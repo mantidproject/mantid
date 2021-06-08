@@ -12,11 +12,7 @@ def get_plotting_module():
     """
     plotting_module = None
     try:
-        from qtpy import PYQT4
-        if PYQT4:
-            import mantidplot as plotting_module
-        else:
-            import mantidqt.plotting.functions as plotting_module
+        import mantidqt.plotting.functions as plotting_module
     except ImportError as exc:
         from mantid.kernel import logger
         logger.debug("Unable to import plotting module {}".format(str(exc)))

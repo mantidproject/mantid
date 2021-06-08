@@ -7,7 +7,8 @@
 import unittest
 from unittest import mock
 
-from mantid.api import FrameworkManager, FunctionFactory
+from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
+from mantid.simpleapi import CreateSampleWorkspace
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel, DEFAULT_START_X
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
@@ -54,8 +55,29 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.dataset_names = ["NewName", "Name1"]
 
-        self.assertEqual(self.model.start_xs, [0.0, 2.0])
-        self.assertEqual(self.model.end_xs, [4.0, 4.0])
+        self.assertEqual(self.model.start_xs, [2.0, 3.0])
+        self.assertEqual(self.model.end_xs, [4.0, 5.0])
+
+    def test_that_the_currently_selected_start_and_end_xs_are_used_for_when_a_larger_number_of_new_datasets_are_loaded(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.current_dataset_index = 1
+        self.model.start_xs = [2.0, 3.0]
+        self.model.end_xs = [4.0, 5.0]
+
+        self.model.dataset_names = ["Name1", "Name2", "Name3"]
+
+        self.assertEqual(self.model.start_xs, [2.0, 3.0, 3.0])
+        self.assertEqual(self.model.end_xs, [4.0, 5.0, 5.0])
+
+    def test_that_newly_loaded_datasets_will_reuse_the_existing_xs_when_there_are_fewer_new_datasets(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.start_xs = [2.0, 3.0]
+        self.model.end_xs = [4.0, 5.0]
+
+        self.model.dataset_names = ["Name2"]
+
+        self.assertEqual(self.model.start_xs, [3.0])
+        self.assertEqual(self.model.end_xs, [5.0])
 
     def test_that_current_dataset_index_will_raise_if_the_index_is_greater_than_or_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
@@ -210,6 +232,8 @@ class BasicFittingModelTest(unittest.TestCase):
     def test_that_clear_cached_fit_functions_will_clear_the_cache_of_fit_functions(self):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = [self.fit_function, None]
+        self.model.fit_statuses = ["success", None]
+        self.model.chi_squared = [1.0, None]
 
         self.model.cache_the_current_fit_functions()
         self.model.clear_cached_fit_functions()
@@ -217,6 +241,8 @@ class BasicFittingModelTest(unittest.TestCase):
         self.assertEqual(len(self.model.single_fit_functions), 2)
         self.assertEqual(self.model.single_fit_functions_cache[0], None)
         self.assertEqual(self.model.single_fit_functions_cache[1], None)
+        self.assertEqual(self.model.fit_statuses_cache, [None, None])
+        self.assertEqual(self.model.chi_squared_cache, [None, None])
 
     def test_that_setting_the_fit_statuses_will_raise_if_the_number_of_fit_statuses_is_not_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
@@ -281,13 +307,19 @@ class BasicFittingModelTest(unittest.TestCase):
     def test_that_use_cached_function_will_replace_the_single_functions_with_the_cached_functions(self):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = [self.fit_function, None]
+        self.model.fit_statuses = ["success", "success"]
+        self.model.chi_squared = [1.0, 2.0]
         self.model.cache_the_current_fit_functions()
         self.model.single_fit_functions = [None, None]
+        self.model.fit_statuses = [None, None]
+        self.model.chi_squared = [None, None]
 
         self.model.use_cached_function()
 
         self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=0")
         self.assertEqual(self.model.single_fit_functions[1], None)
+        self.assertEqual(self.model.fit_statuses, ["success", "success"])
+        self.assertEqual(self.model.chi_squared, [1.0, 2.0])
 
     def test_that_the_minimizer_property_can_be_set_as_expected(self):
         minimizer = "A Minimizer"
@@ -367,6 +399,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.get_active_fit_results(), [])
 
     def test_update_plot_guess_will_evaluate_the_function(self):
+        guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = self.single_fit_functions
         self.model.start_xs = [0.0, 1.0]
@@ -375,6 +408,7 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
+        self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
         with mock.patch('Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.EvaluateFunction') as mock_evaluate:
             self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
             self.model.update_plot_guess(True)
@@ -382,7 +416,7 @@ class BasicFittingModelTest(unittest.TestCase):
                                              Function=self.model.current_single_fit_function,
                                              StartX=self.model.current_start_x,
                                              EndX=self.model.current_end_x,
-                                             OutputWorkspace="__frequency_domain_analysis_fitting_guessName1")
+                                             OutputWorkspace=guess_workspace_name)
 
     @mock.patch('Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.EvaluateFunction')
     def test_update_plot_guess_notifies_subscribers_with_the_guess_workspace_name_if_plot_guess_is_true(self, mock_evaluate):
@@ -395,7 +429,9 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
+        self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
         self.model.update_plot_guess(True)
+
         mock_evaluate.assert_called_with(InputWorkspace=self.model.current_dataset_name,
                                          Function=self.model.current_single_fit_function,
                                          StartX=self.model.current_start_x,
@@ -418,6 +454,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(False, None)
 
     def test_update_plot_guess_will_evaluate_the_function_when_in_double_fit_mode(self):
+        guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = self.single_fit_functions
         self.model.start_xs = [0.0, 1.0]
@@ -427,12 +464,13 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=True)
         self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
         self.model._evaluate_double_pulse_function = mock.Mock()
 
         self.model.update_plot_guess(True)
 
         self.model._evaluate_double_pulse_function.assert_called_once_with(
-            self.model.current_single_fit_function, "__frequency_domain_analysis_fitting_guessName1")
+            self.model.current_single_fit_function, guess_workspace_name)
 
     def test_perform_fit_will_call_the_correct_function_for_a_single_fit(self):
         self.model.dataset_names = self.dataset_names
@@ -506,6 +544,28 @@ class BasicFittingModelTest(unittest.TestCase):
         # This dataset is the second dataset previously and so the A0=5 fit function should be reused.
         self.model.dataset_names = ["Name2"]
         self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=5")
+
+    def test_that_x_limits_of_current_dataset_will_return_the_x_limits_of_the_workspace(self):
+        self.model.dataset_names = self.dataset_names
+        workspace = CreateSampleWorkspace()
+        AnalysisDataService.addOrReplace("Name1", workspace)
+
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+
+        self.assertEqual(x_lower, 0.0)
+        self.assertEqual(x_upper, 20000.0)
+
+    def test_that_x_limits_of_current_dataset_will_return_the_default_x_values_if_there_are_no_workspaces_loaded(self):
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+
+        self.assertEqual(x_lower, 0.0)
+        self.assertEqual(x_upper, 15.0)
+
+    def test_that_x_limits_of_current_dataset_will_return_the_default_x_values_if_the_workspace_does_not_exist(self):
+        x_lower, x_upper = self.model.x_limits_of_workspace("FakeName")
+
+        self.assertEqual(x_lower, 0.0)
+        self.assertEqual(x_upper, 15.0)
 
 
 if __name__ == '__main__':

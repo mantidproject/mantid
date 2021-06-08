@@ -12,7 +12,9 @@
 #include <memory>
 // Boost graphing
 #ifndef Q_MOC_RUN
+#define BOOST_ALLOW_DEPRECATED_HEADERS
 #include <boost/graph/adjacency_list.hpp>
+#undef BOOST_ALLOW_DEPRECATED_HEADERS
 #include <unordered_map>
 #endif
 

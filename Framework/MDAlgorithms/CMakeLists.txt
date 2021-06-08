@@ -2,6 +2,7 @@
 set(SRC_FILES
     src/AccumulateMD.cpp
     src/AndMD.cpp
+    src/ApplyDetailedBalanceMD.cpp
     src/BaseConvertToDiffractionMDWorkspace.cpp
     src/BinMD.cpp
     src/BinaryOperationMD.cpp
@@ -97,6 +98,7 @@ set(SRC_FILES
     src/SaveMD.cpp
     src/SaveMD2.cpp
     src/SaveZODS.cpp
+    src/DgsScatteredTransmissionCorrectionMD.cpp
     src/SetMDFrame.cpp
     src/SetMDUsingMask.cpp
     src/SliceMD.cpp
@@ -117,6 +119,7 @@ set(
   INC_FILES
   inc/MantidMDAlgorithms/AccumulateMD.h
   inc/MantidMDAlgorithms/AndMD.h
+  inc/MantidMDAlgorithms/ApplyDetailedBalanceMD.h
   inc/MantidMDAlgorithms/BaseConvertToDiffractionMDWorkspace.h
   inc/MantidMDAlgorithms/BinMD.h
   inc/MantidMDAlgorithms/BinaryOperationMD.h
@@ -214,6 +217,7 @@ set(
   inc/MantidMDAlgorithms/SaveMD.h
   inc/MantidMDAlgorithms/SaveMD2.h
   inc/MantidMDAlgorithms/SaveZODS.h
+  inc/MantidMDAlgorithms/DgsScatteredTransmissionCorrectionMD.h
   inc/MantidMDAlgorithms/SetMDFrame.h
   inc/MantidMDAlgorithms/SetMDUsingMask.h
   inc/MantidMDAlgorithms/SliceMD.h
@@ -234,6 +238,7 @@ set(TEST_FILES
     # these tests are as they test verify different parts of the CPR algorithms
     AccumulateMDTest.h
     AndMDTest.h
+    ApplyDetailedBalanceMDTest.h
     BooleanBinaryOperationMDTest.h
     CalculateCoverageDGSTest.h
     CentroidPeaksMD2Test.h
@@ -322,6 +327,7 @@ set(TEST_FILES
     SaveMD2Test.h
     SaveMDTest.h
     SaveZODSTest.h
+    DgsScatteredTransmissionCorrectionMDTest.h
     SetMDFrameTest.h
     SetMDUsingMaskTest.h
     SliceMDTest.h

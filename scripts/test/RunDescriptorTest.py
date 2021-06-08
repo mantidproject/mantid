@@ -628,6 +628,7 @@ class RunDescriptorTest(unittest.TestCase):
         CloneWorkspace(wksp,OutputWorkspace='bg_ws')
         AddSampleLog(Workspace=wksp,LogName='gd_prtn_chrg', LogText='10', LogType='Number')
         AddSampleLog(Workspace='bg_ws',LogName='gd_prtn_chrg', LogText='100', LogType='Number')
+        CloneWorkspace('bg_ws',OutputWorkspace='ref_ws')
 
         self.assertFalse(wksp.run().hasProperty('empty_bg_removed'))
 
@@ -646,10 +647,14 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(difr.Result)
 
         # the subtaction occurs only once
-        PropertyManager.sample_run.remove_empty_background()
+        PropertyManager.sample_run.remove_empty_background(bgws)
         # operation above does nothing
         ws = PropertyManager.sample_run.get_workspace()
         difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+        # ensure that bg Workspace remains unchanged
+        bg_ws_restored = PropertyManager.empty_bg_run.get_workspace()
+        difr = CompareWorkspaces(bg_ws_restored,'ref_ws')
         self.assertTrue(difr.Result)
 
     def test_add_emptpy_sectra_first(self):
@@ -743,9 +748,13 @@ class RunDescriptorTest(unittest.TestCase):
         ref_ws = ref_ws - 0.1*ref_ws
         difr = CompareWorkspaces(ref_ws,resWs)
         self.assertTrue(difr.Result)
+        # bg Workspace remains unchanged
+        bg_ws_restored = PropertyManager.empty_bg_run.get_workspace()
+        difr = CompareWorkspaces(bg_ws_restored,bg_ws)
+        self.assertTrue(difr.Result)
 
 
 if __name__ == "__main__" or __name__ == "mantidqt.widgets.codeeditor.execution":
-    #tester=RunDescriptorTest('test_remove_background_matrix_minus_event')
-    #tester.run()
-    unittest.main()
+    tester=RunDescriptorTest('test_remove_background_matching_workspaces')
+    tester.run()
+    #unittest.main()

@@ -6,9 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
 from mantid.api import CompositeFunction, IAlgorithm, IFunction
-from mantid.simpleapi import CopyLogs, EvaluateFunction, RenameWorkspace
+from mantid.simpleapi import CopyLogs, EvaluateFunction
 
-from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name, create_parameter_table_name
+from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
+from Muon.GUI.Common.ADSHandler.workspace_naming import (create_fitted_workspace_name, create_parameter_table_name,
+                                                         get_group_or_pair_from_name,
+                                                         get_run_number_from_workspace_name)
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
 from Muon.GUI.Common.contexts.muon_context import MuonContext
@@ -22,13 +25,6 @@ DEFAULT_CHI_SQUARED = 0.0
 DEFAULT_FIT_STATUS = None
 DEFAULT_SINGLE_FIT_FUNCTION = None
 DEFAULT_START_X = 0.0
-DEFAULT_FDA_END_X = 250.0
-DEFAULT_MA_END_X = 15.0
-
-FDA_GUESS_WORKSPACE = "__frequency_domain_analysis_fitting_guess"
-MA_GUESS_WORKSPACE = "__muon_analysis_fitting_guess"
-FDA_SUFFIX = " FD"
-MA_SUFFIX = " MA"
 
 
 def get_function_name_for_composite(composite: CompositeFunction) -> str:
@@ -54,11 +50,11 @@ class BasicFittingModel:
     The BasicFittingModel stores the datasets, start Xs, end Xs, fit statuses and chi squared for Single Fitting.
     """
 
-    def __init__(self, context: MuonContext, is_frequency_domain: bool = False):
+    def __init__(self, context: MuonContext):
         """Initializes the model with empty fit data."""
         self.context = context
 
-        self._default_end_x = DEFAULT_FDA_END_X if is_frequency_domain else DEFAULT_MA_END_X
+        self._group_or_pair_index = {}
 
         self._current_dataset_index = None
         self._dataset_names = []
@@ -70,7 +66,10 @@ class BasicFittingModel:
         self._single_fit_functions_cache = []
 
         self._fit_statuses = []
+        self._fit_statuses_cache = []
+
         self._chi_squared = []
+        self._chi_squared_cache = []
 
         self._function_name = ""
         self._function_name_auto_update = True
@@ -177,7 +176,7 @@ class BasicFittingModel:
         if self.current_dataset_index is not None:
             return self.end_xs[self.current_dataset_index]
         else:
-            return self._default_end_x
+            return self.context.default_end_x
 
     @current_end_x.setter
     def current_end_x(self, value: float) -> None:
@@ -238,10 +237,14 @@ class BasicFittingModel:
     def cache_the_current_fit_functions(self) -> None:
         """Caches the existing single fit functions. Used before a fit is performed to save the old state."""
         self.single_fit_functions_cache = [self._clone_function(function) for function in self.single_fit_functions]
+        self.fit_statuses_cache = self.fit_statuses.copy()
+        self.chi_squared_cache = self.chi_squared.copy()
 
     def clear_cached_fit_functions(self) -> None:
         """Clears the cached fit functions and removes all fits from the fitting context."""
         self.single_fit_functions_cache = [None] * self.number_of_datasets
+        self.fit_statuses_cache = [None] * self.number_of_datasets
+        self.chi_squared_cache = [None] * self.number_of_datasets
 
     @property
     def fit_statuses(self) -> list:
@@ -255,6 +258,19 @@ class BasicFittingModel:
             raise RuntimeError(f"The provided number of fit statuses is not equal to the number of datasets.")
 
         self._fit_statuses = fit_statuses
+
+    @property
+    def fit_statuses_cache(self) -> list:
+        """Returns all of the cached fit statuses in a list."""
+        return self._fit_statuses_cache
+
+    @fit_statuses_cache.setter
+    def fit_statuses_cache(self, fit_statuses: list) -> None:
+        """Sets the value of the cached fit statuses."""
+        if len(fit_statuses) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of fit statuses is not equal to the number of datasets.")
+
+        self._fit_statuses_cache = fit_statuses
 
     @property
     def current_fit_status(self) -> str:
@@ -281,6 +297,19 @@ class BasicFittingModel:
             raise RuntimeError(f"The provided number of chi squared is not equal to the number of datasets.")
 
         self._chi_squared = chi_squared
+
+    @property
+    def chi_squared_cache(self) -> list:
+        """Returns all of the cached chi squares in a list."""
+        return self._chi_squared_cache
+
+    @chi_squared_cache.setter
+    def chi_squared_cache(self, chi_squared: list) -> None:
+        """Sets the value of the cached fit statuses."""
+        if len(chi_squared) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of chi squared is not equal to the number of datasets.")
+
+        self._chi_squared_cache = chi_squared
 
     @property
     def current_chi_squared(self) -> float:
@@ -361,11 +390,6 @@ class BasicFittingModel:
         """Returns true if the fitting mode is simultaneous. Override this method if you require simultaneous."""
         return False
 
-    @property
-    def global_parameters(self) -> list:
-        """Returns the global parameters stored in the model. Override this method if you require global parameters."""
-        return []
-
     def update_parameter_value(self, full_parameter: str, value: float) -> None:
         """Update the value of a parameter in the fit function."""
         if self.current_single_fit_function is not None:
@@ -376,9 +400,19 @@ class BasicFittingModel:
         """Returns true if rebin is selected within the context."""
         return self.context._do_rebin()
 
+    def x_limits_of_workspace(self, workspace_name: str) -> tuple:
+        """Returns the x data limits of a provided workspace or the current dataset."""
+        if workspace_name is not None and check_if_workspace_exist(workspace_name):
+            x_data = retrieve_ws(workspace_name).dataX(0)
+            if len(x_data) > 0:
+                return x_data[0], x_data[-1]
+        return self.current_start_x, self.current_end_x
+
     def use_cached_function(self) -> None:
         """Sets the current function as being the cached function."""
         self.single_fit_functions = self.single_fit_functions_cache
+        self.fit_statuses = self.fit_statuses_cache.copy()
+        self.chi_squared = self.chi_squared_cache.copy()
 
     def update_plot_guess(self, plot_guess: bool) -> None:
         """Updates the guess plot using the current dataset and function."""
@@ -423,28 +457,32 @@ class BasicFittingModel:
 
     def _reset_end_xs(self) -> None:
         """Resets the end Xs stored by the model."""
-        end_x = self.current_end_x if len(self.end_xs) > 0 else self._default_end_x
-        self.end_xs = [end_x] * self.number_of_datasets
+        self.end_xs = [self.current_end_x] * self.number_of_datasets
 
     def _get_new_start_xs_and_end_xs_using_existing_datasets(self, new_dataset_names: list) -> tuple:
         """Returns the start and end Xs to use for the new datasets. It tries to use existing ranges if possible."""
-        start_xs = [self._get_new_start_x_for(name) for name in new_dataset_names]
-        end_xs = [self._get_new_end_x_for(name) for name in new_dataset_names]
-        return start_xs, end_xs
+        if len(self.dataset_names) == len(new_dataset_names):
+            return self.start_xs, self.end_xs
+        else:
+            start_xs = [self._get_new_start_x_for(name) for name in new_dataset_names]
+            end_xs = [self._get_new_end_x_for(name) for name in new_dataset_names]
+            return start_xs, end_xs
 
     def _get_new_start_x_for(self, new_dataset_name: str) -> float:
         """Returns the start X to use for the new dataset. It tries to use an existing start X if possible."""
         if new_dataset_name in self.dataset_names:
             return self.start_xs[self.dataset_names.index(new_dataset_name)]
         else:
-            return self.retrieve_first_good_data_from_run(new_dataset_name)
+            return self.current_start_x if self.current_dataset_index is not None \
+                else self.retrieve_first_good_data_from_run(new_dataset_name)
 
     def _get_new_end_x_for(self, new_dataset_name: str) -> float:
         """Returns the end X to use for the new dataset. It tries to use an existing end X if possible."""
         if new_dataset_name in self.dataset_names:
             return self.end_xs[self.dataset_names.index(new_dataset_name)]
         else:
-            return self.current_end_x if len(self.end_xs) > 0 else self._default_end_x
+            x_lower, x_upper = self.x_limits_of_workspace(new_dataset_name)
+            return self.current_end_x if x_lower < self.current_end_x < x_upper else x_upper
 
     def _get_new_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
         """Returns the functions to use for the new datasets. It tries to use the existing functions if possible."""
@@ -494,9 +532,59 @@ class BasicFittingModel:
         else:
             return []
 
-    def get_workspace_names_to_display_from_context(self) -> None:
-        """Returns the workspace names to display in the view and store in the model."""
-        raise NotImplementedError("This method must be overridden by a child class.")
+    def get_workspace_names_to_display_from_context(self) -> list:
+        """Returns the workspace names to display in the view based on the selected run and group/pair options."""
+        runs, groups_and_pairs = self.get_selected_runs_groups_and_pairs()
+
+        display_workspaces = []
+        for group_and_pair in groups_and_pairs:
+            display_workspaces += self._get_workspace_names_to_display_from_context(runs, group_and_pair)
+
+        return self._sort_workspace_names(display_workspaces)
+
+    def _get_workspace_names_to_display_from_context(self, runs: list, group_and_pair: str) -> list:
+        """Returns the workspace names for the given runs and group/pair to be displayed in the view."""
+        return self.context.get_names_of_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair,
+                                                           rebin=not self.fit_to_raw)
+
+    def _sort_workspace_names(self, workspace_names: list) -> list:
+        """Sort the workspace names and check the workspaces exist in the ADS."""
+        workspace_names = list(set(self._check_data_exists(workspace_names)))
+        if len(workspace_names) > 1:
+            workspace_names.sort(key=self._workspace_list_sorter)
+        return workspace_names
+
+    def _workspace_list_sorter(self, workspace_name: str) -> int:
+        """Used to sort a list of workspace names based on run number and group/pair name."""
+        run_number = get_run_number_from_workspace_name(workspace_name, self.context.data_context.instrument)
+        grp_pair_number = self._transform_group_or_pair_to_float(workspace_name)
+        return int(run_number) + grp_pair_number
+
+    def _transform_group_or_pair_to_float(self, workspace_name: str) -> int:
+        """Converts the workspace group or pair name to a float which is used in sorting the workspace list."""
+        group_or_pair_name = get_group_or_pair_from_name(workspace_name)
+        if group_or_pair_name not in self._group_or_pair_index:
+            self._group_or_pair_index[group_or_pair_name] = len(self._group_or_pair_index)
+
+        group_or_pair_values = list(self._group_or_pair_index.values())
+        if len(self._group_or_pair_index) > 1:
+            return ((self._group_or_pair_index[group_or_pair_name] - group_or_pair_values[0])
+                    / (group_or_pair_values[-1] - group_or_pair_values[0])) * 0.99
+        else:
+            return 0
+
+    @staticmethod
+    def _check_data_exists(workspace_names: list) -> list:
+        """Returns only the workspace names that exist in the ADS."""
+        return [workspace_name for workspace_name in workspace_names if check_if_workspace_exist(workspace_name)]
+
+    def get_selected_runs_groups_and_pairs(self) -> tuple:
+        """Returns the runs, groups and pairs to use for single fit mode."""
+        return "All", self._get_selected_groups_and_pairs()
+
+    def _get_selected_groups_and_pairs(self) -> list:
+        """Returns the groups and pairs currently selected in the context."""
+        return self.context.group_pair_context.selected_groups_and_pairs
 
     def perform_fit(self) -> tuple:
         """Performs a single fit and returns the resulting function, status and chi squared."""
@@ -662,20 +750,12 @@ class BasicFittingModel:
         alg.setProperty("Minimizer", self.minimizer)
         alg.setProperty("EvaluationType", self.evaluation_type)
         alg.setProperty("MaxIterations", 0)
-        alg.setProperty("Output", "__double_pulse_guess")
+        alg.setProperty("Output", output_workspace)
         alg.execute()
-
-        self.context.ads_observer.observeRename(False)
-        RenameWorkspace(InputWorkspace=alg.getPropertyValue("OutputWorkspace"),
-                        OutputWorkspace=output_workspace)
-        self.context.ads_observer.observeRename(True)
 
     def _get_plot_guess_name(self) -> str:
         """Returns the name to use for the plot guess workspace."""
-        if self.context.workspace_suffix == MA_SUFFIX:
-            return MA_GUESS_WORKSPACE + self.current_dataset_name
-        else:
-            return FDA_GUESS_WORKSPACE + self.current_dataset_name
+        return self.context.guess_workspace_prefix + self.current_dataset_name
 
     def _get_plot_guess_fit_function(self) -> IFunction:
         """Returns the fit function to evaluate when plotting a guess."""

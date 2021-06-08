@@ -16,7 +16,6 @@ pressed. First we will start with the view:
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
     from qtpy import QtWidgets, QtCore, QtGui
 
 
@@ -63,8 +62,6 @@ custom signal from the view to its own function (``handleButton``).
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
-
     class Presenter(object):
 
         # pass the view and model into the presenter
@@ -81,7 +78,6 @@ The main is now:
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
     from qtpy import QtWidgets, QtCore, QtGui
 
     import sys

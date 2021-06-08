@@ -5,12 +5,19 @@ Direct Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+General
+-------
 
-New
-###
+New Features
+############
+
+* Added a new algorithm :ref:`PelicanReduction <algm-PelicanReduction>` for the ANSTO PELICAN instrument that reduces time of flight data versus two theta to S(Q,w).
+* **Added SNS instruments to** :ref:`PyChop <PyChop>`
+
+.. figure:: ../../images/PyChop_HYSPEC.png
+   :class: screenshot
+   :width: 400px
+   :align: center
 
 * Updated instrument geometry for CHESS
 * Loading of SHARP TOF and single-channel data has been added to :ref:`LoadILLTOF <algm-LoadILLTOF-v2>`
@@ -21,18 +28,19 @@ New
 Improvements
 ############
 * :ref:`MDNorm <algm-MDNorm>` algorithm can now efficiently process background.
-* Added SNS instruments to :ref:`PyChop <PyChop>`
+
 
 MSlice
 ------
 
-New
-###
+New Features
+############
 
 - Implemented floating/ontop window behaviour.
 - Added a 'close all' command for plots in the command line interface.
 - Added a button for deleting a line in the settings of a 1D plot.
 - Added a wrapper for the commands necessary for adding a workspace via the command line interface.
+- Added feature of raising or bringing forward plot window for plotover in cuts.
 
 
 BugFixes
@@ -45,5 +53,7 @@ BugFixes
 - Corrected workspace names in scripts generated from plots.
 - Prevented crashes when converting Intensity from S(Q,E) to GDOS.
 - Fixed bug that caused specifying the fixed final energy for more than one workspace at once to fail.
+- Release active interactive cuts on existing slice plots to enable a new slice plot in order to prevent crash.
+- Fixed bug that caused crashes when displaying or closing an empty plot window.
 
 :ref:`Release 6.1.0 <v6.1.0>`

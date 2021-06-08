@@ -239,6 +239,7 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
     detId[i] = std::numeric_limits<int32_t>::quiet_NaN();
     detIDMap[i] = std::numeric_limits<uint64_t>::quiet_NaN();
     L2[i] = std::numeric_limits<double>::quiet_NaN();
+    DIFC[i] = std::numeric_limits<double>::quiet_NaN();
     TwoTheta[i] = std::numeric_limits<double>::quiet_NaN();
     Azimuthal[i] = std::numeric_limits<double>::quiet_NaN();
     //     detMask[i]  = true;

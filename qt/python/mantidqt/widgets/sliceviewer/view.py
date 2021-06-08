@@ -105,6 +105,7 @@ class SliceViewerDataView(QWidget):
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.canvas = SliceViewerCanvas(self.fig)
         self.canvas.mpl_connect('button_release_event', self.mouse_release)
+        self.canvas.mpl_connect('button_press_event', self.presenter.add_delete_peak)
 
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
@@ -124,6 +125,7 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.regionSelectionClicked.connect(self.on_region_selection_toggle)
         self.mpl_toolbar.homeClicked.connect(self.on_home_clicked)
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
+        self.mpl_toolbar.zoomPanClicked.connect(self.presenter.deactivate_peak_adding)
         self.mpl_toolbar.zoomPanFinished.connect(self.on_data_limits_changed)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
 
@@ -380,7 +382,8 @@ class SliceViewerDataView(QWidget):
             self._line_plots.disconnect()
 
         self._image_info_tracker = ImageInfoTracker(image=self.image,
-                                                    transpose_xy=self.dimensions.transpose,
+                                                    transform=self.nonortho_transform,
+                                                    do_transform=self.nonorthogonal_mode,
                                                     widget=self.image_info_widget)
 
         if state:
@@ -515,6 +518,10 @@ class SliceViewerDataView(QWidget):
         if event.button == 3:
             self.on_home_clicked()
 
+    def deactivate_zoom_pan(self):
+        self.deactivate_tool(ToolItemText.PAN)
+        self.deactivate_tool(ToolItemText.ZOOM)
+
     def update_data_clim(self):
         self.image.set_clim(self.colorbar.colorbar.mappable.get_clim())
         if self.line_plots_active:
@@ -594,7 +601,7 @@ class SliceViewerView(QWidget, ObservingView):
         return self._data_view.dimensions
 
     @property
-    def peaks_view(self):
+    def peaks_view(self) -> PeaksViewerCollectionView:
         """Lazily instantiates PeaksViewer and returns it"""
         if self._peaks_view is None:
             self._peaks_view = PeaksViewerCollectionView(MplPainter(self.data_view), self.presenter)

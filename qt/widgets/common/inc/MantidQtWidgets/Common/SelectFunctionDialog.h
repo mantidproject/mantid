@@ -48,6 +48,8 @@ private:
   /// Construct QTreeWidget with categories and functions
   void constructFunctionTree(const std::map<std::string, std::vector<std::string>> &categoryFunctionsMap,
                              const std::vector<std::string> &restrictions);
+  /// Sets the minimum height of the function tree so that all catagories are visible
+  void setMinimumHeightOfFunctionTree();
 
 private slots:
   void searchBoxChanged(const QString &text);

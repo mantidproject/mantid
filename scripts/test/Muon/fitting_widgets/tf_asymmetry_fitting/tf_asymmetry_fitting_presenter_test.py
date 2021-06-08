@@ -157,14 +157,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 2)
         self.assertEqual(self.mock_model_tf_asymmetry_mode.call_count, 2)
 
-    def test_that_handle_selected_group_pair_changed_will_turn_off_tf_asymmetry_mode(self):
-        self.presenter.handle_selected_group_pair_changed()
-
-        self.mock_view_tf_asymmetry_mode.assert_called_with(False)
-        self.mock_model_tf_asymmetry_mode.assert_called_with(False)
-        self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 2)
-        self.assertEqual(self.mock_model_tf_asymmetry_mode.call_count, 2)
-
     def test_that_handle_function_structure_changed_will_attempt_to_update_the_tf_asymmetry_functions(self):
         self.presenter.update_tf_asymmetry_functions_in_model_and_view = mock.Mock()
 
@@ -430,6 +422,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.model.reset_start_xs_and_end_xs = mock.Mock()
         self.model.reset_fit_statuses_and_chi_squared = mock.Mock()
         self.model.reset_fit_functions = mock.Mock()
+        self.model.x_limits_of_workspace = mock.Mock(return_value=(self.start_x, self.end_x))
         self.model.retrieve_first_good_data_from_run = mock.Mock(return_value=self.start_x)
         self.model.get_active_fit_function = mock.Mock(return_value=self.fit_function)
         self.model.get_active_workspace_names = mock.Mock(return_value=[self.dataset_names[self.current_dataset_index]])

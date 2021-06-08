@@ -141,6 +141,7 @@ void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dia
 
 void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog) {
   setDataIndexToCurrentWorkspace(dialog);
+  setActiveParameterType(dialog->parameterType());
   if (m_activeParameterType == "Width")
     dialog->setParameterNames(m_fqFitModel->getWidths(m_dataIndex));
   else if (m_activeParameterType == "EISF")

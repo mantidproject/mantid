@@ -7,7 +7,8 @@
 from mantid.kernel import Logger
 from sans.common.enums import (FindDirectionEnum, DetectorType, SANSInstrument)
 from sans.state.AllStates import AllStates
-from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
+from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter, apply_selective_view_scaling,
+                                       undo_selective_view_scaling)
 
 
 class BeamCentreModel(object):
@@ -32,6 +33,7 @@ class BeamCentreModel(object):
         self._component = DetectorType.LAB
         self.update_lab = True
         self.update_hab = True
+        self.instrument = None
 
         self.reset_inst_defaults(instrument=SANSInstrument.NO_INSTRUMENT)
 
@@ -50,6 +52,8 @@ class BeamCentreModel(object):
             # All other instruments hard-code this as follows
             self._r_min = 0.06 # metres
             self._r_max = 0.280 # metres
+
+        self.instrument = instrument
 
     def find_beam_centre(self, state: AllStates):
         """
@@ -192,36 +196,44 @@ class BeamCentreModel(object):
         self._tolerance = millimeter_2_meter(value)
 
     @property
+    @apply_selective_view_scaling
     def lab_pos_1(self):
-        return meter_2_millimeter(self._lab_pos_1) if self._lab_pos_1 else ''
+        return self._lab_pos_1 if self._lab_pos_1 else ''
 
     @lab_pos_1.setter
+    @undo_selective_view_scaling
     def lab_pos_1(self, value):
-        self._lab_pos_1 = millimeter_2_meter(value)
+        self._lab_pos_1 = value
 
     @property
+    @apply_selective_view_scaling
     def lab_pos_2(self):
-        return meter_2_millimeter(self._lab_pos_2) if self._lab_pos_2 else ''
+        return self._lab_pos_2 if self._lab_pos_2 else ''
 
     @lab_pos_2.setter
+    @undo_selective_view_scaling
     def lab_pos_2(self, value):
-        self._lab_pos_2 = millimeter_2_meter(value)
+        self._lab_pos_2 = value
 
     @property
+    @apply_selective_view_scaling
     def hab_pos_1(self):
-        return meter_2_millimeter(self._hab_pos_1) if self._hab_pos_1 else ''
+        return self._hab_pos_1 if self._hab_pos_1 else ''
 
     @hab_pos_1.setter
+    @undo_selective_view_scaling
     def hab_pos_1(self, value):
-        self._hab_pos_1 = millimeter_2_meter(value)
+        self._hab_pos_1 = value
 
     @property
+    @apply_selective_view_scaling
     def hab_pos_2(self):
-        return meter_2_millimeter(self._hab_pos_2) if self._hab_pos_2 else ''
+        return self._hab_pos_2 if self._hab_pos_2 else ''
 
     @hab_pos_2.setter
+    @undo_selective_view_scaling
     def hab_pos_2(self, value):
-        self._hab_pos_2 = millimeter_2_meter(value)
+        self._hab_pos_2 = value
 
     @property
     def component(self):

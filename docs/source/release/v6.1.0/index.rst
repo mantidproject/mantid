@@ -4,19 +4,28 @@
 Mantid 6.1.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/ReleaseNotesIndex_v6_1.png
    :class: screenshot
-   :width: 385px
+   :width: 440px
    :align: right
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
 
 We are proud to announce version 6.1.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+This release includes several improvements to the user experience, notably a new widget to display total memory usage
+and an additional setting to the window behaviour of plots and interfaces.
+
+Other highlights from this release include:
+
+- A new LeanElasticPeak object for constant wavelength instruments that is supported in existing algorithms for e.g. peak prediction and integration.
+- Added setting to allow user to select Floating/On Top behaviour.
+- Sectors drawn in the instrument viewer can now be used to define wedges for azimuthal averaging of 2D SANS data using :ref:`Q1DWeighted <algm-Q1DWeighted>`.
+- :ref:`ConvertUnits <algm-ConvertUnits>` algorithm has been extended to use diffractometer constants from instrument calibration.
+- New algorithm :ref:`GeneratePythonFitScript <algm-GeneratePythonFitScript>` allows the creation of a python script for sequential fitting.
+- New algorithm :ref:`CalculateMultipleScattering <algm-CalculateMultipleScattering>` to calculate multiple scattering corrections.
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
@@ -80,6 +89,6 @@ For a full list of all issues addressed during this release please see the `GitH
 
 .. _forum: https://forum.mantidproject.org
 
-.. _GitHub milestone: https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release Release 6.1"+is%3Amerged
+.. _GitHub milestone: https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release+6.1"+is%3Amerged
 
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v6.1.0

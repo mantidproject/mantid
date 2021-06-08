@@ -6,14 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+# local imports
+from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
+from .representation.draw import draw_peak_representation
+from .representation.painter import Painted
+
 # 3rd party imports
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, IPeaksWorkspace
 from mantid.kernel import logger, SpecialCoordinateSystem
 
-# local imports
-from mantidqt.widgets.workspacedisplay.table.model \
-    import TableWorkspaceDisplayModel
-from .representation.draw import draw_peak_representation
+# standard library
+import numpy as np
+from typing import List
 
 # map coordinate system to correct Peak getter
 FRAME_TO_PEAK_CENTER_ATTR = {
@@ -28,7 +32,10 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     Extends PeaksWorkspace functionality to include color selection
     """
 
-    def __init__(self, peaks_ws, fg_color, bg_color):
+    def __init__(self,
+                 peaks_ws: IPeaksWorkspace,
+                 fg_color: str,
+                 bg_color: str):
         """
         :param peaks_ws: A pointer to the PeaksWorkspace
         :param fg_color: Color of the glyphs marking the signal region
@@ -40,7 +47,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         super().__init__(peaks_ws)
         self._fg_color = fg_color
         self._bg_color = bg_color
-        self._representations = []
+        self._representations: List[Painted] = []
 
     @property
     def bg_color(self):
@@ -79,6 +86,28 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
             representations.append(peak_repr)
 
         self._representations = representations
+
+    def add_peak(self, pos, frame):
+        """Add a peak to the workspace using the given position and frame"""
+        self.peaks_workspace.addPeak(pos, frame)
+
+    def delete_peak(self, pos, frame):
+        r"""Delete the peak closest to the input position"""
+
+        if self.peaks_workspace.getNumberPeaks() == 0:
+            return
+
+        frame_to_slice_fn = self._frame_to_slice_fn(frame)
+
+        def unpack_pos(peak):
+            v3d_vector = getattr(peak, frame_to_slice_fn)()
+            return [v3d_vector.X(), v3d_vector.Y(), v3d_vector.Z()]
+
+        positions = np.array([unpack_pos(peak) for peak in self.peaks_workspace])
+        positions -= pos  # peak positions relative to the input position
+        distances_squared = np.sum(positions * positions, axis=1)
+        closest_peak_index = np.argmin(distances_squared)
+        return self.peaks_workspace.removePeak(int(closest_peak_index))  # required cast from numpy.int64 to int
 
     def slicepoint(self, selected_index, slice_info):
         """
@@ -122,7 +151,8 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
 
 def create_peaksviewermodel(peaks_ws_name: str, fg_color: str, bg_color: str):
     """
-    A factory function to create a PeaksViewerModel from the given workspace name
+    A factory function to create a PeaksViewerModel from the given workspace name. Used by
+    the PeaksViewerColletionPresenter when appending a new PeaksWorkspace.
     :param peaks_ws_name: A str giving a workspace name that is expected to be a PeaksWorkspace
     :param fg_color: Color of the glyphs marking the signal region
     :param bg_color: Color of the glyphs marking the background region

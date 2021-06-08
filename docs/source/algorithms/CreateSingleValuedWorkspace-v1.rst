@@ -13,10 +13,7 @@ Creates a 2D workspace that contains a single value and an optional
 error value. This was traditionally used for doing binary operations between
 a workspace and a single value. However, now that the Python access allows
 the standard binary operations with workspaces & single numbers, the requirement
-for this algorithm is almost gone.
-
-One use case for which it will be required is when performing operations using only
-the MantidPlot GUI point-and-click approach.
+for this algorithm is almost gone and is occasionally used internally.
 
 Usage
 -----

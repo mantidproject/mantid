@@ -128,6 +128,7 @@ void CreateSampleWorkspace::init() {
                   "Minimum (default) is 1 scan point, which gives a "
                   "non-scanning workspace.");
 
+  declareProperty("InstrumentName", "basic_rect", Direction::Input);
   declareProperty("NumBanks", 2, std::make_shared<BoundedValidator<int>>(0, 100),
                   "The Number of banks in the instrument (default:2)");
   declareProperty("NumMonitors", 0, std::make_shared<BoundedValidator<int>>(0, 100),
@@ -155,6 +156,7 @@ void CreateSampleWorkspace::init() {
 
   /* Aggregate properties in groups */
   std::string instrumentGroupName = "Instrument";
+  setPropertyGroup("InstrumentName", instrumentGroupName);
   setPropertyGroup("NumMonitors", instrumentGroupName);
   setPropertyGroup("BankDistanceFromSample", instrumentGroupName);
   setPropertyGroup("SourceDistanceFromSample", instrumentGroupName);
@@ -172,6 +174,7 @@ void CreateSampleWorkspace::exec() {
   const std::string wsType = getProperty("WorkspaceType");
   const std::string preDefinedFunction = getProperty("Function");
   const std::string userDefinedFunction = getProperty("UserDefinedFunction");
+  const std::string instrName = getPropertyValue("InstrumentName");
   const int numBanks = getProperty("NumBanks");
   const int numMonitors = getProperty("NumMonitors");
   const int bankPixelWidth = getProperty("BankPixelWidth");
@@ -232,7 +235,7 @@ void CreateSampleWorkspace::exec() {
   // Create an instrument with one or more rectangular banks.
   Instrument_sptr inst =
       createTestInstrumentRectangular(progress, numBanks, numMonitors, bankPixelWidth, pixelDiameter, pixelHeight,
-                                      pixelSpacing, bankDistanceFromSample, sourceSampleDistance);
+                                      pixelSpacing, bankDistanceFromSample, sourceSampleDistance, instrName);
 
   auto numBins = static_cast<int>((xMax - xMin) / binWidth);
 
@@ -392,7 +395,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(int numPixels, i
       auto eventsInBin = static_cast<int>(yValues[i]);
       for (int q = 0; q < eventsInBin; q++) {
         DateAndTime pulseTime = run_start + (m_randGen->nextValue() * hourInSeconds);
-        el += TofEvent((i + m_randGen->nextValue()) * binDelta, pulseTime);
+        el += TofEvent((i + m_randGen->nextValue()) * binDelta + x0, pulseTime);
       }
     }
     workspaceIndex++;
@@ -480,12 +483,15 @@ void CreateSampleWorkspace::replaceAll(std::string &str, const std::string &from
  * @param bankDistanceFromSample :: Distance of first bank from sample (defaults
  *to 5.0m)
  * @param sourceSampleDistance :: The distance from the source to the sample
+ * @param instrName :: Name of the underlying instrument, can be used to mock existing beamlines
  * @returns A shared pointer to the generated instrument
  */
-Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
-    API::Progress &progress, int numBanks, int numMonitors, int pixels, double pixelDiameter, double pixelHeight,
-    double pixelSpacing, const double bankDistanceFromSample, const double sourceSampleDistance) {
-  auto testInst = std::make_shared<Instrument>("basic_rect");
+Instrument_sptr
+CreateSampleWorkspace::createTestInstrumentRectangular(API::Progress &progress, int numBanks, int numMonitors,
+                                                       int pixels, double pixelDiameter, double pixelHeight,
+                                                       double pixelSpacing, const double bankDistanceFromSample,
+                                                       const double sourceSampleDistance, const std::string instrName) {
+  auto testInst = std::make_shared<Instrument>(instrName);
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
   testInst->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));

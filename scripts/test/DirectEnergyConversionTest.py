@@ -636,6 +636,61 @@ class DirectEnergyConversionTest(unittest.TestCase):
         difr = CompareWorkspaces(resWs,ws)
         self.assertTrue(difr.Result)
 
+    def test_remove_empty_bg_with_normalisation(self):
+        # create test workspace
+        wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
+                                     NumBanks=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
+                                     XMin=2000, XMax=20000, BinWidth=1)
+        CloneWorkspace(wksp,OutputWorkspace='bg_ws')
+        AddSampleLog(Workspace=wksp,LogName='gd_prtn_chrg', LogText='10.', LogType='Number')
+        AddSampleLog(Workspace='bg_ws',LogName='gd_prtn_chrg', LogText='100.', LogType='Number')
+        wksp = NormaliseByCurrent(wksp,OutputWorkspace='wksp',RecalculatePCharge=False)
+        AddSampleLog(Workspace='wksp',LogName='DirectInelasticReductionNormalisedBy',
+                     LogText='current', LogType='String')
+
+        # Prepare reducer
+        tReducer = DirectEnergyConversion('MAR')
+        tReducer.prop_man.sample_run = wksp
+        tReducer.prop_man.empty_bg_run = 'bg_ws'
+
+        tReducer.remove_empty_background()
+
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
+
+        resWs = 0.9*wksp
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
+    def test_remove_empty_bg_normalised_both(self):
+        # create test workspace
+        wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
+                                     NumBanks=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
+                                     XMin=2000, XMax=20000, BinWidth=1)
+        CloneWorkspace(wksp,OutputWorkspace='bg_ws')
+        AddSampleLog(Workspace=wksp,LogName='gd_prtn_chrg', LogText='10.', LogType='Number')
+        AddSampleLog(Workspace='bg_ws',LogName='gd_prtn_chrg', LogText='100.', LogType='Number')
+        wksp = NormaliseByCurrent(wksp,OutputWorkspace='wksp',RecalculatePCharge=False)
+        AddSampleLog(Workspace='wksp',LogName='DirectInelasticReductionNormalisedBy',
+                     LogText='current', LogType='String')
+        NormaliseByCurrent('bg_ws',OutputWorkspace='bg_ws',RecalculatePCharge=False)
+        AddSampleLog(Workspace='bg_ws',LogName='DirectInelasticReductionNormalisedBy',
+                     LogText='current', LogType='String')
+
+        # Prepare reducer
+        tReducer = DirectEnergyConversion('MAR')
+        tReducer.prop_man.sample_run = wksp
+        tReducer.prop_man.empty_bg_run = 'bg_ws'
+
+        tReducer.remove_empty_background()
+
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
+
+        resWs = 0.9*wksp
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
     def test_remove_empty_bg_with_monovan(self):
         # create test workspace
         wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
@@ -736,6 +791,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #test = DirectEnergyConversionTest('test_remove_empty_bg_all_different')
+    #test = DirectEnergyConversionTest('test_remove_empty_bg_with_normalisation')
     #test.run()
     unittest.main()

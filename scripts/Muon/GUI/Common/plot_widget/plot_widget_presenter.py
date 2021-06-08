@@ -48,6 +48,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         # gui observers
         self._setup_gui_observers()
         self._setup_view_connections()
+        self.enable_observer = GenericObserver(self.enableView)
+        self.disable_observer = GenericObserver(self.disableView)
 
         self.update_view_from_model()
 
@@ -354,10 +356,11 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
                                                                                      self._view.get_plot_type())
 
+        # Disables plot view when clear all is pressed
         if workspace_list:
-            self._view.setEnabled(True)
+            self.enableView()
         else:
-            self._view.setEnabled(False)
+            self.disableView()
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=hold_on, autoscale=autoscale)
 
     def _check_if_counts_and_groups_selected(self):
@@ -368,3 +371,9 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
                 'Pair workspaces have no counts workspace, plotting Asymmetry')
             return True
         return False
+
+    def enableView(self):
+        self._view.setEnabled(True)
+
+    def disableView(self):
+        self._view.setEnabled(False)

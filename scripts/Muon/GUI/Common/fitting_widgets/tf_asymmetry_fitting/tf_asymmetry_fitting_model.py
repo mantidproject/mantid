@@ -33,9 +33,9 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     The TFAsymmetryFittingModel derives from GeneralFittingModel. It adds the ability to do TF Asymmetry fitting.
     """
 
-    def __init__(self, context: MuonContext, is_frequency_domain: bool = False):
+    def __init__(self, context: MuonContext):
         """Initialize the TFAsymmetryFittingModel with emtpy fit data."""
-        super(TFAsymmetryFittingModel, self).__init__(context, is_frequency_domain)
+        super(TFAsymmetryFittingModel, self).__init__(context)
 
         self._tf_asymmetry_mode = False
         self._tf_asymmetry_single_functions = []
@@ -129,7 +129,8 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
     def recalculate_tf_asymmetry_functions(self) -> bool:
         """Recalculates the TF Asymmetry functions based on the datasets and normal functions in the model."""
-        if self.tf_asymmetry_mode:
+        tf_compliant, _ = self.check_datasets_are_tf_asymmetry_compliant()
+        if self.tf_asymmetry_mode and tf_compliant:
             try:
                 self._recalculate_tf_asymmetry_functions()
             except RuntimeError:
@@ -228,10 +229,13 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
             if self.tf_asymmetry_mode:
                 self.function_name += TF_ASYMMETRY_FUNCTION_NAME_APPENDAGE
 
-    def check_datasets_are_tf_asymmetry_compliant(self) -> bool:
+    def check_datasets_are_tf_asymmetry_compliant(self, workspace_names: list = None) -> bool:
         """Returns true if the datasets stored in the model are compatible with TF Asymmetry mode."""
-        non_compliant_workspaces = [item for item in self.dataset_names if "Group" not in item]
-        return len(non_compliant_workspaces) == 0
+        workspace_names = self.dataset_names if workspace_names is None else workspace_names
+        pair_names = [get_group_or_pair_from_name(name) for name in workspace_names if "Group" not in name]
+        # Remove duplicates from the list
+        pair_names = list(dict.fromkeys(pair_names))
+        return len(pair_names) == 0, "'" + "', '".join(pair_names) + "'"
 
     def get_all_fit_functions(self) -> list:
         """Returns all the fit functions for the current fitting mode."""
