@@ -366,7 +366,6 @@ class SuperplotPresenter:
             index (int): index of the corresponding spectrum
         """
         selection = self._view.getSelection()
-        currentIndex = self._view.getSpectrumSliderPosition()
         mode = self._view.getMode()
         self._model.removeData(wsName, index)
         if not self._model.isBinMode() and not self._model.isSpectrumMode():
@@ -376,7 +375,6 @@ class SuperplotPresenter:
         if wsName in selection:
             if index in selection[wsName]:
                 selection[wsName].remove(index)
-                currentIndex = 0
                 if not selection[wsName]:
                     del selection[wsName]
         self._updateList()
