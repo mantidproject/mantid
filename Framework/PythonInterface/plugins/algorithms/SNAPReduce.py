@@ -206,6 +206,13 @@ class SNAPReduce(DataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="",
                                           action=FileAction.OptionalDirectory),
                              doc='Default value is proposal shared directory')
+        #
+        # Section for the Autoreduction Configurator
+        #
+        self.declareProperty(name='EnableConfigurator', defaultValue=False, direction=Direction.Input,
+                             doc='Do not reduce, just save the configuration file for autoreduction')
+        property_names = ['EnableConfigurator']
+        [self.setPropertyGroup(name, 'Autoreduction Configurator') for name in property_names]
 
     def validateInputs(self):
         issues = dict()
