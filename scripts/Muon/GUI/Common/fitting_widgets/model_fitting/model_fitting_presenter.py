@@ -120,8 +120,8 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
     def clear_current_cached_fit_function(self) -> None:
         """Clear the cached fit function for the currently selected dataset."""
-        self.model.clear_current_cached_fit_function()
-        self.view.enable_undo_fit(not self.model.is_single_fit_functions_cache_empty())
+        self.model.clear_undo_data_for_current_dataset_index()
+        self.view.set_number_of_undos(self.model.number_of_undos)
 
     def _create_parameter_combination_workspaces(self) -> None:
         """Creates a matrix workspace for each possible parameter combination to be used for fitting."""

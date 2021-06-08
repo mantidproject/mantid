@@ -62,16 +62,16 @@ class GeneralFittingModel(BasicFittingModel):
 
         self.fitting_context.simultaneous_fit_function_cache = fit_function
 
-    def cache_the_current_fit_functions(self) -> None:
-        """Caches the simultaneous fit function, and the single fit functions defined in the base class."""
+    def save_current_fit_function_to_undo_data(self) -> None:
+        """Saves the current simultaneous fit function, and the single fit functions defined in the base class."""
         self.fitting_context.simultaneous_fit_function_cache = self._clone_function(
             self.fitting_context.simultaneous_fit_function)
-        super().cache_the_current_fit_functions()
+        super().save_current_fit_function_to_undo_data()
 
-    def clear_cached_fit_functions(self) -> None:
-        """Clears the simultaneous fit function cache, and the single fit function cache defined in the base class."""
+    def clear_undo_data(self) -> None:
+        """Clears the saved simultaneous fit functions, and the saved single fit functions defined in the base class."""
         self.fitting_context.simultaneous_fit_function_cache = None
-        super().clear_cached_fit_functions()
+        super().clear_undo_data()
 
     @property
     def simultaneous_fitting_mode(self) -> bool:
@@ -131,10 +131,10 @@ class GeneralFittingModel(BasicFittingModel):
             else:
                 super().automatically_update_function_name()
 
-    def use_cached_function(self) -> None:
-        """Sets the current function as being the cached function."""
+    def undo_previous_fit(self) -> None:
+        """Undoes the previous fit using the saved undo data."""
         self.fitting_context.simultaneous_fit_function = self.fitting_context.simultaneous_fit_function_cache
-        super().use_cached_function()
+        super().undo_previous_fit()
 
     def reset_fit_functions(self, new_functions: list) -> None:
         """Reset the fit functions stored by the model. Attempts to use the currently selected function."""

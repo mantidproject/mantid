@@ -84,7 +84,7 @@ class BasicFittingModel:
         self.reset_fit_functions(functions)
         self.reset_current_dataset_index()
         self.reset_fit_statuses_and_chi_squared()
-        self.clear_cached_fit_functions()
+        self.clear_undo_data()
 
     @property
     def current_dataset_name(self) -> str:
@@ -192,37 +192,34 @@ class BasicFittingModel:
             return DEFAULT_SINGLE_FIT_FUNCTION
 
     @property
-    def single_fit_functions_cache(self) -> list:
-        """Returns the cache of fit functions used for single fitting."""
-        return self.fitting_context.single_fit_functions_cache
+    def number_of_undos(self) -> int:
+        """Returns the number of previous single fits that are saved."""
+        return len(self.fitting_context.single_fit_functions_for_undo)
 
-    @single_fit_functions_cache.setter
-    def single_fit_functions_cache(self, fit_functions: list) -> None:
-        """Sets the cache of fit functions used for single fitting."""
-        self.fitting_context.single_fit_functions_cache = fit_functions
+    def save_current_fit_function_to_undo_data(self) -> None:
+        """Saves the current single fit function and other data before performing a fit."""
+        self.fitting_context.dataset_indices_for_undo.append(self.fitting_context.current_dataset_index)
+        self.fitting_context.single_fit_functions_for_undo.append(self._clone_function(
+            self.current_single_fit_function))
+        self.fitting_context.fit_statuses_for_undo.append(self.current_fit_status)
+        self.fitting_context.chi_squared_for_undo.append(self.current_chi_squared)
 
-    def is_single_fit_functions_cache_empty(self) -> bool:
-        """Returns true if the cache of single functions is empty."""
-        return all([function is None for function in self.fitting_context.single_fit_functions_cache])
+    def clear_undo_data(self) -> None:
+        """Clears the undo fit functions and other data for all previous fits."""
+        self.fitting_context.dataset_indices_for_undo = []
+        self.fitting_context.single_fit_functions_for_undo = []
+        self.fitting_context.fit_statuses_for_undo = []
+        self.fitting_context.chi_squared_for_undo = []
 
-    def cache_the_current_fit_functions(self) -> None:
-        """Caches the existing single fit functions. Used before a fit is performed to save the old state."""
-        self.fitting_context.single_fit_functions_cache = [self._clone_function(function)
-                                                           for function in self.fitting_context.single_fit_functions]
-        self.fitting_context.fit_statuses_cache = self.fitting_context.fit_statuses.copy()
-        self.fitting_context.chi_squared_cache = self.fitting_context.chi_squared.copy()
-
-    def clear_cached_fit_functions(self) -> None:
-        """Clears the cached fit functions and removes all fits from the fitting context."""
-        self.fitting_context.single_fit_functions_cache = [None] * self.fitting_context.number_of_datasets
-        self.fitting_context.fit_statuses_cache = [None] * self.fitting_context.number_of_datasets
-        self.fitting_context.chi_squared_cache = [None] * self.fitting_context.number_of_datasets
-
-    def clear_current_cached_fit_function(self) -> None:
-        """Clears the cached fit function for the currently selected dataset."""
-        self.fitting_context.single_fit_functions_cache[self.fitting_context.current_dataset_index] = None
-        self.fitting_context.fit_statuses_cache[self.fitting_context.current_dataset_index] = None
-        self.fitting_context.chi_squared_cache[self.fitting_context.current_dataset_index] = None
+    def clear_undo_data_for_current_dataset_index(self) -> None:
+        """Clears the undo fit functions and other data for the currently selected index."""
+        current_dataset_index = self.fitting_context.current_dataset_index
+        for i, dataset_index in reversed(list(enumerate(self.fitting_context.dataset_indices_for_undo))):
+            if dataset_index == current_dataset_index:
+                del self.fitting_context.dataset_indices_for_undo[i]
+                del self.fitting_context.single_fit_functions_for_undo[i]
+                del self.fitting_context.fit_statuses_for_undo[i]
+                del self.fitting_context.chi_squared_for_undo[i]
 
     @property
     def fit_statuses(self) -> list:
@@ -233,16 +230,6 @@ class BasicFittingModel:
     def fit_statuses(self, fit_statuses: list) -> None:
         """Sets the value of all fit statuses."""
         self.fitting_context.fit_statuses = fit_statuses
-
-    @property
-    def fit_statuses_cache(self) -> list:
-        """Returns all of the cached fit statuses in a list."""
-        return self.fitting_context.fit_statuses_cache
-
-    @fit_statuses_cache.setter
-    def fit_statuses_cache(self, fit_statuses: list) -> None:
-        """Sets the value of the cached fit statuses."""
-        self.fitting_context.fit_statuses_cache = fit_statuses
 
     @property
     def current_fit_status(self) -> str:
@@ -267,16 +254,6 @@ class BasicFittingModel:
     def chi_squared(self, chi_squared: list) -> None:
         """Sets all of the chi squared values."""
         self.fitting_context.chi_squared = chi_squared
-
-    @property
-    def chi_squared_cache(self) -> list:
-        """Returns all of the cached chi squares in a list."""
-        return self.fitting_context.chi_squared_cache
-
-    @chi_squared_cache.setter
-    def chi_squared_cache(self, chi_squared: list) -> None:
-        """Sets the value of the cached fit statuses."""
-        self.fitting_context.chi_squared_cache = chi_squared
 
     @property
     def current_chi_squared(self) -> float:
@@ -392,11 +369,16 @@ class BasicFittingModel:
                 return x_lower, x_higher
         return self.current_start_x, self.current_end_x
 
-    def use_cached_function(self) -> None:
-        """Sets the current function as being the cached function."""
-        self.fitting_context.single_fit_functions = self.fitting_context.single_fit_functions_cache
-        self.fitting_context.fit_statuses = self.fitting_context.fit_statuses_cache.copy()
-        self.fitting_context.chi_squared = self.fitting_context.chi_squared_cache.copy()
+    def undo_previous_fit(self) -> None:
+        """Undoes the previous fit using the saved undo data."""
+        undo_dataset_index = self.fitting_context.dataset_indices_for_undo.pop()
+        undo_fit_function = self.fitting_context.single_fit_functions_for_undo.pop()
+        undo_fit_status = self.fitting_context.fit_statuses_for_undo.pop()
+        undo_chi_squared = self.fitting_context.chi_squared_for_undo.pop()
+
+        self.fitting_context.single_fit_functions[undo_dataset_index] = undo_fit_function
+        self.fitting_context.fit_statuses[undo_dataset_index] = undo_fit_status
+        self.fitting_context.chi_squared[undo_dataset_index] = undo_chi_squared
 
     def update_plot_guess(self) -> None:
         """Updates the guess plot using the current dataset and function."""

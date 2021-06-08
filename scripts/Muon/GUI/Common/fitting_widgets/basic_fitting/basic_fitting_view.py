@@ -106,6 +106,10 @@ class BasicFittingView(ui_form, base_widget):
         if dataset_index is not None:
             self.fit_function_options.set_current_dataset_index(dataset_index)
 
+    def set_number_of_undos(self, number_of_undos: int) -> None:
+        """Sets the allowed number of 'Undo Fit' events."""
+        self.fit_controls.set_number_of_undos(number_of_undos)
+
     def update_dataset_name_combo_box(self, dataset_names: list) -> None:
         """Update the data in the parameter display combo box."""
         self.workspace_selector.update_dataset_name_combo_box(dataset_names)
@@ -202,10 +206,6 @@ class BasicFittingView(ui_form, base_widget):
     def plot_guess(self, check: bool) -> None:
         """Sets whether or not plot guess is ticked."""
         self.fit_controls.plot_guess = check
-
-    def enable_undo_fit(self, enable: bool) -> None:
-        """Sets whether or not undo fit is enabled."""
-        self.fit_controls.enable_undo_fit(enable)
 
     @property
     def function_name(self) -> str:

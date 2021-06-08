@@ -18,23 +18,25 @@ class BasicFittingContext(FittingContext):
         self._current_dataset_index: int = None
         self._dataset_names: list = []
 
-        self._start_xs: list = []
-        self._end_xs: list = []
+        self._dataset_indices_for_undo: list = []
 
         self._single_fit_functions: list = []
-        self._single_fit_functions_cache: list = []
+        self._single_fit_functions_for_undo: list = []
 
         self._fit_statuses: list = []
-        self._fit_statuses_cache: list = []
+        self._fit_statuses_for_undo: list = []
 
         self._chi_squared: list = []
-        self._chi_squared_cache: list = []
+        self._chi_squared_for_undo: list = []
 
         self._plot_guess: bool = False
         self._guess_workspace_name: str = None
 
         self._function_name: str = ""
         self._function_name_auto_update: bool = True
+
+        self._start_xs: list = []
+        self._end_xs: list = []
 
         self._minimizer: str = ""
         self._evaluation_type: str = ""
@@ -74,30 +76,14 @@ class BasicFittingContext(FittingContext):
         return len(self.dataset_names)
 
     @property
-    def start_xs(self) -> list:
-        """Returns all of the start Xs stored by the model."""
-        return self._start_xs
+    def dataset_indices_for_undo(self) -> list:
+        """Returns the dataset indices from previous fits used for single fitting."""
+        return self._dataset_indices_for_undo
 
-    @start_xs.setter
-    def start_xs(self, start_xs: list) -> None:
-        """Sets all of the start Xs in the model."""
-        if len(start_xs) != self.number_of_datasets:
-            raise RuntimeError(f"The provided number of start Xs is not equal to the number of datasets.")
-
-        self._start_xs = start_xs
-
-    @property
-    def end_xs(self) -> list:
-        """Returns all of the end Xs stored by the model."""
-        return self._end_xs
-
-    @end_xs.setter
-    def end_xs(self, end_xs: list) -> None:
-        """Sets all of the end Xs in the model."""
-        if len(end_xs) != self.number_of_datasets:
-            raise RuntimeError(f"The provided number of end Xs is not equal to the number of datasets.")
-
-        self._end_xs = end_xs
+    @dataset_indices_for_undo.setter
+    def dataset_indices_for_undo(self, dataset_indices: list) -> None:
+        """Sets the dataset indices from previous fits used for single fitting."""
+        self._dataset_indices_for_undo = dataset_indices
 
     @property
     def single_fit_functions(self) -> list:
@@ -113,17 +99,14 @@ class BasicFittingContext(FittingContext):
         self._single_fit_functions = fit_functions
 
     @property
-    def single_fit_functions_cache(self) -> list:
-        """Returns the cache of fit functions used for single fitting."""
-        return self._single_fit_functions_cache
+    def single_fit_functions_for_undo(self) -> list:
+        """Returns the fit functions from previous fits used for single fitting."""
+        return self._single_fit_functions_for_undo
 
-    @single_fit_functions_cache.setter
-    def single_fit_functions_cache(self, fit_functions: list) -> None:
-        """Sets the cache of fit functions used for single fitting."""
-        if len(fit_functions) != self.number_of_datasets:
-            raise RuntimeError(f"The provided number of fit functions is not equal to the number of datasets.")
-
-        self._single_fit_functions_cache = fit_functions
+    @single_fit_functions_for_undo.setter
+    def single_fit_functions_for_undo(self, fit_functions: list) -> None:
+        """Sets the fit functions from previous fits used for single fitting."""
+        self._single_fit_functions_for_undo = fit_functions
 
     @property
     def fit_statuses(self) -> list:
@@ -139,17 +122,14 @@ class BasicFittingContext(FittingContext):
         self._fit_statuses = fit_statuses
 
     @property
-    def fit_statuses_cache(self) -> list:
-        """Returns all of the cached fit statuses in a list."""
-        return self._fit_statuses_cache
+    def fit_statuses_for_undo(self) -> list:
+        """Returns the fit statuses from previous fits used for single fitting."""
+        return self._fit_statuses_for_undo
 
-    @fit_statuses_cache.setter
-    def fit_statuses_cache(self, fit_statuses: list) -> None:
-        """Sets the value of the cached fit statuses."""
-        if len(fit_statuses) != self.number_of_datasets:
-            raise RuntimeError(f"The provided number of fit statuses is not equal to the number of datasets.")
-
-        self._fit_statuses_cache = fit_statuses
+    @fit_statuses_for_undo.setter
+    def fit_statuses_for_undo(self, fit_statuses: list) -> None:
+        """Sets the fit statuses from previous fits used for single fitting."""
+        self._fit_statuses_for_undo = fit_statuses
 
     @property
     def chi_squared(self) -> list:
@@ -165,17 +145,14 @@ class BasicFittingContext(FittingContext):
         self._chi_squared = chi_squared
 
     @property
-    def chi_squared_cache(self) -> list:
-        """Returns all of the cached chi squares in a list."""
-        return self._chi_squared_cache
+    def chi_squared_for_undo(self) -> list:
+        """Returns the chi squared from previous fits used for single fitting."""
+        return self._chi_squared_for_undo
 
-    @chi_squared_cache.setter
-    def chi_squared_cache(self, chi_squared: list) -> None:
-        """Sets the value of the cached fit statuses."""
-        if len(chi_squared) != self.number_of_datasets:
-            raise RuntimeError(f"The provided number of chi squared is not equal to the number of datasets.")
-
-        self._chi_squared_cache = chi_squared
+    @chi_squared_for_undo.setter
+    def chi_squared_for_undo(self, chi_squared: list) -> None:
+        """Sets the chi squared from previous fits used for single fitting."""
+        self._chi_squared_for_undo = chi_squared
 
     @property
     def plot_guess(self) -> bool:
@@ -221,6 +198,32 @@ class BasicFittingContext(FittingContext):
     def function_name_auto_update(self, auto_update: bool) -> None:
         """Sets whether or not to automatically update the function name."""
         self._function_name_auto_update = auto_update
+
+    @property
+    def start_xs(self) -> list:
+        """Returns all of the start Xs stored by the model."""
+        return self._start_xs
+
+    @start_xs.setter
+    def start_xs(self, start_xs: list) -> None:
+        """Sets all of the start Xs in the model."""
+        if len(start_xs) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of start Xs is not equal to the number of datasets.")
+
+        self._start_xs = start_xs
+
+    @property
+    def end_xs(self) -> list:
+        """Returns all of the end Xs stored by the model."""
+        return self._end_xs
+
+    @end_xs.setter
+    def end_xs(self, end_xs: list) -> None:
+        """Sets all of the end Xs in the model."""
+        if len(end_xs) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of end Xs is not equal to the number of datasets.")
+
+        self._end_xs = end_xs
 
     @property
     def minimizer(self) -> str:

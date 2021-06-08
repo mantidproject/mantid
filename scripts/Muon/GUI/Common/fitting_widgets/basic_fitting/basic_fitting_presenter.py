@@ -96,7 +96,7 @@ class BasicFittingPresenter:
         self.update_and_reset_all_data()
 
         self.view.plot_guess, self.model.plot_guess = False, False
-        self.clear_cached_fit_functions()
+        self.clear_undo_data()
 
         if self.model.number_of_datasets == 0:
             self.view.disable_view()
@@ -108,7 +108,7 @@ class BasicFittingPresenter:
         self._update_plot = False
         self.update_and_reset_all_data()
         self._update_plot = True
-        self.clear_cached_fit_functions()
+        self.clear_undo_data()
         self.model.remove_all_fits_from_context()
 
     def handle_selected_group_pair_changed(self) -> None:
@@ -136,9 +136,9 @@ class BasicFittingPresenter:
 
     def handle_undo_fit_clicked(self) -> None:
         """Handle when undo fit is clicked."""
-        self.model.use_cached_function()
-        self.clear_cached_fit_functions()
+        self.model.undo_previous_fit()
         self.model.remove_latest_fit_from_context()
+        self.view.set_number_of_undos(self.model.number_of_undos)
 
         self.update_fit_function_in_view_from_model()
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
@@ -154,7 +154,7 @@ class BasicFittingPresenter:
         if not self.view.fit_object:
             return
 
-        self.model.cache_the_current_fit_functions()
+        self.model.save_current_fit_function_to_undo_data()
         self._perform_fit()
 
     def handle_started(self) -> None:
@@ -173,7 +173,7 @@ class BasicFittingPresenter:
             return
 
         self.handle_fitting_finished(fit_function, fit_status, fit_chi_squared)
-        self.view.enable_undo_fit(True)
+        self.view.set_number_of_undos(self.model.number_of_undos)
         self.view.plot_guess, self.model.plot_guess = False, False
 
     def handle_fitting_finished(self, fit_function, fit_status, chi_squared) -> None:
@@ -230,7 +230,7 @@ class BasicFittingPresenter:
         self.automatically_update_function_name()
 
         if self.model.get_active_fit_function() is None:
-            self.clear_cached_fit_functions()
+            self.clear_undo_data()
             self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
         self.reset_fit_status_and_chi_squared_information()
@@ -275,10 +275,10 @@ class BasicFittingPresenter:
         if self._check_rebin_options():
             self.model.fit_to_raw = self.view.fit_to_raw
 
-    def clear_cached_fit_functions(self) -> None:
-        """Clear the cached fit functions."""
-        self.view.enable_undo_fit(False)
-        self.model.clear_cached_fit_functions()
+    def clear_undo_data(self) -> None:
+        """Clear all the previously saved undo fit functions and other data."""
+        self.model.clear_undo_data()
+        self.view.set_number_of_undos(self.model.number_of_undos)
 
     def reset_fit_status_and_chi_squared_information(self) -> None:
         """Clear the fit status and chi squared information in the view and model."""
