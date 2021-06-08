@@ -27,7 +27,7 @@ endif()
 set_property(TARGET Json PROPERTY FOLDER "MantidFramework")
 
 # Auto-generate exports header
-target_include_directories(Json PUBLIC ${CMAKE_BINARY_DIR}/Framework/Json ${JSONCPP_INCLUDE_DIR})
+target_include_directories(Json PUBLIC ${CMAKE_BINARY_DIR}/Framework/Json SYSTEM PUBLIC ${JSONCPP_INCLUDE_DIR})
 generate_mantid_export_header(Json FALSE)
 
 # Installation settings
@@ -41,7 +41,7 @@ if(CXXTEST_FOUND)
 
 cxxtest_add_test(JsonTest ${TEST_FILES})
 target_include_directories(JsonTest SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR})
-target_link_libraries(JsonTest PUBLIC ${JSONCPP_LIBRARIES} Json)
+target_link_libraries(JsonTest SYSTEM PUBLIC ${JSONCPP_LIBRARIES} PUBLIC Json)
 
 add_dependencies(FrameworkTests JsonTest)
 
