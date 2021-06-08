@@ -13,13 +13,16 @@ from pathlib import Path
 from typing import Optional, Union
 
 
-def run_exists(run_number: Union[str, int], instrument: Optional[str] =None) -> bool:
+def run_exists(run_number: Union[str, int],
+               instrument: Optional[str] = None,
+               oncat: Optional[bool] = True) -> bool:
     r"""
     @brief Test whether the file for a run number exists.
     @details Search first the datasearch directories and if file is not found, use the locations
     provided by ONCat
     @param run_number : just the bare run number, e.g. 12345
-    @param instrument : if None, then retrieve the default instrument from the configuration service
+    @param instrument : if None, retrieve the default instrument from the configuration service
+    @param oncat : whether to use the ONCat archiving service
     """
     if instrument is None:
         instrument = config['default.instrument']
@@ -28,10 +31,11 @@ def run_exists(run_number: Union[str, int], instrument: Optional[str] =None) -> 
     if Path(FileFinder.getFullPath(path)).exists():
         return True
     # check via locations provided by ONCat
-    try:
-        for option in FileFinder.findRuns(path):
-            if Path(option).exists():
-                return True
-    except RuntimeError:
-        return False  # no suggestions found
+    if oncat:
+        try:
+            for option in FileFinder.findRuns(path):
+                if Path(option).exists():
+                    return True
+        except RuntimeError:
+            return False  # no suggestions found
     return False
