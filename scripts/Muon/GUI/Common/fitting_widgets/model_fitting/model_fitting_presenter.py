@@ -80,6 +80,11 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.parameter_combination_thread_success = False
         self.view.warning_popup(error)
 
+    def handle_dataset_name_changed(self) -> None:
+        """Handle when the hidden dataset workspace combo box is changed."""
+        super().handle_dataset_name_changed()
+        self.automatically_update_function_name()
+
     def handle_function_structure_changed(self) -> None:
         """Handle when the function structure is changed."""
         self.update_fit_functions_in_model_from_view()
