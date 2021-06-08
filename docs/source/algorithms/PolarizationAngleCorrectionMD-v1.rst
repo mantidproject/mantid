@@ -37,7 +37,7 @@ Input MDEventWorkspace must be in Q-lab or Q-sample. :math:`|Q|` is not allowed.
 Usage
 -----
 
-**Example - Run Applied Detailed Balance**
+**Example - Run Applying Polarization Angle Correction**
 
 .. testcode:: ExPolarizationAngleCorrectionMDSimple
 
