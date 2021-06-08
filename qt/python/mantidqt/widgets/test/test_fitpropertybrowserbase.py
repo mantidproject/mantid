@@ -80,7 +80,7 @@ class TestFitPropertyBrowser(unittest.TestCase):
         self.assertEqual(a, 'name=LinearBackground,A0=0,A1=0')
         self.assertEqual(self.widget.sizeOfFunctionsGroup(), 3)
 
-    def test_function_string_loaded_correctly(self):
+    def test_multiple_function_string_loaded_correctly(self):
         property_browser = self.create_widget()
         func = "name=Gaussian,Height=100,PeakCentre=1.45,Sigma=0.2,ties=(PeakCentre=1.45);name=Gaussian,Height=100," \
                "PeakCentre=7.5,Sigma=0.2,constraints=(0.18<Sigma<0.22),ties=(PeakCentre=7.5);" \
@@ -100,6 +100,20 @@ class TestFitPropertyBrowser(unittest.TestCase):
             self.assertTrue(h.ifun().isFixed(1))
         # check constraints on last function aren't empty
         self.assertTrue(bool(h.ifun().getConstraints()))
+
+    def test_single_function_string_loaded_correctly(self):
+
+        property_browser = self.create_widget()
+        func = "name=Gaussian,Height=487,PeakCentre=5,Sigma=5;ties=(f0.Sigma=f0.PeakCentre)"
+
+        property_browser.loadFunction(func)
+
+        # test composite func set correctly in browser (string incl. ties and constraints)
+        # note property_browser.getFunctionString() returns the child function (not composite) if only one function
+        self.assertEqual(func, str(property_browser.currentHandler().ifun()))
+        for prefix in property_browser.getPeakPrefixes():
+            h = property_browser.getPeakHandler(prefix)
+            self.assertTrue(h.hasTies())
 
     def test_copy_to_clipboard(self):
         self.widget.loadFunction('name=LinearBackground,A0=0,A1=0')
