@@ -444,7 +444,6 @@ class SuperplotPresenter:
         Args:
             mode (str): new mode
         """
-        selection = self._view.getSelection()
         self._updateSpectrumSlider()
         self._updatePlot()
         figure = self._canvas.figure
