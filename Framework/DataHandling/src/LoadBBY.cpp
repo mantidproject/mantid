@@ -783,7 +783,9 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::F
         tof = 0.0;
         eventProcessor.newFrame();
       } else if ((x >= HISTO_BINS_X) || (y >= HISTO_BINS_Y)) {
-        // ignore
+        // cannot ignore the dt contrbition even if the event
+        // is out of bounds as it is used in the encoding process
+        tof += static_cast<int>(dt) * 0.1;
       } else {
         // conversion from 100 nanoseconds to 1 microsecond
         tof += static_cast<int>(dt) * 0.1;
