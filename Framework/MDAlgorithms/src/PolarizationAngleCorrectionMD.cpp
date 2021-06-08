@@ -41,7 +41,7 @@ int PolarizationAngleCorrectionMD::version() const { return 1; }
 
 /// Summary
 const std::string PolarizationAngleCorrectionMD::summary() const {
-  return "Apply detailed balance to MDEventWorkspace";
+  return "Apply polarization angle correction to MDEventWorkspace";
 }
 
 /// category
@@ -61,18 +61,19 @@ void PolarizationAngleCorrectionMD::init() {
   anglerange->setLower(-180.);
   anglerange->setUpper(180.);
   declareProperty("PolarizationAngle", 0., anglerange,
-                  "An in-plane polarization angle PAP_APA​, between -180 and 180 degrees");
+                  "An in-plane polarization angle​, between -180 and 180 degrees");
 
   auto precisionrange = std::make_shared<BoundedValidator<double>>();
   precisionrange->setLower(0.);
   precisionrange->setUpper(1.);
-  declareProperty("Precision", 1., precisionrange,
-                  "Precision (between 0 and 1). Any event whose cosine of 2 of its schaf angle less than this "
-                  "precision will be ignored.");
+  declareProperty(
+      "Precision", 1., precisionrange,
+      "Precision (between 0 and 1). Any event whose absolute value of cosine of 2 of its schaf angle less than this "
+      "precision will be ignored.");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
-      "The output MDEventWorkspace with detailed balance applied");
+      "The output MDEventWorkspace with polarization angle correction applied");
 }
 
 //---------------------------------------------------------------------------------------------------------
@@ -98,7 +99,7 @@ void PolarizationAngleCorrectionMD::exec() {
     output_ws = input_ws->clone();
   }
 
-  // Apply detailed balance to MDEvents
+  // Apply polarization angle correction to MDEvents
   CALL_MDEVENT_FUNCTION(applyPolarizationAngleCorrection, output_ws);
 
   // refresh cache for MDBoxes: set correct Box signal
@@ -139,7 +140,7 @@ std::map<std::string, std::string> PolarizationAngleCorrectionMD::validateInputs
 
 //---------------------------------------------------------------------------------------------
 /**
- * @brief Apply detailed balance to each MDEvent in MDEventWorkspace
+ * @brief Apply polarization angle correction to each MDEvent in MDEventWorkspace
  */
 template <typename MDE, size_t nd>
 void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(

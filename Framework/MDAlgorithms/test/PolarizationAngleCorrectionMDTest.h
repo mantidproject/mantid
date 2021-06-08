@@ -64,7 +64,7 @@ public:
 
   //---------------------------------------------------------------------------------------------
   /**
-   * @brief Test apply detailed balance to 1 run
+   * @brief Test applying polarization angle correction to 1 run
    */
   void test_1run_qlab() {
     // Check whether the MD to test does exist
@@ -74,7 +74,7 @@ public:
     // specify the output
     std::string outputname("PolarizationAngleSingleQlabTest");
 
-    // Calculate detailed balance for the single MDEventWorkspace
+    // Apply polarizaton angle correction to the single MDEventWorkspace
     PolarizationAngleCorrectionMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
@@ -104,7 +104,7 @@ public:
     // specify the output
     std::string outputname("PolarizationAngleSingleQsampleTest");
 
-    // Calculate detailed balance for the single MDEventWorkspace
+    // Apply polarization angle correction to the single MDEventWorkspace
     PolarizationAngleCorrectionMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
@@ -126,7 +126,7 @@ public:
   }
 
   /**
-   * @brief Test applying detailed balance to 2 merged runs in Q_sample
+   * @brief Test applying polarization angle correction to 2 merged runs in Q_sample
    */
   void test_merged_runs() {
     auto mergedmd = Mantid::API::AnalysisDataService::Instance().retrieve(mQSampleMergedWorkspaceName);
@@ -188,8 +188,8 @@ public:
     merge_alg.execute();
 
     // Calculate the expected result from existing algorithms
-    calculate_polarization_angle_correction(event_ws_0, event_ws_1, mGoldCorrectedQSampleWSName,
-                                            mGoldCorrectedQLabWSName, mGoldCorrectedQSampleMergedWSName);
+    apply_polarization_angle_correction(event_ws_0, event_ws_1, mGoldCorrectedQSampleWSName, mGoldCorrectedQLabWSName,
+                                        mGoldCorrectedQSampleMergedWSName);
 
     // clean the temporary workspaces
     Mantid::API::AnalysisDataService::Instance().remove(event_ws_0);
@@ -340,16 +340,16 @@ private:
   }
 
   /**
-   * @brief Calculate detailed balance, convert to MD and merge as the old way
+   * @brief Apply polarization angle correction, convert to MD and merge as the old way
    *
    */
-  void calculate_polarization_angle_correction(const std::string &event_ws_0, const std::string &event_ws_2,
-                                               const std::string &corrected_qsample_name,
-                                               const std::string &corrected_qlab_name,
-                                               const std::string &corrected_qsample_merged_name) {
+  void apply_polarization_angle_correction(const std::string &event_ws_0, const std::string &event_ws_2,
+                                           const std::string &corrected_qsample_name,
+                                           const std::string &corrected_qlab_name,
+                                           const std::string &corrected_qsample_merged_name) {
     const std::string temp_event_ws0("PolarizationAngleTempEvent0");
 
-    // apply detailed balance and convert to MD for event workspace 1
+    // apply polarization angle correction and convert to MD for event workspace 1
     applyPolarizationAngleCorrection(event_ws_0, temp_event_ws0);
 
     Mantid::DataHandling::SaveNexusProcessed save;
@@ -361,7 +361,7 @@ private:
     convertToMD(temp_event_ws0, corrected_qsample_name, "Q3D", "Q_sample");
     convertToMD(temp_event_ws0, corrected_qlab_name, "Q3D", "Q_lab");
 
-    // apply detailed balance and convert to MD for event workspace 2
+    // apply polarization angle correction and convert to MD for event workspace 2
     const std::string temp_event_ws2("PolarizationAngleTempEvent2");
     const std::string temp_md2("PolarizationAngleMD2GoldTemp");
     applyPolarizationAngleCorrection(event_ws_2, temp_event_ws2);
@@ -377,7 +377,7 @@ private:
   }
 
   /**
-   * @brief Apply detailed balance to event workspace
+   * @brief Apply polarization angle correction to event workspace
    */
   void applyPolarizationAngleCorrection(const std::string &input_ws_name, const std::string &output_ws_name) {
     auto apply_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("HyspecScharpfCorrection");

@@ -15,7 +15,7 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** PolarizationAngleCorrection : Perform the And boolean operation on two MDHistoWorkspaces
+/** PolarizationAngleCorrection : Perform polarization angle correction to an MDEventWorkspace
 
   @date 2011-11-08
 */
@@ -36,7 +36,7 @@ private:
   /// Validate inputs
   std::map<std::string, std::string> validateInputs() override;
 
-  /// Apply detailed balance to each MDEvent
+  /// Apply polarization angle correction to each MDEvent
   template <typename MDE, size_t nd>
   void applyPolarizationAngleCorrection(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
