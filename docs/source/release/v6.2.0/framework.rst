@@ -14,9 +14,6 @@ Concepts
 
 Algorithms
 ----------
-Bugfixes
-############
-GetEiV2 algorithm has been rarely failing on noisy functions with strange error message "Workspace contains Inf or NaN" despite no Inf or NaN-s were actually present in the data. The actual reason for the failure was the denominator of some function, which measures the half-width of the peak may become zero. The solution fixes the issue with zero values in denominator, but still returns unreliable result for noisy function.
 
 Improvements
 ############
@@ -60,5 +57,8 @@ Bugfixes
 ########
 
 - Added parser for input Names to :ref:`algm-CreateMDHistoWorkspace` to allow inputs such as `Names='[H,0,0],[0,K,0],[0,0,L]'`.
+
+- `algm-GetEi2` algorithm has been rarely failing on noisy functions with strange error message "Workspace contains Inf or NaN" despite no Inf or NaN-s were actually present in the data. Despite its relative rarity, the issue was reliably observed at least twice per cycle on ISIS inelastic instruments. The actual reason for the failure was the denominator of the function defining the half-width of the peak becoming zero. The solution fixes the issue with zero values in denominator, but still returns inaccurate result for noisy function.
+
 
 :ref:`Release 6.2.0 <v6.2.0>`
