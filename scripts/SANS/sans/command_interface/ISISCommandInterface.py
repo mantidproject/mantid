@@ -39,6 +39,8 @@ DefaultTrans = True
 # CommandInterfaceStateDirector global instance
 # ----------------------------------------------------------------------------------------------------------------------
 director = CommandInterfaceStateDirector(SANSFacility.ISIS)
+_plot_missing_str = "Plotting is not implemented for workbench yet, please contact us via the forum:\n" \
+                    "https://forum.mantidproject.org/"
 
 
 def deprecated(obj):
@@ -986,7 +988,7 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
         reduced_workspace_names.append(reduced_workspace_name)
 
     if plot:
-        raise NotImplementedError("Plotting is not implemented for workbench yet, please contact the dev team.")
+        raise NotImplementedError(_plot_missing_str)
 
     # Return just the workspace name of the full range
     return reduced_workspace_names[0]
@@ -1013,7 +1015,7 @@ def PhiRanges(phis, plot=True):
         reduced_workspace_names.append(reduced_workspace_name)
 
     if plot:
-        raise NotImplementedError("Plotting is not implemented for workbench yet, please contact the dev team.")
+        raise NotImplementedError(_plot_missing_str)
 
     # Return just the workspace name of the full range
     return reduced_workspace_names[0]
@@ -1068,7 +1070,7 @@ def PlotResult(workspace, canvas=None):
         @param canvas: optional handle to an existing graph to write the plot to
         @return: a handle to the graph that was written to
     """
-    raise NotImplementedError("Plotting is not implemented for workbench yet, please contact the dev team.")
+    raise NotImplementedError(_plot_missing_str)
 
     try:
         import mantidplot
