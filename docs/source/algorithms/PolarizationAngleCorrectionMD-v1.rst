@@ -9,7 +9,7 @@
 Description
 -----------
 
-User inputs an in-plane polarization pa angle between -180 and 180 degrees,
+User inputs an in-plane polarization :math:`P_a` angle between -180 and 180 degrees,
 and a precision (between 0 and 1).
 Then for every MD event, a polarization angle correction is applied as below.
 
@@ -17,17 +17,21 @@ Then for every MD event, a polarization angle correction is applied as below.
    :math:`Q_{lab} = R \times Q_{sample}`
    where R is goniometer rotation matrix.
 
-1. Calculate the horizontal plane angle between momentum transfer and direct beam
-   :math:`\gamma = tan^{-1}(Q_{lab}_x, Q_{lab}_z)`
+2. Calculate the horizontal plane angle between momentum transfer and direct beam
 
-1. Calculate the Scharpf angle as
-   :math:`\alpha = \gamma - pa`
+    :math:`\gamma = tan^{-1}((Q_{lab})_x, (Q_{lab})_z)`
 
-1. Correction factor :math:`F` is equal to :math:`1 / cos(2\alpha)` if :math:`abs(cos(2\alpha))` is greater than precision
+3. Calculate the Scharpf angle as
+   :math:`\alpha = \gamma - P_a`
+   , where :math:`P_a` is the polarization angle
 
-1. Apply correction to each MDEvent as
-::math:`I = I \times F`
-::math:`Err^2 = Err^2 \times F^2`
+4. Correction factor :math:`F` is equal to :math:`1 / cos(2\alpha)` if :math:`abs(cos(2\alpha))` is greater than precision
+
+5. Apply correction to each MDEvent as
+
+   :math:`I = I \times F`
+
+   :math:`Err^2 = Err^2 \times F^2`
 
 Inputs
 ======
