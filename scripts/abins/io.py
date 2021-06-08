@@ -22,7 +22,9 @@ class IO(object):
     """
     Class for Abins I/O HDF file operations.
     """
-    def __init__(self, input_filename=None, group_name=None):
+    def __init__(self, input_filename=None, group_name=None, setting=''):
+
+        self._setting = setting
 
         if isinstance(input_filename, str):
 
@@ -73,6 +75,14 @@ class IO(object):
         saved_hash = self.load(list_of_attributes=["hash"])
         return self._hash_input_filename == saved_hash["attributes"]["hash"]
 
+    def _valid_setting(self):
+        """
+        Checks if setting matches content of HDF file.
+        :returns: True if consistent, otherwise False.
+        """
+        saved_setting = self.load(list_of_attributes=["setting"])
+        return self._setting == saved_setting["attributes"]["setting"]
+
     def _valid_advanced_parameters(self):
         """
         Check if advanced parameters haven't changed.
@@ -81,9 +91,39 @@ class IO(object):
         :returns: True if they are the same, otherwise False
 
         """
+        from abins.parameters import non_performance_parameters as current_advanced_parameters
+
         previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
-        return (abins.parameters.non_performance_parameters
-                == json.loads(previous_advanced_parameters["attributes"]["advanced_parameters"]))
+        previous_advanced_parameters = json.loads(
+            previous_advanced_parameters["attributes"]["advanced_parameters"])
+
+        diff = {key: (value, previous_advanced_parameters.get(key, None))
+                for key, value in current_advanced_parameters.items()
+                if previous_advanced_parameters.get(key, None) != value}
+        diff.update({key: (None, value)
+                     for key, value in previous_advanced_parameters.items()
+                     if key not in current_advanced_parameters})
+
+        if diff:
+            sections = ('instruments', 'sampling', 'hdf_groups')
+
+            for section in sections:
+                if section in diff:
+                    logger.information(f"Differences in Abins {section} parameters:")
+                    new_group, old_group = diff[section]
+                    for key in new_group:
+                        if key not in old_group:
+                            old_group[key] = '<key not present>'
+
+                        if new_group[key] != old_group[key]:
+                            logger.information(key)
+                            logger.information("New values:")
+                            logger.information(str(new_group[key]))
+                            logger.information("Previous values:")
+                            logger.information(str(old_group[key]))
+            return False
+        else:
+            return True
 
     def get_previous_ab_initio_program(self):
         """
@@ -96,12 +136,14 @@ class IO(object):
         Checks if currently used ab initio file is the same as in the previous calculations. Also checks if currently
         used parameters from AbinsParameters are the same as in the previous calculations.
         """
-
         if not self._valid_hash():
             raise ValueError("Different ab initio file  was used in the previous calculations.")
 
         if not self._valid_advanced_parameters():
             raise ValueError("Different advanced parameters were used in the previous calculations.")
+
+        if not self._valid_setting():
+            raise ValueError("Different instrument setting was used in the previous calculations")
 
     def erase_hdf_file(self):
         """
@@ -124,6 +166,7 @@ class IO(object):
         Add attributes for input data filename, hash of file, advanced parameters to data for HDF5 file
         """
         self.add_attribute("hash", self._hash_input_filename)
+        self.add_attribute("setting", self._setting)
         self.add_attribute("filename", self._input_filename)
         self.add_attribute("advanced_parameters",
                            json.dumps(abins.parameters.non_performance_parameters))

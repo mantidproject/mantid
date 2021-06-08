@@ -31,14 +31,11 @@ using Functions::CubicSpline;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SplineInterpolation::SplineInterpolation()
-    : m_cspline(std::make_shared<CubicSpline>()) {}
+SplineInterpolation::SplineInterpolation() : m_cspline(std::make_shared<CubicSpline>()) {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SplineInterpolation::name() const {
-  return "SplineInterpolation";
-}
+const std::string SplineInterpolation::name() const { return "SplineInterpolation"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int SplineInterpolation::version() const { return 1; }
@@ -59,28 +56,21 @@ const std::string SplineInterpolation::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SplineInterpolation::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("WorkspaceToMatch", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("WorkspaceToMatch", "", Direction::Input),
                   "The workspace which defines the points of the spline.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("WorkspaceToInterpolate", "",
-                                            Direction::Input),
-      "The workspace on which to perform the interpolation algorithm.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("WorkspaceToInterpolate", "", Direction::Input),
+                  "The workspace on which to perform the interpolation algorithm.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "The workspace containing the calculated points and derivatives");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The workspace containing the calculated points and derivatives");
 
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      "OutputWorkspaceDeriv", "", Direction::Output,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspaceDeriv", "", Direction::Output,
+                                                                      PropertyMode::Optional),
                   "The workspace containing the calculated derivatives");
 
   auto validator = std::make_shared<BoundedValidator<int>>(0, 2);
-  declareProperty("DerivOrder", 2, validator,
-                  "Order to derivatives to calculate.");
+  declareProperty("DerivOrder", 2, validator, "Order to derivatives to calculate.");
 
   declareProperty("Linear2Points", false,
                   "Set to true to perform linear "
@@ -106,15 +96,13 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
 
       // The minimum number of points for cubic splines is 3
       if (binsNo < 2) {
-        result["WorkspaceToInterpolate"] =
-            "Workspace must have minimum 2 points.";
+        result["WorkspaceToInterpolate"] = "Workspace must have minimum 2 points.";
       } else if (binsNo == 2) {
         if (!linear) {
-          result["WorkspaceToInterpolate"] =
-              "Workspace has only 2 points, "
-              "you can enable linear interpolation by "
-              "setting the property Linear2Points. Otherwise "
-              "provide a minimum of 3 points.";
+          result["WorkspaceToInterpolate"] = "Workspace has only 2 points, "
+                                             "you can enable linear interpolation by "
+                                             "setting the property Linear2Points. Otherwise "
+                                             "provide a minimum of 3 points.";
         } else if (derivOrder == 2) {
           result["DerivOrder"] = "Linear interpolation is requested, hence "
                                  "derivative order can be maximum 1.";
@@ -152,9 +140,8 @@ void SplineInterpolation::exec() {
 
   // warn user that we only use first spectra in matching workspace
   if (histNoToMatch > 1) {
-    g_log.warning()
-        << "Algorithm can only interpolate against a single data set. "
-           "Only the x-axis of the first spectrum will be used.\n";
+    g_log.warning() << "Algorithm can only interpolate against a single data set. "
+                       "Only the x-axis of the first spectrum will be used.\n";
   }
 
   MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(mws, iws);
@@ -201,36 +188,30 @@ void SplineInterpolation::exec() {
     // perform linear interpolation
 
     // first check that the x-axis (first spectrum) is sorted ascending
-    if (!std::is_sorted(mwspt->x(0).rawData().begin(),
-                        mwspt->x(0).rawData().end())) {
-      throw std::runtime_error(
-          "X-axis of the workspace to match is not sorted. "
-          "Consider calling SortXAxis before.");
+    if (!std::is_sorted(mwspt->x(0).rawData().begin(), mwspt->x(0).rawData().end())) {
+      throw std::runtime_error("X-axis of the workspace to match is not sorted. "
+                               "Consider calling SortXAxis before.");
     }
 
     for (size_t i = 0; i < histNo; ++i) {
       // set up the function that needs to be interpolated
-      std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel *)> acc(
-          gsl_interp_accel_alloc(), gsl_interp_accel_free);
-      std::unique_ptr<gsl_interp, void (*)(gsl_interp *)> linear(
-          gsl_interp_alloc(gsl_interp_linear, binsNo), gsl_interp_free);
-      gsl_interp_linear->init(linear.get(), &(iwspt->x(i)[0]),
-                              &(iwspt->y(i)[0]), binsNo);
+      std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel *)> acc(gsl_interp_accel_alloc(),
+                                                                          gsl_interp_accel_free);
+      std::unique_ptr<gsl_interp, void (*)(gsl_interp *)> linear(gsl_interp_alloc(gsl_interp_linear, binsNo),
+                                                                 gsl_interp_free);
+      gsl_interp_linear->init(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo);
 
       // figure out the interpolation range
-      const std::pair<size_t, size_t> range =
-          findInterpolationRange(iwspt, mwspt, i);
+      const std::pair<size_t, size_t> range = findInterpolationRange(iwspt, mwspt, i);
 
       // perform interpolation in the range
       for (size_t k = range.first; k < range.second; ++k) {
-        gsl_interp_linear->eval(linear.get(), &(iwspt->x(i)[0]),
-                                &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k],
-                                acc.get(), &(outputWorkspace->mutableY(i)[k]));
+        gsl_interp_linear->eval(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(),
+                                &(outputWorkspace->mutableY(i)[k]));
         // calculate only 1st order derivative if needed
         if (order > 0) {
-          gsl_interp_linear->eval_deriv(
-              linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo,
-              mwspt->x(0)[k], acc.get(), &(derivs[i]->mutableY(0)[k]));
+          gsl_interp_linear->eval_deriv(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k],
+                                        acc.get(), &(derivs[i]->mutableY(0)[k]));
         }
       }
       // flat extrapolation outside the range
@@ -258,12 +239,10 @@ void SplineInterpolation::exec() {
  * @param iws :: The input workspace to interpolate
  * @return The pointer to the newly created workspace
  */
-API::MatrixWorkspace_sptr SplineInterpolation::setupOutputWorkspace(
-    const API::MatrixWorkspace_sptr &mws,
-    const API::MatrixWorkspace_sptr &iws) const {
+API::MatrixWorkspace_sptr SplineInterpolation::setupOutputWorkspace(const API::MatrixWorkspace_sptr &mws,
+                                                                    const API::MatrixWorkspace_sptr &iws) const {
   const size_t numSpec = iws->getNumberHistograms();
-  MatrixWorkspace_sptr outputWorkspace =
-      WorkspaceFactory::Instance().create(mws, numSpec);
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(mws, numSpec);
   // share x-axes with the first spectrum of mws
   for (size_t i = 0; i < numSpec; ++i) {
     outputWorkspace->setSharedX(i, mws->sharedX(0));
@@ -279,8 +258,7 @@ API::MatrixWorkspace_sptr SplineInterpolation::setupOutputWorkspace(
  * @param workspace :: The input workspace
  * @return The converted workspace containing point data
  */
-MatrixWorkspace_sptr
-SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) {
+MatrixWorkspace_sptr SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) {
   if (workspace->isHistogramData()) {
     g_log.warning("Histogram data provided, converting to point data");
     Algorithm_sptr converter = createChildAlgorithm("ConvertToPointData");
@@ -299,8 +277,8 @@ SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) {
  *spline
  * @param row :: The row of spectra to use
  */
-void SplineInterpolation::setInterpolationPoints(
-    const MatrixWorkspace_const_sptr &inputWorkspace, const size_t row) const {
+void SplineInterpolation::setInterpolationPoints(const MatrixWorkspace_const_sptr &inputWorkspace,
+                                                 const size_t row) const {
   const auto &xIn = inputWorkspace->x(row);
   const auto &yIn = inputWorkspace->y(row);
   const size_t size = xIn.size();
@@ -320,10 +298,9 @@ void SplineInterpolation::setInterpolationPoints(
  * @param outputWorkspace :: The output workspace
  * @param order :: The order of derivatives to calculate
  */
-void SplineInterpolation::calculateDerivatives(
-    const API::MatrixWorkspace_const_sptr &inputWorkspace,
-    const API::MatrixWorkspace_sptr &outputWorkspace,
-    const size_t order) const {
+void SplineInterpolation::calculateDerivatives(const API::MatrixWorkspace_const_sptr &inputWorkspace,
+                                               const API::MatrixWorkspace_sptr &outputWorkspace,
+                                               const size_t order) const {
   // get x and y parameters from workspaces
   const size_t nData = inputWorkspace->y(0).size();
   const double *xValues = &(inputWorkspace->x(0)[0]);
@@ -339,9 +316,8 @@ void SplineInterpolation::calculateDerivatives(
  * @param outputWorkspace :: The output workspace
  * @param row :: The row of spectra to use
  */
-void SplineInterpolation::calculateSpline(
-    const MatrixWorkspace_const_sptr &inputWorkspace,
-    const MatrixWorkspace_sptr &outputWorkspace, const size_t row) const {
+void SplineInterpolation::calculateSpline(const MatrixWorkspace_const_sptr &inputWorkspace,
+                                          const MatrixWorkspace_sptr &outputWorkspace, const size_t row) const {
   // setup input parameters
   const size_t nData = inputWorkspace->y(0).size();
   const double *xValues = &(inputWorkspace->x(0)[0]);
@@ -360,10 +336,9 @@ void SplineInterpolation::calculateSpline(
  * @param doDerivs : whether derivatives are requested
  * @param derivs : the vector of derivative workspaces
  */
-void SplineInterpolation::extrapolateFlat(
-    const MatrixWorkspace_sptr &ows, const MatrixWorkspace_const_sptr &iwspt,
-    const size_t row, const std::pair<size_t, size_t> &indices,
-    const bool doDerivs, std::vector<MatrixWorkspace_sptr> &derivs) const {
+void SplineInterpolation::extrapolateFlat(const MatrixWorkspace_sptr &ows, const MatrixWorkspace_const_sptr &iwspt,
+                                          const size_t row, const std::pair<size_t, size_t> &indices,
+                                          const bool doDerivs, std::vector<MatrixWorkspace_sptr> &derivs) const {
 
   const double yFirst = iwspt->y(row).front();
   const double yLast = iwspt->y(row).back();
@@ -394,9 +369,9 @@ void SplineInterpolation::extrapolateFlat(
  * @param row : the workspace index
  * @return : pair of indices for representing the interpolation range
  */
-std::pair<size_t, size_t> SplineInterpolation::findInterpolationRange(
-    const MatrixWorkspace_const_sptr &iwspt, const MatrixWorkspace_sptr &mwspt,
-    const size_t row) {
+std::pair<size_t, size_t> SplineInterpolation::findInterpolationRange(const MatrixWorkspace_const_sptr &iwspt,
+                                                                      const MatrixWorkspace_sptr &mwspt,
+                                                                      const size_t row) {
 
   auto xAxisIn = iwspt->x(row).rawData();
   std::sort(xAxisIn.begin(), xAxisIn.end());
@@ -425,8 +400,7 @@ std::pair<size_t, size_t> SplineInterpolation::findInterpolationRange(
   }
 
   std::string log = "Workspace index " + std::to_string(row) +
-                    ": Will perform flat extrapolation outside bin range: " +
-                    std::to_string(firstIndex) + " to " +
+                    ": Will perform flat extrapolation outside bin range: " + std::to_string(firstIndex) + " to " +
                     std::to_string(lastIndex) + "\n";
 
   g_log.debug(log);

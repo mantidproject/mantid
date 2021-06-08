@@ -27,7 +27,7 @@ public:
     {
         TSM_ASSERT( "ASCII works", 'A' == 65 );
     }
-    
+
     void testEquals()
     {
         TS_ASSERT_EQUALS( 1 + 1, 2 );

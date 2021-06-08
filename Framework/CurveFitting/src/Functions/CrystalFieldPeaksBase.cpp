@@ -19,10 +19,9 @@ namespace Functions {
 namespace {
 
 // Maps ion name to its int code.
-const std::map<std::string, int> ION_2_NRE{
-    {"Ce", 1},  {"Pr", 2},  {"Nd", 3}, {"Pm", 4}, {"Sm", 5},
-    {"Eu", 6},  {"Gd", 7},  {"Tb", 8}, {"Dy", 9}, {"Ho", 10},
-    {"Er", 11}, {"Tm", 12}, {"Yb", 13}};
+const std::map<std::string, int> ION_2_NRE{{"Ce", 1},  {"Pr", 2},  {"Nd", 3}, {"Pm", 4}, {"Sm", 5},
+                                           {"Eu", 6},  {"Gd", 7},  {"Tb", 8}, {"Dy", 9}, {"Ho", 10},
+                                           {"Er", 11}, {"Tm", 12}, {"Yb", 13}};
 
 const bool REAL_PARAM_PART = true;
 const bool IMAG_PARAM_PART = false;
@@ -267,8 +266,7 @@ const std::map<std::string, std::function<void(API::IFunction &)>> SYMMETRY_MAP{
 } // anonymous namespace
 
 /// Constructor
-CrystalFieldPeaksBase::CrystalFieldPeaksBase()
-    : API::ParamFunction(), m_defaultDomainSize(0) {
+CrystalFieldPeaksBase::CrystalFieldPeaksBase() : API::ParamFunction(), m_defaultDomainSize(0) {
 
   declareAttribute("Ion", Attribute("Ce"));
   declareAttribute("Symmetry", Attribute("Ci"));
@@ -322,11 +320,8 @@ CrystalFieldPeaksBase::CrystalFieldPeaksBase()
 /// @param ham :: Output crystal field hamiltonian (without external field)
 /// @param hz :: Output Zeeman hamiltonian (external field term)
 /// @param nre :: Output ion code.
-void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
-                                                 ComplexFortranMatrix &wf,
-                                                 ComplexFortranMatrix &ham,
-                                                 ComplexFortranMatrix &hz,
-                                                 int &nre) const {
+void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en, ComplexFortranMatrix &wf,
+                                                 ComplexFortranMatrix &ham, ComplexFortranMatrix &hz, int &nre) const {
 
   auto ion = getAttribute("Ion").asString();
   if (ion.empty()) {
@@ -355,18 +350,15 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
           }
           // Catch exceptions thrown by stof so we get a more meaningful error
         } catch (const std::invalid_argument &) {
-          throw std::runtime_error("Invalid value '" + ion.substr(1) +
-                                   "' of J passed to CrystalFieldPeaks.");
+          throw std::runtime_error("Invalid value '" + ion.substr(1) + "' of J passed to CrystalFieldPeaks.");
         } catch (const std::out_of_range &) {
-          throw std::runtime_error("Value of J: '" + ion.substr(1) +
-                                   "' passed to CrystalFieldPeaks is too big.");
+          throw std::runtime_error("Value of J: '" + ion.substr(1) + "' passed to CrystalFieldPeaks is too big.");
         }
       }
       // fall through
     }
     default:
-      throw std::runtime_error("Unknown ion name '" + ion +
-                               "' passed to CrystalFieldPeaks.");
+      throw std::runtime_error("Unknown ion name '" + ion + "' passed to CrystalFieldPeaks.");
     }
   } else {
     nre = ionIter->second;
@@ -433,33 +425,26 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
 
   calculateEigensystem(en, wf, ham, hz, nre, bmol, bext, bkq);
   // MaxPeakCount is a read-only "mutable" attribute.
-  const_cast<CrystalFieldPeaksBase *>(this)->setAttributeValue(
-      "MaxPeakCount", static_cast<int>(en.size()));
+  const_cast<CrystalFieldPeaksBase *>(this)->setAttributeValue("MaxPeakCount", static_cast<int>(en.size()));
 }
 
 /// Perform a castom action when an attribute is set.
-void CrystalFieldPeaksBase::setAttribute(const std::string &name,
-                                         const IFunction::Attribute &attr) {
+void CrystalFieldPeaksBase::setAttribute(const std::string &name, const IFunction::Attribute &attr) {
   if (name == "Symmetry") {
     auto symmIter = SYMMETRY_MAP.find(attr.asString());
     if (symmIter == SYMMETRY_MAP.end()) {
-      throw std::runtime_error(
-          "Unknown symmetry passed to CrystalFieldPeaks: " + attr.asString());
+      throw std::runtime_error("Unknown symmetry passed to CrystalFieldPeaks: " + attr.asString());
     }
     symmIter->second(*this);
   }
   IFunction::setAttribute(name, attr);
 }
 
-std::string CrystalFieldPeaksBaseImpl::name() const {
-  return "CrystalFieldPeaksBaseImpl";
-}
+std::string CrystalFieldPeaksBaseImpl::name() const { return "CrystalFieldPeaksBaseImpl"; }
 
-void CrystalFieldPeaksBaseImpl::function(
-    const API::FunctionDomain & /*domain*/,
-    API::FunctionValues & /*values*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "Method is intentionally not implemented.");
+void CrystalFieldPeaksBaseImpl::function(const API::FunctionDomain & /*domain*/,
+                                         API::FunctionValues & /*values*/) const {
+  throw Kernel::Exception::NotImplementedError("Method is intentionally not implemented.");
 }
 
 } // namespace Functions

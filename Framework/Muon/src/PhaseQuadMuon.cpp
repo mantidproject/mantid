@@ -22,17 +22,15 @@ namespace {
 const std::array<std::string, 2> phaseNames = {{"phase", "phi"}};
 const std::array<std::string, 3> asymmNames = {{"asymmetry", "asymm", "asym"}};
 
-template <typename T1, typename T2>
-int findName(const T1 &patterns, const T2 &names) {
+template <typename T1, typename T2> int findName(const T1 &patterns, const T2 &names) {
   for (const std::string &pattern : patterns) {
-    auto it = std::find_if(names.begin(), names.end(),
-                           [pattern](const std::string &s) {
-                             if (s == pattern) {
-                               return true;
-                             } else {
-                               return false;
-                             }
-                           });
+    auto it = std::find_if(names.begin(), names.end(), [pattern](const std::string &s) {
+      if (s == pattern) {
+        return true;
+      } else {
+        return false;
+      }
+    });
     if (it != names.end()) {
       return static_cast<int>(std::distance(names.begin(), it));
     }
@@ -55,18 +53,14 @@ DECLARE_ALGORITHM(PhaseQuadMuon)
  */
 void PhaseQuadMuon::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
       "Name of the input workspace containing the spectra");
 
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "PhaseTable", "", Direction::Input),
-      "Name of the table containing the detector phases and asymmetries");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("PhaseTable", "", Direction::Input),
+                  "Name of the table containing the detector phases and asymmetries");
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
       "Name of the output workspace");
 }
 
@@ -132,12 +126,10 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
   int phaseCount = 0;
   int asymmetryCount = 0;
   for (const std::string &name : names) {
-    phaseCount += static_cast<int>(std::count_if(
-        phaseNames.cbegin(), phaseNames.cend(),
-        [&name](const auto &goodName) { return goodName == name; }));
-    asymmetryCount += static_cast<int>(std::count_if(
-        asymmNames.cbegin(), asymmNames.cend(),
-        [&name](const auto &goodName) { return goodName == name; }));
+    phaseCount += static_cast<int>(std::count_if(phaseNames.cbegin(), phaseNames.cend(),
+                                                 [&name](const auto &goodName) { return goodName == name; }));
+    asymmetryCount += static_cast<int>(std::count_if(asymmNames.cbegin(), asymmNames.cend(),
+                                                     [&name](const auto &goodName) { return goodName == name; }));
   }
   if (phaseCount == 0) {
     result["PhaseTable"] = "PhaseTable needs phases column";
@@ -146,12 +138,10 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
     result["PhaseTable"] = "PhaseTable needs a asymmetry/asymm/asym column";
   }
   if (phaseCount > 1) {
-    result["PhaseTable"] =
-        "PhaseTable has " + std::to_string(phaseCount) + " phase columns";
+    result["PhaseTable"] = "PhaseTable has " + std::to_string(phaseCount) + " phase columns";
   }
   if (asymmetryCount > 1) {
-    result["PhaseTable"] = "PhaseTable has " + std::to_string(asymmetryCount) +
-                           " asymmetry/asymm/asym columns";
+    result["PhaseTable"] = "PhaseTable has " + std::to_string(asymmetryCount) + " asymmetry/asymm/asym columns";
   }
   // Check units, should be microseconds
   Unit_const_sptr unit = inputWS->getAxis(0)->unit();
@@ -169,8 +159,7 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
  * @return :: Vector containing the normalization constants, N0, for each
  * spectrum
  */
-std::vector<double>
-PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
+std::vector<double> PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
   const size_t nspec = ws->getNumberHistograms();
 
@@ -209,10 +198,8 @@ PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
  * @param n0 :: [input] vector containing the normalization constants
  * @return :: workspace containing the quadrature phase signal
  */
-API::MatrixWorkspace_sptr
-PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
-                      const API::ITableWorkspace_sptr &phase,
-                      const std::vector<double> &n0) {
+API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
+                                                const API::ITableWorkspace_sptr &phase, const std::vector<double> &n0) {
 
   // Poisson limit: below this number we consider we don't have enough
   // statistics
@@ -239,8 +226,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   // Get the maximum asymmetry
   double maxAsym = 0.;
   for (size_t h = 0; h < nspec; h++) {
-    if (phase->Double(h, asymmetryIndex) > maxAsym &&
-        phase->Double(h, asymmetryIndex) != ASYMM_ERROR) {
+    if (phase->Double(h, asymmetryIndex) > maxAsym && phase->Double(h, asymmetryIndex) != ASYMM_ERROR) {
       maxAsym = phase->Double(h, asymmetryIndex);
     }
   }
@@ -259,8 +245,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     double sxy = 0.;
     for (size_t h = 0; h < nspec; h++) {
       emptySpectrum.emplace_back(
-          std::all_of(ws->y(h).begin(), ws->y(h).end(),
-                      [](double value) { return value == 0.; }) ||
+          std::all_of(ws->y(h).begin(), ws->y(h).end(), [](double value) { return value == 0.; }) ||
           phase->Double(h, asymmetryIndex) == ASYMM_ERROR);
       if (!emptySpectrum[h]) {
         const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
@@ -294,8 +279,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
   const size_t npoints = ws->blocksize();
   // Create and populate output workspace
-  API::MatrixWorkspace_sptr ows =
-      create<API::MatrixWorkspace>(*ws, 2, BinEdges(npoints + 1));
+  API::MatrixWorkspace_sptr ows = create<API::MatrixWorkspace>(*ws, 2, BinEdges(npoints + 1));
 
   // X
   ows->setSharedX(0, ws->sharedX(0));
@@ -323,8 +307,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
         const double X = ws->x(h)[i];
         const double exponential = n0[h] * exp(-(X - X0) / muLife);
         const double Y = ws->y(h)[i] - exponential;
-        const double E =
-            (ws->y(h)[i] > poissonLimit) ? ws->e(h)[i] : sqrt(exponential);
+        const double E = (ws->y(h)[i] > poissonLimit) ? ws->e(h)[i] : sqrt(exponential);
 
         realY[i] += aj[h] * Y;
         imagY[i] += bj[h] * Y;

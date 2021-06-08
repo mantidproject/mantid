@@ -263,6 +263,9 @@ add_subdirectory(test)
 
 # Auto-generate exports header
 target_include_directories(Crystal PUBLIC ${CMAKE_BINARY_DIR}/Framework/Crystal)
+target_include_directories( Crystal PUBLIC
+                           ${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal )
+
 generate_mantid_export_header(Crystal FALSE)
 
 # Installation settings

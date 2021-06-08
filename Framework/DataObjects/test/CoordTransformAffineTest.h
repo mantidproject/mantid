@@ -28,8 +28,7 @@ class CoordTransformAffineTest : public CxxTest::TestSuite {
 
 private:
   /** Helper to compare two "vectors" (bare float array and V3D) */
-  void compare(size_t numdims, coord_t *value,
-               const Mantid::Kernel::V3D &expected) {
+  void compare(size_t numdims, coord_t *value, const Mantid::Kernel::V3D &expected) {
     for (size_t i = 0; i < numdims; i++)
       TS_ASSERT_DELTA(value[i], expected[i], 1e-4);
   }
@@ -41,10 +40,10 @@ private:
   }
 
   /** Helper to create a rotation tranformation*/
-  Mantid::Kernel::Matrix<coord_t> createRotationTransform(
-      const Mantid::Kernel::V3D &ax, const Mantid::Kernel::V3D &ay,
-      const Mantid::Kernel::V3D &az, const Mantid::Kernel::V3D &bx,
-      const Mantid::Kernel::V3D &by, const Mantid::Kernel::V3D &bz) {
+  Mantid::Kernel::Matrix<coord_t> createRotationTransform(const Mantid::Kernel::V3D &ax, const Mantid::Kernel::V3D &ay,
+                                                          const Mantid::Kernel::V3D &az, const Mantid::Kernel::V3D &bx,
+                                                          const Mantid::Kernel::V3D &by,
+                                                          const Mantid::Kernel::V3D &bz) {
     Mantid::Kernel::Matrix<coord_t> transform(4, 4);
     transform[0][0] = coord_t(ax.scalar_prod(bx));
     transform[0][1] = coord_t(ax.scalar_prod(by));
@@ -121,8 +120,7 @@ public:
     TS_ASSERT_DELTA(out[0], 3.5, 1e-5);
     TS_ASSERT_DELTA(out[1], 5.5, 1e-5);
     // Wrong number of dimensions?
-    TSM_ASSERT_THROWS_ANYTHING("Check for the right # of dimensions",
-                               ct.applyVMD(VMD(1.0, 2.0, 3.0)));
+    TSM_ASSERT_THROWS_ANYTHING("Check for the right # of dimensions", ct.applyVMD(VMD(1.0, 2.0, 3.0)));
   }
 
   /** Test rotation in isolation */
@@ -140,8 +138,7 @@ public:
     const V3D by(1, 0, 0);
     const V3D bz(0, 0, 1);
 
-    Mantid::Kernel::Matrix<coord_t> transform =
-        createRotationTransform(ax, ay, az, bx, by, bz);
+    Mantid::Kernel::Matrix<coord_t> transform = createRotationTransform(ax, ay, az, bx, by, bz);
     ct.setMatrix(transform);
 
     coord_t out[3];
@@ -175,8 +172,7 @@ public:
 
     double angle = 0.1;
     // Build the basis vectors, a 0.1 rad rotation along +Z
-    std::vector<VMD> bases{{cos(angle), sin(angle), 0.0},
-                           {-sin(angle), cos(angle), 0.0}};
+    std::vector<VMD> bases{{cos(angle), sin(angle), 0.0}, {-sin(angle), cos(angle), 0.0}};
     // Scaling is 1.0
     VMD scale(1.0, 1.0);
     // Build it
@@ -204,12 +200,10 @@ public:
     // //-----------------------------------------------------------------------------------------------
 
     bases.emplace_back(1, 2, 3);
-    TSM_ASSERT_THROWS_ANYTHING("Too many bases throws",
-                               ct.buildOrthogonal(origin, bases, scale));
+    TSM_ASSERT_THROWS_ANYTHING("Too many bases throws", ct.buildOrthogonal(origin, bases, scale));
     bases.resize(2);
     bases[0] = VMD(1, 2, 3, 4);
-    TSM_ASSERT_THROWS_ANYTHING("A base has the wrong dimensions",
-                               ct.buildOrthogonal(origin, bases, scale));
+    TSM_ASSERT_THROWS_ANYTHING("A base has the wrong dimensions", ct.buildOrthogonal(origin, bases, scale));
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -224,8 +218,7 @@ public:
 
     double angle = 0.1;
     // Build the basis vectors, a 0.1 rad rotation along +Z
-    std::vector<VMD> bases{{cos(angle), sin(angle), 0.0},
-                           {-sin(angle), cos(angle), 0.0}};
+    std::vector<VMD> bases{{cos(angle), sin(angle), 0.0}, {-sin(angle), cos(angle), 0.0}};
     // Scaling
     VMD scale(2.0, 3.0);
     // Build it
@@ -240,15 +233,13 @@ public:
     q.rotate(exp2);
     coord_t in2[3] = {-1.4f, 6.6f, 8.987f};
     // The output gets scaled like this
-    coord_t scaledExp2[2] = {static_cast<coord_t>(exp2[0] * 2.0),
-                             static_cast<coord_t>(exp2[1] * 3.0)};
+    coord_t scaledExp2[2] = {static_cast<coord_t>(exp2[0] * 2.0), static_cast<coord_t>(exp2[1] * 3.0)};
     ct.apply(in2, out);
     compare(2, out, scaledExp2);
 
     // Checks for failure to build
     scale = VMD(2, 3, 4);
-    TSM_ASSERT_THROWS_ANYTHING("Mismatch in scaling vector",
-                               ct.buildOrthogonal(origin, bases, scale));
+    TSM_ASSERT_THROWS_ANYTHING("Mismatch in scaling vector", ct.buildOrthogonal(origin, bases, scale));
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -258,32 +249,23 @@ public:
     CoordTransformAffine ct43(4, 3);
     CoordTransformAffine ct32(3, 2);
     CoordTransformAffine ct42(4, 2);
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Null input fails.",
-        CoordTransformAffine::combineTransformations(nullptr, nullptr));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Null input fails.",
-        CoordTransformAffine::combineTransformations(nullptr, &ct43));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Incompatible # of dimensions",
-        CoordTransformAffine::combineTransformations(&ct42, &ct32));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Incompatible # of dimensions",
-        CoordTransformAffine::combineTransformations(&ct32, &ct43));
+    TSM_ASSERT_THROWS_ANYTHING("Null input fails.", CoordTransformAffine::combineTransformations(nullptr, nullptr));
+    TSM_ASSERT_THROWS_ANYTHING("Null input fails.", CoordTransformAffine::combineTransformations(nullptr, &ct43));
+    TSM_ASSERT_THROWS_ANYTHING("Incompatible # of dimensions",
+                               CoordTransformAffine::combineTransformations(&ct42, &ct32));
+    TSM_ASSERT_THROWS_ANYTHING("Incompatible # of dimensions",
+                               CoordTransformAffine::combineTransformations(&ct32, &ct43));
     CoordTransformAffine *ct(nullptr);
-    TSM_ASSERT_THROWS_NOTHING(
-        "Compatible # of dimensions",
-        ct = CoordTransformAffine::combineTransformations(&ct43, &ct32));
+    TSM_ASSERT_THROWS_NOTHING("Compatible # of dimensions",
+                              ct = CoordTransformAffine::combineTransformations(&ct43, &ct32));
     delete ct;
     coord_t center[3] = {1, 2, 3};
     bool bools[3] = {true, true, true};
     CoordTransformDistance ctd(3, center, bools);
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Only aligned or affine inputs",
-        CoordTransformAffine::combineTransformations(&ct33, &ctd));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Only aligned or affine inputs",
-        CoordTransformAffine::combineTransformations(&ctd, &ct33));
+    TSM_ASSERT_THROWS_ANYTHING("Only aligned or affine inputs",
+                               CoordTransformAffine::combineTransformations(&ct33, &ctd));
+    TSM_ASSERT_THROWS_ANYTHING("Only aligned or affine inputs",
+                               CoordTransformAffine::combineTransformations(&ctd, &ct33));
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -299,8 +281,7 @@ public:
     CoordTransformAffine ct2(2, 2);
     ct2.addTranslation(translation2);
     // Combine them
-    boost::scoped_ptr<CoordTransformAffine> combined(
-        CoordTransformAffine::combineTransformations(&ct1, &ct2));
+    boost::scoped_ptr<CoordTransformAffine> combined(CoordTransformAffine::combineTransformations(&ct1, &ct2));
     combined->apply(in, out);
     compare(2, out, expected);
   }
@@ -318,8 +299,7 @@ public:
     ct2->apply(out1, out2);
 
     // Combine them
-    boost::scoped_ptr<CoordTransformAffine> combined(
-        CoordTransformAffine::combineTransformations(ct1, ct2));
+    boost::scoped_ptr<CoordTransformAffine> combined(CoordTransformAffine::combineTransformations(ct1, ct2));
     combined->apply(in, out_combined);
 
     // Applying the combined one = same as each one in sequence
@@ -331,14 +311,12 @@ public:
   void test_combineTransformations_affine_affine() {
     CoordTransformAffine ct1(2, 2);
     double angle = 0.1;
-    std::vector<VMD> bases1{{cos(angle), sin(angle)},
-                            {-sin(angle), cos(angle)}};
+    std::vector<VMD> bases1{{cos(angle), sin(angle)}, {-sin(angle), cos(angle)}};
     ct1.buildOrthogonal(VMD(3.0, 4.0), bases1, VMD(5.5, -6.7));
 
     CoordTransformAffine ct2(2, 2);
     angle = +0.34;
-    std::vector<VMD> bases2{{cos(angle), sin(angle)},
-                            {-sin(angle), cos(angle)}};
+    std::vector<VMD> bases2{{cos(angle), sin(angle)}, {-sin(angle), cos(angle)}};
     ct2.buildOrthogonal(VMD(8.0, -9.0), bases2, VMD(0.34, 12.5));
     // And test
     do_test_combined(&ct1, &ct2);
@@ -349,8 +327,7 @@ public:
   void test_combineTransformations_affine_aligned() {
     CoordTransformAffine ct1(2, 2);
     double angle = 0.1;
-    std::vector<VMD> bases1{{cos(angle), sin(angle)},
-                            {-sin(angle), cos(angle)}};
+    std::vector<VMD> bases1{{cos(angle), sin(angle)}, {-sin(angle), cos(angle)}};
     ct1.buildOrthogonal(VMD(3.0, 4.0), bases1, VMD(5.5, -6.7));
 
     size_t dimensionToBinFrom[2] = {1, 0};
@@ -380,21 +357,17 @@ public:
 
     ct.setMatrix(transform);
 
-    std::string expected =
-        std::string("<CoordTransform>") + "<Type>CoordTransformAffine</Type>" +
-        "<ParameterList>" +
-        "<Parameter><Type>InDimParameter</Type><Value>3</Value></Parameter>" +
-        "<Parameter><Type>OutDimParameter</Type><Value>3</Value></Parameter>" +
-        "<Parameter><Type>AffineMatrixParameter</"
-        "Type><Value>0,1,2,3;4,5,6,7;8,9,10,11;12,13,14,15</Value></"
-        "Parameter>" +
-        "</ParameterList>" + "</CoordTransform>";
+    std::string expected = std::string("<CoordTransform>") + "<Type>CoordTransformAffine</Type>" + "<ParameterList>" +
+                           "<Parameter><Type>InDimParameter</Type><Value>3</Value></Parameter>" +
+                           "<Parameter><Type>OutDimParameter</Type><Value>3</Value></Parameter>" +
+                           "<Parameter><Type>AffineMatrixParameter</"
+                           "Type><Value>0,1,2,3;4,5,6,7;8,9,10,11;12,13,14,15</Value></"
+                           "Parameter>" +
+                           "</ParameterList>" + "</CoordTransform>";
 
     std::string res = ct.toXMLString();
 
-    TSM_ASSERT_EQUALS(
-        "Serialization of CoordTransformAffine has not worked correctly.",
-        expected, ct.toXMLString());
+    TSM_ASSERT_EQUALS("Serialization of CoordTransformAffine has not worked correctly.", expected, ct.toXMLString());
   }
 };
 

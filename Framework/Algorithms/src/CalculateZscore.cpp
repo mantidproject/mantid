@@ -32,12 +32,10 @@ DECLARE_ALGORITHM(CalculateZscore)
 /** Define properties
  */
 void CalculateZscore::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "Anonymous", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "Anonymous", Direction::Input),
                   "Name of input MatrixWorkspace to have Z-score calculated.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output Workspace2D containing the Z-scores.");
 
   declareProperty("WorkspaceIndex", EMPTY_INT(),
@@ -89,8 +87,7 @@ void CalculateZscore::exec() {
       if (wsindex >= inpWS->getNumberHistograms()) {
         stringstream errmsg;
         errmsg << "Input workspace index " << inpwsindex
-               << " is out of input workspace range = "
-               << inpWS->getNumberHistograms() << '\n';
+               << " is out of input workspace range = " << inpWS->getNumberHistograms() << '\n';
       }
     }
 

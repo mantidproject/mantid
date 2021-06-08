@@ -31,9 +31,7 @@ class ConvertCWPDMDToSpectraTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertCWPDMDToSpectraTest *createSuite() {
-    return new ConvertCWPDMDToSpectraTest();
-  }
+  static ConvertCWPDMDToSpectraTest *createSuite() { return new ConvertCWPDMDToSpectraTest(); }
   static void destroySuite(ConvertCWPDMDToSpectraTest *suite) { delete suite; }
 
   //----------------------------------------------------------------------------------------------
@@ -56,14 +54,10 @@ public:
     alg.initialize();
 
     // Set properties
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("BinningParams", "0, 0.1, 120."));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("LinearInterpolateZeroCounts", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParams", "0, 0.1, 120."));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LinearInterpolateZeroCounts", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactor", 65000.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
 
@@ -72,8 +66,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Get ouput
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("ReducedData"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);
 
     // Check output
@@ -95,14 +89,12 @@ public:
 
     // Sample logs: temperature
     TimeSeriesProperty<double> *tempbseries =
-        dynamic_cast<TimeSeriesProperty<double> *>(
-            outws->run().getProperty("temp_b"));
+        dynamic_cast<TimeSeriesProperty<double> *>(outws->run().getProperty("temp_b"));
     TS_ASSERT(tempbseries);
     TS_ASSERT_EQUALS(tempbseries->size(), 61);
     DateAndTime t0 = tempbseries->nthTime(0);
     DateAndTime t3 = tempbseries->nthTime(3);
-    TS_ASSERT_EQUALS(
-        (t3.totalNanoseconds() - t0.totalNanoseconds()) / 1000000000, 90);
+    TS_ASSERT_EQUALS((t3.totalNanoseconds() - t0.totalNanoseconds()) / 1000000000, 90);
 
     // Clean
     AnalysisDataService::Instance().remove("ReducedData");
@@ -118,15 +110,11 @@ public:
     alg.initialize();
 
     // Set properties
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOutput", "dSpacing"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("BinningParams", "0.5, 0.01, 5.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("LinearInterpolateZeroCounts", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParams", "0.5, 0.01, 5.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LinearInterpolateZeroCounts", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactor", 10.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronWaveLength", 2.41));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
@@ -136,8 +124,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Get ouput
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("ReducedData"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);
 
     // Check unit and range of X
@@ -164,14 +152,11 @@ public:
     alg.initialize();
 
     // Set properties
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOutput", "dSpacing"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParams", "0.01"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("LinearInterpolateZeroCounts", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LinearInterpolateZeroCounts", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactor", 10.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronWaveLength", 2.41));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
@@ -181,8 +166,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Get ouput
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("ReducedData"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);
 
     // Check unit and range of X
@@ -208,27 +193,20 @@ public:
     spcloader.initialize();
 
     // Load HB2A spice file
-    TS_ASSERT_THROWS_NOTHING(
-        spcloader.setProperty("Filename", "HB2A_exp0231_scan0001.dat"));
-    TS_ASSERT_THROWS_NOTHING(
-        spcloader.setProperty("OutputWorkspace", "DataTable"));
-    TS_ASSERT_THROWS_NOTHING(
-        spcloader.setProperty("RunInfoWorkspace", "LogParentWS"));
-    TS_ASSERT_THROWS_NOTHING(spcloader.setPropertyValue(
-        "DateAndTimeLog", "date,MM/DD/YYYY,time,HH:MM:SS AM"));
-    TS_ASSERT_THROWS_NOTHING(
-        spcloader.setProperty("IgnoreUnlistedLogs", false));
+    TS_ASSERT_THROWS_NOTHING(spcloader.setProperty("Filename", "HB2A_exp0231_scan0001.dat"));
+    TS_ASSERT_THROWS_NOTHING(spcloader.setProperty("OutputWorkspace", "DataTable"));
+    TS_ASSERT_THROWS_NOTHING(spcloader.setProperty("RunInfoWorkspace", "LogParentWS"));
+    TS_ASSERT_THROWS_NOTHING(spcloader.setPropertyValue("DateAndTimeLog", "date,MM/DD/YYYY,time,HH:MM:SS AM"));
+    TS_ASSERT_THROWS_NOTHING(spcloader.setProperty("IgnoreUnlistedLogs", false));
     spcloader.execute();
 
     // Retrieve the workspaces as the inputs of ConvertSpiceDataToRealSpace
     ITableWorkspace_sptr datatablews =
-        std::dynamic_pointer_cast<ITableWorkspace>(
-            AnalysisDataService::Instance().retrieve("DataTable"));
+        std::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("DataTable"));
     TS_ASSERT(datatablews);
 
     MatrixWorkspace_sptr parentlogws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("LogParentWS"));
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LogParentWS"));
     TS_ASSERT(parentlogws);
 
     // Set up ConvertSpiceDataToRealSpace
@@ -245,10 +223,8 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get on hold of MDWorkspaces for test
-    m_dataMD = std::dynamic_pointer_cast<IMDEventWorkspace>(
-        AnalysisDataService::Instance().retrieve("HB2A_MD"));
-    m_monitorMD = std::dynamic_pointer_cast<IMDEventWorkspace>(
-        AnalysisDataService::Instance().retrieve("MonitorMDW"));
+    m_dataMD = std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("HB2A_MD"));
+    m_monitorMD = std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("MonitorMDW"));
     TS_ASSERT(m_dataMD);
     TS_ASSERT(m_monitorMD);
 
@@ -263,24 +239,18 @@ public:
    */
   void test_ExcludeDetectors() {
     // Set up
-    std::vector<int> vecExcludedDetID{10, 20, 21, 22, 23, 24,
-                                      25, 26, 27, 28, 29, 49};
+    std::vector<int> vecExcludedDetID{10, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 49};
 
     // Init
     ConvertCWPDMDToSpectra alg;
     alg.initialize();
 
     // Set properties
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("BinningParams", "0, 0.1, 120."));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("LinearInterpolateZeroCounts", false));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("ExcludedDetectorIDs", vecExcludedDetID));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParams", "0, 0.1, 120."));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LinearInterpolateZeroCounts", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ExcludedDetectorIDs", vecExcludedDetID));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactor", 65000.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
 
@@ -289,8 +259,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Get ouput
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("ReducedData"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);
 
     // Check output
@@ -316,14 +286,12 @@ public:
 
     // Sample logs: temperature
     TimeSeriesProperty<double> *tempbseries =
-        dynamic_cast<TimeSeriesProperty<double> *>(
-            outws->run().getProperty("temp_b"));
+        dynamic_cast<TimeSeriesProperty<double> *>(outws->run().getProperty("temp_b"));
     TS_ASSERT(tempbseries);
     TS_ASSERT_EQUALS(tempbseries->size(), 61);
     DateAndTime t0 = tempbseries->nthTime(0);
     DateAndTime t3 = tempbseries->nthTime(3);
-    TS_ASSERT_EQUALS(
-        (t3.totalNanoseconds() - t0.totalNanoseconds()) / 1000000000, 90);
+    TS_ASSERT_EQUALS((t3.totalNanoseconds() - t0.totalNanoseconds()) / 1000000000, 90);
 
     // Clean
     AnalysisDataService::Instance().remove("ReducedData");

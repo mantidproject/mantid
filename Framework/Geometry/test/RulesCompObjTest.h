@@ -108,9 +108,8 @@ public:
     CompObj A;
     A.setObj(&cpCylinder);
     A.setObjN(10);
-    TS_ASSERT_EQUALS(
-        A.isValid(V3D(0.0, 0.0, 0.0)),
-        false); // center is inside the cylinder so it will return complement
+    TS_ASSERT_EQUALS(A.isValid(V3D(0.0, 0.0, 0.0)),
+                     false); // center is inside the cylinder so it will return complement
     TS_ASSERT_EQUALS(A.isValid(V3D(1.3, 0.0, 0.0)),
                      true); // outside cap cylinder
     TS_ASSERT_EQUALS(A.isValid(V3D(1.2, 0.0, 0.0)),
@@ -122,7 +121,7 @@ public:
     TS_ASSERT_EQUALS(A.isValid(V3D(-3.2, 0.0, 0.0)),
                      false); // on end of cylinder
     TS_ASSERT_EQUALS(A.isValid(V3D(-3.1, 0.0, 0.0)),
-                     false); // inside the cylinder
+                     false);                                // inside the cylinder
     TS_ASSERT_EQUALS(A.isValid(V3D(0.0, 3.1, 0.0)), true);  // outside cylinder
     TS_ASSERT_EQUALS(A.isValid(V3D(0.0, 3.0, 0.0)), false); // on the cylinder
     TS_ASSERT_EQUALS(A.isValid(V3D(0.0, 2.9, 0.0)), false); // inside cylinder

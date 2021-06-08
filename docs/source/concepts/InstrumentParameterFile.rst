@@ -1,8 +1,8 @@
 .. _InstrumentParameterFile:
 
 .. role:: xml(literal)
-   :class: highlight 
-   
+   :class: highlight
+
 Instrument Parameter File
 =========================
 
@@ -31,13 +31,13 @@ The below example shows some of the elements featured in IN10_silicon_111_Parame
 
   <?xml version="1.0" encoding="UTF-8" ?>
   <parameter-file instrument="IN10" date="2010-07-15 00:00:00">
-   
+
     <component-link name="IN10">
       <parameter name="analysis-type" type="string">
         <value val="spectroscopy" />
       </parameter>
     </component-link>
-   
+
     <component-link name="silicon">
       <parameter name="Efixed">
         <value val="2.0" valid-to="2011-12-31T23:59:59"/>
@@ -45,7 +45,7 @@ The below example shows some of the elements featured in IN10_silicon_111_Parame
         <value val="3.0" valid-from="2013-01-01T00:00:00"/>
       </parameter>
     </component-link>
-   
+
   </parameter-file>
 
 Naming and Using a Parameter File

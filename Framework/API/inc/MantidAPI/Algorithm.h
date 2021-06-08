@@ -75,8 +75,7 @@ Gaudi user guide).
 http://proj-gaudi.web.cern.ch/proj-gaudi/)
 @date 12/09/2007
 */
-class MANTID_API_DLL Algorithm : public IAlgorithm,
-                                 public Kernel::PropertyManagerOwner {
+class MANTID_API_DLL Algorithm : public IAlgorithm, public Kernel::PropertyManagerOwner {
 public:
   /// Base class for algorithm notifications
   class MANTID_API_DLL AlgorithmNotification : public Poco::Notification {
@@ -109,8 +108,7 @@ public:
   class MANTID_API_DLL ProgressNotification : public AlgorithmNotification {
   public:
     /// Constructor
-    ProgressNotification(const Algorithm *const alg, double p,
-                         const std::string &msg, double estimatedTime,
+    ProgressNotification(const Algorithm *const alg, double p, const std::string &msg, double estimatedTime,
                          int progressPrecision);
     std::string name() const override;
     double progress;       ///< Current progress. Value must be between 0 and 1.
@@ -179,30 +177,21 @@ public:
   /// Override if the algorithm is not part of the Mantid distribution.
   const std::string helpURL() const override { return ""; }
 
-  template <typename T, typename = typename std::enable_if<std::is_convertible<
-                            T *, MatrixWorkspace *>::value>::type>
-  std::tuple<std::shared_ptr<T>, Indexing::SpectrumIndexSet>
-  getWorkspaceAndIndices(const std::string &name) const;
+  template <typename T, typename = typename std::enable_if<std::is_convertible<T *, MatrixWorkspace *>::value>::type>
+  std::tuple<std::shared_ptr<T>, Indexing::SpectrumIndexSet> getWorkspaceAndIndices(const std::string &name) const;
 
   template <typename T1, typename T2,
-            typename = typename std::enable_if<
-                std::is_convertible<T1 *, MatrixWorkspace *>::value>::type,
-            typename = typename std::enable_if<
-                std::is_convertible<T2 *, std::string *>::value ||
-                std::is_convertible<T2 *, std::vector<int64_t> *>::value>::type>
-  void setWorkspaceInputProperties(const std::string &name,
-                                   const std::shared_ptr<T1> &wksp,
-                                   IndexType type, const T2 &list);
-
-  template <typename T1, typename T2,
-            typename = typename std::enable_if<
-                std::is_convertible<T1 *, MatrixWorkspace *>::value>::type,
-            typename = typename std::enable_if<
-                std::is_convertible<T2 *, std::string *>::value ||
-                std::is_convertible<T2 *, std::vector<int64_t> *>::value>::type>
-  void setWorkspaceInputProperties(const std::string &name,
-                                   const std::string &wsName, IndexType type,
+            typename = typename std::enable_if<std::is_convertible<T1 *, MatrixWorkspace *>::value>::type,
+            typename = typename std::enable_if<std::is_convertible<T2 *, std::string *>::value ||
+                                               std::is_convertible<T2 *, std::vector<int64_t> *>::value>::type>
+  void setWorkspaceInputProperties(const std::string &name, const std::shared_ptr<T1> &wksp, IndexType type,
                                    const T2 &list);
+
+  template <typename T1, typename T2,
+            typename = typename std::enable_if<std::is_convertible<T1 *, MatrixWorkspace *>::value>::type,
+            typename = typename std::enable_if<std::is_convertible<T2 *, std::string *>::value ||
+                                               std::is_convertible<T2 *, std::vector<int64_t> *>::value>::type>
+  void setWorkspaceInputProperties(const std::string &name, const std::string &wsName, IndexType type, const T2 &list);
 
   const std::string workspaceMethodName() const override;
   const std::vector<std::string> workspaceMethodOn() const override;
@@ -261,13 +250,9 @@ public:
   bool getAlgStartupLogging() const override;
 
   /// setting the child start progress
-  void setChildStartProgress(const double startProgress) const override {
-    m_startChildProgress = startProgress;
-  }
+  void setChildStartProgress(const double startProgress) const override { m_startChildProgress = startProgress; }
   /// setting the child end progress
-  void setChildEndProgress(const double endProgress) const override {
-    m_endChildProgress = endProgress;
-  }
+  void setChildEndProgress(const double endProgress) const override { m_endChildProgress = endProgress; }
 
   /** @name Serialization functions */
   //@{
@@ -283,14 +268,11 @@ public:
   static IAlgorithm_sptr fromHistory(const AlgorithmHistory &history);
   //@}
 
-  virtual std::shared_ptr<Algorithm> createChildAlgorithm(
-      const std::string &name, const double startProgress = -1.,
-      const double endProgress = -1., const bool enableLogging = true,
-      const int &version = -1);
-  void setupAsChildAlgorithm(const std::shared_ptr<Algorithm> &algorithm,
-                             const double startProgress = -1.,
-                             const double endProgress = -1.,
-                             const bool enableLogging = true);
+  virtual std::shared_ptr<Algorithm> createChildAlgorithm(const std::string &name, const double startProgress = -1.,
+                                                          const double endProgress = -1.,
+                                                          const bool enableLogging = true, const int &version = -1);
+  void setupAsChildAlgorithm(const std::shared_ptr<Algorithm> &algorithm, const double startProgress = -1.,
+                             const double endProgress = -1., const bool enableLogging = true);
 
   /// set whether we wish to track the child algorithm's history and pass it the
   /// parent object to fill.
@@ -298,8 +280,7 @@ public:
 
   using WorkspaceVector = std::vector<std::shared_ptr<Workspace>>;
 
-  void findWorkspaces(WorkspaceVector &workspaces, unsigned int direction,
-                      bool checkADS = false) const;
+  void findWorkspaces(WorkspaceVector &workspaces, unsigned int direction, bool checkADS = false) const;
 
   // ------------------ For WorkspaceGroups ------------------------------------
   virtual bool checkGroups();
@@ -321,8 +302,8 @@ protected:
   virtual void execDistributed();
   virtual void execMasterOnly();
 
-  virtual Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes) const;
+  virtual Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const;
 
   /// Returns a semi-colon separated list of workspace types to attach this
   /// algorithm
@@ -331,17 +312,14 @@ protected:
   void cacheWorkspaceProperties();
   void cacheInputWorkspaceHistories();
 
-  void setExecutionState(
-      const ExecutionState state); ///< Sets the current execution state
-  void
-  setResultState(const ResultState state); ///< Sets the result execution state
+  void setExecutionState(const ExecutionState state); ///< Sets the current execution state
+  void setResultState(const ResultState state);       ///< Sets the result execution state
 
   void store();
 
   /** @name Progress Reporting functions */
   friend class Progress;
-  void progress(double p, const std::string &msg = "",
-                double estimatedTime = 0.0, int progressPrecision = 0);
+  void progress(double p, const std::string &msg = "", double estimatedTime = 0.0, int progressPrecision = 0);
   void interruption_point();
 
   /// Return a reference to the algorithm's notification dispatcher
@@ -349,8 +327,7 @@ protected:
 
   /// Observation slot for child algorithm progress notification messages, these
   /// are scaled and then signalled for this algorithm.
-  void handleChildProgressNotification(
-      const Poco::AutoPtr<ProgressNotification> &pNf);
+  void handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification> &pNf);
   /// Return a reference to the algorithm's object that is reporting progress
   const Poco::AbstractObserver &progressObserver() const;
 
@@ -374,12 +351,9 @@ protected:
 
   friend class WorkspaceHistory; // Allow workspace history loading to adjust
                                  // g_execCount
-  static size_t
-      g_execCount; ///< Counter to keep track of algorithm execution order
+  static size_t g_execCount;     ///< Counter to keep track of algorithm execution order
 
-  virtual void setOtherProperties(IAlgorithm *alg,
-                                  const std::string &propertyName,
-                                  const std::string &propertyValue,
+  virtual void setOtherProperties(IAlgorithm *alg, const std::string &propertyName, const std::string &propertyValue,
                                   int periodNum);
 
   /// All the WorkspaceProperties that are Input or InOut. Set in execute()
@@ -403,18 +377,14 @@ protected:
   /// versions
   bool m_usingBaseProcessGroups = false;
 
-  template <typename T, const int AllowedIndexTypes = IndexType::WorkspaceIndex,
-            typename... WSPropArgs,
-            typename = typename std::enable_if<
-                std::is_convertible<T *, MatrixWorkspace *>::value>::type>
-  void declareWorkspaceInputProperties(const std::string &propertyName,
-                                       const std::string &doc,
-                                       WSPropArgs &&... wsPropArgs);
+  template <typename T, const int AllowedIndexTypes = IndexType::WorkspaceIndex, typename... WSPropArgs,
+            typename = typename std::enable_if<std::is_convertible<T *, MatrixWorkspace *>::value>::type>
+  void declareWorkspaceInputProperties(const std::string &propertyName, const std::string &doc,
+                                       WSPropArgs &&...wsPropArgs);
 
 private:
   template <typename T1, typename T2, typename WsType>
-  void doSetInputProperties(const std::string &name, const T1 &wksp,
-                            IndexType type, const T2 &list);
+  void doSetInputProperties(const std::string &name, const T1 &wksp, IndexType type, const T2 &list);
   void lockWorkspaces();
 
   void unlockWorkspaces();
@@ -434,48 +404,43 @@ private:
   void fillHistory(const std::vector<Workspace_sptr> &outputWorkspaces);
 
   // Report that the algorithm has completed.
-  void reportCompleted(const double &duration,
-                       const bool groupProcessing = false);
+  void reportCompleted(const double &duration, const bool groupProcessing = false);
 
   void registerFeatureUsage() const;
 
   Parallel::ExecutionMode getExecutionMode() const;
-  std::map<std::string, Parallel::StorageMode>
-  getInputWorkspaceStorageModes() const;
+  std::map<std::string, Parallel::StorageMode> getInputWorkspaceStorageModes() const;
   void setupSkipValidationMasterOnly();
 
   bool isCompoundProperty(const std::string &name) const;
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
-  std::unique_ptr<Poco::ActiveMethod<bool, Poco::Void, Algorithm,
-                                     Poco::ActiveStarter<Algorithm>>>
-      m_executeAsync;
+  std::unique_ptr<Poco::ActiveMethod<bool, Poco::Void, Algorithm, Poco::ActiveStarter<Algorithm>>> m_executeAsync;
 
   /// Sends notifications to observers. Observers can subscribe to
   /// notificationCenter
   /// using Poco::NotificationCenter::addObserver(...);
   mutable std::unique_ptr<Poco::NotificationCenter> m_notificationCenter;
   /// Child algorithm progress observer
-  mutable std::unique_ptr<Poco::NObserver<Algorithm, ProgressNotification>>
-      m_progressObserver;
+  mutable std::unique_ptr<Poco::NObserver<Algorithm, ProgressNotification>> m_progressObserver;
 
-  std::atomic<ExecutionState> m_executionState; ///< the current execution state
-  std::atomic<ResultState> m_resultState;       ///< the current result State
-  bool m_isChildAlgorithm;      ///< Algorithm is a child algorithm
-  bool m_recordHistoryForChild; ///< Flag to indicate whether history should be
-                                /// recorded. Applicable to child algs only
-  bool m_alwaysStoreInADS; ///< Always store in the ADS, even for child algos
-  bool m_runningAsync;     ///< Algorithm is running asynchronously
-  bool m_rethrow; ///< Algorithm should rethrow exceptions while executing
-  bool m_isAlgStartupLoggingEnabled; /// Whether to log alg startup and
-                                     /// closedown messages from the base class
-                                     /// (default = true)
-  mutable double m_startChildProgress; ///< Keeps value for algorithm's progress
-                                       /// at start of an Child Algorithm
-  mutable double m_endChildProgress;   ///< Keeps value for algorithm's progress
-                                       /// at Child Algorithm's finish
-  AlgorithmID m_algorithmID;           ///< Algorithm ID for managed algorithms
+  std::atomic<ExecutionState> m_executionState;             ///< the current execution state
+  std::atomic<ResultState> m_resultState;                   ///< the current result State
+  bool m_isChildAlgorithm;                                  ///< Algorithm is a child algorithm
+  bool m_recordHistoryForChild;                             ///< Flag to indicate whether history should be
+                                                            /// recorded. Applicable to child algs only
+  bool m_alwaysStoreInADS;                                  ///< Always store in the ADS, even for child algos
+  bool m_runningAsync;                                      ///< Algorithm is running asynchronously
+  bool m_rethrow;                                           ///< Algorithm should rethrow exceptions while executing
+  bool m_isAlgStartupLoggingEnabled;                        /// Whether to log alg startup and
+                                                            /// closedown messages from the base class
+                                                            /// (default = true)
+  mutable double m_startChildProgress;                      ///< Keeps value for algorithm's progress
+                                                            /// at start of an Child Algorithm
+  mutable double m_endChildProgress;                        ///< Keeps value for algorithm's progress
+                                                            /// at Child Algorithm's finish
+  AlgorithmID m_algorithmID;                                ///< Algorithm ID for managed algorithms
   std::vector<std::weak_ptr<IAlgorithm>> m_ChildAlgorithms; ///< A list of
                                                             /// weak pointers
                                                             /// to any child
@@ -523,8 +488,8 @@ using Algorithm_sptr = std::shared_ptr<Algorithm>;
  * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
  */
-#define DECLARE_ALGORITHM(classname)                                           \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_alg_##classname((                \
-      (Mantid::API::AlgorithmFactory::Instance().subscribe<classname>()), 0)); \
+#define DECLARE_ALGORITHM(classname)                                                                                   \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_alg_##classname(((Mantid::API::AlgorithmFactory::Instance().subscribe<classname>()), 0));               \
   }

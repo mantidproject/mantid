@@ -15,18 +15,13 @@ namespace Algorithms {
 /** CalculatePlaczekSelfScattering : This algorithm calculates a correction for
   an incident spectrum defracted by a sample.
 */
-class MANTID_ALGORITHMS_DLL CalculatePlaczekSelfScattering
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculatePlaczekSelfScattering : public API::Algorithm {
 public:
   CalculatePlaczekSelfScattering() : API::Algorithm() {}
   virtual ~CalculatePlaczekSelfScattering() {}
-  virtual const std::string name() const override {
-    return "CalculatePlaczekSelfScattering";
-  }
+  virtual const std::string name() const override { return "CalculatePlaczekSelfScattering"; }
   virtual int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"FitIncidentSpectrum"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"FitIncidentSpectrum"}; }
   const std::string category() const override { return "CorrectionFunctions"; };
   const std::string summary() const override {
     return "Calculates the Placzek self scattering correction of an incident "

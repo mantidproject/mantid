@@ -22,24 +22,17 @@ using namespace API;
 DECLARE_ALGORITHM(SANSBeamFluxCorrection)
 
 void SANSBeamFluxCorrection::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Workspace to be corrected");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
-                                            Direction::Input),
-      "Workspace containing the monitor counts for the sample data");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "", Direction::Input),
+                  "Workspace containing the monitor counts for the sample data");
 
   std::vector<std::string> exts{"_event.nxs", ".nxs", ".nxs.h5"};
-  declareProperty(
-      std::make_unique<API::FileProperty>("ReferenceFluxFilename", "",
-                                          API::FileProperty::Load, exts),
-      "File containing the reference flux spectrum.");
+  declareProperty(std::make_unique<API::FileProperty>("ReferenceFluxFilename", "", API::FileProperty::Load, exts),
+                  "File containing the reference flux spectrum.");
 
-  declareProperty("ReductionProperties", "__sans_reduction_properties",
-                  Direction::Input);
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty("ReductionProperties", "__sans_reduction_properties", Direction::Input);
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Corrected workspace.");
   declareProperty("OutputMessage", "", Direction::Output);
 }
@@ -77,8 +70,7 @@ void SANSBeamFluxCorrection::exec() {
   rebinAlg->setProperty("WorkspaceToRebin", fluxRefWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
   rebinAlg->executeAsChildAlg();
-  MatrixWorkspace_sptr scaledfluxRefWS =
-      rebinAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr scaledfluxRefWS = rebinAlg->getProperty("OutputWorkspace");
 
   progress.report("Rebinning monitor data");
   rebinAlg = createChildAlgorithm("RebinToWorkspace");
@@ -112,8 +104,7 @@ void SANSBeamFluxCorrection::exec() {
  * scientists. A simple Load algorithm should suffice.
  */
 MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
-  const std::string referenceFluxFile =
-      getPropertyValue("ReferenceFluxFilename");
+  const std::string referenceFluxFile = getPropertyValue("ReferenceFluxFilename");
   Poco::Path path(referenceFluxFile);
   const std::string entryName = "SANSBeamFluxCorrection_" + path.getBaseName();
   std::string fluxRefWSName = "__beam_flux_reference_" + path.getBaseName();
@@ -129,13 +120,12 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
     loadAlg->executeAsChildAlg();
     Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");
     fluxRefWS = std::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
-    m_output_message +=
-        "   | Loaded flux reference " + referenceFluxFile + "\n";
+    m_output_message += "   | Loaded flux reference " + referenceFluxFile + "\n";
 
     // Keep the reference data for later use
     AnalysisDataService::Instance().addOrReplace(fluxRefWSName, fluxRefWS);
-    m_reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(
-        entryName, fluxRefWSName, Direction::InOut));
+    m_reductionManager->declareProperty(
+        std::make_unique<WorkspaceProperty<>>(entryName, fluxRefWSName, Direction::InOut));
     m_reductionManager->setPropertyValue(entryName, fluxRefWSName);
     m_reductionManager->setProperty(entryName, fluxRefWS);
   }

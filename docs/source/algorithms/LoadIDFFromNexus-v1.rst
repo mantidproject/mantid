@@ -12,19 +12,19 @@ Description
 Some Nexus files contain an instrument definition. This algorithm loads
 the instrument from this definition. You may need to tell this algorithm
 where in the Nexus file to find the Instrument folder that contains
-the instrument definition. 
+the instrument definition.
 
-It also looks to see if it contains a separate instrument parameter map. 
+It also looks to see if it contains a separate instrument parameter map.
 If yes this is loaded. If no, the algorithm will
 attempt to load on parameter file on your disk from your instrument folder
-with the name INST_Parameters.xml. 
-This may be overridden by a parameter correction file, which can be 
+with the name INST_Parameters.xml.
+This may be overridden by a parameter correction file, which can be
 used to correct out of date embedded parameters.
 
 A parameter correction file contains a list of parameter files,
-each with a non-overlapping date range and an append flag. 
+each with a non-overlapping date range and an append flag.
 If a parameter correction file is found,
-its list is compared to the workspace's run start date. 
+its list is compared to the workspace's run start date.
 If this date occurs within one of the date ranges, the file with that date range
 is used as the parameter file.
 This parameter file must be in the same directory as the correction file.
@@ -58,7 +58,7 @@ Usage
    inst2 = ws_2.getInstrument()
    comp2 = inst2.getComponentByName("both rings")
    print("Unmodified component name = {}".format(comp2.getName()))
-   
+
 Output:
 
 .. testoutput:: ExLoadIDFFromnNexusSimple

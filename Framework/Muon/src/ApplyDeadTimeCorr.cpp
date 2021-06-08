@@ -32,20 +32,15 @@ DECLARE_ALGORITHM(ApplyDeadTimeCorr)
  */
 void ApplyDeadTimeCorr::init() {
 
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input,
-          std::make_shared<EqualBinSizesValidator>(0.5)),
-      "The name of the input workspace containing measured counts");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input, std::make_shared<EqualBinSizesValidator>(0.5)),
+                  "The name of the input workspace containing measured counts");
+
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("DeadTimeTable", "", Direction::Input),
+                  "Name of the Dead Time Table");
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "DeadTimeTable", "", Direction::Input),
-      "Name of the Dead Time Table");
-
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
       "The name of the output workspace containing corrected counts");
 }
 
@@ -62,25 +57,20 @@ void ApplyDeadTimeCorr::exec() {
 
     const API::Run &run = inputWs->run();
     if (run.hasProperty("goodfrm")) {
-      auto numGoodFrames =
-          boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
+      auto numGoodFrames = boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
 
       if (numGoodFrames == 0) {
-        throw std::runtime_error(
-            "Number of good frames in the workspace is zero");
+        throw std::runtime_error("Number of good frames in the workspace is zero");
       }
 
       // Duplicate the input workspace. Only need to change Y values based on
       // dead time corrections
       IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
       duplicate->initialize();
-      duplicate->setProperty<Workspace_sptr>(
-          "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWs));
+      duplicate->setProperty<Workspace_sptr>("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWs));
       duplicate->execute();
-      MatrixWorkspace_sptr outputWs =
-          std::dynamic_pointer_cast<MatrixWorkspace>(
-              static_cast<Workspace_sptr>(
-                  duplicate->getProperty("OutputWorkspace")));
+      MatrixWorkspace_sptr outputWs = std::dynamic_pointer_cast<MatrixWorkspace>(
+          static_cast<Workspace_sptr>(duplicate->getProperty("OutputWorkspace")));
 
       // Presumed to be the same for all data
       double timeBinWidth(inputWs->x(0)[1] - inputWs->x(0)[0]);
@@ -90,22 +80,17 @@ void ApplyDeadTimeCorr::exec() {
           // Apply Dead Time
           for (size_t i = 0; i < deadTimeTable->rowCount(); ++i) {
             API::TableRow deadTimeRow = deadTimeTable->getRow(i);
-            auto index =
-                static_cast<size_t>(inputWs->getIndexFromSpectrumNumber(
-                    static_cast<int>(deadTimeRow.Int(0))));
+            auto index = static_cast<size_t>(inputWs->getIndexFromSpectrumNumber(static_cast<int>(deadTimeRow.Int(0))));
             const auto &yIn = inputWs->y(index);
             auto &yOut = outputWs->mutableY(index);
             for (size_t j = 0; j < yIn.size(); ++j) {
-              const double correction(1 - yIn[j] *
-                                              (deadTimeRow.Double(1) /
-                                               (timeBinWidth * numGoodFrames)));
+              const double correction(1 - yIn[j] * (deadTimeRow.Double(1) / (timeBinWidth * numGoodFrames)));
               if (correction != 0) {
                 yOut[j] = yIn[j] / correction;
               } else {
-                g_log.error()
-                    << "1 - MeasuredCount * (Deadtime/TimeBin width "
-                       "is currently ("
-                    << correction << "). Can't divide by this amount.\n";
+                g_log.error() << "1 - MeasuredCount * (Deadtime/TimeBin width "
+                                 "is currently ("
+                              << correction << "). Can't divide by this amount.\n";
 
                 throw std::invalid_argument("Can't divide by 0");
               }
@@ -117,8 +102,7 @@ void ApplyDeadTimeCorr::exec() {
           throw std::invalid_argument("Invalid argument for algorithm.");
         }
       } else {
-        g_log.error() << "The time bin width is currently (" << timeBinWidth
-                      << "). Can't divide by this amount.\n";
+        g_log.error() << "The time bin width is currently (" << timeBinWidth << "). Can't divide by this amount.\n";
 
         throw std::invalid_argument("Can't divide by 0");
       }
@@ -130,13 +114,11 @@ void ApplyDeadTimeCorr::exec() {
       throw std::invalid_argument(message);
     }
   } else {
-    g_log.error()
-        << "Row count(" << deadTimeTable->rowCount()
-        << ") of Dead time table is bigger than the Number of Histograms("
-        << inputWs->getNumberHistograms() << ").\n";
+    g_log.error() << "Row count(" << deadTimeTable->rowCount()
+                  << ") of Dead time table is bigger than the Number of Histograms(" << inputWs->getNumberHistograms()
+                  << ").\n";
 
-    throw std::invalid_argument(
-        "Row count was bigger than the Number of Histograms.");
+    throw std::invalid_argument("Row count was bigger than the Number of Histograms.");
   }
 }
 

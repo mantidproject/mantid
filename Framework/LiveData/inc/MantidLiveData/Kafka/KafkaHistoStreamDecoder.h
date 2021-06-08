@@ -19,14 +19,13 @@ namespace LiveData {
 
   A call to startCapture() starts the process of capturing the stream on a
   separate thread.
+
+  Some further documentation is in docs/source/concepts/KafkaLiveStreams.rst
 */
 class DLLExport KafkaHistoStreamDecoder : public IKafkaStreamDecoder {
 public:
-  KafkaHistoStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
-                          const std::string &histoTopic,
-                          const std::string &runInfoTopic,
-                          const std::string &spDetTopic,
-                          const std::string &sampleEnvTopic,
+  KafkaHistoStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
+                          const std::string &runInfoTopic, const std::string &sampleEnvTopic,
                           const std::string &chopperTopic);
   ~KafkaHistoStreamDecoder() override;
   // Disable copies since multiple subscribers will cause problems

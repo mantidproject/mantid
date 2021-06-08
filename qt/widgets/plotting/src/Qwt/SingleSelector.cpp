@@ -15,20 +15,16 @@
 
 using namespace MantidQt::MantidWidgets;
 
-SingleSelector::SingleSelector(QwtPlot *plot, SelectType type, double position,
-                               bool visible)
-    : QwtPlotPicker(plot->canvas()), m_type(type), m_position(position),
-      m_lowerBound(0.0), m_upperBound(0.0), m_singleMarker(nullptr),
-      m_plot(plot), m_canvas(plot->canvas()), m_markerMoving(false),
-      m_visible(visible), m_pen(nullptr), m_moveCursor(nullptr) {
+SingleSelector::SingleSelector(QwtPlot *plot, SelectType type, double position, bool visible)
+    : QwtPlotPicker(plot->canvas()), m_type(type), m_position(position), m_lowerBound(0.0), m_upperBound(0.0),
+      m_singleMarker(nullptr), m_plot(plot), m_canvas(plot->canvas()), m_markerMoving(false), m_visible(visible),
+      m_pen(nullptr), m_moveCursor(nullptr) {
   init();
 }
 
-SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type,
-                               double position, bool visible)
-    : QwtPlotPicker(plot->canvas()), m_type(type), m_position(position),
-      m_lowerBound(0.0), m_upperBound(0.0), m_singleMarker(nullptr),
-      m_plot(plot->getPlot()), m_canvas(plot->canvas()), m_markerMoving(false),
+SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type, double position, bool visible)
+    : QwtPlotPicker(plot->canvas()), m_type(type), m_position(position), m_lowerBound(0.0), m_upperBound(0.0),
+      m_singleMarker(nullptr), m_plot(plot->getPlot()), m_canvas(plot->canvas()), m_markerMoving(false),
       m_visible(visible), m_pen(nullptr), m_moveCursor(nullptr) {
   init();
 }
@@ -145,9 +141,7 @@ void SingleSelector::setColour(const QColor &colour) {
   m_singleMarker->setLinePen(*m_pen);
 }
 
-void SingleSelector::setBounds(const std::pair<double, double> &bounds) {
-  setBounds(bounds.first, bounds.second);
-}
+void SingleSelector::setBounds(const std::pair<double, double> &bounds) { setBounds(bounds.first, bounds.second); }
 
 void SingleSelector::setBounds(const double minimum, const double maximum) {
   setLowerBound(minimum);
@@ -229,9 +223,7 @@ void SingleSelector::detach() { m_singleMarker->attach(nullptr); }
  * to the maximum
  * @return
  */
-bool SingleSelector::isMarkerMoving(double x, double xPlusdx) {
-  return (fabs(x - m_position) <= fabs(xPlusdx - x));
-}
+bool SingleSelector::isMarkerMoving(double x, double xPlusdx) { return (fabs(x - m_position) <= fabs(xPlusdx - x)); }
 
 /**
  * @brief Check the position (of the mouse pointer) is neither below the lowest
@@ -239,6 +231,4 @@ bool SingleSelector::isMarkerMoving(double x, double xPlusdx) {
  * @param x
  * @return true if position within the allowed range
  */
-bool SingleSelector::isInsideBounds(double x) {
-  return (x >= m_lowerBound && x <= m_upperBound);
-}
+bool SingleSelector::isInsideBounds(double x) { return (x >= m_lowerBound && x <= m_upperBound); }

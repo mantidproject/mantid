@@ -34,12 +34,16 @@ class ConvertQtoHKLMDHistoTest(unittest.TestCase):
         hkl = ConvertQtoHKLMDHisto(InputWorkspace=mtd["mde_ws"],
                                    PeaksWorkspace=mtd["peaks"])
         self.assertEqual(hkl.getSpecialCoordinateSystem().name, "HKL")
-
-        self.assertEqual(mtd["peaks"].getNumberPeaks(), 12)
+        self.assertFalse(hkl.hasOriginalWorkspace(0))
+        self.assertEqual(mtd["peaks"].getNumberPeaks(), 10)
         peak = mtd["peaks"].getPeak(0)
-        self.assertEqual(peak.getH(), -1)
-        self.assertEqual(peak.getK(), 1)
-        self.assertEqual(peak.getL(), 4)
+        self.assertEqual(peak.getH(), 0.0)
+        self.assertEqual(peak.getK(), 0.0)
+        self.assertEqual(peak.getL(), 10.0)
+        peak = mtd["peaks"].getPeak(1)
+        self.assertEqual(peak.getH(), 0.0)
+        self.assertEqual(peak.getK(), 1.0)
+        self.assertEqual(peak.getL(), 9.0)
 
     def test_qtohkl_corelli(self):
         Load(Filename='CORELLI_29782.nxs', OutputWorkspace='data')

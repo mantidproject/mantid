@@ -14,12 +14,10 @@ namespace API {
  * the given workspace.
  *  @throws std::invalid_argument if a null workspace pointer is passed in
  */
-SpectrumDetectorMapping::SpectrumDetectorMapping(
-    const MatrixWorkspace_const_sptr &workspace, const bool useSpecNoIndex)
+SpectrumDetectorMapping::SpectrumDetectorMapping(const MatrixWorkspace_const_sptr &workspace, const bool useSpecNoIndex)
     : m_indexIsSpecNo(useSpecNoIndex) {
   if (!workspace) {
-    throw std::invalid_argument(
-        "SpectrumDetectorMapping: Null shared workspace pointer passed");
+    throw std::invalid_argument("SpectrumDetectorMapping: Null shared workspace pointer passed");
   }
 
   for (size_t i = 0; i < workspace->getNumberHistograms(); ++i) {
@@ -40,10 +38,9 @@ SpectrumDetectorMapping::SpectrumDetectorMapping(
  *  @throws std::invalid_argument if the spectrumNumbers & detectorIDs vectors
  * are not of equal length
  */
-SpectrumDetectorMapping::SpectrumDetectorMapping(
-    const std::vector<specnum_t> &spectrumNumbers,
-    const std::vector<detid_t> &detectorIDs,
-    const std::vector<detid_t> &ignoreDetIDs)
+SpectrumDetectorMapping::SpectrumDetectorMapping(const std::vector<specnum_t> &spectrumNumbers,
+                                                 const std::vector<detid_t> &detectorIDs,
+                                                 const std::vector<detid_t> &ignoreDetIDs)
     : m_indexIsSpecNo(true) {
   if (spectrumNumbers.size() != detectorIDs.size()) {
     throw std::invalid_argument("SpectrumDetectorMapping: Different length "
@@ -57,32 +54,28 @@ SpectrumDetectorMapping::SpectrumDetectorMapping(
  *  Not safe! Prefer the vector constructor where possible!
  *  @throws std::invalid_argument if a null array pointer is passed in
  */
-SpectrumDetectorMapping::SpectrumDetectorMapping(
-    const specnum_t *const spectrumNumbers, const detid_t *const detectorIDs,
-    size_t arrayLengths)
+SpectrumDetectorMapping::SpectrumDetectorMapping(const specnum_t *const spectrumNumbers,
+                                                 const detid_t *const detectorIDs, size_t arrayLengths)
     : m_indexIsSpecNo(true) {
   if (spectrumNumbers == nullptr || detectorIDs == nullptr) {
-    throw std::invalid_argument(
-        "SpectrumDetectorMapping: Null array pointer passed");
+    throw std::invalid_argument("SpectrumDetectorMapping: Null array pointer passed");
   }
 
   fillMapFromArray(spectrumNumbers, detectorIDs, arrayLengths);
 }
 
 /// Called by the c-array constructors to do the actual filling
-void SpectrumDetectorMapping::fillMapFromArray(
-    const specnum_t *const spectrumNumbers, const detid_t *const detectorIDs,
-    const size_t arrayLengths) {
+void SpectrumDetectorMapping::fillMapFromArray(const specnum_t *const spectrumNumbers, const detid_t *const detectorIDs,
+                                               const size_t arrayLengths) {
   for (size_t i = 0; i < arrayLengths; ++i) {
     m_mapping[spectrumNumbers[i]].insert(detectorIDs[i]);
   }
 }
 
 /// Called by the vector constructors to do the actual filling
-void SpectrumDetectorMapping::fillMapFromVector(
-    const std::vector<specnum_t> &spectrumNumbers,
-    const std::vector<detid_t> &detectorIDs,
-    const std::vector<detid_t> &ignoreDetIDs) {
+void SpectrumDetectorMapping::fillMapFromVector(const std::vector<specnum_t> &spectrumNumbers,
+                                                const std::vector<detid_t> &detectorIDs,
+                                                const std::vector<detid_t> &ignoreDetIDs) {
   std::set<detid_t> ignoreIDs(ignoreDetIDs.begin(), ignoreDetIDs.end());
   const size_t nspec(spectrumNumbers.size());
   for (size_t i = 0; i < nspec; ++i) {
@@ -92,8 +85,7 @@ void SpectrumDetectorMapping::fillMapFromVector(
   }
 }
 /// Default constructor;
-SpectrumDetectorMapping::SpectrumDetectorMapping()
-    : m_indexIsSpecNo(false), m_mapping() {}
+SpectrumDetectorMapping::SpectrumDetectorMapping() : m_indexIsSpecNo(false), m_mapping() {}
 
 /// @returns An ordered set of the unique spectrum numbers
 std::set<specnum_t> SpectrumDetectorMapping::getSpectrumNumbers() const {
@@ -105,31 +97,21 @@ std::set<specnum_t> SpectrumDetectorMapping::getSpectrumNumbers() const {
   return specs;
 }
 
-const std::set<detid_t> &SpectrumDetectorMapping::getDetectorIDsForSpectrumNo(
-    const specnum_t spectrumNo) const {
+const std::set<detid_t> &SpectrumDetectorMapping::getDetectorIDsForSpectrumNo(const specnum_t spectrumNo) const {
   if (!m_indexIsSpecNo)
-    throw std::runtime_error(
-        "Indices are in the spectrum detector map, not spectrum number.");
+    throw std::runtime_error("Indices are in the spectrum detector map, not spectrum number.");
   return m_mapping.at(spectrumNo);
 }
 
-const std::set<detid_t> &
-SpectrumDetectorMapping::getDetectorIDsForSpectrumIndex(
-    const size_t spectrumIndex) const {
+const std::set<detid_t> &SpectrumDetectorMapping::getDetectorIDsForSpectrumIndex(const size_t spectrumIndex) const {
   if (m_indexIsSpecNo)
-    throw std::runtime_error(
-        "Spectrum numbers are in the spectrum detector map, not index.");
+    throw std::runtime_error("Spectrum numbers are in the spectrum detector map, not index.");
   return m_mapping.at(static_cast<int>(spectrumIndex));
 }
 
-const SpectrumDetectorMapping::sdmap &
-SpectrumDetectorMapping::getMapping() const {
-  return m_mapping;
-}
+const SpectrumDetectorMapping::sdmap &SpectrumDetectorMapping::getMapping() const { return m_mapping; }
 
-bool SpectrumDetectorMapping::indexIsSpecNumber() const {
-  return m_indexIsSpecNo;
-}
+bool SpectrumDetectorMapping::indexIsSpecNumber() const { return m_indexIsSpecNo; }
 
 } // namespace API
 } // namespace Mantid

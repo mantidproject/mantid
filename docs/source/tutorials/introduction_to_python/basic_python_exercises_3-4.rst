@@ -1,7 +1,7 @@
 .. _basic_python_exercises_3-4:
 
 =======================
-Basic Python Exercises  
+Basic Python Exercises
 =======================
 
 Exercise 3

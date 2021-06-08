@@ -32,9 +32,8 @@ using std::size_t;
 
 /// Default constructor
 UnwrapSNS::UnwrapSNS()
-    : m_conversionConstant(0.), m_inputWS(), m_inputEvWS(), m_LRef(0.),
-      m_Tmin(0.), m_Tmax(0.), m_frameWidth(0.), m_numberOfSpectra(0),
-      m_XSize(0) {}
+    : m_conversionConstant(0.), m_inputWS(), m_inputEvWS(), m_LRef(0.), m_Tmin(0.), m_Tmax(0.), m_frameWidth(0.),
+      m_numberOfSpectra(0), m_XSize(0) {}
 
 /// Initialisation method
 void UnwrapSNS::init() {
@@ -43,11 +42,10 @@ void UnwrapSNS::init() {
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>();
   wsValidator->add<InstrumentValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
-                  "Contains numbers counts against time of flight (TOF).");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
+      "Contains numbers counts against time of flight (TOF).");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "This workspace will be in the units of time of flight. (See "
                   "http://www.mantidproject.org/Units)");
 
@@ -73,8 +71,7 @@ void UnwrapSNS::init() {
   // Calculate and set the constant factor for the conversion to wavelength
   const double TOFisinMicroseconds = 1e6;
   const double toAngstroms = 1e10;
-  m_conversionConstant = (PhysicalConstants::h * toAngstroms) /
-                         (PhysicalConstants::NeutronMass * TOFisinMicroseconds);
+  m_conversionConstant = (PhysicalConstants::h * toAngstroms) / (PhysicalConstants::NeutronMass * TOFisinMicroseconds);
 }
 
 /** Executes the algorithm
@@ -93,8 +90,7 @@ void UnwrapSNS::exec() {
 
   m_XSize = static_cast<int>(m_inputWS->x(0).size());
   m_numberOfSpectra = static_cast<int>(m_inputWS->getNumberHistograms());
-  g_log.debug() << "Number of spectra in input workspace: " << m_numberOfSpectra
-                << "\n";
+  g_log.debug() << "Number of spectra in input workspace: " << m_numberOfSpectra << "\n";
 
   // go off and do the event version if appropriate
   m_inputEvWS = std::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
@@ -112,8 +108,7 @@ void UnwrapSNS::exec() {
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != m_inputWS) {
-    outputWS = WorkspaceFactory::Instance().create(m_inputWS, m_numberOfSpectra,
-                                                   m_XSize, m_XSize - 1);
+    outputWS = WorkspaceFactory::Instance().create(m_inputWS, m_numberOfSpectra, m_XSize, m_XSize - 1);
     setProperty("OutputWorkspace", outputWS);
   }
 
@@ -122,13 +117,11 @@ void UnwrapSNS::exec() {
   const double L1 = spectrumInfo.l1();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outputWS))
-  for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
-       workspaceIndex++) {
+  for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++) {
     PARALLEL_START_INTERUPT_REGION
     if (!spectrumInfo.hasDetectors(workspaceIndex)) {
       // If the detector flightpath is missing, zero the data
-      g_log.debug() << "Detector information for workspace index "
-                    << workspaceIndex << " is not available.\n";
+      g_log.debug() << "Detector information for workspace index " << workspaceIndex << " is not available.\n";
       outputWS->setSharedX(workspaceIndex, m_inputWS->sharedX(workspaceIndex));
       outputWS->mutableY(workspaceIndex) = 0.0;
       outputWS->mutableE(workspaceIndex) = 0.0;
@@ -147,8 +140,7 @@ void UnwrapSNS::exec() {
 
       auto lengthFirstPartY = std::distance(yIn.begin() + pivot, yIn.end());
       std::copy(yIn.begin() + pivot, yIn.end(), yOut.begin());
-      std::copy(yIn.begin(), yIn.begin() + pivot,
-                yOut.begin() + lengthFirstPartY);
+      std::copy(yIn.begin(), yIn.begin() + pivot, yOut.begin() + lengthFirstPartY);
 
       // fix the uncertainties using the pivot point
       auto &eIn = m_inputWS->e(workspaceIndex);
@@ -156,8 +148,7 @@ void UnwrapSNS::exec() {
 
       auto lengthFirstPartE = std::distance(eIn.begin() + pivot, eIn.end());
       std::copy(eIn.begin() + pivot, eIn.end(), eOut.begin());
-      std::copy(eIn.begin(), eIn.begin() + pivot,
-                eOut.begin() + lengthFirstPartE);
+      std::copy(eIn.begin(), eIn.begin() + pivot, eOut.begin() + lengthFirstPartE);
     }
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
@@ -178,8 +169,7 @@ void UnwrapSNS::execEvent() {
   auto outW = std::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
 
   // set up the progress bar
-  m_progress =
-      std::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
 
   // algorithm assumes the data is sorted so it can jump out early
   outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress.get());
@@ -191,8 +181,7 @@ void UnwrapSNS::execEvent() {
   const double L1 = spectrumInfo.l1();
 
   // do the actual work
-  for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
-       workspaceIndex++) {
+  for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++) {
     std::size_t numEvents = outW->getSpectrum(workspaceIndex).getNumberEvents();
     double Ld = -1.0;
     if (spectrumInfo.hasDetectors(workspaceIndex))
@@ -224,8 +213,8 @@ void UnwrapSNS::execEvent() {
   this->runMaskDetectors();
 }
 
-int UnwrapSNS::unwrapX(const Mantid::HistogramData::HistogramX &datain,
-                       std::vector<double> &dataout, const double &Ld) {
+int UnwrapSNS::unwrapX(const Mantid::HistogramData::HistogramX &datain, std::vector<double> &dataout,
+                       const double &Ld) {
   std::vector<double> tempX_L; // lower half - to be frame wrapped
   tempX_L.reserve(m_XSize);
   tempX_L.clear();
@@ -291,28 +280,22 @@ void UnwrapSNS::getTofRangeData(const bool isEvent) {
   // check the frame width
   m_frameWidth = m_Tmax - m_Tmin;
 
-  g_log.information() << "Frame range in microseconds is: " << m_Tmin << " - "
-                      << m_Tmax << "\n";
+  g_log.information() << "Frame range in microseconds is: " << m_Tmin << " - " << m_Tmax << "\n";
   if (m_Tmin < 0.)
     throw std::runtime_error("Cannot have Tmin less than zero");
   if (m_Tmin > m_Tmax)
     throw std::runtime_error("Have case of Tmin > Tmax");
 
-  g_log.information() << "Wavelength cuttoff is : "
-                      << (m_conversionConstant * m_Tmin / m_LRef)
-                      << "Angstrom, Frame width is: " << m_frameWidth
-                      << "microseconds\n";
+  g_log.information() << "Wavelength cuttoff is : " << (m_conversionConstant * m_Tmin / m_LRef)
+                      << "Angstrom, Frame width is: " << m_frameWidth << "microseconds\n";
 }
 
 void UnwrapSNS::runMaskDetectors() {
   IAlgorithm_sptr alg = createChildAlgorithm("MaskDetectors");
-  alg->setProperty<MatrixWorkspace_sptr>("Workspace",
-                                         this->getProperty("OutputWorkspace"));
-  alg->setProperty<MatrixWorkspace_sptr>("MaskedWorkspace",
-                                         this->getProperty("InputWorkspace"));
+  alg->setProperty<MatrixWorkspace_sptr>("Workspace", this->getProperty("OutputWorkspace"));
+  alg->setProperty<MatrixWorkspace_sptr>("MaskedWorkspace", this->getProperty("InputWorkspace"));
   if (!alg->execute())
-    throw std::runtime_error(
-        "MaskDetectors Child Algorithm has not executed successfully");
+    throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
 }
 
 } // namespace Algorithms

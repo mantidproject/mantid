@@ -35,9 +35,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Peaks;Crystal\\Integration";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Peaks;Crystal\\Integration"; }
 
 private:
   /// Initialise the properties
@@ -45,8 +43,7 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  template <typename MDE, size_t nd>
-  void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr inWS;

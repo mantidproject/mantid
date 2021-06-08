@@ -19,8 +19,7 @@ namespace CurveFitting {
  * @param domain :: Output pointer to the returned domain.
  * @param values :: Output pointer to the returned values.
  */
-void ParDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
-                                   API::FunctionValues_sptr &values) const {
+void ParDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain, API::FunctionValues_sptr &values) const {
   if (i >= m_creators.size())
     throw std::range_error("Function domain index is out of range.");
   if (!m_domain[i]) {
@@ -34,8 +33,7 @@ void ParDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
  * Calculate the value of a least squares cost function
  * @param costFunction :: The cost func to calculate the value for
  */
-void ParDomain::additiveCostFunctionVal(
-    const CostFunctions::CostFuncFitting &costFunction) {
+void ParDomain::additiveCostFunctionVal(const CostFunctions::CostFuncFitting &costFunction) {
   const int n = static_cast<int>(getNDomains());
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < n; ++i) {
@@ -56,9 +54,8 @@ void ParDomain::additiveCostFunctionVal(
  * @param evalDeriv :: Flag to evaluate the first derivatives
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */
-void ParDomain::additiveCostFunctionValDerivHessian(
-    const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
-    bool evalHessian) {
+void ParDomain::additiveCostFunctionValDerivHessian(const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
+                                                    bool evalHessian) {
   const auto n = static_cast<int>(getNDomains());
   PARALLEL_SET_DYNAMIC(0);
   std::vector<API::IFunction_sptr> funs;
@@ -80,8 +77,7 @@ void ParDomain::additiveCostFunctionValDerivHessian(
         funs[k] = costFunction.getFittingFunction()->clone();
       }
     }
-    costFunction.addValDerivHessian(funs[k], domain, simpleValues, evalDeriv,
-                                    evalHessian);
+    costFunction.addValDerivHessian(funs[k], domain, simpleValues, evalDeriv, evalHessian);
   }
 }
 

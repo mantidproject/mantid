@@ -15,6 +15,7 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         LoadMD('HB2C_WANDSCD_data.nxs', OutputWorkspace='ConvertWANDSCDtoQTest_data')
+        SetGoniometer('ConvertWANDSCDtoQTest_data', Axis0='s1,0,1,0,1', Average=False)
         LoadMD('HB2C_WANDSCD_norm.nxs', OutputWorkspace='ConvertWANDSCDtoQTest_norm')
         ConvertWANDSCDtoQTest_Q = ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQTest_data',
                                                     NormalisationWorkspace='ConvertWANDSCDtoQTest_norm')
@@ -25,11 +26,11 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
         self.assertEqual(ConvertWANDSCDtoQTest_peaks.getNumberPeaks(), 14)
 
         peak = ConvertWANDSCDtoQTest_peaks.getPeak(0)
-        self.assertTrue(np.allclose(peak.getQSampleFrame(), [2.40072, 0.00357258, 4.32033]))
+        np.testing.assert_allclose(peak.getQSampleFrame(), [2.400721, 0.001306865, 4.320331], rtol=1e-5)
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
 
         peak = ConvertWANDSCDtoQTest_peaks.getPeak(13)
-        self.assertTrue(np.allclose(peak.getQSampleFrame(), [6.56011, 0.00357258, -2.52058]))
+        np.testing.assert_allclose(peak.getQSampleFrame(), [6.560115, 0.001306865, -2.520578], rtol=1e-5)
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
 
         SetUB('ConvertWANDSCDtoQTest_data',
@@ -76,7 +77,8 @@ class ConvertWANDSCDtoQ_HB3A_Test(systemtesting.MantidSystemTest):
         SetGoniometer('ConvertWANDSCDtoQ_HB3ATest_data',
                       Axis0='omega,0,1,0,-1',
                       Axis1='chi,0,0,1,-1',
-                      Axis2='phi,0,1,0,-1')
+                      Axis2='phi,0,1,0,-1',
+                      Average=False)
 
         ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQ_HB3ATest_data',
                           Wavelength=1.008,

@@ -108,3 +108,27 @@ class PlotConfigDialogPresenter:
             if presenter == tab_presenter:
                 self.tab_widget_presenters[index] = None
                 return
+
+    def configure_curves_tab(self, axes, curve):
+        curves_tab_presenter = self.tab_widget_presenters[2]
+        if not curves_tab_presenter:
+            return
+        curves_tab_widget, _ = self.tab_widget_views[1]
+
+        try:
+            curves_tab_presenter.set_axes_from_object(axes)
+        except ValueError as err:
+            if str(err) == "Axes object does not exist in curves tab":
+                # This can happen when there are no curves on the given axes.
+                return
+            raise err
+
+        self.view.set_current_tab_widget(curves_tab_widget)
+
+        if curve:
+            try:
+                curves_tab_presenter.set_curve_from_object(curve)
+            except ValueError as err:
+                if str(err) == "Curve object does not exist in curves tab":
+                    return
+                raise err

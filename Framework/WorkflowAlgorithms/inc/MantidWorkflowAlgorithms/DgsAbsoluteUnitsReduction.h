@@ -21,9 +21,7 @@ class DLLExport DgsAbsoluteUnitsReduction : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Process the absolute units sample.";
-  }
+  const std::string summary() const override { return "Process the absolute units sample."; }
   int version() const override;
   const std::string category() const override;
 

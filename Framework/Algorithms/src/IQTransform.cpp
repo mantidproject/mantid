@@ -38,8 +38,7 @@ DECLARE_ALGORITHM(IQTransform)
 using namespace Kernel;
 using namespace API;
 
-IQTransform::IQTransform()
-    : API::Algorithm(), m_label(std::make_shared<Units::Label>()) {
+IQTransform::IQTransform() : API::Algorithm(), m_label(std::make_shared<Units::Label>()) {
   /* Just for fun, this is implemented as follows....
    * We fill a map below with the transformation name as the key and
    * a function pointer to the method that does the transformation as
@@ -67,50 +66,42 @@ void IQTransform::init() {
   // Require X data to be increasing from left to right
   wsValidator->add<IncreasingAxisValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "The input workspace must be a distribution with units of Q");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
   // Extract the keys from the transformations map to pass to the property
   std::set<std::string> plottype;
-  for (TransformMap::const_iterator it = m_transforms.begin();
-       it != m_transforms.end(); ++it) {
+  for (TransformMap::const_iterator it = m_transforms.begin(); it != m_transforms.end(); ++it) {
     plottype.insert(it->first);
   }
-  declareProperty(
-      "TransformType", "", std::make_shared<StringListValidator>(plottype),
-      "The name of the transformation to be performed on the workspace");
+  declareProperty("TransformType", "", std::make_shared<StringListValidator>(plottype),
+                  "The name of the transformation to be performed on the workspace");
 
   // A background to be subtracted can be a value or a workspace. Both
   // properties are optional.
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
+  declareProperty("BackgroundValue", 0.0, mustBePositive,
+                  "A constant value to subtract from the data prior to its transformation");
   declareProperty(
-      "BackgroundValue", 0.0, mustBePositive,
-      "A constant value to subtract from the data prior to its transformation");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "BackgroundWorkspace", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("BackgroundWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A workspace to subtract from the input workspace prior to its "
       "transformation."
       "Must be compatible with the input (as for the Minus algorithm).");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("GeneralFunctionConstants"),
-      "A set of 10 constants to be used (only) with the 'General' "
-      "transformation");
+  declareProperty(std::make_unique<ArrayProperty<double>>("GeneralFunctionConstants"),
+                  "A set of 10 constants to be used (only) with the 'General' "
+                  "transformation");
 }
 
 void IQTransform::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   // Print a warning if the input workspace has more than one spectrum
   if (inputWS->getNumberHistograms() > 1) {
-    g_log.warning(
-        "This algorithm is intended for use on single-spectrum workspaces.\n"
-        "Only the first spectrum will be transformed.");
+    g_log.warning("This algorithm is intended for use on single-spectrum workspaces.\n"
+                  "Only the first spectrum will be transformed.");
   }
 
   // Do background subtraction from a workspace first because it doesn't like
@@ -125,8 +116,7 @@ void IQTransform::exec() {
 
   // Create the output workspace
   const size_t length = tmpWS->blocksize();
-  MatrixWorkspace_sptr outputWS =
-      create<MatrixWorkspace>(*inputWS, 1, Points(length));
+  MatrixWorkspace_sptr outputWS = create<MatrixWorkspace>(*inputWS, 1, Points(length));
   m_label->setLabel("");
   outputWS->setYUnit("");
   // Copy the data over. Assume single spectrum input (output will be).
@@ -158,11 +148,9 @@ void IQTransform::exec() {
  *  @param ws         The workspace to perform the subtraction on
  *  @param background The workspace containing the background values
  */
-API::MatrixWorkspace_sptr
-IQTransform::subtractBackgroundWS(const API::MatrixWorkspace_sptr &ws,
-                                  const API::MatrixWorkspace_sptr &background) {
-  g_log.debug() << "Subtracting the workspace " << background->getName()
-                << " from the input workspace.\n";
+API::MatrixWorkspace_sptr IQTransform::subtractBackgroundWS(const API::MatrixWorkspace_sptr &ws,
+                                                            const API::MatrixWorkspace_sptr &background) {
+  g_log.debug() << "Subtracting the workspace " << background->getName() << " from the input workspace.\n";
   return std::move(ws) - background;
 }
 
@@ -178,12 +166,9 @@ void IQTransform::guinierSpheres(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
-  std::transform(X.cbegin(), X.cend(), X.begin(),
-                 VectorHelper::Squares<double>());
-  std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(),
-                 std::divides<double>());
-  std::transform(Y.cbegin(), Y.cend(), Y.begin(),
-                 VectorHelper::LogNoThrow<double>());
+  std::transform(X.cbegin(), X.cend(), X.begin(), VectorHelper::Squares<double>());
+  std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(), std::divides<double>());
+  std::transform(Y.cbegin(), Y.cend(), Y.begin(), VectorHelper::LogNoThrow<double>());
 
   ws->setYUnitLabel("Ln(I)");
   m_label->setLabel("Q^2");
@@ -199,14 +184,10 @@ void IQTransform::guinierRods(const API::MatrixWorkspace_sptr &ws) {
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
 
-  std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(),
-                 std::divides<double>());
-  std::transform(Y.cbegin(), Y.cend(), X.begin(), Y.begin(),
-                 std::multiplies<double>());
-  std::transform(Y.cbegin(), Y.cend(), Y.begin(),
-                 VectorHelper::LogNoThrow<double>());
-  std::transform(X.cbegin(), X.cend(), X.begin(),
-                 VectorHelper::Squares<double>());
+  std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(), std::divides<double>());
+  std::transform(Y.cbegin(), Y.cend(), X.begin(), Y.begin(), std::multiplies<double>());
+  std::transform(Y.cbegin(), Y.cend(), Y.begin(), VectorHelper::LogNoThrow<double>());
+  std::transform(X.cbegin(), X.cend(), X.begin(), VectorHelper::Squares<double>());
 
   ws->setYUnitLabel("Ln(I x Q)");
   m_label->setLabel("Q^2");
@@ -222,14 +203,10 @@ void IQTransform::guinierSheets(const API::MatrixWorkspace_sptr &ws) {
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
 
-  std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(),
-                 std::divides<double>());
-  std::transform(X.cbegin(), X.cend(), X.begin(),
-                 VectorHelper::Squares<double>());
-  std::transform(Y.cbegin(), Y.cend(), X.begin(), Y.begin(),
-                 std::multiplies<double>());
-  std::transform(Y.cbegin(), Y.cend(), Y.begin(),
-                 VectorHelper::LogNoThrow<double>());
+  std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(), std::divides<double>());
+  std::transform(X.cbegin(), X.cend(), X.begin(), VectorHelper::Squares<double>());
+  std::transform(Y.cbegin(), Y.cend(), X.begin(), Y.begin(), std::multiplies<double>());
+  std::transform(Y.cbegin(), Y.cend(), Y.begin(), VectorHelper::LogNoThrow<double>());
 
   ws->setYUnitLabel("Ln(I x Q^2)");
   m_label->setLabel("Q^2");
@@ -243,8 +220,7 @@ void IQTransform::zimm(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
-  std::transform(X.cbegin(), X.cend(), X.begin(),
-                 VectorHelper::Squares<double>());
+  std::transform(X.cbegin(), X.cend(), X.begin(), VectorHelper::Squares<double>());
   for (size_t i = 0; i < Y.size(); ++i) {
     if (Y[i] > 0.0) {
       Y[i] = 1.0 / Y[i];
@@ -267,8 +243,7 @@ void IQTransform::debyeBueche(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
-  std::transform(X.cbegin(), X.cend(), X.begin(),
-                 VectorHelper::Squares<double>());
+  std::transform(X.cbegin(), X.cend(), X.begin(), VectorHelper::Squares<double>());
   for (size_t i = 0; i < Y.size(); ++i) {
     if (Y[i] > 0.0) {
       Y[i] = 1.0 / std::sqrt(Y[i]);
@@ -290,10 +265,8 @@ void IQTransform::holtzer(const API::MatrixWorkspace_sptr &ws) {
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
-  std::transform(Y.cbegin(), Y.cend(), X.begin(), Y.begin(),
-                 std::multiplies<double>());
-  std::transform(E.cbegin(), E.cend(), X.begin(), E.begin(),
-                 std::multiplies<double>());
+  std::transform(Y.cbegin(), Y.cend(), X.begin(), Y.begin(), std::multiplies<double>());
+  std::transform(E.cbegin(), E.cend(), X.begin(), E.begin(), std::multiplies<double>());
 
   ws->setYUnitLabel("I x Q");
 }
@@ -306,12 +279,9 @@ void IQTransform::kratky(const API::MatrixWorkspace_sptr &ws) {
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
   MantidVec Q2(X.size());
-  std::transform(X.cbegin(), X.cend(), Q2.begin(),
-                 VectorHelper::Squares<double>());
-  std::transform(Y.cbegin(), Y.cend(), Q2.begin(), Y.begin(),
-                 std::multiplies<double>());
-  std::transform(E.cbegin(), E.cend(), Q2.begin(), E.begin(),
-                 std::multiplies<double>());
+  std::transform(X.cbegin(), X.cend(), Q2.begin(), VectorHelper::Squares<double>());
+  std::transform(Y.cbegin(), Y.cend(), Q2.begin(), Y.begin(), std::multiplies<double>());
+  std::transform(E.cbegin(), E.cend(), Q2.begin(), E.begin(), std::multiplies<double>());
 
   ws->setYUnitLabel("I x Q^2");
 }
@@ -324,12 +294,9 @@ void IQTransform::porod(const API::MatrixWorkspace_sptr &ws) {
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
   MantidVec Q4(X.size());
-  std::transform(X.cbegin(), X.cend(), X.cbegin(), Q4.begin(),
-                 VectorHelper::TimesSquares<double>());
-  std::transform(Y.cbegin(), Y.cend(), Q4.begin(), Y.begin(),
-                 std::multiplies<double>());
-  std::transform(E.cbegin(), E.cend(), Q4.begin(), E.begin(),
-                 std::multiplies<double>());
+  std::transform(X.cbegin(), X.cend(), X.cbegin(), Q4.begin(), VectorHelper::TimesSquares<double>());
+  std::transform(Y.cbegin(), Y.cend(), Q4.begin(), Y.begin(), std::multiplies<double>());
+  std::transform(E.cbegin(), E.cend(), Q4.begin(), E.begin(), std::multiplies<double>());
 
   ws->setYUnitLabel("I x Q^4");
 }
@@ -345,10 +312,8 @@ void IQTransform::logLog(const API::MatrixWorkspace_sptr &ws) {
   auto &E = ws->mutableE(0);
 
   std::transform(X.cbegin(), X.cend(), X.begin(), VectorHelper::Log<double>());
-  std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(),
-                 std::divides<double>());
-  std::transform(Y.cbegin(), Y.cend(), Y.begin(),
-                 VectorHelper::LogNoThrow<double>());
+  std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(), std::divides<double>());
+  std::transform(Y.cbegin(), Y.cend(), Y.begin(), VectorHelper::LogNoThrow<double>());
 
   ws->setYUnitLabel("Ln(I)");
   m_label->setLabel("Ln(Q)");
@@ -369,8 +334,7 @@ void IQTransform::general(const API::MatrixWorkspace_sptr &ws) {
   const std::vector<double> C = getProperty("GeneralFunctionConstants");
   // Check for the correct number of elements
   if (C.size() != 10) {
-    std::string mess(
-        "The General transformation requires 10 values to be provided.");
+    std::string mess("The General transformation requires 10 values to be provided.");
     g_log.error(mess);
     throw std::invalid_argument(mess);
   }
@@ -378,32 +342,25 @@ void IQTransform::general(const API::MatrixWorkspace_sptr &ws) {
   for (size_t i = 0; i < Y.size(); ++i) {
     double tmpX = std::pow(X[i], C[7]) * std::pow(Y[i], C[8]) * C[9];
     if (tmpX <= 0.0)
-      throw std::range_error(
-          "Attempt to take log of a zero or negative number.");
+      throw std::range_error("Attempt to take log of a zero or negative number.");
     tmpX = std::pow(X[i], C[5]) * std::pow(Y[i], C[6]) * std::log(tmpX);
     const double tmpY = std::pow(X[i], C[2]) * std::pow(Y[i], C[3]) * C[4];
     if (tmpY <= 0.0)
-      throw std::range_error(
-          "Attempt to take log of a zero or negative number.");
-    const double newY =
-        std::pow(X[i], C[0]) * std::pow(Y[i], C[1]) * std::log(tmpY);
+      throw std::range_error("Attempt to take log of a zero or negative number.");
+    const double newY = std::pow(X[i], C[0]) * std::pow(Y[i], C[1]) * std::log(tmpY);
 
     E[i] *= std::pow(X[i], C[0]) *
             (C[1] * std::pow(Y[i], C[1] - 1) * std::log(tmpY) +
-             ((std::pow(Y[i], C[1]) * std::pow(X[i], C[2]) * C[4] * C[3] *
-               std::pow(Y[i], C[3] - 1)) /
-              tmpY));
+             ((std::pow(Y[i], C[1]) * std::pow(X[i], C[2]) * C[4] * C[3] * std::pow(Y[i], C[3] - 1)) / tmpY));
     X[i] = tmpX;
     Y[i] = newY;
   }
 
   std::stringstream ylabel;
-  ylabel << "Q^" << C[0] << " x I^" << C[1] << " x Ln( Q^" << C[2] << " x I^"
-         << C[3] << " x " << C[4] << ")";
+  ylabel << "Q^" << C[0] << " x I^" << C[1] << " x Ln( Q^" << C[2] << " x I^" << C[3] << " x " << C[4] << ")";
   ws->setYUnitLabel(ylabel.str());
   std::stringstream xlabel;
-  xlabel << "Q^" << C[5] << " x I^" << C[6] << " x Ln( Q^" << C[7] << " x I^"
-         << C[8] << " x " << C[9] << ")";
+  xlabel << "Q^" << C[5] << " x I^" << C[6] << " x Ln( Q^" << C[7] << " x I^" << C[8] << " x " << C[9] << ")";
   m_label->setLabel(xlabel.str());
 }
 

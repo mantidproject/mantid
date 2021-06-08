@@ -21,11 +21,9 @@ with IndexProperty and is not intended for isolated use.
 @author Lamar Moore
 @date 05-05-2017
 */
-class MANTID_API_DLL IndexTypeProperty
-    : public Kernel::PropertyWithValue<std::string> {
+class MANTID_API_DLL IndexTypeProperty : public Kernel::PropertyWithValue<std::string> {
 public:
-  IndexTypeProperty(const std::string &name = "IndexType",
-                    int indexType = IndexType::WorkspaceIndex);
+  IndexTypeProperty(const std::string &name = "IndexType", int indexType = IndexType::WorkspaceIndex);
 
   IndexType selectedType() const;
 

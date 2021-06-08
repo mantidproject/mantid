@@ -38,32 +38,22 @@ public:
    */
   template <typename T>
   explicit ListValidator(const T &values,
-                         const std::map<std::string, std::string> &aliases =
-                             std::map<std::string, std::string>(),
+                         const std::map<std::string, std::string> &aliases = std::map<std::string, std::string>(),
                          const bool allowMultiSelection = false)
       : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
-        m_aliases(aliases.begin(), aliases.end()),
-        m_allowMultiSelection(allowMultiSelection) {
-    for (auto aliasIt = m_aliases.begin(); aliasIt != m_aliases.end();
-         ++aliasIt) {
-      if (values.end() ==
-          std::find(values.begin(), values.end(),
-                    boost::lexical_cast<TYPE>(aliasIt->second))) {
-        throw std::invalid_argument("Alias " + aliasIt->first +
-                                    " refers to invalid value " +
-                                    aliasIt->second);
+        m_aliases(aliases.begin(), aliases.end()), m_allowMultiSelection(allowMultiSelection) {
+    for (auto aliasIt = m_aliases.begin(); aliasIt != m_aliases.end(); ++aliasIt) {
+      if (values.end() == std::find(values.begin(), values.end(), boost::lexical_cast<TYPE>(aliasIt->second))) {
+        throw std::invalid_argument("Alias " + aliasIt->first + " refers to invalid value " + aliasIt->second);
         if (m_allowMultiSelection) {
-          throw Kernel::Exception::NotImplementedError(
-              "The List Validator does not support multi selection yet");
+          throw Kernel::Exception::NotImplementedError("The List Validator does not support multi selection yet");
         }
       }
     }
   }
 
   /// Clone the validator
-  IValidator_sptr clone() const override {
-    return std::make_shared<ListValidator<TYPE>>(*this);
-  }
+  IValidator_sptr clone() const override { return std::make_shared<ListValidator<TYPE>>(*this); }
   /**
    * Returns the set of allowed values currently defined
    * @returns A set of allowed values that this validator will currently allow
@@ -85,8 +75,7 @@ public:
    */
   void addAllowedValue(const TYPE &value) {
     // add only new values
-    if (std::find(m_allowedValues.begin(), m_allowedValues.end(), value) ==
-        m_allowedValues.end()) {
+    if (std::find(m_allowedValues.begin(), m_allowedValues.end(), value) == m_allowedValues.end()) {
       m_allowedValues.emplace_back(value);
     }
   }
@@ -108,8 +97,7 @@ public:
 
   void setMultipleSelectionAllowed(const bool isMultiSelectionAllowed) {
     if (isMultiSelectionAllowed) {
-      throw Kernel::Exception::NotImplementedError(
-          "The List Validator does not support Multi selection yet");
+      throw Kernel::Exception::NotImplementedError("The List Validator does not support Multi selection yet");
     }
     m_allowMultiSelection = isMultiSelectionAllowed;
   }
@@ -121,8 +109,7 @@ protected:
    * of allowed values"
    */
   std::string checkValidity(const TYPE &value) const override {
-    if (m_allowedValues.end() !=
-        std::find(m_allowedValues.begin(), m_allowedValues.end(), value)) {
+    if (m_allowedValues.end() != std::find(m_allowedValues.begin(), m_allowedValues.end(), value)) {
       return "";
     } else {
       if (isEmpty(value))
@@ -130,8 +117,7 @@ protected:
       if (isAlias(value))
         return "_alias";
       std::ostringstream os;
-      os << "The value \"" << value
-         << "\" is not in the list of allowed values";
+      os << "The value \"" << value << "\" is not in the list of allowed values";
       return os.str();
     }
   }
@@ -141,9 +127,7 @@ protected:
    * @param value :: The value to check
    * @return True if it is considered empty
    */
-  template <typename T> bool isEmpty(const T &value) const {
-    UNUSED_ARG(value) return false;
-  }
+  template <typename T> bool isEmpty(const T &value) const { UNUSED_ARG(value) return false; }
   /**
    * Is the value considered empty. Specialized string version to use empty
    * @param value :: The value to check
@@ -166,9 +150,7 @@ protected:
    * @param value :: Value to test.
    * @return :: True if it's an alias.
    */
-  bool isAlias(const std::string &value) const {
-    return m_aliases.find(value) != m_aliases.end();
-  }
+  bool isAlias(const std::string &value) const { return m_aliases.find(value) != m_aliases.end(); }
 
   /// The set of valid values
   std::vector<TYPE> m_allowedValues;

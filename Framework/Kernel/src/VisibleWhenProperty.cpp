@@ -18,8 +18,7 @@ namespace Kernel {
  * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value
  * (as string) to check for
  */
-VisibleWhenProperty::VisibleWhenProperty(const std::string &otherPropName,
-                                         ePropertyCriterion when,
+VisibleWhenProperty::VisibleWhenProperty(const std::string &otherPropName, ePropertyCriterion when,
                                          const std::string &value)
     : EnabledWhenProperty(otherPropName, when, value) {}
 
@@ -32,14 +31,12 @@ VisibleWhenProperty::VisibleWhenProperty(const std::string &otherPropName,
  *conditions
  *
  */
-VisibleWhenProperty::VisibleWhenProperty(
-    const VisibleWhenProperty &conditionOne,
-    const VisibleWhenProperty &conditionTwo, eLogicOperator logicOperator)
+VisibleWhenProperty::VisibleWhenProperty(const VisibleWhenProperty &conditionOne,
+                                         const VisibleWhenProperty &conditionTwo, eLogicOperator logicOperator)
     : // For the python interface to be able to easily copy objects in
       // Make a deep copy and turn into a shared pointer and forward on
       VisibleWhenProperty(std::make_shared<VisibleWhenProperty>(conditionOne),
-                          std::make_shared<VisibleWhenProperty>(conditionTwo),
-                          logicOperator) {}
+                          std::make_shared<VisibleWhenProperty>(conditionTwo), logicOperator) {}
 
 /** Multiple conditions constructor - takes two shared pointers to
  * VisibleWhenProperty objects and returns the product of them
@@ -51,15 +48,11 @@ VisibleWhenProperty::VisibleWhenProperty(
  *conditions
  *
  */
-VisibleWhenProperty::VisibleWhenProperty(
-    std::shared_ptr<VisibleWhenProperty> &&conditionOne,
-    std::shared_ptr<VisibleWhenProperty> &&conditionTwo,
-    eLogicOperator logicOperator)
-    : m_comparisonDetails{
-          std::make_shared<ComparisonDetails<VisibleWhenProperty>>(
-              ComparisonDetails<VisibleWhenProperty>{std::move(conditionOne),
-                                                     std::move(conditionTwo),
-                                                     logicOperator})} {}
+VisibleWhenProperty::VisibleWhenProperty(std::shared_ptr<VisibleWhenProperty> &&conditionOne,
+                                         std::shared_ptr<VisibleWhenProperty> &&conditionTwo,
+                                         eLogicOperator logicOperator)
+    : m_comparisonDetails{std::make_shared<ComparisonDetails<VisibleWhenProperty>>(
+          ComparisonDetails<VisibleWhenProperty>{std::move(conditionOne), std::move(conditionTwo), logicOperator})} {}
 
 /**
  * Checks if the user specified combination of visible criterion
@@ -127,9 +120,7 @@ bool VisibleWhenProperty::isVisible(const IPropertyManager *algo) const {
  *
  * @return Pointer to cloned VisisbleWhenProperty object
  */
-IPropertySettings *VisibleWhenProperty::clone() const {
-  return new VisibleWhenProperty(*this);
-}
+IPropertySettings *VisibleWhenProperty::clone() const { return new VisibleWhenProperty(*this); }
 
 } // namespace Kernel
 } // namespace Mantid

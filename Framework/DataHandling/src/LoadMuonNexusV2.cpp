@@ -45,8 +45,7 @@ const std::string BEAMLINE{"/raw_data_1/beamline"};
 
 /// Empty default constructor
 LoadMuonNexusV2::LoadMuonNexusV2()
-    : m_filename(), m_entrynumber(0), m_isFileMultiPeriod(false),
-      m_multiPeriodsLoaded(false) {}
+    : m_filename(), m_entrynumber(0), m_isFileMultiPeriod(false), m_multiPeriodsLoaded(false) {}
 
 /**
  * Return the confidence criteria for this algorithm can load the file
@@ -83,23 +82,18 @@ int LoadMuonNexusV2::confidence(NexusHDF5Descriptor &descriptor) const {
 void LoadMuonNexusV2::init() {
 
   std::vector<std::string> extensions{".nxs", ".nxs_v2"};
-  declareProperty(std::make_unique<FileProperty>(
-                      "Filename", "", FileProperty::Load, extensions),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
                   "The name of the Nexus file to load");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
-      "The name of the workspace to be created as the output of the\n"
-      "algorithm. For multiperiod files, one workspace will be\n"
-      "generated for each period");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace to be created as the output of the\n"
+                  "algorithm. For multiperiod files, one workspace will be\n"
+                  "generated for each period");
 
   auto mustBePositiveSpectra = std::make_shared<BoundedValidator<specnum_t>>();
   mustBePositiveSpectra->setLower(0);
-  declareProperty("SpectrumMin", static_cast<specnum_t>(0),
-                  mustBePositiveSpectra);
-  declareProperty("SpectrumMax", static_cast<specnum_t>(EMPTY_INT()),
-                  mustBePositiveSpectra);
+  declareProperty("SpectrumMin", static_cast<specnum_t>(0), mustBePositiveSpectra);
+  declareProperty("SpectrumMax", static_cast<specnum_t>(EMPTY_INT()), mustBePositiveSpectra);
   declareProperty(std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"));
   auto mustBePositive = std::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(0);
@@ -110,41 +104,31 @@ void LoadMuonNexusV2::init() {
                   "one workspace");
 
   std::vector<std::string> FieldOptions{"Transverse", "Longitudinal"};
-  declareProperty("MainFieldDirection", "Transverse",
-                  std::make_shared<StringListValidator>(FieldOptions),
+  declareProperty("MainFieldDirection", "Transverse", std::make_shared<StringListValidator>(FieldOptions),
                   "Output the main field direction if specified in Nexus file "
                   "(default longitudinal).",
                   Direction::Output);
 
-  declareProperty("TimeZero", 0.0,
-                  "Time zero in units of micro-seconds (default to 0.0)",
-                  Direction::Output);
-  declareProperty("FirstGoodData", 0.0,
-                  "First good data in units of micro-seconds (default to 0.0)",
+  declareProperty("TimeZero", 0.0, "Time zero in units of micro-seconds (default to 0.0)", Direction::Output);
+  declareProperty("FirstGoodData", 0.0, "First good data in units of micro-seconds (default to 0.0)",
                   Direction::Output);
 
-  declareProperty(std::make_unique<ArrayProperty<double>>("TimeZeroList",
-                                                          Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<double>>("TimeZeroList", Direction::Output),
                   "A vector of time zero values");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>(
-          "TimeZeroTable", "", Direction::Output, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<Workspace>>("TimeZeroTable", "", Direction::Output, PropertyMode::Optional),
       "TableWorkspace containing time zero values per spectra.");
 
-  declareProperty(
-      "CorrectTime", true,
-      "Boolean flag controlling whether time should be corrected by timezero.",
-      Direction::Input);
+  declareProperty("CorrectTime", true, "Boolean flag controlling whether time should be corrected by timezero.",
+                  Direction::Input);
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>(
-          "DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<Workspace>>("DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
       "Table or a group of tables containing detector dead times.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "DetectorGroupingTable", "", Direction::Output,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("DetectorGroupingTable", "", Direction::Output,
+                                                                 PropertyMode::Optional),
                   "Table or a group of tables with information about the "
                   "detector grouping.");
 }
@@ -223,14 +207,11 @@ Workspace_sptr LoadMuonNexusV2::runLoadISISNexus() {
       globalNumberOfThreads = PARALLEL_GET_MAX_THREADS;
       PARALLEL_SET_NUM_THREADS(numThreads);
     }
-    ~ScopedNumThreadsSetter() {
-      PARALLEL_SET_NUM_THREADS(globalNumberOfThreads);
-    }
+    ~ScopedNumThreadsSetter() { PARALLEL_SET_NUM_THREADS(globalNumberOfThreads); }
     int globalNumberOfThreads;
   };
   ScopedNumThreadsSetter restoreDefaultThreadsOnExit(1);
-  IAlgorithm_sptr childAlg =
-      createChildAlgorithm("LoadISISNexus", 0, 1, true, 2);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("LoadISISNexus", 0, 1, true, 2);
   declareProperty("LoadMonitors", "Exclude"); // we need to set this property
   auto ISISLoader = std::dynamic_pointer_cast<API::Algorithm>(childAlg);
   ISISLoader->copyPropertiesFrom(*this);
@@ -247,26 +228,21 @@ void LoadMuonNexusV2::chooseLoaderStrategy(const Workspace_sptr &workspace) {
   // Check if single or multi period file and create appropriate loading
   // strategy
   if (m_multiPeriodsLoaded) {
-    WorkspaceGroup_sptr workspaceGroup =
-        std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    WorkspaceGroup_sptr workspaceGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
     assert(workspaceGroup);
-    auto numberHistograms =
-        std::dynamic_pointer_cast<Workspace2D>(workspaceGroup->getItem(0))
-            ->getNumberHistograms();
+    auto numberHistograms = std::dynamic_pointer_cast<Workspace2D>(workspaceGroup->getItem(0))->getNumberHistograms();
     loadMuonProperties(numberHistograms);
-    m_loadMuonStrategy = std::make_unique<MultiPeriodLoadMuonStrategy>(
-        g_log, m_filename, *m_nexusLoader, *workspaceGroup);
+    m_loadMuonStrategy =
+        std::make_unique<MultiPeriodLoadMuonStrategy>(g_log, m_filename, *m_nexusLoader, *workspaceGroup);
 
   } else {
     // we just have a single workspace
-    Workspace2D_sptr workspace2D =
-        std::dynamic_pointer_cast<Workspace2D>(workspace);
+    Workspace2D_sptr workspace2D = std::dynamic_pointer_cast<Workspace2D>(workspace);
     assert(workspace2D);
     // Load Muon specific properties
     loadMuonProperties(workspace2D->getNumberHistograms());
     m_loadMuonStrategy = std::make_unique<SinglePeriodLoadMuonStrategy>(
-        g_log, m_filename, *m_nexusLoader, *workspace2D,
-        static_cast<int>(m_entrynumber), m_isFileMultiPeriod);
+        g_log, m_filename, *m_nexusLoader, *workspace2D, static_cast<int>(m_entrynumber), m_isFileMultiPeriod);
   }
 }
 /**
@@ -275,8 +251,7 @@ void LoadMuonNexusV2::chooseLoaderStrategy(const Workspace_sptr &workspace) {
  */
 void LoadMuonNexusV2::loadMuonProperties(size_t numSpectra) {
 
-  std::string mainFieldDirection =
-      m_nexusLoader->loadMainFieldDirectionFromNexus();
+  std::string mainFieldDirection = m_nexusLoader->loadMainFieldDirectionFromNexus();
   setProperty("MainFieldDirection", mainFieldDirection);
 
   double timeZero = m_nexusLoader->loadTimeZeroFromNexusFile();
@@ -285,8 +260,7 @@ void LoadMuonNexusV2::loadMuonProperties(size_t numSpectra) {
   auto firstGoodData = m_nexusLoader->loadFirstGoodDataFromNexus();
   setProperty("FirstGoodData", firstGoodData);
 
-  auto timeZeroVector =
-      m_nexusLoader->loadTimeZeroListFromNexusFile(numSpectra);
+  auto timeZeroVector = m_nexusLoader->loadTimeZeroListFromNexusFile(numSpectra);
   setProperty("TimeZeroList", timeZeroVector);
 }
 
@@ -295,14 +269,12 @@ Changes the unit of the time axis, which is incorrect due to being loaded using
 LoadISISNexus
 */
 void LoadMuonNexusV2::applyTimeAxisUnitCorrection(Workspace &workspace) {
-  auto newUnit = std::dynamic_pointer_cast<Kernel::Units::Label>(
-      Kernel::UnitFactory::Instance().create("Label"));
+  auto newUnit = std::dynamic_pointer_cast<Kernel::Units::Label>(Kernel::UnitFactory::Instance().create("Label"));
   newUnit->setLabel("Time", Kernel::Units::Symbol::Microsecond);
   auto workspaceGroup = dynamic_cast<WorkspaceGroup *>(&workspace);
   if (workspaceGroup) {
     for (int i = 0; i < workspaceGroup->getNumberOfEntries(); ++i) {
-      auto workspace2D =
-          std::dynamic_pointer_cast<Workspace2D>(workspaceGroup->getItem(i));
+      auto workspace2D = std::dynamic_pointer_cast<Workspace2D>(workspaceGroup->getItem(i));
       workspace2D->getAxis(0)->unit() = newUnit;
     }
   } else {

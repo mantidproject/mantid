@@ -23,9 +23,7 @@ public:
 
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"MDNormSCD", "MDNormSCDPreprocessIncoherent"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"MDNormSCD", "MDNormSCDPreprocessIncoherent"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -38,19 +36,14 @@ private:
 
   DataObjects::MDHistoWorkspace_sptr binInputWS();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
-  std::vector<coord_t>
-  getValuesFromOtherDimensions(bool &skipNormalization,
-                               uint16_t expInfoIndex = 0) const;
-  Kernel::Matrix<coord_t>
-  findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
-                            bool &skipNormalization);
+  std::vector<coord_t> getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex = 0) const;
+  Kernel::Matrix<coord_t> findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
+                                                    bool &skipNormalization);
   void cacheDimensionXValues();
-  void calculateNormalization(const std::vector<coord_t> &otherValues,
-                              const Kernel::Matrix<coord_t> &affineTrans,
+  void calculateNormalization(const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans,
                               uint16_t expInfoIndex);
 
-  void calculateIntersections(std::vector<std::array<double, 4>> &intersections,
-                              const double theta, const double phi);
+  void calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta, const double phi);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;

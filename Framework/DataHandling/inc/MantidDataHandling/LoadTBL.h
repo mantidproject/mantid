@@ -33,9 +33,7 @@ public:
 
   /// The version number
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveTBL"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveTBL"}; }
   /// The category
   const std::string category() const override { return "DataHandling\\Text"; }
   /// Returns a confidence value that this algorithm can load a file
@@ -49,17 +47,14 @@ private:
   /// Split into Column headings with respect to comma delimiters
   bool getColumnHeadings(std::string line, std::vector<std::string> &cols);
   /// Split into columns with respect to the comma delimiters
-  size_t getCells(std::string line, std::vector<std::string> &cols,
-                  size_t expectedCommas, bool isOldTBL) const;
+  size_t getCells(std::string line, std::vector<std::string> &cols, size_t expectedCommas, bool isOldTBL) const;
   /// count the number of commas in the line
   size_t countCommas(const std::string &line) const;
   /// find all pairs of quotes in the line
-  size_t findQuotePairs(const std::string &line,
-                        std::vector<std::vector<size_t>> &quoteBounds) const;
+  size_t findQuotePairs(const std::string &line, std::vector<std::vector<size_t>> &quoteBounds) const;
   /// Parse more complex CSV, used when the data involves commas in the data and
   /// quoted values
-  void csvParse(const std::string &line, std::vector<std::string> &cols,
-                std::vector<std::vector<size_t>> &quoteBounds,
+  void csvParse(const std::string &line, std::vector<std::string> &cols, std::vector<std::vector<size_t>> &quoteBounds,
                 size_t expectedCommas) const;
 };
 

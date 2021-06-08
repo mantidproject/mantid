@@ -124,6 +124,7 @@ void MiniPlotMpl::setData(std::vector<double> x, std::vector<double> y,
   // is very different we need ensure the scale is tight enough to
   // see newer plots so we force a recalculation from the data
   axes.relim();
+  axes.autoscaleView();
   replot();
 }
 
@@ -265,8 +266,9 @@ void MiniPlotMpl::setYLinearScale() {
 void MiniPlotMpl::clearAll() {
   // active curve, labels etc
   clearCurve();
-  // any stored curves
+  // any stored curves and labels
   m_lines.clear();
+  m_storedCurveLabels.clear();
   replot();
 }
 

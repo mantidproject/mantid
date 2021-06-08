@@ -28,20 +28,14 @@ public:
   static void destroySuite(RepoModelTest *suite) { delete suite; }
 
   void setUp() override {
-    if (Mantid::API::ScriptRepositoryFactory::Instance().exists(
-            "ScriptRepositoryImpl")) {
-      Mantid::API::ScriptRepositoryFactory::Instance().unsubscribe(
-          "ScriptRepositoryImpl");
+    if (Mantid::API::ScriptRepositoryFactory::Instance().exists("ScriptRepositoryImpl")) {
+      Mantid::API::ScriptRepositoryFactory::Instance().unsubscribe("ScriptRepositoryImpl");
     }
-    Mantid::API::ScriptRepositoryFactory::Instance()
-        .subscribe<testing::NiceMock<MockScriptRepositoryImpl>>(
-            "ScriptRepositoryImpl");
-  }
-
-  void tearDown() override {
-    Mantid::API::ScriptRepositoryFactory::Instance().unsubscribe(
+    Mantid::API::ScriptRepositoryFactory::Instance().subscribe<testing::NiceMock<MockScriptRepositoryImpl>>(
         "ScriptRepositoryImpl");
   }
+
+  void tearDown() override { Mantid::API::ScriptRepositoryFactory::Instance().unsubscribe("ScriptRepositoryImpl"); }
 
   // test the repo is create and contains the right files
   void test_create_instance() {
@@ -64,9 +58,8 @@ public:
   void test_data_first_column_entries() {
     auto *model = new RepoModel();
     int role = Qt::DisplayRole;
-    std::string expectedEntries[6] = {
-        "Repo",          "README.txt",   "TofConverter.py",
-        "reflectometry", "Reduction.py", "script.py"};
+    std::string expectedEntries[6] = {"Repo",          "README.txt",   "TofConverter.py",
+                                      "reflectometry", "Reduction.py", "script.py"};
     for (auto i = 0; i < 6; ++i) {
       auto index = getIndex(model, i, 0);
       auto rowEntry = model->data(index, role).toString().toStdString();
@@ -79,9 +72,8 @@ public:
   void test_data_second_column_entries() {
     auto *model = new RepoModel();
     int role = Qt::DisplayRole;
-    std::string expectedEntries[6] = {"LOCAL_ONLY",     "UPDATED",
-                                      "REMOTE_ONLY",    "CHANGED",
-                                      "REMOTE_CHANGED", "LOCAL_CHANGED"};
+    std::string expectedEntries[6] = {"LOCAL_ONLY", "UPDATED",        "REMOTE_ONLY",
+                                      "CHANGED",    "REMOTE_CHANGED", "LOCAL_CHANGED"};
     for (auto i = 0; i < 6; ++i) {
       auto index = getIndex(model, i, 1);
       auto rowEntry = model->data(index, role).toString().toStdString();
@@ -110,8 +102,7 @@ public:
     auto *model = new RepoModel();
     int role = Qt::DisplayRole;
     auto filenames = scriptRepoMock.listFiles();
-    std::string expectedEntries[6] = {"protected", "deletable", "protected",
-                                      "protected", "protected", "deletable"};
+    std::string expectedEntries[6] = {"protected", "deletable", "protected", "protected", "protected", "deletable"};
     for (auto i = 0; i < 6; ++i) {
       auto index = getIndex(model, i, 3);
       auto rowEntry = model->data(index, role).toString().toStdString();
@@ -192,8 +183,7 @@ public:
   }
 
   void test_filepath_returns_correct_path() {
-    auto repo_path = Mantid::Kernel::ConfigService::Instance().getString(
-        "ScriptLocalRepository");
+    auto repo_path = Mantid::Kernel::ConfigService::Instance().getString("ScriptLocalRepository");
     auto *model = new RepoModel();
     auto filenames = scriptRepoMock.listFiles();
     for (auto i = 0; i < 6; ++i) {

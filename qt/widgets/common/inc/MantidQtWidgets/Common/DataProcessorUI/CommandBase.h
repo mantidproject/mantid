@@ -21,14 +21,12 @@ action needs to support. Defines a IReflTablePresenter that will be notified.
 */
 class CommandBase : public Command {
 public:
-  CommandBase(DataProcessorPresenter *tablePresenter)
-      : m_presenter(tablePresenter) {
+  CommandBase(DataProcessorPresenter *tablePresenter) : m_presenter(tablePresenter) {
     if (!tablePresenter) {
       throw std::invalid_argument("Invalid abstract presenter");
     }
   };
-  CommandBase(const QDataProcessorWidget &widget)
-      : CommandBase(widget.getPresenter()) {}
+  CommandBase(const QDataProcessorWidget &widget) : CommandBase(widget.getPresenter()) {}
 
 protected:
   DataProcessorPresenter *const m_presenter;

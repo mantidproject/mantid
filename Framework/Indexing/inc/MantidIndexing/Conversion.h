@@ -27,9 +27,7 @@ namespace Indexing {
  * conversion is done using static_cast without any range check. It is the
  * responsibility of the caller to not pass any vectors containing elements that
  * suffer from loss of data in a static_cast. */
-template <
-    class Out, class In,
-    typename std::enable_if<std::is_integral<In>::value>::type * = nullptr>
+template <class Out, class In, typename std::enable_if<std::is_integral<In>::value>::type * = nullptr>
 std::vector<Out> castVector(const std::vector<In> &indices) {
   std::vector<Out> converted;
   converted.reserve(indices.size());
@@ -45,15 +43,12 @@ std::vector<Out> castVector(const std::vector<In> &indices) {
  * conversion is done using static_cast without any range check. It is the
  * responsibility of the caller to not pass any vectors containing elements that
  * suffer from loss of data in a static_cast. */
-template <
-    class Out, class In,
-    typename std::enable_if<!std::is_integral<In>::value>::type * = nullptr>
+template <class Out, class In, typename std::enable_if<!std::is_integral<In>::value>::type * = nullptr>
 std::vector<Out> castVector(const std::vector<In> &indices) {
   std::vector<Out> converted;
   converted.reserve(indices.size());
   for (const auto &index : indices)
-    converted.emplace_back(
-        static_cast<Out>(static_cast<typename In::underlying_type>(index)));
+    converted.emplace_back(static_cast<Out>(static_cast<typename In::underlying_type>(index)));
   return converted;
 }
 

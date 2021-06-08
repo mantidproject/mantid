@@ -17,10 +17,9 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(ISplittersWorkspace)
 
 void export_ISplittersWorkspace() {
-  class_<ISplittersWorkspace, boost::noncopyable>("ISplittersWorkspace",
-                                                  no_init)
-      .def("getNumberSplitters", &ISplittersWorkspace::getNumberSplitters,
-           arg("self"), "Returns the number of splitters within the workspace");
+  class_<ISplittersWorkspace, boost::noncopyable>("ISplittersWorkspace", no_init)
+      .def("getNumberSplitters", &ISplittersWorkspace::getNumberSplitters, arg("self"),
+           "Returns the number of splitters within the workspace");
 
   // register pointers
   RegisterWorkspacePtrToPython<ISplittersWorkspace>();

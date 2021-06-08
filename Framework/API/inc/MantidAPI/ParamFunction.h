@@ -36,18 +36,15 @@ public:
   ParamFunction() {}
 
   /// Set i-th parameter
-  void setParameter(size_t, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(size_t, const double &value, bool explicitlySet = true) override;
   /// Set i-th parameter description
   void setParameterDescription(size_t, const std::string &description) override;
   /// Get i-th parameter
   double getParameter(size_t i) const override;
   /// Set parameter by name.
-  void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
   /// Set description of parameter by name.
-  void setParameterDescription(const std::string &name,
-                               const std::string &description) override;
+  void setParameterDescription(const std::string &name, const std::string &description) override;
   /// Get parameter by name.
   double getParameter(const std::string &name) const override;
   /// Check if function has a parameter with this name.
@@ -81,8 +78,7 @@ public:
 
 protected:
   /// Declare a new parameter
-  void declareParameter(const std::string &name, double initValue = 0,
-                        const std::string &description = "") override;
+  void declareParameter(const std::string &name, double initValue = 0, const std::string &description = "") override;
   /// Get the address of the parameter. For use in UserFunction with mu::Parser
   virtual double *getParameterAddress(size_t i);
   /// Nonvirtual member which removes all declared parameters
@@ -97,8 +93,7 @@ private:
   /// @param i :: Index to check.
   inline void checkParameterIndex(size_t i) const {
     if (i >= nParams()) {
-      throw std::out_of_range("ParamFunction parameter index " +
-                              std::to_string(i) + " out of range " +
+      throw std::out_of_range("ParamFunction parameter index " + std::to_string(i) + " out of range " +
                               std::to_string(nParams()));
     }
   }

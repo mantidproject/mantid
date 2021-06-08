@@ -25,16 +25,9 @@ namespace Parallel {
   @author Simon Heybrock
   @date 2017
 */
-enum class ExecutionMode {
-  Invalid,
-  Serial,
-  Identical,
-  Distributed,
-  MasterOnly
-};
+enum class ExecutionMode { Invalid, Serial, Identical, Distributed, MasterOnly };
 
-MANTID_PARALLEL_DLL ExecutionMode
-getCorrespondingExecutionMode(StorageMode storageMode);
+MANTID_PARALLEL_DLL ExecutionMode getCorrespondingExecutionMode(StorageMode storageMode);
 
 MANTID_PARALLEL_DLL std::string toString(ExecutionMode mode);
 

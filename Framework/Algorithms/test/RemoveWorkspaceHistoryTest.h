@@ -29,9 +29,7 @@ private:
     const std::string category() const override { return "Dummy"; }
 
     void init() override {
-      declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "",
-                                                            Direction::InOut),
-                      "");
+      declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut), "");
       declareProperty("Input1", 2);
       declareProperty("Input2", 1);
       declareProperty("Output1", -1, Direction::Output);
@@ -66,8 +64,7 @@ private:
 
   void createWorkspace(const std::string &wsName) {
     // create a fake workspace for testing
-    std::shared_ptr<WorkspaceTester> input =
-        std::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> input = std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace(wsName, input);
 
     Mantid::API::AlgorithmFactory::Instance().subscribe<SimpleSum>();
@@ -93,9 +90,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RemoveWorkspaceHistoryTest *createSuite() {
-    return new RemoveWorkspaceHistoryTest();
-  }
+  static RemoveWorkspaceHistoryTest *createSuite() { return new RemoveWorkspaceHistoryTest(); }
   static void destroySuite(RemoveWorkspaceHistoryTest *suite) { delete suite; }
 
   void test_Init() {
@@ -109,8 +104,7 @@ public:
     createWorkspace(wsName);
 
     Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<Workspace>(wsName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<Workspace>(wsName));
     TS_ASSERT(!ws->history().empty());
     TS_ASSERT_EQUALS(ws->history().size(), 2);
 
@@ -123,16 +117,14 @@ public:
 
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<Workspace>(wsName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<Workspace>(wsName));
     TS_ASSERT(ws);
     if (!ws)
       return;
 
     // Check the results
     TS_ASSERT_EQUALS(ws->history().size(), 1);
-    TS_ASSERT_EQUALS(ws->history().getAlgorithmHistory(0)->name(),
-                     "RemoveWorkspaceHistory");
+    TS_ASSERT_EQUALS(ws->history().getAlgorithmHistory(0)->name(), "RemoveWorkspaceHistory");
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(wsName);

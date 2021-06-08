@@ -26,9 +26,9 @@ namespace API {
 */
 
 struct MANTID_API_DLL IntegrationResult {
-  double result;
-  double error;
-  size_t intervals;
+  double result;    // integrated intensity
+  double error;     // error in result due to numerical errors in the integration algorithm
+  size_t intervals; // number of bins in which the integration range is divided
 
   int errorCode;
   bool success;
@@ -43,17 +43,14 @@ public:
   double requiredRelativePrecision() const;
 
   IntegrationResult integrateInfinity(const IPeakFunction &peakFunction) const;
-  IntegrationResult integratePositiveInfinity(const IPeakFunction &peakFunction,
-                                              double lowerLimit) const;
-  IntegrationResult integrateNegativeInfinity(const IPeakFunction &peakFunction,
-                                              double upperLimit) const;
+  IntegrationResult integratePositiveInfinity(const IPeakFunction &peakFunction, double lowerLimit) const;
+  IntegrationResult integrateNegativeInfinity(const IPeakFunction &peakFunction, double upperLimit) const;
 
-  IntegrationResult integrate(const IPeakFunction &peakFunction,
-                              double lowerLimit, double upperLimit) const;
+  IntegrationResult integrate(const IPeakFunction &peakFunction, double lowerLimit, double upperLimit) const;
+  double integrateError(const IPeakFunction &peakFunction, double lowerLimit, double upperLimit) const;
 
 protected:
   gsl_function getGSLFunction(const IPeakFunction &peakFunction) const;
-
   gsl_integration_workspace *m_integrationWorkspace;
 
   double m_relativePrecision;

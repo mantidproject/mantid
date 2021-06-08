@@ -10,12 +10,12 @@ Description
 -----------
 
 Removes all algorithm history records from a given workspace. This includes all workflow and child algorithm history records. After this algorithm has been run, the workspace will not be reproducible
-from its history. Note that this algorithm will not remove the environment history associated with a workspace. 
+from its history. Note that this algorithm will not remove the environment history associated with a workspace.
 
 Usage
 -----
 
-**Example:**  
+**Example:**
 
 .. testcode:: ExStripHistory
 
@@ -41,11 +41,11 @@ Usage
    print("After RemoveWorkspaceHistory")
    print_workspace_history(ws)
 
-             
+
 Output:
 
 .. testoutput:: ExStripHistory
-   
+
    Workspace ws has 5 algorithms in it's history
      CreateSampleWorkspace
      ConvertUnits

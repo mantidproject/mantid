@@ -98,16 +98,13 @@ struct IndexLimits {
  * @param Es Profile's E values.
  * @return A single histogram profile workspace.
  */
-Workspace2D_sptr makeOutput(const MatrixWorkspace &parent,
-                            const LineDirection direction,
-                            std::vector<double> &&Xs, std::vector<double> &&Ys,
-                            std::vector<double> &&Es) {
+Workspace2D_sptr makeOutput(const MatrixWorkspace &parent, const LineDirection direction, std::vector<double> &&Xs,
+                            std::vector<double> &&Ys, std::vector<double> &&Es) {
   HistogramBuilder builder;
   builder.setX(std::move(Xs));
   builder.setY(std::move(Ys));
   builder.setE(std::move(Es));
-  builder.setDistribution(direction == LineDirection::horizontal &&
-                          parent.isDistribution());
+  builder.setDistribution(direction == LineDirection::horizontal && parent.isDistribution());
   return create<Workspace2D>(parent, 1, builder.build());
 }
 
@@ -118,8 +115,7 @@ Workspace2D_sptr makeOutput(const MatrixWorkspace &parent,
  * @param box Line profile constraints.
  * @param dir Line profile orientation.
  */
-void setAxesAndUnits(Workspace2D &outWS, const MatrixWorkspace &ws,
-                     const Box &box, const LineDirection dir) {
+void setAxesAndUnits(Workspace2D &outWS, const MatrixWorkspace &ws, const Box &box, const LineDirection dir) {
   // Y units.
   outWS.setYUnit(ws.YUnit());
   outWS.setYUnitLabel(ws.YUnitLabel());
@@ -154,9 +150,8 @@ void setAxesAndUnits(Workspace2D &outWS, const MatrixWorkspace &ws,
  * @throw std::runtime_error if given constraints don't make sense.
  */
 template <typename Container>
-std::pair<size_t, size_t>
-startAndEnd(const Container &bins, const bool isBinEdges,
-            const double lowerLimit, const double upperLimit) {
+std::pair<size_t, size_t> startAndEnd(const Container &bins, const bool isBinEdges, const double lowerLimit,
+                                      const double upperLimit) {
   auto lowerIt = std::upper_bound(bins.cbegin(), bins.cend(), lowerLimit);
   if (lowerIt == bins.cend()) {
     throw std::runtime_error("Profile completely outside input workspace.");
@@ -183,8 +178,7 @@ startAndEnd(const Container &bins, const bool isBinEdges,
  * @param numberHistograms The actual number of histograms.
  * @return Axis bins.
  */
-std::vector<double> extractVerticalBins(const Axis &axis,
-                                        const size_t numberHistograms) {
+std::vector<double> extractVerticalBins(const Axis &axis, const size_t numberHistograms) {
   if (axis.isSpectra()) {
     std::vector<double> spectrumNumbers(numberHistograms);
     std::iota(spectrumNumbers.begin(), spectrumNumbers.end(), 1.0);
@@ -212,12 +206,9 @@ std::vector<double> extractVerticalBins(const Axis &axis,
  * @param ignoreInfs Whether infinities should be ignored or not.
  */
 template <typename Container, typename Function>
-void profile(std::vector<double> &Xs, std::vector<double> &Ys,
-             std::vector<double> &Es, const MatrixWorkspace &ws,
-             const LineDirection dir, const IndexLimits &limits,
-             const Container &lineBins, const bool isBinEdges,
-             Function modeFunction, const bool ignoreNans,
-             const bool ignoreInfs) {
+void profile(std::vector<double> &Xs, std::vector<double> &Ys, std::vector<double> &Es, const MatrixWorkspace &ws,
+             const LineDirection dir, const IndexLimits &limits, const Container &lineBins, const bool isBinEdges,
+             Function modeFunction, const bool ignoreNans, const bool ignoreInfs) {
   const auto lineSize = limits.lineEnd - limits.lineStart;
   Xs.resize(lineSize + (isBinEdges ? 1 : 0));
   Ys.resize(lineSize);
@@ -243,8 +234,7 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
       ++n;
     }
     const size_t nTotal = limits.widthEnd - limits.widthStart;
-    Ys[i - limits.lineStart] =
-        n == 0 ? std::nan("") : modeFunction(ySum, n, nTotal);
+    Ys[i - limits.lineStart] = n == 0 ? std::nan("") : modeFunction(ySum, n, nTotal);
     const double e = modeFunction(std::sqrt(eSqSum), n, nTotal);
     Es[i - limits.lineStart] = std::isnan(e) ? 0 : e;
   }
@@ -259,8 +249,7 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
  * @param n Number of summed points.
  * @return The average.
  */
-double averageMode(const double sum, const size_t n,
-                   const size_t /*unused*/) noexcept {
+double averageMode(const double sum, const size_t n, const size_t /*unused*/) noexcept {
   return sum / static_cast<double>(n);
 }
 
@@ -310,9 +299,7 @@ int LineProfile::version() const { return 1; }
 const std::string LineProfile::category() const { return "Utility"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string LineProfile::summary() const {
-  return "Calculates a line profile over a MatrixWorkspace.";
-}
+const std::string LineProfile::summary() const { return "Calculates a line profile over a MatrixWorkspace."; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -328,36 +315,25 @@ void LineProfile::init() {
   const auto inputWorkspaceValidator = std::make_shared<CompositeValidator>();
   inputWorkspaceValidator->add(std::make_shared<CommonBinsValidator>());
   inputWorkspaceValidator->add(std::make_shared<IncreasingAxisValidator>());
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      PropertyNames::INPUT_WORKSPACE, "", Direction::Input,
-                      inputWorkspaceValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::INPUT_WORKSPACE, "",
+                                                                       Direction::Input, inputWorkspaceValidator),
                   "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
-                  "A single histogram workspace containing the profile.");
-  declareProperty(PropertyNames::CENTRE, EMPTY_DBL(), mandatoryDouble,
-                  "Centre of the line.");
-  declareProperty(PropertyNames::HALF_WIDTH, EMPTY_DBL(),
-                  mandatoryPositiveDouble,
-                  "Half of the width over which to calcualte the profile.");
-  const std::array<std::string, 2> directions = {
-      {DirectionChoices::HORIZONTAL, DirectionChoices::VERTICAL}};
-  declareProperty(PropertyNames::DIRECTION, DirectionChoices::HORIZONTAL,
-                  std::make_shared<ListValidator<std::string>>(directions),
-                  "Orientation of the profile line.");
-  declareProperty(PropertyNames::START, EMPTY_DBL(),
-                  "Starting point of the line.");
-  declareProperty(PropertyNames::END, EMPTY_DBL(), "End point of the line.");
-  const std::array<std::string, 2> modes = {
-      {ModeChoices::AVERAGE, ModeChoices::SUM}};
-  declareProperty(PropertyNames::MODE, ModeChoices::AVERAGE,
-                  std::make_shared<ListValidator<std::string>>(modes),
-                  "How the profile is calculated over the line width.");
-  declareProperty(PropertyNames::IGNORE_INFS, false,
-                  "If true, ignore infinities when calculating the profile.");
   declareProperty(
-      PropertyNames::IGNORE_NANS, true,
-      "If true, ignore not-a-numbers when calculating the profile.");
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
+      "A single histogram workspace containing the profile.");
+  declareProperty(PropertyNames::CENTRE, EMPTY_DBL(), mandatoryDouble, "Centre of the line.");
+  declareProperty(PropertyNames::HALF_WIDTH, EMPTY_DBL(), mandatoryPositiveDouble,
+                  "Half of the width over which to calcualte the profile.");
+  const std::array<std::string, 2> directions = {{DirectionChoices::HORIZONTAL, DirectionChoices::VERTICAL}};
+  declareProperty(PropertyNames::DIRECTION, DirectionChoices::HORIZONTAL,
+                  std::make_shared<ListValidator<std::string>>(directions), "Orientation of the profile line.");
+  declareProperty(PropertyNames::START, EMPTY_DBL(), "Starting point of the line.");
+  declareProperty(PropertyNames::END, EMPTY_DBL(), "End point of the line.");
+  const std::array<std::string, 2> modes = {{ModeChoices::AVERAGE, ModeChoices::SUM}};
+  declareProperty(PropertyNames::MODE, ModeChoices::AVERAGE, std::make_shared<ListValidator<std::string>>(modes),
+                  "How the profile is calculated over the line width.");
+  declareProperty(PropertyNames::IGNORE_INFS, false, "If true, ignore infinities when calculating the profile.");
+  declareProperty(PropertyNames::IGNORE_NANS, true, "If true, ignore not-a-numbers when calculating the profile.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -372,10 +348,8 @@ void LineProfile::exec() {
   const auto horizontalIsBinEdges = ws->isHistogramData();
   const auto vertAxis = ws->getAxis(1);
   // It is easier if the vertical axis values are in a vector.
-  const auto verticalBins =
-      extractVerticalBins(*vertAxis, ws->getNumberHistograms());
-  const auto verticalIsBinEdges =
-      verticalBins.size() > ws->getNumberHistograms();
+  const auto verticalBins = extractVerticalBins(*vertAxis, ws->getNumberHistograms());
+  const auto verticalIsBinEdges = verticalBins.size() > ws->getNumberHistograms();
   const std::string directionString = getProperty(PropertyNames::DIRECTION);
   LineDirection dir{LineDirection::horizontal};
   if (directionString == DirectionChoices::VERTICAL) {
@@ -406,10 +380,8 @@ void LineProfile::exec() {
     bounds.right = centre + halfWidth;
   }
   // Convert the bounds from workspace units to indices.
-  const auto vertInterval =
-      startAndEnd(verticalBins, verticalIsBinEdges, bounds.top, bounds.bottom);
-  const auto horInterval = startAndEnd(horizontalBins, horizontalIsBinEdges,
-                                       bounds.left, bounds.right);
+  const auto vertInterval = startAndEnd(verticalBins, verticalIsBinEdges, bounds.top, bounds.bottom);
+  const auto horInterval = startAndEnd(horizontalBins, horizontalIsBinEdges, bounds.left, bounds.right);
   // Choose mode.
   auto mode = createMode(getProperty(PropertyNames::MODE));
   // Build the actual profile.
@@ -422,31 +394,27 @@ void LineProfile::exec() {
     limits.lineEnd = horInterval.second;
     limits.widthStart = vertInterval.first;
     limits.widthEnd = vertInterval.second;
-    profile(Xs, profileYs, profileEs, *ws, dir, limits, horizontalBins,
-            horizontalIsBinEdges, mode, ignoreNans, ignoreInfs);
+    profile(Xs, profileYs, profileEs, *ws, dir, limits, horizontalBins, horizontalIsBinEdges, mode, ignoreNans,
+            ignoreInfs);
   } else {
     IndexLimits limits;
     limits.lineStart = vertInterval.first;
     limits.lineEnd = vertInterval.second;
     limits.widthStart = horInterval.first;
     limits.widthEnd = horInterval.second;
-    profile(Xs, profileYs, profileEs, *ws, dir, limits, verticalBins,
-            verticalIsBinEdges, mode, ignoreNans, ignoreInfs);
+    profile(Xs, profileYs, profileEs, *ws, dir, limits, verticalBins, verticalIsBinEdges, mode, ignoreNans, ignoreInfs);
   }
   // Prepare and set output.
-  auto outWS = makeOutput(*ws, dir, std::move(Xs), std::move(profileYs),
-                          std::move(profileEs));
+  auto outWS = makeOutput(*ws, dir, std::move(Xs), std::move(profileYs), std::move(profileEs));
   // The actual profile might be of different size than what user
   // specified.
   Box actualBounds;
   actualBounds.top = verticalBins[vertInterval.first];
-  actualBounds.bottom = vertInterval.second < verticalBins.size()
-                            ? verticalBins[vertInterval.second]
-                            : verticalBins.back();
+  actualBounds.bottom =
+      vertInterval.second < verticalBins.size() ? verticalBins[vertInterval.second] : verticalBins.back();
   actualBounds.left = horizontalBins[horInterval.first];
-  actualBounds.right = horInterval.second < horizontalBins.size()
-                           ? horizontalBins[horInterval.second]
-                           : horizontalBins.back();
+  actualBounds.right =
+      horInterval.second < horizontalBins.size() ? horizontalBins[horInterval.second] : horizontalBins.back();
   setAxesAndUnits(*outWS, *ws, actualBounds, dir);
   if (dir == LineDirection::vertical && ws->isDistribution()) {
     divideByBinHeight(*outWS);
@@ -461,13 +429,11 @@ std::map<std::string, std::string> LineProfile::validateInputs() {
   const double start = getProperty(PropertyNames::START);
   const double end = getProperty(PropertyNames::END);
   if (start > end) {
-    issues[PropertyNames::START] =
-        PropertyNames::START + " greater than " + PropertyNames::END + ".";
+    issues[PropertyNames::START] = PropertyNames::START + " greater than " + PropertyNames::END + ".";
   }
   MatrixWorkspace_const_sptr ws = getProperty(PropertyNames::INPUT_WORKSPACE);
   if (ws->getAxis(1)->isText()) {
-    issues[PropertyNames::INPUT_WORKSPACE] =
-        "The vertical axis in " + PropertyNames::INPUT_WORKSPACE + " is text.";
+    issues[PropertyNames::INPUT_WORKSPACE] = "The vertical axis in " + PropertyNames::INPUT_WORKSPACE + " is text.";
   }
   return issues;
 }

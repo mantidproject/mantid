@@ -29,8 +29,7 @@ enum class CompositeRelation { AND = 0, OR = 1 };
 class DLLExport CompositeValidator : public IValidator {
 public:
   /// Default constructor
-  CompositeValidator(
-      const CompositeRelation &relation = CompositeRelation::AND);
+  CompositeValidator(const CompositeRelation &relation = CompositeRelation::AND);
   /// Destructor
   ~CompositeValidator() override;
 
@@ -48,9 +47,7 @@ public:
   /// Add a validator based on the first template type with the second as an
   /// argument.
   /// The argument is used to feed into the validator constructor
-  template <typename T, typename U> void add(const U &arg) {
-    this->add(std::make_shared<T>(arg));
-  }
+  template <typename T, typename U> void add(const U &arg) { this->add(std::make_shared<T>(arg)); }
   /// Returns true if the child list contains a validator of the specified
   /// template type
   template <typename T> bool contains() {
@@ -72,8 +69,7 @@ private:
   /// Verify the value with the child validators with logical "or" relationship
   std::string checkAny(const boost::any &value) const;
   /// build an error message for OR relations
-  std::string buildErrorMessage(const bool valid,
-                                const std::string &errors) const;
+  std::string buildErrorMessage(const bool valid, const std::string &errors) const;
   /// Private Copy constructor: NO DIRECT COPY ALLOWED
   CompositeValidator(const CompositeValidator &);
 

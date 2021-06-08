@@ -37,9 +37,7 @@ public:
   void stopObserving(const Mantid::API::IAlgorithm *alg);
   void stopObservingManager();
 
-  virtual void progressHandle(const IAlgorithm *alg, double p,
-                              const std::string &msg,
-                              const double estimatedTime,
+  virtual void progressHandle(const IAlgorithm *alg, double p, const std::string &msg, const double estimatedTime,
                               const int progressPrecision);
   virtual void startingHandle(IAlgorithm_sptr alg);
   virtual void startHandle(const IAlgorithm *alg);
@@ -47,31 +45,25 @@ public:
   virtual void errorHandle(const IAlgorithm *alg, const std::string &what);
 
 private:
-  void
-  _progressHandle(const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf);
+  void _progressHandle(const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf);
   /// Poco::NObserver for Algorithm::ProgressNotification.
-  Poco::NObserver<AlgorithmObserver, Algorithm::ProgressNotification>
-      m_progressObserver;
+  Poco::NObserver<AlgorithmObserver, Algorithm::ProgressNotification> m_progressObserver;
 
   void _startHandle(const Poco::AutoPtr<Algorithm::StartedNotification> &pNf);
   /// Poco::NObserver for Algorithm::StartedNotification.
-  Poco::NObserver<AlgorithmObserver, Algorithm::StartedNotification>
-      m_startObserver;
+  Poco::NObserver<AlgorithmObserver, Algorithm::StartedNotification> m_startObserver;
 
   void _finishHandle(const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf);
   /// Poco::NObserver for Algorithm::FinishedNotification.
-  Poco::NObserver<AlgorithmObserver, Algorithm::FinishedNotification>
-      m_finishObserver;
+  Poco::NObserver<AlgorithmObserver, Algorithm::FinishedNotification> m_finishObserver;
 
   void _errorHandle(const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf);
   /// Poco::NObserver for Algorithm::ErrorNotification.
-  Poco::NObserver<AlgorithmObserver, Algorithm::ErrorNotification>
-      m_errorObserver;
+  Poco::NObserver<AlgorithmObserver, Algorithm::ErrorNotification> m_errorObserver;
 
   void _startingHandle(const Poco::AutoPtr<AlgorithmStartingNotification> &pNf);
   /// Poco::NObserver for API::AlgorithmStartingNotification
-  Poco::NObserver<AlgorithmObserver, AlgorithmStartingNotification>
-      m_startingObserver;
+  Poco::NObserver<AlgorithmObserver, AlgorithmStartingNotification> m_startingObserver;
 };
 
 } // namespace API

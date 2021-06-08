@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::IntPropertyWithValue.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.IntPropertyWithValue 
+.. autoclass:: mantid.kernel.IntPropertyWithValue
     :members:
     :undoc-members:
     :inherited-members:

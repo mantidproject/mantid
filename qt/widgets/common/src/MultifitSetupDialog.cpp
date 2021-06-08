@@ -29,22 +29,19 @@ MultifitSetupDialog::MultifitSetupDialog(FitPropertyBrowser *fitBrowser)
   ui.setupUi(this);
   auto f = m_fitBrowser->compositeFunction()->getFunction(0);
   if (!f) {
-    throw std::runtime_error(
-        "IFitFunction expected but func function of another type");
+    throw std::runtime_error("IFitFunction expected but func function of another type");
   }
   QAbstractItemModel *model = ui.paramTable->model();
   for (size_t i = 0; i < f->nParams(); ++i) {
     int j = static_cast<int>(i);
     ui.paramTable->insertRow(ui.paramTable->rowCount());
-    model->setData(model->index(j, 0),
-                   QString::fromStdString(f->parameterName(i)));
+    model->setData(model->index(j, 0), QString::fromStdString(f->parameterName(i)));
     ui.paramTable->item(j, 0)->setFlags(nullptr);
     model->setData(model->index(j, 1), "");
     ui.paramTable->item(j, 1)->setCheckState(Qt::Unchecked);
   }
   ui.paramTable->resizeColumnToContents(0);
-  connect(ui.paramTable, SIGNAL(cellChanged(int, int)), this,
-          SLOT(cellChanged(int, int)));
+  connect(ui.paramTable, SIGNAL(cellChanged(int, int)), this, SLOT(cellChanged(int, int)));
 }
 
 /// Setup the function and close dialog
@@ -66,8 +63,8 @@ void MultifitSetupDialog::cellChanged(int row, int col) {
     QString text = ui.paramTable->item(row, col)->text();
     // toggle global/local
     if (isChecked && text.isEmpty()) {
-      ui.paramTable->item(row, col)->setText(QString::fromStdString(
-          m_fitBrowser->compositeFunction()->parameterName(row)));
+      ui.paramTable->item(row, col)->setText(
+          QString::fromStdString(m_fitBrowser->compositeFunction()->parameterName(row)));
     } else if (!isChecked) {
       ui.paramTable->item(row, col)->setText("");
     }

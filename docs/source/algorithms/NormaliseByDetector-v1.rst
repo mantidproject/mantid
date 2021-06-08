@@ -11,7 +11,7 @@ Description
 
 This algorithm is designed to normalise a workspace via detector
 efficiency functions. **For this algorithm to work, the Instrument
-Definition File :ref:`IDF <InstrumentDefinitionFile>` must have fitting functions on the
+Definition File** (:ref:`IDF<InstrumentDefinitionFile>`) **must have fitting functions on the
 component tree**. The setup information for this, as well as some
 examples, are provided below.
 
@@ -45,7 +45,7 @@ Background
 In brief, the components in the IDF file form a tree structure.
 Detectors and Instruments are both types of component. Detectors are
 ultimately children of Instruments in the tree structure. For a more
-complete description see :ref:`IDF <InstrumentDefinitionFile>`. The tree structure of the
+complete description see :ref:`IDF<InstrumentDefinitionFile>`. The tree structure of the
 components, mean that fitting functions do not necessarily have to be
 assigned on a detector-by-detector basis. Applying a fit function to the
 instrument, will ensure that all subcomponents (including detectors),
@@ -159,7 +159,7 @@ definitions on different components in the tree.
 Usage
 -----
 
-**Example - A simple linear correction**  
+**Example - A simple linear correction**
 
 .. testcode:: ExLinear
 
@@ -212,7 +212,7 @@ Usage
 Output:
 
 .. testoutput:: ExLinear
-   
+
   The correction will divide the data by an increasing linear function.
   f(x) = 2x + 1
   The correct value in bin 0 is 0.28 compared to 0.30

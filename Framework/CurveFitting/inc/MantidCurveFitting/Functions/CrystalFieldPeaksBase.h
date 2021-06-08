@@ -19,18 +19,15 @@ namespace Functions {
   CrystalFieldPeaks is a function that calculates crystal field peak
   positions and intensities.
 */
-class MANTID_CURVEFITTING_DLL CrystalFieldPeaksBase
-    : public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL CrystalFieldPeaksBase : public API::ParamFunction {
 public:
   CrystalFieldPeaksBase();
   void setAttribute(const std::string &name, const Attribute &) override;
 
   /// Calculate the crystal field eigensystem
-  void calculateEigenSystem(DoubleFortranVector &en, ComplexFortranMatrix &wf,
-                            ComplexFortranMatrix &ham, ComplexFortranMatrix &hz,
-                            int &nre) const;
-  inline void calculateEigenSystem(DoubleFortranVector &en,
-                                   ComplexFortranMatrix &wf, int &nre) const {
+  void calculateEigenSystem(DoubleFortranVector &en, ComplexFortranMatrix &wf, ComplexFortranMatrix &ham,
+                            ComplexFortranMatrix &hz, int &nre) const;
+  inline void calculateEigenSystem(DoubleFortranVector &en, ComplexFortranMatrix &wf, int &nre) const {
     ComplexFortranMatrix ham, hz;
     calculateEigenSystem(en, wf, ham, hz, nre);
   }
@@ -41,12 +38,10 @@ protected:
   mutable size_t m_defaultDomainSize;
 };
 
-class MANTID_CURVEFITTING_DLL CrystalFieldPeaksBaseImpl
-    : public CrystalFieldPeaksBase {
+class MANTID_CURVEFITTING_DLL CrystalFieldPeaksBaseImpl : public CrystalFieldPeaksBase {
 public:
   std::string name() const override;
-  void function(const API::FunctionDomain &,
-                API::FunctionValues &) const override;
+  void function(const API::FunctionDomain &, API::FunctionValues &) const override;
 };
 
 } // namespace Functions

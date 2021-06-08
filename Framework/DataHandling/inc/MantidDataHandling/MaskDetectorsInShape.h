@@ -42,15 +42,11 @@ public:
   const std::string name() const override { return "MaskDetectorsInShape"; };
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"MaskDetectors", "FindDetectorsInShape"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"MaskDetectors", "FindDetectorsInShape"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Masking"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Masks detectors whose centres fall within the given 3D shape.";
-  }
+  const std::string summary() const override { return "Masks detectors whose centres fall within the given 3D shape."; }
 
 private:
   // Implement abstract Algorithm methods
@@ -58,13 +54,10 @@ private:
   void exec() override;
 
   // internal functions
-  std::vector<int>
-  runFindDetectorsInShape(const API::MatrixWorkspace_sptr &workspace,
-                          const std::string &shapeXML,
-                          const bool includeMonitors);
+  std::vector<int> runFindDetectorsInShape(const API::MatrixWorkspace_sptr &workspace, const std::string &shapeXML,
+                                           const bool includeMonitors);
   /// Calls MaskDetectors as a Child Algorithm
-  void runMaskDetectors(const API::MatrixWorkspace_sptr &workspace,
-                        const std::vector<int> &detectorIds);
+  void runMaskDetectors(const API::MatrixWorkspace_sptr &workspace, const std::vector<int> &detectorIds);
 };
 
 } // namespace DataHandling

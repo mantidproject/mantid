@@ -23,16 +23,15 @@ public:
 };
 
 template <typename T>
-CatalogConfigService *makeCatalogConfigServiceAdapter(
-    const T &adaptee, const std::string &key = "icatDownload.mountPoint") {
+CatalogConfigService *makeCatalogConfigServiceAdapter(const T &adaptee,
+                                                      const std::string &key = "icatDownload.mountPoint") {
   class Adapter : public CatalogConfigService {
   private:
     const T &m_adaptee;
     std::string m_key;
 
   public:
-    Adapter(const T &adaptee, const std::string &key)
-        : m_adaptee(adaptee), m_key(key) {}
+    Adapter(const T &adaptee, const std::string &key) : m_adaptee(adaptee), m_key(key) {}
     OptionalPath preferredMountPoint() const override {
       auto const mountPoint = m_adaptee.getString(m_key);
       if (!mountPoint.empty())
@@ -50,8 +49,7 @@ CatalogConfigService *makeCatalogConfigServiceAdapter(
 
 class MANTID_KERNEL_DLL UserCatalogInfo : public ICatalogInfo {
 public:
-  UserCatalogInfo(const ICatalogInfo &catInfo,
-                  const CatalogConfigService &catalogConfigService);
+  UserCatalogInfo(const ICatalogInfo &catInfo, const CatalogConfigService &catalogConfigService);
 
   UserCatalogInfo(const UserCatalogInfo &other);
 

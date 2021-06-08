@@ -17,23 +17,18 @@ class DateAndTimeHelpersTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DateAndTimeHelpersTest *createSuite() {
-    return new DateAndTimeHelpersTest();
-  }
+  static DateAndTimeHelpersTest *createSuite() { return new DateAndTimeHelpersTest(); }
   static void destroySuite(DateAndTimeHelpersTest *suite) { delete suite; }
 
   void test_verifyAndSanitizeISO8601() {
-    TS_ASSERT_EQUALS(verifyAndSanitizeISO8601("1990- 1- 2T03:04:02.000"),
-                     "1990-01-02T03:04:02.000");
-    TS_ASSERT_EQUALS(verifyAndSanitizeISO8601("1882-01- 2T03:04:02.000"),
-                     "1882-01-02T03:04:02.000");
+    TS_ASSERT_EQUALS(verifyAndSanitizeISO8601("1990- 1- 2T03:04:02.000"), "1990-01-02T03:04:02.000");
+    TS_ASSERT_EQUALS(verifyAndSanitizeISO8601("1882-01- 2T03:04:02.000"), "1882-01-02T03:04:02.000");
   }
 
   void test_createFromSantizedISO8601() {
     DateAndTime date;
 
-    TS_ASSERT_THROWS_NOTHING(
-        date = createFromSanitizedISO8601("1882-01- 2T03:04:02"));
+    TS_ASSERT_THROWS_NOTHING(date = createFromSanitizedISO8601("1882-01- 2T03:04:02"));
     TS_ASSERT_EQUALS(date.toISO8601String(), "1882-01-02T03:04:02");
 
     date = createFromSanitizedISO8601("1990- 1- 2T03:04:02.001");
@@ -44,15 +39,10 @@ public:
     std::vector<DateAndTime> times;
     TS_ASSERT_THROWS(averageSorted(times), const std::invalid_argument &);
 
-    times.emplace_back(
-        createFromSanitizedISO8601("1977-05-25T00:00Z")); // Star Wars IV
-    times.emplace_back(
-        createFromSanitizedISO8601("1977-09-11T00:00Z")); // ATARI 2600
-    times.emplace_back(
-        createFromSanitizedISO8601("1980-05-17T00:00Z")); // Star Wars V
-    times.emplace_back(
-        createFromSanitizedISO8601("1983-05-25T00:00Z")); // Star Wars VI
-    TS_ASSERT_EQUALS(averageSorted(times),
-                     createFromSanitizedISO8601("1979-09-19T00:00Z"));
+    times.emplace_back(createFromSanitizedISO8601("1977-05-25T00:00Z")); // Star Wars IV
+    times.emplace_back(createFromSanitizedISO8601("1977-09-11T00:00Z")); // ATARI 2600
+    times.emplace_back(createFromSanitizedISO8601("1980-05-17T00:00Z")); // Star Wars V
+    times.emplace_back(createFromSanitizedISO8601("1983-05-25T00:00Z")); // Star Wars VI
+    TS_ASSERT_EQUALS(averageSorted(times), createFromSanitizedISO8601("1979-09-19T00:00Z"));
   }
 };

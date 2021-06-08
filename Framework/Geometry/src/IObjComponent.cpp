@@ -13,16 +13,12 @@
 namespace Mantid {
 namespace Geometry {
 
-IObjComponent::IObjComponent() {
-  handle = std::make_unique<GeometryHandler>(this);
-}
+IObjComponent::IObjComponent() { handle = std::make_unique<GeometryHandler>(this); }
 
 /** Constructor, specifying the GeometryHandler (renderer engine)
  * for this IObjComponent.
  */
-IObjComponent::IObjComponent(GeometryHandler *the_handler) {
-  handle.reset(the_handler);
-}
+IObjComponent::IObjComponent(GeometryHandler *the_handler) { handle.reset(the_handler); }
 
 // Looking to get rid of the first of these constructors in due course (and
 // probably add others)

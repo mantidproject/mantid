@@ -30,9 +30,7 @@ namespace {
  * Return the path to the alternate data stream for the given path
  * @param filePath The full path to the main data path
  */
-inline std::string alternateDataStream(const Poco::Path &filePath) {
-  return filePath.toString() + ":checksum";
-}
+inline std::string alternateDataStream(const Poco::Path &filePath) { return filePath.toString() + ":checksum"; }
 
 /**
  * This method looks for ADS with name checksum exists
@@ -49,10 +47,7 @@ inline bool hasAlternateDataStream(const Poco::Path &pathToFile) {
   return true;
 }
 #else
-inline bool hasAlternateDataStream([
-    [maybe_unused]] const Poco::Path &pathToFile) {
-  return false;
-}
+inline bool hasAlternateDataStream([[maybe_unused]] const Poco::Path &pathToFile) { return false; }
 #endif
 
 /**
@@ -62,8 +57,7 @@ inline bool hasAlternateDataStream([
  * @param pathToRawFile The path and name of the raw file.
  * @return list of logfile names.
  */
-std::set<std::string>
-logFilesFromAlternateDataStream(const Poco::Path &pathToRawFile) {
+std::set<std::string> logFilesFromAlternateDataStream(const Poco::Path &pathToRawFile) {
   std::set<std::string> logfilesList;
   std::ifstream adsStream(alternateDataStream(pathToRawFile));
   if (!adsStream) {
@@ -81,8 +75,7 @@ logFilesFromAlternateDataStream(const Poco::Path &pathToRawFile) {
   Poco::Path dirOfFile(pathToRawFile.parent());
   std::string line;
   while (Mantid::Kernel::Strings::extractToEOL(adsStream, line)) {
-    if (boost::algorithm::iends_with(line, ".txt") ||
-        boost::algorithm::iends_with(line, ".log")) {
+    if (boost::algorithm::iends_with(line, ".txt") || boost::algorithm::iends_with(line, ".log")) {
       const size_t asteriskPos = line.find('*');
       if (asteriskPos == std::string::npos)
         continue;
@@ -106,11 +99,9 @@ using Types::Core::DateAndTime;
 
 /// Constructor
 LoadRawHelper::LoadRawHelper()
-    : m_list(false), m_interval(false), m_spec_list(), m_spec_min(0),
-      m_spec_max(EMPTY_INT()), m_numberOfPeriods(0), m_isis_raw(),
-      m_cache_options(), m_specTimeRegimes(), m_prog(0.0), m_numberOfSpectra(0),
-      m_monitordetectorList(), m_bmspeclist(false), m_total_specs(0),
-      m_logCreator() {}
+    : m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(EMPTY_INT()), m_numberOfPeriods(0),
+      m_isis_raw(), m_cache_options(), m_specTimeRegimes(), m_prog(0.0), m_numberOfSpectra(0), m_monitordetectorList(),
+      m_bmspeclist(false), m_total_specs(0), m_logCreator() {}
 
 /// Destructor
 LoadRawHelper::~LoadRawHelper() {}
@@ -118,13 +109,11 @@ LoadRawHelper::~LoadRawHelper() {}
 /// Initialisation method.
 void LoadRawHelper::init() {
   const std::vector<std::string> exts{".raw", ".s*", ".add"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name of the RAW file to read, including its full or "
-      "relative path. The file extension must be .raw or .RAW "
-      "(N.B. case sensitive if running on Linux).");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The name of the RAW file to read, including its full or "
+                  "relative path. The file extension must be .raw or .RAW "
+                  "(N.B. case sensitive if running on Linux).");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, filled with "
                   "the read-in data and stored in the Analysis Data Service. "
                   "If the input RAW file contains multiple periods higher "
@@ -134,8 +123,7 @@ void LoadRawHelper::init() {
   m_cache_options.emplace_back("If Slow");
   m_cache_options.emplace_back("Always");
   m_cache_options.emplace_back("Never");
-  declareProperty("Cache", "If Slow",
-                  std::make_shared<StringListValidator>(m_cache_options),
+  declareProperty("Cache", "If Slow", std::make_shared<StringListValidator>(m_cache_options),
                   "An option allowing the algorithm to cache a remote file on "
                   "the local drive before loading. When \"If Slow\" is set the "
                   "download speed is estimated and if is deemed as slow the "
@@ -188,21 +176,13 @@ void LoadRawHelper::readTitle(FILE *file, std::string &title) {
  *@param file :: pointer to the raw file
  *@param hist :: postion in the file to skip
  */
-void LoadRawHelper::skipData(FILE *file, int hist) {
-  isisRaw().skipData(file, hist);
-}
-void LoadRawHelper::skipData(FILE *file, int64_t hist) {
-  skipData(file, static_cast<int>(hist));
-}
+void LoadRawHelper::skipData(FILE *file, int hist) { isisRaw().skipData(file, hist); }
+void LoadRawHelper::skipData(FILE *file, int64_t hist) { skipData(file, static_cast<int>(hist)); }
 /// calls isisRaw ioRaw.
 /// @param file :: the file pointer
 /// @param from_file :: unknown
-void LoadRawHelper::ioRaw(FILE *file, bool from_file) {
-  isisRaw().ioRAW(file, from_file);
-}
-int LoadRawHelper::getNumberofTimeRegimes() {
-  return isisRaw().daep.n_tr_shift;
-}
+void LoadRawHelper::ioRaw(FILE *file, bool from_file) { isisRaw().ioRAW(file, from_file); }
+int LoadRawHelper::getNumberofTimeRegimes() { return isisRaw().daep.n_tr_shift; }
 
 /**
  * Lazy-instantiation of the ISISRAW reader
@@ -223,24 +203,16 @@ void LoadRawHelper::reset() { m_isis_raw.reset(); }
  * @param hist :: postion in the file to read
  * @return flag is data is read
  */
-bool LoadRawHelper::readData(FILE *file, int hist) {
-  return isisRaw().readData(file, hist);
-}
-bool LoadRawHelper::readData(FILE *file, int64_t hist) {
-  return readData(file, static_cast<int>(hist));
-}
+bool LoadRawHelper::readData(FILE *file, int hist) { return isisRaw().readData(file, hist); }
+bool LoadRawHelper::readData(FILE *file, int64_t hist) { return readData(file, static_cast<int>(hist)); }
 
-float LoadRawHelper::getProtonCharge() const {
-  return isisRaw().rpb.r_gd_prtn_chrg;
-}
+float LoadRawHelper::getProtonCharge() const { return isisRaw().rpb.r_gd_prtn_chrg; }
 
 /**
  * Set the proton charge on the run object
  * @param run :: The run object
  */
-void LoadRawHelper::setProtonCharge(API::Run &run) {
-  run.setProtonCharge(getProtonCharge());
-}
+void LoadRawHelper::setProtonCharge(API::Run &run) { run.setProtonCharge(getProtonCharge()); }
 /** Stores the run number in the run logs
  *  @param run :: the workspace's run object
  */
@@ -254,13 +226,10 @@ void LoadRawHelper::setRunNumber(API::Run &run) {
  * @param lengthIn :: size of workspace vectors
  * @param noTimeRegimes :: number of time regime.
  */
-void LoadRawHelper::readworkspaceParameters(specnum_t &numberOfSpectra,
-                                            int &numberOfPeriods,
-                                            int64_t &lengthIn,
+void LoadRawHelper::readworkspaceParameters(specnum_t &numberOfSpectra, int &numberOfPeriods, int64_t &lengthIn,
                                             int64_t &noTimeRegimes) {
   // Read in the number of spectra in the RAW file
-  m_numberOfSpectra = numberOfSpectra =
-      static_cast<specnum_t>(isisRaw().t_nsp1);
+  m_numberOfSpectra = numberOfSpectra = static_cast<specnum_t>(isisRaw().t_nsp1);
   // Read the number of periods in this file
   numberOfPeriods = isisRaw().t_nper;
   // Read the number of time channels (i.e. bins) from the RAW file
@@ -277,17 +246,13 @@ void LoadRawHelper::readworkspaceParameters(specnum_t &numberOfSpectra,
  * @param yLengthIn :: size of workspace Y vector
  * @return an empty workspace of the given parameters
  */
-DataObjects::Workspace2D_sptr
-LoadRawHelper::createWorkspace(const DataObjects::Workspace2D_sptr &ws_sptr,
-                               int64_t nVectors, int64_t xLengthIn,
-                               int64_t yLengthIn) {
+DataObjects::Workspace2D_sptr LoadRawHelper::createWorkspace(const DataObjects::Workspace2D_sptr &ws_sptr,
+                                                             int64_t nVectors, int64_t xLengthIn, int64_t yLengthIn) {
   DataObjects::Workspace2D_sptr empty;
   if (!ws_sptr)
     return empty;
-  DataObjects::Workspace2D_sptr workspace =
-      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create(ws_sptr, nVectors, xLengthIn,
-                                              yLengthIn));
+  DataObjects::Workspace2D_sptr workspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      WorkspaceFactory::Instance().create(ws_sptr, nVectors, xLengthIn, yLengthIn));
   return workspace;
 }
 
@@ -300,14 +265,12 @@ LoadRawHelper::createWorkspace(const DataObjects::Workspace2D_sptr &ws_sptr,
  *  @param title :: title of the workspace
  *  @return Workspace2D_sptr shared pointer to the workspace
  */
-DataObjects::Workspace2D_sptr
-LoadRawHelper::createWorkspace(int64_t nVectors, int64_t xlengthIn,
-                               int64_t ylengthIn, const std::string &title) {
+DataObjects::Workspace2D_sptr LoadRawHelper::createWorkspace(int64_t nVectors, int64_t xlengthIn, int64_t ylengthIn,
+                                                             const std::string &title) {
   DataObjects::Workspace2D_sptr workspace;
   if (nVectors > 0) {
     workspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-        WorkspaceFactory::Instance().create("Workspace2D", nVectors, xlengthIn,
-                                            ylengthIn));
+        WorkspaceFactory::Instance().create("Workspace2D", nVectors, xlengthIn, ylengthIn));
     // Set the units
     workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     workspace->setYUnit("Counts");
@@ -327,21 +290,19 @@ LoadRawHelper::createWorkspace(int64_t nVectors, int64_t xlengthIn,
  *@param title :: title of the workspace
  *@param pAlg   :: pointer to the algorithm, this method works with.
  */
-void LoadRawHelper::createMonitorWorkspace(
-    DataObjects::Workspace2D_sptr &monws_sptr,
-    DataObjects::Workspace2D_sptr &normalws_sptr,
-    WorkspaceGroup_sptr &mongrp_sptr, const int64_t mwsSpecs,
-    const int64_t nwsSpecs, const int64_t numberOfPeriods,
-    const int64_t lengthIn, const std::string &title,
-    API::Algorithm *const pAlg) {
+void LoadRawHelper::createMonitorWorkspace(DataObjects::Workspace2D_sptr &monws_sptr,
+                                           DataObjects::Workspace2D_sptr &normalws_sptr,
+                                           WorkspaceGroup_sptr &mongrp_sptr, const int64_t mwsSpecs,
+                                           const int64_t nwsSpecs, const int64_t numberOfPeriods,
+                                           const int64_t lengthIn, const std::string &title,
+                                           API::Algorithm *const pAlg) {
   try {
     // create monitor group workspace
     mongrp_sptr = createGroupWorkspace(); // create workspace
     // create monitor workspace
     if (mwsSpecs > 0) {
       if (normalws_sptr) {
-        monws_sptr =
-            createWorkspace(normalws_sptr, mwsSpecs, lengthIn, lengthIn - 1);
+        monws_sptr = createWorkspace(normalws_sptr, mwsSpecs, lengthIn, lengthIn - 1);
 
       } else {
         monws_sptr = createWorkspace(mwsSpecs, lengthIn, lengthIn - 1, title);
@@ -356,15 +317,13 @@ void LoadRawHelper::createMonitorWorkspace(
     // otherwise  set the workspace as "OutputWorkspace"
     if (nwsSpecs > 0) {
       std::string monitorwsName = wsName + "_monitors";
-      pAlg->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-          "MonitorWorkspace", monitorwsName, Direction::Output));
-      setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr,
-                           numberOfPeriods, true, pAlg);
+      pAlg->declareProperty(
+          std::make_unique<WorkspaceProperty<Workspace>>("MonitorWorkspace", monitorwsName, Direction::Output));
+      setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr, numberOfPeriods, true, pAlg);
     } else {
       // if only monitors range selected
       // then set the monitor workspace as the output workspace
-      setWorkspaceProperty("OutputWorkspace", title, mongrp_sptr, monws_sptr,
-                           numberOfPeriods, false, pAlg);
+      setWorkspaceProperty("OutputWorkspace", title, mongrp_sptr, monws_sptr, numberOfPeriods, false, pAlg);
     }
 
   } catch (std::out_of_range &) {
@@ -390,10 +349,9 @@ void LoadRawHelper::exec() {}
  *  @param bmonitors :: boolean flag to name  the workspaces
  *  @param pAlg      :: pointer to algorithm this method works with.
  */
-void LoadRawHelper::setWorkspaceProperty(
-    const DataObjects::Workspace2D_sptr &ws_sptr,
-    const WorkspaceGroup_sptr &grpws_sptr, const int64_t period, bool bmonitors,
-    API::Algorithm *const pAlg) {
+void LoadRawHelper::setWorkspaceProperty(const DataObjects::Workspace2D_sptr &ws_sptr,
+                                         const WorkspaceGroup_sptr &grpws_sptr, const int64_t period, bool bmonitors,
+                                         API::Algorithm *const pAlg) {
   if (!ws_sptr)
     return;
   if (!grpws_sptr)
@@ -412,8 +370,7 @@ void LoadRawHelper::setWorkspaceProperty(
     outputWorkspace = "OutputWorkspace";
   }
   outws = outputWorkspace + "_" + suffix.str();
-  pAlg->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-      outws, wsName, Direction::Output));
+  pAlg->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(outws, wsName, Direction::Output));
   pAlg->setProperty(outws, std::static_pointer_cast<Workspace>(ws_sptr));
   grpws_sptr->addWorkspace(ws_sptr);
 }
@@ -428,11 +385,10 @@ void LoadRawHelper::setWorkspaceProperty(
  * workspace
  *  @param pAlg         :: pointer to algorithm this method works with.
  */
-void LoadRawHelper::setWorkspaceProperty(
-    const std::string &propertyName, const std::string &title,
-    const WorkspaceGroup_sptr &grpws_sptr,
-    const DataObjects::Workspace2D_sptr &ws_sptr, int64_t numberOfPeriods,
-    [[maybe_unused]] bool bMonitor, API::Algorithm *const pAlg) {
+void LoadRawHelper::setWorkspaceProperty(const std::string &propertyName, const std::string &title,
+                                         const WorkspaceGroup_sptr &grpws_sptr,
+                                         const DataObjects::Workspace2D_sptr &ws_sptr, int64_t numberOfPeriods,
+                                         [[maybe_unused]] bool bMonitor, API::Algorithm *const pAlg) {
   Property *ws = pAlg->getProperty("OutputWorkspace");
   if (!ws)
     return;
@@ -443,11 +399,9 @@ void LoadRawHelper::setWorkspaceProperty(
   ws_sptr->setTitle(title);
   ws_sptr->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   if (numberOfPeriods > 1) {
-    pAlg->setProperty(propertyName,
-                      std::dynamic_pointer_cast<Workspace>(grpws_sptr));
+    pAlg->setProperty(propertyName, std::dynamic_pointer_cast<Workspace>(grpws_sptr));
   } else {
-    pAlg->setProperty(propertyName,
-                      std::dynamic_pointer_cast<Workspace>(ws_sptr));
+    pAlg->setProperty(propertyName, std::dynamic_pointer_cast<Workspace>(ws_sptr));
   }
 }
 
@@ -460,12 +414,10 @@ void LoadRawHelper::setWorkspaceProperty(
  *  @param lengthIn :: length of the workspace
  *  @param binStart :: start of bin
  */
-void LoadRawHelper::setWorkspaceData(
-    const DataObjects::Workspace2D_sptr &newWorkspace,
-    const std::vector<std::shared_ptr<HistogramData::HistogramX>>
-        &timeChannelsVec,
-    int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
-    int64_t lengthIn, int64_t binStart) {
+void LoadRawHelper::setWorkspaceData(const DataObjects::Workspace2D_sptr &newWorkspace,
+                                     const std::vector<std::shared_ptr<HistogramData::HistogramX>> &timeChannelsVec,
+                                     int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes, int64_t lengthIn,
+                                     int64_t binStart) {
   if (!newWorkspace)
     return;
 
@@ -492,8 +444,7 @@ void LoadRawHelper::setWorkspaceData(
   else {
 
     // Use std::vector::at just incase spectrum missing from spec array
-    newWorkspace->setX(wsIndex,
-                       timeChannelsVec.at(m_specTimeRegimes[nspecNum] - 1));
+    newWorkspace->setX(wsIndex, timeChannelsVec.at(m_specTimeRegimes[nspecNum] - 1));
   }
 }
 
@@ -501,8 +452,7 @@ void LoadRawHelper::setWorkspaceData(
  *  @param mapping The spectrum number to detector mapping
  *  @return monitorSpecList The spectrum numbers of the monitors
  */
-std::vector<specnum_t>
-LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
+std::vector<specnum_t> LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
   std::vector<specnum_t> spectrumIndices;
 
   if (!m_monitordetectorList.empty()) {
@@ -512,16 +462,14 @@ LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
       // Both m_monitordetectorList & detIDs should be (very) short so the
       // nested loop shouldn't be too evil
       for (auto detID : detIDs) {
-        if (std::find(m_monitordetectorList.begin(),
-                      m_monitordetectorList.end(),
-                      detID) != m_monitordetectorList.end()) {
+        if (std::find(m_monitordetectorList.begin(), m_monitordetectorList.end(), detID) !=
+            m_monitordetectorList.end()) {
           spectrumIndices.emplace_back(SpectrumDetectorPair.first);
         }
       }
     }
   } else {
-    g_log.error()
-        << "monitor detector id list is empty  for the selected workspace\n";
+    g_log.error() << "monitor detector id list is empty  for the selected workspace\n";
   }
 
   return spectrumIndices;
@@ -530,9 +478,7 @@ LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
 /** This method creates pointer to group workspace
  *  @return WorkspaceGroup_sptr shared pointer to the workspace
  */
-WorkspaceGroup_sptr LoadRawHelper::createGroupWorkspace() {
-  return WorkspaceGroup_sptr(new WorkspaceGroup);
-}
+WorkspaceGroup_sptr LoadRawHelper::createGroupWorkspace() { return WorkspaceGroup_sptr(new WorkspaceGroup); }
 
 /** Constructs the time channel (X) vector(s)
  *  @param regimes ::  The number of time regimes (if 1 regime, will actually
@@ -541,9 +487,8 @@ WorkspaceGroup_sptr LoadRawHelper::createGroupWorkspace() {
  *  @return The vector(s) containing the time channel boundaries, in a vector of
  * shared ptrs
  */
-std::vector<std::shared_ptr<HistogramData::HistogramX>>
-LoadRawHelper::getTimeChannels(const int64_t &regimes,
-                               const int64_t &lengthIn) {
+std::vector<std::shared_ptr<HistogramData::HistogramX>> LoadRawHelper::getTimeChannels(const int64_t &regimes,
+                                                                                       const int64_t &lengthIn) {
   auto const timeChannels = new float[lengthIn];
   isisRaw().getTimeChannels(timeChannels, static_cast<int>(lengthIn));
 
@@ -557,12 +502,10 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
       std::shared_ptr<HistogramData::HistogramX> channelsVec(
           new HistogramData::HistogramX(timeChannels, timeChannels + lengthIn));
       const double shift = isisRawRef.daep.tr_shift[i];
-      g_log.debug() << "Time regime " << i + 1 << " shifted by " << shift
-                    << " microseconds\n";
+      g_log.debug() << "Time regime " << i + 1 << " shifted by " << shift << " microseconds\n";
       // Add on the shift for this vector
       using std::placeholders::_1;
-      std::transform(channelsVec->begin(), channelsVec->end(),
-                     channelsVec->begin(),
+      std::transform(channelsVec->begin(), channelsVec->end(), channelsVec->begin(),
                      std::bind(std::plus<double>(), _1, shift));
       timeChannelsVec.emplace_back(channelsVec);
     }
@@ -574,8 +517,7 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
       // No checking for consistency here - that all detectors for given
       // spectrum
       // are declared to use same time regime. Will just use first encountered
-      hint = m_specTimeRegimes.insert(
-          hint, std::make_pair(isisRawRef.spec[j], isisRawRef.timr[j]));
+      hint = m_specTimeRegimes.insert(hint, std::make_pair(isisRawRef.spec[j], isisRawRef.timr[j]));
     }
   } else // Just need one in this case
   {
@@ -593,10 +535,8 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
 /// @param localWorkspace :: The workspace to load the instrument for
 /// @param progStart :: progress at start
 /// @param progEnd :: progress at end
-void LoadRawHelper::runLoadInstrument(
-    const std::string &fileName,
-    const DataObjects::Workspace2D_sptr &localWorkspace, double progStart,
-    double progEnd) {
+void LoadRawHelper::runLoadInstrument(const std::string &fileName, const DataObjects::Workspace2D_sptr &localWorkspace,
+                                      double progStart, double progEnd) {
   g_log.debug("Loading the instrument definition...");
   m_prog = progStart;
   progress(m_prog, "Loading the instrument geometry...");
@@ -616,15 +556,13 @@ void LoadRawHelper::runLoadInstrument(
   try {
     loadInst->setPropertyValue("InstrumentName", instrumentID);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");
     executionSuccessful = false;
   } catch (std::runtime_error &) {
-    g_log.information(
-        "Unable to successfully run LoadInstrument Child Algorithm");
+    g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
     executionSuccessful = false;
   }
 
@@ -638,16 +576,13 @@ void LoadRawHelper::runLoadInstrument(
   } else {
     // If requested update the instrument to positions in the raw file
     const auto &pmap = localWorkspace->constInstrumentParameters();
-    if (pmap.contains(localWorkspace->getInstrument()->getComponentID(),
-                      "det-pos-source")) {
-      std::shared_ptr<Geometry::Parameter> updateDets = pmap.get(
-          localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
+    if (pmap.contains(localWorkspace->getInstrument()->getComponentID(), "det-pos-source")) {
+      std::shared_ptr<Geometry::Parameter> updateDets =
+          pmap.get(localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
       std::string value = updateDets->value<std::string>();
       if (value.substr(0, 8) == "datafile") {
-        IAlgorithm_sptr updateInst =
-            createChildAlgorithm("UpdateInstrumentFromFile");
-        updateInst->setProperty<MatrixWorkspace_sptr>("Workspace",
-                                                      localWorkspace);
+        IAlgorithm_sptr updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
+        updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
         updateInst->setPropertyValue("Filename", fileName);
         updateInst->addObserver(this->progressObserver()); // Enable progress
                                                            // reporting by
@@ -670,8 +605,7 @@ void LoadRawHelper::runLoadInstrument(
     // Debugging code??
     m_monitordetectorList = loadInst->getProperty("MonitorList");
     std::vector<specnum_t>::const_iterator itr;
-    for (itr = m_monitordetectorList.begin();
-         itr != m_monitordetectorList.end(); ++itr) {
+    for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end(); ++itr) {
       g_log.debug() << "Monitor detector id is " << (*itr) << '\n';
     }
   }
@@ -681,9 +615,8 @@ void LoadRawHelper::runLoadInstrument(
 /// instrument definition file fails)
 /// @param fileName :: the raw file filename
 /// @param localWorkspace :: The workspace to load the instrument for
-void LoadRawHelper::runLoadInstrumentFromRaw(
-    const std::string &fileName,
-    const DataObjects::Workspace2D_sptr &localWorkspace) {
+void LoadRawHelper::runLoadInstrumentFromRaw(const std::string &fileName,
+                                             const DataObjects::Workspace2D_sptr &localWorkspace) {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrumentFromRaw");
   loadInst->setPropertyValue("Filename", fileName);
   // Set the workspace property to be the same one filled above
@@ -693,13 +626,11 @@ void LoadRawHelper::runLoadInstrumentFromRaw(
   try {
     loadInst->execute();
   } catch (std::runtime_error &) {
-    g_log.error(
-        "Unable to successfully run LoadInstrumentFromRaw Child Algorithm");
+    g_log.error("Unable to successfully run LoadInstrumentFromRaw Child Algorithm");
   }
   m_monitordetectorList = loadInst->getProperty("MonitorList");
   std::vector<specnum_t>::const_iterator itr;
-  for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end();
-       ++itr) {
+  for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end(); ++itr) {
     g_log.debug() << "Monitor dtector id is " << (*itr) << '\n';
   }
   if (!loadInst->isExecuted()) {
@@ -710,9 +641,8 @@ void LoadRawHelper::runLoadInstrumentFromRaw(
 /// Run the LoadMappingTable Child Algorithm to fill the SpectraToDetectorMap
 /// @param fileName :: the raw file filename
 /// @param localWorkspace :: The workspace to load the mapping table for
-void LoadRawHelper::runLoadMappingTable(
-    const std::string &fileName,
-    const DataObjects::Workspace2D_sptr &localWorkspace) {
+void LoadRawHelper::runLoadMappingTable(const std::string &fileName,
+                                        const DataObjects::Workspace2D_sptr &localWorkspace) {
   g_log.debug("Loading the spectra-detector mapping...");
   progress(m_prog, "Loading the spectra-detector mapping...");
   // Now determine the spectra to detector map calling Child Algorithm
@@ -724,8 +654,7 @@ void LoadRawHelper::runLoadMappingTable(
   try {
     loadmap->execute();
   } catch (std::runtime_error &) {
-    g_log.error(
-        "Unable to successfully execute LoadMappingTable Child Algorithm");
+    g_log.error("Unable to successfully execute LoadMappingTable Child Algorithm");
   }
 
   if (!loadmap->isExecuted()) {
@@ -738,10 +667,8 @@ void LoadRawHelper::runLoadMappingTable(
 /// @param localWorkspace :: The workspace to load the logs for
 /// @param progStart :: starting progress fraction
 /// @param progEnd :: ending progress fraction
-void LoadRawHelper::runLoadLog(
-    const std::string &fileName,
-    const DataObjects::Workspace2D_sptr &localWorkspace, double progStart,
-    double progEnd) {
+void LoadRawHelper::runLoadLog(const std::string &fileName, const DataObjects::Workspace2D_sptr &localWorkspace,
+                               double progStart, double progEnd) {
   // search for the log file to load, and save their names in a set.
   std::list<std::string> logFiles = searchForLogFiles(Poco::Path(fileName));
 
@@ -815,8 +742,7 @@ void LoadRawHelper::runLoadLog(
  */
 std::string LoadRawHelper::extractLogName(const std::string &path) {
   // The log file's name, including workspace (e.g. CSP78173_ICPevent)
-  std::string fileName =
-      Poco::Path(Poco::Path(path).getFileName()).getBaseName();
+  std::string fileName = Poco::Path(Poco::Path(path).getFileName()).getBaseName();
   // Return only the log name (excluding workspace, e.g. ICPevent)
   return (fileName.substr(fileName.find('_') + 1));
 }
@@ -826,10 +752,8 @@ std::string LoadRawHelper::extractLogName(const std::string &path) {
  * @param period :: period number
  * @param local_workspace :: workspace to add period log data to.
  */
-void LoadRawHelper::createPeriodLogs(
-    int64_t period, const DataObjects::Workspace2D_sptr &local_workspace) {
-  m_logCreator->addPeriodLogs(static_cast<int>(period),
-                              local_workspace->mutableRun());
+void LoadRawHelper::createPeriodLogs(int64_t period, const DataObjects::Workspace2D_sptr &local_workspace) {
+  m_logCreator->addPeriodLogs(static_cast<int>(period), local_workspace->mutableRun());
 }
 
 /**
@@ -839,9 +763,7 @@ void LoadRawHelper::createPeriodLogs(
  * @param localWorkspace :: The workspace to attach the information to
  * @param rawFile :: The handle to an ISIS Raw file
  */
-void LoadRawHelper::loadRunParameters(
-    const API::MatrixWorkspace_sptr &localWorkspace,
-    ISISRAW *const rawFile) const {
+void LoadRawHelper::loadRunParameters(const API::MatrixWorkspace_sptr &localWorkspace, ISISRAW *const rawFile) const {
   ISISRAW &localISISRaw = [this, rawFile]() -> ISISRAW & {
     if (rawFile)
       return *rawFile;
@@ -853,13 +775,10 @@ void LoadRawHelper::loadRunParameters(
 
   runDetails.addProperty("run_header", RawFileInfo::runHeader(localISISRaw));
   // Run title is stored in a different attribute
-  runDetails.addProperty("run_title", RawFileInfo::runTitle(localISISRaw),
-                         true);
+  runDetails.addProperty("run_title", RawFileInfo::runTitle(localISISRaw), true);
 
-  runDetails.addProperty("user_name",
-                         std::string(localISISRaw.hdr.hd_user, 20));
-  runDetails.addProperty("inst_abrv",
-                         std::string(localISISRaw.hdr.inst_abrv, 3));
+  runDetails.addProperty("user_name", std::string(localISISRaw.hdr.hd_user, 20));
+  runDetails.addProperty("inst_abrv", std::string(localISISRaw.hdr.inst_abrv, 3));
   runDetails.addProperty("hd_dur", std::string(localISISRaw.hdr.hd_dur, 8));
 
   // Data details on run not the workspace
@@ -868,37 +787,28 @@ void LoadRawHelper::loadRunParameters(
   runDetails.addProperty("nperiods", static_cast<int>(localISISRaw.t_nper));
 
   // RPB struct info
-  runDetails.addProperty("dur", localISISRaw.rpb.r_dur); // actual run duration
-  runDetails.addProperty(
-      "durunits", localISISRaw.rpb.r_durunits); // scaler for above (1=seconds)
-  runDetails.addProperty(
-      "dur_freq",
-      localISISRaw.rpb.r_dur_freq); // testinterval for above (seconds)
+  runDetails.addProperty("dur", localISISRaw.rpb.r_dur);           // actual run duration
+  runDetails.addProperty("durunits", localISISRaw.rpb.r_durunits); // scaler for above (1=seconds)
+  runDetails.addProperty("dur_freq",
+                         localISISRaw.rpb.r_dur_freq);   // testinterval for above (seconds)
   runDetails.addProperty("dmp", localISISRaw.rpb.r_dmp); // dump interval
   runDetails.addProperty("dmp_units",
                          localISISRaw.rpb.r_dmp_units); // scaler for above
   runDetails.addProperty("dmp_freq",
                          localISISRaw.rpb.r_dmp_freq); // interval for above
-  runDetails.addProperty(
-      "freq",
-      localISISRaw.rpb.r_freq); // 2**k where source frequency = 50 / 2**k
-  runDetails.addProperty(
-      "gd_prtn_chrg",
-      static_cast<double>(
-          localISISRaw.rpb.r_gd_prtn_chrg)); // good proton charge (uA.hour)
-  runDetails.addProperty(
-      "tot_prtn_chrg",
-      static_cast<double>(
-          localISISRaw.rpb.r_tot_prtn_chrg)); // total proton charge (uA.hour)
-  runDetails.addProperty("goodfrm", localISISRaw.rpb.r_goodfrm); // good frames
-  runDetails.addProperty("rawfrm", localISISRaw.rpb.r_rawfrm);   // raw frames
-  runDetails.addProperty(
-      "dur_wanted", localISISRaw.rpb.r_dur_wanted); // requested run duration
-                                                    // (units as for "duration"
-                                                    // above)
-  runDetails.addProperty(
-      "dur_secs",
-      localISISRaw.rpb.r_dur_secs); // actual run duration in seconds
+  runDetails.addProperty("freq",
+                         localISISRaw.rpb.r_freq); // 2**k where source frequency = 50 / 2**k
+  runDetails.addProperty("gd_prtn_chrg",
+                         static_cast<double>(localISISRaw.rpb.r_gd_prtn_chrg)); // good proton charge (uA.hour)
+  runDetails.addProperty("tot_prtn_chrg",
+                         static_cast<double>(localISISRaw.rpb.r_tot_prtn_chrg)); // total proton charge (uA.hour)
+  runDetails.addProperty("goodfrm", localISISRaw.rpb.r_goodfrm);                 // good frames
+  runDetails.addProperty("rawfrm", localISISRaw.rpb.r_rawfrm);                   // raw frames
+  runDetails.addProperty("dur_wanted", localISISRaw.rpb.r_dur_wanted);           // requested run duration
+                                                                                 // (units as for "duration"
+                                                                                 // above)
+  runDetails.addProperty("dur_secs",
+                         localISISRaw.rpb.r_dur_secs); // actual run duration in seconds
   runDetails.addProperty("mon_sum1",
                          localISISRaw.rpb.r_mon_sum1); // monitor sum 1
   runDetails.addProperty("mon_sum2",
@@ -926,10 +836,8 @@ Types::Core::DateAndTime LoadRawHelper::extractEndTime(ISISRAW &isisRaw) {
   std::string isisDate = std::string(isisRaw.rpb.r_enddate, 11);
   if (isisDate[0] == ' ')
     isisDate[0] = '0';
-  return DateAndTime(isisDate.substr(7, 4) + "-" +
-                     convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
-                     isisDate.substr(0, 2) + "T" +
-                     std::string(isisRaw.rpb.r_endtime, 8));
+  return DateAndTime(isisDate.substr(7, 4) + "-" + convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
+                     isisDate.substr(0, 2) + "T" + std::string(isisRaw.rpb.r_endtime, 8));
 }
 
 /**
@@ -941,10 +849,8 @@ Types::Core::DateAndTime LoadRawHelper::extractStartTime(ISISRAW &isisRaw) {
   auto isisDate = std::string(isisRaw.hdr.hd_date, 11);
   if (isisDate[0] == ' ')
     isisDate[0] = '0';
-  return DateAndTime(isisDate.substr(7, 4) + "-" +
-                     convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
-                     isisDate.substr(0, 2) + "T" +
-                     std::string(isisRaw.hdr.hd_time, 8));
+  return DateAndTime(isisDate.substr(7, 4) + "-" + convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
+                     isisDate.substr(0, 2) + "T" + std::string(isisRaw.hdr.hd_time, 8));
 }
 
 /// To help transforming date stored in ISIS raw file into iso 8601
@@ -978,17 +884,14 @@ std::string LoadRawHelper::convertMonthLabelToIntStr(std::string month) {
   if (month == "DEC")
     return "12";
 
-  throw std::runtime_error(
-      "LoadRawHelper::convertMonthLabelToIntStr(): Invalid month label found.");
+  throw std::runtime_error("LoadRawHelper::convertMonthLabelToIntStr(): Invalid month label found.");
 }
 
 /// sets optional properties for the loadraw algorithm
 /// @param spec_min :: The minimum spectra number
 /// @param spec_max :: The maximum spectra number
 /// @param spec_list :: The list of Spectra to be included
-void LoadRawHelper::setOptionalProperties(const int &spec_min,
-                                          const int &spec_max,
-                                          const std::vector<int> &spec_list) {
+void LoadRawHelper::setOptionalProperties(const int &spec_min, const int &spec_max, const std::vector<int> &spec_list) {
   m_spec_min = spec_min;
   m_spec_max = spec_max;
   m_spec_list.assign(spec_list.begin(), spec_list.end());
@@ -1012,10 +915,8 @@ void LoadRawHelper::checkOptionalProperties() {
     if (m_spec_list.empty()) {
       m_list = false;
     } else {
-      const int64_t minlist =
-          *min_element(m_spec_list.begin(), m_spec_list.end());
-      const int64_t maxlist =
-          *max_element(m_spec_list.begin(), m_spec_list.end());
+      const int64_t minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
+      const int64_t maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
       if (maxlist > m_numberOfSpectra || minlist <= 0) {
         g_log.error("Invalid list of spectra");
         throw std::invalid_argument("Inconsistent properties defined");
@@ -1079,59 +980,50 @@ specnum_t LoadRawHelper::calculateWorkspaceSize() {
 /// @param monitorSpecList :: the vector of the monitor spectra
 /// @param normalwsSpecs :: the spectra for the detector workspace
 /// @param monitorwsSpecs :: the spectra for the monitor workspace
-void LoadRawHelper::calculateWorkspacesizes(
-    const std::vector<specnum_t> &monitorSpecList, specnum_t &normalwsSpecs,
-    specnum_t &monitorwsSpecs) {
+void LoadRawHelper::calculateWorkspacesizes(const std::vector<specnum_t> &monitorSpecList, specnum_t &normalwsSpecs,
+                                            specnum_t &monitorwsSpecs) {
   if (!m_interval && !m_bmspeclist) {
     monitorwsSpecs = static_cast<specnum_t>(monitorSpecList.size());
     normalwsSpecs = m_total_specs - monitorwsSpecs;
-    g_log.debug()
-        << "normalwsSpecs   when m_interval  & m_bmspeclist are  false is  "
-        << normalwsSpecs << "  monitorwsSpecs is " << monitorwsSpecs << '\n';
+    g_log.debug() << "normalwsSpecs   when m_interval  & m_bmspeclist are  false is  " << normalwsSpecs
+                  << "  monitorwsSpecs is " << monitorwsSpecs << '\n';
   } else if (m_interval || m_bmspeclist) {
     if (m_interval) {
       int msize = 0;
       std::vector<specnum_t>::const_iterator itr1;
-      for (itr1 = monitorSpecList.begin(); itr1 != monitorSpecList.end();
-           ++itr1) {
+      for (itr1 = monitorSpecList.begin(); itr1 != monitorSpecList.end(); ++itr1) {
         if (*itr1 >= m_spec_min && *itr1 < m_spec_max)
           ++msize;
       }
       monitorwsSpecs = msize;
       normalwsSpecs = m_total_specs - monitorwsSpecs;
-      g_log.debug() << "normalwsSpecs when  m_interval true is  "
-                    << normalwsSpecs << "  monitorwsSpecs is " << monitorwsSpecs
-                    << '\n';
+      g_log.debug() << "normalwsSpecs when  m_interval true is  " << normalwsSpecs << "  monitorwsSpecs is "
+                    << monitorwsSpecs << '\n';
     }
     if (m_bmspeclist) {
       if (m_interval) {
-        for (auto itr = m_spec_list.begin();
-             itr != m_spec_list.end();) { // if  the m_spec_list elements are in
-                                          // the range between m_spec_min &
-                                          // m_spec_max
+        for (auto itr = m_spec_list.begin(); itr != m_spec_list.end();) { // if  the m_spec_list elements are in
+                                                                          // the range between m_spec_min &
+                                                                          // m_spec_max
           if (*itr >= m_spec_min && *itr < m_spec_max)
             itr = m_spec_list.erase(itr);
           else
             ++itr;
         }
         if (m_spec_list.empty()) {
-          g_log.debug() << "normalwsSpecs is " << normalwsSpecs
-                        << "  monitorwsSpecs is " << monitorwsSpecs << '\n';
+          g_log.debug() << "normalwsSpecs is " << normalwsSpecs << "  monitorwsSpecs is " << monitorwsSpecs << '\n';
         } else { // at this point there are monitors in the list which are not
                  // in the min& max range
           // so find those  monitors  count and calculate the workspace specs
           specnum_t monCounter = 0;
-          for (auto itr = m_spec_list.begin(); itr != m_spec_list.end();
-               ++itr) {
-            const auto monitr =
-                find(monitorSpecList.begin(), monitorSpecList.end(), *itr);
+          for (auto itr = m_spec_list.begin(); itr != m_spec_list.end(); ++itr) {
+            const auto monitr = find(monitorSpecList.begin(), monitorSpecList.end(), *itr);
             if (monitr != monitorSpecList.end())
               ++monCounter;
           }
           monitorwsSpecs += monCounter;
           normalwsSpecs = m_total_specs - monitorwsSpecs;
-          g_log.debug() << "normalwsSpecs is  " << normalwsSpecs
-                        << "  monitorwsSpecs is " << monitorwsSpecs << '\n';
+          g_log.debug() << "normalwsSpecs is  " << normalwsSpecs << "  monitorwsSpecs is " << monitorwsSpecs << '\n';
         }
       }      // end if loop for m_interval
       else { // if only List true
@@ -1151,11 +1043,9 @@ void LoadRawHelper::calculateWorkspacesizes(
   }
 }
 
-void LoadRawHelper::loadSpectra(
-    FILE *file, const int &period, const int &total_specs,
-    const DataObjects::Workspace2D_sptr &ws_sptr,
-    const std::vector<std::shared_ptr<HistogramData::HistogramX>>
-        &timeChannelsVec) {
+void LoadRawHelper::loadSpectra(FILE *file, const int &period, const int &total_specs,
+                                const DataObjects::Workspace2D_sptr &ws_sptr,
+                                const std::vector<std::shared_ptr<HistogramData::HistogramX>> &timeChannelsVec) {
   double progStart = m_prog;
   double progEnd = 1.0; // Assume this function is called last
 
@@ -1167,14 +1057,12 @@ void LoadRawHelper::loadSpectra(
   int64_t noTimeRegimes = getNumberofTimeRegimes();
   auto lengthIn = static_cast<int64_t>(isisRawRef.t_ntc1 + 1);
 
-  const int64_t periodTimesNSpectraP1 =
-      period * (static_cast<int64_t>(m_numberOfSpectra) + 1);
+  const int64_t periodTimesNSpectraP1 = period * (static_cast<int64_t>(m_numberOfSpectra) + 1);
   // loop through spectra
   for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + periodTimesNSpectraP1;
     if ((i >= m_spec_min && i < m_spec_max) ||
-        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) !=
-                       m_spec_list.end())) {
+        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) != m_spec_list.end())) {
       progress(m_prog, "Reading raw file data...");
 
       // read spectrum from raw file
@@ -1182,15 +1070,12 @@ void LoadRawHelper::loadSpectra(
         throw std::runtime_error("Error reading raw file, in "
                                  "LoadRawHelper::loadSpectra, readData failed");
       // set workspace data
-      setWorkspaceData(ws_sptr, timeChannelsVec, wsIndex, i, noTimeRegimes,
-                       lengthIn, 1);
+      setWorkspaceData(ws_sptr, timeChannelsVec, wsIndex, i, noTimeRegimes, lengthIn, 1);
       ++wsIndex;
 
       if (numberOfPeriods == 1) {
         if (++histCurrent % 100 == 0) {
-          m_prog =
-              progStart + (progEnd - progStart) *
-                              (static_cast<double>(histCurrent) / histTotal);
+          m_prog = progStart + (progEnd - progStart) * (static_cast<double>(histCurrent) / histTotal);
         }
         interruption_point();
       }
@@ -1226,8 +1111,7 @@ int LoadRawHelper::confidence(Kernel::FileDescriptor &descriptor) const {
  * @param pathToRawFile The path and name of the raw file.
  * @returns A set containing paths to log files related to RAW file used.
  */
-std::list<std::string>
-LoadRawHelper::searchForLogFiles(const Poco::Path &pathToRawFile) {
+std::list<std::string> LoadRawHelper::searchForLogFiles(const Poco::Path &pathToRawFile) {
   // If pathToRawFile is the filename of a raw datafile then search for
   // potential log files
   // in the directory of this raw datafile. Otherwise check if it is a potential
@@ -1243,16 +1127,14 @@ LoadRawHelper::searchForLogFiles(const Poco::Path &pathToRawFile) {
   // File property checks whether the given path exists, just check that is
   // actually a file
   if (Poco::File(pathToRawFile).isDirectory()) {
-    throw Exception::FileError("Filename is a directory:",
-                               pathToRawFile.toString());
+    throw Exception::FileError("Filename is a directory:", pathToRawFile.toString());
   }
 
   // start the process or populating potential log files into the container:
   // potentialLogFiles
   // have we been given what looks like a log file
   const auto fileExt = pathToRawFile.getExtension();
-  if (boost::algorithm::iequals(fileExt, "log") ||
-      boost::algorithm::iequals(fileExt, "txt")) {
+  if (boost::algorithm::iequals(fileExt, "log") || boost::algorithm::iequals(fileExt, "txt")) {
     // then we will assume that the file is an ISIS log file
     potentialLogFiles.insert(pathToRawFile.toString());
   } else {
@@ -1273,16 +1155,12 @@ LoadRawHelper::searchForLogFiles(const Poco::Path &pathToRawFile) {
     }
 
     // push potential log files from set to list.
-    potentialLogFilesList.insert(potentialLogFilesList.begin(),
-                                 potentialLogFiles.begin(),
-                                 potentialLogFiles.end());
+    potentialLogFilesList.insert(potentialLogFilesList.begin(), potentialLogFiles.begin(), potentialLogFiles.end());
     // Check for .log
-    const Poco::File combinedLogPath(
-        Poco::Path(pathToRawFile).setExtension("log"));
+    const Poco::File combinedLogPath(Poco::Path(pathToRawFile).setExtension("log"));
     if (combinedLogPath.exists()) {
       // Push three column filename to end of list.
-      potentialLogFilesList.insert(potentialLogFilesList.end(),
-                                   combinedLogPath.path());
+      potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.path());
     }
   }
   return potentialLogFilesList;
@@ -1292,25 +1170,19 @@ LoadRawHelper::searchForLogFiles(const Poco::Path &pathToRawFile) {
  * false
  *  @return true if Exclude Monitors option is selected,otherwise false
  */
-bool LoadRawHelper::isExcludeMonitors(const std::string &monitorOption) {
-  return (monitorOption == "Exclude");
-}
+bool LoadRawHelper::isExcludeMonitors(const std::string &monitorOption) { return (monitorOption == "Exclude"); }
 
 /**This method checks the value of LoadMonitors property and returns true or
  * false
  * @return true if Include Monitors option is selected,otherwise false
  */
-bool LoadRawHelper::isIncludeMonitors(const std::string &monitorOption) {
-  return (monitorOption == "Include");
-}
+bool LoadRawHelper::isIncludeMonitors(const std::string &monitorOption) { return (monitorOption == "Include"); }
 
 /** This method checks the value of LoadMonitors property and returns true or
  * false
  *  @return true if Separate Monitors option is selected,otherwise false
  */
-bool LoadRawHelper::isSeparateMonitors(const std::string &monitorOption) {
-  return (monitorOption == "Separate");
-}
+bool LoadRawHelper::isSeparateMonitors(const std::string &monitorOption) { return (monitorOption == "Separate"); }
 /**The method to interpret LoadMonitors property options and convert then into
  * boolean values
  * @param bincludeMonitors  :: if monitors requested to be included with
@@ -1321,9 +1193,7 @@ bool LoadRawHelper::isSeparateMonitors(const std::string &monitorOption) {
  * @param pAlgo             :: pointer to the algorithm, which has LoadMonitors
  * property.
  */
-void LoadRawHelper::ProcessLoadMonitorOptions(bool &bincludeMonitors,
-                                              bool &bseparateMonitors,
-                                              bool &bexcludeMonitors,
+void LoadRawHelper::ProcessLoadMonitorOptions(bool &bincludeMonitors, bool &bseparateMonitors, bool &bexcludeMonitors,
                                               API::Algorithm *pAlgo) {
   // process monitor option
   std::string monitorOption = pAlgo->getProperty("LoadMonitors");

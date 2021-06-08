@@ -98,10 +98,8 @@ private:
   bool validatePlotOptions();
   void setupTable();
   void createTransforms();
-  QwtPlotCurve *
-  plotMiniplot(QwtPlotCurve *curve,
-               const std::shared_ptr<Mantid::API::MatrixWorkspace> &workspace,
-               size_t workspaceIndex = 0);
+  QwtPlotCurve *plotMiniplot(QwtPlotCurve *curve, const std::shared_ptr<Mantid::API::MatrixWorkspace> &workspace,
+                             size_t workspaceIndex = 0);
 
   void deriveGuinierSpheres();
   void deriveGuinierRods();
@@ -110,8 +108,7 @@ private:
   void derivePorod();
 
   double getValue(QTableWidgetItem * /*item*/);
-  QPair<QStringList, QMap<QString, double>>
-  getProperties(const QString &transform);
+  QPair<QStringList, QMap<QString, double>> getProperties(const QString &transform);
 
 private:
   Ui::SANSPlotSpecial m_uiForm;

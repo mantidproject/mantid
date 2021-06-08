@@ -44,12 +44,8 @@ class ReflectometryBeamStatisticsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflectometryBeamStatisticsTest *createSuite() {
-    return new ReflectometryBeamStatisticsTest();
-  }
-  static void destroySuite(ReflectometryBeamStatisticsTest *suite) {
-    delete suite;
-  }
+  static ReflectometryBeamStatisticsTest *createSuite() { return new ReflectometryBeamStatisticsTest(); }
+  static void destroySuite(ReflectometryBeamStatisticsTest *suite) { delete suite; }
 
   void test_Init() {
     Reflectometry::ReflectometryBeamStatistics alg;
@@ -59,8 +55,7 @@ public:
 
   void test_LogsGetAdded() {
     auto reflectedWS = makeWS(0.7);
-    const std::vector<int> reflectedForeground{FGD_FIRST, BEAM_CENTRE,
-                                               FGD_LAST};
+    const std::vector<int> reflectedForeground{FGD_FIRST, BEAM_CENTRE, FGD_LAST};
     auto directWS = makeWS(0.);
     const std::vector<int> directForeground{FGD_FIRST, BEAM_CENTRE, FGD_LAST};
     Reflectometry::ReflectometryBeamStatistics alg;
@@ -68,22 +63,16 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("ReflectedBeamWorkspace", reflectedWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("ReflectedForeground", reflectedForeground))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ReflectedBeamWorkspace", reflectedWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ReflectedForeground", reflectedForeground))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DirectLineWorkspace", directWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DirectForeground", directForeground))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DirectForeground", directForeground))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelSize", PIXEL_SIZE))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorResolution", DET_RESOLUTION))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorResolution", DET_RESOLUTION))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FirstSlitName", "slit1"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("FirstSlitSizeSampleLog", "slit1.size"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FirstSlitSizeSampleLog", "slit1.size"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SecondSlitName", "slit2"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SecondSlitSizeSampleLog", "slit2.size"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SecondSlitSizeSampleLog", "slit2.size"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     const auto &reflectedRun = reflectedWS->run();
@@ -92,32 +81,18 @@ public:
     checkDirectStatisticsContainedInSampleLogs(directRun);
     const auto reflectedDetFwhm = det_fwhm(*reflectedWS, FGD_FIRST, FGD_LAST);
     const auto directDetFwhm = det_fwhm(*directWS, FGD_FIRST, FGD_LAST);
-    const auto omFwhm = om_fwhm(DET_DIST, DET_DIST, SLIT1_SIZE, SLIT2_SIZE,
-                                reflectedDetFwhm, directDetFwhm);
-    TS_ASSERT_EQUALS(reflectedRun.getPropertyValueAsType<double>(
-                         "beam_stats.beam_rms_variation"),
-                     reflectedDetFwhm)
-    TS_ASSERT_EQUALS(directRun.getPropertyValueAsType<double>(
-                         "beam_stats.beam_rms_variation"),
-                     directDetFwhm)
-    const auto bentSample =
-        omFwhm > 0. && DET_RESOLUTION / DET_DIST > S2_FWHM ? 1 : 0;
-    TS_ASSERT_EQUALS(
-        reflectedRun.getPropertyValueAsType<int>("beam_stats.bent_sample"),
-        bentSample)
-    TS_ASSERT_EQUALS(reflectedRun.getPropertyValueAsType<double>(
-                         "beam_stats.first_slit_angular_spread"),
-                     S2_FWHM)
+    const auto omFwhm = om_fwhm(DET_DIST, DET_DIST, SLIT1_SIZE, SLIT2_SIZE, reflectedDetFwhm, directDetFwhm);
+    TS_ASSERT_EQUALS(reflectedRun.getPropertyValueAsType<double>("beam_stats.beam_rms_variation"), reflectedDetFwhm)
+    TS_ASSERT_EQUALS(directRun.getPropertyValueAsType<double>("beam_stats.beam_rms_variation"), directDetFwhm)
+    const auto bentSample = omFwhm > 0. && DET_RESOLUTION / DET_DIST > S2_FWHM ? 1 : 0;
+    TS_ASSERT_EQUALS(reflectedRun.getPropertyValueAsType<int>("beam_stats.bent_sample"), bentSample)
+    TS_ASSERT_EQUALS(reflectedRun.getPropertyValueAsType<double>("beam_stats.first_slit_angular_spread"), S2_FWHM)
     const auto firstAngularSpread = da();
-    TS_ASSERT_EQUALS(reflectedRun.getPropertyValueAsType<double>(
-                         "beam_stats.incident_angular_spread"),
+    TS_ASSERT_EQUALS(reflectedRun.getPropertyValueAsType<double>("beam_stats.incident_angular_spread"),
                      firstAngularSpread)
-    TS_ASSERT_EQUALS(reflectedRun.getPropertyValueAsType<double>(
-                         "beam_stats.sample_waviness"),
-                     omFwhm)
+    TS_ASSERT_EQUALS(reflectedRun.getPropertyValueAsType<double>("beam_stats.sample_waviness"), omFwhm)
     const auto secondAngularSpread = s3_fwhm(DET_DIST);
-    TS_ASSERT_EQUALS(reflectedRun.getPropertyValueAsType<double>(
-                         "beam_stats.second_slit_angular_spread"),
+    TS_ASSERT_EQUALS(reflectedRun.getPropertyValueAsType<double>("beam_stats.second_slit_angular_spread"),
                      secondAngularSpread)
   }
 
@@ -131,44 +106,33 @@ public:
 private:
   static void checkDirectStatisticsContainedInSampleLogs(const API::Run &run) {
     TS_ASSERT(run.hasProperty("beam_stats.beam_rms_variation"))
-    TS_ASSERT_EQUALS(run.getProperty("beam_stats.beam_rms_variation")->units(),
-                     "m")
+    TS_ASSERT_EQUALS(run.getProperty("beam_stats.beam_rms_variation")->units(), "m")
     TS_ASSERT(!run.hasProperty("beam_stats.bent_sample"))
     TS_ASSERT(!run.hasProperty("beam_stats.first_slit_angular_spread"))
     TS_ASSERT(!run.hasProperty("beam_stats.incident_angular_spread"))
     TS_ASSERT(!run.hasProperty("beam_stats.sample_waviness"))
     TS_ASSERT(!run.hasProperty("beam_stats.second_slit_angular_spread"))
   }
-  static void
-  checkReflectedStatisticsContainedInSampleLogs(const API::Run &run) {
+  static void checkReflectedStatisticsContainedInSampleLogs(const API::Run &run) {
     TS_ASSERT(run.hasProperty("beam_stats.beam_rms_variation"))
-    TS_ASSERT_EQUALS(run.getProperty("beam_stats.beam_rms_variation")->units(),
-                     "m")
+    TS_ASSERT_EQUALS(run.getProperty("beam_stats.beam_rms_variation")->units(), "m")
     TS_ASSERT(run.hasProperty("beam_stats.bent_sample"))
     TS_ASSERT_EQUALS(run.getProperty("beam_stats.bent_sample")->units(), "")
     TS_ASSERT(run.hasProperty("beam_stats.first_slit_angular_spread"))
-    TS_ASSERT_EQUALS(
-        run.getProperty("beam_stats.first_slit_angular_spread")->units(),
-        "radians")
+    TS_ASSERT_EQUALS(run.getProperty("beam_stats.first_slit_angular_spread")->units(), "radians")
     TS_ASSERT(run.hasProperty("beam_stats.incident_angular_spread"))
-    TS_ASSERT_EQUALS(
-        run.getProperty("beam_stats.incident_angular_spread")->units(),
-        "radians")
+    TS_ASSERT_EQUALS(run.getProperty("beam_stats.incident_angular_spread")->units(), "radians")
     TS_ASSERT(run.hasProperty("beam_stats.sample_waviness"))
-    TS_ASSERT_EQUALS(run.getProperty("beam_stats.sample_waviness")->units(),
-                     "radians")
+    TS_ASSERT_EQUALS(run.getProperty("beam_stats.sample_waviness")->units(), "radians")
     TS_ASSERT(run.hasProperty("beam_stats.second_slit_angular_spread"))
-    TS_ASSERT_EQUALS(
-        run.getProperty("beam_stats.second_slit_angular_spread")->units(),
-        "radians")
+    TS_ASSERT_EQUALS(run.getProperty("beam_stats.second_slit_angular_spread")->units(), "radians")
   }
 
   void checkWrongSlitsThrows(const int slit) {
     const std::string slit1 = slit == 1 ? "non-existent" : "slit1";
     const std::string slit2 = slit == 2 ? "non-existent" : "slit2";
     auto reflectedWS = makeWS(0.7);
-    const std::vector<int> reflectedForeground{FGD_FIRST, BEAM_CENTRE,
-                                               FGD_LAST};
+    const std::vector<int> reflectedForeground{FGD_FIRST, BEAM_CENTRE, FGD_LAST};
     auto directWS = makeWS(0.);
     const std::vector<int> directForeground{FGD_FIRST, BEAM_CENTRE, FGD_LAST};
     Reflectometry::ReflectometryBeamStatistics alg;
@@ -176,30 +140,22 @@ private:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("ReflectedBeamWorkspace", reflectedWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("ReflectedForeground", reflectedForeground))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ReflectedBeamWorkspace", reflectedWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ReflectedForeground", reflectedForeground))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DirectLineWorkspace", directWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DirectForeground", directForeground))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DirectForeground", directForeground))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelSize", PIXEL_SIZE))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorResolution", DET_RESOLUTION))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorResolution", DET_RESOLUTION))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FirstSlitName", slit1))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("FirstSlitSizeSampleLog", "slit1.size"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FirstSlitSizeSampleLog", "slit1.size"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SecondSlitName", slit2))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SecondSlitSizeSampleLog", "slit2.size"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SecondSlitSizeSampleLog", "slit2.size"));
     if (slit == 1) {
-      TS_ASSERT_THROWS_EQUALS(
-          alg.execute(), std::runtime_error & e, e.what(),
-          std::string("Some invalid Properties found: [ FirstSlitName ]"));
+      TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, e.what(),
+                              std::string("Some invalid Properties found: [ FirstSlitName ]"));
     } else if (slit == 2) {
-      TS_ASSERT_THROWS_EQUALS(
-          alg.execute(), std::runtime_error & e, e.what(),
-          std::string("Some invalid Properties found: [ SecondSlitName ]"));
+      TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, e.what(),
+                              std::string("Some invalid Properties found: [ SecondSlitName ]"));
     }
     TS_ASSERT(!alg.isExecuted())
   }
@@ -218,9 +174,8 @@ private:
     const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
     constexpr int nBins{100};
     auto ws = create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-        startX, PIXEL_SIZE, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE,
-        sourcePos, monitorPos, samplePos, detectorPos, N_DET, nBins,
-        TOF_BIN_WIDTH);
+        startX, PIXEL_SIZE, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos, monitorPos, samplePos, detectorPos,
+        N_DET, nBins, TOF_BIN_WIDTH);
     // Add slit sizes to sample logs, too.
     auto &run = ws->mutableRun();
     constexpr bool overwrite{true};
@@ -231,8 +186,7 @@ private:
     auto zeros = Kernel::make_cow<HistogramData::HistogramY>(nBins, 0.);
     auto zeroErrors = Kernel::make_cow<HistogramData::HistogramE>(nBins, 0.);
     auto peak = Kernel::make_cow<HistogramData::HistogramY>(nBins, 10.);
-    auto peakErrors =
-        Kernel::make_cow<HistogramData::HistogramE>(nBins, std::sqrt(10.));
+    auto peakErrors = Kernel::make_cow<HistogramData::HistogramE>(nBins, std::sqrt(10.));
     for (size_t i = 0; i < N_DET; ++i) {
       if (i >= FGD_FIRST && i <= FGD_LAST) {
         ws->setSharedY(i, peak);
@@ -242,8 +196,7 @@ private:
         ws->setSharedE(i, zeroErrors);
       }
     }
-    auto convertUnits =
-        API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
+    auto convertUnits = API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
     convertUnits->initialize();
     convertUnits->setChild(true);
     convertUnits->setRethrows(true);
@@ -252,13 +205,11 @@ private:
     convertUnits->setProperty("Target", "Wavelength");
     convertUnits->setProperty("EMode", "Elastic");
     convertUnits->execute();
-    API::MatrixWorkspace_sptr outWS =
-        convertUnits->getProperty("OutputWorkspace");
+    API::MatrixWorkspace_sptr outWS = convertUnits->getProperty("OutputWorkspace");
     return outWS;
   }
 
-  static double det_fwhm(const API::MatrixWorkspace &ws, const size_t fgd_first,
-                         const size_t fgd_last) {
+  static double det_fwhm(const API::MatrixWorkspace &ws, const size_t fgd_first, const size_t fgd_last) {
     // This function comes from COSMOS.
     using namespace boost::math;
     std::vector<double> angd;
@@ -288,8 +239,7 @@ private:
       }
       return sum;
     }();
-    return 2. * std::sqrt(2. * std::log(2.)) * PIXEL_SIZE *
-           std::sqrt(tt / total_angd);
+    return 2. * std::sqrt(2. * std::log(2.)) * PIXEL_SIZE * std::sqrt(tt / total_angd);
   }
 
   static double s3_fwhm(const double l2) {
@@ -297,8 +247,7 @@ private:
     return 0.68 * SLIT2_SIZE / (SLIT2_DIST + l2);
   }
 
-  static double err_ray(const double l2, const double angle_bragg,
-                        const std::string &sumType, const bool polarized,
+  static double err_ray(const double l2, const double angle_bragg, const std::string &sumType, const bool polarized,
                         const double om_fwhm) {
     // This function comes from COSMOS.
     using namespace boost::math;
@@ -306,22 +255,16 @@ private:
     if (sumType == "SumInQ") {
       if (om_fwhm > 0) {
         if (S2_FWHM >= 2 * om_fwhm) {
-          err_ray1 = std::sqrt(pow<2>(DET_RESOLUTION / l2) +
-                               pow<2>(s3_fwhm(l2)) + pow<2>(om_fwhm)) /
-                     angle_bragg;
+          err_ray1 = std::sqrt(pow<2>(DET_RESOLUTION / l2) + pow<2>(s3_fwhm(l2)) + pow<2>(om_fwhm)) / angle_bragg;
         } else {
-          err_ray1 = std::sqrt(pow<2>(DET_RESOLUTION / (2. * l2)) +
-                               pow<2>(s3_fwhm(l2)) + pow<2>(S2_FWHM)) /
-                     angle_bragg;
+          err_ray1 =
+              std::sqrt(pow<2>(DET_RESOLUTION / (2. * l2)) + pow<2>(s3_fwhm(l2)) + pow<2>(S2_FWHM)) / angle_bragg;
         }
       } else {
         if (S2_FWHM > DET_RESOLUTION / l2) {
-          err_ray1 =
-              std::sqrt(pow<2>(DET_RESOLUTION / l2) + pow<2>(s3_fwhm(l2))) /
-              angle_bragg;
+          err_ray1 = std::sqrt(pow<2>(DET_RESOLUTION / l2) + pow<2>(s3_fwhm(l2))) / angle_bragg;
         } else {
-          err_ray1 = std::sqrt(pow<2>(da()) + pow<2>(DET_RESOLUTION / l2)) /
-                     angle_bragg;
+          err_ray1 = std::sqrt(pow<2>(da()) + pow<2>(DET_RESOLUTION / l2)) / angle_bragg;
         }
       }
     } else {
@@ -331,22 +274,17 @@ private:
         err_ray1 = std::sqrt(pow<2>(da()) + pow<2>(om_fwhm)) / angle_bragg;
       }
     }
-    const auto err_ray_temp =
-        0.68 *
-        std::sqrt((pow<2>(PIXEL_SIZE) + pow<2>(SLIT2_SIZE)) / pow<2>(l2)) /
-        angle_bragg;
+    const auto err_ray_temp = 0.68 * std::sqrt((pow<2>(PIXEL_SIZE) + pow<2>(SLIT2_SIZE)) / pow<2>(l2)) / angle_bragg;
     return std::min(err_ray1, err_ray_temp);
   }
 
   static double da() {
     // This function comes from COSMOS.
     using namespace boost::math;
-    return 0.68 * std::sqrt((pow<2>(SLIT1_SIZE) + pow<2>(SLIT2_SIZE)) /
-                            pow<2>(INTERSLIT));
+    return 0.68 * std::sqrt((pow<2>(SLIT1_SIZE) + pow<2>(SLIT2_SIZE)) / pow<2>(INTERSLIT));
   }
 
-  static double om_fwhm(const double l2, const double dirl2,
-                        const double dirs2w, const double dirs3w,
+  static double om_fwhm(const double l2, const double dirl2, const double dirs2w, const double dirs3w,
                         const double det_fwhm, const double detdb_fwhm) {
     // This function comes from COSMOS.
     using namespace boost::math;
@@ -355,14 +293,11 @@ private:
     const double vs = sdr + (ratio * INTERSLIT) / (1 + ratio);
     const double da_det = std::sqrt(pow<2>(da() * vs) + pow<2>(DET_RESOLUTION));
     double om_fwhm{0.};
-    if ((std::abs(SLIT1_SIZE - dirs2w) >= 0.00004 ||
-         std::abs(SLIT2_SIZE - dirs3w) >= 0.00004) &&
-        (det_fwhm - da_det >= 0.) &&
-        (std::sqrt(pow<2>(det_fwhm) - pow<2>(da_det)) >= PIXEL_SIZE)) {
+    if ((std::abs(SLIT1_SIZE - dirs2w) >= 0.00004 || std::abs(SLIT2_SIZE - dirs3w) >= 0.00004) &&
+        (det_fwhm - da_det >= 0.) && (std::sqrt(pow<2>(det_fwhm) - pow<2>(da_det)) >= PIXEL_SIZE)) {
       om_fwhm = 0.5 * std::sqrt(pow<2>(det_fwhm) - pow<2>(da_det)) / dirl2;
     } else if ((pow<2>(det_fwhm) - pow<2>(detdb_fwhm) >= 0.) &&
-               (std::sqrt(pow<2>(det_fwhm) - pow<2>(detdb_fwhm)) >=
-                PIXEL_SIZE)) {
+               (std::sqrt(pow<2>(det_fwhm) - pow<2>(detdb_fwhm)) >= PIXEL_SIZE)) {
       om_fwhm = 0.5 * std::sqrt(pow<2>(det_fwhm) - pow<2>(detdb_fwhm)) / dirl2;
     }
     return om_fwhm;

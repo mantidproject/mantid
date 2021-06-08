@@ -28,8 +28,7 @@ BinFinder::BinFinder(const std::vector<double> &binParams) {
   if (n < 3)
     throw std::invalid_argument("BinFinder: not enough bin parameters.");
   if (n % 2 == 0)
-    throw std::invalid_argument(
-        "BinFinder: the number of bin parameters should be odd.");
+    throw std::invalid_argument("BinFinder: the number of bin parameters should be odd.");
 
   for (size_t i = 0; i < n / 2; i++) {
     // The boundaries
@@ -45,11 +44,9 @@ BinFinder::BinFinder(const std::vector<double> &binParams) {
     if (step == 0)
       throw std::invalid_argument("BinFinder: step size of 0.");
     if ((step < 0) && (min <= 0))
-      throw std::invalid_argument(
-          "BinFinder: logarithmic binning with 0.0 starting bin.");
+      throw std::invalid_argument("BinFinder: logarithmic binning with 0.0 starting bin.");
     if (max <= min)
-      throw std::invalid_argument(
-          "BinFinder: final bin must be > starting bin boundary.");
+      throw std::invalid_argument("BinFinder: final bin must be > starting bin boundary.");
 
     int numBins = 0;
 

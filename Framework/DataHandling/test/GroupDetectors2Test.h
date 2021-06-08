@@ -48,17 +48,13 @@ using Mantid::Types::Event::TofEvent;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:
-  static GroupDetectors2Test *createSuite() {
-    return new GroupDetectors2Test();
-  }
+  static GroupDetectors2Test *createSuite() { return new GroupDetectors2Test(); }
   static void destroySuite(GroupDetectors2Test *suite) { delete suite; }
 
   GroupDetectors2Test()
-      : inputWSName("groupdetectorstests_input_workspace"),
-        offsetWSName("groupdetectorstests_offset_workspace"),
+      : inputWSName("groupdetectorstests_input_workspace"), offsetWSName("groupdetectorstests_offset_workspace"),
         outputWSNameBase("groupdetectorstests_output_basename"),
-        inputFile(Poco::Path::current() +
-                  "GroupDetectors2Test_mapfile_example") {
+        inputFile(Poco::Path::current() + "GroupDetectors2Test_mapfile_example") {
     // This is needed to load in the plugin algorithms (specifically Divide,
     // which is a Child Algorithm of GroupDetectors)
     FrameworkManager::Instance();
@@ -80,8 +76,7 @@ public:
   }
 
   void testAveragingWithNoInstrument() {
-    Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspace123(3, 3, false);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspace123(3, 3, false);
     GroupDetectors2 grouper;
     grouper.initialize();
     grouper.setChild(true);
@@ -111,8 +106,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouper3.execute());
     TS_ASSERT(grouper3.isExecuted());
 
-    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(output));
+    MatrixWorkspace_sptr outputWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     HistogramX tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
@@ -145,8 +140,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouper3.execute());
     TS_ASSERT(grouper3.isExecuted());
 
-    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(output));
+    MatrixWorkspace_sptr outputWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     HistogramX tens{10, 11, 12, 13, 14};
     TS_ASSERT_EQUALS(outputWS->x(0), tens);
@@ -177,8 +172,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouper3.execute());
     TS_ASSERT(grouper3.isExecuted());
 
-    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(output));
+    MatrixWorkspace_sptr outputWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     HistogramX tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
@@ -212,8 +207,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouper3.execute());
     TS_ASSERT(grouper3.isExecuted());
 
-    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(output));
+    MatrixWorkspace_sptr outputWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     HistogramX tens{10, 11, 12, 13, 14};
     TS_ASSERT_EQUALS(outputWS->x(0), tens);
@@ -245,8 +240,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouper3.execute());
     TS_ASSERT(grouper3.isExecuted());
 
-    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(output));
+    MatrixWorkspace_sptr outputWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     HistogramX tens{10, 11, 12, 13, 14};
     TS_ASSERT_EQUALS(outputWS->x(0), tens);
@@ -274,14 +269,11 @@ public:
     TS_ASSERT(grouper3.isExecuted());
 
     MatrixWorkspace_const_sptr outputWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(output));
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     HistogramX tens{10, 11, 12, 13, 14};
     TS_ASSERT_EQUALS(outputWS->x(0), tens);
-    TS_ASSERT_EQUALS(outputWS->y(0),
-                     HistogramY(NBINS, (3 + 1) + (1 + 1) + (4 + 1) + (0 + 1) +
-                                           (2 + 1) + (5 + 1)));
+    TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, (3 + 1) + (1 + 1) + (4 + 1) + (0 + 1) + (2 + 1) + (5 + 1)));
     for (int i = 0; i < NBINS; ++i) { // assume that we have grouped all the
                                       // spectra in the input workspace
       TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(double(NHIST)), 0.0001);
@@ -309,8 +301,7 @@ public:
     TS_ASSERT(grouper.isExecuted());
 
     MatrixWorkspace_const_sptr outputWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(output));
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NHIST - 1);
     HistogramX tens{10, 11, 12, 13, 14};
     Mantid::HistogramData::HistogramE ones(NBINS, 1.0);
@@ -318,8 +309,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->x(0), tens);
     TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, 1 + 3)); // 1+3 = 4
     for (int i = 0; i < NBINS; ++i) {
-      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(static_cast<double>(2)),
-                      1e-6);
+      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(static_cast<double>(2)), 1e-6);
     }
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(0), 1);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(0).getSpectrumNo(), 1);
@@ -383,8 +373,7 @@ public:
     TS_ASSERT(grouper.isExecuted());
 
     MatrixWorkspace_const_sptr outputWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(output));
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NHIST - 3);
     HistogramX tens{10, 11, 12, 13, 14};
     Mantid::HistogramData::HistogramE ones(NBINS, 1.0);
@@ -392,8 +381,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->x(0), tens);
     TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, 1 + 2 + 3));
     for (int i = 0; i < NBINS; ++i) {
-      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(static_cast<double>(3)),
-                      1e-6);
+      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(static_cast<double>(3)), 1e-6);
     }
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(0), 1);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(0).getSpectrumNo(), 1);
@@ -409,8 +397,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->x(2), tens);
     TS_ASSERT_EQUALS(outputWS->y(2), HistogramY(NBINS, 5 + 6));
     for (int i = 0; i < NBINS; ++i) {
-      TS_ASSERT_DELTA(outputWS->e(2)[i], std::sqrt(static_cast<double>(2)),
-                      1e-6);
+      TS_ASSERT_DELTA(outputWS->e(2)[i], std::sqrt(static_cast<double>(2)), 1e-6);
     }
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(2), 3);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(2).getSpectrumNo(), 3);
@@ -435,8 +422,7 @@ public:
     TS_ASSERT(nxLoad.isExecuted());
 
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputSpace + "_1");
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_1");
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 64);
 
@@ -444,17 +430,13 @@ public:
     groupAlg.initialize();
     groupAlg.setPropertyValue("InputWorkspace", outputSpace + "_1");
     groupAlg.setPropertyValue("OutputWorkspace", "boevs");
-    groupAlg.setPropertyValue("MapFile",
-                              "unit_testing/MUSR_Detector_Grouping.xml");
+    groupAlg.setPropertyValue("MapFile", "unit_testing/MUSR_Detector_Grouping.xml");
     TS_ASSERT_THROWS_NOTHING(groupAlg.execute());
     TS_ASSERT(groupAlg.isExecuted());
 
     MatrixWorkspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING(
-        output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "boevs"));
-    Workspace2D_sptr output2D1 =
-        std::dynamic_pointer_cast<Workspace2D>(output1);
+    TS_ASSERT_THROWS_NOTHING(output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("boevs"));
+    Workspace2D_sptr output2D1 = std::dynamic_pointer_cast<Workspace2D>(output1);
     TS_ASSERT_EQUALS(output2D1->getNumberHistograms(), 2);
 
     AnalysisDataService::Instance().remove(outputSpace);
@@ -479,8 +461,7 @@ public:
     TS_ASSERT(nxLoad.isExecuted());
 
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputSpace + "_1");
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_1");
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 64);
 
@@ -488,17 +469,13 @@ public:
     groupAlg.initialize();
     groupAlg.setPropertyValue("InputWorkspace", outputSpace + "_1");
     groupAlg.setPropertyValue("OutputWorkspace", "boevs");
-    groupAlg.setPropertyValue(
-        "MapFile", "unit_testing/MUSR_Detector_Grouping_dublicate.xml");
+    groupAlg.setPropertyValue("MapFile", "unit_testing/MUSR_Detector_Grouping_dublicate.xml");
     TS_ASSERT_THROWS_NOTHING(groupAlg.execute());
     TS_ASSERT(groupAlg.isExecuted());
 
     MatrixWorkspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING(
-        output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "boevs"));
-    Workspace2D_sptr output2D1 =
-        std::dynamic_pointer_cast<Workspace2D>(output1);
+    TS_ASSERT_THROWS_NOTHING(output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("boevs"));
+    Workspace2D_sptr output2D1 = std::dynamic_pointer_cast<Workspace2D>(output1);
     TS_ASSERT_EQUALS(output2D1->getNumberHistograms(), 2);
 
     AnalysisDataService::Instance().remove(outputSpace);
@@ -523,8 +500,7 @@ public:
     TS_ASSERT(nxLoad.isExecuted());
 
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputSpace + "_1");
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_1");
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 64);
 
@@ -532,17 +508,13 @@ public:
     groupAlg.initialize();
     groupAlg.setPropertyValue("InputWorkspace", outputSpace + "_1");
     groupAlg.setPropertyValue("OutputWorkspace", "boevs");
-    groupAlg.setPropertyValue(
-        "MapFile", "unit_testing/MUSR_Detector_Grouping_dublicate2.xml");
+    groupAlg.setPropertyValue("MapFile", "unit_testing/MUSR_Detector_Grouping_dublicate2.xml");
     TS_ASSERT_THROWS_NOTHING(groupAlg.execute());
     TS_ASSERT(groupAlg.isExecuted());
 
     MatrixWorkspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING(
-        output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "boevs"));
-    Workspace2D_sptr output2D1 =
-        std::dynamic_pointer_cast<Workspace2D>(output1);
+    TS_ASSERT_THROWS_NOTHING(output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("boevs"));
+    Workspace2D_sptr output2D1 = std::dynamic_pointer_cast<Workspace2D>(output1);
     TS_ASSERT_EQUALS(output2D1->getNumberHistograms(), 4);
 
     std::set<detid_t>::const_iterator specDet;
@@ -583,15 +555,13 @@ public:
     GroupDetectors2 gd2;
     gd2.initialize();
     gd2.setPropertyValue("InputWorkspace", inputWSName);
-    gd2.setPropertyValue("OutputWorkspace",
-                         "GroupDetectors2_testAverageBehaviour_Output");
+    gd2.setPropertyValue("OutputWorkspace", "GroupDetectors2_testAverageBehaviour_Output");
     gd2.setPropertyValue("WorkspaceIndexList", "0-2");
     gd2.setPropertyValue("Behaviour", "Average");
     TS_ASSERT_THROWS_NOTHING(gd2.execute());
 
     MatrixWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "GroupDetectors2_testAverageBehaviour_Output");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("GroupDetectors2_testAverageBehaviour_Output");
 
     // Result should be 1 + 2  / 2 = 1.5
     TS_ASSERT_EQUALS(output->y(0)[1], 1.5);
@@ -599,9 +569,7 @@ public:
 
   void testAverageBehaviourWithMaskedBins() {
     createTestWorkspace(inputWSName, 0);
-    MatrixWorkspace_sptr input =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWSName);
+    MatrixWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSName);
     input->flagMasked(0, 0);
     GroupDetectors2 gd2;
     gd2.initialize();
@@ -633,9 +601,7 @@ public:
 
   void testSumBehaviourWithMaskedBins() {
     createTestWorkspace(inputWSName, 0);
-    MatrixWorkspace_sptr input =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWSName);
+    MatrixWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSName);
     input->flagMasked(0, 0);
     GroupDetectors2 gd2;
     gd2.initialize();
@@ -664,8 +630,7 @@ public:
     int numPixels = 5;
     int numBins = 5;
     int numEvents = 200;
-    EventWorkspace_sptr input = WorkspaceCreationHelper::createEventWorkspace(
-        numPixels, numBins, numEvents, 0, 1, 4);
+    EventWorkspace_sptr input = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numEvents, 0, 1, 4);
     AnalysisDataService::Instance().addOrReplace("GDEvents", input);
     GroupDetectors2 alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
@@ -683,18 +648,15 @@ public:
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("GDEventsOut"))
     EventWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-        "GDEventsOut");
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("GDEventsOut");
     TS_ASSERT(output);
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(output->getNumberEvents(), (2 + 3 + 4) * numEvents);
     TS_ASSERT_EQUALS(input->x(0).size(), output->x(0).size());
-    TS_ASSERT_DELTA((input->y(2)[0] + input->y(3)[0] + input->y(4)[0]) / 3,
-                    output->y(0)[0], 0.00001);
+    TS_ASSERT_DELTA((input->y(2)[0] + input->y(3)[0] + input->y(4)[0]) / 3, output->y(0)[0], 0.00001);
   }
 
-  void
-  test_GroupingWorkspace_ThreeGroup_NoUngrouped_dontPreserveEvents_inplace() {
+  void test_GroupingWorkspace_ThreeGroup_NoUngrouped_dontPreserveEvents_inplace() {
     dotestGroupingWorkspace(3, false, false, true, false);
   }
 
@@ -714,10 +676,8 @@ public:
     dotestGroupingWorkspace(4, true, true, true, false);
   }
 
-  void dotestGroupingWorkspace(size_t numgroups = 3,
-                               bool includeUngroupedDets = true,
-                               bool includeUngroupedDetsSetting = true,
-                               bool inplace = true, bool preserveEvents = true,
+  void dotestGroupingWorkspace(size_t numgroups = 3, bool includeUngroupedDets = true,
+                               bool includeUngroupedDetsSetting = true, bool inplace = true, bool preserveEvents = true,
                                int bankWidthInPixels = 8) {
     std::string nxsWSname("GroupDetectors2TestTarget_ws");
     std::string groupWSName(nxsWSname + "_GROUP");
@@ -725,8 +685,7 @@ public:
 
     // Create the fake event workspace
     EventWorkspace_sptr inputW =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-            static_cast<int>(numgroups), bankWidthInPixels);
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(static_cast<int>(numgroups), bankWidthInPixels);
     AnalysisDataService::Instance().addOrReplace(nxsWSname, inputW);
 
     //-------- Check on the input workspace ---------------
@@ -736,8 +695,7 @@ public:
 
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      inputW->setX(pix, make_cow<HistogramX>(
-                            std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
+      inputW->setX(pix, make_cow<HistogramX>(std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
       inputW->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
 
@@ -767,38 +725,29 @@ public:
     // ------------ Create a grouping workspace by name -------------
     GroupDetectors2 groupAlg;
     groupAlg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        groupAlg.setPropertyValue("InputWorkspace", nxsWSname));
+    TS_ASSERT_THROWS_NOTHING(groupAlg.setPropertyValue("InputWorkspace", nxsWSname));
     if (inplace)
       outputws = nxsWSname;
-    TS_ASSERT_THROWS_NOTHING(
-        groupAlg.setPropertyValue("OutputWorkspace", outputws));
+    TS_ASSERT_THROWS_NOTHING(groupAlg.setPropertyValue("OutputWorkspace", outputws));
 
     // This fake calibration file was generated using
     // DiffractiongroupAlgsing2Test_helper.py
-    TS_ASSERT_THROWS_NOTHING(
-        groupAlg.setPropertyValue("CopyGroupingFromWorkspace", groupWSName));
+    TS_ASSERT_THROWS_NOTHING(groupAlg.setPropertyValue("CopyGroupingFromWorkspace", groupWSName));
 
-    TS_ASSERT_THROWS_NOTHING(groupAlg.setProperty("KeepUngroupedSpectra",
-                                                  includeUngroupedDetsSetting));
-    TS_ASSERT_THROWS_NOTHING(
-        groupAlg.setProperty("PreserveEvents", preserveEvents));
+    TS_ASSERT_THROWS_NOTHING(groupAlg.setProperty("KeepUngroupedSpectra", includeUngroupedDetsSetting));
+    TS_ASSERT_THROWS_NOTHING(groupAlg.setProperty("PreserveEvents", preserveEvents));
     // OK, run the algorithm
     TS_ASSERT_THROWS_NOTHING(groupAlg.execute(););
     TS_ASSERT(groupAlg.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output =
-            AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
-                outputws));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(outputws));
     if (!output)
       return;
 
     // ---- Did we keep the event workspace ----
     EventWorkspace_const_sptr outputEvent;
-    TS_ASSERT_THROWS_NOTHING(
-        outputEvent = std::dynamic_pointer_cast<const EventWorkspace>(output));
+    TS_ASSERT_THROWS_NOTHING(outputEvent = std::dynamic_pointer_cast<const EventWorkspace>(output));
     if (preserveEvents) {
       TS_ASSERT(outputEvent);
       if (!outputEvent)
@@ -820,17 +769,14 @@ public:
     int numBanks = 2;
     int numSpectraInBank = bankWidth * bankWidth;
     int targetSpectraCount = 1 + (numBanks - 1) * numSpectraInBank;
-    std::string spectraToGroup =
-        "0-" + boost::lexical_cast<std::string>((numSpectraInBank - 1));
+    std::string spectraToGroup = "0-" + boost::lexical_cast<std::string>((numSpectraInBank - 1));
 
     std::string nxsWSname("GroupingWorkspaceUsingMatrixWrokspace_ws");
     std::string groupWSName(nxsWSname + "_GROUP");
     std::string outputws = nxsWSname + "_grouped";
 
     // Create the fake event workspace
-    EventWorkspace_sptr inputW =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-            numBanks, bankWidth);
+    EventWorkspace_sptr inputW = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(numBanks, bankWidth);
     AnalysisDataService::Instance().addOrReplace(nxsWSname, inputW);
 
     //-------- Check on the input workspace ---------------
@@ -840,8 +786,7 @@ public:
 
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      inputW->setX(pix, make_cow<HistogramX>(
-                            std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
+      inputW->setX(pix, make_cow<HistogramX>(std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
       inputW->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
 
@@ -849,28 +794,22 @@ public:
     // -------------
     GroupDetectors2 groupAlg1;
     groupAlg1.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        groupAlg1.setPropertyValue("InputWorkspace", nxsWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        groupAlg1.setPropertyValue("OutputWorkspace", groupWSName));
+    TS_ASSERT_THROWS_NOTHING(groupAlg1.setPropertyValue("InputWorkspace", nxsWSname));
+    TS_ASSERT_THROWS_NOTHING(groupAlg1.setPropertyValue("OutputWorkspace", groupWSName));
 
     // This fake calibration file was generated using
     // DiffractiongroupAlg1sing2Test_helper.py
-    TS_ASSERT_THROWS_NOTHING(groupAlg1.setProperty(
-        "WorkspaceIndexList", spectraToGroup)); // group first bank
+    TS_ASSERT_THROWS_NOTHING(groupAlg1.setProperty("WorkspaceIndexList", spectraToGroup)); // group first bank
 
-    TS_ASSERT_THROWS_NOTHING(
-        groupAlg1.setProperty("KeepUngroupedSpectra", true));
+    TS_ASSERT_THROWS_NOTHING(groupAlg1.setProperty("KeepUngroupedSpectra", true));
     TS_ASSERT_THROWS_NOTHING(groupAlg1.setProperty("PreserveEvents", false));
     // OK, run the algorithm
     TS_ASSERT_THROWS_NOTHING(groupAlg1.execute(););
     TS_ASSERT(groupAlg1.isExecuted());
 
     MatrixWorkspace_const_sptr outputGrp;
-    TS_ASSERT_THROWS_NOTHING(
-        outputGrp =
-            AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
-                groupWSName));
+    TS_ASSERT_THROWS_NOTHING(outputGrp =
+                                 AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(groupWSName));
     if (!outputGrp)
       return;
 
@@ -879,39 +818,30 @@ public:
     // ------------ Create a grouping workspace by name -------------
     GroupDetectors2 groupAlg;
     groupAlg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        groupAlg.setPropertyValue("InputWorkspace", nxsWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        groupAlg.setPropertyValue("OutputWorkspace", outputws));
+    TS_ASSERT_THROWS_NOTHING(groupAlg.setPropertyValue("InputWorkspace", nxsWSname));
+    TS_ASSERT_THROWS_NOTHING(groupAlg.setPropertyValue("OutputWorkspace", outputws));
 
     // This fake calibration file was generated using
     // DiffractiongroupAlgsing2Test_helper.py
-    TS_ASSERT_THROWS_NOTHING(
-        groupAlg.setPropertyValue("CopyGroupingFromWorkspace", groupWSName));
+    TS_ASSERT_THROWS_NOTHING(groupAlg.setPropertyValue("CopyGroupingFromWorkspace", groupWSName));
 
-    TS_ASSERT_THROWS_NOTHING(
-        groupAlg.setProperty("KeepUngroupedSpectra", true));
+    TS_ASSERT_THROWS_NOTHING(groupAlg.setProperty("KeepUngroupedSpectra", true));
     TS_ASSERT_THROWS_NOTHING(groupAlg.setProperty("PreserveEvents", false));
     // OK, run the algorithm
     TS_ASSERT_THROWS_NOTHING(groupAlg.execute(););
     TS_ASSERT(groupAlg.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output =
-            AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
-                outputws));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(outputws));
     if (!output)
       return;
 
     // check output - should match template
-    TS_ASSERT_EQUALS(output->getNumberHistograms(),
-                     outputGrp->getNumberHistograms());
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), outputGrp->getNumberHistograms());
 
     const auto &spectrumInfo = output->spectrumInfo();
     const auto &spectrumInfoGrp = outputGrp->spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(),
-                     spectrumInfoGrp.detector(0).getID());
+    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), spectrumInfoGrp.detector(0).getID());
 
     AnalysisDataService::Instance().remove(nxsWSname);
     AnalysisDataService::Instance().remove(groupWSName);
@@ -945,8 +875,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(groupDetsAlg.execute());
     TS_ASSERT(groupDetsAlg.isExecuted());
 
-    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(outputWSNameBase));
+    MatrixWorkspace_sptr outputWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWSNameBase));
 
     const auto &indexInfo = outputWS->indexInfo();
     const auto &spectrumDefinitions = *(indexInfo.spectrumDefinitions());
@@ -963,8 +893,7 @@ public:
   void test_grouping_with_time_indexes_in_event_workspace_throws() {
 
     auto scanWorkspace = createTestScanWorkspace();
-    EventWorkspace_sptr scanEventWorkspace =
-        Mantid::DataObjects::create<EventWorkspace>(*scanWorkspace);
+    EventWorkspace_sptr scanEventWorkspace = Mantid::DataObjects::create<EventWorkspace>(*scanWorkspace);
     TS_ASSERT(scanEventWorkspace->detectorInfo().isScanning())
 
     GroupDetectors2 groupAlg;
@@ -974,8 +903,7 @@ public:
     groupAlg.setPropertyValue("GroupingPattern", "0-1");
     groupAlg.setPropertyValue("OutputWorkspace", outputWSNameBase);
 
-    TS_ASSERT_THROWS_EQUALS(groupAlg.execute(), const std::runtime_error &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(groupAlg.execute(), const std::runtime_error &e, std::string(e.what()),
                             "GroupDetectors does not currently support "
                             "EventWorkspaces with detector scans.")
   }
@@ -984,9 +912,7 @@ public:
     createTestWorkspace(inputWSName, 0);
     // Use ConvertSpectrumAxis to replace the vertical axis with a
     // NumericAxis.
-    auto convertAxis =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-            "ConvertSpectrumAxis");
+    auto convertAxis = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertSpectrumAxis");
     convertAxis->initialize();
     convertAxis->setChild(true);
     convertAxis->setRethrows(true);
@@ -1005,8 +931,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(group.execute())
     TS_ASSERT(group.isExecuted())
 
-    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(output));
+    MatrixWorkspace_sptr outputWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output));
     // The output should have SpectrumAxis.
     const Axis *axis = outputWS->getAxis(1);
     TS_ASSERT(dynamic_cast<const Mantid::API::SpectraAxis *>(axis) != nullptr);
@@ -1027,8 +953,7 @@ public:
     const int numBanks{1};
     const int bankWidthInPixels{3};
     const bool clearEvents{false};
-    auto ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-        numBanks, bankWidthInPixels, clearEvents);
+    auto ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(numBanks, bankWidthInPixels, clearEvents);
     // Number of events from WorkspaceCreationHelpers::
     // createEventWorkspaceWithStartTime, numEvents = 100, eventPatter = 2.
     const int numEvents{200};
@@ -1044,8 +969,7 @@ public:
 
     // Set the properties
     TS_ASSERT_THROWS_NOTHING(group.setProperty("InputWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(
-        group.setPropertyValue("OutputWorkspace", "GDEventsOut"))
+    TS_ASSERT_THROWS_NOTHING(group.setPropertyValue("OutputWorkspace", "GDEventsOut"))
     TS_ASSERT_THROWS_NOTHING(group.setPropertyValue("GroupingPattern", "2-4"))
     TS_ASSERT_THROWS_NOTHING(group.setPropertyValue("Behaviour", "Average"))
     TS_ASSERT_THROWS_NOTHING(group.setProperty("PreserveEvents", true))
@@ -1054,23 +978,19 @@ public:
     TS_ASSERT(group.isExecuted());
 
     EventWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-        "GDEventsOut");
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("GDEventsOut");
     TS_ASSERT(output);
     const Axis *axis = output->getAxis(1);
     TS_ASSERT(dynamic_cast<const Mantid::API::SpectraAxis *>(axis) != nullptr);
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(output->getNumberEvents(), 3 * numEvents);
     TS_ASSERT_EQUALS(ws->x(0).size(), output->x(0).size());
-    TS_ASSERT_DELTA((ws->y(2)[0] + ws->y(3)[0] + ws->y(4)[0]) / 3,
-                    output->y(0)[0], 0.00001);
+    TS_ASSERT_DELTA((ws->y(2)[0] + ws->y(3)[0] + ws->y(4)[0]) / 3, output->y(0)[0], 0.00001);
   }
 
   void test_masked_detids_get_propagated() {
     createTestWorkspace(inputWSName, 0);
-    MatrixWorkspace_sptr input =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWSName);
+    MatrixWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSName);
     input->mutableDetectorInfo().setMasked(0, true);
     GroupDetectors2 gd2;
     gd2.initialize();
@@ -1128,11 +1048,10 @@ private:
 
   MatrixWorkspace_sptr createTestScanWorkspace() {
     createTestWorkspace(inputWSName, 0);
-    MatrixWorkspace_sptr inputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(inputWSName));
+    MatrixWorkspace_sptr inputWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWSName));
 
-    auto builder =
-        ScanningWorkspaceBuilder(inputWS->getInstrument(), NHIST, 20);
+    auto builder = ScanningWorkspaceBuilder(inputWS->getInstrument(), NHIST, 20);
 
     std::vector<double> timeRanges;
     for (size_t i = 0; i < NHIST; ++i) {
@@ -1175,26 +1094,18 @@ private:
 
 class GroupDetectors2TestPerformance : public CxxTest::TestSuite {
 public:
-  static GroupDetectors2TestPerformance *createSuite() {
-    return new GroupDetectors2TestPerformance();
-  }
-  static void destroySuite(GroupDetectors2TestPerformance *suite) {
-    delete suite;
-  }
+  static GroupDetectors2TestPerformance *createSuite() { return new GroupDetectors2TestPerformance(); }
+  static void destroySuite(GroupDetectors2TestPerformance *suite) { delete suite; }
 
-  GroupDetectors2TestPerformance()
-      : inputEventWs(nullptr), inputMatrixWs(nullptr), groupWs(nullptr), alg() {
+  GroupDetectors2TestPerformance() : inputEventWs(nullptr), inputMatrixWs(nullptr), groupWs(nullptr), alg() {
     constexpr int numGroups = 40;
     // This controls speed of test
     constexpr int bankPixelWidth = 30;
     constexpr int numBins = 1000;
 
-    inputEventWs =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-            numGroups, bankPixelWidth);
+    inputEventWs = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(numGroups, bankPixelWidth);
     inputMatrixWs =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numGroups, bankPixelWidth, numBins);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numGroups, bankPixelWidth, numBins);
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputEventWs->getNumberHistograms(); pix++) {
       size_t xAxisSize = inputEventWs->x(pix).size();
@@ -1230,8 +1141,7 @@ public:
   void setupGroupWS(const size_t numGroups) {
 
     // ------------ Create a grouping workspace to match -------------
-    groupWs =
-        std::make_shared<GroupingWorkspace>(inputEventWs->getInstrument());
+    groupWs = std::make_shared<GroupingWorkspace>(inputEventWs->getInstrument());
 
     // fill in some groups
     constexpr size_t startingGroupNo = 1;

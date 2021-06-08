@@ -40,16 +40,15 @@ int MAX_SUBOPT_ITER = 100;
 
 /// Holder for data to pass to gsl functions
 struct FunctionData {
-  size_t n; // number of parameters
-  const AugmentedLagrangianOptimizer::ObjFunction
-      *userfunc;                     // user supplied function
-  const DblMatrix *eqmatrix;         // equality constraints
-  const std::vector<double> *lambda; // lagrange multiplier for equality
-  const DblMatrix *ineqmatrix;       // inequality constraints
-  const std::vector<double> *mu;     // lagrange multiplier for inequality
-  double rho;                        // scaling parameter
-  gsl_vector *tmp; // gsl vector of size n (used for numerical derivative calc
-                   // to avoid constant reallocation)
+  size_t n;                                                  // number of parameters
+  const AugmentedLagrangianOptimizer::ObjFunction *userfunc; // user supplied function
+  const DblMatrix *eqmatrix;                                 // equality constraints
+  const std::vector<double> *lambda;                         // lagrange multiplier for equality
+  const DblMatrix *ineqmatrix;                               // inequality constraints
+  const std::vector<double> *mu;                             // lagrange multiplier for inequality
+  double rho;                                                // scaling parameter
+  gsl_vector *tmp;                                           // gsl vector of size n (used for numerical derivative calc
+                                                             // to avoid constant reallocation)
 };
 
 /**
@@ -60,8 +59,7 @@ struct FunctionData {
  * @param x The current parameter set
  * @return A value for the constraint
  */
-double evaluateConstraint(const DblMatrix &cmatrix, const size_t index,
-                          const size_t /*unused*/, const double *x) {
+double evaluateConstraint(const DblMatrix &cmatrix, const size_t index, const size_t /*unused*/, const double *x) {
   assert(index < cmatrix.numRows());
   const double *row = cmatrix[index];
 
@@ -83,8 +81,7 @@ double evaluateConstraint(const DblMatrix &cmatrix, const size_t index,
 int relstop(double vold, double vnew, double reltol, double abstol) {
   if (vold != vold)
     return 0; // nan
-  return (fabs(vnew - vold) < abstol ||
-          fabs(vnew - vold) < reltol * (fabs(vnew) + fabs(vold)) * 0.5 ||
+  return (fabs(vnew - vold) < abstol || fabs(vnew - vold) < reltol * (fabs(vnew) + fabs(vold)) * 0.5 ||
           (reltol > 0 && vnew == vold)); /* catch vnew == vold == 0 */
 }
 
@@ -96,8 +93,7 @@ int relstop(double vold, double vnew, double reltol, double abstol) {
  * @param abstol Absolute tolerance
  * @return 1 if criteria satisfied
  */
-int relstopX(const std::vector<double> &xvOld, const std::vector<double> &xvNew,
-             double reltol, double abstol) {
+int relstopX(const std::vector<double> &xvOld, const std::vector<double> &xvNew, double reltol, double abstol) {
   for (size_t i = 0; i < xvOld.size(); ++i) {
     if (!relstop(xvOld[i], xvNew[i], reltol, abstol))
       return 0;
@@ -112,8 +108,7 @@ int relstopX(const std::vector<double> &xvOld, const std::vector<double> &xvNew,
  * @param abstol Absolute tolerance
  * @return 1 if criteria satisfied
  */
-int relstopX(const std::vector<double> &xvOld, const gsl_vector *xvNew,
-             double reltol, double abstol) {
+int relstopX(const std::vector<double> &xvOld, const gsl_vector *xvNew, double reltol, double abstol) {
   for (size_t i = 0; i < xvOld.size(); ++i) {
     if (std::isnan(gsl_vector_get(xvNew, i)))
       return 1;
@@ -138,8 +133,7 @@ void AugmentedLagrangianOptimizer::minimize(std::vector<double> &xv) const {
 
   double ICM(HUGE_VAL), minf_penalty(HUGE_VAL), rho(0.0);
   double minf(HUGE_VAL), penalty(0.0);
-  std::vector<double> xcur(xv), lambda(numEqualityConstraints(), 0),
-      mu(numInequalityConstraints());
+  std::vector<double> xcur(xv), lambda(numEqualityConstraints(), 0), mu(numInequalityConstraints());
   int minfIsFeasible = 0;
   int auglagIters = 0;
 
@@ -203,8 +197,7 @@ void AugmentedLagrangianOptimizer::minimize(std::vector<double> &xv) const {
     }
     ++auglagIters;
 
-    if ((feasible &&
-         (!minfIsFeasible || penalty <= minf_penalty || fcur < minf)) ||
+    if ((feasible && (!minfIsFeasible || penalty <= minf_penalty || fcur < minf)) ||
         (!minfIsFeasible && penalty <= minf_penalty)) {
       OptimizerResult ret = Success;
       if (feasible) {
@@ -242,13 +235,11 @@ double costf(const gsl_vector *v, void *params) {
 
   double lagrangian = (*d->userfunc)(d->n, v->data);
   for (size_t i = 0; i < d->eqmatrix->numRows(); ++i) {
-    double h = evaluateConstraint(*d->eqmatrix, i, d->n, v->data) +
-               ((*d->lambda)[i] / d->rho);
+    double h = evaluateConstraint(*d->eqmatrix, i, d->n, v->data) + ((*d->lambda)[i] / d->rho);
     lagrangian += 0.5 * d->rho * h * h;
   }
   for (size_t i = 0; i < d->ineqmatrix->numRows(); ++i) {
-    double fc = evaluateConstraint(*d->ineqmatrix, i, d->n, v->data) +
-                ((*d->mu)[i] / d->rho);
+    double fc = evaluateConstraint(*d->ineqmatrix, i, d->n, v->data) + ((*d->mu)[i] / d->rho);
     if (fc > 0.0)
       lagrangian += 0.5 * d->rho * fc * fc;
   }
@@ -297,9 +288,9 @@ void costfdf(const gsl_vector *x, void *params, double *f, gsl_vector *df) {
  * optimization. They will
  *             be updated as it proceeds
  */
-void AugmentedLagrangianOptimizer::unconstrainedOptimization(
-    const std::vector<double> &lambda, const std::vector<double> &mu,
-    const double rho, std::vector<double> &xcur) const {
+void AugmentedLagrangianOptimizer::unconstrainedOptimization(const std::vector<double> &lambda,
+                                                             const std::vector<double> &mu, const double rho,
+                                                             std::vector<double> &xcur) const {
   // Data required to calculate function
   FunctionData d;
   d.n = numParameters();
@@ -312,8 +303,7 @@ void AugmentedLagrangianOptimizer::unconstrainedOptimization(
 
   gsl_vector *x = gsl_vector_alloc(d.n);
   std::copy(xcur.begin(), xcur.end(), x->data);
-  gsl_vector *tmp =
-      gsl_vector_alloc(d.n); // Used for numerical derivative calculation
+  gsl_vector *tmp = gsl_vector_alloc(d.n); // Used for numerical derivative calculation
   d.tmp = tmp;
 
   // Unconstrained const function
@@ -325,13 +315,9 @@ void AugmentedLagrangianOptimizer::unconstrainedOptimization(
   costFunc.params = static_cast<void *>(&d);
 
   // Declare minimizer
-  const gsl_multimin_fdfminimizer_type *T =
-      gsl_multimin_fdfminimizer_conjugate_pr;
+  const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_conjugate_pr;
   gsl_multimin_fdfminimizer *s = gsl_multimin_fdfminimizer_alloc(T, costFunc.n);
-  double tol =
-      (xcur[0] > 1e-3
-           ? 1e-4
-           : 1e-3); // Adjust the tolerance for the scale of the first param
+  double tol = (xcur[0] > 1e-3 ? 1e-4 : 1e-3); // Adjust the tolerance for the scale of the first param
   gsl_multimin_fdfminimizer_set(s, &costFunc, x, 0.01, tol);
 
   int iter = 0;
@@ -364,10 +350,8 @@ void AugmentedLagrangianOptimizer::unconstrainedOptimization(
  * must match number of parameters
  *                 where \f$A_{eq} x \geq 0\f$
  */
-void AugmentedLagrangianOptimizer::checkConstraints(
-    const DblMatrix &equality, const DblMatrix &inequality) {
-  const size_t totalNumConstr =
-      numEqualityConstraints() + numInequalityConstraints();
+void AugmentedLagrangianOptimizer::checkConstraints(const DblMatrix &equality, const DblMatrix &inequality) {
+  const size_t totalNumConstr = numEqualityConstraints() + numInequalityConstraints();
   if (totalNumConstr == 0)
     return;
 
@@ -385,8 +369,7 @@ void AugmentedLagrangianOptimizer::checkConstraints(
 
     if (ncols > 0 && ncols != numParameters()) {
       std::ostringstream os;
-      os << "AugmentedLagrangianOptimizer::initializeConstraints - Invalid "
-         << matrix
+      os << "AugmentedLagrangianOptimizer::initializeConstraints - Invalid " << matrix
          << " constraint matrix. Number of columns must match number "
             "of parameters. ncols="
          << ncols << ", nparams=" << numParameters();

@@ -19,7 +19,7 @@ PROPS_FOR_INSTR = ["PrimaryFlightPath", "SpectrumIDs", "L2", "Polar", "Azimuthal
 CAL_FILE, GROUP_FILE = "CalFileName", "GroupFilename"
 CAL_WKSP, GRP_WKSP, MASK_WKSP = "CalibrationWorkspace", "GroupingWorkspace", "MaskWorkspace"
 # AlignAndFocusPowder only uses the ranges
-PROPS_IN_PD_CHARACTER = ["DMin", "DMax", "TMin", "TMax", "CropWavelengthMin", "CropWavelengthMax"]
+PROPS_IN_PD_CHARACTER = ["DMin", "DMax", "DeltaRagged", "TMin", "TMax", "CropWavelengthMin", "CropWavelengthMax"]
 PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
                    GRP_WKSP, CAL_WKSP, "OffsetsWorkspace",
                    MASK_WKSP, "MaskBinTable",

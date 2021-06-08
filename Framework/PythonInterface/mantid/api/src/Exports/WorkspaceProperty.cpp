@@ -23,9 +23,7 @@ void export_WorkspaceProperty() {
 
   using Mantid::API::LockMode;
   // Property and Lock mode enums
-  boost::python::enum_<LockMode::Type>("LockMode")
-      .value("Lock", LockMode::Lock)
-      .value("NoLock", LockMode::NoLock);
+  boost::python::enum_<LockMode::Type>("LockMode").value("Lock", LockMode::Lock).value("NoLock", LockMode::NoLock);
 
   using Mantid::PythonInterface::WorkspacePropertyExporter;
   WorkspacePropertyExporter<Workspace>::define("WorkspaceProperty");

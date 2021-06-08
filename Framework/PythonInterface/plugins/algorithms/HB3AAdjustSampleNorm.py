@@ -4,13 +4,17 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, FileAction, FileProperty, IMDHistoWorkspace, IMDHistoWorkspaceProperty, \
-    PythonAlgorithm, Progress, PropertyMode, MultipleFileProperty, WorkspaceProperty
-from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, FloatArrayProperty, \
-    FloatArrayLengthValidator, FloatPropertyWithValue, V3D
-from mantid.simpleapi import ConvertHFIRSCDtoMDE, ConvertWANDSCDtoQ, DeleteWorkspace, DeleteWorkspaces, DivideMD, \
-    LoadMD, MergeMD, ReplicateMD, SetGoniometer, mtd, GroupWorkspaces
+from mantid.api import (AlgorithmFactory, FileAction, FileProperty,
+                        IMDHistoWorkspace, IMDHistoWorkspaceProperty, PythonAlgorithm,
+                        Progress, PropertyMode, MultipleFileProperty, WorkspaceProperty)
+from mantid.kernel import (Direction, EnabledWhenProperty,
+                           PropertyCriterion, FloatArrayProperty, FloatArrayLengthValidator,
+                           FloatPropertyWithValue, V3D, StringListValidator)
+from mantid.simpleapi import (ConvertHFIRSCDtoMDE, ConvertWANDSCDtoQ, CloneMDWorkspace,
+                              DeleteWorkspace, DeleteWorkspaces, DivideMD, LoadMD, MergeMD,
+                              ReplicateMD, SetGoniometer, mtd, GroupWorkspaces, RenameWorkspace)
 import os
+import numpy as np
 
 
 class HB3AAdjustSampleNorm(PythonAlgorithm):
@@ -39,6 +43,9 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                          action=FileAction.OptionalLoad),
             doc="File with Vanadium normalization scan data")
 
+        self.declareProperty('NormaliseBy', 'Time', StringListValidator(['None', 'Time', 'Monitor']),
+                             "Normalise to monitor, time or None.")
+
         # Alternative WS inputs
         self.declareProperty("InputWorkspaces", defaultValue="", direction=Direction.Input,
                              doc="Workspace or comma-separated workspace list containing input MDHisto scan data.")
@@ -57,8 +64,13 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                              doc="Optional wavelength value to use as backup if one was not found in the sample log")
 
         # Which conversion algorithm to use
-        self.declareProperty("OutputAsMDEventWorkspace", defaultValue=True, direction=Direction.Input,
+        self.declareProperty("OutputType", "Q-sample events", StringListValidator(['Q-sample events', 'Q-sample histogram', 'Detector']),
+                             direction=Direction.Input,
                              doc="Whether to use ConvertHFIRSCDtoQ for an MDEvent, or ConvertWANDSCDtoQ for an MDHisto")
+
+        self.declareProperty("ScaleByMotorStep", False,
+                             "If True then the intensity of the output in Q space will be scaled by the motor step size. "
+                             "This will allow directly comparing the intensity of data measure with diffrent motor step sizes.")
 
         # MDEvent WS Specific options for ConvertHFIRSCDtoQ
         self.declareProperty(FloatArrayProperty("MinValues", [-10, -10, -10], FloatArrayLengthValidator(3),
@@ -93,7 +105,9 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.setPropertySettings("InputWorkspaces", EnabledWhenProperty('Filename', PropertyCriterion.IsDefault))
         self.setPropertySettings("VanadiumWorkspace", EnabledWhenProperty('VanadiumFile', PropertyCriterion.IsDefault))
 
-        event_settings = EnabledWhenProperty('OutputAsMDEventWorkspace', PropertyCriterion.IsDefault)
+        self.setPropertySettings("ScaleByMotorStep", EnabledWhenProperty('OutputType', PropertyCriterion.IsNotEqualTo, "Detector"))
+
+        event_settings = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'Q-sample events')
         self.setPropertyGroup("MinValues", "MDEvent Settings")
         self.setPropertyGroup("MaxValues", "MDEvent Settings")
         self.setPropertyGroup("MergeInputs", "MDEvent Settings")
@@ -101,7 +115,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.setPropertySettings("MaxValues", event_settings)
         self.setPropertySettings("MergeInputs", event_settings)
 
-        histo_settings = EnabledWhenProperty('OutputAsMDEventWorkspace', PropertyCriterion.IsNotDefault)
+        histo_settings = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'Q-sample histogram')
         self.setPropertyGroup("BinningDim0", "MDHisto Settings")
         self.setPropertyGroup("BinningDim1", "MDHisto Settings")
         self.setPropertyGroup("BinningDim2", "MDHisto Settings")
@@ -156,7 +170,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         load_van = not self.getProperty("VanadiumFile").isDefault
         load_files = not self.getProperty("Filename").isDefault
 
-        has_van = not self.getProperty("VanadiumWorkspace").isDefault or load_van
+        output = self.getProperty("OutputType").value
 
         if load_files:
             datafiles = self.getProperty("Filename").value
@@ -169,18 +183,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         vanws = self.getProperty("VanadiumWorkspace").value
         height = self.getProperty("DetectorHeightOffset").value
         distance = self.getProperty("DetectorDistanceOffset").value
-        method = self.getProperty("OutputAsMDEventWorkspace").value
 
         wslist = []
-
-        if method:
-            minvals = self.getProperty("MinValues").value
-            maxvals = self.getProperty("MaxValues").value
-            merge = self.getProperty("MergeInputs").value
-        else:
-            bin0 = self.getProperty("BinningDim0").value
-            bin1 = self.getProperty("BinningDim1").value
-            bin2 = self.getProperty("BinningDim2").value
 
         out_ws = self.getPropertyValue("OutputWorkspace")
         out_ws_name = out_ws
@@ -203,7 +207,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             prog.report()
             self.log().information("Processing '{}'".format(in_file))
 
-            SetGoniometer(Workspace=scan, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1')
+            SetGoniometer(Workspace=scan, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1', Average=False)
             # If processing multiple files, append the base name to the given output name
             if has_multiple:
                 if load_files:
@@ -223,38 +227,36 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 try:
                     exp_info.mutableRun().addProperty('run_number', int(exp_info.run().getProperty('scan').value), True)
                 except ValueError:
-                    # scan must not be a int
+                    # scan must be a int
                     pass
 
             # Use ConvertHFIRSCDtoQ (and normalize van), or use ConvertWANDSCtoQ which handles normalization itself
-            if method:
-                if has_van:
-                    van_norm = ReplicateMD(ShapeWorkspace=scan, DataWorkspace=vanws, StoreInADS=False)
-                    van_norm = DivideMD(LHSWorkspace=scan, RHSWorkspace=van_norm, StoreInADS=False)
-                    ConvertHFIRSCDtoMDE(InputWorkspace=van_norm, Wavelength=wavelength, MinValues=minvals,
-                                        MaxValues=maxvals, OutputWorkspace=out_ws_name)
-                    DeleteWorkspace(van_norm)
-                else:
-                    ConvertHFIRSCDtoMDE(InputWorkspace=scan, Wavelength=wavelength, MinValues=minvals,
-                                        MaxValues=maxvals, OutputWorkspace=out_ws_name)
-            else:
+            if output == "Q-sample events":
+                norm_data = self.__normalization(scan, vanws, load_files)
+                minvals = self.getProperty("MinValues").value
+                maxvals = self.getProperty("MaxValues").value
+                merge = self.getProperty("MergeInputs").value
+                ConvertHFIRSCDtoMDE(InputWorkspace=norm_data, Wavelength=wavelength, MinValues=minvals,
+                                    MaxValues=maxvals, OutputWorkspace=out_ws_name)
+                DeleteWorkspace(norm_data)
+            elif output == 'Q-sample histogram':
+                bin0 = self.getProperty("BinningDim0").value
+                bin1 = self.getProperty("BinningDim1").value
+                bin2 = self.getProperty("BinningDim2").value
                 # Convert to Q space and normalize with from the vanadium
-                if has_van:
-                    ConvertWANDSCDtoQ(InputWorkspace=scan, NormalisationWorkspace=vanws, Frame='Q_sample',
-                                      Wavelength=wavelength, NormaliseBy='Monitor', BinningDim0=bin0, BinningDim1=bin1,
-                                      BinningDim2=bin2,
-                                      OutputWorkspace=out_ws_name)
-                else:
-                    ConvertWANDSCDtoQ(InputWorkspace=scan, Frame='Q_sample',
-                                      Wavelength=wavelength, NormaliseBy='Monitor', BinningDim0=bin0, BinningDim1=bin1,
-                                      BinningDim2=bin2,
-                                      OutputWorkspace=out_ws_name)
-            if load_files:
-                DeleteWorkspace(scan)
+                ConvertWANDSCDtoQ(InputWorkspace=scan, NormalisationWorkspace=vanws, Frame='Q_sample',
+                                  Wavelength=wavelength, NormaliseBy=self.getProperty("NormaliseBy").value,
+                                  BinningDim0=bin0, BinningDim1=bin1, BinningDim2=bin2,
+                                  OutputWorkspace=out_ws_name)
+                if load_files:
+                    DeleteWorkspace(scan)
+            else:
+                norm_data = self.__normalization(scan, vanws, load_files)
+                RenameWorkspace(norm_data, OutputWorkspace=out_ws_name)
 
         if has_multiple:
             out_ws_name = out_ws
-            if method and merge:
+            if output == "Q-sample events" and merge:
                 MergeMD(InputWorkspaces=wslist, OutputWorkspace=out_ws_name)
                 DeleteWorkspaces(wslist)
             else:
@@ -265,6 +267,48 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             DeleteWorkspace(vanws)
 
         self.setProperty("OutputWorkspace", out_ws_name)
+
+    def __normalization(self, data, vanadium, load_files):
+        if vanadium:
+            norm_data = ReplicateMD(ShapeWorkspace=data, DataWorkspace=vanadium)
+            norm_data = DivideMD(LHSWorkspace=data, RHSWorkspace=norm_data)
+        elif load_files:
+            norm_data = data
+        else:
+            norm_data = CloneMDWorkspace(data)
+
+        if self.getProperty("ScaleByMotorStep").value:
+            run = data.getExperimentInfo(0).run()
+            scan_log = 'omega' if np.isclose(run.getTimeAveragedStd('phi'), 0.0) else 'phi'
+            scan_axis = run[scan_log].value
+            scan_step = (scan_axis[-1]-scan_axis[0])/(scan_axis.size-1)
+            norm_data *= scan_step
+
+        normaliseBy = self.getProperty("NormaliseBy").value
+
+        monitors = np.asarray(data.getExperimentInfo(0).run().getProperty('monitor').value)
+        times = np.asarray(data.getExperimentInfo(0).run().getProperty('time').value)
+
+        if load_files and vanadium:
+            DeleteWorkspace(data)
+
+        if normaliseBy == "Monitor":
+            scale = monitors
+        elif normaliseBy == "Time":
+            scale = times
+        else:
+            return norm_data
+
+        if vanadium:
+            if normaliseBy == "Monitor":
+                scale /= vanadium.getExperimentInfo(0).run().getProperty('monitor').value[0]
+            elif normaliseBy == "Time":
+                scale /= vanadium.getExperimentInfo(0).run().getProperty('time').value[0]
+
+        norm_data.setSignalArray(norm_data.getSignalArray()/scale)
+        norm_data.setErrorSquaredArray(norm_data.getErrorSquaredArray()/scale**2)
+
+        return norm_data
 
     def __move_components(self, exp_info, height, distance):
         """

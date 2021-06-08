@@ -26,11 +26,9 @@ namespace std {
  * @param dataItem :: A reference to the weak_ptr
  * @return A bare pointer to the HeldType
  */
-template <typename HeldType>
-inline HeldType *get_pointer(const std::weak_ptr<HeldType> &dataItem) {
+template <typename HeldType> inline HeldType *get_pointer(const std::weak_ptr<HeldType> &dataItem) {
   if (std::shared_ptr<HeldType> lockedItem = dataItem.lock()) {
-    return lockedItem
-        .get(); // Safe as we can guarantee that another reference exists
+    return lockedItem.get(); // Safe as we can guarantee that another reference exists
   } else {
     throw std::runtime_error("Variable invalidated, data has been deleted.");
   }

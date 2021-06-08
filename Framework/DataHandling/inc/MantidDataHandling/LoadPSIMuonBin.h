@@ -64,8 +64,7 @@ struct temperatureHeaderData {
   bool delimeterOfTitlesIsBackSlash;
 };
 
-class DLLExport LoadPSIMuonBin
-    : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadPSIMuonBin : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   const std::string name() const override;
   const std::string summary() const override;
@@ -77,10 +76,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::string getFormattedDateTime(const std::string &date,
-                                   const std::string &time);
-  void assignOutputWorkspaceParticulars(
-      DataObjects::Workspace2D_sptr &outputWorkspace);
+  std::string getFormattedDateTime(const std::string &date, const std::string &time);
+  void assignOutputWorkspaceParticulars(DataObjects::Workspace2D_sptr &outputWorkspace);
   void readSingleVariables(Mantid::Kernel::BinaryStreamReader &streamReader);
   void readStringVariables(Mantid::Kernel::BinaryStreamReader &streamReader);
   void readArrayVariables(Mantid::Kernel::BinaryStreamReader &streamReader);
@@ -99,14 +96,10 @@ private:
   void processTitleHeaderLine(const std::string &line);
 
   // Sample log helper functions
-  Mantid::API::Algorithm_sptr
-  createSampleLogAlgorithm(DataObjects::Workspace2D_sptr &ws);
-  void addToSampleLog(const std::string &logName, const std::string &logText,
-                      DataObjects::Workspace2D_sptr &ws);
-  void addToSampleLog(const std::string &logName, const double &logNumber,
-                      DataObjects::Workspace2D_sptr &ws);
-  void addToSampleLog(const std::string &logName, const int &logNumber,
-                      DataObjects::Workspace2D_sptr &ws);
+  Mantid::API::Algorithm_sptr createSampleLogAlgorithm(DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName, const std::string &logText, DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName, const double &logNumber, DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName, const int &logNumber, DataObjects::Workspace2D_sptr &ws);
 
   std::vector<std::vector<double>> m_histograms;
   struct headerData m_header;

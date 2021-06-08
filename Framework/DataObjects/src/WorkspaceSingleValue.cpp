@@ -18,8 +18,7 @@ using std::size_t;
 DECLARE_WORKSPACE(WorkspaceSingleValue)
 
 /// Constructor
-WorkspaceSingleValue::WorkspaceSingleValue(
-    double value, double error, const Parallel::StorageMode storageMode)
+WorkspaceSingleValue::WorkspaceSingleValue(double value, double error, const Parallel::StorageMode storageMode)
     : API::HistoWorkspace(storageMode) {
   initialize(1, 1, 1);
   // Set the "histogram" to the single value
@@ -45,37 +44,29 @@ WorkspaceSingleValue::WorkspaceSingleValue(const WorkspaceSingleValue &other)
  *  @param XLength :: The number of X data points/bin boundaries
  *  @param YLength :: The number of data/error points
  */
-void WorkspaceSingleValue::init(const std::size_t &NVectors,
-                                const std::size_t &XLength,
-                                const std::size_t &YLength) {
+void WorkspaceSingleValue::init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength) {
   (void)NVectors;
   (void)XLength;
   (void)YLength; // Avoid compiler warning
 }
 
-void WorkspaceSingleValue::init(const HistogramData::Histogram &histogram) {
-  UNUSED_ARG(histogram);
-}
+void WorkspaceSingleValue::init(const HistogramData::Histogram &histogram) { UNUSED_ARG(histogram); }
 
 /// Return the underlying Histogram1D at the given workspace index.
-Histogram1D &
-WorkspaceSingleValue::getSpectrumWithoutInvalidation(const size_t /*index*/) {
+Histogram1D &WorkspaceSingleValue::getSpectrumWithoutInvalidation(const size_t /*index*/) {
   data.setMatrixWorkspace(this, 0);
   return data;
 }
 
 /// Rebin the workspace. Not implemented for this workspace.
-void WorkspaceSingleValue::generateHistogram(const std::size_t index,
-                                             const MantidVec &X, MantidVec &Y,
-                                             MantidVec &E,
+void WorkspaceSingleValue::generateHistogram(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
                                              bool skipError) const {
   UNUSED_ARG(index);
   UNUSED_ARG(X);
   UNUSED_ARG(Y);
   UNUSED_ARG(E);
   UNUSED_ARG(skipError);
-  throw std::runtime_error(
-      "generateHistogram() not implemented for WorkspaceSingleValue.");
+  throw std::runtime_error("generateHistogram() not implemented for WorkspaceSingleValue.");
 }
 
 /// Our parent MatrixWorkspace has hardcoded 2, but we need 0.
@@ -88,35 +79,28 @@ namespace Mantid {
 namespace Kernel {
 template <>
 DLLExport Mantid::DataObjects::WorkspaceSingleValue_sptr
-IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>(const std::string &name) const {
+  auto *prop =
+      dynamic_cast<PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<WorkspaceSingleValue>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<WorkspaceSingleValue>.";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 DLLExport Mantid::DataObjects::WorkspaceSingleValue_const_sptr
-IPropertyManager::getValue<
-    Mantid::DataObjects::WorkspaceSingleValue_const_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_const_sptr>(const std::string &name) const {
+  auto *prop =
+      dynamic_cast<PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<WorkspaceSingleValue>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<WorkspaceSingleValue>.";
     throw std::runtime_error(message);
   }
 }

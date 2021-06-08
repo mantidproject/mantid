@@ -21,27 +21,24 @@ namespace {
 Poco::NullOutputStream NULL_STREAM;
 } // namespace
 
-static const std::string PriorityNames_data[] = {
-    "NOT_USED",         "PRIO_FATAL",   "PRIO_CRITICAL",
-    "PRIO_ERROR",       "PRIO_WARNING", "PRIO_NOTICE",
-    "PRIO_INFORMATION", "PRIO_DEBUG",   "PRIO_TRACE"};
+static const std::string PriorityNames_data[] = {"NOT_USED",         "PRIO_FATAL",   "PRIO_CRITICAL",
+                                                 "PRIO_ERROR",       "PRIO_WARNING", "PRIO_NOTICE",
+                                                 "PRIO_INFORMATION", "PRIO_DEBUG",   "PRIO_TRACE"};
 const std::string *Logger::PriorityNames = PriorityNames_data;
 
 /** Constructor
  * @param name :: The class name invoking this logger
  */
 Logger::Logger(const std::string &name)
-    : m_log(&Poco::Logger::get(name)),
-      m_logStream(std::make_unique<ThreadSafeLogStream>(*m_log)),
-      m_levelOffset(0), m_enabled(true) {}
+    : m_log(&Poco::Logger::get(name)), m_logStream(std::make_unique<ThreadSafeLogStream>(*m_log)), m_levelOffset(0),
+      m_enabled(true) {}
 
 /**
  * @param name The new name
  */
 void Logger::setName(const std::string &name) {
   auto *logger = &Poco::Logger::get(name);
-  auto logStream = std::make_unique<ThreadSafeLogStream>(
-      *logger); // don't swap if this throws
+  auto logStream = std::make_unique<ThreadSafeLogStream>(*logger); // don't swap if this throws
 
   using std::swap;
   swap(m_log, logger);
@@ -69,9 +66,7 @@ void Logger::setEnabled(const bool enabled) { m_enabled = enabled; }
  *
  *  @param msg :: The message to log.
  */
-void Logger::fatal(const std::string &msg) {
-  log(msg, Poco::Message::PRIO_FATAL);
-}
+void Logger::fatal(const std::string &msg) { log(msg, Poco::Message::PRIO_FATAL); }
 
 /** If the Logger's log level is at least Poco::Message::PRIO_ERROR, creates a
  *Message with priority
@@ -80,9 +75,7 @@ void Logger::fatal(const std::string &msg) {
  *
  *  @param msg :: The message to log.
  */
-void Logger::error(const std::string &msg) {
-  log(msg, Poco::Message::PRIO_ERROR);
-}
+void Logger::error(const std::string &msg) { log(msg, Poco::Message::PRIO_ERROR); }
 
 /** If the Logger's log level is at least Poco::Message::PRIO_WARNING, creates a
  *Message with
@@ -91,9 +84,7 @@ void Logger::error(const std::string &msg) {
  *
  *  @param msg :: The message to log.
  */
-void Logger::warning(const std::string &msg) {
-  log(msg, Poco::Message::PRIO_WARNING);
-}
+void Logger::warning(const std::string &msg) { log(msg, Poco::Message::PRIO_WARNING); }
 
 /** If the Logger's log level is at least Poco::Message::PRIO_NOTICE, creates a
  *Message with
@@ -102,9 +93,7 @@ void Logger::warning(const std::string &msg) {
  *
  *  @param msg :: The message to log.
  */
-void Logger::notice(const std::string &msg) {
-  log(msg, Poco::Message::PRIO_NOTICE);
-}
+void Logger::notice(const std::string &msg) { log(msg, Poco::Message::PRIO_NOTICE); }
 
 /** If the Logger's log level is at least Poco::Message::PRIO_INFORMATION,
  *creates a Message with
@@ -114,9 +103,7 @@ void Logger::notice(const std::string &msg) {
  *
  *  @param msg :: The message to log.
  */
-void Logger::information(const std::string &msg) {
-  log(msg, Poco::Message::PRIO_INFORMATION);
-}
+void Logger::information(const std::string &msg) { log(msg, Poco::Message::PRIO_INFORMATION); }
 
 /** If the Logger's log level is at least Poco::Message::PRIO_DEBUG, creates a
  *Message with priority
@@ -125,9 +112,7 @@ void Logger::information(const std::string &msg) {
  *
  *  @param msg :: The message to log.
  */
-void Logger::debug(const std::string &msg) {
-  log(msg, Poco::Message::PRIO_DEBUG);
-}
+void Logger::debug(const std::string &msg) { log(msg, Poco::Message::PRIO_DEBUG); }
 
 /** Logs the given message at debug level, followed by the data in buffer.
  *
@@ -142,8 +127,7 @@ void Logger::debug(const std::string &msg) {
  *  @param buffer :: the binary data to log
  *  @param length :: The length of the binaary data to log
  */
-void Logger::dump(const std::string &msg, const void *buffer,
-                  std::size_t length) {
+void Logger::dump(const std::string &msg, const void *buffer, std::size_t length) {
   if (m_enabled) {
     try {
       m_log->dump(msg, buffer, length);
@@ -244,9 +228,7 @@ std::ostream &Logger::notice() { return getLogStream(Priority::PRIO_NOTICE); }
  * the string is sent to the Logger.
  * @returns an std::ostream reference.
  */
-std::ostream &Logger::information() {
-  return getLogStream(Priority::PRIO_INFORMATION);
-}
+std::ostream &Logger::information() { return getLogStream(Priority::PRIO_INFORMATION); }
 
 /** This class implements an ostream interface to the Logger for debug messages.
  *
@@ -261,9 +243,7 @@ std::ostream &Logger::debug() { return getLogStream(Priority::PRIO_DEBUG); }
  * accumulates a message to the buffer
  * @param msg the log message
  */
-void Logger::accumulate(const std::string &msg) {
-  m_logStream->accumulate(msg);
-}
+void Logger::accumulate(const std::string &msg) { m_logStream->accumulate(msg); }
 
 /**
  * Flushes the accumulated message to the current channel

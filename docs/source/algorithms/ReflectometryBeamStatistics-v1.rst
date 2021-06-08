@@ -45,7 +45,7 @@ Usage
 
    dir = Load('ILL/D17/317369.nxs')
    ref = Load('ILL/D17/317370.nxs')
-   
+
    ReflectometryBeamStatistics(
        ReflectedBeamWorkspace=ref,
        ReflectedForeground=[199, 202, 205],

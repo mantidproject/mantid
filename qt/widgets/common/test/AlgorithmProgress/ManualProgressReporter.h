@@ -21,32 +21,24 @@ class ManualProgressReporter : public API::Algorithm {
 public:
   const std::string name() const override { return "ManualProgressReporter"; }
   int version() const override { return 1; };
-  const std::string category() const override {
-    return "Utility\\Development";
-  };
-  const std::string summary() const override {
-    return "Warning: This algorithm just reports progress a few times.";
-  };
+  const std::string category() const override { return "Utility\\Development"; };
+  const std::string summary() const override { return "Warning: This algorithm just reports progress a few times."; };
 
 private:
   void init() override {
-    declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(
-                        "NumberOfProgressReports", 10),
+    declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>("NumberOfProgressReports", 10),
                     "The number of times the progress will be reported.");
-    declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
-                        "StartAnotherAlgorithm", false),
+    declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("StartAnotherAlgorithm", false),
                     "The algorithm will start a child algorithm on every "
                     "iteration, before reporting progress.");
   };
   void exec() override {
     int numberOfReports = getProperty("NumberOfProgressReports");
     bool startAnotherAlg = getProperty("StartAnotherAlgorithm");
-    auto m_progress =
-        std::make_unique<API::Progress>(this, 0.0, 1.0, numberOfReports);
+    auto m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, numberOfReports);
     for (int i = 0; i < numberOfReports; ++i) {
       if (startAnotherAlg) {
-        auto alg =
-            API::AlgorithmManager::Instance().create("ManualProgressReporter");
+        auto alg = API::AlgorithmManager::Instance().create("ManualProgressReporter");
 
         alg->initialize();
         alg->setProperty("NumberOfProgressReports", numberOfReports);

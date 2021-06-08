@@ -22,15 +22,10 @@ using namespace Mantid::Poldi;
 class TestablePoldiDGrid : public PoldiDGrid {
   friend class PoldiDGridTest;
 
-  TestablePoldiDGrid(
-      std::shared_ptr<PoldiAbstractDetector> detector =
-          std::shared_ptr<PoldiAbstractDetector>(),
-      std::shared_ptr<PoldiAbstractChopper> chopper =
-          std::shared_ptr<PoldiAbstractChopper>(),
-      double deltaT = 0.0,
-      std::pair<double, double> wavelengthRange = std::pair<double, double>())
-      : PoldiDGrid(std::move(detector), std::move(chopper), deltaT,
-                   wavelengthRange) {}
+  TestablePoldiDGrid(std::shared_ptr<PoldiAbstractDetector> detector = std::shared_ptr<PoldiAbstractDetector>(),
+                     std::shared_ptr<PoldiAbstractChopper> chopper = std::shared_ptr<PoldiAbstractChopper>(),
+                     double deltaT = 0.0, std::pair<double, double> wavelengthRange = std::pair<double, double>())
+      : PoldiDGrid(std::move(detector), std::move(chopper), deltaT, wavelengthRange) {}
 };
 
 class PoldiDGridTest : public CxxTest::TestSuite {
@@ -55,42 +50,34 @@ public:
   }
 
   void testdeltaD() {
-    std::shared_ptr<MockDetector> mockDetector =
-        std::make_shared<MockDetector>();
+    std::shared_ptr<MockDetector> mockDetector = std::make_shared<MockDetector>();
     std::shared_ptr<MockChopper> mockChopper = std::make_shared<MockChopper>();
 
-    TestablePoldiDGrid grid(mockDetector, mockChopper, 3.0,
-                            std::make_pair(1.1, 5.0));
+    TestablePoldiDGrid grid(mockDetector, mockChopper, 3.0, std::make_pair(1.1, 5.0));
 
     EXPECT_CALL(*mockDetector, centralElement()).WillOnce(Return(199));
     EXPECT_CALL(*mockChopper, distanceFromSample()).WillOnce(Return(11800.0));
-    EXPECT_CALL(*mockDetector, distanceFromSample(199))
-        .WillOnce(Return(1996.017578125));
+    EXPECT_CALL(*mockDetector, distanceFromSample(199)).WillOnce(Return(1996.017578125));
     EXPECT_CALL(*mockDetector, twoTheta(199)).WillOnce(Return(1.577357650));
 
-    EXPECT_CALL(*mockDetector, qLimits(1.1, 5.0))
-        .WillOnce(Return(std::make_pair(1.549564, 8.960878)));
+    EXPECT_CALL(*mockDetector, qLimits(1.1, 5.0)).WillOnce(Return(std::make_pair(1.549564, 8.960878)));
 
     TS_ASSERT_DELTA(grid.deltaD(), 0.000606307, 1e-9);
     TS_ASSERT_EQUALS(grid.m_hasCachedCalculation, true);
   }
 
   void testdRange() {
-    std::shared_ptr<MockDetector> mockDetector =
-        std::make_shared<MockDetector>();
+    std::shared_ptr<MockDetector> mockDetector = std::make_shared<MockDetector>();
     std::shared_ptr<MockChopper> mockChopper = std::make_shared<MockChopper>();
 
-    TestablePoldiDGrid grid(mockDetector, mockChopper, 3.0,
-                            std::make_pair(1.1, 5.0));
+    TestablePoldiDGrid grid(mockDetector, mockChopper, 3.0, std::make_pair(1.1, 5.0));
 
     EXPECT_CALL(*mockDetector, centralElement()).WillOnce(Return(199));
     EXPECT_CALL(*mockChopper, distanceFromSample()).WillOnce(Return(11800.0));
-    EXPECT_CALL(*mockDetector, distanceFromSample(199))
-        .WillOnce(Return(1996.017578125));
+    EXPECT_CALL(*mockDetector, distanceFromSample(199)).WillOnce(Return(1996.017578125));
     EXPECT_CALL(*mockDetector, twoTheta(199)).WillOnce(Return(1.577357650));
 
-    EXPECT_CALL(*mockDetector, qLimits(1.1, 5.0))
-        .WillOnce(Return(std::make_pair(1.549564, 8.960878)));
+    EXPECT_CALL(*mockDetector, qLimits(1.1, 5.0)).WillOnce(Return(std::make_pair(1.549564, 8.960878)));
 
     grid.createGrid();
 
@@ -100,21 +87,17 @@ public:
   }
 
   void testgrid() {
-    std::shared_ptr<MockDetector> mockDetector =
-        std::make_shared<MockDetector>();
+    std::shared_ptr<MockDetector> mockDetector = std::make_shared<MockDetector>();
     std::shared_ptr<MockChopper> mockChopper = std::make_shared<MockChopper>();
 
-    TestablePoldiDGrid grid(mockDetector, mockChopper, 3.0,
-                            std::make_pair(1.1, 5.0));
+    TestablePoldiDGrid grid(mockDetector, mockChopper, 3.0, std::make_pair(1.1, 5.0));
 
     EXPECT_CALL(*mockDetector, centralElement()).WillOnce(Return(199));
     EXPECT_CALL(*mockChopper, distanceFromSample()).WillOnce(Return(11800.0));
-    EXPECT_CALL(*mockDetector, distanceFromSample(199))
-        .WillOnce(Return(1996.017578125));
+    EXPECT_CALL(*mockDetector, distanceFromSample(199)).WillOnce(Return(1996.017578125));
     EXPECT_CALL(*mockDetector, twoTheta(199)).WillOnce(Return(1.577357650));
 
-    EXPECT_CALL(*mockDetector, qLimits(1.1, 5.0))
-        .WillOnce(Return(std::make_pair(1.549564, 8.960878)));
+    EXPECT_CALL(*mockDetector, qLimits(1.1, 5.0)).WillOnce(Return(std::make_pair(1.549564, 8.960878)));
 
     std::vector<double> dgrid = grid.grid();
 

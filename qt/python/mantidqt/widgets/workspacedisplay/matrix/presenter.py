@@ -7,6 +7,8 @@
 #  This file is part of the mantid workbench.
 #
 #
+from qtpy.QtCore import Qt
+
 from mantid.plots.utility import MantidAxType
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.workspacedisplay.data_copier import DataCopier
@@ -22,7 +24,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     NUM_SELECTED_FOR_CONFIRMATION = 10
 
-    def __init__(self, ws, plot=None, parent=None, model=None, view=None, ads_observer=None, container=None,
+    def __init__(self, ws, plot=None, parent=None, window_flags=Qt.Window, model=None, view=None, ads_observer=None, container=None,
                  window_width=600, window_height=400):
         """
         Creates a display for the provided workspace.
@@ -39,7 +41,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
 
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
-        self.view = view if view else MatrixWorkspaceDisplayView(self, parent)
+        self.view = view if view else MatrixWorkspaceDisplayView(self, parent, window_flags)
         self.container = container if container else StatusBarView(parent, self.view, self.model.get_name(),
                                                                    window_width=window_width,
                                                                    window_height=window_height,
@@ -167,7 +169,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
     def action_copy_cells(self, table):
         self.copy_cells(table)
 
-    def _do_action_plot(self, table, axis, get_index, plot_errors=False):
+    def _do_action_plot(self, table, axis, get_index, plot_errors=False, overplot=False):
         if self.plot is None:
             raise ValueError("Trying to do a plot, but no plotting class dependency was injected in the constructor")
         selection_model = table.selectionModel()
@@ -189,7 +191,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
 
         ws_list = [self.model._ws]
         self.plot(ws_list, wksp_indices=[get_index(index) for index in selected], errors=plot_errors,
-                  plot_kwargs=plot_kwargs)
+                  overplot=overplot, plot_kwargs=plot_kwargs)
 
     def action_plot_spectrum(self, table):
         self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row())
@@ -197,11 +199,25 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
     def action_plot_spectrum_with_errors(self, table):
         self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(), plot_errors=True)
 
+    def action_overplot_spectrum(self, table):
+        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(),
+                             plot_errors=False, overplot=True)
+
+    def action_overplot_spectrum_with_errors(self, table):
+        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(),
+                             plot_errors=True, overplot=True)
+
     def action_plot_bin(self, table):
         self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column())
 
     def action_plot_bin_with_errors(self, table):
         self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column(), plot_errors=True)
+
+    def action_overplot_bin(self, table):
+        self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column(), plot_errors=False, overplot=True)
+
+    def action_overplot_bin_with_errors(self, table):
+        self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column(), plot_errors=True, overplot=True)
 
     def action_keypress_copy(self, table):
         selectionModel = table.selectionModel()

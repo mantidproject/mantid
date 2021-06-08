@@ -22,8 +22,7 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionRunPair {
 public:
   TransmissionRunPair();
-  TransmissionRunPair(std::string firstTransmissionRun,
-                      std::string secondTransmissionRun);
+  TransmissionRunPair(std::string firstTransmissionRun, std::string secondTransmissionRun);
   TransmissionRunPair(std::vector<std::string> firstTransmissionRunNumbers,
                       std::vector<std::string> secondTransmissionRunNumbers);
 
@@ -37,10 +36,8 @@ private:
   std::vector<std::string> m_secondTransmissionRunNumbers;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(TransmissionRunPair const &lhs,
-                                               TransmissionRunPair const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(TransmissionRunPair const &lhs,
-                                               TransmissionRunPair const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(TransmissionRunPair const &lhs, TransmissionRunPair const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(TransmissionRunPair const &lhs, TransmissionRunPair const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

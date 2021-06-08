@@ -54,8 +54,7 @@ QString SANSConstants::getPythonFalseKeyword() {
  * @returns tooltip text for h1
  */
 QString SANSConstants::getQResolutionH1ToolTipText() {
-  const QString qResolutionH1ToolTipText =
-      "The height of the first aperture in mm.";
+  const QString qResolutionH1ToolTipText = "The height of the first aperture in mm.";
   return qResolutionH1ToolTipText;
 }
 
@@ -64,8 +63,7 @@ QString SANSConstants::getQResolutionH1ToolTipText() {
  * @returns tooltip text for h2
  */
 QString SANSConstants::getQResolutionH2ToolTipText() {
-  const QString qResolutionH2ToolTipText =
-      "The height of the seoncd aperture in mm.";
+  const QString qResolutionH2ToolTipText = "The height of the seoncd aperture in mm.";
   return qResolutionH2ToolTipText;
 }
 
@@ -74,8 +72,7 @@ QString SANSConstants::getQResolutionH2ToolTipText() {
  * @returns tooltip text for a1
  */
 QString SANSConstants::getQResolutionA1ToolTipText() {
-  const QString qResolutionA1ToolTipText =
-      "The diameter for the first aperture";
+  const QString qResolutionA1ToolTipText = "The diameter for the first aperture";
   return qResolutionA1ToolTipText;
 }
 
@@ -84,8 +81,7 @@ QString SANSConstants::getQResolutionA1ToolTipText() {
  * @returns tooltip text for a2
  */
 QString SANSConstants::getQResolutionA2ToolTipText() {
-  const QString qResolutionA2ToolTipText =
-      "The diameter for the second aperture";
+  const QString qResolutionA2ToolTipText = "The diameter for the second aperture";
   return qResolutionA2ToolTipText;
 }
 
@@ -93,9 +89,7 @@ QString SANSConstants::getQResolutionA2ToolTipText() {
  * Gets the max double value
  * @returns the max double
  */
-double SANSConstants::getMaxDoubleValue() {
-  return std::numeric_limits<double>::max();
-}
+double SANSConstants::getMaxDoubleValue() { return std::numeric_limits<double>::max(); }
 
 /**
  * Get the number of decimals

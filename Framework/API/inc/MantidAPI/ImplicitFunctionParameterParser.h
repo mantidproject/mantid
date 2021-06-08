@@ -12,12 +12,10 @@
  * subscribe method.
  */
 //#define Parser Parser
-#define DECLARE_IMPLICIT_FUNCTION_PARAMETER_PARSER(classname)                  \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_alg_##classname(                 \
-      ((Mantid::API::ImplicitFunctionParameterParserFactory::Instance()        \
-            .subscribe<classname>(#classname)),                                \
-       0));                                                                    \
+#define DECLARE_IMPLICIT_FUNCTION_PARAMETER_PARSER(classname)                                                          \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_alg_##classname(                                                         \
+      ((Mantid::API::ImplicitFunctionParameterParserFactory::Instance().subscribe<classname>(#classname)), 0));        \
   }
 
 //----------------------------------------------------------------------
@@ -66,14 +64,11 @@ class MANTID_API_DLL ImplicitFunctionParameterParser {
 public:
   /// Successor type. Unique shared pointer with stack scoped deletion
   /// semantics.
-  using SuccessorType = boost::interprocess::unique_ptr<
-      ImplicitFunctionParameterParser,
-      DeleterPolicy<ImplicitFunctionParameterParser>>;
+  using SuccessorType =
+      boost::interprocess::unique_ptr<ImplicitFunctionParameterParser, DeleterPolicy<ImplicitFunctionParameterParser>>;
 
-  virtual ImplicitFunctionParameter *
-  createParameter(Poco::XML::Element *parameterElement) = 0;
-  virtual void
-  setSuccessorParser(ImplicitFunctionParameterParser *paramParser) = 0;
+  virtual ImplicitFunctionParameter *createParameter(Poco::XML::Element *parameterElement) = 0;
+  virtual void setSuccessorParser(ImplicitFunctionParameterParser *paramParser) = 0;
   virtual ~ImplicitFunctionParameterParser() = default;
 
 protected:

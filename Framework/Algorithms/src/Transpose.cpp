@@ -23,12 +23,10 @@ using namespace Kernel;
 using namespace API;
 
 void Transpose::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<CommonBinsValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<CommonBinsValidator>()),
                   "The input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
 }
 
@@ -38,8 +36,7 @@ void Transpose::exec() {
 
   // Things to take care of RebinnedOutput workspaces
   DataObjects::RebinnedOutput_const_sptr inRebinWorkspace =
-      std::dynamic_pointer_cast<const DataObjects::RebinnedOutput>(
-          inputWorkspace);
+      std::dynamic_pointer_cast<const DataObjects::RebinnedOutput>(inputWorkspace);
   DataObjects::RebinnedOutput_sptr outRebinWorkspace =
       std::dynamic_pointer_cast<DataObjects::RebinnedOutput>(outputWorkspace);
 
@@ -53,8 +50,7 @@ void Transpose::exec() {
   for (size_t i = 0; i < newXsize; ++i) {
     newXValues[i] = (*inputYAxis)(i);
   }
-  auto newXVector =
-      Kernel::make_cow<HistogramData::HistogramX>(std::move(newXValues));
+  auto newXVector = Kernel::make_cow<HistogramData::HistogramX>(std::move(newXValues));
 
   Progress progress(this, 0.0, 1.0, newNhist * newYsize);
   progress.report("Swapping data values");
@@ -97,8 +93,7 @@ void Transpose::exec() {
  * @param inputWorkspace A parent workspace to initialize from.
  * @return A pointer to the output workspace.
  */
-API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(
-    const API::MatrixWorkspace_const_sptr &inputWorkspace) {
+API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace) {
   Mantid::API::Axis *yAxis = getVerticalAxis(inputWorkspace);
   const size_t oldNhist = inputWorkspace->getNumberHistograms();
   const auto &inX = inputWorkspace->x(0);
@@ -106,8 +101,7 @@ API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(
   const size_t oldVerticalAxislength = yAxis->length();
 
   // The input Y axis may be binned so the new X data should be too
-  size_t newNhist(oldYlength), newXsize(oldVerticalAxislength),
-      newYsize(oldNhist);
+  size_t newNhist(oldYlength), newXsize(oldVerticalAxislength), newYsize(oldNhist);
   MatrixWorkspace_sptr outputWorkspace = inputWorkspace->cloneEmpty();
   outputWorkspace->initialize(newNhist, newXsize, newYsize);
   outputWorkspace->setTitle(inputWorkspace->getTitle());
@@ -138,8 +132,7 @@ API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(
  * @param workspace :: A pointer to a workspace
  * @return An axis pointer for the vertical axis of the input workspace
  */
-API::Axis *Transpose::getVerticalAxis(
-    const API::MatrixWorkspace_const_sptr &workspace) const {
+API::Axis *Transpose::getVerticalAxis(const API::MatrixWorkspace_const_sptr &workspace) const {
   API::Axis *yAxis;
   try {
     yAxis = workspace->getAxis(1);
@@ -148,8 +141,7 @@ API::Axis *Transpose::getVerticalAxis(
   }
   // Can't put text in dataX
   if (yAxis->isText()) {
-    throw std::invalid_argument(
-        "Axis(1) is a text axis. Transpose is unable to cope with text axes.");
+    throw std::invalid_argument("Axis(1) is a text axis. Transpose is unable to cope with text axes.");
   }
   return yAxis;
 }

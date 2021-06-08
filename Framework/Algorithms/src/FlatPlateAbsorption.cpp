@@ -22,24 +22,19 @@ using namespace Geometry;
 using namespace API;
 
 FlatPlateAbsorption::FlatPlateAbsorption()
-    : AbsorptionCorrection(), m_slabHeight(0.0), m_slabWidth(0.0),
-      m_slabThickness(0.0), m_numXSlices(0), m_numYSlices(0), m_numZSlices(0),
-      m_XSliceThickness(0), m_YSliceThickness(0), m_ZSliceThickness(0) {}
+    : AbsorptionCorrection(), m_slabHeight(0.0), m_slabWidth(0.0), m_slabThickness(0.0), m_numXSlices(0),
+      m_numYSlices(0), m_numZSlices(0), m_XSliceThickness(0), m_YSliceThickness(0), m_ZSliceThickness(0) {}
 
 void FlatPlateAbsorption::defineProperties() {
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("SampleHeight", -1.0, mustBePositive,
-                  "The height of the plate in cm");
-  declareProperty("SampleWidth", -1.0, mustBePositive,
-                  "The width of the plate in cm");
-  declareProperty("SampleThickness", -1.0, mustBePositive,
-                  "The thickness of the plate in cm");
+  declareProperty("SampleHeight", -1.0, mustBePositive, "The height of the plate in cm");
+  declareProperty("SampleWidth", -1.0, mustBePositive, "The width of the plate in cm");
+  declareProperty("SampleThickness", -1.0, mustBePositive, "The thickness of the plate in cm");
 
   auto moreThanZero = std::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(0.001);
-  declareProperty("ElementSize", 1.0, moreThanZero,
-                  "The size of one side of an integration element cube in mm");
+  declareProperty("ElementSize", 1.0, moreThanZero, "The size of one side of an integration element cube in mm");
 }
 
 /// Fetch the properties and set the appropriate member variables
@@ -75,18 +70,14 @@ std::string FlatPlateAbsorption::sampleXML() {
 
   std::ostringstream xmlShapeStream;
   xmlShapeStream << " <cuboid id=\"sample-shape\"> "
-                 << "<left-front-bottom-point x=\"" << szX + samplePos.X()
-                 << "\" y=\"" << -szY + samplePos.Y() << "\" z=\""
-                 << -szZ + samplePos.Z() << "\"  /> "
-                 << "<left-front-top-point  x=\"" << szX + samplePos.X()
-                 << "\" y=\"" << szY + samplePos.Y() << "\" z=\""
-                 << -szZ + samplePos.Z() << "\"  /> "
-                 << "<left-back-bottom-point  x=\"" << szX + samplePos.X()
-                 << "\" y=\"" << -szY + samplePos.Y() << "\" z=\""
-                 << szZ + samplePos.Z() << "\"  /> "
-                 << "<right-front-bottom-point  x=\"" << -szX + samplePos.X()
-                 << "\" y=\"" << -szY + samplePos.Y() << "\" z=\""
-                 << -szZ + samplePos.Z() << "\"  /> "
+                 << "<left-front-bottom-point x=\"" << szX + samplePos.X() << "\" y=\"" << -szY + samplePos.Y()
+                 << "\" z=\"" << -szZ + samplePos.Z() << "\"  /> "
+                 << "<left-front-top-point  x=\"" << szX + samplePos.X() << "\" y=\"" << szY + samplePos.Y()
+                 << "\" z=\"" << -szZ + samplePos.Z() << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << szX + samplePos.X() << "\" y=\"" << -szY + samplePos.Y()
+                 << "\" z=\"" << szZ + samplePos.Z() << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << -szX + samplePos.X() << "\" y=\"" << -szY + samplePos.Y()
+                 << "\" z=\"" << -szZ + samplePos.Z() << "\"  /> "
                  << "</cuboid>";
 
   return xmlShapeStream.str();
@@ -125,8 +116,7 @@ void FlatPlateAbsorption::initialiseCachedDistances() {
         // been defined
         // to fully enclose the requested cuboid
         if (!m_sampleObject->isValid(m_elementPositions[counter])) {
-          throw Exception::InstrumentDefinitionError(
-              "Integration element not located within sample");
+          throw Exception::InstrumentDefinitionError("Integration element not located within sample");
         }
         // Create track for distance in sample before scattering point
         Track incoming(m_elementPositions[counter], m_beamDirection * -1.0);
@@ -134,8 +124,7 @@ void FlatPlateAbsorption::initialiseCachedDistances() {
         m_L1s[counter] = incoming.cbegin()->distFromStart;
 
         // Also calculate element volume here
-        m_elementVolumes[counter] =
-            m_XSliceThickness * m_YSliceThickness * m_ZSliceThickness;
+        m_elementVolumes[counter] = m_XSliceThickness * m_YSliceThickness * m_ZSliceThickness;
 
         counter++;
       }

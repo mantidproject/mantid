@@ -30,9 +30,7 @@ using namespace API;
 
 DECLARE_ALGORITHM(SaveBankScatteringAngles)
 
-const std::string SaveBankScatteringAngles::name() const {
-  return "SaveBankScatteringAngles";
-}
+const std::string SaveBankScatteringAngles::name() const { return "SaveBankScatteringAngles"; }
 
 const std::string SaveBankScatteringAngles::summary() const {
   return "Save scattering angles two-theta and phi for each workspace in a "
@@ -41,28 +39,22 @@ const std::string SaveBankScatteringAngles::summary() const {
 
 int SaveBankScatteringAngles::version() const { return 1; }
 
-const std::vector<std::string> SaveBankScatteringAngles::seeAlso() const {
-  return {"SaveFocusedXYE"};
-}
+const std::vector<std::string> SaveBankScatteringAngles::seeAlso() const { return {"SaveFocusedXYE"}; }
 
-const std::string SaveBankScatteringAngles::category() const {
-  return "DataHandling\\Text;Diffraction\\DataHandling";
-}
+const std::string SaveBankScatteringAngles::category() const { return "DataHandling\\Text;Diffraction\\DataHandling"; }
 
 const std::string SaveBankScatteringAngles::PROP_FILENAME = "Filename";
 
 const std::string SaveBankScatteringAngles::PROP_INPUT_WS = "InputWorkspace";
 
 void SaveBankScatteringAngles::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      PROP_INPUT_WS, "", Kernel::Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PROP_INPUT_WS, "", Kernel::Direction::Input),
                   "A GroupWorkspace where every sub-workspace is a "
                   "single-spectra focused run corresponding to a particular "
                   "bank");
 
   const static std::vector<std::string> exts{".txt", ".new"};
-  declareProperty(std::make_unique<FileProperty>(PROP_FILENAME, "",
-                                                 FileProperty::Save, exts),
+  declareProperty(std::make_unique<FileProperty>(PROP_FILENAME, "", FileProperty::Save, exts),
                   "The name of the file to save to");
 }
 
@@ -95,8 +87,7 @@ void SaveBankScatteringAngles::exec() {
     const auto group = matrixWS->getSpectrum(0).getSpectrumNo();
 
     outFile << "bank :    " << i << "  "
-            << "group:     " << group << "    " << twoTheta << "    " << phi
-            << '\n';
+            << "group:     " << group << "    " << twoTheta << "    " << phi << '\n';
   }
 
   outFile.close();
@@ -123,8 +114,7 @@ std::map<std::string, std::string> SaveBankScatteringAngles::validateInputs() {
       }
     } else {
       issues[PROP_INPUT_WS] =
-          "The workspace " + ws->getName() +
-          " is of the wrong type. It should be a MatrixWorkspace";
+          "The workspace " + ws->getName() + " is of the wrong type. It should be a MatrixWorkspace";
       return issues;
     }
   }

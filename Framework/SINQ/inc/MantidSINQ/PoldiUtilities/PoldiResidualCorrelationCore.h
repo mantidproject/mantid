@@ -24,8 +24,7 @@ namespace Poldi {
         @author Michael Wedel, Paul Scherrer Institut - SINQ
         @date 20/11/2014
   */
-class MANTID_SINQ_DLL PoldiResidualCorrelationCore
-    : public PoldiAutoCorrelationCore {
+class MANTID_SINQ_DLL PoldiResidualCorrelationCore : public PoldiAutoCorrelationCore {
 public:
   PoldiResidualCorrelationCore(Kernel::Logger &g_log, double weight = 0.0);
   double getWeight() const;
@@ -33,21 +32,15 @@ public:
 
 protected:
   double getNormCounts(int x, int y) const override;
-  double
-  reduceChopperSlitList(const std::vector<UncertainValue> &valuesWithSigma,
-                        double weight) const override;
+  double reduceChopperSlitList(const std::vector<UncertainValue> &valuesWithSigma, double weight) const override;
   double calculateAverage(const std::vector<double> &values) const;
-  double calculateAverageDeviationFromValue(const std::vector<double> &values,
-                                            double value) const;
-  double calculateCorrelationBackground(double sumOfCorrelationCounts,
-                                        double sumOfCounts) const override;
+  double calculateAverageDeviationFromValue(const std::vector<double> &values, double value) const;
+  double calculateCorrelationBackground(double sumOfCorrelationCounts, double sumOfCounts) const override;
 
-  DataObjects::Workspace2D_sptr
-  finalizeCalculation(const std::vector<double> &correctedCorrelatedIntensities,
-                      const std::vector<double> &dValues) const override;
-  void distributeCorrelationCounts(
-      const std::vector<double> &correctedCorrelatedIntensities,
-      const std::vector<double> &dValues) const;
+  DataObjects::Workspace2D_sptr finalizeCalculation(const std::vector<double> &correctedCorrelatedIntensities,
+                                                    const std::vector<double> &dValues) const override;
+  void distributeCorrelationCounts(const std::vector<double> &correctedCorrelatedIntensities,
+                                   const std::vector<double> &dValues) const;
   void correctCountData() const;
 
   void addToCountData(int x, int y, double delta) const;

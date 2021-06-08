@@ -57,8 +57,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"Fit", "ConvertFitFunctionForMuonTFAsymmetry",
-            "EstimateMuonAsymmetryFromCounts"};
+    return {"Fit", "ConvertFitFunctionForMuonTFAsymmetry", "EstimateMuonAsymmetryFromCounts"};
   }
 
   /// Algorithm's category for identification overriding a virtual method
@@ -73,10 +72,9 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   double getNormValue(API::CompositeFunction_sptr &func);
   void addNormalizedFits(size_t numberOfFits, const std::vector<double> &);
-  void normalizeWorkspace(
-      const API::MatrixWorkspace_sptr &normalizedWorkspace,
-      const API::MatrixWorkspace_const_sptr &unnormalizedWorkspace,
-      size_t workspaceIndex, double N0);
+  void normalizeWorkspace(const API::MatrixWorkspace_sptr &normalizedWorkspace,
+                          const API::MatrixWorkspace_const_sptr &unnormalizedWorkspace, size_t workspaceIndex,
+                          double N0);
 };
 
 } // namespace Algorithms

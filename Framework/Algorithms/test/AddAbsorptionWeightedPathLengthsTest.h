@@ -28,12 +28,8 @@ class AddAbsorptionWeightedPathLengthsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AddAbsorptionWeightedPathLengthsTest *createSuite() {
-    return new AddAbsorptionWeightedPathLengthsTest();
-  }
-  static void destroySuite(AddAbsorptionWeightedPathLengthsTest *suite) {
-    delete suite;
-  }
+  static AddAbsorptionWeightedPathLengthsTest *createSuite() { return new AddAbsorptionWeightedPathLengthsTest(); }
+  static void destroySuite(AddAbsorptionWeightedPathLengthsTest *suite) { delete suite; }
 
   void test_spherical_sample_single_onbeam_detector() {
     using namespace Mantid::Kernel;
@@ -79,8 +75,7 @@ public:
     const int NPEAKS = 10;
     // this sets up a sample with a spherical shape of radius = 1mm
     auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(NPEAKS);
-    auto shape =
-        ComponentCreationHelper::createSphere(0.001, {0, 0, 0}, "sample-shape");
+    auto shape = ComponentCreationHelper::createSphere(0.001, {0, 0, 0}, "sample-shape");
     peaksWS->mutableSample().setShape(shape);
     setMaterialToVanadium(peaksWS);
 
@@ -124,8 +119,7 @@ public:
     setTestInstrument(peaksWS);
     setMaterialToVanadium(peaksWS);
 
-    auto sphere =
-        ComponentCreationHelper::createSphere(0.002, {0, 0, 0}, "environment");
+    auto sphere = ComponentCreationHelper::createSphere(0.002, {0, 0, 0}, "environment");
 
     auto can = std::make_shared<Mantid::Geometry::Container>(sphere);
     auto environment = std::make_unique<SampleEnvironment>("environment", can);
@@ -143,8 +137,7 @@ public:
     const int NPEAKS = 10;
     // this sets up a sample with a spherical shape of radius = 1mm
     auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(NPEAKS);
-    auto shape =
-        ComponentCreationHelper::createSphere(0.001, {0, 0, 0}, "sample-shape");
+    auto shape = ComponentCreationHelper::createSphere(0.001, {0, 0, 0}, "sample-shape");
     peaksWS->mutableSample().setShape(shape);
     setMaterialToVanadium(peaksWS);
 
@@ -171,30 +164,24 @@ private:
     const double cylHeight(0.0002);
     // One object
     auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-        cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
-        "pixel-shape");
+        cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.), "pixel-shape");
 
     Detector *det = new Detector("det", 1, pixelShape, nullptr);
     det->setPos(0, 0, 1);
     testInst->add(det);
     testInst->markAsDetector(det);
 
-    ComponentCreationHelper::addSourceToInstrument(testInst,
-                                                   V3D(0.0, 0.0, -10.0));
-    ComponentCreationHelper::addSampleToInstrument(testInst,
-                                                   V3D(0.0, 0.0, 0.0));
+    ComponentCreationHelper::addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0));
+    ComponentCreationHelper::addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
 
     peaksWS->setInstrument(testInst);
 
-    auto shape =
-        ComponentCreationHelper::createSphere(0.001, {0, 0, 0}, "sample-shape");
+    auto shape = ComponentCreationHelper::createSphere(0.001, {0, 0, 0}, "sample-shape");
     peaksWS->mutableSample().setShape(shape);
   }
   void setMaterialToVanadium(std::shared_ptr<PeaksWorkspace> peaksWS) {
-    auto shape = std::shared_ptr<IObject>(
-        peaksWS->sample().getShape().cloneWithMaterial(Mantid::Kernel::Material(
-            "Vanadium", Mantid::PhysicalConstants::getNeutronAtom(23, 0),
-            0.072)));
+    auto shape = std::shared_ptr<IObject>(peaksWS->sample().getShape().cloneWithMaterial(
+        Mantid::Kernel::Material("Vanadium", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072)));
     peaksWS->mutableSample().setShape(shape);
   }
 };

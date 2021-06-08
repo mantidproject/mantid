@@ -25,9 +25,7 @@ class EQSANSCorrectFrameTest : public CxxTest::TestSuite {
 public:
   // boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EQSANSCorrectFrameTest *createSuite() {
-    return new EQSANSCorrectFrameTest();
-  }
+  static EQSANSCorrectFrameTest *createSuite() { return new EQSANSCorrectFrameTest(); }
 
   static void destroySuite(EQSANSCorrectFrameTest *suite) {
     suite->cleanup();
@@ -36,20 +34,17 @@ public:
 
   // constructor
   EQSANSCorrectFrameTest()
-      : m_pulseWidth(1.E6 / 60), m_frameWidth(2.E6 / 60), m_minTOF(4.1E6 / 60),
-        m_frameSkipping(true), m_bankSize(2) {
+      : m_pulseWidth(1.E6 / 60), m_frameWidth(2.E6 / 60), m_minTOF(4.1E6 / 60), m_frameSkipping(true), m_bankSize(2) {
 
     // bank contains m_bankSize^2 pixels
     const int numBanks = 1;
-    m_ews = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-        numBanks, m_bankSize);
+    m_ews = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(numBanks, m_bankSize);
     m_ews->getAxis(0)->setUnit("TOF");
 
     // insert one event in each pixel
     std::vector<double> tofs = {0.05, 0.15, 1.05, 1.15};
     const double pulseWidth(m_pulseWidth);
-    std::transform(tofs.begin(), tofs.end(), tofs.begin(),
-                   [&pulseWidth](double tof) { return tof * pulseWidth; });
+    std::transform(tofs.begin(), tofs.end(), tofs.begin(), [&pulseWidth](double tof) { return tof * pulseWidth; });
     const int numPixels(m_bankSize * m_bankSize);
     for (int i = 0; i < numPixels; i++) {
       EventList &evlist = m_ews->getSpectrum(i);
@@ -78,8 +73,7 @@ public:
     alg.setProperty("PathToPixel", true);
     alg.execute();
     std::vector<double> tofs = {7.05, 4.15, 5.05, 6.15};
-    std::transform(tofs.begin(), tofs.end(), tofs.begin(),
-                   [&pulseWidth](double tof) { return tof * pulseWidth; });
+    std::transform(tofs.begin(), tofs.end(), tofs.begin(), [&pulseWidth](double tof) { return tof * pulseWidth; });
     for (int i = 0; i < numPixels; i++) {
       std::vector<TofEvent> &events = m_ews->getSpectrum(i).getEvents();
       TS_ASSERT_EQUALS(events.size(), 1);

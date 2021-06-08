@@ -23,20 +23,15 @@ class ModifyDetectorDotDatFileTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ModifyDetectorDotDatFileTest *createSuite() {
-    return new ModifyDetectorDotDatFileTest();
-  }
-  static void destroySuite(ModifyDetectorDotDatFileTest *suite) {
-    delete suite;
-  }
+  static ModifyDetectorDotDatFileTest *createSuite() { return new ModifyDetectorDotDatFileTest(); }
+  static void destroySuite(ModifyDetectorDotDatFileTest *suite) { delete suite; }
 
   // Helper to set up a simple workspace for testing
   void makeTestWorkspace(const std::string &ads_name) {
     IAlgorithm *loader;
     loader = new Mantid::DataHandling::LoadEmptyInstrument;
     loader->initialize();
-    TS_ASSERT_THROWS_NOTHING(loader->setPropertyValue(
-        "Filename", "unit_testing/MAPS_Definition_Reduced.xml"));
+    TS_ASSERT_THROWS_NOTHING(loader->setPropertyValue("Filename", "unit_testing/MAPS_Definition_Reduced.xml"));
     loader->setPropertyValue("OutputWorkspace", ads_name);
     TS_ASSERT_THROWS_NOTHING(loader->execute());
     TS_ASSERT(loader->isExecuted());
@@ -60,18 +55,15 @@ public:
 
     // Test Properties
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", wsName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputFilename", "detector_few_maps.dat"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputFilename", "detector_few_maps_result.dat"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputFilename", "detector_few_maps.dat"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputFilename", "detector_few_maps_result.dat"));
 
     // Test execution
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Check output file
-    std::string fullFilename =
-        alg.getPropertyValue("OutputFilename"); // Get absolute path
+    std::string fullFilename = alg.getPropertyValue("OutputFilename"); // Get absolute path
     // has the algorithm written the output file to disk?
     bool OutputFileExists = Poco::File(fullFilename).exists();
     TS_ASSERT(OutputFileExists);
@@ -91,8 +83,7 @@ public:
 
       // Check header has name of algorithm in it
       getline(in, header);
-      bool headerHasNameOfAlgorithmInIt =
-          header.find("ModifyDetectorDotDatFile") != std::string::npos;
+      bool headerHasNameOfAlgorithmInIt = header.find("ModifyDetectorDotDatFile") != std::string::npos;
       TS_ASSERT(headerHasNameOfAlgorithmInIt);
 
       // Ignore 2nd line
@@ -109,8 +100,7 @@ public:
         if (detectorData.substr(0, 9) == " 11208002") {
           detector11208002found = true;
           std::istringstream is(detectorData);
-          TS_ASSERT_THROWS_NOTHING(is >> detNo >> offset >> l2 >> code >>
-                                   theta >> phi);
+          TS_ASSERT_THROWS_NOTHING(is >> detNo >> offset >> l2 >> code >> theta >> phi);
         }
       }
 

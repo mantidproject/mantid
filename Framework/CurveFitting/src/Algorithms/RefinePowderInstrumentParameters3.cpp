@@ -32,10 +32,9 @@ DECLARE_ALGORITHM(RefinePowderInstrumentParameters3)
 /** Constructor
  */
 RefinePowderInstrumentParameters3::RefinePowderInstrumentParameters3()
-    : m_dataWS(), m_wsIndex(-1), m_paramTable(), m_fitMode(MONTECARLO),
-      m_stdMode(CONSTANT), m_numWalkSteps(-1), m_randomSeed(-1),
-      m_profileParameters(), m_positionFunc(), m_dampingFactor(0.),
-      m_bestChiSq(0.), m_bestChiSqStep(-1), m_bestChiSqGroup(-1) {}
+    : m_dataWS(), m_wsIndex(-1), m_paramTable(), m_fitMode(MONTECARLO), m_stdMode(CONSTANT), m_numWalkSteps(-1),
+      m_randomSeed(-1), m_profileParameters(), m_positionFunc(), m_dampingFactor(0.), m_bestChiSq(0.),
+      m_bestChiSqStep(-1), m_bestChiSqGroup(-1) {}
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties
@@ -43,56 +42,44 @@ RefinePowderInstrumentParameters3::RefinePowderInstrumentParameters3()
 void RefinePowderInstrumentParameters3::init() {
   // Peak position workspace
   declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace2D>>(
-          "InputPeakPositionWorkspace", "Anonymous", Direction::Input),
+      std::make_unique<WorkspaceProperty<Workspace2D>>("InputPeakPositionWorkspace", "Anonymous", Direction::Input),
       "Data workspace containing workspace positions in TOF agains dSpacing.");
 
   // Workspace Index
-  declareProperty(
-      "WorkspaceIndex", 0,
-      "Workspace Index of the peak positions in PeakPositionWorkspace.");
+  declareProperty("WorkspaceIndex", 0, "Workspace Index of the peak positions in PeakPositionWorkspace.");
 
   // Output workspace
   declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace2D>>(
-          "OutputPeakPositionWorkspace", "Anonymous2", Direction::Output),
+      std::make_unique<WorkspaceProperty<Workspace2D>>("OutputPeakPositionWorkspace", "Anonymous2", Direction::Output),
       "Output data workspace containing refined workspace positions in TOF "
       "agains dSpacing.");
 
   // Input Table workspace containing instrument profile parameters
-  declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "InputInstrumentParameterWorkspace", "Anonymous3", Direction::Input),
-      "INput tableWorkspace containg instrument's parameters.");
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("InputInstrumentParameterWorkspace", "Anonymous3",
+                                                                      Direction::Input),
+                  "INput tableWorkspace containg instrument's parameters.");
 
   // Output table workspace containing the refined parameters
-  declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "OutputInstrumentParameterWorkspace", "Anonymous4",
-          Direction::Output),
-      "Output tableworkspace containing instrument's fitted parameters. ");
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("OutputInstrumentParameterWorkspace",
+                                                                      "Anonymous4", Direction::Output),
+                  "Output tableworkspace containing instrument's fitted parameters. ");
 
   // Refinement algorithm
   vector<string> algoptions{"OneStepFit", "MonteCarlo"};
   auto validator = std::make_shared<Kernel::StringListValidator>(algoptions);
-  declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
-                  "Algorithm to refine the instrument parameters.");
+  declareProperty("RefinementAlgorithm", "MonteCarlo", validator, "Algorithm to refine the instrument parameters.");
 
   // Random walk steps
-  declareProperty("RandomWalkSteps", 10000,
-                  "Number of Monte Carlo random walk steps. ");
+  declareProperty("RandomWalkSteps", 10000, "Number of Monte Carlo random walk steps. ");
 
   // Random seed
-  declareProperty("MonteCarloRandomSeed", 0,
-                  "Random seed for Monte Carlo simulation. ");
+  declareProperty("MonteCarloRandomSeed", 0, "Random seed for Monte Carlo simulation. ");
 
   // Method to calcualte the standard error of peaks
   vector<string> stdoptions{"ConstantValue", "UseInputValue"};
-  auto listvalidator =
-      std::make_shared<Kernel::StringListValidator>(stdoptions);
-  declareProperty(
-      "StandardError", "ConstantValue", listvalidator,
-      "Algorithm to calculate the standard error of peak positions.");
+  auto listvalidator = std::make_shared<Kernel::StringListValidator>(stdoptions);
+  declareProperty("StandardError", "ConstantValue", listvalidator,
+                  "Algorithm to calculate the standard error of peak positions.");
 
   // Damping factor
   declareProperty("Damping", 1.0,
@@ -100,12 +87,10 @@ void RefinePowderInstrumentParameters3::init() {
                   "Gauss-Newton'. (2) Monte Carlo. ");
 
   // Anealing temperature
-  declareProperty("AnnealingTemperature", 1.0,
-                  "Starting annealing temperature.");
+  declareProperty("AnnealingTemperature", 1.0, "Starting annealing temperature.");
 
   // Monte Carlo iterations
-  declareProperty("MonteCarloIterations", 100,
-                  "Number of iterations in Monte Carlo random walk.");
+  declareProperty("MonteCarloIterations", 100, "Number of iterations in Monte Carlo random walk.");
 
   // Output
   declareProperty("ChiSquare", DBL_MAX, Direction::Output);
@@ -135,8 +120,7 @@ void RefinePowderInstrumentParameters3::exec() {
   m_positionFunc->function(domain, rawvalues);
 
   // d) Calcualte statistic
-  double startchi2 =
-      calculateFunctionError(m_positionFunc, m_dataWS, m_wsIndex);
+  double startchi2 = calculateFunctionError(m_positionFunc, m_dataWS, m_wsIndex);
 
   // b) Fit by type
   double finalchi2 = DBL_MAX;
@@ -160,8 +144,7 @@ void RefinePowderInstrumentParameters3::exec() {
   }
 
   // 4. Process the output
-  TableWorkspace_sptr fitparamtable =
-      genOutputProfileTable(m_profileParameters, startchi2, finalchi2);
+  TableWorkspace_sptr fitparamtable = genOutputProfileTable(m_profileParameters, startchi2, finalchi2);
   setProperty("OutputInstrumentParameterWorkspace", fitparamtable);
 
   Workspace2D_sptr outdataws = genOutputWorkspace(domain, rawvalues);
@@ -178,8 +161,7 @@ void RefinePowderInstrumentParameters3::processInputProperties() {
   m_dataWS = getProperty("InputPeakPositionWorkspace");
 
   m_wsIndex = getProperty("WorkspaceIndex");
-  if (m_wsIndex < 0 ||
-      m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms())) {
+  if (m_wsIndex < 0 || m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms())) {
     throw runtime_error("Input workspace index is out of range.");
   }
 
@@ -211,8 +193,7 @@ void RefinePowderInstrumentParameters3::processInputProperties() {
   // Monte Carlo
   m_numWalkSteps = getProperty("RandomWalkSteps");
   if (m_numWalkSteps <= 0)
-    throw runtime_error(
-        "Monte Carlo walk steps cannot be less or equal to 0. ");
+    throw runtime_error("Monte Carlo walk steps cannot be less or equal to 0. ");
 
   m_randomSeed = getProperty("MonteCarloRandomSeed");
 
@@ -231,8 +212,8 @@ void RefinePowderInstrumentParameters3::parseTableWorkspaces() {
 //----------------------------------------------------------------------------------------------
 /** Parse table workspace to a map of Parameters
  */
-void RefinePowderInstrumentParameters3::parseTableWorkspace(
-    const TableWorkspace_sptr &tablews, map<string, Parameter> &parammap) {
+void RefinePowderInstrumentParameters3::parseTableWorkspace(const TableWorkspace_sptr &tablews,
+                                                            map<string, Parameter> &parammap) {
   // 1. Process Table column names
   std::vector<std::string> colnames = tablews->getColumnNames();
   map<string, size_t> colnamedict;
@@ -246,8 +227,7 @@ void RefinePowderInstrumentParameters3::parseTableWorkspace(
   int istep = getStringIndex(colnamedict, "StepSize");
 
   if (iname < 0 || ivalue < 0 || ifit < 0)
-    throw runtime_error(
-        "TableWorkspace does not have column Name, Value and/or Fit.");
+    throw runtime_error("TableWorkspace does not have column Name, Value and/or Fit.");
 
   // 3. Parse
   size_t numrows = tablews->rowCount();
@@ -324,8 +304,8 @@ double RefinePowderInstrumentParameters3::execFitParametersMC() {
 
   // 2. Summary
   stringstream sumss;
-  sumss << "Monte Carlo Results:  Best Chi^2 = " << chisq << " @ Step "
-        << m_bestChiSqStep << ", Group " << m_bestChiSqGroup;
+  sumss << "Monte Carlo Results:  Best Chi^2 = " << chisq << " @ Step " << m_bestChiSqStep << ", Group "
+        << m_bestChiSqGroup;
   g_log.notice(sumss.str());
 
   return chisq;
@@ -337,8 +317,7 @@ double RefinePowderInstrumentParameters3::execFitParametersMC() {
  * Helpful:     double curchi2 = calculateD2TOFFunction(mFunction, domain,
  *values, rawY, rawE);
  */
-double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
-    map<string, Parameter> inparammap) {
+double RefinePowderInstrumentParameters3::doSimulatedAnnealing(map<string, Parameter> inparammap) {
   // 1. Prepare/initialization
   //    Data structure
   size_t numpts = m_dataWS->y(m_wsIndex).size();
@@ -374,8 +353,7 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
 
   double chisq0 = calculateFunction(parammap, vecY);
   double chisq0x = calculateFunctionError(m_positionFunc, m_dataWS, m_wsIndex);
-  g_log.notice() << "[DBx510] Starting Chi^2 = " << chisq0 << " (homemade) "
-                 << chisq0x << " (Levenber-marquadt)\n";
+  g_log.notice() << "[DBx510] Starting Chi^2 = " << chisq0 << " (homemade) " << chisq0x << " (Levenber-marquadt)\n";
 
   bookKeepMCResult(parammap, chisq0, -1, -1,
                    bestresult); // bestresults, maxnumresults);
@@ -414,8 +392,7 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
       */
 
       // c) Determine to accept change
-      bool acceptpropvalues =
-          acceptOrDenyChange(propchisq, chisqx, temperature);
+      bool acceptpropvalues = acceptOrDenyChange(propchisq, chisqx, temperature);
 
       // d) Change current chi^2, apply change, and book keep
       if (acceptpropvalues) {
@@ -432,8 +409,7 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
 
     // f) Annealing
     if (numrecentsteps >= 10) {
-      double acceptratio = static_cast<double>(numrecentacceptance) /
-                           static_cast<double>(numrecentsteps);
+      double acceptratio = static_cast<double>(numrecentacceptance) / static_cast<double>(numrecentsteps);
       if (acceptratio < 0.2) {
         // i) Low acceptance, need to raise temperature
         temperature *= 2.0;
@@ -458,9 +434,7 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
   // 5. Use regular minimzer to try to get a better result
   string fitstatus;
   double fitchisq;
-  bool goodfit =
-      doFitFunction(m_positionFunc, m_dataWS, m_wsIndex,
-                    "Levenberg-MarquardtMD", 1000, fitchisq, fitstatus);
+  bool goodfit = doFitFunction(m_positionFunc, m_dataWS, m_wsIndex, "Levenberg-MarquardtMD", 1000, fitchisq, fitstatus);
 
   bool restoremcresult = false;
   if (goodfit) {
@@ -488,11 +462,9 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
   double chisqfx = calculateFunctionError(m_positionFunc, m_dataWS, m_wsIndex);
   map<string, Parameter> emptymap;
   double chisqf0 = calculateFunction(emptymap, vecY);
-  g_log.notice() << "Best Chi^2 (L-V) = " << chisqfx
-                 << ", (homemade) = " << chisqf0 << '\n';
+  g_log.notice() << "Best Chi^2 (L-V) = " << chisqfx << ", (homemade) = " << chisqf0 << '\n';
   g_log.warning() << "Data Size = " << m_dataWS->x(m_wsIndex).size()
-                  << ", Number of parameters = "
-                  << m_positionFunc->getParameterNames().size() << '\n';
+                  << ", Number of parameters = " << m_positionFunc->getParameterNames().size() << '\n';
 
   return chisqf;
 }
@@ -505,23 +477,20 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
  * @param curparammap: current parameter maps
  * @param newparammap: parameters map containing new/proposed value
  */
-void RefinePowderInstrumentParameters3::proposeNewValues(
-    const vector<string> &mcgroup, map<string, Parameter> &curparammap,
-    map<string, Parameter> &newparammap, double currchisq) {
+void RefinePowderInstrumentParameters3::proposeNewValues(const vector<string> &mcgroup,
+                                                         map<string, Parameter> &curparammap,
+                                                         map<string, Parameter> &newparammap, double currchisq) {
   for (const auto &paramname : mcgroup) {
     // random number between -1 and 1
-    double randomnumber =
-        2 * static_cast<double>(rand()) / static_cast<double>(RAND_MAX) - 1.0;
+    double randomnumber = 2 * static_cast<double>(rand()) / static_cast<double>(RAND_MAX) - 1.0;
 
     // parameter information
     Parameter param = curparammap[paramname];
-    double stepsize = m_dampingFactor * currchisq *
-                      (param.curvalue * param.mcA1 + param.mcA0) *
-                      randomnumber / m_bestChiSq;
+    double stepsize =
+        m_dampingFactor * currchisq * (param.curvalue * param.mcA1 + param.mcA0) * randomnumber / m_bestChiSq;
 
-    g_log.debug() << "Parameter " << paramname << " Step Size = " << stepsize
-                  << " From " << param.mcA0 << ", " << param.mcA1 << ", "
-                  << param.curvalue << ", " << m_dampingFactor << '\n';
+    g_log.debug() << "Parameter " << paramname << " Step Size = " << stepsize << " From " << param.mcA0 << ", "
+                  << param.mcA1 << ", " << param.curvalue << ", " << m_dampingFactor << '\n';
 
     // drunk walk or random walk
     double newvalue;
@@ -599,9 +568,8 @@ void RefinePowderInstrumentParameters3::proposeNewValues(
       p.maxabsstepsize = fabs(stepsize);
 
     g_log.debug() << "[DBx257] " << paramname << "\t"
-                  << "Proposed value = " << setw(15) << newvalue
-                  << " (orig = " << param.curvalue << ",  step = " << stepsize
-                  << "), totRwp = " << currchisq << '\n';
+                  << "Proposed value = " << setw(15) << newvalue << " (orig = " << param.curvalue
+                  << ",  step = " << stepsize << "), totRwp = " << currchisq << '\n';
   }
 }
 
@@ -612,9 +580,7 @@ void RefinePowderInstrumentParameters3::proposeNewValues(
  * @param newchisq:  new chi^2 (as a factor in step size)
  * @param temperature:  annealing temperature
  */
-bool RefinePowderInstrumentParameters3::acceptOrDenyChange(double curchisq,
-                                                           double newchisq,
-                                                           double temperature) {
+bool RefinePowderInstrumentParameters3::acceptOrDenyChange(double curchisq, double newchisq, double temperature) {
   bool accept;
 
   if (newchisq < curchisq) {
@@ -633,9 +599,8 @@ bool RefinePowderInstrumentParameters3::acceptOrDenyChange(double curchisq,
 //----------------------------------------------------------------------------------------------
 /** Book keep the best fitting result
  */
-void RefinePowderInstrumentParameters3::bookKeepMCResult(
-    map<string, Parameter> parammap, double chisq, int istep, int igroup,
-    map<string, Parameter> &bestparammap)
+void RefinePowderInstrumentParameters3::bookKeepMCResult(map<string, Parameter> parammap, double chisq, int istep,
+                                                         int igroup, map<string, Parameter> &bestparammap)
 // vector<pair<double, map<string, Parameter> > >& bestresults,
 // size_t maxnumresults)
 {
@@ -678,8 +643,8 @@ void RefinePowderInstrumentParameters3::bookKeepMCResult(
 //----------------------------------------------------------------------------------------------
 /** Set up Monte Carlo random walk strategy
  */
-void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(
-    map<string, Parameter> &parammap, vector<vector<string>> &mcgroups) {
+void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(map<string, Parameter> &parammap,
+                                                                vector<vector<string>> &mcgroups) {
   stringstream dboutss;
   dboutss << "Monte Carlo minimizer refines: ";
 
@@ -752,15 +717,13 @@ void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(
  *list
  * @param parammap :: parammap
  */
-void RefinePowderInstrumentParameters3::addParameterToMCMinimize(
-    vector<string> &parnamesforMC, const string &parname,
-    map<string, Parameter> parammap) {
+void RefinePowderInstrumentParameters3::addParameterToMCMinimize(vector<string> &parnamesforMC, const string &parname,
+                                                                 map<string, Parameter> parammap) {
   map<string, Parameter>::iterator pariter;
   pariter = parammap.find(parname);
   if (pariter == parammap.end()) {
     stringstream errss;
-    errss << "Parameter " << parname
-          << " does not exisit Le Bail function parameters. ";
+    errss << "Parameter " << parname << " does not exisit Le Bail function parameters. ";
     g_log.error(errss.str());
     throw runtime_error(errss.str());
   }
@@ -776,8 +739,8 @@ void RefinePowderInstrumentParameters3::addParameterToMCMinimize(
  * @param vecY :: vecY
  * Return: chi^2
  */
-double RefinePowderInstrumentParameters3::calculateFunction(
-    const map<string, Parameter> &parammap, vector<double> &vecY) {
+double RefinePowderInstrumentParameters3::calculateFunction(const map<string, Parameter> &parammap,
+                                                            vector<double> &vecY) {
   // 1. Implement parameter values to m_positionFunc
   if (!parammap.empty())
     setFunctionParameterValues(m_positionFunc, parammap);
@@ -791,8 +754,7 @@ double RefinePowderInstrumentParameters3::calculateFunction(
   m_positionFunc->function1D(vecY, vecX);
 
   // 3. Calcualte error
-  double chisq = calculateFunctionChiSquare(
-      vecY, m_dataWS->y(m_wsIndex).rawData(), m_dataWS->e(m_wsIndex).rawData());
+  double chisq = calculateFunctionChiSquare(vecY, m_dataWS->y(m_wsIndex).rawData(), m_dataWS->e(m_wsIndex).rawData());
 
   return chisq;
 }
@@ -800,8 +762,7 @@ double RefinePowderInstrumentParameters3::calculateFunction(
 //----------------------------------------------------------------------------------------------
 /** Calculate Chi^2
  */
-double calculateFunctionChiSquare(const vector<double> &modelY,
-                                  const vector<double> &dataY,
+double calculateFunctionChiSquare(const vector<double> &modelY, const vector<double> &dataY,
                                   const vector<double> &dataE) {
   // 1. Check
   if (modelY.size() != dataY.size() || dataY.size() != dataE.size())
@@ -823,9 +784,8 @@ double calculateFunctionChiSquare(const vector<double> &modelY,
 //----------------------------------------------------------------------------------------------
 /** Calculate Chi^2 of the a function with all parameters are fixed
  */
-double RefinePowderInstrumentParameters3::calculateFunctionError(
-    const IFunction_sptr &function, const Workspace2D_sptr &dataws,
-    int wsindex) {
+double RefinePowderInstrumentParameters3::calculateFunctionError(const IFunction_sptr &function,
+                                                                 const Workspace2D_sptr &dataws, int wsindex) {
   // 1. Record the fitting information
   vector<string> parnames = function->getParameterNames();
   vector<bool> vecFix(parnames.size(), false);
@@ -841,13 +801,10 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(
   double chi2;
   string fitstatus;
   const std::string minimizer = "Levenberg-MarquardtMD";
-  bool fitOK = doFitFunction(function, std::move(dataws), wsindex, minimizer, 0,
-                             chi2, fitstatus);
+  bool fitOK = doFitFunction(function, std::move(dataws), wsindex, minimizer, 0, chi2, fitstatus);
 
   if (!fitOK) {
-    g_log.warning() << "Fit by " << minimizer
-                    << " with 0 iterations failed, with reason: " << fitstatus
-                    << "\n";
+    g_log.warning() << "Fit by " << minimizer << " with 0 iterations failed, with reason: " << fitstatus << "\n";
   }
 
   // 3. Restore the fit/fix setup
@@ -870,19 +827,15 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(
  * Return: double chi2 of the final (best) solution.  If fitting fails, chi2
  *wil be maximum double
  */
-double
-RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &function,
-                                               const Workspace2D_sptr &dataws,
-                                               int wsindex, bool powerfit) {
+double RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &function, const Workspace2D_sptr &dataws,
+                                                      int wsindex, bool powerfit) {
   // 1. Store original
-  map<string, pair<double, double>> start_paramvaluemap, paramvaluemap1,
-      paramvaluemap2, paramvaluemap3;
+  map<string, pair<double, double>> start_paramvaluemap, paramvaluemap1, paramvaluemap2, paramvaluemap3;
   storeFunctionParameterValue(function, start_paramvaluemap);
 
   // 2. Calculate starting chi^2
   double startchisq = calculateFunctionError(function, dataws, wsindex);
-  g_log.notice() << "[DBx436] Starting Chi^2 = " << startchisq
-                 << ", Power-Fit is " << powerfit << '\n';
+  g_log.notice() << "[DBx436] Starting Chi^2 = " << startchisq << ", Power-Fit is " << powerfit << '\n';
 
   // 3. Fitting
   int numiters;
@@ -894,8 +847,7 @@ RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &function,
     double chi2simplex;
     string fitstatussimplex;
     numiters = 10000;
-    bool fitgood1 = doFitFunction(function, dataws, wsindex, minimizer,
-                                  numiters, chi2simplex, fitstatussimplex);
+    bool fitgood1 = doFitFunction(function, dataws, wsindex, minimizer, numiters, chi2simplex, fitstatussimplex);
 
     if (fitgood1)
       storeFunctionParameterValue(function, paramvaluemap1);
@@ -907,8 +859,7 @@ RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &function,
     double chi2lv2;
     string fitstatuslv2;
     numiters = 1000;
-    bool fitgood2 = doFitFunction(function, dataws, wsindex, minimizer,
-                                  numiters, chi2lv2, fitstatuslv2);
+    bool fitgood2 = doFitFunction(function, dataws, wsindex, minimizer, numiters, chi2lv2, fitstatuslv2);
     if (fitgood2)
       storeFunctionParameterValue(function, paramvaluemap2);
     else
@@ -919,8 +870,7 @@ RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &function,
     restoreFunctionParameterValue(start_paramvaluemap, function, tempparmap);
     double chi2lv1;
     string fitstatuslv1;
-    bool fitgood3 = doFitFunction(function, dataws, wsindex, minimizer,
-                                  numiters, chi2lv1, fitstatuslv1);
+    bool fitgood3 = doFitFunction(function, dataws, wsindex, minimizer, numiters, chi2lv1, fitstatuslv1);
     if (fitgood3)
       storeFunctionParameterValue(function, paramvaluemap3);
     else
@@ -928,23 +878,19 @@ RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &function,
 
     // 4. Compare best
     g_log.notice() << "Fit Result:  Chi2s: Simplex = " << chi2simplex << ", "
-                   << "Levenberg 1 = " << chi2lv2
-                   << ", Levenberg 2 = " << chi2lv1 << '\n';
+                   << "Levenberg 1 = " << chi2lv2 << ", Levenberg 2 = " << chi2lv1 << '\n';
 
     if (fitgood1 || fitgood2 || fitgood3) {
       // At least one good fit
       if (fitgood1 && chi2simplex <= chi2lv2 && chi2simplex <= chi2lv1) {
         final_chi2 = chi2simplex;
-        restoreFunctionParameterValue(paramvaluemap1, function,
-                                      m_profileParameters);
+        restoreFunctionParameterValue(paramvaluemap1, function, m_profileParameters);
       } else if (fitgood2 && chi2lv2 <= chi2lv1) {
-        restoreFunctionParameterValue(paramvaluemap2, function,
-                                      m_profileParameters);
+        restoreFunctionParameterValue(paramvaluemap2, function, m_profileParameters);
         final_chi2 = chi2lv2;
       } else if (fitgood3) {
         final_chi2 = chi2lv1;
-        restoreFunctionParameterValue(paramvaluemap3, function,
-                                      m_profileParameters);
+        restoreFunctionParameterValue(paramvaluemap3, function, m_profileParameters);
       } else {
         throw runtime_error("This situation is impossible to happen!");
       }
@@ -954,15 +900,12 @@ RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &function,
     string minimizer = "Levenberg-MarquardtMD";
     string fitstatus;
     numiters = 1000;
-    bool fitgood = doFitFunction(function, dataws, wsindex, minimizer, numiters,
-                                 final_chi2, fitstatus);
+    bool fitgood = doFitFunction(function, dataws, wsindex, minimizer, numiters, final_chi2, fitstatus);
     if (fitgood) {
       storeFunctionParameterValue(function, paramvaluemap1);
-      restoreFunctionParameterValue(paramvaluemap1, function,
-                                    m_profileParameters);
+      restoreFunctionParameterValue(paramvaluemap1, function, m_profileParameters);
     } else {
-      g_log.warning() << "Fit by " << minimizer
-                      << " failed.  Reason: " << fitstatus << "\n";
+      g_log.warning() << "Fit by " << minimizer << " failed.  Reason: " << fitstatus << "\n";
     }
   }
 
@@ -973,16 +916,14 @@ RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &function,
 /** Fit function
  * Minimizer: "Levenberg-MarquardtMD"/"Simplex"
  */
-bool RefinePowderInstrumentParameters3::doFitFunction(
-    const IFunction_sptr &function, const Workspace2D_sptr &dataws, int wsindex,
-    const string &minimizer, int numiters, double &chi2, string &fitstatus) {
+bool RefinePowderInstrumentParameters3::doFitFunction(const IFunction_sptr &function, const Workspace2D_sptr &dataws,
+                                                      int wsindex, const string &minimizer, int numiters, double &chi2,
+                                                      string &fitstatus) {
   // 0. Debug output
   stringstream outss;
-  outss << "Fit function: " << m_positionFunc->asString()
-        << "\nData To Fit: \n";
+  outss << "Fit function: " << m_positionFunc->asString() << "\nData To Fit: \n";
   for (size_t i = 0; i < dataws->x(0).size(); ++i)
-    outss << dataws->x(wsindex)[i] << "\t\t" << dataws->y(wsindex)[i] << "\t\t"
-          << dataws->e(wsindex)[i] << "\n";
+    outss << dataws->x(wsindex)[i] << "\t\t" << dataws->y(wsindex)[i] << "\t\t" << dataws->e(wsindex)[i] << "\n";
   g_log.information() << outss.str();
 
   // 1. Create and setup fit algorithm
@@ -1015,13 +956,11 @@ bool RefinePowderInstrumentParameters3::doFitFunction(
   bool goodfit = fitstatus == "success";
 
   stringstream dbss;
-  dbss << "Fit Result (GSL):  Chi^2 = " << chi2
-       << "; Fit Status = " << fitstatus << ", Return Bool = " << goodfit
+  dbss << "Fit Result (GSL):  Chi^2 = " << chi2 << "; Fit Status = " << fitstatus << ", Return Bool = " << goodfit
        << '\n';
   vector<string> funcparnames = function->getParameterNames();
   for (size_t i = 0; i < funcparnames.size(); ++i)
-    dbss << funcparnames[i] << " = " << setw(20)
-         << function->getParameter(funcparnames[i]) << " +/- "
+    dbss << funcparnames[i] << " = " << setw(20) << function->getParameter(funcparnames[i]) << " +/- "
          << function->getError(i) << "\n";
   g_log.debug() << dbss.str();
 
@@ -1031,8 +970,8 @@ bool RefinePowderInstrumentParameters3::doFitFunction(
 //----------------------------------------------------------------------------------------------
 /** Construct an output TableWorkspace for fitting result (profile parameters)
  */
-TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
-    map<string, Parameter> parameters, double startchi2, double finalchi2) {
+TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(map<string, Parameter> parameters,
+                                                                             double startchi2, double finalchi2) {
   // 1. Create TableWorkspace
   auto tablews = std::make_shared<TableWorkspace>();
 
@@ -1060,8 +999,8 @@ TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
     else
       fitortie = "tie";
 
-    newrow << param.name << param.curvalue << fitortie << param.minvalue
-           << param.maxvalue << param.stepsize << param.fiterror;
+    newrow << param.name << param.curvalue << fitortie << param.minvalue << param.maxvalue << param.stepsize
+           << param.fiterror;
   }
 
   return tablews;
@@ -1075,9 +1014,8 @@ TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
  * @param parname:     string, parameter name
  * @param parvalue:    double, parameter value
  */
-void RefinePowderInstrumentParameters3::addOrReplace(
-    map<string, Parameter> &parameters, const string &parname,
-    double parvalue) {
+void RefinePowderInstrumentParameters3::addOrReplace(map<string, Parameter> &parameters, const string &parname,
+                                                     double parvalue) {
   auto pariter = parameters.find(parname);
   if (pariter != parameters.end()) {
     parameters[parname].curvalue = parvalue;
@@ -1092,14 +1030,14 @@ void RefinePowderInstrumentParameters3::addOrReplace(
 //----------------------------------------------------------------------------------------------
 /** Construct output
  */
-Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(
-    const FunctionDomain1DVector &domain, const FunctionValues &rawvalues) {
+Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(const FunctionDomain1DVector &domain,
+                                                                       const FunctionValues &rawvalues) {
   // 1. Create and set up output workspace
   size_t lenx = m_dataWS->x(m_wsIndex).size();
   size_t leny = m_dataWS->y(m_wsIndex).size();
 
-  Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
-      WorkspaceFactory::Instance().create("Workspace2D", 6, lenx, leny));
+  Workspace2D_sptr outws =
+      std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 6, lenx, leny));
 
   outws->getAxis(0)->setUnit("dSpacing");
 
@@ -1140,8 +1078,8 @@ Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(
 //----------------------------------------------------------------------------------------------
 /** Set parameter values to function from Parameter map
  */
-void RefinePowderInstrumentParameters3::setFunctionParameterValues(
-    const IFunction_sptr &function, map<string, Parameter> params) {
+void RefinePowderInstrumentParameters3::setFunctionParameterValues(const IFunction_sptr &function,
+                                                                   map<string, Parameter> params) {
   // 1. Prepare
   vector<string> funparamnames = function->getParameterNames();
 
@@ -1161,8 +1099,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterValues(
     } else {
       // Not found and thus quit
       stringstream errss;
-      errss << "Peak profile parameter " << parname
-            << " is not found in input parameters. ";
+      errss << "Peak profile parameter " << parname << " is not found in input parameters. ";
       g_log.error(errss.str());
       throw runtime_error(errss.str());
     }
@@ -1212,8 +1149,8 @@ Parameter>& params)
 /** Set parameter fitting setup (boundary, fix or unfix) to function from
  * Parameter map
  */
-void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
-    const IFunction_sptr &function, map<string, Parameter> params) {
+void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(const IFunction_sptr &function,
+                                                                      map<string, Parameter> params) {
   // 1. Prepare
   vector<string> funparamnames = m_positionFunc->getParameterNames();
 
@@ -1234,8 +1171,8 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
         double upperbound = param.maxvalue;
         if (lowerbound >= -DBL_MAX * 0.1 || upperbound <= DBL_MAX * 0.1) {
           // If there is a boundary
-          auto bc = std::make_unique<Constraints::BoundaryConstraint>(
-              function.get(), parname, lowerbound, upperbound, false);
+          auto bc =
+              std::make_unique<Constraints::BoundaryConstraint>(function.get(), parname, lowerbound, upperbound, false);
           function->addConstraint(std::move(bc));
         }
       } else {
@@ -1245,8 +1182,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
     } else {
       // Not found and thus quit
       stringstream errss;
-      errss << "Peak profile parameter " << parname
-            << " is not found in input parameters. ";
+      errss << "Peak profile parameter " << parname << " is not found in input parameters. ";
       g_log.error(errss.str());
       throw runtime_error(errss.str());
     }
@@ -1263,8 +1199,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
  * exacly same as
  * source;
  */
-void duplicateParameters(map<string, Parameter> source,
-                         map<string, Parameter> &target) {
+void duplicateParameters(map<string, Parameter> source, map<string, Parameter> &target) {
   target.clear();
 
   map<string, Parameter>::iterator miter;
@@ -1282,8 +1217,7 @@ void duplicateParameters(map<string, Parameter> source,
  * exacly same as
  * source;
  */
-void copyParametersValues(map<string, Parameter> source,
-                          map<string, Parameter> &target) {
+void copyParametersValues(map<string, Parameter> source, map<string, Parameter> &target) {
   // 1. Check
   if (source.size() != target.size())
     throw runtime_error("Source and Target should have the same size.");
@@ -1298,8 +1232,7 @@ void copyParametersValues(map<string, Parameter> source,
 
     titer = target.find(parname);
     if (titer == target.end())
-      throw runtime_error(
-          "Source and target should have exactly the same keys.");
+      throw runtime_error("Source and target should have exactly the same keys.");
 
     titer->second.curvalue = paramvalue;
   }
@@ -1338,9 +1271,7 @@ int getStringIndex(map<string, size_t> lookupdict, const string &key) {
 //----------------------------------------------------------------------------------------------
 /** Store function parameter values to a map
  */
-void storeFunctionParameterValue(
-    const IFunction_sptr &function,
-    map<string, pair<double, double>> &parvaluemap) {
+void storeFunctionParameterValue(const IFunction_sptr &function, map<string, pair<double, double>> &parvaluemap) {
   parvaluemap.clear();
 
   vector<string> parnames = function->getParameterNames();
@@ -1357,9 +1288,8 @@ void storeFunctionParameterValue(
  * function object
  * and a (string, Parameter) map
  */
-void restoreFunctionParameterValue(
-    map<string, pair<double, double>> parvaluemap,
-    const IFunction_sptr &function, map<string, Parameter> &parammap) {
+void restoreFunctionParameterValue(map<string, pair<double, double>> parvaluemap, const IFunction_sptr &function,
+                                   map<string, Parameter> &parammap) {
   vector<string> parnames = function->getParameterNames();
 
   for (auto &parname : parnames) {

@@ -18,8 +18,7 @@ using Mantid::HistogramData::detail::VectorOf;
 using Mantid::Kernel::cow_ptr;
 using Mantid::Kernel::make_cow;
 
-class VectorOfTester : public VectorOf<VectorOfTester, std::vector<double>>,
-                       public Iterable<VectorOfTester> {
+class VectorOfTester : public VectorOf<VectorOfTester, std::vector<double>>, public Iterable<VectorOfTester> {
 public:
   using VectorOf<VectorOfTester, std::vector<double>>::VectorOf;
   using VectorOf<VectorOfTester, std::vector<double>>::operator=;

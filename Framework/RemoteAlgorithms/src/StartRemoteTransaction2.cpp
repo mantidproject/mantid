@@ -22,25 +22,20 @@ using namespace Mantid::Kernel;
 
 void StartRemoteTransaction2::init() {
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty("ComputeResource", "",
-                  std::make_shared<StringListValidator>(computes),
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer where the new transaction "
                   "will be created",
                   Direction::Input);
 
   // output property
-  declareProperty("TransactionID", std::string(""),
-                  "The ID of the new transaction", Direction::Output);
+  declareProperty("TransactionID", std::string(""), "The ID of the new transaction", Direction::Output);
 }
 
 void StartRemoteTransaction2::exec() {
 
   Mantid::API::IRemoteJobManager_sptr jm =
-      Mantid::API::RemoteJobManagerFactory::Instance().create(
-          getPropertyValue("ComputeResource"));
+      Mantid::API::RemoteJobManagerFactory::Instance().create(getPropertyValue("ComputeResource"));
 
   std::string tid = jm->startRemoteTransaction();
 

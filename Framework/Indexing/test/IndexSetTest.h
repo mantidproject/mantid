@@ -98,8 +98,7 @@ public:
   }
 
   void test_indexList_duplicate_throws() {
-    TS_ASSERT_THROWS_EQUALS(IndexSetTester({2, 1, 2}, 3),
-                            const std::runtime_error &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(IndexSetTester({2, 1, 2}, 3), const std::runtime_error &e, std::string(e.what()),
                             "IndexSet: duplicate indices are not allowed");
   }
 

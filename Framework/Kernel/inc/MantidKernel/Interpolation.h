@@ -41,8 +41,7 @@ private:
   Unit_sptr m_yUnit;
 
 protected:
-  std::vector<DataXY>::const_iterator
-  findIndexOfNextLargerValue(double key) const;
+  std::vector<DataXY>::const_iterator findIndexOfNextLargerValue(double key) const;
   std::vector<DataXY>::const_iterator cbegin() const;
   std::vector<DataXY>::const_iterator cend() const;
 
@@ -86,8 +85,7 @@ public:
 };
 
 // defining operator << and >>
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                           const Interpolation &);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const Interpolation &);
 MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, Interpolation &);
 
 } // namespace Kernel

@@ -22,9 +22,7 @@ using Mantid::DataObjects::Workspace2D_sptr;
 class ConvertToPointDataTest : public CxxTest::TestSuite {
 
 public:
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().clear();
-  }
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().clear(); }
 
   void test_That_The_Algorithm_Has_Two_Properties() {
     ConvertToPointData alg;
@@ -34,8 +32,7 @@ public:
 
   void test_That_Output_Is_The_Same_As_Input_If_Input_Contains_Point_Data() {
     // False indicates a non histogram workspace
-    Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspace123(5, 10, false);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspace123(5, 10, false);
 
     MatrixWorkspace_sptr outputWS = runAlgorithm(testWS);
     TS_ASSERT(outputWS);
@@ -52,18 +49,15 @@ public:
     // from 0.0
     const int numBins(10);
     const int numSpectra(2);
-    Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(numSpectra, numBins);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceBinned(numSpectra, numBins);
     TS_ASSERT_EQUALS(testWS->isHistogramData(), true);
     // add a new vertical axis
-    auto verticalAxis =
-        std::make_unique<Mantid::API::NumericAxis>(numSpectra + 1);
+    auto verticalAxis = std::make_unique<Mantid::API::NumericAxis>(numSpectra + 1);
 
     for (int i = 0; i < numSpectra + 1; i++) {
       verticalAxis->setValue(i, 2 * i);
     }
-    verticalAxis->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
+    verticalAxis->unit() = Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
     verticalAxis->title() = "|Q|";
     testWS->replaceAxis(1, std::move(verticalAxis));
     MatrixWorkspace_sptr outputWS = runAlgorithm(testWS);
@@ -97,8 +91,7 @@ public:
     }
     // test the vertical axis
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->length(), 3);
-    TS_ASSERT_EQUALS(outputWS->getAxis(1)->unit()->unitID(),
-                     "MomentumTransfer");
+    TS_ASSERT_EQUALS(outputWS->getAxis(1)->unit()->unitID(), "MomentumTransfer");
     TS_ASSERT_EQUALS((*(outputWS->getAxis(1)))(0), 0);
     TS_ASSERT_EQUALS((*(outputWS->getAxis(1)))(1), 2);
     TS_ASSERT_EQUALS((*(outputWS->getAxis(1)))(2), 4);
@@ -106,12 +99,9 @@ public:
 
   void test_A_Non_Uniformly_Binned_Histogram_Is_Transformed_Correctly() {
     // Creates a workspace with 2 spectra, and the given bin structure
-    double xBoundaries[11] = {0.0,  1.0,  3.0,  5.0,  6.0, 7.0,
-                              10.0, 13.0, 16.0, 17.0, 17.5};
+    double xBoundaries[11] = {0.0, 1.0, 3.0, 5.0, 6.0, 7.0, 10.0, 13.0, 16.0, 17.0, 17.5};
     const int numSpectra(2);
-    Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceNonUniformlyBinned(
-            numSpectra, 11, xBoundaries);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceNonUniformlyBinned(numSpectra, 11, xBoundaries);
     const size_t numBins = testWS->blocksize();
     TS_ASSERT_EQUALS(testWS->isHistogramData(), true);
 
@@ -148,15 +138,12 @@ public:
 
   void test_Dx_Data_Is_Handled_Correctly() {
     constexpr size_t numBins{11};
-    double xBoundaries[numBins] = {0.0,  1.0,  3.0,  5.0,  6.0, 7.0,
-                                   10.0, 13.0, 16.0, 17.0, 17.5};
+    double xBoundaries[numBins] = {0.0, 1.0, 3.0, 5.0, 6.0, 7.0, 10.0, 13.0, 16.0, 17.0, 17.5};
     constexpr int numSpectra{2};
     Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceNonUniformlyBinned(
-            numSpectra, numBins, xBoundaries, true);
+        WorkspaceCreationHelper::create2DWorkspaceNonUniformlyBinned(numSpectra, numBins, xBoundaries, true);
     TS_ASSERT(testWS->isHistogramData())
-    double xErrors[numBins - 1] = {0.1, 0.2, 0.3, 0.4, 0.5,
-                                   0.6, 0.7, 0.8, 0.9, 1.0};
+    double xErrors[numBins - 1] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
     MatrixWorkspace_sptr outputWS = runAlgorithm(testWS);
     TS_ASSERT(outputWS)
     TS_ASSERT(!outputWS->isHistogramData())
@@ -175,15 +162,13 @@ private:
     IAlgorithm_sptr alg(new ConvertToPointData());
     alg->initialize();
     alg->setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS));
     const std::string outputName = "__algOut";
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", outputName));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outputName));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
-    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(outputName));
+    MatrixWorkspace_sptr outputWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(outputName));
 
     return outputWS;
   }
@@ -194,21 +179,13 @@ class ConvertToPointDataTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertToPointDataTestPerformance *createSuite() {
-    return new ConvertToPointDataTestPerformance();
-  }
+  static ConvertToPointDataTestPerformance *createSuite() { return new ConvertToPointDataTestPerformance(); }
 
-  static void destroySuite(ConvertToPointDataTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(ConvertToPointDataTestPerformance *suite) { delete suite; }
 
-  void setUp() override {
-    inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 10000);
-  }
+  void setUp() override { inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 10000); }
 
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().remove("output");
-  }
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().remove("output"); }
 
   void testPerformanceWS() {
     ConvertToPointData ctpd;

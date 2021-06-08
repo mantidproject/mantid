@@ -52,25 +52,19 @@ public:
 @param customButtonLabel : optional label for another custom button, return code
 for this is defined by CustomButton.
 */
-SelectWorkspacesDialog::SelectWorkspacesDialog(
-    QWidget *parent, const std::string &typeFilter,
-    const std::string &customButtonLabel)
-    : QDialog(parent), m_wsList(nullptr), m_okButton(nullptr),
-      m_customButton(nullptr) {
+SelectWorkspacesDialog::SelectWorkspacesDialog(QWidget *parent, const std::string &typeFilter,
+                                               const std::string &customButtonLabel)
+    : QDialog(parent), m_wsList(nullptr), m_okButton(nullptr), m_customButton(nullptr) {
   setWindowTitle("Mantid - Select workspace");
   m_wsList = new QListWidget(parent);
 
-  Mantid::API::AnalysisDataServiceImpl &ADS =
-      Mantid::API::AnalysisDataService::Instance();
+  Mantid::API::AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   using VecWorkspaces = std::vector<Mantid::API::Workspace_sptr>;
   VecWorkspaces workspaces = ADS.getObjects();
   WorkspaceIsNotOfType comparitor(typeFilter);
-  workspaces.erase(
-      std::remove_if(workspaces.begin(), workspaces.end(), comparitor),
-      workspaces.end());
+  workspaces.erase(std::remove_if(workspaces.begin(), workspaces.end(), comparitor), workspaces.end());
   QStringList tmp;
-  for (VecWorkspaces::const_iterator it = workspaces.begin();
-       it != workspaces.end(); ++it) {
+  for (VecWorkspaces::const_iterator it = workspaces.begin(); it != workspaces.end(); ++it) {
     // if(useFilter && ADS::
     tmp << QString::fromStdString((*it)->getName());
   }
@@ -99,8 +93,7 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(
 
   setLayout(vLayout);
 
-  connect(m_wsList, SIGNAL(itemSelectionChanged()), this,
-          SLOT(selectionChanged()));
+  connect(m_wsList, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChanged()));
 
   selectionChanged();
 }
@@ -113,9 +106,7 @@ QStringList SelectWorkspacesDialog::getSelectedNames() const {
 }
 
 /// Slot to monitor the workspace selection status
-void SelectWorkspacesDialog::selectionChanged() {
-  m_okButton->setEnabled(m_wsList->selectionModel()->hasSelection());
-}
+void SelectWorkspacesDialog::selectionChanged() { m_okButton->setEnabled(m_wsList->selectionModel()->hasSelection()); }
 
 /// slot to handle the custom button press
 void SelectWorkspacesDialog::customButtonPress() { this->done(CustomButton); }

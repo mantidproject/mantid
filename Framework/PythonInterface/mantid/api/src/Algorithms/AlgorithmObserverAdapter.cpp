@@ -10,17 +10,13 @@
 namespace Mantid {
 namespace PythonInterface {
 
-AlgorithmObserverAdapter::AlgorithmObserverAdapter(PyObject *self)
-    : API::AlgorithmObserver(), m_self(self) {}
+AlgorithmObserverAdapter::AlgorithmObserverAdapter(PyObject *self) : API::AlgorithmObserver(), m_self(self) {}
 
-void AlgorithmObserverAdapter::progressHandle(const API::IAlgorithm *alg,
-                                              double p, const std::string &msg,
-                                              const double estimatedTime,
-                                              const int progressPrecision) {
+void AlgorithmObserverAdapter::progressHandle(const API::IAlgorithm *alg, double p, const std::string &msg,
+                                              const double estimatedTime, const int progressPrecision) {
   UNUSED_ARG(alg)
   try {
-    return callMethod<void>(getSelf(), "progressHandle", p, msg, estimatedTime,
-                            progressPrecision);
+    return callMethod<void>(getSelf(), "progressHandle", p, msg, estimatedTime, progressPrecision);
   } catch (UndefinedAttributeError &) {
     return;
   }
@@ -43,8 +39,7 @@ void AlgorithmObserverAdapter::finishHandle(const API::IAlgorithm *alg) {
   }
 }
 
-void AlgorithmObserverAdapter::errorHandle(const API::IAlgorithm *alg,
-                                           const std::string &what) {
+void AlgorithmObserverAdapter::errorHandle(const API::IAlgorithm *alg, const std::string &what) {
   UNUSED_ARG(alg)
   try {
     return callMethod<void>(getSelf(), "errorHandle", what);

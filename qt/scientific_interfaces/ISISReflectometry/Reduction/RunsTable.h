@@ -22,27 +22,20 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTable {
 public:
-  RunsTable(std::vector<std::string> instruments, double thetaTolerance,
-            ReductionJobs ReductionJobs);
+  RunsTable(std::vector<std::string> instruments, double thetaTolerance, ReductionJobs ReductionJobs);
 
   double thetaTolerance() const;
   ReductionJobs const &reductionJobs() const;
   ReductionJobs &mutableReductionJobs();
-  std::vector<MantidWidgets::Batch::RowLocation> const &
-  selectedRowLocations() const;
+  std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations() const;
 
-  void setSelectedRowLocations(
-      std::vector<MantidWidgets::Batch::RowLocation> selected);
-  void appendSelectedRowLocations(
-      MantidWidgets::Batch::RowLocation selectedRowLocation);
+  void setSelectedRowLocations(std::vector<MantidWidgets::Batch::RowLocation> selected);
+  void appendSelectedRowLocations(MantidWidgets::Batch::RowLocation selectedRowLocation);
   template <typename T>
-  bool isInSelection(T const &item,
-                     std::vector<MantidWidgets::Batch::RowLocation> const
-                         &selectedRowLocations) const;
+  bool isInSelection(T const &item, std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const;
   void resetState();
   void resetSkippedItems();
-  boost::optional<Item &>
-  getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
   std::vector<Group> selectedGroups() const;
   std::vector<Row> selectedRows() const;
 
@@ -58,10 +51,8 @@ private:
 };
 
 template <typename T>
-bool RunsTable::isInSelection(
-    T const &item,
-    std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations)
-    const {
+bool RunsTable::isInSelection(T const &item,
+                              std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const {
   auto const path = m_reductionJobs.getPath(item);
   return containsPath(selectedRowLocations, path);
 }

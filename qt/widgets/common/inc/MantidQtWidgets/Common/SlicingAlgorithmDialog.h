@@ -33,8 +33,7 @@ input MD workspace
 2) It pre-populates those dimension input controls based on existing values.
 
 */
-class EXPORT_OPT_MANTIDQT_COMMON SlicingAlgorithmDialog
-    : public MantidQt::API::AlgorithmDialog {
+class EXPORT_OPT_MANTIDQT_COMMON SlicingAlgorithmDialog : public MantidQt::API::AlgorithmDialog {
   Q_OBJECT
 public:
   /// Default Constructor
@@ -42,12 +41,6 @@ public:
 
   /// Destructor
   ~SlicingAlgorithmDialog() override;
-
-  // Customisation for the VSI
-  void customiseLayoutForVsi(const std::string &initialWorkspace);
-
-  /// Reset the aligned dim values for the VSI
-  void resestAlignedDimProperty(size_t index, const QString &propertyValue);
 
 protected:
   /// view
@@ -94,14 +87,11 @@ private:
   QString getCurrentOutputWorkspaceName() const;
 
   /// Build dimension inputs.
-  void makeDimensionInputs(
-      const QString &propertyPrefix, QLayout *owningLayout,
-      QString (*format)(const Mantid::Geometry::IMDDimension_const_sptr &),
-      History history);
+  void makeDimensionInputs(const QString &propertyPrefix, QLayout *owningLayout,
+                           QString (*format)(const Mantid::Geometry::IMDDimension_const_sptr &), History history);
 
   /// Determine if history should be used.
-  History useHistory(const HistoryChanged &criticalChange,
-                     const bool bForceForget);
+  History useHistory(const HistoryChanged &criticalChange, const bool bForceForget);
 
   /// Cleans a given layout.
   void cleanLayoutOfDimensions(QLayout *layout);

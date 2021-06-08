@@ -22,23 +22,17 @@ namespace ModelCreationHelper {
 /* Rows */
 MANTIDQT_ISISREFLECTOMETRY_DLL Row makeEmptyRow();
 MANTIDQT_ISISREFLECTOMETRY_DLL Row makeRow(double theta = 0.5);
-MANTIDQT_ISISREFLECTOMETRY_DLL Row makeRow(std::string const &run,
-                                           double theta = 0.5);
-MANTIDQT_ISISREFLECTOMETRY_DLL Row makeSimpleRow(std::string const &run,
-                                                 double theta = 0.5);
-MANTIDQT_ISISREFLECTOMETRY_DLL Row
-makeRow(std::string const &run, double theta, std::string const &trans1,
-        std::string const &trans2, boost::optional<double> qMin = boost::none,
-        boost::optional<double> qMax = boost::none,
-        boost::optional<double> qStep = boost::none,
-        boost::optional<double> scale = boost::none,
-        ReductionOptionsMap const &optionsMap = ReductionOptionsMap());
-MANTIDQT_ISISREFLECTOMETRY_DLL Row makeRow(std::vector<std::string> const &runs,
-                                           double theta = 0.5);
-MANTIDQT_ISISREFLECTOMETRY_DLL Row
-makeRowWithMainCellsFilled(double theta = 0.5);
-MANTIDQT_ISISREFLECTOMETRY_DLL Row
-makeRowWithOptionsCellFilled(double theta, ReductionOptionsMap options);
+MANTIDQT_ISISREFLECTOMETRY_DLL Row makeRow(std::string const &run, double theta = 0.5);
+MANTIDQT_ISISREFLECTOMETRY_DLL Row makeSimpleRow(std::string const &run, double theta = 0.5);
+MANTIDQT_ISISREFLECTOMETRY_DLL Row makeRow(std::string const &run, double theta, std::string const &trans1,
+                                           std::string const &trans2, boost::optional<double> qMin = boost::none,
+                                           boost::optional<double> qMax = boost::none,
+                                           boost::optional<double> qStep = boost::none,
+                                           boost::optional<double> scale = boost::none,
+                                           ReductionOptionsMap const &optionsMap = ReductionOptionsMap());
+MANTIDQT_ISISREFLECTOMETRY_DLL Row makeRow(std::vector<std::string> const &runs, double theta = 0.5);
+MANTIDQT_ISISREFLECTOMETRY_DLL Row makeRowWithMainCellsFilled(double theta = 0.5);
+MANTIDQT_ISISREFLECTOMETRY_DLL Row makeRowWithOptionsCellFilled(double theta, ReductionOptionsMap options);
 
 /* Groups */
 MANTIDQT_ISISREFLECTOMETRY_DLL Group makeEmptyGroup();
@@ -46,25 +40,20 @@ MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithOneRow();
 MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithTwoRows();
 MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithTwoRowsWithDifferentAngles();
 MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithTwoRowsWithNonstandardNames();
-MANTIDQT_ISISREFLECTOMETRY_DLL Group
-makeGroupWithTwoRowsWithMixedQResolutions();
-MANTIDQT_ISISREFLECTOMETRY_DLL Group
-makeGroupWithTwoRowsWithOutputQResolutions();
+MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithTwoRowsWithMixedQResolutions();
+MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithTwoRowsWithOutputQResolutions();
 
 /* Reduction Jobs */
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneEmptyGroupModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoEmptyGroupsModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithAnInvalidRowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithARowModel();
-MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
-oneGroupWithARowWithInputQRangeModel();
-MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
-oneGroupWithARowWithOutputQRangeModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithARowWithInputQRangeModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithARowWithOutputQRangeModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL
 ReductionJobs oneGroupWithARowWithInputQRangeModelMixedPrecision();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithAnotherRowModel();
-MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
-oneGroupWithAnotherRunWithSameAngleModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithAnotherRunWithSameAngleModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithTwoRunsInARowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithTwoRowsModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithTwoSimpleRowsModel();
@@ -75,34 +64,24 @@ MANTIDQT_ISISREFLECTOMETRY_DLL
 ReductionJobs twoGroupsWithTwoRowsAndOneEmptyGroupModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL
 ReductionJobs oneGroupWithOneRowAndOneGroupWithOneRowAndOneInvalidRowModel();
-MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
-twoGroupsWithOneRowAndOneInvalidRowModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoGroupsWithOneRowAndOneInvalidRowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoGroupsWithMixedRowsModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs emptyReductionJobs();
 MANTIDQT_ISISREFLECTOMETRY_DLL
 ReductionJobs oneGroupWithTwoRowsWithOutputNamesModel();
 
 /* Experiment */
-MANTIDQT_ISISREFLECTOMETRY_DLL std::vector<PerThetaDefaults>
-makePerThetaDefaults();
-MANTIDQT_ISISREFLECTOMETRY_DLL std::vector<PerThetaDefaults>
-makePerThetaDefaultsWithTwoAnglesAndWildcard();
-MANTIDQT_ISISREFLECTOMETRY_DLL std::map<std::string, std::string>
-makeStitchOptions();
-MANTIDQT_ISISREFLECTOMETRY_DLL std::map<std::string, std::string>
-makeEmptyStitchOptions();
-MANTIDQT_ISISREFLECTOMETRY_DLL BackgroundSubtraction
-makeBackgroundSubtraction();
-MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections
-makePolarizationCorrections();
-MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections
-makeEmptyPolarizationCorrections();
+MANTIDQT_ISISREFLECTOMETRY_DLL std::vector<PerThetaDefaults> makePerThetaDefaults();
+MANTIDQT_ISISREFLECTOMETRY_DLL std::vector<PerThetaDefaults> makePerThetaDefaultsWithTwoAnglesAndWildcard();
+MANTIDQT_ISISREFLECTOMETRY_DLL std::map<std::string, std::string> makeStitchOptions();
+MANTIDQT_ISISREFLECTOMETRY_DLL std::map<std::string, std::string> makeEmptyStitchOptions();
+MANTIDQT_ISISREFLECTOMETRY_DLL BackgroundSubtraction makeBackgroundSubtraction();
+MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections makePolarizationCorrections();
+MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections makeEmptyPolarizationCorrections();
 MANTIDQT_ISISREFLECTOMETRY_DLL FloodCorrections makeFloodCorrections();
-MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions
-makeTransmissionStitchOptions();
+MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions makeTransmissionStitchOptions();
 MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda makeTransmissionRunRange();
-MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions
-makeEmptyTransmissionStitchOptions();
+MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions makeEmptyTransmissionStitchOptions();
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeExperiment();
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeEmptyExperiment();
 

@@ -39,13 +39,10 @@ public:
   int version() const override { return 1; };
   /// Related algorithms
   const std::vector<std::string> seeAlso() const override {
-    return {"CreateSampleShape", "CopySample", "SetSampleMaterial",
-            "LoadSampleEnvironment"};
+    return {"CreateSampleShape", "CopySample", "SetSampleMaterial", "LoadSampleEnvironment"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Instrument";
-  }
+  const std::string category() const override { return "DataHandling\\Instrument"; }
 
 private:
   // Implement abstract Algorithm methods

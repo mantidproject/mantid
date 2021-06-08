@@ -9,9 +9,9 @@ CrystalFieldMagnetisation
 Description
 -----------
 
-This function calculates the crystal field (molar) *magnetic moment* as a function of applied magnetic field in a specified 
-direction, in either atomic (:math:`\mu_B/`/ion), SI (Am\ :sup:`2`\ /mol) or cgs (erg/Gauss/mol == emu/mol) units. 
-If using cgs units, the magnetic field (:math:`x`-axis) is expected to be in Gauss. If using SI or atomic units, the field 
+This function calculates the crystal field (molar) *magnetic moment* as a function of applied magnetic field in a specified
+direction, in either atomic (:math:`\mu_B/`/ion), SI (Am\ :sup:`2`\ /mol) or cgs (erg/Gauss/mol == emu/mol) units.
+If using cgs units, the magnetic field (:math:`x`-axis) is expected to be in Gauss. If using SI or atomic units, the field
 should be given in Tesla.
 
 Strictly, to obtain the *magnetisation*, one should divide by the molar volume of the material.
@@ -23,19 +23,19 @@ The function calculates the expectation value of the magnetic moment operator :m
 
 .. math:: M(B) = \frac{1}{Z} \sum_n \langle V_n(H) | g_J \mu_B \mathbf{J} | V_n(H) \rangle \exp(-\beta E_n(H))
 
-where :math:`B` is the magnetic field in Tesla, :math:`g_J` is the Landé g-factor, :math:`\mu_B` is the Bohr magneton. 
-The moment operator is defined as :math:`\mathbf{J} = \hat{J}_x B_x + \hat{J}_y B_y + \hat{J}_z B_z` where 
-:math:`\hat{J}_x`, :math:`\hat{J}_y`, and :math:`\hat{J}_z` are the angular momentum operators in Cartesian coordinates, 
-with :math:`z` defined to be along the quantisation axis of the crystal field (which is usually defined to be the highest 
-symmetry rotation axis). :math:`B_x`, :math:`B_y`, and :math:`B_z` are the components of the unit vector pointing in the 
-direction of the applied magnetic field in this coordinate system. :math:`V_n(B)` and :math:`E_n(B)` are the n\ :sup:`th` 
+where :math:`B` is the magnetic field in Tesla, :math:`g_J` is the Landé g-factor, :math:`\mu_B` is the Bohr magneton.
+The moment operator is defined as :math:`\mathbf{J} = \hat{J}_x B_x + \hat{J}_y B_y + \hat{J}_z B_z` where
+:math:`\hat{J}_x`, :math:`\hat{J}_y`, and :math:`\hat{J}_z` are the angular momentum operators in Cartesian coordinates,
+with :math:`z` defined to be along the quantisation axis of the crystal field (which is usually defined to be the highest
+symmetry rotation axis). :math:`B_x`, :math:`B_y`, and :math:`B_z` are the components of the unit vector pointing in the
+direction of the applied magnetic field in this coordinate system. :math:`V_n(B)` and :math:`E_n(B)` are the n\ :sup:`th`
 eigenvector and eigenvalue (wavefunction and energy) obtained by diagonalising the Hamiltonian:
 
-.. math:: \mathcal{H} = \mathcal{H}_{\mathrm{cf}} + \mathcal{H}_{\mathrm{Zeeman}} = \sum_{k,q} B_k^q \hat{O}_k^q 
+.. math:: \mathcal{H} = \mathcal{H}_{\mathrm{cf}} + \mathcal{H}_{\mathrm{Zeeman}} = \sum_{k,q} B_k^q \hat{O}_k^q
    - g_J \mu_B \mathbf{J}\cdot\mathbf{B}
 
-where in this case the magnetic field :math:`\mathbf{B}` is not normalised. Finally, :math:`\beta = 1/(k_B T)` 
-with :math:`k_B` the Boltzmann constant and :math:`T` the temperature, and :math:`Z` is the partition sum 
+where in this case the magnetic field :math:`\mathbf{B}` is not normalised. Finally, :math:`\beta = 1/(k_B T)`
+with :math:`k_B` the Boltzmann constant and :math:`T` the temperature, and :math:`Z` is the partition sum
 :math:`Z = \sum_n \exp(-\beta E_n(H))`.
 
 Example
@@ -49,24 +49,24 @@ The `x`-axis is given in Tesla, and the magnetisation (`y`-axis) is in bohr magn
 .. testcode:: ExampleCrystalFieldMagnetisation
 
     import numpy as np
-    
+
     # Build a reference data set
     fun = 'name=CrystalFieldMagnetisation,Ion=Ce,B20=0.37737,B22=0.039770,B40=-0.031787,B42=-0.11611,B44=-0.12544,'
     fun += 'Temperature=10'
-    
+
     # This creates a (empty) workspace to use with EvaluateFunction
     x = np.linspace(0, 30, 300)
     y = x * 0
     e = y + 1
     ws = CreateWorkspace(x, y, e)
-    
+
     # The calculated data will be in 'data', WorkspaceIndex=1
     EvaluateFunction(fun, ws, OutputWorkspace='data')
-    
+
      # Change parameters slightly and fit to the reference data
     fun = 'name=CrystalFieldMagnetisation,Ion=Ce,Symmetry=C2v,Temperature=10,B20=0.4,B22=0.04,B40=-0.03,B42=-0.1,B44=-0.1,'
     fun += 'ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0)'
-    
+
     # (set MaxIterations=0 to see the starting point)
     Fit(fun, 'data', WorkspaceIndex=1, Output='fit',MaxIterations=100, CostFunction='Unweighted least squares')
     # Using Unweighted least squares fit because the data has no errors.
@@ -110,7 +110,7 @@ Output (the numbers you see on your machine may vary):
    powder;Boolean;false; Whether to calculate the powder averaged magnetisation or not.
    Hdir;Vector;(0.,0.,1.); The direction of the applied field w.r.t. the crystal field parameters
    Unit;String;'bohr'; The desired units of the output, either: 'bohr' (muB/ion), 'SI' (Am^2/mol) or 'cgs' (erg/G/mol).
-   
+
 .. properties::
 
 .. categories::

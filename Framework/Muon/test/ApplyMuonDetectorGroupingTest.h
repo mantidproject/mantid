@@ -27,8 +27,7 @@ using namespace MuonWorkspaceCreationHelper;
 namespace {
 
 // Set sensible default algorithm properties
-IAlgorithm_sptr algorithmWithPropertiesSet(const std::string &inputWSName,
-                                           const std::string &inputGroupName) {
+IAlgorithm_sptr algorithmWithPropertiesSet(const std::string &inputWSName, const std::string &inputGroupName) {
   auto alg = std::make_shared<ApplyMuonDetectorGrouping>();
   alg->initialize();
   alg->setProperty("InputWorkspace", inputWSName);
@@ -71,12 +70,8 @@ public:
   ApplyMuonDetectorGroupingTest() { Mantid::API::FrameworkManager::Instance(); }
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ApplyMuonDetectorGroupingTest *createSuite() {
-    return new ApplyMuonDetectorGroupingTest();
-  }
-  static void destroySuite(ApplyMuonDetectorGroupingTest *suite) {
-    delete suite;
-  }
+  static ApplyMuonDetectorGroupingTest *createSuite() { return new ApplyMuonDetectorGroupingTest(); }
+  static void destroySuite(ApplyMuonDetectorGroupingTest *suite) { delete suite; }
 
   void test_algorithm_initializes() {
     ApplyMuonDetectorGrouping alg;
@@ -88,8 +83,7 @@ public:
 
     auto ws = createCountsWorkspace(5, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -99,13 +93,12 @@ public:
 
     auto ws = createCountsWorkspace(5, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("inputGroup"))
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("inputGroup"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("inputGroup"));
     // Raw + Rebinned
     TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
   }
@@ -114,14 +107,13 @@ public:
 
     auto ws = createAsymmetryWorkspace(3, 10);
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("AnalysisType", "Asymmetry");
     alg->execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("inputGroup"))
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("inputGroup"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("inputGroup"));
     // Raw + Rebinned + unNorm + unNorm_Raw
     TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 4);
   }
@@ -130,11 +122,10 @@ public:
 
     auto ws = createCountsWorkspace(3, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->execute();
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("inputGroup"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("inputGroup"));
 
     TS_ASSERT(wsGroup->getItem("inputGroup; Group; test; Counts; #1"));
     TS_ASSERT(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
@@ -144,13 +135,12 @@ public:
 
     auto ws = createCountsWorkspace(1, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("Grouping", "1");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("inputGroup"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("inputGroup"));
 
     auto wsOut = wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw");
 
@@ -169,14 +159,13 @@ public:
 
     auto ws = createCountsWorkspace(5, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("inputGroup"));
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("inputGroup"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
@@ -191,22 +180,19 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00866, 0.00001);
   }
 
-  void
-  test_grouping_with_single_detector_and_asymmetry_analysis_gives_correct_values() {
+  void test_grouping_with_single_detector_and_asymmetry_analysis_gives_correct_values() {
 
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(1, 10);
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("AnalysisType", "Asymmetry");
     alg->setProperty("Grouping", "1");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("inputGroup"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("inputGroup"));
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test; Asym; #1_Raw"));
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Asym; #1_Raw"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
@@ -222,22 +208,19 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00145, 0.00001);
   }
 
-  void
-  test_grouping_with_multiple_detectors_and_asymmetry_analysis_gives_correct_values() {
+  void test_grouping_with_multiple_detectors_and_asymmetry_analysis_gives_correct_values() {
 
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(3, 10);
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("AnalysisType", "Asymmetry");
     alg->setProperty("Grouping", "1,2,3");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("inputGroup"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("inputGroup"));
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test; Asym; #1_Raw"));
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Asym; #1_Raw"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
@@ -253,25 +236,22 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.000434, 0.000001);
   }
 
-  void
-  test_grouping_with_summed_multiple_periods_and_counts_analysis_gives_correct_values() {
+  void test_grouping_with_summed_multiple_periods_and_counts_analysis_gives_correct_values() {
 
     // Period 1 yvalues : 1,2,3,4,5,6,7,8,9,10
     // Period 2 yvalues : 2,3,4,5,6,7,8,9,10,11
-    WorkspaceGroup_sptr ws =
-        createMultiPeriodWorkspaceGroup(3, 1, 10, "MuonAnalysis");
+    WorkspaceGroup_sptr ws = createMultiPeriodWorkspaceGroup(3, 1, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("Grouping", "1");
     alg->setProperty("SummedPeriods", "1,2");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("inputGroup"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("inputGroup"));
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
@@ -287,27 +267,24 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00707, 0.0001);
   }
 
-  void
-  test_grouping_with_subtracted_multiple_periods_and_counts_analysis_gives_correct_values() {
+  void test_grouping_with_subtracted_multiple_periods_and_counts_analysis_gives_correct_values() {
 
     // Period 1 y-values : 1,2,3,4,5,6,7,8,9,10
     // Period 2 y-values : 2,3,4,5,6,7,8,9,10,11
     // Period 3 y-values : 3,4,5,6,7,8,9,10,11,12
-    WorkspaceGroup_sptr ws =
-        createMultiPeriodWorkspaceGroup(3, 1, 10, "MuonAnalysis");
+    WorkspaceGroup_sptr ws = createMultiPeriodWorkspaceGroup(3, 1, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("SummedPeriods", "2,3");
     alg->setProperty("SubtractedPeriods", "1");
     alg->setProperty("Grouping", "1");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("inputGroup"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("inputGroup"));
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
@@ -330,18 +307,17 @@ public:
 
     auto ws = createAsymmetryWorkspace(1, 10);
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("Grouping", "1");
     alg->setProperty("ApplyDeadTimeCorrection", true);
     alg->setProperty("DeadTimeTable", deadTimeTable);
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("inputGroup"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("inputGroup"));
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
@@ -361,24 +337,22 @@ public:
 
     auto ws = createCountsWorkspace(3, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("RebinArgs", "0.2");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("inputGroup"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("inputGroup"));
 
-    auto wsOutNoRebin = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
+    auto wsOutNoRebin =
+        std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOutNoRebin->readX(0)[0], 0.000, 0.001);
     TS_ASSERT_DELTA(wsOutNoRebin->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOutNoRebin->readX(0)[9], 0.900, 0.001);
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test; Counts; #1"));
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Counts; #1"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
@@ -398,15 +372,12 @@ public:
   void test_unNorm_workspaces_named_correctly() {
     auto ws = createCountsWorkspace(3, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    Mantid::API::IAlgorithm_sptr alg =
-        algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("AnalysisType", "Asymmetry");
     alg->execute();
 
     auto name = AnalysisDataService::Instance().getObjectNames();
-    TS_ASSERT(AnalysisDataService::Instance().doesExist(
-        "inputGroup; Group; test; Asym; #1_unNorm"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist(
-        "inputGroup; Group; test; Asym; #1_unNorm_Raw"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("inputGroup; Group; test; Asym; #1_unNorm"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("inputGroup; Group; test; Asym; #1_unNorm_Raw"));
   }
 };

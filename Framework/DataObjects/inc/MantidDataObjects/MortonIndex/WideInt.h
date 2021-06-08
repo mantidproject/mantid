@@ -63,11 +63,9 @@ template <size_t Bits, typename Signed> class wide_integer;
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
 struct common_type<wide_integer<Bits, Signed>, wide_integer<Bits2, Signed2>>;
 
-template <size_t Bits, typename Signed, typename Arithmetic>
-struct common_type<wide_integer<Bits, Signed>, Arithmetic>;
+template <size_t Bits, typename Signed, typename Arithmetic> struct common_type<wide_integer<Bits, Signed>, Arithmetic>;
 
-template <typename Arithmetic, size_t Bits, typename Signed>
-struct common_type<Arithmetic, wide_integer<Bits, Signed>>;
+template <typename Arithmetic, size_t Bits, typename Signed> struct common_type<Arithmetic, wide_integer<Bits, Signed>>;
 
 template <size_t Bits, typename Signed> class wide_integer {
 public:
@@ -78,74 +76,50 @@ public:
   wide_integer() = default;
 
   template <typename T> constexpr wide_integer(T rhs) noexcept;
-  template <size_t Bits2, typename Signed2>
-  constexpr wide_integer(const wide_integer<Bits2, Signed2> &rhs) noexcept;
+  template <size_t Bits2, typename Signed2> constexpr wide_integer(const wide_integer<Bits2, Signed2> &rhs) noexcept;
 
   // assignment
   template <size_t Bits2, typename Signed2>
-  constexpr wide_integer<Bits, Signed> &
-  operator=(const wide_integer<Bits2, Signed2> &rhs) noexcept;
+  constexpr wide_integer<Bits, Signed> &operator=(const wide_integer<Bits2, Signed2> &rhs) noexcept;
+
+  template <typename Arithmetic> constexpr wide_integer<Bits, Signed> &operator=(Arithmetic rhs) noexcept;
+
+  template <typename Arithmetic> constexpr wide_integer<Bits, Signed> &operator*=(const Arithmetic &rhs);
+
+  template <typename Arithmetic> constexpr wide_integer<Bits, Signed> &operator/=(const Arithmetic &rhs);
 
   template <typename Arithmetic>
-  constexpr wide_integer<Bits, Signed> &operator=(Arithmetic rhs) noexcept;
+  constexpr wide_integer<Bits, Signed> &operator+=(const Arithmetic &rhs) noexcept(is_same<Signed, unsigned>::value);
 
   template <typename Arithmetic>
-  constexpr wide_integer<Bits, Signed> &operator*=(const Arithmetic &rhs);
+  constexpr wide_integer<Bits, Signed> &operator-=(const Arithmetic &rhs) noexcept(is_same<Signed, unsigned>::value);
 
-  template <typename Arithmetic>
-  constexpr wide_integer<Bits, Signed> &operator/=(const Arithmetic &rhs);
+  template <typename Integral> constexpr wide_integer<Bits, Signed> &operator%=(const Integral &rhs);
 
-  template <typename Arithmetic>
-  constexpr wide_integer<Bits, Signed> &
-  operator+=(const Arithmetic &rhs) noexcept(is_same<Signed, unsigned>::value);
+  template <typename Integral> constexpr wide_integer<Bits, Signed> &operator&=(const Integral &rhs) noexcept;
 
-  template <typename Arithmetic>
-  constexpr wide_integer<Bits, Signed> &
-  operator-=(const Arithmetic &rhs) noexcept(is_same<Signed, unsigned>::value);
+  template <typename Integral> constexpr wide_integer<Bits, Signed> &operator|=(const Integral &rhs) noexcept;
 
-  template <typename Integral>
-  constexpr wide_integer<Bits, Signed> &operator%=(const Integral &rhs);
+  template <typename Integral> constexpr wide_integer<Bits, Signed> &operator^=(const Integral &rhs) noexcept;
 
-  template <typename Integral>
-  constexpr wide_integer<Bits, Signed> &
-  operator&=(const Integral &rhs) noexcept;
-
-  template <typename Integral>
-  constexpr wide_integer<Bits, Signed> &
-  operator|=(const Integral &rhs) noexcept;
-
-  template <typename Integral>
-  constexpr wide_integer<Bits, Signed> &
-  operator^=(const Integral &rhs) noexcept;
-
-  template <typename T2,
-            typename = std::enable_if<std::is_integral<T2>::value &&
-                                      std::is_unsigned<T2>::value>>
+  template <typename T2, typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
   constexpr wide_integer<Bits, Signed> &operator<<=(T2 n) noexcept;
-  template <typename T2,
-            typename = std::enable_if<std::is_integral<T2>::value &&
-                                      std::is_unsigned<T2>::value>>
+  template <typename T2, typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
   constexpr wide_integer<Bits, Signed> &operator>>=(T2 n) noexcept;
 
-  constexpr wide_integer<Bits, Signed> &
-  operator++() noexcept(is_same<Signed, unsigned>::value);
-  constexpr wide_integer<Bits, Signed>
-  operator++(int) noexcept(is_same<Signed, unsigned>::value);
-  constexpr wide_integer<Bits, Signed> &
-  operator--() noexcept(is_same<Signed, unsigned>::value);
-  constexpr wide_integer<Bits, Signed>
-  operator--(int) noexcept(is_same<Signed, unsigned>::value);
+  constexpr wide_integer<Bits, Signed> &operator++() noexcept(is_same<Signed, unsigned>::value);
+  constexpr wide_integer<Bits, Signed> operator++(int) noexcept(is_same<Signed, unsigned>::value);
+  constexpr wide_integer<Bits, Signed> &operator--() noexcept(is_same<Signed, unsigned>::value);
+  constexpr wide_integer<Bits, Signed> operator--(int) noexcept(is_same<Signed, unsigned>::value);
 
   // observers
 
   constexpr explicit operator bool() const noexcept;
 
   template <class T>
-  using __integral_not_wide_integer_class =
-      typename std::enable_if<std::is_arithmetic<T>::value, T>::type;
+  using __integral_not_wide_integer_class = typename std::enable_if<std::is_arithmetic<T>::value, T>::type;
 
-  template <class T, class = __integral_not_wide_integer_class<T>>
-  constexpr operator T() const noexcept;
+  template <class T, class = __integral_not_wide_integer_class<T>> constexpr operator T() const noexcept;
 
   constexpr operator long double() const noexcept;
   constexpr operator double() const noexcept;
@@ -166,185 +140,125 @@ private:
 
 template <typename T> static constexpr bool ArithmeticConcept() noexcept;
 template <class T1, class T2>
-using __only_arithmetic =
-    typename std::enable_if<ArithmeticConcept<T1>() &&
-                            ArithmeticConcept<T2>()>::type;
+using __only_arithmetic = typename std::enable_if<ArithmeticConcept<T1>() && ArithmeticConcept<T2>()>::type;
 
 template <typename T> static constexpr bool IntegralConcept() noexcept;
 template <class T, class T2>
-using __only_integer = typename std::enable_if<IntegralConcept<T>() &&
-                                               IntegralConcept<T2>()>::type;
+using __only_integer = typename std::enable_if<IntegralConcept<T>() && IntegralConcept<T2>()>::type;
 
 // Unary operators
 template <size_t Bits, typename Signed>
-constexpr wide_integer<Bits, Signed>
-operator~(const wide_integer<Bits, Signed> &lhs) noexcept;
+constexpr wide_integer<Bits, Signed> operator~(const wide_integer<Bits, Signed> &lhs) noexcept;
 
 template <size_t Bits, typename Signed>
 constexpr wide_integer<Bits, Signed>
-operator-(const wide_integer<Bits, Signed> &lhs) noexcept(
-    is_same<Signed, unsigned>::value);
+operator-(const wide_integer<Bits, Signed> &lhs) noexcept(is_same<Signed, unsigned>::value);
 
 template <size_t Bits, typename Signed>
 constexpr wide_integer<Bits, Signed>
-operator+(const wide_integer<Bits, Signed> &lhs) noexcept(
-    is_same<Signed, unsigned>::value);
+operator+(const wide_integer<Bits, Signed> &lhs) noexcept(is_same<Signed, unsigned>::value);
 
 // Binary operators
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-std::common_type_t<wide_integer<Bits, Signed>,
-                   wide_integer<Bits2, Signed2>> constexpr
-operator*(const wide_integer<Bits, Signed> &lhs,
-          const wide_integer<Bits2, Signed2> &rhs);
-template <typename Arithmetic, typename Arithmetic2,
-          class = __only_arithmetic<Arithmetic, Arithmetic2>>
-std::common_type_t<Arithmetic, Arithmetic2> constexpr
-operator*(const Arithmetic &rhs, const Arithmetic2 &lhs);
+std::common_type_t<wide_integer<Bits, Signed>, wide_integer<Bits2, Signed2>> constexpr
+operator*(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Arithmetic, typename Arithmetic2, class = __only_arithmetic<Arithmetic, Arithmetic2>>
+std::common_type_t<Arithmetic, Arithmetic2> constexpr operator*(const Arithmetic &rhs, const Arithmetic2 &lhs);
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-std::common_type_t<wide_integer<Bits, Signed>,
-                   wide_integer<Bits2, Signed2>> constexpr
-operator/(const wide_integer<Bits, Signed> &lhs,
-          const wide_integer<Bits2, Signed2> &rhs);
-template <typename Arithmetic, typename Arithmetic2,
-          class = __only_arithmetic<Arithmetic, Arithmetic2>>
-std::common_type_t<Arithmetic, Arithmetic2> constexpr
-operator/(const Arithmetic &rhs, const Arithmetic2 &lhs);
+std::common_type_t<wide_integer<Bits, Signed>, wide_integer<Bits2, Signed2>> constexpr
+operator/(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Arithmetic, typename Arithmetic2, class = __only_arithmetic<Arithmetic, Arithmetic2>>
+std::common_type_t<Arithmetic, Arithmetic2> constexpr operator/(const Arithmetic &rhs, const Arithmetic2 &lhs);
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-std::common_type_t<wide_integer<Bits, Signed>,
-                   wide_integer<Bits2, Signed2>> constexpr
-operator+(const wide_integer<Bits, Signed> &lhs,
-          const wide_integer<Bits2, Signed2> &rhs);
-template <typename Arithmetic, typename Arithmetic2,
-          class = __only_arithmetic<Arithmetic, Arithmetic2>>
-std::common_type_t<Arithmetic, Arithmetic2> constexpr
-operator+(const Arithmetic &rhs, const Arithmetic2 &lhs);
+std::common_type_t<wide_integer<Bits, Signed>, wide_integer<Bits2, Signed2>> constexpr
+operator+(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Arithmetic, typename Arithmetic2, class = __only_arithmetic<Arithmetic, Arithmetic2>>
+std::common_type_t<Arithmetic, Arithmetic2> constexpr operator+(const Arithmetic &rhs, const Arithmetic2 &lhs);
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-std::common_type_t<wide_integer<Bits, Signed>,
-                   wide_integer<Bits2, Signed2>> constexpr
-operator-(const wide_integer<Bits, Signed> &lhs,
-          const wide_integer<Bits2, Signed2> &rhs);
-template <typename Arithmetic, typename Arithmetic2,
-          class = __only_arithmetic<Arithmetic, Arithmetic2>>
-std::common_type_t<Arithmetic, Arithmetic2> constexpr
-operator-(const Arithmetic &rhs, const Arithmetic2 &lhs);
+std::common_type_t<wide_integer<Bits, Signed>, wide_integer<Bits2, Signed2>> constexpr
+operator-(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Arithmetic, typename Arithmetic2, class = __only_arithmetic<Arithmetic, Arithmetic2>>
+std::common_type_t<Arithmetic, Arithmetic2> constexpr operator-(const Arithmetic &rhs, const Arithmetic2 &lhs);
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-std::common_type_t<wide_integer<Bits, Signed>,
-                   wide_integer<Bits2, Signed2>> constexpr
-operator%(const wide_integer<Bits, Signed> &lhs,
-          const wide_integer<Bits2, Signed2> &rhs);
-template <typename Integral, typename Integral2,
-          class = __only_integer<Integral, Integral2>>
-std::common_type_t<Integral, Integral2> constexpr
-operator%(const Integral &rhs, const Integral2 &lhs);
+std::common_type_t<wide_integer<Bits, Signed>, wide_integer<Bits2, Signed2>> constexpr
+operator%(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Integral, typename Integral2, class = __only_integer<Integral, Integral2>>
+std::common_type_t<Integral, Integral2> constexpr operator%(const Integral &rhs, const Integral2 &lhs);
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-std::common_type_t<wide_integer<Bits, Signed>,
-                   wide_integer<Bits2, Signed2>> constexpr
-operator&(const wide_integer<Bits, Signed> &lhs,
-          const wide_integer<Bits2, Signed2> &rhs);
-template <typename Integral, typename Integral2,
-          class = __only_integer<Integral, Integral2>>
-std::common_type_t<Integral, Integral2> constexpr
-operator&(const Integral &rhs, const Integral2 &lhs);
+std::common_type_t<wide_integer<Bits, Signed>, wide_integer<Bits2, Signed2>> constexpr
+operator&(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Integral, typename Integral2, class = __only_integer<Integral, Integral2>>
+std::common_type_t<Integral, Integral2> constexpr operator&(const Integral &rhs, const Integral2 &lhs);
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-std::common_type_t<wide_integer<Bits, Signed>,
-                   wide_integer<Bits2, Signed2>> constexpr
-operator|(const wide_integer<Bits, Signed> &lhs,
-          const wide_integer<Bits2, Signed2> &rhs);
-template <typename Integral, typename Integral2,
-          class = __only_integer<Integral, Integral2>>
-std::common_type_t<Integral, Integral2> constexpr
-operator|(const Integral &rhs, const Integral2 &lhs);
+std::common_type_t<wide_integer<Bits, Signed>, wide_integer<Bits2, Signed2>> constexpr
+operator|(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Integral, typename Integral2, class = __only_integer<Integral, Integral2>>
+std::common_type_t<Integral, Integral2> constexpr operator|(const Integral &rhs, const Integral2 &lhs);
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-std::common_type_t<wide_integer<Bits, Signed>,
-                   wide_integer<Bits2, Signed2>> constexpr
-operator^(const wide_integer<Bits, Signed> &lhs,
-          const wide_integer<Bits2, Signed2> &rhs);
-template <typename Integral, typename Integral2,
-          class = __only_integer<Integral, Integral2>>
-std::common_type_t<Integral, Integral2> constexpr
-operator^(const Integral &rhs, const Integral2 &lhs);
+std::common_type_t<wide_integer<Bits, Signed>, wide_integer<Bits2, Signed2>> constexpr
+operator^(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Integral, typename Integral2, class = __only_integer<Integral, Integral2>>
+std::common_type_t<Integral, Integral2> constexpr operator^(const Integral &rhs, const Integral2 &lhs);
 
 // TODO: Integral
 template <size_t Bits, typename Signed, typename T2,
-          typename = std::enable_if<std::is_integral<T2>::value &&
-                                    std::is_unsigned<T2>::value>>
-constexpr wide_integer<Bits, Signed>
-operator<<(const wide_integer<Bits, Signed> &lhs, T2 n) noexcept;
+          typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
+constexpr wide_integer<Bits, Signed> operator<<(const wide_integer<Bits, Signed> &lhs, T2 n) noexcept;
 
 template <size_t Bits, typename Signed, typename T2,
-          typename = std::enable_if<std::is_integral<T2>::value &&
-                                    std::is_unsigned<T2>::value>>
-constexpr wide_integer<Bits, Signed>
-operator>>(const wide_integer<Bits, Signed> &lhs, T2 n) noexcept;
+          typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
+constexpr wide_integer<Bits, Signed> operator>>(const wide_integer<Bits, Signed> &lhs, T2 n) noexcept;
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-constexpr bool operator<(const wide_integer<Bits, Signed> &lhs,
-                         const wide_integer<Bits2, Signed2> &rhs);
-template <typename Arithmetic, typename Arithmetic2,
-          class = __only_arithmetic<Arithmetic, Arithmetic2>>
+constexpr bool operator<(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Arithmetic, typename Arithmetic2, class = __only_arithmetic<Arithmetic, Arithmetic2>>
 constexpr bool operator<(const Arithmetic &rhs, const Arithmetic2 &lhs);
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-constexpr bool operator>(const wide_integer<Bits, Signed> &lhs,
-                         const wide_integer<Bits2, Signed2> &rhs);
-template <typename Arithmetic, typename Arithmetic2,
-          class = __only_arithmetic<Arithmetic, Arithmetic2>>
+constexpr bool operator>(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Arithmetic, typename Arithmetic2, class = __only_arithmetic<Arithmetic, Arithmetic2>>
 constexpr bool operator>(const Arithmetic &rhs, const Arithmetic2 &lhs);
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-constexpr bool operator<=(const wide_integer<Bits, Signed> &lhs,
-                          const wide_integer<Bits2, Signed2> &rhs);
-template <typename Arithmetic, typename Arithmetic2,
-          class = __only_arithmetic<Arithmetic, Arithmetic2>>
+constexpr bool operator<=(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Arithmetic, typename Arithmetic2, class = __only_arithmetic<Arithmetic, Arithmetic2>>
 constexpr bool operator<=(const Arithmetic &rhs, const Arithmetic2 &lhs);
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-constexpr bool operator>=(const wide_integer<Bits, Signed> &lhs,
-                          const wide_integer<Bits2, Signed2> &rhs);
-template <typename Arithmetic, typename Arithmetic2,
-          class = __only_arithmetic<Arithmetic, Arithmetic2>>
+constexpr bool operator>=(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Arithmetic, typename Arithmetic2, class = __only_arithmetic<Arithmetic, Arithmetic2>>
 constexpr bool operator>=(const Arithmetic &rhs, const Arithmetic2 &lhs);
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-constexpr bool operator==(const wide_integer<Bits, Signed> &lhs,
-                          const wide_integer<Bits2, Signed2> &rhs);
-template <typename Arithmetic, typename Arithmetic2,
-          class = __only_arithmetic<Arithmetic, Arithmetic2>>
+constexpr bool operator==(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Arithmetic, typename Arithmetic2, class = __only_arithmetic<Arithmetic, Arithmetic2>>
 constexpr bool operator==(const Arithmetic &rhs, const Arithmetic2 &lhs);
 
 template <size_t Bits, typename Signed, size_t Bits2, typename Signed2>
-constexpr bool operator!=(const wide_integer<Bits, Signed> &lhs,
-                          const wide_integer<Bits2, Signed2> &rhs);
-template <typename Arithmetic, typename Arithmetic2,
-          class = __only_arithmetic<Arithmetic, Arithmetic2>>
+constexpr bool operator!=(const wide_integer<Bits, Signed> &lhs, const wide_integer<Bits2, Signed2> &rhs);
+template <typename Arithmetic, typename Arithmetic2, class = __only_arithmetic<Arithmetic, Arithmetic2>>
 constexpr bool operator!=(const Arithmetic &rhs, const Arithmetic2 &lhs);
 
-template <size_t Bits, typename Signed>
-std::string to_string(const wide_integer<Bits, Signed> &n);
+template <size_t Bits, typename Signed> std::string to_string(const wide_integer<Bits, Signed> &n);
+
+template <size_t Bits, typename Signed> std::wstring to_wstring(const wide_integer<Bits, Signed> &n);
 
 template <size_t Bits, typename Signed>
-std::wstring to_wstring(const wide_integer<Bits, Signed> &n);
+std::ostream &operator<<(std::ostream &out, const wide_integer<Bits, Signed> &n);
 
 template <size_t Bits, typename Signed>
-std::ostream &operator<<(std::ostream &out,
-                         const wide_integer<Bits, Signed> &n);
+std::wostream &operator<<(std::wostream &out, const wide_integer<Bits, Signed> &n);
 
-template <size_t Bits, typename Signed>
-std::wostream &operator<<(std::wostream &out,
-                          const wide_integer<Bits, Signed> &n);
+template <size_t Bits, typename Signed> std::istream &operator>>(std::istream &in, wide_integer<Bits, Signed> &n);
 
-template <size_t Bits, typename Signed>
-std::istream &operator>>(std::istream &in, wide_integer<Bits, Signed> &n);
-
-template <size_t Bits, typename Signed>
-std::wistream &operator>>(std::wistream &in, wide_integer<Bits, Signed> &n);
+template <size_t Bits, typename Signed> std::wistream &operator>>(std::wistream &in, wide_integer<Bits, Signed> &n);
 
 //// Must be defined in another header
 struct to_chars_result {
@@ -359,13 +273,10 @@ struct from_chars_result {
 ////
 
 template <size_t Bits, typename Signed>
-to_chars_result to_chars(char *first, char *last,
-                         const wide_integer<Bits, Signed> &value,
-                         int base = 10);
+to_chars_result to_chars(char *first, char *last, const wide_integer<Bits, Signed> &value, int base = 10);
 
 template <size_t Bits, typename Signed>
-from_chars_result from_chars(const char *first, const char *last,
-                             wide_integer<Bits, Signed> &value, int base = 10);
+from_chars_result from_chars(const char *first, const char *last, wide_integer<Bits, Signed> &value, int base = 10);
 
 inline namespace literals {
 inline namespace wide_integer_literals {
@@ -393,8 +304,7 @@ constexpr uint256_t operator"" _cppui256(const char *n);
 constexpr uint512_t operator"" _cppui512(const char *n);
 
 // numeric limits
-template <size_t Bits, typename Signed>
-class numeric_limits<wide_integer<Bits, Signed>>;
+template <size_t Bits, typename Signed> class numeric_limits<wide_integer<Bits, Signed>>;
 
 template <size_t Bits, typename Signed> struct hash<wide_integer<Bits, Signed>>;
 

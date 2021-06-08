@@ -26,19 +26,13 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "SliceMDHisto"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Extracts a hyperslab of data from a MDHistoWorkspace";
-  }
+  const std::string summary() const override { return "Extracts a hyperslab of data from a MDHistoWorkspace"; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SliceMD", "IntegrateMDHistoWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SliceMD", "IntegrateMDHistoWorkspace"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Slicing";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Slicing"; }
 
 private:
   /// Initialisation code
@@ -48,11 +42,9 @@ private:
 
   unsigned int m_rank;
   std::vector<int> m_dim;
-  void cutData(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
-               const Mantid::API::IMDHistoWorkspace_sptr &outWS,
-               Mantid::coord_t *sourceDim, Mantid::coord_t *targetDim,
-               std::vector<int> start, std::vector<int> end, unsigned int dim);
+  void cutData(const Mantid::API::IMDHistoWorkspace_sptr &inWS, const Mantid::API::IMDHistoWorkspace_sptr &outWS,
+               Mantid::coord_t *sourceDim, Mantid::coord_t *targetDim, std::vector<int> start, std::vector<int> end,
+               unsigned int dim);
 
-  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
-                    const Mantid::API::IMDHistoWorkspace_sptr &outws);
+  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws, const Mantid::API::IMDHistoWorkspace_sptr &outws);
 };

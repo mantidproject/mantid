@@ -36,8 +36,7 @@ namespace API {
 class TableColumnHelper {
 public:
   /// Constructor
-  TableColumnHelper(ITableWorkspace *tw, const std::string &name)
-      : m_workspace(tw), m_name(name) {}
+  TableColumnHelper(ITableWorkspace *tw, const std::string &name) : m_workspace(tw), m_name(name) {}
   ITableWorkspace *m_workspace; ///< Pointer to the TableWorkspace
   std::string m_name;           ///< column namae
 };
@@ -46,8 +45,7 @@ public:
 class TableConstColumnHelper {
 public:
   /// Constructor
-  TableConstColumnHelper(const ITableWorkspace *tw, const std::string &name)
-      : m_workspace(tw), m_name(name) {}
+  TableConstColumnHelper(const ITableWorkspace *tw, const std::string &name) : m_workspace(tw), m_name(name) {}
   const ITableWorkspace *m_workspace; ///< Pointer to the TableWorkspace
   std::string m_name;                 ///< column namae
 };
@@ -56,8 +54,7 @@ public:
 class TableRowHelper {
 public:
   /// Constructor
-  TableRowHelper(ITableWorkspace *tw, size_t row)
-      : m_workspace(tw), m_row(row) {}
+  TableRowHelper(ITableWorkspace *tw, size_t row) : m_workspace(tw), m_row(row) {}
   ITableWorkspace *m_workspace; ///< Pointer to the TableWorkspace
   size_t m_row;                 ///< Row number
 };
@@ -107,17 +104,12 @@ public:
   ITableWorkspace() {}
 
   /// Returns a clone of the workspace
-  ITableWorkspace_uptr clone() const {
-    return std::unique_ptr<ITableWorkspace>(doClone());
-  }
+  ITableWorkspace_uptr clone() const { return std::unique_ptr<ITableWorkspace>(doClone()); }
 
   /// Returns a default-initialized clone of the workspace
-  ITableWorkspace_uptr cloneEmpty() const {
-    return ITableWorkspace_uptr(doCloneEmpty());
-  }
+  ITableWorkspace_uptr cloneEmpty() const { return ITableWorkspace_uptr(doCloneEmpty()); }
 
-  ITableWorkspace_uptr
-  cloneColumns(const std::vector<std::string> &colNames) const;
+  ITableWorkspace_uptr cloneColumns(const std::vector<std::string> &colNames) const;
 
   ITableWorkspace &operator=(const ITableWorkspace &) = delete;
   /// Return the workspace typeID
@@ -128,11 +120,9 @@ public:
    * @param name :: The name to assign to the column
    * @return True if the column was successfully added
    */
-  virtual Column_sptr addColumn(const std::string &type,
-                                const std::string &name) = 0;
+  virtual Column_sptr addColumn(const std::string &type, const std::string &name) = 0;
   /// Creates n new columns of the same type.
-  virtual bool addColumns(const std::string &type, const std::string &name,
-                          size_t n);
+  virtual bool addColumns(const std::string &type, const std::string &name, size_t n);
   /**Get access to shared pointer containing workspace properties */
   virtual API::LogManager_sptr logs() = 0;
   /**Get constant access to shared pointer containing workspace properties */
@@ -201,9 +191,8 @@ public:
   T &getRef(const std::string &name, size_t index) {
     std::shared_ptr<Column> c = getColumn(name);
     if (!c->isType<T>()) {
-      std::string str = std::string("getRef: Type mismatch. ") +
-                        typeid(T).name() + " != " + c->get_type_info().name() +
-                        '\n';
+      std::string str =
+          std::string("getRef: Type mismatch. ") + typeid(T).name() + " != " + c->get_type_info().name() + '\n';
       throw std::runtime_error(str);
     }
     return *(static_cast<T *>(c->void_pointer(index)));
@@ -221,9 +210,7 @@ public:
     Column_sptr c = getColumn(col);
     if (!c->isType<T>()) {
       std::ostringstream ostr;
-      ostr << "cell: Type mismatch:\n"
-           << typeid(T).name() << " != \n"
-           << c->get_type_info().name() << '\n';
+      ostr << "cell: Type mismatch:\n" << typeid(T).name() << " != \n" << c->get_type_info().name() << '\n';
       throw std::runtime_error(ostr.str());
     }
     if (row >= this->rowCount()) {
@@ -267,9 +254,7 @@ public:
          @param col :: Column number
          @return the reference of a requested cell if it's a string
    */
-  std::string &String(size_t row, size_t col) {
-    return cell<std::string>(row, col);
-  }
+  std::string &String(size_t row, size_t col) { return cell<std::string>(row, col); }
 
   /**  Creates a TableRow object for row \a row.
          @param row :: Row number
@@ -294,8 +279,7 @@ public:
   virtual void find(std::string value, size_t &row, const size_t &col) = 0;
   /// find method to get the index of  Mantid::Kernel::V3D cell value in a table
   /// workspace
-  virtual void find(Mantid::Kernel::V3D value, size_t &row,
-                    const size_t &col) = 0;
+  virtual void find(Mantid::Kernel::V3D value, size_t &row, const size_t &col) = 0;
 
   void modified();
 
@@ -323,12 +307,9 @@ protected:
   void removeFromColumn(Column *c, size_t index) { c->remove(index); }
 
 private:
-  ITableWorkspace *doClone() const override {
-    return doCloneColumns(std::vector<std::string>());
-  }
+  ITableWorkspace *doClone() const override { return doCloneColumns(std::vector<std::string>()); }
   ITableWorkspace *doCloneEmpty() const override = 0;
-  virtual ITableWorkspace *
-  doCloneColumns(const std::vector<std::string> &colNames) const = 0;
+  virtual ITableWorkspace *doCloneColumns(const std::vector<std::string> &colNames) const = 0;
 };
 
 // =====================================================================================
@@ -340,12 +321,10 @@ private:
 template <class T> class ColumnVector {
 public:
   /// Constructor
-  ColumnVector(const TableColumnHelper &th)
-      : m_column(th.m_workspace->getColumn(th.m_name)) {
+  ColumnVector(const TableColumnHelper &th) : m_column(th.m_workspace->getColumn(th.m_name)) {
     if (!m_column->isType<T>()) {
       std::stringstream mess;
-      mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name()
-           << ">.";
+      mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name() << ">.";
       throw std::runtime_error(mess.str());
     }
   }
@@ -353,8 +332,7 @@ public:
   ColumnVector(Column_sptr column) : m_column(std::move(column)) {
     if (!m_column->isType<T>()) {
       std::stringstream mess;
-      mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name()
-           << ">.";
+      mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name() << ">.";
       throw std::runtime_error(mess.str());
     }
   }
@@ -378,12 +356,10 @@ private:
 template <class T> class ConstColumnVector {
 public:
   /// Constructor
-  ConstColumnVector(const TableConstColumnHelper &th)
-      : m_column(th.m_workspace->getColumn(th.m_name)) {
+  ConstColumnVector(const TableConstColumnHelper &th) : m_column(th.m_workspace->getColumn(th.m_name)) {
     if (!m_column->isType<T>()) {
       std::stringstream mess;
-      mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name()
-           << ">.";
+      mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name() << ">.";
       throw std::runtime_error(mess.str());
     }
   }
@@ -391,8 +367,7 @@ public:
   ConstColumnVector(Column_const_sptr column) : m_column(std::move(column)) {
     if (!m_column->isType<T>()) {
       std::stringstream mess;
-      mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name()
-           << ">.";
+      mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name() << ">.";
       throw std::runtime_error(mess.str());
     }
   }

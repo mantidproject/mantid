@@ -34,6 +34,11 @@ class DrillModelTest(unittest.TestCase):
             "a2": "a2"
             }
 
+    EXPORT_ALGORITHMS = {
+            "a1": {"ea1": True},
+            "a2": {"ea2": True}
+            }
+
     SETTINGS = {
             "a1": [
                 "str",
@@ -100,6 +105,13 @@ class DrillModelTest(unittest.TestCase):
         patch = mock.patch.dict(
                 'Interface.ui.drill.model.DrillModel.RundexSettings.ALGORITHM',
                 self.ALGORITHM, clear=True
+                )
+        self.mAlgo = patch.start()
+        self.addCleanup(patch.stop)
+
+        patch = mock.patch.dict(
+                'Interface.ui.drill.model.DrillModel.RundexSettings.EXPORT_ALGORITHMS',
+                self.EXPORT_ALGORITHMS, clear=True
                 )
         self.mAlgo = patch.start()
         self.addCleanup(patch.stop)
@@ -522,9 +534,14 @@ class DrillModelTest(unittest.TestCase):
 
     def test_onTaskSuccess(self):
         self.model.processSuccess = mock.Mock()
+        self.model.exportModel = mock.Mock()
+        s1 = mock.Mock()
+        s1.getParameter.return_value = None
+        self.model.samples = [s1]
         self.model._onTaskSuccess(0)
         self.mLogger.information.assert_called_once()
         self.model.processSuccess.emit.assert_called_once()
+        self.model.exportModel.run.assert_called_once_with(s1)
 
     def test_onTaskError(self):
         self.model.processError = mock.Mock()

@@ -29,10 +29,9 @@ void IdentifyNoisyDetectors::init() {
   wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "InputWorkspace", "", Direction::Input /*,wsVal*/));
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "OutputWorkspace", "", Direction::Output));
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input /*,wsVal*/));
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output));
   declareProperty("RangeLower", 2000.0, "The lower integration range");
   declareProperty("RangeUpper", 19000.0, "The upper integration range");
 }
@@ -48,10 +47,9 @@ void IdentifyNoisyDetectors::exec() {
   const double steps = rangeUpper - rangeLower;
 
   if (0 == nHist)
-    throw std::runtime_error(
-        "Cannot run this algorithm on an input workspace without any spectra. "
-        "It does not seem to make sense and the calculations done here will "
-        "will cause a division by zero.");
+    throw std::runtime_error("Cannot run this algorithm on an input workspace without any spectra. "
+                             "It does not seem to make sense and the calculations done here will "
+                             "will cause a division by zero.");
 
   Progress progress(this, 0.0, 1.0, (nHist * 7) + 6);
 
@@ -137,8 +135,7 @@ void IdentifyNoisyDetectors::exec() {
  * @param valid :: eventual output workspace, holding 0 for bad and 1 for good
  * @param values :: stddeviations of each spectra (I think)
  */
-void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
-                                       const MatrixWorkspace_sptr &valid,
+void IdentifyNoisyDetectors::getStdDev(API::Progress &progress, const MatrixWorkspace_sptr &valid,
                                        const MatrixWorkspace_sptr &values) {
   const auto nhist = static_cast<int>(valid->getNumberHistograms());
   int count = 0;

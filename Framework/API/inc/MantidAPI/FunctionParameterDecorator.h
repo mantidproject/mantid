@@ -36,23 +36,19 @@ public:
   IFunction_sptr clone() const override;
 
   void setWorkspace(std::shared_ptr<const Workspace> ws) override;
-  void setMatrixWorkspace(std::shared_ptr<const MatrixWorkspace> workspace,
-                          size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const MatrixWorkspace> workspace, size_t wi, double startX,
+                          double endX) override;
 
   /// Set i-th parameter of decorated function.
-  void setParameter(size_t i, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(size_t i, const double &value, bool explicitlySet = true) override;
   /// Set i-th parameter description of decorated function.
-  void setParameterDescription(size_t i,
-                               const std::string &description) override;
+  void setParameterDescription(size_t i, const std::string &description) override;
   /// Get i-th parameter of decorated function.
   double getParameter(size_t i) const override;
   /// Set parameter of decorated function by name.
-  void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
   /// Set description of parameter of decorated function by name.
-  void setParameterDescription(const std::string &name,
-                               const std::string &description) override;
+  void setParameterDescription(const std::string &name, const std::string &description) override;
 
   /// Value of i-th active parameter of the decorated function.
   double activeParameter(size_t i) const override;
@@ -93,14 +89,12 @@ public:
   /// Return a value of attribute attName of decorated function-
   IFunction::Attribute getAttribute(const std::string &attName) const override;
   /// Set a value to attribute attName of decorated function.
-  void setAttribute(const std::string &attName,
-                    const IFunction::Attribute &attValue) override;
+  void setAttribute(const std::string &attName, const IFunction::Attribute &attValue) override;
   /// Check if attribute attName exists in decorated function
   bool hasAttribute(const std::string &attName) const override;
 
   /// Tie a parameter of decorated function to other parameters (or a constant).
-  void tie(const std::string &parName, const std::string &expr,
-           bool isDefault = false) override;
+  void tie(const std::string &parName, const std::string &expr, bool isDefault = false) override;
   /// Apply the ties in decorated function.
   void applyTies() override;
   /// Remove all ties of decorated function.
@@ -126,8 +120,7 @@ protected:
 
   void throwIfNoFunctionSet() const;
 
-  void declareParameter(const std::string &name, double initValue,
-                        const std::string &description) override;
+  void declareParameter(const std::string &name, double initValue, const std::string &description) override;
 
   void addTie(std::unique_ptr<ParameterTie>) override;
   void setParameterStatus(size_t i, ParameterStatus status) override;
@@ -139,8 +132,7 @@ protected:
   IFunction_sptr m_wrappedFunction;
 };
 
-using FunctionParameterDecorator_sptr =
-    std::shared_ptr<FunctionParameterDecorator>;
+using FunctionParameterDecorator_sptr = std::shared_ptr<FunctionParameterDecorator>;
 
 } // namespace API
 } // namespace Mantid

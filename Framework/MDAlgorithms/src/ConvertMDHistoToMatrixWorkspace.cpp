@@ -49,10 +49,9 @@ dimension
 @return id/index of the dimension with the longest span in the original
 coordinate system.
 */
-size_t findXAxis(const VMD &start, const VMD &end,
-                 CoordTransform const *const transform,
-                 IMDHistoWorkspace const *const inputWorkspace, Logger &logger,
-                 const size_t id, std::string &xAxisLabel) {
+size_t findXAxis(const VMD &start, const VMD &end, CoordTransform const *const transform,
+                 IMDHistoWorkspace const *const inputWorkspace, Logger &logger, const size_t id,
+                 std::string &xAxisLabel) {
 
   // Find the start and end points in the original workspace
   VMD originalStart = transform->applyVMD(start);
@@ -70,12 +69,11 @@ size_t findXAxis(const VMD &start, const VMD &end,
     return dimIndex;
   }
 
-  auto originalWS = std::dynamic_pointer_cast<IMDWorkspace>(
-      inputWorkspace->getOriginalWorkspace(nOriginalWorkspaces - 1));
+  auto originalWS =
+      std::dynamic_pointer_cast<IMDWorkspace>(inputWorkspace->getOriginalWorkspace(nOriginalWorkspaces - 1));
 
   for (size_t d = 0; d < diff.getNumDims(); d++) {
-    if (fabs(diff[d]) > largest ||
-        (originalWS->getDimension(dimIndex)->getIsIntegrated())) {
+    if (fabs(diff[d]) > largest || (originalWS->getDimension(dimIndex)->getIsIntegrated())) {
       // Skip over any integrated dimensions
       if (originalWS && !originalWS->getDimension(d)->getIsIntegrated()) {
         largest = fabs(diff[d]);
@@ -97,42 +95,34 @@ DECLARE_ALGORITHM(ConvertMDHistoToMatrixWorkspace)
 
 /// Decalare the properties
 void ConvertMDHistoToMatrixWorkspace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input IMDHistoWorkspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output Workspace2D.");
 
-  std::array<std::string, 3> normalizations = {
-      {"NoNormalization", "VolumeNormalization", "NumEventsNormalization"}};
+  std::array<std::string, 3> normalizations = {{"NoNormalization", "VolumeNormalization", "NumEventsNormalization"}};
 
   declareProperty("Normalization", normalizations[0],
-                  Kernel::IValidator_sptr(
-                      new Kernel::ListValidator<std::string>(normalizations)),
+                  Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(normalizations)),
                   "Signal normalization method");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("FindXAxis", true,
-                                                Direction::Input),
-      "If True, tries to automatically determine the dimension to use as the "
-      "output x-axis. Applies to line cut MD workspaces.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("FindXAxis", true, Direction::Input),
+                  "If True, tries to automatically determine the dimension to use as the "
+                  "output x-axis. Applies to line cut MD workspaces.");
 }
 
 /// Execute the algorithm
 void ConvertMDHistoToMatrixWorkspace::exec() {
 
   IMDHistoWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
-  Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims =
-      inputWorkspace->getNonIntegratedDimensions();
+  Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims = inputWorkspace->getNonIntegratedDimensions();
 
   if (nonIntegDims.size() == 1) {
     make1DWorkspace();
   } else if (nonIntegDims.size() == 2) {
     make2DWorkspace();
   } else {
-    throw std::invalid_argument(
-        "Cannot convert MD workspace with more than 2 dimensions.");
+    throw std::invalid_argument("Cannot convert MD workspace with more than 2 dimensions.");
   }
 }
 
@@ -143,8 +133,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   IMDHistoWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
   // This code is copied from MantidQwtIMDWorkspaceData
-  Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims =
-      inputWorkspace->getNonIntegratedDimensions();
+  Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims = inputWorkspace->getNonIntegratedDimensions();
 
   std::string alongDim;
   if (!nonIntegDims.empty())
@@ -158,8 +147,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
 
   size_t id = 0;
   for (size_t d = 0; d < nd; d++) {
-    Mantid::Geometry::IMDDimension_const_sptr dim =
-        inputWorkspace->getDimension(d);
+    Mantid::Geometry::IMDDimension_const_sptr dim = inputWorkspace->getDimension(d);
     if (dim->getDimensionId() == alongDim) {
       // All the way through in the single dimension
       start[d] = dim->getMinimum();
@@ -192,21 +180,17 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
 
   auto line = inputWorkspace->getLineData(start, end, normalization);
 
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", 1, line.x.size(), line.y.size());
+  MatrixWorkspace_sptr outputWorkspace =
+      WorkspaceFactory::Instance().create("Workspace2D", 1, line.x.size(), line.y.size());
   outputWorkspace->mutableY(0) = line.y;
   outputWorkspace->mutableE(0) = line.e;
 
-  const size_t numberTransformsToOriginal =
-      inputWorkspace->getNumberTransformsToOriginal();
+  const size_t numberTransformsToOriginal = inputWorkspace->getNumberTransformsToOriginal();
 
-  CoordTransform_const_sptr transform =
-      std::make_shared<NullCoordTransform>(inputWorkspace->getNumDims());
+  CoordTransform_const_sptr transform = std::make_shared<NullCoordTransform>(inputWorkspace->getNumDims());
   if (numberTransformsToOriginal > 0) {
     const size_t indexToLastTransform = numberTransformsToOriginal - 1;
-    transform = CoordTransform_const_sptr(
-        inputWorkspace->getTransformToOriginal(indexToLastTransform),
-        NullDeleter());
+    transform = CoordTransform_const_sptr(inputWorkspace->getTransformToOriginal(indexToLastTransform), NullDeleter());
   }
 
   assert(line.x.size() == outputWorkspace->x(0).size());
@@ -216,8 +200,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   if (autoFind) {
     // We look to the original workspace if possbible to find the dimension of
     // interest to plot against.
-    id = findXAxis(start, end, transform.get(), inputWorkspace.get(), g_log, id,
-                   xAxisLabel);
+    id = findXAxis(start, end, transform.get(), inputWorkspace.get(), g_log, id, xAxisLabel);
   }
 
   auto &mutableXValues = outputWorkspace->mutableX(0);
@@ -232,8 +215,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   // outputWorkspace->mutableX(0) = inTargetCoord;
 
   std::shared_ptr<Kernel::Units::Label> labelX =
-      std::dynamic_pointer_cast<Kernel::Units::Label>(
-          Kernel::UnitFactory::Instance().create("Label"));
+      std::dynamic_pointer_cast<Kernel::Units::Label>(Kernel::UnitFactory::Instance().create("Label"));
   labelX->setLabel(xAxisLabel);
   outputWorkspace->getAxis(0)->unit() = labelX;
 
@@ -250,8 +232,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   IMDHistoWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
   // find the non-integrated dimensions
-  Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims =
-      inputWorkspace->getNonIntegratedDimensions();
+  Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims = inputWorkspace->getNonIntegratedDimensions();
 
   auto xDim = nonIntegDims[0];
   auto yDim = nonIntegDims[1];
@@ -259,12 +240,10 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   size_t nx = xDim->getNBins();
   size_t ny = yDim->getNBins();
 
-  size_t xDimIndex =
-      inputWorkspace->getDimensionIndexById(xDim->getDimensionId());
+  size_t xDimIndex = inputWorkspace->getDimensionIndexById(xDim->getDimensionId());
   size_t xStride = calcStride(*inputWorkspace, xDimIndex);
 
-  size_t yDimIndex =
-      inputWorkspace->getDimensionIndexById(yDim->getDimensionId());
+  size_t yDimIndex = inputWorkspace->getDimensionIndexById(yDim->getDimensionId());
   size_t yStride = calcStride(*inputWorkspace, yDimIndex);
 
   // get the normalization of the output
@@ -279,19 +258,16 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   } else {
     normalization = NoNormalization;
   }
-  auto inverseVolume =
-      static_cast<signal_t>(inputWorkspace->getInverseVolume());
+  auto inverseVolume = static_cast<signal_t>(inputWorkspace->getInverseVolume());
 
   // create the output workspace
-  MatrixWorkspace_sptr outputWorkspace =
-      WorkspaceFactory::Instance().create("Workspace2D", ny, nx + 1, nx);
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D", ny, nx + 1, nx);
 
   // set the x-values
   const size_t xValsSize = outputWorkspace->x(0).size();
   const double dx = xDim->getBinWidth();
   const double minX = xDim->getMinimum();
-  outputWorkspace->setBinEdges(0, xValsSize,
-                               HistogramData::LinearGenerator(minX, dx));
+  outputWorkspace->setBinEdges(0, xValsSize, HistogramData::LinearGenerator(minX, dx));
   // set the y-values and errors
   for (size_t i = 0; i < ny; ++i) {
     if (i > 0)
@@ -321,8 +297,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   }
 
   // set the first axis
-  auto labelX = std::dynamic_pointer_cast<Kernel::Units::Label>(
-      Kernel::UnitFactory::Instance().create("Label"));
+  auto labelX = std::dynamic_pointer_cast<Kernel::Units::Label>(Kernel::UnitFactory::Instance().create("Label"));
   labelX->setLabel(xDim->getName());
   outputWorkspace->getAxis(0)->unit() = labelX;
 
@@ -331,8 +306,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   for (size_t i = 0; i <= ny; ++i) {
     yAxis->setValue(i, yDim->getX(i));
   }
-  auto labelY = std::dynamic_pointer_cast<Kernel::Units::Label>(
-      Kernel::UnitFactory::Instance().create("Label"));
+  auto labelY = std::dynamic_pointer_cast<Kernel::Units::Label>(Kernel::UnitFactory::Instance().create("Label"));
   labelY->setLabel(yDim->getName());
   yAxis->unit() = labelY;
   outputWorkspace->replaceAxis(1, std::move(yAxis));
@@ -349,8 +323,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
  * @param workspace :: An MD workspace.
  * @param dim :: A dimension index to calculate the stride for.
  */
-size_t ConvertMDHistoToMatrixWorkspace::calcStride(
-    const API::IMDHistoWorkspace &workspace, size_t dim) const {
+size_t ConvertMDHistoToMatrixWorkspace::calcStride(const API::IMDHistoWorkspace &workspace, size_t dim) const {
   size_t stride = 1;
   for (size_t i = 0; i < dim; ++i) {
     auto dimension = workspace.getDimension(i);

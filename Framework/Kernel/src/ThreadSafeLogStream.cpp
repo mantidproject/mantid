@@ -22,13 +22,10 @@ using namespace Mantid::Kernel;
 /**
  * Constructor
  */
-ThreadSafeLogStreamBuf::ThreadSafeLogStreamBuf(Poco::Logger &logger,
-                                               Poco::Message::Priority priority)
+ThreadSafeLogStreamBuf::ThreadSafeLogStreamBuf(Poco::Logger &logger, Poco::Message::Priority priority)
     : Poco::LogStreamBuf(logger, priority), m_messages() {}
 
-int ThreadSafeLogStreamBuf::overflow(char c) {
-  return Poco::UnbufferedStreamBuf::overflow(c);
-}
+int ThreadSafeLogStreamBuf::overflow(char c) { return Poco::UnbufferedStreamBuf::overflow(c); }
 
 /**
  * If the character is an EOL character then write the buffered messsage to the
@@ -39,8 +36,7 @@ int ThreadSafeLogStreamBuf::overflow(char c) {
  */
 int ThreadSafeLogStreamBuf::writeToDevice(char c) {
   if (c == '\n' || c == '\r') {
-    Poco::Message msg(logger().name(), m_messages[Poco::Thread::currentTid()],
-                      getPriority());
+    Poco::Message msg(logger().name(), m_messages[Poco::Thread::currentTid()], getPriority());
     m_messages[Poco::Thread::currentTid()] = "";
     logger().log(msg);
   } else {
@@ -78,9 +74,7 @@ std::string ThreadSafeLogStreamBuf::flush() {
  * @param logger :: A reference to the logger associated with this stream
  * @param priority :: The stream priority
  */
-ThreadSafeLogIOS::ThreadSafeLogIOS(Poco::Logger &logger,
-                                   Poco::Message::Priority priority)
-    : m_buf(logger, priority) {
+ThreadSafeLogIOS::ThreadSafeLogIOS(Poco::Logger &logger, Poco::Message::Priority priority) : m_buf(logger, priority) {
   poco_ios_init(&m_buf);
 }
 
@@ -98,8 +92,7 @@ Poco::LogStreamBuf *ThreadSafeLogIOS::rdbuf() { return &m_buf; }
  * @param logger :: A reference to the logger associated with this stream
  * @param priority :: The stream priority
  */
-ThreadSafeLogStream::ThreadSafeLogStream(Poco::Logger &logger,
-                                         Poco::Message::Priority priority)
+ThreadSafeLogStream::ThreadSafeLogStream(Poco::Logger &logger, Poco::Message::Priority priority)
     : ThreadSafeLogIOS(logger, priority), std::ostream(&m_buf) {}
 
 /**
@@ -107,18 +100,14 @@ ThreadSafeLogStream::ThreadSafeLogStream(Poco::Logger &logger,
  * @param loggerName :: A name for the logger stream
  * @param priority :: The stream priority
  */
-ThreadSafeLogStream::ThreadSafeLogStream(const std::string &loggerName,
-                                         Poco::Message::Priority priority)
-    : ThreadSafeLogIOS(Poco::Logger::get(loggerName), priority), std::ostream(
-                                                                     &m_buf) {}
+ThreadSafeLogStream::ThreadSafeLogStream(const std::string &loggerName, Poco::Message::Priority priority)
+    : ThreadSafeLogIOS(Poco::Logger::get(loggerName), priority), std::ostream(&m_buf) {}
 
 /**
  * Return a reference to the log stream with the priority set to fatal
  * @returns A reference to the log stream with fatal priority level
  */
-ThreadSafeLogStream &ThreadSafeLogStream::fatal() {
-  return priority(Poco::Message::PRIO_FATAL);
-}
+ThreadSafeLogStream &ThreadSafeLogStream::fatal() { return priority(Poco::Message::PRIO_FATAL); }
 
 /**
  * Log a message as fatal and return a reference to the log stream with the
@@ -135,9 +124,7 @@ ThreadSafeLogStream &ThreadSafeLogStream::fatal(const std::string &message) {
  * Return a reference to the log stream with the priority set to critical
  * @returns A reference to the log stream with critical priority level
  */
-ThreadSafeLogStream &ThreadSafeLogStream::critical() {
-  return priority(Poco::Message::PRIO_CRITICAL);
-}
+ThreadSafeLogStream &ThreadSafeLogStream::critical() { return priority(Poco::Message::PRIO_CRITICAL); }
 
 /**
  * Log a message as critical and return a reference to the log stream with the
@@ -154,9 +141,7 @@ ThreadSafeLogStream &ThreadSafeLogStream::critical(const std::string &message) {
  * Return a reference to the log stream with the priority set to error
  * @returns A reference to the log stream with error priority level
  */
-ThreadSafeLogStream &ThreadSafeLogStream::error() {
-  return priority(Poco::Message::PRIO_ERROR);
-}
+ThreadSafeLogStream &ThreadSafeLogStream::error() { return priority(Poco::Message::PRIO_ERROR); }
 
 /**
  * Log a message as error and return a reference to the log stream with the
@@ -173,9 +158,7 @@ ThreadSafeLogStream &ThreadSafeLogStream::error(const std::string &message) {
  * Return a reference to the log stream with the priority set to warning
  * @returns A reference to the log stream with warning priority level
  */
-ThreadSafeLogStream &ThreadSafeLogStream::warning() {
-  return priority(Poco::Message::PRIO_WARNING);
-}
+ThreadSafeLogStream &ThreadSafeLogStream::warning() { return priority(Poco::Message::PRIO_WARNING); }
 
 /**
  * Log a message as a warning and return a reference to the log stream with the
@@ -192,9 +175,7 @@ ThreadSafeLogStream &ThreadSafeLogStream::warning(const std::string &message) {
  * Return a reference tothe log stream with the priority set to notice
  * @returns A reference to the log stream with notice priority level
  */
-ThreadSafeLogStream &ThreadSafeLogStream::notice() {
-  return priority(Poco::Message::PRIO_NOTICE);
-}
+ThreadSafeLogStream &ThreadSafeLogStream::notice() { return priority(Poco::Message::PRIO_NOTICE); }
 
 /**
  * Log a message as a notice and return a reference to the log stream with the
@@ -211,9 +192,7 @@ ThreadSafeLogStream &ThreadSafeLogStream::notice(const std::string &message) {
  * Return a reference to the log stream with the priority set to information
  * @returns A reference to the log stream with information priority level
  */
-ThreadSafeLogStream &ThreadSafeLogStream::information() {
-  return priority(Poco::Message::PRIO_INFORMATION);
-}
+ThreadSafeLogStream &ThreadSafeLogStream::information() { return priority(Poco::Message::PRIO_INFORMATION); }
 
 /**
  * Log a message as information and return a reference to the log stream with
@@ -221,8 +200,7 @@ ThreadSafeLogStream &ThreadSafeLogStream::information() {
  * @param message :: The string to send to the logger
  * @returns A reference to the log stream with information  priority level
  */
-ThreadSafeLogStream &
-ThreadSafeLogStream::information(const std::string &message) {
+ThreadSafeLogStream &ThreadSafeLogStream::information(const std::string &message) {
   m_buf.logger().information(message);
   return priority(Poco::Message::PRIO_INFORMATION);
 }
@@ -231,9 +209,7 @@ ThreadSafeLogStream::information(const std::string &message) {
  * Return a reference to the log stream with the priority set to debug
  * @returns A reference to the log stream with debug priority level
  */
-ThreadSafeLogStream &ThreadSafeLogStream::debug() {
-  return priority(Poco::Message::PRIO_DEBUG);
-}
+ThreadSafeLogStream &ThreadSafeLogStream::debug() { return priority(Poco::Message::PRIO_DEBUG); }
 
 /**
  * Log a message as debug  and return a reference to the log stream with the
@@ -251,8 +227,7 @@ ThreadSafeLogStream &ThreadSafeLogStream::debug(const std::string &message) {
  * @param priority :: The priority level
  * @returns A reference to the log stream with the given priority level
  */
-ThreadSafeLogStream &
-ThreadSafeLogStream::priority(Poco::Message::Priority priority) {
+ThreadSafeLogStream &ThreadSafeLogStream::priority(Poco::Message::Priority priority) {
   m_buf.setPriority(priority);
   return *this;
 }
@@ -262,8 +237,7 @@ ThreadSafeLogStream::priority(Poco::Message::Priority priority) {
  * @param message :: The log message
  * @returns A reference to the log stream with the given priority level
  */
-ThreadSafeLogStream &
-ThreadSafeLogStream::accumulate(const std::string &message) {
+ThreadSafeLogStream &ThreadSafeLogStream::accumulate(const std::string &message) {
   m_buf.accumulate(message);
   return *this;
 }

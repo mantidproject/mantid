@@ -39,8 +39,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("ThetaZMax", 0.09));
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("ThetaYMax", 0.09));
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("EchoConstant", echoConstant));
-    TS_ASSERT_THROWS_NOTHING(
-        testAlg.setProperty("Sample", "Sample set in algorithm"));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Sample", "Sample set in algorithm"));
   }
 
   void test_rejectTooManySpectra() {
@@ -85,10 +84,8 @@ public:
 
     // Check the file against original data - load it into a workspace
     API::Workspace_sptr loadedWS;
-    TS_ASSERT_THROWS_NOTHING(
-        loadedWS = API::AnalysisDataService::Instance().retrieve(outWSName));
-    API::MatrixWorkspace_sptr data =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(loadedWS);
+    TS_ASSERT_THROWS_NOTHING(loadedWS = API::AnalysisDataService::Instance().retrieve(outWSName));
+    API::MatrixWorkspace_sptr data = std::dynamic_pointer_cast<API::MatrixWorkspace>(loadedWS);
     // Check titles were set
     TS_ASSERT_EQUALS(data->getTitle(), "Sample workspace");
     TS_ASSERT_EQUALS(data->sample().getName(), "Sample set in SaveSESANSTest");
@@ -110,8 +107,7 @@ public:
       // bin edges but are now dealing with bin middles
       // X value is now spinEchoLength = wavelength ^ 2 * echoConstant
       // Wavelength is x in original workspace
-      double wavelengthSquared =
-          (static_cast<double>(i) + 1.5) * (static_cast<double>(i) + 1.5);
+      double wavelengthSquared = (static_cast<double>(i) + 1.5) * (static_cast<double>(i) + 1.5);
       TS_ASSERT_DELTA(xValues[i], wavelengthSquared * echoConstant, tolerance);
 
       // Y value is now depolarisation = log(Y) / wavelength ^ 2

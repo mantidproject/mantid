@@ -49,12 +49,12 @@ Usage
 .. testcode:: HorizontalLineProfileExample
 
     import numpy
-    
+
     ws = CreateSampleWorkspace(
         Function='Quasielastic Tunnelling',
         NumBanks=1
     )
-    
+
     # Horizontal profile over spectra 5-10
     horProfile = LineProfile(
         InputWorkspace=ws,
@@ -63,7 +63,7 @@ Usage
         Start=3000,
         End=13000
     )
-    
+
     indexMax = numpy.argmax(horProfile.readY(0))
     epp = horProfile.readX(0)[indexMax]
     print('Elastic peak at {}'.format(epp))
@@ -79,19 +79,19 @@ Output:
 .. testcode:: VerticalLineProfile
 
     import numpy
-    
+
     ws = CreateSampleWorkspace(
         Function='Quasielastic Tunnelling',
         NumBanks=1
     )
-    
+
     wsInTheta = ConvertSpectrumAxis(
         InputWorkspace=ws,
         Target='Theta'
     )
-    
+
     # Verical cuts.
-    
+
     tofs = numpy.arange(3000, 7000, 500)
     cutWSs = list()
     for tof in tofs:
@@ -105,7 +105,7 @@ Output:
             End=0.9
         )
         cutWSs.append(cutWS)
-    
+
     for cut in cutWSs:
         # Vertical axis holds the TOF bin edges of the cut
         axis = cut.getAxis(1)

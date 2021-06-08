@@ -78,6 +78,7 @@ class RundexSettings(object):
                 "TransmissionBeamRuns",
                 "MaskFiles",
                 "ReferenceFiles",
+                "SolventFiles",
                 "OutputWorkspace",
                 "SampleThickness",
                 "CustomOptions"
@@ -129,6 +130,15 @@ class RundexSettings(object):
                 ],
             }
 
+    VISUAL_SETTINGS = {
+            SANS_ACQ: {
+                "HiddenColumns": [
+                    "FluxRuns",
+                    "TransmissionAbsorberRuns"
+                    ]
+                }
+            }
+
     # algo name for each acquisition mode
     ALGORITHM = {
             SANS_ACQ:     "SANSILLAutoProcess",
@@ -137,6 +147,51 @@ class RundexSettings(object):
             REFL_NPOL:    "ReflectometryILLAutoProcess",
             POWDER_DSCAN: "PowderILLDetectorScan",
             POWDER_PSCAN: "PowderILLParameterScan",
+            }
+
+    # export algos for each acquisition mode. Each algo has a boolean to set
+    # it as activated or not
+    EXPORT_ALGORITHMS = {
+            SANS_ACQ: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveCanSAS1D": True,
+                "SaveNISTDAT": True
+                },
+            REFL_POL: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveReflectometryAscii": True
+                },
+            REFL_NPOL: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveReflectometryAscii": True
+                },
+            POWDER_DSCAN: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveFocusedXYE": True
+                },
+            POWDER_PSCAN: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveFocussedXYE": True
+                }
+            }
+
+    EXPORT_ALGO_CRITERIA = {
+            "SaveCanSAS1D": "%OutputType% == 'I(Q)'",
+            "SaveNISTDAT": "%OutputType% == 'I(Qx,Qy)'",
+            }
+
+    EXPORT_ALGO_EXTENSION = {
+            "SaveNexusProcessed": ".nxs",
+            "SaveAscii": ".txt",
+            "SaveCanSAS1D": ".xml",
+            "SaveNISTDAT": ".dat",
+            "SaveReflectometryAscii": ".mft",
+            "SaveFocussedXYE": ".dat"
             }
 
     # ideal number of threads for each acquisition mode (optional)
@@ -152,6 +207,16 @@ class RundexSettings(object):
             }
 
     # settings for each acquisition mode
+
+    # optionnal flags
+    FLAGS = {
+            REFL_POL : {
+                "PolarizationOption": "Polarized"
+                },
+            REFL_NPOL : {
+                "PolarizationOption": "NonPolarized"
+                }
+            }
     SETTINGS = {
             SANS_ACQ : [
                 "ThetaDependent",
@@ -176,7 +241,10 @@ class RundexSettings(object):
                 "DeltaQ",
                 "IQxQyLogBinning",
                 "OutputPanels",
-                "WavelengthRange"
+                "WavelengthRange",
+                "StitchReferenceIndex",
+                "ClearCorrected2DWorkspace",
+                "ShapeTable"
                 ],
             SANS_PSCAN : [
                 "SensitivityMap",
@@ -283,16 +351,6 @@ class RundexSettings(object):
                 ]
             }
 
-    # optionnal flags
-    FLAGS = {
-            REFL_POL : {
-                "PolarizationOption": "Polarized"
-                },
-            REFL_NPOL : {
-                "PolarizationOption": "NonPolarized"
-                }
-            }
-
     # Json keys
     INSTRUMENT_JSON_KEY = "Instrument"
     TECHNIQUE_JSON_KEY = "Technique"
@@ -303,3 +361,4 @@ class RundexSettings(object):
     SAMPLES_JSON_KEY = "Samples"
     CUSTOM_OPT_JSON_KEY = "CustomOptions"
     VISUAL_SETTINGS_JSON_KEY = "VisualSettings"
+    EXPORT_JSON_KEY = "ExportAlgorithms"

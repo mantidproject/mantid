@@ -54,7 +54,7 @@ class GroupingTableView(QtWidgets.QWidget):
 
         self.group_range_label = QtWidgets.QLabel()
         self.group_range_label.setText('Group Asymmetry Range from:')
-        self.group_range_min = QtWidgets.QLineEdit()
+        self.group_range_min = QtWidgets.QLineEdit("0.0")
         self.group_range_min.setEnabled(False)
         positive_float_validator = QtGui.QDoubleValidator(0.0, sys.float_info.max, 5)
         self.group_range_min.setValidator(positive_float_validator)
@@ -63,7 +63,7 @@ class GroupingTableView(QtWidgets.QWidget):
         self.group_range_use_first_good_data.setText(u"\u03BCs (From data file)")
 
         self.group_range_use_first_good_data.setChecked(True)
-        self.group_range_max = QtWidgets.QLineEdit()
+        self.group_range_max = QtWidgets.QLineEdit("1.0")
         self.group_range_max.setEnabled(False)
         self.group_range_max.setValidator(positive_float_validator)
 
@@ -133,7 +133,7 @@ class GroupingTableView(QtWidgets.QWidget):
         self.grouping_table.horizontalHeaderItem(0).setToolTip("The name of the group :"
                                                                "\n    - The name must be unique across all groups/pairs"
                                                                "\n    - The name can only use digits, characters and _")
-        self.grouping_table.horizontalHeaderItem(1).setToolTip("Periods to use when calculating this group.")
+        self.grouping_table.horizontalHeaderItem(1).setToolTip("Sum of periods to use when calculating this group.")
         self.grouping_table.horizontalHeaderItem(2).setToolTip("Whether to include this group in the analysis.")
 
         self.grouping_table.horizontalHeaderItem(3).setToolTip("The sorted list of detectors :"
@@ -178,14 +178,12 @@ class GroupingTableView(QtWidgets.QWidget):
     def _get_selected_row_indices(self):
         return list(set(index.row() for index in self.grouping_table.selectedIndexes()))
 
-    def get_selected_group_names(self):
+    def get_selected_group_names_and_indexes(self):
         indexes = self._get_selected_row_indices()
-        return [str(self.grouping_table.item(i, 0).text()) for i in indexes]
+        return [[str(self.grouping_table.item(i, 0).text()),i] for i in indexes]
 
-    def remove_selected_groups(self):
-        indices = self._get_selected_row_indices()
-        for index in reversed(sorted(indices)):
-            self.grouping_table.removeRow(index)
+    def remove_group_by_index(self, index):
+        self.grouping_table.removeRow(index)
 
     def remove_last_row(self):
         last_row = self.grouping_table.rowCount() - 1
@@ -265,8 +263,8 @@ class GroupingTableView(QtWidgets.QWidget):
         self._on_table_data_changed = slot
 
     def add_pair_requested(self):
-        selected_names = self.get_selected_group_names()
-        self.addPairRequested.emit(selected_names[0], selected_names[1])
+        selected_names = self.get_selected_group_names_and_indexes()
+        self.addPairRequested.emit(selected_names[0][0], selected_names[1][0])
 
     def on_cell_changed(self, _row, _col):
         if not self._updating:

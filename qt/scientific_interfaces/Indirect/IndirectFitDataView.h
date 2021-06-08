@@ -51,6 +51,7 @@ public:
   UserInputValidator &validate(UserInputValidator &validator) override;
 
   void setXRange(std::pair<double, double> const &range) override;
+  std::pair<double, double> getXRange() const override;
   QComboBox *cbParameterType;
   QComboBox *cbParameter;
   QLabel *lbParameter;

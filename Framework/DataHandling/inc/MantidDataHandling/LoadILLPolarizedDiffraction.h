@@ -24,14 +24,11 @@ namespace DataHandling {
 
   @date 15/05/20
 */
-class MANTID_DATAHANDLING_DLL LoadILLPolarizedDiffraction
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLPolarizedDiffraction : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   const std::string category() const override;
   const std::string summary() const override;
   int confidence(Kernel::NexusDescriptor &) const override;
@@ -47,10 +44,8 @@ private:
   void loadData();
   void loadMetaData();
   void loadInstrument(API::MatrixWorkspace_sptr, const std::string &);
-  std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr,
-                                            const NeXus::NXEntry &, const int);
-  std::vector<double> loadBankParameters(const API::MatrixWorkspace_sptr,
-                                         const int);
+  std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr, const NeXus::NXEntry &, const int);
+  std::vector<double> loadBankParameters(const API::MatrixWorkspace_sptr, const int);
   void moveTwoTheta(const NeXus::NXEntry &, API::MatrixWorkspace_sptr);
   std::vector<double> prepareAxes(const NeXus::NXEntry &);
 

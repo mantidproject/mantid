@@ -2,6 +2,7 @@
 set(SRC_FILES
     src/AccumulateMD.cpp
     src/AndMD.cpp
+    src/ApplyDetailedBalanceMD.cpp
     src/BaseConvertToDiffractionMDWorkspace.cpp
     src/BinMD.cpp
     src/BinaryOperationMD.cpp
@@ -52,6 +53,7 @@ set(SRC_FILES
     src/ImportMDHistoWorkspace.cpp
     src/ImportMDHistoWorkspaceBase.cpp
     src/Integrate3DEvents.cpp
+    src/IntegrateQLabEvents.cpp
     src/IntegrateEllipsoids.cpp
     src/IntegrateEllipsoidsTwoStep.cpp
     src/IntegrateFlux.cpp
@@ -85,7 +87,6 @@ set(SRC_FILES
     src/MinusMD.cpp
     src/MultiplyMD.cpp
     src/NotMD.cpp
-    src/OneStepMDEW.cpp
     src/OrMD.cpp
     src/PlusMD.cpp
     src/PowerMD.cpp
@@ -97,6 +98,7 @@ set(SRC_FILES
     src/SaveMD.cpp
     src/SaveMD2.cpp
     src/SaveZODS.cpp
+    src/DgsScatteredTransmissionCorrectionMD.cpp
     src/SetMDFrame.cpp
     src/SetMDUsingMask.cpp
     src/SliceMD.cpp
@@ -117,6 +119,7 @@ set(
   INC_FILES
   inc/MantidMDAlgorithms/AccumulateMD.h
   inc/MantidMDAlgorithms/AndMD.h
+  inc/MantidMDAlgorithms/ApplyDetailedBalanceMD.h
   inc/MantidMDAlgorithms/BaseConvertToDiffractionMDWorkspace.h
   inc/MantidMDAlgorithms/BinMD.h
   inc/MantidMDAlgorithms/BinaryOperationMD.h
@@ -166,6 +169,7 @@ set(
   inc/MantidMDAlgorithms/ImportMDHistoWorkspace.h
   inc/MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h
   inc/MantidMDAlgorithms/Integrate3DEvents.h
+  inc/MantidMDAlgorithms/IntegrateQLabEvents.h
   inc/MantidMDAlgorithms/IntegrateEllipsoids.h
   inc/MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h
   inc/MantidMDAlgorithms/IntegrateFlux.h
@@ -202,7 +206,6 @@ set(
   inc/MantidMDAlgorithms/MinusMD.h
   inc/MantidMDAlgorithms/MultiplyMD.h
   inc/MantidMDAlgorithms/NotMD.h
-  inc/MantidMDAlgorithms/OneStepMDEW.h
   inc/MantidMDAlgorithms/OrMD.h
   inc/MantidMDAlgorithms/PlusMD.h
   inc/MantidMDAlgorithms/PowerMD.h
@@ -214,6 +217,7 @@ set(
   inc/MantidMDAlgorithms/SaveMD.h
   inc/MantidMDAlgorithms/SaveMD2.h
   inc/MantidMDAlgorithms/SaveZODS.h
+  inc/MantidMDAlgorithms/DgsScatteredTransmissionCorrectionMD.h
   inc/MantidMDAlgorithms/SetMDFrame.h
   inc/MantidMDAlgorithms/SetMDUsingMask.h
   inc/MantidMDAlgorithms/SliceMD.h
@@ -234,6 +238,7 @@ set(TEST_FILES
     # these tests are as they test verify different parts of the CPR algorithms
     AccumulateMDTest.h
     AndMDTest.h
+    ApplyDetailedBalanceMDTest.h
     BooleanBinaryOperationMDTest.h
     CalculateCoverageDGSTest.h
     CentroidPeaksMD2Test.h
@@ -277,6 +282,7 @@ set(TEST_FILES
     ImportMDEventWorkspaceTest.h
     ImportMDHistoWorkspaceTest.h
     Integrate3DEventsTest.h
+    IntegrateQLabEventsTest.h
     IntegrateEllipsoidsTest.h
     IntegrateEllipsoidsTwoStepTest.h
     IntegrateEllipsoidsWithSatellitesTest.h
@@ -310,7 +316,6 @@ set(TEST_FILES
     MinusMDTest.h
     MultiplyMDTest.h
     NotMDTest.h
-    OneStepMDEWTest.h
     OrMDTest.h
     PlusMDTest.h
     PowerMDTest.h
@@ -322,6 +327,7 @@ set(TEST_FILES
     SaveMD2Test.h
     SaveMDTest.h
     SaveZODSTest.h
+    DgsScatteredTransmissionCorrectionMDTest.h
     SetMDFrameTest.h
     SetMDUsingMaskTest.h
     SliceMDTest.h

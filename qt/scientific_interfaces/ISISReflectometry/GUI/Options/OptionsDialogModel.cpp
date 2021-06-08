@@ -23,9 +23,8 @@ OptionsDialogModel::OptionsDialogModel() {}
  * @return void
  *
  */
-void OptionsDialogModel::applyDefaultOptions(
-    std::map<std::string, bool> &boolOptions,
-    std::map<std::string, int> &intOptions) {
+void OptionsDialogModel::applyDefaultOptions(std::map<std::string, bool> &boolOptions,
+                                             std::map<std::string, int> &intOptions) {
   boolOptions["WarnProcessAll"] = true;
   boolOptions["WarnDiscardChanges"] = true;
   boolOptions["WarnProcessPartialGroup"] = true;
@@ -53,12 +52,10 @@ void OptionsDialogModel::loadSettings(std::map<std::string, bool> &boolOptions,
  * @return void
  *
  */
-void OptionsDialogModel::saveSettings(
-    const std::map<std::string, bool> &boolOptions,
-    const std::map<std::string, int> &intOptions) {
+void OptionsDialogModel::saveSettings(const std::map<std::string, bool> &boolOptions,
+                                      const std::map<std::string, int> &intOptions) {
   for (const auto &boolOption : boolOptions)
-    setSetting(REFLECTOMETRY_SETTINGS_GROUP, boolOption.first,
-               boolOption.second);
+    setSetting(REFLECTOMETRY_SETTINGS_GROUP, boolOption.first, boolOption.second);
   for (const auto &intOption : intOptions)
     setSetting(REFLECTOMETRY_SETTINGS_GROUP, intOption.first, intOption.second);
 }

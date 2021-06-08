@@ -54,8 +54,7 @@ public:
    */
   template <typename T>
   SLSQPMinimizer(const size_t nparams, const T &objfunc)
-      : m_nparams(nparams), m_neq(0), m_nineq(0), m_objfunc(objfunc),
-        m_constraintNorms() {}
+      : m_nparams(nparams), m_neq(0), m_nineq(0), m_objfunc(objfunc), m_constraintNorms() {}
 
   /**
    * Constructor with constraints
@@ -71,10 +70,9 @@ public:
    * solution \f$A_{eq} x\geq 0\f$
    */
   template <typename T>
-  SLSQPMinimizer(const size_t nparams, const T &objfunc,
-                 const DblMatrix &equality, const DblMatrix &inequality)
-      : m_nparams(nparams), m_neq(equality.numRows()),
-        m_nineq(inequality.numRows()), m_objfunc(objfunc), m_constraintNorms() {
+  SLSQPMinimizer(const size_t nparams, const T &objfunc, const DblMatrix &equality, const DblMatrix &inequality)
+      : m_nparams(nparams), m_neq(equality.numRows()), m_nineq(inequality.numRows()), m_objfunc(objfunc),
+        m_constraintNorms() {
     initializeConstraints(equality, inequality);
   }
 
@@ -103,18 +101,14 @@ private:
    * @param x The current parameter pt
    * @returns The value at the given pt
    */
-  inline double fvalue(const std::vector<double> &x) const {
-    return m_objfunc.eval(x);
-  }
+  inline double fvalue(const std::vector<double> &x) const { return m_objfunc.eval(x); }
   /// Compute derivative numerically
   void fprime(std::vector<double> &grad, const std::vector<double> &x) const;
   /// Compute values of constraints
-  void evaluateConstraints(std::vector<double> &constrValues,
-                           const std::vector<double> &x) const;
+  void evaluateConstraints(std::vector<double> &constrValues, const std::vector<double> &x) const;
 
   /// Create constraint array
-  void initializeConstraints(const DblMatrix &equality,
-                             const DblMatrix &inequality);
+  void initializeConstraints(const DblMatrix &equality, const DblMatrix &inequality);
 
   /// Non-templated wrapper for objective function object to allow it to be
   /// stored
@@ -129,27 +123,21 @@ private:
     template <typename T> class TypeHolder : public BaseHolder {
     public:
       TypeHolder(const T &func) : func(func) {}
-      double eval(const std::vector<double> &x) const override {
-        return func.eval(x);
-      }
+      double eval(const std::vector<double> &x) const override { return func.eval(x); }
       /// The actual function supplied by the user
       T func;
     };
 
   public:
     /// Construct
-    template <typename T>
-    FunctionWrapper(const T &func)
-        : m_funcHolder(std::make_unique<TypeHolder<T>>(func)) {}
+    template <typename T> FunctionWrapper(const T &func) : m_funcHolder(std::make_unique<TypeHolder<T>>(func)) {}
     ~FunctionWrapper() {}
     /**
      * Calls user supplied function
      * @param x - The current pt
      * @returns The value of the function
      */
-    double eval(const std::vector<double> &x) const {
-      return m_funcHolder->eval(x);
-    }
+    double eval(const std::vector<double> &x) const { return m_funcHolder->eval(x); }
     /// Templated holder
     std::unique_ptr<BaseHolder> m_funcHolder;
   };

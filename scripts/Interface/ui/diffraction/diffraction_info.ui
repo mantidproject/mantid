@@ -63,9 +63,9 @@
       <string>To use this application, you will need:
 
 - Your Nexus event files (.nxs)
-- The corresponding SNS powder diffratomer calibration file for time focussing. 
+- The corresponding SNS powder diffratomer calibration file for time focussing.
 
-If you do not have write access to the directory containing your data, make sure to provide an output directory. 
+If you do not have write access to the directory containing your data, make sure to provide an output directory.
 
 If you do not have access to the /SNS mount, make sure that each data file and its corresponding configuration file are always in the same directory. You can use file links as needed. Data files need not be in only one directory.
 

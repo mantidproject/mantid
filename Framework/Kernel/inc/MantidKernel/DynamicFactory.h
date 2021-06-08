@@ -44,8 +44,7 @@ using CaseSensitiveStringComparator = std::less<std::string>;
     @author Nick Draper, Tessella Support Services plc
     @date 10/10/2007
 */
-template <class Base, class Comparator = CaseInsensitiveStringComparator>
-class DynamicFactory {
+template <class Base, class Comparator = CaseInsensitiveStringComparator> class DynamicFactory {
 
 public:
   /// Defines the whether notifications are dispatched
@@ -92,8 +91,7 @@ public:
     if (it != _map.end())
       return it->second->createInstance();
     else
-      throw Exception::NotFoundError(
-          "DynamicFactory: " + className + " is not registered.\n", className);
+      throw Exception::NotFoundError("DynamicFactory: " + className + " is not registered.\n", className);
   }
 
   /// Creates a new instance of the class with the given name, which
@@ -110,8 +108,7 @@ public:
     if (it != _map.end())
       return it->second->createUnwrappedInstance();
     else
-      throw Exception::NotFoundError(
-          "DynamicFactory: " + className + " is not registered.\n", className);
+      throw Exception::NotFoundError("DynamicFactory: " + className + " is not registered.\n", className);
   }
 
   /// Registers the instantiator for the given class with the DynamicFactory.
@@ -135,8 +132,7 @@ public:
   /// replaces any existing
   ///                   factory with the same className, else throws
   ///                   std::runtime_error (default=ThrowOnExisting)
-  void subscribe(const std::string &className,
-                 std::unique_ptr<AbstractFactory> pAbstractFactory,
+  void subscribe(const std::string &className, std::unique_ptr<AbstractFactory> pAbstractFactory,
                  SubscribeAction replace = ErrorIfExists) {
     if (className.empty()) {
       throw std::invalid_argument("Cannot register empty class name");
@@ -161,17 +157,14 @@ public:
       _map.erase(it);
       sendUpdateNotificationIfEnabled();
     } else {
-      throw Exception::NotFoundError(
-          "DynamicFactory:" + className + " is not registered.\n", className);
+      throw Exception::NotFoundError("DynamicFactory:" + className + " is not registered.\n", className);
     }
   }
 
   /// Returns true if the given class is currently registered.
   /// @param className :: the name of the class you wish to check
   /// @returns true is the class is subscribed
-  bool exists(const std::string &className) const {
-    return _map.find(className) != _map.end();
-  }
+  bool exists(const std::string &className) const { return _map.find(className) != _map.end(); }
 
   /// Returns the keys in the map
   /// @return A string vector of keys
@@ -180,8 +173,7 @@ public:
     names.reserve(_map.size());
     std::transform(
         _map.cbegin(), _map.cend(), std::back_inserter(names),
-        [](const std::pair<const std::string, std::unique_ptr<AbstractFactory>>
-               &mapPair) { return mapPair.first; });
+        [](const std::pair<const std::string, std::unique_ptr<AbstractFactory>> &mapPair) { return mapPair.first; });
     return names;
   }
 
@@ -202,13 +194,10 @@ private:
       sendUpdateNotification();
   }
   /// Send an update notification
-  void sendUpdateNotification() {
-    notificationCenter.postNotification(new UpdateNotification);
-  }
+  void sendUpdateNotification() { notificationCenter.postNotification(new UpdateNotification); }
 
   /// A typedef for the map of registered classes
-  using FactoryMap =
-      std::map<std::string, std::unique_ptr<AbstractFactory>, Comparator>;
+  using FactoryMap = std::map<std::string, std::unique_ptr<AbstractFactory>, Comparator>;
   /// The map holding the registered class names and their instantiators
   FactoryMap _map;
   /// Flag marking whether we should dispatch notifications

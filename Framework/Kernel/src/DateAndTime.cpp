@@ -21,9 +21,7 @@ namespace Mantid {
 using namespace Types::Core;
 namespace Kernel {
 
-TimeInterval::TimeInterval(const Types::Core::DateAndTime &from,
-                           const Types::Core::DateAndTime &to)
-    : m_begin(from) {
+TimeInterval::TimeInterval(const Types::Core::DateAndTime &from, const Types::Core::DateAndTime &to) : m_begin(from) {
   if (to > from)
     m_end = to;
   else
@@ -51,17 +49,12 @@ TimeInterval TimeInterval::intersection(const TimeInterval &ti) const {
 }
 
 /// String representation of the begin time
-std::string TimeInterval::begin_str() const {
-  return boost::posix_time::to_simple_string(this->m_begin.to_ptime());
-}
+std::string TimeInterval::begin_str() const { return boost::posix_time::to_simple_string(this->m_begin.to_ptime()); }
 
 /// String representation of the end time
-std::string TimeInterval::end_str() const {
-  return boost::posix_time::to_simple_string(this->m_end.to_ptime());
-}
+std::string TimeInterval::end_str() const { return boost::posix_time::to_simple_string(this->m_end.to_ptime()); }
 
-std::ostream &operator<<(std::ostream &s,
-                         const Mantid::Kernel::TimeInterval &t) {
+std::ostream &operator<<(std::ostream &s, const Mantid::Kernel::TimeInterval &t) {
   s << t.begin().toSimpleString() << " - " << t.end().toSimpleString();
   return s;
 }

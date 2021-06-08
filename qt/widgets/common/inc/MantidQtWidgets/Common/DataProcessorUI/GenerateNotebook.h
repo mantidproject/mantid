@@ -36,51 +36,39 @@ QStringList DLLExport splitByCommas(const QString &namesString);
 
 QString DLLExport plot1DString(const QStringList &ws_names);
 
-QString DLLExport tableString(const TreeData &treeData,
-                              const WhiteList &whitelist);
+QString DLLExport tableString(const TreeData &treeData, const WhiteList &whitelist);
 
 QString DLLExport titleString(const QString &wsName);
 
-boost::tuple<QString, QString> DLLExport postprocessGroupString(
-    const GroupData &rowMap, const ProcessingAlgorithm &processor,
-    const PostprocessingStep &postprocessingStep);
+boost::tuple<QString, QString> DLLExport postprocessGroupString(const GroupData &rowMap,
+                                                                const ProcessingAlgorithm &processor,
+                                                                const PostprocessingStep &postprocessingStep);
 
-QString DLLExport plotsString(const GroupData &groupData,
-                              const QString &stitched_wsStr,
+QString DLLExport plotsString(const GroupData &groupData, const QString &stitched_wsStr,
                               const ProcessingAlgorithm &processor);
 
-QString DLLExport
-reduceRowString(const RowData_sptr &data, const QString &instrument,
-                const WhiteList &whitelist,
-                const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-                const ProcessingAlgorithm &processor,
-                const ColumnOptionsMap &globalPreprocessingOptionsMap);
+QString DLLExport reduceRowString(const RowData_sptr &data, const QString &instrument, const WhiteList &whitelist,
+                                  const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+                                  const ProcessingAlgorithm &processor,
+                                  const ColumnOptionsMap &globalPreprocessingOptionsMap);
 
-boost::tuple<QString, QString> DLLExport loadWorkspaceString(
-    const QString &runStr, const QString &instrument,
-    const PreprocessingAlgorithm &preprocessor, const QString &options);
+boost::tuple<QString, QString> DLLExport loadWorkspaceString(const QString &runStr, const QString &instrument,
+                                                             const PreprocessingAlgorithm &preprocessor,
+                                                             const QString &options);
 
-QString DLLExport preprocessString(const QString &input_name1,
-                                   const QString &input_name2,
-                                   const QString &output_name,
-                                   const PreprocessingAlgorithm &preprocessor,
-                                   const QString &options);
+QString DLLExport preprocessString(const QString &input_name1, const QString &input_name2, const QString &output_name,
+                                   const PreprocessingAlgorithm &preprocessor, const QString &options);
 
-boost::tuple<QString, QString>
-    DLLExport loadRunString(const QString &run, const QString &instrument,
-                            const QString &prefix,
-                            const QString &outputName = QString());
+boost::tuple<QString, QString> DLLExport loadRunString(const QString &run, const QString &instrument,
+                                                       const QString &prefix, const QString &outputName = QString());
 
-QString DLLExport completeOutputProperties(const QString &algName,
-                                           size_t currentProperties);
+QString DLLExport completeOutputProperties(const QString &algName, size_t currentProperties);
 
 class DLLExport GenerateNotebook {
 
 public:
-  GenerateNotebook(const QString &name, const QString &instrument,
-                   WhiteList whitelist,
-                   std::map<QString, PreprocessingAlgorithm> preprocessMap,
-                   const ProcessingAlgorithm &processor,
+  GenerateNotebook(const QString &name, const QString &instrument, WhiteList whitelist,
+                   std::map<QString, PreprocessingAlgorithm> preprocessMap, const ProcessingAlgorithm &processor,
                    boost::optional<PostprocessingStep> postprocessingStep,
                    ColumnOptionsMap preprocessingInstructionsMap);
   virtual ~GenerateNotebook() = default;

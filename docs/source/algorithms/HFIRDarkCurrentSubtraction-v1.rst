@@ -9,8 +9,8 @@
 Description
 -----------
 
-Subtract the dark current from a HFIR SANS data set. 
-This algorithm is rarely called directly. It is called by 
+Subtract the dark current from a HFIR SANS data set.
+This algorithm is rarely called directly. It is called by
 :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>`.
 
 

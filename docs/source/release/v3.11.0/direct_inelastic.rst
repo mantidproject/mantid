@@ -25,7 +25,7 @@ Instrument definitions
 Algorithms
 ##########
 
-- A bug was fixed in :ref:`DPDFReduction <algm-DPDFReduction>` to comply with the signature of one of the underlying C-functions.
+- A bug was fixed in DPDFReduction to comply with the signature of one of the underlying C-functions.
 - :ref:`algm-ComputeCalibrationCoefVan` uses :ref:`algm-IntegrateEPP` as its backend instead of manual summation when integrating the vanadium peak.
 - :ref:`algm-DetectorEfficiencyCorUser` now accepts component-specific efficiency correction formulas.
 

@@ -13,16 +13,14 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-AlgorithmProgressDialogPresenter::AlgorithmProgressDialogPresenter(
-    QWidget *parent, IAlgorithmProgressDialogWidget *view,
-    AlgorithmProgressModel &model)
-    : AlgorithmProgressPresenterBase(parent), m_view{view}, m_model{model},
-      m_progressBars{RunningAlgorithms()} {
+AlgorithmProgressDialogPresenter::AlgorithmProgressDialogPresenter(QWidget *parent,
+                                                                   IAlgorithmProgressDialogWidget *view,
+                                                                   AlgorithmProgressModel &model)
+    : AlgorithmProgressPresenterBase(parent), m_view{view}, m_model{model}, m_progressBars{RunningAlgorithms()} {
   model.setDialog(this);
 
   // Intital setup of any running algorithms
-  auto runningAlgorithms =
-      Mantid::API::AlgorithmManager::Instance().runningInstances();
+  auto runningAlgorithms = Mantid::API::AlgorithmManager::Instance().runningInstances();
 
   for (const auto &alg : runningAlgorithms) {
     if ((alg) && (alg->isRunning())) {
@@ -35,11 +33,9 @@ AlgorithmProgressDialogPresenter::AlgorithmProgressDialogPresenter(
 
 /// This slot is triggered whenever an algorithm has started executing
 /// @param alg The ID of the algorithm that has started executing
-void AlgorithmProgressDialogPresenter::algorithmStartedSlot(
-    Mantid::API::AlgorithmID alg) {
+void AlgorithmProgressDialogPresenter::algorithmStartedSlot(Mantid::API::AlgorithmID alg) {
 
-  const auto algInstance =
-      Mantid::API::AlgorithmManager::Instance().getAlgorithm(alg);
+  const auto algInstance = Mantid::API::AlgorithmManager::Instance().getAlgorithm(alg);
 
   // There is a chance that the algorithm has already finished
   // -> if the updateProgressBarSlot triggers this algorithmStartedSlot, but the
@@ -63,9 +59,9 @@ void AlgorithmProgressDialogPresenter::algorithmStartedSlot(
 /// emitted from another thread, so a copy of the message is forced
 /// @param estimatedTime :: estimated time to completion in seconds
 /// @param progressPrecision :: number of digits after the decimal
-void AlgorithmProgressDialogPresenter::updateProgressBarSlot(
-    Mantid::API::AlgorithmID alg, const double progress, const QString message,
-    const double estimatedTime, const int progressPrecision) {
+void AlgorithmProgressDialogPresenter::updateProgressBarSlot(Mantid::API::AlgorithmID alg, const double progress,
+                                                             const QString message, const double estimatedTime,
+                                                             const int progressPrecision) {
   // if the algorithm isn't contained in the progress bar tree, then pretend it
   // just started
   if (m_progressBars.count(alg) == 0) {
@@ -77,16 +73,14 @@ void AlgorithmProgressDialogPresenter::updateProgressBarSlot(
       return;
     }
   }
-  setProgressBar(m_progressBars.at(alg).second, progress, message,
-                 estimatedTime, progressPrecision);
+  setProgressBar(m_progressBars.at(alg).second, progress, message, estimatedTime, progressPrecision);
 }
 
 /// This slot is triggered whenever an algorithms ends. If the algorithm is not
 /// being tracked, there will not be an active progress bar for it, in which
 /// case no work is done
 /// @param alg The ID of the algorithm that is ending
-void AlgorithmProgressDialogPresenter::algorithmEndedSlot(
-    Mantid::API::AlgorithmID alg) {
+void AlgorithmProgressDialogPresenter::algorithmEndedSlot(Mantid::API::AlgorithmID alg) {
   // if the algorithm has an active widget, then delete it
   // if the count is actually 0, then the algorithm ended
   // before a widget was ever made or displayed, so we avoid doing any work
@@ -98,9 +92,7 @@ void AlgorithmProgressDialogPresenter::algorithmEndedSlot(
     delete item;
   }
 }
-size_t AlgorithmProgressDialogPresenter::getNumberTrackedAlgorithms() {
-  return m_progressBars.size();
-}
+size_t AlgorithmProgressDialogPresenter::getNumberTrackedAlgorithms() { return m_progressBars.size(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

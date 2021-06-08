@@ -23,8 +23,7 @@ namespace {
 Logger g_log("LogManager");
 
 /// Templated method to convert property to double
-template <typename T>
-bool convertSingleValue(const Property *property, double &value) {
+template <typename T> bool convertSingleValue(const Property *property, double &value) {
   if (auto log = dynamic_cast<const PropertyWithValue<T> *>(property)) {
     value = static_cast<double>(*log);
     return true;
@@ -35,8 +34,7 @@ bool convertSingleValue(const Property *property, double &value) {
 
 /// Templated method to convert time series property to single double
 template <typename T>
-bool convertTimeSeriesToDouble(const Property *property, double &value,
-                               const Math::StatisticType &function) {
+bool convertTimeSeriesToDouble(const Property *property, double &value, const Math::StatisticType &function) {
   if (const auto *log = dynamic_cast<const TimeSeriesProperty<T> *>(property)) {
     switch (function) {
     case Math::TimeAveragedMean:
@@ -71,15 +69,12 @@ bool convertTimeSeriesToDouble(const Property *property, double &value,
 
 /// Templated method to convert a property to a single double
 template <typename T>
-bool convertPropertyToDouble(const Property *property, double &value,
-                             const Math::StatisticType &function) {
-  return convertSingleValue<T>(property, value) ||
-         convertTimeSeriesToDouble<T>(property, value, function);
+bool convertPropertyToDouble(const Property *property, double &value, const Math::StatisticType &function) {
+  return convertSingleValue<T>(property, value) || convertTimeSeriesToDouble<T>(property, value, function);
 }
 
 /// Converts a property to a single double
-bool convertPropertyToDouble(const Property *property, double &value,
-                             const Math::StatisticType &function) {
+bool convertPropertyToDouble(const Property *property, double &value, const Math::StatisticType &function) {
   // Order these with double and int first, and less likely options later.
   // The first one to succeed short-circuits and the value is returned.
   // If all fail, returns false.
@@ -102,24 +97,19 @@ const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
 LogManager::LogManager()
     : m_manager(std::make_unique<Kernel::PropertyManager>()),
       m_singleValueCache(
-          std::make_unique<Kernel::Cache<
-              std::pair<std::string, Kernel::Math::StatisticType>, double>>()) {
-}
+          std::make_unique<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>>()) {}
 
 LogManager::LogManager(const LogManager &other)
     : m_manager(std::make_unique<Kernel::PropertyManager>(*other.m_manager)),
-      m_singleValueCache(
-          std::make_unique<Kernel::Cache<
-              std::pair<std::string, Kernel::Math::StatisticType>, double>>(
-              *other.m_singleValueCache)) {}
+      m_singleValueCache(std::make_unique<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>>(
+          *other.m_singleValueCache)) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 LogManager::~LogManager() = default;
 
 LogManager &LogManager::operator=(const LogManager &other) {
   *m_manager = *other.m_manager;
-  m_singleValueCache = std::make_unique<Kernel::Cache<
-      std::pair<std::string, Kernel::Math::StatisticType>, double>>(
+  m_singleValueCache = std::make_unique<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>>(
       *other.m_singleValueCache);
   return *this;
 }
@@ -129,8 +119,7 @@ LogManager &LogManager::operator=(const LogManager &other) {
  * @param start :: The run start
  * @param end :: The run end
  */
-void LogManager::setStartAndEndTime(const Types::Core::DateAndTime &start,
-                                    const Types::Core::DateAndTime &end) {
+void LogManager::setStartAndEndTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &end) {
   this->addProperty<std::string>("start_time", start.toISO8601String(), true);
   this->addProperty<std::string>("end_time", end.toISO8601String(), true);
 }
@@ -205,8 +194,7 @@ const Types::Core::DateAndTime LogManager::endTime() const {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void LogManager::filterByTime(const Types::Core::DateAndTime start,
-                              const Types::Core::DateAndTime stop) {
+void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop) {
   // The propery manager operator will make all timeseriesproperties filter.
   m_manager->filterByTime(start, stop);
 }
@@ -219,8 +207,7 @@ void LogManager::filterByTime(const Types::Core::DateAndTime start,
  * @param splitter :: TimeSplitterType with the intervals and destinations.
  * @param outputs :: Vector of output runs.
  */
-void LogManager::splitByTime(TimeSplitterType &splitter,
-                             std::vector<LogManager *> outputs) const {
+void LogManager::splitByTime(TimeSplitterType &splitter, std::vector<LogManager *> outputs) const {
   // Make a vector of managers for the splitter. Fun!
   const size_t n = outputs.size();
   std::vector<PropertyManager *> output_managers(outputs.size(), nullptr);
@@ -242,9 +229,8 @@ void LogManager::splitByTime(TimeSplitterType &splitter,
  * @param excludedFromFiltering :: A string list of logs that
  * will be excluded from filtering
  */
-void LogManager::filterByLog(
-    const Kernel::TimeSeriesProperty<bool> &filter,
-    const std::vector<std::string> &excludedFromFiltering) {
+void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
+                             const std::vector<std::string> &excludedFromFiltering) {
   // This will invalidate the cache
   m_singleValueCache->clear();
   m_manager->filterByProperty(filter, excludedFromFiltering);
@@ -259,16 +245,13 @@ void LogManager::filterByLog(
  * @param overwrite :: If true, a current value is overwritten. (Default:
  * False)
  */
-void LogManager::addProperty(std::unique_ptr<Kernel::Property> prop,
-                             bool overwrite) {
+void LogManager::addProperty(std::unique_ptr<Kernel::Property> prop, bool overwrite) {
   // Make an exception for the proton charge
   // and overwrite it's value as we don't want to store the proton charge in two
   // separate locations
   // Similar we don't want more than one run_title
   std::string name = prop->name();
-  if (hasProperty(name) &&
-      (overwrite || prop->name() == PROTON_CHARGE_LOG_NAME ||
-       prop->name() == "run_title")) {
+  if (hasProperty(name) && (overwrite || prop->name() == PROTON_CHARGE_LOG_NAME || prop->name() == "run_title")) {
     removeProperty(name);
   }
   m_manager->declareProperty(std::move(prop), "");
@@ -280,9 +263,7 @@ void LogManager::addProperty(std::unique_ptr<Kernel::Property> prop,
  * @param name :: The name of the property
  * @return True if the property exists, false otherwise
  */
-bool LogManager::hasProperty(const std::string &name) const {
-  return m_manager->existsProperty(name);
-}
+bool LogManager::hasProperty(const std::string &name) const { return m_manager->existsProperty(name); }
 
 //-----------------------------------------------------------------------------------------------
 /**
@@ -295,8 +276,7 @@ bool LogManager::hasProperty(const std::string &name) const {
 void LogManager::removeProperty(const std::string &name, bool delProperty) {
   // Remove any cached entries for this log. Need to make this more general
   for (unsigned int stat = 0; stat < 7; ++stat) {
-    m_singleValueCache->removeCache(
-        std::make_pair(name, static_cast<Math::StatisticType>(stat)));
+    m_singleValueCache->removeCache(std::make_pair(name, static_cast<Math::StatisticType>(stat)));
   }
   m_manager->removeProperty(name, delProperty);
 }
@@ -305,9 +285,7 @@ void LogManager::removeProperty(const std::string &name, bool delProperty) {
  * Return all of the current properties
  * @returns A vector of the current list of properties
  */
-const std::vector<Kernel::Property *> &LogManager::getProperties() const {
-  return m_manager->getProperties();
-}
+const std::vector<Kernel::Property *> &LogManager::getProperties() const { return m_manager->getProperties(); }
 
 //-----------------------------------------------------------------------------------------------
 /** Return the total memory used by the run object, in bytes.
@@ -328,15 +306,12 @@ size_t LogManager::getMemorySize() const {
  * @param name The name of a time-series property
  * @return A pointer to the time-series property
  */
-template <typename T>
-Kernel::TimeSeriesProperty<T> *
-LogManager::getTimeSeriesProperty(const std::string &name) const {
+template <typename T> Kernel::TimeSeriesProperty<T> *LogManager::getTimeSeriesProperty(const std::string &name) const {
   Kernel::Property *prop = getProperty(name);
   if (auto *tsp = dynamic_cast<Kernel::TimeSeriesProperty<T> *>(prop)) {
     return tsp;
   } else {
-    throw std::invalid_argument("Run::getTimeSeriesProperty - '" + name +
-                                "' is not a TimeSeriesProperty");
+    throw std::invalid_argument("Run::getTimeSeriesProperty - '" + name + "' is not a TimeSeriesProperty");
   }
 }
 
@@ -346,9 +321,7 @@ LogManager::getTimeSeriesProperty(const std::string &name) const {
  * @return A single double value
  */
 double LogManager::getTimeAveragedStd(const std::string &name) const {
-  return getTimeSeriesProperty<double>(name)
-      ->getStatistics()
-      .time_standard_deviation;
+  return getTimeSeriesProperty<double>(name)->getStatistics().time_standard_deviation;
 }
 
 /**
@@ -357,15 +330,12 @@ double LogManager::getTimeAveragedStd(const std::string &name) const {
  * @param name :: The name of the property
  * @return The value of as the requested type
  */
-template <typename HeldType>
-HeldType LogManager::getPropertyValueAsType(const std::string &name) const {
+template <typename HeldType> HeldType LogManager::getPropertyValueAsType(const std::string &name) const {
   Kernel::Property *prop = getProperty(name);
-  if (auto *valueProp =
-          dynamic_cast<Kernel::PropertyWithValue<HeldType> *>(prop)) {
+  if (auto *valueProp = dynamic_cast<Kernel::PropertyWithValue<HeldType> *>(prop)) {
     return (*valueProp)();
   } else {
-    throw std::invalid_argument("Run::getPropertyValueAsType - '" + name +
-                                "' is not of the requested type");
+    throw std::invalid_argument("Run::getPropertyValueAsType - '" + name + "' is not of the requested type");
   }
 }
 
@@ -377,27 +347,23 @@ HeldType LogManager::getPropertyValueAsType(const std::string &name) const {
  * (default=Mean) @see StatisticType
  * @return A single double value
  */
-double LogManager::getPropertyAsSingleValue(
-    const std::string &name, Kernel::Math::StatisticType statistic) const {
+double LogManager::getPropertyAsSingleValue(const std::string &name, Kernel::Math::StatisticType statistic) const {
   double singleValue(0.0);
   const auto key = std::make_pair(name, statistic);
   if (!m_singleValueCache->getCache(key, singleValue)) {
     const Property *log = getProperty(name);
     if (!convertPropertyToDouble(log, singleValue, statistic)) {
-      if (const auto stringLog =
-              dynamic_cast<const PropertyWithValue<std::string> *>(log)) {
+      if (const auto stringLog = dynamic_cast<const PropertyWithValue<std::string> *>(log)) {
         // Try to lexically cast string to a double
         try {
           singleValue = std::stod(stringLog->value());
         } catch (const std::invalid_argument &) {
-          throw std::invalid_argument(
-              "Run::getPropertyAsSingleValue - Property \"" + name +
-              "\" cannot be converted to a numeric value.");
+          throw std::invalid_argument("Run::getPropertyAsSingleValue - Property \"" + name +
+                                      "\" cannot be converted to a numeric value.");
         }
       } else {
-        throw std::invalid_argument(
-            "Run::getPropertyAsSingleValue - Property \"" + name +
-            "\" is not a single numeric value or numeric time series.");
+        throw std::invalid_argument("Run::getPropertyAsSingleValue - Property \"" + name +
+                                    "\" is not a single numeric value or numeric time series.");
       }
     }
     // Put it in the cache
@@ -419,14 +385,11 @@ int LogManager::getPropertyAsIntegerValue(const std::string &name) const {
 
   Property *prop = getProperty(name);
 
-  if (convertSingleValue<int32_t>(prop, discard) ||
-      convertSingleValue<int64_t>(prop, discard) ||
-      convertSingleValue<uint32_t>(prop, discard) ||
-      convertSingleValue<uint64_t>(prop, discard)) {
+  if (convertSingleValue<int32_t>(prop, discard) || convertSingleValue<int64_t>(prop, discard) ||
+      convertSingleValue<uint32_t>(prop, discard) || convertSingleValue<uint64_t>(prop, discard)) {
     singleValue = std::stoi(prop->value());
   } else {
-    throw std::invalid_argument("Run::getPropertyAsIntegerValue - Property \"" +
-                                name +
+    throw std::invalid_argument("Run::getPropertyAsIntegerValue - Property \"" + name +
                                 "\" cannot be converted to an integer value.");
   }
 
@@ -439,9 +402,7 @@ int LogManager::getPropertyAsIntegerValue(const std::string &name) const {
  * it does not exist
  * @return A pointer to the named property
  */
-Kernel::Property *LogManager::getProperty(const std::string &name) const {
-  return m_manager->getProperty(name);
-}
+Kernel::Property *LogManager::getProperty(const std::string &name) const { return m_manager->getProperty(name); }
 
 /** Clear out the contents of all logs of type TimeSeriesProperty.
  *  Single-value properties will be left unchanged.
@@ -482,8 +443,7 @@ void LogManager::clearOutdatedTimeSeriesLogValues() {
  * @param keepOpen :: do not close group on exit to allow overloading and child
  * classes writing to the same group
  */
-void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
-                           bool keepOpen) const {
+void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen) const {
   file->makeGroup(group, "NXgroup", true);
   file->putAttr("version", 1);
 
@@ -509,8 +469,7 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
  * classes reading from the same group
  * load any NXlog in the current open group.
  */
-void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
-                           bool keepOpen) {
+void LogManager::loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen) {
   if (!group.empty()) {
     file->openGroup(group, "NXgroup");
   }
@@ -530,8 +489,7 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
  * @param entries :: The entries available in the current place in the file.
  * load any NXlog in the current open group.
  */
-void LogManager::loadNexus(::NeXus::File *file,
-                           const std::map<std::string, std::string> &entries) {
+void LogManager::loadNexus(::NeXus::File *file, const std::map<std::string, std::string> &entries) {
 
   for (const auto &name_class : entries) {
     // NXLog types are the main one.
@@ -554,8 +512,7 @@ void LogManager::clearLogs() { m_manager->clear(); }
 
 /// Gets the correct log name for the matching invalid values log for a given
 /// log name
-std::string
-LogManager::getInvalidValuesFilterLogName(const std::string &logName) {
+std::string LogManager::getInvalidValuesFilterLogName(const std::string &logName) {
   return PropertyManager::getInvalidValuesFilterLogName(logName);
 }
 
@@ -566,8 +523,7 @@ bool LogManager::hasInvalidValuesFilter(const std::string &logName) const {
 
 /// returns the invalid values log if the log has a matching invalid values log
 /// filter
-Kernel::TimeSeriesProperty<bool> *
-LogManager::getInvalidValuesFilter(const std::string &logName) const {
+Kernel::TimeSeriesProperty<bool> *LogManager::getInvalidValuesFilter(const std::string &logName) const {
   try {
     auto log = getLogData(getInvalidValuesFilterLogName(logName));
     if (auto tsp = dynamic_cast<TimeSeriesProperty<bool> *>(log)) {
@@ -579,13 +535,9 @@ LogManager::getInvalidValuesFilter(const std::string &logName) const {
   return nullptr;
 }
 
-bool LogManager::operator==(const LogManager &other) const {
-  return *m_manager == *(other.m_manager);
-}
+bool LogManager::operator==(const LogManager &other) const { return *m_manager == *(other.m_manager); }
 
-bool LogManager::operator!=(const LogManager &other) const {
-  return *m_manager != *(other.m_manager);
-}
+bool LogManager::operator!=(const LogManager &other) const { return *m_manager != *(other.m_manager); }
 
 //-----------------------------------------------------------------------------------------------------------------------
 // Private methods
@@ -593,11 +545,10 @@ bool LogManager::operator!=(const LogManager &other) const {
 
 /** @cond */
 /// Macro to instantiate concrete template members
-#define INSTANTIATE(TYPE)                                                      \
-  template MANTID_API_DLL Kernel::TimeSeriesProperty<TYPE>                     \
-      *LogManager::getTimeSeriesProperty(const std::string &) const;           \
-  template MANTID_API_DLL TYPE LogManager::getPropertyValueAsType(             \
-      const std::string &) const;
+#define INSTANTIATE(TYPE)                                                                                              \
+  template MANTID_API_DLL Kernel::TimeSeriesProperty<TYPE> *LogManager::getTimeSeriesProperty(const std::string &)     \
+      const;                                                                                                           \
+  template MANTID_API_DLL TYPE LogManager::getPropertyValueAsType(const std::string &) const;
 
 INSTANTIATE(double)
 INSTANTIATE(int32_t)
@@ -607,16 +558,11 @@ INSTANTIATE(uint64_t)
 INSTANTIATE(std::string)
 INSTANTIATE(bool)
 
-template MANTID_API_DLL uint16_t
-LogManager::getPropertyValueAsType(const std::string &) const;
-template MANTID_API_DLL std::vector<double>
-LogManager::getPropertyValueAsType(const std::string &) const;
-template MANTID_API_DLL std::vector<size_t>
-LogManager::getPropertyValueAsType(const std::string &) const;
-template MANTID_API_DLL std::vector<int>
-LogManager::getPropertyValueAsType(const std::string &) const;
-template MANTID_API_DLL std::vector<long>
-LogManager::getPropertyValueAsType(const std::string &) const;
+template MANTID_API_DLL uint16_t LogManager::getPropertyValueAsType(const std::string &) const;
+template MANTID_API_DLL std::vector<double> LogManager::getPropertyValueAsType(const std::string &) const;
+template MANTID_API_DLL std::vector<size_t> LogManager::getPropertyValueAsType(const std::string &) const;
+template MANTID_API_DLL std::vector<int> LogManager::getPropertyValueAsType(const std::string &) const;
+template MANTID_API_DLL std::vector<long> LogManager::getPropertyValueAsType(const std::string &) const;
 /** @endcond */
 
 } // namespace API

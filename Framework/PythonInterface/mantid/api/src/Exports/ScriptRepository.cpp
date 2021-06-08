@@ -43,8 +43,7 @@ PyObject *getListFiles(ScriptRepository &self) {
 
 tuple getInfo(ScriptRepository &self, const std::string &path) {
   ScriptInfo info = self.info(path);
-  return boost::python::make_tuple<std::string>(info.author,
-                                                info.pub_date.toSimpleString());
+  return boost::python::make_tuple<std::string>(info.author, info.pub_date.toSimpleString());
 }
 
 PyObject *getStatus(ScriptRepository &self, const std::string &path) {
@@ -90,8 +89,7 @@ void export_ScriptRepository() {
   // reset the option to
   docstring_options local_docstring_options(true, true, false);
 
-  const char *repo_desc =
-      "Manage the interaction between the users and the Script folder (mantid subproject). \n\
+  const char *repo_desc = "Manage the interaction between the users and the Script folder (mantid subproject). \n\
 \n\
 Inside the mantid repository (https://github.com/mantidproject) there is also a subproject \n\
 called scripts (https://github.com/mantidproject/scripts), created to allow users to share \n\
@@ -116,8 +114,7 @@ to download scripts through ::download(path), or check for updates through ::upd
 \n\
 '''NOTE:''' Upload is not implemented yet.\n";
 
-  const char *list_files_desc =
-      "Return an array with all the entries inside the repository. \n\
+  const char *list_files_desc = "Return an array with all the entries inside the repository. \n\
 \n\
 Folder os files, locally or remotely, all will be listed together through the listFiles. \n\
 The listFiles has another function, which is related to update the internal cache about \n\
@@ -128,8 +125,7 @@ Returns:\n\
 \n\
   list: entries inside the repository.\n";
 
-  const char *file_info_desc =
-      "Return general information from the entries inside ScriptRepository. \n\
+  const char *file_info_desc = "Return general information from the entries inside ScriptRepository. \n\
 \n\
 The author, description and publication date are available through this method. \n\
 \n\
@@ -140,8 +136,7 @@ Arguments:\n\
 Returns:\n\\n\
   - tuple: (author, last publication date)\n";
 
-  const char *file_description_desc =
-      "Return description of the entry inside ScriptRepository. \n\
+  const char *file_description_desc = "Return description of the entry inside ScriptRepository. \n\
 \n\
 Arguments:\n\
 \n\
@@ -170,8 +165,7 @@ Returns:\n\
 \n\
   - str: Status of the entry.\n";
 
-  const char *download_desc =
-      "Download from repository into your local file system.\n\
+  const char *download_desc = "Download from repository into your local file system.\n\
 \n\
 You may give a file or folder. If the later is given, ScriptRepository will \n\
 download all the files inside that folder from the remote repository to you.\n\
@@ -187,8 +181,7 @@ remote repository to see if there is anything new. It will not download new vers
 of the available files unless you ask to do so. You should do this often to check if \n\
 there is a new script to solve your problem ;)";
 
-  const char *install_desc =
-      "Install the ScriptRepository in your local file system\n\
+  const char *install_desc = "Install the ScriptRepository in your local file system\n\
 \n\
 The installation of the ScriptRepository is very simple. You must only provide a path, \n\
 existing or new folder, where the ScriptRepository will put the database it requires to \n\
@@ -201,17 +194,12 @@ Arguments:\n\
 ";
 
   ///@todo better description
-  class_<ScriptRepository, boost::noncopyable>("ScriptRepository", repo_desc,
-                                               no_init)
-      .def("install", &ScriptRepository::install,
-           (arg("self"), arg("local_path")), install_desc)
+  class_<ScriptRepository, boost::noncopyable>("ScriptRepository", repo_desc, no_init)
+      .def("install", &ScriptRepository::install, (arg("self"), arg("local_path")), install_desc)
       .def("listFiles", &getListFiles, arg("self"), list_files_desc)
       .def("fileInfo", &getInfo, (arg("self"), arg("path")), file_info_desc)
-      .def("description", &getDescription, (arg("self"), arg("path")),
-           file_description_desc)
-      .def("fileStatus", &getStatus, (arg("self"), arg("path")),
-           file_status_desc)
-      .def("download", &ScriptRepository::download,
-           (arg("self"), arg("file_path")), download_desc)
+      .def("description", &getDescription, (arg("self"), arg("path")), file_description_desc)
+      .def("fileStatus", &getStatus, (arg("self"), arg("path")), file_status_desc)
+      .def("download", &ScriptRepository::download, (arg("self"), arg("file_path")), download_desc)
       .def("update", &ScriptRepository::check4Update, arg("self"), update_desc);
 }

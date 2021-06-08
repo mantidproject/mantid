@@ -24,9 +24,7 @@ private:
   const std::string cylinder;
 
 public:
-  static DefineGaugeVolumeTest *createSuite() {
-    return new DefineGaugeVolumeTest();
-  }
+  static DefineGaugeVolumeTest *createSuite() { return new DefineGaugeVolumeTest(); }
   static void destroySuite(DefineGaugeVolumeTest *suite) { delete suite; }
 
   DefineGaugeVolumeTest()
@@ -48,9 +46,8 @@ public:
 
   void testInvalidShape() {
     // Create an 'empty' workspace
-    AnalysisDataService::Instance().add(
-        "EmptyWorkspace",
-        WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1));
+    AnalysisDataService::Instance().add("EmptyWorkspace",
+                                        WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1));
 
     gauge.setPropertyValue("Workspace", "EmptyWorkspace");
     gauge.setPropertyValue("ShapeXML", sphere.substr(0, 50));
@@ -66,8 +63,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(gauge.execute());
     TS_ASSERT(gauge.isExecuted());
 
-    MatrixWorkspace_const_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("EmptyWorkspace"));
+    MatrixWorkspace_const_sptr ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("EmptyWorkspace"));
 
     TS_ASSERT(ws->run().hasProperty("GaugeVolume"));
     TS_ASSERT_EQUALS(ws->run().getProperty("GaugeVolume")->value(), sphere);

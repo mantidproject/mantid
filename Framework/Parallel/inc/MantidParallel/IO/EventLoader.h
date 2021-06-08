@@ -30,21 +30,16 @@ namespace IO {
 */
 namespace EventLoader {
 MANTID_PARALLEL_DLL std::unordered_map<int32_t, size_t>
-makeAnyEventIdToBankMap(const std::string &filename,
-                        const std::string &groupName,
+makeAnyEventIdToBankMap(const std::string &filename, const std::string &groupName,
                         const std::vector<std::string> &bankNames);
-MANTID_PARALLEL_DLL void
-load(const Communicator &communicator, const std::string &filename,
-     const std::string &groupName, const std::vector<std::string> &bankNames,
-     const std::vector<int32_t> &bankOffsets,
-     const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists);
+MANTID_PARALLEL_DLL void load(const Communicator &communicator, const std::string &filename,
+                              const std::string &groupName, const std::vector<std::string> &bankNames,
+                              const std::vector<int32_t> &bankOffsets,
+                              const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists);
 
-MANTID_PARALLEL_DLL void
-load(const std::string &filename, const std::string &groupName,
-     const std::vector<std::string> &bankNames,
-     const std::vector<int32_t> &bankOffsets,
-     const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists,
-     bool precalcEvents);
+MANTID_PARALLEL_DLL void load(const std::string &filename, const std::string &groupName,
+                              const std::vector<std::string> &bankNames, const std::vector<int32_t> &bankOffsets,
+                              const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists, bool precalcEvents);
 
 } // namespace EventLoader
 

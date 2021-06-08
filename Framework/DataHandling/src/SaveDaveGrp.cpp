@@ -25,14 +25,11 @@ using namespace Mantid::API;
 /** Initialize the algorithm's properties.
  */
 void SaveDaveGrp::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "InputWorkspace", "", Direction::Input),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                         "An input workspace.");
-  this->declareProperty(std::make_unique<FileProperty>(
-                            "Filename", "", FileProperty::Save, ".grp"),
+  this->declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".grp"),
                         "A DAVE grouped data format file that will be created");
-  this->declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
-                            "ToMicroEV", false, Kernel::Direction::Input),
+  this->declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("ToMicroEV", false, Kernel::Direction::Input),
                         "Transform all energy units from milli eV to micro eV");
 }
 
@@ -44,8 +41,7 @@ void SaveDaveGrp::exec() {
   std::size_t nSpectra = ws->getNumberHistograms();
   std::size_t nBins = ws->blocksize();
   if (nSpectra * nBins == 0)
-    throw std::invalid_argument(
-        "Either the number of bins or the number of histograms is 0");
+    throw std::invalid_argument("Either the number of bins or the number of histograms is 0");
   std::string xcaption = ws->getAxis(0)->unit()->caption();
   std::string ycaption = ws->getAxis(1)->unit()->caption();
   if (xcaption.length() == 0)
@@ -113,9 +109,7 @@ void SaveDaveGrp::exec() {
     auto &Y = ws->y(i);
     auto &E = ws->e(i);
     auto itE = E.cbegin();
-    std::for_each(Y.cbegin(), Y.cend(), [&itE, &file](const double y) {
-      file << y << " " << *itE++ << "\n";
-    });
+    std::for_each(Y.cbegin(), Y.cend(), [&itE, &file](const double y) { file << y << " " << *itE++ << "\n"; });
 
     progress.report();
   }

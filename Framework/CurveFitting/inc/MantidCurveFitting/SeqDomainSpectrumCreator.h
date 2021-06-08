@@ -28,23 +28,17 @@ namespace CurveFitting {
       @date 28/05/2014
   */
 
-class MANTID_CURVEFITTING_DLL SeqDomainSpectrumCreator
-    : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL SeqDomainSpectrumCreator : public API::IDomainCreator {
 public:
-  SeqDomainSpectrumCreator(Kernel::IPropertyManager *manager,
-                           const std::string &workspacePropertyName);
+  SeqDomainSpectrumCreator(Kernel::IPropertyManager *manager, const std::string &workspacePropertyName);
 
-  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
-                    std::shared_ptr<API::FunctionValues> &values,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain, std::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
 
   API::Workspace_sptr
-  createOutputWorkspace(const std::string &baseName,
-                        API::IFunction_sptr function,
-                        std::shared_ptr<API::FunctionDomain> domain,
-                        std::shared_ptr<API::FunctionValues> values,
-                        const std::string &outputWorkspacePropertyName =
-                            "OutputWorkspace") override;
+  createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
+                        std::shared_ptr<API::FunctionDomain> domain, std::shared_ptr<API::FunctionValues> values,
+                        const std::string &outputWorkspacePropertyName = "OutputWorkspace") override;
   size_t getDomainSize() const override;
 
 protected:

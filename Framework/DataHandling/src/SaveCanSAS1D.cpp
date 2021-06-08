@@ -68,12 +68,10 @@ DECLARE_ALGORITHM(SaveCanSAS1D)
 /// Overwrites Algorithm method.
 void SaveCanSAS1D::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<>>(
-          "InputWorkspace", "", Kernel::Direction::Input,
-          std::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
+      std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Kernel::Direction::Input,
+                                                 std::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
       "The input workspace, which must be in units of Q");
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Save, ".xml"),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save, ".xml"),
                   "The name of the xml file to save");
 
   std::vector<std::string> radiation_source{"Spallation Neutron Source",
@@ -87,10 +85,8 @@ void SaveCanSAS1D::init() {
                                             "x-ray",
                                             "muon",
                                             "electron"};
-  declareProperty(
-      "RadiationSource", "Spallation Neutron Source",
-      std::make_shared<Kernel::StringListValidator>(radiation_source),
-      "The type of radiation used.");
+  declareProperty("RadiationSource", "Spallation Neutron Source",
+                  std::make_shared<Kernel::StringListValidator>(radiation_source), "The type of radiation used.");
   declareProperty("Append", false,
                   "Selecting append allows the workspace to "
                   "be added to an existing canSAS 1-D file as "
@@ -109,12 +105,9 @@ void SaveCanSAS1D::init() {
       "Flat plate",
       "Disc",
   };
-  declareProperty(
-      "Geometry", "Disc",
-      std::make_shared<Kernel::StringListValidator>(collimationGeometry),
-      "The geometry type of the collimation.");
-  auto mustBePositiveOrZero =
-      std::make_shared<Kernel::BoundedValidator<double>>();
+  declareProperty("Geometry", "Disc", std::make_shared<Kernel::StringListValidator>(collimationGeometry),
+                  "The geometry type of the collimation.");
+  auto mustBePositiveOrZero = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositiveOrZero->setLower(0);
   declareProperty("SampleHeight", 0.0, mustBePositiveOrZero,
                   "The height of the collimation element in mm. If specified "
@@ -135,10 +128,8 @@ void SaveCanSAS1D::init() {
  *  @param propertyValue :: value  of the property
  *  @param perioidNum :: period number
  */
-void SaveCanSAS1D::setOtherProperties(API::IAlgorithm *alg,
-                                      const std::string &propertyName,
-                                      const std::string &propertyValue,
-                                      int perioidNum) {
+void SaveCanSAS1D::setOtherProperties(API::IAlgorithm *alg, const std::string &propertyName,
+                                      const std::string &propertyValue, int perioidNum) {
   // call the base class method
   Algorithm::setOtherProperties(alg, propertyName, propertyValue, perioidNum);
 
@@ -150,13 +141,11 @@ void SaveCanSAS1D::setOtherProperties(API::IAlgorithm *alg,
 void SaveCanSAS1D::exec() {
   m_workspace = getProperty("InputWorkspace");
   if (!m_workspace) {
-    throw std::invalid_argument(
-        "Invalid inputworkspace ,Error in  SaveCanSAS1D");
+    throw std::invalid_argument("Invalid inputworkspace ,Error in  SaveCanSAS1D");
   }
 
   if (m_workspace->getNumberHistograms() > 1) {
-    throw std::invalid_argument(
-        "Error in SaveCanSAS1D - more than one histogram.");
+    throw std::invalid_argument("Error in SaveCanSAS1D - more than one histogram.");
   }
 
   // write xml manually as the user requires a specific format were the
@@ -251,9 +240,7 @@ bool SaveCanSAS1D::openForAppending(const std::string &filename) {
       return true;
     }
   } catch (std::fstream::failure &) {
-    g_log.information()
-        << "File " << filename
-        << " couldn't be opened for a appending, will try to create the file\n";
+    g_log.information() << "File " << filename << " couldn't be opened for a appending, will try to create the file\n";
   }
   m_outFile.clear();
   if (m_outFile.is_open()) {
@@ -279,8 +266,7 @@ void SaveCanSAS1D::findEndofLastEntry() {
     m_outFile.read(test_tag, LAST_TAG_LEN);
     // check we're in the correct place in the file
     static const char LAST_TAG[LAST_TAG_LEN + 1] = "</SASentry>";
-    if (std::string(test_tag, LAST_TAG_LEN) !=
-        std::string(LAST_TAG, LAST_TAG_LEN)) {
+    if (std::string(test_tag, LAST_TAG_LEN) != std::string(LAST_TAG, LAST_TAG_LEN)) {
       // we'll allow some extra charaters so there is some variablity in where
       // the tag might be found
       bool tagFound(false);
@@ -326,8 +312,7 @@ void SaveCanSAS1D::writeHeader(const std::string &fileName) {
     createSASRootElement(sasroot);
     m_outFile << sasroot;
   } catch (std::fstream::failure &) {
-    throw Exception::FileError("Error opening the output file for writing",
-                               fileName);
+    throw Exception::FileError("Error opening the output file for writing", fileName);
   }
 }
 /** This method search for xml special characters in the input string
@@ -359,8 +344,7 @@ void SaveCanSAS1D::searchandreplaceSpecialChars(std::string &input) {
  *  @param input :: -input string
  *  @param index ::  position of the special character in the input string
  */
-void SaveCanSAS1D::replacewithEntityReference(
-    std::string &input, const std::string::size_type &index) {
+void SaveCanSAS1D::replacewithEntityReference(std::string &input, const std::string::size_type &index) {
   std::basic_string<char>::reference str = input.at(index);
   switch (str) {
   case '&':
@@ -454,8 +438,7 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
     const auto intensities = m_workspace->points(i);
     auto intensityDeltas = m_workspace->pointStandardDeviations(i);
     if (!intensityDeltas)
-      intensityDeltas =
-          HistogramData::PointStandardDeviations(intensities.size(), 0.0);
+      intensityDeltas = HistogramData::PointStandardDeviations(intensities.size(), 0.0);
     const auto &ydata = m_workspace->y(i);
     const auto &edata = m_workspace->e(i);
     for (size_t j = 0; j < ydata.size(); ++j) {
@@ -561,14 +544,12 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
 
   std::list<std::string> detList;
   using std::placeholders::_1;
-  boost::algorithm::split(detList, detectorNames,
-                          std::bind(std::equal_to<char>(), _1, ','));
+  boost::algorithm::split(detList, detectorNames, std::bind(std::equal_to<char>(), _1, ','));
   for (auto detectorName : detList) {
     boost::algorithm::trim(detectorName);
 
     // get first component with name detectorName in IDF
-    std::shared_ptr<const IComponent> comp =
-        m_workspace->getInstrument()->getComponentByName(detectorName);
+    std::shared_ptr<const IComponent> comp = m_workspace->getInstrument()->getComponentByName(detectorName);
     if (comp != std::shared_ptr<const IComponent>()) {
       sasDet += "\n\t\t\t<SASdetector>";
 
@@ -580,8 +561,7 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
       std::string sasDetUnit = "\n\t\t\t\t<SDD unit=\"m\">";
 
       std::stringstream sdd;
-      double distance =
-          comp->getDistance(*m_workspace->getInstrument()->getSample());
+      double distance = comp->getDistance(*m_workspace->getInstrument()->getSample());
       sdd << distance;
 
       sasDetUnit += sdd.str();
@@ -591,8 +571,7 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
       sasDet += "\n\t\t\t</SASdetector>";
     } else {
       g_log.notice() << "Detector with name " << detectorName
-                     << " does not exist in the instrument of the workspace: "
-                     << m_workspace->getName() << '\n';
+                     << " does not exist in the instrument of the workspace: " << m_workspace->getName() << '\n';
     }
   }
 }
@@ -700,18 +679,15 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
 
     // aperture with name
     std::string collimationGeometry = getProperty("Geometry");
-    sasCollimation +=
-        "\n\t\t\t\t<aperture name=\"" + collimationGeometry + "\">";
+    sasCollimation += "\n\t\t\t\t<aperture name=\"" + collimationGeometry + "\">";
 
     // size
     sasCollimation += "\n\t\t\t\t\t<size>";
 
     // Width
-    sasCollimation += "\n\t\t\t\t\t\t<x unit=\"mm\">" +
-                      std::to_string(collimationWidth) + "</x>";
+    sasCollimation += "\n\t\t\t\t\t\t<x unit=\"mm\">" + std::to_string(collimationWidth) + "</x>";
     // Height
-    sasCollimation += "\n\t\t\t\t\t\t<y unit=\"mm\">" +
-                      std::to_string(collimationHeight) + "</y>";
+    sasCollimation += "\n\t\t\t\t\t\t<y unit=\"mm\">" + std::to_string(collimationHeight) + "</y>";
 
     sasCollimation += "\n\t\t\t\t\t</size>";
     sasCollimation += "\n\t\t\t\t</aperture>";

@@ -32,14 +32,12 @@ Mantid::Kernel::Logger g_log("QENSFit");
 
 using namespace Mantid::API;
 
-void extractFunctionNames(const CompositeFunction_sptr &composite,
-                          std::vector<std::string> &names) {
+void extractFunctionNames(const CompositeFunction_sptr &composite, std::vector<std::string> &names) {
   for (auto i = 0u; i < composite->nFunctions(); ++i)
     names.emplace_back(composite->getFunction(i)->name());
 }
 
-void extractFunctionNames(const IFunction_sptr &function,
-                          std::vector<std::string> &names) {
+void extractFunctionNames(const IFunction_sptr &function, std::vector<std::string> &names) {
   auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     extractFunctionNames(composite, names);
@@ -47,17 +45,14 @@ void extractFunctionNames(const IFunction_sptr &function,
     names.emplace_back(function->name());
 }
 
-void extractConvolvedNames(const IFunction_sptr &function,
-                           std::vector<std::string> &names);
+void extractConvolvedNames(const IFunction_sptr &function, std::vector<std::string> &names);
 
-void extractConvolvedNames(const CompositeFunction_sptr &composite,
-                           std::vector<std::string> &names) {
+void extractConvolvedNames(const CompositeFunction_sptr &composite, std::vector<std::string> &names) {
   for (auto i = 0u; i < composite->nFunctions(); ++i)
     extractConvolvedNames(composite->getFunction(i), names);
 }
 
-void extractConvolvedNames(const IFunction_sptr &function,
-                           std::vector<std::string> &names) {
+void extractConvolvedNames(const IFunction_sptr &function, std::vector<std::string> &names) {
   auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite) {
     if (composite->name() == "Convolution" && composite->nFunctions() > 1 &&
@@ -68,8 +63,7 @@ void extractConvolvedNames(const IFunction_sptr &function,
   }
 }
 
-MatrixWorkspace_sptr
-convertSpectrumAxis(const MatrixWorkspace_sptr &inputWorkspace) {
+MatrixWorkspace_sptr convertSpectrumAxis(const MatrixWorkspace_sptr &inputWorkspace) {
   auto convSpec = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
   convSpec->setLogging(false);
   convSpec->setChild(true);
@@ -81,8 +75,7 @@ convertSpectrumAxis(const MatrixWorkspace_sptr &inputWorkspace) {
   return convSpec->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-convertToElasticQ(const MatrixWorkspace_sptr &inputWorkspace, bool doThrow) {
+MatrixWorkspace_sptr convertToElasticQ(const MatrixWorkspace_sptr &inputWorkspace, bool doThrow) {
   auto axis = inputWorkspace->getAxis(1);
   if (axis->isSpectra())
     return convertSpectrumAxis(inputWorkspace);
@@ -91,8 +84,7 @@ convertToElasticQ(const MatrixWorkspace_sptr &inputWorkspace, bool doThrow) {
       throw std::runtime_error("Input must have axis values of Q");
     return inputWorkspace->clone();
   } else if (doThrow)
-    throw std::runtime_error(
-        "Input workspace must have either spectra or numeric axis.");
+    throw std::runtime_error("Input workspace must have either spectra or numeric axis.");
   return inputWorkspace->clone();
 }
 
@@ -116,9 +108,7 @@ private:
   std::unordered_map<MatrixWorkspace *, MatrixWorkspace_sptr> m_converted;
 };
 
-std::vector<MatrixWorkspace_sptr>
-convertToElasticQ(const std::vector<MatrixWorkspace_sptr> &workspaces,
-                  bool doThrow) {
+std::vector<MatrixWorkspace_sptr> convertToElasticQ(const std::vector<MatrixWorkspace_sptr> &workspaces, bool doThrow) {
   std::vector<MatrixWorkspace_sptr> elasticInput;
   auto appendElasticQWorkspace = ElasticQAppender(elasticInput);
   appendElasticQWorkspace(workspaces[0], doThrow);
@@ -132,8 +122,7 @@ std::string shortParameterName(const std::string &longName) {
   return longName.substr(longName.rfind('.') + 1, longName.size());
 }
 
-void setMultiDataProperties(const IAlgorithm &qensFit, IAlgorithm &fit,
-                            const MatrixWorkspace_sptr &workspace,
+void setMultiDataProperties(const IAlgorithm &qensFit, IAlgorithm &fit, const MatrixWorkspace_sptr &workspace,
                             const std::string &suffix) {
   fit.setProperty("InputWorkspace" + suffix, workspace);
 
@@ -149,14 +138,12 @@ void setMultiDataProperties(const IAlgorithm &qensFit, IAlgorithm &fit,
   fit.setProperty("Exclude" + suffix, exclude);
 }
 
-void setMultiDataProperties(
-    const IAlgorithm &qensFit, IAlgorithm &fit,
-    const std::vector<MatrixWorkspace_sptr> &workspaces) {
+void setMultiDataProperties(const IAlgorithm &qensFit, IAlgorithm &fit,
+                            const std::vector<MatrixWorkspace_sptr> &workspaces) {
   setMultiDataProperties(qensFit, fit, workspaces[0], "");
 
   for (auto i = 1u; i < workspaces.size(); ++i)
-    setMultiDataProperties(qensFit, fit, workspaces[i],
-                           "_" + std::to_string(i));
+    setMultiDataProperties(qensFit, fit, workspaces[i], "_" + std::to_string(i));
 }
 
 IFunction_sptr convertToSingleDomain(IFunction_sptr function) {
@@ -175,8 +162,7 @@ WorkspaceGroup_sptr makeGroup(const Workspace_sptr &workspace) {
   return group;
 }
 
-ITableWorkspace_sptr transposeFitTable(const ITableWorkspace_sptr &table,
-                                       const IFunction &function,
+ITableWorkspace_sptr transposeFitTable(const ITableWorkspace_sptr &table, const IFunction &function,
                                        const std::string &yAxisType) {
   auto transposed = WorkspaceFactory::Instance().createTable();
   transposed->addColumn(yAxisType, "axis-1");
@@ -200,25 +186,20 @@ ITableWorkspace_sptr transposeFitTable(const ITableWorkspace_sptr &table,
   return transposed;
 }
 
-std::string getAxisType(const MatrixWorkspace &workspace,
-                        std::size_t axisIndex) {
+std::string getAxisType(const MatrixWorkspace &workspace, std::size_t axisIndex) {
   return workspace.getAxis(axisIndex)->isNumeric() ? "double" : "str";
 }
 
-NumericAxis const *getNumericAxis(const MatrixWorkspace &workspace,
-                                  std::size_t axisIndex) {
+NumericAxis const *getNumericAxis(const MatrixWorkspace &workspace, std::size_t axisIndex) {
   return dynamic_cast<NumericAxis const *>(workspace.getAxis(axisIndex));
 }
 
-TextAxis const *getTextAxis(const MatrixWorkspace &workspace,
-                            std::size_t axisIndex) {
+TextAxis const *getTextAxis(const MatrixWorkspace &workspace, std::size_t axisIndex) {
   return dynamic_cast<TextAxis const *>(workspace.getAxis(axisIndex));
 }
 
-std::vector<std::string>
-getUniqueWorkspaceNames(std::vector<std::string> &&workspaceNames) {
-  std::set<std::string> uniqueNames(workspaceNames.begin(),
-                                    workspaceNames.end());
+std::vector<std::string> getUniqueWorkspaceNames(std::vector<std::string> &&workspaceNames) {
+  std::set<std::string> uniqueNames(workspaceNames.begin(), workspaceNames.end());
   workspaceNames.assign(uniqueNames.begin(), uniqueNames.end());
   return std::move(workspaceNames);
 }
@@ -240,42 +221,33 @@ auto getTextAxisValueReader(std::size_t axisIndex) {
 }
 
 template <typename T, typename GetValue>
-void addValuesToColumn(
-    Column &column, const std::vector<MatrixWorkspace_sptr> &workspaces,
-    const Mantid::Kernel::PropertyManagerOwner &indexProperties,
-    const GetValue &getValue) {
+void addValuesToColumn(Column &column, const std::vector<MatrixWorkspace_sptr> &workspaces,
+                       const Mantid::Kernel::PropertyManagerOwner &indexProperties, const GetValue &getValue) {
   const std::string prefix = "WorkspaceIndex";
 
   int index = indexProperties.getProperty(prefix);
-  column.cell<T>(0) =
-      getValue(*workspaces.front(), static_cast<std::size_t>(index));
+  column.cell<T>(0) = getValue(*workspaces.front(), static_cast<std::size_t>(index));
 
   for (auto i = 1u; i < workspaces.size(); ++i) {
     const auto indexName = prefix + "_" + std::to_string(i);
     index = indexProperties.getProperty(indexName);
-    column.cell<T>(i) =
-        getValue(*workspaces[i], static_cast<std::size_t>(index));
+    column.cell<T>(i) = getValue(*workspaces[i], static_cast<std::size_t>(index));
   }
 }
 
-void addValuesToTableColumn(
-    ITableWorkspace &table, const std::vector<MatrixWorkspace_sptr> &workspaces,
-    const Mantid::Kernel::PropertyManagerOwner &indexProperties,
-    std::size_t columnIndex) {
+void addValuesToTableColumn(ITableWorkspace &table, const std::vector<MatrixWorkspace_sptr> &workspaces,
+                            const Mantid::Kernel::PropertyManagerOwner &indexProperties, std::size_t columnIndex) {
   if (workspaces.empty())
     return;
 
   const auto column = table.getColumn(columnIndex);
   if (getNumericAxis(*workspaces.front(), 1))
-    addValuesToColumn<double>(*column, workspaces, indexProperties,
-                              getNumericAxisValueReader(1));
+    addValuesToColumn<double>(*column, workspaces, indexProperties, getNumericAxisValueReader(1));
   else if (getTextAxis(*workspaces.front(), 1))
-    addValuesToColumn<std::string>(*column, workspaces, indexProperties,
-                                   getTextAxisValueReader(1));
+    addValuesToColumn<std::string>(*column, workspaces, indexProperties, getTextAxisValueReader(1));
 }
 
-std::vector<std::size_t>
-createDatasetGrouping(const std::vector<MatrixWorkspace_sptr> &workspaces) {
+std::vector<std::size_t> createDatasetGrouping(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   std::vector<std::size_t> grouping;
   grouping.emplace_back(0);
   for (auto i = 1u; i < workspaces.size(); ++i) {
@@ -286,24 +258,20 @@ createDatasetGrouping(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   return grouping;
 }
 
-WorkspaceGroup_sptr
-createGroup(const std::vector<MatrixWorkspace_sptr> &workspaces) {
+WorkspaceGroup_sptr createGroup(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   WorkspaceGroup_sptr group(new WorkspaceGroup);
   for (auto &&workspace : workspaces)
     group->addWorkspace(workspace);
   return group;
 }
 
-WorkspaceGroup_sptr
-runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
-                                   const std::vector<std::size_t> &grouping) {
+WorkspaceGroup_sptr runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
+                                                       const std::vector<std::size_t> &grouping) {
   std::vector<MatrixWorkspace_sptr> results;
   results.reserve(grouping.size() - 1);
   for (auto i = 0u; i < grouping.size() - 1; ++i) {
-    processingAlgorithm.setProperty("StartRowIndex",
-                                    static_cast<int>(grouping[i]));
-    processingAlgorithm.setProperty("EndRowIndex",
-                                    static_cast<int>(grouping[i + 1]) - 1);
+    processingAlgorithm.setProperty("StartRowIndex", static_cast<int>(grouping[i]));
+    processingAlgorithm.setProperty("EndRowIndex", static_cast<int>(grouping[i + 1]) - 1);
     processingAlgorithm.setProperty("OutputWorkspace", "__Result");
     processingAlgorithm.execute();
     results.emplace_back(processingAlgorithm.getProperty("OutputWorkspace"));
@@ -323,22 +291,16 @@ using namespace Kernel;
 DECLARE_ALGORITHM(QENSFitSimultaneous)
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string QENSFitSimultaneous::name() const {
-  return "QENSFitSimultaneous";
-}
+const std::string QENSFitSimultaneous::name() const { return "QENSFitSimultaneous"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int QENSFitSimultaneous::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string QENSFitSimultaneous::category() const {
-  return "Workflow\\MIDAS";
-}
+const std::string QENSFitSimultaneous::category() const { return "Workflow\\MIDAS"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string QENSFitSimultaneous::summary() const {
-  return "Performs a simultaneous QENS fit";
-}
+const std::string QENSFitSimultaneous::summary() const { return "Performs a simultaneous QENS fit"; }
 
 /// Algorithm's see also for related algorithms. @see Algorithm::seeAlso
 const std::vector<std::string> QENSFitSimultaneous::seeAlso() const {
@@ -347,35 +309,28 @@ const std::vector<std::string> QENSFitSimultaneous::seeAlso() const {
 
 void QENSFitSimultaneous::initConcrete() {
   declareProperty("Ties", "", Kernel::Direction::Input);
-  getPointerToProperty("Ties")->setDocumentation(
-      "Math expressions defining ties between parameters of "
-      "the fitting function.");
+  getPointerToProperty("Ties")->setDocumentation("Math expressions defining ties between parameters of "
+                                                 "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty(
-      "MaxIterations", 500, mustBePositive->clone(),
-      "Stop after this number of iterations if a good fit is not found");
+  declareProperty("MaxIterations", 500, mustBePositive->clone(),
+                  "Stop after this number of iterations if a good fit is not found");
 
-  std::vector<std::string> minimizerOptions =
-      API::FuncMinimizerFactory::Instance().getKeys();
-  Kernel::IValidator_sptr minimizerValidator =
-      std::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
+  std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys();
+  Kernel::IValidator_sptr minimizerValidator = std::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
 
-  declareProperty("Minimizer", "Levenberg-Marquardt", minimizerValidator,
-                  "Minimizer to use for fitting.");
+  declareProperty("Minimizer", "Levenberg-Marquardt", minimizerValidator, "Minimizer to use for fitting.");
   declareProperty("CalcErrors", false,
                   "Set to true to calcuate errors when output isn't created "
                   "(default is false).");
-  declareProperty(
-      "ExtractMembers", false,
-      "If true, then each member of the fit will be extracted"
-      ", into their own workspace. These workspaces will have a histogram"
-      " for each spectrum (Q-value) and will be grouped.",
-      Direction::Input);
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
-                      "ConvolveMembers", false),
+  declareProperty("ExtractMembers", false,
+                  "If true, then each member of the fit will be extracted"
+                  ", into their own workspace. These workspaces will have a histogram"
+                  " for each spectrum (Q-value) and will be grouped.",
+                  Direction::Input);
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
                   "If true members of any "
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
@@ -385,30 +340,24 @@ void QENSFitSimultaneous::initConcrete() {
 
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.emplace_back("");
-  declareProperty("ResultXAxisUnit", "MomentumTransfer",
-                  std::make_shared<StringListValidator>(unitOptions),
+  declareProperty("ResultXAxisUnit", "MomentumTransfer", std::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the X Axis of the result workspace, "
                   "defaults to MomentumTransfer");
 
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
                   "The output result workspace(s)");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputParameterWorkspace", "", Direction::Output,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputParameterWorkspace", "",
+                                                                       Direction::Output, PropertyMode::Optional),
                   "The output parameter workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      "OutputWorkspaceGroup", "", Direction::Output,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspaceGroup", "", Direction::Output,
+                                                                      PropertyMode::Optional),
                   "The output group workspace");
 
-  declareProperty(
-      "OutputFitStatus", true,
-      "Flag to output fit status information, which consists of the fit "
-      "OutputStatus and the OutputChiSquared");
+  declareProperty("OutputFitStatus", true,
+                  "Flag to output fit status information, which consists of the fit "
+                  "OutputStatus and the OutputChiSquared");
 
-  std::vector<std::string> costFuncOptions =
-      API::CostFunctionFactory::Instance().getKeys();
+  std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
   // select only CostFuncFitting variety
   for (auto &costFuncOption : costFuncOptions) {
     auto costFunc = std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
@@ -417,12 +366,9 @@ void QENSFitSimultaneous::initConcrete() {
       costFuncOption = "";
     }
   }
-  Kernel::IValidator_sptr costFuncValidator =
-      std::make_shared<Kernel::ListValidator<std::string>>(costFuncOptions);
-  declareProperty(
-      "CostFunction", "Least squares", costFuncValidator,
-      "The cost function to be used for the fit, default is Least squares",
-      Kernel::Direction::InOut);
+  Kernel::IValidator_sptr costFuncValidator = std::make_shared<Kernel::ListValidator<std::string>>(costFuncOptions);
+  declareProperty("CostFunction", "Least squares", costFuncValidator,
+                  "The cost function to be used for the fit, default is Least squares", Kernel::Direction::InOut);
 }
 
 void QENSFitSimultaneous::execConcrete() {
@@ -438,31 +384,24 @@ void QENSFitSimultaneous::execConcrete() {
 
   const auto inputWorkspaces = getWorkspaces();
   const auto workspaces = convertInputToElasticQ(inputWorkspaces);
-  const auto singleDomainFunction =
-      convertToSingleDomain(getProperty("Function"));
+  const auto singleDomainFunction = convertToSingleDomain(getProperty("Function"));
 
   const auto fitResult = performFit(inputWorkspaces, outputBaseName);
   const auto yAxisType = getAxisType(*workspaces.front(), 1);
-  auto transposedTable =
-      transposeFitTable(fitResult.first, *singleDomainFunction, yAxisType);
+  auto transposedTable = transposeFitTable(fitResult.first, *singleDomainFunction, yAxisType);
   addValuesToTableColumn(*transposedTable, workspaces, *this, 0);
   const auto parameterWs = processParameterTable(transposedTable);
   const auto groupWs = makeGroup(fitResult.second);
-  const auto resultWs = processIndirectFitParameters(
-      parameterWs, createDatasetGrouping(workspaces));
-  AnalysisDataService::Instance().addOrReplace(
-      getPropertyValue("OutputWorkspace"), resultWs);
+  const auto resultWs = processIndirectFitParameters(parameterWs, createDatasetGrouping(workspaces));
+  AnalysisDataService::Instance().addOrReplace(getPropertyValue("OutputWorkspace"), resultWs);
 
   if (containsMultipleData(workspaces)) {
-    renameWorkspaces(groupWs, getWorkspaceIndices(), outputBaseName,
-                     "_Workspace", getWorkspaceNames());
+    renameWorkspaces(groupWs, getWorkspaceIndices(), outputBaseName, "_Workspace", getWorkspaceNames());
     auto inputWorkspaceNames = getUniqueWorkspaceNames(getWorkspaceNames());
-    renameWorkspaces(resultWs,
-                     std::vector<std::string>(inputWorkspaceNames.size(), ""),
-                     outputBaseName, "_Result", inputWorkspaceNames);
+    renameWorkspaces(resultWs, std::vector<std::string>(inputWorkspaceNames.size(), ""), outputBaseName, "_Result",
+                     inputWorkspaceNames);
   } else {
-    renameWorkspaces(resultWs, std::vector<std::string>({""}), outputBaseName,
-                     "_Result");
+    renameWorkspaces(resultWs, std::vector<std::string>({""}), outputBaseName, "_Result");
   }
 
   copyLogs(resultWs, workspaces);
@@ -472,8 +411,7 @@ void QENSFitSimultaneous::execConcrete() {
     extractMembers(groupWs, workspaces, outputBaseName + "_Members");
 
   addAdditionalLogs(resultWs);
-  copyLogs(std::dynamic_pointer_cast<MatrixWorkspace>(resultWs->getItem(0)),
-           groupWs);
+  copyLogs(std::dynamic_pointer_cast<MatrixWorkspace>(resultWs->getItem(0)), groupWs);
 
   setProperty("OutputWorkspace", resultWs);
   setProperty("OutputParameterWorkspace", parameterWs);
@@ -481,9 +419,7 @@ void QENSFitSimultaneous::execConcrete() {
 }
 
 std::pair<API::ITableWorkspace_sptr, API::Workspace_sptr>
-QENSFitSimultaneous::performFit(
-    const std::vector<MatrixWorkspace_sptr> &workspaces,
-    const std::string &output) {
+QENSFitSimultaneous::performFit(const std::vector<MatrixWorkspace_sptr> &workspaces, const std::string &output) {
   IFunction_sptr function = getProperty("Function");
   const bool convolveMembers = getProperty("ConvolveMembers");
   const bool outputCompositeMembers = getProperty("OutputCompositeMembers");
@@ -529,12 +465,10 @@ QENSFitSimultaneous::performFit(
   return {fit->getProperty("OutputParameters"), outputWS};
 }
 
-WorkspaceGroup_sptr QENSFitSimultaneous::processIndirectFitParameters(
-    const ITableWorkspace_sptr &parameterWorkspace,
-    const std::vector<std::size_t> &grouping) {
+WorkspaceGroup_sptr QENSFitSimultaneous::processIndirectFitParameters(const ITableWorkspace_sptr &parameterWorkspace,
+                                                                      const std::vector<std::size_t> &grouping) {
   std::string const xAxisUnit = getProperty("ResultXAxisUnit");
-  auto pifp =
-      createChildAlgorithm("ProcessIndirectFitParameters", 0.91, 0.95, false);
+  auto pifp = createChildAlgorithm("ProcessIndirectFitParameters", 0.91, 0.95, false);
   pifp->setAlwaysStoreInADS(false);
   pifp->setProperty("InputWorkspace", parameterWorkspace);
   pifp->setProperty("ColumnX", "axis-1");
@@ -544,13 +478,11 @@ WorkspaceGroup_sptr QENSFitSimultaneous::processIndirectFitParameters(
   return runParameterProcessingWithGrouping(*pifp, grouping);
 }
 
-void QENSFitSimultaneous::copyLogs(
-    const WorkspaceGroup_sptr &resultWorkspace,
-    const std::vector<MatrixWorkspace_sptr> &workspaces) {
+void QENSFitSimultaneous::copyLogs(const WorkspaceGroup_sptr &resultWorkspace,
+                                   const std::vector<MatrixWorkspace_sptr> &workspaces) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
   for (auto &&result : *resultWorkspace) {
-    logCopier->setProperty("OutputWorkspace",
-                           std::dynamic_pointer_cast<MatrixWorkspace>(result));
+    logCopier->setProperty("OutputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(result));
     for (const auto &workspace : workspaces) {
       logCopier->setProperty("InputWorkspace", workspace);
       logCopier->executeAsChildAlg();
@@ -564,17 +496,14 @@ void QENSFitSimultaneous::copyLogs(const MatrixWorkspace_sptr &resultWorkspace,
   logCopier->setProperty("InputWorkspace", resultWorkspace);
 
   for (const auto &workspace : *resultGroup) {
-    logCopier->setProperty(
-        "OutputWorkspace",
-        std::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+    logCopier->setProperty("OutputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(workspace));
     logCopier->executeAsChildAlg();
   }
 }
 
-void QENSFitSimultaneous::extractMembers(
-    const WorkspaceGroup_sptr &resultGroupWs,
-    const std::vector<MatrixWorkspace_sptr> &workspaces,
-    const std::string &outputWsName) {
+void QENSFitSimultaneous::extractMembers(const WorkspaceGroup_sptr &resultGroupWs,
+                                         const std::vector<MatrixWorkspace_sptr> &workspaces,
+                                         const std::string &outputWsName) {
   std::vector<std::string> workspaceNames;
   for (auto i = 0u; i < workspaces.size(); ++i) {
     auto name = "__result_members_" + std::to_string(i);
@@ -582,8 +511,7 @@ void QENSFitSimultaneous::extractMembers(
     workspaceNames.emplace_back(name);
   }
 
-  auto extractAlgorithm =
-      extractMembersAlgorithm(std::move(resultGroupWs), outputWsName);
+  auto extractAlgorithm = extractMembersAlgorithm(std::move(resultGroupWs), outputWsName);
   extractAlgorithm->setProperty("InputWorkspaces", workspaceNames);
   extractAlgorithm->execute();
 
@@ -591,14 +519,12 @@ void QENSFitSimultaneous::extractMembers(
     AnalysisDataService::Instance().remove(workspaceName);
 }
 
-void QENSFitSimultaneous::addAdditionalLogs(
-    const API::WorkspaceGroup_sptr &group) {
+void QENSFitSimultaneous::addAdditionalLogs(const API::WorkspaceGroup_sptr &group) {
   for (auto &&workspace : *group)
     addAdditionalLogs(workspace);
 }
 
-void QENSFitSimultaneous::addAdditionalLogs(
-    const Workspace_sptr &resultWorkspace) {
+void QENSFitSimultaneous::addAdditionalLogs(const Workspace_sptr &resultWorkspace) {
   auto logAdder = createChildAlgorithm("AddSampleLog", -1.0, -1.0, false);
   logAdder->setProperty("Workspace", resultWorkspace);
 
@@ -620,9 +546,8 @@ void QENSFitSimultaneous::addAdditionalLogs(
   }
 }
 
-IAlgorithm_sptr QENSFitSimultaneous::extractMembersAlgorithm(
-    const WorkspaceGroup_sptr &resultGroupWs,
-    const std::string &outputWsName) const {
+IAlgorithm_sptr QENSFitSimultaneous::extractMembersAlgorithm(const WorkspaceGroup_sptr &resultGroupWs,
+                                                             const std::string &outputWsName) const {
   const bool convolved = getProperty("ConvolveMembers");
   std::vector<std::string> convolvedMembers;
   IFunction_sptr function = getProperty("Function");
@@ -630,8 +555,7 @@ IAlgorithm_sptr QENSFitSimultaneous::extractMembersAlgorithm(
   if (convolved)
     extractConvolvedNames(function, convolvedMembers);
 
-  auto extractMembersAlg =
-      AlgorithmManager::Instance().create("ExtractQENSMembers");
+  auto extractMembersAlg = AlgorithmManager::Instance().create("ExtractQENSMembers");
   extractMembersAlg->setProperty("ResultWorkspace", resultGroupWs);
   extractMembersAlg->setProperty("OutputWorkspace", outputWsName);
   extractMembersAlg->setProperty("RenameConvolvedMembers", convolved);
@@ -644,8 +568,7 @@ std::vector<MatrixWorkspace_sptr> QENSFitSimultaneous::getWorkspaces() const {
   workspaces.reserve(m_workspacePropertyNames.size());
   for (const auto &propertyName : m_workspacePropertyNames) {
     Workspace_sptr workspace = getProperty(propertyName);
-    workspaces.emplace_back(
-        std::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+    workspaces.emplace_back(std::dynamic_pointer_cast<MatrixWorkspace>(workspace));
   }
   return workspaces;
 }
@@ -670,8 +593,8 @@ std::vector<std::string> QENSFitSimultaneous::getWorkspaceNames() const {
   return workspaceNames;
 }
 
-std::vector<MatrixWorkspace_sptr> QENSFitSimultaneous::convertInputToElasticQ(
-    const std::vector<MatrixWorkspace_sptr> &workspaces) const {
+std::vector<MatrixWorkspace_sptr>
+QENSFitSimultaneous::convertInputToElasticQ(const std::vector<MatrixWorkspace_sptr> &workspaces) const {
   return convertToElasticQ(workspaces, throwIfElasticQConversionFails());
 }
 
@@ -683,22 +606,16 @@ std::string QENSFitSimultaneous::getOutputBaseName() const {
   return base;
 }
 
-bool QENSFitSimultaneous::throwIfElasticQConversionFails() const {
-  return false;
-}
+bool QENSFitSimultaneous::throwIfElasticQConversionFails() const { return false; }
 
-bool QENSFitSimultaneous::isFitParameter(const std::string & /*unused*/) const {
-  return true;
-}
+bool QENSFitSimultaneous::isFitParameter(const std::string & /*unused*/) const { return true; }
 
 std::vector<std::string> QENSFitSimultaneous::getFitParameterNames() const {
   const auto uniqueParameters = getUniqueParameterNames();
   std::vector<std::string> parameters;
   parameters.reserve(uniqueParameters.size());
-  std::copy_if(
-      uniqueParameters.begin(), uniqueParameters.end(),
-      std::back_inserter(parameters),
-      [&](const std::string &parameter) { return isFitParameter(parameter); });
+  std::copy_if(uniqueParameters.begin(), uniqueParameters.end(), std::back_inserter(parameters),
+               [&](const std::string &parameter) { return isFitParameter(parameter); });
   return parameters;
 }
 
@@ -710,8 +627,7 @@ std::set<std::string> QENSFitSimultaneous::getUniqueParameterNames() const {
   return nameSet;
 }
 
-std::map<std::string, std::string>
-QENSFitSimultaneous::getAdditionalLogStrings() const {
+std::map<std::string, std::string> QENSFitSimultaneous::getAdditionalLogStrings() const {
   const bool convolve = getProperty("ConvolveMembers");
   auto fitProgram = name();
   fitProgram = fitProgram.substr(0, fitProgram.rfind("Simultaneous"));
@@ -723,39 +639,32 @@ QENSFitSimultaneous::getAdditionalLogStrings() const {
   return logs;
 }
 
-std::map<std::string, std::string>
-QENSFitSimultaneous::getAdditionalLogNumbers() const {
+std::map<std::string, std::string> QENSFitSimultaneous::getAdditionalLogNumbers() const {
   return std::map<std::string, std::string>();
 }
 
-ITableWorkspace_sptr QENSFitSimultaneous::processParameterTable(
-    ITableWorkspace_sptr parameterTable) {
+ITableWorkspace_sptr QENSFitSimultaneous::processParameterTable(ITableWorkspace_sptr parameterTable) {
   return parameterTable;
 }
 
-void QENSFitSimultaneous::renameWorkspaces(
-    const API::WorkspaceGroup_sptr &outputGroup,
-    std::vector<std::string> const &spectra, std::string const &outputBaseName,
-    std::string const &endOfSuffix,
-    std::vector<std::string> const &inputWorkspaceNames) {
+void QENSFitSimultaneous::renameWorkspaces(const API::WorkspaceGroup_sptr &outputGroup,
+                                           std::vector<std::string> const &spectra, std::string const &outputBaseName,
+                                           std::string const &endOfSuffix,
+                                           std::vector<std::string> const &inputWorkspaceNames) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
   const auto getNameSuffix = [&](std::size_t i) {
-    std::string workspaceName =
-        inputWorkspaceNames[i] + "_" + spectra[i] + endOfSuffix;
+    std::string workspaceName = inputWorkspaceNames[i] + "_" + spectra[i] + endOfSuffix;
     return workspaceName;
   };
-  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
-                                   endOfSuffix + "s", getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName, endOfSuffix + "s", getNameSuffix);
 }
 
-void QENSFitSimultaneous::renameWorkspaces(
-    const API::WorkspaceGroup_sptr &outputGroup,
-    std::vector<std::string> const &spectra, std::string const &outputBaseName,
-    std::string const &endOfSuffix) {
+void QENSFitSimultaneous::renameWorkspaces(const API::WorkspaceGroup_sptr &outputGroup,
+                                           std::vector<std::string> const &spectra, std::string const &outputBaseName,
+                                           std::string const &endOfSuffix) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
   auto getNameSuffix = [&](std::size_t i) { return spectra[i] + endOfSuffix; };
-  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
-                                   endOfSuffix + "s", getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName, endOfSuffix + "s", getNameSuffix);
 }
 
 } // namespace Algorithms

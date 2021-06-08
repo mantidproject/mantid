@@ -8,7 +8,7 @@ Flowchart Creation
   :local:
 
 
-The flowchart diagrams are created by writing ``graphviz`` .dot files that describe the diagram in plain text, and placing them into ``docs/source/diagrams``. These can then be rendered in documentation by using the diagram directive in an .rst file: 
+The flowchart diagrams are created by writing ``graphviz`` .dot files that describe the diagram in plain text, and placing them into ``docs/source/diagrams``. These can then be rendered in documentation by using the diagram directive in an .rst file:
 
 .. code-block:: rest
 

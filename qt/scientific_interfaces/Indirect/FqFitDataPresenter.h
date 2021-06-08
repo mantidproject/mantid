@@ -21,14 +21,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL FqFitDataPresenter
-    : public IndirectFitDataPresenter {
+class MANTIDQT_INDIRECT_DLL FqFitDataPresenter : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view,
-                     QComboBox *cbParameterType, QComboBox *cbParameter,
-                     QLabel *lbParameterType, QLabel *lbParameter,
-                     IFQFitObserver *SingleFunctionTemplateBrowser);
+  FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType, QComboBox *cbParameter,
+                     QLabel *lbParameterType, QLabel *lbParameter, IFQFitObserver *SingleFunctionTemplateBrowser);
 
 private slots:
   void hideParameterComboBoxes();
@@ -38,10 +35,8 @@ private slots:
   void updateAvailableParameters(const QString &type);
   void updateParameterSelectionEnabled();
   void setParameterLabel(const QString &parameter);
-  void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog,
-                                  const std::string &type);
-  void setDialogParameterNames(FqFitAddWorkspaceDialog *dialog,
-                               const std::string &workspace);
+  void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type);
+  void setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspace);
   void setActiveParameterType(const std::string &type);
   void updateActiveDataIndex();
   void updateActiveDataIndex(int index);
@@ -61,8 +56,7 @@ private:
   void setAvailableParameters(const std::vector<std::string> &parameters);
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   void closeDialog() override;
-  std::unique_ptr<IAddWorkspaceDialog>
-  getAddWorkspaceDialog(QWidget *parent) const override;
+  std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
   void updateParameterOptions(FqFitAddWorkspaceDialog *dialog);
   void updateParameterTypes(FqFitAddWorkspaceDialog *dialog);
   std::vector<std::string> getParameterTypes(TableDatasetIndex dataIndex) const;

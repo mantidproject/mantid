@@ -29,12 +29,8 @@ private:
 
 public:
   LogAdapter(T *adaptee) : m_adaptee(adaptee) {}
-  virtual void warning(const std::string &message) override {
-    m_adaptee->warning(message);
-  }
-  virtual void error(const std::string &message) override {
-    m_adaptee->error(message);
-  }
+  virtual void warning(const std::string &message) override { m_adaptee->warning(message); }
+  virtual void error(const std::string &message) override { m_adaptee->error(message); }
 };
 
 /**
@@ -50,12 +46,8 @@ template <typename T> std::unique_ptr<AbstractLogger> makeLogger(T *adaptee) {
 
   public:
     Adapter(T *adaptee) : m_adaptee(adaptee) {}
-    virtual void warning(const std::string &message) override {
-      m_adaptee->warning(message);
-    }
-    virtual void error(const std::string &message) override {
-      m_adaptee->error(message);
-    }
+    virtual void warning(const std::string &message) override { m_adaptee->warning(message); }
+    virtual void error(const std::string &message) override { m_adaptee->error(message); }
   };
   return std::make_unique<Adapter>(adaptee);
 }

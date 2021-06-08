@@ -16,9 +16,8 @@
 #include <QString>
 #include <QVariant>
 
-static QString JSON{
-    "{\"int\": 1, \"double\": 1.0, \"string\": \"text\", \"bool\": true, "
-    "\"list\":[1,2,3]}"};
+static QString JSON{"{\"int\": 1, \"double\": 1.0, \"string\": \"text\", \"bool\": true, "
+                    "\"list\":[1,2,3]}"};
 
 class QtJSONUtilsTest : public CxxTest::TestSuite {
 public:
@@ -57,22 +56,17 @@ private:
     return map;
   }
 
-  void testMaps(const QMap<QString, QVariant> &map1,
-                const QMap<QString, QVariant> &map2) {
+  void testMaps(const QMap<QString, QVariant> &map1, const QMap<QString, QVariant> &map2) {
     TS_ASSERT_EQUALS(map1[QString("int")].toInt(), 1)
     TS_ASSERT_EQUALS(map2[QString("int")].toInt(), map1[QString("int")].toInt())
     TS_ASSERT_EQUALS(map1[QString("double")].toDouble(), 1.0)
-    TS_ASSERT_EQUALS(map2[QString("double")].toDouble(),
-                     map1[QString("double")].toDouble())
+    TS_ASSERT_EQUALS(map2[QString("double")].toDouble(), map1[QString("double")].toDouble())
     TS_ASSERT_EQUALS(map1[QString("string")].toString(), QString("text"))
-    TS_ASSERT_EQUALS(map2[QString("string")].toString(),
-                     map1[QString("string")].toString())
+    TS_ASSERT_EQUALS(map2[QString("string")].toString(), map1[QString("string")].toString())
     TS_ASSERT_EQUALS(map1[QString("bool")].toBool(), true)
-    TS_ASSERT_EQUALS(map2[QString("bool")].toBool(),
-                     map1[QString("bool")].toBool())
+    TS_ASSERT_EQUALS(map2[QString("bool")].toBool(), map1[QString("bool")].toBool())
     QList<QVariant> list{QVariant(1), QVariant(2), QVariant(3)};
     TS_ASSERT_EQUALS(list, map1[QString("list")].toList())
-    TS_ASSERT_EQUALS(map2[QString("list")].toList(),
-                     map1[QString("list")].toList())
+    TS_ASSERT_EQUALS(map2[QString("list")].toList(), map1[QString("list")].toList())
   }
 };

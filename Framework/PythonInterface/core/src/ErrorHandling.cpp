@@ -30,8 +30,7 @@ namespace {
  * @param traceback A Python traceback object
  * @param root True if this is the root of the traceback, false otherwise
  */
-void tracebackToStream(std::ostream &msg, PyTracebackObject *traceback,
-                       bool root = true) {
+void tracebackToStream(std::ostream &msg, PyTracebackObject *traceback, bool root = true) {
   if (traceback == nullptr)
     return;
   msg << "\n  ";
@@ -41,8 +40,7 @@ void tracebackToStream(std::ostream &msg, PyTracebackObject *traceback,
     msg << "caused by";
 
   msg << " line " << traceback->tb_lineno << " in \'"
-      << extract<const char *>(traceback->tb_frame->f_code->co_filename)()
-      << "\'";
+      << extract<const char *>(traceback->tb_frame->f_code->co_filename)() << "\'";
   tracebackToStream(msg, traceback->tb_next, false);
 }
 
@@ -71,8 +69,7 @@ std::string exceptionToString(bool withTrace) {
     builder << "Unknown exception has occurred.";
   }
   if (withTrace) {
-    tracebackToStream(builder,
-                      reinterpret_cast<PyTracebackObject *>(traceback));
+    tracebackToStream(builder, reinterpret_cast<PyTracebackObject *>(traceback));
   }
 
   // Ensure we decrement the reference count on the traceback and exception
@@ -96,8 +93,7 @@ std::string exceptionToString(bool withTrace) {
  * current Python exception state.
  * @param withTrace If true, include the full traceback in the message
  */
-PythonException::PythonException(bool withTrace)
-    : std::runtime_error(exceptionToString(withTrace)) {}
+PythonException::PythonException(bool withTrace) : std::runtime_error(exceptionToString(withTrace)) {}
 
 } // namespace PythonInterface
 } // namespace Mantid

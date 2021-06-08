@@ -56,15 +56,13 @@ const QString SANSAddFiles::OUT_MSG("Output Directory: ");
 
 SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets)
     : m_SANSForm(ParWidgets), parForm(parent), m_pythonRunning(false),
-      m_newOutDir(*this, &SANSAddFiles::changeOutputDir), m_customBinning(""),
-      m_customBinningText("Bin Settings: "),
+      m_newOutDir(*this, &SANSAddFiles::changeOutputDir), m_customBinning(""), m_customBinningText("Bin Settings: "),
       m_customBinningToolTip("Sets the bin options for custom binning"),
       m_saveEventDataText("Additional Time Shifts: "),
-      m_saveEventDataToolTip(
-          "Set optional, comma-separated time shifts in seconds.\n"
-          "You can either specify non or N-1 time shifts for N files.\n"
-          "Note that the time shifts are relative to the time of the workspace "
-          "which was added last.") {
+      m_saveEventDataToolTip("Set optional, comma-separated time shifts in seconds.\n"
+                             "You can either specify non or N-1 time shifts for N files.\n"
+                             "Note that the time shifts are relative to the time of the workspace "
+                             "which was added last.") {
   initLayout();
 
   // get lists of suported extentions
@@ -90,8 +88,7 @@ SANSAddFiles::~SANSAddFiles() {
 
 // Connect signals and setup widgets
 void SANSAddFiles::initLayout() {
-  connect(m_SANSForm->new2Add_edit, SIGNAL(returnPressed()), this,
-          SLOT(add2Runs2Add()));
+  connect(m_SANSForm->new2Add_edit, SIGNAL(returnPressed()), this, SLOT(add2Runs2Add()));
 
   // the runAsPythonScript() signal needs to get to Qtiplot, here it is
   // connected to the parent, which is connected to Qtiplot
@@ -100,49 +97,39 @@ void SANSAddFiles::initLayout() {
 
   insertListFront("");
 
-  connect(m_SANSForm->toAdd_List, SIGNAL(itemChanged(QListWidgetItem *)), this,
-          SLOT(setCellData(QListWidgetItem *)));
+  connect(m_SANSForm->toAdd_List, SIGNAL(itemChanged(QListWidgetItem *)), this, SLOT(setCellData(QListWidgetItem *)));
 
   // Unfortunately, three signals are needed to track everything that could
   // happen to our QListWidget; this covers adding and removing items as
   // well changes to existing items and clearing all items.
-  connect(m_SANSForm->toAdd_List->model(),
-          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
+  connect(m_SANSForm->toAdd_List->model(), SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(enableSumming()));
-  connect(m_SANSForm->toAdd_List->model(),
-          SIGNAL(rowsRemoved(const QModelIndex &, int, int)), this,
+  connect(m_SANSForm->toAdd_List->model(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)), this,
           SLOT(enableSumming()));
-  connect(m_SANSForm->toAdd_List->model(), SIGNAL(modelReset()), this,
-          SLOT(enableSumming()));
+  connect(m_SANSForm->toAdd_List->model(), SIGNAL(modelReset()), this, SLOT(enableSumming()));
 
   enableSumming();
 
   // buttons on the Add Runs tab
   connect(m_SANSForm->add_Btn, SIGNAL(clicked()), this, SLOT(add2Runs2Add()));
-  connect(m_SANSForm->sum_Btn, SIGNAL(clicked()), this,
-          SLOT(runPythonAddFiles()));
-  connect(m_SANSForm->summedPath_Btn, SIGNAL(clicked()), this,
-          SLOT(outPathSel()));
-  connect(m_SANSForm->browse_to_add_Btn, SIGNAL(clicked()), this,
-          SLOT(new2AddBrowse()));
+  connect(m_SANSForm->sum_Btn, SIGNAL(clicked()), this, SLOT(runPythonAddFiles()));
+  connect(m_SANSForm->summedPath_Btn, SIGNAL(clicked()), this, SLOT(outPathSel()));
+  connect(m_SANSForm->browse_to_add_Btn, SIGNAL(clicked()), this, SLOT(new2AddBrowse()));
   connect(m_SANSForm->clear_Btn, SIGNAL(clicked()), this, SLOT(clearClicked()));
-  connect(m_SANSForm->remove_Btn, SIGNAL(clicked()), this,
-          SLOT(removeSelected()));
+  connect(m_SANSForm->remove_Btn, SIGNAL(clicked()), this, SLOT(removeSelected()));
 
   setToolTips();
 
   setOutDir(ConfigService::Instance().getString("defaultsave.directory"));
 
   // Track changes in the selection of the histogram option
-  connect(m_SANSForm->comboBox_histogram_choice,
-          SIGNAL(currentIndexChanged(int)), this,
+  connect(m_SANSForm->comboBox_histogram_choice, SIGNAL(currentIndexChanged(int)), this,
           SLOT(onCurrentIndexChangedForHistogramChoice(int)));
 
   // Track changes in the overlay options
   m_SANSForm->overlayCheckBox->setEnabled(false);
   m_customBinning = m_SANSForm->eventToHistBinning->text();
-  connect(m_SANSForm->overlayCheckBox, SIGNAL(stateChanged(int)), this,
-          SLOT(onStateChangedForOverlayCheckBox(int)));
+  connect(m_SANSForm->overlayCheckBox, SIGNAL(stateChanged(int)), this, SLOT(onStateChangedForOverlayCheckBox(int)));
 }
 
 /** sets tool tip strings for the components on the form
@@ -151,8 +138,7 @@ void SANSAddFiles::setToolTips() {
   m_SANSForm->summedPath_lb->setToolTip("The output files from summing the "
                                         "workspaces\nwill be saved to this "
                                         "directory");
-  m_SANSForm->summedPath_Btn->setToolTip(
-      "Set the directories used both for loading and\nsaving run data");
+  m_SANSForm->summedPath_Btn->setToolTip("Set the directories used both for loading and\nsaving run data");
 
   m_SANSForm->add_Btn->setToolTip("Click here to do the sum");
   m_SANSForm->clear_Btn->setToolTip("Clear the run files to sum box");
@@ -184,8 +170,7 @@ void SANSAddFiles::setOutDir(const std::string &dir) {
  *  @param pDirInfo :: a pointer to an object with the output directory name in
  * it
  */
-void SANSAddFiles::changeOutputDir(
-    Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo) {
+void SANSAddFiles::changeOutputDir(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo) {
   if (pDirInfo->key() == "defaultsave.directory") {
     setOutDir(pDirInfo->curValue());
   }
@@ -195,8 +180,7 @@ void SANSAddFiles::changeOutputDir(
  */
 void SANSAddFiles::add2Runs2Add() {
   // split comma separated file names or run numbers into a list
-  ArrayProperty<std::string> commaSep(
-      "unusedName", m_SANSForm->new2Add_edit->text().toStdString());
+  ArrayProperty<std::string> commaSep("unusedName", m_SANSForm->new2Add_edit->text().toStdString());
   const std::vector<std::string> &nam = commaSep;
 
   for (const auto &i : nam) { // each comma separated item could be a range of
@@ -216,19 +200,16 @@ void SANSAddFiles::add2Runs2Add() {
       ranges.append(QString::fromStdString(i));
     }
 
-    for (QStringList::const_iterator k = ranges.begin(); k != ranges.end();
-         ++k) {
+    for (QStringList::const_iterator k = ranges.begin(); k != ranges.end(); ++k) {
       // Check the file property
-      FileProperty search("dummy", k->toStdString(), FileProperty::Load,
-                          std::vector<std::string>(), Direction::Input);
+      FileProperty search("dummy", k->toStdString(), FileProperty::Load, std::vector<std::string>(), Direction::Input);
 
       std::string isValid;
       try {
         isValid = search.isValid();
       } catch (const Poco::PathSyntaxException &) {
         QString message =
-            QString("The file entry ") + *k +
-            QString(" is not a valid file path on your operating system");
+            QString("The file entry ") + *k + QString(" is not a valid file path on your operating system");
         QMessageBox::critical(this, "Invalid entry for file path", message);
         m_SANSForm->new2Add_edit->clear();
         return;
@@ -280,8 +261,7 @@ void SANSAddFiles::runPythonAddFiles() {
   code_torun += "print(SANSadd2.add_runs((";
   // there are multiple file list inputs that can be filled in loop through them
   for (int i = 0; i < m_SANSForm->toAdd_List->count(); ++i) {
-    QString filename =
-        m_SANSForm->toAdd_List->item(i)->data(Qt::WhatsThisRole).toString();
+    QString filename = m_SANSForm->toAdd_List->item(i)->data(Qt::WhatsThisRole).toString();
     // allow but do nothing with empty entries
     if (!filename.isEmpty()) {
       // Make sure that the file separators are valid
@@ -295,15 +275,12 @@ void SANSAddFiles::runPythonAddFiles() {
   }
   // pass the current instrument
   code_torun += "),'" + m_SANSForm->inst_opt->currentText() + "', '";
-  QString ext =
-      m_SANSForm->file_opt->itemData(m_SANSForm->file_opt->currentIndex())
-          .toString();
+  QString ext = m_SANSForm->file_opt->itemData(m_SANSForm->file_opt->currentIndex()).toString();
   code_torun += ext + "'";
 
   code_torun += ", rawTypes=(";
   std::vector<std::string>::const_iterator end = m_rawExts.end();
-  for (std::vector<std::string>::const_iterator j = m_rawExts.begin(); j != end;
-       ++j) {
+  for (std::vector<std::string>::const_iterator j = m_rawExts.begin(); j != end; ++j) {
     code_torun += "'" + QString::fromStdString(*j) + "',";
   }
   // remove the comma that would remain at the end of the list
@@ -327,9 +304,7 @@ void SANSAddFiles::runPythonAddFiles() {
   case SAVEASEVENTDATA:
     code_torun += ", saveAsEvent=True";
     code_torun += ", isOverlay=" + overlay;
-    code_torun +=
-        ", time_shifts=" +
-        createPythonStringList(m_SANSForm->eventToHistBinning->text());
+    code_torun += ", time_shifts=" + createPythonStringList(m_SANSForm->eventToHistBinning->text());
     break;
   default:
     break;
@@ -363,9 +338,7 @@ void SANSAddFiles::runPythonAddFiles() {
 /** This slot opens a manage user directories dialog to allowing the default
  *  output directory to be changed
  */
-void SANSAddFiles::outPathSel() {
-  MantidQt::API::ManageUserDirectories::openManageUserDirectories();
-}
+void SANSAddFiles::outPathSel() { MantidQt::API::ManageUserDirectories::openManageUserDirectories(); }
 /** This slot opens a file browser allowing a user select files, which is
  * copied into the new2Add_edit ready to be copied to the listbox (toAdd_List)
  */
@@ -380,14 +353,12 @@ void SANSAddFiles::new2AddBrowse() {
   QString fileFilter = "Files (";
 
   std::vector<std::string>::const_iterator end = m_exts.end();
-  for (std::vector<std::string>::const_iterator i = m_exts.begin(); i != end;
-       ++i) {
+  for (std::vector<std::string>::const_iterator i = m_exts.begin(); i != end; ++i) {
     fileFilter += " *" + QString::fromStdString(*i);
   }
 
   fileFilter += ")";
-  const QStringList files =
-      QFileDialog::getOpenFileNames(parForm, "Select files", dir, fileFilter);
+  const QStringList files = QFileDialog::getOpenFileNames(parForm, "Select files", dir, fileFilter);
 
   if (!files.isEmpty()) {
     // next time the user clicks browse they will see the directory that they
@@ -436,10 +407,8 @@ void SANSAddFiles::removeSelected() {
  * Enables/disables the "Sum" button based on whether there are files to sum.
  */
 void SANSAddFiles::enableSumming() {
-  const auto allItems =
-      m_SANSForm->toAdd_List->findItems("*", Qt::MatchWildcard);
-  const auto nonEmptyItemsCount =
-      std::count_if(allItems.begin(), allItems.end(), isNonEmptyItem);
+  const auto allItems = m_SANSForm->toAdd_List->findItems("*", Qt::MatchWildcard);
+  const auto nonEmptyItemsCount = std::count_if(allItems.begin(), allItems.end(), isNonEmptyItem);
 
   m_SANSForm->sum_Btn->setEnabled(nonEmptyItemsCount > 1);
 }
@@ -455,12 +424,10 @@ void SANSAddFiles::onCurrentIndexChangedForHistogramChoice(int index) {
   switch (index) {
   case CUSTOMBINNING:
     m_SANSForm->overlayCheckBox->setEnabled(false);
-    setHistogramUiLogic(m_customBinningText, m_customBinningToolTip,
-                        m_customBinning, true);
+    setHistogramUiLogic(m_customBinningText, m_customBinningToolTip, m_customBinning, true);
     break;
   case FROMMONITORS:
-    setHistogramUiLogic(m_customBinningText, m_customBinningToolTip,
-                        m_customBinning, false);
+    setHistogramUiLogic(m_customBinningText, m_customBinningToolTip, m_customBinning, false);
     setInputEnabled(false);
     break;
   case SAVEASEVENTDATA:
@@ -482,9 +449,7 @@ void SANSAddFiles::onCurrentIndexChangedForHistogramChoice(int index) {
  * Reacts to changes of the overlay check box when adding event data
  * @param state the state of the check box
  */
-void SANSAddFiles::onStateChangedForOverlayCheckBox(int state) {
-  setInputEnabled(state != 0);
-}
+void SANSAddFiles::onStateChangedForOverlayCheckBox(int state) { setInputEnabled(state != 0); }
 
 /*
  * Check the validity of the time shift input field for added event files
@@ -492,14 +457,12 @@ void SANSAddFiles::onStateChangedForOverlayCheckBox(int state) {
 bool SANSAddFiles::checkValidityTimeShiftsForAddedEventFiles() {
   bool state = true;
 
-  if (m_SANSForm->comboBox_histogram_choice->currentIndex() ==
-          SAVEASEVENTDATA &&
+  if (m_SANSForm->comboBox_histogram_choice->currentIndex() == SAVEASEVENTDATA &&
       m_SANSForm->overlayCheckBox->isChecked()) {
     QString code_torun = "import ISISCommandInterface as i\n";
     code_torun += "i.check_time_shifts_for_added_event_files(number_of_files=";
     code_torun += QString::number(m_SANSForm->toAdd_List->count() - 1);
-    code_torun +=
-        ", time_shifts='" + m_SANSForm->eventToHistBinning->text() + "')\n";
+    code_torun += ", time_shifts='" + m_SANSForm->eventToHistBinning->text() + "')\n";
 
     QString status = runPythonCode(code_torun, false);
     if (!status.isEmpty()) {
@@ -521,9 +484,7 @@ bool SANSAddFiles::checkValidityTimeShiftsForAddedEventFiles() {
  * @param lineEditText :: text for the line edit field
  * @param enabled :: if the input should be enabled.
  */
-void SANSAddFiles::setHistogramUiLogic(const QString &label,
-                                       const QString &toolTip,
-                                       const QString &lineEditText,
+void SANSAddFiles::setHistogramUiLogic(const QString &label, const QString &toolTip, const QString &lineEditText,
                                        bool enabled) {
   // Line edit field
   m_SANSForm->eventToHistBinning->setText(lineEditText);
@@ -570,8 +531,7 @@ QString SANSAddFiles::createPythonStringList(QString inputString) {
     formattedString += quotationMark + inputString + quotationMark + delimiter;
   }
 
-  formattedString.remove(formattedString.length() - delimiter.length(),
-                         delimiter.length());
+  formattedString.remove(formattedString.length() - delimiter.length(), delimiter.length());
   formattedString += finalizer;
   return formattedString;
 }
@@ -615,8 +575,7 @@ void SANSAddFiles::setBinningOptions(bool enable) {
 bool SANSAddFiles::existNonEventFiles() {
   auto elements = m_SANSForm->toAdd_List->count();
   for (int i = 0; i < elements; ++i) {
-    auto fileName =
-        m_SANSForm->toAdd_List->item(i)->data(Qt::WhatsThisRole).toString();
+    auto fileName = m_SANSForm->toAdd_List->item(i)->data(Qt::WhatsThisRole).toString();
     if (!fileName.isEmpty()) {
       // Make sure that the file separators are valid
       fileName.replace("\\", "/");

@@ -92,12 +92,11 @@ ANNmin_k *ANNprPointMK;  // set of k closest points
 //	annkPriSearch - priority search for k nearest neighbors
 //----------------------------------------------------------------------
 
-void ANNkd_tree::annkPriSearch(
-    ANNpoint q,         // query point
-    int k,              // number of near neighbors to return
-    ANNidxArray nn_idx, // nearest neighbor indices (returned)
-    ANNdistArray dd,    // dist to near neighbors (returned)
-    double eps)         // error bound (ignored)
+void ANNkd_tree::annkPriSearch(ANNpoint q,         // query point
+                               int k,              // number of near neighbors to return
+                               ANNidxArray nn_idx, // nearest neighbor indices (returned)
+                               ANNdistArray dd,    // dist to near neighbors (returned)
+                               double eps)         // error bound (ignored)
 {
   // max tolerable squared error
   ANNprMaxErr = ANN_POW(1.0 + eps);
@@ -116,8 +115,7 @@ void ANNkd_tree::annkPriSearch(
   ANNprBoxPQ = new ANNpr_queue(n_pts); // create priority queue for boxes
   ANNprBoxPQ->insert(box_dist, root);  // insert root in priority queue
 
-  while (ANNprBoxPQ->non_empty() &&
-         (!(ANNmaxPtsVisited != 0 && ANNptsVisited > ANNmaxPtsVisited))) {
+  while (ANNprBoxPQ->non_empty() && (!(ANNmaxPtsVisited != 0 && ANNptsVisited > ANNmaxPtsVisited))) {
     ANNkd_ptr np; // next box from prior queue
 
     // extract closest box from queue
@@ -153,8 +151,7 @@ void ANNkd_split::ann_pri_search(ANNdist box_dist) {
     if (box_diff < 0) // within bounds - ignore
       box_diff = 0;
     // distance to further box
-    new_dist = (ANNdist)ANN_SUM(box_dist,
-                                ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
+    new_dist = (ANNdist)ANN_SUM(box_dist, ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
 
     if (child[ANN_HI] != KD_TRIVIAL) // enqueue if not trivial
       ANNprBoxPQ->insert(new_dist, child[ANN_HI]);
@@ -165,8 +162,7 @@ void ANNkd_split::ann_pri_search(ANNdist box_dist) {
     if (box_diff < 0) // within bounds - ignore
       box_diff = 0;
     // distance to further box
-    new_dist = (ANNdist)ANN_SUM(box_dist,
-                                ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
+    new_dist = (ANNdist)ANN_SUM(box_dist, ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
 
     if (child[ANN_LO] != KD_TRIVIAL) // enqueue if not trivial
       ANNprBoxPQ->insert(new_dist, child[ANN_LO]);

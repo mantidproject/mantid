@@ -29,9 +29,7 @@ GaussianComptonProfile::GaussianComptonProfile() : ComptonProfile() {}
 /**
  * @returns A string containing the name of the function
  */
-std::string GaussianComptonProfile::name() const {
-  return "GaussianComptonProfile";
-}
+std::string GaussianComptonProfile::name() const { return "GaussianComptonProfile"; }
 
 void GaussianComptonProfile::declareParameters() {
   ComptonProfile::declareParameters();
@@ -52,14 +50,12 @@ std::vector<size_t> GaussianComptonProfile::intensityParameterIndices() const {
  * @param errors The data errors
  * @returns The number of columns filled
  */
-size_t GaussianComptonProfile::fillConstraintMatrix(
-    Kernel::DblMatrix &cmatrix, const size_t start,
-    const HistogramData::HistogramE &errors) const {
+size_t GaussianComptonProfile::fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
+                                                    const HistogramData::HistogramE &errors) const {
   std::vector<double> result(ySpace().size());
   const double amplitude = 1.0;
   this->massProfile(result.data(), ySpace().size(), amplitude);
-  std::transform(result.begin(), result.end(), errors.begin(), result.begin(),
-                 std::divides<double>());
+  std::transform(result.begin(), result.end(), errors.begin(), result.begin(), std::divides<double>());
   cmatrix.setColumn(start, result);
   return 1;
 }
@@ -71,8 +67,7 @@ size_t GaussianComptonProfile::fillConstraintMatrix(
  * results
  * @param nData The size of the array
  */
-void GaussianComptonProfile::massProfile(double *result,
-                                         const size_t nData) const {
+void GaussianComptonProfile::massProfile(double *result, const size_t nData) const {
   const double amplitude(getParameter(AMP_PARAM));
   this->massProfile(result, nData, amplitude);
 }
@@ -85,21 +80,17 @@ void GaussianComptonProfile::massProfile(double *result,
  * @param nData The size of the array
  * @param amplitude A fixed value for the amplitude
  */
-void GaussianComptonProfile::massProfile(double *result, const size_t nData,
-                                         const double amplitude) const {
+void GaussianComptonProfile::massProfile(double *result, const size_t nData, const double amplitude) const {
   double lorentzPos(0.0), gaussWidth(getParameter(WIDTH_PARAM));
   double gaussFWHM =
-      std::sqrt(std::pow(m_resolutionFunction->resolutionFWHM(), 2) +
-                std::pow(2.0 * STDDEV_TO_HWHM * gaussWidth, 2));
+      std::sqrt(std::pow(m_resolutionFunction->resolutionFWHM(), 2) + std::pow(2.0 * STDDEV_TO_HWHM * gaussWidth, 2));
 
   const auto &yspace = ySpace();
   // Gaussian already folded into Voigt
   std::vector<double> voigt(yspace.size()), voigtDiffResult(yspace.size());
-  m_resolutionFunction->voigtApprox(voigt, yspace, lorentzPos, amplitude,
-                                    m_resolutionFunction->lorentzFWHM(),
+  m_resolutionFunction->voigtApprox(voigt, yspace, lorentzPos, amplitude, m_resolutionFunction->lorentzFWHM(),
                                     gaussFWHM);
-  voigtApproxDiff(voigtDiffResult, yspace, lorentzPos, amplitude,
-                  m_resolutionFunction->lorentzFWHM(), gaussFWHM);
+  voigtApproxDiff(voigtDiffResult, yspace, lorentzPos, amplitude, m_resolutionFunction->lorentzFWHM(), gaussFWHM);
 
   const auto &modq = modQ();
   const auto &ei = e0();
@@ -110,8 +101,7 @@ void GaussianComptonProfile::massProfile(double *result, const size_t nData,
   for (size_t j = 0; j < nData; ++j) {
     const double q = modq[j];
     const double prefactor = mass() * std::pow(ei[j], 0.1) / q;
-    result[j] = prefactor * (voigt[j] - std::pow(gaussWidth, 4.0) *
-                                            voigtDiffResult[j] / (3.0 * q));
+    result[j] = prefactor * (voigt[j] - std::pow(gaussWidth, 4.0) * voigtDiffResult[j] / (3.0 * q));
   }
 }
 

@@ -22,11 +22,9 @@ public:
 
     std::vector<std::vector<unsigned int>> parsedVals = parser.parse(str);
     std::vector<std::vector<unsigned int>>::const_iterator parsedValcitr;
-    for (parsedValcitr = parsedVals.begin(); parsedValcitr != parsedVals.end();
-         ++parsedValcitr) {
+    for (parsedValcitr = parsedVals.begin(); parsedValcitr != parsedVals.end(); ++parsedValcitr) {
       std::vector<unsigned int>::const_iterator citr;
-      for (citr = (*parsedValcitr).begin(); citr != (*parsedValcitr).end();
-           ++citr) {
+      for (citr = (*parsedValcitr).begin(); citr != (*parsedValcitr).end(); ++citr) {
         TS_ASSERT_EQUALS(*citr, startNum)
         startNum += 2;
       }
@@ -40,11 +38,9 @@ public:
 
     std::vector<std::vector<unsigned int>> parsedVals = parser.parse(str);
     std::vector<std::vector<unsigned int>>::const_iterator parsedValcitr;
-    for (parsedValcitr = parsedVals.begin(); parsedValcitr != parsedVals.end();
-         ++parsedValcitr) {
+    for (parsedValcitr = parsedVals.begin(); parsedValcitr != parsedVals.end(); ++parsedValcitr) {
       std::vector<unsigned int>::const_iterator citr;
-      for (citr = (*parsedValcitr).begin(); citr != (*parsedValcitr).end();
-           ++citr) {
+      for (citr = (*parsedValcitr).begin(); citr != (*parsedValcitr).end(); ++citr) {
         TS_ASSERT_EQUALS(*citr, startNum)
         startNum += 1;
       }
@@ -59,11 +55,9 @@ public:
 
     std::vector<std::vector<unsigned int>> parsedVals = parser.parse(str);
     std::vector<std::vector<unsigned int>>::const_iterator parsedValcitr;
-    for (parsedValcitr = parsedVals.begin(); parsedValcitr != parsedVals.end();
-         ++parsedValcitr) {
+    for (parsedValcitr = parsedVals.begin(); parsedValcitr != parsedVals.end(); ++parsedValcitr) {
       std::vector<unsigned int>::const_iterator citr;
-      for (citr = (*parsedValcitr).begin(); citr != (*parsedValcitr).end();
-           ++citr) {
+      for (citr = (*parsedValcitr).begin(); citr != (*parsedValcitr).end(); ++citr) {
         TS_ASSERT_EQUALS(*citr, startNum)
         startNum += 1;
       }
@@ -77,11 +71,9 @@ public:
 
     std::vector<std::vector<unsigned int>> parsedVals = parser.parse(str);
     std::vector<std::vector<unsigned int>>::const_iterator parsedValcitr;
-    for (parsedValcitr = parsedVals.begin(); parsedValcitr != parsedVals.end();
-         ++parsedValcitr) {
+    for (parsedValcitr = parsedVals.begin(); parsedValcitr != parsedVals.end(); ++parsedValcitr) {
       std::vector<unsigned int>::const_iterator citr;
-      for (citr = (*parsedValcitr).begin(); citr != (*parsedValcitr).end();
-           ++citr) {
+      for (citr = (*parsedValcitr).begin(); citr != (*parsedValcitr).end(); ++citr) {
         TS_ASSERT_EQUALS(*citr, startNum)
         startNum += 1;
       }
@@ -95,11 +87,9 @@ public:
 
     std::vector<std::vector<unsigned int>> parsedVals = parser.parse(str);
     std::vector<std::vector<unsigned int>>::const_iterator parsedValcitr;
-    for (parsedValcitr = parsedVals.begin(); parsedValcitr != parsedVals.end();
-         ++parsedValcitr) {
+    for (parsedValcitr = parsedVals.begin(); parsedValcitr != parsedVals.end(); ++parsedValcitr) {
       std::vector<unsigned int>::const_iterator citr;
-      for (citr = (*parsedValcitr).begin(); citr != (*parsedValcitr).end();
-           ++citr) {
+      for (citr = (*parsedValcitr).begin(); citr != (*parsedValcitr).end(); ++citr) {
         TS_ASSERT_EQUALS(*citr, startNum)
         startNum += 2;
       }

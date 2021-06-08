@@ -10,9 +10,7 @@
 struct RunStart;
 
 struct RunStart FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  static FLATBUFFERS_CONSTEXPR const char *GetFullyQualifiedName() {
-    return "RunStart";
-  }
+  static FLATBUFFERS_CONSTEXPR const char *GetFullyQualifiedName() { return "RunStart"; }
   enum {
     VT_START_TIME = 4,
     VT_STOP_TIME = 6,
@@ -27,59 +25,29 @@ struct RunStart FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_DETECTOR_SPECTRUM_MAP = 24
   };
   uint64_t start_time() const { return GetField<uint64_t>(VT_START_TIME, 0); }
-  bool mutate_start_time(uint64_t _start_time) {
-    return SetField<uint64_t>(VT_START_TIME, _start_time, 0);
-  }
+  bool mutate_start_time(uint64_t _start_time) { return SetField<uint64_t>(VT_START_TIME, _start_time, 0); }
   uint64_t stop_time() const { return GetField<uint64_t>(VT_STOP_TIME, 0); }
-  bool mutate_stop_time(uint64_t _stop_time) {
-    return SetField<uint64_t>(VT_STOP_TIME, _stop_time, 0);
-  }
-  const flatbuffers::String *run_name() const {
-    return GetPointer<const flatbuffers::String *>(VT_RUN_NAME);
-  }
-  flatbuffers::String *mutable_run_name() {
-    return GetPointer<flatbuffers::String *>(VT_RUN_NAME);
-  }
+  bool mutate_stop_time(uint64_t _stop_time) { return SetField<uint64_t>(VT_STOP_TIME, _stop_time, 0); }
+  const flatbuffers::String *run_name() const { return GetPointer<const flatbuffers::String *>(VT_RUN_NAME); }
+  flatbuffers::String *mutable_run_name() { return GetPointer<flatbuffers::String *>(VT_RUN_NAME); }
   const flatbuffers::String *instrument_name() const {
     return GetPointer<const flatbuffers::String *>(VT_INSTRUMENT_NAME);
   }
-  flatbuffers::String *mutable_instrument_name() {
-    return GetPointer<flatbuffers::String *>(VT_INSTRUMENT_NAME);
-  }
+  flatbuffers::String *mutable_instrument_name() { return GetPointer<flatbuffers::String *>(VT_INSTRUMENT_NAME); }
   const flatbuffers::String *nexus_structure() const {
     return GetPointer<const flatbuffers::String *>(VT_NEXUS_STRUCTURE);
   }
-  flatbuffers::String *mutable_nexus_structure() {
-    return GetPointer<flatbuffers::String *>(VT_NEXUS_STRUCTURE);
-  }
-  const flatbuffers::String *job_id() const {
-    return GetPointer<const flatbuffers::String *>(VT_JOB_ID);
-  }
-  flatbuffers::String *mutable_job_id() {
-    return GetPointer<flatbuffers::String *>(VT_JOB_ID);
-  }
-  const flatbuffers::String *broker() const {
-    return GetPointer<const flatbuffers::String *>(VT_BROKER);
-  }
-  flatbuffers::String *mutable_broker() {
-    return GetPointer<flatbuffers::String *>(VT_BROKER);
-  }
-  const flatbuffers::String *service_id() const {
-    return GetPointer<const flatbuffers::String *>(VT_SERVICE_ID);
-  }
-  flatbuffers::String *mutable_service_id() {
-    return GetPointer<flatbuffers::String *>(VT_SERVICE_ID);
-  }
-  const flatbuffers::String *filename() const {
-    return GetPointer<const flatbuffers::String *>(VT_FILENAME);
-  }
-  flatbuffers::String *mutable_filename() {
-    return GetPointer<flatbuffers::String *>(VT_FILENAME);
-  }
+  flatbuffers::String *mutable_nexus_structure() { return GetPointer<flatbuffers::String *>(VT_NEXUS_STRUCTURE); }
+  const flatbuffers::String *job_id() const { return GetPointer<const flatbuffers::String *>(VT_JOB_ID); }
+  flatbuffers::String *mutable_job_id() { return GetPointer<flatbuffers::String *>(VT_JOB_ID); }
+  const flatbuffers::String *broker() const { return GetPointer<const flatbuffers::String *>(VT_BROKER); }
+  flatbuffers::String *mutable_broker() { return GetPointer<flatbuffers::String *>(VT_BROKER); }
+  const flatbuffers::String *service_id() const { return GetPointer<const flatbuffers::String *>(VT_SERVICE_ID); }
+  flatbuffers::String *mutable_service_id() { return GetPointer<flatbuffers::String *>(VT_SERVICE_ID); }
+  const flatbuffers::String *filename() const { return GetPointer<const flatbuffers::String *>(VT_FILENAME); }
+  flatbuffers::String *mutable_filename() { return GetPointer<flatbuffers::String *>(VT_FILENAME); }
   uint32_t n_periods() const { return GetField<uint32_t>(VT_N_PERIODS, 1); }
-  bool mutate_n_periods(uint32_t _n_periods) {
-    return SetField<uint32_t>(VT_N_PERIODS, _n_periods, 1);
-  }
+  bool mutate_n_periods(uint32_t _n_periods) { return SetField<uint32_t>(VT_N_PERIODS, _n_periods, 1); }
   const SpectraDetectorMapping *detector_spectrum_map() const {
     return GetPointer<const SpectraDetectorMapping *>(VT_DETECTOR_SPECTRUM_MAP);
   }
@@ -87,25 +55,15 @@ struct RunStart FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return GetPointer<SpectraDetectorMapping *>(VT_DETECTOR_SPECTRUM_MAP);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint64_t>(verifier, VT_START_TIME) &&
-           VerifyField<uint64_t>(verifier, VT_STOP_TIME) &&
-           VerifyOffset(verifier, VT_RUN_NAME) &&
-           verifier.VerifyString(run_name()) &&
-           VerifyOffset(verifier, VT_INSTRUMENT_NAME) &&
-           verifier.VerifyString(instrument_name()) &&
-           VerifyOffset(verifier, VT_NEXUS_STRUCTURE) &&
-           verifier.VerifyString(nexus_structure()) &&
-           VerifyOffset(verifier, VT_JOB_ID) &&
-           verifier.VerifyString(job_id()) &&
-           VerifyOffset(verifier, VT_BROKER) &&
-           verifier.VerifyString(broker()) &&
-           VerifyOffset(verifier, VT_SERVICE_ID) &&
-           verifier.VerifyString(service_id()) &&
-           VerifyOffset(verifier, VT_FILENAME) &&
-           verifier.VerifyString(filename()) &&
-           VerifyField<uint32_t>(verifier, VT_N_PERIODS) &&
-           VerifyOffset(verifier, VT_DETECTOR_SPECTRUM_MAP) &&
+    return VerifyTableStart(verifier) && VerifyField<uint64_t>(verifier, VT_START_TIME) &&
+           VerifyField<uint64_t>(verifier, VT_STOP_TIME) && VerifyOffset(verifier, VT_RUN_NAME) &&
+           verifier.VerifyString(run_name()) && VerifyOffset(verifier, VT_INSTRUMENT_NAME) &&
+           verifier.VerifyString(instrument_name()) && VerifyOffset(verifier, VT_NEXUS_STRUCTURE) &&
+           verifier.VerifyString(nexus_structure()) && VerifyOffset(verifier, VT_JOB_ID) &&
+           verifier.VerifyString(job_id()) && VerifyOffset(verifier, VT_BROKER) && verifier.VerifyString(broker()) &&
+           VerifyOffset(verifier, VT_SERVICE_ID) && verifier.VerifyString(service_id()) &&
+           VerifyOffset(verifier, VT_FILENAME) && verifier.VerifyString(filename()) &&
+           VerifyField<uint32_t>(verifier, VT_N_PERIODS) && VerifyOffset(verifier, VT_DETECTOR_SPECTRUM_MAP) &&
            verifier.VerifyTable(detector_spectrum_map()) && verifier.EndTable();
   }
 };
@@ -113,45 +71,30 @@ struct RunStart FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct RunStartBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_start_time(uint64_t start_time) {
-    fbb_.AddElement<uint64_t>(RunStart::VT_START_TIME, start_time, 0);
-  }
-  void add_stop_time(uint64_t stop_time) {
-    fbb_.AddElement<uint64_t>(RunStart::VT_STOP_TIME, stop_time, 0);
-  }
+  void add_start_time(uint64_t start_time) { fbb_.AddElement<uint64_t>(RunStart::VT_START_TIME, start_time, 0); }
+  void add_stop_time(uint64_t stop_time) { fbb_.AddElement<uint64_t>(RunStart::VT_STOP_TIME, stop_time, 0); }
   void add_run_name(flatbuffers::Offset<flatbuffers::String> run_name) {
     fbb_.AddOffset(RunStart::VT_RUN_NAME, run_name);
   }
-  void add_instrument_name(
-      flatbuffers::Offset<flatbuffers::String> instrument_name) {
+  void add_instrument_name(flatbuffers::Offset<flatbuffers::String> instrument_name) {
     fbb_.AddOffset(RunStart::VT_INSTRUMENT_NAME, instrument_name);
   }
-  void add_nexus_structure(
-      flatbuffers::Offset<flatbuffers::String> nexus_structure) {
+  void add_nexus_structure(flatbuffers::Offset<flatbuffers::String> nexus_structure) {
     fbb_.AddOffset(RunStart::VT_NEXUS_STRUCTURE, nexus_structure);
   }
-  void add_job_id(flatbuffers::Offset<flatbuffers::String> job_id) {
-    fbb_.AddOffset(RunStart::VT_JOB_ID, job_id);
-  }
-  void add_broker(flatbuffers::Offset<flatbuffers::String> broker) {
-    fbb_.AddOffset(RunStart::VT_BROKER, broker);
-  }
+  void add_job_id(flatbuffers::Offset<flatbuffers::String> job_id) { fbb_.AddOffset(RunStart::VT_JOB_ID, job_id); }
+  void add_broker(flatbuffers::Offset<flatbuffers::String> broker) { fbb_.AddOffset(RunStart::VT_BROKER, broker); }
   void add_service_id(flatbuffers::Offset<flatbuffers::String> service_id) {
     fbb_.AddOffset(RunStart::VT_SERVICE_ID, service_id);
   }
   void add_filename(flatbuffers::Offset<flatbuffers::String> filename) {
     fbb_.AddOffset(RunStart::VT_FILENAME, filename);
   }
-  void add_n_periods(uint32_t n_periods) {
-    fbb_.AddElement<uint32_t>(RunStart::VT_N_PERIODS, n_periods, 1);
-  }
-  void add_detector_spectrum_map(
-      flatbuffers::Offset<SpectraDetectorMapping> detector_spectrum_map) {
+  void add_n_periods(uint32_t n_periods) { fbb_.AddElement<uint32_t>(RunStart::VT_N_PERIODS, n_periods, 1); }
+  void add_detector_spectrum_map(flatbuffers::Offset<SpectraDetectorMapping> detector_spectrum_map) {
     fbb_.AddOffset(RunStart::VT_DETECTOR_SPECTRUM_MAP, detector_spectrum_map);
   }
-  explicit RunStartBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
+  explicit RunStartBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   RunStartBuilder &operator=(const RunStartBuilder &);
   flatbuffers::Offset<RunStart> Finish() {
     const auto end = fbb_.EndTable(start_);
@@ -161,16 +104,11 @@ struct RunStartBuilder {
 };
 
 inline flatbuffers::Offset<RunStart> CreateRunStart(
-    flatbuffers::FlatBufferBuilder &_fbb, uint64_t start_time = 0,
-    uint64_t stop_time = 0,
-    flatbuffers::Offset<flatbuffers::String> run_name = 0,
-    flatbuffers::Offset<flatbuffers::String> instrument_name = 0,
-    flatbuffers::Offset<flatbuffers::String> nexus_structure = 0,
-    flatbuffers::Offset<flatbuffers::String> job_id = 0,
-    flatbuffers::Offset<flatbuffers::String> broker = 0,
-    flatbuffers::Offset<flatbuffers::String> service_id = 0,
-    flatbuffers::Offset<flatbuffers::String> filename = 0,
-    uint32_t n_periods = 1,
+    flatbuffers::FlatBufferBuilder &_fbb, uint64_t start_time = 0, uint64_t stop_time = 0,
+    flatbuffers::Offset<flatbuffers::String> run_name = 0, flatbuffers::Offset<flatbuffers::String> instrument_name = 0,
+    flatbuffers::Offset<flatbuffers::String> nexus_structure = 0, flatbuffers::Offset<flatbuffers::String> job_id = 0,
+    flatbuffers::Offset<flatbuffers::String> broker = 0, flatbuffers::Offset<flatbuffers::String> service_id = 0,
+    flatbuffers::Offset<flatbuffers::String> filename = 0, uint32_t n_periods = 1,
     flatbuffers::Offset<SpectraDetectorMapping> detector_spectrum_map = 0) {
   RunStartBuilder builder_(_fbb);
   builder_.add_stop_time(stop_time);
@@ -187,36 +125,27 @@ inline flatbuffers::Offset<RunStart> CreateRunStart(
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<RunStart> CreateRunStartDirect(
-    flatbuffers::FlatBufferBuilder &_fbb, uint64_t start_time = 0,
-    uint64_t stop_time = 0, const char *run_name = nullptr,
-    const char *instrument_name = nullptr,
-    const char *nexus_structure = nullptr, const char *job_id = nullptr,
-    const char *broker = nullptr, const char *service_id = nullptr,
-    const char *filename = nullptr, uint32_t n_periods = 1,
-    flatbuffers::Offset<SpectraDetectorMapping> detector_spectrum_map = 0) {
-  return CreateRunStart(
-      _fbb, start_time, stop_time, run_name ? _fbb.CreateString(run_name) : 0,
-      instrument_name ? _fbb.CreateString(instrument_name) : 0,
-      nexus_structure ? _fbb.CreateString(nexus_structure) : 0,
-      job_id ? _fbb.CreateString(job_id) : 0,
-      broker ? _fbb.CreateString(broker) : 0,
-      service_id ? _fbb.CreateString(service_id) : 0,
-      filename ? _fbb.CreateString(filename) : 0, n_periods,
-      detector_spectrum_map);
+inline flatbuffers::Offset<RunStart>
+CreateRunStartDirect(flatbuffers::FlatBufferBuilder &_fbb, uint64_t start_time = 0, uint64_t stop_time = 0,
+                     const char *run_name = nullptr, const char *instrument_name = nullptr,
+                     const char *nexus_structure = nullptr, const char *job_id = nullptr, const char *broker = nullptr,
+                     const char *service_id = nullptr, const char *filename = nullptr, uint32_t n_periods = 1,
+                     flatbuffers::Offset<SpectraDetectorMapping> detector_spectrum_map = 0) {
+  return CreateRunStart(_fbb, start_time, stop_time, run_name ? _fbb.CreateString(run_name) : 0,
+                        instrument_name ? _fbb.CreateString(instrument_name) : 0,
+                        nexus_structure ? _fbb.CreateString(nexus_structure) : 0,
+                        job_id ? _fbb.CreateString(job_id) : 0, broker ? _fbb.CreateString(broker) : 0,
+                        service_id ? _fbb.CreateString(service_id) : 0, filename ? _fbb.CreateString(filename) : 0,
+                        n_periods, detector_spectrum_map);
 }
 
-inline const RunStart *GetRunStart(const void *buf) {
-  return flatbuffers::GetRoot<RunStart>(buf);
-}
+inline const RunStart *GetRunStart(const void *buf) { return flatbuffers::GetRoot<RunStart>(buf); }
 
 inline const RunStart *GetSizePrefixedRunStart(const void *buf) {
   return flatbuffers::GetSizePrefixedRoot<RunStart>(buf);
 }
 
-inline RunStart *GetMutableRunStart(void *buf) {
-  return flatbuffers::GetMutableRoot<RunStart>(buf);
-}
+inline RunStart *GetMutableRunStart(void *buf) { return flatbuffers::GetMutableRoot<RunStart>(buf); }
 
 inline const char *RunStartIdentifier() { return "pl72"; }
 
@@ -232,14 +161,11 @@ inline bool VerifySizePrefixedRunStartBuffer(flatbuffers::Verifier &verifier) {
   return verifier.VerifySizePrefixedBuffer<RunStart>(RunStartIdentifier());
 }
 
-inline void FinishRunStartBuffer(flatbuffers::FlatBufferBuilder &fbb,
-                                 flatbuffers::Offset<RunStart> root) {
+inline void FinishRunStartBuffer(flatbuffers::FlatBufferBuilder &fbb, flatbuffers::Offset<RunStart> root) {
   fbb.Finish(root, RunStartIdentifier());
 }
 
-inline void
-FinishSizePrefixedRunStartBuffer(flatbuffers::FlatBufferBuilder &fbb,
-                                 flatbuffers::Offset<RunStart> root) {
+inline void FinishSizePrefixedRunStartBuffer(flatbuffers::FlatBufferBuilder &fbb, flatbuffers::Offset<RunStart> root) {
   fbb.FinishSizePrefixed(root, RunStartIdentifier());
 }
 

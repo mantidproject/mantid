@@ -7,7 +7,7 @@ import sys
 
 
 def find_basedir(project, subproject):
-    """ Returns the base directory. If the subproject is known to be in MantidQt or Vates, it uses that.
+    """ Returns the base directory. If the subproject is known to be in MantidQt, it uses that.
     The default is current dir + Framework
 
     Parameters

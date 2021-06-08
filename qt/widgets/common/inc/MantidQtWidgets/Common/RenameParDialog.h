@@ -23,8 +23,7 @@ class EXPORT_OPT_MANTIDQT_COMMON RenameParDialog : public QDialog {
 public:
   /// there has to be a default constructor but you can call it with a pointer
   /// to the thing that will take ownership of it
-  RenameParDialog(const std::vector<std::string> &old_params,
-                  const std::vector<std::string> &new_params,
+  RenameParDialog(const std::vector<std::string> &old_params, const std::vector<std::string> &new_params,
                   QWidget *parent = nullptr);
   std::vector<std::string> setOutput() const;
 protected slots:

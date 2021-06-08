@@ -25,9 +25,8 @@ namespace DataHandling {
 
 class DLLExport ORNLDataArchive : public API::IArchiveSearch {
 public:
-  std::string
-  getArchivePath(const std::set<std::string> &basenames,
-                 const std::vector<std::string> &suffixes) const override;
+  std::string getArchivePath(const std::set<std::string> &basenames,
+                             const std::vector<std::string> &suffixes) const override;
 
   //////////////////////////////////////////////////////////////////////
   // Exposed publicly for testing purposes only.

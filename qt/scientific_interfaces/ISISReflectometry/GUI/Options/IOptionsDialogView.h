@@ -23,10 +23,8 @@ public:
 class MANTIDQT_ISISREFLECTOMETRY_DLL IOptionsDialogView {
 public:
   virtual ~IOptionsDialogView() = default;
-  virtual void getOptions(std::map<std::string, bool> &boolOptions,
-                          std::map<std::string, int> &intOptions) = 0;
-  virtual void setOptions(std::map<std::string, bool> &boolOptions,
-                          std::map<std::string, int> &intOptions) = 0;
+  virtual void getOptions(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) = 0;
+  virtual void setOptions(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) = 0;
   virtual void show() = 0;
   virtual void subscribe(OptionsDialogViewSubscriber *notifyee) = 0;
 };

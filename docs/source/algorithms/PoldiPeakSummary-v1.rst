@@ -21,22 +21,22 @@ Usage
 **Example - PoldiPeakSummary**
 
 .. testcode:: PoldiPeakSummaryExample
-    
+
     # Load data file and instrument, perform correlation analysis
     raw_6904 = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
     LoadInstrument(raw_6904, RewriteSpectraMap=True, InstrumentName = "POLDI")
     correlated_6904 = PoldiAutoCorrelation(raw_6904)
-    
+
     # Run peak search algorithm, store peaks in TableWorkspace
     peaks_6904 = PoldiPeakSearch(correlated_6904)
-    
+
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
                     PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
                     OutputWorkspace = "peaks_refined_6904",
                     FitPlotsWorkspace = "fit_plots_6904")
-                    
+
     summary_6904 = PoldiPeakSummary(mtd["peaks_refined_6904"])
-    
+
     print("Number of refined peaks: {}".format(summary_6904.rowCount()))
     print("Number of columns that describe a peak: {}".format(summary_6904.columnCount()))
 

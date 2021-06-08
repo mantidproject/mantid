@@ -50,24 +50,17 @@ public:
   size_t number() const;
   std::string hmSymbol() const;
 
-  template <typename T>
-  std::vector<T> getEquivalentPositions(const T &position) const {
-    const std::vector<SymmetryOperation> &symmetryOperations =
-        getSymmetryOperations();
+  template <typename T> std::vector<T> getEquivalentPositions(const T &position) const {
+    const std::vector<SymmetryOperation> &symmetryOperations = getSymmetryOperations();
 
     std::vector<T> equivalents;
     equivalents.reserve(symmetryOperations.size());
-    std::transform(symmetryOperations.cbegin(), symmetryOperations.cend(),
-                   std::back_inserter(equivalents),
-                   [&position](const SymmetryOperation &op) {
-                     return Geometry::getWrappedVector(op * position);
-                   });
+    std::transform(symmetryOperations.cbegin(), symmetryOperations.cend(), std::back_inserter(equivalents),
+                   [&position](const SymmetryOperation &op) { return Geometry::getWrappedVector(op * position); });
 
     // Use fuzzy compare with the same condition as V3D::operator==().
     std::sort(equivalents.begin(), equivalents.end(), AtomPositionsLessThan());
-    equivalents.erase(std::unique(equivalents.begin(), equivalents.end(),
-                                  AtomPositionsEqual()),
-                      equivalents.end());
+    equivalents.erase(std::unique(equivalents.begin(), equivalents.end(), AtomPositionsEqual()), equivalents.end());
 
     return equivalents;
   }
@@ -83,8 +76,7 @@ protected:
   std::string m_hmSymbol;
 };
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &stream,
-                                             const SpaceGroup &self);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &stream, const SpaceGroup &self);
 
 using SpaceGroup_sptr = std::shared_ptr<SpaceGroup>;
 using SpaceGroup_const_sptr = std::shared_ptr<const SpaceGroup>;

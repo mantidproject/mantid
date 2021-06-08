@@ -29,15 +29,13 @@ public:
   // Loads the good frame data from the nexus file
   NeXus::NXInt loadGoodFramesDataFromNexus(bool isFileMultiPeriod);
   // Loads the grouping data from the nexus file
-  std::vector<detid_t>
-  loadDetectorGroupingFromNexus(const std::vector<detid_t> &loadedDetectors,
-                                bool isFileMultiPeriod, int periodNumber);
+  std::vector<detid_t> loadDetectorGroupingFromNexus(const std::vector<detid_t> &loadedDetectors,
+                                                     bool isFileMultiPeriod, int periodNumber);
   // Load the orientation from the nexus entry
   std::string loadMainFieldDirectionFromNexus();
   // Load deadtime information
-  std::vector<double>
-  loadDeadTimesFromNexus(const std::vector<detid_t> &loadedDetectors,
-                         bool isFileMultiPeriod, int periodNumber);
+  std::vector<double> loadDeadTimesFromNexus(const std::vector<detid_t> &loadedDetectors, bool isFileMultiPeriod,
+                                             int periodNumber);
   // Load first good data from the nexus entry
   double loadFirstGoodDataFromNexus();
   // Load time zero from the nexus entry

@@ -45,13 +45,10 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", mdWsName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FluxWorkspace", fluxGoodWsName));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "FluxWorkspace", fluxBadWsName)); // it isn't bad any more
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FluxWorkspace", fluxBadWsName)); // it isn't bad any more
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SolidAngleWorkspace", saWsName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "OutWSName"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputNormalizationWorkspace", "OutNormWSName"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "OutWSName"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputNormalizationWorkspace", "OutNormWSName"));
 
     AnalysisDataService::Instance().clear();
   }
@@ -79,8 +76,7 @@ private:
   }
 
   void createGoodFluxWorkspace(const std::string &wsName) {
-    auto flux =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    auto flux = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     const auto &x = flux->x(0);
     auto &y1 = flux->mutableY(1);
 
@@ -94,8 +90,7 @@ private:
   }
 
   void createBadFluxWorkspace(const std::string &wsName) {
-    auto flux =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    auto flux = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     const auto &x = flux->x(0);
     auto &y1 = flux->mutableY(1);
 
@@ -109,8 +104,7 @@ private:
   }
 
   void createSolidAngleWorkspace(const std::string &wsName) {
-    auto sa =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    auto sa = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, sa);
   }
 };

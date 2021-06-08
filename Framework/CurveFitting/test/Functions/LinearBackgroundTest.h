@@ -20,9 +20,7 @@ class LinearBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LinearBackgroundTest *createSuite() {
-    return new LinearBackgroundTest();
-  }
+  static LinearBackgroundTest *createSuite() { return new LinearBackgroundTest(); }
   static void destroySuite(LinearBackgroundTest *suite) { delete suite; }
 
   void test_category() {
@@ -43,8 +41,7 @@ public:
     lin.initialize();
     // set up fitting function
     TS_ASSERT_THROWS(lin.setParameter("X", 1.0), const std::invalid_argument &);
-    TS_ASSERT_THROWS(lin.setParameter("A9", 1.0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(lin.setParameter("A9", 1.0), const std::invalid_argument &);
 
     const double a1 = 2;
     const double a0 = 0.3;

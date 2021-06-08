@@ -31,8 +31,7 @@ using namespace Mantid::DataObjects;
 
 namespace {
 template <typename MDE, size_t nd>
-void prepareUpdate(MDBoxFlatTree &BoxFlatStruct, BoxController *bc,
-                   typename MDEventWorkspace<MDE, nd>::sptr ws,
+void prepareUpdate(MDBoxFlatTree &BoxFlatStruct, BoxController *bc, typename MDEventWorkspace<MDE, nd>::sptr ws,
                    const std::string &filename) {
   // remove all boxes from the DiskBuffer. DB will calculate boxes positions
   // on HDD.
@@ -53,35 +52,26 @@ DECLARE_ALGORITHM(SaveMD)
 /** Initialize the algorithm's properties.
  */
 void SaveMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                     ".nxs"),
-      "The name of the Nexus file to write, as a full or relative path.\n"
-      "Optional if UpdateFileBackEnd is checked.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave, ".nxs"),
+                  "The name of the Nexus file to write, as a full or relative path.\n"
+                  "Optional if UpdateFileBackEnd is checked.");
   // Filename is NOT used if UpdateFileBackEnd
-  setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>(
-                                      "UpdateFileBackEnd", IS_EQUAL_TO, "0"));
+  setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 
-  declareProperty(
-      "UpdateFileBackEnd", false,
-      "Only for MDEventWorkspaces with a file back end: check this to update "
-      "the NXS file on disk\n"
-      "to reflect the current data structure. Filename parameter is ignored.");
-  setPropertySettings("UpdateFileBackEnd",
-                      std::make_unique<EnabledWhenProperty>("MakeFileBacked",
-                                                            IS_EQUAL_TO, "0"));
+  declareProperty("UpdateFileBackEnd", false,
+                  "Only for MDEventWorkspaces with a file back end: check this to update "
+                  "the NXS file on disk\n"
+                  "to reflect the current data structure. Filename parameter is ignored.");
+  setPropertySettings("UpdateFileBackEnd", std::make_unique<EnabledWhenProperty>("MakeFileBacked", IS_EQUAL_TO, "0"));
 
   declareProperty("MakeFileBacked", false,
                   "For an MDEventWorkspace that was created in memory:\n"
                   "This saves it to a file AND makes the workspace into a "
                   "file-backed one.");
-  setPropertySettings("MakeFileBacked",
-                      std::make_unique<EnabledWhenProperty>("UpdateFileBackEnd",
-                                                            IS_EQUAL_TO, "0"));
+  setPropertySettings("MakeFileBacked", std::make_unique<EnabledWhenProperty>("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -91,28 +81,23 @@ void SaveMD::init() {
  *
  * @param ws :: MDEventWorkspace of the given type
  */
-template <typename MDE, size_t nd>
-void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+template <typename MDE, size_t nd> void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   bool updateFileBackend = getProperty("UpdateFileBackEnd");
   bool makeFileBackend = getProperty("MakeFileBacked");
   if (updateFileBackend && makeFileBackend)
-    throw std::invalid_argument(
-        "Please choose either UpdateFileBackEnd or MakeFileBacked, not both.");
+    throw std::invalid_argument("Please choose either UpdateFileBackEnd or MakeFileBacked, not both.");
 
   bool wsIsFileBacked = ws->isFileBacked();
   std::string filename = getPropertyValue("Filename");
   BoxController_sptr bc = ws->getBoxController();
-  auto copyFile =
-      wsIsFileBacked && !filename.empty() && filename != bc->getFilename();
+  auto copyFile = wsIsFileBacked && !filename.empty() && filename != bc->getFilename();
   if (wsIsFileBacked) {
     if (makeFileBackend) {
-      throw std::runtime_error(
-          "MakeFileBacked selected but workspace is already file backed.");
+      throw std::runtime_error("MakeFileBacked selected but workspace is already file backed.");
     }
   } else {
     if (updateFileBackend) {
-      throw std::runtime_error(
-          "UpdateFileBackEnd selected but workspace is not file backed.");
+      throw std::runtime_error("UpdateFileBackEnd selected but workspace is not file backed.");
     }
   }
 
@@ -137,8 +122,8 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // its dimensions
   auto nDims = static_cast<int>(nd);
   bool data_exist;
-  auto file = file_holder_type(MDBoxFlatTree::createOrOpenMDWSgroup(
-      filename, nDims, MDE::getTypeName(), false, data_exist));
+  auto file =
+      file_holder_type(MDBoxFlatTree::createOrOpenMDWSgroup(filename, nDims, MDE::getTypeName(), false, data_exist));
 
   // Save each NEW ExperimentInfo to a spot in the file
   MDBoxFlatTree::saveExperimentInfos(file.get(), ws);
@@ -165,8 +150,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // the boxes file positions are unknown and we need to calculate it.
     BoxFlatStruct.initFlatStructure(ws, filename);
     // create saver class
-    auto Saver = std::shared_ptr<API::IBoxControllerIO>(
-        new DataObjects::BoxControllerNeXusIO(bc.get()));
+    auto Saver = std::shared_ptr<API::IBoxControllerIO>(new DataObjects::BoxControllerNeXusIO(bc.get()));
     Saver->setDataType(sizeof(coord_t), MDE::getTypeName());
     if (makeFileBackend) {
       // store saver with box controller
@@ -251,12 +235,10 @@ void SaveMD::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
   file->makeGroup("MDHistoWorkspace", "NXentry", true);
 
   // Write out the coordinate system
-  file->writeData("coordinate_system",
-                  static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
+  file->writeData("coordinate_system", static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
 
   // Write out the set display normalization
-  file->writeData("visual_normalization",
-                  static_cast<uint32_t>(ws->displayNormalization()));
+  file->writeData("visual_normalization", static_cast<uint32_t>(ws->displayNormalization()));
 
   // Save the algorithm history under "process"
   ws->getHistory().saveNexus(file.get());
@@ -285,13 +267,11 @@ void SaveMD::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
   }
 
   // Write out the affine matrices
-  MDBoxFlatTree::saveAffineTransformMatricies(
-      file.get(), std::dynamic_pointer_cast<const IMDWorkspace>(ws));
+  MDBoxFlatTree::saveAffineTransformMatricies(file.get(), std::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
   // Check that the typedef has not been changed. The NeXus types would need
   // changing if it does!
-  static_assert(sizeof(signal_t) == sizeof(double),
-                "signal_t typedef has been changed!");
+  static_assert(sizeof(signal_t) == sizeof(double), "signal_t typedef has been changed!");
 
   // Number of data points
   auto nPoints = static_cast<int>(ws->getNPoints());
@@ -323,10 +303,8 @@ void SaveMD::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
  */
 void SaveMD::exec() {
   IMDWorkspace_sptr ws = getProperty("InputWorkspace");
-  IMDEventWorkspace_sptr eventWS =
-      std::dynamic_pointer_cast<IMDEventWorkspace>(ws);
-  MDHistoWorkspace_sptr histoWS =
-      std::dynamic_pointer_cast<MDHistoWorkspace>(ws);
+  IMDEventWorkspace_sptr eventWS = std::dynamic_pointer_cast<IMDEventWorkspace>(ws);
+  MDHistoWorkspace_sptr histoWS = std::dynamic_pointer_cast<MDHistoWorkspace>(ws);
 
   if (eventWS) {
     // Wrapper to cast to MDEventWorkspace then call the function

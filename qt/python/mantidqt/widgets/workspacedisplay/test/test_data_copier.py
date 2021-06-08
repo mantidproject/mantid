@@ -131,6 +131,7 @@ class DataCopierTest(TestCase):
         mock_table = MockQTableView()
 
         # two columns are selected at different positions
+        mock_model = mock_table.model()
         mock_index = MockQModelIndex(None, None)
         mock_table.mock_selection_model.currentIndex = Mock(return_value=mock_index)
 
@@ -138,7 +139,7 @@ class DataCopierTest(TestCase):
 
         mock_table.selectionModel.assert_called_once_with()
         self.assertEqual(1, mock_copy.call_count)
-        self.assertEqual(9, mock_index.sibling.call_count)
+        self.assertEqual(9, mock_model.createIndex.call_count)
         mock_show_mouse_toast.assert_called_once_with(UserNotifier.COPY_SUCCESSFUL_MESSAGE)
 
     @patch('qtpy.QtWidgets.QMessageBox.question', return_value=QMessageBox.Yes)

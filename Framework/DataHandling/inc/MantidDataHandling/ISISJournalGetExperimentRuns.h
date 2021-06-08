@@ -25,24 +25,19 @@ public:
   ISISJournalGetExperimentRuns() : API::Algorithm() {}
   ~ISISJournalGetExperimentRuns() override = default;
 
-  const std::string name() const override {
-    return "ISISJournalGetExperimentRuns";
-  }
+  const std::string name() const override { return "ISISJournalGetExperimentRuns"; }
   const std::string summary() const override {
     return "Obtains information of the runs associated with a specific "
            "investigation.";
   }
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CatalogGetDataFiles"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CatalogGetDataFiles"}; }
   const std::string category() const override { return "DataHandling"; }
 
 protected:
   /// Construct a journal; can be overridden by tests to return a mock.
-  virtual std::unique_ptr<API::IJournal>
-  makeJournal(std::string const &instrument,
-              std::string const &cycle = std::string());
+  virtual std::unique_ptr<API::IJournal> makeJournal(std::string const &instrument,
+                                                     std::string const &cycle = std::string());
 
 private:
   void init() override;

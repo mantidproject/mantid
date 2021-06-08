@@ -24,8 +24,7 @@ allocation.
 class ScopedFile {
 public:
   ScopedFile(const std::string &fileContents, const std::string &fileName);
-  ScopedFile(const std::string &fileContents, const std::string &fileName,
-             const std::string &fileDirectory);
+  ScopedFile(const std::string &fileContents, const std::string &fileName, const std::string &fileDirectory);
   ScopedFile &operator=(const ScopedFile &other);
   ScopedFile(const ScopedFile &other);
   void release() const;
@@ -33,8 +32,7 @@ public:
   ~ScopedFile();
 
 private:
-  void doCreateFile(const std::string &fileContents,
-                    const Poco::Path &fileNameAndPath);
+  void doCreateFile(const std::string &fileContents, const Poco::Path &fileNameAndPath);
 
   mutable std::string m_filename;
   std::ofstream m_file;

@@ -34,24 +34,18 @@ const std::string DgsRemap::category() const { return "Workflow\\Inelastic"; }
 /** Initialize the algorithm's properties.
  */
 void DgsRemap::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "InputWorkspace", "", Direction::Input),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                         "An input workspace to mask and group.");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A workspace containing masking information.");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A workspace containing grouping information");
-  this->declareProperty(std::make_unique<FileProperty>(
-                            "OldGroupingFile", "", FileProperty::OptionalLoad),
+  this->declareProperty(std::make_unique<FileProperty>("OldGroupingFile", "", FileProperty::OptionalLoad),
                         "Name of an old grouping format (not XML) file.");
-  this->declareProperty("ExecuteOppositeOrder", false,
-                        "Execute grouping before masking.");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "OutputWorkspace", "", Direction::Output),
+  this->declareProperty("ExecuteOppositeOrder", false, "Execute grouping before masking.");
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                         "The resulting workspace.");
 }
 
@@ -84,13 +78,11 @@ void DgsRemap::execMasking(const MatrixWorkspace_sptr &iWS) {
   }
 }
 
-void DgsRemap::execGrouping(const MatrixWorkspace_sptr &iWS,
-                            MatrixWorkspace_sptr &oWS) {
+void DgsRemap::execGrouping(const MatrixWorkspace_sptr &iWS, MatrixWorkspace_sptr &oWS) {
   MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
   std::string oldGroupingFile = this->getProperty("OldGroupingFile");
   if (groupWS && !oldGroupingFile.empty()) {
-    throw std::runtime_error(
-        "Choose either GroupingWorkspace or OldGroupingFile property!");
+    throw std::runtime_error("Choose either GroupingWorkspace or OldGroupingFile property!");
   }
 
   if (groupWS || !oldGroupingFile.empty()) {
@@ -100,8 +92,7 @@ void DgsRemap::execGrouping(const MatrixWorkspace_sptr &iWS,
     if (groupWS) {
       int64_t ngroups = 0;
       std::vector<int> groupDetIdList;
-      GroupingWorkspace_sptr gWS =
-          std::dynamic_pointer_cast<GroupingWorkspace>(groupWS);
+      GroupingWorkspace_sptr gWS = std::dynamic_pointer_cast<GroupingWorkspace>(groupWS);
       gWS->makeDetectorIDToGroupVector(groupDetIdList, ngroups);
       group->setProperty("DetectorList", groupDetIdList);
     }

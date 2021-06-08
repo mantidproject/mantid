@@ -69,8 +69,7 @@ public:
   /** Returns the bare pointer to the IComponent parent */
   virtual const IComponent *getBareParent() const = 0;
   //! Return an array of all ancestors, the nearest first
-  virtual std::vector<std::shared_ptr<const IComponent>>
-  getAncestors() const = 0;
+  virtual std::vector<std::shared_ptr<const IComponent>> getAncestors() const = 0;
   //! Set the IComponent name
   virtual void setName(const std::string &) = 0;
   //! Get the IComponent name
@@ -116,50 +115,35 @@ public:
   /** Gets the scaling factor of the object for the Object Component.
    * @return a vector with 1 in all 3 directions.
    */
-  virtual Kernel::V3D getScaleFactor() const {
-    return Kernel::V3D(1.0, 1.0, 1.0);
-  }
+  virtual Kernel::V3D getScaleFactor() const { return Kernel::V3D(1.0, 1.0, 1.0); }
 
   /** @name ParameterMap access */
   //@{
   /// Return the names of the parameters for this component
-  virtual std::set<std::string>
-  getParameterNames(bool recursive = true) const = 0;
+  virtual std::set<std::string> getParameterNames(bool recursive = true) const = 0;
   /// return the parameter names and the component they are from
-  virtual std::map<std::string, ComponentID>
-  getParameterNamesByComponent() const = 0;
+  virtual std::map<std::string, ComponentID> getParameterNamesByComponent() const = 0;
   /// Returns a boolean indicating if the component has the named parameter
-  virtual bool hasParameter(const std::string &name,
-                            bool recursive = true) const = 0;
+  virtual bool hasParameter(const std::string &name, bool recursive = true) const = 0;
   // Hack until proper python export functions are defined
-  virtual std::string getParameterType(const std::string &pname,
-                                       bool recursive = true) const = 0;
+  virtual std::string getParameterType(const std::string &pname, bool recursive = true) const = 0;
   // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to
   // resort to
   // one for each type, luckily there won't be too many
   /// Get a parameter defined as a double
-  virtual std::vector<double>
-  getNumberParameter(const std::string &pname, bool recursive = true) const = 0;
+  virtual std::vector<double> getNumberParameter(const std::string &pname, bool recursive = true) const = 0;
   /// Get a parameter defined as a Kernel::V3D
-  virtual std::vector<Kernel::V3D>
-  getPositionParameter(const std::string &pname,
-                       bool recursive = true) const = 0;
+  virtual std::vector<Kernel::V3D> getPositionParameter(const std::string &pname, bool recursive = true) const = 0;
   /// Get a parameter defined as a Kernel::Quaternion
-  virtual std::vector<Kernel::Quat>
-  getRotationParameter(const std::string &pname,
-                       bool recursive = true) const = 0;
+  virtual std::vector<Kernel::Quat> getRotationParameter(const std::string &pname, bool recursive = true) const = 0;
   /// Get a parameter defined as a string
-  virtual std::vector<std::string>
-  getStringParameter(const std::string &pname, bool recursive = true) const = 0;
+  virtual std::vector<std::string> getStringParameter(const std::string &pname, bool recursive = true) const = 0;
   /// Get a parameter defined as an integer
-  virtual std::vector<int> getIntParameter(const std::string &pname,
-                                           bool recursive = true) const = 0;
+  virtual std::vector<int> getIntParameter(const std::string &pname, bool recursive = true) const = 0;
   /// Get a parameter defined as a boolean
-  virtual std::vector<bool> getBoolParameter(const std::string &pname,
-                                             bool recursive = true) const = 0;
+  virtual std::vector<bool> getBoolParameter(const std::string &pname, bool recursive = true) const = 0;
   /// get a string representation of a parameter
-  virtual std::string getParameterAsString(const std::string &pname,
-                                           bool recursive = true) const = 0;
+  virtual std::string getParameterAsString(const std::string &pname, bool recursive = true) const = 0;
   //@}
   /** Prints a text representation of itself
    */

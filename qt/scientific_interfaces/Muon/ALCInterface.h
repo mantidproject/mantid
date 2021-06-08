@@ -55,6 +55,10 @@ private slots:
   void updatePeakData();
 
 private:
+  void importLoadedData(const std::string &workspaceName);
+  void importBaselineData(const std::string &workspaceName);
+  void importPeakData(const std::string &workspaceName);
+
   /// UI form
   Ui::ALCInterface m_ui;
 

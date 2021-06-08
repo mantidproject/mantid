@@ -64,8 +64,7 @@ public:
     /// The name or path of a file containing an x ray attenuation profile
     std::string xRayAttenuationProfileFileName = "";
     /// A flag indicating the unit of sampleNumberDensity
-    Kernel::MaterialBuilder::NumberDensityUnit numberDensityUnit =
-        Kernel::MaterialBuilder::NumberDensityUnit::Atoms;
+    Kernel::MaterialBuilder::NumberDensityUnit numberDensityUnit = Kernel::MaterialBuilder::NumberDensityUnit::Atoms;
   };
   /**
    * Validate the parameters to build the material from, this returns
@@ -96,17 +95,13 @@ private:
    */
   Kernel::MaterialBuilder builder;
 
-  void setMaterial(const std::string &chemicalSymbol, const int atomicNumber,
-                   const int massNumber);
+  void setMaterial(const std::string &chemicalSymbol, const int atomicNumber, const int massNumber);
 
-  void
-  setNumberDensity(const double rho_m, const double rho, const double rho_eff,
-                   const double pFrac,
-                   const Kernel::MaterialBuilder::NumberDensityUnit rhoUnit,
-                   const double zParameter, const double unitCellVolume);
-  void setScatteringInfo(double coherentXSection, double incoherentXSection,
-                         double attenuationXSection, double scatteringXSection,
-                         std::string attenuationProfileFileName,
+  void setNumberDensity(const double rho_m, const double rho, const double rho_eff, const double pFrac,
+                        const Kernel::MaterialBuilder::NumberDensityUnit rhoUnit, const double zParameter,
+                        const double unitCellVolume);
+  void setScatteringInfo(double coherentXSection, double incoherentXSection, double attenuationXSection,
+                         double scatteringXSection, std::string attenuationProfileFileName,
                          std::string xRayAttenuationProfileFileName);
 
   static bool isEmpty(const double toCheck);

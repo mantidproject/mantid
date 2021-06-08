@@ -52,9 +52,7 @@ public:
     TS_ASSERT(algToBeTested.isExecuted());
 
     // get workspace generated
-    MatrixWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace);
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
 
     // check number of histograms
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 61440);
@@ -68,76 +66,45 @@ public:
     auto run = output->run();
 
     // test start and end time
-    TS_ASSERT(
-        run.getProperty("start_time")->value().compare("2014-06-17T09:59:31") ==
-        0)
-    TS_ASSERT(
-        run.getProperty("end_time")->value().find("2014-06-17T09:59:31.08") ==
-        0)
+    TS_ASSERT(run.getProperty("start_time")->value().compare("2014-06-17T09:59:31") == 0)
+    TS_ASSERT(run.getProperty("end_time")->value().find("2014-06-17T09:59:31.08") == 0)
 
     // test data properties
     TS_ASSERT_EQUALS(run.getPropertyValueAsType<int>("att_pos"), 1);
     TS_ASSERT_EQUALS(run.getPropertyValueAsType<int>("frame_count"), 4);
-    TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("period"), 20000.0,
-                    1.0e-5);
-    TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("bm_counts"), 0.0800,
-                    1.0e-5);
+    TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("period"), 20000.0, 1.0e-5);
+    TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("bm_counts"), 0.0800, 1.0e-5);
 
     // test string log properties
     TS_ASSERT(run.getProperty("rough_40")->value().compare("moving") == 0);
     TS_ASSERT(run.getProperty("rough_100")->value().compare("moving") == 0);
 
     // test instrument setup
-    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
-                        run.getProperty("L1_chopper_value"))
-                        ->firstValue(),
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("L1_chopper_value"))->firstValue(),
                     18.4726, 1.0e-3);
-    TS_ASSERT_DELTA(
-        dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("L1"))
-            ->firstValue(),
-        9.35959, 1.0e-3);
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("L1"))->firstValue(), 9.35959, 1.0e-3);
 
-    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
-                        run.getProperty("L2_det_value"))
-                        ->firstValue(),
-                    33.1562, 1.0e-3);
-    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
-                        run.getProperty("L2_curtainl_value"))
-                        ->firstValue(),
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("L2_det_value"))->firstValue(), 33.1562,
+                    1.0e-3);
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("L2_curtainl_value"))->firstValue(),
                     23.2845, 1.0e-3);
-    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
-                        run.getProperty("L2_curtainr_value"))
-                        ->firstValue(),
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("L2_curtainr_value"))->firstValue(),
                     23.2820, 1.0e-3);
-    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
-                        run.getProperty("L2_curtainu_value"))
-                        ->firstValue(),
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("L2_curtainu_value"))->firstValue(),
                     24.2862, 1.0e-3);
-    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
-                        run.getProperty("L2_curtaind_value"))
-                        ->firstValue(),
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("L2_curtaind_value"))->firstValue(),
                     24.2824, 1.0e-3);
 
-    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
-                        run.getProperty("D_curtainl_value"))
-                        ->firstValue(),
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("D_curtainl_value"))->firstValue(),
                     0.3816, 1.0e-4);
-    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
-                        run.getProperty("D_curtainr_value"))
-                        ->firstValue(),
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("D_curtainr_value"))->firstValue(),
                     0.4024, 1.0e-4);
-    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
-                        run.getProperty("D_curtainu_value"))
-                        ->firstValue(),
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("D_curtainu_value"))->firstValue(),
                     0.3947, 1.0e-4);
-    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
-                        run.getProperty("D_curtaind_value"))
-                        ->firstValue(),
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("D_curtaind_value"))->firstValue(),
                     0.3978, 1.0e-4);
-    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
-                        run.getProperty("curtain_rotation"))
-                        ->firstValue(),
-                    10, 1.0e-7);
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("curtain_rotation"))->firstValue(), 10,
+                    1.0e-7);
   }
 
   void test_filter_bby_algorithm() {
@@ -161,8 +128,7 @@ public:
     // check the filtered events
 
     // get workspace generated
-    EventWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
+    EventWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
     auto run = output->run();
 
     // check the number of events and the min and max pulse range
@@ -172,12 +138,8 @@ public:
 
     DateAndTime runstart(run.getProperty("run_start")->value());
     auto timeshift = runstart.totalNanoseconds();
-    double minTime =
-        static_cast<double>(minPulseTime.totalNanoseconds() - timeshift) *
-        1.0e-9;
-    double maxTime =
-        static_cast<double>(maxPulseTime.totalNanoseconds() - timeshift) *
-        1.0e-9;
+    double minTime = static_cast<double>(minPulseTime.totalNanoseconds() - timeshift) * 1.0e-9;
+    double maxTime = static_cast<double>(maxPulseTime.totalNanoseconds() - timeshift) * 1.0e-9;
 
     TS_ASSERT_LESS_THAN(maxTime, 0.0600001);
     TS_ASSERT_LESS_THAN(0.0399999, minTime);

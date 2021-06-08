@@ -43,12 +43,10 @@ struct twos {
 /**
  * Create a test instrument
  */
-Mantid::Geometry::Instrument_sptr
-createTestInstrument(const Mantid::detid_t id,
-                     const Mantid::Kernel::V3D &detPos,
-                     const std::string &detShapeXML = "",
-                     V3D sourcePosition = V3D(0.0, 0.0, -25.0),
-                     V3D samplePosition = V3D(0.0, 0.0, 0.0)) {
+Mantid::Geometry::Instrument_sptr createTestInstrument(const Mantid::detid_t id, const Mantid::Kernel::V3D &detPos,
+                                                       const std::string &detShapeXML = "",
+                                                       V3D sourcePosition = V3D(0.0, 0.0, -25.0),
+                                                       V3D samplePosition = V3D(0.0, 0.0, 0.0)) {
 
   // Requires an instrument.
   auto inst = std::make_shared<Instrument>();
@@ -82,28 +80,23 @@ createTestInstrument(const Mantid::detid_t id,
 /**
  * Set the instrument parameters
  */
-void setInstrumentParametersForTOFSANS(
-    const Mantid::API::MatrixWorkspace_sptr &ws,
-    const std::string &methodType = "", double collimationLengthCorrection = 20,
-    double collimationLengthIncrement = 2, double guideCutoff = 130,
-    double numberOfGuides = 5) {
+void setInstrumentParametersForTOFSANS(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &methodType = "",
+                                       double collimationLengthCorrection = 20, double collimationLengthIncrement = 2,
+                                       double guideCutoff = 130, double numberOfGuides = 5) {
   auto &pmap = ws->instrumentParameters();
   auto instrumentId = ws->getInstrument()->getComponentID();
 
   // Add the parameters
   if (collimationLengthCorrection > 0) {
-    pmap.addDouble(instrumentId, "collimation-length-correction",
-                   collimationLengthCorrection);
+    pmap.addDouble(instrumentId, "collimation-length-correction", collimationLengthCorrection);
   }
 
   if (!methodType.empty()) {
-    pmap.addString(instrumentId, "special-default-collimation-length-method",
-                   methodType);
+    pmap.addString(instrumentId, "special-default-collimation-length-method", methodType);
   }
 
   if (collimationLengthIncrement > 0) {
-    pmap.addDouble(instrumentId, "guide-collimation-length-increment",
-                   collimationLengthIncrement);
+    pmap.addDouble(instrumentId, "guide-collimation-length-increment", collimationLengthIncrement);
   }
 
   if (guideCutoff > 0) {
@@ -118,11 +111,9 @@ void setInstrumentParametersForTOFSANS(
 /*
  * Add a timer series sample log
  */
-void addSampleLog(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                  const std::string &sampleLogName, double value,
+void addSampleLog(const Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &sampleLogName, double value,
                   unsigned int length) {
-  auto timeSeries =
-      new Mantid::Kernel::TimeSeriesProperty<double>(sampleLogName);
+  auto timeSeries = new Mantid::Kernel::TimeSeriesProperty<double>(sampleLogName);
   Mantid::Types::Core::DateAndTime startTime("2010-01-01T00:10:00");
   timeSeries->setUnits("mm");
   for (unsigned int i = 0; i < length; i++) {
@@ -135,20 +126,15 @@ void addSampleLog(const Mantid::API::MatrixWorkspace_sptr &workspace,
  *Create a test workspace with instrument and instrument parameters
  */
 Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
-    const size_t nhist, const double x0, const double x1, const double dx,
-    const std::string &methodType = "", bool isModerator = false,
-    double collimationLengthCorrection = 20,
-    double collimationLengthIncrement = 2, double guideCutoff = 130,
-    double numberOfGuides = 5, V3D sourcePosition = V3D(0.0, 0.0, -25.0),
-    V3D samplePosition = V3D(0.0, 0.0, 0.0),
-    std::vector<double> guideLogDetails = std::vector<double>()) {
+    const size_t nhist, const double x0, const double x1, const double dx, const std::string &methodType = "",
+    bool isModerator = false, double collimationLengthCorrection = 20, double collimationLengthIncrement = 2,
+    double guideCutoff = 130, double numberOfGuides = 5, V3D sourcePosition = V3D(0.0, 0.0, -25.0),
+    V3D samplePosition = V3D(0.0, 0.0, 0.0), std::vector<double> guideLogDetails = std::vector<double>()) {
   Mantid::API::MatrixWorkspace_sptr ws2d;
   if (isModerator) {
-    ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        twos(), static_cast<int>(nhist), x0, x1, dx, true);
+    ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(twos(), static_cast<int>(nhist), x0, x1, dx, true);
   } else {
-    ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        ones(), static_cast<int>(nhist), x0, x1, dx, true);
+    ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(ones(), static_cast<int>(nhist), x0, x1, dx, true);
   }
 
   // Set the units to Wavelength (is needed for both types of worspaces)
@@ -159,20 +145,17 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
   double r(0.55), theta(66.5993), phi(0.0);
   Mantid::Kernel::V3D detPos;
   detPos.spherical_rad(r, theta * M_PI / 180.0, phi * M_PI / 180.0);
-  ws2d->setInstrument(
-      createTestInstrument(id, detPos, "", sourcePosition, samplePosition));
+  ws2d->setInstrument(createTestInstrument(id, detPos, "", sourcePosition, samplePosition));
 
   // Set the instrument parameters
-  setInstrumentParametersForTOFSANS(
-      ws2d, std::move(methodType), collimationLengthCorrection,
-      collimationLengthIncrement, guideCutoff, numberOfGuides);
+  setInstrumentParametersForTOFSANS(ws2d, std::move(methodType), collimationLengthCorrection,
+                                    collimationLengthIncrement, guideCutoff, numberOfGuides);
 
   // Add sample log details
   if (!guideLogDetails.empty()) {
     auto numberOfLogs = static_cast<unsigned int>(guideLogDetails.size());
     for (unsigned i = 0; i < numberOfLogs; ++i) {
-      auto logName = "Guide" + boost::lexical_cast<std::string>(
-                                   i + 1); // Names are Guide1, Guide2, ...
+      auto logName = "Guide" + boost::lexical_cast<std::string>(i + 1); // Names are Guide1, Guide2, ...
       addSampleLog(ws2d, logName, guideLogDetails[i], numberOfLogs);
     }
   }
@@ -210,13 +193,11 @@ public:
     V3D samplePosition = V3D(0.0, 0.0, 0.0);
 
     auto testWorkspace =
-        createTestWorkspace(1, 0, 3, 1, "", false, collimationLengthCorrection,
-                            collimationLengthIncrement, guideCutoff,
+        createTestWorkspace(1, 0, 3, 1, "", false, collimationLengthCorrection, collimationLengthIncrement, guideCutoff,
                             numberOfGuides, sourcePosition, samplePosition);
 
     auto sigmaModerator =
-        createTestWorkspace(1, 0, 3, 1, "", true, collimationLengthCorrection,
-                            collimationLengthIncrement, guideCutoff,
+        createTestWorkspace(1, 0, 3, 1, "", true, collimationLengthCorrection, collimationLengthIncrement, guideCutoff,
                             numberOfGuides, sourcePosition, samplePosition);
 
     const double deltaR = 1;
@@ -239,15 +220,13 @@ public:
 
     // Assert
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
 
     const auto &xOUT = result->x(0);
     const auto &xIN = testWorkspace->x(0);
 
-    TSM_ASSERT_EQUALS("Output should have the same binning as the input.",
-                      xOUT.size(), xIN.size());
+    TSM_ASSERT_EQUALS("Output should have the same binning as the input.", xOUT.size(), xIN.size());
 
     // Clean up
     AnalysisDataService::Instance().remove(outputWS);

@@ -17,9 +17,7 @@ class RawCountValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RawCountValidatorTest *createSuite() {
-    return new RawCountValidatorTest();
-  }
+  static RawCountValidatorTest *createSuite() { return new RawCountValidatorTest(); }
   static void destroySuite(RawCountValidatorTest *suite) { delete suite; }
 
   void test_success() {
@@ -34,8 +32,6 @@ public:
     ws->initialize(1, 1, 1);
     ws->setDistribution(true);
     RawCountValidator validator;
-    TS_ASSERT_EQUALS(
-        validator.isValid(ws),
-        "A workspace containing numbers of counts is required here");
+    TS_ASSERT_EQUALS(validator.isValid(ws), "A workspace containing numbers of counts is required here");
   }
 };

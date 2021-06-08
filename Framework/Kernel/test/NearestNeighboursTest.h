@@ -15,9 +15,7 @@ using namespace Eigen;
 class NearestNeighboursTest : public CxxTest::TestSuite {
 public:
   // This means the constructor isn't called when running other tests
-  static NearestNeighboursTest *createSuite() {
-    return new NearestNeighboursTest();
-  }
+  static NearestNeighboursTest *createSuite() { return new NearestNeighboursTest(); }
   static void destroySuite(NearestNeighboursTest *suite) { delete suite; }
 
   NearestNeighboursTest() {}
@@ -48,8 +46,7 @@ public:
   }
 
   void test_find_nearest_2() {
-    std::vector<Eigen::Vector2d> pts = {Vector2d(1, 1), Vector2d(2, 2),
-                                        Vector2d(2, 3)};
+    std::vector<Eigen::Vector2d> pts = {Vector2d(1, 1), Vector2d(2, 2), Vector2d(2, 3)};
     NearestNeighbours<2> nn(pts);
 
     auto results = nn.findNearest(Vector2d(1, 0.9), 2);

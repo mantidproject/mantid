@@ -36,8 +36,7 @@ using namespace Poco::XML;
 
 DECLARE_LISTENER(SINQHMListener)
 
-SINQHMListener::SINQHMListener()
-    : LiveListener(), httpcon(), response(), oldStatus() {
+SINQHMListener::SINQHMListener() : LiveListener(), httpcon(), response(), oldStatus() {
   connected = false;
   dimDirty = true;
   rank = 0;
@@ -94,8 +93,7 @@ ILiveListener::RunStatus SINQHMListener::runStatus() {
     oldStatus = NoRun;
     return NoRun;
   } else {
-    throw std::runtime_error("Invalid DAQ status code " + daq["DAQ"] +
-                             "detected");
+    throw std::runtime_error("Invalid DAQ status code " + daq["DAQ"] + "detected");
   }
 }
 
@@ -110,8 +108,8 @@ std::shared_ptr<Workspace> SINQHMListener::extractData() {
   std::vector<MDHistoDimension_sptr> dimensions;
   for (int i = 0; i < rank; i++) {
     Mantid::Geometry::GeneralFrame frame(dimNames[i], "");
-    dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
-        dimNames[i], dimNames[i], frame, .0, coord_t(dim[i]), dim[i])));
+    dimensions.emplace_back(
+        MDHistoDimension_sptr(new MDHistoDimension(dimNames[i], dimNames[i], frame, .0, coord_t(dim[i]), dim[i])));
   }
   auto ws = std::make_shared<MDHistoWorkspace>(dimensions);
   ws->setTo(.0, .0, .0);
@@ -121,8 +119,7 @@ std::shared_ptr<Workspace> SINQHMListener::extractData() {
   return ws;
 }
 
-void SINQHMListener::setSpectra(
-    const std::vector<Mantid::specnum_t> & /*specList*/) {
+void SINQHMListener::setSpectra(const std::vector<Mantid::specnum_t> & /*specList*/) {
   /**
    * Nothing to do: we always go for the full data.
    * SINQHM would do subsampling but this cannot easily
@@ -175,8 +172,7 @@ std::istream &SINQHMListener::httpRequest(const std::string &path) {
   httpcon.sendRequest(req);
   std::istream &istr = httpcon.receiveResponse(response);
   if (response.getStatus() != HTTPResponse::HTTP_OK) {
-    throw std::runtime_error("Failed to get " + path + " with reason " +
-                             response.getReason());
+    throw std::runtime_error("Failed to get " + path + " with reason " + response.getReason());
   }
   return istr;
 }
@@ -209,13 +205,11 @@ int SINQHMListener::calculateCAddress(coord_t *pos) {
   }
   return result;
 }
-void SINQHMListener::recurseDim(int *data, const IMDHistoWorkspace_sptr &ws,
-                                int currentDim, coord_t *idx) {
+void SINQHMListener::recurseDim(int *data, const IMDHistoWorkspace_sptr &ws, int currentDim, coord_t *idx) {
   if (currentDim == rank) {
     int Cindex = calculateCAddress(idx);
     int val = data[Cindex];
-    MDHistoWorkspace_sptr mdws =
-        std::dynamic_pointer_cast<MDHistoWorkspace>(ws);
+    MDHistoWorkspace_sptr mdws = std::dynamic_pointer_cast<MDHistoWorkspace>(ws);
     size_t F77index = mdws->getLinearIndexAtCoord(idx);
     mdws->setSignalAt(F77index, signal_t(val));
     mdws->setErrorSquaredAt(F77index, signal_t(val));

@@ -16,4 +16,13 @@ Interfaces
    :maxdepth: 1
 
    ./isis_sans/ISIS SANS.rst
-   *
+   diffraction/*
+   direct/*
+   framework/*
+   general/*
+   ILL/*
+   indirect/*
+   isis_sans/*
+   muon/*
+   reflectometry/*
+   utility/*

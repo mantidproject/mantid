@@ -7,6 +7,8 @@
 #  This file is part of the mantid workbench.
 #
 #
+from qtpy.QtCore import Qt
+
 from .model import SampleLogsModel
 from .view import SampleLogsView
 
@@ -14,11 +16,12 @@ from .view import SampleLogsView
 class SampleLogs(object):
     """
     """
-    def __init__(self, ws, parent=None, model=None, view=None):
+    def __init__(self, ws, parent=None, window_flags=Qt.Window, model=None, view=None):
         # Create model and view, or accept mocked versions
         self.model = model if model else SampleLogsModel(ws)
         self.view = view if view else SampleLogsView(self,
                                                      parent,
+                                                     window_flags,
                                                      self.model.get_name(),
                                                      self.model.isMD(),
                                                      self.model.getNumExperimentInfo())

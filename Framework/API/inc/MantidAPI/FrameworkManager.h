@@ -60,8 +60,7 @@ public:
   void clearPropertyManagers();
 
   /// Creates an algorithm and runs it, with variadic arguments
-  std::shared_ptr<IAlgorithm> exec(const std::string &algorithmName, int count,
-                                   ...);
+  std::shared_ptr<IAlgorithm> exec(const std::string &algorithmName, int count, ...);
 
   /// Returns a shared pointer to the workspace requested
   Workspace *getWorkspace(const std::string &wsName);
@@ -78,8 +77,7 @@ private:
   ~FrameworkManagerImpl() = default;
 
   /// Load a set of plugins using a key from the ConfigService
-  void loadPluginsUsingKey(const std::string &locationKey,
-                           const std::string &excludeKey);
+  void loadPluginsUsingKey(const std::string &locationKey, const std::string &excludeKey);
   /// Set up the global locale
   void setGlobalNumericLocaleToC();
   /// Silence NeXus output
@@ -113,7 +111,6 @@ using FrameworkManager = Mantid::Kernel::SingletonHolder<FrameworkManagerImpl>;
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::FrameworkManagerImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::FrameworkManagerImpl>;
 }
 } // namespace Mantid

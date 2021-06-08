@@ -48,8 +48,7 @@ public:
 };
 
 /// Keep our destructor pure virtual, but require an implementation.
-template <typename ChainableType>
-Chainable<ChainableType>::~Chainable() = default;
+template <typename ChainableType> Chainable<ChainableType>::~Chainable() = default;
 
 } // namespace Kernel
 } // namespace Mantid

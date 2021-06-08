@@ -33,9 +33,7 @@ class ExtractMaskToTableTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ExtractMaskToTableTest *createSuite() {
-    return new ExtractMaskToTableTest();
-  }
+  static ExtractMaskToTableTest *createSuite() { return new ExtractMaskToTableTest(); }
   static void destroySuite(ExtractMaskToTableTest *suite) { delete suite; }
 
   //----------------------------------------------------------------------------------------------
@@ -109,8 +107,7 @@ public:
   void test_writeToNewTable() {
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
-    Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
+    Workspace2D_sptr inputws = WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
@@ -140,8 +137,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Validate
-    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
-        AnalysisDataService::Instance().retrieve("MaskTable1"));
+    TableWorkspace_sptr outws =
+        std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("MaskTable1"));
     TS_ASSERT(outws);
     if (!outws)
       return;
@@ -172,8 +169,7 @@ public:
   void test_appendToExistingTable() {
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
-    Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
+    Workspace2D_sptr inputws = WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
@@ -216,8 +212,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Validate
-    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
-        AnalysisDataService::Instance().retrieve("MaskTable2"));
+    TableWorkspace_sptr outws =
+        std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("MaskTable2"));
     TS_ASSERT(outws);
     if (!outws)
       return;
@@ -273,8 +269,7 @@ public:
   void test_appendToPreviousTable() {
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
-    Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
+    Workspace2D_sptr inputws = WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
@@ -322,8 +317,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Validate
-    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
-        AnalysisDataService::Instance().retrieve("MaskTable2"));
+    TableWorkspace_sptr outws =
+        std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("MaskTable2"));
     TS_ASSERT(outws);
     if (!outws)
       return;
@@ -336,8 +331,7 @@ public:
 
     TableRow therow = outws->getRow(2);
     therow >> xxmin >> xxmax >> specstr;
-    cout << "XMin = " << xxmin << ", XMax = " << xxmax
-         << ", Spec list = " << specstr << ".\n";
+    cout << "XMin = " << xxmin << ", XMax = " << xxmax << ", Spec list = " << specstr << ".\n";
     string expectedspec(" 1,  6-8,  11,  21,  31,  41");
     TS_ASSERT_EQUALS(specstr, expectedspec);
     TS_ASSERT_DELTA(xxmin, 1234.0, 0.0001);
@@ -345,8 +339,7 @@ public:
 
     TableRow therow1 = outws->getRow(1);
     therow1 >> xxmin >> xxmax >> specstr;
-    cout << "XMin = " << xxmin << ", XMax = " << xxmax
-         << ", Spec list = " << specstr << ".\n";
+    cout << "XMin = " << xxmin << ", XMax = " << xxmax << ", Spec list = " << specstr << ".\n";
     string expectedspec2("43");
     TS_ASSERT_DELTA(xxmin, 2345.1, 0.0001);
     TS_ASSERT_DELTA(xxmax, 78910.5, 0.0001);
@@ -364,9 +357,7 @@ public:
   void test_extractFromMaskWorkspace() {
     // Create a workspace with Mask
     const int nvectors(50), nbins(10);
-    Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
-                                                                     nbins);
+    Workspace2D_sptr inputws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors, nbins);
     AnalysisDataService::Instance().addOrReplace("TestWorkspace3", inputws);
 
     //   Mask detectors of spectra 1, 6, 11, ..., 31
@@ -384,8 +375,7 @@ public:
     const auto &detectorInfo = inputws->detectorInfo();
     for (size_t i = 0; i < detectorInfo.size(); ++i) {
       if (detectorInfo.isMasked(i))
-        cout << "Detector : " << detectorInfo.detectorIDs()[i]
-             << " is masked.\n";
+        cout << "Detector : " << detectorInfo.detectorIDs()[i] << " is masked.\n";
     }
 
     /*
@@ -427,8 +417,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Validate
-    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
-        AnalysisDataService::Instance().retrieve("MaskTable3"));
+    TableWorkspace_sptr outws =
+        std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("MaskTable3"));
     TS_ASSERT(outws);
     if (!outws)
       return;
@@ -441,8 +431,7 @@ public:
 
     TableRow therow = outws->getRow(0);
     therow >> xxmin >> xxmax >> specstr;
-    cout << "XMin = " << xxmin << ", XMax = " << xxmax
-         << ", Spec list = " << specstr << ".\n";
+    cout << "XMin = " << xxmin << ", XMax = " << xxmax << ", Spec list = " << specstr << ".\n";
     string expectedspec(" 1-3,  5,  20,  34");
     TS_ASSERT_EQUALS(specstr, expectedspec);
     TS_ASSERT_DELTA(xxmin, 1234.0, 0.0001);

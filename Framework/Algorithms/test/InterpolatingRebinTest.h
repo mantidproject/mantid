@@ -25,8 +25,7 @@ public:
   void testWorkspace_dist() {
     Workspace2D_sptr test_in1D = Create1DData();
     test_in1D->setDistribution(true);
-    AnalysisDataService::Instance().add("InterpolatingRebinTest_indist",
-                                        test_in1D);
+    AnalysisDataService::Instance().add("InterpolatingRebinTest_indist", test_in1D);
 
     InterpolatingRebin rebin;
     rebin.initialize();
@@ -52,8 +51,7 @@ public:
 
     // get the output workspace and test it
     MatrixWorkspace_sptr rebindata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "InterpolatingRebinTest_outdist");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("InterpolatingRebinTest_outdist");
     TS_ASSERT_EQUALS(rebindata->getNumberHistograms(), 1);
     TS_ASSERT(rebindata)
 
@@ -102,15 +100,12 @@ public:
 
     Workspace2D_sptr test_in1D = Create1DData();
     test_in1D->setDistribution(false);
-    AnalysisDataService::Instance().add("InterpolatingRebinTest_in_nondist",
-                                        test_in1D);
+    AnalysisDataService::Instance().add("InterpolatingRebinTest_in_nondist", test_in1D);
 
     InterpolatingRebin rebin;
     rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace",
-                           "InterpolatingRebinTest_in_nondist");
-    rebin.setPropertyValue("OutputWorkspace",
-                           "InterpolatingRebinTest_out_nondist");
+    rebin.setPropertyValue("InputWorkspace", "InterpolatingRebinTest_in_nondist");
+    rebin.setPropertyValue("OutputWorkspace", "InterpolatingRebinTest_out_nondist");
 
     // set the new bins to be less than half the size of the old, one in every 2
     // old bins and one in every 5 old will coinside
@@ -120,8 +115,7 @@ public:
 
     // get the output workspace and test it
     MatrixWorkspace_sptr rebindata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "InterpolatingRebinTest_out_nondist");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("InterpolatingRebinTest_out_nondist");
     TS_ASSERT(rebindata)
     const auto &outX = rebindata->x(0);
     const auto &outY = rebindata->y(0);
@@ -160,21 +154,18 @@ public:
     // input
     TS_ASSERT(!rebindata->isDistribution());
     AnalysisDataService::Instance().remove("InterpolatingRebinTest_in_nondist");
-    AnalysisDataService::Instance().remove(
-        "InterpolatingRebinTest_out_nondist");
+    AnalysisDataService::Instance().remove("InterpolatingRebinTest_out_nondist");
   }
 
   void testWorkspace_close() {
     Workspace2D_sptr test_in1D = Create1DData();
     test_in1D->setDistribution(true);
-    AnalysisDataService::Instance().add("InterpolatingRebinTest_inclose",
-                                        test_in1D);
+    AnalysisDataService::Instance().add("InterpolatingRebinTest_inclose", test_in1D);
 
     InterpolatingRebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace", "InterpolatingRebinTest_inclose");
-    rebin.setPropertyValue("OutputWorkspace",
-                           "InterpolatingRebinTest_outclose");
+    rebin.setPropertyValue("OutputWorkspace", "InterpolatingRebinTest_outclose");
 
     // the extreme values are just passed the ends of the data but the algorithm
     // assume they are on the boundary
@@ -185,8 +176,7 @@ public:
 
     // get the output workspace and test it
     MatrixWorkspace_sptr rebindata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "InterpolatingRebinTest_outclose");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("InterpolatingRebinTest_outclose");
     TS_ASSERT(rebindata)
 
     const auto &outX = rebindata->x(0);
@@ -212,15 +202,12 @@ public:
 
     Workspace2D_sptr test_in1D = badData();
     test_in1D->setDistribution(true);
-    AnalysisDataService::Instance().add("InterpolatingRebinTest_in_nulldata",
-                                        test_in1D);
+    AnalysisDataService::Instance().add("InterpolatingRebinTest_in_nulldata", test_in1D);
 
     InterpolatingRebin rebin;
     rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace",
-                           "InterpolatingRebinTest_in_nulldata");
-    rebin.setPropertyValue("OutputWorkspace",
-                           "InterpolatingRebinTest_out_nulldata");
+    rebin.setPropertyValue("InputWorkspace", "InterpolatingRebinTest_in_nulldata");
+    rebin.setPropertyValue("OutputWorkspace", "InterpolatingRebinTest_out_nulldata");
 
     // set the new bins to be less than half the size of the old, one in every 2
     // old bins and one in every 5 old will coinside
@@ -230,8 +217,7 @@ public:
 
     // get the output workspace and test it
     MatrixWorkspace_sptr rebindata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "InterpolatingRebinTest_out_nulldata");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("InterpolatingRebinTest_out_nulldata");
     TS_ASSERT_EQUALS(rebindata->getNumberHistograms(), 2);
 
     const auto &outX = rebindata->x(0);
@@ -266,10 +252,8 @@ public:
     TS_ASSERT(outY1[7] != outY1[7]);
     TS_ASSERT_DELTA(outE1[7], 2, 0.00001);
 
-    AnalysisDataService::Instance().remove(
-        "InterpolatingRebinTest_in_nulldata");
-    AnalysisDataService::Instance().remove(
-        "InterpolatingRebinTest_out_nulldata");
+    AnalysisDataService::Instance().remove("InterpolatingRebinTest_in_nulldata");
+    AnalysisDataService::Instance().remove("InterpolatingRebinTest_out_nulldata");
   }
 
 private:
@@ -307,8 +291,7 @@ private:
 
     // the second has NAN values
     retVal->setBinEdges(1, nBins + 1, LinearGenerator(0.0, 1.0));
-    retVal->mutableY(1).assign(retVal->mutableY(1).size(),
-                               std::numeric_limits<double>::quiet_NaN());
+    retVal->mutableY(1).assign(retVal->mutableY(1).size(), std::numeric_limits<double>::quiet_NaN());
     retVal->mutableE(1).assign(retVal->mutableE(1).size(), 2.0);
 
     return retVal;

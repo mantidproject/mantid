@@ -742,6 +742,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         # Get the filename for the grouping file
         if group_file is not None:
             grouping_file = group_file
+            group_detectors.setProperty("ExcludeGroupNumbers", [0])
         else:
             try:
                 grouping_file = instrument.getStringParameter('Workflow.GroupingFile')[0]
@@ -762,7 +763,6 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
 
         # Apply the grouping
         group_detectors.setProperty("MapFile", grouping_file)
-        group_detectors.setProperty("ExcludeGroupNumbers", [0])
 
     elif grouping_method == 'Workspace':
         # Apply the grouping

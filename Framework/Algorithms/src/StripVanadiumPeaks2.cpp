@@ -23,19 +23,15 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
 void StripVanadiumPeaks2::init() {
   // Declare inputs and output.  Copied from StripPeaks
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input),
-      "Name of the input workspace. If you use the default vanadium peak "
-      "positions are used, the workspace must be in units of d-spacing.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+                  "Name of the input workspace. If you use the default vanadium peak "
+                  "positions are used, the workspace must be in units of d-spacing.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "The name of the workspace to be created as the output of the "
-      "algorithm.\n"
-      "If the input workspace is an EventWorkspace, then the output must be "
-      "different (and will be made into a Workspace2D).");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace to be created as the output of the "
+                  "algorithm.\n"
+                  "If the input workspace is an EventWorkspace, then the output must be "
+                  "different (and will be made into a Workspace2D).");
 
   auto min = std::make_shared<BoundedValidator<int>>();
   min->setLower(1);
@@ -53,8 +49,7 @@ void StripVanadiumPeaks2::init() {
                   "FindPeaks. Default 4.");
 
   std::vector<std::string> bkgdtypes{"Linear", "Quadratic"};
-  declareProperty("BackgroundType", "Linear",
-                  std::make_shared<StringListValidator>(bkgdtypes),
+  declareProperty("BackgroundType", "Linear", std::make_shared<StringListValidator>(bkgdtypes),
                   "The type of background of the histogram. Present choices "
                   "include Linear and Quadratic. ");
 
@@ -113,27 +108,22 @@ void StripVanadiumPeaks2::exec() {
   double pro0 = 0.0;
   double prof = 1.0;
   bool sublog = true;
-  IAlgorithm_sptr stripPeaks =
-      createChildAlgorithm("StripPeaks", pro0, prof, sublog);
+  IAlgorithm_sptr stripPeaks = createChildAlgorithm("StripPeaks", pro0, prof, sublog);
   stripPeaks->setProperty("InputWorkspace", inputWS);
   stripPeaks->setProperty("FWHM", param_fwhm);
   stripPeaks->setProperty("Tolerance", param_tolerance);
   stripPeaks->setPropertyValue("PeakPositions", peakpositions);
-  stripPeaks->setProperty<std::string>("BackgroundType",
-                                       getProperty("BackgroundType"));
-  stripPeaks->setProperty<bool>("HighBackground",
-                                getProperty("HighBackground"));
+  stripPeaks->setProperty<std::string>("BackgroundType", getProperty("BackgroundType"));
+  stripPeaks->setProperty<bool>("HighBackground", getProperty("HighBackground"));
   if (singleSpectrum) {
     stripPeaks->setProperty("WorkspaceIndex", singleIndex);
   }
-  stripPeaks->setProperty<double>("PeakPositionTolerance",
-                                  getProperty("PeakPositionTolerance"));
+  stripPeaks->setProperty<double>("PeakPositionTolerance", getProperty("PeakPositionTolerance"));
 
   stripPeaks->executeAsChildAlg();
 
   // 3. Get and set output workspace
-  API::MatrixWorkspace_sptr outputWS =
-      stripPeaks->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr outputWS = stripPeaks->getProperty("OutputWorkspace");
 
   this->setProperty("OutputWorkspace", outputWS);
 }

@@ -33,12 +33,8 @@ class SeqDomainSpectrumCreatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SeqDomainSpectrumCreatorTest *createSuite() {
-    return new SeqDomainSpectrumCreatorTest();
-  }
-  static void destroySuite(SeqDomainSpectrumCreatorTest *suite) {
-    delete suite;
-  }
+  static SeqDomainSpectrumCreatorTest *createSuite() { return new SeqDomainSpectrumCreatorTest(); }
+  static void destroySuite(SeqDomainSpectrumCreatorTest *suite) { delete suite; }
 
   SeqDomainSpectrumCreatorTest() { FrameworkManager::Instance(); }
 
@@ -47,34 +43,29 @@ public:
 
     TestableSeqDomainSpectrumCreator otherCreator(nullptr, "Test");
 
-    TS_ASSERT_EQUALS(otherCreator.m_workspacePropertyName,
-                     otherCreator.m_workspacePropertyNames.front());
+    TS_ASSERT_EQUALS(otherCreator.m_workspacePropertyName, otherCreator.m_workspacePropertyNames.front());
     TS_ASSERT_EQUALS(otherCreator.m_workspacePropertyName, "Test");
   }
 
   void testSetMatrixWorkspace() {
     TestableSeqDomainSpectrumCreator creator(nullptr, "");
-    TS_ASSERT_THROWS_NOTHING(creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::create2DWorkspace(5, 5)));
+    TS_ASSERT_THROWS_NOTHING(creator.setMatrixWorkspace(WorkspaceCreationHelper::create2DWorkspace(5, 5)));
 
     TS_ASSERT_EQUALS(creator.m_matrixWorkspace->getNumberHistograms(), 5);
 
-    TS_ASSERT_THROWS(creator.setMatrixWorkspace(MatrixWorkspace_sptr()),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(creator.setMatrixWorkspace(MatrixWorkspace_sptr()), const std::invalid_argument &);
   }
 
   void testGetDomainSize() {
     TestableSeqDomainSpectrumCreator creator(nullptr, "");
-    creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::create2DWorkspace123(4, 12));
+    creator.setMatrixWorkspace(WorkspaceCreationHelper::create2DWorkspace123(4, 12));
 
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
 
     creator.createDomain(domain, values);
 
-    std::shared_ptr<SeqDomain> seqDomain =
-        std::dynamic_pointer_cast<SeqDomain>(domain);
+    std::shared_ptr<SeqDomain> seqDomain = std::dynamic_pointer_cast<SeqDomain>(domain);
 
     TS_ASSERT(seqDomain);
     TS_ASSERT_EQUALS(seqDomain->getNDomains(), 4);
@@ -84,37 +75,32 @@ public:
   void testHistogramIsUsable() {
     TestableSeqDomainSpectrumCreator creator(nullptr, "");
 
-    TS_ASSERT_THROWS(creator.histogramIsUsable(0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(creator.histogramIsUsable(0), const std::invalid_argument &);
 
     // Workspace with 2 histograms, one of which is masked (No. 0)
     std::set<int64_t> masked;
     masked.insert(0);
-    creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::create2DWorkspace123(2, 12, false, masked));
+    creator.setMatrixWorkspace(WorkspaceCreationHelper::create2DWorkspace123(2, 12, false, masked));
 
     TS_ASSERT(!creator.histogramIsUsable(0));
     TS_ASSERT(creator.histogramIsUsable(1));
 
     // No instrument
-    creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::create2DWorkspace123(2, 12));
+    creator.setMatrixWorkspace(WorkspaceCreationHelper::create2DWorkspace123(2, 12));
     TS_ASSERT(creator.histogramIsUsable(0));
     TS_ASSERT(creator.histogramIsUsable(1));
   }
 
   void testCreateDomain() {
     TestableSeqDomainSpectrumCreator creator(nullptr, "");
-    creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::create2DWorkspace123(4, 12, true));
+    creator.setMatrixWorkspace(WorkspaceCreationHelper::create2DWorkspace123(4, 12, true));
 
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
 
     creator.createDomain(domain, values);
 
-    std::shared_ptr<SeqDomain> seqDomain =
-        std::dynamic_pointer_cast<SeqDomain>(domain);
+    std::shared_ptr<SeqDomain> seqDomain = std::dynamic_pointer_cast<SeqDomain>(domain);
 
     for (size_t i = 0; i < seqDomain->getNDomains(); ++i) {
       FunctionDomain_sptr localDomain;
@@ -137,16 +123,14 @@ public:
     // Workspace with 4 histograms, one of which is masked (No. 2)
     std::set<int64_t> masked;
     masked.insert(2);
-    creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::create2DWorkspace123(4, 12, true, masked));
+    creator.setMatrixWorkspace(WorkspaceCreationHelper::create2DWorkspace123(4, 12, true, masked));
 
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
 
     creator.createDomain(domain, values);
 
-    std::shared_ptr<SeqDomain> seqDomain =
-        std::dynamic_pointer_cast<SeqDomain>(domain);
+    std::shared_ptr<SeqDomain> seqDomain = std::dynamic_pointer_cast<SeqDomain>(domain);
 
     // One less than the created workspace
     TS_ASSERT_EQUALS(seqDomain->getNDomains(), 3);
@@ -172,8 +156,7 @@ public:
     // all x values are 1.0
 
     // TODO is the workspace created with the wrong values here
-    MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::create2DWorkspace123(4, 12);
+    MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::create2DWorkspace123(4, 12);
 
     TestableSeqDomainSpectrumCreator creator(nullptr, "");
     creator.setMatrixWorkspace(matrixWs);
@@ -188,15 +171,12 @@ public:
     testFunction->setParameter("Slope", slope);
 
     // TODO or are the output values from createOutputWorkspace wrong
-    Workspace_sptr outputWs =
-        creator.createOutputWorkspace("", testFunction, domain, values);
+    Workspace_sptr outputWs = creator.createOutputWorkspace("", testFunction, domain, values);
 
-    MatrixWorkspace_sptr outputWsMatrix =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
+    MatrixWorkspace_sptr outputWsMatrix = std::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
     TS_ASSERT(outputWsMatrix);
 
-    TS_ASSERT_EQUALS(outputWsMatrix->getNumberHistograms(),
-                     matrixWs->getNumberHistograms());
+    TS_ASSERT_EQUALS(outputWsMatrix->getNumberHistograms(), matrixWs->getNumberHistograms());
 
     // Spectrum 0: 0 + 2 * 1 -> All y-values should be 2
     // Spectrum 1: 1 + 2 * 1 -> All y-values should be 3...etc.
@@ -217,8 +197,7 @@ public:
     // Mask one histogram (No. 2)
     std::set<int64_t> masked;
     masked.insert(2);
-    MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::create2DWorkspace123(4, 12, false, masked);
+    MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::create2DWorkspace123(4, 12, false, masked);
 
     TestableSeqDomainSpectrumCreator creator(nullptr, "");
     creator.setMatrixWorkspace(matrixWs);
@@ -232,16 +211,13 @@ public:
     testFunction->initialize();
     testFunction->setParameter("Slope", slope);
 
-    Workspace_sptr outputWs =
-        creator.createOutputWorkspace("", testFunction, domain, values);
+    Workspace_sptr outputWs = creator.createOutputWorkspace("", testFunction, domain, values);
 
-    MatrixWorkspace_sptr outputWsMatrix =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
+    MatrixWorkspace_sptr outputWsMatrix = std::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
     TS_ASSERT(outputWsMatrix);
 
     // Still has to be the same number of histograms.
-    TS_ASSERT_EQUALS(outputWsMatrix->getNumberHistograms(),
-                     matrixWs->getNumberHistograms());
+    TS_ASSERT_EQUALS(outputWsMatrix->getNumberHistograms(), matrixWs->getNumberHistograms());
 
     // Spectrum 0: 0 + 2 * 1 -> All y-values should be 2
     // Spectrum 1: 1 + 2 * 1 -> All y-values should be 3...etc.
@@ -264,8 +240,7 @@ public:
 
   void testCreateOutputWorkspaceWithDistributionAsInput() {
     // Arrange
-    MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::create2DWorkspace123(4, 12, true);
+    MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::create2DWorkspace123(4, 12, true);
     Mantid::API::WorkspaceHelpers::makeDistribution(matrixWs);
 
     TestableSeqDomainSpectrumCreator creator(nullptr, "");
@@ -279,22 +254,18 @@ public:
     testFunction->initialize();
     testFunction->setParameter("Slope", 2.0);
 
-    Workspace_sptr outputWs =
-        creator.createOutputWorkspace("", testFunction, domain, values);
+    Workspace_sptr outputWs = creator.createOutputWorkspace("", testFunction, domain, values);
 
-    MatrixWorkspace_sptr outputWsMatrix =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
+    MatrixWorkspace_sptr outputWsMatrix = std::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
     TS_ASSERT(outputWsMatrix);
-    TSM_ASSERT("Output should be a distribution",
-               outputWsMatrix->isDistribution());
+    TSM_ASSERT("Output should be a distribution", outputWsMatrix->isDistribution());
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testFit() {
     double slope = 2.0;
 
-    MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::create2DWorkspace123(400, 500);
+    MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::create2DWorkspace123(400, 500);
     for (size_t i = 0; i < matrixWs->getNumberHistograms(); ++i) {
       auto &x = matrixWs->mutableX(i);
       auto &y = matrixWs->mutableY(i);
@@ -313,8 +284,7 @@ public:
     fun->initialize();
     fun->setParameter("Slope", 0.0);
 
-    Mantid::API::IAlgorithm_sptr fit =
-        Mantid::API::AlgorithmManager::Instance().create("Fit");
+    Mantid::API::IAlgorithm_sptr fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
 
     fit->setProperty("Function", fun);
@@ -336,8 +306,7 @@ public:
       slopes[i] = static_cast<double>(i);
     }
 
-    MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::create2DWorkspace123(400, 50);
+    MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::create2DWorkspace123(400, 50);
     for (size_t i = 0; i < matrixWs->getNumberHistograms(); ++i) {
       auto &x = matrixWs->mutableX(i);
       auto &y = matrixWs->mutableY(i);
@@ -358,8 +327,7 @@ public:
       fun->setParameter(i, static_cast<double>(i) + 1.1);
     }
 
-    Mantid::API::IAlgorithm_sptr fit =
-        Mantid::API::AlgorithmManager::Instance().create("Fit");
+    Mantid::API::IAlgorithm_sptr fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
 
     fit->setProperty("Function", fun);
@@ -382,22 +350,19 @@ private:
     friend class SeqDomainSpectrumCreatorTest;
 
   public:
-    TestableSeqDomainSpectrumCreator(IPropertyManager *manager,
-                                     const std::string &workspacePropertyName)
+    TestableSeqDomainSpectrumCreator(IPropertyManager *manager, const std::string &workspacePropertyName)
         : SeqDomainSpectrumCreator(manager, workspacePropertyName) {}
 
     ~TestableSeqDomainSpectrumCreator() override {}
   };
 
-  class SeqDomainCreatorTestFunction : public IFunction1DSpectrum,
-                                       public ParamFunction {
+  class SeqDomainCreatorTestFunction : public IFunction1DSpectrum, public ParamFunction {
   public:
     ~SeqDomainCreatorTestFunction() override {}
 
     std::string name() const override { return "SeqDomainCreatorTestFunction"; }
 
-    void function1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                            FunctionValues &values) const override {
+    void function1DSpectrum(const FunctionDomain1DSpectrum &domain, FunctionValues &values) const override {
 
       double wsIndex = static_cast<double>(domain.getWorkspaceIndex());
       double slope = getParameter("Slope");
@@ -411,17 +376,13 @@ private:
     void init() override { declareParameter("Slope", 1.0); }
   };
 
-  class SeqDomainCreatorTestFunctionComplex : public IFunction1DSpectrum,
-                                              public ParamFunction {
+  class SeqDomainCreatorTestFunctionComplex : public IFunction1DSpectrum, public ParamFunction {
   public:
     ~SeqDomainCreatorTestFunctionComplex() override {}
 
-    std::string name() const override {
-      return "SeqDomainCreatorTestFunctionComplex";
-    }
+    std::string name() const override { return "SeqDomainCreatorTestFunctionComplex"; }
 
-    void function1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                            FunctionValues &values) const override {
+    void function1DSpectrum(const FunctionDomain1DSpectrum &domain, FunctionValues &values) const override {
       double wsIndex = static_cast<double>(domain.getWorkspaceIndex());
       double slope = getParameter(domain.getWorkspaceIndex() % 40);
 
@@ -430,8 +391,7 @@ private:
       }
     }
 
-    void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                                 Jacobian &jacobian) override {
+    void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) override {
       for (size_t j = 0; j < domain.size(); ++j) {
         jacobian.set(j, domain.getWorkspaceIndex() % 40, domain[j]);
       }

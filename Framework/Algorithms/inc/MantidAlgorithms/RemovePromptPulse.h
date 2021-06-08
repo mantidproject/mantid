@@ -18,8 +18,7 @@ namespace Algorithms {
   @author
   @date 2011-07-18
 */
-class MANTID_ALGORITHMS_DLL RemovePromptPulse
-    : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL RemovePromptPulse : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;
@@ -31,9 +30,7 @@ public:
   const std::string category() const override;
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Remove the prompt pulse for a time of flight measurement.";
-  }
+  const std::string summary() const override { return "Remove the prompt pulse for a time of flight measurement."; }
 
 private:
   /// Sets documentation strings for this algorithm
@@ -44,8 +41,7 @@ private:
   void exec() override;
   /// Try to get the frequency from a given name.
   double getFrequency(const API::Run &run);
-  std::vector<double> calculatePulseTimes(const double tmin, const double tmax,
-                                          const double period);
+  std::vector<double> calculatePulseTimes(const double tmin, const double tmax, const double period);
 };
 
 } // namespace Algorithms

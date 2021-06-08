@@ -15,7 +15,7 @@ Its advantages over existing alternatives are that it:
  - Doesn't require RTTI
  - Doesn't require member template functions
  - Doesn't require exception handling
- - Doesn't require any external libraries (including memory management, 
+ - Doesn't require any external libraries (including memory management,
    file/console I/O, graphics libraries)
 
 %prep

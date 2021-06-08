@@ -17,9 +17,7 @@ using namespace Mantid;
 
 class GatherWorkspacesTest : public CxxTest::TestSuite {
 public:
-  static GatherWorkspacesTest *createSuite() {
-    return new GatherWorkspacesTest();
-  }
+  static GatherWorkspacesTest *createSuite() { return new GatherWorkspacesTest(); }
   static void destroySuite(GatherWorkspacesTest *suite) { delete suite; }
 
   GatherWorkspacesTest() {
@@ -40,8 +38,7 @@ public:
   void testRootMustHaveInputWorkspace() {
     MPIAlgorithms::GatherWorkspaces gatherer;
     TS_ASSERT_THROWS_NOTHING(gatherer.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        gatherer.setProperty("OutputWorkspace", "something"));
+    TS_ASSERT_THROWS_NOTHING(gatherer.setProperty("OutputWorkspace", "something"));
     // Haven't set InputWorkspace and this will be the root process, so it
     // should complain
     TS_ASSERT_THROWS(gatherer.execute(), const std::runtime_error &);
@@ -52,16 +49,13 @@ public:
     MPIAlgorithms::GatherWorkspaces gatherer;
     TS_ASSERT_THROWS_NOTHING(gatherer.initialize());
     // Create a small workspace
-    API::MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::Create2DWorkspace154(1, 5);
+    API::MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace154(1, 5);
 
     TS_ASSERT_THROWS_NOTHING(gatherer.setProperty("InputWorkspace", inWS));
-    gatherer.setChild(
-        true); // Make a child algorithm to keep the result out of the ADS
+    gatherer.setChild(true); // Make a child algorithm to keep the result out of the ADS
 
     TS_ASSERT(gatherer.execute());
-    API::MatrixWorkspace_const_sptr outWS =
-        gatherer.getProperty("OutputWorkspace");
+    API::MatrixWorkspace_const_sptr outWS = gatherer.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(inWS->size(), outWS->size());
     for (int i = 0; i < 5; ++i) {
       TS_ASSERT_EQUALS(inWS->readX(0)[i], outWS->readX(0)[i]);
@@ -71,26 +65,21 @@ public:
       // (perhaps?)
     }
 
-    TS_ASSERT_EQUALS(inWS->getInstrument()->baseInstrument(),
-                     outWS->getInstrument()->baseInstrument());
+    TS_ASSERT_EQUALS(inWS->getInstrument()->baseInstrument(), outWS->getInstrument()->baseInstrument());
   }
 
   void testEvents() {
     MPIAlgorithms::GatherWorkspaces gatherer;
     TS_ASSERT_THROWS_NOTHING(gatherer.initialize());
     // Create a small workspace
-    DataObjects::EventWorkspace_sptr inWS =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 5,
-                                                                        true);
+    DataObjects::EventWorkspace_sptr inWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 5, true);
 
     TS_ASSERT_THROWS_NOTHING(gatherer.setProperty("InputWorkspace", inWS));
     TS_ASSERT_THROWS_NOTHING(gatherer.setProperty("PreserveEvents", true));
-    gatherer.setChild(
-        true); // Make a child algorithm to keep the result out of the ADS
+    gatherer.setChild(true); // Make a child algorithm to keep the result out of the ADS
 
     TS_ASSERT(gatherer.execute());
-    API::MatrixWorkspace_const_sptr outWS =
-        gatherer.getProperty("OutputWorkspace");
+    API::MatrixWorkspace_const_sptr outWS = gatherer.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(inWS->size(), outWS->size());
     for (int i = 0; i < 5; ++i) {
       TS_ASSERT_EQUALS(inWS->readX(0)[i], outWS->readX(0)[i]);
@@ -100,8 +89,7 @@ public:
       // (perhaps?)
     }
 
-    TS_ASSERT_EQUALS(inWS->getInstrument()->baseInstrument(),
-                     outWS->getInstrument()->baseInstrument());
+    TS_ASSERT_EQUALS(inWS->getInstrument()->baseInstrument(), outWS->getInstrument()->baseInstrument());
   }
 
   // TODO: Work out a way of testing under MPI because absent that the test is

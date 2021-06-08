@@ -27,17 +27,13 @@ using namespace Kernel;
  * Declare the algorithm properties
  */
 void ExtractMask::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "A workspace whose masking is to be extracted");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "A workspace containing the masked spectra as zeroes and ones.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "A workspace containing the masked spectra as zeroes and ones.");
 
   declareProperty(
-      std::make_unique<ArrayProperty<detid_t>>(
-          "DetectorList", std::make_shared<NullValidator>(), Direction::Output),
+      std::make_unique<ArrayProperty<detid_t>>("DetectorList", std::make_shared<NullValidator>(), Direction::Output),
       "A comma separated list or array containing a list of masked "
       "detector ID's");
 }
@@ -49,8 +45,7 @@ void ExtractMask::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   // convert input to a mask workspace
-  auto inputMaskWS =
-      std::dynamic_pointer_cast<const DataObjects::MaskWorkspace>(inputWS);
+  auto inputMaskWS = std::dynamic_pointer_cast<const DataObjects::MaskWorkspace>(inputWS);
   auto inputWSIsSpecial = bool(inputMaskWS);
   if (inputWSIsSpecial) {
     g_log.notice() << "Input workspace is a MaskWorkspace.\n";
@@ -61,8 +56,7 @@ void ExtractMask::exec() {
   const auto &detInfo = inputWS->detectorInfo();
   const auto &detIds = detInfo.detectorIDs();
   for (size_t i = 0; i < detInfo.size(); ++i) {
-    if ((inputWSIsSpecial && inputMaskWS->isMasked(detIds[i])) ||
-        detInfo.isMasked(i)) {
+    if ((inputWSIsSpecial && inputMaskWS->isMasked(detIds[i])) || detInfo.isMasked(i)) {
       detectorList.emplace_back(detIds[i]);
     }
   }
@@ -82,8 +76,7 @@ void ExtractMask::exec() {
     bool inputIsMasked(false);
     if (spectrumInfo.hasDetectors(i)) {
       // special workspaces can mysteriously have the mask bit set
-      inputIsMasked = (inputWSIsSpecial && inputMaskWS->isMaskedIndex(i)) ||
-                      spectrumInfo.isMasked(i);
+      inputIsMasked = (inputWSIsSpecial && inputMaskWS->isMaskedIndex(i)) || spectrumInfo.isMasked(i);
     }
     maskWS->setMaskedIndex(i, inputIsMasked);
     prog.report();

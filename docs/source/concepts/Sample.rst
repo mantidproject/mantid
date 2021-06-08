@@ -10,7 +10,7 @@ Sample
 
 What is the Sample object?
 --------------------------
-    
+
 The sample object holds details of the samples in an experiment.
 While most of the time this will refer to a single sample, it can also describe a collection of samples.
 Specifically this holds information about a samples:
@@ -70,7 +70,7 @@ Sample Properties
   Material Name V
   Total scattering X-Section: 5.1
   Data lattice parameters are: 2.0 3.0 4.0 90.0 90.0 90.0
-  
+
 
 Multiple Samples
 ################
@@ -82,7 +82,7 @@ The ``Sample()`` method actually returns a collection, however if you do not spe
   ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
 
   s = ws.sample()
-  # Is the same as 
+  # Is the same as
   s = ws.sample()[0]
 
   # You can ask how many samples there are with

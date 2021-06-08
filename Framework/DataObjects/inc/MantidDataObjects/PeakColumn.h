@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Column.h"
+#include "MantidDataObjects/LeanElasticPeak.h"
 #include "MantidDataObjects/Peak.h"
 
 #include <boost/variant.hpp>
@@ -24,11 +25,11 @@ namespace DataObjects {
  * @author Janik Zikovsky
  * @date 2011-04-25 18:06:32.952258
  */
-class DLLExport PeakColumn : public Mantid::API::Column {
+template <class T> class DLLExport PeakColumn : public Mantid::API::Column {
 
 public:
   /// Construct a column with a reference to the peaks list, a name & type
-  PeakColumn(std::vector<Peak> &peaks, const std::string &name);
+  PeakColumn(std::vector<T> &peaks, const std::string &name);
 
   /// Number of individual elements in the column.
   size_t size() const override { return m_peaks.size(); }
@@ -67,13 +68,12 @@ public:
   void fromDouble(size_t i, double value) override;
 
   /// Reference to the data.
-  const std::vector<Peak> &data() const { return m_peaks; }
+  const std::vector<T> &data() const { return m_peaks; }
 
   bool equals(const Column &otherColumn, double tolerance) const override {
     (void)otherColumn;
     (void)tolerance;
-    throw std::runtime_error(
-        "equals not implemented, to compare use CompareWorkspace");
+    throw std::runtime_error("equals not implemented, to compare use CompareWorkspace");
   }
 
 protected:
@@ -90,7 +90,7 @@ protected:
 
 private:
   /// Reference to the peaks object saved in the PeaksWorkspace.
-  std::vector<Peak> &m_peaks;
+  std::vector<T> &m_peaks;
   /// Precision of hkl in table workspace
   int m_hklPrec;
 

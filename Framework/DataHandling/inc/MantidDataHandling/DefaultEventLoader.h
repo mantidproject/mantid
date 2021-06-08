@@ -22,12 +22,10 @@ class LoadEventNexus;
 */
 class MANTID_DATAHANDLING_DLL DefaultEventLoader {
 public:
-  static void
-  load(LoadEventNexus *alg, EventWorkspaceCollection &ws, bool haveWeights,
-       bool event_id_is_spec, std::vector<std::string> bankNames,
-       const std::vector<int> &periodLog, const std::string &classType,
-       std::vector<std::size_t> bankNumEvents, const bool oldNeXusFileNames,
-       const bool precount, const int chunk, const int totalChunks);
+  static void load(LoadEventNexus *alg, EventWorkspaceCollection &ws, bool haveWeights, bool event_id_is_spec,
+                   std::vector<std::string> bankNames, const std::vector<int> &periodLog, const std::string &classType,
+                   std::vector<std::size_t> bankNumEvents, const bool oldNeXusFileNames, const bool precount,
+                   const int chunk, const int totalChunks);
 
   /// Flag for dealing with a simulated file
   bool m_haveWeights;
@@ -61,13 +59,11 @@ public:
 
   /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the
   /// event list.
-  std::vector<std::vector<std::vector<Mantid::Types::Event::TofEvent> *>>
-      eventVectors;
+  std::vector<std::vector<std::vector<Mantid::Types::Event::TofEvent> *>> eventVectors;
 
   /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent>
   /// in the event list.
-  std::vector<std::vector<std::vector<Mantid::DataObjects::WeightedEvent> *>>
-      weightedEventVectors;
+  std::vector<std::vector<std::vector<Mantid::DataObjects::WeightedEvent> *>> weightedEventVectors;
 
   /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace
   /// index)
@@ -77,32 +73,24 @@ public:
   std::vector<std::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
 
 private:
-  DefaultEventLoader(LoadEventNexus *alg, EventWorkspaceCollection &ws,
-                     bool haveWeights, bool event_id_is_spec,
-                     const size_t numBanks, const bool precount,
-                     const int chunk, const int totalChunks);
-  std::pair<size_t, size_t>
-  setupChunking(std::vector<std::string> &bankNames,
-                std::vector<std::size_t> &bankNumEvents);
+  DefaultEventLoader(LoadEventNexus *alg, EventWorkspaceCollection &ws, bool haveWeights, bool event_id_is_spec,
+                     const size_t numBanks, const bool precount, const int chunk, const int totalChunks);
+  std::pair<size_t, size_t> setupChunking(std::vector<std::string> &bankNames, std::vector<std::size_t> &bankNumEvents);
   /// Map detector IDs to event lists.
-  template <class T>
-  void makeMapToEventLists(std::vector<std::vector<T>> &vectors);
+  template <class T> void makeMapToEventLists(std::vector<std::vector<T>> &vectors);
 };
 
 /** Generate a look-up table where the index = the pixel ID of an event
  * and the value = a pointer to the EventList in the workspace
  * @param vectors :: the array to create the map on
  */
-template <class T>
-void DefaultEventLoader::makeMapToEventLists(
-    std::vector<std::vector<T>> &vectors) {
+template <class T> void DefaultEventLoader::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
   vectors.resize(m_ws.nPeriods());
   if (event_id_is_spec) {
     // Find max spectrum no
     auto *ax1 = m_ws.getAxis(1);
-    specnum_t maxSpecNo =
-        -std::numeric_limits<specnum_t>::max(); // So that any number will be
-                                                // greater than this
+    specnum_t maxSpecNo = -std::numeric_limits<specnum_t>::max(); // So that any number will be
+                                                                  // greater than this
     for (size_t i = 0; i < ax1->length(); i++) {
       specnum_t spec = ax1->spectraNo(i);
       if (spec > maxSpecNo)
@@ -120,8 +108,7 @@ void DefaultEventLoader::makeMapToEventLists(
     for (size_t period = 0; period < m_ws.nPeriods(); ++period) {
       for (size_t i = 0; i < m_ws.getNumberHistograms(); ++i) {
         const auto &spec = m_ws.getSpectrum(i);
-        getEventsFrom(m_ws.getSpectrum(i, period),
-                      vectors[period][spec.getSpectrumNo()]);
+        getEventsFrom(m_ws.getSpectrum(i, period), vectors[period][spec.getSpectrumNo()]);
       }
     }
   } else {
@@ -140,8 +127,7 @@ void DefaultEventLoader::makeMapToEventLists(
       // Save a POINTER to the vector
       if (wi < m_ws.getNumberHistograms()) {
         for (size_t period = 0; period < m_ws.nPeriods(); ++period) {
-          getEventsFrom(m_ws.getSpectrum(wi, period),
-                        vectors[period][j - pixelID_to_wi_offset]);
+          getEventsFrom(m_ws.getSpectrum(wi, period), vectors[period][j - pixelID_to_wi_offset]);
         }
       }
     }

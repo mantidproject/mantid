@@ -63,12 +63,10 @@ using ICostFunction_sptr = std::shared_ptr<ICostFunction>;
  * Macro for declaring a new type of cost functions to be used with the
  * CostFunctionFactory
  */
-#define DECLARE_COSTFUNCTION(classname, username)                              \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_costfunction_##classname(        \
-      ((Mantid::API::CostFunctionFactory::Instance().subscribe<classname>(     \
-           #username)),                                                        \
-       0));                                                                    \
+#define DECLARE_COSTFUNCTION(classname, username)                                                                      \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_costfunction_##classname(                                                \
+      ((Mantid::API::CostFunctionFactory::Instance().subscribe<classname>(#username)), 0));                            \
   }
 
 } // namespace API

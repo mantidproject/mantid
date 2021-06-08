@@ -119,7 +119,7 @@ class HB3AFindPeaks(PythonAlgorithm):
                 issues["InputWorkspace"] = "Workspace need to be a MDWorkspace"
             elif AnalysisDataService[input_ws].getSpecialCoordinateSystem().name != "QSample":
                 issues["InputWorkspace"] = "Input workspace expected to be in QSample, " \
-                    "workspace is in '{}'".format(input_ws.getSpecialCoordinateSystem().name)
+                    "workspace is in '{}'".format(AnalysisDataService[input_ws].getSpecialCoordinateSystem().name)
             elif AnalysisDataService[input_ws].getNumDims() != 3:
                 issues["InputWorkspace"] = "Workspace has the wrong number of dimensions"
 

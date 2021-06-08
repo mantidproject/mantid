@@ -22,14 +22,12 @@ using namespace Mantid::Kernel;
 
 class MDWSTransformTestHelper : public MDWSTransform {
 public:
-  std::vector<double> getTransfMatrix(MDWSDescription &TargWSDescription,
-                                      CnvrtToMD::TargetFrame frames,
+  std::vector<double> getTransfMatrix(MDWSDescription &TargWSDescription, CnvrtToMD::TargetFrame frames,
                                       CnvrtToMD::CoordScaling scaling) const {
     CnvrtToMD::CoordScaling inScaling(scaling);
     return MDWSTransform::getTransfMatrix(TargWSDescription, frames, inScaling);
   }
-  CnvrtToMD::TargetFrame
-  findTargetFrame(MDWSDescription &TargWSDescription) const {
+  CnvrtToMD::TargetFrame findTargetFrame(MDWSDescription &TargWSDescription) const {
     return MDWSTransform::findTargetFrame(TargWSDescription);
   }
 };
@@ -53,32 +51,26 @@ public:
 
   void testFindTargetFrame() {
     MDWSDescription TargWSDescription;
-    Mantid::API::MatrixWorkspace_sptr spws =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10);
+    Mantid::API::MatrixWorkspace_sptr spws = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10);
     std::vector<double> minVal(4, -3), maxVal(4, 3);
     TargWSDescription.setMinMax(minVal, maxVal);
 
     TargWSDescription.buildFromMatrixWS(spws, "Q3D", "Direct");
 
     MDWSTransformTestHelper Transf;
-    TS_ASSERT_EQUALS(CnvrtToMD::LabFrame,
-                     Transf.findTargetFrame(TargWSDescription));
+    TS_ASSERT_EQUALS(CnvrtToMD::LabFrame, Transf.findTargetFrame(TargWSDescription));
 
     WorkspaceCreationHelper::setGoniometer(spws, 0, 0, 0);
 
-    TS_ASSERT_EQUALS(CnvrtToMD::SampleFrame,
-                     Transf.findTargetFrame(TargWSDescription));
+    TS_ASSERT_EQUALS(CnvrtToMD::SampleFrame, Transf.findTargetFrame(TargWSDescription));
 
-    spws->mutableSample().setOrientedLattice(
-        std::make_unique<Geometry::OrientedLattice>(*pLattice));
-    TS_ASSERT_EQUALS(CnvrtToMD::HKLFrame,
-                     Transf.findTargetFrame(TargWSDescription));
+    spws->mutableSample().setOrientedLattice(std::make_unique<Geometry::OrientedLattice>(*pLattice));
+    TS_ASSERT_EQUALS(CnvrtToMD::HKLFrame, Transf.findTargetFrame(TargWSDescription));
   }
   void testForceTargetFrame() {
     MDWSDescription TargWSDescription;
 
-    Mantid::API::MatrixWorkspace_sptr spws =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10);
+    Mantid::API::MatrixWorkspace_sptr spws = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10);
     std::vector<double> minVal(4, -3), maxVal(4, 3);
     TargWSDescription.setMinMax(minVal, maxVal);
     spws->mutableSample().setOrientedLattice(nullptr);
@@ -86,27 +78,21 @@ public:
     TargWSDescription.buildFromMatrixWS(spws, "Q3D", "Direct");
 
     MDWSTransformTestHelper Transf;
-    TSM_ASSERT_THROWS(
-        "Forced HKL frame would not accept workspace without oriented lattice",
-        Transf.getTransfMatrix(TargWSDescription, CnvrtToMD::HKLFrame,
-                               CnvrtToMD::HKLScale),
-        const std::invalid_argument &);
+    TSM_ASSERT_THROWS("Forced HKL frame would not accept workspace without oriented lattice",
+                      Transf.getTransfMatrix(TargWSDescription, CnvrtToMD::HKLFrame, CnvrtToMD::HKLScale),
+                      const std::invalid_argument &);
     TSM_ASSERT_THROWS("Forced SampleFrame frame would not accept workspace "
                       "without goniometer defined",
-                      Transf.getTransfMatrix(TargWSDescription,
-                                             CnvrtToMD::SampleFrame,
-                                             CnvrtToMD::HKLScale),
+                      Transf.getTransfMatrix(TargWSDescription, CnvrtToMD::SampleFrame, CnvrtToMD::HKLScale),
                       const std::invalid_argument &);
-    spws->mutableSample().setOrientedLattice(
-        std::make_unique<Geometry::OrientedLattice>(*pLattice));
+    spws->mutableSample().setOrientedLattice(std::make_unique<Geometry::OrientedLattice>(*pLattice));
     WorkspaceCreationHelper::setGoniometer(spws, 20, 0, 0);
 
     // spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
 
     std::vector<double> transf;
     TS_ASSERT_THROWS_NOTHING(
-        transf = Transf.getTransfMatrix(
-            TargWSDescription, CnvrtToMD::SampleFrame, CnvrtToMD::HKLScale));
+        transf = Transf.getTransfMatrix(TargWSDescription, CnvrtToMD::SampleFrame, CnvrtToMD::HKLScale));
   }
 
   void test_buildDimNames() {
@@ -118,8 +104,8 @@ public:
     TargWSDescription.buildFromMatrixWS(ws2D, "Q3D", "Direct");
 
     MDWSTransform MsliceTransf;
-    TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(
-        TargWSDescription, CnvrtToMD::HKLFrame, CnvrtToMD::NoScaling));
+    TS_ASSERT_THROWS_NOTHING(
+        MsliceTransf.setQ3DDimensionsNames(TargWSDescription, CnvrtToMD::HKLFrame, CnvrtToMD::NoScaling));
 
     std::vector<std::string> dimNames = TargWSDescription.getDimNames();
     TS_ASSERT_EQUALS("[H,0,0]", dimNames[0]);
@@ -145,10 +131,8 @@ public:
     std::vector<double> minVal(4, -3), maxVal(4, 3);
     TWS.setMinMax(minVal, maxVal);
 
-    pLattice = std::make_unique<Geometry::OrientedLattice>(
-        5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.);
-    ws2D->mutableSample().setOrientedLattice(
-        std::make_unique<Geometry::OrientedLattice>(*pLattice));
+    pLattice = std::make_unique<Geometry::OrientedLattice>(5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.);
+    ws2D->mutableSample().setOrientedLattice(std::make_unique<Geometry::OrientedLattice>(*pLattice));
     TWS.buildFromMatrixWS(ws2D, "Q3D", "Direct");
 
     std::vector<double> u(3, 0);
@@ -164,10 +148,8 @@ public:
 
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 0);
     CnvrtToMD::CoordScaling scales = CnvrtToMD::HKLScale;
-    TS_ASSERT_THROWS_NOTHING(
-        rot = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::AutoSelect, scales));
-    TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(
-        TWS, CnvrtToMD::HKLFrame, CnvrtToMD::HKLScale));
+    TS_ASSERT_THROWS_NOTHING(rot = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::AutoSelect, scales));
+    TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS, CnvrtToMD::HKLFrame, CnvrtToMD::HKLScale));
 
     dimNames = TWS.getDimNames();
     TS_ASSERT_EQUALS("[H,0,0]", dimNames[0]);
@@ -177,10 +159,8 @@ public:
 
     std::vector<double> rot1;
     scales = CnvrtToMD::OrthogonalHKLScale;
-    TS_ASSERT_THROWS_NOTHING(rot1 = MsliceTransf.getTransfMatrix(
-                                 TWS, CnvrtToMD::AutoSelect, scales));
-    TS_ASSERT_THROWS_NOTHING(
-        MsliceTransf.setQ3DDimensionsNames(TWS, CnvrtToMD::AutoSelect, scales));
+    TS_ASSERT_THROWS_NOTHING(rot1 = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::AutoSelect, scales));
+    TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS, CnvrtToMD::AutoSelect, scales));
 
     dimNames = TWS.getDimNames();
     TS_ASSERT_EQUALS("[H,0,0]", dimNames[0]);
@@ -188,32 +168,23 @@ public:
     TS_ASSERT_EQUALS("[0,-K,0]", dimNames[2]);
     TS_ASSERT_EQUALS("DeltaE", dimNames[3]);
 
-    TSM_ASSERT_DELTA(" element 1 should be a/2Pi", pLattice->a1() / (2 * M_PI),
-                     rot[0], 1.e-6);
-    TSM_ASSERT_DELTA(" element 2 should be -b/2Pi",
-                     -pLattice->a2() / (2 * M_PI), rot[7], 1.e-6);
-    TSM_ASSERT_DELTA(" element 3 should be c/2Pi", pLattice->a3() / (2 * M_PI),
-                     rot[5], 1.e-6);
+    TSM_ASSERT_DELTA(" element 1 should be a/2Pi", pLattice->a1() / (2 * M_PI), rot[0], 1.e-6);
+    TSM_ASSERT_DELTA(" element 2 should be -b/2Pi", -pLattice->a2() / (2 * M_PI), rot[7], 1.e-6);
+    TSM_ASSERT_DELTA(" element 3 should be c/2Pi", pLattice->a3() / (2 * M_PI), rot[5], 1.e-6);
 
     // Orthogonal HKL and HKL are equivalent for rectilinear lattice
     for (int i = 0; i < 9; i++) {
-      TSM_ASSERT_DELTA(" element: " + boost::lexical_cast<std::string>(i) +
-                           " wrong",
-                       rot[i], rot1[i], 1.e-6);
+      TSM_ASSERT_DELTA(" element: " + boost::lexical_cast<std::string>(i) + " wrong", rot[i], rot1[i], 1.e-6);
     }
     // Orthogonal HKL and HKL are equivalent for rectilinear lattice for any
     // goniometer position
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 60);
     scales = CnvrtToMD::HKLScale;
-    TS_ASSERT_THROWS_NOTHING(
-        rot = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::AutoSelect, scales));
+    TS_ASSERT_THROWS_NOTHING(rot = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::AutoSelect, scales));
     scales = CnvrtToMD::OrthogonalHKLScale;
-    TS_ASSERT_THROWS_NOTHING(rot1 = MsliceTransf.getTransfMatrix(
-                                 TWS, CnvrtToMD::AutoSelect, scales));
+    TS_ASSERT_THROWS_NOTHING(rot1 = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::AutoSelect, scales));
     for (int i = 0; i < 9; i++) {
-      TSM_ASSERT_DELTA(" element: " + boost::lexical_cast<std::string>(i) +
-                           " wrong",
-                       rot[i], rot1[i], 1.e-6);
+      TSM_ASSERT_DELTA(" element: " + boost::lexical_cast<std::string>(i) + " wrong", rot[i], rot1[i], 1.e-6);
     }
   }
 
@@ -222,8 +193,7 @@ public:
     std::vector<double> minVal(4, -3), maxVal(4, 3);
     TWS.setMinMax(minVal, maxVal);
     ws2D->mutableSample().setOrientedLattice(
-        std::make_unique<Geometry::OrientedLattice>(5 * M_PI, M_PI, 2 * M_PI,
-                                                    90., 90., 90.));
+        std::make_unique<Geometry::OrientedLattice>(5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.));
     TWS.buildFromMatrixWS(ws2D, "Q3D", "Direct");
 
     std::vector<double> u(3, 0);
@@ -239,8 +209,7 @@ public:
 
     CnvrtToMD::CoordScaling scales = CnvrtToMD::NoScaling;
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 20);
-    TS_ASSERT_THROWS_NOTHING(
-        rot = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::AutoSelect, scales));
+    TS_ASSERT_THROWS_NOTHING(rot = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::AutoSelect, scales));
 
     // and this is Horace transformation matrix obtained from
     // [transf,u_to_rlu]=calc_proj_matrix(alat, angldeg, u, v, 20*deg2rad,
@@ -276,8 +245,7 @@ public:
     Transf[2][2] = 1;
 
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 40);
-    TS_ASSERT_THROWS_NOTHING(
-        rot = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::AutoSelect, scales));
+    TS_ASSERT_THROWS_NOTHING(rot = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::AutoSelect, scales));
     sample = (PermHM * Transf * PermMH).getVector();
     for (size_t i = 0; i < 9; i++) {
       TS_ASSERT_DELTA(sample[i], rot[i], 1.e-4);
@@ -344,8 +312,7 @@ public:
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 0);
     // this is Wollastonite
     ws2D->mutableSample().setOrientedLattice(
-        std::make_unique<Geometry::OrientedLattice>(
-            7.9250, 7.3200, 7.0650, 90.0550, 95.2170, 103.4200));
+        std::make_unique<Geometry::OrientedLattice>(7.9250, 7.3200, 7.0650, 90.0550, 95.2170, 103.4200));
     //
     //[transf,u_to_rlu]=calc_proj_matrix([7.9250,7.3200,7.0650],
     // 90.0550,95.2170,103.4200, u, v, 0, omega, dpsi, gl, gs)
@@ -353,8 +320,7 @@ public:
     // 1.2215   -0.2928  -0.1147
     //    0    1.1650   -0.0011
     //    0         0    1.1244
-    Kernel::Matrix<double> U2RLU(
-        3, 3); // 0 deg rotation, these settins results in inverse B-matrix:
+    Kernel::Matrix<double> U2RLU(3, 3); // 0 deg rotation, these settins results in inverse B-matrix:
     U2RLU[0][0] = 1.2215;
     U2RLU[0][1] = -0.2928;
     U2RLU[0][2] = -0.1147;
@@ -366,8 +332,7 @@ public:
     U2RLU[2][2] = 1.1244;
 
     CnvrtToMD::CoordScaling scales = CnvrtToMD::HKLScale;
-    TS_ASSERT_THROWS_NOTHING(
-        rot = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::AutoSelect, scales));
+    TS_ASSERT_THROWS_NOTHING(rot = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::AutoSelect, scales));
 
     auto sample = U2RLU.getVector();
     for (size_t i = 0; i < 9; i++) {
@@ -379,8 +344,7 @@ public:
     MDWSDescription TWS;
     std::vector<double> rot, sample(9, 0);
 
-    Mantid::API::MatrixWorkspace_sptr spws =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10);
+    Mantid::API::MatrixWorkspace_sptr spws = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10);
     // Mantid::API::MatrixWorkspace_sptr spws
     // =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
     std::vector<double> minVal(2, 0), maxVal(2, 3);
@@ -391,24 +355,21 @@ public:
     MDWSTransformTestHelper MsliceTransf;
 
     CnvrtToMD::CoordScaling scales = CnvrtToMD::NoScaling;
-    TS_ASSERT_THROWS_NOTHING(
-        rot = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::HKLFrame, scales));
+    TS_ASSERT_THROWS_NOTHING(rot = MsliceTransf.getTransfMatrix(TWS, CnvrtToMD::HKLFrame, scales));
     sample[0] = sample[4] = sample[8] = 1;
 
     TS_ASSERT_DELTA(sample, rot, 1.e-7);
   }
 
   MDWSTransfTest() : PermMH(3, 3) {
-    ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
+    ws2D = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     // rotate the crystal by twenty degrees back around y-axis;
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 20);
     // add workspace energy
     ws2D->mutableRun().addProperty("Ei", 13., "meV", true);
 
     pLattice = std::make_unique<Geometry::OrientedLattice>(3, 3, 2, 90, 90, 90);
-    ws2D->mutableSample().setOrientedLattice(
-        std::make_unique<Geometry::OrientedLattice>(*pLattice));
+    ws2D->mutableSample().setOrientedLattice(std::make_unique<Geometry::OrientedLattice>(*pLattice));
 
     // S_mantid*k_mantid = S_hor*k_hor; -- both Mantid and Horace produce the
     // same kind of crystal frame

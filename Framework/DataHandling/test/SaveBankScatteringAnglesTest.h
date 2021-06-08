@@ -35,19 +35,16 @@ public:
 
     SaveBankScatteringAngles testAlg;
     testAlg.initialize();
-    TS_ASSERT_THROWS(testAlg.setProperty("InputWorkspace", "ws"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(testAlg.setProperty("InputWorkspace", "ws"), const std::invalid_argument &);
 
     ADS.remove("ws");
   }
 
   void test_fileSavedWithCorrectNumberOfLines() {
     auto &ADS = API::AnalysisDataService::Instance();
-    const auto ws1 =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 100);
+    const auto ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 100);
     ADS.add("ws1", ws1);
-    const auto ws2 =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 100);
+    const auto ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 100);
     ADS.add("ws2", ws2);
     groupWorkspaces({"ws1", "ws2"}, "group");
 
@@ -98,9 +95,7 @@ public:
     std::string line;
 
     TS_ASSERT_THROWS_NOTHING(std::getline(file, line));
-    TS_ASSERT_EQUALS(
-        line,
-        "bank :    0  group:     1201    89.9396035211    180.0000000000");
+    TS_ASSERT_EQUALS(line, "bank :    0  group:     1201    89.9396035211    180.0000000000");
 
     auto &ADS = API::AnalysisDataService::Instance();
     ADS.remove("ws");
@@ -108,10 +103,8 @@ public:
   }
 
 private:
-  void groupWorkspaces(const std::vector<std::string> &workspaceNames,
-                       const std::string &outputWSName) {
-    const auto groupAlg =
-        API::AlgorithmManager::Instance().create("GroupWorkspaces");
+  void groupWorkspaces(const std::vector<std::string> &workspaceNames, const std::string &outputWSName) {
+    const auto groupAlg = API::AlgorithmManager::Instance().create("GroupWorkspaces");
     groupAlg->setProperty("InputWorkspaces", workspaceNames);
     groupAlg->setProperty("OutputWorkspace", outputWSName);
     groupAlg->execute();

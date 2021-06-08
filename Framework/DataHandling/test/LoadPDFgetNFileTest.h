@@ -21,9 +21,7 @@ class LoadPDFgetNFileTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadPDFgetNFileTest *createSuite() {
-    return new LoadPDFgetNFileTest();
-  }
+  static LoadPDFgetNFileTest *createSuite() { return new LoadPDFgetNFileTest(); }
   static void destroySuite(LoadPDFgetNFileTest *suite) { delete suite; }
 
   /** Test to load .sq file
@@ -46,8 +44,7 @@ public:
 
     // 4.
     DataObjects::Workspace2D_sptr outws =
-        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            API::AnalysisDataService::Instance().retrieve("NOM_Sqa"));
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(API::AnalysisDataService::Instance().retrieve("NOM_Sqa"));
 
     TS_ASSERT(outws);
 
@@ -76,8 +73,7 @@ public:
 
     // 4.
     DataObjects::Workspace2D_sptr outws =
-        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            API::AnalysisDataService::Instance().retrieve("NOM_Gr"));
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(API::AnalysisDataService::Instance().retrieve("NOM_Gr"));
 
     TS_ASSERT(outws);
 
@@ -97,18 +93,15 @@ public:
     std::string datafilename("NOM_5429.bsmo");
 
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", datafilename));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("OutputWorkspace", "NOM_SmoothBackground"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", "NOM_SmoothBackground"));
 
     // 3. Execute
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(loader.isExecuted());
 
     // 4.
-    DataObjects::Workspace2D_sptr outws =
-        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            API::AnalysisDataService::Instance().retrieve(
-                "NOM_SmoothBackground"));
+    DataObjects::Workspace2D_sptr outws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        API::AnalysisDataService::Instance().retrieve("NOM_SmoothBackground"));
 
     TS_ASSERT(outws);
 

@@ -25,11 +25,9 @@ using namespace Kernel;
 using namespace API;
 
 void StripPeaks::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace.");
 
   auto min = std::make_shared<BoundedValidator<int>>();
@@ -57,10 +55,8 @@ void StripPeaks::init() {
                   "option is turned off.");
 
   std::vector<std::string> bkgdtypes{"Linear", "Quadratic"};
-  declareProperty(
-      "BackgroundType", "Linear",
-      std::make_shared<StringListValidator>(bkgdtypes),
-      "Type of Background. Present choices include 'Linear' and 'Quadratic'");
+  declareProperty("BackgroundType", "Linear", std::make_shared<StringListValidator>(bkgdtypes),
+                  "Type of Background. Present choices include 'Linear' and 'Quadratic'");
 
   declareProperty("HighBackground", true,
                   "Flag to indicate that the peaks are "
@@ -75,9 +71,8 @@ void StripPeaks::init() {
 
   auto mustBePositiveDbl = std::make_shared<BoundedValidator<double>>();
   mustBePositiveDbl->setLower(0.);
-  declareProperty(
-      "MaximumChisq", 100., mustBePositiveDbl,
-      "The maximum chisq value for fits to remove the peak. Default 100.");
+  declareProperty("MaximumChisq", 100., mustBePositiveDbl,
+                  "The maximum chisq value for fits to remove the peak. Default 100.");
 }
 
 void StripPeaks::exec() {
@@ -107,8 +102,7 @@ void StripPeaks::exec() {
  *  @param WS :: The workspace to search
  *  @return list of found peaks
  */
-API::ITableWorkspace_sptr
-StripPeaks::findPeaks(const API::MatrixWorkspace_sptr &WS) {
+API::ITableWorkspace_sptr StripPeaks::findPeaks(const API::MatrixWorkspace_sptr &WS) {
   g_log.debug("Calling FindPeaks as a Child Algorithm");
 
   // Read from properties
@@ -124,8 +118,7 @@ StripPeaks::findPeaks(const API::MatrixWorkspace_sptr &WS) {
 
   // Set up and execute algorithm
   bool showlog = true;
-  API::IAlgorithm_sptr findpeaks =
-      createChildAlgorithm("FindPeaks", 0.0, 0.2, showlog);
+  API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", 0.0, 0.2, showlog);
   findpeaks->setProperty("InputWorkspace", WS);
   findpeaks->setProperty<int>("FWHM", fwhm);
   findpeaks->setProperty<int>("Tolerance", tolerance);
@@ -145,8 +138,7 @@ StripPeaks::findPeaks(const API::MatrixWorkspace_sptr &WS) {
                              "for table workspace 'PeaksList'.");
 
   std::stringstream infoss;
-  infoss << "Call FindPeaks() to find " << peakpositions.size()
-         << " peaks with parameters: \n";
+  infoss << "Call FindPeaks() to find " << peakpositions.size() << " peaks with parameters: \n";
   infoss << "\t FWHM            = " << fwhm << ";\n";
   infoss << "\t Tolerance       = " << tolerance << ";\n";
   infoss << "\t HighBackground  = " << highbackground << ";\n";
@@ -158,8 +150,7 @@ StripPeaks::findPeaks(const API::MatrixWorkspace_sptr &WS) {
       infoss << ", ";
   }
   infoss << ")\n"
-         << "Returned number of fitted peak = " << peaklistws->rowCount()
-         << ".";
+         << "Returned number of fitted peak = " << peaklistws->rowCount() << ".";
   g_log.information(infoss.str());
 
   return peaklistws;
@@ -172,9 +163,8 @@ StripPeaks::findPeaks(const API::MatrixWorkspace_sptr &WS) {
  *  @param peakslist :: The succesfully fitted peaks
  *  @return A workspace containing the peak-subtracted data
  */
-API::MatrixWorkspace_sptr
-StripPeaks::removePeaks(const API::MatrixWorkspace_const_sptr &input,
-                        const API::ITableWorkspace_sptr &peakslist) {
+API::MatrixWorkspace_sptr StripPeaks::removePeaks(const API::MatrixWorkspace_const_sptr &input,
+                                                  const API::ITableWorkspace_sptr &peakslist) {
   g_log.debug("Subtracting peaks");
   // Create an output workspace - same size as input one
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(input);
@@ -208,20 +198,16 @@ StripPeaks::removePeaks(const API::MatrixWorkspace_const_sptr &input,
       continue; // Height must be positive
     }
     if (chisq > m_maxChiSq) {
-      g_log.information() << "Error for fit peak at " << centre << " is "
-                          << chisq << ", which exceeds allowed value "
+      g_log.information() << "Error for fit peak at " << centre << " is " << chisq << ", which exceeds allowed value "
                           << m_maxChiSq << "\n";
       if (chisq != DBL_MAX)
-        g_log.error() << "StripPeaks():  Peak Index = " << i
-                      << " @ X = " << centre
-                      << "  Error: Peak fit with too high of chisq " << chisq
-                      << " > " << m_maxChiSq << "\n";
+        g_log.error() << "StripPeaks():  Peak Index = " << i << " @ X = " << centre
+                      << "  Error: Peak fit with too high of chisq " << chisq << " > " << m_maxChiSq << "\n";
       continue;
     } else if (chisq < 0.) {
-      g_log.warning() << "StripPeaks():  Peak Index = " << i
-                      << " @ X = " << centre
-                      << ". Error: Peak fit with too wide peak width" << sigma
-                      << " denoted by chi^2 = " << chisq << " <= 0. \n";
+      g_log.warning() << "StripPeaks():  Peak Index = " << i << " @ X = " << centre
+                      << ". Error: Peak fit with too wide peak width" << sigma << " denoted by chi^2 = " << chisq
+                      << " <= 0. \n";
     }
     {
       // find the bin width at the center of the peak - average of the bins on
@@ -233,37 +219,29 @@ StripPeaks::removePeaks(const API::MatrixWorkspace_const_sptr &input,
       const double fwhm = sigma * 2. * std::sqrt(2. * std::log(2.));
 
       if ((fwhm / bin_width) < 1.5) {
-        g_log.warning() << "StripPeaks():  Peak Index = " << i
-                        << " @ X = " << centre
+        g_log.warning() << "StripPeaks():  Peak Index = " << i << " @ X = " << centre
                         << "  Error: Peak fit with too narrow of peak"
                         << " fwhm = " << fwhm << " bin size = " << bin_width
-                        << " num bins in peak = " << 2. * (fwhm / bin_width)
-                        << " <3\n";
+                        << " num bins in peak = " << 2. * (fwhm / bin_width) << " <3\n";
         continue;
       }
     }
 
-    g_log.information() << "Subtracting peak " << i << " from spectrum "
-                        << peakslist->getRef<int>("spectrum", i)
-                        << " at x = " << centre << " h = " << height
-                        << " s = " << sigma << " chi2 = " << chisq << "\n";
+    g_log.information() << "Subtracting peak " << i << " from spectrum " << peakslist->getRef<int>("spectrum", i)
+                        << " at x = " << centre << " h = " << height << " s = " << sigma << " chi2 = " << chisq << "\n";
 
     { // log the background function
       double a0 = 0.;
       double a1 = 0.;
       double a2 = 0.;
       const std::vector<std::string> columnNames = peakslist->getColumnNames();
-      if (std::find(columnNames.begin(), columnNames.end(), "A0") !=
-          columnNames.end())
+      if (std::find(columnNames.begin(), columnNames.end(), "A0") != columnNames.end())
         a0 = peakslist->getRef<double>("A0", i);
-      if (std::find(columnNames.begin(), columnNames.end(), "A1") !=
-          columnNames.end())
+      if (std::find(columnNames.begin(), columnNames.end(), "A1") != columnNames.end())
         a1 = peakslist->getRef<double>("A1", i);
-      if (std::find(columnNames.begin(), columnNames.end(), "A2") !=
-          columnNames.end())
+      if (std::find(columnNames.begin(), columnNames.end(), "A2") != columnNames.end())
         a2 = peakslist->getRef<double>("A2", i);
-      g_log.information() << "     background = " << a0 << " + " << a1
-                          << " x + " << a2 << " x^2\n";
+      g_log.information() << "     background = " << a0 << " + " << a1 << " x + " << a2 << " x^2\n";
     }
 
     // Get central bin values using points

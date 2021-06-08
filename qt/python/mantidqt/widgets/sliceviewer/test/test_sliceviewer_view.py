@@ -9,13 +9,15 @@
 import io
 import sys
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import matplotlib as mpl
+from matplotlib.colors import Normalize
 from numpy import hstack
 
 mpl.use('Agg')
 from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE  # noqa: E402
+from mantidqt.widgets.sliceviewer.view import SCALENORM  # noqa: E402
 from mantid.simpleapi import (  # noqa: E402
     CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace,
     FakeMDEventData, ConvertToDistribution, Scale, SetUB, RenameWorkspace)
@@ -28,25 +30,47 @@ from qtpy.QtWidgets import QApplication  # noqa: E402
 from math import inf  # noqa: E402
 
 
+class MockConfig(object):
+    def get(self, name):
+        if name == SCALENORM:
+            return "Log"
+
+    def set(self, name):
+        pass
+
+    def has(self, name):
+        if name == SCALENORM:
+            return True
+
+
 @start_qapplication
 class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
-    def setUp(self):
-        self.histo_ws = CreateMDHistoWorkspace(Dimensionality=3,
-                                               Extents='-3,3,-10,10,-1,1',
-                                               SignalInput=range(100),
-                                               ErrorInput=range(100),
-                                               NumberOfBins='5,5,4',
-                                               Names='Dim1,Dim2,Dim3',
-                                               Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                               OutputWorkspace='ws_MD_2d')
-        self.hkl_ws = CreateMDWorkspace(Dimensions=3,
-                                        Extents='-10,10,-10,10,-10,10',
-                                        Names='A,B,C',
-                                        Units='r.l.u.,r.l.u.,r.l.u.',
-                                        Frames='HKL,HKL,HKL',
-                                        OutputWorkspace='hkl_ws')
+    @classmethod
+    def setUpClass(cls):
+        cls.histo_ws = CreateMDHistoWorkspace(Dimensionality=3,
+                                              Extents='-3,3,-10,10,-1,1',
+                                              SignalInput=range(100),
+                                              ErrorInput=range(100),
+                                              NumberOfBins='5,5,4',
+                                              Names='Dim1,Dim2,Dim3',
+                                              Units='MomentumTransfer,EnergyTransfer,Angstrom',
+                                              OutputWorkspace='ws_MD_2d')
+        cls.histo_ws_positive = CreateMDHistoWorkspace(Dimensionality=3,
+                                                       Extents='-3,3,-10,10,-1,1',
+                                                       SignalInput=range(1, 101),
+                                                       ErrorInput=range(100),
+                                                       NumberOfBins='5,5,4',
+                                                       Names='Dim1,Dim2,Dim3',
+                                                       Units='MomentumTransfer,EnergyTransfer,Angstrom',
+                                                       OutputWorkspace='ws_MD_2d_pos')
+        cls.hkl_ws = CreateMDWorkspace(Dimensions=3,
+                                       Extents='-10,10,-9,9,-8,8',
+                                       Names='A,B,C',
+                                       Units='r.l.u.,r.l.u.,r.l.u.',
+                                       Frames='HKL,HKL,HKL',
+                                       OutputWorkspace='hkl_ws')
         expt_info = CreateSampleWorkspace()
-        self.hkl_ws.addExperimentInfo(expt_info)
+        cls.hkl_ws.addExperimentInfo(expt_info)
         SetUB('hkl_ws', 1, 1, 1, 90, 90, 90)
 
     def tearDown(self):
@@ -103,6 +127,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         pres.view.close()
 
     def test_clim_edits_prevent_negative_values_if_lognorm(self):
+
         pres = SliceViewer(self.histo_ws)
         colorbar = pres.view.data_view.colorbar
         colorbar.autoscale.setChecked(False)
@@ -118,8 +143,22 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         pres.view.close()
 
+    def test_norm_switches_if_workspace_contains_non_positive_data(self):
+        conf = MockConfig()
+        pres = SliceViewer(self.histo_ws, conf=conf)
+        colorbar = pres.view.data_view.colorbar
+        self.assertTrue(isinstance(colorbar.get_norm(), Normalize))
+        pres.view.close()
+
+    def test_log_norm_disabled_for_non_positive_data(self):
+        conf = MockConfig()
+        pres = SliceViewer(self.histo_ws, conf=conf)
+        colorbar = pres.view.data_view.colorbar
+        self.assertFalse(colorbar.norm.model().item(1, 0).isEnabled())
+        pres.view.close()
+
     def test_changing_norm_updates_clim_validators(self):
-        pres = SliceViewer(self.histo_ws)
+        pres = SliceViewer(self.histo_ws_positive)
         colorbar = pres.view.data_view.colorbar
         colorbar.autoscale.setChecked(False)
 
@@ -128,6 +167,25 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         colorbar.norm.setCurrentText("Linear")
         self.assertEqual(colorbar.cmin.validator().bottom(), -inf)
+
+        pres.view.close()
+
+    def test_update_plot_data_updates_axes_limits_when_orthog_data_tranposed(self):
+        pres = SliceViewer(self.hkl_ws)
+
+        # not transpose
+        pres.view.data_view.dimensions.transpose = False
+        pres.update_plot_data()
+        extent = pres.view.data_view.image.get_extent()
+        self.assertListEqual(extent, [-10.0, 10.0, -9.0, 9.0])
+
+        # transpose
+        pres.view.data_view.dimensions.transpose = True
+        pres.update_plot_data()
+        extent = pres.view.data_view.image.get_extent()
+        self.assertTupleEqual(extent, (-9.0, 9.0, -10.0, 10.0))
+        self.assertTupleEqual(extent[0:2], pres.view.data_view.ax.get_xlim())
+        self.assertTupleEqual(extent[2:], pres.view.data_view.ax.get_ylim())
 
         pres.view.close()
 
@@ -268,6 +326,16 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         pres.view.data_view.plot_matrix(ws)
 
         self.assertEqual(pres.view.data_view.get_axes_limits()[0], (xmin, xmax))
+
+    def test_close_event(self):
+        ws = CreateSampleWorkspace()
+        pres = SliceViewer(ws)
+        self.assert_widget_created()
+        pres.clear_observer = MagicMock()
+
+        pres.view.close()
+
+        pres.clear_observer.assert_called()
 
 # private helper functions
 

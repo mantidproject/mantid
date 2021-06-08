@@ -25,30 +25,20 @@ public:
   /// Returns typeid for the data in the column
   const std::type_info &get_type_info() const override { return typeid(T); }
   /// Returns typeid for the pointer type to the data element in the column
-  const std::type_info &get_pointer_type_info() const override {
-    return typeid(T *);
-  }
+  const std::type_info &get_pointer_type_info() const override { return typeid(T *); }
   /// Prints out the value to a stream
-  void print(size_t, std::ostream &) const override {
-    throw std::logic_error("Not implemented");
-  }
+  void print(size_t, std::ostream &) const override { throw std::logic_error("Not implemented"); }
   /// Specialized type check
   bool isBool() const override { return false; }
   bool isNumber() const override { return false; }
   /// Must return overall memory size taken by the column.
-  long int sizeOfData() const override {
-    throw std::logic_error("Not implemented");
-  }
+  long int sizeOfData() const override { throw std::logic_error("Not implemented"); }
   /// Virtual constructor. Fully clone any column.
   Column *clone() const override { throw std::logic_error("Not implemented"); }
   /// Cast an element to double if possible
-  double toDouble(size_t) const override {
-    throw std::logic_error("Not implemented");
-  }
+  double toDouble(size_t) const override { throw std::logic_error("Not implemented"); }
   /// Assign an element from double if possible
-  void fromDouble(size_t, double) override {
-    throw std::logic_error("Not implemented");
-  }
+  void fromDouble(size_t, double) override { throw std::logic_error("Not implemented"); }
 
 protected:
   /// Sets the new column size.
@@ -60,9 +50,7 @@ protected:
   /// Pointer to a data element
   void *void_pointer(size_t index) override { return &m_data[index]; }
   /// Pointer to a data element
-  const void *void_pointer(size_t index) const override {
-    return &m_data[index];
-  }
+  const void *void_pointer(size_t index) const override { return &m_data[index]; }
   /// Data storage
   std::vector<T> m_data;
 };
@@ -71,9 +59,7 @@ protected:
 
 class FunctionDomainGeneralTest : public CxxTest::TestSuite {
 public:
-  static FunctionDomainGeneralTest *createSuite() {
-    return new FunctionDomainGeneralTest();
-  }
+  static FunctionDomainGeneralTest *createSuite() { return new FunctionDomainGeneralTest(); }
   static void destroySuite(FunctionDomainGeneralTest *suite) { delete suite; }
 
   void test_sizes() {

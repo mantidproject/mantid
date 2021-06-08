@@ -60,8 +60,7 @@ private:
     WhiteList whitelist;
     whitelist.addElement("Run(s)", "InputWorkspace", "", true, "TOF_");
     whitelist.addElement("Angle", "ThetaIn", "");
-    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "",
-                         true, "TRANS_");
+    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "", true, "TRANS_");
     whitelist.addElement("Q min", "MomentumTransferMinimum", "");
     whitelist.addElement("Q max", "MomentumTransferMaximum", "");
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
@@ -129,9 +128,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static TwoLevelTreeManagerTest *createSuite() {
-    return new TwoLevelTreeManagerTest();
-  }
+  static TwoLevelTreeManagerTest *createSuite() { return new TwoLevelTreeManagerTest(); }
   static void destroySuite(TwoLevelTreeManagerTest *suite) { delete suite; }
 
   void test_publish_commands() {
@@ -181,12 +178,8 @@ public:
     NiceMock<MockDataProcessorPresenter> presenter;
     TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
-    EXPECT_CALL(presenter, selectedParents())
-        .Times(1)
-        .WillOnce(Return(std::set<int>()));
-    EXPECT_CALL(presenter, selectedChildren())
-        .Times(1)
-        .WillOnce(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(presenter, selectedParents()).Times(1).WillOnce(Return(std::set<int>()));
+    EXPECT_CALL(presenter, selectedChildren()).Times(1).WillOnce(Return(std::map<int, std::set<int>>()));
     TS_ASSERT_THROWS_NOTHING(manager.appendRow());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
   }
@@ -198,9 +191,7 @@ public:
     NiceMock<MockDataProcessorPresenter> presenter;
     TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
-    EXPECT_CALL(presenter, selectedParents())
-        .Times(1)
-        .WillOnce(Return(std::set<int>()));
+    EXPECT_CALL(presenter, selectedParents()).Times(1).WillOnce(Return(std::set<int>()));
     EXPECT_CALL(presenter, selectedChildren()).Times(0);
     TS_ASSERT_THROWS_NOTHING(manager.appendGroup());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
@@ -214,9 +205,7 @@ public:
     TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents()).Times(0);
-    EXPECT_CALL(presenter, selectedChildren())
-        .Times(1)
-        .WillOnce(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(presenter, selectedChildren()).Times(1).WillOnce(Return(std::map<int, std::set<int>>()));
     TS_ASSERT_THROWS_NOTHING(manager.deleteRow());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
   }
@@ -228,9 +217,7 @@ public:
     NiceMock<MockDataProcessorPresenter> presenter;
     TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
-    EXPECT_CALL(presenter, selectedParents())
-        .Times(1)
-        .WillOnce(Return(std::set<int>()));
+    EXPECT_CALL(presenter, selectedParents()).Times(1).WillOnce(Return(std::set<int>()));
     EXPECT_CALL(presenter, selectedChildren()).Times(0);
     TS_ASSERT_THROWS_NOTHING(manager.deleteGroup());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
@@ -257,9 +244,7 @@ public:
     TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents()).Times(0);
-    EXPECT_CALL(presenter, selectedChildren())
-        .Times(1)
-        .WillOnce(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(presenter, selectedChildren()).Times(1).WillOnce(Return(std::map<int, std::set<int>>()));
     TS_ASSERT_THROWS_NOTHING(manager.expandSelection());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
   }
@@ -272,9 +257,7 @@ public:
     TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents()).Times(0);
-    EXPECT_CALL(presenter, selectedChildren())
-        .Times(1)
-        .WillOnce(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(presenter, selectedChildren()).Times(1).WillOnce(Return(std::map<int, std::set<int>>()));
     TS_ASSERT_THROWS_NOTHING(manager.clearSelected());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
   }
@@ -287,9 +270,7 @@ public:
     TwoLevelTreeManager manager(&presenter, reflWhitelist());
 
     EXPECT_CALL(presenter, selectedParents()).Times(0);
-    EXPECT_CALL(presenter, selectedChildren())
-        .Times(1)
-        .WillOnce(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(presenter, selectedChildren()).Times(1).WillOnce(Return(std::map<int, std::set<int>>()));
     TS_ASSERT_THROWS_NOTHING(manager.copySelected());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
   }
@@ -320,12 +301,8 @@ public:
     QStringList fourthRow = {"24682", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
 
     // Check that runs have been transferred correctly
-    EXPECT_CALL(presenter, selectedParents())
-        .Times(1)
-        .WillOnce(Return(std::set<int>()));
-    EXPECT_CALL(presenter, selectedChildren())
-        .Times(1)
-        .WillOnce(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(presenter, selectedParents()).Times(1).WillOnce(Return(std::set<int>()));
+    EXPECT_CALL(presenter, selectedChildren()).Times(1).WillOnce(Return(std::map<int, std::set<int>>()));
     auto data = manager.selectedData(false);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
@@ -420,26 +397,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(manager.transfer(runs));
 
     // Check that runs have been transferred correctly
-    EXPECT_CALL(presenter, selectedParents())
-        .Times(1)
-        .WillOnce(Return(std::set<int>()));
-    EXPECT_CALL(presenter, selectedChildren())
-        .Times(1)
-        .WillOnce(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(presenter, selectedParents()).Times(1).WillOnce(Return(std::set<int>()));
+    EXPECT_CALL(presenter, selectedChildren()).Times(1).WillOnce(Return(std::map<int, std::set<int>>()));
     auto data = manager.selectedData(false);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
     TS_ASSERT_EQUALS(data.size(), 2);
-    QStringList firstRow = {
-        "12345", "0.5",  "20000", "0.1",
-        "0.2",   "0.04", "5",     "CorrectDetectorPositions=1"};
-    QStringList secondRow = {
-        "12346", "0.6",  "20001", "0.1",
-        "0.2",   "0.04", "4",     "CorrectDetectorPositions=0"};
-    QStringList thirdRow = {"12347", "0.7",  "20003", "0.3",
-                            "0.4",   "0.01", "3",     ""};
-    QStringList fourthRow = {"12348", "0.8",  "20004", "0.4",
-                             "0.5",   "0.02", "2",     ""};
+    QStringList firstRow = {"12345", "0.5", "20000", "0.1", "0.2", "0.04", "5", "CorrectDetectorPositions=1"};
+    QStringList secondRow = {"12346", "0.6", "20001", "0.1", "0.2", "0.04", "4", "CorrectDetectorPositions=0"};
+    QStringList thirdRow = {"12347", "0.7", "20003", "0.3", "0.4", "0.01", "3", ""};
+    QStringList fourthRow = {"12348", "0.8", "20004", "0.4", "0.5", "0.02", "2", ""};
 
     TS_ASSERT_EQUALS(data[0][0]->data(), firstRow);
     TS_ASSERT_EQUALS(data[0][1]->data(), secondRow);
@@ -459,12 +426,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(manager.update(1, 0, newRow));
     TS_ASSERT_THROWS_NOTHING(manager.update(1, 1, newRow));
     // Check that runs have been updated correctly
-    EXPECT_CALL(presenter, selectedParents())
-        .Times(1)
-        .WillOnce(Return(std::set<int>()));
-    EXPECT_CALL(presenter, selectedChildren())
-        .Times(1)
-        .WillOnce(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(presenter, selectedParents()).Times(1).WillOnce(Return(std::set<int>()));
+    EXPECT_CALL(presenter, selectedChildren()).Times(1).WillOnce(Return(std::map<int, std::set<int>>()));
     auto data = manager.selectedData(false);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 

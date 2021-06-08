@@ -50,8 +50,7 @@ public:
     TS_ASSERT(show.execute())
     TS_ASSERT(show.isExecuted())
     show.setProperty("HKLIntegerOffsets", "offsets");
-    std::shared_ptr<Mantid::API::ITableWorkspace> Offsets =
-        show.getProperty("HKLIntegerOffsets");
+    std::shared_ptr<Mantid::API::ITableWorkspace> Offsets = show.getProperty("HKLIntegerOffsets");
 
     TS_ASSERT_DELTA(Offsets->Double(3, 1), 0.0186555, .1)
     TS_ASSERT_DELTA(Offsets->Double(5, 3), -0.0214665, .1)

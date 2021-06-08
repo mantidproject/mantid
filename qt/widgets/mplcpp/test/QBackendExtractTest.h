@@ -25,9 +25,7 @@ public:
   // ----------------- success tests ---------------------
   void testExtractWithSipWrappedTypeSucceeds() {
     Python::Object mplBackend{backendModule()};
-    Python::Object fig{
-        Python::NewRef(PyImport_ImportModule("matplotlib.figure"))
-            .attr("Figure")()};
+    Python::Object fig{Python::NewRef(PyImport_ImportModule("matplotlib.figure")).attr("Figure")()};
     Python::Object pyCanvas{mplBackend.attr("FigureCanvasQT")(fig)};
     QWidget *w{nullptr};
     TS_ASSERT_THROWS_NOTHING(w = Python::extract<QWidget>(pyCanvas));
@@ -37,10 +35,8 @@ public:
   // ----------------- failure tests ---------------------
 
   void testExtractWithNonSipTypeThrowsException() {
-    const Python::Object nonSipType{
-        Python::NewRef(Py_BuildValue("(ii)", 1, 2))};
+    const Python::Object nonSipType{Python::NewRef(Py_BuildValue("(ii)", 1, 2))};
     struct Foo;
-    TS_ASSERT_THROWS(Python::extract<Foo>(nonSipType),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(Python::extract<Foo>(nonSipType), const std::runtime_error &);
   }
 };

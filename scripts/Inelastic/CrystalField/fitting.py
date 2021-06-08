@@ -934,7 +934,7 @@ class CrystalField(object):
 
     def plot(self, i=0, workspace=None, ws_index=0, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
-        from mantidplot import plotSpectrum
+        from mantid.simpleapi import plotSpectrum
         from mantid.api import AlgorithmManager
         createWS = AlgorithmManager.createUnmanaged('CreateWorkspace')
         createWS.initialize()

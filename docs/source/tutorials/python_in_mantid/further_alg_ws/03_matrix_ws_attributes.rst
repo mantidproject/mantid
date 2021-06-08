@@ -33,7 +33,7 @@ Create a view of the Y data from the 2nd spectrum:
 .. code-block:: python
 
 	y_data2 = raw_workspace.readY(1)
-	
+
 	for y in y_data2:
 	    print(y)
 
@@ -80,5 +80,5 @@ Useful links
 
 * :ref:`WorkingWithWorkspaces`
 * :ref:`MatrixWorkspace`
-* :ref:`Mantid_api` 
+* :ref:`Mantid_api`
 * :ref:`concepts contents`

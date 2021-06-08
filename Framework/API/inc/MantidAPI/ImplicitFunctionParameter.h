@@ -88,48 +88,32 @@ template <typename T> struct ElementTraits {};
  */
 template <> struct ElementTraits<size_t> {
   using ValueType = size_t;
-  static std::string formatCS(const ValueType &value) {
-    return boost::str(boost::format("%u,") % value);
-  }
-  static std::string format(const ValueType &value) {
-    return boost::str(boost::format("%u") % value);
-  }
+  static std::string formatCS(const ValueType &value) { return boost::str(boost::format("%u,") % value); }
+  static std::string format(const ValueType &value) { return boost::str(boost::format("%u") % value); }
 };
 
 /** ElementTraits for boolean element types.
  */
 template <> struct ElementTraits<bool> {
   using ValueType = bool;
-  static std::string formatCS(const ValueType &value) {
-    return boost::str(boost::format("%u,") % value);
-  }
-  static std::string format(const ValueType &value) {
-    return boost::str(boost::format("%u") % value);
-  }
+  static std::string formatCS(const ValueType &value) { return boost::str(boost::format("%u,") % value); }
+  static std::string format(const ValueType &value) { return boost::str(boost::format("%u") % value); }
 };
 
 /** ElementTraits for double element types.
  */
 template <> struct ElementTraits<double> {
   using ValueType = double;
-  static std::string formatCS(const ValueType &value) {
-    return boost::str(boost::format("%.4f,") % value);
-  }
-  static std::string format(const ValueType &value) {
-    return boost::str(boost::format("%.4f") % value);
-  }
+  static std::string formatCS(const ValueType &value) { return boost::str(boost::format("%.4f,") % value); }
+  static std::string format(const ValueType &value) { return boost::str(boost::format("%.4f") % value); }
 };
 
 /** ElementTraits for float element types.
  */
 template <> struct ElementTraits<float> {
   using ValueType = double;
-  static std::string formatCS(const ValueType &value) {
-    return boost::str(boost::format("%.4f,") % value);
-  }
-  static std::string format(const ValueType &value) {
-    return boost::str(boost::format("%.4f") % value);
-  }
+  static std::string formatCS(const ValueType &value) { return boost::str(boost::format("%.4f,") % value); }
+  static std::string format(const ValueType &value) { return boost::str(boost::format("%.4f") % value); }
 };
 
 //------------------------------------------------------------------------------------

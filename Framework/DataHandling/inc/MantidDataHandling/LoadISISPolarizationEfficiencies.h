@@ -15,8 +15,7 @@ namespace DataHandling {
 /** LoadISISPolarizationEfficiencies : Load reflectometry polarization
   efficiency correction factors from disk.
 */
-class MANTID_DATAHANDLING_DLL LoadISISPolarizationEfficiencies
-    : public CreatePolarizationEfficienciesBase {
+class MANTID_DATAHANDLING_DLL LoadISISPolarizationEfficiencies : public CreatePolarizationEfficienciesBase {
 public:
   const std::string name() const override;
   int version() const override;
@@ -25,8 +24,7 @@ public:
 
 private:
   void init() override;
-  API::MatrixWorkspace_sptr
-  createEfficiencies(std::vector<std::string> const &props) override;
+  API::MatrixWorkspace_sptr createEfficiencies(std::vector<std::string> const &props) override;
 };
 
 } // namespace DataHandling

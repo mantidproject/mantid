@@ -12,10 +12,11 @@ from functools import partial
 from qtpy import QtGui
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QKeySequence
-from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView)
+from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView, QMenu)
 
 import mantidqt.icons
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
+from mantidqt.plotting.functions import can_overplot
 
 
 class MatrixWorkspaceTableView(QTableView):
@@ -39,7 +40,7 @@ class MatrixWorkspaceTableView(QTableView):
 
 class MatrixWorkspaceDisplayView(QTabWidget):
 
-    def __init__(self, presenter, parent=None):
+    def __init__(self, presenter, parent=None, window_flags=Qt.Window):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
 
         self.presenter = presenter
@@ -54,6 +55,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.setPalette(palette)
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setWindowFlags(window_flags)
 
         self.active_tab_index = 0
         self.currentChanged.connect(self.set_scroll_position_on_new_focused_tab)
@@ -113,51 +115,14 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         table.addAction(copy_action)
 
         horizontalHeader = table.horizontalHeader()
-        horizontalHeader.setContextMenuPolicy(Qt.ActionsContextMenu)
+        horizontalHeader.setContextMenuPolicy(Qt.CustomContextMenu)
         horizontalHeader.setSectionResizeMode(QHeaderView.Fixed)
-
-        copy_bin_values = QAction(self.COPY_ICON, "Copy", horizontalHeader)
-        copy_bin_values.triggered.connect(partial(self.presenter.action_copy_bin_values, table))
-        copy_bin_to_table = QAction(self.TABLE_ICON, "Copy bin to table", horizontalHeader)
-        copy_bin_to_table.triggered.connect(partial(self.presenter.action_copy_bin_to_table, table))
-
-        plot_bin_action = QAction(self.GRAPH_ICON, "Plot bin (values only)", horizontalHeader)
-        plot_bin_action.triggered.connect(partial(self.presenter.action_plot_bin, table))
-        plot_bin_with_errors_action = QAction(self.GRAPH_ICON, "Plot bin (values + errors)", horizontalHeader)
-        plot_bin_with_errors_action.triggered.connect(partial(self.presenter.action_plot_bin_with_errors, table))
-        separator1 = QAction(horizontalHeader)
-        separator1.setSeparator(True)
-
-        horizontalHeader.addAction(copy_bin_values)
-        horizontalHeader.addAction(copy_bin_to_table)
-        horizontalHeader.addAction(separator1)
-        horizontalHeader.addAction(plot_bin_action)
-        horizontalHeader.addAction(plot_bin_with_errors_action)
+        horizontalHeader.customContextMenuRequested.connect(self.bin_context_menu_opened)
 
         verticalHeader = table.verticalHeader()
-        verticalHeader.setContextMenuPolicy(Qt.ActionsContextMenu)
+        verticalHeader.setContextMenuPolicy(Qt.CustomContextMenu)
         verticalHeader.setSectionResizeMode(QHeaderView.Fixed)
-
-        copy_spectrum_values = QAction(self.COPY_ICON, "Copy", verticalHeader)
-        copy_spectrum_values.triggered.connect(
-            partial(self.presenter.action_copy_spectrum_values, table))
-        copy_spectrum_to_table = QAction(self.TABLE_ICON, "Copy spectrum to table", horizontalHeader)
-        copy_spectrum_to_table.triggered.connect(partial(self.presenter.action_copy_spectrum_to_table, table))
-
-        plot_spectrum_action = QAction(self.GRAPH_ICON, "Plot spectrum (values only)", verticalHeader)
-        plot_spectrum_action.triggered.connect(partial(self.presenter.action_plot_spectrum, table))
-        plot_spectrum_with_errors_action = QAction(self.GRAPH_ICON, "Plot spectrum (values + errors)",
-                                                   verticalHeader)
-        plot_spectrum_with_errors_action.triggered.connect(
-            partial(self.presenter.action_plot_spectrum_with_errors, table))
-        separator1 = QAction(verticalHeader)
-        separator1.setSeparator(True)
-
-        verticalHeader.addAction(copy_spectrum_values)
-        verticalHeader.addAction(copy_spectrum_to_table)
-        verticalHeader.addAction(separator1)
-        verticalHeader.addAction(plot_spectrum_action)
-        verticalHeader.addAction(plot_spectrum_with_errors_action)
+        verticalHeader.customContextMenuRequested.connect(self.spectra_context_menu_opened)
 
     def set_model(self, model_x, model_y, model_e, model_dx):
         self._set_table_model(self.table_x, model_x, MatrixWorkspaceTableViewModelType.x)
@@ -180,3 +145,88 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         """
         reply = QMessageBox.question(self, title, message, QMessageBox.Yes, QMessageBox.No)
         return True if reply == QMessageBox.Yes else False
+
+    def setup_bin_context_menu(self, table):
+        context_menu = QMenu()
+        self.setup_copy_bin_actions(context_menu, table)
+        self.setup_plot_bin_actions(context_menu, table)
+        return context_menu
+
+    def setup_spectra_context_menu(self, table):
+        context_menu = QMenu()
+        self.setup_copy_spectrum_actions(context_menu, table)
+        self.setup_plot_spectrum_actions(context_menu, table)
+        return context_menu
+
+    def bin_context_menu_opened(self, position):
+        """
+        Open the context menu in the correct location
+        :param position: The position to open the menu, e.g. where
+                         the mouse button was clicked
+        """
+        context_menu = self.setup_bin_context_menu(self.currentWidget())
+        context_menu.exec_(self.currentWidget().horizontalHeader().mapToGlobal(position))
+
+    def spectra_context_menu_opened(self, position):
+        """
+        Open the context menu in the correct location
+        :param position: The position to open the menu, e.g. where
+                         the mouse button was clicked
+        """
+        context_menu = self.setup_spectra_context_menu(self.currentWidget())
+        context_menu.exec_(self.currentWidget().verticalHeader().mapToGlobal(position))
+
+    def setup_plot_bin_actions(self, context_menu, table):
+        plot_bin_action = QAction(self.GRAPH_ICON, "Plot bin (values only)", self)
+        plot_bin_action.triggered.connect(partial(self.presenter.action_plot_bin, table))
+        plot_bin_with_errors_action = QAction(self.GRAPH_ICON, "Plot bin (values + errors)", self)
+        plot_bin_with_errors_action.triggered.connect(partial(self.presenter.action_plot_bin_with_errors, table))
+        overplot_bin_action = QAction(self.GRAPH_ICON, "Overplot bin (values only)", self)
+        overplot_bin_action.triggered.connect(partial(self.presenter.action_overplot_bin, table))
+        overplot_bin_with_errors_action = QAction(self.GRAPH_ICON, "Overplot bin (values + errors)", self)
+        overplot_bin_with_errors_action.triggered.connect(partial(self.presenter.action_overplot_bin_with_errors,
+                                                                  table))
+        overplot_bin_action.setEnabled(can_overplot())
+        overplot_bin_with_errors_action.setEnabled(can_overplot())
+        separator = QAction(self)
+        separator.setSeparator(True)
+        list(map(context_menu.addAction, [plot_bin_action, plot_bin_with_errors_action, separator,
+                                          overplot_bin_action, overplot_bin_with_errors_action]))
+
+    def setup_plot_spectrum_actions(self, context_menu, table):
+        plot_spectrum_action = QAction(self.GRAPH_ICON, "Plot spectrum (values only)", self)
+        plot_spectrum_action.triggered.connect(partial(self.presenter.action_plot_spectrum, table))
+        plot_spectrum_with_errors_action = QAction(self.GRAPH_ICON, "Plot spectrum (values + errors)",
+                                                   self)
+        plot_spectrum_with_errors_action.triggered.connect(
+            partial(self.presenter.action_plot_spectrum_with_errors, table))
+        overplot_spectrum_action = QAction(self.GRAPH_ICON, "Overplot spectrum (values only)", self)
+        overplot_spectrum_action.triggered.connect(partial(self.presenter.action_overplot_spectrum, table))
+        overplot_spectrum_with_errors_action = QAction(self.GRAPH_ICON, "Overplot spectrum (values + errors)", self)
+        overplot_spectrum_with_errors_action.triggered.connect(partial(
+            self.presenter.action_overplot_spectrum_with_errors, table))
+        overplot_spectrum_action.setEnabled(can_overplot())
+        overplot_spectrum_with_errors_action.setEnabled(can_overplot())
+        separator = QAction(self)
+        separator.setSeparator(True)
+        list(map(context_menu.addAction, [plot_spectrum_action, plot_spectrum_with_errors_action, separator,
+                                          overplot_spectrum_action, overplot_spectrum_with_errors_action]))
+
+    def setup_copy_bin_actions(self, context_menu, table):
+        copy_bin_values = QAction(self.COPY_ICON, "Copy", self)
+        copy_bin_values.triggered.connect(partial(self.presenter.action_copy_bin_values, table))
+        copy_bin_to_table = QAction(self.TABLE_ICON, "Copy bin to table", self)
+        copy_bin_to_table.triggered.connect(partial(self.presenter.action_copy_bin_to_table, table))
+        separator = QAction(self)
+        separator.setSeparator(True)
+        list(map(context_menu.addAction, [copy_bin_values, copy_bin_to_table, separator]))
+
+    def setup_copy_spectrum_actions(self, context_menu, table):
+        copy_spectrum_values = QAction(self.COPY_ICON, "Copy", self)
+        copy_spectrum_values.triggered.connect(
+            partial(self.presenter.action_copy_spectrum_values, table))
+        copy_spectrum_to_table = QAction(self.TABLE_ICON, "Copy spectrum to table", self)
+        copy_spectrum_to_table.triggered.connect(partial(self.presenter.action_copy_spectrum_to_table, table))
+        separator = QAction(self)
+        separator.setSeparator(True)
+        list(map(context_menu.addAction, [copy_spectrum_values, copy_spectrum_to_table, separator]))

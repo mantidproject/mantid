@@ -20,9 +20,7 @@ class EvaluateMDFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EvaluateMDFunctionTest *createSuite() {
-    return new EvaluateMDFunctionTest();
-  }
+  static EvaluateMDFunctionTest *createSuite() { return new EvaluateMDFunctionTest(); }
   static void destroySuite(EvaluateMDFunctionTest *suite) { delete suite; }
 
   void test_Init() {
@@ -45,15 +43,12 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWorkspace));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Function", funcStr));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     IMDHistoWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -92,8 +87,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    IMDHistoWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>("out");
+    IMDHistoWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>("out");
     AnalysisDataService::Instance().remove("out");
     return ws;
   }

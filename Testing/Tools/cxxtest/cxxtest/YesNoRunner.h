@@ -14,7 +14,7 @@
 #include <cxxtest/TestRunner.h>
 #include <cxxtest/TestListener.h>
 
-namespace CxxTest 
+namespace CxxTest
 {
     class YesNoRunner : public TestListener
     {
@@ -22,7 +22,7 @@ namespace CxxTest
         YesNoRunner()
         {
         }
-        
+
         int run()
         {
             TestRunner::runAllTests( *this );

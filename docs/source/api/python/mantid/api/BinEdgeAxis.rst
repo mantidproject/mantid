@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::BinEdgeAxis.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.BinEdgeAxis 
+.. autoclass:: mantid.api.BinEdgeAxis
     :members:
     :undoc-members:
     :inherited-members:

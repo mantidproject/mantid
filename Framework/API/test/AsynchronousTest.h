@@ -33,23 +33,16 @@ public:
   class AsyncAlgorithm : public Algorithm {
   public:
     AsyncAlgorithm() : Algorithm(), result(0), throw_exception(false) {}
-    AsyncAlgorithm(const bool throw_default)
-        : Algorithm(), result(0), throw_exception(throw_default) {}
+    AsyncAlgorithm(const bool throw_default) : Algorithm(), result(0), throw_exception(throw_default) {}
     ~AsyncAlgorithm() override {}
-    const std::string name() const override {
-      return "AsyncAlgorithm";
-    } ///< Algorithm's name for identification
-    int version() const override {
-      return 1;
-    } ///< Algorithm's version for identification
-    const std::string category() const override {
-      return "Cat";
-    } ///< Algorithm's category for identification
+    const std::string name() const override { return "AsyncAlgorithm"; } ///< Algorithm's name for identification
+    int version() const override { return 1; }                           ///< Algorithm's version for identification
+    const std::string category() const override { return "Cat"; }        ///< Algorithm's category for identification
     const std::string summary() const override { return "Test summary"; }
 
     void init() override {
-      declareProperty(std::make_unique<WorkspaceProperty<>>(
-          "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
+      declareProperty(
+          std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional));
     }
 
     void exec() override {
@@ -84,19 +77,14 @@ public:
   class AsyncAlgorithmThrows : public AsyncAlgorithm {
   public:
     AsyncAlgorithmThrows() : AsyncAlgorithm(true) {}
-    const std::string name() const override {
-      return "AsyncAlgorithmThrows";
-    } ///< Algorithm's name for identification
+    const std::string name() const override { return "AsyncAlgorithmThrows"; } ///< Algorithm's name for identification
   };
 
   AsynchronousTest()
-      : m_startedObserver(*this, &AsynchronousTest::handleStarted),
-        startedNotificationReseived(false),
-        m_finishedObserver(*this, &AsynchronousTest::handleFinished),
-        finishedNotificationReseived(false),
-        m_errorObserver(*this, &AsynchronousTest::handleError),
-        errorNotificationReseived(false), errorNotificationMessage(""),
-        m_progressObserver(*this, &AsynchronousTest::handleProgress), count(0) {
+      : m_startedObserver(*this, &AsynchronousTest::handleStarted), startedNotificationReseived(false),
+        m_finishedObserver(*this, &AsynchronousTest::handleFinished), finishedNotificationReseived(false),
+        m_errorObserver(*this, &AsynchronousTest::handleError), errorNotificationReseived(false),
+        errorNotificationMessage(""), m_progressObserver(*this, &AsynchronousTest::handleProgress), count(0) {
     // DECLARE_ALGORITHM macro doesn't work because the class name contains '::'
     // The algorithms need to be registered because cloning is done through
     // AlgorithmFactory
@@ -191,47 +179,36 @@ public:
     auto result = alg.executeAsync();
     result.wait();
     generalChecks(alg, false, true, false, true);
-    TS_ASSERT_EQUALS(errorNotificationMessage,
-                     "Execution of AsyncAlgorithmThrows for group entry 1 "
-                     "failed: Exception thrown")
+    TS_ASSERT_EQUALS(errorNotificationMessage, "Execution of AsyncAlgorithmThrows for group entry 1 "
+                                               "failed: Exception thrown")
     // The parent algorithm is not executed directly, so the result remains 0
     TS_ASSERT_EQUALS(alg.result, 0)
   }
 
 private:
-  Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::StartedNotification>
-      m_startedObserver;
+  Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::StartedNotification> m_startedObserver;
   bool startedNotificationReseived;
-  void handleStarted(
-      const Poco::AutoPtr<Mantid::API::Algorithm::StartedNotification> &) {
+  void handleStarted(const Poco::AutoPtr<Mantid::API::Algorithm::StartedNotification> &) {
     startedNotificationReseived = true;
   }
 
-  Poco::NObserver<AsynchronousTest,
-                  Mantid::API::Algorithm::FinishedNotification>
-      m_finishedObserver;
+  Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
   bool finishedNotificationReseived;
-  void handleFinished(
-      const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification> &) {
+  void handleFinished(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification> &) {
     finishedNotificationReseived = true;
   }
 
-  Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::ErrorNotification>
-      m_errorObserver;
+  Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
   bool errorNotificationReseived;
   std::string errorNotificationMessage;
-  void handleError(
-      const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification> &pNf) {
+  void handleError(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification> &pNf) {
     errorNotificationReseived = true;
     errorNotificationMessage = pNf->what;
   }
 
-  Poco::NObserver<AsynchronousTest,
-                  Mantid::API::Algorithm::ProgressNotification>
-      m_progressObserver;
+  Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
   int count;
-  void handleProgress(
-      const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf) {
+  void handleProgress(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf) {
     count++;
     TS_ASSERT_LESS_THAN(pNf->progress, 1.000001)
   }
@@ -267,9 +244,8 @@ private:
     alg.addObserver(m_errorObserver);
   }
 
-  void generalChecks(AsyncAlgorithm &alg, const bool expectExecuted,
-                     const bool expectStarted, const bool expectFinished,
-                     const bool expectError) {
+  void generalChecks(AsyncAlgorithm &alg, const bool expectExecuted, const bool expectStarted,
+                     const bool expectFinished, const bool expectError) {
     TS_ASSERT_EQUALS(alg.isExecuted(), expectExecuted)
     TS_ASSERT_EQUALS(startedNotificationReseived, expectStarted)
     TS_ASSERT_EQUALS(finishedNotificationReseived, expectFinished)

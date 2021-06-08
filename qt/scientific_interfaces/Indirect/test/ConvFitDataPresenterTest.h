@@ -41,9 +41,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockConvFitDataView : public IIndirectFitDataView {
 public:
   /// Signals
-  void emitResolutionLoaded(QString const &workspaceName) {
-    emit resolutionLoaded(workspaceName);
-  }
+  void emitResolutionLoaded(QString const &workspaceName) { emit resolutionLoaded(workspaceName); }
 
   /// Public Methods
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
@@ -66,12 +64,12 @@ public:
   MOCK_METHOD1(setResolutionFBSuffices, void(QStringList const &suffices));
 
   MOCK_CONST_METHOD0(isSampleWorkspaceSelectorVisible, bool());
-  MOCK_METHOD1(setSampleWorkspaceSelectorIndex,
-               void(QString const &workspaceName));
+  MOCK_METHOD1(setSampleWorkspaceSelectorIndex, void(QString const &workspaceName));
 
   MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
   MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
+  MOCK_CONST_METHOD0(getXRange, std::pair<double, double>());
 
   /// Public slots
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
@@ -89,9 +87,7 @@ public:
   /// Needed to make sure everything is initialized
   ConvFitDataPresenterTest() { FrameworkManager::Instance(); }
 
-  static ConvFitDataPresenterTest *createSuite() {
-    return new ConvFitDataPresenterTest();
-  }
+  static ConvFitDataPresenterTest *createSuite() { return new ConvFitDataPresenterTest(); }
 
   static void destroySuite(ConvFitDataPresenterTest *suite) { delete suite; }
 
@@ -102,8 +98,7 @@ public:
     m_dataTable = createEmptyTableWidget(6, 5);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
-    m_presenter = std::make_unique<ConvFitDataPresenter>(
-        std::move(m_model.get()), std::move(m_view.get()));
+    m_presenter = std::make_unique<ConvFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()));
 
     SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(6));
     m_model->addWorkspace("WorkspaceName");
@@ -136,14 +131,22 @@ public:
     TS_ASSERT_EQUALS(m_dataTable->columnCount(), 6);
   }
 
-  void
-  test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
+  void test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
+    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), TableDatasetIndex{1});
   }
 
   ///----------------------------------------------------------------------
   /// Unit Tests that test the signals, methods and slots of the presenter
   ///----------------------------------------------------------------------
+
+  void test_that_getXRange_calls_the_correct_method_in_the_view() {
+    auto const xRange = std::make_pair(0.0, 1.0);
+
+    ON_CALL(*m_view, getXRange()).WillByDefault(Return(xRange));
+    EXPECT_CALL(*m_view, getXRange()).Times(1);
+
+    TS_ASSERT_EQUALS(m_presenter->getXRange(), xRange);
+  }
 
 private:
   std::unique_ptr<QTableWidget> m_dataTable;

@@ -21,8 +21,7 @@ namespace Kernel {
   generator algorithm as a specialzation of the PseudoRandomNumberGenerator
   interface.
 */
-class MANTID_KERNEL_DLL MersenneTwister final
-    : public PseudoRandomNumberGenerator {
+class MANTID_KERNEL_DLL MersenneTwister final : public PseudoRandomNumberGenerator {
 
 public:
   /// Construct the generator using time stamp for the initial seed.
@@ -44,9 +43,7 @@ public:
   void setRange(const double start, const double end) override;
   /// Generate the next random number in the sequence within the given range
   /// default range
-  inline double nextValue() override {
-    return uniformRealDistribution(m_engine);
-  }
+  inline double nextValue() override { return uniformRealDistribution(m_engine); }
   /// Generate the next random number in the sequence within the given range.
   inline double nextValue(double start, double end) override {
     return std::uniform_real_distribution<double>(start, end)(m_engine);

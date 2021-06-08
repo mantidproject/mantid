@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--project', dest='project',
                     default="Framework",
-                    help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
+                    help='The project in which this goes. Default: Framework. Can be MantidQt')
 
     args = parser.parse_args()
     subproject = args.subproject

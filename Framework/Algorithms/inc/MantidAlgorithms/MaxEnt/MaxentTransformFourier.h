@@ -20,8 +20,7 @@ public:
   // Deleted default constructor
   MaxentTransformFourier() = delete;
   // Constructor
-  MaxentTransformFourier(MaxentSpace_sptr dataSpace,
-                         MaxentSpace_sptr imageSpace);
+  MaxentTransformFourier(MaxentSpace_sptr dataSpace, MaxentSpace_sptr imageSpace);
   // Transfoms form image space to data space
   std::vector<double> imageToData(const std::vector<double> &image) override;
   // Transforms from data space to image space

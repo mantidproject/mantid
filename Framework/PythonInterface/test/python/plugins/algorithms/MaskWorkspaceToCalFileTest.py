@@ -56,7 +56,7 @@ class MaskWorkspaceToCalFileTest(unittest.TestCase):
         masking_identifier = 0
         not_masking_identifier = 1
         self.do_test_cal_file(masked_workspace, should_invert, masking_identifier, not_masking_identifier, 100)
-        
+
     # Test creating a cal file from a masked MatrixWorkspace with grouping
     def test_calfile_from_grouped_masked_workspace(self):
         run_algorithm('CreateSampleWorkspace', OutputWorkspace='wsMaskWSToCalFileTest', rethrow=True)

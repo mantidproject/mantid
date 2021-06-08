@@ -16,14 +16,12 @@
 
 namespace {
 template <typename T1, typename T2>
-void setWorkspaceProperty(Mantid::API::WorkspaceProperty<T1> *wsProp,
-                          const T2 &wksp, const std::true_type &) {
+void setWorkspaceProperty(Mantid::API::WorkspaceProperty<T1> *wsProp, const T2 &wksp, const std::true_type &) {
   *wsProp = wksp;
 }
 
 template <typename T1, typename T2>
-void setWorkspaceProperty(Mantid::API::WorkspaceProperty<T1> *wsProp,
-                          const T2 &wksp, const std::false_type &) {
+void setWorkspaceProperty(Mantid::API::WorkspaceProperty<T1> *wsProp, const T2 &wksp, const std::false_type &) {
   wsProp->setValue(wksp);
 }
 } // namespace
@@ -40,30 +38,23 @@ IndexType::WorkspaceIndex
 Can contain PropertyMode, LockMode, and validators.
 @param doc Property documentation string.
 */
-template <typename T, const int AllowedIndexTypes, typename... WSPropArgs,
-          typename>
-void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
-                                                const std::string &doc,
-                                                WSPropArgs &&... wsPropArgs) {
-  auto wsProp = std::make_unique<WorkspaceProperty<T>>(
-      propertyName, "", Kernel::Direction::Input,
-      std::forward<WSPropArgs>(wsPropArgs)...);
+template <typename T, const int AllowedIndexTypes, typename... WSPropArgs, typename>
+void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName, const std::string &doc,
+                                                WSPropArgs &&...wsPropArgs) {
+  auto wsProp = std::make_unique<WorkspaceProperty<T>>(propertyName, "", Kernel::Direction::Input,
+                                                       std::forward<WSPropArgs>(wsPropArgs)...);
   const auto &wsPropRef = *wsProp;
   declareProperty(std::move(wsProp), doc);
 
-  auto indexTypePropName =
-      IndexTypeProperty::generatePropertyName(propertyName);
-  auto indexTypeProp =
-      std::make_unique<IndexTypeProperty>(indexTypePropName, AllowedIndexTypes);
+  auto indexTypePropName = IndexTypeProperty::generatePropertyName(propertyName);
+  auto indexTypeProp = std::make_unique<IndexTypeProperty>(indexTypePropName, AllowedIndexTypes);
   const auto &indexTypePropRef = *indexTypeProp;
 
-  declareProperty(std::move(indexTypeProp),
-                  "The type of indices in the optional index set; For optimal "
-                  "performance WorkspaceIndex should be preferred;");
+  declareProperty(std::move(indexTypeProp), "The type of indices in the optional index set; For optimal "
+                                            "performance WorkspaceIndex should be preferred;");
 
   auto indexPropName = IndexProperty::generatePropertyName(propertyName);
-  declareProperty(std::make_unique<IndexProperty>(indexPropName, wsPropRef,
-                                                  indexTypePropRef),
+  declareProperty(std::make_unique<IndexProperty>(indexPropName, wsPropRef, indexTypePropRef),
                   "An optional set of spectra that will be processed by the "
                   "algorithm; If not set, all spectra will be processed; The "
                   "indices in this list can be workspace indices or possibly "
@@ -77,23 +68,18 @@ void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
 }
 
 template <typename T1, typename T2, typename WsType>
-void Algorithm::doSetInputProperties(const std::string &name, const T1 &wksp,
-                                     IndexType type, const T2 &list) {
+void Algorithm::doSetInputProperties(const std::string &name, const T1 &wksp, IndexType type, const T2 &list) {
   if (!isCompoundProperty(name))
-    throw std::runtime_error(
-        "Algorithm::setWorkspaceInputProperties can only be used "
-        "with properties declared using "
-        "declareWorkspaceInputProperties.");
+    throw std::runtime_error("Algorithm::setWorkspaceInputProperties can only be used "
+                             "with properties declared using "
+                             "declareWorkspaceInputProperties.");
 
-  auto *wsProp =
-      dynamic_cast<WorkspaceProperty<WsType> *>(getPointerToProperty(name));
-  auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
-      getPointerToProperty(IndexTypeProperty::generatePropertyName(name)));
-  auto *indexProp = dynamic_cast<IndexProperty *>(
-      getPointerToProperty(IndexProperty::generatePropertyName(name)));
+  auto *wsProp = dynamic_cast<WorkspaceProperty<WsType> *>(getPointerToProperty(name));
+  auto *indexTypeProp =
+      dynamic_cast<IndexTypeProperty *>(getPointerToProperty(IndexTypeProperty::generatePropertyName(name)));
+  auto *indexProp = dynamic_cast<IndexProperty *>(getPointerToProperty(IndexProperty::generatePropertyName(name)));
 
-  setWorkspaceProperty<WsType, T1>(
-      wsProp, wksp, std::is_convertible<T1, std::shared_ptr<WsType>>());
+  setWorkspaceProperty<WsType, T1>(wsProp, wksp, std::is_convertible<T1, std::shared_ptr<WsType>>());
 
   *indexTypeProp = type;
 
@@ -110,9 +96,8 @@ void Algorithm::doSetInputProperties(const std::string &name, const T1 &wksp,
 @param list List of indices to be used.
 */
 template <typename T1, typename T2, typename, typename>
-void Algorithm::setWorkspaceInputProperties(const std::string &name,
-                                            const std::shared_ptr<T1> &wksp,
-                                            IndexType type, const T2 &list) {
+void Algorithm::setWorkspaceInputProperties(const std::string &name, const std::shared_ptr<T1> &wksp, IndexType type,
+                                            const T2 &list) {
   doSetInputProperties<std::shared_ptr<T1>, T2, T1>(name, wksp, type, list);
 }
 
@@ -126,9 +111,8 @@ void Algorithm::setWorkspaceInputProperties(const std::string &name,
 @param list List of indices to be used.
 */
 template <typename T1, typename T2, typename, typename>
-void Algorithm::setWorkspaceInputProperties(const std::string &name,
-                                            const std::string &wsName,
-                                            IndexType type, const T2 &list) {
+void Algorithm::setWorkspaceInputProperties(const std::string &name, const std::string &wsName, IndexType type,
+                                            const T2 &list) {
   doSetInputProperties<std::string, T2, T1>(name, wsName, type, list);
 }
 
@@ -142,10 +126,9 @@ template <typename T, typename>
 std::tuple<std::shared_ptr<T>, Indexing::SpectrumIndexSet>
 Algorithm::getWorkspaceAndIndices(const std::string &name) const {
   if (!isCompoundProperty(name))
-    throw std::runtime_error(
-        "Algorithm::getWorkspacesAndIndices can only be used "
-        "with properties declared using "
-        "declareWorkspaceInputProperties.");
+    throw std::runtime_error("Algorithm::getWorkspacesAndIndices can only be used "
+                             "with properties declared using "
+                             "declareWorkspaceInputProperties.");
 
   std::shared_ptr<T> ws = getProperty(name);
 
@@ -156,8 +139,7 @@ Algorithm::getWorkspaceAndIndices(const std::string &name) const {
   // problems related to the property mechanism in the future:
   // https://github.com/mantidproject/mantid/issues/20092
 
-  auto indexProp = dynamic_cast<IndexProperty *>(
-      getPointerToProperty(IndexProperty::generatePropertyName(name)));
+  auto indexProp = dynamic_cast<IndexProperty *>(getPointerToProperty(IndexProperty::generatePropertyName(name)));
   Indexing::SpectrumIndexSet indexSet = *indexProp;
 
   return std::make_tuple(ws, indexSet);

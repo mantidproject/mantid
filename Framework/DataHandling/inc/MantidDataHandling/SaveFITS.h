@@ -21,9 +21,7 @@ public:
   const std::string name() const override final;
 
   int version() const override final;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadFITS", "SaveNXTomo"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadFITS", "SaveNXTomo"}; }
 
   const std::string category() const override final;
 
@@ -36,21 +34,17 @@ private:
 
   std::map<std::string, std::string> validateInputs() override;
 
-  void saveFITSImage(const API::MatrixWorkspace_sptr &img,
-                     const std::string &filename);
+  void saveFITSImage(const API::MatrixWorkspace_sptr &img, const std::string &filename);
 
-  void writeFITSHeaderBlock(const API::MatrixWorkspace_sptr &img,
-                            std::ofstream &file);
+  void writeFITSHeaderBlock(const API::MatrixWorkspace_sptr &img, std::ofstream &file);
 
-  void writeFITSImageMatrix(const API::MatrixWorkspace_sptr &img,
-                            std::ofstream &file);
+  void writeFITSImageMatrix(const API::MatrixWorkspace_sptr &img, std::ofstream &file);
 
   void writeFITSHeaderEntry(const std::string &hdr, std::ofstream &file);
 
   std::string makeBitDepthHeader(size_t depth) const;
 
-  void writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr &img,
-                                std::ofstream &file);
+  void writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr &img, std::ofstream &file);
 
   void writePaddingFITSHeaders(size_t count, std::ofstream &file);
 

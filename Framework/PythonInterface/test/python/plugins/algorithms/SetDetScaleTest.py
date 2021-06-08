@@ -36,7 +36,7 @@ class SetDetScaleTest(unittest.TestCase):
         y = w.getInstrument().getNumberParameter("detScale49")[0]
         self.assertEqual(x, 0.5)
         self.assertEqual(y, 1.5)
-        
+
         # test both input
         SetDetScale(Workspace=w, DetScaleList='17:1.0,49:2.0', DetScaleFile=filename)
         x = w.getInstrument().getNumberParameter("detScale17")[0]

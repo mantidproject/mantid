@@ -52,19 +52,16 @@ static const std::string WORKSPACE_OUT("OutputWorkspace");
 // It is used to print out information, warning and error messages
 
 LoadPreNexusMonitors::LoadPreNexusMonitors()
-    : Mantid::API::Algorithm(), nMonitors(0),
-      instrument_loaded_correctly(false) {}
+    : Mantid::API::Algorithm(), nMonitors(0), instrument_loaded_correctly(false) {}
 
 void LoadPreNexusMonitors::init() {
   // Filename for the runinfo file.
-  declareProperty(std::make_unique<FileProperty>(
-                      RUNINFO_FILENAME, "", FileProperty::Load, "_runinfo.xml"),
+  declareProperty(std::make_unique<FileProperty>(RUNINFO_FILENAME, "", FileProperty::Load, "_runinfo.xml"),
                   "The filename of the runinfo file for a particular run. "
                   "Allowed Values are: _runinfo.xml");
 
   // The output workspace
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      WORKSPACE_OUT, "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(WORKSPACE_OUT, "", Direction::Output),
                   "The workspace to load the monitors into.");
 
   // Make sure things are initialised.
@@ -121,14 +118,11 @@ void LoadPreNexusMonitors::exec() {
       auto *pE = static_cast<Poco::XML::Element *>(pNode);
       g_log.debug() << "Beam Monitor " << pE->getAttribute("id") << '\n';
       g_log.debug() << "\tname: " << pE->getAttribute("name") << '\n';
-      g_log.debug() << "\tdescription: " << pE->getAttribute("description")
-                    << '\n';
+      g_log.debug() << "\tdescription: " << pE->getAttribute("description") << '\n';
 
       // Now lets get the tof binning settings
-      Poco::XML::Element *pTimeChannels =
-          pE->getChildElement("NumTimeChannels");
-      tmin =
-          boost::lexical_cast<double>(pTimeChannels->getAttribute("startbin"));
+      Poco::XML::Element *pTimeChannels = pE->getChildElement("NumTimeChannels");
+      tmin = boost::lexical_cast<double>(pTimeChannels->getAttribute("startbin"));
       tstep = boost::lexical_cast<double>(pTimeChannels->getAttribute("width"));
     }
 
@@ -136,15 +130,12 @@ void LoadPreNexusMonitors::exec() {
     // TODO: Again we will only use the mast monitor value.
     if (pNode->nodeName() == "DataList") {
       // Get a list of the child elements
-      Poco::AutoPtr<Poco::XML::NodeList> pDataListChildren =
-          pNode->childNodes();
+      Poco::AutoPtr<Poco::XML::NodeList> pDataListChildren = pNode->childNodes();
       for (unsigned long i = 0; i < pDataListChildren->length(); ++i) {
         // We only care about monitors
         if (pDataListChildren->item(i)->nodeName() == "monitor") {
-          auto *element =
-              static_cast<Poco::XML::Element *>(pDataListChildren->item(i));
-          monitorIDs.emplace_back(
-              boost::lexical_cast<int>(element->getAttribute("id")));
+          auto *element = static_cast<Poco::XML::Element *>(pDataListChildren->item(i));
+          monitorIDs.emplace_back(boost::lexical_cast<int>(element->getAttribute("id")));
           monitorFilenames.emplace_back(element->getAttribute("name"));
         }
       }
@@ -153,14 +144,11 @@ void LoadPreNexusMonitors::exec() {
     // Get the size of the files
     if (pNode->nodeName() == "FileFormats") {
       // Get a list of the child elements
-      Poco::AutoPtr<Poco::XML::NodeList> pDataListChildren =
-          pNode->childNodes();
+      Poco::AutoPtr<Poco::XML::NodeList> pDataListChildren = pNode->childNodes();
       for (unsigned long i = 0; i < pDataListChildren->length(); ++i) {
         // We only care about monitors
         if (pDataListChildren->item(i)->nodeName() == "monitor") {
-          std::string dims =
-              static_cast<Poco::XML::Element *>(pDataListChildren->item(i))
-                  ->getAttribute("dims");
+          std::string dims = static_cast<Poco::XML::Element *>(pDataListChildren->item(i))->getAttribute("dims");
           tchannels = boost::lexical_cast<int>(dims);
         }
       }
@@ -181,23 +169,21 @@ void LoadPreNexusMonitors::exec() {
   }
 
   // Create the new workspace
-  MatrixWorkspace_sptr localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", nMonitors, numberTimeBins, tchannels);
+  MatrixWorkspace_sptr localWorkspace =
+      WorkspaceFactory::Instance().create("Workspace2D", nMonitors, numberTimeBins, tchannels);
 
   BinEdges edges(time_bins);
   for (int i = 0; i < nMonitors; i++) {
     // Now lets actually read the monitor files..
     Poco::Path pMonitorFilename(dirPath, monitorFilenames[i]);
 
-    g_log.debug() << "Loading monitor file :" << pMonitorFilename.toString()
-                  << '\n';
+    g_log.debug() << "Loading monitor file :" << pMonitorFilename.toString() << '\n';
 
     Kernel::BinaryFile<uint32_t> monitorFile(pMonitorFilename.toString());
     // temp buffer for file reading
     std::vector<uint32_t> buffer = monitorFile.loadAllIntoVector();
 
-    localWorkspace->setHistogram(i, edges,
-                                 Counts(buffer.begin(), buffer.end()));
+    localWorkspace->setHistogram(i, edges, Counts(buffer.begin(), buffer.end()));
 
     // Just have spectrum number be the same as the monitor number but -ve.
     auto &spectrum = localWorkspace->getSpectrum(i);
@@ -225,8 +211,8 @@ void LoadPreNexusMonitors::exec() {
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument
  * geometry
  */
-void LoadPreNexusMonitors::runLoadInstrument(
-    const std::string &instrument, const MatrixWorkspace_sptr &localWorkspace) {
+void LoadPreNexusMonitors::runLoadInstrument(const std::string &instrument,
+                                             const MatrixWorkspace_sptr &localWorkspace) {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
@@ -243,14 +229,10 @@ void LoadPreNexusMonitors::runLoadInstrument(
     // a bug
     localWorkspace->populateInstrumentParameters();
   } catch (std::invalid_argument &e) {
-    g_log.information()
-        << "Invalid argument to LoadInstrument Child Algorithm : " << e.what()
-        << '\n';
+    g_log.information() << "Invalid argument to LoadInstrument Child Algorithm : " << e.what() << '\n';
     executionSuccessful = false;
   } catch (std::runtime_error &e) {
-    g_log.information()
-        << "Unable to successfully run LoadInstrument Child Algorithm : "
-        << e.what() << '\n';
+    g_log.information() << "Unable to successfully run LoadInstrument Child Algorithm : " << e.what() << '\n';
     executionSuccessful = false;
   }
 

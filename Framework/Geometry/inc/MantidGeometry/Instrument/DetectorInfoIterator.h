@@ -18,8 +18,7 @@ Random access iterator for iteration over DetectorInfo
 @author Bhuvan Bezawada, STFC
 @date 2018
 */
-template <typename T>
-class DetectorInfoIterator : public InfoIteratorBase<T, DetectorInfoItem> {
+template <typename T> class DetectorInfoIterator : public InfoIteratorBase<T, DetectorInfoItem> {
 public:
   using InfoIteratorBase<T, DetectorInfoItem>::InfoIteratorBase;
 };

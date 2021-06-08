@@ -27,24 +27,20 @@ public:
   size_t getNumberDomains() const override;
   std::vector<API::IFunction_sptr> createEquivalentFunctions() const override;
   /// Evaluate the function
-  void function(const API::FunctionDomain &domain,
-                API::FunctionValues &values) const override;
+  void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
 
   //@ Parameters
   //@{
   /// Set i-th parameter
-  void setParameter(size_t, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(size_t, const double &value, bool explicitlySet = true) override;
   /// Set i-th parameter description
   void setParameterDescription(size_t, const std::string &description) override;
   /// Get i-th parameter
   double getParameter(size_t i) const override;
   /// Set parameter by name.
-  void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
   /// Set description of parameter by name.
-  void setParameterDescription(const std::string &name,
-                               const std::string &description) override;
+  void setParameterDescription(const std::string &name, const std::string &description) override;
   /// Get parameter by name.
   double getParameter(const std::string &name) const override;
   /// Check if function has a parameter with this name.
@@ -117,8 +113,7 @@ public:
 
 protected:
   /// Declare a new parameter
-  void declareParameter(const std::string &name, double initValue = 0,
-                        const std::string &description = "") override;
+  void declareParameter(const std::string &name, double initValue = 0, const std::string &description = "") override;
   /// Change status of parameter
   void setParameterStatus(size_t i, ParameterStatus status) override;
   /// Get status of parameter
@@ -157,31 +152,21 @@ private:
   void updateMultiSiteMultiSpectrum() const;
 
   /// Build a function for a single spectrum.
-  API::IFunction_sptr buildSpectrum(int nre, const DoubleFortranVector &en,
-                                    const ComplexFortranMatrix &wf,
-                                    double temperature, double fwhm, size_t i,
-                                    bool addBackground,
+  API::IFunction_sptr buildSpectrum(int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+                                    double temperature, double fwhm, size_t i, bool addBackground,
                                     double intensityScaling) const;
   /// Update a function for a single spectrum.
-  void updateSpectrum(API::IFunction &spectrum, int nre,
-                      const DoubleFortranVector &en,
-                      const ComplexFortranMatrix &wf, double temperature,
-                      double fwhm, size_t iSpec, size_t iFirst) const;
+  void updateSpectrum(API::IFunction &spectrum, int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+                      double temperature, double fwhm, size_t iSpec, size_t iFirst) const;
   /// Calculate excitations at given temperature
-  void calcExcitations(int nre, const DoubleFortranVector &en,
-                       const ComplexFortranMatrix &wf, double temperature,
-                       API::FunctionValues &values,
-                       double intensityScaling) const;
+  void calcExcitations(int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf, double temperature,
+                       API::FunctionValues &values, double intensityScaling) const;
   /// Build a physical property function.
-  API::IFunction_sptr buildPhysprop(int nre, const DoubleFortranVector &en,
-                                    const ComplexFortranMatrix &wf,
-                                    const ComplexFortranMatrix &ham,
-                                    const std::string &propName) const;
+  API::IFunction_sptr buildPhysprop(int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+                                    const ComplexFortranMatrix &ham, const std::string &propName) const;
   /// Update a physical property function.
-  void updatePhysprop(int nre, const DoubleFortranVector &en,
-                      const ComplexFortranMatrix &wf,
-                      const ComplexFortranMatrix &ham,
-                      API::IFunction &fun) const;
+  void updatePhysprop(int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+                      const ComplexFortranMatrix &ham, API::IFunction &fun) const;
 
   /// Set the source function
   void setSource(API::IFunction_sptr source) const;
@@ -191,8 +176,7 @@ private:
   API::CompositeFunction &compositeSource() const;
 
   /// Get a reference to an attribute
-  std::pair<API::IFunction *, std::string>
-  getAttributeReference(const std::string &attName) const;
+  std::pair<API::IFunction *, std::string> getAttributeReference(const std::string &attName) const;
   /// Build and cache the attribute names
   void buildAttributeNames() const;
 
@@ -202,8 +186,7 @@ private:
   void makeMapsSingleSiteMultiSpectrum() const;
   void makeMapsMultiSiteSingleSpectrum() const;
   void makeMapsMultiSiteMultiSpectrum() const;
-  size_t makeMapsForFunction(const IFunction &fun, size_t iFirst,
-                             const std::string &prefix) const;
+  size_t makeMapsForFunction(const IFunction &fun, size_t iFirst, const std::string &prefix) const;
   void cacheSourceParameters() const;
   /// Function that creates the source function.
   mutable CrystalFieldControl m_control;
@@ -224,8 +207,7 @@ private:
   /// Attribute names
   mutable std::vector<std::string> m_attributeNames;
   /// Map parameter/attribute prefixes to pointers to phys prop functions
-  mutable std::unordered_map<std::string, API::IFunction_sptr>
-      m_mapPrefixes2PhysProps;
+  mutable std::unordered_map<std::string, API::IFunction_sptr> m_mapPrefixes2PhysProps;
   /// Temporary cache for parameter values during source function resetting.
   mutable std::vector<double> m_parameterResetCache;
   mutable std::vector<bool> m_fixResetCache;

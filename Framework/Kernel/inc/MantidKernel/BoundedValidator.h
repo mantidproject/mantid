@@ -23,25 +23,21 @@ namespace Kernel {
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
 */
-template <class TYPE>
-class DLLExport BoundedValidator final : public TypedValidator<TYPE> {
+template <class TYPE> class DLLExport BoundedValidator final : public TypedValidator<TYPE> {
 public:
   /// No-arg Constructor
   BoundedValidator() noexcept
-      : TypedValidator<TYPE>(), m_hasLowerBound(false), m_hasUpperBound(false),
-        m_lowerExclusive(false), m_upperExclusive(false), m_lowerBound(TYPE()),
-        m_upperBound(TYPE()) {}
+      : TypedValidator<TYPE>(), m_hasLowerBound(false), m_hasUpperBound(false), m_lowerExclusive(false),
+        m_upperExclusive(false), m_lowerBound(TYPE()), m_upperBound(TYPE()) {}
 
   /** Constructor
    * @param lowerBound :: The lower bounding value
    * @param upperBound :: The upper bounding value
    * @param exclusive :: make bounds exclusive (default inclusive)
    */
-  BoundedValidator(const TYPE lowerBound, const TYPE upperBound,
-                   bool exclusive = false) noexcept
-      : TypedValidator<TYPE>(), m_hasLowerBound(true), m_hasUpperBound(true),
-        m_lowerExclusive(exclusive), m_upperExclusive(exclusive),
-        m_lowerBound(lowerBound), m_upperBound(upperBound) {}
+  BoundedValidator(const TYPE lowerBound, const TYPE upperBound, bool exclusive = false) noexcept
+      : TypedValidator<TYPE>(), m_hasLowerBound(true), m_hasUpperBound(true), m_lowerExclusive(exclusive),
+        m_upperExclusive(exclusive), m_lowerBound(lowerBound), m_upperBound(upperBound) {}
 
   /// Return if it has a lower bound
   bool hasLower() const noexcept { return m_hasLowerBound; }
@@ -56,13 +52,9 @@ public:
   /// Check if upper bound is exclusive
   bool isUpperExclusive() const noexcept { return m_upperExclusive; }
   /// Set the lower bound to be exclusive
-  void setLowerExclusive(const bool exclusive) noexcept {
-    m_lowerExclusive = exclusive;
-  }
+  void setLowerExclusive(const bool exclusive) noexcept { m_lowerExclusive = exclusive; }
   /// Set the upper bound to be exclusive
-  void setUpperExclusive(const bool exclusive) noexcept {
-    m_upperExclusive = exclusive;
-  }
+  void setUpperExclusive(const bool exclusive) noexcept { m_upperExclusive = exclusive; }
 
   /// Set both the upper and lower bounds to be exclusive
   void setExclusive(const bool exclusive) noexcept {
@@ -106,9 +98,7 @@ public:
   }
 
   /// Clone the current state
-  IValidator_sptr clone() const override {
-    return std::make_shared<BoundedValidator>(*this);
-  }
+  IValidator_sptr clone() const override { return std::make_shared<BoundedValidator>(*this); }
 
 private:
   // Data and Function Members for This Class Implementation.
@@ -139,14 +129,12 @@ private:
     error << "";
     // it is allowed not to have a lower bound, if not then you don't need to
     // check
-    if (m_hasLowerBound &&
-        (value < m_lowerBound || (value == m_lowerBound && m_lowerExclusive))) {
+    if (m_hasLowerBound && (value < m_lowerBound || (value == m_lowerBound && m_lowerExclusive))) {
       error << "Selected value " << value << " is ";
       (m_lowerExclusive) ? error << "<=" : error << "<";
       error << " the lower bound (" << m_lowerBound << ")";
     }
-    if (m_hasUpperBound &&
-        (value > m_upperBound || (value == m_upperBound && m_upperExclusive))) {
+    if (m_hasUpperBound && (value > m_upperBound || (value == m_upperBound && m_upperExclusive))) {
       error << "Selected value " << value << " is ";
       (m_upperExclusive) ? error << ">=" : error << ">";
       error << " the upper bound (" << m_upperBound << ")";

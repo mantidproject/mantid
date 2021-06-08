@@ -7,12 +7,15 @@
 #  This file is part of the mantid workbench.
 import argparse
 import os
+from mantid import __version__ as mtd_version
+import warnings
 
 
 def main():
     # setup command line arguments
     parser = argparse.ArgumentParser(description='Mantid Workbench')
     parser.add_argument('script', nargs='?')
+    parser.add_argument('--version', action='version', version=mtd_version)
     parser.add_argument('-x',
                         '--execute',
                         action='store_true',
@@ -24,6 +27,10 @@ def main():
     parser.add_argument('--profile',
                         action='store',
                         help='Run workbench with execution profiling. Specify a path for the output file.')
+    parser.add_argument('--error-on-warning',
+                        action='store_true',
+                        help='Convert python warnings to exceptions')
+
     try:
         # set up bash completion as a soft dependency
         import argcomplete
@@ -33,6 +40,10 @@ def main():
 
     # parse the command line options
     options = parser.parse_args()
+
+    if options.error_on_warning:
+        warnings.simplefilter("error") # Change the filter in this process
+        os.environ["PYTHONWARNINGS"] = "error" # Also affect subprocesses
 
     if options.profile:
         import cProfile

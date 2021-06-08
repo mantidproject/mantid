@@ -42,7 +42,7 @@ public:
   const double *getPointerAt(size_t i) const { return m_data + i; }
   /// Convert to a vector
   std::vector<double> toVector() const;
-  /// Set a peak redius to pass to peak functions.
+  /// Set a peak radius to pass to peak functions.
   void setPeakRadius(int radius);
   /// Get the peak radius.
   int getPeakRadius() const;
@@ -74,13 +74,11 @@ public:
   /// Constructor.
   FunctionDomain1DVector(const double x);
   /// Constructor.
-  FunctionDomain1DVector(const double startX, const double endX,
-                         const size_t n);
+  FunctionDomain1DVector(const double startX, const double endX, const size_t n);
   /// Constructor.
   FunctionDomain1DVector(const std::vector<double> &xvalues);
   /// Constructor.
-  FunctionDomain1DVector(std::vector<double>::const_iterator from,
-                         std::vector<double>::const_iterator to);
+  FunctionDomain1DVector(std::vector<double>::const_iterator from, std::vector<double>::const_iterator to);
   /// Copy constructor.
   FunctionDomain1DVector(const FunctionDomain1DVector &);
   /// Copy assignment operator.
@@ -120,8 +118,7 @@ public:
   /// Constructor.
   FunctionDomain1DSpectrum(size_t wi, const std::vector<double> &xvalues);
   /// Constructor.
-  FunctionDomain1DSpectrum(size_t wi, std::vector<double>::const_iterator from,
-                           std::vector<double>::const_iterator to);
+  FunctionDomain1DSpectrum(size_t wi, std::vector<double>::const_iterator from, std::vector<double>::const_iterator to);
   /// Get the workspace index
   size_t getWorkspaceIndex() const { return m_workspaceIndex; }
 
@@ -139,15 +136,13 @@ public:
   /// Constructor.
   FunctionDomain1DHistogram(const std::vector<double> &bins);
   /// Constructor.
-  FunctionDomain1DHistogram(std::vector<double>::const_iterator from,
-                            std::vector<double>::const_iterator to);
+  FunctionDomain1DHistogram(std::vector<double>::const_iterator from, std::vector<double>::const_iterator to);
 
   /// Disable copy operator
   FunctionDomain1DHistogram(const FunctionDomain1DHistogram &) = delete;
 
   /// Disable assignment operator
-  FunctionDomain1DHistogram &
-  operator=(const FunctionDomain1DHistogram &) = delete;
+  FunctionDomain1DHistogram &operator=(const FunctionDomain1DHistogram &) = delete;
 
   /// Get the leftmost boundary
   double leftBoundary() const;

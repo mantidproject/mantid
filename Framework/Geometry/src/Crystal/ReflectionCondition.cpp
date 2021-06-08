@@ -33,44 +33,36 @@ template <> struct RegisterConditions<> {
 const ReflectionConditions &getAllReflectionConditions() {
   static ReflectionConditions conditions;
   if (conditions.empty()) {
-    RegisterConditions<
-        ReflectionConditionPrimitive, ReflectionConditionCFaceCentred,
-        ReflectionConditionAFaceCentred, ReflectionConditionBFaceCentred,
-        ReflectionConditionBodyCentred, ReflectionConditionAllFaceCentred,
-        ReflectionConditionRhombohedrallyObverse,
-        ReflectionConditionRhombohedrallyReverse,
-        ReflectionConditionHexagonallyReverse>::run(conditions);
+    RegisterConditions<ReflectionConditionPrimitive, ReflectionConditionCFaceCentred, ReflectionConditionAFaceCentred,
+                       ReflectionConditionBFaceCentred, ReflectionConditionBodyCentred,
+                       ReflectionConditionAllFaceCentred, ReflectionConditionRhombohedrallyObverse,
+                       ReflectionConditionRhombohedrallyReverse,
+                       ReflectionConditionHexagonallyReverse>::run(conditions);
   }
   return conditions;
 }
 
 /// Helper function that transforms all ReflectionConditions to strings.
-std::vector<std::string> transformReflectionConditions(
-    const std::function<std::string(const ReflectionCondition_sptr &)> &fn) {
+std::vector<std::string>
+transformReflectionConditions(const std::function<std::string(const ReflectionCondition_sptr &)> &fn) {
   const auto &conditions = getAllReflectionConditions();
 
   std::vector<std::string> names;
   names.reserve(conditions.size());
-  std::transform(conditions.cbegin(), conditions.cend(),
-                 std::back_inserter(names), fn);
+  std::transform(conditions.cbegin(), conditions.cend(), std::back_inserter(names), fn);
 
   return names;
 }
 
 /// Returns all ReflectionCondition names.
 std::vector<std::string> getAllReflectionConditionNames() {
-  return transformReflectionConditions(
-      [](const ReflectionCondition_sptr &condition) {
-        return condition->getName();
-      });
+  return transformReflectionConditions([](const ReflectionCondition_sptr &condition) { return condition->getName(); });
 }
 
 /// Returns all centering symbols.
 std::vector<std::string> getAllReflectionConditionSymbols() {
   return transformReflectionConditions(
-      [](const ReflectionCondition_sptr &condition) {
-        return condition->getSymbol();
-      });
+      [](const ReflectionCondition_sptr &condition) { return condition->getSymbol(); });
 }
 
 /**
@@ -86,16 +78,14 @@ std::vector<std::string> getAllReflectionConditionSymbols() {
  * @param hint :: Hint to include in exception message. Name or symbol.
  * @return ReflectionCondition for which fn matches.
  */
-ReflectionCondition_sptr getReflectionConditionWhere(
-    const std::function<bool(const ReflectionCondition_sptr &)> &fn,
-    const std::string &hint) {
+ReflectionCondition_sptr getReflectionConditionWhere(const std::function<bool(const ReflectionCondition_sptr &)> &fn,
+                                                     const std::string &hint) {
   const auto &conditions = getAllReflectionConditions();
 
   auto it = std::find_if(conditions.cbegin(), conditions.cend(), fn);
 
   if (it == conditions.cend()) {
-    throw std::invalid_argument("No ReflectionCondition found that matches '" +
-                                hint + "'.");
+    throw std::invalid_argument("No ReflectionCondition found that matches '" + hint + "'.");
   }
 
   return *it;
@@ -105,21 +95,14 @@ ReflectionCondition_sptr getReflectionConditionWhere(
 /// getAllReflectionConditionNames for possible names.
 ReflectionCondition_sptr getReflectionConditionByName(const std::string &name) {
   return getReflectionConditionWhere(
-      [=](const ReflectionCondition_sptr &condition) {
-        return condition->getName() == name;
-      },
-      name);
+      [=](const ReflectionCondition_sptr &condition) { return condition->getName() == name; }, name);
 }
 
 /// Returns the ReflectionCondition for the specified centering symbol, see
 /// getAllReflectionConditionSymbols for possible symbols.
-ReflectionCondition_sptr
-getReflectionConditionBySymbol(const std::string &symbol) {
+ReflectionCondition_sptr getReflectionConditionBySymbol(const std::string &symbol) {
   return getReflectionConditionWhere(
-      [=](const ReflectionCondition_sptr &condition) {
-        return condition->getSymbol() == symbol;
-      },
-      symbol);
+      [=](const ReflectionCondition_sptr &condition) { return condition->getSymbol() == symbol; }, symbol);
 }
 
 } // namespace Geometry

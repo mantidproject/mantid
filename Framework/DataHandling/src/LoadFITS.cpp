@@ -80,9 +80,8 @@ const size_t LoadFITS::g_maxBytesPP = g_maxBitDepth / 8;
  * Constructor. Just initialize everything to prevent issues.
  */
 LoadFITS::LoadFITS()
-    : m_headerScaleKey(), m_headerOffsetKey(), m_headerBitDepthKey(),
-      m_headerRotationKey(), m_headerImageKeyKey(), m_headerAxisNameKeys(),
-      m_mapFile(), m_pixelCount(0) {
+    : m_headerScaleKey(), m_headerOffsetKey(), m_headerBitDepthKey(), m_headerRotationKey(), m_headerImageKeyKey(),
+      m_headerAxisNameKeys(), m_mapFile(), m_pixelCount(0) {
   setupDefaultKeywordNames();
 }
 
@@ -95,9 +94,7 @@ LoadFITS::LoadFITS()
 int LoadFITS::confidence(Kernel::FileDescriptor &descriptor) const {
   // Should really improve this to check the file header (of first file at
   // least) to make sure it contains the fields wanted
-  return (descriptor.extension() == ".fits" || descriptor.extension() == ".fit")
-             ? 80
-             : 0;
+  return (descriptor.extension() == ".fits" || descriptor.extension() == ".fit") ? 80 : 0;
 }
 
 /**
@@ -120,20 +117,17 @@ void LoadFITS::init() {
                   "The name of the input file (note that you can give "
                   "multiple file names separated by commas).");
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-      "OutputWorkspace", "", Kernel::Direction::Output));
-
   declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<bool>>(
-          "LoadAsRectImg", false, Kernel::Direction::Input),
-      "If enabled (not by default), the output Workspace2D will have "
-      "one histogram per row and one bin per pixel, such that a 2D "
-      "color plot (color fill plot) will display an image.");
+      std::make_unique<API::WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Kernel::Direction::Output));
+
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("LoadAsRectImg", false, Kernel::Direction::Input),
+                  "If enabled (not by default), the output Workspace2D will have "
+                  "one histogram per row and one bin per pixel, such that a 2D "
+                  "color plot (color fill plot) will display an image.");
 
   auto zeroOrPosDbl = std::make_shared<BoundedValidator<double>>();
   zeroOrPosDbl->setLower(0.0);
-  declareProperty("FilterNoiseLevel", 0.0, zeroOrPosDbl,
-                  "Threshold to remove noisy pixels. Try 50 for example.");
+  declareProperty("FilterNoiseLevel", 0.0, zeroOrPosDbl, "Threshold to remove noisy pixels. Try 50 for example.");
 
   auto posInt = std::make_shared<BoundedValidator<int>>();
   posInt->setLower(1);
@@ -143,16 +137,13 @@ void LoadFITS::init() {
 
   auto posDbl = std::make_shared<BoundedValidator<double>>();
   posDbl->setLower(std::numeric_limits<double>::epsilon());
-  declareProperty("Scale", 80.0, posDbl, "Pixels per cm.",
-                  Kernel::Direction::Input);
+  declareProperty("Scale", 80.0, posDbl, "Pixels per cm.", Kernel::Direction::Input);
 
-  declareProperty(
-      std::make_unique<FileProperty>(g_HEADER_MAP_NAME, "",
-                                     FileProperty::OptionalDirectory, "",
-                                     Kernel::Direction::Input),
-      "A file mapping header key names to non-standard names [line separated "
-      "values in the format KEY=VALUE, e.g. BitDepthName=BITPIX] - do not use "
-      "this if you want to keep compatibility with standard FITS files.");
+  declareProperty(std::make_unique<FileProperty>(g_HEADER_MAP_NAME, "", FileProperty::OptionalDirectory, "",
+                                                 Kernel::Direction::Input),
+                  "A file mapping header key names to non-standard names [line separated "
+                  "values in the format KEY=VALUE, e.g. BitDepthName=BITPIX] - do not use "
+                  "this if you want to keep compatibility with standard FITS files.");
 }
 
 /**
@@ -193,8 +184,7 @@ void LoadFITS::exec() {
  *
  * @throws std::runtime_error if issues are found in the headers
  */
-void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
-                             std::vector<FITSInfo> &headers, size_t firstIndex,
+void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths, std::vector<FITSInfo> &headers, size_t firstIndex,
                              size_t lastIndex) {
   for (size_t i = firstIndex; i <= lastIndex && i <= headers.size(); ++i) {
     loadHeader(paths[i], headers[i]);
@@ -212,12 +202,9 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
     parseHeader(header);
   } catch (std::exception &e) {
     // Unable to parse the header, throw.
-    throw std::runtime_error(
-        "Severe problem found while parsing the header of "
-        "this FITS file (" +
-        filePath +
-        "). This file may not be standard FITS. Error description: " +
-        e.what());
+    throw std::runtime_error("Severe problem found while parsing the header of "
+                             "this FITS file (" +
+                             filePath + "). This file may not be standard FITS. Error description: " + e.what());
   }
 
   // Get and convert specific MANDATORY standard header values which
@@ -235,27 +222,22 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
     try {
       header.bitsPerPixel = boost::lexical_cast<int>(tmpBitPix);
     } catch (std::exception &e) {
-      throw std::runtime_error(
-          "Coult not interpret the entry number of bits per pixel (" +
-          m_headerBitDepthKey + ") as an integer. Error: " + e.what());
+      throw std::runtime_error("Coult not interpret the entry number of bits per pixel (" + m_headerBitDepthKey +
+                               ") as an integer. Error: " + e.what());
     }
     // Check that the files use valid BITPIX values
     // http://archive.stsci.edu/fits/fits_standard/node39.html#SECTION00941000000000000000
-    if (header.bitsPerPixel != 8 && header.bitsPerPixel != 16 &&
-        header.bitsPerPixel != 32 && header.bitsPerPixel != 64)
+    if (header.bitsPerPixel != 8 && header.bitsPerPixel != 16 && header.bitsPerPixel != 32 && header.bitsPerPixel != 64)
       // this implicitly includes when 'header.bitsPerPixel >
       // g_maxBitDepth'
-      throw std::runtime_error(
-          "This algorithm only supports 8, 16, 32 or 64 "
-          "bits per pixel as allowed in the FITS standard. The header of "
-          "file '" +
-          filePath + "' says that its bit depth is: " +
-          std::to_string(header.bitsPerPixel));
+      throw std::runtime_error("This algorithm only supports 8, 16, 32 or 64 "
+                               "bits per pixel as allowed in the FITS standard. The header of "
+                               "file '" +
+                               filePath + "' says that its bit depth is: " + std::to_string(header.bitsPerPixel));
   } catch (std::exception &e) {
-    throw std::runtime_error(
-        "Failed to process the '" + m_headerBitDepthKey +
-        "' entry (bits per pixel) in the header of this file: " + filePath +
-        ". Error description: " + e.what());
+    throw std::runtime_error("Failed to process the '" + m_headerBitDepthKey +
+                             "' entry (bits per pixel) in the header of this file: " + filePath +
+                             ". Error description: " + e.what());
   }
 
   try {
@@ -278,11 +260,9 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
     header.numberOfAxis = static_cast<int>(m_headerAxisNameKeys.size());
 
     for (int j = 0; j < header.numberOfAxis; ++j) {
-      header.axisPixelLengths.emplace_back(boost::lexical_cast<size_t>(
-          header.headerKeys[m_headerAxisNameKeys[j]]));
+      header.axisPixelLengths.emplace_back(boost::lexical_cast<size_t>(header.headerKeys[m_headerAxisNameKeys[j]]));
       // only debug level, when loading multiple files this is very verbose
-      g_log.debug() << "Found axis length header entry: "
-                    << m_headerAxisNameKeys[j] << " = "
+      g_log.debug() << "Found axis length header entry: " << m_headerAxisNameKeys[j] << " = "
                     << header.axisPixelLengths.back() << '\n';
     }
 
@@ -291,10 +271,9 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
     // doesn't support this.
     header.extension = header.headerKeys[g_XTENSION_KEYNAME];
   } catch (std::exception &e) {
-    throw std::runtime_error(
-        "Failed to process the '" + m_headerNAxisNameKey +
-        "' entries (dimensions) in the header of this file: " + filePath +
-        ". Error description: " + e.what());
+    throw std::runtime_error("Failed to process the '" + m_headerNAxisNameKey +
+                             "' entries (dimensions) in the header of this file: " + filePath +
+                             ". Error description: " + e.what());
   }
 
   // scale parameter, header BSCALE in the fits standard
@@ -302,13 +281,11 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
     header.scale = 1;
   } else {
     try {
-      header.scale =
-          boost::lexical_cast<double>(header.headerKeys[m_headerScaleKey]);
+      header.scale = boost::lexical_cast<double>(header.headerKeys[m_headerScaleKey]);
     } catch (std::exception &e) {
-      throw std::runtime_error(
-          "Coult not interpret the entry number of bits per pixel (" +
-          m_headerBitDepthKey + " = " + header.headerKeys[m_headerScaleKey] +
-          ") as a floating point number (double). Error: " + e.what());
+      throw std::runtime_error("Coult not interpret the entry number of bits per pixel (" + m_headerBitDepthKey +
+                               " = " + header.headerKeys[m_headerScaleKey] +
+                               ") as a floating point number (double). Error: " + e.what());
     }
   }
 
@@ -317,33 +294,28 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
     header.offset = 0;
   } else {
     try {
-      header.offset =
-          boost::lexical_cast<int>(header.headerKeys[m_headerOffsetKey]);
+      header.offset = boost::lexical_cast<int>(header.headerKeys[m_headerOffsetKey]);
     } catch (std::exception & /*e*/) {
       // still, second try with floating point format (as used for example
       // by
       // Starlight XPRESS cameras)
       try {
-        auto doff =
-            boost::lexical_cast<double>(header.headerKeys[m_headerOffsetKey]);
+        auto doff = boost::lexical_cast<double>(header.headerKeys[m_headerOffsetKey]);
         double intPart;
         if (0 != modf(doff, &intPart)) {
           // anyway we'll do a cast, but warn if there was a fraction
-          g_log.warning()
-              << "The value given in the FITS header entry for the data "
-                 "offset (" +
-                     m_headerOffsetKey + " = " +
-                     header.headerKeys[m_headerOffsetKey] +
-                     ") has a fractional part, and it will be ignored!\n";
+          g_log.warning() << "The value given in the FITS header entry for the data "
+                             "offset (" +
+                                 m_headerOffsetKey + " = " + header.headerKeys[m_headerOffsetKey] +
+                                 ") has a fractional part, and it will be ignored!\n";
         }
         header.offset = static_cast<int>(doff);
       } catch (std::exception &e) {
-        throw std::runtime_error(
-            "Coult not interpret the entry number of data offset (" +
-            m_headerOffsetKey + " = " + header.headerKeys[m_headerOffsetKey] +
-            ") as an integer number nor a floating point "
-            "number (double). Error: " +
-            e.what());
+        throw std::runtime_error("Coult not interpret the entry number of data offset (" + m_headerOffsetKey + " = " +
+                                 header.headerKeys[m_headerOffsetKey] +
+                                 ") as an integer number nor a floating point "
+                                 "number (double). Error: " +
+                                 e.what());
       }
     }
   }
@@ -363,19 +335,15 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
  * @throws std::exception if there's any issue or unsupported entry in the
  * header
  */
-void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
-                                 const FITSInfo &hdrFirst) {
+void LoadFITS::headerSanityCheck(const FITSInfo &hdr, const FITSInfo &hdrFirst) {
   bool valid = true;
   if (!hdr.extension.empty()) {
     valid = false;
-    g_log.error() << "File " << hdr.filePath
-                  << ": extensions found in the header.\n";
+    g_log.error() << "File " << hdr.filePath << ": extensions found in the header.\n";
   }
   if (hdr.numberOfAxis != 2) {
     valid = false;
-    g_log.error() << "File " << hdr.filePath
-                  << ": the number of axes is not 2 but: " << hdr.numberOfAxis
-                  << '\n';
+    g_log.error() << "File " << hdr.filePath << ": the number of axes is not 2 but: " << hdr.numberOfAxis << '\n';
   }
 
   // Test current item has same axis values as first item.
@@ -384,28 +352,26 @@ void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
     g_log.error() << "File " << hdr.filePath
                   << ": the number of pixels in the first dimension differs "
                      "from the first file loaded ("
-                  << hdrFirst.filePath << "): " << hdr.axisPixelLengths[0]
-                  << " != " << hdrFirst.axisPixelLengths[0] << '\n';
+                  << hdrFirst.filePath << "): " << hdr.axisPixelLengths[0] << " != " << hdrFirst.axisPixelLengths[0]
+                  << '\n';
   }
   if (hdr.axisPixelLengths[1] != hdrFirst.axisPixelLengths[1]) {
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": the number of pixels in the second dimension differs"
                      "from the first file loaded ("
-                  << hdrFirst.filePath << "): " << hdr.axisPixelLengths[0]
-                  << " != " << hdrFirst.axisPixelLengths[0] << '\n';
+                  << hdrFirst.filePath << "): " << hdr.axisPixelLengths[0] << " != " << hdrFirst.axisPixelLengths[0]
+                  << '\n';
   }
 
   // Check the format is correct and create the Workspace
   if (!valid) {
     // Invalid files, record error
-    throw std::runtime_error(
-        "An issue has been found in the header of this FITS file: " +
-        hdr.filePath +
-        ". This algorithm currently doesn't support FITS files with "
-        "non-standard extensions, more than two axis "
-        "of data, or has detected that all the files are "
-        "not similar.");
+    throw std::runtime_error("An issue has been found in the header of this FITS file: " + hdr.filePath +
+                             ". This algorithm currently doesn't support FITS files with "
+                             "non-standard extensions, more than two axis "
+                             "of data, or has detected that all the files are "
+                             "not similar.");
   }
 }
 
@@ -428,8 +394,7 @@ void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
  * @throw std::runtime_error when load fails (for example a memory
  * allocation issue, wrong rebin requested, etc.)
  */
-void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
-                           const std::string &outWSName, bool loadAsRectImg,
+void LoadFITS::doLoadFiles(const std::vector<std::string> &paths, const std::string &outWSName, bool loadAsRectImg,
                            int binSize, double noiseThresh) {
   std::vector<FITSInfo> headers;
   headers.resize(paths.size());
@@ -448,29 +413,23 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   // Check consistency of binSize asap
   for (int i = 0; i < headers[0].numberOfAxis; ++i) {
     if (0 != (headers[0].axisPixelLengths[i] % binSize)) {
-      throw std::runtime_error(
-          "Cannot rebin this image in blocks of " + std::to_string(binSize) +
-          " x " + std::to_string(binSize) +
-          " pixels as requested because the size of dimension " +
-          std::to_string(i + 1) + " (" +
-          std::to_string(headers[0].axisPixelLengths[i]) +
-          ") is not a multiple of the bin size.");
+      throw std::runtime_error("Cannot rebin this image in blocks of " + std::to_string(binSize) + " x " +
+                               std::to_string(binSize) + " pixels as requested because the size of dimension " +
+                               std::to_string(i + 1) + " (" + std::to_string(headers[0].axisPixelLengths[i]) +
+                               ") is not a multiple of the bin size.");
     }
   }
 
-  MantidImage imageY(headers[0].axisPixelLengths[1],
-                     std::vector<double>(headers[0].axisPixelLengths[0]));
-  MantidImage imageE(headers[0].axisPixelLengths[1],
-                     std::vector<double>(headers[0].axisPixelLengths[0]));
+  MantidImage imageY(headers[0].axisPixelLengths[1], std::vector<double>(headers[0].axisPixelLengths[0]));
+  MantidImage imageE(headers[0].axisPixelLengths[1], std::vector<double>(headers[0].axisPixelLengths[0]));
 
   size_t bytes = (headers[0].bitsPerPixel / 8) * m_pixelCount;
   std::vector<char> buffer;
   try {
     buffer.resize(bytes);
   } catch (std::exception &) {
-    throw std::runtime_error(
-        "Could not allocate enough memory to run when trying to allocate " +
-        std::to_string(bytes) + " bytes.");
+    throw std::runtime_error("Could not allocate enough memory to run when trying to allocate " +
+                             std::to_string(bytes) + " bytes.");
   }
 
   // Create a group for these new workspaces, if the group already exists, add
@@ -484,8 +443,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   } else {
     // Get the name of the latest file in group to start numbering from
     if (AnalysisDataService::Instance().doesExist(outWSName))
-      wsGroup =
-          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
+      wsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
 
     std::string latestName = wsGroup->getNames().back();
     // Set next file number
@@ -500,8 +458,8 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   // Create first workspace (with instrument definition). This is also used as
   // a template for creating others
   Workspace2D_sptr imgWS;
-  imgWS = makeWorkspace(headers[0], fileNumberInGroup, buffer, imageY, imageE,
-                        imgWS, loadAsRectImg, binSize, noiseThresh);
+  imgWS =
+      makeWorkspace(headers[0], fileNumberInGroup, buffer, imageY, imageE, imgWS, loadAsRectImg, binSize, noiseThresh);
   progress.report(1, "First file loaded.");
 
   wsGroup->addWorkspace(imgWS);
@@ -514,16 +472,13 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
     // files
     try {
       IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-      std::string directoryName =
-          Kernel::ConfigService::Instance().getInstrumentDirectory();
+      std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
       directoryName = directoryName + "/IMAT_Definition.xml";
       loadInst->setPropertyValue("Filename", directoryName);
-      loadInst->setProperty<MatrixWorkspace_sptr>(
-          "Workspace", std::dynamic_pointer_cast<MatrixWorkspace>(imgWS));
+      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", std::dynamic_pointer_cast<MatrixWorkspace>(imgWS));
       loadInst->execute();
     } catch (std::exception &ex) {
-      g_log.information("Cannot load the instrument definition. " +
-                        std::string(ex.what()));
+      g_log.information("Cannot load the instrument definition. " + std::string(ex.what()));
     }
   }
 
@@ -535,10 +490,9 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
     // FITS), has two axis, and it is consistent with the first header
     headerSanityCheck(headers[i], headers[0]);
 
-    imgWS = makeWorkspace(headers[i], fileNumberInGroup, buffer, imageY, imageE,
-                          imgWS, loadAsRectImg, binSize, noiseThresh);
-    progress.report("Loaded file " + std::to_string(i + 1) + " of " +
-                    std::to_string(totalWS));
+    imgWS = makeWorkspace(headers[i], fileNumberInGroup, buffer, imageY, imageE, imgWS, loadAsRectImg, binSize,
+                          noiseThresh);
+    progress.report("Loaded file " + std::to_string(i + 1) + " of " + std::to_string(totalWS));
     wsGroup->addWorkspace(imgWS);
   }
 
@@ -577,9 +531,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   istr.seekg(0, istr.end);
   const std::streampos fileSize = istr.tellg();
   if (fileSize <= 0) {
-    throw std::runtime_error(
-        "Found a file that is readable but empty (0 bytes size): " +
-        headerInfo.filePath);
+    throw std::runtime_error("Found a file that is readable but empty (0 bytes size): " + headerInfo.filePath);
   }
   istr.seekg(0, istr.beg);
 
@@ -591,8 +543,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   const std::string commentKW = g_COMMENT_KEYNAME;
   bool endFound = false;
 
-  while (!endFound &&
-         (g_BASE_HEADER_SIZE * headerInfo.headerSizeMultiplier < fileSize)) {
+  while (!endFound && (g_BASE_HEADER_SIZE * headerInfo.headerSizeMultiplier < fileSize)) {
     headerInfo.headerSizeMultiplier++;
     const int entriesPerHDU = 36;
 
@@ -637,13 +588,12 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   }
 
   if (!endFound) {
-    throw std::runtime_error(
-        "Could not find any valid END entry in the headers of this file after "
-        "scanning the file (" +
-        std::to_string(fileSize) +
-        " bytes). This does not look like a valid FITS file and "
-        "it is not possible to read it correctly as the boundary between "
-        "the headers and the data is undefined.");
+    throw std::runtime_error("Could not find any valid END entry in the headers of this file after "
+                             "scanning the file (" +
+                             std::to_string(fileSize) +
+                             " bytes). This does not look like a valid FITS file and "
+                             "it is not possible to read it correctly as the boundary between "
+                             "the headers and the data is undefined.");
   }
 
   istr.close();
@@ -675,11 +625,9 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
  *
  * @returns A newly created Workspace2D, as a shared pointer
  */
-Workspace2D_sptr
-LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
-                        std::vector<char> &buffer, MantidImage &imageY,
-                        MantidImage &imageE, const Workspace2D_sptr &parent,
-                        bool loadAsRectImg, int binSize, double noiseThresh) {
+Workspace2D_sptr LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber, std::vector<char> &buffer,
+                                         MantidImage &imageY, MantidImage &imageE, const Workspace2D_sptr &parent,
+                                         bool loadAsRectImg, int binSize, double noiseThresh) {
   // Create workspace (taking into account already here if rebinning is
   // going to happen)
   Workspace2D_sptr ws;
@@ -687,20 +635,16 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
     if (!loadAsRectImg) {
       size_t finalPixelCount = m_pixelCount / binSize * binSize;
       ws = std::dynamic_pointer_cast<Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", finalPixelCount, 2,
-                                              1));
+          WorkspaceFactory::Instance().create("Workspace2D", finalPixelCount, 2, 1));
     } else {
       ws = std::dynamic_pointer_cast<Workspace2D>(
-          WorkspaceFactory::Instance().create(
-              "Workspace2D",
-              fileInfo.axisPixelLengths[1] / binSize, // one bin per column
-              fileInfo.axisPixelLengths[0] / binSize +
-                  1, // one spectrum per row
-              fileInfo.axisPixelLengths[0] / binSize));
+          WorkspaceFactory::Instance().create("Workspace2D",
+                                              fileInfo.axisPixelLengths[1] / binSize,     // one bin per column
+                                              fileInfo.axisPixelLengths[0] / binSize + 1, // one spectrum per row
+                                              fileInfo.axisPixelLengths[0] / binSize));
     }
   } else {
-    ws = std::dynamic_pointer_cast<Workspace2D>(
-        WorkspaceFactory::Instance().create(parent));
+    ws = std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(parent));
   }
 
   // this pixel scale property is used to set the workspace X values
@@ -720,18 +664,14 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
 
     // Note this can change the sizes of the images and the number of pixels
     if (1 == binSize) {
-      ws->setImageYAndE(imageY, imageE, 0, loadAsRectImg, cmpp,
-                        false /* no parallel load */);
+      ws->setImageYAndE(imageY, imageE, 0, loadAsRectImg, cmpp, false /* no parallel load */);
 
     } else {
-      MantidImage rebinnedY(imageY.size() / binSize,
-                            std::vector<double>(imageY[0].size() / binSize));
-      MantidImage rebinnedE(imageE.size() / binSize,
-                            std::vector<double>(imageE[0].size() / binSize));
+      MantidImage rebinnedY(imageY.size() / binSize, std::vector<double>(imageY[0].size() / binSize));
+      MantidImage rebinnedE(imageE.size() / binSize, std::vector<double>(imageE[0].size() / binSize));
 
       doRebin(binSize, imageY, imageE, rebinnedY, rebinnedE);
-      ws->setImageYAndE(rebinnedY, rebinnedE, 0, loadAsRectImg, cmpp,
-                        false /* no parallel load */);
+      ws->setImageYAndE(rebinnedY, rebinnedE, 0, loadAsRectImg, cmpp, false /* no parallel load */);
     }
   }
 
@@ -763,9 +703,8 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
  * @param cmpp centimeters per pixel (already taking into account
  * possible rebinning)
  */
-void LoadFITS::addAxesInfoAndLogs(const Workspace2D_sptr &ws,
-                                  bool loadAsRectImg, const FITSInfo &fileInfo,
-                                  int binSize, double cmpp) {
+void LoadFITS::addAxesInfoAndLogs(const Workspace2D_sptr &ws, bool loadAsRectImg, const FITSInfo &fileInfo, int binSize,
+                                  double cmpp) {
   // add axes
   size_t width = fileInfo.axisPixelLengths[0] / binSize;
   size_t height = fileInfo.axisPixelLengths[1] / binSize;
@@ -779,8 +718,7 @@ void LoadFITS::addAxesInfoAndLogs(const Workspace2D_sptr &ws,
     ws->replaceAxis(0, std::move(axw));
     // "cm" width label unit
     std::shared_ptr<Kernel::Units::Label> unitLbl =
-        std::dynamic_pointer_cast<Kernel::Units::Label>(
-            UnitFactory::Instance().create("Label"));
+        std::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
     unitLbl->setLabel("width", "cm");
     ws->getAxis(0)->unit() = unitLbl;
 
@@ -792,8 +730,7 @@ void LoadFITS::addAxesInfoAndLogs(const Workspace2D_sptr &ws,
     }
     ws->replaceAxis(1, std::move(axh));
     // "cm" height label unit
-    unitLbl = std::dynamic_pointer_cast<Kernel::Units::Label>(
-        UnitFactory::Instance().create("Label"));
+    unitLbl = std::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
     unitLbl->setLabel("height", "cm");
     ws->getAxis(1)->unit() = unitLbl;
 
@@ -806,8 +743,7 @@ void LoadFITS::addAxesInfoAndLogs(const Workspace2D_sptr &ws,
   // Add all header info to log.
   for (const auto &headerKey : fileInfo.headerKeys) {
     ws->mutableRun().removeLogData(headerKey.first, true);
-    ws->mutableRun().addLogData(
-        new PropertyWithValue<std::string>(headerKey.first, headerKey.second));
+    ws->mutableRun().addLogData(new PropertyWithValue<std::string>(headerKey.first, headerKey.second));
   }
 
   // Add rotational data to log. Clear first from copied WS
@@ -816,23 +752,19 @@ void LoadFITS::addAxesInfoAndLogs(const Workspace2D_sptr &ws,
   if (fileInfo.headerKeys.end() != it) {
     auto rot = boost::lexical_cast<double>(it->second);
     if (rot >= 0) {
-      ws->mutableRun().addLogData(
-          new PropertyWithValue<double>("Rotation", rot));
+      ws->mutableRun().addLogData(new PropertyWithValue<double>("Rotation", rot));
     }
   }
 
   // Add axis information to log. Clear first from copied WS
   ws->mutableRun().removeLogData("Axis1", true);
-  ws->mutableRun().addLogData(new PropertyWithValue<int>(
-      "Axis1", static_cast<int>(fileInfo.axisPixelLengths[0])));
+  ws->mutableRun().addLogData(new PropertyWithValue<int>("Axis1", static_cast<int>(fileInfo.axisPixelLengths[0])));
   ws->mutableRun().removeLogData("Axis2", true);
-  ws->mutableRun().addLogData(new PropertyWithValue<int>(
-      "Axis2", static_cast<int>(fileInfo.axisPixelLengths[1])));
+  ws->mutableRun().addLogData(new PropertyWithValue<int>("Axis2", static_cast<int>(fileInfo.axisPixelLengths[1])));
 
   // Add image key data to log. Clear first from copied WS
   ws->mutableRun().removeLogData("ImageKey", true);
-  ws->mutableRun().addLogData(
-      new PropertyWithValue<std::string>("ImageKey", fileInfo.imageKey));
+  ws->mutableRun().addLogData(new PropertyWithValue<std::string>("ImageKey", fileInfo.imageKey));
 }
 
 /**
@@ -847,15 +779,13 @@ void LoadFITS::addAxesInfoAndLogs(const Workspace2D_sptr &ws,
  *
  * @throws std::runtime_error if there are file input issues
  */
-void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
-                                   const Workspace2D_sptr &ws,
+void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp, const Workspace2D_sptr &ws,
                                    std::vector<char> &buffer) {
   const size_t bytespp = (fileInfo.bitsPerPixel / 8);
   const size_t len = m_pixelCount * bytespp;
   readInBuffer(fileInfo, buffer, len);
 
-  const size_t nrows(fileInfo.axisPixelLengths[1]),
-      ncols(fileInfo.axisPixelLengths[0]);
+  const size_t nrows(fileInfo.axisPixelLengths[1]), ncols(fileInfo.axisPixelLengths[0]);
   // Treat buffer as a series of bytes
   auto *buffer8 = reinterpret_cast<uint8_t *>(buffer.data());
 
@@ -908,8 +838,8 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
  *
  * @throws std::runtime_error if there are file input issues
  */
-void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
-                              MantidImage &imageE, std::vector<char> &buffer) {
+void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY, MantidImage &imageE,
+                              std::vector<char> &buffer) {
 
   size_t bytespp = (fileInfo.bitsPerPixel / 8);
   size_t len = m_pixelCount * bytespp;
@@ -970,18 +900,15 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
  *
  * @throws std::runtime_error if there are file input issues
  */
-void LoadFITS::readInBuffer(const FITSInfo &fileInfo, std::vector<char> &buffer,
-                            size_t len) {
+void LoadFITS::readInBuffer(const FITSInfo &fileInfo, std::vector<char> &buffer, size_t len) {
   std::string filename = fileInfo.filePath;
   std::ifstream file(filename, std::ios::in | std::ios::binary);
   file.seekg(g_BASE_HEADER_SIZE * fileInfo.headerSizeMultiplier);
   file.read(&buffer[0], len);
   if (!file) {
-    throw std::runtime_error(
-        "Error while reading file: " + filename + ". Tried to read " +
-        std::to_string(len) + " bytes but got " +
-        std::to_string(file.gcount()) +
-        " bytes. The file and/or its headers may be wrong.");
+    throw std::runtime_error("Error while reading file: " + filename + ". Tried to read " + std::to_string(len) +
+                             " bytes but got " + std::to_string(file.gcount()) +
+                             " bytes. The file and/or its headers may be wrong.");
   }
   // all is loaded
   file.close();
@@ -996,8 +923,7 @@ void LoadFITS::readInBuffer(const FITSInfo &fileInfo, std::vector<char> &buffer,
  * @param imageY raw data (Y values)
  * @param imageE raw data (E/error values)
  */
-void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
-                             MantidImage &imageE) {
+void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY, MantidImage &imageE) {
   if (thresh <= 0.0)
     return;
 
@@ -1009,18 +935,14 @@ void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
   for (size_t j = 1; j < (imageY.size() - 1); ++j) {
     for (size_t i = 1; i < (imageY[0].size() - 1); ++i) {
 
-      if (((imageY[j][i] - imageY[j][i - 1]) > thresh) &&
-          ((imageY[j][i] - imageY[j][i + 1]) > thresh) &&
-          ((imageY[j][i] - imageY[j - 1][i]) > thresh) &&
-          ((imageY[j][i] - imageY[j + 1][i]) > thresh))
+      if (((imageY[j][i] - imageY[j][i - 1]) > thresh) && ((imageY[j][i] - imageY[j][i + 1]) > thresh) &&
+          ((imageY[j][i] - imageY[j - 1][i]) > thresh) && ((imageY[j][i] - imageY[j + 1][i]) > thresh))
         goodY[j][i] = 0;
       else
         goodY[j][i] = 1;
 
-      if (((imageE[j][i] - imageE[j][i - 1]) > thresh) &&
-          ((imageE[j][i] - imageE[j][i + 1]) > thresh) &&
-          ((imageE[j][i] - imageE[j - 1][i]) > thresh) &&
-          ((imageE[j][i] - imageE[j + 1][i]) > thresh))
+      if (((imageE[j][i] - imageE[j][i - 1]) > thresh) && ((imageE[j][i] - imageE[j][i + 1]) > thresh) &&
+          ((imageE[j][i] - imageE[j - 1][i]) > thresh) && ((imageE[j][i] - imageE[j + 1][i]) > thresh))
         goodE[j][i] = 0;
       else
         goodE[j][i] = 1;
@@ -1030,22 +952,16 @@ void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
   for (size_t j = 1; j < (imageY.size() - 1); ++j) {
     for (size_t i = 1; i < (imageY[0].size() - 1); ++i) {
       if (goodY[j][i] == 0.0) {
-        if (goodY[j - 1][i] != 0.0 || goodY[j + 1][i] != 0.0 ||
-            goodY[j][i - 1] != 0.0 || goodY[j][i + 1] != 0.0) {
-          imageY[j][i] = goodY[j - 1][i] * imageY[j - 1][i] +
-                         goodY[j + 1][i] * imageY[j + 1][i] +
-                         goodY[j][i - 1] * imageY[j][i - 1] +
-                         goodY[j][i + 1] * imageY[j][i + 1];
+        if (goodY[j - 1][i] != 0.0 || goodY[j + 1][i] != 0.0 || goodY[j][i - 1] != 0.0 || goodY[j][i + 1] != 0.0) {
+          imageY[j][i] = goodY[j - 1][i] * imageY[j - 1][i] + goodY[j + 1][i] * imageY[j + 1][i] +
+                         goodY[j][i - 1] * imageY[j][i - 1] + goodY[j][i + 1] * imageY[j][i + 1];
         }
       }
 
       if (goodE[j][i] == 0.0) {
-        if (goodE[j - 1][i] != 0.0 || goodE[j + 1][i] != 0.0 ||
-            goodE[j][i - 1] != 0.0 || goodE[j][i + 1] != 0.0) {
-          imageE[j][i] = goodE[j - 1][i] * imageE[j - 1][i] +
-                         goodE[j + 1][i] * imageE[j + 1][i] +
-                         goodE[j][i - 1] * imageE[j][i - 1] +
-                         goodE[j][i + 1] * imageE[j][i + 1];
+        if (goodE[j - 1][i] != 0.0 || goodE[j + 1][i] != 0.0 || goodE[j][i - 1] != 0.0 || goodE[j][i + 1] != 0.0) {
+          imageE[j][i] = goodE[j - 1][i] * imageE[j - 1][i] + goodE[j + 1][i] * imageE[j + 1][i] +
+                         goodE[j][i - 1] * imageE[j][i - 1] + goodE[j][i + 1] * imageE[j][i + 1];
         }
       }
     }
@@ -1061,8 +977,8 @@ void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
  * @param rebinnedY raw data after rebin (Y values)
  * @param rebinnedE raw data after rebin (E/error values)
  */
-void LoadFITS::doRebin(size_t rebin, MantidImage &imageY, MantidImage &imageE,
-                       MantidImage &rebinnedY, MantidImage &rebinnedE) {
+void LoadFITS::doRebin(size_t rebin, MantidImage &imageY, MantidImage &imageE, MantidImage &rebinnedY,
+                       MantidImage &rebinnedE) {
   if (1 >= rebin)
     return;
 
@@ -1105,13 +1021,11 @@ bool LoadFITS::isInstrOtherThanIMAT(const FITSInfo &hdr) {
     // For now, do nothing, just tell
     // Cameras used for HiFi and EMU are in principle only used
     // occasionally for calibration
-    g_log.information()
-        << "Found this in the file headers: " << it->first << " = "
-        << it->second
-        << ". This file seems to come from a Starlight camera, "
-           "as used for calibration of the instruments HiFi and EMU (and"
-           "possibly others). Note: not "
-           "loading instrument definition.\n";
+    g_log.information() << "Found this in the file headers: " << it->first << " = " << it->second
+                        << ". This file seems to come from a Starlight camera, "
+                           "as used for calibration of the instruments HiFi and EMU (and"
+                           "possibly others). Note: not "
+                           "loading instrument definition.\n";
   }
 
   return res;
@@ -1170,8 +1084,7 @@ void LoadFITS::mapHeaderKeys() {
 
         if (lineSplit[0] == g_AXIS_NAMES_NAME && !lineSplit[1].empty()) {
           m_headerAxisNameKeys.clear();
-          boost::split(m_headerAxisNameKeys, lineSplit[1],
-                       boost::is_any_of(","));
+          boost::split(m_headerAxisNameKeys, lineSplit[1], boost::is_any_of(","));
         }
 
         if (lineSplit[0] == g_IMAGE_KEY_NAME && !lineSplit[1].empty()) {
@@ -1181,8 +1094,7 @@ void LoadFITS::mapHeaderKeys() {
 
       fStream.close();
     } else {
-      throw std::runtime_error(
-          "Error while trying to read header keys mapping file: " + name);
+      throw std::runtime_error("Error while trying to read header keys mapping file: " + name);
     }
   } catch (...) {
     g_log.error("Cannot load specified map file, using property values "
@@ -1221,11 +1133,9 @@ size_t LoadFITS::fetchNumber(const std::string &name) {
  *
  * @return A string with the 0-padded number
  */
-std::string LoadFITS::padZeros(const size_t number,
-                               const size_t totalDigitCount) {
+std::string LoadFITS::padZeros(const size_t number, const size_t totalDigitCount) {
   std::ostringstream ss;
-  ss << std::setw(static_cast<int>(totalDigitCount)) << std::setfill('0')
-     << static_cast<int>(number);
+  ss << std::setw(static_cast<int>(totalDigitCount)) << std::setfill('0') << static_cast<int>(number);
 
   return ss.str();
 }

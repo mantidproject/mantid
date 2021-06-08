@@ -130,7 +130,7 @@ if __name__ == "__main__":
                         help='The destination is in a subfolder below the main part of the project, e.g. Geometry/Instrument.')
     parser.add_argument('--project', dest='project',
                         default="Framework",
-                        help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
+                        help='The project in which this goes. Default: Framework. Can be MantidQt')
 
 
     args = parser.parse_args()

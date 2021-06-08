@@ -19,15 +19,12 @@ public:
 
 public:
   // ----------------- success tests ---------------------
-  void testExistsReturnsEmptyStringIfMapExists() {
-    TS_ASSERT_EQUALS("jet", MantidColorMap::exists("jet"));
-  }
+  void testExistsReturnsEmptyStringIfMapExists() { TS_ASSERT_EQUALS("jet", MantidColorMap::exists("jet")); }
 
   // ----------------- failure tests ---------------------
 
   void testExistsThrowsIfMapDoesNotExist() {
     using Mantid::PythonInterface::PythonException;
-    TS_ASSERT_THROWS(MantidColorMap::exists("NotAColormap"),
-                     const PythonException &);
+    TS_ASSERT_THROWS(MantidColorMap::exists("NotAColormap"), const PythonException &);
   }
 };

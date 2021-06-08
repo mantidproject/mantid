@@ -30,9 +30,7 @@ class MANTID_ALGORITHMS_DLL CalculateCountRate : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"ChangePulsetime"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ChangePulsetime"}; }
   const std::string category() const override;
   const std::string summary() const override;
   /// Helper function: true if count rate should be normalized and false
@@ -71,16 +69,13 @@ protected: // for testing, actually private
 
   void setSourceWSandXRanges(DataObjects::EventWorkspace_sptr &InputWorkspace);
 
-  void
-  setOutLogParameters(const DataObjects::EventWorkspace_sptr &InputWorkspace);
+  void setOutLogParameters(const DataObjects::EventWorkspace_sptr &InputWorkspace);
 
-  void calcRateLog(DataObjects::EventWorkspace_sptr &InputWorkspace,
-                   Kernel::TimeSeriesProperty<double> *const targLog);
+  void calcRateLog(DataObjects::EventWorkspace_sptr &InputWorkspace, Kernel::TimeSeriesProperty<double> *const targLog);
 
   void checkAndInitVisWorkspace();
 
-  void histogramEvents(const DataObjects::EventList &el,
-                       std::mutex *spectraLocks);
+  void histogramEvents(const DataObjects::EventList &el, std::mutex *spectraLocks);
 
   void buildVisWSNormalization(std::vector<double> &normalization);
 

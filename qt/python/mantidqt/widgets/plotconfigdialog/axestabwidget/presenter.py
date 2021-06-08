@@ -8,7 +8,6 @@
 
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
-from mantid import logger
 from mantid.plots import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_axes_names_dict
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
@@ -260,21 +259,7 @@ class AxesTabWidgetPresenter:
         self.current_view_props['title'] = self.view.get_title()
         self.current_view_props['minor_ticks'] = self.view.get_show_minor_ticks()
         self.current_view_props['minor_gridlines'] = self.view.get_show_minor_gridlines()
-        try:
-            lower_lim = self.view.get_lower_limit()
-            lower_lim = float(lower_lim)
-        except ValueError:
-            logger.warning("Could not set lower axis limit to " + lower_lim + ". Using 0.0 instead")
-            lower_lim = 0.0
-            self.view.set_lower_limit(lower_lim)
-        try:
-            upper_lim = self.view.get_upper_limit()
-            upper_lim = float(upper_lim)
-        except ValueError:
-            logger.warning("Could not set upper axis limit to " + upper_lim + ". Using 1.0 instead")
-            upper_lim = 1.0
-            self.view.set_upper_limit(upper_lim)
-        self.current_view_props[f"{ax}lim"] = (lower_lim,upper_lim)
+        self.current_view_props[f"{ax}lim"] = (self.view.get_lower_limit(), self.view.get_upper_limit())
         self.current_view_props[f"{ax}label"] = self.view.get_label()
         self.current_view_props[f"{ax}scale"] = self.view.get_scale()
         self.current_view_props[f"{ax}autoscale"] = self.view.get_autoscale_enabled()

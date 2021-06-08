@@ -35,13 +35,9 @@ public:
 
   void test_histo_with_Exponent() {
     MDHistoWorkspace_sptr out;
-    out = UnaryOperationMDTestHelper::doTest("PowerMD", "histo", "out", true,
-                                             "Exponent", "-3.0");
+    out = UnaryOperationMDTestHelper::doTest("PowerMD", "histo", "out", true, "Exponent", "-3.0");
     TS_ASSERT_DELTA(out->getSignalAt(0), 1. / 8., 1e-5);
   }
 
-  void test_event_fails() {
-    UnaryOperationMDTestHelper::doTest("PowerMD", "event", "out",
-                                       false /* fails*/);
-  }
+  void test_event_fails() { UnaryOperationMDTestHelper::doTest("PowerMD", "event", "out", false /* fails*/); }
 };

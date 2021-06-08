@@ -18,10 +18,8 @@ namespace ScopedFileHelper {
 /**
 Constructor generates the file. Sets location to be the temp directory
 */
-ScopedFile::ScopedFile(const std::string &fileContents,
-                       const std::string &fileName) {
-  Poco::Path path(
-      Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
+ScopedFile::ScopedFile(const std::string &fileContents, const std::string &fileName) {
+  Poco::Path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
   path.append(fileName);
   doCreateFile(fileContents, path);
 }
@@ -29,9 +27,7 @@ ScopedFile::ScopedFile(const std::string &fileContents,
 /**
 Constructor generates the file. Sets location as defined by the fileDirectory.
 */
-ScopedFile::ScopedFile(const std::string &fileContents,
-                       const std::string &fileName,
-                       const std::string &fileDirectory) {
+ScopedFile::ScopedFile(const std::string &fileContents, const std::string &fileName, const std::string &fileDirectory) {
   Poco::Path path(fileDirectory);
   path.append(fileName);
   doCreateFile(fileContents, path);
@@ -62,8 +58,7 @@ ScopedFile::ScopedFile(const ScopedFile &other) {
 Common method used by all constructors. Creates a file containing the ASCII file
 contents and 'remembers' the location of that file.
 */
-void ScopedFile::doCreateFile(const std::string &fileContents,
-                              const Poco::Path &fileNameAndPath) {
+void ScopedFile::doCreateFile(const std::string &fileContents, const Poco::Path &fileNameAndPath) {
   m_filename = fileNameAndPath.toString();
   m_file.open(m_filename.c_str(), std::ios_base::out);
   if (!m_file.is_open()) {
@@ -87,8 +82,7 @@ ScopedFile::~ScopedFile() {
     if (remove(m_filename.c_str()) != 0) {
       // destructors shouldn't throw exceptions so we have to resort to printing
       // an error
-      logger.error() << "~ScopedFile() - Error deleting file '" << m_filename
-                     << "'\n";
+      logger.error() << "~ScopedFile() - Error deleting file '" << m_filename << "'\n";
     }
   }
 }

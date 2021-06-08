@@ -18,8 +18,7 @@ namespace detail {
   @author Simon Heybrock
   @date 2017
 */
-template <class Derived, class Int,
-          class = typename std::enable_if<std::is_integral<Int>::value>::type>
+template <class Derived, class Int, class = typename std::enable_if<std::is_integral<Int>::value>::type>
 class IndexType {
 public:
   using underlying_type = Int;
@@ -30,24 +29,12 @@ public:
     m_data = IndexType(other).m_data;
     return *this;
   }
-  template <class T> bool operator==(const T &other) const noexcept {
-    return m_data == IndexType(other).m_data;
-  }
-  template <class T> bool operator!=(const T &other) const noexcept {
-    return m_data != IndexType(other).m_data;
-  }
-  template <class T> bool operator>(const T &other) const noexcept {
-    return m_data > IndexType(other).m_data;
-  }
-  template <class T> bool operator>=(const T &other) const noexcept {
-    return m_data >= IndexType(other).m_data;
-  }
-  template <class T> bool operator<(const T &other) const noexcept {
-    return m_data < IndexType(other).m_data;
-  }
-  template <class T> bool operator<=(const T &other) const noexcept {
-    return m_data <= IndexType(other).m_data;
-  }
+  template <class T> bool operator==(const T &other) const noexcept { return m_data == IndexType(other).m_data; }
+  template <class T> bool operator!=(const T &other) const noexcept { return m_data != IndexType(other).m_data; }
+  template <class T> bool operator>(const T &other) const noexcept { return m_data > IndexType(other).m_data; }
+  template <class T> bool operator>=(const T &other) const noexcept { return m_data >= IndexType(other).m_data; }
+  template <class T> bool operator<(const T &other) const noexcept { return m_data < IndexType(other).m_data; }
+  template <class T> bool operator<=(const T &other) const noexcept { return m_data <= IndexType(other).m_data; }
   std::string str() const { return std::to_string(m_data); }
 
 private:

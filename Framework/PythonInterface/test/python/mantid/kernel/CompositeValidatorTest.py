@@ -29,8 +29,8 @@ class CompositeValidatorTest(unittest.TestCase):
         self._do_validation_test(validation)
 
     def test_composite_validator_with_or_relation(self):
-        validation = CompositeValidator([FloatBoundedValidator(lower=5, upper=10), 
-                                         FloatBoundedValidator(lower=15, upper=20)], 
+        validation = CompositeValidator([FloatBoundedValidator(lower=5, upper=10),
+                                         FloatBoundedValidator(lower=15, upper=20)],
                                         relation=CompositeRelation.OR)
 
         test_alg = self._create_test_algorithm(validation)

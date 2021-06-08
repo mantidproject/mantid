@@ -21,15 +21,15 @@ Usage
 .. testcode:: ExRenameLog
 
   import os
-  
+
   nxsfilename = "HYS_11092_event.nxs"
   wsname = "HYS_11092_event"
-  
-  Load(Filename = nxsfilename, 
+
+  Load(Filename = nxsfilename,
       OutputWorkspace = wsname,
       MetaDataOnly = True,
       LoadLogs = True)
-  
+
   RenameLog(Workspace=wsname, OriginalLogName='a1b', NewLogName='A1B_New')
 
 .. testcleanup:: ExRenameLog

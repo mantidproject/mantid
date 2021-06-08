@@ -34,7 +34,7 @@ import importlib.util
 import inspect
 from mantid.api import FileFinder
 from mantid.api import FrameworkManager
-from mantid.kernel import config, MemoryStats
+from mantid.kernel import config, MemoryStats, ConfigService
 from mantid.simpleapi import AlgorithmManager, Load, SaveNexus
 import numpy
 import platform
@@ -131,6 +131,8 @@ class MantidSystemTest(unittest.TestCase):
         The overriding method should return a pair of strings. This could be two workspace
         names, e.g. return 'workspace1','workspace2', or a workspace name and a nexus
         filename (which must have nxs suffix), e.g. return 'workspace1','GEM00001.nxs'.
+        If validating with WorkspaceToNexus, may return a series of workspaces and
+        nexus filenames, e.g. 'workspace1','GEM00001.nxs','workspace2','GEM00002.nxs'.
         '''
         return None
 
@@ -295,7 +297,8 @@ class MantidSystemTest(unittest.TestCase):
     def validateWorkspaceToNeXus(self):
         '''
         Assumes the second item from self.validate() is a nexus file and loads it
-        to compare to the supplied workspace.
+        to compare to the supplied workspace. Also supports sequential series of
+        comparisons between workspaces and nexus files
         '''
         valNames = list(self.validate())
         numRezToCheck = len(valNames)
@@ -680,7 +683,7 @@ class TestScript(object):
 import sys
 for p in ('{TESTING_FRAMEWORK_DIR}', '{FRAMEWORK_PYTHONINTERFACE_TEST_DIR}', '{self._test_dir}'):
     sys.path.append(p)
-                
+
 # Ensure sys path matches current to avoid weird import errors
 sys.path.extend({sys.path})
 from {self._modname} import {self._test_cls_name}
@@ -1199,6 +1202,10 @@ class MantidFrameworkConfig:
         # Make sure we only save these keys here
         config.reset()
 
+        # With the default facility changed from ISIS to nothing (EMPTY),
+        # the following setting is put in place to avoid failure of tests
+        ConfigService.Instance().setString("default.facility", "ISIS")
+
         # Up the log level so that failures can give useful information
         config['logging.loggers.root.level'] = self.__loglevel
         # Set the correct search path
@@ -1206,9 +1213,6 @@ class MantidFrameworkConfig:
 
         # Save path
         config['defaultsave.directory'] = self.__saveDir
-
-        # Do not show paraview dialog
-        config['paraview.ignore'] = "1"
 
         # Do not update instrument definitions
         config['UpdateInstrumentDefinitions.OnStartup'] = "0"

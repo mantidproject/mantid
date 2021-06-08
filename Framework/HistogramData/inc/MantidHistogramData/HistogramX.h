@@ -32,10 +32,9 @@ template <class Points, class HistogramX> class VectorOf;
   @author Simon Heybrock
   @date 2016
 */
-class MANTID_HISTOGRAMDATA_DLL HistogramX
-    : public detail::FixedLengthVector<HistogramX>,
-      public detail::Offsetable<HistogramX>,
-      public detail::Scalable<HistogramX> {
+class MANTID_HISTOGRAMDATA_DLL HistogramX : public detail::FixedLengthVector<HistogramX>,
+                                            public detail::Offsetable<HistogramX>,
+                                            public detail::Scalable<HistogramX> {
 public:
   using detail::FixedLengthVector<HistogramX>::FixedLengthVector;
   using detail::FixedLengthVector<HistogramX>::operator=;

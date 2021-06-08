@@ -25,7 +25,7 @@ class SaveP2DTest(unittest.TestCase):
 
     def setUp(self):
         self._workspace = self._create_workspace()
-        
+
     def tearDown(self):
         DeleteWorkspace(self._workspace)
 

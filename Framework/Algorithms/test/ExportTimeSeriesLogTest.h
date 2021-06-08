@@ -34,9 +34,7 @@ class ExportTimeSeriesLogTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ExportTimeSeriesLogTest *createSuite() {
-    return new ExportTimeSeriesLogTest();
-  }
+  static ExportTimeSeriesLogTest *createSuite() { return new ExportTimeSeriesLogTest(); }
   static void destroySuite(ExportTimeSeriesLogTest *suite) { delete suite; }
 
   /** Test initialization
@@ -64,8 +62,8 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    EventWorkspace_sptr outws = std::dynamic_pointer_cast<EventWorkspace>(
-        AnalysisDataService::Instance().retrieve("FastSineLogEventWS"));
+    EventWorkspace_sptr outws =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FastSineLogEventWS"));
     TS_ASSERT(outws);
 
     size_t numevents = outws->getNumberEvents();
@@ -95,8 +93,8 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
+    Workspace2D_sptr outws =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
@@ -133,8 +131,8 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
+    Workspace2D_sptr outws =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
@@ -173,8 +171,8 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
+    Workspace2D_sptr outws =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
@@ -211,8 +209,8 @@ public:
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
 
-    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
+    Workspace2D_sptr outws =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
@@ -236,8 +234,7 @@ public:
 
     // 1. Empty workspace
     DataObjects::EventWorkspace_sptr eventws =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 2,
-                                                                        true);
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 2, true);
     // eventws->setName("TestWorkspace");
 
     // 2. Run star time
@@ -246,12 +243,10 @@ public:
     int64_t pulsetime_ns = 100000;
 
     Types::Core::DateAndTime runstarttime(runstarttime_ns);
-    eventws->mutableRun().addProperty("run_start",
-                                      runstarttime.toISO8601String());
+    eventws->mutableRun().addProperty("run_start", runstarttime.toISO8601String());
 
     // 3. Proton charge log
-    Kernel::TimeSeriesProperty<double> *protonchargelog =
-        new Kernel::TimeSeriesProperty<double>("proton_charge");
+    Kernel::TimeSeriesProperty<double> *protonchargelog = new Kernel::TimeSeriesProperty<double>("proton_charge");
     int64_t curtime_ns = runstarttime_ns;
     while (curtime_ns <= runstoptime_ns) {
       Types::Core::DateAndTime curtime(curtime_ns);
@@ -261,15 +256,13 @@ public:
     eventws->mutableRun().addProperty(protonchargelog, true);
 
     // 4. Sine value log (value record 1/4 of pulse time.  it is FAST)
-    Kernel::TimeSeriesProperty<double> *sinlog =
-        new Kernel::TimeSeriesProperty<double>("FastSineLog");
+    Kernel::TimeSeriesProperty<double> *sinlog = new Kernel::TimeSeriesProperty<double>("FastSineLog");
     double period = static_cast<double>(pulsetime_ns);
     curtime_ns = runstarttime_ns;
     size_t numevents = 0;
     while (curtime_ns < runstoptime_ns) {
       Types::Core::DateAndTime curtime(curtime_ns);
-      double value =
-          sin(M_PI * static_cast<double>(curtime_ns) / period * 0.25);
+      double value = sin(M_PI * static_cast<double>(curtime_ns) / period * 0.25);
       sinlog->addValue(curtime, value);
       curtime_ns += pulsetime_ns / 4;
       ++numevents;
@@ -278,8 +271,7 @@ public:
     // cout << "Log 'FastSine' has " << numevents << ".\n";
 
     // 5. Cosine value log (value record 4 pulse time.  it is SLOW)
-    Kernel::TimeSeriesProperty<double> *coslog =
-        new Kernel::TimeSeriesProperty<double>("SlowCosineLog");
+    Kernel::TimeSeriesProperty<double> *coslog = new Kernel::TimeSeriesProperty<double>("SlowCosineLog");
     period = static_cast<double>(pulsetime_ns * 10);
     curtime_ns = runstarttime_ns;
     while (curtime_ns < runstoptime_ns) {

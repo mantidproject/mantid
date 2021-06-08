@@ -27,44 +27,33 @@ using namespace Mantid::Indexing;
 DECLARE_ALGORITHM(RemoveSpectra)
 
 void RemoveSpectra::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "InputWorkspace", "", Direction::Input));
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "OutputWorkspace", "", Direction::Output));
-  declareProperty(
-      std::make_unique<ArrayProperty<size_t>>("WorkspaceIndices",
-                                              Direction::Input),
-      "A comma-separated list of individual workspace indices to remove");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output));
+  declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndices", Direction::Input),
+                  "A comma-separated list of individual workspace indices to remove");
   declareProperty("RemoveMaskedSpectra", false,
                   "Whether or not to remove spectra that have been masked from "
                   "the inputworkspace.",
                   Direction::Input);
-  declareProperty(
-      "RemoveSpectraWithNoDetector", false,
-      "Whether or not to remove spectra that have no attached detector.",
-      Direction::Input);
+  declareProperty("RemoveSpectraWithNoDetector", false,
+                  "Whether or not to remove spectra that have no attached detector.", Direction::Input);
 }
 
 std::map<std::string, std::string> RemoveSpectra::validateInputs() {
   std::map<std::string, std::string> errors;
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  const auto workspace2D =
-      std::dynamic_pointer_cast<const Workspace2D>(inputWS);
+  const auto workspace2D = std::dynamic_pointer_cast<const Workspace2D>(inputWS);
   const auto eventWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (!workspace2D && !eventWS) {
-    errors.insert(std::make_pair(
-        "InputWorkspace",
-        "A none-Workspace2D or EventWorkspace has been provided."));
+    errors.insert(std::make_pair("InputWorkspace", "A none-Workspace2D or EventWorkspace has been provided."));
   }
 
   const std::vector<size_t> indexList = getProperty("WorkspaceIndices");
   for (const auto &index : indexList) {
     // index >= 0 is assumed as it should be a const long unsinged int
     if (index >= inputWS->getNumberHistograms()) {
-      errors.insert(
-          std::make_pair("WorkspaceIndices",
-                         "Passed Workspace Index: " + std::to_string(index) +
-                             " is not valid for passed InputWorkspace"));
+      errors.insert(std::make_pair("WorkspaceIndices", "Passed Workspace Index: " + std::to_string(index) +
+                                                           " is not valid for passed InputWorkspace"));
     }
   }
 
@@ -72,8 +61,7 @@ std::map<std::string, std::string> RemoveSpectra::validateInputs() {
 }
 
 namespace {
-std::vector<size_t>
-discoverSpectraWithNoDetector(const MatrixWorkspace_sptr &inputWS) {
+std::vector<size_t> discoverSpectraWithNoDetector(const MatrixWorkspace_sptr &inputWS) {
   std::vector<size_t> specIDs;
   const auto &spectrumInfo = inputWS->spectrumInfo();
   for (auto i = 0u; i < inputWS->getNumberHistograms(); ++i) {
@@ -83,8 +71,7 @@ discoverSpectraWithNoDetector(const MatrixWorkspace_sptr &inputWS) {
   return specIDs;
 }
 
-std::vector<size_t>
-discoverSpectraWithMask(const MatrixWorkspace_sptr &inputWS) {
+std::vector<size_t> discoverSpectraWithMask(const MatrixWorkspace_sptr &inputWS) {
   std::vector<size_t> specIDs;
   const auto &spectrumInfo = inputWS->spectrumInfo();
   for (auto i = 0u; i < inputWS->getNumberHistograms(); ++i) {
@@ -97,10 +84,8 @@ discoverSpectraWithMask(const MatrixWorkspace_sptr &inputWS) {
   return specIDs;
 }
 
-template <class T>
-bool evaluateIfSpectrumIsInList(std::vector<size_t> &specList, T spectrum) {
-  const auto it =
-      std::find(specList.begin(), specList.end(), spectrum->getSpectrumNo());
+template <class T> bool evaluateIfSpectrumIsInList(std::vector<size_t> &specList, T spectrum) {
+  const auto it = std::find(specList.begin(), specList.end(), spectrum->getSpectrumNo());
   return it != specList.end();
 }
 } // namespace
@@ -109,8 +94,7 @@ void RemoveSpectra::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   std::vector<size_t> specList = getProperty("WorkspaceIndices");
   const bool removeMaskedSpectra = getProperty("RemoveMaskedSpectra");
-  const bool removeSpectraWithNoDetector =
-      getProperty("RemoveSpectraWithNoDetector");
+  const bool removeSpectraWithNoDetector = getProperty("RemoveSpectraWithNoDetector");
 
   if (specList.empty() && removeMaskedSpectra && removeSpectraWithNoDetector) {
     g_log.warning("Nothing passed to the RemoveSpectra algorithm to remove so "
@@ -142,8 +126,8 @@ void RemoveSpectra::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-MatrixWorkspace_sptr RemoveSpectra::copySpectraFromInputToOutput(
-    MatrixWorkspace_sptr inputWS, const std::vector<size_t> &specList) {
+MatrixWorkspace_sptr RemoveSpectra::copySpectraFromInputToOutput(MatrixWorkspace_sptr inputWS,
+                                                                 const std::vector<size_t> &specList) {
   std::vector<size_t> indicesToExtract;
   for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
     if (std::find(specList.begin(), specList.end(), i) == specList.end()) {
@@ -160,8 +144,7 @@ MatrixWorkspace_sptr RemoveSpectra::copySpectraFromInputToOutput(
   extractSpectra->setProperty("WorkspaceIndexList", indicesToExtract);
   extractSpectra->executeAsChildAlg();
 
-  MatrixWorkspace_sptr outputWS =
-      extractSpectra->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWS = extractSpectra->getProperty("OutputWorkspace");
   return outputWS;
 }
 } // namespace Algorithms

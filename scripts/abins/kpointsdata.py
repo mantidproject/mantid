@@ -132,7 +132,7 @@ class KpointsData(collections.abc.Sequence):
         ...
 
     @overload  # noqa F811
-    def __getitem__(self, item: slice) -> List[KpointData]:
+    def __getitem__(self, item: slice) -> List[KpointData]: # noqa F811
         ...
 
     def __getitem__(self, item):  # noqa F811

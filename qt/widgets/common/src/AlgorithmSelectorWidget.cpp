@@ -28,19 +28,14 @@ namespace MantidWidgets {
 /** Constructor
  */
 AlgorithmSelectorWidget::AlgorithmSelectorWidget(QWidget *parent)
-    : QWidget(parent), m_tree(nullptr), m_findAlg(nullptr),
-      m_execButton(nullptr),
-      m_updateObserver(*this,
-                       &AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate),
-      m_updateInProgress(false) {
+    : QWidget(parent), m_tree(nullptr), m_findAlg(nullptr), m_execButton(nullptr),
+      m_updateObserver(*this, &AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate), m_updateInProgress(false) {
   auto *buttonLayout = new QHBoxLayout();
 
   m_tree = new AlgorithmTreeWidget(this);
   m_tree->setHeaderLabel("Algorithms");
-  connect(m_tree, SIGNAL(itemSelectionChanged()), this,
-          SLOT(treeSelectionChanged()));
-  connect(m_tree, SIGNAL(executeAlgorithm(const QString &, int)), this,
-          SLOT(executeSelected()));
+  connect(m_tree, SIGNAL(itemSelectionChanged()), this, SLOT(treeSelectionChanged()));
+  connect(m_tree, SIGNAL(executeAlgorithm(const QString &, int)), this, SLOT(executeSelected()));
 
   m_findAlg = new FindAlgComboBox;
   m_findAlg->setEditable(true);
@@ -52,8 +47,7 @@ AlgorithmSelectorWidget::AlgorithmSelectorWidget(QWidget *parent)
   m_findAlg->setSizePolicy(expandHoriz);
 
   connect(m_findAlg, SIGNAL(enterPressed()), this, SLOT(executeSelected()));
-  connect(m_findAlg, SIGNAL(editTextChanged(const QString &)), this,
-          SLOT(findAlgTextChanged(const QString &)));
+  connect(m_findAlg, SIGNAL(editTextChanged(const QString &)), this, SLOT(findAlgTextChanged(const QString &)));
 
   m_execButton = new QPushButton("Execute");
   connect(m_execButton, SIGNAL(clicked()), this, SLOT(executeSelected()));
@@ -79,19 +73,14 @@ AlgorithmSelectorWidget::AlgorithmSelectorWidget(QWidget *parent)
 /** Destructor
  */
 AlgorithmSelectorWidget::~AlgorithmSelectorWidget() {
-  AlgorithmFactory::Instance().notificationCenter.removeObserver(
-      m_updateObserver);
+  AlgorithmFactory::Instance().notificationCenter.removeObserver(m_updateObserver);
 }
 
 /** Is the the execute button visible */
-bool AlgorithmSelectorWidget::showExecuteButton() const {
-  return m_execButton->isVisible();
-}
+bool AlgorithmSelectorWidget::showExecuteButton() const { return m_execButton->isVisible(); }
 
 /** Show/hide the execute button */
-void AlgorithmSelectorWidget::showExecuteButton(const bool val) {
-  m_execButton->setVisible(val);
-}
+void AlgorithmSelectorWidget::showExecuteButton(const bool val) { m_execButton->setVisible(val); }
 
 //---------------------------------------------------------------------------
 /** Update the lists of algorithms */
@@ -134,8 +123,7 @@ void AlgorithmSelectorWidget::treeSelectionChanged() {
   auto alg = this->getSelectedAlgorithm();
   // Select in the combo box
   m_findAlg->blockSignals(true);
-  m_findAlg->setCurrentIndex(
-      m_findAlg->findText(alg.name, Qt::MatchFixedString));
+  m_findAlg->setCurrentIndex(m_findAlg->findText(alg.name, Qt::MatchFixedString));
   m_findAlg->blockSignals(false);
   // Emit the signal
   emit algorithmSelectionChanged(alg.name, alg.version);
@@ -160,8 +148,7 @@ SelectedAlgorithm AlgorithmSelectorWidget::getSelectedAlgorithm() {
  */
 void AlgorithmSelectorWidget::setSelectedAlgorithm(QString &algName) {
   m_findAlg->blockSignals(true);
-  m_findAlg->setCurrentIndex(
-      m_findAlg->findText(algName, Qt::MatchFixedString));
+  m_findAlg->setCurrentIndex(m_findAlg->findText(algName, Qt::MatchFixedString));
   m_findAlg->blockSignals(false);
   // De-select from the tree
   m_tree->blockSignals(true);
@@ -184,21 +171,18 @@ void AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate(
 // Use an anonymous namespace to keep these at file scope
 namespace {
 
-bool AlgorithmDescriptorLess(const AlgorithmDescriptor &d1,
-                             const AlgorithmDescriptor &d2) {
+bool AlgorithmDescriptorLess(const AlgorithmDescriptor &d1, const AlgorithmDescriptor &d2) {
   if (d1.category < d2.category)
     return true;
   else if (d1.category == d2.category && d1.name < d2.name)
     return true;
-  else if (d1.category == d2.category && d1.name == d2.name &&
-           d1.version > d2.version)
+  else if (d1.category == d2.category && d1.name == d2.name && d1.version > d2.version)
     return true;
 
   return false;
 }
 
-bool AlgorithmDescriptorNameLess(const AlgorithmDescriptor &d1,
-                                 const AlgorithmDescriptor &d2) {
+bool AlgorithmDescriptorNameLess(const AlgorithmDescriptor &d1, const AlgorithmDescriptor &d2) {
   return d1.name < d2.name;
 }
 } // namespace
@@ -243,8 +227,7 @@ void AlgorithmTreeWidget::mousePressEvent(QMouseEvent *e) {
 void AlgorithmTreeWidget::mouseMoveEvent(QMouseEvent *e) {
   if (!(e->buttons() & Qt::LeftButton))
     return;
-  if ((e->pos() - m_dragStartPosition).manhattanLength() <
-      QApplication::startDragDistance())
+  if ((e->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
     return;
 
   // Start dragging
@@ -276,14 +259,12 @@ void AlgorithmTreeWidget::update() {
   this->clear();
 
   using AlgNamesType = std::vector<AlgorithmDescriptor>;
-  AlgNamesType names =
-      AlgorithmFactory::Instance().getDescriptors(false, false);
+  AlgNamesType names = AlgorithmFactory::Instance().getDescriptors(false, false);
 
   // sort by category/name/version to fill QTreeWidget
   sort(names.begin(), names.end(), AlgorithmDescriptorLess);
 
-  QMap<QString, QTreeWidgetItem *>
-      categories; // keeps track of categories added to the tree
+  QMap<QString, QTreeWidgetItem *> categories; // keeps track of categories added to the tree
   QMap<QString, QTreeWidgetItem *> algorithms; // keeps track of algorithms
                                                // added to the tree (needed in
                                                // case there are different
@@ -306,8 +287,7 @@ void AlgorithmTreeWidget::update() {
           if (categories.contains(cn)) {
             catItem = categories[cn];
           } else {
-            QTreeWidgetItem *newCatItem =
-                new QTreeWidgetItem(QStringList(subCats[j]));
+            QTreeWidgetItem *newCatItem = new QTreeWidgetItem(QStringList(subCats[j]));
             categories.insert(cn, newCatItem);
             if (!catItem) {
               this->addTopLevelItem(newCatItem);
@@ -322,8 +302,7 @@ void AlgorithmTreeWidget::update() {
       }
     }
 
-    QTreeWidgetItem *algItem = new QTreeWidgetItem(
-        QStringList(algName + " v." + QString::number(i->version)));
+    QTreeWidgetItem *algItem = new QTreeWidgetItem(QStringList(algName + " v." + QString::number(i->version)));
     QString cat_algName = catName + algName;
     if (!algorithms.contains(cat_algName)) {
       algorithms.insert(cat_algName, algItem);
@@ -369,8 +348,7 @@ void FindAlgComboBox::update() {
 /** Adds alias entries to the list of algorithms */
 void FindAlgComboBox::addAliases(AlgNamesType &algNamesList) {
   AlgNamesType aliasList;
-  for (AlgNamesType::const_iterator i = algNamesList.begin();
-       i != algNamesList.end(); ++i) {
+  for (AlgNamesType::const_iterator i = algNamesList.begin(); i != algNamesList.end(); ++i) {
     // the alias is not empty and is not just different by case from the name
     if ((!i->alias.empty()) && (!boost::iequals(i->alias, i->name))) {
       AlgorithmDescriptor newAlias(*i);
@@ -399,15 +377,13 @@ QString FindAlgComboBox::stripAlias(const QString &text) const {
 /** Return the selected algorithm */
 SelectedAlgorithm FindAlgComboBox::getSelectedAlgorithm() {
   // typed selection
-  QString typedText =
-      this->currentText().trimmed(); // text as typed in the combobox
-  if (!typedText.isEmpty())          // if the text is not empty
+  QString typedText = this->currentText().trimmed(); // text as typed in the combobox
+  if (!typedText.isEmpty())                          // if the text is not empty
   {
     // find the closest matching entry
     int matchedIndex = this->findText(typedText, Qt::MatchStartsWith);
     if (matchedIndex > -1) {
-      typedText = this->itemText(
-          matchedIndex); // text in the combobox at the matched index
+      typedText = this->itemText(matchedIndex); // text in the combobox at the matched index
       typedText = stripAlias(typedText);
     }
   }

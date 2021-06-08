@@ -46,15 +46,11 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "TOFSANSResolution"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Calculate the Q resolution for TOF SANS data.";
-  }
+  const std::string summary() const override { return "Calculate the Q resolution for TOF SANS data."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"TOFSANSResolutionByPixel"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"TOFSANSResolutionByPixel"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "SANS"; }
 

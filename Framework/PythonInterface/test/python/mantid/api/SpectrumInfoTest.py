@@ -45,7 +45,6 @@ class SpectrumInfoTest(unittest.TestCase):
         # One detector cleared. So not counted.
         self.assertEqual(info.detectorCount(), 2)
 
-
     def test_isMonitor(self):
         """ Check if a monitor is present. """
         info = self._ws.spectrumInfo()
@@ -72,6 +71,13 @@ class SpectrumInfoTest(unittest.TestCase):
         """ See if the returned value is a double (float in Python). """
         info = self._ws.spectrumInfo()
         self.assertEqual(type(info.twoTheta(1)), float)
+
+    def test_geogAngles(self):
+        """ See if the returned value is a double (float in Python). """
+        info = self._ws.spectrumInfo()
+        lat, lon = info.geographicalAngles(1)
+        self.assertEqual(type(lat), float)
+        self.assertEqual(type(lon), float)
 
     def test_signedTwoTheta(self):
         """ See if the returned value is a double (float in Python). """
@@ -127,7 +133,7 @@ class SpectrumInfoTest(unittest.TestCase):
     """
     def test_basic_iteration(self):
         info = self._ws.spectrumInfo()
-        expected_iterations = len(info) 
+        expected_iterations = len(info)
         actual_iterations = len(list(iter(info)))
         self.assertEqual(expected_iterations, actual_iterations)
 
@@ -138,10 +144,10 @@ class SpectrumInfoTest(unittest.TestCase):
         next(it) # skip first as detectors cleared
         for item in it:
             self.assertFalse(item.isMonitor)
-            
+
     def test_iterator_for_masked(self):
         info = self._ws.spectrumInfo()
-        # nothing should be masked 
+        # nothing should be masked
         it = iter(info)
         next(it) # skip first as detectors cleared
         for item in it:
@@ -149,7 +155,7 @@ class SpectrumInfoTest(unittest.TestCase):
 
     def test_iterator_for_setting_masked(self):
         info = self._ws.spectrumInfo()
-        # nothing should be masked 
+        # nothing should be masked
         it = iter(info)
         next(it) # skip first as detectors cleared
         for item in it:
@@ -217,7 +223,6 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         with self.assertRaises(OverflowError):
             info.position(-1)
-
 
     """
     ----------------------------------------------------------------------------
@@ -316,7 +321,6 @@ class SpectrumInfoTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             info.samplePosition(0.0)
 
-
     """
     ----------------------------------------------------------------------------
     SpectrumDefinition Tests
@@ -364,6 +368,7 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         spectrumDefinition = info.getSpectrumDefinition(1)
         self.assertEqual(spectrumDefinition[0], (1, 0))
+
 
 if __name__ == '__main__':
     unittest.main()

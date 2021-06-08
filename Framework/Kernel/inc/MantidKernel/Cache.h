@@ -34,8 +34,8 @@ public:
    * @param src The object that this object shall be constructed from.
    */
   Cache(const Cache<KEYTYPE, VALUETYPE> &src)
-      : m_cacheHit(src.m_cacheHit), m_cacheMiss(src.m_cacheMiss),
-        m_cacheMap(src.m_cacheMap), m_mutex() // New mutex which is unlocked
+      : m_cacheHit(src.m_cacheHit), m_cacheMiss(src.m_cacheMiss), m_cacheMap(src.m_cacheMap),
+        m_mutex() // New mutex which is unlocked
   {}
 
   /**
@@ -153,8 +153,7 @@ private:
   /// iterator typedef
   using CacheMapIterator = typename std::map<KEYTYPE, VALUETYPE>::iterator;
   /// const_iterator typedef
-  using CacheMapConstIterator =
-      typename std::map<KEYTYPE, VALUETYPE>::const_iterator;
+  using CacheMapConstIterator = typename std::map<KEYTYPE, VALUETYPE>::const_iterator;
 };
 
 } // namespace Kernel

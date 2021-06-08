@@ -42,8 +42,7 @@ namespace {
 DataObjects::TableWorkspace_sptr createTestEffectiveFuncParameters() {
   // 1. Build a TableWorkspace
   DataObjects::TableWorkspace_sptr peakparms =
-      std::shared_ptr<DataObjects::TableWorkspace>(
-          new DataObjects::TableWorkspace);
+      std::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace);
   peakparms->addColumn("int", "spectrum");
   peakparms->addColumn("double", "centre");
   peakparms->addColumn("double", "width");
@@ -79,8 +78,7 @@ DataObjects::TableWorkspace_sptr createTestEffectiveFuncParameters() {
 DataObjects::TableWorkspace_sptr createTestPeakParameters2() {
   // 1. Build a TableWorkspace
   DataObjects::TableWorkspace_sptr peakparms =
-      std::shared_ptr<DataObjects::TableWorkspace>(
-          new DataObjects::TableWorkspace);
+      std::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace);
   peakparms->addColumn("int", "spectrum");
   peakparms->addColumn("double", "PeakCentre");
   peakparms->addColumn("double", "Sigma");
@@ -117,8 +115,7 @@ DataObjects::TableWorkspace_sptr createTestPeakParameters2() {
 DataObjects::TableWorkspace_sptr createTestPeakParameters3() {
   // 1. Build a TableWorkspace
   DataObjects::TableWorkspace_sptr peakparms =
-      std::shared_ptr<DataObjects::TableWorkspace>(
-          new DataObjects::TableWorkspace);
+      std::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace);
   peakparms->addColumn("int", "spectrum");
   peakparms->addColumn("double", "f0.centre");
   peakparms->addColumn("double", "f0.width");
@@ -151,8 +148,7 @@ API::MatrixWorkspace_sptr createTestInputWorkspace() {
   double maxx = 9.0;
   double dx = 0.02;
   size_t size = static_cast<size_t>((maxx - minx) / dx) + 1;
-  API::MatrixWorkspace_sptr inpWS = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", 5, size, size - 1);
+  API::MatrixWorkspace_sptr inpWS = API::WorkspaceFactory::Instance().create("Workspace2D", 5, size, size - 1);
 
   // 1.5 Generate shared Copy-On-Write x values
   BinEdges x(size, LinearGenerator(minx, dx));
@@ -179,8 +175,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    DataObjects::TableWorkspace_sptr peakparmsws =
-        createTestEffectiveFuncParameters();
+    DataObjects::TableWorkspace_sptr peakparmsws = createTestEffectiveFuncParameters();
 
     TS_ASSERT_EQUALS(peakparmsws->rowCount(), 4);
 
@@ -199,24 +194,19 @@ public:
    */
   void test_UserBinningParameters() {
     // Create input parameter table workspace
-    DataObjects::TableWorkspace_sptr peakparmsws =
-        createTestEffectiveFuncParameters();
-    AnalysisDataService::Instance().addOrReplace("TestPeakParameterTable",
-                                                 peakparmsws);
+    DataObjects::TableWorkspace_sptr peakparmsws = createTestEffectiveFuncParameters();
+    AnalysisDataService::Instance().addOrReplace("TestPeakParameterTable", peakparmsws);
 
     // Initialize algorithm GenertePeaks
     GeneratePeaks alg;
     alg.initialize();
 
     // Set value
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("PeakParametersWorkspace", peakparmsws));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParametersWorkspace", peakparmsws));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Auto"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "Test01WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameter", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
@@ -227,8 +217,7 @@ public:
 
     // Get result/output workspace
     API::MatrixWorkspace_const_sptr peaksws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("Test01WS"));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test01WS"));
     TS_ASSERT(peaksws);
 
     // Check result
@@ -273,8 +262,7 @@ public:
   void test_FromInputWorkspace() {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters2();
-    AnalysisDataService::Instance().addOrReplace("TestParameterTable2",
-                                                 peakparmsws);
+    AnalysisDataService::Instance().addOrReplace("TestParameterTable2", peakparmsws);
     API::MatrixWorkspace_sptr inputws = createTestInputWorkspace();
     AnalysisDataService::Instance().addOrReplace("RawSampleBinWS", inputws);
 
@@ -283,15 +271,12 @@ public:
     alg.initialize();
 
     // Set value
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("PeakParametersWorkspace", peakparmsws));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParametersWorkspace", peakparmsws));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Quadratic"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "Test02WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test02WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
 
@@ -301,8 +286,7 @@ public:
 
     // Get result
     API::MatrixWorkspace_const_sptr peaksws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("Test02WS"));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test02WS"));
     TS_ASSERT(peaksws);
 
     // Check result
@@ -349,22 +333,18 @@ public:
   void test_Background() {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters3();
-    AnalysisDataService::Instance().addOrReplace("TestParameterTable3",
-                                                 peakparmsws);
+    AnalysisDataService::Instance().addOrReplace("TestParameterTable3", peakparmsws);
 
     // Init algorithm
     GeneratePeaks alg;
     alg.initialize();
 
     // Set value
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("PeakParametersWorkspace", peakparmsws));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParametersWorkspace", peakparmsws));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Auto"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "Test03WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test03WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameter", false));
@@ -375,8 +355,7 @@ public:
 
     // Get result
     API::MatrixWorkspace_const_sptr peaksws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("Test03WS"));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test03WS"));
     TS_ASSERT(peaksws);
 
     // Check result
@@ -425,16 +404,12 @@ public:
     alg.initialize();
 
     // Set value
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("PeakParameterValues", vecpeakvalue));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundParameterValues", vecbkgdvalue));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParameterValues", vecpeakvalue));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundParameterValues", vecbkgdvalue));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Auto"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "Test04WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test04WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameter", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
@@ -445,8 +420,7 @@ public:
 
     // Get result/output workspace
     API::MatrixWorkspace_const_sptr peaksws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("Test04WS"));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test04WS"));
     TS_ASSERT(peaksws);
 
     // Check result
@@ -484,16 +458,12 @@ public:
     alg.initialize();
 
     // Set value
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("PeakParameterValues", vecpeakvalue));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundParameterValues", vecbkgdvalue));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParameterValues", vecpeakvalue));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundParameterValues", vecbkgdvalue));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Auto"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "Test01WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameter", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
@@ -504,8 +474,7 @@ public:
 
     // Get result/output workspace
     API::MatrixWorkspace_const_sptr peaksws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("Test01WS"));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test01WS"));
     TS_ASSERT(peaksws);
 
     // Check result
@@ -535,18 +504,13 @@ class GeneratePeaksTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GeneratePeaksTestPerformance *createSuite() {
-    return new GeneratePeaksTestPerformance();
-  }
-  static void destroySuite(GeneratePeaksTestPerformance *suite) {
-    delete suite;
-  }
+  static GeneratePeaksTestPerformance *createSuite() { return new GeneratePeaksTestPerformance(); }
+  static void destroySuite(GeneratePeaksTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     FrameworkManager::Instance();
     peakparmsws = createTestPeakParameters2();
-    AnalysisDataService::Instance().addOrReplace("TestParameterTable2",
-                                                 peakparmsws);
+    AnalysisDataService::Instance().addOrReplace("TestParameterTable2", peakparmsws);
     inputws = createTestInputWorkspace();
     AnalysisDataService::Instance().addOrReplace("RawSampleBinWS", inputws);
   }

@@ -44,11 +44,8 @@ namespace MDAlgorithms {
  * @param efix :: Vector of data source energy values in meV
  * @returns names of data sources which cannot be found
  */
-std::string filterToExistingSources(std::vector<std::string> &input_data,
-                                    std::vector<double> &psi,
-                                    std::vector<double> &gl,
-                                    std::vector<double> &gs,
-                                    std::vector<double> &efix) {
+std::string filterToExistingSources(std::vector<std::string> &input_data, std::vector<double> &psi,
+                                    std::vector<double> &gl, std::vector<double> &gs, std::vector<double> &efix) {
   std::ostringstream nonexistent;
   for (size_t i = input_data.size(); i > 0; i--) {
     if (!dataExists(input_data[i - 1])) {
@@ -69,15 +66,13 @@ std::string filterToExistingSources(std::vector<std::string> &input_data,
  * @returns true if a workspace or file with given name exists
  */
 bool dataExists(const std::string &data_name) {
-  const std::string filepath =
-      Mantid::API::FileFinder::Instance().getFullPath(data_name);
+  const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(data_name);
   // Calls to the ADS in algorithms like this should ordinarily
   // be avoided, unfortunately we have little choice in this case.
   // If we gave FileFinder an absolute path it just returns it (whether or not
   // the file exists) so we must also check the full path returned with
   // fileExists()
-  return (AnalysisDataService::Instance().doesExist(data_name) ||
-          fileExists(filepath));
+  return (AnalysisDataService::Instance().doesExist(data_name) || fileExists(filepath));
 }
 
 /*
@@ -106,10 +101,9 @@ bool fileExists(const std::string &filename) {
  * @param efix :: Vector of data source energy values in meV
  * @returns data sources which are already in the workspace
  */
-std::string filterToNew(std::vector<std::string> &input_data,
-                        std::vector<std::string> &current_data,
-                        std::vector<double> &psi, std::vector<double> &gl,
-                        std::vector<double> &gs, std::vector<double> &efix) {
+std::string filterToNew(std::vector<std::string> &input_data, std::vector<std::string> &current_data,
+                        std::vector<double> &psi, std::vector<double> &gl, std::vector<double> &gs,
+                        std::vector<double> &efix) {
   std::ostringstream old_sources;
   for (size_t i = input_data.size(); i > 0; i--) {
     if (appearsInCurrentData(input_data[i - 1], current_data)) {
@@ -132,10 +126,8 @@ std::string filterToNew(std::vector<std::string> &input_data,
  * workspace
  * @returns true if the named data source appears in the vector of current data
  */
-bool appearsInCurrentData(const std::string &data_source,
-                          std::vector<std::string> &current_data) {
-  for (auto reverse_iter = current_data.rbegin();
-       reverse_iter != current_data.rend(); ++reverse_iter) {
+bool appearsInCurrentData(const std::string &data_source, std::vector<std::string> &current_data) {
+  for (auto reverse_iter = current_data.rbegin(); reverse_iter != current_data.rend(); ++reverse_iter) {
     if (data_source == *reverse_iter) {
       return true;
     }
@@ -150,10 +142,9 @@ bool appearsInCurrentData(const std::string &data_source,
  * @returns a vector of the names of data_sources which have previously been
  * appended to the workspace
  */
-std::vector<std::string>
-getHistoricalDataSources(const WorkspaceHistory &ws_history,
-                         const std::string &create_alg_name,
-                         const std::string &accumulate_alg_name) {
+std::vector<std::string> getHistoricalDataSources(const WorkspaceHistory &ws_history,
+                                                  const std::string &create_alg_name,
+                                                  const std::string &accumulate_alg_name) {
   // Using a set so we only insert unique names
   std::unordered_set<std::string> historical_data_sources;
 
@@ -164,8 +155,7 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history,
   const std::vector<HistoryItem> history_items = view->getAlgorithmsList();
   for (const auto &history_item : history_items) {
     auto alg_history = history_item.getAlgorithmHistory();
-    if (alg_history->name() == create_alg_name ||
-        alg_history->name() == accumulate_alg_name) {
+    if (alg_history->name() == create_alg_name || alg_history->name() == accumulate_alg_name) {
       auto props = alg_history->getProperties();
       for (auto &prop : props) {
         PropertyHistory_const_sptr prop_history = prop;
@@ -176,8 +166,7 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history,
     }
   }
 
-  std::vector<std::string> result(historical_data_sources.begin(),
-                                  historical_data_sources.end());
+  std::vector<std::string> result(historical_data_sources.begin(), historical_data_sources.end());
   return result;
 }
 
@@ -188,17 +177,14 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history,
  * sources
  * @param historical_data_sources :: set of data sources
  */
-void insertDataSources(
-    const std::string &data_sources,
-    std::unordered_set<std::string> &historical_data_sources) {
+void insertDataSources(const std::string &data_sources, std::unordered_set<std::string> &historical_data_sources) {
   // Split the property string into a vector of data sources
   std::vector<std::string> data_split;
   boost::split(data_split, data_sources, boost::is_any_of(","));
 
   // Trim any whitespace from ends of each data source string
   std::for_each(data_split.begin(), data_split.end(),
-                std::bind(boost::algorithm::trim<std::string>,
-                          std::placeholders::_1, std::locale()));
+                std::bind(boost::algorithm::trim<std::string>, std::placeholders::_1, std::locale()));
 
   // Insert each data source into our complete set of historical data sources
   historical_data_sources.insert(data_split.begin(), data_split.end());
@@ -217,92 +203,67 @@ int AccumulateMD::version() const { return 1; }
 const std::string AccumulateMD::category() const { return "MDAlgorithms"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string AccumulateMD::summary() const {
-  return "Add new data to an existing MDHistoWorkspace";
-}
+const std::string AccumulateMD::summary() const { return "Add new data to an existing MDHistoWorkspace"; }
 
 /*
  * Initialize the algorithm's properties.
  */
 void AccumulateMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace to append data to.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "MDEventWorkspace with new data appended.");
 
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
-          "DataSources",
-          std::make_shared<MandatoryValidator<std::vector<std::string>>>(),
-          Direction::Input),
+          "DataSources", std::make_shared<MandatoryValidator<std::vector<std::string>>>(), Direction::Input),
       "Input workspaces to process, or filenames to load and process");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("EFix", Direction::Input),
-      "datasource energy values in meV");
+  declareProperty(std::make_unique<ArrayProperty<double>>("EFix", Direction::Input), "datasource energy values in meV");
 
   std::vector<std::string> e_mode_options{"Elastic", "Direct", "Indirect"};
 
-  declareProperty("Emode", "Direct",
-                  std::make_shared<StringListValidator>(e_mode_options),
+  declareProperty("Emode", "Direct", std::make_shared<StringListValidator>(e_mode_options),
                   "Analysis mode ['Elastic', 'Direct', 'Indirect'].");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "Alatt", std::make_shared<MandatoryValidator<std::vector<double>>>(),
-          Direction::Input),
-      "Lattice parameters");
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      "Alatt", std::make_shared<MandatoryValidator<std::vector<double>>>(), Direction::Input),
+                  "Lattice parameters");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "Angdeg", std::make_shared<MandatoryValidator<std::vector<double>>>(),
-          Direction::Input),
-      "Lattice angles");
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      "Angdeg", std::make_shared<MandatoryValidator<std::vector<double>>>(), Direction::Input),
+                  "Lattice angles");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "u", std::make_shared<MandatoryValidator<std::vector<double>>>(),
-          Direction::Input),
-      "Lattice vector parallel to neutron beam");
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      "u", std::make_shared<MandatoryValidator<std::vector<double>>>(), Direction::Input),
+                  "Lattice vector parallel to neutron beam");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "v", std::make_shared<MandatoryValidator<std::vector<double>>>(),
-          Direction::Input),
-      "Lattice vector perpendicular to neutron beam in the horizontal plane");
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      "v", std::make_shared<MandatoryValidator<std::vector<double>>>(), Direction::Input),
+                  "Lattice vector perpendicular to neutron beam in the horizontal plane");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Psi", Direction::Input),
-      "Psi rotation in degrees. Optional or one entry per run.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Psi", Direction::Input),
+                  "Psi rotation in degrees. Optional or one entry per run.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Gl", Direction::Input),
-      "gl rotation in degrees. Optional or one entry per run.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Gl", Direction::Input),
+                  "gl rotation in degrees. Optional or one entry per run.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Gs", Direction::Input),
-      "gs rotation in degrees. Optional or one entry per run.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Gs", Direction::Input),
+                  "gs rotation in degrees. Optional or one entry per run.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("InPlace", true,
-                                                            Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("InPlace", true, Direction::Input),
                   "Execute conversions to MD and Merge in one-step. Less "
                   "memory overhead.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("Clean", false,
-                                                            Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Clean", false, Direction::Input),
                   "Create workspace from fresh rather than appending to "
                   "existing workspace data.");
 
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                     ".nxs"),
-      "The name of the Nexus file to write, as a full or relative path.\n"
-      "Only used if FileBackEnd is true.");
-  setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>(
-                                      "FileBackEnd", IS_EQUAL_TO, "1"));
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave, ".nxs"),
+                  "The name of the Nexus file to write, as a full or relative path.\n"
+                  "Only used if FileBackEnd is true.");
+  setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>("FileBackEnd", IS_EQUAL_TO, "1"));
 
   declareProperty("FileBackEnd", false,
                   "If true, Filename must also be specified. The algorithm "
@@ -335,15 +296,12 @@ void AccumulateMD::exec() {
   // Progress prog = Progress(this, 0.0, 1.0, 2);
   this->progress(0.0);
 
-  const std::string nonexistent =
-      filterToExistingSources(input_data, psi, gl, gs, efix);
-  g_log.notice() << "These data sources were not found: " << nonexistent
-                 << '\n';
+  const std::string nonexistent = filterToExistingSources(input_data, psi, gl, gs, efix);
+  g_log.notice() << "These data sources were not found: " << nonexistent << '\n';
 
   // If we can't find any data, we can't do anything
   if (input_data.empty()) {
-    g_log.warning() << "No data found matching input in " << this->name()
-                    << '\n';
+    g_log.warning() << "No data found matching input in " << this->name() << '\n';
     this->setProperty("OutputWorkspace", input_ws);
     return; // POSSIBLE EXIT POINT
   }
@@ -354,11 +312,9 @@ void AccumulateMD::exec() {
   bool do_clean = this->getProperty("Clean");
   if (do_clean) {
     this->progress(0.5);
-    IMDEventWorkspace_sptr out_ws = createMDWorkspace(
-        input_data, psi, gl, gs, efix, out_filename, filebackend);
+    IMDEventWorkspace_sptr out_ws = createMDWorkspace(input_data, psi, gl, gs, efix, out_filename, filebackend);
     this->setProperty("OutputWorkspace", out_ws);
-    g_log.notice() << this->name()
-                   << " successfully created a clean workspace\n";
+    g_log.notice() << this->name() << " successfully created a clean workspace\n";
     this->progress(1.0);
     return; // POSSIBLE EXIT POINT
   }
@@ -369,18 +325,14 @@ void AccumulateMD::exec() {
   // Get name from algorithm like this so that an error is thrown if the
   // name of the algorithm is changed
   Algorithm_sptr create_alg = createChildAlgorithm("CreateMD");
-  std::vector<std::string> current_data =
-      getHistoricalDataSources(ws_history, create_alg->name(), this->name());
+  std::vector<std::string> current_data = getHistoricalDataSources(ws_history, create_alg->name(), this->name());
 
   // If there's no new data, we don't have anything to do
-  const std::string old_sources =
-      filterToNew(input_data, current_data, psi, gl, gs, efix);
-  g_log.notice() << "Data from these sources are already in the workspace: "
-                 << old_sources << '\n';
+  const std::string old_sources = filterToNew(input_data, current_data, psi, gl, gs, efix);
+  g_log.notice() << "Data from these sources are already in the workspace: " << old_sources << '\n';
 
   if (input_data.empty()) {
-    g_log.notice() << "No new data to append to workspace in " << this->name()
-                   << '\n';
+    g_log.notice() << "No new data to append to workspace in " << this->name() << '\n';
     this->setProperty("OutputWorkspace", input_ws);
     return; // POSSIBLE EXIT POINT
   }
@@ -389,8 +341,7 @@ void AccumulateMD::exec() {
   // If we reach here then new data exists to append to the input workspace
   // Use CreateMD with the new data to make a temp workspace
   // Merge the temp workspace with the input workspace using MergeMD
-  IMDEventWorkspace_sptr tmp_ws =
-      createMDWorkspace(input_data, psi, gl, gs, efix, "", false);
+  IMDEventWorkspace_sptr tmp_ws = createMDWorkspace(input_data, psi, gl, gs, efix, "", false);
   this->interruption_point();
   this->progress(0.5); // Report as CreateMD is complete
 
@@ -406,8 +357,7 @@ void AccumulateMD::exec() {
   merge_alg->setProperty("InputWorkspaces", ws_names_to_merge);
   merge_alg->executeAsChildAlg();
 
-  API::IMDEventWorkspace_sptr out_ws =
-      merge_alg->getProperty("OutputWorkspace");
+  API::IMDEventWorkspace_sptr out_ws = merge_alg->getProperty("OutputWorkspace");
 
   this->setProperty("OutputWorkspace", out_ws);
   g_log.notice() << this->name() << " successfully appended data\n";
@@ -430,11 +380,10 @@ void AccumulateMD::exec() {
  * @param efix :: Vector of data source energy values in meV
  * @returns the newly created workspace
  */
-IMDEventWorkspace_sptr AccumulateMD::createMDWorkspace(
-    const std::vector<std::string> &data_sources,
-    const std::vector<double> &psi, const std::vector<double> &gl,
-    const std::vector<double> &gs, const std::vector<double> &efix,
-    const std::string &filename, const bool filebackend) {
+IMDEventWorkspace_sptr AccumulateMD::createMDWorkspace(const std::vector<std::string> &data_sources,
+                                                       const std::vector<double> &psi, const std::vector<double> &gl,
+                                                       const std::vector<double> &gs, const std::vector<double> &efix,
+                                                       const std::string &filename, const bool filebackend) {
 
   Algorithm_sptr create_alg = createChildAlgorithm("CreateMD");
 
@@ -467,8 +416,7 @@ std::map<std::string, std::string> AccumulateMD::validateInputs() {
   std::map<std::string, std::string> validation_output;
 
   // Get properties to validate
-  const std::vector<std::string> data_sources =
-      this->getProperty("DataSources");
+  const std::vector<std::string> data_sources = this->getProperty("DataSources");
   const std::vector<double> u = this->getProperty("u");
   const std::vector<double> v = this->getProperty("v");
   const std::vector<double> alatt = this->getProperty("Alatt");
@@ -481,8 +429,7 @@ std::map<std::string, std::string> AccumulateMD::validateInputs() {
   const bool fileBackEnd = this->getProperty("FileBackEnd");
 
   if (fileBackEnd && filename.empty()) {
-    validation_output["Filename"] =
-        "Filename must be given if FileBackEnd is required.";
+    validation_output["Filename"] = "Filename must be given if FileBackEnd is required.";
   }
 
   const size_t ws_entries = data_sources.size();
@@ -515,9 +462,8 @@ std::map<std::string, std::string> AccumulateMD::validateInputs() {
                               "every input datasource";
   }
   if (efix.size() > 1 && efix.size() != ws_entries) {
-    validation_output["EFix"] =
-        "Either specify a single EFix value, or as many "
-        "as there are input datasources";
+    validation_output["EFix"] = "Either specify a single EFix value, or as many "
+                                "as there are input datasources";
   }
 
   return validation_output;

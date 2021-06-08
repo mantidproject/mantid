@@ -109,8 +109,7 @@ static void clear_replies(SOCKET s) {
   while (!done) {
     FD_ZERO(&fds);
     FD_SET(s, &fds);
-    if ((select(FD_SETSIZE, &fds, nullptr, nullptr, &timeout) > 0) &&
-        FD_ISSET(s, &fds)) {
+    if ((select(FD_SETSIZE, &fds, nullptr, nullptr, &timeout) > 0) && FD_ISSET(s, &fds)) {
       recv(s, buffer, sizeof(buffer), 0);
     } else {
       done = 1;
@@ -122,8 +121,7 @@ static void clear_replies(SOCKET s) {
  * client: open a socket and perform initial negotiation
  * return connected socket or INVALID_SOCKET on error
  */
-SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
-                        uint16_t port) {
+SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type, uint16_t port) {
   SOCKET s;
   int setkeepalive = 1;
   struct hostent *hostp;
@@ -147,38 +145,30 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
     return INVALID_SOCKET;
   }
 
-  int zero =
-      setsockopt(s, SOL_SOCKET, SO_KEEPALIVE,
-                 reinterpret_cast<char *>(&setkeepalive), sizeof(setkeepalive));
+  int zero = setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, reinterpret_cast<char *>(&setkeepalive), sizeof(setkeepalive));
   if (0 != zero) {
     closesocket(s);
     return INVALID_SOCKET;
   }
 
-  if (connect(s, reinterpret_cast<struct sockaddr *>(&address),
-              sizeof(address)) == -1) {
+  if (connect(s, reinterpret_cast<struct sockaddr *>(&address), sizeof(address)) == -1) {
     closesocket(s);
     return INVALID_SOCKET;
   }
 
-  auto timeoutInSecConfigVal =
-      Mantid::Kernel::ConfigService::Instance().getValue<int>(
-          "ISISDAE.Timeout");
-  int timeoutinSec = timeoutInSecConfigVal.get_value_or(
-      120); // Default to  120 seconds if not specified
+  auto timeoutInSecConfigVal = Mantid::Kernel::ConfigService::Instance().getValue<int>("ISISDAE.Timeout");
+  int timeoutinSec = timeoutInSecConfigVal.get_value_or(120); // Default to  120 seconds if not specified
 
 #ifdef WIN32
   // WINDOWS
   DWORD timeout = timeoutinSec * 1000;
-  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout,
-             sizeof(timeout));
+  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout));
 #else
   // LINUX
   struct timeval tv;
   tv.tv_sec = timeoutinSec; /* 30 Secs Timeout */
   tv.tv_usec = 0;           // Not init'ing this can cause strange errors
-  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv,
-             sizeof(struct timeval));
+  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(struct timeval));
 #endif // WIN
 
   /* socket connected */
@@ -195,8 +185,7 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
     return INVALID_SOCKET;
   }
   comm = nullptr;
-  if (isisds_recv_command_alloc(s, &comm, reinterpret_cast<void **>(&comm_data),
-                                &data_type, dims_array, &ndims) <= 0) {
+  if (isisds_recv_command_alloc(s, &comm, reinterpret_cast<void **>(&comm_data), &data_type, dims_array, &ndims) <= 0) {
     closesocket(s);
     free(comm);
     return INVALID_SOCKET;
@@ -220,8 +209,7 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
  */
 int isisds_recv_open(SOCKET s, ISISDSAccessMode *access_type) {
   isisds_open_t op;
-  if ((recv_all(s, reinterpret_cast<char *>(&op), sizeof(op), 0)) !=
-      sizeof(op)) {
+  if ((recv_all(s, reinterpret_cast<char *>(&op), sizeof(op), 0)) != sizeof(op)) {
     return -1;
   }
   if (op.len != sizeof(op)) {
@@ -240,8 +228,7 @@ int isisds_recv_open(SOCKET s, ISISDSAccessMode *access_type) {
  * any data
  * shutdown(s, SD_SEND) and then closesocket()
  */
-int isisds_send_command(SOCKET s, const char *command, const void *data,
-                        ISISDSDataType type, const int dims_array[],
+int isisds_send_command(SOCKET s, const char *command, const void *data, ISISDSDataType type, const int dims_array[],
                         int ndims) {
 
   (void)isisds_type_code; // Avoid compiler warning
@@ -280,8 +267,7 @@ int isisds_send_command(SOCKET s, const char *command, const void *data,
 }
 
 /* if not do_alloc, then type and dims_array are checked */
-static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
-                                      ISISDSDataType *type, int dims_array[],
+static int isisds_recv_command_helper(SOCKET s, char **command, void **data, ISISDSDataType *type, int dims_array[],
                                       int *ndims, int do_alloc) {
   int n, len_data, i;
   isisds_command_header_t comm;
@@ -346,26 +332,23 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
 }
 
 /* return > 0 on success */
-int isisds_recv_command(SOCKET s, char *command, int *len_command, void *data,
-                        ISISDSDataType *type, int dims_array[], int *ndims) {
+int isisds_recv_command(SOCKET s, char *command, int *len_command, void *data, ISISDSDataType *type, int dims_array[],
+                        int *ndims) {
   int t_ndims = 1;
   int istat;
   char *command_temp = nullptr;
   if (type == nullptr) {
     return -1;
   }
-  if (dims_array == nullptr || ndims == nullptr ||
-      (*ndims <= 1 && dims_array[0] <= 1)) {
+  if (dims_array == nullptr || ndims == nullptr || (*ndims <= 1 && dims_array[0] <= 1)) {
     int t_dims[8] = {1, 0, 0, 0, 0, 0, 0, 0};
     /* assume single simple value */
-    istat = isisds_recv_command_helper(s, &command_temp, &data, type, t_dims,
-                                       &t_ndims, 0);
+    istat = isisds_recv_command_helper(s, &command_temp, &data, type, t_dims, &t_ndims, 0);
     if ((t_ndims != 1) || (t_dims[0] != 1)) {
       istat = -1;
     }
   } else {
-    istat = isisds_recv_command_helper(s, &command_temp, &data, type,
-                                       dims_array, ndims, 0);
+    istat = isisds_recv_command_helper(s, &command_temp, &data, type, dims_array, ndims, 0);
   }
   if (command_temp) {
     strncpy(command, command_temp, *len_command);
@@ -376,8 +359,7 @@ int isisds_recv_command(SOCKET s, char *command, int *len_command, void *data,
 }
 
 /* return > 0 on success */
-int isisds_recv_command_alloc(SOCKET s, char **command, void **data,
-                              ISISDSDataType *type, int dims_array[],
+int isisds_recv_command_alloc(SOCKET s, char **command, void **data, ISISDSDataType *type, int dims_array[],
                               int *ndims) {
   if (ndims == nullptr || dims_array == nullptr || type == nullptr) {
     return -1;
@@ -390,8 +372,7 @@ int isisds_recv_command_alloc(SOCKET s, char **command, void **data,
   /* *ndims = 0; */
   dims_array[0] = 0;
   *type = ISISDSUnknown;
-  return isisds_recv_command_helper(s, command, data, type, dims_array, ndims,
-                                    1);
+  return isisds_recv_command_helper(s, command, data, type, dims_array, ndims, 1);
 }
 
 int isisds_send_close(SOCKET s) {

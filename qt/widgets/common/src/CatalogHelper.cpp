@@ -24,8 +24,7 @@ namespace MantidWidgets {
  * @param sessionIDs :: The sessions information of each active catalog.
  * @return A vector containing the list of all instruments available.
  */
-const std::vector<std::string>
-CatalogHelper::getInstrumentList(const std::vector<std::string> &sessionIDs) {
+const std::vector<std::string> CatalogHelper::getInstrumentList(const std::vector<std::string> &sessionIDs) {
   auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
   auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
 
@@ -53,10 +52,8 @@ CatalogHelper::getInstrumentList(const std::vector<std::string> &sessionIDs) {
  * @param sessionIDs :: The sessions information of each active catalog.
  * @return A vector containing the list of all investigation types available.
  */
-const std::vector<std::string> CatalogHelper::getInvestigationTypeList(
-    const std::vector<std::string> &sessionIDs) {
-  auto catalogAlgorithm =
-      createCatalogAlgorithm("CatalogListInvestigationTypes");
+const std::vector<std::string> CatalogHelper::getInvestigationTypeList(const std::vector<std::string> &sessionIDs) {
+  auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInvestigationTypes");
   auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
 
   if (session.size() == sessionIDs.size()) {
@@ -81,10 +78,8 @@ const std::vector<std::string> CatalogHelper::getInvestigationTypeList(
  * @param limit  :: limit the number of rows returned by the query.
  * @param sessionIDs :: The sessions information of each active catalog.
  */
-void CatalogHelper::executeSearch(
-    const std::map<std::string, std::string> &userInputFields,
-    const int &offset, const int &limit,
-    const std::vector<std::string> &sessionIDs) {
+void CatalogHelper::executeSearch(const std::map<std::string, std::string> &userInputFields, const int &offset,
+                                  const int &limit, const std::vector<std::string> &sessionIDs) {
   auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
   // Set the properties to limit the number of results returned for paging
   // purposes.
@@ -112,9 +107,8 @@ void CatalogHelper::executeSearch(
  * @param sessionIDs :: The sessions information of each active catalog.
  * @return Number of results returned by the search query.
  */
-int64_t CatalogHelper::getNumberOfSearchResults(
-    const std::map<std::string, std::string> &userInputFields,
-    const std::vector<std::string> &sessionIDs) {
+int64_t CatalogHelper::getNumberOfSearchResults(const std::map<std::string, std::string> &userInputFields,
+                                                const std::vector<std::string> &sessionIDs) {
   auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
   // Set the property to only perform a count search.
   catalogAlgorithm->setProperty("CountOnly", true);
@@ -140,8 +134,7 @@ int64_t CatalogHelper::getNumberOfSearchResults(
  * @param sessionID :: The sessions ID of the selected investigation.
  * @param investigationId :: The investigation id to use for the search.
  */
-void CatalogHelper::executeGetDataFiles(const std::string &investigationId,
-                                        const std::string &sessionID) {
+void CatalogHelper::executeGetDataFiles(const std::string &investigationId, const std::string &sessionID) {
   auto catalogAlgorithm = createCatalogAlgorithm("CatalogGetDataFiles");
 
   catalogAlgorithm->setProperty("InvestigationId", investigationId);
@@ -160,9 +153,9 @@ void CatalogHelper::executeGetDataFiles(const std::string &investigationId,
  * @param sessionID :: The sessions ID of the selected investigation.
  * @return A vector containing the paths to the file(s) the user wants.
  */
-const std::vector<std::string> CatalogHelper::downloadDataFiles(
-    const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles,
-    const std::string &downloadPath, const std::string &sessionID) {
+const std::vector<std::string>
+CatalogHelper::downloadDataFiles(const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles,
+                                 const std::string &downloadPath, const std::string &sessionID) {
   auto catalogAlgorithm = createCatalogAlgorithm("CatalogDownloadDataFiles");
 
   // Prepare for the ugly!
@@ -200,8 +193,8 @@ const std::vector<std::string> CatalogHelper::downloadDataFiles(
  * @return The name of the input field(s) marker to update and related error to
  * throw.
  */
-const std::map<std::string, std::string> CatalogHelper::validateProperties(
-    const std::map<std::string, std::string> &inputFields) {
+const std::map<std::string, std::string>
+CatalogHelper::validateProperties(const std::map<std::string, std::string> &inputFields) {
   auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
 
   // Holds the name of the marker to update if an error is found, and the
@@ -214,8 +207,7 @@ const std::map<std::string, std::string> CatalogHelper::validateProperties(
     try {
       catalogAlgorithm->setProperty(inputField.first, inputField.second);
     } catch (std::invalid_argument &) {
-      std::string documentation = propertyDocumentation(
-          catalogAlgorithm->getProperties(), inputField.first);
+      std::string documentation = propertyDocumentation(catalogAlgorithm->getProperties(), inputField.first);
 
       // Add the input name + "_err" (to indicate the error marker in the GUI,
       // rather than the input field) as the key, and the related error as the
@@ -232,8 +224,7 @@ const std::map<std::string, std::string> CatalogHelper::validateProperties(
 
     getTimevalue(catalogAlgorithm->getProperty(dateField));
   } catch (std::invalid_argument &) {
-    std::string documentation =
-        propertyDocumentation(catalogAlgorithm->getProperties(), dateField);
+    std::string documentation = propertyDocumentation(catalogAlgorithm->getProperties(), dateField);
     errors.emplace(dateField + "_err", documentation);
   }
   return errors;
@@ -253,8 +244,7 @@ time_t CatalogHelper::getTimevalue(const std::string &inputDate) {
   // Split input by "/" prior to rearranging the date
   boost::algorithm::split_regex(dateSegments, inputDate, boost::regex("/"));
   // Reorganise the date to be ISO format.
-  std::string isoDate = dateSegments.at(2) + "-" + dateSegments.at(1) + "-" +
-                        dateSegments.at(0) + " 00:00:00.000";
+  std::string isoDate = dateSegments.at(2) + "-" + dateSegments.at(1) + "-" + dateSegments.at(0) + " 00:00:00.000";
   // Return the date as time_t value.
 
   return Mantid::Types::Core::DateAndTime(isoDate).to_time_t();
@@ -292,9 +282,8 @@ void CatalogHelper::showPublishDialog() {
  * @param name       :: The name of the property to search for.
  * @return The documentation for a given property name.
  */
-const std::string CatalogHelper::propertyDocumentation(
-    const std::vector<Mantid::Kernel::Property *> &properties,
-    const std::string &name) {
+const std::string CatalogHelper::propertyDocumentation(const std::vector<Mantid::Kernel::Property *> &properties,
+                                                       const std::string &name) {
   for (auto property : properties) {
     if (property->name() == name) {
       return property->documentation();
@@ -308,8 +297,7 @@ const std::string CatalogHelper::propertyDocumentation(
  * @param algName :: The name of the algorithm to create.
  * @return A shared pointer to the algorithm created.
  */
-Mantid::API::IAlgorithm_sptr
-CatalogHelper::createCatalogAlgorithm(const std::string &algName) {
+Mantid::API::IAlgorithm_sptr CatalogHelper::createCatalogAlgorithm(const std::string &algName) {
   // If there is an exception we want it to be thrown.
   return Mantid::API::AlgorithmManager::Instance().create(algName);
 }
@@ -318,8 +306,7 @@ CatalogHelper::createCatalogAlgorithm(const std::string &algName) {
  * Execute the given algorithm asynchronously.
  * @param algorithm :: The algorithm to execute.
  */
-void CatalogHelper::executeAsynchronously(
-    const Mantid::API::IAlgorithm_sptr &algorithm) {
+void CatalogHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm) {
   Poco::ActiveResult<bool> result(algorithm->executeAsync());
   while (!result.available()) {
     QCoreApplication::processEvents();
@@ -332,9 +319,8 @@ void CatalogHelper::executeAsynchronously(
  * @param userInputFields  :: The search properties to set against the
  * algorithm.
  */
-void CatalogHelper::setSearchProperties(
-    const Mantid::API::IAlgorithm_sptr &catalogAlgorithm,
-    const std::map<std::string, std::string> &userInputFields) {
+void CatalogHelper::setSearchProperties(const Mantid::API::IAlgorithm_sptr &catalogAlgorithm,
+                                        const std::map<std::string, std::string> &userInputFields) {
   // This will be the workspace where the content of the search result is output
   // to.
   catalogAlgorithm->setProperty("OutputWorkspace", "__searchResults");

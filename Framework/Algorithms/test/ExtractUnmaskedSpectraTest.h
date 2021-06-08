@@ -23,9 +23,7 @@ class ExtractUnmaskedSpectraTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ExtractUnmaskedSpectraTest *createSuite() {
-    return new ExtractUnmaskedSpectraTest();
-  }
+  static ExtractUnmaskedSpectraTest *createSuite() { return new ExtractUnmaskedSpectraTest(); }
   static void destroySuite(ExtractUnmaskedSpectraTest *suite) { delete suite; }
 
   void test_Init() {
@@ -106,36 +104,28 @@ public:
   }
 
 private:
-  Mantid::API::MatrixWorkspace_sptr createInputWorkspace(int n,
-                                                         bool isMasked = true) {
-    auto workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(n, 3);
+  Mantid::API::MatrixWorkspace_sptr createInputWorkspace(int n, bool isMasked = true) {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(n, 3);
     if (isMasked) {
       size_t nMask = n > 1 ? n / 2 : 1;
       std::vector<size_t> indices(nMask);
       {
         // mask spectra with even indices
         size_t i = 0;
-        std::generate(indices.begin(), indices.end(),
-                      [&i]() { return 2 * i++; });
+        std::generate(indices.begin(), indices.end(), [&i]() { return 2 * i++; });
       }
-      auto alg =
-          Mantid::API::AlgorithmFactory::Instance().create("MaskDetectors", -1);
+      auto alg = Mantid::API::AlgorithmFactory::Instance().create("MaskDetectors", -1);
       alg->setChild(true);
       alg->initialize();
-      alg->setProperty(
-          "Workspace",
-          std::dynamic_pointer_cast<Mantid::API::Workspace>(workspace));
+      alg->setProperty("Workspace", std::dynamic_pointer_cast<Mantid::API::Workspace>(workspace));
       alg->setProperty("WorkspaceIndexList", indices);
       alg->execute();
     }
     return workspace;
   }
 
-  Mantid::API::MatrixWorkspace_sptr
-  createMask(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
-    auto maskWS = Mantid::DataObjects::MaskWorkspace_sptr(
-        new Mantid::DataObjects::MaskWorkspace(inputWS));
+  Mantid::API::MatrixWorkspace_sptr createMask(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
+    auto maskWS = Mantid::DataObjects::MaskWorkspace_sptr(new Mantid::DataObjects::MaskWorkspace(inputWS));
     size_t n = inputWS->getNumberHistograms();
     size_t nMask = n > 1 ? n / 2 : 1;
     for (size_t i = 0; i < nMask; ++i) {
@@ -147,8 +137,7 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr
   runAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS,
-               const Mantid::API::MatrixWorkspace_sptr &maskedWS =
-                   Mantid::API::MatrixWorkspace_sptr()) {
+               const Mantid::API::MatrixWorkspace_sptr &maskedWS = Mantid::API::MatrixWorkspace_sptr()) {
     ExtractUnmaskedSpectra alg;
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -157,13 +146,11 @@ private:
     if (maskedWS) {
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskWorkspace", maskedWS));
     }
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    Mantid::API::MatrixWorkspace_sptr outputWS =
-        alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     return outputWS;
   }

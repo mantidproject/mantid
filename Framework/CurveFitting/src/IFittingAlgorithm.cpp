@@ -34,9 +34,8 @@ using namespace Mantid::API;
 //----------------------------------------------------------------------------------------------
 namespace {
 /// Create a domain creator for a particular function and workspace pair.
-std::unique_ptr<IDomainCreator> createDomainCreator(
-    const IFunction *fun, const std::string &workspacePropertyName,
-    IPropertyManager *manager, IDomainCreator::DomainType domainType) {
+std::unique_ptr<IDomainCreator> createDomainCreator(const IFunction *fun, const std::string &workspacePropertyName,
+                                                    IPropertyManager *manager, IDomainCreator::DomainType domainType) {
 
   std::unique_ptr<IDomainCreator> creator;
   Workspace_sptr ws;
@@ -49,30 +48,22 @@ std::unique_ptr<IDomainCreator> createDomainCreator(
 
   // ILatticeFunction requires API::LatticeDomain.
   if (dynamic_cast<const ILatticeFunction *>(fun)) {
-    creator =
-        std::make_unique<LatticeDomainCreator>(manager, workspacePropertyName);
+    creator = std::make_unique<LatticeDomainCreator>(manager, workspacePropertyName);
   } else if (dynamic_cast<const IFunctionMD *>(fun)) {
     creator = std::unique_ptr<IDomainCreator>(
-        API::DomainCreatorFactory::Instance().createDomainCreator(
-            "FitMD", manager, workspacePropertyName, domainType));
+        API::DomainCreatorFactory::Instance().createDomainCreator("FitMD", manager, workspacePropertyName, domainType));
   } else if (dynamic_cast<const IFunction1DSpectrum *>(fun)) {
-    creator = std::make_unique<SeqDomainSpectrumCreator>(manager,
-                                                         workspacePropertyName);
+    creator = std::make_unique<SeqDomainSpectrumCreator>(manager, workspacePropertyName);
   } else if (auto gfun = dynamic_cast<const IFunctionGeneral *>(fun)) {
-    creator = std::make_unique<GeneralDomainCreator>(*gfun, *manager,
-                                                     workspacePropertyName);
+    creator = std::make_unique<GeneralDomainCreator>(*gfun, *manager, workspacePropertyName);
   } else if (std::dynamic_pointer_cast<ITableWorkspace>(ws)) {
-    creator = std::make_unique<TableWorkspaceDomainCreator>(
-        manager, workspacePropertyName, domainType);
+    creator = std::make_unique<TableWorkspaceDomainCreator>(manager, workspacePropertyName, domainType);
   } else {
-    bool histogramFit =
-        manager->getPropertyValue("EvaluationType") == "Histogram";
+    bool histogramFit = manager->getPropertyValue("EvaluationType") == "Histogram";
     if (histogramFit) {
-      creator = std::make_unique<HistogramDomainCreator>(*manager,
-                                                         workspacePropertyName);
+      creator = std::make_unique<HistogramDomainCreator>(*manager, workspacePropertyName);
     } else {
-      creator =
-          std::make_unique<FitMW>(manager, workspacePropertyName, domainType);
+      creator = std::make_unique<FitMW>(manager, workspacePropertyName, domainType);
     }
   }
   return creator;
@@ -88,29 +79,21 @@ const std::string IFittingAlgorithm::category() const { return "Optimization"; }
 /** Initialize the algorithm's properties.
  */
 void IFittingAlgorithm::init() {
-  declareProperty(
-      std::make_unique<API::FunctionProperty>("Function", Direction::InOut),
-      "Parameters defining the fitting function and its initial values");
+  declareProperty(std::make_unique<API::FunctionProperty>("Function", Direction::InOut),
+                  "Parameters defining the fitting function and its initial values");
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-                      "InputWorkspace", "", Kernel::Direction::Input),
-                  "Name of the input Workspace");
-  declareProperty("IgnoreInvalidData", false,
-                  "Flag to ignore infinities, NaNs and data with zero errors.");
-
-  std::array<std::string, 3> domainTypes = {
-      {"Simple", "Sequential", "Parallel"}};
   declareProperty(
-      "DomainType", "Simple",
-      Kernel::IValidator_sptr(
-          new Kernel::ListValidator<std::string>(domainTypes)),
-      "The type of function domain to use: Simple, Sequential, or Parallel.",
-      Kernel::Direction::Input);
+      std::make_unique<API::WorkspaceProperty<API::Workspace>>("InputWorkspace", "", Kernel::Direction::Input),
+      "Name of the input Workspace");
+  declareProperty("IgnoreInvalidData", false, "Flag to ignore infinities, NaNs and data with zero errors.");
+
+  std::array<std::string, 3> domainTypes = {{"Simple", "Sequential", "Parallel"}};
+  declareProperty("DomainType", "Simple", Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(domainTypes)),
+                  "The type of function domain to use: Simple, Sequential, or Parallel.", Kernel::Direction::Input);
 
   std::array<std::string, 2> evaluationTypes = {{"CentrePoint", "Histogram"}};
   declareProperty("EvaluationType", "CentrePoint",
-                  Kernel::IValidator_sptr(
-                      new Kernel::ListValidator<std::string>(evaluationTypes)),
+                  Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(evaluationTypes)),
                   "The way the function is evaluated on histogram data sets. "
                   "If value is \"CentrePoint\" then function is evaluated at "
                   "centre of each bin. If it is \"Histogram\" then function is "
@@ -136,8 +119,7 @@ void IFittingAlgorithm::init() {
 void IFittingAlgorithm::afterPropertySet(const std::string &propName) {
   if (propName == "Function") {
     setFunction();
-  } else if (propName.size() >= 14 &&
-             propName.substr(0, 14) == "InputWorkspace") {
+  } else if (propName.size() >= 14 && propName.substr(0, 14) == "InputWorkspace") {
     if (getPointerToProperty("Function")->isDefault()) {
       throw std::invalid_argument("Function must be set before InputWorkspace");
     }
@@ -175,14 +157,12 @@ void IFittingAlgorithm::setFunction() {
     for (size_t i = 1; i < ndom; ++i) {
       std::string workspacePropertyName = "InputWorkspace_" + std::to_string(i);
       m_workspacePropertyNames[i] = workspacePropertyName;
-      std::string workspaceIndexPropertyName =
-          "WorkspaceIndex_" + std::to_string(i);
+      std::string workspaceIndexPropertyName = "WorkspaceIndex_" + std::to_string(i);
       m_workspaceIndexPropertyNames[i] = workspaceIndexPropertyName;
       if (!existsProperty(workspacePropertyName)) {
-        declareProperty(
-            std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-                workspacePropertyName, "", Kernel::Direction::Input),
-            "Name of the input Workspace");
+        declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(workspacePropertyName, "",
+                                                                                 Kernel::Direction::Input),
+                        "Name of the input Workspace");
       }
     }
   } else {
@@ -199,20 +179,16 @@ void IFittingAlgorithm::setFunction() {
  * @param addProperties :: allow for declaration of properties that specify the
  *   dataset within the workspace to fit to.
  */
-void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
-                                     bool addProperties) {
+void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName, bool addProperties) {
   // m_function->setWorkspace(ws);
   const size_t n = std::string("InputWorkspace").size();
-  const std::string suffix =
-      (workspacePropertyName.size() > n) ? workspacePropertyName.substr(n) : "";
-  const size_t index =
-      suffix.empty() ? 0 : boost::lexical_cast<size_t>(suffix.substr(1));
+  const std::string suffix = (workspacePropertyName.size() > n) ? workspacePropertyName.substr(n) : "";
+  const size_t index = suffix.empty() ? 0 : boost::lexical_cast<size_t>(suffix.substr(1));
 
   IFunction_sptr fun = getProperty("Function");
   setDomainType();
 
-  auto creator =
-      createDomainCreator(fun.get(), workspacePropertyName, this, m_domainType);
+  auto creator = createDomainCreator(fun.get(), workspacePropertyName, this, m_domainType);
 
   if (!m_domainCreator) {
     if (m_workspacePropertyNames.empty()) {
@@ -221,8 +197,7 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
       setFunction();
     }
     if (fun->getNumberDomains() > 1) {
-      auto multiCreator =
-          std::make_shared<MultiDomainCreator>(this, m_workspacePropertyNames);
+      auto multiCreator = std::make_shared<MultiDomainCreator>(this, m_workspacePropertyNames);
       creator->declareDatasetProperties(suffix, addProperties);
       multiCreator->setCreator(index, creator.release());
       m_domainCreator = multiCreator;
@@ -232,13 +207,10 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
     }
   } else {
     if (fun->getNumberDomains() > 1) {
-      std::shared_ptr<MultiDomainCreator> multiCreator =
-          std::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
+      std::shared_ptr<MultiDomainCreator> multiCreator = std::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
       if (!multiCreator) {
         auto &reference = *m_domainCreator;
-        throw std::runtime_error(
-            std::string("MultiDomainCreator expected, found ") +
-            typeid(reference).name());
+        throw std::runtime_error(std::string("MultiDomainCreator expected, found ") + typeid(reference).name());
       }
       if (!multiCreator->hasCreator(index)) {
         creator->declareDatasetProperties(suffix, addProperties);
@@ -257,29 +229,22 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
 void IFittingAlgorithm::addWorkspaces() {
   setDomainType();
   if (m_function->getNumberDomains() > 1) {
-    m_domainCreator.reset(
-        new MultiDomainCreator(this, m_workspacePropertyNames));
+    m_domainCreator.reset(new MultiDomainCreator(this, m_workspacePropertyNames));
   }
   auto props = getProperties();
   for (auto &prop : props) {
-    if ((*prop).direction() == Kernel::Direction::Input &&
-        dynamic_cast<API::IWorkspaceProperty *>(prop)) {
+    if ((*prop).direction() == Kernel::Direction::Input && dynamic_cast<API::IWorkspaceProperty *>(prop)) {
       const std::string workspacePropertyName = (*prop).name();
-      auto creator = createDomainCreator(
-          m_function.get(), workspacePropertyName, this, m_domainType);
+      auto creator = createDomainCreator(m_function.get(), workspacePropertyName, this, m_domainType);
 
       const size_t n = std::string("InputWorkspace").size();
-      const std::string suffix = (workspacePropertyName.size() > n)
-                                     ? workspacePropertyName.substr(n)
-                                     : "";
-      const size_t index =
-          suffix.empty() ? 0 : boost::lexical_cast<size_t>(suffix.substr(1));
+      const std::string suffix = (workspacePropertyName.size() > n) ? workspacePropertyName.substr(n) : "";
+      const size_t index = suffix.empty() ? 0 : boost::lexical_cast<size_t>(suffix.substr(1));
       creator->declareDatasetProperties(suffix, false);
       if (!m_domainCreator) {
         m_domainCreator.reset(creator.release());
       }
-      auto multiCreator =
-          std::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
+      auto multiCreator = std::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
       if (multiCreator) {
         multiCreator->setCreator(index, creator.release());
       }
@@ -289,8 +254,7 @@ void IFittingAlgorithm::addWorkspaces() {
   // If domain creator wasn't created it's probably because
   // InputWorkspace property was deleted. Try without the workspace
   if (!m_domainCreator) {
-    auto creator =
-        createDomainCreator(m_function.get(), "", this, m_domainType);
+    auto creator = createDomainCreator(m_function.get(), "", this, m_domainType);
     creator->declareDatasetProperties("", true);
     m_domainCreator.reset(creator.release());
     m_workspacePropertyNames.clear();
@@ -306,8 +270,7 @@ std::vector<std::string> IFittingAlgorithm::getCostFunctionNames() const {
   auto names = factory.getKeys();
   out.reserve(names.size());
   for (auto &name : names) {
-    if (std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
-            factory.create(name))) {
+    if (std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(factory.create(name))) {
       out.emplace_back(name);
     }
   }
@@ -317,18 +280,14 @@ std::vector<std::string> IFittingAlgorithm::getCostFunctionNames() const {
 /// Declare a "CostFunction" property.
 void IFittingAlgorithm::declareCostFunctionProperty() {
   Kernel::IValidator_sptr costFuncValidator =
-      std::make_shared<Kernel::ListValidator<std::string>>(
-          getCostFunctionNames());
-  declareProperty(
-      "CostFunction", "Least squares", costFuncValidator,
-      "The cost function to be used for the fit, default is Least squares",
-      Kernel::Direction::InOut);
+      std::make_shared<Kernel::ListValidator<std::string>>(getCostFunctionNames());
+  declareProperty("CostFunction", "Least squares", costFuncValidator,
+                  "The cost function to be used for the fit, default is Least squares", Kernel::Direction::InOut);
 }
 
 /// Create a cost function from the "CostFunction" property
 /// and make it ready for evaluation.
-std::shared_ptr<CostFunctions::CostFuncFitting>
-IFittingAlgorithm::getCostFunctionInitialized() const {
+std::shared_ptr<CostFunctions::CostFuncFitting> IFittingAlgorithm::getCostFunctionInitialized() const {
   // Function may need some preparation.
   m_function->sortTies();
   m_function->setUpForFit();
@@ -351,8 +310,7 @@ IFittingAlgorithm::getCostFunctionInitialized() const {
 
   // get the cost function which must be a CostFuncFitting
   auto costFunction = std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
-      API::CostFunctionFactory::Instance().create(
-          getPropertyValue("CostFunction")));
+      API::CostFunctionFactory::Instance().create(getPropertyValue("CostFunction")));
 
   costFunction->setFittingFunction(m_function, domain, values);
 

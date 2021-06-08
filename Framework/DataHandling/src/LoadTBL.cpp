@@ -42,14 +42,10 @@ int LoadTBL::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // Avoid some known file types that have different loaders
   int confidence(0);
-  if (filenameLength > 12
-          ? (filePath.compare(filenameLength - 12, 12, "_runinfo.xml") == 0)
-          : false || filenameLength > 6
-                ? (filePath.compare(filenameLength - 6, 6, ".peaks") == 0)
-                : false || filenameLength > 10
-                      ? (filePath.compare(filenameLength - 10, 10,
-                                          ".integrate") == 0)
-                      : false) {
+  if (filenameLength > 12            ? (filePath.compare(filenameLength - 12, 12, "_runinfo.xml") == 0)
+      : false || filenameLength > 6  ? (filePath.compare(filenameLength - 6, 6, ".peaks") == 0)
+      : false || filenameLength > 10 ? (filePath.compare(filenameLength - 10, 10, ".integrate") == 0)
+                                     : false) {
     confidence = 0;
   } else if (descriptor.isAscii()) {
     std::istream &stream = descriptor.data();
@@ -57,8 +53,7 @@ int LoadTBL::confidence(Kernel::FileDescriptor &descriptor) const {
     Kernel::Strings::extractToEOL(stream, firstLine);
     std::vector<std::string> columns;
     try {
-      if (getCells(firstLine, columns, 16, true) ==
-          17) // right ammount of columns
+      if (getCells(firstLine, columns, 16, true) == 17) // right ammount of columns
       {
         if (filePath.compare(filenameLength - 4, 4, ".tbl") == 0) {
           confidence = 40;
@@ -103,9 +98,7 @@ size_t LoadTBL::countCommas(const std::string &line) const {
  * of pairs of quotes
  * @returns a size_t of how many pairs of quotes were in line
  */
-size_t
-LoadTBL::findQuotePairs(const std::string &line,
-                        std::vector<std::vector<size_t>> &quoteBounds) const {
+size_t LoadTBL::findQuotePairs(const std::string &line, std::vector<std::vector<size_t>> &quoteBounds) const {
   size_t quoteOne = 0;
   size_t quoteTwo = 0;
   while (quoteOne != std::string::npos && quoteTwo != std::string::npos) {
@@ -138,8 +131,7 @@ LoadTBL::findQuotePairs(const std::string &line,
  * cell-delimiting commas) is found
  */
 void LoadTBL::csvParse(const std::string &line, std::vector<std::string> &cols,
-                       std::vector<std::vector<size_t>> &quoteBounds,
-                       size_t expectedCommas) const {
+                       std::vector<std::vector<size_t>> &quoteBounds, size_t expectedCommas) const {
   size_t pairID = 0;
   size_t lastComma = 0;
   size_t pos = 0;
@@ -159,10 +151,8 @@ void LoadTBL::csvParse(const std::string &line, std::vector<std::string> &cols,
       if (pairID < quoteBounds.size() && pos > quoteBounds.at(pairID).at(0)) {
         if (pos > quoteBounds.at(pairID).at(1)) {
           // use the quote indexes to get the substring
-          cols.emplace_back(
-              line.substr(quoteBounds.at(pairID).at(0) + 1,
-                          quoteBounds.at(pairID).at(1) -
-                              (quoteBounds.at(pairID).at(0) + 1)));
+          cols.emplace_back(line.substr(quoteBounds.at(pairID).at(0) + 1,
+                                        quoteBounds.at(pairID).at(1) - (quoteBounds.at(pairID).at(0) + 1)));
           ++pairID;
         }
       } else {
@@ -184,9 +174,7 @@ void LoadTBL::csvParse(const std::string &line, std::vector<std::string> &cols,
     }
   }
   if (cols.size() != expectedCommas + 1) {
-    std::string message = "A line must contain " +
-                          std::to_string(expectedCommas) +
-                          " cell-delimiting commas. Found " +
+    std::string message = "A line must contain " + std::to_string(expectedCommas) + " cell-delimiting commas. Found " +
                           std::to_string(cols.size() - 1) + ".";
     throw std::length_error(message);
   }
@@ -204,8 +192,7 @@ void LoadTBL::csvParse(const std::string &line, std::vector<std::string> &cols,
  * length_error will be thrown for new TBL formats if there are less column
  * headings than expected commas.
  */
-size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols,
-                         size_t expectedCommas, bool isOldTBL) const {
+size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols, size_t expectedCommas, bool isOldTBL) const {
   // first check the number of commas in the line.
   size_t found = countCommas(line);
   if (isOldTBL) {
@@ -213,13 +200,11 @@ size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols,
       // If there are 16 that simplifies things and i can get boost to do the
       // hard
       // work
-      boost::split(cols, line, boost::is_any_of(","),
-                   boost::token_compress_off);
+      boost::split(cols, line, boost::is_any_of(","), boost::token_compress_off);
     } else if (found < expectedCommas) {
       // less than 16 means the line isn't properly formatted. So Throw
-      std::string message =
-          "A line must contain " + std::to_string(expectedCommas) +
-          " cell-delimiting commas. Found " + std::to_string(found) + ".";
+      std::string message = "A line must contain " + std::to_string(expectedCommas) +
+                            " cell-delimiting commas. Found " + std::to_string(found) + ".";
       throw std::length_error(message);
     } else {
       // More than 16 will need further checks as more is only ok when pairs of
@@ -229,9 +214,8 @@ size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols,
       // if we didn't find any quotes, then there are too many commas and we
       // definitely have too many delimiters
       if (quoteBounds.empty()) {
-        std::string message =
-            "A line must contain " + std::to_string(expectedCommas) +
-            " cell-delimiting commas. Found " + std::to_string(found) + ".";
+        std::string message = "A line must contain " + std::to_string(expectedCommas) +
+                              " cell-delimiting commas. Found " + std::to_string(found) + ".";
         throw std::length_error(message);
       }
       // now go through and split it up manually. Throw if we find ourselves in
@@ -245,20 +229,17 @@ size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols,
     csvParse(line, cols, quoteBounds, expectedCommas);
     if (cols.size() > expectedCommas) {
       for (size_t i = expectedCommas + 1; i < cols.size(); i++) {
-        cols[expectedCommas].append(
-            boost::lexical_cast<std::string>("," + cols[i]));
+        cols[expectedCommas].append(boost::lexical_cast<std::string>("," + cols[i]));
       }
     } else if (cols.size() < expectedCommas) {
-      std::string message =
-          "A line must contain " + std::to_string(expectedCommas) +
-          " cell-delimiting commas. Found " + std::to_string(found) + ".";
+      std::string message = "A line must contain " + std::to_string(expectedCommas) +
+                            " cell-delimiting commas. Found " + std::to_string(found) + ".";
       throw std::length_error(message);
     }
   }
   return cols.size();
 }
-bool LoadTBL::getColumnHeadings(std::string line,
-                                std::vector<std::string> &cols) {
+bool LoadTBL::getColumnHeadings(std::string line, std::vector<std::string> &cols) {
   boost::split(cols, line, boost::is_any_of(","), boost::token_compress_off);
   std::string firstEntry = cols[0];
   if (std::all_of(firstEntry.begin(), firstEntry.end(), ::isdigit)) {
@@ -274,12 +255,10 @@ bool LoadTBL::getColumnHeadings(std::string line,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadTBL::init() {
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Load, ".tbl"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".tbl"),
                   "The name of the table file to read, including its full or "
                   "relative path. The file extension must be .tbl");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created.");
 }
 
@@ -302,8 +281,7 @@ void LoadTBL::exec() {
   // We want to check if the first line contains an empty string or series of
   // ",,,,,"
   // to see if we are loading a TBL file that actually contains data or not.
-  boost::split(columnHeadings, line, boost::is_any_of(","),
-               boost::token_compress_off);
+  boost::split(columnHeadings, line, boost::is_any_of(","), boost::token_compress_off);
   for (auto entry = columnHeadings.begin(); entry != columnHeadings.end();) {
     if (entry->empty()) {
       // erase the empty values
@@ -364,8 +342,7 @@ void LoadTBL::exec() {
 
       // check if the first run in the row has any data associated with it
       // 0 = runs, 1 = theta, 2 = trans, 3 = qmin, 4 = qmax
-      if (!rowVec[0].empty() || !rowVec[1].empty() || !rowVec[2].empty() ||
-          !rowVec[3].empty() || !rowVec[4].empty()) {
+      if (!rowVec[0].empty() || !rowVec[1].empty() || !rowVec[2].empty() || !rowVec[3].empty() || !rowVec[4].empty()) {
         TableRow row = ws->appendRow();
         row << stitchStr;
         for (int i = 0; i < 5; ++i) {
@@ -377,8 +354,7 @@ void LoadTBL::exec() {
 
       // check if the second run in the row has any data associated with it
       // 5 = runs, 6 = theta, 7 = trans, 8 = qmin, 9 = qmax
-      if (!rowVec[5].empty() || !rowVec[6].empty() || !rowVec[7].empty() ||
-          !rowVec[8].empty() || !rowVec[9].empty()) {
+      if (!rowVec[5].empty() || !rowVec[6].empty() || !rowVec[7].empty() || !rowVec[8].empty() || !rowVec[9].empty()) {
         TableRow row = ws->appendRow();
         row << stitchStr;
         for (int i = 5; i < 10; ++i) {
@@ -390,8 +366,8 @@ void LoadTBL::exec() {
 
       // check if the third run in the row has any data associated with it
       // 10 = runs, 11 = theta, 12 = trans, 13 = qmin, 14 = qmax
-      if (!rowVec[10].empty() || !rowVec[11].empty() || !rowVec[12].empty() ||
-          !rowVec[13].empty() || !rowVec[14].empty()) {
+      if (!rowVec[10].empty() || !rowVec[11].empty() || !rowVec[12].empty() || !rowVec[13].empty() ||
+          !rowVec[14].empty()) {
         TableRow row = ws->appendRow();
         row << stitchStr;
         for (int i = 10; i < 17; ++i) {
@@ -411,8 +387,7 @@ void LoadTBL::exec() {
     if (!columnHeadings.empty()) {
       // now we need to add the custom column headings from
       // the columns vector to the TableWorkspace
-      for (auto heading = columnHeadings.begin();
-           heading != columnHeadings.end();) {
+      for (auto heading = columnHeadings.begin(); heading != columnHeadings.end();) {
         if (heading->empty()) {
           // there is no need to have empty column headings.
           heading = columnHeadings.erase(heading);

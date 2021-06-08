@@ -35,10 +35,9 @@ public:
 
   void test_exec() {
     // Create a fake offsets workspace
-    auto instr = ComponentCreationHelper::createMinimalInstrument(
-        V3D(0., 0., -10.), // source
-        V3D(0., 0., 0.),   // sample
-        V3D(1., 0., 0.));  // detector
+    auto instr = ComponentCreationHelper::createMinimalInstrument(V3D(0., 0., -10.), // source
+                                                                  V3D(0., 0., 0.),   // sample
+                                                                  V3D(1., 0., 0.));  // detector
     OffsetsWorkspace_sptr offsets = std::make_shared<OffsetsWorkspace>(instr);
     offsets->setValue(1, 0.); // wksp_index=0, detid=1
 
@@ -49,16 +48,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", offsets));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
     Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;

@@ -69,3 +69,6 @@ class HomeRunInfoWidgetModel(object):
     def get_workspace_comment(self):
         ws = self._data.current_workspace
         return ws.getComment()
+
+    def get_periods(self):
+        return self._data.num_periods(self._data.current_run) if self._data.current_run else ''

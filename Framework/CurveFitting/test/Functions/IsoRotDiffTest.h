@@ -42,10 +42,10 @@ public:
    */
   void test_parameters() {
     auto func = createTestIsoRotDiff();
-    TS_ASSERT_EQUALS(func->getParameter("Height"), 0.88);
-    TS_ASSERT_EQUALS(func->getParameter("Radius"), 1.06);
-    TS_ASSERT_EQUALS(func->getParameter("Tau"), 2.03);
-    TS_ASSERT_EQUALS(func->getParameter("Centre"), 0.0004);
+    TS_ASSERT_EQUALS(func->getParameter("f1.Height"), 0.88);
+    TS_ASSERT_EQUALS(func->getParameter("f1.Radius"), 1.06);
+    TS_ASSERT_EQUALS(func->getParameter("f1.Tau"), 2.03);
+    TS_ASSERT_EQUALS(func->getParameter("f1.Centre"), 0.0004);
     TS_ASSERT_EQUALS(func->getAttribute("Q").asDouble(), 0.3);
     TS_ASSERT_EQUALS(func->getAttribute("N").asInt(), 25);
   }
@@ -53,8 +53,7 @@ public:
 private:
   class TestableIsoRotDiff : public IsoRotDiff {
   public:
-    void function(const FunctionDomain &domain,
-                  FunctionValues &values) const override {
+    void function(const FunctionDomain &domain, FunctionValues &values) const override {
       IsoRotDiff::function(domain, values);
     }
   };
@@ -62,10 +61,10 @@ private:
   std::shared_ptr<TestableIsoRotDiff> createTestIsoRotDiff() {
     auto func = std::make_shared<TestableIsoRotDiff>();
     func->initialize();
-    func->setParameter("Height", 0.88);
-    func->setParameter("Radius", 1.06); // Angstrom
-    func->setParameter("Tau", 2.03);    // picosecond
-    func->setParameter("Centre", 0.0004);
+    func->setParameter("f1.Height", 0.88);
+    func->setParameter("f1.Radius", 1.06); // Angstrom
+    func->setParameter("f1.Tau", 2.03);    // picosecond
+    func->setParameter("f1.Centre", 0.0004);
     return func;
   }
 };

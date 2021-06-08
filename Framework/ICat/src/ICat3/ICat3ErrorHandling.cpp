@@ -25,16 +25,14 @@ void CErrorHandling::throwErrorMessages(ICat3::ICATPortBindingProxy &icat) {
   std::basic_string<char>::size_type index2 = error.find(endmsg);
   std::string exception;
   if (index1 != std::string::npos && index2 != std::string::npos) {
-    exception = error.substr(index1 + begmsg.length(),
-                             index2 - (index1 + begmsg.length()));
+    exception = error.substr(index1 + begmsg.length(), index2 - (index1 + begmsg.length()));
   }
   throw std::runtime_error(exception);
 }
 /////////////////////
 
 /// constructor
-SessionException::SessionException(const std::string &error)
-    : std::runtime_error(error), m_error(error) {}
+SessionException::SessionException(const std::string &error) : std::runtime_error(error), m_error(error) {}
 
 const char *SessionException::what() const noexcept { return m_error.c_str(); }
 } // namespace ICat

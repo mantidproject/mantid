@@ -47,13 +47,10 @@ namespace Algorithms {
    @author Steve D Williams, ISIS Facility Rutherford Appleton Laboratory
    @date 07/07/2009
 */
-class MANTID_ALGORITHMS_DLL FindDetectorsOutsideLimits
-    : public DetectorDiagnostic {
+class MANTID_ALGORITHMS_DLL FindDetectorsOutsideLimits : public DetectorDiagnostic {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override {
-    return "FindDetectorsOutsideLimits";
-  }
+  const std::string name() const override { return "FindDetectorsOutsideLimits"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Identifies histograms and their detectors that have total numbers "
@@ -64,9 +61,7 @@ public:
   const std::string category() const override;
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"FindDeadDetectors", "DetectorDiagnostic"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"FindDeadDetectors", "DetectorDiagnostic"}; }
 
 private:
   /// Overridden init

@@ -73,7 +73,8 @@ def mantid_api_import_needed(content):
 
 
 def mantid_api_imported(content):
-    if 'from mantid.simpleapi import *' in content:
+    # check for importing specific objects
+    if 'from mantid.simpleapi import' in content:
         return True
     return False
 

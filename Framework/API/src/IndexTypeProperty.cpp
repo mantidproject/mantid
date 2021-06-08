@@ -8,8 +8,7 @@
 
 namespace Mantid {
 namespace API {
-IndexTypeProperty::IndexTypeProperty(const std::string &name,
-                                     const int indexType)
+IndexTypeProperty::IndexTypeProperty(const std::string &name, const int indexType)
     : PropertyWithValue<std::string>(name, "", Kernel::Direction::Input) {
   if (indexType & IndexType::WorkspaceIndex)
     m_allowedValues.emplace_back("WorkspaceIndex");
@@ -50,9 +49,7 @@ int IndexTypeProperty::allowedTypes() const {
   return types;
 }
 
-std::vector<std::string> IndexTypeProperty::allowedValues() const {
-  return m_allowedValues;
-}
+std::vector<std::string> IndexTypeProperty::allowedValues() const { return m_allowedValues; }
 
 bool IndexTypeProperty::isMultipleSelectionAllowed() { return false; }
 
@@ -72,9 +69,7 @@ IndexTypeProperty &IndexTypeProperty::operator=(API::IndexType type) {
   return *this;
 }
 
-std::string IndexTypeProperty::generatePropertyName(const std::string &name) {
-  return name + "IndexType";
-}
+std::string IndexTypeProperty::generatePropertyName(const std::string &name) { return name + "IndexType"; }
 
 } // namespace API
 } // namespace Mantid

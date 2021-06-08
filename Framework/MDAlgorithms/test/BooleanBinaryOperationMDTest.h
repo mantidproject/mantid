@@ -19,8 +19,7 @@ class MockBooleanBinaryOperationMD : public BooleanBinaryOperationMD {
 public:
   MOCK_METHOD0(initExtraProperties, void());
   MOCK_METHOD2(execHistoHisto,
-               void(Mantid::DataObjects::MDHistoWorkspace_sptr,
-                    Mantid::DataObjects::MDHistoWorkspace_const_sptr));
+               void(Mantid::DataObjects::MDHistoWorkspace_sptr, Mantid::DataObjects::MDHistoWorkspace_const_sptr));
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 class BooleanBinaryOperationMDTest : public CxxTest::TestSuite {
@@ -29,7 +28,6 @@ public:
     MockBooleanBinaryOperationMD alg;
     EXPECT_CALL(alg, initExtraProperties()).Times(1);
     alg.initialize();
-    TSM_ASSERT("Algorithm methods were called as expected",
-               testing::Mock::VerifyAndClearExpectations(&alg));
+    TSM_ASSERT("Algorithm methods were called as expected", testing::Mock::VerifyAndClearExpectations(&alg));
   }
 };

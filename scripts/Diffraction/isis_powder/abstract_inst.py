@@ -7,6 +7,7 @@
 import os
 from isis_powder.routines import calibrate, focus, common, common_enums, common_output
 from mantid.kernel import config, logger
+import mantid.simpleapi as mantid
 # This class provides common hooks for instruments to override
 # if they want to define the behaviour of the hook. Otherwise it
 # returns the object passed in without manipulating it as a default
@@ -275,6 +276,11 @@ class AbstractInst(object):
         :return: the sold angle correction workspace on hrpd, otherwise none
         """
         return None
+
+    def apply_calibration_to_focused_data(self, focused_ws):
+        # convert back to TOF based on engineered detector positions
+        mantid.ApplyDiffCal(InstrumentWorkspace=focused_ws,
+                            ClearCalibration=True)
 
     # Steps applicable to all instruments
 

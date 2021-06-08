@@ -32,56 +32,40 @@ namespace WorkflowAlgorithms {
 DECLARE_ALGORITHM(DgsConvertToEnergyTransfer)
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string DgsConvertToEnergyTransfer::name() const {
-  return "DgsConvertToEnergyTransfer";
-}
+const std::string DgsConvertToEnergyTransfer::name() const { return "DgsConvertToEnergyTransfer"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int DgsConvertToEnergyTransfer::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string DgsConvertToEnergyTransfer::category() const {
-  return "Workflow\\Inelastic\\UsesPropertyManager";
-}
+const std::string DgsConvertToEnergyTransfer::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
 /** Initialize the algorithm's properties.
  */
 void DgsConvertToEnergyTransfer::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "InputWorkspace", "", Direction::Input),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                         "A sample data workspace.");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
-                                            Direction::Input,
-                                            PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A monitor workspace associated with the sample workspace.");
+  this->declareProperty("IncidentEnergyGuess", EMPTY_DBL(),
+                        "This is the starting point for the incident energy calculation.");
   this->declareProperty(
-      "IncidentEnergyGuess", EMPTY_DBL(),
-      "This is the starting point for the incident energy calculation.");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "IntegratedDetectorVanadium", "", Direction::Input,
-                            PropertyMode::Optional),
-                        "A workspace containing the "
-                        "integrated detector vanadium.");
-  this->declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "A mask workspace");
-  this->declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "A grouping workspace");
-  this->declareProperty(
-      "AlternateGroupingTag", "",
-      "Allows modification to the OldGroupingFile property name");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "OutputWorkspace", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("IntegratedDetectorVanadium", "", Direction::Input, PropertyMode::Optional),
+      "A workspace containing the "
+      "integrated detector vanadium.");
+  this->declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("MaskWorkspace", "", Direction::Input,
+                                                                             PropertyMode::Optional),
+                        "A mask workspace");
+  this->declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("GroupingWorkspace", "", Direction::Input,
+                                                                             PropertyMode::Optional),
+                        "A grouping workspace");
+  this->declareProperty("AlternateGroupingTag", "", "Allows modification to the OldGroupingFile property name");
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                         "The name for the output workspace.");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "OutputTibWorkspace", "", Direction::Output),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputTibWorkspace", "", Direction::Output),
                         "The name for the output TIB workspace.");
-  this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
-                        Direction::Input);
+  this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
 }
 
 /** Execute the algorithm.
@@ -89,12 +73,10 @@ void DgsConvertToEnergyTransfer::init() {
 void DgsConvertToEnergyTransfer::exec() {
   g_log.notice() << "Starting DgsConvertToEnergyTransfer\n";
   // Get the reduction property manager
-  const std::string reductionManagerName =
-      this->getProperty("ReductionProperties");
+  const std::string reductionManagerName = this->getProperty("ReductionProperties");
   std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
-    reductionManager =
-        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   else
     throw std::runtime_error("DgsConvertToEnergyTransfer cannot run without a "
                              "reduction PropertyManager.");
@@ -115,18 +97,15 @@ void DgsConvertToEnergyTransfer::exec() {
     // SNS has a log called EnergyRequest that can be used to get the
     // incident energy guess.
     if ("SNS" == facility) {
-      TimeSeriesProperty<double> *eiLog =
-          inputWS->run().getTimeSeriesProperty<double>("EnergyRequest");
+      TimeSeriesProperty<double> *eiLog = inputWS->run().getTimeSeriesProperty<double>("EnergyRequest");
       eiGuess = eiLog->getStatistics().mean;
     } else {
       throw std::runtime_error("Incident energy guess MUST be given!");
     }
   }
-  const bool useEiGuess =
-      reductionManager->getProperty("UseIncidentEnergyGuess");
+  const bool useEiGuess = reductionManager->getProperty("UseIncidentEnergyGuess");
   const double tZeroGuess = reductionManager->getProperty("TimeZeroGuess");
-  std::vector<double> etBinning =
-      reductionManager->getProperty("EnergyTransferRange");
+  std::vector<double> etBinning = reductionManager->getProperty("EnergyTransferRange");
 
   // Create a default set of binning parameters: (-0.5Ei, 0.01Ei, 0.99Ei)
   if (etBinning.empty()) {
@@ -140,10 +119,8 @@ void DgsConvertToEnergyTransfer::exec() {
 
   double incidentEnergy = 0.0;
   double monPeak = 0.0;
-  specnum_t eiMon1Spec =
-      static_cast<specnum_t>(reductionManager->getProperty("Monitor1SpecId"));
-  specnum_t eiMon2Spec =
-      static_cast<specnum_t>(reductionManager->getProperty("Monitor2SpecId"));
+  specnum_t eiMon1Spec = static_cast<specnum_t>(reductionManager->getProperty("Monitor1SpecId"));
+  specnum_t eiMon2Spec = static_cast<specnum_t>(reductionManager->getProperty("Monitor2SpecId"));
 
   if ("SNS" == facility) {
     // SNS wants to preserve events until the last
@@ -156,16 +133,14 @@ void DgsConvertToEnergyTransfer::exec() {
     } else {
       if (!monWS) {
         g_log.notice() << "Trying to determine file name\n";
-        std::string runFileName =
-            inputWS->run().getProperty("Filename")->value();
+        std::string runFileName = inputWS->run().getProperty("Filename")->value();
         if (runFileName.empty())
           throw std::runtime_error("Cannot find run filename, therefore cannot "
                                    "find the initial energy");
 
         std::string loadAlgName;
         std::string fileProp;
-        if (boost::ends_with(runFileName, "_event.nxs") ||
-            boost::ends_with(runFileName, ".nxs.h5") ||
+        if (boost::ends_with(runFileName, "_event.nxs") || boost::ends_with(runFileName, ".nxs.h5") ||
             boost::ends_with(runFileName, ".nxs")) {
           g_log.notice() << "Loading NeXus monitors\n";
           loadAlgName = "LoadNexusMonitors";
@@ -175,8 +150,7 @@ void DgsConvertToEnergyTransfer::exec() {
         if (boost::ends_with(runFileName, "_neutron_event.dat")) {
           g_log.notice() << "Loading PreNeXus monitors\n";
           loadAlgName = "LoadPreNexusMonitors";
-          boost::replace_first(runFileName, "_neutron_event.dat",
-                               "_runinfo.xml");
+          boost::replace_first(runFileName, "_neutron_event.dat", "_runinfo.xml");
           fileProp = "RunInfoFilename";
         }
 
@@ -192,9 +166,8 @@ void DgsConvertToEnergyTransfer::exec() {
         if ((monWSOutput) && (!monWS))
           // this was a group workspace - DGSReduction does not support multi
           // period data yet
-          throw Exception::NotImplementedError(
-              "The file contains multi period data, support for this is not "
-              "implemented in DGSReduction yet");
+          throw Exception::NotImplementedError("The file contains multi period data, support for this is not "
+                                               "implemented in DGSReduction yet");
       }
 
       // Calculate Ei
@@ -234,8 +207,7 @@ void DgsConvertToEnergyTransfer::exec() {
     getei->executeAsChildAlg();
 
     monPeak = getei->getProperty("FirstMonitorPeak");
-    const specnum_t monIndex =
-        static_cast<specnum_t>(getei->getProperty("FirstMonitorIndex"));
+    const specnum_t monIndex = static_cast<specnum_t>(getei->getProperty("FirstMonitorIndex"));
     // Why did the old way get it from the log?
     incidentEnergy = getei->getProperty("IncidentEnergy");
 
@@ -250,8 +222,7 @@ void DgsConvertToEnergyTransfer::exec() {
     const V3D &monPos = specInfo.position(monIndex);
     std::string srcName = inputWS->getInstrument()->getSource()->getName();
 
-    IAlgorithm_sptr moveInstComp =
-        this->createChildAlgorithm("MoveInstrumentComponent");
+    IAlgorithm_sptr moveInstComp = this->createChildAlgorithm("MoveInstrumentComponent");
     moveInstComp->setProperty("Workspace", outputWS);
     moveInstComp->setProperty("ComponentName", srcName);
     moveInstComp->setProperty("X", monPos.X());
@@ -271,18 +242,15 @@ void DgsConvertToEnergyTransfer::exec() {
     else
       detcalFile = inputWS->run().getProperty("Filename")->value();
     if (!detcalFile.empty()) {
-      const bool relocateDets =
-          reductionManager->getProperty("RelocateDetectors");
-      IAlgorithm_sptr loaddetinfo =
-          this->createChildAlgorithm("LoadDetectorInfo");
+      const bool relocateDets = reductionManager->getProperty("RelocateDetectors");
+      IAlgorithm_sptr loaddetinfo = this->createChildAlgorithm("LoadDetectorInfo");
       loaddetinfo->setProperty("Workspace", outputWS);
       loaddetinfo->setProperty("DataFilename", detcalFile);
       loaddetinfo->setProperty("RelocateDets", relocateDets);
       loaddetinfo->executeAsChildAlg();
       outputWS = loaddetinfo->getProperty("Workspace");
     } else {
-      throw std::runtime_error(
-          "Cannot find detcal filename in run object or as parameter.");
+      throw std::runtime_error("Cannot find detcal filename in run object or as parameter.");
     }
   }
 
@@ -290,15 +258,12 @@ void DgsConvertToEnergyTransfer::exec() {
   const bool doTibSub = reductionManager->getProperty("TimeIndepBackgroundSub");
   if (doTibSub) {
     // Setup for later use
-    IAlgorithm_sptr cnvToDist =
-        this->createChildAlgorithm("ConvertToDistribution");
+    IAlgorithm_sptr cnvToDist = this->createChildAlgorithm("ConvertToDistribution");
 
     // Set the binning parameters for the background region
-    double tibTofStart = getDblPropOrParam("TibTofRangeStart", reductionManager,
-                                           "bkgd-range-min", inputWS);
+    double tibTofStart = getDblPropOrParam("TibTofRangeStart", reductionManager, "bkgd-range-min", inputWS);
     tibTofStart += binOffset;
-    double tibTofEnd = getDblPropOrParam("TibTofRangeEnd", reductionManager,
-                                         "bkgd-range-max", inputWS);
+    double tibTofEnd = getDblPropOrParam("TibTofRangeEnd", reductionManager, "bkgd-range-max", inputWS);
     tibTofEnd += binOffset;
     const double tibTofWidth = tibTofEnd - tibTofStart;
     std::vector<double> params{tibTofStart, tibTofWidth, tibTofEnd};
@@ -307,8 +272,7 @@ void DgsConvertToEnergyTransfer::exec() {
 
     // Do we want to treat the TIB as events
     std::vector<std::string> backgroundType =
-        inputWS->getInstrument()->getStringParameter(
-            "treat-background-as-events");
+        inputWS->getInstrument()->getStringParameter("treat-background-as-events");
     if (backgroundType.empty()) {
       // Set the default behaviour.
       treatTibAsEvents = false;
@@ -325,8 +289,7 @@ void DgsConvertToEnergyTransfer::exec() {
       if (treatTibAsEvents) {
         g_log.notice("TIB removal using event mode.");
         // Treat background as events
-        IAlgorithm_sptr createBkg =
-            this->createChildAlgorithm("CreateFlatEventWorkspace");
+        IAlgorithm_sptr createBkg = this->createChildAlgorithm("CreateFlatEventWorkspace");
         createBkg->setProperty("InputWorkspace", outputWS);
         createBkg->setProperty("RangeStart", tibTofStart);
         createBkg->setProperty("RangeEnd", tibTofEnd);
@@ -379,8 +342,7 @@ void DgsConvertToEnergyTransfer::exec() {
         outputWS = cnvToDist->getProperty("Workspace");
 
         // Calculate the background
-        IAlgorithm_sptr flatBg =
-            this->createChildAlgorithm("CalculateFlatBackground");
+        IAlgorithm_sptr flatBg = this->createChildAlgorithm("CalculateFlatBackground");
         flatBg->setProperty("InputWorkspace", origBkgWS);
         flatBg->setProperty("StartX", tibTofStart);
         flatBg->setProperty("EndX", tibTofEnd);
@@ -414,8 +376,7 @@ void DgsConvertToEnergyTransfer::exec() {
       cnvToDist->executeAsChildAlg();
       outputWS = cnvToDist->getProperty("Workspace");
 
-      IAlgorithm_sptr flatBg =
-          this->createChildAlgorithm("CalculateFlatBackground");
+      IAlgorithm_sptr flatBg = this->createChildAlgorithm("CalculateFlatBackground");
       flatBg->setProperty("InputWorkspace", outputWS);
       flatBg->setProperty("OutputWorkspace", outputWS);
       flatBg->setProperty("StartX", tibTofStart);
@@ -427,8 +388,7 @@ void DgsConvertToEnergyTransfer::exec() {
 
     if (!treatTibAsEvents) {
       // Convert result workspace back to histogram
-      IAlgorithm_sptr cnvFrDist =
-          this->createChildAlgorithm("ConvertFromDistribution");
+      IAlgorithm_sptr cnvFrDist = this->createChildAlgorithm("ConvertFromDistribution");
       cnvFrDist->setProperty("Workspace", outputWS);
       cnvFrDist->executeAsChildAlg();
       outputWS = cnvFrDist->getProperty("Workspace");
@@ -509,8 +469,7 @@ void DgsConvertToEnergyTransfer::exec() {
   }
 
   // Rebin to ensure consistency
-  const bool sofphieIsDistribution =
-      reductionManager->getProperty("SofPhiEIsDistribution");
+  const bool sofphieIsDistribution = reductionManager->getProperty("SofPhiEIsDistribution");
 
   g_log.notice() << "Rebinning data\n";
   rebin->setProperty("InputWorkspace", outputWS);
@@ -523,8 +482,7 @@ void DgsConvertToEnergyTransfer::exec() {
 
   if (sofphieIsDistribution) {
     g_log.notice() << "Making distribution\n";
-    IAlgorithm_sptr distrib =
-        this->createChildAlgorithm("ConvertToDistribution");
+    IAlgorithm_sptr distrib = this->createChildAlgorithm("ConvertToDistribution");
     distrib->setProperty("Workspace", outputWS);
     distrib->executeAsChildAlg();
     outputWS = distrib->getProperty("Workspace");
@@ -540,8 +498,7 @@ void DgsConvertToEnergyTransfer::exec() {
   }
 
   // Normalise by the detector vanadium if necessary
-  MatrixWorkspace_sptr detVanWS =
-      this->getProperty("IntegratedDetectorVanadium");
+  MatrixWorkspace_sptr detVanWS = this->getProperty("IntegratedDetectorVanadium");
   if (detVanWS) {
     IAlgorithm_sptr divide = this->createChildAlgorithm("Divide");
     divide->setProperty("LHSWorkspace", outputWS);
@@ -569,8 +526,7 @@ void DgsConvertToEnergyTransfer::exec() {
   outputWS = remap->getProperty("OutputWorkspace");
 
   if ("ISIS" == facility) {
-    double scaleFactor =
-        inputWS->getInstrument()->getNumberParameter("scale-factor")[0];
+    double scaleFactor = inputWS->getInstrument()->getNumberParameter("scale-factor")[0];
     IAlgorithm_sptr scaleAlg = this->createChildAlgorithm("Scale");
     scaleAlg->setProperty("InputWorkspace", outputWS);
     scaleAlg->setProperty("Factor", scaleFactor);

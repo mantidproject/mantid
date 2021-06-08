@@ -20,8 +20,7 @@ struct AreaInfo {
   size_t wsIndex;
   size_t binIndex;
   double weight;
-  AreaInfo(const size_t xi, const size_t yi, const double w)
-      : wsIndex(yi), binIndex(xi), weight(w) {}
+  AreaInfo(const size_t xi, const size_t yi, const double w) : wsIndex(yi), binIndex(xi), weight(w) {}
 };
 /**
  * Private function to calculate polygon area directly to avoid the overhead
@@ -30,10 +29,8 @@ struct AreaInfo {
  * be the same as the first element. Also note that it returns 2x the area!
  */
 template <class T> double polyArea(const T & /*unused*/) { return 0.; }
-template <class T, class... Ts>
-double polyArea(const T &v1, const T &v2, Ts &&... vertices) {
-  return v2.X() * v1.Y() - v2.Y() * v1.X() +
-         polyArea(v2, std::forward<Ts>(vertices)...);
+template <class T, class... Ts> double polyArea(const T &v1, const T &v2, Ts &&...vertices) {
+  return v2.X() * v1.Y() - v2.Y() * v1.X() + polyArea(v2, std::forward<Ts>(vertices)...);
 }
 } // namespace
 
@@ -57,11 +54,9 @@ enum class QuadrilateralType { Rectangle, TrapezoidX, TrapezoidY, General };
  */
 QuadrilateralType getQuadrilateralType(const Quadrilateral &inputQ) {
   const bool inputQHasXParallel =
-      fabs(inputQ[0].Y() - inputQ[3].Y()) < POS_TOLERANCE &&
-      fabs(inputQ[1].Y() - inputQ[2].Y()) < POS_TOLERANCE;
+      fabs(inputQ[0].Y() - inputQ[3].Y()) < POS_TOLERANCE && fabs(inputQ[1].Y() - inputQ[2].Y()) < POS_TOLERANCE;
   const bool inputQHasYParallel =
-      fabs(inputQ[0].X() - inputQ[1].X()) < POS_TOLERANCE &&
-      fabs(inputQ[2].X() - inputQ[3].X()) < POS_TOLERANCE;
+      fabs(inputQ[0].X() - inputQ[1].X()) < POS_TOLERANCE && fabs(inputQ[2].X() - inputQ[3].X()) < POS_TOLERANCE;
   if (inputQHasXParallel && inputQHasYParallel) {
     return QuadrilateralType::Rectangle;
   } else if (inputQHasXParallel) {
@@ -86,15 +81,12 @@ QuadrilateralType getQuadrilateralType(const Quadrilateral &inputQ) {
  * @param x_end An output giving the end index in the dX direction
  * @return True if an intersection is possible
  */
-bool getIntersectionRegion(const std::vector<double> &xAxis,
-                           const std::vector<double> &verticalAxis,
-                           const Quadrilateral &inputQ, size_t &qstart,
-                           size_t &qend, size_t &x_start, size_t &x_end) {
+bool getIntersectionRegion(const std::vector<double> &xAxis, const std::vector<double> &verticalAxis,
+                           const Quadrilateral &inputQ, size_t &qstart, size_t &qend, size_t &x_start, size_t &x_end) {
   const double xn_lo(inputQ.minX()), xn_hi(inputQ.maxX());
   const double yn_lo(inputQ.minY()), yn_hi(inputQ.maxY());
 
-  if (xn_hi < xAxis.front() || xn_lo > xAxis.back() ||
-      yn_hi < verticalAxis.front() || yn_lo > verticalAxis.back())
+  if (xn_hi < xAxis.front() || xn_lo > xAxis.back() || yn_hi < verticalAxis.front() || yn_lo > verticalAxis.back())
     return false;
 
   auto start_it = std::upper_bound(xAxis.cbegin(), xAxis.cend(), xn_lo);
@@ -109,8 +101,7 @@ bool getIntersectionRegion(const std::vector<double> &xAxis,
   }
 
   // Q region
-  start_it =
-      std::upper_bound(verticalAxis.cbegin(), verticalAxis.cend(), yn_lo);
+  start_it = std::upper_bound(verticalAxis.cbegin(), verticalAxis.cend(), yn_lo);
   end_it = std::upper_bound(start_it, verticalAxis.cend(), yn_hi);
   qstart = 0;
   if (start_it != verticalAxis.begin()) {
@@ -136,12 +127,9 @@ bool getIntersectionRegion(const std::vector<double> &xAxis,
  * @param x_end The starting x-axis index
  * @param areaInfos Output vector of indices and areas of overlapping bins
  */
-void calcRectangleIntersections(const std::vector<double> &xAxis,
-                                const std::vector<double> &yAxis,
-                                const Quadrilateral &inputQ,
-                                const size_t y_start, const size_t y_end,
-                                const size_t x_start, const size_t x_end,
-                                std::vector<AreaInfo> &areaInfos) {
+void calcRectangleIntersections(const std::vector<double> &xAxis, const std::vector<double> &yAxis,
+                                const Quadrilateral &inputQ, const size_t y_start, const size_t y_end,
+                                const size_t x_start, const size_t x_end, std::vector<AreaInfo> &areaInfos) {
   std::vector<double> width;
   width.reserve(x_end - x_start);
   for (size_t xi = x_start; xi < x_end; ++xi) {
@@ -173,12 +161,9 @@ void calcRectangleIntersections(const std::vector<double> &xAxis,
  * @param x_end The ending x-axis index
  * @param areaInfos Output vector of indices and areas of overlapping bins
  */
-void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
-                                 const std::vector<double> &yAxis,
-                                 const Quadrilateral &inputQ,
-                                 const size_t y_start, const size_t y_end,
-                                 const size_t x_start, const size_t x_end,
-                                 std::vector<AreaInfo> &areaInfos) {
+void calcTrapezoidYIntersections(const std::vector<double> &xAxis, const std::vector<double> &yAxis,
+                                 const Quadrilateral &inputQ, const size_t y_start, const size_t y_end,
+                                 const size_t x_start, const size_t x_end, std::vector<AreaInfo> &areaInfos) {
   // The algorithm proceeds as follows:
   // 1. Determine the left/right bin boundaries on the x- (horizontal)-grid.
   // 2. Loop along x, for each 1-output-bin wide strip construct a new input Q.
@@ -207,13 +192,11 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
   const double ll_x(ll.X()), ll_y(ll.Y()), ul_y(ul.Y());
   const double lr_x(lr.X()), lr_y(lr.Y()), ur_y(ur.Y());
   // Check if there is only a output single bin and inputQ is fully enclosed
-  if (nx == 1 && ny == 1 &&
-      (ll_y >= yAxis[y_start] && ll_y <= yAxis[y_start + 1]) &&
+  if (nx == 1 && ny == 1 && (ll_y >= yAxis[y_start] && ll_y <= yAxis[y_start + 1]) &&
       (ul_y >= yAxis[y_start] && ul_y <= yAxis[y_start + 1]) &&
       (ur_y >= yAxis[y_start] && ur_y <= yAxis[y_start + 1]) &&
       (lr_y >= yAxis[y_start] && lr_y <= yAxis[y_start + 1])) {
-    areaInfos.emplace_back(x_start, y_start,
-                           0.5 * polyArea(ll, ul, ur, lr, ll));
+    areaInfos.emplace_back(x_start, y_start, 0.5 * polyArea(ll, ul, ur, lr, ll));
     return;
   }
 
@@ -271,10 +254,8 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
     }
   } else {
     // In this case, the diagonals are all on one side or the other.
-    const size_t y2 =
-        std::upper_bound(y0_it, y1_it, (mTop >= 0) ? ll_y : lr_y) - y0_it;
-    const size_t y3 =
-        std::upper_bound(y0_it, y1_it, (mTop >= 0) ? ul_y : ur_y) - y0_it;
+    const size_t y2 = std::upper_bound(y0_it, y1_it, (mTop >= 0) ? ll_y : lr_y) - y0_it;
+    const size_t y3 = std::upper_bound(y0_it, y1_it, (mTop >= 0) ? ul_y : ur_y) - y0_it;
     double val;
     for (size_t yj = 0; yj < ymax; ++yj) {
       const size_t yjx = yj * nx;
@@ -287,10 +268,8 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
       }
       if (val < ll_x || val > lr_x)
         val = NaN;
-      auto left_it =
-          (mTop >= 0) ? std::upper_bound(x0_it, x1_it, val) : (x0_it + 1);
-      auto right_it =
-          (mTop >= 0) ? (x1_it - 1) : std::upper_bound(x0_it, x1_it, val);
+      auto left_it = (mTop >= 0) ? std::upper_bound(x0_it, x1_it, val) : (x0_it + 1);
+      auto right_it = (mTop >= 0) ? (x1_it - 1) : std::upper_bound(x0_it, x1_it, val);
       if (left_it == x1_it)
         left_it--;
       if (right_it == x1_it)
@@ -339,13 +318,10 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
       yj0 = (yi - y_start) * nx;
       yj1 = (yi - y_start + 1) * nx;
       // Checks if this bin is completely inside new quadrilateral
-      if (yAxis[yi] > std::max(nll.Y(), nlr.Y()) &&
-          yAxis[yi + 1] < std::min(nul.Y(), nur.Y())) {
-        areaInfos.emplace_back(
-            xi, yi, (nlr.X() - nll.X()) * (yAxis[yi + 1] - yAxis[yi]));
+      if (yAxis[yi] > std::max(nll.Y(), nlr.Y()) && yAxis[yi + 1] < std::min(nul.Y(), nur.Y())) {
+        areaInfos.emplace_back(xi, yi, (nlr.X() - nll.X()) * (yAxis[yi + 1] - yAxis[yi]));
         // Checks if this bin is not completely outside new quadrilateral
-      } else if (yAxis[yi + 1] >= std::min(nll.Y(), nlr.Y()) &&
-                 yAxis[yi] <= std::max(nul.Y(), nur.Y())) {
+      } else if (yAxis[yi + 1] >= std::min(nll.Y(), nlr.Y()) && yAxis[yi] <= std::max(nul.Y(), nur.Y())) {
         size_t vertBits = 0;
         if (nll.Y() >= yAxis[yi] && nll.Y() <= yAxis[yi + 1])
           vertBits |= LL_IN;
@@ -465,12 +441,9 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
  * @param x_end The starting x-axis index
  * @param areaInfos Output vector of indices and areas of overlapping bins
  */
-void calcGeneralIntersections(const std::vector<double> &xAxis,
-                              const std::vector<double> &yAxis,
-                              const Quadrilateral &inputQ, const size_t qstart,
-                              const size_t qend, const size_t x_start,
-                              const size_t x_end,
-                              std::vector<AreaInfo> &areaInfos) {
+void calcGeneralIntersections(const std::vector<double> &xAxis, const std::vector<double> &yAxis,
+                              const Quadrilateral &inputQ, const size_t qstart, const size_t qend, const size_t x_start,
+                              const size_t x_end, std::vector<AreaInfo> &areaInfos) {
   ConvexPolygon intersectOverlap;
   areaInfos.reserve((qend - qstart) * (x_end - x_start));
   for (size_t yi = qstart; yi < qend; ++yi) {
@@ -479,8 +452,7 @@ void calcGeneralIntersections(const std::vector<double> &xAxis,
     for (size_t xi = x_start; xi < x_end; ++xi) {
       intersectOverlap.clear();
       if (intersection(
-              Quadrilateral(V2D(xAxis[xi], vlo), V2D(xAxis[xi + 1], vlo),
-                            V2D(xAxis[xi + 1], vhi), V2D(xAxis[xi], vhi)),
+              Quadrilateral(V2D(xAxis[xi], vlo), V2D(xAxis[xi + 1], vlo), V2D(xAxis[xi + 1], vhi), V2D(xAxis[xi], vhi)),
               inputQ, intersectOverlap)) {
         areaInfos.emplace_back(xi, yi, intersectOverlap.area());
       }
@@ -495,11 +467,9 @@ void calcGeneralIntersections(const std::vector<double> &xAxis,
  * @param inputWS The input workspace used for testing distribution state
  * @param progress An optional progress object. Reported to once per bin.
  */
-void normaliseOutput(const MatrixWorkspace_sptr &outputWS,
-                     const MatrixWorkspace_const_sptr &inputWS,
+void normaliseOutput(const MatrixWorkspace_sptr &outputWS, const MatrixWorkspace_const_sptr &inputWS,
                      Progress *progress) {
-  const bool removeBinWidth(inputWS->isDistribution() &&
-                            outputWS->id() != "RebinnedOutput");
+  const bool removeBinWidth(inputWS->isDistribution() && outputWS->id() != "RebinnedOutput");
   for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
     const auto &outputX = outputWS->x(i);
     auto &outputY = outputWS->mutableY(i);
@@ -533,10 +503,8 @@ void normaliseOutput(const MatrixWorkspace_sptr &outputWS,
  * @param verticalAxis A vector containing the output vertical axis bin
  * boundaries
  */
-void rebinToOutput(const Quadrilateral &inputQ,
-                   const MatrixWorkspace_const_sptr &inputWS, const size_t i,
-                   const size_t j, MatrixWorkspace &outputWS,
-                   const std::vector<double> &verticalAxis) {
+void rebinToOutput(const Quadrilateral &inputQ, const MatrixWorkspace_const_sptr &inputWS, const size_t i,
+                   const size_t j, MatrixWorkspace &outputWS, const std::vector<double> &verticalAxis) {
   const auto &inY = inputWS->y(i);
   // Check once whether the signal
   if (std::isnan(inY[j])) {
@@ -544,10 +512,8 @@ void rebinToOutput(const Quadrilateral &inputQ,
   }
 
   const auto &X = outputWS.x(0).rawData();
-  size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
-      x_end(X.size() - 1);
-  if (!getIntersectionRegion(X, verticalAxis, inputQ, qstart, qend, x_start,
-                             x_end))
+  size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0), x_end(X.size() - 1);
+  if (!getIntersectionRegion(X, verticalAxis, inputQ, qstart, qend, x_start, x_end))
     return;
 
   const auto &inE = inputWS->e(i);
@@ -559,8 +525,7 @@ void rebinToOutput(const Quadrilateral &inputQ,
     const double vhi = verticalAxis[y + 1];
     for (size_t xi = x_start; xi < x_end; ++xi) {
       intersectOverlap.clear();
-      if (intersection(Quadrilateral(V2D(X[xi], vlo), V2D(X[xi + 1], vlo),
-                                     V2D(X[xi + 1], vhi), V2D(X[xi], vhi)),
+      if (intersection(Quadrilateral(V2D(X[xi], vlo), V2D(X[xi + 1], vlo), V2D(X[xi + 1], vhi), V2D(X[xi], vhi)),
                        inputQ, intersectOverlap)) {
         const double overlapArea = intersectOverlap.area();
         if (overlapArea == 0.) {
@@ -571,8 +536,7 @@ void rebinToOutput(const Quadrilateral &inputQ,
         yValue *= weight;
         double eValue = inE[j];
         if (inputWS->isDistribution()) {
-          const double overlapWidth =
-              intersectOverlap.maxX() - intersectOverlap.minX();
+          const double overlapWidth = intersectOverlap.maxX() - intersectOverlap.minX();
           yValue *= overlapWidth;
           eValue *= overlapWidth;
         }
@@ -606,11 +570,8 @@ void rebinToOutput(const Quadrilateral &inputQ,
  * the final output fractions.
  * This can be null to indicate that the input was a standard 2D workspace.
  */
-void rebinToFractionalOutput(const Quadrilateral &inputQ,
-                             const MatrixWorkspace_const_sptr &inputWS,
-                             const size_t i, const size_t j,
-                             RebinnedOutput &outputWS,
-                             const std::vector<double> &verticalAxis,
+void rebinToFractionalOutput(const Quadrilateral &inputQ, const MatrixWorkspace_const_sptr &inputWS, const size_t i,
+                             const size_t j, RebinnedOutput &outputWS, const std::vector<double> &verticalAxis,
                              const RebinnedOutput_const_sptr &inputRB) {
   const auto &inX = inputWS->binEdges(i);
   const auto &inY = inputWS->y(i);
@@ -620,10 +581,8 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
     return;
 
   const auto &X = outputWS.x(0).rawData();
-  size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
-      x_end(X.size() - 1);
-  if (!getIntersectionRegion(X, verticalAxis, inputQ, qstart, qend, x_start,
-                             x_end))
+  size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0), x_end(X.size() - 1);
+  if (!getIntersectionRegion(X, verticalAxis, inputQ, qstart, qend, x_start, x_end))
     return;
 
   // If the input workspace was normalized by the bin width, we need to
@@ -647,14 +606,11 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   const double inputQArea = inputQ.area();
   const QuadrilateralType inputQType = getQuadrilateralType(inputQ);
   if (inputQType == QuadrilateralType::Rectangle) {
-    calcRectangleIntersections(X, verticalAxis, inputQ, qstart, qend, x_start,
-                               x_end, areaInfos);
+    calcRectangleIntersections(X, verticalAxis, inputQ, qstart, qend, x_start, x_end, areaInfos);
   } else if (inputQType == QuadrilateralType::TrapezoidY) {
-    calcTrapezoidYIntersections(X, verticalAxis, inputQ, qstart, qend, x_start,
-                                x_end, areaInfos);
+    calcTrapezoidYIntersections(X, verticalAxis, inputQ, qstart, qend, x_start, x_end, areaInfos);
   } else {
-    calcGeneralIntersections(X, verticalAxis, inputQ, qstart, qend, x_start,
-                             x_end, areaInfos);
+    calcGeneralIntersections(X, verticalAxis, inputQ, qstart, qend, x_start, x_end, areaInfos);
   }
 
   // If the input is a RebinnedOutput workspace with frac. area we need

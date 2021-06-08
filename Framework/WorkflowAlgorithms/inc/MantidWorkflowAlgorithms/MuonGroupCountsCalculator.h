@@ -16,10 +16,8 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport MuonGroupCountsCalculator : public MuonGroupCalculator {
 public:
-  MuonGroupCountsCalculator(const Mantid::API::WorkspaceGroup_sptr &inputWS,
-                            const std::vector<int> &summedPeriods,
-                            const std::vector<int> &subtractedPeriods,
-                            const int groupIndex);
+  MuonGroupCountsCalculator(const Mantid::API::WorkspaceGroup_sptr &inputWS, const std::vector<int> &summedPeriods,
+                            const std::vector<int> &subtractedPeriods, const int groupIndex);
   /// Performs group counts calculation
   Mantid::API::MatrixWorkspace_sptr calculate() const override;
 };

@@ -1,5 +1,5 @@
 if(CXXTEST_FOUND)
-  include_directories(SYSTEM 
+  include_directories(SYSTEM
 				      ${CXXTEST_INCLUDE_DIR})
 
   include_directories(../../TestHelpers/inc)

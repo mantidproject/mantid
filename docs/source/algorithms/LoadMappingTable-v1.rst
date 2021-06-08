@@ -26,7 +26,7 @@ Usage
 -----
 
 .. testcode::
-  
+
   # Create a workspace
   ws = CreateSampleWorkspace()
   # Replace the instrument in the workspace with HRPD

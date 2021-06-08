@@ -9,8 +9,8 @@
 Description
 -----------
 
-This creates a new event workspace from an existing one by sampling an area of the 
-source workspaces background and then using this to create a new workspace that covers 
+This creates a new event workspace from an existing one by sampling an area of the
+source workspaces background and then using this to create a new workspace that covers
 the same data range as the input workspace.
 
 Usage
@@ -19,7 +19,7 @@ Usage
 **Example: Extract the background into another workspace**
 
 .. testcode:: Extractbackground
-    
+
     ws = CreateSampleWorkspace("Event","Multiple Peaks")
     wsOut=CreateFlatEventWorkspace(ws,RangeStart=15000,RangeEnd=18000)
 

@@ -7,7 +7,7 @@
 from typing import List
 
 from matplotlib.container import ErrorbarContainer
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 from Muon.GUI.Common.plot_widget.plotting_canvas.plot_toolbar import PlotToolbar
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
@@ -26,9 +26,10 @@ if is_pyqt5():
 else:
     from matplotlib.backends.backend_qt4agg import FigureCanvas
 
-DEFAULT_X_LIMITS = [0, 15]
+
 # Default color cycle using Matplotlib color codes C0, C1...ect
-DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(10)]
+NUMBER_OF_COLOURS = 10
+DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(NUMBER_OF_COLOURS)]
 
 
 def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
@@ -37,14 +38,26 @@ def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
     plot_fn(workspace, **plot_kwargs)
 
 
+def get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max):
+    x, y = line.get_data()
+    for i in range(len(x)):
+        if x_min <= x[i] <= x_max:
+            y_min = min(y_min, y[i])
+            y_max = max(y_max, y[i])
+    return y_min, y_max
+
+
 class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
-    def __init__(self, parent=None):
+    def __init__(self, quick_edit, min_y_range, y_axis_margin, parent=None):
         super().__init__(parent)
-
+        # later we will allow these to be changed in the settings
+        self._min_y_range = min_y_range
+        self._y_axis_margin = y_axis_margin
         # create the figure
         self.fig = Figure()
         self.fig.canvas = FigureCanvas(self.fig)
+        self.fig.canvas.setMinimumHeight(500)
         self.toolBar = PlotToolbar(self.fig.canvas, self)
 
         # Create a set of Mantid axis for the figure
@@ -53,12 +66,23 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self._number_of_axes = 1
         self._color_queue = [ColorQueue(DEFAULT_COLOR_CYCLE)]
 
+        # Add a splitter for the plotting canvas and quick edit toolbar
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
+        splitter.addWidget(self.fig.canvas)
+        self._quick_edit = quick_edit
+        splitter.addWidget(self._quick_edit)
+        splitter.setChildrenCollapsible(False)
+
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.toolBar)
-        layout.addWidget(self.fig.canvas)
+        layout.addWidget(splitter)
         self.setLayout(layout)
 
         self._plot_information_list = []  # type : List[PlotInformation}
+
+    @property
+    def autoscale_state(self):
+        return self._quick_edit.autoscale_state
 
     @property
     def plotted_workspace_information(self):
@@ -81,9 +105,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     @property
     def number_of_axes(self):
         return self._number_of_axes
-
-    def add_widget(self, widget):
-        self.layout().addWidget(widget)
 
     def create_new_plot_canvas(self, num_axes):
         """Creates a new blank plotting canvas"""
@@ -129,12 +150,15 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                             plot_kwargs=plot_kwargs)
 
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
+        # We reverse the workspace info list so that we can maintain a unique color queue
+        # See _update_color_queue_on_workspace_removal for more
+        workspace_plot_info_list.reverse()
         for workspace_plot_info in workspace_plot_info_list:
             workspace_name = workspace_plot_info.workspace_name
-            try:
-                workspace = AnalysisDataService.Instance().retrieve(workspace_name)
-            except RuntimeError:
+            if not AnalysisDataService.Instance().doesExist(workspace_name):
                 continue
+
+            workspace = AnalysisDataService.Instance().retrieve(workspace_name)
             for plotted_information in self._plot_information_list.copy():
                 if workspace_plot_info.workspace_name == plotted_information.workspace_name and \
                         workspace_plot_info.axis == plotted_information.axis:
@@ -168,6 +192,16 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                     color = artist[0].get_color()
                 else:
                     color = artist.get_color()
+                # When we repeat colors we don't want to add colors to the queue if they are already plotted.
+                # We know we are repeating colors if we have more lines than colors, then we check if the color
+                # removed is already the color of an existing line. If it is we don't manually re-add the color
+                # to the queue. This ensures we only plot lines of the same colour if we have more lines
+                # plotted than colours
+                lines = self.fig.axes[axis_number].get_lines()
+                if len(lines) > NUMBER_OF_COLOURS:
+                    current_colors = [line.get_c() for line in lines]
+                    if color in current_colors:
+                        return
                 self._color_queue[axis_number] += color
 
     # Ads observer functions
@@ -213,19 +247,34 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         ymin = 1e9
         ymax = -1e9
         for axis in self.fig.axes:
-            ymin_i, ymax_i = self._get_y_axis_autoscale_limts(axis)
+            ymin_i, ymax_i = self._get_y_axis_autoscale_limits(axis)
             if ymin_i < ymin:
                 ymin = ymin_i
             if ymax_i > ymax:
                 ymax = ymax_i
-
         plt.setp(self.fig.axes, ylim=[ymin, ymax])
+
+    @property
+    def get_xlim_list(self):
+        xlim_list=[]
+        for axis in self.fig.axes:
+            min, max = axis.get_xlim()
+            xlim_list.append([min,max])
+        return xlim_list
+
+    @property
+    def get_ylim_list(self):
+        ylim_list=[]
+        for axis in self.fig.axes:
+            min, max = axis.get_ylim()
+            ylim_list.append([min,max])
+        return ylim_list
 
     def autoscale_selected_y_axis(self, axis_number):
         if axis_number >= len(self.fig.axes):
             return
         axis = self.fig.axes[axis_number]
-        bottom, top, = self._get_y_axis_autoscale_limts(axis)
+        bottom, top, = self._get_y_axis_autoscale_limits(axis)
         axis.set_ylim(bottom, top)
 
     def set_title(self, axis_number, title):
@@ -257,24 +306,21 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
         return plot_kwargs
 
-    @staticmethod
-    def _get_y_axis_autoscale_limts(axis):
-        bottom = 1e9
-        top = -1e9
-        ylim = np.inf, -np.inf
-        xmin, xmax = axis.get_xlim()
+    def _get_y_axis_autoscale_limits(self, axis):
+        x_min, x_max = sorted(axis.get_xlim())
+        y_min, y_max = np.inf, -np.inf
         for line in axis.lines:
-            x, y = line.get_data()
-            start, stop = np.searchsorted(x, tuple([xmin, xmax]))
-            y_within_range = y[max(start - 1, 0):(stop + 1)]
-            ylim = min(ylim[0], np.nanmin(y_within_range)), max(ylim[1], np.nanmax(y_within_range))
-            bottom_i = ylim[0] * 1.3 if ylim[0] < 0.0 else ylim[0] * 0.7
-            top_i = ylim[1] * 1.3 if ylim[1] > 0.0 else ylim[1] * 0.7
-            if bottom_i < bottom:
-                bottom = bottom_i
-            if top_i > top:
-                top = top_i
-        return bottom, top
+            y_min, y_max = get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max)
+        if y_min == np.inf:
+            y_min = -self._min_y_range
+        if y_max == -np.inf:
+            y_max = self._min_y_range
+        if y_min == y_max:
+            y_min -= self._min_y_range
+            y_max += self._min_y_range
+        y_margin = abs(y_max - y_min) * self._y_axis_margin
+
+        return y_min - y_margin, y_max + y_margin
 
     def _reset_color_cycle(self):
         for i, ax in enumerate(self.fig.axes):
@@ -292,3 +338,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def add_disable_autoscale_subscriber(self, observer):
         self.toolBar.uncheck_autoscale_notifier.add_subscriber(observer)
+
+    def add_range_changed_subscriber(self, observer):
+        self.toolBar.range_changed_notifier.add_subscriber(observer)

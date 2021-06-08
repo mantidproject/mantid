@@ -43,8 +43,7 @@ void ThermalNeutronBk2BkExpBeta::init() {
 //----------------------------------------------------------------------------------------------
 /** Function 1D
  */
-void ThermalNeutronBk2BkExpBeta::function1D(double *out, const double *xValues,
-                                            const size_t nData) const {
+void ThermalNeutronBk2BkExpBeta::function1D(double *out, const double *xValues, const size_t nData) const {
   double width = getParameter("Width");
   double tcross = getParameter("Tcross");
   double beta0 = getParameter("Beta0");
@@ -53,28 +52,23 @@ void ThermalNeutronBk2BkExpBeta::function1D(double *out, const double *xValues,
   double beta1t = getParameter("Beta1t");
 
   for (size_t i = 0; i < nData; ++i) {
-    out[i] =
-        corefunction(xValues[i], width, tcross, beta0, beta1, beta0t, beta1t);
+    out[i] = corefunction(xValues[i], width, tcross, beta0, beta1, beta0t, beta1t);
   }
 }
 
 /** Derivative: use numerical derivative
  */
-void ThermalNeutronBk2BkExpBeta::functionDeriv(const FunctionDomain &domain,
-                                               Jacobian &jacobian) {
+void ThermalNeutronBk2BkExpBeta::functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
 //----------------------------------------------------------------------------------------------
 /** Core function
  */
-double ThermalNeutronBk2BkExpBeta::corefunction(double dh, double width,
-                                                double tcross, double beta0,
-                                                double beta1, double beta0t,
-                                                double beta1t) const {
+double ThermalNeutronBk2BkExpBeta::corefunction(double dh, double width, double tcross, double beta0, double beta1,
+                                                double beta0t, double beta1t) const {
   double n = 0.5 * gsl_sf_erfc(width * (tcross - 1.0 / dh));
-  double beta =
-      1.0 / (n * (beta0 + beta1 * dh) + (1.0 - n) * (beta0t - beta1t / dh));
+  double beta = 1.0 / (n * (beta0 + beta1 * dh) + (1.0 - n) * (beta0t - beta1t / dh));
 
   return beta;
 }

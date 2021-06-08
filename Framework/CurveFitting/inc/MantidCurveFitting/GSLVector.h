@@ -105,8 +105,7 @@ private:
 };
 
 /// The << operator.
-MANTID_CURVEFITTING_DLL std::ostream &operator<<(std::ostream &ostr,
-                                                 const GSLVector &v);
+MANTID_CURVEFITTING_DLL std::ostream &operator<<(std::ostream &ostr, const GSLVector &v);
 
 } // namespace CurveFitting
 } // namespace Mantid

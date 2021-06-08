@@ -28,8 +28,7 @@ ExpDecay::ExpDecay() {
   declareParameter("Lifetime", 1.0, "Lifetime of the process");
 }
 
-void ExpDecay::function1D(double *out, const double *xValues,
-                          const size_t nData) const {
+void ExpDecay::function1D(double *out, const double *xValues, const size_t nData) const {
   const double h = getParameter("Height");
   const double t = getParameter("Lifetime");
 
@@ -38,8 +37,7 @@ void ExpDecay::function1D(double *out, const double *xValues,
   }
 }
 
-void ExpDecay::functionDeriv1D(Jacobian *out, const double *xValues,
-                               const size_t nData) {
+void ExpDecay::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
   const double h = getParameter("Height");
   const double t = getParameter("Lifetime");
 

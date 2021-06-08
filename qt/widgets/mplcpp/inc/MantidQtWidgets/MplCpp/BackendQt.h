@@ -16,15 +16,13 @@
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #error "Qt >= 5 required"
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) &&                               \
-    QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) && QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 
 /// Define PyQt version that matches the matplotlib backend
 constexpr static const char *PYQT_MODULE = "PyQt5";
 
 /// Define matplotlib backend that will be used to draw the canvas
-constexpr static const char *MPL_QT_BACKEND =
-    "matplotlib.backends.backend_qt5agg";
+constexpr static const char *MPL_QT_BACKEND = "matplotlib.backends.backend_qt5agg";
 
 #else
 #error "Unknown Qt version. Cannot determine matplotlib backend."

@@ -14,6 +14,7 @@ TILED_PAGE = "TiledPlotsHelp.html"
 WATERFALL_PAGE = "WaterfallPlotsHelp.html"
 PLOT3D_PAGE = "3DPlotsHelp.html"
 COLORFILL_PAGE = "ColorfillPlotsHelp.html"
+MESH_PAGE = "MeshPlotHelp.html"
 
 # Create a plot page for each enumeration in FigureType
 # The values can be edited if there is a more relevant documentation page
@@ -25,7 +26,8 @@ HELP_PAGES = {FigureType.Other: BASE_URL + INDEX_PAGE,
               FigureType.Wireframe: BASE_URL + PLOT3D_PAGE,
               FigureType.Surface: BASE_URL + PLOT3D_PAGE,
               FigureType.Image: BASE_URL + COLORFILL_PAGE,
-              FigureType.Contour: BASE_URL + COLORFILL_PAGE}
+              FigureType.Contour: BASE_URL + COLORFILL_PAGE,
+              FigureType.Mesh: BASE_URL + MESH_PAGE}
 
 
 class PlotHelpPages(object):

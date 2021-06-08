@@ -26,8 +26,7 @@ public:
   /**
    Constructor
    */
-  CalculateReflectometryQxQz()
-      : m_cos_theta_i(0.0), m_sin_theta_i(0.0), m_dirQx(0.0), m_dirQz(0.0) {}
+  CalculateReflectometryQxQz() : m_cos_theta_i(0.0), m_sin_theta_i(0.0), m_dirQx(0.0), m_dirQz(0.0) {}
 
   /**
    Setter for the incident theta value require for the calculation. Internally
@@ -69,28 +68,23 @@ public:
     return wavenumber * m_dirQz;
   }
 
-  Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower,
-                                             double thetaUpper,
+  Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower, double thetaUpper,
                                              double thetaLower) override {
     setThetaFinal(thetaLower);
     const Mantid::Kernel::V2D firstVertex(calculateDim0(lamLower), // highest qx
                                           calculateDim1(lamLower));
-    const Mantid::Kernel::V2D secondVertex(
-        calculateDim0(lamUpper),
-        calculateDim1(lamUpper)); // lowest qz
+    const Mantid::Kernel::V2D secondVertex(calculateDim0(lamUpper),
+                                           calculateDim1(lamUpper)); // lowest qz
     setThetaFinal(thetaUpper);
-    const Mantid::Kernel::V2D thirdVertex(
-        calculateDim0(lamLower),
-        calculateDim1(lamLower)); // highest qz
+    const Mantid::Kernel::V2D thirdVertex(calculateDim0(lamLower),
+                                          calculateDim1(lamLower)); // highest qz
     const Mantid::Kernel::V2D fourthVertex(calculateDim0(lamUpper), // lowest qx
                                            calculateDim1(lamUpper));
-    Mantid::Geometry::Quadrilateral quad(fourthVertex, secondVertex,
-                                         firstVertex, thirdVertex);
+    Mantid::Geometry::Quadrilateral quad(fourthVertex, secondVertex, firstVertex, thirdVertex);
     // Our lower-left vertex may not be in the right position
     // we keep shifting the vertices around in a clock-wise fashion
     // until the lower-left vertex is in the correct place.
-    while ((quad.at(0).X() > quad.at(3).X()) ||
-           (quad.at(0).Y() > quad.at(1).Y())) {
+    while ((quad.at(0).X() > quad.at(3).X()) || (quad.at(0).Y() > quad.at(1).Y())) {
       quad.shiftVertexesClockwise();
     }
 

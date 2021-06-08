@@ -6,13 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,too-many-lines
 import os
-
+from pathlib import Path
 import mantid.simpleapi as api
 from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DistributedDataProcessorAlgorithm, \
     FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceProperty, \
     ITableWorkspace, MatrixWorkspace
-from mantid.kernel import ConfigService, Direction, FloatArrayProperty, FloatBoundedValidator, \
-    IntArrayBoundedValidator, IntArrayProperty, Property, PropertyManagerDataService, StringListValidator
+from mantid.kernel import (
+    ConfigService, Direction, EnabledWhenProperty, FloatArrayProperty, FloatBoundedValidator, IntArrayBoundedValidator,
+    IntArrayProperty, MaterialBuilder, Property, PropertyCriterion, PropertyManagerDataService, StringListValidator,
+    StringTimeSeriesProperty)
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
 from mantid.utils import absorptioncorrutils
 if AlgorithmFactory.exists('GatherWorkspaces'):
@@ -158,7 +160,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3) "
 
     def PyInit(self):
-        self.copyProperties('AlignAndFocusPowderFromFiles', ['Filename', 'PreserveEvents'])
+        self.copyProperties('AlignAndFocusPowderFromFiles', ['Filename', 'PreserveEvents', 'DMin', 'DMax', 'DeltaRagged'])
 
         self.declareProperty("Sum", False,
                              "Sum the runs. Does nothing for characterization runs")
@@ -215,8 +217,15 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                              "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', "
                              "'pdfgetn', and 'topas'")
         self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
-        self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
-        self.copyProperties('AlignAndFocusPowderFromFiles', 'CacheDir')
+        self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="",action=FileAction.Directory))
+
+        # Caching options
+        self.declareProperty( 'CacheDir', "", 'comma-delimited ascii string representation of a list of candidate cache directories')
+        self.declareProperty('CleanCache', False, 'Remove all cache files within CacheDir')
+        self.setPropertySettings('CleanCache', EnabledWhenProperty('CacheDir', PropertyCriterion.IsNotDefault))
+        property_names = ('CacheDir', 'CleanCache')
+        [self.setPropertyGroup(name, 'Caching') for name in property_names]
+
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
 
         # absorption correction
@@ -263,8 +272,25 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         # If doing absorption correction, make sure the sample formula is correct
         if self.getProperty("TypeOfCorrection").value != "None":
-            if self.getProperty("SampleFormula").value == '':
-                issues['SampleFormula'] = "A sample formula must be provided."
+            if self.getProperty("SampleFormula").value.strip() != '':
+                try:
+                    MaterialBuilder().setFormula(self.getProperty("SampleFormula").value.strip())
+                except ValueError as ex:
+                    issues['SampleFormula'] = "Invalid SampleFormula: '{}'".format(str(ex))
+
+        # The provided cache directory does not exist
+        cache_dir_string = self.getProperty('CacheDir').value  # comma-delimited string representation of list
+        if bool(cache_dir_string):
+
+            cache_dirs = [candidate.strip() for candidate in cache_dir_string.split(',')]
+
+            for cache_dir in cache_dirs:
+                if bool(cache_dir) and Path(cache_dir).exists() is False:
+                    issues['CacheDir'] = f'Directory {cache_dir} does not exist'
+
+        # We cannot clear the cache if property "CacheDir" has not been set
+        if self.getProperty('CleanCache').value and not bool(self.getProperty('CacheDir').value):
+            issues['CleanCache'] = 'Property "CacheDir" must be set in order to clean the cache'
 
         return issues
 
@@ -299,6 +325,12 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._scaleFactor = self.getProperty("ScaleData").value
         self._offsetFactor = self.getProperty("OffsetData").value
         self._outDir = self.getProperty("OutputDirectory").value
+        # Caching options
+        self._cache_dirs = [os.path.abspath(me.strip()) for me in self.getProperty("CacheDir").value.split(',')
+                            if me.strip()]  # filter out empty elements
+        self._cache_dir = self._cache_dirs[0] if self._cache_dirs else ""
+        self._clean_cache = self.getProperty("CleanCache").value
+
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
         self._outTypes = self.getProperty("SaveAs").value.lower()
         self._absMethod = self.getProperty("TypeOfCorrection").value
@@ -344,6 +376,10 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         if self.COMPRESS_TOL_TOF < -0.:
             self.COMPRESS_TOL_TOF = 0.01
 
+        # Clean the cache directory if so requested
+        if self._clean_cache:
+            api.CleanFileCache(CacheDir=self._cache_dir, AgeInDays=0)
+
         # Process data
         # List stores the workspacename of all data workspaces that will be converted to d-spacing in the end.
         workspacelist = []
@@ -379,14 +415,30 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             api.Load(Filename=samRuns[0], OutputWorkspace=absName, MetaDataOnly=True)
             self._info = self._getinfo(absName)
             metaws = absName
-        a_sample, a_container = absorptioncorrutils.calculate_absorption_correction(samRuns[0], self._absMethod,
-                                                                                    self._info, self._sampleFormula,
-                                                                                    self._massDensity,
-                                                                                    self._numberDensity,
-                                                                                    self._containerShape,
-                                                                                    self._num_wl_bins,
-                                                                                    self._elementSize,
-                                                                                    metaws)
+            if self._sampleFormula == '' and "SampleFormula" in mtd[metaws].run():
+                # Do a quick check to see if the sample formula in the logs is correct
+                try:
+                    MaterialBuilder().setFormula(mtd[metaws].run()["SampleFormula"].lastValue().strip())
+                except ValueError:
+                    self.log().warning(
+                        "Sample formula '{}' found in sample logs does not have a valid format - specify manually in "
+                        "algorithm input.".format(mtd[metaws].run()["SampleFormula"].lastValue().strip()))
+
+        # NOTE: inconsistent naming among different methods
+        #       -> adding more comments to help clarify
+        a_sample, a_container = absorptioncorrutils.calculate_absorption_correction(
+            samRuns[0],  # filename: File to be used for absorption correction
+            self._absMethod,  # [None, SampleOnly, SampleAndContainer, FullPaalmanPings]
+            self._info,  # PropertyManager of run characterizations
+            self._sampleFormula,  # Material for absorption correction
+            self._massDensity,  # Mass density of the sample
+            self._numberDensity,  # Optional number density of sample to be added
+            self._containerShape,  # Shape definition of container
+            self._num_wl_bins,  # Number of bins: len(ws.readX(0))-1
+            self._elementSize,  # Size of one side of the integration element cube in mm
+            metaws,  # Optional workspace containing metadata
+            self._cache_dirs,  # Cache dir for absorption correction workspace
+        )
 
         if self.getProperty("Sum").value and len(samRuns) > 1:
             self.log().information('Ignoring value of "Sum" property')
@@ -445,7 +497,30 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             # process the container
             can_run_numbers = self._info["container"].value
             can_run_numbers = ['%s_%d' % (self._instrument, value) for value in can_run_numbers]
-            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, preserveEvents, absorptionWksp=a_container)
+            # Check if existing container
+            #  - has history and is using SNSPowderReduction
+            #    - was created using the same method
+            #       -> carry on as usual
+            #    - was created with a different method
+            #       -> delete the current one, then carry on
+            #  - no history (processing list of runs)
+            #    -> carry on as a single call wiht list of runs ensures that same method is used.
+            can_run_ws_name, _ = self._generate_container_run_name(can_run_numbers, samRunIndex)
+            if can_run_ws_name in mtd:
+                hstry = mtd[can_run_ws_name].getHistory()
+                if not hstry.empty():
+                    alg = hstry.getAlgorithm(0)
+                    if alg.name() == "SNSPowderReduction":
+                        if alg.getPropertyValue("TypeOfCorrection") != self._absMethod:
+                            self.log().information(
+                                f"Remove {can_run_ws_name} as it is generated with a different method"
+                            )
+                            mtd.remove(can_run_ws_name)
+
+            can_run_ws_name = self._process_container_runs(can_run_numbers,
+                                                           samRunIndex,
+                                                           preserveEvents,
+                                                           absorptionWksp=a_container)
             if can_run_ws_name is not None:
                 workspacelist.append(can_run_ws_name)
 
@@ -762,7 +837,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                          MaxChunkSize=self._chunks,
                                          FilterBadPulses=self._filterBadPulses,
                                          Characterizations=characterizations,
-                                         CacheDir=self.getProperty("CacheDir").value,
+                                         CacheDir=self._cache_dir,
                                          Params=self._binning,
                                          ResampleX=self._resampleX,
                                          Dspacing=self._bin_in_dspace,
@@ -1231,19 +1306,23 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         return do_split_raw_wksp, num_out_wksp
 
-    def _process_container_runs(self, can_run_numbers, samRunIndex, preserveEvents, absorptionWksp=None):
-        """ Process container runs
+    def _generate_container_run_name(self, can_run_numbers, samRunIndex):
+        """generate container workspace name based on given info
+
         :param can_run_numbers:
-        :return:
+        :param samRunIndex:
+
+        :return can_run_ws_name:
+        :return can_run_number:
         """
         assert isinstance(samRunIndex, int)
 
         if noRunSpecified(can_run_numbers):
             # no container run is specified
             can_run_ws_name = None
+            can_run_number = None
         else:
             # reduce container run such that it can be removed from sample run
-
             if len(can_run_numbers) == 1:
                 # only 1 container run
                 can_run_number = can_run_numbers[0]
@@ -1253,7 +1332,21 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
             # get reference to container run
             can_run_ws_name = getBasename(can_run_number)
-            self.log().notice('Processing empty container {}'.format(can_run_ws_name))
+        return can_run_ws_name, can_run_number
+
+    def _process_container_runs(self,
+                                can_run_numbers,
+                                samRunIndex,
+                                preserveEvents,
+                                absorptionWksp=None):
+        """ Process container runs
+        :param can_run_numbers:
+        :return:
+        """
+        can_run_ws_name, can_run_number = self._generate_container_run_name(
+            can_run_numbers, samRunIndex)
+
+        if can_run_ws_name is not None:
             if self.does_workspace_exist(can_run_ws_name):
                 # container run exists to get reference from mantid
                 api.ConvertUnits(InputWorkspace=can_run_ws_name,
@@ -1263,7 +1356,10 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 fileArg = [can_run_number]
                 if self.getProperty("Sum").value:
                     fileArg = can_run_numbers
-                self._focusAndSum(fileArg, preserveEvents, final_name=can_run_ws_name, absorptionWksp=absorptionWksp)
+                self._focusAndSum(fileArg,
+                                  preserveEvents,
+                                  final_name=can_run_ws_name,
+                                  absorptionWksp=absorptionWksp)
 
                 # smooth background
                 smoothParams = self.getProperty("BackgroundSmoothParams").value
@@ -1324,10 +1420,27 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                                                   opt_wl_max=self._wavelengthMax)
 
             # calculate the correction which is 1/normal carpenter correction - it doesn't look at sample shape
-            api.AbsorptionCorrection(absWksp,
-                                     OutputWorkspace='__V_corr_abs',
-                                     ScatterFrom='Sample',
-                                     ElementSize=self._elementSize)
+            # NOTE: somehow most of the information that create_absorption_input should provide is missing, so
+            #       we are forced to add them dynamically here.
+            missing_value_dict = {
+                "SampleFormula": 'V',
+                "SampleDensity": str(absorptioncorrutils.VAN_SAMPLE_DENSITY),
+                "BL11A:CS:ITEMS:HeightInContainerUnits": "mm",
+                "BL11A:CS:ITEMS:HeightInContainer": "7.0",
+                "SampleContainer": "None",
+            }
+            for key, value in missing_value_dict.items():
+                if not mtd[absWksp].mutableRun().hasProperty(key):
+                    mtd[absWksp].mutableRun()[key] = StringTimeSeriesProperty(key)
+                    mtd[absWksp].mutableRun()[key].addValue(0, value)
+
+            abs_v_wsn, _ = absorptioncorrutils.calc_absorption_corr_using_wksp(
+                absWksp,
+                "SampleOnly",
+                element_size=self._elementSize,
+                cache_dirs=self._cache_dirs,
+            )
+            api.RenameWorkspace(abs_v_wsn, '__V_corr_abs')
 
             api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
                                                    CylinderSampleRadius=self._vanRadius,

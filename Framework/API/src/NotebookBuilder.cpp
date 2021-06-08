@@ -26,10 +26,8 @@ namespace {
 Mantid::Kernel::Logger g_log("NotebookBuilder");
 }
 
-NotebookBuilder::NotebookBuilder(const std::shared_ptr<HistoryView> &view,
-                                 std::string versionSpecificity)
-    : m_historyItems(view->getAlgorithmsList()), m_output(),
-      m_versionSpecificity(std::move(versionSpecificity)),
+NotebookBuilder::NotebookBuilder(const std::shared_ptr<HistoryView> &view, std::string versionSpecificity)
+    : m_historyItems(view->getAlgorithmsList()), m_output(), m_versionSpecificity(std::move(versionSpecificity)),
       m_nb_writer(new NotebookWriter()) {}
 
 /**
@@ -40,8 +38,7 @@ NotebookBuilder::NotebookBuilder(const std::shared_ptr<HistoryView> &view,
  * @param ws_comment :: workspace comment
  * @return a formatted ipython notebook string of the history
  */
-const std::string NotebookBuilder::build(const std::string &ws_name,
-                                         const std::string &ws_title,
+const std::string NotebookBuilder::build(const std::string &ws_name, const std::string &ws_title,
                                          const std::string &ws_comment) {
   // record workspace details in notebook
   std::string workspace_details;
@@ -66,18 +63,15 @@ const std::string NotebookBuilder::build(const std::string &ws_name,
  * @param iter :: reference to the iterator pointing to the vector of history
  *items
  */
-void NotebookBuilder::writeHistoryToStream(
-    std::vector<HistoryItem>::const_iterator &iter) {
+void NotebookBuilder::writeHistoryToStream(std::vector<HistoryItem>::const_iterator &iter) {
   auto algHistory = iter->getAlgorithmHistory();
   if (iter->isUnrolled()) {
 
-    m_nb_writer->markdownCell(std::string("Child algorithms of ") +
-                              algHistory->name());
+    m_nb_writer->markdownCell(std::string("Child algorithms of ") + algHistory->name());
 
     buildChildren(iter);
 
-    m_nb_writer->markdownCell(std::string("End of child algorithms of ") +
-                              algHistory->name());
+    m_nb_writer->markdownCell(std::string("End of child algorithms of ") + algHistory->name());
 
   } else {
     // create the string for this algorithm
@@ -93,12 +87,10 @@ void NotebookBuilder::writeHistoryToStream(
  * @param iter :: reference to the iterator pointing to the vector of history
  *items
  */
-void NotebookBuilder::buildChildren(
-    std::vector<HistoryItem>::const_iterator &iter) {
+void NotebookBuilder::buildChildren(std::vector<HistoryItem>::const_iterator &iter) {
   size_t numChildren = iter->numberOfChildren();
   ++iter; // move to first child
-  for (size_t i = 0; i < numChildren && iter != m_historyItems.end();
-       ++i, ++iter) {
+  for (size_t i = 0; i < numChildren && iter != m_historyItems.end(); ++i, ++iter) {
     writeHistoryToStream(iter);
   }
   --iter;
@@ -110,8 +102,7 @@ void NotebookBuilder::buildChildren(
  * @param algHistory :: pointer to an algorithm history object
  * @returns std::string to run this algorithm
  */
-const std::string NotebookBuilder::buildAlgorithmString(
-    const AlgorithmHistory_const_sptr &algHistory) {
+const std::string NotebookBuilder::buildAlgorithmString(const AlgorithmHistory_const_sptr &algHistory) {
   std::ostringstream properties;
   const std::string name = algHistory->name();
   std::string prop;
@@ -160,8 +151,7 @@ const std::string NotebookBuilder::buildAlgorithmString(
  * @param propHistory :: reference to a property history object
  * @returns std::string for this property
  */
-const std::string NotebookBuilder::buildPropertyString(
-    const PropertyHistory_const_sptr &propHistory) {
+const std::string NotebookBuilder::buildPropertyString(const PropertyHistory_const_sptr &propHistory) {
   using Mantid::Kernel::Direction;
 
   // Create a vector of all non workspace property type names
@@ -171,11 +161,9 @@ const std::string NotebookBuilder::buildPropertyString(
   // No need to specify value for default properties
   if (!propHistory->isDefault()) {
     // Do not give values to output properties other than workspace properties
-    if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(),
-             propHistory->type()) != nonWorkspaceTypes.end() &&
+    if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(), propHistory->type()) != nonWorkspaceTypes.end() &&
         propHistory->direction() == Direction::Output) {
-      g_log.debug() << "Ignoring property " << propHistory->name()
-                    << " of type " << propHistory->type() << '\n';
+      g_log.debug() << "Ignoring property " << propHistory->name() << " of type " << propHistory->type() << '\n';
       // Handle numerical properties
     } else if (propHistory->type() == "number") {
       prop = propHistory->name() + "=" + propHistory->value();

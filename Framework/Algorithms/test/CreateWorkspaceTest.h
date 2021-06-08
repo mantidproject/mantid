@@ -19,8 +19,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 
 namespace {
-void run_create(const Parallel::Communicator &comm,
-                const std::string &storageMode) {
+void run_create(const Parallel::Communicator &comm, const std::string &storageMode) {
   using namespace Parallel;
   auto alg = ParallelTestHelpers::create<Algorithms::CreateWorkspace>(comm);
   std::vector<double> dataEYX(2000);
@@ -74,30 +73,21 @@ public:
     std::vector<std::string> qvals{"9.876"};
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty<int>("NSpec", 1));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty<std::vector<double>>("DataX", dataEYX));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty<std::vector<double>>("DataY", dataEYX));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty<std::vector<double>>("DataE", dataEYX));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty<std::vector<double>>("Dx", dataEYX));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty<std::vector<double>>("DataX", dataEYX));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty<std::vector<double>>("DataY", dataEYX));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty<std::vector<double>>("DataE", dataEYX));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty<std::vector<double>>("Dx", dataEYX));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UnitX", "Wavelength"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("VerticalAxisUnit", "MomentumTransfer"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty<std::vector<std::string>>("VerticalAxisValues", qvals));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "test_CreateWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("VerticalAxisUnit", "MomentumTransfer"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty<std::vector<std::string>>("VerticalAxisValues", qvals));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "test_CreateWorkspace"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     TS_ASSERT(alg.isExecuted());
     Mantid::API::MatrixWorkspace_const_sptr ws;
 
-    TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                "test_CreateWorkspace")));
+    TS_ASSERT_THROWS_NOTHING(ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("test_CreateWorkspace")));
 
     TS_ASSERT(!ws->isHistogramData());
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
@@ -117,15 +107,12 @@ public:
 
     double axisVal = 0.0;
 
-    TS_ASSERT_THROWS_NOTHING(
-        axisVal = boost::lexical_cast<double>(ws->getAxis(1)->label(0)));
+    TS_ASSERT_THROWS_NOTHING(axisVal = boost::lexical_cast<double>(ws->getAxis(1)->label(0)));
 
     TS_ASSERT_DELTA(axisVal, 9.876, 0.001);
 
     // Remove the created workspace
-    TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::AnalysisDataService::Instance().remove(
-            "test_CreateWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(Mantid::API::AnalysisDataService::Instance().remove("test_CreateWorkspace"));
   }
 
   void testCreateBinEdges() {
@@ -136,25 +123,18 @@ public:
     std::vector<double> dataEYDx{0.0, 1.234, 2.468};
 
     TS_ASSERT_THROWS_NOTHING(createBinEdges.setProperty<int>("NSpec", 1));
-    TS_ASSERT_THROWS_NOTHING(
-        createBinEdges.setProperty<std::vector<double>>("DataX", dataX));
-    TS_ASSERT_THROWS_NOTHING(
-        createBinEdges.setProperty<std::vector<double>>("DataY", dataEYDx));
-    TS_ASSERT_THROWS_NOTHING(
-        createBinEdges.setProperty<std::vector<double>>("DataE", dataEYDx));
-    TS_ASSERT_THROWS_NOTHING(
-        createBinEdges.setProperty<std::vector<double>>("Dx", dataEYDx));
-    TS_ASSERT_THROWS_NOTHING(createBinEdges.setPropertyValue(
-        "OutputWorkspace", "test_CreateWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.setProperty<std::vector<double>>("DataX", dataX));
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.setProperty<std::vector<double>>("DataY", dataEYDx));
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.setProperty<std::vector<double>>("DataE", dataEYDx));
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.setProperty<std::vector<double>>("Dx", dataEYDx));
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.setPropertyValue("OutputWorkspace", "test_CreateWorkspace"));
     TS_ASSERT_THROWS_NOTHING(createBinEdges.execute());
 
     TS_ASSERT(createBinEdges.isExecuted());
     Mantid::API::MatrixWorkspace_const_sptr ws;
 
-    TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                "test_CreateWorkspace")));
+    TS_ASSERT_THROWS_NOTHING(ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("test_CreateWorkspace")));
 
     TS_ASSERT(ws->isHistogramData());
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
@@ -171,24 +151,19 @@ public:
     }
 
     // Remove the created workspace
-    TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::AnalysisDataService::Instance().remove(
-            "test_CreateWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(Mantid::API::AnalysisDataService::Instance().remove("test_CreateWorkspace"));
   }
 
   void testCreateTextAxis() {
-    std::vector<std::string> textAxis{"I've Got", "A Lovely", "Bunch Of",
-                                      "Coconuts"};
+    std::vector<std::string> textAxis{"I've Got", "A Lovely", "Bunch Of", "Coconuts"};
     // Get hold of the output workspace
-    Mantid::API::MatrixWorkspace_sptr workspace =
-        executeVerticalAxisTest("Text", textAxis);
+    Mantid::API::MatrixWorkspace_sptr workspace = executeVerticalAxisTest("Text", textAxis);
     TS_ASSERT(workspace->isHistogramData());
     TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(workspace->x(0)[0], 1.1);
     TS_ASSERT_EQUALS(workspace->x(2)[1], 2.2);
 
-    Mantid::API::TextAxis *axis =
-        dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(1));
+    Mantid::API::TextAxis *axis = dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(1));
 
     TS_ASSERT_EQUALS(axis->label(0), "I've Got");
     TS_ASSERT_EQUALS(axis->label(1), "A Lovely");
@@ -222,23 +197,19 @@ public:
   }
 
   void testParenting() {
-    MatrixWorkspace_sptr parent =
-        WorkspaceCreationHelper::createEventWorkspace(1, 1, 1);
-    WorkspaceCreationHelper::addTSPEntry(parent->mutableRun(), "ALogEntry",
-                                         99.0);
+    MatrixWorkspace_sptr parent = WorkspaceCreationHelper::createEventWorkspace(1, 1, 1);
+    WorkspaceCreationHelper::addTSPEntry(parent->mutableRun(), "ALogEntry", 99.0);
 
     Mantid::Algorithms::CreateWorkspace alg;
     alg.initialize();
     const std::string outWS = "testParenting";
     alg.setPropertyValue("OutputWorkspace", outWS);
-    alg.setProperty<std::vector<double>>("DataX",
-                                         std::vector<double>{1.1, 2.2});
+    alg.setProperty<std::vector<double>>("DataX", std::vector<double>{1.1, 2.2});
     alg.setProperty<std::vector<double>>("DataY", std::vector<double>(2, 1.1));
     alg.setProperty("ParentWorkspace", parent);
     TS_ASSERT(alg.execute());
 
-    MatrixWorkspace_const_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWS);
+    MatrixWorkspace_const_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWS);
     TS_ASSERT(output->run().hasProperty("ALogEntry"));
 
     AnalysisDataService::Instance().remove(outWS);
@@ -246,11 +217,9 @@ public:
 
   void testVerticalAxisValuesAsBinEdges() {
     std::vector<std::string> edgeAxis{"1.1", "2.2", "3.3", "4.4", "5.5"};
-    Mantid::API::MatrixWorkspace_sptr workspace =
-        executeVerticalAxisTest("DeltaE", edgeAxis);
+    Mantid::API::MatrixWorkspace_sptr workspace = executeVerticalAxisTest("DeltaE", edgeAxis);
 
-    Mantid::API::BinEdgeAxis *axis =
-        dynamic_cast<Mantid::API::BinEdgeAxis *>(workspace->getAxis(1));
+    Mantid::API::BinEdgeAxis *axis = dynamic_cast<Mantid::API::BinEdgeAxis *>(workspace->getAxis(1));
     TS_ASSERT(axis != nullptr)
     TS_ASSERT_EQUALS(axis->length(), 5)
     TS_ASSERT_EQUALS(axis->getValue(0), 1.1);
@@ -265,11 +234,9 @@ public:
 
   void testVerticalAxisValuesAsPoints() {
     std::vector<std::string> pointAxis{"1.1", "2.2", "3.3", "4.4"};
-    Mantid::API::MatrixWorkspace_sptr workspace =
-        executeVerticalAxisTest("DeltaE", pointAxis);
+    Mantid::API::MatrixWorkspace_sptr workspace = executeVerticalAxisTest("DeltaE", pointAxis);
 
-    Mantid::API::NumericAxis *axis =
-        dynamic_cast<Mantid::API::NumericAxis *>(workspace->getAxis(1));
+    Mantid::API::NumericAxis *axis = dynamic_cast<Mantid::API::NumericAxis *>(workspace->getAxis(1));
     TS_ASSERT(axis != nullptr)
     TS_ASSERT_EQUALS(axis->length(), 4)
     TS_ASSERT_EQUALS(axis->getValue(0), 1.1);
@@ -281,25 +248,19 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove("test_CreateWorkspace");
   }
 
-  void test_parallel_cloned() {
-    ParallelTestHelpers::runParallel(run_create,
-                                     "Parallel::StorageMode::Cloned");
-  }
+  void test_parallel_cloned() { ParallelTestHelpers::runParallel(run_create, "Parallel::StorageMode::Cloned"); }
 
   void test_parallel_distributed() {
-    ParallelTestHelpers::runParallel(run_create,
-                                     "Parallel::StorageMode::Distributed");
+    ParallelTestHelpers::runParallel(run_create, "Parallel::StorageMode::Distributed");
   }
 
   void test_parallel_master_only() {
-    ParallelTestHelpers::runParallel(run_create,
-                                     "Parallel::StorageMode::MasterOnly");
+    ParallelTestHelpers::runParallel(run_create, "Parallel::StorageMode::MasterOnly");
   }
 
 private:
-  MatrixWorkspace_sptr
-  executeVerticalAxisTest(const std::string &vertUnit,
-                          const std::vector<std::string> &vertValues) {
+  MatrixWorkspace_sptr executeVerticalAxisTest(const std::string &vertUnit,
+                                               const std::vector<std::string> &vertValues) {
     Mantid::Algorithms::CreateWorkspace alg;
     alg.initialize();
     alg.setPropertyValue("OutputWorkspace", "test_CreateWorkspace");
@@ -311,8 +272,7 @@ private:
 
     std::vector<double> values{1.0, 2.0, 3.0, 4.0};
 
-    alg.setProperty<std::vector<double>>("DataX",
-                                         std::vector<double>{1.1, 2.2});
+    alg.setProperty<std::vector<double>>("DataX", std::vector<double>{1.1, 2.2});
     alg.setProperty<std::vector<double>>("DataY", values);
     alg.setProperty<std::vector<double>>("DataE", values);
 
@@ -321,10 +281,8 @@ private:
     TS_ASSERT(alg.isExecuted());
 
     // Get hold of the output workspace
-    Mantid::API::MatrixWorkspace_sptr workspace =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                "test_CreateWorkspace"));
+    Mantid::API::MatrixWorkspace_sptr workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("test_CreateWorkspace"));
     return workspace;
   }
 };

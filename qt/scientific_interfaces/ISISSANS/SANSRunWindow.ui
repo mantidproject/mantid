@@ -841,7 +841,7 @@ Zero Error</string>
              <item row="3" column="5">
               <widget class="QCheckBox" name="saveNXcanSAS_check">
                <property name="toolTip">
-                <string>Select one or more file formats. 
+                <string>Select one or more file formats.
 The NXcanSAS format can be used to save 1D and 2D data. </string>
                </property>
                <property name="text">

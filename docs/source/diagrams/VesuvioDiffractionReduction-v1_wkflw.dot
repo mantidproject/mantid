@@ -6,7 +6,7 @@ digraph VesuvioDiffractionReduction {
     $process_style
     ScaleMonitor    [label="Scale data and detectors by monitor intensities"]
   }
-  
+
   subgraph params {
     $param_style
     InputFiles
@@ -29,12 +29,12 @@ digraph VesuvioDiffractionReduction {
     ConvertUnits
     GroupSpectra
   }
-  
+
   subgraph decisions {
     $decision_style
     allProcessed      [label="Processed all workspaces?"]
   }
-  
+
   InputFiles            -> LoadFiles
   SpectraRange          -> LoadFiles
   SumFiles              -> LoadFiles

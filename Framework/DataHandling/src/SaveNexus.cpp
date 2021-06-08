@@ -34,13 +34,11 @@ using namespace DataObjects;
 void SaveNexus::init() {
   // Declare required parameters, filename with ext {.nxs,.nx5,.xml} and input
   // workspace
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                   "Name of the workspace to be saved");
 
   const std::vector<std::string> fileExts{".nxs", ".nx5", ".xml"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Save, fileExts),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, fileExts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
   //
@@ -56,8 +54,7 @@ void SaveNexus::init() {
   // spectrum_min, spectrum_max - range of "spectra" numbers to write
   // spectrum_list            list of spectra values to write
   //
-  declareProperty("Title", "", std::make_shared<NullValidator>(),
-                  "A title to describe the saved workspace");
+  declareProperty("Title", "", std::make_shared<NullValidator>(), "A title to describe the saved workspace");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
@@ -65,18 +62,15 @@ void SaveNexus::init() {
   //  "(Not implemented yet) The index number of the workspace within the Nexus
   //  file\n"
   // "(default leave unchanged)" );
-  declareProperty(
-      "WorkspaceIndexMin", 0, mustBePositive,
-      "Number of first WorkspaceIndex to read, only for single period data.\n"
-      "Not yet implemented");
-  declareProperty(
-      "WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive,
-      "Number of last WorkspaceIndex to read, only for single period data.\n"
-      "Not yet implemented.");
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
-      "List of WorkspaceIndex numbers to read, only for single period data.\n"
-      "Not yet implemented");
+  declareProperty("WorkspaceIndexMin", 0, mustBePositive,
+                  "Number of first WorkspaceIndex to read, only for single period data.\n"
+                  "Not yet implemented");
+  declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive,
+                  "Number of last WorkspaceIndex to read, only for single period data.\n"
+                  "Not yet implemented.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
+                  "List of WorkspaceIndex numbers to read, only for single period data.\n"
+                  "Not yet implemented");
   declareProperty("Append", false,
                   "Determines whether .nxs file needs to be\n"
                   "over written or appended");
@@ -103,9 +97,7 @@ void SaveNexus::exec() {
  *  @param propertyValue :: value  of the property
  *  @param perioidNum :: period number
  */
-void SaveNexus::setOtherProperties(IAlgorithm *alg,
-                                   const std::string &propertyName,
-                                   const std::string &propertyValue,
+void SaveNexus::setOtherProperties(IAlgorithm *alg, const std::string &propertyName, const std::string &propertyValue,
                                    int perioidNum) {
   if (propertyName == "Append") {
     if (perioidNum != 1) {
@@ -116,8 +108,7 @@ void SaveNexus::setOtherProperties(IAlgorithm *alg,
     Algorithm::setOtherProperties(alg, propertyName, propertyValue, perioidNum);
 }
 void SaveNexus::runSaveNexusProcessed() {
-  IAlgorithm_sptr saveNexusPro =
-      createChildAlgorithm("SaveNexusProcessed", 0.0, 1.0, true);
+  IAlgorithm_sptr saveNexusPro = createChildAlgorithm("SaveNexusProcessed", 0.0, 1.0, true);
   // Pass through the same output filename
   saveNexusPro->setPropertyValue("Filename", m_filename);
   // Set the workspace property
@@ -126,15 +117,12 @@ void SaveNexus::runSaveNexusProcessed() {
   //
   std::vector<int> specList = getProperty("WorkspaceIndexList");
   if (!specList.empty())
-    saveNexusPro->setPropertyValue("WorkspaceIndexList",
-                                   getPropertyValue("WorkspaceIndexList"));
+    saveNexusPro->setPropertyValue("WorkspaceIndexList", getPropertyValue("WorkspaceIndexList"));
   //
   int specMax = getProperty("WorkspaceIndexMax");
   if (specMax != Mantid::EMPTY_INT()) {
-    saveNexusPro->setPropertyValue("WorkspaceIndexMax",
-                                   getPropertyValue("WorkspaceIndexMax"));
-    saveNexusPro->setPropertyValue("WorkspaceIndexMin",
-                                   getPropertyValue("WorkspaceIndexMin"));
+    saveNexusPro->setPropertyValue("WorkspaceIndexMax", getPropertyValue("WorkspaceIndexMax"));
+    saveNexusPro->setPropertyValue("WorkspaceIndexMin", getPropertyValue("WorkspaceIndexMin"));
   }
   std::string title = getProperty("Title");
   if (!title.empty())
@@ -145,9 +133,8 @@ void SaveNexus::runSaveNexusProcessed() {
 
   // If we're tracking history, add the entry before we save it to file
   if (trackingHistory()) {
-    m_history->fillAlgorithmHistory(
-        this, Mantid::Types::Core::DateAndTime::getCurrentTime(), 0,
-        Algorithm::g_execCount);
+    m_history->fillAlgorithmHistory(this, Mantid::Types::Core::DateAndTime::getCurrentTime(), 0,
+                                    Algorithm::g_execCount);
     if (!isChild()) {
       m_inputWorkspace->history().addHistory(m_history);
     }
@@ -160,12 +147,10 @@ void SaveNexus::runSaveNexusProcessed() {
   try {
     saveNexusPro->execute();
   } catch (std::runtime_error &) {
-    g_log.error(
-        "Unable to successfully run SaveNexusprocessed Child Algorithm");
+    g_log.error("Unable to successfully run SaveNexusprocessed Child Algorithm");
   }
   if (!saveNexusPro->isExecuted())
-    g_log.error(
-        "Unable to successfully run SaveNexusProcessed Child Algorithm");
+    g_log.error("Unable to successfully run SaveNexusProcessed Child Algorithm");
   //
   progress(1);
 }

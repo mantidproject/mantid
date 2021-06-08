@@ -16,9 +16,7 @@ class ChebyshevPolynomialTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ChebyshevPolynomialTest *createSuite() {
-    return new ChebyshevPolynomialTest();
-  }
+  static ChebyshevPolynomialTest *createSuite() { return new ChebyshevPolynomialTest(); }
   static void destroySuite(ChebyshevPolynomialTest *suite) { delete suite; }
 
   void test_values_are_correct_for_x_in_range() {

@@ -29,12 +29,9 @@ public:
   static ThresholdMDTest *createSuite() { return new ThresholdMDTest(); }
   static void destroySuite(ThresholdMDTest *suite) { delete suite; }
   Mantid::Geometry::QLab frame;
-  MDHistoWorkspace_sptr createInputWorkspace(signal_t signal,
-                                             signal_t errorSQ = 0,
-                                             const int nBins = 1) {
+  MDHistoWorkspace_sptr createInputWorkspace(signal_t signal, signal_t errorSQ = 0, const int nBins = 1) {
     MDHistoDimension_sptr dim = std::make_shared<MDHistoDimension>(
-        "X", "X", frame, static_cast<coord_t>(0), static_cast<coord_t>(10),
-        static_cast<size_t>(nBins));
+        "X", "X", frame, static_cast<coord_t>(0), static_cast<coord_t>(10), static_cast<size_t>(nBins));
     MDHistoWorkspace_sptr histo = std::make_shared<MDHistoWorkspace>(dim);
     auto signals = histo->mutableSignalArray();
     auto errorsSQ = histo->mutableErrorSquaredArray();
@@ -51,8 +48,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  IMDHistoWorkspace_sptr doExecute(const IMDHistoWorkspace_sptr &inWS,
-                                   const std::string &condition,
+  IMDHistoWorkspace_sptr doExecute(const IMDHistoWorkspace_sptr &inWS, const std::string &condition,
                                    const double &referenceValue) {
     const std::string outWSName = "OutWS";
     ThresholdMD alg;
@@ -64,8 +60,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", outWSName);
     alg.execute();
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-        outWSName);
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName);
     return outWS;
   }
 
@@ -73,16 +68,14 @@ public:
     const int nBins = 2;
     auto inWS = createInputWorkspace(1, 1, nBins); // Signal on input = 1;
     inWS->setSignalAt(1,
-                      3); // Signal values are now [1, 3] in this 1D workspace
-    auto outWS =
-        doExecute(inWS, "Less Than", 3); // Overwrite those less than 3 with 0.
+                      3);                         // Signal values are now [1, 3] in this 1D workspace
+    auto outWS = doExecute(inWS, "Less Than", 3); // Overwrite those less than 3 with 0.
 
     TS_ASSERT_EQUALS(inWS->getNPoints(), outWS->getNPoints());
     TSM_ASSERT_EQUALS("Overwrite the first entry", 0,
                       outWS->getSignalAt(0)); // Overwrite the first entry.
-    TSM_ASSERT_EQUALS(
-        "Do Not overwrite the second entry", 3,
-        outWS->getSignalAt(1)); // Do NOT overwrite the second entry.
+    TSM_ASSERT_EQUALS("Do Not overwrite the second entry", 3,
+                      outWS->getSignalAt(1)); // Do NOT overwrite the second entry.
     TSM_ASSERT_EQUALS("Do not touch the errors", inWS->getErrorAt(0),
                       outWS->getErrorAt(0)); // Don't touch these.
   }
@@ -96,8 +89,7 @@ public:
                            1); // Overwrite those greater than 1 with 0.
 
     TS_ASSERT_EQUALS(inWS->getNPoints(), outWS->getNPoints());
-    TSM_ASSERT_EQUALS("Do not overwrite the first entry", 1,
-                      outWS->getSignalAt(0));
+    TSM_ASSERT_EQUALS("Do not overwrite the first entry", 1, outWS->getSignalAt(0));
     TSM_ASSERT_EQUALS("Overwrite the second entry", 0, outWS->getSignalAt(1));
     TSM_ASSERT_EQUALS("Do not touch the errors", inWS->getErrorAt(0),
                       outWS->getErrorAt(0)); // Don't touch these.
@@ -122,18 +114,13 @@ public:
     alg.setPropertyValue("OutputWorkspace", outWSName);
     alg.execute();
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-        outWSName);
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName);
     TS_ASSERT_EQUALS(inWS->getNPoints(), outWS->getNPoints());
-    TSM_ASSERT_EQUALS(
-        "Overwrite the first entry with the custom overwrite value.", 9,
-        outWS->getSignalAt(0));
+    TSM_ASSERT_EQUALS("Overwrite the first entry with the custom overwrite value.", 9, outWS->getSignalAt(0));
     // Overwrite the first entry.
-    TSM_ASSERT_EQUALS("Do Not overwrite the second entry", 3,
-                      outWS->getSignalAt(1));
+    TSM_ASSERT_EQUALS("Do Not overwrite the second entry", 3, outWS->getSignalAt(1));
     // Do NOT overwrite the second entry.
-    TSM_ASSERT_EQUALS("Do not touch the errors", inWS->getErrorAt(0),
-                      outWS->getErrorAt(0));
+    TSM_ASSERT_EQUALS("Do not touch the errors", inWS->getErrorAt(0), outWS->getErrorAt(0));
     // Don't touch these.
   }
 };

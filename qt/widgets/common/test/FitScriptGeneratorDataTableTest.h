@@ -20,12 +20,8 @@ using namespace MantidQt::MantidWidgets;
 class FitScriptGeneratorDataTableTest : public CxxTest::TestSuite {
 
 public:
-  static FitScriptGeneratorDataTableTest *createSuite() {
-    return new FitScriptGeneratorDataTableTest;
-  }
-  static void destroySuite(FitScriptGeneratorDataTableTest *suite) {
-    delete suite;
-  }
+  static FitScriptGeneratorDataTableTest *createSuite() { return new FitScriptGeneratorDataTableTest; }
+  static void destroySuite(FitScriptGeneratorDataTableTest *suite) { delete suite; }
 
   void setUp() override {
     assertNoTopLevelWidgets();
@@ -42,8 +38,7 @@ public:
     assertWidgetCreated();
   }
 
-  void
-  test_that_adding_a_domain_to_the_data_table_will_change_the_number_of_table_rows() {
+  void test_that_adding_a_domain_to_the_data_table_will_change_the_number_of_table_rows() {
     m_dataTable->show();
     TS_ASSERT_EQUALS(m_dataTable->rowCount(), 0);
 
@@ -52,8 +47,7 @@ public:
     TS_ASSERT_EQUALS(m_dataTable->rowCount(), 1);
   }
 
-  void
-  test_that_adding_a_domain_to_the_data_table_will_show_the_correct_data_in_the_table() {
+  void test_that_adding_a_domain_to_the_data_table_will_show_the_correct_data_in_the_table() {
     m_dataTable->show();
     m_dataTable->addDomain("Name", WorkspaceIndex(0), 0.0, 2.0);
 
@@ -63,8 +57,7 @@ public:
     TS_ASSERT_EQUALS(m_dataTable->endX(0), 2.0);
   }
 
-  void
-  test_that_removing_a_domain_in_the_data_table_will_change_the_number_of_table_rows() {
+  void test_that_removing_a_domain_in_the_data_table_will_change_the_number_of_table_rows() {
     m_dataTable->show();
     m_dataTable->addDomain("Name", WorkspaceIndex(0), 0.0, 2.0);
 
@@ -72,6 +65,17 @@ public:
     m_dataTable->removeDomain("Name", WorkspaceIndex(0));
 
     TS_ASSERT_EQUALS(m_dataTable->rowCount(), 0);
+  }
+
+  void test_that_allRows_will_return_all_of_the_existing_row_indices() {
+    m_dataTable->show();
+    m_dataTable->addDomain("Name", WorkspaceIndex(0), 0.0, 2.0);
+    m_dataTable->addDomain("Name2", WorkspaceIndex(0), 0.0, 2.0);
+    m_dataTable->addDomain("Name3", WorkspaceIndex(0), 0.0, 2.0);
+
+    auto const allIndices = m_dataTable->allRows();
+    auto const expectedIndices = std::vector<FitDomainIndex>{2, 1, 0};
+    TS_ASSERT_EQUALS(allIndices, expectedIndices);
   }
 
   void test_that_selectedRows_will_return_the_currently_selected_row() {
@@ -82,27 +86,41 @@ public:
     m_dataTable->addDomain("Name2", WorkspaceIndex(0), 0.0, 2.0);
     m_dataTable->addDomain("Name3", WorkspaceIndex(0), 0.0, 2.0);
 
-    // Retrieve the pixel position of the first column cell at rowIndex
-    int xPos = m_dataTable->columnViewportPosition(0) + 5;
-    int yPos = m_dataTable->rowViewportPosition(rowIndex) + 10;
-
-    // Click the table cell, thereby selecting a row
-    QWidget *pViewport = m_dataTable->viewport();
-    QTest::mouseClick(pViewport, Qt::LeftButton, NULL, QPoint(xPos, yPos));
-    QTest::qWait(500);
+    selectRowInTable(rowIndex);
 
     auto const selectedIndices = m_dataTable->selectedRows();
     TS_ASSERT_EQUALS(selectedIndices.size(), 1);
     TS_ASSERT_EQUALS(selectedIndices[0].value, rowIndex);
   }
 
-private:
-  void assertWidgetCreated() {
-    TS_ASSERT_LESS_THAN(0, QApplication::topLevelWidgets().size());
+  void test_that_selectedDomainFunctionPrefix_will_return_the_currently_selected_function_index() {
+    int rowIndex(1);
+
+    m_dataTable->show();
+    m_dataTable->addDomain("Name", WorkspaceIndex(0), 0.0, 2.0);
+    m_dataTable->addDomain("Name2", WorkspaceIndex(0), 0.0, 2.0);
+    m_dataTable->addDomain("Name3", WorkspaceIndex(0), 0.0, 2.0);
+
+    selectRowInTable(rowIndex);
+
+    auto const selectedPrefix = m_dataTable->selectedDomainFunctionPrefix();
+    TS_ASSERT_EQUALS(selectedPrefix, "f1.");
   }
 
-  void assertNoTopLevelWidgets() {
-    TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size());
+private:
+  void assertWidgetCreated() { TS_ASSERT_LESS_THAN(0, QApplication::topLevelWidgets().size()); }
+
+  void assertNoTopLevelWidgets() { TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size()); }
+
+  void selectRowInTable(int row) {
+    // Retrieve the pixel position of the first column cell at rowIndex
+    int xPos = m_dataTable->columnViewportPosition(0) + 5;
+    int yPos = m_dataTable->rowViewportPosition(row) + 10;
+
+    // Click the table cell, thereby selecting a row
+    QWidget *pViewport = m_dataTable->viewport();
+    QTest::mouseClick(pViewport, Qt::LeftButton, NULL, QPoint(xPos, yPos));
+    QApplication::sendPostedEvents();
   }
 
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;

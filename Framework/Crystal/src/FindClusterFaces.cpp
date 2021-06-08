@@ -41,10 +41,9 @@ using OptionalLabelPeakIndexMap = boost::optional<LabelMap>;
  * @return (optional) Map of labels to inspect for to the Peaks Index in the
  * peaks workspace which matches the cluster id.
  */
-OptionalLabelPeakIndexMap
-createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
-                          const IPeaksWorkspace_sptr &filterWorkspace,
-                          IMDHistoWorkspace_sptr &clusterImage) {
+OptionalLabelPeakIndexMap createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
+                                                    const IPeaksWorkspace_sptr &filterWorkspace,
+                                                    IMDHistoWorkspace_sptr &clusterImage) {
   OptionalLabelPeakIndexMap optionalAllowedLabels;
 
   if (filterWorkspace) {
@@ -58,8 +57,7 @@ createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
 
     for (int i = 0; i < filterWorkspace->getNumberPeaks(); ++i) {
       Mantid::Geometry::IPeak &peak = filterWorkspace->getPeak(i);
-      const auto labelIdAtPeakCenter =
-          static_cast<int>(projection.signalAtPeakCenter(peak));
+      const auto labelIdAtPeakCenter = static_cast<int>(projection.signalAtPeakCenter(peak));
       if (labelIdAtPeakCenter > emptyLabelId) {
         allowedLabels.emplace(labelIdAtPeakCenter, i);
       }
@@ -95,8 +93,7 @@ void checkDataPoint(const size_t &linearIndex, const double signalValue) {
   // Check that the signal value looks like a label id.
   if (std::modf(signalValue, &intPart) != 0.0) {
     std::stringstream buffer;
-    buffer << "Problem at linear index: " << linearIndex
-           << " SignalValue is not an integer: " << signalValue
+    buffer << "Problem at linear index: " << linearIndex << " SignalValue is not an integer: " << signalValue
            << " Suggests wrong input IMDHistoWorkspace passed to "
               "FindClusterFaces.";
 
@@ -117,26 +114,20 @@ container
 @param localClusterFaces : collection of cluster faces to add faces to
 (writable)
 */
-void findFacesAtIndex(const size_t linearIndex, IMDIterator *mdIterator,
-                      IMDHistoWorkspace_sptr &clusterImage,
-                      const double &radius, const int &id,
-                      const int &emptyLabelId,
-                      const std::vector<size_t> &imageShape,
-                      ClusterFaces &localClusterFaces) {
-  auto indexes =
-      Mantid::Kernel::Utils::getIndicesFromLinearIndex(linearIndex, imageShape);
+void findFacesAtIndex(const size_t linearIndex, IMDIterator *mdIterator, IMDHistoWorkspace_sptr &clusterImage,
+                      const double &radius, const int &id, const int &emptyLabelId,
+                      const std::vector<size_t> &imageShape, ClusterFaces &localClusterFaces) {
+  auto indexes = Mantid::Kernel::Utils::getIndicesFromLinearIndex(linearIndex, imageShape);
 
   const auto neighbours = mdIterator->findNeighbourIndexesFaceTouching();
   for (auto neighbourLinearIndex : neighbours) {
-    const auto neighbourId =
-        static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
+    const auto neighbourId = static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
 
     if (neighbourId <= emptyLabelId) {
       // We have an edge!
 
       // In which dimension is the edge?
-      auto neighbourIndexes = Mantid::Kernel::Utils::getIndicesFromLinearIndex(
-          neighbourLinearIndex, imageShape);
+      auto neighbourIndexes = Mantid::Kernel::Utils::getIndicesFromLinearIndex(neighbourLinearIndex, imageShape);
       for (size_t j = 0; j < imageShape.size(); ++j) {
         if (indexes[j] != neighbourIndexes[j]) {
           const bool maxEdge = neighbourLinearIndex > linearIndex;
@@ -166,9 +157,8 @@ Process without peak filtering
 @param imageShape : shape of IMDHistoWorkspace
 
 */
-void executeUnFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces,
-                       Progress &progress, IMDHistoWorkspace_sptr &clusterImage,
-                       const std::vector<size_t> &imageShape) {
+void executeUnFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces, Progress &progress,
+                       IMDHistoWorkspace_sptr &clusterImage, const std::vector<size_t> &imageShape) {
   const int emptyLabelId = 0;
   const double radius = -1;
   do {
@@ -184,8 +174,7 @@ void executeUnFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces,
       progress.report();
 
       // Find faces
-      findFacesAtIndex(linearIndex, mdIterator, clusterImage, radius, id,
-                       emptyLabelId, imageShape, localClusterFaces);
+      findFacesAtIndex(linearIndex, mdIterator, clusterImage, radius, id, emptyLabelId, imageShape, localClusterFaces);
     }
   } while (mdIterator->next());
 }
@@ -204,11 +193,9 @@ Process with peak filtering
 processing.
 
 */
-void executeFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces,
-                     Progress &progress, IMDHistoWorkspace_sptr &clusterImage,
-                     const std::vector<size_t> &imageShape,
-                     PeaksWorkspace_sptr &filterWorkspace,
-                     const OptionalLabelPeakIndexMap &optionalAllowedLabels) {
+void executeFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces, Progress &progress,
+                     IMDHistoWorkspace_sptr &clusterImage, const std::vector<size_t> &imageShape,
+                     PeaksWorkspace_sptr &filterWorkspace, const OptionalLabelPeakIndexMap &optionalAllowedLabels) {
   const int emptyLabelId = 0;
   PeakClusterProjection projection(clusterImage);
   do {
@@ -238,8 +225,8 @@ void executeFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces,
         progress.report();
 
         // Find faces
-        findFacesAtIndex(linearIndex, mdIterator, clusterImage, radius, id,
-                         emptyLabelId, imageShape, localClusterFaces);
+        findFacesAtIndex(linearIndex, mdIterator, clusterImage, radius, id, emptyLabelId, imageShape,
+                         localClusterFaces);
       }
     }
 
@@ -261,9 +248,7 @@ const std::string FindClusterFaces::name() const { return "FindClusterFaces"; }
 int FindClusterFaces::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string FindClusterFaces::category() const {
-  return "Crystal\\Integration";
-}
+const std::string FindClusterFaces::category() const { return "Crystal\\Integration"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -271,34 +256,25 @@ const std::string FindClusterFaces::category() const {
 /** Initialize the algorithm's properties.
  */
 void FindClusterFaces::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input image workspace consisting of cluster ids.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-          "FilterWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional filtering peaks workspace. Used to restrict face finding to "
-      "clusters in image which correspond to peaks in the workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("FilterWorkspace", "", Direction::Input,
+                                                                      PropertyMode::Optional),
+                  "Optional filtering peaks workspace. Used to restrict face finding to "
+                  "clusters in image which correspond to peaks in the workspace.");
 
-  declareProperty("LimitRows", true,
-                  "Limit the report output to a maximum number of rows");
+  declareProperty("LimitRows", true, "Limit the report output to a maximum number of rows");
 
-  declareProperty(std::make_unique<PropertyWithValue<int>>(
-                      "MaximumRows", 100000,
-                      std::make_shared<BoundedValidator<int>>(),
-                      Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("MaximumRows", 100000,
+                                                           std::make_shared<BoundedValidator<int>>(), Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
-  setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>(
-                                         "LimitRows", IS_DEFAULT));
+  setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>("LimitRows", IS_DEFAULT));
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "An output table workspace containing cluster face information.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "An output table workspace containing cluster face information.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "TruncatedOutput", false, Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("TruncatedOutput", false, Direction::Output),
                   "Indicates that the output results were truncated if True");
 }
 
@@ -319,14 +295,12 @@ void FindClusterFaces::exec() {
   PeaksWorkspace_sptr filterWorkspace = this->getProperty("FilterWorkspace");
 
   // Use the peaks workspace to filter to labels of interest
-  OptionalLabelPeakIndexMap optionalAllowedLabels = createOptionalLabelFilter(
-      dimensionality, emptyLabelId, filterWorkspace, clusterImage);
+  OptionalLabelPeakIndexMap optionalAllowedLabels =
+      createOptionalLabelFilter(dimensionality, emptyLabelId, filterWorkspace, clusterImage);
 
-  const int nThreads = Mantid::API::FrameworkManager::Instance()
-                           .getNumOMPThreads(); // NThreads to Request
-  auto mdIterators = clusterImage->createIterators(nThreads); // Iterators
-  const auto nIterators =
-      static_cast<int>(mdIterators.size()); // Number of iterators yielded.
+  const int nThreads = Mantid::API::FrameworkManager::Instance().getNumOMPThreads(); // NThreads to Request
+  auto mdIterators = clusterImage->createIterators(nThreads);                        // Iterators
+  const auto nIterators = static_cast<int>(mdIterators.size());                      // Number of iterators yielded.
   VecClusterFaces clusterFaces(nIterators);
   size_t nSteps = 1000;
   if (optionalAllowedLabels.is_initialized()) {
@@ -342,11 +316,10 @@ void FindClusterFaces::exec() {
     auto mdIterator = mdIterators[it].get();
 
     if (usingFiltering) {
-      executeFiltered(mdIterator, localClusterFaces, progress, clusterImage,
-                      imageShape, filterWorkspace, optionalAllowedLabels);
+      executeFiltered(mdIterator, localClusterFaces, progress, clusterImage, imageShape, filterWorkspace,
+                      optionalAllowedLabels);
     } else {
-      executeUnFiltered(mdIterator, localClusterFaces, progress, clusterImage,
-                        imageShape);
+      executeUnFiltered(mdIterator, localClusterFaces, progress, clusterImage, imageShape);
     }
     PARALLEL_END_INTERUPT_REGION
   }
@@ -370,9 +343,8 @@ void FindClusterFaces::exec() {
     for (const auto &clusterFace : localClusterFaces) {
       if (!limitRows || (out->rowCount() < size_t(maxRows))) {
         TableRow row = out->appendRow();
-        row << clusterFace.clusterId << double(clusterFace.workspaceIndex)
-            << clusterFace.faceNormalDimension << clusterFace.maxEdge
-            << clusterFace.radius;
+        row << clusterFace.clusterId << double(clusterFace.workspaceIndex) << clusterFace.faceNormalDimension
+            << clusterFace.maxEdge << clusterFace.radius;
       }
       ++totalFaces;
     }

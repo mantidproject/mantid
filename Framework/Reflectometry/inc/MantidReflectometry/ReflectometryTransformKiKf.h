@@ -18,13 +18,10 @@ namespace Reflectometry {
 
   @date 2012-06-06
 */
-class DLLExport ReflectometryTransformKiKf
-    : public DataObjects::ReflectometryTransform {
+class DLLExport ReflectometryTransformKiKf : public DataObjects::ReflectometryTransform {
 public:
-  ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin,
-                             double kfMax, double incidentTheta,
-                             int numberOfBinsQx = 100,
-                             int numberOfBinsQz = 100);
+  ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta,
+                             int numberOfBinsQx = 100, int numberOfBinsQz = 100);
 
   /// Disable default constructor
   ReflectometryTransformKiKf() = delete;
@@ -33,8 +30,7 @@ public:
   ReflectometryTransformKiKf(const ReflectometryTransformKiKf &) = delete;
 
   /// Disable assignment operator
-  ReflectometryTransformKiKf &
-  operator=(const ReflectometryTransformKiKf &) = delete;
+  ReflectometryTransformKiKf &operator=(const ReflectometryTransformKiKf &) = delete;
 };
 
 } // namespace Reflectometry

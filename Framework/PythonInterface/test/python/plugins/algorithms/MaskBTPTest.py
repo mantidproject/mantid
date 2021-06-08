@@ -128,7 +128,6 @@ class MaskBTPTest(unittest.TestCase):
         MaskBTP(Instrument='SEQUOIA', Bank="150")
         return
 
-
     def testEQSANSMaskBTP(self):
         w = LoadEmptyInstrument(InstrumentName='EQ-SANS',
                                 OutputWorkspace='empty_eqsans')
@@ -175,7 +174,6 @@ class MaskBTPTest(unittest.TestCase):
         wksp = mtd[ws_name]
         self.assertEqual(int(192*256/2), len(masked))
         self.checkConsistentMask(wksp, masked)
-
 
     def test_eqsans_interleaved(self):
         ws_name = 'eqsans'
@@ -265,20 +263,20 @@ class MaskBTPTest(unittest.TestCase):
         self.checkConsistentMask(ws, mask)
 
     def test_d22b(self):
-        ws = LoadEmptyInstrument(InstrumentName="D22B")
+        path = config["instrumentDefinition.directory"] + "D22B_Definition.xml"
+        ws = LoadEmptyInstrument(Filename=path)
         mask = MaskBTP(Workspace=ws, Bank="2")
 
         self.assertEquals(len(mask), 256*96)
         self.checkConsistentMask(ws, mask)
 
     def test_d11b(self):
-        ws = LoadEmptyInstrument(InstrumentName="D11B")
+        path = config["instrumentDefinition.directory"] + "D11B_Definition.xml"
+        ws = LoadEmptyInstrument(Filename=path)
         mask = MaskBTP(Workspace=ws, Components="detector_right, detector_left")
 
         self.assertEquals(len(mask), 256*32*2)
         self.checkConsistentMask(ws, mask)
-
-
 
 if __name__ == '__main__':
     unittest.main()

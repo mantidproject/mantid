@@ -17,20 +17,15 @@ SaveTableCommand defines the action "Save Table"
 */
 class SaveTableCommand : public CommandBase {
 public:
-  SaveTableCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
+  SaveTableCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
   SaveTableCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~SaveTableCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::SaveFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::SaveFlag); };
   QString name() override { return QString("Save Table"); }
   QString icon() override { return QString("://filesave.png"); }
   QString tooltip() override { return QString("Save Table"); }
-  QString whatsthis() override {
-    return QString("Saves current table as a table workspace");
-  }
+  QString whatsthis() override { return QString("Saves current table as a table workspace"); }
   QString shortcut() override { return QString(); }
   bool modifiesSettings() override { return false; }
 };

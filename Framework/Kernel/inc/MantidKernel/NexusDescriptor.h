@@ -42,8 +42,7 @@ public:
   static const unsigned char HDF5Signature[8];
 
   /// Returns true if the file is considered to store data in a hierarchy
-  static bool isReadable(const std::string &filename,
-                         const Version version = AnyVersion);
+  static bool isReadable(const std::string &filename, const Version version = AnyVersion);
 
 public:
   /**
@@ -99,8 +98,7 @@ private:
   /// Initialize object with filename
   void initialize(const std::string &filename);
   /// Walk the tree and cache the structure
-  void walkFile(::NeXus::File &file, const std::string &rootPath,
-                const std::string &className,
+  void walkFile(::NeXus::File &file, const std::string &rootPath, const std::string &className,
                 std::map<std::string, std::string> &pmap, int level);
 
   /// Full filename

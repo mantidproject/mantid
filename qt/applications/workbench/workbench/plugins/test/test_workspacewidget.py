@@ -13,7 +13,7 @@ from unittest import mock
 import matplotlib as mpl
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace, CreateSingleValuedWorkspace,
-                              CreateMDHistoWorkspace, CreateWorkspace, ConjoinWorkspaces, GroupWorkspaces)
+                              CreateMDHistoWorkspace, CreateWorkspace, ConjoinWorkspaces, GroupWorkspaces, LoadNexus)
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from qtpy.QtWidgets import QMainWindow
@@ -29,6 +29,8 @@ ALGORITHM_HISTORY_WINDOW = "mantidqt.widgets.workspacewidget." \
 MATRIXWORKSPACE_DISPLAY = "mantidqt.widgets.workspacedisplay.matrix." \
                           "presenter.MatrixWorkspaceDisplay"
 MATRIXWORKSPACE_DISPLAY_TYPE = "StatusBarView"
+SAMPLE_MATERIAL_DIALOG_TYPE = "SampleMaterialDialogView"
+SAMPLE_MATERIAL_DIALOG = "mantidqt.widgets.samplematerialdialog.samplematerial_view." + SAMPLE_MATERIAL_DIALOG_TYPE
 
 
 @start_qapplication
@@ -98,6 +100,14 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
             self.ws_widget._do_show_detectors([self.ws_names[0]])
         self.assert_widget_type_exists(MATRIXWORKSPACE_DISPLAY_TYPE)
 
+    def test_detector_table_shows_with_a_workspace_missing_an_efixed(self):
+        workspace_name = "TOSCA26911_show_detectors"
+        LoadNexus(Filename=workspace_name + '.nxs', OutputWorkspace=workspace_name)
+
+        with mock.patch(MATRIXWORKSPACE_DISPLAY + '.show_view', lambda x: None):
+            self.ws_widget._do_show_detectors([workspace_name])
+        self.assert_widget_type_exists(MATRIXWORKSPACE_DISPLAY_TYPE)
+
     @mock.patch('workbench.plugins.workspacewidget.plot', autospec=True)
     def test_plot_with_plot_bin(self, mock_plot):
         self.ws_widget._ads.add(self.ws_names[0], self.w_spaces[0])
@@ -151,6 +161,23 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         self.ws_widget._action_double_click_workspace(self.ws_names[5])
         mock_plot_from_names.assert_called_once_with([self.ws_names[5]], errors=False, overplot=False,
                                                      show_colorfill_btn=True)
+
+    def test_sample_material_opens_with_single_workspace_name(self):
+        """
+        Sample material dialog should work with a single workspace selected
+        """
+        single_ws_list = [self.ws_names[0]]
+        with mock.patch(SAMPLE_MATERIAL_DIALOG + '.show', lambda x: None):
+            self.ws_widget._do_sample_material(single_ws_list)
+        self.assert_widget_type_exists(SAMPLE_MATERIAL_DIALOG_TYPE)
+
+    def test_sample_material_doesnt_open_with_multiple_workspace_names(self):
+        """
+        Sample material dialog should not open if multiple workspaces are selected.
+        """
+        with mock.patch(SAMPLE_MATERIAL_DIALOG + '.show', lambda x: None):
+            self.ws_widget._do_sample_material(self.ws_names)
+        self.assert_widget_type_doesnt_exist(SAMPLE_MATERIAL_DIALOG_TYPE)
 
     def test_empty_workspaces(self):
         self.ws_widget._ads.clear()

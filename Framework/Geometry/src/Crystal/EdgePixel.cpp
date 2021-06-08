@@ -20,18 +20,16 @@ namespace Geometry {
   @param  Edge         Number of edge points for each bank
   @return True if peak is on edge
 */
-bool edgePixel(const Mantid::Geometry::Instrument_const_sptr &inst,
-               const std::string &bankName, int col, int row, int Edge) {
+bool edgePixel(const Mantid::Geometry::Instrument_const_sptr &inst, const std::string &bankName, int col, int row,
+               int Edge) {
   if (bankName == "None")
     return false;
-  std::shared_ptr<const Geometry::IComponent> parent =
-      inst->getComponentByName(bankName);
+  std::shared_ptr<const Geometry::IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
     std::shared_ptr<const Geometry::RectangularDetector> RDet =
         std::dynamic_pointer_cast<const Geometry::RectangularDetector>(parent);
 
-    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
-           row >= (RDet->ypixels() - Edge);
+    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge || row >= (RDet->ypixels() - Edge);
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
     std::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -52,8 +50,8 @@ bool edgePixel(const Mantid::Geometry::Instrument_const_sptr &inst,
     auto NROWS = static_cast<int>(grandchildren.size());
     auto NCOLS = static_cast<int>(children.size());
     // Wish pixels and tubes start at 1 not 0
-    return col - startI < Edge || col - startI >= (NCOLS - Edge) ||
-           row - startI < Edge || row - startI >= (NROWS - Edge);
+    return col - startI < Edge || col - startI >= (NCOLS - Edge) || row - startI < Edge ||
+           row - startI >= (NROWS - Edge);
   }
   return false;
 }

@@ -63,15 +63,11 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RemoveLogs"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Remove logs from a workspace.";
-  }
+  const std::string summary() const override { return "Remove logs from a workspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"RenameLog", "DeleteLog"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"RenameLog", "DeleteLog"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Logs"; }
 

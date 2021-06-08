@@ -32,9 +32,8 @@ DECLARE_ALGORITHM(MergeMDFiles)
 /** Constructor
  */
 MergeMDFiles::MergeMDFiles()
-    : m_nDims(0), m_MDEventType(), m_fileBasedTargetWS(false), m_Filenames(),
-      m_EventLoader(), m_OutIWS(), m_totalEvents(0), m_totalLoaded(0),
-      m_fileMutex(), m_statsMutex() {}
+    : m_nDims(0), m_MDEventType(), m_fileBasedTargetWS(false), m_Filenames(), m_EventLoader(), m_OutIWS(),
+      m_totalEvents(0), m_totalLoaded(0), m_fileMutex(), m_statsMutex() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -52,19 +51,16 @@ void MergeMDFiles::init() {
                   "Select several MDEventWorkspace NXS files to merge "
                   "together. Files must have common box structure.");
 
-  declareProperty(
-      std::make_unique<FileProperty>("OutputFilename", "",
-                                     FileProperty::OptionalSave, exts),
-      "Choose a file to which to save the output workspace. \n"
-      "Optional: if specified, the workspace created will be file-backed. \n"
-      "If not, it will be created in memory.");
+  declareProperty(std::make_unique<FileProperty>("OutputFilename", "", FileProperty::OptionalSave, exts),
+                  "Choose a file to which to save the output workspace. \n"
+                  "Optional: if specified, the workspace created will be file-backed. \n"
+                  "If not, it will be created in memory.");
 
   declareProperty("Parallel", false,
                   "Run the loading tasks in parallel.\n"
                   "This can be faster but might use more memory.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output MDEventWorkspace.");
 }
 
@@ -90,34 +86,28 @@ void MergeMDFiles::loadBoxData() {
     for (size_t i = 0; i < m_Filenames.size(); i++) {
       // load box structure and the experimental info from each target
       // workspace.
-      m_fileComponentsStructure[i].loadBoxStructure(m_Filenames[i], m_nDims,
-                                                    m_MDEventType, true, true);
+      m_fileComponentsStructure[i].loadBoxStructure(m_Filenames[i], m_nDims, m_MDEventType, true, true);
       // export just loaded experiment info to the target workspace
       m_fileComponentsStructure[i].exportExperiment(m_OutIWS);
 
       // Check for consistency
       if (i > 0) {
-        if (m_fileComponentsStructure[i].getEventIndex().size() !=
-            targetEventIndexes.size())
-          throw std::runtime_error(
-              "Inconsistent number of boxes found in file " + m_Filenames[i] +
-              ". Cannot merge these files. Did you generate them all with "
-              "exactly the same box structure?");
+        if (m_fileComponentsStructure[i].getEventIndex().size() != targetEventIndexes.size())
+          throw std::runtime_error("Inconsistent number of boxes found in file " + m_Filenames[i] +
+                                   ". Cannot merge these files. Did you generate them all with "
+                                   "exactly the same box structure?");
       }
 
       // calculate total number of events per target cell, which will be
       size_t nBoxes = Boxes.size();
       for (size_t j = 0; j < nBoxes; j++) {
         size_t ID = Boxes[j]->getID();
-        targetEventIndexes[2 * ID + 1] +=
-            m_fileComponentsStructure[i].getEventIndex()[2 * ID + 1];
-        m_totalEvents +=
-            m_fileComponentsStructure[i].getEventIndex()[2 * ID + 1];
+        targetEventIndexes[2 * ID + 1] += m_fileComponentsStructure[i].getEventIndex()[2 * ID + 1];
+        m_totalEvents += m_fileComponentsStructure[i].getEventIndex()[2 * ID + 1];
       }
 
       // Open the event data, track the total number of events
-      auto bc = std::shared_ptr<API::BoxController>(
-          new API::BoxController(static_cast<size_t>(m_nDims)));
+      auto bc = std::shared_ptr<API::BoxController>(new API::BoxController(static_cast<size_t>(m_nDims)));
       bc->fromXMLString(m_fileComponentsStructure[i].getBCXMLdescr());
 
       m_EventLoader[i] = new BoxControllerNeXusIO(bc.get());
@@ -149,8 +139,7 @@ void MergeMDFiles::loadBoxData() {
     eventsStart += nEvents;
   }
 
-  g_log.notice() << m_totalEvents << " events in " << m_Filenames.size()
-                 << " files.\n";
+  g_log.notice() << m_totalEvents << " events in " << m_Filenames.size() << " files.\n";
 }
 
 /** Task that loads all of the events from corresponded boxes of all files
@@ -167,8 +156,7 @@ uint64_t MergeMDFiles::loadEventsFromSubBoxes(API::IMDNode *TargetBox) {
 
   for (size_t iw = 0; iw < this->m_EventLoader.size(); iw++) {
     size_t ID = TargetBox->getID();
-    numFileEvents[iw] = static_cast<size_t>(
-        m_fileComponentsStructure[iw].getEventIndex()[2 * ID + 1]);
+    numFileEvents[iw] = static_cast<size_t>(m_fileComponentsStructure[iw].getEventIndex()[2 * ID + 1]);
     nBoxEvents += numFileEvents[iw];
   }
 
@@ -177,12 +165,10 @@ uint64_t MergeMDFiles::loadEventsFromSubBoxes(API::IMDNode *TargetBox) {
 
   for (size_t iw = 0; iw < this->m_EventLoader.size(); iw++) {
     size_t ID = TargetBox->getID();
-    uint64_t fileLocation =
-        m_fileComponentsStructure[iw].getEventIndex()[2 * ID + 0];
+    uint64_t fileLocation = m_fileComponentsStructure[iw].getEventIndex()[2 * ID + 0];
     if (numFileEvents[iw] == 0)
       continue;
-    TargetBox->loadAndAddFrom(m_EventLoader[iw], fileLocation,
-                              numFileEvents[iw]);
+    TargetBox->loadAndAddFrom(m_EventLoader[iw], fileLocation, numFileEvents[iw]);
   }
 
   return nBoxEvents;
@@ -197,9 +183,7 @@ uint64_t MergeMDFiles::loadEventsFromSubBoxes(API::IMDNode *TargetBox) {
  * @param outputFile :: the name of the output file where file-based workspace
  *should be saved
  */
-void MergeMDFiles::doExecByCloning(
-    const Mantid::API::IMDEventWorkspace_sptr &ws,
-    const std::string &outputFile) {
+void MergeMDFiles::doExecByCloning(const Mantid::API::IMDEventWorkspace_sptr &ws, const std::string &outputFile) {
   m_OutIWS = ws;
   m_MDEventType = ws->getEventTypeName();
 
@@ -215,8 +199,7 @@ void MergeMDFiles::doExecByCloning(
   // Fix the max depth to something bigger.
   bc->setMaxDepth(20);
   bc->setSplitThreshold(5000);
-  auto saver = std::shared_ptr<API::IBoxControllerIO>(
-      new DataObjects::BoxControllerNeXusIO(bc.get()));
+  auto saver = std::shared_ptr<API::IBoxControllerIO>(new DataObjects::BoxControllerNeXusIO(bc.get()));
   saver->setDataType(sizeof(coord_t), m_MDEventType);
   if (m_fileBasedTargetWS) {
     bc->setFileBacked(saver, outputFile);
@@ -266,8 +249,7 @@ void MergeMDFiles::doExecByCloning(
     this->loadEventsFromSubBoxes(boxes[ib]);
 
     if (DiskBuf) {
-      if (box->getDataInMemorySize() >
-          0) { // data position has been already pre-calculated
+      if (box->getDataInMemorySize() > 0) { // data position has been already pre-calculated
         box->getISaveable()->save();
         box->clearDataFromMemory();
         // Kernel::ISaveable *Saver = box->getISaveable();
@@ -357,11 +339,9 @@ void MergeMDFiles::exec() {
   // the existence/ usage of the buffer indicates if the algorithm works with
   // file based or memory based target workspaces;
   // pDiskBuffer = NULL;
-  MultipleFileProperty *multiFileProp =
-      dynamic_cast<MultipleFileProperty *>(getPointerToProperty("Filenames"));
+  MultipleFileProperty *multiFileProp = dynamic_cast<MultipleFileProperty *>(getPointerToProperty("Filenames"));
   if (!multiFileProp) {
-    throw std::logic_error(
-        "Filenames property must have MultipleFileProperty type.");
+    throw std::logic_error("Filenames property must have MultipleFileProperty type.");
   }
   m_Filenames = VectorHelper::flattenVector(multiFileProp->operator()());
   if (m_Filenames.empty())
@@ -373,11 +353,10 @@ void MergeMDFiles::exec() {
   if (!outputFile.empty()) {
     m_fileBasedTargetWS = true;
     if (Poco::File(outputFile).exists())
-      throw std::invalid_argument(
-          " File " + outputFile +
-          " already exists. Can not use existing file "
-          "as the target to MergeMD files.\n" +
-          " Use it as one of source files if you want to add MD data to it");
+      throw std::invalid_argument(" File " + outputFile +
+                                  " already exists. Can not use existing file "
+                                  "as the target to MergeMD files.\n" +
+                                  " Use it as one of source files if you want to add MD data to it");
   }
 
   // Start by loading the first file but just the box structure, no events, and
@@ -393,8 +372,7 @@ void MergeMDFiles::exec() {
 
   auto firstWS = std::dynamic_pointer_cast<API::IMDEventWorkspace>(result);
   if (!firstWS)
-    throw std::runtime_error(
-        "Can not load MDEventWorkspace from initial file " + firstFile);
+    throw std::runtime_error("Can not load MDEventWorkspace from initial file " + firstFile);
 
   // do the job
   this->doExecByCloning(firstWS, outputFile);

@@ -25,8 +25,7 @@ namespace ISISReflectometry {
     SavePresenter is a presenter class for the tab 'Save ASCII' in the
     ISIS Reflectometry Interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL SavePresenter : public ISavePresenter,
-                                                     public SaveViewSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL SavePresenter : public ISavePresenter, public SaveViewSubscriber {
 public:
   SavePresenter(ISaveView *view, std::unique_ptr<IAsciiSaver> saver);
 
@@ -68,8 +67,7 @@ private:
   /// Save selected workspaces to a directory
   void saveSelectedWorkspaces();
   /// Save specified workspaces to a directory
-  void saveWorkspaces(std::vector<std::string> const &workspaceNames,
-                      std::vector<std::string> const &logParameters);
+  void saveWorkspaces(std::vector<std::string> const &workspaceNames, std::vector<std::string> const &logParameters);
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
   NamedFormat formatFromIndex(int formatIndex) const;

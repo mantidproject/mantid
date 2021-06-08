@@ -25,12 +25,10 @@ void export_UnitFactory() {
       .def("create", &UnitFactoryImpl::create, (arg("self"), arg("className")),
            "Creates a named unit if it exists in the factory")
 
-      .def("getKeys", &UnitFactoryImpl::getKeys, arg("self"),
-           return_value_policy<Policies::VectorToNumpy>(),
+      .def("getKeys", &UnitFactoryImpl::getKeys, arg("self"), return_value_policy<Policies::VectorToNumpy>(),
            "Returns a list of units available from the factory")
 
-      .def("Instance", &UnitFactory::Instance,
-           return_value_policy<reference_existing_object>(),
+      .def("Instance", &UnitFactory::Instance, return_value_policy<reference_existing_object>(),
            "Returns a reference to the UnitFactory singleton")
       .staticmethod("Instance");
 }

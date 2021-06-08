@@ -28,23 +28,18 @@ namespace DataObjects {
  *dimensionToBinFrom
  *
  */
-CoordTransformAligned::CoordTransformAligned(const size_t inD,
-                                             const size_t outD,
-                                             const size_t *dimensionToBinFrom,
-                                             const coord_t *origin,
-                                             const coord_t *scaling)
-    : CoordTransform(inD, outD), m_dimensionToBinFrom(outD), m_origin(outD),
-      m_scaling(outD) {
+CoordTransformAligned::CoordTransformAligned(const size_t inD, const size_t outD, const size_t *dimensionToBinFrom,
+                                             const coord_t *origin, const coord_t *scaling)
+    : CoordTransform(inD, outD), m_dimensionToBinFrom(outD), m_origin(outD), m_scaling(outD) {
   if (!origin || !scaling || !dimensionToBinFrom)
     throw std::runtime_error("CoordTransformAligned::ctor(): at least one of "
                              "the input arrays is a NULL pointer.");
   for (size_t d = 0; d < outD; d++) {
     m_dimensionToBinFrom[d] = dimensionToBinFrom[d];
     if (m_dimensionToBinFrom[d] >= inD) {
-      throw std::runtime_error(
-          "CoordTransformAligned::ctor(): invalid entry in "
-          "dimensionToBinFrom[" +
-          std::to_string(d) + "]. Cannot build the coordinate transformation.");
+      throw std::runtime_error("CoordTransformAligned::ctor(): invalid entry in "
+                               "dimensionToBinFrom[" +
+                               std::to_string(d) + "]. Cannot build the coordinate transformation.");
     }
     m_origin[d] = origin[d];
     m_scaling[d] = scaling[d];
@@ -66,22 +61,19 @@ CoordTransformAligned::CoordTransformAligned(const size_t inD,
  *dimensionToBinFrom
  *
  */
-CoordTransformAligned::CoordTransformAligned(
-    const size_t inD, const size_t outD, std::vector<size_t> dimensionToBinFrom,
-    std::vector<coord_t> origin, std::vector<coord_t> scaling)
-    : CoordTransform(inD, outD),
-      m_dimensionToBinFrom(std::move(dimensionToBinFrom)),
-      m_origin(std::move(origin)), m_scaling(std::move(scaling)) {
-  if (m_dimensionToBinFrom.size() != outD || m_origin.size() != outD ||
-      m_scaling.size() != outD)
+CoordTransformAligned::CoordTransformAligned(const size_t inD, const size_t outD,
+                                             std::vector<size_t> dimensionToBinFrom, std::vector<coord_t> origin,
+                                             std::vector<coord_t> scaling)
+    : CoordTransform(inD, outD), m_dimensionToBinFrom(std::move(dimensionToBinFrom)), m_origin(std::move(origin)),
+      m_scaling(std::move(scaling)) {
+  if (m_dimensionToBinFrom.size() != outD || m_origin.size() != outD || m_scaling.size() != outD)
     throw std::runtime_error("CoordTransformAligned::ctor(): at least one of "
                              "the input vectors is the wrong size.");
   for (size_t d = 0; d < outD; d++) {
     if (m_dimensionToBinFrom[d] >= inD) {
-      throw std::runtime_error(
-          "CoordTransformAligned::ctor(): invalid entry in "
-          "dimensionToBinFrom[" +
-          std::to_string(d) + "]. Cannot build the coordinate transformation.");
+      throw std::runtime_error("CoordTransformAligned::ctor(): invalid entry in "
+                               "dimensionToBinFrom[" +
+                               std::to_string(d) + "]. Cannot build the coordinate transformation.");
     }
   }
 }
@@ -90,8 +82,7 @@ CoordTransformAligned::CoordTransformAligned(
 /** Virtual cloner
  * @return a copy of this object  */
 CoordTransform *CoordTransformAligned::clone() const {
-  return new CoordTransformAligned(inD, outD, m_dimensionToBinFrom, m_origin,
-                                   m_scaling);
+  return new CoordTransformAligned(inD, outD, m_dimensionToBinFrom, m_origin, m_scaling);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -100,8 +91,7 @@ CoordTransform *CoordTransformAligned::clone() const {
  * @param inputVector :: fixed-size array of input coordinates, of size inD
  * @param outVector :: fixed-size array of output coordinates, of size outD
  */
-void CoordTransformAligned::apply(const coord_t *inputVector,
-                                  coord_t *outVector) const {
+void CoordTransformAligned::apply(const coord_t *inputVector, coord_t *outVector) const {
   // For each output dimension
   for (size_t out = 0; out < outD; ++out) {
     // Get the coordinate at the dimension in the INPUT workspace corresponding
@@ -120,8 +110,7 @@ void CoordTransformAligned::apply(const coord_t *inputVector,
  *
  * @return An affine matrix matrix with inD+1 columns, outD+1 rows.
  */
-Mantid::Kernel::Matrix<coord_t>
-CoordTransformAligned::makeAffineMatrix() const {
+Mantid::Kernel::Matrix<coord_t> CoordTransformAligned::makeAffineMatrix() const {
   // Zeroed-out affine matrix
   Matrix<coord_t> mat(outD + 1, inD + 1);
   // Bottom-right corner of the matrix is always 1.
@@ -149,13 +138,11 @@ std::string CoordTransformAligned::toXMLString() const {
   using namespace Poco::XML;
 
   AutoPtr<Document> pDoc = new Document;
-  AutoPtr<Element> coordTransformElement =
-      pDoc->createElement("CoordTransform");
+  AutoPtr<Element> coordTransformElement = pDoc->createElement("CoordTransform");
   pDoc->appendChild(coordTransformElement);
 
   AutoPtr<Element> coordTransformTypeElement = pDoc->createElement("Type");
-  coordTransformTypeElement->appendChild(
-      pDoc->createTextNode("CoordTransformAffine"));
+  coordTransformTypeElement->appendChild(pDoc->createTextNode("CoordTransformAffine"));
   coordTransformElement->appendChild(coordTransformTypeElement);
 
   AutoPtr<Element> paramListElement = pDoc->createElement("ParameterList");
@@ -174,9 +161,8 @@ std::string CoordTransformAligned::toXMLString() const {
   InDimParameter inD_param(inD);
   OutDimParameter outD_param(outD);
 
-  std::string formattedXMLString = boost::str(
-      boost::format(xmlstream.str().c_str()) % inD_param.toXMLString().c_str() %
-      outD_param.toXMLString().c_str());
+  std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str()) % inD_param.toXMLString().c_str() %
+                                              outD_param.toXMLString().c_str());
   return formattedXMLString;
 }
 
@@ -184,9 +170,7 @@ std::string CoordTransformAligned::toXMLString() const {
  * Coordinate transform id
  * @return the type of coordinate transform
  */
-std::string CoordTransformAligned::id() const {
-  return "CoordTransformAligned";
-}
+std::string CoordTransformAligned::id() const { return "CoordTransformAligned"; }
 
 } // namespace DataObjects
 } // namespace Mantid

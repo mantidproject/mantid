@@ -4,10 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import os
 from functools import wraps
 import sys
-from qtpy import QtWidgets, QtCore, QtGui
+from qtpy import QtWidgets, QtCore
+from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 
 """
 This module contains the methods for
@@ -92,11 +92,15 @@ def addComboToTable(table,row,options,col=1):
     return combo
 
 
-def addDoubleToTable(table,value,row,col=1, minimum=0.0):
+def addDoubleToTable(table, value, row, col=1, minimum=0.0):
     number_widget = QtWidgets.QLineEdit(str(value))
-    number_widget.setValidator(QtGui.QDoubleValidator(minimum, sys.float_info.max, 3))
-    table.setCellWidget(row,col, number_widget)
-    return number_widget
+    validator = LineEditDoubleValidator(number_widget, float(value))
+    validator.setBottom(minimum)
+    validator.setTop(sys.float_info.max)
+    validator.setDecimals(3)
+    number_widget.setValidator(validator)
+    table.setCellWidget(row, col, number_widget)
+    return number_widget, validator
 
 
 def addCheckBoxToTable(table,state,row,col=1):
@@ -139,11 +143,10 @@ def addSpinBoxToTable(table,default,row,col=1):
 # the headers.
 def setTableHeaders(table):
     # is it not windows
-    if os.name != "nt":
+    if QtCore.QSysInfo.productType() != "windows":
         return
-    version = QtCore.QSysInfo.WindowsVersion
-    WINDOWS_10 = 160
-    if (version == WINDOWS_10):
+    WINDOWS_10 = "10"
+    if (QtCore.QSysInfo.productVersion() == WINDOWS_10):
         styleSheet = \
             "QHeaderView::section{" \
             + "border-top:0px solid #D8D8D8;" \

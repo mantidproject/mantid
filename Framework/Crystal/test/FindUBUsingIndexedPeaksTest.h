@@ -16,6 +16,7 @@
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
@@ -48,8 +49,7 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(WSName)));
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(WSName)));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -65,9 +65,8 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt = ws->mutableSample().getOrientedLattice();
 
-    double correct_UB[] = {-0.04542050, 0.04061990,  -0.0122354,
-                           0.00140347,  -0.00318493, 0.116545,
-                           0.05749760,  0.03223800,  0.02737380};
+    double correct_UB[] = {-0.04542050, 0.04061990, -0.0122354, 0.00140347, -0.00318493,
+                           0.116545,    0.05749760, 0.03223800, 0.02737380};
 
     std::vector<double> UB_calculated = latt.getUB().getVector();
 
@@ -78,6 +77,57 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(WSName);
   }
+
+  void test_exec_LeanElasticPeak() {
+    // Name of the output workspace.
+    std::string WSName("peaks");
+    LoadNexusProcessed loader;
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT(loader.isInitialized());
+    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks.nxs");
+    loader.setPropertyValue("OutputWorkspace", WSName);
+
+    TS_ASSERT(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    PeaksWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(WSName)));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    // Convert PeaksWorkspace to LeanElasticPeaksWorkspace
+    auto lpw = std::make_shared<LeanElasticPeaksWorkspace>();
+    for (auto peak : ws->getPeaks())
+      lpw->addPeak(peak);
+    AnalysisDataService::Instance().addOrReplace(WSName, lpw);
+
+    FindUBUsingIndexedPeaks alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", WSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Check that we set an oriented lattice
+    TS_ASSERT(lpw->mutableSample().hasOrientedLattice());
+    // Check that the UB matrix is the same as in TOPAZ_3007.mat
+    OrientedLattice latt = lpw->mutableSample().getOrientedLattice();
+
+    double correct_UB[] = {-0.04542050, 0.04061990, -0.0122354, 0.00140347, -0.00318493,
+                           0.116545,    0.05749760, 0.03223800, 0.02737380};
+
+    std::vector<double> UB_calculated = latt.getUB().getVector();
+
+    for (size_t i = 0; i < 9; i++) {
+      TS_ASSERT_DELTA(correct_UB[i], UB_calculated[i], 5e-4);
+    }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(WSName);
+  }
+
   void test_mod() {
     LoadIsawPeaks alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize())
@@ -90,8 +140,7 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve("peaks")));
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("peaks")));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -107,16 +156,14 @@ public:
     FindUBUsingIndexedPeaks alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize())
     TS_ASSERT(alg2.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg2.setPropertyValue("ToleranceForSatellite", "0.05"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("ToleranceForSatellite", "0.05"));
     TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("PeaksWorkspace", "peaks"));
     TS_ASSERT_THROWS_NOTHING(alg2.execute(););
     TS_ASSERT(alg2.isExecuted());
 
     PeaksWorkspace_sptr Modulated;
     TS_ASSERT_THROWS_NOTHING(
-        Modulated = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve("peaks")));
+        Modulated = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("peaks")));
     // Check that we set an oriented lattice
     TS_ASSERT(ws->mutableSample().hasOrientedLattice());
     // Check that the UB matrix is the same as in TOPAZ_3007.mat

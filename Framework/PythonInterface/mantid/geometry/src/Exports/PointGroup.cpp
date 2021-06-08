@@ -29,13 +29,11 @@ namespace //<unnamed>
 using namespace Mantid::PythonInterface;
 
 bool isEquivalent(PointGroup &self, const object &hkl1, const object &hkl2) {
-  return self.isEquivalent(Converters::PyObjectToV3D(hkl1)(),
-                           Converters::PyObjectToV3D(hkl2)());
+  return self.isEquivalent(Converters::PyObjectToV3D(hkl1)(), Converters::PyObjectToV3D(hkl2)());
 }
 
 boost::python::list getEquivalents(PointGroup &self, const object &hkl) {
-  const std::vector<Mantid::Kernel::V3D> &equivalents =
-      self.getEquivalents(Converters::PyObjectToV3D(hkl)());
+  const std::vector<Mantid::Kernel::V3D> &equivalents = self.getEquivalents(Converters::PyObjectToV3D(hkl)());
 
   boost::python::list pythonEquivalents;
   for (const auto &equivalent : equivalents) {
@@ -61,8 +59,7 @@ std::string __repr__implementation(const PointGroup &self) {
 void export_PointGroup() {
   register_ptr_to_python<std::shared_ptr<PointGroup>>();
 
-  scope pointGroupScope =
-      class_<PointGroup, boost::noncopyable>("PointGroup", no_init);
+  scope pointGroupScope = class_<PointGroup, boost::noncopyable>("PointGroup", no_init);
 
   enum_<PointGroup::CrystalSystem>("CrystalSystem")
       .value("Triclinic", PointGroup::CrystalSystem::Triclinic)
@@ -87,14 +84,12 @@ void export_PointGroup() {
       .def("getHMSymbol", &PointGroup::getSymbol, arg("self"))
       .def("getCrystalSystem", &PointGroup::crystalSystem, arg("self"))
       .def("getLatticeSystem", &PointGroup::latticeSystem, arg("self"))
-      .def("isEquivalent", &isEquivalent,
-           (arg("self"), arg("hkl1"), arg("hkl2")),
+      .def("isEquivalent", &isEquivalent, (arg("self"), arg("hkl1"), arg("hkl2")),
            "Check whether the two HKLs are symmetrically equivalent.")
       .def("getEquivalents", &getEquivalents, (arg("self"), arg("hkl")),
            "Returns an array with all symmetry equivalents of the supplied "
            "HKL.")
-      .def("getReflectionFamily", &getReflectionFamily,
-           (arg("self"), arg("hkl")),
+      .def("getReflectionFamily", &getReflectionFamily, (arg("self"), arg("hkl")),
            "Returns the same HKL for all symmetry equivalents.")
       .def(str(self))
       .def("__repr__", &__repr__implementation);

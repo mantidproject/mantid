@@ -24,21 +24,18 @@ class IFuncMinimizer;
 namespace CurveFitting {
 namespace Algorithms {
 MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr
-getDoublePulseFunction(std::shared_ptr<const API::IFunction> const &function,
-                       double offset, double firstPulseWeight,
+getDoublePulseFunction(std::shared_ptr<const API::IFunction> const &function, double offset, double firstPulseWeight,
                        double secondPulseWeight);
 
 MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr
-getDoublePulseMultiDomainFunction(
-    std::shared_ptr<const API::MultiDomainFunction> const &function,
-    double offset, double firstPulseWeight, double secondPulseWeight);
+getDoublePulseMultiDomainFunction(std::shared_ptr<const API::MultiDomainFunction> const &function, double offset,
+                                  double firstPulseWeight, double secondPulseWeight);
 
-MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr extractInnerFunction(
-    std::shared_ptr<const Mantid::CurveFitting::Functions::Convolution> const
-        &function);
+MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr
+extractInnerFunction(std::shared_ptr<const Mantid::CurveFitting::Functions::Convolution> const &function);
 
-MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr extractInnerFunction(
-    std::shared_ptr<const API::MultiDomainFunction> const &function);
+MANTID_CURVEFITTING_DLL Mantid::API::IFunction_sptr
+extractInnerFunction(std::shared_ptr<const API::MultiDomainFunction> const &function);
 /**
 
 A function to fit muon data from a double pulse source. It does this by
@@ -105,8 +102,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"FitGaussian",      "UserFunction1D",   "PlotPeakByLogValue",
-            "SplineBackground", "EvaluateFunction", "Fit"};
+    return {"FitGaussian", "UserFunction1D", "PlotPeakByLogValue", "SplineBackground", "EvaluateFunction", "Fit"};
   }
 
 private:
@@ -115,11 +111,10 @@ private:
 
   std::vector<Mantid::API::MatrixWorkspace_sptr> getWorkspaces() const;
   void declareAdditionalProperties();
-  void runFitAlgorith(Mantid::API::IAlgorithm_sptr fitAlgorithm,
-                      Mantid::API::IFunction_sptr function, int maxIterations);
+  void runFitAlgorith(Mantid::API::IAlgorithm_sptr fitAlgorithm, Mantid::API::IFunction_sptr function,
+                      int maxIterations);
   void setOutputProperties();
-  void createOutput(Mantid::API::IAlgorithm_sptr fitAlg,
-                    Mantid::API::IFunction_sptr function);
+  void createOutput(Mantid::API::IAlgorithm_sptr fitAlg, Mantid::API::IFunction_sptr function);
 
   bool m_makeOutput;
   bool m_outputFitData;

@@ -90,8 +90,7 @@ public:
     TS_ASSERT(!f.isPointContained(point));
   }
 
-  void add2DVertex(std::vector<std::vector<coord_t>> &vertexes, double x,
-                   double y) {
+  void add2DVertex(std::vector<std::vector<coord_t>> &vertexes, double x, double y) {
     std::vector<coord_t> vertex;
     vertex.emplace_back(static_cast<coord_t>(x));
     vertex.emplace_back(static_cast<coord_t>(y));
@@ -103,9 +102,8 @@ public:
    * @param vertexes :: returns the vertex array
    * @return also a bare-array version of the same thing
    */
-  std::vector<coord_t>
-  make2DVertexSquare(std::vector<std::vector<coord_t>> &vertexes, double x1,
-                     double y1, double x2, double y2) {
+  std::vector<coord_t> make2DVertexSquare(std::vector<std::vector<coord_t>> &vertexes, double x1, double y1, double x2,
+                                          double y2) {
     auto out = std::vector<coord_t>(8);
     vertexes.clear();
     add2DVertex(vertexes, x1, y1);
@@ -158,117 +156,81 @@ public:
     std::vector<coord_t> bareVertexes;
 
     bareVertexes = make2DVertexSquare(vertexes, 1.2, 0.2, 1.8, 0.8);
+    TSM_ASSERT("Box that is to the right; not touching", !f.isBoxTouching(vertexes));
+    TSM_ASSERT("Box that is to the right; not touching", !f.isBoxTouching(bareVertexes.data(), 4));
     TSM_ASSERT("Box that is to the right; not touching",
-               !f.isBoxTouching(vertexes));
-    TSM_ASSERT("Box that is to the right; not touching",
-               !f.isBoxTouching(bareVertexes.data(), 4));
-    TSM_ASSERT("Box that is to the right; not touching",
-               f.boxContact(bareVertexes.data(), 4) ==
-                   MDImplicitFunction::NOT_TOUCHING);
+               f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::NOT_TOUCHING);
 
     bareVertexes = make2DVertexSquare(vertexes, 0.2, 1.2, 0.8, 1.8);
     TSM_ASSERT("Box that is above; not touching", !f.isBoxTouching(vertexes));
+    TSM_ASSERT("Box that is above; not touching", !f.isBoxTouching(bareVertexes.data(), 4));
     TSM_ASSERT("Box that is above; not touching",
-               !f.isBoxTouching(bareVertexes.data(), 4));
-    TSM_ASSERT("Box that is above; not touching",
-               f.boxContact(bareVertexes.data(), 4) ==
-                   MDImplicitFunction::NOT_TOUCHING);
+               f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::NOT_TOUCHING);
 
     bareVertexes = make2DVertexSquare(vertexes, 0.8, 0.8, 1.8, 1.8);
+    TSM_ASSERT("Box with one corner touching in the upper right; touches", f.isBoxTouching(vertexes));
+    TSM_ASSERT("Box with one corner touching in the upper right; touches", f.isBoxTouching(bareVertexes.data(), 4));
     TSM_ASSERT("Box with one corner touching in the upper right; touches",
-               f.isBoxTouching(vertexes));
-    TSM_ASSERT("Box with one corner touching in the upper right; touches",
-               f.isBoxTouching(bareVertexes.data(), 4));
-    TSM_ASSERT("Box with one corner touching in the upper right; touches",
-               f.boxContact(bareVertexes.data(), 4) ==
-                   MDImplicitFunction::TOUCHING);
+               f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::TOUCHING);
 
     bareVertexes = make2DVertexSquare(vertexes, 0.8, 0.2, 1.8, 0.8);
+    TSM_ASSERT("Box with both right-hand vertexes inside; touches", f.isBoxTouching(vertexes));
+    TSM_ASSERT("Box with both right-hand vertexes inside; touches", f.isBoxTouching(bareVertexes.data(), 4));
     TSM_ASSERT("Box with both right-hand vertexes inside; touches",
-               f.isBoxTouching(vertexes));
-    TSM_ASSERT("Box with both right-hand vertexes inside; touches",
-               f.isBoxTouching(bareVertexes.data(), 4));
-    TSM_ASSERT("Box with both right-hand vertexes inside; touches",
-               f.boxContact(bareVertexes.data(), 4) ==
-                   MDImplicitFunction::TOUCHING);
+               f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::TOUCHING);
 
     bareVertexes = make2DVertexSquare(vertexes, 0.8, -1.0, 1.8, +3.0);
-    TSM_ASSERT("Box overlapping on the right side, no vertexes inside; touches",
-               f.isBoxTouching(vertexes));
+    TSM_ASSERT("Box overlapping on the right side, no vertexes inside; touches", f.isBoxTouching(vertexes));
     TSM_ASSERT("Box overlapping on the right side, no vertexes inside; touches",
                f.isBoxTouching(bareVertexes.data(), 4));
     TSM_ASSERT("Box overlapping on the right side, no vertexes inside; touches",
-               f.boxContact(bareVertexes.data(), 4) ==
-                   MDImplicitFunction::TOUCHING);
+               f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::TOUCHING);
 
     bareVertexes = make2DVertexSquare(vertexes, -2.0, -1.0, 0.2, +3.0);
-    TSM_ASSERT("Box overlapping on the left side, no vertexes inside; touches",
-               f.isBoxTouching(vertexes));
+    TSM_ASSERT("Box overlapping on the left side, no vertexes inside; touches", f.isBoxTouching(vertexes));
     TSM_ASSERT("Box overlapping on the left side, no vertexes inside; touches",
                f.isBoxTouching(bareVertexes.data(), 4));
     TSM_ASSERT("Box overlapping on the left side, no vertexes inside; touches",
-               f.boxContact(bareVertexes.data(), 4) ==
-                   MDImplicitFunction::TOUCHING);
+               f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::TOUCHING);
 
     bareVertexes = make2DVertexSquare(vertexes, -2.0, 0.9, +3.0, +3.0);
+    TSM_ASSERT("Box overlapping on the top side, no vertexes inside; touches", f.isBoxTouching(vertexes));
+    TSM_ASSERT("Box overlapping on the top side, no vertexes inside; touches", f.isBoxTouching(bareVertexes.data(), 4));
     TSM_ASSERT("Box overlapping on the top side, no vertexes inside; touches",
-               f.isBoxTouching(vertexes));
-    TSM_ASSERT("Box overlapping on the top side, no vertexes inside; touches",
-               f.isBoxTouching(bareVertexes.data(), 4));
-    TSM_ASSERT("Box overlapping on the top side, no vertexes inside; touches",
-               f.boxContact(bareVertexes.data(), 4) ==
-                   MDImplicitFunction::TOUCHING);
+               f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::TOUCHING);
 
     bareVertexes = make2DVertexSquare(vertexes, -2.0, -3.0, +3.0, +0.1);
-    TSM_ASSERT(
-        "Box overlapping on the bottom side, no vertexes inside; touches",
-        f.isBoxTouching(vertexes));
-    TSM_ASSERT(
-        "Box overlapping on the bottom side, no vertexes inside; touches",
-        f.isBoxTouching(bareVertexes.data(), 4));
-    TSM_ASSERT(
-        "Box overlapping on the bottom side, no vertexes inside; touches",
-        f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::TOUCHING);
+    TSM_ASSERT("Box overlapping on the bottom side, no vertexes inside; touches", f.isBoxTouching(vertexes));
+    TSM_ASSERT("Box overlapping on the bottom side, no vertexes inside; touches",
+               f.isBoxTouching(bareVertexes.data(), 4));
+    TSM_ASSERT("Box overlapping on the bottom side, no vertexes inside; touches",
+               f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::TOUCHING);
 
     bareVertexes = make2DVertexSquare(vertexes, -2.0, -2.0, 3.0, 3.0);
-    TSM_ASSERT(
-        "Box bigger than region on all directions, no vertexes inside; touches",
-        f.isBoxTouching(vertexes));
-    TSM_ASSERT(
-        "Box bigger than region on all directions, no vertexes inside; touches",
-        f.isBoxTouching(bareVertexes.data(), 4));
-    TSM_ASSERT(
-        "Box bigger than region on all directions, no vertexes inside; touches",
-        f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::TOUCHING);
+    TSM_ASSERT("Box bigger than region on all directions, no vertexes inside; touches", f.isBoxTouching(vertexes));
+    TSM_ASSERT("Box bigger than region on all directions, no vertexes inside; touches",
+               f.isBoxTouching(bareVertexes.data(), 4));
+    TSM_ASSERT("Box bigger than region on all directions, no vertexes inside; touches",
+               f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::TOUCHING);
 
     bareVertexes = make2DVertexSquare(vertexes, 0.5, -10.0, 0.55, +10.0);
-    TSM_ASSERT(
-        "Narrow box passing through the middle, no vertexes inside; touches",
-        f.isBoxTouching(vertexes));
-    TSM_ASSERT(
-        "Narrow box passing through the middle, no vertexes inside; touches",
-        f.isBoxTouching(bareVertexes.data(), 4));
-    TSM_ASSERT(
-        "Narrow box passing through the middle, no vertexes inside; touches",
-        f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::TOUCHING);
+    TSM_ASSERT("Narrow box passing through the middle, no vertexes inside; touches", f.isBoxTouching(vertexes));
+    TSM_ASSERT("Narrow box passing through the middle, no vertexes inside; touches",
+               f.isBoxTouching(bareVertexes.data(), 4));
+    TSM_ASSERT("Narrow box passing through the middle, no vertexes inside; touches",
+               f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::TOUCHING);
 
     bareVertexes = make2DVertexSquare(vertexes, 0.5, 1.1, 0.55, +10.0);
+    TSM_ASSERT("Narrow box but above; not touching", !f.isBoxTouching(vertexes));
+    TSM_ASSERT("Narrow box but above; not touching", !f.isBoxTouching(bareVertexes.data(), 4));
     TSM_ASSERT("Narrow box but above; not touching",
-               !f.isBoxTouching(vertexes));
-    TSM_ASSERT("Narrow box but above; not touching",
-               !f.isBoxTouching(bareVertexes.data(), 4));
-    TSM_ASSERT("Narrow box but above; not touching",
-               f.boxContact(bareVertexes.data(), 4) ==
-                   MDImplicitFunction::NOT_TOUCHING);
+               f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::NOT_TOUCHING);
 
     bareVertexes = make2DVertexSquare(vertexes, 0.1, 0.1, 0.9, 0.9);
+    TSM_ASSERT("Box that is completely within region; touches ", f.isBoxTouching(vertexes));
+    TSM_ASSERT("Box that is completely within region; touches ", f.isBoxTouching(bareVertexes.data(), 4));
     TSM_ASSERT("Box that is completely within region; touches ",
-               f.isBoxTouching(vertexes));
-    TSM_ASSERT("Box that is completely within region; touches ",
-               f.isBoxTouching(bareVertexes.data(), 4));
-    TSM_ASSERT("Box that is completely within region; touches ",
-               f.boxContact(bareVertexes.data(), 4) ==
-                   MDImplicitFunction::CONTAINED);
+               f.boxContact(bareVertexes.data(), 4) == MDImplicitFunction::CONTAINED);
 
     vertexes.clear();
     add2DVertex(vertexes, 3.0, -0.1);

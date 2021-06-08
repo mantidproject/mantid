@@ -26,42 +26,36 @@ using namespace Mantid::API;
 DECLARE_ALGORITHM(SaveDiffFittingAscii)
 
 /// Empty constructor
-SaveDiffFittingAscii::SaveDiffFittingAscii()
-    : Mantid::API::Algorithm(), m_sep(','), m_counter(0) {
+SaveDiffFittingAscii::SaveDiffFittingAscii() : Mantid::API::Algorithm(), m_sep(','), m_counter(0) {
   useAlgorithm("EnggSaveSinglePeakFitResultsToHDF5", 1);
 }
 
 /// Initialisation method.
 void SaveDiffFittingAscii::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The name of the workspace containing the data you want to "
                   "save to a TBL file");
 
   // Declare required parameters, filename with ext {.his} and input
   // workspace
   const std::vector<std::string> exts{".txt", ".csv", ""};
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Save, exts),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save, exts),
                   "The filename to use for the saved data");
 
-  declareProperty(
-      "RunNumber", "",
-      "Run number list of the focused files, which is used to generate the "
-      "parameters table workspace");
+  declareProperty("RunNumber", "",
+                  "Run number list of the focused files, which is used to generate the "
+                  "parameters table workspace");
 
-  declareProperty(
-      "Bank", "",
-      "Bank number list of the focused files, which is used to generate "
-      "the parameters table workspace");
+  declareProperty("Bank", "",
+                  "Bank number list of the focused files, which is used to generate "
+                  "the parameters table workspace");
 
   std::vector<std::string> formats;
 
   formats.emplace_back("AppendToExistingFile");
   formats.emplace_back("OverwriteFile");
-  declareProperty("OutMode", "AppendToExistingFile",
-                  std::make_shared<Kernel::StringListValidator>(formats),
+  declareProperty("OutMode", "AppendToExistingFile", std::make_shared<Kernel::StringListValidator>(formats),
                   "Over write the file or append data to existing file");
 }
 
@@ -74,12 +68,10 @@ void SaveDiffFittingAscii::exec() {
   /// Workspace
   const ITableWorkspace_sptr tbl_ws = getProperty("InputWorkspace");
   if (!tbl_ws)
-    throw std::runtime_error(
-        "Please provide an input table workspace to be saved.");
+    throw std::runtime_error("Please provide an input table workspace to be saved.");
 
   std::vector<API::ITableWorkspace_sptr> input_ws;
-  input_ws.emplace_back(
-      std::dynamic_pointer_cast<DataObjects::TableWorkspace>(tbl_ws));
+  input_ws.emplace_back(std::dynamic_pointer_cast<DataObjects::TableWorkspace>(tbl_ws));
 
   processAll(input_ws);
 }
@@ -90,28 +82,23 @@ bool SaveDiffFittingAscii::processGroups() {
 
     std::string name = getPropertyValue("InputWorkspace");
 
-    WorkspaceGroup_sptr inputGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
+    WorkspaceGroup_sptr inputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
 
     std::vector<API::ITableWorkspace_sptr> input_ws;
     input_ws.reserve(inputGroup->getNumberOfEntries());
     for (int i = 0; i < inputGroup->getNumberOfEntries(); ++i) {
-      input_ws.emplace_back(
-          std::dynamic_pointer_cast<ITableWorkspace>(inputGroup->getItem(i)));
+      input_ws.emplace_back(std::dynamic_pointer_cast<ITableWorkspace>(inputGroup->getItem(i)));
     }
 
     processAll(input_ws);
   } catch (std::runtime_error &rexc) {
-    g_log.error(
-        std::string("Error while processing a group of workspaces. Details: ") +
-        rexc.what() + '\n');
+    g_log.error(std::string("Error while processing a group of workspaces. Details: ") + rexc.what() + '\n');
   }
 
   return true;
 }
 
-void SaveDiffFittingAscii::processAll(
-    const std::vector<API::ITableWorkspace_sptr> &input_ws) {
+void SaveDiffFittingAscii::processAll(const std::vector<API::ITableWorkspace_sptr> &input_ws) {
 
   const std::string filename = getProperty("Filename");
   const std::string outMode = getProperty("OutMode");
@@ -126,8 +113,7 @@ void SaveDiffFittingAscii::processAll(
     appendToFile = true;
 
   // Initialize the file stream
-  std::ofstream file(filename.c_str(),
-                     (appendToFile ? std::ios::app : std::ios::out));
+  std::ofstream file(filename.c_str(), (appendToFile ? std::ios::app : std::ios::out));
 
   if (!file) {
     throw Exception::FileError("Unable to create file: ", filename);
@@ -180,24 +166,20 @@ void SaveDiffFittingAscii::processAll(
 
 std::vector<std::string> SaveDiffFittingAscii::splitList(std::string strList) {
   std::vector<std::string> splitList;
-  strList.erase(std::remove(strList.begin(), strList.end(), ' '),
-                strList.end());
+  strList.erase(std::remove(strList.begin(), strList.end(), ' '), strList.end());
   boost::split(splitList, strList, boost::is_any_of(","));
 
   return splitList;
 }
 
-void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
-                                     const std::string &bank,
-                                     std::ofstream &file) {
+void SaveDiffFittingAscii::writeInfo(const std::string &runNumber, const std::string &bank, std::ofstream &file) {
 
   file << "run number: " << runNumber << '\n';
   file << "bank: " << bank << '\n';
   m_counter++;
 }
 
-void SaveDiffFittingAscii::writeHeader(
-    const std::vector<std::string> &columnHeadings, std::ofstream &file) {
+void SaveDiffFittingAscii::writeHeader(const std::vector<std::string> &columnHeadings, std::ofstream &file) {
   for (const auto &heading : columnHeadings) {
     // if last header in the table workspace, put eol
     if (&heading == &columnHeadings.back()) {
@@ -208,16 +190,14 @@ void SaveDiffFittingAscii::writeHeader(
   }
 }
 
-void SaveDiffFittingAscii::writeData(const API::ITableWorkspace_sptr &workspace,
-                                     std::ofstream &file,
+void SaveDiffFittingAscii::writeData(const API::ITableWorkspace_sptr &workspace, std::ofstream &file,
                                      const size_t columnSize) {
 
   for (size_t rowIndex = 0; rowIndex < workspace->rowCount(); ++rowIndex) {
     TableRow row = workspace->getRow(rowIndex);
     for (size_t columnIndex = 0; columnIndex < columnSize; columnIndex++) {
 
-      const auto row_str =
-          boost::lexical_cast<std::string>(row.Double(columnIndex));
+      const auto row_str = boost::lexical_cast<std::string>(row.Double(columnIndex));
       g_log.debug() << row_str << std::endl;
 
       if (columnIndex == columnSize - 1)
@@ -228,8 +208,7 @@ void SaveDiffFittingAscii::writeData(const API::ITableWorkspace_sptr &workspace,
   }
 }
 
-void SaveDiffFittingAscii::writeVal(const std::string &val, std::ofstream &file,
-                                    const bool endline) {
+void SaveDiffFittingAscii::writeVal(const std::string &val, std::ofstream &file, const bool endline) {
   std::string valStr = boost::lexical_cast<std::string>(val);
 
   // checking if it needs to be surrounded in
@@ -256,10 +235,8 @@ std::map<std::string, std::string> SaveDiffFittingAscii::validateInputs() {
   // check for null pointers - this is to protect against workspace groups
   const std::string inputWS = getProperty("InputWorkspace");
 
-  WorkspaceGroup_sptr inWks =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inputWS);
-  API::WorkspaceGroup_const_sptr inGrp =
-      std::dynamic_pointer_cast<const API::WorkspaceGroup>(inWks);
+  WorkspaceGroup_sptr inWks = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inputWS);
+  API::WorkspaceGroup_const_sptr inGrp = std::dynamic_pointer_cast<const API::WorkspaceGroup>(inWks);
 
   const ITableWorkspace_sptr tbl_ws = getProperty("InputWorkspace");
   if (tbl_ws) {
@@ -267,9 +244,8 @@ std::map<std::string, std::string> SaveDiffFittingAscii::validateInputs() {
   }
 
   if (!inGrp && !tbl_ws) {
-    std::string message =
-        "The current version of this algorithm only "
-        "supports input workspaces of type TableWorkspace and WorkspaceGroup";
+    std::string message = "The current version of this algorithm only "
+                          "supports input workspaces of type TableWorkspace and WorkspaceGroup";
     errors["InputWorkspace"] = message;
   }
 

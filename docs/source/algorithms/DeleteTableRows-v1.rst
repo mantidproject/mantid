@@ -36,7 +36,7 @@ Usage
     DeleteTableRows(t,Rows=[2,4,6,8]) #Note: the previous delete will have moved all the rows up 1
 
     #delete a range of rows, you can also refer to the workspace using the name in the Workspace List
-    DeleteTableRows("myTable",Rows=range(7,14)) 
+    DeleteTableRows("myTable",Rows=range(7,14))
 
     print("The remaining values in the first column")
     print(t.column(0))

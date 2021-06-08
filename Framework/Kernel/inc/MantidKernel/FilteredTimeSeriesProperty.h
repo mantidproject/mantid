@@ -17,20 +17,16 @@ namespace Kernel {
  * Templated class that defines a filtered time series but
  * still gives access to the original data.
  */
-template <typename HeldType>
-class DLLExport FilteredTimeSeriesProperty
-    : public TimeSeriesProperty<HeldType> {
+template <typename HeldType> class DLLExport FilteredTimeSeriesProperty : public TimeSeriesProperty<HeldType> {
 
 public:
   /// Construct with a source time series & a filter property
-  FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp,
-                             const TimeSeriesProperty<bool> &filterProp);
+  FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp, const TimeSeriesProperty<bool> &filterProp);
 
   /// Construct with a source time series to take ownership of & a filter
   /// property
-  FilteredTimeSeriesProperty(
-      std::unique_ptr<const TimeSeriesProperty<HeldType>> seriesProp,
-      const TimeSeriesProperty<bool> &filterProp);
+  FilteredTimeSeriesProperty(std::unique_ptr<const TimeSeriesProperty<HeldType>> seriesProp,
+                             const TimeSeriesProperty<bool> &filterProp);
   /// Destructor
   ~FilteredTimeSeriesProperty() override;
 

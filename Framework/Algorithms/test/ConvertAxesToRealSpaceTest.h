@@ -21,9 +21,7 @@ class ConvertAxesToRealSpaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertAxesToRealSpaceTest *createSuite() {
-    return new ConvertAxesToRealSpaceTest();
-  }
+  static ConvertAxesToRealSpaceTest *createSuite() { return new ConvertAxesToRealSpaceTest(); }
   static void destroySuite(ConvertAxesToRealSpaceTest *suite) { delete suite; }
 
   void test_Init() {
@@ -34,8 +32,7 @@ public:
 
   void test_exec_y_theta() {
     std::string baseWSName("ConvertAxesToRealSpaceTest_exec_y_theta");
-    MatrixWorkspace_sptr ws =
-        do_algorithm_run(baseWSName, "y", "theta", 50, 10);
+    MatrixWorkspace_sptr ws = do_algorithm_run(baseWSName, "y", "theta", 50, 10);
     if (!ws)
       return;
   }
@@ -55,15 +52,12 @@ public:
     do_algorithm_run(baseWSName, "phi", "signed2theta", 100, 200);
   }
 
-  MatrixWorkspace_sptr do_algorithm_run(const std::string &baseWSName,
-                                        const std::string &verticalAxis,
-                                        const std::string &horizontalAxis,
-                                        int nHBins, int nVBins) {
+  MatrixWorkspace_sptr do_algorithm_run(const std::string &baseWSName, const std::string &verticalAxis,
+                                        const std::string &horizontalAxis, int nHBins, int nVBins) {
     std::string inWSName(baseWSName + "_InputWS");
     std::string outWSName(baseWSName + "_OutputWS");
 
-    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        3, 2, false);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 2, false);
     AnalysisDataService::Instance().addOrReplace(inWSName, testWS);
 
     Mantid::Algorithms::ConvertAxesToRealSpace conv;
@@ -71,12 +65,9 @@ public:
     conv.initialize();
 
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        conv.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        conv.setPropertyValue("VerticalAxis", verticalAxis));
-    TS_ASSERT_THROWS_NOTHING(
-        conv.setPropertyValue("HorizontalAxis", horizontalAxis));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("VerticalAxis", verticalAxis));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("HorizontalAxis", horizontalAxis));
     TS_ASSERT_THROWS_NOTHING(conv.setProperty("NumberVerticalBins", nVBins));
     TS_ASSERT_THROWS_NOTHING(conv.setProperty("NumberHorizontalBins", nHBins));
 
@@ -89,9 +80,7 @@ public:
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return ws;

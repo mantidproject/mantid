@@ -46,95 +46,78 @@ tests.
 //----------------------------------------------------------------------------------------------
 
 /// Add a sample at samplePos to given instrument.
-void addSampleToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
-                           const Mantid::Kernel::V3D &samplePos);
+void addSampleToInstrument(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Kernel::V3D &samplePos);
 
 /// Add a source with given name and sourcePos to given instrument
-void addSourceToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
-                           const Mantid::Kernel::V3D &sourcePos,
+void addSourceToInstrument(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Kernel::V3D &sourcePos,
                            const std::string &name = "moderator");
 
 /**
  * Return the appropriate XML for the requested cylinder
  */
-std::string cappedCylinderXML(double radius, double height,
-                              const Mantid::Kernel::V3D &baseCentre,
-                              const Mantid::Kernel::V3D &axis,
-                              const std::string &id);
+std::string cappedCylinderXML(double radius, double height, const Mantid::Kernel::V3D &baseCentre,
+                              const Mantid::Kernel::V3D &axis, const std::string &id);
 
 /**
  * Create a capped cylinder object
  */
-std::shared_ptr<Mantid::Geometry::CSGObject>
-createCappedCylinder(double radius, double height,
-                     const Mantid::Kernel::V3D &baseCentre,
-                     const Mantid::Kernel::V3D &axis, const std::string &id);
+std::shared_ptr<Mantid::Geometry::CSGObject> createCappedCylinder(double radius, double height,
+                                                                  const Mantid::Kernel::V3D &baseCentre,
+                                                                  const Mantid::Kernel::V3D &axis,
+                                                                  const std::string &id);
 /**
  * Return the XML for a hollow cylinder
  */
-std::string hollowCylinderXML(double innerRadius, double outerRadius,
-                              double height,
-                              const Mantid::Kernel::V3D &baseCentre,
-                              const Mantid::Kernel::V3D &axis,
+std::string hollowCylinderXML(double innerRadius, double outerRadius, double height,
+                              const Mantid::Kernel::V3D &baseCentre, const Mantid::Kernel::V3D &axis,
                               const std::string &id);
 /**
  * Create a hollow cylinder object
  */
-std::shared_ptr<Mantid::Geometry::CSGObject>
-createHollowCylinder(double innerRadius, double outerRadius, double height,
-                     const Mantid::Kernel::V3D &baseCentre,
-                     const Mantid::Kernel::V3D &axis, const std::string &id);
+std::shared_ptr<Mantid::Geometry::CSGObject> createHollowCylinder(double innerRadius, double outerRadius, double height,
+                                                                  const Mantid::Kernel::V3D &baseCentre,
+                                                                  const Mantid::Kernel::V3D &axis,
+                                                                  const std::string &id);
 /**
  * Return the XML for a sphere.
  */
-std::string sphereXML(double radius, const Mantid::Kernel::V3D &centre,
-                      const std::string &id);
+std::string sphereXML(double radius, const Mantid::Kernel::V3D &centre, const std::string &id);
 /**
  * Create a sphere object
  */
 std::shared_ptr<Mantid::Geometry::CSGObject>
-createSphere(double radius,
-             const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D(),
-             const std::string &id = "sp-1");
-std::string cuboidXML(double xHalfLength, double yHalfLength = -1.0,
-                      double zHalfLength = -1.0,
-                      Mantid::Kernel::V3D centre = {0.0, 0.0, 0.0},
-                      const std::string &id = "detector-shape");
+createSphere(double radius, const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D(), const std::string &id = "sp-1");
+std::string cuboidXML(double xHalfLength, double yHalfLength = -1.0, double zHalfLength = -1.0,
+                      Mantid::Kernel::V3D centre = {0.0, 0.0, 0.0}, const std::string &id = "detector-shape");
 /** Create a cuboid shape*/
-std::shared_ptr<Mantid::Geometry::CSGObject>
-createCuboid(double xHalfLength, double yHalfLength = -1.0,
-             double zHalfLength = -1.0,
-             Mantid::Kernel::V3D centre = {0.0, 0.0, 0.0},
-             const std::string &id = "detector-shape");
+std::shared_ptr<Mantid::Geometry::CSGObject> createCuboid(double xHalfLength, double yHalfLength = -1.0,
+                                                          double zHalfLength = -1.0,
+                                                          Mantid::Kernel::V3D centre = {0.0, 0.0, 0.0},
+                                                          const std::string &id = "detector-shape");
 /**
  * Create a rotated cuboid shape
  */
-std::shared_ptr<Mantid::Geometry::CSGObject>
-createCuboid(double xHalfLength, double yHalfLength, double zHalfLength,
-             double angle, Mantid::Kernel::V3D axis);
+std::shared_ptr<Mantid::Geometry::CSGObject> createCuboid(double xHalfLength, double yHalfLength, double zHalfLength,
+                                                          double angle, Mantid::Kernel::V3D axis);
 /**
  * Create a component assembly at the origin made up of 4 cylindrical detectors
  */
-std::shared_ptr<Mantid::Geometry::CompAssembly>
-createTestAssemblyOfFourCylinders();
+std::shared_ptr<Mantid::Geometry::CompAssembly> createTestAssemblyOfFourCylinders();
 /**
  * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and
  * r2
  */
 std::shared_ptr<Mantid::Geometry::CSGObject>
-createHollowShell(double innerRadius, double outerRadius,
-                  const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D());
+createHollowShell(double innerRadius, double outerRadius, const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D());
 /**
  * Create a detector group containing 5 detectors
  */
-std::shared_ptr<Mantid::Geometry::DetectorGroup>
-createDetectorGroupWith5CylindricalDetectors();
+std::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWith5CylindricalDetectors();
 /**
  * Create a detector group containing n detectors with gaps
  */
 std::shared_ptr<Mantid::Geometry::DetectorGroup>
-createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet = 4,
-                                                     double gap = 0.01);
+createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet = 4, double gap = 0.01);
 /**
  * Create a detector group containing detectors ring
  * R_min -- min radius of the ring
@@ -143,9 +126,7 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet = 4,
   The detectors are the cylinders with 1.5cm height and 0.5 cm radius
  */
 std::shared_ptr<Mantid::Geometry::DetectorGroup>
-createRingOfCylindricalDetectors(const double R_min = 4.5,
-                                 const double R_max = 5,
-                                 const double z000000000000000 = 4);
+createRingOfCylindricalDetectors(const double R_min = 4.5, const double R_max = 5, const double z000000000000000 = 4);
 
 /**
  * Create a detector vector containing detectors ring
@@ -155,9 +136,7 @@ createRingOfCylindricalDetectors(const double R_min = 4.5,
   The detectors are the cylinders with 1.5cm height and 0.5 cm radius
  */
 std::vector<std::unique_ptr<Mantid::Geometry::IDetector>>
-createVectorOfCylindricalDetectors(const double R_min = 4.5,
-                                   const double R_max = 5,
-                                   const double z000000000000000 = 4);
+createVectorOfCylindricalDetectors(const double R_min = 4.5, const double R_max = 5, const double z000000000000000 = 4);
 
 /**
  * Creates a single flat bank with cylindrical (tubes) of detectors. Vertical y
@@ -173,16 +152,14 @@ createVectorOfCylindricalDetectors(const double R_min = 4.5,
  * @return Instrument with single bank as described by parameters.
  */
 Mantid::Geometry::Instrument_sptr
-createCylInstrumentWithVerticalOffsetsSpecified(
-    size_t nTubes, std::vector<double> verticalOffsets, size_t nDetsPerTube,
-    double xMin, double xMax, double yMin, double yMax);
+createCylInstrumentWithVerticalOffsetsSpecified(size_t nTubes, std::vector<double> verticalOffsets, size_t nDetsPerTube,
+                                                double xMin, double xMax, double yMin, double yMax);
 
 /** create instrument with cylindrical detectors located in specific angular
  * positions */
-Mantid::Geometry::Instrument_sptr
-createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
-                                           const std::vector<double> &polar,
-                                           const std::vector<double> &azim);
+Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
+                                                                             const std::vector<double> &polar,
+                                                                             const std::vector<double> &azim);
 /**
  * Create an test instrument with n panels of 9 cylindrical detectors, a source
  * and a sample position.
@@ -197,68 +174,54 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
  * @param cylHeight :: height of each detector
  * @return Created instrument
  */
-Mantid::Geometry::Instrument_sptr createTestInstrumentCylindrical(
-    int num_banks,
-    const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0.0, 0.0, -10.),
-    const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(),
-    const double cylRadius = 0.004, const double cylHeight = 0.0002);
+Mantid::Geometry::Instrument_sptr
+createTestInstrumentCylindrical(int num_banks,
+                                const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0.0, 0.0, -10.),
+                                const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(),
+                                const double cylRadius = 0.004, const double cylHeight = 0.0002);
 
-void addRectangularBank(Mantid::Geometry::Instrument &testInstrument,
-                        int idStart, int pixels, double pixelSpacing,
-                        const std::string &bankName,
-                        const Mantid::Kernel::V3D &bankPos,
+void addRectangularBank(Mantid::Geometry::Instrument &testInstrument, int idStart, int pixels, double pixelSpacing,
+                        const std::string &bankName, const Mantid::Kernel::V3D &bankPos,
                         const Mantid::Kernel::Quat &bankRot);
 
 /// Create a test instrument with n panels of rectangular detectors,
 /// pixels*pixels in size, a source and spherical sample shape.
-Mantid::Geometry::Instrument_sptr
-createTestInstrumentRectangular(int num_banks, int pixels,
-                                double pixelSpacing = 0.008,
-                                double bankDistanceFromSample = 5.0);
+Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
+                                                                  double pixelSpacing = 0.008,
+                                                                  double bankDistanceFromSample = 5.0);
 
-Mantid::Geometry::Instrument_sptr
-createTestInstrumentRectangular2(int num_banks, int pixels,
-                                 double pixelSpacing = 0.008);
+Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
+                                                                   double pixelSpacing = 0.008);
 
-Mantid::Geometry::Instrument_sptr
-createTestUnnamedRectangular2(int num_banks, int pixels,
-                              double pixelSpacing = 0.008);
+Mantid::Geometry::Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels, double pixelSpacing = 0.008);
 
 /// Creates a mimimal valid virtual instrument.
-Mantid::Geometry::Instrument_sptr
-createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
-                        const Mantid::Kernel::V3D &samplePos,
-                        const Mantid::Kernel::V3D &detectorPos);
+Mantid::Geometry::Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
+                                                          const Mantid::Kernel::V3D &samplePos,
+                                                          const Mantid::Kernel::V3D &detectorPos);
 
-Mantid::Geometry::Instrument_sptr
-createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
-                                   const Mantid::Kernel::Quat &monitorRot);
+Mantid::Geometry::Instrument_sptr createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
+                                                                     const Mantid::Kernel::Quat &monitorRot);
 
 // creates a minimal instrument with optional source, sample, and detector.
-Mantid::Geometry::Instrument_sptr
-createInstrumentWithOptionalComponents(bool haveSource, bool haveSample,
-                                       bool haveDetector);
+Mantid::Geometry::Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource, bool haveSample,
+                                                                         bool haveDetector);
 
 Mantid::Geometry::Instrument_sptr createSimpleInstrumentWithRotation(
-    const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
-    const Mantid::Kernel::V3D &detectorPos,
-    const Mantid::Kernel::Quat &relativeBankRotation,
-    const Mantid::Kernel::Quat &relativeDetRotation,
+    const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos, const Mantid::Kernel::V3D &detectorPos,
+    const Mantid::Kernel::Quat &relativeBankRotation, const Mantid::Kernel::Quat &relativeDetRotation,
     const Mantid::Kernel::V3D detOffset = Mantid::Kernel::V3D(0, 0, 0));
 
-Mantid::Geometry::Instrument_sptr createInstrumentWithSourceRotation(
-    const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
-    const Mantid::Kernel::V3D &detectorPos,
-    const Mantid::Kernel::Quat &relativeSourceRotation);
+Mantid::Geometry::Instrument_sptr
+createInstrumentWithSourceRotation(const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
+                                   const Mantid::Kernel::V3D &detectorPos,
+                                   const Mantid::Kernel::Quat &relativeSourceRotation);
+
+Mantid::Geometry::Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos,
+                                                 const Mantid::Kernel::V3D &samplePos,
+                                                 const Mantid::Kernel::V3D &trolley1Pos,
+                                                 const Mantid::Kernel::V3D &trolley2Pos);
 
 Mantid::Geometry::Instrument_sptr
-sansInstrument(const Mantid::Kernel::V3D &sourcePos,
-               const Mantid::Kernel::V3D &samplePos,
-               const Mantid::Kernel::V3D &trolley1Pos,
-               const Mantid::Kernel::V3D &trolley2Pos);
-
-Mantid::Geometry::Instrument_sptr
-createInstrumentWithPSDTubes(const size_t nTubes = 3,
-                             const size_t nPixelsPerTube = 50,
-                             const bool mirrorTubes = false);
+createInstrumentWithPSDTubes(const size_t nTubes = 3, const size_t nPixelsPerTube = 50, const bool mirrorTubes = false);
 } // namespace ComponentCreationHelper

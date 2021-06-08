@@ -76,14 +76,11 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"CreateDummyCalFile",   "CreateCalFileByNames", "AlignDetectors",
-            "DiffractionFocussing", "LoadCalFile",          "SaveCalFile",
-            "MergeCalFiles"};
+    return {"CreateDummyCalFile", "CreateCalFileByNames", "AlignDetectors", "DiffractionFocussing",
+            "LoadCalFile",        "SaveCalFile",          "MergeCalFiles"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\DataHandling\\CalFiles";
-  }
+  const std::string category() const override { return "Diffraction\\DataHandling\\CalFiles"; }
 
 private:
   /// Map containing the detector entries found in the *.cal file. The key is
@@ -102,8 +99,7 @@ private:
   /// extension(.xml or .XML) but no path
   /// this is determine by the mantid instrument.directory
   /// @return Shared pointer to the 2D workspace
-  DataObjects::Workspace2D_sptr
-  loadEmptyInstrument(const std::string &instrument_xml_name);
+  DataObjects::Workspace2D_sptr loadEmptyInstrument(const std::string &instrument_xml_name);
   /// Calibration map containing the detector entries found in the *.cal file.
   /// The key is the udet number, the value of is a pair of <group,selected>.
   calmap calibration;

@@ -8,8 +8,10 @@ import Muon.GUI.Common.utilities.load_utils as utils
 import os
 import unittest
 
-from mantid import simpleapi, ConfigService
+from mantid import simpleapi
+from mantid.kernel import ConfigService
 from mantid.api import AnalysisDataService, ITableWorkspace
+from unittest import mock
 
 
 def create_simple_workspace(data_x, data_y, run_number=0):
@@ -57,6 +59,7 @@ class MuonFileUtilsTest(unittest.TestCase):
         self.assertEqual(instrument, 'MUSR')
 
     def test_that_load_dead_time_from_filename_places_table_in_ADS(self):
+        ConfigService.Instance().setString("default.facility", "ISIS")
         filename = 'MUSR00022725.nsx'
 
         name = utils.load_dead_time_from_filename(filename)
@@ -64,8 +67,10 @@ class MuonFileUtilsTest(unittest.TestCase):
 
         self.assertEqual(name, 'MUSR00022725.nsx_deadtime_table')
         self.assertTrue(isinstance(dead_time_table, ITableWorkspace))
+        ConfigService.Instance().setString("default.facility", " ")
 
     def test_load_workspace_from_filename_for_existing_file(self):
+        ConfigService.Instance().setString("default.facility", "ISIS")
         filename = 'MUSR00022725.nsx'
         load_result, run, filename, _ = utils.load_workspace_from_filename(filename)
 
@@ -74,16 +79,31 @@ class MuonFileUtilsTest(unittest.TestCase):
         self.assertEqual(load_result['MainFieldDirection'], 'Transverse')
         self.assertAlmostEqual(load_result['TimeZero'], 0.55000, 5)
         self.assertEqual(run, 22725)
+        ConfigService.Instance().setString("default.facility", " ")
 
     def test_load_workspace_from_filename_for_file_path(self):
-        filename = 'PSI'+ os.sep + 'run_1529_templs0.mon'
+        filename = 'PSI' + os.sep + 'run_1529_templs0.mon'
         inputs = {
               "DeadTimeTable": "__notUsed",
               "DetectorGroupingTable": "__notUsed"}
 
-        alg, _ = utils.create_load_algorithm(filename,inputs)
+        alg, _ = utils.create_load_algorithm(filename, inputs)
         self.assertTrue(filename in alg.getProperty("Filename").value)
 
+    @mock.patch('Muon.GUI.Common.utilities.load_utils.CloneWorkspace')
+    def test_combine_loaded_runs_for_psi_data(self, clone_mock):
+        workspace = mock.MagicMock()
+        workspace.workspace.name = "name"
+        model = mock.MagicMock()
+        model._data_context.num_periods = mock.Mock(return_value=1)
+        # Workspace is missing DeadTimeTable and DetectorGroupingTable which should be handled without raising
+        model._loaded_data_store.get_data = mock.Mock(return_value={"workspace": {"OutputWorkspace": workspace,
+                                                                                  "MainFieldDirection": 0,
+                                                                                  "TimeZero": 0, "FirstGoodData": 0,
+                                                                                  "DataDeadTimeTable": "dtt"}})
+        run_list = [1529]
+        utils.combine_loaded_runs(model, run_list)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

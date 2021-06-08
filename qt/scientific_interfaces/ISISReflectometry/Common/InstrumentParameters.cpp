@@ -8,31 +8,20 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-InstrumentParameters::InstrumentParameters(
-    Mantid::Geometry::Instrument_const_sptr instrument)
+InstrumentParameters::InstrumentParameters(Mantid::Geometry::Instrument_const_sptr instrument)
     : m_instrument(std::move(instrument)) {}
 
-std::vector<InstrumentParameterTypeMissmatch> const &
-InstrumentParameters::typeErrors() const {
-  return m_typeErrors;
-}
+std::vector<InstrumentParameterTypeMissmatch> const &InstrumentParameters::typeErrors() const { return m_typeErrors; }
 
-bool InstrumentParameters::hasTypeErrors() const {
-  return !m_typeErrors.empty();
-}
+bool InstrumentParameters::hasTypeErrors() const { return !m_typeErrors.empty(); }
 
-std::vector<MissingInstrumentParameterValue> const &
-InstrumentParameters::missingValues() const {
+std::vector<MissingInstrumentParameterValue> const &InstrumentParameters::missingValues() const {
   return m_missingValueErrors;
 }
 
-bool InstrumentParameters::hasMissingValues() const {
-  return !m_missingValueErrors.empty();
-}
+bool InstrumentParameters::hasMissingValues() const { return !m_missingValueErrors.empty(); }
 
-std::string const &MissingInstrumentParameterValue::parameterName() const {
-  return m_parameterName;
-}
+std::string const &MissingInstrumentParameterValue::parameterName() const { return m_parameterName; }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

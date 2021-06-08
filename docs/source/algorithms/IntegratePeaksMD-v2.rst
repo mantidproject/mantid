@@ -44,12 +44,16 @@ the provided radii. Errors are also summed in quadrature.
    IntegratePeaksMD\_graph1.png
 
 -  All the Radii are specified in :math:`\AA^{-1}`
--  A sphere of radius **PeakRadius** is integrated around the center of
+-  A sphere or ellipsoid of radius **PeakRadius** is integrated around the center of
    each peak.
 
    -  This gives the summed intensity :math:`I_{peak}` and the summed
       squared error :math:`\sigma I_{peak}^2`.
    -  The volume of integration is :math:`V_{peak}`.
+   -  An ellipsoidal shape is integrated when the **Ellipsoid** option is enabled (the following also applies to BackgroundInnerRadius and BackgroundOuterRadius):
+
+      -  When only one value for PeakRadius is given, then the ellipsoidal shape is calculated automatically with axes proportional to the sqrt of the eigenvalues of the covariance matrix. If **FixMajorAxisLength = true** then with the ellipsoid will be scaled such that the radius along the major axis is equal to the radius of the spherical region over which the covariance was estimated. In addition the covariance can be estimated iteratively (by setting **MaxIterations > 1**) - points outside of 3 standard deviations will be exluded and the covariance will be estimated again. If the ellipsoid is large enough to fully contain the spherical region then the spherical region will be used instead.
+      -  Three values for PeakRadius can be given, which correspond to the semi-axis lengths (a,b,c) of the ellipsoid.
 
 -  If **BackgroundOuterRadius** is specified, then a shell, with radius
    r where **BackgroundInnerRadius** < r < **BackgroundOuterRadius**, is
@@ -64,8 +68,8 @@ the provided radii. Errors are also summed in quadrature.
 
 -  **AdaptiveQMultiplier** can be used for the radius to vary as a function of the modulus of Q. If the AdaptiveQBackground option is set to True, the background radius also changes so each peak has a different integration radius.  Q includes the 2*pi factor.
 
-   -  PeakRadius + AdaptiveQMultiplier * **|Q|** 
-   -  BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** 
+   -  PeakRadius + AdaptiveQMultiplier * **|Q|**
+   -  BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|**
    -  BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**
 
 Background Subtraction
@@ -103,49 +107,49 @@ If BackgroundInnerRadius is left blank, then **BackgroundInnerRadius** =
 IntegrateIfOnEdge option
 ###################################
 
-Edges for each bank or pack of tubes of the instrument are defined by masking the edges in the PeaksWorkspace instrument. 
+Edges for each bank or pack of tubes of the instrument are defined by masking the edges in the PeaksWorkspace instrument.
 e.g. For TOPAZ pixels 0 and 255 in both directions for the Rectangular Detector.
 Q in the lab frame for every peak is calculated, call it C
 For every point on the edge, the trajectory in reciprocal space is a straight line, going through:
 
 :math:`\vec{O}=(0,0,0)`
 
-Calculate a point at a fixed momentum, say k=1. 
+Calculate a point at a fixed momentum, say k=1.
 Q in the lab frame:
 
-:math:`\vec{E}=(-k*sin(\theta)*cos(\phi),-k*sin(\theta)*sin(\phi),k-k*cos(\phi))`
+:math:`\vec{E}=(-k \cdot \sin(\theta) \cdot \cos(\phi),-k \cdot \sin(\theta) \cdot \sin(\phi),k-k \cdot \cos(\phi))`
 
-Normalize E to 1: 
+Normalize E to 1:
 
-:math:`\vec{E}=\vec{E}*(1./\left|\vec{E}\right|)`
+:math:`\vec{E}=\vec{E} \cdot (1./\left|\vec{E}\right|)`
 
 The distance from C to OE is given by:
 
-:math:`dv=\vec{C}-\vec{E}*(\vec{C} \cdot \vec{E})`
+:math:`dv=\vec{C}-\vec{E} \cdot (\vec{C} \cdot \vec{E})`
 
 If:
 
 :math:`\left|dv\right|<PeakRadius`
 
-for the integration, one of the detector trajectories on the edge is too close to the peak 
+for the integration, one of the detector trajectories on the edge is too close to the peak
 This method is also applied to all masked pixels.  If there are masked pixels trajectories inside an integration volume, the peak must be rejected.
 
-   
+
 CorrectIfOnEdge option
 ###################################
 
-This is an extension of what was calculated for the IntegrateIfOnEdge option.  It will only be calculated if this option  
-is true and the minimum dv is less than PeakRadius or BackgroundOuterRadius.  
+This is an extension of what was calculated for the IntegrateIfOnEdge option.  It will only be calculated if this option
+is true and the minimum dv is less than PeakRadius or BackgroundOuterRadius.
 
 For the background if
 
-:math:`\left|dv\right|_{min}<BackgroundOuterRadius` 
+:math:`\left|dv\right|_{\text{min}}<BackgroundOuterRadius`
 
-:math:`h = BackgroundOuterRadius - \left|dv\right|_{min}`
+:math:`h = BackgroundOuterRadius - \left|dv\right|_{\text{min}}`
 
 From the minimum of dv the volume of the cap of the sphere is found:
 
-:math:`V_{cap} = \pi h^2 / 3 (3 * BackgroundOuterRadius - h)`
+:math:`V_{cap} = \pi h^2 / 3 (3 \cdot BackgroundOuterRadius - h)`
 
 The volume of the total sphere is calculated and for the background the volume of the inner radius must be subtracted:
 
@@ -158,15 +162,15 @@ The integrated intensity is multiplied by the ratio of the volume of the sphere 
 
 For the peak assume that the shape is Gaussian.  If
 
-:math:`\left|dv\right|_{min}<PeakRadius`
+:math:`\left|dv\right|_{\text{min}}<PeakRadius`
 
 :math:`\sigma = PeakRadius / 3`
 
-:math:`h = PeakRadius * exp(-\left|dv\right|_{min}^2 / (2 \sigma^2)`
+:math:`h = PeakRadius \cdot \exp(-\left|dv\right|_{min}^2 / (2 \sigma^2)`
 
 From the minimum of dv the volume of the cap of the sphere is found:
 
-:math:`V_{cap} = \pi h^2 / 3 (3 * PeakRadius - h)`
+:math:`V_{cap} = \pi h^2 / 3 (3 \cdot PeakRadius - h)`
 
 and the volume of the sphere is calculated
 
@@ -177,17 +181,17 @@ The integrated intensity is multiplied by the ratio of the volume of the sphere 
 :math:`I_{peakMultiplier} = V_{sphere} / (V_{sphere} - V_{cap})`
 
 
-   
+
 Usage
 ------
 
 **Example - IntegratePeaks:**
 
-User should provide its own 
+User should provide its own
 event nexus file instead of **TOPAZ_3132_event.nxs** used within this example. The original **TOPAZ_3132_event.nxs**
 file is available in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
 
-.. The code itself works but disabled from doc tests as takes too long to complete. 
+.. The code itself works but disabled from doc tests as takes too long to complete.
 .. .. testcode:: exIntegratePeaksMD
 
 .. code-block:: python
@@ -202,7 +206,7 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
               name= name[:8]
            row += "| {:8} ".format(name)
        print(row + "|")
-   
+
        for i in range(nRows):
            row = ""
            for name in tab_names:
@@ -224,9 +228,9 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
    peaks= IntegratePeaksMD(InputWorkspace='TOPAZ_3132_md', PeaksWorkspace='peaks',\
         PeakRadius=0.12, BackgroundOuterRadius=0.2, BackgroundInnerRadius=0.16,\
         OutputWorkspace='peaks')
-        
+
    # print the integration results
-   print_tableWS(peaks,10)   
+   print_tableWS(peaks,10)
 
 **Output:**
 

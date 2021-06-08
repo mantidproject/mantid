@@ -41,13 +41,10 @@ namespace Algorithms {
    @author Steve D Williams, ISIS Facility Rutherford Appleton Laboratory
    @date 15/06/2009
 */
-class MANTID_ALGORITHMS_DLL DetectorEfficiencyVariation
-    : public DetectorDiagnostic {
+class MANTID_ALGORITHMS_DLL DetectorEfficiencyVariation : public DetectorDiagnostic {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override {
-    return "DetectorEfficiencyVariation";
-  }
+  const std::string name() const override { return "DetectorEfficiencyVariation"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Compares two white beam vanadium workspaces from the same "
@@ -58,9 +55,7 @@ public:
   const std::string category() const override;
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"DetectorDiagnostic"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"DetectorDiagnostic"}; }
 
 protected:
   // Overridden Algorithm methods
@@ -68,12 +63,10 @@ protected:
   void exec() override;
 
   /// Loads and checks the values passed to the algorithm
-  void retrieveProperties(API::MatrixWorkspace_sptr &whiteBeam1,
-                          API::MatrixWorkspace_sptr &whiteBeam2,
+  void retrieveProperties(API::MatrixWorkspace_sptr &whiteBeam1, API::MatrixWorkspace_sptr &whiteBeam2,
                           double &variation, int &minSpec, int &maxSpec);
   /// Apply the detector test criterion
-  int doDetectorTests(const API::MatrixWorkspace_const_sptr &counts1,
-                      const API::MatrixWorkspace_const_sptr &counts2,
+  int doDetectorTests(const API::MatrixWorkspace_const_sptr &counts1, const API::MatrixWorkspace_const_sptr &counts2,
                       const double average, double variation);
 
 private:

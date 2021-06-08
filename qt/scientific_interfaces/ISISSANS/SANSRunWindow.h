@@ -74,8 +74,7 @@ signals:
   // signal  to notify mask file loaded
   void userfileLoaded();
   /// signal to send gemoetry information
-  void sendGeometryInformation(QString & /*_t1*/, QString & /*_t2*/,
-                               QString & /*_t3*/, QString & /*_t4*/);
+  void sendGeometryInformation(QString & /*_t1*/, QString & /*_t2*/, QString & /*_t3*/, QString & /*_t4*/);
 
 private:
   /// Stores the batch or single run mode selection
@@ -85,16 +84,7 @@ private:
   enum MaskType { DefaultMask = 0, TimeMask = 1, PixelMask = 2 };
 
   /// Enumerate the tabs of this interface.
-  enum Tab {
-    RUN_NUMBERS,
-    REDUCTION_SETTINGS,
-    GEOMETRY,
-    MASKING,
-    LOGGING,
-    ADD_RUNS,
-    DIAGNOSTICS,
-    ONE_D_ANALYSIS
-  };
+  enum Tab { RUN_NUMBERS, REDUCTION_SETTINGS, GEOMETRY, MASKING, LOGGING, ADD_RUNS, DIAGNOSTICS, ONE_D_ANALYSIS };
 
   /// Enum for the two states of the Q Resolution aperture selection
   enum QResoluationAperture { CIRCULAR, RECTANGULAR };
@@ -131,50 +121,38 @@ private:
   /// Load a CSV file
   bool loadCSVFile();
   /// Set limits step and type options
-  void setLimitStepParameter(const QString &pname, QString param,
-                             QLineEdit *step_value, QComboBox *step_type);
+  void setLimitStepParameter(const QString &pname, QString param, QLineEdit *step_value, QComboBox *step_type);
   /// Construct mask table
   void updateMaskTable();
   /// Add spectrum masks to table
-  void addSpectrumMasksToTable(const QString &mask_string,
-                               const QString &det_name);
+  void addSpectrumMasksToTable(const QString &mask_string, const QString &det_name);
   /// Add a time mask string to the mask table
   void addTimeMasksToTable(const QString &mask_string, const QString &det_name);
   /// Append the given information as a new row to the masking table.
-  void appendRowToMaskTable(const QString &type, const QString &detector,
-                            const QString &details);
-  void readNumberOfEntries(const QString &RunStep,
-                           API::FileFinderWidget *const output);
+  void appendRowToMaskTable(const QString &type, const QString &detector, const QString &details);
+  void readNumberOfEntries(const QString &RunStep, API::FileFinderWidget *const output);
   QString readUserFileGUIChanges(const States type);
   QString readSampleObjectGUIChanges();
   /// Get the component distances
-  void componentLOQDistances(
-      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace,
-      double &lms, double &lsda, double &lsdb);
+  void componentLOQDistances(const std::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace, double &lms,
+                             double &lsda, double &lsdb);
   /// Enable/disable user interaction
   void setProcessingState(const States action);
   /// Check for workspace name in the AnalysisDataService
   bool workspaceExists(const QString &ws_name) const;
-  Mantid::API::MatrixWorkspace_sptr
-  getGroupMember(const Mantid::API::Workspace_const_sptr &in,
-                 const int member) const;
+  Mantid::API::MatrixWorkspace_sptr getGroupMember(const Mantid::API::Workspace_const_sptr &in, const int member) const;
   /// Construct a QStringList of the currently loaded workspaces
   QStringList currentWorkspaceList() const;
   /// Is the user file loaded
   bool isUserFileLoaded() const;
   /// Create a mask string
-  void addUserMaskStrings(QString &exec_script, const QString &importCommand,
-                          enum MaskType mType);
+  void addUserMaskStrings(QString &exec_script, const QString &importCommand, enum MaskType mType);
   /// Set geometry details
   void setGeometryDetails();
   /// Set the SANS2D geometry
-  void setSANS2DGeometry(
-      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace,
-      int wscode);
+  void setSANS2DGeometry(const std::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace, int wscode);
   /// Set LOQ geometry
-  void setLOQGeometry(
-      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace,
-      int wscode);
+  void setLOQGeometry(const std::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace, int wscode);
   /// Mark an error on a label
   void markError(QLabel *label);
   /// set the name of the output workspace, empty means there is no output
@@ -183,20 +161,16 @@ private:
   bool runAssign(int key, QString &logs);
   /// Load a scatter sample file or can run via Python objects using the passed
   /// Python command
-  bool assignDetBankRun(API::FileFinderWidget &runFile,
-                        const QString &assignFn);
+  bool assignDetBankRun(API::FileFinderWidget &runFile, const QString &assignFn);
   /// runs that contain only monitor counts can be direct or transmission runs
-  bool assignMonitorRun(API::FileFinderWidget &trans,
-                        API::FileFinderWidget &direct, const QString &assignFn);
+  bool assignMonitorRun(API::FileFinderWidget &trans, API::FileFinderWidget &direct, const QString &assignFn);
   /// Get the detectors' names
   void fillDetectNames(QComboBox *output);
   QStringList getSaveAlgs();
   /// Handle a delete notification from Mantid
-  void handleMantidDeleteWorkspace(
-      Mantid::API::WorkspacePostDeleteNotification_ptr p_dnf);
+  void handleMantidDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr p_dnf);
   // Format a double in a string with a specfied colour, format and precision
-  QString formatDouble(double value, const QString &colour = "black",
-                       char format = 'f', int precision = 3);
+  QString formatDouble(double value, const QString &colour = "black", char format = 'f', int precision = 3);
   /// Issue a warning
   void raiseOneTimeMessage(const QString &msg, int index = -1);
   /// Reset the geometry box to blank
@@ -206,8 +180,7 @@ private:
   /// Flip the reload flag
   void forceDataReload(bool force = true);
   /// Browse for a file
-  bool browseForFile(const QString &box_title, QLineEdit *file_field,
-                     QString file_filter = QString());
+  bool browseForFile(const QString &box_title, QLineEdit *file_field, QString file_filter = QString());
   /// Add a csv line to the batch grid
   int addBatchLine(const QString &csv_line, QString separator = "");
   /// Save the batch file
@@ -219,8 +192,7 @@ public slots:
   /// apply mask
   void applyMask(const QString &wsName, bool time_pixel);
   /// Create a zero error free clone for the specified workspace
-  void createZeroErrorFreeClone(QString &originalWorkspaceName,
-                                QString &clonedWorkspaceName);
+  void createZeroErrorFreeClone(QString &originalWorkspaceName, QString &clonedWorkspaceName);
   /// Destroy a zero error free cloned workspace
   void deleteZeroErrorFreeClone(QString &clonedWorkspaceName);
 
@@ -370,14 +342,11 @@ private:
   /// Holds pointers to the check box for each supported save format with the
   /// name of its save algorithm
   QHash<const QCheckBox *const, QString> m_savFormats;
-  using SavFormatsConstIt =
-      QHash<const QCheckBox *const, QString>::const_iterator;
+  using SavFormatsConstIt = QHash<const QCheckBox *const, QString>::const_iterator;
   /// Get notified when the system input directories have changed
-  Poco::NObserver<SANSRunWindow, Mantid::Kernel::ConfigValChangeNotification>
-      m_newInDir;
+  Poco::NObserver<SANSRunWindow, Mantid::Kernel::ConfigValChangeNotification> m_newInDir;
   /// An observer for a delete notification from Mantid
-  Poco::NObserver<SANSRunWindow, Mantid::API::WorkspacePostDeleteNotification>
-      m_delete_observer;
+  Poco::NObserver<SANSRunWindow, Mantid::API::WorkspacePostDeleteNotification> m_delete_observer;
   /// A map of S2D detector names to QLabel pointers
   QList<QHash<QString, QLabel *>> m_s2d_detlabels;
   /// A map of LOQ detector names to QLabel pointers
@@ -406,11 +375,9 @@ private:
   QValidator *m_intValidatorZeroToMax;
 
   void initAnalysDetTab();
-  void makeValidator(QLabel *const newValid, QWidget *control, QWidget *tab,
-                     const QString &errorMsg);
+  void makeValidator(QLabel *const newValid, QWidget *control, QWidget *tab, const QString &errorMsg);
   void upDateDataDir();
-  void handleInputDirChange(
-      Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
+  void handleInputDirChange(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
   QString getInstrumentClass() const;
   bool entriesAreValid(const ValCheck check = ALL);
   bool entriesAreValid(ValMap &vals);
@@ -445,9 +412,8 @@ private:
   /// Check the validty of inputs
   bool areSettingsValid(States type);
   /// Check setting for wavelengths and Q values
-  void checkWaveLengthAndQValues(bool &isValid, QString &message,
-                                 QLineEdit *min, QLineEdit *max,
-                                 QComboBox *selection, const QString &type);
+  void checkWaveLengthAndQValues(bool &isValid, QString &message, QLineEdit *min, QLineEdit *max, QComboBox *selection,
+                                 const QString &type);
   /// Checks if the save settings are valid for a particular workspace
   bool areSaveSettingsValid(const QString &workspaceName);
   /// Update the beam center fields
@@ -464,44 +430,35 @@ private:
   /// Write the QResolution GUI changes to a python script
   void writeQResolutionSettingsToPythonScript(QString &pythonCode);
   /// Write single line for Q Resolution
-  void writeQResolutionSettingsToPythonScriptSingleEntry(
-      const QString &value, const QString &code_entry,
-      const QString &lineEnding, QString &py_code) const;
+  void writeQResolutionSettingsToPythonScriptSingleEntry(const QString &value, const QString &code_entry,
+                                                         const QString &lineEnding, QString &py_code) const;
   /// Sets the cirucular aperture, ie labels and populates the values with what
   /// is available from the user file
   void setupQResolutionCircularAperture();
   /// Sets the rectuanular aperture
-  void setupQResolutionRectangularAperture(const QString &h1, const QString &w1,
-                                           const QString &h2,
-                                           const QString &w2);
+  void setupQResolutionRectangularAperture(const QString &h1, const QString &w1, const QString &h2, const QString &w2);
   /// Set the rectangular aperture
   void setupQResolutionRectangularAperture();
   /// Set the aperture type
-  void setQResolutionApertureType(QResoluationAperture apertureType,
-                                  const QString &a1H1Label,
-                                  const QString &a2H2Label, const QString &a1H1,
-                                  const QString &a2H2,
-                                  const QString &toolTipA1H1,
-                                  const QString &toolTipA2H2,
-                                  bool w1W2Disabled);
+  void setQResolutionApertureType(QResoluationAperture apertureType, const QString &a1H1Label, const QString &a2H2Label,
+                                  const QString &a1H1, const QString &a2H2, const QString &toolTipA1H1,
+                                  const QString &toolTipA2H2, bool w1W2Disabled);
   /// Initialize the QResolution settings
   void initQResolutionSettings();
 
   /// Gets the BackgroundCorrection settings
   void retrieveBackgroundCorrection();
   /// Get Background runner
-  SANSBackgroundCorrectionSettings
-  retrieveBackgroundCorrectionSetting(bool isTime, bool isMon);
+  SANSBackgroundCorrectionSettings retrieveBackgroundCorrectionSetting(bool isTime, bool isMon);
   /// Initialize the background correction
   void initializeBackgroundCorrection();
   /// Sets the BackgroundCorrection settings
   void writeBackgroundCorrectionToPythonScript(QString &pythonCode);
   /// Generic addition of background correction to python script
-  void addBackgroundCorrectionToPythonScript(
-      QString &pythonCode,
-      const MantidQt::CustomInterfaces::SANSBackgroundCorrectionSettings
-          &setting,
-      bool isTimeBased);
+  void
+  addBackgroundCorrectionToPythonScript(QString &pythonCode,
+                                        const MantidQt::CustomInterfaces::SANSBackgroundCorrectionSettings &setting,
+                                        bool isTimeBased);
   /// Check if the user file has a valid user file extension
   bool hasUserFileValidFileExtension();
   /// Check if the user file is valid

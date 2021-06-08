@@ -24,8 +24,7 @@ namespace Functions {
 namespace {
 
 // Does the actual calculation of the heat capacity
-void calculate(double *out, const double *xValues, const size_t nData,
-               const DoubleFortranVector &en) {
+void calculate(double *out, const double *xValues, const size_t nData, const DoubleFortranVector &en) {
   const double k_B = PhysicalConstants::BoltzmannConstant; // in meV/K
   // Want output in J/K/mol
   const double convfact = PhysicalConstants::N_A * PhysicalConstants::meV;
@@ -49,14 +48,11 @@ void calculate(double *out, const double *xValues, const size_t nData,
 }
 } // namespace
 
-CrystalFieldHeatCapacityBase::CrystalFieldHeatCapacityBase()
-    : API::IFunction1D() {
+CrystalFieldHeatCapacityBase::CrystalFieldHeatCapacityBase() : API::IFunction1D() {
   declareAttribute("ScaleFactor", Attribute(1.0));
 }
 
-void CrystalFieldHeatCapacityBase::function1D(double *out,
-                                              const double *xValues,
-                                              const size_t nData) const {
+void CrystalFieldHeatCapacityBase::function1D(double *out, const double *xValues, const size_t nData) const {
   // Use stored values
   calculate(out, xValues, nData, m_en);
   auto fact = getAttribute("ScaleFactor").asDouble();
@@ -70,8 +66,7 @@ void CrystalFieldHeatCapacityBase::function1D(double *out,
 DECLARE_FUNCTION(CrystalFieldHeatCapacity)
 
 CrystalFieldHeatCapacity::CrystalFieldHeatCapacity()
-    : CrystalFieldPeaksBase(), CrystalFieldHeatCapacityBase(),
-      m_setDirect(false) {}
+    : CrystalFieldPeaksBase(), CrystalFieldHeatCapacityBase(), m_setDirect(false) {}
 
 // Sets the eigenvectors / values directly
 void CrystalFieldHeatCapacity::setEnergy(const DoubleFortranVector &en) {
@@ -79,8 +74,7 @@ void CrystalFieldHeatCapacity::setEnergy(const DoubleFortranVector &en) {
   m_en = en;
 }
 
-void CrystalFieldHeatCapacity::function1D(double *out, const double *xValues,
-                                          const size_t nData) const {
+void CrystalFieldHeatCapacity::function1D(double *out, const double *xValues, const size_t nData) const {
   if (!m_setDirect) {
     ComplexFortranMatrix wf;
     int nre = 0;
@@ -93,10 +87,7 @@ CrystalFieldHeatCapacityCalculation::CrystalFieldHeatCapacityCalculation()
     : API::ParamFunction(), CrystalFieldHeatCapacityBase() {}
 
 // Sets the eigenvectors / values directly
-void CrystalFieldHeatCapacityCalculation::setEnergy(
-    const DoubleFortranVector &en) {
-  m_en = en;
-}
+void CrystalFieldHeatCapacityCalculation::setEnergy(const DoubleFortranVector &en) { m_en = en; }
 
 } // namespace Functions
 } // namespace CurveFitting

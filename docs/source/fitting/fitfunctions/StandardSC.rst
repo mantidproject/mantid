@@ -31,12 +31,12 @@ The relationship between :math:`\omega` and magnetic field B is given by:
 
 .. math:: \omega = 2 \pi \nu = \gamma_\mu \text{B}
 
-where, 
+where,
 
 :math:`\gamma_\mu` is the gyromagnetic ratio of muon.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

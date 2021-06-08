@@ -36,43 +36,35 @@ void IndexSXPeaks::init() {
   reasonable_angle->setUpper(175.0);
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<Mantid::DataObjects::PeaksWorkspace>>(
-          "PeaksWorkspace", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<Mantid::DataObjects::PeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
       "Input Peaks Workspace");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "a", -1.0, mustBePositive->clone(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("a", -1.0, mustBePositive->clone(), Direction::Input),
                   "Lattice parameter a");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "b", -1.0, mustBePositive->clone(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("b", -1.0, mustBePositive->clone(), Direction::Input),
                   "Lattice parameter b");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "c", -1.0, std::move(mustBePositive), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("c", -1.0, std::move(mustBePositive), Direction::Input),
                   "Lattice parameter c");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "alpha", -1.0, reasonable_angle->clone(), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("alpha", -1.0, reasonable_angle->clone(), Direction::Input),
       "Lattice parameter alpha");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "beta", -1.0, reasonable_angle->clone(), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("beta", -1.0, reasonable_angle->clone(), Direction::Input),
       "Lattice parameter beta");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "gamma", -1.0, std::move(reasonable_angle), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("gamma", -1.0, std::move(reasonable_angle), Direction::Input),
       "Lattice parameter gamma");
 
   declareProperty(std::make_unique<ArrayProperty<int>>("PeakIndices"),
                   "Index of the peaks in the table workspace to be used. If no "
                   "index are provided, all will be used.");
 
-  declareProperty("dTolerance", 0.01,
-                  "Tolerance for peak positions in d-spacing");
+  declareProperty("dTolerance", 0.01, "Tolerance for peak positions in d-spacing");
 
   std::vector<int> extents(6, 0);
   const int range = 20;
@@ -82,11 +74,10 @@ void IndexSXPeaks::init() {
   extents[3] = range;
   extents[4] = -range;
   extents[5] = range;
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("SearchExtents", std::move(extents)),
-      "A comma separated list of min, max for each of H, K and L,\n"
-      "Specifies the search extents applied for H K L values "
-      "associated with the peaks.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("SearchExtents", std::move(extents)),
+                  "A comma separated list of min, max for each of H, K and L,\n"
+                  "Specifies the search extents applied for H K L values "
+                  "associated with the peaks.");
 }
 
 /**
@@ -95,8 +86,7 @@ sit.
 @param peakCandidates : Potential peaks containing sets of possible hkl values.
 @param unitcell : the unit cell for lattice
 */
-void IndexSXPeaks::cullHKLs(std::vector<PeakCandidate> &peakCandidates,
-                            Mantid::Geometry::UnitCell &unitcell) {
+void IndexSXPeaks::cullHKLs(std::vector<PeakCandidate> &peakCandidates, Mantid::Geometry::UnitCell &unitcell) {
   size_t npeaks = peakCandidates.size();
   for (std::size_t p = 0; p < npeaks; p++) {
     for (std::size_t q = 0; q < npeaks; q++) {
@@ -115,8 +105,7 @@ Check that not all peaks are colinear and throw if they are not.
 @param peakCandidates : Potential peaks
 @throws runtime_error if all colinear peaks have been provided
 */
-void IndexSXPeaks::validateNotColinear(
-    std::vector<PeakCandidate> &peakCandidates) const {
+void IndexSXPeaks::validateNotColinear(std::vector<PeakCandidate> &peakCandidates) const {
   // Find two non-colinear peaks
   bool all_collinear = true;
   size_t npeaks = peakCandidates.size();
@@ -148,19 +137,16 @@ void IndexSXPeaks::exec() {
   // Need a least two peaks
   std::size_t npeaks = peakindices.size();
   if (npeaks > size_t(ws->getNumberPeaks())) {
-    throw std::runtime_error(
-        "Cannot have more peaks indices than actual peaks");
+    throw std::runtime_error("Cannot have more peaks indices than actual peaks");
   }
   if (npeaks == 1 || ws->getNumberPeaks() < 2) {
-    throw std::runtime_error(
-        "At least 2 peaks are required for this algorithm to work");
+    throw std::runtime_error("At least 2 peaks are required for this algorithm to work");
   }
   if (npeaks == 0) {
     // If the user provides no peaks we default to use all the available peaks.
     npeaks = ws->getNumberPeaks();
     peakindices.reserve(npeaks);
-    for (int i = 1; i <= int(npeaks);
-         i++) // create indexes corresponding to all peak indexes
+    for (int i = 1; i <= int(npeaks); i++) // create indexes corresponding to all peak indexes
     {
       peakindices.emplace_back(i);
     }
@@ -250,8 +236,7 @@ void IndexSXPeaks::exec() {
       g_log.information(stream.str());
     } catch (std::logic_error &) {
       std::stringstream msg;
-      msg << "Peak Index: " << row + 1
-          << " cannot be assigned a single HKL set.";
+      msg << "Peak Index: " << row + 1 << " cannot be assigned a single HKL set.";
       g_log.warning(msg.str());
       continue;
     }

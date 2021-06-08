@@ -28,7 +28,7 @@ where,
 and :math:`a (\mu s^{-1})` is the half-width at half maximum of the Lorentzian distribution.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

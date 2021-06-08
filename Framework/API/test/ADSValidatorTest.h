@@ -24,9 +24,7 @@ class MockWorkspace : public Workspace {
   size_t getMemorySize() const override { return 1; }
 
 private:
-  MockWorkspace *doClone() const override {
-    throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
-  }
+  MockWorkspace *doClone() const override { throw std::runtime_error("Cloning of MockWorkspace is not implemented."); }
   MockWorkspace *doCloneEmpty() const override {
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
@@ -113,14 +111,10 @@ public:
     ADSValidator adsValidator(true);
 
     auto allowedList = adsValidator.allowedValues();
-    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws1Name) !=
-              allowedList.cend());
-    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws2Name) !=
-              allowedList.cend());
-    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws3Name) !=
-              allowedList.cend());
-    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(),
-                        wsInvalidName) == allowedList.cend());
+    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws1Name) != allowedList.cend());
+    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws2Name) != allowedList.cend());
+    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), ws3Name) != allowedList.cend());
+    TS_ASSERT(std::find(allowedList.cbegin(), allowedList.cend(), wsInvalidName) == allowedList.cend());
 
     ads.remove(ws1Name);
     ads.remove(ws2Name);

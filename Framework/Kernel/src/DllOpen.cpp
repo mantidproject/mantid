@@ -37,9 +37,7 @@ const std::string LIB_SUFFIX = ".dll";
  * @param filename The file name of the library
  * @return True if it matches the expected format, false otherwise
  */
-bool DllOpen::isValidFilename(const std::string &filename) {
-  return boost::ends_with(filename, LIB_SUFFIX);
-}
+bool DllOpen::isValidFilename(const std::string &filename) { return boost::ends_with(filename, LIB_SUFFIX); }
 
 /* Opens the Windows .dll file.
  * @param filePath :: Filepath of the library.
@@ -53,19 +51,15 @@ void *DllOpen::openDll(const std::string &filePath) {
     LPVOID lpDisplayBuf;
     DWORD dw = GetLastError();
 
-    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-                      FORMAT_MESSAGE_IGNORE_INSERTS,
-                  NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                  (LPTSTR)&lpMsgBuf, 0, NULL);
+    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, dw,
+                  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
 
     // Display the error message and exit the process
     size_t n = lstrlen((LPCTSTR)lpMsgBuf) + 40;
 
     lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, n * sizeof(TCHAR));
-    _snprintf((char *)lpDisplayBuf, n, "failed with error %lu: %s", dw,
-              (char *)lpMsgBuf);
-    g_log.error() << "Could not open library " << filePath << ": "
-                  << (LPCTSTR)lpDisplayBuf << '\n';
+    _snprintf((char *)lpDisplayBuf, n, "failed with error %lu: %s", dw, (char *)lpMsgBuf);
+    g_log.error() << "Could not open library " << filePath << ": " << (LPCTSTR)lpDisplayBuf << '\n';
 
     LocalFree(lpMsgBuf);
     LocalFree(lpDisplayBuf);
@@ -93,8 +87,7 @@ const std::string LIB_SUFFIX = ".dylib";
  * @return True if it matches the expected format, false otherwise
  */
 bool DllOpen::isValidFilename(const std::string &filename) {
-  return boost::starts_with(filename, LIB_PREFIX) &&
-         boost::ends_with(filename, LIB_SUFFIX);
+  return boost::starts_with(filename, LIB_PREFIX) && boost::ends_with(filename, LIB_SUFFIX);
 }
 
 /* Opens the Linux .so file

@@ -1,5 +1,6 @@
 set(SRC_FILES
     src/AppendGeometryToSNSNexus.cpp
+    src/ApplyDiffCal.cpp
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
     src/CompressEvents.cpp
@@ -212,6 +213,7 @@ set(SRC_FILES
 
 set(INC_FILES
     inc/MantidDataHandling/AppendGeometryToSNSNexus.h
+    inc/MantidDataHandling/ApplyDiffCal.h
     inc/MantidDataHandling/BankPulseTimes.h
     inc/MantidDataHandling/CheckMantidVersion.h
     inc/MantidDataHandling/CompressEvents.h
@@ -427,6 +429,7 @@ set(INC_FILES
 
 set(TEST_FILES
     AppendGeometryToSNSNexusTest.h
+    ApplyDiffCalTest.h
     CheckMantidVersionTest.h
     CompressEventsTest.h
     CreateChunkingFromInstrumentTest.h
@@ -684,7 +687,7 @@ target_link_libraries(DataHandling
                       Catalog)
 
 if(ENABLE_LIB3MF)
-  target_link_libraries(DataHandling LINK_PRIVATE 
+  target_link_libraries(DataHandling LINK_PRIVATE
                         ${LIB3MF_LIBRARIES})
 endif()
 

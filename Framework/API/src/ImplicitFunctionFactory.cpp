@@ -18,40 +18,33 @@
 namespace Mantid {
 namespace API {
 
-Mantid::Geometry::MDImplicitFunction_sptr
-ImplicitFunctionFactoryImpl::create(const std::string &className) const {
+Mantid::Geometry::MDImplicitFunction_sptr ImplicitFunctionFactoryImpl::create(const std::string &className) const {
   UNUSED_ARG(className);
   throw std::runtime_error("Use of create in this context is forbidden. Use "
                            "createUnwrappedInstead.");
 }
 
 Mantid::Geometry::MDImplicitFunction *
-ImplicitFunctionFactoryImpl::createUnwrapped(
-    Poco::XML::Element *processXML) const {
+ImplicitFunctionFactoryImpl::createUnwrapped(Poco::XML::Element *processXML) const {
 
   ImplicitFunctionParser *funcParser =
-      Mantid::API::ImplicitFunctionParserFactory::Instance()
-          .createImplicitFunctionParserFromXML(processXML);
+      Mantid::API::ImplicitFunctionParserFactory::Instance().createImplicitFunctionParserFromXML(processXML);
 
-  boost::scoped_ptr<ImplicitFunctionBuilder> functionBuilder(
-      funcParser->createFunctionBuilder(processXML));
+  boost::scoped_ptr<ImplicitFunctionBuilder> functionBuilder(funcParser->createFunctionBuilder(processXML));
   return functionBuilder->create();
 }
 
 Mantid::Geometry::MDImplicitFunction *
-ImplicitFunctionFactoryImpl::createUnwrapped(
-    const std::string &processXML) const {
+ImplicitFunctionFactoryImpl::createUnwrapped(const std::string &processXML) const {
   using namespace Poco::XML;
   DOMParser pParser;
   Poco::AutoPtr<Document> pDoc = pParser.parseString(processXML);
   Element *pInstructionsXML = pDoc->documentElement();
 
   boost::scoped_ptr<ImplicitFunctionParser> funcParser(
-      ImplicitFunctionParserFactory::Instance()
-          .createImplicitFunctionParserFromXML(processXML));
+      ImplicitFunctionParserFactory::Instance().createImplicitFunctionParserFromXML(processXML));
 
-  boost::scoped_ptr<ImplicitFunctionBuilder> functionBuilder(
-      funcParser->createFunctionBuilder(pInstructionsXML));
+  boost::scoped_ptr<ImplicitFunctionBuilder> functionBuilder(funcParser->createFunctionBuilder(pInstructionsXML));
   return functionBuilder->create();
 }
 } // namespace API

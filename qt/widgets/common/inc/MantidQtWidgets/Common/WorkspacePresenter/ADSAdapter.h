@@ -26,8 +26,7 @@ public:
   void registerPresenter(Presenter_wptr presenter) override;
   bool doesWorkspaceExist(const std::string &wsname) const override;
 
-  std::map<std::string, Mantid::API::Workspace_sptr>
-  topLevelItems() const override;
+  std::map<std::string, Mantid::API::Workspace_sptr> topLevelItems() const override;
 
   std::string getOldName() const override;
   std::string getNewName() const override;
@@ -42,41 +41,28 @@ private:
 
   // ADS Notification Handlers
   void handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr pNf);
-  Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceAddNotification>
-      m_addObserver;
+  Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceAddNotification> m_addObserver;
 
-  void handleReplaceWorkspace(
-      Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
-  Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceAfterReplaceNotification>
-      m_replaceObserver;
+  void handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
-  void
-  handleDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
-  Poco::NObserver<ADSAdapter, Mantid::API::WorkspacePostDeleteNotification>
-      m_deleteObserver;
+  void handleDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::WorkspacePostDeleteNotification> m_deleteObserver;
 
   void handleClearADS(Mantid::API::ClearADSNotification_ptr pNf);
-  Poco::NObserver<ADSAdapter, Mantid::API::ClearADSNotification>
-      m_clearADSObserver;
+  Poco::NObserver<ADSAdapter, Mantid::API::ClearADSNotification> m_clearADSObserver;
 
   void handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr pNf);
-  Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceRenameNotification>
-      m_renameObserver;
+  Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
 
-  void
-  handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr pNf);
-  Poco::NObserver<ADSAdapter, Mantid::API::WorkspacesGroupedNotification>
-      m_groupworkspacesObserver;
+  void handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::WorkspacesGroupedNotification> m_groupworkspacesObserver;
 
-  void
-  handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf);
-  Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceUnGroupingNotification>
-      m_ungroupworkspaceObserver;
+  void handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceUnGroupingNotification> m_ungroupworkspaceObserver;
 
-  void
-  handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr pNf);
-  Poco::NObserver<ADSAdapter, Mantid::API::GroupUpdatedNotification>
-      m_workspaceGroupUpdateObserver;
+  void handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::GroupUpdatedNotification> m_workspaceGroupUpdateObserver;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

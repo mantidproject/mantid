@@ -10,7 +10,7 @@ This is a Python binding to the C++ class Mantid::API::Workspace.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.Workspace 
+.. autoclass:: mantid.api.Workspace
     :members:
     :undoc-members:
     :inherited-members:

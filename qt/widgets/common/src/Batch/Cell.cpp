@@ -10,19 +10,15 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-Cell::Cell(std::string const &contentText, std::string const &backgroundColor,
-           int borderThickness, std::string const &borderColor,
-           int borderOpacity, bool isEditable)
-    : m_contentText(contentText), m_backgroundColor(backgroundColor),
-      m_borderThickness(borderThickness), m_borderOpacity(borderOpacity),
-      m_borderColor(borderColor), m_iconFilePath(), m_isEditable(isEditable),
+Cell::Cell(std::string const &contentText, std::string const &backgroundColor, int borderThickness,
+           std::string const &borderColor, int borderOpacity, bool isEditable)
+    : m_contentText(contentText), m_backgroundColor(backgroundColor), m_borderThickness(borderThickness),
+      m_borderOpacity(borderOpacity), m_borderColor(borderColor), m_iconFilePath(), m_isEditable(isEditable),
       m_toolTip(""), m_direction(Direction::INPUT) {}
 
 Cell::Cell(std::string const &contentText)
-    : m_contentText(contentText), m_backgroundColor("white"),
-      m_borderThickness(1), m_borderOpacity(255), m_borderColor("darkGrey"),
-      m_iconFilePath(), m_isEditable(true), m_toolTip(""),
-      m_direction(Direction::INPUT) {}
+    : m_contentText(contentText), m_backgroundColor("white"), m_borderThickness(1), m_borderOpacity(255),
+      m_borderColor("darkGrey"), m_iconFilePath(), m_isEditable(true), m_toolTip(""), m_direction(Direction::INPUT) {}
 
 std::string const &Cell::contentText() const { return m_contentText; }
 
@@ -36,23 +32,15 @@ std::string const &Cell::borderColor() const { return m_borderColor; }
 
 int Cell::borderOpacity() const { return m_borderOpacity; }
 
-void Cell::setContentText(std::string const &contentText) {
-  m_contentText = contentText;
-}
+void Cell::setContentText(std::string const &contentText) { m_contentText = contentText; }
 
 void Cell::setToolTip(std::string const &toolTip) { m_toolTip = toolTip; }
 
-void Cell::setBorderThickness(int borderThickness) {
-  m_borderThickness = borderThickness;
-}
+void Cell::setBorderThickness(int borderThickness) { m_borderThickness = borderThickness; }
 
-void Cell::setBorderColor(std::string const &borderColor) {
-  m_borderColor = borderColor;
-}
+void Cell::setBorderColor(std::string const &borderColor) { m_borderColor = borderColor; }
 
-void Cell::setBackgroundColor(std::string const &backgroundColor) {
-  m_backgroundColor = backgroundColor;
-}
+void Cell::setBackgroundColor(std::string const &backgroundColor) { m_backgroundColor = backgroundColor; }
 
 void Cell::setForegroundColor(std::string const &foregroundColor) {
   m_foregroundColor = foregroundColor;
@@ -66,13 +54,9 @@ std::string const &Cell::backgroundColor() const { return m_backgroundColor; }
 
 std::string const &Cell::foregroundColor() const { return m_foregroundColor; }
 
-void Cell::setBorderOpacity(int borderOpacity) {
-  m_borderOpacity = borderOpacity;
-}
+void Cell::setBorderOpacity(int borderOpacity) { m_borderOpacity = borderOpacity; }
 
-void Cell::setIconFilePath(std::string const &iconFilePath) {
-  m_iconFilePath = iconFilePath;
-}
+void Cell::setIconFilePath(std::string const &iconFilePath) { m_iconFilePath = iconFilePath; }
 
 std::string const &Cell::iconFilePath() const { return m_iconFilePath; }
 
@@ -102,16 +86,13 @@ std::ostream &operator<<(std::ostream &os, Cell const &cell) {
 }
 
 bool operator==(Cell const &lhs, Cell const &rhs) {
-  return lhs.contentText() == rhs.contentText() &&
-         lhs.isEditable() == rhs.isEditable() &&
-         lhs.borderThickness() == rhs.borderThickness() &&
-         lhs.borderColor() == rhs.borderColor();
+  return lhs.contentText() == rhs.contentText() && lhs.isEditable() == rhs.isEditable() &&
+         lhs.borderThickness() == rhs.borderThickness() && lhs.borderColor() == rhs.borderColor();
 }
 
 bool operator!=(Cell const &lhs, Cell const &rhs) { return !(lhs == rhs); }
 
-std::vector<Cell> paddedCellsToWidth(std::vector<Cell> const &cells,
-                                     Cell const &paddingCell, int paddedWidth) {
+std::vector<Cell> paddedCellsToWidth(std::vector<Cell> const &cells, Cell const &paddingCell, int paddedWidth) {
   auto paddedCells = cells;
   for (auto i = static_cast<int>(cells.size()); i < paddedWidth; i++)
     paddedCells.emplace_back(paddingCell);

@@ -52,8 +52,7 @@ private:
 };
 
 /// Calculate the size of a vector
-template <class VectorClass>
-size_t FortranVector<VectorClass>::makeSize(int firstIndex, int lastIndex) {
+template <class VectorClass> size_t FortranVector<VectorClass>::makeSize(int firstIndex, int lastIndex) {
   if (lastIndex < firstIndex) {
     throw std::invalid_argument("Vector defined with invalid index range.");
   }
@@ -61,14 +60,11 @@ size_t FortranVector<VectorClass>::makeSize(int firstIndex, int lastIndex) {
 }
 
 /// Constructor
-template <class VectorClass>
-FortranVector<VectorClass>::FortranVector()
-    : VectorClass(makeSize(1, 1)), m_base(1) {}
+template <class VectorClass> FortranVector<VectorClass>::FortranVector() : VectorClass(makeSize(1, 1)), m_base(1) {}
 
 /// Constructor
 template <class VectorClass>
-FortranVector<VectorClass>::FortranVector(const int n)
-    : VectorClass(makeSize(1, n)), m_base(1) {}
+FortranVector<VectorClass>::FortranVector(const int n) : VectorClass(makeSize(1, n)), m_base(1) {}
 
 /// Construct a FortranVector that has arbitrary index bases.
 /// For example FortranVector(-2,2) creates a vector of length 5.
@@ -86,8 +82,7 @@ FortranVector<VectorClass>::FortranVector(const int iFirst, const int iLast)
 /// avoid confusion with resize() method of the base class.
 /// @param iFirst :: Lowest value for the index
 /// @param iLast :: Highest value for the index
-template <class VectorClass>
-void FortranVector<VectorClass>::allocate(int iFirst, int iLast) {
+template <class VectorClass> void FortranVector<VectorClass>::allocate(int iFirst, int iLast) {
   m_base = iFirst;
   this->resize(makeSize(iFirst, iLast));
 }
@@ -95,52 +90,42 @@ void FortranVector<VectorClass>::allocate(int iFirst, int iLast) {
 /// Resize the vector. Named this way to mimic the fortran style and to
 /// avoid confusion with resize() method of the base class.
 /// @param newSize :: The new size of the vector. Index base is set to 1.
-template <class VectorClass>
-void FortranVector<VectorClass>::allocate(int newSize) {
+template <class VectorClass> void FortranVector<VectorClass>::allocate(int newSize) {
   m_base = 1;
   this->resize(makeSize(1, newSize));
 }
 
 /// The "index" operator
 template <class VectorClass>
-typename FortranVector<VectorClass>::ElementConstType
-FortranVector<VectorClass>::operator()(int i) const {
+typename FortranVector<VectorClass>::ElementConstType FortranVector<VectorClass>::operator()(int i) const {
   return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
 }
 
 /// Get the reference to the data element
 template <class VectorClass>
-typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::
-operator()(int i) {
+typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::operator()(int i) {
   return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
 }
 
 /// The "index" operator
 template <class VectorClass>
-typename FortranVector<VectorClass>::ElementConstType
-    FortranVector<VectorClass>::operator[](int i) const {
+typename FortranVector<VectorClass>::ElementConstType FortranVector<VectorClass>::operator[](int i) const {
   return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
 }
 
 /// Get the reference to the data element
 template <class VectorClass>
-typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::
-operator[](int i) {
+typename FortranVector<VectorClass>::ElementRefType FortranVector<VectorClass>::operator[](int i) {
   return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
 }
 
 /// Move the data of this vector to a newly created vector of the bas class.
 /// Do not use this vector after calling this method. The intension of it is
 /// to keep fortran-style calculations separate from C++-style.
-template <class VectorClass>
-VectorClass FortranVector<VectorClass>::moveToBaseVector() {
-  return VectorClass::move();
-}
+template <class VectorClass> VectorClass FortranVector<VectorClass>::moveToBaseVector() { return VectorClass::move(); }
 
 /// Get the length of the vector as an int.
-template <class VectorClass> int FortranVector<VectorClass>::len() const {
-  return static_cast<int>(this->size());
-}
+template <class VectorClass> int FortranVector<VectorClass>::len() const { return static_cast<int>(this->size()); }
 
 } // namespace CurveFitting
 } // namespace Mantid

@@ -22,19 +22,17 @@ using namespace MantidQt::MantidWidgets;
 class QProgressBar;
 class QWidget;
 
-class MockAlgorithmProgressDialogWidget
-    : public IAlgorithmProgressDialogWidget {
+class MockAlgorithmProgressDialogWidget : public IAlgorithmProgressDialogWidget {
 public:
   MockAlgorithmProgressDialogWidget() {
     mainProgressBar = std::make_shared<MockAlgorithmProgressWidget>();
     auto pres = mainProgressBar->m_presenter.get();
-    m_presenter = std::make_shared<AlgorithmProgressDialogPresenter>(
-        static_cast<QWidget *>(nullptr), this, pres->model());
+    m_presenter =
+        std::make_shared<AlgorithmProgressDialogPresenter>(static_cast<QWidget *>(nullptr), this, pres->model());
   }
   virtual ~MockAlgorithmProgressDialogWidget() {}
 
-  MOCK_METHOD1(addAlgorithm, std::pair<QTreeWidgetItem *, QProgressBar *>(
-                                 Mantid::API::IAlgorithm_sptr));
+  MOCK_METHOD1(addAlgorithm, std::pair<QTreeWidgetItem *, QProgressBar *>(Mantid::API::IAlgorithm_sptr));
 
   std::shared_ptr<AlgorithmProgressDialogPresenter> m_presenter;
   // This is the mocked main progress bar,

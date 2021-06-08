@@ -44,4 +44,4 @@ class SampleTransmissionCalculatorPresenter(object):
 
     def help_window(self):
         gui_name = 'Sample Transmission Calculator'
-        InterfaceManager().showCustomInterfaceHelp(gui_name)
+        InterfaceManager().showCustomInterfaceHelp(gui_name,'general')

@@ -7,23 +7,11 @@
 # pylint: disable=invalid-name
 from qtpy import QtCore, QtWidgets
 
-from .tabs.calibration.model import CalibrationModel
-from .tabs.calibration.view import CalibrationView
-from .tabs.calibration.presenter import CalibrationPresenter
-from .tabs.common import CalibrationObserver, SavedirObserver
-from .tabs.common.path_handling import get_run_number_from_path
-from .tabs.focus.model import FocusModel
-from .tabs.focus.view import FocusView
-from .tabs.focus.presenter import FocusPresenter
-from .tabs.fitting.view import FittingView
-from .tabs.fitting.presenter import FittingPresenter
-from .settings.settings_model import SettingsModel
-from .settings.settings_view import SettingsView
-from .settings.settings_presenter import SettingsPresenter
 from mantidqt.icons import get_icon
-
-from mantidqt.interfacemanager import InterfaceManager
+from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqt.utils.qt import load_ui
+from Engineering.gui.engineering_diffraction.presenter import EngineeringDiffractionPresenter
+from .tabs.common import SavedirObserver
 
 Ui_main_window, _ = load_ui(__file__, "main_window.ui")
 
@@ -43,35 +31,30 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
         # Main Window
         self.setupUi(self)
-        self.doc = "Engineering Diffraction"
         self.tabs = self.tab_main
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.calibration_presenter = None
-        self.focus_presenter = None
-        self.fitting_presenter = None
-        self.settings_presenter = None
-        self.calibration_observer = CalibrationObserver(self)
-        self.savedir_observer = SavedirObserver(self)
-        self.set_on_help_clicked(self.open_help_window)
 
-        self.set_on_settings_clicked(self.open_settings)
         self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
 
-        # Setup Elements
-        self.setup_settings()
-        self.setup_calibration()
-        self.setup_focus()
-        self.setup_fitting()
-
-        # Setup status bar
+        # Create status bar widgets
         self.status_label = QtWidgets.QLabel()
         self.savedir_label = QtWidgets.QLabel()
         self.savedir_label.setMaximumWidth(self.status_savdirMaxwidth)
-        self.setup_statusbar()
 
-        # Setup notifiers
-        self.setup_calibration_notifier()
-        self.setup_savedir_notifier()
+        # observers
+        self.update_statusbar_text_observable = GenericObserverWithArgPassing(self.set_statusbar_text)
+        self.update_savedir_observable = GenericObserverWithArgPassing(self.update_savedir)
+        self.savedir_observer = SavedirObserver(self)
+
+        # this presenter needs to be accessible to this view so that it can be accessed by project save
+        self.presenter = self.setup_presenter()
+
+        # setup that can only happen with presenter created
+        self.setup_statusbar()
+        self.set_on_instrument_changed(self.presenter.calibration_presenter.set_instrument_override)
+        self.set_on_rb_num_changed(self.presenter.calibration_presenter.set_rb_num)
+        self.set_on_instrument_changed(self.presenter.focus_presenter.set_instrument_override)
+        self.set_on_rb_num_changed(self.presenter.focus_presenter.set_rb_num)
 
         # Usage Reporting
         try:
@@ -83,51 +66,38 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         except ImportError:
             pass
 
-    def closeEvent(self, event):
-        self.fitting_presenter.data_widget.ads_observer.unsubscribe()
-        self.fitting_presenter.plot_widget.view.ensure_fit_dock_closed()
-
-    def setup_settings(self):
-        model = SettingsModel()
-        view = SettingsView(self)
-        self.settings_presenter = SettingsPresenter(model, view)
-        self.settings_presenter.load_settings_from_file_or_default()
-
-    def setup_calibration(self):
-        cal_model = CalibrationModel()
-        cal_view = CalibrationView(parent=self.tabs)
-        self.calibration_presenter = CalibrationPresenter(cal_model, cal_view)
-        self.set_on_instrument_changed(self.calibration_presenter.set_instrument_override)
-        self.set_on_rb_num_changed(self.calibration_presenter.set_rb_num)
-        self.tabs.addTab(cal_view, "Calibration")
-
-    def setup_focus(self):
-        focus_model = FocusModel()
-        focus_view = FocusView()
-        self.focus_presenter = FocusPresenter(focus_model, focus_view)
-        self.set_on_instrument_changed(self.focus_presenter.set_instrument_override)
-        self.set_on_rb_num_changed(self.focus_presenter.set_rb_num)
-        self.tabs.addTab(focus_view, "Focus")
-
-    def setup_fitting(self):
-        fitting_view = FittingView()
-        self.fitting_presenter = FittingPresenter(fitting_view)
-        self.focus_presenter.add_focus_subscriber(self.fitting_presenter.data_widget.presenter.focus_run_observer)
-        self.tabs.addTab(fitting_view, "Fitting")
-
-    def setup_calibration_notifier(self):
-        self.calibration_presenter.calibration_notifier.add_subscriber(
-            self.focus_presenter.calibration_observer)
-        self.calibration_presenter.calibration_notifier.add_subscriber(self.calibration_observer)
-
-    def setup_savedir_notifier(self):
-        self.settings_presenter.savedir_notifier.add_subscriber(self.savedir_observer)
+    def setup_presenter(self):
+        presenter = EngineeringDiffractionPresenter()
+        presenter.setup_calibration(self)
+        presenter.setup_focus(self)
+        presenter.setup_fitting(self)
+        presenter.setup_settings(self)
+        presenter.setup_calibration_notifier()
+        presenter.statusbar_observable.add_subscriber(self.update_statusbar_text_observable)
+        presenter.savedir_observable.add_subscriber(self.update_savedir_observable)
+        self.set_on_settings_clicked(presenter.open_settings)
+        self.set_on_help_clicked(presenter.open_help_window)
+        return presenter
 
     def setup_statusbar(self):
         self.statusbar.addWidget(self.status_label)
         self.set_statusbar_text("No Calibration Loaded.")
         self.statusbar.addWidget(self.savedir_label)
-        self.update_savedir(self.settings_presenter.settings["save_location"])
+        self.update_savedir(self.presenter.settings_presenter.settings["save_location"])
+
+    def set_statusbar_text(self, text):
+        self.status_label.setText(text)
+
+    def update_savedir(self, savedir):
+        savedir_text = "SaveDir: " + savedir
+        self.savedir_label.setToolTip(savedir_text)
+        self.savedir_label.setText(savedir_text)
+
+    def closeEvent(self, _):
+        self.presenter.handle_close()
+
+    def get_rb_no(self):
+        return self.lineEdit_RBNumber.text()
 
     def set_on_help_clicked(self, slot):
         self.pushButton_help.clicked.connect(slot)
@@ -140,26 +110,3 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
     def set_on_instrument_changed(self, slot):
         self.comboBox_instrument.currentIndexChanged.connect(slot)
-
-    def open_help_window(self):
-        InterfaceManager().showCustomInterfaceHelp(self.doc)
-
-    def open_settings(self):
-        self.settings_presenter.show()
-
-    def get_rb_no(self):
-        return self.lineEdit_RBNumber.text()
-
-    def update_calibration(self, calibration):
-        instrument = calibration.get_instrument()
-        van_no = get_run_number_from_path(calibration.get_vanadium(), instrument)
-        sample_no = get_run_number_from_path(calibration.get_sample(), instrument)
-        self.set_statusbar_text(f"V: {van_no}, CeO2: {sample_no}, Instrument: {instrument}")
-
-    def set_statusbar_text(self, text):
-        self.status_label.setText(text)
-
-    def update_savedir(self, savedir):
-        savedir_text = "SaveDir: " + savedir
-        self.savedir_label.setToolTip(savedir_text)
-        self.savedir_label.setText(savedir_text)

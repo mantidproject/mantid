@@ -29,10 +29,8 @@ void Divide::exec() {
   BinaryOperation::exec();
 }
 
-void Divide::performBinaryOperation(const HistogramData::Histogram &lhs,
-                                    const HistogramData::Histogram &rhs,
-                                    HistogramData::HistogramY &YOut,
-                                    HistogramData::HistogramE &EOut) {
+void Divide::performBinaryOperation(const HistogramData::Histogram &lhs, const HistogramData::Histogram &rhs,
+                                    HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
   const auto bins = static_cast<int>(lhs.e().size());
 
   for (int j = 0; j < bins; ++j) {
@@ -47,8 +45,7 @@ void Divide::performBinaryOperation(const HistogramData::Histogram &lhs,
     // (Sa c/a)2 + (Sb c/b)2 = (Sc)2
     // = (Sa 1/b)2 + (Sb (a/b2))2
     // (Sc)2 = (1/b)2( (Sa)2 + (Sb a/b)2 )
-    EOut[j] = sqrt(pow(lhs.e()[j], 2) + pow(leftY * rhs.e()[j] / rightY, 2)) /
-              fabs(rightY);
+    EOut[j] = sqrt(pow(lhs.e()[j], 2) + pow(leftY * rhs.e()[j] / rightY, 2)) / fabs(rightY);
 
     // Copy the result last in case one of the input workspaces is also any
     // output
@@ -56,10 +53,8 @@ void Divide::performBinaryOperation(const HistogramData::Histogram &lhs,
   }
 }
 
-void Divide::performBinaryOperation(const HistogramData::Histogram &lhs,
-                                    const double rhsY, const double rhsE,
-                                    HistogramData::HistogramY &YOut,
-                                    HistogramData::HistogramE &EOut) {
+void Divide::performBinaryOperation(const HistogramData::Histogram &lhs, const double rhsY, const double rhsE,
+                                    HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
   if (rhsY == 0 && m_warnOnZeroDivide)
     g_log.warning() << "Division by zero: the RHS is a single-valued vector "
                        "with value zero."
@@ -80,11 +75,9 @@ void Divide::performBinaryOperation(const HistogramData::Histogram &lhs,
   }
 }
 
-void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
-                            const API::MatrixWorkspace_const_sptr rhs,
+void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs,
                             API::MatrixWorkspace_sptr out) {
-  if (rhs->YUnit().empty() ||
-      !WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
+  if (rhs->YUnit().empty() || !WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
     // Do nothing
   }
   // If the Y units match, then the output will be a distribution and will be
@@ -110,8 +103,7 @@ void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
  *  @param lhs :: Reference to the EventList that will be modified in place.
  *  @param rhs :: Const reference to the EventList on the right hand side.
  */
-void Divide::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                         const DataObjects::EventList &rhs) {
+void Divide::performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs) {
   // We must histogram the rhs event list to divide.
   MantidVec rhsY, rhsE;
   rhs.generateHistogram(rhs.readX(), rhsY, rhsE);
@@ -126,9 +118,7 @@ void Divide::performEventBinaryOperation(DataObjects::EventList &lhs,
  *  @param rhsY :: The vector of rhs data values
  *  @param rhsE :: The vector of rhs error values
  */
-void Divide::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                         const MantidVec &rhsX,
-                                         const MantidVec &rhsY,
+void Divide::performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
                                          const MantidVec &rhsE) {
   // Divide is implemented at the EventList level.
   lhs.divide(rhsX, rhsY, rhsE);
@@ -142,9 +132,7 @@ void Divide::performEventBinaryOperation(DataObjects::EventList &lhs,
  *  @param rhsY :: The rhs data value
  *  @param rhsE :: The rhs error value
  */
-void Divide::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                         const double &rhsY,
-                                         const double &rhsE) {
+void Divide::performEventBinaryOperation(DataObjects::EventList &lhs, const double &rhsY, const double &rhsE) {
   // Multiply is implemented at the EventList level.
   lhs.divide(rhsY, rhsE);
 }
@@ -187,9 +175,8 @@ void Divide::checkRequirements() {
  *  @retval "<reason why not compatible>" The two workspaces are NOT size
  *compatible
  */
-std::string Divide::checkSizeCompatibility(
-    const API::MatrixWorkspace_const_sptr lhs,
-    const API::MatrixWorkspace_const_sptr rhs) const {
+std::string Divide::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                           const API::MatrixWorkspace_const_sptr rhs) const {
   // --- Check for event workspaces - different than workspaces 2D! ---
 
   // A SingleValueWorkspace on the right matches anything
@@ -208,8 +195,7 @@ std::string Divide::checkSizeCompatibility(
   // Are we allowing the division by different # of spectra, using detector IDs
   // to match up?
   if (m_AllowDifferentNumberSpectra ||
-      (m_rhsBlocksize == 1 &&
-       lhs->getNumberHistograms() == rhs->getNumberHistograms())) {
+      (m_rhsBlocksize == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms())) {
     return "";
   }
 

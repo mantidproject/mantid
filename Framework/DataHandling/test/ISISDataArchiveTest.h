@@ -18,17 +18,11 @@ using namespace Mantid::API;
 
 class MockOutRequests : public ISISDataArchive {
 public:
-  MockOutRequests()
-      : m_sendRequestReturnVal("/archive/default/path"),
-        m_mockFileExists(true) {}
+  MockOutRequests() : m_sendRequestReturnVal("/archive/default/path"), m_mockFileExists(true) {}
 
-  void setSendRequestReturnVal(std::string &return_val) {
-    m_sendRequestReturnVal = return_val;
-  }
+  void setSendRequestReturnVal(std::string &return_val) { m_sendRequestReturnVal = return_val; }
 
-  void setFileExists(const bool doesFileExist) {
-    m_mockFileExists = doesFileExist;
-  }
+  void setFileExists(const bool doesFileExist) { m_mockFileExists = doesFileExist; }
 
 protected:
   /**
@@ -134,8 +128,7 @@ public:
   }
 
   void testFactory() {
-    std::shared_ptr<IArchiveSearch> arch =
-        ArchiveSearchFactory::Instance().create("ISISDataSearch");
+    std::shared_ptr<IArchiveSearch> arch = ArchiveSearchFactory::Instance().create("ISISDataSearch");
     TS_ASSERT(arch);
   }
 
@@ -157,8 +150,7 @@ public:
     ISISDataArchive arch;
 
     const std::vector<std::string> correct_exts = {".RAW"};
-    const std::string actualResult =
-        arch.getCorrectExtension(path, correct_exts);
+    const std::string actualResult = arch.getCorrectExtension(path, correct_exts);
     TS_ASSERT_EQUALS(actualResult, path + ".RAW");
   }
 
@@ -174,8 +166,7 @@ public:
     ISISDataArchive arch;
 
     const std::vector<std::string> incorrect_exts = {".so", ".txt"};
-    const std::string actualResult =
-        arch.getCorrectExtension(path, incorrect_exts);
+    const std::string actualResult = arch.getCorrectExtension(path, incorrect_exts);
     TS_ASSERT_EQUALS(actualResult, "");
   }
 };

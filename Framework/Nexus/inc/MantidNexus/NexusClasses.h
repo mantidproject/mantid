@@ -39,11 +39,11 @@ namespace NeXus {
  */
 struct NXInfo {
   NXInfo() : nxname(), rank(0), dims(), type(-1), stat(NX_ERROR) {}
-  std::string nxname; ///< name of the object
-  int rank;           ///< number of dimensions of the data
-  int dims[4];        ///< sizes along each dimension
-  int type;      ///< type of the data, e.g. NX_CHAR, NX_FLOAT32, see napi.h
-  NXstatus stat; ///< return status
+  std::string nxname;                       ///< name of the object
+  int rank;                                 ///< number of dimensions of the data
+  int dims[4];                              ///< sizes along each dimension
+  int type;                                 ///< type of the data, e.g. NX_CHAR, NX_FLOAT32, see napi.h
+  NXstatus stat;                            ///< return status
   operator bool() { return stat == NX_OK; } ///< returns success of an operation
 };
 
@@ -53,7 +53,7 @@ struct NXClassInfo {
   NXClassInfo() : nxname(), nxclass(), datatype(-1), stat(NX_ERROR) {}
   std::string nxname;  ///< name of the object
   std::string nxclass; ///< NX class of the object or "SDS" if a dataset
-  int datatype; ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see
+  int datatype;        ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see
   /// napi.h
   NXstatus stat;                            ///< return status
   operator bool() { return stat == NX_OK; } ///< returns success of an operation
@@ -71,13 +71,10 @@ const int g_processed_blocksize = 8;
  */
 class DLLExport NXAttributes {
 public:
-  int n() const { return int(m_values.size()); } ///< number of attributes
-  std::vector<std::string>
-  names() const; ///< Returns the list of attribute names
-  std::vector<std::string>
-  values() const; ///< Returns the list of attribute values
-  std::string operator()(const std::string &name)
-      const; ///< returns the value of attribute with name name
+  int n() const { return int(m_values.size()); }         ///< number of attributes
+  std::vector<std::string> names() const;                ///< Returns the list of attribute names
+  std::vector<std::string> values() const;               ///< Returns the list of attribute values
+  std::string operator()(const std::string &name) const; ///< returns the value of attribute with name name
   void set(const std::string &name,
            const std::string &value); ///< set the attribute's value
   void set(const std::string &name,
@@ -98,8 +95,7 @@ class DLLExport NXObject {
   friend class NXRoot;    ///< a friend class declaration
 public:
   // Constructor
-  NXObject(const NXhandle fileID, const NXClass *parent,
-           const std::string &name);
+  NXObject(const NXhandle fileID, const NXClass *parent, const std::string &name);
   virtual ~NXObject() = default;
   /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
   virtual std::string NX_class() const = 0;
@@ -180,8 +176,7 @@ public:
    * rank()-4. i,j,k and l are its indices.
    *            The rank of the data must be 4
    */
-  virtual void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1,
-                    int l = -1) {
+  virtual void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1, int l = -1) {
     // Avoid compiler warnings
     (void)blocksize;
     (void)i;
@@ -199,9 +194,7 @@ private:
 };
 
 template <typename T>
-using container_T =
-    std::conditional_t<std::is_same<T, bool>{}, boost::container::vector<bool>,
-                       std::vector<T>>;
+using container_T = std::conditional_t<std::is_same<T, bool>{}, boost::container::vector<bool>, std::vector<T>>;
 
 /**  Templated class implementation of NXDataSet. After loading the data it can
  * be accessed via operators () and [].
@@ -214,8 +207,7 @@ public:
    * containing the dataset.
    *   @param name :: The name of the dataset relative to its parent
    */
-  NXDataSetTyped(const NXClass &parent, const std::string &name)
-      : NXDataSet(parent, name), m_n(0) {}
+  NXDataSetTyped(const NXClass &parent, const std::string &name) : NXDataSet(parent, name), m_n(0) {}
   /** Returns a pointer to the internal data buffer.
    *  @throw runtime_error exception if the data have not been loaded /
    * initialized.
@@ -223,15 +215,13 @@ public:
    */
   const T *operator()() const {
     if (m_data.empty())
-      throw std::runtime_error("Attempt to read uninitialized data from " +
-                               path());
+      throw std::runtime_error("Attempt to read uninitialized data from " + path());
     return m_data.data();
   }
 
   T *operator()() {
     if (m_data.empty())
-      throw std::runtime_error("Attempt to read uninitialized data from " +
-                               path());
+      throw std::runtime_error("Attempt to read uninitialized data from " + path());
     return m_data.data();
   }
 
@@ -243,16 +233,13 @@ public:
    */
   const T &operator[](int i) const {
     if (m_data.empty())
-      throw std::runtime_error("Attempt to read uninitialized data from " +
-                               path());
+      throw std::runtime_error("Attempt to read uninitialized data from " + path());
     if (i < 0 || i >= m_n)
       rangeError();
     return m_data[i];
   }
 
-  T &operator[](int i) {
-    return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)[i]);
-  }
+  T &operator[](int i) { return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)[i]); }
   /** Returns a value assuming the data is a two-dimensional array
    *  @param i :: The index along dim0()
    *  @param j :: The index along dim1()
@@ -260,12 +247,8 @@ public:
    *  @throw range_error if the indeces point outside the buffer.
    *  @return A reference to the value
    */
-  const T &operator()(int i, int j) const {
-    return this->operator[](i *dim1() + j);
-  }
-  T &operator()(int i, int j) {
-    return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j));
-  }
+  const T &operator()(int i, int j) const { return this->operator[](i *dim1() + j); }
+  T &operator()(int i, int j) { return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j)); }
   /** Returns a value assuming the data is a tree-dimensional array
    *  @param i :: The index along dim0()
    *  @param j :: The index along dim1()
@@ -274,12 +257,8 @@ public:
    *  @throw range_error if the indeces point outside the buffer.
    *  @return A reference to the value
    */
-  const T &operator()(int i, int j, int k) const {
-    return this->operator[]((i * dim1() + j) * dim2() + k);
-  }
-  T &operator()(int i, int j, int k) {
-    return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j, k));
-  }
+  const T &operator()(int i, int j, int k) const { return this->operator[]((i * dim1() + j) * dim2() + k); }
+  T &operator()(int i, int j, int k) { return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j, k)); }
 
   /// Returns a the internal buffer
   container_T<T> &vecBuffer() { return m_data; }
@@ -306,8 +285,7 @@ public:
    * rank()-4. i,j,k and l are its indeces.
    *            The rank of the data must be 4
    */
-  void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1,
-            int l = -1) override {
+  void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1, int l = -1) override {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
@@ -459,8 +437,7 @@ private:
    */
   void alloc(int n) {
     if (n <= 0) {
-      throw std::runtime_error("Attempt to load from an empty dataset " +
-                               path());
+      throw std::runtime_error("Attempt to load from an empty dataset " + path());
     }
     try {
       if (m_n != n) {
@@ -469,15 +446,12 @@ private:
       }
     } catch (...) {
       std::ostringstream ostr;
-      ostr << "Cannot allocate " << n * sizeof(T)
-           << " bytes of memory to load the data";
+      ostr << "Cannot allocate " << n * sizeof(T) << " bytes of memory to load the data";
       throw std::runtime_error(ostr.str());
     }
   }
   /// A shortcut to "throw std::range_error("Nexus dataset range error");"
-  void rangeError() const {
-    throw std::range_error("Nexus dataset range error");
-  }
+  void rangeError() const { throw std::range_error("Nexus dataset range error"); }
   // We cannot use an STL vector due to the dreaded std::vector<bool>
   container_T<T> m_data; ///< The data buffer
   int m_size[4];         ///< The sizes of the loaded data
@@ -551,17 +525,14 @@ public:
    *   @param name :: The name of the class.
    *   @return The opened NXClass
    */
-  NXClass openNXGroup(const std::string &name) const {
-    return openNXClass<NXClass>(name);
-  }
+  NXClass openNXGroup(const std::string &name) const { return openNXClass<NXClass>(name); }
 
   /**  Templated method for creating datasets. It also opens the created set.
    *   @param name :: The name of the dataset
    *   @tparam T The type of the data (int, double, ...).
    *   @return The new object
    */
-  template <class T>
-  NXDataSetTyped<T> openNXDataSet(const std::string &name) const {
+  template <class T> NXDataSetTyped<T> openNXDataSet(const std::string &name) const {
     NXDataSetTyped<T> data(*this, name);
     data.open();
     return data;
@@ -571,37 +542,27 @@ public:
    *   @param name :: The name of the dataset
    *   @return The int
    */
-  NXInt openNXInt(const std::string &name) const {
-    return openNXDataSet<int>(name);
-  }
+  NXInt openNXInt(const std::string &name) const { return openNXDataSet<int>(name); }
   /**  Creates and opens a float dataset
    *   @param name :: The name of the dataset
    *   @return The float
    */
-  NXFloat openNXFloat(const std::string &name) const {
-    return openNXDataSet<float>(name);
-  }
+  NXFloat openNXFloat(const std::string &name) const { return openNXDataSet<float>(name); }
   /**  Creates and opens a double dataset
    *   @param name :: The name of the dataset
    *   @return The double
    */
-  NXDouble openNXDouble(const std::string &name) const {
-    return openNXDataSet<double>(name);
-  }
+  NXDouble openNXDouble(const std::string &name) const { return openNXDataSet<double>(name); }
   /**  Creates and opens a char dataset
    *   @param name :: The name of the dataset
    *   @return The char
    */
-  NXChar openNXChar(const std::string &name) const {
-    return openNXDataSet<char>(name);
-  }
+  NXChar openNXChar(const std::string &name) const { return openNXDataSet<char>(name); }
   /**  Creates and opens a size_t dataset
    *   @param name :: The name of the dataset
    *   @return The size_t
    */
-  NXSize openNXSize(const std::string &name) const {
-    return openNXDataSet<std::size_t>(name);
-  }
+  NXSize openNXSize(const std::string &name) const { return openNXDataSet<std::size_t>(name); }
   /**  Returns a string
    *   @param name :: The name of the NXChar dataset
    *   @return The string
@@ -651,12 +612,10 @@ public:
   bool openLocal(const std::string &nxclass = "");
 
 protected:
-  std::shared_ptr<std::vector<NXClassInfo>>
-      m_groups; ///< Holds info about the child NXClasses
-  std::shared_ptr<std::vector<NXInfo>>
-      m_datasets;     ///< Holds info about the datasets in this NXClass
-  void readAllInfo(); ///< Fills in m_groups and m_datasets.
-  void clear();       ///< Deletes content of m_groups and m_datasets
+  std::shared_ptr<std::vector<NXClassInfo>> m_groups; ///< Holds info about the child NXClasses
+  std::shared_ptr<std::vector<NXInfo>> m_datasets;    ///< Holds info about the datasets in this NXClass
+  void readAllInfo();                                 ///< Fills in m_groups and m_datasets.
+  void clear();                                       ///< Deletes content of m_groups and m_datasets
 private:
   /// Pricate constructor.
   NXClass() : NXObject() { clear(); }
@@ -673,31 +632,25 @@ public:
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXLog(const NXClass &parent, const std::string &name)
-      : NXClass(parent, name) {}
+  NXLog(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXlog"; }
   /// Creates a property wrapper around the log
   Kernel::Property *createProperty();
   /// Creates a TimeSeriesProperty and returns a pointer to it
-  Kernel::Property *createTimeSeries(const std::string &start_time = "",
-                                     const std::string &new_name = "");
+  Kernel::Property *createTimeSeries(const std::string &start_time = "", const std::string &new_name = "");
 
 private:
   /// Creates a single value property of the log
   Kernel::Property *createSingleValueProperty();
   /// Parse a time series
   template <class TYPE>
-  Kernel::Property *parseTimeSeries(const std::string &logName,
-                                    const TYPE &times,
-                                    const std::string &time0 = "") {
-    std::string start_time =
-        (!time0.empty()) ? time0 : times.attributes("start");
+  Kernel::Property *parseTimeSeries(const std::string &logName, const TYPE &times, const std::string &time0 = "") {
+    std::string start_time = (!time0.empty()) ? time0 : times.attributes("start");
     if (start_time.empty()) {
       start_time = "2000-01-01T00:00:00";
     }
-    auto start_t =
-        Kernel::DateAndTimeHelpers::createFromSanitizedISO8601(start_time);
+    auto start_t = Kernel::DateAndTimeHelpers::createFromSanitizedISO8601(start_time);
     NXInfo vinfo = getDataSetInfo("value");
     if (!vinfo)
       return nullptr;
@@ -717,13 +670,11 @@ private:
           if (!isprint(*c))
             *c = ' ';
         }
-        logv->addValue(t,
-                       std::string(value() + i * value.dim1(), value.dim1()));
+        logv->addValue(t, std::string(value() + i * value.dim1(), value.dim1()));
       }
       return logv;
     } else if (vinfo.type == NX_FLOAT64) {
-      if (logName.find("running") != std::string::npos ||
-          logName.find("period ") != std::string::npos) {
+      if (logName.find("running") != std::string::npos || logName.find("period ") != std::string::npos) {
         auto logv = new Kernel::TimeSeriesProperty<bool>(logName);
         NXDouble value(*this, "value");
         value.openLocal();
@@ -753,8 +704,7 @@ private:
   ///@param times :: the array of time offsets
   ///@returns a property pointer
   template <class NX_TYPE, class TIME_TYPE>
-  Kernel::Property *loadValues(const std::string &logName, NX_TYPE &value,
-                               Types::Core::DateAndTime start_t,
+  Kernel::Property *loadValues(const std::string &logName, NX_TYPE &value, Types::Core::DateAndTime start_t,
                                const TIME_TYPE &times) {
     value.openLocal();
     auto logv = new Kernel::TimeSeriesProperty<double>(logName);
@@ -807,8 +757,7 @@ public:
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXBinary(const NXClass &parent, const std::string &name)
-      : NXNote(parent, name) {}
+  NXBinary(const NXClass &parent, const std::string &name) : NXNote(parent, name) {}
   /// Return the binary data associated with the note
   std::vector<char> &binary();
 
@@ -827,8 +776,7 @@ public:
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXMainClass(const NXClass &parent, const std::string &name)
-      : NXClass(parent, name) {}
+  NXMainClass(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /**  Opens a NXLog class
    *   @param name :: The name of the NXLog
    *   @return The log
@@ -838,9 +786,7 @@ public:
    *   @param name :: The name of the NXNote
    *   @return The note
    */
-  NXNote openNXNote(const std::string &name) {
-    return openNXClass<NXNote>(name);
-  }
+  NXNote openNXNote(const std::string &name) { return openNXClass<NXNote>(name); }
 };
 
 /**  Implements NXdata Nexus class.
@@ -858,8 +804,7 @@ public:
   /**  Opens the dataset within this NXData with signal=1 attribute.
    */
   template <typename T> NXDataSetTyped<T> openData() {
-    for (std::vector<NXInfo>::const_iterator it = datasets().begin();
-         it != datasets().end(); it++) {
+    for (std::vector<NXInfo>::const_iterator it = datasets().begin(); it != datasets().end(); it++) {
       NXDataSet dset(*this, it->nxname);
       dset.open();
       // std::cerr << "NXData signal of " << it->nxname << " = " <<
@@ -895,8 +840,7 @@ public:
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXDetector(const NXClass &parent, const std::string &name)
-      : NXMainClass(parent, name) {}
+  NXDetector(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXdetector"; }
   /// Opens the dataset containing pixel distances
@@ -916,8 +860,7 @@ public:
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXDiskChopper(const NXClass &parent, const std::string &name)
-      : NXMainClass(parent, name) {}
+  NXDiskChopper(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXdisk_chopper"; }
   /// Opens the dataset containing pixel distances
@@ -933,25 +876,20 @@ public:
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXInstrument(const NXClass &parent, const std::string &name)
-      : NXMainClass(parent, name) {}
+  NXInstrument(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXinstrument"; }
   /**  Opens a NXDetector
    *   @param name :: The name of the class
    *   @return The detector
    */
-  NXDetector openNXDetector(const std::string &name) {
-    return openNXClass<NXDetector>(name);
-  }
+  NXDetector openNXDetector(const std::string &name) { return openNXClass<NXDetector>(name); }
 
   /**  Opens a NXDetector
    *   @param name :: The name of the class
    *   @return The detector
    */
-  NXDiskChopper openNXDiskChopper(const std::string &name) {
-    return openNXClass<NXDiskChopper>(name);
-  }
+  NXDiskChopper openNXDiskChopper(const std::string &name) { return openNXClass<NXDiskChopper>(name); }
 };
 
 /**  Implements NXentry Nexus class.
@@ -963,24 +901,19 @@ public:
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXEntry(const NXClass &parent, const std::string &name)
-      : NXMainClass(parent, name) {}
+  NXEntry(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXentry"; }
   /**  Opens a NXData
    *   @param name :: The name of the class
    *   @return the nxdata entry
    */
-  NXData openNXData(const std::string &name) {
-    return openNXClass<NXData>(name);
-  }
+  NXData openNXData(const std::string &name) { return openNXClass<NXData>(name); }
   /**  Opens a NXInstrument
    *   @param name :: The name of the class
    *   @return the instrument
    */
-  NXInstrument openNXInstrument(const std::string &name) {
-    return openNXClass<NXInstrument>(name);
-  }
+  NXInstrument openNXInstrument(const std::string &name) { return openNXClass<NXInstrument>(name); }
 };
 
 /**  Implements NXroot Nexus class.
@@ -1002,9 +935,7 @@ public:
    *   @param name :: The name of the entry
    *   @return the entry
    */
-  NXEntry openEntry(const std::string &name) {
-    return openNXClass<NXEntry>(name);
-  }
+  NXEntry openEntry(const std::string &name) { return openNXClass<NXEntry>(name); }
   NXEntry openFirstEntry();
 
 private:

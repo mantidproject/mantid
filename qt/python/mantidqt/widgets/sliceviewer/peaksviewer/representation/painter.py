@@ -49,7 +49,9 @@ class EllipticalShell(Patch):
         arc = Path.arc(theta1=0.0, theta2=360.0)
         # Draw the outer unit circle followed by a reversed and scaled inner circle
         v1 = arc.vertices
-        v2 = arc.vertices[::-1] * float(1.0 - self.frac_thick)
+        v2 = np.zeros_like(v1)
+        v2[:, 0] = v1[::-1, 0] * float(1.0 - self.frac_thick[0])
+        v2[:, 1] = v1[::-1, 1] * float(1.0 - self.frac_thick[1])
         v = np.vstack([v1, v2, v1[0, :], (0, 0)])
         c = np.hstack([arc.codes, arc.codes, Path.MOVETO, Path.CLOSEPOLY])
         c[len(arc.codes)] = Path.MOVETO
@@ -80,12 +82,12 @@ class EllipticalShell(Patch):
         return self._path
 
 
-class MplPainter():
+class MplPainter:
     """
     Implementation of a PeakPainter that uses matplotlib to draw
     """
 
-    def __init__(self, view):
+    def __init__(self, view: 'SliceViewerDataView'):
         """
         :param view: An object defining an axes property.
         """
@@ -178,10 +180,13 @@ class MplPainter():
             to_data_coords.transform(artist_bbox.max)
 
 
-class Painted():
+class Painted:
     """Combine a collection of artists with the painter that created them"""
 
-    def __init__(self, painter, artists, effective_bbox=None):
+    def __init__(self,
+                 painter: MplPainter,
+                 artists,
+                 effective_bbox=None):
         """
         :param painter: A reference to the painter responsible for
                         drawing the artists.

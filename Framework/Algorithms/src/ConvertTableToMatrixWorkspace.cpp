@@ -29,20 +29,15 @@ using namespace HistogramData;
 using namespace DataObjects;
 
 void ConvertTableToMatrixWorkspace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input TableWorkspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output Workspace2D.");
-  declareProperty("ColumnX", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("ColumnX", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The column name for the X vector.");
-  declareProperty("ColumnY", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("ColumnY", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The column name for the Y vector.");
-  declareProperty("ColumnE", "",
-                  "The column name for the E vector (optional).");
+  declareProperty("ColumnE", "", "The column name for the E vector (optional).");
 }
 
 void ConvertTableToMatrixWorkspace::exec() {
@@ -65,12 +60,10 @@ void ConvertTableToMatrixWorkspace::exec() {
   outputWorkspace->mutableY(0).assign(Y.cbegin(), Y.cend());
 
   if (!columnE.empty()) {
-    outputWorkspace->mutableE(0) =
-        inputWorkspace->getColumn(columnE)->numeric_fill<>();
+    outputWorkspace->mutableE(0) = inputWorkspace->getColumn(columnE)->numeric_fill<>();
   }
 
-  auto labelX = std::dynamic_pointer_cast<Units::Label>(
-      UnitFactory::Instance().create("Label"));
+  auto labelX = std::dynamic_pointer_cast<Units::Label>(UnitFactory::Instance().create("Label"));
   labelX->setLabel(columnX);
   outputWorkspace->getAxis(0)->unit() = labelX;
 

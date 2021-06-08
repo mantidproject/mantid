@@ -22,8 +22,8 @@ class DLLExport ListPropertyWidget : public PropertyWidget {
   Q_OBJECT
 
 public:
-  ListPropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = nullptr,
-                     QGridLayout *layout = nullptr, int row = -1);
+  ListPropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = nullptr, QGridLayout *layout = nullptr,
+                     int row = -1);
   ~ListPropertyWidget() override;
   QString getValue() const override;
   void setValueImpl(const QString &value) override;

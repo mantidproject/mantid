@@ -21,9 +21,7 @@ namespace DataHandling {
 class DLLExport ModifyDetectorDotDatFile : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override {
-    return "ModifyDetectorDotDatFile";
-  };
+  const std::string name() const override { return "ModifyDetectorDotDatFile"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Modifies an ISIS detector dot data file, so that the detector "
@@ -32,13 +30,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"ResizeRectangularDetector"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ResizeRectangularDetector"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Instrument";
-  }
+  const std::string category() const override { return "DataHandling\\Instrument"; }
 
 private:
   /// Initialise the properties

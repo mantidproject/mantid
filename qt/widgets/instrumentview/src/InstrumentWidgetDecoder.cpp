@@ -118,6 +118,7 @@ void InstrumentWidgetDecoder::decodeRenderTab(
   obj->m_lighting->setChecked(map[QString("displayLighting")].toBool());
   obj->m_GLView->setChecked(map[QString("useOpenGL")].toBool());
   obj->m_UCorrection->setChecked(map[QString("useUCorrection")].toBool());
+  obj->m_freezeRotation->setChecked(map[QString("freezeRotation")].toBool());
 
   // Load the surface
   auto surface = obj->getSurface();
@@ -172,8 +173,8 @@ void InstrumentWidgetDecoder::decodePickTab(const QMap<QString, QVariant> &map,
   obj->m_free_draw->setChecked(map[QString("freeDraw")].toBool());
   obj->m_one->setChecked(map[QString("one")].toBool());
   obj->m_tube->setChecked(map[QString("tube")].toBool());
-  obj->m_peak->setChecked(map[QString("peak")].toBool());
-  obj->m_peakSelect->setChecked(map[QString("peakSelect")].toBool());
+  obj->m_peakAdd->setChecked(map[QString("peakAdd")].toBool());
+  obj->m_peakErase->setChecked(map[QString("peakErase")].toBool());
 }
 
 void InstrumentWidgetDecoder::decodeActor(

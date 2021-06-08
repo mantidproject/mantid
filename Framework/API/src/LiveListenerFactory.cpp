@@ -35,10 +35,9 @@ Kernel::Logger g_log("LiveListenerFactory");
  * @throws std::runtime_error If unable to connect to the listener at the
  *                            configured address.
  */
-std::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
-    const std::string &instrumentName, bool connect,
-    const API::IAlgorithm *callingAlgorithm,
-    const std::string &listenerConnectionName) const {
+std::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const std::string &instrumentName, bool connect,
+                                                               const API::IAlgorithm *callingAlgorithm,
+                                                               const std::string &listenerConnectionName) const {
   try {
     // Look up LiveListenerInfo based on given instrument and listener names
     auto inst = Kernel::ConfigService::Instance().getInstrument(instrumentName);
@@ -69,13 +68,10 @@ std::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
  *                   if it has any.
  * @return A shared pointer to the created ILiveListener implementation
  */
-std::shared_ptr<ILiveListener>
-LiveListenerFactoryImpl::create(const Kernel::LiveListenerInfo &info,
-                                bool connect,
-                                const API::IAlgorithm *callingAlgorithm) const {
+std::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const Kernel::LiveListenerInfo &info, bool connect,
+                                                               const API::IAlgorithm *callingAlgorithm) const {
 
-  ILiveListener_sptr listener =
-      Kernel::DynamicFactory<ILiveListener>::create(info.listener());
+  ILiveListener_sptr listener = Kernel::DynamicFactory<ILiveListener>::create(info.listener());
 
   // Give LiveListener additional properties if provided
   if (callingAlgorithm) {
@@ -101,8 +97,7 @@ LiveListenerFactoryImpl::create(const Kernel::LiveListenerInfo &info,
     // Just catch the base class exception
     catch (Poco::Exception &pocoEx) {
       std::stringstream ss;
-      ss << "Unable to connect listener [" << info.listener() << "] to ["
-         << info.address() << "]: " << pocoEx.what();
+      ss << "Unable to connect listener [" << info.listener() << "] to [" << info.address() << "]: " << pocoEx.what();
       g_log.debug(ss.str());
       throw std::runtime_error(ss.str());
     }
@@ -121,11 +116,9 @@ LiveListenerFactoryImpl::create(const Kernel::LiveListenerInfo &info,
  * @returns Never
  * @throws Exception::NotImplementedError every time!
  */
-ILiveListener *
-LiveListenerFactoryImpl::createUnwrapped(const std::string &className) const {
+ILiveListener *LiveListenerFactoryImpl::createUnwrapped(const std::string &className) const {
   UNUSED_ARG(className)
-  throw Kernel::Exception::NotImplementedError(
-      "Don't use this method - use the safe one!!!");
+  throw Kernel::Exception::NotImplementedError("Don't use this method - use the safe one!!!");
 }
 
 } // namespace API

@@ -38,46 +38,32 @@ class WorkspacePropertyTest : public CxxTest::TestSuite {
   };
 
   using WorkspacePropertyWorkspace = WorkspaceProperty<Workspace>;
-  using WorkspacePropertyWorkspace_uptr =
-      std::unique_ptr<WorkspacePropertyWorkspace>;
+  using WorkspacePropertyWorkspace_uptr = std::unique_ptr<WorkspacePropertyWorkspace>;
 
   using WorkspacePropertyWorkspaceTester2 = WorkspaceProperty<WorkspaceTester2>;
-  using WorkspacePropertyWorkspaceTester2_uptr =
-      std::unique_ptr<WorkspacePropertyWorkspaceTester2>;
+  using WorkspacePropertyWorkspaceTester2_uptr = std::unique_ptr<WorkspacePropertyWorkspaceTester2>;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static WorkspacePropertyTest *createSuite() {
-    return new WorkspacePropertyTest();
-  }
+  static WorkspacePropertyTest *createSuite() { return new WorkspacePropertyTest(); }
   static void destroySuite(WorkspacePropertyTest *suite) { delete suite; }
 
   WorkspacePropertyTest() {
     AnalysisDataService::Instance().clear();
-    WorkspaceFactory::Instance().subscribe<WorkspaceTester1>(
-        "WorkspacePropertyTest");
-    WorkspaceFactory::Instance().subscribe<WorkspaceTester2>(
-        "WorkspacePropertyTest2");
-    wsp1 = std::make_unique<WorkspacePropertyWorkspace>("workspace1", "ws1",
-                                                        Direction::Input);
-    wsp2 = std::make_unique<WorkspacePropertyWorkspace>("workspace2", "",
-                                                        Direction::Output);
-    wsp3 = std::make_unique<WorkspacePropertyWorkspaceTester2>(
-        "workspace3", "ws3", Direction::InOut);
+    WorkspaceFactory::Instance().subscribe<WorkspaceTester1>("WorkspacePropertyTest");
+    WorkspaceFactory::Instance().subscribe<WorkspaceTester2>("WorkspacePropertyTest2");
+    wsp1 = std::make_unique<WorkspacePropertyWorkspace>("workspace1", "ws1", Direction::Input);
+    wsp2 = std::make_unique<WorkspacePropertyWorkspace>("workspace2", "", Direction::Output);
+    wsp3 = std::make_unique<WorkspacePropertyWorkspaceTester2>("workspace3", "ws3", Direction::InOut);
     // Two optional properties of different types
-    wsp4 = std::make_unique<WorkspacePropertyWorkspace>(
-        "workspace4", "", Direction::Input, PropertyMode::Optional);
-    wsp5 = std::make_unique<WorkspacePropertyWorkspaceTester2>(
-        "workspace5", "", Direction::Input, PropertyMode::Optional);
-    wsp6 = std::make_unique<WorkspacePropertyWorkspace>("InvalidNameTest", "",
-                                                        Direction::Output);
+    wsp4 = std::make_unique<WorkspacePropertyWorkspace>("workspace4", "", Direction::Input, PropertyMode::Optional);
+    wsp5 =
+        std::make_unique<WorkspacePropertyWorkspaceTester2>("workspace5", "", Direction::Input, PropertyMode::Optional);
+    wsp6 = std::make_unique<WorkspacePropertyWorkspace>("InvalidNameTest", "", Direction::Output);
   }
 
-  void testConstructor() {
-    TS_ASSERT_THROWS(WorkspaceProperty<Workspace>("test", "", 3),
-                     const std::out_of_range &)
-  }
+  void testConstructor() { TS_ASSERT_THROWS(WorkspaceProperty<Workspace>("test", "", 3), const std::out_of_range &) }
 
   void testValue() {
     TS_ASSERT_EQUALS(wsp1->value(), "ws1")
@@ -97,28 +83,22 @@ public:
     p.setValue("WorkspaceName");
     TS_ASSERT(p.isValueSerializable());
     p.setValue("");
-    MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
     p.setDataItem(ws);
     TS_ASSERT(!p.isDefault())
     TS_ASSERT(!p.isValueSerializable());
   }
 
   void testSetValue() {
-    TS_ASSERT_EQUALS(wsp1->setValue(""),
-                     "Enter a name for the Input/InOut workspace")
+    TS_ASSERT_EQUALS(wsp1->setValue(""), "Enter a name for the Input/InOut workspace")
     TS_ASSERT_EQUALS(wsp1->value(), "")
-    TS_ASSERT_EQUALS(wsp1->setValueFromJson(Json::Value("")),
-                     "Enter a name for the Input/InOut workspace")
+    TS_ASSERT_EQUALS(wsp1->setValueFromJson(Json::Value("")), "Enter a name for the Input/InOut workspace")
     TS_ASSERT_EQUALS(wsp1->value(), "")
 
-    TS_ASSERT_EQUALS(
-        wsp1->setValue("newValue"),
-        "Workspace \"newValue\" was not found in the Analysis Data Service")
+    TS_ASSERT_EQUALS(wsp1->setValue("newValue"), "Workspace \"newValue\" was not found in the Analysis Data Service")
     TS_ASSERT_EQUALS(wsp1->value(), "newValue")
-    TS_ASSERT_EQUALS(
-        wsp1->setValueFromJson(Json::Value("newValue")),
-        "Workspace \"newValue\" was not found in the Analysis Data Service")
+    TS_ASSERT_EQUALS(wsp1->setValueFromJson(Json::Value("newValue")),
+                     "Workspace \"newValue\" was not found in the Analysis Data Service")
     TS_ASSERT_EQUALS(wsp1->value(), "newValue")
     wsp1->setValue("ws1");
   }
@@ -126,21 +106,15 @@ public:
   void testSetValue_On_Optional() {
     TS_ASSERT_EQUALS(wsp4->setValue(""), "");
     TS_ASSERT_EQUALS(wsp4->value(), "");
-    TS_ASSERT_EQUALS(
-        wsp4->setValue("newValue"),
-        "Workspace \"newValue\" was not found in the Analysis Data Service");
+    TS_ASSERT_EQUALS(wsp4->setValue("newValue"), "Workspace \"newValue\" was not found in the Analysis Data Service");
     TS_ASSERT_EQUALS(wsp4->value(), "newValue");
     wsp4->setValue("");
   }
 
   void testIsValid() {
-    TS_ASSERT_EQUALS(
-        wsp1->isValid(),
-        "Workspace \"ws1\" was not found in the Analysis Data Service");
+    TS_ASSERT_EQUALS(wsp1->isValid(), "Workspace \"ws1\" was not found in the Analysis Data Service");
     TS_ASSERT_EQUALS(wsp2->isValid(), "Enter a name for the Output workspace");
-    TS_ASSERT_EQUALS(
-        wsp3->isValid(),
-        "Workspace \"ws3\" was not found in the Analysis Data Service");
+    TS_ASSERT_EQUALS(wsp3->isValid(), "Workspace \"ws3\" was not found in the Analysis Data Service");
     TS_ASSERT_EQUALS(wsp4->isValid(), "");
     TS_ASSERT_EQUALS(wsp6->isValid(), "Enter a name for the Output workspace");
 
@@ -160,8 +134,7 @@ public:
 
     // The other three need the input workspace to exist in the ADS
     Workspace_sptr space;
-    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create(
-                                 "WorkspacePropertyTest", 1, 1, 1));
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1));
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add("ws1", space));
     wsp1->setValue("ws1");
     TS_ASSERT_EQUALS(wsp1->isValid(), "");
@@ -169,13 +142,10 @@ public:
     // Put workspace of wrong type and check validation fails
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add("ws3", space));
     wsp3->setValue("ws3");
-    TS_ASSERT_EQUALS(wsp3->isValid(),
-                     "Workspace ws3 is not of the correct type");
+    TS_ASSERT_EQUALS(wsp3->isValid(), "Workspace ws3 is not of the correct type");
     // Now put correct type in and check it passes
-    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create(
-                                 "WorkspacePropertyTest2", 1, 1, 1))
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().addOrReplace("ws3", space));
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest2", 1, 1, 1))
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace("ws3", space));
     wsp3->setValue("ws3");
     TS_ASSERT_EQUALS(wsp3->isValid(), "");
 
@@ -184,8 +154,7 @@ public:
     TS_ASSERT_EQUALS(wsp4->isValid(), "");
     // Check incorrect type
     wsp5->setValue("ws1");
-    TS_ASSERT_EQUALS(wsp5->isValid(),
-                     "Workspace ws1 is not of the correct type");
+    TS_ASSERT_EQUALS(wsp5->isValid(), "Workspace ws1 is not of the correct type");
     // Now the correct type
     wsp5->setValue("ws3");
     TS_ASSERT_EQUALS(wsp5->isValid(), "");
@@ -208,17 +177,14 @@ public:
 
   void testIsDefaultWorksOnUnnamedWorkspaces() {
     std::string defaultWSName{""};
-    WorkspaceProperty<Workspace> p("PropertyName", defaultWSName,
-                                   Direction::InOut);
+    WorkspaceProperty<Workspace> p("PropertyName", defaultWSName, Direction::InOut);
     TS_ASSERT(p.isDefault())
-    MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
     p.setDataItem(ws);
     TS_ASSERT(!p.isDefault())
     TS_ASSERT_EQUALS(p.value(), defaultWSName)
     defaultWSName = "default";
-    WorkspaceProperty<Workspace> p2("PropertyName", defaultWSName,
-                                    Direction::Input);
+    WorkspaceProperty<Workspace> p2("PropertyName", defaultWSName, Direction::Input);
     TS_ASSERT(p2.isDefault())
     p2.setDataItem(ws);
     TS_ASSERT(!p2.isDefault())
@@ -240,10 +206,8 @@ public:
 
   void testInvalidAllowedValues() {
     std::vector<std::string> vals;
-    WorkspaceProperty<TableWorkspaceTester> testTblProperty(
-        "Table Mismatch test", "ws3", Direction::Input);
-    WorkspaceProperty<WorkspaceGroup> testGroupProperty(
-        "Group Mismatch test", "ws1", Direction::Input);
+    WorkspaceProperty<TableWorkspaceTester> testTblProperty("Table Mismatch test", "ws3", Direction::Input);
+    WorkspaceProperty<WorkspaceGroup> testGroupProperty("Group Mismatch test", "ws1", Direction::Input);
 
     TS_ASSERT_THROWS_NOTHING(vals = testTblProperty.allowedValues());
     TS_ASSERT_EQUALS(vals.size(), 0);
@@ -271,10 +235,8 @@ public:
 
     // create empty workspace with blank name
     Workspace_sptr space;
-    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create(
-                                 "WorkspacePropertyTest", 1, 1, 1));
-    auto wsp7 =
-        new WorkspaceProperty<Workspace>("workspace7", "", Direction::Input);
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1));
+    auto wsp7 = new WorkspaceProperty<Workspace>("workspace7", "", Direction::Input);
     *wsp7 = space;
     TS_ASSERT(wsp7->getWorkspace())
 
@@ -298,14 +260,12 @@ public:
     TS_ASSERT_THROWS(wsp2->store(), const std::runtime_error &)
     // So now create and assign the workspace and test again
     Workspace_sptr space;
-    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create(
-                                 "WorkspacePropertyTest", 1, 1, 1));
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1));
     *wsp2 = space;
     TS_ASSERT(wsp2->store())
     // Check it really has been stored in the ADS
     Workspace_sptr storedspace;
-    TS_ASSERT_THROWS_NOTHING(
-        storedspace = AnalysisDataService::Instance().retrieve("ws2"))
+    TS_ASSERT_THROWS_NOTHING(storedspace = AnalysisDataService::Instance().retrieve("ws2"))
     TS_ASSERT_EQUALS(storedspace->id(), "WorkspacePropTest")
 
     // This one should pass
@@ -321,8 +281,7 @@ public:
     wsp4->setValue("");
     // Create and assign the workspace
     Workspace_sptr space;
-    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create(
-                                 "WorkspacePropertyTest", 1, 1, 1));
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1));
     *wsp4 = space;
 
     PropertyHistory history = wsp4->createHistory();
@@ -347,8 +306,7 @@ public:
     TS_ASSERT(wsp5->isLocking());
 
     // Create one that is not locking
-    WorkspaceProperty<Workspace> p1("workspace1", "ws1", Direction::Input,
-                                    PropertyMode::Mandatory, LockMode::NoLock);
+    WorkspaceProperty<Workspace> p1("workspace1", "ws1", Direction::Input, PropertyMode::Mandatory, LockMode::NoLock);
     TS_ASSERT(!p1.isLocking());
 
     // Copy constructor, both ways
@@ -359,8 +317,7 @@ public:
   }
 
   void test_storing_workspace_name_assing() {
-    Workspace_sptr ws1 =
-        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    Workspace_sptr ws1 = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
     AnalysisDataService::Instance().add("space1", ws1);
     WorkspaceProperty<Workspace> p1("workspace1", "", Direction::Input);
     p1 = ws1;
@@ -369,8 +326,7 @@ public:
   }
 
   void test_storing_workspace_name_setDataItem() {
-    Workspace_sptr ws1 =
-        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    Workspace_sptr ws1 = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
     AnalysisDataService::Instance().add("space1", ws1);
     WorkspaceProperty<Workspace> p1("workspace1", "", Direction::Input);
     p1.setDataItem(ws1);
@@ -379,8 +335,7 @@ public:
   }
 
   void test_not_storing_workspace_name() {
-    Workspace_sptr ws1 =
-        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    Workspace_sptr ws1 = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
     WorkspaceProperty<Workspace> p1("workspace1", "", Direction::Input);
     p1 = ws1;
     TS_ASSERT_EQUALS(p1.value(), "");
@@ -388,16 +343,14 @@ public:
 
   void test_trimmming() {
     // trimming on
-    Workspace_sptr ws1 =
-        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    Workspace_sptr ws1 = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
     AnalysisDataService::Instance().add("space1", ws1);
     WorkspaceProperty<Workspace> p1("workspace1", "", Direction::Input);
     p1.setValue("  space1\t\n");
     TS_ASSERT_EQUALS(p1.value(), "space1");
 
     // turn trimming off
-    Workspace_sptr ws2 =
-        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    Workspace_sptr ws2 = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
     AnalysisDataService::Instance().add("  space1\t\n", ws2);
     WorkspaceProperty<Workspace> p2("workspace1", "", Direction::Input);
     p2.setAutoTrim(false);

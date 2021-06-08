@@ -90,9 +90,4 @@ if(DOXYGEN_FOUND)
       ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/Mantid_Logo_Transparent.png
       ${CMAKE_CURRENT_BINARY_DIR}/doxy_header.html)
 
-  # remove file that was configured for mantidplot
-  if (EXISTS "${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ParaViewVersion.cpp")
-    file (REMOVE "${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ParaViewVersion.cpp")
-  endif()
-
 endif(DOXYGEN_FOUND)

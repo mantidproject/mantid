@@ -18,8 +18,7 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL IInstrumentOptionDefaults {
 public:
   virtual ~IInstrumentOptionDefaults() = default;
-  virtual Instrument
-  get(Mantid::Geometry::Instrument_const_sptr instrument) = 0;
+  virtual Instrument get(Mantid::Geometry::Instrument_const_sptr instrument) = 0;
 };
 
 /** @class InstrumentOptionDefaults
@@ -27,8 +26,7 @@ public:
     This class gets the defaults for the "Instrument" settings tab in the
     reflectometry GUI
  */
-class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentOptionDefaults
-    : public IInstrumentOptionDefaults {
+class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentOptionDefaults : public IInstrumentOptionDefaults {
 public:
   Instrument get(Mantid::Geometry::Instrument_const_sptr instrument) override;
 };

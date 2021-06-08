@@ -129,6 +129,6 @@ if(PACKAGE_DOCS)
     else(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
       install(DIRECTORY ${SPHINX_BUILD_DIR}/html/
               DESTINATION ${_bundle}${HTML_DOCS_DEST})
-    endif(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+    endif()
   endforeach()
 endif(PACKAGE_DOCS)

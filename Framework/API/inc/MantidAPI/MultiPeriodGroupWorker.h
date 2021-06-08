@@ -41,8 +41,7 @@ public:
   /// Check groups
   VecWSGroupType findMultiPeriodGroups(Algorithm const *const sourceAlg) const;
   /// Process groups
-  bool processGroups(Algorithm *const sourceAlg,
-                     const VecWSGroupType &vecMultiPeriodGroups) const;
+  bool processGroups(Algorithm *const sourceAlg, const VecWSGroupType &vecMultiPeriodGroups) const;
 
 private:
   // Disable copy
@@ -51,23 +50,18 @@ private:
   MultiPeriodGroupWorker &operator=(const MultiPeriodGroupWorker &);
 
   /// Try ot add a workspace to the group of input workspaces.
-  void tryAddInputWorkspaceToInputGroups(
-      const Workspace_sptr &ws, VecWSGroupType &vecMultiPeriodWorkspaceGroups,
-      VecWSGroupType &vecWorkspaceGroups) const;
+  void tryAddInputWorkspaceToInputGroups(const Workspace_sptr &ws, VecWSGroupType &vecMultiPeriodWorkspaceGroups,
+                                         VecWSGroupType &vecWorkspaceGroups) const;
 
   /// Copy input workspace properties to spawned algorithm.
-  void copyInputWorkspaceProperties(IAlgorithm *targetAlg,
-                                    IAlgorithm *sourceAlg,
-                                    const int &periodNumber) const;
+  void copyInputWorkspaceProperties(IAlgorithm *targetAlg, IAlgorithm *sourceAlg, const int &periodNumber) const;
 
   /// Create an input workspace string from the workspace groups.
-  std::string createFormattedInputWorkspaceNames(
-      const size_t &periodIndex,
-      const VecWSGroupType &vecWorkspaceGroups) const;
+  std::string createFormattedInputWorkspaceNames(const size_t &periodIndex,
+                                                 const VecWSGroupType &vecWorkspaceGroups) const;
 
   /// Validate the input group workspace
-  void validateMultiPeriodGroupInputs(
-      const VecWSGroupType &vecMultiPeriodGroups) const;
+  void validateMultiPeriodGroupInputs(const VecWSGroupType &vecMultiPeriodGroups) const;
 
   /// Workspace property name
   std::string m_workspacePropertyName;

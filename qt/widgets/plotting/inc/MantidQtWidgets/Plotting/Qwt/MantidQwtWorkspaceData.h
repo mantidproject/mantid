@@ -86,11 +86,9 @@ private:
 /**
  * Base class for MatrixWorkspace Qwt data types
  */
-class EXPORT_OPT_MANTIDQT_PLOTTING MantidQwtMatrixWorkspaceData
-    : public MantidQwtWorkspaceData {
+class EXPORT_OPT_MANTIDQT_PLOTTING MantidQwtMatrixWorkspaceData : public MantidQwtWorkspaceData {
 public:
   MantidQwtMatrixWorkspaceData(bool logScaleY);
   /// Return a new data object of the same type but with a new workspace
-  virtual MantidQwtMatrixWorkspaceData *
-  copyWithNewSource(const Mantid::API::MatrixWorkspace &workspace) const = 0;
+  virtual MantidQwtMatrixWorkspaceData *copyWithNewSource(const Mantid::API::MatrixWorkspace &workspace) const = 0;
 };

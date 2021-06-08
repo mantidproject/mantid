@@ -13,17 +13,14 @@ namespace Mantid {
 namespace API {
 
 Workspace::Workspace(const Parallel::StorageMode storageMode)
-    : m_history(std::make_unique<WorkspaceHistory>()),
-      m_storageMode(storageMode) {}
+    : m_history(std::make_unique<WorkspaceHistory>()), m_storageMode(storageMode) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 Workspace::~Workspace() = default;
 
 Workspace::Workspace(const Workspace &other)
-    : Kernel::DataItem(other), m_title(other.m_title),
-      m_comment(other.m_comment), m_name(),
-      m_history(std::make_unique<WorkspaceHistory>(other.getHistory())),
-      m_storageMode(other.m_storageMode) {}
+    : Kernel::DataItem(other), m_title(other.m_title), m_comment(other.m_comment), m_name(),
+      m_history(std::make_unique<WorkspaceHistory>(other.getHistory())), m_storageMode(other.m_storageMode) {}
 
 /** Set the title of the workspace
  *
@@ -72,26 +69,21 @@ const std::string &Workspace::getName() const { return m_name; }
  *
  * @param n: number of algorithms defining a clean workspace
  */
-bool Workspace::isDirty(const int n) const {
-  return static_cast<int>(m_history->size()) > n;
-}
+bool Workspace::isDirty(const int n) const { return static_cast<int>(m_history->size()) > n; }
 
 /**
  * Returns the memory footprint in sensible units
  * @return A string with the
  */
 std::string Workspace::getMemorySizeAsStr() const {
-  return Mantid::Kernel::memToString<uint64_t>(
-      static_cast<uint64_t>(getMemorySize()) / 1024);
+  return Mantid::Kernel::memToString<uint64_t>(static_cast<uint64_t>(getMemorySize()) / 1024);
 }
 
 /// Returns the storage mode (used for MPI runs)
 Parallel::StorageMode Workspace::storageMode() const { return m_storageMode; }
 
 /// Sets the storage mode (used for MPI runs)
-void Workspace::setStorageMode(Parallel::StorageMode storageMode) {
-  m_storageMode = storageMode;
-}
+void Workspace::setStorageMode(Parallel::StorageMode storageMode) { m_storageMode = storageMode; }
 
 } // namespace API
 } // Namespace Mantid
@@ -102,31 +94,25 @@ namespace Kernel {
 
 template <>
 MANTID_API_DLL Mantid::API::Workspace_sptr
-IPropertyManager::getValue<Mantid::API::Workspace_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::Workspace_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::Workspace_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::Workspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected shared_ptr<Workspace>.";
+    std::string message = "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<Workspace>.";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 MANTID_API_DLL Mantid::API::Workspace_const_sptr
-IPropertyManager::getValue<Mantid::API::Workspace_const_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::Workspace_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::Workspace_const_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::Workspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<Workspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<Workspace>.";
     throw std::runtime_error(message);
   }
 }

@@ -45,9 +45,7 @@ public:
     return {"CompareSampleLogs", "CopyLogs", "CheckForSampleLogs"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Sample;Utility\\Workspaces";
-  }
+  const std::string category() const override { return "Sample;Utility\\Workspaces"; }
   std::map<std::string, std::string> validateInputs() override;
 
 private:
@@ -56,9 +54,8 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Function to copy information from one sample to another
-  void copyParameters(API::Sample &from, API::Sample &to, bool nameFlag,
-                      bool materialFlag, bool environmentFlag, bool shapeFlag,
-                      bool latticeFlag, bool orientationOnlyFlag);
+  void copyParameters(API::Sample &from, API::Sample &to, bool nameFlag, bool materialFlag, bool environmentFlag,
+                      bool shapeFlag, bool latticeFlag, bool orientationOnlyFlag);
 };
 
 } // namespace Algorithms

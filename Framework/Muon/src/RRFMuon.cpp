@@ -24,27 +24,21 @@ DECLARE_ALGORITHM(RRFMuon)
 void RRFMuon::init() {
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
       "Name of the input workspace containing the spectra in the lab frame");
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
       "Name of the output workspace containing the spectra in the RRF");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>("Frequency", 0,
-                                                              Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Frequency", 0, Direction::Input),
                   "Frequency of the oscillations");
 
   std::vector<std::string> unitOptions{"MHz", "Gauss", "Mrad/s"};
-  declareProperty("FrequencyUnits", "MHz",
-                  std::make_shared<StringListValidator>(unitOptions),
-                  "The frequency units");
+  declareProperty("FrequencyUnits", "MHz", std::make_shared<StringListValidator>(unitOptions), "The frequency units");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("Phase", 0, Direction::Input),
-      "Phase accounting for any misalignment of the counters");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Phase", 0, Direction::Input),
+                  "Phase accounting for any misalignment of the counters");
 }
 
 /** Executes the algorithm
@@ -58,8 +52,7 @@ void RRFMuon::exec() {
   // Get units
   std::string units = getProperty("FrequencyUnits");
   // Convert frequency to input workspace X units
-  double factor =
-      unitConversionFactor(inputWs->getAxis(0)->unit()->label().ascii(), units);
+  double factor = unitConversionFactor(inputWs->getAxis(0)->unit()->label().ascii(), units);
   // Get phase
   double phase = getProperty("Phase");
   // Get number of histograms
@@ -79,17 +72,13 @@ void RRFMuon::exec() {
   MantidVec rrfRe(nData),
       rrfIm(nData); // Rotating Reference frame (RRF) polarizations
   for (size_t t = 0; t < nData; t++) {
-    rrfRe[t] = labRe[t] * cos(twoPiFreq * time[t] + phase) +
-               labIm[t] * sin(twoPiFreq * time[t] + phase);
-    rrfIm[t] = -labRe[t] * sin(twoPiFreq * time[t] + phase) +
-               labIm[t] * cos(twoPiFreq * time[t] + phase);
+    rrfRe[t] = labRe[t] * cos(twoPiFreq * time[t] + phase) + labIm[t] * sin(twoPiFreq * time[t] + phase);
+    rrfIm[t] = -labRe[t] * sin(twoPiFreq * time[t] + phase) + labIm[t] * cos(twoPiFreq * time[t] + phase);
   }
 
   // Create output workspace to put results into
-  API::MatrixWorkspace_sptr outputWs =
-      std::dynamic_pointer_cast<API::MatrixWorkspace>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", nHisto,
-                                                   nData + 1, nData));
+  API::MatrixWorkspace_sptr outputWs = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+      API::WorkspaceFactory::Instance().create("Workspace2D", nHisto, nData + 1, nData));
   outputWs->getAxis(0)->unit() = inputWs->getAxis(0)->unit();
 
   // Put results into output workspace
@@ -109,8 +98,7 @@ void RRFMuon::exec() {
  *  @param uin :: [input] input workspace units
  *  @param uuser :: [input] units selected by user
  */
-double RRFMuon::unitConversionFactor(const std::string &uin,
-                                     const std::string &uuser) {
+double RRFMuon::unitConversionFactor(const std::string &uin, const std::string &uuser) {
 
   if ((uin == "microsecond")) {
 

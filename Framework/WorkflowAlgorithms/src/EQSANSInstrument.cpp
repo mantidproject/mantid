@@ -25,23 +25,18 @@ namespace EQSANSInstrument {
 /*
  * Read a parameter from the instrument description
  */
-double readInstrumentParameter(const std::string &parameter,
-                               const API::MatrixWorkspace_sptr &dataWS) {
-  std::vector<double> pars =
-      dataWS->getInstrument()->getNumberParameter(parameter);
+double readInstrumentParameter(const std::string &parameter, const API::MatrixWorkspace_sptr &dataWS) {
+  std::vector<double> pars = dataWS->getInstrument()->getNumberParameter(parameter);
   if (pars.empty())
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Unable to find [" + parameter + "] instrument parameter");
+    throw Kernel::Exception::InstrumentDefinitionError("Unable to find [" + parameter + "] instrument parameter");
   return pars[0];
 }
 
 /*
  * Return the detector ID corresponding to the [x,y] pixel coordinates.
  */
-int getDetectorFromPixel(const int &pixel_x, const int &pixel_y,
-                         const API::MatrixWorkspace_sptr &dataWS) {
-  int ny_pixels = static_cast<int>(
-      readInstrumentParameter("number-of-y-pixels", std::move(dataWS)));
+int getDetectorFromPixel(const int &pixel_x, const int &pixel_y, const API::MatrixWorkspace_sptr &dataWS) {
+  int ny_pixels = static_cast<int>(readInstrumentParameter("number-of-y-pixels", std::move(dataWS)));
   return ny_pixels * pixel_x + pixel_y;
 }
 
@@ -49,13 +44,10 @@ int getDetectorFromPixel(const int &pixel_x, const int &pixel_y,
  * Returns the real-space coordinates corresponding to the
  * given pixel coordinates [m].
  */
-void getCoordinateFromPixel(const double &pixel_x, const double &pixel_y,
-                            const API::MatrixWorkspace_sptr &dataWS, double &x,
-                            double &y) {
-  const int nx_pixels =
-      static_cast<int>(readInstrumentParameter("number-of-x-pixels", dataWS));
-  const int ny_pixels =
-      static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
+void getCoordinateFromPixel(const double &pixel_x, const double &pixel_y, const API::MatrixWorkspace_sptr &dataWS,
+                            double &x, double &y) {
+  const int nx_pixels = static_cast<int>(readInstrumentParameter("number-of-x-pixels", dataWS));
+  const int ny_pixels = static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
   const double pixel_size_x = readInstrumentParameter("x-pixel-size", dataWS);
   const double pixel_size_y = readInstrumentParameter("y-pixel-size", dataWS);
   x = (nx_pixels / 2.0 - 0.5 - pixel_x) * pixel_size_x / 1000.0;
@@ -69,13 +61,10 @@ void getCoordinateFromPixel(const double &pixel_x, const double &pixel_y,
  * @param x: real-space x coordinate [m]
  * @param y: real-space y coordinate [m]
  */
-void getPixelFromCoordinate(const double &x, const double &y,
-                            const API::MatrixWorkspace_sptr &dataWS,
-                            double &pixel_x, double &pixel_y) {
-  const int nx_pixels =
-      static_cast<int>(readInstrumentParameter("number-of-x-pixels", dataWS));
-  const int ny_pixels =
-      static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
+void getPixelFromCoordinate(const double &x, const double &y, const API::MatrixWorkspace_sptr &dataWS, double &pixel_x,
+                            double &pixel_y) {
+  const int nx_pixels = static_cast<int>(readInstrumentParameter("number-of-x-pixels", dataWS));
+  const int ny_pixels = static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
   const double pixel_size_x = readInstrumentParameter("x-pixel-size", dataWS);
   const double pixel_size_y = readInstrumentParameter("y-pixel-size", dataWS);
   pixel_x = -x / pixel_size_x * 1000.0 + nx_pixels / 2.0 - 0.5;
@@ -86,8 +75,7 @@ void getPixelFromCoordinate(const double &x, const double &y,
  * Returns the default beam center position, or the pixel location
  * of real-space coordinates (0,0).
  */
-void getDefaultBeamCenter(const API::MatrixWorkspace_sptr &dataWS,
-                          double &pixel_x, double &pixel_y) {
+void getDefaultBeamCenter(const API::MatrixWorkspace_sptr &dataWS, double &pixel_x, double &pixel_y) {
   getPixelFromCoordinate(0.0, 0.0, std::move(dataWS), pixel_x, pixel_y);
 }
 

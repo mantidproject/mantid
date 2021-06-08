@@ -70,72 +70,39 @@ can also be created directly from a XML shape string.
 class MANTID_GEOMETRY_DLL ShapeFactory {
 public:
   std::shared_ptr<CSGObject> createShape(Poco::XML::Element *pElem);
-  std::shared_ptr<CSGObject> createShape(std::string shapeXML,
-                                         bool addTypeTag = true);
+  std::shared_ptr<CSGObject> createShape(std::string shapeXML, bool addTypeTag = true);
 
-  static std::shared_ptr<CSGObject> createSphere(const Kernel::V3D &centre,
-                                                 double radius);
-  static std::shared_ptr<CSGObject>
-  createHexahedralShape(double xlb, double xlf, double xrf, double xrb,
-                        double ylb, double ylf, double yrf, double yrb);
+  static std::shared_ptr<CSGObject> createSphere(const Kernel::V3D &centre, double radius);
+  static std::shared_ptr<CSGObject> createHexahedralShape(double xlb, double xlf, double xrf, double xrb, double ylb,
+                                                          double ylf, double yrf, double yrb);
 
 private:
   static std::string sphereAlgebra(const int surfaceID);
-  std::string parseSphere(Poco::XML::Element *pElem,
-                          std::map<int, std::shared_ptr<Surface>> &prim,
-                          int &l_id);
-  std::string parseInfinitePlane(Poco::XML::Element *pElem,
-                                 std::map<int, std::shared_ptr<Surface>> &prim,
-                                 int &l_id);
-  std::string
-  parseInfiniteCylinder(Poco::XML::Element *pElem,
-                        std::map<int, std::shared_ptr<Surface>> &prim,
-                        int &l_id);
-  std::string parseCylinder(Poco::XML::Element *pElem,
-                            std::map<int, std::shared_ptr<Surface>> &prim,
-                            int &l_id);
-  std::string
-  parseSegmentedCylinder(Poco::XML::Element *pElem,
-                         std::map<int, std::shared_ptr<Surface>> &prim,
-                         int &l_id);
-  std::string parseHollowCylinder(Poco::XML::Element *pElem,
-                                  std::map<int, std::shared_ptr<Surface>> &prim,
-                                  int &l_id);
+  std::string parseSphere(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
+  std::string parseInfinitePlane(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
+  std::string parseInfiniteCylinder(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim,
+                                    int &l_id);
+  std::string parseCylinder(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
+  std::string parseSegmentedCylinder(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim,
+                                     int &l_id);
+  std::string parseHollowCylinder(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
 
   CuboidCorners parseCuboid(Poco::XML::Element *pElem);
-  std::string parseCuboid(Poco::XML::Element *pElem,
-                          std::map<int, std::shared_ptr<Surface>> &prim,
-                          int &l_id);
-  std::string parseInfiniteCone(Poco::XML::Element *pElem,
-                                std::map<int, std::shared_ptr<Surface>> &prim,
-                                int &l_id);
-  std::string parseCone(Poco::XML::Element *pElem,
-                        std::map<int, std::shared_ptr<Surface>> &prim,
-                        int &l_id);
+  std::string parseCuboid(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
+  std::string parseInfiniteCone(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
+  std::string parseCone(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
 
-  static std::string
-  parseHexahedronFromStruct(Hexahedron &hex,
-                            std::map<int, std::shared_ptr<Surface>> &prim,
-                            int &l_id);
+  static std::string parseHexahedronFromStruct(Hexahedron &hex, std::map<int, std::shared_ptr<Surface>> &prim,
+                                               int &l_id);
   Hexahedron parseHexahedron(Poco::XML::Element *pElem);
-  std::string parseHexahedron(Poco::XML::Element *pElem,
-                              std::map<int, std::shared_ptr<Surface>> &prim,
-                              int &l_id);
-  std::string parseTaperedGuide(Poco::XML::Element *pElem,
-                                std::map<int, std::shared_ptr<Surface>> &prim,
-                                int &l_id);
-  std::string parseTorus(Poco::XML::Element *pElem,
-                         std::map<int, std::shared_ptr<Surface>> &prim,
-                         int &l_id);
-  std::string
-  parseSliceOfCylinderRing(Poco::XML::Element *pElem,
-                           std::map<int, std::shared_ptr<Surface>> &prim,
-                           int &l_id);
+  std::string parseHexahedron(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
+  std::string parseTaperedGuide(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
+  std::string parseTorus(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
+  std::string parseSliceOfCylinderRing(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim,
+                                       int &l_id);
 
-  Poco::XML::Element *getShapeElement(Poco::XML::Element *pElem,
-                                      const std::string &name);
-  Poco::XML::Element *getOptionalShapeElement(Poco::XML::Element *pElem,
-                                              const std::string &name);
+  Poco::XML::Element *getShapeElement(Poco::XML::Element *pElem, const std::string &name);
+  Poco::XML::Element *getOptionalShapeElement(Poco::XML::Element *pElem, const std::string &name);
   double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
   void createGeometryHandler(Poco::XML::Element *, std::shared_ptr<CSGObject>);

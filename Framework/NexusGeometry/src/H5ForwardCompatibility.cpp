@@ -27,8 +27,7 @@ ssize_t getObjName(const H5::H5Object &obj, char *obj_name, size_t buf_size) {
   if (name_size < 0) {
     throw H5::Exception("getObjName", "H5Iget_name failed");
   } else if (name_size == 0) {
-    throw H5::Exception("getObjName",
-                        "Object must have a name, but name length is 0");
+    throw H5::Exception("getObjName", "Object must have a name, but name length is 0");
   }
   // Return length of the name
   return (name_size);
@@ -45,8 +44,7 @@ std::string getObjName(const H5::H5Object &obj) {
   if (name_size < 0) {
     throw H5::Exception("getObjName", "H5Iget_name failed");
   } else if (name_size == 0) {
-    throw H5::Exception("getObjName",
-                        "Object must have a name, but name length is 0");
+    throw H5::Exception("getObjName", "Object must have a name, but name length is 0");
   }
   // Object's name exists, retrieve it
   else if (name_size > 0) {

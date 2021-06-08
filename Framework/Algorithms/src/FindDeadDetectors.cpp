@@ -21,47 +21,37 @@ using namespace API;
 
 /// Initialisation method.
 void FindDeadDetectors::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "Each histogram from the input workspace maps to a histogram in this\n"
-      "workspace with one value that indicates if there was a dead detector");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "Each histogram from the input workspace maps to a histogram in this\n"
+                  "workspace with one value that indicates if there was a dead detector");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
-  declareProperty(
-      "DeadThreshold", 0.0, mustBePositive,
-      "The threshold against which to judge if a spectrum belongs to a dead\n"
-      "detector");
+  declareProperty("DeadThreshold", 0.0, mustBePositive,
+                  "The threshold against which to judge if a spectrum belongs to a dead\n"
+                  "detector");
   // As the property takes ownership of the validator pointer, have to take care
   // to pass in a unique
   // pointer to each property.
-  declareProperty(
-      "LiveValue", 0.0, mustBePositive,
-      "The value to assign to an integrated spectrum flagged as 'live'\n"
-      "(default 0.0)");
-  declareProperty(
-      "DeadValue", 100.0, mustBePositive,
-      "The value to assign to an integrated spectrum flagged as 'dead'\n"
-      "(default 100.0)");
+  declareProperty("LiveValue", 0.0, mustBePositive,
+                  "The value to assign to an integrated spectrum flagged as 'live'\n"
+                  "(default 0.0)");
+  declareProperty("DeadValue", 100.0, mustBePositive,
+                  "The value to assign to an integrated spectrum flagged as 'dead'\n"
+                  "(default 100.0)");
   // EMPTY_DBL() is a tag that tells us that no value has been set and we want
   // to use the default
-  declareProperty(
-      "RangeLower", EMPTY_DBL(),
-      "No bin with a boundary at an x value less than this will be used\n"
-      "in the summation that decides if a detector is 'dead' (default: the\n"
-      "start of each histogram)");
-  declareProperty(
-      "RangeUpper", EMPTY_DBL(),
-      "No bin with a boundary at an x value higher than this value will\n"
-      "be used in the summation that decides if a detector is 'dead'\n"
-      "(default: the end of each histogram)");
-  declareProperty(
-      "OutputFile", "",
-      "A filename to which to write the list of dead detector UDETs");
+  declareProperty("RangeLower", EMPTY_DBL(),
+                  "No bin with a boundary at an x value less than this will be used\n"
+                  "in the summation that decides if a detector is 'dead' (default: the\n"
+                  "start of each histogram)");
+  declareProperty("RangeUpper", EMPTY_DBL(),
+                  "No bin with a boundary at an x value higher than this value will\n"
+                  "be used in the summation that decides if a detector is 'dead'\n"
+                  "(default: the end of each histogram)");
+  declareProperty("OutputFile", "", "A filename to which to write the list of dead detector UDETs");
   // This output property will contain the list of UDETs for the dead detectors
   declareProperty("FoundDead", std::vector<detid_t>(), Direction::Output);
 }
@@ -119,8 +109,7 @@ void FindDeadDetectors::exec() {
     }
   }
 
-  g_log.notice() << "Found a total of " << countDets
-                 << " 'dead' detectors within " << countSpec
+  g_log.notice() << "Found a total of " << countDets << " 'dead' detectors within " << countSpec
                  << " 'dead' spectra.\n";
 
   // Assign it to the output workspace property
@@ -138,10 +127,8 @@ MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace() {
   API::IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
   // Now execute integration.
   // pass inputed values straight to Integration, checking must be done there
-  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
-                                              getProperty("InputWorkspace"));
-  childAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
-                                              getProperty("OutputWorkspace"));
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));
+  childAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", getProperty("OutputWorkspace"));
   childAlg->setProperty<double>("RangeLower", getProperty("RangeLower"));
   childAlg->setProperty<double>("RangeUpper", getProperty("RangeUpper"));
   childAlg->executeAsChildAlg();

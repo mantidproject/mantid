@@ -24,16 +24,14 @@ public:
     // int iii;
     // std::cin >> iii;
     std::string wsName = "DeleteTableRowsTest_table";
-    ITableWorkspace_sptr tw =
-        WorkspaceFactory::Instance().createTable("TableWorkspace");
+    ITableWorkspace_sptr tw = WorkspaceFactory::Instance().createTable("TableWorkspace");
     AnalysisDataService::Instance().add(wsName, tw);
     tw->addColumn("int", "int");
     for (size_t i = 0; i < 10; ++i) {
       TableRow row = tw->appendRow();
       row << int(i);
     }
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("DeleteTableRows");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("DeleteTableRows");
     alg->setPropertyValue("TableWorkspace", wsName);
     alg->setPropertyValue("Rows", "1,3,5,7,9");
     alg->execute();

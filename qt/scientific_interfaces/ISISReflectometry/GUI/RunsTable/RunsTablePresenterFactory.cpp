@@ -11,16 +11,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-RunsTablePresenterFactory::RunsTablePresenterFactory(
-    std::vector<std::string> const &instruments, double thetaTolerance,
-    Plotter plotter)
-    : m_instruments(instruments), m_thetaTolerance(thetaTolerance),
-      m_plotter(std::move(plotter)) {}
+RunsTablePresenterFactory::RunsTablePresenterFactory(std::vector<std::string> const &instruments, double thetaTolerance,
+                                                     Plotter plotter)
+    : m_instruments(instruments), m_thetaTolerance(thetaTolerance), m_plotter(std::move(plotter)) {}
 
-std::unique_ptr<IRunsTablePresenter> RunsTablePresenterFactory::
-operator()(IRunsTableView *view) const {
-  return std::make_unique<RunsTablePresenter>(
-      view, m_instruments, m_thetaTolerance, ReductionJobs(), m_plotter);
+std::unique_ptr<IRunsTablePresenter> RunsTablePresenterFactory::operator()(IRunsTableView *view) const {
+  return std::make_unique<RunsTablePresenter>(view, m_instruments, m_thetaTolerance, ReductionJobs(), m_plotter);
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

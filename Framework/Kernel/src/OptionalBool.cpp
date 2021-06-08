@@ -25,9 +25,7 @@ OptionalBool::OptionalBool(bool arg) { m_arg = arg ? True : False; }
 
 OptionalBool::OptionalBool(Value arg) : m_arg(arg) {}
 
-bool OptionalBool::operator==(const OptionalBool &other) const {
-  return m_arg == other.getValue();
-}
+bool OptionalBool::operator==(const OptionalBool &other) const { return m_arg == other.getValue(); }
 
 OptionalBool::Value OptionalBool::getValue() const { return m_arg; }
 
@@ -44,9 +42,7 @@ std::istream &operator>>(std::istream &istream, OptionalBool &object) {
 }
 
 std::map<std::string, OptionalBool::Value> OptionalBool::strToEmumMap() {
-  return {{StrUnset, OptionalBool::Unset},
-          {StrFalse, OptionalBool::False},
-          {StrTrue, OptionalBool::True}};
+  return {{StrUnset, OptionalBool::Unset}, {StrFalse, OptionalBool::False}, {StrTrue, OptionalBool::True}};
 }
 
 std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap() {
@@ -64,8 +60,7 @@ std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap() {
  * @return A new Json::Value
  */
 Json::Value encodeAsJson(const OptionalBool & /*unused*/) {
-  throw Exception::NotImplementedError(
-      "encodeAsJson not implemented for OptionalBool type");
+  throw Exception::NotImplementedError("encodeAsJson not implemented for OptionalBool type");
 }
 
 } // namespace Kernel

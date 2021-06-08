@@ -42,11 +42,9 @@ public:
   /** Create the (blank) MDEW */
   static void createMDEW() {
     // ---- Start with empty MDEW ----
-    FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 14, "Dimensions", "3", "Extents",
-        "-10,10,-10,10,-10,10", "Names", "h,k,l", "Units", "-,-,-", "SplitInto",
-        "5", "MaxRecursionDepth", "2", "OutputWorkspace",
-        "PeakIntensityVsRadiusTest_MDEWS");
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 14, "Dimensions", "3", "Extents", "-10,10,-10,10,-10,10",
+                                      "Names", "h,k,l", "Units", "-,-,-", "SplitInto", "5", "MaxRecursionDepth", "2",
+                                      "OutputWorkspace", "PeakIntensityVsRadiusTest_MDEWS");
   }
 
   //-------------------------------------------------------------------------------
@@ -54,8 +52,7 @@ public:
   static void addPeak(size_t num, double x, double y, double z, double radius) {
     std::ostringstream mess;
     mess << num << ", " << x << ", " << y << ", " << z << ", " << radius;
-    FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
-                                      "PeakIntensityVsRadiusTest_MDEWS",
+    FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace", "PeakIntensityVsRadiusTest_MDEWS",
                                       "PeakParams", mess.str().c_str());
   }
 
@@ -67,13 +64,10 @@ public:
 
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(
-            5); // Unused fake instruement
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5); // Unused fake instruement
     peakWS->addPeak(Peak(inst, 1, 1.0, V3D(0., 0., 0.)));
     peakWS->addPeak(Peak(inst, 1, 1.0, V3D(5., 5., 5.)));
-    AnalysisDataService::Instance().addOrReplace(
-        "PeakIntensityVsRadiusTest_peaks", peakWS);
+    AnalysisDataService::Instance().addOrReplace("PeakIntensityVsRadiusTest_peaks", peakWS);
   }
 
   void test_worksWithValidInputs() {
@@ -91,33 +85,25 @@ public:
     ensureExecutionThrows(1.0, 1.0, 0.12, 0.15);
   }
 
-  void ensureExecutionThrows(double BackgroundInnerFactor,
-                             double BackgroundOuterFactor,
-                             double BackgroundInnerRadius,
+  void ensureExecutionThrows(double BackgroundInnerFactor, double BackgroundOuterFactor, double BackgroundInnerRadius,
                              double BackgroundOuterRadius) {
-    doTestValid(false, BackgroundInnerFactor, BackgroundOuterFactor,
-                BackgroundInnerRadius, BackgroundOuterRadius);
+    doTestValid(false, BackgroundInnerFactor, BackgroundOuterFactor, BackgroundInnerRadius, BackgroundOuterRadius);
   }
 
-  void ensureExecutionNoThrow(double BackgroundInnerFactor,
-                              double BackgroundOuterFactor,
-                              double BackgroundInnerRadius,
+  void ensureExecutionNoThrow(double BackgroundInnerFactor, double BackgroundOuterFactor, double BackgroundInnerRadius,
                               double BackgroundOuterRadius) {
-    doTestValid(true, BackgroundInnerFactor, BackgroundOuterFactor,
-                BackgroundInnerRadius, BackgroundOuterRadius);
+    doTestValid(true, BackgroundInnerFactor, BackgroundOuterFactor, BackgroundInnerRadius, BackgroundOuterRadius);
   }
 
   /** Check the validateInputs() calls */
-  void doTestValid(bool assertExecuteSuccess, double BackgroundInnerFactor,
-                   double BackgroundOuterFactor, double BackgroundInnerRadius,
-                   double BackgroundOuterRadius) {
+  void doTestValid(bool assertExecuteSuccess, double BackgroundInnerFactor, double BackgroundOuterFactor,
+                   double BackgroundInnerRadius, double BackgroundOuterRadius) {
     PeakIntensityVsRadius alg;
     // Name of the output workspace.
     std::string outWSName("PeakIntensityVsRadiusTest_OutputWS");
     assertSuccessfulInitialization(alg);
-    assertNoThrowWhenSettingProperties(
-        alg, outWSName, BackgroundInnerFactor, BackgroundOuterFactor,
-        BackgroundInnerRadius, BackgroundOuterRadius);
+    assertNoThrowWhenSettingProperties(alg, outWSName, BackgroundInnerFactor, BackgroundOuterFactor,
+                                       BackgroundInnerRadius, BackgroundOuterRadius);
     if (assertExecuteSuccess) {
       TS_ASSERT_THROWS_NOTHING(alg.execute(););
     } else {
@@ -125,30 +111,20 @@ public:
     }
   }
 
-  void assertNoThrowWhenSettingProperties(PeakIntensityVsRadius &alg,
-                                          std::string &outWSName,
-                                          double BackgroundInnerFactor,
-                                          double BackgroundOuterFactor,
-                                          double BackgroundInnerRadius,
-                                          double BackgroundOuterRadius) {
+  void assertNoThrowWhenSettingProperties(PeakIntensityVsRadius &alg, std::string &outWSName,
+                                          double BackgroundInnerFactor, double BackgroundOuterFactor,
+                                          double BackgroundInnerRadius, double BackgroundOuterRadius) {
     auto constexpr DEFAULT_NUM_STEPS = 16;
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InputWorkspace", "PeakIntensityVsRadiusTest_MDEWS"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "PeaksWorkspace", "PeakIntensityVsRadiusTest_peaks"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "PeakIntensityVsRadiusTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", "PeakIntensityVsRadiusTest_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RadiusStart", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RadiusEnd", 1.5));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumSteps", DEFAULT_NUM_STEPS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundInnerFactor", BackgroundInnerFactor));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundOuterFactor", BackgroundOuterFactor));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundInnerRadius", BackgroundInnerRadius));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundOuterRadius", BackgroundOuterRadius));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerFactor", BackgroundInnerFactor));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterFactor", BackgroundOuterFactor));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerRadius", BackgroundInnerRadius));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterRadius", BackgroundOuterRadius));
   }
 
   void test_throwsWhenSettingInvalidPropertyValues() {
@@ -158,8 +134,7 @@ public:
   }
 
   template <typename PropertyType>
-  void assertInvalidPropertyValue(PeakIntensityVsRadius &alg,
-                                  std::string const &name, PropertyType value) {
+  void assertInvalidPropertyValue(PeakIntensityVsRadius &alg, std::string const &name, PropertyType value) {
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty(name, value))
   }
 
@@ -174,26 +149,21 @@ public:
     assertFlatAfter1(ws);
   }
 
-  MatrixWorkspace_sptr doTest(double BackgroundInnerFactor,
-                              double BackgroundOuterFactor,
-                              double BackgroundInnerRadius,
+  MatrixWorkspace_sptr doTest(double BackgroundInnerFactor, double BackgroundOuterFactor, double BackgroundInnerRadius,
                               double BackgroundOuterRadius) {
     // Name of the output workspace.
     std::string outWSName("PeakIntensityVsRadiusTest_OutputWS");
 
     PeakIntensityVsRadius alg;
     assertSuccessfulInitialization(alg);
-    assertNoThrowWhenSettingProperties(
-        alg, outWSName, BackgroundInnerFactor, BackgroundOuterFactor,
-        BackgroundInnerRadius, BackgroundOuterRadius);
+    assertNoThrowWhenSettingProperties(alg, outWSName, BackgroundInnerFactor, BackgroundOuterFactor,
+                                       BackgroundInnerRadius, BackgroundOuterRadius);
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
     return ws;
   }

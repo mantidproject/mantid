@@ -28,9 +28,7 @@ using namespace Geometry;
 DECLARE_ALGORITHM(DetectorEfficiencyCorUser)
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string DetectorEfficiencyCorUser::name() const {
-  return "DetectorEfficiencyCorUser";
-}
+const std::string DetectorEfficiencyCorUser::name() const { return "DetectorEfficiencyCorUser"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int DetectorEfficiencyCorUser::version() const { return 1; }
@@ -48,16 +46,13 @@ void DetectorEfficiencyCorUser::init() {
   val->add<WorkspaceUnitValidator>("DeltaE");
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input, val),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, val),
                   "The workspace to correct for detector efficiency");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace in which to store the result.");
   auto checkEi = std::make_shared<BoundedValidator<double>>();
   checkEi->setLower(0.0);
-  declareProperty("IncidentEnergy", EMPTY_DBL(), checkEi,
-                  "The energy of neutrons leaving the source.");
+  declareProperty("IncidentEnergy", EMPTY_DBL(), checkEi, "The energy of neutrons leaving the source.");
 }
 
 /** Execute the algorithm.
@@ -68,11 +63,9 @@ void DetectorEfficiencyCorUser::exec() {
 
   const size_t numberOfChannels = this->m_inputWS->blocksize();
   // Calculate the number of spectra in this workspace
-  const auto numberOfSpectra =
-      static_cast<int>(this->m_inputWS->size() / numberOfChannels);
+  const auto numberOfSpectra = static_cast<int>(this->m_inputWS->size() / numberOfChannels);
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
-  auto numberOfSpectra_i =
-      static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
+  auto numberOfSpectra_i = static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS, *m_inputWS))
@@ -103,9 +96,7 @@ void DetectorEfficiencyCorUser::exec() {
  * @param parser :: muParser used to evalute f(e)
  * @param index :: the workspace index of the histogram to correct
  */
-void DetectorEfficiencyCorUser::correctHistogram(const size_t index,
-                                                 const double eff0, double &e,
-                                                 mu::Parser &parser) {
+void DetectorEfficiencyCorUser::correctHistogram(const size_t index, const double eff0, double &e, mu::Parser &parser) {
   const auto &xIn = m_inputWS->points(index);
   const auto &yIn = m_inputWS->y(index);
   const auto &eIn = m_inputWS->e(index);
@@ -131,13 +122,11 @@ double DetectorEfficiencyCorUser::evaluate(const mu::Parser &parser) const {
     return parser.Eval();
   } catch (mu::Parser::exception_type &e) {
     throw Kernel::Exception::InstrumentDefinitionError(
-        "Error calculating formula from string. Muparser error message is: " +
-        e.GetMsg());
+        "Error calculating formula from string. Muparser error message is: " + e.GetMsg());
   }
 }
 
-mu::Parser DetectorEfficiencyCorUser::generateParser(const std::string &formula,
-                                                     double *e) const {
+mu::Parser DetectorEfficiencyCorUser::generateParser(const std::string &formula, double *e) const {
   mu::Parser p;
   p.DefineVar("e", e);
   p.SetExpr(formula);
@@ -149,20 +138,17 @@ mu::Parser DetectorEfficiencyCorUser::generateParser(const std::string &formula,
  * @param workspaceIndex detector's workspace index
  * @return the efficiency correction formula
  */
-std::string
-DetectorEfficiencyCorUser::retrieveFormula(const size_t workspaceIndex) {
+std::string DetectorEfficiencyCorUser::retrieveFormula(const size_t workspaceIndex) {
   const std::string formulaParamName("formula_eff");
   const auto &paramMap = m_inputWS->constInstrumentParameters();
   auto det = m_inputWS->getDetector(workspaceIndex);
   auto param = paramMap.getRecursive(det.get(), formulaParamName, "string");
   if (!param) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "No <" + formulaParamName + "> parameter found for component '" +
-        det->getFullName() + "' in the instrument definition.");
+    throw Kernel::Exception::InstrumentDefinitionError("No <" + formulaParamName + "> parameter found for component '" +
+                                                       det->getFullName() + "' in the instrument definition.");
   }
   const auto ret = param->asString();
-  g_log.debug() << "Found formula for workspace index " << workspaceIndex
-                << ": " << ret << "\n";
+  g_log.debug() << "Found formula for workspace index " << workspaceIndex << ": " << ret << "\n";
   return ret;
 }
 
@@ -180,9 +166,7 @@ void DetectorEfficiencyCorUser::retrieveProperties() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != this->m_inputWS) {
-    m_outputWS.reset(
-        Mantid::DataObjects::create<DataObjects::Workspace2D>(*m_inputWS)
-            .release());
+    m_outputWS.reset(Mantid::DataObjects::create<DataObjects::Workspace2D>(*m_inputWS).release());
   }
 
   // these first three properties are fully checked by validators
@@ -192,8 +176,7 @@ void DetectorEfficiencyCorUser::retrieveProperties() {
     Mantid::Kernel::Property *prop = m_inputWS->run().getProperty("Ei");
     double val;
     if (!prop || !Strings::convert(prop->value(), val)) {
-      throw std::invalid_argument(
-          "No Ei value has been set or stored within the run information.");
+      throw std::invalid_argument("No Ei value has been set or stored within the run information.");
     }
     m_Ei = val;
     g_log.debug() << "Using stored Ei value " << m_Ei << "\n";

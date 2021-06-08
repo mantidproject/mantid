@@ -17,17 +17,14 @@
  * if the option isn't set or property doesn't have this option.
  * @param ManagerType :: Manager class to use
  */
-template <class ManagerType>
-class CompositeEditorFactory : public QtAbstractEditorFactory<ManagerType> {
+template <class ManagerType> class CompositeEditorFactory : public QtAbstractEditorFactory<ManagerType> {
   using FactoryBaseType = QtAbstractEditorFactory<ManagerType>;
 
 public:
   CompositeEditorFactory(QObject *parent, FactoryBaseType *defaultFactory)
-      : QtAbstractEditorFactory<ManagerType>(parent),
-        m_defaultFactory(defaultFactory), m_secondaryFactory(nullptr) {}
+      : QtAbstractEditorFactory<ManagerType>(parent), m_defaultFactory(defaultFactory), m_secondaryFactory(nullptr) {}
 
-  void setSecondaryFactory(const QString &optionName,
-                           FactoryBaseType *factory) {
+  void setSecondaryFactory(const QString &optionName, FactoryBaseType *factory) {
     m_optionName = optionName;
     m_secondaryFactory = factory;
   }
@@ -43,16 +40,13 @@ protected:
     // Do nothing
   }
 
-  QWidget *createEditorForManager(ManagerType *manager, QtProperty *property,
-                                  QWidget *parent) override {
+  QWidget *createEditorForManager(ManagerType *manager, QtProperty *property, QWidget *parent) override {
     if (!m_secondaryFactory) {
       throw std::logic_error("Secondary editor factory isn't set.");
     }
 
-    if (property->hasOption(m_optionName) &&
-        property->checkOption(m_optionName)) {
-      return m_secondaryFactory->createEditorForManager(manager, property,
-                                                        parent);
+    if (property->hasOption(m_optionName) && property->checkOption(m_optionName)) {
+      return m_secondaryFactory->createEditorForManager(manager, property, parent);
     }
 
     return m_defaultFactory->createEditorForManager(manager, property, parent);

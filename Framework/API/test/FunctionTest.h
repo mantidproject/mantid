@@ -24,8 +24,7 @@ using namespace Mantid::API;
 class MocSpectrum : public SpectrumTester {
 public:
   MocSpectrum(size_t nx, size_t ny)
-      : SpectrumTester(HistogramData::getHistogramXMode(nx, ny),
-                       HistogramData::Histogram::YMode::Counts) {
+      : SpectrumTester(HistogramData::getHistogramXMode(nx, ny), HistogramData::Histogram::YMode::Counts) {
     dataX().resize(nx);
     dataY().resize(ny);
     dataE().resize(ny);
@@ -59,9 +58,7 @@ public:
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
   /// index.
-  const ISpectrum &getSpectrum(const size_t index) const override {
-    return m_spectra[index];
-  }
+  const ISpectrum &getSpectrum(const size_t index) const override { return m_spectra[index]; }
   const std::string id(void) const override { return ""; }
   void init(const size_t &, const size_t &, const size_t &) override {}
   void init(const HistogramData::Histogram &) override {}
@@ -82,8 +79,7 @@ public:
 
   std::string name() const override { return "IFT_Funct"; }
 
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     double c0 = getParameter("c0");
     double c1 = getParameter("c1");
     double c2 = getParameter("c2");
@@ -93,8 +89,7 @@ public:
       out[i] = c0 + x * (c1 + x * (c2 + x * c3));
     }
   }
-  void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) override {
+  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
     for (size_t i = 0; i < nData; i++) {
       double x = xValues[i];
       out->set(i, 0, 1.);
@@ -110,16 +105,14 @@ public:
   void testIFunction() {
     IFT_Funct f;
 
-    TS_ASSERT_EQUALS(f.parameterDescription(0),
-                     "this is the famous c0 blah...");
+    TS_ASSERT_EQUALS(f.parameterDescription(0), "this is the famous c0 blah...");
 
     f.setParameter("c0", 1.0);
     f.setParameter("c1", 1.1);
     f.setParameter("c2", 1.2);
     f.setParameter("c3", 1.3);
 
-    TS_ASSERT_EQUALS(f.parameterDescription(0),
-                     "this is the famous c0 blah...");
+    TS_ASSERT_EQUALS(f.parameterDescription(0), "this is the famous c0 blah...");
 
     TS_ASSERT_EQUALS(f.nParams(), 4);
 
@@ -414,11 +407,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     IFunction_const_sptr funcConst;
     IFunction_sptr funcNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        funcConst = manager.getValue<IFunction_const_sptr>(funcName));
+    TS_ASSERT_THROWS_NOTHING(funcConst = manager.getValue<IFunction_const_sptr>(funcName));
     TS_ASSERT(funcConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(funcNonConst =
-                                 manager.getValue<IFunction_sptr>(funcName));
+    TS_ASSERT_THROWS_NOTHING(funcNonConst = manager.getValue<IFunction_sptr>(funcName));
     TS_ASSERT(funcNonConst != nullptr);
     TS_ASSERT_EQUALS(funcConst, funcNonConst);
 

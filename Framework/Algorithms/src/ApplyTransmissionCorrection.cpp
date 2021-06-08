@@ -41,53 +41,41 @@ void ApplyTransmissionCorrection::init() {
   auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP, "",
-                                            Direction::Input, wsValidator),
-      "Workspace to apply the transmission correction to");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      PropertyNames::TRANSMISSION_WKSP, "", Direction::Output,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP, "", Direction::Input, wsValidator),
+                  "Workspace to apply the transmission correction to");
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::TRANSMISSION_WKSP, "", Direction::Output,
+                                                        PropertyMode::Optional),
                   "Workspace containing the transmission values [optional]");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      PropertyNames::OUTPUT_WKSP, "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
                   "Workspace to store the corrected data in");
 
   // Alternatively, the user can specify a transmission that will ba applied to
   // all wavelength bins
-  declareProperty(
-      PropertyNames::TRANSMISSION_VALUE, EMPTY_DBL(),
-      "Transmission value to apply to all wavelengths. If specified, "
-      "TransmissionWorkspace will not be used.");
+  declareProperty(PropertyNames::TRANSMISSION_VALUE, EMPTY_DBL(),
+                  "Transmission value to apply to all wavelengths. If specified, "
+                  "TransmissionWorkspace will not be used.");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(PropertyNames::TRANSMISSION_ERROR, 0.0, mustBePositive,
                   "The error on the transmission value (default 0.0)");
 
-  declareProperty(
-      "ThetaDependent", true,
-      "If true, a theta-dependent transmission correction will be applied.");
+  declareProperty("ThetaDependent", true, "If true, a theta-dependent transmission correction will be applied.");
 }
 
-std::map<std::string, std::string>
-ApplyTransmissionCorrection::validateInputs() {
+std::map<std::string, std::string> ApplyTransmissionCorrection::validateInputs() {
   std::map<std::string, std::string> result;
 
   // needed to find out what mode we are working in
   const double trans_value = getProperty(PropertyNames::TRANSMISSION_VALUE);
   if (isEmpty(trans_value)) { // require a transmission workspace
-    MatrixWorkspace_const_sptr transWS =
-        getProperty(PropertyNames::TRANSMISSION_WKSP);
+    MatrixWorkspace_const_sptr transWS = getProperty(PropertyNames::TRANSMISSION_WKSP);
     if (!transWS) {
-      const std::string msg(
-          "Must specify \"TransmissionValue\" or \"TransmissionWorkspace\"");
+      const std::string msg("Must specify \"TransmissionValue\" or \"TransmissionWorkspace\"");
       result[PropertyNames::TRANSMISSION_VALUE] = msg;
       result[PropertyNames::TRANSMISSION_WKSP] = msg;
     } else {
-      MatrixWorkspace_const_sptr inputWS =
-          getProperty(PropertyNames::INPUT_WKSP);
-      if ((transWS->getNumberHistograms() > 1) &&
-          (transWS->getNumberHistograms() != inputWS->getNumberHistograms())) {
+      MatrixWorkspace_const_sptr inputWS = getProperty(PropertyNames::INPUT_WKSP);
+      if ((transWS->getNumberHistograms() > 1) && (transWS->getNumberHistograms() != inputWS->getNumberHistograms())) {
         const std::string msg("Input and transmission workspaces have "
                               "incompatible number of spectra");
         result[PropertyNames::INPUT_WKSP] = msg;
@@ -108,8 +96,7 @@ void ApplyTransmissionCorrection::exec() {
   const bool thetaDependent = getProperty("ThetaDependent");
   const double trans_value = getProperty(PropertyNames::TRANSMISSION_VALUE);
   const double trans_error = getProperty(PropertyNames::TRANSMISSION_ERROR);
-  MatrixWorkspace_const_sptr transWS =
-      getProperty(PropertyNames::TRANSMISSION_WKSP);
+  MatrixWorkspace_const_sptr transWS = getProperty(PropertyNames::TRANSMISSION_WKSP);
 
   // Check whether we only need to divided the workspace by the transmission.
   // theta-dependence modifies the input transmission information
@@ -141,8 +128,7 @@ void ApplyTransmissionCorrection::exec() {
       PARALLEL_START_INTERUPT_REGION
 
       if (!spectrumInfo.hasDetectors(i)) {
-        g_log.warning() << "Workspace index " << i
-                        << " has no detector assigned to it - discarding'\n";
+        g_log.warning() << "Workspace index " << i << " has no detector assigned to it - discarding'\n";
         continue;
       }
 
@@ -160,8 +146,7 @@ void ApplyTransmissionCorrection::exec() {
       const double exp_term = 0.5 / cos(spectrumInfo.twoTheta(i)) + 0.5;
       for (int j = 0; j < static_cast<int>(inputWS->y(0).size()); j++) {
         correctionY[j] = pow(TrIn[j], -1. * exp_term); // 1 / TrIn^exp_term
-        correctionE[j] =
-            std::fabs(ETrIn[j] * exp_term / pow(TrIn[j], exp_term + 1.0));
+        correctionE[j] = std::fabs(ETrIn[j] * exp_term / pow(TrIn[j], exp_term + 1.0));
       }
 
       progress.report("Calculating transmission correction");
@@ -176,26 +161,21 @@ void ApplyTransmissionCorrection::exec() {
   } else { // !thetaDependent case - divide does the actual work
     // this case divide and set output workspace
     auto divideAlg = createChildAlgorithm("Divide", 0.0, 1.0);
-    divideAlg->setProperty("LHSWorkspace",
-                           getPropertyValue(PropertyNames::INPUT_WKSP));
+    divideAlg->setProperty("LHSWorkspace", getPropertyValue(PropertyNames::INPUT_WKSP));
     if (transWS) { // use the supplied transmission workspace
-      divideAlg->setProperty(
-          "RHSWorkspace", getPropertyValue(PropertyNames::TRANSMISSION_WKSP));
+      divideAlg->setProperty("RHSWorkspace", getPropertyValue(PropertyNames::TRANSMISSION_WKSP));
     } else {
       // set the RHS to be a single value workspace with the requested
       // uncertainty
-      auto createSingleAlg =
-          createChildAlgorithm("CreateSingleValuedWorkspace");
+      auto createSingleAlg = createChildAlgorithm("CreateSingleValuedWorkspace");
       createSingleAlg->setProperty("DataValue", trans_value);
       createSingleAlg->setProperty("ErrorValue", trans_error);
       createSingleAlg->executeAsChildAlg();
-      MatrixWorkspace_sptr singleWS =
-          createSingleAlg->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr singleWS = createSingleAlg->getProperty("OutputWorkspace");
 
       divideAlg->setProperty("RHSWorkspace", singleWS);
     }
-    divideAlg->setProperty("OutputWorkspace",
-                           getPropertyValue(PropertyNames::OUTPUT_WKSP));
+    divideAlg->setProperty("OutputWorkspace", getPropertyValue(PropertyNames::OUTPUT_WKSP));
     divideAlg->executeAsChildAlg();
 
     // call divide and set output workspace

@@ -9,11 +9,12 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, Workspa
 from mantid.kernel import (Direction, IntArrayProperty, FloatTimeSeriesProperty,
                            StringListValidator, FloatBoundedValidator, EnabledWhenProperty,
                            PropertyCriterion, Property)
-from mantid.simpleapi import (SaveGSS, SaveFocusedXYE)
+from mantid.simpleapi import (SaveGSSCW, SaveFocusedXYE, AnalysisDataService)
 from mantid import logger
 import numpy as np
 import datetime
 import os
+import os.path
 import re
 import warnings
 
@@ -229,7 +230,7 @@ class HB2AReduce(PythonAlgorithm):
         # Get either vcorr file or vanadium data
         vanadium_count, vanadium_monitor, vcorr = self.get_vanadium(detector_mask, data['m1'][0],
                                                                     data['colltrans'][0], exp,
-                                                                    indir)
+                                                                    indir, metadata)
 
         def_x = self.getProperty("DefX").value
         if not def_x:
@@ -270,7 +271,7 @@ class HB2AReduce(PythonAlgorithm):
         createWS_alg.setProperty("WorkspaceTitle", str(metadata['scan_title']))
         createWS_alg.execute()
         outWS = createWS_alg.getProperty("OutputWorkspace").value
-
+        AnalysisDataService.addOrReplace(outputfn, outWS)
         self.setProperty("OutputWorkspace", outWS)
         self.add_metadata(outWS, metadata, data)
 
@@ -281,18 +282,24 @@ class HB2AReduce(PythonAlgorithm):
             outputdir = outputdir if outputdir != "" else f"/HFIR/HB2A/IPTS-{metadata['proposal']}/shared"
             _outputfunc = {
                 'XYE': SaveFocusedXYE,
-                'GSAS': SaveGSS
+                'GSAS': SaveGSSCW
             }[self.getProperty('OutputFormat').value]
             _outputext = {
                 "XYE": 'dat',
                 "GSAS": 'gss',
             }[self.getProperty('OutputFormat').value]
             outputbase = os.path.join(outputdir, outputfn)
-            _outputfunc(
-                InputWorkspace=outWS,
-                Filename=f"{outputbase}.{_outputext}",
-                SplitFiles=False,
-            )
+            if self.getProperty('OutputFormat').value == "GSAS":
+                _outputfunc(
+                    InputWorkspace=outWS,
+                    OutputFilename=f"{outputbase}.{_outputext}",
+                )
+            else:
+                _outputfunc(
+                    InputWorkspace=outWS,
+                    Filename=f"{outputbase}.{_outputext}",
+                    SplitFiles=False,
+                )
 
     def get_detector_mask(self, exp, indir):
         """Returns an anode mask"""
@@ -312,7 +319,7 @@ class HB2AReduce(PythonAlgorithm):
         detector_mask[exclude_detectors - 1] = False
         return detector_mask
 
-    def get_vanadium(self, detector_mask, m1, colltrans, exp, indir):
+    def get_vanadium(self, detector_mask, m1, colltrans, exp, indir, metadata):
         """
         This function returns either (vanadium_count, vanadium_monitor, None) or
         (None, None, vcorr) depending what type of file is provided by getProperty("Vanadium")
@@ -332,20 +339,51 @@ class HB2AReduce(PythonAlgorithm):
                 vcorr_filename = vanadium_filename
         else:  # Find adjacent vcorr file
             # m1 is the monochromator angle
-            # m1 = 0 -> Ge 115, 1.54A
-            # m1 = 9.45 -> Ge 113, 2.41A
+            # m1 = -4.375 -> Ge 117, 1.12 A
+            # m1 = 0 -> Ge 115, 1.54 A
+            # m1 = 9.45 -> Ge 113, 2.41 A
             # colltrans is the collimator position, whether in or out of the beam
-            # colltrans = 0 -> IN
-            # colltrans = +/-80 -> OUT
-            vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
-                exp, 115 if np.isclose(m1, 0, atol=0.1) else 113,
-                "IN" if np.isclose(colltrans, 0, atol=0.1) else "OUT")
+            CONVENTION_2021_02 = np.datetime64(datetime.datetime(2021, 2, 23))
+            CONVENTION_2021_04 = np.datetime64(datetime.datetime(2021, 4, 25))
+            date_created = self.get_date(metadata)
+            if date_created >= CONVENTION_2021_04:
+                if np.isclose(m1, -4.375, atol=0.1):
+                    ge_peak = 117
+                elif np.isclose(m1, 0, atol=0.1):
+                    ge_peak = 115
+                else:
+                    ge_peak = 113
+                vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
+                    exp, ge_peak,
+                    "OUT" if np.isclose(colltrans, 0, atol=0.1) else "IN")
+            elif date_created >= CONVENTION_2021_02:
+                # Convention after `CONVENTION_2021_02`.
+                # colltrans = 0 -> OUT
+                # colltrans = +/-80 -> IN
+                vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
+                    exp, 115 if np.isclose(m1, 0, atol=0.1) else 113,
+                    "OUT" if np.isclose(colltrans, 0, atol=0.1) else "IN")
+            else:
+                # Legacy convention.
+                # colltrans = +/-80 -> OUT
+                # colltrans = 0 -> IN
+                vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
+                    exp, 115 if np.isclose(m1, 0, atol=0.1) else 113,
+                    "IN" if np.isclose(colltrans, 0, atol=0.1) else "OUT")
+
         vcorr_filename = os.path.join(indir, vcorr_filename)
         logger.notice("Using vcorr file: {}".format(vcorr_filename))
         if not os.path.isfile(vcorr_filename):
             raise RuntimeError("Vanadium file {} does not exist".format(vcorr_filename))
 
         return None, None, np.genfromtxt(vcorr_filename)[detector_mask]
+
+    def get_date(self, metadata):
+        # Get correct start time
+        date_created = np.datetime64(
+            datetime.datetime.strptime(metadata['time'] + ' ' + metadata['date'],
+                                       '%I:%M:%S %p %m/%d/%Y'))
+        return date_created
 
     def process(self,
                 counts,

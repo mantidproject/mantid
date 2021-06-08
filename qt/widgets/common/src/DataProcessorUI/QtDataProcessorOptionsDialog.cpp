@@ -13,8 +13,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 /** Constructor */
-QtDataProcessorOptionsDialog::QtDataProcessorOptionsDialog(
-    DataProcessorView *view, DataProcessorPresenter *presenter)
+QtDataProcessorOptionsDialog::QtDataProcessorOptionsDialog(DataProcessorView *view, DataProcessorPresenter *presenter)
     : QDialog(dynamic_cast<QWidget *>(view)), m_presenter(presenter) {
   initLayout();
   initBindings();
@@ -27,8 +26,7 @@ QtDataProcessorOptionsDialog::~QtDataProcessorOptionsDialog() {}
 /** Initialise the ui */
 void QtDataProcessorOptionsDialog::initLayout() {
   ui.setupUi(this);
-  connect(ui.buttonBox->button(QDialogButtonBox::Ok), SIGNAL(clicked()), this,
-          SLOT(saveOptions()));
+  connect(ui.buttonBox->button(QDialogButtonBox::Ok), SIGNAL(clicked()), this, SLOT(saveOptions()));
 }
 
 /** Bind options to their widgets */

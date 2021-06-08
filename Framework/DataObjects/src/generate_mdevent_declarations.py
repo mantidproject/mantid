@@ -203,7 +203,7 @@ def generate():
         for nd in dimensions:
             lines.append("%s/// Typedef for a %s with %d dimension%s " % (padding,c, nd, ['','s'][nd>1]) )
             lines.append("%stypedef %s<%s<%d>, %d> %s%d;" % (padding,c, mdevent_type, nd, nd, c, nd) )
-       
+
         lines.append("\n");
 
     lines += footer_lines + lines_after

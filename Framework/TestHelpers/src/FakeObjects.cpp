@@ -14,8 +14,7 @@ namespace Mantid {
 namespace Kernel {
 ///@cond TEMPLATE
 template class DLLExport PropertyWithValue<std::shared_ptr<WorkspaceTester>>;
-template class DLLExport
-    PropertyWithValue<std::shared_ptr<TableWorkspaceTester>>;
+template class DLLExport PropertyWithValue<std::shared_ptr<TableWorkspaceTester>>;
 ///@endcond TEMPLATE
 } // namespace Kernel
 namespace API {

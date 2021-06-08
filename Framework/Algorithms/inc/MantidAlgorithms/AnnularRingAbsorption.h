@@ -27,9 +27,7 @@ class MANTID_ALGORITHMS_DLL AnnularRingAbsorption : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"AbsorptionCorrection"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AbsorptionCorrection"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -40,13 +38,10 @@ private:
   void attachSample(API::MatrixWorkspace_sptr &workspace);
   void runCreateSampleShape(API::MatrixWorkspace_sptr &workspace);
   std::string createSampleShapeXML(const Kernel::V3D &upAxis) const;
-  const std::string cylinderXML(const std::string &id,
-                                const Kernel::V3D &bottomCentre,
-                                const double radius, const Kernel::V3D &axis,
-                                const double height) const;
+  const std::string cylinderXML(const std::string &id, const Kernel::V3D &bottomCentre, const double radius,
+                                const Kernel::V3D &axis, const double height) const;
   void runSetSampleMaterial(API::MatrixWorkspace_sptr &workspace);
-  API::MatrixWorkspace_sptr
-  runMonteCarloAbsorptionCorrection(const API::MatrixWorkspace_sptr &workspace);
+  API::MatrixWorkspace_sptr runMonteCarloAbsorptionCorrection(const API::MatrixWorkspace_sptr &workspace);
 };
 
 } // namespace Algorithms

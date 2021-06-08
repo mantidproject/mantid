@@ -33,8 +33,7 @@ using Kernel::V3D;
  * @param instrument :: The instrument to perform the ray tracings on. It must
  * have a defined source.
  */
-InstrumentRayTracer::InstrumentRayTracer(Instrument_const_sptr instrument)
-    : m_instrument(std::move(instrument)) {
+InstrumentRayTracer::InstrumentRayTracer(Instrument_const_sptr instrument) : m_instrument(std::move(instrument)) {
   if (!m_instrument) {
     std::ostringstream lexer;
     lexer << "Cannot create a InstrumentRayTracer, invalid instrument given. "
@@ -102,10 +101,8 @@ IDetector_const_sptr InstrumentRayTracer::getDetectorResult() const {
   // Go through all results
   Links::const_iterator resultItr = results.begin();
   for (; resultItr != results.end(); ++resultItr) {
-    IComponent_const_sptr component =
-        m_instrument->getComponentByID(resultItr->componentID);
-    IDetector_const_sptr det =
-        std::dynamic_pointer_cast<const IDetector>(component);
+    IComponent_const_sptr component = m_instrument->getComponentByID(resultItr->componentID);
+    IDetector_const_sptr det = std::dynamic_pointer_cast<const IDetector>(component);
     if (det) {
       if (!m_instrument->isMonitor(det->getID())) {
         return det;
@@ -150,12 +147,10 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
 
     // Quick test. If this suceeds moved on to test the children
     if (bbox.doesLineIntersect(testRay)) {
-      if (ICompAssembly_const_sptr assembly =
-              std::dynamic_pointer_cast<const ICompAssembly>(node)) {
+      if (ICompAssembly_const_sptr assembly = std::dynamic_pointer_cast<const ICompAssembly>(node)) {
         assembly->testIntersectionWithChildren(testRay, nodeQueue);
       } else {
-        throw Kernel::Exception::NotImplementedError(
-            "Implement non-comp assembly interactions");
+        throw Kernel::Exception::NotImplementedError("Implement non-comp assembly interactions");
       }
     }
   }

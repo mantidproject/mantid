@@ -37,10 +37,8 @@ public:
     loader.setPropertyValue("LoadLogFiles", "0");
     loader.execute();
 
-    TS_ASSERT_THROWS_NOTHING(
-        mr.setPropertyValue("InputWorkspace", "tomultiply"));
-    TS_ASSERT_THROWS_NOTHING(
-        mr.setPropertyValue("OutputWorkspace", "multiplied"));
+    TS_ASSERT_THROWS_NOTHING(mr.setPropertyValue("InputWorkspace", "tomultiply"));
+    TS_ASSERT_THROWS_NOTHING(mr.setPropertyValue("OutputWorkspace", "multiplied"));
     TS_ASSERT_THROWS_NOTHING(mr.setPropertyValue("StartBin", "60"));
     TS_ASSERT_THROWS_NOTHING(mr.setPropertyValue("EndBin", "1000"));
     TS_ASSERT_THROWS_NOTHING(mr.setPropertyValue("Factor", "1.25"));
@@ -50,11 +48,9 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("tomultiply")));
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("tomultiply")));
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("multiplied")));
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiplied")));
 
     const size_t length = result->blocksize();
     for (size_t i = 0; i < length; ++i) {

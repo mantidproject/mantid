@@ -25,15 +25,11 @@ public:
   }
 
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConvertToMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConvertToMD"}; }
 
 protected: // for testing
-  void findMinMaxValues(MDWSDescription &WSDescription,
-                        MDTransfInterface *const pQtransf,
-                        Kernel::DeltaEMode::Type iEMode,
-                        std::vector<double> &MinValues,
+  void findMinMaxValues(MDWSDescription &WSDescription, MDTransfInterface *const pQtransf,
+                        Kernel::DeltaEMode::Type iEMode, std::vector<double> &MinValues,
                         std::vector<double> &MaxValues);
 
 private:

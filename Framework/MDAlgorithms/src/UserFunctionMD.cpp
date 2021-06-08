@@ -32,19 +32,13 @@ UserFunctionMD::UserFunctionMD() {
 /**
  * @return A list of attribute names
  */
-std::vector<std::string> UserFunctionMD::getAttributeNames() const {
-  return std::vector<std::string>(1, "Formula");
-}
+std::vector<std::string> UserFunctionMD::getAttributeNames() const { return std::vector<std::string>(1, "Formula"); }
 
 /// Has attribute "Formula"
-bool UserFunctionMD::hasAttribute(const std::string &attName) const {
-  UNUSED_ARG(attName);
-  return attName == "Formula";
-}
+bool UserFunctionMD::hasAttribute(const std::string &attName) const { return attName == "Formula"; }
 
 /// Return Formula
-UserFunctionMD::Attribute
-UserFunctionMD::getAttribute(const std::string &attName) const {
+UserFunctionMD::Attribute UserFunctionMD::getAttribute(const std::string &attName) const {
   UNUSED_ARG(attName);
   return Attribute(m_formula);
 }
@@ -53,8 +47,7 @@ UserFunctionMD::getAttribute(const std::string &attName) const {
  * @param attName :: Attribute name - must be "Formula"
  * @param attr :: Attribute value - the formula
  */
-void UserFunctionMD::setAttribute(const std::string &attName,
-                                  const UserFunctionMD::Attribute &attr) {
+void UserFunctionMD::setAttribute(const std::string &attName, const UserFunctionMD::Attribute &attr) {
   UNUSED_ARG(attName);
   m_formula = attr.asString();
   if (!m_vars.empty()) {

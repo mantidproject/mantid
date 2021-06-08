@@ -27,15 +27,12 @@ class ITransformScale;
 
 Constructs a scaling transform object from a string
  */
-class MANTID_API_DLL TransformScaleFactoryImpl
-    : public Kernel::DynamicFactory<ITransformScale> {
+class MANTID_API_DLL TransformScaleFactoryImpl : public Kernel::DynamicFactory<ITransformScale> {
 public:
   /// Returns scaling transform
-  std::shared_ptr<ITransformScale>
-  create(const std::string &type) const override;
+  std::shared_ptr<ITransformScale> create(const std::string &type) const override;
   TransformScaleFactoryImpl(const TransformScaleFactoryImpl &) = delete;
-  TransformScaleFactoryImpl &
-  operator=(const TransformScaleFactoryImpl &) = delete;
+  TransformScaleFactoryImpl &operator=(const TransformScaleFactoryImpl &) = delete;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<TransformScaleFactoryImpl>;
@@ -50,15 +47,13 @@ private:
   // Do not use default methods
 };
 
-using TransformScaleFactory =
-    Mantid::Kernel::SingletonHolder<TransformScaleFactoryImpl>;
+using TransformScaleFactory = Mantid::Kernel::SingletonHolder<TransformScaleFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::TransformScaleFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::TransformScaleFactoryImpl>;
 }
 } // namespace Mantid

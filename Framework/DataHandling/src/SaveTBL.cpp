@@ -30,12 +30,10 @@ SaveTBL::SaveTBL() : m_sep(','), m_stichgroups(), m_nogroup() {}
 
 /// Initialisation method.
 void SaveTBL::init() {
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Save, ".tbl"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".tbl"),
                   "The filename of the output TBL file.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The name of the workspace containing the data you want to "
                   "save to a TBL file.");
 }
@@ -78,19 +76,16 @@ void SaveTBL::exec() {
   writeColumnNames(file, columnHeadings);
   for (size_t rowIndex = 0; rowIndex < ws->rowCount(); ++rowIndex) {
     TableRow row = ws->getRow(rowIndex);
-    for (size_t columnIndex = 0; columnIndex < columnHeadings.size();
-         columnIndex++) {
+    for (size_t columnIndex = 0; columnIndex < columnHeadings.size(); columnIndex++) {
       if (ws->getColumn(columnIndex)->type() != "str") {
         file.close();
         int error = remove(filename.c_str());
         if (error == 0)
-          throw std::runtime_error(columnHeadings[columnIndex] +
-                                   " column must be of type \"str\". The TBL "
-                                   "file will not be saved");
+          throw std::runtime_error(columnHeadings[columnIndex] + " column must be of type \"str\". The TBL "
+                                                                 "file will not be saved");
         else
-          throw std::runtime_error(
-              "Saving TBL unsuccessful, please check the " +
-              columnHeadings[columnIndex] + " column is of type \"str\".");
+          throw std::runtime_error("Saving TBL unsuccessful, please check the " + columnHeadings[columnIndex] +
+                                   " column is of type \"str\".");
       } else {
         if (columnIndex == columnHeadings.size() - 1)
           writeVal<std::string>(row.String(columnIndex), file, false, true);
@@ -103,8 +98,7 @@ void SaveTBL::exec() {
   file.close();
 }
 
-void SaveTBL::writeColumnNames(std::ofstream &file,
-                               std::vector<std::string> const &columnHeadings) {
+void SaveTBL::writeColumnNames(std::ofstream &file, std::vector<std::string> const &columnHeadings) {
   auto it = columnHeadings.begin();
   for (; it != columnHeadings.end() - 1; ++it) {
     auto const &heading = *it;
@@ -122,9 +116,7 @@ void SaveTBL::writeColumnNames(std::ofstream &file,
  * @param endsep : boolean true to include a comma after the data
  * @param endline : boolean true to put an EOL at the end of this data value
  */
-template <class T>
-void SaveTBL::writeVal(const T &val, std::ofstream &file, bool endsep,
-                       bool endline) {
+template <class T> void SaveTBL::writeVal(const T &val, std::ofstream &file, bool endsep, bool endline) {
   std::string valStr = boost::lexical_cast<std::string>(val);
   size_t comPos = valStr.find(',');
   if (comPos != std::string::npos) {

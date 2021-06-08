@@ -26,8 +26,7 @@ namespace {
 
 class JSON {
 public:
-  QScriptValue encodeInner(const QMap<QString, QVariant> &map,
-                           QScriptEngine *engine) {
+  QScriptValue encodeInner(const QMap<QString, QVariant> &map, QScriptEngine *engine) {
     QScriptValue obj = engine->newObject();
     QMapIterator<QString, QVariant> i(map);
     while (i.hasNext()) {
@@ -41,8 +40,7 @@ public:
       else if (i.value().type() == QVariant::Bool)
         obj.setProperty(i.key(), i.value().toBool());
       else if (i.value().type() == QVariant::List)
-        obj.setProperty(i.key(),
-                        qScriptValueFromSequence(engine, i.value().toList()));
+        obj.setProperty(i.key(), qScriptValueFromSequence(engine, i.value().toList()));
       else if (i.value().type() == QVariant::Map)
         obj.setProperty(i.key(), encodeInner(i.value().toMap(), engine));
     }
@@ -51,8 +49,7 @@ public:
 
   QString encode(const QMap<QString, QVariant> &map) {
     QScriptEngine engine;
-    engine.evaluate(
-        "function toString() { return JSON.stringify(this, null, 4) }");
+    engine.evaluate("function toString() { return JSON.stringify(this, null, 4) }");
 
     QScriptValue toString = engine.globalObject().property("toString");
     QScriptValue obj = encodeInner(map, &engine);
@@ -117,13 +114,11 @@ void writeData(const QString &filename, const QByteArray &data) {
   QFile jsonFile(filename);
 
   if (!jsonFile.open(QFile::WriteOnly)) {
-    throw std::invalid_argument("Could not open file at " +
-                                filename.toStdString());
+    throw std::invalid_argument("Could not open file at " + filename.toStdString());
   }
 
   if (jsonFile.write(data) == -1) {
-    throw std::runtime_error("Failed to write data to " +
-                             filename.toStdString());
+    throw std::runtime_error("Failed to write data to " + filename.toStdString());
   }
 }
 
@@ -133,8 +128,7 @@ namespace API {
 void saveJSONToFile(QString &filename, const QMap<QString, QVariant> &map) {
   auto filenameString = filename.toStdString();
   if (filenameString.find_last_of(".") == std::string::npos ||
-      filenameString.substr(filenameString.find_last_of(".") + 1) !=
-          std::string("json")) {
+      filenameString.substr(filenameString.find_last_of(".") + 1) != std::string("json")) {
     filename += ".json";
   }
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -153,8 +147,7 @@ QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QFile jsonFile(filename);
   if (!jsonFile.open(QFile::ReadOnly)) {
-    throw std::invalid_argument("Cannot open file at: " +
-                                filename.toStdString());
+    throw std::invalid_argument("Cannot open file at: " + filename.toStdString());
   }
   QString jsonString(jsonFile.readAll());
   return loadJSONFromString(jsonString);
@@ -165,8 +158,7 @@ QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
    */
   QFile file(filename);
   if (!file.open(QFile::ReadOnly)) {
-    throw std::invalid_argument("Cannot open file at: " +
-                                filename.toStdString());
+    throw std::invalid_argument("Cannot open file at: " + filename.toStdString());
   }
 
   // step 2

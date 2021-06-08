@@ -25,18 +25,12 @@ private:
     // Empty overrides of virtual methods
     const std::string unitID() const override { return "aUnit"; }
     const std::string caption() const override { return "Caption"; }
-    const Mantid::Kernel::UnitLabel label() const override {
-      return Mantid::Kernel::UnitLabel("unittext", L"", "");
-    }
+    const Mantid::Kernel::UnitLabel label() const override { return Mantid::Kernel::UnitLabel("unittext", L"", ""); }
     void init() override {}
     double singleToTOF(const double) const override { return 0; }
     double singleFromTOF(const double) const override { return 0; }
-    double conversionTOFMax() const override {
-      return std::numeric_limits<double>::quiet_NaN();
-    }
-    double conversionTOFMin() const override {
-      return std::numeric_limits<double>::quiet_NaN();
-    }
+    double conversionTOFMax() const override { return std::numeric_limits<double>::quiet_NaN(); }
+    double conversionTOFMin() const override { return std::numeric_limits<double>::quiet_NaN(); }
 
     Unit *clone() const override { return new EmptyUtf8Label(); }
   };
@@ -86,8 +80,7 @@ public:
     ws->getAxis(0)->setUnit("TOF");
     ws->replaceAxis(1, std::make_unique<Mantid::API::NumericAxis>(1));
     ws->getAxis(1)->setUnit("TOF");
-    QString expected =
-        MantidQt::API::toQStringInternal(L"Time-of-flight (\u03bcs)");
+    QString expected = MantidQt::API::toQStringInternal(L"Time-of-flight (\u03bcs)");
     TS_ASSERT_EQUALS(expected, PlotAxis(*ws, 0).title());
     TS_ASSERT_EQUALS(expected, PlotAxis(*ws, 1).title());
   }
@@ -122,36 +115,31 @@ public:
     TS_ASSERT_EQUALS("Spectrum", PlotAxis(*ws, 1).title());
   }
 
-  void
-  test_Passing_Workspace_Not_Plotting_As_Distribution_Creates_UnitLess_Title_For_Y_Data_No_X_Unit() {
+  void test_Passing_Workspace_Not_Plotting_As_Distribution_Creates_UnitLess_Title_For_Y_Data_No_X_Unit() {
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ws->setYUnit("Counts");
     TS_ASSERT_EQUALS("Counts", PlotAxis(false, *ws).title());
   }
 
-  void
-  test_Passing_Workspace_And_Plotting_As_Distribution_Creates_UnitLess_Title_For_Y_Data_No_X_Unit() {
+  void test_Passing_Workspace_And_Plotting_As_Distribution_Creates_UnitLess_Title_For_Y_Data_No_X_Unit() {
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ws->setYUnit("Counts");
     TS_ASSERT_EQUALS("Counts", PlotAxis(true, *ws).title());
   }
 
-  void
-  test_Passing_Non_Distribution_Workspace_And_Plotting_As_Distribution_Adds_XUnit() {
+  void test_Passing_Non_Distribution_Workspace_And_Plotting_As_Distribution_Adds_XUnit() {
     using MantidQt::API::PlotAxis;
     using MantidQt::API::toQStringInternal;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ws->setDistribution(false);
     ws->setYUnit("Counts");
     ws->getAxis(0)->setUnit("Energy");
-    TS_ASSERT_EQUALS("Counts (meV)" + toQStringInternal(L"\u207b\u00b9"),
-                     PlotAxis(true, *ws).title());
+    TS_ASSERT_EQUALS("Counts (meV)" + toQStringInternal(L"\u207b\u00b9"), PlotAxis(true, *ws).title());
   }
 
-  void
-  test_Passing_Workspace_And_Not_Plotting_As_Distribution_Does_Not_Add_XUnit() {
+  void test_Passing_Workspace_And_Not_Plotting_As_Distribution_Does_Not_Add_XUnit() {
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ws->setDistribution(false);
@@ -169,19 +157,16 @@ public:
     ws->getAxis(0)->setUnit("Energy");
     QString titleWithPlotAsDist = PlotAxis(true, *ws).title();
     QString titleWithNoPlotAsDist = PlotAxis(false, *ws).title();
-    TS_ASSERT_EQUALS("Counts (meV)" + toQStringInternal(L"\u207b\u00b9"),
-                     titleWithNoPlotAsDist);
-    TS_ASSERT_EQUALS("Counts (meV)" + toQStringInternal(L"\u207b\u00b9"),
-                     titleWithPlotAsDist);
+    TS_ASSERT_EQUALS("Counts (meV)" + toQStringInternal(L"\u207b\u00b9"), titleWithNoPlotAsDist);
+    TS_ASSERT_EQUALS("Counts (meV)" + toQStringInternal(L"\u207b\u00b9"), titleWithPlotAsDist);
   }
 
   void test_title_from_just_dimension() {
     using Mantid::Geometry::MDHistoDimension;
     using Mantid::Kernel::UnitLabel;
     using MantidQt::API::PlotAxis;
-    Mantid::Geometry::GeneralFrame frame(
-        Mantid::Geometry::GeneralFrame::GeneralFrameTOF,
-        UnitLabel("us", L"\u03bcs", "\\mu s"));
+    Mantid::Geometry::GeneralFrame frame(Mantid::Geometry::GeneralFrame::GeneralFrameTOF,
+                                         UnitLabel("us", L"\u03bcs", "\\mu s"));
     MDHistoDimension dim("tof", "dimx", frame, 0.0f, 1.0f, 10);
     QString expected = MantidQt::API::toQStringInternal(L"tof (\u03bcs)");
     TS_ASSERT_EQUALS(expected, PlotAxis(dim).title());
@@ -189,8 +174,7 @@ public:
 
   //---------------------- Failure cases -------------------------------
 
-  void
-  test_Index_Greater_Than_numDims_Or_Less_Than_Zero_Throws_Invalid_Argument() {
+  void test_Index_Greater_Than_numDims_Or_Less_Than_Zero_Throws_Invalid_Argument() {
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     TS_ASSERT_THROWS(PlotAxis(*ws, 2), const std::invalid_argument &);

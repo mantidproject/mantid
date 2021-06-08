@@ -31,17 +31,13 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadMD"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Load a MDEventWorkspace in .nxs format.";
-  }
+  const std::string summary() const override { return "Load a MDEventWorkspace in .nxs format."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override { return {"SaveMD"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\DataHandling";
-  }
+  const std::string category() const override { return "MDAlgorithms\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
@@ -56,14 +52,11 @@ private:
   std::string convention;
 
   /// Helper method
-  template <typename MDE, size_t nd>
-  void doLoad(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void doLoad(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
-  void
-  loadExperimentInfos(std::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
+  void loadExperimentInfos(std::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
 
-  void loadSlab(const std::string &name, void *data,
-                const DataObjects::MDHistoWorkspace_sptr &ws,
+  void loadSlab(const std::string &name, void *data, const DataObjects::MDHistoWorkspace_sptr &ws,
                 NeXus::NXnumtype dataType);
   void loadHisto();
 
@@ -75,9 +68,7 @@ private:
 
   void loadQConvention();
 
-  void loadVisualNormalization(
-      const std::string &key,
-      boost::optional<Mantid::API::MDNormalization> &normalization);
+  void loadVisualNormalization(const std::string &key, boost::optional<Mantid::API::MDNormalization> &normalization);
 
   /// Load all the affine matricies
   void loadAffineMatricies(const API::IMDWorkspace_sptr &ws);

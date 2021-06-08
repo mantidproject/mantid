@@ -18,9 +18,9 @@ Analysis
 
 This algorithm performs the *PairAsymmetry* option of the :ref:`algm-MuonProcess` algorithm, requiring two items of data; spectra corresponding to the groups of detector IDs. This can be given directly to the algorithm via the **InputWorkspace1** and **InputWorkspace2** properties, which accept MatrixWorkspaces with single spectra and identical binning. The pair asymmetry is calculated between the times **TimeMin** and **TimeMax**, and using the **Alpha** parameter (see :ref:`algm-CalculateMuonAsymmetry` for details).
 
-Alternatively by checking setting **SpecifyGroupsManually** to true the groupings can be performed as part of the algorithm (requiring the full, ungrouped, data in **InputWorkspace**). 
+Alternatively by checking setting **SpecifyGroupsManually** to true the groupings can be performed as part of the algorithm (requiring the full, ungrouped, data in **InputWorkspace**).
 
-In this case **Group1** and **Group2** are separator or range based lists (e.g. "1,2,3-6,7") of detector IDs. 
+In this case **Group1** and **Group2** are separator or range based lists (e.g. "1,2,3-6,7") of detector IDs.
 
 Rebbing is optional and can be achieved through the **Rebin** property (using syntax as in :ref:`algm-Rebin`).
 
@@ -69,26 +69,26 @@ Usage
     # Create the workspace group in which the analysed workspaces will be placed
     ws = CreateSampleWorkspace()
     wsGroup = GroupWorkspaces("ws")
-    RenameWorkspace(  
-                      InputWorkspace="wsGroup", 
-                      OutputWorkspace='MUSR00015193', 
+    RenameWorkspace(
+                      InputWorkspace="wsGroup",
+                      OutputWorkspace='MUSR00015193',
                       OverwriteExisting=True)
 
     # Load the data
-    LoadMuonNexus(  Filename='MUSR00015193.nxs', 
+    LoadMuonNexus(  Filename='MUSR00015193.nxs',
                     OutputWorkspace='MuonAnalysis')
 
     # Create two detector groupings
     ApplyMuonDetectorGrouping(
-        InputWorkspace='MuonAnalysis', 
-        InputWorkspaceGroup='MUSR00015193', 
-        GroupName='fwd', 
+        InputWorkspace='MuonAnalysis',
+        InputWorkspaceGroup='MUSR00015193',
+        GroupName='fwd',
         Grouping='1-32'
         )
     ApplyMuonDetectorGrouping(
-        InputWorkspace='MuonAnalysis', 
-        InputWorkspaceGroup='MUSR00015193', 
-        GroupName='bwd', 
+        InputWorkspace='MuonAnalysis',
+        InputWorkspaceGroup='MUSR00015193',
+        GroupName='bwd',
         Grouping='33-64'
         )
     # Add the groupings to the group workspace
@@ -97,11 +97,11 @@ Usage
 
     # Apply the pairing algorithm to the two groups
     ApplyMuonDetectorGroupPairing(
-           InputWorkspaceGroup='MUSR00015193', 
+           InputWorkspaceGroup='MUSR00015193',
            PairName='pairTest',
            Alpha=1.0,
            SpecifyGroupsManually=False,
-           InputWorkspace1='MUSR00015193; Group; fwd; Counts; #1_Raw', 
+           InputWorkspace1='MUSR00015193; Group; fwd; Counts; #1_Raw',
            InputWorkspace2='MUSR00015193; Group; bwd; Counts; #1_Raw'
            )
 

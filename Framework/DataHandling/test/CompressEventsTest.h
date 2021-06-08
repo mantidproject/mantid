@@ -32,13 +32,11 @@ public:
   void test_InvalidInputs() {
     CompressEvents alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS(alg.setPropertyValue("Tolerance", "-1.0"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Tolerance", "-1.0"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.0"));
   }
 
-  void doTest(const std::string &inputName, const std::string &outputName,
-              double tolerance, int numPixels = 50,
+  void doTest(const std::string &inputName, const std::string &outputName, double tolerance, int numPixels = 50,
               double wallClockTolerance = 0.) {
     EventWorkspace_sptr input, output;
     EventType eventType = WEIGHTED_NOTIME;
@@ -51,13 +49,11 @@ public:
      * 200 events; two in each bin, at time 0.5, 1.5, etc.
      * PulseTime = 1 second, 2 seconds, etc.
      */
-    input = WorkspaceCreationHelper::createEventWorkspace(numPixels, 100, 100,
-                                                          0.0, 1.0, 2);
+    input = WorkspaceCreationHelper::createEventWorkspace(numPixels, 100, 100, 0.0, 1.0, 2);
     AnalysisDataService::Instance().addOrReplace(inputName, input);
     // Quick initial check
     TS_ASSERT_EQUALS(input->getNumberEvents(), 200 * numPixels);
-    const double inputIntegral =
-        input->getSpectrum(0).integrate(0., 1.0 * 100, true);
+    const double inputIntegral = input->getSpectrum(0).integrate(0., 1.0 * 100, true);
 
     CompressEvents alg;
     alg.initialize();
@@ -66,19 +62,14 @@ public:
     alg.setProperty("Tolerance", tolerance);
     if (wallClockTolerance > 0.) {
       alg.setProperty("WallClockTolerance", wallClockTolerance);
-      alg.setProperty(
-          "StartTime",
-          "2010-01-01T00:00:00"); // copied from createEventWorkspace
+      alg.setProperty("StartTime",
+                      "2010-01-01T00:00:00"); // copied from createEventWorkspace
     }
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            inputName));
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            outputName));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputName));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputName));
 
     // Avoid accessing empty pointer
     TS_ASSERT(output);
@@ -97,8 +88,7 @@ public:
     // Event list is now of type WeightedEventNoTime
     TS_ASSERT_EQUALS(output->getEventType(), eventType);
 
-    TS_ASSERT_DELTA(output->getSpectrum(0).integrate(0., 1.0 * 100, true),
-                    inputIntegral, 1.e-6);
+    TS_ASSERT_DELTA(output->getSpectrum(0).integrate(0., 1.0 * 100, true), inputIntegral, 1.e-6);
 
     // Check an event to see if it makes sense
     if (output->getSpectrum(0).getNumberEvents() > 0) {
@@ -119,35 +109,19 @@ public:
   }
 
   // WEIGHTED_NOTIME tests
-  void test_DifferentOutput() {
-    doTest("CompressEvents_input", "CompressEvents_output", 0.5);
-  }
-  void test_InPlace() {
-    doTest("CompressEvents_input", "CompressEvents_input", 0.5);
-  }
-  void test_DifferentOutput_ZeroTolerance() {
-    doTest("CompressEvents_input", "CompressEvents_output", 0.0);
-  }
-  void test_InPlace_ZeroTolerance() {
-    doTest("CompressEvents_input", "CompressEvents_input", 0.0);
-  }
+  void test_DifferentOutput() { doTest("CompressEvents_input", "CompressEvents_output", 0.5); }
+  void test_InPlace() { doTest("CompressEvents_input", "CompressEvents_input", 0.5); }
+  void test_DifferentOutput_ZeroTolerance() { doTest("CompressEvents_input", "CompressEvents_output", 0.0); }
+  void test_InPlace_ZeroTolerance() { doTest("CompressEvents_input", "CompressEvents_input", 0.0); }
 
-  void test_DifferentOutput_Parallel() {
-    doTest("CompressEvents_input", "CompressEvents_output", 0.5, 1);
-  }
-  void test_InPlace_Parallel() {
-    doTest("CompressEvents_input", "CompressEvents_input", 0.5, 1);
-  }
+  void test_DifferentOutput_Parallel() { doTest("CompressEvents_input", "CompressEvents_output", 0.5, 1); }
+  void test_InPlace_Parallel() { doTest("CompressEvents_input", "CompressEvents_input", 0.5, 1); }
 
   //  doTest(std::string inputName, std::string outputName, double tolerance,
   //                int numPixels = 50, double wallClockTolerance = 0.)
   // WEIGHTED tests
-  void test_DifferentOutput_WithPulseTime() {
-    doTest("CompressEvents_input", "CompressEvents_output", 0.5, 50, .001);
-  }
-  void test_InPlace_WithPulseTime() {
-    doTest("CompressEvents_input", "CompressEvents_input", 0.5, 50, .001);
-  }
+  void test_DifferentOutput_WithPulseTime() { doTest("CompressEvents_input", "CompressEvents_output", 0.5, 50, .001); }
+  void test_InPlace_WithPulseTime() { doTest("CompressEvents_input", "CompressEvents_input", 0.5, 50, .001); }
   void test_DifferentOutput_ZeroTolerance_WithPulseTime() {
     doTest("CompressEvents_input", "CompressEvents_output", 0.0, 50, .001);
   }

@@ -15,9 +15,7 @@ namespace API {
 using std::size_t;
 
 /// Constructor
-Axis::Axis()
-    : m_title(),
-      m_unit(Mantid::Kernel::UnitFactory::Instance().create("Empty")) {}
+Axis::Axis() : m_title(), m_unit(Mantid::Kernel::UnitFactory::Instance().create("Empty")) {}
 
 /// Returns the user-defined title for this axis
 const std::string &Axis::title() const { return m_title; }
@@ -51,8 +49,7 @@ const Kernel::Unit_sptr &Axis::setUnit(const std::string &unitName) {
  *  @param verticalIndex :: The verticalIndex (used in RefAxis)
  *  @returns The double value at the given index
  */
-double Axis::getValue(const std::size_t &index,
-                      const std::size_t &verticalIndex) const {
+double Axis::getValue(const std::size_t &index, const std::size_t &verticalIndex) const {
   return (*this)(index, verticalIndex);
 }
 

@@ -57,10 +57,10 @@ public:
   const std::string category() const override { return "Inelastic\\SofQW"; }
   /// Create the output workspace
   template <typename Workspace>
-  static std::unique_ptr<Workspace> setUpOutputWorkspace(
-      const API::MatrixWorkspace &inputWorkspace,
-      const std::vector<double> &qbinParams, std::vector<double> &qAxis,
-      const std::vector<double> &ebinParams, const SofQCommon &emodeProperties);
+  static std::unique_ptr<Workspace>
+  setUpOutputWorkspace(const API::MatrixWorkspace &inputWorkspace, const std::vector<double> &qbinParams,
+                       std::vector<double> &qAxis, const std::vector<double> &ebinParams,
+                       const SofQCommon &emodeProperties);
   /// Create the input properties on the given algorithm object
   static void createCommonInputProperties(API::Algorithm &alg);
 
@@ -83,10 +83,10 @@ private:
  *  @return A pointer to the newly-created workspace
  */
 template <typename Workspace>
-std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
-    const API::MatrixWorkspace &inputWorkspace,
-    const std::vector<double> &qbinParams, std::vector<double> &qAxis,
-    const std::vector<double> &ebinParams, const SofQCommon &emodeProperties) {
+std::unique_ptr<Workspace>
+SofQW::setUpOutputWorkspace(const API::MatrixWorkspace &inputWorkspace, const std::vector<double> &qbinParams,
+                            std::vector<double> &qAxis, const std::vector<double> &ebinParams,
+                            const SofQCommon &emodeProperties) {
   using Kernel::VectorHelper::createAxisFromRebinParams;
   // Create vector to hold the new X axis values
   HistogramData::BinEdges xAxis(0);
@@ -96,8 +96,7 @@ std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
     xAxis = inputWorkspace.binEdges(0);
   } else if (ebinParams.size() == 1) {
     inputWorkspace.getXMinMax(eMin, eMax);
-    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true, true,
-                              eMin, eMax);
+    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true, true, eMin, eMax);
   } else {
     createAxisFromRebinParams(ebinParams, xAxis.mutableRawData());
   }
@@ -110,17 +109,14 @@ std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
     }
     double qMin;
     double qMax;
-    std::tie(qMin, qMax) =
-        emodeProperties.qBinHints(inputWorkspace, eMin, eMax);
-    yLength =
-        createAxisFromRebinParams(qbinParams, qAxis, true, true, qMin, qMax);
+    std::tie(qMin, qMax) = emodeProperties.qBinHints(inputWorkspace, eMin, eMax);
+    yLength = createAxisFromRebinParams(qbinParams, qAxis, true, true, qMin, qMax);
   } else {
     yLength = createAxisFromRebinParams(qbinParams, qAxis);
   }
 
   // Create output workspace, bin edges are same as in inputWorkspace index 0
-  auto outputWorkspace =
-      DataObjects::create<Workspace>(inputWorkspace, yLength - 1, xAxis);
+  auto outputWorkspace = DataObjects::create<Workspace>(inputWorkspace, yLength - 1, xAxis);
 
   // Create a binned numeric axis to replace the default vertical one
   auto verticalAxis = std::make_unique<API::BinEdgeAxis>(qAxis);
@@ -128,8 +124,7 @@ std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
   outputWorkspace->replaceAxis(1, std::move(verticalAxis));
 
   // Set the axis units
-  verticalAxisRaw->unit() =
-      Kernel::UnitFactory::Instance().create("MomentumTransfer");
+  verticalAxisRaw->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer");
   verticalAxisRaw->title() = "|Q|";
 
   // Set the X axis title (for conversion to MD)

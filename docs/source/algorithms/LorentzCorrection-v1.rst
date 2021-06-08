@@ -19,7 +19,7 @@ The Lorentz correction for time-of-flight single crystal diffraction, ``L``, is 
 Where :math:`\theta` is the scattering angle. For time-of-flight powder diffraction it is calculated according to
 
 .. math::
-   L = \sin{theta}
+   L = \sin{\theta}
 
 The calculations performed in this Algorithm are a subset of those performed by the :ref:`algm-AnvredCorrection` for single crystal measurements
 

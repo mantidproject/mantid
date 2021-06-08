@@ -20,8 +20,7 @@ using Kernel::V3D;
  *  @param index :: Workspace index of spectrum to do the calculation for
  *  @param extraLength :: extra length for gravity correction
  */
-GravitySANSHelper::GravitySANSHelper(const API::SpectrumInfo &spectrumInfo,
-                                     const size_t index,
+GravitySANSHelper::GravitySANSHelper(const API::SpectrumInfo &spectrumInfo, const size_t index,
                                      const double extraLength)
     : m_beamLineNorm(-1), m_dropPerAngstrom2(-1), m_cachedDrop(0) {
   m_samplePos = spectrumInfo.samplePosition();
@@ -33,8 +32,7 @@ GravitySANSHelper::GravitySANSHelper(const API::SpectrumInfo &spectrumInfo,
   m_cachedLineOfSight = spectrumInfo.position(index) - m_samplePos;
   // the drop is proportional to the wave length squared and using this to do
   // the full calculation only once increases the speed a lot
-  m_dropPerAngstrom2 =
-      gravitationalDrop(spectrumInfo.l2(index), 1e-10, extraLength);
+  m_dropPerAngstrom2 = gravitationalDrop(spectrumInfo.l2(index), 1e-10, extraLength);
 }
 /** Caclulates the sin of the that the neutron left the sample at, before the
  * effect of gravity
@@ -52,8 +50,7 @@ double GravitySANSHelper::calcSinTheta(const double wavAngstroms) const {
  *  @param[out] yFrac component in the y direction
  *  @return sin of the angle theta to the detector
  */
-double GravitySANSHelper::calcComponents(const double wavAngstroms,
-                                         double &xFrac, double &yFrac) const {
+double GravitySANSHelper::calcComponents(const double wavAngstroms, double &xFrac, double &yFrac) const {
   const V3D &detPos = getDetLoc(wavAngstroms);
 
   const double phi = atan2(detPos.Y(), detPos.X());
@@ -83,8 +80,7 @@ const V3D &GravitySANSHelper::getDetLoc(const double wav) const {
  */
 double GravitySANSHelper::calcSinTheta() const {
   // This is 0.5*cos(2theta)
-  double halfcosTheta = m_cachedLineOfSight.scalar_prod(m_beamLine) /
-                        m_cachedLineOfSight.norm() / m_beamLineNorm;
+  double halfcosTheta = m_cachedLineOfSight.scalar_prod(m_beamLine) / m_cachedLineOfSight.norm() / m_beamLineNorm;
   // This is sin(theta)
   return sqrt(0.5 - halfcosTheta);
 }
@@ -101,19 +97,15 @@ double GravitySANSHelper::calcSinTheta() const {
  *  @param extraLength :: additional length
  *  @return the deviation in meters
  */
-double GravitySANSHelper::gravitationalDrop(const double l2,
-                                            const double waveLength,
-                                            const double extraLength) const {
+double GravitySANSHelper::gravitationalDrop(const double l2, const double waveLength, const double extraLength) const {
   using namespace PhysicalConstants;
   /// Pre-factor in gravity calculation: gm^2/2h^2
-  static const double gm2_OVER_2h2 =
-      g * NeutronMass * NeutronMass / (2.0 * h * h);
+  static const double gm2_OVER_2h2 = g * NeutronMass * NeutronMass / (2.0 * h * h);
 
   // Perform a path length correction if an Lextra is specified.
   // The correction is Lcorr^2 = (L + Lextra)^2 -(LExtra)^2
   const auto pathLengthWithExtraLength = l2 + extraLength;
-  const auto pathLengthSquared =
-      std::pow(pathLengthWithExtraLength, 2) - std::pow(extraLength, 2);
+  const auto pathLengthSquared = std::pow(pathLengthWithExtraLength, 2) - std::pow(extraLength, 2);
 
   // Want L2 (sample-pixel distance) squared, times the prefactor g^2/h^2
   const double L2 = gm2_OVER_2h2 * pathLengthSquared;

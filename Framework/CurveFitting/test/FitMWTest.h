@@ -42,9 +42,7 @@ using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
 namespace {
-API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram,
-                                              size_t NVectors = 2,
-                                              size_t YLength = 20) {
+API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram, size_t NVectors = 2, size_t YLength = 20) {
   MatrixWorkspace_sptr ws2(new WorkspaceTester);
   size_t XLength = YLength + (histogram ? 1 : 0);
   ws2->initialize(NVectors, XLength, YLength);
@@ -63,8 +61,7 @@ API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram,
   return ws2;
 }
 
-void doTestExecPointData(const API::MatrixWorkspace_sptr &ws2,
-                         bool performance = false) {
+void doTestExecPointData(const API::MatrixWorkspace_sptr &ws2, bool performance = false) {
   API::IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 1.);
   fun->setParameter("Lifetime", 1.0);
@@ -89,8 +86,8 @@ void doTestExecPointData(const API::MatrixWorkspace_sptr &ws2,
     // TS_ASSERT_DIFFERS(chi2, 0.0);
     TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
 
-    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        API::AnalysisDataService::Instance().retrieve("Output_Workspace"));
+    MatrixWorkspace_sptr outWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(API::AnalysisDataService::Instance().retrieve("Output_Workspace"));
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 3);
     API::Axis *axis = outWS->getAxis(1);
@@ -109,8 +106,7 @@ void doTestExecPointData(const API::MatrixWorkspace_sptr &ws2,
     }
 
     ITableWorkspace_sptr covar = std::dynamic_pointer_cast<ITableWorkspace>(
-        API::AnalysisDataService::Instance().retrieve(
-            "Output_NormalisedCovarianceMatrix"));
+        API::AnalysisDataService::Instance().retrieve("Output_NormalisedCovarianceMatrix"));
 
     TS_ASSERT(covar);
     TS_ASSERT_EQUALS(covar->columnCount(), 3);
@@ -132,8 +128,8 @@ void doTestExecPointData(const API::MatrixWorkspace_sptr &ws2,
     TS_ASSERT_DIFFERS(fun->getError(0), 0.0);
     TS_ASSERT_DIFFERS(fun->getError(1), 0.0);
 
-    ITableWorkspace_sptr params = std::dynamic_pointer_cast<ITableWorkspace>(
-        API::AnalysisDataService::Instance().retrieve("Output_Parameters"));
+    ITableWorkspace_sptr params =
+        std::dynamic_pointer_cast<ITableWorkspace>(API::AnalysisDataService::Instance().retrieve("Output_Parameters"));
 
     TS_ASSERT(params);
     TS_ASSERT_EQUALS(params->columnCount(), 3);
@@ -152,8 +148,7 @@ void doTestExecPointData(const API::MatrixWorkspace_sptr &ws2,
   //--------------------------------------------------//
   if (!performance) {
     // Fit fit1;
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("Fit");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     Mantid::API::IAlgorithm &fit1 = *alg;
     fit1.initialize();
 
@@ -169,8 +164,7 @@ void doTestExecPointData(const API::MatrixWorkspace_sptr &ws2,
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"), 1.0, 1e-4);
   }
 }
-void doTestExecHistogramData(const API::MatrixWorkspace_sptr &ws2,
-                             bool performance = false) {
+void doTestExecHistogramData(const API::MatrixWorkspace_sptr &ws2, bool performance = false) {
   API::IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 1.);
   fun->setParameter("Lifetime", 1.);
@@ -259,8 +253,7 @@ public:
 
     // Assert
     Mantid::API::MatrixWorkspace_sptr out_ws =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>("out_Workspace");
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("out_Workspace");
     TS_ASSERT(out_ws);
     TSM_ASSERT("Output should be a distribution", out_ws->isDistribution());
     API::AnalysisDataService::Instance().clear();
@@ -287,8 +280,7 @@ public:
     TS_ASSERT(fit.isExecuted());
 
     Mantid::API::MatrixWorkspace_sptr out_ws =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>("out_Workspace");
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("out_Workspace");
     TS_ASSERT(out_ws);
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 3);
     auto &e = out_ws->e(1);
@@ -317,10 +309,8 @@ public:
 
     TS_ASSERT(fit.isExecuted());
 
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
-        "out_Workspace"));
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
-        "out_Parameters"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("out_Workspace"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("out_Parameters"));
 
     Mantid::API::AnalysisDataService::Instance().clear();
   }
@@ -344,10 +334,8 @@ public:
 
     TS_ASSERT(fit.isExecuted());
 
-    TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist(
-        "out_Workspace"));
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
-        "out_Parameters"));
+    TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("out_Workspace"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("out_Parameters"));
 
     Mantid::API::AnalysisDataService::Instance().clear();
   }
@@ -363,8 +351,7 @@ public:
     fitmw.setWorkspaceIndex(1);
     fitmw.createDomain(domain, values);
 
-    FunctionDomain1DSpectrum *specDom =
-        dynamic_cast<FunctionDomain1DSpectrum *>(domain.get());
+    FunctionDomain1DSpectrum *specDom = dynamic_cast<FunctionDomain1DSpectrum *>(domain.get());
     TS_ASSERT(specDom);
     TS_ASSERT_EQUALS(specDom->getWorkspaceIndex(), 1);
     TS_ASSERT_EQUALS(specDom->size(), ws2->blocksize());
@@ -493,8 +480,7 @@ public:
     TS_ASSERT_DELTA(v1d->getFitData(0), 4.0, 1e-13);
   }
 
-  void
-  test_Composite_Function_With_SeparateMembers_Option_On_FitMW_Outputs_Composite_Values_Plus_Each_Member() {
+  void test_Composite_Function_With_SeparateMembers_Option_On_FitMW_Outputs_Composite_Values_Plus_Each_Member() {
     const bool histogram = true;
     auto ws2 = createTestWorkspace(histogram);
 
@@ -518,8 +504,8 @@ public:
     // Requires a property manager to make a workspce
     auto propManager = std::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
-    propManager->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-        wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->declareProperty(
+        std::make_unique<WorkspaceProperty<Workspace>>(wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, ws2);
 
     FitMW fitmw(propManager.get(), wsPropName);
@@ -530,13 +516,11 @@ public:
 
     // Create Output
     const std::string baseName("TestOutput_");
-    fitmw.createOutputWorkspace(baseName, composite, domain, values,
-                                "OutputWorkspace");
+    fitmw.createOutputWorkspace(baseName, composite, domain, values, "OutputWorkspace");
 
     MatrixWorkspace_sptr outputWS;
     // A new property should have appeared
-    TS_ASSERT_THROWS_NOTHING(outputWS =
-                                 propManager->getProperty("OutputWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(outputWS = propManager->getProperty("OutputWorkspace"));
     if (!outputWS) {
       TS_FAIL("No output workspace was found in the property manager");
       return;
@@ -555,10 +539,8 @@ public:
     TS_ASSERT_EQUALS(axis->label(3), "ExpDecay");
     TS_ASSERT_EQUALS(axis->label(4), "ExpDecay");
 
-    const double eValues[nExpectedHist] = {1.0, 0.01703318673, 0.0, 0.0092811,
-                                           0.0142825267};
-    const double yValues[nExpectedHist] = {
-        8.1873075308, 3.294074078, 4.893233452, 1.391615229, 1.902458849};
+    const double eValues[nExpectedHist] = {1.0, 0.01703318673, 0.0, 0.0092811, 0.0142825267};
+    const double yValues[nExpectedHist] = {8.1873075308, 3.294074078, 4.893233452, 1.391615229, 1.902458849};
 
     for (size_t i = 0; i < nExpectedHist; ++i) {
       TS_ASSERT_DELTA(outputWS->y(i)[1], yValues[i], 1e-8);
@@ -582,8 +564,8 @@ public:
     // Requires a property manager to make a workspce
     auto propManager = std::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
-    propManager->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-        wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->declareProperty(
+        std::make_unique<WorkspaceProperty<Workspace>>(wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, ws);
 
     FitMW fitmw(propManager.get(), wsPropName);
@@ -642,13 +624,11 @@ public:
   void test_setting_instrument_fitting_parameters() {
     std::shared_ptr<Mantid::Geometry::Instrument> instrument;
     instrument.reset(new Mantid::Geometry::Instrument);
-    Mantid::Geometry::ObjComponent *source =
-        new Mantid::Geometry::ObjComponent("source", instrument.get());
+    Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent("source", instrument.get());
     instrument->add(source);
     source->setPos(0.0, 0.0, -10.0);
     instrument->markAsSource(source);
-    Mantid::Geometry::Component *sample =
-        new Mantid::Geometry::Component("sample", instrument.get());
+    Mantid::Geometry::Component *sample = new Mantid::Geometry::Component("sample", instrument.get());
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
     auto *det = new Mantid::Geometry::Detector("det", 1, nullptr);
@@ -667,8 +647,7 @@ public:
     const auto detIndex = detectorInfo.indexOf(det->getID());
     const auto &detFromWS = detectorInfo.detector(detIndex);
 
-    Geometry::Parameter_sptr param =
-        pmap.getRecursive(&detFromWS, "Lifetime", "fitting");
+    Geometry::Parameter_sptr param = pmap.getRecursive(&detFromWS, "Lifetime", "fitting");
     TS_ASSERT(param);
 
     API::IFunction_sptr expDecay(new ExpDecay);
@@ -678,8 +657,8 @@ public:
     // Requires a property manager to make a workspce
     auto propManager = std::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
-    propManager->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-        wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->declareProperty(
+        std::make_unique<WorkspaceProperty<Workspace>>(wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, ws);
 
     FitMW fitmw(propManager.get(), wsPropName);
@@ -729,8 +708,8 @@ public:
     // Requires a property manager to make a workspce
     auto propManager = std::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
-    propManager->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-        wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->declareProperty(
+        std::make_unique<WorkspaceProperty<Workspace>>(wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, data);
 
     IFunction_sptr fitfun;
@@ -754,13 +733,11 @@ public:
 
     // Create Output
     const std::string baseName("TestOutput_");
-    fitmw.createOutputWorkspace(baseName, conv, domain, values,
-                                "OutputWorkspace");
+    fitmw.createOutputWorkspace(baseName, conv, domain, values, "OutputWorkspace");
 
     MatrixWorkspace_sptr outputWS;
     // A new property should have appeared
-    TS_ASSERT_THROWS_NOTHING(outputWS =
-                                 propManager->getProperty("OutputWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(outputWS = propManager->getProperty("OutputWorkspace"));
     if (!outputWS) {
       TS_FAIL("No output workspace was found in the property manager");
       return;
@@ -779,8 +756,7 @@ public:
     TS_ASSERT_EQUALS(axis->label(3), "Convolution");
     TS_ASSERT_EQUALS(axis->label(4), "Convolution");
 
-    FunctionDomain1DView x(data->mutableX(0).rawData().data(),
-                           data->mutableX(0).size());
+    FunctionDomain1DView x(data->mutableX(0).rawData().data(), data->mutableX(0).size());
     FunctionValues gaus1Values(x);
     FunctionValues gaus2Values(x);
 
@@ -807,13 +783,9 @@ public:
     }
   }
 
-  void test_convolve_members_option_without_background() {
-    do_test_convolve_members_option(false);
-  }
+  void test_convolve_members_option_without_background() { do_test_convolve_members_option(false); }
 
-  void test_convolve_members_option_with_background() {
-    do_test_convolve_members_option(true);
-  }
+  void test_convolve_members_option_with_background() { do_test_convolve_members_option(true); }
 
   void test_exclude() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
@@ -1007,8 +979,7 @@ public:
     IFunction_sptr fun = fit.getProperty("Function");
     TS_ASSERT_EQUALS(fun->getParameter("A0"), 1);
 
-    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "out_Workspace");
+    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out_Workspace");
     TS_ASSERT(out);
     if (!out)
       return;
@@ -1020,34 +991,29 @@ public:
   }
 
   void test_exclude_odd_number() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double, int) { return 1.0; }, 1, 0.0, 3., 0.5);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 1.0; }, 1, 0.0, 3., 0.5);
 
     std::vector<double> exclude{-2.0, -1.0, 4.0};
     Fit fit;
     fit.initialize();
     fit.setProperty("Function", "name=FlatBackground");
     fit.setProperty("InputWorkspace", ws);
-    TS_ASSERT_THROWS(fit.setProperty("Exclude", exclude),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fit.setProperty("Exclude", exclude), const std::invalid_argument &);
   }
 
   void test_exclude_unordered() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double, int) { return 1.0; }, 1, 0.0, 3., 0.5);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 1.0; }, 1, 0.0, 3., 0.5);
 
     std::vector<double> exclude{-2.0, -1.0, 4.0, 2.0};
     Fit fit;
     fit.initialize();
     fit.setProperty("Function", "name=FlatBackground");
     fit.setProperty("InputWorkspace", ws);
-    TS_ASSERT_THROWS(fit.setProperty("Exclude", exclude),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fit.setProperty("Exclude", exclude), const std::invalid_argument &);
   }
 
   void test_exclude_overlapped() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
 
     std::vector<double> exclude{-1.0, 1.0, 0.0, 1.0, 9.0, 11.0, 7.5, 9.0};
     Fit fit;
@@ -1077,8 +1043,7 @@ public:
   }
 
   void test_exclude_overlapped_1() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
 
     std::vector<double> exclude{6.0, 8.1, 2.1, 4.3, 4.2, 6.7};
     Fit fit;
@@ -1108,8 +1073,7 @@ public:
   }
 
   void test_exclude_overlapped_2() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
 
     std::vector<double> exclude{0.0, 2.0, 2.0, 4.0};
     Fit fit;
@@ -1139,8 +1103,7 @@ public:
   }
 
   void test_exclude_jump_into_excluded() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
 
     std::vector<double> exclude{0.0, 4.1, 4.3, 11.0};
     Fit fit;
@@ -1170,8 +1133,7 @@ public:
   }
 
   void test_exclude_jump_over_few_ranges() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
 
     std::vector<double> exclude{0.0, 4.1, 4.2, 4.3, 4.4, 4.5, 6.0, 11.0};
     Fit fit;
@@ -1201,8 +1163,7 @@ public:
   }
 
   void test_exclude_jump_over_few_ranges_into_excluded() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
 
     std::vector<double> exclude{0.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.9, 11.0};
     Fit fit;
@@ -1232,8 +1193,7 @@ public:
   }
 
   void test_exclude_almost_empty_range() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
 
     std::vector<double> exclude{0.0, 4.1, 5.0, 5.0, 8.0, 10.0};
     Fit fit;
@@ -1263,8 +1223,7 @@ public:
   }
 
   void test_exclude_almost_empty_range_1() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
 
     std::vector<double> exclude{0.0, 4.1, 5.0, 5.0};
     Fit fit;
@@ -1295,19 +1254,16 @@ public:
 
   void test_normalised_composite_member_output() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return 0.1 + exp(-0.5 * pow(x / 0.5, 2)); }, 1,
-        -2.0, 2.0, 0.2, true);
+        [](double x, int) { return 0.1 + exp(-0.5 * pow(x / 0.5, 2)); }, 1, -2.0, 2.0, 0.2, true);
     Fit fit;
     fit.initialize();
-    fit.setProperty("Function",
-                    "name=FlatBackground;name=Gaussian,Height=1,Sigma=0.5");
+    fit.setProperty("Function", "name=FlatBackground;name=Gaussian,Height=1,Sigma=0.5");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Output", "out");
     fit.setProperty("OutputCompositeMembers", true);
     fit.setProperty("Normalise", true);
     fit.execute();
-    auto out_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "out_Workspace");
+    auto out_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out_Workspace");
     auto const &y1 = out_ws->readY(1);
     auto const &y3 = out_ws->readY(3);
     auto const &y4 = out_ws->readY(4);
@@ -1322,9 +1278,7 @@ class FitMWTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FitMWTestPerformance *createSuite() {
-    return new FitMWTestPerformance();
-  }
+  static FitMWTestPerformance *createSuite() { return new FitMWTestPerformance(); }
   static void destroySuite(FitMWTestPerformance *suite) { delete suite; }
 
   FitMWTestPerformance() {
@@ -1335,12 +1289,8 @@ public:
     histWS = createTestWorkspace(histogram, NVectors, YLength);
   }
 
-  void test_exec_point_data_performance() {
-    doTestExecPointData(binsWS, performance);
-  }
-  void test_exec_histogram_data_performance() {
-    doTestExecHistogramData(histWS, performance);
-  }
+  void test_exec_point_data_performance() { doTestExecPointData(binsWS, performance); }
+  void test_exec_histogram_data_performance() { doTestExecHistogramData(histWS, performance); }
 
 private:
   API::MatrixWorkspace_sptr histWS;

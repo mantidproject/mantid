@@ -16,8 +16,7 @@ class ParseKeyValueStringTest : public CxxTest::TestSuite {
 public:
   using StdMap = std::map<std::string, std::string>;
   using QtMap = std::map<QString, QString>;
-  static constexpr const char *TEST_STRING =
-      R"(a = 1,b=2.0, c=3, d='1,2,3',e="4,5,6",f=1+1=2, g = '\'')";
+  static constexpr const char *TEST_STRING = R"(a = 1,b=2.0, c=3, d='1,2,3',e="4,5,6",f=1+1=2, g = '\'')";
 
   void testStdMapParsedOutputsAreCorrect() {
     StdMap kvp = parseKeyValueString(TEST_STRING);
@@ -30,23 +29,19 @@ public:
   }
 
   void testStdMapParseKeyValueStringThrowsIfTrailingSeparator() {
-    TS_ASSERT_THROWS(parseKeyValueString("a = 1, b = 2, c = 3,"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(parseKeyValueString("a = 1, b = 2, c = 3,"), const std::runtime_error &);
   }
 
   void testQtMapParseKeyValueStringThrowsIfTrailingSeparator() {
-    TS_ASSERT_THROWS(parseKeyValueQString("a = 1, b = 2, c = 3,"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(parseKeyValueQString("a = 1, b = 2, c = 3,"), const std::runtime_error &);
   }
 
   void testStdParseKeyValueStringThrowsIfNotKeyValuePair() {
-    TS_ASSERT_THROWS(parseKeyValueString("a = 1, b = 2, c = 3,d"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(parseKeyValueString("a = 1, b = 2, c = 3,d"), const std::runtime_error &);
   }
 
   void testQtParseKeyValueStringThrowsIfNotKeyValuePair() {
-    TS_ASSERT_THROWS(parseKeyValueQString("a = 1, b = 2, c = 3,d"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(parseKeyValueQString("a = 1, b = 2, c = 3,d"), const std::runtime_error &);
   }
 
   void testStdParseKeyValueStringThrowsIfStartsWithSeparator() {
@@ -54,19 +49,15 @@ public:
   }
 
   void testQtParseKeyValueStringThrowsIfStartsWithSeparator() {
-    TS_ASSERT_THROWS(parseKeyValueQString(",a = 1"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(parseKeyValueQString(",a = 1"), const std::runtime_error &);
   }
 
-  void
-  testStdParseKeyValueStringThrowsIfStartsWithSeparatorAndEndsWithEquals() {
-    TS_ASSERT_THROWS(parseKeyValueString(",a = 1 = 2,="),
-                     const std::runtime_error &);
+  void testStdParseKeyValueStringThrowsIfStartsWithSeparatorAndEndsWithEquals() {
+    TS_ASSERT_THROWS(parseKeyValueString(",a = 1 = 2,="), const std::runtime_error &);
   }
 
   void testQtParseKeyValueStringThrowsIfStartsWithSeparatorAndEndsWithEquals() {
-    TS_ASSERT_THROWS(parseKeyValueQString(",a = 1 = 2,="),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(parseKeyValueQString(",a = 1 = 2,="), const std::runtime_error &);
   }
 
   void testStdParseKeyValueStringThrowsIfValuesOnlyContainEquals() {
@@ -90,8 +81,7 @@ public:
   }
 
 private:
-  template <class StringType>
-  void assertTestStringOutputsAreCorrect(std::map<StringType, StringType> kvp) {
+  template <class StringType> void assertTestStringOutputsAreCorrect(std::map<StringType, StringType> kvp) {
     TS_ASSERT_EQUALS(kvp["a"], "1");
     TS_ASSERT_EQUALS(kvp["b"], "2.0");
     TS_ASSERT_EQUALS(kvp["c"], "3");

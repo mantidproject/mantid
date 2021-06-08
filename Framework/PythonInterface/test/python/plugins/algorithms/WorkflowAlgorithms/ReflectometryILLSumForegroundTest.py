@@ -22,10 +22,6 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
                                    Measurement='ReflectedBeam',
                                    ForegroundHalfWidth=5,
                                    OutputWorkspace='rb')
-        ReflectometryILLPreprocess(Run='ILL/Figaro/000002.nxs',
-                                   Measurement='DirectBeam',
-                                   ForegroundHalfWidth=5,
-                                   OutputWorkspace='fig_db')
 
     @classmethod
     def tearDownClass(cls):
@@ -58,13 +54,6 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
                                       DirectForegroundWorkspace='db_frg')
 
         self.checkOutput(mtd['rb_inq_frg'], 1045)
-
-    def testDirectBeamFigaro(self):
-        # the direct beam
-        ReflectometryILLSumForeground(InputWorkspace='fig_db',
-                                      OutputWorkspace='fig_db_frg')
-
-        self.checkOutput(mtd['fig_db_frg'], 971)
 
 
     def checkOutput(self, ws, blocksize):

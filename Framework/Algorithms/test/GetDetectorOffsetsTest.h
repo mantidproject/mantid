@@ -25,9 +25,7 @@ class GetDetectorOffsetsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GetDetectorOffsetsTest *createSuite() {
-    return new GetDetectorOffsetsTest();
-  }
+  static GetDetectorOffsetsTest *createSuite() { return new GetDetectorOffsetsTest(); }
   static void destroySuite(GetDetectorOffsetsTest *suite) { delete suite; }
 
   GetDetectorOffsetsTest() { Mantid::API::FrameworkManager::Instance(); }
@@ -44,16 +42,13 @@ public:
 
   void testExec() {
     // ---- Create the simple workspace -------
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
     // loop through xvals, calculate and set to Y
-    std::transform(
-        xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
-        [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -64,8 +59,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", WS));
     std::string outputWS("offsetsped");
     std::string maskWS("masksped");
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("Step", "0.02"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference", "1.00"));
@@ -75,9 +69,7 @@ public:
     TS_ASSERT(offsets.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
     if (!output)
       return;
 
@@ -86,9 +78,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
 
     MatrixWorkspace_const_sptr mask;
-    TS_ASSERT_THROWS_NOTHING(
-        mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            maskWS));
+    TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS));
     if (!mask)
       return;
     TS_ASSERT(!mask->detectorInfo().isMasked(0));
@@ -96,16 +86,13 @@ public:
 
   void testExecWithGroup() {
     // --------- Workspace with summed spectra -------
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::createGroupedWorkspace2D(3, 200, 1.0);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::createGroupedWorkspace2D(3, 200, 1.0);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
     // loop through xvals, calculate and set to Y
-    std::transform(
-        xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
-        [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -116,8 +103,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", WS));
     std::string outputWS("offsetsped");
     std::string maskWS("masksped");
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("Step", "0.02"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference", "1.00"));
@@ -137,9 +123,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
 
     MatrixWorkspace_const_sptr mask;
-    TS_ASSERT_THROWS_NOTHING(
-        mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            maskWS));
+    TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS));
     if (!mask)
       return;
     TS_ASSERT(!mask->detectorInfo().isMasked(0));
@@ -147,16 +131,13 @@ public:
 
   void testExecAbsolute() {
     // ---- Create the simple workspace -------
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
     // loop through xvals, calculate and set to Y
-    std::transform(
-        xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
-        [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
 
@@ -166,24 +147,20 @@ public:
     TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", WS));
     std::string outputWS("offsetsped");
     std::string maskWS("masksped");
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("Step", "0.02"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference", "1.00"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMin", "-20"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMax", "20"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaxOffset", "10"));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("OffsetMode", "Absolute"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OffsetMode", "Absolute"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DIdeal", "3.5"));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
     if (!output)
       return;
 
@@ -192,9 +169,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
 
     MatrixWorkspace_const_sptr mask;
-    TS_ASSERT_THROWS_NOTHING(
-        mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            maskWS));
+    TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS));
     if (!mask)
       return;
     TS_ASSERT(!mask->detectorInfo().isMasked(0));
@@ -209,29 +184,22 @@ class GetDetectorOffsetsTestPerformance : public CxxTest::TestSuite {
   int numpixels;
 
 public:
-  static GetDetectorOffsetsTestPerformance *createSuite() {
-    return new GetDetectorOffsetsTestPerformance();
-  }
-  static void destroySuite(GetDetectorOffsetsTestPerformance *suite) {
-    delete suite;
-  }
+  static GetDetectorOffsetsTestPerformance *createSuite() { return new GetDetectorOffsetsTestPerformance(); }
+  static void destroySuite(GetDetectorOffsetsTestPerformance *suite) { delete suite; }
 
   GetDetectorOffsetsTestPerformance() { FrameworkManager::Instance(); }
 
   void setUp() override {
     numpixels = 10000;
-    WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        numpixels, 200, false);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels, 200, false);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
 
       auto xvals = WS->points(wi);
       auto &Y = WS->mutableY(wi);
 
-      std::transform(
-          xvals.cbegin(), xvals.cend(), Y.begin(),
-          [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
+      std::transform(xvals.cbegin(), xvals.cend(), Y.begin(),
+                     [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
       auto &E = WS->mutableE(wi);
       E.assign(E.size(), 0.001);
     }
@@ -247,8 +215,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference", "1.00"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMin", "-20"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMax", "20"));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("OutputWorkspace", "dummyname"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", "dummyname"));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
     OffsetsWorkspace_sptr output;

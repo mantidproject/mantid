@@ -20,12 +20,10 @@ boost::mpi::environment environment;
 #endif
 
 #ifdef MPI_EXPERIMENTAL
-Communicator::Communicator(const boost::mpi::communicator &comm)
-    : m_communicator(comm) {}
+Communicator::Communicator(const boost::mpi::communicator &comm) : m_communicator(comm) {}
 #endif
 
-Communicator::Communicator(std::shared_ptr<detail::ThreadingBackend> backend,
-                           const int rank)
+Communicator::Communicator(std::shared_ptr<detail::ThreadingBackend> backend, const int rank)
     : m_backend(std::move(backend)), m_rank(rank) {}
 
 int Communicator::rank() const {
@@ -49,9 +47,7 @@ int Communicator::size() const {
 #ifdef MPI_EXPERIMENTAL
 /// For internal use only. Casts the Communicator to the underlying
 /// boost::mpi::communicator object.
-Communicator::operator const boost::mpi::communicator &() const {
-  return m_communicator;
-}
+Communicator::operator const boost::mpi::communicator &() const { return m_communicator; }
 #endif
 
 /// For internal use only. Returns true if the communicator has a
@@ -63,8 +59,7 @@ bool Communicator::hasBackend() const { return static_cast<bool>(m_backend); }
 detail::ThreadingBackend &Communicator::backend() const {
   if (!m_backend)
 #ifndef MPI_EXPERIMENTAL
-    throw std::runtime_error(
-        "Parallel::Communicator without backend in non-MPI build.");
+    throw std::runtime_error("Parallel::Communicator without backend in non-MPI build.");
 #else
     throw std::runtime_error("Parallel::Communicator without backend in MPI "
                              "build. Check hasBackend() before accessing the "

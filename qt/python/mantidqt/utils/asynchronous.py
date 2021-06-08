@@ -215,3 +215,25 @@ class AsyncTaskFailure(AsyncTaskResult):
     @property
     def success(self):
         return False
+
+
+# From https://stackoverflow.com/questions/5179467/equivalent-of-setinterval-in-python by Andrea
+# (https://stackoverflow.com/users/249001/andrea) with help of jd (https://stackoverflow.com/users/280490/jd)
+def set_interval(interval):
+    """
+    This is a decorator function that will repeat once per interval.
+    """
+    def outer_wrap(function):
+        def wrap(*args, **kwargs):
+            stop = threading.Event()
+
+            def inner_wrap():
+                function(*args, **kwargs)
+                while not stop.isSet():
+                    stop.wait(interval)
+                    function(*args, **kwargs)
+            t = threading.Timer(0, inner_wrap)
+            t.start()
+            return stop
+        return wrap
+    return outer_wrap

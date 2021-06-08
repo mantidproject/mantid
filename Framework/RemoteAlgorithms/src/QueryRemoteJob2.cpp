@@ -30,27 +30,20 @@ void QueryRemoteJob2::init() {
   auto nullValidator = std::make_shared<NullValidator>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty(
-      "ComputeResource", "", std::make_shared<StringListValidator>(computes),
-      "The name of the remote compute resource to query", Direction::Input);
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
+                  "The name of the remote compute resource to query", Direction::Input);
 
   // The ID of the job we want to query
-  declareProperty("JobID", "", requireValue, "The ID of the job to query",
-                  Direction::Input);
+  declareProperty("JobID", "", requireValue, "The ID of the job to query", Direction::Input);
 
   // Name given to the job
-  declareProperty("JobName", "", nullValidator, "The name of the job",
-                  Direction::Output);
+  declareProperty("JobName", "", nullValidator, "The name of the job", Direction::Output);
 
   // Name of the executable/python or other kind of script that was (or will be)
   // run
-  declareProperty(
-      "ScriptName", "", nullValidator,
-      "The name of the script or executable that was (or will be) run",
-      Direction::Output);
+  declareProperty("ScriptName", "", nullValidator, "The name of the script or executable that was (or will be) run",
+                  Direction::Output);
 
   // A human readable description of the job's status
   declareProperty("JobStatusString", "", nullValidator,
@@ -59,9 +52,7 @@ void QueryRemoteJob2::init() {
                   Direction::Output);
 
   // Transaction ID this job is associated with
-  declareProperty("TransID", "", nullValidator,
-                  "The transaction ID this job was submitted under",
-                  Direction::Output);
+  declareProperty("TransID", "", nullValidator, "The transaction ID this job was submitted under", Direction::Output);
 
   // Dates and times for job submit, job start and job complete (may be empty
   // depending on the server-side implementation)
@@ -89,11 +80,9 @@ void QueryRemoteJob2::init() {
 
 void QueryRemoteJob2::exec() {
   Mantid::API::IRemoteJobManager_sptr jm =
-      Mantid::API::RemoteJobManagerFactory::Instance().create(
-          getPropertyValue("ComputeResource"));
+      Mantid::API::RemoteJobManagerFactory::Instance().create(getPropertyValue("ComputeResource"));
 
-  Mantid::API::IRemoteJobManager::RemoteJobInfo info =
-      jm->queryRemoteJob(getPropertyValue("JobID"));
+  Mantid::API::IRemoteJobManager::RemoteJobInfo info = jm->queryRemoteJob(getPropertyValue("JobID"));
 
   setProperty("JobName", info.name);
   setProperty("ScriptName", info.runnableName);

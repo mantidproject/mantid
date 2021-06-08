@@ -46,16 +46,14 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   // when the object goes out of scope
   QTemporaryFile tmp_file;
   if (!tmp_file.open()) {
-    throw std::runtime_error("An error occurred opening a temporary file in " +
-                             QDir::tempPath().toStdString());
+    throw std::runtime_error("An error occurred opening a temporary file in " + QDir::tempPath().toStdString());
   }
   // The file name is only valid when the file is open
   QString tmpstring = tmp_file.fileName();
   tmp_file.close();
-  QString code_to_run =
-      "from __future__ import (absolute_import, division, print_function)\n"
-      "import sys; sys.stdout = open(\"" +
-      tmpstring + "\", 'w');\n" + code;
+  QString code_to_run = "from __future__ import (absolute_import, division, print_function)\n"
+                        "import sys; sys.stdout = open(\"" +
+                        tmpstring + "\", 'w');\n" + code;
   emit runAsPythonScript(code_to_run, true);
 
   // Now get the output
@@ -67,8 +65,7 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
     tmpstring.append(stream.readLine().trimmed() + "\n");
   }
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
-    g_log.debug() << "Raw output from execution:\n"
-                  << qPrintable(tmpstring) << "\n";
+    g_log.debug() << "Raw output from execution:\n" << qPrintable(tmpstring) << "\n";
   return tmpstring;
 }
 /** This Python helper function converts a list of strings into one

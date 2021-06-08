@@ -25,6 +25,7 @@ from sans.state.StateObjects.StateScale import StateScale
 from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
 from sans.state.StateObjects.StateWavelength import StateWavelength
 from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
+from sans.user_file.parser_helpers.wavelength_parser import parse_range_wavelength
 from sans.user_file.settings_tags import TubeCalibrationFileId, MaskId, LimitsId, complex_range, GravityId, \
     QResolutionId, OtherId, MonId, TransId, FitId, BackId, SampleId, SetId, DetectorId, simple_range, \
     rebin_string_values
@@ -984,7 +985,9 @@ class ParsedDictConverter(IStateParser):
             elif isinstance(event_slices, rebin_string_values):
                 start, stop = get_ranges_for_rebin_array(event_slices.value)
             else:
-                start, stop = get_ranges_from_event_slice_setting(event_slices.value)
+                pairs = get_ranges_from_event_slice_setting(event_slices.value)
+                start = [i[0] for i in pairs]
+                stop = [i[1] for i in pairs]
 
             state.start_time = start
             state.end_time = stop
@@ -1064,25 +1067,22 @@ def _set_wavelength_limits(state_obj, user_file_items):
     if not wavelength_limits:
         return state_obj
 
+    if wavelength_limits.step_type in [RangeStepType.RANGE_LIN, RangeStepType.LIN]:
+        state_obj.wavelength_step_type = RangeStepType.LIN
+    else:
+        state_obj.wavelength_step_type = RangeStepType.LOG
+
     if wavelength_limits.step_type in [RangeStepType.RANGE_LIN, RangeStepType.RANGE_LOG]:
         wavelength_range = _get_last_element(user_file_items.get(OtherId.WAVELENGTH_RANGE))
+        full_interval, pairs = parse_range_wavelength(wavelength_range)
 
-        wavelength_start, wavelength_stop = get_ranges_from_event_slice_setting(wavelength_range)
-        wavelength_start = [min(wavelength_start)] + wavelength_start
-        wavelength_stop = [max(wavelength_stop)] + wavelength_stop
-
-        wavelength_step_type = RangeStepType.LIN if wavelength_limits.step_type is RangeStepType.RANGE_LIN \
-            else RangeStepType.LOG
-
-        state_obj.wavelength_low = wavelength_start
-        state_obj.wavelength_high = wavelength_stop
-        state_obj.wavelength_step = wavelength_limits.step
-        state_obj.wavelength_step_type = wavelength_step_type
+        state_obj.wavelength_interval.wavelength_full_range = full_interval
+        state_obj.wavelength_interval.selected_ranges = pairs
+        state_obj.wavelength_interval.wavelength_step = wavelength_limits.step
     else:
-        state_obj.wavelength_low = [wavelength_limits.start]
-        state_obj.wavelength_high = [wavelength_limits.stop]
-        state_obj.wavelength_step = wavelength_limits.step
-        state_obj.wavelength_step_type = wavelength_limits.step_type
+        full_range = (wavelength_limits.start, wavelength_limits.stop)
+        state_obj.wavelength_interval.wavelength_full_range = full_range
+        state_obj.wavelength_interval.wavelength_step = wavelength_limits.step
 
     return state_obj
 

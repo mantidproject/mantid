@@ -35,9 +35,7 @@ namespace MDAlgorithms {
 class DisabledProperty : public EnabledWhenProperty {
 public:
   DisabledProperty() : EnabledWhenProperty("NonExistingProperty", IS_DEFAULT) {}
-  bool checkCriterion(const IPropertyManager * /*algo*/) const override {
-    return false;
-  }
+  bool checkCriterion(const IPropertyManager * /*algo*/) const override { return false; }
 };
 
 //----------------------------------------------------------------------------------------------
@@ -45,67 +43,54 @@ public:
  */
 void BaseConvertToDiffractionMDWorkspace::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace. If the workspace "
                   "already exists, then the events will be added to it.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("Append", false,
-                                                Direction::Input),
-      "Append events to the output workspace. The workspace is replaced if "
-      "unchecked.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Append", false, Direction::Input),
+                  "Append events to the output workspace. The workspace is replaced if "
+                  "unchecked.");
 
   // Disabled for this version
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "ClearInputWorkspace", false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("ClearInputWorkspace", false, Direction::Input),
                   "Clearing the events from the input workspace during "
                   "conversion (to save memory) is not supported by algorithm "
                   "v2");
   // disable property on interface
-  this->setPropertySettings("ClearInputWorkspace",
-                            std::make_unique<DisabledProperty>());
+  this->setPropertySettings("ClearInputWorkspace", std::make_unique<DisabledProperty>());
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("OneEventPerBin", true,
-                                                Direction::Input),
-      "Use the histogram representation (event for event workspaces).\n"
-      "One MDEvent will be created for each histogram bin (even empty ones).\n"
-      "Warning! This can use significantly more memory!");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("OneEventPerBin", true, Direction::Input),
+                  "Use the histogram representation (event for event workspaces).\n"
+                  "One MDEvent will be created for each histogram bin (even empty ones).\n"
+                  "Warning! This can use significantly more memory!");
 
   frameOptions.emplace_back("Q (sample frame)");
   frameOptions.emplace_back("Q (lab frame)");
   frameOptions.emplace_back("HKL");
-  declareProperty(
-      "OutputDimensions", "Q (lab frame)",
-      std::make_shared<StringListValidator>(frameOptions),
-      "What will be the dimensions of the output workspace?\n"
-      "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
-      "  Q (sample frame): Wave-vector change of the lattice in the frame of "
-      "the sample (taking out goniometer rotation).\n"
-      "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices.");
+  declareProperty("OutputDimensions", "Q (lab frame)", std::make_shared<StringListValidator>(frameOptions),
+                  "What will be the dimensions of the output workspace?\n"
+                  "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
+                  "  Q (sample frame): Wave-vector change of the lattice in the frame of "
+                  "the sample (taking out goniometer rotation).\n"
+                  "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "LorentzCorrection", false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("LorentzCorrection", false, Direction::Input),
                   "Correct the weights of events by multiplying by the Lorentz "
                   "formula: sin(theta)^2 / lambda^4");
 
   // Box controller properties. These are the defaults
-  this->initBoxControllerProps("2" /*SplitInto*/, 1500 /*SplitThreshold*/,
-                               20 /*MaxRecursionDepth*/);
+  this->initBoxControllerProps("2" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1),
-      "Optional. If specified, then all the boxes will be split to this "
-      "minimum recursion depth. 1 = one level of splitting, etc.\n"
-      "Be careful using this since it can quickly create a huge number of "
-      "boxes = (SplitInto ^ (MinRercursionDepth * NumDimensions)).\n"
-      "But setting this property equal to MaxRecursionDepth property is "
-      "necessary if one wants to generate multiple file based workspaces in "
-      "order to merge them later\n");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1),
+                  "Optional. If specified, then all the boxes will be split to this "
+                  "minimum recursion depth. 1 = one level of splitting, etc.\n"
+                  "Be careful using this since it can quickly create a huge number of "
+                  "boxes = (SplitInto ^ (MinRercursionDepth * NumDimensions)).\n"
+                  "But setting this property equal to MaxRecursionDepth property is "
+                  "necessary if one wants to generate multiple file based workspaces in "
+                  "order to merge them later\n");
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 }
 
@@ -120,9 +105,9 @@ void BaseConvertToDiffractionMDWorkspace::init() {
  *
  *@return TargFrameName and ScalingName
  */
-void BaseConvertToDiffractionMDWorkspace::convertFramePropertyNames(
-    const std::string &TargFrame, std::string &TargFrameName,
-    std::string &ScalingName) {
+void BaseConvertToDiffractionMDWorkspace::convertFramePropertyNames(const std::string &TargFrame,
+                                                                    std::string &TargFrameName,
+                                                                    std::string &ScalingName) {
   // ----------------- Handle the type of output
   // -------------------------------------
 
@@ -130,26 +115,18 @@ void BaseConvertToDiffractionMDWorkspace::convertFramePropertyNames(
 
   if (TargFrame == frameOptions[0]) // "Q (sample frame)"
   {
-    TargFrameName =
-        QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::SampleFrame);
-    ScalingName = QSclAndFrames.getQScaling(
-        MDAlgorithms::CnvrtToMD::NoScaling); //< momentums in A^-1
-  } else if (TargFrame == frameOptions[1])   //     "Q (lab frame)"
+    TargFrameName = QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::SampleFrame);
+    ScalingName = QSclAndFrames.getQScaling(MDAlgorithms::CnvrtToMD::NoScaling); //< momentums in A^-1
+  } else if (TargFrame == frameOptions[1])                                       //     "Q (lab frame)"
   {
-    TargFrameName =
-        QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::LabFrame);
-    ScalingName = QSclAndFrames.getQScaling(
-        MDAlgorithms::CnvrtToMD::NoScaling); //< momentums in A^-1
-  } else if (TargFrame == frameOptions[2])   // "HKL"
+    TargFrameName = QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::LabFrame);
+    ScalingName = QSclAndFrames.getQScaling(MDAlgorithms::CnvrtToMD::NoScaling); //< momentums in A^-1
+  } else if (TargFrame == frameOptions[2])                                       // "HKL"
   {
-    TargFrameName =
-        QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::HKLFrame);
-    ScalingName = QSclAndFrames.getQScaling(
-        MDAlgorithms::CnvrtToMD::HKLScale); //< momentums in A^-1
+    TargFrameName = QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::HKLFrame);
+    ScalingName = QSclAndFrames.getQScaling(MDAlgorithms::CnvrtToMD::HKLScale); //< momentums in A^-1
   } else {
-    throw std::invalid_argument(
-        "BaseConvertToDiffractionMDWorkspace::Unknown target frame: " +
-        TargFrame);
+    throw std::invalid_argument("BaseConvertToDiffractionMDWorkspace::Unknown target frame: " + TargFrame);
   }
 }
 
@@ -157,17 +134,14 @@ void BaseConvertToDiffractionMDWorkspace::convertFramePropertyNames(
 /** Execute the algorithm.   */
 void BaseConvertToDiffractionMDWorkspace::exec() {
 
-  Mantid::API::Algorithm_sptr Convert =
-      createChildAlgorithm("ConvertToMD", 0., 1.);
+  Mantid::API::Algorithm_sptr Convert = createChildAlgorithm("ConvertToMD", 0., 1.);
   Convert->initialize();
 
   Convert->setRethrows(true);
   Convert->initialize();
 
-  Convert->setProperty<MatrixWorkspace_sptr>(
-      "InputWorkspace", this->getProperty("InputWorkspace"));
-  Convert->setProperty("OutputWorkspace",
-                       this->getPropertyValue("OutputWorkspace"));
+  Convert->setProperty<MatrixWorkspace_sptr>("InputWorkspace", this->getProperty("InputWorkspace"));
+  Convert->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
   Convert->setProperty("OverwriteExisting", !this->getProperty("Append"));
 
   if (!MDTransfFactory::Instance().exists("Q3D")) {
@@ -178,12 +152,10 @@ void BaseConvertToDiffractionMDWorkspace::exec() {
   Convert->setPropertyValue("QDimensions", "Q3D");
 
   std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
-  Convert->setPropertyValue("dEAnalysisMode",
-                            dE_modes[Kernel::DeltaEMode::Elastic]);
+  Convert->setPropertyValue("dEAnalysisMode", dE_modes[Kernel::DeltaEMode::Elastic]);
 
   std::string TargetFrame, Scaling;
-  this->convertFramePropertyNames(this->getPropertyValue("OutputDimensions"),
-                                  TargetFrame, Scaling);
+  this->convertFramePropertyNames(this->getPropertyValue("OutputDimensions"), TargetFrame, Scaling);
   Convert->setProperty("Q3DFrames", TargetFrame);
   Convert->setProperty("QConversionScales", Scaling);
 
@@ -204,10 +176,8 @@ void BaseConvertToDiffractionMDWorkspace::exec() {
 
   // Box controller properties. Has defaults
   Convert->setProperty("SplitInto", this->getPropertyValue("SplitInto"));
-  Convert->setProperty("SplitThreshold",
-                       this->getPropertyValue("SplitThreshold"));
-  Convert->setProperty("MaxRecursionDepth",
-                       this->getPropertyValue("MaxRecursionDepth"));
+  Convert->setProperty("SplitThreshold", this->getPropertyValue("SplitThreshold"));
+  Convert->setProperty("MaxRecursionDepth", this->getPropertyValue("MaxRecursionDepth"));
   std::string depth = this->getPropertyValue("MinRecursionDepth");
   if (depth == "0")
     depth = "1"; // ConvertToMD does not understand 0 depth

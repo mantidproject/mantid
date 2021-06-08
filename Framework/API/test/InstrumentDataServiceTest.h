@@ -19,9 +19,7 @@ class InstrumentDataServiceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InstrumentDataServiceTest *createSuite() {
-    return new InstrumentDataServiceTest();
-  }
+  static InstrumentDataServiceTest *createSuite() { return new InstrumentDataServiceTest(); }
   static void destroySuite(InstrumentDataServiceTest *suite) { delete suite; }
 
   InstrumentDataServiceTest() : inst1(new Instrument), inst2(new Instrument) {
@@ -30,32 +28,25 @@ public:
 
   void testAdd() {
     // Adding an Instrument with empty name should throw
-    TS_ASSERT_THROWS(InstrumentDataService::Instance().add("", inst1),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(InstrumentDataService::Instance().add("", inst1), const std::runtime_error &);
     // This should not throw, valid name
-    TS_ASSERT_THROWS_NOTHING(
-        InstrumentDataService::Instance().add("inst1", inst1));
+    TS_ASSERT_THROWS_NOTHING(InstrumentDataService::Instance().add("inst1", inst1));
     TS_ASSERT_EQUALS(inst1.use_count(), 2);
   }
 
   void testAddOrReplace() {
     // AddorReplace an Instrument with empty name should throw
-    TS_ASSERT_THROWS(InstrumentDataService::Instance().addOrReplace("", inst2),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS_NOTHING(
-        InstrumentDataService::Instance().addOrReplace("inst2", inst2));
+    TS_ASSERT_THROWS(InstrumentDataService::Instance().addOrReplace("", inst2), const std::runtime_error &);
+    TS_ASSERT_THROWS_NOTHING(InstrumentDataService::Instance().addOrReplace("inst2", inst2));
     TS_ASSERT_EQUALS(inst2.use_count(), 2);
     // Test replace
-    TS_ASSERT_THROWS_NOTHING(
-        InstrumentDataService::Instance().addOrReplace("inst1", inst2));
+    TS_ASSERT_THROWS_NOTHING(InstrumentDataService::Instance().addOrReplace("inst1", inst2));
     TS_ASSERT_EQUALS(inst2.use_count(), 3);
     TS_ASSERT_EQUALS(inst1.use_count(), 1);
     // i
-    TS_ASSERT_EQUALS(InstrumentDataService::Instance().retrieve("inst1"),
-                     inst2);
+    TS_ASSERT_EQUALS(InstrumentDataService::Instance().retrieve("inst1"), inst2);
     // Change back
-    TS_ASSERT_THROWS_NOTHING(
-        InstrumentDataService::Instance().addOrReplace("inst1", inst1));
+    TS_ASSERT_THROWS_NOTHING(InstrumentDataService::Instance().addOrReplace("inst1", inst1));
     TS_ASSERT_EQUALS(inst2.use_count(), 2);
     TS_ASSERT_EQUALS(inst1.use_count(), 2);
   }
@@ -67,12 +58,10 @@ public:
 
   void testRetrieve() {
     // Retrieve the instrument
-    TS_ASSERT_EQUALS(InstrumentDataService::Instance().retrieve("inst1"),
-                     inst1);
+    TS_ASSERT_EQUALS(InstrumentDataService::Instance().retrieve("inst1"), inst1);
     // Should throw if the instrument can not be retrieved
-    TS_ASSERT_THROWS(
-        InstrumentDataService::Instance().retrieve("notregistered"),
-        const Mantid::Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(InstrumentDataService::Instance().retrieve("notregistered"),
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void testRemove() {
@@ -95,8 +84,7 @@ public:
   void testDoesExist() {
     // Add inst1
     InstrumentDataService::Instance().add("inst1", inst1);
-    TS_ASSERT_THROWS_NOTHING(
-        InstrumentDataService::Instance().doesExist("youpla"));
+    TS_ASSERT_THROWS_NOTHING(InstrumentDataService::Instance().doesExist("youpla"));
     ;
     TS_ASSERT(InstrumentDataService::Instance().doesExist("inst1"));
     TS_ASSERT(!InstrumentDataService::Instance().doesExist("inst3"));

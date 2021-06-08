@@ -142,10 +142,6 @@ class MantidInstaller(object):
             # This will put the release mantid packages at the start and the nightly ones at the end
             # with increasing version numbers
             matches.sort()
-            # Make sure we don't get Vates
-            for match in matches:
-                if 'vates'in match:
-                    matches.remove(match)
         # Take the last one as it will have the highest version number
         if len(matches) > 0:
             self.mantidInstaller = os.path.join(os.getcwd(), matches[-1])

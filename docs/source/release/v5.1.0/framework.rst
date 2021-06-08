@@ -45,7 +45,7 @@ Algorithms
   ClearMaskedSpectra has been removed as it no longer has a use,
   and :ref:`MaskInstrument <algm-MaskInstrument>` is now deprecated and you should use :ref:`MaskDetectors <algm-MaskDetectors>` instead.
 
-- Enhanced :ref:`LoadNGEM <algm-LoadNGEM>` to handle partially written events in the data file. 
+- Enhanced :ref:`LoadNGEM <algm-LoadNGEM>` to handle partially written events in the data file.
   When such incomplete data is encountered, it is skipped until the next valid data is encountered and a warning is printed at algorithm completion of the total number of data bytes discarded.
 
 - Added specialization to :ref:`SetUncertainties <algm-SetUncertainties>` for the
@@ -73,7 +73,7 @@ Data Handling
    :align: right
    :alt: An example of a CAD 3D Geometry
    :width: 600 px
-   
+
    An example of a CAD 3D Geometry - Not typically found on beamlines
 
 - **The sample environment xml file now supports the geometry being supplied in the form of a .3mf format file (so far on the Windows platform only). Previously it only supported** ``.stl`` **files. The** ``.3mf`` **format is a 3D printing format that allows multiple mesh objects to be stored in a single file that can be generated from many popular CAD applications. As part of this change the algorithms** :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` **and** :ref:`SaveSampleEnvironmentAndShape <algm-SaveSampleEnvironmentAndShape>` **have been updated to also support the .3mf format.**

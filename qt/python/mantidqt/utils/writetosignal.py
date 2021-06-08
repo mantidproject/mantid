@@ -8,6 +8,7 @@
 #
 #
 from qtpy.QtCore import QObject, Signal
+from io import UnsupportedOperation
 
 
 class WriteToSignal(QObject):
@@ -21,10 +22,14 @@ class WriteToSignal(QObject):
     def __init__(self, original_out):
         QObject.__init__(self)
         # If the file descriptor of the stream is < 0 then we are running in a no-external-console mode
-        if not hasattr(original_out, 'fileno') or original_out.fileno() < 0:
-            self._original_out = None
-        else:
+        try:
             self._original_out = original_out
+            if not hasattr(original_out, 'fileno') or original_out.fileno() < 0:
+                self._original_out = None
+        except UnsupportedOperation:
+            # In some cases fileno may be defined but throw this instead,
+            # such as in the case of io.StringIO
+            self._original_out = None
 
     def closed(self):
         return False

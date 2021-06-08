@@ -100,7 +100,7 @@ the first element in the group will be used on every input workspace. If
 transmission runs are provided as matrix workspaces the specified runs will be
 used for all members of the input workspace group.
 
-Polarization Analysis 
+Polarization Analysis
 ~~~~~~~~~~~~~~~~~~~~~
 
 If :literal:`PolarizationAnalysis` is set to false the reduction stops. If it

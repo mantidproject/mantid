@@ -21,16 +21,14 @@ using namespace API;
 using namespace DataObjects;
 
 void NormaliseByCurrent::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
-                      "RecalculatePCharge", false, Kernel::Direction::Input),
-                  "Re-integrates the proton charge. This will modify the "
-                  "gd_prtn_chrg. Does nothing for multi-period data");
+  declareProperty(
+      std::make_unique<Kernel::PropertyWithValue<bool>>("RecalculatePCharge", false, Kernel::Direction::Input),
+      "Re-integrates the proton charge. This will modify the "
+      "gd_prtn_chrg. Does nothing for multi-period data");
 }
 
 /**
@@ -44,9 +42,8 @@ void NormaliseByCurrent::init() {
  * std::runtime_error if the charge value(s) are not set in the
  * workspace logs or if the values are invalid (0)
  */
-double NormaliseByCurrent::extractCharge(
-    const std::shared_ptr<Mantid::API::MatrixWorkspace> &inputWS,
-    const bool integratePCharge) const {
+double NormaliseByCurrent::extractCharge(const std::shared_ptr<Mantid::API::MatrixWorkspace> &inputWS,
+                                         const bool integratePCharge) const {
   // Get the good proton charge and check it's valid
   double charge(-1.0);
   const Run &run = inputWS->run();
@@ -68,21 +65,18 @@ double NormaliseByCurrent::extractCharge(
 
     // Fetch the charge property
     Property *chargeProperty = run.getLogData("proton_charge_by_period");
-    auto *chargePropertyArray =
-        dynamic_cast<ArrayProperty<double> *>(chargeProperty);
+    auto *chargePropertyArray = dynamic_cast<ArrayProperty<double> *>(chargeProperty);
     if (chargePropertyArray) {
       charge = chargePropertyArray->operator()()[periodNumber - 1];
     } else {
-      throw Exception::NotFoundError(
-          "Proton charge log (proton_charge_by_period) not found for this "
-          "multiperiod data workspace (" +
-              inputWS->getName() + ")",
-          "proton_charge_by_period");
+      throw Exception::NotFoundError("Proton charge log (proton_charge_by_period) not found for this "
+                                     "multiperiod data workspace (" +
+                                         inputWS->getName() + ")",
+                                     "proton_charge_by_period");
     }
 
     if (charge == 0) {
-      throw std::domain_error("The proton charge found for period number " +
-                              std::to_string(periodNumber) +
+      throw std::domain_error("The proton charge found for period number " + std::to_string(periodNumber) +
                               " in the input workspace (" + inputWS->getName() +
                               ") run information is zero. When applying "
                               "NormaliseByCurrent on multiperiod data, a "
@@ -104,9 +98,8 @@ double NormaliseByCurrent::extractCharge(
     }
 
     if (charge == 0) {
-      throw std::domain_error(
-          "The proton charge found in the input workspace (" +
-          inputWS->getName() + ") run information is zero");
+      throw std::domain_error("The proton charge found in the input workspace (" + inputWS->getName() +
+                              ") run information is zero");
     }
   }
   return charge;
@@ -133,8 +126,7 @@ void NormaliseByCurrent::exec() {
   } else {
     inputWS *= invcharge;
   }
-  outputWS->mutableRun().addLogData(
-      new Kernel::PropertyWithValue<double>("NormalizationFactor", charge));
+  outputWS->mutableRun().addLogData(new Kernel::PropertyWithValue<double>("NormalizationFactor", charge));
   outputWS->setYUnitLabel("Counts per microAmp.hour");
 }
 

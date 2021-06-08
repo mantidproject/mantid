@@ -25,18 +25,14 @@ class MANTIDQT_ISISSANS_DLL SANSBackgroundCorrectionWidget : public QWidget {
 public:
   SANSBackgroundCorrectionWidget(QWidget *parent = nullptr);
 
-  void setDarkRunSettingForTimeDetectors(
-      const SANSBackgroundCorrectionSettings &setting);
+  void setDarkRunSettingForTimeDetectors(const SANSBackgroundCorrectionSettings &setting);
   SANSBackgroundCorrectionSettings getDarkRunSettingForTimeDetectors();
-  void setDarkRunSettingForUampDetectors(
-      const SANSBackgroundCorrectionSettings &setting);
+  void setDarkRunSettingForUampDetectors(const SANSBackgroundCorrectionSettings &setting);
   SANSBackgroundCorrectionSettings getDarkRunSettingForUampDetectors();
 
-  void setDarkRunSettingForTimeMonitors(
-      const SANSBackgroundCorrectionSettings &setting);
+  void setDarkRunSettingForTimeMonitors(const SANSBackgroundCorrectionSettings &setting);
   SANSBackgroundCorrectionSettings getDarkRunSettingForTimeMonitors();
-  void setDarkRunSettingForUampMonitors(
-      const SANSBackgroundCorrectionSettings &setting);
+  void setDarkRunSettingForUampMonitors(const SANSBackgroundCorrectionSettings &setting);
   SANSBackgroundCorrectionSettings getDarkRunSettingForUampMonitors();
 
   void resetEntries();

@@ -24,8 +24,7 @@ namespace WorkflowAlgorithms {
 // Pulse widge (micro sec per angstrom)
 const double PULSEWIDTH = 20.0;
 // Chopper phase offset (micro sec)
-const double CHOPPER_PHASE_OFFSET[2][4] = {{9507., 9471., 9829.7, 9584.3},
-                                           {19024., 18820., 19714., 19360.}};
+const double CHOPPER_PHASE_OFFSET[2][4] = {{9507., 9471., 9829.7, 9584.3}, {19024., 18820., 19714., 19360.}};
 // Chopper angles (degree)
 const double CHOPPER_ANGLE[4] = {129.605, 179.989, 230.010, 230.007};
 // Chopper location (mm)
@@ -52,8 +51,7 @@ private:
   void exec() override;
 
   /// Compute TOF offset
-  double getTofOffset(const API::MatrixWorkspace_const_sptr &inputWS,
-                      bool frame_skipping, double source_to_monitor);
+  double getTofOffset(const API::MatrixWorkspace_const_sptr &inputWS, bool frame_skipping, double source_to_monitor);
 };
 
 } // namespace WorkflowAlgorithms

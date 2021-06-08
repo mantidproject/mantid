@@ -24,8 +24,7 @@ namespace Functions {
 
   Both are normalized by the peak area.
 */
-class MANTID_CURVEFITTING_DLL ComptonPeakProfile : public API::ParamFunction,
-                                                   public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL ComptonPeakProfile : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Default constructor required for factory
   ComptonPeakProfile();
@@ -36,8 +35,7 @@ private:
   /** @name Function evaluation */
   ///@{
   /// Calculate the function
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
   /// Ensure the object is ready to be fitted
   void setUpForFit() override;
   /// Cache a copy of the workspace pointer and pull out the parameters

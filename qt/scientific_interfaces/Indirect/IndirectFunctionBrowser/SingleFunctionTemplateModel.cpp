@@ -49,15 +49,12 @@ void SingleFunctionTemplateModel::updateAvailableFunctions(
   for (auto functionInfo : functionInitialisationStrings) {
     IFunction_sptr function;
     try {
-      function =
-          FunctionFactory::Instance().createInitialized(functionInfo.second);
+      function = FunctionFactory::Instance().createInitialized(functionInfo.second);
     } catch (std::invalid_argument &) {
       // Error in function string, adding an empty function to map
     }
-    m_fitTypeToFunctionStore.insert(QString::fromStdString(functionInfo.first),
-                                    function);
-    m_globalParameterStore.insert(QString::fromStdString(functionInfo.first),
-                                  QStringList());
+    m_fitTypeToFunctionStore.insert(QString::fromStdString(functionInfo.first), function);
+    m_globalParameterStore.insert(QString::fromStdString(functionInfo.first), QStringList());
   }
   // Sort the FunctionList as None should always appear first
   m_fitTypeList = m_fitTypeToFunctionStore.keys();
@@ -65,12 +62,8 @@ void SingleFunctionTemplateModel::updateAvailableFunctions(
   m_fitType = m_fitTypeList.front();
 }
 
-QStringList SingleFunctionTemplateModel::getFunctionList() {
-  return m_fitTypeList;
-}
-int SingleFunctionTemplateModel::getEnumIndex() {
-  return m_fitTypeList.indexOf(m_fitType);
-}
+QStringList SingleFunctionTemplateModel::getFunctionList() { return m_fitTypeList; }
+int SingleFunctionTemplateModel::getEnumIndex() { return m_fitTypeList.indexOf(m_fitType); }
 
 void SingleFunctionTemplateModel::setFunction(IFunction_sptr fun) {
   if (!fun)
@@ -104,8 +97,7 @@ void SingleFunctionTemplateModel::setFitType(const QString &type) {
 
 QString SingleFunctionTemplateModel::getFitType() { return m_fitType; }
 
-void SingleFunctionTemplateModel::updateParameterEstimationData(
-    DataForParameterEstimationCollection &&data) {
+void SingleFunctionTemplateModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
 }
 
@@ -116,13 +108,11 @@ void SingleFunctionTemplateModel::estimateFunctionParameters() {
   // Estimate function parameters - parameters are updated in-place.
   for (int i = 0; i < getNumberDomains(); ++i) {
     auto function = getSingleFunction(i);
-    m_parameterEstimation->estimateFunctionParameters(function,
-                                                      m_estimationData[i]);
+    m_parameterEstimation->estimateFunctionParameters(function, m_estimationData[i]);
   }
 }
 
-void SingleFunctionTemplateModel::setGlobal(const QString &name,
-                                            bool isGlobal) {
+void SingleFunctionTemplateModel::setGlobal(const QString &name, bool isGlobal) {
   auto globalParameters = getGlobalParameters();
   if (isGlobal && !globalParameters.contains(name)) {
     globalParameters << name;
@@ -133,12 +123,9 @@ void SingleFunctionTemplateModel::setGlobal(const QString &name,
   setGlobalParameters(globalParameters);
 }
 
-boost::optional<QString>
-SingleFunctionTemplateModel::findFitTypeForFunctionName(
-    const QString &name) const {
+boost::optional<QString> SingleFunctionTemplateModel::findFitTypeForFunctionName(const QString &name) const {
   auto nameAsString = name.toStdString();
-  auto result = std::find_if(m_fitTypeToFunctionStore.constBegin(),
-                             m_fitTypeToFunctionStore.constEnd(),
+  auto result = std::find_if(m_fitTypeToFunctionStore.constBegin(), m_fitTypeToFunctionStore.constEnd(),
                              [&nameAsString](const auto &function) -> bool {
                                if (function)
                                  return function->name() == nameAsString;

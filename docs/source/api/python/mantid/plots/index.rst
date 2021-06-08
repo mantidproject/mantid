@@ -6,7 +6,7 @@
 
 The functions in this module are intended to be used with matplotlib's
 object oriented abstract program interface (API). matplotlib's
-(stateful) functional interface is discouraged by matplotlib. 
+(stateful) functional interface is discouraged by matplotlib.
 The object oriented API allow for customization as well.
 
 The plotting of a :class:`mantid.api.MatrixWorkspace` or a
@@ -15,12 +15,12 @@ The use of a ``mantid`` projection allows most matplotlib-like
 experience:
 
 .. code-block:: python
-    
+
     import matplotlib.pyplot as plt
     from mantid import plots
-    
+
     #some code here to get a workspace, and x, y, yerr arrays
-        
+
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
     ax.errorbar(workspace,'rs',specNum=1) #for workspaces
     ax.errorbar(x,y,yerr,'bo')            #for arrays
@@ -156,13 +156,13 @@ Similarly, showing the actual values with :func:`~mantid.plots.MantidAxes.pcolor
    :align: center
    :figwidth: image
 
-A couple of notes about :func:`~mantid.plots.MantidAxes.pcolor`, 
-:func:`~mantid.plots.MantidAxes.pcolormesh`, 
+A couple of notes about :func:`~mantid.plots.MantidAxes.pcolor`,
+:func:`~mantid.plots.MantidAxes.pcolormesh`,
 and :func:`~mantid.plots.MantidAxes.pcolorfast`:
 
-* If the :class:`mantid.api.MatrixWorkspace` has unequal bins, 
+* If the :class:`mantid.api.MatrixWorkspace` has unequal bins,
   the polygons/meshes will have sides not aligned
-  with the axes. One can override this behavior by using the 
+  with the axes. One can override this behavior by using the
   **axisaligned** keyword, and setting it to True
 * If the :class:`mantid.api.MatrixWorkspace` has different numbers
   of bins the above functions will automatically use the
@@ -227,7 +227,7 @@ Available Functions
 
 When using ``mantid`` projection
 --------------------------------
- 
+
 .. autoclass:: mantid.plots.MantidAxes
    :members: plot, errorbar, scatter, contour,
              contourf, pcolor, pcolorfast, pcolormesh, tripcolor,
@@ -247,7 +247,7 @@ Functions to use when **mantid** projection is not available
    :members: plot, errorbar, scatter, contour, contourf, pcolor,
              pcolorfast, pcolormesh, tripcolor, tricontour, tricontourf
 
-             
+
 Functions to use when **mantid3d** projection is not available
 --------------------------------------------------------------
 

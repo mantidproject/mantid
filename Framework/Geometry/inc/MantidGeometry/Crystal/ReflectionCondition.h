@@ -38,8 +38,7 @@ public:
 
 //------------------------------------------------------------------------
 /** Primitive ReflectionCondition */
-class MANTID_GEOMETRY_DLL ReflectionConditionPrimitive
-    : public ReflectionCondition {
+class MANTID_GEOMETRY_DLL ReflectionConditionPrimitive : public ReflectionCondition {
 public:
   /// Name of the reflection condition
   std::string getName() override { return "Primitive"; }
@@ -51,68 +50,55 @@ public:
 
 //------------------------------------------------------------------------
 /** C-face centred ReflectionCondition */
-class MANTID_GEOMETRY_DLL ReflectionConditionCFaceCentred
-    : public ReflectionCondition {
+class MANTID_GEOMETRY_DLL ReflectionConditionCFaceCentred : public ReflectionCondition {
 public:
   /// Name of the reflection condition
   std::string getName() override { return "C-face centred"; }
   /// Symbol of the associated lattice centering.
   std::string getSymbol() override { return "C"; }
   /// Return true if the hkl is allowed.
-  bool isAllowed(int h, int k, int /*l*/) override {
-    return (((h + k) % 2) == 0);
-  }
+  bool isAllowed(int h, int k, int /*l*/) override { return (((h + k) % 2) == 0); }
 };
 
 //------------------------------------------------------------------------
 /** A-face centred ReflectionCondition */
-class MANTID_GEOMETRY_DLL ReflectionConditionAFaceCentred
-    : public ReflectionCondition {
+class MANTID_GEOMETRY_DLL ReflectionConditionAFaceCentred : public ReflectionCondition {
 public:
   /// Name of the reflection condition
   std::string getName() override { return "A-face centred"; }
   /// Symbol of the associated lattice centering.
   std::string getSymbol() override { return "A"; }
   /// Return true if the hkl is allowed.
-  bool isAllowed(int /*h*/, int k, int l) override {
-    return (((k + l) % 2) == 0);
-  }
+  bool isAllowed(int /*h*/, int k, int l) override { return (((k + l) % 2) == 0); }
 };
 
 //------------------------------------------------------------------------
 /** B-face centred ReflectionCondition */
-class MANTID_GEOMETRY_DLL ReflectionConditionBFaceCentred
-    : public ReflectionCondition {
+class MANTID_GEOMETRY_DLL ReflectionConditionBFaceCentred : public ReflectionCondition {
 public:
   /// Name of the reflection condition
   std::string getName() override { return "B-face centred"; }
   /// Symbol of the associated lattice centering.
   std::string getSymbol() override { return "B"; }
   /// Return true if the hkl is allowed.
-  bool isAllowed(int h, int /*k*/, int l) override {
-    return (((h + l) % 2) == 0);
-  }
+  bool isAllowed(int h, int /*k*/, int l) override { return (((h + l) % 2) == 0); }
 };
 
 //------------------------------------------------------------------------
 /** Body centred ReflectionCondition */
-class MANTID_GEOMETRY_DLL ReflectionConditionBodyCentred
-    : public ReflectionCondition {
+class MANTID_GEOMETRY_DLL ReflectionConditionBodyCentred : public ReflectionCondition {
 public:
   /// Name of the reflection condition
   std::string getName() override { return "Body centred"; }
   /// Symbol of the associated lattice centering.
   std::string getSymbol() override { return "I"; }
   /// Return true if the hkl is allowed.
-  bool isAllowed(int h, int k, int l) override {
-    return ((h + k + l) % 2) == 0;
-  }
+  bool isAllowed(int h, int k, int l) override { return ((h + k + l) % 2) == 0; }
 };
 
 //------------------------------------------------------------------------
 /** All-face centred ReflectionCondition */
-class MANTID_GEOMETRY_DLL ReflectionConditionAllFaceCentred
-    : public ReflectionCondition {
+class MANTID_GEOMETRY_DLL ReflectionConditionAllFaceCentred : public ReflectionCondition {
 public:
   /// Name of the reflection condition
   std::string getName() override { return "All-face centred"; }
@@ -120,56 +106,46 @@ public:
   std::string getSymbol() override { return "F"; }
   /// Return true if the hkl is allowed.
   bool isAllowed(int h, int k, int l) override {
-    return (
-        ((((h + k) % 2) == 0) && (((h + l) % 2) == 0) && (((k + l) % 2) == 0)) |
-            ((h % 2 == 0) && (k % 2 == 0) && (l % 2 == 0)) ||
-        ((h % 2 == 1) && (k % 2 == 1) && (l % 2 == 1)));
+    return (((((h + k) % 2) == 0) && (((h + l) % 2) == 0) && (((k + l) % 2) == 0)) |
+                ((h % 2 == 0) && (k % 2 == 0) && (l % 2 == 0)) ||
+            ((h % 2 == 1) && (k % 2 == 1) && (l % 2 == 1)));
   }
 };
 
 //------------------------------------------------------------------------
 /** Rhombohedrally centred, obverse ReflectionCondition*/
-class MANTID_GEOMETRY_DLL ReflectionConditionRhombohedrallyObverse
-    : public ReflectionCondition {
+class MANTID_GEOMETRY_DLL ReflectionConditionRhombohedrallyObverse : public ReflectionCondition {
 public:
   /// Name of the reflection condition
   std::string getName() override { return "Rhombohedrally centred, obverse"; }
   /// Symbol of the associated lattice centering.
   std::string getSymbol() override { return "Robv"; }
   /// Return true if the hkl is allowed.
-  bool isAllowed(int h, int k, int l) override {
-    return (((-h + k + l) % 3) == 0);
-  }
+  bool isAllowed(int h, int k, int l) override { return (((-h + k + l) % 3) == 0); }
 };
 
 //------------------------------------------------------------------------
 /** Rhombohedrally centred, reverse ReflectionCondition*/
-class MANTID_GEOMETRY_DLL ReflectionConditionRhombohedrallyReverse
-    : public ReflectionCondition {
+class MANTID_GEOMETRY_DLL ReflectionConditionRhombohedrallyReverse : public ReflectionCondition {
 public:
   /// Name of the reflection condition
   std::string getName() override { return "Rhombohedrally centred, reverse"; }
   /// Symbol of the associated lattice centering.
   std::string getSymbol() override { return "Rrev"; }
   /// Return true if the hkl is allowed.
-  bool isAllowed(int h, int k, int l) override {
-    return (((h - k + l) % 3) == 0);
-  }
+  bool isAllowed(int h, int k, int l) override { return (((h - k + l) % 3) == 0); }
 };
 
 //------------------------------------------------------------------------
 /** Hexagonally centred, reverse ReflectionCondition*/
-class MANTID_GEOMETRY_DLL ReflectionConditionHexagonallyReverse
-    : public ReflectionCondition {
+class MANTID_GEOMETRY_DLL ReflectionConditionHexagonallyReverse : public ReflectionCondition {
 public:
   /// Name of the reflection condition
   std::string getName() override { return "Hexagonally centred, reverse"; }
   /// Symbol of the associated lattice centering.
   std::string getSymbol() override { return "H"; }
   /// Return true if the hkl is allowed.
-  bool isAllowed(int h, int k, int /*l*/) override {
-    return (((h - k) % 3) == 0);
-  }
+  bool isAllowed(int h, int k, int /*l*/) override { return (((h - k) % 3) == 0); }
 };
 
 /// Shared pointer to a ReflectionCondition
@@ -180,10 +156,8 @@ using ReflectionConditions = std::vector<ReflectionCondition_sptr>;
 MANTID_GEOMETRY_DLL const ReflectionConditions &getAllReflectionConditions();
 MANTID_GEOMETRY_DLL std::vector<std::string> getAllReflectionConditionNames();
 MANTID_GEOMETRY_DLL std::vector<std::string> getAllReflectionConditionSymbols();
-MANTID_GEOMETRY_DLL ReflectionCondition_sptr
-getReflectionConditionByName(const std::string &name);
-MANTID_GEOMETRY_DLL ReflectionCondition_sptr
-getReflectionConditionBySymbol(const std::string &symbol);
+MANTID_GEOMETRY_DLL ReflectionCondition_sptr getReflectionConditionByName(const std::string &name);
+MANTID_GEOMETRY_DLL ReflectionCondition_sptr getReflectionConditionBySymbol(const std::string &symbol);
 
 } // namespace Geometry
 } // namespace Mantid

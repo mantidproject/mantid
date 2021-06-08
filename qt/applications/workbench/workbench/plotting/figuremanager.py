@@ -12,7 +12,9 @@ import copy
 from distutils.version import LooseVersion
 import io
 import sys
+import re
 from functools import wraps
+
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
@@ -43,8 +45,13 @@ from workbench.plotting.toolbar import WorkbenchNavigationToolbar, ToolbarStateM
 from workbench.plotting.plothelppages import PlotHelpPages
 
 
+def _replace_workspace_name_in_string(old_name, new_name, string):
+    return re.sub(rf'\b{old_name}\b', new_name, string)
+
+
 def _catch_exceptions(func):
     """Catch all exceptions in method and print a traceback to stderr"""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -132,7 +139,8 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
     def renameHandle(self, oldName, newName):
         """
         Called when the ADS has renamed a workspace.
-        If this workspace is attached to this figure then the figure name is updated
+        If this workspace is attached to this figure then the figure name is updated, as are the artists names and
+        axis creation arguments
         :param oldName: The old name of the workspace.
         :param newName: The new name of the workspace
         """
@@ -140,11 +148,14 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
             if isinstance(ax, MantidAxes):
                 ws = AnalysisDataService.retrieve(newName)
                 if isinstance(ws, MatrixWorkspace):
-                    for ws_name, artists in ax.tracked_workspaces.items():
-                        if ws_name == oldName:
-                            ax.tracked_workspaces[newName] = ax.tracked_workspaces.pop(oldName)
+                    ax.rename_workspace(newName, oldName)
                 elif isinstance(ws, ITableWorkspace):
                     ax.wsName = newName
+                ax.make_legend()
+            ax.set_title(_replace_workspace_name_in_string(oldName, newName, ax.get_title()))
+        self.canvas.set_window_title(
+            _replace_workspace_name_in_string(oldName, newName, self.canvas.get_window_title()))
+        self.canvas.draw()
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
@@ -161,6 +172,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         The qt.QMainWindow
 
     """
+
     def __init__(self, canvas, num):
         assert QAppThreadCall.is_qapp_thread(
         ), "FigureManagerWorkbench cannot be created outside of the QApplication thread"
@@ -306,8 +318,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         if self.toolbar:
             self.toolbar.destroy()
+
         self._ads_observer.observeAll(False)
-        del self._ads_observer
+        self._ads_observer = None
         # disconnect window events before calling Gcf.destroy. window.close is not guaranteed to
         # delete the object and do this for us. On macOS it was observed that closing the figure window
         # would produce an extraneous activated event that would add a new figure to the plots list
@@ -326,6 +339,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def launch_plot_options(self):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
+
+    def launch_plot_options_on_curves_tab(self, axes, curve):
+        self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
+        self.plot_options_dialog.configure_curves_tab(axes, curve)
 
     def launch_plot_help(self):
         PlotHelpPages.show_help_page_for_figure(self.canvas.figure)
@@ -495,7 +512,8 @@ def new_figure_manager(num, *args, **kwargs):
 
 def new_figure_manager_given_figure(num, figure):
     """Create a new manager from a num & figure """
-    def _new_figure_manager_given_figure_impl(num, figure):
+
+    def _new_figure_manager_given_figure_impl(num: int, figure):
         """Create a new figure manager instance for the given figure.
         Forces all public and non-dunder method calls onto the QApplication thread.
         """
@@ -503,4 +521,4 @@ def new_figure_manager_given_figure(num, figure):
         return force_method_calls_to_qapp_thread(FigureManagerWorkbench(canvas, num))
 
     # figure manager & canvas must be created on the QApplication thread
-    return QAppThreadCall(_new_figure_manager_given_figure_impl)(num, figure)
+    return QAppThreadCall(_new_figure_manager_given_figure_impl)(int(num), figure)

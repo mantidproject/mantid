@@ -34,22 +34,17 @@ DECLARE_ALGORITHM(NormaliseByDetector)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-NormaliseByDetector::NormaliseByDetector(bool parallelExecution)
-    : m_parallelExecution(parallelExecution) {}
+NormaliseByDetector::NormaliseByDetector(bool parallelExecution) : m_parallelExecution(parallelExecution) {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string NormaliseByDetector::name() const {
-  return "NormaliseByDetector";
-}
+const std::string NormaliseByDetector::name() const { return "NormaliseByDetector"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int NormaliseByDetector::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string NormaliseByDetector::category() const {
-  return "CorrectionFunctions\\NormalisationCorrections";
-}
+const std::string NormaliseByDetector::category() const { return "CorrectionFunctions\\NormalisationCorrections"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -58,22 +53,19 @@ const std::string NormaliseByDetector::category() const {
  */
 void NormaliseByDetector::init() {
   auto compositeValidator = std::make_shared<CompositeValidator>();
-  compositeValidator->add(
-      std::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
+  compositeValidator->add(std::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
   compositeValidator->add(std::make_shared<API::HistogramValidator>());
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input, compositeValidator),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, compositeValidator),
       "An input workspace in wavelength");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
-const Geometry::FitParameter NormaliseByDetector::tryParseFunctionParameter(
-    const Geometry::Parameter_sptr &parameter, const Geometry::IDetector &det) {
+const Geometry::FitParameter NormaliseByDetector::tryParseFunctionParameter(const Geometry::Parameter_sptr &parameter,
+                                                                            const Geometry::IDetector &det) {
   if (parameter == nullptr) {
     std::stringstream stream;
     stream << det.getName()
@@ -99,21 +91,18 @@ normalisation routine.
 use.
 @param prog: progress reporting object.
 */
-void NormaliseByDetector::processHistogram(
-    size_t wsIndex, const MatrixWorkspace_const_sptr &inWS,
-    const MatrixWorkspace_sptr &denominatorWS, Progress &prog) {
+void NormaliseByDetector::processHistogram(size_t wsIndex, const MatrixWorkspace_const_sptr &inWS,
+                                           const MatrixWorkspace_sptr &denominatorWS, Progress &prog) {
   const auto &paramMap = inWS->constInstrumentParameters();
   const auto &spectrumInfo = inWS->spectrumInfo();
   const auto &det = spectrumInfo.detector(wsIndex);
   const std::string type = "fitting";
   Geometry::Parameter_sptr foundParam = paramMap.getRecursiveByType(&det, type);
 
-  const Geometry::FitParameter &foundFittingParam =
-      tryParseFunctionParameter(foundParam, det);
+  const Geometry::FitParameter &foundFittingParam = tryParseFunctionParameter(foundParam, det);
 
   const std::string &fitFunctionName = foundFittingParam.getFunction();
-  IFunction_sptr function =
-      FunctionFactory::Instance().createFunction(fitFunctionName);
+  IFunction_sptr function = FunctionFactory::Instance().createFunction(fitFunctionName);
   using ParamNames = std::vector<std::string>;
   ParamNames allParamNames = function->getParameterNames();
 
@@ -121,17 +110,14 @@ void NormaliseByDetector::processHistogram(
   for (auto &name : allParamNames) {
     Geometry::Parameter_sptr param = paramMap.getRecursive(&det, name, type);
 
-    const Geometry::FitParameter &fitParam =
-        tryParseFunctionParameter(param, det);
+    const Geometry::FitParameter &fitParam = tryParseFunctionParameter(param, det);
 
     if (fitParam.getFormula().empty()) {
-      throw std::runtime_error(
-          "A Forumla has not been provided for a fit function");
+      throw std::runtime_error("A Forumla has not been provided for a fit function");
     } else {
       const std::string &resultUnitStr = fitParam.getResultUnit();
       if (!resultUnitStr.empty() && resultUnitStr != "Wavelength") {
-        throw std::runtime_error(
-            "Units for function parameters must be in Wavelength");
+        throw std::runtime_error("Units for function parameters must be in Wavelength");
       }
     }
     mu::Parser p;
@@ -162,21 +148,18 @@ sequentially.
 @param inWS: Workspace input. Contains instrument to use as well as X data to
 use.
 */
-MatrixWorkspace_sptr
-NormaliseByDetector::processHistograms(const MatrixWorkspace_sptr &inWS) {
+MatrixWorkspace_sptr NormaliseByDetector::processHistograms(const MatrixWorkspace_sptr &inWS) {
   const size_t nHistograms = inWS->getNumberHistograms();
   const auto progress_items = static_cast<size_t>(double(nHistograms) * 1.2);
   Progress prog(this, 0.0, 1.0, progress_items);
   // Clone the input workspace to create a template for the denominator
   // workspace.
-  IAlgorithm_sptr cloneAlg =
-      this->createChildAlgorithm("CloneWorkspace", 0.0, 0.1, true);
+  IAlgorithm_sptr cloneAlg = this->createChildAlgorithm("CloneWorkspace", 0.0, 0.1, true);
   cloneAlg->setProperty("InputWorkspace", inWS);
   cloneAlg->setPropertyValue("OutputWorkspace", "temp");
   cloneAlg->executeAsChildAlg();
   Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr denominatorWS =
-      std::dynamic_pointer_cast<MatrixWorkspace>(temp);
+  MatrixWorkspace_sptr denominatorWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
   // Choose between parallel execution and sequential execution then, process
   // histograms accordingly.
@@ -208,8 +191,7 @@ void NormaliseByDetector::exec() {
   MatrixWorkspace_sptr denominatorWS = processHistograms(inWS);
 
   // Perform the normalisation.
-  IAlgorithm_sptr divideAlg =
-      this->createChildAlgorithm("Divide", 0.9, 1.0, true);
+  IAlgorithm_sptr divideAlg = this->createChildAlgorithm("Divide", 0.9, 1.0, true);
   divideAlg->setRethrows(true);
   divideAlg->setProperty("LHSWorkspace", inWS);
   divideAlg->setProperty("RHSWorkspace", denominatorWS);

@@ -51,15 +51,12 @@ public:
     LiveDataAlgorithmImpl alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("StartTime", "2010-09-14T04:20:12.95"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("StartTime", "2010-09-14T04:20:12.95"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
 
     TS_ASSERT(!alg.hasPostProcessing());
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PostProcessingAlgorithm", "RenameWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PostProcessingAlgorithm", "RenameWorkspace"));
     TS_ASSERT(alg.hasPostProcessing());
 
     // Remove workspace from the data service.
@@ -67,8 +64,7 @@ public:
   }
 
   void test_validateInputs() {
-    FacilityHelper::ScopedFacilities loadTESTFacility(
-        "unit_testing/UnitTestFacilities.xml", "TEST");
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     LiveDataAlgorithmImpl alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -77,28 +73,23 @@ public:
 
     alg.setPropertyValue("Instrument", "FakeEventDataListener");
 
-    TSM_ASSERT("No OutputWorkspace",
-               !alg.validateInputs()["OutputWorkspace"].empty());
+    TSM_ASSERT("No OutputWorkspace", !alg.validateInputs()["OutputWorkspace"].empty());
     alg.setPropertyValue("OutputWorkspace", "out_ws");
     TSM_ASSERT("Is OK now", alg.validateInputs().empty());
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PostProcessingScript", "Pause(1)"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PostProcessingScript", "Pause(1)"));
     TS_ASSERT(alg.hasPostProcessing());
 
-    TSM_ASSERT("No AccumulationWorkspace",
-               !alg.validateInputs()["AccumulationWorkspace"].empty());
+    TSM_ASSERT("No AccumulationWorkspace", !alg.validateInputs()["AccumulationWorkspace"].empty());
     alg.setPropertyValue("AccumulationWorkspace", "accum_ws");
     TSM_ASSERT("Is OK now", alg.validateInputs().empty());
 
     alg.setPropertyValue("AccumulationWorkspace", "out_ws");
-    TSM_ASSERT("AccumulationWorkspace == OutputWorkspace",
-               !alg.validateInputs()["AccumulationWorkspace"].empty());
+    TSM_ASSERT("AccumulationWorkspace == OutputWorkspace", !alg.validateInputs()["AccumulationWorkspace"].empty());
 
     alg.setPropertyValue("Instrument", "TESTHISTOLISTENER");
     alg.setPropertyValue("AccumulationMethod", "Add");
-    TSM_ASSERT("Shouldn't add histograms",
-               !alg.validateInputs()["AccumulationMethod"].empty());
+    TSM_ASSERT("Shouldn't add histograms", !alg.validateInputs()["AccumulationMethod"].empty());
   }
 
   /** Test creating the processing algorithm.
@@ -121,13 +112,10 @@ public:
 
       IAlgorithm_sptr procAlg;
       procAlg = alg.makeAlgorithm(post > 0);
-      TSM_ASSERT("NULL algorithm pointer returned if nothing is specified.",
-                 !procAlg);
+      TSM_ASSERT("NULL algorithm pointer returned if nothing is specified.", !procAlg);
 
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue(prefix + "ProcessingAlgorithm", "Rebin"));
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-          prefix + "ProcessingProperties", "Params=0,100,1000"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(prefix + "ProcessingAlgorithm", "Rebin"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(prefix + "ProcessingProperties", "Params=0,100,1000"));
 
       procAlg = alg.makeAlgorithm(post > 0);
       TSM_ASSERT("Non-NULL algorithm pointer", procAlg);

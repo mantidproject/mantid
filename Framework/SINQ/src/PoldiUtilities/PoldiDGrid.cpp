@@ -12,28 +12,21 @@
 namespace Mantid {
 namespace Poldi {
 
-PoldiDGrid::PoldiDGrid(std::shared_ptr<PoldiAbstractDetector> detector,
-                       std::shared_ptr<PoldiAbstractChopper> chopper,
+PoldiDGrid::PoldiDGrid(std::shared_ptr<PoldiAbstractDetector> detector, std::shared_ptr<PoldiAbstractChopper> chopper,
                        double deltaT, std::pair<double, double> wavelengthRange)
-    : m_detector(std::move(detector)), m_chopper(std::move(chopper)),
-      m_deltaT(deltaT), m_wavelengthRange(wavelengthRange),
-      m_dRangeAsMultiples(), m_deltaD(0.0), m_dgrid(),
+    : m_detector(std::move(detector)), m_chopper(std::move(chopper)), m_deltaT(deltaT),
+      m_wavelengthRange(wavelengthRange), m_dRangeAsMultiples(), m_deltaD(0.0), m_dgrid(),
       m_hasCachedCalculation(false) {}
 
-void PoldiDGrid::setDetector(
-    std::shared_ptr<PoldiAbstractDetector> newDetector) {
+void PoldiDGrid::setDetector(std::shared_ptr<PoldiAbstractDetector> newDetector) {
   m_detector = std::move(newDetector);
 }
 
-void PoldiDGrid::setChopper(std::shared_ptr<PoldiAbstractChopper> newChopper) {
-  m_chopper = std::move(newChopper);
-}
+void PoldiDGrid::setChopper(std::shared_ptr<PoldiAbstractChopper> newChopper) { m_chopper = std::move(newChopper); }
 
 void PoldiDGrid::setDeltaT(double newDeltaT) { m_deltaT = newDeltaT; }
 
-void PoldiDGrid::setWavelengthRange(std::pair<double, double> wavelengthRange) {
-  m_wavelengthRange = wavelengthRange;
-}
+void PoldiDGrid::setWavelengthRange(std::pair<double, double> wavelengthRange) { m_wavelengthRange = wavelengthRange; }
 
 double PoldiDGrid::deltaD() {
   if (!m_hasCachedCalculation) {
@@ -58,12 +51,10 @@ std::vector<double> PoldiDGrid::grid() {
  *deltaD.
  */
 std::pair<int, int> PoldiDGrid::calculateDRange() {
-  std::pair<double, double> qLimits =
-      m_detector->qLimits(m_wavelengthRange.first, m_wavelengthRange.second);
+  std::pair<double, double> qLimits = m_detector->qLimits(m_wavelengthRange.first, m_wavelengthRange.second);
 
-  return std::make_pair(
-      static_cast<int>(Conversions::qToD(qLimits.second) / m_deltaD),
-      static_cast<int>(Conversions::qToD(qLimits.first) / m_deltaD));
+  return std::make_pair(static_cast<int>(Conversions::qToD(qLimits.second) / m_deltaD),
+                        static_cast<int>(Conversions::qToD(qLimits.first) / m_deltaD));
 }
 
 /** Computes the resolution limit of the POLDI experiment defined by the current
@@ -81,9 +72,7 @@ std::pair<int, int> PoldiDGrid::calculateDRange() {
 double PoldiDGrid::calculateDeltaD() {
   auto centralElement = static_cast<int>(m_detector->centralElement());
 
-  return Conversions::TOFtoD(m_deltaT,
-                             m_chopper->distanceFromSample() +
-                                 m_detector->distanceFromSample(centralElement),
+  return Conversions::TOFtoD(m_deltaT, m_chopper->distanceFromSample() + m_detector->distanceFromSample(centralElement),
                              sin(m_detector->twoTheta(centralElement) / 2.0));
 }
 
@@ -93,24 +82,20 @@ double PoldiDGrid::calculateDeltaD() {
  */
 void PoldiDGrid::createGrid() {
   if (!m_detector) {
-    throw std::runtime_error(
-        "PoldiDGrid cannot operate with an invalid detector.");
+    throw std::runtime_error("PoldiDGrid cannot operate with an invalid detector.");
   }
 
   if (!m_chopper) {
-    throw std::runtime_error(
-        "PoldiDGrid cannot operate with an invalid chopper.");
+    throw std::runtime_error("PoldiDGrid cannot operate with an invalid chopper.");
   }
 
   if (m_deltaT <= 0.0) {
-    throw std::runtime_error(
-        "PoldiDGrid can only operate with positive non-zero time differences");
+    throw std::runtime_error("PoldiDGrid can only operate with positive non-zero time differences");
   }
 
   if (m_wavelengthRange.first <= 0.0 || m_wavelengthRange.second <= 0.0 ||
       m_wavelengthRange.first >= m_wavelengthRange.second) {
-    throw std::runtime_error(
-        "PoldiDGrid cannot operate with supplied wavelength range");
+    throw std::runtime_error("PoldiDGrid cannot operate with supplied wavelength range");
   }
 
   m_deltaD = calculateDeltaD();

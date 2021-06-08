@@ -39,15 +39,12 @@ public:
       if (Poco::File(asciiPath).exists())
         m_testAsciiPath = asciiPath.toString();
 
-      if (!m_testNexusPath.empty() && !m_testNonNexusPath.empty() &&
-          !m_testAsciiPath.empty())
+      if (!m_testNexusPath.empty() && !m_testNonNexusPath.empty() && !m_testAsciiPath.empty())
         break;
     }
-    if (m_testNexusPath.empty() || m_testNonNexusPath.empty() ||
-        m_testAsciiPath.empty()) {
-      throw std::runtime_error(
-          "Unable to find test files for FileDescriptorTest. "
-          "The AutoTestData directory needs to be in the search path");
+    if (m_testNexusPath.empty() || m_testNonNexusPath.empty() || m_testAsciiPath.empty()) {
+      throw std::runtime_error("Unable to find test files for FileDescriptorTest. "
+                               "The AutoTestData directory needs to be in the search path");
     }
   }
 
@@ -67,8 +64,7 @@ public:
     TS_ASSERT(!descr.isAscii());
   }
 
-  void
-  test_isAscii_Returns_True_For_Stream_Pointing_At_Ascii_File_And_Stream_Is_Returned_To_Position_On_Entry() {
+  void test_isAscii_Returns_True_For_Stream_Pointing_At_Ascii_File_And_Stream_Is_Returned_To_Position_On_Entry() {
     std::ifstream is(m_testAsciiPath.c_str(), std::ios::in | std::ios::binary);
     // move stream along one to check it is returned to here
     is.seekg(1);
@@ -77,10 +73,8 @@ public:
     TS_ASSERT_EQUALS(1, is.tellg());
   }
 
-  void
-  test_isAscii_Returns_False_For_Stream_Pointing_At_Ascii_File_And_Stream_Is_Returned_To_Position_On_Entry() {
-    std::ifstream is(m_testNonNexusPath.c_str(),
-                     std::ios::in | std::ios::binary);
+  void test_isAscii_Returns_False_For_Stream_Pointing_At_Ascii_File_And_Stream_Is_Returned_To_Position_On_Entry() {
+    std::ifstream is(m_testNonNexusPath.c_str(), std::ios::in | std::ios::binary);
     // move stream along one to check it is returned to here
     is.seekg(1);
 
@@ -139,14 +133,11 @@ public:
   //===================== Failure cases
   //============================================
   void test_IsAscii_Throws_For_Inaccessible_Filename() {
-    TS_ASSERT_THROWS(FileDescriptor::isAscii(""),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(FileDescriptor::isAscii("__not_a_File.txt__"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(FileDescriptor::isAscii(""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(FileDescriptor::isAscii("__not_a_File.txt__"), const std::invalid_argument &);
   }
 
-  void
-  test_IsAscii_Returns_True_For_Ascii_Stream_Shorter_Than_NBytes_Requested_And_Clears_Error_Flags() {
+  void test_IsAscii_Returns_True_For_Ascii_Stream_Shorter_Than_NBytes_Requested_And_Clears_Error_Flags() {
     // Fake data
     std::istringstream is;
     is.str("abcdef"); // 6 bytes
@@ -165,8 +156,7 @@ public:
   }
 
   void test_Constructor_Throws_With_NonExistant_filename() {
-    TS_ASSERT_THROWS(FileDescriptor("__ThisShouldBeANonExistantFile.txt"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(FileDescriptor("__ThisShouldBeANonExistantFile.txt"), const std::invalid_argument &);
   }
 
 private:

@@ -13,11 +13,9 @@ namespace DataProcessor {
 
 class GridDelegate : public QStyledItemDelegate {
 public:
-  explicit GridDelegate(QObject *parent = nullptr)
-      : QStyledItemDelegate(parent){};
+  explicit GridDelegate(QObject *parent = nullptr) : QStyledItemDelegate(parent){};
 
-  void paint(QPainter *painter, const QStyleOptionViewItem &option,
-             const QModelIndex &index) const override {
+  void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
 
     QStyledItemDelegate::paint(painter, option, index);
 

@@ -32,8 +32,7 @@ namespace DataHandling {
 class MANTID_DATAHANDLING_DLL ISISJournal : public API::IJournal {
 public:
   ISISJournal(std::string const &instrument, std::string const &cycle,
-              std::unique_ptr<Kernel::InternetHelper> internetHelper =
-                  std::make_unique<Kernel::InternetHelper>());
+              std::unique_ptr<Kernel::InternetHelper> internetHelper = std::make_unique<Kernel::InternetHelper>());
   virtual ~ISISJournal();
 
   ISISJournal(ISISJournal const &rhs) = delete;
@@ -44,9 +43,8 @@ public:
   /// Get the list of cycle names
   std::vector<std::string> getCycleNames() override;
   /// Get data for runs that match the given filters
-  std::vector<RunData>
-  getRuns(std::vector<std::string> const &valuesToLookup = {},
-          RunData const &filters = RunData()) override;
+  std::vector<RunData> getRuns(std::vector<std::string> const &valuesToLookup = {},
+                               RunData const &filters = RunData()) override;
 
 private:
   std::unique_ptr<Kernel::InternetHelper> m_internetHelper;

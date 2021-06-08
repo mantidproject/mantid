@@ -12,7 +12,7 @@ Description
 This algorithm uses a numerical integration method to calculate
 attenuation factors resulting from absorption and single scattering
 within a cuboid region of a sample with the dimensions and material
-properties given. 
+properties given.
 
 The gauge volume generated will be an axis-aligned
 cuboid centred on the sample (centre) position. The sample must fully
@@ -49,7 +49,7 @@ Usage
 **Example: A simple spherical sample with a cuboid gauge volume**
 
 .. testcode:: ExCuboidGuageSimpleSpere
-    
+
     #setup the sample shape
     sphere = '''<sphere id="sample-sphere">
           <centre x="0" y="0" z="0"/>

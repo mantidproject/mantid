@@ -11,26 +11,21 @@ namespace Mantid {
 namespace Poldi {
 
 PoldiTimeTransformer::PoldiTimeTransformer()
-    : m_detectorCenter(), m_detectorElementData(), m_detectorEfficiency(0.0),
-      m_chopperSlits(0), m_spectrum() {}
+    : m_detectorCenter(), m_detectorElementData(), m_detectorEfficiency(0.0), m_chopperSlits(0), m_spectrum() {}
 
-PoldiTimeTransformer::PoldiTimeTransformer(
-    const PoldiInstrumentAdapter_sptr &poldiInstrument) {
+PoldiTimeTransformer::PoldiTimeTransformer(const PoldiInstrumentAdapter_sptr &poldiInstrument) {
   initializeFromPoldiInstrument(poldiInstrument);
 }
 
-void PoldiTimeTransformer::initializeFromPoldiInstrument(
-    const PoldiInstrumentAdapter_sptr &poldiInstrument) {
+void PoldiTimeTransformer::initializeFromPoldiInstrument(const PoldiInstrumentAdapter_sptr &poldiInstrument) {
   if (!poldiInstrument) {
-    throw std::invalid_argument(
-        "Cannot initialize PoldiTimeTransformer from null-instrument.");
+    throw std::invalid_argument("Cannot initialize PoldiTimeTransformer from null-instrument.");
   }
 
   PoldiAbstractDetector_sptr detector = poldiInstrument->detector();
   PoldiAbstractChopper_sptr chopper = poldiInstrument->chopper();
 
-  m_spectrum = std::const_pointer_cast<const PoldiSourceSpectrum>(
-      poldiInstrument->spectrum());
+  m_spectrum = std::const_pointer_cast<const PoldiSourceSpectrum>(poldiInstrument->spectrum());
 
   m_detectorCenter = getDetectorCenterCharacteristics(detector, chopper);
   m_detectorElementData = getDetectorElementData(detector, chopper);
@@ -39,17 +34,11 @@ void PoldiTimeTransformer::initializeFromPoldiInstrument(
   m_chopperSlits = chopper->slitPositions().size();
 }
 
-double PoldiTimeTransformer::dToTOF(double d) const {
-  return m_detectorCenter.tof1A * d;
-}
+double PoldiTimeTransformer::dToTOF(double d) const { return m_detectorCenter.tof1A * d; }
 
-double
-PoldiTimeTransformer::detectorElementIntensity(double centreD,
-                                               size_t detectorIndex) const {
-  double lambda =
-      dToTOF(centreD) * m_detectorElementData[detectorIndex]->lambdaFactor();
-  double intensity = m_spectrum->intensity(lambda) *
-                     m_detectorElementData[detectorIndex]->intensityFactor();
+double PoldiTimeTransformer::detectorElementIntensity(double centreD, size_t detectorIndex) const {
+  double lambda = dToTOF(centreD) * m_detectorElementData[detectorIndex]->lambdaFactor();
+  double intensity = m_spectrum->intensity(lambda) * m_detectorElementData[detectorIndex]->intensityFactor();
 
   return intensity * (1.0 - exp(-m_detectorEfficiency * lambda));
 }
@@ -65,33 +54,26 @@ double PoldiTimeTransformer::calculatedTotalIntensity(double centreD) const {
   return sum;
 }
 
-size_t PoldiTimeTransformer::detectorElementCount() const {
-  return m_detectorElementData.size();
-}
+size_t PoldiTimeTransformer::detectorElementCount() const { return m_detectorElementData.size(); }
 
 std::vector<DetectorElementData_const_sptr>
-PoldiTimeTransformer::getDetectorElementData(
-    const PoldiAbstractDetector_sptr &detector,
-    const PoldiAbstractChopper_sptr &chopper) {
+PoldiTimeTransformer::getDetectorElementData(const PoldiAbstractDetector_sptr &detector,
+                                             const PoldiAbstractChopper_sptr &chopper) {
   std::vector<DetectorElementData_const_sptr> data(detector->elementCount());
 
-  DetectorElementCharacteristics center =
-      getDetectorCenterCharacteristics(detector, chopper);
+  DetectorElementCharacteristics center = getDetectorCenterCharacteristics(detector, chopper);
 
   for (int i = 0; i < static_cast<int>(detector->elementCount()); ++i) {
-    data[i] =
-        std::make_shared<DetectorElementData>(i, center, detector, chopper);
+    data[i] = std::make_shared<DetectorElementData>(i, center, detector, chopper);
   }
 
   return data;
 }
 
 DetectorElementCharacteristics
-PoldiTimeTransformer::getDetectorCenterCharacteristics(
-    const PoldiAbstractDetector_sptr &detector,
-    const PoldiAbstractChopper_sptr &chopper) {
-  return DetectorElementCharacteristics(
-      static_cast<int>(detector->centralElement()), detector, chopper);
+PoldiTimeTransformer::getDetectorCenterCharacteristics(const PoldiAbstractDetector_sptr &detector,
+                                                       const PoldiAbstractChopper_sptr &chopper) {
+  return DetectorElementCharacteristics(static_cast<int>(detector->centralElement()), detector, chopper);
 }
 
 } // namespace Poldi

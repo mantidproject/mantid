@@ -725,7 +725,7 @@
                <string notr="true">font: italic 10pt &quot;Bitstream Charter&quot;;</string>
               </property>
               <property name="text">
-               <string>If characterization file is given, the correction run numbers are given by the file. 
+               <string>If characterization file is given, the correction run numbers are given by the file.
 The corrections can be overridden and disabled though.</string>
               </property>
              </widget>

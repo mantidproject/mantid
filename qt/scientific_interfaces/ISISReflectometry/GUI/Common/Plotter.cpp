@@ -28,15 +28,13 @@ namespace ISISReflectometry {
 Plotter::Plotter(IPythonRunner *pythonRunner) : m_pythonRunner(pythonRunner) {}
 #endif
 
-void Plotter::reflectometryPlot(
-    const std::vector<std::string> &workspaces) const {
+void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) const {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   if (!workspaces.empty()) {
     std::string pythonSrc;
     pythonSrc += "base_graph = None\n";
     for (const auto &workspace : workspaces)
-      pythonSrc += "base_graph = plotSpectrum(\"" + workspace +
-                   "\", 0, True, window = base_graph)\n";
+      pythonSrc += "base_graph = plotSpectrum(\"" + workspace + "\", 0, True, window = base_graph)\n";
 
     pythonSrc += "base_graph.activeLayer().logLogAxes()\n";
 
@@ -62,31 +60,25 @@ void Plotter::reflectometryPlot(
   actualWorkspaces.reserve(workspaces.size());
   for (const auto &workspace : workspaces) {
     const Mantid::API::Workspace_sptr workspaceObject =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::Workspace>(workspace);
-    if (const auto workspaceGroup =
-            std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
-                workspaceObject)) {
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::Workspace>(workspace);
+    if (const auto workspaceGroup = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(workspaceObject)) {
       for (auto index = 0u; index < workspaceGroup->size(); ++index) {
-        actualWorkspaces.emplace_back(
-            workspaceGroup->getItem(index)->getName());
+        actualWorkspaces.emplace_back(workspaceGroup->getItem(index)->getName());
       }
     } else {
       actualWorkspaces.emplace_back(workspace);
     }
   }
 
-  plot(actualWorkspaces, boost::none, wksp_indices, boost::none, boost::none,
-       ax_properties, window_title, plotErrorBars, false);
+  plot(actualWorkspaces, boost::none, wksp_indices, boost::none, boost::none, ax_properties, window_title,
+       plotErrorBars, false);
 #endif
 }
 
 // This should never be implemented for Qt 5 or above because that is
 // workbench.
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-void Plotter::runPython(const std::string &pythonCode) const {
-  m_pythonRunner->runPythonAlgorithm(pythonCode);
-}
+void Plotter::runPython(const std::string &pythonCode) const { m_pythonRunner->runPythonAlgorithm(pythonCode); }
 #endif
 
 } // namespace ISISReflectometry

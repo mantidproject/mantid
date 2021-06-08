@@ -58,10 +58,8 @@ public:
       TS_FAIL(e.what());
     }
 
-    ITableWorkspace_sptr table =
-        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                "DeadTimeTable"));
+    ITableWorkspace_sptr table = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("DeadTimeTable"));
 
     Column_const_sptr col = table->getColumn(1);
     const Column *tableC = col.get();

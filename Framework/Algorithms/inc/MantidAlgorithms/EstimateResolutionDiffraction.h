@@ -14,8 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 /** EstimateResolutionDiffraction : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL EstimateResolutionDiffraction
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL EstimateResolutionDiffraction : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;
@@ -28,9 +27,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"EstimateDivergence"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"EstimateDivergence"}; }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override;

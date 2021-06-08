@@ -30,17 +30,14 @@ class MANTID_ALGORITHMS_DLL AppendSpectra : public WorkspaceJoiners {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConjoinSpectra"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConjoinSpectra"}; }
 
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
 
-  void fixSpectrumNumbers(const API::MatrixWorkspace &ws1,
-                          const API::MatrixWorkspace &ws2,
+  void fixSpectrumNumbers(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2,
                           API::MatrixWorkspace &output) override;
   void combineLogs(const API::Run &lhs, const API::Run &rhs, API::Run &ans);
 };

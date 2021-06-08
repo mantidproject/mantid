@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import ConvertWANDSCDtoQ, CreateMDHistoWorkspace, CreateSingleValuedWorkspace, SetUB, mtd
+from mantid.simpleapi import ConvertWANDSCDtoQ, CreateMDHistoWorkspace, CreateSingleValuedWorkspace, SetUB, mtd, SetGoniometer
+from mantid.kernel import FloatTimeSeriesProperty
 import unittest
 import numpy as np
 
@@ -30,7 +31,10 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
         ConvertWANDSCDtoQTest_data.addExperimentInfo(ConvertWANDSCDtoQTest_dummy)
 
-        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty('s1', list(np.arange(0, 50, 0.5)), True)
+        log = FloatTimeSeriesProperty('s1')
+        for t, v in zip(range(100), np.arange(0, 50, 0.5)):
+            log.addValue(t, v)
+        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run()['s1'] = log
         ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty('duration', [60.] * 100, True)
         ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty('monitor_count', [120000.] * 100, True)
         ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty('twotheta', list(
@@ -39,6 +43,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
             np.tile(np.linspace(-0.15, 0.15, 32), 240)), True)
 
         SetUB(ConvertWANDSCDtoQTest_data, 5, 5, 7, 90, 90, 120, u=[-1, 0, 1], v=[1, 0, 1])
+        SetGoniometer(ConvertWANDSCDtoQTest_data, Axis0='s1,0,1,0,1', Average=False)
 
         # Create Normalisation workspace
         S = np.ones((32, 240, 1))
@@ -105,6 +110,36 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         self.assertAlmostEqual(np.nanargmax(s), 22780)
 
         ConvertWANDSCDtoQTest_out.delete()
+
+    def test_COP(self):
+        ConvertWANDSCDtoQTest_out = ConvertWANDSCDtoQ('ConvertWANDSCDtoQTest_data', BinningDim0='-8.08,8.08,101',
+                                                      BinningDim1='-1.68,1.68,21', BinningDim2='-8.08,8.08,101',
+                                                      NormaliseBy='None')
+
+        ConvertWANDSCDtoQTest_cop = ConvertWANDSCDtoQ('ConvertWANDSCDtoQTest_data', BinningDim0='-8.08,8.08,101',
+                                                      BinningDim1='-1.68,1.68,21', BinningDim2='-8.08,8.08,101',
+                                                      NormaliseBy='None', ObliquityParallaxCoefficient=1.5)
+
+        self.assertTrue(ConvertWANDSCDtoQTest_out)
+        self.assertTrue(ConvertWANDSCDtoQTest_cop)
+
+        Test_out = ConvertWANDSCDtoQTest_out.getSignalArray().copy()
+        Test_cop = ConvertWANDSCDtoQTest_cop.getSignalArray().copy()
+
+        x, y, z = np.meshgrid(np.linspace(-8,8,101),
+                              np.linspace(-1.6,1.6,21),
+                              np.linspace(-8,8,101), indexing='ij')
+
+        Test_out_max_Qy = y[~np.isnan(Test_out)].max()
+        Test_cop_max_Qy = y[~np.isnan(Test_cop)].max()
+
+        # Test whether Qy is scaled by ObliquityParallaxCoefficient correctly
+        proportion = Test_cop_max_Qy/Test_out_max_Qy
+
+        self.assertAlmostEquals(proportion, 1.5, 5)
+
+        ConvertWANDSCDtoQTest_out.delete()
+        ConvertWANDSCDtoQTest_cop.delete()
 
     def test_HKL_norm_and_KeepTemporary(self):
         ConvertWANDSCDtoQTest_out = ConvertWANDSCDtoQ('ConvertWANDSCDtoQTest_data',

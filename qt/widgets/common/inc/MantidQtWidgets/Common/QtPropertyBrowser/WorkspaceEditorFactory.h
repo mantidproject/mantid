@@ -12,29 +12,23 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class WorkspaceEditorFactory
-    : public QtAbstractEditorFactory<QtStringPropertyManager> {
+class WorkspaceEditorFactory : public QtAbstractEditorFactory<QtStringPropertyManager> {
   Q_OBJECT
 public:
-  WorkspaceEditorFactory(QObject *parent = nullptr)
-      : QtAbstractEditorFactory<QtStringPropertyManager>(parent) {}
+  WorkspaceEditorFactory(QObject *parent = nullptr) : QtAbstractEditorFactory<QtStringPropertyManager>(parent) {}
 
 protected:
   using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler
                                                    // warning
   void connectPropertyManager(QtStringPropertyManager * /*manager*/) override {}
-  QWidget *createEditorForManager(QtStringPropertyManager *manager,
-                                  QtProperty *property,
-                                  QWidget *parent) override;
-  void
-  disconnectPropertyManager(QtStringPropertyManager * /*manager*/) override {}
+  QWidget *createEditorForManager(QtStringPropertyManager *manager, QtProperty *property, QWidget *parent) override;
+  void disconnectPropertyManager(QtStringPropertyManager * /*manager*/) override {}
 };
 
 class WorkspaceEditor : public WorkspaceSelector {
   Q_OBJECT
 public:
-  WorkspaceEditor(QtProperty *property, QtStringPropertyManager *manager,
-                  QWidget *parent);
+  WorkspaceEditor(QtProperty *property, QtStringPropertyManager *manager, QWidget *parent);
 protected slots:
   void updateProperty(const QString &text);
 

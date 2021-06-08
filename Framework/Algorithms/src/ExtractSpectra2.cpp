@@ -31,9 +31,7 @@ const std::string ExtractSpectra2::name() const { return "ExtractSpectra2"; }
 int ExtractSpectra2::version() const { return 2; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ExtractSpectra2::category() const {
-  return "Transforms\\Splitting";
-}
+const std::string ExtractSpectra2::category() const { return "Transforms\\Splitting"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ExtractSpectra2::summary() const {
@@ -43,11 +41,9 @@ const std::string ExtractSpectra2::summary() const {
 
 /// Initialize the algorithm's properties.
 void ExtractSpectra2::init() {
-  declareWorkspaceInputProperties<
-      MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
+  declareWorkspaceInputProperties<MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
       "InputWorkspace", "The input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
 }
 
@@ -55,14 +51,10 @@ void ExtractSpectra2::init() {
 void ExtractSpectra2::exec() {
   std::shared_ptr<MatrixWorkspace> inputWS;
   Indexing::SpectrumIndexSet indexSet;
-  std::tie(inputWS, indexSet) =
-      getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
+  std::tie(inputWS, indexSet) = getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
 
   auto outputWS = create<MatrixWorkspace>(
-      *inputWS,
-      dynamic_cast<IndexProperty *>(
-          getPointerToProperty("InputWorkspaceIndexSet"))
-          ->getFilteredIndexInfo(),
+      *inputWS, dynamic_cast<IndexProperty *>(getPointerToProperty("InputWorkspaceIndexSet"))->getFilteredIndexInfo(),
       HistogramData::BinEdges(2));
 
   Axis *inAxis1(nullptr);

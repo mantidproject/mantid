@@ -45,8 +45,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"FindDetectorsOutsideLimits", "FindDeadDetectors",
-            "MedianDetectorTest", "DetectorEfficiencyVariation"};
+    return {"FindDetectorsOutsideLimits", "FindDeadDetectors", "MedianDetectorTest", "DetectorEfficiencyVariation"};
   }
 
 private:
@@ -54,37 +53,30 @@ private:
   void init() override;
   void exec() override;
   /// Apply a given mask
-  void applyMask(const API::MatrixWorkspace_sptr &inputWS,
-                 const API::MatrixWorkspace_sptr &maskWS);
+  void applyMask(const API::MatrixWorkspace_sptr &inputWS, const API::MatrixWorkspace_sptr &maskWS);
   /// Perform checks on detector vanadium
-  API::MatrixWorkspace_sptr
-  doDetVanTest(const API::MatrixWorkspace_sptr &inputWS, int &nFails);
+  API::MatrixWorkspace_sptr doDetVanTest(const API::MatrixWorkspace_sptr &inputWS, int &nFails);
 
 protected:
   /// Get the total counts for each spectra
-  API::MatrixWorkspace_sptr
-  integrateSpectra(const API::MatrixWorkspace_sptr &inputWS, const int indexMin,
-                   const int indexMax, const double lower, const double upper,
-                   const bool outputWorkspace2D = false);
+  API::MatrixWorkspace_sptr integrateSpectra(const API::MatrixWorkspace_sptr &inputWS, const int indexMin,
+                                             const int indexMax, const double lower, const double upper,
+                                             const bool outputWorkspace2D = false);
 
-  DataObjects::MaskWorkspace_sptr
-  generateEmptyMask(const API::MatrixWorkspace_const_sptr &inputWS);
+  DataObjects::MaskWorkspace_sptr generateEmptyMask(const API::MatrixWorkspace_const_sptr &inputWS);
 
   /// Calculate the median of the given workspace. This assumes that the input
   /// workspace contains
   /// integrated counts
-  std::vector<double>
-  calculateMedian(const API::MatrixWorkspace &input, bool excludeZeroes,
-                  const std::vector<std::vector<size_t>> &indexmap);
+  std::vector<double> calculateMedian(const API::MatrixWorkspace &input, bool excludeZeroes,
+                                      const std::vector<std::vector<size_t>> &indexmap);
   /// Convert to a distribution
   API::MatrixWorkspace_sptr convertToRate(API::MatrixWorkspace_sptr workspace);
   /// method to check which spectra should be grouped when calculating the
   /// median
-  std::vector<std::vector<size_t>>
-  makeMap(const API::MatrixWorkspace_sptr &countsWS);
+  std::vector<std::vector<size_t>> makeMap(const API::MatrixWorkspace_sptr &countsWS);
   /// method to create the map with all spectra
-  std::vector<std::vector<size_t>>
-  makeInstrumentMap(const API::MatrixWorkspace &countsWS);
+  std::vector<std::vector<size_t>> makeInstrumentMap(const API::MatrixWorkspace &countsWS);
 
   /** @name Progress reporting */
   //@{
@@ -102,8 +94,7 @@ protected:
     /// Time taken to find failing detectors
     RTWriteFile = 200,
     /// The total of all run times
-    RTTotal = RTGetSolidAngle + RTGetTotalCounts + RTGetRate + RTMarkDetects +
-              RTWriteFile
+    RTTotal = RTGetSolidAngle + RTGetTotalCounts + RTGetRate + RTMarkDetects + RTWriteFile
   };
 
   /// Update the fraction complete estimate assuming that the algorithm has

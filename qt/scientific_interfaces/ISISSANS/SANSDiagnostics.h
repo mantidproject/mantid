@@ -29,13 +29,9 @@ public:
   /// destructor
   ~RectDetectorDetails() {}
   /// set minimum detector id
-  inline void setMinimumDetectorId(const Mantid::detid_t minDetId) {
-    m_minDetId = minDetId;
-  }
+  inline void setMinimumDetectorId(const Mantid::detid_t minDetId) { m_minDetId = minDetId; }
   /// set maximum detector id
-  inline void setMaximumDetectorId(const Mantid::detid_t maxDetId) {
-    m_maxDetId = maxDetId;
-  }
+  inline void setMaximumDetectorId(const Mantid::detid_t maxDetId) { m_maxDetId = maxDetId; }
   /// set detector name
   void setDetectorName(const QString &detName) { m_detName = detName; }
 
@@ -79,8 +75,7 @@ private:
   /// set tool tips
   void setToolTips();
   /// execute sumrowcolumn algorithm
-  bool executeSumRowColumn(const std::vector<unsigned int> &values,
-                           const QString &ipws, const QString &op,
+  bool executeSumRowColumn(const std::vector<unsigned int> &values, const QString &ipws, const QString &op,
                            const QString &orientation);
   /// load the settings from the registry
   void loadSettings();
@@ -96,33 +91,26 @@ private:
   /// returns the filename
   QString getFileName();
   /// run loadraw algorithm
-  bool runLoadAlgorithm(const QString &fileName, const QString &specMin = "-1",
-                        const QString &specMax = "-1");
+  bool runLoadAlgorithm(const QString &fileName, const QString &specMin = "-1", const QString &specMax = "-1");
   /// returns sumrowcolumn script
-  bool runsumRowColumn(const QString &ipwsName, const QString &opwsName,
-                       const QString &orientation, const QString &hvMin,
-                       const QString &hvMax);
+  bool runsumRowColumn(const QString &ipwsName, const QString &opwsName, const QString &orientation,
+                       const QString &hvMin, const QString &hvMax);
   // get rectangular detector details
-  std::vector<std::shared_ptr<RectDetectorDetails>>
-  rectangularDetectorDetails(Mantid::API::Workspace_sptr &ws_sptr);
+  std::vector<std::shared_ptr<RectDetectorDetails>> rectangularDetectorDetails(Mantid::API::Workspace_sptr &ws_sptr);
   /// returns sumspectra script
-  bool runsumSpectra(const QString &ipwsName, const QString &opwsName,
-                     const QString &wsStartIndex, const QString &wsEndIndex);
+  bool runsumSpectra(const QString &ipwsName, const QString &opwsName, const QString &wsStartIndex,
+                     const QString &wsEndIndex);
   /// display total number of periods box
   void displayTotalPeriods();
   /// display rectangualr detectors
   void displayRectangularDetectors(const QString &wsName);
 
   // This method executes loadraw and sumrow column algorithm
-  void IntegralClicked(const QString &range, const QString &orientation,
-                       const QString &specMin, const QString &specMax,
-                       const QString &detectorName,
-                       const QString &integrationType, bool bMask,
-                       bool time_pixel);
+  void IntegralClicked(const QString &range, const QString &orientation, const QString &specMin, const QString &specMax,
+                       const QString &detectorName, const QString &integrationType, bool bMask, bool time_pixel);
 
   // This method executes sumspectra algorithm
-  void TimeIntegralClicked(const QString &range, const QString &specMin,
-                           const QString &specMax, const QString &opws,
+  void TimeIntegralClicked(const QString &range, const QString &specMin, const QString &specMax, const QString &opws,
                            bool pixel_mask);
 
   /// plot spectrum
@@ -132,16 +120,13 @@ private:
   void disableDetectorGroupBoxes(bool bStatus);
 
   /// minimum and maximum spectrum Nos for detector
-  void minandMaxSpectrumNos(const std::vector<Mantid::specnum_t> &specList,
-                            QString &minSpec, QString &maxSpec);
+  void minandMaxSpectrumNos(const std::vector<Mantid::specnum_t> &specList, QString &minSpec, QString &maxSpec);
 
   /// get workspaceIndexes from spectrum list
   void getWorkspaceIndexes(const Mantid::API::MatrixWorkspace_sptr &mws_sptr,
-                           const std::vector<Mantid::specnum_t> &specList,
-                           QString &startWSIndex, QString &endWSIndex);
+                           const std::vector<Mantid::specnum_t> &specList, QString &startWSIndex, QString &endWSIndex);
   /// get spectra list from workspace.
-  void getSpectraList(const Mantid::API::MatrixWorkspace_sptr &mws_sptr,
-                      const Mantid::detid_t detNum,
+  void getSpectraList(const Mantid::API::MatrixWorkspace_sptr &mws_sptr, const Mantid::detid_t detNum,
                       std::vector<Mantid::specnum_t> &specList);
 
   /// get detector name
@@ -170,13 +155,10 @@ private:
   /// applys the time channel or pixel mask
   void maskDetector(const QString &wsName, bool bMask, bool time_pixel);
   // getvalues of HVMin and HvMax values for sumrowcolumn algorithm
-  void HVMinHVMaxStringValues(const int minVal, const int maxVal,
-                              QString &hvMin, QString &hvMax);
+  void HVMinHVMaxStringValues(const int minVal, const int maxVal, QString &hvMin, QString &hvMax);
   /// Create the name for the outputworkspace
-  QString createOutputWorkspaceName(const QString &originalWorkspaceName,
-                                    const QString &detectorName,
-                                    const QString &integrationType,
-                                    const QString &min, const QString &max);
+  QString createOutputWorkspaceName(const QString &originalWorkspaceName, const QString &detectorName,
+                                    const QString &integrationType, const QString &min, const QString &max);
 
 private:
   QString m_dataDir;       ///< default data search directory

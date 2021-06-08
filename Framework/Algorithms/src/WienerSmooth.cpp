@@ -40,28 +40,20 @@ const double guessSignalToNoiseRatio = 1e15;
 int WienerSmooth::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string WienerSmooth::category() const {
-  return "Arithmetic\\FFT;Transforms\\Smoothing";
-}
+const std::string WienerSmooth::category() const { return "Arithmetic\\FFT;Transforms\\Smoothing"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string WienerSmooth::summary() const {
-  return "Smooth spectra using Wiener filter.";
-}
+const std::string WienerSmooth::summary() const { return "Smooth spectra using Wiener filter."; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void WienerSmooth::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
-                  "An input workspace.");
-  declareProperty(
-      std::make_unique<Kernel::ArrayProperty<int>>("WorkspaceIndexList"),
-      "Workspace indices for spectra to process. "
-      "If empty smooth all spectra.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input), "An input workspace.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("WorkspaceIndexList"),
+                  "Workspace indices for spectra to process. "
+                  "If empty smooth all spectra.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -87,8 +79,7 @@ void WienerSmooth::exec() {
     // fill wsIndexList with consecutive integers from 0 to nSpectra - 1
     wsIndexList.resize(nInputSpectra);
     wsIndexList.front() = 0;
-    for (auto index = wsIndexList.begin() + 1; index != wsIndexList.end();
-         ++index) {
+    for (auto index = wsIndexList.begin() + 1; index != wsIndexList.end(); ++index) {
       *index = *(index - 1) + 1;
     }
   }
@@ -102,15 +93,14 @@ void WienerSmooth::exec() {
 
   // create full output workspace by copying all settings from tinputWS
   // blocksize is taken form first
-  API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(
-      inputWS, nOutputSpectra, first->x(0).size(), first->y(0).size());
+  API::MatrixWorkspace_sptr outputWS =
+      API::WorkspaceFactory::Instance().create(inputWS, nOutputSpectra, first->x(0).size(), first->y(0).size());
 
   // TODO: ideally axis cloning should be done via API::Axis interface but it's
   // not possible
   // at he moment and as it turned out not straight-forward to implement
   auto inAxis = inputWS->getAxis(1);
-  auto outAxis =
-      std::unique_ptr<API::Axis>(inAxis->clone(nOutputSpectra, outputWS.get()));
+  auto outAxis = std::unique_ptr<API::Axis>(inAxis->clone(nOutputSpectra, outputWS.get()));
 
   bool isSpectra = outAxis->isSpectra();
   bool isNumeric = outAxis->isNumeric();
@@ -153,9 +143,7 @@ void WienerSmooth::exec() {
  * @param wsIndex :: An index of a spectrum to smooth.
  * @return :: A single-spectrum workspace with the smoothed data.
  */
-API::MatrixWorkspace_sptr
-WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
-                                   size_t wsIndex) {
+API::MatrixWorkspace_sptr WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS, size_t wsIndex) {
   size_t dataSize = inputWS->blocksize();
 
   // it won't work for very small workspaces
@@ -210,8 +198,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
   g_log.debug() << "Spline break points " << nbreak << '\n';
 
   // define the spline
-  API::IFunction_sptr spline =
-      API::FunctionFactory::Instance().createFunction("BSpline");
+  API::IFunction_sptr spline = API::FunctionFactory::Instance().createFunction("BSpline");
   auto xInterval = getStartEnd(X, inputWS->isHistogramData());
   spline->setAttributeValue("StartX", xInterval.first);
   spline->setAttributeValue("EndX", xInterval.second);
@@ -245,26 +232,23 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
   fourier->setProperty("IgnoreXBins", true);
   fourier->execute();
 
-  API::MatrixWorkspace_sptr fourierOut =
-      fourier->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr fourierOut = fourier->getProperty("OutputWorkspace");
 
   // spectrum 2 of the transformed workspace has the transform modulus which is
   // a square
   // root of the power spectrum
   auto &powerSpec = fourierOut->mutableY(2);
   // convert the modulus to power spectrum wich is the base of the Wiener filter
-  std::transform(powerSpec.begin(), powerSpec.end(), powerSpec.begin(),
-                 PowerSpectrum());
+  std::transform(powerSpec.begin(), powerSpec.end(), powerSpec.begin(), PowerSpectrum());
 
   // estimate power spectrum's noise as the average of its high frequency half
   size_t n2 = powerSpec.size();
-  double noise =
-      std::accumulate(powerSpec.begin() + n2 / 2, powerSpec.end(), 0.0);
+  double noise = std::accumulate(powerSpec.begin() + n2 / 2, powerSpec.end(), 0.0);
   noise /= static_cast<double>(n2);
 
   // index of the maximum element in powerSpec
-  const size_t imax = static_cast<size_t>(std::distance(
-      powerSpec.begin(), std::max_element(powerSpec.begin(), powerSpec.end())));
+  const size_t imax =
+      static_cast<size_t>(std::distance(powerSpec.begin(), std::max_element(powerSpec.begin(), powerSpec.end())));
 
   if (noise == 0.0) {
     noise = powerSpec[imax] / guessSignalToNoiseRatio;
@@ -345,10 +329,8 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
   auto &re = fourierOut->mutableY(0);
   auto &im = fourierOut->mutableY(1);
 
-  std::transform(re.begin(), re.end(), wf.begin(), re.begin(),
-                 std::multiplies<double>());
-  std::transform(im.begin(), im.end(), wf.begin(), im.begin(),
-                 std::multiplies<double>());
+  std::transform(re.begin(), re.end(), wf.begin(), re.begin(), std::multiplies<double>());
+  std::transform(im.begin(), im.end(), wf.begin(), im.begin(), std::multiplies<double>());
 
   // inverse fourier transform
   fourier = createChildAlgorithm("RealFFT");
@@ -367,8 +349,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
   }
 
   // add the spline "background" to the smoothed data
-  std::transform(y.begin(), y.end(), background.begin(), y.begin(),
-                 std::plus<double>());
+  std::transform(y.begin(), y.end(), background.begin(), y.begin(), std::plus<double>());
 
   // copy the x-values and errors from the original spectrum
   // remove the last values for odd-sized inputs
@@ -397,14 +378,12 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
  * the bin centers are used.
  * @return :: A pair of start x and end x.
  */
-std::pair<double, double>
-WienerSmooth::getStartEnd(const Mantid::HistogramData::HistogramX &X,
-                          bool isHistogram) const {
+std::pair<double, double> WienerSmooth::getStartEnd(const Mantid::HistogramData::HistogramX &X,
+                                                    bool isHistogram) const {
   const size_t n = X.size();
   if (n < 3) {
     // 3 is the smallest number for this method to work without breaking
-    throw std::runtime_error(
-        "Number of bins/data points cannot be smaller than 3.");
+    throw std::runtime_error("Number of bins/data points cannot be smaller than 3.");
   }
   if (isHistogram) {
     return std::make_pair((X[0] + X[1]) / 2, (X[n - 1] + X[n - 2]) / 2);
@@ -419,9 +398,7 @@ WienerSmooth::getStartEnd(const Mantid::HistogramData::HistogramX &X,
  * @param wsIndex :: The index of the input spectrum.
  * @return :: Workspace with the copied spectrum.
  */
-API::MatrixWorkspace_sptr
-WienerSmooth::copyInput(const API::MatrixWorkspace_sptr &inputWS,
-                        size_t wsIndex) {
+API::MatrixWorkspace_sptr WienerSmooth::copyInput(const API::MatrixWorkspace_sptr &inputWS, size_t wsIndex) {
   auto alg = createChildAlgorithm("ExtractSingleSpectrum");
   alg->initialize();
   alg->setProperty("InputWorkspace", inputWS);

@@ -24,12 +24,12 @@ namespace CxxTest
         {
             (CXXTEST_STD(cout) << " {Start " << numTotalTests << " tests} ").flush();
         }
-        
+
         void guiEnterTest( const char *suiteName, const char *testName )
         {
             (CXXTEST_STD(cout) << " {" << suiteName << "::" << testName << "()} ").flush();
         }
-        
+
         void yellowBar()
         {
             (CXXTEST_STD(cout) << " {Yellow} ").flush();

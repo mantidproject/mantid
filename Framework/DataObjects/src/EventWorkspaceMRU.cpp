@@ -39,8 +39,7 @@ void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
     m_bufferedDataE.resize(thread_num + 1);
     for (auto &data : m_bufferedDataE) {
       if (!data)
-        data = std::make_unique<mru_listE>(
-            50); // Create a MRU list with this many entries.
+        data = std::make_unique<mru_listE>(50); // Create a MRU list with this many entries.
     }
   }
 }
@@ -55,8 +54,7 @@ void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
     m_bufferedDataY.resize(thread_num + 1);
     for (auto &data : m_bufferedDataY) {
       if (!data)
-        data = std::make_unique<mru_listY>(
-            50); // Create a MRU list with this many entries.
+        data = std::make_unique<mru_listY>(50); // Create a MRU list with this many entries.
     }
   }
 }
@@ -89,11 +87,9 @@ void EventWorkspaceMRU::clear() {
  * @param index :: index of the data to return
  * @return pointer to the TypeWithMarker that has the data; NULL if not found.
  */
-Kernel::cow_ptr<HistogramData::HistogramY>
-EventWorkspaceMRU::findY(size_t thread_num, const EventList *index) {
+Kernel::cow_ptr<HistogramData::HistogramY> EventWorkspaceMRU::findY(size_t thread_num, const EventList *index) {
   Poco::ScopedReadRWLock _lock(m_changeMruListsMutexY);
-  auto result = m_bufferedDataY[thread_num]->find(
-      reinterpret_cast<std::uintptr_t>(index));
+  auto result = m_bufferedDataY[thread_num]->find(reinterpret_cast<std::uintptr_t>(index));
   if (result)
     return result->m_data;
   return YType(nullptr);
@@ -105,11 +101,9 @@ EventWorkspaceMRU::findY(size_t thread_num, const EventList *index) {
  * @param index :: index of the data to return
  * @return pointer to the TypeWithMarker that has the data; NULL if not found.
  */
-Kernel::cow_ptr<HistogramData::HistogramE>
-EventWorkspaceMRU::findE(size_t thread_num, const EventList *index) {
+Kernel::cow_ptr<HistogramData::HistogramE> EventWorkspaceMRU::findE(size_t thread_num, const EventList *index) {
   Poco::ScopedReadRWLock _lock(m_changeMruListsMutexE);
-  auto result = m_bufferedDataE[thread_num]->find(
-      reinterpret_cast<std::uintptr_t>(index));
+  auto result = m_bufferedDataE[thread_num]->find(reinterpret_cast<std::uintptr_t>(index));
   if (result)
     return result->m_data;
   return EType(nullptr);
@@ -121,11 +115,9 @@ EventWorkspaceMRU::findE(size_t thread_num, const EventList *index) {
  * @param data :: the new data
  * @param index :: index of the data to insert
  */
-void EventWorkspaceMRU::insertY(size_t thread_num, YType data,
-                                const EventList *index) {
+void EventWorkspaceMRU::insertY(size_t thread_num, YType data, const EventList *index) {
   Poco::ScopedReadRWLock _lock(m_changeMruListsMutexY);
-  auto yWithMarker = std::make_shared<TypeWithMarker<YType>>(
-      reinterpret_cast<std::uintptr_t>(index));
+  auto yWithMarker = std::make_shared<TypeWithMarker<YType>>(reinterpret_cast<std::uintptr_t>(index));
   yWithMarker->m_data = std::move(data);
   m_bufferedDataY[thread_num]->insert(yWithMarker);
   // the memory is cleared automatically due to being a smart_ptr
@@ -137,11 +129,9 @@ void EventWorkspaceMRU::insertY(size_t thread_num, YType data,
  * @param data :: the new data
  * @param index :: index of the data to insert
  */
-void EventWorkspaceMRU::insertE(size_t thread_num, EType data,
-                                const EventList *index) {
+void EventWorkspaceMRU::insertE(size_t thread_num, EType data, const EventList *index) {
   Poco::ScopedReadRWLock _lock(m_changeMruListsMutexE);
-  auto eWithMarker = std::make_shared<TypeWithMarker<EType>>(
-      reinterpret_cast<std::uintptr_t>(index));
+  auto eWithMarker = std::make_shared<TypeWithMarker<EType>>(reinterpret_cast<std::uintptr_t>(index));
   eWithMarker->m_data = std::move(data);
   auto oldData = m_bufferedDataE[thread_num]->insert(eWithMarker);
   // And clear up the memory of the old one, if it is dropping out.

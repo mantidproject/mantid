@@ -16,8 +16,7 @@ public:
 
   virtual void algorithmStarted() = 0;
   virtual void algorithmEnded() = 0;
-  virtual void updateProgress(const double progress, const QString &message,
-                              const double estimatedTime,
+  virtual void updateProgress(const double progress, const QString &message, const double estimatedTime,
                               const int progressPrecision) = 0;
   virtual void showDetailsDialog() = 0;
 };

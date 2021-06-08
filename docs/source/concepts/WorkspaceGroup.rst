@@ -8,19 +8,19 @@ Workspace Group
 .. contents::
   :local:
 
-A WorkspaceGroup is a group of workspaces. The WorkspaceGroup object does not hold any data itself, but instead holds a list of Workspace objects. They appear as an expandable list of workspaces in the MantidPlot interface (the list of workspaces is also called the ADS or *AnalysisDataService*). Thus, workspace groups add structure to the ADS and make it more readable and also allow algorithms to be executed over a list of workspaces contained within the group but passing the group to the algorithm.
+A WorkspaceGroup is a group of workspaces. The WorkspaceGroup object does not hold any data itself, but instead holds a list of Workspace objects. They appear as an expandable list of workspaces in the :ref:`Workspaces Toolbox <main_window>` in the main window (the list of workspaces is also called the ADS or *AnalysisDataService*). Thus, workspace groups add structure to the ADS and make it more readable and also allow algorithms to be executed over a list of workspaces contained within the group but passing the group to the algorithm.
 
 Most algorithms can be passed a WorkspaceGroup in place of a normal workspace input, and will simply execute the algorithm on each workspace contained within the group.
 
-Working with Event Workspaces in Python
+Working with Group Workspaces in Python
 ----------------------------------------
 
 Creating and splitting groups
 #############################
 
-Workspace groups can be created through the MantidPlot interface;
+Workspace groups can be created through the MantidWorkbench interface;
 
-- Select a few workspaces from the ADS in MantidPlot and click the "Group" button above the list of workspaces. The group will be named "NewGroup".
+- Select a few workspaces from the Workspaces Toolbox in the main window and click the "Group" button above the list of workspaces. The group will be named "NewGroup".
 
 Workspace groups can be created in a more flexible way in the Python script window using the Python API. Groups may be created via the :ref:`GroupWorkspaces <algm-GroupWorkspaces>` algorithm,  This will place a workspace group directly into the ADS, and requires at least one workspace to be added to the group.
 
@@ -34,7 +34,7 @@ Workspace groups can be created in a more flexible way in the Python script wind
     # Create a group workpace
     wsList = [ws1,ws2,ws3]
     wsGroup = GroupWorkspaces(wsList)
-    # or 
+    # or
     wsGroup = GroupWorkspaces("ws1,ws2,ws3")
 
     print(wsGroup.getNames())
@@ -129,7 +129,7 @@ when adding the group to the ADS, the workspaces will also be added, and given d
 Accessing Workspace Groups
 ##########################
 
-The methods for getting a variable to an EventWorkspace is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
+The methods for getting a variable to a WorkspaceGroup is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
 
 If you want to check if a variable points to something that is a Workspace Group you can use this:
 
@@ -166,7 +166,7 @@ Looping over all of the members of a group
     # Get the member workspaces in a loop
     for i in range(wsGroup.getNumberOfEntries()):
         wsLoop = wsGroup.getItem(i)
-        print("Member {0} {1}".format(i, wsLoop.getName()))
+        print("Member {0} {1}".format(i, wsLoop.name()))
 
 
 Output:
@@ -227,7 +227,7 @@ otherwise indexing will be confused by each deletion.
     ws1 = CreateSampleWorkspace()
     ws2 = CreateSampleWorkspace()
     wsGroup = GroupWorkspaces("ws1,ws2")
-    
+
     DeleteWorkspace(wsGroup)
 
 .. include:: WorkspaceNavigation.txt

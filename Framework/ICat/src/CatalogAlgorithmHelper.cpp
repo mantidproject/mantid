@@ -23,24 +23,21 @@ using Poco::Net::HTTPResponse;
  * @returns An appropriate error message for the user if it exists. Otherwise an
  * empty string.
  */
-const std::string
-CatalogAlgorithmHelper::getIDSError(HTTPResponse::HTTPStatus &HTTPStatus,
-                                    std::istream &responseStream) {
-  std::set<HTTPResponse::HTTPStatus> successHTTPStatus = {
-      HTTPResponse::HTTP_OK, HTTPResponse::HTTP_CREATED,
-      HTTPResponse::HTTP_ACCEPTED};
+const std::string CatalogAlgorithmHelper::getIDSError(HTTPResponse::HTTPStatus &HTTPStatus,
+                                                      std::istream &responseStream) {
+  std::set<HTTPResponse::HTTPStatus> successHTTPStatus = {HTTPResponse::HTTP_OK, HTTPResponse::HTTP_CREATED,
+                                                          HTTPResponse::HTTP_ACCEPTED};
 
   // HTTP Status is not one of the positive statuses
   if (successHTTPStatus.find(HTTPStatus) == successHTTPStatus.end()) {
     // Attempt to parse response as json stream
     Json::Value json;
-    Json::Reader json_reader;
-    auto json_valid = json_reader.parse(responseStream, json);
+    ::Json::CharReaderBuilder readerBuilder;
+    std::string errors;
 
     // Error messages from IDS are returned as json
-    if (json_valid) {
-      return json.get("code", "UNKNOWN").asString() + ": " +
-             json.get("message", "Unknown Error").asString();
+    if (Json::parseFromStream(readerBuilder, responseStream, &json, &errors)) {
+      return json.get("code", "UNKNOWN").asString() + ": " + json.get("message", "Unknown Error").asString();
     } else {
       // Sometimes the HTTP server can throw an error (which is plain HTML)
       return "HTTP Error: " + std::to_string(HTTPStatus);

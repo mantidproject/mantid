@@ -18,7 +18,7 @@ The aim of this exercise is to use Mantid to write a script, which excludes this
 
 #. :ref:`algm-Load` - Load the given HRPD data set, HRP39182.RAW into a workspace called 'HRP39182'
 #. :ref:`algm-MaskBins` - Mask out the bins corresponding to the pulse with XMin=19990 and XMax=20040
-#. Repeat the previous step for the other 4 pulses, each of which is 20000 microseconds after the previous. *All MaskBins executions should happen on the same InputWorkspace so that all 5 pulses are masked from the same workspace. Hint: A loop might be useful.* 
+#. Repeat the previous step for the other 4 pulses, each of which is 20000 microseconds after the previous. *All MaskBins executions should happen on the same InputWorkspace so that all 5 pulses are masked from the same workspace. Hint: A loop might be useful.*
 #. :ref:`algm-AlignDetectors` - Correct the masked workspace for small variations in detector position, using the calibration file `hrpd_new_072_01_corr.cal`. (Note: This performs an explicit conversion to dSpacing)
 #. :ref:`algm-DiffractionFocussing` - Focus the data in the masked workspace using the same cal file as the previous step (called a grouping file here)
 
@@ -49,6 +49,6 @@ Merge, mask, correct and compare.
 #. :ref:`algm-MultiplyRange` - Calculate sample transmission of 95%.
 #. :ref:`algm-ConvertUnits` - Convert the data from TOF to Delta Energy. (Find the Efixed value as Ei in the Sample Logs for the workspace)
 #. :ref:`algm-DetectorEfficiencyCorUser` - Correct the data with the detector efficiency for this instrument.
-#. Compare the corrected with the unccorrected data, say bin 4 of spectrum number 7 (workspace index 6). 
+#. Compare the corrected with the unccorrected data, say bin 4 of spectrum number 7 (workspace index 6).
 
 :ref:`Solutions <01_pim_sol>`

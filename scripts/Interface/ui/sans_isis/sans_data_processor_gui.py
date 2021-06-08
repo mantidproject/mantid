@@ -116,10 +116,6 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
-        def on_row_inserted(self):
-            pass
-
-        @abstractmethod
         def on_rows_removed(self):
             pass
 
@@ -154,12 +150,13 @@ class SANSDataProcessorGui(QMainWindow,
             """
             pass
 
-    def __init__(self):
+    def __init__(self, parent=None, window_flags=None):
         """
         Initialise the interface
         """
-        super(QMainWindow, self).__init__()
-
+        super(QMainWindow, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.setupUi(self)
 
         # Listeners allow us to to notify all presenters
@@ -483,6 +480,7 @@ class SANSDataProcessorGui(QMainWindow,
     def _row_inserted(self, row_location):
         if row_location.depth() > 1:
             self.data_processor_table.removeRowAt(row_location)
+        self._call_settings_listeners(lambda listener: listener.on_insert_row())
 
     def _append_and_edit_at_child_row_requested(self):
         self.data_processor_table.appendAndEditAtChildRow()

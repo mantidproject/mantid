@@ -43,10 +43,8 @@ namespace {
  *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
  *  @throw  NotFoundException If the class is not registered in the factory
  **/
-Workspace_sptr createFromParentPtr(WorkspaceFactoryImpl &self,
-                                   const MatrixWorkspace_sptr &parent,
-                                   size_t NVectors = size_t(-1),
-                                   size_t XLength = size_t(-1),
+Workspace_sptr createFromParentPtr(WorkspaceFactoryImpl &self, const MatrixWorkspace_sptr &parent,
+                                   size_t NVectors = size_t(-1), size_t XLength = size_t(-1),
                                    size_t YLength = size_t(-1)) {
   return self.create(parent, NVectors, XLength, YLength);
 }
@@ -57,8 +55,7 @@ GNU_DIAG_OFF("unused-local-typedef")
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(createFromParent_Overload, createFromParentPtr,
-                                2, 5)
+BOOST_PYTHON_FUNCTION_OVERLOADS(createFromParent_Overload, createFromParentPtr, 2, 5)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createTable_Overload, createTable, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createPeaks_Overload, createPeaks, 0, 1)
 
@@ -73,39 +70,30 @@ void export_WorkspaceFactory() {
                                     "If the size parameters are passed then "
                                     "the workspace will be a different size.";
 
-  const char *createFromScratchDoc =
-      "Create a clean new worksapce of the given size.";
-  using createFromScratchPtr = MatrixWorkspace_sptr (WorkspaceFactoryImpl::*)(
-      const std::string &, const size_t &, const size_t &, const size_t &)
-      const;
+  const char *createFromScratchDoc = "Create a clean new worksapce of the given size.";
+  using createFromScratchPtr = MatrixWorkspace_sptr (WorkspaceFactoryImpl::*)(const std::string &, const size_t &,
+                                                                              const size_t &, const size_t &) const;
 
-  class_<WorkspaceFactoryImpl, boost::noncopyable>("WorkspaceFactoryImpl",
-                                                   no_init)
+  class_<WorkspaceFactoryImpl, boost::noncopyable>("WorkspaceFactoryImpl", no_init)
       .def("create", &createFromParentPtr,
-           createFromParent_Overload(createFromParentDoc,
-                                     (arg("self"), arg("parent"),
-                                      arg("NVectors") = -1, arg("XLength") = -1,
-                                      arg("YLength") = -1)))
+           createFromParent_Overload(createFromParentDoc, (arg("self"), arg("parent"), arg("NVectors") = -1,
+                                                           arg("XLength") = -1, arg("YLength") = -1)))
 
-      .def("create", (createFromScratchPtr)&WorkspaceFactoryImpl::create,
-           createFromScratchDoc, return_value_policy<AsType<Workspace_sptr>>(),
-           (arg("self"), arg("className"), arg("NVectors"), arg("XLength"),
-            arg("YLength")))
+      .def("create", (createFromScratchPtr)&WorkspaceFactoryImpl::create, createFromScratchDoc,
+           return_value_policy<AsType<Workspace_sptr>>(),
+           (arg("self"), arg("className"), arg("NVectors"), arg("XLength"), arg("YLength")))
 
       .def("createTable", &WorkspaceFactoryImpl::createTable,
            createTable_Overload(
                "Creates an empty TableWorkspace",
-               (arg("self"), arg("className") = "TableWorkspace"))
-               [return_value_policy<AsType<Workspace_sptr>>()])
+               (arg("self"), arg("className") = "TableWorkspace"))[return_value_policy<AsType<Workspace_sptr>>()])
 
       .def("createPeaks", &WorkspaceFactoryImpl::createPeaks,
            createPeaks_Overload(
                "Creates an empty PeaksWorkspace",
-               (arg("self"), arg("className") = "PeaksWorkspace"))
-               [return_value_policy<AsType<Workspace_sptr>>()])
+               (arg("self"), arg("className") = "PeaksWorkspace"))[return_value_policy<AsType<Workspace_sptr>>()])
 
-      .def("Instance", &WorkspaceFactory::Instance,
-           return_value_policy<reference_existing_object>(),
+      .def("Instance", &WorkspaceFactory::Instance, return_value_policy<reference_existing_object>(),
            "Returns the single instance of this class.")
       .staticmethod("Instance");
 }

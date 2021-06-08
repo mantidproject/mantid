@@ -22,9 +22,7 @@ class IncreasingAxisValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IncreasingAxisValidatorTest *createSuite() {
-    return new IncreasingAxisValidatorTest();
-  }
+  static IncreasingAxisValidatorTest *createSuite() { return new IncreasingAxisValidatorTest(); }
   static void destroySuite(IncreasingAxisValidatorTest *suite) { delete suite; }
 
   IncreasingAxisValidatorTest() {
@@ -38,8 +36,7 @@ public:
     m_wrong_ws->initialize(1, 3, 3);
 
     auto bad_points = {2.0, 1.0, 0.0};
-    std::copy(bad_points.begin(), bad_points.end(),
-              m_wrong_ws->mutableX(0).begin());
+    std::copy(bad_points.begin(), bad_points.end(), m_wrong_ws->mutableX(0).begin());
   }
 
   void testRight() { TS_ASSERT_EQUALS(validator.isValid(m_right_ws), ""); }

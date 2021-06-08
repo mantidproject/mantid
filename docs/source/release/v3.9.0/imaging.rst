@@ -20,9 +20,9 @@ Bug Fixes
 - Clicking Cancel now cancels the running reconstruction process.
 - The reconstruction scripts will now run with TomoPy v1.x.x, however the output is not tested with versions newer than 0.10.x.
 - Selecting the Center of Rotation, Area for Normalsation and Region of Interest will now always follow the exact position of the mouse.
-- Multiple success/warning/error messages will no longer be shown after an operation. 
+- Multiple success/warning/error messages will no longer be shown after an operation.
 
-Work done on imaging has received funding from the Horizon 2020 Framework 
+Work done on imaging has received funding from the Horizon 2020 Framework
 Programme of the European Union under the SINE2020 project Grant No 654000.
 
 

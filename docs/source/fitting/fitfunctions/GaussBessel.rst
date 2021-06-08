@@ -27,7 +27,7 @@ where,
 and :math:`\phi` is the phase.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

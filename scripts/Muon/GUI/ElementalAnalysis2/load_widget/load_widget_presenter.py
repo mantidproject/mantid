@@ -80,6 +80,7 @@ class LoadWidgetPresenterEA(object):
         self.loadNotifier.notify_subscribers()
 
     def handle_run_widget_data_changed(self):
+        self._model.update_current_data()
         self.load_run_widget.update_view_from_model(self._model.runs)
         self.loadNotifier.notify_subscribers()
 

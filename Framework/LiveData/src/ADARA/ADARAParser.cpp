@@ -14,8 +14,8 @@ using namespace ADARA;
 /* ------------------------------------------------------------------------ */
 
 Parser::Parser(unsigned int initial_buffer_size, unsigned int max_pkt_size)
-    : m_size(initial_buffer_size), m_max_size(max_pkt_size), m_len(0),
-      m_restart_offset(0), m_oversize_len(0), m_oversize_offset(0) {
+    : m_size(initial_buffer_size), m_max_size(max_pkt_size), m_len(0), m_restart_offset(0), m_oversize_len(0),
+      m_oversize_offset(0) {
   m_buffer = new uint8_t[initial_buffer_size];
 
   last_bytes_read = -1;
@@ -96,8 +96,7 @@ int Parser::bufferParse(std::string &log_info, unsigned int max_packets) {
       processed++;
   }
 
-  while (valid_len >= PacketHeader::header_length() &&
-         processed < max_packets && !stopped) {
+  while (valid_len >= PacketHeader::header_length() && processed < max_packets && !stopped) {
 
     PacketHeader hdr(p);
 
@@ -234,10 +233,10 @@ int Parser::bufferParse(std::string &log_info, unsigned int max_packets) {
 }
 
 bool Parser::rxPacket(const Packet &pkt) {
-#define MAP_TYPE(pkt_type, obj_type)                                           \
-  case pkt_type: {                                                             \
-    obj_type raw(pkt.packet(), pkt.packet_length());                           \
-    return rxPacket(raw);                                                      \
+#define MAP_TYPE(pkt_type, obj_type)                                                                                   \
+  case pkt_type: {                                                                                                     \
+    obj_type raw(pkt.packet(), pkt.packet_length());                                                                   \
+    return rxPacket(raw);                                                                                              \
   }
 
   switch (pkt.base_type()) {
@@ -280,8 +279,8 @@ bool Parser::rxUnknownPkt(const Packet &pkt) {
   return false;
 }
 
-bool Parser::rxOversizePkt(const PacketHeader *hdr, const uint8_t * /*unused*/,
-                           unsigned int /*unused*/, unsigned int /*unused*/) {
+bool Parser::rxOversizePkt(const PacketHeader *hdr, const uint8_t * /*unused*/, unsigned int /*unused*/,
+                           unsigned int /*unused*/) {
   // NOTE: ADARA::PacketHeader *hdr can be NULL...! ;-o
   /* Default is to discard the data */
   if (hdr != nullptr)
@@ -289,10 +288,10 @@ bool Parser::rxOversizePkt(const PacketHeader *hdr, const uint8_t * /*unused*/,
   return false;
 }
 
-#define EXPAND_HANDLER(_class)                                                 \
-  bool Parser::rxPacket(const _class &pkt) {                                   \
-    (m_discarded_packets[pkt.base_type()])++;                                  \
-    return false;                                                              \
+#define EXPAND_HANDLER(_class)                                                                                         \
+  bool Parser::rxPacket(const _class &pkt) {                                                                           \
+    (m_discarded_packets[pkt.base_type()])++;                                                                          \
+    return false;                                                                                                      \
   }
 
 EXPAND_HANDLER(RawDataPkt)
@@ -327,8 +326,7 @@ void Parser::getDiscardedPacketsLogString(std::string &log_info) {
   // Append Each Discarded Packet Type Count...
   for (auto &discarded_packet : m_discarded_packets) {
     std::stringstream ss;
-    ss << std::hex << "0x" << discarded_packet.first << std::dec << "="
-       << discarded_packet.second << "; ";
+    ss << std::hex << "0x" << discarded_packet.first << std::dec << "=" << discarded_packet.second << "; ";
     log_info.append(ss.str());
 
     total_discarded += discarded_packet.second;

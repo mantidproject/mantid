@@ -26,17 +26,14 @@ namespace {
 // algorithm (a MatrixWorkspace).
 class setUpADSWithWorkspace {
 public:
-  setUpADSWithWorkspace(const Workspace_sptr &ws) {
-    AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
-  };
+  setUpADSWithWorkspace(const Workspace_sptr &ws) { AnalysisDataService::Instance().addOrReplace(inputWSName, ws); };
   ~setUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
 
   std::string const inputWSName = "inputData";
 };
 
 // Set only mandatory fields; input and output workspace
-IAlgorithm_sptr
-algorithmWithoutOptionalPropertiesSet(const std::string &inputWSName) {
+IAlgorithm_sptr algorithmWithoutOptionalPropertiesSet(const std::string &inputWSName) {
 
   auto alg = std::make_shared<MuonGroupingCounts>();
   alg->initialize();
@@ -49,34 +46,26 @@ algorithmWithoutOptionalPropertiesSet(const std::string &inputWSName) {
 
 // Set up algorithm without any optional properties
 // i.e. just the input workspace and group name.
-IAlgorithm_sptr
-setUpAlgorithmWithoutOptionalProperties(const WorkspaceGroup_sptr &ws,
-                                        const std::string &name) {
+IAlgorithm_sptr setUpAlgorithmWithoutOptionalProperties(const WorkspaceGroup_sptr &ws, const std::string &name) {
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg =
-      algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   alg->setProperty("GroupName", name);
   return alg;
 }
 
 // Set up algorithm with GroupName applied
-IAlgorithm_sptr setUpAlgorithmWithGroupName(const WorkspaceGroup_sptr &ws,
-                                            const std::string &name) {
+IAlgorithm_sptr setUpAlgorithmWithGroupName(const WorkspaceGroup_sptr &ws, const std::string &name) {
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg =
-      algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   alg->setProperty("GroupName", name);
   return alg;
 }
 
 // Set up algorithm with TimeOffset applied
-IAlgorithm_sptr
-setUpAlgorithmWithGroupNameAndDetectors(const WorkspaceGroup_sptr &ws,
-                                        const std::string &name,
-                                        const std::vector<int> &detectors) {
+IAlgorithm_sptr setUpAlgorithmWithGroupNameAndDetectors(const WorkspaceGroup_sptr &ws, const std::string &name,
+                                                        const std::vector<int> &detectors) {
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg =
-      algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   alg->setProperty("GroupName", name);
   alg->setProperty("Grouping", detectors);
   return alg;
@@ -93,9 +82,7 @@ MatrixWorkspace_sptr getOutputWorkspace(const IAlgorithm_sptr &alg) {
 
 class MuonGroupingCountsTest : public CxxTest::TestSuite {
 public:
-  static MuonGroupingCountsTest *createSuite() {
-    return new MuonGroupingCountsTest();
-  }
+  static MuonGroupingCountsTest *createSuite() { return new MuonGroupingCountsTest(); }
   static void destroySuite(MuonGroupingCountsTest *suite) { delete suite; }
 
   // --------------------------------------------------------------------------
@@ -129,8 +116,7 @@ public:
     auto alg = std::make_shared<MuonGroupingCounts>();
     alg->initialize();
 
-    TS_ASSERT_THROWS_ANYTHING(
-        alg->setProperty("InputWorkspace", setup.inputWSName));
+    TS_ASSERT_THROWS_ANYTHING(alg->setProperty("InputWorkspace", setup.inputWSName));
   }
 
   void test_that_input_workspace_can_be_a_WorkspaceGroup() {
@@ -140,22 +126,19 @@ public:
     auto alg = std::make_shared<MuonGroupingCounts>();
     alg->initialize();
 
-    TSM_ASSERT_THROWS_NOTHING(
-        "", alg->setProperty("InputWorkspace", setup.inputWSName))
+    TSM_ASSERT_THROWS_NOTHING("", alg->setProperty("InputWorkspace", setup.inputWSName))
   }
 
   void test_that_group_name_must_be_supplied() {
 
     auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "group1");
     setUpADSWithWorkspace setup(ws);
-    IAlgorithm_sptr alg =
-        algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+    IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
 
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
-  void
-  test_that_group_names_with_alphanumeric_characters_or_underscores_are_allowed() {
+  void test_that_group_names_with_alphanumeric_characters_or_underscores_are_allowed() {
     auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "group1");
 
     std::vector<std::string> validNames = {"fwd", "fwd2", "bwd_2"};
@@ -165,8 +148,7 @@ public:
     }
   }
 
-  void
-  test_that_exec_throws_if_group_name_is_not_alphanumeric_or_underscored() {
+  void test_that_exec_throws_if_group_name_is_not_alphanumeric_or_underscored() {
     auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "group1");
 
     std::vector<std::string> invalidNames = {"@", "fwd!", "#1", "fwd @", "   "};
@@ -176,8 +158,7 @@ public:
     }
   }
 
-  void
-  test_that_cannot_add_spectra_to_group_which_exceed_those_in_the_workspace() {
+  void test_that_cannot_add_spectra_to_group_which_exceed_those_in_the_workspace() {
     auto ws = createMultiPeriodWorkspaceGroup(1, 5, 10, "group1");
 
     std::vector<int> detectors = {6, 7, 8, 9, 10};
@@ -205,8 +186,7 @@ public:
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
-  void
-  test_that_supplying_too_many_periods_to_SummedPeriods_throws_on_execute() {
+  void test_that_supplying_too_many_periods_to_SummedPeriods_throws_on_execute() {
     auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
     std::vector<int> detectors = {1, 2, 3};
     auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);
@@ -217,8 +197,7 @@ public:
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
-  void
-  test_that_supplying_too_many_periods_to_SubtractedPeriods_throws_on_execute() {
+  void test_that_supplying_too_many_periods_to_SubtractedPeriods_throws_on_execute() {
     auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
     std::vector<int> detectors = {1, 2, 3};
     auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);

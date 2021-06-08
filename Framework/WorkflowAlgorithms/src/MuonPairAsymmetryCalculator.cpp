@@ -26,14 +26,13 @@ namespace WorkflowAlgorithms {
  * group of the pair
  * @param alpha :: [input] Alpha (balance) value of the pair
  */
-MuonPairAsymmetryCalculator::MuonPairAsymmetryCalculator(
-    const API::WorkspaceGroup_sptr &inputWS,
-    const std::vector<int> &summedPeriods,
-    const std::vector<int> &subtractedPeriods, const int firstPairIndex,
-    const int secondPairIndex, const double alpha)
-    : IMuonAsymmetryCalculator(inputWS, summedPeriods, subtractedPeriods),
-      m_alpha(alpha), m_firstPairIndex(firstPairIndex),
-      m_secondPairIndex(secondPairIndex) {}
+MuonPairAsymmetryCalculator::MuonPairAsymmetryCalculator(const API::WorkspaceGroup_sptr &inputWS,
+                                                         const std::vector<int> &summedPeriods,
+                                                         const std::vector<int> &subtractedPeriods,
+                                                         const int firstPairIndex, const int secondPairIndex,
+                                                         const double alpha)
+    : IMuonAsymmetryCalculator(inputWS, summedPeriods, subtractedPeriods), m_alpha(alpha),
+      m_firstPairIndex(firstPairIndex), m_secondPairIndex(secondPairIndex) {}
 
 /**
  * Calculates asymmetry for the given pair of groups, using the alpha value
@@ -73,8 +72,7 @@ MatrixWorkspace_sptr MuonPairAsymmetryCalculator::calculate() const {
  * @param inputWS :: [input] Workspace to calculate asymmetry from
  * @returns Result of the calculation
  */
-MatrixWorkspace_sptr MuonPairAsymmetryCalculator::asymmetryCalc(
-    const Workspace_sptr &inputWS) const {
+MatrixWorkspace_sptr MuonPairAsymmetryCalculator::asymmetryCalc(const Workspace_sptr &inputWS) const {
   MatrixWorkspace_sptr outWS;
 
   if (inputWS) {

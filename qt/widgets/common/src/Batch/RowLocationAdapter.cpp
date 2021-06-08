@@ -9,11 +9,9 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-RowLocationAdapter::RowLocationAdapter(QStandardItemModel const &model)
-    : m_model(model) {}
+RowLocationAdapter::RowLocationAdapter(QStandardItemModel const &model) : m_model(model) {}
 
-RowLocation
-RowLocationAdapter::atIndex(QModelIndexForMainModel const &index) const {
+RowLocation RowLocationAdapter::atIndex(QModelIndexForMainModel const &index) const {
   if (index.isValid()) {
     auto pathComponents = RowPath();
     auto currentIndex = index.untyped();
@@ -27,8 +25,7 @@ RowLocationAdapter::atIndex(QModelIndexForMainModel const &index) const {
   }
 }
 
-QModelIndex RowLocationAdapter::walkFromRootToParentIndexOf(
-    RowLocation const &location) const {
+QModelIndex RowLocationAdapter::walkFromRootToParentIndexOf(RowLocation const &location) const {
   auto parentIndex = QModelIndex();
   auto &path = location.path();
   for (auto it = path.cbegin(); it != path.cend() - 1; ++it)
@@ -36,9 +33,8 @@ QModelIndex RowLocationAdapter::walkFromRootToParentIndexOf(
   return parentIndex;
 }
 
-boost::optional<QModelIndexForMainModel>
-RowLocationAdapter::indexIfExistsAt(RowLocation const &location,
-                                    int column) const {
+boost::optional<QModelIndexForMainModel> RowLocationAdapter::indexIfExistsAt(RowLocation const &location,
+                                                                             int column) const {
   if (location.isRoot()) {
     return fromMainModel(QModelIndex(), m_model);
   } else {
@@ -51,8 +47,7 @@ RowLocationAdapter::indexIfExistsAt(RowLocation const &location,
   }
 }
 
-QModelIndexForMainModel RowLocationAdapter::indexAt(RowLocation const &location,
-                                                    int column) const {
+QModelIndexForMainModel RowLocationAdapter::indexAt(RowLocation const &location, int column) const {
   auto maybeIndex = indexIfExistsAt(location, column);
   if (maybeIndex.is_initialized())
     return maybeIndex.get();

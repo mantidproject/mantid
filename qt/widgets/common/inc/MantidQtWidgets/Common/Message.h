@@ -35,16 +35,13 @@ public:
   /// Default constuctor required by Qt meta-type system
   Message();
   /// Construct a message from a QString with a given priority (default=notice)
-  Message(const QString &text, Priority priority = Priority::PRIO_NOTICE,
-          const QString &scriptPath = "");
+  Message(const QString &text, Priority priority = Priority::PRIO_NOTICE, const QString &scriptPath = "");
   /// Construct a message from a std::string with a given priority
   /// (default=notice)
-  Message(const std::string &text, Priority priority = Priority::PRIO_NOTICE,
-          const QString &scriptPath = "");
+  Message(const std::string &text, Priority priority = Priority::PRIO_NOTICE, const QString &scriptPath = "");
   /// Construct a message from a c-style string and a given priority
   /// (default=notice)
-  Message(const char *text, Priority priority = Priority::PRIO_NOTICE,
-          const QString &scriptPath = "");
+  Message(const char *text, Priority priority = Priority::PRIO_NOTICE, const QString &scriptPath = "");
   /// Copy constructor
   Message(const Message &msg);
   /// Copy assignment

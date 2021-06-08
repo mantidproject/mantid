@@ -35,8 +35,7 @@ namespace {
 
 // Set algorithm properties to sensible defaults (assuming data with 10 groups)
 // Use when specifying groups manually
-void setPairAlgorithmProperties(ApplyMuonDetectorGroupPairing &alg,
-                                const std::string &inputWSName,
+void setPairAlgorithmProperties(ApplyMuonDetectorGroupPairing &alg, const std::string &inputWSName,
                                 const std::string &wsGroupName) {
   alg.setProperty("SpecifyGroupsManually", true);
   alg.setProperty("PairName", "test");
@@ -57,9 +56,8 @@ void setPairAlgorithmProperties(ApplyMuonDetectorGroupPairing &alg,
 
 // Set algorithm properties to sensible defaults (assuming data with 10 groups)
 // Use when entering workspaces to pair
-void setPairAlgorithmPropertiesForInputWorkspace(
-    ApplyMuonDetectorGroupPairing &alg, const std::string &inputWSName,
-    const std::string &wsGroupName) {
+void setPairAlgorithmPropertiesForInputWorkspace(ApplyMuonDetectorGroupPairing &alg, const std::string &inputWSName,
+                                                 const std::string &wsGroupName) {
   alg.setProperty("SpecifyGroupsManually", false);
   alg.setProperty("PairName", "test");
   alg.setProperty("Alpha", 1.0);
@@ -90,17 +88,11 @@ public:
 class ApplyMuonDetectorGroupPairingTest : public CxxTest::TestSuite {
 public:
   // WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  ApplyMuonDetectorGroupPairingTest() {
-    Mantid::API::FrameworkManager::Instance();
-  }
+  ApplyMuonDetectorGroupPairingTest() { Mantid::API::FrameworkManager::Instance(); }
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ApplyMuonDetectorGroupPairingTest *createSuite() {
-    return new ApplyMuonDetectorGroupPairingTest();
-  }
-  static void destroySuite(ApplyMuonDetectorGroupPairingTest *suite) {
-    delete suite;
-  }
+  static ApplyMuonDetectorGroupPairingTest *createSuite() { return new ApplyMuonDetectorGroupPairingTest(); }
+  static void destroySuite(ApplyMuonDetectorGroupPairingTest *suite) { delete suite; }
 
   void test_Init() {
     ApplyMuonDetectorGroupPairing alg;
@@ -109,16 +101,14 @@ public:
   }
 
   void test_nonAlphanumericPairNamesNotAllowed() {
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
     alg.initialize();
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
 
-    std::vector<std::string> badPairNames = {"",  "!", ";name;", ".",
-                                             ",", ";", ":"};
+    std::vector<std::string> badPairNames = {"", "!", ";name;", ".", ",", ";", ":"};
     for (auto badName : badPairNames) {
       alg.setProperty("PairName", badName);
       TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
@@ -127,8 +117,7 @@ public:
   }
 
   void test_zeroOrNegativeAlphaNotAllowed() {
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -144,8 +133,7 @@ public:
   }
 
   void test_throwsIfTwoGroupsAreIdentical() {
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -153,8 +141,7 @@ public:
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
 
     std::vector<std::string> badGroup1 = {"1-5", "1-5", "1-5", "1-5"};
-    std::vector<std::string> badGroup2 = {"1-5", "1,2,3,4,5", "5,4,3,2,1",
-                                          "1,2,2,3,4,5,5,5"};
+    std::vector<std::string> badGroup2 = {"1-5", "1,2,3,4,5", "5,4,3,2,1", "1,2,2,3,4,5,5,5"};
     for (size_t i = 0; i < badGroup1.size(); i++) {
       alg.setProperty("Group1", badGroup1[i]);
       alg.setProperty("Group2", badGroup2[i]);
@@ -164,8 +151,7 @@ public:
   }
 
   void test_throwsIfTimeMinGreaterThanTimeMax() {
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -183,8 +169,7 @@ public:
     // periods are set to "1" and "" and so no checks are needed.
     int nPeriods = 2;
     WorkspaceGroup_sptr ws =
-        MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
-            nPeriods, 10, 10, "MuonAnalysis");
+        MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(nPeriods, 10, 10, "MuonAnalysis");
     ;
     setUpADSWithWorkspace setup(ws);
 
@@ -210,8 +195,7 @@ public:
   }
 
   void test_producesOutputWorkspacesInWorkspaceGroup() {
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 5);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 5);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -226,8 +210,7 @@ public:
   }
 
   void test_outputWorkspacesHaveCorrectName() {
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 5);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 5);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -241,16 +224,15 @@ public:
 
   void test_workspacePairingHasCorrectAsymmetryValues() {
     MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
-            10, 10, MuonWorkspaceCreationHelper::yDataAsymmetry());
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10, MuonWorkspaceCreationHelper::yDataAsymmetry());
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
     alg.initialize();
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
     alg.execute();
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Current behaviour is to convert bin edge x-values to bin centre x-values
     // (point data) so there is on fewer x-value now.
@@ -268,8 +250,7 @@ public:
   }
 
   void test_timeOffsetShiftsTimeAxisCorrectly() {
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -277,8 +258,8 @@ public:
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
     alg.setProperty("TimeOffset", 0.2);
     alg.execute();
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Account for the bin edges to point data conversion
     double shift = 0.2 + 0.05;
@@ -289,8 +270,7 @@ public:
 
   void test_throwsIfRequestedDetectorIDsNotInWorkspace() {
 
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(5, 10);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(5, 10);
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -302,9 +282,7 @@ public:
   }
 
   void test_summingPeriodsGivesCorrectAsymmetryValues() {
-    WorkspaceGroup_sptr ws =
-        MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
-            4, 10, 10, "MuonAnalysis");
+    WorkspaceGroup_sptr ws = MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(4, 10, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -312,8 +290,8 @@ public:
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
     alg.setProperty("SummedPeriods", "1,2");
     alg.execute();
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Summation of periods occurs before asymmetry calculation
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
@@ -331,9 +309,7 @@ public:
   }
 
   void test_subtractingPeriodsGivesCorrectAsymmetryValues() {
-    WorkspaceGroup_sptr ws =
-        MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
-            4, 10, 10, "MuonAnalysis");
+    WorkspaceGroup_sptr ws = MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(4, 10, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -342,8 +318,8 @@ public:
     alg.setProperty("SummedPeriods", "1,2");
     alg.setProperty("SubtractedPeriods", "3");
     alg.execute();
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Summation of periods occurs before asymmetry calculation
     // Subtraction of periods occurs AFTER asymmetry calculation
@@ -364,8 +340,7 @@ public:
   void test_applyingDeadTimeCorrectionGivesCorrectAsymmetryValues() {
 
     MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
-            10, 10, MuonWorkspaceCreationHelper::yDataAsymmetry());
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10, MuonWorkspaceCreationHelper::yDataAsymmetry());
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -374,16 +349,15 @@ public:
 
     // Apply same dead time to every spectra
     std::vector<double> deadTimes(10, 0.0025);
-    ITableWorkspace_sptr deadTimeTable =
-        MuonWorkspaceCreationHelper::createDeadTimeTable(10, deadTimes);
+    ITableWorkspace_sptr deadTimeTable = MuonWorkspaceCreationHelper::createDeadTimeTable(10, deadTimes);
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyDeadTimeCorrection", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeadTimeTable", deadTimeTable));
 
     alg.execute();
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
@@ -400,19 +374,15 @@ public:
 
   void test_asymmetryValuesCorrectWhenEnteringWorkspacesByHand() {
 
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
     ApplyMuonDetectorGroupPairing alg;
     alg.initialize();
-    setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName,
-                                                setup.groupWSName);
-    MatrixWorkspace_sptr groupWS1 =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
-            1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(0.5, 0.1));
-    MatrixWorkspace_sptr groupWS2 =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
-            1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.0, 0.2));
+    setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName, setup.groupWSName);
+    MatrixWorkspace_sptr groupWS1 = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+        1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(0.5, 0.1));
+    MatrixWorkspace_sptr groupWS2 = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+        1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.0, 0.2));
     const std::string groupWS1Name = "EMU000012345; Group; fwd; Counts; #1_Raw";
     const std::string groupWS2Name = "EMU000012345; Group; bwd; Counts; #1_Raw";
     AnalysisDataService::Instance().addOrReplace(groupWS1Name, groupWS1);
@@ -423,8 +393,8 @@ public:
     alg.setProperty("InputWorkspace2", groupWS2Name);
     alg.execute();
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
@@ -442,19 +412,15 @@ public:
   void test_inputWorkspaceWithMultipleSpectraFails() {
     // We expect the input workspaces to have a single spectra.
 
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
     ApplyMuonDetectorGroupPairing alg;
     alg.initialize();
-    setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName,
-                                                setup.groupWSName);
-    MatrixWorkspace_sptr groupWS1 =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
-            2, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(0.5, 0.1));
-    MatrixWorkspace_sptr groupWS2 =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
-            1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.0, 0.2));
+    setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName, setup.groupWSName);
+    MatrixWorkspace_sptr groupWS1 = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+        2, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(0.5, 0.1));
+    MatrixWorkspace_sptr groupWS2 = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+        1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.0, 0.2));
     const std::string groupWS1Name = "EMU000012345; Group; fwd; Counts; #1_Raw";
     const std::string groupWS2Name = "EMU000012345; Group; bwd; Counts; #1_Raw";
     AnalysisDataService::Instance().addOrReplace(groupWS1Name, groupWS1);
@@ -470,19 +436,15 @@ public:
   void test_inputWorkspaceWithDifferentTimeAxisFails() {
     // e.g. rebin with non-rebin should throw an error from this algorithm.
 
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
     ApplyMuonDetectorGroupPairing alg;
     alg.initialize();
-    setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName,
-                                                setup.groupWSName);
-    MatrixWorkspace_sptr groupWS1 =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
-            1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(0.5, 0.1));
-    MatrixWorkspace_sptr groupWS2 =
-        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
-            1, 20, MuonWorkspaceCreationHelper::yDataAsymmetry(1.0, 0.2));
+    setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName, setup.groupWSName);
+    MatrixWorkspace_sptr groupWS1 = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+        1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(0.5, 0.1));
+    MatrixWorkspace_sptr groupWS2 = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+        1, 20, MuonWorkspaceCreationHelper::yDataAsymmetry(1.0, 0.2));
     const std::string groupWS1Name = "EMU000012345; Group; fwd; Counts; #1_Raw";
     const std::string groupWS2Name = "EMU000012345; Group; bwd; Counts; #1_Raw";
     AnalysisDataService::Instance().addOrReplace(groupWS1Name, groupWS1);

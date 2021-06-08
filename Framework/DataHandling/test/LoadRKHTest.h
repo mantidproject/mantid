@@ -24,8 +24,7 @@ public:
 
   // A sample file is in the repository
   LoadRKHTest()
-      : dataFile(""), tempFile("LoadRKH_test_file_2D"),
-        tempFile2("LoadRKH_test_file_1D_with_DX"),
+      : dataFile(""), tempFile("LoadRKH_test_file_2D"), tempFile2("LoadRKH_test_file_1D_with_DX"),
         tempFile3("LoadRKL_with_second_header") {
     dataFile = "DIRECT.041";
   }
@@ -63,8 +62,7 @@ public:
     loadrkh.setPropertyValue("OutputWorkspace", outputSpace);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 loadrkh.getPropertyValue("OutputWorkspace"))
+    TS_ASSERT_THROWS_NOTHING(result = loadrkh.getPropertyValue("OutputWorkspace"))
     TS_ASSERT(result == outputSpace);
 
     // Should now throw nothing
@@ -75,8 +73,7 @@ public:
     using namespace Mantid::DataObjects;
     // Now need to test the resultant workspace, first retrieve it
     Workspace_sptr rkhspace;
-    TS_ASSERT_THROWS_NOTHING(
-        rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr data = std::dynamic_pointer_cast<Workspace2D>(rkhspace);
 
     // The data in the 2D workspace does not match the file data directly
@@ -142,8 +139,7 @@ public:
     // Paths change, so this comparison does not work in general
     // TS_ASSERT_EQUALS( result, tempFile );
 
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 rkhAlg.getPropertyValue("OutputWorkspace"))
+    TS_ASSERT_THROWS_NOTHING(result = rkhAlg.getPropertyValue("OutputWorkspace"))
     TS_ASSERT(result == outputSpace);
 
     // Should now throw nothing
@@ -154,8 +150,7 @@ public:
     using namespace Mantid::DataObjects;
     // Now need to test the resultant workspace, first retrieve it
     Workspace_sptr rkhspace;
-    TS_ASSERT_THROWS_NOTHING(
-        rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr data = std::dynamic_pointer_cast<Workspace2D>(rkhspace);
 
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 2);
@@ -210,8 +205,7 @@ public:
     // Assert
     std::string result;
     TS_ASSERT_THROWS_NOTHING(result = rkhAlg.getPropertyValue("Filename"))
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 rkhAlg.getPropertyValue("OutputWorkspace"))
+    TS_ASSERT_THROWS_NOTHING(result = rkhAlg.getPropertyValue("OutputWorkspace"))
     TS_ASSERT(result == outputSpace);
     TS_ASSERT_THROWS_NOTHING(rkhAlg.execute());
     TS_ASSERT(rkhAlg.isExecuted());
@@ -221,8 +215,7 @@ public:
     // Now need to test the resultant workspace, first retrieve it
     Workspace_sptr rkhspace;
 
-    TS_ASSERT_THROWS_NOTHING(
-        rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr data = std::dynamic_pointer_cast<Workspace2D>(rkhspace);
 
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 1);
@@ -269,8 +262,7 @@ public:
     // Assert
     std::string result;
     TS_ASSERT_THROWS_NOTHING(result = rkhAlg.getPropertyValue("Filename"))
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 rkhAlg.getPropertyValue("OutputWorkspace"))
+    TS_ASSERT_THROWS_NOTHING(result = rkhAlg.getPropertyValue("OutputWorkspace"))
     TS_ASSERT(result == outputSpace);
     TS_ASSERT_THROWS_NOTHING(rkhAlg.execute());
     TS_ASSERT(rkhAlg.isExecuted());
@@ -280,8 +272,7 @@ public:
     // Now need to test the resultant workspace, first retrieve it
     Workspace_sptr rkhspace;
 
-    TS_ASSERT_THROWS_NOTHING(
-        rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr data = std::dynamic_pointer_cast<Workspace2D>(rkhspace);
 
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 1);

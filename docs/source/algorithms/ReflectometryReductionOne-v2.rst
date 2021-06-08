@@ -114,7 +114,7 @@ When normalizing by transmission runs, i.e. when one or two transmission runs
 are given, the spectrum numbers in the
 transmission workspaces must be the same as those in the input run
 workspace. You can pass individual processing instructions to the transmission
-runs. 
+runs.
 
 When normalizing by transmission run, this algorithm will run
 :ref:`algm-CreateTransmissionWorkspace` as a child algorithm, with properties :literal:`WavelengthMin`,

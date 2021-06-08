@@ -26,16 +26,16 @@ def main():
     """Parse the options and execute the program."""
     usage = \
     """Usage: %prog [options] [test1 [test2 [...]]]
-    
+
     If you provide one or more tests, this will run the provided tests.
     Otherwise, it will look for tests in the current directory and run them all.
     """
     # option parsing
-    parser = OptionParser(usage) 
+    parser = OptionParser(usage)
 
     parser.set_defaults(
             action='run',
-            verbose=True) 
+            verbose=True)
 
     parser.add_option("-c", "--clean",
             action='store_const', const='clean', dest='action',
@@ -57,7 +57,7 @@ def main():
             help='turn on debug output.')
 
     (options, args) = parser.parse_args()
- 
+
     if options.debug or options.verbose:
         tool_stdout = None
     # gather the tests
@@ -75,7 +75,7 @@ def main():
     elif options.action == 'clean':
         for t in tests:
             clean_test(t)
-        
+
 
 def crawl_tests(target):
     """Gather the directories in the test directory."""
@@ -153,7 +153,7 @@ def read_opts(t):
             'links'          : {}
             }
     exec(open(join(t, "TestDef.py")), opts)
-    return opts 
+    return opts
 
 
 def setup_env(t, opts):
@@ -214,7 +214,7 @@ def run_scons(t, opts):
         os.chdir(cwd) # clean up
         raise e
     os.chdir(cwd)
-    
+
 if __name__ == "__main__":
     main()
 

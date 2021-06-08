@@ -21,17 +21,13 @@ class FrequencyVariancesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FrequencyVariancesTest *createSuite() {
-    return new FrequencyVariancesTest();
-  }
+  static FrequencyVariancesTest *createSuite() { return new FrequencyVariancesTest(); }
   static void destroySuite(FrequencyVariancesTest *suite) { delete suite; }
 
   void test_has_correct_mixins() {
     FrequencyVariances data;
     TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
-        (dynamic_cast<detail::VarianceVectorOf<FrequencyVariances, HistogramE,
-                                               FrequencyStandardDeviations> &>(
-            data))));
+        (dynamic_cast<detail::VarianceVectorOf<FrequencyVariances, HistogramE, FrequencyStandardDeviations> &>(data))));
   }
 
   void test_construct_default() {
@@ -65,29 +61,25 @@ public:
   void test_construct_from_empty_CountVariances_null_BinEdges() {
     const CountVariances counts(0);
     const BinEdges edges{};
-    TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
-                     const std::logic_error &);
+    TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges), const std::logic_error &);
   }
 
   void test_construct_from_empty_CountVariances_size_mismatch() {
     const CountVariances counts(0);
     const BinEdges edges{1.0, 2.0};
-    TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
-                     const std::logic_error &);
+    TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges), const std::logic_error &);
   }
 
   void test_construct_from_CountVariances_null_BinEdges() {
     const CountVariances counts(1);
     const BinEdges edges{};
-    TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
-                     const std::logic_error &);
+    TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges), const std::logic_error &);
   }
 
   void test_construct_from_CountVariances_size_mismatch() {
     const CountVariances counts(2);
     const BinEdges edges{1.0, 2.0};
-    TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
-                     const std::logic_error &);
+    TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges), const std::logic_error &);
   }
 
   void test_construct_from_CountVariances() {

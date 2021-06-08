@@ -37,13 +37,11 @@ protected:
   virtual void currentFinished() = 0;
 };
 
-template <typename Callback>
-class MANTIDQT_INDIRECT_DLL QtLazyAsyncRunner : public QtLazyAsyncRunnerBase {
+template <typename Callback> class MANTIDQT_INDIRECT_DLL QtLazyAsyncRunner : public QtLazyAsyncRunnerBase {
 public:
   using ReturnType = typename std::result_of<Callback()>::type;
 
-  explicit QtLazyAsyncRunner()
-      : m_current(), m_next(boost::none), m_initialized(false) {
+  explicit QtLazyAsyncRunner() : m_current(), m_next(boost::none), m_initialized(false) {
     connect(&m_current, SIGNAL(finished()), this, SLOT(currentFinishedBase()));
   }
 

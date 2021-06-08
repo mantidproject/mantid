@@ -38,6 +38,7 @@ correction on data using functions extracted from
 :ref:`SNSPowderReduction <algm-SNSPowderReduction>` so they
 can be called from different algorithms.
 
+
 .. code-block:: python
 
     from mantid.kernel import PropertyManagerDataService
@@ -59,6 +60,14 @@ can be called from different algorithms.
     props = PropertyManagerDataService.retrieve("props")
 
     # Sample only absorption correction
-    abs_sample = absorptioncorrutils.calculate_absorption_correction("PG3_46577.nxs.h5", "SampleOnly", props, "Si", 1.165, element_size=2)
+    abs_sample, _ = absorptioncorrutils.calculate_absorption_correction(
+        "PG3_46577.nxs.h5",  # input filename
+        "SampleOnly",        # absorption correction method
+        props,               # PropertyManager
+        "Si",                # sample_formula
+        1.165,               # mass_density
+        element_size=2,      # integration element cube in mm
+        cache_dir="/tmp",    # cache diretory for speeding up repeated calculation
+        )
 
 

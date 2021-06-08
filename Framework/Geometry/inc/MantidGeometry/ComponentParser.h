@@ -24,13 +24,10 @@ namespace Geometry {
 class DLLExport ComponentParser : public Poco::XML::ContentHandler {
 public:
   /// Signals start of element
-  void startElement(const Poco::XML::XMLString &,
-                    const Poco::XML::XMLString &localName,
-                    const Poco::XML::XMLString &,
+  void startElement(const Poco::XML::XMLString &, const Poco::XML::XMLString &localName, const Poco::XML::XMLString &,
                     const Poco::XML::Attributes &attr) override;
   /// Signals end of element
-  void endElement(const Poco::XML::XMLString &,
-                  const Poco::XML::XMLString &localName,
+  void endElement(const Poco::XML::XMLString &, const Poco::XML::XMLString &localName,
                   const Poco::XML::XMLString &) override;
 
   void characters(const Poco::XML::XMLChar[], int, int) override;
@@ -42,19 +39,14 @@ public:
   // These functions must be present as they are abstract in the base class.
   // They are not used them here.
   /// Signals start of XML document
-  void startDocument() override {}                                ///< Not used
-  void setDocumentLocator(const Poco::XML::Locator *) override {} ///< Not used
-  void endDocument() override {}                                  ///< Not used
-  void ignorableWhitespace(const Poco::XML::XMLChar[], int, int) override {
-  } ///< Not used
-  void processingInstruction(const Poco::XML::XMLString &,
-                             const Poco::XML::XMLString &) override {
-  } ///< Not used
-  void startPrefixMapping(const Poco::XML::XMLString &,
-                          const Poco::XML::XMLString &) override {
-  }                                                               ///< Not used
-  void endPrefixMapping(const Poco::XML::XMLString &) override {} ///< Not used
-  void skippedEntity(const Poco::XML::XMLString &) override {}    ///< Not used
+  void startDocument() override {}                                                                   ///< Not used
+  void setDocumentLocator(const Poco::XML::Locator *) override {}                                    ///< Not used
+  void endDocument() override {}                                                                     ///< Not used
+  void ignorableWhitespace(const Poco::XML::XMLChar[], int, int) override {}                         ///< Not used
+  void processingInstruction(const Poco::XML::XMLString &, const Poco::XML::XMLString &) override {} ///< Not used
+  void startPrefixMapping(const Poco::XML::XMLString &, const Poco::XML::XMLString &) override {}    ///< Not used
+  void endPrefixMapping(const Poco::XML::XMLString &) override {}                                    ///< Not used
+  void skippedEntity(const Poco::XML::XMLString &) override {}                                       ///< Not used
 
 private:
   /// The components currently being built up.

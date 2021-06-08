@@ -16,9 +16,7 @@ class ChebyshevSeriesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ChebyshevSeriesTest *createSuite() {
-    return new ChebyshevSeriesTest();
-  }
+  static ChebyshevSeriesTest *createSuite() { return new ChebyshevSeriesTest(); }
   static void destroySuite(ChebyshevSeriesTest *suite) { delete suite; }
 
   void test_expected_values_for_x_in_range() {

@@ -15,19 +15,15 @@ using namespace Mantid::Poldi;
 
 class UncertainValueIOTest : public CxxTest::TestSuite {
 public:
-  static UncertainValueIOTest *createSuite() {
-    return new UncertainValueIOTest();
-  }
+  static UncertainValueIOTest *createSuite() { return new UncertainValueIOTest(); }
   static void destroySuite(UncertainValueIOTest *suite) { delete suite; }
 
   void testToString() {
     UncertainValue value(4.0);
-    TS_ASSERT_EQUALS(UncertainValueIO::toString(value),
-                     std::string("4.000000"));
+    TS_ASSERT_EQUALS(UncertainValueIO::toString(value), std::string("4.000000"));
 
     UncertainValue otherValue(4.0, 4.0);
-    TS_ASSERT_EQUALS(UncertainValueIO::toString(otherValue),
-                     std::string("4.000000 +/- 4.000000"));
+    TS_ASSERT_EQUALS(UncertainValueIO::toString(otherValue), std::string("4.000000 +/- 4.000000"));
   }
 
   void testFromString() {
@@ -47,23 +43,18 @@ public:
     TS_ASSERT_EQUALS(two.error(), 1.0);
 
     std::string invalidOne("asdf");
-    TS_ASSERT_THROWS(UncertainValueIO::fromString(invalidOne),
-                     const boost::bad_lexical_cast &);
+    TS_ASSERT_THROWS(UncertainValueIO::fromString(invalidOne), const boost::bad_lexical_cast &);
 
     std::string invalidTwo("4.0 +/- 3.0 +/- 1.0");
-    TS_ASSERT_THROWS(UncertainValueIO::fromString(invalidTwo),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(UncertainValueIO::fromString(invalidTwo), const std::runtime_error &);
   }
 
   void testComplementarity() {
     std::string uncertainString("4.000000 +/- 1.000000");
-    TS_ASSERT_EQUALS(UncertainValueIO::toString(
-                         UncertainValueIO::fromString(uncertainString)),
-                     uncertainString);
+    TS_ASSERT_EQUALS(UncertainValueIO::toString(UncertainValueIO::fromString(uncertainString)), uncertainString);
 
     UncertainValue uncertainValue(4.0, 1.0);
-    UncertainValue convertedValue = UncertainValueIO::fromString(
-        UncertainValueIO::toString(uncertainValue));
+    UncertainValue convertedValue = UncertainValueIO::fromString(UncertainValueIO::toString(uncertainValue));
     TS_ASSERT_EQUALS(convertedValue.value(), uncertainValue.value());
     TS_ASSERT_EQUALS(convertedValue.error(), uncertainValue.error());
   }

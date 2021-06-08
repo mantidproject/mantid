@@ -41,9 +41,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Utility";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Utility"; }
 
 private:
   void init() override;
@@ -58,16 +56,12 @@ private:
 protected: // for testing
   void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
                                  DataObjects::TableWorkspace_sptr &targWS);
-  void
-  buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
-                              DataObjects::TableWorkspace_sptr &targWS);
-  void updateMasksState(const API::MatrixWorkspace_const_sptr &inputWS,
-                        DataObjects::TableWorkspace_sptr &targWS);
+  void buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
+                                   DataObjects::TableWorkspace_sptr &targWS);
+  void updateMasksState(const API::MatrixWorkspace_const_sptr &inputWS, DataObjects::TableWorkspace_sptr &targWS);
   // build a table workspace corresponding to the input matrix workspace
-  std::shared_ptr<DataObjects::TableWorkspace>
-  createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS);
-  bool
-  isDetInfoLost(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D) const;
+  std::shared_ptr<DataObjects::TableWorkspace> createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS);
+  bool isDetInfoLost(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D) const;
   // helper function to get efixed if it is there or not;
   double getEi(const API::MatrixWorkspace_const_sptr &inputWS) const;
 };

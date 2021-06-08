@@ -43,11 +43,11 @@ Usage
     ###### Simulates Load workspace for and Indirect spectrometer #################
     tof_ws = CreateSimulationWorkspace(Instrument='MAR',BinParams=[-50,2,50],UnitX='TOF')
     SetInstrumentParameter(tof_ws,ParameterName='t0',ParameterType='Number',Value='0.5')
-    SetInstrumentParameter(tof_ws,ParameterName='efixed',ParameterType='Number',Value='30.')    
+    SetInstrumentParameter(tof_ws,ParameterName='efixed',ParameterType='Number',Value='30.')
     ###### Convert data to format acceptable by ConvertToYSpace
     tof_ws = ConvertToPointData(tof_ws)
     ###### Convert to Y Space
-    wsY=ConvertToYSpace(InputWorkspace='tof_ws',Mass='30')    
+    wsY=ConvertToYSpace(InputWorkspace='tof_ws',Mass='30')
     #
     # Look at sample results:
     print('part of the converted workspace:')
@@ -58,7 +58,7 @@ Usage
 .. testcleanup:: ExConvetToYSp
 
    DeleteWorkspace(wsY)
-   DeleteWorkspace(tof_ws)   
+   DeleteWorkspace(tof_ws)
 
 **Output:**
 

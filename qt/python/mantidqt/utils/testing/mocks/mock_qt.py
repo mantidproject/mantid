@@ -14,6 +14,9 @@ try:
     class MockQTableViewModel:
         def __init__(self):
             self.type = MatrixWorkspaceTableViewModelType.x
+            self.createIndex = Mock()
+            self.data = Mock()
+
 except ImportError:
     pass
 
@@ -57,6 +60,7 @@ class MockQTableView:
         self.verticalHeader = Mock(return_value=self.mock_verticalHeader)
         self.setModel = Mock()
         self.mock_model = MockQTableViewModel()
+
         self.model = Mock(return_value=self.mock_model)
 
         self.mock_selection_model = MockQSelectionModel()

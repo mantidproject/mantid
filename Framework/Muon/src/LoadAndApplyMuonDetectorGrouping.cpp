@@ -37,20 +37,15 @@ std::string plotTypeToString(const Mantid::Muon::PlotType &plotType) {
   return "Counts";
 }
 
-void throwIfGroupNotInPair(const std::string &pairName,
-                           const std::string &pairGroup,
+void throwIfGroupNotInPair(const std::string &pairName, const std::string &pairGroup,
                            const std::vector<std::string> &groupNames) {
-  bool group1inPair = (std::find(groupNames.begin(), groupNames.end(),
-                                 pairGroup) != groupNames.end());
+  bool group1inPair = (std::find(groupNames.begin(), groupNames.end(), pairGroup) != groupNames.end());
   if (!group1inPair) {
-    throw std::invalid_argument("Pairing " + pairName + " : required group " +
-                                pairGroup + " is missing");
+    throw std::invalid_argument("Pairing " + pairName + " : required group " + pairGroup + " is missing");
   }
 }
 
-void throwIfGroupsNotInPair(const std::string &pairName,
-                            const std::string &pairGroup1,
-                            const std::string &pairGroup2,
+void throwIfGroupsNotInPair(const std::string &pairName, const std::string &pairGroup1, const std::string &pairGroup2,
                             const std::vector<std::string> &groupNames) {
   throwIfGroupNotInPair(pairName, pairGroup1, groupNames);
   throwIfGroupNotInPair(pairName, pairGroup2, groupNames);
@@ -72,71 +67,50 @@ DECLARE_ALGORITHM(LoadAndApplyMuonDetectorGrouping)
 void LoadAndApplyMuonDetectorGrouping::init() {
   std::string emptyString("");
 
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", API::FileProperty::Load,
-                                     ".xml"),
-      "The XML file containing the grouping and pairing information");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", API::FileProperty::Load, ".xml"),
+                  "The XML file containing the grouping and pairing information");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>(
-          "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
+      std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input workspace containing data from detectors that the "
       "grouping/pairing will be applied to.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "WorkspaceGroup", "", Direction::InOut, PropertyMode::Optional),
-      "The workspaces created by the algorithm will be placed inside this "
-      "group. If not specified will save to \"MuonAnalysisGroup\" ");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("WorkspaceGroup", "", Direction::InOut,
+                                                                      PropertyMode::Optional),
+                  "The workspaces created by the algorithm will be placed inside this "
+                  "group. If not specified will save to \"MuonAnalysisGroup\" ");
 
-  declareProperty(
-      "AddGroupingTable", false,
-      "Whether to add a TableWorkspace of the groupings to the ADS.");
+  declareProperty("AddGroupingTable", false, "Whether to add a TableWorkspace of the groupings to the ADS.");
 
   // Cropping
 
-  declareProperty("CropWorkspaces", false,
-                  "Whether to crop the x-axis of the output workspaces.");
+  declareProperty("CropWorkspaces", false, "Whether to crop the x-axis of the output workspaces.");
 
-  declareProperty("TimeMin", 0.0, "Start time for the data in mus.",
-                  Direction::Input);
+  declareProperty("TimeMin", 0.0, "Start time for the data in mus.", Direction::Input);
   setPropertySettings("TimeMin",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "CropWorkspaces", Kernel::IS_EQUAL_TO, "1"));
+                      std::make_unique<Kernel::EnabledWhenProperty>("CropWorkspaces", Kernel::IS_EQUAL_TO, "1"));
 
-  declareProperty("TimeMax", 32.0, "End time for the data in mus.",
-                  Direction::Input);
+  declareProperty("TimeMax", 32.0, "End time for the data in mus.", Direction::Input);
   setPropertySettings("TimeMax",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "CropWorkspaces", Kernel::IS_EQUAL_TO, "1"));
+                      std::make_unique<Kernel::EnabledWhenProperty>("CropWorkspaces", Kernel::IS_EQUAL_TO, "1"));
 
   // Group asymmetry range
 
-  declareProperty(
-      "ApplyAsymmetryToGroups", false,
-      "Whether to calculate group asymmetry and store the workspaces.");
+  declareProperty("ApplyAsymmetryToGroups", false, "Whether to calculate group asymmetry and store the workspaces.");
 
-  declareProperty(
-      "AsymmetryTimeMin", EMPTY_DBL(),
-      "Start time for the group asymmetry calculation (micro seconds).",
-      Direction::Input);
-  setPropertySettings("AsymmetryTimeMin",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "ApplyAsymmetryToGroups", Kernel::IS_EQUAL_TO, "1"));
+  declareProperty("AsymmetryTimeMin", EMPTY_DBL(), "Start time for the group asymmetry calculation (micro seconds).",
+                  Direction::Input);
+  setPropertySettings("AsymmetryTimeMin", std::make_unique<Kernel::EnabledWhenProperty>("ApplyAsymmetryToGroups",
+                                                                                        Kernel::IS_EQUAL_TO, "1"));
 
-  declareProperty(
-      "AsymmetryTimeMax", EMPTY_DBL(),
-      "End time for the group asymmetry calculation (micro seconds).",
-      Direction::Input);
-  setPropertySettings("AsymmetryTimeMax",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "ApplyAsymmetryToGroups", Kernel::IS_EQUAL_TO, "1"));
+  declareProperty("AsymmetryTimeMax", EMPTY_DBL(), "End time for the group asymmetry calculation (micro seconds).",
+                  Direction::Input);
+  setPropertySettings("AsymmetryTimeMax", std::make_unique<Kernel::EnabledWhenProperty>("ApplyAsymmetryToGroups",
+                                                                                        Kernel::IS_EQUAL_TO, "1"));
 
   // Optional properties
 
-  declareProperty("RebinArgs", emptyString,
-                  "Rebin arguments. No rebinning if left empty.",
-                  Direction::Input);
+  declareProperty("RebinArgs", emptyString, "Rebin arguments. No rebinning if left empty.", Direction::Input);
 
   declareProperty("TimeOffset", 0.0,
                   "Shift the times of all data by a fixed amount (in micro "
@@ -144,18 +118,15 @@ void LoadAndApplyMuonDetectorGrouping::init() {
                   "become 0.0 seconds.",
                   Direction::Input);
 
-  declareProperty("SummedPeriods", std::to_string(1),
-                  "A list of periods to sum in multiperiod data.",
+  declareProperty("SummedPeriods", std::to_string(1), "A list of periods to sum in multiperiod data.",
                   Direction::Input);
 
-  declareProperty("SubtractedPeriods", emptyString,
-                  "A list of periods to subtract in multiperiod data.",
+  declareProperty("SubtractedPeriods", emptyString, "A list of periods to subtract in multiperiod data.",
                   Direction::Input);
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
-      "Table with dead time information, used to apply dead time correction.");
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DeadTimeTable", "", Direction::Input,
+                                                                      PropertyMode::Optional),
+                  "Table with dead time information, used to apply dead time correction.");
 
   // Perform Group Associations.
 
@@ -181,8 +152,7 @@ void LoadAndApplyMuonDetectorGrouping::init() {
  * Performs validation of inputs to the algorithm.
  * - Check the input workspace and WorkspaceGroup are not the same
  */
-std::map<std::string, std::string>
-LoadAndApplyMuonDetectorGrouping::validateInputs() {
+std::map<std::string, std::string> LoadAndApplyMuonDetectorGrouping::validateInputs() {
   std::map<std::string, std::string> errors;
 
   if (!this->isDefault("WorkspaceGroup")) {
@@ -199,12 +169,10 @@ LoadAndApplyMuonDetectorGrouping::validateInputs() {
   return errors;
 }
 
-void LoadAndApplyMuonDetectorGrouping::getTimeLimitsFromInputWorkspace(
-    const Workspace_sptr &inputWS, AnalysisOptions &options) {
-  MatrixWorkspace_sptr inputMatrixWS =
-      std::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
-  WorkspaceGroup_sptr inputGroupWS =
-      std::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+void LoadAndApplyMuonDetectorGrouping::getTimeLimitsFromInputWorkspace(const Workspace_sptr &inputWS,
+                                                                       AnalysisOptions &options) {
+  MatrixWorkspace_sptr inputMatrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
+  WorkspaceGroup_sptr inputGroupWS = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
   if (inputMatrixWS) {
     if (inputMatrixWS->getNumberHistograms() > 0) {
       double timeMin = inputMatrixWS->mutableX(0)[0];
@@ -213,8 +181,7 @@ void LoadAndApplyMuonDetectorGrouping::getTimeLimitsFromInputWorkspace(
       options.timeLimits = std::make_pair(timeMin, timeMax);
     }
   } else if (inputGroupWS) {
-    MatrixWorkspace_sptr ws1 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(inputGroupWS->getItem(0));
+    MatrixWorkspace_sptr ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(inputGroupWS->getItem(0));
     double timeMin = ws1->mutableX(0)[0];
     auto sizex = ws1->mutableX(0).size();
     double timeMax = ws1->mutableX(0)[sizex - 1];
@@ -225,8 +192,7 @@ void LoadAndApplyMuonDetectorGrouping::getTimeLimitsFromInputWorkspace(
   }
 }
 
-void LoadAndApplyMuonDetectorGrouping::getTimeLimitsFromInputs(
-    AnalysisOptions &options) {
+void LoadAndApplyMuonDetectorGrouping::getTimeLimitsFromInputs(AnalysisOptions &options) {
   auto timeMin = getProperty("TimeMin");
   auto timeMax = getProperty("TimeMax");
   options.timeLimits = std::make_pair(timeMin, timeMax);
@@ -268,16 +234,13 @@ void LoadAndApplyMuonDetectorGrouping::exec() {
 }
 
 // Checks that the detector IDs in grouping are in the workspace
-void LoadAndApplyMuonDetectorGrouping::checkDetectorIDsInWorkspace(
-    API::Grouping &grouping, Workspace_sptr workspace) {
-  bool check = MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(
-      grouping, std::move(workspace));
+void LoadAndApplyMuonDetectorGrouping::checkDetectorIDsInWorkspace(API::Grouping &grouping, Workspace_sptr workspace) {
+  bool check = MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(grouping, std::move(workspace));
   if (!check) {
     g_log.error("One or more detector IDs specified in the groups is not "
                 "contained in the InputWorkspace");
-    throw std::runtime_error(
-        "One or more detector IDs specified in the groups is not "
-        "contained in the InputWorkspace");
+    throw std::runtime_error("One or more detector IDs specified in the groups is not "
+                             "contained in the InputWorkspace");
   }
 }
 
@@ -286,17 +249,13 @@ void LoadAndApplyMuonDetectorGrouping::checkDetectorIDsInWorkspace(
  * that it would have if created by the MuonAnalysis GUI.
  * e.g. MUSR0001234
  */
-WorkspaceGroup_sptr
-LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(
-    Workspace_sptr workspace) {
+WorkspaceGroup_sptr LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(Workspace_sptr workspace) {
   auto &ads = AnalysisDataService::Instance();
-  std::string groupedWSName =
-      MuonAlgorithmHelper::getRunLabel(std::move(workspace));
+  std::string groupedWSName = MuonAlgorithmHelper::getRunLabel(std::move(workspace));
 
   WorkspaceGroup_sptr groupedWS;
   if (ads.doesExist(groupedWSName)) {
-    if ((groupedWS = std::dynamic_pointer_cast<WorkspaceGroup>(
-             ads.retrieve(groupedWSName)))) {
+    if ((groupedWS = std::dynamic_pointer_cast<WorkspaceGroup>(ads.retrieve(groupedWSName)))) {
       return groupedWS;
     }
   }
@@ -323,11 +282,10 @@ AnalysisOptions LoadAndApplyMuonDetectorGrouping::setDefaultOptions() {
  * Adds the group names and corresponding detector IDs to
  * a TableWorkspace in the ADS named "MuonGroupings"
  */
-void LoadAndApplyMuonDetectorGrouping::addGroupingInformationToADS(
-    const Mantid::API::Grouping &grouping) {
+void LoadAndApplyMuonDetectorGrouping::addGroupingInformationToADS(const Mantid::API::Grouping &grouping) {
 
-  auto groupingTable = std::dynamic_pointer_cast<ITableWorkspace>(
-      WorkspaceFactory::Instance().createTable("TableWorkspace"));
+  auto groupingTable =
+      std::dynamic_pointer_cast<ITableWorkspace>(WorkspaceFactory::Instance().createTable("TableWorkspace"));
   groupingTable->addColumn("str", "GroupName");
   groupingTable->addColumn("vector_int", "Detectors");
 
@@ -335,8 +293,7 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingInformationToADS(
   for (size_t i = 0; i < numGroups; i++) {
     TableRow newRow = groupingTable->appendRow();
     newRow << grouping.groupNames[i];
-    std::vector<int> detectorIDs =
-        Kernel::Strings::parseRange(grouping.groups[i]);
+    std::vector<int> detectorIDs = Kernel::Strings::parseRange(grouping.groups[i]);
     std::sort(detectorIDs.begin(), detectorIDs.end());
     newRow << detectorIDs;
   }
@@ -363,12 +320,10 @@ API::Grouping LoadAndApplyMuonDetectorGrouping::loadGroupsAndPairs() {
  * Check if the group/pair names are valid, and if all the groups which
  * are paired are also included as groups.
  */
-void LoadAndApplyMuonDetectorGrouping::CheckValidGroupsAndPairs(
-    const Grouping &grouping) {
+void LoadAndApplyMuonDetectorGrouping::CheckValidGroupsAndPairs(const Grouping &grouping) {
   for (auto &&groupName : grouping.groupNames) {
     if (!MuonAlgorithmHelper::checkValidGroupPairName(groupName)) {
-      throw std::invalid_argument("Some group names are invalid : " +
-                                  groupName);
+      throw std::invalid_argument("Some group names are invalid : " + groupName);
     }
   }
 
@@ -380,8 +335,7 @@ void LoadAndApplyMuonDetectorGrouping::CheckValidGroupsAndPairs(
     std::string pairGroup1 = grouping.groupNames[grouping.pairs[p].first];
     std::string pairGroup2 = grouping.groupNames[grouping.pairs[p].second];
 
-    throwIfGroupsNotInPair(pairName, pairGroup1, pairGroup2,
-                           grouping.groupNames);
+    throwIfGroupsNotInPair(pairName, pairGroup1, pairGroup2, grouping.groupNames);
   }
 }
 
@@ -389,15 +343,13 @@ void LoadAndApplyMuonDetectorGrouping::CheckValidGroupsAndPairs(
  * Add all the supplied groups to the ADS, inside wsGrouped, by
  * executing the ApplyMuonDetectorGrouping algorithm
  */
-void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
-    const Mantid::Muon::AnalysisOptions &options,
-    const Mantid::API::Workspace_sptr &ws,
-    const Mantid::API::WorkspaceGroup_sptr &wsGrouped) {
+void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(const Mantid::Muon::AnalysisOptions &options,
+                                                        const Mantid::API::Workspace_sptr &ws,
+                                                        const Mantid::API::WorkspaceGroup_sptr &wsGrouped) {
 
   size_t numGroups = options.grouping.groups.size();
   for (auto i = 0u; i < numGroups; ++i) {
-    IAlgorithm_sptr alg =
-        this->createChildAlgorithm("ApplyMuonDetectorGrouping");
+    IAlgorithm_sptr alg = this->createChildAlgorithm("ApplyMuonDetectorGrouping");
     if (!this->isLogging())
       alg->setLogging(false);
     alg->setProperty("InputWorkspace", ws->getName());
@@ -427,15 +379,13 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
  * Add all the supplied pairs to the ADS, inside wsGrouped, by
  * executing the ApplyMuonDetectorGroupPairing algorithm
  */
-void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
-    const Mantid::Muon::AnalysisOptions &options,
-    const Mantid::API::Workspace_sptr &ws,
-    const Mantid::API::WorkspaceGroup_sptr &wsGrouped) {
+void LoadAndApplyMuonDetectorGrouping::addPairingToADS(const Mantid::Muon::AnalysisOptions &options,
+                                                       const Mantid::API::Workspace_sptr &ws,
+                                                       const Mantid::API::WorkspaceGroup_sptr &wsGrouped) {
 
   size_t numPairs = options.grouping.pairs.size();
   for (size_t i = 0; i < numPairs; i++) {
-    IAlgorithm_sptr alg =
-        this->createChildAlgorithm("ApplyMuonDetectorGroupPairing");
+    IAlgorithm_sptr alg = this->createChildAlgorithm("ApplyMuonDetectorGroupPairing");
     if (!this->isLogging())
       alg->setLogging(false);
     alg->setProperty("SpecifyGroupsManually", true);
@@ -447,10 +397,8 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
     alg->setProperty("TimeMin", options.timeLimits.first);
     alg->setProperty("TimeMax", options.timeLimits.second);
 
-    std::string group1 =
-        options.grouping.groups[options.grouping.pairs[i].first];
-    std::string group2 =
-        options.grouping.groups[options.grouping.pairs[i].second];
+    std::string group1 = options.grouping.groups[options.grouping.pairs[i].first];
+    std::string group2 = options.grouping.groups[options.grouping.pairs[i].second];
     alg->setProperty("Group1", group1);
     alg->setProperty("Group2", group2);
 

@@ -30,24 +30,19 @@ namespace MDAlgorithms {
  @date 02/11/2011
  */
 template <class VectorValueParameterType>
-class DLLExport Vector3DParameterParser
-    : public Mantid::API::ImplicitFunctionParameterParser {
+class DLLExport Vector3DParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   VectorValueParameterType *parseVectorParameter(std::string value);
 
-  Mantid::API::ImplicitFunctionParameter *
-  createParameter(Poco::XML::Element *parameterElement) override;
+  Mantid::API::ImplicitFunctionParameter *createParameter(Poco::XML::Element *parameterElement) override;
 
-  void setSuccessorParser(
-      Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
+  void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
 };
 
 ////////////////////////////////////////////////////////////////////
 
 template <typename VectorValueParameterType>
-VectorValueParameterType *
-Vector3DParameterParser<VectorValueParameterType>::parseVectorParameter(
-    std::string value) {
+VectorValueParameterType *Vector3DParameterParser<VectorValueParameterType>::parseVectorParameter(std::string value) {
   std::vector<std::string> strs;
   boost::split(strs, value, boost::is_any_of(","));
 
@@ -57,9 +52,8 @@ Vector3DParameterParser<VectorValueParameterType>::parseVectorParameter(
     ny = std::stod(strs.at(1));
     nz = std::stod(strs.at(2));
   } catch (std::exception &ex) {
-    std::string message = std::string(ex.what()) + " Failed to parse " +
-                          VectorValueParameterType::parameterName() +
-                          " value: " + value;
+    std::string message =
+        std::string(ex.what()) + " Failed to parse " + VectorValueParameterType::parameterName() + " value: " + value;
     throw std::invalid_argument(message.c_str());
   }
   return new VectorValueParameterType(nx, ny, nz);
@@ -67,14 +61,12 @@ Vector3DParameterParser<VectorValueParameterType>::parseVectorParameter(
 
 template <typename VectorValueParameterType>
 Mantid::API::ImplicitFunctionParameter *
-Vector3DParameterParser<VectorValueParameterType>::createParameter(
-    Poco::XML::Element *parameterElement) {
+Vector3DParameterParser<VectorValueParameterType>::createParameter(Poco::XML::Element *parameterElement) {
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (VectorValueParameterType::parameterName() != typeName) {
     return m_successor->createParameter(parameterElement);
   } else {
-    std::string sParameterValue =
-        parameterElement->getChildElement("Value")->innerText();
+    std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
     return parseVectorParameter(sParameterValue);
   }
 }

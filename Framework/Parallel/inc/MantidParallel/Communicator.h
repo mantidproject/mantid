@@ -46,10 +46,10 @@ public:
 
   int rank() const;
   int size() const;
-  template <typename... T> void send(T &&... args) const;
-  template <typename... T> Status recv(T &&... args) const;
-  template <typename... T> Request isend(T &&... args) const;
-  template <typename... T> Request irecv(T &&... args) const;
+  template <typename... T> void send(T &&...args) const;
+  template <typename... T> Status recv(T &&...args) const;
+  template <typename... T> Request isend(T &&...args) const;
+  template <typename... T> Request irecv(T &&...args) const;
 
 #ifdef MPI_EXPERIMENTAL
   operator const boost::mpi::communicator &() const;
@@ -59,8 +59,7 @@ public:
   detail::ThreadingBackend &backend() const;
 
 private:
-  Communicator(std::shared_ptr<detail::ThreadingBackend> backend,
-               const int rank);
+  Communicator(std::shared_ptr<detail::ThreadingBackend> backend, const int rank);
 
 #ifdef MPI_EXPERIMENTAL
   boost::mpi::communicator m_communicator;
@@ -72,7 +71,7 @@ private:
   friend class ParallelTestHelpers::ParallelRunner;
 };
 
-template <typename... T> void Communicator::send(T &&... args) const {
+template <typename... T> void Communicator::send(T &&...args) const {
 #ifdef MPI_EXPERIMENTAL
   if (!hasBackend())
     return m_communicator.send(std::forward<T>(args)...);
@@ -80,7 +79,7 @@ template <typename... T> void Communicator::send(T &&... args) const {
   backend().send(m_rank, std::forward<T>(args)...);
 }
 
-template <typename... T> Status Communicator::recv(T &&... args) const {
+template <typename... T> Status Communicator::recv(T &&...args) const {
 #ifdef MPI_EXPERIMENTAL
   if (!hasBackend())
     return Status(m_communicator.recv(std::forward<T>(args)...));
@@ -88,7 +87,7 @@ template <typename... T> Status Communicator::recv(T &&... args) const {
   return backend().recv(m_rank, std::forward<T>(args)...);
 }
 
-template <typename... T> Request Communicator::isend(T &&... args) const {
+template <typename... T> Request Communicator::isend(T &&...args) const {
 #ifdef MPI_EXPERIMENTAL
   if (!hasBackend())
     return m_communicator.isend(std::forward<T>(args)...);
@@ -96,7 +95,7 @@ template <typename... T> Request Communicator::isend(T &&... args) const {
   return backend().isend(m_rank, std::forward<T>(args)...);
 }
 
-template <typename... T> Request Communicator::irecv(T &&... args) const {
+template <typename... T> Request Communicator::irecv(T &&...args) const {
 #ifdef MPI_EXPERIMENTAL
   if (!hasBackend())
     return m_communicator.irecv(std::forward<T>(args)...);

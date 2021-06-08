@@ -24,8 +24,7 @@ namespace PythonInterface {
 namespace Converters {
 
 // Free function to determine data type being stored in container
-template <template <class> class Container, typename HeldType>
-std::string dtype(const Container<HeldType> &) {
+template <template <class> class Container, typename HeldType> std::string dtype(const Container<HeldType> &) {
   if (std::is_same<HeldType, bool>::value) {
     return "b";
   } else if (std::is_integral<HeldType>::value) {

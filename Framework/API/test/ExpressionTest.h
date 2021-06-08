@@ -332,10 +332,8 @@ public:
     TS_ASSERT_EQUALS(expression.str(), "(((a+b+sin(x))))");
     TS_ASSERT_EQUALS(expression.bracketsRemoved().str(), "a+b+sin(x)");
     TS_ASSERT_EQUALS(expression.bracketsRemoved().name(), "+");
-    TS_ASSERT_EQUALS(expression.bracketsRemoved().bracketsRemoved().str(),
-                     "a+b+sin(x)");
-    TS_ASSERT_EQUALS(expression.bracketsRemoved().bracketsRemoved().name(),
-                     "+");
+    TS_ASSERT_EQUALS(expression.bracketsRemoved().bracketsRemoved().str(), "a+b+sin(x)");
+    TS_ASSERT_EQUALS(expression.bracketsRemoved().bracketsRemoved().name(), "+");
   }
 
   void testBrackets1() {
@@ -401,8 +399,7 @@ public:
   void testEndOnOperator() {
     {
       Expression expression;
-      TS_ASSERT_THROWS(expression.parse("x+y+z +  "),
-                       const std::runtime_error &);
+      TS_ASSERT_THROWS(expression.parse("x+y+z +  "), const std::runtime_error &);
     }
     {
       Expression expression;
@@ -446,8 +443,7 @@ public:
       expression.parse("x+(y");
       TS_FAIL("Expected an exception.");
     } catch (Expression::ParsingError &error) {
-      TS_ASSERT_EQUALS(std::string(error.what()),
-                       "Unmatched bracket at\n\n(y\n^\n");
+      TS_ASSERT_EQUALS(std::string(error.what()), "Unmatched bracket at\n\n(y\n^\n");
     }
   }
 
@@ -457,8 +453,7 @@ public:
       expression.parse("x+sin(y-3");
       TS_FAIL("Expected an exception.");
     } catch (Expression::ParsingError &error) {
-      TS_ASSERT_EQUALS(std::string(error.what()),
-                       "Unmatched bracket at\n\nsin(y-3\n   ^\n");
+      TS_ASSERT_EQUALS(std::string(error.what()), "Unmatched bracket at\n\nsin(y-3\n   ^\n");
     }
   }
 
@@ -468,9 +463,7 @@ public:
       expression.parse("x+sinsinsinsinsin(y-3");
       TS_FAIL("Expected an exception.");
     } catch (Expression::ParsingError &error) {
-      TS_ASSERT_EQUALS(
-          std::string(error.what()),
-          "Unmatched bracket at\n\n...nsinsinsin(y-3\n             ^\n");
+      TS_ASSERT_EQUALS(std::string(error.what()), "Unmatched bracket at\n\n...nsinsinsin(y-3\n             ^\n");
     }
   }
 
@@ -480,10 +473,9 @@ public:
       expression.parse("x+sinsinsinsinsin(y-3*1+2+3+4+5+6+7+0");
       TS_FAIL("Expected an exception.");
     } catch (Expression::ParsingError &error) {
-      TS_ASSERT_EQUALS(std::string(error.what()),
-                       "Unmatched bracket "
-                       "at\n\n...nsinsinsin(y-3*1+2+3+4+"
-                       "5+...\n             ^\n");
+      TS_ASSERT_EQUALS(std::string(error.what()), "Unmatched bracket "
+                                                  "at\n\n...nsinsinsin(y-3*1+2+3+4+"
+                                                  "5+...\n             ^\n");
     }
   }
 
@@ -493,8 +485,7 @@ public:
       expression.parse("x+y+z)");
       TS_FAIL("Expected an exception.");
     } catch (Expression::ParsingError &error) {
-      TS_ASSERT_EQUALS(std::string(error.what()),
-                       "Unmatched bracket at\n\nx+y+z)\n^\n");
+      TS_ASSERT_EQUALS(std::string(error.what()), "Unmatched bracket at\n\nx+y+z)\n^\n");
     }
   }
 
@@ -504,9 +495,7 @@ public:
       expression.parse("x+y+");
       TS_FAIL("Expected an exception.");
     } catch (Expression::ParsingError &error) {
-      TS_ASSERT_EQUALS(
-          std::string(error.what()),
-          "A binary operator isn't followed by a value at\n\nx+y+\n   ^\n");
+      TS_ASSERT_EQUALS(std::string(error.what()), "A binary operator isn't followed by a value at\n\nx+y+\n   ^\n");
     }
   }
 
@@ -516,8 +505,7 @@ public:
       expression.parse("x+y++++z");
       TS_FAIL("Expected an exception.");
     } catch (Expression::ParsingError &error) {
-      TS_ASSERT_EQUALS(std::string(error.what()),
-                       "Unrecognized operator at\n\nx+y++++z\n   ^\n");
+      TS_ASSERT_EQUALS(std::string(error.what()), "Unrecognized operator at\n\nx+y++++z\n   ^\n");
     }
   }
 
@@ -527,10 +515,9 @@ public:
       expression.parse("x+y+ + + +");
       TS_FAIL("Expected an exception.");
     } catch (Expression::ParsingError &error) {
-      TS_ASSERT_EQUALS(std::string(error.what()),
-                       "A binary operator isn't "
-                       "followed by a value at\n\nx+y+ "
-                       "+ + +\n         ^\n");
+      TS_ASSERT_EQUALS(std::string(error.what()), "A binary operator isn't "
+                                                  "followed by a value at\n\nx+y+ "
+                                                  "+ + +\n         ^\n");
     }
   }
 
@@ -540,8 +527,7 @@ public:
       expression.parse("x+y+ )");
       TS_FAIL("Expected an exception.");
     } catch (Expression::ParsingError &error) {
-      TS_ASSERT_EQUALS(std::string(error.what()),
-                       "Unmatched bracket at\n\nx+y+ )\n^\n");
+      TS_ASSERT_EQUALS(std::string(error.what()), "Unmatched bracket at\n\nx+y+ )\n^\n");
     }
   }
 };

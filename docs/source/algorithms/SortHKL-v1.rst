@@ -39,8 +39,8 @@ Finally, the peaks in the output workspace are sorted by H, K and L.
 The EquivalentsWorkspace contains specta that can be plotted for each set of
 equivalent intensities.  The X axis is the wavelength and the Y axis is the corrected intensity of the
 peaks.  The error is the difference in the intensity of that peak and the average for all equivalent
-peaks.  For example, see the 424 equivalent intensities in plot below.  The intensity of the peak at 
-wavelength 0.5 is marked as an outlier by setting the error to the same value as the intensity. 
+peaks.  For example, see the 424 equivalent intensities in plot below.  The intensity of the peak at
+wavelength 0.5 is marked as an outlier by setting the error to the same value as the intensity.
 The average intensity is 21903.
 
 .. figure:: /images/EquivalentIntensities.png

@@ -40,8 +40,7 @@ public:
     TS_ASSERT_EQUALS(mei.addExperimentInfo(ei), 0);
     MultipleExperimentInfos copy(mei);
     TS_ASSERT_EQUALS(copy.getNumExperimentInfo(), 1);
-    TSM_ASSERT_DIFFERS("ExperimentInfo's were deep-copied",
-                       copy.getExperimentInfo(0), mei.getExperimentInfo(0));
+    TSM_ASSERT_DIFFERS("ExperimentInfo's were deep-copied", copy.getExperimentInfo(0), mei.getExperimentInfo(0));
   }
 
   void testHasOrientedLattice() {
@@ -66,9 +65,7 @@ public:
     }
 
     // remove the last one
-    mei.getExperimentInfo((nExperimentInfosToAdd - 1))
-        ->mutableSample()
-        .clearOrientedLattice();
+    mei.getExperimentInfo((nExperimentInfosToAdd - 1))->mutableSample().clearOrientedLattice();
     TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);
   }
 };

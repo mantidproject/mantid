@@ -26,7 +26,7 @@ Usage
     x = np.linspace(0, 10, 100)
     y = np.exp(-4*(x-4)**2) -0.01*(x-5)**2 + 0.3
     ws = CreateWorkspace(x, y)
-    
+
     # do a fit with the polynomial fit function
     Fit("name=Polynomial,n=2", ws, Exclude=[2, 6], Output='out')
 

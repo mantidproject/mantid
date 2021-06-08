@@ -88,7 +88,7 @@ class WorkspaceSaverTest(unittest.TestCase):
         ws_saver.save_workspaces(["group2"])
 
         self.assertListEqual(["group1", "group2", "ws1", "ws2", "ws3", "ws4"], ADS.getObjectNames())
-        logger.warning.assert_called_with(u'Couldn\'t save workspace in project: "group2" because SaveNexusProcessed: '
+        logger.warning.assert_called_with(u'Couldn\'t save workspace in project: "group2" because SaveNexusProcessed-v1: '
                                           u'NeXus files do not support nested groups of groups')
 
     def _load_MDWorkspace_and_test_it(self, save_name):

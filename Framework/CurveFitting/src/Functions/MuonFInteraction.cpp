@@ -30,8 +30,7 @@ void MuonFInteraction::init() {
   declareParameter("A", 1, "Amplitude at 0");
 }
 
-void MuonFInteraction::function1D(double *out, const double *xValues,
-                                  const size_t nData) const {
+void MuonFInteraction::function1D(double *out, const double *xValues, const size_t nData) const {
   const double lambda = getParameter("Lambda");
   const double omega = getParameter("Omega");
   const double beta = getParameter("Beta");
@@ -41,10 +40,8 @@ void MuonFInteraction::function1D(double *out, const double *xValues,
   for (size_t i = 0; i < nData; i++) {
     double A1 = exp(-pow(lambda * xValues[i], beta)) * A / 6;
     double A2 = cos(sqrt3 * omega * xValues[i]);
-    double A3 =
-        (1.0 - 1.0 / sqrt3) * cos(((3.0 - sqrt3) / 2.0) * omega * xValues[i]);
-    double A4 =
-        (1.0 + 1.0 / sqrt3) * cos(((3.0 + sqrt3) / 2.0) * omega * xValues[i]);
+    double A3 = (1.0 - 1.0 / sqrt3) * cos(((3.0 - sqrt3) / 2.0) * omega * xValues[i]);
+    double A4 = (1.0 + 1.0 / sqrt3) * cos(((3.0 + sqrt3) / 2.0) * omega * xValues[i]);
 
     out[i] = A1 * (3 + A2 + A3 + A4);
   }

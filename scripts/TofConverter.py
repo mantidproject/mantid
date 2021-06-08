@@ -5,12 +5,19 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
+import sys
 from TofConverter import converterGUI
 from mantidqt.gui_helper import get_qapplication
 
 app, within_mantid = get_qapplication()
 
-reducer = converterGUI.MainWindow()#the main ui class in this file is called MainWindow
+if 'workbench' in sys.modules:
+    from workbench.config import get_window_config
+
+    parent, flags = get_window_config()
+else:
+    parent, flags = None, None
+reducer = converterGUI.MainWindow(parent, flags)#the main ui class in this file is called MainWindow
 reducer.show()
 if not within_mantid:
     app.exec_()

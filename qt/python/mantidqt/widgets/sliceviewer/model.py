@@ -9,7 +9,8 @@
 from enum import Enum
 from typing import Dict, List, Sequence, Tuple, Optional
 
-from mantid.api import MatrixWorkspace, MultipleExperimentInfos, SpecialCoordinateSystem
+from mantid.api import MatrixWorkspace, MultipleExperimentInfos
+from mantid.kernel import SpecialCoordinateSystem
 from mantid.plots.datafunctions import get_indices
 from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
 import numpy as np
@@ -154,6 +155,7 @@ class SliceViewerModel:
                        not provided the full extent of each dimension is used
         """
         workspace = self._get_ws()
+
         params, _, __ = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits)
         params['EnableLogging'] = LOG_GET_WS_MDE_ALGORITHM_CALLS
         return BinMD(InputWorkspace=workspace, OutputWorkspace=self._rebinned_name, **params)
@@ -192,6 +194,12 @@ class SliceViewerModel:
         workspace = self._get_ws()
         xdim, ydim = workspace.getDimension(xindex), workspace.getDimension(yindex)
         return (xdim.getMinimum(), xdim.getMaximum()), (ydim.getMinimum(), ydim.getMaximum())
+
+    def is_ragged_matrix_plotted(self):
+        """
+        :return: bool for if workspace is matrix workspace with non common bins
+        """
+        return self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isCommonBins()
 
     def get_dim_info(self, n: int) -> dict:
         """
@@ -254,11 +262,11 @@ class SliceViewerModel:
         expt_info = self._get_ws().getExperimentInfo(0)
         lattice = expt_info.sample().getOrientedLattice()
         try:
-            proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value)
+            proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float)
             proj_matrix = proj_matrix.reshape(3, 3)
         except (AttributeError, KeyError):  # run can be None so no .get()
             # assume orthogonal projection
-            proj_matrix = np.diag([1., 1., 1.])
+            proj_matrix = np.eye(3)
         display_indices = list(range(0, proj_matrix.shape[0]))
         display_indices.pop(slice_info.z_index)
         return NonOrthogonalTransform.from_lattice(lattice,

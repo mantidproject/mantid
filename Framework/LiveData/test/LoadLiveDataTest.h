@@ -52,37 +52,25 @@ public:
    * @return the created processed WS
    */
   template <typename TYPE>
-  std::shared_ptr<TYPE>
-  doExec(const std::string &AccumulationMethod,
-         const std::string &ProcessingAlgorithm = "",
-         const std::string &ProcessingProperties = "",
-         const std::string &PostProcessingAlgorithm = "",
-         const std::string &PostProcessingProperties = "",
-         bool PreserveEvents = true,
-         const ILiveListener_sptr &listener = ILiveListener_sptr(),
-         bool makeThrow = false) {
-    FacilityHelper::ScopedFacilities loadTESTFacility(
-        "unit_testing/UnitTestFacilities.xml", "TEST");
+  std::shared_ptr<TYPE> doExec(const std::string &AccumulationMethod, const std::string &ProcessingAlgorithm = "",
+                               const std::string &ProcessingProperties = "",
+                               const std::string &PostProcessingAlgorithm = "",
+                               const std::string &PostProcessingProperties = "", bool PreserveEvents = true,
+                               const ILiveListener_sptr &listener = ILiveListener_sptr(), bool makeThrow = false) {
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     LoadLiveData alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Instrument", "TestDataListener"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("AccumulationMethod", AccumulationMethod));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ProcessingAlgorithm", ProcessingAlgorithm));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ProcessingProperties", ProcessingProperties));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PostProcessingAlgorithm",
-                                                  PostProcessingAlgorithm));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PostProcessingProperties",
-                                                  PostProcessingProperties));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Instrument", "TestDataListener"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AccumulationMethod", AccumulationMethod));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ProcessingAlgorithm", ProcessingAlgorithm));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ProcessingProperties", ProcessingProperties));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PostProcessingAlgorithm", PostProcessingAlgorithm));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PostProcessingProperties", PostProcessingProperties));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", PreserveEvents));
     if (!PostProcessingAlgorithm.empty())
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("AccumulationWorkspace", "fake_accum"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AccumulationWorkspace", "fake_accum"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "fake"));
     if (listener)
       alg.setLiveListener(listener);
@@ -95,13 +83,11 @@ public:
 
     // Retrieve the workspace from data service.
     std::shared_ptr<TYPE> ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<TYPE>("fake"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<TYPE>("fake"));
     TS_ASSERT(ws);
 
     if (auto matrixws = dynamic_cast<MatrixWorkspace *>(ws.get())) {
-      TSM_ASSERT_LESS_THAN("Run number should be non-zero", 0,
-                           matrixws->getRunNumber());
+      TSM_ASSERT_LESS_THAN("Run number should be non-zero", 0, matrixws->getRunNumber());
     }
 
     return ws;
@@ -127,8 +113,7 @@ public:
     auto ws1 = doExec<EventWorkspace>("Replace");
     auto &ws1CompInfo = ws1->mutableComponentInfo();
     // Put the sample somewhere else prior to the next replace
-    const Kernel::V3D newSamplePosition =
-        ws1CompInfo.position(ws1CompInfo.sample()) + V3D(1, 1, 1);
+    const Kernel::V3D newSamplePosition = ws1CompInfo.position(ws1CompInfo.sample()) + V3D(1, 1, 1);
     ws1CompInfo.setPosition(ws1CompInfo.sample(), newSamplePosition);
 
     // Second Run of replace
@@ -136,8 +121,7 @@ public:
     const auto &ws2CompInfo = ws2->componentInfo();
     // Check the sample is where I put it. i.e. Instrument should NOT be
     // overwritten.
-    TSM_ASSERT_EQUALS("Instrument should NOT have been overwritten",
-                      newSamplePosition,
+    TSM_ASSERT_EQUALS("Instrument should NOT have been overwritten", newSamplePosition,
                       ws2CompInfo.position(ws2CompInfo.sample()));
   }
 
@@ -146,15 +130,12 @@ public:
     auto ws1 = doExec<EventWorkspace>("Replace");
 
     TS_ASSERT_THROWS_NOTHING(
-        doExec<WorkspaceGroup>("Replace", "", "", "", "", false,
-                               ILiveListener_sptr(new TestGroupDataListener)));
+        doExec<WorkspaceGroup>("Replace", "", "", "", "", false, ILiveListener_sptr(new TestGroupDataListener)));
   }
 
   //--------------------------------------------------------------------------------------------
   void test_replace_group_with_workspace() {
-    auto ws1 =
-        doExec<WorkspaceGroup>("Replace", "", "", "", "", false,
-                               ILiveListener_sptr(new TestGroupDataListener));
+    auto ws1 = doExec<WorkspaceGroup>("Replace", "", "", "", "", false, ILiveListener_sptr(new TestGroupDataListener));
 
     TS_ASSERT_THROWS_NOTHING(doExec<EventWorkspace>("Replace"));
   }
@@ -183,8 +164,7 @@ public:
     TS_ASSERT_EQUALS(ws1->getNumberEvents(), 200);
 
     // Next one adds events, keeps # of histos the same
-    ws2 = doExec<EventWorkspace>("Add", "", "", "", "", true,
-                                 ILiveListener_sptr());
+    ws2 = doExec<EventWorkspace>("Add", "", "", "", "", true, ILiveListener_sptr());
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws2->getNumberEvents(), 400);
 
@@ -200,8 +180,7 @@ public:
     Workspace2D_sptr ws1, ws2;
 
     // First go creates the fake ws
-    ws1 = doExec<Workspace2D>("Add", "Rebin", "Params=40e3, 1e3, 60e3", "", "",
-                              false);
+    ws1 = doExec<Workspace2D>("Add", "Rebin", "Params=40e3, 1e3, 60e3", "", "", false);
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
     double total;
     total = 0;
@@ -210,8 +189,7 @@ public:
     TS_ASSERT_DELTA(total, 100.0, 1e-4);
 
     // Next one adds the histograms together
-    ws2 = doExec<Workspace2D>("Add", "Rebin", "Params=40e3, 1e3, 60e3", "", "",
-                              false);
+    ws2 = doExec<Workspace2D>("Add", "Rebin", "Params=40e3, 1e3, 60e3", "", "", false);
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 2);
 
     // The new total signal is 200.0
@@ -231,8 +209,7 @@ public:
   /** Simple processing of a chunk */
   void test_ProcessChunk_DoPreserveEvents() {
     EventWorkspace_sptr ws;
-    ws = doExec<EventWorkspace>("Replace", "", "", "Rebin",
-                                "Params=40e3, 1e3, 60e3", true);
+    ws = doExec<EventWorkspace>("Replace", "", "", "Rebin", "Params=40e3, 1e3, 60e3", true);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     // Check that rebin was called
@@ -245,8 +222,7 @@ public:
   /** DONT convert to workspace 2D when processing */
   void test_ProcessChunk_DontPreserveEvents() {
     Workspace2D_sptr ws;
-    ws = doExec<Workspace2D>("Replace", "Rebin", "Params=40e3, 1e3, 60e3", "",
-                             "", false);
+    ws = doExec<Workspace2D>("Replace", "Rebin", "Params=40e3, 1e3, 60e3", "", "", false);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     // Check that rebin was called
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
@@ -259,11 +235,8 @@ public:
   /** Do PostProcessing */
   void test_PostProcessing() {
     // No chunk processing, but PostProcessing
-    EventWorkspace_sptr ws = doExec<EventWorkspace>("Replace", "", "", "Rebin",
-                                                    "Params=40e3, 1e3, 60e3");
-    EventWorkspace_sptr ws_accum =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            "fake_accum");
+    EventWorkspace_sptr ws = doExec<EventWorkspace>("Replace", "", "", "Rebin", "Params=40e3, 1e3, 60e3");
+    EventWorkspace_sptr ws_accum = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake_accum");
     TS_ASSERT(ws)
     TS_ASSERT(ws_accum)
 
@@ -285,11 +258,8 @@ public:
   void test_Chunk_and_PostProcessing() {
     // Process both times
     EventWorkspace_sptr ws =
-        doExec<EventWorkspace>("Replace", "Rebin", "Params=20e3, 1e3, 60e3",
-                               "Rebin", "Params=40e3, 1e3, 60e3");
-    EventWorkspace_sptr ws_accum =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            "fake_accum");
+        doExec<EventWorkspace>("Replace", "Rebin", "Params=20e3, 1e3, 60e3", "Rebin", "Params=40e3, 1e3, 60e3");
+    EventWorkspace_sptr ws_accum = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake_accum");
     TS_ASSERT(ws)
     TS_ASSERT(ws_accum)
 
@@ -325,195 +295,157 @@ public:
   /** Handle WorkspaceGroups returned by the listener */
   void test_WorkspaceGroup_Replace_None_None() {
     WorkspaceGroup_sptr ws =
-        doExec<WorkspaceGroup>("Replace", "", "", "", "", false,
-                               ILiveListener_sptr(new TestGroupDataListener));
+        doExec<WorkspaceGroup>("Replace", "", "", "", "", false, ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->getName(), "fake");
-    MatrixWorkspace_sptr mws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
+    MatrixWorkspace_sptr mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(mws->blocksize(), 10);
     TS_ASSERT_EQUALS(mws->readX(1)[10], 10.0);
     TS_ASSERT_EQUALS(mws->readY(1)[5], 2.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(),
-                                     0.0, std::plus<double>()),
-                     20.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 20.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
   void test_WorkspaceGroup_Replace_Rebin_None() {
-    WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>(
-        "Replace", "Rebin", "Params=0,2,8", "", "", false,
-        ILiveListener_sptr(new TestGroupDataListener));
+    WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>("Replace", "Rebin", "Params=0,2,8", "", "", false,
+                                                    ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->getName(), "fake");
-    MatrixWorkspace_sptr mws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
+    MatrixWorkspace_sptr mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(mws->blocksize(), 4);
     TS_ASSERT_EQUALS(mws->readX(1)[4], 8.0);
     TS_ASSERT_EQUALS(mws->readY(1)[3], 4.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(),
-                                     0.0, std::plus<double>()),
-                     16.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 16.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
   void test_WorkspaceGroup_Replace_None_Rebin() {
-    WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>(
-        "Replace", "", "", "Rebin", "Params=0,2,8", false,
-        ILiveListener_sptr(new TestGroupDataListener));
+    WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>("Replace", "", "", "Rebin", "Params=0,2,8", false,
+                                                    ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->getName(), "fake");
-    MatrixWorkspace_sptr mws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
+    MatrixWorkspace_sptr mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(mws->blocksize(), 4);
     TS_ASSERT_EQUALS(mws->readX(1)[4], 8.0);
     TS_ASSERT_EQUALS(mws->readY(1)[3], 4.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(),
-                                     0.0, std::plus<double>()),
-                     16.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 16.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
   /** Handle WorkspaceGroups returned by the listener */
   void test_WorkspaceGroup_Add_None_None() {
-    doExec<WorkspaceGroup>("Add", "", "", "", "", false,
-                           ILiveListener_sptr(new TestGroupDataListener));
+    doExec<WorkspaceGroup>("Add", "", "", "", "", false, ILiveListener_sptr(new TestGroupDataListener));
     WorkspaceGroup_sptr ws =
-        doExec<WorkspaceGroup>("Add", "", "", "", "", false,
-                               ILiveListener_sptr(new TestGroupDataListener));
+        doExec<WorkspaceGroup>("Add", "", "", "", "", false, ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->getName(), "fake");
-    MatrixWorkspace_sptr mws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
+    MatrixWorkspace_sptr mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(mws->blocksize(), 10);
     TS_ASSERT_EQUALS(mws->readX(1)[10], 10.0);
     TS_ASSERT_EQUALS(mws->readY(1)[5], 4.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(),
-                                     0.0, std::plus<double>()),
-                     40.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 40.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
   void test_WorkspaceGroup_Add_Rebin_None() {
     doExec<WorkspaceGroup>("Add", "Rebin", "Params=0,2,8", "", "", false,
                            ILiveListener_sptr(new TestGroupDataListener));
-    WorkspaceGroup_sptr ws =
-        doExec<WorkspaceGroup>("Add", "Rebin", "Params=0,2,8", "", "", false,
-                               ILiveListener_sptr(new TestGroupDataListener));
+    WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>("Add", "Rebin", "Params=0,2,8", "", "", false,
+                                                    ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->getName(), "fake");
-    MatrixWorkspace_sptr mws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
+    MatrixWorkspace_sptr mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(mws->blocksize(), 4);
     TS_ASSERT_EQUALS(mws->readX(1)[4], 8.0);
     TS_ASSERT_EQUALS(mws->readY(1)[3], 8.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(),
-                                     0.0, std::plus<double>()),
-                     32.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 32.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
   void test_WorkspaceGroup_Add_None_Rebin() {
     doExec<WorkspaceGroup>("Add", "", "", "Rebin", "Params=0,2,8", false,
                            ILiveListener_sptr(new TestGroupDataListener));
-    WorkspaceGroup_sptr ws =
-        doExec<WorkspaceGroup>("Add", "", "", "Rebin", "Params=0,2,8", false,
-                               ILiveListener_sptr(new TestGroupDataListener));
+    WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>("Add", "", "", "Rebin", "Params=0,2,8", false,
+                                                    ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->getName(), "fake");
-    MatrixWorkspace_sptr mws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
+    MatrixWorkspace_sptr mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(mws->blocksize(), 4);
     TS_ASSERT_EQUALS(mws->readX(1)[4], 8.0);
     TS_ASSERT_EQUALS(mws->readY(1)[3], 8.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(),
-                                     0.0, std::plus<double>()),
-                     32.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 32.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
   /** Handle WorkspaceGroups returned by the listener */
   void test_WorkspaceGroup_Append_None_None() {
-    doExec<WorkspaceGroup>("Append", "", "", "", "", false,
-                           ILiveListener_sptr(new TestGroupDataListener));
+    doExec<WorkspaceGroup>("Append", "", "", "", "", false, ILiveListener_sptr(new TestGroupDataListener));
     WorkspaceGroup_sptr ws =
-        doExec<WorkspaceGroup>("Append", "", "", "", "", false,
-                               ILiveListener_sptr(new TestGroupDataListener));
+        doExec<WorkspaceGroup>("Append", "", "", "", "", false, ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->getName(), "fake");
-    MatrixWorkspace_sptr mws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
+    MatrixWorkspace_sptr mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(mws->blocksize(), 10);
     TS_ASSERT_EQUALS(mws->readX(1)[10], 10.0);
     TS_ASSERT_EQUALS(mws->readY(1)[5], 2.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(),
-                                     0.0, std::plus<double>()),
-                     20.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 20.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
   void test_WorkspaceGroup_Append_Rebin_None() {
     doExec<WorkspaceGroup>("Append", "Rebin", "Params=0,2,8", "", "", false,
                            ILiveListener_sptr(new TestGroupDataListener));
-    WorkspaceGroup_sptr ws =
-        doExec<WorkspaceGroup>("Append", "Rebin", "Params=0,2,8", "", "", false,
-                               ILiveListener_sptr(new TestGroupDataListener));
+    WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>("Append", "Rebin", "Params=0,2,8", "", "", false,
+                                                    ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->getName(), "fake");
-    MatrixWorkspace_sptr mws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
+    MatrixWorkspace_sptr mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(mws->blocksize(), 4);
     TS_ASSERT_EQUALS(mws->readX(1)[4], 8.0);
     TS_ASSERT_EQUALS(mws->readY(1)[3], 4.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(),
-                                     0.0, std::plus<double>()),
-                     16.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 16.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
   void test_WorkspaceGroup_Append_None_Rebin() {
     doExec<WorkspaceGroup>("Append", "", "", "Rebin", "Params=0,2,8", false,
                            ILiveListener_sptr(new TestGroupDataListener));
-    WorkspaceGroup_sptr ws =
-        doExec<WorkspaceGroup>("Append", "", "", "Rebin", "Params=0,2,8", false,
-                               ILiveListener_sptr(new TestGroupDataListener));
+    WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>("Append", "", "", "Rebin", "Params=0,2,8", false,
+                                                    ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->getName(), "fake");
-    MatrixWorkspace_sptr mws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
+    MatrixWorkspace_sptr mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(mws->blocksize(), 4);
     TS_ASSERT_EQUALS(mws->readX(1)[4], 8.0);
     TS_ASSERT_EQUALS(mws->readY(1)[3], 4.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(),
-                                     0.0, std::plus<double>()),
-                     16.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 16.0);
     AnalysisDataService::Instance().clear();
   }
 };

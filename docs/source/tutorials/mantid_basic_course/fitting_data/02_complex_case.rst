@@ -7,9 +7,9 @@ A more Complex case
 .. raw:: html
 
     <style> .red {color:#FF0000; font-weight:bold} </style>
-    <style> .green {color:#008000; font-weight:bold} </style>    
-    <style> .blue {color:#0000FF; font-weight:bold} </style> 
-    <style> .orange {color:#FF8C00; font-weight:bold} </style> 
+    <style> .green {color:#008000; font-weight:bold} </style>
+    <style> .blue {color:#0000FF; font-weight:bold} </style>
+    <style> .orange {color:#FF8C00; font-weight:bold} </style>
 
 .. role:: red
 .. role:: blue
@@ -44,9 +44,9 @@ The fitting range is the region of the data where you will attempt to do
 a fit, represented by the green vertical dashed lines.  These
 match the :green:`StartX and EndX values` in the Fit Property Browser.
 
-A. You can click and drag the vertical dashed lines to alter the range, 
+A. You can click and drag the vertical dashed lines to alter the range,
    which will update the StartX and EndX values.
-B. You can click on the StartX/EndX values and type in new ones, 
+B. You can click on the StartX/EndX values and type in new ones,
    which will update the dashed lines on the plot.
 
 
@@ -65,14 +65,14 @@ setting properties including:
 More documentation of these is available from :ref:`Fitting`.
 
 
-Functions properties: Setting up a fit model 
+Functions properties: Setting up a fit model
 ============================================
 
 Let's build a model consisting of a peak and a background function.
 
-1. Right-click on the plot, and choose 'Select peak type' --> select *Gaussian*. 
+1. Right-click on the plot, and choose 'Select peak type' --> select *Gaussian*.
    Move the mouse cursor to click near the top of the peak.
-2. Click on the central solid red line and drag it sideways and upwards to set the initial peak centre and height. Drag either one of the dashed red lines to set the initial 
+2. Click on the central solid red line and drag it sideways and upwards to set the initial peak centre and height. Drag either one of the dashed red lines to set the initial
    Full Width Half Maximum (FWHM) of the peak.
 
 .. figure:: /images/ChangePeakWidth.png
@@ -91,7 +91,7 @@ Just as with the StartX/EndX values, dragging on the plot and changing these val
    :align: center
 
 Now you have created a **CompositeFunction** model, which is the sum of a Gaussian and a
-Flat-background 
+Flat-background
 
 i.e. ``f0-Gaussian + f1-FlatBackground``
 
@@ -136,7 +136,7 @@ Tying and constraining fit parameters
 The Mantid fitting framework allows you to tie or constrain parameters.
 
 **Tying** sets a parameter equal to an expression
-of other parameters (from any of the selected functions). 
+of other parameters (from any of the selected functions).
 
 **Fixing** is basically tying a parameter to a number (constant).
 

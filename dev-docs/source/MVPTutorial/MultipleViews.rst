@@ -17,7 +17,6 @@ previous section into a single view. To achieve this we will create a
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
     from qtpy import QtWidgets, QtCore, QtGui
 
     import numpy as np
@@ -34,7 +33,7 @@ previous section into a single view. To achieve this we will create a
             self.options_view = view.View(parent=self)
 
             grid.addWidget(self.plot_view)
-            grid.addWidget(self.options_view)          
+            grid.addWidget(self.options_view)
             self.setLayout(grid)
 
 The important thing to note here is that when the PlotView and View

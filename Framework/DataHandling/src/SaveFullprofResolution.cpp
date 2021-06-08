@@ -33,38 +33,30 @@ DECLARE_ALGORITHM(SaveFullprofResolution)
 /** Constructor
  */
 SaveFullprofResolution::SaveFullprofResolution()
-    : API::Algorithm(), m_profileParamMap(), m_profileTableWS(),
-      m_outIrfFilename(), m_bankID(-1), m_fpProfileNumber(-1), m_append(false) {
-}
+    : API::Algorithm(), m_profileParamMap(), m_profileTableWS(), m_outIrfFilename(), m_bankID(-1),
+      m_fpProfileNumber(-1), m_append(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Init to define parameters
  */
 void SaveFullprofResolution::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>("InputWorkspace", "",
-                                                          Direction::Input),
-      "Input TableWorkspace containing the parameters for .irf file.");
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("InputWorkspace", "", Direction::Input),
+                  "Input TableWorkspace containing the parameters for .irf file.");
 
   std::vector<std::string> exts{".irf"};
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "OutputFilename", "", API::FileProperty::Save, exts),
+  declareProperty(std::make_unique<API::FileProperty>("OutputFilename", "", API::FileProperty::Save, exts),
                   "Name of the output .irf file.");
 
-  std::shared_ptr<BoundedValidator<int>> bankboundval =
-      std::make_shared<BoundedValidator<int>>();
+  std::shared_ptr<BoundedValidator<int>> bankboundval = std::make_shared<BoundedValidator<int>>();
   bankboundval->setLower(0);
-  declareProperty("Bank", EMPTY_INT(),
-                  "Bank number of the parameters belonged to. ");
+  declareProperty("Bank", EMPTY_INT(), "Bank number of the parameters belonged to. ");
 
   vector<string> supportedfunctions;
-  supportedfunctions.emplace_back(
-      "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
+  supportedfunctions.emplace_back("Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
   supportedfunctions.emplace_back("Jason Hodge's function (profile 10)");
-  auto funcvalidator =
-      std::make_shared<StringListValidator>(supportedfunctions);
-  declareProperty("ProfileFunction", "Jason Hodge's function (profile 10)",
-                  funcvalidator, "Profile number defined in Fullprof.");
+  auto funcvalidator = std::make_shared<StringListValidator>(supportedfunctions);
+  declareProperty("ProfileFunction", "Jason Hodge's function (profile 10)", funcvalidator,
+                  "Profile number defined in Fullprof.");
 
   declareProperty("Append", false,
                   "If true and the output file exists, the "
@@ -101,16 +93,12 @@ void SaveFullprofResolution::exec() {
   std::ofstream ofile;
   // Make it work!
   if (m_append) {
-    ofile.open(m_outIrfFilename.c_str(),
-               std::ofstream::out | std::ofstream::app);
-    g_log.information() << "Opened output file " << m_outIrfFilename
-                        << " in append mode. "
+    ofile.open(m_outIrfFilename.c_str(), std::ofstream::out | std::ofstream::app);
+    g_log.information() << "Opened output file " << m_outIrfFilename << " in append mode. "
                         << "\n";
   } else {
-    ofile.open(m_outIrfFilename.c_str(),
-               std::ofstream::out | std::ofstream::trunc);
-    g_log.information() << "Opened output file " << m_outIrfFilename
-                        << " in new/overwrite mode. "
+    ofile.open(m_outIrfFilename.c_str(), std::ofstream::out | std::ofstream::trunc);
+    g_log.information() << "Opened output file " << m_outIrfFilename << " in new/overwrite mode. "
                         << "\n";
   }
   ofile << filestr;
@@ -141,15 +129,13 @@ void SaveFullprofResolution::processProperties() {
 
   // Profile function
   string proffunction = getProperty("ProfileFunction");
-  if (proffunction ==
-      "Back-to-back exponential convoluted with pseudo-voigt (profile 9)")
+  if (proffunction == "Back-to-back exponential convoluted with pseudo-voigt (profile 9)")
     m_fpProfileNumber = 9;
   else if (proffunction == "Jason Hodge's function (profile 10)")
     m_fpProfileNumber = 10;
   else {
     stringstream errmsg;
-    errmsg << "It is impossible to have profile function " << proffunction
-           << " input. ";
+    errmsg << "It is impossible to have profile function " << proffunction << " input. ";
     g_log.error(errmsg.str());
     throw runtime_error(errmsg.str());
   }
@@ -200,8 +186,7 @@ void SaveFullprofResolution::parseTableWorkspace() {
     // and BANK matches
     for (size_t i = 1; i < numcols; ++i) {
       if (boost::starts_with(colnames[i], "Value")) {
-        int bankid = boost::math::iround(
-            m_profileTableWS->cell<double>(rowbankindex, i));
+        int bankid = boost::math::iround(m_profileTableWS->cell<double>(rowbankindex, i));
         if (bankid == m_bankID) {
           colindex = static_cast<int>(i);
           break;
@@ -221,8 +206,7 @@ void SaveFullprofResolution::parseTableWorkspace() {
 
   // Parse
   for (size_t ir = 0; ir < numpars; ++ir) {
-    double parvalue =
-        m_profileTableWS->cell<double>(ir, static_cast<size_t>(colindex));
+    double parvalue = m_profileTableWS->cell<double>(ir, static_cast<size_t>(colindex));
     m_profileParamMap.emplace(vec_parnames[ir], parvalue);
   }
 
@@ -230,8 +214,7 @@ void SaveFullprofResolution::parseTableWorkspace() {
   stringstream dbss("Imported Parameter Table: \n");
   map<string, double>::iterator mit;
   for (mit = m_profileParamMap.begin(); mit != m_profileParamMap.end(); ++mit)
-    dbss << setw(20) << mit->first << " = " << setprecision(5) << mit->second
-         << '\n';
+    dbss << setw(20) << mit->first << " = " << setprecision(5) << mit->second << '\n';
   g_log.debug(dbss.str());
 }
 
@@ -272,8 +255,7 @@ std::string SaveFullprofResolution::toProf10IrfString() {
     profindex = 10;
   } else if (profindex != 10) {
     stringstream errmsg;
-    errmsg << "This column in table has profile number " << profindex
-           << " other than 10.";
+    errmsg << "This column in table has profile number " << profindex << " other than 10.";
     g_log.error(errmsg.str());
     throw runtime_error(errmsg.str());
   }
@@ -285,14 +267,12 @@ std::string SaveFullprofResolution::toProf10IrfString() {
   if (!m_append) {
     content << "  Instrumental resolution function for POWGEN/SNS  ireso: 6"
             << "\n";
-    content << "! To be used with function NPROF=" << profindex
-            << " in FullProf  (Res=6)"
+    content << "! To be used with function NPROF=" << profindex << " in FullProf  (Res=6)"
             << "\n";
   }
 
   // Write bank information
-  content << "! ----------------------------------------------  Bank "
-          << m_bankID << "  ";
+  content << "! ----------------------------------------------  Bank " << m_bankID << "  ";
   if (has_key(m_profileParamMap, "CWL")) {
     double cwl = m_profileParamMap["CWL"];
     if (cwl > 0)
@@ -305,28 +285,24 @@ std::string SaveFullprofResolution::toProf10IrfString() {
   }
 
   // Write profile parameter
-  content
-      << "!  Type of profile function: back-to-back exponentials * pseudo-Voigt"
-      << "\n";
+  content << "!  Type of profile function: back-to-back exponentials * pseudo-Voigt"
+          << "\n";
   content << "NPROF " << profindex << "\n";
 
   content << "!       Tof-min(us)    step      Tof-max(us)"
           << "\n";
-  content << "TOFRG   " << setprecision(3) << tofmin << " " << setw(16)
-          << setprecision(5) << tofstep << " " << setw(16) << setprecision(3)
-          << tofmax << "\n";
+  content << "TOFRG   " << setprecision(3) << tofmin << " " << setw(16) << setprecision(5) << tofstep << " " << setw(16)
+          << setprecision(3) << tofmax << "\n";
 
   content << "!       Zero   Dtt1"
           << "\n";
-  content << "ZD2TOF     " << setw(16) << setprecision(5) << zero << setw(16)
-          << setprecision(5) << dtt1 << "\n";
+  content << "ZD2TOF     " << setw(16) << setprecision(5) << zero << setw(16) << setprecision(5) << dtt1 << "\n";
 
   content << "!       Zerot    Dtt1t       Dtt2t    x-cross    Width"
           << "\n";
-  content << "ZD2TOT    " << setprecision(5) << zerot << setw(16)
-          << setprecision(5) << dtt1t << setw(16) << setprecision(5) << dtt2t
-          << setw(16) << setprecision(10) << xcross << setw(16)
-          << setprecision(5) << width << "\n";
+  content << "ZD2TOT    " << setprecision(5) << zerot << setw(16) << setprecision(5) << dtt1t << setw(16)
+          << setprecision(5) << dtt2t << setw(16) << setprecision(10) << xcross << setw(16) << setprecision(5) << width
+          << "\n";
 
   content << "!     TOF-TWOTH of the bank"
           << "\n";
@@ -337,27 +313,23 @@ std::string SaveFullprofResolution::toProf10IrfString() {
   // In .irf file, Sig-0, Sig-1 and Sig-2 are the squared values;
   content << "!       Sig-2     Sig-1     Sig-0"
           << "\n";
-  content << "SIGMA  " << setprecision(6) << sig2 * sig2 << setw(16)
-          << setprecision(6) << sig1 * sig1 << setw(16) << setprecision(6)
-          << sig0 * sig0 << "\n";
+  content << "SIGMA  " << setprecision(6) << sig2 * sig2 << setw(16) << setprecision(6) << sig1 * sig1 << setw(16)
+          << setprecision(6) << sig0 * sig0 << "\n";
 
   content << "!       Gam-2     Gam-1     Gam-0"
           << "\n";
-  content << "GAMMA  " << setw(16) << setprecision(6) << gam2 << " " << setw(16)
-          << setprecision(6) << gam1 << " " << setw(16) << setprecision(6)
-          << gam0 << "\n";
+  content << "GAMMA  " << setw(16) << setprecision(6) << gam2 << " " << setw(16) << setprecision(6) << gam1 << " "
+          << setw(16) << setprecision(6) << gam0 << "\n";
 
   content << "!          alph0       beta0       alph1       beta1"
           << "\n";
-  content << "ALFBE        " << setprecision(6) << alph0 << " " << setw(16)
-          << setprecision(6) << beta0 << " " << setw(16) << setprecision(6)
-          << alph1 << " " << setw(16) << setprecision(6) << beta1 << "\n";
+  content << "ALFBE        " << setprecision(6) << alph0 << " " << setw(16) << setprecision(6) << beta0 << " "
+          << setw(16) << setprecision(6) << alph1 << " " << setw(16) << setprecision(6) << beta1 << "\n";
 
   content << "!         alph0t      beta0t      alph1t      beta1t"
           << "\n";
-  content << "ALFBT       " << setprecision(6) << alph0t << " " << setw(16)
-          << setprecision(6) << beta0t << " " << setw(16) << setprecision(6)
-          << alph1t << " " << setw(16) << setprecision(6) << beta1t << "\n";
+  content << "ALFBT       " << setprecision(6) << alph0t << " " << setw(16) << setprecision(6) << beta0t << " "
+          << setw(16) << setprecision(6) << alph1t << " " << setw(16) << setprecision(6) << beta1t << "\n";
   content << "END"
           << "\n";
 
@@ -395,8 +367,7 @@ std::string SaveFullprofResolution::toProf9IrfString() {
     profindex = 9;
   } else if (profindex != 9) {
     stringstream errmsg;
-    errmsg << "This column in table has profile number " << profindex
-           << " other than 9.";
+    errmsg << "This column in table has profile number " << profindex << " other than 9.";
     g_log.error(errmsg.str());
     throw runtime_error(errmsg.str());
   }
@@ -409,14 +380,12 @@ std::string SaveFullprofResolution::toProf9IrfString() {
     content << "Instrumental resolution function for HRPD/ISIS L. Chapon "
                "12/2003  ireso: 5"
             << "\n";
-    content << "! To be used with function NPROF=" << profindex
-            << " in FullProf  (Res=5)"
+    content << "! To be used with function NPROF=" << profindex << " in FullProf  (Res=5)"
             << "\n";
   }
 
   // Write bank information
-  content << "! ----------------------------------------------  Bank "
-          << m_bankID << "  ";
+  content << "! ----------------------------------------------  Bank " << m_bankID << "  ";
   if (has_key(m_profileParamMap, "CWL")) {
     double cwl = m_profileParamMap["CWL"];
     if (cwl > 0.)
@@ -429,21 +398,18 @@ std::string SaveFullprofResolution::toProf9IrfString() {
   }
 
   // Write profile parameters
-  content
-      << "!  Type of profile function: back-to-back exponentials * pseudo-Voigt"
-      << "\n";
+  content << "!  Type of profile function: back-to-back exponentials * pseudo-Voigt"
+          << "\n";
   content << "NPROF " << profindex << "\n";
   content << "!       Tof-min(us)    step      Tof-max(us)"
           << "\n";
-  content << "TOFRG   " << setprecision(3) << tofmin << " " << setw(16)
-          << setprecision(5) << tofstep << " " << setw(16) << setprecision(3)
-          << tofmax << "\n";
+  content << "TOFRG   " << setprecision(3) << tofmin << " " << setw(16) << setprecision(5) << tofstep << " " << setw(16)
+          << setprecision(3) << tofmax << "\n";
 
   content << "!        Dtt1           Dtt2       Zero"
           << "\n";
-  content << "D2TOF     " << setw(16) << setprecision(5) << dtt1 << setw(16)
-          << setprecision(5) << dtt2 << setw(16) << setprecision(5) << zero
-          << "\n";
+  content << "D2TOF     " << setw(16) << setprecision(5) << dtt1 << setw(16) << setprecision(5) << dtt2 << setw(16)
+          << setprecision(5) << zero << "\n";
 
   content << "!     TOF-TWOTH of the bank"
           << "\n";
@@ -454,21 +420,18 @@ std::string SaveFullprofResolution::toProf9IrfString() {
   // In .irf file, Sig-0, Sig-1 and Sig-2 are the squared values;
   content << "!       Sig-2     Sig-1     Sig-0"
           << "\n";
-  content << "SIGMA  " << setprecision(6) << sig2 * sig2 << setw(16)
-          << setprecision(6) << sig1 * sig1 << setw(16) << setprecision(6)
-          << sig0 * sig0 << "\n";
+  content << "SIGMA  " << setprecision(6) << sig2 * sig2 << setw(16) << setprecision(6) << sig1 * sig1 << setw(16)
+          << setprecision(6) << sig0 * sig0 << "\n";
 
   content << "!       Gam-2     Gam-1     Gam-0"
           << "\n";
-  content << "GAMMA  " << setw(16) << setprecision(6) << gam2 << " " << setw(16)
-          << setprecision(6) << gam1 << " " << setw(16) << setprecision(6)
-          << gam0 << "\n";
+  content << "GAMMA  " << setw(16) << setprecision(6) << gam2 << " " << setw(16) << setprecision(6) << gam1 << " "
+          << setw(16) << setprecision(6) << gam0 << "\n";
 
   content << "!          alph0       beta0       alph1       beta1"
           << "\n";
-  content << "ALFBE        " << setprecision(6) << alph0 << " " << setw(16)
-          << setprecision(6) << beta0 << " " << setw(16) << setprecision(6)
-          << alph1 << " " << setw(16) << setprecision(6) << beta1 << "\n";
+  content << "ALFBE        " << setprecision(6) << alph0 << " " << setw(16) << setprecision(6) << beta0 << " "
+          << setw(16) << setprecision(6) << alph1 << " " << setw(16) << setprecision(6) << beta1 << "\n";
 
   content << "END"
           << "\n";
@@ -479,8 +442,7 @@ std::string SaveFullprofResolution::toProf9IrfString() {
 //
 /** Check wether a profile parameter map has the parameter
  */
-bool SaveFullprofResolution::has_key(std::map<std::string, double> profmap,
-                                     const std::string &key) {
+bool SaveFullprofResolution::has_key(std::map<std::string, double> profmap, const std::string &key) {
   map<string, double>::iterator fiter;
   fiter = profmap.find(key);
   bool exist = true;

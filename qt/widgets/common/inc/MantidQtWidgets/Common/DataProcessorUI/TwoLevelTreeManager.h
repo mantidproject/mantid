@@ -28,12 +28,10 @@ to a DataProcessorUI with a post-processing algorithm defined).
 class EXPORT_OPT_MANTIDQT_COMMON TwoLevelTreeManager : public TreeManager {
 public:
   /// Constructor
-  TwoLevelTreeManager(DataProcessorPresenter *presenter,
-                      const Mantid::API::ITableWorkspace_sptr &table,
+  TwoLevelTreeManager(DataProcessorPresenter *presenter, const Mantid::API::ITableWorkspace_sptr &table,
                       const WhiteList &whitelist);
   /// Constructor (no table ws given)
-  TwoLevelTreeManager(DataProcessorPresenter *presenter,
-                      const WhiteList &whitelist);
+  TwoLevelTreeManager(DataProcessorPresenter *presenter, const WhiteList &whitelist);
   /// Destructor
   ~TwoLevelTreeManager() override;
 
@@ -62,8 +60,7 @@ public:
   /// Blank table
   void newTable(const WhiteList &whitelist) override;
   /// New table
-  void newTable(Mantid::API::ITableWorkspace_sptr table,
-                const WhiteList &whitelist) override;
+  void newTable(Mantid::API::ITableWorkspace_sptr table, const WhiteList &whitelist) override;
 
   /// Return selected data
   TreeData selectedData(bool prompt) override;
@@ -76,10 +73,8 @@ public:
   /// Get the number of rows of a given parent
   int rowCount() const override;
   int rowCount(int parent) const override;
-  void setCell(int row, int column, int parentRow, int parentColumn,
-               const std::string &value) override;
-  std::string getCell(int row, int column, int parentRow,
-                      int parentColumn) const override;
+  void setCell(int row, int column, int parentRow, int parentColumn, const std::string &value) override;
+  std::string getCell(int row, int column, int parentRow, int parentColumn) const override;
   int getNumberOfRows() override;
   /// Get the 'processed' status of a data item
   bool isProcessed(int position) const override;
@@ -96,8 +91,7 @@ public:
   void invalidateAllProcessed() override;
 
   /// Validate a table workspace
-  bool isValidModel(Mantid::API::Workspace_sptr ws,
-                    size_t whitelistColumns) const override;
+  bool isValidModel(Mantid::API::Workspace_sptr ws, size_t whitelistColumns) const override;
 
   /// Return the model
   std::shared_ptr<AbstractTreeModel> getModel() override;
@@ -119,11 +113,9 @@ private:
   /// Get the number of rows in a group
   int numRowsInGroup(int groupId) const;
   /// Create a default table workspace
-  Mantid::API::ITableWorkspace_sptr
-  createDefaultWorkspace(const WhiteList &whitelist);
+  Mantid::API::ITableWorkspace_sptr createDefaultWorkspace(const WhiteList &whitelist);
   /// Validate a table workspace
-  void validateModel(const Mantid::API::ITableWorkspace_sptr &ws,
-                     size_t whitelistColumns) const;
+  void validateModel(const Mantid::API::ITableWorkspace_sptr &ws, size_t whitelistColumns) const;
   TreeData constructTreeData(const ChildItems &rows);
 };
 } // namespace DataProcessor

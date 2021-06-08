@@ -92,9 +92,7 @@ struct tm getTimeValue(const std::string &sDate, std::string &error) {
 } // namespace
 
 /// create a copy of the the validator
-IValidator_sptr DateValidator::clone() const {
-  return std::make_shared<DateValidator>(*this);
-}
+IValidator_sptr DateValidator::clone() const { return std::make_shared<DateValidator>(*this); }
 
 /** Checks the given value is a valid date
  *  @param value :: input date property to validate

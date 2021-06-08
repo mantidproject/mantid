@@ -33,16 +33,13 @@ Class for 3D vectors.
 class MANTID_KERNEL_DLL V3D final {
 public:
   constexpr V3D() noexcept : m_pt({{0., 0., 0.}}) {}
-  constexpr V3D(double xx, double yy, double zz) noexcept
-      : m_pt({{xx, yy, zz}}) {}
+  constexpr V3D(double xx, double yy, double zz) noexcept : m_pt({{xx, yy, zz}}) {}
 
   /// Convenience method for sorting list of V3D objects based on magnitude
   static bool compareMagnitude(const Kernel::V3D &v1, const Kernel::V3D &v2);
 
   // explicit conversion into vector
-  operator std::vector<double>() const {
-    return std::vector<double>(m_pt.cbegin(), m_pt.cend());
-  }
+  operator std::vector<double>() const { return std::vector<double>(m_pt.cbegin(), m_pt.cend()); }
 
   /**
     Addtion operator
@@ -133,18 +130,14 @@ public:
     @param D :: value to scale
     @return this * D
    */
-  constexpr V3D operator*(const double D) const noexcept {
-    return V3D(m_pt[0] * D, m_pt[1] * D, m_pt[2] * D);
-  }
+  constexpr V3D operator*(const double D) const noexcept { return V3D(m_pt[0] * D, m_pt[1] * D, m_pt[2] * D); }
 
   /**
     Scalar divsion
     @param D :: value to scale
     @return this / D
   */
-  constexpr V3D operator/(const double D) const noexcept {
-    return V3D(m_pt[0] / D, m_pt[1] / D, m_pt[2] / D);
-  }
+  constexpr V3D operator/(const double D) const noexcept { return V3D(m_pt[0] / D, m_pt[1] / D, m_pt[2] / D); }
 
   /**
     Scalar product
@@ -175,9 +168,7 @@ public:
     Negation
    * @return a vector with same magnitude but in opposite direction
    */
-  constexpr V3D operator-() const noexcept {
-    return V3D(-m_pt[0], -m_pt[1], -m_pt[2]);
-  }
+  constexpr V3D operator-() const noexcept { return V3D(-m_pt[0], -m_pt[1], -m_pt[2]); }
 
   /**
     Equals operator with tolerance factor
@@ -185,8 +176,7 @@ public:
     @return true if the items are equal
   */
   bool operator==(const V3D &v) const noexcept {
-    return !(std::abs(m_pt[0] - v.m_pt[0]) > Tolerance ||
-             std::abs(m_pt[1] - v.m_pt[1]) > Tolerance ||
+    return !(std::abs(m_pt[0] - v.m_pt[0]) > Tolerance || std::abs(m_pt[1] - v.m_pt[1]) > Tolerance ||
              std::abs(m_pt[2] - v.m_pt[2]) > Tolerance);
   }
 
@@ -194,9 +184,7 @@ public:
    *  @param other :: The V3D to compare against
    *  @returns True if the vectors are different
    */
-  bool operator!=(const V3D &other) const noexcept {
-    return !(this->operator==(other));
-  }
+  bool operator!=(const V3D &other) const noexcept { return !(this->operator==(other)); }
 
   /**
     compare
@@ -211,9 +199,7 @@ public:
   }
 
   /// Comparison operator greater than.
-  constexpr bool operator>(const V3D &rhs) const noexcept {
-    return rhs < *this;
-  }
+  constexpr bool operator>(const V3D &rhs) const noexcept { return rhs < *this; }
 
   /**
     Sets the vector position from a triplet of doubles x,y,z
@@ -221,17 +207,13 @@ public:
     @param yy :: The Y coordinate
     @param zz :: The Z coordinate
   */
-  void operator()(const double xx, const double yy, const double zz) noexcept {
-    m_pt = {{xx, yy, zz}};
-  }
+  void operator()(const double xx, const double yy, const double zz) noexcept { m_pt = {{xx, yy, zz}}; }
 
   // Access
   // Setting x, y and z values
   void spherical(const double R, const double theta, const double phi) noexcept;
-  void spherical_rad(const double R, const double polar,
-                     const double azimuth) noexcept;
-  void azimuth_polar_SNS(const double R, const double azimuth,
-                         const double polar) noexcept;
+  void spherical_rad(const double R, const double polar, const double azimuth) noexcept;
+  void azimuth_polar_SNS(const double R, const double azimuth, const double polar) noexcept;
   /**
     Set is x position
     @param xx :: The X coordinate
@@ -283,9 +265,7 @@ public:
   double normalize();
   double norm() const noexcept { return sqrt(norm2()); }
   /// Vector length squared
-  constexpr double norm2() const noexcept {
-    return m_pt[0] * m_pt[0] + m_pt[1] * m_pt[1] + m_pt[2] * m_pt[2];
-  }
+  constexpr double norm2() const noexcept { return m_pt[0] * m_pt[0] + m_pt[1] * m_pt[1] + m_pt[2] * m_pt[2]; }
   /// transform vector into form, used to describe directions in
   /// crystallogaphical coodinate system
   double toMillerIndexes(double eps = 1.e-3);
@@ -299,8 +279,7 @@ public:
   }
   /// Cross product (this * argument)
   constexpr V3D cross_prod(const V3D &v) const noexcept {
-    return V3D(m_pt[1] * v.m_pt[2] - m_pt[2] * v.m_pt[1],
-               m_pt[2] * v.m_pt[0] - m_pt[0] * v.m_pt[2],
+    return V3D(m_pt[1] * v.m_pt[2] - m_pt[2] * v.m_pt[1], m_pt[2] * v.m_pt[0] - m_pt[0] * v.m_pt[2],
                m_pt[0] * v.m_pt[1] - m_pt[1] * v.m_pt[0]);
   }
   /**
@@ -325,8 +304,7 @@ public:
   double hklError() const;
 
   // Make 2 vectors into 3 orthogonal vectors
-  static std::vector<V3D>
-  makeVectorsOrthogonal(const std::vector<V3D> &vectors);
+  static std::vector<V3D> makeVectorsOrthogonal(const std::vector<V3D> &vectors);
 
   // Send to a stream
   void printSelf(std::ostream &) const;
@@ -337,9 +315,7 @@ public:
   void fromString(const std::string &str);
 
   /// Calculate the volume of a cube X*Y*Z
-  double volume() const noexcept {
-    return std::abs(m_pt[0] * m_pt[1] * m_pt[2]);
-  }
+  double volume() const noexcept { return std::abs(m_pt[0] * m_pt[1] * m_pt[2]); }
   /// rebase to new basis vector
   int reBase(const V3D &, const V3D &, const V3D &) noexcept;
   /// Determine if there is a master direction

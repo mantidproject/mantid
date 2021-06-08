@@ -59,8 +59,7 @@ void createWorkspace2DInADS(const std::string &inputWS) {
 }
 
 void createEventWorkspaceInADS(const std::string &inputEvWS) {
-  EventWorkspace_sptr event =
-      WorkspaceCreationHelper::createEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
+  EventWorkspace_sptr event = WorkspaceCreationHelper::createEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
   event->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   AnalysisDataService::Instance().add(inputEvWS, event);
 
@@ -76,9 +75,7 @@ class He3TubeEfficiencyTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static He3TubeEfficiencyTest *createSuite() {
-    return new He3TubeEfficiencyTest();
-  }
+  static He3TubeEfficiencyTest *createSuite() { return new He3TubeEfficiencyTest(); }
   static void destroySuite(He3TubeEfficiencyTest *suite) { delete suite; }
 
   He3TubeEfficiencyTest() : inputWS("testInput"), inputEvWS("testEvInput") {}
@@ -95,8 +92,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr result =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
+    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
 
     // Monitor should be untouched
     TS_ASSERT_DELTA(result->y(0).front(), 10.0, 1e-6);
@@ -120,10 +116,8 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr result =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
-    EventWorkspace_sptr ev_result =
-        std::dynamic_pointer_cast<EventWorkspace>(result);
+    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
+    EventWorkspace_sptr ev_result = std::dynamic_pointer_cast<EventWorkspace>(result);
 
     // Monitor events should be untouched
     EventList mon_ev = ev_result->getSpectrum(0);
@@ -143,12 +137,9 @@ public:
     He3TubeEfficiency alg;
     alg.initialize();
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("TubePressure", "-10"),
-                     const invalid_argument &);
-    TS_ASSERT_THROWS(alg.setPropertyValue("TubeThickness", "-0.08"),
-                     const invalid_argument &);
-    TS_ASSERT_THROWS(alg.setPropertyValue("TubeTemperature", "-100"),
-                     const invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("TubePressure", "-10"), const invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("TubeThickness", "-0.08"), const invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("TubeTemperature", "-100"), const invalid_argument &);
 
     AnalysisDataService::Instance().remove(inputWS);
   }
@@ -166,8 +157,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr result =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
+    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
 
     // Monitor should be untouched
     TS_ASSERT_DELTA(result->y(0).front(), 10.0, 1e-6);
@@ -192,10 +182,8 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr result =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
-    EventWorkspace_sptr ev_result =
-        std::dynamic_pointer_cast<EventWorkspace>(result);
+    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
+    EventWorkspace_sptr ev_result = std::dynamic_pointer_cast<EventWorkspace>(result);
 
     // Monitor should be untouched
     EventList mon_ev = ev_result->getSpectrum(0);

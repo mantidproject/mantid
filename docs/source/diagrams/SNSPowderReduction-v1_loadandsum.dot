@@ -20,7 +20,7 @@ digraph LoadAndSum {
     $decision_style
     isLastRunNumber [label="Is Last Run Number?"]
   }
-  
+
   subgraph values {
     $value_style
     RunNumber [label="Run Number"]
@@ -36,6 +36,6 @@ digraph LoadAndSum {
   isLastRunNumber     -> getRunNumber [label="No"]
 
   isLastRunNumber     -> normaliseByCurrent [label="Yes"]
-  normaliseByCurrent  -> OutputWorkspace  
-  
+  normaliseByCurrent  -> OutputWorkspace
+
 }

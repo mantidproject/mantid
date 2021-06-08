@@ -22,12 +22,8 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflectometryTransformQxQzTest *createSuite() {
-    return new ReflectometryTransformQxQzTest();
-  }
-  static void destroySuite(ReflectometryTransformQxQzTest *suite) {
-    delete suite;
-  }
+  static ReflectometryTransformQxQzTest *createSuite() { return new ReflectometryTransformQxQzTest(); }
+  static void destroySuite(ReflectometryTransformQxQzTest *suite) { delete suite; }
 
   void test_qxmin_greater_than_qxmax_throws() {
     double qxMin = 2;
@@ -35,9 +31,8 @@ public:
     double qzMin = 1;
     double qzMax = 2;
     double incidentTheta = 1;
-    TS_ASSERT_THROWS(
-        ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
+                     const std::invalid_argument &);
   }
 
   void test_qxmin_equal_to_qxmax_throws() {
@@ -46,9 +41,8 @@ public:
     double qzMin = 1;
     double qzMax = 2;
     double incidentTheta = 1;
-    TS_ASSERT_THROWS(
-        ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
+                     const std::invalid_argument &);
   }
 
   void test_qzmin_greater_than_qzmax_throws() {
@@ -57,9 +51,8 @@ public:
     double qzMin = 2;
     double qzMax = 1; // Smaller than qzMin!
     double incidentTheta = 1;
-    TS_ASSERT_THROWS(
-        ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
+                     const std::invalid_argument &);
   }
 
   void test_qzmin_equal_to_qzmax_throws() {
@@ -68,9 +61,8 @@ public:
     double qzMin = 1;
     double qzMax = 1; // Equal to qzMin!
     double incidentTheta = 1;
-    TS_ASSERT_THROWS(
-        ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
+                     const std::invalid_argument &);
   }
 
   void test_incident_theta_negative() {
@@ -79,9 +71,7 @@ public:
     double qzMin = 1;
     double qzMax = 3;
     double incidentTheta = -0.001; // Negative
-    TS_ASSERT_THROWS(
-        ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-        const std::out_of_range &);
+    TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta), const std::out_of_range &);
   }
 
   void test_incident_theta_too_large() {
@@ -90,9 +80,7 @@ public:
     double qzMin = 1;
     double qzMax = 3;
     double incidentTheta = 90.001; // Too large
-    TS_ASSERT_THROWS(
-        ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-        const std::out_of_range &);
+    TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta), const std::out_of_range &);
   }
 
   void test_valid_construction_inputs() {
@@ -101,8 +89,7 @@ public:
     double qzMin = 1;
     double qzMax = 2;
     double incidentTheta = 1;
-    TS_ASSERT_THROWS_NOTHING(
-        ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta));
+    TS_ASSERT_THROWS_NOTHING(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta));
   }
 
   //---- Tests for Qx Calculator ---- //
@@ -128,8 +115,7 @@ public:
 
     // Now reset the final theta and should be able to re-execute
     calculator.setThetaFinal(90);
-    TS_ASSERT_DELTA(-2 * M_PI / wavelength,
-                    calculator.calculateDim0(wavelength), 0.0001);
+    TS_ASSERT_DELTA(-2 * M_PI / wavelength, calculator.calculateDim0(wavelength), 0.0001);
   }
 
   //---- End Tests for Qx Calculator ---- //
@@ -152,13 +138,11 @@ public:
     calculator.setThetaIncident(90);
     calculator.setThetaFinal(90);
     const double wavelength = 0.1;
-    TS_ASSERT_DELTA(2 * (2 * M_PI / wavelength),
-                    calculator.calculateDim1(wavelength), 0.001);
+    TS_ASSERT_DELTA(2 * (2 * M_PI / wavelength), calculator.calculateDim1(wavelength), 0.001);
 
     // Now reset the final theta and should be able to re-execute
     calculator.setThetaFinal(0);
-    TS_ASSERT_DELTA(2 * M_PI / wavelength, calculator.calculateDim1(wavelength),
-                    0.001);
+    TS_ASSERT_DELTA(2 * M_PI / wavelength, calculator.calculateDim1(wavelength), 0.001);
   }
 
   //---- End Tests for Qz Calculator ---- //

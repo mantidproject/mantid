@@ -47,15 +47,13 @@ public:
 
   void testValidateWS() {
     // get a mock workspace with wrong instrument name
-    IAlgorithm_sptr lei =
-        AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
+    IAlgorithm_sptr lei = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     lei->initialize();
     lei->setPropertyValue("Filename", "NOW4_Definition.xml");
     lei->setPropertyValue("OutputWorkspace", "wrongTypeWs");
     lei->setPropertyValue("MakeEventWorkspace", "1");
     lei->execute();
-    auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-        "wrongTypeWs");
+    auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("wrongTypeWs");
 
     // get a mock calTable
     std::string calTableName = "correctCalTable";
@@ -113,8 +111,7 @@ private:
     // Name of the output workspace.
     std::string outWSName("correctWs");
 
-    IAlgorithm_sptr lei =
-        AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
+    IAlgorithm_sptr lei = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     lei->initialize();
     lei->setPropertyValue("Filename", "CORELLI_Definition.xml");
     lei->setPropertyValue("OutputWorkspace", outWSName);
@@ -126,19 +123,16 @@ private:
     return ws;
   }
 
-  TableWorkspace_sptr
-  createTestCalibrationTableWorkspace(const std::string &outWSName) {
+  TableWorkspace_sptr createTestCalibrationTableWorkspace(const std::string &outWSName) {
 
     ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
     AnalysisDataService::Instance().addOrReplace(outWSName, itablews);
 
-    TableWorkspace_sptr tablews =
-        std::dynamic_pointer_cast<TableWorkspace>(itablews);
+    TableWorkspace_sptr tablews = std::dynamic_pointer_cast<TableWorkspace>(itablews);
     TS_ASSERT(tablews);
 
     // Set up columns
-    for (size_t i = 0;
-         i < CorelliCalibration::calibrationTableColumnNames.size(); i++) {
+    for (size_t i = 0; i < CorelliCalibration::calibrationTableColumnNames.size(); i++) {
       std::string colname = CorelliCalibration::calibrationTableColumnNames[i];
       std::string type = CorelliCalibration::calibrationTableColumnTypes[i];
       tablews->addColumn(type, colname);
@@ -148,11 +142,9 @@ private:
     Mantid::API::TableRow sourceRow = tablews->appendRow();
     sourceRow << "moderator" << 0. << 0. << -15.560 << 0. << 0. << 0. << 0.;
     Mantid::API::TableRow sampleRow = tablews->appendRow();
-    sampleRow << "sample-position" << 0.0001 << -0.0002 << 0.003 << 0. << 0.
-              << 0. << 0.;
+    sampleRow << "sample-position" << 0.0001 << -0.0002 << 0.003 << 0. << 0. << 0. << 0.;
     Mantid::API::TableRow bank1Row = tablews->appendRow();
-    bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999
-             << 0.3424 << 5.67;
+    bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999 << 0.3424 << 5.67;
     // bank42 is at the x-axis (transverse of beam direction)
     // rotating 180 should reverse its bottom pixel (1) and top pixel (256)
     TableRow bank42Row = tablews->appendRow();

@@ -31,38 +31,27 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-TOFSANSResolutionByPixel::TOFSANSResolutionByPixel()
-    : API::Algorithm(), m_wl_resolution(0.) {}
+TOFSANSResolutionByPixel::TOFSANSResolutionByPixel() : API::Algorithm(), m_wl_resolution(0.) {}
 
 void TOFSANSResolutionByPixel::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<WorkspaceUnitValidator>("Wavelength")),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Name the workspace to calculate the resolution for, for "
                   "each pixel and wavelength");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
-      "Name of the newly created workspace which contains the Q resolution.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
+                  "Name of the newly created workspace which contains the Q resolution.");
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
-  declareProperty("DeltaR", 0.0, positiveDouble,
-                  "Virtual ring width on the detector (mm).");
-  declareProperty("SampleApertureRadius", 0.0, positiveDouble,
-                  "Sample aperture radius, R2 (mm).");
-  declareProperty("SourceApertureRadius", 0.0, positiveDouble,
-                  "Source aperture radius, R1 (mm).");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "SigmaModerator", "", Direction::Input,
-                      std::make_shared<WorkspaceUnitValidator>("Wavelength")),
+  declareProperty("DeltaR", 0.0, positiveDouble, "Virtual ring width on the detector (mm).");
+  declareProperty("SampleApertureRadius", 0.0, positiveDouble, "Sample aperture radius, R2 (mm).");
+  declareProperty("SourceApertureRadius", 0.0, positiveDouble, "Source aperture radius, R1 (mm).");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("SigmaModerator", "", Direction::Input,
+                                                        std::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Moderator time spread (microseconds) as a"
                   "function of wavelength (Angstroms).");
-  declareProperty("CollimationLength", 0.0, positiveDouble,
-                  "Collimation length (m)");
-  declareProperty("AccountForGravity", false,
-                  "Whether to correct for the effects of gravity");
-  declareProperty("ExtraLength", 0.0, positiveDouble,
-                  "Additional length for gravity correction.");
+  declareProperty("CollimationLength", 0.0, positiveDouble, "Collimation length (m)");
+  declareProperty("AccountForGravity", false, "Whether to correct for the effects of gravity");
+  declareProperty("ExtraLength", 0.0, positiveDouble, "Additional length for gravity correction.");
 }
 
 /*
@@ -93,8 +82,7 @@ void TOFSANSResolutionByPixel::exec() {
 
   // The moderator workspace needs to match the data workspace
   // in terms of wavelength binning
-  const MatrixWorkspace_sptr sigmaModeratorVSwavelength =
-      getModeratorWorkspace(inWS);
+  const MatrixWorkspace_sptr sigmaModeratorVSwavelength = getModeratorWorkspace(inWS);
 
   // create interpolation table from sigmaModeratorVSwavelength
   Kernel::Interpolation lookUpTable;
@@ -138,8 +126,7 @@ void TOFSANSResolutionByPixel::exec() {
   for (int i = 0; i < numberOfSpectra; i++) {
     IDetector_const_sptr det;
     if (!spectrumInfo.hasDetectors(i)) {
-      g_log.information() << "Workspace index " << i
-                          << " has no detector assigned to it - discarding\n";
+      g_log.information() << "Workspace index " << i << " has no detector assigned to it - discarding\n";
       continue;
     }
     // If no detector found or if it's masked or a monitor, skip onto the next
@@ -149,8 +136,7 @@ void TOFSANSResolutionByPixel::exec() {
 
     const double L2 = spectrumInfo.l2(i);
     TOFSANSResolutionByPixelCalculator calculator;
-    const double waveLengthIndependentFactor =
-        calculator.getWavelengthIndependentFactor(R1, R2, deltaR, LCollim, L2);
+    const double waveLengthIndependentFactor = calculator.getWavelengthIndependentFactor(R1, R2, deltaR, LCollim, L2);
 
     // Multiplicative factor to go from lambda to Q
     // Don't get fooled by the function name...
@@ -164,8 +150,7 @@ void TOFSANSResolutionByPixel::exec() {
     // Gravity correction
     std::unique_ptr<GravitySANSHelper> grav;
     if (doGravity) {
-      grav = std::make_unique<GravitySANSHelper>(spectrumInfo, i,
-                                                 getProperty("ExtraLength"));
+      grav = std::make_unique<GravitySANSHelper>(spectrumInfo, i, getProperty("ExtraLength"));
     }
 
     // Get handles on the outputWorkspace
@@ -187,9 +172,8 @@ void TOFSANSResolutionByPixel::exec() {
       const double sigmaSpreadFromBin = xIn[j + 1] - xIn[j];
 
       // Get the uncertainty in Q
-      auto sigmaQ = calculator.getSigmaQValue(lookUpTable.value(wl),
-                                              waveLengthIndependentFactor, q,
-                                              wl, sigmaSpreadFromBin, L1, L2);
+      auto sigmaQ = calculator.getSigmaQValue(lookUpTable.value(wl), waveLengthIndependentFactor, q, wl,
+                                              sigmaSpreadFromBin, L1, L2);
 
       // Insert the Q value and the Q resolution into the outputworkspace
       yOut[j] = sigmaQ;
@@ -208,8 +192,7 @@ void TOFSANSResolutionByPixel::exec() {
  * @param inputWorkspace: the input workspace
  * @returns a copy of the input workspace
  */
-MatrixWorkspace_sptr TOFSANSResolutionByPixel::setupOutputWorkspace(
-    const MatrixWorkspace_sptr &inputWorkspace) {
+MatrixWorkspace_sptr TOFSANSResolutionByPixel::setupOutputWorkspace(const MatrixWorkspace_sptr &inputWorkspace) {
   IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
   duplicate->initialize();
   duplicate->setProperty<Workspace_sptr>("InputWorkspace", inputWorkspace);
@@ -223,8 +206,8 @@ MatrixWorkspace_sptr TOFSANSResolutionByPixel::setupOutputWorkspace(
  * @param inputWorkspace: the input workspace
  * @returns the moderator workspace wiht the correct wavelength binning
  */
-MatrixWorkspace_sptr TOFSANSResolutionByPixel::getModeratorWorkspace(
-    const Mantid::API::MatrixWorkspace_sptr &inputWorkspace) {
+MatrixWorkspace_sptr
+TOFSANSResolutionByPixel::getModeratorWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace) {
 
   MatrixWorkspace_sptr sigmaModerator = getProperty("SigmaModerator");
   IAlgorithm_sptr rebinned = createChildAlgorithm("RebinToWorkspace");
@@ -241,8 +224,7 @@ MatrixWorkspace_sptr TOFSANSResolutionByPixel::getModeratorWorkspace(
  * Check the input workspace
  * @param inWS: the input workspace
  */
-void TOFSANSResolutionByPixel::checkInput(
-    const Mantid::API::MatrixWorkspace_sptr &inWS) {
+void TOFSANSResolutionByPixel::checkInput(const Mantid::API::MatrixWorkspace_sptr &inWS) {
   // Make sure that input workspace has an instrument as we rely heavily on
   // thisa
   auto inst = inWS->getInstrument();

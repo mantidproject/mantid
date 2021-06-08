@@ -1,3 +1,5 @@
+.. _mantid.api.HistogramValidator:
+
 ====================
  HistogramValidator
 ====================
@@ -8,7 +10,7 @@ This is a Python binding to the C++ class Mantid::API::HistogramValidator.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.HistogramValidator 
+.. autoclass:: mantid.api.HistogramValidator
     :members:
     :undoc-members:
     :inherited-members:

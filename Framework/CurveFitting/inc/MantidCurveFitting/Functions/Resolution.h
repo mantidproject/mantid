@@ -24,8 +24,7 @@ TabulatedFunction's attributes.
 @author Roman Tolchenov, Tessella plc
 @date 12/02/2010
 */
-class MANTID_CURVEFITTING_DLL Resolution : public API::ParamFunction,
-                                           public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL Resolution : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Constructor
   Resolution();
@@ -33,11 +32,9 @@ public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "Resolution"; }
   /// Function values
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
   ///  function derivatives
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
   /// Returns the number of attributes associated with the function
   size_t nAttributes() const override;
   /// Returns a list of attribute names

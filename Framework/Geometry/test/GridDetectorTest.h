@@ -79,10 +79,9 @@ public:
     auto det = std::make_unique<GridDetector>("MyGrid");
     auto cuboidShape = ComponentCreationHelper::createCuboid(0.5);
     // Initialize with these parameters
-    TS_ASSERT_THROWS(det->initialize(cuboidShape, 100, -50.0, 1.0, 200, -100.0,
-                                     1.0, 300, -20, 1.0, 1000000, "abc", 1000,
-                                     1),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(
+        det->initialize(cuboidShape, 100, -50.0, 1.0, 200, -100.0, 1.0, 300, -20, 1.0, 1000000, "abc", 1000, 1),
+        const std::invalid_argument &);
   }
 
   void testFullConstructor() {
@@ -92,8 +91,7 @@ public:
     det->setPos(0, 0, 0);
 
     // Initialize with these parameters
-    det->initialize(cuboidShape, 5, -2.5, 1.0, 7, -3.5, 1.0, 3, -1.5, 1.0,
-                    1000000, "zyx", 3, 1);
+    det->initialize(cuboidShape, 5, -2.5, 1.0, 7, -3.5, 1.0, 3, -1.5, 1.0, 1000000, "zyx", 3, 1);
 
     do_test_on(*det);
 
@@ -112,8 +110,7 @@ public:
 
     auto det = std::make_unique<GridDetector>("MyGrid");
     det->setPos(1, 2, 1);
-    det->initialize(cuboidShape, 5, -2.5, 1.0, 7, -3.5, 1.0, 3, -1.5, 1.0,
-                    1000000, "zyx", 3, 1);
+    det->initialize(cuboidShape, 5, -2.5, 1.0, 7, -3.5, 1.0, 3, -1.5, 1.0, 1000000, "zyx", 3, 1);
 
     // --- Now make a parametrized version ----
     ParameterMap_sptr pmap(new ParameterMap());

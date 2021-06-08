@@ -30,12 +30,10 @@ void FilterByTime::init() {
   std::string commonHelp("\nYou can only specify the relative or absolute "
                          "start/stop times, not both.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input event workspace");
 
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
   auto min = std::make_shared<BoundedValidator<double>>();
@@ -54,18 +52,12 @@ void FilterByTime::init() {
                   "ProtonCharge sample log) is used as the zero. " +
                       commonHelp);
 
-  std::string absoluteHelp(
-      "Specify date and UTC time in ISO8601 format, e.g. 2010-09-14T04:20:12." +
-      commonHelp);
-  declareProperty(
-      "AbsoluteStartTime", "",
-      "Absolute start time; events before this time are filtered out. " +
-          absoluteHelp);
+  std::string absoluteHelp("Specify date and UTC time in ISO8601 format, e.g. 2010-09-14T04:20:12." + commonHelp);
+  declareProperty("AbsoluteStartTime", "",
+                  "Absolute start time; events before this time are filtered out. " + absoluteHelp);
 
-  declareProperty(
-      "AbsoluteStopTime", "",
-      "Absolute stop time; events at of after this time are filtered out. " +
-          absoluteHelp);
+  declareProperty("AbsoluteStopTime", "",
+                  "Absolute stop time; events at of after this time are filtered out. " + absoluteHelp);
 }
 
 /** Executes the algorithm
@@ -84,13 +76,11 @@ void FilterByTime::exec() {
   start_str = getPropertyValue("AbsoluteStartTime");
   stop_str = getPropertyValue("AbsoluteStopTime");
 
-  if ((start_str != "") && (stop_str != "") && (start_dbl <= 0.0) &&
-      (stop_dbl <= 0.0)) {
+  if ((start_str != "") && (stop_str != "") && (start_dbl <= 0.0) && (stop_dbl <= 0.0)) {
     // Use the absolute string
     start = DateAndTime(start_str);
     stop = DateAndTime(stop_str);
-  } else if ((start_str == "") && (stop_str == "") &&
-             ((start_dbl > 0.0) || (stop_dbl > 0.0))) {
+  } else if ((start_str == "") && (stop_str == "") && ((start_dbl > 0.0) || (stop_dbl > 0.0))) {
     // Use the relative times in seconds.
     DateAndTime first = inputWS->getFirstPulseTime();
     DateAndTime last = inputWS->getLastPulseTime();
@@ -98,10 +88,8 @@ void FilterByTime::exec() {
     if (stop_dbl > 0.0) {
       stop = first + stop_dbl;
     } else {
-      this->getLogger().debug()
-          << "No end filter time specified - assuming last pulse\n";
-      stop =
-          last + 10000.0; // so we get all events - needs to be past last pulse
+      this->getLogger().debug() << "No end filter time specified - assuming last pulse\n";
+      stop = last + 10000.0; // so we get all events - needs to be past last pulse
     }
   } else {
     // Either both or none were specified
@@ -112,8 +100,7 @@ void FilterByTime::exec() {
   }
 
   if (stop <= start)
-    throw std::invalid_argument(
-        "The stop time should be larger than the start time.");
+    throw std::invalid_argument("The stop time should be larger than the start time.");
 
   auto outputWS = DataObjects::create<EventWorkspace>(*inputWS);
 

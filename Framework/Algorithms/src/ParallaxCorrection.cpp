@@ -30,8 +30,7 @@ static const std::string DIRECTION_PARAMETER = "direction";
  * @param direction : x or y
  * @return empty string if valid, error message otherwise
  */
-std::string validateFormula(const std::string &parallax,
-                            const std::string &direction) {
+std::string validateFormula(const std::string &parallax, const std::string &direction) {
   if (direction != "x" && direction != "y") {
     return "Direction must be x or y";
   }
@@ -57,9 +56,7 @@ DECLARE_ALGORITHM(ParallaxCorrection)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ParallaxCorrection::name() const {
-  return "ParallaxCorrection";
-}
+const std::string ParallaxCorrection::name() const { return "ParallaxCorrection"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ParallaxCorrection::version() const { return 1; }
@@ -79,20 +76,15 @@ void ParallaxCorrection::init() {
   auto validator = std::make_shared<Kernel::CompositeValidator>();
   validator->add(std::make_unique<API::InstrumentValidator>());
   validator->add(std::make_unique<API::WorkspaceUnitValidator>("Wavelength"));
-  auto lengthValidator =
-      std::make_shared<Kernel::ArrayLengthValidator<std::string>>();
+  auto lengthValidator = std::make_shared<Kernel::ArrayLengthValidator<std::string>>();
   lengthValidator->setLengthMin(1);
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "",
+                                                                                 Kernel::Direction::Input, validator),
+                  "An input workspace.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>("ComponentNames", lengthValidator),
+                  "List of instrument components to perform the corrections for.");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Kernel::Direction::Input, validator),
-      "An input workspace.");
-  declareProperty(
-      std::make_unique<Kernel::ArrayProperty<std::string>>("ComponentNames",
-                                                           lengthValidator),
-      "List of instrument components to perform the corrections for.");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "An output workspace.");
 }
 
@@ -104,9 +96,8 @@ void ParallaxCorrection::init() {
  * @param parallax : the correction formula for the bank
  * @param direction : the tube direction in the bank
  */
-void ParallaxCorrection::performCorrection(
-    const API::MatrixWorkspace_sptr &outWS, const std::vector<size_t> &indices,
-    const std::string &parallax, const std::string &direction) {
+void ParallaxCorrection::performCorrection(const API::MatrixWorkspace_sptr &outWS, const std::vector<size_t> &indices,
+                                           const std::string &parallax, const std::string &direction) {
   double t;
   mu::Parser muParser;
   muParser.DefineVar("t", &t);
@@ -127,8 +118,7 @@ void ParallaxCorrection::performCorrection(
       spectrum /= correction;
       errors /= correction;
     } else {
-      g_log.warning() << "Correction is <=0 for workspace index " << wsIndex
-                      << ". Skipping the correction.\n";
+      g_log.warning() << "Correction is <=0 for workspace index " << wsIndex << ". Skipping the correction.\n";
     }
   }
 }
@@ -137,8 +127,7 @@ void ParallaxCorrection::performCorrection(
 /** Execute the algorithm.
  */
 void ParallaxCorrection::exec() {
-  API::MatrixWorkspace_const_sptr inputWorkspace =
-      getProperty("InputWorkspace");
+  API::MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   API::MatrixWorkspace_sptr outputWorkspace = getProperty("OutputWorkspace");
   if (inputWorkspace != outputWorkspace) {
     outputWorkspace = inputWorkspace->clone();
@@ -148,27 +137,20 @@ void ParallaxCorrection::exec() {
   const auto &detectorInfo = outputWorkspace->detectorInfo();
   const auto &allDetIDs = detectorInfo.detectorIDs();
   const auto &componentInfo = outputWorkspace->componentInfo();
-  auto progress =
-      std::make_unique<API::Progress>(this, 0., 1., componentNames.size());
+  auto progress = std::make_unique<API::Progress>(this, 0., 1., componentNames.size());
   for (const auto &componentName : componentNames) {
-    progress->report("Performing parallax correction for component " +
-                     componentName);
+    progress->report("Performing parallax correction for component " + componentName);
     const auto component = instrument->getComponentByName(componentName);
     if (!component) {
-      g_log.error() << "No component defined with name " << componentName
-                    << "\n";
+      g_log.error() << "No component defined with name " << componentName << "\n";
       continue;
     }
-    if (!component->hasParameter(PARALLAX_PARAMETER) ||
-        !component->hasParameter(DIRECTION_PARAMETER)) {
-      g_log.error() << "No parallax correction defined in IPF for component "
-                    << componentName << "\n";
+    if (!component->hasParameter(PARALLAX_PARAMETER) || !component->hasParameter(DIRECTION_PARAMETER)) {
+      g_log.error() << "No parallax correction defined in IPF for component " << componentName << "\n";
       continue;
     }
-    const std::string parallax =
-        component->getStringParameter(PARALLAX_PARAMETER)[0];
-    const std::string direction =
-        component->getStringParameter(DIRECTION_PARAMETER)[0];
+    const std::string parallax = component->getStringParameter(PARALLAX_PARAMETER)[0];
+    const std::string direction = component->getStringParameter(DIRECTION_PARAMETER)[0];
     const auto valid = validateFormula(parallax, direction);
     if (!valid.empty()) {
       g_log.error() << "Unable to parse the parallax formula and direction "
@@ -177,17 +159,14 @@ void ParallaxCorrection::exec() {
       continue;
     }
     const auto componentIndex = componentInfo.indexOfAny(componentName);
-    const auto &detectorIndices =
-        componentInfo.detectorsInSubtree(componentIndex);
+    const auto &detectorIndices = componentInfo.detectorsInSubtree(componentIndex);
     if (detectorIndices.empty()) {
-      g_log.error() << "No detectors found in component " << componentName
-                    << "\n";
+      g_log.error() << "No detectors found in component " << componentName << "\n";
       continue;
     }
     std::vector<detid_t> detIDs;
     detIDs.reserve(detectorIndices.size());
-    std::transform(detectorIndices.cbegin(), detectorIndices.cend(),
-                   std::back_inserter(detIDs),
+    std::transform(detectorIndices.cbegin(), detectorIndices.cend(), std::back_inserter(detIDs),
                    [&allDetIDs](size_t i) { return allDetIDs[i]; });
     const auto indices = outputWorkspace->getIndicesFromDetectorIDs(detIDs);
     performCorrection(outputWorkspace, indices, parallax, direction);

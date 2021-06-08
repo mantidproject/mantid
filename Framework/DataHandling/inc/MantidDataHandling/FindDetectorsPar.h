@@ -64,15 +64,13 @@ struct FileTypeDescriptor {
   std::streampos data_start_position; //< the position in the file where the
   // data structure starts
   size_t nData_records, //< number of data records -- actually nDetectors
-      nData_blocks; //< nEnergy bins for SPE file, 5 or 6 for PAR file and 7 for
+      nData_blocks;     //< nEnergy bins for SPE file, 5 or 6 for PAR file and 7 for
   // PHX file
   char line_end; //< the character which ends line in current ASCII file 0x0A
                  //(LF)
   // Unix, 0x0D (CR) Mac and 0x0D 0x0A (CR LF) Win, but the last is interpreted
   // as 0x0A here
-  FileTypeDescriptor()
-      : Type(BIN_file), data_start_position(0), nData_records(0),
-        nData_blocks(0), line_end(0x0A) {}
+  FileTypeDescriptor() : Type(BIN_file), data_start_position(0), nData_records(0), nData_blocks(0), line_end(0x0A) {}
 };
 
 /**
@@ -134,18 +132,14 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Instrument";
-  }
+  const std::string category() const override { return "DataHandling\\Instrument"; }
   /// the accessors, used to return algorithm results when called as Child
   /// Algorithm, without setting the properties;
   std::vector<double> const &getAzimuthal() const { return azimuthal; }
   std::vector<double> const &getPolar() const { return polar; }
   std::vector<double> const &getAzimWidth() const { return azimuthalWidth; }
   std::vector<double> const &getPolarWidth() const { return polarWidth; }
-  std::vector<double> const &getFlightPath() const {
-    return secondaryFlightpath;
-  }
+  std::vector<double> const &getFlightPath() const { return secondaryFlightpath; }
   std::vector<size_t> const &getDetID() const { return detID; }
   /// number of real detectors, calculated by algorithm
   size_t getNDetectors() const { return m_nDetectors; }
@@ -170,8 +164,7 @@ private:
   std::vector<size_t> detID;
 
   // calculate generic detectors parameters:
-  void calcDetPar(const Geometry::IDetector &det, const Kernel::V3D &Observer,
-                  DetParameters &Detector);
+  void calcDetPar(const Geometry::IDetector &det, const Kernel::V3D &Observer, DetParameters &Detector);
 
   /// if ASCII file is selected as the datasource, this structure describes the
   /// type of this file.
@@ -193,15 +186,12 @@ protected: // for testing purposes
   /**! The function reads line from input stream and puts it into buffer.
    *   It behaves like std::ifstream getline but the getline reads additional
    * symbol from a row in a Unix-formatted file under windows;*/
-  size_t get_my_line(std::ifstream &in, char *buf, size_t buf_size,
-                     const char DELIM);
+  size_t get_my_line(std::ifstream &in, char *buf, size_t buf_size, const char DELIM);
   /// load file header and identify which file (PHX,PAR or SPE) it belongs to.
   /// It also identifies the position of the begining of the data
-  FileTypeDescriptor get_ASCII_header(std::string const &fileName,
-                                      std::ifstream &data_stream);
+  FileTypeDescriptor get_ASCII_header(std::string const &fileName, std::ifstream &data_stream);
   /// load PAR or PHX file
-  void load_plain(std::ifstream &stream, std::vector<double> &Data,
-                  FileTypeDescriptor const &FILE_TYPE);
+  void load_plain(std::ifstream &stream, std::vector<double> &Data, FileTypeDescriptor const &FILE_TYPE);
 };
 
 /**Small helper class-holder used to precalculate the detectors parameters in
@@ -223,8 +213,7 @@ public:
   int64_t detID;
   // default detector ID -- -1 means undefined
   DetParameters()
-      : azimutAngle(0.), polarAngle(0.), secondaryFlightPath(0.), azimWidth(0.),
-        polarWidth(0.), detID(-1) {}
+      : azimutAngle(0.), polarAngle(0.), secondaryFlightPath(0.), azimWidth(0.), polarWidth(0.), detID(-1) {}
 };
 
 /** helper class-collection to keep together the parameters, which characterize
@@ -243,10 +232,8 @@ class AvrgDetector {
 
 public:
   AvrgDetector()
-      : m_AzimutSum(0), m_PolarSum(0), m_FlightPathSum(0), m_AzimBase(0),
-        m_PolarBase(0), m_useSphericalSizes(false), m_AzimMin(FLT_MAX),
-        m_PolarMin(FLT_MAX), m_AzimMax(-FLT_MAX), m_PolarMax(-FLT_MAX),
-        m_nComponents(0) {}
+      : m_AzimutSum(0), m_PolarSum(0), m_FlightPathSum(0), m_AzimBase(0), m_PolarBase(0), m_useSphericalSizes(false),
+        m_AzimMin(FLT_MAX), m_PolarMin(FLT_MAX), m_AzimMax(-FLT_MAX), m_PolarMax(-FLT_MAX), m_nComponents(0) {}
   void addDetInfo(const Geometry::IDetector &det, const Kernel::V3D &Observer);
   void returnAvrgDetPar(DetParameters &avrgDet);
 

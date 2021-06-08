@@ -15,15 +15,12 @@ namespace CustomInterfaces {
 namespace IDA {
 class MANTIDQT_INDIRECT_DLL IDAFunctionParameterEstimation {
   using EstimationFunction =
-      std::function<void(::Mantid::API::IFunction_sptr &function,
-                         const DataForParameterEstimation &estimationData)>;
+      std::function<void(::Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData)>;
 
 public:
-  void addParameterEstimationFunction(std::string functionName,
-                                      EstimationFunction function);
-  void
-  estimateFunctionParameters(::Mantid::API::IFunction_sptr &function,
-                             const DataForParameterEstimation &estimationData);
+  void addParameterEstimationFunction(std::string functionName, EstimationFunction function);
+  void estimateFunctionParameters(::Mantid::API::IFunction_sptr &function,
+                                  const DataForParameterEstimation &estimationData);
 
 private:
   std::map<std::string, EstimationFunction> m_funcMap;

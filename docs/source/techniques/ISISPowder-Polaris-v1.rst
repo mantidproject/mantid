@@ -16,11 +16,11 @@ If not more details can be read here: :ref:`intro_to_objects-isis-powder-diffrac
 
 To create a POLARIS object the following parameters are required:
 
-- :ref:`calibration_directory_polaris_isis-powder-diffraction-ref` 
-- :ref:`output_directory_polaris_isis-powder-diffraction-ref` 
-- :ref:`user_name_polaris_isis-powder-diffraction-ref` 
+- :ref:`calibration_directory_polaris_isis-powder-diffraction-ref`
+- :ref:`output_directory_polaris_isis-powder-diffraction-ref`
+- :ref:`user_name_polaris_isis-powder-diffraction-ref`
 
-Optionally a configuration file may be specified if one exists 
+Optionally a configuration file may be specified if one exists
 using the following parameter:
 
 - :ref:`config_file_polaris_isis-powder-diffraction-ref`
@@ -34,10 +34,10 @@ Example
 ..  code-block:: python
 
   from isis_powder import Polaris
-  
+
   calibration_dir = r"C:\path\to\calibration_dir"
   output_dir = r"C:\path\to\output_dir"
-  
+
   polaris_example = Polaris(calibration_directory=calibration_dir,
                             output_directory=output_dir,
                             user_name="Mantid")
@@ -56,7 +56,7 @@ The following methods can be executed on a POLARIS object:
 - :ref:`focus_polaris_isis-powder-diffraction-ref`
 - :ref:`set_sample_polaris_isis-powder-diffraction-ref`
 
-For information on creating a POLARIS object see: 
+For information on creating a POLARIS object see:
 :ref:`creating_polaris_object_isis-powder-diffraction-ref`
 
 .. _create_vanadium_polaris_isis-powder-diffraction-ref:
@@ -218,7 +218,7 @@ Example
 Calibration Mapping File
 -------------------------
 The calibration mapping file holds the mapping between
-run numbers, current label, offset filename and the empty 
+run numbers, current label, offset filename and the empty
 and vanadium numbers.
 
 For more details on the calibration mapping file see:
@@ -287,7 +287,7 @@ Within the folder the following should be present:
 
 The script will also save out vanadium splines into the relevant
 label folder which are subsequently loaded and used within the
-:ref:`focus_polaris_isis-powder-diffraction-ref` method. 
+:ref:`focus_polaris_isis-powder-diffraction-ref` method.
 
 Example Input:
 
@@ -299,7 +299,7 @@ Example Input:
 
 calibration_mapping_file
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-This parameter gives the full path to the YAML file containing the 
+This parameter gives the full path to the YAML file containing the
 calibration mapping. For more details on this file see:
 :ref:`calibration_mapping_polaris-isis-powder-ref`
 
@@ -318,7 +318,7 @@ mode
 ^^^^^^^^^^
 *optional*
 
-The current chopper mode to use in the 
+The current chopper mode to use in the
 :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
 and :ref:`focus_polaris_isis-powder-diffraction-ref` method.
 This determines which vanadium and empty run numbers
@@ -343,10 +343,10 @@ Example Input:
 
 config_file
 ^^^^^^^^^^^
-The full path to the YAML configuration file. This file is 
+The full path to the YAML configuration file. This file is
 described in detail here: :ref:`configuration_files_isis-powder-diffraction-ref`
 It is recommended to set this parameter at object creation instead
-of on a method as it will warn if any parameters are overridden 
+of on a method as it will warn if any parameters are overridden
 in the scripting window.
 
 *Note: This should be the full path to the file including extension*
@@ -362,12 +362,12 @@ Example Input:
 
 do_absorb_corrections
 ^^^^^^^^^^^^^^^^^^^^^
-Indicates whether to perform vanadium absorption corrections 
+Indicates whether to perform vanadium absorption corrections
 in :ref:`create_vanadium_polaris_isis-powder-diffraction-ref` mode.
 In :ref:`focus_polaris_isis-powder-diffraction-ref` mode
 sample absorption corrections require the sample be
 set first with the :ref:`set_sample_polaris_isis-powder-diffraction-ref`
-method. 
+method.
 
 Accepted values are: **True** or **False**
 
@@ -384,9 +384,9 @@ Example Input:
 
 do_van_normalisation
 ^^^^^^^^^^^^^^^^^^^^
-Indicates whether to divide the focused workspace within 
+Indicates whether to divide the focused workspace within
 :ref:`focus_polaris_isis-powder-diffraction-ref` mode with a
-previously generated vanadium spline. 
+previously generated vanadium spline.
 
 This requires a vanadium to have been previously created
 with the :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
@@ -406,15 +406,15 @@ file_ext
 ^^^^^^^^
 *Optional*
 
-Specifies a file extension to use when using the 
+Specifies a file extension to use when using the
 :ref:`focus_polaris_isis-powder-diffraction-ref` method.
 
-This should be used to process partial runs. When 
+This should be used to process partial runs. When
 processing full runs (i.e. completed runs) it should not
 be specified as Mantid will automatically determine the
 best extension to use.
 
-*Note: A leading dot (.) is not required but 
+*Note: A leading dot (.) is not required but
 is preferred for readability*
 
 Example Input:
@@ -432,7 +432,7 @@ Indicates a run from the current cycle to use when calling
 :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`.
 This does not have the be the first run of the cycle or
 the run number corresponding to the vanadium. However it
-must be in the correct cycle according to the 
+must be in the correct cycle according to the
 :ref:`calibration_mapping_polaris-isis-powder-ref`.
 
 Example Input:
@@ -447,7 +447,7 @@ Example Input:
 
 input_mode
 ^^^^^^^^^^
-Indicates how to interpret the parameter 
+Indicates how to interpret the parameter
 :ref:`run_number_polaris_isis_powder-diffraction-ref` whilst
 calling the :ref:`focus_polaris_isis-powder-diffraction-ref`
 method.
@@ -473,7 +473,7 @@ multiple_scattering
 *optional*
 
 Indicates whether to account for the effects of multiple scattering
-when calculating absorption corrections. 
+when calculating absorption corrections.
 
 Accepted values are: **True** or **False**
 
@@ -495,10 +495,10 @@ output_directory
 ^^^^^^^^^^^^^^^^
 Specifies the path to the output directory to save resulting files
 into. The script will automatically create a folder
-with the label determined from the 
+with the label determined from the
 :ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
 and within that create another folder for the current
-:ref:`user_name_polaris_isis-powder-diffraction-ref`. 
+:ref:`user_name_polaris_isis-powder-diffraction-ref`.
 
 Within this folder processed data will be saved out in
 several formats.
@@ -516,13 +516,13 @@ run_number
 Specifies the run number(s) to process when calling the
 :ref:`focus_polaris_isis-powder-diffraction-ref` method.
 
-This parameter accepts a single value or a range 
+This parameter accepts a single value or a range
 of values with the following syntax:
 
-**-** : Indicates a range of runs inclusive 
+**-** : Indicates a range of runs inclusive
 (e.g. *1-10* would process 1, 2, 3....8, 9, 10)
 
-**,** : Indicates a gap between runs 
+**,** : Indicates a gap between runs
 (e.g. *1, 3, 5, 7* would process run numbers 1, 3, 5, 7)
 
 These can be combined like so:
@@ -548,10 +548,10 @@ sample_empty
 *Optional*
 
 This parameter specifies a/several sample empty run(s)
-to subtract from the run in the 
-:ref:`focus_polaris_isis-powder-diffraction-ref` method. 
+to subtract from the run in the
+:ref:`focus_polaris_isis-powder-diffraction-ref` method.
 If multiple runs are specified it will sum these runs
-before subtracting the result. 
+before subtracting the result.
 
 This input uses the same syntax as
 :ref:`run_number_polaris_isis_powder-diffraction-ref`.
@@ -571,7 +571,7 @@ Example Input:
   polaris_example.focus(sample_empty="100-110", ...)
 
 .. _suffix_polaris_isis-powder-diffraction-ref:
-  
+
 suffix
 ^^^^^^
 *Optional*
@@ -583,15 +583,15 @@ Example Input:
 
 .. code-block:: python
 
-  polaris_example.focus(suffix="-corr", ...) 
+  polaris_example.focus(suffix="-corr", ...)
 
 .. _user_name_polaris_isis-powder-diffraction-ref:
 
 user_name
 ^^^^^^^^^
-Specifies the name of the current user when creating a 
+Specifies the name of the current user when creating a
 new POLARIS object. This is only used when saving data to
-sort data into respective user folders. 
+sort data into respective user folders.
 See :ref:`output_directory_polaris_isis-powder-diffraction-ref`
 for more details.
 
@@ -606,14 +606,14 @@ Advanced Parameters
 --------------------
 .. warning:: These values are not intended to be changed and should
              reflect optimal defaults for the instrument. For more
-             details please read: 
+             details please read:
              :ref:`instrument_advanced_properties_isis-powder-diffraction-ref`
-             
+
              This section is mainly intended to act as reference of the
              current settings distributed with Mantid
 
 All values changed in the advanced configuration file
-requires the user to restart Mantid for the new values to take effect. 
+requires the user to restart Mantid for the new values to take effect.
 Please read :ref:`instrument_advanced_properties_isis-powder-diffraction-ref`
 before proceeding to change values within the advanced configuration file.
 
@@ -625,7 +625,7 @@ Indicates a list of TOF values to crop the focused workspace
 which was created by :ref:`focus_polaris_isis-powder-diffraction-ref`
 on a bank by bank basis.
 
-This parameter is a list of bank cropping values with 
+This parameter is a list of bank cropping values with
 one list entry per bank. The values **must** have a smaller
 TOF window than the :ref:`vanadium_cropping_values_polaris_isis-powder-diffraction-ref`
 
@@ -661,8 +661,8 @@ On POLARIS this is set to the following:
 
 vanadium_peaks_masking_file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Determines the name of the masking file containing the 
-masks to remove Bragg peaks on Polaris. This file must 
+Determines the name of the masking file containing the
+masks to remove Bragg peaks on Polaris. This file must
 be located within the top level of the
 :ref:`calibration_directory_polaris_isis-powder-diffraction-ref`.
 
@@ -706,11 +706,11 @@ A template for the filename of the generated dSpacing XYE file.
 
 sample_empty_scale
 ^^^^^^^^^^^^^^^^^^
-Required if :ref:`sample_empty_polaris_isis_powder-diffraction-ref` 
+Required if :ref:`sample_empty_polaris_isis_powder-diffraction-ref`
 is set to **True**
 
 Sets a factor to scale the sample empty run(s) to before
-subtracting. This value is multiplied after summing the 
+subtracting. This value is multiplied after summing the
 sample empty runs and before subtracting the empty from
 the data set. For more details see: :ref:`Scale <algm-Scale-v1>`.
 
@@ -725,12 +725,12 @@ Example Input:
 
 raw_data_cropping_values
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-Determines the TOF window to crop all spectra down to before any 
+Determines the TOF window to crop all spectra down to before any
 processing in the :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
-and :ref:`focus_polaris_isis-powder-diffraction-ref` methods. 
+and :ref:`focus_polaris_isis-powder-diffraction-ref` methods.
 
 This helps remove negative counts where at very low TOF
-the empty counts can exceed the captured neutron counts 
+the empty counts can exceed the captured neutron counts
 of the run to process.
 
 On POLARIS this is set to the following:
@@ -753,7 +753,7 @@ will need to be called again.*
 On POLARIS this is set to the following:
 
 ..  code-block:: python
-  
+
   spline_coefficient: 100
 
 
@@ -761,14 +761,14 @@ On POLARIS this is set to the following:
 
 vanadium_cropping_values
 ^^^^^^^^^^^^^^^^^^^^^^^^
-Determines the TOF windows to crop to on a bank by bank basis 
+Determines the TOF windows to crop to on a bank by bank basis
 within the :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
 method. This is applied after focusing and before a spline is taken.
 
 It is used to remove low counts at the start and end of the vanadium run
-to produce a spline which better matches the data. 
+to produce a spline which better matches the data.
 
-This parameter is a list of bank cropping values with 
+This parameter is a list of bank cropping values with
 one list entry per bank. The values **must** have a larger
 TOF window than the :ref:`focused_cropping_values_polaris_isis-powder-diffraction-ref`
 and a smaller window than :ref:`raw_data_cropping_values_polaris_isis-powder-diffraction-ref`.
@@ -785,7 +785,7 @@ On POLARIS this is set to the following:
                              ]
 
 .. _vanadium_sample_details_polaris_isis-powder-diffraction-ref:
-  
+
 Vanadium sample details
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -800,7 +800,7 @@ On POLARIS this is set to the following:
 .. code-block:: python
 
   chemical_formula = "V"
-		
+
 cylinder_sample_height
 ======================
 
@@ -809,7 +809,7 @@ The height of the Vanadium rod.
 On POLARIS this is set to the following:
 
 .. code-block:: python
-		
+
   cylinder_sample_height = 4.0
 
 cylinder_sample_radius
@@ -820,7 +820,7 @@ The radius of the Vanadium rod.
 On POLARIS this is set to the following:
 
 .. code-block:: python
-		
+
   cylinder_sample_radius = 0.25
 
 cylinder_position
@@ -834,5 +834,5 @@ On POLARIS this is set to the following:
 
   cylinder_position = [0.0, 0.0, 0.0]
 
-   
+
 .. categories:: Techniques

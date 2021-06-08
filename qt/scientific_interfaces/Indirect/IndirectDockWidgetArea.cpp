@@ -16,14 +16,12 @@ IndirectDockWidgetArea::IndirectDockWidgetArea(QWidget *parent)
   QMainWindow::setWindowFlags(Qt::Widget);
   setDockOptions(QMainWindow::AnimatedDocks);
   m_fitPropertyBrowser = new IndirectFitPropertyBrowser();
-  m_fitPropertyBrowser->setFeatures(QDockWidget::DockWidgetFloatable |
-                                    QDockWidget::DockWidgetMovable);
+  m_fitPropertyBrowser->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
   QDockWidget *plotViewArea = new QDockWidget();
   plotViewArea->setWindowTitle("Mini plots");
   m_fitPlotView = new IndirectFitPlotView();
   plotViewArea->setWidget(m_fitPlotView);
-  plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable |
-                            QDockWidget::DockWidgetMovable);
+  plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
   addDockWidget(Qt::BottomDockWidgetArea, m_fitPropertyBrowser);
   addDockWidget(Qt::BottomDockWidgetArea, plotViewArea);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)

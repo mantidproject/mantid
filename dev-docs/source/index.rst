@@ -4,15 +4,8 @@
 Developer Documentation
 =======================
 
-.. toctree::
-   :hidden:
-
-   DevelopmentTeam
-
 These pages contain the developer documentation for mantid. They are aimed at those who are modifying the
 source code of the project. For user documentation please see :ref:`here <mantid:contents>`.
-
-Meet the :ref:`team <DevelopmentTeam>`.
 
 ======
 Guides
@@ -25,7 +18,6 @@ Guides
    GettingStarted
    BuildingOnOSX
    BuildingWithCMake
-   BuildingVATES
    Standards/index
    Testing/index
    DoxygenSetup
@@ -39,8 +31,8 @@ Guides
 :doc:`Standards <Standards/index>`
    Details of coding and documentation standards for the project. Includes specifics regarding algorithms.
 
-:doc:`Testing <Testing/index>`
-   Details of unscripted and acceptance testing.
+:doc:`Manual Testing <Testing/index>`
+   Details of manual and acceptance/smoke testing.
 
 :doc:`DoxygenSetup`
    Configure a doxygen build locally.
@@ -59,6 +51,7 @@ Development Process
    Communication
    IssueTracking
    UserSupport
+   GitConfig
    GitWorkflow
    AutomatedBuildProcess
    JenkinsConfiguration
@@ -108,18 +101,20 @@ Tools
    :hidden:
 
    ToolsOverview
+   ProfilingOverview
    ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
    PyCharm
    VSCode
    Eclipse
+   WindowsSubsystemForLinux
 
 :doc:`ToolsOverview`
    Describes ``class_maker``, ``valgrind`` and related tools.
 
-:doc:`ProfilingWithValgrind`
-   How to use valgrind to profile your code.
+:doc:`ProfilingOverview`
+   There are a few different ways to profile Mantid code.
 
 :doc:`FlowchartCreation`
    Describes how to create a flow chart with dot.
@@ -135,6 +130,9 @@ Tools
 
 :doc:`Eclipse`
    Guide to setting up Eclipse on Ubuntu
+
+:doc:`WindowsSubsystemForLinux`
+   Guide for setting up Ubuntu 18.04 and Centos7 as subsystems on Windows (WSL2).
 
 =======
 Testing
@@ -236,6 +234,7 @@ Component Overviews
    EventWorkspaceDev
    HandlingXML
    IndexProperty
+   IndirectDataAnalysisFileStructure
    InstrumentViewer
    ISISReflectometryInterface
    ISISSANSReductionBackend

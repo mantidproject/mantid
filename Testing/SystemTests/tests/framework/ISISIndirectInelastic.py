@@ -7,7 +7,7 @@
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-lines
 #pylint: disable=too-many-instance-attributes,non-parent-init-called,abstract-method,too-few-public-methods
 # non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
-# abstract-mehod checking seems to ignore the fact some classes are declared abstract using abc
+# abstract-method checking seems to ignore the fact some classes are declared abstract using abc
 
 '''
 - TOSCA only supported by "Reduction" (the Energy Transfer tab of C2E).
@@ -154,7 +154,7 @@ class ISISIndirectInelasticBase(MantidSystemTest, metaclass=ABCMeta):
 #==============================================================================
 
 
-class ISISIndirectInelasticReduction(metaclass=ABCMeta):
+class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic reduction tests
 
     The workflow is defined in the _run() method, simply
@@ -383,7 +383,7 @@ class IRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
 #==============================================================================
 
 
-class ISISIndirectInelasticCalibration(metaclass=ABCMeta):
+class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic calibration tests
 
     The workflow is defined in the _run() method, simply
@@ -454,7 +454,7 @@ class IRISCalibration(ISISIndirectInelasticCalibration):
 #==============================================================================
 
 
-class ISISIndirectInelasticResolution(metaclass=ABCMeta):
+class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic resolution tests
 
     The workflow is defined in the _run() method, simply
@@ -542,7 +542,7 @@ class IRISResolution(ISISIndirectInelasticResolution):
 #==============================================================================
 
 
-class ISISIndirectInelasticDiagnostics(metaclass=ABCMeta):
+class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic diagnostic tests
 
     The workflow is defined in the _run() method, simply
@@ -616,7 +616,7 @@ class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
 #==============================================================================
 
 
-class ISISIndirectInelasticMoments(metaclass=ABCMeta):
+class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic TransformToIqt/TransformToIqtFit tests
 
     The output of Elwin is usually used with MSDFit and so we plug one into
@@ -680,7 +680,7 @@ class IRISMoments(ISISIndirectInelasticMoments):
 #==============================================================================
 
 
-class ISISIndirectInelasticElwinAndMSDFit(metaclass=ABCMeta):
+class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic Elwin/MSD Fit tests
 
     The output of Elwin is usually used with MSDFit and so we plug one into
@@ -782,7 +782,7 @@ class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 #==============================================================================
 
 
-class ISISIndirectInelasticIqtAndIqtFit(metaclass=ABCMeta):
+class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
     '''
     A base class for the ISIS indirect inelastic Iqt/IqtFit tests
 
@@ -906,7 +906,7 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
 #==============================================================================
 
 
-class ISISIndirectInelasticIqtAndIqtFitMulti(metaclass=ABCMeta):
+class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic Iqt/IqtFit tests
 
     The output of Elwin is usually used with MSDFit and so we plug one into
@@ -1040,7 +1040,7 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 #==============================================================================
 
 
-class ISISIndirectInelasticConvFit(metaclass=ABCMeta):
+class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic ConvFit tests
 
     The workflow is defined in the _run() method, simply
@@ -1145,7 +1145,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
 # Transmission Monitor Test
 
 
-class ISISIndirectInelasticTransmissionMonitor(metaclass=ABCMeta):
+class ISISIndirectInelasticTransmissionMonitor(ISISIndirectInelasticBase):
     # Mark as an abstract class
     def _run(self):
         '''Defines the workflow for the test'''

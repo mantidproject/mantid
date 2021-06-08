@@ -33,12 +33,8 @@ class ExtractPolarizationEfficienciesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ExtractPolarizationEfficienciesTest *createSuite() {
-    return new ExtractPolarizationEfficienciesTest();
-  }
-  static void destroySuite(ExtractPolarizationEfficienciesTest *suite) {
-    delete suite;
-  }
+  static ExtractPolarizationEfficienciesTest *createSuite() { return new ExtractPolarizationEfficienciesTest(); }
+  static void destroySuite(ExtractPolarizationEfficienciesTest *suite) { delete suite; }
 
   void test_init() {
     ExtractPolarizationEfficiencies alg;
@@ -403,8 +399,7 @@ public:
     loader.execute();
     LoadParameterFile paramLoader;
     paramLoader.initialize();
-    paramLoader.setPropertyValue("Filename",
-                                 "unit_testing/REFL_Parameters_Fredrikze.xml");
+    paramLoader.setPropertyValue("Filename", "unit_testing/REFL_Parameters_Fredrikze.xml");
     paramLoader.setProperty("Workspace", workspace);
     paramLoader.execute();
 
@@ -475,8 +470,7 @@ public:
     alg.setRethrows(true);
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()),
                             "Instrument vector parameter \"efficiency_lambda\" "
                             "must have at least 2 elements but it has 1");
   }
@@ -490,8 +484,7 @@ public:
     alg.setRethrows(true);
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()),
                             "Instrument vector parameter \"efficiency_lambda\" "
                             "must have at least 2 elements but it has 0");
   }
@@ -505,15 +498,13 @@ public:
     alg.setRethrows(true);
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), std::runtime_error & e, std::string(e.what()),
-        "Instrument vector parameter \"P1\" is expected to be the same size as "
-        "\"efficiency_lambda\" but 4 != 3");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()),
+                            "Instrument vector parameter \"P1\" is expected to be the same size as "
+                            "\"efficiency_lambda\" but 4 != 3");
   }
 
 private:
-  MatrixWorkspace_sptr createPointWS(size_t size, double startX,
-                                     double endX) const {
+  MatrixWorkspace_sptr createPointWS(size_t size, double startX, double endX) const {
     double const dX = (endX - startX) / double(size - 1);
     Points xVals(size, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);
@@ -522,10 +513,8 @@ private:
     return retVal;
   }
 
-  MatrixWorkspace_sptr
-  createInputWorkspace(std::string const &method,
-                       std::string const &lambda = "1 2 3 4",
-                       bool skipP1 = false, bool loadErrors = false) {
+  MatrixWorkspace_sptr createInputWorkspace(std::string const &method, std::string const &lambda = "1 2 3 4",
+                                            bool skipP1 = false, bool loadErrors = false) {
     auto workspace = createPointWS(1, 0, 10);
     auto pmap = std::make_shared<ParameterMap>();
     auto instrument = std::make_shared<Instrument>();
@@ -541,8 +530,7 @@ private:
       pmap->addString(instrument.get(), "Rho", "0.971 0.972 0.973 0.974");
       pmap->addString(instrument.get(), "Alpha", "0.961 0.962 0.963 0.964");
     } else {
-      pmap->addString(instrument.get(), "polarization_correction_option",
-                      "00,01,10,11");
+      pmap->addString(instrument.get(), "polarization_correction_option", "00,01,10,11");
       if (!skipP1) {
         pmap->addString(instrument.get(), "P1", "0.991 0.992 0.993 0.994");
         if (loadErrors) {

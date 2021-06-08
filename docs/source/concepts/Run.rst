@@ -124,7 +124,7 @@ Getting a specific property
   Property name: run_start
   Property value: 2010-01-01T00:00:00
 
-The Gonioneter
+The Goniometer
 ##############
 
 If the instrument contains a Goniometer it can be accessed from the run object.
@@ -142,6 +142,30 @@ If the instrument contains a Goniometer it can be accessed from the run object.
   :options: +NORMALIZE_WHITESPACE
 
   Goniometer angles:  [50,0,0]
+
+Multiple goniometers can be accessed from the run object by
+
+.. testcode:: GetGoniometertest2
+
+  wg=CreateSingleValuedWorkspace()
+  AddTimeSeriesLog(wg, Name="Motor1", Time="2010-01-01T00:00:00", Value=0)
+  AddTimeSeriesLog(wg, Name="Motor1", Time="2010-01-01T00:01:00", Value=45)
+  AddTimeSeriesLog(wg, Name="Motor1", Time="2010-01-01T00:02:00", Value=90)
+  SetGoniometer(wg,Axis0="Motor1,0,1,0,1",Average=False)
+
+  print("Number of goniometers =", wg.getRun().getNumGoniometers())
+
+  for i in range(wg.getRun().getNumGoniometers()):
+      print("Goniometer angles:  {}".format(wg.getRun().getGoniometer(i).getEulerAngles('YZY')))
+
+.. testoutput:: GetGoniometertest2
+  :hide:
+  :options: +NORMALIZE_WHITESPACE
+
+  Number of goniometers = 3
+  Goniometer angles:  [0,0,0]
+  Goniometer angles:  [45,0,0]
+  Goniometer angles:  [90,0,0]
 
 Listing all properties
 ^^^^^^^^^^^^^^^^^^^^^^

@@ -47,10 +47,8 @@ const double SQRTPI = std::sqrt(M_PI);
 void Voigt::declareParameters() {
   declareParameter(LORENTZ_AMP, 0.0, "Value of the Lorentzian amplitude");
   declareParameter(LORENTZ_POS, 0.0, "Position of the Lorentzian peak");
-  declareParameter(LORENTZ_FWHM, 0.0,
-                   "Value of the full-width half-maximum for the Lorentzian");
-  declareParameter(GAUSSIAN_FWHM, 0.0,
-                   "Value of the full-width half-maximum for the Gaussian");
+  declareParameter(LORENTZ_FWHM, 0.0, "Value of the full-width half-maximum for the Lorentzian");
+  declareParameter(GAUSSIAN_FWHM, 0.0, "Value of the full-width half-maximum for the Gaussian");
 }
 
 /**
@@ -59,8 +57,7 @@ void Voigt::declareParameters() {
  * @param xValues :: The X values
  * @param nData :: The number of X values to evaluate
  */
-void Voigt::functionLocal(double *out, const double *xValues,
-                          const size_t nData) const {
+void Voigt::functionLocal(double *out, const double *xValues, const size_t nData) const {
   calculateFunctionAndDerivative(xValues, nData, out, nullptr);
 }
 
@@ -71,8 +68,7 @@ void Voigt::functionLocal(double *out, const double *xValues,
  * @param xValues :: The X values
  * @param nData :: The number of X values to evaluate
  */
-void Voigt::functionDerivLocal(API::Jacobian *out, const double *xValues,
-                               const size_t nData) {
+void Voigt::functionDerivLocal(API::Jacobian *out, const double *xValues, const size_t nData) {
   calculateFunctionAndDerivative(xValues, nData, nullptr, out);
 }
 
@@ -84,9 +80,7 @@ void Voigt::functionDerivLocal(API::Jacobian *out, const double *xValues,
  * @param derivatives :: The Jacobian matrix containing the partial derivatives
  * for each x value (allowed null)
  */
-void Voigt::calculateFunctionAndDerivative(const double *xValues,
-                                           const size_t nData,
-                                           double *functionValues,
+void Voigt::calculateFunctionAndDerivative(const double *xValues, const size_t nData, double *functionValues,
                                            API::Jacobian *derivatives) const {
   const double a_L = getParameter(LORENTZ_AMP);
   const double lorentzPos = getParameter(LORENTZ_POS);
@@ -120,11 +114,7 @@ void Voigt::calculateFunctionAndDerivative(const double *xValues,
       derivatives->set(i, 0, prefactor * fx / a_L);
       derivatives->set(i, 1, -prefactor * dFdx * 2.0 * rtln2oGammaG);
       derivatives->set(i, 2, prefactor * (fx / gamma_L + dFdy * rtln2oGammaG));
-      derivatives->set(
-          i, 3,
-          -prefactor *
-              (fx + (rtln2oGammaG) * (2.0 * xoffset * dFdx + gamma_L * dFdy)) /
-              gamma_G);
+      derivatives->set(i, 3, -prefactor * (fx + (rtln2oGammaG) * (2.0 * xoffset * dFdx + gamma_L * dFdy)) / gamma_G);
     }
   }
 }
@@ -140,8 +130,7 @@ double Voigt::centre() const { return getParameter(LORENTZ_POS); }
  * @return value of height of peak
  */
 double Voigt::height() const {
-  if (getParameter(LORENTZ_AMP) == 0.0 || getParameter(LORENTZ_FWHM) == 0.0 ||
-      getParameter(GAUSSIAN_FWHM) == 0.0) {
+  if (getParameter(LORENTZ_AMP) == 0.0 || getParameter(LORENTZ_FWHM) == 0.0 || getParameter(GAUSSIAN_FWHM) == 0.0) {
     return 0.0;
   }
   double pos = getParameter(LORENTZ_POS);
@@ -155,17 +144,13 @@ double Voigt::height() const {
  * 0.5*(LorentzFWHM + GaussianFWHM)
  * @return value of FWHM of peak
  */
-double Voigt::fwhm() const {
-  return (getParameter(LORENTZ_FWHM) + getParameter(GAUSSIAN_FWHM));
-}
+double Voigt::fwhm() const { return (getParameter(LORENTZ_FWHM) + getParameter(GAUSSIAN_FWHM)); }
 
 /**
  * Set the centre of the peak, the LorentzPos parameter
  * @param value :: The new value for the centre of the peak
  */
-void Voigt::setCentre(const double value) {
-  this->setParameter(LORENTZ_POS, value);
-}
+void Voigt::setCentre(const double value) { this->setParameter(LORENTZ_POS, value); }
 
 /**
  * Set the height of the peak. Sets LorentzAmp parameter to 1.5*value

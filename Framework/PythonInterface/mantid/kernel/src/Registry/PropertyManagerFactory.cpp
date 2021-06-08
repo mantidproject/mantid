@@ -26,8 +26,7 @@ namespace Registry {
  * @param mapping A Python dictionary instance
  * @return A new C++ PropertyManager instance
  */
-std::shared_ptr<Kernel::PropertyManager>
-createPropertyManager(const boost::python::dict &mapping) {
+std::shared_ptr<Kernel::PropertyManager> createPropertyManager(const boost::python::dict &mapping) {
   auto pmgr = std::make_shared<PropertyManager>();
 #if PY_MAJOR_VERSION >= 3
   object view(mapping.attr("items")());
@@ -39,8 +38,7 @@ createPropertyManager(const boost::python::dict &mapping) {
   for (ssize_t i = 0; i < length; ++i) {
     const object keyValue(handle<>(PyIter_Next(itemIter.ptr())));
     const std::string cppkey = extract<std::string>(keyValue[0])();
-    pmgr->declareProperty(PropertyWithValueFactory::create(cppkey, keyValue[1],
-                                                           Direction::Input));
+    pmgr->declareProperty(PropertyWithValueFactory::create(cppkey, keyValue[1], Direction::Input));
   }
   return pmgr;
 }

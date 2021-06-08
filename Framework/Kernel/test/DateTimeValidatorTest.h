@@ -16,9 +16,7 @@ class DateTimeValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DateTimeValidatorTest *createSuite() {
-    return new DateTimeValidatorTest();
-  }
+  static DateTimeValidatorTest *createSuite() { return new DateTimeValidatorTest(); }
   static void destroySuite(DateTimeValidatorTest *suite) { delete suite; }
 
   //---------------------------- Success cases
@@ -42,8 +40,7 @@ public:
   void test_empty_string_is_invalid_when_allowed_is_false() {
     DateTimeValidator validator;
     validator.allowEmpty(false);
-    TS_ASSERT_EQUALS("Error interpreting string '' as a date/time.",
-                     validator.isValid(""));
+    TS_ASSERT_EQUALS("Error interpreting string '' as a date/time.", validator.isValid(""));
   }
 
   void test_empty_string_is_valid_when_allowed_is_true() {
@@ -55,24 +52,21 @@ public:
   void test_text_string_is_invalid() {
     DateTimeValidator validator;
     const std::string input = "not a timestamp";
-    const std::string error =
-        "Error interpreting string '" + input + "' as a date/time.";
+    const std::string error = "Error interpreting string '" + input + "' as a date/time.";
     TS_ASSERT_EQUALS(error, validator.isValid(input));
   }
 
   void test_date_alone_is_invalid() {
     DateTimeValidator validator;
     const std::string input = "2014-03-21";
-    const std::string error =
-        "Error interpreting string '" + input + "' as a date/time.";
+    const std::string error = "Error interpreting string '" + input + "' as a date/time.";
     TS_ASSERT_EQUALS(error, validator.isValid(input));
   }
 
   void test_time_alone_is_invalid() {
     DateTimeValidator validator;
     const std::string input = "09:03:30";
-    const std::string error =
-        "Error interpreting string '" + input + "' as a date/time.";
+    const std::string error = "Error interpreting string '" + input + "' as a date/time.";
     TS_ASSERT_EQUALS(error, validator.isValid(input));
   }
 };

@@ -36,8 +36,7 @@ std::vector<std::string> parseDimensionNames(const std::string &names_string) {
   // NB, the order of the two parts matters
   regex expression(R"(\[([^\[]*)\]|[^,]+)");
 
-  boost::sregex_token_iterator iter(names_string.begin(), names_string.end(),
-                                    expression, 0);
+  boost::sregex_token_iterator iter(names_string.begin(), names_string.end(), expression, 0);
   boost::sregex_token_iterator end;
 
   std::vector<std::string> names_result(iter, end);
@@ -56,9 +55,7 @@ struct InputArgument {
 
 /// Comparator to allow sorting by dimension index.
 struct LessThanIndex {
-  bool operator()(const InputArgument &a, const InputArgument &b) const {
-    return a.index < b.index;
-  }
+  bool operator()(const InputArgument &a, const InputArgument &b) const { return a.index < b.index; }
 };
 
 //----------------------------------------------------------------------------------------------
@@ -69,9 +66,7 @@ const std::string MaskMD::name() const { return "MaskMD"; }
 int MaskMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MaskMD::category() const {
-  return "MDAlgorithms\\Transforms";
-}
+const std::string MaskMD::category() const { return "MDAlgorithms\\Transforms"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -79,31 +74,22 @@ const std::string MaskMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void MaskMD::init() {
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("ClearExistingMasks", true,
-                                                Direction::Input),
-      "Clears any existing masks before applying the provided masking.");
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "Workspace", "", Direction::InOut),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("ClearExistingMasks", true, Direction::Input),
+                  "Clears any existing masks before applying the provided masking.");
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("Workspace", "", Direction::InOut),
                   "An input/output workspace.");
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>(
-          "Dimensions",
-          std::make_shared<MandatoryValidator<std::vector<std::string>>>(),
-          Direction::Input),
-      "Dimension ids/names all comma separated.\n"
-      "According to the dimensionality of the workspace, these names will be "
-      "grouped,\n"
-      "so the number of entries must be n*(number of dimensions in the "
-      "workspace).");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
+                      "Dimensions", std::make_shared<MandatoryValidator<std::vector<std::string>>>(), Direction::Input),
+                  "Dimension ids/names all comma separated.\n"
+                  "According to the dimensionality of the workspace, these names will be "
+                  "grouped,\n"
+                  "so the number of entries must be n*(number of dimensions in the "
+                  "workspace).");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "Extents",
-          std::make_shared<MandatoryValidator<std::vector<double>>>(),
-          Direction::Input),
-      "Extents {min, max} corresponding to each of the dimensions specified, "
-      "according to the order those identifies have been specified.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      "Extents", std::make_shared<MandatoryValidator<std::vector<double>>>(), Direction::Input),
+                  "Extents {min, max} corresponding to each of the dimensions specified, "
+                  "according to the order those identifies have been specified.");
 }
 
 /**
@@ -116,8 +102,7 @@ workspace.
 @throws runtime_error if the requested dimension is unknown either by id, or by
 name in the workspace.
 */
-size_t tryFetchDimensionIndex(const Mantid::API::IMDWorkspace_sptr &ws,
-                              const std::string &candidateNameOrId) {
+size_t tryFetchDimensionIndex(const Mantid::API::IMDWorkspace_sptr &ws, const std::string &candidateNameOrId) {
   size_t dimWorkspaceIndex;
   try {
     dimWorkspaceIndex = ws->getDimensionIndexById(candidateNameOrId);
@@ -232,8 +217,7 @@ std::map<std::string, std::string> MaskMD::validateInputs() {
 
   // Check cardinality on names/ids
   if (nDimensionIds % nDims != 0) {
-    messageStream << "Number of dimension ids/names must be n * " << nDims
-                  << ". The following names were given: ";
+    messageStream << "Number of dimension ids/names must be n * " << nDims << ". The following names were given: ";
     for (const auto &name : dimensions) {
       messageStream << name << ", ";
     }
@@ -244,18 +228,15 @@ std::map<std::string, std::string> MaskMD::validateInputs() {
 
   // Check cardinality on extents
   if (extents.size() != (2 * dimensions.size())) {
-    messageStream << "Number of extents must be " << 2 * dimensions.size()
-                  << ". ";
+    messageStream << "Number of extents must be " << 2 * dimensions.size() << ". ";
     validation_output["Extents"] = messageStream.str();
   }
   // Check extent value provided.
-  for (size_t i = 0; (i < nDimensionIds) && ((i * 2 + 1) < extents.size());
-       ++i) {
+  for (size_t i = 0; (i < nDimensionIds) && ((i * 2 + 1) < extents.size()); ++i) {
     double min = extents[i * 2];
     double max = extents[(i * 2) + 1];
     if (min > max) {
-      messageStream << "Cannot have minimum extents " << min
-                    << " larger than maximum extents " << max << ". ";
+      messageStream << "Cannot have minimum extents " << min << " larger than maximum extents " << max << ". ";
       validation_output["Extents"] = messageStream.str();
     }
   }

@@ -48,14 +48,12 @@ protected:
   virtual void execEvent() = 0;
 
   /// Run the algorithm with a MDHisotWorkspace as output and operand
-  virtual void
-  execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                 Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) = 0;
+  virtual void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                              Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) = 0;
 
   /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
-  virtual void execHistoScalar(
-      Mantid::DataObjects::MDHistoWorkspace_sptr out,
-      Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) = 0;
+  virtual void execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                               Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) = 0;
 
   /// The name of the first input workspace property
   virtual std::string inputPropName1() const { return "LHSWorkspace"; }

@@ -35,8 +35,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadLLB)
 /** Constructor
  */
 LoadLLB::LoadLLB()
-    : m_supportedInstruments{"MIBEMOL"}, m_numberOfTubes{0},
-      m_numberOfPixelsPerTube{0}, m_numberOfChannels{0},
+    : m_supportedInstruments{"MIBEMOL"}, m_numberOfTubes{0}, m_numberOfPixelsPerTube{0}, m_numberOfChannels{0},
       m_numberOfHistograms{0}, m_wavelength{0.0}, m_channelWidth{0.0} {}
 
 //----------------------------------------------------------------------------------------------
@@ -57,8 +56,7 @@ const std::string LoadLLB::category() const { return "DataHandling\\Nexus"; }
  */
 int LoadLLB::confidence(Kernel::NexusDescriptor &descriptor) const {
   // fields existent only at the LLB
-  if (descriptor.pathExists("/nxentry/program_name") &&
-      descriptor.pathExists("/nxentry/subrun_number") &&
+  if (descriptor.pathExists("/nxentry/program_name") && descriptor.pathExists("/nxentry/subrun_number") &&
       descriptor.pathExists("/nxentry/total_subruns")) {
     return 80;
   } else {
@@ -73,11 +71,9 @@ int LoadLLB::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadLLB::init() {
   const std::vector<std::string> exts{".nxs", ".hdf"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name of the Nexus file to load");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -107,15 +103,12 @@ void LoadLLB::exec() {
 void LoadLLB::setInstrumentName(NeXus::NXEntry &entry) {
 
   m_instrumentPath = "nxinstrument";
-  m_instrumentName =
-      m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
+  m_instrumentName = m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
 
   if (m_instrumentName.empty()) {
-    throw std::runtime_error(
-        "Cannot read the instrument name from the Nexus file!");
+    throw std::runtime_error("Cannot read the instrument name from the Nexus file!");
   }
-  g_log.debug() << "Instrument Name: " << m_instrumentName
-                << " in NxPath: " << m_instrumentPath << '\n';
+  g_log.debug() << "Instrument Name: " << m_instrumentName << " in NxPath: " << m_instrumentPath << '\n';
 }
 
 void LoadLLB::initWorkSpace(NeXus::NXEntry &entry) {
@@ -142,9 +135,8 @@ void LoadLLB::initWorkSpace(NeXus::NXEntry &entry) {
   // total number of spectra + (number of monitors = 0),
   // bin boundaries = m_numberOfChannels + 1
   // Z/time dimension
-  m_localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", m_numberOfHistograms, m_numberOfChannels + 1,
-      m_numberOfChannels);
+  m_localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", m_numberOfHistograms, m_numberOfChannels + 1,
+                                                         m_numberOfChannels);
   m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
 }
@@ -169,21 +161,18 @@ void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   data.load();
 
   // EPP
-  int calculatedDetectorElasticPeakPosition =
-      getDetectorElasticPeakPosition(data);
+  int calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(data);
 
   // Assign time bin to first X entry
-  setTimeBinning(m_localWorkspace->mutableX(0),
-                 calculatedDetectorElasticPeakPosition, m_channelWidth);
+  setTimeBinning(m_localWorkspace->mutableX(0), calculatedDetectorElasticPeakPosition, m_channelWidth);
 
   Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube);
   size_t spec = 0;
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       float *data_p = &data(static_cast<int>(i), static_cast<int>(j));
-      m_localWorkspace->setHistogram(
-          spec++, m_localWorkspace->binEdges(0),
-          Counts(data_p, data_p + m_numberOfChannels));
+      m_localWorkspace->setHistogram(spec++, m_localWorkspace->binEdges(0),
+                                     Counts(data_p, data_p + m_numberOfChannels));
       progress.report();
     }
   }
@@ -202,58 +191,46 @@ int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
       currentSpec += data_p[j];
 
     if (i > 0) {
-      cumulatedSumOfSpectras[i] =
-          cumulatedSumOfSpectras[i - 1] + static_cast<int>(currentSpec);
+      cumulatedSumOfSpectras[i] = cumulatedSumOfSpectras[i - 1] + static_cast<int>(currentSpec);
     } else {
       cumulatedSumOfSpectras[i] = static_cast<int>(currentSpec);
     }
   }
-  auto it = std::max_element(cumulatedSumOfSpectras.begin(),
-                             cumulatedSumOfSpectras.end());
+  auto it = std::max_element(cumulatedSumOfSpectras.begin(), cumulatedSumOfSpectras.end());
 
   int calculatedDetectorElasticPeakPosition;
   if (it == cumulatedSumOfSpectras.end()) {
-    throw std::runtime_error(
-        "No Elastic peak position found while analyzing the data!");
+    throw std::runtime_error("No Elastic peak position found while analyzing the data!");
   } else {
     // calculatedDetectorElasticPeakPosition = *it;
-    calculatedDetectorElasticPeakPosition =
-        static_cast<int>(std::distance(cumulatedSumOfSpectras.begin(), it));
+    calculatedDetectorElasticPeakPosition = static_cast<int>(std::distance(cumulatedSumOfSpectras.begin(), it));
 
     if (calculatedDetectorElasticPeakPosition == 0) {
       throw std::runtime_error("No Elastic peak position found while analyzing "
                                "the data. Elastic peak position is ZERO!");
     } else {
-      g_log.debug() << "Calculated Detector EPP: "
-                    << calculatedDetectorElasticPeakPosition << '\n';
+      g_log.debug() << "Calculated Detector EPP: " << calculatedDetectorElasticPeakPosition << '\n';
     }
   }
   return calculatedDetectorElasticPeakPosition;
 }
 
-void LoadLLB::setTimeBinning(HistogramX &histX, int elasticPeakPosition,
-                             double channelWidth) {
+void LoadLLB::setTimeBinning(HistogramX &histX, int elasticPeakPosition, double channelWidth) {
 
   double l1 = m_localWorkspace->spectrumInfo().l1();
   double l2 = m_localWorkspace->spectrumInfo().l2(1);
 
-  double theoreticalElasticTOF = (m_loader.calculateTOF(l1, m_wavelength) +
-                                  m_loader.calculateTOF(l2, m_wavelength)) *
-                                 1e6; // microsecs
+  double theoreticalElasticTOF =
+      (m_loader.calculateTOF(l1, m_wavelength) + m_loader.calculateTOF(l2, m_wavelength)) * 1e6; // microsecs
 
-  g_log.debug() << "elasticPeakPosition : "
-                << static_cast<float>(elasticPeakPosition) << '\n';
+  g_log.debug() << "elasticPeakPosition : " << static_cast<float>(elasticPeakPosition) << '\n';
   g_log.debug() << "l1 : " << l1 << '\n';
   g_log.debug() << "l2 : " << l2 << '\n';
   g_log.debug() << "theoreticalElasticTOF : " << theoreticalElasticTOF << '\n';
 
   for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-    histX[i] =
-        theoreticalElasticTOF +
-        channelWidth *
-            static_cast<double>(static_cast<int>(i) - elasticPeakPosition) -
-        channelWidth /
-            2; // to make sure the bin is in the middle of the elastic peak
+    histX[i] = theoreticalElasticTOF + channelWidth * static_cast<double>(static_cast<int>(i) - elasticPeakPosition) -
+               channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
   }
 }
 
@@ -327,8 +304,7 @@ void LoadLLB::runLoadInstrument() {
 
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (...) {
     g_log.information("Cannot load the instrument definition.");

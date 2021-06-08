@@ -20,23 +20,17 @@ energy-transfer-mode
 class DLLExport DisplayNormalizationSetter {
 public:
   void operator()(const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
-                  const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace,
-                  bool isQ = false,
-                  const Mantid::Kernel::DeltaEMode::Type &mode =
-                      Mantid::Kernel::DeltaEMode::Elastic);
+                  const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace, bool isQ = false,
+                  const Mantid::Kernel::DeltaEMode::Type &mode = Mantid::Kernel::DeltaEMode::Elastic);
 
 private:
-  void setNormalizationMDEvent(
-      const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
-      const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace,
-      bool isQ = false,
-      const Mantid::Kernel::DeltaEMode::Type &mode =
-          Mantid::Kernel::DeltaEMode::Elastic);
+  void setNormalizationMDEvent(const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
+                               const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace, bool isQ = false,
+                               const Mantid::Kernel::DeltaEMode::Type &mode = Mantid::Kernel::DeltaEMode::Elastic);
 
-  void applyNormalizationMDEvent(
-      const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
-      Mantid::API::MDNormalization displayNormalization,
-      Mantid::API::MDNormalization displayNormalizationHisto);
+  void applyNormalizationMDEvent(const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
+                                 Mantid::API::MDNormalization displayNormalization,
+                                 Mantid::API::MDNormalization displayNormalizationHisto);
 };
 } // namespace MDAlgorithms
 } // namespace Mantid

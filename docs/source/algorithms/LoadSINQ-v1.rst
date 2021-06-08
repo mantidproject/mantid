@@ -26,11 +26,11 @@ The following usage example loads a POLDI data file using the instrument name, y
 .. testcode:: ExLoadSINQPOLDI
 
     poldi_data = LoadSINQ(Instrument = "POLDI", Year = 2013, Numor = 6904)
-    
+
     print("Poldi sample 6904 has {} histograms.".format(poldi_data.getNumberHistograms()))
 
 Output:
-    
+
 .. testoutput:: ExLoadSINQPOLDI
 
     Poldi sample 6904 has 400 histograms.

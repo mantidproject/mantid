@@ -17,9 +17,7 @@ class EqualBinSizesValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EqualBinSizesValidatorTest *createSuite() {
-    return new EqualBinSizesValidatorTest();
-  }
+  static EqualBinSizesValidatorTest *createSuite() { return new EqualBinSizesValidatorTest(); }
   static void destroySuite(EqualBinSizesValidatorTest *suite) { delete suite; }
 
   void test_null() {
@@ -42,9 +40,7 @@ public:
     Mantid::MantidVec xData{1, 2, 3};
     ws->setPoints(1, xData);
     EqualBinSizesValidator val(0.1);
-    TS_ASSERT_EQUALS(
-        val.isValid(ws),
-        "The workspace must have common bin boundaries for all histograms");
+    TS_ASSERT_EQUALS(val.isValid(ws), "The workspace must have common bin boundaries for all histograms");
   }
 
   void test_equalBinSizes() {
@@ -60,8 +56,7 @@ public:
     Mantid::MantidVec xData{1, 2, 5};
     ws->setPoints(0, xData);
     EqualBinSizesValidator val(0.1);
-    TS_ASSERT_EQUALS(val.isValid(ws),
-                     "X axis must be linear (all bins must have the same "
-                     "width) dx=1 reference dx=2 bin number=0");
+    TS_ASSERT_EQUALS(val.isValid(ws), "X axis must be linear (all bins must have the same "
+                                      "width) dx=1 reference dx=2 bin number=0");
   }
 };

@@ -57,15 +57,11 @@ public:
   const std::string name() const override { return "LoadNexusMonitors"; }
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Load all monitors from a NeXus file into a workspace.";
-  }
+  const std::string summary() const override { return "Load all monitors from a NeXus file into a workspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
@@ -82,8 +78,7 @@ private:
   void fixUDets(::NeXus::File &file);
 
   /// Load the logs
-  void runLoadLogs(const std::string &filename,
-                   const API::MatrixWorkspace_sptr &localWorkspace);
+  void runLoadLogs(const std::string &filename, const API::MatrixWorkspace_sptr &localWorkspace);
 
   /// is it possible to open the file?
   bool canOpenAsNeXus(const std::string &fname);
@@ -97,14 +92,13 @@ private:
 
   void readEventMonitorEntry(NeXus::File &file, size_t ws_index);
 
-  void readHistoMonitorEntry(NeXus::File &file, size_t ws_index,
-                             size_t numPeriods);
+  void readHistoMonitorEntry(NeXus::File &file, size_t ws_index, size_t numPeriods);
 
 private:
   std::vector<LoadNexusMonitorsAlg::MonitorInfo> m_monitorInfo;
   std::vector<HistogramData::BinEdges> m_multiPeriodBinEdges;
   std::vector<HistogramData::Counts> m_multiPeriodCounts;
-  std::string m_filename; ///< The name and path of the input file
+  std::string m_filename;                ///< The name and path of the input file
   API::MatrixWorkspace_sptr m_workspace; ///< The workspace being filled out
   size_t m_monitor_count{0};             ///< Number of monitors
   std::string m_top_entry_name;          ///< name of top level NXentry to use

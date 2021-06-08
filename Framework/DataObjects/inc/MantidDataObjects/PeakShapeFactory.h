@@ -23,12 +23,10 @@ public:
   /// Destructor
   virtual ~PeakShapeFactory() = default;
   /// Make the product
-  virtual Mantid::Geometry::PeakShape *
-  create(const std::string &source) const = 0;
+  virtual Mantid::Geometry::PeakShape *create(const std::string &source) const = 0;
   /// Set the successor factory. create will be called on that if this instance
   /// is not suitable.
-  virtual void
-  setSuccessor(std::shared_ptr<const PeakShapeFactory> successorFactory) = 0;
+  virtual void setSuccessor(std::shared_ptr<const PeakShapeFactory> successorFactory) = 0;
 };
 
 /// Helper typedef

@@ -31,8 +31,7 @@ public:
 
   std::string name() const override { return "DeltaFunctionTest_Gauss"; }
 
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override {
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -41,8 +40,7 @@ public:
       out[i] = h * exp(-x * x * w);
     }
   }
-  void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) override {
+  void functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     double c = getParameter("c");
     double h = getParameter("h");
@@ -126,8 +124,7 @@ public:
     // H*p1*p2);
     conv.function(wView, out);
     for (int i = 0; i < N; i++) {
-      TS_ASSERT_DELTA(out.getCalculated(i),
-                      H * p1 * p2 * h * exp(-w[i] * w[i] * a), 1e-10);
+      TS_ASSERT_DELTA(out.getCalculated(i), H * p1 * p2 * h * exp(-w[i] * w[i] * a), 1e-10);
     }
   }
 
@@ -166,8 +163,7 @@ public:
     for (size_t i = 10; i < x.size() - 10; ++i) {
       auto xx = x[i];
       auto xxx = xx - shift;
-      auto d =
-          y[i] - hh * exp(-xx * xx / bb) - scale * ha * exp(-xxx * xxx / a);
+      auto d = y[i] - hh * exp(-xx * xx / bb) - scale * ha * exp(-xxx * xxx / a);
       TS_ASSERT_DELTA(d, 0.0, 1e-11);
     }
   }
@@ -215,9 +211,7 @@ public:
       auto xx = x[i];
       auto xx1 = xx - shift1;
       auto xx2 = xx - shift2;
-      auto d = y[i] - hh * exp(-xx * xx / bb) -
-               scale1 * ha * exp(-xx1 * xx1 / a) -
-               scale2 * ha * exp(-xx2 * xx2 / a);
+      auto d = y[i] - hh * exp(-xx * xx / bb) - scale1 * ha * exp(-xx1 * xx1 / a) - scale2 * ha * exp(-xx2 * xx2 / a);
       TS_ASSERT_DELTA(d, 0.0, 1e-11);
     }
   }

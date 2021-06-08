@@ -4,41 +4,104 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import List
-from Muon.GUI.Common.muon_load_data import MuonLoadData
+from mantidqt.utils.observer_pattern import GenericObservable
+from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+from Muon.GUI.Common import thread_model
+from mantid.simpleapi import Rebin
+from Muon.GUI.Common import message_box
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, remove_ws_if_present
 
-
-class DataContext(object):
-    def __init__(self, load_data=MuonLoadData()):
-        self.instrument = "rooth"
-        self.current_runs = []
-        self._loaded_data = load_data
-        self._run_info = []
-        self.previous_runs = []
-
-    @property
-    def run_info(self):
-        return self._run_info
-
-    def run_info_update(self, run_object):
-        self._run_info.append(run_object)
-
-    def clear_run_info(self):
-        self._run_info = []
+REBINNED_FIXED_WS_SUFFIX = "_EA_Rebinned_Fixed"
+REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
 
 
 class ElementalAnalysisContext(object):
-    def __init__(self):
+
+    def __init__(self, data_context, ea_group_context=None, muon_gui_context=None, workspace_suffix=' EA'):
         self._window_title = "Elemental Analysis 2"
-        self.data_context = DataContext()
+        self.data_context = data_context
+        self._gui_context = muon_gui_context
+        self._group_context = ea_group_context
+        self.workspace_suffix = workspace_suffix
+
+        self.update_view_from_model_notifier = GenericObservable()
+        self.update_plots_notifier = GenericObservable()
+        self.calculation_started_notifier = GenericObservable()
+        self.calculation_finished_notifier = GenericObservable()
 
     @property
     def name(self):
         return self._window_title
 
+    @property
+    def gui_context(self):
+        return self._gui_context
 
-class RunObject(object):
-    def __init__(self, run, detectors, groupworkspace):
-        self._run_number: int = run
-        self._detectors: List[str] = detectors
-        self._groupworkspace = groupworkspace
+    @property
+    def group_context(self):
+        return self._group_context
+
+    def update_current_data(self):
+        if len(self.data_context.current_runs) > 0:
+
+            if not self.group_context.groups:
+                self.group_context.reset_group_to_default(self.data_context._loaded_data)
+
+            else:
+                self.group_context.add_new_group(self.group_context.groups, self.data_context._loaded_data)
+        else:
+            self.data_context.clear()
+
+    def remove_workspace(self, workspace):
+        # required as the renameHandler returns a name instead of a workspace.
+        if isinstance(workspace, str):
+            workspace_name = workspace
+        else:
+            workspace_name = workspace.name()
+
+        self.data_context.remove_workspace_by_name(workspace_name)
+        self.group_context.remove_group(workspace_name)
+        self.gui_context.remove_workspace_by_name(workspace_name)
+        self.update_view_from_model_notifier.notify_subscribers(workspace_name)
+
+    def clear_context(self):
+        self.data_context.clear()
+        self.group_context.clear()
+
+    def workspace_replaced(self, workspace):
+        self.update_plots_notifier.notify_subscribers(workspace)
+
+    def handle_calculation_started(self):
+        self.calculation_started_notifier.notify_subscribers()
+
+    def calculation_success(self):
+        self.calculation_finished_notifier.notify_subscribers()
+
+    def handle_calculation_error(self, error):
+        self.calculation_finished_notifier.notify_subscribers()
+        message_box.warning(str(error), None)
+
+    def _run_rebin(self, name, rebin_type, params):
+        rebined_run_name = None
+        if rebin_type == "Fixed":
+            rebined_run_name = str(name) + REBINNED_FIXED_WS_SUFFIX
+        if rebin_type == "Variable":
+            rebined_run_name = str(name) + REBINNED_VARIABLE_WS_SUFFIX
+
+        remove_ws_if_present(rebined_run_name)
+
+        workspace = Rebin(InputWorkspace=name, OutputWorkspace=rebined_run_name, Params=params)
+        group = retrieve_ws(name.split(";")[0])
+        group.addWorkspace(workspace)
+        self.group_context[name].update_workspaces(name, workspace, rebin=True)
+
+    def handle_rebin(self, name, rebin_type, rebin_param):
+        self.rebin_model = ThreadModelWrapper(lambda: self._run_rebin(name, rebin_type, rebin_param))
+        self.rebin_thread = thread_model.ThreadModel(self.rebin_model)
+        self.rebin_thread.threadWrapperSetUp(self.handle_calculation_started,
+                                             self.calculation_success,
+                                             self.handle_calculation_error)
+        self.rebin_thread.start()
+
+    def show_all_groups(self):
+        pass

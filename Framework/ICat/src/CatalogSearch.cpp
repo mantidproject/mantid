@@ -33,10 +33,8 @@ void CatalogSearch::init() {
 
   // Properties related to the search fields the user will fill in to improve
   // search.
-  declareProperty("InvestigationName", "",
-                  "The name of the investigation to search for.");
-  declareProperty("Instrument", "",
-                  "The name of the instrument used in the investigation.");
+  declareProperty("InvestigationName", "", "The name of the investigation to search for.");
+  declareProperty("Instrument", "", "The name of the instrument used in the investigation.");
   declareProperty("RunRange", "",
                   "The range of runs to search for related "
                   "investigations. Must be in the format "
@@ -49,17 +47,11 @@ void CatalogSearch::init() {
                   "The end date for the range of "
                   "investigations to be searched. The "
                   "format must be DD/MM/YYYY.");
-  declareProperty(
-      "Keywords", "",
-      "A comma separated list of words to search for in the investigation.");
+  declareProperty("Keywords", "", "A comma separated list of words to search for in the investigation.");
   declareProperty("InvestigationId", "", "The ID of the investigation.");
-  declareProperty(
-      "InvestigatorSurname", "",
-      "The surname of the investigator associated to the investigation.");
-  declareProperty("SampleName", "",
-                  "The name of the sample used in the investigation.");
-  declareProperty("DataFileName", "",
-                  "The name of the data file in the investigation.");
+  declareProperty("InvestigatorSurname", "", "The surname of the investigator associated to the investigation.");
+  declareProperty("SampleName", "", "The name of the sample used in the investigation.");
+  declareProperty("DataFileName", "", "The name of the data file in the investigation.");
   declareProperty("InvestigationType", "", "The type of the investigation.");
   declareProperty("MyData", false,
                   "If set to true, only search in "
@@ -68,23 +60,17 @@ void CatalogSearch::init() {
 
   // These are needed for paging on the interface, and to minimise the amount of
   // results returned by the query.
-  declareProperty(
-      "CountOnly", false,
-      "Boolean option to perform COUNT search only. This is used for paging.");
+  declareProperty("CountOnly", false, "Boolean option to perform COUNT search only. This is used for paging.");
   declareProperty<int>("Limit", 100,
                        "The maximum amount of search results to "
                        "return. Adds a LIMIT clause to the "
                        "query. This is used for paging.");
-  declareProperty<int>(
-      "Offset", 0,
-      "The location to begin returning results from. This is used for paging.");
+  declareProperty<int>("Offset", 0, "The location to begin returning results from. This is used for paging.");
 
-  declareProperty("Session", "",
-                  "The session information of the catalog search in.");
+  declareProperty("Session", "", "The session information of the catalog search in.");
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "OutputWorkspace", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the workspace that will be created to store the "
       "search results.");
   declareProperty<int64_t>("NumberOfSearchResults", 0,
@@ -101,23 +87,19 @@ void CatalogSearch::exec() {
   // Get the user input search terms to search for.
   getInputProperties(params);
   // Create output workspace.
-  auto workspace =
-      API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   // Obtain all the active catalogs.
-  auto catalogs =
-      API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"));
+  auto catalogs = API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"));
   // Search for investigations with user specific search inputs.
   setProperty("OutputWorkspace", workspace);
   // Do not perform a full search if we only want a COUNT search.
   if (getProperty("CountOnly")) {
     // Set the related property needed for paging.
-    setProperty("NumberOfSearchResults",
-                catalogs->getNumberOfSearchResults(params));
+    setProperty("NumberOfSearchResults", catalogs->getNumberOfSearchResults(params));
     return;
   }
   // Search for investigations in the archives.
-  catalogs->search(params, workspace, getProperty("Offset"),
-                   getProperty("Limit"));
+  catalogs->search(params, workspace, getProperty("Offset"), getProperty("Limit"));
 }
 
 /**
@@ -147,8 +129,7 @@ void CatalogSearch::getInputProperties(CatalogSearchParam &params) {
  * @param runRange :: The input field to parse.
  * @param params   :: reference to inputs object.
  */
-void CatalogSearch::setRunRanges(std::string &runRange,
-                                 CatalogSearchParam &params) {
+void CatalogSearch::setRunRanges(std::string &runRange, CatalogSearchParam &params) {
   // A container to hold the range of run numbers.
   std::vector<std::string> runNumbers;
   // Split the input text by "-",":" or "," and add contents to runNumbers.
@@ -180,8 +161,7 @@ void CatalogSearch::setRunRanges(std::string &runRange,
   }
 
   if (startRange > endRange) {
-    throw std::runtime_error(
-        "Run end number cannot be lower than run start number.");
+    throw std::runtime_error("Run end number cannot be lower than run start number.");
   }
 
   params.setRunStart(startRange);

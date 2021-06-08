@@ -19,8 +19,7 @@ namespace Kernel {
  * @return Whether workspace is threadsafe.
  */
 template <typename Arg>
-inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
-threadSafe(Arg workspace) {
+inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type threadSafe(Arg workspace) {
   return !workspace || workspace->threadSafe();
 }
 
@@ -32,10 +31,8 @@ threadSafe(Arg workspace) {
  * @return whether workspace is threadsafe.
  */
 template <typename Arg, typename... Args>
-inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
-threadSafe(Arg workspace, Args &&... others) {
-  return (!workspace || workspace->threadSafe()) &&
-         threadSafe(std::forward<Args>(others)...);
+inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type threadSafe(Arg workspace, Args &&...others) {
+  return (!workspace || workspace->threadSafe()) && threadSafe(std::forward<Args>(others)...);
 }
 
 /** Thread-safety check
@@ -44,8 +41,7 @@ threadSafe(Arg workspace, Args &&... others) {
  * @return Whether workspace is threadsafe.
  */
 template <typename Arg>
-inline typename std::enable_if<!std::is_pointer<Arg>::value, bool>::type
-threadSafe(const Arg &workspace) {
+inline typename std::enable_if<!std::is_pointer<Arg>::value, bool>::type threadSafe(const Arg &workspace) {
   return workspace.threadSafe();
 }
 
@@ -57,8 +53,8 @@ threadSafe(const Arg &workspace) {
  * @return whether workspace is threadsafe.
  */
 template <typename Arg, typename... Args>
-inline typename std::enable_if<!std::is_pointer<Arg>::value, bool>::type
-threadSafe(const Arg &workspace, Args &&... others) {
+inline typename std::enable_if<!std::is_pointer<Arg>::value, bool>::type threadSafe(const Arg &workspace,
+                                                                                    Args &&...others) {
   return workspace.threadSafe() && threadSafe(std::forward<Args>(others)...);
 }
 
@@ -68,8 +64,7 @@ threadSafe(const Arg &workspace, Args &&... others) {
  * @param d second element in binary operation
  * @param op binary operation on elements f and d
  */
-template <typename T, typename BinaryOp>
-void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
+template <typename T, typename BinaryOp> void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
   T old = f.load();
   T desired;
   do {
@@ -87,8 +82,8 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
 #define PARALLEL_SET_CONFIG_THREADS
 #else //_MSC_VER
 #define PRAGMA(x) _Pragma(#x)
-#define PARALLEL_SET_CONFIG_THREADS                                            \
-  setMaxCoresToConfig();                                                       \
+#define PARALLEL_SET_CONFIG_THREADS                                                                                    \
+  setMaxCoresToConfig();                                                                                               \
   PARALLEL_SET_DYNAMIC(false);
 #endif //_MSC_VER
 
@@ -96,34 +91,34 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
  * Note the end of the block if not defined that must be added by including
  * PARALLEL_END_INTERUPT_REGION at the end of the loop
  */
-#define PARALLEL_START_INTERUPT_REGION                                         \
-  if (!m_parallelException && !m_cancel) {                                     \
+#define PARALLEL_START_INTERUPT_REGION                                                                                 \
+  if (!m_parallelException && !m_cancel) {                                                                             \
     try {
 
 /** Ends a block to skip processing is the algorithm has been interupted
  * Note the start of the block if not defined that must be added by including
  * PARALLEL_START_INTERUPT_REGION at the start of the loop
  */
-#define PARALLEL_END_INTERUPT_REGION                                           \
-  } /* End of try block in PARALLEL_START_INTERUPT_REGION */                   \
-  catch (std::exception & ex) {                                                \
-    if (!m_parallelException) {                                                \
-      m_parallelException = true;                                              \
-      g_log.error() << this->name() << ": " << ex.what() << "\n";              \
-    }                                                                          \
-  }                                                                            \
-  catch (...) {                                                                \
-    m_parallelException = true;                                                \
-  }                                                                            \
+#define PARALLEL_END_INTERUPT_REGION                                                                                   \
+  } /* End of try block in PARALLEL_START_INTERUPT_REGION */                                                           \
+  catch (std::exception & ex) {                                                                                        \
+    if (!m_parallelException) {                                                                                        \
+      m_parallelException = true;                                                                                      \
+      g_log.error() << this->name() << ": " << ex.what() << "\n";                                                      \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  catch (...) {                                                                                                        \
+    m_parallelException = true;                                                                                        \
+  }                                                                                                                    \
   } // End of if block in PARALLEL_START_INTERUPT_REGION
 
 /** Adds a check after a Parallel region to see if it was interupted
  */
-#define PARALLEL_CHECK_INTERUPT_REGION                                         \
-  if (m_parallelException) {                                                   \
-    g_log.debug("Exception thrown in parallel region");                        \
-    throw std::runtime_error(this->name() + ": error (see log)");              \
-  }                                                                            \
+#define PARALLEL_CHECK_INTERUPT_REGION                                                                                 \
+  if (m_parallelException) {                                                                                           \
+    g_log.debug("Exception thrown in parallel region");                                                                \
+    throw std::runtime_error(this->name() + ": error (see log)");                                                      \
+  }                                                                                                                    \
   interruption_point();
 
 // _OPENMP is automatically defined if openMP support is enabled in the
@@ -138,16 +133,16 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
  *   "condition" must evaluate to TRUE in order for the
  *   code to be executed in parallel
  */
-#define PARALLEL_FOR_IF(condition)                                             \
-  PARALLEL_SET_CONFIG_THREADS                                                  \
+#define PARALLEL_FOR_IF(condition)                                                                                     \
+  PARALLEL_SET_CONFIG_THREADS                                                                                          \
   PRAGMA(omp parallel for if (condition) )
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
  *   This includes no checks to see if workspaces are suitable
  *   and therefore should not be used in any loops that access workspaces.
  */
-#define PARALLEL_FOR_NO_WSP_CHECK()                                            \
-  PARALLEL_SET_CONFIG_THREADS                                                  \
+#define PARALLEL_FOR_NO_WSP_CHECK()                                                                                    \
+  PARALLEL_SET_CONFIG_THREADS                                                                                          \
   PRAGMA(omp parallel for)
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
@@ -155,12 +150,12 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
  *  This includes no checks to see if workspaces are suitable
  *  and therefore should not be used in any loops that access workspace.
  */
-#define PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE(variable)                         \
-  PARALLEL_SET_CONFIG_THREADS                                                  \
+#define PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE(variable)                                                                 \
+  PARALLEL_SET_CONFIG_THREADS                                                                                          \
   PRAGMA(omp parallel for firstprivate(variable) )
 
-#define PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(variable1, variable2)          \
-  PARALLEL_SET_CONFIG_THREADS                                                  \
+#define PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(variable1, variable2)                                                  \
+  PARALLEL_SET_CONFIG_THREADS                                                                                          \
   PRAGMA(omp parallel for firstprivate(variable1, variable2) )
 
 /** Ensures that the next execution line or block is only executed if
@@ -205,8 +200,7 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
 #define PARALLEL_SECTION PRAGMA(omp section)
 
 inline void setMaxCoresToConfig() {
-  const auto maxCores = Mantid::Kernel::ConfigService::Instance().getValue<int>(
-      "MultiThreaded.MaxCores");
+  const auto maxCores = Mantid::Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
   if (maxCores.get_value_or(0) > 0) {
     PARALLEL_SET_NUM_THREADS(maxCores.get());
   }

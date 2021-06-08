@@ -33,8 +33,7 @@ SANSEventSlicing::~SANSEventSlicing() {}
 void SANSEventSlicing::initLayout() {
   ui.setupUi(this);
   connect(ui.applyPb, SIGNAL(clicked()), this, SLOT(doApplySlice()));
-  connect(ui.run_opt, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(onChangeWorkspace(const QString &)));
+  connect(ui.run_opt, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(onChangeWorkspace(const QString &)));
 }
 
 void SANSEventSlicing::onChangeWorkspace(const QString &newWS) {
@@ -53,14 +52,11 @@ void SANSEventSlicing::onChangeWorkspace(const QString &newWS) {
 void SANSEventSlicing::doApplySlice() {
   QString run_name = ui.run_opt->currentText();
   if (run_name.isEmpty()) {
-    raiseWarning(
-        "Wrong Input",
-        "Invalid run Number.\nPlease, provide a correct run number of file!");
+    raiseWarning("Wrong Input", "Invalid run Number.\nPlease, provide a correct run number of file!");
     return;
   }
   try {
-    QString code = createSliceEventCode(run_name, ui.startDouble->text(),
-                                        ui.stopDouble->text());
+    QString code = createSliceEventCode(run_name, ui.startDouble->text(), ui.stopDouble->text());
 
     ChargeAndTime info = runSliceEvent(code);
 
@@ -70,8 +66,7 @@ void SANSEventSlicing::doApplySlice() {
   }
 }
 
-SANSEventSlicing::ChargeAndTime
-SANSEventSlicing::getFullChargeAndTime(const QString &name_ws) {
+SANSEventSlicing::ChargeAndTime SANSEventSlicing::getFullChargeAndTime(const QString &name_ws) {
 
   QString code;
   QTextStream stream(&code);
@@ -92,13 +87,11 @@ SANSEventSlicing::getFullChargeAndTime(const QString &name_ws) {
   return values2ChargeAndTime(result);
 }
 
-SANSEventSlicing::ChargeAndTime
-SANSEventSlicing::values2ChargeAndTime(const QString &input) {
+SANSEventSlicing::ChargeAndTime SANSEventSlicing::values2ChargeAndTime(const QString &input) {
   QStringList values = input.split(" ");
   ChargeAndTime inf;
   if (values.size() < 2)
-    throw std::runtime_error(
-        QString("Unexpected result: %1").arg(input).toStdString());
+    throw std::runtime_error(QString("Unexpected result: %1").arg(input).toStdString());
 
   inf.charge = values[0];
   inf.time = values[1];
@@ -113,9 +106,7 @@ void SANSEventSlicing::checkPythonOutput(const QString &result) {
   }
 }
 
-QString SANSEventSlicing::createSliceEventCode(const QString &name_ws,
-                                               const QString &start,
-                                               const QString &stop) {
+QString SANSEventSlicing::createSliceEventCode(const QString &name_ws, const QString &start, const QString &stop) {
   if (start.isEmpty() && stop.isEmpty()) {
     throw std::invalid_argument("You must provide the limits for the slicing");
   }
@@ -139,8 +130,7 @@ QString SANSEventSlicing::createSliceEventCode(const QString &name_ws,
   return code;
 }
 
-SANSEventSlicing::ChargeAndTime
-SANSEventSlicing::runSliceEvent(const QString &code) {
+SANSEventSlicing::ChargeAndTime SANSEventSlicing::runSliceEvent(const QString &code) {
   QString result = runPythonCode(code).simplified();
 
   checkPythonOutput(result);
@@ -148,8 +138,7 @@ SANSEventSlicing::runSliceEvent(const QString &code) {
   return values2ChargeAndTime(result);
 }
 
-void SANSEventSlicing::raiseWarning(const QString &title,
-                                    const QString &message) {
+void SANSEventSlicing::raiseWarning(const QString &title, const QString &message) {
   QMessageBox::warning(this, title, message);
 }
 

@@ -25,8 +25,7 @@ DECLARE_ALGORITHM(ConvertToEventWorkspace)
 /** Initialize the algorithm's properties.
  */
 void ConvertToEventWorkspace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("InputWorkspace", "", Direction::Input),
                   "An input Workspace2D.");
   declareProperty("GenerateZeros", false,
                   "Generate an event even for empty bins\n"
@@ -35,13 +34,11 @@ void ConvertToEventWorkspace::init() {
                   "Generate a number of evenly spread events in each bin. See "
                   "the help for details.\n"
                   "Warning! This may use significantly more memory.");
-  declareProperty(
-      "MaxEventsPerBin", 10,
-      "If GenerateMultipleEvents is true, specifies a maximum number of events "
-      "to generate in a single bin.\n"
-      "Use a value that matches your instrument's TOF resolution. Default 10.");
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty("MaxEventsPerBin", 10,
+                  "If GenerateMultipleEvents is true, specifies a maximum number of events "
+                  "to generate in a single bin.\n"
+                  "Use a value that matches your instrument's TOF resolution. Default 10.");
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output EventWorkspace.");
 }
 
@@ -69,8 +66,7 @@ void ConvertToEventWorkspace::exec() {
     EventList &el = outWS->getSpectrum(wi);
 
     // This method fills in the events
-    el.createFromHistogram(&inSpec, GenerateZeros, GenerateMultipleEvents,
-                           MaxEventsPerBin);
+    el.createFromHistogram(&inSpec, GenerateZeros, GenerateMultipleEvents, MaxEventsPerBin);
 
     prog.report("Converting");
     PARALLEL_END_INTERUPT_REGION

@@ -7,10 +7,14 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
+#include "MantidQtWidgets/Common/FitScriptGeneratorMockObjects.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -19,8 +23,11 @@
 #include <gmock/gmock.h>
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <QApplication>
+#include <QClipboard>
 #include <QListView>
 #include <QTableWidget>
 #include <QtTest>
@@ -30,31 +37,26 @@ using namespace MantidQt::MantidWidgets;
 using namespace testing;
 using namespace WorkspaceCreationHelper;
 
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
+namespace {
 
-class MockFitScriptGeneratorPresenter : public IFitScriptGeneratorPresenter {
+IFunction_sptr createIFunction(std::string const &functionString) {
+  return FunctionFactory::Instance().createInitialized(functionString);
+}
 
-public:
-  MockFitScriptGeneratorPresenter(FitScriptGeneratorView *view) {
-    m_view = view;
-    m_view->subscribePresenter(this);
-  }
+CompositeFunction_sptr toComposite(IFunction_sptr function) {
+  return std::dynamic_pointer_cast<CompositeFunction>(function);
+}
 
-  MOCK_METHOD1(notifyPresenter, void(ViewEvent const &ev));
-  MOCK_METHOD0(openFitScriptGenerator, void());
+CompositeFunction_sptr createEmptyComposite() { return toComposite(createIFunction("name=CompositeFunction")); }
 
-private:
-  FitScriptGeneratorView *m_view;
-};
-
-GNU_DIAG_ON_SUGGEST_OVERRIDE
+} // namespace
 
 class FitScriptGeneratorViewTest : public CxxTest::TestSuite {
 
 public:
-  static FitScriptGeneratorViewTest *createSuite() {
-    return new FitScriptGeneratorViewTest;
-  }
+  FitScriptGeneratorViewTest() { FrameworkManager::Instance(); }
+
+  static FitScriptGeneratorViewTest *createSuite() { return new FitScriptGeneratorViewTest; }
   static void destroySuite(FitScriptGeneratorViewTest *suite) { delete suite; }
 
   void setUp() override {
@@ -65,11 +67,14 @@ public:
     m_workspace = create2DWorkspace(3, 3);
     m_workspaceGroup = createWorkspaceGroup(3, 3, 3, "GroupName");
 
+    m_function = createEmptyComposite();
+    m_function->addFunction(createIFunction("name=FlatBackground"));
+    m_function->addFunction(createIFunction("name=ExpDecay"));
+
     AnalysisDataService::Instance().addOrReplace(m_wsName, m_workspace);
 
     m_view = std::make_unique<FitScriptGeneratorView>();
-    m_presenter =
-        std::make_unique<MockFitScriptGeneratorPresenter>(m_view.get());
+    m_presenter = std::make_unique<MockFitScriptGeneratorPresenter>(m_view.get());
   }
 
   void tearDown() override {
@@ -90,8 +95,7 @@ public:
   void test_that_clicking_the_remove_button_will_notify_the_presenter() {
     openFitScriptGeneratorWidget();
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::RemoveClicked))
-        .Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::RemoveDomainClicked, "", "")).Times(1);
 
     QTest::mouseClick(m_view->removeButton(), Qt::LeftButton);
     QApplication::sendPostedEvents();
@@ -100,14 +104,13 @@ public:
   void test_that_clicking_the_add_workspace_button_will_notify_the_presenter() {
     openFitScriptGeneratorWidget();
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::AddClicked)).Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::AddDomainClicked, "", "")).Times(1);
 
     QTest::mouseClick(m_view->addWorkspaceButton(), Qt::LeftButton);
     QApplication::sendPostedEvents();
   }
 
-  void
-  test_that_adding_a_domain_to_the_view_will_change_the_number_of_table_rows() {
+  void test_that_adding_a_domain_to_the_view_will_change_the_number_of_table_rows() {
     openFitScriptGeneratorWidget();
     TS_ASSERT_EQUALS(m_view->tableWidget()->rowCount(), 0);
 
@@ -116,8 +119,7 @@ public:
     TS_ASSERT_EQUALS(m_view->tableWidget()->rowCount(), 1);
   }
 
-  void
-  test_that_adding_a_domain_to_the_view_will_show_the_correct_data_in_the_table() {
+  void test_that_adding_a_domain_to_the_view_will_show_the_correct_data_in_the_table() {
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
 
@@ -127,8 +129,7 @@ public:
     TS_ASSERT_EQUALS(m_view->endX(0), 2.0);
   }
 
-  void
-  test_that_removing_a_domain_in_the_view_will_change_the_number_of_table_rows() {
+  void test_that_removing_a_domain_in_the_view_will_change_the_number_of_table_rows() {
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
 
@@ -142,8 +143,7 @@ public:
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::StartXChanged))
-        .Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::StartXChanged, "", "")).Times(1);
 
     changeValueInTableCell(0, ColumnIndex::StartX);
   }
@@ -152,9 +152,20 @@ public:
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::EndXChanged)).Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::EndXChanged, "", "")).Times(1);
 
     changeValueInTableCell(0, ColumnIndex::EndX);
+  }
+
+  void test_that_allRows_will_return_all_of_the_existing_row_indices() {
+    openFitScriptGeneratorWidget();
+    m_view->addWorkspaceDomain("Name", m_wsIndex, 0.0, 2.0);
+    m_view->addWorkspaceDomain("Name2", m_wsIndex, 0.0, 2.0);
+    m_view->addWorkspaceDomain("Name3", m_wsIndex, 0.0, 2.0);
+
+    auto const allIndices = m_view->allRows();
+    auto const expectedIndices = std::vector<FitDomainIndex>{2, 1, 0};
+    TS_ASSERT_EQUALS(allIndices, expectedIndices);
   }
 
   void test_that_selectedRows_will_return_the_currently_selected_row() {
@@ -172,17 +183,37 @@ public:
     TS_ASSERT_EQUALS(selectedIndices[0].value, rowIndex);
   }
 
-  void
-  test_that_selectedRows_will_return_an_empty_vector_if_there_are_no_currently_selected_rows() {
+  void test_that_selectedRows_will_return_the_first_row_index_by_default() {
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
+    m_view->addWorkspaceDomain("Name2", m_wsIndex, 0.0, 2.0);
 
     auto const selectedIndices = m_view->selectedRows();
-    TS_ASSERT_EQUALS(selectedIndices.size(), 0);
+    TS_ASSERT_EQUALS(selectedIndices.size(), 1);
+    TS_ASSERT_EQUALS(selectedIndices[0], FitDomainIndex(0));
   }
 
-  void
-  test_that_getDialogWorkspaces_returns_the_expected_workspace_selected_in_the_AddWorkspaceDialog() {
+  void test_that_parameterValue_will_return_the_correct_value_of_the_specified_parameter() {
+    openFitScriptGeneratorWidget();
+    m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
+    m_function->addFunction(createIFunction("name=LinearBackground"));
+    m_view->setFunction(m_function);
+
+    TS_ASSERT_EQUALS(m_view->parameterValue("f0.A0"), 0.0);
+    TS_ASSERT_EQUALS(m_view->parameterValue("f1.Height"), 1.0);
+    TS_ASSERT_EQUALS(m_view->parameterValue("f2.A0"), 0.0);
+    TS_ASSERT_EQUALS(m_view->parameterValue("f2.A1"), 0.0);
+  }
+
+  void test_that_attributeValue_will_return_the_correct_value_of_the_specified_attribute() {
+    openFitScriptGeneratorWidget();
+    m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
+    m_view->setFunction(m_function);
+
+    TS_ASSERT(!m_view->attributeValue("NumDeriv").asBool());
+  }
+
+  void test_that_getDialogWorkspaces_returns_the_expected_workspace_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
     auto dialog = m_view->addWorkspaceDialog();
@@ -217,13 +248,11 @@ public:
     TS_ASSERT_EQUALS(workspaces.size(), 3);
     for (auto i = 0u; i < workspaces.size(); ++i) {
       TS_ASSERT_EQUALS(workspaces[i]->getNumberHistograms(), 3);
-      TS_ASSERT_EQUALS(workspaces[i]->getName(),
-                       "GroupName_" + std::to_string(i));
+      TS_ASSERT_EQUALS(workspaces[i]->getName(), "GroupName_" + std::to_string(i));
     }
   }
 
-  void
-  test_that_getDialogWorkspaceIndices_returns_the_expected_workspace_index_selected_in_the_AddWorkspaceDialog() {
+  void test_that_getDialogWorkspaceIndices_returns_the_expected_workspace_index_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
     auto dialog = m_view->addWorkspaceDialog();
@@ -237,8 +266,7 @@ public:
 
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
     TS_ASSERT_EQUALS(workspaceIndices.size(), 1);
-    TS_ASSERT_EQUALS(workspaceIndices[0],
-                     MantidQt::MantidWidgets::WorkspaceIndex(1));
+    TS_ASSERT_EQUALS(workspaceIndices[0], MantidQt::MantidWidgets::WorkspaceIndex(1));
   }
 
   void
@@ -257,19 +285,17 @@ public:
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
     TS_ASSERT_EQUALS(workspaceIndices.size(), 3);
     for (auto i = 0u; i < workspaceIndices.size(); ++i)
-      TS_ASSERT_EQUALS(workspaceIndices[i],
-                       MantidQt::MantidWidgets::WorkspaceIndex(i));
+      TS_ASSERT_EQUALS(workspaceIndices[i], MantidQt::MantidWidgets::WorkspaceIndex(i));
   }
 
-  void
-  test_that_resetSelection_will_reset_the_selected_rows_value_to_its_previous_value() {
+  void test_that_resetSelection_will_reset_the_selected_rows_value_to_its_previous_value() {
     int rowIndex(1);
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
     m_view->addWorkspaceDomain("Name2", m_wsIndex, 0.0, 2.0);
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::StartXChanged))
-        .Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::SelectionChanged, "", "")).Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::StartXChanged, "", "")).Times(1);
 
     // Change the value of StartX to 5.0
     changeValueInTableCell(rowIndex, ColumnIndex::StartX);
@@ -281,19 +307,53 @@ public:
     TS_ASSERT_EQUALS(startX, 0.0);
   }
 
+  void test_that_clicking_the_generate_script_file_button_will_notify_the_presenter() {
+    openFitScriptGeneratorWidget();
+
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::GenerateScriptToFileClicked, "", "")).Times(1);
+
+    QTest::mouseClick(m_view->generateScriptToFileButton(), Qt::LeftButton);
+    QApplication::sendPostedEvents();
+  }
+
+  void test_that_clicking_the_generate_script_to_clipboard_button_will_notify_the_presenter() {
+    openFitScriptGeneratorWidget();
+
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::GenerateScriptToClipboardClicked, "", "")).Times(1);
+
+    QTest::mouseClick(m_view->generateScriptToClipboardButton(), Qt::LeftButton);
+    QApplication::sendPostedEvents();
+  }
+
+  void test_that_saveTextToClipboard_will_save_the_provided_text_to_the_clipboard() {
+    std::string const message("This is a copied message");
+    openFitScriptGeneratorWidget();
+
+    m_view->saveTextToClipboard(message);
+
+    TS_ASSERT_EQUALS(QApplication::clipboard()->text().toStdString(), message);
+  }
+
+  void test_that_fitOptions_returns_the_default_fitting_options() {
+    openFitScriptGeneratorWidget();
+
+    auto const [maxIterations, minimizer, costFunction, evaluationType] = m_view->fitOptions();
+
+    TS_ASSERT_EQUALS(maxIterations, "500");
+    TS_ASSERT_EQUALS(minimizer, "Levenberg-Marquardt");
+    TS_ASSERT_EQUALS(costFunction, "Least squares");
+    TS_ASSERT_EQUALS(evaluationType, "CentrePoint");
+  }
+
 private:
   void openFitScriptGeneratorWidget() {
     EXPECT_CALL(*m_presenter, openFitScriptGenerator()).Times(1);
     m_presenter->openFitScriptGenerator();
   }
 
-  void assertWidgetCreated() {
-    TS_ASSERT_LESS_THAN(0, QApplication::topLevelWidgets().size());
-  }
+  void assertWidgetCreated() { TS_ASSERT_LESS_THAN(0, QApplication::topLevelWidgets().size()); }
 
-  void assertNoTopLevelWidgets() {
-    TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size());
-  }
+  void assertNoTopLevelWidgets() { TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size()); }
 
   void changeValueInTableCell(int row, int column) {
     // Retrieve the pixel position of a StartX cell
@@ -324,6 +384,7 @@ private:
   MantidQt::MantidWidgets::WorkspaceIndex m_wsIndex;
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   Mantid::API::WorkspaceGroup_sptr m_workspaceGroup;
+  Mantid::API::CompositeFunction_sptr m_function;
   std::unique_ptr<FitScriptGeneratorView> m_view;
   std::unique_ptr<MockFitScriptGeneratorPresenter> m_presenter;
 };

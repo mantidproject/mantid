@@ -25,9 +25,7 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetSampleMaterial)
 
-const std::string SetSampleMaterial::name() const {
-  return "SetSampleMaterial";
-}
+const std::string SetSampleMaterial::name() const { return "SetSampleMaterial"; }
 
 int SetSampleMaterial::version() const { return (1); }
 
@@ -42,31 +40,24 @@ using namespace Kernel;
  */
 void SetSampleMaterial::init() {
   using namespace Mantid::Kernel;
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "InputWorkspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::InOut),
                   "The workspace with which to associate the sample ");
-  declareProperty("ChemicalFormula", "",
-                  "The chemical formula, see examples in documentation");
+  declareProperty("ChemicalFormula", "", "The chemical formula, see examples in documentation");
   declareProperty("AtomicNumber", 0, "The atomic number");
-  declareProperty("MassNumber", 0,
-                  "Mass number if ion (use 0 for default mass number)");
+  declareProperty("MassNumber", 0, "Mass number if ion (use 0 for default mass number)");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty(
-      "SampleNumberDensity", EMPTY_DBL(), mustBePositive,
-      "This number density of the sample in number of "
-      "atoms or formula units per cubic Angstrom will be used instead of "
-      "calculated");
-  declareProperty(
-      "SampleEffectiveNumberDensity", EMPTY_DBL(), mustBePositive,
-      "Defines the effective number density of the sample, which is "
-      "related to the number density and packing fraction.");
-  declareProperty(
-      "SamplePackingFraction", EMPTY_DBL(), mustBePositive,
-      "Defines the packing fraction of the sample which can be used "
-      "to calculate the number density and the effective number density");
-  declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
-                  "Number of formula units in unit cell");
+  declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
+                  "This number density of the sample in number of "
+                  "atoms or formula units per cubic Angstrom will be used instead of "
+                  "calculated");
+  declareProperty("SampleEffectiveNumberDensity", EMPTY_DBL(), mustBePositive,
+                  "Defines the effective number density of the sample, which is "
+                  "related to the number density and packing fraction.");
+  declareProperty("SamplePackingFraction", EMPTY_DBL(), mustBePositive,
+                  "Defines the packing fraction of the sample which can be used "
+                  "to calculate the number density and the effective number density");
+  declareProperty("ZParameter", EMPTY_DBL(), mustBePositive, "Number of formula units in unit cell");
   declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
                   "Unit cell volume in Angstoms^3. Will be calculated from the "
                   "OrientedLattice if not supplied.");
@@ -84,30 +75,23 @@ void SetSampleMaterial::init() {
                   "incoherent) for the sample material in barns will be used "
                   "instead of tabulated");
   const std::vector<std::string> extensions{".DAT"};
-  declareProperty(
-      std::make_unique<FileProperty>("AttenuationProfile", "",
-                                     FileProperty::OptionalLoad, extensions),
-      "The path name of the file containing the attenuation profile");
+  declareProperty(std::make_unique<FileProperty>("AttenuationProfile", "", FileProperty::OptionalLoad, extensions),
+                  "The path name of the file containing the attenuation profile");
 
-  declareProperty(
-      std::make_unique<FileProperty>("XRayAttenuationProfile", "",
-                                     FileProperty::OptionalLoad, extensions),
-      "The path name of the file containing the Xray attenuation profile");
+  declareProperty(std::make_unique<FileProperty>("XRayAttenuationProfile", "", FileProperty::OptionalLoad, extensions),
+                  "The path name of the file containing the Xray attenuation profile");
 
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the effective number density.");
-  declareProperty(
-      "SampleMass", EMPTY_DBL(), mustBePositive,
-      "Measured mass in g of the sample. This is used with the SampleVolume "
-      "to calculate the number density.");
-  declareProperty(
-      "SampleVolume", EMPTY_DBL(), mustBePositive,
-      "Measured volume in gm^3 of the sample. This is used with the SampleMass "
-      "to calculate the number density.");
+  declareProperty("SampleMass", EMPTY_DBL(), mustBePositive,
+                  "Measured mass in g of the sample. This is used with the SampleVolume "
+                  "to calculate the number density.");
+  declareProperty("SampleVolume", EMPTY_DBL(), mustBePositive,
+                  "Measured volume in gm^3 of the sample. This is used with the SampleMass "
+                  "to calculate the number density.");
   const std::vector<std::string> units({"Atoms", "Formula Units"});
-  declareProperty("NumberDensityUnit", units.front(),
-                  std::make_shared<StringListValidator>(units),
+  declareProperty("NumberDensityUnit", units.front(), std::make_shared<StringListValidator>(units),
                   "Choose which units SampleNumberDensity referes to.");
 
   // Perform Group Associations.
@@ -137,17 +121,13 @@ void SetSampleMaterial::init() {
 
   // Extra property settings
   setPropertySettings("ChemicalFormula",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "AtomicNumber", Kernel::IS_DEFAULT));
+                      std::make_unique<Kernel::EnabledWhenProperty>("AtomicNumber", Kernel::IS_DEFAULT));
   setPropertySettings("AtomicNumber",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "ChemicalFormula", Kernel::IS_DEFAULT));
+                      std::make_unique<Kernel::EnabledWhenProperty>("ChemicalFormula", Kernel::IS_DEFAULT));
   setPropertySettings("MassNumber",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "ChemicalFormula", Kernel::IS_DEFAULT));
+                      std::make_unique<Kernel::EnabledWhenProperty>("ChemicalFormula", Kernel::IS_DEFAULT));
   setPropertySettings("NumberDensityUnit",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "SampleNumberDensity", Kernel::IS_NOT_DEFAULT));
+                      std::make_unique<Kernel::EnabledWhenProperty>("SampleNumberDensity", Kernel::IS_NOT_DEFAULT));
 }
 
 std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
@@ -167,8 +147,7 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
   params.attenuationXSection = getProperty("AttenuationXSection");
   params.scatteringXSection = getProperty("ScatteringXSection");
   params.attenuationProfileFileName = getPropertyValue("AttenuationProfile");
-  params.xRayAttenuationProfileFileName =
-      getPropertyValue("XRayAttenuationProfile");
+  params.xRayAttenuationProfileFileName = getPropertyValue("XRayAttenuationProfile");
   const std::string numberDensityUnit = getProperty("NumberDensityUnit");
   if (numberDensityUnit == "Atoms") {
     params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;
@@ -190,9 +169,7 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
  * @param abs_xs Absorption cross section
  * @param tot_xs Total scattering cross section
  */
-void SetSampleMaterial::fixNeutron(NeutronAtom &neutron, double coh_xs,
-                                   double inc_xs, double abs_xs,
-                                   double tot_xs) {
+void SetSampleMaterial::fixNeutron(NeutronAtom &neutron, double coh_xs, double inc_xs, double abs_xs, double tot_xs) {
   if (!isEmpty(coh_xs))
     neutron.coh_scatt_xs = coh_xs;
   if (!isEmpty(inc_xs))
@@ -210,8 +187,7 @@ void SetSampleMaterial::exec() {
   // Get the input workspace
   Workspace_sptr workspace = getProperty("InputWorkspace");
   // an ExperimentInfo object has a sample
-  ExperimentInfo_sptr expInfo =
-      std::dynamic_pointer_cast<ExperimentInfo>(workspace);
+  ExperimentInfo_sptr expInfo = std::dynamic_pointer_cast<ExperimentInfo>(workspace);
   if (!expInfo) {
     throw std::runtime_error("InputWorkspace does not have a sample object");
   }
@@ -231,26 +207,19 @@ void SetSampleMaterial::exec() {
     normalizedLaue = 0.;
 
   // set the material but leave the geometry unchanged
-  auto shapeObject = std::shared_ptr<Geometry::IObject>(
-      expInfo->sample().getShape().cloneWithMaterial(*material));
+  auto shapeObject = std::shared_ptr<Geometry::IObject>(expInfo->sample().getShape().cloneWithMaterial(*material));
   expInfo->mutableSample().setShape(shapeObject);
   g_log.information() << "Sample number density ";
   if (isEmpty(material->numberDensity())) {
     g_log.information() << "was not specified\n";
   } else {
-    g_log.information() << "= " << material->numberDensity()
-                        << " atoms/Angstrom^3\n";
+    g_log.information() << "= " << material->numberDensity() << " atoms/Angstrom^3\n";
   }
-  g_log.information() << "Cross sections for wavelength = "
-                      << NeutronAtom::ReferenceLambda << " Angstroms\n"
-                      << "    Coherent " << material->cohScatterXSection()
-                      << " barns\n"
-                      << "    Incoherent " << material->incohScatterXSection()
-                      << " barns\n"
-                      << "    Total " << material->totalScatterXSection()
-                      << " barns\n"
-                      << "    Absorption " << material->absorbXSection()
-                      << " barns\n"
+  g_log.information() << "Cross sections for wavelength = " << NeutronAtom::ReferenceLambda << " Angstroms\n"
+                      << "    Coherent " << material->cohScatterXSection() << " barns\n"
+                      << "    Incoherent " << material->incohScatterXSection() << " barns\n"
+                      << "    Total " << material->totalScatterXSection() << " barns\n"
+                      << "    Absorption " << material->absorbXSection() << " barns\n"
                       << "PDF terms\n"
                       << "    <b_coh>^2 = " << bcoh_avg_sq << "\n"
                       << "    <b_tot^2> = " << btot_sq_avg << "\n"

@@ -18,8 +18,7 @@ namespace MantidWidgets {
  * Constructor
  * @param view A pointer to a view object that displays the information
  */
-ImageInfoPresenter::ImageInfoPresenter(IImageInfoWidget *view)
-    : m_model(), m_view(std::move(view)) {
+ImageInfoPresenter::ImageInfoPresenter(IImageInfoWidget *view) : m_model(), m_view(std::move(view)) {
   m_view->setRowCount(2);
 }
 
@@ -28,8 +27,7 @@ ImageInfoPresenter::ImageInfoPresenter(IImageInfoWidget *view)
  * @param y Y position on an image of the workspace
  * @param signal The signal value at the given position
  */
-void ImageInfoPresenter::cursorAt(const double x, const double y,
-                                  const double signal) {
+void ImageInfoPresenter::cursorAt(const double x, const double y, const double signal) {
   assert(m_model);
   m_view->showInfo(m_model->info(x, y, signal));
 }
@@ -38,16 +36,14 @@ void ImageInfoPresenter::cursorAt(const double x, const double y,
  * Set a new workspace for the view to display
  * @param workspace A pointer to a new workspace
  */
-void ImageInfoPresenter::setWorkspace(
-    const Mantid::API::Workspace_sptr &workspace) {
+void ImageInfoPresenter::setWorkspace(const Mantid::API::Workspace_sptr &workspace) {
   if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace))
     m_model = std::make_unique<ImageInfoModelMatrixWS>(matrixWS);
   else {
     m_model = std::make_unique<ImageInfoModelMD>();
   }
   // Blank view
-  cursorAt(ImageInfoModel::UnsetValue, ImageInfoModel::UnsetValue,
-           ImageInfoModel::UnsetValue);
+  cursorAt(ImageInfoModel::UnsetValue, ImageInfoModel::UnsetValue, ImageInfoModel::UnsetValue);
 }
 
 } // namespace MantidWidgets

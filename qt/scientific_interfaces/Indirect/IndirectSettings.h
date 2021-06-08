@@ -23,8 +23,7 @@ class QIcon;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectSettings
-    : public MantidQt::API::UserSubWindow {
+class MANTIDQT_INDIRECT_DLL IndirectSettings : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 
 public:
@@ -48,8 +47,7 @@ private slots:
 
 private:
   void otherUserSubWindowCreated(QPointer<UserSubWindow> window) override;
-  void
-  otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) override;
+  void otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) override;
 
   void connectIndirectInterface(const QPointer<UserSubWindow> &window);
 

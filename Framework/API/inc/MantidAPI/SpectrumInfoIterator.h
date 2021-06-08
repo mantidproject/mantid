@@ -26,14 +26,11 @@ iterator.
 */
 
 template <typename T>
-class SpectrumInfoIterator
-    : public boost::iterator_facade<SpectrumInfoIterator<T>,
-                                    SpectrumInfoItem<T> &,
-                                    boost::random_access_traversal_tag> {
+class SpectrumInfoIterator : public boost::iterator_facade<SpectrumInfoIterator<T>, SpectrumInfoItem<T> &,
+                                                           boost::random_access_traversal_tag> {
 
 public:
-  SpectrumInfoIterator(T &spectrumInfo, const size_t index)
-      : m_item(spectrumInfo, index) {}
+  SpectrumInfoIterator(T &spectrumInfo, const size_t index) : m_item(spectrumInfo, index) {}
 
 private:
   // Allow boost iterator access
@@ -41,11 +38,8 @@ private:
 
   // Iterator methods
   void advance(int64_t delta) {
-    m_item.m_index =
-        delta < 0 ? std::max(static_cast<uint64_t>(0),
-                             static_cast<uint64_t>(m_item.m_index) + delta)
-                  : std::min(m_item.m_spectrumInfo->size(),
-                             m_item.m_index + static_cast<size_t>(delta));
+    m_item.m_index = delta < 0 ? std::max(static_cast<uint64_t>(0), static_cast<uint64_t>(m_item.m_index) + delta)
+                               : std::min(m_item.m_spectrumInfo->size(), m_item.m_index + static_cast<size_t>(delta));
   }
 
   // This could cause a segmentation fault if a user goes past the end of the
@@ -69,13 +63,10 @@ private:
   void setIndex(const size_t index) { m_item.m_index = index; }
 
   uint64_t distance_to(const SpectrumInfoIterator<T> &other) const {
-    return static_cast<uint64_t>(other.getIndex()) -
-           static_cast<uint64_t>(getIndex());
+    return static_cast<uint64_t>(other.getIndex()) - static_cast<uint64_t>(getIndex());
   }
 
-  bool equal(const SpectrumInfoIterator<T> &other) const {
-    return getIndex() == other.getIndex();
-  }
+  bool equal(const SpectrumInfoIterator<T> &other) const { return getIndex() == other.getIndex(); }
 
   SpectrumInfoItem<T> &dereference() const { return m_item; }
 

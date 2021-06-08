@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ErrorReporter.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -29,32 +30,23 @@ Logger g_log("ErrorReporter");
 // Constructor for ErrorReporter
 /** Constructor
  */
-ErrorReporter::ErrorReporter(const std::string &application,
-                             const Types::Core::time_duration &upTime,
+ErrorReporter::ErrorReporter(const std::string &application, const Types::Core::time_duration &upTime,
                              const std::string &exitCode, const bool share)
     : ErrorReporter(application, upTime, exitCode, share, "", "", "", "") {}
 
 /** Constructor
  */
-ErrorReporter::ErrorReporter(const std::string &application,
-                             const Types::Core::time_duration &upTime,
-                             const std::string &exitCode, const bool share,
-                             const std::string &name, const std::string &email,
-                             const std::string &textBox)
-    : ErrorReporter(application, upTime, exitCode, share, name, email, textBox,
-                    "") {}
+ErrorReporter::ErrorReporter(const std::string &application, const Types::Core::time_duration &upTime,
+                             const std::string &exitCode, const bool share, const std::string &name,
+                             const std::string &email, const std::string &textBox)
+    : ErrorReporter(application, upTime, exitCode, share, name, email, textBox, "") {}
 
-ErrorReporter::ErrorReporter(const std::string &application,
-                             const Types::Core::time_duration &upTime,
-                             const std::string &exitCode, const bool share,
-                             const std::string &name, const std::string &email,
-                             const std::string &textBox,
-                             const std::string &traceback)
-    : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
-      m_share(share), m_name(name), m_email(email), m_textbox(textBox),
-      m_stacktrace(traceback) {
-  auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
-      "errorreports.rooturl");
+ErrorReporter::ErrorReporter(const std::string &application, const Types::Core::time_duration &upTime,
+                             const std::string &exitCode, const bool share, const std::string &name,
+                             const std::string &email, const std::string &textBox, const std::string &traceback)
+    : m_application(application), m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(name), m_email(email),
+      m_textbox(textBox), m_stacktrace(traceback) {
+  auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>("errorreports.rooturl");
   if (!url.is_initialized()) {
     g_log.debug() << "Failed to load error report url\n";
   } else {
@@ -84,11 +76,9 @@ std::string ErrorReporter::generateErrorMessage() const {
   ::Json::Value message;
 
   // username
-  message["uid"] = Kernel::ChecksumHelper::md5FromString(
-      ConfigService::Instance().getUsername());
+  message["uid"] = Kernel::ChecksumHelper::md5FromString(ConfigService::Instance().getUsername());
   // hostname
-  message["host"] = Kernel::ChecksumHelper::md5FromString(
-      ConfigService::Instance().getComputerName());
+  message["host"] = Kernel::ChecksumHelper::md5FromString(ConfigService::Instance().getComputerName());
 
   // os name, version, and architecture
   message["osName"] = ConfigService::Instance().getOSName();
@@ -96,15 +86,14 @@ std::string ErrorReporter::generateErrorMessage() const {
   message["osVersion"] = ConfigService::Instance().getOSVersion();
   message["osReadable"] = ConfigService::Instance().getOSVersionReadable();
 
-  // legacy interface requires paraview version
+  // legacy interface requires paraview version DON'T REMOVE
   message["ParaView"] = 0;
 
   // mantid version and sha1
   message["mantidVersion"] = MantidVersion::version();
   message["mantidSha1"] = MantidVersion::revisionFull();
 
-  message["dateTime"] =
-      Types::Core::DateAndTime::getCurrentTime().toISO8601String();
+  message["dateTime"] = Types::Core::DateAndTime::getCurrentTime().toISO8601String();
 
   message["upTime"] = to_simple_string(m_upTime);
 
@@ -126,16 +115,14 @@ std::string ErrorReporter::generateErrorMessage() const {
     message["stacktrace"] = "";
   }
 
-  ::Json::FastWriter writer;
-  return writer.write(message);
+  return Mantid::JsonHelpers::jsonToString(message);
 }
 
 /** Submits a post request to the specified url with the message as the body
  @param message : String containg json formatted error message
  @param url : The url to send the post request to
 */
-int ErrorReporter::sendReport(const std::string &message,
-                              const std::string &url) {
+int ErrorReporter::sendReport(const std::string &message, const std::string &url) {
   int status = -1;
   try {
     Kernel::InternetHelper helper;
@@ -145,9 +132,7 @@ int ErrorReporter::sendReport(const std::string &message,
     status = helper.sendRequest(url, responseStream);
   } catch (Mantid::Kernel::Exception::InternetError &e) {
     status = e.errorCode();
-    g_log.information() << "Call to \"" << url << "\" responded with " << status
-                        << "\n"
-                        << e.what() << "\n";
+    g_log.information() << "Call to \"" << url << "\" responded with " << status << "\n" << e.what() << "\n";
   }
 
   return status;

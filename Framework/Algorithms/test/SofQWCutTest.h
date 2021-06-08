@@ -43,13 +43,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(sqw_q.setProperty("InputWorkspace", inWS));
     std::ostringstream wsname_q;
     wsname_q << "_tmp_q_" << loadedWS;
-    TS_ASSERT_THROWS_NOTHING(
-        sqw_q.setPropertyValue("OutputWorkspace", wsname_q.str()));
-    TS_ASSERT_THROWS_NOTHING(
-        sqw_q.setPropertyValue("QAxisBinning", "0,0.0125,10"));
+    TS_ASSERT_THROWS_NOTHING(sqw_q.setPropertyValue("OutputWorkspace", wsname_q.str()));
+    TS_ASSERT_THROWS_NOTHING(sqw_q.setPropertyValue("QAxisBinning", "0,0.0125,10"));
     TS_ASSERT_THROWS_NOTHING(sqw_q.setPropertyValue("EMode", "Direct"));
-    TS_ASSERT_THROWS_NOTHING(
-        sqw_q.setPropertyValue("EAxisBinning", "-1.5,3,1.5"));
+    TS_ASSERT_THROWS_NOTHING(sqw_q.setPropertyValue("EAxisBinning", "-1.5,3,1.5"));
     TS_ASSERT_THROWS_NOTHING(sqw_q.execute());
     TS_ASSERT(sqw_q.isExecuted());
 
@@ -60,12 +57,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(sqw_e.setProperty("InputWorkspace", inWS));
     std::ostringstream wsname_e;
     wsname_e << "_tmp_e_" << loadedWS;
-    TS_ASSERT_THROWS_NOTHING(
-        sqw_e.setPropertyValue("OutputWorkspace", wsname_e.str()));
+    TS_ASSERT_THROWS_NOTHING(sqw_e.setPropertyValue("OutputWorkspace", wsname_e.str()));
     TS_ASSERT_THROWS_NOTHING(sqw_e.setPropertyValue("QAxisBinning", "5,5,10"));
     TS_ASSERT_THROWS_NOTHING(sqw_e.setPropertyValue("EMode", "Direct"));
-    TS_ASSERT_THROWS_NOTHING(
-        sqw_e.setPropertyValue("EAxisBinning", "-5,0.5,55"));
+    TS_ASSERT_THROWS_NOTHING(sqw_e.setPropertyValue("EAxisBinning", "-5,0.5,55"));
     TS_ASSERT_THROWS_NOTHING(sqw_e.execute());
     TS_ASSERT(sqw_e.isExecuted());
 
@@ -243,13 +238,11 @@ public:
     sqw.initialize();
     sqw.setChild(true);
     TS_ASSERT_THROWS_NOTHING(sqw.setProperty("InputWorkspace", inWS));
-    TS_ASSERT_THROWS_NOTHING(
-        sqw.setPropertyValue("OutputWorkspace", "__unused"));
+    TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("OutputWorkspace", "__unused"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("QAxisBinning", "0,10,10"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EMode", "Direct"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EFixed", "25"));
-    TS_ASSERT_THROWS_NOTHING(
-        sqw.setPropertyValue("EAxisBinning", "-1.5,3,1.5"));
+    TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EAxisBinning", "-1.5,3,1.5"));
     TS_ASSERT_THROWS_NOTHING(sqw.execute());
     TS_ASSERT(sqw.isExecuted());
 

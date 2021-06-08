@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::ArrayProperty.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.CIntArrayProperty 
+.. autoclass:: mantid.kernel.CIntArrayProperty
     :members:
     :undoc-members:
     :inherited-members:

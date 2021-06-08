@@ -34,7 +34,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - Calculating dead times for a file**  
+**Example - Calculating dead times for a file**
 
 .. testcode:: CalMuonDeadTime
 

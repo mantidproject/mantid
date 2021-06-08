@@ -49,15 +49,12 @@ public:
   bool isUndefined() const { return (min > max); }
   //
   std::string extentsStr() const {
-    return (boost::lexical_cast<std::string>(min) + "-" +
-            boost::lexical_cast<std::string>(max));
+    return (boost::lexical_cast<std::string>(min) + "-" + boost::lexical_cast<std::string>(max));
   }
   T getMin() const { return min; }
   T getMax() const { return max; }
   /// return the vertice in the grid, based on this extent's size
-  T getGridVertex(const size_t ind) const {
-    return min + m_size * static_cast<T>(ind);
-  }
+  T getGridVertex(const size_t ind) const { return min + m_size * static_cast<T>(ind); }
 
   void scaleExtents(double scaling, double offset) {
     min = static_cast<T>(min * scaling + offset);

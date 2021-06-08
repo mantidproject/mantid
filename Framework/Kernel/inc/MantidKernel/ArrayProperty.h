@@ -25,21 +25,17 @@ namespace Kernel {
     @author Russell Taylor, Tessella Support Services plc
     @date 27/02/2008
  */
-template <typename T>
-class DLLExport ArrayProperty : public PropertyWithValue<std::vector<T>> {
+template <typename T> class DLLExport ArrayProperty : public PropertyWithValue<std::vector<T>> {
 public:
-  ArrayProperty(
-      const std::string &name, std::vector<T> vec,
-      const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
-      const unsigned int direction = Direction::Input);
+  ArrayProperty(const std::string &name, std::vector<T> vec,
+                const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
+                const unsigned int direction = Direction::Input);
   ArrayProperty(const std::string &name, const IValidator_sptr &validator,
                 const unsigned int direction = Direction::Input);
-  ArrayProperty(const std::string &name,
+  ArrayProperty(const std::string &name, const unsigned int direction = Direction::Input);
+  ArrayProperty(const std::string &name, const std::string &values,
+                const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
                 const unsigned int direction = Direction::Input);
-  ArrayProperty(
-      const std::string &name, const std::string &values,
-      const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
-      const unsigned int direction = Direction::Input);
 
   ArrayProperty(const ArrayProperty &);
 
@@ -64,8 +60,7 @@ private:
   void visualStudioC4661Workaround();
 };
 
-template <>
-MANTID_KERNEL_DLL void ArrayProperty<int>::visualStudioC4661Workaround();
+template <> MANTID_KERNEL_DLL void ArrayProperty<int>::visualStudioC4661Workaround();
 
 } // namespace Kernel
 } // namespace Mantid

@@ -21,17 +21,13 @@ namespace Mantid {
 namespace Kernel {
 
 /// Constructor
-PropertyHistory::PropertyHistory(const std::string &name,
-                                 const std::string &value,
-                                 const std::string &type, const bool isdefault,
-                                 const unsigned int direction)
-    : m_name(name), m_value(value), m_type(type), m_isDefault(isdefault),
-      m_direction(direction) {}
+PropertyHistory::PropertyHistory(const std::string &name, const std::string &value, const std::string &type,
+                                 const bool isdefault, const unsigned int direction)
+    : m_name(name), m_value(value), m_type(type), m_isDefault(isdefault), m_direction(direction) {}
 
 PropertyHistory::PropertyHistory(Property const *const prop)
-    : m_name(prop->name()), m_value(prop->valueAsPrettyStr(0, true)),
-      m_type(prop->type()), m_isDefault(prop->isDefault()),
-      m_direction(prop->direction()) {}
+    : m_name(prop->name()), m_value(prop->valueAsPrettyStr(0, true)), m_type(prop->type()),
+      m_isDefault(prop->isDefault()), m_direction(prop->direction()) {}
 
 /** Prints a text representation of itself
  *  @param os :: The output stream to write to
@@ -40,8 +36,7 @@ PropertyHistory::PropertyHistory(Property const *const prop)
  *  @param maxPropertyLength :: the max length for any property value string (0
  * = full length)
  */
-void PropertyHistory::printSelf(std::ostream &os, const int indent,
-                                const size_t maxPropertyLength) const {
+void PropertyHistory::printSelf(std::ostream &os, const int indent, const size_t maxPropertyLength) const {
   os << std::string(indent, ' ') << "Name: " << m_name;
   if ((maxPropertyLength > 0) && (m_value.size() > maxPropertyLength)) {
     os << ", Value: " << Strings::shorten(m_value, maxPropertyLength);
@@ -85,10 +80,8 @@ bool PropertyHistory::isEmptyDefault() const {
 
   // If default, input, number type and matches empty value then return true
   if (m_isDefault && m_direction != Direction::Output) {
-    if (std::find(numberTypes.begin(), numberTypes.end(), m_type) !=
-        numberTypes.end()) {
-      if (std::find(emptyValues.begin(), emptyValues.end(), m_value) !=
-          emptyValues.end()) {
+    if (std::find(numberTypes.begin(), numberTypes.end(), m_type) != numberTypes.end()) {
+      if (std::find(emptyValues.begin(), emptyValues.end(), m_value) != emptyValues.end()) {
         emptyDefault = true;
       }
     }

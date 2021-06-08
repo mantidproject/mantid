@@ -20,9 +20,7 @@ class QOneLevelTreeModelTest : public CxxTest::TestSuite {
 
 public:
   // This means the constructor isn't called when running other tests
-  static QOneLevelTreeModelTest *createSuite() {
-    return new QOneLevelTreeModelTest();
-  }
+  static QOneLevelTreeModelTest *createSuite() { return new QOneLevelTreeModelTest(); }
   static void destroySuite(QOneLevelTreeModelTest *suite) { delete suite; }
 
   // Create a white list
@@ -69,13 +67,11 @@ public:
     auto ws = oneRowTable();
 
     ws->addColumn("str", "Group");
-    TS_ASSERT_THROWS(QOneLevelTreeModel(ws, m_whitelist),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(QOneLevelTreeModel(ws, m_whitelist), const std::invalid_argument &);
 
     ws->addColumn("str", "Group1");
     ws->addColumn("str", "Group2");
-    TS_ASSERT_THROWS(QOneLevelTreeModel(ws, m_whitelist),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(QOneLevelTreeModel(ws, m_whitelist), const std::invalid_argument &);
   }
 
   void testConstructorOneRowTable() {
@@ -88,15 +84,11 @@ public:
     TS_ASSERT_EQUALS(model.columnCount(), 2);
 
     // Test data
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0)).toString().toStdString(),
-                     "row0_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 1)).toString().toStdString(),
-                     "row0_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)).toString().toStdString(), "row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1)).toString().toStdString(), "row0_col1");
     // Header data
-    TS_ASSERT_EQUALS(model.headerData(0, Qt::Horizontal, Qt::DisplayRole),
-                     "Column1");
-    TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::DisplayRole),
-                     "Column2");
+    TS_ASSERT_EQUALS(model.headerData(0, Qt::Horizontal, Qt::DisplayRole), "Column1");
+    TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::DisplayRole), "Column2");
   }
 
   void testConstructorFourRowTable() {
@@ -109,19 +101,13 @@ public:
     TS_ASSERT_EQUALS(model.columnCount(), 2);
 
     // Test data
-    TS_ASSERT_EQUALS(model.data(model.index(2, 0)).toString().toStdString(),
-                     "row2_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(2, 1)).toString().toStdString(),
-                     "row2_col1");
-    TS_ASSERT_EQUALS(model.data(model.index(3, 0)).toString().toStdString(),
-                     "row3_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(3, 1)).toString().toStdString(),
-                     "row3_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(2, 0)).toString().toStdString(), "row2_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(2, 1)).toString().toStdString(), "row2_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(3, 0)).toString().toStdString(), "row3_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(3, 1)).toString().toStdString(), "row3_col1");
     // Header data
-    TS_ASSERT_EQUALS(model.headerData(0, Qt::Horizontal, Qt::DisplayRole),
-                     "Column1");
-    TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::DisplayRole),
-                     "Column2");
+    TS_ASSERT_EQUALS(model.headerData(0, Qt::Horizontal, Qt::DisplayRole), "Column1");
+    TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::DisplayRole), "Column2");
   }
 
   void testColumnCount() {
@@ -160,22 +146,14 @@ public:
     model.setData(model.index(2, 1), "new_value3");
 
     // Test data
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0)).toString().toStdString(),
-                     "new_value1");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 1)).toString().toStdString(),
-                     "row0_col1");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0)).toString().toStdString(),
-                     "row1_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 1)).toString().toStdString(),
-                     "new_value2");
-    TS_ASSERT_EQUALS(model.data(model.index(2, 0)).toString().toStdString(),
-                     "row2_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(2, 1)).toString().toStdString(),
-                     "new_value3");
-    TS_ASSERT_EQUALS(model.data(model.index(3, 0)).toString().toStdString(),
-                     "row3_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(3, 1)).toString().toStdString(),
-                     "row3_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)).toString().toStdString(), "new_value1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1)).toString().toStdString(), "row0_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0)).toString().toStdString(), "row1_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 1)).toString().toStdString(), "new_value2");
+    TS_ASSERT_EQUALS(model.data(model.index(2, 0)).toString().toStdString(), "row2_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(2, 1)).toString().toStdString(), "new_value3");
+    TS_ASSERT_EQUALS(model.data(model.index(3, 0)).toString().toStdString(), "row3_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(3, 1)).toString().toStdString(), "row3_col1");
   }
 
   void testInsertRowsOneRowTable() {
@@ -244,22 +222,10 @@ public:
     TS_ASSERT_EQUALS(model.setProcessed(true, 2), true);
 
     // Only 1st and 3rd rows are highlighted
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole)
-                         .toString()
-                         .toStdString(),
-                     Colour::SUCCESS);
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole)
-                         .toString()
-                         .toStdString(),
-                     "");
-    TS_ASSERT_EQUALS(model.data(model.index(2, 0), Qt::BackgroundRole)
-                         .toString()
-                         .toStdString(),
-                     Colour::SUCCESS);
-    TS_ASSERT_EQUALS(model.data(model.index(3, 0), Qt::BackgroundRole)
-                         .toString()
-                         .toStdString(),
-                     "");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole).toString().toStdString(), Colour::SUCCESS);
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole).toString().toStdString(), "");
+    TS_ASSERT_EQUALS(model.data(model.index(2, 0), Qt::BackgroundRole).toString().toStdString(), Colour::SUCCESS);
+    TS_ASSERT_EQUALS(model.data(model.index(3, 0), Qt::BackgroundRole).toString().toStdString(), "");
   }
 
   void testIsProcessedFourRowTable() {

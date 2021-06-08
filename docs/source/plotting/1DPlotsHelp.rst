@@ -14,6 +14,7 @@ Basic 1D and Tiled Plots
 * :ref:`Waterfall_Plots`
 * :ref:`Colorfill_Plots`
 * :ref:`3D_Plots`
+* :ref:`Mesh_Plots`
 
 **General Plot Help**
 
@@ -46,22 +47,22 @@ Click Menus
 -----------
 
 .. figure:: /images/PlotClickMenus1D.png
-   :alt: Click Menus 1D 
+   :alt: Click Menus 1D
    :align: center
    :width: 1500px
 
 |
 |
 
-|FigureOptionsGear.png| ptions Menu
------------------------------------
+Options Menu
+------------
 
 .. figure:: /images/PlotOptions.png
    :alt: Plot Options Axes Legend
    :align: center
 
 
-| **TIP**: Change a Legend entry by editing `Set curve label` on the Curves tab. 
+| **TIP**: Change a Legend entry by editing `Set curve label` on the Curves tab.
   Then on the Legend tab there are Color and Font options.
 |
 |
@@ -96,7 +97,7 @@ Click the generate a script button |GenerateAScript.png| on a 1D Plot:
    axes.set_title('MAR11060')
    axes.set_xlabel('Time-of-flight ($\mu s$)')
    axes.set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes.legend().set_draggable(True)
+   axes.legend().draggable()
 
    plt.show()
 
@@ -115,7 +116,7 @@ Click the generate a script button |GenerateAScript.png| on a 1D Plot:
    axes.set_title('MAR11060')
    axes.set_xlabel('Time-of-flight ($\mu s$)')
    axes.set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes.legend()   #.set_draggable(True) # uncomment to set the legend draggable 
+   axes.legend()   #.draggable() # uncomment to set the legend draggable
 
    plt.show()
 
@@ -124,7 +125,7 @@ For more advice: :ref:`02_scripting_plots`
 |
 |
 
-Tiled Plots 
+Tiled Plots
 ===========
 
 |
@@ -151,8 +152,8 @@ Click Menus
 |
 |
 
-|FigureOptionsGear.png| ptions Menu
------------------------------------
+Options Menu
+------------
 
 Tiled plots are essentially an array of axes (1D plots) on the same figure. As such, when editing them in the Options Menu, you should take care to select the correct set of axes:
 
@@ -166,7 +167,7 @@ Tiled plots are essentially an array of axes (1D plots) on the same figure. As s
    :alt: Plot Options Axes Legend Tiled plots
    :align: center
 
-| **TIP**: Change a Legend entry by editing `Set curve label` on the Curves tab. 
+| **TIP**: Change a Legend entry by editing `Set curve label` on the Curves tab.
   Then on the Legend tab there are Color and Font options.
 |
 |
@@ -181,7 +182,7 @@ Tiled plots are essentially an array of axes (1D plots) on the same figure. As s
 Scripting
 ---------
 
-Click the generate a script button |GenerateAScript.png| on a Tiled Plot:
+An example script for a Tiled Plot:
 
 .. code-block:: python
 
@@ -198,22 +199,22 @@ Click the generate a script button |GenerateAScript.png| on a Tiled Plot:
    axes[0][0].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 1', specNum=1)
    axes[0][0].set_xlabel('Time-of-flight ($\mu s$)')
    axes[0][0].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[0][0].legend().set_draggable(True)
+   axes[0][0].legend().draggable()
 
    axes[0][1].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 2', specNum=2)
    axes[0][1].set_xlabel('Time-of-flight ($\mu s$)')
    axes[0][1].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[0][1].legend().set_draggable(True)
+   axes[0][1].legend().draggable()
 
    axes[1][0].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 3', specNum=3)
    axes[1][0].set_xlabel('Time-of-flight ($\mu s$)')
    axes[1][0].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[1][0].legend().set_draggable(True)
+   axes[1][0].legend().draggable()
 
    axes[1][1].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 4', specNum=4)
    axes[1][1].set_xlabel('Time-of-flight ($\mu s$)')
    axes[1][1].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[1][1].legend().set_draggable(True)
+   axes[1][1].legend().draggable()
 
    plt.show()
 
@@ -229,22 +230,22 @@ Click the generate a script button |GenerateAScript.png| on a Tiled Plot:
    axes[0][0].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 1', specNum=1)
    axes[0][0].set_xlabel('Time-of-flight ($\mu s$)')
    axes[0][0].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[0][0].legend()   #.set_draggable(True) # uncomment to set the legend draggable 
+   axes[0][0].legend()   #.draggable() # uncomment to set the legend draggable
 
    axes[0][1].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 2', specNum=2)
    axes[0][1].set_xlabel('Time-of-flight ($\mu s$)')
    axes[0][1].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[0][1].legend()   #.set_draggable(True) # uncomment to set the legend draggable 
+   axes[0][1].legend()   #.draggable() # uncomment to set the legend draggable
 
    axes[1][0].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 3', specNum=3)
    axes[1][0].set_xlabel('Time-of-flight ($\mu s$)')
    axes[1][0].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[1][0].legend()   #.set_draggable(True) # uncomment to set the legend draggable 
+   axes[1][0].legend()   #.draggable() # uncomment to set the legend draggable
 
    axes[1][1].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 4', specNum=4)
    axes[1][1].set_xlabel('Time-of-flight ($\mu s$)')
    axes[1][1].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[1][1].legend()   #.set_draggable(True) # uncomment to set the legend draggable 
+   axes[1][1].legend()   #.draggable() # uncomment to set the legend draggable
 
    plt.show()
 
@@ -293,5 +294,5 @@ File > Settings
 
 .. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
    :width: 150px
-.. |GenerateAScript.png| image:: /images/GenerateAScript.png  
+.. |GenerateAScript.png| image:: /images/GenerateAScript.png
    :width: 30px

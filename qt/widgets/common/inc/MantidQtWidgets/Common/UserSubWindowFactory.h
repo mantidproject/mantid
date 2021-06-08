@@ -37,12 +37,10 @@ class UserSubWindow;
     @author Martyn Gigg, Tessella plc
     @date 06/07/2010
 */
-class EXPORT_OPT_MANTIDQT_COMMON UserSubWindowFactoryImpl
-    : public Mantid::Kernel::DynamicFactory<UserSubWindow> {
+class EXPORT_OPT_MANTIDQT_COMMON UserSubWindowFactoryImpl : public Mantid::Kernel::DynamicFactory<UserSubWindow> {
 public:
   UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl &) = delete;
-  UserSubWindowFactoryImpl &
-  operator=(const UserSubWindowFactoryImpl &) = delete;
+  UserSubWindowFactoryImpl &operator=(const UserSubWindowFactoryImpl &) = delete;
   // Override createUnwrapped to search through the alias list
   UserSubWindow *createUnwrapped(const std::string &name) const override;
 
@@ -83,12 +81,8 @@ private:
 
   // QHash doesn't seem to support std::unique_ptr<> as a valueso a std::map is
   // used instead
-  std::map<std::string,
-           std::shared_ptr<Mantid::Kernel::AbstractInstantiator<BaseEncoder>>>
-      m_encoders;
-  std::map<std::string,
-           std::shared_ptr<Mantid::Kernel::AbstractInstantiator<BaseDecoder>>>
-      m_decoders;
+  std::map<std::string, std::shared_ptr<Mantid::Kernel::AbstractInstantiator<BaseEncoder>>> m_encoders;
+  std::map<std::string, std::shared_ptr<Mantid::Kernel::AbstractInstantiator<BaseDecoder>>> m_decoders;
 };
 
 template <typename TYPE> void UserSubWindowFactoryImpl::subscribe() {
@@ -97,34 +91,24 @@ template <typename TYPE> void UserSubWindowFactoryImpl::subscribe() {
   saveAliasNames<TYPE>(realName);
 
   // Make a record of each interface's categories.
-  const QStringList categories =
-      TYPE::categoryInfo().split(";", QString::SkipEmptyParts);
+  const QStringList categories = TYPE::categoryInfo().split(";", QString::SkipEmptyParts);
   QSet<QString> result;
-  foreach (const QString category, categories) {
-    result.insert(category.trimmed());
-  }
+  foreach (const QString category, categories) { result.insert(category.trimmed()); }
   m_categoryLookup[QString::fromStdString(realName)] = result;
 }
 
 template <typename WindowType, typename EncoderType, typename DecoderType>
 void UserSubWindowFactoryImpl::subscribe(const std::string &decoderTag) {
   subscribe<WindowType>();
-  m_encoders.insert(
-      {WindowType::name(),
-       std::make_shared<
-           Mantid::Kernel::Instantiator<EncoderType, BaseEncoder>>()});
-  m_decoders.insert(
-      {decoderTag,
-       std::make_shared<
-           Mantid::Kernel::Instantiator<DecoderType, BaseDecoder>>()});
+  m_encoders.insert({WindowType::name(), std::make_shared<Mantid::Kernel::Instantiator<EncoderType, BaseEncoder>>()});
+  m_decoders.insert({decoderTag, std::make_shared<Mantid::Kernel::Instantiator<DecoderType, BaseDecoder>>()});
 }
 
 /**
  * Save the alias names of an interface
  * @param realName :: The real name of the interface
  */
-template <typename TYPE>
-void UserSubWindowFactoryImpl::saveAliasNames(const std::string &realName) {
+template <typename TYPE> void UserSubWindowFactoryImpl::saveAliasNames(const std::string &realName) {
   std::set<std::string> aliases = TYPE::aliases();
   for (const auto &alias_std_str : aliases) {
     QString alias = QString::fromStdString(alias_std_str);
@@ -146,8 +130,7 @@ void UserSubWindowFactoryImpl::saveAliasNames(const std::string &realName) {
 }
 
 /// The specific instantiation of the templated type
-using UserSubWindowFactory =
-    Mantid::Kernel::SingletonHolder<UserSubWindowFactoryImpl>;
+using UserSubWindowFactory = Mantid::Kernel::SingletonHolder<UserSubWindowFactoryImpl>;
 
 } // namespace API
 } // namespace MantidQt

@@ -24,27 +24,21 @@ using namespace API;
 
 void GroupDetectors::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "Workspace", "", Direction::InOut,
-          std::make_shared<CommonBinsValidator>()),
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut, std::make_shared<CommonBinsValidator>()),
       "The name of the workspace2D on which to perform the algorithm");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<specnum_t>>("SpectraList"),
-      "An array containing a list of the indexes of the spectra to combine\n"
-      "(DetectorList and WorkspaceIndexList are ignored if this is set)");
+  declareProperty(std::make_unique<ArrayProperty<specnum_t>>("SpectraList"),
+                  "An array containing a list of the indexes of the spectra to combine\n"
+                  "(DetectorList and WorkspaceIndexList are ignored if this is set)");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<detid_t>>("DetectorList"),
-      "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
-      "set)");
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("DetectorList"),
+                  "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
+                  "set)");
 
   declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An array of workspace indices to combine");
 
-  declareProperty("ResultIndex", -1,
-                  "The workspace index of the summed spectrum (or -1 on error)",
-                  Direction::Output);
+  declareProperty("ResultIndex", -1, "The workspace index of the summed spectrum (or -1 on error)", Direction::Output);
 }
 
 void GroupDetectors::exec() {

@@ -15,12 +15,9 @@ namespace ICat {
 DECLARE_ALGORITHM(CatalogKeepAlive)
 
 void CatalogKeepAlive::init() {
-  declareProperty("Session", "",
-                  "The session information of the catalog to use.");
-  declareProperty<int>(
-      "TimePeriod", 1200,
-      "Frequency to refresh session in seconds. Default 1200 (20 minutes).",
-      Kernel::Direction::Input);
+  declareProperty("Session", "", "The session information of the catalog to use.");
+  declareProperty<int>("TimePeriod", 1200, "Frequency to refresh session in seconds. Default 1200 (20 minutes).",
+                       Kernel::Direction::Input);
 }
 
 void CatalogKeepAlive::exec() {
@@ -28,8 +25,7 @@ void CatalogKeepAlive::exec() {
   if (timePeriod <= 0)
     throw std::runtime_error("TimePeriod must be greater than zero.");
 
-  Types::Core::DateAndTime lastTimeExecuted =
-      Types::Core::DateAndTime::getCurrentTime();
+  Types::Core::DateAndTime lastTimeExecuted = Types::Core::DateAndTime::getCurrentTime();
 
   // Keep going until cancelled
   while (true) {
@@ -38,13 +34,11 @@ void CatalogKeepAlive::exec() {
     // Exit if the user presses cancel
     this->interruption_point();
 
-    double secondsSinceExecuted = Types::Core::DateAndTime::secondsFromDuration(
-        Types::Core::DateAndTime::getCurrentTime() - lastTimeExecuted);
+    double secondsSinceExecuted =
+        Types::Core::DateAndTime::secondsFromDuration(Types::Core::DateAndTime::getCurrentTime() - lastTimeExecuted);
 
     if (secondsSinceExecuted > timePeriod) {
-      API::CatalogManager::Instance()
-          .getCatalog(getPropertyValue("Session"))
-          ->keepAlive();
+      API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->keepAlive();
       lastTimeExecuted = Types::Core::DateAndTime::getCurrentTime();
     }
   }

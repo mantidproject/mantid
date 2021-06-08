@@ -9,8 +9,8 @@
 Description
 -----------
 
-Beam finder workflow algorithm for SANS instruments. 
-This algorithm is rarely called directly. It is called by 
+Beam finder workflow algorithm for SANS instruments.
+This algorithm is rarely called directly. It is called by
 :ref:`SANSReduction <algm-SANSReduction>` or :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>`.
 
 This algorithm abstracts out the details of how to call the :ref:`FindCenterOfMassPosition <algm-FindCenterOfMassPosition>`

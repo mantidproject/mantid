@@ -24,7 +24,7 @@ Usage
 .. testcode:: CalculatePolynomialBackgroundExample
 
    import numpy
-   
+
    ws = CreateSampleWorkspace(Function='One Peak')
    # ws has a background of 0.3
    # There is a single peak around X = 10000 micro-s. Lets exclude it from

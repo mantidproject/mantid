@@ -54,13 +54,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadRawBin0", "LoadRaw"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadRawBin0", "LoadRaw"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Diagnostics\\Raw;DataHandling\\Raw";
-  }
+  const std::string category() const override { return "Diagnostics\\Raw;DataHandling\\Raw"; }
 
 private:
   /// Overwrites Algorithm method.

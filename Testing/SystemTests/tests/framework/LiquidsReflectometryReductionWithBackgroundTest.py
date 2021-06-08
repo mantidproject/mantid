@@ -203,8 +203,12 @@ class TOFMismatchTest(systemtesting.MantidSystemTest):
                                           CropFirstAndLastPoints=False,
                                           OutputWorkspace='reflectivity_119816')
         except RuntimeError as err:
-            if str(err).startswith("Requested TOF range does not match data"):
+            msg_exp = "LiquidsReflectometryReduction-v1: Requested TOF range does not match data"
+            if str(err).startswith(msg_exp):
                 self.correct_exception_caught = True
+            else:
+                print("EXPECTED ERROR:", msg_exp)
+                print("OBSERVED ERROR:", str(err))
 
     def validate(self):
         return self.correct_exception_caught
@@ -244,8 +248,12 @@ class BadDataTOFRangeTest(systemtesting.MantidSystemTest):
                                           CropFirstAndLastPoints=False,
                                           OutputWorkspace='reflectivity_119816')
         except RuntimeError as err:
-            if str(err).startswith("Requested TOF range does not match data"):
+            msg_exp = "LiquidsReflectometryReduction-v1: Requested TOF range does not match data"
+            if str(err).startswith(msg_exp):
                 self.correct_exception_caught = True
+            else:
+                print("EXPECTED ERROR:", msg_exp)
+                print("OBSERVED ERROR:", str(err))
 
     def validate(self):
         return self.correct_exception_caught
@@ -284,8 +292,12 @@ class BadPeakSelectionTest(systemtesting.MantidSystemTest):
                                           CropFirstAndLastPoints=False,
                                           OutputWorkspace='reflectivity_119816')
         except RuntimeError as err:
-            if str(err).startswith("The reflectivity is all zeros"):
+            msg_exp = "LiquidsReflectometryReduction-v1: The reflectivity is all zeros"
+            if str(err).startswith(msg_exp):
                 self.correct_exception_caught = True
+            else:
+                print("EXPECTED ERROR:", msg_exp)
+                print("OBSERVED ERROR:", str(err))
 
     def validate(self):
         return self.correct_exception_caught

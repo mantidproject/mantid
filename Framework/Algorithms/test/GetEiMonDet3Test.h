@@ -38,9 +38,7 @@ class GetEiMonDet3Test : public CxxTest::TestSuite {
 public:
   static GetEiMonDet3Test *createSuite() { return new GetEiMonDet3Test(); }
   static void destroySuite(GetEiMonDet3Test *suite) { delete suite; }
-  static double velocity(const double energy) {
-    return std::sqrt(2 * energy * meV / NeutronMass);
-  }
+  static double velocity(const double energy) { return std::sqrt(2 * energy * meV / NeutronMass); }
   static constexpr double time_of_flight(const double velocity) {
     return (MONITOR_DISTANCE + DETECTOR_DISTANCE) / velocity * 1e6;
   }
@@ -71,9 +69,7 @@ public:
     setupSimple(ws, algorithm);
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
-    TS_ASSERT_DELTA(
-        static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi,
-        1e-6)
+    TS_ASSERT_DELTA(static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi, 1e-6)
   }
 
   void testSuccessWithPulseInterval() {
@@ -83,13 +79,10 @@ public:
     auto ws = createWorkspace(peaks);
     GetEiMonDet3 algorithm;
     setupSimple(ws, algorithm);
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setProperty("PulseInterval", pulseInterval))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("PulseInterval", pulseInterval))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
-    TS_ASSERT_DELTA(
-        static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi,
-        1e-6)
+    TS_ASSERT_DELTA(static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi, 1e-6)
   }
 
   void testPulseIntervalInSampleLogs() {
@@ -102,9 +95,7 @@ public:
     setupSimple(ws, algorithm);
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
-    TS_ASSERT_DELTA(
-        static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi,
-        1e-6)
+    TS_ASSERT_DELTA(static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi, 1e-6)
   }
 
   void testMonitorWorkspace() {
@@ -118,15 +109,12 @@ public:
     algorithm.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", detWs))
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setProperty("DetectorWorkspaceIndexSet", "0"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspaceIndexSet", "0"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorIndex", 0))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorWorkspace", monWs))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
-    TS_ASSERT_DELTA(
-        static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi,
-        1e-6)
+    TS_ASSERT_DELTA(static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi, 1e-6)
   }
 
   void testMonitorWorkspaceWithEPPTable() {
@@ -145,17 +133,13 @@ public:
     algorithm.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", detWs))
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setProperty("DetectorWorkspaceIndexSet", "0"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspaceIndexSet", "0"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorIndex", 0))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorWorkspace", monWs))
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setProperty("MonitorEPPTable", monitorEPPWs))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorEPPTable", monitorEPPWs))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
-    TS_ASSERT_DELTA(
-        static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi,
-        1e-6)
+    TS_ASSERT_DELTA(static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi, 1e-6)
   }
 
 private:
@@ -172,19 +156,16 @@ private:
     detectorRs.emplace_back(-MONITOR_DISTANCE, 0., 0.);
     // Add more detectors --- these should be treated as the real ones.
     detectorRs.emplace_back(0., 0., DETECTOR_DISTANCE);
-    createInstrumentForWorkspaceWithDistances(std::move(targetWs), sampleR,
-                                              sourceR, detectorRs);
+    createInstrumentForWorkspaceWithDistances(std::move(targetWs), sampleR, sourceR, detectorRs);
   }
 
-  static MatrixWorkspace_sptr
-  createWorkspace(const std::vector<double> &peakPositions) {
+  static MatrixWorkspace_sptr createWorkspace(const std::vector<double> &peakPositions) {
     constexpr size_t nDetectors{1};
     constexpr size_t nBins{512};
     constexpr double X0{TOF_START};
     constexpr double dX{TOF_WIDTH / nBins};
     // Number of spectra = detectors + monitor.
-    MatrixWorkspace_sptr ws =
-        create2DWorkspaceBinned(nDetectors + 1, nBins, X0, dX);
+    MatrixWorkspace_sptr ws = create2DWorkspaceBinned(nDetectors + 1, nBins, X0, dX);
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     attachInstrument(ws);
     for (size_t i = 0; i < peakPositions.size(); ++i) {
@@ -205,31 +186,26 @@ private:
     return ws;
   }
 
-  static std::vector<double> peakCentres(const double timeAtMonitor,
-                                         const double energy,
+  static std::vector<double> peakCentres(const double timeAtMonitor, const double energy,
                                          const double pulseInterval = 0.) {
     std::vector<double> centres;
     centres.emplace_back(timeAtMonitor + TOF_START);
-    const double timeOfFlight =
-        timeAtMonitor + time_of_flight(velocity(energy)) - pulseInterval;
+    const double timeOfFlight = timeAtMonitor + time_of_flight(velocity(energy)) - pulseInterval;
     centres.emplace_back(timeOfFlight + TOF_START);
     return centres;
   }
 
   // Mininum setup for GetEiMonDet3.
-  static void setupSimple(const MatrixWorkspace_sptr &ws,
-                          GetEiMonDet3 &algorithm) {
+  static void setupSimple(const MatrixWorkspace_sptr &ws, GetEiMonDet3 &algorithm) {
     algorithm.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setProperty("DetectorWorkspaceIndexSet", "1"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspaceIndexSet", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorIndex", 0))
   }
 
-  static std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr>
-  splitMonitorAndDetectors(MatrixWorkspace_sptr &ws) {
+  static std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> splitMonitorAndDetectors(MatrixWorkspace_sptr &ws) {
     ExtractSpectra2 extract;
     extract.initialize();
     extract.setChild(true);

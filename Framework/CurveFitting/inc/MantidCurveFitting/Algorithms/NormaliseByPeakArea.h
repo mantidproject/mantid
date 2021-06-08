@@ -32,9 +32,7 @@ public:
            "input mass value.";
   }
 
-  const std::vector<std::string> seeAlso() const override {
-    return {"MonitorEfficiencyCorUser", "Divide"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"MonitorEfficiencyCorUser", "Divide"}; }
 
   int version() const override;
   const std::string category() const override;
@@ -53,15 +51,12 @@ private:
   /// Convert input workspace to Y coordinates for fitting
   API::MatrixWorkspace_sptr convertInputToY();
   /// Fit the mass peak & find the area value
-  double fitToMassPeak(const API::MatrixWorkspace_sptr &yspace,
-                       const size_t index);
+  double fitToMassPeak(const API::MatrixWorkspace_sptr &yspace, const size_t index);
   /// Normalise given TOF spectrum
   void normaliseTOFData(const double area, const size_t index);
   /// Stores/accumulates the results
-  void saveToOutput(const API::MatrixWorkspace_sptr &accumWS,
-                    const Kernel::cow_ptr<HistogramData::HistogramY> &yValues,
-                    const Kernel::cow_ptr<HistogramData::HistogramE> &eValues,
-                    const size_t index);
+  void saveToOutput(const API::MatrixWorkspace_sptr &accumWS, const Kernel::cow_ptr<HistogramData::HistogramY> &yValues,
+                    const Kernel::cow_ptr<HistogramData::HistogramE> &eValues, const size_t index);
   /// Symmetrises the data in yspace about the origin
   void symmetriseYSpace();
 

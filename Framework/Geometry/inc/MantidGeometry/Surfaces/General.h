@@ -39,8 +39,7 @@ public:
 
   int setSurface(const std::string &) override;
   void setBaseEqn() override;
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) override;
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) override;
 };
 
 } // NAMESPACE Geometry

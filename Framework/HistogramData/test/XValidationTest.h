@@ -57,13 +57,9 @@ public:
     TS_ASSERT(!isValid(data));
   }
 
-  void test_detects_zero_width() {
-    TS_ASSERT(!isValid(makeX({1.0, 2.0, 2.0, 3.0})));
-  }
+  void test_detects_zero_width() { TS_ASSERT(!isValid(makeX({1.0, 2.0, 2.0, 3.0}))); }
 
-  void test_detects_non_increasing() {
-    TS_ASSERT(!isValid(makeX({1.0, 3.0, 2.0, 4.0})));
-  }
+  void test_detects_non_increasing() { TS_ASSERT(!isValid(makeX({1.0, 3.0, 2.0, 4.0}))); }
 
   void test_accepts_nan() {
     TS_ASSERT(isValid(makeX({NAN})));

@@ -50,12 +50,13 @@ def _focus_mode_all(output_file_paths, processed_spectra, attenuation_filepath):
                                          OutputWorkspace=summed_spectra_name)
 
     mantid.SaveGSS(InputWorkspace=summed_spectra, Filename=output_file_paths["gss_filename"], Append=False, Bank=1)
+    mantid.SaveFocusedXYE(InputWorkspace=summed_spectra_name, Filename=output_file_paths["tof_xye_filename"],
+                          Append=False, IncludeHeader=False)
 
     summed_spectra = mantid.ConvertUnits(InputWorkspace=summed_spectra, Target="dSpacing",
                                          OutputWorkspace=summed_spectra_name)
     mantid.SaveNexus(Filename=output_file_paths["nxs_filename"], InputWorkspace=summed_spectra, Append=False)
-    mantid.SaveFocusedXYE(InputWorkspace=summed_spectra_name, Filename=output_file_paths["tof_xye_filename"],
-                          Append=False, IncludeHeader=False)
+
     output_list = [summed_spectra]
     for i in range(0, 5):
         spectra_index = (i + 9)  # Compensate for 0 based index

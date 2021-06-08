@@ -37,11 +37,9 @@ using namespace DataObjects;
  *
  */
 void CreateDummyCalFile::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The workspace containing the geometry to be calibrated.");
-  declareProperty(std::make_unique<FileProperty>("CalFilename", "",
-                                                 FileProperty::Save, ".cal"),
+  declareProperty(std::make_unique<FileProperty>("CalFilename", "", FileProperty::Save, ".cal"),
                   "The name of the output [[CalFile]]");
 }
 
@@ -61,8 +59,7 @@ void CreateDummyCalFile::exec() {
   // Get some stuff from the input workspace
   Instrument_const_sptr inst = inputW->getInstrument();
   if (!inst)
-    throw std::invalid_argument(
-        "The InputWorkspace does not have an instrument definition");
+    throw std::invalid_argument("The InputWorkspace does not have an instrument definition");
 
   std::string instname = inst->getName();
 
@@ -71,8 +68,7 @@ void CreateDummyCalFile::exec() {
 
   // Split the names of the group and insert in a vector, throw if group empty
   std::vector<std::string> vgroups;
-  boost::split(vgroups, instname,
-               boost::algorithm::detail::is_any_ofF<char>(",/*"));
+  boost::split(vgroups, instname, boost::algorithm::detail::is_any_ofF<char>(",/*"));
   if (vgroups.empty()) {
     g_log.error("Could not determine group names. Group names should be "
                 "separated by / or ,");
@@ -83,8 +79,7 @@ void CreateDummyCalFile::exec() {
   // Assign incremental number to each group
   std::map<std::string, int> group_map;
   int index = 0;
-  for (std::vector<std::string>::const_iterator it = vgroups.begin();
-       it != vgroups.end(); ++it)
+  for (std::vector<std::string>::const_iterator it = vgroups.begin(); it != vgroups.end(); ++it)
     group_map[(*it)] = ++index;
 
   // Not needed anymore
@@ -95,8 +90,7 @@ void CreateDummyCalFile::exec() {
   using sptr_IComp = std::shared_ptr<const Geometry::IComponent>;
   using sptr_IDet = std::shared_ptr<const Geometry::IDetector>;
   std::queue<std::pair<sptr_ICompAss, int>> assemblies;
-  sptr_ICompAss current =
-      std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
+  sptr_ICompAss current = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
   sptr_IDet currentDet;
   sptr_IComp currentIComp;
   sptr_ICompAss currentchild;
@@ -121,16 +115,13 @@ void CreateDummyCalFile::exec() {
     if (nchilds != 0) {
       for (int i = 0; i < nchilds; ++i) {
         currentIComp = (*(current.get()))[i]; // Get child
-        currentDet =
-            std::dynamic_pointer_cast<const Geometry::IDetector>(currentIComp);
+        currentDet = std::dynamic_pointer_cast<const Geometry::IDetector>(currentIComp);
         if (currentDet.get()) // Is detector
         {
           instrcalib[number++] = std::make_pair(currentDet->getID(), top_group);
         } else // Is an assembly, push in the queue
         {
-          currentchild =
-              std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-                  currentIComp);
+          currentchild = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(currentIComp);
           if (currentchild.get()) {
             child_group = group_map[currentchild->getName()];
             if (child_group == 0)
@@ -149,23 +140,20 @@ void CreateDummyCalFile::exec() {
   progress(0.2);
 }
 
-bool CreateDummyCalFile::groupingFileDoesExist(
-    const std::string &filename) const {
+bool CreateDummyCalFile::groupingFileDoesExist(const std::string &filename) const {
   std::ifstream file(filename.c_str());
   // Check if the file already exists
   if (!file)
     return false;
   file.close();
   std::ostringstream mess;
-  mess << "Calibration file " << filename
-       << " already exist. Only grouping will be modified";
+  mess << "Calibration file " << filename << " already exist. Only grouping will be modified";
   g_log.information(mess.str());
   return true;
 }
 
 /// Creates and saves the output file
-void CreateDummyCalFile::saveGroupingFile(const std::string &filename,
-                                          bool overwrite) const {
+void CreateDummyCalFile::saveGroupingFile(const std::string &filename, bool overwrite) const {
   std::ostringstream message;
   std::fstream outfile;
   std::fstream infile;
@@ -217,8 +205,7 @@ void CreateDummyCalFile::saveGroupingFile(const std::string &filename,
   } else //
   {
     for (const auto &value : instrcalib)
-      writeCalEntry(outfile, value.first, (value.second).first, 0.0, 1,
-                    (value.second).second);
+      writeCalEntry(outfile, value.first, (value.second).first, 0.0, 1, (value.second).second);
   }
 
   // Closing
@@ -228,18 +215,14 @@ void CreateDummyCalFile::saveGroupingFile(const std::string &filename,
 }
 
 /// Writes a single calibration line to the output file
-void CreateDummyCalFile::writeCalEntry(std::ostream &os, int number, int udet,
-                                       double offset, int select, int group) {
-  os << std::fixed << std::setw(9) << number << std::fixed << std::setw(15)
-     << udet << std::fixed << std::setprecision(7) << std::setw(15) << offset
-     << std::fixed << std::setw(8) << select << std::fixed << std::setw(8)
-     << group << "\n";
+void CreateDummyCalFile::writeCalEntry(std::ostream &os, int number, int udet, double offset, int select, int group) {
+  os << std::fixed << std::setw(9) << number << std::fixed << std::setw(15) << udet << std::fixed
+     << std::setprecision(7) << std::setw(15) << offset << std::fixed << std::setw(8) << select << std::fixed
+     << std::setw(8) << group << "\n";
 }
 
 /// Writes out the header to the output file
-void CreateDummyCalFile::writeHeaders(std::ostream &os,
-                                      const std::string &filename,
-                                      bool overwrite) const {
+void CreateDummyCalFile::writeHeaders(std::ostream &os, const std::string &filename, bool overwrite) const {
   os << "# Diffraction focusing calibration file created by Mantid"
      << "\n";
   os << "# Detectors have been grouped using assembly names:" << groups << "\n";

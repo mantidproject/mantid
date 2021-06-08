@@ -7,7 +7,7 @@
 #pragma once
 
 /**
- * This file is present so that the TestSuite.h header can be included in a precompiled 
+ * This file is present so that the TestSuite.h header can be included in a precompiled
  * header file and still have exception handling and the STL
  */
 

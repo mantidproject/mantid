@@ -38,8 +38,7 @@ using namespace MantidQt::CustomDialogs;
 /**
  * Constructor
  */
-LoadRawDialog::LoadRawDialog(QWidget *parent)
-    : AlgorithmDialog(parent), m_pathBox(nullptr), m_wsBox(nullptr) {}
+LoadRawDialog::LoadRawDialog(QWidget *parent) : AlgorithmDialog(parent), m_pathBox(nullptr), m_wsBox(nullptr) {}
 
 /**
  *Destructor
@@ -128,8 +127,7 @@ void LoadRawDialog::initLayout() {
     auto *cacheBox = new QComboBox;
     std::vector<std::string> items = cacheProp->allowedValues();
     std::vector<std::string>::const_iterator vend = items.end();
-    for (std::vector<std::string>::const_iterator vitr = items.begin();
-         vitr != vend; ++vitr) {
+    for (std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend; ++vitr) {
       cacheBox->addItem(QString::fromStdString(*vitr));
     }
     prop_line = new QHBoxLayout;
@@ -155,8 +153,7 @@ void LoadRawDialog::initLayout() {
     auto *monitorsBox = new QComboBox;
     std::vector<std::string> monitoritems = loadMonitors->allowedValues();
     std::vector<std::string>::const_iterator mend = monitoritems.end();
-    for (std::vector<std::string>::const_iterator mitr = monitoritems.begin();
-         mitr != mend; ++mitr) {
+    for (std::vector<std::string>::const_iterator mitr = monitoritems.begin(); mitr != mend; ++mitr) {
       monitorsBox->addItem(QString::fromStdString(*mitr));
     }
     prop_line->addWidget(new QLabel("LoadMonitors:"), 0, Qt::AlignRight);

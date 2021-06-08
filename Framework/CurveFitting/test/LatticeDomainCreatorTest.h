@@ -27,14 +27,11 @@ class LatticeDomainCreatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LatticeDomainCreatorTest *createSuite() {
-    return new LatticeDomainCreatorTest();
-  }
+  static LatticeDomainCreatorTest *createSuite() { return new LatticeDomainCreatorTest(); }
   static void destroySuite(LatticeDomainCreatorTest *suite) { delete suite; }
 
   void testGetDomainSizeIPeaksWorkspace() {
-    Workspace_sptr peaksWs = std::dynamic_pointer_cast<Workspace>(
-        WorkspaceCreationHelper::createPeaksWorkspace(5));
+    Workspace_sptr peaksWs = std::dynamic_pointer_cast<Workspace>(WorkspaceCreationHelper::createPeaksWorkspace(5));
 
     TestableLatticeDomainCreator dc;
     TS_ASSERT_THROWS_NOTHING(dc.setWorkspace(peaksWs));
@@ -59,14 +56,12 @@ public:
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
 
-    TS_ASSERT_THROWS_NOTHING(
-        dc.createDomainFromPeakTable(table, domain, values, 0));
+    TS_ASSERT_THROWS_NOTHING(dc.createDomainFromPeakTable(table, domain, values, 0));
 
     TS_ASSERT_EQUALS(domain->size(), 3);
     TS_ASSERT_EQUALS(values->size(), 3);
 
-    std::shared_ptr<LatticeDomain> latticeDomain =
-        std::dynamic_pointer_cast<LatticeDomain>(domain);
+    std::shared_ptr<LatticeDomain> latticeDomain = std::dynamic_pointer_cast<LatticeDomain>(domain);
 
     TS_ASSERT(latticeDomain);
 
@@ -93,8 +88,7 @@ public:
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
 
-    TS_ASSERT_THROWS_NOTHING(
-        dc.createDomainFromPeakTable(table, domain, values, 0));
+    TS_ASSERT_THROWS_NOTHING(dc.createDomainFromPeakTable(table, domain, values, 0));
 
     // Domain size should still be 3, because 0, 0, 0 can not be used
     TS_ASSERT_EQUALS(domain->size(), 3);
@@ -110,16 +104,14 @@ public:
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
 
-    TS_ASSERT_THROWS(dc.createDomainFromPeakTable(invalid, domain, values, 0),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(dc.createDomainFromPeakTable(invalid, domain, values, 0), const std::runtime_error &);
 
-    TS_ASSERT_THROWS(dc.createDomainFromPeakTable(empty, domain, values, 0),
-                     const std::range_error &);
+    TS_ASSERT_THROWS(dc.createDomainFromPeakTable(empty, domain, values, 0), const std::range_error &);
   }
 
   void testCreateDomainPeaksWorkspace() {
-    IPeaksWorkspace_sptr peaksWs = std::dynamic_pointer_cast<IPeaksWorkspace>(
-        WorkspaceCreationHelper::createPeaksWorkspace(2));
+    IPeaksWorkspace_sptr peaksWs =
+        std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceCreationHelper::createPeaksWorkspace(2));
     peaksWs->getPeak(0).setHKL(V3D(1, 1, 1));
     peaksWs->getPeak(1).setHKL(V3D(2, 2, 0));
 
@@ -128,14 +120,12 @@ public:
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
 
-    TS_ASSERT_THROWS_NOTHING(
-        dc.createDomainFromPeaksWorkspace(peaksWs, domain, values, 0));
+    TS_ASSERT_THROWS_NOTHING(dc.createDomainFromPeaksWorkspace(peaksWs, domain, values, 0));
 
     TS_ASSERT_EQUALS(domain->size(), 2);
     TS_ASSERT_EQUALS(values->size(), 2);
 
-    std::shared_ptr<LatticeDomain> latticeDomain =
-        std::dynamic_pointer_cast<LatticeDomain>(domain);
+    std::shared_ptr<LatticeDomain> latticeDomain = std::dynamic_pointer_cast<LatticeDomain>(domain);
 
     TS_ASSERT(latticeDomain);
 
@@ -166,11 +156,9 @@ public:
     values->setCalculated(2, 1.627567);
 
     Workspace_sptr outputWs;
-    TS_ASSERT_THROWS_NOTHING(
-        outputWs = dc.createOutputWorkspace("base", fn, domain, values, "pp"));
+    TS_ASSERT_THROWS_NOTHING(outputWs = dc.createOutputWorkspace("base", fn, domain, values, "pp"));
 
-    ITableWorkspace_sptr tableWs =
-        std::dynamic_pointer_cast<ITableWorkspace>(outputWs);
+    ITableWorkspace_sptr tableWs = std::dynamic_pointer_cast<ITableWorkspace>(outputWs);
     TS_ASSERT(tableWs);
 
     TS_ASSERT_EQUALS(tableWs->rowCount(), 3);
@@ -228,8 +216,7 @@ private:
 
   class EmptyLatticeFunction : public LatticeFunction {
   public:
-    void functionLattice(const LatticeDomain &latticeDomain,
-                         FunctionValues &values) const override {
+    void functionLattice(const LatticeDomain &latticeDomain, FunctionValues &values) const override {
       UNUSED_ARG(latticeDomain);
       UNUSED_ARG(values);
     }

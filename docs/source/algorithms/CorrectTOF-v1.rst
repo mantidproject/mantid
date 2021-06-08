@@ -78,7 +78,7 @@ Output:
 **Example 2: Apply correction to the TOFTOF data.**
 
 .. testcode:: ExCorrectTOF2
-    
+
     import numpy
 
     # load TOFTOF data

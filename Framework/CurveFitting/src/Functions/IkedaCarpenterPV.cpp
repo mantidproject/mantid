@@ -79,19 +79,17 @@ double IkedaCarpenterPV::fwhm() const {
   double gamma = getParameter("Gamma");
 
   if (sigmaSquared < 0) {
-    g_log.debug()
-        << "SigmaSquared NEGATIVE!.\n"
-        << "Likely due to a fit not converging properly\n"
-        << "If this is frequent problem please report to Mantid team.\n"
-        << "For now to calculate width force SigmaSquared positive.\n";
+    g_log.debug() << "SigmaSquared NEGATIVE!.\n"
+                  << "Likely due to a fit not converging properly\n"
+                  << "If this is frequent problem please report to Mantid team.\n"
+                  << "For now to calculate width force SigmaSquared positive.\n";
     sigmaSquared = -sigmaSquared;
   }
   if (gamma < 0) {
-    g_log.debug()
-        << "Gamma NEGATIVE!.\n"
-        << "Likely due to a fit not converging properly\n"
-        << "If this is frequent problem please report to Mantid team.\n"
-        << "For now to calculate width force Gamma positive.\n";
+    g_log.debug() << "Gamma NEGATIVE!.\n"
+                  << "Likely due to a fit not converging properly\n"
+                  << "If this is frequent problem please report to Mantid team.\n"
+                  << "For now to calculate width force Gamma positive.\n";
     gamma = -gamma;
     ;
   }
@@ -119,8 +117,7 @@ void IkedaCarpenterPV::init() {
   this->lowerConstraint0("Beta0");
   declareParameter("Kappa", 46.0, "Controls contribution of slow decay term");
   this->lowerConstraint0("Kappa");
-  declareParameter("SigmaSquared", 1.0,
-                   "standard deviation squared (Voigt Guassian broadening)");
+  declareParameter("SigmaSquared", 1.0, "standard deviation squared (Voigt Guassian broadening)");
   this->lowerConstraint0("SigmaSquared");
   declareParameter("Gamma", 1.0, "Voigt Lorentzian broadening");
   this->lowerConstraint0("Gamma");
@@ -129,8 +126,7 @@ void IkedaCarpenterPV::init() {
 }
 
 void IkedaCarpenterPV::lowerConstraint0(const std::string &paramName) {
-  auto mixingConstraint =
-      std::make_unique<BoundaryConstraint>(this, paramName, 0.0, true);
+  auto mixingConstraint = std::make_unique<BoundaryConstraint>(this, paramName, 0.0, true);
   mixingConstraint->setPenaltyFactor(1e9);
 
   addConstraint(std::move(mixingConstraint));
@@ -144,8 +140,7 @@ void IkedaCarpenterPV::lowerConstraint0(const std::string &paramName) {
  *  @param xValues :: x values
  *  @param nData :: length of xValues
  */
-void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double *xValues,
-                                                    const size_t &nData) const {
+void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double *xValues, const size_t &nData) const {
   // if wavelength vector already have the right size no need for resizing it
   // further we make the assumption that no need to recalculate this vector if
   // it already has the right size
@@ -153,8 +148,7 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double *xValues,
   if (m_waveLength.size() != nData) {
     m_waveLength.resize(nData);
 
-    Mantid::Kernel::Unit_sptr wavelength =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    Mantid::Kernel::Unit_sptr wavelength = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     for (size_t i = 0; i < nData; i++) {
       m_waveLength[i] = xValues[i];
     }
@@ -169,11 +163,10 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double *xValues,
       if (sample != nullptr) {
         convertValue(m_waveLength, wavelength, mws, m_workspaceIndex);
       } else {
-        g_log.warning()
-            << "No sample set for instrument in workspace.\n"
-            << "Can't calculate wavelength in IkedaCarpenter.\n"
-            << "Default all wavelengths to one.\n"
-            << "Solution is to load appropriate instrument into workspace.\n";
+        g_log.warning() << "No sample set for instrument in workspace.\n"
+                        << "Can't calculate wavelength in IkedaCarpenter.\n"
+                        << "Default all wavelengths to one.\n"
+                        << "Solution is to load appropriate instrument into workspace.\n";
         for (size_t i = 0; i < nData; i++)
           m_waveLength[i] = 1.0;
       }
@@ -195,8 +188,7 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double *xValues,
  *  @param H :: pseudo voigt param
  *  @param eta :: pseudo voigt param
  */
-void IkedaCarpenterPV::convertVoigtToPseudo(const double &voigtSigmaSq,
-                                            const double &voigtGamma, double &H,
+void IkedaCarpenterPV::convertVoigtToPseudo(const double &voigtSigmaSq, const double &voigtGamma, double &H,
                                             double &eta) const {
   double fwhmGsq = 8.0 * M_LN2 * voigtSigmaSq;
   double fwhmG = sqrt(fwhmGsq);
@@ -205,10 +197,8 @@ void IkedaCarpenterPV::convertVoigtToPseudo(const double &voigtSigmaSq,
   double fwhmLsq = voigtGamma * voigtGamma;
   double fwhmL4 = fwhmLsq * fwhmLsq;
 
-  H = pow(fwhmG4 * fwhmG + 2.69269 * fwhmG4 * fwhmL +
-              2.42843 * fwhmGsq * fwhmG * fwhmLsq +
-              4.47163 * fwhmGsq * fwhmLsq * fwhmL + 0.07842 * fwhmG * fwhmL4 +
-              fwhmL4 * fwhmL,
+  H = pow(fwhmG4 * fwhmG + 2.69269 * fwhmG4 * fwhmL + 2.42843 * fwhmGsq * fwhmG * fwhmLsq +
+              4.47163 * fwhmGsq * fwhmLsq * fwhmL + 0.07842 * fwhmG * fwhmL4 + fwhmL4 * fwhmL,
           0.2);
 
   if (H == 0.0)
@@ -219,8 +209,7 @@ void IkedaCarpenterPV::convertVoigtToPseudo(const double &voigtSigmaSq,
   eta = 1.36603 * tmp - 0.47719 * tmp * tmp + 0.11116 * tmp * tmp * tmp;
 }
 
-void IkedaCarpenterPV::constFunction(double *out, const double *xValues,
-                                     const int &nData) const {
+void IkedaCarpenterPV::constFunction(double *out, const double *xValues, const int &nData) const {
   const double I = getParameter("I");
   const double alpha0 = getParameter("Alpha0");
   const double alpha1 = getParameter("Alpha1");
@@ -281,30 +270,23 @@ void IkedaCarpenterPV::constFunction(double *out, const double *xValues,
     double ys = (alpha * sigmaSquared - diff) * someConst;
     double yr = (beta * sigmaSquared - diff) * someConst;
 
-    std::complex<double> zs =
-        std::complex<double>(-alpha * diff, 0.5 * alpha * gamma);
+    std::complex<double> zs = std::complex<double>(-alpha * diff, 0.5 * alpha * gamma);
     std::complex<double> zu = (1 - k) * zs;
     std::complex<double> zv = (1 + k) * zs;
-    std::complex<double> zr =
-        std::complex<double>(-beta * diff, 0.5 * beta * gamma);
+    std::complex<double> zr = std::complex<double>(-beta * diff, 0.5 * beta * gamma);
 
     double N = 0.25 * alpha * (1 - k * k) / (k * k);
 
     out[i] = I * N *
-             ((1 - eta) * (Nu * exp(u + gsl_sf_log_erfc(yu)) +
-                           Nv * exp(v + gsl_sf_log_erfc(yv)) +
-                           Ns * exp(s + gsl_sf_log_erfc(ys)) +
-                           Nr * exp(r + gsl_sf_log_erfc(yr))) -
+             ((1 - eta) * (Nu * exp(u + gsl_sf_log_erfc(yu)) + Nv * exp(v + gsl_sf_log_erfc(yv)) +
+                           Ns * exp(s + gsl_sf_log_erfc(ys)) + Nr * exp(r + gsl_sf_log_erfc(yr))) -
               eta * 2.0 / M_PI *
-                  (Nu * exponentialIntegral(zu).imag() +
-                   Nv * exponentialIntegral(zv).imag() +
-                   Ns * exponentialIntegral(zs).imag() +
-                   Nr * exponentialIntegral(zr).imag()));
+                  (Nu * exponentialIntegral(zu).imag() + Nv * exponentialIntegral(zv).imag() +
+                   Ns * exponentialIntegral(zs).imag() + Nr * exponentialIntegral(zr).imag()));
   }
 }
 
-void IkedaCarpenterPV::functionLocal(double *out, const double *xValues,
-                                     const size_t nData) const {
+void IkedaCarpenterPV::functionLocal(double *out, const double *xValues, const size_t nData) const {
   const double I = getParameter("I");
   const double alpha0 = getParameter("Alpha0");
   const double alpha1 = getParameter("Alpha1");
@@ -365,37 +347,28 @@ void IkedaCarpenterPV::functionLocal(double *out, const double *xValues,
     double ys = (alpha * sigmaSquared - diff) * someConst;
     double yr = (beta * sigmaSquared - diff) * someConst;
 
-    std::complex<double> zs =
-        std::complex<double>(-alpha * diff, 0.5 * alpha * gamma);
+    std::complex<double> zs = std::complex<double>(-alpha * diff, 0.5 * alpha * gamma);
     std::complex<double> zu = (1 - k) * zs;
     std::complex<double> zv = (1 + k) * zs;
-    std::complex<double> zr =
-        std::complex<double>(-beta * diff, 0.5 * beta * gamma);
+    std::complex<double> zr = std::complex<double>(-beta * diff, 0.5 * beta * gamma);
 
     double N = 0.25 * alpha * (1 - k * k) / (k * k);
 
     out[i] = I * N *
-             ((1 - eta) * (Nu * exp(u + gsl_sf_log_erfc(yu)) +
-                           Nv * exp(v + gsl_sf_log_erfc(yv)) +
-                           Ns * exp(s + gsl_sf_log_erfc(ys)) +
-                           Nr * exp(r + gsl_sf_log_erfc(yr))) -
+             ((1 - eta) * (Nu * exp(u + gsl_sf_log_erfc(yu)) + Nv * exp(v + gsl_sf_log_erfc(yv)) +
+                           Ns * exp(s + gsl_sf_log_erfc(ys)) + Nr * exp(r + gsl_sf_log_erfc(yr))) -
               eta * 2.0 / M_PI *
-                  (Nu * exponentialIntegral(zu).imag() +
-                   Nv * exponentialIntegral(zv).imag() +
-                   Ns * exponentialIntegral(zs).imag() +
-                   Nr * exponentialIntegral(zr).imag()));
+                  (Nu * exponentialIntegral(zu).imag() + Nv * exponentialIntegral(zv).imag() +
+                   Ns * exponentialIntegral(zs).imag() + Nr * exponentialIntegral(zr).imag()));
   }
 }
 
-void IkedaCarpenterPV::functionDerivLocal(API::Jacobian * /*jacobian*/,
-                                          const double * /*xValues*/,
+void IkedaCarpenterPV::functionDerivLocal(API::Jacobian * /*jacobian*/, const double * /*xValues*/,
                                           const size_t /*nData*/) {
-  throw Mantid::Kernel::Exception::NotImplementedError(
-      "functionDerivLocal is not implemented for IkedaCarpenterPV.");
+  throw Mantid::Kernel::Exception::NotImplementedError("functionDerivLocal is not implemented for IkedaCarpenterPV.");
 }
 
-void IkedaCarpenterPV::functionDeriv(const API::FunctionDomain &domain,
-                                     API::Jacobian &jacobian) {
+void IkedaCarpenterPV::functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
@@ -404,15 +377,13 @@ double IkedaCarpenterPV::intensity() const {
   auto interval = getDomainInterval(1e-2);
 
   API::PeakFunctionIntegrator integrator;
-  API::IntegrationResult result =
-      integrator.integrate(*this, interval.first, interval.second);
+  API::IntegrationResult result = integrator.integrate(*this, interval.first, interval.second);
 
   return result.result;
 }
 
-void IkedaCarpenterPV::setMatrixWorkspace(
-    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
-    double startX, double endX) {
+void IkedaCarpenterPV::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
+                                          double startX, double endX) {
   if (workspace) {
     // convert inital parameters that depend on x axis to correct units so
     // inital guess is reasonable

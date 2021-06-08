@@ -46,15 +46,12 @@ input to the workspaces first input WorkspaceProperty
 class EXPORT_OPT_MANTIDQT_COMMON WorkspaceSelector : public QComboBox {
   Q_OBJECT
 
-  Q_PROPERTY(
-      QStringList WorkspaceTypes READ getWorkspaceTypes WRITE setWorkspaceTypes)
-  Q_PROPERTY(
-      bool ShowHidden READ showHiddenWorkspaces WRITE showHiddenWorkspaces)
+  Q_PROPERTY(QStringList WorkspaceTypes READ getWorkspaceTypes WRITE setWorkspaceTypes)
+  Q_PROPERTY(bool ShowHidden READ showHiddenWorkspaces WRITE showHiddenWorkspaces)
   Q_PROPERTY(bool ShowGroups READ showWorkspaceGroups WRITE showWorkspaceGroups)
   Q_PROPERTY(bool Optional READ isOptional WRITE setOptional)
   Q_PROPERTY(QStringList Suffix READ getSuffixes WRITE setSuffixes)
-  Q_PROPERTY(QString Algorithm READ getValidatingAlgorithm WRITE
-                 setValidatingAlgorithm)
+  Q_PROPERTY(QString Algorithm READ getValidatingAlgorithm WRITE setValidatingAlgorithm)
   friend class DataSelector;
 
 public:
@@ -90,11 +87,9 @@ private:
   void handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
   void handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf);
   void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
-  void
-  handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
+  void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
-  bool checkEligibility(const QString &name,
-                        const Mantid::API::Workspace_sptr &object) const;
+  bool checkEligibility(const QString &name, const Mantid::API::Workspace_sptr &object) const;
   bool hasValidSuffix(const QString &name) const;
   bool hasValidNumberOfBins(const Mantid::API::Workspace_sptr &object) const;
 
@@ -106,18 +101,11 @@ protected:
 
 private:
   /// Poco Observers for ADS Notifications
-  Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceAddNotification>
-      m_addObserver;
-  Poco::NObserver<WorkspaceSelector,
-                  Mantid::API::WorkspacePostDeleteNotification>
-      m_remObserver;
-  Poco::NObserver<WorkspaceSelector, Mantid::API::ClearADSNotification>
-      m_clearObserver;
-  Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceRenameNotification>
-      m_renameObserver;
-  Poco::NObserver<WorkspaceSelector,
-                  Mantid::API::WorkspaceAfterReplaceNotification>
-      m_replaceObserver;
+  Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceAddNotification> m_addObserver;
+  Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspacePostDeleteNotification> m_remObserver;
+  Poco::NObserver<WorkspaceSelector, Mantid::API::ClearADSNotification> m_clearObserver;
+  Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
+  Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
   bool m_init;
 

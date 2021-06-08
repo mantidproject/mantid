@@ -837,7 +837,7 @@ public:
         {
           std::ostringstream mess;
           mess << message << ", evaluated at wi " << wi << ", i " << i;
-          
+
           TS_ASSERT_DELTA(xIn[i], xOut[i], 0.0001);
           double sig3 = yOut[i];
           double err3 = eOut[i];
@@ -916,7 +916,7 @@ public:
     case 2: wsNameOut = "MinusTest_rhs"; break;
     }
 
-	// Sanity check, the inputs were set to have 2.0 in each bin (2 events) 
+	// Sanity check, the inputs were set to have 2.0 in each bin (2 events)
     TS_ASSERT_DELTA(  rhs->readY(0)[0], 2.00, 1e-5);
     TS_ASSERT_DELTA(  rhs->readE(0)[0], sqrt(2.00), 1e-5);
 
@@ -1103,7 +1103,7 @@ public:
     m_ws2D_1 = WorkspaceCreationHelper::create2DWorkspace(histograms, bins);
     m_ws2D_2 = WorkspaceCreationHelper::create2DWorkspace(histograms, bins);
   }
-  
+
   void test_large_2D()
   {
     constexpr bool doPlus{@PLUSMINUSTEST_DO_PLUS@};

@@ -27,8 +27,7 @@ public:
   static constexpr const char *MATERIAL_TAG = "material";
 
   Material parse(std::istream &istr) const;
-  Material parse(Poco::XML::Element *node,
-                 const std::string &XMLFilePath = "") const;
+  Material parse(Poco::XML::Element *node, const std::string &XMLFilePath = "") const;
 };
 
 } // namespace Kernel

@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::RebinParamsValidator.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.RebinParamsValidator 
+.. autoclass:: mantid.kernel.RebinParamsValidator
     :members:
     :undoc-members:
     :inherited-members:

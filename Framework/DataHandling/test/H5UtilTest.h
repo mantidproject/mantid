@@ -77,8 +77,7 @@ public:
     const std::string ATTR_NAME_6("attributeName6");
     const std::vector<int> ATTR_VALUE_6 = {12, 44, 78};
 
-    std::map<std::string, std::string> stringAttributesScalar{
-        {ATTR_NAME_1, ATTR_VALUE_1}, {ATTR_NAME_2, ATTR_VALUE_2}};
+    std::map<std::string, std::string> stringAttributesScalar{{ATTR_NAME_1, ATTR_VALUE_1}, {ATTR_NAME_2, ATTR_VALUE_2}};
 
     removeFile(FILENAME);
 
@@ -86,8 +85,7 @@ public:
     { // write tests
       H5File file(FILENAME, H5F_ACC_EXCL);
       auto group = H5Util::createGroupNXS(file, GRP_NAME, "NXentry");
-      H5Util::writeScalarDataSetWithStrAttributes(group, DATA_NAME, DATA_VALUE,
-                                                  stringAttributesScalar);
+      H5Util::writeScalarDataSetWithStrAttributes(group, DATA_NAME, DATA_VALUE, stringAttributesScalar);
       auto data = group.openDataSet(DATA_NAME);
       // Add the float and int attribute
       H5Util::writeNumAttribute(data, ATTR_NAME_3, ATTR_VALUE_3);
@@ -102,17 +100,13 @@ public:
 
     // Assert
     TS_ASSERT(Poco::File(FILENAME).exists());
-    std::map<std::string, float> floatAttributesScalar{
-        {ATTR_NAME_3, ATTR_VALUE_3}};
+    std::map<std::string, float> floatAttributesScalar{{ATTR_NAME_3, ATTR_VALUE_3}};
     std::map<std::string, int> intAttributesScalar{{ATTR_NAME_4, ATTR_VALUE_4}};
-    std::map<std::string, std::vector<float>> floatVectorAttributesScalar{
-        {ATTR_NAME_5, ATTR_VALUE_5}};
-    std::map<std::string, std::vector<int>> intVectorAttributesScalar{
-        {ATTR_NAME_6, ATTR_VALUE_6}};
-    do_assert_simple_string_data_set(
-        FILENAME, GRP_NAME, DATA_NAME, DATA_VALUE, stringAttributesScalar,
-        floatAttributesScalar, intAttributesScalar, floatVectorAttributesScalar,
-        intVectorAttributesScalar);
+    std::map<std::string, std::vector<float>> floatVectorAttributesScalar{{ATTR_NAME_5, ATTR_VALUE_5}};
+    std::map<std::string, std::vector<int>> intVectorAttributesScalar{{ATTR_NAME_6, ATTR_VALUE_6}};
+    do_assert_simple_string_data_set(FILENAME, GRP_NAME, DATA_NAME, DATA_VALUE, stringAttributesScalar,
+                                     floatAttributesScalar, intAttributesScalar, floatVectorAttributesScalar,
+                                     intVectorAttributesScalar);
 
     // cleanup
     removeFile(FILENAME);
@@ -123,10 +117,8 @@ public:
     const std::string GRP_NAME("array1d");
     const std::vector<float> array1d_float = {0, 1, 2, 3, 4};
     const std::vector<double> array1d_double = {0, 1, 2, 3, 4};
-    const std::vector<int32_t> array1d_int32 = {
-        0, 1, 2, 3, 4, std::numeric_limits<int32_t>::max()};
-    const std::vector<uint32_t> array1d_uint32 = {
-        0, 1, 2, 3, 4, std::numeric_limits<uint32_t>::max()};
+    const std::vector<int32_t> array1d_int32 = {0, 1, 2, 3, 4, std::numeric_limits<int32_t>::max()};
+    const std::vector<uint32_t> array1d_uint32 = {0, 1, 2, 3, 4, std::numeric_limits<uint32_t>::max()};
 
     // HDF doesn't like opening existing files in write mode
     removeFile(FILENAME);
@@ -148,27 +140,16 @@ public:
       auto group = file.openGroup(GRP_NAME);
 
       // without conversion
-      TS_ASSERT_EQUALS(H5Util::readArray1DCoerce<float>(group, "array1d_float"),
-                       array1d_float);
-      TS_ASSERT_EQUALS(
-          H5Util::readArray1DCoerce<double>(group, "array1d_double"),
-          array1d_double);
-      TS_ASSERT_EQUALS(
-          H5Util::readArray1DCoerce<int32_t>(group, "array1d_int32"),
-          array1d_int32);
-      TS_ASSERT_EQUALS(
-          H5Util::readArray1DCoerce<uint32_t>(group, "array1d_uint32"),
-          array1d_uint32);
+      TS_ASSERT_EQUALS(H5Util::readArray1DCoerce<float>(group, "array1d_float"), array1d_float);
+      TS_ASSERT_EQUALS(H5Util::readArray1DCoerce<double>(group, "array1d_double"), array1d_double);
+      TS_ASSERT_EQUALS(H5Util::readArray1DCoerce<int32_t>(group, "array1d_int32"), array1d_int32);
+      TS_ASSERT_EQUALS(H5Util::readArray1DCoerce<uint32_t>(group, "array1d_uint32"), array1d_uint32);
 
       //  with conversion
-      TS_ASSERT_EQUALS(
-          H5Util::readArray1DCoerce<double>(group, "array1d_float"),
-          array1d_double);
-      TS_ASSERT_THROWS(
-          H5Util::readArray1DCoerce<int32_t>(group, "array1d_uint32"),
-          const boost::numeric::positive_overflow &);
-      TS_ASSERT_THROWS_NOTHING(
-          H5Util::readArray1DCoerce<uint32_t>(group, "array1d_int32"));
+      TS_ASSERT_EQUALS(H5Util::readArray1DCoerce<double>(group, "array1d_float"), array1d_double);
+      TS_ASSERT_THROWS(H5Util::readArray1DCoerce<int32_t>(group, "array1d_uint32"),
+                       const boost::numeric::positive_overflow &);
+      TS_ASSERT_THROWS_NOTHING(H5Util::readArray1DCoerce<uint32_t>(group, "array1d_int32"));
 
       file.close();
     }
@@ -217,18 +198,14 @@ public:
 
 private:
   void do_assert_simple_string_data_set(
-      const std::string &filename, const std::string &groupName,
-      const std::string &dataName, const std::string &dataValue,
-      const std::map<std::string, std::string> &stringAttributes =
-          std::map<std::string, std::string>(),
-      const std::map<std::string, float> &floatAttributes =
-          std::map<std::string, float>(),
-      const std::map<std::string, int> &intAttributes =
-          std::map<std::string, int>(),
+      const std::string &filename, const std::string &groupName, const std::string &dataName,
+      const std::string &dataValue,
+      const std::map<std::string, std::string> &stringAttributes = std::map<std::string, std::string>(),
+      const std::map<std::string, float> &floatAttributes = std::map<std::string, float>(),
+      const std::map<std::string, int> &intAttributes = std::map<std::string, int>(),
       const std::map<std::string, std::vector<float>> &floatVectorAttributes =
           std::map<std::string, std::vector<float>>(),
-      const std::map<std::string, std::vector<int>> &intVectorAttributes =
-          std::map<std::string, std::vector<int>>()) {
+      const std::map<std::string, std::vector<int>> &intVectorAttributes = std::map<std::string, std::vector<int>>()) {
     TS_ASSERT(Poco::File(filename).exists());
 
     // read tests
@@ -246,74 +223,56 @@ private:
     TS_ASSERT_EQUALS(dataCheck, dataValue);
 
     // Check the attributes
-    do_test_attributes_on_data_set(data, stringAttributes, floatAttributes,
-                                   intAttributes, floatVectorAttributes,
+    do_test_attributes_on_data_set(data, stringAttributes, floatAttributes, intAttributes, floatVectorAttributes,
                                    intVectorAttributes);
     file.close();
   }
 
-  void do_test_attributes_on_data_set(
-      H5::DataSet &data,
-      const std::map<std::string, std::string> &stringAttributes,
-      const std::map<std::string, float> &floatAttributes,
-      const std::map<std::string, int> &intAttributes,
-      const std::map<std::string, std::vector<float>> &floatVectorAttributes,
-      const std::map<std::string, std::vector<int>> &intVectorAttributes) {
+  void do_test_attributes_on_data_set(H5::DataSet &data, const std::map<std::string, std::string> &stringAttributes,
+                                      const std::map<std::string, float> &floatAttributes,
+                                      const std::map<std::string, int> &intAttributes,
+                                      const std::map<std::string, std::vector<float>> &floatVectorAttributes,
+                                      const std::map<std::string, std::vector<int>> &intVectorAttributes) {
     auto numAttributes = data.getNumAttrs();
-    auto expectedNumStringAttributes =
-        static_cast<int>(stringAttributes.size());
+    auto expectedNumStringAttributes = static_cast<int>(stringAttributes.size());
     auto expectedNumFloatAttributes = static_cast<int>(floatAttributes.size());
     auto expectedNumIntAttributes = static_cast<int>(intAttributes.size());
-    auto expectedNumFloatVectorAttributes =
-        static_cast<int>(floatVectorAttributes.size());
-    auto expectedNumIntVectorAttributes =
-        static_cast<int>(intVectorAttributes.size());
-    int totalNumAttributs =
-        expectedNumStringAttributes + expectedNumFloatAttributes +
-        expectedNumIntAttributes + expectedNumFloatVectorAttributes +
-        expectedNumIntVectorAttributes;
-    TSM_ASSERT_EQUALS("There should be two attributes present.",
-                      totalNumAttributs, numAttributes);
+    auto expectedNumFloatVectorAttributes = static_cast<int>(floatVectorAttributes.size());
+    auto expectedNumIntVectorAttributes = static_cast<int>(intVectorAttributes.size());
+    int totalNumAttributs = expectedNumStringAttributes + expectedNumFloatAttributes + expectedNumIntAttributes +
+                            expectedNumFloatVectorAttributes + expectedNumIntVectorAttributes;
+    TSM_ASSERT_EQUALS("There should be two attributes present.", totalNumAttributs, numAttributes);
 
     for (auto &attribute : stringAttributes) {
       auto value = H5Util::readAttributeAsString(data, attribute.first);
-      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
-                        attribute.second, value);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value", attribute.second, value);
     }
 
     for (auto &attribute : floatAttributes) {
       auto value = H5Util::readNumAttributeCoerce<float>(data, attribute.first);
-      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
-                        attribute.second, value);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value", attribute.second, value);
     }
 
     for (auto &attribute : intAttributes) {
       auto value = H5Util::readNumAttributeCoerce<int>(data, attribute.first);
-      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
-                        attribute.second, value);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value", attribute.second, value);
     }
 
     for (auto &attribute : floatVectorAttributes) {
-      std::vector<float> value =
-          H5Util::readNumArrayAttributeCoerce<float>(data, attribute.first);
-      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
-                        attribute.second, value);
+      std::vector<float> value = H5Util::readNumArrayAttributeCoerce<float>(data, attribute.first);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value", attribute.second, value);
     }
 
     for (auto &attribute : intVectorAttributes) {
-      std::vector<int> value =
-          H5Util::readNumArrayAttributeCoerce<int>(data, attribute.first);
-      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
-                        attribute.second, value);
+      std::vector<int> value = H5Util::readNumArrayAttributeCoerce<int>(data, attribute.first);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value", attribute.second, value);
     }
 
     // Test that coerced read works
     std::vector<int> expectedCoerced = {12, 34, 455};
     for (auto &attribute : floatVectorAttributes) {
-      std::vector<int> value =
-          H5Util::readNumArrayAttributeCoerce<int>(data, attribute.first);
-      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value",
-                        expectedCoerced, value);
+      std::vector<int> value = H5Util::readNumArrayAttributeCoerce<int>(data, attribute.first);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value", expectedCoerced, value);
     }
   }
 };

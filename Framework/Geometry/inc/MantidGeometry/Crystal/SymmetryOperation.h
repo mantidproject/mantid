@@ -121,9 +121,7 @@ public:
   bool hasTranslation() const;
 
   /// Returns the transformed vector.
-  template <typename T> T operator*(const T &operand) const {
-    return m_matrixVectorPair * operand;
-  }
+  template <typename T> T operator*(const T &operand) const { return m_matrixVectorPair * operand; }
 
   Kernel::V3D transformHKL(const Kernel::V3D &hkl) const;
 
@@ -140,8 +138,7 @@ protected:
   void init(const MatrixVectorPair<int, V3R> &matrixVectorPair);
 
   size_t getOrderFromMatrix(const Kernel::IntMatrix &matrix) const;
-  V3R getReducedVector(const Kernel::IntMatrix &matrix,
-                       const V3R &vector) const;
+  V3R getReducedVector(const Kernel::IntMatrix &matrix, const V3R &vector) const;
 
   size_t m_order;
   Kernel::IntMatrix m_transposedInverseMatrix;
@@ -151,19 +148,15 @@ protected:
   MatrixVectorPair<int, V3R> m_matrixVectorPair;
 };
 
-MANTID_GEOMETRY_DLL std::ostream &
-operator<<(std::ostream &stream, const SymmetryOperation &operation);
-MANTID_GEOMETRY_DLL std::istream &operator>>(std::istream &stream,
-                                             SymmetryOperation &operation);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &stream, const SymmetryOperation &operation);
+MANTID_GEOMETRY_DLL std::istream &operator>>(std::istream &stream, SymmetryOperation &operation);
 
 MANTID_GEOMETRY_DLL V3R getWrappedVector(const V3R &vector);
 MANTID_GEOMETRY_DLL Kernel::V3D getWrappedVector(const Kernel::V3D &vector);
 
-MANTID_GEOMETRY_DLL SymmetryOperation
-getUnitCellIntervalOperation(const SymmetryOperation &symOp);
+MANTID_GEOMETRY_DLL SymmetryOperation getUnitCellIntervalOperation(const SymmetryOperation &symOp);
 
-template <typename T, typename U>
-Kernel::Matrix<T> convertMatrix(const Kernel::Matrix<U> &matrix) {
+template <typename T, typename U> Kernel::Matrix<T> convertMatrix(const Kernel::Matrix<U> &matrix) {
   Kernel::Matrix<T> converted(matrix.numRows(), matrix.numCols());
 
   for (size_t i = 0; i < converted.numRows(); ++i) {

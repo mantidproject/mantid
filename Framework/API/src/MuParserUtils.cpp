@@ -48,8 +48,7 @@ void MANTID_API_DLL addDefaultConstants(mu::Parser &parser) {
 }
 
 using oneVarFun = double (*)(double); // pointer to a function of one variable
-const std::map<std::string, oneVarFun> MUPARSER_ONEVAR_FUNCTIONS = {
-    {"erf", gsl_sf_erf}, {"erfc", gsl_sf_erfc}};
+const std::map<std::string, oneVarFun> MUPARSER_ONEVAR_FUNCTIONS = {{"erf", gsl_sf_erf}, {"erfc", gsl_sf_erfc}};
 
 void MANTID_API_DLL extraOneVarFunctions(mu::Parser &parser) {
   for (const auto &function : MUPARSER_ONEVAR_FUNCTIONS) {

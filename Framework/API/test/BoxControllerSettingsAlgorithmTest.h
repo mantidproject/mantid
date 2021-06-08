@@ -24,15 +24,12 @@ using ScopedFileHelper::ScopedFile;
 
 //------------------------------------------------------------------------------------------------
 /** Concrete declaration of BoxControllerSettingsAlgorithm for testing */
-class BoxControllerSettingsAlgorithmImpl
-    : public BoxControllerSettingsAlgorithm {
+class BoxControllerSettingsAlgorithmImpl : public BoxControllerSettingsAlgorithm {
   // Make all the members public so I can test them.
   friend class BoxControllerSettingsAlgorithmTest;
 
 public:
-  const std::string name() const override {
-    return "BoxControllerSettingsAlgorithmImpl";
-  }
+  const std::string name() const override { return "BoxControllerSettingsAlgorithmImpl"; }
   int version() const override { return 1; }
   const std::string category() const override { return "Testing"; }
   const std::string summary() const override { return "Summary of this test."; }
@@ -43,22 +40,16 @@ public:
 class BoxControllerSettingsAlgorithmTest : public CxxTest::TestSuite {
 
 private:
-  MatrixWorkspace_sptr
-  create_workspace_with_splitting_params(int splitThreshold, int splitInto,
-                                         int maxRecursionDepth) {
+  MatrixWorkspace_sptr create_workspace_with_splitting_params(int splitThreshold, int splitInto,
+                                                              int maxRecursionDepth) {
     auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 2, 1);
-    auto baseInstrument =
-        ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0.0);
+    auto baseInstrument = ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0.0);
     auto parameters = std::make_shared<Mantid::Geometry::ParameterMap>();
-    parameters->add("double", baseInstrument.get(), "SplitThreshold",
-                    static_cast<double>(splitThreshold));
-    parameters->add("double", baseInstrument.get(), "SplitInto",
-                    static_cast<double>(splitInto));
-    parameters->add("double", baseInstrument.get(), "MaxRecursionDepth",
-                    static_cast<double>(maxRecursionDepth));
-    ws->setInstrument(std::make_shared<Mantid::Geometry::Instrument>(
-        baseInstrument, parameters));
+    parameters->add("double", baseInstrument.get(), "SplitThreshold", static_cast<double>(splitThreshold));
+    parameters->add("double", baseInstrument.get(), "SplitInto", static_cast<double>(splitInto));
+    parameters->add("double", baseInstrument.get(), "MaxRecursionDepth", static_cast<double>(maxRecursionDepth));
+    ws->setInstrument(std::make_shared<Mantid::Geometry::Instrument>(baseInstrument, parameters));
 
     return ws;
   }
@@ -85,8 +76,7 @@ public:
     TS_ASSERT_EQUALS(bc->getMaxDepth(), 34);
   }
 
-  void doTest(const BoxController_sptr &bc, const std::string &SplitInto = "",
-              const std::string &SplitThreshold = "",
+  void doTest(const BoxController_sptr &bc, const std::string &SplitInto = "", const std::string &SplitThreshold = "",
               const std::string &MaxRecursionDepth = "") {
     BoxControllerSettingsAlgorithmImpl alg;
     alg.initBoxControllerProps();
@@ -120,8 +110,7 @@ public:
 
   void test_MaxRecursionDepth() {
     BoxController_sptr bc(new BoxController(3));
-    TSM_ASSERT_THROWS_ANYTHING("Negative MaxRecursionDepth",
-                               doTest(bc, "", "", "-1"));
+    TSM_ASSERT_THROWS_ANYTHING("Negative MaxRecursionDepth", doTest(bc, "", "", "-1"));
     doTest(bc, "", "", "34");
     TS_ASSERT_EQUALS(bc->getMaxDepth(), 34);
   }
@@ -132,8 +121,7 @@ public:
     const int maxRecursionDepth = 5;
 
     // Workspace has instrument has parameters for all box splitting parameters.
-    auto ws = create_workspace_with_splitting_params(splitThreshold, splitInto,
-                                                     maxRecursionDepth);
+    auto ws = create_workspace_with_splitting_params(splitThreshold, splitInto, maxRecursionDepth);
 
     BoxController_sptr bc(new BoxController(1));
 
@@ -163,15 +151,13 @@ public:
     const int maxRecursionDepth = 5;
 
     // Workspace has instrument has parameters for all box splitting parameters.
-    auto ws = create_workspace_with_splitting_params(splitThreshold, splitInto,
-                                                     maxRecursionDepth);
+    auto ws = create_workspace_with_splitting_params(splitThreshold, splitInto, maxRecursionDepth);
 
     BoxController_sptr bc(new BoxController(1));
 
     // Create splitting parameters that are not default and not the same as
     // those on the instrument parameters.
-    const std::vector<int> nonDefaultSplitInto =
-        std::vector<int>(bc->getNDims(), splitInto + 1);
+    const std::vector<int> nonDefaultSplitInto = std::vector<int>(bc->getNDims(), splitInto + 1);
     const int nonDefaultSplitThreshold = splitThreshold + 1;
     const int nonDefaultMaxRecursionDepth = maxRecursionDepth + 1;
 
@@ -198,8 +184,7 @@ public:
     // box splitting.
     auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 2, 1);
-    ws->setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0));
+    ws->setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0));
 
     BoxController_sptr bc(new BoxController(1));
 

@@ -21,8 +21,7 @@ using namespace Mantid::Kernel;
 class IntFactory : public DynamicFactory<int> {};
 
 // Helper class
-class CaseSensitiveIntFactory
-    : public DynamicFactory<int, CaseSensitiveStringComparator> {};
+class CaseSensitiveIntFactory : public DynamicFactory<int, CaseSensitiveStringComparator> {};
 
 class DynamicFactoryTest : public CxxTest::TestSuite {
   using int_ptr = std::shared_ptr<int>;
@@ -34,15 +33,12 @@ public:
   static void destroySuite(DynamicFactoryTest *suite) { delete suite; }
 
   DynamicFactoryTest()
-      : CxxTest::TestSuite(), factory(),
-        m_notificationObserver(*this, &DynamicFactoryTest::handleFactoryUpdate),
+      : CxxTest::TestSuite(), factory(), m_notificationObserver(*this, &DynamicFactoryTest::handleFactoryUpdate),
         m_updateNoticeReceived(false) {
     factory.notificationCenter.addObserver(m_notificationObserver);
   }
 
-  ~DynamicFactoryTest() override {
-    factory.notificationCenter.removeObserver(m_notificationObserver);
-  }
+  ~DynamicFactoryTest() override { factory.notificationCenter.removeObserver(m_notificationObserver); }
 
   void testCreate() {
     TS_ASSERT_THROWS(factory.create("testEntry"), const std::runtime_error &)
@@ -53,21 +49,16 @@ public:
   }
 
   void testCreateCaseSensitive() {
-    TS_ASSERT_THROWS(caseSensitiveFactory.create("testEntryCaseSensitive"),
-                     const std::runtime_error &)
+    TS_ASSERT_THROWS(caseSensitiveFactory.create("testEntryCaseSensitive"), const std::runtime_error &)
     caseSensitiveFactory.subscribe<int>("testEntryCaseSensitive");
-    TS_ASSERT_THROWS(int_ptr i =
-                         caseSensitiveFactory.create("testEntryCaseSENSITIVE"),
-                     const std::runtime_error
-                         &); // case error on a case sensitive dynamic factory
-    TS_ASSERT_THROWS_NOTHING(
-        int_ptr i2 = caseSensitiveFactory.create("testEntryCaseSensitive"));
+    TS_ASSERT_THROWS(int_ptr i = caseSensitiveFactory.create("testEntryCaseSENSITIVE"),
+                     const std::runtime_error &); // case error on a case sensitive dynamic factory
+    TS_ASSERT_THROWS_NOTHING(int_ptr i2 = caseSensitiveFactory.create("testEntryCaseSensitive"));
     caseSensitiveFactory.unsubscribe("testEntryCaseSensitive");
   }
 
   void testCreateUnwrapped() {
-    TS_ASSERT_THROWS(factory.createUnwrapped("testUnrappedEntry"),
-                     const std::runtime_error &)
+    TS_ASSERT_THROWS(factory.createUnwrapped("testUnrappedEntry"), const std::runtime_error &)
     factory.subscribe<int>("testUnwrappedEntry");
     int *i = nullptr;
     TS_ASSERT_THROWS_NOTHING(i = factory.createUnwrapped("testUnwrappedEntry"));
@@ -80,17 +71,12 @@ public:
   }
 
   void testCreateUnwrappedCaseSensitive() {
-    TS_ASSERT_THROWS(
-        caseSensitiveFactory.create("testUnrappedEntryCaseSensitive"),
-        const std::runtime_error &)
+    TS_ASSERT_THROWS(caseSensitiveFactory.create("testUnrappedEntryCaseSensitive"), const std::runtime_error &)
     caseSensitiveFactory.subscribe<int>("testUnrappedEntryCaseSensitive");
     int *i = nullptr;
-    TS_ASSERT_THROWS(i = caseSensitiveFactory.createUnwrapped(
-                         "testUnrappedentrycaseSENSITIVE"),
-                     const std::runtime_error
-                         &); // case error on a case sensitive dynamic factory
-    TS_ASSERT_THROWS_NOTHING(i = caseSensitiveFactory.createUnwrapped(
-                                 "testUnrappedEntryCaseSensitive"));
+    TS_ASSERT_THROWS(i = caseSensitiveFactory.createUnwrapped("testUnrappedentrycaseSENSITIVE"),
+                     const std::runtime_error &); // case error on a case sensitive dynamic factory
+    TS_ASSERT_THROWS_NOTHING(i = caseSensitiveFactory.createUnwrapped("testUnrappedEntryCaseSensitive"));
     delete i;
     caseSensitiveFactory.unsubscribe("testUnrappedEntryCaseSensitive");
   }
@@ -99,23 +85,17 @@ public:
     TS_ASSERT_THROWS(factory.subscribe<int>(""), const std::invalid_argument &);
   }
 
-  void
-  testSubscribeWithReplaceEqualsErrorIfExistsThrowsRegisteringMatchingClass() {
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribe("int", std::make_unique<Instantiator<int, int>>()));
-    TS_ASSERT_THROWS(
-        factory.subscribe("int", std::make_unique<Instantiator<int, int>>(),
-                          IntFactory::ErrorIfExists),
-        const std::runtime_error &);
+  void testSubscribeWithReplaceEqualsErrorIfExistsThrowsRegisteringMatchingClass() {
+    TS_ASSERT_THROWS_NOTHING(factory.subscribe("int", std::make_unique<Instantiator<int, int>>()));
+    TS_ASSERT_THROWS(factory.subscribe("int", std::make_unique<Instantiator<int, int>>(), IntFactory::ErrorIfExists),
+                     const std::runtime_error &);
     factory.unsubscribe("int");
   }
 
   void testSubscribeWithReplaceEqualsOverwriteCurrentReplacesMatchingClass() {
+    TS_ASSERT_THROWS_NOTHING(factory.subscribe("int", std::make_unique<Instantiator<int, int>>()));
     TS_ASSERT_THROWS_NOTHING(
-        factory.subscribe("int", std::make_unique<Instantiator<int, int>>()));
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribe("int", std::make_unique<Instantiator<int, int>>(),
-                          IntFactory::OverwriteCurrent));
+        factory.subscribe("int", std::make_unique<Instantiator<int, int>>(), IntFactory::OverwriteCurrent));
 
     factory.unsubscribe("int");
   }
@@ -171,8 +151,7 @@ public:
     std::vector<std::string> keys = factory.getKeys();
 
     TSM_ASSERT("Could not find the test key in the returned vector.",
-               std::find(keys.begin(), keys.end(), testKey) !=
-                   keys.end()) // check the case is correct
+               std::find(keys.begin(), keys.end(), testKey) != keys.end()) // check the case is correct
 
     TS_ASSERT(!keys.empty());
 
@@ -191,14 +170,10 @@ public:
   }
 
 private:
-  void
-  handleFactoryUpdate(const Poco::AutoPtr<IntFactory::UpdateNotification> &) {
-    m_updateNoticeReceived = true;
-  }
+  void handleFactoryUpdate(const Poco::AutoPtr<IntFactory::UpdateNotification> &) { m_updateNoticeReceived = true; }
 
   IntFactory factory;
   CaseSensitiveIntFactory caseSensitiveFactory;
-  Poco::NObserver<DynamicFactoryTest, IntFactory::UpdateNotification>
-      m_notificationObserver;
+  Poco::NObserver<DynamicFactoryTest, IntFactory::UpdateNotification> m_notificationObserver;
   bool m_updateNoticeReceived;
 };

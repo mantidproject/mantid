@@ -40,10 +40,8 @@ private:
   void init() override;
   void exec() override;
 
-  void addParameter(Mantid::Geometry::ParameterMap &pmap,
-                    const Mantid::Geometry::IComponent *cmptId,
-                    const std::string &paramName, const std::string &paramType,
-                    const std::string &paramValue) const;
+  void addParameter(Mantid::Geometry::ParameterMap &pmap, const Mantid::Geometry::IComponent *cmptId,
+                    const std::string &paramName, const std::string &paramType, const std::string &paramValue) const;
 };
 
 } // namespace Algorithms

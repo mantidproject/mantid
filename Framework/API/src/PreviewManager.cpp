@@ -9,9 +9,8 @@
 namespace Mantid {
 namespace API {
 
-std::vector<std::string>
-PreviewManagerImpl::getPreviews(const std::string &facility,
-                                const std::string &technique) const {
+std::vector<std::string> PreviewManagerImpl::getPreviews(const std::string &facility,
+                                                         const std::string &technique) const {
   std::vector<std::string> previews;
   if (m_previews.find(facility) != m_previews.end()) {
     for (const auto &pvs : m_previews.at(facility)) {
@@ -25,10 +24,8 @@ PreviewManagerImpl::getPreviews(const std::string &facility,
   return previews;
 }
 
-const IPreview &
-PreviewManagerImpl::getPreview(const std::string &facility,
-                               const std::string &technique,
-                               const std::string &preview) const {
+const IPreview &PreviewManagerImpl::getPreview(const std::string &facility, const std::string &technique,
+                                               const std::string &preview) const {
   if (!checkPreview(facility, technique, preview)) {
     throw std::runtime_error("Preview with the given name is not registered "
                              "under the facility and technique.");
@@ -36,19 +33,15 @@ PreviewManagerImpl::getPreview(const std::string &facility,
   return *m_previews.at(facility).at(technique).at(preview);
 }
 
-bool PreviewManagerImpl::checkFacility(const std::string &facility) const {
-  return m_previews.count(facility) > 0;
-}
-bool PreviewManagerImpl::checkTechnique(const std::string &facility,
-                                        const std::string &technique) const {
+bool PreviewManagerImpl::checkFacility(const std::string &facility) const { return m_previews.count(facility) > 0; }
+bool PreviewManagerImpl::checkTechnique(const std::string &facility, const std::string &technique) const {
   if (checkFacility(facility)) {
     return m_previews.at(facility).count(technique) > 0;
   } else {
     return false;
   }
 }
-bool PreviewManagerImpl::checkPreview(const std::string &facility,
-                                      const std::string &technique,
+bool PreviewManagerImpl::checkPreview(const std::string &facility, const std::string &technique,
                                       const std::string &preview) const {
   if (checkTechnique(facility, technique)) {
     return m_previews.at(facility).at(technique).count(preview) > 0;

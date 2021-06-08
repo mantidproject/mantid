@@ -32,8 +32,7 @@ public:
   void reset();
 
 private:
-  std::chrono::time_point<std::chrono::high_resolution_clock>
-      m_start; ///< The starting time
+  std::chrono::time_point<std::chrono::high_resolution_clock> m_start; ///< The starting time
 };
 
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const Timer &);

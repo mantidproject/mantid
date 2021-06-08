@@ -12,8 +12,7 @@ void export_IWorkspaceProperty() {
   using Mantid::API::IWorkspaceProperty;
 
   class_<IWorkspaceProperty, boost::noncopyable>("IWorkspaceProperty", no_init)
-      .def("isOptional", &IWorkspaceProperty::isOptional, arg("self"),
-           "Is the input workspace property optional")
+      .def("isOptional", &IWorkspaceProperty::isOptional, arg("self"), "Is the input workspace property optional")
       .def("isLocking", &IWorkspaceProperty::isLocking, arg("self"),
            "Will the workspace be locked when starting an algorithm");
 }

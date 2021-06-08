@@ -23,11 +23,6 @@ set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
 set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} )
 set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
 
-# Separate directory of plugins to be discovered by the ParaView framework
-# These cannot be mixed with our other plugins. Further sub-directories
-# based on the Qt version will also be created by the installation targets
-set ( PVPLUGINS_DIR "plugins/paraview/qt4/" )
-
 if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set ( CMAKE_INSTALL_PREFIX /opt/mantid${CPACK_PACKAGE_SUFFIX} CACHE PATH "Install path" FORCE )
 endif()
@@ -100,13 +95,9 @@ set ( PRE_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/prerm )
 set ( POST_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm )
 
 if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora" ) # RHEL/Fedora
-  if ( "${UNIX_CODENAME}" MATCHES "Santiago" )
-    set ( WRAPPER_PREFIX "scl enable mantidlibs34 \"" )
-    set ( WRAPPER_POSTFIX "\"" )
-  else()
-    set ( WRAPPER_PREFIX "" )
-    set ( WRAPPER_POSTFIX "" )
-  endif()
+  # these are used if we need to scl enable at runtime
+  set ( WRAPPER_PREFIX "" )
+  set ( WRAPPER_POSTFIX "" )
 
   if ("${UNIX_DIST}" MATCHES "^Fedora")
     # The instrument view doesn't work with the wayland compositor
@@ -205,8 +196,7 @@ fi" )
 set ( ERROR_CMD "-m mantidqt.dialogs.errorreports.main --exitcode=\$?" )
 
 ##### Local dev version
-set ( PYTHON_ARGS "-Wdefault::DeprecationWarning" )
-set ( PARAVIEW_PYTHON_PATHS "" )
+set ( PYTHON_ARGS "-Wdefault::DeprecationWarning -Werror:::mantid -Werror:::mantidqt" )
 
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin" )
 
@@ -232,7 +222,6 @@ execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPyt
 
 ##### Package version
 unset ( PYTHON_ARGS )
-set ( PARAVIEW_PYTHON_PATHS "" )
 
 # used by mantidplot and mantidworkbench
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )

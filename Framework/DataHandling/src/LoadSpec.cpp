@@ -33,20 +33,16 @@ LoadSpec::LoadSpec() {}
 /// Initialisation method.
 void LoadSpec::init() {
   const std::vector<std::string> exts{".dat", ".txt"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name of the text file to read, including its full or "
-      "relative path. The file extension must be .txt or .dat.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "The name of the workspace that will be created, filled with the read-in "
-      "data and stored in the [[Analysis Data Service]].");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The name of the text file to read, including its full or "
+                  "relative path. The file extension must be .txt or .dat.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace that will be created, filled with the read-in "
+                  "data and stored in the [[Analysis Data Service]].");
 
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   units.insert(units.begin(), "MomemtumTransfer");
-  declareProperty("Unit", "Energy",
-                  std::make_shared<Kernel::StringListValidator>(units),
+  declareProperty("Unit", "Energy", std::make_shared<Kernel::StringListValidator>(units),
                   "The unit to assign to the X axis (anything known to the "
                   "[[Unit Factory]] or \"Dimensionless\")");
 }
@@ -66,13 +62,12 @@ void LoadSpec::exec() {
   std::vector<double> input;
 
   const size_t nSpectra = readNumberOfSpectra(file);
-  auto localWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 2, 1));
+  auto localWorkspace =
+      std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 2, 1));
 
-  localWorkspace->getAxis(0)->unit() =
-      UnitFactory::Instance().create(getProperty("Unit"));
+  localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
 
-  file.clear(); // end of file has been reached so we need to clear file state
+  file.clear();                 // end of file has been reached so we need to clear file state
   file.seekg(0, std::ios::beg); // go back to beginning of file
 
   int specNum = -1; // spectrum number
@@ -137,8 +132,7 @@ size_t LoadSpec::readNumberOfSpectra(std::ifstream &file) const {
  * @param line :: the current line in the file to process
  * @param buffer :: the buffer to store loaded data in
  */
-void LoadSpec::readLine(const std::string &line,
-                        std::vector<double> &buffer) const {
+void LoadSpec::readLine(const std::string &line, std::vector<double> &buffer) const {
   if (!line.empty() && line[0] != '#') {
     using tokenizer = Mantid::Kernel::StringTokenizer;
     const std::string sep = " ";
@@ -156,8 +150,7 @@ void LoadSpec::readLine(const std::string &line,
  * @param input :: the input buffer containing the raw data
  * @param histogram :: the histogram object to fill with values
  * */
-void LoadSpec::readHistogram(const std::vector<double> &input,
-                             HistogramData::Histogram &histogram) const {
+void LoadSpec::readHistogram(const std::vector<double> &input, HistogramData::Histogram &histogram) const {
   std::vector<double> x, y, e;
 
   auto isHist = input.size() % 3 > 0;

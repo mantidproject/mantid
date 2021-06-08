@@ -79,18 +79,10 @@ public:
   /// object, i.e. whether use_count() == 1.
   bool unique() const noexcept { return Data.unique(); }
 
-  const DataType &operator*() const {
-    return *Data;
-  } ///< Pointer dereference access
-  const DataType *operator->() const {
-    return Data.get();
-  } ///< indirectrion dereference access
-  bool operator==(const cow_ptr<DataType> &A) const noexcept {
-    return Data == A.Data;
-  } ///< Based on ptr equality
-  bool operator!=(const cow_ptr<DataType> &A) const noexcept {
-    return Data != A.Data;
-  } ///< Based on ptr inequality
+  const DataType &operator*() const { return *Data; }       ///< Pointer dereference access
+  const DataType *operator->() const { return Data.get(); } ///< indirectrion dereference access
+  bool operator==(const cow_ptr<DataType> &A) const noexcept { return Data == A.Data; } ///< Based on ptr equality
+  bool operator!=(const cow_ptr<DataType> &A) const noexcept { return Data != A.Data; } ///< Based on ptr inequality
   DataType &access();
 };
 
@@ -98,14 +90,12 @@ public:
  Constructor : creates a new cow_ptr around the resource
  resource is a sink.
  */
-template <typename DataType>
-cow_ptr<DataType>::cow_ptr(DataType *resourcePtr) : Data(resourcePtr) {}
+template <typename DataType> cow_ptr<DataType>::cow_ptr(DataType *resourcePtr) : Data(resourcePtr) {}
 
 /**
   Constructor : creates new data() object
 */
-template <typename DataType>
-cow_ptr<DataType>::cow_ptr() : Data(std::make_shared<DataType>()) {}
+template <typename DataType> cow_ptr<DataType>::cow_ptr() : Data(std::make_shared<DataType>()) {}
 
 /**
   Copy constructor : double references the data object
@@ -113,8 +103,7 @@ cow_ptr<DataType>::cow_ptr() : Data(std::make_shared<DataType>()) {}
 */
 // Note: Need custom implementation, since std::mutex is not copyable.
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A) noexcept
-    : Data(std::atomic_load(&A.Data)) {}
+cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A) noexcept : Data(std::atomic_load(&A.Data)) {}
 
 /**
   Assignment operator : double references the data object
@@ -123,9 +112,7 @@ cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A) noexcept
   @return *this
 */
 // Note: Need custom implementation, since std::mutex is not copyable.
-template <typename DataType>
-cow_ptr<DataType> &cow_ptr<DataType>::
-operator=(const cow_ptr<DataType> &A) noexcept {
+template <typename DataType> cow_ptr<DataType> &cow_ptr<DataType>::operator=(const cow_ptr<DataType> &A) noexcept {
   if (this != &A) {
     std::atomic_store(&Data, std::atomic_load(&A.Data));
   }
@@ -138,8 +125,7 @@ operator=(const cow_ptr<DataType> &A) noexcept {
   @param A :: object to copy
   @return *this
 */
-template <typename DataType>
-cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) noexcept {
+template <typename DataType> cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) noexcept {
   if (this->Data != A) {
     std::atomic_store(&Data, std::atomic_load(&A));
   }
@@ -172,13 +158,11 @@ template <typename DataType> DataType &cow_ptr<DataType>::access() {
   return *Data;
 }
 
-template <typename DataType>
-cow_ptr<DataType>::cow_ptr(ptr_type &&resourceSptr) noexcept {
+template <typename DataType> cow_ptr<DataType>::cow_ptr(ptr_type &&resourceSptr) noexcept {
   std::atomic_store(&this->Data, std::move(resourceSptr));
 }
 
-template <typename DataType>
-cow_ptr<DataType>::cow_ptr(const ptr_type &resourceSptr) noexcept {
+template <typename DataType> cow_ptr<DataType>::cow_ptr(const ptr_type &resourceSptr) noexcept {
   std::atomic_store(&this->Data, std::atomic_load(&resourceSptr));
 }
 

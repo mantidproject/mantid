@@ -25,12 +25,12 @@ digraph ProcessIndirectFitParameters {
 	ConvertTableToMatrixWorkspace
 	RenameWorkspace
   }
-  
+
   subgraph decisions  {
     $decision_style
 	processedAllColumns	[label="All columns to workspaces"]
   }
-  
+
   subgraph process  {
     $process_style
 	searchForParams		[label="searchforFitParams: Search for strings that have the given word as their suffix"]
@@ -60,5 +60,5 @@ digraph ProcessIndirectFitParameters {
   replaceXAxis					-> replaceXUnit
   XAxisUnit						-> replaceXUnit
   replaceXUnit					-> OutputWorkspace
-  
+
 }

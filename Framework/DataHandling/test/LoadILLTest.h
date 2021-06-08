@@ -25,7 +25,14 @@ public:
   static LoadILLTest *createSuite() { return new LoadILLTest(); }
   static void destroySuite(LoadILLTest *suite) { delete suite; }
 
-  void tearDown() override { AnalysisDataService::Instance().clear(); }
+  void setUp() override { ConfigService::Instance().setString("default.facility", "ILL"); }
+
+  void tearDown() override {
+
+    ConfigService::Instance().setString("default.facility", " ");
+
+    AnalysisDataService::Instance().clear();
+  }
 
   void checkLoader(const std::string &filename, std::string resultLoader) {
     Load alg;
@@ -44,16 +51,27 @@ public:
 
   void test_LoadSANS_D22() { checkLoader("ILL/D22/192068", "LoadILLSANS"); }
 
-  void test_LoadSANS_D16() { checkLoader("ILL/D16/218356", "LoadILLSANS"); }
-
-  void test_LoadDiffraction_D2B() {
-    checkLoader("ILL/D2B/535401", "LoadILLDiffraction");
+  void test_LoadSANS_D16() {
+    checkLoader("ILL/D16/023583", "LoadILLSANS");
+    checkLoader("ILL/D16/218356", "LoadILLSANS");
   }
+
+  void test_LoadDiffraction_D1B() { checkLoader("ILL/D1B/473432", "LoadILLDiffraction"); }
+
+  void test_LoadDiffraction_D2B() { checkLoader("ILL/D2B/535401", "LoadILLDiffraction"); }
 
   void test_LoadDiffraction_D20() {
     checkLoader("ILL/D20/967076", "LoadILLDiffraction");
     checkLoader("ILL/D20/967087", "LoadILLDiffraction");
   }
+
+  void test_loadDiffraction_IN5() { checkLoader("ILL/IN5/199857", "LoadILLDiffraction"); }
+
+  void test_loadDiffraction_PANTHER() { checkLoader("ILL/PANTHER/010578", "LoadILLDiffraction"); }
+
+  void test_loadDiffraction_SHARP() { checkLoader("ILL/SHARP/000104.nxs", "LoadILLDiffraction"); }
+
+  void test_LoadPolarizedDiffraction_D7() { checkLoader("ILL/D7/394458", "LoadILLPolarizedDiffraction"); }
 
   void test_loadIndirect_IN16B() {
     checkLoader("ILL/IN16B/090661", "LoadILLIndirect"); // one wing qens
@@ -82,11 +100,12 @@ public:
     checkLoader("ILL/PANTHER/001723", "LoadILLTOF");
   }
 
-  void test_loadReflectometry_D17() {
-    checkLoader("ILL/D17/317370", "LoadILLReflectometry");
+  void test_loadTOF_SHARP() {
+    checkLoader("ILL/SHARP/000102", "LoadILLTOF"); // single-channel
+    checkLoader("ILL/SHARP/000103", "LoadILLTOF");
   }
 
-  void test_loadReflectometry_FIGARO() {
-    checkLoader("ILL/Figaro/000002", "LoadILLReflectometry");
-  }
+  void test_loadReflectometry_D17() { checkLoader("ILL/D17/317370", "LoadILLReflectometry"); }
+
+  void test_loadReflectometry_FIGARO() { checkLoader("ILL/Figaro/000002", "LoadILLReflectometry"); }
 };

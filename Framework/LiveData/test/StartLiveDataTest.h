@@ -36,8 +36,7 @@ public:
   static StartLiveDataTest *createSuite() { return new StartLiveDataTest(); }
   static void destroySuite(StartLiveDataTest *suite) { delete suite; }
 
-  StartLiveDataTest()
-      : loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST") {
+  StartLiveDataTest() : loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST") {
     FrameworkManager::Instance();
   }
 
@@ -59,41 +58,30 @@ public:
    * @return the created processed WS
    */
   std::tuple<std::shared_ptr<StartLiveData>, EventWorkspace_sptr>
-  doExecEvent(const std::string &AccumulationMethod, double UpdateEvery,
-              const std::string &ProcessingAlgorithm = "",
-              const std::string &ProcessingProperties = "",
-              const std::string &PostProcessingAlgorithm = "",
+  doExecEvent(const std::string &AccumulationMethod, double UpdateEvery, const std::string &ProcessingAlgorithm = "",
+              const std::string &ProcessingProperties = "", const std::string &PostProcessingAlgorithm = "",
               const std::string &PostProcessingProperties = "") {
     auto alg = std::make_shared<StartLiveData>();
     TS_ASSERT_THROWS_NOTHING(alg->initialize())
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("FromNow", "1"));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("UpdateEvery", UpdateEvery));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("Instrument", "TestDataListener"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Instrument", "TestDataListener"));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "fake"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("AccumulationMethod", AccumulationMethod));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("ProcessingAlgorithm", ProcessingAlgorithm));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("ProcessingProperties", ProcessingProperties));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("PostProcessingAlgorithm",
-                                                   PostProcessingAlgorithm));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("PostProcessingProperties",
-                                                   PostProcessingProperties));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AccumulationMethod", AccumulationMethod));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ProcessingAlgorithm", ProcessingAlgorithm));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ProcessingProperties", ProcessingProperties));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("PostProcessingAlgorithm", PostProcessingAlgorithm));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("PostProcessingProperties", PostProcessingProperties));
     if (!PostProcessingAlgorithm.empty())
-      TS_ASSERT_THROWS_NOTHING(
-          alg->setPropertyValue("AccumulationWorkspace", "fake_accum"));
+      TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AccumulationWorkspace", "fake_accum"));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("PreserveEvents", true));
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
 
     // Retrieve the workspace from data service.
     EventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws =
-            AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake"));
     TS_ASSERT(ws);
     return std::make_tuple(alg, ws);
   }
@@ -102,8 +90,7 @@ public:
   /** StartLiveData and run LoadLiveData only once (UpdateEvery=0)
    * This checks that the properties are copied to LoadLiveData */
   void test_startOnce() {
-    const auto [alg, ws] =
-        doExecEvent("Replace", 0, "", "", "Rebin", "Params=40e3, 1e3, 60e3");
+    const auto [alg, ws] = doExecEvent("Replace", 0, "", "", "Rebin", "Params=40e3, 1e3, 60e3");
     UNUSED_ARG(alg);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
@@ -118,8 +105,7 @@ public:
    */
   void test_FirstCallReplacesTheOutputWorkspace() {
     // Make an existing output workspace "fake" that should be overwritten
-    AnalysisDataService::Instance().addOrReplace(
-        "fake", WorkspaceCreationHelper::create2DWorkspace(23, 12));
+    AnalysisDataService::Instance().addOrReplace("fake", WorkspaceCreationHelper::create2DWorkspace(23, 12));
 
     const auto [alg, ws] = doExecEvent("Add", 0);
     UNUSED_ARG(alg);

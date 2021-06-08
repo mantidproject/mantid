@@ -18,9 +18,7 @@ using Mantid::DataObjects::MaskWorkspace_sptr;
 
 class MaskWorkspaceTest : public CxxTest::TestSuite {
 public:
-  void test_default_constructor() {
-    TS_ASSERT_THROWS_NOTHING(Mantid::DataObjects::MaskWorkspace());
-  }
+  void test_default_constructor() { TS_ASSERT_THROWS_NOTHING(Mantid::DataObjects::MaskWorkspace()); }
 
   void test_constructor_using_length() {
     int nDetectors = 10;
@@ -37,8 +35,7 @@ public:
   void test_constructure_using_instrument() {
     int pixels = 10;
 
-    Mantid::Geometry::Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
+    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
     inst->setName("MaskWorkspaceTest_Instrument");
 
     Mantid::DataObjects::MaskWorkspace maskWS(inst, false);
@@ -55,8 +52,7 @@ public:
     int pixels = 10;
     int maskpixels = 25;
 
-    Mantid::Geometry::Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
+    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
     inst->setName("MaskWorkspaceTest_Instrument");
 
     Mantid::DataObjects::MaskWorkspace maskWS(inst, false);
@@ -90,8 +86,7 @@ public:
     int pixels = 10;
     int maskpixels = 25;
 
-    Mantid::Geometry::Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
+    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
     inst->setName("MaskWorkspaceTest_Instrument");
 
     Mantid::DataObjects::MaskWorkspace maskWS(inst, false);
@@ -132,11 +127,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     MaskWorkspace_const_sptr wsConst;
     MaskWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<MaskWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<MaskWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(wsNonConst =
-                                 manager.getValue<MaskWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<MaskWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 

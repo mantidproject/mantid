@@ -17,15 +17,13 @@ namespace API {
 /**
   Verify that a workspace has valid sample shape.
 */
-class MANTID_API_DLL SampleShapeValidator
-    : public Kernel::TypedValidator<std::shared_ptr<ExperimentInfo>> {
+class MANTID_API_DLL SampleShapeValidator : public Kernel::TypedValidator<std::shared_ptr<ExperimentInfo>> {
 public:
   std::string getType() const;
   Kernel::IValidator_sptr clone() const override;
 
 private:
-  std::string
-  checkValidity(const std::shared_ptr<ExperimentInfo> &value) const override;
+  std::string checkValidity(const std::shared_ptr<ExperimentInfo> &value) const override;
 };
 
 } // namespace API

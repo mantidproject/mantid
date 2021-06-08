@@ -21,14 +21,11 @@ public:
   void test_constructor_vectors() {
     std::vector<coord_t> normal;
     std::vector<coord_t> point;
-    TSM_ASSERT_THROWS_ANYTHING("O-dimensions are not allowed.",
-                               MDPlane test(normal, point));
+    TSM_ASSERT_THROWS_ANYTHING("O-dimensions are not allowed.", MDPlane test(normal, point));
     normal.emplace_back(1.234f);
     normal.emplace_back(4.56f);
     point.emplace_back(0.f);
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Mismatched dimensions in normal/point are not allowed.",
-        MDPlane test(normal, point));
+    TSM_ASSERT_THROWS_ANYTHING("Mismatched dimensions in normal/point are not allowed.", MDPlane test(normal, point));
     point.emplace_back(0.f);
     MDPlane p(normal, point);
     TS_ASSERT_EQUALS(p.getNumDims(), 2);
@@ -40,8 +37,7 @@ public:
   void test_constructor_bareArrays() {
     coord_t normal[2] = {1.234f, 4.56f};
     coord_t point[2] = {1.0, 0.0};
-    TSM_ASSERT_THROWS_ANYTHING("O-dimensions are not allowed.",
-                               MDPlane test(0, normal, point));
+    TSM_ASSERT_THROWS_ANYTHING("O-dimensions are not allowed.", MDPlane test(0, normal, point));
     MDPlane p(2, normal, point);
     TS_ASSERT_EQUALS(p.getNumDims(), 2);
     TS_ASSERT_DELTA(p.getNormal()[0], 1.234, 1e-5);
@@ -88,8 +84,7 @@ public:
     std::vector<VMD> points;
     points.emplace_back(VMD(1., 1., 0.));
     points.emplace_back(VMD(2., 2., 0.));
-    TS_ASSERT_THROWS_ANYTHING(
-        MDPlane p(points, VMD(0., 0., 0.), VMD(0.5, 1.5, 1.0)));
+    TS_ASSERT_THROWS_ANYTHING(MDPlane p(points, VMD(0., 0., 0.), VMD(0.5, 1.5, 1.0)));
   }
 
   /// Define a plane along x=y axis vertical in Z and t
@@ -236,8 +231,7 @@ public:
     point.clear();
     point.emplace_back(4.0f);
     point.emplace_back(12.0f);
-    TSM_ASSERT("Point should be found to be inside region bounded by plane",
-               p1.isPointInside(point));
+    TSM_ASSERT("Point should be found to be inside region bounded by plane", p1.isPointInside(point));
 
     // Point lies on the plane, not inside it
     point.clear();
@@ -254,8 +248,7 @@ public:
     coord_t point1[2] = {5.0, 0.0};
     MDPlane plane1(2, normal1, point1);
     coord_t test_point1[2] = {4.5, 0.0};
-    TSM_ASSERT("Point should be found to be inside region bounded by plane",
-               plane1.isPointInside(test_point1));
+    TSM_ASSERT("Point should be found to be inside region bounded by plane", plane1.isPointInside(test_point1));
 
     // Point lies on the plane, not inside it
     coord_t test_point2[2] = {5.0, 0.0};

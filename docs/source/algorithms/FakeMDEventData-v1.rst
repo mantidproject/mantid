@@ -36,7 +36,7 @@ Output:
 
     Number of events = 1000000
 
-The output looks like the following in the `SliceViewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`_:
+The output looks like the following in the :ref:`sliceviewer`:
 
 .. image:: /images/FakeMDEventData_Uniform2D.png
     :alt: Uniform 2D FakeMDEventData
@@ -62,17 +62,10 @@ Output:
 
     Number of events = 150000
 
-The output looks like the following in the `SliceViewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`_:
+The output looks like the following in the :ref:`sliceviewer`:
 
 .. image:: /images/FakeMDEventData_Peaks3D.png
     :alt: Peaks 3D FakeMDEventData
-
-Running :ref:`BinMD <algm-BinMD>`
-on the resulting workspace, the output looks like the following in the `VSI <http://www.mantidproject.org/VatesSimpleInterface_v2>`_:
-
-.. image:: /images/FakeMDEventData_Peaks3D_VSI.png
-    :alt: Peaks 3D FakeMDEventData in VSI
-    :scale: 75%
 
 |
 
@@ -93,21 +86,11 @@ Output:
 
     Number of events = 1000000
 
-The output looks like the following in the `SliceViewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`_ when
+The output looks like the following in the :ref:`sliceviewer` when
 the T slider is moved to ~5K:
 
 .. image:: /images/FakeMDEventData_Peaks4D.png
     :alt: Peaks 4D FakeMDEventData
-
-Running :ref:`BinMD <algm-BinMD>`
-on the resulting workspace to create a 3D workspace with L integrated, the output looks like the following in the
-`VSI <http://www.mantidproject.org/VatesSimpleInterface_v2>`_:
-
-.. image:: /images/FakeMDEventData_Peaks4D_as_3D_VSI.png
-    :alt: Peaks 4D FakeMDEventData as 3D in VSI
-    :scale: 75%
-
-|
 
 .. categories::
 

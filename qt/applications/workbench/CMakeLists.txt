@@ -31,7 +31,7 @@ endif()
 if(APPLE OR WIN32)
   # development version
   add_executable(MantidWorkbench mantidworkbench.cpp)
-  target_compile_definitions(MantidWorkbench 
+  target_compile_definitions(MantidWorkbench
     PRIVATE
     -DPYTHON_EXECUTABLE_PATH="${Python_EXECUTABLE}")
   target_link_libraries(MantidWorkbench PRIVATE Boost::filesystem)
@@ -55,7 +55,7 @@ if(APPLE OR WIN32)
                         OUTPUT_NAME ${PACKAGE_EXECUTABLE}
                         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
   target_compile_definitions(MantidWorkbenchInstalled
-    PRIVATE 
+    PRIVATE
     -DPYTHON_EXECUTABLE_PATH="${_py_exe}"
     -DQT_PLUGIN_PATH="${_qt_plugins}")
   target_link_libraries(MantidWorkbenchInstalled PRIVATE Boost::filesystem)
@@ -66,7 +66,7 @@ if(APPLE OR WIN32)
           DESTINATION ${WORKBENCH_BIN_DIR})
 endif()
 
-# process resources files 
+# process resources files
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 if (WIN32)
   function (CREATE_QRC_FILE_TEMPLATE BUILD_TYPE)
@@ -130,7 +130,7 @@ if(APPLE)
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION ${WORKBENCH_BUNDLE} )
 install (CODE "
     execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
-                            \${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP} ${Python_EXECUTABLE} ${ParaView_DIR}
+                            \${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP} ${Python_EXECUTABLE}
                     RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
     if(NOT install_name_tool_result EQUAL 0)
       message(\"\${_out}\")
@@ -142,11 +142,12 @@ endif()
 # Testing
 set(TEST_FILES
     workbench/config/test/test_user.py
-    workbench/test/mainwindowtest.py
+    workbench/test/test_mainwindow.py
     workbench/test/test_import.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratoraxes.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorcolorfills.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfigure.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlegend.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlines.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorutils.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfitting.py
@@ -163,6 +164,7 @@ set(TEST_FILES
     workbench/plugins/test/test_jupyterconsole.py
     workbench/plugins/test/test_workspacewidget.py
     workbench/utils/test/test_workspacehistorygeneration.py
+    workbench/widgets/about/test/test_about_presenter.py
     workbench/widgets/plotselector/test/test_plotselector_model.py
     workbench/widgets/plotselector/test/test_plotselector_presenter.py
     workbench/widgets/plotselector/test/test_plotselector_view.py

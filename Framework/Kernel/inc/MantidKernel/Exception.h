@@ -126,8 +126,7 @@ public:
    * @param fileName :: Filename where happened
    * @param lineNumber :: Number of the line where error happened
    */
-  ParseError(const std::string &desc, const std::string &fileName,
-             const int &lineNumber);
+  ParseError(const std::string &desc, const std::string &fileName, const int &lineNumber);
   /// Copy constructor
   ParseError(const ParseError &A);
   /// Assignment operator

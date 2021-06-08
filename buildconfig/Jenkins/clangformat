@@ -6,6 +6,12 @@
 
 # clang-format executable
 
+# Rely on pre-commit if clang format is in the config.yaml
+if grep -F "id: clang-format" $WORKSPACE/.pre-commit-config.yaml; then
+  echo "Pre-commit will handle clang-format. Skipping check."
+  exit 0
+fi
+
 SCRIPT_DIR=$(dirname "$0")
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
     # This relies on the fact pull requests use pull/$PR-NAME

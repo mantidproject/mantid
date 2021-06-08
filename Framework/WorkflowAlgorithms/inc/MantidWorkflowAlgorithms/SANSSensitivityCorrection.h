@@ -20,19 +20,13 @@ namespace WorkflowAlgorithms {
 class DLLExport SANSSensitivityCorrection : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override {
-    return "SANSSensitivityCorrection";
-  }
+  const std::string name() const override { return "SANSSensitivityCorrection"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Perform SANS sensitivity correction.";
-  }
+  const std::string summary() const override { return "Perform SANS sensitivity correction."; }
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Workflow\\SANS\\UsesPropertyManager";
-  }
+  const std::string category() const override { return "Workflow\\SANS\\UsesPropertyManager"; }
 
 private:
   /// Initialisation code

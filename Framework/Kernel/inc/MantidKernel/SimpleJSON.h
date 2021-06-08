@@ -43,8 +43,7 @@ void DLLExport initFromStream(JSONObject &obj, std::istream &istr);
 // that ostr will actually be std::cout or std::cerr, but it can
 // be any output stream.  This function mostly exists for debugging
 // purposes.
-void DLLExport prettyPrint(const JSONObject &obj, std::ostream &ostr,
-                           unsigned indentLevel);
+void DLLExport prettyPrint(const JSONObject &obj, std::ostream &ostr, unsigned indentLevel);
 
 class JSONException;
 

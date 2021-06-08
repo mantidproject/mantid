@@ -15,8 +15,7 @@ namespace Kernel {
 /**
  * Construct an object
  */
-NDRandomNumberGenerator::NDRandomNumberGenerator(const unsigned int ndims)
-    : m_ndims(ndims), m_nextPoint(ndims, 0.0) {}
+NDRandomNumberGenerator::NDRandomNumberGenerator(const unsigned int ndims) : m_ndims(ndims), m_nextPoint(ndims, 0.0) {}
 
 /**
  *  Generate the next set of values that form a point in ND space
@@ -33,8 +32,7 @@ const std::vector<double> &NDRandomNumberGenerator::nextPoint() {
  * @param value :: value to be cached
  *
  */
-void NDRandomNumberGenerator::cacheGeneratedValue(const size_t index,
-                                                  const double value) {
+void NDRandomNumberGenerator::cacheGeneratedValue(const size_t index, const double value) {
   assert(index < m_ndims);
   m_nextPoint[index] = value;
 }
@@ -45,8 +43,7 @@ void NDRandomNumberGenerator::cacheGeneratedValue(const size_t index,
  * Avoids returning the vectors by value and copying.
  * @param nextPoint :: A vector containing the new set of points
  */
-void NDRandomNumberGenerator::cacheNextPoint(
-    const std::vector<double> &nextPoint) {
+void NDRandomNumberGenerator::cacheNextPoint(const std::vector<double> &nextPoint) {
   assert(nextPoint.size() == m_ndims);
   m_nextPoint = nextPoint;
 }

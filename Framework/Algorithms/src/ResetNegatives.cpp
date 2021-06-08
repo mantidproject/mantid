@@ -28,26 +28,17 @@ const std::string ResetNegatives::name() const { return "ResetNegatives"; }
 int ResetNegatives::version() const { return 1; }
 
 /// @copydoc Mantid::API::IAlgorithm::category()
-const std::string ResetNegatives::category() const {
-  return "CorrectionFunctions\\SpecialCorrections";
-}
+const std::string ResetNegatives::category() const { return "CorrectionFunctions\\SpecialCorrections"; }
 
 //----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::Algorithm::init()
 void ResetNegatives::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
-                  "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input), "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
-  declareProperty(
-      "AddMinimum", true,
-      "Add the minimum value of the spectrum to bring it up to zero.");
-  declareProperty("ResetValue", 0.,
-                  "Reset negative values to this number (default=0)");
-  setPropertySettings("ResetValue", std::make_unique<EnabledWhenProperty>(
-                                        "AddMinimum", IS_NOT_DEFAULT));
+  declareProperty("AddMinimum", true, "Add the minimum value of the spectrum to bring it up to zero.");
+  declareProperty("ResetValue", 0., "Reset negative values to this number (default=0)");
+  setPropertySettings("ResetValue", std::make_unique<EnabledWhenProperty>("AddMinimum", IS_NOT_DEFAULT));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -77,14 +68,12 @@ void ResetNegatives::exec() {
     g_log.information() << "No values are negative. Copying InputWorkspace to "
                            "OutputWorkspace\n";
     if (inputWS != outputWS) {
-      IAlgorithm_sptr clone =
-          this->createChildAlgorithm("CloneWorkspace", .1, 1.);
+      IAlgorithm_sptr clone = this->createChildAlgorithm("CloneWorkspace", .1, 1.);
       clone->setProperty<Workspace_sptr>("InputWorkspace", inputWS);
       clone->executeAsChildAlg();
 
       Workspace_sptr temp = clone->getProperty("OutputWorkspace");
-      setProperty("OutputWorkspace",
-                  std::dynamic_pointer_cast<MatrixWorkspace>(temp));
+      setProperty("OutputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(temp));
     }
     return;
   }
@@ -113,8 +102,7 @@ void ResetNegatives::exec() {
   if (this->getProperty("AddMinimum")) {
     this->pushMinimum(minWS, outputWS, prog);
   } else {
-    this->changeNegatives(minWS, this->getProperty("ResetValue"), outputWS,
-                          prog);
+    this->changeNegatives(minWS, this->getProperty("ResetValue"), outputWS, prog);
   }
 
   setProperty("OutputWorkspace", outputWS);
@@ -141,8 +129,7 @@ inline double fixZero(const double value) {
  * @param wksp The workspace to modify.
  * @param prog The progress.
  */
-void ResetNegatives::pushMinimum(const MatrixWorkspace_const_sptr &minWS,
-                                 const MatrixWorkspace_sptr &wksp,
+void ResetNegatives::pushMinimum(const MatrixWorkspace_const_sptr &minWS, const MatrixWorkspace_sptr &wksp,
                                  Progress &prog) {
   int64_t nHist = minWS->getNumberHistograms();
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp, *minWS))
@@ -152,9 +139,7 @@ void ResetNegatives::pushMinimum(const MatrixWorkspace_const_sptr &minWS,
     if (minValue <= 0) {
       minValue *= -1.;
       auto &y = wksp->mutableY(i);
-      std::transform(y.begin(), y.end(), y.begin(), [minValue](double value) {
-        return fixZero(value + minValue);
-      });
+      std::transform(y.begin(), y.end(), y.begin(), [minValue](double value) { return fixZero(value + minValue); });
     }
     prog.report();
     PARALLEL_END_INTERUPT_REGION
@@ -172,16 +157,13 @@ void ResetNegatives::pushMinimum(const MatrixWorkspace_const_sptr &minWS,
  * @param wksp The workspace to modify.
  * @param prog The progress.
  */
-void ResetNegatives::changeNegatives(const MatrixWorkspace_const_sptr &minWS,
-                                     const double spectrumNegativeValues,
-                                     const MatrixWorkspace_sptr &wksp,
-                                     Progress &prog) {
+void ResetNegatives::changeNegatives(const MatrixWorkspace_const_sptr &minWS, const double spectrumNegativeValues,
+                                     const MatrixWorkspace_sptr &wksp, Progress &prog) {
   int64_t nHist = wksp->getNumberHistograms();
   PARALLEL_FOR_IF(Kernel::threadSafe(*minWS, *wksp))
   for (int64_t i = 0; i < nHist; i++) {
     PARALLEL_START_INTERUPT_REGION
-    if (minWS->y(i)[0] <=
-        0.) // quick check to see if there is a reason to bother
+    if (minWS->y(i)[0] <= 0.) // quick check to see if there is a reason to bother
     {
       auto &y = wksp->mutableY(i);
       for (double &value : y) {

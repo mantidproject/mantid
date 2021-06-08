@@ -15,8 +15,7 @@ using Mantid::CurveFitting::Algorithms::NormaliseByPeakArea;
 
 namespace {
 
-Mantid::API::MatrixWorkspace_sptr
-createTwoSpectrumWorkspace(double x0 = 50, double x1 = 300, double dx = 0.5) {
+Mantid::API::MatrixWorkspace_sptr createTwoSpectrumWorkspace(double x0 = 50, double x1 = 300, double dx = 0.5) {
   auto twoSpectrum = ComptonProfileTestHelpers::createTestWorkspace(
       2, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::Full, true, true);
   return twoSpectrum;
@@ -38,9 +37,7 @@ class NormaliseByPeakAreaTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static NormaliseByPeakAreaTest *createSuite() {
-    return new NormaliseByPeakAreaTest();
-  }
+  static NormaliseByPeakAreaTest *createSuite() { return new NormaliseByPeakAreaTest(); }
   static void destroySuite(NormaliseByPeakAreaTest *suite) { delete suite; }
 
   void test_Init() {
@@ -63,22 +60,17 @@ public:
     MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr yspaceWS = alg->getProperty("YSpaceDataWorkspace");
     MatrixWorkspace_sptr fittedWS = alg->getProperty("FittedWorkspace");
-    MatrixWorkspace_sptr symmetrisedWS =
-        alg->getProperty("SymmetrisedWorkspace");
+    MatrixWorkspace_sptr symmetrisedWS = alg->getProperty("SymmetrisedWorkspace");
     TS_ASSERT(outputWS != nullptr);
     TS_ASSERT(yspaceWS != nullptr);
     TS_ASSERT(fittedWS != nullptr);
     TS_ASSERT(symmetrisedWS != nullptr);
 
     // Dimensions
-    TS_ASSERT_EQUALS(testWS->getNumberHistograms(),
-                     outputWS->getNumberHistograms());
-    TS_ASSERT_EQUALS(testWS->getNumberHistograms(),
-                     yspaceWS->getNumberHistograms());
-    TS_ASSERT_EQUALS(testWS->getNumberHistograms(),
-                     fittedWS->getNumberHistograms());
-    TS_ASSERT_EQUALS(testWS->getNumberHistograms(),
-                     symmetrisedWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(testWS->getNumberHistograms(), outputWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(testWS->getNumberHistograms(), yspaceWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(testWS->getNumberHistograms(), fittedWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(testWS->getNumberHistograms(), symmetrisedWS->getNumberHistograms());
 
     TS_ASSERT_EQUALS(testWS->blocksize(), outputWS->blocksize());
     TS_ASSERT_EQUALS(testWS->blocksize(), yspaceWS->blocksize());
@@ -159,8 +151,7 @@ public:
     TS_ASSERT_DELTA(14.59086103, symE.back(), 1e-08);
   }
 
-  void
-  test_exec_sum_spectrum_gives_original_TOF_plus_single_spectrum_yspace_values() {
+  void test_exec_sum_spectrum_gives_original_TOF_plus_single_spectrum_yspace_values() {
     using namespace Mantid::API;
 
     auto alg = createAlgorithm();
@@ -174,8 +165,7 @@ public:
     MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr yspaceWS = alg->getProperty("YSpaceDataWorkspace");
     MatrixWorkspace_sptr fittedWS = alg->getProperty("FittedWorkspace");
-    MatrixWorkspace_sptr symmetrisedWS =
-        alg->getProperty("SymmetrisedWorkspace");
+    MatrixWorkspace_sptr symmetrisedWS = alg->getProperty("SymmetrisedWorkspace");
     TS_ASSERT(outputWS != nullptr);
     TS_ASSERT(yspaceWS != nullptr);
     TS_ASSERT(fittedWS != nullptr);
@@ -275,12 +265,8 @@ class NormaliseByPeakAreaTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static NormaliseByPeakAreaTestPerformance *createSuite() {
-    return new NormaliseByPeakAreaTestPerformance();
-  }
-  static void destroySuite(NormaliseByPeakAreaTestPerformance *suite) {
-    delete suite;
-  }
+  static NormaliseByPeakAreaTestPerformance *createSuite() { return new NormaliseByPeakAreaTestPerformance(); }
+  static void destroySuite(NormaliseByPeakAreaTestPerformance *suite) { delete suite; }
 
   void setUp() override { testWS = createTwoSpectrumWorkspace(); }
 

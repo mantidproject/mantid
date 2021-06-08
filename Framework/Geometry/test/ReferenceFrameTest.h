@@ -26,14 +26,10 @@ public:
 
   void testDefaultSettings() {
     ReferenceFrame defaultInstance;
-    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", Y,
-                      defaultInstance.pointingUp());
-    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", Z,
-                      defaultInstance.pointingAlongBeam());
-    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", Right,
-                      defaultInstance.getHandedness());
-    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", "source",
-                      defaultInstance.origin());
+    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", Y, defaultInstance.pointingUp());
+    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", Z, defaultInstance.pointingAlongBeam());
+    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", Right, defaultInstance.getHandedness());
+    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", "source", defaultInstance.origin());
   }
 
   void testGetUp() {
@@ -101,8 +97,7 @@ public:
   }
 
   void testIdenticalUpAndBeamDirectionsThrow() {
-    TS_ASSERT_THROWS(ReferenceFrame(X, X, Right, "source"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(ReferenceFrame(X, X, Right, "source"), const std::invalid_argument &);
   }
 
   void testGetUpDirectionVector() {
@@ -194,10 +189,9 @@ public:
     TS_ASSERT_EQUALS(0, x_vec[2]);
 
     // Error if theta sign is along the beam
-    TS_ASSERT_THROWS_EQUALS(
-        ReferenceFrame z(Y, Z, Z, Right, "source"),
-        const std::invalid_argument &e, std::string(e.what()),
-        "Scattering angle sign axis cannot be the same as the beam direction");
+    TS_ASSERT_THROWS_EQUALS(ReferenceFrame z(Y, Z, Z, Right, "source"), const std::invalid_argument &e,
+                            std::string(e.what()),
+                            "Scattering angle sign axis cannot be the same as the beam direction");
   }
 
   void testAxisLabelReturns() {

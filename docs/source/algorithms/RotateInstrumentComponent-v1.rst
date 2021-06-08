@@ -14,7 +14,7 @@ by an angle given in degrees. Rotation by 0 degrees does not change the
 component's orientation. The rotation axis (X,Y,Z) must be given in the
 co-ordinate system attached to the component and rotates with it.
 The centre of rotation is the centre of the component to be rotated,
-and any children of that component (such as detectors in a bank, or pixels in a tube) 
+and any children of that component (such as detectors in a bank, or pixels in a tube)
 are moved and rotated along with the component.
 
 Usage
@@ -22,7 +22,7 @@ Usage
 
 Example 1: Rotating a bank around the Y Axis
 ############################################
-  
+
 .. figure:: ../images/RotateBank90.png
    :alt: RotateBank90.png‎
    :align: center

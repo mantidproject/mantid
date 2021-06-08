@@ -18,18 +18,15 @@ class ReflectionGeneratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflectionGeneratorTest *createSuite() {
-    return new ReflectionGeneratorTest();
-  }
+  static ReflectionGeneratorTest *createSuite() { return new ReflectionGeneratorTest(); }
   static void destroySuite(ReflectionGeneratorTest *suite) { delete suite; }
 
   void test_getUniqueHKLs() {
     double dMin = 0.55;
     double dMax = 4.0;
 
-    ReflectionGenerator generator(
-        CrystalStructure("4.126 4.126 4.126", "P m -3 m", "Si 0 0 0 1.0 0.01"),
-        ReflectionConditionFilter::Centering);
+    ReflectionGenerator generator(CrystalStructure("4.126 4.126 4.126", "P m -3 m", "Si 0 0 0 1.0 0.01"),
+                                  ReflectionConditionFilter::Centering);
 
     TS_ASSERT_THROWS_NOTHING(generator.getUniqueHKLs(dMin, dMax));
 
@@ -54,9 +51,8 @@ public:
     double dMax = 4.0;
 
     // make a structure with P-1
-    ReflectionGenerator generator(
-        CrystalStructure("4.126 4.126 4.126", "P -1", "Si 0 0 0 1.0 0.01"),
-        ReflectionConditionFilter::Centering);
+    ReflectionGenerator generator(CrystalStructure("4.126 4.126 4.126", "P -1", "Si 0 0 0 1.0 0.01"),
+                                  ReflectionConditionFilter::Centering);
 
     std::vector<V3D> unique = generator.getUniqueHKLs(dMin, dMax);
     std::vector<V3D> peaks = generator.getHKLs(dMin, dMax);
@@ -68,8 +64,7 @@ public:
   void test_getDValues() {
     std::vector<V3D> hkls{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
 
-    ReflectionGenerator generator(
-        CrystalStructure("2 3 5", "P -1", "Si 0 0 0 1.0 0.01"));
+    ReflectionGenerator generator(CrystalStructure("2 3 5", "P -1", "Si 0 0 0 1.0 0.01"));
     std::vector<double> dValues = generator.getDValues(hkls);
 
     TS_ASSERT_EQUALS(dValues.size(), hkls.size());
@@ -79,14 +74,12 @@ public:
   }
 
   void test_getUniqueHKLsStructureFactor() {
-    CrystalStructure si("5.43 5.43 5.43", "F m -3 m",
-                        "Si 0.3 0.3 0.3 1.0 0.05");
+    CrystalStructure si("5.43 5.43 5.43", "F m -3 m", "Si 0.3 0.3 0.3 1.0 0.05");
 
-    ReflectionGenerator generator(si,
-                                  ReflectionConditionFilter::StructureFactor);
+    ReflectionGenerator generator(si, ReflectionConditionFilter::StructureFactor);
 
-    std::vector<V3D> hklsCentering = generator.getUniqueHKLs(
-        0.6, 10.0, std::make_shared<HKLFilterCentering>(si.centering()));
+    std::vector<V3D> hklsCentering =
+        generator.getUniqueHKLs(0.6, 10.0, std::make_shared<HKLFilterCentering>(si.centering()));
 
     std::vector<V3D> hklsStructureFactors = generator.getUniqueHKLs(0.6, 10.0);
 
@@ -99,8 +92,7 @@ public:
 
   void test_getUniqueHKLsHexagonal() {
     ReflectionGenerator generator(
-        CrystalStructure("3.2094 3.2094 5.2108 90.0 90.0 120.0", "P 63/m m c",
-                         "Mg 1/3 2/3 1/4 1.0 0.005"),
+        CrystalStructure("3.2094 3.2094 5.2108 90.0 90.0 120.0", "P 63/m m c", "Mg 1/3 2/3 1/4 1.0 0.005"),
         ReflectionConditionFilter::StructureFactor);
 
     std::vector<V3D> hkls = generator.getUniqueHKLs(0.5, 10.0);
@@ -114,10 +106,9 @@ public:
   }
 
   void test_getUniqueHKLsTrigonal() {
-    ReflectionGenerator generator(
-        CrystalStructure("4.759355 4.759355 12.99231 90.0 90.0 120.0", "R -3 c",
-                         "Al 0 0 0.35217 1.0 0.005; O 0.69365 0 1/4 1.0 0.005"),
-        ReflectionConditionFilter::StructureFactor);
+    ReflectionGenerator generator(CrystalStructure("4.759355 4.759355 12.99231 90.0 90.0 120.0", "R -3 c",
+                                                   "Al 0 0 0.35217 1.0 0.005; O 0.69365 0 1/4 1.0 0.005"),
+                                  ReflectionConditionFilter::StructureFactor);
 
     std::vector<V3D> hkls = generator.getUniqueHKLs(0.885, 10.0);
 

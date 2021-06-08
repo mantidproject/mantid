@@ -115,7 +115,7 @@ This test covers the Cropping functionality.
 5. Check that only a single output file was generated.
 
 6. Go to focus tab and do the same with the Crop Focus. In comparison to the previous focus test, this will only
-   generate a single axis on the figure, rather than two. 
+   generate a single axis on the figure, rather than two.
 
 7. Change the RB number to "Custom".
 

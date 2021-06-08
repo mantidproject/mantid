@@ -32,14 +32,11 @@
 #include "MantidQtWidgets/Plotting/Qwt/qwt_compat.h"
 #include <climits>
 
-QwtScaleTransformation *ScaleEngine::transformation() const {
-  return new ScaleTransformation(this);
-}
+QwtScaleTransformation *ScaleEngine::transformation() const { return new ScaleTransformation(this); }
 
 ScaleTransformation::~ScaleTransformation() {}
 
-double ScaleTransformation::invXForm(double p, double p1, double p2, double s1,
-                                     double s2) const {
+double ScaleTransformation::invXForm(double p, double p1, double p2, double s1, double s2) const {
   if (!d_engine->hasBreak()) {
     QwtScaleTransformation *tr = newScaleTransformation();
     double res = tr->invXForm(p, p1, p2, s1, s2);
@@ -99,8 +96,7 @@ double ScaleTransformation::invXForm(double p, double p1, double p2, double s1,
   return DBL_MAX; // something invalid
 }
 
-double ScaleTransformation::xForm(double s, double s1, double s2, double p1,
-                                  double p2) const {
+double ScaleTransformation::xForm(double s, double s1, double s2, double p1, double p2) const {
   if ((d_engine->type() == ScaleTransformation::Log10) && s < 0.0) {
     if (p1 < p2) {
       if (d_engine->testAttribute(QwtScaleEngine::Inverted))
@@ -174,9 +170,7 @@ double ScaleTransformation::xForm(double s, double s1, double s2, double p1,
   return DBL_MAX; // something invalid
 }
 
-QwtScaleTransformation *ScaleTransformation::copy() const {
-  return new ScaleTransformation(d_engine);
-}
+QwtScaleTransformation *ScaleTransformation::copy() const { return new ScaleTransformation(d_engine); }
 
 QwtScaleTransformation *ScaleTransformation::newScaleTransformation() const {
   QwtScaleTransformation *transform = nullptr;
@@ -201,19 +195,15 @@ QwtScaleTransformation *ScaleTransformation::newScaleTransformation() const {
  *
  *****************************************************************************/
 
-ScaleEngine::ScaleEngine(ScaleTransformation::Type type, double left_break,
-                         double right_break)
-    : QwtScaleEngine(), d_type(type), d_break_left(left_break),
-      d_break_right(right_break), d_break_pos(50), d_step_before(0.0),
-      d_step_after(0.0), d_minor_ticks_before(1), d_minor_ticks_after(1),
-      d_log10_scale_after(false), d_break_width(4), d_break_decoration(true),
-      d_nth_power(2.0) {}
+ScaleEngine::ScaleEngine(ScaleTransformation::Type type, double left_break, double right_break)
+    : QwtScaleEngine(), d_type(type), d_break_left(left_break), d_break_right(right_break), d_break_pos(50),
+      d_step_before(0.0), d_step_after(0.0), d_minor_ticks_before(1), d_minor_ticks_after(1),
+      d_log10_scale_after(false), d_break_width(4), d_break_decoration(true), d_nth_power(2.0) {}
 
 ScaleEngine::~ScaleEngine() {}
 
 bool ScaleEngine::hasBreak() const {
-  return !(d_break_left == d_break_right ||
-           (d_break_left == -DBL_MAX && d_break_right == DBL_MAX));
+  return !(d_break_left == d_break_right || (d_break_left == -DBL_MAX && d_break_right == DBL_MAX));
 }
 
 double ScaleEngine::axisBreakLeft() const { return d_break_left; }
@@ -257,13 +247,11 @@ void ScaleEngine::clone(const ScaleEngine *engine) {
   setMargins(engine->lowerMargin(), engine->upperMargin());
 }
 
-QwtScaleDiv ScaleEngine::divideScale(double x1, double x2, int maxMajSteps,
-                                     int maxMinSteps, double stepSize) const {
+QwtScaleDiv ScaleEngine::divideScale(double x1, double x2, int maxMajSteps, int maxMinSteps, double stepSize) const {
   QwtScaleEngine *engine;
   if (!hasBreak()) {
     engine = newScaleEngine();
-    QwtScaleDiv div =
-        engine->divideScale(x1, x2, maxMajSteps, maxMinSteps, stepSize);
+    QwtScaleDiv div = engine->divideScale(x1, x2, maxMajSteps, maxMinSteps, stepSize);
     delete engine;
     return div;
   }
@@ -290,8 +278,7 @@ QwtScaleDiv ScaleEngine::divideScale(double x1, double x2, int maxMajSteps,
   if (d_minor_ticks_before > 1)
     max_min_intervals = d_minor_ticks_before + 1;
 
-  QwtScaleDiv div1 =
-      engine->divideScale(x1, lb, maxMajSteps / 2, max_min_intervals, step1);
+  QwtScaleDiv div1 = engine->divideScale(x1, lb, maxMajSteps / 2, max_min_intervals, step1);
 
   max_min_intervals = d_minor_ticks_after;
   if (d_minor_ticks_after == 1)
@@ -307,23 +294,18 @@ QwtScaleDiv ScaleEngine::divideScale(double x1, double x2, int maxMajSteps,
   else
     engine = new QwtLinearScaleEngine();
 
-  QwtScaleDiv div2 =
-      engine->divideScale(rb, x2, maxMajSteps / 2, max_min_intervals, step2);
+  QwtScaleDiv div2 = engine->divideScale(rb, x2, maxMajSteps / 2, max_min_intervals, step2);
 
   QwtValueList ticks[QwtScaleDiv::NTickTypes];
-  ticks[QwtScaleDiv::MinorTick] =
-      div1.ticks(QwtScaleDiv::MinorTick) + div2.ticks(QwtScaleDiv::MinorTick);
-  ticks[QwtScaleDiv::MediumTick] =
-      div1.ticks(QwtScaleDiv::MediumTick) + div2.ticks(QwtScaleDiv::MediumTick);
-  ticks[QwtScaleDiv::MajorTick] =
-      div1.ticks(QwtScaleDiv::MajorTick) + div2.ticks(QwtScaleDiv::MajorTick);
+  ticks[QwtScaleDiv::MinorTick] = div1.ticks(QwtScaleDiv::MinorTick) + div2.ticks(QwtScaleDiv::MinorTick);
+  ticks[QwtScaleDiv::MediumTick] = div1.ticks(QwtScaleDiv::MediumTick) + div2.ticks(QwtScaleDiv::MediumTick);
+  ticks[QwtScaleDiv::MajorTick] = div1.ticks(QwtScaleDiv::MajorTick) + div2.ticks(QwtScaleDiv::MajorTick);
 
   delete engine;
   return QwtScaleDiv(x1, x2, ticks);
 }
 
-void ScaleEngine::autoScale(int maxNumSteps, double &x1, double &x2,
-                            double &stepSize) const {
+void ScaleEngine::autoScale(int maxNumSteps, double &x1, double &x2, double &stepSize) const {
   if (!hasBreak() || testAttribute(QwtScaleEngine::Inverted)) {
     QwtScaleEngine *engine = newScaleEngine();
     engine->setAttributes(attributes());

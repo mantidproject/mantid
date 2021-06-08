@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
 import unittest
-import sys
 
 from unittest.mock import call, patch, MagicMock, Mock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.settings.general.presenter import GeneralSettings, GeneralProperties
+from workbench.config import SAVE_STATE_VERSION
 from qtpy.QtCore import Qt
 
 
@@ -94,6 +94,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
         self.assert_connected_once(presenter.view.main_font,
                                    presenter.view.main_font.clicked)
+        self.assert_connected_once(presenter.view.window_behaviour,
+                                   presenter.view.window_behaviour.currentTextChanged)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_facility_changed(self, mock_ConfigService):
@@ -105,7 +107,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         mock_ConfigService.setFacility.assert_called_once_with(new_facility)
 
-        self.assertEqual(43, presenter.view.instrument.count())
+        self.assertEqual(1, presenter.view.instrument.count())
 
     def test_setup_confirmations(self):
         presenter = GeneralSettings(None)
@@ -129,6 +131,19 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter.action_prompt_save_on_close(False)
 
         mock_conf.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, False)
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_action_window_behaviour_changed(self, mock_conf):
+        presenter = GeneralSettings(None)
+        values = presenter.WINDOW_BEHAVIOUR
+        presenter.action_window_behaviour_changed(values[0])
+
+        mock_conf.set.assert_called_once_with(GeneralProperties.WINDOW_BEHAVIOUR.value, values[0])
+        mock_conf.set.reset_mock()
+
+        presenter.action_window_behaviour_changed(values[1])
+
+        mock_conf.set.assert_called_once_with(GeneralProperties.WINDOW_BEHAVIOUR.value, values[1])
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_action_prompt_save_editor_modified(self, mock_CONF):
@@ -167,17 +182,10 @@ class GeneralSettingsTest(unittest.TestCase):
         GeneralSettings(None)
 
         # calls().__bool__() are the calls to bool() on the retrieved value from ConfigService.getString
-        # In python 3 it __bool__ is called otherwise __nonzero__ is used
-        if sys.version_info < (3,):
-            mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value),
-                                            call().__nonzero__(),
-                                            call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value),
-                                            call().__nonzero__()])
-        else:
-            mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value),
-                                            call().__bool__(),
-                                            call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value),
-                                            call().__bool__()])
+        mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value),
+                                        call().__bool__(),
+                                        call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value),
+                                        call().__bool__()])
 
         mock_ConfigService.getString.assert_has_calls([call(GeneralProperties.PR_RECOVERY_ENABLED.value),
                                                        call(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value),
@@ -218,7 +226,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
         num_checkpoints = "532532"
         presenter.action_total_number_checkpoints(num_checkpoints)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value, num_checkpoints)
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value,
+                                                             num_checkpoints)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_instrument_changed(self, mock_ConfigService):
@@ -237,7 +246,8 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_crystallography_convention(Qt.Checked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.CRYSTALLOGRAPY_CONV.value, "Crystallography")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.CRYSTALLOGRAPY_CONV.value,
+                                                             "Crystallography")
 
         mock_ConfigService.setString.reset_mock()
 
@@ -307,7 +317,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.fill_layout_display()
 
-        calls = [call('a'), call('b'),  call('c')]
+        calls = [call('a'), call('b'), call('c')]
         presenter.view.layout_display.addItem.assert_has_calls(calls)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
@@ -345,7 +355,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         calls = [call(GeneralProperties.USER_LAYOUT.value), call(GeneralProperties.USER_LAYOUT.value)]
         mock_CONF.get.assert_has_calls(calls)
-        mock_parent.saveState.assert_called_once_with()
+        mock_parent.saveState.assert_called_once_with(SAVE_STATE_VERSION)
         mock_parent.populate_layout_menu.assert_called_once_with()
 
     @patch(WORKBENCH_CONF_CLASSPATH)
@@ -365,7 +375,7 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter.load_layout()
 
         mock_CONF.get.assert_called_once_with(GeneralProperties.USER_LAYOUT.value)
-        mock_parent.restoreState.assert_called_once_with(test_dict['a'])
+        mock_parent.restoreState.assert_called_once_with(test_dict['a'], SAVE_STATE_VERSION)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_delete_layout(self, mock_CONF):

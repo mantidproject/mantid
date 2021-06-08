@@ -21,21 +21,16 @@ std::string bibtex(Citation &self) { return self.bibtex(); }
 std::string endnote(Citation &self) { return self.endnote(); }
 
 void export_Citation() {
-  class_<Citation, boost::noncopyable>(
-      "Citation", init<optional<const std::string &, const std::string &,
-                                const std::string &, const std::string &,
-                                const std::string &>>())
+  class_<Citation, boost::noncopyable>("Citation",
+                                       init<optional<const std::string &, const std::string &, const std::string &,
+                                                     const std::string &, const std::string &>>())
       .def(init<NeXus::File *, const std::string &>())
-      .def("description", &description, arg("self"),
-           "Returns the description on the citation object")
+      .def("description", &description, arg("self"), "Returns the description on the citation object")
       .def("url", &url, arg("self"), "Returns the url on the citation object")
       .def("doi", &doi, arg("self"), "Returns the doi on the citation object")
-      .def("bibtex", &bibtex, arg("self"),
-           "Returns the bibtex formatted citation from the citation object")
-      .def("endnote", &endnote, arg("self"),
-           "Returns the endnote formatted citation from the citation object")
-      .def("saveNexus", &Citation::saveNexus,
-           (arg("self"), arg("file"), arg("group")),
+      .def("bibtex", &bibtex, arg("self"), "Returns the bibtex formatted citation from the citation object")
+      .def("endnote", &endnote, arg("self"), "Returns the endnote formatted citation from the citation object")
+      .def("saveNexus", &Citation::saveNexus, (arg("self"), arg("file"), arg("group")),
            "Save data from this object to a NeXus file")
       .def("__eq__", &Citation::operator==);
 }

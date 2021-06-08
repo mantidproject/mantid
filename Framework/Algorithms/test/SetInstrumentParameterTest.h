@@ -24,9 +24,7 @@ class SetInstrumentParameterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SetInstrumentParameterTest *createSuite() {
-    return new SetInstrumentParameterTest();
-  }
+  static SetInstrumentParameterTest *createSuite() { return new SetInstrumentParameterTest(); }
   static void destroySuite(SetInstrumentParameterTest *suite) { delete suite; }
 
   void test_Init() {
@@ -41,8 +39,7 @@ public:
     std::string paramName = "TestParam";
     std::string paramValue = "Left";
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
     ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue);
 
     auto cmpt = ws->getInstrument()->getComponentByName(cmptName);
@@ -55,12 +52,10 @@ public:
     std::string paramName = "TestParam";
     std::string paramValue = "Left";
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
     ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue);
 
-    TS_ASSERT_EQUALS(paramValue,
-                     ws->getInstrument()->getStringParameter(paramName)[0]);
+    TS_ASSERT_EQUALS(paramValue, ws->getInstrument()->getStringParameter(paramName)[0]);
   }
 
   void test_detlist_string_value() {
@@ -69,8 +64,7 @@ public:
     std::string paramName = "TestParam";
     std::string paramValue = "Left";
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
     ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue);
 
     const auto &detectorInfo = ws->detectorInfo();
@@ -89,8 +83,7 @@ public:
     std::string paramType = "Number";
     std::string paramValue = "1";
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
     ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue, paramType);
 
     auto cmpt = ws->getInstrument()->getComponentByName(cmptName);
@@ -104,8 +97,7 @@ public:
     std::string paramType = "Number";
     std::string paramValue = "1.12";
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
     ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue, paramType);
 
     auto cmpt = ws->getInstrument()->getComponentByName(cmptName);
@@ -120,8 +112,7 @@ public:
     std::string paramValue = "1.12";
     std::string paramValue2 = "3.22";
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
     ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue, paramType);
 
     auto cmpt = ws->getInstrument()->getComponentByName(cmptName);
@@ -142,8 +133,7 @@ public:
     std::string paramType2 = "String";
     std::string paramValue2 = "A String";
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
     ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue, paramType);
 
     auto cmpt = ws->getInstrument()->getComponentByName(cmptName);
@@ -158,28 +148,24 @@ public:
   void test_bool() {
     const std::string paramName = "TestParam";
     const std::string paramType = "Bool";
-    const std::map<std::string, bool> paramValues = {
-        {"true", true},   {"TRUE", true},   {"True", true},   {"1", true},
-        {"false", false}, {"FALSE", false}, {"False", false}, {"0", false}};
+    const std::map<std::string, bool> paramValues = {{"true", true},   {"TRUE", true},   {"True", true},
+                                                     {"1", true},      {"false", false}, {"FALSE", false},
+                                                     {"False", false}, {"0", false}};
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
 
     for (const auto &value : paramValues) {
       ExecuteAlgorithm(ws, "", "", paramName, value.first, paramType);
-      TS_ASSERT(ws->getInstrument()->getBoolParameter(paramName)[0] ==
-                value.second);
+      TS_ASSERT(ws->getInstrument()->getBoolParameter(paramName)[0] == value.second);
     }
   }
 
-  MatrixWorkspace_sptr
-  ExecuteAlgorithm(MatrixWorkspace_sptr testWS, const std::string &cmptName,
-                   const std::string &detList, const std::string &paramName,
-                   const std::string &paramValue,
-                   const std::string &paramType = "", bool fails = false) {
+  MatrixWorkspace_sptr ExecuteAlgorithm(MatrixWorkspace_sptr testWS, const std::string &cmptName,
+                                        const std::string &detList, const std::string &paramName,
+                                        const std::string &paramValue, const std::string &paramType = "",
+                                        bool fails = false) {
     // add the workspace to the ADS
-    AnalysisDataService::Instance().addOrReplace(
-        "SetInstrumentParameter_Temporary", testWS);
+    AnalysisDataService::Instance().addOrReplace("SetInstrumentParameter_Temporary", testWS);
 
     // execute algorithm
     SetInstrumentParameter alg;
@@ -208,8 +194,7 @@ public:
 
     // check output
     MatrixWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            alg.getProperty("Workspace"));
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(alg.getProperty("Workspace"));
 
     // cleanup
     AnalysisDataService::Instance().remove(output->getName());

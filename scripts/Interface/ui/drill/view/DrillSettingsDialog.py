@@ -191,9 +191,7 @@ class DrillSettingsDialog(QDialog):
         for (n, t) in types.items():
             label = QLabel(n, self)
             self.settings[n] = DrillSetting(n, values[n], types[n], doc[n])
-            self.settings[n].valueChanged.connect(
-                    lambda p : self.valueChanged.emit(p)
-                    )
+            self.settings[n].valueChanged.connect(self.onValueChanged)
             self.settings[n].fileChecked.connect(
                     lambda v, n=n : self.onSettingValidation(n, v)
                     )
@@ -202,6 +200,20 @@ class DrillSettingsDialog(QDialog):
             widget.setToolTip(doc[n])
 
             self.formLayout.addRow(label, widget)
+
+    def onValueChanged(self, setting):
+        """
+        Check the get value before sending the signal.
+
+        Args:
+            setting (str): name of the setting
+        """
+        try:
+            self.getSettingValue(setting)
+            self.valueChanged.emit(setting)
+        except:
+            self.onSettingValidation(setting, False, "Unable to parse the "
+                                     "value. Check the input")
 
     def setSettings(self, settings):
         """

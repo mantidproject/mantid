@@ -27,8 +27,7 @@ namespace pwvjdetail {
 /// General type to convert a Json::Value to a set C++ type
 template <typename T> struct ToCpp {
   T operator()(const Json::Value &) {
-    throw Exception::NotImplementedError(
-        "Unknown conversion from Json to C++ type");
+    throw Exception::NotImplementedError("Unknown conversion from Json to C++ type");
   }
 };
 /// Specialization of ToCpp for int
@@ -49,9 +48,7 @@ template <> struct ToCpp<unsigned int> {
 };
 /// Specialization of ToCpp for unsigned long long int
 template <> struct ToCpp<unsigned long long int> {
-  unsigned long long int operator()(const Json::Value &value) {
-    return value.asUInt64();
-  }
+  unsigned long long int operator()(const Json::Value &value) { return value.asUInt64(); }
 };
 /// Specialization of ToCpp for bool
 template <> struct ToCpp<bool> {
@@ -80,9 +77,7 @@ template <typename T> struct ToCpp<std::vector<T>> {
       try {
         arrayValues.emplace_back(toCpp(elem));
       } catch (Json::Exception &exc) {
-        throw std::invalid_argument(
-            "Mixed-type JSON array values not supported:" +
-            std::string(exc.what()));
+        throw std::invalid_argument("Mixed-type JSON array values not supported:" + std::string(exc.what()));
       }
     }
     return arrayValues;
@@ -92,9 +87,7 @@ template <typename T> struct ToCpp<std::vector<T>> {
 } // namespace pwvjdetail
 
 /// Attempt to decode the given Json::Value as the given Type
-template <typename Type> Type decode(const Json::Value &value) {
-  return pwvjdetail::ToCpp<Type>()(value);
-}
+template <typename Type> Type decode(const Json::Value &value) { return pwvjdetail::ToCpp<Type>()(value); }
 
 /// Attempt to create a PropertyManager from the Json::Value
 MANTID_KERNEL_DLL
@@ -102,8 +95,7 @@ PropertyManager_sptr createPropertyManager(const Json::Value &keyValues);
 
 /// Attempt to create a Property of the most appropriate type
 /// from a string name and Json value object
-MANTID_KERNEL_DLL std::unique_ptr<Property>
-decodeAsProperty(const std::string &name, const Json::Value &value);
+MANTID_KERNEL_DLL std::unique_ptr<Property> decodeAsProperty(const std::string &name, const Json::Value &value);
 
 namespace pwvjdetail {
 // There is a known isssue with jsoncpp and ambiguous overloads when called
@@ -134,8 +126,7 @@ template <typename ValueType> Json::Value encodeAsJson(const ValueType &value) {
  * @param vectorValue The C++ value to encode
  * @return A new Json::Value
  */
-template <typename ValueType>
-Json::Value encodeAsJson(const std::vector<ValueType> &vectorValue) {
+template <typename ValueType> Json::Value encodeAsJson(const std::vector<ValueType> &vectorValue) {
   Json::Value jsonArray(Json::arrayValue);
   for (const auto &element : vectorValue) {
     jsonArray.append(encodeAsJson(element));
@@ -148,8 +139,7 @@ Json::Value encodeAsJson(const std::vector<ValueType> &vectorValue) {
  * @return A new Json::Value
  * @throws std::runtime_error for all inputs
  */
-template <typename ValueType>
-Json::Value encodeAsJson(const std::shared_ptr<ValueType> &) {
+template <typename ValueType> Json::Value encodeAsJson(const std::shared_ptr<ValueType> &) {
   throw std::runtime_error("Unable to encode shared_ptr<T> as Json::Value.");
 }
 
@@ -158,10 +148,8 @@ Json::Value encodeAsJson(const std::shared_ptr<ValueType> &) {
  * @return A new Json::Value
  * @throws Exception::NotImplementedError
  */
-template <typename ValueType>
-Json::Value encodeAsJson(const Kernel::Matrix<ValueType> &) {
-  throw Exception::NotImplementedError(
-      "encodeAsJson not implemented for matrix-value type");
+template <typename ValueType> Json::Value encodeAsJson(const Kernel::Matrix<ValueType> &) {
+  throw Exception::NotImplementedError("encodeAsJson not implemented for matrix-value type");
 }
 
 } // namespace Kernel

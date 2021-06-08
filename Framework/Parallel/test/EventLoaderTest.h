@@ -44,8 +44,7 @@ namespace {
 class FakeDataSource : public NXEventDataSource<int32_t> {
 public:
   FakeDataSource(const int numWorkers) : m_numWorkers(numWorkers) {}
-  std::unique_ptr<AbstractEventDataPartitioner<int32_t>>
-  setBankIndex(const size_t bank) override {
+  std::unique_ptr<AbstractEventDataPartitioner<int32_t>> setBankIndex(const size_t bank) override {
     m_bank = bank;
     auto index = std::vector<int64_t>{0,
                                       100,
@@ -61,20 +60,16 @@ public:
     int64_t time_zero_offset = 123456789 + 1000000 * m_bank;
 
     return std::make_unique<EventDataPartitioner<int64_t, double, int32_t>>(
-        m_numWorkers, PulseTimeGenerator<int64_t, double>{
-                          index, time_zero, "second", time_zero_offset});
+        m_numWorkers, PulseTimeGenerator<int64_t, double>{index, time_zero, "second", time_zero_offset});
   }
 
-  void readEventID(int32_t *event_id, size_t start,
-                   size_t count) const override {
+  void readEventID(int32_t *event_id, size_t start, size_t count) const override {
     // Factor 13 such that there is a gap in the detector IDs between banks.
     for (size_t i = 0; i < count; ++i)
-      event_id[i] = static_cast<int32_t>(m_bank * 13 * m_pixelsPerBank +
-                                         (start + i) % m_pixelsPerBank);
+      event_id[i] = static_cast<int32_t>(m_bank * 13 * m_pixelsPerBank + (start + i) % m_pixelsPerBank);
   }
 
-  void readEventTimeOffset(int32_t *event_time_offset, size_t start,
-                           size_t count) const override {
+  void readEventTimeOffset(int32_t *event_time_offset, size_t start, size_t count) const override {
     for (size_t i = 0; i < count; ++i)
       event_time_offset[i] = static_cast<int32_t>(17 * m_bank + start + i);
   }
@@ -98,33 +93,25 @@ void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
   // and pulse times, such that we can verify correct mapping.
   FakeDataSource dataSource(comm.size());
   const std::vector<int32_t> bankOffsets{0, 12 * 77, 24 * 77};
-  std::vector<std::vector<Types::Event::TofEvent>> eventLists(
-      (3 * 77 + comm.size() - 1 - comm.rank()) / comm.size());
+  std::vector<std::vector<Types::Event::TofEvent>> eventLists((3 * 77 + comm.size() - 1 - comm.rank()) / comm.size());
   std::vector<std::vector<Types::Event::TofEvent> *> eventListPtrs;
   for (auto &eventList : eventLists)
     eventListPtrs.emplace_back(&eventList);
 
-  EventParser<int32_t> dataSink(comm, chunker.makeWorkerGroups(), bankOffsets,
-                                eventListPtrs);
-  TS_ASSERT_THROWS_NOTHING(
-      (EventLoader::load<int32_t>(chunker, dataSource, dataSink)));
+  EventParser<int32_t> dataSink(comm, chunker.makeWorkerGroups(), bankOffsets, eventListPtrs);
+  TS_ASSERT_THROWS_NOTHING((EventLoader::load<int32_t>(chunker, dataSource, dataSink)));
 
-  for (size_t localSpectrumIndex = 0; localSpectrumIndex < eventLists.size();
-       ++localSpectrumIndex) {
+  for (size_t localSpectrumIndex = 0; localSpectrumIndex < eventLists.size(); ++localSpectrumIndex) {
     size_t globalSpectrumIndex = comm.size() * localSpectrumIndex + comm.rank();
     size_t bank = globalSpectrumIndex / 77;
     size_t pixelInBank = globalSpectrumIndex % 77;
-    TS_ASSERT_EQUALS(eventLists[localSpectrumIndex].size(),
-                     (bankSizes[bank] + 77 - 1 - pixelInBank) / 77);
+    TS_ASSERT_EQUALS(eventLists[localSpectrumIndex].size(), (bankSizes[bank] + 77 - 1 - pixelInBank) / 77);
     int64_t previousPulseTime{0};
-    for (size_t event = 0; event < eventLists[localSpectrumIndex].size();
-         ++event) {
+    for (size_t event = 0; event < eventLists[localSpectrumIndex].size(); ++event) {
       // Every 77th event in the input is in this list so our TOF should jump
       // over 77 TOFs in the input.
-      double microseconds =
-          static_cast<double>(17 * bank + 77 * event + pixelInBank) * 1e-3;
-      TS_ASSERT_EQUALS(eventLists[localSpectrumIndex][event].tof(),
-                       microseconds);
+      double microseconds = static_cast<double>(17 * bank + 77 * event + pixelInBank) * 1e-3;
+      TS_ASSERT_EQUALS(eventLists[localSpectrumIndex][event].tof(), microseconds);
       size_t index = event * 77 + pixelInBank;
       size_t pulse = 0;
       if (index >= 100)
@@ -142,10 +129,8 @@ void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
       //   event_time_offset is used correctly, and for correct bank.
       // - The factor 1000000000 converts event_time_offset from input unit
       //   seconds to nanoseconds, confirming that the input unit is adhered to.
-      const auto pulseTime =
-          eventLists[localSpectrumIndex][event].pulseTime().totalNanoseconds();
-      TS_ASSERT_EQUALS(pulseTime, 123456789 + 1000000 * bank +
-                                      (10 * pulse + bank) * 1000000000);
+      const auto pulseTime = eventLists[localSpectrumIndex][event].pulseTime().totalNanoseconds();
+      TS_ASSERT_EQUALS(pulseTime, 123456789 + 1000000 * bank + (10 * pulse + bank) * 1000000000);
       TS_ASSERT(pulseTime >= previousPulseTime);
       previousPulseTime = pulseTime;
     }
@@ -161,35 +146,25 @@ public:
   static void destroySuite(EventLoaderTest *suite) { delete suite; }
 
   void test_throws_if_file_does_not_exist() {
-    TS_ASSERT_THROWS(
-        EventLoader::load(Communicator{}, "abcdefg", "", {}, {}, {}),
-        const H5::FileIException &);
+    TS_ASSERT_THROWS(EventLoader::load(Communicator{}, "abcdefg", "", {}, {}, {}), const H5::FileIException &);
   }
 
   void test_H5DataType_parameter_pack_conversion() {
     using EventLoader::load;
-    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_INT32),
-                            const std::runtime_error &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_INT32), const std::runtime_error &e, std::string(e.what()),
                             "int32_t");
-    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_INT64),
-                            const std::runtime_error &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_INT64), const std::runtime_error &e, std::string(e.what()),
                             "int64_t");
-    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_UINT32),
-                            const std::runtime_error &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_UINT32), const std::runtime_error &e, std::string(e.what()),
                             "uint32_t");
-    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_UINT64),
-                            const std::runtime_error &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_UINT64), const std::runtime_error &e, std::string(e.what()),
                             "uint64_t");
-    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_FLOAT),
-                            const std::runtime_error &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_FLOAT), const std::runtime_error &e, std::string(e.what()),
                             "float");
-    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_DOUBLE),
-                            const std::runtime_error &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_DOUBLE), const std::runtime_error &e, std::string(e.what()),
                             "double");
-    TS_ASSERT_THROWS_EQUALS(
-        load(H5::PredType::NATIVE_CHAR), const std::runtime_error &e,
-        std::string(e.what()),
-        "Unsupported H5::DataType for event_time_offset in NXevent_data");
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_CHAR), const std::runtime_error &e, std::string(e.what()),
+                            "Unsupported H5::DataType for event_time_offset in NXevent_data");
   }
 
   void test_load() {

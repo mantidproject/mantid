@@ -14,20 +14,15 @@
 #include <sstream>
 #include <stdexcept>
 
-DoubleEditor::DoubleEditor(QtProperty *property, QWidget *parent)
-    : QLineEdit(parent), m_property(property) {
-  auto mgr =
-      dynamic_cast<QtDoublePropertyManager *>(property->propertyManager());
+DoubleEditor::DoubleEditor(QtProperty *property, QWidget *parent) : QLineEdit(parent), m_property(property) {
+  auto mgr = dynamic_cast<QtDoublePropertyManager *>(property->propertyManager());
   if (!mgr) {
-    throw std::runtime_error(
-        "QtDoublePropertyManager expected as parent of DoubleEditor");
+    throw std::runtime_error("QtDoublePropertyManager expected as parent of DoubleEditor");
   }
 
   m_decimals = mgr->decimals(property);
-  setValidator(new QDoubleValidator(mgr->minimum(property),
-                                    mgr->maximum(property), 20, this));
+  setValidator(new QDoubleValidator(mgr->minimum(property), mgr->maximum(property), 20, this));
   connect(this, SIGNAL(editingFinished()), this, SLOT(updateProperty()));
-  // double val = mgr->value(property);
   setValue(mgr->value(property));
 }
 
@@ -36,11 +31,15 @@ DoubleEditor::~DoubleEditor() {}
 void DoubleEditor::setValue(const double &d) { setText(formatValue(d)); }
 
 void DoubleEditor::updateProperty() {
-  auto mgr =
-      dynamic_cast<QtDoublePropertyManager *>(m_property->propertyManager());
-  if (mgr) {
+  if (!this->isModified())
+    return;
+  // Ignore second signal if two were triggered by pressing the Enter key
+  // see https://bugreports.qt.io/browse/QTBUG-40
+  this->setModified(false);
+
+  auto mgr = dynamic_cast<QtDoublePropertyManager *>(m_property->propertyManager());
+  if (mgr)
     mgr->setValue(m_property, text().toDouble());
-  }
 }
 
 /**
@@ -58,8 +57,7 @@ QString DoubleEditor::formatValue(const double &d) const {
 }
 
 void ParameterEditor::updateProperty() {
-  auto mgr =
-      dynamic_cast<ParameterPropertyManager *>(m_property->propertyManager());
+  auto mgr = dynamic_cast<ParameterPropertyManager *>(m_property->propertyManager());
   if (mgr) {
     // To find out whether the value was really changed, we format it and
     // compare string values. This

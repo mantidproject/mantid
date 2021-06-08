@@ -15,9 +15,7 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DetectorEfficiencyVariation)
 
-const std::string DetectorEfficiencyVariation::category() const {
-  return "Diagnostics";
-}
+const std::string DetectorEfficiencyVariation::category() const { return "Diagnostics"; }
 
 using namespace Kernel;
 using namespace API;
@@ -27,18 +25,14 @@ using Geometry::IDetector_const_sptr;
 /// Initialize the algorithm
 void DetectorEfficiencyVariation::init() {
   auto val = std::make_shared<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "WhiteBeamBase", "", Direction::Input, val),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("WhiteBeamBase", "", Direction::Input, val),
                   "Name of a white beam vanadium workspace");
   // The histograms, the detectors in each histogram and their first and last
   // bin boundary must match
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "WhiteBeamCompare", "", Direction::Input, val),
-      "Name of a matching second white beam vanadium run from the same "
-      "instrument");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("WhiteBeamCompare", "", Direction::Input, val),
+                  "Name of a matching second white beam vanadium run from the same "
+                  "instrument");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "A MaskWorkpace where each spectra that failed the test is "
                   "masked. Each histogram from the input workspace maps to a "
                   "histogram in this workspace with one value that indicates "
@@ -60,16 +54,14 @@ void DetectorEfficiencyVariation::init() {
   declareProperty("EndWorkspaceIndex", Mantid::EMPTY_INT(), mustBePosInt,
                   "The index number of the last spectrum to include in the "
                   "calculation (default: the last spectrum in the workspace)");
-  declareProperty(
-      "RangeLower", Mantid::EMPTY_DBL(),
-      "No bin with a boundary at an x value less than this will be included "
-      "in the summation used to decide if a detector is 'bad' (default: the "
-      "start of each histogram)");
-  declareProperty(
-      "RangeUpper", Mantid::EMPTY_DBL(),
-      "No bin with a boundary at an x value higher than this value will "
-      "be included in the summation used to decide if a detector is 'bad' "
-      "(default: the end of each histogram)");
+  declareProperty("RangeLower", Mantid::EMPTY_DBL(),
+                  "No bin with a boundary at an x value less than this will be included "
+                  "in the summation used to decide if a detector is 'bad' (default: the "
+                  "start of each histogram)");
+  declareProperty("RangeUpper", Mantid::EMPTY_DBL(),
+                  "No bin with a boundary at an x value higher than this value will "
+                  "be included in the summation used to decide if a detector is 'bad' "
+                  "(default: the end of each histogram)");
   declareProperty("NumberOfFailures", 0, Direction::Output);
 }
 
@@ -90,10 +82,8 @@ void DetectorEfficiencyVariation::exec() {
   const double rangeLower = getProperty("RangeLower");
   const double rangeUpper = getProperty("RangeUpper");
 
-  MatrixWorkspace_sptr counts1 =
-      integrateSpectra(WB1, minSpec, maxSpec, rangeLower, rangeUpper);
-  MatrixWorkspace_sptr counts2 =
-      integrateSpectra(WB2, minSpec, maxSpec, rangeLower, rangeUpper);
+  MatrixWorkspace_sptr counts1 = integrateSpectra(WB1, minSpec, maxSpec, rangeLower, rangeUpper);
+  MatrixWorkspace_sptr counts2 = integrateSpectra(WB2, minSpec, maxSpec, rangeLower, rangeUpper);
   MatrixWorkspace_sptr countRatio;
   try {
     // Note. This can produce NAN/INFs. Leave for now and sort it out in the
@@ -103,12 +93,8 @@ void DetectorEfficiencyVariation::exec() {
     g_log.error() << "The two white beam workspaces size must match.";
     throw;
   }
-  double average =
-      calculateMedian(*countRatio, false, makeInstrumentMap(*countRatio))
-          .at(0); // Include zeroes
-  g_log.notice() << name()
-                 << ": The median of the ratio of the integrated counts is: "
-                 << average << '\n';
+  double average = calculateMedian(*countRatio, false, makeInstrumentMap(*countRatio)).at(0); // Include zeroes
+  g_log.notice() << name() << ": The median of the ratio of the integrated counts is: " << average << '\n';
   //
   int numFailed = doDetectorTests(counts1, counts2, average, variation);
 
@@ -131,21 +117,18 @@ void DetectorEfficiencyVariation::exec() {
  * @throw invalid_argument if there is an incapatible property value and so the
  * algorithm can't continue
  */
-void DetectorEfficiencyVariation::retrieveProperties(
-    API::MatrixWorkspace_sptr &whiteBeam1,
-    API::MatrixWorkspace_sptr &whiteBeam2, double &variation, int &startWsIndex,
-    int &endWsIndex) {
+void DetectorEfficiencyVariation::retrieveProperties(API::MatrixWorkspace_sptr &whiteBeam1,
+                                                     API::MatrixWorkspace_sptr &whiteBeam2, double &variation,
+                                                     int &startWsIndex, int &endWsIndex) {
   whiteBeam1 = getProperty("WhiteBeamBase");
   whiteBeam2 = getProperty("WhiteBeamCompare");
-  if (whiteBeam1->getInstrument()->getName() !=
-      whiteBeam2->getInstrument()->getName()) {
+  if (whiteBeam1->getInstrument()->getName() != whiteBeam2->getInstrument()->getName()) {
     throw std::invalid_argument("The two input white beam vanadium workspaces "
                                 "must be from the same instrument");
   }
   int maxWsIndex = static_cast<int>(whiteBeam1->getNumberHistograms()) - 1;
   if (maxWsIndex !=
-      static_cast<int>(whiteBeam2->getNumberHistograms()) -
-          1) { // we would get a crash later on if this were not true
+      static_cast<int>(whiteBeam2->getNumberHistograms()) - 1) { // we would get a crash later on if this were not true
     throw std::invalid_argument("The input white beam vanadium workspaces must "
                                 "be have the same number of histograms");
   }
@@ -161,14 +144,12 @@ void DetectorEfficiencyVariation::retrieveProperties(
   if (endWsIndex == Mantid::EMPTY_INT())
     endWsIndex = maxWsIndex;
   if ((endWsIndex < 0) || (endWsIndex > maxWsIndex)) {
-    g_log.warning(
-        "EndWorkspaceIndex out of range, changed to max Workspace number");
+    g_log.warning("EndWorkspaceIndex out of range, changed to max Workspace number");
     endWsIndex = maxWsIndex;
   }
   if ((endWsIndex < startWsIndex)) {
-    g_log.warning(
-        "EndWorkspaceIndex can not be less than the StartWorkspaceIndex, "
-        "changed to max Workspace number");
+    g_log.warning("EndWorkspaceIndex can not be less than the StartWorkspaceIndex, "
+                  "changed to max Workspace number");
     endWsIndex = maxWsIndex;
   }
 }
@@ -186,10 +167,9 @@ void DetectorEfficiencyVariation::retrieveProperties(
  * masked on counts1
  * @return number of detectors for which tests failed
  */
-int DetectorEfficiencyVariation::doDetectorTests(
-    const API::MatrixWorkspace_const_sptr &counts1,
-    const API::MatrixWorkspace_const_sptr &counts2, const double average,
-    double variation) {
+int DetectorEfficiencyVariation::doDetectorTests(const API::MatrixWorkspace_const_sptr &counts1,
+                                                 const API::MatrixWorkspace_const_sptr &counts2, const double average,
+                                                 double variation) {
   // DIAG in libISIS did this.  A variation of less than 1 doesn't make sense in
   // this algorithm
   if (variation < 1) {
@@ -209,8 +189,7 @@ int DetectorEfficiencyVariation::doDetectorTests(
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = counts1->getInstrument();
   if (instrument != nullptr) {
-    checkForMask = ((instrument->getSource() != nullptr) &&
-                    (instrument->getSample() != nullptr));
+    checkForMask = ((instrument->getSource() != nullptr) && (instrument->getSample() != nullptr));
   }
 
   const double deadValue(1.0);

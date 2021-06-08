@@ -15,8 +15,7 @@ namespace Geometry {
 
 class IsotropicAtomBraggScatterer;
 
-using IsotropicAtomBraggScatterer_sptr =
-    std::shared_ptr<IsotropicAtomBraggScatterer>;
+using IsotropicAtomBraggScatterer_sptr = std::shared_ptr<IsotropicAtomBraggScatterer>;
 
 /** @class IsotropicAtomBraggScatterer
 
@@ -76,8 +75,7 @@ using IsotropicAtomBraggScatterer_sptr =
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 21/10/2014
   */
-class MANTID_GEOMETRY_DLL IsotropicAtomBraggScatterer
-    : public BraggScattererInCrystalStructure {
+class MANTID_GEOMETRY_DLL IsotropicAtomBraggScatterer : public BraggScattererInCrystalStructure {
 public:
   IsotropicAtomBraggScatterer();
 
@@ -90,8 +88,7 @@ public:
   double getOccupancy() const;
   double getU() const;
 
-  StructureFactor
-  calculateStructureFactor(const Kernel::V3D &hkl) const override;
+  StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const override;
 
 protected:
   void setElement(const std::string &element);
@@ -106,8 +103,7 @@ protected:
   std::string m_label;
 };
 
-using IsotropicAtomBraggScatterer_sptr =
-    std::shared_ptr<IsotropicAtomBraggScatterer>;
+using IsotropicAtomBraggScatterer_sptr = std::shared_ptr<IsotropicAtomBraggScatterer>;
 
 class MANTID_GEOMETRY_DLL IsotropicAtomBraggScattererParser {
 public:
@@ -117,14 +113,12 @@ public:
 
 private:
   BraggScatterer_sptr getScatterer(const std::string &singleScatterer) const;
-  std::vector<std::string>
-  getCleanScattererTokens(const std::vector<std::string> &tokens) const;
+  std::vector<std::string> getCleanScattererTokens(const std::vector<std::string> &tokens) const;
 
   std::string m_scattererString;
 };
 
-MANTID_GEOMETRY_DLL std::string
-getIsotropicAtomBraggScattererString(const BraggScatterer_sptr &scatterer);
+MANTID_GEOMETRY_DLL std::string getIsotropicAtomBraggScattererString(const BraggScatterer_sptr &scatterer);
 
 } // namespace Geometry
 } // namespace Mantid

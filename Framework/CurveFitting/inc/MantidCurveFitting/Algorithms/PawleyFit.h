@@ -25,14 +25,11 @@ namespace Algorithms {
 
 */
 struct MANTID_CURVEFITTING_DLL V3DFromHKLColumnExtractor {
-  Kernel::V3D operator()(const API::Column_const_sptr &hklColumn,
-                         size_t i) const;
+  Kernel::V3D operator()(const API::Column_const_sptr &hklColumn, size_t i) const;
 
 protected:
-  Kernel::V3D getHKLFromV3DColumn(const API::Column_const_sptr &hklColumn,
-                                  size_t i) const;
-  Kernel::V3D getHKLFromStringColumn(const API::Column_const_sptr &hklColumn,
-                                     size_t i) const;
+  Kernel::V3D getHKLFromV3DColumn(const API::Column_const_sptr &hklColumn, size_t i) const;
+  Kernel::V3D getHKLFromStringColumn(const API::Column_const_sptr &hklColumn, size_t i) const;
 
   Kernel::V3D getHKLFromString(const std::string &hklString) const;
 };
@@ -54,27 +51,20 @@ public:
   PawleyFit();
   const std::string name() const override { return "PawleyFit"; }
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"PoldiPeakSearch"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PoldiPeakSearch"}; }
   const std::string summary() const override;
   const std::string category() const override { return "Diffraction\\Fitting"; }
 
 protected:
   double getTransformedCenter(double d, const Kernel::Unit_sptr &unit) const;
 
-  void addHKLsToFunction(Functions::PawleyFunction_sptr &pawleyFn,
-                         const API::ITableWorkspace_sptr &tableWs,
-                         const Kernel::Unit_sptr &unit, double startX,
-                         double endX) const;
+  void addHKLsToFunction(Functions::PawleyFunction_sptr &pawleyFn, const API::ITableWorkspace_sptr &tableWs,
+                         const Kernel::Unit_sptr &unit, double startX, double endX) const;
 
-  API::ITableWorkspace_sptr
-  getLatticeFromFunction(const Functions::PawleyFunction_sptr &pawleyFn) const;
-  API::ITableWorkspace_sptr getPeakParametersFromFunction(
-      const Functions::PawleyFunction_sptr &pawleyFn) const;
+  API::ITableWorkspace_sptr getLatticeFromFunction(const Functions::PawleyFunction_sptr &pawleyFn) const;
+  API::ITableWorkspace_sptr getPeakParametersFromFunction(const Functions::PawleyFunction_sptr &pawleyFn) const;
 
-  API::IFunction_sptr
-  getCompositeFunction(const Functions::PawleyFunction_sptr &pawleyFn) const;
+  API::IFunction_sptr getCompositeFunction(const Functions::PawleyFunction_sptr &pawleyFn) const;
 
   void init() override;
   void exec() override;

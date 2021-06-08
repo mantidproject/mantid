@@ -45,9 +45,7 @@ public:
     pmd.setPropertyValue("OutputWorkspace", outputSpace);
     TS_ASSERT_THROWS_NOTHING(pmd.execute());
 
-    IMDHistoWorkspace_sptr data =
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-            outputSpace);
+    IMDHistoWorkspace_sptr data = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outputSpace);
     TS_ASSERT_EQUALS(3, data->getNumDims());
     long nBin = static_cast<long>(data->getNPoints());
     long sum = 0;
@@ -78,9 +76,7 @@ public:
 
   void testMetaDataCopy() {
     makeTestMD();
-    IMDHistoWorkspace_sptr data =
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-            std::string("PMDTest"));
+    IMDHistoWorkspace_sptr data = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(std::string("PMDTest"));
     data->setTitle("Hugo");
     if (data->getNumExperimentInfo() == 0) {
       data->addExperimentInfo((ExperimentInfo_sptr) new ExperimentInfo());
@@ -95,8 +91,7 @@ public:
     pmd.setPropertyValue("OutputWorkspace", outputSpace);
     TS_ASSERT_THROWS_NOTHING(pmd.execute());
 
-    data = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-        outputSpace);
+    data = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outputSpace);
     std::string tst = data->getTitle();
     size_t found = tst.find("Hugo");
     TS_ASSERT_DIFFERS(found, std::string::npos);
@@ -115,20 +110,16 @@ public:
 private:
   MDHistoWorkspace_sptr makeTestMD() {
     IMDDimension_sptr dim;
-    Mantid::Geometry::GeneralFrame frame(
-        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "mm");
+    Mantid::Geometry::GeneralFrame frame(Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "mm");
     std::vector<IMDDimension_sptr> dimensions;
     dim = MDHistoDimension_sptr(
-        new MDHistoDimension(std::string("x"), std::string("ID0"), frame,
-                             coord_t(-5), coord_t(5), size_t(10)));
+        new MDHistoDimension(std::string("x"), std::string("ID0"), frame, coord_t(-5), coord_t(5), size_t(10)));
     dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dim));
     dim = MDHistoDimension_sptr(
-        new MDHistoDimension(std::string("y"), std::string("ID1"), frame,
-                             coord_t(-6), coord_t(6), size_t(12)));
+        new MDHistoDimension(std::string("y"), std::string("ID1"), frame, coord_t(-6), coord_t(6), size_t(12)));
     dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dim));
     dim = MDHistoDimension_sptr(
-        new MDHistoDimension(std::string("z"), std::string("ID2"), frame,
-                             coord_t(-10), coord_t(10), size_t(20)));
+        new MDHistoDimension(std::string("z"), std::string("ID2"), frame, coord_t(-10), coord_t(10), size_t(20)));
     dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dim));
 
     MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));

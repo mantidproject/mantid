@@ -18,11 +18,9 @@ namespace Reflectometry {
 
   @date 2012-06-06
 */
-class MANTID_REFLECTOMETRY_DLL ReflectometryTransformP
-    : public DataObjects::ReflectometryTransform {
+class MANTID_REFLECTOMETRY_DLL ReflectometryTransformP : public DataObjects::ReflectometryTransform {
 public:
-  ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin,
-                          double pDiffMax, double incidentTheta,
+  ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta,
                           int numberOfBinsQx = 100, int numberOfBinsQz = 100);
 };
 

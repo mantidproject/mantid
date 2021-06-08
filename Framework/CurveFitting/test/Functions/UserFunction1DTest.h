@@ -33,8 +33,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
     ITableWorkspace_sptr params =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            "UserFunction1D_Parameters");
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("UserFunction1D_Parameters");
 
     TS_ASSERT_EQUALS(params->String(0, 0), "Chi^2/DoF");
     TS_ASSERT_EQUALS(params->String(1, 0), "a");
@@ -52,8 +51,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg1->execute());
 
     ITableWorkspace_sptr params1 =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            "UserFunction1D1_Parameters");
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("UserFunction1D1_Parameters");
 
     TS_ASSERT_EQUALS(params1->String(0, 0), "Chi^2/DoF");
     TS_ASSERT_EQUALS(params1->String(1, 0), "a");
@@ -71,9 +69,8 @@ public:
 
 private:
   Mantid::DataObjects::Workspace2D_sptr setupWS() {
-    Mantid::DataObjects::Workspace2D_sptr ws =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create("Workspace2D", 3, 10, 10));
+    Mantid::DataObjects::Workspace2D_sptr ws = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 3, 10, 10));
     for (int i = 0; i < 3; i++) {
       Mantid::MantidVec &X = ws->dataX(i);
       Mantid::MantidVec &Y = ws->dataY(i);

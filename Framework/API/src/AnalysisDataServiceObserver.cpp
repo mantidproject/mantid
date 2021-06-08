@@ -7,8 +7,7 @@
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 
 namespace {
-template <typename Observer>
-void modifyObserver(const bool turnOn, bool &isObserving, Observer &observer) {
+template <typename Observer> void modifyObserver(const bool turnOn, bool &isObserving, Observer &observer) {
   if (turnOn && !isObserving) {
     AnalysisDataService::Instance().notificationCenter.addObserver(observer);
   } else if (!turnOn && isObserving) {
@@ -29,9 +28,7 @@ AnalysisDataServiceObserver::AnalysisDataServiceObserver()
       m_renameObserver(*this, &AnalysisDataServiceObserver::_renameHandle),
       m_groupObserver(*this, &AnalysisDataServiceObserver::_groupHandle),
       m_unGroupObserver(*this, &AnalysisDataServiceObserver::_unGroupHandle),
-      m_groupUpdatedObserver(*this,
-                             &AnalysisDataServiceObserver::_groupUpdateHandle) {
-}
+      m_groupUpdatedObserver(*this, &AnalysisDataServiceObserver::_groupUpdateHandle) {}
 
 AnalysisDataServiceObserver::~AnalysisDataServiceObserver() {
   // Turn off/remove all observers
@@ -66,9 +63,7 @@ void AnalysisDataServiceObserver::observeAll(bool turnOn) {
  * @param turnOn bool; if this is True then, if not already present, the
  * observer will be added else removed if it's false.
  */
-void AnalysisDataServiceObserver::observeAdd(bool turnOn) {
-  modifyObserver(turnOn, m_observingAdd, m_addObserver);
-}
+void AnalysisDataServiceObserver::observeAdd(bool turnOn) { modifyObserver(turnOn, m_observingAdd, m_addObserver); }
 
 /**
  * @brief Function will add/remove the observer to the ADS for when a workspace
@@ -163,8 +158,7 @@ void AnalysisDataServiceObserver::anyChangeHandle() {}
  * @param wsName std::string; the name of the workspace added
  * @param ws Workspace_sptr; the Workspace that is added
  */
-void AnalysisDataServiceObserver::addHandle(
-    const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
+void AnalysisDataServiceObserver::addHandle(const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
@@ -176,8 +170,7 @@ void AnalysisDataServiceObserver::addHandle(
  * @param wsName std::string; the name of the workspace replacing
  * @param ws Workspace_sptr; the Workspace that is replacing
  */
-void AnalysisDataServiceObserver::replaceHandle(
-    const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
+void AnalysisDataServiceObserver::replaceHandle(const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
@@ -189,8 +182,7 @@ void AnalysisDataServiceObserver::replaceHandle(
  * @param wsName std::string; the name of the workspace
  * @param ws Workspace_sptr; the Workspace that is deleted
  */
-void AnalysisDataServiceObserver::deleteHandle(
-    const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
+void AnalysisDataServiceObserver::deleteHandle(const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
@@ -208,8 +200,7 @@ void AnalysisDataServiceObserver::clearHandle() {}
  * @param wsName std::string; the name of the workspace
  * @param newName std::string; the new name of the workspace
  */
-void AnalysisDataServiceObserver::renameHandle(const std::string &wsName,
-                                               const std::string &newName) {
+void AnalysisDataServiceObserver::renameHandle(const std::string &wsName, const std::string &newName) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(newName)
 }
@@ -221,8 +212,7 @@ void AnalysisDataServiceObserver::renameHandle(const std::string &wsName,
  * @param wsName std::string; the name of the workspace
  * @param ws Workspace_sptr; the WorkspaceGroup that was added/created
  */
-void AnalysisDataServiceObserver::groupHandle(const std::string &wsName,
-                                              const Workspace_sptr &ws) {
+void AnalysisDataServiceObserver::groupHandle(const std::string &wsName, const Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
@@ -234,8 +224,7 @@ void AnalysisDataServiceObserver::groupHandle(const std::string &wsName,
  * @param wsName std::string; the name of the workspace
  * @param ws Workspace_sptr; the WorkspaceGroup that was ungrouped
  */
-void AnalysisDataServiceObserver::unGroupHandle(const std::string &wsName,
-                                                const Workspace_sptr &ws) {
+void AnalysisDataServiceObserver::unGroupHandle(const std::string &wsName, const Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
@@ -248,8 +237,7 @@ void AnalysisDataServiceObserver::unGroupHandle(const std::string &wsName,
  * @param wsName std::string; the name of the workspace
  * @param ws Workspace_sptr; the WorkspaceGroup that was updated
  */
-void AnalysisDataServiceObserver::groupUpdateHandle(const std::string &wsName,
-                                                    const Workspace_sptr &ws) {
+void AnalysisDataServiceObserver::groupUpdateHandle(const std::string &wsName, const Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
@@ -257,15 +245,13 @@ void AnalysisDataServiceObserver::groupUpdateHandle(const std::string &wsName,
 // ------------------------------------------------------------
 // Private Methods
 // ------------------------------------------------------------
-void AnalysisDataServiceObserver::_addHandle(
-    const Poco::AutoPtr<AnalysisDataServiceImpl::AddNotification> &pNf) {
+void AnalysisDataServiceObserver::_addHandle(const Poco::AutoPtr<AnalysisDataServiceImpl::AddNotification> &pNf) {
   this->anyChangeHandle();
   this->addHandle(pNf->objectName(), pNf->object());
 }
 
 void AnalysisDataServiceObserver::_replaceHandle(
-    const Poco::AutoPtr<AnalysisDataServiceImpl::AfterReplaceNotification>
-        &pNf) {
+    const Poco::AutoPtr<AnalysisDataServiceImpl::AfterReplaceNotification> &pNf) {
   this->anyChangeHandle();
   this->replaceHandle(pNf->objectName(), pNf->object());
 }
@@ -276,36 +262,31 @@ void AnalysisDataServiceObserver::_deleteHandle(
   this->deleteHandle(pNf->objectName(), pNf->object());
 }
 
-void AnalysisDataServiceObserver::_clearHandle(
-    const Poco::AutoPtr<AnalysisDataServiceImpl::ClearNotification> &pNf) {
+void AnalysisDataServiceObserver::_clearHandle(const Poco::AutoPtr<AnalysisDataServiceImpl::ClearNotification> &pNf) {
   UNUSED_ARG(pNf)
   this->anyChangeHandle();
   this->clearHandle();
 }
 
-void AnalysisDataServiceObserver::_renameHandle(
-    const Poco::AutoPtr<AnalysisDataServiceImpl::RenameNotification> &pNf) {
+void AnalysisDataServiceObserver::_renameHandle(const Poco::AutoPtr<AnalysisDataServiceImpl::RenameNotification> &pNf) {
   this->anyChangeHandle();
   this->renameHandle(pNf->objectName(), pNf->newObjectName());
 }
 
 void AnalysisDataServiceObserver::_groupHandle(
-    const Poco::AutoPtr<AnalysisDataServiceImpl::GroupWorkspacesNotification>
-        &pNf) {
+    const Poco::AutoPtr<AnalysisDataServiceImpl::GroupWorkspacesNotification> &pNf) {
   this->anyChangeHandle();
   this->groupHandle(pNf->objectName(), pNf->object());
 }
 
 void AnalysisDataServiceObserver::_unGroupHandle(
-    const Poco::AutoPtr<
-        AnalysisDataServiceImpl::UnGroupingWorkspaceNotification> &pNf) {
+    const Poco::AutoPtr<AnalysisDataServiceImpl::UnGroupingWorkspaceNotification> &pNf) {
   this->anyChangeHandle();
   this->unGroupHandle(pNf->objectName(), pNf->object());
 }
 
 void AnalysisDataServiceObserver::_groupUpdateHandle(
-    const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification>
-        &pNf) {
+    const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification> &pNf) {
   this->anyChangeHandle();
   this->groupUpdateHandle(pNf->objectName(), pNf->object());
 }

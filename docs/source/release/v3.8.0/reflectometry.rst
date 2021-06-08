@@ -20,7 +20,7 @@ ReflectometryReductionOne
 ReflectometryReductionOneAuto
 -----------------------------
 
-- The scaling step has now been added to the Workflow diagram of ReflectometryReductionOneAuto `#16671 <https://github.com/mantidproject/mantid/pull/16671>`__   
+- The scaling step has now been added to the Workflow diagram of ReflectometryReductionOneAuto `#16671 <https://github.com/mantidproject/mantid/pull/16671>`__
 
 CreateTransmissionWorkspace
 ---------------------------

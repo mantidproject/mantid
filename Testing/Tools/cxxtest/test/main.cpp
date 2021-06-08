@@ -23,7 +23,7 @@ public:
     {
         CxxTest::TestRunner::runAllTests( *this );
     }
-    
+
     void leaveWorld( const CxxTest::WorldDescription &wd )
     {
         printf( "Number of suites: %u\n", wd.numSuites() );

@@ -24,39 +24,31 @@ boost::python::list getListFromV3DVector(const std::vector<V3D> &hkls) {
   return hklList;
 }
 
-boost::python::list getHKLsDefaultFilter(ReflectionGenerator &self, double dMin,
-                                         double dMax) {
+boost::python::list getHKLsDefaultFilter(ReflectionGenerator &self, double dMin, double dMax) {
   return getListFromV3DVector(self.getHKLs(dMin, dMax));
 }
 
-boost::python::list getHKLsUsingFilter(ReflectionGenerator &self, double dMin,
-                                       double dMax,
+boost::python::list getHKLsUsingFilter(ReflectionGenerator &self, double dMin, double dMax,
                                        ReflectionConditionFilter filter) {
-  return getListFromV3DVector(
-      self.getHKLs(dMin, dMax, self.getReflectionConditionFilter(filter)));
+  return getListFromV3DVector(self.getHKLs(dMin, dMax, self.getReflectionConditionFilter(filter)));
 }
 
-boost::python::list getUniqueHKLsDefaultFilter(ReflectionGenerator &self,
-                                               double dMin, double dMax) {
+boost::python::list getUniqueHKLsDefaultFilter(ReflectionGenerator &self, double dMin, double dMax) {
   return getListFromV3DVector(self.getUniqueHKLs(dMin, dMax));
 }
 
-boost::python::list getUniqueHKLsUsingFilter(ReflectionGenerator &self,
-                                             double dMin, double dMax,
+boost::python::list getUniqueHKLsUsingFilter(ReflectionGenerator &self, double dMin, double dMax,
                                              ReflectionConditionFilter filter) {
-  return getListFromV3DVector(self.getUniqueHKLs(
-      dMin, dMax, self.getReflectionConditionFilter(filter)));
+  return getListFromV3DVector(self.getUniqueHKLs(dMin, dMax, self.getReflectionConditionFilter(filter)));
 }
 
-std::vector<double> getDValues(ReflectionGenerator &self,
-                               const boost::python::object &hkls) {
+std::vector<double> getDValues(ReflectionGenerator &self, const boost::python::object &hkls) {
   Converters::PySequenceToVector<V3D> converter(hkls);
 
   return self.getDValues(converter());
 }
 
-std::vector<double> getFsSquared(ReflectionGenerator &self,
-                                 const boost::python::object &hkls) {
+std::vector<double> getFsSquared(ReflectionGenerator &self, const boost::python::object &hkls) {
   Converters::PySequenceToVector<V3D> converter(hkls);
 
   return self.getFsSquared(converter());
@@ -74,12 +66,9 @@ void export_ReflectionGenerator() {
   class_<ReflectionGenerator>("ReflectionGenerator", no_init)
       .def(init<const CrystalStructure &, optional<ReflectionConditionFilter>>(
           (arg("crystalStructure"), arg("defaultFilter"))))
-      .def("getHKLs", &getHKLsDefaultFilter,
-           (arg("self"), arg("dMin"), arg("dmax")))
-      .def("getHKLsUsingFilter", &getHKLsUsingFilter,
-           (arg("self"), arg("dMin"), arg("dmax"), arg("filter")))
-      .def("getUniqueHKLs", &getUniqueHKLsDefaultFilter,
-           (arg("self"), arg("dMin"), arg("dmax")))
+      .def("getHKLs", &getHKLsDefaultFilter, (arg("self"), arg("dMin"), arg("dmax")))
+      .def("getHKLsUsingFilter", &getHKLsUsingFilter, (arg("self"), arg("dMin"), arg("dmax"), arg("filter")))
+      .def("getUniqueHKLs", &getUniqueHKLsDefaultFilter, (arg("self"), arg("dMin"), arg("dmax")))
       .def("getUniqueHKLsUsingFilter", &getUniqueHKLsUsingFilter,
            (arg("self"), arg("dMin"), arg("dmax"), arg("filter")))
       .def("getDValues", &getDValues, (arg("self"), arg("hkls")))

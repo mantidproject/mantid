@@ -43,7 +43,7 @@ public:
   Algebra &operator+=(const Algebra &);
   Algebra &operator*=(const Algebra &);
   Algebra operator+(const Algebra &) const;
-  Algebra operator*(const Algebra &)const;
+  Algebra operator*(const Algebra &) const;
   int logicalEqual(const Algebra &) const;
 
   void Complement();

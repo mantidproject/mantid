@@ -19,8 +19,7 @@ Kernel::Logger g_log("TableWorkspace");
 
 // struct to keep record on what rows to sort and according to which criteria
 struct SortIterationRecord {
-  SortIterationRecord(size_t ki, size_t is, size_t ie)
-      : keyIndex(ki), iStart(is), iEnd(ie) {}
+  SortIterationRecord(size_t ki, size_t is, size_t ie) : keyIndex(ki), iStart(is), iEnd(ie) {}
   size_t keyIndex; // index in criteria vector
   size_t iStart;   // start row to sort
   size_t iEnd;     // end row to sort (one past last)
@@ -30,8 +29,7 @@ struct SortIterationRecord {
 DECLARE_WORKSPACE(TableWorkspace)
 
 /// Constructor
-TableWorkspace::TableWorkspace(size_t nrows)
-    : ITableWorkspace(), m_rowCount(0), m_LogManager(new API::LogManager) {
+TableWorkspace::TableWorkspace(size_t nrows) : ITableWorkspace(), m_rowCount(0), m_LogManager(new API::LogManager) {
   setRowCount(nrows);
 }
 
@@ -49,11 +47,8 @@ TableWorkspace::TableWorkspace(const TableWorkspace &other)
 }
 
 size_t TableWorkspace::getMemorySize() const {
-  size_t data_size = std::accumulate(m_columns.cbegin(), m_columns.cend(),
-                                     static_cast<size_t>(0),
-                                     [](size_t sum, const auto &column) {
-                                       return sum = column->sizeOfData();
-                                     });
+  size_t data_size = std::accumulate(m_columns.cbegin(), m_columns.cend(), static_cast<size_t>(0),
+                                     [](size_t sum, const auto &column) { return sum = column->sizeOfData(); });
   data_size += m_LogManager->getMemorySize();
   return data_size;
 }
@@ -62,16 +57,13 @@ size_t TableWorkspace::getMemorySize() const {
     @param name :: Column name.
     @return A shared pointer to the created column (will be null on failure).
 */
-API::Column_sptr TableWorkspace::addColumn(const std::string &type,
-                                           const std::string &name) {
+API::Column_sptr TableWorkspace::addColumn(const std::string &type, const std::string &name) {
   API::Column_sptr c;
   if (type.empty()) {
-    throw std::invalid_argument(
-        "Empty string passed as type argument of addColumn.");
+    throw std::invalid_argument("Empty string passed as type argument of addColumn.");
   }
   if (name.empty()) {
-    throw std::invalid_argument(
-        "Empty string passed as name argument of addColumn.");
+    throw std::invalid_argument("Empty string passed as name argument of addColumn.");
     return c;
   }
   // Check that there is no column with the same name.
@@ -88,8 +80,7 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type,
     resizeColumn(c.get(), rowCount());
   } catch (Kernel::Exception::NotFoundError &e) {
     std::stringstream ss;
-    ss << "Column of type " << type << " and name " << name
-       << " has not been added.\n";
+    ss << "Column of type " << type << " and name " << name << " has not been added.\n";
     ss << e.what() << '\n';
     throw std::invalid_argument(ss.str());
   }
@@ -120,11 +111,9 @@ API::Column_sptr TableWorkspace::getColumn(const std::string &name) {
   return *ci;
 }
 /// Gets the shared pointer to a column.
-API::Column_const_sptr
-TableWorkspace::getColumn(const std::string &name) const {
-  const auto found = std::find_if(
-      m_columns.cbegin(), m_columns.cend(),
-      [&name](const auto &column) { return column->name() == name; });
+API::Column_const_sptr TableWorkspace::getColumn(const std::string &name) const {
+  const auto found = std::find_if(m_columns.cbegin(), m_columns.cend(),
+                                  [&name](const auto &column) { return column->name() == name; });
   if (found == m_columns.cend()) {
     throw std::runtime_error("Column " + name + " does not exist.");
   }
@@ -135,8 +124,7 @@ TableWorkspace::getColumn(const std::string &name) const {
 API::Column_sptr TableWorkspace::getColumn(size_t index) {
   if (index >= columnCount()) {
     std::stringstream ss;
-    ss << "Column index is out of range: " << index << "(" << columnCount()
-       << ")\n";
+    ss << "Column index is out of range: " << index << "(" << columnCount() << ")\n";
     throw std::range_error(ss.str());
   }
   return m_columns[index];
@@ -146,8 +134,7 @@ API::Column_sptr TableWorkspace::getColumn(size_t index) {
 API::Column_const_sptr TableWorkspace::getColumn(size_t index) const {
   if (index >= columnCount()) {
     std::stringstream ss;
-    ss << "Column index is out of range: " << index << "(" << columnCount()
-       << ")\n";
+    ss << "Column index is out of range: " << index << "(" << columnCount() << ")\n";
     throw std::range_error(ss.str());
   }
   return m_columns[index];
@@ -194,15 +181,13 @@ void TableWorkspace::removeRow(size_t index) {
 std::vector<std::string> TableWorkspace::getColumnNames() const {
   std::vector<std::string> nameList;
   nameList.reserve(m_columns.size());
-  std::transform(m_columns.cbegin(), m_columns.cend(),
-                 std::back_inserter(nameList),
+  std::transform(m_columns.cbegin(), m_columns.cend(), std::back_inserter(nameList),
                  [](const auto &column) { return column->name(); });
   return nameList;
 }
 
 void TableWorkspace::addColumn(const std::shared_ptr<API::Column> &column) {
-  auto ci = std::find_if(m_columns.begin(), m_columns.end(),
-                         FindName(column->name()));
+  auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(column->name()));
   if (ci != m_columns.end()) {
     std::stringstream ss;
     ss << "Column with name " << column->name() << " already exists.\n";
@@ -260,8 +245,7 @@ void TableWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
     std::vector<std::pair<size_t, size_t>> equalRanges;
 
     // sort indexVec
-    column.sortIndex(ascending, record.iStart, record.iEnd, indexVec,
-                     equalRanges);
+    column.sortIndex(ascending, record.iStart, record.iEnd, indexVec, equalRanges);
 
     // if column had 1 or more ranges of equal values and there is next item in
     // criteria
@@ -269,8 +253,7 @@ void TableWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
     if (record.keyIndex < criteria.size() - 1) {
       size_t keyIndex = record.keyIndex + 1;
       for (auto &equalRange : equalRanges) {
-        sortRecords.push(
-            SortIterationRecord(keyIndex, equalRange.first, equalRange.second));
+        sortRecords.push(SortIterationRecord(keyIndex, equalRange.first, equalRange.second));
       }
     }
 
@@ -290,8 +273,7 @@ void TableWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
 
 /// Clone the workspace keeping only selected columns.
 /// @param colNames :: Names of columns to clone.
-TableWorkspace *
-TableWorkspace::doCloneColumns(const std::vector<std::string> &colNames) const {
+TableWorkspace *TableWorkspace::doCloneColumns(const std::vector<std::string> &colNames) const {
   if (colNames.empty()) {
     return new TableWorkspace(*this);
   }
@@ -299,8 +281,7 @@ TableWorkspace::doCloneColumns(const std::vector<std::string> &colNames) const {
   ws->setRowCount(rowCount());
   auto it = m_columns.cbegin();
   while (it != m_columns.cend()) {
-    if (colNames.end() !=
-        std::find(colNames.begin(), colNames.end(), (**it).name())) {
+    if (colNames.end() != std::find(colNames.begin(), colNames.end(), (**it).name())) {
       ws->addColumn(std::shared_ptr<API::Column>((*it)->clone()));
     }
     ++it;
@@ -324,34 +305,26 @@ namespace Mantid {
 namespace Kernel {
 template <>
 DLLExport DataObjects::TableWorkspace_sptr
-IPropertyManager::getValue<DataObjects::TableWorkspace_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<DataObjects::TableWorkspace_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<TableWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<TableWorkspace>.";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 DLLExport DataObjects::TableWorkspace_const_sptr
-IPropertyManager::getValue<DataObjects::TableWorkspace_const_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<DataObjects::TableWorkspace_const_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<TableWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<TableWorkspace>.";
     throw std::runtime_error(message);
   }
 }

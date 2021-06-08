@@ -26,10 +26,9 @@ namespace {
 struct yData {
   double operator()(const double x, size_t) {
     // Create a fake muon dataset
-    double a = 0.1; // Amplitude of the oscillations
-    double w = 25.; // Frequency of the oscillations
-    double tau = Mantid::PhysicalConstants::MuonLifetime *
-                 1e6; // Muon life time in microseconds
+    double a = 0.1;                                             // Amplitude of the oscillations
+    double w = 25.;                                             // Frequency of the oscillations
+    double tau = Mantid::PhysicalConstants::MuonLifetime * 1e6; // Muon life time in microseconds
     double phi = 0.05;
     double e = exp(-x / tau);
     return (20. * (1.0 + a * cos(w * x + phi)) * e);
@@ -41,10 +40,8 @@ struct eData {
 };
 
 MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
-  MatrixWorkspace_sptr ws =
-      WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          yData(), static_cast<int>(nspec), 0.0, 1.0,
-          (1.0 / static_cast<double>(maxt)), true, eData());
+  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+      yData(), static_cast<int>(nspec), 0.0, 1.0, (1.0 / static_cast<double>(maxt)), true, eData());
   // Add  number of good frames
   ws->mutableRun().addProperty("goodfrm", 10);
   // AnalysisDataService::Instance().addOrReplace("ws",ws);
@@ -52,8 +49,7 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
 }
 
 ITableWorkspace_sptr genTable() {
-  Mantid::API::ITableWorkspace_sptr table =
-      Mantid::API::WorkspaceFactory::Instance().createTable();
+  Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
   table->addColumn("double", "norm");
   table->addColumn("str", "name");
   table->addColumn("str", "method");
@@ -61,8 +57,7 @@ ITableWorkspace_sptr genTable() {
 }
 
 IAlgorithm_sptr setUpAlg(ITableWorkspace_sptr &table) {
-  IAlgorithm_sptr asymmAlg =
-      AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
+  IAlgorithm_sptr asymmAlg = AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
   asymmAlg->initialize();
   asymmAlg->setChild(true);
   asymmAlg->setProperty("NormalizationTable", table);
@@ -77,12 +72,8 @@ class EstimateMuonAsymmetryFromCountsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EstimateMuonAsymmetryFromCountsTest *createSuite() {
-    return new EstimateMuonAsymmetryFromCountsTest();
-  }
-  static void destroySuite(EstimateMuonAsymmetryFromCountsTest *suite) {
-    delete suite;
-  }
+  static EstimateMuonAsymmetryFromCountsTest *createSuite() { return new EstimateMuonAsymmetryFromCountsTest(); }
+  static void destroySuite(EstimateMuonAsymmetryFromCountsTest *suite) { delete suite; }
 
   EstimateMuonAsymmetryFromCountsTest() { FrameworkManager::Instance(); }
 
@@ -162,16 +153,12 @@ public:
 
     for (int j = 0; j < 3; j++) {
       if (j != 0) { // check we have 2 spectra
-        TS_ASSERT_EQUALS(workspaces[j]->getNumberHistograms(),
-                         workspaces[0]->getNumberHistograms());
+        TS_ASSERT_EQUALS(workspaces[j]->getNumberHistograms(), workspaces[0]->getNumberHistograms());
       }
       if (j != 2) { // check results match
-        TS_ASSERT_EQUALS(workspaces[j]->x(j).rawData(),
-                         workspaces[2]->x(j).rawData());
-        TS_ASSERT_EQUALS(workspaces[j]->y(j).rawData(),
-                         workspaces[2]->y(j).rawData());
-        TS_ASSERT_EQUALS(workspaces[j]->e(j).rawData(),
-                         workspaces[2]->e(j).rawData());
+        TS_ASSERT_EQUALS(workspaces[j]->x(j).rawData(), workspaces[2]->x(j).rawData());
+        TS_ASSERT_EQUALS(workspaces[j]->y(j).rawData(), workspaces[2]->y(j).rawData());
+        TS_ASSERT_EQUALS(workspaces[j]->e(j).rawData(), workspaces[2]->e(j).rawData());
       }
     }
   }
@@ -215,11 +202,10 @@ public:
   void test_NumberOfDataPoints() {
 
     double dx = (1.0 / 300.0);
-    auto fineWS = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        yData(), 1, 0.0, 1.0, dx, true, eData());
+    auto fineWS = WorkspaceCreationHelper::create2DWorkspaceFromFunction(yData(), 1, 0.0, 1.0, dx, true, eData());
     fineWS->mutableRun().addProperty("goodfrm", 10);
-    auto coarseWS = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        yData(), 1, dx, 1.0 + dx, 3.0 * dx, true, eData());
+    auto coarseWS =
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(yData(), 1, dx, 1.0 + dx, 3.0 * dx, true, eData());
 
     coarseWS->mutableRun().addProperty("goodfrm", 10);
 
@@ -239,8 +225,7 @@ public:
     coarseAlg->setPropertyValue("OutputWorkspace", "coarseOutWS");
     TS_ASSERT_THROWS_NOTHING(coarseAlg->execute());
     TS_ASSERT(coarseAlg->isExecuted());
-    MatrixWorkspace_sptr coarseOutWS =
-        coarseAlg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr coarseOutWS = coarseAlg->getProperty("OutputWorkspace");
 
     // check names in table
 
@@ -327,9 +312,7 @@ public:
     delete suite;
   }
 
-  EstimateMuonAsymmetryFromCountsTestPerformance() {
-    FrameworkManager::Instance();
-  }
+  EstimateMuonAsymmetryFromCountsTestPerformance() { FrameworkManager::Instance(); }
 
   void setUp() override { input = createWorkspace(1000, 100); }
 
@@ -341,8 +324,7 @@ public:
     alg.setProperty("StartX", 0.1);
     alg.setProperty("EndX", 0.9);
 
-    Mantid::API::ITableWorkspace_sptr table =
-        Mantid::API::WorkspaceFactory::Instance().createTable();
+    Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
     table->addColumn("double", "norm");
     table->addColumn("str", "name");
     table->addColumn("str", "method");

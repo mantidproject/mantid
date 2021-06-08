@@ -27,12 +27,12 @@ Usage
 
 .. testcode:: ExCompareMDWorkspaces
 
-   # create sample inelastic workspace for MARI instrument containing 1 at all spectra 
+   # create sample inelastic workspace for MARI instrument containing 1 at all spectra
    ws1=CreateSimulationWorkspace(Instrument='MAR',BinParams='-10,1,10',UnitX='DeltaE')
    AddSampleLog(ws1,'Ei','12.','Number')
    # create the copy of first workspace
    ws1a=ws1
-   # create second workspace which has different signals   
+   # create second workspace which has different signals
    ws2=ws1*2;
    # Convert to MD
    mdWs1 =ConvertToMD(InputWorkspace=ws1,QDimensions='|Q|',QConversionScales='Q in A^-1',SplitInto='100,100',MaxRecursionDepth='1')
@@ -40,7 +40,7 @@ Usage
    mdWs2=ConvertToMD(InputWorkspace=ws2,QDimensions='|Q|',QConversionScales='Q in A^-1',SplitInto='100,100',MaxRecursionDepth='1')
    # compare the workspaces
    comp_rez1=CompareMDWorkspaces(mdWs1,mdWs1a)
-   comp_rez2=CompareMDWorkspaces(mdWs1,mdWs2)   
+   comp_rez2=CompareMDWorkspaces(mdWs1,mdWs2)
 
    # print comparison results
    print("Workspaces mdWs1 and mdWs1a are equal? : {0}  : Comparison result: {1}".format(comp_rez1[0], comp_rez1[1]))
@@ -48,7 +48,7 @@ Usage
 
 
 
-   
+
 **Output:**
 
 .. testoutput:: ExCompareMDWorkspaces

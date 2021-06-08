@@ -46,14 +46,11 @@ Mantid::Kernel::Logger g_log("AlgorithmDialog");
  * Default Constructor
  */
 AlgorithmDialog::AlgorithmDialog(QWidget *parent)
-    : QDialog(parent), m_algorithm(), m_algName(""), m_algProperties(),
-      m_propertyValueMap(), m_tied_properties(), m_forScript(false),
-      m_python_arguments(), m_enabled(), m_disabled(), m_strMessage(""),
-      m_keepOpen(false), m_msgAvailable(false), m_isInitialized(false),
-      m_autoParseOnInit(true), m_validators(), m_noValidation(),
-      m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker(),
-      m_keepOpenCheckBox(nullptr), m_okButton(nullptr), m_exitButton(nullptr),
-      m_observers(), m_btnTimer(), m_statusTracked(false) {
+    : QDialog(parent), m_algorithm(), m_algName(""), m_algProperties(), m_propertyValueMap(), m_tied_properties(),
+      m_forScript(false), m_python_arguments(), m_enabled(), m_disabled(), m_strMessage(""), m_keepOpen(false),
+      m_msgAvailable(false), m_isInitialized(false), m_autoParseOnInit(true), m_validators(), m_noValidation(),
+      m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker(), m_keepOpenCheckBox(nullptr), m_okButton(nullptr),
+      m_exitButton(nullptr), m_observers(), m_btnTimer(), m_statusTracked(false) {
   m_btnTimer.setSingleShot(true);
 }
 
@@ -105,8 +102,7 @@ void AlgorithmDialog::initializeLayout() {
     return;
 
   // Set a common title
-  setWindowTitle(QString::fromStdString(getAlgorithm()->name()) +
-                 " input dialog");
+  setWindowTitle(QString::fromStdString(getAlgorithm()->name()) + " input dialog");
   // Set the icon
   setWindowIcon(QIcon(":/mantidplot.png"));
 
@@ -163,14 +159,12 @@ void AlgorithmDialog::parseInput() {}
 void AlgorithmDialog::saveInput() {
   AlgorithmInputHistory::Instance().clearAlgorithmInput(m_algName);
   QStringList::const_iterator pend = m_algProperties.end();
-  for (QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend;
-       ++pitr) {
+  for (QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend; ++pitr) {
     Mantid::Kernel::Property *p = getAlgorithmProperty(*pitr);
     if (p->remember()) {
       QString pName = *pitr;
       QString value = m_propertyValueMap.value(pName);
-      AlgorithmInputHistory::Instance().storeNewValue(
-          m_algName, QPair<QString, QString>(pName, value));
+      AlgorithmInputHistory::Instance().storeNewValue(m_algName, QPair<QString, QString>(pName, value));
     }
   }
 }
@@ -185,14 +179,10 @@ void AlgorithmDialog::setAlgorithm(const Mantid::API::IAlgorithm_sptr &alg) {
   m_algName = QString::fromStdString(alg->name());
   m_algProperties.clear();
   m_tied_properties.clear();
-  std::vector<Mantid::Kernel::Property *>::const_iterator iend =
-      alg->getProperties().end();
-  for (std::vector<Mantid::Kernel::Property *>::const_iterator itr =
-           alg->getProperties().begin();
-       itr != iend; ++itr) {
+  std::vector<Mantid::Kernel::Property *>::const_iterator iend = alg->getProperties().end();
+  for (std::vector<Mantid::Kernel::Property *>::const_iterator itr = alg->getProperties().begin(); itr != iend; ++itr) {
     Mantid::Kernel::Property *p = *itr;
-    if (dynamic_cast<Mantid::API::IWorkspaceProperty *>(p) ||
-        p->direction() != Mantid::Kernel::Direction::Output) {
+    if (dynamic_cast<Mantid::API::IWorkspaceProperty *>(p) || p->direction() != Mantid::Kernel::Direction::Output) {
       m_algProperties.append(QString::fromStdString(p->name()));
     }
   }
@@ -205,16 +195,13 @@ void AlgorithmDialog::setAlgorithm(const Mantid::API::IAlgorithm_sptr &alg) {
  * Get the algorithm pointer
  * @returns A pointer to the algorithm that is associated with the dialog
  */
-Mantid::API::IAlgorithm_sptr AlgorithmDialog::getAlgorithm() const {
-  return m_algorithm;
-}
+Mantid::API::IAlgorithm_sptr AlgorithmDialog::getAlgorithm() const { return m_algorithm; }
 
 /**
  * Get a named property for this algorithm
  * @param propName :: The name of the property
  */
-Mantid::Kernel::Property *
-AlgorithmDialog::getAlgorithmProperty(const QString &propName) const {
+Mantid::Kernel::Property *AlgorithmDialog::getAlgorithmProperty(const QString &propName) const {
   if (m_algProperties.contains(propName)) {
     return m_algorithm->getProperty(propName.toStdString());
   } else
@@ -225,9 +212,7 @@ AlgorithmDialog::getAlgorithmProperty(const QString &propName) const {
  * Return a true if the given property requires user input
  * @param propName :: The name of the property
  */
-bool AlgorithmDialog::requiresUserInput(const QString &propName) const {
-  return m_algProperties.contains(propName);
-}
+bool AlgorithmDialog::requiresUserInput(const QString &propName) const { return m_algProperties.contains(propName); }
 
 //-------------------------------------------------------------------------------------------------
 /**
@@ -274,8 +259,7 @@ QLabel *AlgorithmDialog::getValidatorMarker(const QString &propname) {
 /**
  * Adds a property (name,value) pair to the stored map
  */
-void AlgorithmDialog::storePropertyValue(const QString &name,
-                                         const QString &value) {
+void AlgorithmDialog::storePropertyValue(const QString &name, const QString &value) {
   if (name.isEmpty())
     return;
   m_propertyValueMap.insert(name, value);
@@ -297,8 +281,7 @@ void AlgorithmDialog::removePropertyValue(const QString &name) {
 void AlgorithmDialog::showValidators() {
   // Do nothing for non-generic algorithm dialogs
   QStringList::const_iterator pend = m_algProperties.end();
-  for (QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend;
-       ++pitr) {
+  for (QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend; ++pitr) {
     const QString propName = *pitr;
 
     // Find the widget for this property.
@@ -330,8 +313,7 @@ void AlgorithmDialog::showValidators() {
  * end.
  * @return true if the property is valid.
  */
-bool AlgorithmDialog::setPropertyValue(const QString &pName,
-                                       bool validateOthers) {
+bool AlgorithmDialog::setPropertyValue(const QString &pName, bool validateOthers) {
   // Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
   QString value = getInputValue(pName);
 
@@ -363,8 +345,7 @@ bool AlgorithmDialog::setPropertyValue(const QString &pName,
 bool AlgorithmDialog::setPropertyValues(const QStringList &skipList) {
   QStringList::const_iterator pend = m_algProperties.end();
   bool allValid(true);
-  for (QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend;
-       ++pitr) {
+  for (QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend; ++pitr) {
     const QString pName = *pitr;
     if (skipList.contains(pName)) {
       // For the load dialog, skips setting some properties
@@ -412,9 +393,7 @@ bool AlgorithmDialog::setPropertyValues(const QStringList &skipList) {
  * Return the message string
  * @returns the message string
  */
-const QString &AlgorithmDialog::getOptionalMessage() const {
-  return m_strMessage;
-}
+const QString &AlgorithmDialog::getOptionalMessage() const { return m_strMessage; }
 
 //-------------------------------------------------------------------------------------------------
 /** Add the optional message in a light yellow box to the layout
@@ -425,8 +404,7 @@ void AlgorithmDialog::addOptionalMessage(QVBoxLayout *mainLay) {
   QLabel *inputMessage = new QLabel(this);
   inputMessage->setFrameStyle(QFrame::Panel | QFrame::Sunken);
   QPalette pal = inputMessage->palette();
-  pal.setColor(inputMessage->backgroundRole(),
-               QColor(255, 255, 224)); // Light yellow
+  pal.setColor(inputMessage->backgroundRole(), QColor(255, 255, 224)); // Light yellow
   pal.setColor(inputMessage->foregroundRole(), Qt::black);
   inputMessage->setPalette(pal);
   inputMessage->setAutoFillBackground(true);
@@ -451,9 +429,7 @@ bool AlgorithmDialog::isForScript() const { return m_forScript; }
  * Is there a message string available
  * @returns A boolean indicating whether the message string is empty
  */
-bool AlgorithmDialog::isMessageAvailable() const {
-  return !m_strMessage.isEmpty();
-}
+bool AlgorithmDialog::isMessageAvailable() const { return !m_strMessage.isEmpty(); }
 
 //-------------------------------------------------------------------------------------------------
 /**
@@ -489,8 +465,7 @@ bool AlgorithmDialog::isWidgetEnabled(const QString &propName) const {
      *   (2) A user passed a value into the dialog
      */
 
-    return !(m_disabled.contains(propName) ||
-             m_python_arguments.contains(propName));
+    return !(m_disabled.contains(propName) || m_python_arguments.contains(propName));
   }
 }
 
@@ -519,8 +494,7 @@ void AlgorithmDialog::untie(const QString &property) {
  * parent_layout otherwise it
  *          returns a pointer to the QLabel instance marking the validity
  */
-QWidget *AlgorithmDialog::tie(QWidget *widget, const QString &property,
-                              QLayout *parent_layout, bool readHistory) {
+QWidget *AlgorithmDialog::tie(QWidget *widget, const QString &property, QLayout *parent_layout, bool readHistory) {
   if (m_tied_properties.contains(property))
     m_tied_properties.remove(property);
 
@@ -551,8 +525,7 @@ QWidget *AlgorithmDialog::tie(QWidget *widget, const QString &property,
 
       if (QBoxLayout *box = qobject_cast<QBoxLayout *>(parent_layout)) {
         box->insertWidget(item_index + 1, validlbl);
-      } else if (QGridLayout *grid =
-                     qobject_cast<QGridLayout *>(parent_layout)) {
+      } else if (QGridLayout *grid = qobject_cast<QGridLayout *>(parent_layout)) {
         int row(0), col(0), span(0);
         grid->getItemPosition(item_index, &row, &col, &span, &span);
         grid->addWidget(validlbl, row, col + 2);
@@ -589,8 +562,7 @@ QWidget *AlgorithmDialog::tie(QWidget *widget, const QString &property,
 QString AlgorithmDialog::openFileDialog(const QString &propName) {
   if (propName.isEmpty())
     return "";
-  return FilePropertyWidget::openFileDialog(
-      this->getAlgorithmProperty(propName));
+  return FilePropertyWidget::openFileDialog(this->getAlgorithmProperty(propName));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -604,8 +576,7 @@ QString AlgorithmDialog::openFileDialog(const QString &propName) {
  * @param optionsBox :: A pointer to a QComoboBox object
  * @returns A newed QComboBox
  */
-void AlgorithmDialog::fillAndSetComboBox(const QString &propName,
-                                         QComboBox *optionsBox) const {
+void AlgorithmDialog::fillAndSetComboBox(const QString &propName, QComboBox *optionsBox) const {
   if (!optionsBox)
     return;
   Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
@@ -614,16 +585,14 @@ void AlgorithmDialog::fillAndSetComboBox(const QString &propName,
 
   std::vector<std::string> items = property->allowedValues();
   std::vector<std::string>::const_iterator vend = items.end();
-  for (std::vector<std::string>::const_iterator vitr = items.begin();
-       vitr != vend; ++vitr) {
+  for (std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend; ++vitr) {
     optionsBox->addItem(QString::fromStdString(*vitr));
   }
 
   // Display the appropriate value
   QString displayed("");
   if (!isForScript()) {
-    displayed =
-        AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
+    displayed = AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
   }
   if (displayed.isEmpty()) {
     displayed = QString::fromStdString(property->value());
@@ -641,15 +610,12 @@ void AlgorithmDialog::fillAndSetComboBox(const QString &propName,
  * @param propName :: The name of the property
  * @param textField :: The QLineEdit field
  */
-void AlgorithmDialog::fillLineEdit(const QString &propName,
-                                   QLineEdit *textField) {
+void AlgorithmDialog::fillLineEdit(const QString &propName, QLineEdit *textField) {
   if (!isForScript()) {
-    textField->setText(
-        AlgorithmInputHistory::Instance().previousInput(m_algName, propName));
+    textField->setText(AlgorithmInputHistory::Instance().previousInput(m_algName, propName));
   } else {
     Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
-    if (property && property->isValid().empty() &&
-        (m_python_arguments.contains(propName) || !property->isDefault())) {
+    if (property && property->isValid().empty() && (m_python_arguments.contains(propName) || !property->isDefault())) {
       textField->setText(QString::fromStdString(property->value()));
     }
   }
@@ -657,9 +623,8 @@ void AlgorithmDialog::fillLineEdit(const QString &propName,
 
 //-------------------------------------------------------------------------------------------------
 /** Layout the buttons and others in the generic dialog */
-QLayout *AlgorithmDialog::createDefaultButtonLayout(
-    const QString &helpText, const QString &loadText, const QString &cancelText,
-    const QString &keepOpenText) {
+QLayout *AlgorithmDialog::createDefaultButtonLayout(const QString &helpText, const QString &loadText,
+                                                    const QString &cancelText, const QString &keepOpenText) {
   m_okButton = new QPushButton(loadText);
   connect(m_okButton, SIGNAL(clicked()), this, SLOT(accept()));
   m_okButton->setDefault(true);
@@ -673,8 +638,7 @@ QLayout *AlgorithmDialog::createDefaultButtonLayout(
 
   m_keepOpenCheckBox = new QCheckBox(keepOpenText);
   m_keepOpenCheckBox->setLayoutDirection(Qt::LayoutDirection::RightToLeft);
-  connect(m_keepOpenCheckBox, SIGNAL(stateChanged(int)), this,
-          SLOT(keepOpenChanged(int)));
+  connect(m_keepOpenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(keepOpenChanged(int)));
   buttonRowLayout->addWidget(m_keepOpenCheckBox);
   if (keepOpenText.isEmpty()) {
     setShowKeepOpen(false);
@@ -703,9 +667,7 @@ QPushButton *AlgorithmDialog::createHelpButton(const QString &helpText) const {
  * Flag an input workspace widget
  * @param inputWidget :: A widget used to enter the input workspace
  */
-void AlgorithmDialog::flagInputWS(QWidget *inputWidget) {
-  m_inputws_opts.push_back(inputWidget);
-}
+void AlgorithmDialog::flagInputWS(QWidget *inputWidget) { m_inputws_opts.push_back(inputWidget); }
 
 //-----------------------------------------------------------
 // Protected slots
@@ -728,10 +690,9 @@ void AlgorithmDialog::accept() {
       executeAlgorithmAsync();
     }
   } else {
-    QMessageBox::critical(
-        this, "",
-        "One or more properties are invalid. The invalid properties are\n"
-        "marked with a *, hold your mouse over the * for more information.");
+    QMessageBox::critical(this, "",
+                          "One or more properties are invalid. The invalid properties are\n"
+                          "marked with a *, hold your mouse over the * for more information.");
   }
 }
 
@@ -760,9 +721,7 @@ void AlgorithmDialog::helpClicked() {
 /**
  * A slot to handle the keep open button click
  */
-void AlgorithmDialog::keepOpenChanged(int state) {
-  m_keepOpen = (state == Qt::Checked);
-}
+void AlgorithmDialog::keepOpenChanged(int state) { m_keepOpen = (state == Qt::Checked); }
 
 //-------------------------------------------------------------------------------------------------
 
@@ -802,8 +761,7 @@ void AlgorithmDialog::executeAlgorithmAsync() {
       m_okButton->setEnabled(false);
     }
   } catch (Poco::NoThreadAvailableException &) {
-    g_log.error() << "No thread was available to run the " << algToExec->name()
-                  << " algorithm in the background.\n";
+    g_log.error() << "No thread was available to run the " << algToExec->name() << " algorithm in the background.\n";
   }
 }
 
@@ -841,8 +799,7 @@ void AlgorithmDialog::parse() {
  * @param presetValues :: A string containing a list of "name=value" pairs with
  * each separated by an '|' character
  */
-void AlgorithmDialog::setPresetValues(
-    const QHash<QString, QString> &presetValues) {
+void AlgorithmDialog::setPresetValues(const QHash<QString, QString> &presetValues) {
   if (presetValues.isEmpty())
     return;
   QHashIterator<QString, QString> itr(presetValues);
@@ -863,8 +820,7 @@ void AlgorithmDialog::setPresetValues(
  * @param enabled:: A list of parameter names to keep enabled
  * @param disabled:: A list of parameter names whose widgets should be disabled
  */
-void AlgorithmDialog::addEnabledAndDisableLists(const QStringList &enabled,
-                                                const QStringList &disabled) {
+void AlgorithmDialog::addEnabledAndDisableLists(const QStringList &enabled, const QStringList &disabled) {
   m_enabled = enabled;
   m_disabled = disabled;
 }
@@ -906,8 +862,7 @@ void AlgorithmDialog::executeOnAccept(bool on) {
     connect(this, SIGNAL(rejected()), this, SLOT(removeAlgorithmFromManager()));
   } else {
     disconnect(this, SIGNAL(accepted()), this, SLOT(executeAlgorithmAsync()));
-    disconnect(this, SIGNAL(rejected()), this,
-               SLOT(removeAlgorithmFromManager()));
+    disconnect(this, SIGNAL(rejected()), this, SLOT(removeAlgorithmFromManager()));
   }
 }
 
@@ -937,8 +892,7 @@ QString AlgorithmDialog::getValue(QWidget *widget) {
     return opts->currentText().trimmed();
   } else if (QLineEdit *textfield = qobject_cast<QLineEdit *>(widget)) {
     return textfield->text().trimmed();
-  } else if (QAbstractButton *checker =
-                 qobject_cast<QAbstractButton *>(widget)) {
+  } else if (QAbstractButton *checker = qobject_cast<QAbstractButton *>(widget)) {
     if (checker->isChecked())
       return QString("1");
     else
@@ -949,15 +903,12 @@ QString AlgorithmDialog::getValue(QWidget *widget) {
     return value;
   } else if (MantidWidget *mtd_widget = qobject_cast<MantidWidget *>(widget)) {
     return mtd_widget->getUserInput().toString().trimmed();
-  } else if (PropertyWidget *propWidget =
-                 qobject_cast<PropertyWidget *>(widget)) {
+  } else if (PropertyWidget *propWidget = qobject_cast<PropertyWidget *>(widget)) {
     return propWidget->getValue().trimmed();
   } else {
-    QMessageBox::warning(
-        this, windowTitle(),
-        QString("Cannot parse input from ") +
-            widget->metaObject()->className() +
-            ". Update AlgorithmDialog::getValue() to cope with this widget.");
+    QMessageBox::warning(this, windowTitle(),
+                         QString("Cannot parse input from ") + widget->metaObject()->className() +
+                             ". Update AlgorithmDialog::getValue() to cope with this widget.");
     return "";
   }
 }
@@ -968,8 +919,7 @@ QString AlgorithmDialog::getPreviousValue(const QString &propName) const {
   if (!isForScript()) {
     value = m_propertyValueMap.value(propName);
     if (value.isEmpty())
-      value =
-          AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
+      value = AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
   } else if (getAlgorithmProperty(propName)) {
     value = m_propertyValueMap.value(propName);
   }
@@ -986,8 +936,7 @@ QString AlgorithmDialog::getPreviousValue(const QString &propName) const {
  * @param widget :: A pointer to the widget
  * @param propName :: The property name
  */
-void AlgorithmDialog::setPreviousValue(QWidget *widget,
-                                       const QString &propName) {
+void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString &propName) {
   // If is called from a script, check if we have such property
   if (isForScript() && !getAlgorithmProperty(propName))
     return;
@@ -1008,8 +957,7 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget,
     return;
   }
   if (QAbstractButton *checker = qobject_cast<QAbstractButton *>(widget)) {
-    if (value.isEmpty() &&
-        dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property))
+    if (value.isEmpty() && dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property))
       value = QString::fromStdString(property->value());
     checker->setChecked(value != "0");
     return;
@@ -1056,10 +1004,9 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget,
 
   // Reaching here means we have a widget type we don't understand. Tell the
   // developer
-  QMessageBox::warning(
-      this, windowTitle(),
-      QString("Cannot set value for ") + widget->metaObject()->className() +
-          ". Update AlgorithmDialog::setValue() to cope with this widget.");
+  QMessageBox::warning(this, windowTitle(),
+                       QString("Cannot set value for ") + widget->metaObject()->className() +
+                           ". Update AlgorithmDialog::setValue() to cope with this widget.");
 }
 
 /**
@@ -1069,8 +1016,7 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget,
  *
  * @param observer Pointer to the AlgorithmObserver to add.
  */
-void AlgorithmDialog::addAlgorithmObserver(
-    Mantid::API::AlgorithmObserver *observer) {
+void AlgorithmDialog::addAlgorithmObserver(Mantid::API::AlgorithmObserver *observer) {
   m_observers.emplace_back(observer);
   // turn off the keep open option - it would only confuse things if someone is
   // watching
@@ -1093,8 +1039,7 @@ void AlgorithmDialog::finishHandle(const IAlgorithm *alg) {
  * @param alg Completed algorithm (unused)
  * @param what the error message (unused)
  */
-void AlgorithmDialog::errorHandle(const IAlgorithm *alg,
-                                  const std::string &what) {
+void AlgorithmDialog::errorHandle(const IAlgorithm *alg, const std::string &what) {
   UNUSED_ARG(alg);
   UNUSED_ARG(what);
   emit algCompletedSignal();

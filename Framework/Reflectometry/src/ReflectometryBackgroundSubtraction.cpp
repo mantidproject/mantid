@@ -24,17 +24,13 @@ namespace Reflectometry {
 DECLARE_ALGORITHM(ReflectometryBackgroundSubtraction)
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string ReflectometryBackgroundSubtraction::name() const {
-  return "ReflectometryBackgroundSubtraction";
-}
+const std::string ReflectometryBackgroundSubtraction::name() const { return "ReflectometryBackgroundSubtraction"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ReflectometryBackgroundSubtraction::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ReflectometryBackgroundSubtraction::category() const {
-  return "Reflectometry;Reflectometry\\ISIS";
-}
+const std::string ReflectometryBackgroundSubtraction::category() const { return "Reflectometry;Reflectometry\\ISIS"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ReflectometryBackgroundSubtraction::summary() const {
@@ -49,9 +45,8 @@ const std::string ReflectometryBackgroundSubtraction::summary() const {
  * @param spectraList :: a vector containing all of the spectra in the
  * background
  */
-void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
-    const MatrixWorkspace_sptr &inputWS,
-    const std::vector<specnum_t> &spectraList) {
+void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(const MatrixWorkspace_sptr &inputWS,
+                                                                            const std::vector<specnum_t> &spectraList) {
 
   auto alg = this->createChildAlgorithm("GroupDetectors");
   alg->setProperty("InputWorkspace", inputWS);
@@ -75,8 +70,7 @@ void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
  * @param spectraList :: a vector containing a list of spectra
  * @return a vector containing a list of ranges of the given spectraList.
  */
-std::vector<double> ReflectometryBackgroundSubtraction::findSpectrumRanges(
-    const std::vector<specnum_t> &spectraList) {
+std::vector<double> ReflectometryBackgroundSubtraction::findSpectrumRanges(const std::vector<specnum_t> &spectraList) {
 
   std::vector<double> spectrumRanges;
   spectrumRanges.emplace_back(spectraList[0]);
@@ -103,14 +97,13 @@ std::vector<double> ReflectometryBackgroundSubtraction::findSpectrumRanges(
  * @param spectrumRanges :: a vector containing the ranges of spectra containing
  * the background
  */
-void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
-    MatrixWorkspace_sptr inputWS, const std::vector<double> &spectrumRanges) {
+void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(MatrixWorkspace_sptr inputWS,
+                                                                       const std::vector<double> &spectrumRanges) {
 
   // if the input workspace is an event workspace it must be converted to a
   // Matrix workspace as cannot transpose an event workspace
 
-  DataObjects::EventWorkspace_const_sptr eventW =
-      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
+  DataObjects::EventWorkspace_const_sptr eventW = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
   MatrixWorkspace_sptr outputWorkspace;
   if (eventW) {
     auto convert = createChildAlgorithm("ConvertToMatrixWorkspace");
@@ -156,18 +149,15 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
  * @param inputWS :: the input workspace
  * @param indexList :: the ranges of the background region
  */
-void ReflectometryBackgroundSubtraction::calculatePixelBackground(
-    const MatrixWorkspace_sptr &inputWS, const std::vector<double> &indexList) {
+void ReflectometryBackgroundSubtraction::calculatePixelBackground(const MatrixWorkspace_sptr &inputWS,
+                                                                  const std::vector<double> &indexList) {
 
-  const std::vector<int> backgroundRange{static_cast<int>(indexList.front()),
-                                         static_cast<int>(indexList.back())};
+  const std::vector<int> backgroundRange{static_cast<int>(indexList.front()), static_cast<int>(indexList.back())};
 
-  auto peakRangeProp =
-      dynamic_cast<IndexProperty *>(getPointerToProperty("PeakRange"));
+  auto peakRangeProp = dynamic_cast<IndexProperty *>(getPointerToProperty("PeakRange"));
   Indexing::SpectrumIndexSet peakRangeIndexSet = *peakRangeProp;
-  const std::vector<int> peakRange{
-      static_cast<int>(peakRangeIndexSet[0]),
-      static_cast<int>(peakRangeIndexSet[peakRangeIndexSet.size() - 1])};
+  const std::vector<int> peakRange{static_cast<int>(peakRangeIndexSet[0]),
+                                   static_cast<int>(peakRangeIndexSet[peakRangeIndexSet.size() - 1])};
 
   IAlgorithm_sptr LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
   LRBgd->initialize();
@@ -192,22 +182,17 @@ void ReflectometryBackgroundSubtraction::init() {
 
   // Input workspace
   auto inputWSProp = std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "InputWorkspace", "An input workspace", Direction::Input,
-      std::make_shared<CommonBinsValidator>());
+      "InputWorkspace", "An input workspace", Direction::Input, std::make_shared<CommonBinsValidator>());
   const auto &inputWSPropRef = *inputWSProp;
   declareProperty(std::move(inputWSProp), "An input workspace.");
 
-  auto inputIndexType = std::make_unique<IndexTypeProperty>(
-      "InputWorkspaceIndexType",
-      IndexType::SpectrumNum | IndexType::WorkspaceIndex);
+  auto inputIndexType = std::make_unique<IndexTypeProperty>("InputWorkspaceIndexType",
+                                                            IndexType::SpectrumNum | IndexType::WorkspaceIndex);
   const auto &inputIndexTypeRef = *inputIndexType;
-  declareProperty(std::move(inputIndexType),
-                  "The type of indices in the optional index set; For optimal "
-                  "performance WorkspaceIndex should be preferred;");
+  declareProperty(std::move(inputIndexType), "The type of indices in the optional index set; For optimal "
+                                             "performance WorkspaceIndex should be preferred;");
 
-  declareProperty(std::make_unique<IndexProperty>("ProcessingInstructions",
-                                                  inputWSPropRef,
-                                                  inputIndexTypeRef),
+  declareProperty(std::make_unique<IndexProperty>("ProcessingInstructions", inputWSPropRef, inputIndexTypeRef),
                   "An optional set of spectra containing the background. If "
                   "not set all spectra will be processed. The indices in this "
                   "list can be workspace indices or spectrum numbers, "
@@ -215,57 +200,43 @@ void ReflectometryBackgroundSubtraction::init() {
                   "are entered as a comma-separated list of values, and/or "
                   "ranges.");
 
-  std::vector<std::string> backgroundTypes = {"PerDetectorAverage",
-                                              "Polynomial", "AveragePixelFit"};
+  std::vector<std::string> backgroundTypes = {"PerDetectorAverage", "Polynomial", "AveragePixelFit"};
   declareProperty("BackgroundCalculationMethod", "PerDetectorAverage",
                   std::make_shared<StringListValidator>(backgroundTypes),
-                  "The type of background reduction to perform.",
-                  Direction::Input);
+                  "The type of background reduction to perform.", Direction::Input);
 
   // polynomial properties
   auto nonnegativeInt = std::make_shared<BoundedValidator<int>>();
   nonnegativeInt->setLower(0);
-  declareProperty("DegreeOfPolynomial", 0, nonnegativeInt,
-                  "Degree of the fitted polynomial.");
-  std::array<std::string, 2> costFuncOpts{
-      {"Least squares", "Unweighted least squares"}};
-  declareProperty("CostFunction", "Least squares",
-                  std::make_shared<ListValidator<std::string>>(costFuncOpts),
+  declareProperty("DegreeOfPolynomial", 0, nonnegativeInt, "Degree of the fitted polynomial.");
+  std::array<std::string, 2> costFuncOpts{{"Least squares", "Unweighted least squares"}};
+  declareProperty("CostFunction", "Least squares", std::make_shared<ListValidator<std::string>>(costFuncOpts),
                   "The cost function to be passed to the Fit algorithm.");
 
-  setPropertySettings(
-      "DegreeOfPolynomial",
-      std::make_unique<EnabledWhenProperty>("BackgroundCalculationMethod",
-                                            IS_EQUAL_TO, "Polynomial"));
-  setPropertySettings("CostFunction", std::make_unique<EnabledWhenProperty>(
-                                          "BackgroundCalculationMethod",
-                                          IS_EQUAL_TO, "Polynomial"));
+  setPropertySettings("DegreeOfPolynomial",
+                      std::make_unique<EnabledWhenProperty>("BackgroundCalculationMethod", IS_EQUAL_TO, "Polynomial"));
+  setPropertySettings("CostFunction",
+                      std::make_unique<EnabledWhenProperty>("BackgroundCalculationMethod", IS_EQUAL_TO, "Polynomial"));
 
   // Average pixel properties
-  declareProperty(
-      std::make_unique<IndexProperty>("PeakRange", inputWSPropRef,
-                                      inputIndexTypeRef),
-      "A set of spectra defining the reflectivity peak. If not set all spectra "
-      "will be processed. The indices in this list can be workspace indices or "
-      "spectrum numbers, depending on the InputWorkspaceIndexType");
+  declareProperty(std::make_unique<IndexProperty>("PeakRange", inputWSPropRef, inputIndexTypeRef),
+                  "A set of spectra defining the reflectivity peak. If not set all spectra "
+                  "will be processed. The indices in this list can be workspace indices or "
+                  "spectrum numbers, depending on the InputWorkspaceIndexType");
 
-  declareProperty("SumPeak", false,
-                  "If True, the resulting peak will be summed");
+  declareProperty("SumPeak", false, "If True, the resulting peak will be summed");
 
-  setPropertySettings("PeakRange", std::make_unique<EnabledWhenProperty>(
-                                       "BackgroundCalculationMethod",
-                                       IS_EQUAL_TO, "AveragePixelFit"));
+  setPropertySettings("PeakRange", std::make_unique<EnabledWhenProperty>("BackgroundCalculationMethod", IS_EQUAL_TO,
+                                                                         "AveragePixelFit"));
 
-  setPropertySettings("SumPeak", std::make_unique<EnabledWhenProperty>(
-                                     "BackgroundCalculationMethod", IS_EQUAL_TO,
-                                     "AveragePixelFit"));
+  setPropertySettings(
+      "SumPeak", std::make_unique<EnabledWhenProperty>("BackgroundCalculationMethod", IS_EQUAL_TO, "AveragePixelFit"));
 
   // Output workspace
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output,
-                                                        PropertyMode::Optional),
-                  "The output workspace containing the InputWorkspace with the "
-                  "background removed.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "The output workspace containing the InputWorkspace with the "
+      "background removed.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -273,8 +244,7 @@ void ReflectometryBackgroundSubtraction::init() {
  */
 void ReflectometryBackgroundSubtraction::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  auto indexProp = dynamic_cast<IndexProperty *>(
-      getPointerToProperty("ProcessingInstructions"));
+  auto indexProp = dynamic_cast<IndexProperty *>(getPointerToProperty("ProcessingInstructions"));
   Indexing::SpectrumIndexSet indexSet = *indexProp;
   const std::string backgroundType = getProperty("BackgroundCalculationMethod");
 
@@ -300,10 +270,9 @@ void ReflectometryBackgroundSubtraction::exec() {
     auto range = static_cast<int>(spectraList.back() - spectraList.front());
     int degree = getProperty("degreeOfPolynomial");
     if (range < degree) {
-      throw std::invalid_argument(
-          "Cannot fit polynomial, number of data points in region < "
-          "the number of fitting parameters: " +
-          std::to_string(range + 1) + " < " + std::to_string(degree + 1));
+      throw std::invalid_argument("Cannot fit polynomial, number of data points in region < "
+                                  "the number of fitting parameters: " +
+                                  std::to_string(range + 1) + " < " + std::to_string(degree + 1));
     }
     auto spectrumRanges = findSpectrumRanges(spectraList);
     calculatePolynomialBackground(inputWS, spectrumRanges);
@@ -314,14 +283,12 @@ void ReflectometryBackgroundSubtraction::exec() {
   }
 }
 
-std::map<std::string, std::string>
-ReflectometryBackgroundSubtraction::validateInputs() {
+std::map<std::string, std::string> ReflectometryBackgroundSubtraction::validateInputs() {
 
   std::map<std::string, std::string> errors;
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  auto indexProp = dynamic_cast<IndexProperty *>(
-      getPointerToProperty("ProcessingInstructions"));
+  auto indexProp = dynamic_cast<IndexProperty *>(getPointerToProperty("ProcessingInstructions"));
   Indexing::SpectrumIndexSet indexSet = *indexProp;
   const std::string backgroundType = getProperty("BackgroundCalculationMethod");
 
@@ -334,14 +301,12 @@ ReflectometryBackgroundSubtraction::validateInputs() {
 
     if (backgroundType == "AveragePixelFit") {
       if (indexSet.size() == 1) {
-        errors["ProcessingInstructions"] =
-            "Input workspace index set must "
-            "contain a more than one spectra for "
-            "AveragePixelFit background subtraction";
+        errors["ProcessingInstructions"] = "Input workspace index set must "
+                                           "contain a more than one spectra for "
+                                           "AveragePixelFit background subtraction";
       }
 
-      auto peakRangeProp =
-          dynamic_cast<IndexProperty *>(getPointerToProperty("PeakRange"));
+      auto peakRangeProp = dynamic_cast<IndexProperty *>(getPointerToProperty("PeakRange"));
       Indexing::SpectrumIndexSet peakRangeSet = *peakRangeProp;
       if (!peakRangeSet.isContiguous()) {
         errors["PeakRange"] = "PeakRange must be a single range";

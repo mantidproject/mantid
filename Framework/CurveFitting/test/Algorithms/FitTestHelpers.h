@@ -25,9 +25,8 @@ static API::MatrixWorkspace_sptr generateSmoothCurveWorkspace();
 
 /// Run fit on a (single spectrum) matrix workspace, using the given type
 /// of function and minimizer option
-static Mantid::API::IAlgorithm_sptr
-runFitAlgorithm(const MatrixWorkspace_sptr &dataToFit, CurveBenchmarks ctype,
-                const std::string &minimizer = "Levenberg-MarquardtMD") {
+static Mantid::API::IAlgorithm_sptr runFitAlgorithm(const MatrixWorkspace_sptr &dataToFit, CurveBenchmarks ctype,
+                                                    const std::string &minimizer = "Levenberg-MarquardtMD") {
 
   auto fit = AlgorithmManager::Instance().create("Fit");
   fit->initialize();
@@ -45,17 +44,15 @@ runFitAlgorithm(const MatrixWorkspace_sptr &dataToFit, CurveBenchmarks ctype,
 
 /// Produces a workspace with data ready to be Fit-ted with the type of function
 /// passed
-static API::MatrixWorkspace_sptr
-generateCurveDataForFit(CurveBenchmarks ctype) {
+static API::MatrixWorkspace_sptr generateCurveDataForFit(CurveBenchmarks ctype) {
 
   if (SingleB2BPeak == ctype)
     return generatePeaksCurveWorkspace();
   else if (SmoothishGaussians == ctype)
     return generateSmoothCurveWorkspace();
   else
-    throw std::invalid_argument(
-        "Unknown curve type when trying to generate curve data: " +
-        boost::lexical_cast<std::string>(ctype));
+    throw std::invalid_argument("Unknown curve type when trying to generate curve data: " +
+                                boost::lexical_cast<std::string>(ctype));
 }
 
 /// Produces a string description of a function with parameters and values, as
@@ -78,14 +75,11 @@ static std::string generateFunctionDescrForFit(CurveBenchmarks ctype) {
 // X0=10000, S=400", NumBanks=1, BankPixelWidth=1, Random=True)
 static API::MatrixWorkspace_sptr generatePeaksCurveWorkspace() {
 
-  Mantid::API::IAlgorithm_sptr sampleAlg =
-      Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
+  Mantid::API::IAlgorithm_sptr sampleAlg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
   sampleAlg->initialize();
   sampleAlg->setChild(true);
   sampleAlg->setProperty("Function", "User Defined");
-  sampleAlg->setProperty(
-      "UserDefinedFunction",
-      "name=BackToBackExponential, I=15000, A=1, B=1.2, X0=10000, S=400");
+  sampleAlg->setProperty("UserDefinedFunction", "name=BackToBackExponential, I=15000, A=1, B=1.2, X0=10000, S=400");
   sampleAlg->setProperty("NumBanks", 1);
   sampleAlg->setProperty("BankPixelWidth", 1);
   sampleAlg->setProperty("XMin", 0.0);
@@ -108,16 +102,13 @@ static API::MatrixWorkspace_sptr generatePeaksCurveWorkspace() {
 // NumBanks=1, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.01, Random=True)
 static API::MatrixWorkspace_sptr generateSmoothCurveWorkspace() {
 
-  Mantid::API::IAlgorithm_sptr sampleAlg =
-      Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
+  Mantid::API::IAlgorithm_sptr sampleAlg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
   sampleAlg->initialize();
   sampleAlg->setChild(true);
   sampleAlg->setProperty("Function", "User Defined");
-  sampleAlg->setProperty(
-      "UserDefinedFunction",
-      "name=LinearBackground, A0=0.4, A1=0.4; name=Gaussian, PeakCentre=1.3, "
-      "Height=7, Sigma=1.7; name=Gaussian, PeakCentre=5, Height=10, "
-      "Sigma=0.7; name=Gaussian, PeakCentre=8, Height=9, Sigma=1.8");
+  sampleAlg->setProperty("UserDefinedFunction", "name=LinearBackground, A0=0.4, A1=0.4; name=Gaussian, PeakCentre=1.3, "
+                                                "Height=7, Sigma=1.7; name=Gaussian, PeakCentre=5, Height=10, "
+                                                "Sigma=0.7; name=Gaussian, PeakCentre=8, Height=9, Sigma=1.8");
   sampleAlg->setProperty("NumBanks", 1);
   sampleAlg->setProperty("BankPixelWidth", 1);
   sampleAlg->setProperty("XMin", 0.0);

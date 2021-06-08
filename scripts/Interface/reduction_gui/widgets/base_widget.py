@@ -107,7 +107,7 @@ class BaseWidget(QWidget):
         """
         return None
 
-    def live_button_toggled_actions(self,checked):
+    def live_button_toggled_actions(self, checked):
         """
             Actions to take on the widget (e.g. setting or disabling certain items) if the
             live button has been turned on or off.
@@ -116,17 +116,14 @@ class BaseWidget(QWidget):
         """
         pass
 
-    def dir_browse_dialog(self):
+    def dir_browse_dialog(self, title: str = 'Select Directory') -> str:
+        r"""Pop up a directory dialog box.
+        @param title: string to use as dialog's title
+        @returns absolute path to directory
         """
-            Pop up a directory dialog box.
-            @param data_type: string used to filter the files
-            @param title: string to use as title
-            @param multi: multiselection is enabled if True
-        """
-        dirname = QFileDialog.getExistingDirectory(self, "Select Directory")
+        dirname = QFileDialog.getExistingDirectory(self, caption=title)
         if isinstance(dirname, tuple):
             dirname = dirname[0]
-
         return dirname
 
     def data_browse_dialog(self, data_type=None, title=None, multi=False):

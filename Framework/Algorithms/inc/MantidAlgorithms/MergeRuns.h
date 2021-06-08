@@ -71,9 +71,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConjoinWorkspaces"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConjoinWorkspaces"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Merging"; }
   // Overriden MultiPeriodGroupAlgorithm method.
@@ -99,8 +97,7 @@ private:
   /// the OUTPUT EW. -1 if it should add a new entry at the end.
   using AdditionTable = std::vector<std::pair<int, int>>;
   /// Copy the history from the input workspaces to the output workspaces
-  template <typename Container>
-  void copyHistoryFromInputWorkspaces(const Container &workspaces) {
+  template <typename Container> void copyHistoryFromInputWorkspaces(const Container &workspaces) {
     API::Workspace_sptr outWS = this->getProperty("OutputWorkspace");
 
     // this is not a child algorithm. Add the history algorithm to the
@@ -124,27 +121,18 @@ private:
 
   // Methods called by exec()
   using Mantid::API::Algorithm::validateInputs;
-  bool validateInputsForEventWorkspaces(
-      const std::vector<std::string> &inputWorkspaces);
+  bool validateInputsForEventWorkspaces(const std::vector<std::string> &inputWorkspaces);
   boost::optional<std::vector<double>> checkRebinning();
-  static std::vector<double>
-  calculateRebinParams(const std::vector<double> &bins1,
-                       const std::vector<double> &bins2);
-  static void noOverlapParams(const HistogramData::HistogramX &X1,
-                              const HistogramData::HistogramX &X2,
+  static std::vector<double> calculateRebinParams(const std::vector<double> &bins1, const std::vector<double> &bins2);
+  static void noOverlapParams(const HistogramData::HistogramX &X1, const HistogramData::HistogramX &X2,
                               std::vector<double> &params);
-  static void intersectionParams(const HistogramData::HistogramX &X1, size_t &i,
-                                 const HistogramData::HistogramX &X2,
+  static void intersectionParams(const HistogramData::HistogramX &X1, size_t &i, const HistogramData::HistogramX &X2,
                                  std::vector<double> &params);
-  static void inclusionParams(const HistogramData::HistogramX &X1, size_t &i,
-                              const HistogramData::HistogramX &X2,
+  static void inclusionParams(const HistogramData::HistogramX &X1, size_t &i, const HistogramData::HistogramX &X2,
                               std::vector<double> &params);
-  API::MatrixWorkspace_sptr
-  rebinInput(const API::MatrixWorkspace_sptr &workspace,
-             const std::vector<double> &params);
-  API::MatrixWorkspace_sptr
-  buildScanningOutputWorkspace(const API::MatrixWorkspace_sptr &outWS,
-                               const API::MatrixWorkspace_sptr &addee);
+  API::MatrixWorkspace_sptr rebinInput(const API::MatrixWorkspace_sptr &workspace, const std::vector<double> &params);
+  API::MatrixWorkspace_sptr buildScanningOutputWorkspace(const API::MatrixWorkspace_sptr &outWS,
+                                                         const API::MatrixWorkspace_sptr &addee);
   /// Progress reporting
   std::unique_ptr<API::Progress> m_progress;
 
@@ -157,10 +145,9 @@ private:
   /// Total number of histograms in the output workspace
   size_t m_outputSize = 0;
 
-  std::vector<SpectrumDefinition>
-  buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
-                     const Geometry::DetectorInfo &addeeDetInfo,
-                     const Geometry::DetectorInfo &newOutDetInfo);
+  std::vector<SpectrumDefinition> buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
+                                                     const Geometry::DetectorInfo &addeeDetInfo,
+                                                     const Geometry::DetectorInfo &newOutDetInfo);
 };
 
 } // namespace Algorithms

@@ -263,35 +263,9 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         mock_view.get_autoscale_enabled.assert_called_once_with()
         mock_view.set_limit_input_enabled.assert_called_once_with(False)
 
-    def test_broken_e_notation_for_lower_axis_lims(self):
-        mock_view = mock.Mock(get_lower_limit=mock.Mock(return_value="e"),
-                              get_upper_limit=mock.Mock(return_value="10"),
-                              get_selected_ax_name=lambda: "My Axes: (0, 0)",
-                              get_axis=lambda: "x",
-                              get_properties=lambda: {})
-
-        presenter = Presenter(self.fig, view=mock_view)
-        presenter.get_selected_ax_name = 'x'
-        presenter.axis_changed()
-
-        self.assertEqual(presenter.current_view_props["xlim"], (0.0, 10.0))
-
-    def test_broken_e_notation_for_upper_axis_lims(self):
-        mock_view = mock.Mock(get_lower_limit=mock.Mock(return_value="-1"),
-                              get_upper_limit=mock.Mock(return_value="e"),
-                              get_selected_ax_name=lambda: "My Axes: (0, 0)",
-                              get_axis=lambda: "x",
-                              get_properties=lambda: {})
-
-        presenter = Presenter(self.fig, view=mock_view)
-        presenter.get_selected_ax_name = 'x'
-        presenter.axis_changed()
-
-        self.assertEqual(presenter.current_view_props["xlim"], (-1.0, 1.0))
-
     def test_ax_limits_set_correctly(self):
-        mock_view = mock.Mock(get_lower_limit=mock.Mock(return_value="-1"),
-                              get_upper_limit=mock.Mock(return_value="10"),
+        mock_view = mock.Mock(get_lower_limit=mock.Mock(return_value=-1.0),
+                              get_upper_limit=mock.Mock(return_value=10.0),
                               get_selected_ax_name=lambda: "My Axes: (0, 0)",
                               get_axis=lambda: "x",
                               get_properties=lambda: {})

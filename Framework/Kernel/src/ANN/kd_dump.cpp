@@ -261,16 +261,15 @@ ANNbd_tree::ANNbd_tree( // build bd-tree from dump file
 //		is used to indicate which type of tree we are expecting.
 //----------------------------------------------------------------------
 
-static ANNkd_ptr
-annReadDump(istream &in,              // input stream
-            ANNtreeType tree_type,    // type of tree expected
-            ANNpointArray &the_pts,   // new points (returned)
-            ANNidxArray &the_pidx,    // point indices (returned)
-            int &the_dim,             // dimension (returned)
-            int &the_n_pts,           // number of points (returned)
-            int &the_bkt_size,        // bucket size (returned)
-            ANNpoint &the_bnd_box_lo, // low bounding point (ret'd)
-            ANNpoint &the_bnd_box_hi) // high bounding point (ret'd)
+static ANNkd_ptr annReadDump(istream &in,              // input stream
+                             ANNtreeType tree_type,    // type of tree expected
+                             ANNpointArray &the_pts,   // new points (returned)
+                             ANNidxArray &the_pidx,    // point indices (returned)
+                             int &the_dim,             // dimension (returned)
+                             int &the_n_pts,           // number of points (returned)
+                             int &the_bkt_size,        // bucket size (returned)
+                             ANNpoint &the_bnd_box_lo, // low bounding point (ret'd)
+                             ANNpoint &the_bnd_box_hi) // high bounding point (ret'd)
 {
   int j;
   char str[STRING_LEN];     // storage for string
@@ -335,8 +334,8 @@ annReadDump(istream &in,              // input stream
       in >> the_bnd_box_hi[j];
     }
 
-    if (0 > the_n_pts || static_cast<size_t>(std::numeric_limits<int>::max()) <=
-                             static_cast<size_t>(the_n_pts / sizeof(ANNidx))) {
+    if (0 > the_n_pts ||
+        static_cast<size_t>(std::numeric_limits<int>::max()) <= static_cast<size_t>(the_n_pts / sizeof(ANNidx))) {
       annError("Too big number of elements for the point index array. This "
                "would cause an overflow when allocating memory",
                ANNabort);
@@ -440,9 +439,8 @@ static ANNkd_ptr annReadTree(istream &in,           // input stream
     in >> n_bnds; // number of bounding sides
                   // allocate bounds array
 
-    if (0 > n_bnds ||
-        static_cast<size_t>(std::numeric_limits<int>::max()) <=
-            static_cast<size_t>(n_bnds / sizeof(ANNorthHalfSpace))) {
+    if (0 > n_bnds || static_cast<size_t>(std::numeric_limits<int>::max()) <=
+                          static_cast<size_t>(n_bnds / sizeof(ANNorthHalfSpace))) {
       annError("Too big number of bounding sides, would cause overflow when "
                "allocating memory",
                ANNabort);

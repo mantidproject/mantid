@@ -48,13 +48,11 @@ private:
   std::string getInstrumentName(const std::string &nxfilename);
 
   /// Run LoadInstrument as a Child Algorithm
-  bool runLoadInstrument(const std::string &idf_filename,
-                         const API::MatrixWorkspace_sptr &localWorkspace,
+  bool runLoadInstrument(const std::string &idf_filename, const API::MatrixWorkspace_sptr &localWorkspace,
                          Algorithm *alg);
 
   /// Load logs from the NeXus file
-  static bool runLoadNexusLogs(const std::string &nexusFileName,
-                               const API::MatrixWorkspace_sptr &localWorkspace,
+  static bool runLoadNexusLogs(const std::string &nexusFileName, const API::MatrixWorkspace_sptr &localWorkspace,
                                Algorithm *alg);
 
   /// Are we going to make a copy of the NeXus file to operate on ?

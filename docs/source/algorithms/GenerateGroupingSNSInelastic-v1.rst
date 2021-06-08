@@ -11,9 +11,9 @@ Description
 
 Generate grouping files for ARCS, CNCS, HYSPEC, and SEQUOIA, by grouping
 py pixels along a tube and px tubes. py is 1, 2, 4, 8, 16, 32, 64, or
-128. px is 1, 2, 4, or 8. 
+128. px is 1, 2, 4, or 8.
 
-.. Note :: 
+.. Note ::
 
     All parameters are strings. Using integers for AlongTubes or AcrossTubes will cause errors
 
@@ -28,12 +28,12 @@ Usage
     import mantid
     outputFilename=mantid.config.getString("defaultsave.directory")+"cncs.xml"
     GenerateGroupingSNSInelastic(outputFilename,AlongTubes="16",AcrossTubes="4",Instrument="CNCS")
-    
+
     #check that it works
     import os.path
     if(os.path.isfile(outputFilename)):
         print("Found file cncs.xml")
-    
+
     ws=Load("CNCS_7860")
     wsg=GroupDetectors(ws,outputFilename)
     print("The grouped workspace has {} histograms".format(wsg.getNumberHistograms()))
@@ -42,7 +42,7 @@ Usage
 
    DeleteWorkspace(ws)
    DeleteWorkspace(wsg)
-   import os,mantid   
+   import os,mantid
    filename=mantid.config.getString("defaultsave.directory")+"cncs.xml"
    os.remove(filename)
 
@@ -57,7 +57,7 @@ If one would use LoadDetectorsGroupingFile on cncs.xml one would get a workspace
 
 .. figure:: /images/GenerateGroupingSNSInelastic.png
    :alt: GenerateGroupingSNSInelastic.png
-    
+
 .. categories::
 
 .. sourcelink::

@@ -32,15 +32,13 @@ using namespace Kernel;
 
 namespace {
 /// Conversion constant
-const double MASS_TO_MEV =
-    0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
+const double MASS_TO_MEV = 0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
 } // namespace
 
 /** Constructor
  */
 ConvertToYSpace::ConvertToYSpace()
-    : Algorithm(), m_inputWS(), m_mass(0.0), m_l1(0.0), m_samplePos(),
-      m_outputWS(), m_qOutputWS() {}
+    : Algorithm(), m_inputWS(), m_mass(0.0), m_l1(0.0), m_samplePos(), m_outputWS(), m_qOutputWS() {}
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToYSpace::name() const { return "ConvertToYSpace"; }
@@ -49,23 +47,19 @@ const std::string ConvertToYSpace::name() const { return "ConvertToYSpace"; }
 int ConvertToYSpace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvertToYSpace::category() const {
-  return "Transforms\\Units";
-}
+const std::string ConvertToYSpace::category() const { return "Transforms\\Units"; }
 
 /**
  * @param ws The workspace with attached instrument
  * @param index Index of the spectrum
  * @return DetectorParams structure containing the relevant parameters
  */
-DetectorParams ConvertToYSpace::getDetectorParameters(
-    const API::MatrixWorkspace_const_sptr &ws, const size_t index) {
+DetectorParams ConvertToYSpace::getDetectorParameters(const API::MatrixWorkspace_const_sptr &ws, const size_t index) {
   auto inst = ws->getInstrument();
   auto sample = inst->getSample();
   auto source = inst->getSource();
   if (!sample || !source) {
-    throw std::invalid_argument(
-        "ConvertToYSpace - Workspace has no source/sample.");
+    throw std::invalid_argument("ConvertToYSpace - Workspace has no source/sample.");
   }
 
   const auto &spectrumInfo = ws->spectrumInfo();
@@ -81,8 +75,7 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
   detpar.l2 = spectrumInfo.l2(index);
   detpar.pos = spectrumInfo.position(index);
   detpar.theta = spectrumInfo.twoTheta(index);
-  detpar.t0 =
-      getComponentParameter(det, pmap, "t0") * 1e-6; // Convert to seconds
+  detpar.t0 = getComponentParameter(det, pmap, "t0") * 1e-6; // Convert to seconds
   detpar.efixed = getComponentParameter(det, pmap, "efixed");
   return detpar;
 }
@@ -96,13 +89,10 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
  * @returns The value of the parameter if it exists
  * @throws A std::invalid_argument error if the parameter does not exist
  */
-double
-ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp,
-                                       const Geometry::ParameterMap &pmap,
-                                       const std::string &name) {
+double ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp, const Geometry::ParameterMap &pmap,
+                                              const std::string &name) {
   double result(0.0);
-  if (const auto &group =
-          dynamic_cast<const Geometry::DetectorGroup *>(&comp)) {
+  if (const auto &group = dynamic_cast<const Geometry::DetectorGroup *>(&comp)) {
     double avg(0.0);
     for (const auto &det : group->getDetectors()) {
       auto param = pmap.getRecursive(det->getComponentID(), name);
@@ -119,9 +109,7 @@ ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp,
     if (param) {
       result = param->value<double>();
     } else {
-      throw std::invalid_argument(
-          "ComptonProfile - Unable to find component parameter \"" + name +
-          "\".");
+      throw std::invalid_argument("ComptonProfile - Unable to find component parameter \"" + name + "\".");
     }
   }
   return result;
@@ -141,19 +129,14 @@ ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp,
  * avoids repeated calculation
  * @param detpar Struct defining Detector parameters @see ComptonProfile
  */
-void ConvertToYSpace::calculateY(double &yspace, double &qspace, double &ei,
-                                 const double mass, const double tsec,
-                                 const double k1, const double v1,
-                                 const DetectorParams &detpar) {
+void ConvertToYSpace::calculateY(double &yspace, double &qspace, double &ei, const double mass, const double tsec,
+                                 const double k1, const double v1, const DetectorParams &detpar) {
   const double v0 = detpar.l1 / (tsec - detpar.t0 - (detpar.l2 / v1));
   ei = MASS_TO_MEV * v0 * v0;
   const double w = ei - detpar.efixed;
-  const double k0 =
-      std::sqrt(ei / PhysicalConstants::E_mev_toNeutronWavenumberSq);
-  qspace =
-      std::sqrt(k0 * k0 + k1 * k1 - 2.0 * k0 * k1 * std::cos(detpar.theta));
-  const double wreduced =
-      PhysicalConstants::E_mev_toNeutronWavenumberSq * qspace * qspace / mass;
+  const double k0 = std::sqrt(ei / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+  qspace = std::sqrt(k0 * k0 + k1 * k1 - 2.0 * k0 * k1 * std::cos(detpar.theta));
+  const double wreduced = PhysicalConstants::E_mev_toNeutronWavenumberSq * qspace * qspace / mass;
   yspace = 0.2393 * (mass / qspace) * (w - wreduced);
 }
 
@@ -166,23 +149,18 @@ void ConvertToYSpace::init() {
   wsValidator->add<HistogramValidator>(false); // point data
   wsValidator->add<InstrumentValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "The input workspace in Time of Flight");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   mustBePositive->setLowerExclusive(true); // strictly greater than 0.0
-  declareProperty("Mass", -1.0, mustBePositive,
-                  "The mass defining the recoil peak in AMU");
+  declareProperty("Mass", -1.0, mustBePositive, "The mass defining the recoil peak in AMU");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace in y-Space");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("QWorkspace", "",
-                                                        Direction::Output,
-                                                        PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("QWorkspace", "", Direction::Output, PropertyMode::Optional),
                   "The output workspace in q-Space");
 }
 
@@ -208,8 +186,7 @@ void ConvertToYSpace::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     if (!convert(i)) {
-      g_log.warning("No detector defined for index=" + std::to_string(i) +
-                    ". Zeroing spectrum.");
+      g_log.warning("No detector defined for index=" + std::to_string(i) + ". Zeroing spectrum.");
       m_outputWS->getSpectrum(i).clearData();
       PARALLEL_CRITICAL(setMasked) {
         spectrumInfo.setMasked(i, true);
@@ -240,8 +217,7 @@ bool ConvertToYSpace::convert(const size_t index) {
   try {
     DetectorParams detPar = getDetectorParameters(m_inputWS, index);
     const double v1 = std::sqrt(detPar.efixed / MASS_TO_MEV);
-    const double k1 = std::sqrt(detPar.efixed /
-                                PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    const double k1 = std::sqrt(detPar.efixed / PhysicalConstants::E_mev_toNeutronWavenumberSq);
 
     auto &outX = m_outputWS->mutableX(index);
     auto &outY = m_outputWS->mutableY(index);

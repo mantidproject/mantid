@@ -38,8 +38,7 @@ without the need for indexes.
 class DetectorInfoPythonIterator {
 public:
   explicit DetectorInfoPythonIterator(DetectorInfo &detectorInfo)
-      : m_begin(detectorInfo.begin()), m_end(detectorInfo.end()),
-        m_firstOrDone(true) {}
+      : m_begin(detectorInfo.begin()), m_end(detectorInfo.end()), m_firstOrDone(true) {}
 
   DetectorInfoItem<DetectorInfo> next() {
     if (!m_firstOrDone)

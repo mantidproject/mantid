@@ -46,19 +46,16 @@ class AbstractDoubleValueExtractor {
 public:
   virtual ~AbstractDoubleValueExtractor() = default;
 
-  virtual double operator()(const API::Run &runInformation,
-                            const std::string &propertyName) const = 0;
+  virtual double operator()(const API::Run &runInformation, const std::string &propertyName) const = 0;
 };
 
-using AbstractDoubleValueExtractor_sptr =
-    std::shared_ptr<AbstractDoubleValueExtractor>;
+using AbstractDoubleValueExtractor_sptr = std::shared_ptr<AbstractDoubleValueExtractor>;
 
 class NumberDoubleValueExtractor : public AbstractDoubleValueExtractor {
 public:
   NumberDoubleValueExtractor() : AbstractDoubleValueExtractor() {}
 
-  double operator()(const API::Run &runInformation,
-                    const std::string &propertyName) const override {
+  double operator()(const API::Run &runInformation, const std::string &propertyName) const override {
     return runInformation.getPropertyValueAsType<double>(propertyName);
   }
 };
@@ -67,11 +64,8 @@ class VectorDoubleValueExtractor : public AbstractDoubleValueExtractor {
 public:
   VectorDoubleValueExtractor() : AbstractDoubleValueExtractor() {}
 
-  double operator()(const API::Run &runInformation,
-                    const std::string &propertyName) const override {
-    return runInformation
-        .getPropertyValueAsType<std::vector<double>>(propertyName)
-        .front();
+  double operator()(const API::Run &runInformation, const std::string &propertyName) const override {
+    return runInformation.getPropertyValueAsType<std::vector<double>>(propertyName).front();
   }
 };
 
@@ -79,21 +73,15 @@ class VectorIntValueExtractor : public AbstractDoubleValueExtractor {
 public:
   VectorIntValueExtractor() : AbstractDoubleValueExtractor() {}
 
-  double operator()(const API::Run &runInformation,
-                    const std::string &propertyName) const override {
-    return static_cast<double>(
-        runInformation.getPropertyValueAsType<std::vector<int>>(propertyName)
-            .front());
+  double operator()(const API::Run &runInformation, const std::string &propertyName) const override {
+    return static_cast<double>(runInformation.getPropertyValueAsType<std::vector<int>>(propertyName).front());
   }
 };
 
 class MANTID_SINQ_DLL PoldiInstrumentAdapter {
 public:
-  PoldiInstrumentAdapter(
-      const API::MatrixWorkspace_const_sptr &matrixWorkspace);
-  PoldiInstrumentAdapter(
-      const Geometry::Instrument_const_sptr &mantidInstrument,
-      const API::Run &runInformation);
+  PoldiInstrumentAdapter(const API::MatrixWorkspace_const_sptr &matrixWorkspace);
+  PoldiInstrumentAdapter(const Geometry::Instrument_const_sptr &mantidInstrument, const API::Run &runInformation);
   virtual ~PoldiInstrumentAdapter() = default;
 
   PoldiAbstractChopper_sptr chopper() const;
@@ -103,24 +91,19 @@ public:
 protected:
   PoldiInstrumentAdapter() {}
 
-  void initializeFromInstrumentAndRun(
-      const Geometry::Instrument_const_sptr &mantidInstrument,
-      const API::Run &runInformation);
+  void initializeFromInstrumentAndRun(const Geometry::Instrument_const_sptr &mantidInstrument,
+                                      const API::Run &runInformation);
 
   void setDetector(const Geometry::Instrument_const_sptr &mantidInstrument);
 
-  void setChopper(const Geometry::Instrument_const_sptr &mantidInstrument,
-                  const API::Run &runInformation);
+  void setChopper(const Geometry::Instrument_const_sptr &mantidInstrument, const API::Run &runInformation);
   double getCleanChopperSpeed(double rawChopperSpeed) const;
   double getChopperSpeedFromRun(const API::Run &runInformation) const;
   double getChopperSpeedTargetFromRun(const API::Run &runInformation) const;
-  bool chopperSpeedMatchesTarget(const API::Run &runInformation,
-                                 double chopperSpeed) const;
+  bool chopperSpeedMatchesTarget(const API::Run &runInformation, double chopperSpeed) const;
 
-  double extractPropertyFromRun(const API::Run &runInformation,
-                                const std::string &propertyName) const;
-  AbstractDoubleValueExtractor_sptr
-  getExtractorForProperty(Kernel::Property *chopperSpeedProperty) const;
+  double extractPropertyFromRun(const API::Run &runInformation, const std::string &propertyName) const;
+  AbstractDoubleValueExtractor_sptr getExtractorForProperty(Kernel::Property *chopperSpeedProperty) const;
 
   void setSpectrum(const Geometry::Instrument_const_sptr &mantidInstrument);
 

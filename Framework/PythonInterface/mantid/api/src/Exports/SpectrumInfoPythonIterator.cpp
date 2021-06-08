@@ -20,8 +20,7 @@ void export_SpectrumInfoPythonIterator() {
   // Export to Python
   class_<SpectrumInfoPythonIterator>("SpectrumInfoPythonIterator", no_init)
       .def("__iter__", objects::identity_function())
-      .def("__next__", &SpectrumInfoPythonIterator::next,
-           return_value_policy<copy_const_reference>());
+      .def("__next__", &SpectrumInfoPythonIterator::next, return_value_policy<copy_const_reference>());
   /*
    Return value policy for next is to copy the const reference. Copy by value is
    essential for python 2.0 compatibility because items (SpectrumInfoItem) will

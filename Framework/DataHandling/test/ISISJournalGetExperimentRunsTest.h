@@ -26,10 +26,8 @@ using testing::AtLeast;
 using testing::NiceMock;
 using testing::Return;
 
-static auto testRun1 = IJournal::RunData{
-    {"name", "run 1"}, {"run_number", "12345"}, {"title", "run 1 description"}};
-static auto testRun2 = IJournal::RunData{
-    {"name", "run 2"}, {"run_number", "22345"}, {"title", "run 2 description"}};
+static auto testRun1 = IJournal::RunData{{"name", "run 1"}, {"run_number", "12345"}, {"title", "run 1 description"}};
+static auto testRun2 = IJournal::RunData{{"name", "run 2"}, {"run_number", "22345"}, {"title", "run 2 description"}};
 
 /**
  * Mock out the IJournal calls used by the algorithm
@@ -38,8 +36,7 @@ class MockJournal : public IJournal {
 public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(getCycleNames, std::vector<std::string>());
-  MOCK_METHOD2(getRuns, std::vector<RunData>(std::vector<std::string> const &,
-                                             RunData const &));
+  MOCK_METHOD2(getRuns, std::vector<RunData>(std::vector<std::string> const &, RunData const &));
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
@@ -52,20 +49,16 @@ public:
   // The constructor takes ownership of the journal, but note that when
   // makeJournal is called ownership is lost, so this algorithm can only be
   // executed once
-  MockISISJournalGetExperimentRuns()
-      : m_journal(std::make_unique<NiceMock<MockJournal>>()) {}
+  MockISISJournalGetExperimentRuns() : m_journal(std::make_unique<NiceMock<MockJournal>>()) {}
 
-  void setJournal(std::unique_ptr<IJournal> journal) {
-    m_journal = std::move(journal);
-  }
+  void setJournal(std::unique_ptr<IJournal> journal) { m_journal = std::move(journal); }
 
 private:
   std::unique_ptr<IJournal> m_journal;
 
   // Note that this passes ownership of the journal to the caller so can only
   // be called once (i.e. create a new algorithm for each test).
-  std::unique_ptr<IJournal> makeJournal(std::string const &,
-                                        std::string const &) override {
+  std::unique_ptr<IJournal> makeJournal(std::string const &, std::string const &) override {
     return std::move(m_journal);
   }
 };
@@ -92,8 +85,7 @@ public:
 
     ITableWorkspace_sptr table = alg.getProperty("Outputworkspace");
     auto const names = table->getColumnNames();
-    auto const expectedNames =
-        std::vector<std::string>{"Name", "Run Number", "Title"};
+    auto const expectedNames = std::vector<std::string>{"Name", "Run Number", "Title"};
     TS_ASSERT_EQUALS(table->columnCount(), expectedNames.size());
     TS_ASSERT_EQUALS(names, expectedNames);
   }
@@ -128,20 +120,15 @@ private:
 
   // Set up and return a known mock journal on the algorithm so that we can
   // test expectations on it
-  NiceMock<MockJournal> *
-  setupAlgJournal(MockISISJournalGetExperimentRuns &alg) {
+  NiceMock<MockJournal> *setupAlgJournal(MockISISJournalGetExperimentRuns &alg) {
     auto journal_uptr = std::make_unique<NiceMock<MockJournal>>();
     auto journal = journal_uptr.get();
     alg.setJournal(std::move(journal_uptr));
     return journal;
   }
 
-  void
-  expectJournalReturns(NiceMock<MockJournal> *journal,
-                       std::vector<IJournal::RunData> const &expectedRuns) {
-    EXPECT_CALL(*journal, getRuns(_, _))
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(expectedRuns));
+  void expectJournalReturns(NiceMock<MockJournal> *journal, std::vector<IJournal::RunData> const &expectedRuns) {
+    EXPECT_CALL(*journal, getRuns(_, _)).Times(AtLeast(1)).WillRepeatedly(Return(expectedRuns));
   }
 
   void assertTableRowEquals(TableRow &tableRow, IJournal::RunData &runData) {

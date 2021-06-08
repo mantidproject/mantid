@@ -63,14 +63,12 @@ public:
 
     // Add absolute path to a file which doesn't exist
     Poco::Path filepath =
-        Poco::Path(Mantid::Kernel::ConfigService::Instance().getTempDir(),
-                   "ACCUMULATEMDTEST_NONEXISTENTFILE");
+        Poco::Path(Mantid::Kernel::ConfigService::Instance().getTempDir(), "ACCUMULATEMDTEST_NONEXISTENTFILE");
 
     // Create vector of data_sources to filter
     std::vector<std::string> data_sources{filepath.toString()};
 
-    Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs,
-                                                  efix);
+    Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs, efix);
 
     TS_ASSERT(data_sources.empty());
   }
@@ -84,11 +82,9 @@ public:
     std::vector<double> efix(1, 0.0);
 
     // Create vector of data_sources to filter
-    std::vector<std::string> data_sources{
-        "ACCUMULATEMDTEST_NONEXISTENTWORKSPACE"};
+    std::vector<std::string> data_sources{"ACCUMULATEMDTEST_NONEXISTENTWORKSPACE"};
 
-    Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs,
-                                                  efix);
+    Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs, efix);
 
     TS_ASSERT(data_sources.empty());
   }
@@ -110,8 +106,7 @@ public:
     // Create vector of data_sources to filter
     std::vector<std::string> data_sources{ws_name};
 
-    Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs,
-                                                  efix);
+    Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs, efix);
 
     TS_ASSERT(!data_sources.empty());
 
@@ -129,15 +124,13 @@ public:
 
     // Create a temporary file to find
     Poco::Path filepath =
-        Poco::Path(Mantid::Kernel::ConfigService::Instance().getTempDir(),
-                   "ACCUMULATEMDTEST_EXISTENTFILE");
+        Poco::Path(Mantid::Kernel::ConfigService::Instance().getTempDir(), "ACCUMULATEMDTEST_EXISTENTFILE");
     Poco::File existent_file(filepath);
     existent_file.createFile();
     // Create vector of data_sources to filter
     std::vector<std::string> data_sources{filepath.toString()};
 
-    Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs,
-                                                  efix);
+    Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs, efix);
 
     TS_ASSERT(!data_sources.empty());
 
@@ -155,8 +148,7 @@ public:
     std::vector<double> gs(3, 0.0);
     std::vector<double> efix(3, 0.0);
 
-    Mantid::MDAlgorithms::filterToNew(input_data, current_data, psi, gl, gs,
-                                      efix);
+    Mantid::MDAlgorithms::filterToNew(input_data, current_data, psi, gl, gs, efix);
 
     // Two input vectors were identical, so we should get an empty vector back
     TS_ASSERT(input_data.empty());
@@ -169,8 +161,7 @@ public:
   }
 
   void test_filter_to_new() {
-    std::vector<std::string> input_data{"test1", "test2", "test3", "test4",
-                                        "test5"};
+    std::vector<std::string> input_data{"test1", "test2", "test3", "test4", "test5"};
     std::vector<std::string> current_data{"test1", "test3", "test4"};
 
     // Create vector for other parameters
@@ -179,8 +170,7 @@ public:
     std::vector<double> gs(5, 0.0);
     std::vector<double> efix(5, 0.0);
 
-    Mantid::MDAlgorithms::filterToNew(input_data, current_data, psi, gl, gs,
-                                      efix);
+    Mantid::MDAlgorithms::filterToNew(input_data, current_data, psi, gl, gs, efix);
 
     // test2 and test5 is new data (it is in input_data but not current_data)
     // and so should be returned in the vector
@@ -228,8 +218,7 @@ public:
 
   void test_algorithm_success_append_data() {
 
-    auto sim_alg = Mantid::API::AlgorithmManager::Instance().create(
-        "CreateSimulationWorkspace");
+    auto sim_alg = Mantid::API::AlgorithmManager::Instance().create("CreateSimulationWorkspace");
     sim_alg->initialize();
     sim_alg->setPropertyValue("Instrument", "MAR");
     sim_alg->setPropertyValue("BinParams", "-3,1,3");
@@ -240,8 +229,7 @@ public:
     sim_alg->setPropertyValue("OutputWorkspace", "data_source_2");
     sim_alg->execute();
 
-    auto log_alg =
-        Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+    auto log_alg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
     log_alg->initialize();
     log_alg->setProperty("Workspace", "data_source_1");
     log_alg->setPropertyValue("LogName", "Ei");
@@ -252,8 +240,7 @@ public:
     log_alg->setProperty("Workspace", "data_source_2");
     log_alg->execute();
 
-    auto create_alg =
-        Mantid::API::AlgorithmManager::Instance().create("CreateMD");
+    auto create_alg = Mantid::API::AlgorithmManager::Instance().create("CreateMD");
     create_alg->setRethrows(true);
     create_alg->initialize();
     create_alg->setPropertyValue("OutputWorkspace", "md_sample_workspace");
@@ -266,8 +253,8 @@ public:
     create_alg->execute();
     // IMDEventWorkspace_sptr in_ws =
     // create_alg->getProperty("OutputWorkspace");
-    IMDEventWorkspace_sptr in_ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
-        AnalysisDataService::Instance().retrieve("md_sample_workspace"));
+    IMDEventWorkspace_sptr in_ws =
+        std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("md_sample_workspace"));
 
     AccumulateMD acc_alg;
     acc_alg.initialize();
@@ -281,8 +268,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(acc_alg.execute());
     // IMDEventWorkspace_sptr out_ws = acc_alg.getProperty("OutputWorkspace");
     IMDEventWorkspace_sptr out_ws =
-        std::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve("accumulated_workspace"));
+        std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("accumulated_workspace"));
 
     // Should have the same number of events in output as the sum of the inputs
     TS_ASSERT_EQUALS(2 * in_ws->getNEvents(), out_ws->getNEvents());
@@ -290,8 +276,7 @@ public:
 
   void test_algorithm_success_clean() {
 
-    auto sim_alg = Mantid::API::AlgorithmManager::Instance().create(
-        "CreateSimulationWorkspace");
+    auto sim_alg = Mantid::API::AlgorithmManager::Instance().create("CreateSimulationWorkspace");
     sim_alg->initialize();
     sim_alg->setPropertyValue("Instrument", "MAR");
     sim_alg->setPropertyValue("BinParams", "-3,1,3");
@@ -302,8 +287,7 @@ public:
     sim_alg->setPropertyValue("OutputWorkspace", "data_source_2");
     sim_alg->execute();
 
-    auto log_alg =
-        Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+    auto log_alg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
     log_alg->initialize();
     log_alg->setProperty("Workspace", "data_source_1");
     log_alg->setPropertyValue("LogName", "Ei");
@@ -314,8 +298,7 @@ public:
     log_alg->setProperty("Workspace", "data_source_2");
     log_alg->execute();
 
-    auto create_alg =
-        Mantid::API::AlgorithmManager::Instance().create("CreateMD");
+    auto create_alg = Mantid::API::AlgorithmManager::Instance().create("CreateMD");
     create_alg->setRethrows(true);
     create_alg->initialize();
     create_alg->setPropertyValue("OutputWorkspace", "md_sample_workspace");
@@ -326,8 +309,8 @@ public:
     create_alg->setPropertyValue("u", "1,0,0");
     create_alg->setPropertyValue("v", "0,1,0");
     create_alg->execute();
-    IMDEventWorkspace_sptr in_ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
-        AnalysisDataService::Instance().retrieve("md_sample_workspace"));
+    IMDEventWorkspace_sptr in_ws =
+        std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("md_sample_workspace"));
 
     AccumulateMD acc_alg;
     acc_alg.initialize();
@@ -341,8 +324,7 @@ public:
     acc_alg.setProperty("Clean", true);
     TS_ASSERT_THROWS_NOTHING(acc_alg.execute());
     IMDEventWorkspace_sptr out_ws =
-        std::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve("accumulated_workspace"));
+        std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("accumulated_workspace"));
 
     // Should only have the same number of events as data_source_2 this time
     // as create from clean so lost data in data_source_1

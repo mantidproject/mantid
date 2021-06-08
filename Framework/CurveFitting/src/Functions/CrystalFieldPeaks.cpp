@@ -18,12 +18,10 @@ namespace Functions {
 DECLARE_FUNCTION(CrystalFieldPeaks)
 
 /// Constructor
-CrystalFieldPeaks::CrystalFieldPeaks()
-    : CrystalFieldPeaksBase(), API::IFunctionGeneral(), m_defaultDomainSize(0) {
+CrystalFieldPeaks::CrystalFieldPeaks() : CrystalFieldPeaksBase(), API::IFunctionGeneral(), m_defaultDomainSize(0) {
 
   declareAttribute("Temperature", Attribute(1.0));
-  declareParameter("IntensityScaling", 1.0,
-                   "A scaling factor for peak intensities.");
+  declareParameter("IntensityScaling", 1.0, "A scaling factor for peak intensities.");
 }
 
 std::string CrystalFieldPeaks::name() const { return "CrystalFieldPeaks"; }
@@ -32,13 +30,10 @@ size_t CrystalFieldPeaks::getNumberDomainColumns() const { return 0; }
 
 size_t CrystalFieldPeaks::getNumberValuesPerArgument() const { return 2; }
 
-size_t CrystalFieldPeaks::getDefaultDomainSize() const {
-  return m_defaultDomainSize;
-}
+size_t CrystalFieldPeaks::getDefaultDomainSize() const { return m_defaultDomainSize; }
 
-void CrystalFieldPeaks::functionGeneral(
-    const API::FunctionDomainGeneral & /*domain*/,
-    API::FunctionValues &values) const {
+void CrystalFieldPeaks::functionGeneral(const API::FunctionDomainGeneral & /*domain*/,
+                                        API::FunctionValues &values) const {
 
   DoubleFortranVector en;
   ComplexFortranMatrix wf;
@@ -51,13 +46,11 @@ void CrystalFieldPeaks::functionGeneral(
   DoubleFortranMatrix iEnergies;
   const double de = getAttribute("ToleranceEnergy").asDouble();
   const double di = getAttribute("ToleranceIntensity").asDouble();
-  calculateIntensities(nre, en, wf, temperature, de, degeneration, eEnergies,
-                       iEnergies);
+  calculateIntensities(nre, en, wf, temperature, de, degeneration, eEnergies, iEnergies);
 
   DoubleFortranVector eExcitations;
   DoubleFortranVector iExcitations;
-  calculateExcitations(eEnergies, iEnergies, de, di, eExcitations,
-                       iExcitations);
+  calculateExcitations(eEnergies, iEnergies, de, di, eExcitations, iExcitations);
 
   size_t n = eExcitations.size();
   if (2 * n > values.size()) {

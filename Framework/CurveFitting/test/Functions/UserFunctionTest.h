@@ -23,15 +23,9 @@ public:
     std::vector<double> m_buffer;
 
   public:
-    UserTestJacobian(int nData, int nParams) : m_nParams(nParams) {
-      m_buffer.resize(nData * nParams);
-    }
-    void set(size_t iY, size_t iP, double value) override {
-      m_buffer[iY * m_nParams + iP] = value;
-    }
-    double get(size_t iY, size_t iP) override {
-      return m_buffer[iY * m_nParams + iP];
-    }
+    UserTestJacobian(int nData, int nParams) : m_nParams(nParams) { m_buffer.resize(nData * nParams); }
+    void set(size_t iY, size_t iP, double value) override { m_buffer[iY * m_nParams + iP] = value; }
+    double get(size_t iY, size_t iP) override { return m_buffer[iY * m_nParams + iP]; }
     void zero() override { m_buffer.assign(m_buffer.size(), 0.0); }
   };
 
@@ -45,8 +39,7 @@ public:
     TS_ASSERT_EQUALS(fun.getParameter("h"), 2.2);
     TS_ASSERT_EQUALS(fun.getParameter("a"), 2.0);
     TS_ASSERT_EQUALS(fun.getParameter("c"), 1.2);
-    TS_ASSERT_EQUALS(fun.asString(),
-                     "name=UserFunction,Formula=h*sin(a*x-c),h=2.2,a=2,c=1.2");
+    TS_ASSERT_EQUALS(fun.asString(), "name=UserFunction,Formula=h*sin(a*x-c),h=2.2,a=2,c=1.2");
     TS_ASSERT_EQUALS(fun.getAttribute("Formula").asString(), "h*sin(a*x-c)");
 
     const size_t nParams = 3;

@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
-
+from math import floor
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
+from Muon.GUI.Common.muon_diff import MuonDiff
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_phasequad import MuonPhasequad
@@ -40,7 +41,7 @@ def get_grouping_psi(workspace):
                 grouping_list.append(MuonGroup(sample_log_value, [ii + 1]))
             sample_log_value_list.append(sample_log_value)
 
-    return grouping_list, [], ''
+    return grouping_list, [], [], ''
 
 
 def get_default_grouping(workspace, instrument, main_field_direction):
@@ -56,13 +57,13 @@ def get_default_grouping(workspace, instrument, main_field_direction):
                 grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
 
         except IndexError:
-            return [], [], ''
+            return [], [], [], ''
     else:
         return get_grouping_psi(workspace)
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = os.path.join(instrument_directory, grouping_file)
-    new_groups, new_pairs, description, default = xml_utils.load_grouping_from_XML(filename)
-    return new_groups, new_pairs, default
+    new_groups, new_pairs, new_diffs, description, default = xml_utils.load_grouping_from_XML(filename)
+    return new_groups, new_pairs, new_diffs, default
 
 
 def construct_empty_group(group_names, group_index=0):
@@ -112,18 +113,20 @@ class MuonGroupPairContext(object):
     def __init__(self, check_group_contains_valid_detectors=lambda x: True):
         self._groups = []
         self._pairs = []
+        self._diffs = []
         self._phasequad = []
         self._selected = ''
         self._selected_type = ''
         self._selected_pairs = []
         self._selected_groups = []
+        self._selected_diffs = []
 
         self.message_notifier = MessageNotifier(self)
 
         self._check_group_contains_valid_detectors = check_group_contains_valid_detectors
 
     def __getitem__(self, name):
-        for item in self._groups + self.pairs:
+        for item in self.all_groups_and_pairs:
             if item.name == name:
                 return item
         return None
@@ -141,12 +144,31 @@ class MuonGroupPairContext(object):
         return self._phasequad
 
     @property
+    def diffs(self):
+        return self._diffs
+
+    def get_diffs(self, group_or_pair):
+        return [diff for diff in self._diffs if diff.group_or_pair == group_or_pair]
+
+    @property
+    def all_groups_and_pairs(self):
+        return self.groups + self.pairs + self.diffs
+
+    @property
     def selected_pairs(self):
         return self._selected_pairs
 
     @property
     def selected_groups(self):
         return self._selected_groups
+
+    @property
+    def selected_diffs(self):
+        return self._selected_diffs
+
+    @property
+    def selected_groups_and_pairs(self):
+        return self.selected_groups+self.selected_pairs+self.selected_diffs
 
     def clear(self):
         self.clear_groups()
@@ -158,11 +180,22 @@ class MuonGroupPairContext(object):
     def clear_pairs(self):
         self._pairs = []
 
+    def clear_diffs(self, group_or_pair):
+        to_rm = []
+        for diff in self._diffs:
+            if diff.group_or_pair == group_or_pair:
+                to_rm.append(diff.name)
+        for name in to_rm:
+            self.remove_diff(name)
+
     def clear_selected_pairs(self):
         self._selected_pairs = []
 
     def clear_selected_groups(self):
         self._selected_groups = []
+
+    def clear_selected_diffs(self):
+        self._selected_diffs = []
 
     @property
     def selected(self):
@@ -181,6 +214,10 @@ class MuonGroupPairContext(object):
     def selected_type(self, value):
         if value in ["Pair", "Group"] and self._selected_type != value:
             self._selected_type = value
+
+    @property
+    def diff_names(self):
+        return [diff.name for diff in self._diffs]
 
     @property
     def group_names(self):
@@ -242,15 +279,30 @@ class MuonGroupPairContext(object):
                     self._phasequad.remove(phasequad_obj)
                 return
 
+    def add_diff(self, diff):
+        assert isinstance(diff, MuonDiff)
+        if self._check_name_unique(diff.name):
+            self._diffs.append(diff)
+        else:
+            raise ValueError('Groups and pairs must have unique names')
+
+    def remove_diff(self, diff_name):
+        for diff in self._diffs:
+            if diff.name == diff_name:
+                self._diffs.remove(diff)
+                return
+
     def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction, num_periods):
-        default_groups, default_pairs, default_selected = get_default_grouping(workspace, instrument, main_field_direction)
+        default_groups, default_pairs, default_diffs, default_selected = get_default_grouping(workspace, instrument, main_field_direction)
         if num_periods == 1:
             self._groups = default_groups
+            self._diffs = default_diffs
             self._pairs = default_pairs
             self._selected = default_selected
         else:
             periods = range(num_periods + 1)[1:]
             self._groups = []
+            self._diffs = []
             self._pairs = []
             for period in periods:
                 for group in default_groups:
@@ -259,12 +311,24 @@ class MuonGroupPairContext(object):
             for period in periods:
                 for pair in default_pairs:
                     self._pairs.append(MuonPair(pair.name + str(period), pair.forward_group + str(period),
-                                       pair.backward_group + str(period), pair.alpha))
+                                       pair.backward_group + str(period), pair.alpha, [period]))
+
+            if default_diffs:
+                for diff in default_diffs:
+                    self._diffs.append(MuonDiff(diff.name, diff.forward, diff.backward, diff.group_or_pair, diff.periods))
+            else:
+                for index in range(0, floor(len(periods)/2.)):
+                    for pair in default_pairs:
+                        odd_period = index*2 + 1
+                        even_period = odd_period+1
+                        self._diffs.append(MuonDiff("pair_diff"+str(index+1),
+                                                    pair.name + str(odd_period), pair.name + str(even_period), group_or_pair="pair",
+                                                    periods=[odd_period,even_period]))
 
             self._selected = self.pair_names[0]
 
     def _check_name_unique(self, name):
-        for item in self._groups + self.pairs:
+        for item in self.all_groups_and_pairs:
             if item.name == name:
                 return False
         return True
@@ -298,7 +362,7 @@ class MuonGroupPairContext(object):
         return workspace_list
 
     def get_equivalent_group_pair(self, workspace_name):
-        for item in self._groups + self._pairs:
+        for item in self.all_groups_and_pairs:
             equivalent_name = item.get_rebined_or_unbinned_version_of_workspace_if_it_exists(workspace_name)
             if equivalent_name:
                 return equivalent_name
@@ -314,6 +378,7 @@ class MuonGroupPairContext(object):
     def reset_selected_groups_and_pairs(self):
         self.clear_selected_pairs()
         self.clear_selected_groups()
+        self.clear_selected_diffs()
 
     def add_group_to_selected_groups(self, group):
         if group in self.group_names and group not in self.selected_groups:
@@ -322,6 +387,14 @@ class MuonGroupPairContext(object):
     def remove_group_from_selected_groups(self, group):
         if group in self.group_names and group in self.selected_groups:
             self._selected_groups.remove(str(group))
+
+    def add_diff_to_selected_diffs(self, diff):
+        if diff in self.diff_names and diff not in self.selected_diffs:
+            self._selected_diffs.append(str(diff))
+
+    def remove_diff_from_selected_diffs(self, diff):
+        if diff in self.diff_names and diff in self.selected_diffs:
+            self._selected_diffs.remove(str(diff))
 
     def add_pair_to_selected_pairs(self, pair):
         if pair in self.pair_names and pair not in self.selected_pairs:
@@ -332,7 +405,7 @@ class MuonGroupPairContext(object):
             self._selected_pairs.remove(str(pair))
 
     def remove_workspace_by_name(self, workspace_name):
-        for item in self.groups + self.pairs:
+        for item in self.all_groups_and_pairs:
             item.remove_workspace_by_name(workspace_name)
 
     def get_unormalisised_workspace_list(self, workspace_list):
@@ -345,7 +418,7 @@ class MuonGroupPairContext(object):
                 return unnormalised_workspace
 
     def get_group_pair_name_and_run_from_workspace_name(self, workspace_name):
-        for group_pair in self.groups + self.pairs:
+        for group_pair in self.all_groups_and_pairs:
             run = group_pair.get_run_for_workspace(workspace_name)
             if(run):
                 return group_pair.name, str(run)

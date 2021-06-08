@@ -21,9 +21,8 @@ class IndexInfo;
   @author Simon Heybrock
   @date 2016
 */
-MANTID_INDEXING_DLL IndexInfo
-group(const IndexInfo &source, std::vector<SpectrumNumber> &&specNums,
-      const std::vector<std::vector<std::size_t>> &grouping);
+MANTID_INDEXING_DLL IndexInfo group(const IndexInfo &source, std::vector<SpectrumNumber> &&specNums,
+                                    const std::vector<std::vector<std::size_t>> &grouping);
 
 } // namespace Indexing
 } // namespace Mantid

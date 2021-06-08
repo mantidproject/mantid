@@ -35,9 +35,7 @@ public:
   }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConvertUnits"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConvertUnits"}; }
   const std::string category() const override;
 
 protected:
@@ -51,10 +49,8 @@ private:
   /// A simple internal structure to hold information on variables
   class Variable {
   public:
-    Variable(const std::string &name)
-        : name(name), value(0.0), isGeometric(false) {}
-    Variable(const std::string &name, bool isGeometric)
-        : name(name), value(0.0), isGeometric(isGeometric) {}
+    Variable(const std::string &name) : name(name), value(0.0), isGeometric(false) {}
+    Variable(const std::string &name, bool isGeometric) : name(name), value(0.0), isGeometric(isGeometric) {}
     std::string name;
     double value;
     bool isGeometric;
@@ -62,10 +58,8 @@ private:
   using Variable_ptr = std::shared_ptr<Variable>;
 
   void setAxisValue(const double &value, std::vector<Variable_ptr> &variables);
-  void calculateValues(mu::Parser &p, std::vector<double> &vec,
-                       std::vector<Variable_ptr> variables);
-  void setGeometryValues(const API::SpectrumInfo &specInfo, const size_t index,
-                         std::vector<Variable_ptr> &variables);
+  void calculateValues(mu::Parser &p, std::vector<double> &vec, std::vector<Variable_ptr> variables);
+  void setGeometryValues(const API::SpectrumInfo &specInfo, const size_t index, std::vector<Variable_ptr> &variables);
   double evaluateResult(mu::Parser &p);
 };
 

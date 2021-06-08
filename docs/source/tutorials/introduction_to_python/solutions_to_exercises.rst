@@ -1,7 +1,7 @@
 .. _solutions_to_exercises:
 
 ======================
-Solutions To Exercises 
+Solutions To Exercises
 ======================
 
 Exercise 1
@@ -75,7 +75,7 @@ Exercise 3
    ## Use the list to print out the value of the ratio of successive numbers of the sequence,
    ##   printing out the final value.
    ## Extend the program so that the Fibonacci list is calculated in a function that takes the
-   ##   number of required values as a parameter and returns the list. 
+   ##   number of required values as a parameter and returns the list.
 
    # Function to calculate the first n fibonacci numbers
    # and return them as a list
@@ -146,14 +146,14 @@ Exercise 4
    # Write a program that creates a dictionary and initializes it with 5 names/ID pairs.
    ## Create a function that prints out the dictionary in a nicely formatted table;
    ## Update the dictionary with another 5 name/values and reprint the table,
-   ##   making sure you understand the ordering within the map. 
+   ##   making sure you understand the ordering within the map.
 
    def formatLine(cola, colb, width):
        return cola.center(width) + '|' + colb.center(width)
 
    # A simple two cloumn print out
    def outputStore(store):
-       print('Phonebook contains {} entries:'.format(len(store))) 
+       print('Phonebook contains {} entries:'.format(len(store)))
 
        # Do a quick sweep to find out the longest name
        col_width = 0
@@ -183,26 +183,26 @@ Exercise 4
 
    #Phonebook contains 5 entries:
    #------------------------------------------
-   #         Name        |         Ext.        
+   #         Name        |         Ext.
    #------------------------------------------
-   #         Bob         |         2314        
-   #      Joe Bloggs     |         1233        
-   #    Linus Torvalds   |         4132        
-   #   Guido Van Rossum  |         4321        
-   #     Martyn Gigg     |         1234        
+   #         Bob         |         2314
+   #      Joe Bloggs     |         1233
+   #    Linus Torvalds   |         4132
+   #   Guido Van Rossum  |         4321
+   #     Martyn Gigg     |         1234
    #Phonebook contains 9 entries:
    #------------------------------------------
-   #         Name        |         Ext.        
+   #         Name        |         Ext.
    #------------------------------------------
-   #   Guido Van Rossum  |         4321        
-   #     Martyn Gigg     |         1234        
-   #      Steve Jobs     |         7898        
-   #   Bjarne Strousoup  |         9876        
-   #      Joe Bloggs     |         1233        
-   #    Linus Torvalds   |         4132        
-   #         Dave        |         7098        
-   #      Bill Gates     |         9898        
-   #         Bob         |         9871   
+   #   Guido Van Rossum  |         4321
+   #     Martyn Gigg     |         1234
+   #      Steve Jobs     |         7898
+   #   Bjarne Strousoup  |         9876
+   #      Joe Bloggs     |         1233
+   #    Linus Torvalds   |         4132
+   #         Dave        |         7098
+   #      Bill Gates     |         9898
+   #         Bob         |         9871
 
 Exercise 5
 ==========
@@ -240,8 +240,8 @@ Exercise 5
    #         3. Split the line up into sections (Hint: The string has a .split() function that splits the string on
    #            whitespace and gives back a list with each section as an element of the list)
    #         4. Convert the second column value into an integer
-   #         5. Keep track of the values for each line and compute an average for the file. 
-   #   4. Finally, print out a list of file,average-value pairs 
+   #         5. Keep track of the values for each line and compute an average for the file.
+   #   4. Finally, print out a list of file,average-value pairs
    import os
 
    file_dir = "C:\\MantidInstall\\data\\"

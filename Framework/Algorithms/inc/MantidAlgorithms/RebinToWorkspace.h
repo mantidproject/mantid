@@ -46,9 +46,8 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"Rebin"}; }
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 
 private:
   bool m_preserveEvents{true};
@@ -59,12 +58,9 @@ private:
   /// Execution code
   void exec() override;
 
-  bool needToRebin(const API::MatrixWorkspace_sptr &left,
-                   const API::MatrixWorkspace_sptr &rght);
-  void rebin(API::MatrixWorkspace_sptr &toRebin,
-             API::MatrixWorkspace_sptr &toMatch);
-  void histogram(API::MatrixWorkspace_sptr &toRebin,
-                 API::MatrixWorkspace_sptr &toMatch);
+  bool needToRebin(const API::MatrixWorkspace_sptr &left, const API::MatrixWorkspace_sptr &rght);
+  void rebin(API::MatrixWorkspace_sptr &toRebin, API::MatrixWorkspace_sptr &toMatch);
+  void histogram(API::MatrixWorkspace_sptr &toRebin, API::MatrixWorkspace_sptr &toMatch);
 };
 } // namespace Algorithms
 } // namespace Mantid

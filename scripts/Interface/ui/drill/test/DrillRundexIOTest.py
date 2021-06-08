@@ -26,6 +26,8 @@ class DrillRundexIOTest(unittest.TestCase):
 
         self.filename = "test"
         self.mDrillModel = mock.Mock()
+        self.mExportModel = mock.Mock()
+        self.mDrillModel.getExportModel.return_value = self.mExportModel
         self.model = DrillRundexIO(self.filename, self.mDrillModel)
 
     def test_getFilename(self):
@@ -152,6 +154,8 @@ class DrillRundexIOTest(unittest.TestCase):
         mD.getCycleAndExperiment.return_value = "cycle", "exp"
         mD.getVisualSettings.return_value = {"key": "value"}
         mD.getSettings.return_value = {"setting1": "value1"}
+        self.mExportModel.getAlgorithms.return_value = ["ex1", "ex2"]
+        self.mExportModel.isAlgoritmActivated.return_value = True
         s0 = mock.Mock()
         s0.getParameters.return_value = {"param1": "value1"}
         mD.getSamples.return_value = [s0]
@@ -165,6 +169,7 @@ class DrillRundexIOTest(unittest.TestCase):
                 "ExperimentID": "exp",
                 "VisualSettings": {"key": "value"},
                 "GlobalSettings": {"setting1": "value1"},
+                "ExportAlgorithms": ["ex1", "ex2"],
                 "Samples": [{"param1": "value1"}],
                 "SamplesGroups": {"A": [0]},
                 "MasterSamples": {"A": 0}

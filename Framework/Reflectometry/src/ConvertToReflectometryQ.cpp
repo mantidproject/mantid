@@ -75,14 +75,12 @@ Check that the input workspace is of the correct type.
 @throw: runtime_error if the units do not appear to be correct/compatible with
 the algorithm.
 */
-void checkInputWorkspace(
-    const Mantid::API::MatrixWorkspace_const_sptr &inputWs) {
+void checkInputWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &inputWs) {
   auto spectraAxis = inputWs->getAxis(1);
   const std::string label = spectraAxis->unit()->label();
   const std::string expectedLabel = "degrees";
   if (expectedLabel != label) {
-    std::string message =
-        "Spectra axis should have units of degrees. Instead found: " + label;
+    std::string message = "Spectra axis should have units of degrees. Instead found: " + label;
     throw std::runtime_error(message);
   }
 }
@@ -94,12 +92,10 @@ Check the extents.
 */
 void checkExtents(const std::vector<double> &extents) {
   if (extents.size() != 4) {
-    throw std::runtime_error(
-        "Four comma separated extents inputs should be provided");
+    throw std::runtime_error("Four comma separated extents inputs should be provided");
   }
   if ((extents[0] >= extents[1]) || (extents[2] >= extents[3])) {
-    throw std::runtime_error(
-        "Extents must be provided min, max with min less than max!");
+    throw std::runtime_error("Extents must be provided min, max with min less than max!");
   }
 }
 
@@ -110,8 +106,7 @@ incident theta value.
 @param theta: The proposed incident theta value provided by the user.
 @throw: logic_error if the theta value is out of range.
 */
-void checkCustomThetaInputs(const bool bUseOwnIncidentTheta,
-                            const double &theta) {
+void checkCustomThetaInputs(const bool bUseOwnIncidentTheta, const double &theta) {
   if (bUseOwnIncidentTheta) {
     if (theta < 0 || theta > 90) {
       throw std::logic_error("Overriding incident theta is out of range");
@@ -136,8 +131,7 @@ Check for the output dimensionality.
 @throw: runtime_errror if the dimensionality is not supported.
 */
 void checkOutputDimensionalityChoice(const std::string &outputDimensions) {
-  if (outputDimensions != qSpaceTransform() &&
-      outputDimensions != kSpaceTransform() &&
+  if (outputDimensions != qSpaceTransform() && outputDimensions != kSpaceTransform() &&
       outputDimensions != pSpaceTransform()) {
     throw std::runtime_error("Unknown transformation");
   }
@@ -155,8 +149,7 @@ double getThetaFromLogs(const MatrixWorkspace_sptr &inputWs) {
   const Mantid::API::Run &run = inputWs->run();
   try {
     Property *p = run.getLogData("stheta");
-    auto incidentThetas =
-        dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(p);
+    auto incidentThetas = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(p);
     if (!incidentThetas) {
       throw std::runtime_error("stheta log not found");
     }
@@ -178,17 +171,13 @@ DECLARE_ALGORITHM(ConvertToReflectometryQ)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string ConvertToReflectometryQ::name() const {
-  return "ConvertToReflectometryQ";
-}
+const std::string ConvertToReflectometryQ::name() const { return "ConvertToReflectometryQ"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ConvertToReflectometryQ::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvertToReflectometryQ::category() const {
-  return "Reflectometry";
-}
+const std::string ConvertToReflectometryQ::category() const { return "Reflectometry"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -197,104 +186,79 @@ const std::string ConvertToReflectometryQ::category() const {
  */
 void ConvertToReflectometryQ::init() {
   auto compositeValidator = std::make_shared<CompositeValidator>();
-  compositeValidator->add(
-      std::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
+  compositeValidator->add(std::make_shared<API::WorkspaceUnitValidator>("Wavelength"));
   compositeValidator->add(std::make_shared<API::HistogramValidator>());
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input, compositeValidator),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, compositeValidator),
       "An input workspace in wavelength");
 
-  std::vector<std::string> propOptions{qSpaceTransform(), pSpaceTransform(),
-                                       kSpaceTransform()};
+  std::vector<std::string> propOptions{qSpaceTransform(), pSpaceTransform(), kSpaceTransform()};
 
-  declareProperty(
-      "OutputDimensions", "Q (lab frame)",
-      std::make_shared<StringListValidator>(propOptions),
-      "What will be the dimensions of the output workspace?\n"
-      "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
-      "  P (lab frame): Momentum in the sample frame.\n"
-      "  K initial and final vectors in the z plane.");
+  declareProperty("OutputDimensions", "Q (lab frame)", std::make_shared<StringListValidator>(propOptions),
+                  "What will be the dimensions of the output workspace?\n"
+                  "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
+                  "  P (lab frame): Momentum in the sample frame.\n"
+                  "  K initial and final vectors in the z plane.");
 
   std::vector<std::string> transOptions{centerTransform(), normPolyTransform()};
 
-  declareProperty("Method", centerTransform(),
-                  std::make_shared<StringListValidator>(transOptions),
+  declareProperty("Method", centerTransform(), std::make_shared<StringListValidator>(transOptions),
                   "What method should be used for the axis transformation?\n"
                   "  Centre: Use center point rebinning.\n"
                   "  NormalisedPolygon: Use normalised polygon rebinning.");
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
-                      "OverrideIncidentTheta", false),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("OverrideIncidentTheta", false),
                   "Use the provided incident theta value.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("IncidentTheta", -1),
-      "An input incident theta value specified in degrees."
-      "Optional input value for the incident theta specified in degrees.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("IncidentTheta", -1),
+                  "An input incident theta value specified in degrees."
+                  "Optional input value for the incident theta specified in degrees.");
 
   std::vector<double> extents{-50, +50, -50, +50};
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Extents", std::move(extents)),
-      "A comma separated list of min, max for each dimension. "
-      "Takes four values in the form dim_0_min, dim_0_max, "
-      "dim_1_min, dim_1_max,\n"
-      "specifying the extents of each dimension. Optional, default "
-      "+-50 in each dimension.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Extents", std::move(extents)),
+                  "A comma separated list of min, max for each dimension. "
+                  "Takes four values in the form dim_0_min, dim_0_max, "
+                  "dim_1_min, dim_1_max,\n"
+                  "specifying the extents of each dimension. Optional, default "
+                  "+-50 in each dimension.");
 
   setPropertySettings("IncidentTheta",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "OverrideIncidentTheta", IS_EQUAL_TO, "1"));
+                      std::make_unique<Kernel::EnabledWhenProperty>("OverrideIncidentTheta", IS_EQUAL_TO, "1"));
 
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<bool>>("OutputAsMDWorkspace",
-                                                        true),
-      "Generate the output as a MDWorkspace, otherwise a Workspace2D is "
-      "returned.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("OutputAsMDWorkspace", true),
+                  "Generate the output as a MDWorkspace, otherwise a Workspace2D is "
+                  "returned.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Output 2D Workspace.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputVertexes", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputVertexes", "", Direction::Output),
                   "Output TableWorkspace with vertex information. See "
                   "DumpVertexes property.");
 
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>("NumberBinsQx", 100),
-      "The number of bins along the qx axis. Optional and only "
-      "applies to 2D workspaces. Defaults to 100.");
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>("NumberBinsQz", 100),
-      "The number of bins along the qx axis. Optional and only "
-      "applies to 2D workspaces. Defaults to 100.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>("NumberBinsQx", 100),
+                  "The number of bins along the qx axis. Optional and only "
+                  "applies to 2D workspaces. Defaults to 100.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>("NumberBinsQz", 100),
+                  "The number of bins along the qx axis. Optional and only "
+                  "applies to 2D workspaces. Defaults to 100.");
 
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<bool>>("DumpVertexes", false),
-      "If set, with 2D rebinning, the intermediate vertexes for "
-      "each polygon will be written out for debugging purposes. "
-      "Creates a second output table workspace.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("DumpVertexes", false),
+                  "If set, with 2D rebinning, the intermediate vertexes for "
+                  "each polygon will be written out for debugging purposes. "
+                  "Creates a second output table workspace.");
 
-  setPropertySettings("NumberBinsQx",
-                      std::make_unique<EnabledWhenProperty>(
-                          "OutputAsMDWorkspace", IS_NOT_DEFAULT));
-  setPropertySettings("NumberBinsQz",
-                      std::make_unique<EnabledWhenProperty>(
-                          "OutputAsMDWorkspace", IS_NOT_DEFAULT));
+  setPropertySettings("NumberBinsQx", std::make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_NOT_DEFAULT));
+  setPropertySettings("NumberBinsQz", std::make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_NOT_DEFAULT));
 
   // Create box controller properties.
   this->initBoxControllerProps("2,2", 50, 10);
 
   // Only show box controller properties when a md workspace is returned.
-  setPropertySettings("SplitInto", std::make_unique<EnabledWhenProperty>(
-                                       "OutputAsMDWorkspace", IS_DEFAULT));
-  setPropertySettings("SplitThreshold", std::make_unique<EnabledWhenProperty>(
-                                            "OutputAsMDWorkspace", IS_DEFAULT));
-  setPropertySettings(
-      "MaxRecursionDepth",
-      std::make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_DEFAULT));
+  setPropertySettings("SplitInto", std::make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_DEFAULT));
+  setPropertySettings("SplitThreshold", std::make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_DEFAULT));
+  setPropertySettings("MaxRecursionDepth", std::make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_DEFAULT));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -344,28 +308,22 @@ void ConvertToReflectometryQ::exec() {
   ReflectometryTransform_sptr transform;
   Mantid::Geometry::MDFrame_uptr frame;
   if (outputDimensions == qSpaceTransform()) {
-    transform = std::make_shared<ReflectometryTransformQxQz>(
-        dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx,
-        numberOfBinsQz);
+    transform = std::make_shared<ReflectometryTransformQxQz>(dim0min, dim0max, dim1min, dim1max, incidentTheta,
+                                                             numberOfBinsQx, numberOfBinsQz);
     frame.reset(new Mantid::Geometry::QLab);
   } else if (outputDimensions == pSpaceTransform()) {
-    transform = std::make_shared<ReflectometryTransformP>(
-        dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx,
-        numberOfBinsQz);
-    frame.reset(new Mantid::Geometry::GeneralFrame(
-        "P", Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
+    transform = std::make_shared<ReflectometryTransformP>(dim0min, dim0max, dim1min, dim1max, incidentTheta,
+                                                          numberOfBinsQx, numberOfBinsQz);
+    frame.reset(new Mantid::Geometry::GeneralFrame("P", Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
   } else {
-    transform = std::make_shared<ReflectometryTransformKiKf>(
-        dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx,
-        numberOfBinsQz);
-    frame.reset(new Mantid::Geometry::GeneralFrame(
-        "KiKf", Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
+    transform = std::make_shared<ReflectometryTransformKiKf>(dim0min, dim0max, dim1min, dim1max, incidentTheta,
+                                                             numberOfBinsQx, numberOfBinsQz);
+    frame.reset(new Mantid::Geometry::GeneralFrame("KiKf", Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
   }
 
   IMDWorkspace_sptr outputWS;
 
-  TableWorkspace_sptr vertexes =
-      std::make_shared<Mantid::DataObjects::TableWorkspace>();
+  TableWorkspace_sptr vertexes = std::make_shared<Mantid::DataObjects::TableWorkspace>();
   Progress transSelectionProg(this, 0.0, 0.1, 2);
   if (outputAsMDWorkspace) {
     transSelectionProg.report("Choosing Transformation");
@@ -383,8 +341,7 @@ void ConvertToReflectometryQ::exec() {
       auto vertexesTable = vertexes;
       // perform the normalised polygon transformation
       transPerformProg.report("Performing Transformation");
-      auto normPolyTrans = transform->executeNormPoly(
-          inputWs, vertexesTable, dumpVertexes, outputDimensions);
+      auto normPolyTrans = transform->executeNormPoly(inputWs, vertexesTable, dumpVertexes, outputDimensions);
       // copy any experiment info from input workspace
       normPolyTrans->copyExperimentInfoFrom(inputWs.get());
       // produce MDHistoWorkspace from normPolyTrans workspace.
@@ -404,8 +361,7 @@ void ConvertToReflectometryQ::exec() {
     auto vertexesTable = vertexes;
     // perform the normalised polygon transformation
     transPerformProg.report("Performing Transformation");
-    auto output2DWS = transform->executeNormPoly(
-        inputWs, vertexesTable, dumpVertexes, outputDimensions);
+    auto output2DWS = transform->executeNormPoly(inputWs, vertexesTable, dumpVertexes, outputDimensions);
     // copy any experiment info from input workspace
     output2DWS->copyExperimentInfoFrom(inputWs.get());
     outputWS = output2DWS;
@@ -428,9 +384,7 @@ void ConvertToReflectometryQ::exec() {
   setPropertyProg.report("Success");
 }
 
-MatrixWorkspace_sptr
-ConvertToReflectometryQ::correctDetectors(MatrixWorkspace_sptr inputWs,
-                                          const double theta) {
+MatrixWorkspace_sptr ConvertToReflectometryQ::correctDetectors(MatrixWorkspace_sptr inputWs, const double theta) {
 
   if (theta < 0)
     return inputWs;
@@ -450,16 +404,14 @@ ConvertToReflectometryQ::correctDetectors(MatrixWorkspace_sptr inputWs,
     auto parent = detector->getParent();
     if (parent) {
       auto parentType = parent->type();
-      auto detectorName = (parentType == "Instrument") ? detector->getName()
-                                                       : parent->getName();
+      auto detectorName = (parentType == "Instrument") ? detector->getName() : parent->getName();
       componentsToMove.insert(detectorName);
     }
   }
 
   MatrixWorkspace_sptr outWS = inputWs;
   for (const auto &component : componentsToMove) {
-    IAlgorithm_sptr alg =
-        createChildAlgorithm("SpecularReflectionPositionCorrect");
+    IAlgorithm_sptr alg = createChildAlgorithm("SpecularReflectionPositionCorrect");
     alg->setProperty("InputWorkspace", outWS);
     alg->setProperty("TwoTheta", theta);
     alg->setProperty("DetectorComponentName", component);

@@ -75,8 +75,7 @@ public:
       pool.schedule(std::make_shared<FunctionTask>(unconditional_writer));
     pool.joinAll();
     std::cout << tim << " to execute all " << numTasks << " tasks\n";
-    TSM_ASSERT_EQUALS("The writers were all called", shared_data.size(),
-                      DATA_SIZE + numTasks)
+    TSM_ASSERT_EQUALS("The writers were all called", shared_data.size(), DATA_SIZE + numTasks)
   }
 
   /** Mix 1 writing thread for 9 reading threads */
@@ -92,7 +91,6 @@ public:
     }
     pool.joinAll();
     std::cout << tim << " to execute all " << numTasks << " tasks\n";
-    TSM_ASSERT_EQUALS("The writers were all called", shared_data.size(),
-                      DATA_SIZE + numTasks / 10)
+    TSM_ASSERT_EQUALS("The writers were all called", shared_data.size(), DATA_SIZE + numTasks / 10)
   }
 };

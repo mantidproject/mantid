@@ -131,7 +131,7 @@ Output:
 
     ws = Load(path)
     print("Saved workspace has {} spectra".format(ws.getNumberHistograms()))
-    
+
 Output:
 
 .. testoutput:: ExSaveNexusProcessedEvent

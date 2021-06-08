@@ -28,9 +28,7 @@ public:
   const std::string name() const override { return "SumEventsByLogValue"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"FilterByLogValue"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"FilterByLogValue"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Events"; }
   /// Summary of algorithms purpose
@@ -48,26 +46,19 @@ private:
 
   void createTableOutput(const Kernel::TimeSeriesProperty<int> *log);
 
-  template <typename T>
-  void createBinnedOutput(const Kernel::TimeSeriesProperty<T> *log);
+  template <typename T> void createBinnedOutput(const Kernel::TimeSeriesProperty<T> *log);
 
-  void filterEventList(const API::IEventList &eventList, const int minVal,
-                       const int maxVal,
-                       const Kernel::TimeSeriesProperty<int> *log,
-                       std::vector<int> &Y);
-  void addMonitorCounts(const API::ITableWorkspace_sptr &outputWorkspace,
-                        const Kernel::TimeSeriesProperty<int> *log,
+  void filterEventList(const API::IEventList &eventList, const int minVal, const int maxVal,
+                       const Kernel::TimeSeriesProperty<int> *log, std::vector<int> &Y);
+  void addMonitorCounts(const API::ITableWorkspace_sptr &outputWorkspace, const Kernel::TimeSeriesProperty<int> *log,
                         const int minVal, const int maxVal);
-  std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>>
-  getNumberSeriesLogs();
-  double
-  sumProtonCharge(const Kernel::TimeSeriesProperty<double> *protonChargeLog,
-                  const Kernel::TimeSplitterType &filter);
+  std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>> getNumberSeriesLogs();
+  double sumProtonCharge(const Kernel::TimeSeriesProperty<double> *protonChargeLog,
+                         const Kernel::TimeSplitterType &filter);
 
-  DataObjects::EventWorkspace_const_sptr
-      m_inputWorkspace;                ///< The input workspace
-  std::string m_logName;               ///< The name of the log to sum against
-  std::vector<double> m_binningParams; ///< The optional binning parameters
+  DataObjects::EventWorkspace_const_sptr m_inputWorkspace; ///< The input workspace
+  std::string m_logName;                                   ///< The name of the log to sum against
+  std::vector<double> m_binningParams;                     ///< The optional binning parameters
 };
 
 } // namespace Algorithms

@@ -13,8 +13,7 @@ namespace Mantid {
 namespace API {
 
 /// The constructor
-FunctionDomain1D::FunctionDomain1D(const double *x, size_t n)
-    : m_data(x), m_n(n), m_peakRadius(0) {}
+FunctionDomain1D::FunctionDomain1D(const double *x, size_t n) : m_data(x), m_n(n), m_peakRadius(0) {}
 
 /// Convert to a vector
 std::vector<double> FunctionDomain1D::toVector() const {
@@ -40,9 +39,7 @@ int FunctionDomain1D::getPeakRadius() const { return m_peakRadius; }
  * Create a domain from a vector.
  * @param xvalues :: Vector with function arguments to be copied from.
  */
-FunctionDomain1DVector::FunctionDomain1DVector(
-    const std::vector<double> &xvalues)
-    : FunctionDomain1D(nullptr, 0) {
+FunctionDomain1DVector::FunctionDomain1DVector(const std::vector<double> &xvalues) : FunctionDomain1D(nullptr, 0) {
   if (xvalues.empty()) {
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
   }
@@ -55,9 +52,8 @@ FunctionDomain1DVector::FunctionDomain1DVector(
  * @param from :: Iterator to start copying values from.
  * @param to :: Iterator to the end of the data.
  */
-FunctionDomain1DVector::FunctionDomain1DVector(
-    std::vector<double>::const_iterator from,
-    std::vector<double>::const_iterator to)
+FunctionDomain1DVector::FunctionDomain1DVector(std::vector<double>::const_iterator from,
+                                               std::vector<double>::const_iterator to)
     : FunctionDomain1D(nullptr, 0) {
   if (from == to) {
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
@@ -74,9 +70,7 @@ FunctionDomain1DVector::FunctionDomain1DVector(
  * @param endX :: The end of an interval.
  * @param n :: Number of values to create.
  */
-FunctionDomain1DVector::FunctionDomain1DVector(const double startX,
-                                               const double endX,
-                                               const size_t n)
+FunctionDomain1DVector::FunctionDomain1DVector(const double startX, const double endX, const size_t n)
     : FunctionDomain1D(nullptr, 0) {
   if (n == 0) {
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
@@ -97,8 +91,7 @@ FunctionDomain1DVector::FunctionDomain1DVector(const double startX,
  * Create a domain with a single value.
  * @param x :: The argument value.
  */
-FunctionDomain1DVector::FunctionDomain1DVector(const double x)
-    : FunctionDomain1D(nullptr, 0) {
+FunctionDomain1DVector::FunctionDomain1DVector(const double x) : FunctionDomain1D(nullptr, 0) {
   m_X.resize(1);
   m_X[0] = x;
   resetData(&m_X[0], m_X.size());
@@ -108,9 +101,7 @@ FunctionDomain1DVector::FunctionDomain1DVector(const double x)
  * Copy constructor.
  * @param right :: The other domain.
  */
-FunctionDomain1DVector::FunctionDomain1DVector(
-    const FunctionDomain1DVector &right)
-    : FunctionDomain1D(nullptr, 0) {
+FunctionDomain1DVector::FunctionDomain1DVector(const FunctionDomain1DVector &right) : FunctionDomain1D(nullptr, 0) {
   *this = right;
 }
 
@@ -118,8 +109,7 @@ FunctionDomain1DVector::FunctionDomain1DVector(
  * Copy assignment operator.
  * @param right :: The other domain.
  */
-FunctionDomain1DVector &FunctionDomain1DVector::
-operator=(const FunctionDomain1DVector &right) {
+FunctionDomain1DVector &FunctionDomain1DVector::operator=(const FunctionDomain1DVector &right) {
   if (right.m_X.empty()) {
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
   }
@@ -133,8 +123,7 @@ operator=(const FunctionDomain1DVector &right) {
  * @param wi :: The workspace index of a spectrum the xvalues come from.
  * @param xvalues :: Vector with function arguments to be copied from.
  */
-FunctionDomain1DSpectrum::FunctionDomain1DSpectrum(
-    size_t wi, const std::vector<double> &xvalues)
+FunctionDomain1DSpectrum::FunctionDomain1DSpectrum(size_t wi, const std::vector<double> &xvalues)
     : FunctionDomain1DVector(xvalues), m_workspaceIndex(wi) {}
 
 /**
@@ -143,15 +132,13 @@ FunctionDomain1DSpectrum::FunctionDomain1DSpectrum(
  * @param from :: Iterator to start copying values from.
  * @param to :: Iterator to the end of the data.
  */
-FunctionDomain1DSpectrum::FunctionDomain1DSpectrum(
-    size_t wi, std::vector<double>::const_iterator from,
-    std::vector<double>::const_iterator to)
+FunctionDomain1DSpectrum::FunctionDomain1DSpectrum(size_t wi, std::vector<double>::const_iterator from,
+                                                   std::vector<double>::const_iterator to)
     : FunctionDomain1DVector(from, to), m_workspaceIndex(wi) {}
 
 /// Constructor.
 /// @param bins :: A vector with bin boundaries.
-FunctionDomain1DHistogram::FunctionDomain1DHistogram(
-    const std::vector<double> &bins)
+FunctionDomain1DHistogram::FunctionDomain1DHistogram(const std::vector<double> &bins)
     : FunctionDomain1DHistogram(bins.begin(), bins.end()) {}
 
 /**
@@ -159,9 +146,8 @@ FunctionDomain1DHistogram::FunctionDomain1DHistogram(
  * @param from :: Iterator to start copying values from.
  * @param to :: Iterator to the end of the data.
  */
-FunctionDomain1DHistogram::FunctionDomain1DHistogram(
-    std::vector<double>::const_iterator from,
-    std::vector<double>::const_iterator to)
+FunctionDomain1DHistogram::FunctionDomain1DHistogram(std::vector<double>::const_iterator from,
+                                                     std::vector<double>::const_iterator to)
     : FunctionDomain1D(nullptr, 0), m_bins(from, to) {
   if (m_bins.size() < 2) {
     throw std::runtime_error("Cannot initialize FunctionDomain1DHistogram with "
@@ -171,9 +157,7 @@ FunctionDomain1DHistogram::FunctionDomain1DHistogram(
 }
 
 /// Get the leftmost boundary
-double FunctionDomain1DHistogram::leftBoundary() const {
-  return m_bins.front();
-}
+double FunctionDomain1DHistogram::leftBoundary() const { return m_bins.front(); }
 
 } // namespace API
 } // namespace Mantid

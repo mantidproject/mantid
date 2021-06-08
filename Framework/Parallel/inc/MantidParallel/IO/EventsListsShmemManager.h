@@ -61,29 +61,21 @@ class MANTID_PARALLEL_DLL EventsListsShmemManager {
 public:
   // Constructor for client usage: "sets" Manager to the piece of shared memory
   // with existed GuardedEventLists in it
-  EventsListsShmemManager(const std::string &segmentName,
-                          const std::string &elName);
+  EventsListsShmemManager(const std::string &segmentName, const std::string &elName);
 
   virtual ~EventsListsShmemManager() = default;
 
-  void appendEvent(std::size_t chunkN, std::size_t listN,
-                   const Types::Event::TofEvent &event);
-  template <typename InIter>
-  void appendEvent(std::size_t chunkN, std::size_t listN, InIter from,
-                   InIter to);
+  void appendEvent(std::size_t chunkN, std::size_t listN, const Types::Event::TofEvent &event);
+  template <typename InIter> void appendEvent(std::size_t chunkN, std::size_t listN, InIter from, InIter to);
 
-  std::size_t pixelCount() {
-    return m_chunks && !m_chunks->empty() ? m_chunks->at(0).size() : 0;
-  }
+  std::size_t pixelCount() { return m_chunks && !m_chunks->empty() ? m_chunks->at(0).size() : 0; }
 
-  MANTID_PARALLEL_DLL friend std::ostream &
-  operator<<(std::ostream &os, const EventsListsShmemManager &manager);
+  MANTID_PARALLEL_DLL friend std::ostream &operator<<(std::ostream &os, const EventsListsShmemManager &manager);
 
 protected:
   // Constructor for internal usage in  that just sets up the names, instance
   // for m_eventLists is defined later in derivated class constructor.
-  EventsListsShmemManager(const std::string &segmentName,
-                          const std::string &elName, int);
+  EventsListsShmemManager(const std::string &segmentName, const std::string &elName, int);
 
   const VoidAllocator &alloc() const;
 
@@ -105,8 +97,7 @@ protected:
 
 /// Appends the range of ToF events (from other container for example)
 template <typename InIter>
-void EventsListsShmemManager::appendEvent(std::size_t chunkN, std::size_t listN,
-                                          InIter from, InIter to) {
+void EventsListsShmemManager::appendEvent(std::size_t chunkN, std::size_t listN, InIter from, InIter to) {
   if (!m_chunks)
     throw("No event lists found.");
   auto &list = m_chunks->at(chunkN).at(listN);

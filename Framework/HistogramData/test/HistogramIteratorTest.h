@@ -19,9 +19,7 @@ class HistogramIteratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HistogramIteratorTest *createSuite() {
-    return new HistogramIteratorTest();
-  }
+  static HistogramIteratorTest *createSuite() { return new HistogramIteratorTest(); }
   static void destroySuite(HistogramIteratorTest *suite) { delete suite; }
 
   void test_construction() {
@@ -108,9 +106,7 @@ public:
     hist.setPointStandardDeviations(PointStandardDeviations{0.1, 0.3, 0.5});
     const auto dX = hist.dataDx();
     TS_ASSERT(std::equal(hist.begin(), hist.end(), dX.begin(),
-                         [](const HistogramItem &item, const double &dx) {
-                           return item.centerError() == dx;
-                         }));
+                         [](const HistogramItem &item, const double &dx) { return item.centerError() == dx; }));
   }
 
   void test_iterate_over_histogram_counts() {
@@ -118,9 +114,7 @@ public:
     Histogram hist(Points{1.1, 1.2, 1.4}, expectedCounts);
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedCounts.begin(),
-                         [](const HistogramItem &item, const double &counts) {
-                           return item.counts() == counts;
-                         }));
+                         [](const HistogramItem &item, const double &counts) { return item.counts() == counts; }));
   }
 
   void test_iterate_over_histogram_counts_when_histogram_has_frequencies() {
@@ -128,9 +122,7 @@ public:
     Counts expectedCounts = hist.counts();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedCounts.begin(),
-                         [](const HistogramItem &item, const double &counts) {
-                           return item.counts() == counts;
-                         }));
+                         [](const HistogramItem &item, const double &counts) { return item.counts() == counts; }));
   }
 
   void test_iterate_over_histogram_frequencies() {
@@ -139,9 +131,7 @@ public:
 
     TS_ASSERT(
         std::equal(hist.begin(), hist.end(), expectedFrequencies.begin(),
-                   [](const HistogramItem &item, const double &frequency) {
-                     return item.frequency() == frequency;
-                   }));
+                   [](const HistogramItem &item, const double &frequency) { return item.frequency() == frequency; }));
   }
 
   void test_iterate_over_histogram_frequencies_when_histogram_has_counts() {
@@ -150,9 +140,7 @@ public:
 
     TS_ASSERT(
         std::equal(hist.begin(), hist.end(), expectedFrequencies.begin(),
-                   [](const HistogramItem &item, const double &frequency) {
-                     return item.frequency() == frequency;
-                   }));
+                   [](const HistogramItem &item, const double &frequency) { return item.frequency() == frequency; }));
   }
 
   void test_iterate_over_histogram_center_when_histogram_has_bins() {
@@ -160,9 +148,7 @@ public:
     Points expectedPoints = hist.points();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedPoints.begin(),
-                         [](const HistogramItem &item, const double &point) {
-                           return item.center() == point;
-                         }));
+                         [](const HistogramItem &item, const double &point) { return item.center() == point; }));
   }
 
   void test_iterate_over_histogram_center_when_histogram_has_points() {
@@ -170,9 +156,7 @@ public:
     Points expectedPoints = hist.points();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedPoints.begin(),
-                         [](const HistogramItem &item, const double &point) {
-                           return item.center() == point;
-                         }));
+                         [](const HistogramItem &item, const double &point) { return item.center() == point; }));
   }
 
   void test_iterate_over_histogram_width_when_histogram_has_bins() {
@@ -180,9 +164,7 @@ public:
     std::vector<double> expectedWidths = {1, 1, 2};
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedWidths.begin(),
-                         [](const HistogramItem &item, const double &width) {
-                           return item.binWidth() == width;
-                         }));
+                         [](const HistogramItem &item, const double &width) { return item.binWidth() == width; }));
   }
 
   void test_iterate_over_histogram_width_when_histogram_has_points() {
@@ -190,113 +172,89 @@ public:
     std::vector<double> expectedWidths = {2, 2, 2};
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedWidths.begin(),
-                         [](const HistogramItem &item, const double &width) {
-                           return item.binWidth() == width;
-                         }));
+                         [](const HistogramItem &item, const double &width) { return item.binWidth() == width; }));
   }
 
   void test_iterate_over_histogram_count_variances_when_histogram_has_counts() {
     Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4});
     auto expectedCountVariances = hist.countVariances();
 
-    TS_ASSERT(std::equal(hist.begin(), hist.end(),
-                         expectedCountVariances.begin(),
-                         [](const HistogramItem &item, const double &variance) {
-                           return item.countVariance() == variance;
-                         }));
+    TS_ASSERT(
+        std::equal(hist.begin(), hist.end(), expectedCountVariances.begin(),
+                   [](const HistogramItem &item, const double &variance) { return item.countVariance() == variance; }));
   }
 
-  void
-  test_iterate_over_histogram_count_variances_when_histogram_has_frequencies() {
+  void test_iterate_over_histogram_count_variances_when_histogram_has_frequencies() {
     Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4});
     auto expectedCountVariances = hist.countVariances();
 
-    TS_ASSERT(std::equal(hist.begin(), hist.end(),
-                         expectedCountVariances.begin(),
-                         [](const HistogramItem &item, const double &variance) {
-                           return item.countVariance() == variance;
-                         }));
+    TS_ASSERT(
+        std::equal(hist.begin(), hist.end(), expectedCountVariances.begin(),
+                   [](const HistogramItem &item, const double &variance) { return item.countVariance() == variance; }));
   }
 
   void test_iterate_over_histogram_count_std_when_histogram_has_counts() {
     Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4});
     auto expectedCountStd = hist.countStandardDeviations();
 
-    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedCountStd.begin(),
-                         [](const HistogramItem &item, const double &sigma) {
-                           return item.countStandardDeviation() == sigma;
-                         }));
+    TS_ASSERT(std::equal(
+        hist.begin(), hist.end(), expectedCountStd.begin(),
+        [](const HistogramItem &item, const double &sigma) { return item.countStandardDeviation() == sigma; }));
   }
 
   void test_iterate_over_histogram_count_std_when_histogram_has_frequencies() {
     Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4});
     auto expectedCountStd = hist.countStandardDeviations();
 
-    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedCountStd.begin(),
-                         [](const HistogramItem &item, const double &sigma) {
-                           return item.countStandardDeviation() == sigma;
-                         }));
+    TS_ASSERT(std::equal(
+        hist.begin(), hist.end(), expectedCountStd.begin(),
+        [](const HistogramItem &item, const double &sigma) { return item.countStandardDeviation() == sigma; }));
   }
 
-  void
-  test_iterate_over_histogram_frequency_variances_when_histogram_has_frequencys() {
+  void test_iterate_over_histogram_frequency_variances_when_histogram_has_frequencys() {
     Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4});
     auto expectedFrequencyVariances = hist.frequencyVariances();
 
-    TS_ASSERT(std::equal(hist.begin(), hist.end(),
-                         expectedFrequencyVariances.begin(),
-                         [](const HistogramItem &item, const double &variance) {
-                           return item.frequencyVariance() == variance;
-                         }));
+    TS_ASSERT(std::equal(
+        hist.begin(), hist.end(), expectedFrequencyVariances.begin(),
+        [](const HistogramItem &item, const double &variance) { return item.frequencyVariance() == variance; }));
   }
 
-  void
-  test_iterate_over_histogram_frequency_variances_when_histogram_has_frequencies() {
+  void test_iterate_over_histogram_frequency_variances_when_histogram_has_frequencies() {
     Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4});
     auto expectedFrequencyVariances = hist.frequencyVariances();
 
-    TS_ASSERT(std::equal(hist.begin(), hist.end(),
-                         expectedFrequencyVariances.begin(),
-                         [](const HistogramItem &item, const double &variance) {
-                           return item.frequencyVariance() == variance;
-                         }));
+    TS_ASSERT(std::equal(
+        hist.begin(), hist.end(), expectedFrequencyVariances.begin(),
+        [](const HistogramItem &item, const double &variance) { return item.frequencyVariance() == variance; }));
   }
 
-  void
-  test_iterate_over_histogram_frequency_std_when_histogram_has_frequencys() {
+  void test_iterate_over_histogram_frequency_std_when_histogram_has_frequencys() {
     Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4});
     auto expectedFrequencyStd = hist.frequencyStandardDeviations();
 
-    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedFrequencyStd.begin(),
-                         [](const HistogramItem &item, const double &sigma) {
-                           return item.frequencyStandardDeviation() == sigma;
-                         }));
+    TS_ASSERT(std::equal(
+        hist.begin(), hist.end(), expectedFrequencyStd.begin(),
+        [](const HistogramItem &item, const double &sigma) { return item.frequencyStandardDeviation() == sigma; }));
   }
 
-  void
-  test_iterate_over_histogram_frequency_std_when_histogram_has_frequencies() {
+  void test_iterate_over_histogram_frequency_std_when_histogram_has_frequencies() {
     Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4});
     auto expectedFrequencyStd = hist.frequencyStandardDeviations();
 
-    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedFrequencyStd.begin(),
-                         [](const HistogramItem &item, const double &sigma) {
-                           return item.frequencyStandardDeviation() == sigma;
-                         }));
+    TS_ASSERT(std::equal(
+        hist.begin(), hist.end(), expectedFrequencyStd.begin(),
+        [](const HistogramItem &item, const double &sigma) { return item.frequencyStandardDeviation() == sigma; }));
   }
 };
 
 class HistogramIteratorTestPerformance : public CxxTest::TestSuite {
 public:
-  static HistogramIteratorTestPerformance *createSuite() {
-    return new HistogramIteratorTestPerformance;
-  }
-  static void destroySuite(HistogramIteratorTestPerformance *suite) {
-    delete suite;
-  }
+  static HistogramIteratorTestPerformance *createSuite() { return new HistogramIteratorTestPerformance; }
+  static void destroySuite(HistogramIteratorTestPerformance *suite) { delete suite; }
 
   HistogramIteratorTestPerformance()
-      : m_hist(BinEdges(histSize, LinearGenerator(0, 1)),
-               Counts(histSize - 1, LinearGenerator(0, 1))) {}
+      : m_hist(BinEdges(histSize, LinearGenerator(0, 1)), Counts(histSize - 1, LinearGenerator(0, 1))) {}
 
   void test_convert_counts_to_frequency_for_each_item() {
     double total = 0;

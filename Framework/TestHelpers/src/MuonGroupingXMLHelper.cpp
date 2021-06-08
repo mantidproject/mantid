@@ -29,9 +29,7 @@ namespace MuonGroupingXMLHelper {
  * @param group :: Detector grouping string (e.g. "1-4,5,6-10").
  * @return ScopedFile object.
  */
-ScopedFileHelper::ScopedFile
-createGroupingXMLSingleGroup(const std::string &groupName,
-                             const std::string &group) {
+ScopedFileHelper::ScopedFile createGroupingXMLSingleGroup(const std::string &groupName, const std::string &group) {
   std::string fileContents("");
   fileContents += "<detector-grouping description=\"test XML file\"> \n";
   fileContents += "\t<group name=\"" + groupName + "\"> \n";
@@ -51,9 +49,7 @@ createGroupingXMLSingleGroup(const std::string &groupName,
  * to test a possible failure case.
  * @return ScopedFile object.
  */
-ScopedFileHelper::ScopedFile
-createGroupingXMLSinglePair(const std::string &pairName,
-                            const std::string &groupName) {
+ScopedFileHelper::ScopedFile createGroupingXMLSinglePair(const std::string &pairName, const std::string &groupName) {
 
   std::string fileContents("");
 
@@ -89,8 +85,7 @@ createGroupingXMLSinglePair(const std::string &pairName,
  * @param nDetectorsPerGroup ::  The number of detector IDs per group
  * @return ScopedFile.
  */
-ScopedFileHelper::ScopedFile
-createXMLwithPairsAndGroups(const int &nGroups, const int &nDetectorsPerGroup) {
+ScopedFileHelper::ScopedFile createXMLwithPairsAndGroups(const int &nGroups, const int &nDetectorsPerGroup) {
 
   API::Grouping grouping;
   std::string groupIDs;
@@ -100,8 +95,8 @@ createXMLwithPairsAndGroups(const int &nGroups, const int &nDetectorsPerGroup) {
     if (nGroups == 1) {
       groupIDs = "1";
     } else {
-      groupIDs = std::to_string((group - 1) * nDetectorsPerGroup + 1) + "-" +
-                 std::to_string(group * nDetectorsPerGroup);
+      groupIDs =
+          std::to_string((group - 1) * nDetectorsPerGroup + 1) + "-" + std::to_string(group * nDetectorsPerGroup);
     }
     grouping.groupNames.emplace_back(groupName);
     grouping.groups.emplace_back(groupIDs);
@@ -135,8 +130,7 @@ std::string groupingToXML(const Mantid::API::Grouping &grouping) {
   Poco::AutoPtr<Poco::XML::Document> mDoc = new Poco::XML::Document();
 
   // Create root element with a description
-  Poco::AutoPtr<Poco::XML::Element> rootElem =
-      mDoc->createElement("detector-grouping");
+  Poco::AutoPtr<Poco::XML::Element> rootElem = mDoc->createElement("detector-grouping");
   rootElem->setAttribute("description", grouping.description);
   mDoc->appendChild(rootElem);
 
@@ -157,19 +151,16 @@ std::string groupingToXML(const Mantid::API::Grouping &grouping) {
     gElem->setAttribute("name", grouping.pairNames[pi]);
     rootElem->appendChild(gElem);
 
-    Poco::AutoPtr<Poco::XML::Element> fwElem =
-        mDoc->createElement("forward-group");
+    Poco::AutoPtr<Poco::XML::Element> fwElem = mDoc->createElement("forward-group");
     fwElem->setAttribute("val", grouping.groupNames[grouping.pairs[pi].first]);
     gElem->appendChild(fwElem);
 
-    Poco::AutoPtr<Poco::XML::Element> bwElem =
-        mDoc->createElement("backward-group");
+    Poco::AutoPtr<Poco::XML::Element> bwElem = mDoc->createElement("backward-group");
     bwElem->setAttribute("val", grouping.groupNames[grouping.pairs[pi].second]);
     gElem->appendChild(bwElem);
 
     Poco::AutoPtr<Poco::XML::Element> alphaElem = mDoc->createElement("alpha");
-    alphaElem->setAttribute(
-        "val", boost::lexical_cast<std::string>(grouping.pairAlphas[pi]));
+    alphaElem->setAttribute("val", boost::lexical_cast<std::string>(grouping.pairAlphas[pi]));
     gElem->appendChild(alphaElem);
   }
 

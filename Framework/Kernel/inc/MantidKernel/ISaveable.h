@@ -159,9 +159,7 @@ private:
   size_t setBufferPosition(std::list<ISaveable *>::iterator bufPosition);
   /// returns the iterator pointing to the position of this object within the
   /// memory to-write buffer
-  boost::optional<std::list<ISaveable *>::iterator> &getBufPostion() {
-    return m_BufPosition;
-  }
+  boost::optional<std::list<ISaveable *>::iterator> &getBufPostion() { return m_BufPosition; }
   /// return the amount of memory, this object had when it was stored in buffer
   /// last time;
   size_t getBufferSize() const { return m_BufMemorySize; }

@@ -44,13 +44,9 @@ public:
   }
   /// Algorithm's version for identification.
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CatalogLogin"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CatalogLogin"}; }
   /// Algorithm's category for identification.
-  const std::string category() const override {
-    return "DataHandling\\Catalog";
-  }
+  const std::string category() const override { return "DataHandling\\Catalog"; }
 
 private:
   /// Override algorithm initialisation method.
@@ -66,12 +62,10 @@ private:
   /// Saves the workspace as a nexus file to the user's default directory.
   void saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace);
   /// Publish the history of a given workspace.
-  void publishWorkspaceHistory(
-      Mantid::API::ICatalogInfoService_sptr &catalogInfoService,
-      Mantid::API::Workspace_sptr &workspace);
+  void publishWorkspaceHistory(Mantid::API::ICatalogInfoService_sptr &catalogInfoService,
+                               Mantid::API::Workspace_sptr &workspace);
   /// Generate the history of a given workspace.
-  const std::string
-  generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace);
+  const std::string generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace);
 };
 } // namespace ICat
 } // namespace Mantid

@@ -22,14 +22,11 @@ namespace Reflectometry {
 
  @date 2012-05-29
  */
-class MANTID_REFLECTOMETRY_DLL ReflectometryTransformQxQz
-    : public DataObjects::ReflectometryTransform {
+class MANTID_REFLECTOMETRY_DLL ReflectometryTransformQxQz : public DataObjects::ReflectometryTransform {
 public:
   /// Constructor
-  ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin,
-                             double qzMax, double incidentTheta,
-                             int numberOfBinsQx = 100,
-                             int numberOfBinsQz = 100);
+  ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta,
+                             int numberOfBinsQx = 100, int numberOfBinsQz = 100);
 
   /// Disable default constructor
   ReflectometryTransformQxQz() = delete;
@@ -38,8 +35,7 @@ public:
   ReflectometryTransformQxQz(const ReflectometryTransformQxQz &) = delete;
 
   /// Disable assignment operator
-  ReflectometryTransformQxQz &
-  operator=(const ReflectometryTransformQxQz &) = delete;
+  ReflectometryTransformQxQz &operator=(const ReflectometryTransformQxQz &) = delete;
 };
 
 } // namespace Reflectometry

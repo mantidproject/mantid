@@ -29,33 +29,25 @@ DECLARE_ALGORITHM(LoadEventAndCompress)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const string LoadEventAndCompress::name() const {
-  return "LoadEventAndCompress";
-}
+const string LoadEventAndCompress::name() const { return "LoadEventAndCompress"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadEventAndCompress::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const string LoadEventAndCompress::category() const {
-  return "Workflow\\DataHandling";
-}
+const string LoadEventAndCompress::category() const { return "Workflow\\DataHandling"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const string LoadEventAndCompress::summary() const {
-  return "Load an event workspace by chunks and compress";
-}
+const string LoadEventAndCompress::summary() const { return "Load an event workspace by chunks and compress"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadEventAndCompress::init() {
   // algorithms to copy properties from
-  auto algLoadEventNexus =
-      AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
+  auto algLoadEventNexus = AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
   algLoadEventNexus->initialize();
-  auto algDetermineChunking =
-      AlgorithmManager::Instance().createUnmanaged("DetermineChunking");
+  auto algDetermineChunking = AlgorithmManager::Instance().createUnmanaged("DetermineChunking");
   algDetermineChunking->initialize();
 
   // declare properties
@@ -83,13 +75,10 @@ void LoadEventAndCompress::init() {
   copyProperty(algLoadEventNexus, "FilterMonByTimeStart");
   copyProperty(algLoadEventNexus, "FilterMonByTimeStop");
 
-  setPropertySettings(
-      "MonitorsLoadOnly",
-      std::make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
+  setPropertySettings("MonitorsLoadOnly", std::make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
   auto asEventsIsOn = [] {
     std::unique_ptr<IPropertySettings> settings =
-        std::make_unique<VisibleWhenProperty>("MonitorsLoadOnly", IS_EQUAL_TO,
-                                              "1");
+        std::make_unique<VisibleWhenProperty>("MonitorsLoadOnly", IS_EQUAL_TO, "1");
     return settings;
   };
   setPropertySettings("FilterMonByTofMin", asEventsIsOn());
@@ -111,8 +100,7 @@ void LoadEventAndCompress::init() {
 }
 
 /// @see DataProcessorAlgorithm::determineChunk(const std::string &)
-ITableWorkspace_sptr
-LoadEventAndCompress::determineChunk(const std::string &filename) {
+ITableWorkspace_sptr LoadEventAndCompress::determineChunk(const std::string &filename) {
   double maxChunkSize = getProperty("MaxChunkSize");
 
   auto alg = createChildAlgorithm("DetermineChunking");
@@ -122,8 +110,7 @@ LoadEventAndCompress::determineChunk(const std::string &filename) {
   ITableWorkspace_sptr chunkingTable = alg->getProperty("OutputWorkspace");
 
   if (chunkingTable->rowCount() > 1)
-    g_log.information() << "Will load data in " << chunkingTable->rowCount()
-                        << " chunks\n";
+    g_log.information() << "Will load data in " << chunkingTable->rowCount() << " chunks\n";
   else
     g_log.information("Not chunking");
 
@@ -142,21 +129,16 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
   alg->setProperty<string>("Filename", getProperty("Filename"));
   alg->setProperty<double>("FilterByTofMin", getProperty("FilterByTofMin"));
   alg->setProperty<double>("FilterByTofMax", getProperty("FilterByTofMax"));
-  alg->setProperty<double>("FilterByTimeStart",
-                           getProperty("FilterByTimeStart"));
+  alg->setProperty<double>("FilterByTimeStart", getProperty("FilterByTimeStart"));
   alg->setProperty<double>("FilterByTimeStop", getProperty("FilterByTimeStop"));
 
   alg->setProperty<string>("NXentryName", getProperty("NXentryName"));
   alg->setProperty<bool>("LoadMonitors", getProperty("LoadMonitors"));
   alg->setProperty<string>("MonitorsLoadOnly", getProperty("MonitorsLoadOnly"));
-  alg->setProperty<double>("FilterMonByTofMin",
-                           getProperty("FilterMonByTofMin"));
-  alg->setProperty<double>("FilterMonByTofMax",
-                           getProperty("FilterMonByTofMax"));
-  alg->setProperty<double>("FilterMonByTimeStart",
-                           getProperty("FilterMonByTimeStart"));
-  alg->setProperty<double>("FilterMonByTimeStop",
-                           getProperty("FilterMonByTimeStop"));
+  alg->setProperty<double>("FilterMonByTofMin", getProperty("FilterMonByTofMin"));
+  alg->setProperty<double>("FilterMonByTofMax", getProperty("FilterMonByTofMax"));
+  alg->setProperty<double>("FilterMonByTimeStart", getProperty("FilterMonByTimeStart"));
+  alg->setProperty<double>("FilterMonByTimeStop", getProperty("FilterMonByTimeStop"));
 
   // determine if loading logs - always load logs for first chunk or
   // `FilterBadPulses` which will change delete some of the proton_charge log
@@ -168,8 +150,7 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
     const double filterByTimeStop = getProperty("FilterByTimeStop");
     const double filterMonByTimeStart = getProperty("FilterMonByTimeStart");
     const double filterMonByTimeStop = getProperty("FilterMonByTimeStop");
-    loadLogs = (!isEmpty(filterByTimeStart)) || (!isEmpty(filterByTimeStop)) ||
-               (!isEmpty(filterMonByTimeStart)) ||
+    loadLogs = (!isEmpty(filterByTimeStart)) || (!isEmpty(filterByTimeStop)) || (!isEmpty(filterMonByTimeStart)) ||
                (!isEmpty(filterMonByTimeStop));
   }
   alg->setProperty<bool>("LoadLogs", loadLogs);
@@ -190,8 +171,7 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
 /**
  * Process a chunk in-place
  */
-API::MatrixWorkspace_sptr
-LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp) {
+API::MatrixWorkspace_sptr LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp) {
   EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(wksp);
 
   if (m_filterBadPulses > 0.) {
@@ -206,8 +186,7 @@ LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp) {
   auto compressEvents = createChildAlgorithm("CompressEvents");
   compressEvents->setProperty("InputWorkspace", eventWS);
   compressEvents->setProperty("OutputWorkspace", eventWS);
-  compressEvents->setProperty<double>("Tolerance",
-                                      getProperty("CompressTOFTolerance"));
+  compressEvents->setProperty<double>("Tolerance", getProperty("CompressTOFTolerance"));
   compressEvents->executeAsChildAlg();
   eventWS = compressEvents->getProperty("OutputWorkspace");
 
@@ -260,8 +239,7 @@ void LoadEventAndCompress::exec() {
   Workspace_sptr total = assemble(resultWS);
 
   // don't assume that any chunk had the correct binning so just reset it here
-  EventWorkspace_sptr totalEventWS =
-      std::dynamic_pointer_cast<EventWorkspace>(total);
+  EventWorkspace_sptr totalEventWS = std::dynamic_pointer_cast<EventWorkspace>(total);
   if (totalEventWS->getNEvents())
     totalEventWS->resetAllXToSingleBin();
 
@@ -271,8 +249,8 @@ void LoadEventAndCompress::exec() {
   setProperty("OutputWorkspace", total);
 }
 
-Parallel::ExecutionMode LoadEventAndCompress::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+Parallel::ExecutionMode
+LoadEventAndCompress::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   static_cast<void>(storageModes);
   return Parallel::ExecutionMode::Distributed;
 }

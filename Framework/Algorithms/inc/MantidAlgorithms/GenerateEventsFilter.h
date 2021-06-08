@@ -61,9 +61,7 @@ public:
     return {"FilterEvents", "FilterByTime", "FilterByLogValue"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Events\\EventFiltering";
-  }
+  const std::string category() const override { return "Events\\EventFiltering"; }
 
 private:
   /// Implement abstract Algorithm methods
@@ -78,63 +76,50 @@ private:
   void setFilterByTimeOnly();
   void setFilterByLogValue(const std::string &logname);
 
-  void processSingleValueFilter(double minvalue, double maxvalue,
-                                bool filterincrease, bool filterdecrease);
+  void processSingleValueFilter(double minvalue, double maxvalue, bool filterincrease, bool filterdecrease);
 
-  void processMultipleValueFilters(double minvalue, double valueinterval,
-                                   double maxvalue, bool filterincrease,
+  void processMultipleValueFilters(double minvalue, double valueinterval, double maxvalue, bool filterincrease,
                                    bool filterdecrease);
 
-  void makeFilterBySingleValue(double min, double max, double TimeTolerance,
-                               bool centre, bool filterIncrease,
-                               bool filterDecrease,
-                               Types::Core::DateAndTime startTime,
+  void makeFilterBySingleValue(double min, double max, double TimeTolerance, bool centre, bool filterIncrease,
+                               bool filterDecrease, Types::Core::DateAndTime startTime,
                                Types::Core::DateAndTime stopTime, int wsindex);
 
   /// Make multiple-log-value filters in serial
-  void makeMultipleFiltersByValues(std::map<size_t, int> indexwsindexmap,
-                                   const std::vector<double> &logvalueranges,
-                                   bool centre, bool filterIncrease,
-                                   bool filterDecrease,
-                                   Types::Core::DateAndTime startTime,
-                                   Types::Core::DateAndTime stopTime);
+  void makeMultipleFiltersByValues(std::map<size_t, int> indexwsindexmap, const std::vector<double> &logvalueranges,
+                                   bool centre, bool filterIncrease, bool filterDecrease,
+                                   Types::Core::DateAndTime startTime, Types::Core::DateAndTime stopTime);
 
   /// Make multiple-log-value filters in serial in parallel
-  void makeMultipleFiltersByValuesParallel(
-      const std::map<size_t, int> &indexwsindexmap,
-      const std::vector<double> &logvalueranges, bool centre,
-      bool filterIncrease, bool filterDecrease,
-      Types::Core::DateAndTime startTime, Types::Core::DateAndTime stopTime);
+  void makeMultipleFiltersByValuesParallel(const std::map<size_t, int> &indexwsindexmap,
+                                           const std::vector<double> &logvalueranges, bool centre, bool filterIncrease,
+                                           bool filterDecrease, Types::Core::DateAndTime startTime,
+                                           Types::Core::DateAndTime stopTime);
 
   /// Generate event splitters for partial sample log (serial)
-  void makeMultipleFiltersByValuesPartialLog(
-      int istart, int iend, std::vector<Types::Core::DateAndTime> &vecSplitTime,
-      std::vector<int> &vecSplitGroup, std::map<size_t, int> indexwsindexmap,
-      const std::vector<double> &logvalueranges,
-      const Types::Core::time_duration &tol, bool filterIncrease,
-      bool filterDecrease, Types::Core::DateAndTime startTime,
-      Types::Core::DateAndTime stopTime);
+  void makeMultipleFiltersByValuesPartialLog(int istart, int iend, std::vector<Types::Core::DateAndTime> &vecSplitTime,
+                                             std::vector<int> &vecSplitGroup, std::map<size_t, int> indexwsindexmap,
+                                             const std::vector<double> &logvalueranges,
+                                             const Types::Core::time_duration &tol, bool filterIncrease,
+                                             bool filterDecrease, Types::Core::DateAndTime startTime,
+                                             Types::Core::DateAndTime stopTime);
 
   /// Generate event filters for integer sample log
-  void processIntegerValueFilter(int minvalue, int maxvalue,
-                                 bool filterIncrease, bool filterDecrease,
+  void processIntegerValueFilter(int minvalue, int maxvalue, bool filterIncrease, bool filterDecrease,
                                  Types::Core::DateAndTime runend);
 
   /// Search a value in a sorted vector
   size_t searchValue(const std::vector<double> &sorteddata, double value);
 
   /// Add a splitter
-  void addNewTimeFilterSplitter(Types::Core::DateAndTime starttime,
-                                Types::Core::DateAndTime stoptime, int wsindex,
+  void addNewTimeFilterSplitter(Types::Core::DateAndTime starttime, Types::Core::DateAndTime stoptime, int wsindex,
                                 const std::string &info);
 
   /// Create a splitter and add to the vector of time splitters
-  Types::Core::DateAndTime
-  makeSplitterInVector(std::vector<Types::Core::DateAndTime> &vecSplitTime,
-                       std::vector<int> &vecGroupIndex,
-                       Types::Core::DateAndTime start,
-                       Types::Core::DateAndTime stop, int group, int64_t tol_ns,
-                       Types::Core::DateAndTime lasttime);
+  Types::Core::DateAndTime makeSplitterInVector(std::vector<Types::Core::DateAndTime> &vecSplitTime,
+                                                std::vector<int> &vecGroupIndex, Types::Core::DateAndTime start,
+                                                Types::Core::DateAndTime stop, int group, int64_t tol_ns,
+                                                Types::Core::DateAndTime lasttime);
 
   /// Generate a matrix workspace containing splitters
   void generateSplittersInMatrixWorkspace();
@@ -146,12 +131,9 @@ private:
   void generateSplittersInSplitterWS();
 
   /// Identify the a sample log entry is within intended value and time region
-  bool identifyLogEntry(const int &index, const Types::Core::DateAndTime &currT,
-                        const bool &lastgood, const double &minvalue,
-                        const double &maxvalue,
-                        const Types::Core::DateAndTime &startT,
-                        const Types::Core::DateAndTime &stopT,
-                        const bool &filterIncrease, const bool &filterDecrease);
+  bool identifyLogEntry(const int &index, const Types::Core::DateAndTime &currT, const bool &lastgood,
+                        const double &minvalue, const double &maxvalue, const Types::Core::DateAndTime &startT,
+                        const Types::Core::DateAndTime &stopT, const bool &filterIncrease, const bool &filterDecrease);
 
   /// Determine the chaning direction of log value
   int determineChangingDirection(int startindex);

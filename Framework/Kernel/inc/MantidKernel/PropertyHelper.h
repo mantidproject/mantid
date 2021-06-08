@@ -24,9 +24,7 @@ namespace Kernel {
 // --------------------- convert values to strings
 namespace {
 /// Convert values to strings.
-template <typename T> std::string toString(const T &value) {
-  return boost::lexical_cast<std::string>(value);
-}
+template <typename T> std::string toString(const T &value) { return boost::lexical_cast<std::string>(value); }
 
 /// Throw an exception if a shared pointer is converted to a string.
 template <typename T> std::string toString(const std::shared_ptr<T> &value) {
@@ -35,9 +33,7 @@ template <typename T> std::string toString(const std::shared_ptr<T> &value) {
 }
 
 /// Specialization for a property of type std::vector.
-template <typename T>
-std::string toString(const std::vector<T> &value,
-                     const std::string &delimiter = ",") {
+template <typename T> std::string toString(const std::vector<T> &value, const std::string &delimiter = ",") {
   std::stringstream result;
   std::size_t vsize = value.size();
   for (std::size_t i = 0; i < vsize; ++i) {
@@ -50,8 +46,7 @@ std::string toString(const std::vector<T> &value,
 
 /// Specialization for a property of type std::vector<std::vector>.
 template <typename T>
-std::string toString(const std::vector<std::vector<T>> &value,
-                     const std::string &outerDelimiter = ",",
+std::string toString(const std::vector<std::vector<T>> &value, const std::string &outerDelimiter = ",",
                      const std::string &innerDelimiter = "+") {
   std::stringstream result;
   std::size_t vsize = value.size();
@@ -71,17 +66,14 @@ std::string toString(const std::vector<std::vector<T>> &value,
 
 // --------------------- convert values to pretty strings
 /// Convert values to pretty strings.
-template <typename T>
-std::string toPrettyString(const T &value, size_t maxLength = 0,
-                           bool collapseLists = true) {
+template <typename T> std::string toPrettyString(const T &value, size_t maxLength = 0, bool collapseLists = true) {
   UNUSED_ARG(collapseLists);
   return Strings::shorten(boost::lexical_cast<std::string>(value), maxLength);
 }
 
 /// Throw an exception if a shared pointer is converted to a pretty string.
 template <typename T>
-std::string toPrettyString(const std::shared_ptr<T> &value,
-                           size_t maxLength = 0, bool collapseLists = true) {
+std::string toPrettyString(const std::shared_ptr<T> &value, size_t maxLength = 0, bool collapseLists = true) {
   UNUSED_ARG(value);
   UNUSED_ARG(maxLength);
   UNUSED_ARG(collapseLists);
@@ -94,16 +86,12 @@ std::string toPrettyString(const std::shared_ptr<T> &value,
  */
 template <typename T>
 std::string toPrettyString(
-    const std::vector<T> &value, size_t maxLength = 0,
-    bool collapseLists = true, const std::string &delimiter = ",",
+    const std::vector<T> &value, size_t maxLength = 0, bool collapseLists = true, const std::string &delimiter = ",",
     const std::string &unusedDelimiter = "+",
-    typename std::enable_if<!(std::is_integral<T>::value &&
-                              std::is_arithmetic<T>::value)>::type * =
-        nullptr) {
+    typename std::enable_if<!(std::is_integral<T>::value && std::is_arithmetic<T>::value)>::type * = nullptr) {
   UNUSED_ARG(unusedDelimiter);
   UNUSED_ARG(collapseLists);
-  return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter),
-                          maxLength);
+  return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter), maxLength);
 }
 
 /** Specialization for a property of type std::vector of integral types.
@@ -114,16 +102,13 @@ std::string toPrettyString(
  *   will be compressed into a list syntax e.g. 1-5.
  */
 template <typename T>
-std::string toPrettyString(
-    const std::vector<T> &value, size_t maxLength = 0,
-    bool collapseLists = true, const std::string &delimiter = ",",
-    const std::string &listDelimiter = "-",
-    typename std::enable_if<std::is_integral<T>::value &&
-                            std::is_arithmetic<T>::value>::type * = nullptr) {
+std::string
+toPrettyString(const std::vector<T> &value, size_t maxLength = 0, bool collapseLists = true,
+               const std::string &delimiter = ",", const std::string &listDelimiter = "-",
+               typename std::enable_if<std::is_integral<T>::value && std::is_arithmetic<T>::value>::type * = nullptr) {
   std::string retVal;
   if (collapseLists) {
-    retVal = Strings::joinCompress(value.begin(), value.end(), delimiter,
-                                   listDelimiter);
+    retVal = Strings::joinCompress(value.begin(), value.end(), delimiter, listDelimiter);
   } else {
     retVal = Strings::join(value.begin(), value.end(), delimiter);
   }
@@ -138,27 +123,22 @@ GNU_DIAG_OFF("unused-function")
  */
 
 template <>
-std::string toPrettyString(
-    const std::vector<bool> &value, size_t maxLength, bool collapseLists,
-    const std::string &delimiter, const std::string &unusedDelimiter,
-    typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
+std::string toPrettyString(const std::vector<bool> &value, size_t maxLength, bool collapseLists,
+                           const std::string &delimiter, const std::string &unusedDelimiter,
+                           typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
   UNUSED_ARG(unusedDelimiter);
   UNUSED_ARG(collapseLists);
-  return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter),
-                          maxLength);
+  return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter), maxLength);
 }
 
 GNU_DIAG_ON("unused-function")
 
 /// Specialization for a property of type std::vector<std::vector>.
 template <typename T>
-std::string toPrettyString(const std::vector<std::vector<T>> &value,
-                           size_t maxLength = 0, bool collapseLists = true,
-                           const std::string &outerDelimiter = ",",
-                           const std::string &innerDelimiter = "+") {
+std::string toPrettyString(const std::vector<std::vector<T>> &value, size_t maxLength = 0, bool collapseLists = true,
+                           const std::string &outerDelimiter = ",", const std::string &innerDelimiter = "+") {
   UNUSED_ARG(collapseLists);
-  return Strings::shorten(toString<T>(value, outerDelimiter, innerDelimiter),
-                          maxLength);
+  return Strings::shorten(toString<T>(value, outerDelimiter, innerDelimiter), maxLength);
 }
 
 /// Specialization for any type, should be appropriate for properties with a
@@ -166,13 +146,10 @@ std::string toPrettyString(const std::vector<std::vector<T>> &value,
 template <typename T> int findSize(const T &) { return 1; }
 
 /// Specialization for properties that are of type vector.
-template <typename T> int findSize(const std::vector<T> &value) {
-  return static_cast<int>(value.size());
-}
+template <typename T> int findSize(const std::vector<T> &value) { return static_cast<int>(value.size()); }
 
 // ------------- Convert strings to values
-template <typename T>
-inline void appendValue(const std::string &strvalue, std::vector<T> &value) {
+template <typename T> inline void appendValue(const std::string &strvalue, std::vector<T> &value) {
   // try to split the string
   std::size_t pos = strvalue.find(':');
   std::size_t numChar = std::string::npos; // go to the end of the string
@@ -220,22 +197,15 @@ inline void appendValue(const std::string &strvalue, std::vector<T> &value) {
   }
 }
 
-template <typename T> void toValue(const std::string &strvalue, T &value) {
-  value = boost::lexical_cast<T>(strvalue);
-}
+template <typename T> void toValue(const std::string &strvalue, T &value) { value = boost::lexical_cast<T>(strvalue); }
 
-template <typename T> void toValue(const std::string &, std::shared_ptr<T> &) {
-  throw boost::bad_lexical_cast();
-}
+template <typename T> void toValue(const std::string &, std::shared_ptr<T> &) { throw boost::bad_lexical_cast(); }
 
 namespace detail {
 // vector<int> specializations
-template <typename T>
-void toValue(const std::string &strvalue, std::vector<T> &value,
-             std::true_type) {
+template <typename T> void toValue(const std::string &strvalue, std::vector<T> &value, std::true_type) {
   using tokenizer = Mantid::Kernel::StringTokenizer;
-  tokenizer values(strvalue, ",",
-                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+  tokenizer values(strvalue, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   value.clear();
   value.reserve(values.count());
   for (const auto &token : values) {
@@ -243,29 +213,23 @@ void toValue(const std::string &strvalue, std::vector<T> &value,
   }
 }
 
-template <typename T>
-void toValue(const std::string &strvalue, std::vector<T> &value,
-             std::false_type) {
+template <typename T> void toValue(const std::string &strvalue, std::vector<T> &value, std::false_type) {
   // Split up comma-separated properties
   using tokenizer = Mantid::Kernel::StringTokenizer;
-  tokenizer values(strvalue, ",",
-                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+  tokenizer values(strvalue, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
   value.clear();
   value.reserve(values.count());
-  std::transform(
-      values.cbegin(), values.cend(), std::back_inserter(value),
-      [](const std::string &str) { return boost::lexical_cast<T>(str); });
+  std::transform(values.cbegin(), values.cend(), std::back_inserter(value),
+                 [](const std::string &str) { return boost::lexical_cast<T>(str); });
 }
 
 // bool and char don't make sense as types to generate a range of values.
 // This is similar to std::is_integral<T>, but bool and char are std::false_type
 template <class T> struct is_range_type : public std::false_type {};
 template <class T> struct is_range_type<const T> : public is_range_type<T> {};
-template <class T>
-struct is_range_type<volatile const T> : public is_range_type<T> {};
-template <class T>
-struct is_range_type<volatile T> : public is_range_type<T> {};
+template <class T> struct is_range_type<volatile const T> : public is_range_type<T> {};
+template <class T> struct is_range_type<volatile T> : public is_range_type<T> {};
 
 template <> struct is_range_type<unsigned short> : public std::true_type {};
 template <> struct is_range_type<unsigned int> : public std::true_type {};
@@ -277,30 +241,25 @@ template <> struct is_range_type<int> : public std::true_type {};
 template <> struct is_range_type<long> : public std::true_type {};
 template <> struct is_range_type<long long> : public std::true_type {};
 } // namespace detail
-template <typename T>
-void toValue(const std::string &strvalue, std::vector<T> &value) {
+template <typename T> void toValue(const std::string &strvalue, std::vector<T> &value) {
   detail::toValue(strvalue, value, detail::is_range_type<T>());
 }
 
 template <typename T>
-void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
-             const std::string &outerDelimiter = ",",
+void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value, const std::string &outerDelimiter = ",",
              const std::string &innerDelimiter = "+") {
   using tokenizer = Mantid::Kernel::StringTokenizer;
-  tokenizer tokens(strvalue, outerDelimiter,
-                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+  tokenizer tokens(strvalue, outerDelimiter, tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
   value.clear();
   value.reserve(tokens.count());
 
   for (const auto &token : tokens) {
-    tokenizer values(token, innerDelimiter,
-                     tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+    tokenizer values(token, innerDelimiter, tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
     std::vector<T> vect;
     vect.reserve(values.count());
-    std::transform(
-        values.begin(), values.end(), std::back_inserter(vect),
-        [](const std::string &str) { return boost::lexical_cast<T>(str); });
+    std::transform(values.begin(), values.end(), std::back_inserter(vect),
+                   [](const std::string &str) { return boost::lexical_cast<T>(str); });
     value.emplace_back(std::move(vect));
   }
 }
@@ -326,8 +285,7 @@ template <typename T> inline void addingOperator(T &lhs, const T &rhs) {
   lhs = static_cast<T>(lhs + rhs);
 }
 
-template <typename T>
-inline void addingOperator(std::vector<T> &lhs, const std::vector<T> &rhs) {
+template <typename T> inline void addingOperator(std::vector<T> &lhs, const std::vector<T> &rhs) {
   // This concatenates the two
   if (&lhs != &rhs) {
     lhs.insert(lhs.end(), rhs.begin(), rhs.end());
@@ -338,37 +296,27 @@ inline void addingOperator(std::vector<T> &lhs, const std::vector<T> &rhs) {
 }
 
 template <> inline void addingOperator(bool &, const bool &) {
-  throw Exception::NotImplementedError(
-      "PropertyWithValue.h: += operator not implemented for type bool");
+  throw Exception::NotImplementedError("PropertyWithValue.h: += operator not implemented for type bool");
 }
 
 template <> inline void addingOperator(OptionalBool &, const OptionalBool &) {
-  throw Exception::NotImplementedError(
-      "PropertyWithValue.h: += operator not implemented for type OptionalBool");
+  throw Exception::NotImplementedError("PropertyWithValue.h: += operator not implemented for type OptionalBool");
 }
 
-template <typename T>
-inline void addingOperator(std::shared_ptr<T> &, const std::shared_ptr<T> &) {
-  throw Exception::NotImplementedError(
-      "PropertyWithValue.h: += operator not implemented for std::shared_ptr");
+template <typename T> inline void addingOperator(std::shared_ptr<T> &, const std::shared_ptr<T> &) {
+  throw Exception::NotImplementedError("PropertyWithValue.h: += operator not implemented for std::shared_ptr");
 }
 
-template <typename T>
-inline std::vector<std::string>
-determineAllowedValues(const T &, const IValidator &validator) {
+template <typename T> inline std::vector<std::string> determineAllowedValues(const T &, const IValidator &validator) {
   return validator.allowedValues();
 }
 
-template <>
-inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
-                                                       const IValidator &) {
+template <> inline std::vector<std::string> determineAllowedValues(const OptionalBool &, const IValidator &) {
   auto enumMap = OptionalBool::enumToStrMap();
   std::vector<std::string> values;
   values.reserve(enumMap.size());
   std::transform(enumMap.cbegin(), enumMap.cend(), std::back_inserter(values),
-                 [](const std::pair<OptionalBool::Value, std::string> &str) {
-                   return str.second;
-                 });
+                 [](const std::pair<OptionalBool::Value, std::string> &str) { return str.second; });
   return values;
 }
 } // namespace

@@ -38,8 +38,7 @@ public:
     rebunch.setPropertyValue("OutputWorkspace", "test_out");
     rebunch.setPropertyValue("NBunch", "5");
     rebunch.execute();
-    MatrixWorkspace_sptr rebunchdata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
+    MatrixWorkspace_sptr rebunchdata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
     auto &outX = rebunchdata->x(0);
     auto &outY = rebunchdata->y(0);
     auto &outE = rebunchdata->e(0);
@@ -68,8 +67,7 @@ public:
     rebunch.setPropertyValue("OutputWorkspace", "test_out");
     rebunch.setPropertyValue("NBunch", "7");
     rebunch.execute();
-    MatrixWorkspace_sptr rebunchdata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
+    MatrixWorkspace_sptr rebunchdata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
     auto &outX = rebunchdata->x(0);
     auto &outY = rebunchdata->y(0);
@@ -102,8 +100,7 @@ public:
     rebunch.setPropertyValue("OutputWorkspace", "test_out");
     rebunch.setPropertyValue("NBunch", "5");
     rebunch.execute();
-    MatrixWorkspace_sptr rebunchdata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
+    MatrixWorkspace_sptr rebunchdata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
     auto &outX = rebunchdata->x(5);
     auto &outY = rebunchdata->y(5);
@@ -135,8 +132,7 @@ public:
     rebunch.setPropertyValue("OutputWorkspace", "test_out");
     rebunch.setPropertyValue("NBunch", "7");
     rebunch.execute();
-    MatrixWorkspace_sptr rebunchdata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
+    MatrixWorkspace_sptr rebunchdata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
     auto &outX = rebunchdata->x(5);
     auto &outY = rebunchdata->y(5);
     auto &outE = rebunchdata->e(5);
@@ -211,9 +207,7 @@ private:
 
 class RebunchTestPerformance : public CxxTest::TestSuite {
 public:
-  static RebunchTestPerformance *createSuite() {
-    return new RebunchTestPerformance();
-  }
+  static RebunchTestPerformance *createSuite() { return new RebunchTestPerformance(); }
 
   static void destroySuite(RebunchTestPerformance *suite) { delete suite; }
 

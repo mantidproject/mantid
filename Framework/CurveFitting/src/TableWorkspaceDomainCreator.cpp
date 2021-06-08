@@ -120,13 +120,11 @@ using namespace Kernel;
  * @param workspacePropertyName :: Name of the workspace property.
  * @param domainType :: Type of the domain: Simple, Sequential, or Parallel.
  */
-TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
-    Kernel::IPropertyManager *fit, const std::string &workspacePropertyName,
-    TableWorkspaceDomainCreator::DomainType domainType)
-    : IDomainCreator(fit, std::vector<std::string>(1, workspacePropertyName),
-                     domainType),
-      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(0),
-      m_noErrCol(false) {
+TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(Kernel::IPropertyManager *fit,
+                                                         const std::string &workspacePropertyName,
+                                                         TableWorkspaceDomainCreator::DomainType domainType)
+    : IDomainCreator(fit, std::vector<std::string>(1, workspacePropertyName), domainType), m_startX(EMPTY_DBL()),
+      m_endX(EMPTY_DBL()), m_maxSize(0), m_noErrCol(false) {
   if (m_workspacePropertyNames.empty()) {
     throw std::runtime_error("Cannot create FitMW: no workspace given");
   }
@@ -138,11 +136,9 @@ TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
  * set up the creator.
  * @param domainType :: Type of the domain: Simple, Sequential, or Parallel.
  */
-TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
-    TableWorkspaceDomainCreator::DomainType domainType)
-    : IDomainCreator(nullptr, std::vector<std::string>(), domainType),
-      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(10),
-      m_noErrCol(false) {}
+TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(TableWorkspaceDomainCreator::DomainType domainType)
+    : IDomainCreator(nullptr, std::vector<std::string>(), domainType), m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()),
+      m_maxSize(10), m_noErrCol(false) {}
 
 /**
  * Declare properties that specify the dataset within the workspace to fit to.
@@ -150,8 +146,7 @@ TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
  * @param addProp :: allows for the declaration of certain properties of the
  * dataset
  */
-void TableWorkspaceDomainCreator::declareDatasetProperties(
-    const std::string &suffix, bool addProp) {
+void TableWorkspaceDomainCreator::declareDatasetProperties(const std::string &suffix, bool addProp) {
 
   m_startXPropertyName = "StartX" + suffix;
   m_endXPropertyName = "EndX" + suffix;
@@ -164,47 +159,34 @@ void TableWorkspaceDomainCreator::declareDatasetProperties(
   if (addProp) {
     auto mustBePositive = std::make_shared<BoundedValidator<int>>();
     mustBePositive->setLower(0);
-    declareProperty(
-        new PropertyWithValue<double>(m_startXPropertyName, EMPTY_DBL()),
-        "A value of x in, or on the low x boundary of, the first bin to "
-        "include in\n"
-        "the fit (default lowest value of x)");
-    declareProperty(
-        new PropertyWithValue<double>(m_endXPropertyName, EMPTY_DBL()),
-        "A value in, or on the high x boundary of, the last bin the fitting "
-        "range\n"
-        "(default the highest value of x)");
-    if (m_domainType != Simple &&
-        !m_manager->existsProperty(m_maxSizePropertyName)) {
+    declareProperty(new PropertyWithValue<double>(m_startXPropertyName, EMPTY_DBL()),
+                    "A value of x in, or on the low x boundary of, the first bin to "
+                    "include in\n"
+                    "the fit (default lowest value of x)");
+    declareProperty(new PropertyWithValue<double>(m_endXPropertyName, EMPTY_DBL()),
+                    "A value in, or on the high x boundary of, the last bin the fitting "
+                    "range\n"
+                    "(default the highest value of x)");
+    if (m_domainType != Simple && !m_manager->existsProperty(m_maxSizePropertyName)) {
       auto mustBePositive = std::make_shared<BoundedValidator<int>>();
-      declareProperty(
-          new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
-          "The maximum number of values per a simple domain.");
+      declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
+                      "The maximum number of values per a simple domain.");
     }
     if (!m_manager->existsProperty(m_excludePropertyName)) {
-      auto mustBeOrderedPairs =
-          std::make_shared<ArrayOrderedPairsValidator<double>>();
-      declareProperty(
-          new ArrayProperty<double>(m_excludePropertyName, mustBeOrderedPairs),
-          "A list of pairs of doubles that specify ranges that must be "
-          "excluded from fit.");
+      auto mustBeOrderedPairs = std::make_shared<ArrayOrderedPairsValidator<double>>();
+      declareProperty(new ArrayProperty<double>(m_excludePropertyName, mustBeOrderedPairs),
+                      "A list of pairs of doubles that specify ranges that must be "
+                      "excluded from fit.");
     }
-    declareProperty(
-        new PropertyWithValue<std::string>(m_xColumnPropertyName, ""),
-        "The name of the X column.");
-    declareProperty(
-        new PropertyWithValue<std::string>(m_yColumnPropertyName, ""),
-        "The name of the Y column.");
-    declareProperty(
-        new PropertyWithValue<std::string>(m_errorColumnPropertyName, ""),
-        "The name of the error column.");
+    declareProperty(new PropertyWithValue<std::string>(m_xColumnPropertyName, ""), "The name of the X column.");
+    declareProperty(new PropertyWithValue<std::string>(m_yColumnPropertyName, ""), "The name of the Y column.");
+    declareProperty(new PropertyWithValue<std::string>(m_errorColumnPropertyName, ""), "The name of the error column.");
   }
 }
 
 /// Create a domain from the input workspace
-void TableWorkspaceDomainCreator::createDomain(
-    std::shared_ptr<API::FunctionDomain> &domain,
-    std::shared_ptr<API::FunctionValues> &values, size_t i0) {
+void TableWorkspaceDomainCreator::createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                                               std::shared_ptr<API::FunctionValues> &values, size_t i0) {
 
   setParameters();
 
@@ -263,8 +245,7 @@ void TableWorkspaceDomainCreator::createDomain(
   assert(n == domain->size());
   auto Y = m_tableWorkspace->getColumn(m_yColName);
   if (endRowNo > Y->size()) {
-    throw std::runtime_error(
-        "TableWorkspaceDomainCreator: Inconsistent TableWorkspace");
+    throw std::runtime_error("TableWorkspaceDomainCreator: Inconsistent TableWorkspace");
   }
 
   // Helps find points excluded form fit.
@@ -297,8 +278,7 @@ void TableWorkspaceDomainCreator::createDomain(
       weight = 1.0 / error;
       if (!std::isfinite(weight)) {
         if (!m_ignoreInvalidData)
-          throw std::runtime_error(
-              "Error of a data point is probably too small.");
+          throw std::runtime_error("Error of a data point is probably too small.");
         weight = 0.0;
       }
     }
@@ -318,12 +298,9 @@ void TableWorkspaceDomainCreator::createDomain(
  * @param values :: A API::FunctionValues instance containing the fitting data
  * @param outputWorkspacePropertyName :: The property name
  */
-std::shared_ptr<API::Workspace>
-TableWorkspaceDomainCreator::createOutputWorkspace(
-    const std::string &baseName, API::IFunction_sptr function,
-    std::shared_ptr<API::FunctionDomain> domain,
-    std::shared_ptr<API::FunctionValues> values,
-    const std::string &outputWorkspacePropertyName) {
+std::shared_ptr<API::Workspace> TableWorkspaceDomainCreator::createOutputWorkspace(
+    const std::string &baseName, API::IFunction_sptr function, std::shared_ptr<API::FunctionDomain> domain,
+    std::shared_ptr<API::FunctionValues> values, const std::string &outputWorkspacePropertyName) {
 
   if (!values) {
     throw std::logic_error("FunctionValues expected");
@@ -372,11 +349,9 @@ TableWorkspaceDomainCreator::createOutputWorkspace(
 
   if (!outputWorkspacePropertyName.empty()) {
     declareProperty(
-        new API::WorkspaceProperty<API::MatrixWorkspace>(
-            outputWorkspacePropertyName, "", Direction::Output),
+        new API::WorkspaceProperty<API::MatrixWorkspace>(outputWorkspacePropertyName, "", Direction::Output),
         "Name of the output Workspace holding resulting simulated spectrum");
-    m_manager->setPropertyValue(outputWorkspacePropertyName,
-                                baseName + "Workspace");
+    m_manager->setPropertyValue(outputWorkspacePropertyName, baseName + "Workspace");
     m_manager->setProperty(outputWorkspacePropertyName, ws);
   }
 
@@ -387,25 +362,21 @@ TableWorkspaceDomainCreator::createOutputWorkspace(
  * @param functionList The current list of functions to append to
  * @param function A function that may or not be composite
  */
-void TableWorkspaceDomainCreator::appendCompositeFunctionMembers(
-    std::list<API::IFunction_sptr> &functionList,
-    const API::IFunction_sptr &function) const {
+void TableWorkspaceDomainCreator::appendCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
+                                                                 const API::IFunction_sptr &function) const {
   // if function is a Convolution then output of convolved model's members may
   // be required
-  if (m_convolutionCompositeMembers &&
-      std::dynamic_pointer_cast<Functions::Convolution>(function)) {
+  if (m_convolutionCompositeMembers && std::dynamic_pointer_cast<Functions::Convolution>(function)) {
     appendConvolvedCompositeFunctionMembers(functionList, function);
   } else {
-    const auto compositeFn =
-        std::dynamic_pointer_cast<API::CompositeFunction>(function);
+    const auto compositeFn = std::dynamic_pointer_cast<API::CompositeFunction>(function);
     if (!compositeFn)
       return;
 
     const size_t nlocals = compositeFn->nFunctions();
     for (size_t i = 0; i < nlocals; ++i) {
       auto localFunction = compositeFn->getFunction(i);
-      auto localComposite =
-          std::dynamic_pointer_cast<API::CompositeFunction>(localFunction);
+      auto localComposite = std::dynamic_pointer_cast<API::CompositeFunction>(localFunction);
       if (localComposite)
         appendCompositeFunctionMembers(functionList, localComposite);
       else
@@ -427,14 +398,11 @@ void TableWorkspaceDomainCreator::appendCompositeFunctionMembers(
  * @return True if all conditions are fulfilled and it is possible to produce
  * the output.
  */
-void TableWorkspaceDomainCreator::appendConvolvedCompositeFunctionMembers(
-    std::list<API::IFunction_sptr> &functionList,
-    const API::IFunction_sptr &function) const {
-  std::shared_ptr<Functions::Convolution> convolution =
-      std::dynamic_pointer_cast<Functions::Convolution>(function);
+void TableWorkspaceDomainCreator::appendConvolvedCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
+                                                                          const API::IFunction_sptr &function) const {
+  std::shared_ptr<Functions::Convolution> convolution = std::dynamic_pointer_cast<Functions::Convolution>(function);
 
-  const auto compositeFn = std::dynamic_pointer_cast<API::CompositeFunction>(
-      convolution->getFunction(1));
+  const auto compositeFn = std::dynamic_pointer_cast<API::CompositeFunction>(convolution->getFunction(1));
   if (!compositeFn) {
     functionList.insert(functionList.end(), convolution);
   } else {
@@ -442,8 +410,7 @@ void TableWorkspaceDomainCreator::appendConvolvedCompositeFunctionMembers(
     const size_t nlocals = compositeFn->nFunctions();
     for (size_t i = 0; i < nlocals; ++i) {
       auto localFunction = compositeFn->getFunction(i);
-      std::shared_ptr<Functions::Convolution> localConvolution =
-          std::make_shared<Functions::Convolution>();
+      std::shared_ptr<Functions::Convolution> localConvolution = std::make_shared<Functions::Convolution>();
       localConvolution->addFunction(resolution);
       localConvolution->addFunction(localFunction);
       functionList.insert(functionList.end(), localConvolution);
@@ -461,8 +428,7 @@ void TableWorkspaceDomainCreator::appendConvolvedCompositeFunctionMembers(
  * @param resultValues A presized values holder for the results
  */
 void TableWorkspaceDomainCreator::addFunctionValuesToWS(
-    const API::IFunction_sptr &function,
-    std::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
+    const API::IFunction_sptr &function, std::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
     const std::shared_ptr<API::FunctionDomain> &domain,
     const std::shared_ptr<API::FunctionValues> &resultValues) const {
   const size_t nData = resultValues->size();
@@ -567,12 +533,11 @@ void TableWorkspaceDomainCreator::addFunctionValuesToWS(
  * @param nhistograms The number of histograms
  * @param nyvalues The number of y values to hold
  */
-API::MatrixWorkspace_sptr
-TableWorkspaceDomainCreator::createEmptyResultWS(const size_t nhistograms,
-                                                 const size_t nyvalues) {
+API::MatrixWorkspace_sptr TableWorkspaceDomainCreator::createEmptyResultWS(const size_t nhistograms,
+                                                                           const size_t nyvalues) {
   size_t nxvalues(nyvalues);
-  API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", nhistograms, nxvalues, nyvalues);
+  API::MatrixWorkspace_sptr ws =
+      API::WorkspaceFactory::Instance().create("Workspace2D", nhistograms, nxvalues, nyvalues);
   ws->setTitle(m_tableWorkspace->getTitle());
   auto tAxis = std::make_unique<API::TextAxis>(nhistograms);
   ws->replaceAxis(1, std::move(tAxis));
@@ -596,14 +561,11 @@ TableWorkspaceDomainCreator::createEmptyResultWS(const size_t nhistograms,
 
   // X values for all
   for (size_t i = 0; i < nhistograms; i++) {
-    ws->mutableX(i).assign(xData.begin() + m_startRowNo,
-                           xData.begin() + m_startRowNo + nxvalues);
+    ws->mutableX(i).assign(xData.begin() + m_startRowNo, xData.begin() + m_startRowNo + nxvalues);
   }
   // Data values for the first histogram
-  ws->mutableY(0).assign(yData.begin() + m_startRowNo,
-                         yData.begin() + m_startRowNo + nyvalues);
-  ws->mutableE(0).assign(eData.begin() + m_startRowNo,
-                         eData.begin() + m_startRowNo + nyvalues);
+  ws->mutableY(0).assign(yData.begin() + m_startRowNo, yData.begin() + m_startRowNo + nyvalues);
+  ws->mutableE(0).assign(eData.begin() + m_startRowNo, eData.begin() + m_startRowNo + nyvalues);
 
   return ws;
 }
@@ -653,8 +615,7 @@ void TableWorkspaceDomainCreator::setInitialValues(API::IFunction &function) {
  * Calculate size and starting iterator in the X array
  * @returns :: A pair of start iterator and size of the data.
  */
-std::pair<size_t, size_t>
-TableWorkspaceDomainCreator::getXInterval(std::vector<double> xData) const {
+std::pair<size_t, size_t> TableWorkspaceDomainCreator::getXInterval(std::vector<double> xData) const {
   const auto sizeOfData = xData.size();
   if (sizeOfData == 0) {
     throw std::runtime_error("Workspace contains no data.");
@@ -676,8 +637,7 @@ TableWorkspaceDomainCreator::getXInterval(std::vector<double> xData) const {
     m_endX = xData.back();
     to = xData.end();
   } else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL()) {
-    throw std::invalid_argument(
-        "Both StartX and EndX must be given to set fitting interval.");
+    throw std::invalid_argument("Both StartX and EndX must be given to set fitting interval.");
   } else if (isXAscending) {
     if (m_startX > m_endX) {
       std::swap(m_startX, m_endX);
@@ -688,8 +648,7 @@ TableWorkspaceDomainCreator::getXInterval(std::vector<double> xData) const {
     if (m_startX < m_endX) {
       std::swap(m_startX, m_endX);
     }
-    from =
-        std::lower_bound(xData.begin(), xData.end(), m_startX, greaterIsLess);
+    from = std::lower_bound(xData.begin(), xData.end(), m_startX, greaterIsLess);
     to = std::upper_bound(from, xData.end(), m_endX, greaterIsLess);
   }
 
@@ -701,8 +660,7 @@ TableWorkspaceDomainCreator::getXInterval(std::vector<double> xData) const {
                                 "within the workspace interval.");
   }
 
-  return std::make_pair(std::distance(xData.begin(), from),
-                        std::distance(xData.begin(), to));
+  return std::make_pair(std::distance(xData.begin(), from), std::distance(xData.begin(), to));
 }
 
 /**
@@ -743,8 +701,7 @@ void TableWorkspaceDomainCreator::setParameters() const {
  * wrong type.
  */
 
-void TableWorkspaceDomainCreator::setXYEColumnNames(
-    const API::ITableWorkspace_sptr &ws) const {
+void TableWorkspaceDomainCreator::setXYEColumnNames(const API::ITableWorkspace_sptr &ws) const {
 
   auto columnNames = ws->getColumnNames();
 
@@ -799,8 +756,7 @@ void TableWorkspaceDomainCreator::setXYEColumnNames(
  * @throws std::runtime_error if the Exclude property has an odd number of
  * entries.
  */
-void TableWorkspaceDomainCreator::setAndValidateWorkspace(
-    const API::Workspace_sptr &ws) const {
+void TableWorkspaceDomainCreator::setAndValidateWorkspace(const API::Workspace_sptr &ws) const {
   auto tableWorkspace = std::dynamic_pointer_cast<API::ITableWorkspace>(ws);
   if (!tableWorkspace) {
     throw std::invalid_argument("InputWorkspace must be a TableWorkspace.");

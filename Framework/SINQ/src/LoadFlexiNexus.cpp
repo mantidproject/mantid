@@ -38,24 +38,20 @@ using Mantid::HistogramData::Points;
 
 void LoadFlexiNexus::init() {
 
-  declareProperty(std::make_unique<FileProperty>(
-                      "Filename", "", FileProperty::Load,
-                      std::vector<std::string>{".hdf", ".h5", ""}),
-                  "A NeXus file");
-  declareProperty(std::make_unique<FileProperty>(
-                      "Dictionary", "", FileProperty::Load,
-                      std::vector<std::string>{".txt", ".dic", ""}),
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, std::vector<std::string>{".hdf", ".h5", ""}),
+      "A NeXus file");
+  declareProperty(std::make_unique<FileProperty>("Dictionary", "", FileProperty::Load,
+                                                 std::vector<std::string>{".txt", ".dic", ""}),
                   "A Dictionary for controlling NeXus loading");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-      "OutputWorkspace", "", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output));
 }
 
 void LoadFlexiNexus::exec() {
 
   std::string filename = getProperty("Filename");
   std::string dictname = getProperty("Dictionary");
-  g_log.information() << "Running FlexiNexus for " << filename << " with  "
-                      << dictname << '\n';
+  g_log.information() << "Running FlexiNexus for " << filename << " with  " << dictname << '\n';
 
   loadDictionary(getProperty("Dictionary"));
 
@@ -134,8 +130,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     spectraLength = static_cast<int>(inf.dims[1]);
   }
 
-  g_log.debug() << "Reading " << nSpectra << " spectra of length "
-                << spectraLength << ".\n";
+  g_log.debug() << "Reading " << nSpectra << " spectra of length " << spectraLength << ".\n";
 
   // need to locate x-axis data too.....
   std::map<std::string, std::string>::const_iterator it;
@@ -166,8 +161,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
 
   // fill the data.......
   ws = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-      WorkspaceFactory::Instance().create("Workspace2D", nSpectra, xData.size(),
-                                          spectraLength));
+      WorkspaceFactory::Instance().create("Workspace2D", nSpectra, xData.size(), spectraLength));
 
   // x can be bin edges or points, depending on branching above
   auto x = Kernel::make_cow<HistogramData::HistogramX>(xData);
@@ -179,10 +173,8 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     else
       ws->setHistogram(wsIndex, BinEdges(x), Counts(beg, end));
 
-    ws->getSpectrum(wsIndex).setSpectrumNo(
-        static_cast<specnum_t>(yData[wsIndex]));
-    ws->getSpectrum(wsIndex).setDetectorID(
-        static_cast<detid_t>(yData[wsIndex]));
+    ws->getSpectrum(wsIndex).setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));
+    ws->getSpectrum(wsIndex).setDetectorID(static_cast<detid_t>(yData[wsIndex]));
   }
 
   ws->setYUnit("Counts");
@@ -216,8 +208,7 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin) {
 
   std::vector<MDHistoDimension_sptr> dimensions;
   for (int k = static_cast<int>(inf.dims.size()) - 1; k >= 0; k--) {
-    dimensions.emplace_back(
-        makeDimension(fin, k, static_cast<int>(inf.dims[k])));
+    dimensions.emplace_back(makeDimension(fin, k, static_cast<int>(inf.dims[k])));
   }
 
   auto ws = std::make_shared<MDHistoWorkspace>(dimensions);
@@ -265,8 +256,7 @@ int LoadFlexiNexus::calculateF77Address(int * /*unused*/, int /*unused*/) {
 
 double LoadFlexiNexus::dblSqrt(double in) { return sqrt(in); }
 
-MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
-                                                    int length) {
+MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index, int length) {
   static const char *axisNames[] = {"x", "y", "z"};
   std::map<std::string, std::string>::const_iterator it;
 
@@ -308,11 +298,9 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
     g_log.notice("WARNING: swapped axis values on " + name);
   }
   Mantid::Geometry::GeneralFrame frame(name, "");
-  return MDHistoDimension_sptr(
-      new MDHistoDimension(name, name, frame, min, max, length));
+  return MDHistoDimension_sptr(new MDHistoDimension(name, name, frame, min, max, length));
 }
-void LoadFlexiNexus::addMetaData(NeXus::File *fin, const Workspace_sptr &ws,
-                                 const ExperimentInfo_sptr &info) {
+void LoadFlexiNexus::addMetaData(NeXus::File *fin, const Workspace_sptr &ws, const ExperimentInfo_sptr &info) {
   std::map<std::string, std::string>::const_iterator it;
 
   // assign a title
@@ -372,8 +360,7 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, const Workspace_sptr &ws,
           if (inf.type == ::NeXus::CHAR) {
             std::string data = fin->getStrData();
             r.addProperty(it->first, data, true);
-          } else if (inf.type == ::NeXus::FLOAT32 ||
-                     inf.type == ::NeXus::FLOAT64) {
+          } else if (inf.type == ::NeXus::FLOAT32 || inf.type == ::NeXus::FLOAT64) {
             std::vector<double> data;
             fin->getDataCoerce(data);
             r.addProperty(it->first, data, true);

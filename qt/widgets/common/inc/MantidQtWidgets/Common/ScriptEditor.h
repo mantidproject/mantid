@@ -52,10 +52,8 @@ public:
   };
 
 public:
-  ScriptEditor(const QString &lexerName, const QFont &font = QFont(),
-               QWidget *parent = nullptr);
-  ScriptEditor(QWidget *parent = nullptr, QsciLexer *lexer = nullptr,
-               const QString &settingsGroup = "");
+  ScriptEditor(const QString &lexerName, const QFont &font = QFont(), QWidget *parent = nullptr);
+  ScriptEditor(QWidget *parent = nullptr, QsciLexer *lexer = nullptr, const QString &settingsGroup = "");
   /// Destructor
   ~ScriptEditor() override;
 
@@ -74,8 +72,7 @@ public:
   void setAutoMarginResize();
   /// Enable the auto complete. Default is for backwards compatability
   /// with existing code
-  void
-  enableAutoCompletion(AutoCompletionSource source = QsciScintilla::AcsAPIs);
+  void enableAutoCompletion(AutoCompletionSource source = QsciScintilla::AcsAPIs);
   /// Disable the auto complete
   void disableAutoCompletion();
 
@@ -102,9 +99,8 @@ public:
   inline QsciAPIs *scintillaAPI() const { return m_completer; }
 
   /// Replace all occurences of a string
-  void replaceAll(const QString &search, const QString &replace, bool regex,
-                  bool caseSensitive, bool matchWords, bool wrap,
-                  bool forward = true);
+  void replaceAll(const QString &search, const QString &replace, bool regex, bool caseSensitive, bool matchWords,
+                  bool wrap, bool forward = true);
 
   /// Get the current zoom factor
   int getZoom() const;
@@ -158,8 +154,7 @@ protected:
   void dropEvent(QDropEvent *de) override;
   void dragMoveEvent(QDragMoveEvent *de) override;
   void dragEnterEvent(QDragEnterEvent *de) override;
-  QByteArray fromMimeData(const QMimeData *source,
-                          bool &rectangular) const override;
+  QByteArray fromMimeData(const QMimeData *source, bool &rectangular) const override;
 
 private slots:
 

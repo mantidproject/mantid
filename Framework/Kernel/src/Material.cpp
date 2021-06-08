@@ -54,23 +54,19 @@ inline double scatteringXS(const double realLength, const double imagLength) {
 }
 } // namespace
 
-Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
-    const std::shared_ptr<PhysicalConstants::Atom> &atom,
-    const double multiplicity)
+Mantid::Kernel::Material::FormulaUnit::FormulaUnit(const std::shared_ptr<PhysicalConstants::Atom> &atom,
+                                                   const double multiplicity)
     : atom(atom), multiplicity(multiplicity) {}
 
-Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
-    const PhysicalConstants::Atom &atom, const double multiplicity)
-    : atom(std::make_shared<PhysicalConstants::Atom>(atom)),
-      multiplicity(multiplicity) {}
+Mantid::Kernel::Material::FormulaUnit::FormulaUnit(const PhysicalConstants::Atom &atom, const double multiplicity)
+    : atom(std::make_shared<PhysicalConstants::Atom>(atom)), multiplicity(multiplicity) {}
 
 /**
  * Construct an "empty" material. Everything returns zero
  */
 Material::Material()
-    : m_name(), m_chemicalFormula(), m_atomTotal(0.0), m_numberDensity(0.0),
-      m_packingFraction(1.0), m_temperature(0.0), m_pressure(0.0),
-      m_linearAbsorpXSectionByWL(0.0), m_totalScatterXSection(0.0) {}
+    : m_name(), m_chemicalFormula(), m_atomTotal(0.0), m_numberDensity(0.0), m_packingFraction(1.0), m_temperature(0.0),
+      m_pressure(0.0), m_linearAbsorpXSectionByWL(0.0), m_totalScatterXSection(0.0) {}
 
 /**
  * Construct a material object
@@ -81,12 +77,10 @@ Material::Material()
  * @param temperature :: The temperature in Kelvin (Default = 300K)
  * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
  */
-Material::Material(const std::string &name, const ChemicalFormula &formula,
-                   const double numberDensity, const double packingFraction,
-                   const double temperature, const double pressure)
-    : m_name(name), m_atomTotal(0.0), m_numberDensity(numberDensity),
-      m_packingFraction(packingFraction), m_temperature(temperature),
-      m_pressure(pressure) {
+Material::Material(const std::string &name, const ChemicalFormula &formula, const double numberDensity,
+                   const double packingFraction, const double temperature, const double pressure)
+    : m_name(name), m_atomTotal(0.0), m_numberDensity(numberDensity), m_packingFraction(packingFraction),
+      m_temperature(temperature), m_pressure(pressure) {
   m_chemicalFormula.assign(formula.begin(), formula.end());
   this->countAtoms();
   this->calculateLinearAbsorpXSectionByWL();
@@ -102,13 +96,10 @@ Material::Material(const std::string &name, const ChemicalFormula &formula,
  * @param temperature :: The temperature in Kelvin (Default = 300K)
  * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
  */
-Material::Material(const std::string &name,
-                   const PhysicalConstants::NeutronAtom &atom,
-                   const double numberDensity, const double packingFraction,
-                   const double temperature, const double pressure)
-    : m_name(name), m_chemicalFormula(), m_atomTotal(1.0),
-      m_numberDensity(numberDensity), m_packingFraction(packingFraction),
-      m_temperature(temperature), m_pressure(pressure) {
+Material::Material(const std::string &name, const PhysicalConstants::NeutronAtom &atom, const double numberDensity,
+                   const double packingFraction, const double temperature, const double pressure)
+    : m_name(name), m_chemicalFormula(), m_atomTotal(1.0), m_numberDensity(numberDensity),
+      m_packingFraction(packingFraction), m_temperature(temperature), m_pressure(pressure) {
   if (atom.z_number == 0) { // user specified atom
     m_chemicalFormula.emplace_back(atom, 1.);
   } else if (atom.a_number > 0) { // single isotope
@@ -122,11 +113,9 @@ Material::Material(const std::string &name,
 
 // update the total atom count
 void Material::countAtoms() {
-  m_atomTotal = std::accumulate(std::begin(m_chemicalFormula),
-                                std::end(m_chemicalFormula), 0.,
-                                [](double subtotal, const FormulaUnit &right) {
-                                  return subtotal + right.multiplicity;
-                                });
+  m_atomTotal =
+      std::accumulate(std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) { return subtotal + right.multiplicity; });
 }
 
 /**
@@ -143,22 +132,18 @@ void Material::calculateLinearAbsorpXSectionByWL() {
   if (m_chemicalFormula.size() == 1) {
     weightedTotal = m_chemicalFormula.front().atom->neutron.abs_scatt_xs;
   } else {
-    weightedTotal =
-        std::accumulate(std::begin(m_chemicalFormula),
-                        std::end(m_chemicalFormula), 0.,
-                        [](double subtotal, const FormulaUnit &right) {
-                          return subtotal + right.atom->neutron.abs_scatt_xs *
-                                                right.multiplicity;
-                        }) /
-        m_atomTotal;
+    weightedTotal = std::accumulate(std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
+                                    [](double subtotal, const FormulaUnit &right) {
+                                      return subtotal + right.atom->neutron.abs_scatt_xs * right.multiplicity;
+                                    }) /
+                    m_atomTotal;
   }
 
   if (!std::isnormal(weightedTotal)) {
     weightedTotal = 0.;
   }
 
-  m_linearAbsorpXSectionByWL =
-      weightedTotal / PhysicalConstants::NeutronAtom::ReferenceLambda;
+  m_linearAbsorpXSectionByWL = weightedTotal / PhysicalConstants::NeutronAtom::ReferenceLambda;
 }
 
 // calculate the total scattering x section (by wavelength) following Sears
@@ -168,14 +153,11 @@ void Material::calculateTotalScatterXSection() {
   if (m_chemicalFormula.size() == 1)
     weightedTotal = m_chemicalFormula.front().atom->neutron.tot_scatt_xs;
   else {
-    weightedTotal =
-        std::accumulate(std::begin(m_chemicalFormula),
-                        std::end(m_chemicalFormula), 0.,
-                        [](double subtotal, const FormulaUnit &right) {
-                          return subtotal + right.atom->neutron.tot_scatt_xs *
-                                                right.multiplicity;
-                        }) /
-        m_atomTotal;
+    weightedTotal = std::accumulate(std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
+                                    [](double subtotal, const FormulaUnit &right) {
+                                      return subtotal + right.atom->neutron.tot_scatt_xs * right.multiplicity;
+                                    }) /
+                    m_atomTotal;
   }
 
   if (!std::isnormal(weightedTotal)) {
@@ -189,8 +171,7 @@ void Material::setAttenuationProfile(AttenuationProfile attenuationOverride) {
   m_attenuationOverride = std::move(attenuationOverride);
 }
 
-void Material::setXRayAttenuationProfile(
-    AttenuationProfile attenuationProfile) {
+void Material::setXRayAttenuationProfile(AttenuationProfile attenuationProfile) {
   m_xRayAttenuationProfile = std::move(attenuationProfile);
 }
 
@@ -200,9 +181,7 @@ void Material::setXRayAttenuationProfile(
  */
 const std::string &Material::name() const { return m_name; }
 
-const Material::ChemicalFormula &Material::chemicalFormula() const {
-  return m_chemicalFormula;
-}
+const Material::ChemicalFormula &Material::chemicalFormula() const { return m_chemicalFormula; }
 
 /**
  * Get the number density
@@ -214,9 +193,7 @@ double Material::numberDensity() const { return m_numberDensity; }
  * Get the effective number density
  * @returns The number density of the material in atoms / Angstrom^3
  */
-double Material::numberDensityEffective() const {
-  return m_numberDensity * m_packingFraction;
-}
+double Material::numberDensityEffective() const { return m_numberDensity * m_packingFraction; }
 
 /**
  * Get the packing fraction. This should be a number 0<f<=1. However,
@@ -274,9 +251,7 @@ double Material::totalScatterXSection() const { return m_totalScatterXSection; }
  * @returns The value of the absoprtion cross section at
  * the given wavelength
  */
-double Material::absorbXSection(const double lambda) const {
-  return m_linearAbsorpXSectionByWL * lambda;
-}
+double Material::absorbXSection(const double lambda) const { return m_linearAbsorpXSectionByWL * lambda; }
 
 /**
  * @param lambda Wavelength (Angstroms) to compute the attenuation (default =
@@ -285,8 +260,7 @@ double Material::absorbXSection(const double lambda) const {
  */
 double Material::attenuationCoefficient(const double lambda) const {
   if (!m_attenuationOverride) {
-    return 100 * numberDensityEffective() *
-           (totalScatterXSection() + absorbXSection(lambda));
+    return 100 * numberDensityEffective() * (totalScatterXSection() + absorbXSection(lambda));
   } else {
     return m_attenuationOverride->getAttenuationCoefficient(lambda);
   }
@@ -307,11 +281,9 @@ double Material::attenuation(const double distance, const double lambda) const {
  * @param energy KeV to compute the attenuation
  * @return The dimensionless attenuation factor
  */
-double Material::xRayAttenuation(const double distance,
-                                 const double energy) const {
+double Material::xRayAttenuation(const double distance, const double energy) const {
   if (m_xRayAttenuationProfile) {
-    return exp(-m_xRayAttenuationProfile->getAttenuationCoefficient(energy) *
-               distance);
+    return exp(-m_xRayAttenuationProfile->getAttenuationCoefficient(energy) * distance);
   } else {
     throw std::runtime_error("xRayAttenuationProfile override not set");
   }
@@ -333,18 +305,15 @@ double Material::linearAbsorpCoef(const double lambda) const {
 }
 
 // This must match the values that come from the scalar version
-std::vector<double> Material::linearAbsorpCoef(
-    std::vector<double>::const_iterator lambdaBegin,
-    std::vector<double>::const_iterator lambdaEnd) const {
+std::vector<double> Material::linearAbsorpCoef(std::vector<double>::const_iterator lambdaBegin,
+                                               std::vector<double>::const_iterator lambdaEnd) const {
 
   const double densityTerm = 100. * numberDensityEffective();
 
   std::vector<double> linearCoef(std::distance(lambdaBegin, lambdaEnd));
 
   std::transform(lambdaBegin, lambdaEnd, linearCoef.begin(),
-                 [densityTerm, this](const double lambda) {
-                   return densityTerm * this->absorbXSection(lambda);
-                 });
+                 [densityTerm, this](const double lambda) { return densityTerm * this->absorbXSection(lambda); });
 
   return linearCoef;
 }
@@ -377,12 +346,10 @@ double Material::cohScatterLengthReal(const double lambda) const {
     return m_chemicalFormula.front().atom->neutron.coh_scatt_length_real;
 
   const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            return subtotal + right.atom->neutron.coh_scatt_length_real *
-                                  right.multiplicity;
-          }) /
+      std::accumulate(std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal + right.atom->neutron.coh_scatt_length_real * right.multiplicity;
+                      }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -400,12 +367,10 @@ double Material::cohScatterLengthImg(const double lambda) const {
     return m_chemicalFormula.front().atom->neutron.coh_scatt_length_img;
 
   const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            return subtotal + right.atom->neutron.coh_scatt_length_img *
-                                  right.multiplicity;
-          }) /
+      std::accumulate(std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal + right.atom->neutron.coh_scatt_length_img * right.multiplicity;
+                      }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -423,12 +388,10 @@ double Material::incohScatterLengthReal(const double lambda) const {
     return m_chemicalFormula.front().atom->neutron.inc_scatt_length_real;
 
   const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            return subtotal + right.atom->neutron.inc_scatt_length_real *
-                                  right.multiplicity;
-          }) /
+      std::accumulate(std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal + right.atom->neutron.inc_scatt_length_real * right.multiplicity;
+                      }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -446,12 +409,10 @@ double Material::incohScatterLengthImg(const double lambda) const {
     return m_chemicalFormula.front().atom->neutron.inc_scatt_length_img;
 
   const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            return subtotal + right.atom->neutron.inc_scatt_length_img *
-                                  right.multiplicity;
-          }) /
+      std::accumulate(std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal + right.atom->neutron.inc_scatt_length_img * right.multiplicity;
+                      }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -550,28 +511,17 @@ void Material::saveNexus(::NeXus::File *file, const std::string &group) const {
     }
     file->writeData("chemical_formula", formula.str());
   } else if (style == "userdefined") {
-    file->writeData("coh_scatt_length_real",
-                    m_chemicalFormula[0].atom->neutron.coh_scatt_length_real);
-    file->writeData("coh_scatt_length_img",
-                    m_chemicalFormula[0].atom->neutron.coh_scatt_length_img);
-    file->writeData("inc_scatt_length_real",
-                    m_chemicalFormula[0].atom->neutron.inc_scatt_length_real);
-    file->writeData("inc_scatt_length_img",
-                    m_chemicalFormula[0].atom->neutron.inc_scatt_length_img);
-    file->writeData("coh_scatt_xs",
-                    m_chemicalFormula[0].atom->neutron.coh_scatt_xs);
-    file->writeData("inc_scatt_xs",
-                    m_chemicalFormula[0].atom->neutron.inc_scatt_xs);
-    file->writeData("tot_scatt_xs",
-                    m_chemicalFormula[0].atom->neutron.tot_scatt_xs);
-    file->writeData("abs_scatt_xs",
-                    m_chemicalFormula[0].atom->neutron.abs_scatt_xs);
-    file->writeData("tot_scatt_length",
-                    m_chemicalFormula[0].atom->neutron.tot_scatt_length);
-    file->writeData("coh_scatt_length",
-                    m_chemicalFormula[0].atom->neutron.coh_scatt_length);
-    file->writeData("inc_scatt_length",
-                    m_chemicalFormula[0].atom->neutron.inc_scatt_length);
+    file->writeData("coh_scatt_length_real", m_chemicalFormula[0].atom->neutron.coh_scatt_length_real);
+    file->writeData("coh_scatt_length_img", m_chemicalFormula[0].atom->neutron.coh_scatt_length_img);
+    file->writeData("inc_scatt_length_real", m_chemicalFormula[0].atom->neutron.inc_scatt_length_real);
+    file->writeData("inc_scatt_length_img", m_chemicalFormula[0].atom->neutron.inc_scatt_length_img);
+    file->writeData("coh_scatt_xs", m_chemicalFormula[0].atom->neutron.coh_scatt_xs);
+    file->writeData("inc_scatt_xs", m_chemicalFormula[0].atom->neutron.inc_scatt_xs);
+    file->writeData("tot_scatt_xs", m_chemicalFormula[0].atom->neutron.tot_scatt_xs);
+    file->writeData("abs_scatt_xs", m_chemicalFormula[0].atom->neutron.abs_scatt_xs);
+    file->writeData("tot_scatt_length", m_chemicalFormula[0].atom->neutron.tot_scatt_length);
+    file->writeData("coh_scatt_length", m_chemicalFormula[0].atom->neutron.coh_scatt_length);
+    file->writeData("inc_scatt_length", m_chemicalFormula[0].atom->neutron.inc_scatt_length);
   }
 
   file->writeData("number_density", m_numberDensity);
@@ -601,8 +551,7 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
       if (element_Z > 0) {
         m_chemicalFormula.emplace_back(getAtom(element_Z, element_A), 1);
       } else {
-        m_chemicalFormula.emplace_back(
-            Mantid::PhysicalConstants::getNeutronAtom(element_Z, element_A), 1);
+        m_chemicalFormula.emplace_back(Mantid::PhysicalConstants::getNeutronAtom(element_Z, element_A), 1);
       }
     } catch (std::runtime_error &) { /* ignore and use the default */
     }
@@ -633,8 +582,7 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
     }
     // the other option is empty which does not need to be addressed
   } else {
-    throw std::runtime_error(
-        "Only know how to read version 1 or 2 for Material");
+    throw std::runtime_error("Only know how to read version 1 or 2 for Material");
   }
   this->countAtoms();
   this->calculateLinearAbsorpXSectionByWL();
@@ -651,9 +599,8 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
   file->closeGroup();
 }
 
-namespace { // anonymous namespace to hide the function
-str_pair
-getAtomName(const std::string &text) // TODO change to get number after letters
+namespace {                                   // anonymous namespace to hide the function
+str_pair getAtomName(const std::string &text) // TODO change to get number after letters
 {
   // one character doesn't need
   if (text.size() <= 1)
@@ -669,12 +616,10 @@ getAtomName(const std::string &text) // TODO change to get number after letters
 }
 } // namespace
 
-Material::ChemicalFormula
-Material::parseChemicalFormula(const std::string &chemicalSymbol) {
+Material::ChemicalFormula Material::parseChemicalFormula(const std::string &chemicalSymbol) {
   Material::ChemicalFormula CF;
 
-  tokenizer tokens(chemicalSymbol, " -",
-                   Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  tokenizer tokens(chemicalSymbol, " -", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   for (const auto &atom : tokens) {
     try {
       std::string name;
@@ -713,8 +658,7 @@ Material::parseChemicalFormula(const std::string &chemicalSymbol) {
       CF.emplace_back(getAtom(name, aNumber), static_cast<double>(numberAtoms));
     } catch (boost::bad_lexical_cast &e) {
       std::stringstream msg;
-      msg << "While trying to parse atom \"" << atom
-          << "\" encountered bad_lexical_cast: " << e.what();
+      msg << "While trying to parse atom \"" << atom << "\" encountered bad_lexical_cast: " << e.what();
       throw std::runtime_error(msg.str());
     }
   }

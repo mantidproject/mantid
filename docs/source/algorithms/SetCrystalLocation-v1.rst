@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm changes the sample location for an events workspace.  If the InputWorkspace and OutputWorkspace are the same, the position is simply changed.  If the InputWorkspace and OutputWorkspace are different, the InputWorkspace is cloned then the clone's position is changed.  The former is faster, especially for large workspaces. 
+This algorithm changes the sample location for an events workspace.  If the InputWorkspace and OutputWorkspace are the same, the position is simply changed.  If the InputWorkspace and OutputWorkspace are different, the InputWorkspace is cloned then the clone's position is changed.  The former is faster, especially for large workspaces.
 
 Usage
 -----

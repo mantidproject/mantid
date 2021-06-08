@@ -35,10 +35,7 @@ namespace {
 /// Holds a flag at a given value
 /// and flips it back to its starting value on destruction
 struct HoldFlag {
-  HoldFlag(bool &current, const bool holdValue)
-      : initial(current), heldflag(current) {
-    heldflag = holdValue;
-  }
+  HoldFlag(bool &current, const bool holdValue) : initial(current), heldflag(current) { heldflag = holdValue; }
   ~HoldFlag() { heldflag = initial; }
   bool initial;
   bool &heldflag;
@@ -49,9 +46,7 @@ struct HoldFlag {
 // of it's lifetime.
 class PreventLoadRequests {
 public:
-  explicit PreventLoadRequests(LoadDialog &dialog) : m_dialog(dialog) {
-    m_dialog.disableLoadRequests();
-  }
+  explicit PreventLoadRequests(LoadDialog &dialog) : m_dialog(dialog) { m_dialog.disableLoadRequests(); }
 
   ~PreventLoadRequests() { m_dialog.enableLoadRequests(); }
 
@@ -68,8 +63,7 @@ DECLARE_DIALOG(LoadDialog)
 
 /// Default constructor
 LoadDialog::LoadDialog(QWidget *parent)
-    : API::AlgorithmDialog(parent), m_form(), m_currentFiles(),
-      m_initialHeight(0), m_populating(false) {
+    : API::AlgorithmDialog(parent), m_form(), m_currentFiles(), m_initialHeight(0), m_populating(false) {
   // We will handle parsing the input ourselves on startup
   m_autoParseOnInit = false;
 }
@@ -92,10 +86,8 @@ void LoadDialog::createDynamicWidgets() {
 /// Override the help button clicked method
 void LoadDialog::helpClicked() {
   const auto loaderName = getAlgorithm()->getPropertyValue("LoaderName");
-  QString helpPage = (loaderName.empty()) ? QString("Load")
-                                          : QString::fromStdString(loaderName);
-  MantidQt::API::HelpWindow::showAlgorithm(this->nativeParentWidget(),
-                                           helpPage);
+  QString helpPage = (loaderName.empty()) ? QString("Load") : QString::fromStdString(loaderName);
+  MantidQt::API::HelpWindow::showAlgorithm(this->nativeParentWidget(), helpPage);
 }
 
 /**
@@ -111,8 +103,7 @@ void LoadDialog::suggestWSName() {
   QString fileSuggestion;
   if (m_form.fileWidget->isValid()) {
     if (m_form.fileWidget->getFilenames().size() == 1)
-      fileSuggestion =
-          QFileInfo(m_form.fileWidget->getFirstFilename()).completeBaseName();
+      fileSuggestion = QFileInfo(m_form.fileWidget->getFirstFilename()).completeBaseName();
     else
       fileSuggestion = "MultiFiles";
   }
@@ -126,11 +117,9 @@ void LoadDialog::suggestWSName() {
  */
 void LoadDialog::enableNameSuggestion(const bool on) {
   if (on) {
-    connect(m_form.fileWidget, SIGNAL(filesFound()), this,
-            SLOT(suggestWSName()));
+    connect(m_form.fileWidget, SIGNAL(filesFound()), this, SLOT(suggestWSName()));
   } else {
-    disconnect(m_form.fileWidget, SIGNAL(filesFound()), this,
-               SLOT(suggestWSName()));
+    disconnect(m_form.fileWidget, SIGNAL(filesFound()), this, SLOT(suggestWSName()));
   }
 }
 
@@ -155,8 +144,7 @@ void LoadDialog::accept() {
   m_form.propertyLayout->setEnabled(true);
 
   // Check that the file still exists just incase it somehow got removed
-  std::string errMess =
-      getAlgorithm()->getPointerToProperty("Filename")->isValid();
+  std::string errMess = getAlgorithm()->getPointerToProperty("Filename")->isValid();
   if (!errMess.empty()) {
     m_currentFiles = "";
     createDynamicWidgets();
@@ -180,8 +168,7 @@ void LoadDialog::initLayout() {
   m_form.fileWidget->readSettings("Mantid/Algorithms/Load");
   m_initialHeight = this->height();
 
-  const std::string &outWsName =
-      getAlgorithm()->getPropertyValue("OutputWorkspace");
+  const std::string &outWsName = getAlgorithm()->getPropertyValue("OutputWorkspace");
   if (!outWsName.empty()) {
     // OutputWorkspace name suggestion received as parameter, just take it and
     // don't change it
@@ -190,8 +177,7 @@ void LoadDialog::initLayout() {
     // Guess at an output workspace name but only if the user hasn't changed
     // anything
     enableNameSuggestion(true);
-    connect(m_form.workspaceEdit, SIGNAL(textEdited(const QString &)), this,
-            SLOT(enableNameSuggestion()));
+    connect(m_form.workspaceEdit, SIGNAL(textEdited(const QString &)), this, SLOT(enableNameSuggestion()));
   }
 
   // Connect the file finder's file found signal to the dynamic property create
@@ -199,8 +185,7 @@ void LoadDialog::initLayout() {
   // When the file text is set the Load algorithm finds the concrete loader and
   // then we
   // know what extra properties to create
-  connect(m_form.fileWidget, SIGNAL(filesFound()), this,
-          SLOT(createDynamicWidgets()));
+  connect(m_form.fileWidget, SIGNAL(filesFound()), this, SLOT(createDynamicWidgets()));
   tieStaticWidgets(true);
 }
 
@@ -211,8 +196,7 @@ void LoadDialog::saveInput() {
   m_form.fileWidget->saveSettings("Mantid/Algorithms/Load");
   AlgorithmDialog::saveInput();
   // Ensure the filename is store as the full file
-  API::AlgorithmInputHistory::Instance().storeNewValue(
-      "Load", QPair<QString, QString>("Filename", m_currentFiles));
+  API::AlgorithmInputHistory::Instance().storeNewValue("Load", QPair<QString, QString>("Filename", m_currentFiles));
 }
 
 /**
@@ -227,8 +211,7 @@ void LoadDialog::tieStaticWidgets(const bool readHistory) {
     delete validLbl->widget();
     delete validLbl;
   }
-  tie(m_form.workspaceEdit, "OutputWorkspace", m_form.workspaceLayout,
-      readHistory);
+  tie(m_form.workspaceEdit, "OutputWorkspace", m_form.workspaceLayout, readHistory);
   tie(m_form.fileWidget, "Filename", nullptr, readHistory);
 }
 
@@ -302,8 +285,7 @@ void LoadDialog::createDynamicLayout() {
     if (propName == "OutputWorkspace" || propName == "Filename")
       continue;
     if (requiresUserInput(propName)) {
-      dialogHeight += createWidgetsForProperty(prop, m_form.propertyLayout,
-                                               m_form.scrollAreaWidgetContents);
+      dialogHeight += createWidgetsForProperty(prop, m_form.propertyLayout, m_form.scrollAreaWidgetContents);
     }
   }
   // Re-enable and recompute the size of the layout
@@ -330,8 +312,7 @@ void LoadDialog::createDynamicLayout() {
  * @param propertyLayout A layout where the widgets are to be placed
  * @param parent The parent widget
  */
-int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
-                                         QVBoxLayout *propertyLayout,
+int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop, QVBoxLayout *propertyLayout,
                                          QWidget *parent) {
   QString propName = QString::fromStdString(prop->name());
   QWidget *inputWidget(nullptr);
@@ -362,8 +343,7 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
       inputWidget = optionsBox;
       std::vector<std::string> items = prop->allowedValues();
       std::vector<std::string>::const_iterator vend = items.end();
-      for (std::vector<std::string>::const_iterator vitr = items.begin();
-           vitr != vend; ++vitr) {
+      for (std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend; ++vitr) {
         optionsBox->addItem(QString::fromStdString(*vitr));
       }
       // Set current as visible

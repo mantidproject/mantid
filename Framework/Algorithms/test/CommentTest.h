@@ -40,28 +40,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", wsName));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "Text", "The next algorithm is doing ws equals 1/ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Text", "The next algorithm is doing ws equals 1/ws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(
-        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            wsName));
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
     TS_ASSERT(outputWS);
     if (!outputWS)
       return;
 
     IAlgorithm_sptr lastAlgorithm = outputWS->getHistory().lastAlgorithm();
 
-    TS_ASSERT_EQUALS(lastAlgorithm->getPropertyValue("Workspace"),
-                     alg.getPropertyValue("Workspace"));
-    TS_ASSERT_EQUALS(lastAlgorithm->getPropertyValue("Text"),
-                     alg.getPropertyValue("Text"));
-    TSM_ASSERT("The workspace has been altered by Comment",
-               Mantid::API::equals(ws, ws2));
+    TS_ASSERT_EQUALS(lastAlgorithm->getPropertyValue("Workspace"), alg.getPropertyValue("Workspace"));
+    TS_ASSERT_EQUALS(lastAlgorithm->getPropertyValue("Text"), alg.getPropertyValue("Text"));
+    TSM_ASSERT("The workspace has been altered by Comment", Mantid::API::equals(ws, ws2));
 
     AnalysisDataService::Instance().remove(wsName);
   }

@@ -27,8 +27,7 @@ public:
     const size_t n = 10;
     TableWorkspace ws(n);
     ws.addColumn("int", "col");
-    TableColumn<int> &column =
-        static_cast<TableColumn<int> &>(*ws.getColumn("col"));
+    TableColumn<int> &column = static_cast<TableColumn<int> &>(*ws.getColumn("col"));
     auto &data = column.data();
     data[0] = 5;
     data[1] = 7;
@@ -93,8 +92,7 @@ public:
     data[8] = 0;
     data[9] = 12;
 
-    auto column2 =
-        static_cast<TableColumn<std::string> &>(*ws.getColumn("col2"));
+    auto column2 = static_cast<TableColumn<std::string> &>(*ws.getColumn("col2"));
     auto &data2 = column2.data();
     data2[0] = "five";
     data2[1] = "seven";
@@ -157,8 +155,7 @@ public:
     data[8] = 0;
     data[9] = 12;
 
-    auto column2 =
-        static_cast<TableColumn<std::string> &>(*ws.getColumn("col2"));
+    auto column2 = static_cast<TableColumn<std::string> &>(*ws.getColumn("col2"));
     auto &data2 = column2.data();
     data2[0] = "five";
     data2[1] = "seven";
@@ -207,10 +204,8 @@ public:
     TableWorkspace ws(n);
     ws.addColumn("int", "col1");
     ws.addColumn("str", "col2");
-    auto clonedColInt =
-        std::unique_ptr<Mantid::API::Column>(ws.getColumn("col1")->clone());
-    auto clonedColStr =
-        std::unique_ptr<Mantid::API::Column>(ws.getColumn("col2")->clone());
+    auto clonedColInt = std::unique_ptr<Mantid::API::Column>(ws.getColumn("col1")->clone());
+    auto clonedColStr = std::unique_ptr<Mantid::API::Column>(ws.getColumn("col2")->clone());
     TS_ASSERT_EQUALS(clonedColInt->type(), "int");
     TS_ASSERT_EQUALS(clonedColStr->type(), "str");
   }
@@ -232,8 +227,7 @@ public:
     data1[8] = 0;
     data1[9] = 12;
 
-    auto column2 =
-        static_cast<TableColumn<std::string> &>(*ws.getColumn("col2"));
+    auto column2 = static_cast<TableColumn<std::string> &>(*ws.getColumn("col2"));
     auto &data2 = column2.data();
     data2[0] = "five";
     data2[1] = "seven";
@@ -274,11 +268,9 @@ public:
     TS_ASSERT_EQUALS(data2[indexVec[9]], "twelve (1)");
 
     std::vector<std::pair<size_t, size_t>> eqRanges2;
-    column2.sortIndex(ascending, eqRanges[0].first, eqRanges[0].second,
-                      indexVec, eqRanges2);
+    column2.sortIndex(ascending, eqRanges[0].first, eqRanges[0].second, indexVec, eqRanges2);
     TS_ASSERT(eqRanges2.empty());
-    column2.sortIndex(ascending, eqRanges[1].first, eqRanges[1].second,
-                      indexVec, eqRanges2);
+    column2.sortIndex(ascending, eqRanges[1].first, eqRanges[1].second, indexVec, eqRanges2);
     TS_ASSERT(eqRanges2.empty());
 
     column1.sortValues(indexVec);
@@ -459,8 +451,7 @@ public:
     const size_t n = 10;
     TableWorkspace ws(n);
     ws.addColumn("str", "col1");
-    auto column =
-        static_cast<TableColumn<std::string> &>(*ws.getColumn("col1"));
+    auto column = static_cast<TableColumn<std::string> &>(*ws.getColumn("col1"));
     auto &data = column.data();
     data[0] = "hello";
     auto column2 = std::unique_ptr<Mantid::API::Column>(column.clone());
@@ -471,8 +462,7 @@ public:
     const size_t n = 10;
     TableWorkspace ws(n);
     ws.addColumn("str", "col1");
-    auto column =
-        static_cast<TableColumn<std::string> &>(*ws.getColumn("col1"));
+    auto column = static_cast<TableColumn<std::string> &>(*ws.getColumn("col1"));
     auto &data = column.data();
     data[0] = "1";
     auto column2 = std::unique_ptr<Mantid::API::Column>(column.clone());

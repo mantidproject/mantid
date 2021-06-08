@@ -31,10 +31,8 @@ public:
   void mouseDoubleClickEvent(QMouseEvent *e) override;
 
   QStringList getSelectedWorkspaceNames() const;
-  MantidWSIndexWidget::UserInput
-  chooseSpectrumFromSelected(bool showWaterfallOpt = true,
-                             bool showPlotAll = true, bool showTiledOpt = true,
-                             bool isAdvanced = false) const;
+  MantidWSIndexWidget::UserInput chooseSpectrumFromSelected(bool showWaterfallOpt = true, bool showPlotAll = true,
+                                                            bool showTiledOpt = true, bool isAdvanced = false) const;
   void setSortScheme(MantidItemSortScheme /*sortScheme*/);
   void setSortOrder(Qt::SortOrder /*sortOrder*/);
   MantidItemSortScheme getSortScheme() const;
@@ -43,8 +41,7 @@ public:
   void disableNodes(bool);
   void sort();
   void dropEvent(QDropEvent *de) override;
-  QList<std::shared_ptr<const Mantid::API::MatrixWorkspace>>
-  getSelectedMatrixWorkspaces() const;
+  QList<std::shared_ptr<const Mantid::API::MatrixWorkspace>> getSelectedMatrixWorkspaces() const;
 
   /// Action that is executed when a workspace in the tree is double clicked.
   std::function<void(QString)> m_doubleClickAction = nullptr;

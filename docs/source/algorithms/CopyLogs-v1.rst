@@ -35,12 +35,12 @@ Usage
    demo_ws1 = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
    demo_ws2 = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
 
-   # Add logs to first workspace 
+   # Add logs to first workspace
    AddSampleLog(Workspace=demo_ws1, LogName='x', LogText='hello world', LogType='String')
    AddSampleLog(Workspace=demo_ws1, LogName='y', LogText='1', LogType='Number')
    AddSampleLog(Workspace=demo_ws1, LogName='z', LogText='2', LogType='Number Series')
 
-   # Add logs to second workspace 
+   # Add logs to second workspace
    AddSampleLog(Workspace=demo_ws2, LogName='x', LogText='hello universe', LogType='String')
    AddSampleLog(Workspace=demo_ws2, LogName='w', LogText='3', LogType='Number')
 
@@ -58,7 +58,7 @@ Usage
    print("1st workspace log values x = {} , y = {} , z = {}".format(log_x1.value, log_y.value, log_z.value))
    print("2nd workspace log values x = {} , w = {}".format(log_x2.value, log_w.value ))
 
-   # Copy logs of 1st workspace to 2nd workspace 
+   # Copy logs of 1st workspace to 2nd workspace
    CopyLogs( demo_ws1, demo_ws2)
 
    # Fetch the new logs
@@ -79,7 +79,7 @@ Usage
 
 Output:
 
-.. testoutput:: ExCopyLogsSimple 
+.. testoutput:: ExCopyLogsSimple
 
    Before CopyLog
    1st workspace log values x = hello world , y = 1 , z = [2]
@@ -97,12 +97,12 @@ Output:
    demo_ws1 = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
    demo_ws2 = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
 
-   # Add logs to first workspace 
+   # Add logs to first workspace
    AddSampleLog(Workspace=demo_ws1, LogName='x', LogText='hello world', LogType='String')
    AddSampleLog(Workspace=demo_ws1, LogName='y', LogText='1', LogType='Number')
    AddSampleLog(Workspace=demo_ws1, LogName='z', LogText='2', LogType='Number Series')
 
-   # Add logs to second workspace 
+   # Add logs to second workspace
    AddSampleLog(Workspace=demo_ws2, LogName='x', LogText='hello universe', LogType='String')
    AddSampleLog(Workspace=demo_ws2, LogName='w', LogText='3', LogType='Number')
 
@@ -120,7 +120,7 @@ Output:
    print("1st workspace log values x = {} , y = {} , z = {}".format(log_x1.value, log_y.value, log_z.value))
    print("2nd workspace log values x = {} , w = {}".format(log_x2.value, log_w.value))
 
-   # Copy logs of 1st workspace to 2nd workspace 
+   # Copy logs of 1st workspace to 2nd workspace
    CopyLogs( demo_ws1, demo_ws2, MergeStrategy='MergeKeepExisting')
 
    # Fetch the new logs
@@ -141,7 +141,7 @@ Output:
 
 Output:
 
-.. testoutput:: ExCopyLogsKeepExisting 
+.. testoutput:: ExCopyLogsKeepExisting
 
    Before CopyLog
    1st workspace log values x = hello world , y = 1 , z = [2]

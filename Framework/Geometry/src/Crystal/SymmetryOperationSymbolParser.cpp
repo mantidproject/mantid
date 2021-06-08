@@ -17,13 +17,12 @@ namespace Geometry {
 
 /// Verify that the matrix does not contain elements with abs(element) > 1 and
 /// has an acceptable number of non-zero elements.
-void SymmetryOperationSymbolParser::verifyMatrix(
-    const Kernel::IntMatrix &matrix) {
+void SymmetryOperationSymbolParser::verifyMatrix(const Kernel::IntMatrix &matrix) {
   for (size_t i = 0; i < matrix.numRows(); ++i) {
     if (!isValidMatrixRow(matrix[i], matrix.numCols())) {
       std::ostringstream error;
-      error << "Matrix row " << i << " is invalid. Elements: [" << matrix[i][0]
-            << ", " << matrix[i][1] << ", " << matrix[i][2] << "]";
+      error << "Matrix row " << i << " is invalid. Elements: [" << matrix[i][0] << ", " << matrix[i][1] << ", "
+            << matrix[i][2] << "]";
       throw Kernel::Exception::ParseError(error.str(), "", 0);
     }
   }
@@ -49,8 +48,7 @@ void SymmetryOperationSymbolParser::verifyMatrix(
  * @param identifier :: Symbol representing a symmetry operation
  * @return Kernel::IntMatrix and V3R, representing the symmetry operation.
  */
-MatrixVectorPair<int, V3R>
-SymmetryOperationSymbolParser::parseIdentifier(const std::string &identifier) {
+MatrixVectorPair<int, V3R> SymmetryOperationSymbolParser::parseIdentifier(const std::string &identifier) {
   MatrixVectorPair<int, V3R> pair = parseMatrixVectorPair<int>(identifier);
 
   verifyMatrix(pair.getMatrix());
@@ -60,8 +58,7 @@ SymmetryOperationSymbolParser::parseIdentifier(const std::string &identifier) {
 
 /// Returns a Jones faithful representation of the symmetry operation
 /// characterized by the supplied matrix/column pair.
-std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(
-    const MatrixVectorPair<int, V3R> &data) {
+std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(const MatrixVectorPair<int, V3R> &data) {
   return getNormalizedIdentifier(data.getMatrix(), data.getVector());
 }
 
@@ -87,8 +84,7 @@ std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(
  * @param vector
  * @return
  */
-std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(
-    const Kernel::IntMatrix &matrix, const V3R &vector) {
+std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(const Kernel::IntMatrix &matrix, const V3R &vector) {
   if (matrix.numCols() != 3 || matrix.numRows() != 3) {
     throw std::runtime_error("Matrix is not a 3x3 matrix.");
   }
@@ -133,8 +129,7 @@ std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(
 
 /// Checks if there are either 1 or 2 zeros in a given matrix row and all
 /// non-zero elements are 1 or -1.
-bool SymmetryOperationSymbolParser::isValidMatrixRow(const int *element,
-                                                     size_t columnNumber) {
+bool SymmetryOperationSymbolParser::isValidMatrixRow(const int *element, size_t columnNumber) {
   int nulls = 0;
   for (size_t i = 0; i < columnNumber; ++i) {
     if (abs(element[i]) > 1) {

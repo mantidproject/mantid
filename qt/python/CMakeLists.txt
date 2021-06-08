@@ -76,6 +76,7 @@ if(ENABLE_WORKBENCH)
       mantidqt/utils/test/test_modal_tester.py
       mantidqt/utils/test/test_qt_utils.py
       mantidqt/utils/test/test_writetosignal.py
+      mantidqt/utils/qt/test/test_line_edit_double_validator.py
       mantidqt/utils/qt/test/test_qappthreadcall.py
       mantidqt/widgets/test/test_messagedisplay.py
       mantidqt/widgets/test/test_fitpropertybrowser.py
@@ -110,6 +111,8 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogview.py
         mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
         mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
+        mantidqt/widgets/memorywidget/test/test_memoryinfo.py
+        mantidqt/widgets/memorywidget/test/test_memorypresenter.py
         mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py
         mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curveproperties.py
         mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curvestabwidgetpresenter.py
@@ -118,7 +121,9 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
         mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
         mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+        mantidqt/widgets/samplematerialdialog/test/test_samplematerial_presenter.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
+        mantidqt/widgets/sliceviewer/test/test_sliceviewer_imageinfowidget.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_movemousecursor.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
@@ -126,18 +131,19 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_transform.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_zoom.py
+        mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_actions.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_view.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksviewercollectionpresenter.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectormodel.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectorpresenter.py
+        mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_sliceviewer_add_delete_peaks_integration.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_alpha.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_draw.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_painter.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_nonintegrated.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_ellipsoid.py
-        mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_spherical.py
         mantidqt/widgets/test/test_jupyterconsole.py
         mantidqt/widgets/workspacedisplay/test/test_data_copier.py
         mantidqt/widgets/workspacedisplay/test/test_workspacedisplay_view.py

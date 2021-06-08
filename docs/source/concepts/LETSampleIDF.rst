@@ -2,16 +2,16 @@
 
 .. role:: xml(literal)
    :class: highlight
-   
+
 IDF ISIS LET annotated
 =========================
 
-This page annotates the direct inelastic instrument LET, with the purpose of (hopefully) quickly learn the basis of creating a similar IDF. 
+This page annotates the direct inelastic instrument LET, with the purpose of (hopefully) quickly learn the basis of creating a similar IDF.
 
 Instrument view of LET
 ----------------------
 
-LET consists of doors (in the speech of LET scientists) where each door is made up of a number of tupes along the y-axis (green line in picture below), where each tube is made up of a sequence pixels (detectors). 
+LET consists of doors (in the speech of LET scientists) where each door is made up of a number of tupes along the y-axis (green line in picture below), where each tube is made up of a sequence pixels (detectors).
 
 The view of the instrument below is in the 'Full 3D' mode.
 
@@ -26,15 +26,15 @@ An annotated version of the ISIS LET IDF
 .. code-block:: xml
 
   <!-- Specify name of instrument and date from when this IDF is valid -->
-  <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+  <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
-              name="LET" 
+              name="LET"
               valid-from   ="1900-01-31 23:59:59"
               valid-to     ="2100-01-31 23:59:59"
               last-modified="2012-03-13 00:00:00">
-   
-  <!-- Specify various optional defaults --> 
+
+  <!-- Specify various optional defaults -->
     <defaults>
       <length unit="meter"/>
       <angle unit="degree"/>
@@ -42,25 +42,25 @@ An annotated version of the ISIS LET IDF
         <along-beam axis="z"/>
         <pointing-up axis="y"/>
         <handedness val="right"/>
-        <origin val="beam" /> 
+        <origin val="beam" />
       </reference-frame>
       <default-view view="cylindrical_y"/>
       <!-- The option below will by default orientate the
            z-axis of any component to point from (0,0,0) towards the component. -->
       <components-are-facing x="0.0" y="0.0" z="0.0" />
     </defaults>
-   
-   
-  <!-- Specify monitor components. Monitors collect data hence 
+
+
+  <!-- Specify monitor components. Monitors collect data hence
        the idlist="monitors", which specify the name of a list of detector/monitor IDs.
        For ISIS data this provides the link between the data and the components
        collecting the data. Even for data not associated with unique IDs,
-       unique ID numbers of your choice are still required, for subsequent 
+       unique ID numbers of your choice are still required, for subsequent
        use by Mantid analysis -->
     <component type="monitors" idlist="monitors">
       <location/>
     </component>
-   
+
     <!-- Specify what a type with name="monitors" is. This type happens to be a container/grouping
          of the monitors of this instrument. This grouping is here entirely optional. Only difference
          it makes is that in the Mantid instrument view tree these will be listed under one node, and
@@ -78,12 +78,12 @@ An annotated version of the ISIS LET IDF
         <location r="1.088" t="180.0" p="0.0" name="monitor8" />
       </component>
     </type>
-   
+
     <!-- Define the monitor detector IDs. There are 8 of these on LET -->
     <idlist idname="monitors">
       <id start="11" end="81" step="10"/>
     </idlist>
-   
+
     <!-- Define the type monitor, which is given a physical shape.
          More specifically here a cylindrical shape. See http://www.mantidproject.org/HowToDefineGeometricShape
          for all the options for defining a physical shape -->
@@ -96,35 +96,35 @@ An annotated version of the ISIS LET IDF
       </cylinder>
       <algebra val="some-shape" />
     </type>
-   
-   
+
+
   <!-- ISIS is a neutron spallation source. Therefore an important
        piece of information is the position the source relative to
-       the sample, which is needed to calculate neutron flightpaths. 
-       The source currently also serves as a point along the beam, and 
-       the source-to-sample direction is used to determine the beam 
+       the sample, which is needed to calculate neutron flightpaths.
+       The source currently also serves as a point along the beam, and
+       the source-to-sample direction is used to determine the beam
        direction in a number of parts of the Mantid code. -->
     <component type="undulator">
-      <location z="-25.0">     <!-- Specify location of this component --> 
-        <facing val="none"/>   <!-- The <facing> tag here overwrites the default <components-are-facing> set above --> 
-      </location>  
+      <location z="-25.0">     <!-- Specify location of this component -->
+        <facing val="none"/>   <!-- The <facing> tag here overwrites the default <components-are-facing> set above -->
+      </location>
     </component>
-  <!-- Specify the type with name "undulator", which 'is' marked as being the Source. 
+  <!-- Specify the type with name "undulator", which 'is' marked as being the Source.
        Optionally you may define a geometric shape for the Source. In some cases done
        with the purpose to get it to show up in the Mantid Instrument view.
        See http://www.mantidproject.org/HowToDefineGeometricShape for more on geometric shapes -->
     <type name="undulator" is="Source">
       <cylinder id="some-shape">
         <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
-        <axis x="0.0" y="0.0" z="1.0" /> 
+        <axis x="0.0" y="0.0" z="1.0" />
         <radius val="0.01" />
         <height val="0.03" />
-      </cylinder> 
+      </cylinder>
       <algebra val="some-shape" />
     </type>
-   
+
   <!-- Specify the position of the sample and here a shape for
-       this sample also --> 
+       this sample also -->
     <component type="nickel-holder">
       <location> <facing val="none"/> </location>
     </component>
@@ -135,12 +135,12 @@ An annotated version of the ISIS LET IDF
       </sphere>
       <algebra val="some-shape" />
     </type>
-   
+
   <!-- Specify the LET doors structure. Here the instrument scientist has
-       decided to define components of types: door01, ..., door12, where 
-       each of these are placeholders for the same type LETdoor. The effect 
+       decided to define components of types: door01, ..., door12, where
+       each of these are placeholders for the same type LETdoor. The effect
        of this is that you will have the node structure door01->LETdoor->tube1 etc.
-   
+
        An alternative would have been to instead of the xml code
        <component type="door01" idlist="door01">
          <location />
@@ -150,13 +150,13 @@ An annotated version of the ISIS LET IDF
            <location  x="-1.8805" z="2.9519"> <facing x="0" y="0" z="0"/>
          </component>
        </type>
-   
+
        have
-   
+
        <component type="LETdoor" idlist="door01" name="door01">
          <location  x="-1.8805" z="2.9519"> <facing x="0" y="0" z="0"/>
        </component>
-   
+
        which would have given the node structure door01->tube1 etc. Both choices are
        equally valid. -->
     <component type="door01" idlist="door01"><location /></component>
@@ -171,16 +171,16 @@ An annotated version of the ISIS LET IDF
     <component type="door10" idlist="door10"><location /></component>
     <component type="door11" idlist="door11"><location /></component>
     <component type="door12" idlist="door12"><location /></component>
-   
+
     <type name="door01">
       <component type="LETdoor">
         <!-- Note here the instrument scientist has chosen to put in <facing x="0" y="0" z="0"/>
              This element in fact here has no effect since the default
-             option set at the top <components-are-facing x="0.0" y="0.0" z="0.0" /> 
+             option set at the top <components-are-facing x="0.0" y="0.0" z="0.0" />
              will already face any component to x="0.0" y="0.0" z="0.0" -->
         <location  x="-1.8805" z="2.9519"> <facing x="0" y="0" z="0"/> </location>
       </component>
-    </type> 
+    </type>
     <type name="door02">
       <component type="LETdoor">
         <location  x="  -1.0525    " z="  3.3380    "> <facing x="0" y="0" z="0"/> </location>
@@ -236,7 +236,7 @@ An annotated version of the ISIS LET IDF
         <location  x=" 2.5805    " z=" -2.3646    "> <facing x="0" y="0" z="0"/> </location>
       </component>
     </type>
-   
+
     <type name="LETdoor">
       <component type="LETtube" outline="yes">
         <location  x="   -0.393024    " z="  -0.221369E-01" name="tube1" />
@@ -273,10 +273,10 @@ An annotated version of the ISIS LET IDF
         <location  x="  0.393024    " z="  -0.221369E-01" name="tube32" />
       </component>
     </type>
-   
+
   <!-- Here the type for a tube is defined. It using the shorthand notation
-       <locations> to define 1024 pixels at positions along the y-axis. 
-   
+       <locations> to define 1024 pixels at positions along the y-axis.
+
        Note also the 'outline' attribute is used. The attribute is to overcome
        a technical difficulty when displaying and rotating a lot of
        shapes in Mantid Instrument Viewer. For more information on this see www.mantidproject.org/IDF -->
@@ -285,8 +285,8 @@ An annotated version of the ISIS LET IDF
         <locations y="-2.00304" y-end="2.00304" n-elements="1024" />
       </component>
     </type>
-   
-   
+
+
     <type name="pixel" is="detector">
       <cylinder id="cyl-approx">
         <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
@@ -296,8 +296,8 @@ An annotated version of the ISIS LET IDF
       </cylinder>
       <algebra val="cyl-approx" />
     </type>
-   
-   
+
+
      <!-- DETECTOR ID LISTS -->
     <idlist idname="door01">
       <id start="1110001" end="1111024" />
@@ -708,7 +708,7 @@ An annotated version of the ISIS LET IDF
       <id start="12480001" end="12481024" />
     </idlist>
    </instrument>
-        
+
 
 
 .. categories:: Concepts

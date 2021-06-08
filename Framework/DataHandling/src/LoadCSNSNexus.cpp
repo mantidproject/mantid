@@ -37,48 +37,37 @@ const std::string LoadCSNSNexus::name() const { return "LoadCSNSNexus"; }
 int LoadCSNSNexus::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadCSNSNexus::category() const {
-  return "DataHandling\\Nexus";
-}
+const std::string LoadCSNSNexus::category() const { return "DataHandling\\Nexus"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadCSNSNexus::init() {
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "Instrument", "GPPD", Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("Instrument", "GPPD", Direction::Input),
                   "Different instrument with different detector combinations");
 
   const std::vector<std::string> exts{".h5", ".nxs"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name of the Nexus file to load");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
 
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "NXentryName", "csns", Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("NXentryName", "csns", Direction::Input),
                   "Optional: Name of entry (default csns)");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadBank", true,
-                                                            Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadBank", true, Direction::Input),
                   "Default true: load bank data, false: load monitor data.");
 
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "Bankname", Direction::Input),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("Bankname", Direction::Input),
                   "Optional: A comma-separated list of bank/monitor to read");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<uint32_t>>("StartT0", Direction::Input),
-      "Optional: A comma-separated list of StartNo of T0 to read.");
-  declareProperty(
-      std::make_unique<ArrayProperty<uint32_t>>("EndT0", Direction::Input),
-      "Optional: A comma-separated list of endNo of T0 to read.");
+  declareProperty(std::make_unique<ArrayProperty<uint32_t>>("StartT0", Direction::Input),
+                  "Optional: A comma-separated list of StartNo of T0 to read.");
+  declareProperty(std::make_unique<ArrayProperty<uint32_t>>("EndT0", Direction::Input),
+                  "Optional: A comma-separated list of endNo of T0 to read.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadEvent", false,
-                                                            Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadEvent", false, Direction::Input),
                   "Default false: load event data, true: load histogram data.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output orkspace.");
 
   const std::string grp1 = "Bank/Monitor";
@@ -96,8 +85,7 @@ void LoadCSNSNexus::init() {
  * @param[in] typeName :: start_time_utc or end_time_utc
  * @return expTime
  */
-Types::Core::DateAndTime
-LoadCSNSNexus::getExperimentTime(const std::string &typeName) {
+Types::Core::DateAndTime LoadCSNSNexus::getExperimentTime(const std::string &typeName) {
   Types::Core::DateAndTime data;
   std::string expTime;
   m_file->openGroup(m_entry, "NXentry");
@@ -121,8 +109,7 @@ LoadCSNSNexus::getExperimentTime(const std::string &typeName) {
  * @param[in] bankName :: bank1,bank2,bank3
  * @return modules
  */
-std::vector<std::string>
-LoadCSNSNexus::getGPPDModules(const std::string &bankName) {
+std::vector<std::string> LoadCSNSNexus::getGPPDModules(const std::string &bankName) {
   int firstModuleId(-1), secondModuleId(-1);
   if (bankName == "bank3") {
     firstModuleId = 1;
@@ -174,9 +161,8 @@ bool LoadCSNSNexus::checkBanknames(const std::vector<std::string> &inputNames) {
  * @param[in] inputNames :: Bankname
  * @return modules
  */
-std::vector<std::string>
-LoadCSNSNexus::getModules(const std::string &inst,
-                          const std::vector<std::string> &inputNames) {
+std::vector<std::string> LoadCSNSNexus::getModules(const std::string &inst,
+                                                   const std::vector<std::string> &inputNames) {
   std::vector<std::string> data;
   if (inst == "SANS" || inst == "MR")
     data.push_back("module1");
@@ -196,8 +182,7 @@ LoadCSNSNexus::getModules(const std::string &inst,
  * @param[in] inputList :: moduleList or monitorList
  * @return pixelId
  */
-std::vector<int64_t>
-LoadCSNSNexus::getPixelId(const std::vector<std::string> &inputList) {
+std::vector<int64_t> LoadCSNSNexus::getPixelId(const std::vector<std::string> &inputList) {
   std::vector<int64_t> _tmp;
   std::vector<int64_t> pixelId;
   m_file->openGroup(m_entry, "NXentry");
@@ -229,8 +214,7 @@ std::vector<uint32_t> LoadCSNSNexus::getTimeBin(const std::string &typeName) {
   m_file->openGroup("instrument", "NXinstrument");
   auto entries = m_file->getEntries();
   for (const auto &[name, nodeType] : entries) {
-    if ((name.compare(0, 6, typeName) == 0) ||
-        (name.compare(0, 7, typeName) == 0)) {
+    if ((name.compare(0, 6, typeName) == 0) || (name.compare(0, 7, typeName) == 0)) {
       m_file->openGroup(name, nodeType);
       m_file->readData("time_of_flight", tmp);
       m_file->closeGroup();
@@ -248,8 +232,7 @@ std::vector<uint32_t> LoadCSNSNexus::getTimeBin(const std::string &typeName) {
  * @param[in] inputList :: moduleList or monitorList
  * @return histogram data
  */
-std::vector<uint32_t>
-LoadCSNSNexus::getHistData(const std::vector<std::string> &inputList) {
+std::vector<uint32_t> LoadCSNSNexus::getHistData(const std::vector<std::string> &inputList) {
   std::vector<int> tmp;
   std::vector<uint32_t> data;
 
@@ -277,10 +260,8 @@ LoadCSNSNexus::getHistData(const std::vector<std::string> &inputList) {
  * @param[in] pidNums :: total pixel numbers
  * @param[in] histData :: histogram data
  */
-void LoadCSNSNexus::loadHistData(MatrixWorkspace_sptr &workspace,
-                                 const std::vector<uint32_t> &timeOfFlight,
-                                 size_t pidNums,
-                                 const std::vector<uint32_t> &histData) {
+void LoadCSNSNexus::loadHistData(MatrixWorkspace_sptr &workspace, const std::vector<uint32_t> &timeOfFlight,
+                                 size_t pidNums, const std::vector<uint32_t> &histData) {
   size_t timeNums = timeOfFlight.size();
   MantidVecPtr x, e;
   MantidVec xA;
@@ -324,10 +305,8 @@ void LoadCSNSNexus::loadHistData(MatrixWorkspace_sptr &workspace,
  * @return event data :: specNo, tof, t0
  */
 std::multimap<uint32_t, std::pair<float, int64_t>>
-LoadCSNSNexus::getEventData(const std::vector<std::string> &inputList,
-                            const std::vector<uint32_t> &startList,
-                            const std::vector<uint32_t> &endList,
-                            const std::vector<int64_t> &pids) {
+LoadCSNSNexus::getEventData(const std::vector<std::string> &inputList, const std::vector<uint32_t> &startList,
+                            const std::vector<uint32_t> &endList, const std::vector<int64_t> &pids) {
   std::vector<int64_t> pid_tmp;
   std::vector<int64_t> pidList;
   std::vector<int64_t> t0_tmp;
@@ -378,8 +357,7 @@ LoadCSNSNexus::getEventData(const std::vector<std::string> &inputList,
   for (size_t i = 0; i < pidList.size(); i++) {
     uint32_t specNo = mapping[pidList[i]];
     tofPulse = std::make_pair(tofList[i], t0List[i]);
-    data.insert(std::multimap<uint32_t, std::pair<float, int64_t>>::value_type(
-        specNo, tofPulse));
+    data.insert(std::multimap<uint32_t, std::pair<float, int64_t>>::value_type(specNo, tofPulse));
   }
 
   tofList.clear();
@@ -395,10 +373,8 @@ LoadCSNSNexus::getEventData(const std::vector<std::string> &inputList,
  * @param[in] pidNums :: total pixel numbers
  * @param[in] evtData :: event data
  */
-void LoadCSNSNexus::loadEventData(
-    EventWorkspace_sptr &workspace, const std::vector<uint32_t> &timeOfFlight,
-    size_t pidNums,
-    const std::multimap<uint32_t, std::pair<float, int64_t>> evtData) {
+void LoadCSNSNexus::loadEventData(EventWorkspace_sptr &workspace, const std::vector<uint32_t> &timeOfFlight,
+                                  size_t pidNums, const std::multimap<uint32_t, std::pair<float, int64_t>> evtData) {
   workspace->initialize(pidNums, 1, 1);
   float m_tof;
   uint64_t m_pulseTime;
@@ -448,24 +424,20 @@ void LoadCSNSNexus::exec() {
         g_log.information() << "load event data " << std::endl;
         std::vector<uint32_t> startT0 = getProperty("startT0");
         std::vector<uint32_t> endT0 = getProperty("endT0");
-        std::multimap<uint32_t, std::pair<float, int64_t>> evtData =
-            getEventData(m_modules, startT0, endT0, pid_bank);
+        std::multimap<uint32_t, std::pair<float, int64_t>> evtData = getEventData(m_modules, startT0, endT0, pid_bank);
         loadEventData(ws_evt, tof_bank, pid_bank.size(), evtData);
         ws_evt->mutableRun().setStartAndEndTime(start_time, end_time);
-        ws_evt->getAxis(0)->unit() =
-            Kernel::UnitFactory::Instance().create("TOF");
+        ws_evt->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
         ws_evt->setYUnit("Counts");
 
       } else {
         g_log.information() << "load histogram data " << std::endl;
-        ws_hist = WorkspaceFactory::Instance().create(
-            "Workspace2D", pid_bank.size(), tof_bank.size(),
-            tof_bank.size() - 1);
+        ws_hist =
+            WorkspaceFactory::Instance().create("Workspace2D", pid_bank.size(), tof_bank.size(), tof_bank.size() - 1);
         std::vector<uint32_t> histData = getHistData(m_modules);
         loadHistData(ws_hist, tof_bank, pid_bank.size(), histData);
         ws_hist->mutableRun().setStartAndEndTime(start_time, end_time);
-        ws_hist->getAxis(0)->unit() =
-            Kernel::UnitFactory::Instance().create("TOF");
+        ws_hist->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
         ws_hist->setYUnit("Counts");
       }
     } else {
@@ -476,8 +448,7 @@ void LoadCSNSNexus::exec() {
     g_log.information() << "load monitor data " << std::endl;
     std::vector<int64_t> pid_mon = getPixelId(bankNames);
     std::vector<uint32_t> tof_mon = getTimeBin("monitor");
-    ws_hist = WorkspaceFactory::Instance().create(
-        "Workspace2D", pid_mon.size(), tof_mon.size(), tof_mon.size() - 1);
+    ws_hist = WorkspaceFactory::Instance().create("Workspace2D", pid_mon.size(), tof_mon.size(), tof_mon.size() - 1);
     std::vector<uint32_t> histData_mon = getHistData(bankNames);
     loadHistData(ws_hist, tof_mon, pid_mon.size(), histData_mon);
     ws_hist->mutableRun().setStartAndEndTime(start_time, end_time);

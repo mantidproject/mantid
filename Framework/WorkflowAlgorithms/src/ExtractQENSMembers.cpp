@@ -30,49 +30,37 @@ DECLARE_ALGORITHM(ExtractQENSMembers)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ExtractQENSMembers::name() const {
-  return "ExtractQENSMembers";
-}
+const std::string ExtractQENSMembers::name() const { return "ExtractQENSMembers"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ExtractQENSMembers::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ExtractQENSMembers::category() const {
-  return "Workflow\\MIDAS";
-}
+const std::string ExtractQENSMembers::category() const { return "Workflow\\MIDAS"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string ExtractQENSMembers::summary() const {
-  return "Extracts the fit members from a QENS fit";
-}
+const std::string ExtractQENSMembers::summary() const { return "Extracts the fit members from a QENS fit"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ExtractQENSMembers::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "The input workspace used in the fit. Ignored if 'InputWorkspaces' "
-      "property is provided.");
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>("InputWorkspaces", ""),
-      "List of the workspaces used in the fit.");
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      "ResultWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
+                  "The input workspace used in the fit. Ignored if 'InputWorkspaces' "
+                  "property is provided.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("InputWorkspaces", ""),
+                  "List of the workspaces used in the fit.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("ResultWorkspace", "", Direction::Input),
                   "The result group workspace produced in a QENS fit.");
   declareProperty("RenameConvolvedMembers", false,
                   "If true, renames the n-th 'Convolution' member, to the n-th "
                   "supplied name in the ConvolvedMembers property.");
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>("ConvolvedMembers"),
-      "A list of the names of the members which were convolved "
-      "before being output by the fit routine. These must be "
-      "provided in the same order as originally provided to the "
-      "fit.");
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("ConvolvedMembers"),
+                  "A list of the names of the members which were convolved "
+                  "before being output by the fit routine. These must be "
+                  "provided in the same order as originally provided to the "
+                  "fit.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace group, containing the fit members.");
 }
 
@@ -90,8 +78,7 @@ std::map<std::string, std::string> ExtractQENSMembers::validateInputs() {
 void ExtractQENSMembers::exec() {
   auto inputWorkspaces = getInputWorkspaces();
   WorkspaceGroup_sptr resultWS = getProperty("ResultWorkspace");
-  MatrixWorkspace_sptr initialWS =
-      std::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(0));
+  MatrixWorkspace_sptr initialWS = std::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(0));
   const auto qValues = getQValues(inputWorkspaces);
   auto members = getAxisLabels(initialWS, 1);
 
@@ -102,21 +89,16 @@ void ExtractQENSMembers::exec() {
   auto memberWorkspaces = createMembersWorkspaces(initialWS, members);
 
   for (auto i = 1u; i < resultWS->size(); ++i)
-    appendToMembers(
-        std::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(i)),
-        memberWorkspaces);
+    appendToMembers(std::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(i)), memberWorkspaces);
   setNumericAxis(memberWorkspaces, qValues, 1);
 
   std::string outputWSName = getProperty("OutputWorkspace");
-  auto workspaceNames =
-      addMembersToADS(members, memberWorkspaces, outputWSName);
+  auto workspaceNames = addMembersToADS(members, memberWorkspaces, outputWSName);
   setProperty("OutputWorkspace", groupWorkspaces(workspaceNames));
 }
 
-std::vector<MatrixWorkspace_sptr>
-ExtractQENSMembers::getInputWorkspaces() const {
-  const std::vector<std::string> workspaceNames =
-      getProperty("InputWorkspaces");
+std::vector<MatrixWorkspace_sptr> ExtractQENSMembers::getInputWorkspaces() const {
+  const std::vector<std::string> workspaceNames = getProperty("InputWorkspaces");
   std::vector<MatrixWorkspace_sptr> workspaces;
 
   if (!workspaceNames.empty()) {
@@ -135,8 +117,7 @@ ExtractQENSMembers::getInputWorkspaces() const {
  * @param workspaces The workspaces whose Q-Values to extract.
  * @return            The extracted Q-Values.
  */
-std::vector<double> ExtractQENSMembers::getQValues(
-    const std::vector<MatrixWorkspace_sptr> &workspaces) {
+std::vector<double> ExtractQENSMembers::getQValues(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   std::vector<double> qValues;
 
   for (const auto &workspace : workspaces) {
@@ -157,9 +138,8 @@ std::vector<double> ExtractQENSMembers::getQValues(
  * @param axisIndex The index of the axis whose labels retrieve.
  * @return          The retrieved axis labels.
  */
-std::vector<std::string>
-ExtractQENSMembers::getAxisLabels(const MatrixWorkspace_sptr &workspace,
-                                  size_t axisIndex) const {
+std::vector<std::string> ExtractQENSMembers::getAxisLabels(const MatrixWorkspace_sptr &workspace,
+                                                           size_t axisIndex) const {
   auto axis = workspace->getAxis(axisIndex);
   std::vector<std::string> labels;
   labels.reserve(axis->length());
@@ -177,9 +157,8 @@ ExtractQENSMembers::getAxisLabels(const MatrixWorkspace_sptr &workspace,
  * @param newNames  The names to use in renaming.
  * @return          A vector of the members, with the convolved members renamed.
  */
-std::vector<std::string> ExtractQENSMembers::renameConvolvedMembers(
-    const std::vector<std::string> &members,
-    const std::vector<std::string> &newNames) const {
+std::vector<std::string> ExtractQENSMembers::renameConvolvedMembers(const std::vector<std::string> &members,
+                                                                    const std::vector<std::string> &newNames) const {
   std::vector<std::string> newMembers;
   newMembers.reserve(members.size());
   auto index = 0u;
@@ -200,16 +179,12 @@ std::vector<std::string> ExtractQENSMembers::renameConvolvedMembers(
  * @param spectrum  The spectrum to extract.
  * @return          A workspace containing the extracted spectrum.
  */
-MatrixWorkspace_sptr
-ExtractQENSMembers::extractSpectrum(const MatrixWorkspace_sptr &inputWS,
-                                    size_t spectrum) {
+MatrixWorkspace_sptr ExtractQENSMembers::extractSpectrum(const MatrixWorkspace_sptr &inputWS, size_t spectrum) {
   auto extractAlg = createChildAlgorithm("ExtractSpectra", -1.0, -1.0, false);
   extractAlg->setProperty("InputWorkspace", inputWS);
   extractAlg->setProperty("OutputWorkspace", "__extracted");
-  extractAlg->setProperty("StartWorkspaceIndex",
-                          boost::numeric_cast<int>(spectrum));
-  extractAlg->setProperty("EndWorkspaceIndex",
-                          boost::numeric_cast<int>(spectrum));
+  extractAlg->setProperty("StartWorkspaceIndex", boost::numeric_cast<int>(spectrum));
+  extractAlg->setProperty("EndWorkspaceIndex", boost::numeric_cast<int>(spectrum));
   extractAlg->executeAsChildAlg();
   return extractAlg->getProperty("OutputWorkspace");
 }
@@ -221,9 +196,8 @@ ExtractQENSMembers::extractSpectrum(const MatrixWorkspace_sptr &inputWS,
  * @param inputWS           The input workspace to append to.
  * @param spectraWorkspace  The workspace whose spectra to append.
  */
-MatrixWorkspace_sptr ExtractQENSMembers::appendSpectra(
-    const MatrixWorkspace_sptr &inputWS,
-    const MatrixWorkspace_sptr &spectraWorkspace) {
+MatrixWorkspace_sptr ExtractQENSMembers::appendSpectra(const MatrixWorkspace_sptr &inputWS,
+                                                       const MatrixWorkspace_sptr &spectraWorkspace) {
   auto appendAlg = createChildAlgorithm("AppendSpectra", -1.0, -1.0, false);
   appendAlg->setProperty("InputWorkspace1", inputWS);
   appendAlg->setProperty("InputWorkspace2", spectraWorkspace);
@@ -238,8 +212,7 @@ MatrixWorkspace_sptr ExtractQENSMembers::appendSpectra(
  * @param workspaceNames  A vector of the names of the workspaces to group.
  * @return                The group workspace.
  */
-WorkspaceGroup_sptr ExtractQENSMembers::groupWorkspaces(
-    const std::vector<std::string> &workspaceNames) {
+WorkspaceGroup_sptr ExtractQENSMembers::groupWorkspaces(const std::vector<std::string> &workspaceNames) {
   auto groupAlg = createChildAlgorithm("GroupWorkspaces", -1.0, -1.0, false);
   groupAlg->setProperty("InputWorkspaces", workspaceNames);
   groupAlg->setProperty("OutputWorkspace", "__grouped");
@@ -255,9 +228,8 @@ WorkspaceGroup_sptr ExtractQENSMembers::groupWorkspaces(
  * @param members   A vector of the member names.
  * @return          A vector of the created members workspaces.
  */
-std::vector<MatrixWorkspace_sptr> ExtractQENSMembers::createMembersWorkspaces(
-    const MatrixWorkspace_sptr &initialWS,
-    const std::vector<std::string> &members) {
+std::vector<MatrixWorkspace_sptr> ExtractQENSMembers::createMembersWorkspaces(const MatrixWorkspace_sptr &initialWS,
+                                                                              const std::vector<std::string> &members) {
   std::vector<MatrixWorkspace_sptr> memberWorkspaces;
   memberWorkspaces.reserve(members.size());
   for (auto i = 0u; i < members.size(); ++i)
@@ -272,9 +244,8 @@ std::vector<MatrixWorkspace_sptr> ExtractQENSMembers::createMembersWorkspaces(
  * @param resultWS  The result workspace.
  * @param members   A vector containing the member workspaces.
  */
-void ExtractQENSMembers::appendToMembers(
-    const MatrixWorkspace_sptr &resultWS,
-    std::vector<Mantid::API::MatrixWorkspace_sptr> &members) {
+void ExtractQENSMembers::appendToMembers(const MatrixWorkspace_sptr &resultWS,
+                                         std::vector<Mantid::API::MatrixWorkspace_sptr> &members) {
   for (auto i = 0u; i < members.size(); ++i)
     members[i] = appendSpectra(members[i], extractSpectrum(resultWS, i));
 }
@@ -287,9 +258,8 @@ void ExtractQENSMembers::appendToMembers(
  * @param values      The values used to create the numeric axis.
  * @param axisIndex   The index of the axis to set.
  */
-void ExtractQENSMembers::setNumericAxis(
-    const std::vector<MatrixWorkspace_sptr> &workspaces,
-    const std::vector<double> &values, size_t axisIndex) const {
+void ExtractQENSMembers::setNumericAxis(const std::vector<MatrixWorkspace_sptr> &workspaces,
+                                        const std::vector<double> &values, size_t axisIndex) const {
   auto qAxis = NumericAxis(values.size());
   for (auto i = 0u; i < values.size(); ++i)
     qAxis.setValue(i, values[i]);
@@ -310,10 +280,10 @@ void ExtractQENSMembers::setNumericAxis(
  * @return                  A vector containing the names of the added
  *                          workspaces.
  */
-std::vector<std::string> ExtractQENSMembers::addMembersToADS(
-    const std::vector<std::string> &members,
-    const std::vector<Mantid::API::MatrixWorkspace_sptr> &memberWorkspaces,
-    const std::string &outputWSName) {
+std::vector<std::string>
+ExtractQENSMembers::addMembersToADS(const std::vector<std::string> &members,
+                                    const std::vector<Mantid::API::MatrixWorkspace_sptr> &memberWorkspaces,
+                                    const std::string &outputWSName) {
   std::unordered_map<std::string, size_t> nameCounts;
   std::vector<std::string> workspaceNames;
   workspaceNames.reserve(members.size());

@@ -385,7 +385,7 @@ An example would be ``5-10,12:2:16,20-30``.
 | **Ranges**    | A set of wavelength ranges. This option  |
 |               | only appears if a range step type is     |
 |               | selected.                                |
-+---------------+------------------------------------------+  
++---------------+------------------------------------------+
 
 Cuts
 """"

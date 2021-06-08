@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.Common.ADSHandler.workspace_naming import TF_ASYMMETRY_PREFIX
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 COUNTS_PLOT_TYPE = 'Counts'
@@ -70,17 +69,16 @@ class PlotWidgetModel(object):
         :param plot_type: plotting type, e.g Counts, Frequency Re
         :return: a list of workspace names
         """
-        currently_selected_groups = self.context.group_pair_context.selected_groups
-        currently_selected_pairs = self.context.group_pair_context.selected_pairs
+        currently_selected = self.context.group_pair_context.selected_groups_and_pairs
         workspace_list = []
 
         if FREQ_PLOT_TYPE in plot_type:
-            for grouppair in currently_selected_groups + currently_selected_pairs:
+            for grouppair in currently_selected:
                 workspace_list += self.get_freq_workspaces_to_plot(grouppair, plot_type)
             workspace_list = list(set(workspace_list))
             return workspace_list
         else:
-            for grouppair in currently_selected_groups + currently_selected_pairs:
+            for grouppair in currently_selected:
                 workspace_list += self.get_time_workspaces_to_plot(grouppair, is_raw, plot_type)
             return workspace_list
 
@@ -128,7 +126,7 @@ class PlotWidgetModel(object):
 
     def create_tiled_keys(self, tiled_by):
         if tiled_by == TILED_BY_GROUP_TYPE:
-            keys = self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
+            keys = self.context.group_pair_context.selected_groups_and_pairs
         else:
             keys = [run_list_to_string(item) for item in self.context.data_context.current_runs]
         return keys
@@ -155,7 +153,7 @@ class PlotWidgetModel(object):
         indices = []
         for workspace_name in fit.output_workspace_names:
             first_fit_index = 1  # calc
-            if TF_ASYMMETRY_PREFIX in workspace_name:
+            if fit.tf_asymmetry_fit:
                 first_fit_index = 3
             second_fit_index = 2  # Diff
             workspaces.append(workspace_name)

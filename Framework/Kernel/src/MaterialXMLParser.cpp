@@ -60,28 +60,22 @@ const char *ATTENPROFX_ATT = "xrayattenuationprofile";
 // Base type to put in a hash
 struct BuilderHandle {
   virtual ~BuilderHandle() = default;
-  virtual void operator()(MaterialBuilder &builder,
-                          const std::string &value) const = 0;
+  virtual void operator()(MaterialBuilder &builder, const std::string &value) const = 0;
 };
 using BuilderHandle_uptr = std::unique_ptr<BuilderHandle>;
 
 // Pointer to member function on MaterialBuilder
-template <typename ArgType>
-using BuilderMethod = MaterialBuilder &(MaterialBuilder::*)(ArgType);
+template <typename ArgType> using BuilderMethod = MaterialBuilder &(MaterialBuilder::*)(ArgType);
 
 // Template type where ArgType indicates the expected argument type including
 // const & ref qualifiers
-template <typename ArgType>
-struct TypedBuilderHandle final : public BuilderHandle {
+template <typename ArgType> struct TypedBuilderHandle final : public BuilderHandle {
   // Remove const/reference qualifiers from ArgType
-  using ValueType = typename std::remove_const<
-      typename std::remove_reference<ArgType>::type>::type;
+  using ValueType = typename std::remove_const<typename std::remove_reference<ArgType>::type>::type;
 
-  explicit TypedBuilderHandle(BuilderMethod<ArgType> m)
-      : BuilderHandle(), m_method(m) {}
+  explicit TypedBuilderHandle(BuilderMethod<ArgType> m) : BuilderHandle(), m_method(m) {}
 
-  void operator()(MaterialBuilder &builder,
-                  const std::string &value) const override {
+  void operator()(MaterialBuilder &builder, const std::string &value) const override {
     auto typedVal = boost::lexical_cast<ValueType>(value);
     (builder.*m_method)(typedVal);
   }
@@ -93,11 +87,8 @@ private:
 using Handlers = std::unordered_map<std::string, BuilderHandle_uptr>;
 
 // Insert a handle into the given map
-template <typename ArgType>
-void insertHandle(Handlers *hash, const std::string &name,
-                  BuilderMethod<ArgType> m) {
-  hash->insert(std::make_pair(
-      name, BuilderHandle_uptr(new TypedBuilderHandle<ArgType>(m))));
+template <typename ArgType> void insertHandle(Handlers *hash, const std::string &name, BuilderMethod<ArgType> m) {
+  hash->insert(std::make_pair(name, BuilderHandle_uptr(new TypedBuilderHandle<ArgType>(m))));
 }
 
 // Find the appropriate handler for a given attribute
@@ -112,16 +103,12 @@ const BuilderHandle &findHandle(const std::string &name) {
     insertHandle(&handles, ZPARAM_ATT, &MaterialBuilder::setZParameter);
     insertHandle(&handles, CELLVOL_ATT, &MaterialBuilder::setUnitCellVolume);
     insertHandle(&handles, MASSDENS_ATT, &MaterialBuilder::setMassDensity);
-    insertHandle(&handles, TOTSC_ATT,
-                 &MaterialBuilder::setTotalScatterXSection);
+    insertHandle(&handles, TOTSC_ATT, &MaterialBuilder::setTotalScatterXSection);
     insertHandle(&handles, COHSC_ATT, &MaterialBuilder::setCoherentXSection);
-    insertHandle(&handles, INCOHSC_ATT,
-                 &MaterialBuilder::setIncoherentXSection);
+    insertHandle(&handles, INCOHSC_ATT, &MaterialBuilder::setIncoherentXSection);
     insertHandle(&handles, ABSORB_ATT, &MaterialBuilder::setAbsorptionXSection);
-    insertHandle(&handles, ATTENPROF_ATT,
-                 &MaterialBuilder::setAttenuationProfileFilename);
-    insertHandle(&handles, ATTENPROFX_ATT,
-                 &MaterialBuilder::setXRayAttenuationProfileFilename);
+    insertHandle(&handles, ATTENPROF_ATT, &MaterialBuilder::setAttenuationProfileFilename);
+    insertHandle(&handles, ATTENPROFX_ATT, &MaterialBuilder::setXRayAttenuationProfileFilename);
   }
   auto iter = handles.find(name);
   if (iter != handles.end())
@@ -137,8 +124,7 @@ const BuilderHandle &findHandle(const std::string &name) {
  * @param attr The attribute name
  * @param value The value in the attribute
  */
-void addToBuilder(MaterialBuilder *builder, const std::string &attr,
-                  const std::string &value) {
+void addToBuilder(MaterialBuilder *builder, const std::string &attr, const std::string &value) {
   // Find the appropriate member function on the builder and set the value
   // We need 3 maps for the 3 allowable value types for the builder member
   // functions
@@ -172,8 +158,7 @@ Material MaterialXMLParser::parse(std::istream &istr) const {
     doc = parser.parse(&src);
   } catch (SAXParseException &exc) {
     std::ostringstream os;
-    os << "MaterialXMLReader::read() - Error parsing stream as XML: "
-       << exc.what();
+    os << "MaterialXMLReader::read() - Error parsing stream as XML: " << exc.what();
     throw std::invalid_argument(os.str());
   }
 
@@ -193,8 +178,7 @@ Material MaterialXMLParser::parse(std::istream &istr) const {
     node = nodeIter.nextNode();
   }
   if (!found) {
-    throw std::invalid_argument(
-        "MaterialXMLReader::read() - No material tags found.");
+    throw std::invalid_argument("MaterialXMLReader::read() - No material tags found.");
   }
   return matr;
 }
@@ -208,8 +192,7 @@ Material MaterialXMLParser::parse(std::istream &istr) const {
  * specification was read from (if any)
  * @return A new Material object
  */
-Material MaterialXMLParser::parse(Poco::XML::Element *element,
-                                  const std::string &XMLFilePath) const {
+Material MaterialXMLParser::parse(Poco::XML::Element *element, const std::string &XMLFilePath) const {
   using namespace Poco::XML;
   using NamedNodeMapPtr = AutoPtr<NamedNodeMap>;
   NamedNodeMapPtr attrs = element->attributes();

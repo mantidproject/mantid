@@ -48,34 +48,26 @@ const std::string RadiusSum::category() const { return "Transforms\\Grouping"; }
  */
 void RadiusSum::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
-  auto twoOrThreeElements =
-      std::make_shared<ArrayLengthValidator<double>>(2, 3);
+  auto twoOrThreeElements = std::make_shared<ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Centre", std::move(myInput),
-                                              std::move(twoOrThreeElements)),
-      "Coordinate of the centre of the ring");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Centre", std::move(myInput), std::move(twoOrThreeElements)),
+                  "Coordinate of the centre of the ring");
 
   auto nonNegative = std::make_shared<BoundedValidator<double>>();
   nonNegative->setLower(0);
-  declareProperty("MinRadius", 0.0, nonNegative->clone(),
-                  "Length of the inner ring. Default=0");
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "MaxRadius", std::numeric_limits<double>::max(),
-                      std::move(nonNegative)),
+  declareProperty("MinRadius", 0.0, nonNegative->clone(), "Length of the inner ring. Default=0");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("MaxRadius", std::numeric_limits<double>::max(),
+                                                              std::move(nonNegative)),
                   "Length of the outer ring. Default=ImageSize.");
 
   auto nonNegativeInt = std::make_shared<BoundedValidator<int>>();
   nonNegativeInt->setLower(1);
-  declareProperty("NumBins", 100, std::move(nonNegativeInt),
-                  "Number of slice bins for the output. Default=100");
+  declareProperty("NumBins", 100, std::move(nonNegativeInt), "Number of slice bins for the output. Default=100");
 
   const char *normBy = "NormalizeByRadius";
   const char *normOrder = "NormalizationOrder";
@@ -87,8 +79,7 @@ void RadiusSum::init() {
                   "If 2, the normalization will be divided by "
                   "the quadratic value of the ring for each "
                   "radius.");
-  setPropertySettings(normOrder, std::make_unique<VisibleWhenProperty>(
-                                     normBy, IS_EQUAL_TO, "1"));
+  setPropertySettings(normOrder, std::make_unique<VisibleWhenProperty>(normBy, IS_EQUAL_TO, "1"));
 
   const char *groupNorm = "Normalization";
   setPropertyGroup(normBy, groupNorm);
@@ -151,8 +142,7 @@ std::vector<double> RadiusSum::processNumericImageRadiusSum() {
 
   // the position of the pixel in the vertical axis comes from the axis(1)
   // (NumericAxis)
-  API::NumericAxis *verticalAxis =
-      dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
+  API::NumericAxis *verticalAxis = dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
 
   // assumption: in a numeric image, all the bins position for every row in the
   // image
@@ -216,8 +206,7 @@ void RadiusSum::cacheInputPropertyValues() {
   else
     centre = V3D(centre_aux[0], centre_aux[1], centre_aux[2]);
 
-  g_log.debug()
-      << "Copy the remaning properties: MinRadius, MaxRadius and NumBins\n";
+  g_log.debug() << "Copy the remaning properties: MinRadius, MaxRadius and NumBins\n";
   min_radius = getProperty("MinRadius");
   max_radius = getProperty("MaxRadius");
   num_bins = getProperty("NumBins");
@@ -237,8 +226,7 @@ void RadiusSum::inputValidationSanityCheck() {
 
   const std::vector<double> boundary_limits = getBoundariesOfInputWorkspace();
   std::stringstream s;
-  std::copy(boundary_limits.begin(), std::prev(boundary_limits.end()),
-            std::ostream_iterator<double>(s, ", "));
+  std::copy(boundary_limits.begin(), std::prev(boundary_limits.end()), std::ostream_iterator<double>(s, ", "));
   s << boundary_limits.back();
   g_log.information() << "Boundary limits are: " << s.str() << '\n';
 
@@ -249,12 +237,10 @@ void RadiusSum::inputValidationSanityCheck() {
   g_log.debug() << "Recalculate MaxRadius if default value is given\n";
   if (max_radius > 0.9 * std::numeric_limits<double>::max()) {
     max_radius = getMaxDistance(centre, boundary_limits);
-    g_log.notice() << "RadiusMax automatically calculated and set to "
-                   << max_radius << '\n';
+    g_log.notice() << "RadiusMax automatically calculated and set to " << max_radius << '\n';
   }
 
-  g_log.debug()
-      << "Check number of bins to alert user if many bins will end up empty\n";
+  g_log.debug() << "Check number of bins to alert user if many bins will end up empty\n";
   numBinsIsReasonable();
 }
 
@@ -271,8 +257,7 @@ void RadiusSum::inputValidationSanityCheck() {
  * @param inWS the input workspace
  * @return True if it is an instrument related workspace.
  */
-bool RadiusSum::inputWorkspaceHasInstrumentAssociated(
-    const API::MatrixWorkspace_sptr &inWS) {
+bool RadiusSum::inputWorkspaceHasInstrumentAssociated(const API::MatrixWorkspace_sptr &inWS) {
   return inWS->getAxis(1)->isSpectra();
 }
 
@@ -301,8 +286,7 @@ std::vector<double> RadiusSum::getBoundariesOfInputWorkspace() {
  *  @return a list of values that defines the limits of the image in this order:
  *Xmin, Xmax, Ymin, Ymax
  */
-std::vector<double>
-RadiusSum::getBoundariesOfNumericImage(const API::MatrixWorkspace_sptr &inWS) {
+std::vector<double> RadiusSum::getBoundariesOfNumericImage(const API::MatrixWorkspace_sptr &inWS) {
 
   // horizontal axis
 
@@ -322,8 +306,7 @@ RadiusSum::getBoundariesOfNumericImage(const API::MatrixWorkspace_sptr &inWS) {
   }
 
   // vertical axis
-  API::NumericAxis *verticalAxis =
-      dynamic_cast<API::NumericAxis *>(inWS->getAxis(1));
+  API::NumericAxis *verticalAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(1));
   if (!verticalAxis)
     throw std::invalid_argument("Vertical axis is not a numeric axis. Can not "
                                 "find the limits of the image.");
@@ -358,8 +341,7 @@ RadiusSum::getBoundariesOfNumericImage(const API::MatrixWorkspace_sptr &inWS) {
  * @return a list of values that defines the limits of the image in this order:
  *Xmin, Xmax, Ymin, Ymax, Zmin, Zmax
  */
-std::vector<double>
-RadiusSum::getBoundariesOfInstrument(const API::MatrixWorkspace_sptr &inWS) {
+std::vector<double> RadiusSum::getBoundariesOfInstrument(const API::MatrixWorkspace_sptr &inWS) {
 
   // This function is implemented based in the following assumption:
   //   - The workspace is composed by spectrum with associated spectrum No which
@@ -478,13 +460,11 @@ RadiusSum::getBoundariesOfInstrument(const API::MatrixWorkspace_sptr &inWS) {
  *  If the test fails, it will raise an exception (invalid_argument) to
  *express that the given centre is not inside the boundaries.
  */
-void RadiusSum::centerIsInsideLimits(const std::vector<double> &centre,
-                                     const std::vector<double> &boundaries) {
+void RadiusSum::centerIsInsideLimits(const std::vector<double> &centre, const std::vector<double> &boundaries) {
   // sanity check
   if ((2 * centre.size()) != boundaries.size())
-    throw std::invalid_argument(
-        "CenterIsInsideLimits: The centre and boundaries were not given in the "
-        "correct as {x1,x2,...} and {x1_min, x1_max, x2_min, x2_max, ... }");
+    throw std::invalid_argument("CenterIsInsideLimits: The centre and boundaries were not given in the "
+                                "correct as {x1,x2,...} and {x1_min, x1_max, x2_min, x2_max, ... }");
 
   bool check_passed = true;
   std::stringstream s;
@@ -492,9 +472,8 @@ void RadiusSum::centerIsInsideLimits(const std::vector<double> &centre,
   for (size_t i = 0; i < 2; i++) { // TODO: fix this
     if (centre[i] < boundaries[2 * i] || centre[i] > boundaries[2 * i + 1]) {
       check_passed = false;
-      s << "The position for axis " << i + 1 << " (" << centre[i]
-        << ") is outside the limits [" << boundaries[2 * i] << ", "
-        << boundaries[2 * i + 1] << "]. \n";
+      s << "The position for axis " << i + 1 << " (" << centre[i] << ") is outside the limits [" << boundaries[2 * i]
+        << ", " << boundaries[2 * i + 1] << "]. \n";
     }
   }
 
@@ -516,13 +495,10 @@ void RadiusSum::numBinsIsReasonable() {
                     << "It corresponds to a separation smaller than the image "
                        "resolution (detector size). "
                     << "A resonable number is smaller than "
-                    << static_cast<int>((max_radius - min_radius) /
-                                        min_bin_size)
-                    << '\n';
+                    << static_cast<int>((max_radius - min_radius) / min_bin_size) << '\n';
 }
 
-double
-RadiusSum::getMinBinSizeForInstrument(const API::MatrixWorkspace_sptr &inWS) {
+double RadiusSum::getMinBinSizeForInstrument(const API::MatrixWorkspace_sptr &inWS) {
   // Assumption made: the detectors are placed one after the other, so the
   // minimum
   // reasonalbe size for the bin is the width of one detector.
@@ -539,8 +515,7 @@ RadiusSum::getMinBinSizeForInstrument(const API::MatrixWorkspace_sptr &inWS) {
   throw std::invalid_argument("Did not find any non monitor detector position");
 }
 
-double
-RadiusSum::getMinBinSizeForNumericImage(const API::MatrixWorkspace_sptr &inWS) {
+double RadiusSum::getMinBinSizeForNumericImage(const API::MatrixWorkspace_sptr &inWS) {
   // The pixel dimensions:
   //  - width: image width/ number of pixels in one row
   //  - height: image height/ number of pixels in one column
@@ -552,22 +527,18 @@ RadiusSum::getMinBinSizeForNumericImage(const API::MatrixWorkspace_sptr &inWS) {
   int nY = static_cast<int>(inWS->getAxis(1)->length());
 
   // remembering boundaries is defined as { xMin, xMax, yMin, yMax}
-  return std::min(((boundaries[1] - boundaries[0]) / nX),
-                  ((boundaries[3] - boundaries[2]) / nY));
+  return std::min(((boundaries[1] - boundaries[0]) / nX), ((boundaries[3] - boundaries[2]) / nY));
 }
 
-void RadiusSum::normalizeOutputByRadius(std::vector<double> &values,
-                                        double exp_power) {
-  g_log.debug()
-      << "Normalization of the output in relation to the 'radius' (distance)\n";
+void RadiusSum::normalizeOutputByRadius(std::vector<double> &values, double exp_power) {
+  g_log.debug() << "Normalization of the output in relation to the 'radius' (distance)\n";
 
   // the radius can be defined as:
   // radius_min + bin_size/2 + n * bin_size ; for 0<= n <= num_bins
   double bin_size = (max_radius - min_radius) / num_bins;
   double first_radius = min_radius + bin_size / 2;
 
-  g_log.debug() << "Calculate Output[i] = Counts[i] / (Radius[i] ^ "
-                << exp_power << ") << \n";
+  g_log.debug() << "Calculate Output[i] = Counts[i] / (Radius[i] ^ " << exp_power << ") << \n";
   if (exp_power > 1.00001 || exp_power < 0.99999) {
     for (int i = 0; i < static_cast<int>(values.size()); i++) {
       values[i] = values[i] / pow(first_radius + i * bin_size, exp_power);
@@ -579,8 +550,7 @@ void RadiusSum::normalizeOutputByRadius(std::vector<double> &values,
   }
 }
 
-double RadiusSum::getMaxDistance(const V3D &centre,
-                                 const std::vector<double> &boundary_limits) {
+double RadiusSum::getMaxDistance(const V3D &centre, const std::vector<double> &boundary_limits) {
 
   std::array<double, 2> Xs = {{boundary_limits[0], boundary_limits[1]}};
   std::array<double, 2> Ys = {{boundary_limits[2], boundary_limits[3]}};
@@ -609,8 +579,8 @@ void RadiusSum::setUpOutputWorkspace(const std::vector<double> &values) {
 
   g_log.debug() << "Output calculated, setting up the output workspace\n";
 
-  API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(
-      inputWS, 1, values.size() + 1, values.size());
+  API::MatrixWorkspace_sptr outputWS =
+      API::WorkspaceFactory::Instance().create(inputWS, 1, values.size() + 1, values.size());
 
   g_log.debug() << "Set the data\n";
   outputWS->mutableY(0) = values;
@@ -619,8 +589,7 @@ void RadiusSum::setUpOutputWorkspace(const std::vector<double> &values) {
 
   auto xSize = outputWS->mutableX(0).size();
   double bin_size = (max_radius - min_radius) / num_bins;
-  outputWS->setBinEdges(0, xSize,
-                        HistogramData::LinearGenerator(min_radius, bin_size));
+  outputWS->setBinEdges(0, xSize, HistogramData::LinearGenerator(min_radius, bin_size));
 
   // configure the axis:
   // for numeric images, the axis are the same as the input workspace, and are

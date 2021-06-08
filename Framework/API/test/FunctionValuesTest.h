@@ -38,8 +38,7 @@ public:
     }
     for (size_t i = 0; i < values.size(); ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), double(i) + 0.01);
-      TS_ASSERT_EQUALS(values.getCalculated(i),
-                       *values.getPointerToCalculated(i));
+      TS_ASSERT_EQUALS(values.getCalculated(i), *values.getPointerToCalculated(i));
     }
   }
 

@@ -40,18 +40,13 @@ class AlgorithmHintStrategyTest : public CxxTest::TestSuite {
       declareProperty("DoubleValue", 0.01);
       declareProperty("BoolValue", false);
       declareProperty("StringValue", "Empty");
-      auto mustBePositive =
-          std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
+      auto mustBePositive = std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
       mustBePositive->setLower(0);
       declareProperty("PositiveIntValue", 0, mustBePositive);
       declareProperty("PositiveIntValue1", 0, mustBePositive);
-      declareProperty(
-          std::make_unique<Mantid::Kernel::ArrayProperty<int>>("IntArray"));
-      declareProperty(std::make_unique<Mantid::Kernel::ArrayProperty<double>>(
-          "DoubleArray"));
-      declareProperty(
-          std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
-              "StringArray"));
+      declareProperty(std::make_unique<Mantid::Kernel::ArrayProperty<int>>("IntArray"));
+      declareProperty(std::make_unique<Mantid::Kernel::ArrayProperty<double>>("DoubleArray"));
+      declareProperty(std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>("StringArray"));
     };
     void exec() override { return; };
   };
@@ -59,9 +54,7 @@ class AlgorithmHintStrategyTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AlgorithmHintStrategyTest *createSuite() {
-    return new AlgorithmHintStrategyTest();
-  }
+  static AlgorithmHintStrategyTest *createSuite() { return new AlgorithmHintStrategyTest(); }
   static void destroySuite(AlgorithmHintStrategyTest *suite) { delete suite; }
 
   AlgorithmHintStrategyTest() {
@@ -72,27 +65,22 @@ public:
 
   void testCreateHints() {
     auto strategy = AlgorithmHintStrategy(m_propAlg, {});
-    auto expected = std::vector<Hint>(
-        {Hint("IntValue", ""), Hint("DoubleValue", ""), Hint("BoolValue", ""),
-         Hint("StringValue", ""), Hint("PositiveIntValue", ""),
-         Hint("PositiveIntValue1", ""), Hint("IntArray", ""),
-         Hint("DoubleArray", ""), Hint("StringArray", "")});
+    auto expected =
+        std::vector<Hint>({Hint("IntValue", ""), Hint("DoubleValue", ""), Hint("BoolValue", ""),
+                           Hint("StringValue", ""), Hint("PositiveIntValue", ""), Hint("PositiveIntValue1", ""),
+                           Hint("IntArray", ""), Hint("DoubleArray", ""), Hint("StringArray", "")});
     TS_ASSERT_EQUALS(expected, strategy.createHints());
   }
 
   void testBlacklist() {
-    auto strategy =
-        AlgorithmHintStrategy(m_propAlg, {"DoubleValue", "IntArray"});
-    auto expected = std::vector<Hint>(
-        {Hint("IntValue", ""), Hint("BoolValue", ""), Hint("StringValue", ""),
-         Hint("PositiveIntValue", ""), Hint("PositiveIntValue1", ""),
-         Hint("DoubleArray", ""), Hint("StringArray", "")});
+    auto strategy = AlgorithmHintStrategy(m_propAlg, {"DoubleValue", "IntArray"});
+    auto expected = std::vector<Hint>({Hint("IntValue", ""), Hint("BoolValue", ""), Hint("StringValue", ""),
+                                       Hint("PositiveIntValue", ""), Hint("PositiveIntValue1", ""),
+                                       Hint("DoubleArray", ""), Hint("StringArray", "")});
 
     auto hints = strategy.createHints();
 
-    auto compare = [](Hint const &lhs, Hint const &rhs) -> bool {
-      return lhs.word() < rhs.word();
-    };
+    auto compare = [](Hint const &lhs, Hint const &rhs) -> bool { return lhs.word() < rhs.word(); };
     std::sort(expected.begin(), expected.end(), compare);
     std::sort(hints.begin(), hints.end(), compare);
 

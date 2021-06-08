@@ -15,11 +15,8 @@ namespace PythonInterface {
 namespace Converters {
 namespace Impl {
 // Forward declaration of implementations. Keeps numpy header out of this header
-template <typename ElementType>
-PyObject *clone1D(const std::vector<ElementType> &cvector);
-template <typename ElementType>
-PyObject *cloneND(const ElementType *carray, const int ndims,
-                  Py_intptr_t *dims);
+template <typename ElementType> PyObject *clone1D(const std::vector<ElementType> &cvector);
+template <typename ElementType> PyObject *cloneND(const ElementType *carray, const int ndims, Py_intptr_t *dims);
 } // namespace Impl
 
 /**
@@ -34,9 +31,7 @@ struct Clone {
      * memory
      * @return
      */
-    static PyObject *create1D(const std::vector<ElementType> &cvector) {
-      return Impl::clone1D<ElementType>(cvector);
-    }
+    static PyObject *create1D(const std::vector<ElementType> &cvector) { return Impl::clone1D<ElementType>(cvector); }
     /**
      * Returns a Numpy array that has a copy of the array data
      * @param carray :: The input data array
@@ -44,8 +39,7 @@ struct Clone {
      * @param dims :: The extents in each of the dimensions
      * @return
      */
-    static PyObject *createFromArray(const ElementType *carray, const int ndims,
-                                     Py_intptr_t *dims) {
+    static PyObject *createFromArray(const ElementType *carray, const int ndims, Py_intptr_t *dims) {
       return Impl::cloneND<ElementType>(carray, ndims, dims);
     }
   };

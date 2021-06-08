@@ -33,26 +33,22 @@ void FindCenterOfMassPosition::init() {
   auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      "InputWorkspace", "", Direction::Input, wsValidator));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator));
   declareProperty("Output", "",
                   "If not empty, a table workspace of that "
                   "name will contain the center of mass position.");
 
   auto positiveInt = std::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(0);
-  declareProperty("NPixelX", 192, positiveInt,
-                  "Number of detector pixels in the X direction.");
+  declareProperty("NPixelX", 192, positiveInt, "Number of detector pixels in the X direction.");
 
   positiveInt->setLower(0);
-  declareProperty("NPixelY", 192, positiveInt,
-                  "Number of detector pixels in the Y direction.");
+  declareProperty("NPixelY", 192, positiveInt, "Number of detector pixels in the Y direction.");
 
-  declareProperty(
-      "DirectBeam", true,
-      "If true, a direct beam calculation will be performed. Otherwise, the "
-      "center of mass "
-      "of the scattering data will be computed by excluding the beam area.");
+  declareProperty("DirectBeam", true,
+                  "If true, a direct beam calculation will be performed. Otherwise, the "
+                  "center of mass "
+                  "of the scattering data will be computed by excluding the beam area.");
 
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
@@ -106,8 +102,7 @@ void FindCenterOfMassPosition::exec() {
 
   // Get the number of monitors. We assume that all monitors are stored in the
   // first spectra
-  int n_monitors =
-      static_cast<int>(inputWS->getInstrument()->getMonitors().size());
+  int n_monitors = static_cast<int>(inputWS->getInstrument()->getMonitors().size());
   const auto numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
   // Find center of mass and iterate until we converge
@@ -121,8 +116,7 @@ void FindCenterOfMassPosition::exec() {
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (int i = 0; i < numSpec; i++) {
       if (!spectrumInfo.hasDetectors(i)) {
-        g_log.warning() << "Workspace index " << i
-                        << " has no detector assigned to it - discarding\n";
+        g_log.warning() << "Workspace index " << i << " has no detector assigned to it - discarding\n";
         continue;
       }
       // Skip if we have a monitor or if the detector is masked.
@@ -152,8 +146,8 @@ void FindCenterOfMassPosition::exec() {
     position_y /= total_count;
 
     // Compute the distance to the previous iteration
-    distance = sqrt((center_x - position_x) * (center_x - position_x) +
-                    (center_y - position_y) * (center_y - position_y));
+    distance =
+        sqrt((center_x - position_x) * (center_x - position_x) + (center_y - position_y) * (center_y - position_y));
 
     // Modify the bounding box around the detector region used to
     // compute the center of mass so that it is centered around
@@ -184,16 +178,14 @@ void FindCenterOfMassPosition::exec() {
 
     // Quit if we found the exact same distance five times in a row.
     if (n_local_minima > 5) {
-      g_log.warning()
-          << "Found the same or equivalent center of mass locations "
-             "more than 5 times in a row: stopping here\n";
+      g_log.warning() << "Found the same or equivalent center of mass locations "
+                         "more than 5 times in a row: stopping here\n";
       break;
     }
 
     // Quit if we haven't converged after the maximum number of iterations.
     if (++n_iteration > max_iteration) {
-      g_log.warning() << "More than " << max_iteration
-                      << " iteration to find beam center: stopping here\n";
+      g_log.warning() << "More than " << max_iteration << " iteration to find beam center: stopping here\n";
       break;
     }
 
@@ -209,14 +201,13 @@ void FindCenterOfMassPosition::exec() {
   // otherwise use an ArrayProperty
   if (!output.empty()) {
     // Store the result in a table workspace
-    declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-        "OutputWorkspace", "", Direction::Output));
+    declareProperty(
+        std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputWorkspace", "", Direction::Output));
 
     // Set the name of the new workspace
     setPropertyValue("OutputWorkspace", output);
 
-    Mantid::API::ITableWorkspace_sptr m_result =
-        std::make_shared<TableWorkspace>();
+    Mantid::API::ITableWorkspace_sptr m_result = std::make_shared<TableWorkspace>();
     m_result->addColumn("str", "Name");
     m_result->addColumn("double", "Value");
 
@@ -228,16 +219,15 @@ void FindCenterOfMassPosition::exec() {
     setProperty("OutputWorkspace", m_result);
   } else {
     // Store the results using an ArrayProperty
-    declareProperty(std::make_unique<ArrayProperty<double>>(
-        "CenterOfMass", std::make_shared<NullValidator>(), Direction::Output));
+    declareProperty(
+        std::make_unique<ArrayProperty<double>>("CenterOfMass", std::make_shared<NullValidator>(), Direction::Output));
     std::vector<double> center_of_mass;
     center_of_mass.emplace_back(center_x);
     center_of_mass.emplace_back(center_y);
     setProperty("CenterOfMass", center_of_mass);
   }
 
-  g_log.information() << "Center of Mass found at x=" << center_x
-                      << " y=" << center_y << '\n';
+  g_log.information() << "Center of Mass found at x=" << center_x << " y=" << center_y << '\n';
 }
 
 } // namespace Algorithms

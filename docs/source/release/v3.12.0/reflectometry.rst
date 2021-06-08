@@ -21,13 +21,13 @@ New features
 - The following new options have been added to the Settings tab:
 
   - A new table has been added to the Experiment settings which allows default options to be specified on a per-angle basis. If a row in the Runs tab contains an angle, it will be looked up in this table and those options will be used if a matching angle is found (the angle does not have to be exact as it will match to within 100th of a degree). If you want to specify values that will be used by default for all runs, then simply leave the angle empty.
-    
+
   - Two new drop-down boxes have been added to the Experiment settings, 'ReductionType' and 'SummationType', which are passed to the corresponding parameters of :ref:`algm-ReflectometryReductionOneAuto`.
 
   - A 'CorrectDetectors' check box has been added to the Instrument settings, which maps to the corresponding property in :ref:`algm-ReflectometryReductionOneAuto`.
 
 - The 'Get Defaults' button now looks for values for the following additional properties in the IDF:
-  
+
   - AnalysisMode
   - PolarizationAnalysis
   - TransRunStartOverlap
@@ -43,21 +43,21 @@ Improvements
 ############
 
 - Output workspace names and plotting:
-  
+
   - Output workspace names now use ``+`` to indicate preprocessed (i.e. summed) workspaces, rather than ``_``, which is used to indicate postprocessed (i.e. stitched) workspaces.
   - Output workspace names for time sliced data now contain the time periods, rather than just a slice index number.
   - Plotting results in event handling mode now plots the ``IvsQ_binned_`` workspaces rather than ``IvsQ_``, to make the behaviour consistent with non-event mode.
   - The Python code generated when you tick ``Output Notebook`` has been improved to support special characters (e.g. ``+``) in workspace names.
   - The ``Output Notebook`` option now works for all groups that are processed as non-event workspaces. Previously, if event handling was enabled but a group contained non-event workspaces, generating the notebook was not performed.
-    
+
 - Properties on the Runs tab now take precedence over properties on the Settings tab.
-  
+
 - Extra tooltips have been added along with a new ``?`` button which links to the documentation page.
-  
+
 - The runs tab table now contains grid lines to make it easier to see where to enter text.
-  
+
 - Menu items and toolbar buttons are now enabled/disabled when appropriate, e.g. to prevent table modification during processing. Directly editing table rows and settings is also disabled during processing.
-  
+
 - The 'DirectBeam' box has been from the settings tab because this is not used.
 
 
@@ -65,9 +65,9 @@ Bug fixes
 #########
 
 - Fixed some bugs where transmission runs entered on the Settings tab were not being found, whether entered as a run number to load or as the name of an existing workspace in the ADS.
-  
+
 - The Python code generated when you tick ``Output Notebook`` has been changed so that all algorithm property values are enclosed in quotes. Unquoted values were causing failures in some algorithms. A bug has also been fixed in setting the legend location for the 4th (stitched) plot, which is shown when post-processing is performed.
-  
+
 - If any of the mandatory parameters listed below are missing when pressing 'Get Default' a warning is shown rather than a crash.
 
   - MonitorIntegralMax

@@ -76,8 +76,7 @@ public:
   // ... or, write conditional logic around boost's optional results.
   template <typename T> boost::optional<T> get(const std::string &path) const {
     try {
-      return boost::make_optional(
-          getNestedContentValueAsType<T>(*m_content, path));
+      return boost::make_optional(getNestedContentValueAsType<T>(*m_content, path));
     } catch (ContentError &) {
       return boost::none;
     }
@@ -86,19 +85,14 @@ public:
   std::string toString() const;
 
   static ONCatEntity fromJSONStream(std::istream &streamContent);
-  static std::vector<ONCatEntity>
-  vectorFromJSONStream(std::istream &streamContent);
+  static std::vector<ONCatEntity> vectorFromJSONStream(std::istream &streamContent);
 
 private:
-  ONCatEntity(const std::string &id, const std::string &type,
-              Content_uptr content);
+  ONCatEntity(const std::string &id, const std::string &type, Content_uptr content);
 
-  template <typename T>
-  T getNestedContentValueAsType(const Content &content,
-                                const std::string &path) const;
+  template <typename T> T getNestedContentValueAsType(const Content &content, const std::string &path) const;
 
-  Content getNestedContent(const Content &content,
-                           const std::string &path) const;
+  Content getNestedContent(const Content &content, const std::string &path) const;
 
   std::string m_id;
   std::string m_type;
@@ -106,25 +100,18 @@ private:
 };
 
 template <>
-MANTID_CATALOG_DLL std::string
-ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                         const std::string &path) const;
+MANTID_CATALOG_DLL std::string ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                                                        const std::string &path) const;
 template <>
-MANTID_CATALOG_DLL int
-ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                         const std::string &path) const;
+MANTID_CATALOG_DLL int ONCatEntity::getNestedContentValueAsType(const Content &content, const std::string &path) const;
 template <>
-MANTID_CATALOG_DLL float
-ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                         const std::string &path) const;
+MANTID_CATALOG_DLL float ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                                                  const std::string &path) const;
 template <>
-MANTID_CATALOG_DLL double
-ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                         const std::string &path) const;
+MANTID_CATALOG_DLL double ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                                                   const std::string &path) const;
 template <>
-MANTID_CATALOG_DLL bool
-ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                         const std::string &path) const;
+MANTID_CATALOG_DLL bool ONCatEntity::getNestedContentValueAsType(const Content &content, const std::string &path) const;
 
 } // namespace ONCat
 } // namespace Catalog

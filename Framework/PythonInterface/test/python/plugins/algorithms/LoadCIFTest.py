@@ -159,13 +159,8 @@ class AtomListBuilderTest(unittest.TestCase):
                                    (u'_atom_site_occupancy', [u'1.0', u'1.0(0)']),
                                    (u'_atom_site_b_iso_or_equiv', [u'1.0', u'2.0'])]))
 
-        # python 2 & 3 convert float to str with different precision
-        if sys.version_info[0] < 3:
-            self.assertEqual(self.builder._getAtoms(data),
-                             'Si 1/8 1/8 1/8 1.0 0.0126651479553;Al 0.34 0.56 0.23 1.0 0.0253302959106')
-        else:
-            self.assertEqual(self.builder._getAtoms(data),
-                             'Si 1/8 1/8 1/8 1.0 0.012665147955292222;Al 0.34 0.56 0.23 1.0 0.025330295910584444')
+        self.assertEqual(self.builder._getAtoms(data),
+                         'Si 1/8 1/8 1/8 1.0 0.012665147955292222;Al 0.34 0.56 0.23 1.0 0.025330295910584444')
 
     def test_getAtoms_no_occupancy(self):
         data = self._getData(dict([(u'_atom_site_label', [u'Si', u'Al']),
@@ -193,13 +188,8 @@ class AtomListBuilderTest(unittest.TestCase):
                                    (u'_atom_site_occupancy', [u'1.0', u'1.0(0)']),
                                    (u'_atom_site_b_iso_or_equiv', [u'1.0', u'sdfsdfs'])]))
 
-        # python 2 & 3 convert float to str with different precision
-        if sys.version_info[0] < 3:
-            self.assertEqual(self.builder._getAtoms(data),
-                             'Si 1/8 1/8 1/8 1.0 0.0126651479553;Al 0.34 0.56 0.23 1.0')
-        else:
-            self.assertEqual(self.builder._getAtoms(data),
-                             'Si 1/8 1/8 1/8 1.0 0.012665147955292222;Al 0.34 0.56 0.23 1.0')
+        self.assertEqual(self.builder._getAtoms(data),
+                         'Si 1/8 1/8 1/8 1.0 0.012665147955292222;Al 0.34 0.56 0.23 1.0')
 
     def test_getAtoms_aniso_u_orthogonal(self):
         uElements = {'11': [u'0.01', u'0.02'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'], '22': [u'0.01', u'0.02'],

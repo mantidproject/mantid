@@ -19,8 +19,7 @@ GET_POINTER_SPECIALIZATION(PeaksWorkspace)
 
 void export_PeaksWorkspace() {
 
-  class_<PeaksWorkspace, bases<IPeaksWorkspace>, boost::noncopyable>(
-      "PeaksWorkspace", no_init);
+  class_<PeaksWorkspace, bases<IPeaksWorkspace>, boost::noncopyable>("PeaksWorkspace", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<PeaksWorkspace>();

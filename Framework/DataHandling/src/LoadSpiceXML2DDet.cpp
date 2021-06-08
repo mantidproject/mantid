@@ -49,8 +49,7 @@ const char INT32 = 'i';
  * @brief SpiceXMLNode::SpiceXMLNode
  * @param nodename
  */
-SpiceXMLNode::SpiceXMLNode(const std::string &nodename)
-    : m_name{nodename}, m_typechar('s') {}
+SpiceXMLNode::SpiceXMLNode(const std::string &nodename) : m_name{nodename}, m_typechar('s') {}
 
 /** Set node value in string format
  * @brief SpiceXMLNode::setValue
@@ -64,8 +63,7 @@ void SpiceXMLNode::setValue(const std::string &strvalue) { m_value = strvalue; }
  * @param nodeunit
  * @param nodedescription
  */
-void SpiceXMLNode::setParameters(const std::string &nodetype,
-                                 const std::string &nodeunit,
+void SpiceXMLNode::setParameters(const std::string &nodetype, const std::string &nodeunit,
                                  const std::string &nodedescription) {
   // data type
   if (nodetype == "FLOAT32") {
@@ -141,23 +139,18 @@ const std::string SpiceXMLNode::getValue() const { return m_value; }
 /** Constructor
  */
 LoadSpiceXML2DDet::LoadSpiceXML2DDet()
-    : m_detXMLFileName(), m_detXMLNodeName(), m_numPixelX(0), m_numPixelY(0),
-      m_loadInstrument(false), m_detSampleDistanceShift(0.0),
-      m_hasScanTable(false), m_ptNumber4Log(0), m_idfFileName() {}
+    : m_detXMLFileName(), m_detXMLNodeName(), m_numPixelX(0), m_numPixelY(0), m_loadInstrument(false),
+      m_detSampleDistanceShift(0.0), m_hasScanTable(false), m_ptNumber4Log(0), m_idfFileName() {}
 
 /** Destructor
  */
 LoadSpiceXML2DDet::~LoadSpiceXML2DDet() = default;
 
-const std::string LoadSpiceXML2DDet::name() const {
-  return "LoadSpiceXML2DDet";
-}
+const std::string LoadSpiceXML2DDet::name() const { return "LoadSpiceXML2DDet"; }
 
 int LoadSpiceXML2DDet::version() const { return 1; }
 
-const std::string LoadSpiceXML2DDet::category() const {
-  return "DataHandling\\XML";
-}
+const std::string LoadSpiceXML2DDet::category() const { return "DataHandling\\XML"; }
 
 const std::string LoadSpiceXML2DDet::summary() const {
   return "Load 2-dimensional detector data file in XML format from SPICE. ";
@@ -170,61 +163,49 @@ void LoadSpiceXML2DDet::init() {
   std::vector<std::string> exts;
   exts.emplace_back(".xml");
   exts.emplace_back(".bin");
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "",
-                                     FileProperty::FileAction::Load, exts),
-      "XML file name for one scan including 2D detectors counts from SPICE");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::FileAction::Load, exts),
+                  "XML file name for one scan including 2D detectors counts from SPICE");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "Name of output matrix workspace. "
-      "Output workspace will be an X by Y Workspace2D if instrument "
-      "is not loaded. ");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "Name of output matrix workspace. "
+                  "Output workspace will be an X by Y Workspace2D if instrument "
+                  "is not loaded. ");
 
-  declareProperty(
-      "DetectorLogName", "Detector",
-      "Log name (i.e., XML node name) for detector counts in XML file."
-      "By default, the name is 'Detector'");
+  declareProperty("DetectorLogName", "Detector",
+                  "Log name (i.e., XML node name) for detector counts in XML file."
+                  "By default, the name is 'Detector'");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<size_t>>("DetectorGeometry"),
-      "A size-2 unsigned integer array [X, Y] for detector geometry. "
-      "Such that the detector contains X x Y pixels."
-      "If the input data is a binary file, input for DetectorGeometry will be "
-      "overridden "
-      "by detector geometry specified in the binary file");
+  declareProperty(std::make_unique<ArrayProperty<size_t>>("DetectorGeometry"),
+                  "A size-2 unsigned integer array [X, Y] for detector geometry. "
+                  "Such that the detector contains X x Y pixels."
+                  "If the input data is a binary file, input for DetectorGeometry will be "
+                  "overridden "
+                  "by detector geometry specified in the binary file");
 
-  declareProperty(
-      "LoadInstrument", true,
-      "Flag to load instrument to output workspace. "
-      "HFIR's HB3A will be loaded if InstrumentFileName is not specified.");
+  declareProperty("LoadInstrument", true,
+                  "Flag to load instrument to output workspace. "
+                  "HFIR's HB3A will be loaded if InstrumentFileName is not specified.");
 
-  declareProperty(
-      std::make_unique<FileProperty>("InstrumentFilename", "",
-                                     FileProperty::OptionalLoad, ".xml"),
-      "The filename (including its full or relative path) of an instrument "
-      "definition file. The file extension must either be .xml or .XML when "
-      "specifying an instrument definition file. Note Filename or "
-      "InstrumentName must be specified but not both.");
+  declareProperty(std::make_unique<FileProperty>("InstrumentFilename", "", FileProperty::OptionalLoad, ".xml"),
+                  "The filename (including its full or relative path) of an instrument "
+                  "definition file. The file extension must either be .xml or .XML when "
+                  "specifying an instrument definition file. Note Filename or "
+                  "InstrumentName must be specified but not both.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "SpiceTableWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Name of TableWorkspace loaded from SPICE scan file by LoadSpiceAscii.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("SpiceTableWorkspace", "", Direction::Input,
+                                                                       PropertyMode::Optional),
+                  "Name of TableWorkspace loaded from SPICE scan file by LoadSpiceAscii.");
 
-  declareProperty("PtNumber", 0,
-                  "Pt. value for the row to get sample log from. ");
+  declareProperty("PtNumber", 0, "Pt. value for the row to get sample log from. ");
 
   declareProperty("UserSpecifiedWaveLength", EMPTY_DBL(),
                   "User can specify the wave length of the instrument if it is "
                   "drifted from the designed value."
                   "It happens often.");
 
-  declareProperty(
-      "ShiftedDetectorDistance", 0.,
-      "Amount of shift of the distance between source and detector centre."
-      "It is used to apply instrument calibration.");
+  declareProperty("ShiftedDetectorDistance", 0.,
+                  "Amount of shift of the distance between source and detector centre."
+                  "It is used to apply instrument calibration.");
 
   declareProperty("DetectorCenterXShift", 0.0,
                   "The amount of shift of "
@@ -255,8 +236,7 @@ void LoadSpiceXML2DDet::processInputs() {
                              "It either has 2 integers or left empty to get "
                              "determined automatically.");
   }
-  g_log.debug() << "User input poixels numbers: " << m_numPixelX << ", "
-                << m_numPixelY << "\n";
+  g_log.debug() << "User input poixels numbers: " << m_numPixelX << ", " << m_numPixelY << "\n";
 
   m_loadInstrument = getProperty("LoadInstrument");
 
@@ -283,8 +263,7 @@ void LoadSpiceXML2DDet::processInputs() {
  * @param outws :: workspace to have sample logs to set up
  * @return
  */
-bool LoadSpiceXML2DDet::setupSampleLogs(
-    const API::MatrixWorkspace_sptr &outws) {
+bool LoadSpiceXML2DDet::setupSampleLogs(const API::MatrixWorkspace_sptr &outws) {
   // With given spice scan table, 2-theta is read from there.
   if (m_hasScanTable) {
     ITableWorkspace_sptr spicetablews = getProperty("SpiceTableWorkspace");
@@ -295,18 +274,14 @@ bool LoadSpiceXML2DDet::setupSampleLogs(
 
   // Process 2theta
   bool return_true = true;
-  if (!outws->run().hasProperty("2theta") &&
-      outws->run().hasProperty("_2theta")) {
+  if (!outws->run().hasProperty("2theta") && outws->run().hasProperty("_2theta")) {
     // Set up 2theta if it is not set up yet
     double logvalue = std::stod(outws->run().getProperty("_2theta")->value());
-    TimeSeriesProperty<double> *newlogproperty =
-        new TimeSeriesProperty<double>("2theta");
+    TimeSeriesProperty<double> *newlogproperty = new TimeSeriesProperty<double>("2theta");
     newlogproperty->addValue(anytime, logvalue);
     outws->mutableRun().addProperty(newlogproperty);
-    g_log.information() << "Set 2theta from _2theta (as XML node) with value "
-                        << logvalue << "\n";
-  } else if (!outws->run().hasProperty("2theta") &&
-             !outws->run().hasProperty("_2theta")) {
+    g_log.information() << "Set 2theta from _2theta (as XML node) with value " << logvalue << "\n";
+  } else if (!outws->run().hasProperty("2theta") && !outws->run().hasProperty("_2theta")) {
     // Neither 2theta nor _2theta
     g_log.warning("No 2theta is set up for loading instrument.");
     return_true = false;
@@ -323,8 +298,7 @@ bool LoadSpiceXML2DDet::setupSampleLogs(
 
   // set up Sample-detetor distance calibration
   double sampledetdistance = m_detSampleDistanceShift;
-  TimeSeriesProperty<double> *distproperty =
-      new TimeSeriesProperty<double>("diffr");
+  TimeSeriesProperty<double> *distproperty = new TimeSeriesProperty<double>("diffr");
   distproperty->addValue(anytime, sampledetdistance);
   outws->mutableRun().addProperty(distproperty);
 
@@ -341,10 +315,8 @@ void LoadSpiceXML2DDet::exec() {
 
   // check the file end
   MatrixWorkspace_sptr outws;
-  if (m_detXMLFileName.substr(m_detXMLFileName.find_last_of('.') + 1) ==
-      "bin") {
-    std::vector<unsigned int> vec_counts =
-        binaryParseIntegers(m_detXMLFileName);
+  if (m_detXMLFileName.substr(m_detXMLFileName.find_last_of('.') + 1) == "bin") {
+    std::vector<unsigned int> vec_counts = binaryParseIntegers(m_detXMLFileName);
     outws = createMatrixWorkspace(vec_counts);
   } else {
     // Parse detector XML file
@@ -352,12 +324,10 @@ void LoadSpiceXML2DDet::exec() {
 
     // Create output workspace
     if (m_numPixelX * m_numPixelY > 0)
-      outws = xmlCreateMatrixWorkspaceKnownGeometry(
-          vec_xmlnode, m_numPixelX, m_numPixelY, m_detXMLNodeName,
-          m_loadInstrument);
+      outws = xmlCreateMatrixWorkspaceKnownGeometry(vec_xmlnode, m_numPixelX, m_numPixelY, m_detXMLNodeName,
+                                                    m_loadInstrument);
     else
-      outws = xmlCreateMatrixWorkspaceUnknowGeometry(
-          vec_xmlnode, m_detXMLNodeName, m_loadInstrument);
+      outws = xmlCreateMatrixWorkspaceUnknowGeometry(vec_xmlnode, m_detXMLNodeName, m_loadInstrument);
   }
 
   // Set up log for loading instrument
@@ -386,8 +356,7 @@ void LoadSpiceXML2DDet::exec() {
  * @param xmlfilename :: name of the XML file to parse
  * @return vector of SpiceXMLNode containing information in XML file
  */
-std::vector<SpiceXMLNode>
-LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
+std::vector<SpiceXMLNode> LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
   // Declare output
   std::vector<SpiceXMLNode> vecspicenode;
 
@@ -416,8 +385,7 @@ LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
     Poco::AutoPtr<Poco::XML::NodeList> children = pNode->childNodes();
     const size_t numchildren = children->length();
     if (numchildren > 1) {
-      g_log.debug() << "Parent node " << nodename << " has " << numchildren
-                    << " children."
+      g_log.debug() << "Parent node " << nodename << " has " << numchildren << " children."
                     << "\n";
       if (nodename == "SPICErack") {
         // SPICErack is the main parent node.  start_time and end_time are there
@@ -429,8 +397,7 @@ LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
           SpiceXMLNode xmlnode(attname);
           xmlnode.setValue(attvalue);
           vecspicenode.emplace_back(xmlnode);
-          g_log.debug() << "SPICErack attribute " << j << " Name = " << attname
-                        << ", Value = " << attvalue << "\n";
+          g_log.debug() << "SPICErack attribute " << j << " Name = " << attname << ", Value = " << attvalue << "\n";
         }
       }
 
@@ -483,8 +450,7 @@ LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
 
 //----------------------------------------------------------------------------------------------
 /// parse binary integer file
-std::vector<unsigned int>
-LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
+std::vector<unsigned int> LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
   // check binary file size
   ifstream infile(binary_file_name.c_str(), ios::binary);
   streampos begin, end;
@@ -493,15 +459,12 @@ LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
   end = infile.tellg();
   g_log.information() << "File size is: " << (end - begin) << " bytes.\n";
 
-  size_t num_unsigned_int =
-      static_cast<size_t>(end - begin) / sizeof(unsigned int);
+  size_t num_unsigned_int = static_cast<size_t>(end - begin) / sizeof(unsigned int);
   if (num_unsigned_int <= 2)
-    throw std::runtime_error(
-        "Input binary file size is too small (<= 2 unsigned int)");
+    throw std::runtime_error("Input binary file size is too small (<= 2 unsigned int)");
 
   size_t num_dets = num_unsigned_int - 2;
-  g_log.information() << "File contains " << num_unsigned_int
-                      << " unsigned integers and thus " << num_dets
+  g_log.information() << "File contains " << num_unsigned_int << " unsigned integers and thus " << num_dets
                       << " detectors.\n";
 
   // define output vector
@@ -520,15 +483,11 @@ LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
   infile.read((char *)&buffer, sizeof(buffer));
   auto num_cols = static_cast<size_t>(buffer);
   if (num_rows * num_cols != num_dets) {
-    g_log.error() << "Input binary file " << binary_file_name
-                  << " has inconsistent specification "
+    g_log.error() << "Input binary file " << binary_file_name << " has inconsistent specification "
                   << "on detector size. "
-                  << "First 2 unsigned integers are " << num_rows << ", "
-                  << num_cols
-                  << ", while the detector number specified in the file is "
-                  << num_dets << "\n";
-    throw std::runtime_error(
-        "Input binary file has inconsistent specification on detector size.");
+                  << "First 2 unsigned integers are " << num_rows << ", " << num_cols
+                  << ", while the detector number specified in the file is " << num_dets << "\n";
+    throw std::runtime_error("Input binary file has inconsistent specification on detector size.");
   }
 
   for (size_t i = 0; i < num_dets; ++i) {
@@ -538,19 +497,18 @@ LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
     total_counts += buffer;
   }
 
-  g_log.information() << "For detector " << num_rows << " x " << num_cols
-                      << ", total counts = " << total_counts << "\n";
+  g_log.information() << "For detector " << num_rows << " x " << num_cols << ", total counts = " << total_counts
+                      << "\n";
 
   return vec_counts;
 }
 
 //----------------------------------------------------------------------------------------------
-MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
-    const std::vector<unsigned int> &vec_counts) {
+MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(const std::vector<unsigned int> &vec_counts) {
   // Create matrix workspace
   size_t numspec = vec_counts.size();
-  MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
+  MatrixWorkspace_sptr outws =
+      std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
 
   g_log.information("Workspace created");
 
@@ -579,10 +537,10 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
  * @param loadinstrument :: flag to load instrument to output workspace or not.
  * @return
  */
-MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceKnownGeometry(
-    const std::vector<SpiceXMLNode> &vecxmlnode, const size_t &numpixelx,
-    const size_t &numpixely, const std::string &detnodename,
-    const bool &loadinstrument) {
+MatrixWorkspace_sptr
+LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceKnownGeometry(const std::vector<SpiceXMLNode> &vecxmlnode,
+                                                         const size_t &numpixelx, const size_t &numpixely,
+                                                         const std::string &detnodename, const bool &loadinstrument) {
 
   // TODO FIXME - If version 2 works, then this version will be discarded
 
@@ -591,12 +549,11 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceKnownGeometry(
 
   if (loadinstrument) {
     size_t numspec = numpixelx * numpixely;
-    outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
+    outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
   } else {
     outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", numpixely, numpixelx,
-                                            numpixelx));
+        WorkspaceFactory::Instance().create("Workspace2D", numpixely, numpixelx, numpixelx));
   }
 
   // Go through all XML nodes to process
@@ -630,8 +587,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceKnownGeometry(
         // Check whether it exceeds boundary
         if (i_col == numpixelx) {
           std::stringstream errss;
-          errss << "Number of non-empty rows (" << i_col + 1
-                << ") in detector data "
+          errss << "Number of non-empty rows (" << i_col + 1 << ") in detector data "
                 << "exceeds user defined geometry size " << numpixelx << ".";
           throw std::runtime_error(errss.str());
         }
@@ -644,8 +600,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceKnownGeometry(
         // in Y direction
         if (veccounts.size() != numpixely) {
           std::stringstream errss;
-          errss << "[Version 1] Row " << i_col << " contains "
-                << veccounts.size() << " items other than " << numpixely
+          errss << "[Version 1] Row " << i_col << " contains " << veccounts.size() << " items other than " << numpixely
                 << " counts specified by user.";
           throw std::runtime_error(errss.str());
         }
@@ -664,8 +619,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceKnownGeometry(
             columnIndex = i_col;
           }
 
-          outws->mutableX(rowIndex)[columnIndex] =
-              static_cast<double>(columnIndex);
+          outws->mutableX(rowIndex)[columnIndex] = static_cast<double>(columnIndex);
           outws->mutableY(rowIndex)[columnIndex] = counts;
 
           if (counts > 0)
@@ -692,27 +646,21 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceKnownGeometry(
       const std::string nodevalue = xmlnode.getValue();
       if (xmlnode.isDouble()) {
         double dvalue = std::stod(nodevalue);
-        outws->mutableRun().addProperty(
-            new PropertyWithValue<double>(nodename, dvalue));
-        g_log.debug() << "Log name / xml node : " << xmlnode.getName()
-                      << " (double) value = " << dvalue << "\n";
+        outws->mutableRun().addProperty(new PropertyWithValue<double>(nodename, dvalue));
+        g_log.debug() << "Log name / xml node : " << xmlnode.getName() << " (double) value = " << dvalue << "\n";
       } else if (xmlnode.isInteger()) {
         int ivalue = std::stoi(nodevalue);
-        outws->mutableRun().addProperty(
-            new PropertyWithValue<int>(nodename, ivalue));
-        g_log.debug() << "Log name / xml node : " << xmlnode.getName()
-                      << " (int) value = " << ivalue << "\n";
+        outws->mutableRun().addProperty(new PropertyWithValue<int>(nodename, ivalue));
+        g_log.debug() << "Log name / xml node : " << xmlnode.getName() << " (int) value = " << ivalue << "\n";
       } else {
         std::string str_value(nodevalue);
         if (nodename == "start_time") {
           // replace 2015-01-17 13:36:45 by  2015-01-17T13:36:45
           str_value = nodevalue;
           str_value.replace(10, 1, "T");
-          g_log.debug() << "Replace start_time " << nodevalue
-                        << " by Mantid time format " << str_value << "\n";
+          g_log.debug() << "Replace start_time " << nodevalue << " by Mantid time format " << str_value << "\n";
         }
-        outws->mutableRun().addProperty(
-            new PropertyWithValue<std::string>(nodename, str_value));
+        outws->mutableRun().addProperty(new PropertyWithValue<std::string>(nodename, str_value));
       }
     }
   }
@@ -720,8 +668,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceKnownGeometry(
   // Raise exception if no detector node is found
   if (!parsedDet) {
     std::stringstream errss;
-    errss << "Unable to find an XML node of name " << detnodename
-          << ". Unable to load 2D detector XML file.";
+    errss << "Unable to find an XML node of name " << detnodename << ". Unable to load 2D detector XML file.";
     throw std::runtime_error(errss.str());
   }
 
@@ -733,9 +680,9 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceKnownGeometry(
 /** create the output matrix workspace without knowledge of detector geometry
  *
  */
-MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceUnknowGeometry(
-    const std::vector<SpiceXMLNode> &vecxmlnode, const std::string &detnodename,
-    const bool &loadinstrument) {
+MatrixWorkspace_sptr
+LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceUnknowGeometry(const std::vector<SpiceXMLNode> &vecxmlnode,
+                                                          const std::string &detnodename, const bool &loadinstrument) {
 
   // Create matrix workspace
   MatrixWorkspace_sptr outws;
@@ -757,8 +704,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceUnknowGeometry(
       // Get node value string (256x256 as a whole)
       const std::string detvaluestr = xmlnode.getValue();
 
-      outws =
-          this->xmlParseDetectorNode(detvaluestr, loadinstrument, max_counts);
+      outws = this->xmlParseDetectorNode(detvaluestr, loadinstrument, max_counts);
 
       // Set flag
       parsedDet = true;
@@ -778,8 +724,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceUnknowGeometry(
           // replace 2015-01-17 13:36:45 by  2015-01-17T13:36:45
           std::string str_value(nodevalue);
           str_value.replace(10, 1, "T");
-          g_log.debug() << "Replace start_time " << nodevalue
-                        << " by Mantid time format " << str_value << "\n";
+          g_log.debug() << "Replace start_time " << nodevalue << " by Mantid time format " << str_value << "\n";
           str_log_map.emplace(nodename, str_value);
         } else
           str_log_map.emplace(nodename, nodevalue);
@@ -789,23 +734,19 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceUnknowGeometry(
 
   // Add the property to output workspace
   for (auto &log_entry : str_log_map) {
-    outws->mutableRun().addProperty(
-        new PropertyWithValue<std::string>(log_entry.first, log_entry.second));
+    outws->mutableRun().addProperty(new PropertyWithValue<std::string>(log_entry.first, log_entry.second));
   }
   for (auto &log_entry : int_log_map) {
-    outws->mutableRun().addProperty(
-        new PropertyWithValue<int>(log_entry.first, log_entry.second));
+    outws->mutableRun().addProperty(new PropertyWithValue<int>(log_entry.first, log_entry.second));
   }
   for (auto &log_entry : dbl_log_map) {
-    outws->mutableRun().addProperty(
-        new PropertyWithValue<double>(log_entry.first, log_entry.second));
+    outws->mutableRun().addProperty(new PropertyWithValue<double>(log_entry.first, log_entry.second));
   }
 
   // Raise exception if no detector node is found
   if (!parsedDet) {
     std::stringstream errss;
-    errss << "Unable to find an XML node of name " << detnodename
-          << ". Unable to load 2D detector XML file.";
+    errss << "Unable to find an XML node of name " << detnodename << ". Unable to load 2D detector XML file.";
     throw std::runtime_error(errss.str());
   }
 
@@ -814,8 +755,8 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceUnknowGeometry(
   return outws;
 }
 
-API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
-    const std::string &detvaluestr, bool loadinstrument, double &max_counts) {
+API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(const std::string &detvaluestr, bool loadinstrument,
+                                                                  double &max_counts) {
   // Split to lines
   std::vector<std::string> vecLines;
   boost::split(vecLines, detvaluestr, boost::algorithm::is_any_of("\n"));
@@ -833,16 +774,15 @@ API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
       ++num_weird_line;
   }
   size_t num_pixel_x = vecLines.size() - num_empty_line - num_weird_line;
-  g_log.information() << "There are " << num_empty_line << " lines and "
-                      << num_weird_line << " lines are not regular.\n";
+  g_log.information() << "There are " << num_empty_line << " lines and " << num_weird_line
+                      << " lines are not regular.\n";
 
   // read the first line to determine the number of pixels at X direction
   size_t first_regular_line = 0;
   if (vecLines[first_regular_line].size() < 100)
     ++first_regular_line;
   std::vector<std::string> veccounts;
-  boost::split(veccounts, vecLines[first_regular_line],
-               boost::algorithm::is_any_of(" \t"));
+  boost::split(veccounts, vecLines[first_regular_line], boost::algorithm::is_any_of(" \t"));
   size_t num_pixel_y = veccounts.size();
 
   // create output workspace
@@ -850,12 +790,11 @@ API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
 
   if (loadinstrument) {
     size_t numspec = num_pixel_x * num_pixel_y;
-    outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
+    outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
   } else {
     outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", num_pixel_y,
-                                            num_pixel_x, num_pixel_x));
+        WorkspaceFactory::Instance().create("Workspace2D", num_pixel_y, num_pixel_x, num_pixel_x));
   }
 
   // XML file records data in the order of column-major
@@ -878,8 +817,7 @@ API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
     // Check whether it exceeds boundary
     if (i_col == num_pixel_x) {
       std::stringstream errss;
-      errss << "Number of non-empty rows (" << i_col + 1
-            << ") in detector data "
+      errss << "Number of non-empty rows (" << i_col + 1 << ") in detector data "
             << "exceeds user defined geometry size " << num_pixel_x << ".";
       throw std::runtime_error(errss.str());
     }
@@ -890,8 +828,7 @@ API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
     // in Y direction
     if (veccounts.size() != num_pixel_y) {
       std::stringstream errss;
-      errss << "Row " << i_col << " contains " << veccounts.size()
-            << " items other than " << num_pixel_y
+      errss << "Row " << i_col << " contains " << veccounts.size() << " items other than " << num_pixel_y
             << " counts specified by user.";
       throw std::runtime_error(errss.str());
     }
@@ -938,9 +875,8 @@ API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
  * @param spicetablews
  * @param ptnumber
  */
-void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
-    const MatrixWorkspace_sptr &matrixws,
-    const ITableWorkspace_sptr &spicetablews, int ptnumber) {
+void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(const MatrixWorkspace_sptr &matrixws,
+                                                     const ITableWorkspace_sptr &spicetablews, int ptnumber) {
   size_t numrows = spicetablews->rowCount();
   std::vector<std::string> colnames = spicetablews->getColumnNames();
   // FIXME - Shouldn't give a better value?
@@ -968,8 +904,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
   }
 
   if (!foundlog)
-    g_log.warning() << "Pt. " << ptnumber
-                    << " is not found.  Log is not loaded to output workspace."
+    g_log.warning() << "Pt. " << ptnumber << " is not found.  Log is not loaded to output workspace."
                     << "\n";
 }
 
@@ -979,8 +914,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
  * @param wavelength
  * @return
  */
-bool LoadSpiceXML2DDet::getHB3AWavelength(const MatrixWorkspace_sptr &dataws,
-                                          double &wavelength) {
+bool LoadSpiceXML2DDet::getHB3AWavelength(const MatrixWorkspace_sptr &dataws, double &wavelength) {
   bool haswavelength(false);
   wavelength = -1.;
 
@@ -990,8 +924,7 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(const MatrixWorkspace_sptr &dataws,
   if (dataws->run().hasProperty("_m1")) {
     g_log.notice("[DB] Data workspace has property _m1!");
     Kernel::TimeSeriesProperty<double> *ts =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-            dataws->run().getProperty("_m1"));
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(dataws->run().getProperty("_m1"));
 
     if (ts && ts->size() > 0) {
       double m1pos = ts->valuesAsVector()[0];
@@ -1002,8 +935,7 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(const MatrixWorkspace_sptr &dataws,
         wavelength = 1.5424;
         haswavelength = true;
       } else {
-        g_log.warning() << "m1 position " << m1pos
-                        << " does not have defined mapping to "
+        g_log.warning() << "m1 position " << m1pos << " does not have defined mapping to "
                         << "wavelength."
                         << "\n";
       }
@@ -1018,8 +950,7 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(const MatrixWorkspace_sptr &dataws,
         wavelength = 1.5424;
         haswavelength = true;
       } else {
-        g_log.warning() << "m1 position " << m1pos
-                        << " does not have defined mapping to "
+        g_log.warning() << "m1 position " << m1pos << " does not have defined mapping to "
                         << "wavelength."
                         << "\n";
       }
@@ -1044,8 +975,7 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(const MatrixWorkspace_sptr &dataws,
  * @param dataws
  * @param wavelength
  */
-void LoadSpiceXML2DDet::setXtoLabQ(const API::MatrixWorkspace_sptr &dataws,
-                                   const double &wavelength) {
+void LoadSpiceXML2DDet::setXtoLabQ(const API::MatrixWorkspace_sptr &dataws, const double &wavelength) {
 
   size_t numspec = dataws->getNumberHistograms();
   for (size_t iws = 0; iws < numspec; ++iws) {
@@ -1063,8 +993,7 @@ void LoadSpiceXML2DDet::setXtoLabQ(const API::MatrixWorkspace_sptr &dataws,
  * @param matrixws
  * @param idffilename
  */
-void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws,
-                                       const std::string &idffilename) {
+void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws, const std::string &idffilename) {
   // load instrument
   API::IAlgorithm_sptr loadinst = createChildAlgorithm("LoadInstrument");
   loadinst->initialize();
@@ -1073,8 +1002,7 @@ void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws,
     loadinst->setProperty("Filename", idffilename);
   } else
     loadinst->setProperty("InstrumentName", "HB3A");
-  loadinst->setProperty("RewriteSpectraMap",
-                        Mantid::Kernel::OptionalBool(true));
+  loadinst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
   loadinst->execute();
   if (!loadinst->isExecuted())
     g_log.error("Unable to load instrument to output workspace");

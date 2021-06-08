@@ -45,9 +45,7 @@ public:
     const int ndets = 5;
     // Test workspace with 5 detectors, 3 detectors + 2 monitors at the end. 1:1
     // mapping of spectrum:ID
-    Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(ndets, 1,
-                                                                     true);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(ndets, 1, true);
     const std::string scalingFile = createTestScalingFile(testWS);
     // Needs to be in the ADS for this algorithm
     const std::string wsName("PSDTest");
@@ -112,8 +110,7 @@ public:
 
     // Test a few detectors
     int testIndices[3] = {6, 7, 8};
-    V3D expectedValues[3] = {V3D(-0.08982175, -1.03708771, 3.88495351),
-                             V3D(-0.09233499, -1.06610575, 3.87703178),
+    V3D expectedValues[3] = {V3D(-0.08982175, -1.03708771, 3.88495351), V3D(-0.09233499, -1.06610575, 3.87703178),
                              V3D(-0.09484302, -1.09506369, 3.86889169)};
     const auto &spectrumInfo = testWS->spectrumInfo();
     for (int i = 0; i < 3; ++i) {
@@ -147,8 +144,7 @@ private:
       double l2, theta, phi;
       oldPos.getSpherical(l2, theta, phi);
       const auto &detector = spectrumInfo.detector(i);
-      writer << detector.getID() << "\t" << -1 << "\t" << l2 << "\t" << -1
-             << "\t" << theta << "\t" << phi << "\n";
+      writer << detector.getID() << "\t" << -1 << "\t" << l2 << "\t" << -1 << "\t" << theta << "\t" << phi << "\n";
     }
 
     writer.close();
@@ -164,8 +160,7 @@ private:
     const std::string outputName("test-emptyMARI");
     loader.setPropertyValue("OutputWorkspace", outputName);
     loader.execute();
-    Workspace_sptr result =
-        AnalysisDataService::Instance().retrieve(outputName);
+    Workspace_sptr result = AnalysisDataService::Instance().retrieve(outputName);
     return std::dynamic_pointer_cast<Workspace2D>(result);
   }
 

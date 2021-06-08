@@ -16,9 +16,6 @@
     <height>768</height>
    </size>
   </property>
-  <property name="windowTitle">
-   <string>DrILL - Data Reduction for ILL[*]</string>
-  </property>
   <property name="styleSheet">
    <string notr="true"/>
   </property>
@@ -121,6 +118,16 @@
        <widget class="QToolButton" name="settings">
         <property name="toolTip">
          <string>Settings window</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="export">
+        <property name="toolTip">
+         <string>Export settings window</string>
         </property>
         <property name="text">
          <string>...</string>
@@ -618,10 +625,13 @@
    <property name="text">
     <string>&amp;New</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
   <action name="actionProcessGroup">
    <property name="text">
-    <string>Process selected group(s)</string>
+    <string>Process selected &amp;group(s)</string>
    </property>
   </action>
  </widget>

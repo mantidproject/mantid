@@ -33,19 +33,14 @@ using namespace DataObjects;
 
 void SANSBeamFinder::init() {
   const std::vector<std::string> fileExts{"_event.nxs", ".xml"};
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Load, fileExts),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, fileExts),
                   "Data filed used to find beam center");
 
-  declareProperty("BeamCenterX", EMPTY_DBL(),
-                  "Beam position in X pixel coordinates");
-  declareProperty("BeamCenterY", EMPTY_DBL(),
-                  "Beam position in Y pixel coordinates");
+  declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel coordinates");
+  declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates");
 
-  declareProperty("UseDirectBeamMethod", true,
-                  "If true, the direct beam method will be used");
-  declareProperty("BeamRadius", 3.0,
-                  "Beam radius in pixels, used with the scattered beam method");
+  declareProperty("UseDirectBeamMethod", true, "If true, the direct beam method will be used");
+  declareProperty("BeamRadius", 3.0, "Beam radius in pixels, used with the scattered beam method");
 
   declareProperty("FoundBeamCenterX", EMPTY_DBL(), Direction::Output);
   declareProperty("FoundBeamCenterY", EMPTY_DBL(), Direction::Output);
@@ -53,13 +48,11 @@ void SANSBeamFinder::init() {
   declareProperty("PersistentCorrection", true,
                   "If true, the algorithm will be persistent and re-used when "
                   "other data sets are processed");
-  declareProperty("ReductionProperties", "__sans_reduction_properties",
-                  Direction::Input);
+  declareProperty("ReductionProperties", "__sans_reduction_properties", Direction::Input);
   declareProperty("OutputMessage", "", Direction::Output);
 }
 
-MatrixWorkspace_sptr
-SANSBeamFinder::loadBeamFinderFile(const std::string &beamCenterFile) {
+MatrixWorkspace_sptr SANSBeamFinder::loadBeamFinderFile(const std::string &beamCenterFile) {
   Poco::Path path(beamCenterFile);
   const std::string entryName = "SANSBeamFinder" + path.getBaseName();
   const std::string reductionManagerName = getProperty("ReductionProperties");
@@ -68,8 +61,7 @@ SANSBeamFinder::loadBeamFinderFile(const std::string &beamCenterFile) {
 
   if (m_reductionManager->existsProperty(entryName)) {
     finderWS = m_reductionManager->getProperty(entryName);
-    m_output_message +=
-        "   |Using existing workspace: " + finderWS->getName() + '\n';
+    m_output_message += "   |Using existing workspace: " + finderWS->getName() + '\n';
   } else {
     // Load the dark current if we don't have it already
     std::string finderWSName = "__beam_finder_" + path.getBaseName();
@@ -89,8 +81,7 @@ SANSBeamFinder::loadBeamFinderFile(const std::string &beamCenterFile) {
     } else {
       // Get load algorithm as a string so that we can create a completely
       // new proxy and ensure that we don't overwrite existing properties
-      IAlgorithm_sptr loadAlg0 =
-          m_reductionManager->getProperty("LoadAlgorithm");
+      IAlgorithm_sptr loadAlg0 = m_reductionManager->getProperty("LoadAlgorithm");
       const std::string loadString = loadAlg0->toString();
       IAlgorithm_sptr loadAlg = Algorithm::fromString(loadString);
 
@@ -105,8 +96,7 @@ SANSBeamFinder::loadBeamFinderFile(const std::string &beamCenterFile) {
         loadAlg->setProperty("ReductionProperties", reductionManagerName);
       loadAlg->setPropertyValue("OutputWorkspace", finderWSName);
       loadAlg->execute();
-      std::shared_ptr<Workspace> wks =
-          AnalysisDataService::Instance().retrieve(finderWSName);
+      std::shared_ptr<Workspace> wks = AnalysisDataService::Instance().retrieve(finderWSName);
       finderWS = std::dynamic_pointer_cast<MatrixWorkspace>(wks);
 
       m_output_message += "   |Loaded " + beamCenterFile + "\n";
@@ -115,8 +105,7 @@ SANSBeamFinder::loadBeamFinderFile(const std::string &beamCenterFile) {
         m_output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
       }
     }
-    m_reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(
-        entryName, "", Direction::Output));
+    m_reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(entryName, "", Direction::Output));
     m_reductionManager->setPropertyValue(entryName, finderWSName);
     m_reductionManager->setProperty(entryName, finderWS);
   }
@@ -127,19 +116,15 @@ void SANSBeamFinder::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
-    m_reductionManager =
-        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+    m_reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
     m_reductionManager = std::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
-                                                        m_reductionManager);
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, m_reductionManager);
   }
 
   const bool persistent = getProperty("PersistentCorrection");
-  if (!m_reductionManager->existsProperty("SANSBeamFinderAlgorithm") &&
-      persistent) {
-    auto algProp =
-        std::make_unique<AlgorithmProperty>("SANSBeamFinderAlgorithm");
+  if (!m_reductionManager->existsProperty("SANSBeamFinderAlgorithm") && persistent) {
+    auto algProp = std::make_unique<AlgorithmProperty>("SANSBeamFinderAlgorithm");
     algProp->setValue(toString());
     m_reductionManager->declareProperty(std::move(algProp));
   }
@@ -149,8 +134,7 @@ void SANSBeamFinder::exec() {
   // Pixel coordinate to real-space coordinate mapping scheme
   bool specialMapping = false;
   if (m_reductionManager->existsProperty("InstrumentName")) {
-    const std::string instrumentName =
-        m_reductionManager->getPropertyValue("InstrumentName");
+    const std::string instrumentName = m_reductionManager->getPropertyValue("InstrumentName");
     specialMapping = instrumentName == "HFIRSANS";
   }
 
@@ -168,8 +152,7 @@ void SANSBeamFinder::exec() {
   // property manager for other algorithms to find it
   if (!isEmpty(center_x) && !isEmpty(center_y)) {
     m_output_message += "   |Using supplied beam center: ";
-  } else if (m_reductionManager->existsProperty(entryNameX) &&
-             m_reductionManager->existsProperty(entryNameY)) {
+  } else if (m_reductionManager->existsProperty(entryNameX) && m_reductionManager->existsProperty(entryNameY)) {
     center_x = m_reductionManager->getProperty(entryNameX);
     center_y = m_reductionManager->getProperty(entryNameY);
   } else {
@@ -189,8 +172,7 @@ void SANSBeamFinder::exec() {
 
     double beamRadius = getProperty("BeamRadius");
     if (!directBeam && !isEmpty(beamRadius)) {
-      std::vector<double> pars =
-          beamCenterWS->getInstrument()->getNumberParameter("x-pixel-size");
+      std::vector<double> pars = beamCenterWS->getInstrument()->getNumberParameter("x-pixel-size");
       if (pars.empty()) {
         g_log.error() << "Could not read pixel size from instrument "
                          "parameters: using default\n";
@@ -202,11 +184,9 @@ void SANSBeamFinder::exec() {
     std::vector<double> centerOfMass = ctrAlg->getProperty("CenterOfMass");
 
     if (specialMapping) {
-      HFIRInstrument::getPixelFromCoordinate(centerOfMass[0], centerOfMass[1],
-                                             beamCenterWS, center_x, center_y);
+      HFIRInstrument::getPixelFromCoordinate(centerOfMass[0], centerOfMass[1], beamCenterWS, center_x, center_y);
     } else {
-      EQSANSInstrument::getPixelFromCoordinate(
-          centerOfMass[0], centerOfMass[1], beamCenterWS, center_x, center_y);
+      EQSANSInstrument::getPixelFromCoordinate(centerOfMass[0], centerOfMass[1], beamCenterWS, center_x, center_y);
     }
 
     m_output_message += "   |Found beam center: ";
@@ -215,20 +195,16 @@ void SANSBeamFinder::exec() {
   // Store for later use
   if (persistent) {
     if (!m_reductionManager->existsProperty("LatestBeamCenterX"))
-      m_reductionManager->declareProperty(
-          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterX",
-                                                      center_x));
+      m_reductionManager->declareProperty(std::make_unique<PropertyWithValue<double>>("LatestBeamCenterX", center_x));
     if (!m_reductionManager->existsProperty("LatestBeamCenterY"))
-      m_reductionManager->declareProperty(
-          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterY",
-                                                      center_y));
+      m_reductionManager->declareProperty(std::make_unique<PropertyWithValue<double>>("LatestBeamCenterY", center_y));
 
     m_reductionManager->setProperty("LatestBeamCenterX", center_x);
     m_reductionManager->setProperty("LatestBeamCenterY", center_y);
   }
 
-  m_output_message += "[" + Poco::NumberFormatter::format(center_x, 3) + ", " +
-                      Poco::NumberFormatter::format(center_y, 3) + "]\n";
+  m_output_message +=
+      "[" + Poco::NumberFormatter::format(center_x, 3) + ", " + Poco::NumberFormatter::format(center_y, 3) + "]\n";
 
   // Workflow algorithms can use the LatestBeamCenterX/Y entries, but to be
   // compatible with the old ReductionSteps we also set output properties
@@ -246,8 +222,7 @@ void SANSBeamFinder::exec() {
  * 2016/05/06 : this only works for RectangularDetector
  *
  */
-void SANSBeamFinder::maskEdges(const MatrixWorkspace_sptr &beamCenterWS,
-                               int high, int low, int left, int right,
+void SANSBeamFinder::maskEdges(const MatrixWorkspace_sptr &beamCenterWS, int high, int low, int left, int right,
                                const std::string &componentName) {
 
   auto instrument = beamCenterWS->getInstrument();
@@ -258,14 +233,12 @@ void SANSBeamFinder::maskEdges(const MatrixWorkspace_sptr &beamCenterWS,
         std::dynamic_pointer_cast<const Mantid::Geometry::RectangularDetector>(
             instrument->getComponentByName(componentName)));
   } catch (std::exception &) {
-    g_log.warning("Expecting the component " + componentName +
-                  " to be a RectangularDetector. maskEdges not executed.");
+    g_log.warning("Expecting the component " + componentName + " to be a RectangularDetector. maskEdges not executed.");
     return;
   }
 
   if (!component) {
-    g_log.warning("Expecting the component " + componentName +
-                  " to be a RectangularDetector. maskEdges not executed.");
+    g_log.warning("Expecting the component " + componentName + " to be a RectangularDetector. maskEdges not executed.");
     return;
   }
 
@@ -276,16 +249,14 @@ void SANSBeamFinder::maskEdges(const MatrixWorkspace_sptr &beamCenterWS,
     IDs.emplace_back(component->idstart() + i);
   }
   // left
-  for (int i = component->maxDetectorID();
-       i > (component->maxDetectorID() - left * component->idstep()); i--) {
+  for (int i = component->maxDetectorID(); i > (component->maxDetectorID() - left * component->idstep()); i--) {
     IDs.emplace_back(i);
   }
   // low
   // 0,256,512,768,..,1,257,513
   for (int row = 0; row < low; row++) { // 0,1
     for (int i = row + component->idstart();
-         i < component->nelements() * component->idstep() -
-                 component->idstep() + low + component->idstart();
+         i < component->nelements() * component->idstep() - component->idstep() + low + component->idstart();
          i += component->idstep()) {
       IDs.emplace_back(i);
     }
@@ -294,15 +265,12 @@ void SANSBeamFinder::maskEdges(const MatrixWorkspace_sptr &beamCenterWS,
   // 255, 511, 767..
   for (int row = 0; row < high; row++) {
     for (int i = component->idstep() + component->idstart() - row - 1;
-         i <
-         component->nelements() * component->idstep() + component->idstart();
-         i += component->idstep()) {
+         i < component->nelements() * component->idstep() + component->idstart(); i += component->idstep()) {
       IDs.emplace_back(i);
     }
   }
 
-  g_log.debug() << "SANSBeamFinder::maskEdges Detector Ids to Mask:"
-                << std::endl;
+  g_log.debug() << "SANSBeamFinder::maskEdges Detector Ids to Mask:" << std::endl;
   for (auto id : IDs) {
     g_log.debug() << id << " ";
   }

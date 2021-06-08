@@ -21,26 +21,20 @@ namespace Algorithms {
 DECLARE_ALGORITHM(WeightedMeanOfWorkspace)
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string WeightedMeanOfWorkspace::name() const {
-  return "WeightedMeanOfWorkspace";
-}
+const std::string WeightedMeanOfWorkspace::name() const { return "WeightedMeanOfWorkspace"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int WeightedMeanOfWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string WeightedMeanOfWorkspace::category() const {
-  return "Arithmetic";
-}
+const std::string WeightedMeanOfWorkspace::category() const { return "Arithmetic"; }
 
 /** Initialize the algorithm's properties.
  */
 void WeightedMeanOfWorkspace::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "InputWorkspace", "", Direction::Input),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                         "An input workspace.");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "OutputWorkspace", "", Direction::Output),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                         "An output workspace.");
 }
 
@@ -49,15 +43,12 @@ void WeightedMeanOfWorkspace::init() {
 void WeightedMeanOfWorkspace::exec() {
   MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   // Check if it is an event workspace
-  EventWorkspace_const_sptr eventW =
-      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  EventWorkspace_const_sptr eventW = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventW != nullptr) {
-    throw std::runtime_error(
-        "WeightedMeanOfWorkspace cannot handle EventWorkspaces!");
+    throw std::runtime_error("WeightedMeanOfWorkspace cannot handle EventWorkspaces!");
   }
   // Create the output workspace
-  MatrixWorkspace_sptr singleValued =
-      WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
+  MatrixWorkspace_sptr singleValued = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
   // Calculate weighted mean
   std::size_t numHists = inputWS->getNumberHistograms();
   double averageValue = 0.0;

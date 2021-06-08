@@ -32,6 +32,9 @@ class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
         return 4000
 
     def runTest(self):
+        # raise tolerance to 1e-4
+        self.tolerance = 1e-4
+
         import platform
         if platform.system() == "Darwin":
             import resource
@@ -167,7 +170,7 @@ class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
 
         # load output hkl file and the golden one
         LoadHKL(Filename="TOPAZ_3132.hkl", OutputWorkspace="TOPAZ_3132")
-        LoadHKL(Filename='TOPAZ_3132_reference.hkl', OutputWorkspace="TOPAZ_3132_golden")
+        LoadHKL(Filename='TOPAZ_3132_reference_04012021.hkl', OutputWorkspace="TOPAZ_3132_golden")
 
     def validateMethod(self):
         return "ValidateWorkspaceToWorkspace"

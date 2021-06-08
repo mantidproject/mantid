@@ -63,7 +63,7 @@ Y axis units and labels
 
 The optional parameters YAxisUnit and YAxisLabel can be used to change the
 y axis unit and label when conjoining workspaces. Changing YAxisUnit updates
-YAxisLabel automatically with the value of YAxisUnit, unless a separate value 
+YAxisLabel automatically with the value of YAxisUnit, unless a separate value
 is supplied.
 
 Exception

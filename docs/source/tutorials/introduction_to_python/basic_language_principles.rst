@@ -1,7 +1,7 @@
 .. _basic_language_principles:
 
 =========================
-Basic Language Principles 
+Basic Language Principles
 =========================
 
 -  Python is an interpreted language meaning there is no explicit
@@ -16,7 +16,7 @@ Basic Language Principles
    support for various operations upon them. The table below summarises
    how to use them in Python:
 
-| 
+|
 
 +---------+------------+------------------------------+
 | Type    | Example    | Python code                  |
@@ -48,7 +48,7 @@ Basic Language Principles
 
    # Later on it can be used for something else
    # x is a string and adding a number produces an error
-   x = "a string"  
+   x = "a string"
    x + 5
 
    #will give you an error

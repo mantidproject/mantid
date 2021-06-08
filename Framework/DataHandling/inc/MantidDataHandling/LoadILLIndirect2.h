@@ -17,23 +17,18 @@ namespace DataHandling {
 /**
   Loads an ILL IN16B nexus file into a Mantid workspace.
 */
-class DLLExport LoadILLIndirect2
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+class DLLExport LoadILLIndirect2 : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 2; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
 
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Loads a ILL/IN16B nexus file.";
-  }
+  const std::string summary() const override { return "Loads a ILL/IN16B nexus file."; }
   const std::string category() const override;
 
 private:
@@ -42,8 +37,7 @@ private:
 
   void loadDataDetails(NeXus::NXEntry &entry);
   void initWorkSpace();
-  void setInstrumentName(const NeXus::NXEntry &firstEntry,
-                         const std::string &instrumentNamePath);
+  void setInstrumentName(const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath);
   std::string getDataPath(NeXus::NXEntry &entry);
   void loadNexusEntriesIntoProperties(const std::string &nexusfilename);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry);
@@ -67,8 +61,7 @@ private:
   std::set<int> m_activeSDIndices;     // set of Single Detector indices,
                                        // that were actually active
   bool m_bats{false};                  // A flag marking the BATS mode
-  size_t m_firstTubeAngleRounded{
-      251}; // A flag holding the rounded angle of the first tube
+  size_t m_firstTubeAngleRounded{251}; // A flag holding the rounded angle of the first tube
 
   std::vector<std::string> m_supportedInstruments{"IN16B"};
   LoadHelper m_loader;

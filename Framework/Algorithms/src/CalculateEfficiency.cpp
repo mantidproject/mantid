@@ -34,30 +34,21 @@ using namespace DataObjects;
  *
  */
 void CalculateEfficiency::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "The workspace containing the flood data");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "The name of the workspace to be created as the output of the algorithm");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace to be created as the output of the algorithm");
 
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
-  declareProperty(
-      "MinEfficiency", EMPTY_DBL(), positiveDouble,
-      "Minimum efficiency for a pixel to be considered (default: no minimum).");
-  declareProperty(
-      "MaxEfficiency", EMPTY_DBL(), positiveDouble,
-      "Maximum efficiency for a pixel to be considered (default: no maximum).");
-  declareProperty("MaskedFullComponent", "",
-                  "Component Name to fully mask according to the IDF file.");
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("MaskedEdges"),
-      "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
-  declareProperty(
-      "MaskedComponent", "",
-      "Component Name to mask the edges according to the IDF file.");
+  declareProperty("MinEfficiency", EMPTY_DBL(), positiveDouble,
+                  "Minimum efficiency for a pixel to be considered (default: no minimum).");
+  declareProperty("MaxEfficiency", EMPTY_DBL(), positiveDouble,
+                  "Maximum efficiency for a pixel to be considered (default: no maximum).");
+  declareProperty("MaskedFullComponent", "", "Component Name to fully mask according to the IDF file.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("MaskedEdges"),
+                  "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
+  declareProperty("MaskedComponent", "", "Component Name to mask the edges according to the IDF file.");
 }
 
 /** Executes the algorithm
@@ -76,25 +67,20 @@ void CalculateEfficiency::exec() {
 
   //  BioSANS has 2 detectors and reduces one at the time: one is masked!
   //  We must use that masked detector
-  const std::string maskedFullComponent =
-      getPropertyValue("MaskedFullComponent");
+  const std::string maskedFullComponent = getPropertyValue("MaskedFullComponent");
   if (!maskedFullComponent.empty()) {
-    g_log.debug() << "CalculateEfficiency: Masking Full Component: "
-                  << maskedFullComponent << "\n";
+    g_log.debug() << "CalculateEfficiency: Masking Full Component: " << maskedFullComponent << "\n";
     maskComponent(*inputWS, maskedFullComponent);
   }
 
   // BioSANS has 2 detectors and the front masks the back!!!!
   // We must mask the shaded part to calculate efficency
   std::vector<int> maskedEdges = getProperty("MaskedEdges");
-  if (!maskedEdges.empty() && (maskedEdges[0] > 0 || maskedEdges[1] > 0 ||
-                               maskedEdges[2] > 0 || maskedEdges[3] > 0)) {
-    g_log.debug() << "CalculateEfficiency: Masking edges length = "
-                  << maskedEdges.size() << ")"
+  if (!maskedEdges.empty() && (maskedEdges[0] > 0 || maskedEdges[1] > 0 || maskedEdges[2] > 0 || maskedEdges[3] > 0)) {
+    g_log.debug() << "CalculateEfficiency: Masking edges length = " << maskedEdges.size() << ")"
                   << " of the component " << maskedFullComponent << "\n";
     const std::string maskedComponent = getPropertyValue("MaskedComponent");
-    maskEdges(inputWS, maskedEdges[0], maskedEdges[1], maskedEdges[2],
-              maskedEdges[3], maskedComponent);
+    maskEdges(inputWS, maskedEdges[0], maskedEdges[1], maskedEdges[2], maskedEdges[3], maskedComponent);
   }
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS; // = getProperty("OutputWorkspace");
@@ -110,8 +96,7 @@ void CalculateEfficiency::exec() {
 
   outputWS = WorkspaceFactory::Instance().create(rebinnedWS);
   WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS, false);
-  for (int i = 0; i < static_cast<int>(rebinnedWS->getNumberHistograms());
-       i++) {
+  for (int i = 0; i < static_cast<int>(rebinnedWS->getNumberHistograms()); i++) {
     outputWS->setSharedX(i, rebinnedWS->sharedX(i));
   }
   setProperty("OutputWorkspace", outputWS);
@@ -142,8 +127,7 @@ void CalculateEfficiency::exec() {
     // recompute the relative efficiency.
     // We pass EMPTY_DBL() to avoid masking pixels that might end up high or low
     // after the new normalization.
-    normalizeDetectors(rebinnedWS, outputWS, sum, err, npixels, EMPTY_DBL(),
-                       EMPTY_DBL());
+    normalizeDetectors(rebinnedWS, outputWS, sum, err, npixels, EMPTY_DBL(), EMPTY_DBL());
   }
 }
 
@@ -156,12 +140,10 @@ void CalculateEfficiency::exec() {
  * @param error: error on sum (counts)
  * @param nPixels: number of unmasked detector pixels that contributed to sum
  */
-void CalculateEfficiency::sumUnmaskedDetectors(
-    const MatrixWorkspace_sptr &rebinnedWS, double &sum, double &error,
-    int &nPixels) {
+void CalculateEfficiency::sumUnmaskedDetectors(const MatrixWorkspace_sptr &rebinnedWS, double &sum, double &error,
+                                               int &nPixels) {
   // Number of spectra
-  const auto numberOfSpectra =
-      static_cast<int>(rebinnedWS->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int>(rebinnedWS->getNumberHistograms());
   sum = 0.0;
   error = 0.0;
   nPixels = 0;
@@ -182,8 +164,8 @@ void CalculateEfficiency::sumUnmaskedDetectors(
     nPixels++;
   }
 
-  g_log.debug() << "sumUnmaskedDetectors: unmasked pixels = " << nPixels
-                << " from a total of " << numberOfSpectra << "\n";
+  g_log.debug() << "sumUnmaskedDetectors: unmasked pixels = " << nPixels << " from a total of " << numberOfSpectra
+                << "\n";
 
   error = std::sqrt(error);
 }
@@ -200,10 +182,9 @@ void CalculateEfficiency::sumUnmaskedDetectors(
  * @param nPixels: number of unmasked detector pixels that contributed to sum
  */
 
-void CalculateEfficiency::normalizeDetectors(
-    const MatrixWorkspace_sptr &rebinnedWS,
-    const MatrixWorkspace_sptr &outputWS, double sum, double error, int nPixels,
-    double min_eff, double max_eff) {
+void CalculateEfficiency::normalizeDetectors(const MatrixWorkspace_sptr &rebinnedWS,
+                                             const MatrixWorkspace_sptr &outputWS, double sum, double error,
+                                             int nPixels, double min_eff, double max_eff) {
   // Number of spectra
   const size_t numberOfSpectra = rebinnedWS->getNumberHistograms();
 
@@ -213,9 +194,7 @@ void CalculateEfficiency::normalizeDetectors(
 
   const auto &spectrumInfo = rebinnedWS->spectrumInfo();
   for (size_t i = 0; i < numberOfSpectra; i++) {
-    const double currProgress =
-        0.4 +
-        0.2 * (static_cast<double>(i) / static_cast<double>(numberOfSpectra));
+    const double currProgress = 0.4 + 0.2 * (static_cast<double>(i) / static_cast<double>(numberOfSpectra));
     progress(currProgress, "Computing sensitivity");
     // If this spectrum is masked, skip to the next one
     if (spectrumInfo.isMasked(i))
@@ -236,8 +215,7 @@ void CalculateEfficiency::normalizeDetectors(
     // Normalize counts to get relative efficiency
     YOut[0] = nPixels / sum * YIn[0];
     const double err_sum = YIn[0] / sum * error;
-    EOut[0] = nPixels / std::abs(sum) *
-              std::sqrt(EIn[0] * EIn[0] + err_sum * err_sum);
+    EOut[0] = nPixels / std::abs(sum) * std::sqrt(EIn[0] * EIn[0] + err_sum * err_sum);
 
     // Mask this detector if the signal is outside the acceptable band
     if (!isEmpty(min_eff) && YOut[0] < min_eff)
@@ -250,8 +228,7 @@ void CalculateEfficiency::normalizeDetectors(
                    "efficiency range ["
                 << min_eff << "," << max_eff << "] = " << dets_to_mask.size()
                 << " from a total of non masked = " << nPixels
-                << " (from a total number of spectra in the ws = "
-                << numberOfSpectra << ")\n";
+                << " (from a total number of spectra in the ws = " << numberOfSpectra << ")\n";
 
   // If we identified pixels to be masked, mask them now
   if (!dets_to_mask.empty()) {
@@ -261,15 +238,13 @@ void CalculateEfficiency::normalizeDetectors(
       IAlgorithm_sptr mask = createChildAlgorithm("MaskDetectors", 0.8, 0.9);
       // First we mask detectors in the output workspace
       mask->setProperty<MatrixWorkspace_sptr>("Workspace", outputWS);
-      mask->setProperty<std::vector<size_t>>("WorkspaceIndexList",
-                                             dets_to_mask);
+      mask->setProperty<std::vector<size_t>>("WorkspaceIndexList", dets_to_mask);
       mask->execute();
 
       mask = createChildAlgorithm("MaskDetectors", 0.9, 1.0);
       // Then we mask the same detectors in the input workspace
       mask->setProperty<MatrixWorkspace_sptr>("Workspace", rebinnedWS);
-      mask->setProperty<std::vector<size_t>>("WorkspaceIndexList",
-                                             dets_to_mask);
+      mask->setProperty<std::vector<size_t>>("WorkspaceIndexList", dets_to_mask);
       mask->execute();
     } catch (std::invalid_argument &err) {
       std::stringstream e;
@@ -277,8 +252,7 @@ void CalculateEfficiency::normalizeDetectors(
       g_log.error(e.str());
     } catch (std::runtime_error &err) {
       std::stringstream e;
-      e << "Unable to successfully run MaskDetectors Child Algorithm: "
-        << err.what();
+      e << "Unable to successfully run MaskDetectors Child Algorithm: " << err.what();
       g_log.error(e.str());
     }
   }
@@ -289,16 +263,13 @@ void CalculateEfficiency::normalizeDetectors(
  * @param ws :: workspace with the respective instrument assigned
  * @param componentName :: must be a known CompAssembly.
  */
-void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
-                                        const std::string &componentName) {
+void CalculateEfficiency::maskComponent(MatrixWorkspace &ws, const std::string &componentName) {
   auto instrument = ws.getInstrument();
   try {
     std::shared_ptr<const Geometry::ICompAssembly> component =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-            instrument->getComponentByName(componentName));
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(instrument->getComponentByName(componentName));
     if (!component) {
-      g_log.warning("Component " + componentName +
-                    " expected to be a CompAssembly, e.g., a bank. Component " +
+      g_log.warning("Component " + componentName + " expected to be a CompAssembly, e.g., a bank. Component " +
                     componentName + " not masked!");
       return;
     }
@@ -307,8 +278,7 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
       std::shared_ptr<Geometry::ICompAssembly> xColumn =
           std::dynamic_pointer_cast<Geometry::ICompAssembly>((*component)[x]);
       for (int y = 0; y < xColumn->nelements(); y++) {
-        std::shared_ptr<Geometry::Detector> detector =
-            std::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+        std::shared_ptr<Geometry::Detector> detector = std::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
         if (detector) {
           auto detID = detector->getID();
           detectorList.emplace_back(detID);
@@ -336,8 +306,7 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
  * @param low :: number of rows to mask Bottom
  * @param componentName :: Must be a RectangularDetector
  */
-void CalculateEfficiency::maskEdges(const MatrixWorkspace_sptr &ws, int left,
-                                    int right, int high, int low,
+void CalculateEfficiency::maskEdges(const MatrixWorkspace_sptr &ws, int left, int right, int high, int low,
                                     const std::string &componentName) {
 
   auto instrument = ws->getInstrument();
@@ -348,13 +317,11 @@ void CalculateEfficiency::maskEdges(const MatrixWorkspace_sptr &ws, int left,
         std::dynamic_pointer_cast<const Mantid::Geometry::RectangularDetector>(
             instrument->getComponentByName(componentName)));
   } catch (std::exception &) {
-    g_log.warning("Expecting the component " + componentName +
-                  " to be a RectangularDetector. maskEdges not executed.");
+    g_log.warning("Expecting the component " + componentName + " to be a RectangularDetector. maskEdges not executed.");
     return;
   }
   if (!component) {
-    g_log.warning("Component " + componentName +
-                  " is not a RectangularDetector. MaskEdges not executed.");
+    g_log.warning("Component " + componentName + " is not a RectangularDetector. MaskEdges not executed.");
     return;
   }
 
@@ -374,8 +341,7 @@ void CalculateEfficiency::maskEdges(const MatrixWorkspace_sptr &ws, int left,
   // low: 0,256,512,768,..,1,257,513
   for (int row = 0; row < low; row++) {
     i = row + component->idstart();
-    while (i < component->nelements() * component->idstep() -
-                   component->idstep() + low + component->idstart()) {
+    while (i < component->nelements() * component->idstep() - component->idstep() + low + component->idstart()) {
       IDs.emplace_back(i);
       i += component->idstep();
     }
@@ -383,15 +349,13 @@ void CalculateEfficiency::maskEdges(const MatrixWorkspace_sptr &ws, int left,
   // high # 255, 511, 767..
   for (int row = 0; row < high; row++) {
     i = component->idstep() + component->idstart() - row - 1;
-    while (i < component->nelements() * component->idstep() +
-                   component->idstart()) {
+    while (i < component->nelements() * component->idstep() + component->idstart()) {
       IDs.emplace_back(i);
       i += component->idstep();
     }
   }
 
-  g_log.debug() << "CalculateEfficiency::maskEdges Detector Ids to Mask:"
-                << std::endl;
+  g_log.debug() << "CalculateEfficiency::maskEdges Detector Ids to Mask:" << std::endl;
   for (auto id : IDs) {
     g_log.debug() << id << " ";
   }

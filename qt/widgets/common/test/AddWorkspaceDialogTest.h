@@ -25,9 +25,7 @@ using namespace WorkspaceCreationHelper;
 class AddWorkspaceDialogTest : public CxxTest::TestSuite {
 
 public:
-  static AddWorkspaceDialogTest *createSuite() {
-    return new AddWorkspaceDialogTest;
-  }
+  static AddWorkspaceDialogTest *createSuite() { return new AddWorkspaceDialogTest; }
   static void destroySuite(AddWorkspaceDialogTest *suite) { delete suite; }
 
   void setUp() override {
@@ -55,8 +53,7 @@ public:
     assertWidgetCreated();
   }
 
-  void
-  test_that_getWorkspaces_returns_an_empty_vector_when_the_workspaces_do_not_exist_anymore() {
+  void test_that_getWorkspaces_returns_an_empty_vector_when_the_workspaces_do_not_exist_anymore() {
     m_dialog->show();
 
     auto combobox = m_dialog->workspaceNameComboBox();
@@ -72,8 +69,7 @@ public:
     TS_ASSERT(workspaces.empty());
   }
 
-  void
-  test_that_getWorkspaces_returns_the_expected_workspace_selected_in_the_AddWorkspaceDialog() {
+  void test_that_getWorkspaces_returns_the_expected_workspace_selected_in_the_AddWorkspaceDialog() {
     m_dialog->show();
 
     auto combobox = m_dialog->workspaceNameComboBox();
@@ -104,13 +100,11 @@ public:
     TS_ASSERT_EQUALS(workspaces.size(), 3);
     for (auto i = 0u; i < workspaces.size(); ++i) {
       TS_ASSERT_EQUALS(workspaces[i]->getNumberHistograms(), 3);
-      TS_ASSERT_EQUALS(workspaces[i]->getName(),
-                       "GroupName_" + std::to_string(i));
+      TS_ASSERT_EQUALS(workspaces[i]->getName(), "GroupName_" + std::to_string(i));
     }
   }
 
-  void
-  test_that_workspaceIndices_returns_the_expected_workspaces_indices_from_the_AddWorkspaceDialog() {
+  void test_that_workspaceIndices_returns_the_expected_workspaces_indices_from_the_AddWorkspaceDialog() {
     m_dialog->show();
 
     auto combobox = m_dialog->workspaceNameComboBox();
@@ -125,13 +119,9 @@ public:
   }
 
 private:
-  void assertWidgetCreated() {
-    TS_ASSERT_LESS_THAN(0, QApplication::topLevelWidgets().size());
-  }
+  void assertWidgetCreated() { TS_ASSERT_LESS_THAN(0, QApplication::topLevelWidgets().size()); }
 
-  void assertNoTopLevelWidgets() {
-    TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size());
-  }
+  void assertNoTopLevelWidgets() { TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size()); }
 
   std::string m_wsName;
   Mantid::API::MatrixWorkspace_sptr m_workspace;

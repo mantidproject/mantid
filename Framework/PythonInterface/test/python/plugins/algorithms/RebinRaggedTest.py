@@ -57,7 +57,7 @@ class RebinRaggedTest(unittest.TestCase):
 
         AnalysisDataService.remove("NOM_91796_banks")
 
-    def test_sample_workspace(self):
+    def test_hist_workspace(self):
         # numpy 1.7 (on rhel7) doesn't have np.full
         xmins = np.full((200, ), 2600.0)
         xmins[11] = 3000.0
@@ -66,7 +66,7 @@ class RebinRaggedTest(unittest.TestCase):
         deltas = np.full(200, 400.0)
         deltas[13] = 600.0
 
-        ws = api.CreateSampleWorkspace()
+        ws = api.CreateSampleWorkspace(OutputWorkspace='RebinRagged_hist', WorkspaceType='Histogram')
 
         rebinned = api.RebinRagged(ws, XMin=xmins, XMax=xmaxs, Delta=deltas)
 
@@ -89,6 +89,40 @@ class RebinRaggedTest(unittest.TestCase):
             else:
                 # parameters are set so all y-values are 0.6
                 np.testing.assert_almost_equal(0.6, y, err_msg=label)
+
+    def test_event_workspace(self):
+        # numpy 1.7 (on rhel7) doesn't have np.full
+        xmins = np.full((200, ), 2600.0)
+        xmins[11] = 3000.0
+        xmaxs = np.full((200, ), 6200.0)
+        xmaxs[12] = 5000.0
+        deltas = np.full(200, 400.0)
+        deltas[13] = 600.0
+
+        ws = api.CreateSampleWorkspace(OutputWorkspace='RebinRagged_events', WorkspaceType='Event')
+        orig_y = ws.readY(0)
+
+        rebinned = api.RebinRagged(ws, XMin=xmins, XMax=xmaxs, Delta=deltas)
+
+        self.assertEqual(rebinned.getNumberHistograms(), 200)
+        for i in range(rebinned.getNumberHistograms()):
+            label = "index={}".format(i)
+            if i == 11:
+                self.assertEqual(rebinned.readX(i).size, 9, label)
+            elif i == 12 or i == 13:
+                self.assertEqual(rebinned.readX(i).size, 7, label)
+            else:
+                self.assertEqual(
+                    rebinned.readX(i).size,
+                    10,
+                )
+
+            y = rebinned.readY(i)
+            if i == 13:
+                np.testing.assert_almost_equal(21, y, err_msg=label)
+            else:
+                # parameters are set so all y-values are 0.6
+                np.testing.assert_almost_equal(14, y, err_msg=label)
 
 
 if __name__ == "__main__":

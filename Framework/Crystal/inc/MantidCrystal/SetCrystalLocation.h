@@ -35,15 +35,11 @@ public:
     return "This algorithm sets the sample location of the "
            "input event workspace.";
   }
-  const std::vector<std::string> seeAlso() const override {
-    return {"OptimizeCrystalPlacement"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"OptimizeCrystalPlacement"}; }
 
   int version() const override { return 1; };
 
-  const std::string category() const override {
-    return "Crystal\\Corrections";
-  };
+  const std::string category() const override { return "Crystal\\Corrections"; };
 
 private:
   void init() override;

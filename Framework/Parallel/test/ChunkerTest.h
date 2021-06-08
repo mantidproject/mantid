@@ -19,8 +19,7 @@ namespace Mantid {
 namespace Parallel {
 namespace IO {
 bool operator==(const Chunker::LoadRange &a, const Chunker::LoadRange &b) {
-  return a.bankIndex == b.bankIndex && a.eventOffset == b.eventOffset &&
-         a.eventCount == b.eventCount;
+  return a.bankIndex == b.bankIndex && a.eventOffset == b.eventOffset && a.eventCount == b.eventCount;
 }
 } // namespace IO
 } // namespace Parallel
@@ -184,19 +183,14 @@ public:
         // The following bank sizes come from actual files which have cause
         // trouble so this also servers as a regression test.
         for (const auto &bankSizes :
-             {std::vector<size_t>{2091281, 520340,  841355,  912704,  1435110,
-                                  567885,  1850044, 1333453, 1507522, 1396560,
-                                  1699092, 1484645, 515805,  474417,  633111,
-                                  600780,  638784,  572031,  741562,  593741,
-                                  546107,  552800,  556607},
-              std::vector<size_t>{
-                  5158050,  5566070,  5528000,  5461070,  5937410,  7415620,
-                  5720310,  6387840,  6007800,  6331110,  4744170,  20912810,
-                  14846450, 16990920, 13965600, 15075220, 13334530, 18500440,
-                  5678850,  14351100, 9127040,  8413550,  5203400}}) {
+             {std::vector<size_t>{2091281, 520340,  841355,  912704,  1435110, 567885, 1850044, 1333453,
+                                  1507522, 1396560, 1699092, 1484645, 515805,  474417, 633111,  600780,
+                                  638784,  572031,  741562,  593741,  546107,  552800, 556607},
+              std::vector<size_t>{5158050,  5566070,  5528000, 5461070,  5937410,  7415620,  5720310,  6387840,
+                                  6007800,  6331110,  4744170, 20912810, 14846450, 16990920, 13965600, 15075220,
+                                  13334530, 18500440, 5678850, 14351100, 9127040,  8413550,  5203400}}) {
           const size_t chunkSize = 1024 * 1024;
-          TS_ASSERT_THROWS_NOTHING(
-              Chunker chunker(workers, worker, bankSizes, chunkSize));
+          TS_ASSERT_THROWS_NOTHING(Chunker chunker(workers, worker, bankSizes, chunkSize));
           Chunker chunker(workers, worker, bankSizes, chunkSize);
           TS_ASSERT_THROWS_NOTHING(chunker.makeLoadRanges());
         }
@@ -320,16 +314,13 @@ public:
         maxWork = std::max(maxWork, work);
       }
 
-      const size_t totalWork =
-          std::accumulate(sizes.begin(), sizes.end(), static_cast<size_t>(0));
+      const size_t totalWork = std::accumulate(sizes.begin(), sizes.end(), static_cast<size_t>(0));
       const size_t wastedWork = maxWork * workers - totalWork;
 
       // Fuzzy test to ensure that imbalance is not too large. This are by no
       // means hard limits and may be subject to change. Current limit is: At
       // most 30% and 3 of the workers may be `wasted` (whichever is less).
-      TS_ASSERT(static_cast<double>(wastedWork) /
-                    static_cast<double>(totalWork) <
-                std::min(0.3, 3.0 / workers));
+      TS_ASSERT(static_cast<double>(wastedWork) / static_cast<double>(totalWork) < std::min(0.3, 3.0 / workers));
     }
   }
 
@@ -341,8 +332,7 @@ public:
       TS_ASSERT_EQUALS(result.size(), workers);
       TS_ASSERT_EQUALS(result[0].first, 1);
       TS_ASSERT_EQUALS(result[1].first, 1);
-      TS_ASSERT_EQUALS(result[0].second.size(),
-                       (banks + workers - 1) / workers);
+      TS_ASSERT_EQUALS(result[0].second.size(), (banks + workers - 1) / workers);
       TS_ASSERT_EQUALS(result[1].second.size(), banks / workers);
     }
   }

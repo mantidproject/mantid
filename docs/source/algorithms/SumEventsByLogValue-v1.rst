@@ -51,14 +51,14 @@ of the log value.
 Usage
 -----
 
-**Example - Single-Spectrum Mode**  
+**Example - Single-Spectrum Mode**
 
 .. testcode:: Single-Spectrum
 
   # a sample workspace with a sample instrument
   ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
 
-  AddTimeSeriesLog(ws, Name="Log2FilterBy", Time="2010-01-01T00:00:00", Value=1) 
+  AddTimeSeriesLog(ws, Name="Log2FilterBy", Time="2010-01-01T00:00:00", Value=1)
   AddTimeSeriesLog(ws, Name="Log2FilterBy", Time="2010-01-01T00:10:00", Value=2)
   AddTimeSeriesLog(ws, Name="Log2FilterBy", Time="2010-01-01T00:20:00", Value=3)
   AddTimeSeriesLog(ws, Name="Log2FilterBy", Time="2010-01-01T00:30:00", Value=1)

@@ -33,9 +33,9 @@ class PolDiffILLReductionTest(unittest.TestCase):
         mtd.clear()
 
     def test_absorber_transmission(self):
-        PolDiffILLReduction(Run='396991', ProcessAs='BeamWithAbsorber', OutputWorkspace='cadmium_ws')
+        PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws')
         self._check_output(mtd['cadmium_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
-        self._check_process_flag(mtd['cadmium_ws'], 'Absorber')
+        self._check_process_flag(mtd['cadmium_ws'], 'Cadmium')
         self.assertAlmostEqual(mtd['cadmium_ws_1'].readY(0)[0], 116, delta=1)
 
     def test_beam(self):
@@ -46,22 +46,22 @@ class PolDiffILLReductionTest(unittest.TestCase):
 
     def test_transmission(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
-        PolDiffILLReduction(Run='396991', ProcessAs='BeamWithAbsorber', OutputWorkspace='cadmium_ws')
+        PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
-                            AbsorberTransmissionInputWorkspace='cadmium_ws_1', BeamInputWorkspace='beam_ws_1',)
+                            CadmiumTransmissionInputWorkspace='cadmium_ws_1', BeamInputWorkspace='beam_ws_1',)
         self._check_output(mtd['quartz_transmission'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self.assertAlmostEqual(mtd['quartz_transmission_1'].readY(0)[0], 0.692, delta=1e-3)
         self._check_process_flag(mtd['quartz_transmission'], 'Transmission')
 
     def test_absorber(self):
-        PolDiffILLReduction(Run='396928', ProcessAs='Absorber', OutputWorkspace='absorber_ws')
+        PolDiffILLReduction(Run='396928', ProcessAs='Cadmium', OutputWorkspace='absorber_ws')
         self._check_output(mtd['absorber_ws'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
-        self._check_process_flag(mtd['absorber_ws'], 'Absorber')
+        self._check_process_flag(mtd['absorber_ws'], 'Cadmium')
 
     def test_container(self):
-        PolDiffILLReduction(Run='396917', ProcessAs='Container', OutputWorkspace='container_ws')
+        PolDiffILLReduction(Run='396917', ProcessAs='Empty', OutputWorkspace='container_ws')
         self._check_output(mtd['container_ws'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
-        self._check_process_flag(mtd['container_ws'], 'Container')
+        self._check_process_flag(mtd['container_ws'], 'Empty')
 
     def test_quartz(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
@@ -71,7 +71,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             OutputTreatment='Average', OutputWorkspace='quartz')
         self._check_output(mtd['quartz'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['quartz'], 'Quartz')
-    
+
     def test_vanadium(self):
         sampleProperties = {'FormulaUnits': 1, 'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
@@ -81,14 +81,14 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['vanadium'], 'Vanadium')
 
     def test_vanadium_annulus(self):
-        PolDiffILLReduction(Run='396917', ProcessAs='Container', OutputWorkspace='container_ws')
+        PolDiffILLReduction(Run='396917', ProcessAs='Empty', OutputWorkspace='container_ws')
         sampleProperties = {'FormulaUnits': 1, 'SampleChemicalFormula': 'V', 'SampleMass': 8.54, 'FormulaUnitMass': 50.94,
                             'SampleInnerRadius': 2, 'SampleOuterRadius': 2.5, 'Height': 2,
                             'BeamWidth': 2.6, 'BeamHeight': 2.6, 'SampleDensity': 1,
                             'ContainerChemicalFormula': 'Al', 'ContainerDensity': 2.7,
                             'ContainerInnerRadius': 0.1, 'ContainerOuterRadius': 2.51, 'EventsPerPoint':1000}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium_annulus',
-                            ContainerInputWorkspace='container_ws',
+                            EmptyInputWorkspace='container_ws',
                             SampleAndEnvironmentProperties=sampleProperties,
                             SelfAttenuationMethod='MonteCarlo',
                             SampleGeometry='Annulus',
@@ -103,7 +103,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             OutputTreatment='Individual')
         self._check_output(mtd['sample'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['sample'], 'Sample')
-    
+
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws[0].getRun().getLogData('ProcessedAs').value, value)
 

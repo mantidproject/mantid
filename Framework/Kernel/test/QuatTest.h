@@ -259,60 +259,41 @@ public:
     Quat rotator(rotAngle, rotAxis);
 
     std::vector<double> rotMatrix;
-    TSM_ASSERT_THROWS_NOTHING(
-        "The rotator quaternion has to be a unit quaternion",
-        rotMatrix = rotator.getRotation(true));
+    TSM_ASSERT_THROWS_NOTHING("The rotator quaternion has to be a unit quaternion",
+                              rotMatrix = rotator.getRotation(true));
 
     // Kroniker Deltas valid for valid rotational matrix; a_ij*a_jk=delta_jk
-    double cron00 = rotMatrix[0] * rotMatrix[0] + rotMatrix[1] * rotMatrix[1] +
-                    rotMatrix[2] * rotMatrix[2];
+    double cron00 = rotMatrix[0] * rotMatrix[0] + rotMatrix[1] * rotMatrix[1] + rotMatrix[2] * rotMatrix[2];
     TSM_ASSERT_DELTA("delta_00 should be 1", 1.0, cron00, FLT_EPSILON);
-    double cron11 = rotMatrix[3] * rotMatrix[3] + rotMatrix[4] * rotMatrix[4] +
-                    rotMatrix[5] * rotMatrix[5];
+    double cron11 = rotMatrix[3] * rotMatrix[3] + rotMatrix[4] * rotMatrix[4] + rotMatrix[5] * rotMatrix[5];
     TSM_ASSERT_DELTA("delta_11 should be 1", 1.0, cron11, FLT_EPSILON);
-    double cron22 = rotMatrix[6] * rotMatrix[6] + rotMatrix[7] * rotMatrix[7] +
-                    rotMatrix[8] * rotMatrix[8];
+    double cron22 = rotMatrix[6] * rotMatrix[6] + rotMatrix[7] * rotMatrix[7] + rotMatrix[8] * rotMatrix[8];
     TSM_ASSERT_DELTA("delta_22 should be 1", 1.0, cron22, FLT_EPSILON);
 
-    double cron01 = rotMatrix[0] * rotMatrix[1] + rotMatrix[3] * rotMatrix[4] +
-                    rotMatrix[6] * rotMatrix[7];
+    double cron01 = rotMatrix[0] * rotMatrix[1] + rotMatrix[3] * rotMatrix[4] + rotMatrix[6] * rotMatrix[7];
     TSM_ASSERT_DELTA("delta_01 should be 0", 0.0, cron01, FLT_EPSILON);
-    double cron02 = rotMatrix[0] * rotMatrix[2] + rotMatrix[3] * rotMatrix[5] +
-                    rotMatrix[6] * rotMatrix[8];
+    double cron02 = rotMatrix[0] * rotMatrix[2] + rotMatrix[3] * rotMatrix[5] + rotMatrix[6] * rotMatrix[8];
     TSM_ASSERT_DELTA("delta_02 should be 0", 0.0, cron02, FLT_EPSILON);
-    double cron12 = rotMatrix[1] * rotMatrix[2] + rotMatrix[4] * rotMatrix[5] +
-                    rotMatrix[7] * rotMatrix[8];
+    double cron12 = rotMatrix[1] * rotMatrix[2] + rotMatrix[4] * rotMatrix[5] + rotMatrix[7] * rotMatrix[8];
     TSM_ASSERT_DELTA("delta_12 should be 0", 0.0, cron12, FLT_EPSILON);
 
-    double det =
-        rotMatrix[0] *
-            (rotMatrix[4] * rotMatrix[8] - rotMatrix[5] * rotMatrix[7]) +
-        rotMatrix[1] *
-            (rotMatrix[5] * rotMatrix[6] - rotMatrix[3] * rotMatrix[8]) +
-        rotMatrix[2] *
-            (rotMatrix[3] * rotMatrix[7] - rotMatrix[4] * rotMatrix[6]);
+    double det = rotMatrix[0] * (rotMatrix[4] * rotMatrix[8] - rotMatrix[5] * rotMatrix[7]) +
+                 rotMatrix[1] * (rotMatrix[5] * rotMatrix[6] - rotMatrix[3] * rotMatrix[8]) +
+                 rotMatrix[2] * (rotMatrix[3] * rotMatrix[7] - rotMatrix[4] * rotMatrix[6]);
 
-    TSM_ASSERT_DELTA(
-        "Determinant for the proper rotation matrix has to be equal to 1 ", 1.0,
-        det, FLT_EPSILON);
+    TSM_ASSERT_DELTA("Determinant for the proper rotation matrix has to be equal to 1 ", 1.0, det, FLT_EPSILON);
 
-    double x1 = (rotMatrix[0] * some.X() + rotMatrix[1] * some.Y() +
-                 rotMatrix[2] * some.Z()) *
-                targ_norm / some_norm;
+    double x1 = (rotMatrix[0] * some.X() + rotMatrix[1] * some.Y() + rotMatrix[2] * some.Z()) * targ_norm / some_norm;
     TSM_ASSERT_DELTA("X -coordinate obtained using the rotation matxis have to "
                      "coinside with the one obtained by rotation via quat",
                      x1, target.X(), FLT_EPSILON);
 
-    double y1 = (rotMatrix[3] * some.X() + rotMatrix[4] * some.Y() +
-                 rotMatrix[5] * some.Z()) *
-                targ_norm / some_norm;
+    double y1 = (rotMatrix[3] * some.X() + rotMatrix[4] * some.Y() + rotMatrix[5] * some.Z()) * targ_norm / some_norm;
     TSM_ASSERT_DELTA("Y -coordinate obtained using the rotation matxis have to "
                      "coinside with the one obtained by rotation via quat",
                      y1, target.Y(), FLT_EPSILON);
 
-    double z1 = (rotMatrix[6] * some.X() + rotMatrix[7] * some.Y() +
-                 rotMatrix[8] * some.Z()) *
-                targ_norm / some_norm;
+    double z1 = (rotMatrix[6] * some.X() + rotMatrix[7] * some.Y() + rotMatrix[8] * some.Z()) * targ_norm / some_norm;
     TSM_ASSERT_DELTA("Z -coordinate obtained using the rotation matxis have to "
                      "coinside with the one obtained by rotation via quat",
                      z1, target.Z(), FLT_EPSILON);
@@ -325,9 +306,8 @@ public:
     Quat rot2(some, target);
 
     std::vector<double> rotMatrix2;
-    TSM_ASSERT_THROWS_NOTHING(
-        "The rotator quaternion has to be a unit quaternion",
-        rotMatrix2 = rot2.getRotation(true));
+    TSM_ASSERT_THROWS_NOTHING("The rotator quaternion has to be a unit quaternion",
+                              rotMatrix2 = rot2.getRotation(true));
 
     for (int i = 0; i < 9; i++) {
       TSM_ASSERT_DELTA("Elements of the rotation matrix obtained quat on 2 "
@@ -335,20 +315,17 @@ public:
                        rotMatrix[i], rotMatrix2[i], FLT_EPSILON);
     }
 
-    x1 = (rotMatrix2[0] * some.X() + rotMatrix2[1] * some.Y() +
-          rotMatrix2[2] * some.Z());
+    x1 = (rotMatrix2[0] * some.X() + rotMatrix2[1] * some.Y() + rotMatrix2[2] * some.Z());
     TSM_ASSERT_DELTA("X -coordinate obtained using the rotation matxis have to "
                      "coinside with the one obtained by rotation via quat",
                      x1, target.X(), FLT_EPSILON);
 
-    y1 = (rotMatrix2[3] * some.X() + rotMatrix2[4] * some.Y() +
-          rotMatrix2[5] * some.Z());
+    y1 = (rotMatrix2[3] * some.X() + rotMatrix2[4] * some.Y() + rotMatrix2[5] * some.Z());
     TSM_ASSERT_DELTA("Y -coordinate obtained using the rotation matxis have to "
                      "coinside with the one obtained by rotation via quat",
                      y1, target.Y(), FLT_EPSILON);
 
-    z1 = (rotMatrix2[6] * some.X() + rotMatrix2[7] * some.Y() +
-          rotMatrix2[8] * some.Z());
+    z1 = (rotMatrix2[6] * some.X() + rotMatrix2[7] * some.Y() + rotMatrix2[8] * some.Z());
     TSM_ASSERT_DELTA("Z -coordinate obtained using the rotation matxis have to "
                      "coinside with the one obtained by rotation via quat",
                      z1, target.Z(), FLT_EPSILON);
@@ -402,9 +379,7 @@ public:
           rez = Test.getRotation();
           rot = Rot.getVector();
           for (int ii = 0; ii < 9; ii++) {
-            TSM_ASSERT_DELTA(
-                "This operation should return initial rotation matrix", rot[ii],
-                rez[ii], 1e-4);
+            TSM_ASSERT_DELTA("This operation should return initial rotation matrix", rot[ii], rez[ii], 1e-4);
           }
         }
       }
@@ -567,8 +542,7 @@ public:
     this->compareArbitrary(rotQ);
     rotQ = Quat(-546.0, V3D(-0.5, 0.5, sqrt(0.5)));
     this->compareArbitrary(rotQ);
-    rotQ = Quat(34.0, V3D(-0.5, 0.5, sqrt(0.5))) *
-           Quat(-25.0, V3D(0.1, 0.2, sqrt(0.95)));
+    rotQ = Quat(34.0, V3D(-0.5, 0.5, sqrt(0.5))) * Quat(-25.0, V3D(0.1, 0.2, sqrt(0.95)));
     this->compareArbitrary(rotQ);
   }
 

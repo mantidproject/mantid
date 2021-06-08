@@ -12,17 +12,14 @@
 
 namespace {
 
-template <typename T>
-void setSetting(std::string const &settingGroup, std::string const &settingName,
-                T const &value) {
+template <typename T> void setSetting(std::string const &settingGroup, std::string const &settingName, T const &value) {
   QSettings settings;
   settings.beginGroup(QString::fromStdString(settingGroup));
   settings.setValue(QString::fromStdString(settingName), value);
   settings.endGroup();
 }
 
-QVariant getSetting(std::string const &settingGroup,
-                    std::string const &settingName) {
+QVariant getSetting(std::string const &settingGroup, std::string const &settingName) {
   QSettings settings;
   settings.beginGroup(QString::fromStdString(settingGroup));
   auto const settingValue = settings.value(QString::fromStdString(settingName));
@@ -40,21 +37,15 @@ static std::string const INDIRECT_SETTINGS_GROUP("Indirect Settings");
 static std::string const RESTRICT_DATA_PROPERTY("restrict-input-by-name");
 static std::string const ERROR_BARS_PROPERTY("plot-error-bars-external");
 
-bool restrictInputDataByName() {
-  return getSetting(INDIRECT_SETTINGS_GROUP, RESTRICT_DATA_PROPERTY).toBool();
-}
+bool restrictInputDataByName() { return getSetting(INDIRECT_SETTINGS_GROUP, RESTRICT_DATA_PROPERTY).toBool(); }
 
-bool externalPlotErrorBars() {
-  return getSetting(INDIRECT_SETTINGS_GROUP, ERROR_BARS_PROPERTY).toBool();
-}
+bool externalPlotErrorBars() { return getSetting(INDIRECT_SETTINGS_GROUP, ERROR_BARS_PROPERTY).toBool(); }
 
 void setRestrictInputDataByName(bool restricted) {
   setSetting(INDIRECT_SETTINGS_GROUP, RESTRICT_DATA_PROPERTY, restricted);
 }
 
-void setExternalPlotErrorBars(bool errorBars) {
-  setSetting(INDIRECT_SETTINGS_GROUP, ERROR_BARS_PROPERTY, errorBars);
-}
+void setExternalPlotErrorBars(bool errorBars) { setSetting(INDIRECT_SETTINGS_GROUP, ERROR_BARS_PROPERTY, errorBars); }
 
 } // namespace IndirectSettingsHelper
 } // namespace CustomInterfaces

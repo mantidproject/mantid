@@ -49,9 +49,7 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PlotAsymmetryByLogValue"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Calculates asymmetry for a series of log values";
-  }
+  const std::string summary() const override { return "Calculates asymmetry for a series of log values"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
@@ -71,29 +69,22 @@ private:
   // Analyse loaded run
   void doAnalysis(const API::Workspace_sptr &loadedWs, size_t index);
   // Parse run names
-  void parseRunNames(std::string &firstFN, std::string &lastFN,
-                     std::string &fnBase, std::string &fnExt, int &fnZeros);
+  void parseRunNames(std::string &firstFN, std::string &lastFN, std::string &fnBase, std::string &fnExt, int &fnZeros);
   // Load dead-time corrections from specified file
   API::Workspace_sptr loadCorrectionsFromFile(const std::string &deadTimeFile);
   // Apply dead-time corrections
-  void applyDeadtimeCorr(API::Workspace_sptr &loadedWs,
-                         API::Workspace_sptr deadTimes);
+  void applyDeadtimeCorr(API::Workspace_sptr &loadedWs, API::Workspace_sptr deadTimes);
   /// Create custom detector grouping
-  API::Workspace_sptr createCustomGrouping(const std::vector<int> &fwd,
-                                           const std::vector<int> &bwd);
+  API::Workspace_sptr createCustomGrouping(const std::vector<int> &fwd, const std::vector<int> &bwd);
   /// Group detectors
-  void groupDetectors(API::Workspace_sptr &loadedWs,
-                      API::Workspace_sptr grouping);
+  void groupDetectors(API::Workspace_sptr &loadedWs, API::Workspace_sptr grouping);
   /// Calculate the integral asymmetry for a workspace (single period)
-  void calcIntAsymmetry(const API::MatrixWorkspace_sptr &ws, double &Y,
-                        double &E);
+  void calcIntAsymmetry(const API::MatrixWorkspace_sptr &ws, double &Y, double &E);
   /// Calculate the integral asymmetry for a workspace (red & green)
-  void calcIntAsymmetry(const API::MatrixWorkspace_sptr &ws_red,
-                        const API::MatrixWorkspace_sptr &ws_green, double &Y,
+  void calcIntAsymmetry(const API::MatrixWorkspace_sptr &ws_red, const API::MatrixWorkspace_sptr &ws_green, double &Y,
                         double &E);
   /// Group detectors
-  void groupDetectors(API::MatrixWorkspace_sptr &ws,
-                      const std::vector<int> &spectraList);
+  void groupDetectors(API::MatrixWorkspace_sptr &ws, const std::vector<int> &spectraList);
   /// Get log value
   double getLogValue(API::MatrixWorkspace &ws);
   /// Populate output workspace with results
@@ -105,8 +96,7 @@ private:
   /// Get path to the direcotry from a file name
   std::string getDirectoryFromFileName(const std::string &fileName) const;
   /// Uses FirstRun and LastRun to populate filenames vector
-  void populateFileNamesFromFirstLast(std::string firstRun,
-                                      std::string lastRun);
+  void populateFileNamesFromFirstLast(std::string firstRun, std::string lastRun);
 
   /// Properties needed to load a run
   /// Stores base name shared by all runs

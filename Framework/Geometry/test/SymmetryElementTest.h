@@ -21,9 +21,7 @@ class SymmetryElementTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SymmetryElementTest *createSuite() {
-    return new SymmetryElementTest();
-  }
+  static SymmetryElementTest *createSuite() { return new SymmetryElementTest(); }
   static void destroySuite(SymmetryElementTest *suite) { delete suite; }
 
   void testConstructionHmSymbol() {
@@ -39,8 +37,7 @@ public:
     TS_ASSERT_EQUALS(identity.hmSymbol(), "1");
 
     SymmetryElement_sptr cloned = identity.clone();
-    SymmetryElementIdentity_sptr castedClone =
-        std::dynamic_pointer_cast<SymmetryElementIdentity>(cloned);
+    SymmetryElementIdentity_sptr castedClone = std::dynamic_pointer_cast<SymmetryElementIdentity>(cloned);
 
     TS_ASSERT(castedClone);
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), "1");
@@ -53,8 +50,7 @@ public:
     TS_ASSERT_EQUALS(translation.getTranslation(), bodyCenteringVector);
 
     SymmetryElement_sptr cloned = translation.clone();
-    SymmetryElementTranslation_sptr castedClone =
-        std::dynamic_pointer_cast<SymmetryElementTranslation>(cloned);
+    SymmetryElementTranslation_sptr castedClone = std::dynamic_pointer_cast<SymmetryElementTranslation>(cloned);
 
     TS_ASSERT(castedClone);
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), "t");
@@ -68,8 +64,7 @@ public:
     TS_ASSERT_EQUALS(inversion.getInversionPoint(), oneEighth);
 
     SymmetryElement_sptr cloned = inversion.clone();
-    SymmetryElementInversion_sptr castedClone =
-        std::dynamic_pointer_cast<SymmetryElementInversion>(cloned);
+    SymmetryElementInversion_sptr castedClone = std::dynamic_pointer_cast<SymmetryElementInversion>(cloned);
 
     TS_ASSERT(castedClone);
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), "-1");
@@ -83,12 +78,10 @@ public:
     V3R axis(0, 0, 1);
     V3R translation = V3R(0, 0, 1) / 4;
 
-    TS_ASSERT_THROWS(MockSymmetryElementWithAxis invalidElement(
-                         "41", V3R(0, 0, 0), translation),
+    TS_ASSERT_THROWS(MockSymmetryElementWithAxis invalidElement("41", V3R(0, 0, 0), translation),
                      const std::invalid_argument &);
 
-    TS_ASSERT_THROWS_NOTHING(
-        MockSymmetryElementWithAxis axisElement("41", axis, translation));
+    TS_ASSERT_THROWS_NOTHING(MockSymmetryElementWithAxis axisElement("41", axis, translation));
 
     MockSymmetryElementWithAxis axisElement("41", axis, translation);
     TS_ASSERT_EQUALS(axisElement.getAxis(), axis);
@@ -100,33 +93,28 @@ public:
     std::string symbolScrew("41");
     V3R axis(0, 0, 1);
     V3R translation = V3R(0, 0, 1) / 4;
-    SymmetryElementRotation::RotationSense rotationSense(
-        SymmetryElementRotation::Negative);
+    SymmetryElementRotation::RotationSense rotationSense(SymmetryElementRotation::Negative);
 
     SymmetryElementRotation defaultTranslation(symbolPlain, axis);
     TS_ASSERT_EQUALS(defaultTranslation.hmSymbol(), symbolPlain);
     TS_ASSERT_EQUALS(defaultTranslation.getAxis(), axis);
     TS_ASSERT_EQUALS(defaultTranslation.getTranslation(), V3R(0, 0, 0));
-    TS_ASSERT_EQUALS(defaultTranslation.getRotationSense(),
-                     SymmetryElementRotation::Positive);
+    TS_ASSERT_EQUALS(defaultTranslation.getRotationSense(), SymmetryElementRotation::Positive);
 
     SymmetryElementRotation defaultSense(symbolScrew, axis, translation);
     TS_ASSERT_EQUALS(defaultSense.hmSymbol(), symbolScrew);
     TS_ASSERT_EQUALS(defaultSense.getAxis(), axis);
     TS_ASSERT_EQUALS(defaultSense.getTranslation(), translation);
-    TS_ASSERT_EQUALS(defaultSense.getRotationSense(),
-                     SymmetryElementRotation::Positive);
+    TS_ASSERT_EQUALS(defaultSense.getRotationSense(), SymmetryElementRotation::Positive);
 
-    SymmetryElementRotation rotationElement(symbolScrew, axis, translation,
-                                            rotationSense);
+    SymmetryElementRotation rotationElement(symbolScrew, axis, translation, rotationSense);
     TS_ASSERT_EQUALS(rotationElement.hmSymbol(), symbolScrew);
     TS_ASSERT_EQUALS(rotationElement.getAxis(), axis);
     TS_ASSERT_EQUALS(rotationElement.getTranslation(), translation);
     TS_ASSERT_EQUALS(rotationElement.getRotationSense(), rotationSense);
 
     SymmetryElement_sptr cloned = rotationElement.clone();
-    SymmetryElementRotation_sptr castedClone =
-        std::dynamic_pointer_cast<SymmetryElementRotation>(cloned);
+    SymmetryElementRotation_sptr castedClone = std::dynamic_pointer_cast<SymmetryElementRotation>(cloned);
     TS_ASSERT(castedClone);
 
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), symbolScrew);
@@ -152,8 +140,7 @@ public:
     TS_ASSERT_EQUALS(mirrorElement.getTranslation(), translation);
 
     SymmetryElement_sptr cloned = mirrorElement.clone();
-    SymmetryElementMirror_sptr castedClone =
-        std::dynamic_pointer_cast<SymmetryElementMirror>(cloned);
+    SymmetryElementMirror_sptr castedClone = std::dynamic_pointer_cast<SymmetryElementMirror>(cloned);
     TS_ASSERT(castedClone);
 
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), symbolGlide);
@@ -166,8 +153,7 @@ private:
     friend class SymmetryElementTest;
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
   public:
-    MockSymmetryElement(const std::string &hmSymbol)
-        : SymmetryElement(hmSymbol) {}
+    MockSymmetryElement(const std::string &hmSymbol) : SymmetryElement(hmSymbol) {}
     MOCK_CONST_METHOD0(clone, SymmetryElement_sptr());
   };
 
@@ -175,8 +161,7 @@ private:
     friend class SymmetryElementTest;
 
   public:
-    MockSymmetryElementWithAxis(const std::string &symbol, const V3R &axis,
-                                const V3R &translation)
+    MockSymmetryElementWithAxis(const std::string &symbol, const V3R &axis, const V3R &translation)
         : SymmetryElementWithAxis(symbol, axis, translation) {}
     MOCK_CONST_METHOD0(clone, SymmetryElement_sptr());
   };

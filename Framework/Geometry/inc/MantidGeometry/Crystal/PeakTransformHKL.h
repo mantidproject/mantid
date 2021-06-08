@@ -22,13 +22,11 @@ public:
   /// Constructor
   PeakTransformHKL();
   /// Constructor
-  PeakTransformHKL(const std::string &xPlotLabel,
-                   const std::string &yPlotLabel);
+  PeakTransformHKL(const std::string &xPlotLabel, const std::string &yPlotLabel);
   /// Virtual constructor
   PeakTransform_sptr clone() const override;
   /// Transform peak.
-  Mantid::Kernel::V3D
-  transformPeak(const Mantid::Geometry::IPeak &peak) const override;
+  Mantid::Kernel::V3D transformPeak(const Mantid::Geometry::IPeak &peak) const override;
   /// Getter for a friendly name to describe the transform type.
   std::string getFriendlyName() const override { return name(); }
   /// Getter for the special coordinate representation of this transform type.

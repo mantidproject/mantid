@@ -103,10 +103,8 @@ public:
   }
 
   void testSetValue() {
-    TS_ASSERT_THROWS(numericAxis->setValue(-1, 1.1),
-                     const Exception::IndexError &);
-    TS_ASSERT_THROWS(numericAxis->setValue(5, 1.1),
-                     const Exception::IndexError &);
+    TS_ASSERT_THROWS(numericAxis->setValue(-1, 1.1), const Exception::IndexError &);
+    TS_ASSERT_THROWS(numericAxis->setValue(5, 1.1), const Exception::IndexError &);
 
     for (int i = 0; i < 5; ++i) {
       TS_ASSERT_THROWS_NOTHING(numericAxis->setValue(i, i + 0.5));
@@ -154,10 +152,8 @@ public:
    */
   void test_equal() {
     double points1[] = {1.0, 2.0, 10e-16, 4.0, 5.0};
-    double points2[] = {1.0, 2.0, 20e-16, 4.0,
-                        5.0}; // Just inside the tolerance
-    double points3[] = {1.0, 2.0, 21e-16, 4.0,
-                        5.0}; // Just outsie the tolerance
+    double points2[] = {1.0, 2.0, 20e-16, 4.0, 5.0}; // Just inside the tolerance
+    double points3[] = {1.0, 2.0, 21e-16, 4.0, 5.0}; // Just outsie the tolerance
     const size_t npoints(5);
     NumericAxis axis1(std::vector<double>(points1, points1 + npoints));
     NumericAxis axis2(std::vector<double>(points2, points2 + npoints));

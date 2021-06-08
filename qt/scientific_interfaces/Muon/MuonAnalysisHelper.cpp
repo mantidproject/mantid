@@ -50,8 +50,7 @@ QColor getWorkspaceColor(size_t index) {
 }
 
 /// Get keys from parameter table
-std::vector<std::string>
-getKeysFromTable(const Mantid::API::ITableWorkspace_sptr &tab) {
+std::vector<std::string> getKeysFromTable(const Mantid::API::ITableWorkspace_sptr &tab) {
   std::vector<std::string> keys;
   if (tab) {
     Mantid::API::TableRow row = tab->getFirstRow();
@@ -181,8 +180,7 @@ void printRunInfo(const MatrixWorkspace_sptr &runWs, std::ostringstream &out) {
     // Add counts per detector per good frame
     out << "\nCounts/(Good frames*number detectors): ";
     out << std::setprecision(3);
-    out << countsPerFrame / static_cast<double>(runWs->getNumberHistograms())
-        << " Events per frame per detector";
+    out << countsPerFrame / static_cast<double>(runWs->getNumberHistograms()) << " Events per frame per detector";
   }
   // Add average temperature.
   out << "\nAverage Temperature: ";
@@ -191,8 +189,7 @@ void printRunInfo(const MatrixWorkspace_sptr &runWs, std::ostringstream &out) {
     Mantid::Kernel::SplittingInterval time_split(start, end);
     std::vector<Mantid::Kernel::SplittingInterval> splitVector = {time_split};
     auto tempSample = run.getProperty("Temp_Sample");
-    const auto *tempSampleTimeSeries =
-        dynamic_cast<const TimeSeriesProperty<double> *>(tempSample);
+    const auto *tempSampleTimeSeries = dynamic_cast<const TimeSeriesProperty<double> *>(tempSample);
 
     if (tempSampleTimeSeries) {
       out << tempSampleTimeSeries->averageValueInFilter(splitVector);
@@ -240,9 +237,7 @@ void printRunInfo(const MatrixWorkspace_sptr &runWs, std::ostringstream &out) {
  * Constructor
  * @param groupName :: The top-level group to use for all the widgets
  */
-WidgetAutoSaver::WidgetAutoSaver(const QString &groupName) {
-  m_settings.beginGroup(groupName);
-}
+WidgetAutoSaver::WidgetAutoSaver(const QString &groupName) { m_settings.beginGroup(groupName); }
 
 /**
  * Register new widget for auto-saving.
@@ -250,13 +245,11 @@ WidgetAutoSaver::WidgetAutoSaver(const QString &groupName) {
  * @param name :: A name to use when saving/loading
  * @param defaultValue :: A value to load when the widget has not been saved yet
  */
-void WidgetAutoSaver::registerWidget(QWidget *widget, const QString &name,
-                                     QVariant defaultValue) {
+void WidgetAutoSaver::registerWidget(QWidget *widget, const QString &name, QVariant defaultValue) {
   m_registeredWidgets.push_back(widget);
   m_widgetNames[widget] = name;
   m_widgetDefaultValues[widget] = std::move(defaultValue);
-  m_widgetGroups[widget] =
-      m_settings.group(); // Current group set up using beginGroup and endGroup
+  m_widgetGroups[widget] = m_settings.group(); // Current group set up using beginGroup and endGroup
 }
 
 /**
@@ -370,9 +363,7 @@ void WidgetAutoSaver::loadWidgetValues() {
  * put in the given group.
  * @param name :: The name of the group
  */
-void WidgetAutoSaver::beginGroup(const QString &name) {
-  m_settings.beginGroup(name);
-}
+void WidgetAutoSaver::beginGroup(const QString &name) { m_settings.beginGroup(name); }
 
 /**
  * Ends the scope of the previous begin group.
@@ -414,8 +405,7 @@ std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
   if (wsList.empty())
     throw std::invalid_argument("Unable to run on an empty list");
 
-  const std::string instrument =
-      firstPeriod(wsList.front())->getInstrument()->getName();
+  const std::string instrument = firstPeriod(wsList.front())->getInstrument()->getName();
 
   // Extract the run numbers
   std::vector<int> runNumbers;
@@ -438,8 +428,7 @@ std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
  * @return :: run label
  * @throws std::invalid_argument if empty run list given
  */
-std::string getRunLabel(const std::string &instrument,
-                        const std::vector<int> &runNumbers) {
+std::string getRunLabel(const std::string &instrument, const std::vector<int> &runNumbers) {
   if (runNumbers.empty()) {
     throw std::invalid_argument("Cannot run on an empty list");
   }
@@ -450,9 +439,7 @@ std::string getRunLabel(const std::string &instrument,
   // Zero-padding for the first run
   int zeroPadding;
   try {
-    zeroPadding = ConfigService::Instance()
-                      .getInstrument(instrument)
-                      .zeroPadding(ranges.begin()->first);
+    zeroPadding = ConfigService::Instance().getInstrument(instrument).zeroPadding(ranges.begin()->first);
   } catch (const Mantid::Kernel::Exception::NotFoundError &) {
     // Old muon instrument without an IDF - default to 3 zeros
     zeroPadding = 3;
@@ -492,8 +479,7 @@ std::string getRunLabel(const std::string &instrument,
  * @param runs :: [input] Vector of run numbers - need not be sorted
  * @returns Vector of pairs of (start, end) of consecutive runs
  */
-std::vector<std::pair<int, int>>
-findConsecutiveRuns(const std::vector<int> &runs) {
+std::vector<std::pair<int, int>> findConsecutiveRuns(const std::vector<int> &runs) {
   // Groups to output
   std::vector<std::pair<int, int>> ranges;
   // Sort the vector to begin with
@@ -537,11 +523,9 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
   };
 
   // Comparison function for doubles
-  auto numericalCompare = [](const std::string &first,
-                             const std::string &second) {
+  auto numericalCompare = [](const std::string &first, const std::string &second) {
     try {
-      return boost::lexical_cast<double>(first) <
-             boost::lexical_cast<double>(second);
+      return boost::lexical_cast<double>(first) < boost::lexical_cast<double>(second);
     } catch (boost::bad_lexical_cast & /*e*/) {
       return false;
     }
@@ -552,12 +536,10 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
   auto startRange = findLogRange(workspaces, "run_start", dateCompare);
   auto endRange = findLogRange(workspaces, "run_end", dateCompare);
   auto tempRange = findLogRange(workspaces, "sample_temp", numericalCompare);
-  auto fieldRange =
-      findLogRange(workspaces, "sample_magn_field", numericalCompare);
+  auto fieldRange = findLogRange(workspaces, "sample_magn_field", numericalCompare);
 
   // Create accumulator workspace by cloning the first one from the list
-  IAlgorithm_sptr cloneAlg =
-      AlgorithmManager::Instance().create("CloneWorkspace");
+  IAlgorithm_sptr cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
   cloneAlg->setRethrows(true);
   cloneAlg->setPropertyValue("InputWorkspace", firstEntry.name());
@@ -576,8 +558,7 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
     alg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
     alg->execute();
 
-    appendTimeSeriesLogs(wsEntry.retrieve(), accumulatorEntry.retrieve(),
-                         "Temp_Sample");
+    appendTimeSeriesLogs(wsEntry.retrieve(), accumulatorEntry.retrieve(), "Temp_Sample");
   }
 
   // Replace the start and end times with the earliest start and latest end
@@ -593,23 +574,18 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
     }
     return oss.str();
   };
-  replaceLogValue(accumulatorEntry.name(), "sample_temp",
-                  rangeString(tempRange));
-  replaceLogValue(accumulatorEntry.name(), "sample_magn_field",
-                  rangeString(fieldRange));
+  replaceLogValue(accumulatorEntry.name(), "sample_temp", rangeString(tempRange));
+  replaceLogValue(accumulatorEntry.name(), "sample_magn_field", rangeString(fieldRange));
   // Construct range of run numbers differently
-  replaceLogValue(accumulatorEntry.name(), "run_number",
-                  [](std::pair<std::string, std::string> range) {
-                    for (size_t i = 0;
-                         i < range.first.size() && i < range.second.size();
-                         ++i) {
-                      if (range.first[i] != range.second[i]) {
-                        range.second.erase(0, i);
-                        break;
-                      }
-                    }
-                    return range.first + "-" + range.second;
-                  }(runNumRange));
+  replaceLogValue(accumulatorEntry.name(), "run_number", [](std::pair<std::string, std::string> range) {
+    for (size_t i = 0; i < range.first.size() && i < range.second.size(); ++i) {
+      if (range.first[i] != range.second[i]) {
+        range.second.erase(0, i);
+        break;
+      }
+    }
+    return range.first + "-" + range.second;
+  }(runNumRange));
 
   return accumulatorEntry.retrieve();
 }
@@ -625,14 +601,12 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
  * @return Value if field is valid, default value otherwise. If default value is
  * empty, EMPTY_DBL() is returned
  */
-double getValidatedDouble(QLineEdit *field, const QString &defaultValue,
-                          const QString &valueDescr, Logger &log) {
+double getValidatedDouble(QLineEdit *field, const QString &defaultValue, const QString &valueDescr, Logger &log) {
   bool ok;
   double value = field->text().toDouble(&ok);
 
   if (!ok) {
-    log.warning() << "The value of " << valueDescr.toStdString()
-                  << " is invalid. ";
+    log.warning() << "The value of " << valueDescr.toStdString() << " is invalid. ";
     log.warning() << "Reset to default.\n";
     field->setText(defaultValue);
 
@@ -655,8 +629,7 @@ double getValidatedDouble(QLineEdit *field, const QString &defaultValue,
  * @param groupName :: Name of the group workspaces should be in
  * @param inputWorkspaces :: Names of the workspaces to group
  */
-void groupWorkspaces(const std::string &groupName,
-                     const std::vector<std::string> &inputWorkspaces) {
+void groupWorkspaces(const std::string &groupName, const std::vector<std::string> &inputWorkspaces) {
   auto &ads = AnalysisDataService::Instance();
 
   WorkspaceGroup_sptr group;
@@ -673,8 +646,7 @@ void groupWorkspaces(const std::string &groupName,
     }
   } else {
     // Doesn't exist or isn't a group -> create/overwrite
-    IAlgorithm_sptr groupingAlg =
-        AlgorithmManager::Instance().create("GroupWorkspaces");
+    IAlgorithm_sptr groupingAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
     groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
     groupingAlg->setPropertyValue("OutputWorkspace", groupName);
     groupingAlg->execute();
@@ -686,8 +658,7 @@ void groupWorkspaces(const std::string &groupName,
  * @param logName :: [input] Name of log to replace
  * @param logValue :: [input] Name of value to replace it with
  */
-void replaceLogValue(const std::string &wsName, const std::string &logName,
-                     const std::string &logValue) {
+void replaceLogValue(const std::string &wsName, const std::string &logName, const std::string &logValue) {
   IAlgorithm_sptr removeAlg = AlgorithmManager::Instance().create("DeleteLog");
   removeAlg->setLogging(false);
   removeAlg->setRethrows(true);
@@ -711,8 +682,7 @@ void replaceLogValue(const std::string &wsName, const std::string &logName,
  * @param logName :: [input] Name of log
  * @returns All values found for the given log
  */
-std::vector<std::string> findLogValues(const Workspace_sptr &ws,
-                                       const std::string &logName) {
+std::vector<std::string> findLogValues(const Workspace_sptr &ws, const std::string &logName) {
   std::vector<std::string> values;
   MatrixWorkspace_sptr matrixWS;
 
@@ -727,8 +697,7 @@ std::vector<std::string> findLogValues(const Workspace_sptr &ws,
     auto groupWS = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
     if (groupWS && groupWS->getNumberOfEntries() > 0) {
       for (int index = 0; index < groupWS->getNumberOfEntries(); index++) {
-        matrixWS =
-            std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(index));
+        matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(index));
         if (matrixWS) {
           if (matrixWS->run().hasProperty(logName)) {
             values.emplace_back(matrixWS->run().getProperty(logName)->value());
@@ -747,9 +716,9 @@ std::vector<std::string> findLogValues(const Workspace_sptr &ws,
  * @param isLessThan :: [input] Function to sort values (<)
  * @returns :: Pair of (smallest, largest) values
  */
-std::pair<std::string, std::string> findLogRange(
-    const Workspace_sptr &ws, const std::string &logName,
-    bool (*isLessThan)(const std::string &first, const std::string &second)) {
+std::pair<std::string, std::string> findLogRange(const Workspace_sptr &ws, const std::string &logName,
+                                                 bool (*isLessThan)(const std::string &first,
+                                                                    const std::string &second)) {
   auto values = findLogValues(ws, logName);
   if (!values.empty()) {
     auto minmax = std::minmax_element(values.begin(), values.end(), isLessThan);
@@ -767,9 +736,9 @@ std::pair<std::string, std::string> findLogRange(
  * @param isLessThan :: [input] Function to sort values (<)
  * @returns :: Pair of (smallest, largest) values
  */
-std::pair<std::string, std::string> findLogRange(
-    const std::vector<Workspace_sptr> &workspaces, const std::string &logName,
-    bool (*isLessThan)(const std::string &first, const std::string &second)) {
+std::pair<std::string, std::string>
+findLogRange(const std::vector<Workspace_sptr> &workspaces, const std::string &logName,
+             bool (*isLessThan)(const std::string &first, const std::string &second)) {
   std::string smallest, largest;
   for (const auto &ws : workspaces) {
     auto range = findLogRange(ws, logName, isLessThan);
@@ -794,28 +763,23 @@ std::pair<std::string, std::string> findLogRange(
  * @throws std::invalid_argument if the workspaces supplied are null or have
  * different number of periods
  */
-void appendTimeSeriesLogs(const Workspace_sptr &toAppend,
-                          const Workspace_sptr &resultant,
-                          const std::string &logName) {
+void appendTimeSeriesLogs(const Workspace_sptr &toAppend, const Workspace_sptr &resultant, const std::string &logName) {
   // check input
   if (!toAppend || !resultant) {
-    throw std::invalid_argument(
-        "Cannot append logs: workspaces supplied are null");
+    throw std::invalid_argument("Cannot append logs: workspaces supplied are null");
   }
 
   // Cast the inputs to MatrixWorkspace (could be a group)
   auto getWorkspaces = [](const Workspace_sptr &ws) {
     std::vector<MatrixWorkspace_sptr> workspaces;
-    MatrixWorkspace_sptr matrixWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    MatrixWorkspace_sptr matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
     if (matrixWS) {
       workspaces.emplace_back(matrixWS);
     } else { // it's a workspace group
       auto groupWS = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
       if (groupWS && groupWS->getNumberOfEntries() > 0) {
         for (int index = 0; index < groupWS->getNumberOfEntries(); index++) {
-          matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-              groupWS->getItem(index));
+          matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(index));
           if (matrixWS) {
             workspaces.emplace_back(matrixWS);
           }
@@ -830,8 +794,7 @@ void appendTimeSeriesLogs(const Workspace_sptr &toAppend,
     const Mantid::API::Run &run = ws->run();
     TimeSeriesProperty<double> *prop = nullptr;
     if (run.hasProperty(logName)) {
-      prop =
-          dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(logName));
+      prop = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(logName));
       if (!prop) {
         throw std::invalid_argument("Property" + logName + " of wrong type");
       }
@@ -846,8 +809,7 @@ void appendTimeSeriesLogs(const Workspace_sptr &toAppend,
       TimeSeriesProperty<double> *firstProp = getTSLog(firstWorkspaces[i]);
       TimeSeriesProperty<double> *secondProp = getTSLog(secondWorkspaces[i]);
       if (firstProp && secondProp) {
-        secondProp->operator+=(
-            static_cast<const Property *>(firstProp)); // adds the values
+        secondProp->operator+=(static_cast<const Property *>(firstProp)); // adds the values
         secondProp->eliminateDuplicates();
       }
     }
@@ -864,13 +826,11 @@ void appendTimeSeriesLogs(const Workspace_sptr &toAppend,
  * @param firstRun :: [input] First run number - use this if tokenizing fails
  * @returns Run number/period string
  */
-QString runNumberString(const std::string &workspaceName,
-                        const std::string &firstRun) {
+QString runNumberString(const std::string &workspaceName, const std::string &firstRun) {
   std::string periods = "";        // default
   std::string instRuns = firstRun; // default
 
-  Mantid::Kernel::StringTokenizer tokenizer(
-      workspaceName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer tokenizer(workspaceName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   const size_t numTokens = tokenizer.count();
   if (numTokens > 4) { // format is ok
     instRuns = tokenizer[0];
@@ -906,9 +866,8 @@ QString runNumberString(const std::string &workspaceName,
  * @returns :: True or false to load new grouping
  * @throws std::invalid_argument if loadedWorkspace is null
  */
-bool isReloadGroupingNecessary(
-    const std::shared_ptr<Mantid::API::Workspace> &currentWorkspace,
-    const std::shared_ptr<Mantid::API::Workspace> &loadedWorkspace) {
+bool isReloadGroupingNecessary(const std::shared_ptr<Mantid::API::Workspace> &currentWorkspace,
+                               const std::shared_ptr<Mantid::API::Workspace> &loadedWorkspace) {
   if (!loadedWorkspace) {
     throw std::invalid_argument("No loaded workspace to get grouping for!");
   }
@@ -938,8 +897,7 @@ bool isReloadGroupingNecessary(
     } catch (std::exception &) {
       // Log not found in one or both workspaces - ignore it
     }
-    if (loadedField && currentField &&
-        loadedField->value() != currentField->value()) {
+    if (loadedField && currentField && loadedField->value() != currentField->value()) {
       reloadNecessary = true;
     }
   }
@@ -963,8 +921,7 @@ bool isReloadGroupingNecessary(
 Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
   Muon::DatasetParams params;
 
-  Mantid::Kernel::StringTokenizer tokenizer(
-      wsName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer tokenizer(wsName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   const size_t numTokens = tokenizer.count();
   if (numTokens < 5) {
     throw std::invalid_argument("Could not parse workspace name: " + wsName);
@@ -991,9 +948,7 @@ Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
     versionString = tokenizer[4];
   }
   // Remove the # from the version string
-  versionString.erase(
-      std::remove(versionString.begin(), versionString.end(), '#'),
-      versionString.end());
+  versionString.erase(std::remove(versionString.begin(), versionString.end(), '#'), versionString.end());
 
   try {
     params.version = boost::lexical_cast<size_t>(versionString);
@@ -1013,27 +968,22 @@ Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
  * @param runNumbers :: [output] Vector to fill with run numbers
  * @throws std::invalid_argument if input cannot be parsed
  */
-void parseRunLabel(const std::string &label, std::string &instrument,
-                   std::vector<int> &runNumbers) {
+void parseRunLabel(const std::string &label, std::string &instrument, std::vector<int> &runNumbers) {
   const size_t instPos = label.find_first_of("0123456789");
   instrument = label.substr(0, instPos);
   const size_t numPos = label.find_first_not_of('0', instPos);
   if (numPos != std::string::npos) {
     std::string runString = label.substr(numPos, label.size());
     // sets of continuous ranges
-    Mantid::Kernel::StringTokenizer rangeTokenizer(
-        runString, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer rangeTokenizer(runString, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
     for (const auto &range : rangeTokenizer.asVector()) {
-      Mantid::Kernel::StringTokenizer pairTokenizer(
-          range, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+      Mantid::Kernel::StringTokenizer pairTokenizer(range, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM);
       try {
         if (pairTokenizer.count() == 2) {
           // Range of run numbers
           // Deal with common part of string: "151" in "15189-91"
-          const size_t diff =
-              pairTokenizer[0].length() - pairTokenizer[1].length();
-          const std::string endRun =
-              pairTokenizer[0].substr(0, diff) + pairTokenizer[1];
+          const size_t diff = pairTokenizer[0].length() - pairTokenizer[1].length();
+          const std::string endRun = pairTokenizer[0].substr(0, diff) + pairTokenizer[1];
           const int start = boost::lexical_cast<int>(pairTokenizer[0]);
           const int end = boost::lexical_cast<int>(endRun);
           for (int run = start; run < end + 1; run++) {
@@ -1043,12 +993,10 @@ void parseRunLabel(const std::string &label, std::string &instrument,
           // Single run
           runNumbers.emplace_back(boost::lexical_cast<int>(pairTokenizer[0]));
         } else {
-          throw std::invalid_argument("Failed to parse run label: " + label +
-                                      " too many tokens ");
+          throw std::invalid_argument("Failed to parse run label: " + label + " too many tokens ");
         }
       } catch (const boost::bad_lexical_cast &) {
-        throw std::invalid_argument("Failed to parse run label: " + label +
-                                    " not a good run number");
+        throw std::invalid_argument("Failed to parse run label: " + label + " not a good run number");
       } catch (...) {
         throw std::invalid_argument("Failed to parse run label: " + label);
       }
@@ -1124,8 +1072,7 @@ std::string generateWorkspaceName(const Muon::DatasetParams &params) {
  * tables) or parameter tables themselves
  * @return :: List of colors with the key being position in input vector.
  */
-QMap<int, QColor>
-getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
+QMap<int, QColor> getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
   QMap<int, QColor> colors; // position, color
 
   // Vector of <number of runs in fit, parameters in fit> pairs
@@ -1140,21 +1087,17 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
       for (size_t i = 0; i < group->size(); ++i) {
         const auto &wsInGroup = group->getItem(i);
         if (wsInGroup->getName().find("_Parameters") != std::string::npos) {
-          params = getKeysFromTable(
-              std::dynamic_pointer_cast<ITableWorkspace>(wsInGroup));
-        } else if (wsInGroup->getName().find("_Workspace") !=
-                   std::string::npos) {
+          params = getKeysFromTable(std::dynamic_pointer_cast<ITableWorkspace>(wsInGroup));
+        } else if (wsInGroup->getName().find("_Workspace") != std::string::npos) {
           ++nRuns;
         }
       }
-    } else if (const auto table =
-                   std::dynamic_pointer_cast<ITableWorkspace>(ws)) {
+    } else if (const auto table = std::dynamic_pointer_cast<ITableWorkspace>(ws)) {
       nRuns = 1;
       params = getKeysFromTable(table);
     } else {
-      throw std::invalid_argument(
-          "Unexpected workspace type for " + ws->getName() +
-          " (expected WorkspaceGroup or ITableWorkspace)");
+      throw std::invalid_argument("Unexpected workspace type for " + ws->getName() +
+                                  " (expected WorkspaceGroup or ITableWorkspace)");
     }
     fitProperties.emplace_back(nRuns, params);
   }

@@ -57,9 +57,7 @@ namespace Algorithms {
  *
  *
  */
-class MANTID_ALGORITHMS_DLL CheckWorkspacesMatch
-    : public API::Algorithm,
-      public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL CheckWorkspacesMatch : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   CheckWorkspacesMatch();
 
@@ -75,9 +73,7 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CompareWorkspaces"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CompareWorkspaces"}; }
 
   /// Algorithm's category for identification
   const std::string category() const override { return "Utility\\Workspaces"; }

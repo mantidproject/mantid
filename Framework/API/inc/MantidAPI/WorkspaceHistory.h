@@ -80,9 +80,7 @@ public:
 
 private:
   /// Recursive function to load the algorithm history tree from file
-  void loadNestedHistory(
-      ::NeXus::File *file,
-      AlgorithmHistory_sptr parent = std::shared_ptr<AlgorithmHistory>());
+  void loadNestedHistory(::NeXus::File *file, AlgorithmHistory_sptr parent = std::shared_ptr<AlgorithmHistory>());
   /// Parse an algorithm history string loaded from file
   AlgorithmHistory_sptr parseAlgorithmHistory(const std::string &rawData);
   /// Find the history entries at this level in the file.
@@ -93,8 +91,7 @@ private:
   Mantid::API::AlgorithmHistories m_algorithms;
 };
 
-MANTID_API_DLL std::ostream &operator<<(std::ostream &,
-                                        const WorkspaceHistory &);
+MANTID_API_DLL std::ostream &operator<<(std::ostream &, const WorkspaceHistory &);
 
 } // namespace API
 } // namespace Mantid

@@ -18,8 +18,7 @@ class ExperimentInfo;
 /**
   A validator which checks that a workspace has a valid instrument.
 */
-class MANTID_API_DLL InstrumentValidator
-    : public Kernel::TypedValidator<std::shared_ptr<ExperimentInfo>> {
+class MANTID_API_DLL InstrumentValidator : public Kernel::TypedValidator<std::shared_ptr<ExperimentInfo>> {
 public:
   /// Enumeration describing requirements
   enum Requirements { SourcePosition = 0x1, SamplePosition = 0x2 };
@@ -28,8 +27,7 @@ public:
   InstrumentValidator(const unsigned int flags = SamplePosition);
   std::string getType() const;
   Kernel::IValidator_sptr clone() const override;
-  std::string
-  checkValidity(const std::shared_ptr<ExperimentInfo> &value) const override;
+  std::string checkValidity(const std::shared_ptr<ExperimentInfo> &value) const override;
 
 private:
   unsigned int m_requires;

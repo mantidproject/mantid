@@ -22,13 +22,11 @@ namespace Mantid {
 namespace CurveFitting {
 
 /// Constructor
-GSLVector::GSLVector()
-    : m_data(1), m_view(gsl_vector_view_array(m_data.data(), 1)) {}
+GSLVector::GSLVector() : m_data(1), m_view(gsl_vector_view_array(m_data.data(), 1)) {}
 
 /// Constructor
 /// @param n :: The length of the vector.
-GSLVector::GSLVector(const size_t n)
-    : m_data(n), m_view(gsl_vector_view_array(m_data.data(), n)) {}
+GSLVector::GSLVector(const size_t n) : m_data(n), m_view(gsl_vector_view_array(m_data.data(), n)) {}
 
 /// Construct from a std vector
 /// @param v :: A std vector.
@@ -37,8 +35,7 @@ GSLVector::GSLVector(const std::vector<double> &v)
 
 /// Construct from an initialisation list
 /// @param ilist :: A list of doubles: {V0, V1, V2, ...}
-GSLVector::GSLVector(std::initializer_list<double> ilist)
-    : GSLVector(ilist.size()) {
+GSLVector::GSLVector(std::initializer_list<double> ilist) : GSLVector(ilist.size()) {
   for (auto cell = ilist.begin(); cell != ilist.end(); ++cell) {
     auto i = static_cast<size_t>(std::distance(ilist.begin(), cell));
     set(i, *cell);
@@ -48,14 +45,12 @@ GSLVector::GSLVector(std::initializer_list<double> ilist)
 /// Copy constructor.
 /// @param v :: The other vector
 GSLVector::GSLVector(const GSLVector &v)
-    : m_data(v.m_data),
-      m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
+    : m_data(v.m_data), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
 
 /// Copy from a gsl vector
 /// @param v :: A vector to copy from.
 GSLVector::GSLVector(const gsl_vector *v)
-    : m_data(v->size),
-      m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {
+    : m_data(v->size), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {
   for (size_t i = 0; i < v->size; ++i) {
     m_data[i] = gsl_vector_get(v, i);
   }
@@ -63,8 +58,7 @@ GSLVector::GSLVector(const gsl_vector *v)
 
 /// Move constructor.
 GSLVector::GSLVector(std::vector<double> &&v)
-    : m_data(std::move(v)),
-      m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
+    : m_data(std::move(v)), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
 
 /// Copy assignment operator
 /// @param v :: The other vector
@@ -116,8 +110,7 @@ void GSLVector::set(size_t i, double value) {
     m_data[i] = value;
   else {
     std::stringstream errmsg;
-    errmsg << "GSLVector index = " << i
-           << " is out of range = " << m_data.size() << " in GSLVector.set()";
+    errmsg << "GSLVector index = " << i << " is out of range = " << m_data.size() << " in GSLVector.set()";
     throw std::out_of_range(errmsg.str());
   }
 }
@@ -128,8 +121,7 @@ double GSLVector::get(size_t i) const {
     return m_data[i];
 
   std::stringstream errmsg;
-  errmsg << "GSLVector index = " << i << " is out of range = " << m_data.size()
-         << " in GSLVector.get()";
+  errmsg << "GSLVector index = " << i << " is out of range = " << m_data.size() << " in GSLVector.get()";
   throw std::out_of_range(errmsg.str());
 }
 
@@ -168,16 +160,14 @@ GSLVector &GSLVector::operator*=(const GSLVector &v) {
 /// Multiply by a number
 /// @param d :: The number
 GSLVector &GSLVector::operator*=(const double d) {
-  std::transform(m_data.begin(), m_data.end(), m_data.begin(),
-                 [d](double x) { return x * d; });
+  std::transform(m_data.begin(), m_data.end(), m_data.begin(), [d](double x) { return x * d; });
   return *this;
 }
 
 /// Add a number
 /// @param d :: The number
 GSLVector &GSLVector::operator+=(const double d) {
-  std::transform(m_data.begin(), m_data.end(), m_data.begin(),
-                 [d](double x) { return x + d; });
+  std::transform(m_data.begin(), m_data.end(), m_data.begin(), [d](double x) { return x + d; });
   return *this;
 }
 
@@ -195,9 +185,8 @@ double GSLVector::norm() const { return sqrt(norm2()); }
 
 /// Get vector's norm squared
 double GSLVector::norm2() const {
-  return std::accumulate(
-      m_data.cbegin(), m_data.cend(), 0.,
-      [](double sum, double element) { return sum + element * element; });
+  return std::accumulate(m_data.cbegin(), m_data.cend(), 0.,
+                         [](double sum, double element) { return sum + element * element; });
 }
 
 /// Calculate the dot product
@@ -247,9 +236,8 @@ std::pair<size_t, size_t> GSLVector::indicesOfMinMaxElements() const {
     // can it ever happen?
     throw std::runtime_error("Cannot find min or max element of vector.");
   }
-  return std::make_pair(
-      static_cast<size_t>(std::distance(m_data.begin(), pit.first)),
-      static_cast<size_t>(std::distance(m_data.begin(), pit.second)));
+  return std::make_pair(static_cast<size_t>(std::distance(m_data.begin(), pit.first)),
+                        static_cast<size_t>(std::distance(m_data.begin(), pit.second)));
 }
 
 /// Create an index array that would sort this vector
@@ -261,13 +249,9 @@ std::vector<size_t> GSLVector::sortIndices(bool ascending) const {
     indices[i] = i;
   }
   if (ascending) {
-    std::sort(indices.begin(), indices.end(), [this](size_t i, size_t j) {
-      return this->m_data[i] < m_data[j];
-    });
+    std::sort(indices.begin(), indices.end(), [this](size_t i, size_t j) { return this->m_data[i] < m_data[j]; });
   } else {
-    std::sort(indices.begin(), indices.end(), [this](size_t i, size_t j) {
-      return this->m_data[i] > m_data[j];
-    });
+    std::sort(indices.begin(), indices.end(), [this](size_t i, size_t j) { return this->m_data[i] > m_data[j]; });
   }
   return indices;
 }

@@ -20,8 +20,7 @@ namespace MplCpp {
 namespace {
 Python::Object newFigure(bool tightLayout = true) {
   GlobalInterpreterLock lock;
-  Python::Object figureModule{
-      Python::NewRef(PyImport_ImportModule("matplotlib.figure"))};
+  Python::Object figureModule{Python::NewRef(PyImport_ImportModule("matplotlib.figure"))};
   auto fig = figureModule.attr("Figure")();
   if (tightLayout) {
     auto tight = Python::NewRef(Py_BuildValue("{sf}", "pad", 0.5));
@@ -35,15 +34,13 @@ Python::Object newFigure(bool tightLayout = true) {
  * Construct a C++ wrapper around an existing figure instance
  * @param obj An existing Figure instance
  */
-Figure::Figure(Python::Object obj)
-    : Python::InstanceHolder(std::move(obj), "add_axes") {}
+Figure::Figure(Python::Object obj) : Python::InstanceHolder(std::move(obj), "add_axes") {}
 
 /**
  * Construct a new default figure.
  * @param tightLayout If true set a tight layout on the matplotlib figure
  */
-Figure::Figure(bool tightLayout)
-    : Python::InstanceHolder(newFigure(tightLayout)) {}
+Figure::Figure(bool tightLayout) : Python::InstanceHolder(newFigure(tightLayout)) {}
 
 /**
  * @return The number attribute of the current figure
@@ -57,8 +54,7 @@ int Figure::number() const {
  * @return The facecolor of the current figure
  */
 QColor Figure::faceColor() const {
-  return ColorConverter::toRGB(
-      callMethodNoCheck<Python::Object>(pyobj(), "get_facecolor"));
+  return ColorConverter::toRGB(callMethodNoCheck<Python::Object>(pyobj(), "get_facecolor"));
 }
 
 /**
@@ -67,9 +63,7 @@ QColor Figure::faceColor() const {
  * See https://matplotlib.org/api/colors_api.html
  */
 void Figure::setFaceColor(const QColor &color) {
-  callMethodNoCheck<void, const char *>(
-      pyobj(), "set_facecolor",
-      color.name(QColor::HexRgb).toLatin1().constData());
+  callMethodNoCheck<void, const char *>(pyobj(), "set_facecolor", color.name(QColor::HexRgb).toLatin1().constData());
 }
 
 /**
@@ -77,9 +71,7 @@ void Figure::setFaceColor(const QColor &color) {
  * @param color A character string indicating the color.
  * See https://matplotlib.org/api/colors_api.html
  */
-void Figure::setFaceColor(const char *color) {
-  callMethodNoCheck<void, const char *>(pyobj(), "set_facecolor", color);
-}
+void Figure::setFaceColor(const char *color) { callMethodNoCheck<void, const char *>(pyobj(), "set_facecolor", color); }
 
 /**
  * Sets how tight_layout is called when drawing. ("pad", "w_pad", "h_pad",
@@ -119,8 +111,7 @@ void Figure::setWindowTitle(const char *title) {
  */
 Axes Figure::addAxes(double left, double bottom, double width, double height) {
   GlobalInterpreterLock lock;
-  return Axes{pyobj().attr("add_axes")(
-      Python::NewRef(Py_BuildValue("(ffff)", left, bottom, width, height)))};
+  return Axes{pyobj().attr("add_axes")(Python::NewRef(Py_BuildValue("(ffff)", left, bottom, width, height)))};
 }
 
 /**
@@ -150,14 +141,11 @@ Axes Figure::addSubPlot(const int subplotspec, const QString &projection) {
  * @param format An optional object describing how to format the tick labels
  * @return A reference to the matplotlib.colorbar.Colorbar object
  */
-Python::Object Figure::colorbar(const ScalarMappable &mappable, const Axes &cax,
-                                const Python::Object &ticks,
+Python::Object Figure::colorbar(const ScalarMappable &mappable, const Axes &cax, const Python::Object &ticks,
                                 const Python::Object &format) {
   GlobalInterpreterLock lock;
-  const auto args = Python::NewRef(
-      Py_BuildValue("(OO)", mappable.pyobj().ptr(), cax.pyobj().ptr()));
-  const auto kwargs = Python::NewRef(
-      Py_BuildValue("{sOsO}", "ticks", ticks.ptr(), "format", format.ptr()));
+  const auto args = Python::NewRef(Py_BuildValue("(OO)", mappable.pyobj().ptr(), cax.pyobj().ptr()));
+  const auto kwargs = Python::NewRef(Py_BuildValue("{sOsO}", "ticks", ticks.ptr(), "format", format.ptr()));
   Python::Object attr(pyobj().attr("colorbar"));
   return Python::NewRef(PyObject_Call(attr.ptr(), args.ptr(), kwargs.ptr()));
 }

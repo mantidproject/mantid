@@ -29,8 +29,7 @@ using Kernel::V3D;
 
 Mantid::Kernel::Logger g_log("Goniometer");
 
-void GoniometerAxis::saveNexus(::NeXus::File *file,
-                               const std::string &group) const {
+void GoniometerAxis::saveNexus(::NeXus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXmotor", true);
   file->writeData("name", name);
   file->writeData("angle", angle);
@@ -92,13 +91,9 @@ void Goniometer::setR(Kernel::DblMatrix rot) {
 /// Function reports if the goniometer is defined
 bool Goniometer::isDefined() const { return initFromR || (!motors.empty()); }
 
-bool Goniometer::operator==(const Goniometer &other) const {
-  return this->R == other.R;
-}
+bool Goniometer::operator==(const Goniometer &other) const { return this->R == other.R; }
 
-bool Goniometer::operator!=(const Goniometer &other) const {
-  return this->R != other.R;
-}
+bool Goniometer::operator!=(const Goniometer &other) const { return this->R != other.R; }
 
 /// Return information about axes.
 /// @return str :: string that contains on each line one motor information (axis
@@ -119,11 +114,8 @@ std::string Goniometer::axesInfo() {
       info << "Name \t Direction \t Sense \t Angle \n";
       for (it = motors.begin(); it < motors.end(); ++it) {
         sense = ((*it).sense == CCW) ? strCCW : strCW;
-        double angle = ((*it).angleunit == angDegrees)
-                           ? ((*it).angle)
-                           : ((*it).angle * rad2deg);
-        info << (*it).name << "\t" << (*it).rotationaxis << "\t" << sense
-             << "\t" << angle << '\n';
+        double angle = ((*it).angleunit == angDegrees) ? ((*it).angle) : ((*it).angle * rad2deg);
+        info << (*it).name << "\t" << (*it).rotationaxis << "\t" << sense << "\t" << angle << '\n';
       }
     }
     return info.str();
@@ -139,19 +131,16 @@ std::string Goniometer::axesInfo() {
   @param sense :: rotation sense (CW or CCW), CCW by default
   @param angUnit :: units for angle of type#AngleUnit, angDegrees by default
 */
-void Goniometer::pushAxis(const std::string &name, double axisx, double axisy,
-                          double axisz, double angle, int sense, int angUnit) {
+void Goniometer::pushAxis(const std::string &name, double axisx, double axisy, double axisz, double angle, int sense,
+                          int angUnit) {
   if (initFromR) {
-    throw std::runtime_error(
-        "Initialized from a rotation matrix, so no axes can be pushed.");
+    throw std::runtime_error("Initialized from a rotation matrix, so no axes can be pushed.");
   } else {
-    if (!std::isfinite(axisx) || !std::isfinite(axisy) ||
-        !std::isfinite(axisz) || !std::isfinite(angle)) {
+    if (!std::isfinite(axisx) || !std::isfinite(axisy) || !std::isfinite(axisz) || !std::isfinite(angle)) {
       g_log.warning() << "NaN encountered while trying to push axis to "
                          "goniometer, Operation aborted"
-                      << "\naxis name" << name << "\naxisx" << axisx
-                      << "\naxisy" << axisx << "\naxisz" << axisz << "\nangle"
-                      << angle;
+                      << "\naxis name" << name << "\naxisx" << axisx << "\naxisy" << axisx << "\naxisz" << axisz
+                      << "\nangle" << angle;
       return;
     }
     std::vector<GoniometerAxis>::iterator it;
@@ -191,8 +180,7 @@ void Goniometer::setRotationAngle(const std::string &name, double value) {
 */
 void Goniometer::setRotationAngle(size_t axisnumber, double value) {
   if (axisnumber >= motors.size())
-    throw std::out_of_range(
-        "Goniometer::setRotationAngle(): axis number specified is too large.");
+    throw std::out_of_range("Goniometer::setRotationAngle(): axis number specified is too large.");
   (motors.at(axisnumber)).angle = value; // it will throw out of range exception
                                          // if axisnumber is not in range
   recalculateR();
@@ -207,12 +195,10 @@ void Goniometer::setRotationAngle(size_t axisnumber, double value) {
  * @param inner :: whether the goniometer is the most inner (phi) or most outer
  * (omega)
  */
-void Goniometer::calcFromQSampleAndWavelength(
-    const Mantid::Kernel::V3D &position, double wavelength, bool flip_x,
-    bool inner) {
+void Goniometer::calcFromQSampleAndWavelength(const Mantid::Kernel::V3D &position, double wavelength, bool flip_x,
+                                              bool inner) {
   V3D Q(position);
-  if (Kernel::ConfigService::Instance().getString("Q.convention") ==
-      "Crystallography")
+  if (Kernel::ConfigService::Instance().getString("Q.convention") == "Crystallography")
     Q *= -1;
 
   Matrix<double> starting_goniometer = getR();
@@ -224,8 +210,7 @@ void Goniometer::calcFromQSampleAndWavelength(
   double norm_q2 = Q.norm2();
   double theta = acos(1 - norm_q2 / (2 * wv * wv)); // [0, pi]
   double phi = asin(-Q[1] / (wv * sin(theta)));     // [-pi/2, pi/2]
-  V3D Q_lab(-wv * sin(theta) * cos(phi), -wv * sin(theta) * sin(phi),
-            wv * (1 - cos(theta)));
+  V3D Q_lab(-wv * sin(theta) * cos(phi), -wv * sin(theta) * sin(phi), wv * (1 - cos(theta)));
 
   if (flip_x)
     Q_lab[0] *= -1;
@@ -286,12 +271,9 @@ size_t Goniometer::getNumberAxes() const { return motors.size(); }
  */
 void Goniometer::makeUniversalGoniometer() {
   motors.clear();
-  this->pushAxis("omega", 0., 1., 0., 0., Mantid::Geometry::CCW,
-                 Mantid::Geometry::angDegrees);
-  this->pushAxis("chi", 0., 0., 1., 0., Mantid::Geometry::CCW,
-                 Mantid::Geometry::angDegrees);
-  this->pushAxis("phi", 0., 1., 0., 0., Mantid::Geometry::CCW,
-                 Mantid::Geometry::angDegrees);
+  this->pushAxis("omega", 0., 1., 0., 0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
+  this->pushAxis("chi", 0., 0., 1., 0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
+  this->pushAxis("phi", 0., 1., 0., 0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
 }
 
 /** Return Euler angles acording to a convention
@@ -329,8 +311,7 @@ void Goniometer::recalculateR() {
  * @param file :: open NeXus file
  * @param group :: name of the group to create
  */
-void Goniometer::saveNexus(::NeXus::File *file,
-                           const std::string &group) const {
+void Goniometer::saveNexus(::NeXus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXpositioner", true);
   file->putAttr("version", 1);
   // Because the order of the axes is very important, they have to be written

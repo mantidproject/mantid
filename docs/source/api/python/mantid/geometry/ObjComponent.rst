@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Geometry::ObjComponent.
 
 .. module:`mantid.geometry`
 
-.. autoclass:: mantid.geometry.ObjComponent 
+.. autoclass:: mantid.geometry.ObjComponent
     :members:
     :undoc-members:
     :inherited-members:

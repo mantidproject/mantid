@@ -37,10 +37,11 @@ class AdvancedSetupWidget(BaseWidget):
         class AdvancedSetFrame(QFrame):
             """ Define class linked to UI Frame
             """
-
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_adv_setup.ui', baseinstance=self)
+                self.ui = load_ui(__file__,
+                                  '../../../ui/diffraction/diffraction_adv_setup.ui',
+                                  baseinstance=self)
 
         self._content = AdvancedSetFrame(self)
         self._layout.addWidget(self._content)
@@ -129,8 +130,15 @@ class AdvancedSetupWidget(BaseWidget):
         # Handler for events
         # TODO - Need to add an event handler for the change of instrument and facility
 
-        self._content.material_help_button.clicked.connect(functools.partial(self._show_concept_help, "Materials"))
-        self._content.absorption_help_button.clicked.connect(functools.partial(self._show_concept_help, "AbsorptionAndMultipleScattering"))
+        self._content.material_help_button.clicked.connect(
+            functools.partial(self._show_concept_help, "Materials"))
+        self._content.absorption_help_button.clicked.connect(
+            functools.partial(self._show_concept_help, "AbsorptionAndMultipleScattering"))
+
+        # Initialization for Caching options
+        self._content.cache_dir_browse_1.clicked.connect(self._cache_dir_browse_1)
+        self._content.cache_dir_browse_2.clicked.connect(self._cache_dir_browse_2)
+        self._content.cache_dir_browse_3.clicked.connect(self._cache_dir_browse_3)
 
         # Validated widgets
 
@@ -141,7 +149,8 @@ class AdvancedSetupWidget(BaseWidget):
             @param state: RunSetupScript object
         """
 
-        self._content.pushdatapos_combo.setCurrentIndex(self._content.pushdatapos_combo.findText(state.pushdatapositive))
+        self._content.pushdatapos_combo.setCurrentIndex(
+            self._content.pushdatapos_combo.findText(state.pushdatapositive))
         self._content.unwrap_edit.setText(str(state.unwrapref))
         self._content.lowres_edit.setText(str(state.lowresref))
         self._content.removepromptwidth_edit.setText(str(state.removepropmppulsewidth))
@@ -160,8 +169,10 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.sampleformula_edit.setText(str(state.sampleformula))
         self._content.numberdensity_edit.setText(str(state.samplenumberdensity))
         self._content.massdensity_edit.setText(str(state.measuredmassdensity))
-        self._content.containertype_combo.setCurrentIndex(self._content.containertype_combo.findText(state.containershape))
-        self._content.correctiontype_combo.setCurrentIndex(self._content.correctiontype_combo.findText(state.typeofcorrection))
+        self._content.containertype_combo.setCurrentIndex(
+            self._content.containertype_combo.findText(state.containershape))
+        self._content.correctiontype_combo.setCurrentIndex(
+            self._content.correctiontype_combo.findText(state.typeofcorrection))
 
         self._content.preserveevents_checkbox.setChecked(state.preserveevents)
         self._content.outputfileprefix_edit.setText(state.outputfileprefix)
@@ -169,6 +180,12 @@ class AdvancedSetupWidget(BaseWidget):
         # range of wavelength
         self._content.cropwavelengthmin_edit.setText(str(state.cropwavelengthmin))
         self._content.lineEdit_croppedWavelengthMax.setText(str(state.cropwavelengthmax))
+
+        # populate Caching options
+        self._content.cache_dir_edit_1.setText(state.cache_dir_scan_save)
+        self._content.cache_dir_edit_2.setText(state.cache_dir_scan_1)
+        self._content.cache_dir_edit_3.setText(state.cache_dir_scan_2)
+        self._content.clean_cache_box.setChecked(state.clean_cache)
 
         return
 
@@ -178,6 +195,9 @@ class AdvancedSetupWidget(BaseWidget):
         """
         s = AdvancedSetupScript(self._instrument_name)
 
+        #
+        # Initialize AdvancedSetupScript static variables with widget's content
+        #
         s.pushdatapositive = str(self._content.pushdatapos_combo.currentText())
         s.unwrapref = self._content.unwrap_edit.text()
         s.lowresref = self._content.lowres_edit.text()
@@ -204,6 +224,11 @@ class AdvancedSetupWidget(BaseWidget):
         s.preserveevents = self._content.preserveevents_checkbox.isChecked()
 
         s.outputfileprefix = self._content.outputfileprefix_edit.text()
+        # Caching options
+        s.cache_dir_scan_save = self._content.cache_dir_edit_1.text()
+        s.cache_dir_scan_1 = self._content.cache_dir_edit_2.text()
+        s.cache_dir_scan_2 = self._content.cache_dir_edit_3.text()
+        s.clean_cache = self._content.clean_cache_box.isChecked()
 
         return s
 
@@ -222,11 +247,13 @@ class AdvancedSetupWidget(BaseWidget):
         return
 
     def _show_help(self):
-
         class HelpDialog(QDialog):
             def __init__(self, parent=None):
                 QDialog.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_info.ui', baseinstance=self)
+                self.ui = load_ui(__file__,
+                                  '../../../ui/diffraction/diffraction_info.ui',
+                                  baseinstance=self)
+
         dialog = HelpDialog(self)
         dialog.exec_()
 
@@ -243,21 +270,41 @@ class AdvancedSetupWidget(BaseWidget):
 
     def _validate_formula(self):
         try:
-            MaterialBuilder().setFormula(self._content.sampleformula_edit.text())
+            if self._content.sampleformula_edit.text().strip() != '':
+                MaterialBuilder().setFormula(self._content.sampleformula_edit.text().strip())
             self._content.sampleformula_edit.setToolTip("")
             self._content.sampleformula_edit.setStyleSheet("QLineEdit{}")
         except ValueError as e:
-            self._content.sampleformula_edit.setToolTip(str(e).replace("MaterialBuilder::setFormula() - ",""))
+            self._content.sampleformula_edit.setToolTip(
+                str(e).replace("MaterialBuilder::setFormula() - ", ""))
             self._content.sampleformula_edit.setStyleSheet("QLineEdit{background:salmon;}")
 
     def _calculate_packing_fraction(self):
         try:
-            self._content.packingfraction_edit.setText('{:.5f}'.format(MaterialBuilder()
-                                                                       .setFormula(self._content.sampleformula_edit.text())
-                                                                       .setNumberDensity(float(self._content.numberdensity_edit.text()))
-                                                                       .setMassDensity(float(self._content.massdensity_edit.text()))
-                                                                       .build().packingFraction))
+            self._content.packingfraction_edit.setText('{:.5f}'.format(MaterialBuilder().setFormula(
+                self._content.sampleformula_edit.text()).setNumberDensity(
+                    float(self._content.numberdensity_edit.text())).setMassDensity(
+                        float(self._content.massdensity_edit.text())).build().packingFraction))
         except ValueError:  # boost.python.ArgumentError are not catchable
             self._content.packingfraction_edit.setText(str(1))
+
+    def _cache_dir_browse_1(self):
+        r"""Event handling for browsing the cache directory"""
+        dir_path = self.dir_browse_dialog(title='Select the Cache Directory (scan&save)')
+        if dir_path:
+            self._content.cache_dir_edit_1.setText(dir_path)
+
+    def _cache_dir_browse_2(self):
+        r"""Event handling for browsing the cache directory"""
+        dir_path = self.dir_browse_dialog(title='Select the Cache Directory (scan only)')
+        if dir_path:
+            self._content.cache_dir_edit_2.setText(dir_path)
+
+    def _cache_dir_browse_3(self):
+        r"""Event handling for browsing the cache directory"""
+        dir_path = self.dir_browse_dialog(title='Select the Cache Directory (scan only)')
+        if dir_path:
+            self._content.cache_dir_edit_3.setText(dir_path)
+
 
 #ENDCLASSDEF

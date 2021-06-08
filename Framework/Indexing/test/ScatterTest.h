@@ -45,17 +45,14 @@ void run_StorageMode_Cloned(const Communicator &comm) {
     TS_ASSERT_EQUALS(result.storageMode(), StorageMode::Distributed);
     TS_ASSERT_EQUALS(result.globalSize(), indexInfo.size());
     // Assuming round-robin partitioning
-    TS_ASSERT_EQUALS(result.size(),
-                     (indexInfo.size() + comm.size() - 1 - comm.rank()) /
-                         comm.size());
+    TS_ASSERT_EQUALS(result.size(), (indexInfo.size() + comm.size() - 1 - comm.rank()) / comm.size());
     const auto resultSpecDefs = result.spectrumDefinitions();
     const auto specDefs = indexInfo.spectrumDefinitions();
     const auto indices = result.makeIndexSet();
     size_t current = 0;
     for (size_t i = 0; i < specDefs->size(); ++i) {
       if (static_cast<int>(i) % comm.size() == comm.rank()) {
-        TS_ASSERT_EQUALS(result.spectrumNumber(indices[current]),
-                         indexInfo.spectrumNumber(i));
+        TS_ASSERT_EQUALS(result.spectrumNumber(indices[current]), indexInfo.spectrumNumber(i));
         TS_ASSERT_EQUALS(resultSpecDefs->at(indices[current]), specDefs->at(i));
         ++current;
       }
@@ -77,8 +74,7 @@ public:
     TS_ASSERT_EQUALS(result.storageMode(), StorageMode::Cloned);
     TS_ASSERT_EQUALS(result.globalSize(), indexInfo.size());
     TS_ASSERT_EQUALS(result.size(), indexInfo.size());
-    TS_ASSERT_EQUALS(result.spectrumDefinitions(),
-                     indexInfo.spectrumDefinitions());
+    TS_ASSERT_EQUALS(result.spectrumDefinitions(), indexInfo.spectrumDefinitions());
     TS_ASSERT_EQUALS(result.spectrumNumber(0), indexInfo.spectrumNumber(0));
     TS_ASSERT_EQUALS(result.spectrumNumber(1), indexInfo.spectrumNumber(1));
     TS_ASSERT_EQUALS(result.spectrumNumber(2), indexInfo.spectrumNumber(2));

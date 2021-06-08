@@ -38,24 +38,20 @@ Declares OutputWorkspace output property.
 class MANTID_CURVEFITTING_DLL FitMW : public IMWDomainCreator {
 public:
   /// Constructor
-  FitMW(Kernel::IPropertyManager *fit, const std::string &workspacePropertyName,
-        DomainType domainType = Simple);
+  FitMW(Kernel::IPropertyManager *fit, const std::string &workspacePropertyName, DomainType domainType = Simple);
   /// Constructor
   FitMW(DomainType domainType = Simple);
   /// Declare properties that specify the dataset within the workspace to fit
   /// to.
-  void declareDatasetProperties(const std::string &suffix = "",
-                                bool addProp = true) override;
+  void declareDatasetProperties(const std::string &suffix = "", bool addProp = true) override;
   /// Create a domain from the input workspace
-  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
-                    std::shared_ptr<API::FunctionValues> &values,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain, std::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
   /// Create an output workspace.
-  std::shared_ptr<API::Workspace> createOutputWorkspace(
-      const std::string &baseName, API::IFunction_sptr function,
-      std::shared_ptr<API::FunctionDomain> domain,
-      std::shared_ptr<API::FunctionValues> values,
-      const std::string &outputWorkspacePropertyName) override;
+  std::shared_ptr<API::Workspace> createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
+                                                        std::shared_ptr<API::FunctionDomain> domain,
+                                                        std::shared_ptr<API::FunctionValues> values,
+                                                        const std::string &outputWorkspacePropertyName) override;
   /// Set max size for Sequantial and Parallel domains
   /// @param maxSize :: Maximum size of each simple domain
   void setMaxSize(size_t maxSize) { m_maxSize = maxSize; }

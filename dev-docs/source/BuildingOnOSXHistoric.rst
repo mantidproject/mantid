@@ -15,8 +15,8 @@ OS X 10.9 using clang and macports
 
 *Disclaimer*
 
-This instruction considers that you either use macports or need them for your other development projects. It also 
-considers that you need to compile Mantid by yourself. In other cases please either `download a Mantid dmg package <http://download.mantidproject.org/>`_ or follow the instructions below. Warning: 
+This instruction considers that you either use macports or need them for your other development projects. It also
+considers that you need to compile Mantid by yourself. In other cases please either `download a Mantid dmg package <http://download.mantidproject.org/>`_ or follow the instructions below. Warning:
 it is not recommended to have both, homebrew and macports installed simultaneously on one mac.
 
 Instruction
@@ -34,7 +34,7 @@ Instruction
 
   1. Download the source code from the `NeXus developers website <http://download.nexusformat.org/kits/>`_.
   2. Build and install it:
-   
+
      .. code-block:: sh
 
        % ./configure --prefix=/opt/local
@@ -42,10 +42,10 @@ Instruction
        % sudo make install
 
       You may need to install additional packages to be able to build libNeXus.
-      
+
   3. libNeXus must be recompiled after update of the macports if it's dependencies have been updated. Otherwise it may depend on some non-existent libraries.
-   
-- jsoncpp: ``mantid/Code/Mantid/Framework/DataObjects/src/NoShape.cpp`` line 3 contains: ``#include <jsoncpp/json/json.h>`` but in macports there is no ``jsoncpp`` folder in the ``/opt/local/include``, ``json.h`` is located in ``/opt/local/include/json``. As a temporary solution, you may create a symbolic link:  
+
+- jsoncpp: ``mantid/Code/Mantid/Framework/DataObjects/src/NoShape.cpp`` line 3 contains: ``#include <jsoncpp/json/json.h>`` but in macports there is no ``jsoncpp`` folder in the ``/opt/local/include``, ``json.h`` is located in ``/opt/local/include/json``. As a temporary solution, you may create a symbolic link:
 
   .. code-block:: sh
 
@@ -57,10 +57,10 @@ Instruction
 
 .. code-block:: sh
 
-    cmake  -DCMAKE_C_COMPILER=/usr/bin/clang \  
+    cmake  -DCMAKE_C_COMPILER=/usr/bin/clang \
       -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -G 'Unix Makefiles' \
-      -DCMAKE_PREFIX_PATH=/opt/local \ 
-      -DCMAKE_BUILD_TYPE=Release \ 
+      -DCMAKE_PREFIX_PATH=/opt/local \
+      -DCMAKE_BUILD_TYPE=Release \
       -DENABLE_CPACK=True \
       -DPOCO_INCLUDE_DIR=/opt/local/include \
       -DQWTPLOT3D_INCLUDE_DIR=/opt/local/include/qwtplot3d \
@@ -74,10 +74,9 @@ Instruction
       -DSPHINX_EXECUTABLE=/opt/local/bin/sphinx-build-2.7 \
       -DPACKAGE_DOCS=FALSE \
       -DDOCS_HTML=TRUE \
-      -DPYQT4_PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/PyQt4 \ 
+      -DPYQT4_PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/PyQt4 \
       -DSITEPACKAGES_PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages \
       -DOPENSSL_ROOT_DIR=/opt/local \
-      -DMAKE_VATES=FALSE \
       -DMACPORTS=TRUE \
       -DCMAKE_INSTALL_PREFIX=path_where_to_install_mantid  /path_to_repository/mantid/Code/Mantid
 
@@ -86,23 +85,11 @@ Instruction
 7. You may create the dmg package running the ``make package`` command
 8. You may also install Mantid using the ``make install`` command. *Warning*: if you do not want to install Mantid in /Applications, correct the CMAKE_INSTALL_PREFIX in the ``cmake_install.cmake`` file in your build directory.
 
-Building VATES
---------------
-Starting from Mantid 3.4, it is possible to build it with VATES support using macports. 
-
-1. Build Paraview using the following instruction: :ref:`BuildingVATES`.
-
-2. Set cmake option ``-DMAKE_VATES=TRUE``
-
-3. Set path to the paraview build directory: ``-DParaView_DIR=/put_your_path_here``
-
-4. Run steps 6-7(8) to build/install Mantid
-
 
 ##########################################
 OS X 10.10 and 10.11 using clang and Xcode
 ##########################################
-These instructions are from the assumptions of a blank newly installed Mac and want to use the system python. Other python distributions may work but have not been tested. 
+These instructions are from the assumptions of a blank newly installed Mac and want to use the system python. Other python distributions may work but have not been tested.
 
 1. First install Xcode and then clone the mantid git repository.
 
@@ -157,7 +144,7 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
         brew install pyqt --build-from-source
         brew install qscintilla2 --build-from-source --without-python3
         brew install poco --c++11
-        brew install boost --c++11 
+        brew install boost --c++11
         # boost-python brings in homebrew's python if installed with --build-bottle.
         brew install boost-python --c++11 --build-from-source
         brew install gsl
@@ -195,7 +182,7 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
         sudo -H pip install sphinx
         # https://github.com/mantidproject/mantid/issues/13481
         sudo -H pip install "ipython[notebook]==3.2.1"
-        # qtconsole only required with ipython 4+ 
+        # qtconsole only required with ipython 4+
         #sudo -H pip install qtconsole
         sudo -H pip install qtpy
         sudo -H pip install pygments
@@ -240,7 +227,7 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
 
   .. code-block:: sh
 
-        cd /System/Library/Frameworks/Python.framework/Headers 
+        cd /System/Library/Frameworks/Python.framework/Headers
 
   then
 
@@ -249,10 +236,10 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
         sudo cp pyport.h pyport.h.original
         sudo patch pyport.h $MANTIDCHECKOUTROOT/buildconfig/pyport.patch
 
-- If building with Xcode on OS X Yosemite 
+- If building with Xcode on OS X Yosemite
 
   .. code-block:: sh
-   
+
         cd /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7
 
 
@@ -281,7 +268,7 @@ Troubleshooting
 2. If you have upgraded to Mavericks (OS X 10.9) from a previous version of OS X with homebrew already installed then you may encounter some issues related to the fact that the default std lib has changed.  The easiest way to avoid this is to remove and then re-install all your formulas.
 3. You may find that if you build the ``MantidPlot`` target then you will get errors when you run, such as *Can't start python* and *Cannot load Curve Fitting Plugins*, this is due to the fact that the MantidPlot target does not contain all the dependencies.  You are best, if you are unsure of the hierarchy, to just use the ALL_BUILD target and then just switch to the MantidPlot target in order to run.
 4. NOTE that you might need to run ``./MantidPlot.app/Contents/MacOS/MantidPlot`` from the ``BUILD-DIR/bin`` (instead of ``open MantidPlot.app`` OR ``./MantidPlot`` from ``BUILD-DIR/bin/MantidPlot.app/Contents/MacOS/``) to get the library paths correct. Otherwise the issues above might show up (at least on OS X 10.11 El Capitan).
-5. Upgrading HDF5 requires also rebuilding nexusformat, h5py, and ParaView.  
+5. Upgrading HDF5 requires also rebuilding nexusformat, and h5py.
 
 
 ##########
@@ -290,7 +277,7 @@ OS X 10.12
 The following instructions setup the build environment for mantid using clang compiler and python provided by the system, and all the other dependencies installed with brew. The drawback is that one has little control over python version and OpenMP will not be found. Make sure you have Qt Creator IDE and optionally cmake (GUI) app installed.
 
 1. Install Xcode from AppStore
-2. Install Xcode command line tools 
+2. Install Xcode command line tools
 
 .. code-block:: sh
 
@@ -377,7 +364,7 @@ If, while configuring Mantid, cmake complains that it cannot find sip, uninstall
     sudo pip install sphinx_bootstrap_theme
     sudo pip install psutil
     sudo pip install "matplotlib>=2.1.2"
-    sudo pip install requests==2.9.1 
+    sudo pip install requests==2.9.1
 
 9. Install h5py
 
@@ -394,7 +381,7 @@ If, while configuring Mantid, cmake complains that it cannot find sip, uninstall
 
 11. Git clone the mantid repository
 
-12. Disable the system integrity protection (SIP). To do this 
+12. Disable the system integrity protection (SIP). To do this
 
     - restart the computer
     - before the apple logo appears press `Command+R` to enter the recovery mode
@@ -403,7 +390,7 @@ If, while configuring Mantid, cmake complains that it cannot find sip, uninstall
       .. code-block:: sh
 
         csrutil disable
-   
+
     - reboot again
 
 13. Now that SIP is disabled we can do the necessary patch:
@@ -429,7 +416,7 @@ If, while configuring Mantid, cmake complains that it cannot find sip, uninstall
     PATH=/usr/local/bin/:$PATH
 
 Local bin contains the symlink to the brew packages, which have to come first in path, before `/usr/bin`. That's why it is important not to have python or clang (with this setup) in brew.
-    
+
 
 16. Add to your `.profile`
 

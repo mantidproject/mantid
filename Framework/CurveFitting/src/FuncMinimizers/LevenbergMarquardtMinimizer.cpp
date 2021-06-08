@@ -27,12 +27,8 @@ namespace {
 // Get a reference to the logger
 Kernel::Logger g_log("LevenbergMarquardtMinimizer");
 
-bool cannotReachSpecifiedToleranceInF(int errorCode) {
-  return errorCode == GSL_ETOLF;
-}
-bool cannotReachSpecifiedToleranceInX(int errorCode) {
-  return errorCode == GSL_ETOLX;
-}
+bool cannotReachSpecifiedToleranceInF(int errorCode) { return errorCode == GSL_ETOLF; }
+bool cannotReachSpecifiedToleranceInX(int errorCode) { return errorCode == GSL_ETOLX; }
 } // namespace
 
 // clang-format off
@@ -40,8 +36,7 @@ DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer, Levenberg-Marquardt)
 // clang-format on
 
 LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
-    : m_data(nullptr), gslContainer(), m_gslSolver(nullptr), m_function(),
-      m_absError(1e-4), m_relError(1e-4) {
+    : m_data(nullptr), gslContainer(), m_gslSolver(nullptr), m_function(), m_absError(1e-4), m_relError(1e-4) {
   declareProperty("AbsError", m_absError,
                   "Absolute error allowed for "
                   "parameters - a stopping parameter "
@@ -52,12 +47,9 @@ LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
                   "in success.");
 }
 
-void LevenbergMarquardtMinimizer::initialize(
-    API::ICostFunction_sptr costFunction, size_t /*maxIterations*/) {
+void LevenbergMarquardtMinimizer::initialize(API::ICostFunction_sptr costFunction, size_t /*maxIterations*/) {
   // set-up GSL container to be used with GSL simplex algorithm
-  auto leastSquares =
-      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
-          costFunction);
+  auto leastSquares = std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(costFunction);
   if (leastSquares) {
     m_data = std::make_unique<GSL_FitData>(leastSquares);
   } else {
@@ -80,13 +72,10 @@ void LevenbergMarquardtMinimizer::initialize(
   // setup GSL solver
   m_gslSolver = gsl_multifit_fdfsolver_alloc(T, m_data->n, m_data->p);
   if (!m_gslSolver) {
-    throw std::runtime_error(
-        "Levenberg-Marquardt minimizer failed to initialize. \n" +
-        std::to_string(m_data->n) + " data points, " +
-        std::to_string(m_data->p) + " fitting parameters. ");
+    throw std::runtime_error("Levenberg-Marquardt minimizer failed to initialize. \n" + std::to_string(m_data->n) +
+                             " data points, " + std::to_string(m_data->p) + " fitting parameters. ");
   }
-  gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer,
-                             m_data->initFuncParams);
+  gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer, m_data->initFuncParams);
 
   m_function = leastSquares->getFittingFunction();
 }
@@ -139,8 +128,7 @@ bool LevenbergMarquardtMinimizer::iterate(size_t /*iteration*/) {
 }
 
 int LevenbergMarquardtMinimizer::hasConverged() {
-  return gsl_multifit_test_delta(m_gslSolver->dx, m_gslSolver->x, m_absError,
-                                 m_relError);
+  return gsl_multifit_test_delta(m_gslSolver->dx, m_gslSolver->x, m_absError, m_relError);
 }
 
 double LevenbergMarquardtMinimizer::costFunctionVal() {
@@ -153,8 +141,7 @@ double LevenbergMarquardtMinimizer::costFunctionVal() {
  * @param epsrel :: Is used to remove linear-dependent columns
  * @param covar :: Returned covariance matrix, here as
  */
-void LevenbergMarquardtMinimizer::calCovarianceMatrix(double epsrel,
-                                                      gsl_matrix *covar) {
+void LevenbergMarquardtMinimizer::calCovarianceMatrix(double epsrel, gsl_matrix *covar) {
 #if GSL_MAJOR_VERSION < 2
   gsl_multifit_covar(m_gslSolver->J, epsrel, covar);
 #else

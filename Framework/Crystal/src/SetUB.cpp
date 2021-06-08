@@ -46,45 +46,32 @@ void SetUB::init() {
   std::vector<double> zeroes(9, 0.), u0(3, 0), v0(3, 0);
   u0[0] = 1.;
   v0[1] = 1.;
-  this->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                            "Workspace", "", Direction::InOut),
+  this->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "", Direction::InOut),
                         "An input workspace.");
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "a", 1.0, mustBePositive->clone(), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("a", 1.0, mustBePositive->clone(), Direction::Input),
       "Lattice parameter a");
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "b", 1.0, mustBePositive->clone(), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("b", 1.0, mustBePositive->clone(), Direction::Input),
       "Lattice parameter b");
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "c", 1.0, std::move(mustBePositive), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("c", 1.0, std::move(mustBePositive), Direction::Input),
       "Lattice parameter c");
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "alpha", 90.0, reasonableAngle->clone(), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("alpha", 90.0, reasonableAngle->clone(), Direction::Input),
       "Lattice parameter alpha (degrees)");
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "beta", 90.0, reasonableAngle->clone(), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("beta", 90.0, reasonableAngle->clone(), Direction::Input),
       "Lattice parameter beta (degrees)");
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "gamma", 90.0, std::move(reasonableAngle), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("gamma", 90.0, std::move(reasonableAngle), Direction::Input),
       "Lattice parameter gamma(degrees) ");
-  this->declareProperty(std::make_unique<ArrayProperty<double>>(
-                            "u", std::move(u0), mustBe3D->clone()),
+  this->declareProperty(std::make_unique<ArrayProperty<double>>("u", std::move(u0), mustBe3D->clone()),
                         "Vector along k_i, when goniometer is at 0");
-  this->declareProperty(
-      std::make_unique<ArrayProperty<double>>("v", std::move(v0),
-                                              std::move(mustBe3D)),
-      "In plane vector perpendicular to k_i, when goniometer is at 0");
-  this->declareProperty(std::make_unique<ArrayProperty<double>>(
-                            "UB", std::move(zeroes), threeVthree),
-                        "UB Matrix");
-  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
-                            "MDSampleNumber", EMPTY_INT(), Direction::Input),
+  this->declareProperty(std::make_unique<ArrayProperty<double>>("v", std::move(v0), std::move(mustBe3D)),
+                        "In plane vector perpendicular to k_i, when goniometer is at 0");
+  this->declareProperty(std::make_unique<ArrayProperty<double>>("UB", std::move(zeroes), threeVthree), "UB Matrix");
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>("MDSampleNumber", EMPTY_INT(), Direction::Input),
                         "For an MD workspace, the sample number to wich to "
                         "attach an oriented lattice (starting from 0). No "
                         "number, or negative number, means that it will copy "
@@ -110,8 +97,7 @@ void SetUB::exec() {
     std::vector<double> v = getProperty("v");
 
     lattice = std::make_unique<OrientedLattice>(a, b, c, alpha, beta, gamma);
-    lattice->setUFromVectors(Mantid::Kernel::V3D(u[0], u[1], u[2]),
-                             Mantid::Kernel::V3D(v[0], v[1], v[2]));
+    lattice->setUFromVectors(Mantid::Kernel::V3D(u[0], u[1], u[2]), Mantid::Kernel::V3D(v[0], v[1], v[2]));
   } else {
     if (UBMatrix.determinant() == 0)
       throw std::invalid_argument("UB matrix determinant is 0");
@@ -125,25 +111,20 @@ void SetUB::exec() {
   Workspace_sptr ws = this->getProperty("Workspace");
 
   // Sample copy;
-  MultipleExperimentInfos_sptr mdws =
-      std::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
+  MultipleExperimentInfos_sptr mdws = std::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
   if (mdws != nullptr) {
     int sampleNumber = getProperty("MDSampleNumber");
-    if ((sampleNumber == EMPTY_INT()) ||
-        (sampleNumber < 0)) // copy to all samples
+    if ((sampleNumber == EMPTY_INT()) || (sampleNumber < 0)) // copy to all samples
     {
       for (uint16_t i = 0; i < mdws->getNumExperimentInfo(); i++) {
-        mdws->getExperimentInfo(i)->mutableSample().setOrientedLattice(
-            std::make_unique<OrientedLattice>(*lattice));
+        mdws->getExperimentInfo(i)->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(*lattice));
       }
     } else // copy to a single sample
     {
-      if (static_cast<uint16_t>(sampleNumber) >
-          (mdws->getNumExperimentInfo() - 1)) {
+      if (static_cast<uint16_t>(sampleNumber) > (mdws->getNumExperimentInfo() - 1)) {
         g_log.warning() << "Number greater than the number of last sample in "
                            "the workspace ("
-                        << (mdws->getNumExperimentInfo() - 1)
-                        << "). Will use sample number 0 instead\n";
+                        << (mdws->getNumExperimentInfo() - 1) << "). Will use sample number 0 instead\n";
         sampleNumber = 0;
       }
       mdws->getExperimentInfo(static_cast<uint16_t>(sampleNumber))

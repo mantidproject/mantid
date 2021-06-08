@@ -13,10 +13,9 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 template <class... Containers>
-auto zip_range(Containers &... containers)
-    -> decltype(boost::make_iterator_range(
-        boost::make_zip_iterator(boost::make_tuple(containers.begin()...)),
-        boost::make_zip_iterator(boost::make_tuple(containers.end()...)))) {
+auto zip_range(Containers &...containers)
+    -> decltype(boost::make_iterator_range(boost::make_zip_iterator(boost::make_tuple(containers.begin()...)),
+                                           boost::make_zip_iterator(boost::make_tuple(containers.end()...)))) {
   return {boost::make_zip_iterator(boost::make_tuple(containers.begin()...)),
           boost::make_zip_iterator(boost::make_tuple(containers.end()...))};
 }

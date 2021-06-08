@@ -34,9 +34,8 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus)
 /** Constructor
  */
 LoadSINQFocus::LoadSINQFocus()
-    : m_supportedInstruments{"FOCUS"}, m_numberOfTubes{0},
-      m_numberOfPixelsPerTube{0}, m_numberOfChannels{0}, m_numberOfHistograms{
-                                                             0} {
+    : m_supportedInstruments{"FOCUS"}, m_numberOfTubes{0}, m_numberOfPixelsPerTube{0}, m_numberOfChannels{0},
+      m_numberOfHistograms{0} {
 
   this->useAlgorithm("LoadSINQ");
   this->deprecatedDate("2013-10-28");
@@ -50,9 +49,7 @@ const std::string LoadSINQFocus::name() const { return "LoadSINQFocus"; }
 int LoadSINQFocus::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadSINQFocus::category() const {
-  return "DataHandling\\Nexus";
-}
+const std::string LoadSINQFocus::category() const { return "DataHandling\\Nexus"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -77,11 +74,9 @@ int LoadSINQFocus::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadSINQFocus::init() {
   const std::vector<std::string> exts{".nxs", ".hdf"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name of the Nexus file to load");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -119,11 +114,9 @@ void LoadSINQFocus::setInstrumentName(NeXus::NXEntry &entry) {
   m_instrumentPath = m_loader.findInstrumentNexusPath(entry);
 
   if (m_instrumentPath.empty()) {
-    throw std::runtime_error(
-        "Cannot set the instrument name from the Nexus file!");
+    throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
-  m_instrumentName =
-      m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
+  m_instrumentName = m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
   size_t pos = m_instrumentName.find(' ');
   m_instrumentName = m_instrumentName.substr(0, pos);
 }
@@ -152,9 +145,8 @@ void LoadSINQFocus::initWorkSpace(NeXus::NXEntry &entry) {
   // total number of spectra + (number of monitors = 0),
   // bin boundaries = m_numberOfChannels + 1
   // Z/time dimension
-  m_localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", m_numberOfHistograms, m_numberOfChannels + 1,
-      m_numberOfChannels);
+  m_localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", m_numberOfHistograms, m_numberOfChannels + 1,
+                                                         m_numberOfChannels);
   m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
 }
@@ -166,8 +158,7 @@ void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   NXInt data = dataGroup.openIntData();
   data.load();
 
-  std::vector<double> timeBinning =
-      m_loader.getTimeBinningFromNexusPath(entry, "merged/time_binning");
+  std::vector<double> timeBinning = m_loader.getTimeBinningFromNexusPath(entry, "merged/time_binning");
   auto &x = m_localWorkspace->mutableX(0);
   x.assign(timeBinning.begin(), timeBinning.end());
 
@@ -181,12 +172,10 @@ void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
       }
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j));
-      m_localWorkspace->mutableY(spec).assign(data_p,
-                                              data_p + m_numberOfChannels);
+      m_localWorkspace->mutableY(spec).assign(data_p, data_p + m_numberOfChannels);
       // Assign Error
       auto &E = m_localWorkspace->mutableE(spec);
-      std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     LoadSINQFocus::calculateError);
+      std::transform(data_p, data_p + m_numberOfChannels, E.begin(), LoadSINQFocus::calculateError);
       ++spec;
       progress.report();
     }
@@ -210,8 +199,7 @@ void LoadSINQFocus::loadRunDetails(NXEntry &entry) {
   // end_time = getDateTimeInIsoFormat(end_time);
   runDetails.addProperty("run_end", end_time);
 
-  double wavelength =
-      entry.getFloat(m_instrumentPath + "/monochromator/lambda");
+  double wavelength = entry.getFloat(m_instrumentPath + "/monochromator/lambda");
   runDetails.addProperty<double>("wavelength", wavelength);
 
   double energy = entry.getFloat(m_instrumentPath + "/monochromator/energy");
@@ -232,8 +220,7 @@ void LoadSINQFocus::loadRunDetails(NXEntry &entry) {
  */
 void LoadSINQFocus::loadExperimentDetails(NXEntry &entry) {
 
-  std::string name =
-      boost::lexical_cast<std::string>(entry.getFloat("sample/name"));
+  std::string name = boost::lexical_cast<std::string>(entry.getFloat("sample/name"));
   m_localWorkspace->mutableSample().setName(name);
 }
 
@@ -251,8 +238,7 @@ void LoadSINQFocus::runLoadInstrument() {
     // different IDF
 
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
     loadInst->execute();
   } catch (...) {

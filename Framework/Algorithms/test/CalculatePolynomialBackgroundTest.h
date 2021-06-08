@@ -22,12 +22,8 @@ class CalculatePolynomialBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculatePolynomialBackgroundTest *createSuite() {
-    return new CalculatePolynomialBackgroundTest();
-  }
-  static void destroySuite(CalculatePolynomialBackgroundTest *suite) {
-    delete suite;
-  }
+  static CalculatePolynomialBackgroundTest *createSuite() { return new CalculatePolynomialBackgroundTest(); }
+  static void destroySuite(CalculatePolynomialBackgroundTest *suite) { delete suite; }
 
   CalculatePolynomialBackgroundTest() { API::FrameworkManager::Instance(); }
 
@@ -117,8 +113,7 @@ public:
     const HistogramData::CountStandardDeviations stdDevs{0, 0.001, 0, 0};
     const HistogramData::BinEdges edges{0, 1, 2, 3, 4};
     API::MatrixWorkspace_sptr ws(
-        DataObjects::create<DataObjects::Workspace2D>(
-            nHist, HistogramData::Histogram(edges, counts, stdDevs))
+        DataObjects::create<DataObjects::Workspace2D>(nHist, HistogramData::Histogram(edges, counts, stdDevs))
             .release());
     auto alg = makeAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
@@ -149,22 +144,18 @@ public:
     const HistogramData::Counts counts{0, 4, 0, 0};
     const HistogramData::BinEdges edges{0, 1, 2, 3, 4};
     API::MatrixWorkspace_sptr ws(
-        DataObjects::create<DataObjects::Workspace2D>(
-            nHist, HistogramData::Histogram(edges, counts))
-            .release());
+        DataObjects::create<DataObjects::Workspace2D>(nHist, HistogramData::Histogram(edges, counts)).release());
     auto alg = makeAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("Degree", 0))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("CostFunction", "Unweighted least squares"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("CostFunction", "Unweighted least squares"))
     TS_ASSERT_THROWS_NOTHING(alg->execute())
     TS_ASSERT(alg->isExecuted())
     API::MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT(outWS)
     // Unweighted fitting of zeroth order polynomial is equivalent to the mean.
-    const double result = std::accumulate(counts.cbegin(), counts.cend(), 0.0) /
-                          static_cast<double>(counts.size());
+    const double result = std::accumulate(counts.cbegin(), counts.cend(), 0.0) / static_cast<double>(counts.size());
     for (size_t histI = 0; histI < nHist; ++histI) {
       const auto &xs = ws->x(histI);
       const auto &bkgYs = outWS->y(histI);
@@ -200,8 +191,7 @@ public:
       }
     }
     HistogramData::Histogram h{edges, counts};
-    API::MatrixWorkspace_sptr ws =
-        DataObjects::create<DataObjects::Workspace2D>(1, h);
+    API::MatrixWorkspace_sptr ws = DataObjects::create<DataObjects::Workspace2D>(1, h);
     auto alg = makeAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
@@ -231,8 +221,7 @@ public:
     const auto nBin = edges.size() - 1;
     const HistogramData::Counts counts{1.0, 2.0, 0.0, 0.0, 5.0, 6.0};
     const HistogramData::Histogram h{edges, counts};
-    auto ws = API::MatrixWorkspace_sptr(
-        DataObjects::create<DataObjects::Workspace2D>(nHist, h));
+    auto ws = API::MatrixWorkspace_sptr(DataObjects::create<DataObjects::Workspace2D>(nHist, h));
     auto alg = makeAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
@@ -256,8 +245,7 @@ public:
   }
 
 private:
-  static std::shared_ptr<Algorithms::CalculatePolynomialBackground>
-  makeAlgorithm() {
+  static std::shared_ptr<Algorithms::CalculatePolynomialBackground> makeAlgorithm() {
     auto a = std::make_shared<Algorithms::CalculatePolynomialBackground>();
     a->initialize();
     a->setChild(true);
@@ -278,8 +266,7 @@ public:
     std::iota(x.begin(), x.end(), 0.0);
     const Mantid::HistogramData::BinEdges edges(x);
     const Mantid::HistogramData::Histogram h(edges, counts);
-    m_ws = Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(nHisto,
-                                                                         h);
+    m_ws = Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(nHisto, h);
     // The histograms in m_ws share the same Y and E values. We want unshared
     // histograms to performance-test possible cache trashing issues.
     for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {

@@ -20,9 +20,7 @@ class HardThresholdBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HardThresholdBackgroundTest *createSuite() {
-    return new HardThresholdBackgroundTest();
-  }
+  static HardThresholdBackgroundTest *createSuite() { return new HardThresholdBackgroundTest(); }
   static void destroySuite(HardThresholdBackgroundTest *suite) { delete suite; }
 
   void test_isBackground() {

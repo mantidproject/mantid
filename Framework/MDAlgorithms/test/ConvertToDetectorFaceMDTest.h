@@ -27,9 +27,7 @@ class ConvertToDetectorFaceMDTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertToDetectorFaceMDTest *createSuite() {
-    return new ConvertToDetectorFaceMDTest();
-  }
+  static ConvertToDetectorFaceMDTest *createSuite() { return new ConvertToDetectorFaceMDTest(); }
   static void destroySuite(ConvertToDetectorFaceMDTest *suite) { delete suite; }
 
   void test_Init() {
@@ -40,9 +38,7 @@ public:
 
   //----------------------------------------------------------------------------
   EventWorkspace_sptr makeTestWS(EventType type) {
-    EventWorkspace_sptr in_ws =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(5, 10,
-                                                                        false);
+    EventWorkspace_sptr in_ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(5, 10, false);
     if ((type == WEIGHTED) || (type == WEIGHTED_NOTIME)) {
       for (size_t i = 0; i < in_ws->getNumberHistograms(); i++) {
         EventList &el = in_ws->getSpectrum(i);
@@ -56,23 +52,19 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  template <class WSTYPE>
-  std::shared_ptr<WSTYPE> doTest(EventType type,
-                                 const std::string &BankNumbers) {
+  template <class WSTYPE> std::shared_ptr<WSTYPE> doTest(EventType type, const std::string &BankNumbers) {
     EventWorkspace_sptr in_ws = makeTestWS(type);
     ConvertToDetectorFaceMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    alg.setProperty("InputWorkspace",
-                    std::dynamic_pointer_cast<MatrixWorkspace>(in_ws));
+    alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(in_ws));
     alg.setPropertyValue("BankNumbers", BankNumbers);
     alg.setPropertyValue("OutputWorkspace", "output_md");
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted())
 
     std::shared_ptr<WSTYPE> ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<WSTYPE>("output_md"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<WSTYPE>("output_md"));
     TS_ASSERT(ws);
     if (!ws)
       return ws;
@@ -86,8 +78,7 @@ public:
       TS_ASSERT_DELTA(dim->getMinimum(), 0, 1e-5);
       TS_ASSERT_DELTA(dim->getMaximum(), 10, 1e-5);
       TS_ASSERT_EQUALS(dim->getUnits(), "pixel");
-      TSM_ASSERT_EQUALS("Should be convertible to a General frame",
-                        Mantid::Geometry::GeneralFrame::GeneralFrameName,
+      TSM_ASSERT_EQUALS("Should be convertible to a General frame", Mantid::Geometry::GeneralFrame::GeneralFrameName,
                         dim->getMDFrame().name());
     }
     IMDDimension_const_sptr dim = ws->getDimension(2);
@@ -96,8 +87,7 @@ public:
     TS_ASSERT_DELTA(dim->getMinimum(), 0, 1e-5);
     TS_ASSERT_DELTA(dim->getMaximum(), 100, 1e-5);
     TS_ASSERT_EQUALS(dim->getUnits(), "Angstrom");
-    TSM_ASSERT_EQUALS("Should be convertible to a General frame",
-                      Mantid::Geometry::GeneralFrame::GeneralFrameName,
+    TSM_ASSERT_EQUALS("Should be convertible to a General frame", Mantid::Geometry::GeneralFrame::GeneralFrameName,
                       dim->getMDFrame().name());
 
     return ws;
@@ -110,8 +100,7 @@ public:
     ConvertToDetectorFaceMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    alg.setProperty("InputWorkspace",
-                    std::dynamic_pointer_cast<MatrixWorkspace>(in_ws));
+    alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(in_ws));
     alg.setPropertyValue("BankNumbers", BankNumbers);
     alg.setPropertyValue("OutputWorkspace", "output_md");
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
@@ -136,11 +125,9 @@ public:
     TS_ASSERT_EQUALS(ws4->getNPoints(), 20000 * 2);
   }
   void test_WeightedEventNoTime() {
-    MDEventWorkspace3::sptr ws3 =
-        doTest<MDEventWorkspace3>(WEIGHTED_NOTIME, "1");
+    MDEventWorkspace3::sptr ws3 = doTest<MDEventWorkspace3>(WEIGHTED_NOTIME, "1");
     TS_ASSERT_EQUALS(ws3->getNPoints(), 10000);
-    MDEventWorkspace4::sptr ws4 =
-        doTest<MDEventWorkspace4>(WEIGHTED_NOTIME, "1,2");
+    MDEventWorkspace4::sptr ws4 = doTest<MDEventWorkspace4>(WEIGHTED_NOTIME, "1,2");
     TS_ASSERT_EQUALS(ws4->getNPoints(), 10000 * 2);
   }
 

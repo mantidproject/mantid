@@ -25,10 +25,8 @@ class BatchPresenterFactory : public IBatchPresenterFactory {
 public:
   BatchPresenterFactory(
       // cppcheck-suppress passedByValue
-      RunsPresenterFactory runsPresenterFactory,
-      EventPresenterFactory eventPresenterFactory,
-      ExperimentPresenterFactory experimentPresenterFactory,
-      InstrumentPresenterFactory instrumentPresenterFactory,
+      RunsPresenterFactory runsPresenterFactory, EventPresenterFactory eventPresenterFactory,
+      ExperimentPresenterFactory experimentPresenterFactory, InstrumentPresenterFactory instrumentPresenterFactory,
       SavePresenterFactory savePresenterFactory)
       : m_runsPresenterFactory(std::move(runsPresenterFactory)),
         m_eventPresenterFactory(std::move(eventPresenterFactory)),
@@ -39,20 +37,16 @@ public:
   std::unique_ptr<IBatchPresenter> make(IBatchView *view) override {
     auto runsPresenter = m_runsPresenterFactory.make(view->runs());
     auto eventPresenter = m_eventPresenterFactory.make(view->eventHandling());
-    auto experimentPresenter =
-        m_experimentPresenterFactory.make(view->experiment());
-    auto instrumentPresenter =
-        m_instrumentPresenterFactory.make(view->instrument());
+    auto experimentPresenter = m_experimentPresenterFactory.make(view->experiment());
+    auto instrumentPresenter = m_instrumentPresenterFactory.make(view->instrument());
     auto savePresenter = m_savePresenterFactory.make(view->save());
 
-    auto model = Batch(
-        experimentPresenter->experiment(), instrumentPresenter->instrument(),
-        runsPresenter->mutableRunsTable(), eventPresenter->slicing());
+    auto model = Batch(experimentPresenter->experiment(), instrumentPresenter->instrument(),
+                       runsPresenter->mutableRunsTable(), eventPresenter->slicing());
 
-    return std::make_unique<BatchPresenter>(
-        view, std::move(model), std::move(runsPresenter),
-        std::move(eventPresenter), std::move(experimentPresenter),
-        std::move(instrumentPresenter), std::move(savePresenter));
+    return std::make_unique<BatchPresenter>(view, std::move(model), std::move(runsPresenter), std::move(eventPresenter),
+                                            std::move(experimentPresenter), std::move(instrumentPresenter),
+                                            std::move(savePresenter));
   }
 
 private:

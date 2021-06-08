@@ -52,12 +52,11 @@ public:
   explicit Component(const std::string &name, IComponent *parent = nullptr);
   //! Create a named component with positioning vector, and parent component
   //(optional)
-  Component(const std::string &name, const Kernel::V3D &position,
-            IComponent *parent = nullptr);
+  Component(const std::string &name, const Kernel::V3D &position, IComponent *parent = nullptr);
   //! Create a named component with positioning vector, orientation and parent
   // component
-  Component(const std::string &name, const Kernel::V3D &position,
-            const Kernel::Quat &rotation, IComponent *parent = nullptr);
+  Component(const std::string &name, const Kernel::V3D &position, const Kernel::Quat &rotation,
+            IComponent *parent = nullptr);
 
   IComponent *clone() const override;
 
@@ -137,11 +136,9 @@ public:
   /// Return the parameter names
   std::set<std::string> getParameterNames(bool recursive = true) const override;
   /// return the parameter names and the component they are from
-  std::map<std::string, ComponentID>
-  getParameterNamesByComponent() const override;
+  std::map<std::string, ComponentID> getParameterNamesByComponent() const override;
   /// Returns a boolean indicating if the component has the named parameter
-  bool hasParameter(const std::string &name,
-                    bool recursive = true) const override;
+  bool hasParameter(const std::string &name, bool recursive = true) const override;
 
   /**
    * Get a parameter defined as a double
@@ -150,8 +147,7 @@ public:
    * components
    * @returns A list of values
    */
-  std::vector<double> getNumberParameter(const std::string &pname,
-                                         bool recursive = true) const override {
+  std::vector<double> getNumberParameter(const std::string &pname, bool recursive = true) const override {
     return getParameter<double>(pname, recursive);
   }
 
@@ -162,8 +158,7 @@ public:
    * components
    * @returns A list of values
    */
-  std::vector<int> getIntParameter(const std::string &pname,
-                                   bool recursive = true) const override {
+  std::vector<int> getIntParameter(const std::string &pname, bool recursive = true) const override {
     return getParameter<int>(pname, recursive);
   }
 
@@ -176,8 +171,7 @@ public:
    * @returns std::string describing parameter type or empty string if the type
    * is not found
    */
-  std::string getParameterType(const std::string &pname,
-                               bool recursive = true) const override {
+  std::string getParameterType(const std::string &pname, bool recursive = true) const override {
     Parameter_sptr param = Parameter_sptr(); // Null shared pointer
     if (recursive) {
       param = m_map->getRecursive(this, pname);
@@ -194,12 +188,10 @@ public:
   std::string getDescription() const;
 
   /** Get description of a parameter attached to this component  */
-  std::string getParamDescription(const std::string &pname,
-                                  bool recursive = true) const;
+  std::string getParamDescription(const std::string &pname, bool recursive = true) const;
 
   /** Get a component's parameter short description */
-  std::string getParamShortDescription(const std::string &pname,
-                                       bool recursive = true) const;
+  std::string getParamShortDescription(const std::string &pname, bool recursive = true) const;
   /** Get a components's short description*/
   std::string getShortDescription() const;
   /**Set components description. Works for parameterized components only */
@@ -211,8 +203,7 @@ public:
    * components
    * @returns A list of values
    */
-  std::vector<bool> getBoolParameter(const std::string &pname,
-                                     bool recursive = true) const override {
+  std::vector<bool> getBoolParameter(const std::string &pname, bool recursive = true) const override {
     return getParameter<bool>(pname, recursive);
   }
 
@@ -223,9 +214,7 @@ public:
    * components
    * @returns A list of values
    */
-  std::vector<Kernel::V3D>
-  getPositionParameter(const std::string &pname,
-                       bool recursive = true) const override {
+  std::vector<Kernel::V3D> getPositionParameter(const std::string &pname, bool recursive = true) const override {
     return getParameter<Kernel::V3D>(pname, recursive);
   }
 
@@ -236,9 +225,7 @@ public:
    * components
    * @returns A list of values
    */
-  std::vector<Kernel::Quat>
-  getRotationParameter(const std::string &pname,
-                       bool recursive = true) const override {
+  std::vector<Kernel::Quat> getRotationParameter(const std::string &pname, bool recursive = true) const override {
     return getParameter<Kernel::Quat>(pname, recursive);
   }
 
@@ -249,15 +236,12 @@ public:
    * components
    * @returns A list of values
    */
-  std::vector<std::string>
-  getStringParameter(const std::string &pname,
-                     bool recursive = true) const override {
+  std::vector<std::string> getStringParameter(const std::string &pname, bool recursive = true) const override {
     return getParameter<std::string>(pname, recursive);
   }
   //@}
 
-  std::string getParameterAsString(const std::string &pname,
-                                   bool recursive = true) const override {
+  std::string getParameterAsString(const std::string &pname, bool recursive = true) const override {
     std::string retVal;
     if (m_map) {
       retVal = m_map->getString(this, pname, recursive);
@@ -282,8 +266,7 @@ public:
 
   bool isParametrized() const override;
 
-  virtual size_t
-  registerContents(class ComponentVisitor &componentVisitor) const override;
+  virtual size_t registerContents(class ComponentVisitor &componentVisitor) const override;
   bool hasComponentInfo() const;
   size_t index() const;
 
@@ -313,9 +296,7 @@ protected:
    * @return A list of size 0 or 1 containing the parameter value or
    * nothing if it does not exist
    */
-  template <class TYPE>
-  std::vector<TYPE> getParameter(const std::string &p_name,
-                                 bool recursive) const {
+  template <class TYPE> std::vector<TYPE> getParameter(const std::string &p_name, bool recursive) const {
     if (m_map) {
       Parameter_sptr param = Parameter_sptr(); // Null shared pointer
       if (recursive) {

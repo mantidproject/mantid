@@ -28,30 +28,22 @@ DECLARE_ALGORITHM(SaveFocusedXYE)
  * Initialise the algorithm
  */
 void SaveFocusedXYE::init() {
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
-                                                 Kernel::Direction::Input),
-      "The name of the workspace containing the data you wish to save");
-  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
-                                                      API::FileProperty::Save),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Kernel::Direction::Input),
+                  "The name of the workspace containing the data you wish to save");
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save),
                   "The filename to use when saving data");
-  declareProperty("SplitFiles", true,
-                  "Save each spectrum in a different file (default true)");
+  declareProperty("SplitFiles", true, "Save each spectrum in a different file (default true)");
   declareProperty("StartAtBankNumber", 0,
                   "Start bank (spectrum) numbers at this number in the file.  "
                   "The bank number in the file will be the workspace index + "
                   "StartAtBankNumber.");
-  declareProperty(
-      "Append", false,
-      "If true and Filename already exists, append, else overwrite");
-  declareProperty("IncludeHeader", true,
-                  "Whether to include the header lines (default: true)");
+  declareProperty("Append", false, "If true and Filename already exists, append, else overwrite");
+  declareProperty("IncludeHeader", true, "Whether to include the header lines (default: true)");
   std::vector<std::string> header(3);
   header[0] = "XYE";
   header[1] = "MAUD";
   header[2] = "TOPAS";
-  declareProperty("Format", "XYE",
-                  std::make_shared<Kernel::StringListValidator>(header),
+  declareProperty("Format", "XYE", std::make_shared<Kernel::StringListValidator>(header),
                   "A type of the header: XYE (default) or MAUD.");
 }
 
@@ -95,8 +87,7 @@ void SaveFocusedXYE::exec() {
   const bool split = getProperty("SplitFiles");
   std::ostringstream number;
   std::fstream out;
-  std::ios_base::openmode mode =
-      (append ? (std::ios_base::out | std::ios_base::app) : std::ios_base::out);
+  std::ios_base::openmode mode = (append ? (std::ios_base::out | std::ios_base::app) : std::ios_base::out);
 
   m_comment = "#";
   const std::string headerType = getProperty("Format");
@@ -151,8 +142,7 @@ void SaveFocusedXYE::exec() {
                       // filename-i.ext
     {
       number << "-" << i + startingbank;
-      const std::string file(
-          std::string(filename).append(number.str()).append(".").append(ext));
+      const std::string file(std::string(filename).append(number.str()).append(".").append(ext));
       Poco::File fileObj(file);
       const bool exists = fileObj.exists();
       out.open(file.c_str(), mode);
@@ -167,12 +157,9 @@ void SaveFocusedXYE::exec() {
     }
 
     if (headers) {
-      writeSpectraHeader(out, i + startingbank,
-                         inputWS->getSpectrum(i).getSpectrumNo(), l1 + l2, tth,
-                         inputWS->getAxis(0)->unit()->caption(),
-                         inputWS->getAxis(1)->unit()->caption(),
-                         inputWS->getAxis(1)->unit()->label(),
-                         inputWS->getAxis(1)->getValue(i));
+      writeSpectraHeader(out, i + startingbank, inputWS->getSpectrum(i).getSpectrumNo(), l1 + l2, tth,
+                         inputWS->getAxis(0)->unit()->caption(), inputWS->getAxis(1)->unit()->caption(),
+                         inputWS->getAxis(1)->unit()->label(), inputWS->getAxis(1)->getValue(i));
     }
     const size_t datasize = Y.size();
     for (size_t j = 0; j < datasize; j++) {
@@ -182,10 +169,8 @@ void SaveFocusedXYE::exec() {
       } else {
         xvalue = X[j];
       }
-      out << std::fixed << std::setprecision(5) << std::setw(15) << xvalue
-          << std::fixed << std::setprecision(8) << std::setw(18) << Y[j]
-          << std::fixed << std::setprecision(8) << std::setw(18) << E[j]
-          << "\n";
+      out << std::fixed << std::setprecision(5) << std::setw(15) << xvalue << std::fixed << std::setprecision(8)
+          << std::setw(18) << Y[j] << std::fixed << std::setprecision(8) << std::setw(18) << E[j] << "\n";
     }
     // Close at each iteration
     if (split) {
@@ -205,10 +190,8 @@ void SaveFocusedXYE::exec() {
  *  @param propertyValue :: value  of the property
  *  @param perioidNum :: period number
  */
-void SaveFocusedXYE::setOtherProperties(IAlgorithm *alg,
-                                        const std::string &propertyName,
-                                        const std::string &propertyValue,
-                                        int perioidNum) {
+void SaveFocusedXYE::setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
+                                        const std::string &propertyValue, int perioidNum) {
   if (propertyName == "Append") {
     if (perioidNum != 1) {
       alg->setPropertyValue(propertyName, "1");
@@ -223,9 +206,7 @@ void SaveFocusedXYE::setOtherProperties(IAlgorithm *alg,
  * @param os :: The stream to use to write the information
  * @param workspace :: A shared pointer to MatrixWorkspace
  */
-void SaveFocusedXYE::writeHeaders(
-    std::ostream &os,
-    Mantid::API::MatrixWorkspace_const_sptr &workspace) const {
+void SaveFocusedXYE::writeHeaders(std::ostream &os, Mantid::API::MatrixWorkspace_const_sptr &workspace) const {
   if (m_headerType == XYE || m_headerType == TOPAS) {
     writeXYEHeaders(os, workspace);
   } else // MAUD
@@ -239,15 +220,12 @@ void SaveFocusedXYE::writeHeaders(
  * @param os :: The stream to use to write the information
  * @param workspace :: A shared pointer to MatrixWorkspace
  */
-void SaveFocusedXYE::writeXYEHeaders(
-    std::ostream &os,
-    Mantid::API::MatrixWorkspace_const_sptr &workspace) const {
+void SaveFocusedXYE::writeXYEHeaders(std::ostream &os, Mantid::API::MatrixWorkspace_const_sptr &workspace) const {
   if (m_headerType != TOPAS)
     os << "XYDATA\n";
   os << m_comment << " File generated by Mantid, "
      << "Instrument " << workspace->getInstrument()->getName() << '\n';
-  os << m_comment
-     << " The X-axis unit is: " << workspace->getAxis(0)->unit()->caption()
+  os << m_comment << " The X-axis unit is: " << workspace->getAxis(0)->unit()->caption()
      << ", The Y-axis unit is: " << workspace->YUnitLabel() << '\n';
 }
 
@@ -256,12 +234,9 @@ void SaveFocusedXYE::writeXYEHeaders(
  * @param os :: The stream to use to write the information
  * @param workspace :: A shared pointer to MatrixWorkspace
  */
-void SaveFocusedXYE::writeMAUDHeaders(
-    std::ostream &os,
-    Mantid::API::MatrixWorkspace_const_sptr &workspace) const {
+void SaveFocusedXYE::writeMAUDHeaders(std::ostream &os, Mantid::API::MatrixWorkspace_const_sptr &workspace) const {
   os << "#C  " << workspace->getTitle() << '\n';
-  os << "#C  " << workspace->getInstrument()->getName()
-     << workspace->getRunNumber() << '\n';
+  os << "#C  " << workspace->getInstrument()->getName() << workspace->getRunNumber() << '\n';
   os << "#A  OMEGA      90.00\n";
   os << "#A  CHI         0.00\n";
   os << "#A  PHI       -90.00\n";
@@ -269,15 +244,11 @@ void SaveFocusedXYE::writeMAUDHeaders(
 }
 
 /// Write spectra header
-void SaveFocusedXYE::writeSpectraHeader(std::ostream &os, size_t index1,
-                                        size_t index2, double flightPath,
-                                        double tth, const std::string &caption,
-                                        const std::string &spectrumAxisCaption,
-                                        const std::string &spectraAxisLabel,
-                                        double observable) {
+void SaveFocusedXYE::writeSpectraHeader(std::ostream &os, size_t index1, size_t index2, double flightPath, double tth,
+                                        const std::string &caption, const std::string &spectrumAxisCaption,
+                                        const std::string &spectraAxisLabel, double observable) {
   if (m_headerType == XYE || m_headerType == TOPAS) {
-    writeXYESpectraHeader(os, index1, caption, spectrumAxisCaption,
-                          spectraAxisLabel, observable);
+    writeXYESpectraHeader(os, index1, caption, spectrumAxisCaption, spectraAxisLabel, observable);
   } else // MAUD
   {
     writeMAUDSpectraHeader(os, index1, index2, flightPath, tth, caption);
@@ -285,27 +256,22 @@ void SaveFocusedXYE::writeSpectraHeader(std::ostream &os, size_t index1,
 }
 
 /// Write spectra XYE header
-void SaveFocusedXYE::writeXYESpectraHeader(
-    std::ostream &os, size_t index1, const std::string &caption,
-    const std::string &spectrumAxisCaption, const std::string &spectraAxisLabel,
-    double observable) {
+void SaveFocusedXYE::writeXYESpectraHeader(std::ostream &os, size_t index1, const std::string &caption,
+                                           const std::string &spectrumAxisCaption, const std::string &spectraAxisLabel,
+                                           double observable) {
   os << m_comment << " Data for spectra :" << index1 << '\n';
   if (spectrumAxisCaption == "Temperature") {
     os << "TEMP " << observable << ' ' << spectraAxisLabel << '\n';
   } else {
-    os << m_comment << " " << spectrumAxisCaption << " " << observable << ' '
-       << spectraAxisLabel << '\n';
+    os << m_comment << " " << spectrumAxisCaption << " " << observable << ' ' << spectraAxisLabel << '\n';
   }
   os << m_comment << " " << caption << "              Y                 E\n";
 }
 
 /// Write spectra MAUD header
-void SaveFocusedXYE::writeMAUDSpectraHeader(std::ostream &os, size_t index1,
-                                            size_t index2, double flightPath,
-                                            double tth,
-                                            const std::string &caption) {
-  os << "#S" << std::setw(5) << index1 + 1 << " - Group" << std::setw(4)
-     << index2 << '\n';
+void SaveFocusedXYE::writeMAUDSpectraHeader(std::ostream &os, size_t index1, size_t index2, double flightPath,
+                                            double tth, const std::string &caption) {
+  os << "#S" << std::setw(5) << index1 + 1 << " - Group" << std::setw(4) << index2 << '\n';
   os << "#P0 0 0 " << tth << ' ' << flightPath << '\n';
   os << "#L " << caption << " Data Error\n";
 }

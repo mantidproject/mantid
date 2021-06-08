@@ -22,8 +22,7 @@ using std::size_t;
  * Overridden method creates an initialization string which makes it look like a
  * siple function.
  */
-std::string ImmutableCompositeFunction::writeToString(
-    const std::string &parentLocalAttributesStr) const {
+std::string ImmutableCompositeFunction::writeToString(const std::string &parentLocalAttributesStr) const {
   return IFunction::writeToString(parentLocalAttributesStr);
 }
 
@@ -31,9 +30,7 @@ std::string ImmutableCompositeFunction::writeToString(
  * A convenience method to add a new function.
  * @param fun @@ A pointer to a newly created function.
  */
-void ImmutableCompositeFunction::addFunction(IFunction *fun) {
-  addFunction(IFunction_sptr(fun));
-}
+void ImmutableCompositeFunction::addFunction(IFunction *fun) { addFunction(IFunction_sptr(fun)); }
 
 /**
  * Set parameter by name.
@@ -41,9 +38,7 @@ void ImmutableCompositeFunction::addFunction(IFunction *fun) {
  * @param value :: A new parameter value.
  * @param explicitlySet :: The explicitly set flag.
  */
-void ImmutableCompositeFunction::setParameter(const std::string &name,
-                                              const double &value,
-                                              bool explicitlySet) {
+void ImmutableCompositeFunction::setParameter(const std::string &name, const double &value, bool explicitlySet) {
   auto alias = m_aliases.find(name);
   if (alias != m_aliases.end()) {
     CompositeFunction::setParameter(alias->second, value, explicitlySet);
@@ -57,8 +52,7 @@ void ImmutableCompositeFunction::setParameter(const std::string &name,
  * @param name :: An alias or a name in CompositeFunction's style: f#.name
  * @param description :: A parameter description.
  */
-void ImmutableCompositeFunction::setParameterDescription(
-    const std::string &name, const std::string &description) {
+void ImmutableCompositeFunction::setParameterDescription(const std::string &name, const std::string &description) {
   auto alias = m_aliases.find(name);
   if (alias != m_aliases.end()) {
     CompositeFunction::setParameterDescription(alias->second, description);
@@ -84,8 +78,7 @@ double ImmutableCompositeFunction::getParameter(const std::string &name) const {
  * Returns the index of parameter name
  * @param name :: An alias or a name in CompositeFunction's style: f#.name
  */
-size_t
-ImmutableCompositeFunction::parameterIndex(const std::string &name) const {
+size_t ImmutableCompositeFunction::parameterIndex(const std::string &name) const {
   auto alias = m_aliases.find(name);
   if (alias != m_aliases.end()) {
     return alias->second;
@@ -98,8 +91,7 @@ ImmutableCompositeFunction::parameterIndex(const std::string &name) const {
  */
 std::string ImmutableCompositeFunction::parameterName(size_t i) const {
   const auto found =
-      std::find_if(m_aliases.cbegin(), m_aliases.cend(),
-                   [i](const auto &element) { return element.second == i; });
+      std::find_if(m_aliases.cbegin(), m_aliases.cend(), [i](const auto &element) { return element.second == i; });
   if (found == m_aliases.cend()) {
     return CompositeFunction::parameterName(i);
   } else {
@@ -114,8 +106,7 @@ std::string ImmutableCompositeFunction::parameterName(size_t i) const {
  * @param parName :: Fully qualified parameter name.
  * @param alias :: An alias for the parameter.
  */
-void ImmutableCompositeFunction::setAlias(const std::string &parName,
-                                          const std::string &alias) {
+void ImmutableCompositeFunction::setAlias(const std::string &parName, const std::string &alias) {
   // make sure the alias is unique
   if (m_aliases.count(alias) > 0) {
     throw Kernel::Exception::ExistsError("ImmutableCompositeFunction", alias);
@@ -131,9 +122,7 @@ void ImmutableCompositeFunction::setAlias(const std::string &parName,
  * parameter name and value
  *  is a math expression tying the parameter to other parameters or a constant.
  */
-void ImmutableCompositeFunction::addDefaultTies(const std::string &ties) {
-  CompositeFunction::addTies(ties, true);
-}
+void ImmutableCompositeFunction::addDefaultTies(const std::string &ties) { CompositeFunction::addTies(ties, true); }
 
 /**
  * Add a list of constraints from a string. Constraints added with this method
@@ -142,8 +131,7 @@ void ImmutableCompositeFunction::addDefaultTies(const std::string &ties) {
  * asString() method.
  * @param constraints :: A comma-separated list of constraint expressions.
  */
-void ImmutableCompositeFunction::addDefaultConstraints(
-    const std::string &constraints) {
+void ImmutableCompositeFunction::addDefaultConstraints(const std::string &constraints) {
   CompositeFunction::addConstraints(constraints, true);
 }
 

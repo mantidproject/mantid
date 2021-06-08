@@ -1,4 +1,5 @@
 set(SRC_FILES
+    src/SetValueWhenProperty.cpp
     src/ANN_complete.cpp
     src/ArrayBoundedValidator.cpp
     src/ArrayLengthValidator.cpp
@@ -23,7 +24,6 @@ set(SRC_FILES
     src/DateTimeValidator.cpp
     src/DateValidator.cpp
     src/DeltaEMode.cpp
-    src/Diffraction.cpp
     src/DirectoryValidator.cpp
     src/DiskBuffer.cpp
     src/DllOpen.cpp
@@ -140,6 +140,7 @@ set(SRC_UNITY_IGNORE_FILES
     src/System.cpp)
 
 set(INC_FILES
+    inc/MantidKernel/SetValueWhenProperty.h
     inc/MantidKernel/ANN/ANN.h
     inc/MantidKernel/ANN/ANNperf.h
     inc/MantidKernel/ANN/ANNx.h
@@ -173,7 +174,6 @@ set(INC_FILES
     inc/MantidKernel/DateTimeValidator.h
     inc/MantidKernel/DateValidator.h
     inc/MantidKernel/DeltaEMode.h
-    inc/MantidKernel/Diffraction.h
     inc/MantidKernel/DirectoryValidator.h
     inc/MantidKernel/DiskBuffer.h
     inc/MantidKernel/DllConfig.h
@@ -343,7 +343,6 @@ set(TEST_FILES
     DateTimeValidatorTest.h
     DateValidatorTest.h
     DeltaEModeTest.h
-    DiffractionTest.h
     DirectoryValidatorTest.h
     DiskBufferISaveableTest.h
     DiskBufferTest.h
@@ -519,6 +518,7 @@ target_link_libraries(Kernel
                       ${NETWORK_LIBRARIES}
                       span
                       ${HDF5_LIBRARIES}
+                      Json
                       )
 if(WIN32)
   target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage
@@ -545,14 +545,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h)
 
 # This section deals with creating the GithubApiHelper implementation
-
-if(WIN32)
-  set(GITHUB_AUTHORIZATION_TOKEN "8ec7afc857540ee60af78cba1cf7779a6ed0b6b9")
-elseif(APPLE)
-  set(GITHUB_AUTHORIZATION_TOKEN "9f1c1acd61ecb87b21ad0382f6b403c8294992c5")
-else()
-  set(GITHUB_AUTHORIZATION_TOKEN "ccacbaf39a7ad8151fca03b4ea99a29b28f0993b")
-endif()
+set (GITHUB_AUTHORIZATION_TOKEN ""
+     CACHE STRING "token used for authenticated read access to github")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h)
 
@@ -570,8 +564,6 @@ set(FRAMEWORK_PLUGINS_DIR ".")
 set(QT_PLUGINS_DIR ".")
 # %V will be replaced with the major version of Qt at runtime
 set(PV_PLUGINS_DIR "")
-set(PARAVIEW_PYTHON_PATHS "")
-set(IGNORE_PARAVIEW "0")
 set(UPDATE_INSTRUMENT_DEFINTITIONS "0")
 set(CHECK_FOR_NEW_MANTID_VERSION "0")
 set(ENABLE_USAGE_REPORTS "0")
@@ -590,8 +582,6 @@ set(HTML_ROOT ${DOCS_BUILDDIR}/html)
 # configuration below
 if(MPI_BUILD)
   set(CONSOLEPATTERN "%H:%M:%S,%i [%N:%P] %p %s - %t")
-  set(PV_PLUGINS_DIR "")
-  set(IGNORE_PARAVIEW "1")
 else()
   set(CONSOLEPATTERN "%s-[%p] %t")
 endif()
@@ -632,7 +622,6 @@ endif()
 set(FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins)
 set(PYTHONPLUGIN_DIRS "${FRAMEWORK_PLUGINS_DIR}/python")
 set(PYTHONPLUGIN_MANIFEST "${PYTHONPLUGIN_DIRS}/python-plugin-manifest.txt")
-set(PARAVIEW_PYTHON_PATHS "")
 set(UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_NETWORK_ACCESS}")
 set(CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_NETWORK_ACCESS}")
 set(ENABLE_USAGE_REPORTS "${ENABLE_NETWORK_ACCESS}")
@@ -645,11 +634,8 @@ set(HTML_ROOT ../share/doc/html)
 if(${CMAKE_PROJECT_NAME} MATCHES "MantidFramework")
   set(QT_PLUGINS_DIR "")
   set(COLORMAPS_FOLDER "")
-  set(PV_PLUGINS_DIR "")
-  set(IGNORE_PARAVIEW "1")
 else()
   set(QT_PLUGINS_DIR "${MANTID_ROOT}/plugins/qt%V")
-  set(PV_PLUGINS_DIR "${MANTID_ROOT}/plugins/${PVPLUGINS_SUBDIR}/qt%V")
   set(COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps)
 endif()
 

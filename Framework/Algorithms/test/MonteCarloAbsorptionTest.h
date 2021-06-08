@@ -50,8 +50,7 @@ struct TestWorkspaceDescriptor {
   double efixed;
 };
 
-void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
-               const Environment environment) {
+void addSample(const Mantid::API::MatrixWorkspace_sptr &ws, const Environment environment) {
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
   using namespace Mantid::Kernel;
@@ -59,8 +58,7 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
   namespace PhysicalConstants = Mantid::PhysicalConstants;
 
   if (environment == Environment::MeshSamplePlusContainer) {
-    std::string samplePath =
-        Mantid::API::FileFinder::Instance().getFullPath("PearlSample.stl");
+    std::string samplePath = Mantid::API::FileFinder::Instance().getFullPath("PearlSample.stl");
     ScaleUnits scaleType = ScaleUnits::millimetres;
     ReadMaterial::MaterialParameters params;
     params.chemicalSymbol = "V";
@@ -68,116 +66,92 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
     std::shared_ptr<MeshObject> shape = binaryStlReader.readShape();
     ws->mutableSample().setShape(shape);
 
-    std::string envPath =
-        Mantid::API::FileFinder::Instance().getFullPath("PearlEnvironment.stl");
+    std::string envPath = Mantid::API::FileFinder::Instance().getFullPath("PearlEnvironment.stl");
     // set up a uniform material for whole environment here to give simple case
     params.chemicalSymbol = "Ti-Zr";
     params.massDensity = 5.23;
     auto binaryStlReaderEnv = LoadBinaryStl(envPath, scaleType, params);
-    std::shared_ptr<MeshObject> environmentShape =
-        binaryStlReaderEnv.readShape();
+    std::shared_ptr<MeshObject> environmentShape = binaryStlReaderEnv.readShape();
 
     auto can = std::make_shared<Container>(environmentShape);
-    std::unique_ptr<SampleEnvironment> environment =
-        std::make_unique<SampleEnvironment>("PearlEnvironment", can);
+    std::unique_ptr<SampleEnvironment> environment = std::make_unique<SampleEnvironment>("PearlEnvironment", can);
 
     ws->mutableSample().setEnvironment(std::move(environment));
   } else {
-    if (environment == Environment::CylinderSampleOnly ||
-        environment == Environment::CylinderSamplePlusContainer) {
+    if (environment == Environment::CylinderSampleOnly || environment == Environment::CylinderSamplePlusContainer) {
       // Define a sample shape
       constexpr double sampleRadius{0.006};
       constexpr double sampleHeight{0.04};
       const V3D sampleBaseCentre{0., -sampleHeight / 2., 0.};
       const V3D yAxis{0., 1., 0.};
-      auto sampleShape = ComponentCreationHelper::createCappedCylinder(
-          sampleRadius, sampleHeight, sampleBaseCentre, yAxis,
-          "sample-cylinder");
+      auto sampleShape = ComponentCreationHelper::createCappedCylinder(sampleRadius, sampleHeight, sampleBaseCentre,
+                                                                       yAxis, "sample-cylinder");
       // And a material assuming it's a CSG Object
-      sampleShape->setMaterial(Material(
-          "Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
+      sampleShape->setMaterial(Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
       ws->mutableSample().setShape(sampleShape);
       if (environment == Environment::CylinderSamplePlusContainer) {
         constexpr double containerWallThickness{0.002};
         constexpr double containerInnerRadius{1.2 * sampleHeight};
-        constexpr double containerOuterRadius{containerInnerRadius +
-                                              containerWallThickness};
+        constexpr double containerOuterRadius{containerInnerRadius + containerWallThickness};
 
-        auto canShape = ComponentCreationHelper::createHollowShell(
-            containerInnerRadius, containerOuterRadius);
+        auto canShape = ComponentCreationHelper::createHollowShell(containerInnerRadius, containerOuterRadius);
         // Set material assuming it's a CSG Object
-        canShape->setMaterial(Material(
-            "CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
+        canShape->setMaterial(Material("CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
         auto can = std::make_shared<Container>(canShape);
-        ws->mutableSample().setEnvironment(
-            std::make_unique<SampleEnvironment>("can", can));
+        ws->mutableSample().setEnvironment(std::make_unique<SampleEnvironment>("can", can));
       }
     } else if (environment == Environment::CubeRotatedSampleOnly) {
       // create cube that has been rotated about x axis so that the
       // depth the neutron tracks pass through varies linearly with y
-      auto cubeShape = ComponentCreationHelper::createCuboid(
-          sqrt(2) / 200, sqrt(2) / 200, sqrt(2) / 200, 45, V3D{1, 0, 0});
+      auto cubeShape =
+          ComponentCreationHelper::createCuboid(sqrt(2) / 200, sqrt(2) / 200, sqrt(2) / 200, 45, V3D{1, 0, 0});
 
       // create test material with mu=1 for lambda=0.5, mu=2 for lambda=1.5
-      auto shape = std::shared_ptr<IObject>(
-          cubeShape->cloneWithMaterial(Mantid::Kernel::Material(
-              "Test",
-              Mantid::PhysicalConstants::NeutronAtom(
-                  0, 0, 0, 0, 0, 0.5 /*total scattering xs*/,
-                  Mantid::PhysicalConstants::NeutronAtom::
-                      ReferenceLambda /*absorption xs*/),
-              1 /*number density*/)));
+      auto shape = std::shared_ptr<IObject>(cubeShape->cloneWithMaterial(
+          Mantid::Kernel::Material("Test",
+                                   Mantid::PhysicalConstants::NeutronAtom(
+                                       0, 0, 0, 0, 0, 0.5 /*total scattering xs*/,
+                                       Mantid::PhysicalConstants::NeutronAtom::ReferenceLambda /*absorption xs*/),
+                                   1 /*number density*/)));
       ws->mutableSample().setShape(shape);
-    } else if (environment == Environment::CubeSampleOnly ||
-               environment == Environment::CubeSamplePlusContainer) {
+    } else if (environment == Environment::CubeSampleOnly || environment == Environment::CubeSamplePlusContainer) {
       // create 1cm x 1cm cube
-      auto cubeShape = ComponentCreationHelper::createCuboid(
-          0.005, 0.005, 0.005, {0., 0., -0.005});
+      auto cubeShape = ComponentCreationHelper::createCuboid(0.005, 0.005, 0.005, {0., 0., -0.005});
 
       // create test material with mu=1 for lambda=0.5, mu=2 for lambda=1.5
-      auto shape = std::shared_ptr<IObject>(
-          cubeShape->cloneWithMaterial(Mantid::Kernel::Material(
-              "Test",
-              Mantid::PhysicalConstants::NeutronAtom(
-                  0, 0, 0, 0, 0, 0.5 /*total scattering xs*/,
-                  Mantid::PhysicalConstants::NeutronAtom::
-                      ReferenceLambda /*absorption xs*/),
-              1 /*number density*/)));
+      auto shape = std::shared_ptr<IObject>(cubeShape->cloneWithMaterial(
+          Mantid::Kernel::Material("Test",
+                                   Mantid::PhysicalConstants::NeutronAtom(
+                                       0, 0, 0, 0, 0, 0.5 /*total scattering xs*/,
+                                       Mantid::PhysicalConstants::NeutronAtom::ReferenceLambda /*absorption xs*/),
+                                   1 /*number density*/)));
       ws->mutableSample().setShape(shape);
       if (environment == Environment::CubeSamplePlusContainer) {
-        auto xmlShapeStreamFront = ComponentCreationHelper::cuboidXML(
-            0.005, 0.005, 0.0025, {0., 0., -0.0125}, "front");
-        auto xmlShapeStreamBack = ComponentCreationHelper::cuboidXML(
-            0.005, 0.005, 0.0025, {0., 0., 0.0025}, "back");
-        std::string combinedXML = xmlShapeStreamFront + xmlShapeStreamBack +
-                                  "<algebra val=\"back:front\"/>";
+        auto xmlShapeStreamFront = ComponentCreationHelper::cuboidXML(0.005, 0.005, 0.0025, {0., 0., -0.0125}, "front");
+        auto xmlShapeStreamBack = ComponentCreationHelper::cuboidXML(0.005, 0.005, 0.0025, {0., 0., 0.0025}, "back");
+        std::string combinedXML = xmlShapeStreamFront + xmlShapeStreamBack + "<algebra val=\"back:front\"/>";
         ShapeFactory shapeMaker;
         auto holderShape = shapeMaker.createShape(combinedXML);
-        auto shape = std::shared_ptr<IObject>(
-            holderShape->cloneWithMaterial(Mantid::Kernel::Material(
-                "Test",
-                Mantid::PhysicalConstants::NeutronAtom(
-                    0, 0, 0, 0, 0, 0.5 /*total scattering xs*/,
-                    Mantid::PhysicalConstants::NeutronAtom::
-                        ReferenceLambda /*absorption xs*/),
-                1 /*number density*/)));
+        auto shape = std::shared_ptr<IObject>(holderShape->cloneWithMaterial(
+            Mantid::Kernel::Material("Test",
+                                     Mantid::PhysicalConstants::NeutronAtom(
+                                         0, 0, 0, 0, 0, 0.5 /*total scattering xs*/,
+                                         Mantid::PhysicalConstants::NeutronAtom::ReferenceLambda /*absorption xs*/),
+                                     1 /*number density*/)));
         auto can = std::make_shared<Container>(shape);
-        ws->mutableSample().setEnvironment(
-            std::make_unique<SampleEnvironment>("can", can));
+        ws->mutableSample().setEnvironment(std::make_unique<SampleEnvironment>("can", can));
       }
     }
   }
 }
 
-Mantid::API::MatrixWorkspace_sptr
-setUpWS(const TestWorkspaceDescriptor &wsProps) {
+Mantid::API::MatrixWorkspace_sptr setUpWS(const TestWorkspaceDescriptor &wsProps) {
   using namespace Mantid::Kernel;
   using namespace Mantid::Geometry;
 
   Mantid::DataObjects::Workspace2D_sptr space;
   if (wsProps.fullInstrument) {
-    space = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        wsProps.nspectra, wsProps.nbins);
+    space = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(wsProps.nspectra, wsProps.nbins);
   } else {
     // create a test instrument with a single detector on the beam line so
     // that a test case with a simple path length calculation can be created
@@ -188,8 +162,7 @@ setUpWS(const TestWorkspaceDescriptor &wsProps) {
     const double cylHeight(0.0002);
     // One object
     auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-        cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
-        "pixel-shape");
+        cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.), "pixel-shape");
 
     // source and detector are at +/-100m so tracks approx parallel to beam
     constexpr double distance = 100.0;
@@ -198,13 +171,10 @@ setUpWS(const TestWorkspaceDescriptor &wsProps) {
     testInst->add(det);
     testInst->markAsDetector(det);
 
-    ComponentCreationHelper::addSourceToInstrument(testInst,
-                                                   V3D(0.0, 0.0, -distance));
-    ComponentCreationHelper::addSampleToInstrument(testInst,
-                                                   V3D(0.0, 0.0, 0.0));
+    ComponentCreationHelper::addSourceToInstrument(testInst, V3D(0.0, 0.0, -distance));
+    ComponentCreationHelper::addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
 
-    space = WorkspaceCreationHelper::create2DWorkspaceBinned(wsProps.nspectra,
-                                                             wsProps.nbins);
+    space = WorkspaceCreationHelper::create2DWorkspaceBinned(wsProps.nspectra, wsProps.nbins);
 
     space->getSpectrum(0).setDetectorID(det->getID());
     space->setInstrument(testInst);
@@ -238,9 +208,7 @@ public:
     using namespace Mantid::Geometry;
 
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {
-        1, 2, false, Environment::CubeRotatedSampleOnly, DeltaEMode::Elastic,
-        -1};
+    TestWorkspaceDescriptor wsProps = {1, 2, false, Environment::CubeRotatedSampleOnly, DeltaEMode::Elastic, -1};
     auto testWS = setUpWS(wsProps);
 
     // calculate expected value of the att factor as integral exp(-mu*t)p(t)dt
@@ -267,16 +235,14 @@ public:
     const double calculatedAttFactor1 = (1 - 3 * exp(-2)) / 2;
     const double calculatedAttFactorSq1 = (1 - 5 * exp(-4)) / 8;
     TS_ASSERT_DELTA(calculatedAttFactor1, yData[0], delta);
-    const double calculatedAttFactorSD1 =
-        sqrt(calculatedAttFactorSq1 - pow(calculatedAttFactor1, 2));
+    const double calculatedAttFactorSD1 = sqrt(calculatedAttFactorSq1 - pow(calculatedAttFactor1, 2));
     TS_ASSERT_DELTA(calculatedAttFactorSD1, attenuationFactorsSD1, delta);
 
     double attenuationFactorsSD2 = eData[1] * sqrt(NEVENTS);
     const double calculatedAttFactor2 = (1 - 5 * exp(-4)) / 8;
     const double calculatedAttFactorSq2 = (1 - 9 * exp(-8)) / 32;
     TS_ASSERT_DELTA(calculatedAttFactor2, yData[1], delta);
-    const double calculatedAttFactorSD2 =
-        sqrt(calculatedAttFactorSq2 - pow(calculatedAttFactor2, 2));
+    const double calculatedAttFactorSD2 = sqrt(calculatedAttFactorSq2 - pow(calculatedAttFactor2, 2));
     TS_ASSERT_DELTA(calculatedAttFactorSD2, attenuationFactorsSD2, delta);
   }
 
@@ -288,14 +254,9 @@ public:
     double lambdaFixed = 0.5;
     double EFixedForLambda =
         1e20 * pow(Mantid::PhysicalConstants::h, 2) /
-        (2.0 * Mantid::PhysicalConstants::NeutronMass *
-         Mantid::PhysicalConstants::meV * pow(lambdaFixed, 2));
-    TestWorkspaceDescriptor wsProps = {1,
-                                       2,
-                                       false,
-                                       Environment::CubeRotatedSampleOnly,
-                                       DeltaEMode::Direct,
-                                       EFixedForLambda};
+        (2.0 * Mantid::PhysicalConstants::NeutronMass * Mantid::PhysicalConstants::meV * pow(lambdaFixed, 2));
+    TestWorkspaceDescriptor wsProps = {
+        1, 2, false, Environment::CubeRotatedSampleOnly, DeltaEMode::Direct, EFixedForLambda};
     auto testWS = setUpWS(wsProps);
 
     // calculate expected value of the att factor as integral att(t)p(t)dt
@@ -330,14 +291,9 @@ public:
     double lambdaFixed = 0.5;
     double EFixedForLambda =
         1e20 * pow(Mantid::PhysicalConstants::h, 2) /
-        (2.0 * Mantid::PhysicalConstants::NeutronMass *
-         Mantid::PhysicalConstants::meV * pow(lambdaFixed, 2));
-    TestWorkspaceDescriptor wsProps = {1,
-                                       2,
-                                       false,
-                                       Environment::CubeRotatedSampleOnly,
-                                       DeltaEMode::Indirect,
-                                       EFixedForLambda};
+        (2.0 * Mantid::PhysicalConstants::NeutronMass * Mantid::PhysicalConstants::meV * pow(lambdaFixed, 2));
+    TestWorkspaceDescriptor wsProps = {
+        1, 2, false, Environment::CubeRotatedSampleOnly, DeltaEMode::Indirect, EFixedForLambda};
     auto testWS = setUpWS(wsProps);
 
     // calculate expected value of the att factor as integral att(t)p(t)dt
@@ -368,9 +324,7 @@ public:
     using namespace Mantid::Geometry;
 
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {
-        1, 2, false, Environment::CubeSamplePlusContainer, DeltaEMode::Elastic,
-        -1};
+    TestWorkspaceDescriptor wsProps = {1, 2, false, Environment::CubeSamplePlusContainer, DeltaEMode::Elastic, -1};
     auto testWS = setUpWS(wsProps);
 
     auto mcAbsorb = createAlgorithm();
@@ -393,9 +347,7 @@ public:
     using namespace Mantid::Geometry;
 
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {
-        1, 2, false, Environment::CubeRotatedSampleOnly, DeltaEMode::Elastic,
-        -1};
+    TestWorkspaceDescriptor wsProps = {1, 2, false, Environment::CubeRotatedSampleOnly, DeltaEMode::Elastic, -1};
     auto testWS = setUpWS(wsProps);
     auto inst = testWS->getInstrument();
     auto &pmap = testWS->instrumentParameters();
@@ -429,9 +381,7 @@ public:
     using namespace Mantid::Geometry;
 
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {
-        1, 2, false, Environment::CubeRotatedSampleOnly, DeltaEMode::Elastic,
-        -1};
+    TestWorkspaceDescriptor wsProps = {1, 2, false, Environment::CubeRotatedSampleOnly, DeltaEMode::Elastic, -1};
     auto testWS = setUpWS(wsProps);
     auto inst = testWS->getInstrument();
     auto &pmap = testWS->instrumentParameters();
@@ -454,12 +404,7 @@ public:
     using Mantid::Kernel::DeltaEMode;
     const int nspectra = 5;
     const int nbins = 10;
-    TestWorkspaceDescriptor wsProps = {nspectra,
-                                       nbins,
-                                       true,
-                                       Environment::CylinderSampleOnly,
-                                       DeltaEMode::Elastic,
-                                       -1};
+    TestWorkspaceDescriptor wsProps = {nspectra, nbins, true, Environment::CylinderSampleOnly, DeltaEMode::Elastic, -1};
     auto testWS = setUpWS(wsProps);
     auto mcAbsorb = createTestAlgorithm();
     auto MCAbsorptionStrategy = std::make_shared<MockMCAbsorptionStrategy>();
@@ -468,18 +413,13 @@ public:
     using namespace ::testing;
     std::vector<double> attenuationFactorZeroes(nbins);
     std::vector<double> attenuationFactorErrorZeroes(nbins);
-    std::vector<double> dummyAttFactor = {10.0, 9.0, 8.0, 7.0, 6.0,
-                                          5.0,  4.0, 3.0, 2.0, 1.0};
-    std::vector<double> dummyAttFactorErr = {1.0, 1.1, 1.0, 1.1, 0.9,
-                                             1.2, 1.0, 1.1, 1.1, 1.0};
-    std::vector<double> wavelengths = {0.5, 1.5, 2.5, 3.5, 4.5,
-                                       5.5, 6.5, 7.5, 8.5, 9.5};
+    std::vector<double> dummyAttFactor = {10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0};
+    std::vector<double> dummyAttFactorErr = {1.0, 1.1, 1.0, 1.1, 0.9, 1.2, 1.0, 1.1, 1.1, 1.0};
+    std::vector<double> wavelengths = {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5};
     EXPECT_CALL(*MCAbsorptionStrategy,
-                calculate(_, _, wavelengths, _, attenuationFactorZeroes,
-                          attenuationFactorErrorZeroes, _))
+                calculate(_, _, wavelengths, _, attenuationFactorZeroes, attenuationFactorErrorZeroes, _))
         .Times(Exactly(static_cast<int>(nspectra)))
-        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttFactor),
-                              SetArgReferee<5>(dummyAttFactorErr)));
+        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttFactor), SetArgReferee<5>(dummyAttFactorErr)));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
     auto outputWS = getOutputWorkspace(mcAbsorb);
@@ -492,12 +432,7 @@ public:
     using Mantid::Kernel::DeltaEMode;
     const int nspectra = 5;
     const int nbins = 10;
-    TestWorkspaceDescriptor wsProps = {nspectra,
-                                       nbins,
-                                       true,
-                                       Environment::CylinderSampleOnly,
-                                       DeltaEMode::Elastic,
-                                       -1};
+    TestWorkspaceDescriptor wsProps = {nspectra, nbins, true, Environment::CylinderSampleOnly, DeltaEMode::Elastic, -1};
     auto testWS = setUpWS(wsProps);
     auto mcAbsorb = createTestAlgorithm();
     auto MCAbsorptionStrategy = std::make_shared<MockMCAbsorptionStrategy>();
@@ -514,36 +449,25 @@ public:
     std::vector<double> dummyAttFactorErr = {1.0, 1.0, 1.1, 1.2, 1.1, 1.0};
     std::vector<double> wavelengths = {0.5, 2.5, 4.5, 6.5, 8.5, 9.5};
     EXPECT_CALL(*MCAbsorptionStrategy,
-                calculate(_, _, wavelengths, _, attenuationFactorZeroes,
-                          attenuationFactorErrorZeroes, _))
+                calculate(_, _, wavelengths, _, attenuationFactorZeroes, attenuationFactorErrorZeroes, _))
         .Times(Exactly(static_cast<int>(nspectra)))
-        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttFactor),
-                              SetArgReferee<5>(dummyAttFactorErr)));
+        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttFactor), SetArgReferee<5>(dummyAttFactorErr)));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
     auto outputWS = getOutputWorkspace(mcAbsorb);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), nspectra);
     TS_ASSERT_EQUALS(dummyAttFactor[0], outputWS->y(0).front());
     TS_ASSERT_EQUALS(dummyAttFactorErr[0], outputWS->e(0).front());
-    TS_ASSERT_EQUALS((dummyAttFactor[0] + dummyAttFactor[1]) / 2,
-                     outputWS->y(0)[1]);
-    TS_ASSERT_EQUALS(
-        sqrt(pow(dummyAttFactorErr[0], 2) + pow(dummyAttFactorErr[1], 2)) / 2.0,
-        outputWS->e(0)[1]);
-    TS_ASSERT_EQUALS((dummyAttFactor[1] + dummyAttFactor[2]) / 2,
-                     outputWS->y(0)[3]);
+    TS_ASSERT_EQUALS((dummyAttFactor[0] + dummyAttFactor[1]) / 2, outputWS->y(0)[1]);
+    TS_ASSERT_EQUALS(sqrt(pow(dummyAttFactorErr[0], 2) + pow(dummyAttFactorErr[1], 2)) / 2.0, outputWS->e(0)[1]);
+    TS_ASSERT_EQUALS((dummyAttFactor[1] + dummyAttFactor[2]) / 2, outputWS->y(0)[3]);
   }
 
   void test_Lambda_StepSize_Two_Spline_Interpolation() {
     using Mantid::Kernel::DeltaEMode;
     const int nspectra = 5;
     const int nbins = 9;
-    TestWorkspaceDescriptor wsProps = {nspectra,
-                                       nbins,
-                                       true,
-                                       Environment::CylinderSampleOnly,
-                                       DeltaEMode::Elastic,
-                                       -1};
+    TestWorkspaceDescriptor wsProps = {nspectra, nbins, true, Environment::CylinderSampleOnly, DeltaEMode::Elastic, -1};
     auto testWS = setUpWS(wsProps);
     auto mcAbsorb = createTestAlgorithm();
     auto MCAbsorptionStrategy = std::make_shared<MockMCAbsorptionStrategy>();
@@ -569,11 +493,9 @@ public:
     std::vector<double> dummyAttFactorErr = {1.0, 1.0, 1.1, 1.2, 1.1};
     std::vector<double> wavelengths = {0.5, 2.5, 4.5, 6.5, 8.5};
     EXPECT_CALL(*MCAbsorptionStrategy,
-                calculate(_, _, wavelengths, _, attenuationFactorZeroes,
-                          attenuationFactorErrorZeroes, _))
+                calculate(_, _, wavelengths, _, attenuationFactorZeroes, attenuationFactorErrorZeroes, _))
         .Times(Exactly(static_cast<int>(nspectra)))
-        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttFactor),
-                              SetArgReferee<5>(dummyAttFactorErr)));
+        .WillRepeatedly(DoAll(SetArgReferee<4>(dummyAttFactor), SetArgReferee<5>(dummyAttFactorErr)));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
     auto outputWS = getOutputWorkspace(mcAbsorb);
@@ -583,10 +505,8 @@ public:
     std::vector<double> a, b, interp;
     for (size_t i = 0; i < nlambdabins - 1; i++) {
       a.emplace_back(qdash[i] - (dummyAttFactor[i + 1] - dummyAttFactor[i]));
-      b.emplace_back(-qdash[i + 1] +
-                     (dummyAttFactor[i + 1] - dummyAttFactor[i]));
-      interp.emplace_back(tx * (dummyAttFactor[i] + dummyAttFactor[i + 1]) +
-                          pow(tx, 3) * (a[i] + b[i]));
+      b.emplace_back(-qdash[i + 1] + (dummyAttFactor[i + 1] - dummyAttFactor[i]));
+      interp.emplace_back(tx * (dummyAttFactor[i] + dummyAttFactor[i + 1]) + pow(tx, 3) * (a[i] + b[i]));
     }
 
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), nspectra);
@@ -602,11 +522,8 @@ public:
     // create an instrument including some monitors so that there's a good
     // variation in the wavelength range of the spectra when convert from TOF to
     // wavelength
-    MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 100,
-                                                                     true);
-    testWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 100, true);
+    testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     Mantid::Algorithms::ConvertUnits convert;
     convert.initialize();
@@ -625,8 +542,7 @@ public:
 
   void test_ignore_masked_spectra() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {
-        5, 10, true, Environment::CylinderSampleOnly, DeltaEMode::Elastic, -1};
+    TestWorkspaceDescriptor wsProps = {5, 10, true, Environment::CylinderSampleOnly, DeltaEMode::Elastic, -1};
     auto testWS = setUpWS(wsProps);
     testWS->mutableSpectrumInfo().setMasked(0, true);
     auto mcAbsorb = createAlgorithm();
@@ -638,8 +554,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS(outputWS->spectrumInfo().isMasked(0), true);
     auto yData = outputWS->getSpectrum(0).dataY();
-    bool allZero = std::all_of(yData.begin(), yData.end(),
-                               [](double i) { return i == 0; });
+    bool allZero = std::all_of(yData.begin(), yData.end(), [](double i) { return i == 0; });
     TS_ASSERT_EQUALS(allZero, true);
   }
 
@@ -653,18 +568,15 @@ public:
     // Create a simple test workspace that has no instrument
     auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
 
-    TS_ASSERT_THROWS(mcAbsorb->setProperty("InputWorkspace", testWS),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(mcAbsorb->setProperty("InputWorkspace", testWS), const std::invalid_argument &);
   }
 
   void test_Workspace_With_An_Invalid_Sample_Shape_Is_Not_Accepted() {
     using namespace Mantid::API;
 
-    auto testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 1);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 1);
     // Needs to have units of wavelength
-    testWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", testWS));
     TS_ASSERT_THROWS(mcabs->execute(), const std::invalid_argument &);
@@ -672,22 +584,16 @@ public:
 
   void test_Lower_Limit_for_Number_of_Wavelengths() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {
-        1, 10, true, Environment::CylinderSampleOnly, DeltaEMode::Direct, 12.0};
+    TestWorkspaceDescriptor wsProps = {1, 10, true, Environment::CylinderSampleOnly, DeltaEMode::Direct, 12.0};
     int nlambda{1};
-    TS_ASSERT_THROWS(runAlgorithm(wsProps, true, nlambda, "Linear"),
-                     const std::runtime_error &)
+    TS_ASSERT_THROWS(runAlgorithm(wsProps, true, nlambda, "Linear"), const std::runtime_error &)
     nlambda = 2;
-    TS_ASSERT_THROWS(runAlgorithm(wsProps, true, nlambda, "CSpline"),
-                     const std::runtime_error &)
+    TS_ASSERT_THROWS(runAlgorithm(wsProps, true, nlambda, "CSpline"), const std::runtime_error &)
   }
 
   void test_event_workspace() {
-    auto inputWS =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(5, 2,
-                                                                        true);
-    inputWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    auto inputWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(5, 2, true);
+    inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     addSample(inputWS, Environment::CylinderSampleOnly);
 
     auto mcabs = createAlgorithm();
@@ -700,25 +606,17 @@ public:
     using Mantid::Kernel::DeltaEMode;
     constexpr int nspectra = 25;
     constexpr int nbins = 10;
-    TestWorkspaceDescriptor wsProps = {nspectra,
-                                       nbins,
-                                       true,
-                                       Environment::CylinderSampleOnly,
-                                       DeltaEMode::Elastic,
-                                       -1};
+    TestWorkspaceDescriptor wsProps = {nspectra, nbins, true, Environment::CylinderSampleOnly, DeltaEMode::Elastic, -1};
     auto modelWS = setUpWS(wsProps);
     auto mcAbsorb = createTestAlgorithm();
     auto MCAbsorptionStrategy = std::make_shared<MockMCAbsorptionStrategy>();
     mcAbsorb->setAbsorptionStrategy(MCAbsorptionStrategy);
-    auto sparseWS =
-        std::make_shared<MockSparseWorkspace>(*modelWS, nbins, 3, 3);
+    auto sparseWS = std::make_shared<MockSparseWorkspace>(*modelWS, nbins, 3, 3);
     mcAbsorb->setSparseWorkspace(sparseWS);
     using namespace ::testing;
-    EXPECT_CALL(*MCAbsorptionStrategy, calculate(_, _, _, _, _, _, _))
-        .Times(Exactly(static_cast<int>(9)));
+    EXPECT_CALL(*MCAbsorptionStrategy, calculate(_, _, _, _, _, _, _)).Times(Exactly(static_cast<int>(9)));
     Mantid::HistogramData::Frequencies ysOnes(nbins, 1.0);
-    Mantid::HistogramData::Points ps =
-        modelWS->getSpectrum(0).histogram().points();
+    Mantid::HistogramData::Points ps = modelWS->getSpectrum(0).histogram().points();
     Mantid::HistogramData::FrequencyStandardDeviations errs(nbins, 0.5);
     const Mantid::HistogramData::Histogram testHistogramOnes(ps, ysOnes, errs);
     EXPECT_CALL(*sparseWS, bilinearInterpolateFromDetectorGrid(_, _))
@@ -740,54 +638,41 @@ public:
   }
 
 private:
-  class MockMCAbsorptionStrategy final
-      : public Mantid::Algorithms::IMCAbsorptionStrategy {
+  class MockMCAbsorptionStrategy final : public Mantid::Algorithms::IMCAbsorptionStrategy {
   public:
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
-    MOCK_METHOD7(calculate,
-                 void(Mantid::Kernel::PseudoRandomNumberGenerator &rng,
-                      const Mantid::Kernel::V3D &finalPos,
-                      const std::vector<double> &lambdas,
-                      const double lambdaFixed,
-                      std::vector<double> &attenuationFactors,
-                      std::vector<double> &attFactorErrors,
-                      Mantid::Algorithms::MCInteractionStatistics &stats));
+    MOCK_METHOD7(calculate, void(Mantid::Kernel::PseudoRandomNumberGenerator &rng, const Mantid::Kernel::V3D &finalPos,
+                                 const std::vector<double> &lambdas, const double lambdaFixed,
+                                 std::vector<double> &attenuationFactors, std::vector<double> &attFactorErrors,
+                                 Mantid::Algorithms::MCInteractionStatistics &stats));
     GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
   class MockSparseWorkspace final : public Mantid::Algorithms::SparseWorkspace {
   public:
-    MockSparseWorkspace(const Mantid::API::MatrixWorkspace &modelWS,
-                        const size_t wavelengthPoints, const size_t rows,
+    MockSparseWorkspace(const Mantid::API::MatrixWorkspace &modelWS, const size_t wavelengthPoints, const size_t rows,
                         const size_t columns)
         : SparseWorkspace(modelWS, wavelengthPoints, rows, columns){};
 
   public:
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD2(interpolateFromDetectorGrid,
-                       Mantid::HistogramData::Histogram(const double lat,
-                                                        const double lon));
+                       Mantid::HistogramData::Histogram(const double lat, const double lon));
     MOCK_CONST_METHOD2(bilinearInterpolateFromDetectorGrid,
-                       Mantid::HistogramData::Histogram(const double lat,
-                                                        const double lon));
+                       Mantid::HistogramData::Histogram(const double lat, const double lon));
     GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
-  class TestMonteCarloAbsorption final
-      : public Mantid::Algorithms::MonteCarloAbsorption {
+  class TestMonteCarloAbsorption final : public Mantid::Algorithms::MonteCarloAbsorption {
   public:
-    void setAbsorptionStrategy(
-        std::shared_ptr<MockMCAbsorptionStrategy> absStrategy) {
+    void setAbsorptionStrategy(std::shared_ptr<MockMCAbsorptionStrategy> absStrategy) {
       m_MCAbsorptionStrategy = absStrategy;
     }
-    void setSparseWorkspace(std::shared_ptr<MockSparseWorkspace> sparseWS) {
-      m_SparseWorkspace = sparseWS;
-    }
+    void setSparseWorkspace(std::shared_ptr<MockSparseWorkspace> sparseWS) { m_SparseWorkspace = sparseWS; }
 
   protected:
     std::shared_ptr<Mantid::Algorithms::IMCAbsorptionStrategy>
     createStrategy(Mantid::Algorithms::IMCInteractionVolume &interactionVol,
-                   const Mantid::Algorithms::IBeamProfile &beamProfile,
-                   Mantid::Kernel::DeltaEMode::Type EMode, const size_t nevents,
-                   const size_t maxScatterPtAttempts,
+                   const Mantid::Algorithms::IBeamProfile &beamProfile, Mantid::Kernel::DeltaEMode::Type EMode,
+                   const size_t nevents, const size_t maxScatterPtAttempts,
                    const bool regenerateTracksForEachLambda) override {
       UNUSED_ARG(interactionVol);
       UNUSED_ARG(beamProfile);
@@ -798,8 +683,7 @@ private:
       return m_MCAbsorptionStrategy;
     }
     std::shared_ptr<Mantid::Algorithms::SparseWorkspace>
-    createSparseWorkspace(const Mantid::API::MatrixWorkspace &modelWS,
-                          const size_t wavelengthPoints, const size_t rows,
+    createSparseWorkspace(const Mantid::API::MatrixWorkspace &modelWS, const size_t wavelengthPoints, const size_t rows,
                           const size_t columns) override {
       UNUSED_ARG(modelWS);
       UNUSED_ARG(wavelengthPoints);
@@ -812,26 +696,22 @@ private:
     std::shared_ptr<MockMCAbsorptionStrategy> m_MCAbsorptionStrategy;
     std::shared_ptr<MockSparseWorkspace> m_SparseWorkspace;
   };
-  Mantid::API::MatrixWorkspace_const_sptr
-  runAlgorithm(const TestWorkspaceDescriptor &wsProps,
-               const bool resimulateTracksForDiffWavelengths = false,
-               int nlambda = -1, const std::string &interpolate = "",
-               const bool sparseInstrument = false, const int sparseRows = 2,
-               const int sparseColumns = 2) {
+  Mantid::API::MatrixWorkspace_const_sptr runAlgorithm(const TestWorkspaceDescriptor &wsProps,
+                                                       const bool resimulateTracksForDiffWavelengths = false,
+                                                       int nlambda = -1, const std::string &interpolate = "",
+                                                       const bool sparseInstrument = false, const int sparseRows = 2,
+                                                       const int sparseColumns = 2) {
     auto inputWS = setUpWS(wsProps);
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));
     if (resimulateTracksForDiffWavelengths) {
-      TS_ASSERT_THROWS_NOTHING(
-          mcabs->setProperty("ResimulateTracksForDifferentWavelengths", true));
+      TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("ResimulateTracksForDifferentWavelengths", true));
       if (nlambda > 0) {
-        TS_ASSERT_THROWS_NOTHING(
-            mcabs->setProperty("NumberOfWavelengthPoints", nlambda));
+        TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("NumberOfWavelengthPoints", nlambda));
       }
     }
     if (!interpolate.empty()) {
-      TS_ASSERT_THROWS_NOTHING(
-          mcabs->setProperty("Interpolation", interpolate));
+      TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("Interpolation", interpolate));
     }
     if (sparseInstrument) {
       mcabs->setProperty("SparseInstrument", true);
@@ -865,8 +745,7 @@ private:
     return alg;
   }
 
-  Mantid::API::MatrixWorkspace_const_sptr
-  getOutputWorkspace(const Mantid::API::IAlgorithm_sptr &alg) {
+  Mantid::API::MatrixWorkspace_const_sptr getOutputWorkspace(const Mantid::API::IAlgorithm_sptr &alg) {
     using Mantid::API::MatrixWorkspace_sptr;
     MatrixWorkspace_sptr output = alg->getProperty("OutputWorkspace");
     TS_ASSERT(output);
@@ -875,9 +754,7 @@ private:
     return output;
   }
 
-  void
-  verifyDimensions(TestWorkspaceDescriptor wsProps,
-                   const Mantid::API::MatrixWorkspace_const_sptr &outputWS) {
+  void verifyDimensions(TestWorkspaceDescriptor wsProps, const Mantid::API::MatrixWorkspace_const_sptr &outputWS) {
     TS_ASSERT_EQUALS(wsProps.nspectra, outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(wsProps.nbins, outputWS->blocksize());
   }
@@ -885,21 +762,13 @@ private:
 
 class MonteCarloAbsorptionTestPerformance : public CxxTest::TestSuite {
 public:
-  static MonteCarloAbsorptionTestPerformance *createSuite() {
-    return new MonteCarloAbsorptionTestPerformance();
-  }
+  static MonteCarloAbsorptionTestPerformance *createSuite() { return new MonteCarloAbsorptionTestPerformance(); }
 
-  static void destroySuite(MonteCarloAbsorptionTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(MonteCarloAbsorptionTestPerformance *suite) { delete suite; }
 
   MonteCarloAbsorptionTestPerformance() {
-    TestWorkspaceDescriptor wsProps = {10,
-                                       700,
-                                       true,
-                                       Environment::CylinderSampleOnly,
-                                       Mantid::Kernel::DeltaEMode::Elastic,
-                                       -1};
+    TestWorkspaceDescriptor wsProps = {
+        10, 700, true, Environment::CylinderSampleOnly, Mantid::Kernel::DeltaEMode::Elastic, -1};
 
     inputElastic = setUpWS(wsProps);
 

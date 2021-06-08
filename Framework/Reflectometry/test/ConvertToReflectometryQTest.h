@@ -43,15 +43,12 @@ private:
   Makes the tests much more readable like this.
   */
   std::shared_ptr<ConvertToReflectometryQ>
-  make_standard_algorithm(const std::string &outputdimensions = "Q (lab frame)",
-                          bool outputAsMD = true) {
-    MatrixWorkspace_sptr in_ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+  make_standard_algorithm(const std::string &outputdimensions = "Q (lab frame)", bool outputAsMD = true) {
+    MatrixWorkspace_sptr in_ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     in_ws->getAxis(0)->setUnit("Wavelength");
 
     PropertyWithValue<std::string> *testProperty =
-        new PropertyWithValue<std::string>("test_property", "test_value",
-                                           Direction::Input);
+        new PropertyWithValue<std::string>("test_property", "test_value", Direction::Input);
     in_ws->mutableRun().addLogData(testProperty);
 
     auto newAxis = std::make_unique<NumericAxis>(in_ws->getAxis(1)->length());
@@ -75,9 +72,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertToReflectometryQTest *createSuite() {
-    return new ConvertToReflectometryQTest();
-  }
+  static ConvertToReflectometryQTest *createSuite() { return new ConvertToReflectometryQTest(); }
   static void destroySuite(ConvertToReflectometryQTest *suite) { delete suite; }
 
   void test_name() {
@@ -96,23 +91,20 @@ public:
     auto alg = make_standard_algorithm();
     alg->setProperty("OverrideIncidentTheta", true);
     alg->setProperty("IncidentTheta", -0.0001);
-    TSM_ASSERT_THROWS("Incident theta is negative, should throw",
-                      alg->execute(), const std::logic_error &);
+    TSM_ASSERT_THROWS("Incident theta is negative, should throw", alg->execute(), const std::logic_error &);
   }
 
   void test_theta_initial_too_large_throws() {
     auto alg = make_standard_algorithm();
     alg->setProperty("OverrideIncidentTheta", true);
     alg->setProperty("IncidentTheta", 90.001);
-    TSM_ASSERT_THROWS("Incident theta is too large, should throw",
-                      alg->execute(), const std::logic_error &);
+    TSM_ASSERT_THROWS("Incident theta is too large, should throw", alg->execute(), const std::logic_error &);
   }
 
   void test_wrong_number_of_extents_throws() {
     auto alg = make_standard_algorithm();
     alg->setProperty("Extents", "-1");
-    TSM_ASSERT_THROWS("Should only accept 4 extents", alg->execute(),
-                      const std::runtime_error &);
+    TSM_ASSERT_THROWS("Should only accept 4 extents", alg->execute(), const std::runtime_error &);
   }
 
   void test_extents_with_qxmin_equals_qxmax_throws() {
@@ -155,47 +147,40 @@ public:
     auto alg = make_standard_algorithm();
     alg->execute();
     auto ws = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            "OutputTransformedWorkspace"));
+        Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
     TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
     // Assert that dimensions should be a general frame
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
-    TSM_ASSERT_EQUALS("Should be a QLab frame",
-                      Mantid::Geometry::QLab::QLabName, frame0.name());
-    TSM_ASSERT_EQUALS(
-        "Should have a special coordinate system selection of QLab",
-        ws->getSpecialCoordinateSystem(), Mantid::Kernel::QLab);
+    TSM_ASSERT_EQUALS("Should be a QLab frame", Mantid::Geometry::QLab::QLabName, frame0.name());
+    TSM_ASSERT_EQUALS("Should have a special coordinate system selection of QLab", ws->getSpecialCoordinateSystem(),
+                      Mantid::Kernel::QLab);
   }
 
   void test_execute_kikf_md() {
     auto alg = make_standard_algorithm("K (incident, final)");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     auto ws = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            "OutputTransformedWorkspace"));
+        Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
     // Assert that dimensions should be a general frame
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
     TSM_ASSERT_EQUALS("Should be a general frame", "KiKf", frame0.name());
-    TSM_ASSERT_EQUALS(
-        "Should have a special coordinate system selection of None",
-        ws->getSpecialCoordinateSystem(), Mantid::Kernel::None);
+    TSM_ASSERT_EQUALS("Should have a special coordinate system selection of None", ws->getSpecialCoordinateSystem(),
+                      Mantid::Kernel::None);
   }
 
   void test_execute_pipf_md() {
     auto alg = make_standard_algorithm("P (lab frame)");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     auto ws = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            "OutputTransformedWorkspace"));
+        Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
     // Assert that dimensions should be a general frame
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
     TSM_ASSERT_EQUALS("Should be a general frame", "P", frame0.name());
-    TSM_ASSERT_EQUALS(
-        "Should have a special coordinate system selection of None",
-        ws->getSpecialCoordinateSystem(), Mantid::Kernel::None);
+    TSM_ASSERT_EQUALS("Should have a special coordinate system selection of None", ws->getSpecialCoordinateSystem(),
+                      Mantid::Kernel::None);
   }
 
   void test_execute_qxqz_2D() {
@@ -203,8 +188,7 @@ public:
     auto alg = make_standard_algorithm("Q (lab frame)", outputAsMD);
     alg->execute();
     auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            "OutputTransformedWorkspace"));
+        Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
     TS_ASSERT_EQUALS(2, ws->run().getLogData().size());
   }
@@ -215,8 +199,7 @@ public:
     alg->setProperty("Method", "NormalisedPolygon");
     alg->execute();
     auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            "OutputTransformedWorkspace"));
+        Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
     TS_ASSERT_EQUALS(2, ws->run().getLogData().size());
   }
@@ -227,8 +210,7 @@ public:
     alg->setProperty("Method", "NormalisedPolygon");
     alg->execute();
     auto ws = std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            "OutputTransformedWorkspace"));
+        Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
     TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
   }
@@ -238,8 +220,7 @@ public:
     auto alg = make_standard_algorithm("K (incident, final)", outputAsMD);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            "OutputTransformedWorkspace"));
+        Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
   }
 
@@ -248,8 +229,7 @@ public:
     auto alg = make_standard_algorithm("P (lab frame)", outputAsMD);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            "OutputTransformedWorkspace"));
+        Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
     TS_ASSERT(ws != nullptr);
   }
 
@@ -258,8 +238,7 @@ public:
     alg->setProperty("Extents", "-1,1,0.999,1");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     std::string outWSName = alg->getPropertyValue("OutputWorkspace");
-    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-        outWSName);
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName);
     auto bc = outWS->getBoxController();
 
     TS_ASSERT_EQUALS(2, bc->getSplitInto(0));
@@ -282,8 +261,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     std::string outWSName = alg->getPropertyValue("OutputWorkspace");
-    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-        outWSName);
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName);
     auto bc = outWS->getBoxController();
 
     // Check that the box controller settings percolate through to the output
@@ -318,8 +296,7 @@ public:
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // Convert units to wavelength
-    auto unitsalg =
-        AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
+    auto unitsalg = AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
     unitsalg->setChild(true);
     unitsalg->initialize();
     unitsalg->setProperty("InputWorkspace", group->getItem(0));
@@ -330,8 +307,7 @@ public:
     m_workspace = unitsalg->getProperty("OutputWorkspace");
 
     // Convert the specturm axis ot signed_theta
-    auto specaxisalg =
-        AlgorithmManager::Instance().createUnmanaged("ConvertSpectrumAxis");
+    auto specaxisalg = AlgorithmManager::Instance().createUnmanaged("ConvertSpectrumAxis");
     specaxisalg->setChild(true);
     specaxisalg->initialize();
     specaxisalg->setProperty("InputWorkspace", m_workspace);
@@ -355,8 +331,7 @@ public:
     alg.setProperty("IncidentTheta", 0.5);
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
-    auto out = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(
-        "OutputTransformedWorkspace");
+    auto out = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("OutputTransformedWorkspace");
     TS_ASSERT(out != nullptr);
     TS_ASSERT_EQUALS(out->getNumDims(), 2);
   }
@@ -375,8 +350,7 @@ public:
     alg.setProperty("Method", "NormalisedPolygon");
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
-    auto out = AnalysisDataService::Instance().retrieveWS<Workspace2D>(
-        "OutputTransformedWorkspace");
+    auto out = AnalysisDataService::Instance().retrieveWS<Workspace2D>("OutputTransformedWorkspace");
     TS_ASSERT(out != nullptr);
     TS_ASSERT_EQUALS(out->getNumDims(), 2);
   }

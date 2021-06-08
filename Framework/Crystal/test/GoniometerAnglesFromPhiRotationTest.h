@@ -48,8 +48,7 @@ public:
     // Needed for ticket #6469
     try {
       API::Workspace_sptr ows = loadPeaks.getProperty("OutputWorkspace");
-      PeaksWorkspace_sptr Peak5637 =
-          std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
+      PeaksWorkspace_sptr Peak5637 = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
     } catch (...) {
       PeaksWorkspace_sptr Peak5637 = loadPeaks.getProperty("OutputWorkspace");
     }
@@ -63,8 +62,7 @@ public:
     // Needed for ticket #6469
     try {
       API::Workspace_sptr ows = loadPeaks2.getProperty("OutputWorkspace");
-      PeaksWorkspace_sptr Peak5643 =
-          std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
+      PeaksWorkspace_sptr Peak5643 = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
     } catch (...) {
       PeaksWorkspace_sptr Peak5643 = loadPeaks.getProperty("OutputWorkspace");
     }

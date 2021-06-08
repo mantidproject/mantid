@@ -19,14 +19,14 @@ Note that the NormalizationWorkspace is not changed, and needs to be smoothed as
    :alt: PreSmooth.png
    :width: 400px
    :align: center
-   
+
    No smoothing
-   
+
 .. figure:: /images/Smoothed.png
    :alt: PreSmooth.png
    :width: 400px
    :align: center
-   
+
    Smooth with WidthVector=5
 
 WidthVector and Functions

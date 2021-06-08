@@ -46,9 +46,7 @@ public:
     return {"CatalogGetDataFiles", "CatalogDownloadDataFiles", "CatalogLogin"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Catalog";
-  }
+  const std::string category() const override { return "DataHandling\\Catalog"; }
 
 private:
   /// Overwrites Algorithm init method.

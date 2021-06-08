@@ -27,16 +27,15 @@ public:
     size_t eventOffset;
     size_t eventCount;
   };
-  Chunker(const int numWorkers, const int worker,
-          const std::vector<size_t> &bankSizes, const size_t chunkSize);
+  Chunker(const int numWorkers, const int worker, const std::vector<size_t> &bankSizes, const size_t chunkSize);
 
   size_t chunkSize() const;
 
   std::vector<std::vector<int>> makeWorkerGroups() const;
   std::vector<LoadRange> makeLoadRanges() const;
 
-  static std::vector<std::pair<int, std::vector<size_t>>>
-  makeBalancedPartitioning(const int workers, const std::vector<size_t> &sizes);
+  static std::vector<std::pair<int, std::vector<size_t>>> makeBalancedPartitioning(const int workers,
+                                                                                   const std::vector<size_t> &sizes);
 
 private:
   const int m_worker;

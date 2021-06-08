@@ -44,9 +44,8 @@ public:
    * @param function :: Function representing peaks to fit
    * @param xValues :: The x values for a guess fit
    */
-  virtual Mantid::API::MatrixWorkspace_sptr
-  guessData(Mantid::API::IFunction_const_sptr function,
-            const std::vector<double> &xValues) = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr guessData(Mantid::API::IFunction_const_sptr function,
+                                                      const std::vector<double> &xValues) = 0;
 
 signals:
 

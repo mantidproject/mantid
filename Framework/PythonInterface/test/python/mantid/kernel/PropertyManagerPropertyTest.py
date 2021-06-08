@@ -40,11 +40,11 @@ class PropertyManagerPropertyTest(unittest.TestCase):
     def test_set_property_on_algorithm_from_dictionary(self):
         fake = FakeAlgorithm()
         fake.initialize()
-        fake.setProperty("Args", {'A': 1, 
-                                  'B':10.5, 
-                                  'C':'String arg', 
-                                  'D': [0.0,11.3], 
-                                  'E':{'F':10.4, 
+        fake.setProperty("Args", {'A': 1,
+                                  'B':10.5,
+                                  'C':'String arg',
+                                  'D': [0.0,11.3],
+                                  'E':{'F':10.4,
                                        'G': [1.0,2.0, 3.0],
                                        'H':{'I': "test",
                                        'J': 120.6}}})
@@ -64,7 +64,7 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         self.assertEqual(11.3,array_value[1])
 
         # Check the level-1 nested property manager property
-        # Get the level1-nested property manager 
+        # Get the level1-nested property manager
         nested_l1_pmgr = pmgr['E'].value
         self.assertEqual(3, len(nested_l1_pmgr))
         self.assertTrue('F' in nested_l1_pmgr)
@@ -76,7 +76,7 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         self.assertTrue('H' in nested_l1_pmgr)
         self.assertTrue(isinstance(nested_l1_pmgr['H'].value, PropertyManager))
 
-        # Get the level2-nested property manager 
+        # Get the level2-nested property manager
         nested_l2_pmgr = nested_l1_pmgr['H'].value
         self.assertTrue('I' in nested_l2_pmgr)
         self.assertEqual("test", nested_l2_pmgr['I'].value)

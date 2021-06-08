@@ -17,18 +17,15 @@ using Kernel::V2D;
 
 /** Constructor
  */
-Quadrilateral::Quadrilateral(const V2D &lowerLeft, const V2D &lowerRight,
-                             const V2D &upperRight, const V2D &upperLeft)
-    : ConvexPolygon(), m_vertices{
-                           {lowerLeft, upperLeft, upperRight, lowerRight}} {}
+Quadrilateral::Quadrilateral(const V2D &lowerLeft, const V2D &lowerRight, const V2D &upperRight, const V2D &upperLeft)
+    : ConvexPolygon(), m_vertices{{lowerLeft, upperLeft, upperRight, lowerRight}} {}
 
 /**
  *  Special constructor for a rectangle
  */
-Quadrilateral::Quadrilateral(const double lowerX, const double upperX,
-                             const double lowerY, const double upperY)
-    : ConvexPolygon(), m_vertices{{V2D(lowerX, lowerY), V2D(lowerX, upperY),
-                                   V2D(upperX, upperY), V2D(upperX, lowerY)}} {}
+Quadrilateral::Quadrilateral(const double lowerX, const double upperX, const double lowerY, const double upperY)
+    : ConvexPolygon(), m_vertices{
+                           {V2D(lowerX, lowerY), V2D(lowerX, upperY), V2D(upperX, upperY), V2D(upperX, lowerY)}} {}
 
 /**
  * Return the vertex at the given index
@@ -38,8 +35,7 @@ Quadrilateral::Quadrilateral(const double lowerX, const double upperX,
  */
 const Kernel::V2D &Quadrilateral::at(const size_t index) const {
   if (index > 3)
-    throw Kernel::Exception::IndexError(index, npoints(),
-                                        "Quadrilateral::at()");
+    throw Kernel::Exception::IndexError(index, npoints(), "Quadrilateral::at()");
   return (*this)[index];
 }
 

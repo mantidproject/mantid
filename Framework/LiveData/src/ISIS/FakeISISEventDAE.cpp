@@ -45,11 +45,10 @@ public:
    * Constructor. Defines the simulated dataset dimensions.
    * @param soc :: A socket that provides communication with the client.
    */
-  TestServerConnection(const Poco::Net::StreamSocket &soc, int nper, int nspec,
-                       int rate, int nevents,
+  TestServerConnection(const Poco::Net::StreamSocket &soc, int nper, int nspec, int rate, int nevents,
                        const std::shared_ptr<Progress> &prog)
-      : Poco::Net::TCPServerConnection(soc), m_nPeriods(nper),
-        m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents), m_prog(prog) {
+      : Poco::Net::TCPServerConnection(soc), m_nPeriods(nper), m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents),
+        m_prog(prog) {
     m_prog->report(0, "Client Connected");
     sendInitialSetup();
   }
@@ -96,11 +95,9 @@ public:
       }
 
       int bytesSent = 0;
-      int targetSize =
-          m_nEvents * static_cast<int>(sizeof(TCPStreamEventNeutron));
+      int targetSize = m_nEvents * static_cast<int>(sizeof(TCPStreamEventNeutron));
       while (bytesSent < targetSize) {
-        bytesSent += socket().sendBytes(neutronVector.data() + bytesSent,
-                                        targetSize - bytesSent);
+        bytesSent += socket().sendBytes(neutronVector.data() + bytesSent, targetSize - bytesSent);
       }
 
       // report progress
@@ -123,8 +120,7 @@ public:
 /**
  * Implements Poco TCPServerConnectionFactory
  */
-class TestServerConnectionFactory
-    : public Poco::Net::TCPServerConnectionFactory {
+class TestServerConnectionFactory : public Poco::Net::TCPServerConnectionFactory {
   int m_nPeriods; ///< Number of periods in the fake dataset
   int m_nSpectra; ///< Number of spectra in the fake dataset
   int m_Rate;
@@ -135,18 +131,15 @@ public:
   /**
    * Constructor.
    */
-  TestServerConnectionFactory(int nper, int nspec, int rate, int nevents,
-                              const std::shared_ptr<Progress> &prog)
-      : Poco::Net::TCPServerConnectionFactory(), m_nPeriods(nper),
-        m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents), m_prog(prog) {}
+  TestServerConnectionFactory(int nper, int nspec, int rate, int nevents, const std::shared_ptr<Progress> &prog)
+      : Poco::Net::TCPServerConnectionFactory(), m_nPeriods(nper), m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents),
+        m_prog(prog) {}
   /**
    * The factory method.
    * @param socket :: The socket.
    */
-  Poco::Net::TCPServerConnection *
-  createConnection(const Poco::Net::StreamSocket &socket) override {
-    return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_Rate,
-                                    m_nEvents, m_prog);
+  Poco::Net::TCPServerConnection *createConnection(const Poco::Net::StreamSocket &socket) override {
+    return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_Rate, m_nEvents, m_prog);
   }
 };
 } // namespace
@@ -155,22 +148,15 @@ public:
  * Declare the algorithm properties
  */
 void FakeISISEventDAE::init() {
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
-      "Number of periods.");
-  declareProperty(std::make_unique<PropertyWithValue<int>>("NSpectra", 100,
-                                                           Direction::Input),
-                  "Number of spectra.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("Rate", 20, Direction::Input),
-      "Rate of sending the data: stream of NEvents events is sent "
-      "every Rate milliseconds.");
-  declareProperty(std::make_unique<PropertyWithValue<int>>("NEvents", 1000,
-                                                           Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input), "Number of periods.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NSpectra", 100, Direction::Input), "Number of spectra.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("Rate", 20, Direction::Input),
+                  "Rate of sending the data: stream of NEvents events is sent "
+                  "every Rate milliseconds.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NEvents", 1000, Direction::Input),
                   "Number of events in each packet.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("Port", 59876, Direction::Input),
-      "The port to broadcast on (default 59876, ISISDAE 10000).");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("Port", 59876, Direction::Input),
+                  "The port to broadcast on (default 59876, ISISDAE 10000).");
 }
 
 /**
@@ -184,8 +170,7 @@ void FakeISISEventDAE::exec() {
   int port = getProperty("Port");
 
   // start the live HistoDAE as well
-  API::IAlgorithm_sptr histoDAE =
-      createChildAlgorithm("FakeISISHistoDAE", -1.0, -1.0);
+  API::IAlgorithm_sptr histoDAE = createChildAlgorithm("FakeISISHistoDAE", -1.0, -1.0);
   histoDAE->setLoggingOffset(-2); // make most messages from the HistoDAE
                                   // invisible to default logging levels
   histoDAE->setProperty("NPeriods", nper);
@@ -199,9 +184,7 @@ void FakeISISEventDAE::exec() {
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
   socket.listen();
   Poco::Net::TCPServer server(
-      TestServerConnectionFactory::Ptr(
-          new TestServerConnectionFactory(nper, nspec, rate, nevents, prog)),
-      socket);
+      TestServerConnectionFactory::Ptr(new TestServerConnectionFactory(nper, nspec, rate, nevents, prog)), socket);
   server.start();
   // Keep going until you get cancelled
   while (true) {

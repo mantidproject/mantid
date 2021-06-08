@@ -46,19 +46,16 @@ SortHKL::SortHKL() {
 SortHKL::~SortHKL() = default;
 
 void SortHKL::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
 
   /* TODO: These two properties with string lists keep appearing -
    * Probably there should be a dedicated Property type or validator. */
   std::vector<std::string> pgOptions;
   pgOptions.reserve(2 * m_pointGroups.size() + 5);
-  std::transform(m_pointGroups.cbegin(), m_pointGroups.cend(),
-                 std::back_inserter(pgOptions),
+  std::transform(m_pointGroups.cbegin(), m_pointGroups.cend(), std::back_inserter(pgOptions),
                  [](const auto &group) { return group->getSymbol(); });
-  std::transform(m_pointGroups.cbegin(), m_pointGroups.cend(),
-                 std::back_inserter(pgOptions),
+  std::transform(m_pointGroups.cbegin(), m_pointGroups.cend(), std::back_inserter(pgOptions),
                  [](const auto &group) { return group->getName(); });
   // Scripts may have Orthorhombic misspelled from past bug in PointGroupFactory
   pgOptions.emplace_back("222 (Orthorombic)");
@@ -66,49 +63,39 @@ void SortHKL::init() {
   pgOptions.emplace_back("2mm (Orthorombic)");
   pgOptions.emplace_back("m2m (Orthorombic)");
   pgOptions.emplace_back("mmm (Orthorombic)");
-  declareProperty("PointGroup", pgOptions[0],
-                  std::make_shared<StringListValidator>(pgOptions),
+  declareProperty("PointGroup", pgOptions[0], std::make_shared<StringListValidator>(pgOptions),
                   "Which point group applies to this crystal?");
 
   std::vector<std::string> centeringOptions;
   centeringOptions.reserve(2 * m_refConds.size());
-  std::transform(m_refConds.cbegin(), m_refConds.cend(),
-                 std::back_inserter(centeringOptions),
+  std::transform(m_refConds.cbegin(), m_refConds.cend(), std::back_inserter(centeringOptions),
                  [](const auto &condition) { return condition->getSymbol(); });
-  std::transform(m_refConds.cbegin(), m_refConds.cend(),
-                 std::back_inserter(centeringOptions),
+  std::transform(m_refConds.cbegin(), m_refConds.cend(), std::back_inserter(centeringOptions),
                  [](const auto &condition) { return condition->getName(); });
-  declareProperty("LatticeCentering", centeringOptions[0],
-                  std::make_shared<StringListValidator>(centeringOptions),
+  declareProperty("LatticeCentering", centeringOptions[0], std::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Output PeaksWorkspace");
-  declareProperty("OutputChi2", 0.0, "Chi-square is available as output",
-                  Direction::Output);
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "StatisticsTable", "StatisticsTable", Direction::Output),
-                  "An output table workspace for the statistics of the peaks.");
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "RowName", "Overall", Direction::Input),
+  declareProperty("OutputChi2", 0.0, "Chi-square is available as output", Direction::Output);
+  declareProperty(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>("StatisticsTable", "StatisticsTable", Direction::Output),
+      "An output table workspace for the statistics of the peaks.");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("RowName", "Overall", Direction::Input),
                   "name of row");
   declareProperty("Append", false,
                   "Append to output table workspace if true.\n"
                   "If false, new output table workspace (default).");
   const std::vector<std::string> equivTypes{"Mean", "Median"};
-  declareProperty("EquivalentIntensities", equivTypes.front(),
-                  std::make_shared<StringListValidator>(equivTypes),
+  declareProperty("EquivalentIntensities", equivTypes.front(), std::make_shared<StringListValidator>(equivTypes),
                   "Replace intensities by mean(default), "
                   "or median.");
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "SigmaCritical", 3.0, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("SigmaCritical", 3.0, Direction::Input),
                   "Removes peaks whose intensity deviates more than "
                   "SigmaCritical from the mean (or median).");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "EquivalentsWorkspace", "EquivalentIntensities", Direction::Output),
-      "Output Equivalent Intensities");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("EquivalentsWorkspace", "EquivalentIntensities",
+                                                                       Direction::Output),
+                  "Output Equivalent Intensities");
   declareProperty("WeightedZScore", false,
                   "Use weighted ZScore if true.\n"
                   "If false, standard ZScore (default).");
@@ -127,19 +114,16 @@ void SortHKL::exec() {
 
   UnitCell cell = inputPeaksWorkspace->sample().getOrientedLattice();
 
-  UniqueReflectionCollection uniqueReflections =
-      getUniqueReflections(peaks, cell);
+  UniqueReflectionCollection uniqueReflections = getUniqueReflections(peaks, cell);
   std::string equivalentIntensities = getPropertyValue("EquivalentIntensities");
   double sigmaCritical = getProperty("SigmaCritical");
   bool weightedZ = getProperty("WeightedZScore");
 
-  MatrixWorkspace_sptr UniqWksp =
-      Mantid::API::WorkspaceFactory::Instance().create(
-          "Workspace2D", uniqueReflections.getReflections().size(), 20, 20);
+  MatrixWorkspace_sptr UniqWksp = Mantid::API::WorkspaceFactory::Instance().create(
+      "Workspace2D", uniqueReflections.getReflections().size(), 20, 20);
   int counter = 0;
   size_t maxPeaks = 0;
-  auto tAxis =
-      std::make_unique<TextAxis>(uniqueReflections.getReflections().size());
+  auto tAxis = std::make_unique<TextAxis>(uniqueReflections.getReflections().size());
   UniqWksp->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   for (const auto &unique : uniqueReflections.getReflections()) {
     /* Since all possible unique reflections are explored
@@ -170,15 +154,12 @@ void SortHKL::exec() {
       if (zScores.size() > maxPeaks)
         maxPeaks = zScores.size();
       // Possibly remove outliers.
-      auto outliersRemoved =
-          unique.second.removeOutliers(sigmaCritical, weightedZ);
+      auto outliersRemoved = unique.second.removeOutliers(sigmaCritical, weightedZ);
 
       auto intensityStatistics =
-          Kernel::getStatistics(outliersRemoved.getIntensities(),
-                                StatOptions::Mean | StatOptions::Median);
+          Kernel::getStatistics(outliersRemoved.getIntensities(), StatOptions::Mean | StatOptions::Median);
 
-      g_log.debug() << "Mean = " << intensityStatistics.mean
-                    << "  Median = " << intensityStatistics.median << "\n";
+      g_log.debug() << "Mean = " << intensityStatistics.mean << "  Median = " << intensityStatistics.median << "\n";
       // sort wavelengths & intensities
       for (size_t i = 0; i < wavelengths.size(); i++) {
         size_t i0 = i;
@@ -196,8 +177,7 @@ void SortHKL::exec() {
         intensities[i] = temp;
       }
       g_log.debug() << "Zscores ";
-      for (size_t i = 0; i < std::min(zScores.size(), static_cast<size_t>(20));
-           ++i) {
+      for (size_t i = 0; i < std::min(zScores.size(), static_cast<size_t>(20)); ++i) {
         UniqX[i] = wavelengths[i];
         UniqY[i] = intensities[i];
         if (zScores[i] > sigmaCritical)
@@ -214,8 +194,7 @@ void SortHKL::exec() {
 
   if (counter > 0) {
     MatrixWorkspace_sptr UniqWksp2 =
-        Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", counter,
-                                                         maxPeaks, maxPeaks);
+        Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", counter, maxPeaks, maxPeaks);
     for (int64_t i = 0; i < counter; ++i) {
       auto &outSpec = UniqWksp2->getSpectrum(i);
       const auto &inSpec = UniqWksp->getSpectrum(i);
@@ -229,8 +208,7 @@ void SortHKL::exec() {
     setProperty("EquivalentsWorkspace", UniqWksp);
   }
 
-  PeaksStatistics peaksStatistics(uniqueReflections, equivalentIntensities,
-                                  sigmaCritical, weightedZ);
+  PeaksStatistics peaksStatistics(uniqueReflections, equivalentIntensities, sigmaCritical, weightedZ);
 
   // Store the statistics for output.
   const std::string tableName = getProperty("StatisticsTable");
@@ -239,8 +217,7 @@ void SortHKL::exec() {
 
   // Store all peaks that were used to calculate statistics.
 
-  PeaksWorkspace_sptr outputPeaksWorkspace =
-      getOutputPeaksWorkspace(inputPeaksWorkspace);
+  PeaksWorkspace_sptr outputPeaksWorkspace = getOutputPeaksWorkspace(inputPeaksWorkspace);
 
   std::vector<Peak> &originalOutputPeaks = outputPeaksWorkspace->getPeaks();
   originalOutputPeaks.swap(peaksStatistics.m_peaks);
@@ -255,18 +232,14 @@ void SortHKL::exec() {
 
 /// Returns a vector which contains only peaks with I > 0, sigma > 0 and valid
 /// HKL.
-std::vector<Peak>
-SortHKL::getNonZeroPeaks(const std::vector<Peak> &inputPeaks) const {
+std::vector<Peak> SortHKL::getNonZeroPeaks(const std::vector<Peak> &inputPeaks) const {
   std::vector<Peak> peaks;
   peaks.reserve(inputPeaks.size());
 
-  std::remove_copy_if(inputPeaks.begin(), inputPeaks.end(),
-                      std::back_inserter(peaks), [](const Peak &peak) {
-                        return peak.getIntensity() <= 0.0 ||
-                               peak.getSigmaIntensity() <= 0.0 ||
-                               peak.getIntMNP() != V3D(0, 0, 0) ||
-                               peak.getHKL() == V3D(0, 0, 0);
-                      });
+  std::remove_copy_if(inputPeaks.begin(), inputPeaks.end(), std::back_inserter(peaks), [](const Peak &peak) {
+    return peak.getIntensity() <= 0.0 || peak.getSigmaIntensity() <= 0.0 || peak.getIntMNP() != V3D(0, 0, 0) ||
+           peak.getHKL() == V3D(0, 0, 0);
+  });
 
   return peaks;
 }
@@ -282,9 +255,7 @@ SortHKL::getNonZeroPeaks(const std::vector<Peak> &inputPeaks) const {
  * @param cell :: UnitCell to use for calculation of possible reflections.
  * @return Map of unique reflections.
  */
-UniqueReflectionCollection
-SortHKL::getUniqueReflections(const std::vector<Peak> &peaks,
-                              const UnitCell &cell) const {
+UniqueReflectionCollection SortHKL::getUniqueReflections(const std::vector<Peak> &peaks, const UnitCell &cell) const {
   ReflectionCondition_sptr centering = getCentering();
   PointGroup_sptr pointGroup = getPointgroup();
 
@@ -298,14 +269,11 @@ SortHKL::getUniqueReflections(const std::vector<Peak> &peaks,
 
 /// Returns the centering extracted from the user-supplied property.
 ReflectionCondition_sptr SortHKL::getCentering() const {
-  ReflectionCondition_sptr centering =
-      std::make_shared<ReflectionConditionPrimitive>();
+  ReflectionCondition_sptr centering = std::make_shared<ReflectionConditionPrimitive>();
 
   const std::string refCondName = getPropertyValue("LatticeCentering");
   const auto found = std::find_if(m_refConds.crbegin(), m_refConds.crend(),
-                                  [refCondName](const auto &condition) {
-                                    return condition->getName() == refCondName;
-                                  });
+                                  [refCondName](const auto &condition) { return condition->getName() == refCondName; });
   if (found != m_refConds.crend()) {
     centering = *found;
   }
@@ -316,8 +284,7 @@ ReflectionCondition_sptr SortHKL::getCentering() const {
 /// Returns the PointGroup-object constructed from the property supplied by the
 /// user.
 PointGroup_sptr SortHKL::getPointgroup() const {
-  PointGroup_sptr pointGroup =
-      PointGroupFactory::Instance().createPointGroup("-1");
+  PointGroup_sptr pointGroup = PointGroupFactory::Instance().createPointGroup("-1");
 
   std::string pointGroupName = getPropertyValue("PointGroup");
   size_t pos = pointGroupName.find("Orthorombic");
@@ -326,11 +293,8 @@ PointGroup_sptr SortHKL::getPointgroup() const {
     pointGroupName.replace(pos, 11, "Orthorhombic");
     g_log.warning() << "Please correct to " << pointGroupName << ".\n";
   }
-  const auto found =
-      std::find_if(m_pointGroups.crbegin(), m_pointGroups.crend(),
-                   [&pointGroupName](const auto &group) {
-                     return group->getName() == pointGroupName;
-                   });
+  const auto found = std::find_if(m_pointGroups.crbegin(), m_pointGroups.crend(),
+                                  [&pointGroupName](const auto &group) { return group->getName() == pointGroupName; });
   if (found != m_pointGroups.crend()) {
     pointGroup = *found;
   }
@@ -341,21 +305,17 @@ PointGroup_sptr SortHKL::getPointgroup() const {
 /// Returns the lowest and highest d-Value in the list. Uses UnitCell and HKL
 /// for calculation to prevent problems with potentially inconsistent d-Values
 /// in Peak.
-std::pair<double, double> SortHKL::getDLimits(const std::vector<Peak> &peaks,
-                                              const UnitCell &cell) const {
-  auto dLimitIterators = std::minmax_element(
-      peaks.begin(), peaks.end(), [cell](const Peak &lhs, const Peak &rhs) {
-        return cell.d(lhs.getHKL()) < cell.d(rhs.getHKL());
-      });
+std::pair<double, double> SortHKL::getDLimits(const std::vector<Peak> &peaks, const UnitCell &cell) const {
+  auto dLimitIterators = std::minmax_element(peaks.begin(), peaks.end(), [cell](const Peak &lhs, const Peak &rhs) {
+    return cell.d(lhs.getHKL()) < cell.d(rhs.getHKL());
+  });
 
-  return std::make_pair(cell.d((*dLimitIterators.first).getHKL()),
-                        cell.d((*dLimitIterators.second).getHKL()));
+  return std::make_pair(cell.d((*dLimitIterators.first).getHKL()), cell.d((*dLimitIterators.second).getHKL()));
 }
 
 /// Create a TableWorkspace for the statistics with appropriate columns or get
 /// one from the ADS.
-ITableWorkspace_sptr
-SortHKL::getStatisticsTable(const std::string &name) const {
+ITableWorkspace_sptr SortHKL::getStatisticsTable(const std::string &name) const {
   TableWorkspace_sptr tablews;
 
   // Init or append to a table workspace
@@ -380,9 +340,7 @@ SortHKL::getStatisticsTable(const std::string &name) const {
 
 /// Inserts statistics the supplied PeaksStatistics-objects into the supplied
 /// TableWorkspace.
-void SortHKL::insertStatisticsIntoTable(
-    const ITableWorkspace_sptr &table,
-    const PeaksStatistics &statistics) const {
+void SortHKL::insertStatisticsIntoTable(const ITableWorkspace_sptr &table, const PeaksStatistics &statistics) const {
   if (!table) {
     throw std::runtime_error("Can't store statistics into Null-table.");
   }
@@ -396,15 +354,13 @@ void SortHKL::insertStatisticsIntoTable(
   // append to the table workspace
   API::TableRow newrow = table->appendRow();
 
-  newrow << name << statistics.m_uniqueReflections << statistics.m_dspacingMin
-         << statistics.m_dspacingMax << statistics.m_redundancy
-         << statistics.m_meanIOverSigma << 100.0 * statistics.m_rMerge
+  newrow << name << statistics.m_uniqueReflections << statistics.m_dspacingMin << statistics.m_dspacingMax
+         << statistics.m_redundancy << statistics.m_meanIOverSigma << 100.0 * statistics.m_rMerge
          << 100.0 * statistics.m_rPim << 100.0 * completeness;
 }
 
 /// Returns a PeaksWorkspace which is either the input workspace or a clone.
-PeaksWorkspace_sptr SortHKL::getOutputPeaksWorkspace(
-    const PeaksWorkspace_sptr &inputPeaksWorkspace) const {
+PeaksWorkspace_sptr SortHKL::getOutputPeaksWorkspace(const PeaksWorkspace_sptr &inputPeaksWorkspace) const {
   PeaksWorkspace_sptr outputPeaksWorkspace = getProperty("OutputWorkspace");
   if (outputPeaksWorkspace != inputPeaksWorkspace) {
     outputPeaksWorkspace = inputPeaksWorkspace->clone();
@@ -414,11 +370,9 @@ PeaksWorkspace_sptr SortHKL::getOutputPeaksWorkspace(
 }
 
 /// Sorts the peaks in the workspace by H, K and L.
-void SortHKL::sortOutputPeaksByHKL(
-    const IPeaksWorkspace_sptr &outputPeaksWorkspace) {
+void SortHKL::sortOutputPeaksByHKL(const IPeaksWorkspace_sptr &outputPeaksWorkspace) {
   // Sort by HKL
-  std::vector<std::pair<std::string, bool>> criteria{
-      {"H", true}, {"K", true}, {"L", true}};
+  std::vector<std::pair<std::string, bool>> criteria{{"H", true}, {"K", true}, {"L", true}};
   outputPeaksWorkspace->sort(criteria);
 }
 

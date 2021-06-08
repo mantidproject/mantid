@@ -46,20 +46,14 @@ struct MANTID_GEOMETRY_DLL Link {
    * @param compID :: An optional component identifier for the physical object
    * hit. (Default=NULL)
    */
-  inline Link(const Kernel::V3D &entry, const Kernel::V3D &exit,
-              const double totalDistance, const IObject &obj,
+  inline Link(const Kernel::V3D &entry, const Kernel::V3D &exit, const double totalDistance, const IObject &obj,
               const ComponentID compID = nullptr)
       : entryPoint(entry), exitPoint(exit), distFromStart(totalDistance),
-        distInsideObject(entryPoint.distance(exitPoint)), object(&obj),
-        componentID(compID) {}
+        distInsideObject(entryPoint.distance(exitPoint)), object(&obj), componentID(compID) {}
   /// Less than operator
-  inline bool operator<(const Link &other) const {
-    return distFromStart < other.distFromStart;
-  }
+  inline bool operator<(const Link &other) const { return distFromStart < other.distFromStart; }
   /// Less than operator
-  inline bool operator<(const double &other) const {
-    return distFromStart < other;
-  }
+  inline bool operator<(const double &other) const { return distFromStart < other; }
 
   inline bool operator==(const Link &other) const {
     if (componentID != other.componentID) {
@@ -75,10 +69,9 @@ struct MANTID_GEOMETRY_DLL Link {
     // The entryPoint seems to be identical among duplicated Links, so the
     //  built-in V3D == operator is used in for that case.
     const double tolerance = 1.0e-5;
-    bool isExitSame =
-        !(std::abs(exitPoint[0] - other.exitPoint[0]) > tolerance ||
-          std::abs(exitPoint[1] - other.exitPoint[1]) > tolerance ||
-          std::abs(exitPoint[2] - other.exitPoint[2]) > tolerance);
+    bool isExitSame = !(std::abs(exitPoint[0] - other.exitPoint[0]) > tolerance ||
+                        std::abs(exitPoint[1] - other.exitPoint[1]) > tolerance ||
+                        std::abs(exitPoint[2] - other.exitPoint[2]) > tolerance);
     return isExitSame && (entryPoint == other.entryPoint);
   }
 
@@ -101,8 +94,7 @@ inline bool operator<(const TrackDirection left, const TrackDirection right) {
   return static_cast<int>(left) < static_cast<int>(right);
 }
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
-                                             const TrackDirection &direction);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os, const TrackDirection &direction);
 
 /**
  * Stores a point of intersection along a track. The component intersected
@@ -122,14 +114,9 @@ struct IntersectionPoint {
    * (Default=NULL)
    * @param obj :: A reference to the object that was intersected
    */
-  inline IntersectionPoint(const TrackDirection direction,
-                           const Kernel::V3D &end,
-                           const double distFromStartOfTrack,
-                           const IObject &obj,
-                           const ComponentID compID = nullptr)
-      : direction(direction), endPoint(end),
-        distFromStart(distFromStartOfTrack), object(&obj), componentID(compID) {
-  }
+  inline IntersectionPoint(const TrackDirection direction, const Kernel::V3D &end, const double distFromStartOfTrack,
+                           const IObject &obj, const ComponentID compID = nullptr)
+      : direction(direction), endPoint(end), distFromStart(distFromStartOfTrack), object(&obj), componentID(compID) {}
 
   /**
    * A IntersectionPoint is less-than another if either
@@ -143,8 +130,7 @@ struct IntersectionPoint {
    */
   inline bool operator<(const IntersectionPoint &other) const {
     const double diff = fabs(distFromStart - other.distFromStart);
-    return (diff > Kernel::Tolerance) ? distFromStart < other.distFromStart
-                                      : direction < other.direction;
+    return (diff > Kernel::Tolerance) ? distFromStart < other.distFromStart : direction < other.direction;
   }
 
   inline bool operator==(const IntersectionPoint &other) const {
@@ -188,12 +174,11 @@ public:
   Track(const Kernel::V3D &startPt, const Kernel::V3D &unitVector);
   virtual ~Track() = default;
   /// Adds a point of intersection to the track
-  void addPoint(const TrackDirection direction, const Kernel::V3D &endPoint,
-                const IObject &obj, const ComponentID compID = nullptr);
+  void addPoint(const TrackDirection direction, const Kernel::V3D &endPoint, const IObject &obj,
+                const ComponentID compID = nullptr);
   /// Adds a link to the track
-  int addLink(const Kernel::V3D &firstPoint, const Kernel::V3D &secondPoint,
-              const double distanceAlongTrack, const IObject &obj,
-              const ComponentID compID = nullptr);
+  int addLink(const Kernel::V3D &firstPoint, const Kernel::V3D &secondPoint, const double distanceAlongTrack,
+              const IObject &obj, const ComponentID compID = nullptr);
   /// Remove touching Links that have identical components
   void removeCojoins();
   /// Construct links between added points

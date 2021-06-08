@@ -23,8 +23,7 @@ namespace CustomInterfaces {
   Modelling step
                                interface.
 */
-class MANTIDQT_MUONINTERFACE_DLL ALCBaselineModellingView
-    : public IALCBaselineModellingView {
+class MANTIDQT_MUONINTERFACE_DLL ALCBaselineModellingView : public IALCBaselineModellingView {
   Q_OBJECT
 
 public:
@@ -41,12 +40,9 @@ public:
 
 public slots:
   void initialize() override;
-  void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                    std::size_t const &workspaceIndex = 0) override;
-  void setCorrectedCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                         std::size_t const &workspaceIndex = 0) override;
-  void setBaselineCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                        std::size_t const &workspaceIndex = 0) override;
+  void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) override;
+  void setCorrectedCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) override;
+  void setBaselineCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) override;
   void setFunction(Mantid::API::IFunction_const_sptr func) override;
   void setNoOfSectionRows(int rows) override;
   void setSectionRow(int row, SectionRow values) override;
@@ -64,10 +60,8 @@ private slots:
 
 private:
   /// Helper to set range selector values
-  void setSelectorValues(MantidWidgets::RangeSelector *selector,
-                         SectionSelector values);
-  QHash<QString, QVariant> getPlotKwargs(MantidWidgets::PreviewPlot *plot,
-                                         const QString &curveName);
+  void setSelectorValues(MantidWidgets::RangeSelector *selector, SectionSelector values);
+  QHash<QString, QVariant> getPlotKwargs(MantidWidgets::PreviewPlot *plot, const QString &curveName);
 
   /// The widget used
   QWidget *const m_widget;

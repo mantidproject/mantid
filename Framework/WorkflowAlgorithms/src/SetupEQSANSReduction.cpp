@@ -50,20 +50,16 @@ void SetupEQSANSReduction::init() {
                   "If true, the masking information "
                   "found in the configuration file "
                   "will be used");
-  declareProperty("UseConfig", true,
-                  "If true, the best configuration file found will be used");
+  declareProperty("UseConfig", true, "If true, the best configuration file found will be used");
   declareProperty("CorrectForFlightPath", false,
                   "If true, the TOF will be modified for the true flight path "
                   "from the sample to the detector pixel");
 
-  declareProperty("SkipTOFCorrection", false,
-                  "If true, the EQSANS TOF correction will be skipped");
-  declareProperty("PreserveEvents", false,
-                  "If true, the output workspace will be an event workspace");
+  declareProperty("SkipTOFCorrection", false, "If true, the EQSANS TOF correction will be skipped");
+  declareProperty("PreserveEvents", false, "If true, the output workspace will be an event workspace");
 
-  declareProperty(
-      "SampleDetectorDistance", EMPTY_DBL(),
-      "Sample to detector distance to use (overrides meta data), in mm");
+  declareProperty("SampleDetectorDistance", EMPTY_DBL(),
+                  "Sample to detector distance to use (overrides meta data), in mm");
 
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(),
                   "Offset to the sample to detector distance (use only when "
@@ -75,12 +71,8 @@ void SetupEQSANSReduction::init() {
                   "Offset applies to the detector position (use only when "
                   "using the distance found in the meta data), in mm");
 
-  declareProperty(
-      "SolidAngleCorrection", true,
-      "If true, the solid angle correction will be applied to the data");
-  declareProperty(
-      "DetectorTubes", false,
-      "If true, the solid angle correction for tube detectors will be applied");
+  declareProperty("SolidAngleCorrection", true, "If true, the solid angle correction will be applied to the data");
+  declareProperty("DetectorTubes", false, "If true, the solid angle correction for tube detectors will be applied");
 
   declareProperty("LoadNexusInstrumentXML", true,
                   "Reads the embedded Instrument XML from the NeXus file "
@@ -110,39 +102,27 @@ void SetupEQSANSReduction::init() {
 
   // Beam center
   std::string center_grp = "Beam Center";
-  std::vector<std::string> centerOptions{"None", "Value", "DirectBeam",
-                                         "Scattering"};
+  std::vector<std::string> centerOptions{"None", "Value", "DirectBeam", "Scattering"};
 
-  declareProperty("BeamCenterMethod", "None",
-                  std::make_shared<StringListValidator>(centerOptions),
+  declareProperty("BeamCenterMethod", "None", std::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the data beam center");
 
   // declareProperty("FindBeamCenter", false, "If True, the beam center will be
   // calculated");
-  declareProperty(
-      "UseConfigBeam", false,
-      "If True, the beam center will be taken from the config file");
+  declareProperty("UseConfigBeam", false, "If True, the beam center will be taken from the config file");
 
   //    Option 1: Set beam center by hand
-  declareProperty("BeamCenterX", EMPTY_DBL(),
-                  "Position of the beam center, in pixel");
-  declareProperty("BeamCenterY", EMPTY_DBL(),
-                  "Position of the beam center, in pixel");
-  setPropertySettings("BeamCenterX",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BeamCenterMethod", IS_EQUAL_TO, "Value"));
-  setPropertySettings("BeamCenterY",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BeamCenterMethod", IS_EQUAL_TO, "Value"));
+  declareProperty("BeamCenterX", EMPTY_DBL(), "Position of the beam center, in pixel");
+  declareProperty("BeamCenterY", EMPTY_DBL(), "Position of the beam center, in pixel");
+  setPropertySettings("BeamCenterX", std::make_unique<VisibleWhenProperty>("BeamCenterMethod", IS_EQUAL_TO, "Value"));
+  setPropertySettings("BeamCenterY", std::make_unique<VisibleWhenProperty>("BeamCenterMethod", IS_EQUAL_TO, "Value"));
 
   //    Option 2: Find it (expose properties from FindCenterOfMass)
   declareProperty(
-      std::make_unique<API::FileProperty>(
-          "BeamCenterFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+      std::make_unique<API::FileProperty>("BeamCenterFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
       "The name of the input event Nexus file to load");
   setPropertySettings("BeamCenterFile",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BeamCenterMethod", IS_NOT_EQUAL_TO, "None"));
+                      std::make_unique<VisibleWhenProperty>("BeamCenterMethod", IS_NOT_EQUAL_TO, "None"));
 
   // declareProperty("Tolerance", EMPTY_DBL(), "Tolerance on the center of mass
   // position between each iteration [m]. Default: 0.00125");
@@ -150,13 +130,11 @@ void SetupEQSANSReduction::init() {
   positiveDouble->setLower(0);
   // declareProperty("UseDirectBeamMethod", true, "If true, the direct beam
   // method will be used");
-  declareProperty(
-      "BeamRadius", EMPTY_DBL(),
-      "Radius of the beam area used the exclude the beam when calculating "
-      "the center of mass of the scattering pattern [pixels]. Default=3.0");
+  declareProperty("BeamRadius", EMPTY_DBL(),
+                  "Radius of the beam area used the exclude the beam when calculating "
+                  "the center of mass of the scattering pattern [pixels]. Default=3.0");
   setPropertySettings("BeamRadius",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
+                      std::make_unique<VisibleWhenProperty>("BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
 
   // -- Define group --
   setPropertyGroup("BeamCenterMethod", center_grp);
@@ -179,21 +157,17 @@ void SetupEQSANSReduction::init() {
   incidentBeamNormOptions.emplace_back("BeamProfileAndCharge");
   // The data will be normalised to the total charge only (no beam profile)
   incidentBeamNormOptions.emplace_back("Charge");
-  this->declareProperty(
-      "Normalisation", "BeamProfileAndCharge",
-      std::make_shared<StringListValidator>(incidentBeamNormOptions),
-      "Options for data normalisation");
+  this->declareProperty("Normalisation", "BeamProfileAndCharge",
+                        std::make_shared<StringListValidator>(incidentBeamNormOptions),
+                        "Options for data normalisation");
 
-  declareProperty("LoadMonitors", false,
-                  "If true, the monitor workspace will be loaded");
+  declareProperty("LoadMonitors", false, "If true, the monitor workspace will be loaded");
   // declareProperty("NormaliseToBeam", true, "If true, the data will be
   // normalised to the total charge and divided by the beam profile");
   // declareProperty("NormaliseToMonitor", false, "If true, the data will be
   // normalised to the monitor, otherwise the total charge will be used");
   declareProperty(
-      std::make_unique<API::FileProperty>("MonitorReferenceFile", "",
-                                          API::FileProperty::OptionalLoad,
-                                          "_event.nxs"),
+      std::make_unique<API::FileProperty>("MonitorReferenceFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
       "The name of the beam monitor reference file used for normalisation");
 
   setPropertyGroup("Normalisation", norm_grp);
@@ -202,68 +176,52 @@ void SetupEQSANSReduction::init() {
 
   // Dark current
   declareProperty(
-      std::make_unique<API::FileProperty>(
-          "DarkCurrentFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+      std::make_unique<API::FileProperty>("DarkCurrentFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
       "The name of the input event Nexus file to load as dark current.");
 
   // Sensitivity
   std::string eff_grp = "Sensitivity";
   declareProperty(
-      std::make_unique<API::FileProperty>(
-          "SensitivityFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+      std::make_unique<API::FileProperty>("SensitivityFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
       "Flood field or sensitivity file.");
-  declareProperty(
-      "MinEfficiency", EMPTY_DBL(), positiveDouble,
-      "Minimum efficiency for a pixel to be considered (default: no minimum).");
-  declareProperty(
-      "MaxEfficiency", EMPTY_DBL(), positiveDouble,
-      "Maximum efficiency for a pixel to be considered (default: no maximum).");
+  declareProperty("MinEfficiency", EMPTY_DBL(), positiveDouble,
+                  "Minimum efficiency for a pixel to be considered (default: no minimum).");
+  declareProperty("MaxEfficiency", EMPTY_DBL(), positiveDouble,
+                  "Maximum efficiency for a pixel to be considered (default: no maximum).");
   declareProperty("UseDefaultDC", true,
                   "If true, the dark current subtracted "
                   "from the sample data will also be "
                   "subtracted from the flood field.");
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "SensitivityDarkCurrentFile", "",
-                      API::FileProperty::OptionalLoad, "_event.nxs"),
+  declareProperty(std::make_unique<API::FileProperty>("SensitivityDarkCurrentFile", "", API::FileProperty::OptionalLoad,
+                                                      "_event.nxs"),
                   "The name of the input file to load as dark current.");
   // - sensitivity beam center
-  declareProperty("SensitivityBeamCenterMethod", "None",
-                  std::make_shared<StringListValidator>(centerOptions),
+  declareProperty("SensitivityBeamCenterMethod", "None", std::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the sensitivity data beam center");
 
   //    Option 1: Set beam center by hand
-  declareProperty("SensitivityBeamCenterX", EMPTY_DBL(),
-                  "Sensitivity beam center location in X [pixels]");
+  declareProperty("SensitivityBeamCenterX", EMPTY_DBL(), "Sensitivity beam center location in X [pixels]");
   setPropertySettings("SensitivityBeamCenterX",
-                      std::make_unique<VisibleWhenProperty>(
-                          "SensitivityBeamCenterMethod", IS_EQUAL_TO, "Value"));
+                      std::make_unique<VisibleWhenProperty>("SensitivityBeamCenterMethod", IS_EQUAL_TO, "Value"));
 
-  declareProperty("SensitivityBeamCenterY", EMPTY_DBL(),
-                  "Sensitivity beam center location in Y [pixels]");
+  declareProperty("SensitivityBeamCenterY", EMPTY_DBL(), "Sensitivity beam center location in Y [pixels]");
   setPropertySettings("SensitivityBeamCenterY",
-                      std::make_unique<VisibleWhenProperty>(
-                          "SensitivityBeamCenterMethod", IS_EQUAL_TO, "Value"));
+                      std::make_unique<VisibleWhenProperty>("SensitivityBeamCenterMethod", IS_EQUAL_TO, "Value"));
 
   //    Option 2: Find it (expose properties from FindCenterOfMass)
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "SensitivityBeamCenterFile", "",
-                      API::FileProperty::OptionalLoad, ".xml"),
-                  "The name of the input data file to load");
-  setPropertySettings(
-      "SensitivityBeamCenterFile",
-      std::make_unique<VisibleWhenProperty>("SensitivityBeamCenterMethod",
-                                            IS_NOT_EQUAL_TO, "None"));
-
   declareProperty(
-      "SensitivityBeamCenterRadius", EMPTY_DBL(),
-      "Radius of the beam area used the exclude the beam when calculating "
-      "the center of mass of the scattering pattern [pixels]. Default=3.0");
-  setPropertySettings("SensitivityBeamCenterRadius",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
+      std::make_unique<API::FileProperty>("SensitivityBeamCenterFile", "", API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load");
+  setPropertySettings("SensitivityBeamCenterFile",
+                      std::make_unique<VisibleWhenProperty>("SensitivityBeamCenterMethod", IS_NOT_EQUAL_TO, "None"));
 
-  declareProperty("OutputSensitivityWorkspace", "",
-                  "Name to give the sensitivity workspace");
+  declareProperty("SensitivityBeamCenterRadius", EMPTY_DBL(),
+                  "Radius of the beam area used the exclude the beam when calculating "
+                  "the center of mass of the scattering pattern [pixels]. Default=3.0");
+  setPropertySettings("SensitivityBeamCenterRadius",
+                      std::make_unique<VisibleWhenProperty>("BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
+
+  declareProperty("OutputSensitivityWorkspace", "", "Name to give the sensitivity workspace");
 
   // -- Define group --
   setPropertyGroup("SensitivityFile", eff_grp);
@@ -281,98 +239,70 @@ void SetupEQSANSReduction::init() {
   // Transmission
   std::string trans_grp = "Transmission";
   std::vector<std::string> transOptions{"Value", "DirectBeam"};
-  declareProperty("TransmissionMethod", "Value",
-                  std::make_shared<StringListValidator>(transOptions),
+  declareProperty("TransmissionMethod", "Value", std::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");
 
   // - Transmission value entered by hand
-  declareProperty("TransmissionValue", EMPTY_DBL(), positiveDouble,
-                  "Transmission value.");
+  declareProperty("TransmissionValue", EMPTY_DBL(), positiveDouble, "Transmission value.");
   setPropertySettings("TransmissionValue",
-                      std::make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "Value"));
-  declareProperty("TransmissionError", EMPTY_DBL(), positiveDouble,
-                  "Transmission error.");
+                      std::make_unique<VisibleWhenProperty>("TransmissionMethod", IS_EQUAL_TO, "Value"));
+  declareProperty("TransmissionError", EMPTY_DBL(), positiveDouble, "Transmission error.");
   setPropertySettings("TransmissionError",
-                      std::make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "Value"));
+                      std::make_unique<VisibleWhenProperty>("TransmissionMethod", IS_EQUAL_TO, "Value"));
 
   // - Direct beam method transmission calculation
-  declareProperty(
-      "TransmissionBeamRadius", 3.0,
-      "Radius of the beam area used to compute the transmission [pixels]");
+  declareProperty("TransmissionBeamRadius", 3.0, "Radius of the beam area used to compute the transmission [pixels]");
   setPropertySettings("TransmissionBeamRadius",
-                      std::make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "TransmissionSampleDataFile", "",
-                      API::FileProperty::OptionalLoad, ".xml"),
-                  "Sample data file for transmission calculation");
+                      std::make_unique<VisibleWhenProperty>("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      std::make_unique<API::FileProperty>("TransmissionSampleDataFile", "", API::FileProperty::OptionalLoad, ".xml"),
+      "Sample data file for transmission calculation");
   setPropertySettings("TransmissionSampleDataFile",
-                      std::make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "TransmissionEmptyDataFile", "",
-                      API::FileProperty::OptionalLoad, ".xml"),
-                  "Empty data file for transmission calculation");
+                      std::make_unique<VisibleWhenProperty>("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      std::make_unique<API::FileProperty>("TransmissionEmptyDataFile", "", API::FileProperty::OptionalLoad, ".xml"),
+      "Empty data file for transmission calculation");
   setPropertySettings("TransmissionEmptyDataFile",
-                      std::make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty("FitFramesTogether", false,
-                  "If true, the two frames will be fit together");
+                      std::make_unique<VisibleWhenProperty>("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty("FitFramesTogether", false, "If true, the two frames will be fit together");
   setPropertySettings("FitFramesTogether",
-                      std::make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      std::make_unique<VisibleWhenProperty>("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   // - transmission beam center
-  declareProperty("TransmissionBeamCenterMethod", "None",
-                  std::make_shared<StringListValidator>(centerOptions),
+  declareProperty("TransmissionBeamCenterMethod", "None", std::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the transmission data beam center");
   setPropertySettings("TransmissionBeamCenterMethod",
-                      std::make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      std::make_unique<VisibleWhenProperty>("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   //    Option 1: Set beam center by hand
-  declareProperty("TransmissionBeamCenterX", EMPTY_DBL(),
-                  "Transmission beam center location in X [pixels]");
+  declareProperty("TransmissionBeamCenterX", EMPTY_DBL(), "Transmission beam center location in X [pixels]");
   setPropertySettings("TransmissionBeamCenterX",
-                      std::make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty("TransmissionBeamCenterY", EMPTY_DBL(),
-                  "Transmission beam center location in Y [pixels]");
+                      std::make_unique<VisibleWhenProperty>("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty("TransmissionBeamCenterY", EMPTY_DBL(), "Transmission beam center location in Y [pixels]");
   setPropertySettings("TransmissionBeamCenterY",
-                      std::make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      std::make_unique<VisibleWhenProperty>("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   //    Option 2: Find it (expose properties from FindCenterOfMass)
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "TransmissionBeamCenterFile", "",
-                      API::FileProperty::OptionalLoad, ".xml"),
-                  "The name of the input data file to load");
+  declareProperty(
+      std::make_unique<API::FileProperty>("TransmissionBeamCenterFile", "", API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load");
   setPropertySettings("TransmissionBeamCenterFile",
-                      std::make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      std::make_unique<VisibleWhenProperty>("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   declareProperty(
-      std::make_unique<API::FileProperty>("TransmissionDarkCurrentFile", "",
-                                          API::FileProperty::OptionalLoad,
-                                          ".xml"),
+      std::make_unique<API::FileProperty>("TransmissionDarkCurrentFile", "", API::FileProperty::OptionalLoad, ".xml"),
       "The name of the input data file to load as transmission dark current.");
   setPropertySettings("TransmissionDarkCurrentFile",
-                      std::make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
+                      std::make_unique<VisibleWhenProperty>("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
 
-  declareProperty(
-      "TransmissionUseSampleDC", true,
-      "If true, the sample dark current will be used IF a dark current file is"
-      "not set.");
+  declareProperty("TransmissionUseSampleDC", true,
+                  "If true, the sample dark current will be used IF a dark current file is"
+                  "not set.");
   setPropertySettings("TransmissionUseSampleDC",
-                      std::make_unique<VisibleWhenProperty>(
-                          "TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
+                      std::make_unique<VisibleWhenProperty>("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
 
-  declareProperty(
-      "ThetaDependentTransmission", true,
-      "If true, a theta-dependent transmission correction will be applied.");
+  declareProperty("ThetaDependentTransmission", true,
+                  "If true, a theta-dependent transmission correction will be applied.");
 
   // -- Define group --
   setPropertyGroup("TransmissionMethod", trans_grp);
@@ -394,90 +324,65 @@ void SetupEQSANSReduction::init() {
   // Background options
   std::string bck_grp = "Background";
   declareProperty("BackgroundFiles", "", "Background data files");
-  declareProperty("BckTransmissionMethod", "Value",
-                  std::make_shared<StringListValidator>(transOptions),
+  declareProperty("BckTransmissionMethod", "Value", std::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");
 
   // - Transmission value entered by hand
-  declareProperty("BckTransmissionValue", EMPTY_DBL(), positiveDouble,
-                  "Transmission value.");
+  declareProperty("BckTransmissionValue", EMPTY_DBL(), positiveDouble, "Transmission value.");
   setPropertySettings("BckTransmissionValue",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BckTransmissionMethod", IS_EQUAL_TO, "Value"));
+                      std::make_unique<VisibleWhenProperty>("BckTransmissionMethod", IS_EQUAL_TO, "Value"));
 
-  declareProperty("BckTransmissionError", EMPTY_DBL(), positiveDouble,
-                  "Transmission error.");
+  declareProperty("BckTransmissionError", EMPTY_DBL(), positiveDouble, "Transmission error.");
   setPropertySettings("BckTransmissionError",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BckTransmissionMethod", IS_EQUAL_TO, "Value"));
+                      std::make_unique<VisibleWhenProperty>("BckTransmissionMethod", IS_EQUAL_TO, "Value"));
 
   // - Direct beam method transmission calculation
-  declareProperty(
-      "BckTransmissionBeamRadius", 3.0,
-      "Radius of the beam area used to compute the transmission [pixels]");
+  declareProperty("BckTransmissionBeamRadius", 3.0,
+                  "Radius of the beam area used to compute the transmission [pixels]");
   setPropertySettings("BckTransmissionBeamRadius",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "BckTransmissionSampleDataFile", "",
-                      API::FileProperty::OptionalLoad, ".xml"),
-                  "Sample data file for transmission calculation");
+                      std::make_unique<VisibleWhenProperty>("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      std::make_unique<API::FileProperty>("BckTransmissionSampleDataFile", "", API::FileProperty::OptionalLoad, ".xml"),
+      "Sample data file for transmission calculation");
   setPropertySettings("BckTransmissionSampleDataFile",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "BckTransmissionEmptyDataFile", "",
-                      API::FileProperty::OptionalLoad, ".xml"),
-                  "Empty data file for transmission calculation");
+                      std::make_unique<VisibleWhenProperty>("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      std::make_unique<API::FileProperty>("BckTransmissionEmptyDataFile", "", API::FileProperty::OptionalLoad, ".xml"),
+      "Empty data file for transmission calculation");
   setPropertySettings("BckTransmissionEmptyDataFile",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty("BckFitFramesTogether", false,
-                  "If true, the two frames will be fit together");
+                      std::make_unique<VisibleWhenProperty>("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty("BckFitFramesTogether", false, "If true, the two frames will be fit together");
   setPropertySettings("BckFitFramesTogether",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      std::make_unique<VisibleWhenProperty>("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   // - transmission beam center
-  declareProperty("BckTransmissionBeamCenterMethod", "None",
-                  std::make_shared<StringListValidator>(centerOptions),
+  declareProperty("BckTransmissionBeamCenterMethod", "None", std::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the transmission data beam center");
   setPropertySettings("BckTransmissionBeamCenterMethod",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      std::make_unique<VisibleWhenProperty>("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
   //    Option 1: Set beam center by hand
-  declareProperty("BckTransmissionBeamCenterX", EMPTY_DBL(),
-                  "Transmission beam center location in X [pixels]");
+  declareProperty("BckTransmissionBeamCenterX", EMPTY_DBL(), "Transmission beam center location in X [pixels]");
   setPropertySettings("BckTransmissionBeamCenterX",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty("BckTransmissionBeamCenterY", EMPTY_DBL(),
-                  "Transmission beam center location in Y [pixels]");
+                      std::make_unique<VisibleWhenProperty>("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty("BckTransmissionBeamCenterY", EMPTY_DBL(), "Transmission beam center location in Y [pixels]");
   //    Option 2: Find it (expose properties from FindCenterOfMass)
   setPropertySettings("BckTransmissionBeamCenterY",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "BckTransmissionBeamCenterFile", "",
-                      API::FileProperty::OptionalLoad, ".xml"),
-                  "The name of the input data file to load");
+                      std::make_unique<VisibleWhenProperty>("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(
+      std::make_unique<API::FileProperty>("BckTransmissionBeamCenterFile", "", API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load");
   setPropertySettings("BckTransmissionBeamCenterFile",
-                      std::make_unique<VisibleWhenProperty>(
-                          "BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      std::make_unique<VisibleWhenProperty>("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "BckTransmissionDarkCurrentFile", "",
-                      API::FileProperty::OptionalLoad, ".xml"),
+  declareProperty(std::make_unique<API::FileProperty>("BckTransmissionDarkCurrentFile", "",
+                                                      API::FileProperty::OptionalLoad, ".xml"),
                   "The name of the input data file to load as background "
                   "transmission dark current.");
-  setPropertySettings(
-      "BckTransmissionDarkCurrentFile",
-      std::make_unique<VisibleWhenProperty>("BckTransmissionMethod",
-                                            IS_EQUAL_TO, "BeamSpreader"));
+  setPropertySettings("BckTransmissionDarkCurrentFile",
+                      std::make_unique<VisibleWhenProperty>("BckTransmissionMethod", IS_EQUAL_TO, "BeamSpreader"));
 
-  declareProperty(
-      "BckThetaDependentTransmission", true,
-      "If true, a theta-dependent transmission correction will be applied.");
+  declareProperty("BckThetaDependentTransmission", true,
+                  "If true, a theta-dependent transmission correction will be applied.");
 
   setPropertyGroup("BackgroundFiles", bck_grp);
   setPropertyGroup("BckTransmissionMethod", bck_grp);
@@ -498,14 +403,11 @@ void SetupEQSANSReduction::init() {
 
   // Masking
   std::string mask_grp = "Mask";
-  declareProperty(std::make_unique<ArrayProperty<int>>("MaskedDetectorList"),
-                  "List of detector IDs to be masked");
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("MaskedEdges"),
-      "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
+  declareProperty(std::make_unique<ArrayProperty<int>>("MaskedDetectorList"), "List of detector IDs to be masked");
+  declareProperty(std::make_unique<ArrayProperty<int>>("MaskedEdges"),
+                  "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
   std::vector<std::string> maskOptions{"None", "Front", "Back"};
-  declareProperty("MaskedSide", "None",
-                  std::make_shared<StringListValidator>(maskOptions),
+  declareProperty("MaskedSide", "None", std::make_shared<StringListValidator>(maskOptions),
                   "Mask one side of the detector");
 
   setPropertyGroup("MaskedDetectorList", mask_grp);
@@ -518,39 +420,30 @@ void SetupEQSANSReduction::init() {
   scaleOptions.emplace_back("None");
   scaleOptions.emplace_back("Value");
   scaleOptions.emplace_back("ReferenceData");
-  declareProperty("AbsoluteScaleMethod", "None",
-                  std::make_shared<StringListValidator>(scaleOptions),
+  declareProperty("AbsoluteScaleMethod", "None", std::make_shared<StringListValidator>(scaleOptions),
                   "Absolute scale correction method");
   declareProperty("AbsoluteScalingFactor", 1.0, "Absolute scaling factor");
   setPropertySettings("AbsoluteScalingFactor",
-                      std::make_unique<VisibleWhenProperty>(
-                          "AbsoluteScaleMethod", IS_EQUAL_TO, "Value"));
+                      std::make_unique<VisibleWhenProperty>("AbsoluteScaleMethod", IS_EQUAL_TO, "Value"));
 
-  declareProperty(std::make_unique<API::FileProperty>(
-      "AbsoluteScalingReferenceFilename", "", API::FileProperty::OptionalLoad,
-      ".xml"));
+  declareProperty(std::make_unique<API::FileProperty>("AbsoluteScalingReferenceFilename", "",
+                                                      API::FileProperty::OptionalLoad, ".xml"));
   setPropertySettings("AbsoluteScalingReferenceFilename",
-                      std::make_unique<VisibleWhenProperty>(
-                          "AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
-  declareProperty(
-      "AbsoluteScalingBeamDiameter", 0.0,
-      "Beamstop diameter for computing the absolute scale factor [mm]. "
-      "Read from file if not supplied.");
+                      std::make_unique<VisibleWhenProperty>("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+  declareProperty("AbsoluteScalingBeamDiameter", 0.0,
+                  "Beamstop diameter for computing the absolute scale factor [mm]. "
+                  "Read from file if not supplied.");
   setPropertySettings("AbsoluteScalingBeamDiameter",
-                      std::make_unique<VisibleWhenProperty>(
-                          "AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
-  declareProperty(
-      "AbsoluteScalingAttenuatorTrans", 1.0,
-      "Attenuator transmission value for computing the absolute scale factor");
+                      std::make_unique<VisibleWhenProperty>("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+  declareProperty("AbsoluteScalingAttenuatorTrans", 1.0,
+                  "Attenuator transmission value for computing the absolute scale factor");
   setPropertySettings("AbsoluteScalingAttenuatorTrans",
-                      std::make_unique<VisibleWhenProperty>(
-                          "AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+                      std::make_unique<VisibleWhenProperty>("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
   declareProperty("AbsoluteScalingApplySensitivity", false,
                   "Apply sensitivity correction to the reference data "
                   "when computing the absolute scale factor");
   setPropertySettings("AbsoluteScalingApplySensitivity",
-                      std::make_unique<VisibleWhenProperty>(
-                          "AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+                      std::make_unique<VisibleWhenProperty>("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
 
   setPropertyGroup("AbsoluteScaleMethod", abs_scale_grp);
   setPropertyGroup("AbsoluteScalingFactor", abs_scale_grp);
@@ -564,25 +457,18 @@ void SetupEQSANSReduction::init() {
   declareProperty("DoAzimuthalAverage", true);
   auto positiveInt = std::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(0);
-  declareProperty("IQNumberOfBins", 100, positiveInt,
-                  "Number of I(q) bins when binning is not specified");
-  declareProperty("IQLogBinning", false,
-                  "I(q) log binning when binning is not specified");
+  declareProperty("IQNumberOfBins", 100, positiveInt, "Number of I(q) bins when binning is not specified");
+  declareProperty("IQLogBinning", false, "I(q) log binning when binning is not specified");
   declareProperty("IQIndependentBinning", true,
                   "If true and frame skipping is "
                   "used, each frame will have "
                   "its own binning");
-  declareProperty(
-      "IQScaleResults", true,
-      "If true and frame skipping is used, frame 1 will be scaled to frame 2");
-  declareProperty("ComputeResolution", false,
-                  "If true the Q resolution will be computed");
-  declareProperty("SampleApertureDiameter", 10.0,
-                  "Sample aperture diameter [mm]");
+  declareProperty("IQScaleResults", true, "If true and frame skipping is used, frame 1 will be scaled to frame 2");
+  declareProperty("ComputeResolution", false, "If true the Q resolution will be computed");
+  declareProperty("SampleApertureDiameter", 10.0, "Sample aperture diameter [mm]");
 
   declareProperty("Do2DReduction", true);
-  declareProperty("IQ2DNumberOfBins", 100, positiveInt,
-                  "Number of I(qx,qy) bins.");
+  declareProperty("IQ2DNumberOfBins", 100, positiveInt, "Number of I(qx,qy) bins.");
 
   // -- Define group --
   setPropertyGroup("DoAzimuthalAverage", iq1d_grp);
@@ -597,11 +483,9 @@ void SetupEQSANSReduction::init() {
 
   // Outputs
   declareProperty("ProcessInfo", "", "Additional process information");
-  declareProperty("OutputDirectory", "",
-                  "Directory to put the output files in");
+  declareProperty("OutputDirectory", "", "Directory to put the output files in");
   declareProperty("OutputMessage", "", Direction::Output);
-  declareProperty("ReductionProperties", "__sans_reduction_properties",
-                  Direction::Input);
+  declareProperty("ReductionProperties", "__sans_reduction_properties", Direction::Input);
 }
 
 void SetupEQSANSReduction::exec() {
@@ -611,27 +495,20 @@ void SetupEQSANSReduction::exec() {
     g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
-  std::shared_ptr<PropertyManager> reductionManager =
-      std::make_shared<PropertyManager>();
-  PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
-                                                      reductionManager);
+  std::shared_ptr<PropertyManager> reductionManager = std::make_shared<PropertyManager>();
+  PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
 
   // Store name of the instrument
-  reductionManager->declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("InstrumentName",
-                                                       "EQSANS"));
+  reductionManager->declareProperty(std::make_unique<PropertyWithValue<std::string>>("InstrumentName", "EQSANS"));
 
   // Store additional (and optional) process information
   const std::string processInfo = getProperty("ProcessInfo");
-  reductionManager->declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("ProcessInfo",
-                                                       processInfo));
+  reductionManager->declareProperty(std::make_unique<PropertyWithValue<std::string>>("ProcessInfo", processInfo));
 
   // Store the output directory
   const std::string outputDirectory = getProperty("OutputDirectory");
   reductionManager->declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("OutputDirectory",
-                                                       outputDirectory));
+      std::make_unique<PropertyWithValue<std::string>>("OutputDirectory", outputDirectory));
 
   // Store normalization algorithm
   const std::string normalization = getProperty("Normalisation");
@@ -682,8 +559,7 @@ void SetupEQSANSReduction::exec() {
   const bool preserveEvents = getProperty("PreserveEvents");
   loadAlg->setProperty("PreserveEvents", preserveEvents);
   // load from nexus if they aren't in the reference file
-  loadAlg->setProperty("LoadMonitors",
-                       (loadMonitors && monitorRefFile.empty()));
+  loadAlg->setProperty("LoadMonitors", (loadMonitors && monitorRefFile.empty()));
 
   const double sdd = getProperty("SampleDetectorDistance");
   loadAlg->setProperty("SampleDetectorDistance", sdd);
@@ -709,24 +585,20 @@ void SetupEQSANSReduction::exec() {
   // Store dark current algorithm
   const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
   if (!darkCurrentFile.empty()) {
-    IAlgorithm_sptr darkAlg =
-        createChildAlgorithm("EQSANSDarkCurrentSubtraction");
+    IAlgorithm_sptr darkAlg = createChildAlgorithm("EQSANSDarkCurrentSubtraction");
     darkAlg->setProperty("Filename", darkCurrentFile);
     darkAlg->setProperty("OutputDarkCurrentWorkspace", "");
     darkAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-    auto dcAlgProp =
-        std::make_unique<AlgorithmProperty>("DarkCurrentAlgorithm");
+    auto dcAlgProp = std::make_unique<AlgorithmProperty>("DarkCurrentAlgorithm");
     dcAlgProp->setValue(darkAlg->toString());
     reductionManager->declareProperty(std::move(dcAlgProp));
   }
 
   // Store default dark current algorithm
-  IAlgorithm_sptr darkDefaultAlg =
-      createChildAlgorithm("EQSANSDarkCurrentSubtraction");
+  IAlgorithm_sptr darkDefaultAlg = createChildAlgorithm("EQSANSDarkCurrentSubtraction");
   darkDefaultAlg->setProperty("OutputDarkCurrentWorkspace", "");
   darkDefaultAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-  auto ddcAlgProp =
-      std::make_unique<AlgorithmProperty>("DefaultDarkCurrentAlgorithm");
+  auto ddcAlgProp = std::make_unique<AlgorithmProperty>("DefaultDarkCurrentAlgorithm");
   ddcAlgProp->setValue(darkDefaultAlg->toString());
   reductionManager->declareProperty(std::move(ddcAlgProp));
 
@@ -736,8 +608,7 @@ void SetupEQSANSReduction::exec() {
     const bool detectorTubes = getProperty("DetectorTubes");
     IAlgorithm_sptr solidAlg = createChildAlgorithm("SANSSolidAngleCorrection");
     solidAlg->setProperty("DetectorTubes", detectorTubes);
-    auto ssaAlgProp =
-        std::make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
+    auto ssaAlgProp = std::make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
     ssaAlgProp->setValue(solidAlg->toString());
     reductionManager->declareProperty(std::move(ssaAlgProp));
   }
@@ -750,12 +621,8 @@ void SetupEQSANSReduction::exec() {
   // Beam center option for transmission data
   if (boost::iequals(centerMethod, "Value")) {
     if (!isEmpty(beamCenterX) && !isEmpty(beamCenterY)) {
-      reductionManager->declareProperty(
-          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterX",
-                                                      beamCenterX));
-      reductionManager->declareProperty(
-          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterY",
-                                                      beamCenterY));
+      reductionManager->declareProperty(std::make_unique<PropertyWithValue<double>>("LatestBeamCenterX", beamCenterX));
+      reductionManager->declareProperty(std::make_unique<PropertyWithValue<double>>("LatestBeamCenterY", beamCenterY));
     }
   } else if (!boost::iequals(centerMethod, "None")) {
     bool useDirectBeamMethod = true;
@@ -772,8 +639,7 @@ void SetupEQSANSReduction::exec() {
         ctrAlg->setProperty("BeamRadius", beamRadius);
       ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-      auto ctrAlgProp =
-          std::make_unique<AlgorithmProperty>("SANSBeamFinderAlgorithm");
+      auto ctrAlgProp = std::make_unique<AlgorithmProperty>("SANSBeamFinderAlgorithm");
       ctrAlgProp->setValue(ctrAlg->toString());
       reductionManager->declareProperty(std::move(ctrAlgProp));
     } else {
@@ -822,17 +688,14 @@ void SetupEQSANSReduction::exec() {
     absAlg->setProperty("Method", absScaleMethod);
     absAlg->setProperty("ScalingFactor", absScaleFactor);
     absAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-    auto absAlgProp =
-        std::make_unique<AlgorithmProperty>("AbsoluteScaleAlgorithm");
+    auto absAlgProp = std::make_unique<AlgorithmProperty>("AbsoluteScaleAlgorithm");
     absAlgProp->setValue(absAlg->toString());
     reductionManager->declareProperty(std::move(absAlgProp));
   } else if (boost::iequals(absScaleMethod, "ReferenceData")) {
-    const std::string absRefFile =
-        getPropertyValue("AbsoluteScalingReferenceFilename");
+    const std::string absRefFile = getPropertyValue("AbsoluteScalingReferenceFilename");
     const double beamDiam = getProperty("AbsoluteScalingBeamDiameter");
     const double attTrans = getProperty("AbsoluteScalingAttenuatorTrans");
-    const bool applySensitivity =
-        getProperty("AbsoluteScalingApplySensitivity");
+    const bool applySensitivity = getProperty("AbsoluteScalingApplySensitivity");
 
     IAlgorithm_sptr absAlg = createChildAlgorithm("SANSAbsoluteScale");
     absAlg->setProperty("Method", absScaleMethod);
@@ -841,8 +704,7 @@ void SetupEQSANSReduction::exec() {
     absAlg->setProperty("AttenuatorTransmission", attTrans);
     absAlg->setProperty("ApplySensitivity", applySensitivity);
     absAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-    auto scaleAlgProp =
-        std::make_unique<AlgorithmProperty>("AbsoluteScaleAlgorithm");
+    auto scaleAlgProp = std::make_unique<AlgorithmProperty>("AbsoluteScaleAlgorithm");
     scaleAlgProp->setValue(absAlg->toString());
     reductionManager->declareProperty(std::move(scaleAlgProp));
   }
@@ -889,17 +751,14 @@ void SetupEQSANSReduction::exec() {
   reductionManager->declareProperty(std::move(setupAlgProp));
 }
 
-void SetupEQSANSReduction::setupSensitivity(
-    const std::shared_ptr<PropertyManager> &reductionManager) {
+void SetupEQSANSReduction::setupSensitivity(const std::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
 
   const std::string sensitivityFile = getPropertyValue("SensitivityFile");
   if (!sensitivityFile.empty()) {
     const bool useSampleDC = getProperty("UseDefaultDC");
-    const std::string sensitivityDarkCurrentFile =
-        getPropertyValue("SensitivityDarkCurrentFile");
-    const std::string outputSensitivityWS =
-        getPropertyValue("OutputSensitivityWorkspace");
+    const std::string sensitivityDarkCurrentFile = getPropertyValue("SensitivityDarkCurrentFile");
+    const std::string outputSensitivityWS = getPropertyValue("OutputSensitivityWorkspace");
     const double minEff = getProperty("MinEfficiency");
     const double maxEff = getProperty("MaxEfficiency");
     const double sensitivityBeamCenterX = getProperty("SensitivityBeamCenterX");
@@ -913,20 +772,15 @@ void SetupEQSANSReduction::setupSensitivity(
     effAlg->setProperty("MaxEfficiency", maxEff);
 
     // Beam center option for sensitivity data
-    const std::string centerMethod =
-        getPropertyValue("SensitivityBeamCenterMethod");
+    const std::string centerMethod = getPropertyValue("SensitivityBeamCenterMethod");
     if (boost::iequals(centerMethod, "Value")) {
-      if (!isEmpty(sensitivityBeamCenterX) &&
-          !isEmpty(sensitivityBeamCenterY)) {
+      if (!isEmpty(sensitivityBeamCenterX) && !isEmpty(sensitivityBeamCenterY)) {
         effAlg->setProperty("BeamCenterX", sensitivityBeamCenterX);
         effAlg->setProperty("BeamCenterY", sensitivityBeamCenterY);
       }
-    } else if (boost::iequals(centerMethod, "DirectBeam") ||
-               boost::iequals(centerMethod, "Scattering")) {
-      const std::string beamCenterFile =
-          getProperty("SensitivityBeamCenterFile");
-      const double sensitivityBeamRadius =
-          getProperty("SensitivityBeamCenterRadius");
+    } else if (boost::iequals(centerMethod, "DirectBeam") || boost::iequals(centerMethod, "Scattering")) {
+      const std::string beamCenterFile = getProperty("SensitivityBeamCenterFile");
+      const double sensitivityBeamRadius = getProperty("SensitivityBeamCenterRadius");
       bool useDirectBeam = boost::iequals(centerMethod, "DirectBeam");
       if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
@@ -937,14 +791,12 @@ void SetupEQSANSReduction::setupSensitivity(
           ctrAlg->setProperty("BeamRadius", sensitivityBeamRadius);
         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-        auto sensAlgProp = std::make_unique<AlgorithmProperty>(
-            "SensitivityBeamCenterAlgorithm");
+        auto sensAlgProp = std::make_unique<AlgorithmProperty>("SensitivityBeamCenterAlgorithm");
         sensAlgProp->setValue(ctrAlg->toString());
         reductionManager->declareProperty(std::move(sensAlgProp));
       } else {
-        g_log.error()
-            << "ERROR: Sensitivity beam center determination was required"
-               " but no file was provided\n";
+        g_log.error() << "ERROR: Sensitivity beam center determination was required"
+                         " but no file was provided\n";
       }
     }
 
@@ -956,14 +808,12 @@ void SetupEQSANSReduction::setupSensitivity(
     reductionManager->declareProperty(std::move(algProp));
   }
 }
-void SetupEQSANSReduction::setupTransmission(
-    const std::shared_ptr<PropertyManager> &reductionManager) {
+void SetupEQSANSReduction::setupTransmission(const std::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Transmission options
   const bool thetaDependentTrans = getProperty("ThetaDependentTransmission");
   const std::string transMethod = getProperty("TransmissionMethod");
-  const std::string darkCurrent =
-      getPropertyValue("TransmissionDarkCurrentFile");
+  const std::string darkCurrent = getPropertyValue("TransmissionDarkCurrentFile");
   const bool useSampleDC = getProperty("TransmissionUseSampleDC");
 
   // Transmission is entered by hand
@@ -971,37 +821,30 @@ void SetupEQSANSReduction::setupTransmission(
     const double transValue = getProperty("TransmissionValue");
     const double transError = getProperty("TransmissionError");
     if (!isEmpty(transValue) && !isEmpty(transError)) {
-      IAlgorithm_sptr transAlg =
-          createChildAlgorithm("ApplyTransmissionCorrection");
+      IAlgorithm_sptr transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
       transAlg->setProperty("TransmissionValue", transValue);
       transAlg->setProperty("TransmissionError", transError);
       transAlg->setProperty("ThetaDependent", thetaDependentTrans);
 
-      auto algProp =
-          std::make_unique<AlgorithmProperty>("TransmissionAlgorithm");
+      auto algProp = std::make_unique<AlgorithmProperty>("TransmissionAlgorithm");
       algProp->setValue(transAlg->toString());
       reductionManager->declareProperty(std::move(algProp));
     } else {
-      g_log.information(
-          "SetupEQSANSReduction [TransmissionAlgorithm]:"
-          "expected transmission/error values and got empty values");
+      g_log.information("SetupEQSANSReduction [TransmissionAlgorithm]:"
+                        "expected transmission/error values and got empty values");
     }
   }
   // Direct beam method for transmission determination
   else if (boost::iequals(transMethod, "DirectBeam")) {
-    const std::string sampleFilename =
-        getPropertyValue("TransmissionSampleDataFile");
-    const std::string emptyFilename =
-        getPropertyValue("TransmissionEmptyDataFile");
+    const std::string sampleFilename = getPropertyValue("TransmissionSampleDataFile");
+    const std::string emptyFilename = getPropertyValue("TransmissionEmptyDataFile");
     const double beamRadius = getProperty("TransmissionBeamRadius");
     const bool fitFramesTogether = getProperty("FitFramesTogether");
     const double beamX = getProperty("TransmissionBeamCenterX");
     const double beamY = getProperty("TransmissionBeamCenterY");
-    const std::string centerMethod =
-        getPropertyValue("TransmissionBeamCenterMethod");
+    const std::string centerMethod = getPropertyValue("TransmissionBeamCenterMethod");
 
-    IAlgorithm_sptr transAlg =
-        createChildAlgorithm("EQSANSDirectBeamTransmission");
+    IAlgorithm_sptr transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
     transAlg->setProperty("FitFramesTogether", fitFramesTogether);
     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
@@ -1010,13 +853,11 @@ void SetupEQSANSReduction::setupTransmission(
     transAlg->setProperty("UseSampleDarkCurrent", useSampleDC);
 
     // Beam center option for transmission data
-    if (boost::iequals(centerMethod, "Value") && !isEmpty(beamX) &&
-        !isEmpty(beamY)) {
+    if (boost::iequals(centerMethod, "Value") && !isEmpty(beamX) && !isEmpty(beamY)) {
       transAlg->setProperty("BeamCenterX", beamX);
       transAlg->setProperty("BeamCenterY", beamY);
     } else if (boost::iequals(centerMethod, "DirectBeam")) {
-      const std::string beamCenterFile =
-          getProperty("TransmissionBeamCenterFile");
+      const std::string beamCenterFile = getProperty("TransmissionBeamCenterFile");
       if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
@@ -1024,14 +865,12 @@ void SetupEQSANSReduction::setupTransmission(
         ctrAlg->setProperty("PersistentCorrection", false);
         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-        auto algProp = std::make_unique<AlgorithmProperty>(
-            "TransmissionBeamCenterAlgorithm");
+        auto algProp = std::make_unique<AlgorithmProperty>("TransmissionBeamCenterAlgorithm");
         algProp->setValue(ctrAlg->toString());
         reductionManager->declareProperty(std::move(algProp));
       } else {
-        g_log.error()
-            << "ERROR: Transmission beam center determination was required"
-               " but no file was provided\n";
+        g_log.error() << "ERROR: Transmission beam center determination was required"
+                         " but no file was provided\n";
       }
     }
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
@@ -1041,57 +880,46 @@ void SetupEQSANSReduction::setupTransmission(
   }
 }
 
-void SetupEQSANSReduction::setupBackground(
-    const std::shared_ptr<PropertyManager> &reductionManager) {
+void SetupEQSANSReduction::setupBackground(const std::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Background
   const std::string backgroundFile = getPropertyValue("BackgroundFiles");
   if (!backgroundFile.empty())
     reductionManager->declareProperty(
-        std::make_unique<PropertyWithValue<std::string>>("BackgroundFiles",
-                                                         backgroundFile));
+        std::make_unique<PropertyWithValue<std::string>>("BackgroundFiles", backgroundFile));
   else
     return;
 
-  const std::string darkCurrent =
-      getPropertyValue("BckTransmissionDarkCurrentFile");
-  const bool bckThetaDependentTrans =
-      getProperty("BckThetaDependentTransmission");
+  const std::string darkCurrent = getPropertyValue("BckTransmissionDarkCurrentFile");
+  const bool bckThetaDependentTrans = getProperty("BckThetaDependentTransmission");
   const std::string bckTransMethod = getProperty("BckTransmissionMethod");
   if (boost::iequals(bckTransMethod, "Value")) {
     const double transValue = getProperty("BckTransmissionValue");
     const double transError = getProperty("BckTransmissionError");
     if (!isEmpty(transValue) && !isEmpty(transError)) {
-      IAlgorithm_sptr transAlg =
-          createChildAlgorithm("ApplyTransmissionCorrection");
+      IAlgorithm_sptr transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
       transAlg->setProperty("TransmissionValue", transValue);
       transAlg->setProperty("TransmissionError", transError);
       transAlg->setProperty("ThetaDependent", bckThetaDependentTrans);
 
-      auto algProp =
-          std::make_unique<AlgorithmProperty>("BckTransmissionAlgorithm");
+      auto algProp = std::make_unique<AlgorithmProperty>("BckTransmissionAlgorithm");
       algProp->setValue(transAlg->toString());
       reductionManager->declareProperty(std::move(algProp));
     } else {
-      g_log.information(
-          "SetupEQSANSReduction [BckTransmissionAlgorithm]: "
-          "expected transmission/error values and got empty values");
+      g_log.information("SetupEQSANSReduction [BckTransmissionAlgorithm]: "
+                        "expected transmission/error values and got empty values");
     }
   } else if (boost::iequals(bckTransMethod, "DirectBeam")) {
-    const std::string sampleFilename =
-        getPropertyValue("BckTransmissionSampleDataFile");
-    const std::string emptyFilename =
-        getPropertyValue("BckTransmissionEmptyDataFile");
+    const std::string sampleFilename = getPropertyValue("BckTransmissionSampleDataFile");
+    const std::string emptyFilename = getPropertyValue("BckTransmissionEmptyDataFile");
     const double beamRadius = getProperty("BckTransmissionBeamRadius");
     const double beamX = getProperty("BckTransmissionBeamCenterX");
     const double beamY = getProperty("BckTransmissionBeamCenterY");
-    const bool thetaDependentTrans =
-        getProperty("BckThetaDependentTransmission");
+    const bool thetaDependentTrans = getProperty("BckThetaDependentTransmission");
     const bool useSampleDC = getProperty("TransmissionUseSampleDC");
     const bool fitFramesTogether = getProperty("BckFitFramesTogether");
 
-    IAlgorithm_sptr transAlg =
-        createChildAlgorithm("EQSANSDirectBeamTransmission");
+    IAlgorithm_sptr transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
     transAlg->setProperty("FitFramesTogether", fitFramesTogether);
     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
@@ -1100,15 +928,12 @@ void SetupEQSANSReduction::setupBackground(
     transAlg->setProperty("UseSampleDarkCurrent", useSampleDC);
 
     // Beam center option for transmission data
-    const std::string centerMethod =
-        getPropertyValue("BckTransmissionBeamCenterMethod");
-    if (boost::iequals(centerMethod, "Value") && !isEmpty(beamX) &&
-        !isEmpty(beamY)) {
+    const std::string centerMethod = getPropertyValue("BckTransmissionBeamCenterMethod");
+    if (boost::iequals(centerMethod, "Value") && !isEmpty(beamX) && !isEmpty(beamY)) {
       transAlg->setProperty("BeamCenterX", beamX);
       transAlg->setProperty("BeamCenterY", beamY);
     } else if (boost::iequals(centerMethod, "DirectBeam")) {
-      const std::string beamCenterFile =
-          getProperty("BckTransmissionBeamCenterFile");
+      const std::string beamCenterFile = getProperty("BckTransmissionBeamCenterFile");
       if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
@@ -1116,8 +941,7 @@ void SetupEQSANSReduction::setupBackground(
         ctrAlg->setProperty("PersistentCorrection", false);
         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-        auto algProp = std::make_unique<AlgorithmProperty>(
-            "BckTransmissionBeamCenterAlgorithm");
+        auto algProp = std::make_unique<AlgorithmProperty>("BckTransmissionBeamCenterAlgorithm");
         algProp->setValue(ctrAlg->toString());
         reductionManager->declareProperty(std::move(algProp));
       } else {
@@ -1127,8 +951,7 @@ void SetupEQSANSReduction::setupBackground(
     }
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
-    auto algProp =
-        std::make_unique<AlgorithmProperty>("BckTransmissionAlgorithm");
+    auto algProp = std::make_unique<AlgorithmProperty>("BckTransmissionAlgorithm");
     algProp->setValue(transAlg->toString());
     reductionManager->declareProperty(std::move(algProp));
   }

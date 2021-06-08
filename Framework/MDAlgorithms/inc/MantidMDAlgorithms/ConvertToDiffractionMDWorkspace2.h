@@ -21,8 +21,7 @@ namespace MDAlgorithms {
  *
  * @date 2013-05-20
  */
-class DLLExport ConvertToDiffractionMDWorkspace2
-    : public MDAlgorithms::BaseConvertToDiffractionMDWorkspace {
+class DLLExport ConvertToDiffractionMDWorkspace2 : public MDAlgorithms::BaseConvertToDiffractionMDWorkspace {
 public:
   /// Algorithm's version for identification
   int version() const override { return 2; }
@@ -34,8 +33,7 @@ protected: // for testing
   // method to convert the extents specified for the
   // ConvertToDiffractionMDWorksapce  into the min-max properties names of the
   // ConvertToMD
-  void convertExtents(const std::vector<double> &Extents,
-                      std::vector<double> &minVal,
+  void convertExtents(const std::vector<double> &Extents, std::vector<double> &minVal,
                       std::vector<double> &maxVal) override;
 };
 

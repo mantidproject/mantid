@@ -24,9 +24,7 @@ class NexusDescriptorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static NexusDescriptorTest *createSuite() {
-    return new NexusDescriptorTest();
-  }
+  static NexusDescriptorTest *createSuite() { return new NexusDescriptorTest(); }
   static void destroySuite(NexusDescriptorTest *suite) { delete suite; }
 
   NexusDescriptorTest() {
@@ -45,15 +43,12 @@ public:
       if (Poco::File(nonhdf5Path).exists())
         m_testNonHDFPath = nonhdf5Path.toString();
 
-      if (!m_testHDF5Path.empty() && !m_testHDF4Path.empty() &&
-          !m_testNonHDFPath.empty())
+      if (!m_testHDF5Path.empty() && !m_testHDF4Path.empty() && !m_testNonHDFPath.empty())
         break;
     }
-    if (m_testHDF5Path.empty() || m_testHDF4Path.empty() ||
-        m_testNonHDFPath.empty()) {
-      throw std::runtime_error(
-          "Unable to find test files for FileDescriptorTest. "
-          "The AutoTestData directory needs to be in the search path");
+    if (m_testHDF5Path.empty() || m_testHDF4Path.empty() || m_testNonHDFPath.empty()) {
+      throw std::runtime_error("Unable to find test files for FileDescriptorTest. "
+                               "The AutoTestData directory needs to be in the search path");
     }
 
     m_testHDF5 = std::make_shared<NexusDescriptor>(m_testHDF5Path);
@@ -63,12 +58,9 @@ public:
   //======================================
   void test_isReadable_Returns_False_For_Non_HDF_Filename() {
     TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath));
-    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath,
-                                           NexusDescriptor::AnyVersion));
-    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath,
-                                           NexusDescriptor::Version4));
-    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath,
-                                           NexusDescriptor::Version5));
+    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::AnyVersion));
+    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::Version4));
+    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::Version5));
   }
 
   void test_isReadable_Defaults_To_All_Versions() {
@@ -77,22 +69,17 @@ public:
   }
 
   void test_isReadable_With_Version4_Returns_True_Only_For_HDF4() {
-    TS_ASSERT(
-        NexusDescriptor::isReadable(m_testHDF4Path, NexusDescriptor::Version4));
-    TS_ASSERT(!NexusDescriptor::isReadable(m_testHDF5Path,
-                                           NexusDescriptor::Version4));
+    TS_ASSERT(NexusDescriptor::isReadable(m_testHDF4Path, NexusDescriptor::Version4));
+    TS_ASSERT(!NexusDescriptor::isReadable(m_testHDF5Path, NexusDescriptor::Version4));
   }
 
   void test_isReadable_With_Version5_Returns_True_Only_For_HDF4() {
-    TS_ASSERT(
-        NexusDescriptor::isReadable(m_testHDF5Path, NexusDescriptor::Version5));
-    TS_ASSERT(!NexusDescriptor::isReadable(m_testHDF4Path,
-                                           NexusDescriptor::Version5));
+    TS_ASSERT(NexusDescriptor::isReadable(m_testHDF5Path, NexusDescriptor::Version5));
+    TS_ASSERT(!NexusDescriptor::isReadable(m_testHDF4Path, NexusDescriptor::Version5));
   }
 
   void test_isReadable_Throws_With_Invalid_Filename() {
-    TS_ASSERT_THROWS(NexusDescriptor::isReadable(""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(NexusDescriptor::isReadable(""), const std::invalid_argument &);
   }
 
   //=================================== NexusDescriptor methods
@@ -108,13 +95,11 @@ public:
   }
 
   void test_Constructor_Throws_With_NonExistant_filename() {
-    TS_ASSERT_THROWS(NexusDescriptor("__ThisShouldBeANonExistantFile.txt"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(NexusDescriptor("__ThisShouldBeANonExistantFile.txt"), const std::invalid_argument &);
   }
 
   void test_Constructor_Throws_When_Given_File_Not_Identified_As_HDF() {
-    TS_ASSERT_THROWS(NexusDescriptor fd(m_testNonHDFPath),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(NexusDescriptor fd(m_testNonHDFPath), const std::invalid_argument &);
   }
 
   void test_File_Handle_Returned_By_Data_Is_Valid() {
@@ -128,40 +113,29 @@ public:
     TS_ASSERT_EQUALS("NXentry", entryType.second);
   }
 
-  void test_hasRootAttr_Returns_True_For_Existing_Attr() {
-    TS_ASSERT(m_testHDF5->hasRootAttr("file_time"));
-  }
+  void test_hasRootAttr_Returns_True_For_Existing_Attr() { TS_ASSERT(m_testHDF5->hasRootAttr("file_time")); }
 
-  void test_hasRootAttr_Returns_False_For_Non_Existing_Attr() {
-    TS_ASSERT(!m_testHDF5->hasRootAttr("not_attr"));
-  }
+  void test_hasRootAttr_Returns_False_For_Non_Existing_Attr() { TS_ASSERT(!m_testHDF5->hasRootAttr("not_attr")); }
 
-  void test_PathExists_Returns_False_For_Path_Not_In_File() {
-    TS_ASSERT(!m_testHDF5->pathExists("/raw_data_1/bank1"));
-  }
+  void test_PathExists_Returns_False_For_Path_Not_In_File() { TS_ASSERT(!m_testHDF5->pathExists("/raw_data_1/bank1")); }
 
   void test_PathExists_Returns_False_For_Invalid_Path_Specification() {
     TS_ASSERT(!m_testHDF5->pathExists("raw_data_1\\bank1"));
   }
 
-  void test_PathExists_Returns_False_For_Root_Path_Along() {
-    TS_ASSERT(!m_testHDF5->pathExists("/"));
-  }
+  void test_PathExists_Returns_False_For_Root_Path_Along() { TS_ASSERT(!m_testHDF5->pathExists("/")); }
 
   void test_PathExists_Returns_True_For_Path_At_Any_Level_In_File() {
     TS_ASSERT(m_testHDF5->pathExists("/entry"));
     TS_ASSERT(m_testHDF5->pathExists("/entry/bank1/data_x_y"));
   }
 
-  void
-  test_PathOfTypeExists_Returns_True_For_Path_Of_Right_Type_At_Any_Level_In_File() {
+  void test_PathOfTypeExists_Returns_True_For_Path_Of_Right_Type_At_Any_Level_In_File() {
     TS_ASSERT(m_testHDF5->pathOfTypeExists("/entry", "NXentry"));
-    TS_ASSERT(
-        m_testHDF5->pathOfTypeExists("/entry/bank1_events", "NXevent_data"));
+    TS_ASSERT(m_testHDF5->pathOfTypeExists("/entry/bank1_events", "NXevent_data"));
   }
 
-  void
-  test_PathOfTypeExists_Returns_False_For_Path_In_File_But_Of_Wrong_Type() {
+  void test_PathOfTypeExists_Returns_False_For_Path_In_File_But_Of_Wrong_Type() {
     TS_ASSERT(!m_testHDF5->pathOfTypeExists("/entry", "NXlog"));
     TS_ASSERT(!m_testHDF5->pathOfTypeExists("/entry/bank1_events", "NXentry"));
   }

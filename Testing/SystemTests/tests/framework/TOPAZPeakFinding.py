@@ -13,6 +13,7 @@ them.
 import systemtesting
 import numpy
 from mantid.simpleapi import *
+from mantid.dataobjects import PeaksWorkspace, LeanElasticPeaksWorkspace
 
 
 class TOPAZPeakFinding(systemtesting.MantidSystemTest):
@@ -72,6 +73,42 @@ class TOPAZPeakFinding(systemtesting.MantidSystemTest):
         ConvertToDiffractionMDWorkspace(InputWorkspace='topaz_3132',OutputWorkspace='topaz_3132_QSample',
                                         OutputDimensions='Q (sample frame)',LorentzCorrection='1',SplitInto='2',SplitThreshold='150')
         FindPeaksMD(InputWorkspace='topaz_3132_QSample',PeakDistanceThreshold='0.12',MaxPeaks='200',OutputWorkspace='peaks_QSample')
+        self.assertTrue(isinstance(mtd['peaks_QSample'], PeaksWorkspace))
+        FindUBUsingFFT(PeaksWorkspace='peaks_QSample',MinD='2',MaxD='16')
+        CopySample(InputWorkspace='peaks_QSample',OutputWorkspace='topaz_3132',CopyName='0',CopyMaterial='0',
+                   CopyEnvironment='0',CopyShape='0')
+
+        # Index the peaks and check
+        results = IndexPeaks(PeaksWorkspace='peaks_QSample')
+        indexed = results[0]
+        if indexed < 199:
+            raise Exception("Expected at least 199 of 200 peaks to be indexed. Only indexed %d!" % indexed)
+
+        # Check the UB matrix
+        w = mtd["topaz_3132"]
+        s = w.sample()
+        ol = s.getOrientedLattice()
+        self.assertDelta( ol.a(), 4.714, 0.01, "Correct lattice a value not found.")
+        self.assertDelta( ol.b(), 6.06, 0.01, "Correct lattice b value not found.")
+        self.assertDelta( ol.c(), 10.42, 0.01, "Correct lattice c value not found.")
+        self.assertDelta( ol.alpha(), 90, 0.4, "Correct lattice angle alpha value not found.")
+        self.assertDelta( ol.beta(), 90, 0.4, "Correct lattice angle beta value not found.")
+        self.assertDelta( ol.gamma(), 90, 0.4, "Correct lattice angle gamma value not found.")
+
+        # Compare new and old UBs
+        newUB = numpy.array(mtd["topaz_3132"].sample().getOrientedLattice().getUB())
+        # UB Matrices are not necessarily the same, some of the H,K and/or L sign can be reversed
+        diff = abs(newUB) - abs(originalUB) < 0.001
+        for c in range(3):
+            # This compares each column, allowing old == new OR old == -new
+            if not numpy.all(diff[:,c]) :
+                raise Exception("More than 0.001 difference between UB matrices: Q (lab frame):\n"
+                                "%s\nQ (sample frame):\n%s" % (originalUB, newUB) )
+
+        # repeat but use LeanElasticPeaks
+        FindPeaksMD(InputWorkspace='topaz_3132_QSample',PeakDistanceThreshold='0.12',MaxPeaks='200',OutputWorkspace='peaks_QSample',
+                    OutputType='LeanElasticPeak')
+        self.assertTrue(isinstance(mtd['peaks_QSample'], LeanElasticPeaksWorkspace))
         FindUBUsingFFT(PeaksWorkspace='peaks_QSample',MinD='2',MaxD='16')
         CopySample(InputWorkspace='peaks_QSample',OutputWorkspace='topaz_3132',CopyName='0',CopyMaterial='0',
                    CopyEnvironment='0',CopyShape='0')

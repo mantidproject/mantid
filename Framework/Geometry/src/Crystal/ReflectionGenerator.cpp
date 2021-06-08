@@ -26,38 +26,29 @@ private:
 };
 
 /// Constructor
-ReflectionGenerator::ReflectionGenerator(
-    const CrystalStructure &crystalStructure,
-    ReflectionConditionFilter defaultFilter)
+ReflectionGenerator::ReflectionGenerator(const CrystalStructure &crystalStructure,
+                                         ReflectionConditionFilter defaultFilter)
     : m_crystalStructure(crystalStructure),
-      m_sfCalculator(StructureFactorCalculatorFactory::create<
-                     StructureFactorCalculatorSummation>(m_crystalStructure)),
+      m_sfCalculator(StructureFactorCalculatorFactory::create<StructureFactorCalculatorSummation>(m_crystalStructure)),
       m_defaultHKLFilter(getReflectionConditionFilter(defaultFilter)) {}
 
 /// Returns the internally stored crystal structure
-const CrystalStructure &ReflectionGenerator::getCrystalStructure() const {
-  return m_crystalStructure;
-}
+const CrystalStructure &ReflectionGenerator::getCrystalStructure() const { return m_crystalStructure; }
 
 /// Returns a DRangeFilter from the supplied d-limits and the internally stored
 /// cell.
-HKLFilter_const_sptr ReflectionGenerator::getDRangeFilter(double dMin,
-                                                          double dMax) const {
-  return std::make_shared<const HKLFilterDRange>(m_crystalStructure.cell(),
-                                                 dMin, dMax);
+HKLFilter_const_sptr ReflectionGenerator::getDRangeFilter(double dMin, double dMax) const {
+  return std::make_shared<const HKLFilterDRange>(m_crystalStructure.cell(), dMin, dMax);
 }
 
 /// Returns a reflection condition HKLFilter based on the supplied enum.
-HKLFilter_const_sptr ReflectionGenerator::getReflectionConditionFilter(
-    ReflectionConditionFilter filter) {
+HKLFilter_const_sptr ReflectionGenerator::getReflectionConditionFilter(ReflectionConditionFilter filter) {
   switch (filter) {
   case ReflectionConditionFilter::Centering:
-    return std::make_shared<const HKLFilterCentering>(
-        m_crystalStructure.centering());
+    return std::make_shared<const HKLFilterCentering>(m_crystalStructure.centering());
     break;
   case ReflectionConditionFilter::SpaceGroup:
-    return std::make_shared<const HKLFilterSpaceGroup>(
-        m_crystalStructure.spaceGroup());
+    return std::make_shared<const HKLFilterSpaceGroup>(m_crystalStructure.spaceGroup());
     break;
   case ReflectionConditionFilter::StructureFactor:
     return std::make_shared<const HKLFilterStructureFactor>(m_sfCalculator);
@@ -74,9 +65,8 @@ std::vector<V3D> ReflectionGenerator::getHKLs(double dMin, double dMax) const {
 
 /// Returns a list of HKLs within the specified d-limits using the specified
 /// filter. If the pointer is null, it's ignored.
-std::vector<Kernel::V3D> ReflectionGenerator::getHKLs(
-    double dMin, double dMax,
-    const HKLFilter_const_sptr &reflectionConditionFilter) const {
+std::vector<Kernel::V3D> ReflectionGenerator::getHKLs(double dMin, double dMax,
+                                                      const HKLFilter_const_sptr &reflectionConditionFilter) const {
   HKLGenerator generator(m_crystalStructure.cell(), dMin);
 
   HKLFilter_const_sptr filter = getDRangeFilter(dMin, dMax);
@@ -87,23 +77,20 @@ std::vector<Kernel::V3D> ReflectionGenerator::getHKLs(
   std::vector<V3D> hkls;
   hkls.reserve(generator.size());
 
-  std::remove_copy_if(generator.begin(), generator.end(),
-                      std::back_inserter(hkls), (~filter)->fn());
+  std::remove_copy_if(generator.begin(), generator.end(), std::back_inserter(hkls), (~filter)->fn());
   return hkls;
 }
 
 /// Returns a list of symetrically independent HKLs within the specified
 /// d-limits using the default reflection condition filter.
-std::vector<V3D> ReflectionGenerator::getUniqueHKLs(double dMin,
-                                                    double dMax) const {
+std::vector<V3D> ReflectionGenerator::getUniqueHKLs(double dMin, double dMax) const {
   return getUniqueHKLs(dMin, dMax, m_defaultHKLFilter);
 }
 
 /// Returns a list of symetrically independent HKLs within the specified
 /// d-limits using the specified reflection condition filter.
-std::vector<V3D> ReflectionGenerator::getUniqueHKLs(
-    double dMin, double dMax,
-    const HKLFilter_const_sptr &reflectionConditionFilter) const {
+std::vector<V3D> ReflectionGenerator::getUniqueHKLs(double dMin, double dMax,
+                                                    const HKLFilter_const_sptr &reflectionConditionFilter) const {
   HKLGenerator generator(m_crystalStructure.cell(), dMin);
 
   HKLFilter_const_sptr filter = getDRangeFilter(dMin, dMax);
@@ -130,8 +117,7 @@ std::vector<V3D> ReflectionGenerator::getUniqueHKLs(
 
 /// Returns a list of d-values that correspond to the supplied hkl list, using
 /// the unit cell of the stored crystal structure.
-std::vector<double>
-ReflectionGenerator::getDValues(const std::vector<V3D> &hkls) const {
+std::vector<double> ReflectionGenerator::getDValues(const std::vector<V3D> &hkls) const {
   std::vector<double> dValues;
   dValues.reserve(hkls.size());
 
@@ -143,8 +129,7 @@ ReflectionGenerator::getDValues(const std::vector<V3D> &hkls) const {
 
 /// Returns a list of squared structure factor amplitudes corresponding to the
 /// supplied list of HKLs.
-std::vector<double>
-ReflectionGenerator::getFsSquared(const std::vector<V3D> &hkls) const {
+std::vector<double> ReflectionGenerator::getFsSquared(const std::vector<V3D> &hkls) const {
   return m_sfCalculator->getFsSquared(hkls);
 }
 

@@ -14,25 +14,20 @@
 #include <sstream>
 
 /// Constructor
-QwtWorkspaceBinData::QwtWorkspaceBinData(
-    const Mantid::API::MatrixWorkspace &workspace, int binIndex,
-    const bool logScaleY)
-    : MantidQwtMatrixWorkspaceData(logScaleY), m_binIndex(binIndex), m_X(),
-      m_Y(), m_E(), m_xTitle(), m_yTitle() {
+QwtWorkspaceBinData::QwtWorkspaceBinData(const Mantid::API::MatrixWorkspace &workspace, int binIndex,
+                                         const bool logScaleY)
+    : MantidQwtMatrixWorkspaceData(logScaleY), m_binIndex(binIndex), m_X(), m_Y(), m_E(), m_xTitle(), m_yTitle() {
   init(workspace);
 }
 
 ///
-QwtWorkspaceBinData *QwtWorkspaceBinData::copy() const {
-  return new QwtWorkspaceBinData(*this);
-}
+QwtWorkspaceBinData *QwtWorkspaceBinData::copy() const { return new QwtWorkspaceBinData(*this); }
 
 /**
  * @param workspace A reference to a different workspace
  * @return A new data object
  */
-QwtWorkspaceBinData *QwtWorkspaceBinData::copyWithNewSource(
-    const Mantid::API::MatrixWorkspace &workspace) const {
+QwtWorkspaceBinData *QwtWorkspaceBinData::copyWithNewSource(const Mantid::API::MatrixWorkspace &workspace) const {
   return new QwtWorkspaceBinData(workspace, m_binIndex, logScaleY());
 }
 
@@ -84,16 +79,14 @@ QString QwtWorkspaceBinData::getYAxisLabel() const { return m_yTitle; }
 void QwtWorkspaceBinData::init(const Mantid::API::MatrixWorkspace &workspace) {
   if (workspace.axes() != 2) {
     std::ostringstream os;
-    os << "QwtWorkspaceBinData(): Workspace must have two axes, found "
-       << workspace.axes();
+    os << "QwtWorkspaceBinData(): Workspace must have two axes, found " << workspace.axes();
     throw std::invalid_argument(os.str());
   }
 
   // Check binIndex is valid
   if (static_cast<size_t>(m_binIndex) >= workspace.blocksize()) {
     std::ostringstream os;
-    os << "QwtWorkspaceBinData(): Index out of range. index=" << m_binIndex
-       << ", nvalues=" << workspace.blocksize();
+    os << "QwtWorkspaceBinData(): Index out of range. index=" << m_binIndex << ", nvalues=" << workspace.blocksize();
     throw std::out_of_range(os.str());
   }
 

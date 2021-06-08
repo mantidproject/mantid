@@ -52,7 +52,7 @@ Single Crystal Diffraction
    :class: screenshot
    :width: 500px
 
-- The output peak workspace from :ref:`PredictFractionalPeaks<algm-PredictFractionalPeaks-v1>` now keeps the same lattice parameters as the input workspace. 
+- The output peak workspace from :ref:`PredictFractionalPeaks<algm-PredictFractionalPeaks-v1>` now keeps the same lattice parameters as the input workspace.
 - :ref:`SaveReflections <algm-SaveReflections>` now has the option to save peaks to separate files based on their associated modulation vectors when using the Jana format.
 - ``IndexPeaksWithSatellites`` has been deleted as it had been deprecated and superseded by :ref:`IndexPeaks <algm-IndexPeaks-v1>`.
 

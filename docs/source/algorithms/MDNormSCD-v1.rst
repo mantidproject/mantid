@@ -10,7 +10,7 @@
 Description
 -----------
 
-The algorithm calculates a normalization MD workspace for single crystal diffraction experiments. 
+The algorithm calculates a normalization MD workspace for single crystal diffraction experiments.
 Trajectories of each detector in reciprocal space are calculated, and the flux is integrated between intersections with each
 MDBox. A brief introduction to the multi-dimensional data normalization can be found :ref:`here <MDNorm>`.
 
@@ -40,7 +40,7 @@ Usage
     MaskBTP(Workspace=rawVan,Pixel="0-9,246-255")
     MaskBTP(Workspace=rawVan,Tube="0-9,246-255")
     rawVan=CropWorkspace(InputWorkspace=rawVan,XMin='1.85',XMax='10')
-    
+
     #Solid angle
     sa=Rebin(InputWorkspace=rawVan,Params='1.85,10,10',PreserveEvents='0')
     SaveNexus(InputWorkspace=sa, Filename="/home/3y9/Desktop/TOPAZ/solidAngle.nxs")
@@ -56,9 +56,9 @@ Usage
     flux=Rebin(InputWorkspace=flux,Params='1.85,10,10')
     flux=IntegrateFlux(flux)
     SaveNexus(InputWorkspace=flux, Filename="/home/3y9/Desktop/TOPAZ/spectra.nxs")
-    
+
     #data
-    #If you have multiple workspaces, add separately the output workspaces, and separately the 
+    #If you have multiple workspaces, add separately the output workspaces, and separately the
     #output normalization workspaces, then divide the two sums
     runs = range(7985,7995,1)
     mdout = None
@@ -79,7 +79,7 @@ Usage
                 Q3DFrames="HKL",QConversionScales="HKL",
                 MinValues="-10,-10,-10",Maxvalues="10,10,10")
             SaveMD(InputWorkspace=MDdata, Filename="/home/3y9/Desktop/TOPAZ/MDdata_"+str(run)+".nxs")
-    
+
         #running the algorithm
         mdout, mdnorm = MDNormSCD(InputWorkspace='MDdata',
             AlignedDim0='[H,0,0],-8,8,100',
@@ -89,15 +89,15 @@ Usage
             SolidAngleWorkspace=sa,
             TemporaryDataWorkspace=mdout,
             TemporaryNormalizationWorkspace=mdnorm)
-        
+
     normalized=DivideMD('mdout','mdnorm')
   except:
     pass
-   
-.. testoutput:: MDNormSCDExample 
 
-    
-    
+.. testoutput:: MDNormSCDExample
+
+
+
 
 References
 ----------

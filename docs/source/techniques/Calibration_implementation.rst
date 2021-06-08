@@ -9,19 +9,19 @@ TubeSpec
 ------------------
 
 .. autoclass:: tube_spec.TubeSpec
-   :members:                
+   :members:
 
 TubeCalibFitParams
 ------------------
 
 .. autoclass:: tube_calib_fit_params.TubeCalibFitParams
-   :members:              
+   :members:
 
 
 IdealTube
 ---------
 
 .. autoclass:: ideal_tube.IdealTube
-   :members:              
+   :members:
 
 .. categories:: Techniques

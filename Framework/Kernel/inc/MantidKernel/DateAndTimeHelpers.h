@@ -14,18 +14,14 @@ namespace Mantid {
 namespace Kernel {
 namespace DateAndTimeHelpers {
 
-MANTID_KERNEL_DLL Types::Core::DateAndTime
-createFromSanitizedISO8601(const std::string &date);
+MANTID_KERNEL_DLL Types::Core::DateAndTime createFromSanitizedISO8601(const std::string &date);
 
-MANTID_KERNEL_DLL std::string
-verifyAndSanitizeISO8601(const std::string &date, bool displayWarnings = true);
+MANTID_KERNEL_DLL std::string verifyAndSanitizeISO8601(const std::string &date, bool displayWarnings = true);
 
-MANTID_KERNEL_DLL Types::Core::DateAndTime
-averageSorted(const std::vector<Types::Core::DateAndTime> &times);
+MANTID_KERNEL_DLL Types::Core::DateAndTime averageSorted(const std::vector<Types::Core::DateAndTime> &times);
 
-MANTID_KERNEL_DLL Types::Core::DateAndTime
-averageSorted(const std::vector<Types::Core::DateAndTime> &times,
-              const std::vector<double> &weights);
+MANTID_KERNEL_DLL Types::Core::DateAndTime averageSorted(const std::vector<Types::Core::DateAndTime> &times,
+                                                         const std::vector<double> &weights);
 
 } // namespace DateAndTimeHelpers
 } // namespace Kernel

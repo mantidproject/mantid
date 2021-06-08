@@ -15,10 +15,9 @@ namespace CurveFitting {
 /// @param exclude :: The value of the "Exclude" property.
 /// @param startX :: The start of the overall fit interval.
 /// @param endX :: The end of the overall fit interval.
-ExcludeRangeFinder::ExcludeRangeFinder(const std::vector<double> &exclude,
-                                       double startX, double endX)
-    : m_exclIndex(exclude.size()), m_startExcludedRange(), m_endExcludeRange(),
-      m_exclude(exclude), m_size(exclude.size()) {
+ExcludeRangeFinder::ExcludeRangeFinder(const std::vector<double> &exclude, double startX, double endX)
+    : m_exclIndex(exclude.size()), m_startExcludedRange(), m_endExcludeRange(), m_exclude(exclude),
+      m_size(exclude.size()) {
   // m_exclIndex is initialised with exclude.size() to be the default when
   // there are no exclusion ranges defined.
   if (!m_exclude.empty()) {

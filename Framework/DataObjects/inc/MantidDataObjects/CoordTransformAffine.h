@@ -44,18 +44,15 @@ public:
   const Mantid::Kernel::Matrix<coord_t> &getMatrix() const;
   Mantid::Kernel::Matrix<coord_t> makeAffineMatrix() const override;
   void setMatrix(const Mantid::Kernel::Matrix<coord_t> &newMatrix);
-  void buildOrthogonal(const Mantid::Kernel::VMD &origin,
-                       const std::vector<Mantid::Kernel::VMD> &axes,
+  void buildOrthogonal(const Mantid::Kernel::VMD &origin, const std::vector<Mantid::Kernel::VMD> &axes,
                        const Mantid::Kernel::VMD &scaling);
 
-  void buildNonOrthogonal(const Mantid::Kernel::VMD &origin,
-                          const std::vector<Mantid::Kernel::VMD> &axes,
+  void buildNonOrthogonal(const Mantid::Kernel::VMD &origin, const std::vector<Mantid::Kernel::VMD> &axes,
                           const Mantid::Kernel::VMD &scaling);
 
   void apply(const coord_t *inputVector, coord_t *outVector) const override;
 
-  static CoordTransformAffine *combineTransformations(CoordTransform *first,
-                                                      CoordTransform *second);
+  static CoordTransformAffine *combineTransformations(CoordTransform *first, CoordTransform *second);
 
 protected:
   /** Affine Matrix to perform the transformation. The matrix has inD+1 columns,

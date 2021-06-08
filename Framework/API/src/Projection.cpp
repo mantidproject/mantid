@@ -49,8 +49,7 @@ Projection::Projection(const V3D &u, const V3D &v, const V3D &w) {
 
 Projection::Projection(const ITableWorkspace &ws) {
   if (ws.columnCount() != 4)
-    throw std::runtime_error(
-        "4 columns must be provided to create a projection");
+    throw std::runtime_error("4 columns must be provided to create a projection");
 
   const size_t numRows = ws.rowCount();
   if (numRows != 3)

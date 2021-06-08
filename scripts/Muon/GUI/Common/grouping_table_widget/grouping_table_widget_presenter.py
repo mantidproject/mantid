@@ -139,7 +139,7 @@ class GroupingTablePresenter(object):
             self.add_group(group)
 
     def handle_remove_group_button_clicked(self):
-        group_names = self._view.get_selected_group_names()
+        group_names = self._view.get_selected_group_names_and_indexes()
         if not group_names:
             self.remove_last_row_in_view_and_model()
         else:
@@ -147,17 +147,31 @@ class GroupingTablePresenter(object):
         self.notify_data_changed()
 
     def remove_selected_rows_in_view_and_model(self, group_names):
-        self._view.remove_selected_groups()
-        for group_name in group_names:
-            self._model.remove_group_from_analysis(group_name)
-        self._model.remove_groups_by_name(group_names)
+        safe_to_rm = []
+        warnings = ""
+        for name, index in group_names:
+            used_by = self._model.check_group_in_use(name)
+            if used_by:
+                warnings+=used_by+"\n"
+            else:
+                safe_to_rm.append([index, name])
+        for index, name in reversed(safe_to_rm):
+            self._model.remove_group_from_analysis(name)
+            self._view.remove_group_by_index(index)
+        self._model.remove_groups_by_name([name for _,name in safe_to_rm])
+        if warnings:
+            self._view.warning_popup(warnings)
 
     def remove_last_row_in_view_and_model(self):
         if self._view.num_rows() > 0:
             name = self._view.get_table_contents()[-1][0]
-            self._view.remove_last_row()
-            self._model.remove_group_from_analysis(name)
-            self._model.remove_groups_by_name([name])
+            used_by = self._model.check_group_in_use(name)
+            if used_by:
+                self._view.warning_popup(used_by)
+            else:
+                self._view.remove_last_row()
+                self._model.remove_group_from_analysis(name)
+                self._model.remove_groups_by_name([name])
 
     def handle_data_change(self, row, col):
         changed_item = self._view.get_table_item(row, col)
@@ -201,7 +215,6 @@ class GroupingTablePresenter(object):
     def update_view_from_model(self):
         self._view.disable_updates()
         self._view.clear()
-
         for group in self._model.groups:
             to_analyse = True if group.name in self._model.selected_groups else False
             display_period_warning = self._model.validate_periods_list(group.periods)

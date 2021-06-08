@@ -40,11 +40,11 @@ The script below shows a more complex example of mixing Mantid's algorithms with
 	evalues = numpy.sum(evalues, axis=1) # Sum the squares
 	evalues = numpy.sqrt(evalues)
 
-	xlimits = xvalues[ :, [0,-1] ] # numpy array slice. : takes all rows and [0,-1] selects only column 0 and n-1 
+	xlimits = xvalues[ :, [0,-1] ] # numpy array slice. : takes all rows and [0,-1] selects only column 0 and n-1
 	# + any other operations that numpy can do
 
-	# Put back into workspace. 
-	white_beam = CreateWorkspace(xlimits, sumy, evalues,NSpec=sumy.shape[0]) 
+	# Put back into workspace.
+	white_beam = CreateWorkspace(xlimits, sumy, evalues,NSpec=sumy.shape[0])
 
 	# Divide sample run
 	sample = Load("MAR11015")

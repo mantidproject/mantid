@@ -25,9 +25,8 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger g_log("MSDFit");
 std::vector<std::string> MSDFIT_HIDDEN_PROPS = std::vector<std::string>(
-    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
-     "OutputCompositeMembers", "OutputWorkspace", "IgnoreInvalidData", "Output",
-     "PeakRadius", "PlotParameter"});
+    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers", "OutputCompositeMembers",
+     "OutputWorkspace", "IgnoreInvalidData", "Output", "PeakRadius", "PlotParameter"});
 
 const std::string MSDGAUSSFUNC{"MsdGauss"};
 const std::string MSDPETERSFUNC{"MsdPeters"};
@@ -39,36 +38,29 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-auto msdFunctionStrings = std::map<std::string, std::string>(
-    {{"None", ""},
-     {"Gauss", "name=MsdGauss,Height=1,Msd=0.05,constraints=(Height>0, Msd>0)"},
-     {"Peters",
-      "name=MsdPeters,Height=1,Msd=0.05,Beta=1,constraints=(Height>0, "
-      "Msd>0, Beta>0)"},
-     {"Yi",
-      "name=MsdYi,Height=1,Msd=0.05,Sigma=1,constraints=(Height>0, Msd>0, "
-      "Sigma>0)"}});
+auto msdFunctionStrings =
+    std::map<std::string, std::string>({{"None", ""},
+                                        {"Gauss", "name=MsdGauss,Height=1,Msd=0.05,constraints=(Height>0, Msd>0)"},
+                                        {"Peters", "name=MsdPeters,Height=1,Msd=0.05,Beta=1,constraints=(Height>0, "
+                                                   "Msd>0, Beta>0)"},
+                                        {"Yi", "name=MsdYi,Height=1,Msd=0.05,Sigma=1,constraints=(Height>0, Msd>0, "
+                                               "Sigma>0)"}});
 
 IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
-    : IndirectFitAnalysisTab(new MSDFitModel, parent),
-      m_uiForm(new Ui::IndirectFitTab) {
+    : IndirectFitAnalysisTab(new MSDFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
 
   m_msdFittingModel = dynamic_cast<MSDFitModel *>(getFittingModel());
-  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
-      m_msdFittingModel, m_uiForm->dockArea->m_fitDataView));
+  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(m_msdFittingModel, m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   auto parameterEstimation = createParameterEstimation();
   auto templateBrowser = new SingleFunctionTemplateBrowser(
-      msdFunctionStrings,
-      std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
-  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
-      templateBrowser);
+      msdFunctionStrings, std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
+  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
-  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(
-      MSDFIT_HIDDEN_PROPS);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(MSDFIT_HIDDEN_PROPS);
 
   setEditResultVisible(false);
   respondToFunctionChanged();
@@ -86,44 +78,35 @@ void IndirectDataAnalysisMSDFitTab::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
 }
 
-void IndirectDataAnalysisMSDFitTab::setRunEnabled(bool enable) {
-  m_uiForm->pbRun->setEnabled(enable);
+void IndirectDataAnalysisMSDFitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
+
+EstimationDataSelector IndirectDataAnalysisMSDFitTab::getEstimationDataSelector() const {
+
+  return [](const std::vector<double> &x, const std::vector<double> &y,
+            const std::pair<double, double> range) -> DataForParameterEstimation {
+    // Find data thats within range
+    double xmin = range.first;
+    double xmax = range.second;
+    if (xmin > xmax) {
+      return DataForParameterEstimation{};
+    }
+
+    const auto startItr =
+        std::find_if(x.cbegin(), x.cend(), [xmin](const double &val) -> bool { return val >= (xmin - 1e-5); });
+    auto endItr = std::find_if(x.cbegin(), x.cend(), [xmax](const double &val) -> bool { return val > xmax; });
+
+    size_t first = std::distance(x.cbegin(), startItr);
+    size_t end = std::distance(x.cbegin(), endItr);
+    size_t m = first + (end - first) / 2;
+
+    if (std::distance(startItr, endItr - 1) < 2)
+      return DataForParameterEstimation{};
+
+    return DataForParameterEstimation{{x[first], x[m]}, {y[first], y[m]}};
+  };
 }
 
-EstimationDataSelector
-IndirectDataAnalysisMSDFitTab::getEstimationDataSelector() const {
-
-  return
-      [](const std::vector<double> &x, const std::vector<double> &y,
-         const std::pair<double, double> range) -> DataForParameterEstimation {
-        // Find data thats within range
-        double xmin = range.first;
-        double xmax = range.second;
-        if (xmin > xmax) {
-          return DataForParameterEstimation{};
-        }
-
-        const auto startItr = std::find_if(
-            x.cbegin(), x.cend(),
-            [xmin](const double &val) -> bool { return val >= (xmin - 1e-5); });
-        auto endItr = std::find_if(
-            x.cbegin(), x.cend(),
-            [xmax](const double &val) -> bool { return val > xmax; });
-
-        size_t first = std::distance(x.cbegin(), startItr);
-        size_t end = std::distance(x.cbegin(), endItr);
-        size_t m = first + (end - first) / 2;
-
-        if (std::distance(startItr, endItr - 1) < 2)
-          return DataForParameterEstimation{};
-
-        return DataForParameterEstimation{{x[first], x[m]}, {y[first], y[m]}};
-      };
-}
-
-void IndirectDataAnalysisMSDFitTab::fitFunctionChanged() {
-  m_msdFittingModel->setFitTypeString(getFitTypeString());
-}
+void IndirectDataAnalysisMSDFitTab::fitFunctionChanged() { m_msdFittingModel->setFitTypeString(getFitTypeString()); }
 
 std::string IndirectDataAnalysisMSDFitTab::getFitTypeString() const {
   // This function attempts to work out which fit type is being done. It will
@@ -150,10 +133,8 @@ std::string IndirectDataAnalysisMSDFitTab::getFitTypeString() const {
 // Create parameter estimation functions
 // These function rely on the data returned from getEstimationDataSelector,
 // which should be appropriately configured.
-IDAFunctionParameterEstimation
-IndirectDataAnalysisMSDFitTab::createParameterEstimation() const {
-  auto estimateMsd = [](::Mantid::API::IFunction_sptr &function,
-                        const DataForParameterEstimation &estimationData) {
+IDAFunctionParameterEstimation IndirectDataAnalysisMSDFitTab::createParameterEstimation() const {
+  auto estimateMsd = [](::Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData) {
     auto y = estimationData.y;
     auto x = estimationData.x;
     if (x.size() != 2 || y.size() != 2) {
@@ -169,8 +150,7 @@ IndirectDataAnalysisMSDFitTab::createParameterEstimation() const {
   IDAFunctionParameterEstimation parameterEstimation;
 
   parameterEstimation.addParameterEstimationFunction(MSDGAUSSFUNC, estimateMsd);
-  parameterEstimation.addParameterEstimationFunction(MSDPETERSFUNC,
-                                                     estimateMsd);
+  parameterEstimation.addParameterEstimationFunction(MSDPETERSFUNC, estimateMsd);
   parameterEstimation.addParameterEstimationFunction(MSDYIFUNC, estimateMsd);
 
   return parameterEstimation;

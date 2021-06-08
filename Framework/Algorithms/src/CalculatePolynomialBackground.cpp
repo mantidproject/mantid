@@ -48,8 +48,7 @@ const static std::string LEVENBERG_MARQUARDT = "Levenberg-Marquardt";
  *  @param wsIndex a workspace index to specify a histogram in ws
  *  @return a ranges-like vector with filtered pairs removed
  */
-std::vector<double> filterRangesOutsideX(const std::vector<double> &ranges,
-                                         const Mantid::API::MatrixWorkspace &ws,
+std::vector<double> filterRangesOutsideX(const std::vector<double> &ranges, const Mantid::API::MatrixWorkspace &ws,
                                          const size_t wsIndex) {
   const auto minX = ws.x(wsIndex).front();
   const auto maxX = ws.x(wsIndex).back();
@@ -72,8 +71,7 @@ std::vector<double> filterRangesOutsideX(const std::vector<double> &ranges,
  *  @param wsIndex a workspace index identifying a histogram
  *  @return a pair of values spanning a range
  */
-std::pair<double, double> totalRange(const std::vector<double> &ranges,
-                                     const Mantid::API::MatrixWorkspace &ws,
+std::pair<double, double> totalRange(const std::vector<double> &ranges, const Mantid::API::MatrixWorkspace &ws,
                                      const size_t wsIndex) {
   const auto minX = ws.x(wsIndex).front();
   const auto maxX = ws.x(wsIndex).back();
@@ -83,8 +81,7 @@ std::pair<double, double> totalRange(const std::vector<double> &ranges,
   const auto minmaxIt = std::minmax_element(ranges.cbegin(), ranges.cend());
   const auto minEdge = *minmaxIt.first;
   const auto maxEdge = *minmaxIt.second;
-  return std::pair<double, double>(std::min(minEdge, minX),
-                                   std::max(maxEdge, maxX));
+  return std::pair<double, double>(std::min(minEdge, minX), std::max(maxEdge, maxX));
 }
 
 /** Merges, sorts and limits ranges within totalRange.
@@ -92,9 +89,7 @@ std::pair<double, double> totalRange(const std::vector<double> &ranges,
  *  @param totalRange a pair of start-end values to limit the output ranges
  *  @return a ranges-like vector of processed ranges
  */
-std::vector<double>
-includedRanges(const std::vector<double> &ranges,
-               const std::pair<double, double> &totalRange) {
+std::vector<double> includedRanges(const std::vector<double> &ranges, const std::pair<double, double> &totalRange) {
   if (ranges.empty()) {
     return {totalRange.first, totalRange.second};
   }
@@ -106,13 +101,11 @@ includedRanges(const std::vector<double> &ranges,
     edges[i].first = ranges[i];
     edges[i].second = i % 2 == 0 ? Edge::start : Edge::end;
   }
-  std::sort(
-      edges.begin(), edges.end(),
-      [](const std::pair<double, Edge> &p1, const std::pair<double, Edge> &p2) {
-        if (p1.first == p2.first)
-          return p1.second < p2.second;
-        return p1.first < p2.first;
-      });
+  std::sort(edges.begin(), edges.end(), [](const std::pair<double, Edge> &p1, const std::pair<double, Edge> &p2) {
+    if (p1.first == p2.first)
+      return p1.second < p2.second;
+    return p1.first < p2.first;
+  });
   // If an 'end' edge is followed by a 'start', we have a new range. Everything
   // else can be merged.
   std::vector<double> mergedRanges;
@@ -144,14 +137,12 @@ includedRanges(const std::vector<double> &ranges,
  *  @param wsIndex a workspace index identifying a histogram in ws
  *  @return a ranges-like vector of processed ranges
  */
-std::vector<double> histogramRanges(const std::vector<double> &ranges,
-                                    const Mantid::API::MatrixWorkspace &ws,
+std::vector<double> histogramRanges(const std::vector<double> &ranges, const Mantid::API::MatrixWorkspace &ws,
                                     const size_t wsIndex) {
   const auto filteredRanges = filterRangesOutsideX(ranges, ws, wsIndex);
   if (!ranges.empty() && filteredRanges.empty()) {
-    throw std::runtime_error(
-        "The given XRanges mismatch with the histogram at workspace index " +
-        std::to_string(wsIndex));
+    throw std::runtime_error("The given XRanges mismatch with the histogram at workspace index " +
+                             std::to_string(wsIndex));
   }
   const auto fullRange = totalRange(filteredRanges, ws, wsIndex);
   return includedRanges(filteredRanges, fullRange);
@@ -179,11 +170,10 @@ std::vector<double> invertRanges(const std::vector<double> &ranges) {
  *  @param minimizer a string representing the minimizer used for the fitting
  *  @return a vector of final fitted parameters
  */
-std::vector<double>
-executeFit(Mantid::API::Algorithm &fit, const std::string &function,
-           Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex,
-           const std::vector<double> &ranges, const std::string &costFunction,
-           const std::string &minimizer) {
+std::vector<double> executeFit(Mantid::API::Algorithm &fit, const std::string &function,
+                               Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex,
+                               const std::vector<double> &ranges, const std::string &costFunction,
+                               const std::string &minimizer) {
   const auto fitRanges = histogramRanges(ranges, *ws, wsIndex);
   const auto excludedRanges = invertRanges(fitRanges);
   fit.setProperty("Function", function);
@@ -196,8 +186,7 @@ executeFit(Mantid::API::Algorithm &fit, const std::string &function,
   fit.setProperty(Prop::COST_FUNCTION, costFunction);
   fit.setProperty("CreateOutput", true);
   fit.executeAsChildAlg();
-  Mantid::API::ITableWorkspace_sptr fitResult =
-      fit.getProperty("OutputParameters");
+  Mantid::API::ITableWorkspace_sptr fitResult = fit.getProperty("OutputParameters");
   std::vector<double> parameters(fitResult->rowCount() - 1);
   for (size_t row = 0; row < parameters.size(); ++row) {
     parameters[row] = fitResult->cell<double>(row, 1);
@@ -210,8 +199,7 @@ executeFit(Mantid::API::Algorithm &fit, const std::string &function,
  *  @param parameters a vector containing the polynomial coefficients
  *  @return a function string
  */
-std::string makeFunctionString(const std::string &name,
-                               const std::vector<double> &parameters) {
+std::string makeFunctionString(const std::string &name, const std::vector<double> &parameters) {
   const auto degree = parameters.size() - 1;
   std::ostringstream s;
   s << "name=" << name;
@@ -251,9 +239,8 @@ std::string makeNameString(const size_t degree) {
  *  @param ws an output workspace
  *  @param wsIndex a workspace index identifying a histogram
  */
-void evaluateInPlace(const std::string &name,
-                     const std::vector<double> &parameters,
-                     Mantid::API::MatrixWorkspace &ws, const size_t wsIndex) {
+void evaluateInPlace(const std::string &name, const std::vector<double> &parameters, Mantid::API::MatrixWorkspace &ws,
+                     const size_t wsIndex) {
   const auto degree = parameters.size() - 1;
   auto bkg = std::dynamic_pointer_cast<Mantid::API::IFunction1D>(
       Mantid::API::FunctionFactory::Instance().createFunction(name));
@@ -280,9 +267,7 @@ DECLARE_ALGORITHM(CalculatePolynomialBackground)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CalculatePolynomialBackground::name() const {
-  return "CalculatePolynomialBackground";
-}
+const std::string CalculatePolynomialBackground::name() const { return "CalculatePolynomialBackground"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CalculatePolynomialBackground::version() const { return 1; }
@@ -304,33 +289,24 @@ void CalculatePolynomialBackground::init() {
   auto increasingAxis = std::make_shared<API::IncreasingAxisValidator>();
   auto nonnegativeInt = std::make_shared<Kernel::BoundedValidator<int>>();
   nonnegativeInt->setLower(0);
-  auto orderedPairs =
-      std::make_shared<Kernel::ArrayOrderedPairsValidator<double>>();
+  auto orderedPairs = std::make_shared<Kernel::ArrayOrderedPairsValidator<double>>();
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                      Prop::INPUT_WS, "", Kernel::Direction::Input, increasingAxis),
+                  "An input workspace.");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::INPUT_WS, "", Kernel::Direction::Input, increasingAxis),
-      "An input workspace.");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::OUTPUT_WS, "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A workspace containing the fitted background.");
-  declareProperty(Prop::POLY_DEGREE, 0, nonnegativeInt,
-                  "Degree of the fitted polynomial.");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                      Prop::XRANGES, std::vector<double>(), orderedPairs),
+  declareProperty(Prop::POLY_DEGREE, 0, nonnegativeInt, "Degree of the fitted polynomial.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(Prop::XRANGES, std::vector<double>(), orderedPairs),
                   "A list of fitting ranges given as pairs of X values.");
-  std::array<std::string, 2> costFuncOpts{
-      {CostFunc::WEIGHTED_LEAST_SQUARES, CostFunc::UNWEIGHTED_LEAST_SQUARES}};
-  declareProperty(
-      Prop::COST_FUNCTION, CostFunc::WEIGHTED_LEAST_SQUARES,
-      std::make_shared<Kernel::ListValidator<std::string>>(costFuncOpts),
-      "The cost function to be passed to the Fit algorithm.");
-  std::array<std::string, 2> minimizerOpts{
-      {Minimizer::LEVENBERG_MARQUARDT_MD, Minimizer::LEVENBERG_MARQUARDT}};
-  declareProperty(
-      Prop::MINIMIZER, Minimizer::LEVENBERG_MARQUARDT_MD,
-      std::make_shared<Kernel::ListValidator<std::string>>(minimizerOpts),
-      "The minimizer to be passed to the Fit algorithm.");
+  std::array<std::string, 2> costFuncOpts{{CostFunc::WEIGHTED_LEAST_SQUARES, CostFunc::UNWEIGHTED_LEAST_SQUARES}};
+  declareProperty(Prop::COST_FUNCTION, CostFunc::WEIGHTED_LEAST_SQUARES,
+                  std::make_shared<Kernel::ListValidator<std::string>>(costFuncOpts),
+                  "The cost function to be passed to the Fit algorithm.");
+  std::array<std::string, 2> minimizerOpts{{Minimizer::LEVENBERG_MARQUARDT_MD, Minimizer::LEVENBERG_MARQUARDT}};
+  declareProperty(Prop::MINIMIZER, Minimizer::LEVENBERG_MARQUARDT_MD,
+                  std::make_shared<Kernel::ListValidator<std::string>>(minimizerOpts),
+                  "The minimizer to be passed to the Fit algorithm.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -339,13 +315,11 @@ void CalculatePolynomialBackground::init() {
 void CalculatePolynomialBackground::exec() {
   API::MatrixWorkspace_sptr inWS = getProperty(Prop::INPUT_WS);
 
-  API::MatrixWorkspace_sptr outWS{
-      DataObjects::create<DataObjects::Workspace2D>(*inWS)};
+  API::MatrixWorkspace_sptr outWS{DataObjects::create<DataObjects::Workspace2D>(*inWS)};
   const std::vector<double> inputRanges = getProperty(Prop::XRANGES);
   const std::string costFunction = getProperty(Prop::COST_FUNCTION);
   const std::string minimizer = getProperty(Prop::MINIMIZER);
-  const auto polyDegree =
-      static_cast<size_t>(static_cast<int>(getProperty(Prop::POLY_DEGREE)));
+  const auto polyDegree = static_cast<size_t>(static_cast<int>(getProperty(Prop::POLY_DEGREE)));
   const std::vector<double> initialParams(polyDegree + 1, 0.1);
   const auto name = makeNameString(polyDegree);
   const auto fitFunction = makeFunctionString(name, initialParams);
@@ -356,8 +330,7 @@ void CalculatePolynomialBackground::exec() {
     PARALLEL_START_INTERUPT_REGION
     const bool logging{false};
     auto fit = createChildAlgorithm("Fit", 0, 0, logging);
-    const auto parameters = executeFit(*fit, fitFunction, inWS, i, inputRanges,
-                                       costFunction, minimizer);
+    const auto parameters = executeFit(*fit, fitFunction, inWS, i, inputRanges, costFunction, minimizer);
     evaluateInPlace(name, parameters, *outWS, i);
     progress.report();
     PARALLEL_END_INTERUPT_REGION

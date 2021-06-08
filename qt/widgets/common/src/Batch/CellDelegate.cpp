@@ -14,20 +14,15 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-CellDelegate::CellDelegate(QObject *parent, QTreeView const &view,
-                           FilteredTreeModel const &filteredModel,
+CellDelegate::CellDelegate(QObject *parent, QTreeView const &view, FilteredTreeModel const &filteredModel,
                            QStandardItemModel const &mainModel)
-    : QStyledItemDelegate(parent), m_view(view), m_filteredModel(filteredModel),
-      m_mainModel(mainModel) {}
+    : QStyledItemDelegate(parent), m_view(view), m_filteredModel(filteredModel), m_mainModel(mainModel) {}
 
-void CellDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
-                         const QModelIndex &index) const {
+void CellDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const {
   QStyledItemDelegate::paint(painter, option, index);
   painter->save();
 
-  auto *item = modelItemFromIndex(
-      m_mainModel,
-      fromMainModel(m_filteredModel.mapToSource(index), m_mainModel));
+  auto *item = modelItemFromIndex(m_mainModel, fromMainModel(m_filteredModel.mapToSource(index), m_mainModel));
   auto borderColor = getBorderColor(*item);
   auto borderThickness = getBorderThickness(*item);
 

@@ -15,10 +15,8 @@ namespace WorkflowAlgorithms {
  */
 class DLLExport MuonGroupCalculator : public IMuonAsymmetryCalculator {
 public:
-  MuonGroupCalculator(const Mantid::API::WorkspaceGroup_sptr &inputWS,
-                      const std::vector<int> &summedPeriods,
-                      const std::vector<int> &subtractedPeriods,
-                      const int groupIndex);
+  MuonGroupCalculator(const Mantid::API::WorkspaceGroup_sptr &inputWS, const std::vector<int> &summedPeriods,
+                      const std::vector<int> &subtractedPeriods, const int groupIndex);
   void setStartEnd(const double start, const double end);
   void setWSName(const std::string &wsName);
 

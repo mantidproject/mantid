@@ -27,14 +27,11 @@ public:
   ~FakeEventDataListener() override;
 
   std::string name() const override { return "FakeEventDataListener"; }
-  bool supportsHistory() const override {
-    return false;
-  } // For the time being at least
+  bool supportsHistory() const override { return false; } // For the time being at least
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(
-      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
+  void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   std::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;
@@ -44,14 +41,11 @@ public:
 private:
   void generateEvents(Poco::Timer &);
 
-  DataObjects::EventWorkspace_sptr
-      m_buffer; ///< Used to buffer events between calls to extractData()
-  std::unique_ptr<Kernel::PseudoRandomNumberGenerator>
-      m_rand; ///< Used in generation of random events
-  Poco::Timer
-      m_timer;    ///< Used to call the event-generating function on a schedule
-  int m_datarate; ///< The data rate to (attempt to) generate in events/sec
-  int m_callbackloop; ///< Number of times to loop within each generateEvents()
+  DataObjects::EventWorkspace_sptr m_buffer;                   ///< Used to buffer events between calls to extractData()
+  std::unique_ptr<Kernel::PseudoRandomNumberGenerator> m_rand; ///< Used in generation of random events
+  Poco::Timer m_timer; ///< Used to call the event-generating function on a schedule
+  int m_datarate;      ///< The data rate to (attempt to) generate in events/sec
+  int m_callbackloop;  ///< Number of times to loop within each generateEvents()
   /// call
   double m_endRunEvery; ///< Make a new run every N seconds
   int m_notyettimes;    ///< Number of calls to extractData for which to throw a

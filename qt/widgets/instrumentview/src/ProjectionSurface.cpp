@@ -670,6 +670,10 @@ InputController *ProjectionSurface::getController() const {
   return controller;
 }
 
+void ProjectionSurface::freezeRotation(bool freeze) {
+  getController()->freezeRotation(freeze);
+}
+
 // --- Shape2D manipulation --- //
 
 void ProjectionSurface::startCreatingShape2D(const QString &type,

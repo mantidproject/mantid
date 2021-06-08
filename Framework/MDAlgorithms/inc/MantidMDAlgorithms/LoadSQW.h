@@ -45,19 +45,18 @@ struct dataPositions {
   std::streamoff s_start;
   std::streamoff err_start;
   std::streamoff n_cell_pix_start; // where data.npix  array starts
-  std::streamoff min_max_start; // data range positions (uRange -- this is the
-                                // data which describe the extents of the
-                                // MDPixesl (events))
-  std::streamoff pix_start;     //< event data positions
-  size_t mdImageSize; //< the variable describes the size of Horace MD image
-                      //(number of pixels in Horace DND object or number of bins
+  std::streamoff min_max_start;    // data range positions (uRange -- this is the
+                                   // data which describe the extents of the
+                                   // MDPixesl (events))
+  std::streamoff pix_start;        //< event data positions
+  size_t mdImageSize;              //< the variable describes the size of Horace MD image
+                                   //(number of pixels in Horace DND object or number of bins
   // in Mantid Histo workspace)
 
   /// Default Constructor
   dataPositions()
-      : if_sqw_start(18), n_dims_start(22), sqw_header_start(26),
-        component_headers_starts(), detectors_start(0), data_start(0),
-        geom_start(0), npax_start(0), s_start(0),
+      : if_sqw_start(18), n_dims_start(22), sqw_header_start(26), component_headers_starts(), detectors_start(0),
+        data_start(0), geom_start(0), npax_start(0), s_start(0),
         // the following values have to be identified from the file
         // itself
         err_start(0), n_cell_pix_start(0), min_max_start(0), pix_start(0),
@@ -66,22 +65,17 @@ struct dataPositions {
 
   // the helper methods
   /// Block 1:  Main_header: Parse SQW main data header
-  void parse_sqw_main_header(
-      std::ifstream &dataStream); // Legacy - candidate for removal
+  void parse_sqw_main_header(std::ifstream &dataStream); // Legacy - candidate for removal
   /// Block 2: Header: Parse header of single SPE file
-  std::streamoff parse_component_header(
-      std::ifstream &dataStream,
-      std::streamoff start_location); // Legacy -candidate for removal
+  std::streamoff parse_component_header(std::ifstream &dataStream,
+                                        std::streamoff start_location); // Legacy -candidate for removal
   /// Block 3: Detpar: parse positions of the contributed detectors. These
   /// detectors have to be the same for all contributing spe files
-  std::streamoff parse_sqw_detpar(
-      std::ifstream &dataStream,
-      std::streamoff start_location); // Legacy - candidate for removal
+  std::streamoff parse_sqw_detpar(std::ifstream &dataStream,
+                                  std::streamoff start_location); // Legacy - candidate for removal
   /// Block 4: Data: parse positions of the data fields
-  void
-  parse_data_locations(std::ifstream &dataStream, std::streamoff data_start,
-                       std::vector<size_t> &nBins,
-                       uint64_t &nDataPoints); // Legacy - candidate for removal
+  void parse_data_locations(std::ifstream &dataStream, std::streamoff data_start, std::vector<size_t> &nBins,
+                            uint64_t &nDataPoints); // Legacy - candidate for removal
 };
 } // namespace LoadSQWHelper
 
@@ -101,9 +95,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\SQW;MDAlgorithms\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\SQW;MDAlgorithms\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
@@ -114,31 +106,25 @@ private:
 
 protected: // for testing
   /// Read events onto the workspace.
-  virtual void readEvents(
-      Mantid::DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4> *ws);
+  virtual void readEvents(Mantid::DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4> *ws);
 
   /// Read DND dimensions.
-  void readDNDDimensions(
-      std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVectorOut,
-      bool arrangeByMDImage = true);
+  void readDNDDimensions(std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVectorOut,
+                         bool arrangeByMDImage = true);
   /// Read SQW dimensions
-  void readSQWDimensions(
-      std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVectorOut);
+  void readSQWDimensions(std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVectorOut);
 
   /// Extract lattice information
-  virtual void addLattice(
-      Mantid::DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4> *ws);
+  virtual void addLattice(Mantid::DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4> *ws);
 
   /// Parse metadata from file.
   void parseMetadata(const std::string &fileName); // New controlling function
                                                    // over legacy ones.
   /// build an initial range of 4 dimensions
-  void buildMDDimsBase(
-      std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector);
+  void buildMDDimsBase(std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector);
   /// add range of dimensions to the workspace;
-  void addDimsToWs(
-      Mantid::DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4> *ws,
-      std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector);
+  void addDimsToWs(Mantid::DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4> *ws,
+                   std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector);
 
   /// read real box sizes for all Horace Boxes;
   void readBoxSizes();

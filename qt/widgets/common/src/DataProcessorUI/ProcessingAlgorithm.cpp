@@ -20,13 +20,11 @@ namespace DataProcessor {
  * @param version : The version of the algorithm to use. Defaults to -1 to
  * indicate the most recent version.
  */
-ProcessingAlgorithm::ProcessingAlgorithm(
-    const QString &name, std::vector<QString> prefix,
-    std::size_t postprocessedOutputPrefixIndex,
-    const std::set<QString> &blacklist, const int version)
+ProcessingAlgorithm::ProcessingAlgorithm(const QString &name, std::vector<QString> prefix,
+                                         std::size_t postprocessedOutputPrefixIndex, const std::set<QString> &blacklist,
+                                         const int version)
     : ProcessingAlgorithmBase(std::move(name), std::move(blacklist), version),
-      m_postprocessedOutputPrefixIndex(postprocessedOutputPrefixIndex),
-      m_prefix(std::move(prefix)) {
+      m_postprocessedOutputPrefixIndex(postprocessedOutputPrefixIndex), m_prefix(std::move(prefix)) {
 
   ensureValidPostprocessedOutput();
 
@@ -45,10 +43,9 @@ ProcessingAlgorithm::ProcessingAlgorithm(
   // The number of prefixes given should match the number of output
   // workspaces
   if (m_outputProperties.size() != m_prefix.size()) {
-    throw std::invalid_argument(
-        "Invalid ProcessingAlgorithm. The number of prefixes "
-        "given must "
-        "match the number of output ws properties defined for this algorithm");
+    throw std::invalid_argument("Invalid ProcessingAlgorithm. The number of prefixes "
+                                "given must "
+                                "match the number of output ws properties defined for this algorithm");
   }
 }
 
@@ -62,48 +59,37 @@ ProcessingAlgorithm::ProcessingAlgorithm(
  * @param version : The version of the algorithm to use. Defaults to -1 to
  * indicate the most recent version.
  */
-ProcessingAlgorithm::ProcessingAlgorithm(
-    const QString &name, QString const &prefix,
-    std::size_t postprocessedOutputPrefixIndex, QString const &blacklist,
-    const int version)
-    : ProcessingAlgorithm(std::move(name), convertStringToVector(prefix),
-                          postprocessedOutputPrefixIndex,
+ProcessingAlgorithm::ProcessingAlgorithm(const QString &name, QString const &prefix,
+                                         std::size_t postprocessedOutputPrefixIndex, QString const &blacklist,
+                                         const int version)
+    : ProcessingAlgorithm(std::move(name), convertStringToVector(prefix), postprocessedOutputPrefixIndex,
                           convertStringToSet(blacklist), version) {}
 
 /**
  * Constructor
  */
-ProcessingAlgorithm::ProcessingAlgorithm()
-    : m_prefix(), m_inputProperties(), m_outputProperties() {}
+ProcessingAlgorithm::ProcessingAlgorithm() : m_prefix(), m_inputProperties(), m_outputProperties() {}
 
 // Destructor
 ProcessingAlgorithm::~ProcessingAlgorithm() {}
 
 // Returns the number of output properties
-size_t ProcessingAlgorithm::numberOfOutputProperties() const {
-  return m_outputProperties.size();
-}
+size_t ProcessingAlgorithm::numberOfOutputProperties() const { return m_outputProperties.size(); }
 
 /** Returns the prefix that will be added to the name of this output ws property
  *@param index : The property index
  */
-QString ProcessingAlgorithm::prefix(size_t index) const {
-  return m_prefix[index];
-}
+QString ProcessingAlgorithm::prefix(size_t index) const { return m_prefix[index]; }
 
 /** Returns the name of an input property specified by its index
  *@param index : The property index
  */
-QString ProcessingAlgorithm::inputPropertyName(size_t index) const {
-  return m_inputProperties[index];
-}
+QString ProcessingAlgorithm::inputPropertyName(size_t index) const { return m_inputProperties[index]; }
 
 /** Returns the name of an output ws property specified by its index
  *@param index : The property index
  */
-QString ProcessingAlgorithm::outputPropertyName(size_t index) const {
-  return m_outputProperties[index];
-}
+QString ProcessingAlgorithm::outputPropertyName(size_t index) const { return m_outputProperties[index]; }
 
 /** Returns the prefix that will be added to the default output ws property
  */
@@ -113,12 +99,9 @@ QString ProcessingAlgorithm::defaultOutputPrefix() const { return m_prefix[0]; }
  * property declared by the algorithm. Algorithm properties are
  * extracted in order, so this is the first in our list.
  */
-QString ProcessingAlgorithm::defaultOutputPropertyName() const {
-  return m_outputProperties[0];
-}
+QString ProcessingAlgorithm::defaultOutputPropertyName() const { return m_outputProperties[0]; }
 
-bool ProcessingAlgorithm::isValidOutputPrefixIndex(
-    std::size_t outputPrefixIndex) const {
+bool ProcessingAlgorithm::isValidOutputPrefixIndex(std::size_t outputPrefixIndex) const {
   return outputPrefixIndex < m_prefix.size();
 }
 
@@ -128,9 +111,7 @@ void ProcessingAlgorithm::ensureValidPostprocessedOutput() const {
                              "into the prefix array.");
 }
 
-QString ProcessingAlgorithm::postprocessedOutputPrefix() const {
-  return m_prefix[m_postprocessedOutputPrefixIndex];
-}
+QString ProcessingAlgorithm::postprocessedOutputPrefix() const { return m_prefix[m_postprocessedOutputPrefixIndex]; }
 
 /** Returns the postprocessed output ws property. This is property
  * name specified on construction.
@@ -143,21 +124,15 @@ QString ProcessingAlgorithm::postprocessedOutputPropertyName() const {
  * property declared by the algorithm. Algorithm properties are
  * extracted in order, so this is the first in our list.
  */
-QString ProcessingAlgorithm::defaultInputPropertyName() const {
-  return m_inputProperties[0];
-}
+QString ProcessingAlgorithm::defaultInputPropertyName() const { return m_inputProperties[0]; }
 
 /** Returns the list of input property names
  */
-std::vector<QString> ProcessingAlgorithm::inputProperties() const {
-  return m_inputProperties;
-}
+std::vector<QString> ProcessingAlgorithm::inputProperties() const { return m_inputProperties; }
 
 /** Returns the list of output property names
  */
-std::vector<QString> ProcessingAlgorithm::outputProperties() const {
-  return m_outputProperties;
-}
+std::vector<QString> ProcessingAlgorithm::outputProperties() const { return m_outputProperties; }
 
 /** Returns the list of prefixes associated with the output properties
  */

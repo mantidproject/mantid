@@ -27,8 +27,7 @@ namespace Parallel {
 enum class StorageMode { Cloned, Distributed, MasterOnly };
 
 MANTID_PARALLEL_DLL std::string toString(StorageMode mode);
-MANTID_PARALLEL_DLL std::string
-toString(const std::map<std::string, StorageMode> &map);
+MANTID_PARALLEL_DLL std::string toString(const std::map<std::string, StorageMode> &map);
 MANTID_PARALLEL_DLL StorageMode fromString(const std::string &mode);
 
 } // namespace Parallel

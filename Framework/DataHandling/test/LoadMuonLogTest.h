@@ -52,14 +52,11 @@ public:
     loaderNexusFile.setPropertyValue("Filename", inputFile);
 
     outputSpace = "LoadMuonLogTest-nexusdatafile";
-    TS_ASSERT_THROWS(loaderNexusFile.setPropertyValue("Workspace", outputSpace),
-                     const std::invalid_argument &)
+    TS_ASSERT_THROWS(loaderNexusFile.setPropertyValue("Workspace", outputSpace), const std::invalid_argument &)
     // Create an empty workspace and put it in the AnalysisDataService
-    MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().add(outputSpace, ws));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));
 
     loaderNexusFile.setChild(true);
     loaderNexusFile.execute();
@@ -68,28 +65,21 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
 
     // std::shared_ptr<Sample> sample = output->getSample();
 
     // obtain the expected log data which was read from the Nexus file (NXlog)
 
-    Property *l_property =
-        output->run().getLogData(std::string("BEAMLOG_CURRENT"));
-    TimeSeriesProperty<double> *l_timeSeriesDouble1 =
-        dynamic_cast<TimeSeriesProperty<double> *>(l_property);
+    Property *l_property = output->run().getLogData(std::string("BEAMLOG_CURRENT"));
+    TimeSeriesProperty<double> *l_timeSeriesDouble1 = dynamic_cast<TimeSeriesProperty<double> *>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble1->value();
-    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 27),
-                     "2006-Nov-21 07:03:08  182.8");
+    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 27), "2006-Nov-21 07:03:08  182.8");
 
     l_property = output->run().getLogData(std::string("BEAMLOG_FREQ"));
-    TimeSeriesProperty<double> *l_timeSeriesDouble =
-        dynamic_cast<TimeSeriesProperty<double> *>(l_property);
+    TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 24),
-                     "2006-Nov-21 07:03:08  50");
+    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 24), "2006-Nov-21 07:03:08  50");
   }
 
 private:

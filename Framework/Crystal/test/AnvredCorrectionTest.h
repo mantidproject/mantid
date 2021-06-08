@@ -35,12 +35,10 @@ namespace {
  *
  * @return EventWorkspace_sptr
  */
-EventWorkspace_sptr createDiffractionEventWorkspace(int numBanks = 1,
-                                                    int numPixels = 1) {
+EventWorkspace_sptr createDiffractionEventWorkspace(int numBanks = 1, int numPixels = 1) {
   // setup the test workspace
   EventWorkspace_sptr retVal =
-      WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-          numBanks, numPixels, false);
+      WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(numBanks, numPixels, false);
 
   MoveInstrumentComponent mover;
   mover.initialize();
@@ -69,8 +67,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numBanks = 1,
   return retVal;
 }
 
-void do_test_events(const MatrixWorkspace_sptr &workspace, bool ev,
-                    bool performance = false) {
+void do_test_events(const MatrixWorkspace_sptr &workspace, bool ev, bool performance = false) {
 
   workspace->getAxis(0)->setUnit("Wavelength");
 
@@ -90,9 +87,7 @@ void do_test_events(const MatrixWorkspace_sptr &workspace, bool ev,
 
   if (!performance) {
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "TOPAZ"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TOPAZ"));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -107,9 +102,7 @@ void do_test_events(const MatrixWorkspace_sptr &workspace, bool ev,
 
 class AnvredCorrectionTest : public CxxTest::TestSuite {
 public:
-  static AnvredCorrectionTest *createSuite() {
-    return new AnvredCorrectionTest();
-  }
+  static AnvredCorrectionTest *createSuite() { return new AnvredCorrectionTest(); }
   static void destroySuite(AnvredCorrectionTest *suite) { delete suite; }
 
   void test_Init() {
@@ -126,18 +119,32 @@ public:
 
   void test_NoEvents() { do_test_events(workspace, false); }
 
+  void test_extrapolation_large_muR() {
+    // repeat test with large radius and absorption to get muR > 2.5 (i.e. do extrapolation)
+    // previously this threw an error
+    workspace->getAxis(0)->setUnit("Wavelength");
+    AnvredCorrection alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "TOPAZ");
+    alg.setProperty("PreserveEvents", false);
+    alg.setProperty("OnlySphericalAbsorption", true);
+    alg.setProperty("LinearScatteringCoef", 0.0);
+    alg.setProperty("LinearAbsorptionCoef", 1.0); // large
+    alg.setProperty("Radius", 0.1);               // large
+    TS_ASSERT_THROWS_NOTHING(alg.execute();)
+    TS_ASSERT(alg.isExecuted())
+  }
+
 private:
   EventWorkspace_sptr workspace;
 };
 
 class AnvredCorrectionTestPerformance : public CxxTest::TestSuite {
 public:
-  static AnvredCorrectionTestPerformance *createSuite() {
-    return new AnvredCorrectionTestPerformance();
-  }
-  static void destroySuite(AnvredCorrectionTestPerformance *suite) {
-    delete suite;
-  }
+  static AnvredCorrectionTestPerformance *createSuite() { return new AnvredCorrectionTestPerformance(); }
+  static void destroySuite(AnvredCorrectionTestPerformance *suite) { delete suite; }
 
   // executed before each test
   void setUp() override { workspace = createDiffractionEventWorkspace(100, 5); }
@@ -147,9 +154,7 @@ public:
 
   void testEventsPerformance() { do_test_events(workspace, true, performance); }
 
-  void testNoEventsPerformace() {
-    do_test_events(workspace, false, performance);
-  }
+  void testNoEventsPerformace() { do_test_events(workspace, false, performance); }
 
 private:
   const bool performance = true;

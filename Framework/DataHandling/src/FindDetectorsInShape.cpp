@@ -26,18 +26,14 @@ using namespace API;
 using namespace Geometry;
 
 void FindDetectorsInShape::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "Workspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty("ShapeXML", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("ShapeXML", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The XML definition of the shape");
-  declareProperty(
-      "IncludeMonitors", false,
-      "Whether monitors should be included if they are contained in the\n"
-      "shape (default false)");
-  declareProperty("DetectorList", std::vector<int>(),
-                  "The list of detector ids included within the shape",
+  declareProperty("IncludeMonitors", false,
+                  "Whether monitors should be included if they are contained in the\n"
+                  "shape (default false)");
+  declareProperty("DetectorList", std::vector<int>(), "The list of detector ids included within the shape",
                   Direction::Output);
 }
 
@@ -73,8 +69,7 @@ void FindDetectorsInShape::exec() {
     }
     iprogress++;
     if (iprogress % iprogress_step == 0) {
-      progress(static_cast<double>(iprogress) /
-               static_cast<double>(objCmptCount));
+      progress(static_cast<double>(iprogress) / static_cast<double>(objCmptCount));
       interruption_point();
     }
   }

@@ -10,12 +10,12 @@
 Description
 -----------
 
-:ref:`IntegratePeaksMDHKL <algm-IntegratePeaksMDHKL>` provides integration of a 
-:ref:`MDHistoWorkspace <MDHistoWorkspace>` or :ref:`MDEventWorkspace <MDWorkspace>` in 3-dimensions. 
-The units of the workspace must be HKL.  The  main usage will be for data normalized by 
+:ref:`IntegratePeaksMDHKL <algm-IntegratePeaksMDHKL>` provides integration of a
+:ref:`MDHistoWorkspace <MDHistoWorkspace>` or :ref:`MDEventWorkspace <MDWorkspace>` in 3-dimensions.
+The units of the workspace must be HKL.  The  main usage will be for data normalized by
 :ref:`MDNormSCD <algm-MDNormSCD>`.
-A 3D box is created for each peak and the background and peak data are separated.  The intensity and sigma of the 
-intensity is found from the grid inside the peak and the background is subtracted.  The boxes are created and integrated 
+A 3D box is created for each peak and the background and peak data are separated.  The intensity and sigma of the
+intensity is found from the grid inside the peak and the background is subtracted.  The boxes are created and integrated
 in parallel and less memory is required than binning all HKL at once.
 
 :math:`I_{corr} = I_{peak} - pts_{peak}/pts_{bg} * I_{bg}`
@@ -24,16 +24,16 @@ with the errors summed in quadrature:
 
 :math:`\sigma_{I,corr}^2 = \sigma_{I,peak}^2 + (pts_{peak}/pts_{bg})^2 * \sigma_{I,bg}^2`
 
-Using the DeltaHKL parameter, the problem of nearly peaks or regions of diffuse scattering can be avoided.  Also for 
+Using the DeltaHKL parameter, the problem of nearly peaks or regions of diffuse scattering can be avoided.  Also for
 normalized data, the unmeasured data points are excluded from the background. See white regions in last figure.
 
 .. figure:: /images/peak3d.png
    :alt: peak3d.png
    :width: 400px
    :align: center
-   
+
    Peak Integration Input. 3D Box.
-   
+
 .. figure:: /images/IntegratePeaksMDHKLbox.png
    :alt: IntegratePeaksMDHKLbox.png
    :width: 400px
@@ -52,9 +52,9 @@ normalized data, the unmeasured data points are excluded from the background. Se
    :alt: IntegratePeaksMDHKLbkg.png
    :width: 400px
    :align: center
-   
+
    Integration slice of background grid points.
-   
+
 
 Usage
 -----
@@ -93,12 +93,12 @@ Output:
 
 .. testoutput:: IntegratePeaksMDHKLExample
 
-   99913.3212993 316.123352485 
-   99913.3212993 316.123352485 
-   99913.3212993 316.123352485 
-   99945.2374619 316.157736186 
-   99951.6716018 316.164910575 
-   99926.3456269 316.133414893 
+   99913.3212993 316.123352485
+   99913.3212993 316.123352485
+   99913.3212993 316.123352485
+   99945.2374619 316.157736186
+   99951.6716018 316.164910575
+   99926.3456269 316.133414893
 
 .. categories::
 

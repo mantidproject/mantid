@@ -54,13 +54,9 @@ public:
   const std::string name() const override { return "GetDetOffsetsMultiPeaks"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"GetDetectorOffsets"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"GetDetectorOffsets"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Diffraction\\Calibration";
-  }
+  const std::string category() const override { return "Diffraction\\Calibration"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Creates an OffsetsWorkspace containing offsets for each detector. "
@@ -80,46 +76,33 @@ private:
   /// Main function to calculate all detectors' offsets
   void calculateDetectorsOffsets();
 
-  void importFitWindowTableWorkspace(
-      const DataObjects::TableWorkspace_sptr &windowtablews);
+  void importFitWindowTableWorkspace(const DataObjects::TableWorkspace_sptr &windowtablews);
 
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  int fitSpectra(const int64_t wi, const API::MatrixWorkspace_sptr &inputW,
-                 const std::vector<double> &peakPositions,
-                 const std::vector<double> &fitWindows, size_t &nparams,
-                 double &minD, double &maxD, std::vector<double> &peakPosToFit,
-                 std::vector<double> &peakPosFitted, std::vector<double> &chisq,
-                 std::vector<double> &peakHeights, int &i_highestpeak,
-                 double &resolution, double &dev_resolution);
+  int fitSpectra(const int64_t wi, const API::MatrixWorkspace_sptr &inputW, const std::vector<double> &peakPositions,
+                 const std::vector<double> &fitWindows, size_t &nparams, double &minD, double &maxD,
+                 std::vector<double> &peakPosToFit, std::vector<double> &peakPosFitted, std::vector<double> &chisq,
+                 std::vector<double> &peakHeights, int &i_highestpeak, double &resolution, double &dev_resolution);
 
   /// Add peak fitting and offset calculation information to information table
   /// workspaces per spectrum
-  void addInfoToReportWS(int wi, const FitPeakOffsetResult &offsetresult,
-                         const std::vector<double> &tofitpeakpositions,
+  void addInfoToReportWS(int wi, const FitPeakOffsetResult &offsetresult, const std::vector<double> &tofitpeakpositions,
                          const std::vector<double> &fittedpeakpositions);
 
   /// Generate a list of peaks to calculate detectors' offset
-  void generatePeaksList(const API::ITableWorkspace_sptr &peakslist, int wi,
-                         const std::vector<double> &peakPositionRef,
-                         std::vector<double> &peakPosToFit,
-                         std::vector<double> &peakPosFitted,
-                         std::vector<double> &peakHeightFitted,
-                         std::vector<double> &chisq, bool useFitWindows,
-                         const std::vector<double> &fitWindowsToUse,
-                         const double minD, const double maxD,
+  void generatePeaksList(const API::ITableWorkspace_sptr &peakslist, int wi, const std::vector<double> &peakPositionRef,
+                         std::vector<double> &peakPosToFit, std::vector<double> &peakPosFitted,
+                         std::vector<double> &peakHeightFitted, std::vector<double> &chisq, bool useFitWindows,
+                         const std::vector<double> &fitWindowsToUse, const double minD, const double maxD,
                          double &deltaDovD, double &dev_deltaDovD);
 
-  FitPeakOffsetResult
-  calculatePeakOffset(const int wi, std::vector<double> &vec_peakPosFitted,
-                      std::vector<double> &vec_peakPosRef);
+  FitPeakOffsetResult calculatePeakOffset(const int wi, std::vector<double> &vec_peakPosFitted,
+                                          std::vector<double> &vec_peakPosRef);
 
   /// Calculate a spectrum's offset by optimizing offset
-  void fitPeaksOffset(const size_t inpnparams, const double minD,
-                      const double maxD,
-                      const std::vector<double> &vec_peakPosRef,
-                      const std::vector<double> &vec_peakPosFitted,
-                      const std::vector<double> &vec_peakHeights,
-                      FitPeakOffsetResult &fitresult);
+  void fitPeaksOffset(const size_t inpnparams, const double minD, const double maxD,
+                      const std::vector<double> &vec_peakPosRef, const std::vector<double> &vec_peakPosFitted,
+                      const std::vector<double> &vec_peakHeights, FitPeakOffsetResult &fitresult);
 
   /// Make a summary on all fit
   void makeFitSummary();

@@ -44,35 +44,27 @@ public:
   void testInit() { TS_ASSERT(pAlg->isInitialized()) }
 
   void testExecThrow() {
-    Mantid::API::MatrixWorkspace_sptr ws2D =
-        WorkspaceCreationHelper::createGroupedWorkspace2DWithRingsAndBoxes();
+    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::createGroupedWorkspace2DWithRingsAndBoxes();
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
     TSM_ASSERT_THROWS(" the workspace X axis does not have units ",
-                      pAlg->setPropertyValue("InputWorkspace", ws2D->getName()),
-                      const std::invalid_argument &);
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+                      pAlg->setPropertyValue("InputWorkspace", ws2D->getName()), const std::invalid_argument &);
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
   }
 
   /** Calculate min-max value defaults*/
-  Mantid::API::IAlgorithm_sptr
-  calcMinMaxValDefaults(const std::string &QMode, const std::string &QFrame,
-                        const std::string &OtherProperties = std::string("")) {
+  Mantid::API::IAlgorithm_sptr calcMinMaxValDefaults(const std::string &QMode, const std::string &QFrame,
+                                                     const std::string &OtherProperties = std::string("")) {
 
-    auto childAlg =
-        AlgorithmManager::Instance().create("ConvertToMDMinMaxLocal");
+    auto childAlg = AlgorithmManager::Instance().create("ConvertToMDMinMaxLocal");
     if (!childAlg) {
-      TSM_ASSERT("Can not create child ChildAlgorithm to found min/max values",
-                 false);
+      TSM_ASSERT("Can not create child ChildAlgorithm to found min/max values", false);
       return nullptr;
     }
     childAlg->initialize();
     if (!childAlg->isInitialized()) {
-      TSM_ASSERT(
-          "Can not initialize child ChildAlgorithm to found min/max values",
-          false);
+      TSM_ASSERT("Can not initialize child ChildAlgorithm to found min/max values", false);
       return nullptr;
     }
     childAlg->setPropertyValue("InputWorkspace", "testWSProcessed");
@@ -83,16 +75,15 @@ public:
 
     childAlg->execute();
     if (!childAlg->isExecuted()) {
-      TSM_ASSERT("Can not execute child ChildAlgorithm to found min/max values",
-                 false);
+      TSM_ASSERT("Can not execute child ChildAlgorithm to found min/max values", false);
       return nullptr;
     }
     return childAlg;
   }
 
   void testExecRunsOnNewWorkspaceNoLimits() {
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
     // add workspace energy
     ws2D->mutableRun().addProperty("Ei", 12., "meV", true);
 
@@ -100,20 +91,15 @@ public:
     // clear stuff from analysis data service for test to work in specified way
     AnalysisDataService::Instance().remove("EnergyTransfer4DWS");
 
-    TSM_ASSERT_THROWS_NOTHING(
-        "the inital is not in the units of energy transfer",
-        pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",
+                              pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
 
     pAlg->execute();
     if (!pAlg->isExecuted()) {
-      TSM_ASSERT(
-          "have not executed convertToMD without min-max limits specied ",
-          false);
+      TSM_ASSERT("have not executed convertToMD without min-max limits specied ", false);
       return;
     }
 
@@ -123,8 +109,7 @@ public:
     // get the results
     std::vector<double> minVal = childAlg->getProperty("MinValues");
     std::vector<double> maxVal = childAlg->getProperty("MaxValues");
-    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(
-        "EnergyTransfer4DWS");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("EnergyTransfer4DWS");
 
     size_t NDims = outWS->getNumDims();
     for (size_t i = 0; i < NDims; i++) {
@@ -135,8 +120,8 @@ public:
   }
 
   void testExecRunsOnNewWorkspaceNoLimits5D() {
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
     // add workspace energy
     ws2D->mutableRun().addProperty("Ei", 12., "meV", true);
 
@@ -144,21 +129,16 @@ public:
     // clear stuff from analysis data service for test to work in specified way
     AnalysisDataService::Instance().remove("EnergyTransfer4DWS");
 
-    TSM_ASSERT_THROWS_NOTHING(
-        "the inital is not in the units of energy transfer",
-        pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer5DWS"));
+    TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",
+                              pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer5DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OtherDimensions", "Ei"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
 
     pAlg->execute();
     if (!pAlg->isExecuted()) {
-      TSM_ASSERT(
-          "have not executed convertToMD without min-max limits specied ",
-          false);
+      TSM_ASSERT("have not executed convertToMD without min-max limits specied ", false);
       return;
     }
 
@@ -168,8 +148,7 @@ public:
     // get the results
     std::vector<double> minVal = childAlg->getProperty("MinValues");
     std::vector<double> maxVal = childAlg->getProperty("MaxValues");
-    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(
-        "EnergyTransfer5DWS");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("EnergyTransfer5DWS");
 
     size_t NDims = outWS->getNumDims();
     for (size_t i = 0; i < NDims - 1; i++) {
@@ -184,8 +163,8 @@ public:
   }
 
   void testExecWorksAutoLimitsOnNewWorkspaceNoMinMaxLimits() {
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
     // add workspace energy
     ws2D->mutableRun().addProperty("Ei", 12., "meV", true);
 
@@ -194,22 +173,18 @@ public:
     AnalysisDataService::Instance().remove("EnergyTransfer4DWS");
 
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OtherDimensions", ""));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
 
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxValues", ""));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinValues", ""));
 
     //  pAlg->setRethrows(true);
     pAlg->execute();
     if (!pAlg->isExecuted()) {
-      TSM_ASSERT("have not executed convertToMD with only min limits specied ",
-                 false);
+      TSM_ASSERT("have not executed convertToMD with only min limits specied ", false);
       return;
     }
 
@@ -221,8 +196,7 @@ public:
     std::vector<double> minVal = childAlg->getProperty("MinValues");
     std::vector<double> maxVal = childAlg->getProperty("MaxValues");
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(
-        "EnergyTransfer4DWS");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("EnergyTransfer4DWS");
 
     size_t NDims = outWS->getNumDims();
     for (size_t i = 0; i < NDims; i++) {
@@ -234,25 +208,20 @@ public:
   void testExecFine() {
     // create model processed workpsace with 10x10 cylindrical detectors, 10
     // energy levels and oriented lattice
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
     // add workspace energy
     ws2D->mutableRun().addProperty("Ei", 12., "meV", true);
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
 
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("MaxValues", " 50., 50., 50, 20"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxValues", " 50., 50., 50, 20"));
 
     pAlg->execute();
     TSM_ASSERT("Should be successful ", pAlg->isExecuted());
@@ -260,8 +229,8 @@ public:
   void testExecAndAdd() {
     // create model processed workpsace with 10x10 cylindrical detectors, 10
     // energy levels and oriented lattice
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
 
     // rotate the crystal by twenty degrees back;
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 20);
@@ -272,21 +241,15 @@ public:
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
 
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("MaxValues", " 50., 50., 50, 20"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxValues", " 50., 50., 50, 20"));
 
     pAlg->execute();
-    TSM_ASSERT("Should succseed as adding should work fine ",
-               pAlg->isExecuted());
+    TSM_ASSERT("Should succseed as adding should work fine ", pAlg->isExecuted());
   }
 
   // check the results;
@@ -298,8 +261,7 @@ public:
     azim[2] = 1;
 
     Mantid::API::MatrixWorkspace_sptr ws2D =
-        WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azim, 3,
-                                                            -1, 2, 10);
+        WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azim, 3, -1, 2, 10);
 
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 0); // gl
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(1, 0);
@@ -307,34 +269,26 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TSM_ASSERT_THROWS_NOTHING(
-        "the inital is not in the units of energy transfer",
-        pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("MinValues", "-10.,-10.,-10,-2"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("MaxValues", " 10., 10., 10, 8"))
+    TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",
+                              pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinValues", "-10.,-10.,-10,-2"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxValues", " 10., 10., 10, 8"))
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("PreprocDetectorsWS", ""));
 
     pAlg->execute();
     TSM_ASSERT("Should be successful ", pAlg->isExecuted());
 
-    Mantid::API::Workspace_sptr wsOut =
-        AnalysisDataService::Instance().retrieve("EnergyTransfer4DWS");
-    TSM_ASSERT(
-        "Can not retrieve resulting workspace from the analysis data service ",
-        wsOut);
+    Mantid::API::Workspace_sptr wsOut = AnalysisDataService::Instance().retrieve("EnergyTransfer4DWS");
+    TSM_ASSERT("Can not retrieve resulting workspace from the analysis data service ", wsOut);
   }
 
   void testWithExistingLatticeTrowsLowEnergy() {
     // create model processed workpsace with 10x10 cylindrical detectors, 10
     // energy levels and oriented lattice
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100, 10, true);
     // add workspace energy
     ws2D->mutableRun().addProperty("Ei", 2., "meV", true);
 
@@ -344,19 +298,13 @@ public:
     alg->initialize();
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("QDimensions", "Q3D"));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("dEAnalysisMode", "Direct"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("InputWorkspace", ws2D->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("MaxValues", " 50., 50.,-50,10"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("MaxValues", " 50., 50.,-50,10"));
 
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
-    TSM_ASSERT(
-        "Should be not-successful as input energy was lower then obtained",
-        !alg->isExecuted());
+    TSM_ASSERT("Should be not-successful as input energy was lower then obtained", !alg->isExecuted());
   }
 
   ConvertToQ3DdETest() {

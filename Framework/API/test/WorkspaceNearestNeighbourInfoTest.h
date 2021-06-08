@@ -19,25 +19,18 @@ class WorkspaceNearestNeighbourInfoTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static WorkspaceNearestNeighbourInfoTest *createSuite() {
-    return new WorkspaceNearestNeighbourInfoTest();
-  }
-  static void destroySuite(WorkspaceNearestNeighbourInfoTest *suite) {
-    delete suite;
-  }
+  static WorkspaceNearestNeighbourInfoTest *createSuite() { return new WorkspaceNearestNeighbourInfoTest(); }
+  static void destroySuite(WorkspaceNearestNeighbourInfoTest *suite) { delete suite; }
 
   WorkspaceNearestNeighbourInfoTest() {
     workspace.initialize(100, 1, 1);
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(workspace, false,
-                                                           false, "");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(workspace, false, false, "");
     workspace.rebuildSpectraMapping();
     workspace.getSpectrum(0).clearData();
     workspace.mutableSpectrumInfo().setMasked(0, true);
   }
 
-  void test_construct() {
-    TS_ASSERT_THROWS_NOTHING(WorkspaceNearestNeighbourInfo(workspace, false));
-  }
+  void test_construct() { TS_ASSERT_THROWS_NOTHING(WorkspaceNearestNeighbourInfo(workspace, false)); }
 
   void test_neighbourCount() {
     // No detailed test, just checking if parameters are passed on to

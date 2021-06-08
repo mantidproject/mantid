@@ -69,15 +69,11 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LeBailFit"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Do LeBail Fit to a spectrum of powder diffraction data. ";
-  }
+  const std::string summary() const override { return "Do LeBail Fit to a spectrum of powder diffraction data. "; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CreateLeBailFitInput", "FitPowderDiffPeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CreateLeBailFitInput", "FitPowderDiffPeaks"}; }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Diffraction\\Fitting"; }
@@ -103,16 +99,14 @@ private:
   void createLeBailFunction();
 
   /// Crop the workspace for better usage
-  API::MatrixWorkspace_sptr
-  cropWorkspace(const API::MatrixWorkspace_sptr &inpws, size_t wsindex);
+  API::MatrixWorkspace_sptr cropWorkspace(const API::MatrixWorkspace_sptr &inpws, size_t wsindex);
 
   /// Process and calculate input background
   void processInputBackground();
 
   //--------------  Le Bail Formular: Calculate Peak Intensities ------------
   /// Calcualte peak heights from model to data
-  bool calculatePeaksIntensities(API::MatrixWorkspace_sptr dataws,
-                                 size_t workspaceindex, bool zerobackground,
+  bool calculatePeaksIntensities(API::MatrixWorkspace_sptr dataws, size_t workspaceindex, bool zerobackground,
                                  std::vector<double> &allpeaksvalues);
 
   //--------------  Import and Export ---------------------------------------
@@ -123,67 +117,54 @@ private:
   void parseBraggPeaksParametersTable();
 
   /// Parse content in a table workspace to vector for background parameters
-  void parseBackgroundTableWorkspace(
-      const DataObjects::TableWorkspace_sptr &bkgdparamws,
-      std::vector<std::string> &bkgdparnames,
-      std::vector<double> &bkgdorderparams);
+  void parseBackgroundTableWorkspace(const DataObjects::TableWorkspace_sptr &bkgdparamws,
+                                     std::vector<std::string> &bkgdparnames, std::vector<double> &bkgdorderparams);
 
   /// Create and set up output table workspace for peaks
   void exportBraggPeakParameterToTable();
 
   /// Output parameters (fitted or tied)
-  void
-  exportInstrumentParameterToTable(std::map<std::string, Parameter> parammap);
+  void exportInstrumentParameterToTable(std::map<std::string, Parameter> parammap);
 
   /// Create output data workspace
   void createOutputDataWorkspace();
 
   //--------------  Random Walk Suite ----------------------------------------
   /// Main for random walk process
-  void execRandomWalkMinimizer(size_t maxcycles,
-                               std::map<std::string, Parameter> &parammap);
+  void execRandomWalkMinimizer(size_t maxcycles, std::map<std::string, Parameter> &parammap);
 
   /// Work on Markov chain to 'solve' LeBail function
-  void doMarkovChain(const std::map<std::string, Parameter> &parammap,
-                     const Mantid::HistogramData::HistogramX &vecX,
-                     const Mantid::HistogramData::HistogramY &vecPurePeak,
-                     const std::vector<double> &vecBkgd, size_t maxcycles,
-                     const Kernel::Rfactor &startR, int randomseed);
+  void doMarkovChain(const std::map<std::string, Parameter> &parammap, const Mantid::HistogramData::HistogramX &vecX,
+                     const Mantid::HistogramData::HistogramY &vecPurePeak, const std::vector<double> &vecBkgd,
+                     size_t maxcycles, const Kernel::Rfactor &startR, int randomseed);
 
   /// Set up Monte Carlo random walk strategy
   void setupBuiltInRandomWalkStrategy();
 
-  void setupRandomWalkStrategyFromTable(
-      const DataObjects::TableWorkspace_sptr &tablews);
+  void setupRandomWalkStrategyFromTable(const DataObjects::TableWorkspace_sptr &tablews);
 
   /// Add parameter (to a vector of string/name) for MC random walk
-  void addParameterToMCMinimize(std::vector<std::string> &parnamesforMC,
-                                const std::string &parname);
+  void addParameterToMCMinimize(std::vector<std::string> &parnamesforMC, const std::string &parname);
 
   /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
-  bool calculateDiffractionPattern(
-      const Mantid::HistogramData::HistogramX &vecX,
-      const Mantid::HistogramData::HistogramY &vecY, bool inputraw,
-      bool outputwithbkgd, const Mantid::HistogramData::HistogramY &vecBkgd,
-      std::vector<double> &values, Kernel::Rfactor &rfactor);
+  bool calculateDiffractionPattern(const Mantid::HistogramData::HistogramX &vecX,
+                                   const Mantid::HistogramData::HistogramY &vecY, bool inputraw, bool outputwithbkgd,
+                                   const Mantid::HistogramData::HistogramY &vecBkgd, std::vector<double> &values,
+                                   Kernel::Rfactor &rfactor);
 
   /// Determine whether the proposed value should be accepted or denied
   bool acceptOrDeny(Kernel::Rfactor currR, Kernel::Rfactor newR);
 
   /// Propose new parameters
-  bool proposeNewValues(const std::vector<std::string> &mcgroup,
-                        Kernel::Rfactor r,
-                        std::map<std::string, Parameter> &curparammap,
-                        std::map<std::string, Parameter> &newparammap,
+  bool proposeNewValues(const std::vector<std::string> &mcgroup, Kernel::Rfactor r,
+                        std::map<std::string, Parameter> &curparammap, std::map<std::string, Parameter> &newparammap,
                         bool prevBetterRwp);
 
   ///  Limit proposed value in the specified boundary
-  double limitProposedValueInBound(const Parameter &param, double newvalue,
-                                   double direction, int choice);
+  double limitProposedValueInBound(const Parameter &param, double newvalue, double direction, int choice);
 
   /// Book keep the (sopposed) best MC result
-  void bookKeepBestMCResult(std::map<std::string, Parameter> parammap,
-                            const std::vector<double> &bkgddata,
+  void bookKeepBestMCResult(std::map<std::string, Parameter> parammap, const std::vector<double> &bkgddata,
                             Kernel::Rfactor rfactor, size_t istep);
 
   /// Apply the value of parameters in the source to target
@@ -222,14 +203,12 @@ private:
   Functions::BackgroundFunction_sptr m_backgroundFunction;
 
   /// Function parameters updated by fit
-  std::map<std::string, Parameter>
-      m_funcParameters; // char = f: fit... = t: tie to value
+  std::map<std::string, Parameter> m_funcParameters; // char = f: fit... = t: tie to value
   /// Input function parameters that are stored for reference
   std::map<std::string, double> m_origFuncParameters;
 
   /// Convert a map of Parameter to a map of double
-  std::map<std::string, double>
-  convertToDoubleMap(std::map<std::string, Parameter> &inmap);
+  std::map<std::string, double> convertToDoubleMap(std::map<std::string, Parameter> &inmap);
 
   /// =============================    =========================== ///
 
@@ -307,9 +286,7 @@ private:
 };
 
 /// Write a set of (XY) data to a column file
-void writeRfactorsToFile(std::vector<double> vecX,
-                         std::vector<Kernel::Rfactor> vecR,
-                         const std::string &filename);
+void writeRfactorsToFile(std::vector<double> vecX, std::vector<Kernel::Rfactor> vecR, const std::string &filename);
 
 } // namespace Algorithms
 } // namespace CurveFitting

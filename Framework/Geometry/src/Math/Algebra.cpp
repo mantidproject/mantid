@@ -160,15 +160,12 @@ std::string Algebra::writeMCNPX() const
   std::ostringstream cx;
   for (int i = 0; i < lenOut; i++) {
     if (islower(Out[i]) || isupper(Out[i])) {
-      auto vc = find_if(
-          SurfMap.cbegin(), SurfMap.cend(),
-          MapSupport::valEqual<int, std::string>(std::string(1, Out[i])));
+      auto vc =
+          find_if(SurfMap.cbegin(), SurfMap.cend(), MapSupport::valEqual<int, std::string>(std::string(1, Out[i])));
       if (vc == SurfMap.end()) {
         logger.error() << "SurfMap size == " << SurfMap.size() << '\n';
-        for_each(SurfMap.begin(), SurfMap.end(),
-                 MapSupport::mapWrite<int, std::string>());
-        throw Kernel::Exception::NotFoundError("Algebra::writeMCNPX",
-                                               std::string(1, Out[i]));
+        for_each(SurfMap.begin(), SurfMap.end(), MapSupport::mapWrite<int, std::string>());
+        throw Kernel::Exception::NotFoundError("Algebra::writeMCNPX", std::string(1, Out[i]));
       }
       if (Out[i + 1] == '\'')
         cx << " -" << vc->first;
@@ -222,8 +219,7 @@ int Algebra::setFunctionObjStr(const std::string &A)
       ipt++;
     } else if (A[ipt] == '-' || isdigit(A[ipt])) {
       int N;
-      int nCount = Mantid::Kernel::Strings::convPartNum(
-          A.substr(ipt, std::string::npos), N);
+      int nCount = Mantid::Kernel::Strings::convPartNum(A.substr(ipt, std::string::npos), N);
       if (nCount) {
         int neg(0);
         if (N < 0) {
@@ -235,10 +231,7 @@ int Algebra::setFunctionObjStr(const std::string &A)
           if (!bigFlag) {
             SurfMap[N] = nLiteral;
             cx << nLiteral;
-            nLiteral[0] =
-                (nLiteral[0] == 'z')
-                    ? 'A'
-                    : static_cast<char>(static_cast<int>(nLiteral[0]) + 1);
+            nLiteral[0] = (nLiteral[0] == 'z') ? 'A' : static_cast<char>(static_cast<int>(nLiteral[0]) + 1);
             bigFlag = (nLiteral[0] == 'Z') ? 1 : 0;
           } else {
             std::ostringstream lcx;

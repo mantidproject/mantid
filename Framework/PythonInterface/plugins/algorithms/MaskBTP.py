@@ -80,7 +80,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         deleteWS = False
         if not ws:
             IDF = mantid.api.ExperimentInfo.getInstrumentFilename(self.instname)
-            ws = mantid.simpleapi.LoadEmptyInstrument(IDF, OutputWorkspace=self.instname + "MaskBTP")
+            ws = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF, OutputWorkspace=self.instname + "MaskBTP")
             deleteWS = True  # if there is going to be an issue with the instrument provdied
         self.instname = ws.getInstrument().getName()  # update the instrument name
 
@@ -267,7 +267,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         elif self.instname == "D11B":
             return ["detector_center", "detector_left", "detector_right"][banknum - 1]
         elif self.instname == "D22B":
-            return ["detector", "detector_right"][banknum - 1]
+            return ["detector_back", "detector_front"][banknum - 1]
         elif self.instname in ["D11", "D11lr", "D22", "D22lr", "D16"]:
             return "detector"
         else:

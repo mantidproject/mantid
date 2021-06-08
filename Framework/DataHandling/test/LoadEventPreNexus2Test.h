@@ -43,9 +43,7 @@ class LoadEventPreNexus2Test : public CxxTest::TestSuite {
 public:
   std::unique_ptr<LoadEventPreNexus2> eventLoader;
 
-  static LoadEventPreNexus2Test *createSuite() {
-    return new LoadEventPreNexus2Test();
-  }
+  static LoadEventPreNexus2Test *createSuite() { return new LoadEventPreNexus2Test(); }
   static void destroySuite(LoadEventPreNexus2Test *suite) { delete suite; }
 
   LoadEventPreNexus2Test() {}
@@ -56,8 +54,7 @@ public:
   }
 
   void test_file_not_found() {
-    TS_ASSERT_THROWS(eventLoader->setPropertyValue(
-                         "EventFilename", "this_file_doesnt_exist.blabla.data"),
+    TS_ASSERT_THROWS(eventLoader->setPropertyValue("EventFilename", "this_file_doesnt_exist.blabla.data"),
                      const std::invalid_argument &);
     // Execute fails since the properties aren't set correctly.
     TS_ASSERT_THROWS(eventLoader->execute(), const std::runtime_error &);
@@ -69,14 +66,12 @@ public:
     TS_ASSERT_EQUALS(sizeof(DasEvent), 8);
   }
 
-  void checkWorkspace(const std::string &eventfile, const std::string &WSName,
-                      int numpixels_with_events) {
+  void checkWorkspace(const std::string &eventfile, const std::string &WSName, int numpixels_with_events) {
     // Get the event file size
     struct stat filestatus;
     stat(eventfile.c_str(), &filestatus);
 
-    EventWorkspace_sptr ew =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(WSName);
+    EventWorkspace_sptr ew = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(WSName);
 
     // The # of events = size of the file / 8 bytes (per event)
     TS_ASSERT_EQUALS(ew->getNumberEvents(), filestatus.st_size / 8);
@@ -119,13 +114,12 @@ public:
     // std::cout << "***** executing *****\n";
     TS_ASSERT(eventLoader->execute());
 
-    EventWorkspace_sptr ew = std::dynamic_pointer_cast<EventWorkspace>(
-        AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs"));
+    EventWorkspace_sptr ew =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs"));
 
     // Get the start time of all pulses
     Kernel::TimeSeriesProperty<double> *log =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-            ew->mutableRun().getProperty("proton_charge"));
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(ew->mutableRun().getProperty("proton_charge"));
     std::map<DateAndTime, double> logMap = log->valueAsMap();
     std::map<DateAndTime, double>::iterator it, it2;
     it = logMap.begin();
@@ -139,9 +133,7 @@ public:
 
   void test_LoadPreNeXus_CNCS() { do_test_LoadPreNeXus_CNCS("Serial"); }
 
-  void test_LoadPreNeXus_CNCS_parallel() {
-    do_test_LoadPreNeXus_CNCS("Parallel");
-  }
+  void test_LoadPreNeXus_CNCS_parallel() { do_test_LoadPreNeXus_CNCS("Parallel"); }
 
   void do_test_LoadPreNeXus_CNCS(const std::string &parallel) {
     std::string eventfile("CNCS_7860_neutron_event.dat");
@@ -157,8 +149,8 @@ public:
     // std::cout << "***** executing *****\n";
     TS_ASSERT(eventLoader->execute());
 
-    EventWorkspace_sptr ew = std::dynamic_pointer_cast<EventWorkspace>(
-        AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs"));
+    EventWorkspace_sptr ew =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs"));
     /*
      * LoadEventPreNexusTest.h
      *
@@ -192,8 +184,7 @@ public:
 
     // Bunch of checks
     TS_ASSERT_EQUALS(outputWS->getNumberEvents(), inputWS->getNumberEvents());
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
-                     inputWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), inputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(outputWS->getInstrument()->getName(), "CNCS");
 
     std::size_t wkspIndex = 4348; // a good workspace index (with events)
@@ -218,8 +209,7 @@ public:
     // Check the run_start property exists and is right.
     Property *p = nullptr;
     TS_ASSERT(outputWS->mutableRun().hasProperty("run_start"));
-    TS_ASSERT_THROWS_NOTHING(
-        p = outputWS->mutableRun().getProperty("run_start");)
+    TS_ASSERT_THROWS_NOTHING(p = outputWS->mutableRun().getProperty("run_start");)
     if (p) {
       TS_ASSERT_EQUALS(p->value(), "2010-03-25T16:08:37.457381666");
     }
@@ -229,8 +219,7 @@ public:
     std::string eventfile("CNCS_7860_neutron_event.dat");
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
-    eventLoader->setPropertyValue("OutputWorkspace",
-                                  "LoadPreNexus2_cncs_skipped");
+    eventLoader->setPropertyValue("OutputWorkspace", "LoadPreNexus2_cncs_skipped");
     // Load just 2 pixels
     eventLoader->setProperty("SpectrumList", "45, 110");
 
@@ -261,8 +250,7 @@ public:
   }
 
   void test_invalid_chunk_number() {
-    eventLoader->setPropertyValue("EventFilename",
-                                  "CNCS_7860_neutron_event.dat");
+    eventLoader->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
     eventLoader->setPropertyValue("ChunkNumber", "3");
     eventLoader->setPropertyValue("TotalChunks", "2");
     TS_ASSERT_THROWS(eventLoader->execute(), const std::runtime_error &);
@@ -270,24 +258,22 @@ public:
 
   void test_loading_chunks() {
     // Load chunk 1 of 2
-    eventLoader->setPropertyValue("EventFilename",
-                                  "CNCS_7860_neutron_event.dat");
+    eventLoader->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
     eventLoader->setPropertyValue("ChunkNumber", "1");
     eventLoader->setPropertyValue("TotalChunks", "2");
     eventLoader->setPropertyValue("OutputWorkspace", "LoadPreNexus2_chunk1");
     TS_ASSERT(eventLoader->execute());
-    EventWorkspace_sptr chunk1 = std::dynamic_pointer_cast<EventWorkspace>(
-        AnalysisDataService::Instance().retrieve("LoadPreNexus2_chunk1"));
+    EventWorkspace_sptr chunk1 =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("LoadPreNexus2_chunk1"));
 
     // Load chunk 2 of 2
-    eventLoader->setPropertyValue("EventFilename",
-                                  "CNCS_7860_neutron_event.dat");
+    eventLoader->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
     eventLoader->setPropertyValue("ChunkNumber", "2");
     eventLoader->setPropertyValue("TotalChunks", "2");
     eventLoader->setPropertyValue("OutputWorkspace", "LoadPreNexus2_chunk2");
     TS_ASSERT(eventLoader->execute());
-    EventWorkspace_sptr chunk2 = std::dynamic_pointer_cast<EventWorkspace>(
-        AnalysisDataService::Instance().retrieve("LoadPreNexus2_chunk2"));
+    EventWorkspace_sptr chunk2 =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("LoadPreNexus2_chunk2"));
 
     // The number of events should be roughly equal and the sum should be 112266
     TS_ASSERT_EQUALS(chunk1->getNumberEvents(), 56139)

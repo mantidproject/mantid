@@ -17,6 +17,7 @@ from mantid.api import MultipleExperimentInfos
 from mantid.kernel import PropertyManager
 from qtpy.QtGui import QStandardItemModel, QStandardItem, QColor
 from qtpy.QtCore import Qt
+import numpy as np
 
 TimeSeriesProperties = (BoolTimeSeriesProperty,
                         FloatTimeSeriesProperty, Int32TimeSeriesProperty,
@@ -58,10 +59,11 @@ def get_value(log):
             # otherwise just show the number of values
             return entry_descr
     else:
-        return log.value
+        # convert to numpy array to fix some issues converting _kernel.std_vector_dbl to string
+        return str(np.array(log.value))
 
 
-class SampleLogsModel(object):
+class SampleLogsModel():
     """This class stores the workspace object and return log values when
     requested
     """
@@ -224,7 +226,7 @@ class SampleLogsModel(object):
             size = log.size() if hasattr(log, 'size') else 0
             name = create_table_item("Name", key, invalid_value_count, size, lambda: log.name)
             log_type = create_table_item("Type", key, invalid_value_count, size, get_type, log)
-            value = create_table_item("Value", key, invalid_value_count, size, lambda log: str(get_value(log)), log)
+            value = create_table_item("Value", key, invalid_value_count, size, lambda log: get_value(log), log)
             unit = create_table_item("Units", key, invalid_value_count, size, lambda: log.units)
             model.appendRow((name, log_type, value, unit))
 

@@ -23,8 +23,7 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Instrument {
 public:
   Instrument();
-  Instrument(boost::optional<RangeInLambda> wavelengthRange,
-             MonitorCorrections monitorCorrections,
+  Instrument(boost::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
              DetectorCorrections detectorCorrections);
 
   boost::optional<RangeInLambda> const &wavelengthRange() const;
@@ -44,10 +43,8 @@ private:
   DetectorCorrections m_detectorCorrections;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Instrument const &lhs,
-                                               Instrument const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Instrument const &lhs,
-                                               Instrument const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Instrument const &lhs, Instrument const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Instrument const &lhs, Instrument const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

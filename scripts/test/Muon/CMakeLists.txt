@@ -1,78 +1,7 @@
 # Tests for Muon GUIs
 
 set ( TEST_PY_FILES
-   workspaceNaming_test.py
-   FFTModel_test.py
-   FFTPresenter_test.py
-   fft_presenter_context_interaction_test.py
-   fitting_tab_widget/workspace_selector_dialog_presenter_test.py
-   fitting_tab_widget/fitting_tab_presenter_test.py
-   fitting_tab_widget/fitting_tab_model_test.py
-   seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
-   seq_fitting_tab_widget/sequential_table_test.py
-   fit_information_test.py
-   fit_parameters_test.py
-   fitting_context_test.py
-   home_instrument_widget_test.py
-   plot_widget/plot_widget_presenter_test.py
-   plot_widget/plot_widget_model_test.py
-   plotting_canvas/plot_color_queue_test.py
-   plotting_canvas/plotting_canvas_presenter_test.py
-   plotting_canvas/plotting_canvas_model_test.py
-   external_plotting_model_test.py
-   home_runinfo_presenter_test.py
-   home_tab_widget/home_instrument_widget_presenter_test.py
-   list_selector/list_selector_view_test.py
-   list_selector/list_selector_presenter_test.py
-   load_run_widget/loadrun_model_test.py
-   load_run_widget/loadrun_presenter_current_run_test.py
-   load_run_widget/loadrun_presenter_single_file_test.py
-   load_run_widget/loadrun_presenter_multiple_file_test.py
-   load_file_widget/loadfile_model_test.py
-   load_file_widget/loadfile_presenter_single_file_test.py
-   load_file_widget/loadfile_presenter_multiple_file_test.py
-   load_file_widget/loadfile_view_test.py
-   load_run_widget/loadrun_presenter_increment_decrement_test.py
-   load_run_widget/loadrun_view_test.py
-   loading_tab/loadwidget_presenter_test.py
-   loading_tab/loadwidget_presenter_multiple_file_test.py
-   loading_tab/loadwidget_presenter_failure_test.py
-   phase_table_widget/phase_table_presenter_test.py
-   phase_table_widget/phase_table_context_test.py
-   frequency_domain_context_test.py
-   grouping_tab/grouping_table_presenter_test.py
-   grouping_tab/grouping_tab_model_test.py
-   grouping_tab/calculate_pair_and_group_test.py
-   grouping_tab/pairing_table_presenter_test.py
-   grouping_tab/grouping_tab_presenter_test.py
-   grouping_tab/pairing_table_group_selector_test.py
-   grouping_tab/pairing_table_alpha_test.py
-   MaxEntModel_test.py
-   MaxEntPresenter_test.py
-   max_ent_presenter_load_interaction_test.py
-   muon_context_test.py
-   muon_context_with_frequency_test.py
-   muon_data_context_test.py
-   muon_gui_context_test.py
-   muon_group_pair_context_test.py
-   results_tab_widget/results_tab_model_test.py
-   results_tab_widget/results_tab_presenter_test.py
-   transformWidget_test.py
-   transform_widget_new_test.py
-   utilities/muon_group_test.py
-   utilities/muon_base_pair_test.py
-   utilities/muon_pair_test.py
-   utilities/muon_phasequad_test.py
-   utilities/load_utils_test.py
-   utilities/thread_model_test.py
-   utilities/muon_workspace_wrapper_test.py
-   utilities/muon_workspace_wrapper_directory_test.py
-   utilities/muon_load_data_test.py
-   utilities/muon_file_utils_test.py
-   utilities/run_string_utils_operator_test.py
-   utilities/run_string_utils_conversion_test.py
-   help_widget_presenter_test.py
-   xml_utils_test.py
+   ADSHandler/workspace_naming_test.py
    elemental_analysis/elemental_analysis_test.py
    elemental_analysis/name_generator_test.py
    elemental_analysis/detectors_presenter_test.py
@@ -86,67 +15,104 @@ set ( TEST_PY_FILES
    elemental_analysis/load_model_test.py
    elemental_analysis_2/elemental_analysis_context_test.py
    elemental_analysis_2/elemental_analysis_main_GUI_test.py
-   elemental_analysis_2/elemental_analysis_load_model_test.py
-   elemental_analysis_2/elemental_analysis_load_widget_presenter_test.py
-   elemental_analysis_2/elemental_analysis_loadfile_model_test.py
-   elemental_analysis_2/elemental_analysis_loadrun_model_test.py
-   elemental_analysis_2/elemental_analysis_loadrun_presenter_single_run_test.py
-   elemental_analysis_2/elemental_analysis_loadrun_presenter_increment_decrement_test.py
-   elemental_analysis_2/elemental_analysis_loadutils_test.py
-)
-
-# LoadWidgetModel_test.py, LoadWidgetPresenter_test.py and LoadWidgetView_test.py are currently not Qt5 compatible
-set ( TEST_PY_FILES_QT4
-   LoadWidgetPresenter_test.py
-   LoadWidgetView_test.py
-   FFTPresenter_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_loadutils_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_load_model_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_load_widget_presenter_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_loadfile_model_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_loadrun_model_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_loadrun_presenter_single_run_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_loadrun_presenter_increment_decrement_test.py
+   elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_tab_model_test.py
+   elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_tab_presenter_test.py
+   elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_table_presenter_test.py
+   elemental_analysis_2/EA_auto_tab/ea_auto_tab_model_test.py
+   elemental_analysis_2/EA_auto_tab/ea_auto_tab_presenter_test.py
+   elemental_analysis_2/EA_auto_tab/ea_match_table_presenter_test.py
+   external_plotting_model_test.py
+   FFTModel_test.py
    fft_presenter_context_interaction_test.py
-   ADSHandler/workspace_naming_test.py
-   fitting_tab_widget/workspace_selector_dialog_presenter_test.py
-   fitting_tab_widget/fitting_tab_presenter_test.py
-   fitting_tab_widget/fitting_tab_model_test.py
-   seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
-   seq_fitting_tab_widget/sequential_table_test.py
    fit_information_test.py
    fit_parameters_test.py
    fitting_context_test.py
-   home_instrument_widget_test.py
-   plot_widget/plot_widget_presenter_test.py
-   plot_widget/plot_widget_model_test.py
-   plotting_canvas/plotting_canvas_presenter_test.py
-   plotting_canvas/plotting_canvas_model_test.py
-   external_plotting_model_test.py
-   home_runinfo_presenter_test.py
-   list_selector/list_selector_view_test.py
-   list_selector/list_selector_presenter_test.py
-   load_run_widget/loadrun_presenter_current_run_test.py
-   load_run_widget/loadrun_presenter_single_file_test.py
-   load_run_widget/loadrun_presenter_multiple_file_test.py
-   load_file_widget/loadfile_presenter_single_file_test.py
-   load_file_widget/loadfile_presenter_multiple_file_test.py
-   load_file_widget/loadfile_view_test.py
-   load_run_widget/loadrun_presenter_increment_decrement_test.py
-   load_run_widget/loadrun_view_test.py
-   loading_tab/loadwidget_presenter_test.py
-   loading_tab/loadwidget_presenter_multiple_file_test.py
-   loading_tab/loadwidget_presenter_failure_test.py
-   phase_table_widget/phase_table_presenter_test.py
-   grouping_tab/grouping_table_presenter_test.py
-   grouping_tab/pairing_table_presenter_test.py
+   fitting_widgets/basic_fitting/basic_fitting_model_test.py
+   fitting_widgets/basic_fitting/basic_fitting_presenter_test.py
+   fitting_widgets/basic_fitting/basic_fitting_view_test.py
+   fitting_widgets/basic_fitting/fit_controls_view_test.py
+   fitting_widgets/basic_fitting/fit_function_options_view_test.py
+   fitting_widgets/basic_fitting/workspace_selector_view_test.py
+   fitting_widgets/general_fitting/general_fitting_model_test.py
+   fitting_widgets/general_fitting/general_fitting_presenter_test.py
+   fitting_widgets/general_fitting/general_fitting_options_view_test.py
+   fitting_widgets/general_fitting/general_fitting_view_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_model_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_options_view_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_presenter_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_view_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_mode_switcher_view_test.py
+   frequency_domain_context_test.py
+   grouping_tab/calculate_pair_and_group_test.py
+   grouping_tab/difference_table_presenter_test.py
+   grouping_tab/difference_table_selector_test.py
+   grouping_tab/difference_widget_presenter_test.py
+   grouping_tab/grouping_tab_model_test.py
    grouping_tab/grouping_tab_presenter_test.py
-   grouping_tab/pairing_table_group_selector_test.py
+   grouping_tab/grouping_table_presenter_test.py
    grouping_tab/pairing_table_alpha_test.py
-   MaxEntPresenter_test.py
-   max_ent_presenter_load_interaction_test.py
-   results_tab_widget/results_tab_presenter_test.py
-   transformWidget_test.py
-   transform_widget_new_test.py
+   grouping_tab/pairing_table_group_selector_test.py
+   grouping_tab/pairing_table_presenter_test.py
    help_widget_presenter_test.py
-   elemental_analysis/PeriodicTableModel_test.py
-   elemental_analysis/PeriodicTablePresenter_test.py
-   elemental_analysis/load_utils_test.py
-   elemental_analysis_2/elemental_analysis_context_test.py
-   elemental_analysis_2/elemental_analysis_main_GUI_test.py
+   home_instrument_widget_test.py
+   home_runinfo_presenter_test.py
+   home_tab_widget/home_instrument_widget_presenter_test.py
+   list_selector/list_selector_presenter_test.py
+   list_selector/list_selector_view_test.py
+   load_file_widget/loadfile_model_test.py
+   load_file_widget/loadfile_presenter_multiple_file_test.py
+   load_file_widget/loadfile_presenter_single_file_test.py
+   load_file_widget/loadfile_view_test.py
+   load_run_widget/loadrun_model_test.py
+   load_run_widget/loadrun_presenter_current_run_test.py
+   load_run_widget/loadrun_presenter_increment_decrement_test.py
+   load_run_widget/loadrun_presenter_multiple_file_test.py
+   load_run_widget/loadrun_presenter_single_file_test.py
+   load_run_widget/loadrun_view_test.py
+   loading_tab/loadwidget_presenter_failure_test.py
+   loading_tab/loadwidget_presenter_multiple_file_test.py
+   loading_tab/loadwidget_presenter_test.py
+   max_ent_presenter_load_interaction_test.py
+   MaxEntModel_test.py
+   MaxEntPresenter_test.py
+   muon_context_test.py
+   muon_context_with_frequency_test.py
+   muon_data_context_test.py
+   muon_group_pair_context_test.py
+   muon_gui_context_test.py
+   muon_period_info_widget_test.py
+   phase_table_widget/phase_table_context_test.py
+   phase_table_widget/phase_table_presenter_test.py
+   plot_widget/plot_widget_model_test.py
+   plot_widget/plot_widget_presenter_test.py
+   plotting_canvas/plot_color_queue_test.py
+   plotting_canvas/plotting_canvas_model_test.py
+   plotting_canvas/plotting_canvas_presenter_test.py
+   results_tab_widget/results_tab_model_test.py
+   results_tab_widget/results_tab_presenter_test.py
+   seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
+   seq_fitting_tab_widget/sequential_table_test.py
+   transform_widget_test.py
+   utilities/load_utils_test.py
+   utilities/muon_base_pair_test.py
+   utilities/muon_file_utils_test.py
+   utilities/muon_group_test.py
+   utilities/muon_load_data_test.py
+   utilities/muon_pair_test.py
+   utilities/muon_phasequad_test.py
+   utilities/muon_workspace_wrapper_directory_test.py
+   utilities/muon_workspace_wrapper_test.py
+   utilities/run_string_utils_conversion_test.py
+   utilities/run_string_utils_operator_test.py
+   utilities/thread_model_test.py
+   xml_utils_test.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

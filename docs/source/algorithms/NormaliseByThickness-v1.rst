@@ -19,7 +19,7 @@ Usage
 
     #create a workspace
     raw=CreateSampleWorkspace()
-        
+
     #apply algorithm
     norm=NormaliseByThickness(raw,SampleThickness=10)
 
@@ -29,8 +29,8 @@ Usage
     print("Min(norm)= {}".format(norm[0].dataY(0).min()))
     print("Max(raw)= {}".format(raw.dataY(0).max()))
     print("Max(norm)= {}".format(norm[0].dataY(0).max()))
-    
-    
+
+
 .. testcleanup:: NormaliseByThicness
 
     DeleteWorkspace('raw')

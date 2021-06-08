@@ -17,15 +17,11 @@ PasteSelectedCommand defines the action "Paste Selected"
 */
 class PasteSelectedCommand : public CommandBase {
 public:
-  PasteSelectedCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
-  PasteSelectedCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  PasteSelectedCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
+  PasteSelectedCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~PasteSelectedCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::PasteSelectedFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::PasteSelectedFlag); };
   QString name() override { return QString("Paste Selected"); }
   QString icon() override { return QString("://paste.png"); }
   QString tooltip() override { return QString("Paste selected"); }

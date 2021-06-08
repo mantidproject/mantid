@@ -20,9 +20,7 @@ Kernel::Logger logger("mathSupport");
 }
 
 template <typename InputIter>
-int solveQuadratic(
-    const InputIter Coef,
-    std::pair<std::complex<double>, std::complex<double>> &OutAns)
+int solveQuadratic(const InputIter Coef, std::pair<std::complex<double>, std::complex<double>> &OutAns)
 /**
   Solves Complex Quadratic
   @param Coef :: iterator over all the coefients in the order
@@ -56,16 +54,15 @@ int solveQuadratic(
     return (cf == 0) ? 1 : 2;
   }
 
-  std::complex<double> CQ(-0.5 * b,
-                          (b >= 0 ? -0.5 * sqrt(-cf) : 0.5 * sqrt(-cf)));
+  std::complex<double> CQ(-0.5 * b, (b >= 0 ? -0.5 * sqrt(-cf) : 0.5 * sqrt(-cf)));
   OutAns.first = CQ / a;
   OutAns.second = c / CQ;
   return 2;
 }
 
 template <typename CInputIter>
-int solveCubic(const CInputIter Coef, std::complex<double> &AnsA,
-               std::complex<double> &AnsB, std::complex<double> &AnsC)
+int solveCubic(const CInputIter Coef, std::complex<double> &AnsA, std::complex<double> &AnsB,
+               std::complex<double> &AnsC)
 /**
   Solves Cubic equation
   @param Coef :: iterator over all the coefients in the order
@@ -150,30 +147,20 @@ int solveCubic(const CInputIter Coef, std::complex<double> &AnsA,
 
 /// \cond TEMPLATE
 
-template MANTID_GEOMETRY_DLL int
-solveQuadratic(const double *,
-               std::pair<std::complex<double>, std::complex<double>> &);
-template MANTID_GEOMETRY_DLL int
-solveQuadratic(double *,
-               std::pair<std::complex<double>, std::complex<double>> &);
-template MANTID_GEOMETRY_DLL int
-solveQuadratic(const std::vector<double>::const_iterator,
-               std::pair<std::complex<double>, std::complex<double>> &);
-template MANTID_GEOMETRY_DLL int solveCubic(const double *,
-                                            std::complex<double> &,
-                                            std::complex<double> &,
+template MANTID_GEOMETRY_DLL int solveQuadratic(const double *,
+                                                std::pair<std::complex<double>, std::complex<double>> &);
+template MANTID_GEOMETRY_DLL int solveQuadratic(double *, std::pair<std::complex<double>, std::complex<double>> &);
+template MANTID_GEOMETRY_DLL int solveQuadratic(const std::vector<double>::const_iterator,
+                                                std::pair<std::complex<double>, std::complex<double>> &);
+template MANTID_GEOMETRY_DLL int solveCubic(const double *, std::complex<double> &, std::complex<double> &,
                                             std::complex<double> &);
-template MANTID_GEOMETRY_DLL int solveCubic(double *, std::complex<double> &,
-                                            std::complex<double> &,
+template MANTID_GEOMETRY_DLL int solveCubic(double *, std::complex<double> &, std::complex<double> &,
                                             std::complex<double> &);
 
-template MANTID_GEOMETRY_DLL int solveCubic(const std::vector<double>::iterator,
-                                            std::complex<double> &,
-                                            std::complex<double> &,
-                                            std::complex<double> &);
-template MANTID_GEOMETRY_DLL int
-solveCubic(const std::vector<double>::const_iterator, std::complex<double> &,
-           std::complex<double> &, std::complex<double> &);
+template MANTID_GEOMETRY_DLL int solveCubic(const std::vector<double>::iterator, std::complex<double> &,
+                                            std::complex<double> &, std::complex<double> &);
+template MANTID_GEOMETRY_DLL int solveCubic(const std::vector<double>::const_iterator, std::complex<double> &,
+                                            std::complex<double> &, std::complex<double> &);
 
 /// \endcond TEMPLATE
 } // namespace Mantid

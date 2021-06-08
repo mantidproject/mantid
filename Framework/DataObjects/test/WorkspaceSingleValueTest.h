@@ -81,11 +81,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     WorkspaceSingleValue_const_sptr wsConst;
     WorkspaceSingleValue_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<WorkspaceSingleValue_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<WorkspaceSingleValue_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(
-        wsNonConst = manager.getValue<WorkspaceSingleValue_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<WorkspaceSingleValue_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
@@ -93,8 +91,7 @@ public:
     PropertyManagerHelper::TypedValue val(manager, wsName);
     WorkspaceSingleValue_const_sptr wsCastConst;
     WorkspaceSingleValue_sptr wsCastNonConst;
-    TS_ASSERT_THROWS_NOTHING(wsCastConst =
-                                 (WorkspaceSingleValue_const_sptr)val);
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (WorkspaceSingleValue_const_sptr)val);
     TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (WorkspaceSingleValue_sptr)val);
     TS_ASSERT(wsCastNonConst != nullptr);
@@ -106,8 +103,7 @@ public:
     TS_ASSERT(!ws.isRaggedWorkspace());
   }
 
-  void
-  test_that_getNumberBins_and_getMaxNumberBins_returns_one_for_a_WorkspaceSingleValue() {
+  void test_that_getNumberBins_and_getMaxNumberBins_returns_one_for_a_WorkspaceSingleValue() {
     WorkspaceSingleValue ws;
     TS_ASSERT_EQUALS(ws.getNumberBins(0), 1);
     TS_ASSERT_EQUALS(ws.getMaxNumberBins(), 1);

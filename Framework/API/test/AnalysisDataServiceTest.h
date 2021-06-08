@@ -22,9 +22,7 @@ class MockWorkspace : public Workspace {
   size_t getMemorySize() const override { return 1; }
 
 private:
-  MockWorkspace *doClone() const override {
-    throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
-  }
+  MockWorkspace *doClone() const override { throw std::runtime_error("Cloning of MockWorkspace is not implemented."); }
   MockWorkspace *doCloneEmpty() const override {
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
@@ -37,17 +35,14 @@ private:
   AnalysisDataServiceImpl &ads;
 
 public:
-  static AnalysisDataServiceTest *createSuite() {
-    return new AnalysisDataServiceTest();
-  }
+  static AnalysisDataServiceTest *createSuite() { return new AnalysisDataServiceTest(); }
   static void destroySuite(AnalysisDataServiceTest *suite) { delete suite; }
 
   AnalysisDataServiceTest() : ads(AnalysisDataService::Instance()) {}
 
   void setUp() override { ads.clear(); }
 
-  void
-  test_IsValid_Returns_An_Empty_String_For_A_Valid_Name_When_All_CharsAre_Allowed() {
+  void test_IsValid_Returns_An_Empty_String_For_A_Valid_Name_When_All_CharsAre_Allowed() {
     TS_ASSERT_EQUALS(ads.isValid("CamelCase"), "");
     TS_ASSERT_EQUALS(ads.isValid("_Has_Underscore"), "");
     TS_ASSERT_EQUALS(ads.isValid("alllowercase"), "");
@@ -62,10 +57,8 @@ public:
       std::ostringstream name;
       name << "NotAllowed" << illegalChars[i];
       std::ostringstream expectedError;
-      expectedError
-          << "Invalid object name '" << name.str()
-          << "'. Names cannot contain any of the following characters: "
-          << illegalChars;
+      expectedError << "Invalid object name '" << name.str()
+                    << "'. Names cannot contain any of the following characters: " << illegalChars;
       TS_ASSERT_EQUALS(ads.isValid(name.str()), expectedError.str());
     }
     // Clean up
@@ -87,23 +80,19 @@ public:
   }
 
   void test_retrieveWorkspaces_with_all_missing_items_throws_exception() {
-    TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a"}),
-                     const Exception::NotFoundError &);
-    TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a", "b"}),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a"}), const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a", "b"}), const Exception::NotFoundError &);
   }
 
   void test_retrieveWorkspaces_with_some_missing_items_throws_exception() {
     const std::string name("test_some_missing_items");
     addToADS(name);
-    TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a", "b"}),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a", "b"}), const Exception::NotFoundError &);
     ads.remove(name);
   }
 
   void test_retrieveWorkspaces_with_all_items_present_and_no_group_unrolling() {
-    const std::vector<std::string> names{"test_all_items_present_1",
-                                         "test_all_items_present_2"};
+    const std::vector<std::string> names{"test_all_items_present_1", "test_all_items_present_2"};
     std::vector<Workspace_sptr> expected;
     for (const auto &name : names) {
       expected.emplace_back(addToADS(name));
@@ -118,8 +107,7 @@ public:
   }
 
   void test_retrieveWorkspaces_with_group_unrolling() {
-    const std::vector<std::string> names{"test_all_items_present_unroll_1",
-                                         "test_all_items_present_unroll_2"};
+    const std::vector<std::string> names{"test_all_items_present_unroll_1", "test_all_items_present_unroll_2"};
     std::vector<Workspace_sptr> expected;
     expected.emplace_back(addToADS(names[0]));
     const size_t nitems{4u};
@@ -156,13 +144,11 @@ public:
     this->doAddingOnInvalidNameTests(false /*Don't use replace*/);
   }
 
-  void
-  test_AddOrReplace_With_Name_Containing_Special_Chars_Throws_Invalid_Argument() {
+  void test_AddOrReplace_With_Name_Containing_Special_Chars_Throws_Invalid_Argument() {
     this->doAddingOnInvalidNameTests(true /*Use replace*/);
   }
 
-  void
-  test_Add_Then_Changing_Illegal_Char_List_Only_Affects_Future_Additions() {
+  void test_Add_Then_Changing_Illegal_Char_List_Only_Affects_Future_Additions() {
     // The ADS shouldcurrently accept anything
     const std::string illegalChar(".");
     std::string name = "ContainsIllegal" + illegalChar;
@@ -178,8 +164,7 @@ public:
     ads.setIllegalCharacterList("");
   }
 
-  void
-  test_AddOrReplace_Does_Not_Throw_When_Adding_Object_That_Has_A_Name_That_Already_Exists() {
+  void test_AddOrReplace_Does_Not_Throw_When_Adding_Object_That_Has_A_Name_That_Already_Exists() {
     const std::string name("MySpaceAddOrReplace");
     TS_ASSERT_THROWS_NOTHING(addOrReplaceToADS(name));
     TS_ASSERT_THROWS(addToADS(name), const std::runtime_error &);
@@ -347,19 +332,16 @@ public:
   // objects
   // persists, as this class is where it will most be used.
   void test_size() {
-    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
-                                        "0");
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces", "0");
     TS_ASSERT_EQUALS(ads.size(), 0);
     addToADS("something");
     TS_ASSERT_EQUALS(ads.size(), 1);
     addToADS("__hidden");
     TSM_ASSERT_EQUALS("Hidden workspaces should not be counted", ads.size(), 1);
 
-    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
-                                        "1");
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces", "1");
     TS_ASSERT_EQUALS(ads.size(), 2);
-    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
-                                        "0");
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces", "0");
   }
 
   void test_getObjectNames_and_getObjects() {
@@ -370,28 +352,20 @@ public:
     auto names = ads.getObjectNames();
     auto objects = ads.getObjects();
     TSM_ASSERT_EQUALS("Hidden entries should not be returned", names.size(), 2);
-    TSM_ASSERT_EQUALS("Hidden entries should not be returned", objects.size(),
-                      2);
-    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "One"),
-                      names.end());
-    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "Two"),
-                      names.end());
-    TS_ASSERT_EQUALS(std::find(names.cbegin(), names.cend(), "__Three"),
-                     names.end());
-    TSM_ASSERT_EQUALS("Hidden entries should not be returned",
-                      std::find(names.cbegin(), names.cend(), "__Three"),
+    TSM_ASSERT_EQUALS("Hidden entries should not be returned", objects.size(), 2);
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "One"), names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "Two"), names.end());
+    TS_ASSERT_EQUALS(std::find(names.cbegin(), names.cend(), "__Three"), names.end());
+    TSM_ASSERT_EQUALS("Hidden entries should not be returned", std::find(names.cbegin(), names.cend(), "__Three"),
                       names.end());
 
-    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
-                                        "1");
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces", "1");
     names = ads.getObjectNames();
     objects = ads.getObjects();
     TS_ASSERT_EQUALS(names.size(), 3);
     TS_ASSERT_EQUALS(objects.size(), 3);
-    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "__Three"),
-                      names.end());
-    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
-                                        "0");
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "__Three"), names.end());
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces", "0");
   }
 
   void test_deepRemoveGroup() {
@@ -402,8 +376,7 @@ public:
     // name doesn't exist
     TS_ASSERT_THROWS(ads.deepRemoveGroup("abc"), const std::runtime_error &);
     // workspace isn't a group
-    TS_ASSERT_THROWS(ads.deepRemoveGroup("group_1"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ads.deepRemoveGroup("group_1"), const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(ads.deepRemoveGroup("group"));
     TS_ASSERT_EQUALS(ads.size(), 1);
 
@@ -423,12 +396,9 @@ public:
     TS_ASSERT_EQUALS(ads.size(), 3);
     TS_ASSERT_EQUALS(group->size(), 1);
 
-    TS_ASSERT_THROWS(ads.removeFromGroup("group", "noworkspace"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(ads.removeFromGroup("nogroup", "noworkspace"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(ads.removeFromGroup("nogroup", "group_1"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ads.removeFromGroup("group", "noworkspace"), const std::runtime_error &);
+    TS_ASSERT_THROWS(ads.removeFromGroup("nogroup", "noworkspace"), const std::runtime_error &);
+    TS_ASSERT_THROWS(ads.removeFromGroup("nogroup", "group_1"), const std::runtime_error &);
     ads.clear();
   }
 
@@ -466,8 +436,7 @@ public:
     ads.clear();
   }
 
-  void
-  test_topLevelItems_Does_Not_Contain_Workspaces_That_Are_In_A_Group_In_The_List() {
+  void test_topLevelItems_Does_Not_Contain_Workspaces_That_Are_In_A_Group_In_The_List() {
     // this adds 1 group to the ADS (5 ws's altogether)
     auto group = addGroupWithGroupToADS("snapshot_group");
     // plus 1 more ws
@@ -494,16 +463,13 @@ public:
     auto nullWS = MockWorkspace_sptr();
 
     // Shouldn't be able to add null pointers
-    TS_ASSERT_THROWS(ads.add("null_workspace", nullWS),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(ads.addOrReplace("null_workspace", nullWS),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ads.add("null_workspace", nullWS), const std::runtime_error &);
+    TS_ASSERT_THROWS(ads.addOrReplace("null_workspace", nullWS), const std::runtime_error &);
 
     TS_ASSERT(!ads.doesExist("null_workspace"));
   }
 
-  void
-  test_throws_when_adding_a_group_which_contains_a_ws_with_the_same_name() {
+  void test_throws_when_adding_a_group_which_contains_a_ws_with_the_same_name() {
     auto ws1 = addToADS("ws1");
     auto ws2 = addToADS("ws2");
     WorkspaceGroup_sptr group(new WorkspaceGroup);
@@ -511,8 +477,7 @@ public:
     group->addWorkspace(ws2);
 
     TS_ASSERT_THROWS(ads.add("ws1", group), const std::invalid_argument &);
-    TS_ASSERT_THROWS(ads.addOrReplace("ws1", group),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(ads.addOrReplace("ws1", group), const std::invalid_argument &);
   }
 
   void test_throws_when_adding_to_a_group_a_workspace_with_the_same_name() {
@@ -534,18 +499,14 @@ private:
     for (size_t i = 0; i < nchars; ++i) {
       // Build illegal name
       std::ostringstream name;
-      name << allowed << illegalChars[i] << allowed << illegalChars[i]
-           << allowed;
+      name << allowed << illegalChars[i] << allowed << illegalChars[i] << allowed;
       // Add it
       std::ostringstream errorMsg;
-      errorMsg << "Name containing illegal character " << illegalChars[i]
-               << " is not allowed but ADS did not throw.";
+      errorMsg << "Name containing illegal character " << illegalChars[i] << " is not allowed but ADS did not throw.";
       if (replace) {
-        TSM_ASSERT_THROWS(errorMsg.str(), addToADS(name.str()),
-                          const std::invalid_argument &);
+        TSM_ASSERT_THROWS(errorMsg.str(), addToADS(name.str()), const std::invalid_argument &);
       } else {
-        TSM_ASSERT_THROWS(errorMsg.str(), addOrReplaceToADS(name.str()),
-                          const std::invalid_argument &);
+        TSM_ASSERT_THROWS(errorMsg.str(), addOrReplaceToADS(name.str()), const std::invalid_argument &);
       }
       bool stored = ads.doesExist(name.str());
       TS_ASSERT_EQUALS(stored, false);
@@ -565,8 +526,7 @@ private:
   }
 
   /// Add a group with N simple workspaces to the ADS
-  WorkspaceGroup_sptr addGroupToADS(const std::string &name,
-                                    const size_t nitems = 2) {
+  WorkspaceGroup_sptr addGroupToADS(const std::string &name, const size_t nitems = 2) {
     auto group(std::make_shared<WorkspaceGroup>());
     for (auto i = 0u; i < nitems; ++i) {
       group->addWorkspace(std::make_shared<MockWorkspace>());
@@ -576,8 +536,7 @@ private:
   }
 
   /// Add a group with N simple workspaces to the ADS
-  WorkspaceGroup_sptr addOrReplaceGroupToADS(const std::string &name,
-                                             const size_t nitems = 2) {
+  WorkspaceGroup_sptr addOrReplaceGroupToADS(const std::string &name, const size_t nitems = 2) {
     auto group(std::make_shared<WorkspaceGroup>());
     for (auto i = 0u; i < nitems; ++i) {
       group->addWorkspace(std::make_shared<MockWorkspace>());
@@ -600,7 +559,5 @@ private:
   }
 
   /// Add or replace the given name
-  void addOrReplaceToADS(const std::string &name) {
-    ads.addOrReplace(name, Workspace_sptr(new MockWorkspace));
-  }
+  void addOrReplaceToADS(const std::string &name) { ads.addOrReplace(name, Workspace_sptr(new MockWorkspace)); }
 };

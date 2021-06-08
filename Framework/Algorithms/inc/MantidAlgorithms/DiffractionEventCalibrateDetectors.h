@@ -23,13 +23,10 @@ namespace Algorithms {
  @author Vickie Lynch SNS, ORNL
  @date 12/02/2010
  */
-class MANTID_ALGORITHMS_DLL DiffractionEventCalibrateDetectors
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DiffractionEventCalibrateDetectors : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override {
-    return "DiffractionEventCalibrateDetectors";
-  }
+  const std::string name() const override { return "DiffractionEventCalibrateDetectors"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm optimizes the position and angles of all of the "
@@ -39,22 +36,17 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"AlignComponents", "GetDetOffsetsMultiPeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AlignComponents", "GetDetOffsetsMultiPeaks"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Diffraction\\Calibration;"
            "CorrectionFunctions\\InstrumentCorrections";
   }
   /// Function to optimize
-  double intensity(double x, double y, double z, double rotx, double roty,
-                   double rotz, const std::string &detname,
-                   const std::string &inname, const std::string &outname,
-                   const std::string &peakOpt, const std::string &rb_param,
-                   const std::string &groupWSName);
-  void movedetector(double x, double y, double z, double rotx, double roty,
-                    double rotz, const std::string &detname,
+  double intensity(double x, double y, double z, double rotx, double roty, double rotz, const std::string &detname,
+                   const std::string &inname, const std::string &outname, const std::string &peakOpt,
+                   const std::string &rb_param, const std::string &groupWSName);
+  void movedetector(double x, double y, double z, double rotx, double roty, double rotz, const std::string &detname,
                     const Mantid::DataObjects::EventWorkspace_sptr &inputW);
 
 private:

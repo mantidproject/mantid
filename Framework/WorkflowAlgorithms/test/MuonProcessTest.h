@@ -66,24 +66,19 @@ public:
     MuonProcess alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", data->workspace));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", output.name()));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
-    MatrixWorkspace_sptr ws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -122,26 +117,21 @@ public:
     MuonProcess alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", data->workspace));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", output.name()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CropWorkspace", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Xmin", 3.0));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
-    MatrixWorkspace_sptr ws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -171,26 +161,21 @@ public:
     MuonProcess alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", data->workspace));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", output.name()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CropWorkspace", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Xmin", 3.0));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
-    MatrixWorkspace_sptr ws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -219,23 +204,19 @@ public:
     MuonProcess alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", data->workspace));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", "1,2"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 1));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", output.name()));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
-    MatrixWorkspace_sptr ws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -273,28 +254,23 @@ public:
     MuonProcess alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", data->workspace));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeZero", 0.5));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Xmin", 0.1));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Xmax", 16.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RebinParams", "0.08"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", output.name()));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
-    MatrixWorkspace_sptr ws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -341,26 +317,21 @@ public:
     MuonProcess alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", data->workspace));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyDeadTimeCorrection", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeadTimeTable", deadTimes));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", output.name()));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
-    MatrixWorkspace_sptr ws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -384,8 +355,7 @@ public:
   void test_errorReporting_emptyGrouping() {
     ScopedWorkspace output;
 
-    auto emptyGrouping =
-        createGroupingTable(std::vector<int>(), std::vector<int>());
+    auto emptyGrouping = createGroupingTable(std::vector<int>(), std::vector<int>());
 
     MuonProcess alg;
     alg.setRethrows(true);
@@ -395,22 +365,17 @@ public:
 
     // Single-period input
     auto data = loadEMU();
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", data->workspace));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
 
     // Test empty grouping
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SubtractedPeriodSet", std::vector<int>{}));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorGroupingTable", emptyGrouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SubtractedPeriodSet", std::vector<int>{}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", emptyGrouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", output.name()));
 
     TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
     TS_ASSERT(!alg.isExecuted());
@@ -422,8 +387,7 @@ public:
     Workspace_sptr emptyWS;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", emptyWS),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", emptyWS), const std::invalid_argument &);
   }
 
   void test_errorReporting_badWSType() {
@@ -441,16 +405,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", badWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", output.name()));
 
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
@@ -470,18 +431,14 @@ public:
     auto data = loadEMU();
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", data->workspace));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SummedPeriodSet", std::vector<int>{1, 9}));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", std::vector<int>{1, 9}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", output.name()));
 
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
@@ -501,16 +458,13 @@ public:
     auto data = loadEMU();
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", data->workspace));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", output.name()));
 
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
@@ -530,19 +484,15 @@ public:
     auto data = loadEMU();
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", data->workspace));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", grouping));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyDeadTimeCorrection", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", output.name()));
 
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
@@ -570,8 +520,7 @@ public:
       return;
     }
 
-    MatrixWorkspace_sptr ws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (!ws)
@@ -585,8 +534,7 @@ public:
   }
 
 private:
-  TableWorkspace_sptr createGroupingTable(const std::vector<int> &group1,
-                                          const std::vector<int> &group2) {
+  TableWorkspace_sptr createGroupingTable(const std::vector<int> &group1, const std::vector<int> &group2) {
     auto t = std::make_shared<TableWorkspace>();
 
     t->addColumn("vector_int", "Detectors");
@@ -630,7 +578,5 @@ private:
    * Use LoadMuonNexus to load data from MUSR file
    * @returns LoadedData struct
    */
-  std::unique_ptr<LoadedData> loadMUSR() {
-    return loadData("MUSR00015189.nxs");
-  }
+  std::unique_ptr<LoadedData> loadMUSR() { return loadData("MUSR00015189.nxs"); }
 };

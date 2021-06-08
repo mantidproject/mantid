@@ -26,16 +26,12 @@ using Kernel::V2D;
 /**
  * Constructs a 'null' polygon with no points
  */
-ConvexPolygon::ConvexPolygon()
-    : m_minX(DBL_MAX), m_maxX(-DBL_MAX), m_minY(DBL_MAX), m_maxY(-DBL_MAX),
-      m_vertices() {}
+ConvexPolygon::ConvexPolygon() : m_minX(DBL_MAX), m_maxX(-DBL_MAX), m_minY(DBL_MAX), m_maxY(-DBL_MAX), m_vertices() {}
 
 /**
  * @param vertices A list of points that form the polygon
  */
-ConvexPolygon::ConvexPolygon(const Vertices &vertices) : m_vertices(vertices) {
-  setup();
-}
+ConvexPolygon::ConvexPolygon(const Vertices &vertices) : m_vertices(vertices) { setup(); }
 
 /// @return True if polygon has 3 or more points
 bool ConvexPolygon::isValid() const { return (npoints() > 2); }
@@ -76,9 +72,7 @@ void ConvexPolygon::insert(double x, double y) { this->insert(V2D(x, y)); }
  * @returns A reference to the polygon at that index
  * @throws Exception::IndexError if the index is out of range
  */
-const V2D &ConvexPolygon::operator[](const size_t index) const {
-  return m_vertices[index];
-}
+const V2D &ConvexPolygon::operator[](const size_t index) const { return m_vertices[index]; }
 
 /**
  * Return the vertex at the given index. The index is checked for validity
@@ -90,8 +84,7 @@ const Kernel::V2D &ConvexPolygon::at(const size_t index) const {
   if (index < npoints()) {
     return m_vertices[index];
   } else {
-    throw Kernel::Exception::IndexError(index, npoints(),
-                                        "ConvexPolygon::at()");
+    throw Kernel::Exception::IndexError(index, npoints(), "ConvexPolygon::at()");
   }
 }
 
@@ -220,10 +213,8 @@ void ConvexPolygon::setup() {
  * @param b :: The second vertex in the set
  * @param c :: The third vertex in the set
  */
-double ConvexPolygon::triangleArea(const V2D &a, const V2D &b,
-                                   const V2D &c) const {
-  return 0.5 * (b.X() - a.X()) * (c.Y() - a.Y()) -
-         (c.X() - a.X()) * (b.Y() - a.Y());
+double ConvexPolygon::triangleArea(const V2D &a, const V2D &b, const V2D &c) const {
+  return 0.5 * (b.X() - a.X()) * (c.Y() - a.Y()) - (c.X() - a.X()) * (b.Y() - a.Y());
 }
 
 //-----------------------------------------------------------------------------

@@ -28,9 +28,7 @@ public:
   const std::string category() const override;
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Loads a nexus file from MLZ facility.";
-  }
+  const std::string summary() const override { return "Loads a nexus file from MLZ facility."; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
@@ -51,8 +49,7 @@ private:
 
   NeXus::NXData loadNexusFileData(NeXus::NXEntry &entry);
   void maskDetectors(NeXus::NXEntry &entry);
-  void loadDataIntoTheWorkSpace(
-      NeXus::NXEntry &entry); //, int ElasticPeakPosition = -1);
+  void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry); //, int ElasticPeakPosition = -1);
 
   void runLoadInstrument();
 

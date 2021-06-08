@@ -45,23 +45,17 @@ public:
   /// Set the project path
   virtual void setProjectPath(const QString &path) = 0;
   /// Update the workspaces list with a collection of workspace info items
-  virtual void
-  updateWorkspacesList(const std::vector<WorkspaceInfo> &workspaces) = 0;
+  virtual void updateWorkspacesList(const std::vector<WorkspaceInfo> &workspaces) = 0;
   /// Update the list of interfaces
-  virtual void
-  updateInterfacesList(const std::vector<std::string> &interfaces) = 0;
+  virtual void updateInterfacesList(const std::vector<std::string> &interfaces) = 0;
   /// Update the included windows list with a collection of window info items
-  virtual void
-  updateIncludedWindowsList(const std::vector<WindowInfo> &windows) = 0;
+  virtual void updateIncludedWindowsList(const std::vector<WindowInfo> &windows) = 0;
   /// Update the excluded windows list with a collection of window info items
-  virtual void
-  updateExcludedWindowsList(const std::vector<WindowInfo> &windows) = 0;
+  virtual void updateExcludedWindowsList(const std::vector<WindowInfo> &windows) = 0;
   /// Remove items from the included window list
-  virtual void
-  removeFromIncludedWindowsList(const std::vector<std::string> &windows) = 0;
+  virtual void removeFromIncludedWindowsList(const std::vector<std::string> &windows) = 0;
   /// Remove items from the excluded window list
-  virtual void
-  removeFromExcludedWindowsList(const std::vector<std::string> &windows) = 0;
+  virtual void removeFromExcludedWindowsList(const std::vector<std::string> &windows) = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

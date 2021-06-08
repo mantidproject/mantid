@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::Progress.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.Progress 
+.. autoclass:: mantid.api.Progress
     :members:
     :undoc-members:
     :inherited-members:

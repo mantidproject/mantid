@@ -46,12 +46,10 @@ LoadNexus::LoadNexus() : Algorithm(), m_filename() {}
 void LoadNexus::init() {
   // Declare required input parameters for all Child Algorithms
   const std::vector<std::string> exts{".nxs", ".nx5", ".xml", ".n*"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name of the Nexus file to read, as a full or relative path.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The name of the Nexus file to read, as a full or relative path.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.  A workspace of this name will be created "
                   "and stored in the Analysis Data Service. For multiperiod "
@@ -60,15 +58,11 @@ void LoadNexus::init() {
   // Declare optional input parameters
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty(
-      "SpectrumMin", 1, mustBePositive,
-      "Number of first spectrum to read, only for single period data.");
-  declareProperty(
-      "SpectrumMax", Mantid::EMPTY_INT(), mustBePositive,
-      "Number of last spectrum to read, only for single period data.");
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("SpectrumList"),
-      "List of spectrum numbers to read, only for single period data.");
+  declareProperty("SpectrumMin", 1, mustBePositive, "Number of first spectrum to read, only for single period data.");
+  declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive,
+                  "Number of last spectrum to read, only for single period data.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("SpectrumList"),
+                  "List of spectrum numbers to read, only for single period data.");
 
   declareProperty("EntryNumber", 0, mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
@@ -91,8 +85,7 @@ void LoadNexus::exec() {
   // documentation of this algorithm.
 
   std::vector<std::string> entryName, definition;
-  int count =
-      Mantid::NeXus::getNexusEntryTypes(m_filename, entryName, definition);
+  int count = Mantid::NeXus::getNexusEntryTypes(m_filename, entryName, definition);
   if (count <= -1) {
     g_log.error("Error reading file " + m_filename);
     throw Exception::FileError("Unable to read data in File:", m_filename);
@@ -110,11 +103,9 @@ void LoadNexus::exec() {
     Mantid::NeXus::NXRoot root(m_filename);
     Mantid::NeXus::NXEntry entry = root.openEntry(root.groups().front().nxname);
     try {
-      Mantid::NeXus::NXChar nxc =
-          entry.openNXChar("instrument/SNSdetector_calibration_id");
+      Mantid::NeXus::NXChar nxc = entry.openNXChar("instrument/SNSdetector_calibration_id");
     } catch (...) {
-      g_log.error("File " + m_filename +
-                  " is a currently unsupported type of NeXus file");
+      g_log.error("File " + m_filename + " is a currently unsupported type of NeXus file");
       throw Exception::FileError("Unable to read File:", m_filename);
     }
     runLoadTOFRawNexus();
@@ -128,27 +119,21 @@ void LoadNexus::runLoadMuonNexus() {
   // Set the workspace property
   std::string outputWorkspace = "OutputWorkspace";
   loadMuonNexus->setPropertyValue(outputWorkspace, m_workspace);
-  loadMuonNexus->setPropertyValue("DeadTimeTable",
-                                  m_workspace + "_DeadTimeTable");
-  loadMuonNexus->setPropertyValue("DetectorGroupingTable",
-                                  m_workspace + "DetectorGroupingTable");
+  loadMuonNexus->setPropertyValue("DeadTimeTable", m_workspace + "_DeadTimeTable");
+  loadMuonNexus->setPropertyValue("DetectorGroupingTable", m_workspace + "DetectorGroupingTable");
 
   // Get the array passed in the spectrum_list, if an empty array was passed use
   // the default
   std::vector<int> specList = getProperty("SpectrumList");
   if (!specList.empty())
-    loadMuonNexus->setPropertyValue("SpectrumList",
-                                    getPropertyValue("SpectrumList"));
+    loadMuonNexus->setPropertyValue("SpectrumList", getPropertyValue("SpectrumList"));
   //
   int specMax = getProperty("SpectrumMax");
   if (specMax != Mantid::EMPTY_INT()) {
-    loadMuonNexus->setPropertyValue("SpectrumMax",
-                                    getPropertyValue("SpectrumMax"));
-    loadMuonNexus->setPropertyValue("SpectrumMin",
-                                    getPropertyValue("SpectrumMin"));
+    loadMuonNexus->setPropertyValue("SpectrumMax", getPropertyValue("SpectrumMax"));
+    loadMuonNexus->setPropertyValue("SpectrumMin", getPropertyValue("SpectrumMin"));
   }
-  loadMuonNexus->setPropertyValue("EntryNumber",
-                                  getPropertyValue("EntryNumber"));
+  loadMuonNexus->setPropertyValue("EntryNumber", getPropertyValue("EntryNumber"));
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   // try
@@ -166,30 +151,24 @@ void LoadNexus::runLoadMuonNexus() {
 }
 
 void LoadNexus::runLoadNexusProcessed() {
-  IAlgorithm_sptr loadNexusPro =
-      createChildAlgorithm("LoadNexusProcessed", 0., 1.);
+  IAlgorithm_sptr loadNexusPro = createChildAlgorithm("LoadNexusProcessed", 0., 1.);
   // Pass through the same input filename
   loadNexusPro->setPropertyValue("Filename", m_filename);
   // Set the workspace property
   loadNexusPro->setPropertyValue("OutputWorkspace", m_workspace);
 
-  loadNexusPro->setPropertyValue("SpectrumMin",
-                                 getPropertyValue("SpectrumMin"));
-  loadNexusPro->setPropertyValue("SpectrumMax",
-                                 getPropertyValue("SpectrumMax"));
-  loadNexusPro->setPropertyValue("SpectrumList",
-                                 getPropertyValue("SpectrumList"));
+  loadNexusPro->setPropertyValue("SpectrumMin", getPropertyValue("SpectrumMin"));
+  loadNexusPro->setPropertyValue("SpectrumMax", getPropertyValue("SpectrumMax"));
+  loadNexusPro->setPropertyValue("SpectrumList", getPropertyValue("SpectrumList"));
 
   // Get the array passed in the spectrum_list, if an empty array was passed use
   // the default
 
-  loadNexusPro->setPropertyValue("EntryNumber",
-                                 getPropertyValue("EntryNumber"));
+  loadNexusPro->setPropertyValue("EntryNumber", getPropertyValue("EntryNumber"));
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   loadNexusPro->execute();
   if (!loadNexusPro->isExecuted())
-    g_log.error(
-        "Unable to successfully run LoadNexusProcessed Child Algorithm");
+    g_log.error("Unable to successfully run LoadNexusProcessed Child Algorithm");
 
   setOutputWorkspace(loadNexusPro);
 }
@@ -205,18 +184,14 @@ void LoadNexus::runLoadIsisNexus() {
   // the default
   std::vector<int> specList = getProperty("SpectrumList");
   if (!specList.empty())
-    loadNexusPro->setPropertyValue("SpectrumList",
-                                   getPropertyValue("SpectrumList"));
+    loadNexusPro->setPropertyValue("SpectrumList", getPropertyValue("SpectrumList"));
   //
   int specMax = getProperty("SpectrumMax");
   if (specMax != Mantid::EMPTY_INT()) {
-    loadNexusPro->setPropertyValue("SpectrumMax",
-                                   getPropertyValue("SpectrumMax"));
-    loadNexusPro->setPropertyValue("SpectrumMin",
-                                   getPropertyValue("SpectrumMin"));
+    loadNexusPro->setPropertyValue("SpectrumMax", getPropertyValue("SpectrumMax"));
+    loadNexusPro->setPropertyValue("SpectrumMin", getPropertyValue("SpectrumMin"));
   }
-  loadNexusPro->setPropertyValue("EntryNumber",
-                                 getPropertyValue("EntryNumber"));
+  loadNexusPro->setPropertyValue("EntryNumber", getPropertyValue("EntryNumber"));
 
   loadNexusPro->execute();
 
@@ -227,8 +202,7 @@ void LoadNexus::runLoadIsisNexus() {
 }
 
 void LoadNexus::runLoadTOFRawNexus() {
-  IAlgorithm_sptr loadNexusPro =
-      createChildAlgorithm("LoadTOFRawNexus", 0., 1.);
+  IAlgorithm_sptr loadNexusPro = createChildAlgorithm("LoadTOFRawNexus", 0., 1.);
   // Pass through the same input filename
   loadNexusPro->setPropertyValue("Filename", m_filename);
   // Set the workspace property
@@ -238,15 +212,12 @@ void LoadNexus::runLoadTOFRawNexus() {
   // the default
   std::vector<int> specList = getProperty("SpectrumList");
   if (!specList.empty())
-    loadNexusPro->setPropertyValue("SpectrumList",
-                                   getPropertyValue("SpectrumList"));
+    loadNexusPro->setPropertyValue("SpectrumList", getPropertyValue("SpectrumList"));
   //
   int specMax = getProperty("SpectrumMax");
   if (specMax != Mantid::EMPTY_INT()) {
-    loadNexusPro->setPropertyValue("SpectrumMax",
-                                   getPropertyValue("SpectrumMax"));
-    loadNexusPro->setPropertyValue("SpectrumMin",
-                                   getPropertyValue("SpectrumMin"));
+    loadNexusPro->setPropertyValue("SpectrumMax", getPropertyValue("SpectrumMax"));
+    loadNexusPro->setPropertyValue("SpectrumMin", getPropertyValue("SpectrumMin"));
   }
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
@@ -273,12 +244,11 @@ void LoadNexus::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
   const size_t count = loader->propertyCount();
   for (size_t i = 0; i < count; ++i) {
     Property *prop = loaderProps[i];
-    if (dynamic_cast<IWorkspaceProperty *>(prop) &&
-        prop->direction() == Direction::Output) {
+    if (dynamic_cast<IWorkspaceProperty *>(prop) && prop->direction() == Direction::Output) {
       const std::string &name = prop->name();
       if (!this->existsProperty(name)) {
-        declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-            name, loader->getPropertyValue(name), Direction::Output));
+        declareProperty(
+            std::make_unique<WorkspaceProperty<Workspace>>(name, loader->getPropertyValue(name), Direction::Output));
       }
       Workspace_sptr wkspace = loader->getProperty(name);
       setProperty(name, wkspace);

@@ -42,8 +42,7 @@ class GuiStateDirectorTest(unittest.TestCase):
         except ValueError:
             has_raised = True
         self.assertFalse(has_raised)
-        self.assertEqual(state.wavelength.wavelength_low,  [1.5])
-        self.assertEqual(state.wavelength.wavelength_high,  [12.5])
+        self.assertEqual(state.wavelength.wavelength_interval.wavelength_full_range,  (1.5, 12.5))
 
     def test_that_will_raise_when_models_are_incomplete(self):
         state_model = self._get_state_gui_model()
@@ -58,8 +57,7 @@ class GuiStateDirectorTest(unittest.TestCase):
         row_entry = self._get_row_entry(option_string="WavelengthMin=3.14,WavelengthMax=10.3")
         state = director.create_state(row_entry)
         self.assertTrue(isinstance(state, StateGuiModel))
-        self.assertEqual(state.all_states.wavelength.wavelength_low,  [3.14])
-        self.assertEqual(state.all_states.wavelength.wavelength_high,  [10.3])
+        self.assertEqual(state.all_states.wavelength.wavelength_interval.wavelength_full_range,  (3.14, 10.3))
 
     def test_that_shift_and_scale_set_on_state_from_options_column(self):
         state_model = self._get_state_gui_model()

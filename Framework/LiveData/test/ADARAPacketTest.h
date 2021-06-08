@@ -44,8 +44,7 @@ public:
 
   void testBankedEventPacketParser() {
     std::shared_ptr<ADARA::BankedEventPkt> pkt =
-        basicPacketTests<ADARA::BankedEventPkt>(
-            bankedEventPacket, sizeof(bankedEventPacket), 728504567, 761741666);
+        basicPacketTests<ADARA::BankedEventPkt>(bankedEventPacket, sizeof(bankedEventPacket), 728504567, 761741666);
     if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->cycle(), 0x3C);
       TS_ASSERT_EQUALS(pkt->pulseCharge(), 1549703);
@@ -77,8 +76,7 @@ public:
 
   void testBeamMonitorPacketParser() {
     std::shared_ptr<ADARA::BeamMonitorPkt> pkt =
-        basicPacketTests<ADARA::BeamMonitorPkt>(
-            beamMonitorPacket, sizeof(beamMonitorPacket), 728504567, 761741666);
+        basicPacketTests<ADARA::BeamMonitorPkt>(beamMonitorPacket, sizeof(beamMonitorPacket), 728504567, 761741666);
     if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->cycle(), 0x3c);
       TS_ASSERT_EQUALS(pkt->flags(), 0);
@@ -91,21 +89,18 @@ public:
 
   void testDeviceDescriptorPacketParser() {
     std::shared_ptr<ADARA::DeviceDescriptorPkt> pkt =
-        basicPacketTests<ADARA::DeviceDescriptorPkt>(
-            devDesPacket, sizeof(devDesPacket), 726785379, 0);
+        basicPacketTests<ADARA::DeviceDescriptorPkt>(devDesPacket, sizeof(devDesPacket), 726785379, 0);
     if (pkt != nullptr) {
       // Basic XML validation
       Poco::XML::DOMParser parser;
-      TS_ASSERT_THROWS_NOTHING(
-          Poco::AutoPtr<Poco::XML::Document> doc = parser.parseMemory(
-              pkt->description().c_str(), pkt->description().length()));
+      TS_ASSERT_THROWS_NOTHING(Poco::AutoPtr<Poco::XML::Document> doc =
+                                   parser.parseMemory(pkt->description().c_str(), pkt->description().length()));
     }
   }
 
   void testRunStatusPacketParser() {
     std::shared_ptr<ADARA::RunStatusPkt> pkt =
-        basicPacketTests<ADARA::RunStatusPkt>(
-            runStatusPacket, sizeof(runStatusPacket), 728504568, 5625794);
+        basicPacketTests<ADARA::RunStatusPkt>(runStatusPacket, sizeof(runStatusPacket), 728504568, 5625794);
 
     if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->runNumber(), 13247);
@@ -120,8 +115,8 @@ public:
   }
 
   void testRTDLPacketParser() {
-    std::shared_ptr<ADARA::RTDLPkt> pkt = basicPacketTests<ADARA::RTDLPkt>(
-        rtdlPacket, sizeof(rtdlPacket), 728504567, 761741666);
+    std::shared_ptr<ADARA::RTDLPkt> pkt =
+        basicPacketTests<ADARA::RTDLPkt>(rtdlPacket, sizeof(rtdlPacket), 728504567, 761741666);
 
     if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->cycle(), 60);
@@ -138,14 +133,12 @@ public:
 
   void testSyncPacketParser() {
     // the basic tests cover everything in the sync packet
-    basicPacketTests<ADARA::SyncPkt>(syncPacket, sizeof(syncPacket), 728504568,
-                                     5617153);
+    basicPacketTests<ADARA::SyncPkt>(syncPacket, sizeof(syncPacket), 728504568, 5617153);
   }
 
   void testVariableDoublePacketParser() {
     std::shared_ptr<ADARA::VariableDoublePkt> pkt =
-        basicPacketTests<ADARA::VariableDoublePkt>(
-            variableDoublePacket, sizeof(variableDoublePacket), 728281149, 0);
+        basicPacketTests<ADARA::VariableDoublePkt>(variableDoublePacket, sizeof(variableDoublePacket), 728281149, 0);
 
     if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->devId(), 2);
@@ -160,8 +153,7 @@ public:
 
   void testVariableU32PacketParser() {
     std::shared_ptr<ADARA::VariableU32Pkt> pkt =
-        basicPacketTests<ADARA::VariableU32Pkt>(
-            variableU32Packet, sizeof(variableU32Packet), 728281149, 0);
+        basicPacketTests<ADARA::VariableU32Pkt>(variableU32Packet, sizeof(variableU32Packet), 728281149, 0);
 
     if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->devId(), 2);
@@ -179,10 +171,10 @@ protected:
   // public member
   // The test class will handle everything from there.
   using ADARA::Parser::rxPacket;
-#define DEFINE_RX_PACKET(PktType)                                              \
-  bool rxPacket(const PktType &pkt) override {                                 \
-    m_pkt.reset(new PktType(pkt));                                             \
-    return false;                                                              \
+#define DEFINE_RX_PACKET(PktType)                                                                                      \
+  bool rxPacket(const PktType &pkt) override {                                                                         \
+    m_pkt.reset(new PktType(pkt));                                                                                     \
+    return false;                                                                                                      \
   }
 
   DEFINE_RX_PACKET(ADARA::RawDataPkt)
@@ -208,9 +200,7 @@ protected:
   // Call the base class rxPacket(const ADARA::Packet &pkt) which will
   // eventually result
   // in the execution of one of the rxPacket() functions defined above
-  bool rxPacket(const ADARA::Packet &pkt) override {
-    return ADARA::Parser::rxPacket(pkt);
-  }
+  bool rxPacket(const ADARA::Packet &pkt) override { return ADARA::Parser::rxPacket(pkt); }
 
 private:
   unsigned char *m_initialBufferAddr;
@@ -221,8 +211,7 @@ private:
   // Returns a shared pointer to the packet so further tests can
   // be conducted.
   template <class T>
-  std::shared_ptr<T> basicPacketTests(const unsigned char *data, unsigned len,
-                                      unsigned pulseHigh, unsigned pulseLow) {
+  std::shared_ptr<T> basicPacketTests(const unsigned char *data, unsigned len, unsigned pulseHigh, unsigned pulseLow) {
     parseOnePacket(data, len);
 
     // verify that we can cast the packet to the type we expect it to be
@@ -259,8 +248,7 @@ private:
 
     unsigned char *bufferAddr = bufferFillAddress();
     TS_ASSERT(bufferAddr != nullptr);
-    TS_ASSERT(bufferAddr ==
-              m_initialBufferAddr); // verify that there's nothing in the buffer
+    TS_ASSERT(bufferAddr == m_initialBufferAddr); // verify that there's nothing in the buffer
 
     memcpy(bufferAddr, data, len);
     bufferBytesAppended(len);
@@ -271,14 +259,10 @@ private:
     // We don't actually use the messages for anything, though.
     TS_ASSERT_THROWS_NOTHING((packetsParsed = bufferParse(bufferParseLog, 1)));
     TS_ASSERT(packetsParsed == 1);
-    TS_ASSERT(
-        m_pkt !=
-        std::shared_ptr<ADARA::Packet>()); // verify m_pkt has been updated
+    TS_ASSERT(m_pkt != std::shared_ptr<ADARA::Packet>()); // verify m_pkt has been updated
 
-    TS_ASSERT(bufferParse(bufferParseLog, 0) ==
-              0); // try to parse again, make sure there's nothing to parse
-    TS_ASSERT(bufferFillAddress() ==
-              m_initialBufferAddr); // verify that there's nothing in the buffer
+    TS_ASSERT(bufferParse(bufferParseLog, 0) == 0);        // try to parse again, make sure there's nothing to parse
+    TS_ASSERT(bufferFillAddress() == m_initialBufferAddr); // verify that there's nothing in the buffer
   }
 
   // Make it easy to compare the actual pulse ID value to the formatted

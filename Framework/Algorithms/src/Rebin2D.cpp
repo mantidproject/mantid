@@ -41,31 +41,21 @@ void Rebin2D::init() {
   using Kernel::Direction;
   using Kernel::PropertyWithValue;
   using Kernel::RebinParamsValidator;
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
-                  "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input), "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
-  const std::string docString =
-      "A comma separated list of first bin boundary, width, last bin boundary. "
-      "Optionally "
-      "this can be followed by a comma and more widths and last boundary "
-      "pairs. "
-      "Negative width values indicate logarithmic binning.";
+  const std::string docString = "A comma separated list of first bin boundary, width, last bin boundary. "
+                                "Optionally "
+                                "this can be followed by a comma and more widths and last boundary "
+                                "pairs. "
+                                "Negative width values indicate logarithmic binning.";
   auto rebinValidator = std::make_shared<RebinParamsValidator>();
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Axis1Binning", rebinValidator),
-      docString);
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Axis2Binning", rebinValidator),
-      docString);
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("UseFractionalArea", false,
-                                                Direction::Input),
-      "Flag to turn on the using the fractional area tracking RebinnedOutput "
-      "workspace\n."
-      "Default is false.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Axis1Binning", rebinValidator), docString);
+  declareProperty(std::make_unique<ArrayProperty<double>>("Axis2Binning", rebinValidator), docString);
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("UseFractionalArea", false, Direction::Input),
+                  "Flag to turn on the using the fractional area tracking RebinnedOutput "
+                  "workspace\n."
+                  "Default is false.");
   declareProperty(std::make_unique<PropertyWithValue<bool>>("Transpose", false),
                   "Run the Transpose algorithm on the resulting matrix.");
 }
@@ -76,12 +66,10 @@ void Rebin2D::init() {
 void Rebin2D::exec() {
   // Information to form input grid
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  const NumericAxis *oldAxis2 =
-      dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
+  const NumericAxis *oldAxis2 = dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
   if (!oldAxis2) {
-    throw std::invalid_argument(
-        "Vertical axis is not a numeric axis, cannot rebin. "
-        "If it is a spectra axis try running ConvertSpectrumAxis first.");
+    throw std::invalid_argument("Vertical axis is not a numeric axis, cannot rebin. "
+                                "If it is a spectra axis try running ConvertSpectrumAxis first.");
   }
 
   const auto &oldXEdges = inputWS->binEdges(0);
@@ -105,11 +93,10 @@ void Rebin2D::exec() {
   auto inputHasFA = std::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
   // For MatrixWorkspace, only UseFractionalArea=False makes sense.
   if (useFractionalArea && !inputHasFA) {
-    g_log.warning(
-        "Fractional area tracking was requested but input workspace does "
-        "not have calculated bin fractions. Assuming bins are exact "
-        "(fractions are unity). The results may not be accurate if this "
-        "workspace was previously rebinned.");
+    g_log.warning("Fractional area tracking was requested but input workspace does "
+                  "not have calculated bin fractions. Assuming bins are exact "
+                  "(fractions are unity). The results may not be accurate if this "
+                  "workspace was previously rebinned.");
   }
   // For RebinnedOutput, should always use useFractionalArea to get the
   // correct signal and errors (so that weights of input ws is accounted for).
@@ -120,8 +107,7 @@ void Rebin2D::exec() {
     useFractionalArea = true;
   }
 
-  auto outputWS =
-      createOutputWorkspace(inputWS, newXBins, newYBins, useFractionalArea);
+  auto outputWS = createOutputWorkspace(inputWS, newXBins, newYBins, useFractionalArea);
   auto outputRB = std::dynamic_pointer_cast<RebinnedOutput>(outputWS);
 
   // Progress reports & cancellation
@@ -142,12 +128,10 @@ void Rebin2D::exec() {
       const double x_jp1 = oldXEdges[j + 1];
       Quadrilateral inputQ(x_j, x_jp1, vlo, vhi);
       if (!useFractionalArea) {
-        FractionalRebinning::rebinToOutput(std::move(inputQ), inputWS, i, j,
-                                           *outputWS, newYBins.rawData());
+        FractionalRebinning::rebinToOutput(std::move(inputQ), inputWS, i, j, *outputWS, newYBins.rawData());
       } else {
-        FractionalRebinning::rebinToFractionalOutput(
-            std::move(inputQ), inputWS, i, j, *outputRB, newYBins.rawData(),
-            inputHasFA);
+        FractionalRebinning::rebinToFractionalOutput(std::move(inputQ), inputWS, i, j, *outputRB, newYBins.rawData(),
+                                                     inputHasFA);
       }
     }
 
@@ -183,18 +167,14 @@ void Rebin2D::exec() {
  * @param useFractionalArea :: use a RebinnedOutput workspace
  * @return A pointer to the output workspace
  */
-MatrixWorkspace_sptr
-Rebin2D::createOutputWorkspace(const MatrixWorkspace_const_sptr &parent,
-                               BinEdges &newXBins, BinEdges &newYBins,
-                               const bool useFractionalArea) const {
+MatrixWorkspace_sptr Rebin2D::createOutputWorkspace(const MatrixWorkspace_const_sptr &parent, BinEdges &newXBins,
+                                                    BinEdges &newYBins, const bool useFractionalArea) const {
   using Kernel::VectorHelper::createAxisFromRebinParams;
 
   auto &newY = newYBins.mutableRawData();
   // First create the two sets of bin boundaries
-  static_cast<void>(createAxisFromRebinParams(getProperty("Axis1Binning"),
-                                              newXBins.mutableRawData()));
-  const int newYSize =
-      createAxisFromRebinParams(getProperty("Axis2Binning"), newY);
+  static_cast<void>(createAxisFromRebinParams(getProperty("Axis1Binning"), newXBins.mutableRawData()));
+  const int newYSize = createAxisFromRebinParams(getProperty("Axis2Binning"), newY);
   // and now the workspace
   HistogramData::BinEdges binEdges(newXBins);
   MatrixWorkspace_sptr outputWS;

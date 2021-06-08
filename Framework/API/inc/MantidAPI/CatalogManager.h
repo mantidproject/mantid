@@ -27,9 +27,7 @@ public:
   CatalogManagerImpl &operator=(const CatalogManagerImpl &) = delete;
   /// Creates a new catalog and session, and adds it to the activeCatalogs
   /// container.
-  CatalogSession_sptr login(const std::string &username,
-                            const std::string &password,
-                            const std::string &endpoint,
+  CatalogSession_sptr login(const std::string &username, const std::string &password, const std::string &endpoint,
                             const std::string &facility);
   /// Get a specific catalog using the sessionID.
   ICatalog_sptr getCatalog(const std::string &sessionID);
@@ -58,7 +56,6 @@ using CatalogManager = Kernel::SingletonHolder<CatalogManagerImpl>;
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Kernel::SingletonHolder<Mantid::API::CatalogManagerImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Kernel::SingletonHolder<Mantid::API::CatalogManagerImpl>;
 }
 } // namespace Mantid

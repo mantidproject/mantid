@@ -42,8 +42,7 @@ static constexpr const char *RUN_TITLE = "title";
  * @returns : a vector contining the data (name, number and title) for each run
  * @throws : if there is an error fetching the data
  */
-std::vector<IJournal::RunData> getRuns(IJournal *journal,
-                                       std::string const &investigationId) {
+std::vector<IJournal::RunData> getRuns(IJournal *journal, std::string const &investigationId) {
   static auto valuesToLookup = std::vector<std::string>{RUN_NUMBER, RUN_TITLE};
   auto filters = IJournal::RunData{{INVESTIGATION_ID, investigationId}};
   auto runs = journal->getRuns(valuesToLookup, filters);
@@ -56,10 +55,8 @@ std::vector<IJournal::RunData> getRuns(IJournal *journal,
  * @returns : a table workspace containing one row for each run, with columns
  * for the data fields of interest (name, number and title)
  */
-ITableWorkspace_sptr
-convertRunDataToTable(std::vector<IJournal::RunData> &runs) {
-  auto workspace =
-      API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+ITableWorkspace_sptr convertRunDataToTable(std::vector<IJournal::RunData> &runs) {
+  auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
 
   workspace->addColumn("str", "Name");
   workspace->addColumn("str", "Run Number");
@@ -93,8 +90,7 @@ std::string getDefaultInstrument(std::vector<std::string> const &instruments) {
     return std::string();
 
   auto instrument = ConfigService::Instance().getInstrument().name();
-  if (std::find(instruments.cbegin(), instruments.cend(), instrument) ==
-      instruments.cend()) {
+  if (std::find(instruments.cbegin(), instruments.cend(), instrument) == instruments.cend()) {
     instrument = instruments.front();
   }
   return instrument;
@@ -105,18 +101,12 @@ void ISISJournalGetExperimentRuns::init() {
   auto const instruments = getInstruments();
   auto const instrument = getDefaultInstrument(instruments);
 
-  declareProperty("Instrument", instrument,
-                  std::make_shared<StringListValidator>(instruments),
-                  "The instrument name");
-  declareProperty("Cycle", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
-                  "The cycle name, for example 19_4");
-  declareProperty("InvestigationId", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("Instrument", instrument, std::make_shared<StringListValidator>(instruments), "The instrument name");
+  declareProperty("Cycle", "", std::make_shared<MandatoryValidator<std::string>>(), "The cycle name, for example 19_4");
+  declareProperty("InvestigationId", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "ID of the selected investigation");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "OutputWorkspace", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the workspace to store the run details.");
 }
 
@@ -137,9 +127,8 @@ void ISISJournalGetExperimentRuns::exec() {
  * @param instrument : the instrument name (case insensitive), e.g. INTER
  * @param cycle : the cycle name, e.g. 19_4
  */
-std::unique_ptr<IJournal>
-ISISJournalGetExperimentRuns::makeJournal(std::string const &instrument,
-                                          std::string const &cycle) {
+std::unique_ptr<IJournal> ISISJournalGetExperimentRuns::makeJournal(std::string const &instrument,
+                                                                    std::string const &cycle) {
   return std::make_unique<ISISJournal>(instrument, cycle);
 }
 } // namespace DataHandling

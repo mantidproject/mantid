@@ -21,26 +21,21 @@ using namespace Mantid::DataObjects;
 // It is used to print out information, warning and error messages
 
 void SINQTranspose3D::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-      "InputWorkspace", "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input));
   std::vector<std::string> transposeOptions{"Y,X,Z", "X,Z,Y", "TRICS", "AMOR"};
-  this->declareProperty("TransposeOption", "Y,X,Z",
-                        std::make_shared<StringListValidator>(transposeOptions),
+  this->declareProperty("TransposeOption", "Y,X,Z", std::make_shared<StringListValidator>(transposeOptions),
                         "The transpose option");
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-      "OutputWorkspace", "", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output));
 }
 
 void SINQTranspose3D::exec() {
-  IMDHistoWorkspace_sptr inWS =
-      IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
+  IMDHistoWorkspace_sptr inWS = IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
 
   std::string transposeOption = getProperty("TransposeOption");
 
   if (inWS->getNumDims() != 3) {
-    throw std::runtime_error(
-        "This algorithm only works with MDHistoWorkspaces of rank 3!");
+    throw std::runtime_error("This algorithm only works with MDHistoWorkspaces of rank 3!");
   }
 
   if (transposeOption == "Y,X,Z") {
@@ -207,9 +202,8 @@ void SINQTranspose3D::doAMOR(const IMDHistoWorkspace_sptr &inWS) {
   setProperty("OutputWorkspace", outWS);
 }
 
-void SINQTranspose3D::copyMetaData(
-    const Mantid::API::IMDHistoWorkspace_sptr &inws,
-    const Mantid::API::IMDHistoWorkspace_sptr &outws) {
+void SINQTranspose3D::copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
+                                   const Mantid::API::IMDHistoWorkspace_sptr &outws) {
   outws->setTitle(inws->getTitle());
   ExperimentInfo_sptr info;
 

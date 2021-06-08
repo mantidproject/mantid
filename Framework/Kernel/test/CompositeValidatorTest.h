@@ -73,8 +73,7 @@ public:
     TS_ASSERT_EQUALS("b2", *(allowed2.begin()));
   }
 
-  void
-  test_Given_TwoValidators_When_CheckIsValid_That_ValidValuesReturnValid() {
+  void test_Given_TwoValidators_When_CheckIsValid_That_ValidValuesReturnValid() {
     // Arrange
     auto val1 = std::make_shared<BoundedValidator<int>>(1, 50);
     auto val2 = std::make_shared<BoundedValidator<int>>(60, 100);

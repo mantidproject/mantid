@@ -32,16 +32,13 @@ const std::string SignalOverError::name() const { return "SignalOverError"; }
 int SignalOverError::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SignalOverError::category() const {
-  return "Arithmetic\\Errors";
-}
+const std::string SignalOverError::category() const { return "Arithmetic\\Errors"; }
 
 //----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Perform the Y/E */
-void SignalOverError::performUnaryOperation(const double XIn, const double YIn,
-                                            const double EIn, double &YOut,
+void SignalOverError::performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut,
                                             double &EOut) {
   (void)XIn; // Avoid compiler warning
   // Signal / Error

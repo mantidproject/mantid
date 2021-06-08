@@ -31,7 +31,8 @@ public:
 };
 
 // wrapper of that sink to be a stream
-boost::iostreams::stream<PyStdoutSink> PyStdout;
+PyStdoutSink pyStdoutSinkInstance = PyStdoutSink(); // needs to be initialized separately
+boost::iostreams::stream<PyStdoutSink> PyStdout(pyStdoutSinkInstance);
 
 } // anonymous namespace
 

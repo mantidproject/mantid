@@ -45,9 +45,7 @@ public:
 
   /// The version number
   int version() const override { return 2; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveAscii"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveAscii"}; }
   /// The category
   const std::string category() const override { return "DataHandling\\Text"; }
   /// Returns a confidence value that this algorithm can load a file
@@ -67,11 +65,9 @@ protected:
   /// Check if the file has been found to incosistantly include spectra IDs
   void inconsistantIDCheck() const;
   /// Split the data into columns.
-  int splitIntoColumns(std::list<std::string> &columns,
-                       const std::string &str) const;
+  int splitIntoColumns(std::list<std::string> &columns, const std::string &str) const;
   /// Fill the given vector with the data values
-  void fillInputValues(std::vector<double> &values,
-                       const std::list<std::string> &columns) const;
+  void fillInputValues(std::vector<double> &values, const std::list<std::string> &columns) const;
   // write the values in the current line to teh end fo teh current spectra
   void addToCurrentSpectra(std::list<std::string> &columns);
   // check that the nubmer of columns in the current line match the number found
@@ -80,11 +76,9 @@ protected:
   // interpret a line that has been deemed valid enough to look at.
   void parseLine(const std::string &line, std::list<std::string> &columns);
   // find the number of collums we should expect from now on
-  void setcolumns(std::ifstream &file, std::string &line,
-                  std::list<std::string> &columns);
+  void setcolumns(std::ifstream &file, std::string &line, std::list<std::string> &columns);
   // wirte the spectra to the workspace
-  void writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
-                        const size_t &numSpectra) const;
+  void writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace, const size_t &numSpectra) const;
   // Process the header information. This implementation just skips it entirely.
   void processHeader(std::ifstream &file);
   /// The column separator

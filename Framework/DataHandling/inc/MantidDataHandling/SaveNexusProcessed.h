@@ -52,15 +52,12 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
-  void saveSpectraDetectorMapNexus(
-      const API::MatrixWorkspace &ws, ::NeXus::File *file,
-      const std::vector<int> &wsIndices,
-      const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
+  void saveSpectraDetectorMapNexus(const API::MatrixWorkspace &ws, ::NeXus::File *file,
+                                   const std::vector<int> &wsIndices,
+                                   const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
-  void saveSpectrumNumbersNexus(
-      const API::MatrixWorkspace &ws, ::NeXus::File *file,
-      const std::vector<int> &wsIndices,
-      const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
+  void saveSpectrumNumbersNexus(const API::MatrixWorkspace &ws, ::NeXus::File *file, const std::vector<int> &wsIndices,
+                                const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
   virtual bool saveLegacyInstrument() { return true; }
 
@@ -74,25 +71,18 @@ protected:
   void exec() override;
 
 private:
-  void getWSIndexList(
-      std::vector<int> &indices,
-      const Mantid::API::MatrixWorkspace_const_sptr &matrixWorkspace);
+  void getWSIndexList(std::vector<int> &indices, const Mantid::API::MatrixWorkspace_const_sptr &matrixWorkspace);
 
   template <class T>
-  static void appendEventListData(const std::vector<T> &events, size_t offset,
-                                  double *tofs, float *weights,
+  static void appendEventListData(const std::vector<T> &events, size_t offset, double *tofs, float *weights,
                                   float *errorSquareds, int64_t *pulsetimes);
 
-  void execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
-                 const bool uniformSpectra, const std::vector<int> &spec);
+  void execEvent(Mantid::NeXus::NexusFileIO *nexusFile, const bool uniformSpectra, const std::vector<int> &spec);
   /// sets non workspace properties for the algorithm
-  void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
-                          const std::string &propertyValue,
+  void setOtherProperties(IAlgorithm *alg, const std::string &propertyName, const std::string &propertyValue,
                           int perioidNum) override;
-  void doExec(const Mantid::API::Workspace_sptr &inputWorkspace,
-              std::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
-              const bool keepFile = false,
-              boost::optional<size_t> entryNumber = boost::optional<size_t>());
+  void doExec(const Mantid::API::Workspace_sptr &inputWorkspace, std::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
+              const bool keepFile = false, boost::optional<size_t> entryNumber = boost::optional<size_t>());
 
   /// Pointer to the local workspace
   API::MatrixWorkspace_const_sptr m_inputWorkspace;

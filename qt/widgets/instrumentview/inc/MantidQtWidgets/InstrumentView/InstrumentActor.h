@@ -60,7 +60,7 @@ public:
   /// Invalid workspace index in detector index to workspace index lookup
   static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
   /// Value that indicates this pixel data is invalid
-  static constexpr double INVALID_VALUE = -std::numeric_limits<double>::max();
+  static constexpr double INVALID_VALUE = std::numeric_limits<double>::lowest();
 
   /// Constructor
   InstrumentActor(const QString &wsName, bool autoscaling = true,

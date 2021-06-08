@@ -34,14 +34,10 @@ private:
   void init() override;
   void exec() override;
 
-  DataObjects::EventWorkspace_sptr
-  getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWS);
-  DataObjects::EventWorkspace_sptr
-  cloneInputWorkspace(const API::Workspace_sptr &inputWS);
-  void runMaskDetectors(const API::MatrixWorkspace_sptr &inputWS,
-                        const API::MatrixWorkspace_sptr &maskWS);
-  void runFilterByXValue(const API::MatrixWorkspace_sptr &inputWS,
-                         const double xmin, const double xmax);
+  DataObjects::EventWorkspace_sptr getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWS);
+  DataObjects::EventWorkspace_sptr cloneInputWorkspace(const API::Workspace_sptr &inputWS);
+  void runMaskDetectors(const API::MatrixWorkspace_sptr &inputWS, const API::MatrixWorkspace_sptr &maskWS);
+  void runFilterByXValue(const API::MatrixWorkspace_sptr &inputWS, const double xmin, const double xmax);
 };
 
 } // namespace WorkflowAlgorithms

@@ -18,7 +18,7 @@ sort of the InputWorkspace.
 Usage
 -----
 
-**Example - sort a peaks workspace by column name:**  
+**Example - sort a peaks workspace by column name:**
 
 .. testcode:: ExSortPeaksWorkspaceSimple
 

@@ -142,7 +142,14 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="MantidQt::MantidWidgets::PreviewPlot" name="dataPlot" native="true"/>
+         <widget class="MantidQt::MantidWidgets::PreviewPlot" name="dataPlot" native="true">
+          <property name="toolTip">
+           <string>Use right-click for plot options</string>
+          </property>
+          <property name="toolTipDuration">
+           <number>2000</number>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -152,7 +159,14 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="MantidQt::MantidWidgets::PreviewPlot" name="correctedPlot" native="true"/>
+         <widget class="MantidQt::MantidWidgets::PreviewPlot" name="correctedPlot" native="true">
+          <property name="toolTip">
+           <string>Use right-click for plot options</string>
+          </property>
+          <property name="toolTipDuration">
+           <number>2000</number>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

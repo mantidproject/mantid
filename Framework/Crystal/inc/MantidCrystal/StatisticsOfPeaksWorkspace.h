@@ -23,23 +23,15 @@ class MANTID_CRYSTAL_DLL StatisticsOfPeaksWorkspace : public API::Algorithm {
 public:
   StatisticsOfPeaksWorkspace();
   /// Algorithm's name for identification
-  const std::string name() const override {
-    return "StatisticsOfPeaksWorkspace";
-  };
+  const std::string name() const override { return "StatisticsOfPeaksWorkspace"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Statistics of a PeaksWorkspace.";
-  }
+  const std::string summary() const override { return "Statistics of a PeaksWorkspace."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"ShowPeakHKLOffsets"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ShowPeakHKLOffsets"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Crystal\\Peaks;DataHandling\\Text";
-  }
+  const std::string category() const override { return "Crystal\\Peaks;DataHandling\\Text"; }
 
 private:
   /// Point Groups possible
@@ -49,8 +41,7 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Runs SortHKL on workspace
-  void doSortHKL(const Mantid::API::Workspace_sptr &ws,
-                 const std::string &runName);
+  void doSortHKL(const Mantid::API::Workspace_sptr &ws, const std::string &runName);
 
   DataObjects::PeaksWorkspace_sptr ws;
 };
