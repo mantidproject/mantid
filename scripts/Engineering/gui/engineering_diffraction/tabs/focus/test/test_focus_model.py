@@ -46,36 +46,35 @@ class FocusModelTest(unittest.TestCase):
         self.assertEqual(load_sample.call_count, 0)
 
     @patch(file_path + ".DeleteWorkspace")
-    @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".Load")
     @patch(file_path + ".FocusModel._output_sample_logs")
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")
+    @patch(file_path + ".FocusModel._whole_inst_prefocus")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
-    def test_focus_run_for_each_bank(self, load_focus, run_focus, output, ads, logs, load, clone, delete):
+    def test_focus_run_for_each_bank(self, load_focus, run_focus, prefocus, output, ads, logs, load, delete):
         ads.retrieve.return_value = "test_wsp"
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
-        clone.side_effect = clone_ws_side_effect
 
         self.model.focus_run(["305761"], banks, False, "ENGINX", "0", None, None)
 
         self.assertEqual(len(banks), run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
                                      "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1],
-                                     "test_wsp", "test_wsp", DF_KWARG_SOUTH, "test_wsp", "engggui_calibration_bank_2")
+                                     "test_wsp", DF_KWARG_SOUTH, "engggui_calibration_bank_2")
 
     @patch(file_path + ".create_custom_grouping_workspace")
     @patch(file_path + ".DeleteWorkspace")
-    @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".Load")
     @patch(file_path + ".FocusModel._output_sample_logs")
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")
+    @patch(file_path + ".FocusModel._whole_inst_prefocus")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
-    def test_focus_run_for_custom_spectra(self, load_focus, run_focus, output, ads, logs, load, clone, delete, cgw):
+    def test_focus_run_for_custom_spectra(self, load_focus, run_focus, prefocus, output, ads, logs, load, delete, cgw):
         ads.retrieve.return_value = "test_wsp"
         spectra = "20-50"
         load_focus.return_value = "mocked_sample"
@@ -86,20 +85,20 @@ class FocusModelTest(unittest.TestCase):
         self.assertEqual(1, run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
                                      "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "Cropped",
-                                     "test_wsp", "test_wsp", DF_KWARG_CUSTOM, "test_wsp", "engggui_calibration_Cropped")
+                                     "test_wsp", DF_KWARG_CUSTOM, "engggui_calibration_Cropped")
 
     @patch(file_path + ".DeleteWorkspace")
-    @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".Load")
     @patch(file_path + ".FocusModel._output_sample_logs")
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")
     @patch(file_path + ".FocusModel._plot_focused_workspaces")
+    @patch(file_path + ".FocusModel._whole_inst_prefocus")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_plotted_when_checked(self, fetch_van, load_focus, run_focus, plot_focus, output, ads, logs, load,
-                                        clone, delete):
+    def test_focus_plotted_when_checked(self, fetch_van, load_focus, run_focus, prefocus, plot_focus, output, ads, logs,
+                                        load, delete):
         ads.doesExist.return_value = True
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         banks = ["1", "2"]
@@ -110,17 +109,17 @@ class FocusModelTest(unittest.TestCase):
         self.assertEqual(1, plot_focus.call_count)
 
     @patch(file_path + ".DeleteWorkspace")
-    @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".Load")
     @patch(file_path + ".FocusModel._output_sample_logs")
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")
     @patch(file_path + ".FocusModel._plot_focused_workspaces")
+    @patch(file_path + ".FocusModel._whole_inst_prefocus")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_not_plotted_when_not_checked(self, fetch_van, load_focus, run_focus, plot_focus, output, ads, logs,
-                                                load, clone, delete):
+    def test_focus_not_plotted_when_not_checked(self, fetch_van, load_focus, run_focus, prefocus, plot_focus, output,
+                                                ads, logs, load, delete):
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"

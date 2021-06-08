@@ -97,7 +97,7 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
     @patch(file_path + ".vanadium_corrections.handle_van_curves")
     @patch(file_path + ".Load")
-    @patch(file_path + ".generate_tof_fit_workspace")
+    @patch(file_path + ".generate_tof_fit_dictionary")
     @patch(class_path + "._plot_tof_fit")
     @patch(class_path + ".run_calibration")
     def test_plotting_check(self, calib, plot_tof, gen_tof, load, handle_vc, van, sample, output_files, update_table,
@@ -118,7 +118,7 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
     @patch(file_path + ".vanadium_corrections.handle_van_curves")
     @patch(file_path + ".Load")
-    @patch(file_path + ".generate_tof_fit_workspace")
+    @patch(file_path + ".generate_tof_fit_dictionary")
     @patch(class_path + "._plot_tof_fit")
     @patch(class_path + ".run_calibration")
     def test_plotting_check_cropped(self, calib, plot_tof_fit, gen_tof, load, handle_vc, van, sample,
