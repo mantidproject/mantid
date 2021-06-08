@@ -498,7 +498,6 @@ class SuperplotPresenter:
         """
         selection = self._view.getSelection()
         currentIndex = self._view.getSpectrumSliderPosition()
-        plottedData = self._model.getPlottedData()
         self._syncWithCurrentPlot()
         self._updateList()
         self._view.setSpectrumSliderPosition(currentIndex)
