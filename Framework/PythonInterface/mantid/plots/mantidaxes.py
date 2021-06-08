@@ -110,19 +110,6 @@ class MantidAxes(Axes):
         """
         super().clear()
         self.tracked_workspaces = dict()
-        self.creation_args = list()
-        self.interactive_markers = list()
-
-    def remove_all_curves(self):
-        """
-        Remove all curves from the axes.
-        """
-        for ws, artists in self.tracked_workspaces.items():
-            for artist in artists:
-                artist.remove(self)
-        self.tracked_workspaces = dict()
-        self.creation_args = list()
-        self.interactive_markers = list()
 
     def add_artist_correctly(self, artist):
         """
