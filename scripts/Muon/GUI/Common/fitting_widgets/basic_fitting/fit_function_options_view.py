@@ -119,6 +119,8 @@ class FitFunctionOptionsView(ui_form, base_widget):
             self.function_browser.setFunction("")
         else:
             self.function_browser.setFunction(str(fit_function))
+            # Required to update the parameter errors as they are not stored in the function string
+            self.function_browser.updateParameters(fit_function)
         self.function_browser.blockSignals(False)
         self.function_browser.setErrorsEnabled(True)
 
