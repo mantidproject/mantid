@@ -9,7 +9,6 @@ from .SuperplotView import SuperplotView
 from .SuperplotModel import SuperplotModel
 
 from mantid.api import mtd
-from mantid.plots.axesfunctions import plot
 from mantid.plots.utility import MantidAxType
 
 import matplotlib
