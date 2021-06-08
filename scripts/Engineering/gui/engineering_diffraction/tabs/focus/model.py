@@ -73,6 +73,11 @@ class FocusModel(object):
             region_calib = "engggui_calibration_Custom"
             name = 'Custom'
         if df_kwarg:
+            # check correct region calibration exists
+            if not Ads.doesExist(region_calib):
+                logger.warning(f"Cannot focus as the region calibration workspace \"{region_calib}\" is not "
+                               f"present.")
+                return
             for sample_path in sample_paths:
                 sample_workspace = path_handling.load_workspace(sample_path)
                 run_no = path_handling.get_run_number_from_path(sample_path, instrument)
@@ -99,6 +104,11 @@ class FocusModel(object):
                     else:
                         df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
                         region_calib = "engggui_calibration_bank_2"
+                    # check correct region calibration exists
+                    if not Ads.doesExist(region_calib):
+                        logger.warning(f"Cannot focus as the region calibration workspace \"{region_calib}\" is not "
+                                       f"present.")
+                        return
                     # need to clone these workspaces as they're altered in each run of focus
                     sample_ws_clone = CloneWorkspace(sample_workspace)
                     success = self._run_focus(sample_ws_clone, tof_output_name, integration_workspace,
