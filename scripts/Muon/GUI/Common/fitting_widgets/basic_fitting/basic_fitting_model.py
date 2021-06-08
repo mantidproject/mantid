@@ -435,7 +435,15 @@ class BasicFittingModel:
 
     def reset_fit_functions(self, new_functions: list) -> None:
         """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
-        self.fitting_context.single_fit_functions = new_functions
+        self.fitting_context.single_fit_functions = [self._clear_function_errors(func) for func in new_functions]
+
+    @staticmethod
+    def _clear_function_errors(function: IFunction) -> IFunction:
+        """Clears the errors of a function by setting them to zero."""
+        if function is not None:
+            for i in range(function.nParams()):
+                function.setError(i, 0.0)
+        return function
 
     def _reset_start_xs(self) -> None:
         """Resets the start Xs stored by the context."""
@@ -480,7 +488,7 @@ class BasicFittingModel:
     def _get_new_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
         """Returns the functions to use for the new datasets. It tries to use the existing functions if possible."""
         if len(self.fitting_context.dataset_names) == len(new_dataset_names):
-            return self.fitting_context.single_fit_functions
+            return [self._clear_function_errors(function) for function in self.fitting_context.single_fit_functions]
         else:
             return [self._get_new_function_for(name) for name in new_dataset_names]
 
@@ -488,10 +496,10 @@ class BasicFittingModel:
         """Returns the function to use for the new dataset. It tries to use an existing function if possible."""
         dataset_names = self.fitting_context.dataset_names
         if new_dataset_name in dataset_names:
-            return self._clone_function(
-                self.fitting_context.single_fit_functions[dataset_names.index(new_dataset_name)])
+            return self._clear_function_errors(self._clone_function(
+                self.fitting_context.single_fit_functions[dataset_names.index(new_dataset_name)]))
         else:
-            return self._clone_function(self.current_single_fit_function)
+            return self._clear_function_errors(self._clone_function(self.current_single_fit_function))
 
     def retrieve_first_good_data_from(self, workspace_name: str) -> float:
         """Returns the first good data value from a workspace."""
