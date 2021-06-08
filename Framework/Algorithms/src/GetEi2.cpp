@@ -355,7 +355,7 @@ MatrixWorkspace_sptr GetEi2::extractSpectrum(size_t ws_index, const double start
 
 /**
  * Calculate the width of the peak within the given region
- * @param data_ws :: The workspace containg the window around the peak
+ * @param data_ws :: The workspace congaing the window around the peak
  * @param prominence :: The factor that the peak must be above the error to
  * count as a peak
  * @param peak_x :: An output vector containing just the X values of the peak
@@ -533,13 +533,13 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
       ip1--;
     }
     // similarly, noise may cause two points around the
-    while (peak_y[ip1] == peak_y[ip2]) { // TODO: shold be smoothing with runnign average here
+    while (peak_y[ip1] == peak_y[ip2]) { // TODO: should be smoothing with running average here
       g_log.warning() << "A peak with a constant values on the trailing edge has "
                          "been found. The estimation of the "
                       << "half-height point will not be as accurate.\n";
       ip1--;
       if (ip1 < 0)
-        throw std::invalid_argument("trailing edge values are equal unil the start of the peak");
+        throw std::invalid_argument("trailing edge values are equal until the start of the peak");
     }
 
     xp_hh = peak_x[ip2] + (peak_x[ip1] - peak_x[ip2]) * ((hby2 - peak_y[ip2]) / (peak_y[ip1] - peak_y[ip2]));
@@ -575,7 +575,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
                       << "half-height point will not be as accurate.\n";
       im1++;
     }
-    while (peak_y[im1] == peak_y[im2]) { // TODO: shoile be smoothing with runnign average here
+    while (peak_y[im1] == peak_y[im2]) { // TODO: should be smoothing with running average here
       g_log.warning() << "A peak with a constant values on the rising edge has "
                          "been found. The estimation of the "
                       << "half-height point will not be as accurate.\n";
