@@ -98,6 +98,7 @@ set(SRC_FILES
     src/SaveMD.cpp
     src/SaveMD2.cpp
     src/SaveZODS.cpp
+    src/DgsScatteredTransmissionCorrectionMD.cpp
     src/SetMDFrame.cpp
     src/SetMDUsingMask.cpp
     src/SliceMD.cpp
@@ -216,6 +217,7 @@ set(
   inc/MantidMDAlgorithms/SaveMD.h
   inc/MantidMDAlgorithms/SaveMD2.h
   inc/MantidMDAlgorithms/SaveZODS.h
+  inc/MantidMDAlgorithms/DgsScatteredTransmissionCorrectionMD.h
   inc/MantidMDAlgorithms/SetMDFrame.h
   inc/MantidMDAlgorithms/SetMDUsingMask.h
   inc/MantidMDAlgorithms/SliceMD.h
@@ -325,6 +327,7 @@ set(TEST_FILES
     SaveMD2Test.h
     SaveMDTest.h
     SaveZODSTest.h
+    DgsScatteredTransmissionCorrectionMDTest.h
     SetMDFrameTest.h
     SetMDUsingMaskTest.h
     SliceMDTest.h
