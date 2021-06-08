@@ -88,7 +88,7 @@ class SuperplotPresenter:
                 args = [{}]
             if "axis" in args[0]:
                 if (args[0]["axis"] == MantidAxType.BIN
-                    or args[0]["axis"] == MantidAxType.BIN.value):
+                   or args[0]["axis"] == MantidAxType.BIN.value):
                     for arg in args:
                         if ("axis" not in arg
                             or (arg["axis"] != MantidAxType.BIN
@@ -282,7 +282,7 @@ class SuperplotPresenter:
         # add selection to plot
         for wsName, spectra in selection.items():
             if (currentSpectrumIndex not in spectra
-                and not self._view.isSpectrumDisabled()):
+               and not self._view.isSpectrumDisabled()):
                 spectra.append(currentSpectrumIndex)
             for sp in spectra:
                 if sp == -1:
@@ -421,7 +421,7 @@ class SuperplotPresenter:
                     self._model.removeData(wsName, spectrum)
         if not self._model.isBinMode() and not self._model.isSpectrumMode():
             self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
-                self.BIN_MODE_TEXT])
+                                          self.BIN_MODE_TEXT])
             self._view.setMode(mode)
         self._updateList()
         self._updateSpectrumSlider()
