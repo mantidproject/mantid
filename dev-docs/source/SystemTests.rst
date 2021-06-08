@@ -257,7 +257,7 @@ via the normal method in the first case.
 
 Do not use the multiprocessing ``-j`` flag in your configuration parameters
 as this will render you unable to debug the system tests directly, as they
-will no longer be running under the parent Python thread.
+will no longer be running under the parent Python process.
 
 N.B. Windows users do not need to specify the configuration with the ``-C``
 flag as when using the ``systemtest.bat`` script, as this is not passed to

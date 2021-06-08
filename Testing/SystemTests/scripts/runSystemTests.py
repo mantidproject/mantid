@@ -210,7 +210,7 @@ def main():
 
     if options.ncores == 1:
         #####################################################################
-        # Run the tests sequentially within the current Python thread
+        # Run the tests sequentially within the current Python process
         #####################################################################
         no_exec_runner = systemtesting.TestRunner(clean=options.clean)
         tmgr.replaceRunner(no_exec_runner)
@@ -218,10 +218,10 @@ def main():
             mod_test_counts = test_counts[modname]
             if not options.quiet:
                 test_suffix = '' if mod_test_counts == 1 else 's'
-                print("Test module {} has {} test{}:".format(modname, mod_test_counts, test_suffix))
+                print(f"Test module {modname} has {mod_test_counts} test{test_suffix}:")
                 for suite in suite_list:
-                    print("    - {}".format(suite._fqtestname))
-            tmgr.executeTestsListUnderParentThread(suite_list, status_dict)
+                    print(f"    - {suite._fqtestname}")
+            tmgr.executeTestsListUnderCurrentProcess(suite_list, status_dict)
         skipped_tests, failed_tests, total_tests = tmgr.getTestResultStats()
         success = failed_tests == 0
     else:

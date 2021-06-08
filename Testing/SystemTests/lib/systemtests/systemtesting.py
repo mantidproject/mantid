@@ -658,7 +658,7 @@ class TestRunner(object):
     def start(self, script):
         '''Run the given test code in a new subprocess'''
         if self._executable is None:
-            return self.start_in_parent_thread(script)
+            return self.start_in_current_process(script)
         exec_call = self._executable
         if self._exec_args:
             exec_call += ' ' + self._exec_args
@@ -671,7 +671,7 @@ class TestRunner(object):
         os.remove(tmp_file.name)
         return results
 
-    def start_in_parent_thread(self, script):
+    def start_in_current_process(self, script):
         """Run the given test code within the current Python process
         Error handling adapted from: https://stackoverflow.com/questions/28836078/how-to-get-the-line-number-of-an-error-from-exec-or-execfile-in-python
         Do not use in multithreading environment due to stdout context manager"""
@@ -682,7 +682,7 @@ class TestRunner(object):
         try:
             write_to_dual_stdout = redirect_stdout(dual_stdout)
             with write_to_dual_stdout:
-                exec(script.asStringSingleThread(self._clean), exec_globals, exec_locals)
+                exec(script.asString(self._clean, call_exit=False), exec_globals, exec_locals)
             exitcode = exec_locals['exitcode']
             dump = dual_stdout.dump.getvalue()
             return exitcode, dump
@@ -696,8 +696,8 @@ class TestRunner(object):
             detail = ex.args[0]
             cl, exc, tb = sys.exc_info()
             line_number = traceback.extract_tb(tb)[-1][1]
-        print("%s at line %d of SystemTest for %s.%s: %s" % (error_class, line_number, script._modname,
-                                                             script._test_cls_name, detail))
+        print(f"{error_class} at line {line_number} of SystemTest for {script._modname}.{script._test_cls_name}: "
+              f"{detail}")
         if exitcode is None:
             if "exitcode" in exec_locals:
                 exitcode = exec_locals['exitcode']
@@ -722,7 +722,7 @@ class TestScript(object):
         self._test_cls_name = test_cls_name
         self._exclude_in_pr_builds = not exclude_in_pr_builds
 
-    def asString(self, clean=False):
+    def asString(self, clean=False, call_exit=True):
         code = f"""
 import sys
 for p in ('{TESTING_FRAMEWORK_DIR}', '{FRAMEWORK_PYTHONINTERFACE_TEST_DIR}', '{self._test_dir}'):
@@ -741,14 +741,10 @@ if {self._exclude_in_pr_builds}:
                     "exitcode = systest.returnValidationCode({})\n".format(TestRunner.VALIDATION_FAIL_CODE)
         else:
             code += "exitcode = 0\n"
-        code += "systest.cleanup()\nsys.exit(exitcode)\n"
+        code += "systest.cleanup()\n"
+        if call_exit:
+            code += "sys.exit(exitcode)\n"
         return code
-
-    def asStringSingleThread(self, clean=False):
-        code = self.asString(clean)
-        # this removes the last line before the EOF \n, in this case the sys.exit
-        code_noexit = code[:code.rfind('\n', 0, code.rindex('\n'))]
-        return code_noexit
 
 
 #########################################################################
@@ -1103,9 +1099,9 @@ class TestManager(object):
     def replaceRunner(self, new_runner):
         self._runner = new_runner
 
-    def executeTestsListUnderParentThread(self, tests_to_run, status_dict):
-        """This is used when running the tests under the single parent thread, removing the test executable so that the
-         provided test list is run under the parent python thread"""
+    def executeTestsListUnderCurrentProcess(self, tests_to_run, status_dict):
+        """This is used when running the tests under the current process, removing the test executable so that the
+         provided test list is run under the current python process"""
         self._tests = tests_to_run
         self.executeTests(status_dict=status_dict)
 
@@ -1494,7 +1490,7 @@ def testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left, re
 
 
 class DualStdOut:
-    """This helper class is used when running SystemTests under the parent Python thread, allowing the output of the
+    """This helper class is used when running SystemTests under the current Python process, allowing the output of the
     test to be printed both to for display and a StringIO object to collate the test results from.
     """
     def __init__(self):
