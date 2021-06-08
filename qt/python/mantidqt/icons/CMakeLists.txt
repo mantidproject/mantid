@@ -27,5 +27,5 @@ if(ENABLE_WORKBENCH)
 endif()
 
 if(APPLE AND NOT USE_PYTHON_DYNAMIC_LIB)
-set_target_properties(mantidqt_iconsqt5 PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+target_link_options(mantidqt_iconsqt5 PRIVATE -Wl,-undefined,dynamic_lookup)
 endif()
