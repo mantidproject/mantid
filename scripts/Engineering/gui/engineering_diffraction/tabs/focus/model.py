@@ -13,8 +13,8 @@ from Engineering.gui.engineering_diffraction.tabs.common import vanadium_correct
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.EnggUtils import create_custom_grouping_workspace
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
-    Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, CloneWorkspace, DeleteWorkspace, \
-    ConvertUnits, ReplaceSpecialValues, ApplyDiffCal, RenameWorkspace
+    Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, DeleteWorkspace, ApplyDiffCal, \
+    ConvertUnits, ReplaceSpecialValues
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
@@ -83,18 +83,31 @@ class FocusModel(object):
                 run_no = path_handling.get_run_number_from_path(sample_path, instrument)
                 tof_output_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + name
                 dspacing_output_name = tof_output_name + "_dSpacing"
-                success = self._run_focus(sample_workspace, tof_output_name, integration_workspace,
-                                          curves_workspace, df_kwarg, full_calib_workspace, region_calib)
-                if success:
-                    output_workspaces.append([tof_output_name])
-                    self._save_output(instrument, sample_path, "Cropped", tof_output_name, rb_num)
-                    self._save_output(instrument, sample_path, "Cropped", dspacing_output_name, rb_num)
+                # perform prefocus operations on whole instrument workspace
+                prefocus_success = self._whole_inst_prefocus(sample_workspace, integration_workspace,
+                                                             full_calib_workspace)
+                if not prefocus_success:
+                    continue
+                # perform focus over chosen region of interest
+                self._run_focus(sample_workspace, tof_output_name, curves_workspace, df_kwarg, region_calib)
+                output_workspaces.append([tof_output_name])
+                self._save_output(instrument, sample_path, "Cropped", tof_output_name, rb_num)
+                self._save_output(instrument, sample_path, "Cropped", dspacing_output_name, rb_num)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
+            # remove created grouping workspace if present
+            if Ads.doesExist("grp_ws"):
+                DeleteWorkspace("grp_ws")
         else:
             for sample_path in sample_paths:
                 sample_workspace = path_handling.load_workspace(sample_path)
                 run_no = path_handling.get_run_number_from_path(sample_path, instrument)
                 workspaces_for_run = []
+                # perform prefocus operations on whole instrument workspace
+                prefocus_success = self._whole_inst_prefocus(sample_workspace, integration_workspace,
+                                                             full_calib_workspace)
+                if not prefocus_success:
+                    continue
+                # perform focus over chosen banks
                 for name in banks:
                     tof_output_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)
                     dspacing_output_name = tof_output_name + "_dSpacing"
@@ -109,15 +122,11 @@ class FocusModel(object):
                         logger.warning(f"Cannot focus as the region calibration workspace \"{region_calib}\" is not "
                                        f"present.")
                         return
-                    # need to clone these workspaces as they're altered in each run of focus
-                    sample_ws_clone = CloneWorkspace(sample_workspace)
-                    success = self._run_focus(sample_ws_clone, tof_output_name, integration_workspace,
-                                              curves_workspace, df_kwarg, full_calib_workspace, region_calib)
-                    if success:
-                        workspaces_for_run.append(tof_output_name)
-                        # Save the output to the file system.
-                        self._save_output(instrument, sample_path, name, tof_output_name, rb_num)
-                        self._save_output(instrument, sample_path, name, dspacing_output_name, rb_num)
+                    self._run_focus(sample_workspace, tof_output_name, curves_workspace, df_kwarg, region_calib)
+                    workspaces_for_run.append(tof_output_name)
+                    # Save the output to the file system.
+                    self._save_output(instrument, sample_path, name, tof_output_name, rb_num)
+                    self._save_output(instrument, sample_path, name, dspacing_output_name, rb_num)
                 output_workspaces.append(workspaces_for_run)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
                 DeleteWorkspace(sample_workspace)
@@ -128,13 +137,16 @@ class FocusModel(object):
                 self._plot_focused_workspaces(ws_names)
 
     @staticmethod
-    def _run_focus(input_workspace,
-                   tof_output_name,
-                   vanadium_integration_ws,
-                   vanadium_curves_ws,
-                   df_kwarg,
-                   full_calib,
-                   region_calib):
+    def _whole_inst_prefocus(input_workspace,
+                             vanadium_integration_ws,
+                             full_calib) -> bool:
+        """This is used to perform the operations done on the whole instrument workspace, before the chosen region of
+        interest is focused using _run_focus
+        :param input_workspace: Raw sample run to process prior to focussing over a region of interest
+        :param vanadium_integration_ws: Integral of the supplied vanadium run
+        :param full_calib: Full instrument calibration workspace (table ws output from PDCalibration)
+        :return True if successful, False if aborted
+        """
         if input_workspace.getRun().getProtonCharge() > 0:
             NormaliseByCurrent(InputWorkspace=input_workspace, OutputWorkspace=input_workspace)
         else:
@@ -146,21 +158,34 @@ class FocusModel(object):
                              InfinityValue=0)
         ApplyDiffCal(InstrumentWorkspace=input_workspace, CalibrationWorkspace=full_calib)
         ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target='dSpacing')
+        return True
+
+    @staticmethod
+    def _run_focus(input_workspace,
+                   tof_output_name,
+                   vanadium_curves_ws,
+                   df_kwarg,
+                   region_calib) -> None:
+        """Focus the processed full instrument workspace over the chosen region of interest
+        :param input_workspace: Processed full instrument workspace converted to dSpacing
+        :param tof_output_name: Name for the time-of-flight output workspace
+        :param vanadium_curves_ws: Workspace containing the vanadium curves
+        :param df_kwarg: kwarg to pass to DiffractionFocussing specifying the region of interest
+        :param region_calib: Region of interest calibration workspace (table ws output from PDCalibration)
+        """
         # rename workspace prior to focussing to avoid errors later
         dspacing_output_name = tof_output_name + "_dSpacing"
-        RenameWorkspace(input_workspace, dspacing_output_name)
         # focus over specified region of interest
-        DiffractionFocussing(InputWorkspace=input_workspace, OutputWorkspace=dspacing_output_name,
-                             **df_kwarg)
-        curves_rebinned = RebinToWorkspace(WorkspaceToRebin=vanadium_curves_ws, WorkspaceToMatch=dspacing_output_name)
-        Divide(LHSWorkspace=dspacing_output_name, RHSWorkspace=curves_rebinned, OutputWorkspace=dspacing_output_name,
-               AllowDifferentNumberSpectra=True) # 1 spectra
+        focused_sample = DiffractionFocussing(InputWorkspace=input_workspace, OutputWorkspace=dspacing_output_name,
+                                              **df_kwarg)
+        curves_rebinned = RebinToWorkspace(WorkspaceToRebin=vanadium_curves_ws, WorkspaceToMatch=focused_sample)
+        Divide(LHSWorkspace=focused_sample, RHSWorkspace=curves_rebinned, OutputWorkspace=focused_sample,
+               AllowDifferentNumberSpectra=True)
         # apply calibration from specified region of interest
-        ApplyDiffCal(InstrumentWorkspace=dspacing_output_name, CalibrationWorkspace=region_calib)
+        ApplyDiffCal(InstrumentWorkspace=focused_sample, CalibrationWorkspace=region_calib)
         # output in both dSpacing and TOF
-        ConvertUnits(InputWorkspace=dspacing_output_name, OutputWorkspace=tof_output_name, Target='TOF')
+        ConvertUnits(InputWorkspace=focused_sample, OutputWorkspace=tof_output_name, Target='TOF')
         DeleteWorkspace(curves_rebinned)
-        return True
 
     @staticmethod
     def _plot_focused_workspaces(focused_workspaces):
