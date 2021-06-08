@@ -169,7 +169,7 @@ public:
     do_test_MINITOPAZ(TOF, 1, false, true, 399);
   }
 
-  void test_MINITOPAZ_autoExtents() {
+  void do_test_MINITOPAZ_autoExtents(std::string targetUnitName) {
 
     int numEventsPer = 100;
     EventWorkspace_sptr in_ws = Mantid::DataObjects::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
@@ -178,6 +178,9 @@ public:
     AnalysisDataService::Instance().addOrReplace("inputWS", in_ws);
     FrameworkManager::Instance().exec("Rebin", 8, "InputWorkspace", "inputWS", "OutputWorkspace", "inputWS", "Params",
                                       "0, 500, 16e3", "PreserveEvents", "0");
+
+    FrameworkManager::Instance().exec("ConvertUnits", 6, "InputWorkspace", "inputWS", "OutputWorkspace", "inputWS",
+                                      "Target", targetUnitName.c_str());
 
     ConvertToDiffractionMDWorkspace3 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -204,5 +207,12 @@ public:
     dim = ws->getDimension(2);
     TS_ASSERT_DELTA(dim->getMinimum(), 0, 1e-3);
     TS_ASSERT_DELTA(dim->getMaximum(), 0.705, 1e-3);
+  }
+
+  void test_MINITOPAZ_autoExtents_TOF() { do_test_MINITOPAZ_autoExtents("TOF"); }
+
+  void test_MINITOPAZ_autoExtents_dSpacing() {
+    // ISIS use ConvertToDiffractionMDWorkspace on workspaces with dSpacing units
+    do_test_MINITOPAZ_autoExtents("dSpacing");
   }
 };
