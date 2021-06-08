@@ -7,9 +7,11 @@ import re
 import copy
 import hashlib
 
+
 def getBranchName(directory):
     """Returns the name of the current git branch"""
     return subprocess.check_output(["git","rev-parse","--abbrev-ref","HEAD"],cwd=directory).strip()
+
 
 def getRemotes(directory):
     """Returns list of remote git repositories"""
@@ -17,13 +19,15 @@ def getRemotes(directory):
     remotes = []
     for line in gitRemoteOutput.splitlines():
         if '(fetch)' in line:
-            splitLine = line.split();
+            splitLine = line.split()
             remotes.append({'name': splitLine[0].strip(), 'url': splitLine[1].strip()})
     return remotes
+
 
 def gitLogValue(format,directory):
     """Returns git log value specified by format"""
     return subprocess.check_output(["git","log","-1","--pretty=format:%"+format],cwd=directory).strip()
+
 
 def getAllFilesWithExtension(directory,extension):
     """Recursively return a list of all files in directory with specified extension"""
@@ -31,8 +35,9 @@ def getAllFilesWithExtension(directory,extension):
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file.endswith(extension):
-                 filesWithExtension.append(os.path.realpath(os.path.join(root, file)))
+                filesWithExtension.append(os.path.realpath(os.path.join(root, file)))
     return filesWithExtension
+
 
 def getSourcePathFromGcovFile(gcovFilename):
     """Return the source path corresponding to a .gcov file"""
@@ -40,7 +45,8 @@ def getSourcePathFromGcovFile(gcovFilename):
     srcFilename = re.sub(".gcov$","",gcovFilenameWithExtension)
     return re.sub("#","/",srcFilename)
 
-def main(argv):
+
+def main(argv):  # noqa: C901
     arguments = ['COVERAGE_SRCS_FILE=','COVERALLS_OUTPUT_FILE=','COV_PATH=','PROJECT_ROOT=']
     COVERAGE_SRCS_FILE=None
     COVERALLS_OUTPUT_FILE=None
@@ -60,13 +66,13 @@ def main(argv):
         else:
             assert False, "unhandled option"
 
-    if COVERAGE_SRCS_FILE == None:
+    if COVERAGE_SRCS_FILE is None:
         assert False, "COVERAGE_SRCS_FILE is not defined"
-    if COVERALLS_OUTPUT_FILE==None:
+    if COVERALLS_OUTPUT_FILE is None:
         assert False, "COVERALLS_OUTPUT_FILE is not defined"
-    if COV_PATH==None:
+    if COV_PATH is None:
         assert False, "COV_PATH is not defined"
-    if PROJECT_ROOT==None:
+    if PROJECT_ROOT is None:
         assert False, "PROJECT_ROOT is not defined"
 
     gcdaAllFiles = getAllFilesWithExtension(COV_PATH,".gcda")
@@ -83,11 +89,11 @@ def main(argv):
     for gcovFile in gcovAllFiles:
         sourceWithPath = getSourcePathFromGcovFile(gcovFile)
         if sourceWithPath in sourcesToCheck:
-            print "YES: ",sourceWithPath.strip()," WAS FOUND"
+            print("YES: ",sourceWithPath.strip()," WAS FOUND")
             gcovCheckedFiles.append(gcovFile)
             uncheckedSources.remove(sourceWithPath)
         else:
-            print "NO: ",sourceWithPath.strip()," WAS NOT FOUND"
+            print("NO: ",sourceWithPath.strip()," WAS NOT FOUND")
 
     coverageList = []
     for gcovFilename in gcovCheckedFiles:
@@ -95,7 +101,7 @@ def main(argv):
         #get name for json file
         sourceWithPath = getSourcePathFromGcovFile(gcovFilename)
         fileCoverage['name'] = os.path.relpath(sourceWithPath,PROJECT_ROOT)
-        print "Generating JSON file for "+fileCoverage['name']
+        print("Generating JSON file for "+fileCoverage['name'])
         fileCoverage['source_digest'] = hashlib.md5(open(sourceWithPath, 'rb').read()).hexdigest()
         lineCoverage = []
         gcovFile = open(gcovFilename,'r')
@@ -110,7 +116,7 @@ def main(argv):
                 else:
                     lineCoverage.append(int(line[0]))
                 if lineNumber != len(lineCoverage):
-                    raise RuntimeError['line_number does not match len(array)']
+                    raise RuntimeError('line_number does not match len(array)')
         gcovFile.close()
         fileCoverage['coverage'] = lineCoverage
         coverageList.append(copy.deepcopy(fileCoverage))
@@ -121,7 +127,7 @@ def main(argv):
         fileCoverage['source_digest'] = hashlib.md5(open(uncheckedFilename, 'rb').read()).hexdigest()
         lineCoverage =  []
         uncheckedFile = open(uncheckedFilename,'r')
-        for line in uncheckedFile:
+        for _ in uncheckedFile:
             lineCoverage.append(0)
         uncheckedFile.close()
         fileCoverage['coverage'] = lineCoverage
@@ -131,8 +137,8 @@ def main(argv):
     coverallsOutput['repo_token'] = os.environ.get('COVERALLS_REPO_TOKEN')
     coverallsOutput['source_files'] = coverageList
 
-    head = {'id':gitLogValue('H',PROJECT_ROOT),'author_name':gitLogValue('an',PROJECT_ROOT), \
-            'author_email':gitLogValue('ae',PROJECT_ROOT),'committer_name':gitLogValue('cn',PROJECT_ROOT), \
+    head = {'id':gitLogValue('H',PROJECT_ROOT),'author_name':gitLogValue('an',PROJECT_ROOT),
+            'author_email':gitLogValue('ae',PROJECT_ROOT),'committer_name':gitLogValue('cn',PROJECT_ROOT),
             'committer_email':gitLogValue('ce',PROJECT_ROOT), 'message':gitLogValue('B',PROJECT_ROOT)}
 
     gitDict = {'head':head,'branch':getBranchName(PROJECT_ROOT),'remotes':getRemotes(COV_PATH)}
@@ -140,6 +146,7 @@ def main(argv):
 
     with open(COVERALLS_OUTPUT_FILE, 'w') as outfile:
         json.dump(coverallsOutput,outfile,indent=4)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
