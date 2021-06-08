@@ -24,6 +24,8 @@ if(CXXTEST_FOUND)
                         Beamline
                         Types
                         Kernel
+                        ${OpenGL_LIBRARIES}
+                        ${TBB_LIBRARIES}
                         ${NEXUS_LIBRARIES}
                         ${GSL_LIBRARIES}
                         ${Boost_LIBRARIES}
