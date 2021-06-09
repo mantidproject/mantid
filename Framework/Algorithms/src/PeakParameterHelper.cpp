@@ -70,7 +70,7 @@ int observePeakCenter(const Histogram &histogram, FunctionValues &bkgd_values, s
   // the minimum search size is 5 bins (arbitrary).
   const size_t windowSize = stop_index - start_index;
   const size_t searchBox = std::max(static_cast<size_t>(.3 * static_cast<double>(windowSize)), static_cast<size_t>(5));
-  const size_t left = std::max(peak_center_index - searchBox, start_index);
+  const size_t left = std::max(static_cast<ssize_t>(peak_center_index - searchBox), static_cast<ssize_t>(start_index));
   const size_t rght = std::min(peak_center_index + searchBox, stop_index);
 
   for (size_t i = left; i < rght; ++i) {

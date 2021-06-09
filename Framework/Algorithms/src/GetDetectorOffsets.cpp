@@ -196,8 +196,8 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   auto it = std::max_element(yValues.cbegin(), yValues.cend());
 
   // Set the default peak height and location
-  double peakHeight = *it;
-  double peakLoc = inputW->x(s)[it - yValues.begin()];
+  const double peakHeight = *it;
+  const double peakLoc = inputW->x(s)[it - yValues.begin()];
 
   IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
 
@@ -216,9 +216,6 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
                                         bkgdFunction, false, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
     if (result != PeakFitResult::GOOD) {
       g_log.debug() << "bad result for observing peak parameters, using default peak height and loc\n";
-    } else {
-      peakHeight = peakFunction->height();
-      peakLoc = peakFunction->centre();
     }
   } else {
     g_log.debug() << "range size is zero in estimatePeakParameters, using default peak height and loc\n";
