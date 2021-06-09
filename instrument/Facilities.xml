@@ -767,6 +767,9 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>Disk chopper time-of-flight spectrometer</technique>
+    <acquisition>Count</acquisition>
+    <acquisition>TOFCount</acquisition>
+    <acquisition>ScanCount</acquisition>
   </instrument>
 
   <instrument name="D7">
