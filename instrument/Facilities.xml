@@ -737,6 +737,7 @@
 
   <instrument name="D1B">
     <technique>Powder diffraction</technique>
+    <acquisition>Count</acquisition>
   </instrument>
 
   <instrument name="D4C">
