@@ -14,8 +14,12 @@ class TFAsymmetryFittingContext(GeneralFittingContext):
         super(TFAsymmetryFittingContext, self).__init__(allow_double_pulse_fitting)
 
         self._tf_asymmetry_mode: bool = False
+
         self._tf_asymmetry_single_functions: list = []
         self._tf_asymmetry_simultaneous_function: IFunction = None
+
+        self._normalisations_for_undo: list = []
+        self._normalisations_fixed_for_undo: list = []
 
     @property
     def tf_asymmetry_mode(self) -> bool:
@@ -46,3 +50,23 @@ class TFAsymmetryFittingContext(GeneralFittingContext):
     def tf_asymmetry_simultaneous_function(self, tf_asymmetry_simultaneous_function: IFunction) -> None:
         """Sets the simultaneous TF Asymmetry fit function stored in the model."""
         self._tf_asymmetry_simultaneous_function = tf_asymmetry_simultaneous_function
+
+    @property
+    def normalisations_for_undo(self) -> list:
+        """Returns the previous normalisations that can be used when undoing."""
+        return self._normalisations_for_undo
+
+    @normalisations_for_undo.setter
+    def normalisations_for_undo(self, normalisations: list) -> None:
+        """Sets the previous normalisations that can be used when undoing."""
+        self._normalisations_for_undo = normalisations
+
+    @property
+    def normalisations_fixed_for_undo(self) -> list:
+        """Returns the previous booleans whether the normalisations were fixed that can be used when undoing."""
+        return self._normalisations_fixed_for_undo
+
+    @normalisations_fixed_for_undo.setter
+    def normalisations_fixed_for_undo(self, normalisations_fixed: list) -> None:
+        """Sets the previous booleans for if the normalisations are fixed that can be used when undoing."""
+        self._normalisations_fixed_for_undo = normalisations_fixed
