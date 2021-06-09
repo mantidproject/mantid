@@ -126,45 +126,50 @@ class AboutPresenterTest(TestCase):
         self.assertEqual(0, mock_ConfigService.setFacility.call_count)
         self.assertEqual(3, mock_ConfigService.getFacility.call_count)
         self.assertEqual(3, mock_ConfigService.mock_facility.name.call_count)
-        self.assert_connected_once(presenter.view.about_widget.cb_facility, presenter.view.about_widget.cb_facility.currentTextChanged)
+        self.assert_connected_once(presenter.view.about_widget.cb_facility,
+                                   presenter.view.about_widget.cb_facility.currentTextChanged)
 
     def test_setup_checkbox_signals(self):
         presenter = AboutPresenter(None)
+        about_widget = presenter.view.about_widget
 
-        self.assert_connected_once(presenter.view.about_widget.chk_do_not_show_until_next_release,
+        self.assert_connected_once(about_widget.chk_do_not_show_until_next_release,
                                    presenter.view.about_widget.chk_do_not_show_until_next_release.stateChanged)
 
-        self.assert_connected_once(presenter.view.about_widget.chk_allow_usage_data,
-                                   presenter.view.about_widget.chk_allow_usage_data.stateChanged)
+        self.assert_connected_once(about_widget.chk_allow_usage_data,
+                                   about_widget.chk_allow_usage_data.stateChanged)
 
     def test_setup_button_signals(self):
         presenter = AboutPresenter(None)
+        about_widget = presenter.view.about_widget
 
-        self.assert_connected_once(presenter.view.about_widget.clb_release_notes,
-                                   presenter.view.about_widget.clb_release_notes.clicked)
-        self.assert_connected_once(presenter.view.about_widget.clb_sample_datasets,
-                                   presenter.view.about_widget.clb_sample_datasets.clicked)
-        self.assert_connected_once(presenter.view.about_widget.clb_mantid_introduction,
-                                   presenter.view.about_widget.clb_mantid_introduction.clicked)
-        self.assert_connected_once(presenter.view.about_widget.clb_python_introduction,
-                                   presenter.view.about_widget.clb_python_introduction.clicked)
-        self.assert_connected_once(presenter.view.about_widget.clb_python_in_mantid,
-                                   presenter.view.about_widget.clb_python_in_mantid.clicked)
-        self.assert_connected_once(presenter.view.about_widget.clb_extending_mantid,
-                                   presenter.view.about_widget.clb_extending_mantid.clicked)
-        self.assert_connected_once(presenter.view.about_widget.pb_manage_user_directories,
-                                   presenter.view.about_widget.pb_manage_user_directories.clicked)
-        self.assert_connected_once(presenter.view.about_widget.lbl_privacy_policy,
-                                   presenter.view.about_widget.lbl_privacy_policy.linkActivated)
+        self.assert_connected_once(about_widget.clb_release_notes,
+                                   about_widget.clb_release_notes.clicked)
+        self.assert_connected_once(about_widget.clb_sample_datasets,
+                                   about_widget.clb_sample_datasets.clicked)
+        self.assert_connected_once(about_widget.clb_mantid_introduction,
+                                   about_widget.clb_mantid_introduction.clicked)
+        self.assert_connected_once(about_widget.clb_python_introduction,
+                                   about_widget.clb_python_introduction.clicked)
+        self.assert_connected_once(about_widget.clb_python_in_mantid,
+                                   about_widget.clb_python_in_mantid.clicked)
+        self.assert_connected_once(about_widget.clb_extending_mantid,
+                                   about_widget.clb_extending_mantid.clicked)
+        self.assert_connected_once(about_widget.pb_manage_user_directories,
+                                   about_widget.pb_manage_user_directories.clicked)
+        self.assert_connected_once(about_widget.lbl_privacy_policy,
+                                   about_widget.lbl_privacy_policy.linkActivated)
 
     def test_setup_link_signals(self):
         presenter = AboutPresenter(None)
+        about_widget = presenter.view.about_widget
 
-        self.assert_connected_once(presenter.view.about_widget.clb_release_notes,
-                                   presenter.view.about_widget.clb_release_notes.clicked)
+        self.assert_connected_once(about_widget.clb_release_notes,
+                                   about_widget.clb_release_notes.clicked)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_that_about_presenter_is_instantiated_without_error_when_getFacility_causes_exception(self, MockConfigService):
+    def test_that_about_presenter_is_instantiated_without_error_when_getFacility_causes_exception(self,
+                                                                                                  MockConfigService):
         MockConfigService.getFacility.side_effect = RuntimeError(Mock(status=101), "No facility")
         presenter = AboutPresenter(None)
 

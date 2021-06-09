@@ -28,30 +28,33 @@ class AboutPresenter(object):
         self.usage_reporting_verification_view = usage_reporting_verification_view \
             if usage_reporting_verification_view else UsageReportingVerificationView(parent, self)
         self.parent = parent
-        self.view.about_widget.clb_release_notes.clicked.connect(self.action_open_release_notes)
-        self.view.about_widget.clb_sample_datasets.clicked.connect(self.action_open_download_website)
-        self.view.about_widget.clb_mantid_introduction.clicked.connect(self.action_open_mantid_introduction)
-        self.view.about_widget.clb_python_introduction.clicked.connect(self.action_open_python_introduction)
-        self.view.about_widget.clb_python_in_mantid.clicked.connect(self.action_open_python_in_mantid)
-        self.view.about_widget.clb_extending_mantid.clicked.connect(self.action_open_extending_mantid)
-        self.view.about_widget.lbl_privacy_policy.linkActivated.connect(self.action_open_external_link)
-        self.view.about_widget.pb_manage_user_directories.clicked.connect(self.action_manage_user_directories)
-        self.view.about_widget.pb_close.clicked.connect(self.action_close)
+
+        about_widget = self.view.about_widget
+        about_widget.clb_release_notes.clicked.connect(self.action_open_release_notes)
+        about_widget.clb_sample_datasets.clicked.connect(self.action_open_download_website)
+        about_widget.clb_mantid_introduction.clicked.connect(self.action_open_mantid_introduction)
+        about_widget.clb_python_introduction.clicked.connect(self.action_open_python_introduction)
+        about_widget.clb_python_in_mantid.clicked.connect(self.action_open_python_in_mantid)
+        about_widget.clb_extending_mantid.clicked.connect(self.action_open_extending_mantid)
+        about_widget.lbl_privacy_policy.linkActivated.connect(self.action_open_external_link)
+        about_widget.pb_manage_user_directories.clicked.connect(self.action_manage_user_directories)
+        about_widget.pb_close.clicked.connect(self.action_close)
+
         self.setup_facilities_group()
 
         # set chk_allow_usage_data
         isUsageReportEnabled = ConfigService.getString(self.USAGE_REPORTING, True)
         if isUsageReportEnabled == "0":
-            self.view.about_widget.chk_allow_usage_data.setChecked(False)
-        self.view.about_widget.chk_allow_usage_data.stateChanged.connect(self.action_usage_data_changed)
+            about_widget.chk_allow_usage_data.setChecked(False)
+        about_widget.chk_allow_usage_data.stateChanged.connect(self.action_usage_data_changed)
 
         # set do not show
         qSettings = QSettings()
         qSettings.beginGroup(self.DO_NOT_SHOW_GROUP)
         doNotShowUntilNextRelease = int(qSettings.value(self.DO_NOT_SHOW, "0"))
         qSettings.endGroup()
-        self.view.about_widget.chk_do_not_show_until_next_release.setChecked(doNotShowUntilNextRelease)
-        self.view.about_widget.chk_do_not_show_until_next_release.stateChanged.connect(self.action_do_not_show_until_next_release)
+        about_widget.chk_do_not_show_until_next_release.setChecked(doNotShowUntilNextRelease)
+        about_widget.chk_do_not_show_until_next_release.stateChanged.connect(self.action_do_not_show_until_next_release)
 
     @staticmethod
     def should_show_on_startup():
@@ -78,7 +81,7 @@ class AboutPresenter(object):
 
         settings = QSettings()
         settings.beginGroup(AboutPresenter.DO_NOT_SHOW_GROUP)
-        doNotShowUntilNextRelease =int(settings.value(AboutPresenter.DO_NOT_SHOW, '0'))
+        doNotShowUntilNextRelease = int(settings.value(AboutPresenter.DO_NOT_SHOW, '0'))
         lastVersion = settings.value(AboutPresenter.LAST_VERSION, "")
         settings.endGroup()
 
