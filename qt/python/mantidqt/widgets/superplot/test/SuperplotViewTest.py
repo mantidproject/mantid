@@ -61,7 +61,7 @@ class SuperplotViewTest(unittest.TestCase):
     def test_setSelection(self):
         self.mDockSide.workspacesList.topLevelItemCount.return_value = 3
         ws1 = mock.Mock()
-        ws1.getWorkspaceName.return_value = "ws1"
+        ws1.get_workspace_name.return_value = "ws1"
         ws1.childCount.return_value = 4
         sp1 = mock.Mock()
         sp1.get_spectrum_index.return_value = 1
@@ -73,11 +73,11 @@ class SuperplotViewTest(unittest.TestCase):
         sp4.get_spectrum_index.return_value = 4
         ws1.child.side_effect = [sp1, sp2, sp3, sp4]
         ws2 = mock.Mock()
-        ws2.getWorkspaceName.return_value = "ws2"
+        ws2.get_workspace_name.return_value = "ws2"
         ws2.childCount.return_value = 2
         ws2.child.side_effect = [sp1, sp2]
         ws3 = mock.Mock()
-        ws3.getWorkspaceName.return_value = "ws3"
+        ws3.get_workspace_name.return_value = "ws3"
         ws3.childCount.return_value = 0
         self.mDockSide.workspacesList.topLevelItem.side_effect = [ws1, ws2, ws3]
         self.view.setSelection({"ws1": [1, 2, 3], "ws2": [-1]})
@@ -92,7 +92,7 @@ class SuperplotViewTest(unittest.TestCase):
 
     def test_getSelection(self):
         ws1Item = mock.Mock()
-        ws1Item.getWorkspaceName.return_value = "ws1"
+        ws1Item.get_workspace_name.return_value = "ws1"
         ws1Item.parent.return_value = None
         sp1Item = mock.Mock()
         sp1Item.get_spectrum_index.return_value = 1
@@ -101,7 +101,7 @@ class SuperplotViewTest(unittest.TestCase):
         sp2Item.get_spectrum_index.return_value = 2
         sp2Item.parent.return_value = ws1Item
         ws2Item = mock.Mock()
-        ws2Item.getWorkspaceName.return_value = "ws2"
+        ws2Item.get_workspace_name.return_value = "ws2"
         ws2Item.parent.return_value = None
         self.mDockSide.workspacesList.selectedItems.return_value = [sp1Item,
                                                                     sp2Item,

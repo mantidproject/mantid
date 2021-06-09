@@ -52,7 +52,7 @@ class WorkspaceItem(QTreeWidgetItem):
         self.treeWidget().setItemWidget(self, 1, self._delButton)
         self.treeWidget().resizeColumnToContents(1)
 
-    def getWorkspaceName(self):
+    def get_workspace_name(self):
         """
         Get the name of the workspace.
 

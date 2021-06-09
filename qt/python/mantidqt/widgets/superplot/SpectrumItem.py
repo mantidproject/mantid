@@ -49,7 +49,7 @@ class SpectrumItem(QTreeWidgetItem):
     def __init__(self, treeWidget, index):
         super().__init__(treeWidget)
         self._spectrum_index = index
-        self._workspace_name = self.parent().getWorkspaceName()
+        self._workspace_name = self.parent().get_workspace_name()
         self._del_button = QToolButton()
         self._del_button.setMinimumSize(20, 20)
         self._del_button.setMaximumSize(20, 20)
