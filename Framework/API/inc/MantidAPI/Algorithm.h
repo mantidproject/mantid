@@ -288,7 +288,7 @@ public:
 
   virtual bool processGroups();
 
-  void copyNonWorkspaceProperties(Algorithm *alg, int periodNum);
+  void copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum);
 
   const Parallel::Communicator &communicator() const;
   void setCommunicator(const Parallel::Communicator &communicator);

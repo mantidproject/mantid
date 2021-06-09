@@ -1509,7 +1509,7 @@ bool Algorithm::processGroups() {
  * @param alg :: other IAlgorithm
  * @param periodNum :: number of the "period" = the entry in the group + 1
  */
-void Algorithm::copyNonWorkspaceProperties(Algorithm *alg, int periodNum) {
+void Algorithm::copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum) {
   if (!alg)
     throw std::runtime_error("Algorithm not created!");
   const auto &props = this->getProperties();
