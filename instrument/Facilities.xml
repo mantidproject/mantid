@@ -719,8 +719,8 @@
 
   <instrument name="D33">
     <technique>SANS</technique>
-    <acquisition>Mono</acquisition>
-    <acquisition>TOF</acquisition>
+    <acquisition>Count</acquisition>
+    <acquisition>TOFCount</acquisition>
     <attribute>2D</attribute>
   </instrument>
 
