@@ -14,7 +14,7 @@ Project Recovery test
 - Before running these tests, open ``File > Settings > General > Project Recovery`` and set ``Enabled`` to true,
   ``Time between recovery checkpoints`` to 2 seconds and ``Total number of checkpoints`` to 5.
   Further instructions can be found on the
-  `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`__.
+  :ref:`Project Recovery concepts page <Project Recovery>`.
 - Download the ISIS sample dataset from the `Downloads page <http://download.mantidproject.org/>`_.
 - `TOPAZ_3132_event.nxs` - available in ``/Testing/Data/SystemTest/``, get this by building the `SystemTestData` target.
   It should be in ``ExternalData/Testing/Data/SystemTest/``
