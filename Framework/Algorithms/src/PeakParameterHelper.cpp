@@ -93,6 +93,8 @@ int observePeakCenter(const Histogram &histogram, FunctionValues &bkgd_values, s
  * @param ipeak :: array index for the peak center in histogram
  * @param istart :: array index for the left boundary of the peak
  * @param istop :: array index for the right boundary of the peak
+ * @param peakWidthEstimateApproach :: whether to guess fwhm from instrument or observation
+ * @param peakWidthPercentage :: fwhm scaling factor when guessing from instrument
  * @return peak width as double
  */
 double observePeakFwhm(const Histogram &histogram, FunctionValues &bkgd_values, size_t ipeak, size_t istart,
@@ -141,6 +143,9 @@ double observePeakFwhm(const Histogram &histogram, FunctionValues &bkgd_values, 
  * @param peakfunction :: (in/out) peak function to set observed value to
  * @param bkgdfunction :: background function previously defined
  * @param observe_peak_width :: flag to estimate peak width from input data
+ * @param peakWidthEstimateApproach :: whether to guess fwhm from instrument or observation
+ * @param peakWidthPercentage :: fwhm scaling factor when guessing from instrument
+ * @param minPeakHeight :: function parameters will only be set if estimated peak height is larger
  * @return :: obervation success or not
  */
 int estimatePeakParameters(const Histogram &histogram, const std::pair<size_t, size_t> &peak_window,

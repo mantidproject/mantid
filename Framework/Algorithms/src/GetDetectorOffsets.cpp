@@ -213,7 +213,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
     auto peakFunction = std::dynamic_pointer_cast<IPeakFunction>(fun_ptr->getFunction(1));
 
     int result = estimatePeakParameters(histogram, std::pair<size_t, size_t>(start_index, stop_index), peakFunction,
-                                        bkgdFunction, true, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
+                                        bkgdFunction, false, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
     if (result != PeakFitResult::GOOD) {
       g_log.debug() << "bad result for observing peak parameters, using default peak height and loc\n";
     } else {
@@ -238,8 +238,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
     throw;
   }
 
-  auto fun = createFunction(peakHeight, peakLoc);
-  fit_alg->setProperty("Function", fun);
+  fit_alg->setProperty("Function", fun_ptr);
 
   fit_alg->setProperty("InputWorkspace", inputW);
   fit_alg->setProperty<int>("WorkspaceIndex",
@@ -248,8 +247,6 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   fit_alg->setProperty("EndX", m_Xmax);
   fit_alg->setProperty("MaxIterations", 100);
 
-  fun_ptr = createFunction(peakHeight, peakLoc);
-  fit_alg->setProperty("Function", fun_ptr);
   fit_alg->executeAsChildAlg();
   std::string fitStatus = fit_alg->getProperty("OutputStatus");
   // Pixel with large offset will be masked
