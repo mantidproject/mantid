@@ -68,8 +68,7 @@ def _get_splash_image():
 
 SPLASH = QSplashScreen(_get_splash_image(), Qt.WindowStaysOnTopHint)
 SPLASH.show()
-SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
-                   | Qt.AlignAbsolute, QColor(Qt.black))
+SPLASH.showMessage("Starting...",  int(Qt.AlignBottom) | int(Qt.AlignLeft) | int(Qt.AlignAbsolute), QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -226,7 +225,7 @@ class MainWindow(QMainWindow):
         if not self.splash:
             return
         if msg:
-            self.splash.showMessage(msg, Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute,
+            self.splash.showMessage(msg, int(Qt.AlignBottom) | int(Qt.AlignLeft) | int(Qt.AlignAbsolute),
                                     QColor(Qt.black))
         QApplication.processEvents(QEventLoop.AllEvents)
 

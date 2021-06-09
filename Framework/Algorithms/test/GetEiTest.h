@@ -24,7 +24,7 @@ using Mantid::HistogramData::LinearGenerator;
 
 namespace GetEiTestHelper {
 IAlgorithm_sptr runGetEiUsingTestMonitors(const std::string &inputWS, const double energyGuess, const bool fixei) {
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
+  auto alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
   alg->initialize();
   alg->setPropertyValue("InputWorkspace", inputWS);
   alg->setProperty("Monitor1Spec", 1);
@@ -172,7 +172,7 @@ public:
     const std::string outputName("eitest1");
     AnalysisDataService::Instance().add(outputName, testWS);
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
+    auto alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", outputName);
     alg->setProperty("Monitor2Spec", 2);
@@ -188,7 +188,7 @@ public:
     const std::string outputName("eitest2");
     AnalysisDataService::Instance().add(outputName, testWS);
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
+    auto alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", outputName);
     alg->setProperty("Monitor1Spec", 1);
@@ -206,7 +206,7 @@ public:
     const std::string outputName("eitest2");
     AnalysisDataService::Instance().add(outputName, testWS);
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
+    auto alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", outputName);
     alg->setProperty("Monitor1Spec", 1);
@@ -237,7 +237,7 @@ public:
   }
 
   void testCNCS() {
-    IAlgorithm_sptr ld = AlgorithmManager::Instance().createUnmanaged("LoadNexusMonitors");
+    auto ld = AlgorithmManager::Instance().createUnmanaged("LoadNexusMonitors");
     std::string outws_name = "cncs";
     ld->initialize();
     ld->setPropertyValue("Filename", "CNCS_7860_event.nxs");
@@ -246,7 +246,7 @@ public:
     ld->execute();
     TS_ASSERT(ld->isExecuted());
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
+    auto alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", outws_name);
     TS_ASSERT_THROWS_NOTHING(alg->execute());

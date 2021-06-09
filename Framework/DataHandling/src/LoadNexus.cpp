@@ -113,7 +113,7 @@ void LoadNexus::exec() {
 }
 
 void LoadNexus::runLoadMuonNexus() {
-  IAlgorithm_sptr loadMuonNexus = createChildAlgorithm("LoadMuonNexus", 0., 1.);
+  auto loadMuonNexus = createChildAlgorithm("LoadMuonNexus", 0., 1.);
   // Pass through the same input filename
   loadMuonNexus->setPropertyValue("Filename", m_filename);
   // Set the workspace property
@@ -151,7 +151,7 @@ void LoadNexus::runLoadMuonNexus() {
 }
 
 void LoadNexus::runLoadNexusProcessed() {
-  IAlgorithm_sptr loadNexusPro = createChildAlgorithm("LoadNexusProcessed", 0., 1.);
+  auto loadNexusPro = createChildAlgorithm("LoadNexusProcessed", 0., 1.);
   // Pass through the same input filename
   loadNexusPro->setPropertyValue("Filename", m_filename);
   // Set the workspace property
@@ -174,7 +174,7 @@ void LoadNexus::runLoadNexusProcessed() {
 }
 
 void LoadNexus::runLoadIsisNexus() {
-  IAlgorithm_sptr loadNexusPro = createChildAlgorithm("LoadISISNexus", 0., 1.);
+  auto loadNexusPro = createChildAlgorithm("LoadISISNexus", 0., 1.);
   // Pass through the same input filename
   loadNexusPro->setPropertyValue("Filename", m_filename);
   // Set the workspace property
@@ -202,7 +202,7 @@ void LoadNexus::runLoadIsisNexus() {
 }
 
 void LoadNexus::runLoadTOFRawNexus() {
-  IAlgorithm_sptr loadNexusPro = createChildAlgorithm("LoadTOFRawNexus", 0., 1.);
+  auto loadNexusPro = createChildAlgorithm("LoadTOFRawNexus", 0., 1.);
   // Pass through the same input filename
   loadNexusPro->setPropertyValue("Filename", m_filename);
   // Set the workspace property

@@ -510,7 +510,7 @@ void IntegrateEllipsoidsTwoStep::calculateE1(const Geometry::DetectorInfo &detec
 
 void IntegrateEllipsoidsTwoStep::runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
                                                   const std::string &property, const std::string &values) {
-  IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
+  auto alg = createChildAlgorithm("MaskBTP");
   alg->setProperty<Workspace_sptr>("Workspace", peakWS);
   alg->setProperty(property, values);
   if (!alg->execute())
