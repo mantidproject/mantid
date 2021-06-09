@@ -98,8 +98,8 @@ class TestFitPropertyBrowser(unittest.TestCase):
             self.assertTrue(h.hasTies())
             # check the peak centre is fixed
             self.assertTrue(h.ifun().isFixed(1))
-        # check constraints on last function aren't empty
-        self.assertTrue(bool(h.ifun().getConstraints()))
+        # check constraints on last function have correct length
+        self.assertEqual(15, len(h.ifun().getConstraints()))
 
     def test_single_function_string_loaded_correctly(self):
 
