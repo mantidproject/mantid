@@ -9,7 +9,10 @@ from systemtesting import MantidSystemTest
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import (ConvertUnits, LoadRaw, FilterPeaks, PredictPeaks, SetUB, SaveIsawPeaks, MaskBTP,
-                              LoadEmptyInstrument, AddPeak, CreatePeaksWorkspace, CreateMDWorkspace, IntegratePeaksMD)
+                              LoadEmptyInstrument, AddPeak, CreatePeaksWorkspace, CreateMDWorkspace, IntegratePeaksMD,
+                              CropWorkspace, NormaliseByCurrent, ReplaceSpecialValues, NormaliseToMonitor,
+                              CreateSampleShape, SetSampleMaterial, AbsorptionCorrection, Divide, SmoothNeighbours,
+                              SmoothData)
 from mantid import config
 import numpy as np
 import os
@@ -132,8 +135,47 @@ class WISHPeakIntegrationRespectsMaskingTest(MantidSystemTest):
         # test which peaks were not integrated due to being on edge (i.e. shape = 'none')
 
         self.assertListEqual([pk.getPeakShape().shapeName() for pk in self._peaks_pixels],
-                              ['spherical', 'none', 'spherical', 'spherical'])
+                             ['spherical', 'none', 'spherical', 'spherical'])
         self.assertListEqual([pk.getPeakShape().shapeName() for pk in self._peaks_pixels_beamTubes],
-                              ['none', 'none', 'spherical', 'spherical'])
+                             ['none', 'none', 'spherical', 'spherical'])
         self.assertListEqual([pk.getPeakShape().shapeName() for pk in self._peaks_pixels_edgeTubes],
-                              ['none', 'none', 'spherical', 'none'])
+                             ['none', 'none', 'spherical', 'none'])
+
+
+class WISHProcessVanadiumForNormalisationTest(MantidSystemTest):
+    """
+    This tests that IntegratePeaksMD correctly ignores peaks at tube ends and that a custom masking for tubes
+    adjacent to the beam in and out is respected by IntegratePeaksMD
+    """
+
+    def cleanup(self):
+        ADS.clear()
+
+    def runTest(self):
+        # load data for bank 1 (incl. monitor spectra 1-5)
+        van, van_mon = LoadRaw(Filename='WISH/input/11_4/WISH00019612.raw', SpectrumMin=1, SpectrumMax=19461,
+                               LoadMonitors="Separate")
+        for ws in [van, van_mon]:
+            CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=6000, XMax=99000)
+            NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+            ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='Wavelength')
+            CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=0.8, XMax=9.3)
+        van = NormaliseToMonitor(InputWorkspace=van, MonitorWorkspaceIndex=3, MonitorWorkspace=van_mon)
+        van = ReplaceSpecialValues(InputWorkspace=van, NaNValue=0, InfinityValue=0)
+        # create Abs Correction for V
+        shape = '''<sphere id="V-sphere">
+            <centre x="0.0"  y="0.0" z="0.0" />
+            <radius val="0.0025"/>
+            </sphere>'''
+        CreateSampleShape(InputWorkspace=van, ShapeXML=shape)
+        SetSampleMaterial(InputWorkspace=van, SampleNumberDensity=0.0119, ScatteringXSection=5.197,
+                          AttenuationXSection=4.739, ChemicalFormula='V0.95 Nb0.05')
+        abs_cor = AbsorptionCorrection(InputWorkspace=van, ElementSize=0.5)
+        # correct Vanadium run for absorption
+        van = Divide(LHSWorkspace=van, RHSWorkspace=abs_cor, OutputWorkspace=van)
+        # smooth data
+        SmoothNeighbours(InputWorkspace=van, OutputWorkspace=van, Radius=3)
+        SmoothData(InputWorkspace=van, OutputWorkspace=van, NPoints=300)
+
+    def validate(self):
+        return "van", "WISH19612_vana_bank1_SXProcessed.nxs"
