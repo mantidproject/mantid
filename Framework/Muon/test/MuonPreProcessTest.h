@@ -49,14 +49,14 @@ public:
 // Set up algorithm with none of the optional properties
 IAlgorithm_sptr setUpAlgorithmWithNoOptionalProperties(const Workspace_sptr &ws) {
   setUpADSWithWorkspace setup(std::move(ws));
-  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   return alg;
 }
 
 // Set up algorithm with TimeOffset applied
 IAlgorithm_sptr setUpAlgorithmWithTimeOffset(const MatrixWorkspace_sptr &ws, const double &offset) {
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   alg->setProperty("TimeOffset", offset);
   return alg;
 }
@@ -65,7 +65,7 @@ IAlgorithm_sptr setUpAlgorithmWithTimeOffset(const MatrixWorkspace_sptr &ws, con
 IAlgorithm_sptr setUpAlgorithmWithTimeZeroTable(const MatrixWorkspace_sptr &ws,
                                                 const ITableWorkspace_sptr &timeZeroTable) {
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   alg->setProperty("TimeZeroTable", timeZeroTable);
   return alg;
 }
@@ -73,7 +73,7 @@ IAlgorithm_sptr setUpAlgorithmWithTimeZeroTable(const MatrixWorkspace_sptr &ws,
 // Set up algorithm with DeadTimeTable applied
 IAlgorithm_sptr setUpAlgorithmWithDeadTimeTable(const MatrixWorkspace_sptr &ws, const ITableWorkspace_sptr &deadTimes) {
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   alg->setProperty("DeadTimeTable", deadTimes);
   return alg;
 }
@@ -81,7 +81,7 @@ IAlgorithm_sptr setUpAlgorithmWithDeadTimeTable(const MatrixWorkspace_sptr &ws, 
 // Set up algorithm with TimeMin applied
 IAlgorithm_sptr setUpAlgorithmWithTimeMin(const MatrixWorkspace_sptr &ws, const double &timeMin) {
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   alg->setProperty("TimeMin", timeMin);
   return alg;
 }
@@ -89,7 +89,7 @@ IAlgorithm_sptr setUpAlgorithmWithTimeMin(const MatrixWorkspace_sptr &ws, const 
 // Set up algorithm with TimeMax applied
 IAlgorithm_sptr setUpAlgorithmWithTimeMax(const MatrixWorkspace_sptr &ws, const double &timeMax) {
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   alg->setProperty("TimeMax", timeMax);
   return alg;
 }
@@ -141,7 +141,7 @@ public:
   void test_that_algorithm_does_not_execute_if_TimeMax_lower_than_TimeMin() {
     auto ws = createCountsWorkspace(2, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+    auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
     alg->setProperty("TimeMin", 0.6);
     alg->setProperty("TimeMax", 0.4);
 
@@ -151,7 +151,7 @@ public:
   void test_that_negative_TimeMin_is_an_accepted_input() {
     auto ws = createCountsWorkspace(2, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+    auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
     alg->setProperty("TimeMin", -1.0);
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -160,7 +160,7 @@ public:
   void test_that_TimeMin_and_TimeMax_must_be_different() {
     auto ws = createCountsWorkspace(2, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+    auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
     alg->setProperty("TimeMin", 0.5);
     alg->setProperty("TimeMax", 0.5);
 
@@ -171,7 +171,7 @@ public:
     // bins : 0.0 , 0.1 , 0.2 , ... , 1.0 (bin edges)
     auto ws = createCountsWorkspace(2, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+    auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
     alg->setProperty("OutputWorkspace", "__notUsed");
     alg->setAlwaysStoreInADS(false);
 
@@ -243,7 +243,7 @@ public:
     // y =  0   , 1   , 2   , ... , 9
     auto ws = createCountsWorkspace(2, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+    auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
     std::vector<double> rebinArgs = {0.2};
     alg->setProperty("RebinArgs", rebinArgs);
     alg->setProperty("OutputWorkspace", "__notUsed");
@@ -269,7 +269,7 @@ public:
     // y =  0   , 1   , 2   , ... , 9
     auto ws = createCountsWorkspace(1, 10, 0.0, 0, true, 1.0, 2.0);
     setUpADSWithWorkspace setup(ws);
-    IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+    auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
     std::vector<double> rebinArgs = {-0.2};
     alg->setProperty("RebinArgs", rebinArgs);
     alg->setProperty("OutputWorkspace", "__notUsed");
@@ -457,7 +457,7 @@ public:
     WorkspaceGroup_sptr ws = createMultiPeriodWorkspaceGroup(3, 1, 10, "MuonAnalysis");
 
     setUpADSWithWorkspace setup(ws);
-    IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+    auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
     alg->execute();
 
     WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");

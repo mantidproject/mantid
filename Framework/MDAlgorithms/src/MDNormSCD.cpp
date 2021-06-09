@@ -220,7 +220,7 @@ std::string MDNormSCD::inputEnergyMode() const {
  */
 MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
   const auto &props = getProperties();
-  IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
+  auto binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
   binMD->setPropertyValue("AxisAligned", "1");
   for (auto prop : props) {
     const auto &propName = prop->name();

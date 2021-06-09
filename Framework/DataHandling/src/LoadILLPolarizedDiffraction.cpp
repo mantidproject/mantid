@@ -299,7 +299,7 @@ void LoadILLPolarizedDiffraction::loadInstrument(API::MatrixWorkspace_sptr works
   // the start time is needed in the workspace when loading the parameter file
   workspace->mutableRun().addProperty("start_time", startTime);
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", m_instName + "_Definition.xml");
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -326,7 +326,7 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(const API
     float *twoThetaDataEnd = twoThetaDataStart + D7_NUMBER_PIXELS_BANK;
     twoTheta.assign(twoThetaDataStart, twoThetaDataEnd);
   } else {
-    IAlgorithm_sptr loadIpf = createChildAlgorithm("LoadParameterFile");
+    auto loadIpf = createChildAlgorithm("LoadParameterFile");
     loadIpf->setPropertyValue("Filename", getPropertyValue("YIGFilename"));
     loadIpf->setProperty("Workspace", workspace);
     loadIpf->execute();
@@ -447,7 +447,7 @@ std::vector<double> LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entr
  * @param workspace : workspace to change the
  */
 API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(API::MatrixWorkspace_sptr workspace) {
-  IAlgorithm_sptr convertSpectrumAxis = createChildAlgorithm("ConvertSpectrumAxis");
+  auto convertSpectrumAxis = createChildAlgorithm("ConvertSpectrumAxis");
   convertSpectrumAxis->initialize();
   convertSpectrumAxis->setProperty("InputWorkspace", workspace);
   convertSpectrumAxis->setProperty("OutputWorkspace", "__unused_for_child");
@@ -457,7 +457,7 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(API::
   convertSpectrumAxis->execute();
   workspace = convertSpectrumAxis->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr changeSign = createChildAlgorithm("ConvertAxisByFormula");
+  auto changeSign = createChildAlgorithm("ConvertAxisByFormula");
   changeSign->initialize();
   changeSign->setProperty("InputWorkspace", workspace);
   changeSign->setProperty("OutputWorkspace", "__unused_for_child");
@@ -472,7 +472,7 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(API::
  * @param workspace : workspace to be transposed
  */
 API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::transposeMonochromatic(API::MatrixWorkspace_sptr workspace) {
-  IAlgorithm_sptr transpose = createChildAlgorithm("Transpose");
+  auto transpose = createChildAlgorithm("Transpose");
   transpose->initialize();
   transpose->setProperty("InputWorkspace", workspace);
   transpose->setProperty("OutputWorkspace", "__unused_for_child");
