@@ -708,6 +708,7 @@
 
   <instrument name="D11">
     <technique>SANS</technique>
+    <acquisition>Count</acquisition>
   </instrument>
 
   <instrument name="D16">
