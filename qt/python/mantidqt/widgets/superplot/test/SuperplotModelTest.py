@@ -16,15 +16,15 @@ from mantidqt.widgets.superplot.SuperplotModel import SuperplotModel
 class SuperplotModelTest(unittest.TestCase):
 
     def setUp(self):
-        pyModule = "mantidqt.widgets.superplot.SuperplotModel"
+        py_module = "mantidqt.widgets.superplot.SuperplotModel"
 
-        patch = mock.patch(pyModule + ".SuperplotAdsObserver")
-        self.mObs = patch.start()
-        self.mObs = self.mObs.return_value
+        patch = mock.patch(py_module + ".SuperplotAdsObserver")
+        self.m_obs = patch.start()
+        self.m_obs = self.m_obs.return_value
         self.addCleanup(patch.stop)
 
-        patch = mock.patch(pyModule + ".mtd")
-        self.mMtd = patch.start()
+        patch = mock.patch(py_module + ".mtd")
+        self.m_mtd = patch.start()
         self.addCleanup(patch.stop)
 
         self.model = SuperplotModel()
@@ -33,29 +33,29 @@ class SuperplotModelTest(unittest.TestCase):
         self.assertEqual(self.model._workspaces, [])
         self.assertEqual(self.model._plotted_data, [])
         self.assertIsNone(self.model._plot_mode)
-        self.mObs.signals.sig_ws_deleted.connect.assert_called_once()
-        self.mObs.signals.sig_ws_renamed.connect.assert_called_once()
-        self.mObs.signals.sig_ws_replaced.connect.assert_called_once()
+        self.m_obs.signals.sig_ws_deleted.connect.assert_called_once()
+        self.m_obs.signals.sig_ws_renamed.connect.assert_called_once()
+        self.m_obs.signals.sig_ws_replaced.connect.assert_called_once()
 
-    def test_addWorkspace(self):
-        self.mMtd.__contains__.return_value = False
+    def test_add_workspace(self):
+        self.m_mtd.__contains__.return_value = False
         self.model.add_workspace("ws1")
         self.assertEqual(self.model._workspaces, [])
-        self.mMtd.__contains__.return_value = True
+        self.m_mtd.__contains__.return_value = True
         self.model.add_workspace("ws1")
         self.assertEqual(self.model._workspaces, ["ws1"])
         self.model.add_workspace("ws1")
         self.assertEqual(self.model._workspaces, ["ws1"])
         self.model.add_workspace("ws2")
         self.assertEqual(self.model._workspaces, ["ws1", "ws2"])
-        self.mMtd.__getitem__.return_value = mock.Mock(spec=WorkspaceGroup)
-        self.mMtd.__getitem__.return_value.getNames.return_value = ["ws2",
+        self.m_mtd.__getitem__.return_value = mock.Mock(spec=WorkspaceGroup)
+        self.m_mtd.__getitem__.return_value.getNames.return_value = ["ws2",
                                                                     "ws3",
                                                                     "ws4"]
         self.model.add_workspace("g1")
         self.assertEqual(self.model._workspaces, ["ws1", "ws2", "ws3", "ws4"])
 
-    def test_delWorkspace(self):
+    def test_del_workspace(self):
         self.model._workspaces = ["ws1", "ws2", "ws3"]
         self.model._plotted_data = [("ws1", 1), ("ws2", 2)]
         self.model._plot_mode = self.model.BIN_MODE
@@ -76,7 +76,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.assertEqual(self.model._plotted_data, [])
         self.assertIsNone(self.model._plot_mode)
 
-    def test_getWorkspaces(self):
+    def test_get_workspaces(self):
         self.model._workspaces = ["ws1", "ws2", "ws3"]
         wsList = self.model.get_workspaces()
         self.assertEqual(wsList, self.model._workspaces)
@@ -85,7 +85,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.assertEqual(wsList, ["ws1", "ws2"])
         self.assertEqual(self.model._workspaces, ["ws1", "ws2", "ws3"])
 
-    def test_setBinMode(self):
+    def test_set_bin_mode(self):
         self.assertIsNone(self.model._plot_mode)
         self.model.set_bin_mode()
         self.assertEqual(self.model._plot_mode, self.model.BIN_MODE)
@@ -93,7 +93,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.model.set_bin_mode()
         self.assertEqual(self.model._plot_mode, self.model.BIN_MODE)
 
-    def test_setSpectrumMode(self):
+    def test_set_spectrum_mode(self):
         self.assertIsNone(self.model._plot_mode)
         self.model.set_spectrum_mode()
         self.assertEqual(self.model._plot_mode, self.model.SPECTRUM_MODE)
@@ -101,7 +101,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.model.set_spectrum_mode()
         self.assertEqual(self.model._plot_mode, self.model.SPECTRUM_MODE)
 
-    def test_isBinMode(self):
+    def test_is_bin_mode(self):
         self.assertIsNone(self.model._plot_mode)
         self.assertFalse(self.model.is_bin_mode())
         self.model._plot_mode = self.model.BIN_MODE
@@ -109,7 +109,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.model._plot_mode = self.model.SPECTRUM_MODE
         self.assertFalse(self.model.is_bin_mode())
 
-    def test_isSpectrumMode(self):
+    def test_is_spectrum_mode(self):
         self.assertIsNone(self.model._plot_mode)
         self.assertFalse(self.model.is_spectrum_mode())
         self.model._plot_mode = self.model.SPECTRUM_MODE
@@ -117,7 +117,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.model._plot_mode = self.model.BIN_MODE
         self.assertFalse(self.model.is_spectrum_mode())
 
-    def test_addData(self):
+    def test_add_data(self):
         self.assertEqual(self.model._plotted_data, [])
         self.model.add_data("ws1", 1)
         self.assertEqual(self.model._plotted_data, [("ws1", 1)])
@@ -126,7 +126,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.model.add_data("ws1", 1)
         self.assertEqual(self.model._plotted_data, [("ws1", 1), ("ws1", 2)])
 
-    def test_removeData(self):
+    def test_remove_data(self):
         self.assertEqual(self.model._plotted_data, [])
         self.model.remove_data("ws1", 1)
         self.assertEqual(self.model._plotted_data, [])
@@ -142,7 +142,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.assertEqual(self.model._plotted_data, [])
         self.assertIsNone(self.model._plot_mode)
 
-    def test_getPlottedData(self):
+    def test_get_plotted_data(self):
         self.assertEqual(self.model._plotted_data, [])
         self.assertEqual(self.model.get_plotted_data(), [])
         self.model._plotted_data = [("ws1", 1), ("ws1", 2), ("ws2", 1)]
@@ -153,7 +153,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.assertEqual(self.model._plotted_data,
                          [("ws1", 1), ("ws1", 2), ("ws2", 1)])
 
-    def test_onWorkspaceDeleted(self):
+    def test_on_workspace_deleted(self):
         self.model._workspaces = ["ws1", "ws2", "ws3"]
         self.model._plotted_data = [("ws1", 1), ("ws1", 3), ("ws3", 10)]
         self.model._plot_mode = self.model.SPECTRUM_MODE
@@ -183,7 +183,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.model.sig_workspace_deleted.emit.assert_called_once_with("ws3")
         self.model.sig_workspace_deleted.reset_mock()
 
-    def test_onWorkspaceRenamed(self):
+    def test_on_workspace_renamed(self):
         self.model._workspaces = ["ws1", "ws2", "ws3"]
         self.model._plotted_data = [("ws1", 1), ("ws1", 3), ("ws3", 10)]
         self.model.sig_workspace_renamed = mock.Mock()
@@ -198,7 +198,7 @@ class SuperplotModelTest(unittest.TestCase):
                          [("ws5", 1), ("ws5", 3), ("ws3", 10)])
         self.model.sig_workspace_renamed.emit.assert_called_once_with("ws1", "ws5")
 
-    def test_onWorkspaceReplaced(self):
+    def test_on_workspace_replaced(self):
         self.model._workspaces = ["ws1", "ws2", "ws3"]
         self.model.sig_workspace_replaced = mock.Mock()
         self.model.on_workspace_replaced("ws4")
