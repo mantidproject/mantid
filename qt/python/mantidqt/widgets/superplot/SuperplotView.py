@@ -209,7 +209,7 @@ class SuperplotView(QWidget):
         wsItem.takeChildren()
         for num in nums:
             item = SpectrumItem(wsItem, num)
-            item.signals.delClicked.connect(
+            item.signals.sig_del_clicked.connect(
                     self._presenter.onDelSpectrumButtonClicked)
             item.setText(0, str(num))
         self._sideView.workspacesList.expandAll()
