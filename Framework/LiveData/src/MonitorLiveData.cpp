@@ -133,8 +133,6 @@ void MonitorLiveData::exec() {
 
   // Keep going until you get cancelled
   while (true) {
-    // Exit if the user presses cancel
-    this->interruption_point();
 
     DateAndTime now = DateAndTime::getCurrentTime();
     double seconds = DateAndTime::secondsFromDuration(now - lastTime);
@@ -145,6 +143,9 @@ void MonitorLiveData::exec() {
 
     // Sleep for 50 msec
     Poco::Thread::sleep(50);
+
+    // Exit if the user presses cancel
+    this->interruption_point();
 
     if (seconds > UpdateEvery) {
       lastTime = now;

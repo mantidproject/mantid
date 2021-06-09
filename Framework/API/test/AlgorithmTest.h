@@ -348,9 +348,8 @@ public:
     // Set the properties so that we know what they are
     alg.setPropertyValue("prop1", "value1");
     alg.setProperty("prop2", 5);
-    std::string expected = "{\"name\":\"ToyAlgorithm\",\"properties\":{"
-                           "\"prop1\":\"value1\",\"prop2\":5},\"version\":"
-                           "1}\n";
+    std::string expected =
+        "{\"name\":\"ToyAlgorithm\",\"properties\":{\"prop1\":\"value1\",\"prop2\":5},\"version\":1}";
     TS_ASSERT_EQUALS(alg.toString(), expected);
   }
 

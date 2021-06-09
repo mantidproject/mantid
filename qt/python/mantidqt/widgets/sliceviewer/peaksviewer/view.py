@@ -9,9 +9,14 @@
 # 3rd party imports
 from qtpy.QtCore import QSortFilterProxyModel
 from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
+from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
 
 # local imports
-from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
+from .representation.painter import MplPainter
+from .actions import PeakActionsView
+
+# standard
+from typing import Optional
 
 
 class _LessThanOperatorSortFilterModel(QSortFilterProxyModel):
@@ -70,19 +75,26 @@ class PeaksViewerView(QWidget):
     """
     TITLE_PREFIX = "Workspace: "
 
-    def __init__(self, painter, sliceinfo_provider, parent=None):
+    def __init__(self,
+                 painter: MplPainter,
+                 sliceinfo_provider: 'SliceViewer',
+                 parent=None):
         """
         :param painter: An object responsible for draw the peaks representations
         :param sliceinfo_provider: An object responsible for providing access to current slice information
         :param parent: An optional parent widget
         """
         super().__init__(parent)
-        self._painter = painter
-        self._sliceinfo_provider = sliceinfo_provider
-        self._group_box = None
-        self._presenter = None
-        self._table_view = None
+        self._painter: MplPainter = painter
+        self._sliceinfo_provider: 'SliceViewer' = sliceinfo_provider
+        self._group_box: Optional[QGroupBox] = None
+        self._presenter: Optional['PeaksViewerPresenter'] = None  # handle to its presenter
+        self._table_view: Optional[_PeaksWorkspaceTableView] = None
         self._setup_ui()
+
+    @property
+    def presenter(self):
+        return self._presenter
 
     @property
     def painter(self):
@@ -191,8 +203,10 @@ class PeaksViewerView(QWidget):
 class PeaksViewerCollectionView(QWidget):
     """Display a collection of PeaksViewerView objects in a scrolling view.
     """
-
-    def __init__(self, painter, sliceinfo_provider, parent=None):
+    def __init__(self,
+                 painter: MplPainter,
+                 sliceinfo_provider: 'SliceViewer',
+                 parent=None):
         """
         :param painter: An object responsible for draw the peaks representations
         :param sliceinfo_provider: An object responsible for providing access to current slice information
@@ -201,25 +215,38 @@ class PeaksViewerCollectionView(QWidget):
         super(PeaksViewerCollectionView, self).__init__(parent)
         self._painter = painter
         self._sliceinfo_provider = sliceinfo_provider
+        self._peak_actions_view = PeakActionsView(parent=self)
+        self._peaks_layout: Optional[QVBoxLayout] = None
         self._setup_ui()
 
-    def append_peaksviewer(self):
+    @property
+    def peak_actions_view(self) -> PeakActionsView:
+        return self._peak_actions_view
+
+    def append_peaksviewer(self, index=-1) -> PeaksViewerView:
         """
         Append a view widget to end of the current list of views
         :param peaks_view: A reference to a single view widget for a PeaksWorkspace
+        :param index: the index to insert the PeaksViewerView within the PeaksViewerCollectionView
         """
         child_view = PeaksViewerView(self._painter, self._sliceinfo_provider, parent=self)
-        self._peaks_layout.addWidget(child_view)
+        self._peaks_layout.insertWidget(index, child_view)
         return child_view
 
-    def remove_peaksviewer(self, widget):
+    def remove_peaksviewer(self, widget: PeaksViewerView):
         """
         Remove a PeaksViewer from the collection
         :param widget: A reference to the PeaksViewerView
+        :return: index of removed PeaksViewerView within PeaksViewerCollectionView
         """
         layout = self._peaks_layout
-        item = layout.takeAt(layout.indexOf(widget))
+        index = layout.indexOf(widget)
+        item = layout.takeAt(index)
         item.widget().deleteLater()
+        return index
+
+    def deactivate_zoom_pan(self):
+        self._sliceinfo_provider.deactivate_zoom_pan()
 
     # private api
     def _setup_ui(self):
@@ -227,6 +254,8 @@ class PeaksViewerCollectionView(QWidget):
         Arrange widgets on the window.
         """
         # create vertical layouts for outer widget
-        outer_layout = QVBoxLayout()
-        self.setLayout(outer_layout)
-        self._peaks_layout = outer_layout
+        self._outer_layout = QVBoxLayout()  # contains everything
+        self._outer_layout.addWidget(self._peak_actions_view)
+        self._peaks_layout = QVBoxLayout()  # contains the tables of peaks
+        self._outer_layout.addLayout(self._peaks_layout)
+        self.setLayout(self._outer_layout)

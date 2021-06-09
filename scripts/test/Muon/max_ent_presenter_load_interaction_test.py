@@ -11,12 +11,12 @@ from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtCore
 
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view_new
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter_new
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
 from Muon.GUI.Common.test_helpers.general_test_helpers import create_workspace_wrapper_stub_object
 from mantid.simpleapi import CreateWorkspace
 
@@ -39,9 +39,9 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.context.gui_context.update({'RebinType': 'None'})
         self.model = maxent_model.MaxEntModel()
 
-        self.view = maxent_view_new.MaxEntView()
+        self.view = maxent_view.MaxEntView()
 
-        self.presenter = maxent_presenter_new.MaxEntPresenter(self.view, self.context)
+        self.presenter = maxent_presenter.MaxEntPresenter(self.view, self.context)
 
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
         ws, run, filename, _ = load_utils.load_workspace_from_filename(file_path)
@@ -90,7 +90,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.assertEqual(retrieve_combobox_info(self.view.phase_table_combo),
                          ['Construct', 'MUSR22222_phase_table', 'MUSR33333_phase_table'])
 
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter_new.MuonWorkspaceWrapper')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter.MuonWorkspaceWrapper')
     def test_add_maxent_workspace_to_ADS(self, workspace_wrapper_mock):
         self.presenter.getWorkspaceNames()
         self.context.dead_time_table = mock.MagicMock(return_value='deadtime_table_name')

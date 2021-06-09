@@ -17,9 +17,11 @@ New features
 Improvements
 ############
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` major interface update along with enabling the calibration of T0 and sample position.
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` minor interface update that allows fine control of bank rotation calibration.
 
 Bugfixes
 ########
+- fix d-spacing calculation when parabolic model is selected.
 
 Engineering Diffraction
 -----------------------
@@ -35,6 +37,7 @@ New features
 Improvements
 ############
 - Find detector in peaks will check which det is closer when dealing with peak-in-gap situation for tube-type detectors.
+- Existing :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now provides better calibration of panel orientation for flat panel detectors.
 
 Bugfixes
 ########

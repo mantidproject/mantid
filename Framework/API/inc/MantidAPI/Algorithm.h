@@ -84,10 +84,10 @@ public:
   class MANTID_API_DLL AlgorithmNotification : public Poco::Notification {
   public:
     AlgorithmNotification(const Algorithm *const alg);
-    const Algorithm *algorithm() const;
+    const IAlgorithm *algorithm() const;
 
   private:
-    const Algorithm *const m_algorithm; ///< The algorithm
+    const IAlgorithm *const m_algorithm; ///< The algorithm
   };
 
   /// StartedNotification is sent when the algorithm begins execution.
@@ -262,11 +262,11 @@ public:
   /// Serialize an object to a json object
   ::Json::Value toJson() const override;
   /// De-serialize an object from a string
-  static Algorithm_sptr fromString(const std::string &input);
+  static IAlgorithm_sptr fromString(const std::string &input);
   /// De-serialize an object from a Json
-  static Algorithm_sptr fromJson(const Json::Value &input);
+  static IAlgorithm_sptr fromJson(const Json::Value &input);
   /// Construct an object from a history entry
-  static Algorithm_sptr fromHistory(const AlgorithmHistory &history);
+  static IAlgorithm_sptr fromHistory(const AlgorithmHistory &history);
   //@}
 
   virtual std::shared_ptr<Algorithm> createChildAlgorithm(const std::string &name, const double startProgress = -1.,

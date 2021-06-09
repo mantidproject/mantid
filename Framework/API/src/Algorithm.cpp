@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 
+#include "MantidJson/Json.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"
@@ -890,11 +891,7 @@ void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg, const double st
  * a json formatted string.
  * @returns This object serialized as a string
  */
-std::string Algorithm::toString() const {
-  ::Json::FastWriter writer;
-
-  return writer.write(toJson());
-}
+std::string Algorithm::toString() const { return Mantid::JsonHelpers::jsonToString(toJson()); }
 
 /**
  * Serialize this object to a json object)
@@ -918,10 +915,9 @@ std::string Algorithm::toString() const {
  * @param history :: AlgorithmHistory object
  * @return a shared pointer to the created algorithm.
  */
-Algorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
+IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
   ::Json::Value root;
   ::Json::Value jsonMap;
-  ::Json::FastWriter writer;
 
   auto props = history.getProperties();
   const size_t numProps(props.size());
@@ -936,8 +932,8 @@ Algorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
   root["version"] = history.version();
   root["properties"] = jsonMap;
 
-  const std::string output = writer.write(root);
-  Algorithm_sptr alg;
+  const std::string output = Mantid::JsonHelpers::jsonToString(root);
+  IAlgorithm_sptr alg;
 
   try {
     alg = Algorithm::fromString(output);
@@ -957,10 +953,9 @@ Algorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
  * @return A pointer to a managed algorithm object
  * @throws std::runtime_error if the algorithm cannot be created
  */
-Algorithm_sptr Algorithm::fromString(const std::string &input) {
+IAlgorithm_sptr Algorithm::fromString(const std::string &input) {
   ::Json::Value root;
-  ::Json::Reader reader;
-  if (reader.parse(input, root)) {
+  if (Mantid::JsonHelpers::parse(input, &root)) {
     return fromJson(root);
   } else {
     throw std::runtime_error("Cannot create algorithm, invalid string format.");
@@ -974,7 +969,7 @@ Algorithm_sptr Algorithm::fromString(const std::string &input) {
  * @return A new algorithm object
  * @throws std::runtime_error if the algorithm cannot be created
  */
-Algorithm_sptr Algorithm::fromJson(const Json::Value &serialized) {
+IAlgorithm_sptr Algorithm::fromJson(const Json::Value &serialized) {
   const std::string algName = serialized["name"].asString();
   const int version = serialized.get("version", -1).asInt();
   auto alg = AlgorithmManager::Instance().createUnmanaged(algName, version);
@@ -1875,7 +1870,7 @@ void Algorithm::setCommunicator(const Parallel::Communicator &communicator) {
 Algorithm::AlgorithmNotification::AlgorithmNotification(const Algorithm *const alg)
     : Poco::Notification(), m_algorithm(alg) {}
 
-const Algorithm *Algorithm::AlgorithmNotification::algorithm() const { return m_algorithm; }
+const IAlgorithm *Algorithm::AlgorithmNotification::algorithm() const { return m_algorithm; }
 
 Algorithm::StartedNotification::StartedNotification(const Algorithm *const alg) : AlgorithmNotification(alg) {}
 std::string Algorithm::StartedNotification::name() const { return "StartedNotification"; } ///< class name
