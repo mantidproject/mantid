@@ -751,6 +751,7 @@
 
   <instrument name="FIGARO">
     <technique>Reflectometry</technique>
+    <acquisition>TOFCount</acquisition>
   </instrument>
 
   <instrument name="PANTHER">
