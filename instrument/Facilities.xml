@@ -673,6 +673,8 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>Cold neutron time-focussing time-of-flight spectrometer</technique>
+    <acquisition>Count</acquisition>
+    <acquisition>TOFCount</acquisition>
   </instrument>
 
   <instrument name="IN10">
