@@ -43,7 +43,7 @@ class SuperplotPresenter:
 
         self._updateList()
         self._updatePlot()
-        plottedData = self._model.getPlottedData()
+        plottedData = self._model.get_plotted_data()
         selection = dict()
         for ws, sp in plottedData:
             if ws not in selection:
@@ -94,7 +94,7 @@ class SuperplotPresenter:
                             or (arg["axis"] != MantidAxType.BIN
                                 and arg["axis"] != MantidAxType.BIN.value)):
                             return
-                    self._model.setBinMode()
+                    self._model.set_bin_mode()
                     self._view.set_available_modes([self.BIN_MODE_TEXT])
                 else:
                     for arg in args:
@@ -102,7 +102,7 @@ class SuperplotPresenter:
                             and (arg["axis"] == MantidAxType.BIN
                                  or arg["axis"] == MantidAxType.BIN.value)):
                             return
-                    self._model.setSpectrumMode()
+                    self._model.set_spectrum_mode()
                     self._view.set_available_modes([self.SPECTRUM_MODE_TEXT])
             else:
                 for arg in args:
@@ -110,7 +110,7 @@ class SuperplotPresenter:
                         and (arg["axis"] != MantidAxType.SPECTRUM
                              and arg["axis"] != MantidAxType.SPECTRUM.value)):
                         return
-                self._model.setSpectrumMode()
+                self._model.set_spectrum_mode()
                 self._view.set_available_modes([self.SPECTRUM_MODE_TEXT])
             if "function" in args[0]:
                 self._plotFunction = args[0]["function"]
@@ -124,8 +124,8 @@ class SuperplotPresenter:
                     i = 0
                 specIndex = args[i]["wkspIndex"]
             wsName = ws.name()
-            self._model.addWorkspace(wsName)
-            self._model.addData(wsName, specIndex)
+            self._model.add_workspace(wsName)
+            self._model.add_data(wsName, specIndex)
 
     def onVisibilityChanged(self, state):
         """
@@ -150,7 +150,7 @@ class SuperplotPresenter:
         """
         selection = self._view.get_selection()
         addedWorkspace = self._view.get_selected_workspace()
-        self._model.addWorkspace(addedWorkspace)
+        self._model.add_workspace(addedWorkspace)
         self._updateList()
         self._view.set_selection(selection)
         self._updatePlot()
@@ -166,9 +166,9 @@ class SuperplotPresenter:
         else:
             selectedWorkspaces = [wsName]
         for selectedWorkspace in selectedWorkspaces:
-            self._model.delWorkspace(selectedWorkspace)
+            self._model.del_workspace(selectedWorkspace)
         self._updateList()
-        if not self._model.isBinMode() and not self._model.isSpectrumMode():
+        if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
             mode = self._view.get_mode()
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
                                           self.BIN_MODE_TEXT])
@@ -229,7 +229,7 @@ class SuperplotPresenter:
             self._view.check_hold_button(False)
             return
         index = self._view.get_spectrum_slider_position()
-        plottedData = self._model.getPlottedData()
+        plottedData = self._model.get_plotted_data()
         for ws in selection:
             if (ws, index) not in plottedData:
                 self._view.check_hold_button(False)
@@ -240,8 +240,8 @@ class SuperplotPresenter:
         """
         Update the workspaces/spectra list.
         """
-        names = self._model.getWorkspaces()
-        plottedData = self._model.getPlottedData()
+        names = self._model.get_workspaces()
+        plottedData = self._model.get_plotted_data()
         self._view.set_workspaces_list(names)
         for name in names:
             spectra = list()
@@ -258,7 +258,7 @@ class SuperplotPresenter:
         """
         selection = self._view.get_selection()
         currentSpectrumIndex = self._view.get_spectrum_slider_position()
-        plottedData = self._model.getPlottedData()
+        plottedData = self._model.get_plotted_data()
         mode = self._view.get_mode()
 
         figure = self._canvas.figure
@@ -367,8 +367,8 @@ class SuperplotPresenter:
         """
         selection = self._view.get_selection()
         mode = self._view.get_mode()
-        self._model.removeData(wsName, index)
-        if not self._model.isBinMode() and not self._model.isSpectrumMode():
+        self._model.remove_data(wsName, index)
+        if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
                                           self.BIN_MODE_TEXT])
             self._view.set_mode(mode)
@@ -392,12 +392,12 @@ class SuperplotPresenter:
         spectrumIndex = self._view.get_spectrum_slider_position()
         mode = self._view.get_mode()
         for wsName in selection:
-            self._model.addData(wsName, spectrumIndex)
+            self._model.add_data(wsName, spectrumIndex)
         if mode == self.SPECTRUM_MODE_TEXT:
-            self._model.setSpectrumMode()
+            self._model.set_spectrum_mode()
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT])
         else:
-            self._model.setBinMode()
+            self._model.set_bin_mode()
             self._view.set_available_modes([self.BIN_MODE_TEXT])
         self._view.check_hold_button(False)
         self._updateList()
@@ -413,11 +413,11 @@ class SuperplotPresenter:
         mode = self._view.get_mode()
         for wsName in selection:
             if not self._view.is_spectrum_disabled():
-                self._model.removeData(wsName, spectrumIndex)
+                self._model.remove_data(wsName, spectrumIndex)
             else:
                 for spectrum in selection[wsName]:
-                    self._model.removeData(wsName, spectrum)
-        if not self._model.isBinMode() and not self._model.isSpectrumMode():
+                    self._model.remove_data(wsName, spectrum)
+        if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
                                             self.BIN_MODE_TEXT])
             self._view.set_mode(mode)

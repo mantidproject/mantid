@@ -67,16 +67,16 @@ class SuperplotModel(QObject):
         self._plottedData = list()
         self._adsObserver = SuperplotAdsObserver()
         self._adsObserver.signals.sig_ws_deleted.connect(
-                self.onWorkspaceDeleted)
+                self.on_workspace_deleted)
         self._adsObserver.signals.sig_ws_renamed.connect(
-                self.onWorkspaceRenamed)
+                self.on_workspace_renamed)
         self._adsObserver.signals.sig_ws_replaced.connect(
-                self.onWorkspaceReplaced)
+                self.on_workspace_replaced)
 
     def __del__(self):
         del self._adsObserver
 
-    def addWorkspace(self, name):
+    def add_workspace(self, name):
         """
         Add a workspace to the list. If it is a workspace group, all the members
         are added.
@@ -94,7 +94,7 @@ class SuperplotModel(QObject):
             if name not in self._workspaces:
                 self._workspaces.append(name)
 
-    def delWorkspace(self, name):
+    def del_workspace(self, name):
         """
         Remove a workspace from the list.
 
@@ -108,7 +108,7 @@ class SuperplotModel(QObject):
         if not self._plottedData:
             self._plotMode = None
 
-    def getWorkspaces(self):
+    def get_workspaces(self):
         """
         Get the list of workspace names.
 
@@ -117,19 +117,19 @@ class SuperplotModel(QObject):
         """
         return self._workspaces.copy()
 
-    def setBinMode(self):
+    def set_bin_mode(self):
         """
         Set the plot mode to 'bins'.
         """
         self._plotMode = self.BIN_MODE
 
-    def setSpectrumMode(self):
+    def set_spectrum_mode(self):
         """
         Set the plot mode to 'spectra'.
         """
         self._plotMode = self.SPECTRUM_MODE
 
-    def isBinMode(self):
+    def is_bin_mode(self):
         """
         Return true if the plot mode is 'bins'.
 
@@ -138,7 +138,7 @@ class SuperplotModel(QObject):
         """
         return self._plotMode == self.BIN_MODE
 
-    def isSpectrumMode(self):
+    def is_spectrum_mode(self):
         """
         Return true if the plot mode is 'spectra'.
 
@@ -147,7 +147,7 @@ class SuperplotModel(QObject):
         """
         return self._plotMode == self.SPECTRUM_MODE
 
-    def addData(self, workspace, spectrum):
+    def add_data(self, workspace, spectrum):
         """
         Add a workspace, spectrum index pair from the plotted data.
 
@@ -158,7 +158,7 @@ class SuperplotModel(QObject):
         if (workspace, spectrum) not in self._plottedData:
             self._plottedData.append((workspace, spectrum))
 
-    def removeData(self, workspace, spectrum):
+    def remove_data(self, workspace, spectrum):
         """
         Remove a workspace, spectrum index pair from the plotted data.
 
@@ -171,7 +171,7 @@ class SuperplotModel(QObject):
         if not self._plottedData:
             self._plotMode = None
 
-    def getPlottedData(self):
+    def get_plotted_data(self):
         """
         Get the plotted data.
 
@@ -180,7 +180,7 @@ class SuperplotModel(QObject):
         """
         return self._plottedData.copy()
 
-    def onWorkspaceDeleted(self, wsName):
+    def on_workspace_deleted(self, wsName):
         """
         Triggered when the ADS reports a workspace deletion. This method deletes
         any reference to the corresponding workspace.
@@ -197,7 +197,7 @@ class SuperplotModel(QObject):
             self._plotMode = None
         self.workspaceDeleted.emit(wsName)
 
-    def onWorkspaceRenamed(self, oldName, newName):
+    def on_workspace_renamed(self, oldName, newName):
         """
         Triggered when the ADS reports a workspace renaming. This method rename
         any reference to this workspace.
@@ -215,7 +215,7 @@ class SuperplotModel(QObject):
                 self._plottedData[i] = (newName, self._plottedData[i][1])
         self.workspaceRenamed.emit(oldName, newName)
 
-    def onWorkspaceReplaced(self, wsName):
+    def on_workspace_replaced(self, wsName):
         """
         Triggered when the ADS reports a workspace replacement.
 
