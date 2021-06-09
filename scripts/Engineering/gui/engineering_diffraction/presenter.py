@@ -71,7 +71,6 @@ class EngineeringDiffractionPresenter(object):
         settings_view = SettingsView(view)
         settings_presenter = SettingsPresenter(settings_model, settings_view)
         settings_presenter.load_settings_from_file_or_default()
-        settings_presenter.set_peak_function_from_settings()  # to update mantid settings based on UI settings
         self.settings_presenter = settings_presenter
         self.setup_savedir_notifier(view)
 

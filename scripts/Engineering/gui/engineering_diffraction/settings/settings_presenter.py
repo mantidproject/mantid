@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from os import path
-from mantid.kernel import ConfigService
 from mantidqt.utils.observer_pattern import Observable
 
 SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
@@ -76,9 +75,6 @@ class SettingsPresenter(object):
 
     def descending_changed(self, state):
         self.view.set_ascending_checked(not bool(state))
-
-    def set_peak_function_from_settings(self):
-        ConfigService.setString("curvefitting.defaultPeak", self.settings["default_peak"])
 
     def save_new_settings(self):
         self._collect_new_settings_from_view()

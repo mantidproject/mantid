@@ -8,7 +8,6 @@
 import unittest
 
 from unittest import mock
-from unittest.mock import patch
 from Engineering.gui.engineering_diffraction.settings import settings_model, settings_view, settings_presenter
 
 
@@ -72,9 +71,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.model.set_settings_dict.assert_called_with(self.settings)
         self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
 
-    @patch("Engineering.gui.engineering_diffraction.settings.settings_presenter.ConfigService")
-    def test_show(self, mock_config):
-        mock_config.getString.return_value = self.settings["default_peak"]
+    def test_show(self):
         self.presenter.settings = self.settings.copy()
 
         self.presenter.show()
