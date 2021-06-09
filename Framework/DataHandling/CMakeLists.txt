@@ -689,6 +689,7 @@ target_link_libraries(DataHandling
 if(ENABLE_LIB3MF)
   target_link_libraries(DataHandling LINK_PRIVATE
                         ${LIB3MF_LIBRARIES})
+  target_include_directories(DataHandling PRIVATE ${LIB3MF_INCLUDE_DIR})
 endif()
 
 # Add the unit tests directory

@@ -99,7 +99,7 @@ endif()
 
 find_package(Doxygen) # optional
 
-if(CMAKE_HOST_WIN32)
+if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
   find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
   set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
   find_package(
@@ -107,14 +107,14 @@ if(CMAKE_HOST_WIN32)
     COMPONENTS CXX HL
     REQUIRED CONFIGS hdf5-config.cmake
   )
-  set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
 else()
   find_package(ZLIB REQUIRED)
   find_package(
     HDF5
     COMPONENTS CXX HL
-    REQUIRED
+    REQUIRED CONFIGS hdf5-config.cmake
   )
+  set(HDF5_LIBRARIES hdf5_cpp-shared hdf5_hl-shared)
 endif()
 
 find_package(OpenSSL REQUIRED)
@@ -426,7 +426,12 @@ if (ENABLE_PRECOMMIT)
   endif ()
 
   if (MSVC)
+    message("PRECOMMIT ${PRE_COMMIT_EXE} ")
+    if(CONDA_BUILD)
+    execute_process(COMMAND "${PRE_COMMIT_EXE}" install --overwrite WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
+    else()
     execute_process(COMMAND "${PRE_COMMIT_EXE}.cmd" install --overwrite WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
+    endif()
     if(NOT PRE_COMMIT_RESULT EQUAL "0")
         message(FATAL_ERROR "Pre-commit install failed with ${PRE_COMMIT_RESULT}")
     endif()
