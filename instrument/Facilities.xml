@@ -726,6 +726,7 @@
 
   <instrument name="D2B">
     <technique>Powder diffraction</technique>
+    <acquisition>DetectorScan</acquisition>
   </instrument>
 
   <instrument name="D20">
