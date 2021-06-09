@@ -128,7 +128,7 @@ class SuperplotView(QWidget):
                     wsItem.setSelected(True)
                 for j in range(wsItem.childCount()):
                     spItem = wsItem.child(j)
-                    if spItem.getSpectrumIndex() in selection[wsName]:
+                    if spItem.get_spectrum_index() in selection[wsName]:
                         spItem.setSelected(True)
         self._sideView.workspacesList.blockSignals(False)
 
@@ -147,7 +147,7 @@ class SuperplotView(QWidget):
                 if wsName not in selection:
                     selection[wsName] = [-1]
             else:
-                spectrum = item.getSpectrumIndex()
+                spectrum = item.get_spectrum_index()
                 wsName = item.parent().getWorkspaceName()
                 if wsName in selection:
                     selection[wsName].append(spectrum)
@@ -173,7 +173,7 @@ class SuperplotView(QWidget):
 
         for i in range(wsItem.childCount()):
             spItem = wsItem.child(i)
-            if spItem.getSpectrumIndex() == spectrumIndex:
+            if spItem.get_spectrum_index() == spectrumIndex:
                 brush = spItem.foreground(0)
                 brush.setColor(QColor(color))
                 spItem.setForeground(0, brush)
@@ -233,7 +233,7 @@ class SuperplotView(QWidget):
             return []
         nums = list()
         for i in range(wsItem.childCount()):
-            nums.append(wsItem.child(i).getSpectrumIndex())
+            nums.append(wsItem.child(i).get_spectrum_index())
         return nums
 
     def checkHoldButton(self, state):

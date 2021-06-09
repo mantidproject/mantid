@@ -64,13 +64,13 @@ class SuperplotViewTest(unittest.TestCase):
         ws1.getWorkspaceName.return_value = "ws1"
         ws1.childCount.return_value = 4
         sp1 = mock.Mock()
-        sp1.getSpectrumIndex.return_value = 1
+        sp1.get_spectrum_index.return_value = 1
         sp2 = mock.Mock()
-        sp2.getSpectrumIndex.return_value = 2
+        sp2.get_spectrum_index.return_value = 2
         sp3 = mock.Mock()
-        sp3.getSpectrumIndex.return_value = 3
+        sp3.get_spectrum_index.return_value = 3
         sp4 = mock.Mock()
-        sp4.getSpectrumIndex.return_value = 4
+        sp4.get_spectrum_index.return_value = 4
         ws1.child.side_effect = [sp1, sp2, sp3, sp4]
         ws2 = mock.Mock()
         ws2.getWorkspaceName.return_value = "ws2"
@@ -95,10 +95,10 @@ class SuperplotViewTest(unittest.TestCase):
         ws1Item.getWorkspaceName.return_value = "ws1"
         ws1Item.parent.return_value = None
         sp1Item = mock.Mock()
-        sp1Item.getSpectrumIndex.return_value = 1
+        sp1Item.get_spectrum_index.return_value = 1
         sp1Item.parent.return_value = ws1Item
         sp2Item = mock.Mock()
-        sp2Item.getSpectrumIndex.return_value = 2
+        sp2Item.get_spectrum_index.return_value = 2
         sp2Item.parent.return_value = ws1Item
         ws2Item = mock.Mock()
         ws2Item.getWorkspaceName.return_value = "ws2"
@@ -114,14 +114,14 @@ class SuperplotViewTest(unittest.TestCase):
         self.view.modifySpectrumLabel("test", 1, "label", "#000000")
         it1 = mock.Mock()
         sp1 = mock.Mock()
-        sp1.getSpectrumIndex.return_value = 1
+        sp1.get_spectrum_index.return_value = 1
         sp2 = mock.Mock()
-        sp2.getSpectrumIndex.return_value = 2
+        sp2.get_spectrum_index.return_value = 2
         it1.childCount.return_value = 2
         it1.child.side_effect = [sp1, sp2]
         it2 = mock.Mock()
         sp3 = mock.Mock()
-        sp3.getSpectrumIndex.return_value = 3
+        sp3.get_spectrum_index.return_value = 3
         it2.childCount.return_value = 1
         it2.child.side_effect = [sp3]
         self.mDockSide.workspacesList.findItems.return_value = [it1, it2]
@@ -156,9 +156,9 @@ class SuperplotViewTest(unittest.TestCase):
         ws1 = mock.Mock()
         ws1.childCount.return_value = 2
         sp1 = mock.Mock()
-        sp1.getSpectrumIndex.return_value = 1
+        sp1.get_spectrum_index.return_value = 1
         sp2 = mock.Mock()
-        sp2.getSpectrumIndex.return_value = 2
+        sp2.get_spectrum_index.return_value = 2
         ws1.child.side_effect = [sp1, sp2]
         self.mDockSide.workspacesList.findItems.return_value = []
         self.assertEqual(self.view.getSpectraList("wsName"), [])

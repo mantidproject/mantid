@@ -62,7 +62,7 @@ class SpectrumItem(QTreeWidgetItem):
         self.treeWidget().setItemWidget(self, 1, self._delButton)
         self.treeWidget().resizeColumnToContents(1)
 
-    def getSpectrumIndex(self):
+    def get_spectrum_index(self):
         """
         Get the index of the spectrum.
 
