@@ -14,8 +14,8 @@ from mantid.simpleapi import AlignAndFocusPowder, AlignAndFocusPowderFromFiles, 
 # 3rd party
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, MultipleFileProperty,
                         Progress, PropertyMode, WorkspaceProperty)
-from mantid.kernel import (Direction, FloatArrayProperty, IntArrayBoundedValidator, IntArrayProperty,
-                           IntBoundedValidator, Property, StringListValidator)
+from mantid.kernel import (Direction, EnabledWhenProperty, FloatArrayProperty, IntArrayBoundedValidator,
+                           IntArrayProperty, IntBoundedValidator, Property, PropertyCriterion, StringListValidator)
 from mantid.utils.path import run_file
 import numpy as np
 
@@ -219,7 +219,15 @@ class SNAPReduce(DataProcessorAlgorithm):
         #
         self.declareProperty(name='EnableConfigurator', defaultValue=False, direction=Direction.Input,
                              doc='Do not reduce, just save the configuration file for autoreduction')
-        property_names = ['EnableConfigurator']
+        config_enabled = EnabledWhenProperty('EnableConfigurator', PropertyCriterion.IsNotDefault)
+
+        self.declareProperty(FileProperty(name='ConfigSaveDir', defaultValue='',
+                                          action=FileAction.OptionalDirectory),
+                             doc='Default directory is /SNS/IPTS-XXXX/shared/config where XXXX is the'
+                                 'IPTS number of the first input run number')
+        self.setPropertySettings('ConfigSaveDir', config_enabled)
+
+        property_names = ['EnableConfigurator', 'ConfigSaveDir']
         [self.setPropertyGroup(name, 'Autoreduction Configurator') for name in property_names]
 
     def validateInputs(self):  # noqa: C901  ignore "too complex" warning
@@ -303,6 +311,11 @@ class SNAPReduce(DataProcessorAlgorithm):
                     = "Calibration=\"%s\" requires one or two filenames" % calibration
         else:
             raise ValueError("Calibration value \"%s\" not supported" % calibration)
+
+        # Check ConfigSaveDir directory
+        dir_name = self.getProperty('ConfigSaveDir').value
+        if len(dir_name) > 0 and not Path(dir_name).is_dir():
+            issues['ConfigSaveDir'] = f'Directory {dir_name} not found'
 
         return issues
 
