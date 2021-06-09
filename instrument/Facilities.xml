@@ -656,6 +656,8 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>Disk chopper time-of-flight spectrometer IN4</technique>
+    <acquisition>Count</acquisition>
+    <acquisition>TOFCount</acquisition>
   </instrument>
 
   <instrument name="IN5">
