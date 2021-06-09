@@ -146,8 +146,6 @@ private:
   QList<ParamID> m_globals;
   FitSubType m_fitSubType;
   BackgroundSubType m_backgroundSubtype;
-  std::string m_resolutionName;
-  TableDatasetIndex m_resolutionIndex;
   std::vector<std::pair<std::string, size_t>> m_fitResolutions;
   std::vector<double> m_qValues;
   bool m_isQDependentFunction = false;

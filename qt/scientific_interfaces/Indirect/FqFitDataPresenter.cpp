@@ -31,9 +31,11 @@ FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *
 
 void FqFitDataPresenter::setActiveParameterType(const std::string &type) { m_activeParameterType = type; }
 
-void FqFitDataPresenter::updateActiveDataIndex() { m_dataIndex = m_fqFitModel->getNumberOfWorkspaces(); }
+void FqFitDataPresenter::updateActiveWorkspaceIndex() {
+  m_activeWorkspaceIndex = m_fqFitModel->getNumberOfWorkspaces();
+}
 
-void FqFitDataPresenter::updateActiveDataIndex(int index) { m_dataIndex = index; }
+void FqFitDataPresenter::updateActiveWorkspaceIndex(int index) { m_activeWorkspaceIndex = index; }
 
 void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
   FqFitParameters parameters;
@@ -82,8 +84,8 @@ std::vector<std::string> FqFitDataPresenter::getParameterTypes(FqFitParameters &
 }
 
 void FqFitDataPresenter::addWorkspace(IndirectFittingModel *model, const std::string &name) {
-  if (model->getNumberOfWorkspaces() > m_dataIndex)
-    model->removeWorkspace(m_dataIndex);
+  if (model->getNumberOfWorkspaces() > m_activeWorkspaceIndex)
+    model->removeWorkspace(m_activeWorkspaceIndex);
   model->addWorkspace(name);
 }
 
@@ -94,7 +96,7 @@ void FqFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
     // here we can say that we are in multiple mode so we can append the spectra
     // to the current one and then setspectra
     setModelSpectrum(fqFitDialog->parameterNameIndex());
-    updateActiveDataIndex();
+    updateActiveWorkspaceIndex();
   }
 }
 
@@ -102,12 +104,12 @@ void FqFitDataPresenter::setModelSpectrum(int index) {
   if (index < 0)
     throw std::runtime_error("No valid parameter was selected.");
   else if (m_activeParameterType == "Width")
-    m_fqFitModel->setActiveWidth(static_cast<std::size_t>(index), m_dataIndex, false);
+    m_fqFitModel->setActiveWidth(static_cast<std::size_t>(index), m_activeWorkspaceIndex, false);
   else
-    m_fqFitModel->setActiveEISF(static_cast<std::size_t>(index), m_dataIndex, false);
+    m_fqFitModel->setActiveEISF(static_cast<std::size_t>(index), m_activeWorkspaceIndex, false);
 }
 
-void FqFitDataPresenter::setDataIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog) {
+void FqFitDataPresenter::setActiveWorkspaceIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog) {
   //  update active data index with correct index based on the workspace name
   //  and the vector in m_fitDataModel which is in the base class
   //  indirectFittingModel get table workspace index
@@ -118,12 +120,12 @@ void FqFitDataPresenter::setDataIndexToCurrentWorkspace(IAddWorkspaceDialog cons
   auto wsIt = std::find(wsVector.begin(), wsVector.end(), wsName);
   // this is the index of the workspace.
   int index = int(std::distance(wsVector.begin(), wsIt));
-  updateActiveDataIndex(index);
+  updateActiveWorkspaceIndex(index);
 }
 
 void FqFitDataPresenter::closeDialog() {
-  if (m_fqFitModel->getNumberOfWorkspaces() > m_dataIndex)
-    m_fqFitModel->removeWorkspace(m_dataIndex);
+  if (m_fqFitModel->getNumberOfWorkspaces() > m_activeWorkspaceIndex)
+    m_fqFitModel->removeWorkspace(m_activeWorkspaceIndex);
   IndirectFitDataPresenter::closeDialog();
 }
 

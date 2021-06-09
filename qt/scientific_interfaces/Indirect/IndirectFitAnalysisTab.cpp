@@ -271,10 +271,10 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateSingleFitOutput(bool)));
 
   if (error) {
-    m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm, m_currentTableDatasetIndex);
+    m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm, m_activeWorkspaceIndex);
     m_fittingAlgorithm.reset();
   } else
-    m_fittingModel->addSingleFitOutput(m_fittingAlgorithm, m_currentTableDatasetIndex, m_singleFitWorkspaceIndex);
+    m_fittingModel->addSingleFitOutput(m_fittingAlgorithm, m_activeWorkspaceIndex, m_activeSpectrumIndex);
 }
 
 /**
@@ -428,12 +428,12 @@ void IndirectFitAnalysisTab::singleFit() { singleFit(getSelectedDataIndex(), get
 
 void IndirectFitAnalysisTab::singleFit(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) {
   if (validate()) {
-    m_singleFitWorkspaceIndex = spectrum;
+    m_activeSpectrumIndex = spectrum;
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
     m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
-    m_currentTableDatasetIndex = dataIndex;
+    m_activeWorkspaceIndex = dataIndex;
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
   }
 }

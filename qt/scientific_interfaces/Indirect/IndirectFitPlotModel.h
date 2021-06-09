@@ -33,7 +33,7 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr appendGuessToInput(const Mantid::API::MatrixWorkspace_sptr &guessWorkspace) const;
 
-  TableDatasetIndex getActiveDataIndex() const;
+  TableDatasetIndex getActiveWorkspaceIndex() const;
   WorkspaceIndex getActiveSpectrum() const;
   TableDatasetIndex numberOfWorkspaces() const;
   FitDomainIndex getActiveDomainIndex() const;
@@ -91,8 +91,8 @@ private:
   bool isResolutionLoaded() const;
 
   IndirectFittingModel *m_fittingModel;
-  TableDatasetIndex m_activeIndex;
-  WorkspaceIndex m_activeSpectrum;
+  TableDatasetIndex m_activeWorkspaceIndex;
+  WorkspaceIndex m_activeSpectrumIndex;
 };
 
 } // namespace IDA

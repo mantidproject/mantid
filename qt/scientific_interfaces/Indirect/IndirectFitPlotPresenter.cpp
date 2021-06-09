@@ -78,7 +78,7 @@ void IndirectFitPlotPresenter::handlePlotSpectrumChanged(WorkspaceIndex spectrum
 
 void IndirectFitPlotPresenter::watchADS(bool watch) { m_view->watchADS(watch); }
 
-TableDatasetIndex IndirectFitPlotPresenter::getSelectedDataIndex() const { return m_model->getActiveDataIndex(); }
+TableDatasetIndex IndirectFitPlotPresenter::getSelectedDataIndex() const { return m_model->getActiveWorkspaceIndex(); }
 
 WorkspaceIndex IndirectFitPlotPresenter::getSelectedSpectrum() const { return m_model->getActiveSpectrum(); }
 
@@ -161,7 +161,7 @@ void IndirectFitPlotPresenter::appendLastDataToSelection() {
 }
 
 void IndirectFitPlotPresenter::updateSelectedDataName() {
-  m_view->setNameInDataSelection(m_model->getFitDataName(), m_model->getActiveDataIndex());
+  m_view->setNameInDataSelection(m_model->getFitDataName(), m_model->getActiveWorkspaceIndex());
 }
 
 void IndirectFitPlotPresenter::updateDataSelection() {
@@ -352,7 +352,7 @@ void IndirectFitPlotPresenter::plotSpectrum(WorkspaceIndex spectrum) const {
 }
 
 void IndirectFitPlotPresenter::emitFitSingleSpectrum() {
-  emit fitSingleSpectrum(m_model->getActiveDataIndex(), m_model->getActiveSpectrum());
+  emit fitSingleSpectrum(m_model->getActiveWorkspaceIndex(), m_model->getActiveSpectrum());
 }
 
 void IndirectFitPlotPresenter::emitFWHMChanged(double minimum, double maximum) { emit fwhmChanged(maximum - minimum); }

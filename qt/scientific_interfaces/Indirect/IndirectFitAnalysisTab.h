@@ -104,8 +104,8 @@ private:
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
-  TableDatasetIndex m_currentTableDatasetIndex;
-  WorkspaceIndex m_singleFitWorkspaceIndex;
+  TableDatasetIndex m_activeWorkspaceIndex;
+  WorkspaceIndex m_activeSpectrumIndex;
 
 protected slots:
   void setModelFitFunction();

@@ -47,10 +47,10 @@ private:
   std::vector<std::string> getParameterTypes(FqFitParameters &parameters) const;
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
-  void setDataIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
+  void setActiveWorkspaceIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
 
   std::string m_activeParameterType;
-  TableDatasetIndex m_dataIndex;
+  TableDatasetIndex m_activeWorkspaceIndex;
 
   FqFitModel *m_fqFitModel;
   Notifier<IFQFitObserver> m_notifier;
