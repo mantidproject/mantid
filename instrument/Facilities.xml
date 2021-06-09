@@ -731,6 +731,8 @@
 
   <instrument name="D20">
     <technique>Powder diffraction</technique>
+    <acquisition>Count</acquisition>
+    <acquisition>DetectorScan</acquisition>
   </instrument>
 
   <instrument name="D1B">
