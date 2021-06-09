@@ -62,11 +62,11 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.mModel.set_bin_mode.assert_called_once()
 
     def test_getSideView(self):
-        self.presenter.getSideView()
+        self.presenter.get_side_view()
         self.mView.get_side_widget.assert_called_once()
 
     def test_getBottomView(self):
-        self.presenter.getBottomView()
+        self.presenter.get_bottom_view()
         self.mView.get_bottom_widget.assert_called_once()
 
     def test_close(self):
@@ -76,41 +76,41 @@ class SuperplotPresenterTest(unittest.TestCase):
     def test_onVisibilityChanged(self):
         self.mCanvas.reset_mock()
         self.mFigure.resetMock()
-        self.presenter.onVisibilityChanged(True)
-        self.presenter.onVisibilityChanged(False)
+        self.presenter.on_visibility_changed(True)
+        self.presenter.on_visibility_changed(False)
         self.mFigure.tight_layout.assert_called_once()
         self.mCanvas.draw_idle.assert_called_once()
 
     def test_onAddButtonClicked(self):
-        self.presenter._updateList = mock.Mock()
-        self.presenter.onAddButtonClicked()
+        self.presenter._update_list = mock.Mock()
+        self.presenter.on_add_button_clicked()
         self.mModel.add_workspace.assert_called_once()
-        self.presenter._updateList.assert_called_once()
+        self.presenter._update_list.assert_called_once()
         self.mView.set_selection.assert_called_once()
 
     def test_onDelButtonClicked(self):
-        self.presenter._updateList = mock.Mock()
-        self.presenter._updatePlot = mock.Mock()
-        self.presenter._updateSpectrumSlider = mock.Mock()
+        self.presenter._update_list = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
+        self.presenter._update_spectrum_slider = mock.Mock()
         self.mView.get_selection.return_value = {"ws1": 1, "ws2": 2}
-        self.presenter.onDelButtonClicked()
+        self.presenter.on_del_button_clicked()
         self.mView.get_selection.assert_called_once()
         calls = [mock.call("ws1"), mock.call("ws2")]
         self.mModel.del_workspace.assert_has_calls(calls)
-        self.presenter._updateList.assert_called_once()
-        self.presenter._updatePlot.assert_called_once()
-        self.presenter._updateSpectrumSlider.assert_called_once()
-        self.presenter._updateList.reset_mock()
-        self.presenter._updatePlot.reset_mock()
-        self.presenter._updateSpectrumSlider.reset_mock()
+        self.presenter._update_list.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
+        self.presenter._update_spectrum_slider.assert_called_once()
+        self.presenter._update_list.reset_mock()
+        self.presenter._update_plot.reset_mock()
+        self.presenter._update_spectrum_slider.reset_mock()
         self.mModel.reset_mock()
-        self.presenter.onDelButtonClicked("ws3")
+        self.presenter.on_del_button_clicked("ws3")
         self.mModel.del_workspace.assert_called_once_with("ws3")
-        self.presenter._updatePlot.assert_called_once()
-        self.presenter._updateSpectrumSlider.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
+        self.presenter._update_spectrum_slider.assert_called_once()
 
     def test_updateSpectrumSlider(self):
-        self.presenter._updateSpectrumSlider()
+        self.presenter._update_spectrum_slider()
         self.mView.set_spectrum_slider_position.assert_called_once_with(0)
         self.mView.set_spectrum_slider_max.assert_called_once_with(0)
         self.mView.set_spectrum_spin_box_value.assert_called_once_with(0)
@@ -123,7 +123,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.mMtd.__getitem__.return_value = ws
         self.mView.get_mode.return_value = self.presenter.SPECTRUM_MODE_TEXT
         self.mView.get_selection.return_value = {"ws1": [10]}
-        self.presenter._updateSpectrumSlider()
+        self.presenter._update_spectrum_slider()
         ws.getNumberHistograms.assert_called_once()
         self.mView.set_spectrum_disabled.assert_called_once_with(False)
         self.mView.set_spectrum_slider_max.assert_called_once_with(49)
@@ -135,18 +135,18 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.mModel.get_plotted_data.return_value = [("ws1", 1), ("ws2", 2)]
         self.mView.get_selection.return_value = {"ws1": []}
         self.mView.get_spectrum_slider_position.return_value = 10
-        self.presenter._updateHoldButton()
+        self.presenter._update_hold_button()
         self.mView.check_hold_button.assert_called_once_with(False)
         self.mView.reset_mock()
         self.mView.get_selection.return_value = {"ws2": []}
         self.mView.get_spectrum_slider_position.return_value = 2
-        self.presenter._updateHoldButton()
+        self.presenter._update_hold_button()
         self.mView.check_hold_button.assert_called_once_with(True)
 
     def test_updateList(self):
         self.mModel.get_workspaces.return_value = ["ws1", "ws2", "ws5"]
         self.mModel.get_plotted_data.return_value = [("ws5", 5), ("ws2", 1)]
-        self.presenter._updateList()
+        self.presenter._update_list()
         self.mView.set_workspaces_list.assert_called_once_with(["ws1", "ws2",
                                                               "ws5"])
         calls = [mock.call("ws1", []), mock.call("ws2", [1]),
@@ -184,7 +184,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         line.get_label.return_value = "label"
         line.get_color.return_value = "color"
         self.mAxes.plot.return_value = [line]
-        self.presenter._updatePlot()
+        self.presenter._update_plot()
         self.mAxes.remove_artists_if.assert_called_once()
         calls = [mock.call("ws5", 5, "label", "color"),
                  mock.call("ws2", 1, "label", "color"),
@@ -192,121 +192,121 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.mView.modify_spectrum_label.assert_has_calls(calls)
 
     def test_onWorkspaceSelectionChanged(self):
-        self.presenter._updatePlot = mock.Mock()
-        self.presenter._updateSpectrumSlider = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
+        self.presenter._update_spectrum_slider = mock.Mock()
         self.mView.get_selection.return_value = {}
-        self.presenter.onWorkspaceSelectionChanged()
-        self.presenter._updateSpectrumSlider.assert_called_once()
-        self.presenter._updateSpectrumSlider.reset_mock()
+        self.presenter.on_workspace_selection_changed()
+        self.presenter._update_spectrum_slider.assert_called_once()
+        self.presenter._update_spectrum_slider.reset_mock()
         self.mView.get_selection.return_value = {"ws1": [1], "ws2": [1]}
-        self.presenter.onWorkspaceSelectionChanged()
-        self.presenter._updateSpectrumSlider.assert_called_once()
-        self.presenter._updateSpectrumSlider.reset_mock()
+        self.presenter.on_workspace_selection_changed()
+        self.presenter._update_spectrum_slider.assert_called_once()
+        self.presenter._update_spectrum_slider.reset_mock()
         self.mView.get_selection.return_value = {"ws1": [1], "ws2": [2]}
-        self.presenter.onWorkspaceSelectionChanged()
-        self.presenter._updateSpectrumSlider.assert_called_once()
+        self.presenter.on_workspace_selection_changed()
+        self.presenter._update_spectrum_slider.assert_called_once()
 
     def test_onSpectrumSliderMoved(self):
-        self.presenter._updateHoldButton = mock.Mock()
-        self.presenter._updatePlot = mock.Mock()
-        self.presenter.onSpectrumSliderMoved(1)
+        self.presenter._update_hold_button = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
+        self.presenter.on_spectrum_slider_moved(1)
         self.mView.set_spectrum_spin_box_value.assert_called_once_with(1)
-        self.presenter._updateHoldButton.assert_called_once()
-        self.presenter._updatePlot.assert_called_once()
+        self.presenter._update_hold_button.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
 
     def test_onSpectrumSpinBoxChanged(self):
-        self.presenter._updateHoldButton = mock.Mock()
-        self.presenter._updatePlot = mock.Mock()
-        self.presenter.onSpectrumSpinBoxChanged(1)
+        self.presenter._update_hold_button = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
+        self.presenter.on_spectrum_spin_box_changed(1)
         self.mView.set_spectrum_slider_position.assert_called_once()
-        self.presenter._updateHoldButton.assert_called_once()
-        self.presenter._updatePlot.assert_called_once()
+        self.presenter._update_hold_button.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
 
     def test_onDelSpectrumButtonClicked(self):
-        self.presenter._updateList = mock.Mock()
-        self.presenter._updateSpectrumSlider = mock.Mock()
-        self.presenter._updatePlot = mock.Mock()
+        self.presenter._update_list = mock.Mock()
+        self.presenter._update_spectrum_slider = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
         self.mView.get_selection.return_value = {"ws1": [1], "ws2": [2]}
-        self.presenter.onDelSpectrumButtonClicked("ws3", 10)
-        self.presenter._updateList.assert_called_once()
-        self.presenter._updateSpectrumSlider.assert_called_once()
-        self.presenter._updatePlot.assert_called_once()
+        self.presenter.on_del_spectrum_button_clicked("ws3", 10)
+        self.presenter._update_list.assert_called_once()
+        self.presenter._update_spectrum_slider.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
         self.mView.set_selection.assert_called_once_with({"ws1": [1],
                                                          "ws2": [2]})
         self.mView.reset_mock()
-        self.presenter.onDelSpectrumButtonClicked("ws1", 1)
+        self.presenter.on_del_spectrum_button_clicked("ws1", 1)
         self.mView.set_selection.assert_called_once_with({"ws2": [2]})
 
     def test_onHold(self):
-        self.presenter._updateList = mock.Mock()
-        self.presenter._updatePlot = mock.Mock()
+        self.presenter._update_list = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
         self.mView.is_spectrum_disabled.return_value = False
         self.mView.get_selection.return_value = {"ws1": [1], "ws2": [2]}
         self.mView.get_spectrum_slider_position.return_value = 10
         self.mView.get_mode.return_value = self.presenter.SPECTRUM_MODE_TEXT
-        self.presenter._onHold()
+        self.presenter._on_hold()
         calls = [mock.call("ws1", 10), mock.call("ws2", 10)]
         self.mModel.add_data.assert_has_calls(calls)
         self.mModel.set_spectrum_mode.assert_called_once()
-        self.presenter._updateList.assert_called_once()
-        self.presenter._updatePlot.assert_called_once()
+        self.presenter._update_list.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
         self.mView.set_selection.assert_called_once_with({"ws1": [1],
                                                          "ws2": [2]})
         self.mView.get_mode.return_value = self.presenter.BIN_MODE_TEXT
-        self.presenter._onHold()
+        self.presenter._on_hold()
         self.mModel.set_bin_mode.assert_called_once()
 
     def test_onUnHold(self):
-        self.presenter._updateList = mock.Mock()
-        self.presenter._updatePlot = mock.Mock()
-        self.presenter._updateSpectrumSlider = mock.Mock()
+        self.presenter._update_list = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
+        self.presenter._update_spectrum_slider = mock.Mock()
         self.mView.is_spectrum_disabled.return_value = False
         self.mView.get_selection.return_value = {"ws1": [], "ws2": []}
         self.mView.get_spectrum_slider_position.return_value = 10
-        self.presenter._onUnHold()
+        self.presenter._on_un_hold()
         calls = [mock.call("ws1", 10), mock.call("ws2", 10)]
         self.mModel.remove_data.assert_has_calls(calls)
-        self.presenter._updateList.assert_called_once()
-        self.presenter._updatePlot.assert_called_once()
-        self.presenter._updateSpectrumSlider.assert_called_once()
+        self.presenter._update_list.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
+        self.presenter._update_spectrum_slider.assert_called_once()
 
     def test_onHoldButtonToggled(self):
-        self.presenter._onHold = mock.Mock()
-        self.presenter._onUnHold = mock.Mock()
-        self.presenter.onHoldButtonToggled(True)
-        self.presenter._onHold.assert_called_once()
-        self.presenter._onUnHold.assert_not_called
-        self.presenter.onHoldButtonToggled(False)
-        self.presenter._onUnHold.assert_called_once()
+        self.presenter._on_hold = mock.Mock()
+        self.presenter._on_un_hold = mock.Mock()
+        self.presenter.on_hold_button_toggled(True)
+        self.presenter._on_hold.assert_called_once()
+        self.presenter._on_un_hold.assert_not_called
+        self.presenter.on_hold_button_toggled(False)
+        self.presenter._on_un_hold.assert_called_once()
 
     def test_onModeChanged(self):
-        self.presenter._updateSpectrumSlider = mock.Mock()
-        self.presenter._updatePlot = mock.Mock()
+        self.presenter._update_spectrum_slider = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
         self.mView.get_selection.return_value = {"ws1": [1], "ws2": [2]}
-        self.presenter.onModeChanged("mode")
-        self.presenter._updateSpectrumSlider.assert_called_once()
-        self.presenter._updatePlot.assert_called_once()
+        self.presenter.on_mode_changed("mode")
+        self.presenter._update_spectrum_slider.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
 
     def test_onWorkspaceDeleted(self):
-        self.presenter._updateList = mock.Mock()
-        self.presenter._updatePlot = mock.Mock()
+        self.presenter._update_list = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
         self.mView.get_selection.return_value = {"ws1": [1], "ws2": [2]}
-        self.presenter.onWorkspaceDeleted("ws1")
+        self.presenter.on_workspace_deleted("ws1")
         self.mView.set_selection.assert_called_once_with({"ws2": [2]})
-        self.presenter._updateList.assert_called_once()
-        self.presenter._updatePlot.assert_called_once()
+        self.presenter._update_list.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
 
     def test_onWorkspaceRenamed(self):
-        self.presenter._updateList = mock.Mock()
-        self.presenter._updatePlot = mock.Mock()
+        self.presenter._update_list = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
         self.mView.get_selection.return_value = {"ws1": [1], "ws2": [2]}
-        self.presenter.onWorkspaceRenamed("ws1", "ws3")
+        self.presenter.on_workspace_renamed("ws1", "ws3")
         self.mView.set_selection.assert_called_once_with({"ws3": [1],
                                                          "ws2": [2]})
-        self.presenter._updateList.assert_called_once()
-        self.presenter._updatePlot.assert_called_once()
+        self.presenter._update_list.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
 
     def test_onWorkspaceReplaced(self):
-        self.presenter._updatePlot = mock.Mock()
-        self.presenter.onWorkspaceReplaced("ws1")
-        self.presenter._updatePlot.assert_called_once()
+        self.presenter._update_plot = mock.Mock()
+        self.presenter.on_workspace_replaced("ws1")
+        self.presenter._update_plot.assert_called_once()

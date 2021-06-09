@@ -78,18 +78,19 @@ class SuperplotView(QWidget):
         self._bottom_view = SuperplotViewBottom(self)
 
         side = self._side_view
-        side.visibilityChanged.connect(self._presenter.onVisibilityChanged)
-        side.addButton.clicked.connect(self._presenter.onAddButtonClicked)
+        side.visibilityChanged.connect(self._presenter.on_visibility_changed)
+        side.addButton.clicked.connect(self._presenter.on_add_button_clicked)
         side.workspacesList.itemSelectionChanged.connect(
-                self._presenter.onWorkspaceSelectionChanged)
+                self._presenter.on_workspace_selection_changed)
         bottom = self._bottom_view
-        bottom.holdButton.toggled.connect(self._presenter.onHoldButtonToggled)
+        bottom.holdButton.toggled.connect(
+                self._presenter.on_hold_button_toggled)
         bottom.spectrumSlider.valueChanged.connect(
-                self._presenter.onSpectrumSliderMoved)
+                self._presenter.on_spectrum_slider_moved)
         bottom.spectrumSpinBox.valueChanged.connect(
-                self._presenter.onSpectrumSpinBoxChanged)
+                self._presenter.on_spectrum_spin_box_changed)
         bottom.modeComboBox.currentTextChanged.connect(
-                self._presenter.onModeChanged)
+                self._presenter.on_mode_changed)
 
     def get_side_widget(self):
         return self._side_view
@@ -192,7 +193,7 @@ class SuperplotView(QWidget):
         for name in names:
             item = WorkspaceItem(self._side_view.workspacesList, name)
             item.signals.sig_del_clicked.connect(
-                    self._presenter.onDelButtonClicked)
+                    self._presenter.on_del_button_clicked)
             item.setText(0, name)
         self._side_view.workspacesList.blockSignals(False)
 
@@ -211,7 +212,7 @@ class SuperplotView(QWidget):
         for num in nums:
             item = SpectrumItem(ws_item, num)
             item.signals.sig_del_clicked.connect(
-                    self._presenter.onDelSpectrumButtonClicked)
+                    self._presenter.on_del_spectrum_button_clicked)
             item.setText(0, str(num))
         self._side_view.workspacesList.expandAll()
         self._side_view.workspacesList.blockSignals(False)

@@ -32,17 +32,17 @@ class SuperplotPresenter:
         self._matplotlibVersion = matplotlib.__version__
 
         if self.parent:
-            self.parent.plot_updated.connect(self.onPlotUpdated)
+            self.parent.plot_updated.connect(self.on_plot_updated)
 
-        self._model.sig_workspace_deleted.connect(self.onWorkspaceDeleted)
-        self._model.sig_workspace_renamed.connect(self.onWorkspaceRenamed)
-        self._model.sig_workspace_replaced.connect(self.onWorkspaceReplaced)
+        self._model.sig_workspace_deleted.connect(self.on_workspace_deleted)
+        self._model.sig_workspace_renamed.connect(self.on_workspace_renamed)
+        self._model.sig_workspace_replaced.connect(self.on_workspace_replaced)
 
         #initial state
-        self._syncWithCurrentPlot()
+        self._sync_with_current_plot()
 
-        self._updateList()
-        self._updatePlot()
+        self._update_list()
+        self._update_plot()
         plottedData = self._model.get_plotted_data()
         selection = dict()
         for ws, sp in plottedData:
@@ -52,12 +52,12 @@ class SuperplotPresenter:
                 if selection[ws][0] < sp:
                     selection[ws] = [sp]
         self._view.set_selection(selection)
-        self._updateSpectrumSlider()
+        self._update_spectrum_slider()
 
-    def getSideView(self):
+    def get_side_view(self):
         return self._view.get_side_widget()
 
-    def getBottomView(self):
+    def get_bottom_view(self):
         return self._view.get_bottom_widget()
 
     def close(self):
@@ -69,7 +69,7 @@ class SuperplotPresenter:
         self._view.close()
         del self._model
 
-    def _syncWithCurrentPlot(self):
+    def _sync_with_current_plot(self):
         """
         This methods synchronize the model with the current plotted data. It
         first checks that the plotted data are consistent (i.e. only bins, only
@@ -127,7 +127,7 @@ class SuperplotPresenter:
             self._model.add_workspace(wsName)
             self._model.add_data(wsName, specIndex)
 
-    def onVisibilityChanged(self, state):
+    def on_visibility_changed(self, state):
         """
         Triggered when the visibility of the superplot widget changed. This
         funcion rescale the figure to be sure that the axis and labels are not
@@ -143,7 +143,7 @@ class SuperplotPresenter:
                 pass
             self._canvas.draw_idle()
 
-    def onAddButtonClicked(self):
+    def on_add_button_clicked(self):
         """
         Triggered when the add button is pressed. This function adds the
         workspace to the selection list.
@@ -151,11 +151,11 @@ class SuperplotPresenter:
         selection = self._view.get_selection()
         addedWorkspace = self._view.get_selected_workspace()
         self._model.add_workspace(addedWorkspace)
-        self._updateList()
+        self._update_list()
         self._view.set_selection(selection)
-        self._updatePlot()
+        self._update_plot()
 
-    def onDelButtonClicked(self, wsName=None):
+    def on_del_button_clicked(self, wsName=None):
         """
         Triggered when the del button is pressed. This function removes the
         selected workspace from the selection list.
@@ -167,17 +167,17 @@ class SuperplotPresenter:
             selectedWorkspaces = [wsName]
         for selectedWorkspace in selectedWorkspaces:
             self._model.del_workspace(selectedWorkspace)
-        self._updateList()
+        self._update_list()
         if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
             mode = self._view.get_mode()
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
                                           self.BIN_MODE_TEXT])
             self._view.set_mode(mode)
         self._view.set_selection(selection)
-        self._updateSpectrumSlider()
-        self._updatePlot()
+        self._update_spectrum_slider()
+        self._update_plot()
 
-    def _updateSpectrumSlider(self):
+    def _update_spectrum_slider(self):
         """
         Update the spectrum slider and spinbox to match the selected workspaces.
         """
@@ -220,7 +220,7 @@ class SuperplotPresenter:
         self._view.set_spectrum_spin_box_max(maximum - 1)
         self._view.set_spectrum_spin_box_value(position)
 
-    def _updateHoldButton(self):
+    def _update_hold_button(self):
         """
         Update the hold button state based on the selection.
         """
@@ -236,7 +236,7 @@ class SuperplotPresenter:
                 return
         self._view.check_hold_button(True)
 
-    def _updateList(self):
+    def _update_list(self):
         """
         Update the workspaces/spectra list.
         """
@@ -250,7 +250,7 @@ class SuperplotPresenter:
                     spectra.append(data[1])
             self._view.set_spectra_list(name, spectra)
 
-    def _updatePlot(self):
+    def _update_plot(self):
         """
         Update the plot. This function overplots the memorized data with the
         currently selected workspace and spectrum index. It keeps a memory of
@@ -326,15 +326,15 @@ class SuperplotPresenter:
             axes.set_title("")
         self._canvas.draw_idle()
 
-    def onWorkspaceSelectionChanged(self):
+    def on_workspace_selection_changed(self):
         """
         Triggered when the selected workspace (in the workspace tree) changed.
         """
-        self._updateSpectrumSlider()
-        self._updateHoldButton()
-        self._updatePlot()
+        self._update_spectrum_slider()
+        self._update_hold_button()
+        self._update_plot()
 
-    def onSpectrumSliderMoved(self, position):
+    def on_spectrum_slider_moved(self, position):
         """
         Triggered when the spectrum slider moved.
 
@@ -342,10 +342,10 @@ class SuperplotPresenter:
             position (int): slider position
         """
         self._view.set_spectrum_spin_box_value(position)
-        self._updateHoldButton()
-        self._updatePlot()
+        self._update_hold_button()
+        self._update_plot()
 
-    def onSpectrumSpinBoxChanged(self, value):
+    def on_spectrum_spin_box_changed(self, value):
         """
         Triggered when the spectrum spinbox changed.
 
@@ -353,10 +353,10 @@ class SuperplotPresenter:
             value (int): spinbox value
         """
         self._view.set_spectrum_slider_position(value)
-        self._updateHoldButton()
-        self._updatePlot()
+        self._update_hold_button()
+        self._update_plot()
 
-    def onDelSpectrumButtonClicked(self, wsName, index):
+    def on_del_spectrum_button_clicked(self, wsName, index):
         """
         Triggered when the delete button of a selected spectrum has been
         pressed.
@@ -377,12 +377,12 @@ class SuperplotPresenter:
                 selection[wsName].remove(index)
                 if not selection[wsName]:
                     del selection[wsName]
-        self._updateList()
+        self._update_list()
         self._view.set_selection(selection)
-        self._updateSpectrumSlider()
-        self._updatePlot()
+        self._update_spectrum_slider()
+        self._update_plot()
 
-    def _onHold(self):
+    def _on_hold(self):
         """
         Add the selected ws, sp pair to the plot.
         """
@@ -400,11 +400,11 @@ class SuperplotPresenter:
             self._model.set_bin_mode()
             self._view.set_available_modes([self.BIN_MODE_TEXT])
         self._view.check_hold_button(False)
-        self._updateList()
+        self._update_list()
         self._view.set_selection(selection)
-        self._updatePlot()
+        self._update_plot()
 
-    def _onUnHold(self):
+    def _on_un_hold(self):
         """
         Remove the selected ws, sp pair from the plot.
         """
@@ -421,11 +421,11 @@ class SuperplotPresenter:
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
                                             self.BIN_MODE_TEXT])
             self._view.set_mode(mode)
-        self._updateList()
-        self._updateSpectrumSlider()
-        self._updatePlot()
+        self._update_list()
+        self._update_spectrum_slider()
+        self._update_plot()
 
-    def onHoldButtonToggled(self, state):
+    def on_hold_button_toggled(self, state):
         """
         Triggered when the hold button state changed.
 
@@ -433,25 +433,25 @@ class SuperplotPresenter:
             state (bool): status of the two state button
         """
         if state:
-            self._onHold()
+            self._on_hold()
         else:
-            self._onUnHold()
+            self._on_un_hold()
 
-    def onModeChanged(self, mode):
+    def on_mode_changed(self, mode):
         """
         Triggered when the selected mode changed in the view.
 
         Args:
             mode (str): new mode
         """
-        self._updateSpectrumSlider()
-        self._updatePlot()
+        self._update_spectrum_slider()
+        self._update_plot()
         figure = self._canvas.figure
         axes = figure.gca()
         axes.relim()
         axes.autoscale()
 
-    def onWorkspaceDeleted(self, wsName):
+    def on_workspace_deleted(self, wsName):
         """
         Triggered when the model reports a workspace deletion.
 
@@ -461,11 +461,11 @@ class SuperplotPresenter:
         selection = self._view.get_selection()
         if wsName in selection:
             del selection[wsName]
-        self._updateList()
+        self._update_list()
         self._view.set_selection(selection)
-        self._updatePlot()
+        self._update_plot()
 
-    def onWorkspaceRenamed(self, oldName, newName):
+    def on_workspace_renamed(self, oldName, newName):
         """
         Triggered when the model reports a workspace renaming.
 
@@ -477,20 +477,20 @@ class SuperplotPresenter:
         if oldName in selection:
             selection[newName] = selection[oldName]
             del selection[oldName]
-        self._updateList()
+        self._update_list()
         self._view.set_selection(selection)
-        self._updatePlot()
+        self._update_plot()
 
-    def onWorkspaceReplaced(self, wsName):
+    def on_workspace_replaced(self, wsName):
         """
         Triggered when the model reports a workapce replacement.
 
         Args:
             wsName (str): name of the workspace
         """
-        self._updatePlot()
+        self._update_plot()
 
-    def onPlotUpdated(self):
+    def on_plot_updated(self):
         """
         Triggered when the plot window is updated (drag and drop only for now).
         This methods redo an init procedure to synchronize the list with the
@@ -498,9 +498,9 @@ class SuperplotPresenter:
         """
         selection = self._view.get_selection()
         currentIndex = self._view.get_spectrum_slider_position()
-        self._syncWithCurrentPlot()
-        self._updateList()
+        self._sync_with_current_plot()
+        self._update_list()
         self._view.set_spectrum_slider_position(currentIndex)
         self._view.set_spectrum_spin_box_value(currentIndex)
         self._view.set_selection(selection)
-        self._updatePlot()
+        self._update_plot()
