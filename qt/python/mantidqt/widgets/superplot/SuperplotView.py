@@ -91,17 +91,17 @@ class SuperplotView(QWidget):
         bottom.modeComboBox.currentTextChanged.connect(
                 self._presenter.onModeChanged)
 
-    def getSideWidget(self):
+    def get_side_widget(self):
         return self._sideView
 
-    def getBottomWidget(self):
+    def get_bottom_widget(self):
         return self._bottomView
 
     def close(self):
         self._sideView.close()
         self._bottomView.close()
 
-    def getSelectedWorkspace(self):
+    def get_selected_workspace(self):
         """
         Get the workspace selected in the workspace selector.
 
@@ -110,7 +110,7 @@ class SuperplotView(QWidget):
         """
         return self._sideView.workspaceSelector.currentText()
 
-    def setSelection(self, selection):
+    def set_selection(self, selection):
         """
         Set the selected workspaces and spectra in list.
 
@@ -132,7 +132,7 @@ class SuperplotView(QWidget):
                         spItem.setSelected(True)
         self._sideView.workspacesList.blockSignals(False)
 
-    def getSelection(self):
+    def get_selection(self):
         """
         Get the current selection.
 
@@ -155,7 +155,7 @@ class SuperplotView(QWidget):
                     selection[wsName] = [spectrum]
         return selection
 
-    def modifySpectrumLabel(self, wsName, spectrumIndex, label, color):
+    def modify_spectrum_label(self, wsName, spectrumIndex, label, color):
         """
         Modify spectrum label text and color.
 
@@ -179,7 +179,7 @@ class SuperplotView(QWidget):
                 spItem.setForeground(0, brush)
                 spItem.setText(0, label)
 
-    def setWorkspacesList(self, names):
+    def set_workspaces_list(self, names):
         """
         Set the list of selected workspaces and update the workspace slider
         length.
@@ -196,7 +196,7 @@ class SuperplotView(QWidget):
             item.setText(0, name)
         self._sideView.workspacesList.blockSignals(False)
 
-    def setSpectraList(self, name, nums):
+    def set_spectra_list(self, name, nums):
         """
         Set the list of spectrum index for a workspace in the list.
 
@@ -216,7 +216,7 @@ class SuperplotView(QWidget):
         self._sideView.workspacesList.expandAll()
         self._sideView.workspacesList.blockSignals(False)
 
-    def getSpectraList(self, name):
+    def get_spectra_list(self, name):
         """
         Get the list of spectrum indexes for a workspace in the list.
 
@@ -237,7 +237,7 @@ class SuperplotView(QWidget):
             nums.append(wsItem.child(i).get_spectrum_index())
         return nums
 
-    def checkHoldButton(self, state):
+    def check_hold_button(self, state):
         """
         Set the check state of the hold button. This function does not trigger
         the button signals.
@@ -249,7 +249,7 @@ class SuperplotView(QWidget):
         self._bottomView.holdButton.setChecked(state)
         self._bottomView.holdButton.blockSignals(False)
 
-    def setSpectrumDisabled(self, state):
+    def set_spectrum_disabled(self, state):
         """
         Disable/enable the spectrum selection widgets (slider and spinbox).
 
@@ -259,7 +259,7 @@ class SuperplotView(QWidget):
         self._bottomView.spectrumSlider.setDisabled(state)
         self._bottomView.spectrumSpinBox.setDisabled(state)
 
-    def isSpectrumDisabled(self):
+    def is_spectrum_disabled(self):
         """
         Get the state of the spectrum selection widgets.
 
@@ -268,7 +268,7 @@ class SuperplotView(QWidget):
         """
         return not self._bottomView.spectrumSlider.isEnabled()
 
-    def setSpectrumSliderMax(self, length):
+    def set_spectrum_slider_max(self, length):
         """
         Set the max value of the spectrum slider.
 
@@ -277,7 +277,7 @@ class SuperplotView(QWidget):
         """
         self._bottomView.spectrumSlider.setMaximum(length)
 
-    def setSpectrumSliderPosition(self, position):
+    def set_spectrum_slider_position(self, position):
         """
         Set the spectrum slider position. This function does not trigger any
         QSlider signals.
@@ -289,7 +289,7 @@ class SuperplotView(QWidget):
         self._bottomView.spectrumSlider.setSliderPosition(position)
         self._bottomView.spectrumSlider.blockSignals(False)
 
-    def getSpectrumSliderPosition(self):
+    def get_spectrum_slider_position(self):
         """
         Get the spectrum slider position.
 
@@ -298,7 +298,7 @@ class SuperplotView(QWidget):
         """
         return self._bottomView.spectrumSlider.value()
 
-    def setSpectrumSpinBoxMax(self, value):
+    def set_spectrum_spin_box_max(self, value):
         """
         Set the max value of the spectrum spinbox.
 
@@ -307,7 +307,7 @@ class SuperplotView(QWidget):
         """
         self._bottomView.spectrumSpinBox.setMaximum(value)
 
-    def setSpectrumSpinBoxValue(self, value):
+    def set_spectrum_spin_box_value(self, value):
         """
         Set the spectrum spinbox value. This function does not trigger any
         spinbox signals.
@@ -319,7 +319,7 @@ class SuperplotView(QWidget):
         self._bottomView.spectrumSpinBox.setValue(value)
         self._bottomView.spectrumSpinBox.blockSignals(False)
 
-    def getSpectrumSpinBoxValue(self):
+    def get_spectrum_spin_box_value(self):
         """
         Get the current spectrum spinbox value.
 
@@ -328,7 +328,7 @@ class SuperplotView(QWidget):
         """
         return self._bottomView.spectrumSpinBox.value()
 
-    def setAvailableModes(self, modes):
+    def set_available_modes(self, modes):
         """
         Set available modes in the mode combobox.
 
@@ -340,7 +340,7 @@ class SuperplotView(QWidget):
         self._bottomView.modeComboBox.addItems(modes)
         self._bottomView.modeComboBox.blockSignals(False)
 
-    def setMode(self, mode):
+    def set_mode(self, mode):
         """
         Set the selected mode. This method does not trigegr any combobox signal.
 
@@ -351,7 +351,7 @@ class SuperplotView(QWidget):
         self._bottomView.modeComboBox.setCurrentText(mode)
         self._bottomView.modeComboBox.blockSignals(False)
 
-    def getMode(self):
+    def get_mode(self):
         """
         Get the selected mode from the combobox.
 
