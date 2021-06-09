@@ -161,8 +161,18 @@ void CrossCorrelate::exec() {
 
   // Now start the real stuff
   // Create a 2DWorkspace that will hold the result
-  const auto numReferenceY = static_cast<int>(referenceYVector.size());
-  const int numPoints = 2 * numReferenceY - 3;
+  auto numReferenceY = static_cast<int>(referenceYVector.size());
+
+  // max the shift
+  int shiftCorrection = 0;
+  if (maxDSpaceShift != EMPTY_DBL()) {
+    // convert dspacing to bins, where maxDSpaceShift is at least 0.1
+    const auto maxBins = std::max(0.0 + maxDSpaceShift * 2, 0.1) / inputWS->getDimension(0)->getBinWidth();
+    // calc range based on max bins
+    shiftCorrection = std::max(0.0, abs((-numReferenceY + 2) - (numReferenceY - 2)) - maxBins) / 2;
+  }
+
+  const int numPoints = 2 * numReferenceY - shiftCorrection - 3;
   if (numPoints < 1)
     throw std::runtime_error("Range is not valid");
 
@@ -177,17 +187,11 @@ void CrossCorrelate::exec() {
   bool isDistribution = inputWS->isDistribution();
 
   auto &outX = out->mutableX(0);
-  for (int i = 0; i < static_cast<int>(outX.size()); ++i) {
-    outX[i] = static_cast<double>(i - numReferenceY + 2);
+  for (int i = 0; i < shiftCorrection; ++i) {
+    outX[i] = std::nan("");
   }
-
-  // max the shift
-  int shiftCorrection = 0;
-  if (maxDSpaceShift != EMPTY_DBL()) {
-    // convert dspacing to bins, where maxDSpaceShift is at least 0.1
-    const auto maxBins = std::max(0.0 + maxDSpaceShift * 2, 0.1) / inputWS->getDimension(0)->getBinWidth();
-    // calc range based on max bins
-    shiftCorrection = std::max(0.0, abs((-numReferenceY + 2) - (numReferenceY - 2)) - maxBins) / 2;
+  for (int i = shiftCorrection; i < static_cast<int>(outX.size()); ++i) {
+    outX[i] = static_cast<double>(i - numReferenceY + 2);
   }
 
   // Initialise the progress reporting object
