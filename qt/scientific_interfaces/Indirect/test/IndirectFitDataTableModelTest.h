@@ -104,16 +104,11 @@ public:
   }
 
   void test_getDomainIndex_calculates_correct_value() {
-    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(0), MantidQt::MantidWidgets::WorkspaceIndex(0)),
-                     FitDomainIndex{0});
-    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(0), MantidQt::MantidWidgets::WorkspaceIndex(1)),
-                     FitDomainIndex{1});
-    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(0), MantidQt::MantidWidgets::WorkspaceIndex(2)),
-                     FitDomainIndex{2});
-    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(0), MantidQt::MantidWidgets::WorkspaceIndex(3)),
-                     FitDomainIndex{3});
-    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(1), MantidQt::MantidWidgets::WorkspaceIndex(0)),
-                     FitDomainIndex{4});
+    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(0), WorkspaceIndex(0)), FitDomainIndex{0});
+    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(0), WorkspaceIndex(1)), FitDomainIndex{1});
+    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(0), WorkspaceIndex(2)), FitDomainIndex{2});
+    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(0), WorkspaceIndex(3)), FitDomainIndex{3});
+    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(1), WorkspaceIndex(0)), FitDomainIndex{4});
   }
 
   void test_getQValuesForData_returns_correct_value() {
@@ -166,33 +161,29 @@ public:
     std::vector<double> exclusionVector = {0.1, 0.3};
     auto excludeString = "0.100,0.300";
     m_fitData->setExcludeRegion(excludeString, FitDomainIndex{0});
-    TS_ASSERT_EQUALS(m_fitData->getExcludeRegion(TableDatasetIndex{0}, MantidQt::MantidWidgets::WorkspaceIndex{0}),
-                     excludeString);
-    TS_ASSERT_EQUALS(
-        m_fitData->getExcludeRegionVector(TableDatasetIndex{0}, MantidQt::MantidWidgets::WorkspaceIndex{0}),
-        exclusionVector);
+    TS_ASSERT_EQUALS(m_fitData->getExcludeRegion(TableDatasetIndex{0}, WorkspaceIndex{0}), excludeString);
+    TS_ASSERT_EQUALS(m_fitData->getExcludeRegionVector(TableDatasetIndex{0}, WorkspaceIndex{0}), exclusionVector);
     TS_ASSERT_EQUALS(m_fitData->getExcludeRegion(FitDomainIndex{0}), excludeString);
     TS_ASSERT_EQUALS(m_fitData->getExcludeRegionVector(FitDomainIndex{0}), exclusionVector);
   }
 
   void test_getFittingRange_returns_range_for_spectra() {
     std::pair<double, double> fittingPair = {0.0, 5.0};
-    TS_ASSERT_EQUALS(m_fitData->getFittingRange(TableDatasetIndex{0}, MantidQt::MantidWidgets::WorkspaceIndex{0}),
-                     fittingPair);
+    TS_ASSERT_EQUALS(m_fitData->getFittingRange(TableDatasetIndex{0}, WorkspaceIndex{0}), fittingPair);
     TS_ASSERT_EQUALS(m_fitData->getFittingRange(FitDomainIndex{0}), fittingPair);
   }
 
   void test_getSubIndices_returns_correct_value() {
-    std::pair<TableDatasetIndex, MantidQt::MantidWidgets::WorkspaceIndex> subindices = {0, 3};
+    std::pair<WorkspaceID, WorkspaceIndex> subindices = {0, 3};
     TS_ASSERT_EQUALS(m_fitData->getSubIndices(FitDomainIndex{3}), subindices)
     subindices = {1, 0};
     TS_ASSERT_EQUALS(m_fitData->getSubIndices(FitDomainIndex{4}), subindices)
   }
 
   void test_can_set_spectra_on_existing_workspace() {
-    m_fitData->setSpectra("1", TableDatasetIndex{0});
+    m_fitData->setSpectra("1", WorkspaceID{0});
 
-    TS_ASSERT_EQUALS(m_fitData->getSpectra(TableDatasetIndex{0}), FunctionModelSpectra("1"));
+    TS_ASSERT_EQUALS(m_fitData->getSpectra(WorkspaceID{0}), FunctionModelSpectra("1"));
   }
 
   void test_that_setting_spectra_on_non_existent_workspace_throws_exception() {
@@ -202,8 +193,7 @@ public:
 
   void test_that_setting_startX_on_non_existent_workspace_throws_exception() {
     TS_ASSERT_THROWS(m_fitData->setStartX(0, TableDatasetIndex{2}), const std::out_of_range &)
-    TS_ASSERT_THROWS(m_fitData->setStartX(0, TableDatasetIndex{2}, MantidQt::MantidWidgets::WorkspaceIndex{10}),
-                     const std::out_of_range &)
+    TS_ASSERT_THROWS(m_fitData->setStartX(0, TableDatasetIndex{2}, WorkspaceIndex{10}), const std::out_of_range &)
   }
 
 private:

@@ -49,7 +49,6 @@ set(
   src/ImageInfoModelMD.cpp
   src/ImageInfoPresenter.cpp
   src/ImageInfoWidget.cpp
-  src/IndexTypes.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
   src/InterfaceManager.cpp
@@ -473,7 +472,6 @@ set(
   src/FunctionTreeView.cpp
   src/HintingLineEdit.cpp
   src/IFunctionModel.cpp
-  src/IndexTypes.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
   src/LineEditWithClear.cpp

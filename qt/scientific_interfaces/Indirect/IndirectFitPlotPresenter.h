@@ -28,11 +28,11 @@ public:
 
   void watchADS(bool watch);
 
-  TableDatasetIndex getSelectedDataIndex() const;
+  WorkspaceID getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
   FitDomainIndex getSelectedSpectrumIndex() const;
   FitDomainIndex getSelectedDomainIndex() const;
-  bool isCurrentlySelected(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
+  bool isCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
 
   void setFitSingleSpectrumIsFitting(bool fitting);
   void setFitSingleSpectrumEnabled(bool enable);
@@ -61,10 +61,10 @@ public slots:
   void setActiveSpectrum(WorkspaceIndex spectrum);
 
 signals:
-  void selectedFitDataChanged(TableDatasetIndex /*_t1*/);
+  void selectedFitDataChanged(WorkspaceID /*_t1*/);
   void noFitDataSelected();
   void plotSpectrumChanged(WorkspaceIndex /*_t1*/);
-  void fitSingleSpectrum(TableDatasetIndex /*_t1*/, WorkspaceIndex /*_t2*/);
+  void fitSingleSpectrum(WorkspaceID /*_t1*/, WorkspaceIndex /*_t2*/);
   void startXChanged(double /*_t1*/);
   void endXChanged(double /*_t1*/);
   void fwhmChanged(double /*_t1*/);
@@ -76,7 +76,7 @@ private slots:
   void setModelEndX(double value);
   void setModelHWHM(double minimum, double maximum);
   void setModelBackground(double background);
-  void setActiveIndex(TableDatasetIndex index);
+  void setActiveIndex(WorkspaceID workspaceID);
   void setHWHMMaximum(double minimum);
   void setHWHMMinimum(double maximum);
   void plotGuess(bool doPlotGuess);
@@ -84,7 +84,7 @@ private slots:
   void plotCurrentPreview();
   void emitFitSingleSpectrum();
   void emitFWHMChanged(double minimum, double maximum);
-  void handleSelectedFitDataChanged(TableDatasetIndex index);
+  void handleSelectedFitDataChanged(WorkspaceID workspaceID);
 
 private:
   void disableAllDataSelection();

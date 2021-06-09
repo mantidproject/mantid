@@ -64,7 +64,7 @@ public:
   MOCK_METHOD1(subscribePresenter, void(IFitScriptGeneratorPresenter *presenter));
 
   MOCK_CONST_METHOD1(workspaceName, std::string(FitDomainIndex index));
-  MOCK_CONST_METHOD1(workspaceIndex, MantidQt::MantidWidgets::WorkspaceIndex(FitDomainIndex index));
+  MOCK_CONST_METHOD1(workspaceIndex, WorkspaceIndex(FitDomainIndex index));
   MOCK_CONST_METHOD1(startX, double(FitDomainIndex index));
   MOCK_CONST_METHOD1(endX, double(FitDomainIndex index));
 
@@ -77,15 +77,13 @@ public:
   MOCK_CONST_METHOD1(parameterValue, double(std::string const &parameter));
   MOCK_CONST_METHOD1(attributeValue, Mantid::API::IFunction::Attribute(std::string const &attribute));
 
-  MOCK_METHOD2(removeWorkspaceDomain,
-               void(std::string const &workspaceName, MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex));
+  MOCK_METHOD2(removeWorkspaceDomain, void(std::string const &workspaceName, WorkspaceIndex workspaceIndex));
   MOCK_METHOD4(addWorkspaceDomain,
-               void(std::string const &workspaceName, MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
-                    double startX, double endX));
+               void(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX));
 
   MOCK_METHOD0(openAddWorkspaceDialog, bool());
   MOCK_METHOD0(getDialogWorkspaces, std::vector<Mantid::API::MatrixWorkspace_const_sptr>());
-  MOCK_CONST_METHOD0(getDialogWorkspaceIndices, std::vector<MantidQt::MantidWidgets::WorkspaceIndex>());
+  MOCK_CONST_METHOD0(getDialogWorkspaceIndices, std::vector<WorkspaceIndex>());
 
   MOCK_METHOD7(openEditLocalParameterDialog,
                void(std::string const &parameter, std::vector<std::string> const &workspaceNames,
@@ -128,28 +126,22 @@ class MockFitScriptGeneratorModel : public IFitScriptGeneratorModel {
 public:
   MOCK_METHOD1(subscribePresenter, void(IFitScriptGeneratorPresenter *presenter));
 
-  MOCK_METHOD2(removeWorkspaceDomain,
-               void(std::string const &workspaceName, MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex));
+  MOCK_METHOD2(removeWorkspaceDomain, void(std::string const &workspaceName, WorkspaceIndex workspaceIndex));
   MOCK_METHOD4(addWorkspaceDomain,
-               void(std::string const &workspaceName, MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
-                    double startX, double endX));
-  MOCK_CONST_METHOD2(hasWorkspaceDomain,
-                     bool(std::string const &workspaceName, MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex));
+               void(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX));
+  MOCK_CONST_METHOD2(hasWorkspaceDomain, bool(std::string const &workspaceName, WorkspaceIndex workspaceIndex));
 
-  MOCK_METHOD3(updateStartX, bool(std::string const &workspaceName,
-                                  MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex, double startX));
-  MOCK_METHOD3(updateEndX, bool(std::string const &workspaceName,
-                                MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex, double endX));
+  MOCK_METHOD3(updateStartX, bool(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX));
+  MOCK_METHOD3(updateEndX, bool(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double endX));
 
   MOCK_METHOD3(removeFunction,
-               void(std::string const &workspaceName, MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
-                    std::string const &function));
-  MOCK_METHOD3(addFunction, void(std::string const &workspaceName,
-                                 MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex, std::string const &function));
-  MOCK_METHOD3(setFunction, void(std::string const &workspaceName,
-                                 MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex, std::string const &function));
-  MOCK_CONST_METHOD2(getFunction, Mantid::API::IFunction_sptr(std::string const &workspaceName,
-                                                              MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex));
+               void(std::string const &workspaceName, WorkspaceIndex workspaceIndex, std::string const &function));
+  MOCK_METHOD3(addFunction,
+               void(std::string const &workspaceName, WorkspaceIndex workspaceIndex, std::string const &function));
+  MOCK_METHOD3(setFunction,
+               void(std::string const &workspaceName, WorkspaceIndex workspaceIndex, std::string const &function));
+  MOCK_CONST_METHOD2(getFunction,
+                     Mantid::API::IFunction_sptr(std::string const &workspaceName, WorkspaceIndex workspaceIndex));
 
   MOCK_CONST_METHOD3(getEquivalentFunctionIndexForDomain,
                      std::string(std::string const &workspaceName,

@@ -55,7 +55,7 @@ public:
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
   void estimateFunctionParameters() override;
   void setBackgroundA0(double) override;
-  void setResolution(std::string const &, TableDatasetIndex const &) override;
+  void setResolution(std::string const &, WorkspaceID const &) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &) override;
   void setQValues(const std::vector<double> &) override;
   int getCurrentDataset() override;

@@ -140,12 +140,12 @@ FitDomainIndex IndirectFitPlotView::getSelectedSpectrumIndex() const {
   return FitDomainIndex{static_cast<size_t>(m_plotForm->cbPlotSpectrum->currentIndex())};
 }
 
-TableDatasetIndex IndirectFitPlotView::getSelectedDataIndex() const {
-  return TableDatasetIndex{static_cast<size_t>(m_plotForm->cbDataSelection->currentIndex())};
+WorkspaceID IndirectFitPlotView::getSelectedDataIndex() const {
+  return WorkspaceID{static_cast<size_t>(m_plotForm->cbDataSelection->currentIndex())};
 }
 
-TableDatasetIndex IndirectFitPlotView::dataSelectionSize() const {
-  return TableDatasetIndex{static_cast<size_t>(m_plotForm->cbDataSelection->count())};
+WorkspaceID IndirectFitPlotView::dataSelectionSize() const {
+  return WorkspaceID{static_cast<size_t>(m_plotForm->cbDataSelection->count())};
 }
 
 bool IndirectFitPlotView::isPlotGuessChecked() const { return m_plotForm->ckPlotGuess->isChecked(); }
@@ -220,8 +220,8 @@ void IndirectFitPlotView::appendToDataSelection(const std::string &dataName) {
   m_plotForm->cbDataSelection->addItem(QString::fromStdString(dataName));
 }
 
-void IndirectFitPlotView::setNameInDataSelection(const std::string &dataName, TableDatasetIndex index) {
-  m_plotForm->cbDataSelection->setItemText(static_cast<int>(index.value), QString::fromStdString(dataName));
+void IndirectFitPlotView::setNameInDataSelection(const std::string &dataName, WorkspaceID workspaceID) {
+  m_plotForm->cbDataSelection->setItemText(static_cast<int>(workspaceID.value), QString::fromStdString(dataName));
 }
 
 void IndirectFitPlotView::clearDataSelection() { m_plotForm->cbDataSelection->clear(); }
@@ -350,7 +350,7 @@ void IndirectFitPlotView::displayMessage(const std::string &message) const {
 
 void IndirectFitPlotView::emitSelectedFitDataChanged(int index) {
   if (index >= 0)
-    emit selectedFitDataChanged(TableDatasetIndex{static_cast<size_t>(index)});
+    emit selectedFitDataChanged(WorkspaceID{static_cast<size_t>(index)});
 }
 
 // Required due to a bug in qt causing the valueChanged signal to be emitted

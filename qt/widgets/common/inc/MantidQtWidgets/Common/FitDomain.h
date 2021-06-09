@@ -27,7 +27,7 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON FitDomain {
 
 public:
-  FitDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX);
+  FitDomain(std::string const &workspaceName, WorkspaceIndex SpectraIndex, double startX, double endX);
 
   [[nodiscard]] std::string domainName() const;
   [[nodiscard]] std::string workspaceName() const noexcept { return m_workspaceName; }

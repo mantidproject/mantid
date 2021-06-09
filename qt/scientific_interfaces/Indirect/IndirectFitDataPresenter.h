@@ -55,11 +55,11 @@ signals:
   void dataAdded();
   void dataRemoved();
   void dataChanged();
-  void startXChanged(double, TableDatasetIndex, WorkspaceIndex);
+  void startXChanged(double, WorkspaceID, WorkspaceIndex);
   void startXChanged(double);
-  void endXChanged(double, TableDatasetIndex, WorkspaceIndex);
+  void endXChanged(double, WorkspaceID, WorkspaceIndex);
   void endXChanged(double);
-  void excludeRegionChanged(const std::string &, TableDatasetIndex, WorkspaceIndex);
+  void excludeRegionChanged(const std::string &, WorkspaceID, WorkspaceIndex);
   void requestedAddWorkspaceDialog();
 
 protected:

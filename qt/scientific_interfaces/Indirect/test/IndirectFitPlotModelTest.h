@@ -62,7 +62,7 @@ public:
 private:
   std::string sequentialFitOutputName() const override { return ""; };
   std::string simultaneousFitOutputName() const override { return ""; };
-  std::string singleFitOutputName(TableDatasetIndex index, IDA::WorkspaceIndex spectrum) const override {
+  std::string singleFitOutputName(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override {
     UNUSED_ARG(index);
     UNUSED_ARG(spectrum);
     return "";
@@ -158,7 +158,7 @@ IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModel *model, MatrixWorks
 
 IndirectFittingModel *getModelWithFitOutputData() {
   auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
-  auto const modelWorkspace = model->getWorkspace(TableDatasetIndex{0});
+  auto const modelWorkspace = model->getWorkspace(WorkspaceID{0});
 
   auto const alg = getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
   model->addOutput(alg);
@@ -184,9 +184,9 @@ public:
   void test_that_IndirectFittingModel_instantiates_a_model_with_the_correct_starting_member_variables() {
     auto const model = getFitPlotModel();
 
-    TS_ASSERT_EQUALS(model.getActiveDataIndex(), TableDatasetIndex{0});
-    TS_ASSERT_EQUALS(model.getActiveSpectrum(), IDA::WorkspaceIndex{0});
-    TS_ASSERT_EQUALS(model.numberOfWorkspaces(), TableDatasetIndex{2});
+    TS_ASSERT_EQUALS(model.getActiveDataIndex(), WorkspaceID{0});
+    TS_ASSERT_EQUALS(model.getActiveSpectrum(), WorkspaceIndex{0});
+    TS_ASSERT_EQUALS(model.numberOfWorkspaces(), WorkspaceID{2});
   }
 
   void test_that_getWorkspace_returns_a_workspace_with_the_correct_number_of_spectra() {
@@ -224,7 +224,7 @@ public:
   void test_that_getSpectra_returns_the_same_spectra_range_which_was_provided_as_input() {
     auto const model = getFitPlotModel();
 
-    FunctionModelSpectra const spectra = FunctionModelSpectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9});
+    FunctionModelSpectra const spectra = FunctionModelSpectra(WorkspaceIndex{0}, WorkspaceIndex{9});
     FunctionModelSpectra const storedSpectra = model.getSpectra();
 
     TS_ASSERT_EQUALS(storedSpectra, spectra);
@@ -250,29 +250,29 @@ public:
   void test_that_getActiveDataIndex_returns_the_index_which_it_has_been_set_to() {
     auto model = getFitPlotModel();
 
-    model.setActiveIndex(TableDatasetIndex{2});
+    model.setActiveIndex(WorkspaceID{2});
 
-    TS_ASSERT_EQUALS(model.getActiveDataIndex(), TableDatasetIndex{2});
+    TS_ASSERT_EQUALS(model.getActiveDataIndex(), WorkspaceID{2});
   }
 
   void test_that_getActiveSpectrum_returns_the_spectrum_which_it_has_been_set_to() {
     auto model = getFitPlotModel();
 
-    model.setActiveSpectrum(IDA::WorkspaceIndex{3});
+    model.setActiveSpectrum(WorkspaceIndex{3});
 
-    TS_ASSERT_EQUALS(model.getActiveSpectrum(), IDA::WorkspaceIndex{3});
+    TS_ASSERT_EQUALS(model.getActiveSpectrum(), WorkspaceIndex{3});
   }
 
   void test_that_getFitDataName_returns_the_correctly_calculated_name() {
     auto const model = getFitPlotModel();
 
     TS_ASSERT_EQUALS(model.getFitDataName(), "Workspace1 (0-9)");
-    TS_ASSERT_EQUALS(model.getFitDataName(TableDatasetIndex{1}), "Workspace2 (0-9)");
+    TS_ASSERT_EQUALS(model.getFitDataName(WorkspaceID{1}), "Workspace2 (0-9)");
   }
 
   void test_that_getFitDataName_does_not_throw_when_provided_an_out_of_range_index() {
     auto const model = getFitPlotModel();
-    TS_ASSERT_THROWS_NOTHING(model.getFitDataName(TableDatasetIndex{10000000}));
+    TS_ASSERT_THROWS_NOTHING(model.getFitDataName(WorkspaceID{10000000}));
   }
 
   void test_that_getLastFitDataName_returns_the_name_for_the_last_workspace_in_the_model() {

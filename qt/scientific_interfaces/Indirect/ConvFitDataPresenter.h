@@ -21,13 +21,13 @@ public:
   ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view);
 
 signals:
-  void modelResolutionAdded(std::string const &name, TableDatasetIndex const &index);
+  void modelResolutionAdded(std::string const &name, WorkspaceID const &workspaceIndex);
 
 private slots:
   void setModelResolution(const QString &name);
 
 private:
-  void setModelResolution(std::string const &name, TableDatasetIndex const &index);
+  void setModelResolution(std::string const &name, WorkspaceID const &workspaceIndex);
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
   void addWorkspace(ConvFitAddWorkspaceDialog const &dialog, IndirectFittingModel &model);

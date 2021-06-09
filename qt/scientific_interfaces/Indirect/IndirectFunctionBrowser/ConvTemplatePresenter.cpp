@@ -175,8 +175,8 @@ void ConvTemplatePresenter::setQValues(const std::vector<double> &qValues) { m_m
 
 void ConvTemplatePresenter::setErrorsEnabled(bool enabled) { m_view->setErrorsEnabled(enabled); }
 
-void ConvTemplatePresenter::setResolution(std::string const &name, TableDatasetIndex const &index) {
-  m_model.setResolution(name, index);
+void ConvTemplatePresenter::setResolution(std::string const &name, WorkspaceID const &workspaceIndex) {
+  m_model.setResolution(name, workspaceIndex);
 }
 
 void ConvTemplatePresenter::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {

@@ -55,10 +55,8 @@ template <int Class> struct IndexType {
 using FitDomainIndex = IndexType<0>;
 // Used to index spectra in workspaces
 using WorkspaceIndex = IndexType<1>;
-// Used to index worspaces in workspace groups
-using WorkspaceGroupIndex = IndexType<2>;
 // Used to index data by workspace
-using TableDatasetIndex = IndexType<3>;
+using WorkspaceID = IndexType<2>;
 
 /** A class which wraps a vector so that you supply not only the value
  * type but also the expected index type.
@@ -102,7 +100,3 @@ template <int i> std::ostream &operator<<(std::ostream &out, const MantidQt::Man
   out << index.value;
   return out;
 }
-
-Q_DECLARE_METATYPE(MantidQt::MantidWidgets::FitDomainIndex)
-Q_DECLARE_METATYPE(MantidQt::MantidWidgets::WorkspaceIndex)
-Q_DECLARE_METATYPE(MantidQt::MantidWidgets::WorkspaceGroupIndex)

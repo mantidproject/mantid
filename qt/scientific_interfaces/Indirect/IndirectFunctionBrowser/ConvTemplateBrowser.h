@@ -51,7 +51,7 @@ public:
   void estimateFunctionParameters() override;
 
   void setBackgroundA0(double value) override;
-  void setResolution(std::string const &name, TableDatasetIndex const &index) override;
+  void setResolution(std::string const &name, WorkspaceID const &workspaceIndex) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
   void addDeltaFunction();
   void removeDeltaFunction();

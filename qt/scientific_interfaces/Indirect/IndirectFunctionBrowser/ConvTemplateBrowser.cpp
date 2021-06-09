@@ -331,8 +331,8 @@ void ConvTemplateBrowser::estimateFunctionParameters() {}
 
 void ConvTemplateBrowser::setBackgroundA0(double value) { m_presenter.setBackgroundA0(value); }
 
-void ConvTemplateBrowser::setResolution(std::string const &name, TableDatasetIndex const &index) {
-  m_presenter.setResolution(name, index);
+void ConvTemplateBrowser::setResolution(std::string const &name, WorkspaceID const &workspaceIndex) {
+  m_presenter.setResolution(name, workspaceIndex);
 }
 
 void ConvTemplateBrowser::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {

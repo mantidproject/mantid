@@ -122,7 +122,7 @@ IndirectFitPlotModel::IndirectFitPlotModel(IndirectFittingModel *fittingModel)
 
 IndirectFitPlotModel::~IndirectFitPlotModel() { deleteExternalGuessWorkspace(); }
 
-void IndirectFitPlotModel::setActiveIndex(TableDatasetIndex index) { m_activeWorkspaceIndex = index; }
+void IndirectFitPlotModel::setActiveIndex(WorkspaceID workspaceID) { m_activeWorkspaceIndex = workspaceID; }
 
 void IndirectFitPlotModel::setActiveSpectrum(WorkspaceIndex spectrum) { m_activeSpectrumIndex = spectrum; }
 
@@ -173,15 +173,15 @@ std::pair<double, double> IndirectFitPlotModel::getResultRange() const {
   return {xValues.front(), xValues.back()};
 }
 
-TableDatasetIndex IndirectFitPlotModel::getActiveWorkspaceIndex() const { return m_activeWorkspaceIndex; }
+WorkspaceID IndirectFitPlotModel::getActiveWorkspaceIndex() const { return m_activeWorkspaceIndex; }
 
 WorkspaceIndex IndirectFitPlotModel::getActiveSpectrum() const { return m_activeSpectrumIndex; }
 
-TableDatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const { return m_fittingModel->getNumberOfWorkspaces(); }
+WorkspaceID IndirectFitPlotModel::numberOfWorkspaces() const { return m_fittingModel->getNumberOfWorkspaces(); }
 
 FitDomainIndex IndirectFitPlotModel::getActiveDomainIndex() const {
   FitDomainIndex index{0};
-  for (TableDatasetIndex iws{0}; iws < numberOfWorkspaces(); ++iws) {
+  for (WorkspaceID iws{0}; iws < numberOfWorkspaces(); ++iws) {
     if (iws < m_activeWorkspaceIndex) {
       index += FitDomainIndex{m_fittingModel->getNumberOfSpectra(iws)};
     } else {
@@ -198,9 +198,9 @@ FitDomainIndex IndirectFitPlotModel::getActiveDomainIndex() const {
   return index;
 }
 
-std::string IndirectFitPlotModel::getFitDataName(TableDatasetIndex index) const {
-  if (m_fittingModel->getWorkspace(index))
-    return m_fittingModel->createDisplayName(index);
+std::string IndirectFitPlotModel::getFitDataName(WorkspaceID workspaceID) const {
+  if (m_fittingModel->getWorkspace(workspaceID))
+    return m_fittingModel->createDisplayName(workspaceID);
   return "";
 }
 
@@ -209,7 +209,7 @@ std::string IndirectFitPlotModel::getFitDataName() const { return getFitDataName
 std::string IndirectFitPlotModel::getLastFitDataName() const {
   auto const workspaceCount = m_fittingModel->getNumberOfWorkspaces();
   if (workspaceCount.value > 0)
-    return getFitDataName(workspaceCount - TableDatasetIndex{1});
+    return getFitDataName(workspaceCount - WorkspaceID{1});
   return "";
 }
 

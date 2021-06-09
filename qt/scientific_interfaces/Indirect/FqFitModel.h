@@ -25,7 +25,7 @@ public:
   using IndirectFittingModel::addWorkspace;
   void addWorkspace(const std::string &workspaceName, const int &spectrum_index);
   void addWorkspace(const std::string &workspaceName) override;
-  void removeWorkspace(TableDatasetIndex index) override;
+  void removeWorkspace(WorkspaceID workspaceID) override;
 
   bool isMultiFit() const override;
 
@@ -41,8 +41,7 @@ public:
 private:
   bool allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
   FqFitParameters &addFqFitParameters(Mantid::API::MatrixWorkspace *workspace, const std::string &hwhmName);
-  std::unordered_map<std::string, FqFitParameters>::const_iterator
-  findFqFitParameters(TableDatasetIndex dataIndex) const;
+  std::unordered_map<std::string, FqFitParameters>::const_iterator findFqFitParameters(WorkspaceID workspaceID) const;
   std::string getResultXAxisUnit() const override;
   std::string getResultLogName() const override;
   std::unordered_map<std::string, FqFitParameters> m_fqFitParameters;

@@ -159,7 +159,7 @@ public:
     auto result = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
     m_model->addOutput(group, parameters, result);
     auto const index = FitDomainIndex{0};
-    auto resultLocation = ResultLocationNew(result, WorkspaceGroupIndex{static_cast<size_t>(index.value)});
+    auto resultLocation = ResultLocationNew(result, WorkspaceID{static_cast<size_t>(index.value)});
     TS_ASSERT_EQUALS(m_model->getResultLocation(index)->index, resultLocation.index);
   }
 

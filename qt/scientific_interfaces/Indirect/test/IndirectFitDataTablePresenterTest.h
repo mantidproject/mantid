@@ -55,41 +55,38 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockIndirectDataTableModel : public IIndirectFitDataTableModel {
 public:
   MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
-  MOCK_CONST_METHOD1(getWorkspace, Mantid::API::MatrixWorkspace_sptr(TableDatasetIndex index));
-  MOCK_CONST_METHOD1(getSpectra, FunctionModelSpectra(TableDatasetIndex index));
+  MOCK_CONST_METHOD1(getWorkspace, Mantid::API::MatrixWorkspace_sptr(WorkspaceID workspaceID));
+  MOCK_CONST_METHOD1(getSpectra, FunctionModelSpectra(WorkspaceID workspaceID));
   MOCK_CONST_METHOD0(isMultiFit, bool());
-  MOCK_CONST_METHOD0(getNumberOfWorkspaces, TableDatasetIndex());
-  MOCK_CONST_METHOD1(getNumberOfSpectra, size_t(TableDatasetIndex index));
+  MOCK_CONST_METHOD0(getNumberOfWorkspaces, WorkspaceID());
+  MOCK_CONST_METHOD1(getNumberOfSpectra, size_t(WorkspaceID workspaceID));
   MOCK_CONST_METHOD0(getNumberOfDomains, size_t());
-  MOCK_CONST_METHOD2(getDomainIndex, FitDomainIndex(TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD2(getDomainIndex, FitDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_CONST_METHOD0(getQValuesForData, std::vector<double>());
   MOCK_CONST_METHOD0(getResolutionsForFit, std::vector<std::pair<std::string, size_t>>());
   MOCK_CONST_METHOD0(getWorkspaceNames, std::vector<std::string>());
 
-  MOCK_METHOD2(setSpectra, void(const std::string &spectra, TableDatasetIndex dataIndex));
-  MOCK_METHOD2(setSpectra, void(FunctionModelSpectra &&spectra, TableDatasetIndex dataIndex));
-  MOCK_METHOD2(setSpectra, void(const FunctionModelSpectra &spectra, TableDatasetIndex dataIndex));
+  MOCK_METHOD2(setSpectra, void(const std::string &spectra, WorkspaceID workspaceID));
+  MOCK_METHOD2(setSpectra, void(FunctionModelSpectra &&spectra, WorkspaceID workspaceID));
+  MOCK_METHOD2(setSpectra, void(const FunctionModelSpectra &spectra, WorkspaceID workspaceID));
   MOCK_METHOD1(addWorkspace, void(const std::string &workspaceName));
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const std::string &spectra));
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const FunctionModelSpectra &spectra));
   MOCK_METHOD2(addWorkspace, void(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra));
-  MOCK_METHOD1(removeWorkspace, void(TableDatasetIndex index));
+  MOCK_METHOD1(removeWorkspace, void(WorkspaceID workspaceID));
   MOCK_METHOD1(removeDataByIndex, void(FitDomainIndex fitDomainIndex));
   MOCK_METHOD0(clear, void());
 
-  MOCK_CONST_METHOD2(getFittingRange,
-                     std::pair<double, double>(TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
-  MOCK_CONST_METHOD2(getExcludeRegion, std::string(TableDatasetIndex dataIndex, IDA::WorkspaceIndex index));
-  MOCK_CONST_METHOD2(getExcludeRegionVector,
-                     std::vector<double>(TableDatasetIndex dataIndex, IDA::WorkspaceIndex index));
-  MOCK_METHOD3(setStartX, void(double startX, TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
-  MOCK_METHOD2(setStartX, void(double startX, TableDatasetIndex dataIndex));
-  MOCK_METHOD3(setEndX, void(double endX, TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
-  MOCK_METHOD2(setEndX, void(double endX, TableDatasetIndex dataIndex));
+  MOCK_CONST_METHOD2(getFittingRange, std::pair<double, double>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD2(getExcludeRegion, std::string(WorkspaceID workspaceID, WorkspaceIndex index));
+  MOCK_CONST_METHOD2(getExcludeRegionVector, std::vector<double>(WorkspaceID workspaceID, WorkspaceIndex index));
+  MOCK_METHOD3(setStartX, void(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_METHOD2(setStartX, void(double startX, WorkspaceID workspaceID));
+  MOCK_METHOD3(setEndX, void(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_METHOD2(setEndX, void(double endX, WorkspaceID workspaceID));
 
-  MOCK_METHOD3(setExcludeRegion,
-               void(const std::string &exclude, TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
-  MOCK_METHOD2(setResolution, void(const std::string &name, TableDatasetIndex index));
+  MOCK_METHOD3(setExcludeRegion, void(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_METHOD2(setResolution, void(const std::string &name, WorkspaceID workspaceID));
   MOCK_METHOD2(setExcludeRegion, void(const std::string &exclude, FitDomainIndex index));
 
   MOCK_CONST_METHOD1(getWorkspace, Mantid::API::MatrixWorkspace_sptr(FitDomainIndex index));
@@ -98,7 +95,7 @@ public:
   MOCK_CONST_METHOD1(getExcludeRegionVector, std::vector<double>(FitDomainIndex index));
   MOCK_CONST_METHOD1(getExcludeRegion, std::string(FitDomainIndex index));
 
-  MOCK_CONST_METHOD1(getSubIndices, std::pair<TableDatasetIndex, IDA::WorkspaceIndex>(FitDomainIndex));
+  MOCK_CONST_METHOD1(getSubIndices, std::pair<WorkspaceID, WorkspaceIndex>(FitDomainIndex));
 
   MOCK_METHOD0(switchToSingleInputMode, void());
   MOCK_METHOD0(switchToMultipleInputMode, void());
@@ -152,17 +149,17 @@ public:
   ///----------------------------------------------------------------------
 
   void test_that_the_cellChanged_signal_will_set_the_models_startX_when_the_relevant_column_is_changed() {
-    EXPECT_CALL(*m_model, setStartX(2.0, TableDatasetIndex(0), IDA::WorkspaceIndex(0))).Times(1);
+    EXPECT_CALL(*m_model, setStartX(2.0, WorkspaceID(0), WorkspaceIndex(0))).Times(1);
     m_table->item(0, START_X_COLUMN)->setText("2.0");
   }
 
   void test_that_the_cellChanged_signal_will_set_the_models_endX_when_the_relevant_column_is_changed() {
-    EXPECT_CALL(*m_model, setEndX(2.0, TableDatasetIndex(0), IDA::WorkspaceIndex(0))).Times(1);
+    EXPECT_CALL(*m_model, setEndX(2.0, WorkspaceID(0), WorkspaceIndex(0))).Times(1);
     m_table->item(0, END_X_COLUMN)->setText("2.0");
   }
 
   void test_that_the_cellChanged_signal_will_set_the_models_excludeRegion_when_the_relevant_column_is_changed() {
-    EXPECT_CALL(*m_model, setExcludeRegion("0-4", TableDatasetIndex(0), IDA::WorkspaceIndex(0))).Times(1);
+    EXPECT_CALL(*m_model, setExcludeRegion("0-4", WorkspaceID(0), WorkspaceIndex(0))).Times(1);
     m_table->item(0, EXCLUDE_REGION_COLUMN)->setText("0-4");
   }
 

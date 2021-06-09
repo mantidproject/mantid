@@ -66,7 +66,7 @@ private:
 
   void setWorkspaces(QStringList const &workspaceNames, double startX, double endX);
   void addWorkspaces(std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
-                     std::vector<WorkspaceIndex> const &workspaceIndices);
+                     std::vector<WorkspaceIndex> const &spectraIndices);
   void addWorkspace(std::string const &workspaceName, double startX, double endX);
   void addWorkspace(Mantid::API::MatrixWorkspace_const_sptr const &workspace, double startX, double endX);
   void addWorkspace(Mantid::API::MatrixWorkspace_const_sptr const &workspace, WorkspaceIndex workspaceIndex,

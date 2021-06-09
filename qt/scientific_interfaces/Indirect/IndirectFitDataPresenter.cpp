@@ -33,12 +33,12 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFittingModel *model,
   connect(m_view, SIGNAL(startXChanged(double)), this, SIGNAL(startXChanged(double)));
   connect(m_view, SIGNAL(endXChanged(double)), this, SIGNAL(endXChanged(double)));
 
-  connect(m_tablePresenter.get(), SIGNAL(startXChanged(double, TableDatasetIndex, WorkspaceIndex)), this,
-          SIGNAL(startXChanged(double, TableDatasetIndex, WorkspaceIndex)));
-  connect(m_tablePresenter.get(), SIGNAL(endXChanged(double, TableDatasetIndex, WorkspaceIndex)), this,
-          SIGNAL(endXChanged(double, TableDatasetIndex, WorkspaceIndex)));
-  connect(m_tablePresenter.get(), SIGNAL(excludeRegionChanged(const std::string &, TableDatasetIndex, WorkspaceIndex)),
-          this, SIGNAL(excludeRegionChanged(const std::string &, TableDatasetIndex, WorkspaceIndex)));
+  connect(m_tablePresenter.get(), SIGNAL(startXChanged(double, WorkspaceID, WorkspaceIndex)), this,
+          SIGNAL(startXChanged(double, WorkspaceID, WorkspaceIndex)));
+  connect(m_tablePresenter.get(), SIGNAL(endXChanged(double, WorkspaceID, WorkspaceIndex)), this,
+          SIGNAL(endXChanged(double, WorkspaceID, WorkspaceIndex)));
+  connect(m_tablePresenter.get(), SIGNAL(excludeRegionChanged(const std::string &, WorkspaceID, WorkspaceIndex)), this,
+          SIGNAL(excludeRegionChanged(const std::string &, WorkspaceID, WorkspaceIndex)));
 }
 
 IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }
