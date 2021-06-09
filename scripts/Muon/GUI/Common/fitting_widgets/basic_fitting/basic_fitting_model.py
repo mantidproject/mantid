@@ -191,7 +191,6 @@ class BasicFittingModel:
         else:
             return DEFAULT_SINGLE_FIT_FUNCTION
 
-    @property
     def number_of_undos(self) -> int:
         """Returns the number of previous single fits that are saved."""
         return len(self.fitting_context.single_fit_functions_for_undo)

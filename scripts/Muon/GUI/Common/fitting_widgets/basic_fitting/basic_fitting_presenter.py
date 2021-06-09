@@ -138,7 +138,7 @@ class BasicFittingPresenter:
         """Handle when undo fit is clicked."""
         self.model.undo_previous_fit()
         self.model.remove_latest_fit_from_context()
-        self.view.set_number_of_undos(self.model.number_of_undos)
+        self.view.set_number_of_undos(self.model.number_of_undos())
 
         self.update_fit_function_in_view_from_model()
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
@@ -173,7 +173,7 @@ class BasicFittingPresenter:
             return
 
         self.handle_fitting_finished(fit_function, fit_status, fit_chi_squared)
-        self.view.set_number_of_undos(self.model.number_of_undos)
+        self.view.set_number_of_undos(self.model.number_of_undos())
         self.view.plot_guess, self.model.plot_guess = False, False
 
     def handle_fitting_finished(self, fit_function, fit_status, chi_squared) -> None:
@@ -278,7 +278,7 @@ class BasicFittingPresenter:
     def clear_undo_data(self) -> None:
         """Clear all the previously saved undo fit functions and other data."""
         self.model.clear_undo_data()
-        self.view.set_number_of_undos(self.model.number_of_undos)
+        self.view.set_number_of_undos(self.model.number_of_undos())
 
     def reset_fit_status_and_chi_squared_information(self) -> None:
         """Clear the fit status and chi squared information in the view and model."""
