@@ -10,23 +10,29 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectDockWidgetArea::IndirectDockWidgetArea(QWidget *parent)
-    : QMainWindow(parent), m_uiForm(new Ui::IndirectDockWidgetArea) {
-  m_uiForm->setupUi(this);
+IndirectDockWidgetArea::IndirectDockWidgetArea(QWidget *parent) : QMainWindow(parent) {
   QMainWindow::setWindowFlags(Qt::Widget);
   setDockOptions(QMainWindow::AnimatedDocks);
+
+  QDockWidget *dataViewArea = new QDockWidget();
+  dataViewArea->setWindowTitle("Data Input");
+  m_fitDataView = new IndirectFitDataView(this);
+  dataViewArea->setWidget(m_fitDataView);
+  dataViewArea->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+
   m_fitPropertyBrowser = new IndirectFitPropertyBrowser();
   m_fitPropertyBrowser->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+
   QDockWidget *plotViewArea = new QDockWidget();
   plotViewArea->setWindowTitle("Mini plots");
   m_fitPlotView = new IndirectFitPlotView();
   plotViewArea->setWidget(m_fitPlotView);
   plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+
+  addDockWidget(Qt::TopDockWidgetArea, dataViewArea);
   addDockWidget(Qt::BottomDockWidgetArea, m_fitPropertyBrowser);
   addDockWidget(Qt::BottomDockWidgetArea, plotViewArea);
   resizeDocks({m_fitPropertyBrowser, plotViewArea}, {20, 20}, Qt::Horizontal);
-  m_fitDataView = m_uiForm->fitDataView;
-  m_fitDataView->setFixedHeight(300);
 }
 } // namespace IDA
 } // namespace CustomInterfaces
