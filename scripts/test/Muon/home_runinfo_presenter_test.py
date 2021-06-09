@@ -7,6 +7,7 @@
 import unittest
 from mantid.api import FileFinder
 from unittest import mock
+from unittest.mock import call
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_model import HomeRunInfoWidgetModel
@@ -42,22 +43,22 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
 
         self.presenter.update_view_from_model()
 
-        add_text_line_calls = [mock.call("Instrument                : MUSR"),
-                               mock.call("Run                       : 22725"),
-                               mock.call("Title                     : FeTeSe T=1 F=100"),
-                               mock.call("Comment                   : FC first sample"),
-                               mock.call("Start                     : 2009-03-24T04:18:58"),
-                               mock.call("End                       : 2009-03-24T04:56:26"),
-                               mock.call("Counts (MEv)              : 20.076704"),
-                               mock.call("Good Frames               : 88540"),
-                               mock.call("Counts per Good Frame     : 226.753"),
-                               mock.call("Counts per Good Frame per det : 3.543"),
-                               mock.call("Average Temperature (K)   : 19.69992"),
-                               mock.call("Sample Temperature (K)    : 1.0"),
-                               mock.call("Sample Magnetic Field (G) : 100.0"),
-                               mock.call("Number of DAQ Periods     : 1")]
+        expected = [call("Instrument                : MUSR"),
+                    call("Run                       : 22725"),
+                    call("Title                     : FeTeSe T=1 F=100"),
+                    call("Comment                   : FC first sample"),
+                    call("Start                     : 2009-03-24T04:18:58"),
+                    call("End                       : 2009-03-24T04:56:26"),
+                    call("Counts (MEv)              : 20.076704"),
+                    call("Good Frames               : 88540"),
+                    call("Counts per Good Frame     : 226.753"),
+                    call("Counts per Good Frame per det : 3.543"),
+                    call("Average Temperature (K)   : 19.69992"),
+                    call("Sample Temperature (K)    : 1.0"),
+                    call("Sample Magnetic Field (G) : 100.0"),
+                    call("Number of DAQ Periods     : 1")]
 
-        self.view.add_text_line.assert_has_calls(add_text_line_calls)
+        self.assertEqual(self.view.add_text_line.call_args_list, expected)
 
 
 if __name__ == '__main__':
