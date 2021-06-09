@@ -191,7 +191,8 @@ class SuperplotView(QWidget):
         self._sideView.workspacesList.clear()
         for name in names:
             item = WorkspaceItem(self._sideView.workspacesList, name)
-            item.signals.delClicked.connect(self._presenter.onDelButtonClicked)
+            item.signals.sig_del_clicked.connect(
+                    self._presenter.onDelButtonClicked)
             item.setText(0, name)
         self._sideView.workspacesList.blockSignals(False)
 

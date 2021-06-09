@@ -15,7 +15,7 @@ class WorkspaceItemSignals(QObject):
     """
     Thrown when the delete button is pressed.
     """
-    delClicked = Signal(str)
+    sig_del_clicked = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -26,12 +26,12 @@ class WorkspaceItem(QTreeWidgetItem):
     """
     Name of the workspace represented by this item.
     """
-    _workspaceName = None
+    _workspace_name = None
 
     """
     Delete button.
     """
-    _delButton = None
+    _del_button = None
 
     """
     WorkspaceItem signals.
@@ -40,16 +40,17 @@ class WorkspaceItem(QTreeWidgetItem):
 
     def __init__(self, treeWidget, name):
         super().__init__(treeWidget)
-        self._workspaceName = name
-        self._delButton = QToolButton()
-        self._delButton.setMinimumSize(20, 20)
-        self._delButton.setMaximumSize(20, 20)
-        self._delButton.setText("-")
-        self._delButton.setToolTip("Remove the workspace from the list")
+        self._workspace_name = name
+        self._del_button = QToolButton()
+        self._del_button.setMinimumSize(20, 20)
+        self._del_button.setMaximumSize(20, 20)
+        self._del_button.setText("-")
+        self._del_button.setToolTip("Remove the workspace from the list")
         self.signals = WorkspaceItemSignals()
-        self._delButton.clicked.connect(
-                lambda c : self.signals.delClicked.emit(self._workspaceName))
-        self.treeWidget().setItemWidget(self, 1, self._delButton)
+        self._del_button.clicked.connect(
+                lambda c : self.signals.sig_del_clicked.emit(
+                    self._workspace_name))
+        self.treeWidget().setItemWidget(self, 1, self._del_button)
         self.treeWidget().resizeColumnToContents(1)
 
     def get_workspace_name(self):
@@ -59,4 +60,4 @@ class WorkspaceItem(QTreeWidgetItem):
         Returns:
             str: name of the workspace
         """
-        return self._workspaceName
+        return self._workspace_name
