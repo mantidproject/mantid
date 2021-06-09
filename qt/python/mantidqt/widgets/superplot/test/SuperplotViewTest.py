@@ -44,10 +44,10 @@ class SuperplotViewTest(unittest.TestCase):
         self.view = SuperplotView(self.mPresenter)
 
     def test_getSideWidget(self):
-        self.assertEqual(self.view.get_side_widget(), self.view._sideView)
+        self.assertEqual(self.view.get_side_widget(), self.view._side_view)
 
     def test_getBottomWidget(self):
-        self.assertEqual(self.view.get_bottom_widget(), self.view._bottomView)
+        self.assertEqual(self.view.get_bottom_widget(), self.view._bottom_view)
 
     def test_close(self):
         self.view.close()
