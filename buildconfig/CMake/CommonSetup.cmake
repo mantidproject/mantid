@@ -107,14 +107,14 @@ if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
     COMPONENTS CXX HL
     REQUIRED CONFIGS hdf5-config.cmake
   )
+  set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
 else()
   find_package(ZLIB REQUIRED)
   find_package(
     HDF5
     COMPONENTS CXX HL
-    REQUIRED CONFIGS hdf5-config.cmake
+    REQUIRED
   )
-  set(HDF5_LIBRARIES hdf5_cpp-shared hdf5_hl-shared)
 endif()
 
 find_package(OpenSSL REQUIRED)
