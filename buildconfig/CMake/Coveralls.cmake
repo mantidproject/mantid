@@ -25,6 +25,7 @@
 # Param _COVERAGE_SRCS	A list of source files that coverage should be collected for.
 # Param _COVERALLS_UPLOAD Upload the result to coveralls?
 #
+
 function(coveralls_setup _COVERAGE_SRCS _COVERALLS_UPLOAD)
 
 	if (ARGC GREATER 2)
@@ -55,6 +56,9 @@ function(coveralls_setup _COVERAGE_SRCS _COVERALLS_UPLOAD)
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
 
+	include(ProcessorCount)
+	ProcessorCount(NUM_CPU)
+
 	add_custom_target(coveralls_generate
 
 		# Zero the coverage counters.
@@ -62,7 +66,7 @@ function(coveralls_setup _COVERAGE_SRCS _COVERALLS_UPLOAD)
 				-P "${_CMAKE_SCRIPT_PATH}/CoverallsClear.cmake"
 
 		# Run regression tests. Continue even if tests fail.
-		COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure || true
+		COMMAND ${CMAKE_CTEST_COMMAND} -j ${NUM_CPU} --output-on-failure || true
 
 		# Generate Gcov and translate it into coveralls JSON.
 		# We do this by executing an external CMake script.
