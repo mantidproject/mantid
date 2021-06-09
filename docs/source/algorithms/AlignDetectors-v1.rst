@@ -85,7 +85,7 @@ Output:
 .. testoutput:: ExAlignDetectors
 
     Peak in dSpace 2.66413186052
-    Peak from calibration 2.5596132087
+    Peak from calibration 2.6612675141
 
 
 .. categories::

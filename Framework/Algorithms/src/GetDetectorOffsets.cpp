@@ -196,7 +196,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   auto it = std::max_element(yValues.cbegin(), yValues.cend());
 
   // Set the default peak height and location
-  const double peakHeight = *it;
+  double peakHeight = *it;
   const double peakLoc = inputW->x(s)[it - yValues.begin()];
 
   IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
@@ -213,9 +213,11 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
     auto peakFunction = std::dynamic_pointer_cast<IPeakFunction>(fun_ptr->getFunction(1));
 
     int result = estimatePeakParameters(histogram, std::pair<size_t, size_t>(start_index, stop_index), peakFunction,
-                                        bkgdFunction, false, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
+                                        bkgdFunction, true, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
     if (result != PeakFitResult::GOOD) {
       g_log.debug() << "bad result for observing peak parameters, using default peak height and loc\n";
+    } else {
+      peakHeight = peakFunction->height();
     }
   } else {
     g_log.debug() << "range size is zero in estimatePeakParameters, using default peak height and loc\n";
