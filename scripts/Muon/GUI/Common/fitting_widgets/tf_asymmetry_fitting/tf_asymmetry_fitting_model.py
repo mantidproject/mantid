@@ -110,11 +110,11 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         """Updates the parameters in the normal simultaneous function based on a TF Asymmetry simultaneous function."""
         for domain_index in range(tf_asymmetry_simultaneous_function.nFunctions()):
             tf_asymmetry_domain_function = tf_asymmetry_simultaneous_function.getFunction(domain_index)
-            parameter_values = self.get_fit_function_parameter_values(self._get_normal_fit_function_from(
+            parameter_values, errors = self.get_fit_function_parameter_values(self._get_normal_fit_function_from(
                 tf_asymmetry_domain_function))
 
             simultaneous_function = self.fitting_context.simultaneous_fit_function.getFunction(domain_index)
-            self._set_fit_function_parameter_values(simultaneous_function, parameter_values)
+            self._set_fit_function_parameter_values(simultaneous_function, parameter_values, errors)
 
     def get_domain_tf_asymmetry_fit_function(self, tf_simultaneous_function: IFunction, dataset_index: int) -> IFunction:
         """Returns the fit function in the TF Asymmetry simultaneous function corresponding to the specified index."""
@@ -295,12 +295,13 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
             else:
                 return self._get_all_fit_function_parameter_values_for_tf_single_function(fit_function)
         else:
-            return self.get_fit_function_parameter_values(fit_function)
+            parameter_values, _ = self.get_fit_function_parameter_values(fit_function)
+            return parameter_values
 
     def _get_all_fit_function_parameter_values_for_tf_single_function(self, tf_single_function: IFunction) -> list:
         """Returns the required parameters values including normalisation from a TF asymmetry single function."""
         normal_single_function = self._get_normal_fit_function_from(tf_single_function)
-        parameter_values = self.get_fit_function_parameter_values(normal_single_function)
+        parameter_values, _ = self.get_fit_function_parameter_values(normal_single_function)
         return [self._get_normalisation_from_tf_fit_function(tf_single_function)] + parameter_values
 
     def _get_all_fit_function_parameter_values_for_tf_simultaneous_function(self, tf_simultaneous_function: IFunction) -> list:
@@ -311,7 +312,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
             tf_domain_function = self.get_domain_tf_asymmetry_fit_function(tf_simultaneous_function, domain_index)
             normal_domain_function = self._get_normal_fit_function_from(tf_domain_function)
-            parameter_values = self.get_fit_function_parameter_values(normal_domain_function)
+            parameter_values, _ = self.get_fit_function_parameter_values(normal_domain_function)
             all_parameters += parameter_values
         return all_parameters
 
@@ -339,15 +340,20 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     @staticmethod
     def get_fit_function_parameter_values(fit_function: IFunction) -> list:
         """Get all the parameter values within a given fit function."""
+        parameters, errors = [], []
         if fit_function is not None:
-            return [fit_function.getParameterValue(i) for i in range(fit_function.nParams())]
-        return []
+            for i in range(fit_function.nParams()):
+                parameters.append(fit_function.getParameterValue(i))
+                errors.append(fit_function.getError(i))
+        return parameters, errors
 
     @staticmethod
-    def _set_fit_function_parameter_values(fit_function: IFunction, parameter_values: list) -> None:
+    def _set_fit_function_parameter_values(fit_function: IFunction, parameter_values: list, errors: list = None) -> None:
         """Set the parameter values within a fit function."""
         for i in range(fit_function.nParams()):
             fit_function.setParameter(i, parameter_values[i])
+            if errors is not None:
+                fit_function.setError(i, errors[i])
 
     def _get_normal_fit_function_from(self, tf_asymmetry_function: IFunction) -> IFunction:
         """Returns the ordinary fit function embedded within the TF Asymmetry fit function."""
