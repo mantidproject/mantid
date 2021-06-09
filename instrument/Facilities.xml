@@ -776,6 +776,8 @@
     <technique>Polarized diffraction</technique>
     <technique>Polarized spectroscopy</technique>
     <technique>Diffuse Scattering</technique>
+    <acquisition>Count</acquisition>
+    <acquisition>TOFCount</acquisition>
   </instrument>
 
   <instrument name="D19">
