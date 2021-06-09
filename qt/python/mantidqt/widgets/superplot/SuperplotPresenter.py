@@ -21,15 +21,15 @@ class SuperplotPresenter:
     _view = None
     _model = None
     _canvas = None
-    _plotFunction = None
-    _matplotlibVersion = None
+    _plot_function = None
+    _matplotlib_version = None
 
     def __init__(self, canvas, parent=None):
         self._view = SuperplotView(self, parent)
         self._model = SuperplotModel()
         self._canvas = canvas
         self.parent = parent
-        self._matplotlibVersion = matplotlib.__version__
+        self._matplotlib_version = matplotlib.__version__
 
         if self.parent:
             self.parent.plot_updated.connect(self.on_plot_updated)
@@ -43,9 +43,9 @@ class SuperplotPresenter:
 
         self._update_list()
         self._update_plot()
-        plottedData = self._model.get_plotted_data()
+        plotted_data = self._model.get_plotted_data()
         selection = dict()
-        for ws, sp in plottedData:
+        for ws, sp in plotted_data:
             if ws not in selection:
                 selection[ws] = [sp]
             else:
@@ -113,19 +113,19 @@ class SuperplotPresenter:
                 self._model.set_spectrum_mode()
                 self._view.set_available_modes([self.SPECTRUM_MODE_TEXT])
             if "function" in args[0]:
-                self._plotFunction = args[0]["function"]
+                self._plot_function = args[0]["function"]
 
         for artist in artists:
-            ws, specIndex = \
+            ws, spec_index = \
                     axes.get_artists_workspace_and_workspace_index(artist)
-            if specIndex is None:
+            if spec_index is None:
                 i = artists.index(artist)
                 if i >= len(args):
                     i = 0
                 specIndex = args[i]["wkspIndex"]
-            wsName = ws.name()
-            self._model.add_workspace(wsName)
-            self._model.add_data(wsName, specIndex)
+            ws_name = ws.name()
+            self._model.add_workspace(ws_name)
+            self._model.add_data(ws_name, spec_index)
 
     def on_visibility_changed(self, state):
         """
@@ -149,24 +149,24 @@ class SuperplotPresenter:
         workspace to the selection list.
         """
         selection = self._view.get_selection()
-        addedWorkspace = self._view.get_selected_workspace()
-        self._model.add_workspace(addedWorkspace)
+        added_workspace = self._view.get_selected_workspace()
+        self._model.add_workspace(added_workspace)
         self._update_list()
         self._view.set_selection(selection)
         self._update_plot()
 
-    def on_del_button_clicked(self, wsName=None):
+    def on_del_button_clicked(self, ws_name=None):
         """
         Triggered when the del button is pressed. This function removes the
         selected workspace from the selection list.
         """
         selection = self._view.get_selection()
-        if wsName is None:
-            selectedWorkspaces = selection.copy()
+        if ws_name is None:
+            selected_workspaces = selection.copy()
         else:
-            selectedWorkspaces = [wsName]
-        for selectedWorkspace in selectedWorkspaces:
-            self._model.del_workspace(selectedWorkspace)
+            selected_workspaces = [ws_name]
+        for selected_workspace in selected_workspaces:
+            self._model.del_workspace(selected_workspace)
         self._update_list()
         if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
             mode = self._view.get_mode()
@@ -192,9 +192,9 @@ class SuperplotPresenter:
         maximum = None
         position = None
         mode = self._view.get_mode()
-        for wsName in selection:
-            ws = mtd[wsName]
-            for sp in selection[wsName]:
+        for ws_name in selection:
+            ws = mtd[ws_name]
+            for sp in selection[ws_name]:
                 if position is None:
                     position = sp
                 elif position != sp:
@@ -229,9 +229,9 @@ class SuperplotPresenter:
             self._view.check_hold_button(False)
             return
         index = self._view.get_spectrum_slider_position()
-        plottedData = self._model.get_plotted_data()
+        plotted_data = self._model.get_plotted_data()
         for ws in selection:
-            if (ws, index) not in plottedData:
+            if (ws, index) not in plotted_data:
                 self._view.check_hold_button(False)
                 return
         self._view.check_hold_button(True)
@@ -241,11 +241,11 @@ class SuperplotPresenter:
         Update the workspaces/spectra list.
         """
         names = self._model.get_workspaces()
-        plottedData = self._model.get_plotted_data()
+        plotted_data = self._model.get_plotted_data()
         self._view.set_workspaces_list(names)
         for name in names:
             spectra = list()
-            for data in plottedData:
+            for data in plotted_data:
                 if data[0] == name:
                     spectra.append(data[1])
             self._view.set_spectra_list(name, spectra)
@@ -257,19 +257,19 @@ class SuperplotPresenter:
         the last plot and removes it if is not part of the memorised data.
         """
         selection = self._view.get_selection()
-        currentSpectrumIndex = self._view.get_spectrum_slider_position()
-        plottedData = self._model.get_plotted_data()
+        current_spectrum_index = self._view.get_spectrum_slider_position()
+        plotted_data = self._model.get_plotted_data()
         mode = self._view.get_mode()
 
         figure = self._canvas.figure
         axes = figure.gca()
         artists = axes.get_tracked_artists()
 
-        # remove curves not in plottedData
+        # remove curves not in plotted_data
         for artist in artists:
             ws, sp = axes.get_artists_workspace_and_workspace_index(artist)
-            wsName = ws.name()
-            if (wsName, sp) not in plottedData:
+            ws_name = ws.name()
+            if (ws_name, sp) not in plotted_data:
                 axes.remove_artists_if(lambda a: a==artist)
             else:
                 label = artist.get_label()
@@ -277,18 +277,18 @@ class SuperplotPresenter:
                     color = artist.get_color()
                 except:
                     color = artist.lines[0].get_color()
-                self._view.modify_spectrum_label(wsName, sp, label, color)
+                self._view.modify_spectrum_label(ws_name, sp, label, color)
 
         # add selection to plot
-        for wsName, spectra in selection.items():
-            if (currentSpectrumIndex not in spectra
+        for ws_name, spectra in selection.items():
+            if (current_spectrum_index not in spectra
                and not self._view.is_spectrum_disabled()):
-                spectra.append(currentSpectrumIndex)
+                spectra.append(current_spectrum_index)
             for sp in spectra:
                 if sp == -1:
                     continue
-                if (wsName, sp) not in plottedData:
-                    ws = mtd[wsName]
+                if (ws_name, sp) not in plotted_data:
+                    ws = mtd[ws_name]
                     kwargs = {}
                     if mode == self.SPECTRUM_MODE_TEXT:
                         kwargs["axis"] = MantidAxType.SPECTRUM
@@ -297,7 +297,7 @@ class SuperplotPresenter:
                         kwargs["axis"] = MantidAxType.BIN
                         kwargs["wkspIndex"] = sp
 
-                    if self._plotFunction == "errorbar":
+                    if self._plot_function == "errorbar":
                         lines = axes.errorbar(ws, **kwargs)
                         label = lines.get_label()
                         color = lines.lines[0].get_color()
@@ -305,16 +305,16 @@ class SuperplotPresenter:
                         lines = axes.plot(ws, **kwargs)
                         label = lines[0].get_label()
                         color = lines[0].get_color()
-                    self._view.modify_spectrum_label(wsName, sp, label, color)
+                    self._view.modify_spectrum_label(ws_name, sp, label, color)
 
-        if selection or plottedData:
+        if selection or plotted_data:
             axes.set_axis_on()
             figure.tight_layout()
             legend = axes.legend()
             if legend:
                 # Legend.draggable() deprecated since v3.0.0
                 # https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.0.0.html
-                if self._matplotlibVersion >= "3.0.0":
+                if self._matplotlib_version >= "3.0.0":
                     legend.set_draggable(True)
                 else:
                     legend.draggable()
@@ -356,27 +356,27 @@ class SuperplotPresenter:
         self._update_hold_button()
         self._update_plot()
 
-    def on_del_spectrum_button_clicked(self, wsName, index):
+    def on_del_spectrum_button_clicked(self, ws_name, index):
         """
         Triggered when the delete button of a selected spectrum has been
         pressed.
 
         Args:
-            wsName (str): name of the corresponding workspace
+            ws_name (str): name of the corresponding workspace
             index (int): index of the corresponding spectrum
         """
         selection = self._view.get_selection()
         mode = self._view.get_mode()
-        self._model.remove_data(wsName, index)
+        self._model.remove_data(ws_name, index)
         if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
                                           self.BIN_MODE_TEXT])
             self._view.set_mode(mode)
-        if wsName in selection:
-            if index in selection[wsName]:
-                selection[wsName].remove(index)
-                if not selection[wsName]:
-                    del selection[wsName]
+        if ws_name in selection:
+            if index in selection[ws_name]:
+                selection[ws_name].remove(index)
+                if not selection[ws_name]:
+                    del selection[ws_name]
         self._update_list()
         self._view.set_selection(selection)
         self._update_spectrum_slider()
@@ -389,10 +389,10 @@ class SuperplotPresenter:
         if self._view.is_spectrum_disabled():
             return
         selection = self._view.get_selection()
-        spectrumIndex = self._view.get_spectrum_slider_position()
+        spectrum_index = self._view.get_spectrum_slider_position()
         mode = self._view.get_mode()
-        for wsName in selection:
-            self._model.add_data(wsName, spectrumIndex)
+        for ws_name in selection:
+            self._model.add_data(ws_name, spectrum_index)
         if mode == self.SPECTRUM_MODE_TEXT:
             self._model.set_spectrum_mode()
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT])
@@ -409,14 +409,14 @@ class SuperplotPresenter:
         Remove the selected ws, sp pair from the plot.
         """
         selection = self._view.get_selection()
-        spectrumIndex = self._view.get_spectrum_slider_position()
+        spectrum_index = self._view.get_spectrum_slider_position()
         mode = self._view.get_mode()
-        for wsName in selection:
+        for ws_name in selection:
             if not self._view.is_spectrum_disabled():
-                self._model.remove_data(wsName, spectrumIndex)
+                self._model.remove_data(ws_name, spectrum_index)
             else:
-                for spectrum in selection[wsName]:
-                    self._model.remove_data(wsName, spectrum)
+                for spectrum in selection[ws_name]:
+                    self._model.remove_data(ws_name, spectrum)
         if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
                                             self.BIN_MODE_TEXT])
@@ -451,42 +451,42 @@ class SuperplotPresenter:
         axes.relim()
         axes.autoscale()
 
-    def on_workspace_deleted(self, wsName):
+    def on_workspace_deleted(self, ws_name):
         """
         Triggered when the model reports a workspace deletion.
 
         Args:
-            name (str): name of the workspace
+            ws_name (str): name of the workspace
         """
         selection = self._view.get_selection()
-        if wsName in selection:
-            del selection[wsName]
+        if ws_name in selection:
+            del selection[ws_name]
         self._update_list()
         self._view.set_selection(selection)
         self._update_plot()
 
-    def on_workspace_renamed(self, oldName, newName):
+    def on_workspace_renamed(self, old_name, new_name):
         """
         Triggered when the model reports a workspace renaming.
 
         Args:
-            oldName (str): old name of the workspace
-            newName (str): new name of the workspace
+            old_name (str): old name of the workspace
+            new_name (str): new name of the workspace
         """
         selection = self._view.get_selection()
-        if oldName in selection:
-            selection[newName] = selection[oldName]
-            del selection[oldName]
+        if old_name in selection:
+            selection[new_name] = selection[old_name]
+            del selection[old_name]
         self._update_list()
         self._view.set_selection(selection)
         self._update_plot()
 
-    def on_workspace_replaced(self, wsName):
+    def on_workspace_replaced(self, ws_name):
         """
         Triggered when the model reports a workapce replacement.
 
         Args:
-            wsName (str): name of the workspace
+            ws_name (str): name of the workspace
         """
         self._update_plot()
 
@@ -497,10 +497,10 @@ class SuperplotPresenter:
         plot.
         """
         selection = self._view.get_selection()
-        currentIndex = self._view.get_spectrum_slider_position()
+        current_index = self._view.get_spectrum_slider_position()
         self._sync_with_current_plot()
         self._update_list()
-        self._view.set_spectrum_slider_position(currentIndex)
-        self._view.set_spectrum_spin_box_value(currentIndex)
+        self._view.set_spectrum_slider_position(current_index)
+        self._view.set_spectrum_spin_box_value(current_index)
         self._view.set_selection(selection)
         self._update_plot()
