@@ -37,6 +37,7 @@ class InstrumentViewPresenter(ObservingPresenter):
         # TODO FIXME - this may not be a good design.  It violates the OO principles
         # Update the instrument view manager
         InstrumentViewManager.register(self, self.ws_name)
+        self.container.closing.connect(lambda : self.close(self.ws_name))
 
     def current_workspace_equals(self, name):
         return self.ws_name == name
