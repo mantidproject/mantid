@@ -52,9 +52,9 @@ class SuperplotPresenterTest(unittest.TestCase):
 
     def test_init(self):
         self.presenter.__init__(self.mCanvas)
-        self.mModel.workspaceDeleted.connect.assert_called_once()
-        self.mModel.workspaceRenamed.connect.assert_called_once()
-        self.mModel.workspaceReplaced.connect.assert_called_once()
+        self.mModel.sig_workspace_deleted.connect.assert_called_once()
+        self.mModel.sig_workspace_renamed.connect.assert_called_once()
+        self.mModel.sig_workspace_replaced.connect.assert_called_once()
         self.mView.set_available_modes.assert_called()
         self.mModel.set_spectrum_mode.assert_called_once()
         self.mAxes.creation_args = [{"axis": 0}]

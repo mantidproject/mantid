@@ -31,8 +31,8 @@ class SuperplotModelTest(unittest.TestCase):
 
     def test_init(self):
         self.assertEqual(self.model._workspaces, [])
-        self.assertEqual(self.model._plottedData, [])
-        self.assertIsNone(self.model._plotMode)
+        self.assertEqual(self.model._plotted_data, [])
+        self.assertIsNone(self.model._plot_mode)
         self.mObs.signals.sig_ws_deleted.connect.assert_called_once()
         self.mObs.signals.sig_ws_renamed.connect.assert_called_once()
         self.mObs.signals.sig_ws_replaced.connect.assert_called_once()
@@ -57,24 +57,24 @@ class SuperplotModelTest(unittest.TestCase):
 
     def test_delWorkspace(self):
         self.model._workspaces = ["ws1", "ws2", "ws3"]
-        self.model._plottedData = [("ws1", 1), ("ws2", 2)]
-        self.model._plotMode = self.model.BIN_MODE
+        self.model._plotted_data = [("ws1", 1), ("ws2", 2)]
+        self.model._plot_mode = self.model.BIN_MODE
         self.model.del_workspace("ws4")
         self.assertEqual(self.model._workspaces, ["ws1", "ws2", "ws3"])
-        self.assertEqual(self.model._plottedData, [("ws1", 1), ("ws2", 2)])
-        self.assertEqual(self.model._plotMode, self.model.BIN_MODE)
+        self.assertEqual(self.model._plotted_data, [("ws1", 1), ("ws2", 2)])
+        self.assertEqual(self.model._plot_mode, self.model.BIN_MODE)
         self.model.del_workspace("ws3")
         self.assertEqual(self.model._workspaces, ["ws1", "ws2"])
-        self.assertEqual(self.model._plottedData, [("ws1", 1), ("ws2", 2)])
-        self.assertEqual(self.model._plotMode, self.model.BIN_MODE)
+        self.assertEqual(self.model._plotted_data, [("ws1", 1), ("ws2", 2)])
+        self.assertEqual(self.model._plot_mode, self.model.BIN_MODE)
         self.model.del_workspace("ws2")
         self.assertEqual(self.model._workspaces, ["ws1"])
-        self.assertEqual(self.model._plottedData, [("ws1", 1)])
-        self.assertEqual(self.model._plotMode, self.model.BIN_MODE)
+        self.assertEqual(self.model._plotted_data, [("ws1", 1)])
+        self.assertEqual(self.model._plot_mode, self.model.BIN_MODE)
         self.model.del_workspace("ws1")
         self.assertEqual(self.model._workspaces, [])
-        self.assertEqual(self.model._plottedData, [])
-        self.assertIsNone(self.model._plotMode)
+        self.assertEqual(self.model._plotted_data, [])
+        self.assertIsNone(self.model._plot_mode)
 
     def test_getWorkspaces(self):
         self.model._workspaces = ["ws1", "ws2", "ws3"]
@@ -86,122 +86,122 @@ class SuperplotModelTest(unittest.TestCase):
         self.assertEqual(self.model._workspaces, ["ws1", "ws2", "ws3"])
 
     def test_setBinMode(self):
-        self.assertIsNone(self.model._plotMode)
+        self.assertIsNone(self.model._plot_mode)
         self.model.set_bin_mode()
-        self.assertEqual(self.model._plotMode, self.model.BIN_MODE)
-        self.model._plotMode = self.model.SPECTRUM_MODE
+        self.assertEqual(self.model._plot_mode, self.model.BIN_MODE)
+        self.model._plot_mode = self.model.SPECTRUM_MODE
         self.model.set_bin_mode()
-        self.assertEqual(self.model._plotMode, self.model.BIN_MODE)
+        self.assertEqual(self.model._plot_mode, self.model.BIN_MODE)
 
     def test_setSpectrumMode(self):
-        self.assertIsNone(self.model._plotMode)
+        self.assertIsNone(self.model._plot_mode)
         self.model.set_spectrum_mode()
-        self.assertEqual(self.model._plotMode, self.model.SPECTRUM_MODE)
-        self.model._plotMode = self.model.BIN_MODE
+        self.assertEqual(self.model._plot_mode, self.model.SPECTRUM_MODE)
+        self.model._plot_mode = self.model.BIN_MODE
         self.model.set_spectrum_mode()
-        self.assertEqual(self.model._plotMode, self.model.SPECTRUM_MODE)
+        self.assertEqual(self.model._plot_mode, self.model.SPECTRUM_MODE)
 
     def test_isBinMode(self):
-        self.assertIsNone(self.model._plotMode)
+        self.assertIsNone(self.model._plot_mode)
         self.assertFalse(self.model.is_bin_mode())
-        self.model._plotMode = self.model.BIN_MODE
+        self.model._plot_mode = self.model.BIN_MODE
         self.assertTrue(self.model.is_bin_mode())
-        self.model._plotMode = self.model.SPECTRUM_MODE
+        self.model._plot_mode = self.model.SPECTRUM_MODE
         self.assertFalse(self.model.is_bin_mode())
 
     def test_isSpectrumMode(self):
-        self.assertIsNone(self.model._plotMode)
+        self.assertIsNone(self.model._plot_mode)
         self.assertFalse(self.model.is_spectrum_mode())
-        self.model._plotMode = self.model.SPECTRUM_MODE
+        self.model._plot_mode = self.model.SPECTRUM_MODE
         self.assertTrue(self.model.is_spectrum_mode())
-        self.model._plotMode = self.model.BIN_MODE
+        self.model._plot_mode = self.model.BIN_MODE
         self.assertFalse(self.model.is_spectrum_mode())
 
     def test_addData(self):
-        self.assertEqual(self.model._plottedData, [])
+        self.assertEqual(self.model._plotted_data, [])
         self.model.add_data("ws1", 1)
-        self.assertEqual(self.model._plottedData, [("ws1", 1)])
+        self.assertEqual(self.model._plotted_data, [("ws1", 1)])
         self.model.add_data("ws1", 2)
-        self.assertEqual(self.model._plottedData, [("ws1", 1), ("ws1", 2)])
+        self.assertEqual(self.model._plotted_data, [("ws1", 1), ("ws1", 2)])
         self.model.add_data("ws1", 1)
-        self.assertEqual(self.model._plottedData, [("ws1", 1), ("ws1", 2)])
+        self.assertEqual(self.model._plotted_data, [("ws1", 1), ("ws1", 2)])
 
     def test_removeData(self):
-        self.assertEqual(self.model._plottedData, [])
+        self.assertEqual(self.model._plotted_data, [])
         self.model.remove_data("ws1", 1)
-        self.assertEqual(self.model._plottedData, [])
-        self.model._plottedData = [("ws1", 1), ("ws1", 2), ("ws2", 1)]
-        self.model._plotMode = self.model.BIN_MODE
+        self.assertEqual(self.model._plotted_data, [])
+        self.model._plotted_data = [("ws1", 1), ("ws1", 2), ("ws2", 1)]
+        self.model._plot_mode = self.model.BIN_MODE
         self.model.remove_data("ws1", 1)
-        self.assertEqual(self.model._plottedData, [("ws1", 2), ("ws2", 1)])
-        self.assertEqual(self.model._plotMode, self.model.BIN_MODE)
+        self.assertEqual(self.model._plotted_data, [("ws1", 2), ("ws2", 1)])
+        self.assertEqual(self.model._plot_mode, self.model.BIN_MODE)
         self.model.remove_data("ws2", 1)
-        self.assertEqual(self.model._plottedData, [("ws1", 2)])
-        self.assertEqual(self.model._plotMode, self.model.BIN_MODE)
+        self.assertEqual(self.model._plotted_data, [("ws1", 2)])
+        self.assertEqual(self.model._plot_mode, self.model.BIN_MODE)
         self.model.remove_data("ws1", 2)
-        self.assertEqual(self.model._plottedData, [])
-        self.assertIsNone(self.model._plotMode)
+        self.assertEqual(self.model._plotted_data, [])
+        self.assertIsNone(self.model._plot_mode)
 
     def test_getPlottedData(self):
-        self.assertEqual(self.model._plottedData, [])
+        self.assertEqual(self.model._plotted_data, [])
         self.assertEqual(self.model.get_plotted_data(), [])
-        self.model._plottedData = [("ws1", 1), ("ws1", 2), ("ws2", 1)]
+        self.model._plotted_data = [("ws1", 1), ("ws1", 2), ("ws2", 1)]
         data = self.model.get_plotted_data()
         self.assertEqual(data, [("ws1", 1), ("ws1", 2), ("ws2", 1)])
         data = data[0:2]
         self.assertEqual(data, [("ws1", 1), ("ws1", 2)])
-        self.assertEqual(self.model._plottedData,
+        self.assertEqual(self.model._plotted_data,
                          [("ws1", 1), ("ws1", 2), ("ws2", 1)])
 
     def test_onWorkspaceDeleted(self):
         self.model._workspaces = ["ws1", "ws2", "ws3"]
-        self.model._plottedData = [("ws1", 1), ("ws1", 3), ("ws3", 10)]
-        self.model._plotMode = self.model.SPECTRUM_MODE
-        self.model.workspaceDeleted = mock.Mock()
+        self.model._plotted_data = [("ws1", 1), ("ws1", 3), ("ws3", 10)]
+        self.model._plot_mode = self.model.SPECTRUM_MODE
+        self.model.sig_workspace_deleted = mock.Mock()
         self.model.on_workspace_deleted("ws4")
         self.assertEqual(self.model._workspaces, ["ws1", "ws2", "ws3"])
-        self.assertEqual(self.model._plottedData,
+        self.assertEqual(self.model._plotted_data,
                          [("ws1", 1), ("ws1", 3), ("ws3", 10)])
-        self.assertEqual(self.model._plotMode, self.model.SPECTRUM_MODE)
-        self.model.workspaceDeleted.emit.assert_not_called()
+        self.assertEqual(self.model._plot_mode, self.model.SPECTRUM_MODE)
+        self.model.sig_workspace_deleted.emit.assert_not_called()
         self.model.on_workspace_deleted("ws1")
         self.assertEqual(self.model._workspaces, ["ws2", "ws3"])
-        self.assertEqual(self.model._plottedData, [("ws3", 10)])
-        self.assertEqual(self.model._plotMode, self.model.SPECTRUM_MODE)
-        self.model.workspaceDeleted.emit.assert_called_once_with("ws1")
-        self.model.workspaceDeleted.reset_mock()
+        self.assertEqual(self.model._plotted_data, [("ws3", 10)])
+        self.assertEqual(self.model._plot_mode, self.model.SPECTRUM_MODE)
+        self.model.sig_workspace_deleted.emit.assert_called_once_with("ws1")
+        self.model.sig_workspace_deleted.reset_mock()
         self.model.on_workspace_deleted("ws2")
         self.assertEqual(self.model._workspaces, ["ws3"])
-        self.assertEqual(self.model._plottedData, [("ws3", 10)])
-        self.assertEqual(self.model._plotMode, self.model.SPECTRUM_MODE)
-        self.model.workspaceDeleted.emit.assert_called_once_with("ws2")
-        self.model.workspaceDeleted.reset_mock()
+        self.assertEqual(self.model._plotted_data, [("ws3", 10)])
+        self.assertEqual(self.model._plot_mode, self.model.SPECTRUM_MODE)
+        self.model.sig_workspace_deleted.emit.assert_called_once_with("ws2")
+        self.model.sig_workspace_deleted.reset_mock()
         self.model.on_workspace_deleted("ws3")
         self.assertEqual(self.model._workspaces, [])
-        self.assertEqual(self.model._plottedData, [])
-        self.assertIsNone(self.model._plotMode)
-        self.model.workspaceDeleted.emit.assert_called_once_with("ws3")
-        self.model.workspaceDeleted.reset_mock()
+        self.assertEqual(self.model._plotted_data, [])
+        self.assertIsNone(self.model._plot_mode)
+        self.model.sig_workspace_deleted.emit.assert_called_once_with("ws3")
+        self.model.sig_workspace_deleted.reset_mock()
 
     def test_onWorkspaceRenamed(self):
         self.model._workspaces = ["ws1", "ws2", "ws3"]
-        self.model._plottedData = [("ws1", 1), ("ws1", 3), ("ws3", 10)]
-        self.model.workspaceRenamed = mock.Mock()
+        self.model._plotted_data = [("ws1", 1), ("ws1", 3), ("ws3", 10)]
+        self.model.sig_workspace_renamed = mock.Mock()
         self.model.on_workspace_renamed("ws4", "ws5")
         self.assertEqual(self.model._workspaces, ["ws1", "ws2", "ws3"])
-        self.assertEqual(self.model._plottedData,
+        self.assertEqual(self.model._plotted_data,
                          [("ws1", 1), ("ws1", 3), ("ws3", 10)])
-        self.model.workspaceRenamed.emit.assert_not_called()
+        self.model.sig_workspace_renamed.emit.assert_not_called()
         self.model.on_workspace_renamed("ws1", "ws5")
         self.assertEqual(self.model._workspaces, ["ws5", "ws2", "ws3"])
-        self.assertEqual(self.model._plottedData,
+        self.assertEqual(self.model._plotted_data,
                          [("ws5", 1), ("ws5", 3), ("ws3", 10)])
-        self.model.workspaceRenamed.emit.assert_called_once_with("ws1", "ws5")
+        self.model.sig_workspace_renamed.emit.assert_called_once_with("ws1", "ws5")
 
     def test_onWorkspaceReplaced(self):
         self.model._workspaces = ["ws1", "ws2", "ws3"]
-        self.model.workspaceReplaced = mock.Mock()
+        self.model.sig_workspace_replaced = mock.Mock()
         self.model.on_workspace_replaced("ws4")
-        self.model.workspaceReplaced.emit.assert_not_called()
+        self.model.sig_workspace_replaced.emit.assert_not_called()
         self.model.on_workspace_replaced("ws1")
-        self.model.workspaceReplaced.emit.assert_called_once_with("ws1")
+        self.model.sig_workspace_replaced.emit.assert_called_once_with("ws1")

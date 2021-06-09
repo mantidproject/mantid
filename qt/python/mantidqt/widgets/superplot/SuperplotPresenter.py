@@ -34,9 +34,9 @@ class SuperplotPresenter:
         if self.parent:
             self.parent.plot_updated.connect(self.onPlotUpdated)
 
-        self._model.workspaceDeleted.connect(self.onWorkspaceDeleted)
-        self._model.workspaceRenamed.connect(self.onWorkspaceRenamed)
-        self._model.workspaceReplaced.connect(self.onWorkspaceReplaced)
+        self._model.sig_workspace_deleted.connect(self.onWorkspaceDeleted)
+        self._model.sig_workspace_renamed.connect(self.onWorkspaceRenamed)
+        self._model.sig_workspace_replaced.connect(self.onWorkspaceReplaced)
 
         #initial state
         self._syncWithCurrentPlot()

@@ -29,7 +29,7 @@ class SuperplotModel(QObject):
     Args:
         str: name of the workspace
     """
-    workspaceDeleted = Signal(str)
+    sig_workspace_deleted = Signal(str)
 
     """
     Emitted when a workspace is renamed (ADS observation).
@@ -37,14 +37,14 @@ class SuperplotModel(QObject):
         str: old name
         str: new name
     """
-    workspaceRenamed = Signal(str, str)
+    sig_workspace_renamed = Signal(str, str)
 
     """
     Emitted when a workspace is replaced (ADS observation).
     Args:
         str: name of the workspace
     """
-    workspaceReplaced = Signal(str)
+    sig_workspace_replaced = Signal(str)
 
     """
     List of managed workspace names.
@@ -54,27 +54,27 @@ class SuperplotModel(QObject):
     """
     List of plotted workspace, spectrum index pairs.
     """
-    _plottedData = None
+    _plotted_data = None
 
     """
     Plot mode (bins or spectra).
     """
-    _plotMode = None
+    _plot_mode = None
 
     def __init__(self):
         super().__init__()
         self._workspaces = list()
-        self._plottedData = list()
-        self._adsObserver = SuperplotAdsObserver()
-        self._adsObserver.signals.sig_ws_deleted.connect(
+        self._plotted_data = list()
+        self._ads_observer = SuperplotAdsObserver()
+        self._ads_observer.signals.sig_ws_deleted.connect(
                 self.on_workspace_deleted)
-        self._adsObserver.signals.sig_ws_renamed.connect(
+        self._ads_observer.signals.sig_ws_renamed.connect(
                 self.on_workspace_renamed)
-        self._adsObserver.signals.sig_ws_replaced.connect(
+        self._ads_observer.signals.sig_ws_replaced.connect(
                 self.on_workspace_replaced)
 
     def __del__(self):
-        del self._adsObserver
+        del self._ads_observer
 
     def add_workspace(self, name):
         """
@@ -103,10 +103,10 @@ class SuperplotModel(QObject):
         """
         if name in self._workspaces:
             self._workspaces.remove(name)
-            self._plottedData = [(n, i) for (n, i) in self._plottedData
-                                 if n != name]
-        if not self._plottedData:
-            self._plotMode = None
+            self._plotted_data = [(n, i) for (n, i) in self._plotted_data
+                                  if n != name]
+        if not self._plotted_data:
+            self._plot_mode = None
 
     def get_workspaces(self):
         """
@@ -121,13 +121,13 @@ class SuperplotModel(QObject):
         """
         Set the plot mode to 'bins'.
         """
-        self._plotMode = self.BIN_MODE
+        self._plot_mode = self.BIN_MODE
 
     def set_spectrum_mode(self):
         """
         Set the plot mode to 'spectra'.
         """
-        self._plotMode = self.SPECTRUM_MODE
+        self._plot_mode = self.SPECTRUM_MODE
 
     def is_bin_mode(self):
         """
@@ -136,7 +136,7 @@ class SuperplotModel(QObject):
         Returns:
             bool: True if 'bins' mode
         """
-        return self._plotMode == self.BIN_MODE
+        return self._plot_mode == self.BIN_MODE
 
     def is_spectrum_mode(self):
         """
@@ -145,7 +145,7 @@ class SuperplotModel(QObject):
         Returns:
             bool: True if 'spectra' mode
         """
-        return self._plotMode == self.SPECTRUM_MODE
+        return self._plot_mode == self.SPECTRUM_MODE
 
     def add_data(self, workspace, spectrum):
         """
@@ -155,8 +155,8 @@ class SuperplotModel(QObject):
             workspaces (str): name of the workspace
             spectrum (int): index of the spectrum
         """
-        if (workspace, spectrum) not in self._plottedData:
-            self._plottedData.append((workspace, spectrum))
+        if (workspace, spectrum) not in self._plotted_data:
+            self._plotted_data.append((workspace, spectrum))
 
     def remove_data(self, workspace, spectrum):
         """
@@ -166,10 +166,10 @@ class SuperplotModel(QObject):
             workspaces (str): name of the workspace
             spectrum (int): index of the spectrum
         """
-        if (workspace, spectrum) in self._plottedData:
-            self._plottedData.remove((workspace, spectrum))
-        if not self._plottedData:
-            self._plotMode = None
+        if (workspace, spectrum) in self._plotted_data:
+            self._plotted_data.remove((workspace, spectrum))
+        if not self._plotted_data:
+            self._plot_mode = None
 
     def get_plotted_data(self):
         """
@@ -178,50 +178,50 @@ class SuperplotModel(QObject):
         Returns:
             list(tuple(str, int)): list of workspace, spectrum index pairs
         """
-        return self._plottedData.copy()
+        return self._plotted_data.copy()
 
-    def on_workspace_deleted(self, wsName):
+    def on_workspace_deleted(self, ws_name):
         """
         Triggered when the ADS reports a workspace deletion. This method deletes
         any reference to the corresponding workspace.
 
         Args:
-            wsName (str): name of the deleted workspace
+            ws_name (str): name of the deleted workspace
         """
-        if wsName not in self._workspaces:
+        if ws_name not in self._workspaces:
             return
-        self._workspaces.remove(wsName)
-        self._plottedData = [(ws, sp) for (ws, sp) in self._plottedData
-                             if ws != wsName]
-        if not self._plottedData:
-            self._plotMode = None
-        self.workspaceDeleted.emit(wsName)
+        self._workspaces.remove(ws_name)
+        self._plotted_data = [(ws, sp) for (ws, sp) in self._plotted_data
+                              if ws != ws_name]
+        if not self._plotted_data:
+            self._plot_mode = None
+        self.sig_workspace_deleted.emit(ws_name)
 
-    def on_workspace_renamed(self, oldName, newName):
+    def on_workspace_renamed(self, old_name, new_name):
         """
         Triggered when the ADS reports a workspace renaming. This method rename
         any reference to this workspace.
 
         Args:
-            oldName (str): old name of the workspace
-            newName (str): new name of the workspace
+            old_name (str): old name of the workspace
+            new_name (str): new name of the workspace
         """
-        if oldName not in self._workspaces:
+        if old_name not in self._workspaces:
             return
-        i = self._workspaces.index(oldName)
-        self._workspaces[i] = newName
-        for i in range(len(self._plottedData)):
-            if self._plottedData[i][0] == oldName:
-                self._plottedData[i] = (newName, self._plottedData[i][1])
-        self.workspaceRenamed.emit(oldName, newName)
+        i = self._workspaces.index(old_name)
+        self._workspaces[i] = new_name
+        for i in range(len(self._plotted_data)):
+            if self._plotted_data[i][0] == old_name:
+                self._plotted_data[i] = (new_name, self._plotted_data[i][1])
+        self.sig_workspace_renamed.emit(old_name, new_name)
 
-    def on_workspace_replaced(self, wsName):
+    def on_workspace_replaced(self, ws_name):
         """
         Triggered when the ADS reports a workspace replacement.
 
         Args:
-            wsName (str): name of the workspace
+            ws_name (str): name of the workspace
         """
-        if wsName not in self._workspaces:
+        if ws_name not in self._workspaces:
             return
-        self.workspaceReplaced.emit(wsName)
+        self.sig_workspace_replaced.emit(ws_name)
