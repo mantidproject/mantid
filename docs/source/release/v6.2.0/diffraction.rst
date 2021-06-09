@@ -25,6 +25,9 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+New features
+############
+New setting for default peak function to fit in the Engineering Diffraction interface (initial default is :ref:`BackToBackExponential <func-BackToBackExponential>`).
 
 Single Crystal Diffraction
 --------------------------
