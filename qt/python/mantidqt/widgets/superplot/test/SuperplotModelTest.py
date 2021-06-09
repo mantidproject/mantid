@@ -33,9 +33,9 @@ class SuperplotModelTest(unittest.TestCase):
         self.assertEqual(self.model._workspaces, [])
         self.assertEqual(self.model._plottedData, [])
         self.assertIsNone(self.model._plotMode)
-        self.mObs.signals.wsDeleted.connect.assert_called_once()
-        self.mObs.signals.wsRenamed.connect.assert_called_once()
-        self.mObs.signals.wsReplaced.connect.assert_called_once()
+        self.mObs.signals.sig_ws_deleted.connect.assert_called_once()
+        self.mObs.signals.sig_ws_renamed.connect.assert_called_once()
+        self.mObs.signals.sig_ws_replaced.connect.assert_called_once()
 
     def test_addWorkspace(self):
         self.mMtd.__contains__.return_value = False

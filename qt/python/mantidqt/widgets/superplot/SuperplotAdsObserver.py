@@ -18,7 +18,7 @@ class SuperplotAdsObserverSignals(QObject):
     Args:
         str: name of the deleted workspace
     """
-    wsDeleted = Signal(str)
+    sig_ws_deleted = Signal(str)
 
     """
     Emitted when a workspace is renamed.
@@ -26,14 +26,14 @@ class SuperplotAdsObserverSignals(QObject):
         str: old name
         str: new name
     """
-    wsRenamed = Signal(str, str)
+    sig_ws_renamed = Signal(str, str)
 
     """
     Emitted when a workspace is replaced.
     Args:
         str: name of the workspace
     """
-    wsReplaced = Signal(str)
+    sig_ws_replaced = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -51,32 +51,32 @@ class SuperplotAdsObserver(AnalysisDataServiceObserver):
     def __del__(self):
         self.observeAll(False)
 
-    def deleteHandle(self, wsName, ws):
+    def deleteHandle(self, ws_name, ws):
         """
         Triggered when a workspace is deleted.
 
         Args:
-            wsName (str): name of the workspace
+            ws_name (str): name of the workspace
             ws (workspace): reference to the workspace
         """
-        self.signals.wsDeleted.emit(wsName)
+        self.signals.sig_ws_deleted.emit(ws_name)
 
-    def renameHandle(self, oldName, newName):
+    def renameHandle(self, old_name, new_name):
         """
         Triggered when a workspace is renamed.
 
         Args:
-            oldName (str): old name of the workspace
-            newName (str): new name of the workspace
+            old_name (str): old name of the workspace
+            new_name (str): new name of the workspace
         """
-        self.signals.wsRenamed.emit(oldName, newName)
+        self.signals.sig_ws_renamed.emit(old_name, new_name)
 
-    def replacedHandle(self, wsName, ws):
+    def replacedHandle(self, ws_name, ws):
         """
         Triggered when a workspace is replaces.
 
         Args:
-            wsName (str): name of the workspace
+            ws_name (str): name of the workspace
             ws (workspace): reference to the workspace
         """
-        self.signals.wsReplaced.emit(wsName)
+        self.signals.sig_ws_replaced.emit(ws_name)
