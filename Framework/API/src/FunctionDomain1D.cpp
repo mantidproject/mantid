@@ -55,7 +55,7 @@ FunctionDomain1DVector::FunctionDomain1DVector(std::vector<double> &&xvalues) : 
   if (xvalues.empty()) {
     throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
   }
-  m_X = std::move( xvalues );
+  m_X = std::move(xvalues);
   /* clear the invalidated object */
   xvalues.clear();
   resetData(&m_X[0], m_X.size());
