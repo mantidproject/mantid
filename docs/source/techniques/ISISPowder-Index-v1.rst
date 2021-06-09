@@ -29,7 +29,7 @@ the scripts as it is beyond the scope of this documentation.
 Prerequisites
 ---------------
 Users must setup their input directories so Mantid can find the input files. Instructions
-on completing this are located `here <http://www.mantidproject.org/ManageUserDirectories>`_.
+on completing this are located :ref:`here <ManageUserDirectories>`.
 *Note: Mantid will not search folders recursively each folder must be added*
 
 Additionally *Search Data Archive* can be ticked if the device is located on the ISIS

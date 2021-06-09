@@ -289,6 +289,7 @@ void IndirectFitPlotView::setHWHMMinimum(double maximum) {
 
 void IndirectFitPlotView::addFitRangeSelector() {
   auto fitRangeSelector = m_topPlot->addRangeSelector("FitRange");
+  fitRangeSelector->setBounds(-1.0, 1.0);
 
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this, SIGNAL(startXChanged(double)));
   connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this, SIGNAL(endXChanged(double)));
@@ -315,6 +316,7 @@ void IndirectFitPlotView::setBackgroundBounds() {
 
 void IndirectFitPlotView::addHWHMRangeSelector() {
   auto hwhmRangeSelector = m_topPlot->addRangeSelector("HWHM");
+  hwhmRangeSelector->setBounds(-1.0, 1.0);
   hwhmRangeSelector->setColour(Qt::red);
   hwhmRangeSelector->setRange(0.0, 0.0);
   hwhmRangeSelector->setVisible(false);

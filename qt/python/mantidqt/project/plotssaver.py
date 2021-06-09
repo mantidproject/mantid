@@ -158,7 +158,9 @@ class PlotsSaver(object):
                 "yAxisScale": ax.yaxis.get_scale(),
                 "yLim": ax.get_ylim(),
                 "yAutoScale": ax.get_autoscaley_on(),
-                "showMinorGrid": hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines}
+                "showMinorGrid": hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines,
+                "tickParams": self.get_dict_from_tick_properties(ax),
+                "spineWidths": self.get_dict_from_spine_widths(ax)}
 
     def get_dict_from_axis_properties(self, ax):
         prop_dict = {"majorTickLocator": type(ax.get_major_locator()).__name__,
@@ -167,19 +169,8 @@ class PlotsSaver(object):
                      "minorTickFormatter": type(ax.get_minor_formatter()).__name__,
                      "gridStyle": self.get_dict_for_grid_style(ax),
                      "visible": ax.get_visible()}
-        label1On = ax._major_tick_kw.get('label1On', True)
 
-        if isinstance(ax, matplotlib.axis.XAxis):
-            if label1On:
-                prop_dict["position"] = "Bottom"
-            else:
-                prop_dict["position"] = "Top"
-        elif isinstance(ax, matplotlib.axis.YAxis):
-            if label1On:
-                prop_dict["position"] = "Left"
-            else:
-                prop_dict["position"] = "Right"
-        else:
+        if not (isinstance(ax, matplotlib.axis.YAxis) or isinstance(ax, matplotlib.axis.XAxis)):
             raise ValueError("Value passed is not a valid axis")
 
         if isinstance(ax.get_major_locator(), ticker.FixedLocator):
@@ -283,3 +274,65 @@ class PlotsSaver(object):
     @staticmethod
     def get_dict_from_fig_properties(fig):
         return {"figWidth": fig.get_figwidth(), "figHeight": fig.get_figheight(), "dpi": fig.dpi}
+
+    @staticmethod
+    def get_dict_from_tick_properties(ax):
+        xaxis_major_kw = ax.xaxis._major_tick_kw
+        xaxis_minor_kw = ax.xaxis._minor_tick_kw
+
+        yaxis_major_kw = ax.yaxis._major_tick_kw
+        yaxis_minor_kw = ax.yaxis._minor_tick_kw
+
+        tick_dict = {
+            "xaxis": {
+                "major": {
+                    "bottom": xaxis_major_kw['tick1On'],
+                    "top": xaxis_major_kw['tick2On'],
+                    "labelbottom": xaxis_major_kw['label1On'],
+                    "labeltop": xaxis_major_kw['label2On']
+                },
+                "minor": {
+                    "bottom": xaxis_minor_kw['tick1On'],
+                    "top": xaxis_minor_kw['tick2On'],
+                    "labelbottom": xaxis_minor_kw['label1On'],
+                    "labeltop": xaxis_minor_kw['label2On']
+                }
+            },
+            "yaxis": {
+                "major": {
+                    "left": yaxis_major_kw['tick1On'],
+                    "right": yaxis_major_kw['tick2On'],
+                    "labelleft": yaxis_major_kw['label1On'],
+                    "labelright": yaxis_major_kw['label2On']
+                },
+                "minor": {
+                    "left": yaxis_minor_kw['tick1On'],
+                    "right": yaxis_minor_kw['tick2On'],
+                    "labelleft": yaxis_minor_kw['label1On'],
+                    "labelright": yaxis_minor_kw['label2On']
+                }
+            }
+        }
+        # Set none guaranteed variables in tick_dict
+        for axis in tick_dict:
+            for size in tick_dict[axis]:
+                # Setup keyword dict for given axis and size (major/minor)
+                keyword_dict_variable_name = f"{axis}_{size}_kw"
+                keyword_dict = locals()[keyword_dict_variable_name]
+
+                if "tickdir" in keyword_dict:
+                    tick_dict[axis][size]["direction"] = keyword_dict["tickdir"]
+                if "size" in keyword_dict:
+                    tick_dict[axis][size]["size"] = keyword_dict["size"]
+                if "width" in keyword_dict:
+                    tick_dict[axis][size]["width"] = keyword_dict["width"]
+
+        return tick_dict
+
+    @staticmethod
+    def get_dict_from_spine_widths(ax):
+        return {
+            'left': ax.spines['left']._linewidth,
+            'right': ax.spines['right']._linewidth,
+            'bottom': ax.spines['bottom']._linewidth,
+            'top': ax.spines['top']._linewidth}

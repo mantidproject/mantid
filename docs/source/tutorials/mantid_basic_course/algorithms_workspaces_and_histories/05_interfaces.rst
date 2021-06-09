@@ -25,8 +25,9 @@ A simple walkthrough
 --------------------
 
 #. Start the interface with the Interfaces > SANS > "ISIS SANS"
-#. On the **Run** tab, in the top right click *Manage Directories* and browse to the "loqdemo" folder, then click OK
-#. Now click on the *Load User File* button and browse to "MaskFile.txt" in the loqdemo folder
+#. On the **Run** tab, in the top right click *Manage Directories* and browse to the ``TrainingCourseData\loqdemo`` folder, then click OK
+#. Click on the *Load User File* button. In the new file explorer, instead of filtering for ``TOML`` files, change this to ``Text`` files.
+   Now browse to the ``TrainingCourseData\loqdemo`` folder and open "MaskFile.txt".
 #. Similarly, Load the batch file called "batch_mode_reduction.csv"
 #. Some pre-set values will have populated the Run table and the **Settings** tab
 #. Back on the **Run** tab, notice that the Run table is editable and in the lower-right corner, there are several

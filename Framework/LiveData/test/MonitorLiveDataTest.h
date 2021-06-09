@@ -157,7 +157,7 @@ public:
     Poco::ActiveResult<bool> res1 = alg1->executeAsync();
     Poco::Thread::sleep(50);
     while (alg1->m_chunkNumber < stopAtChunk)
-      Poco::Thread::sleep(10);
+      Poco::Thread::sleep(5);
     return true;
   }
 

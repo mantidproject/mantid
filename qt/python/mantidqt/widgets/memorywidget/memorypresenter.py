@@ -7,36 +7,29 @@
 #  This file is part of the mantidqt package
 #
 #
-from qtpy.QtCore import QTimer
+from threading import Timer
 
 from ..memorywidget.memoryinfo import get_memory_info
+from ...utils.asynchronous import set_interval
 
-TIME_INTERVAL_MEMORY_USAGE_UPDATE = 2000  # in ms
+TIME_INTERVAL_MEMORY_USAGE_UPDATE = 2.000  # in s
 
 
 class MemoryPresenter(object):
     """
-    Gets system memory usage information and passes it to
-    the memory view
-    This happens at the beginning as well as every
-    TIME_INTERVAL_MEMORY_USAGE_UPDATE (ms) using QTimer
-    Besides, sets the style of the memory(progress) bar
-    at the beginning
+    Gets system memory usage information and passes it to the memory view this happens at the beginning as well as
+    every TIME_INTERVAL_MEMORY_USAGE_UPDATE (s) using threading.Timer; Also, sets the style of the memory(progress) bar
+    on construction.
     """
     def __init__(self, view):
         self.view = view
-        self.timer = QTimer()
-        self.update_memory_usage()
+        self.update_allowed = True
         self.set_bar_color_at_start()
-        self.update_at_regular_intervals()
+        self.update_memory_usage()
+        self.thread_stopper = self.update_memory_usage_threaded()
 
-    def update_at_regular_intervals(self):
-        """
-        Sets timer so that the memory usage is updated
-        every TIME_INTERVAL_MEMORY_USAGE_UPDATE (ms)
-        """
-        self.timer.timeout.connect(self.update_memory_usage)
-        self.timer.start(TIME_INTERVAL_MEMORY_USAGE_UPDATE)
+    def __del__(self):
+        self.cancel_memory_update()
 
     def set_bar_color_at_start(self):
         """
@@ -50,9 +43,24 @@ class MemoryPresenter(object):
         else:
             pass
 
+    @set_interval(TIME_INTERVAL_MEMORY_USAGE_UPDATE)
+    def update_memory_usage_threaded(self):
+        """
+        Calls update_memory_usage once every TIME_INTERVAL_MEMORY_USAGE_UPDATE
+        """
+        self.update_memory_usage()
+
     def update_memory_usage(self):
         """
         Gets memory usage information and passes it to the view
         """
-        mem_used_percent, mem_used, mem_avail = get_memory_info()
-        self.view.set_value(mem_used_percent, mem_used, mem_avail)
+        if self.update_allowed:
+            mem_used_percent, mem_used, mem_avail = get_memory_info()
+            self.view.invoke_set_value(mem_used_percent, mem_used, mem_avail)
+
+    def cancel_memory_update(self):
+        """
+        Ensures that the thread will not restart after it finishes next, as well as attempting to cancel it.
+        """
+        self.update_allowed = False
+        self.thread_stopper.set()

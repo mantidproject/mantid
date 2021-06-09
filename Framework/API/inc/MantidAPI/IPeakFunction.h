@@ -10,9 +10,38 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionWithLocation.h"
+#include "boost/shared_ptr.hpp"
 
 namespace Mantid {
 namespace API {
+
+class TempJacobian : public Jacobian {
+public:
+  TempJacobian(size_t y, size_t p) : m_y(y), m_p(p), m_J(y * p) {}
+  void set(size_t iY, size_t iP, double value) override { m_J[iY * m_p + iP] = value; }
+  double get(size_t iY, size_t iP) override { return m_J[iY * m_p + iP]; }
+  size_t maxParam(size_t iY) {
+    double max = -DBL_MAX;
+    size_t maxIndex = 0;
+    for (size_t i = 0; i < m_p; ++i) {
+      double current = get(iY, i);
+      if (current > max) {
+        maxIndex = i;
+        max = current;
+      }
+    }
+
+    return maxIndex;
+  }
+  void zero() override { m_J.assign(m_J.size(), 0.0); }
+
+protected:
+  size_t m_y;
+  size_t m_p;
+  std::vector<double> m_J;
+};
+
+using IntegrationResultCache = std::pair<double, double>;
 /** An interface to a peak function, which extend the interface of
     IFunctionWithLocation by adding methods to set and get peak width.
 
@@ -35,8 +64,22 @@ public:
   /// Returns the integral intensity of the peak
   virtual double intensity() const;
 
+  /**
+   * Error in the integrated intensity of the peak due to uncertainties in the values of the fit parameters.
+   * @details if the peak function contains no fit-parameter uncertainties, then the integration error is set to NaN.
+   * Also, this function assumes no correlation between the fit parameters, so that their corresponding errors are
+   * summed up in quadrature.
+   */
+  virtual double intensityError() const;
+
   /// Sets the integral intensity of the peak
   virtual void setIntensity(const double newIntensity);
+
+  /// Override parent so that we may bust the cache when a parameter is set
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
+
+  /// Override parent so that we may bust the cache when a parameter is set
+  void setParameter(size_t, const double &value, bool explicitlySet = true) override;
 
   /// General implementation of the method for all peaks.
   void function1D(double *out, const double *xValues, const size_t nData) const override;
@@ -78,6 +121,9 @@ public:
     throw std::runtime_error("Generic intensity fixing isn't implemented for this function.");
   }
 
+protected:
+  virtual IntegrationResultCache integrate() const;
+
 private:
   /// Set new peak radius
   void setPeakRadius(int r) const;
@@ -86,6 +132,10 @@ private:
   mutable int m_peakRadius;
   /// The default level for searching a domain interval (getDomainInterval())
   static constexpr double DEFAULT_SEARCH_LEVEL = 1e-5;
+  // Cache the result of a PeakFunctionIntegrator call
+  mutable boost::shared_ptr<IntegrationResultCache> integrationResult = nullptr;
+  // Flag to dirty the cache when a param has been set
+  mutable bool m_parameterContextDirty = false;
 };
 
 using IPeakFunction_sptr = std::shared_ptr<IPeakFunction>;

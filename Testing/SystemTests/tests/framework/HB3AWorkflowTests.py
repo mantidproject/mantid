@@ -15,7 +15,7 @@ from mantid.simpleapi import (HB3AAdjustSampleNorm, HB3AFindPeaks,
                               FakeMDEventData, FindPeaksMD,
                               ShowPossibleCells, FindUBUsingFFT,
                               OptimizeLatticeForCellType,
-                              SelectCellOfType)
+                              SelectCellOfType, HasUB)
 from mantid.kernel import V3D
 from mantid.geometry import OrientedLattice, SpaceGroupFactory
 
@@ -24,6 +24,7 @@ class SingleFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
         ws_name = 'SingleFileFindPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3AFindPeaks(InputWorkspace=ws_name+'_data',
@@ -56,6 +57,7 @@ class SingleFilePredictPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
         ws_name = 'SingleFilePredictPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3APredictPeaks(InputWorkspace=ws_name+"_data",
@@ -86,6 +88,7 @@ class SingleFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemT
     def runTest(self):
         ws_name = 'SingleFilePredictPeaksUBFromFindPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3AFindPeaks(InputWorkspace=ws_name+'_data',
@@ -123,6 +126,7 @@ class MultiFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
         ws_name = 'MultiFileFindPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3AFindPeaks(InputWorkspace=ws_name+'_data',
@@ -178,6 +182,7 @@ class MultiFilePredictPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
         ws_name = 'MultiFilePredictPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3APredictPeaks(InputWorkspace=ws_name+"_data",
@@ -233,6 +238,7 @@ class MultiFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemTe
     def runTest(self):
         ws_name = 'MultiFilePredictPeaksUBFromFindPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3AFindPeaks(InputWorkspace=ws_name+'_data',
@@ -396,3 +402,21 @@ class SatellitePeaksFakeData(systemtesting.MantidSystemTest):
         for n in range(satellites.getNumberPeaks()):
             HKL = satellites.getPeak(n).getHKL()
             self.assertTrue(HKL in sat_hkl, msg=f"Peak {n} with HKL={HKL}")
+
+
+class HB3AFindPeaksTest(systemtesting.MantidSystemTest):
+    # test moved from unittests because of large memory usage
+    def runTest(self):
+        # Test with vanadium normalization to make sure UB matrix and peaks can still be found
+
+        norm = HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs",
+                                    VanadiumFile="HB3A_exp0722_scan0220.nxs",
+                                    NormaliseBy='None')
+        peaks = HB3AFindPeaks(InputWorkspace=norm,
+                              CellType="Orthorhombic",
+                              Centering="F",
+                              PeakDistanceThreshold=0.25,
+                              Wavelength=1.008)
+        # Verify UB and peaks were found
+        self.assertTrue(HasUB(peaks))
+        self.assertGreater(peaks.getNumberPeaks(), 0)

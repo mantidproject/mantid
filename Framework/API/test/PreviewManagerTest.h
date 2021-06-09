@@ -65,6 +65,7 @@ public:
     TS_ASSERT_EQUALS(preview.type(), IPreview::PreviewType::SVIEW);
   }
   void test_get_preview_by_non_existent_name() {
-    TS_ASSERT_THROWS(PreviewManager::Instance().getPreview("TestFacility", "SANS", "BasicPreview2"), std::runtime_error)
+    TS_ASSERT_THROWS(PreviewManager::Instance().getPreview("TestFacility", "SANS", "BasicPreview2"),
+                     const std::runtime_error &)
   }
 };

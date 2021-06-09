@@ -118,7 +118,7 @@ void FlippingRatioCorrectionMD::exec() {
   }
   // Create workspaces by cloning
   API::IMDWorkspace_sptr outputWS1, outputWS2;
-  API::IAlgorithm_sptr cloneMD = createChildAlgorithm("CloneMDWorkspace", 0, 0.25, true);
+  auto cloneMD = createChildAlgorithm("CloneMDWorkspace", 0, 0.25, true);
   cloneMD->setRethrows(true);
   cloneMD->setProperty("InputWorkspace", inWS);
   cloneMD->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace1"));

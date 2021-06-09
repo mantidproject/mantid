@@ -40,6 +40,7 @@ New Features
 - Added a 'close all' command for plots in the command line interface.
 - Added a button for deleting a line in the settings of a 1D plot.
 - Added a wrapper for the commands necessary for adding a workspace via the command line interface.
+- Added feature of raising or bringing forward plot window for plotover in cuts.
 
 
 BugFixes
@@ -53,5 +54,6 @@ BugFixes
 - Prevented crashes when converting Intensity from S(Q,E) to GDOS.
 - Fixed bug that caused specifying the fixed final energy for more than one workspace at once to fail.
 - Release active interactive cuts on existing slice plots to enable a new slice plot in order to prevent crash.
+- Fixed bug that caused crashes when displaying or closing an empty plot window.
 
 :ref:`Release 6.1.0 <v6.1.0>`

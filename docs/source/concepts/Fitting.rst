@@ -82,7 +82,7 @@ sum and convolution of other fit functions. For more information for
 how to create a model see the documentation for :ref:`Fit <algm-Fit>`, the
 Fitting section of the Mantid Introduction :ref:`tutorial <mantid_basic_course>`
 for how to do this using the Fit Function Toolbox and
-this Python fit tutorial: https://www.mantidproject.org/Introduction_to_Python_Fit_Functions.
+this Python fit tutorial: :ref:`emwp_py_fit_funcs`.
 
 From the class diagram above note fitting also support constraints (IConstraint),
 see :ref:`here <algm-Fit>` for more on this. Further fitting parameters can be
@@ -156,7 +156,6 @@ implementation used for solving crystal structures from powder diffraction data.
     # For this demo example, just one fitting parameter is globally fitted, the peak center of a Gaussian peak
     # Please bear in mind the example here is to demonstrate this algorithm not provide a real global fitting problem
 
-    from __future__ import print_function
     from random import random
     from time import sleep
 

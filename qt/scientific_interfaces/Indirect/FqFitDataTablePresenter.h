@@ -7,7 +7,7 @@
 #pragma once
 
 #include "FqFitModel.h"
-#include "IndirectDataTablePresenter.h"
+#include "IndirectFitDataTablePresenter.h"
 
 #include <QTableWidget>
 
@@ -21,7 +21,7 @@ namespace IDA {
 /**
   Presenter for a table of data containing Widths/EISF.
 */
-class DLLExport FqFitDataTablePresenter : public IndirectDataTablePresenter {
+class DLLExport FqFitDataTablePresenter : public IndirectFitDataTablePresenter {
   Q_OBJECT
 public:
   FqFitDataTablePresenter(FqFitModel *model, QTableWidget *dataTable);

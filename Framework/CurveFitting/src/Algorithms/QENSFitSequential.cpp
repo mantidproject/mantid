@@ -190,13 +190,13 @@ std::string replaceWorkspaces(const std::string &input, const std::vector<Matrix
   return newInput.str();
 }
 
-void renameWorkspace(const IAlgorithm_sptr &renamer, const Workspace_sptr &workspace, const std::string &newName) {
+void renameWorkspace(const Algorithm_sptr &renamer, const Workspace_sptr &workspace, const std::string &newName) {
   renamer->setProperty("InputWorkspace", workspace);
   renamer->setProperty("OutputWorkspace", newName);
   renamer->executeAsChildAlg();
 }
 
-void deleteTemporaries(const IAlgorithm_sptr &deleter, const std::string &base) {
+void deleteTemporaries(const Algorithm_sptr &deleter, const std::string &base) {
   auto name = base + std::to_string(1);
   std::size_t i = 2;
 
@@ -233,7 +233,7 @@ void renameWorkspacesWith(const WorkspaceGroup_sptr &groupWorkspace, F const &ge
 }
 
 template <typename F>
-void renameWorkspacesInQENSFit(Algorithm *qensFit, const IAlgorithm_sptr &renameAlgorithm,
+void renameWorkspacesInQENSFit(Algorithm *qensFit, const Algorithm_sptr &renameAlgorithm,
                                WorkspaceGroup_sptr outputGroup, std::string const &outputBaseName,
                                std::string const &groupSuffix, const F &getNameSuffix) {
   Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
@@ -275,7 +275,7 @@ WorkspaceGroup_sptr createGroup(const std::vector<MatrixWorkspace_sptr> &workspa
   return group;
 }
 
-WorkspaceGroup_sptr runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
+WorkspaceGroup_sptr runParameterProcessingWithGrouping(Algorithm &processingAlgorithm,
                                                        const std::vector<std::size_t> &grouping) {
   std::vector<MatrixWorkspace_sptr> results;
   results.reserve(grouping.size() - 1);

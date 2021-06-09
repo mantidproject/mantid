@@ -92,6 +92,12 @@ double Gaussian::intensity() const {
   }
   return m_intensityCache;
 }
+double Gaussian::intensityError() const {
+  const double heightError = getError("Height");
+  const double sigmaError = getError("Sigma");
+
+  return intensity() * sqrt(pow(heightError / getParameter("Height"), 2) + pow(sigmaError / getParameter("Sigma"), 2));
+}
 
 void Gaussian::setCentre(const double c) { setParameter("PeakCentre", c); }
 void Gaussian::setHeight(const double h) { setParameter("Height", h); }
