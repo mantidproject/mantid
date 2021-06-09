@@ -714,6 +714,7 @@
 
   <instrument name="D22">
     <technique>SANS</technique>
+    <acquisition>Count</acquisition>
   </instrument>
 
   <instrument name="D33">
