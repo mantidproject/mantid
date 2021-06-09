@@ -746,6 +746,7 @@
 
   <instrument name="D17">
     <technique>Reflectometry</technique>
+    <acquisition>TOFCount</acquisition>
   </instrument>
 
   <instrument name="FIGARO">
