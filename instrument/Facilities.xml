@@ -708,7 +708,7 @@
 
   <instrument name="D16">
     <technique>SANS</technique>
-    <acquisition>Mono</acquisition>
+    <acquisition>Count</acquisition>
     <attribute>2D</attribute>
   </instrument>
 
