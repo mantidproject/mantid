@@ -534,14 +534,17 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
     }
     // Similarly, noise may cause the points at ip1 and ip2 around the half-height region to have the
     // same y-values. If the values of y at ip1 and ip2 are equal, it will result in a divide-by-zero
-    // in the calculation of xp_hh below. Shift the index ip1 until the heights are no longer equal.
-    while (peak_y[ip1] == peak_y[ip2]) {
+    // in the calculation of xp_hh below.
+    if (peak_y[ip1] == peak_y[ip2]) {
       g_log.warning() << "A peak with a constant values on the trailing edge has "
                          "been found. The estimation of the "
                       << "half-height point will not be as accurate.\n";
-      ip1--;
-      if (ip1 < 0)
-        throw std::invalid_argument("trailing edge values are equal until the start of the peak");
+      // Shift the index ip1 until the heights are no longer equal. This avoids the divide-by-zero.
+      while (peak_y[ip1] == peak_y[ip2]) {
+        ip1--;
+        if (ip1 < 0)
+          throw std::invalid_argument("Trailing edge values are equal until the start of the peak");
+      }
     }
 
     xp_hh = peak_x[ip2] + (peak_x[ip1] - peak_x[ip2]) * ((hby2 - peak_y[ip2]) / (peak_y[ip1] - peak_y[ip2]));
@@ -580,13 +583,16 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
     // Similarly, noise may cause the points at im1 and im2 around the half-height region to have the
     // same y-values. If the values of y at im1 and im2 are equal, it will result in a divide-by-zero
     // in the calculation of xp_hh below. Shift the index im1 until the heights are no longer equal.
-    while (peak_y[im1] == peak_y[im2]) {
+    if (peak_y[im1] == peak_y[im2]) {
       g_log.warning() << "A peak with a constant values on the rising edge has "
                          "been found. The estimation of the "
                       << "half-height point will not be as accurate.\n";
-      im1++;
-      if (im1 >= nyvals)
-        throw std::invalid_argument("the rising edge values are equal up to the end of the peak");
+      // Shift the index ip1 until the heights are no longer equal. This avoids the divide-by-zero.
+      while (peak_y[im1] == peak_y[im2]) {
+        im1++;
+        if (im1 >= nyvals)
+          throw std::invalid_argument("The rising edge values are equal up to the end of the peak");
+      }
     }
 
     xm_hh = peak_x[im2] + (peak_x[im1] - peak_x[im2]) * ((hby2 - peak_y[im2]) / (peak_y[im1] - peak_y[im2]));
