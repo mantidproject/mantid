@@ -172,7 +172,7 @@ void CrossCorrelate::exec() {
     shiftCorrection = std::max(0.0, abs((-numReferenceY + 2) - (numReferenceY - 2)) - maxBins) / 2;
   }
 
-  const int numPoints = 2 * numReferenceY - shiftCorrection - 3;
+  const int numPoints = 2 * (numReferenceY - shiftCorrection) - 3;
   if (numPoints < 1)
     throw std::runtime_error("Range is not valid");
 
@@ -187,11 +187,8 @@ void CrossCorrelate::exec() {
   bool isDistribution = inputWS->isDistribution();
 
   auto &outX = out->mutableX(0);
-  for (int i = 0; i < shiftCorrection; ++i) {
-    outX[i] = std::nan("");
-  }
-  for (int i = shiftCorrection; i < static_cast<int>(outX.size()); ++i) {
-    outX[i] = static_cast<double>(i - numReferenceY + 2);
+  for (int i = 0; i < static_cast<int>(outX.size()); ++i) {
+    outX[i] = static_cast<double>(i - (numReferenceY - shiftCorrection) + 2);
   }
 
   // Initialise the progress reporting object
@@ -246,8 +243,9 @@ void CrossCorrelate::exec() {
         val += (x * y);
         err2 += x * x * yE + y * y * xE;
       }
-      outY[dataIndex + numReferenceY - 2] = (val * normalisation);
-      outE[dataIndex + numReferenceY - 2] = sqrt(val * val * normalisationE2 + normalisation * normalisation * err2);
+      outY[dataIndex + numReferenceY - shiftCorrection - 2] = (val * normalisation);
+      outE[dataIndex + numReferenceY - shiftCorrection - 2] =
+          sqrt(val * val * normalisationE2 + normalisation * normalisation * err2);
     }
     // Update progress information
     m_progress->report();
