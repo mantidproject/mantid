@@ -199,6 +199,11 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   double peakHeight = *it;
   const double peakLoc = inputW->x(s)[it - yValues.begin()];
 
+  // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
+  // Pixel with large offset will be masked
+  if (std::isnan(peakHeight))
+    return (1000.);
+
   IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
 
   // Try to observe the peak height and location
@@ -211,22 +216,14 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
     // create a background function
     auto bkgdFunction = std::dynamic_pointer_cast<IBackgroundFunction>(fun_ptr->getFunction(0));
     auto peakFunction = std::dynamic_pointer_cast<IPeakFunction>(fun_ptr->getFunction(1));
-
     int result = estimatePeakParameters(histogram, std::pair<size_t, size_t>(start_index, stop_index), peakFunction,
                                         bkgdFunction, true, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
     if (result != PeakFitResult::GOOD) {
       g_log.debug() << "bad result for observing peak parameters, using default peak height and loc\n";
-    } else {
-      peakHeight = peakFunction->height();
     }
   } else {
     g_log.debug() << "range size is zero in estimatePeakParameters, using default peak height and loc\n";
   }
-
-  // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
-  // Pixel with large offset will be masked
-  if (std::isnan(peakHeight))
-    return (1000.);
 
   IAlgorithm_sptr fit_alg;
   try {
