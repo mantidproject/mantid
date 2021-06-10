@@ -12,7 +12,7 @@ from mantid.simpleapi import (ConvertUnits, LoadRaw, FilterPeaks, PredictPeaks, 
                               LoadEmptyInstrument, AddPeak, CreatePeaksWorkspace, CreateMDWorkspace, IntegratePeaksMD,
                               CropWorkspace, NormaliseByCurrent, ReplaceSpecialValues, NormaliseToMonitor,
                               CreateSampleShape, SetSampleMaterial, AbsorptionCorrection, Divide, SmoothNeighbours,
-                              SmoothData)
+                              SmoothData, LoadNexus, RebinToWorkspace, ConvertToDiffractionMDWorkspace)
 from mantid import config
 import numpy as np
 import os
@@ -144,8 +144,7 @@ class WISHPeakIntegrationRespectsMaskingTest(MantidSystemTest):
 
 class WISHProcessVanadiumForNormalisationTest(MantidSystemTest):
     """
-    This tests that IntegratePeaksMD correctly ignores peaks at tube ends and that a custom masking for tubes
-    adjacent to the beam in and out is respected by IntegratePeaksMD
+    This tests the processing of the vanadium run used to correct for detector efficiency
     """
 
     def cleanup(self):
@@ -153,15 +152,7 @@ class WISHProcessVanadiumForNormalisationTest(MantidSystemTest):
 
     def runTest(self):
         # load data for bank 1 (incl. monitor spectra 1-5)
-        van, van_mon = LoadRaw(Filename='WISH/input/11_4/WISH00019612.raw', SpectrumMin=1, SpectrumMax=19461,
-                               LoadMonitors="Separate")
-        for ws in [van, van_mon]:
-            CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=6000, XMax=99000)
-            NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
-            ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='Wavelength')
-            CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=0.8, XMax=9.3)
-        van = NormaliseToMonitor(InputWorkspace=van, MonitorWorkspaceIndex=3, MonitorWorkspace=van_mon)
-        van = ReplaceSpecialValues(InputWorkspace=van, NaNValue=0, InfinityValue=0)
+        van = load_data_and_normalise('WISH/input/11_4/WISH00019612.raw', outputWorkspace="van")
         # create Abs Correction for V
         shape = '''<sphere id="V-sphere">
             <centre x="0.0"  y="0.0" z="0.0" />
@@ -179,3 +170,50 @@ class WISHProcessVanadiumForNormalisationTest(MantidSystemTest):
 
     def validate(self):
         return "van", "WISH19612_vana_bank1_SXProcessed.nxs"
+
+
+class WISHNormaliseDataAndCreateMDWorkspaceTest(MantidSystemTest):
+    """
+    This tests the loading and normalisation of data, incl. correction for detector efficiency using vanadium and
+    creation of MD workspace
+    """
+    def cleanup(self):
+        ADS.clear()
+
+    def runTest(self):
+        # Load processed vanadium for normalisation (bank 1)
+        van = LoadNexus(Filename="WISH19612_vana_bank1_SXProcessed.nxs")
+        # Load raw data (bank 1)
+        ws = load_data_and_normalise("WISH00038237.raw")  # default so doesn't get overwrite van
+        # normalise to vanadium
+        RebinToWorkspace(WorkspaceToRebin=van, WorkspaceToMatch=ws, OutputWorkspace=van)
+        Divide(LHSWorkspace=ws, RHSWorkspace=van, OutputWorkspace=ws)
+        ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
+                             InfinityValue=0, BigNumberThreshold=1e15, SmallNumberThreshold=-1e15)
+        # Convert to Diffraction MD and Lorentz Correction
+        ConvertToDiffractionMDWorkspace(InputWorkspace=ws, OutputWorkspace='wsMD',
+                                        LorentzCorrection=True, OneEventPerBin=False)
+
+    def validate(self):
+        return "wsMD", "WISH38237_MD.nxs"
+
+
+def load_data_and_normalise(filename, spectrumMin=1, spectrumMax=19461, outputWorkspace="sample"):
+    """
+    Function to load in raw data, crop and normalise
+    :param filename: file path to .raw
+    :param spectrumMin: min spec to load (default incl. all monitors)
+    :param spectrumMax: max spec to load (default includes only bank 1)
+    :param outputWorkspace: name of output workspace (can be specified to stop workspaces being overwritten)
+    :return: normalised and cropped data with xunit wavelength (excl. monitors)
+    """
+    sample, mon = LoadRaw(Filename=filename, SpectrumMin=spectrumMin, SpectrumMax=spectrumMax,
+                           LoadMonitors="Separate", OutputWorkspace=outputWorkspace)
+    for ws in [sample, mon]:
+        CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=6000, XMax=99000)
+        NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='Wavelength')
+    NormaliseToMonitor(InputWorkspace=sample, OutputWorkspace=sample, MonitorWorkspaceIndex=3, MonitorWorkspace=mon)
+    ReplaceSpecialValues(InputWorkspace=sample, OutputWorkspace=sample, NaNValue=0, InfinityValue=0)
+    CropWorkspace(InputWorkspace=sample, OutputWorkspace=sample, XMin=0.8, XMax=9.3)
+    return sample
