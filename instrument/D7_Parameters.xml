@@ -29,8 +29,9 @@
 		  count_repeater:/entry0/duration//entry1/duration:f" />
     </parameter>
     <parameter name="logbook_optional_parameters" type="string">
-      <value val="TOF:/entry0/acquisition_mode:d,
-		  polarisation:/entry0/D7/POL/actual_state+/entry0/D7/POL/actual_stateB1B2:s" />
+      <value val="polarisation:/entry0/D7/POL/actual_state+/entry2/D7/POL/actual_state+/entry4/D7/POL/actual_state:s,
+		  wavelength:/entry0/D7/monochromator/wavelength:f,
+		  TOF:/entry0/acquisition_mode:d" />
     </parameter>
   </component-link>
 
