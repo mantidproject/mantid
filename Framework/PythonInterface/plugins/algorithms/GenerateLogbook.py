@@ -251,8 +251,17 @@ class GenerateLogbook(PythonAlgorithm):
             if operation == list():
                 break
             ind1, ind2, op = operation[0]
+            if values[ind2] is None or values[ind2] is str():
+                if op != "+" or op == "+" and values[ind1] in [None, str()]:
+                    values[ind1] = "N/A"
+                values.pop(ind2)
+                binary_operations.pop(ind1)
+                continue
             if op == "+":
-                new_val = values[ind1] + values[ind2]
+                padding = 0
+                if type(values[ind1]) == str:
+                    padding = " "
+                new_val = values[ind1] + padding + values[ind2]
             elif op == "-":
                 new_val = values[ind1] - values[ind2]
             elif op == "*":
@@ -265,6 +274,8 @@ class GenerateLogbook(PythonAlgorithm):
                     new_val = values[ind1] / values[ind2]
             else:
                 raise RuntimeError("Unknown operation: {}".format(operation))
+            if type(new_val) == str():
+                new_val = new_val.strip()
             values[ind1] = new_val
             values.pop(ind2)
             binary_operations.pop(ind1)
@@ -315,7 +326,7 @@ class GenerateLogbook(PythonAlgorithm):
         """Fills out the logbook with the requested meta-data."""
         n_entries = len(self._metadata_headers)
         entry_not_found_msg = "The requested entry: {}, is not present in the raw data"
-        operators = ["+","-","*","//"]
+        operators = ["+", "-", "*", "//"]
         cache_entries_ops = {}
 
         for file_no, file_name in enumerate(data_array):
@@ -341,10 +352,9 @@ class GenerateLogbook(PythonAlgorithm):
                                 split_entry, index = self._get_index(split_entry)
                                 data = f.get(split_entry)[index]
                             except TypeError:
-                                values[0] = "Not found"
-                                binary_operations = []
+                                values[split_entry_no] = ""
                                 self.log().warning(entry_not_found_msg.format(entry))
-                                break
+                                continue
                             else:
                                 if isinstance(data, np.bytes_):
                                     if any(op in operators[1:] for op in binary_operations):
