@@ -20,46 +20,46 @@ qapp = QApplication(sys.argv)
 class SuperplotViewTest(unittest.TestCase):
 
     def setUp(self):
-        pyModule = "mantidqt.widgets.superplot.SuperplotView"
+        py_module = "mantidqt.widgets.superplot.SuperplotView"
 
-        patch = mock.patch(pyModule + ".SuperplotViewSide")
-        self.mDockSide = patch.start()
-        self.mDockSide = self.mDockSide.return_value
+        patch = mock.patch(py_module + ".SuperplotViewSide")
+        self.m_dock_side = patch.start()
+        self.m_dock_side = self.m_dock_side.return_value
         self.addCleanup(patch.stop)
 
-        patch = mock.patch(pyModule + ".SuperplotViewBottom")
-        self.mDockBottom = patch.start()
-        self.mDockBottom = self.mDockBottom.return_value
+        patch = mock.patch(py_module + ".SuperplotViewBottom")
+        self.m_dock_bottom = patch.start()
+        self.m_dock_bottom = self.m_dock_bottom.return_value
         self.addCleanup(patch.stop)
 
-        patch = mock.patch(pyModule + ".WorkspaceItem")
-        self.mWsItem = patch.start()
+        patch = mock.patch(py_module + ".WorkspaceItem")
+        self.m_ws_item = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch(pyModule + ".SpectrumItem")
-        self.mSpItem = patch.start()
+        patch = mock.patch(py_module + ".SpectrumItem")
+        self.m_sp_item = patch.start()
         self.addCleanup(patch.stop)
 
-        self.mPresenter = mock.Mock()
-        self.view = SuperplotView(self.mPresenter)
+        self.m_presenter = mock.Mock()
+        self.view = SuperplotView(self.m_presenter)
 
-    def test_getSideWidget(self):
+    def test_get_side_widget(self):
         self.assertEqual(self.view.get_side_widget(), self.view._side_view)
 
-    def test_getBottomWidget(self):
+    def test_get_bottom_widget(self):
         self.assertEqual(self.view.get_bottom_widget(), self.view._bottom_view)
 
     def test_close(self):
         self.view.close()
-        self.mDockSide.close.assert_called_once()
-        self.mDockBottom.close.assert_called_once()
+        self.m_dock_side.close.assert_called_once()
+        self.m_dock_bottom.close.assert_called_once()
 
-    def test_getSelectedWorkspace(self):
+    def test_get_selected_workspace(self):
         self.view.get_selected_workspace()
-        self.mDockSide.workspaceSelector.currentText.assert_called_once()
+        self.m_dock_side.workspaceSelector.currentText.assert_called_once()
 
-    def test_setSelection(self):
-        self.mDockSide.workspacesList.topLevelItemCount.return_value = 3
+    def test_set_selection(self):
+        self.m_dock_side.workspacesList.topLevelItemCount.return_value = 3
         ws1 = mock.Mock()
         ws1.get_workspace_name.return_value = "ws1"
         ws1.childCount.return_value = 4
@@ -79,9 +79,9 @@ class SuperplotViewTest(unittest.TestCase):
         ws3 = mock.Mock()
         ws3.get_workspace_name.return_value = "ws3"
         ws3.childCount.return_value = 0
-        self.mDockSide.workspacesList.topLevelItem.side_effect = [ws1, ws2, ws3]
+        self.m_dock_side.workspacesList.topLevelItem.side_effect = [ws1, ws2, ws3]
         self.view.set_selection({"ws1": [1, 2, 3], "ws2": [-1]})
-        self.mDockSide.workspacesList.clearSelection.assert_called_once()
+        self.m_dock_side.workspacesList.clearSelection.assert_called_once()
         ws1.setSelected.assert_not_called()
         sp1.setSelected.assert_called_once()
         sp2.setSelected.assert_called_once()
@@ -90,27 +90,27 @@ class SuperplotViewTest(unittest.TestCase):
         ws2.setSelected.assert_called_once()
         ws3.setSelected.assert_not_called()
 
-    def test_getSelection(self):
-        ws1Item = mock.Mock()
-        ws1Item.get_workspace_name.return_value = "ws1"
-        ws1Item.parent.return_value = None
-        sp1Item = mock.Mock()
-        sp1Item.get_spectrum_index.return_value = 1
-        sp1Item.parent.return_value = ws1Item
-        sp2Item = mock.Mock()
-        sp2Item.get_spectrum_index.return_value = 2
-        sp2Item.parent.return_value = ws1Item
-        ws2Item = mock.Mock()
-        ws2Item.get_workspace_name.return_value = "ws2"
-        ws2Item.parent.return_value = None
-        self.mDockSide.workspacesList.selectedItems.return_value = [sp1Item,
-                                                                    sp2Item,
-                                                                    ws2Item]
+    def test_get_selection(self):
+        ws1_item = mock.Mock()
+        ws1_item.get_workspace_name.return_value = "ws1"
+        ws1_item.parent.return_value = None
+        sp1_item = mock.Mock()
+        sp1_item.get_spectrum_index.return_value = 1
+        sp1_item.parent.return_value = ws1_item
+        sp2_item = mock.Mock()
+        sp2_item.get_spectrum_index.return_value = 2
+        sp2_item.parent.return_value = ws1_item
+        ws2_item = mock.Mock()
+        ws2_item.get_workspace_name.return_value = "ws2"
+        ws2_item.parent.return_value = None
+        self.m_dock_side.workspacesList.selectedItems.return_value = [sp1_item,
+                                                                      sp2_item,
+                                                                      ws2_item]
         self.assertDictEqual(self.view.get_selection(), {"ws1": [1, 2],
-                                                        "ws2": [-1]})
+                                                         "ws2": [-1]})
 
-    def test_modifySpectrumLabel(self):
-        self.mDockSide.workspacesList.findItems.return_value = []
+    def test_modify_spectrum_label(self):
+        self.m_dock_side.workspacesList.findItems.return_value = []
         self.view.modify_spectrum_label("test", 1, "label", "#000000")
         it1 = mock.Mock()
         sp1 = mock.Mock()
@@ -124,7 +124,7 @@ class SuperplotViewTest(unittest.TestCase):
         sp3.get_spectrum_index.return_value = 3
         it2.childCount.return_value = 1
         it2.child.side_effect = [sp3]
-        self.mDockSide.workspacesList.findItems.return_value = [it1, it2]
+        self.m_dock_side.workspacesList.findItems.return_value = [it1, it2]
         self.view.modify_spectrum_label("wsName", 1, "label", "#000000")
         sp1.foreground.assert_called_once()
         sp1.setForeground.assert_called_once()
@@ -136,23 +136,23 @@ class SuperplotViewTest(unittest.TestCase):
         sp3.setForeground.assert_not_called()
         sp3.setText.assert_not_called()
 
-    def test_setWorkspacesList(self):
+    def test_set_workspaces_list(self):
         self.view.set_workspaces_list(["ws1", "ws2", "ws3"])
-        self.mDockSide.workspacesList.clear.assert_called_once()
-        calls = [mock.call(self.mDockSide.workspacesList, "ws1"),
-                 mock.call(self.mDockSide.workspacesList, "ws2"),
-                 mock.call(self.mDockSide.workspacesList, "ws3")]
-        self.mWsItem.assert_has_calls(calls, any_order=True)
+        self.m_dock_side.workspacesList.clear.assert_called_once()
+        calls = [mock.call(self.m_dock_side.workspacesList, "ws1"),
+                 mock.call(self.m_dock_side.workspacesList, "ws2"),
+                 mock.call(self.m_dock_side.workspacesList, "ws3")]
+        self.m_ws_item.assert_has_calls(calls, any_order=True)
 
-    def test_setSpectraList(self):
+    def test_set_spectra_list(self):
         it1 = mock.Mock()
-        self.mDockSide.workspacesList.findItems.return_value = [it1]
+        self.m_dock_side.workspacesList.findItems.return_value = [it1]
         self.view.set_spectra_list("wsName", [1, 2, 3])
         it1.takeChildren.assert_called_once()
         calls = [mock.call(it1, 1), mock.call(it1, 2), mock.call(it1, 3)]
-        self.mSpItem.assert_has_calls(calls, any_order=True)
+        self.m_sp_item.assert_has_calls(calls, any_order=True)
 
-    def test_getSpectraList(self):
+    def test_get_spectra_list(self):
         ws1 = mock.Mock()
         ws1.childCount.return_value = 2
         sp1 = mock.Mock()
@@ -160,75 +160,75 @@ class SuperplotViewTest(unittest.TestCase):
         sp2 = mock.Mock()
         sp2.get_spectrum_index.return_value = 2
         ws1.child.side_effect = [sp1, sp2]
-        self.mDockSide.workspacesList.findItems.return_value = []
+        self.m_dock_side.workspacesList.findItems.return_value = []
         self.assertEqual(self.view.get_spectra_list("wsName"), [])
-        self.mDockSide.workspacesList.findItems.return_value = [ws1]
+        self.m_dock_side.workspacesList.findItems.return_value = [ws1]
         self.assertEqual(self.view.get_spectra_list("wsName"), [1, 2])
 
-    def test_checkHoldButton(self):
-        widget = self.mDockBottom.holdButton
+    def test_check_hold_button(self):
+        widget = self.m_dock_bottom.holdButton
         self.view.check_hold_button(True)
         widget.setChecked.assert_called_once_with(True)
 
-    def test_setSpectrumDisabled(self):
-        widget1 = self.mDockBottom.spectrumSlider
-        widget2 = self.mDockBottom.spectrumSpinBox
+    def test_set_spectrum_disabled(self):
+        widget1 = self.m_dock_bottom.spectrumSlider
+        widget2 = self.m_dock_bottom.spectrumSpinBox
         self.view.set_spectrum_disabled(True)
         widget1.setDisabled.assert_called_once_with(True)
         widget2.setDisabled.assert_called_once_with(True)
 
-    def test_getSpectrumDisabled(self):
-        widget = self.mDockBottom.spectrumSlider
+    def test_get_spectrum_disabled(self):
+        widget = self.m_dock_bottom.spectrumSlider
         widget.isEnabled.return_value = True
         self.assertFalse(self.view.is_spectrum_disabled())
         widget.isEnabled.assert_called_once()
 
-    def setSpectrumSliderMax(self):
-        widget = self.mDockBottom.spectrumSlider
+    def test_set_spectrum_slider_max(self):
+        widget = self.m_dock_bottom.spectrumSlider
         self.view.set_spectrum_slider_max(100)
         widget.setMaximum.assert_called_once_with(100)
 
-    def test_setSpectrumSliderPosition(self):
-        widget = self.mDockBottom.spectrumSlider
+    def test_set_spectrum_slider_sosition(self):
+        widget = self.m_dock_bottom.spectrumSlider
         self.view.set_spectrum_slider_position(10)
         widget.setSliderPosition.assert_called_once_with(10)
 
-    def test_getSpectrumSliderPosition(self):
-        widget = self.mDockBottom.spectrumSlider
+    def test_get_spectrum_slider_position(self):
+        widget = self.m_dock_bottom.spectrumSlider
         widget.value.return_value = 10
         value = self.view.get_spectrum_slider_position()
         self.assertEqual(value, 10)
         widget.value.assert_called_once()
 
-    def test_setSpectrumSpinBoxMax(self):
-        widget = self.mDockBottom.spectrumSpinBox
+    def test_set_spectrum_spin_box_max(self):
+        widget = self.m_dock_bottom.spectrumSpinBox
         self.view.set_spectrum_spin_box_max(100)
         widget.setMaximum.assert_called_once_with(100)
 
-    def test_setSpectrumSpinBoxValue(self):
-        widget = self.mDockBottom.spectrumSpinBox
+    def test_set_spectrum_spin_box_value(self):
+        widget = self.m_dock_bottom.spectrumSpinBox
         self.view.set_spectrum_spin_box_value(10)
         widget.setValue.assert_called_once_with(10)
 
-    def test_getSpectrumSpinBoxValue(self):
-        widget = self.mDockBottom.spectrumSpinBox
+    def test_get_spectrum_spin_box_value(self):
+        widget = self.m_dock_bottom.spectrumSpinBox
         widget.value.return_value = 10
         value = self.view.get_spectrum_spin_box_value()
         self.assertEqual(value, 10)
         widget.value.assert_called_once()
 
-    def test_setAvailableModes(self):
-        widget = self.mDockBottom.modeComboBox
+    def test_set_available_modes(self):
+        widget = self.m_dock_bottom.modeComboBox
         self.view.set_available_modes(["mode1", "mode2"])
         widget.addItems.assert_called_once_with(["mode1", "mode2"])
 
-    def test_setMode(self):
-        widget = self.mDockBottom.modeComboBox
+    def test_set_mode(self):
+        widget = self.m_dock_bottom.modeComboBox
         self.view.set_mode("mode")
         widget.setCurrentText.assert_called_once_with("mode")
 
-    def test_getMode(self):
-        widget = self.mDockBottom.modeComboBox
+    def test_get_mode(self):
+        widget = self.m_dock_bottom.modeComboBox
         widget.currentText.return_value = "mode1"
         mode = self.view.get_mode()
         self.assertEqual(mode, "mode1")
