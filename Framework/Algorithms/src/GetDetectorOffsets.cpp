@@ -57,10 +57,11 @@ void GetDetectorOffsets::init() {
                   "The function type for fitting the peaks.");
   declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
 
-  std::vector<std::string> modes{"Relative", "Absolute"};
+  /* Signed mode calculates offset in number of bins */
+  std::vector<std::string> modes{"Relative", "Absolute", "Signed"};
 
   declareProperty("OffsetMode", "Relative", std::make_shared<StringListValidator>(modes),
-                  "Whether to calculate a relative or absolute offset");
+                  "Whether to calculate a relative, absolute, or signed offset");
   declareProperty("DIdeal", 2.0, mustBePositive,
                   "The known peak centre value from the NIST standard "
                   "information, this is only used in Absolute OffsetMode.");
@@ -82,10 +83,18 @@ void GetDetectorOffsets::exec() {
   m_dreference = getProperty("DReference");
   m_step = getProperty("Step");
 
-  std::string mode = getProperty("OffsetMode");
-  bool isAbsolute = false;
-  if (mode == "Absolute") {
-    isAbsolute = true;
+  std::string mode_str = getProperty("OffsetMode");
+
+  if (mode_str == "Absolute") {
+    mode = offset_mode::absolute_offset;
+  }
+
+  else if (mode_str == "Relative") {
+    mode = offset_mode::relative_offset;
+  }
+
+  else if (mode_str == "Signed") {
+    mode = offset_mode::signed_offset;
   }
 
   m_dideal = getProperty("DIdeal");
@@ -105,7 +114,7 @@ void GetDetectorOffsets::exec() {
   for (int64_t wi = 0; wi < nspec; ++wi) {
     PARALLEL_START_INTERUPT_REGION
     // Fit the peak
-    double offset = fitSpectra(wi, isAbsolute);
+    double offset = fitSpectra(wi);
     double mask = 0.0;
     if (std::abs(offset) > m_maxOffset) {
       offset = 0.0;
@@ -161,10 +170,9 @@ void GetDetectorOffsets::exec() {
 /** Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
  *
  *  @param s :: The Workspace Index to fit
- *  @param isAbsolbute :: Whether to calculate an absolute offset
  *  @return The calculated offset value
  */
-double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
+double GetDetectorOffsets::fitSpectra(const int64_t s) {
   // Find point of peak centre
   const auto &yValues = inputW->y(s);
   auto it = std::max_element(yValues.cbegin(), yValues.cend());
@@ -204,16 +212,33 @@ double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
 
   // std::vector<double> params = fit_alg->getProperty("Parameters");
   API::IFunction_sptr function = fit_alg->getProperty("Function");
-  double offset = function->getParameter(3); // params[3]; // f1.PeakCentre
-  offset = -1. * offset * m_step / (m_dreference + offset * m_step);
-  // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
-  // negative
 
-  if (isAbsolbute) {
+  double offset = function->getParameter(3); // params[3]; // f1.PeakCentre
+
+  if (mode == offset_mode::signed_offset) {
+    // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
+    // negative
+    offset *= -1;
+  }
+
+  /* offset relative to the reference */
+  else if (mode == offset_mode::relative_offset) {
+    // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
+    // negative
+    offset = -1. * offset * m_step / (m_dreference + offset * m_step);
+  }
+
+  /* Offset relative to the ideal */
+  else if (mode == offset_mode::absolute_offset) {
+
+    offset = -1. * offset * m_step / (m_dreference + offset * m_step);
+
     // translated from(DIdeal - FittedPeakCentre)/(FittedPeakCentre)
     // given by Matt Tucker in ticket #10642
+
     offset += (m_dideal - m_dreference) / m_dreference;
   }
+
   return offset;
 }
 
