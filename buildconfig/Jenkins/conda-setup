@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if ! conda --version; then
     if [[ ! -f Miniconda3-latest-Linux-x86_64.sh ]]; then
         # Download miniconda
-        wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+        curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
     fi
     sh Miniconda3-latest-Linux-x86_64.sh -b
     rm Miniconda3-latest-Linux-x86_64.sh
