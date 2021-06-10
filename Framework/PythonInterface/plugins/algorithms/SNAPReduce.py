@@ -476,10 +476,10 @@ class SNAPReduce(DataProcessorAlgorithm):
 
     def PyExec(self):
 
-        if self.getProperty('EnableConfigurator'):
+        if self.getProperty('EnableConfigurator').value:
             self._create_and_save_configuration()
             return  # do not carry out the reduction
-        return
+
         in_Runs = self.getProperty("RunNumbers").value
         progress = Progress(self, 0., .25, 3)
         finalUnits = self.getPropertyValue("FinalUnits")
