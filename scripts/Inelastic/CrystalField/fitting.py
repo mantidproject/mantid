@@ -1219,9 +1219,13 @@ class CrystalFieldSite(object):
         if self.crystalField.NumberOfSpectra > 1:
             differentIntensities = False
             for x in range(self.crystalField.NumberOfSpectra):
-                params['sp'+str(x)+'.IntensityScaling'] = self.crystalField.IntensityScaling[x]
-                if self.crystalField.IntensityScaling[x] is not other.IntensityScaling[x] and other.IntensityScaling[x] != 1.0 :
-                    differentIntensities = True
+                if self.crystalField.IntensityScaling[x] is not other.IntensityScaling[x] and other.IntensityScaling[x] != 1.0:
+                    if self.crystalField.IntensityScaling[x] == 1.0:
+                        params['sp'+str(x)+'.IntensityScaling'] = other.IntensityScaling[x]
+                    else:
+                        differentIntensities = True
+                else:
+                    params['sp'+str(x)+'.IntensityScaling'] = self.crystalField.IntensityScaling[x]
             if differentIntensities:
                 warnings.warn('Mismatch between IntensityScaling values of CrystalField objects', RuntimeWarning)
         params['ion0.IntensityScaling'] = abundances[0]
@@ -1244,6 +1248,7 @@ class CrystalFieldFit(object):
 
     def __init__(self, Model=None, Temperature=None, FWHM=None, InputWorkspace=None,
                  ResolutionModel=None, **kwargs):
+        from mantid.kernel import logger
         self.model = Model
         if Temperature is not None:
             self.model.Temperature = Temperature
@@ -1256,6 +1261,10 @@ class CrystalFieldFit(object):
         self._fit_properties = kwargs
         self._function = None
         self._estimated_parameters = None
+        if self.model.NumberOfSpectra == 1:
+            logger.notice("Fit single spectrum")
+        else:
+            logger.notice("Fit multiple spectra")
 
     def fit(self):
         """
