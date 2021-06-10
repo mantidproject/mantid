@@ -91,9 +91,11 @@ class AsyncTask(threading.Thread):
 
 
 class Receiver(object):
-    output, exc_value = None, None
 
     def __init__(self, success_cb=None, error_cb=None):
+        self.output = None
+        self.exc_value = None
+
         self.success_cb = success_cb
         self.error_cb = error_cb
 
