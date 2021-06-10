@@ -20,7 +20,7 @@ EXPECTED_CONDA_PATH=$EXPECTED_MINICONDA_DIR_PATH/bin/conda
 ENVS=$($EXPECTED_CONDA_PATH env list)
 if [[ ! $ENVS = *"$EXPECTED_MINICONDA_DIR_PATH/envs/mantid"* ]]; then
     # THIS IS JUST A TEST PATH:
-    $EXPECTED_CONDA_PATH env create -f $SCRIPT_DIR/../mantid-developer-linux.yml
+    $EXPECTED_CONDA_PATH env create -f $SCRIPT_DIR/../../mantid-developer-linux.yml
 else
     echo "Conda environment already setup."
     exit
