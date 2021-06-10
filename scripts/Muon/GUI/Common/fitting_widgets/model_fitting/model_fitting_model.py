@@ -58,11 +58,13 @@ class ModelFittingModel(BasicFittingModel):
 
     def parameter_combination_workspace_name(self, x_parameter: str, y_parameter: str) -> str:
         """Returns the workspace name being used for a particular parameter combination."""
-        return self.current_result_table_name + "_" + x_parameter + "_" + y_parameter
+        results_table_name = self.current_result_table_name
+        return results_table_name + "_" + x_parameter + "_" + y_parameter if results_table_name is not None else None
 
     def parameter_combination_group_name(self):
         """Returns the workspace group name being used to store the current parameter combinations."""
-        return self.current_result_table_name + "_Parameter_Combinations"
+        results_table_name = self.current_result_table_name
+        return results_table_name + "_Parameter_Combinations" if results_table_name is not None else None
 
     def get_workspace_names_to_display_from_context(self) -> list:
         """Returns the names of results tables to display in the view."""
@@ -75,19 +77,24 @@ class ModelFittingModel(BasicFittingModel):
         self.fitting_context.y_parameter_errors = {}
 
         self._extract_x_and_y_from_current_result_table()
-        workspace_group = self._create_workspace_group_to_store_combination_workspaces()
-        self.dataset_names = self._create_matrix_workspaces_for_parameter_combinations(workspace_group)
 
-        return self.fitting_context.x_parameters.keys(), self.fitting_context.y_parameters.keys()
+        workspace_group = self._create_workspace_group_to_store_combination_workspaces()
+        if workspace_group is not None:
+            self.dataset_names = self._create_matrix_workspaces_for_parameter_combinations(workspace_group)
+            return self.fitting_context.x_parameters.keys(), self.fitting_context.y_parameters.keys()
+        else:
+            return [], []
 
     def _extract_x_and_y_from_current_result_table(self) -> None:
         """Extracts the X, Y and error values from the currently selected result table and saves them in the context."""
-        current_results_table = retrieve_ws(self.current_result_table_name)
+        results_table_name = self.current_result_table_name
+        if results_table_name is not None and check_if_workspace_exist(results_table_name):
+            current_results_table = retrieve_ws(results_table_name)
 
-        for i, column_name in enumerate(current_results_table.getColumnNames()):
-            self._save_values_from_table_column(column_name, current_results_table.column(i))
+            for i, column_name in enumerate(current_results_table.getColumnNames()):
+                self._save_values_from_table_column(column_name, current_results_table.column(i))
 
-        self._populate_empty_parameter_errors(current_results_table.rowCount())
+            self._populate_empty_parameter_errors(current_results_table.rowCount())
 
     def _save_values_from_table_column(self, column_name: str, values: list) -> None:
         """Saves the values from a results table column in the correct location based on the column name."""
@@ -107,6 +114,9 @@ class ModelFittingModel(BasicFittingModel):
     def _create_workspace_group_to_store_combination_workspaces(self) -> WorkspaceGroup:
         """Return the Workspace Group used to store the different parameter combination matrix workspaces."""
         group_name = self.parameter_combination_group_name()
+        if group_name is None:
+            return None
+
         if check_if_workspace_exist(group_name):
             workspace_group = retrieve_ws(group_name)
         else:

@@ -38,7 +38,8 @@ class WorkspaceGroupDefinition(metaclass=Singleton):
             self._remove_non_existing_workspaces()
             for group_name, workspace_set in self.grouping.items():
                 workspace_list = list(workspace_set)
-                GroupWorkspaces(InputWorkspaces=workspace_list, OutputWorkspace=group_name)
+                if len(workspace_list) > 0:
+                    GroupWorkspaces(InputWorkspaces=workspace_list, OutputWorkspace=group_name)
 
     def new_workspace_group(self, group_name):
         if group_name not in self.grouping:
