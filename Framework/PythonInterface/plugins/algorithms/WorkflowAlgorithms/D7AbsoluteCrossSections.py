@@ -93,7 +93,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             else:
                 required_keys = []
                 if normalisation_method == 'Incoherent':
-                    required_keys = ['FormulaUnits', 'SampleMass', 'FormulaUnitMass']
+                    required_keys = ['SampleMass', 'FormulaUnitMass']
                 elif normalisation_method == 'Incoherent' and self.getProperty('AbsoluteUnitsNormalisation').value:
                     required_keys.append('IncoherentCrossSection')
                 elif normalisation_method == 'Paramagnetic':
@@ -213,9 +213,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         if self.getPropertyValue('NormalisationMethod') != 'None' and 'NMoles' not in self._sampleAndEnvironmentProperties:
             sample_mass = self._sampleAndEnvironmentProperties['SampleMass'].value
-            formula_units = self._sampleAndEnvironmentProperties['FormulaUnits'].value
             formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
-            self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass) * formula_units
+            self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass)
 
     def _cross_section_separation(self, ws, nMeasurements, nComponents):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the

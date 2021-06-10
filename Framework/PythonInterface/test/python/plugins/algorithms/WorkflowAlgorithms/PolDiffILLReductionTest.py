@@ -73,7 +73,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['quartz'], 'Quartz')
 
     def test_vanadium(self):
-        sampleProperties = {'FormulaUnits': 1, 'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
+        sampleProperties = {'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
@@ -82,7 +82,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
 
     def test_vanadium_annulus(self):
         PolDiffILLReduction(Run='396917', ProcessAs='Empty', OutputWorkspace='container_ws')
-        sampleProperties = {'FormulaUnits': 1, 'SampleChemicalFormula': 'V', 'SampleMass': 8.54, 'FormulaUnitMass': 50.94,
+        sampleProperties = {'SampleChemicalFormula': 'V', 'SampleMass': 8.54, 'FormulaUnitMass': 50.94,
                             'SampleInnerRadius': 2, 'SampleOuterRadius': 2.5, 'Height': 2,
                             'BeamWidth': 2.6, 'BeamHeight': 2.6, 'SampleDensity': 1,
                             'ContainerChemicalFormula': 'Al', 'ContainerDensity': 2.7,
@@ -97,7 +97,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['vanadium_annulus'], 'Vanadium')
 
     def test_sample(self):
-        sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.93, 'FormulaUnitMass': 182.56}
+        sampleProperties = {'SampleMass': 2.93, 'FormulaUnitMass': 182.56}
         PolDiffILLReduction(Run='397004', ProcessAs='Sample', OutputWorkspace='sample',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')

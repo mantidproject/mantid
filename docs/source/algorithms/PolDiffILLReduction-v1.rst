@@ -74,13 +74,12 @@ The complete list of keys can is summarised below:
 Sample-only keys:
 
 - *SampleMass*
-- *FormulaUnits*
 - *FormulaUnitMass*
 - *SampleChemicalFormula*
 - *SampleDensity*
 - *Height*
 
-The SampleMass needs to be defined, as well as FormulaUnitMass and FormulaUnits, even when the self-attenuation is not taken into account. The other
+The SampleMass needs to be defined, as well as the FormulaUnitMass, even when the self-attenuation is not taken into account. The other
 parameters are required when the self-attenuation is calculated.
 
 Container-only keys:
@@ -199,9 +198,9 @@ This example below performs a complete reduction for D7 data.
 
 .. testcode:: ExPolDiffILLReduction
 
-    vanadium_dictionary = {'SampleMass':8.54,'SampleDensity':0.2,'FormulaUnits':1,'FormulaUnitMass':50.94}
+    vanadium_dictionary = {'SampleMass':8.54,'SampleDensity':0.2,'FormulaUnitMass':50.94}
 
-    sample_dictionary = {'SampleMass':2.932,'SampleDensity':0.1,'FormulaUnits':1, 'FormulaUnitMass':182.56}
+    sample_dictionary = {'SampleMass':2.932,'SampleDensity':0.1,'FormulaUnitMass':182.56}
 
     # Beam with cadmium absorber, used for transmission
     PolDiffILLReduction(

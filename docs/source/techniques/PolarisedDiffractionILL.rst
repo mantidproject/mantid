@@ -50,7 +50,7 @@ A very basic reduction would include a vanadium reference and a sample, without 
 .. testcode:: BasicReduction
 
     # Define vanadium properties:
-    vanadiumProperties = {'FormulaUnits': 1, 'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
+    vanadiumProperties = {'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
 
     # Vanadium reduction
     PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputTreatment='Sum',
@@ -58,7 +58,7 @@ A very basic reduction would include a vanadium reference and a sample, without 
                         SampleAndEnvironmentProperties=vanadiumProperties)
 
     # Define the number of formula units for the sample
-    sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
+    sampleProperties = {'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
     # Sample reduction
     PolDiffILLReduction(Run='397004', ProcessAs='Sample', OutputWorkspace='reduced_sample',
                             SampleAndEnvironmentProperties=sampleProperties)
@@ -404,7 +404,6 @@ The complete list of keys can is summarised below:
 Sample-only keys:
 
 - *SampleMass*
-- *FormulaUnits*
 - *FormulaUnitMass*
 - *SampleChemicalFormula*
 - *SampleDensity*
@@ -486,7 +485,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
 
 .. testcode:: ExPolarisedDifffractionVanadium
 
-    vanadium_dictionary = {'SampleMass':8.54,'FormulaUnits':1,'FormulaUnitMass':50.94,'SampleChemicalFormula':'V',
+    vanadium_dictionary = {'SampleMass':8.54,'FormulaUnitMass':50.94,'SampleChemicalFormula':'V',
                            'Height':2.0,'SampleDensity':0.118,'SampleInnerRadius':2.0, 'SampleOuterRadius':2.49,
                            'BeamWidth':2.5,'BeamHeight':2.5,
                            'ContainerChemicalFormula':'Al','ContainerDensity':0.0027,'ContainerOuterRadius':2.52,
@@ -670,9 +669,9 @@ Sample normalisation
 
 .. testcode:: ExPolarisedDifffractionSampleFull
 
-    vanadium_dictionary = {'SampleMass':8.54,'FormulaUnits':1,'FormulaUnitMass':50.94}
+    vanadium_dictionary = {'SampleMass':8.54,'FormulaUnitMass':50.94}
 
-    sample_dictionary = {'SampleMass':2.932,'SampleDensity':2.0,'FormulaUnits':1,'FormulaUnitMass':182.56,
+    sample_dictionary = {'SampleMass':2.932,'SampleDensity':2.0,'FormulaUnitMass':182.56,
                          'SampleChemicalFormula':'Mn0.5-Fe0.5-P-S3','Height':2.0,'SampleDensity':0.118,
                          'SampleInnerRadius':2.0, 'SampleOuterRadius':2.49,'BeamWidth':2.5,'BeamHeight':2.5,
                          'ContainerChemicalFormula':'Al','ContainerDensity':0.027,'ContainerOuterRadius':2.52,

@@ -35,7 +35,6 @@ This information is used for proper normalisation of the given sample.
 The following keys need to be defined:
 
 - *SampleMass*
-- *FormulaUnits*
 - *FormulaUnitMass*
 - *SampleSpin* if the `NormalisationMethod` is set to `Paramagnetic`
 - *IncoherentCrossSection* if the `NormalisationMethod` is set to `Incoherent` and `AbsoluteUnitsNormalisation` is *True*
@@ -159,7 +158,7 @@ Usage
 
 .. testcode:: ExD7AbsoluteCrossSections_XYZ_separation
 
-   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 50.942}
+   sampleProperties = {'SampleMass': 2.932, 'FormulaUnitMass': 50.942}
 
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz') # loads already reduced data
    D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
@@ -187,7 +186,7 @@ Output:
 
 .. testcode:: ExD7AbsoluteCrossSections_vanadium_normalisation
 
-   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
+   sampleProperties = {'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
 
    Load('ILL/D7/396993_reduced.nxs', OutputWorkspace='vanadium_input')
    GroupWorkspaces(InputWorkspaces='vanadium_input', OutputWorkspace='vanadium_data')
@@ -214,7 +213,7 @@ Output:
 
 .. testcode:: ExD7AbsoluteCrossSections_paramagnetic_normalisation
 
-   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 182.54, 'SampleSpin':0.5}
+   sampleProperties = {'SampleMass': 2.932, 'FormulaUnitMass': 182.54, 'SampleSpin':0.5}
 
    Load('ILL/D7/397004_reduced.nxs', OutputWorkspace='sample_data')
    D7AbsoluteCrossSections(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_magnetic',

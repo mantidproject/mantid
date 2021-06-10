@@ -58,7 +58,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
             sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
             geometry_type = self.getPropertyValue('SampleGeometry')
-            required_keys = ['FormulaUnits', 'SampleMass', 'FormulaUnitMass']
+            required_keys = ['SampleMass', 'FormulaUnitMass']
             if geometry_type != 'None':
                 required_keys += ['SampleChemicalFormula', 'SampleDensity', 'ContainerDensity',
                                   'ContainerChemicalFormula']
@@ -457,9 +457,8 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         if 'NMoles' not in self._sampleAndEnvironmentProperties:
             sample_mass = self._sampleAndEnvironmentProperties['SampleMass'].value
-            formula_units = self._sampleAndEnvironmentProperties['FormulaUnits'].value
             formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
-            self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass) * formula_units
+            self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass)
 
     def _prepare_arguments(self):
         attenuation_method = self.getPropertyValue('SelfAttenuationMethod')

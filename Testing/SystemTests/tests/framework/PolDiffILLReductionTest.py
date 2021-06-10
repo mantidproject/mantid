@@ -25,7 +25,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         config.appendDataSearchSubDir('ILL/D7/')
         Load('numerical_attenuation.nxs', OutputWorkspace='numerical_attenuation_ws')
 
-        self._sampleProperties = {'FormulaUnits': 1, 'SampleChemicalFormula': 'V', 'SampleMass': 8.54,
+        self._sampleProperties = {'SampleChemicalFormula': 'V', 'SampleMass': 8.54,
                                   'FormulaUnitMass': 50.94,'SampleInnerRadius': 2, 'SampleOuterRadius': 2.5,
                                   'SampleRadius':2.5, 'Height': 2,'SampleThickness':0.5, 'SampleDensity': 0.1,
                                   'SampleAngle':0, 'SampleWidth':2.5, 'BeamWidth': 3.0, 'BeamHeight': 3.0,
