@@ -28,35 +28,35 @@ ProcessAs
 ---------
 Different input properties can be specified depending on the value of **ProcessAs**, as summarized in the table:
 
-+------------------+--------------------------------------+--------------------------------------------+
-| ProcessAs        | Input Workspace Properties           | Other Input Properties                     |
-+==================+======================================+============================================+
-| BeamWithCadmium  |                                      |                                            |
-+------------------+--------------------------------------+--------------------------------------------+
-| EmptyBeam        | * CadmiumTransmissionInputWorkspace  |                                            |
-|                  |                                      |                                            |
-+------------------+--------------------------------------+--------------------------------------------+
-| Transmission     | * CadmiumTransmissionInputWorkspace  |                                            |
-|                  | * **BeamInputWorkspace**             |                                            |
-+------------------+--------------------------------------+--------------------------------------------+
-| Cadmium          |                                      |                                            |
-+------------------+--------------------------------------+--------------------------------------------+
-| Empty            |                                      |                                            |
-+------------------+--------------------------------------+--------------------------------------------+
-| Quartz           | * CadmiumInputWorkspace              | * OutputTreatment                          |
-|                  | * EmptyInputWorkspace                |                                            |
-|                  | * **TransmissionInputWorkspace**     |                                            |
-+------------------+--------------------------------------+--------------------------------------------+
-| Vanadium         | * CadmiumInputWorkspace              | * SampleGeometry                           |
-|                  | * EmptyInputWorkspace                | * **SampleAndEnvironmentProperties**       |
-|                  | * TransmissionInputWorkspace         | * OutputTreatment                          |
-|                  | * QuartzInputWorkspace               |                                            |
-+------------------+--------------------------------------+--------------------------------------------+
-| Sample           | * CadmiumInputWorkspace              | * SampleGeometry                           |
-|                  | * EmptyInputWorkspace                | * **SampleAndEnvironmentProperties**       |
-|                  | * TransmissionInputWorkspace         | * OutputTreatment                          |
-|                  | * QuartzInputWorkspace               |                                            |
-+------------------+--------------------------------------+--------------------------------------------+
++------------------+---------------------------------+--------------------------------------------+
+| ProcessAs        | Input Workspace Properties      | Other Input Properties                     |
++==================+=================================+============================================+
+| BeamWithCadmium  |                                 |                                            |
++------------------+---------------------------------+--------------------------------------------+
+| EmptyBeam        | * CadmiumTransmissionWorkspace  |                                            |
+|                  |                                 |                                            |
++------------------+---------------------------------+--------------------------------------------+
+| Transmission     | * CadmiumTransmissionWorkspace  |                                            |
+|                  | * **EmptyBeamWorkspace**        |                                            |
++------------------+---------------------------------+--------------------------------------------+
+| Cadmium          |                                 |                                            |
++------------------+---------------------------------+--------------------------------------------+
+| Empty            |                                 |                                            |
++------------------+---------------------------------+--------------------------------------------+
+| Quartz           | * CadmiumWorkspace              | * OutputTreatment                          |
+|                  | * EmptyContainerWorkspace       |                                            |
+|                  | * **Transmission**              |                                            |
++------------------+---------------------------------+--------------------------------------------+
+| Vanadium         | * CadmiumWorkspace              | * SampleGeometry                           |
+|                  | * EmptyContainerWorkspace       | * **SampleAndEnvironmentProperties**       |
+|                  | * Transmission                  | * OutputTreatment                          |
+|                  | * QuartzWorkspace               |                                            |
++------------------+---------------------------------+--------------------------------------------+
+| Sample           | * CadmiumWorkspace              | * SampleGeometry                           |
+|                  | * EmptyContainerWorkspace       | * **SampleAndEnvironmentProperties**       |
+|                  | * Transmission                  | * OutputTreatment                          |
+|                  | * QuartzWorkspace               |                                            |
++------------------+---------------------------------+--------------------------------------------+
 
 All the input workspace properties above are optional, unless bolded.
 For example, if processing as sample, if a empty container and cadmium absorber inputs are specified, subtraction will be performed, if not, the step will be skipped.
@@ -212,17 +212,17 @@ This example below performs a complete reduction for D7 data.
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
         ProcessAs='EmptyBeam'
     )
-    print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium_transmission_ws_1'].readY(0)[0] / mtd['beam_ws_1'].readY(0)[0]))
+    print('Cadmium absorber monitor 2 rate as a ratio of empty beam is {0:.3f}'.format(mtd['cadmium_transmission_ws_1'].readY(0)[0] / mtd['beam_ws_1'].readY(0)[0]))
 
     # Quartz transmission
     PolDiffILLReduction(
         Run='396985',
         OutputWorkspace='quartz_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
     print('Quartz transmission is {0:.3f}'.format(mtd['quartz_transmission_1'].readY(0)[0]))
@@ -246,8 +246,8 @@ This example below performs a complete reduction for D7 data.
         Run='396939',
         OutputWorkspace='pol_corrections',
         CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='quartz_transmission_1',
+        EmptyContainerInputWorkspace='empty_ws',
+        Transmission='quartz_transmission',
         OutputTreatment='Average',
         ProcessAs='Quartz'
     )
@@ -256,8 +256,8 @@ This example below performs a complete reduction for D7 data.
     PolDiffILLReduction(
         Run='396990',
         OutputWorkspace='vanadium_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
     print('Vanadium transmission is {0:.3f}'.format(mtd['vanadium_transmission_1'].readY(0)[0]))
@@ -266,9 +266,9 @@ This example below performs a complete reduction for D7 data.
     PolDiffILLReduction(
         Run='396993',
         OutputWorkspace='vanadium_ws',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='vanadium_transmission_1',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='vanadium_transmission',
         QuartzInputWorkspace='pol_corrections',
         OutputTreatment='Sum',
         SampleGeometry='None',
@@ -280,8 +280,8 @@ This example below performs a complete reduction for D7 data.
     PolDiffILLReduction(
        Run='396986',
        OutputWorkspace='sample_transmission',
-       CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-       BeamInputWorkspace='beam_ws_1',
+       CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+       EmptyBeamWorkspace='beam_ws',
        ProcessAs='Transmission'
     )
     print('Sample transmission is {0:.3f}'.format(mtd['sample_transmission_1'].readY(0)[0]))
@@ -290,10 +290,10 @@ This example below performs a complete reduction for D7 data.
     PolDiffILLReduction(
         Run='397004',
         OutputWorkspace='sample_ws',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='sample_transmission_1',
-        QuartzInputWorkspace='pol_corrections',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='sample_transmission',
+        QuartzWorkspace='pol_corrections',
         OutputTreatment='Individual',
         SampleGeometry='None',
         SampleAndEnvironmentProperties=sample_dictionary,
@@ -304,7 +304,7 @@ Output:
 
 .. testoutput:: ExPolDiffILLReduction
 
-    Cadmium absorber transmission is 0.011
+    Cadmium absorber monitor 2 rate as a ratio of empty beam is 0.011
     Quartz transmission is 0.700
     Vanadium transmission is 0.886
     Sample transmission is 0.962

@@ -195,7 +195,7 @@ Transmission
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
         ProcessAs='EmptyBeam'
     )
     print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium_transmission_ws_1'].readY(0)[0] / mtd['beam_ws_1'].readY(0)[0]))
@@ -204,8 +204,8 @@ Transmission
     PolDiffILLReduction(
         Run='396985',
         OutputWorkspace='quartz_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
     print('Quartz transmission is {0:.3f}'.format(mtd['quartz_transmission_1'].readY(0)[0]))
@@ -282,7 +282,7 @@ Below is the relevant workflow diagram describing reduction steps of the quartz 
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
         ProcessAs='EmptyBeam'
     )
 
@@ -290,8 +290,8 @@ Below is the relevant workflow diagram describing reduction steps of the quartz 
     PolDiffILLReduction(
         Run='396985',
         OutputWorkspace='quartz_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
 
@@ -313,9 +313,9 @@ Below is the relevant workflow diagram describing reduction steps of the quartz 
     PolDiffILLReduction(
         Run='396939',
         OutputWorkspace='pol_corrections',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='quartz_transmission_1',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='quartz_transmission',
         OutputTreatment='Average',
         ProcessAs='Quartz'
     )
@@ -503,7 +503,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
         ProcessAs='EmptyBeam'
     )
 
@@ -511,8 +511,8 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396985',
         OutputWorkspace='quartz_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
 
@@ -534,9 +534,9 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396939',
         OutputWorkspace='pol_corrections',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='quartz_transmission_1',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='quartz_transmission',
         OutputTreatment='Average',
         ProcessAs='Quartz'
     )
@@ -545,8 +545,8 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396990',
         OutputWorkspace='vanadium_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
     print('Vanadium transmission is {0:.3f}'.format(mtd['vanadium_transmission_1'].readY(0)[0]))
@@ -555,10 +555,10 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396993',
         OutputWorkspace='vanadium_ws',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='vanadium_transmission_1',
-        QuartzInputWorkspace='pol_corrections',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='vanadium_transmission',
+        QuartzWorkspace='pol_corrections',
         OutputTreatment='Sum',
         SelfAttenuationMethod='MonteCarlo',
         SampleGeometry='Annulus',
@@ -689,7 +689,7 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
         ProcessAs='EmptyBeam'
     )
 
@@ -697,8 +697,8 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396985, 396986',
         OutputWorkspace='quartz_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
 
@@ -720,9 +720,9 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396939, 396940',
         OutputWorkspace='pol_corrections',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='quartz_transmission_1',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='quartz_transmission',
         OutputTreatment='Average',
         ProcessAs='Quartz'
     )
@@ -731,8 +731,8 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396990',
         OutputWorkspace='vanadium_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
 
@@ -740,10 +740,10 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396993, 396994',
         OutputWorkspace='vanadium_ws',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='vanadium_transmission_1',
-        QuartzInputWorkspace='pol_corrections',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='vanadium_transmission',
+        QuartzWorkspace='pol_corrections',
         OutputTreatment='Sum',
         SampleGeometry='None',
         SampleAndEnvironmentProperties=vanadium_dictionary,
@@ -755,8 +755,8 @@ Sample normalisation
     PolDiffILLReduction(
        Run='396986, 396987',
        OutputWorkspace='sample_transmission',
-       CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-       BeamInputWorkspace='beam_ws_1',
+       CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+       EmptyBeamWorkspace='beam_ws',
        ProcessAs='Transmission'
     )
     print('Sample transmission is {0:.3f}'.format(mtd['sample_transmission_1'].readY(0)[0]))
@@ -765,10 +765,10 @@ Sample normalisation
     PolDiffILLReduction(
         Run='397004, 397005',
         OutputWorkspace='sample_ws',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='sample_transmission_1',
-        QuartzInputWorkspace='pol_corrections',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='sample_transmission',
+        QuartzWorkspace='pol_corrections',
         OutputTreatment='Individual',
         InstrumentCalibration=calibration_file,
         SelfAttenuationMethod='Numerical',
