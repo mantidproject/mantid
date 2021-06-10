@@ -20,6 +20,12 @@ Improvements
 
 - :ref:`CreateSampleWorkspace <algm-CreateSampleWorkspace>` has new property InstrumentName.
 
+Bugfixes
+########
+
+- Fix rare divide-by zero error when running :ref:`GetEi <algm-GetEi2>` on noisy data.
+
+
 Fit Functions
 -------------
 - new method `IPeakFunction::intensityError` calculates the error in the integrated intensity of the peak due to uncertainties in the values of the fit parameters.
@@ -57,8 +63,5 @@ Bugfixes
 ########
 
 - Added parser for input Names to :ref:`algm-CreateMDHistoWorkspace` to allow inputs such as `Names='[H,0,0],[0,K,0],[0,0,L]'`.
-
-- `algm-GetEi2` algorithm has been rarely failing on noisy functions with strange error message "Workspace contains Inf or NaN" despite no Inf or NaN-s were actually present in the data. Despite its relative rarity, the issue was reliably observed at least twice per cycle on ISIS inelastic instruments. The actual reason for the failure was the denominator of the function defining the half-width of the peak becoming zero. The solution fixes the issue with zero values in denominator, but still returns inaccurate result for noisy function.
-
 
 :ref:`Release 6.2.0 <v6.2.0>`
