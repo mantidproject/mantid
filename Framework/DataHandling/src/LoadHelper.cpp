@@ -14,7 +14,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidTypes/Core/DateAndTime.h"
 
 #include <nexus/napi.h>
 
