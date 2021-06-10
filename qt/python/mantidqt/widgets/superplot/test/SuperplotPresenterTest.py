@@ -8,11 +8,7 @@
 import unittest
 from unittest import mock
 
-from mantid.plots.utility import MantidAxType
-
 from mantidqt.widgets.superplot.SuperplotPresenter import SuperplotPresenter
-from mantidqt.widgets.superplot.SuperplotView import SuperplotView
-from mantidqt.widgets.superplot.SuperplotModel import SuperplotModel
 
 
 class SuperplotPresenterTest(unittest.TestCase):
