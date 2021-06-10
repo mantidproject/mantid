@@ -59,7 +59,7 @@ Output:
 .. testoutput:: ExGenerateLogbook_D7
 
    Number of numors in the logbook: 3
-   Number of headers in the logbook: 8
+   Number of headers in the logbook: 9
 
 .. testcleanup:: ExGenerateLogbook_D7
 
@@ -85,7 +85,7 @@ Output:
 .. testoutput:: ExGenerateLogbook_D7_binary_operations
 
    Number of numors in the logbook: 3
-   Number of headers in the logbook: 7
+   Number of headers in the logbook: 8
 
 .. testcleanup:: ExGenerateLogbook_D7_binary_operations
 
