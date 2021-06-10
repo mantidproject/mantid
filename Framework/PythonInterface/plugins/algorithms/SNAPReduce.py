@@ -5,21 +5,26 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-init,too-many-lines
-from mantid.simpleapi import AlignAndFocusPowder, AlignAndFocusPowderFromFiles, CloneWorkspace, \
-    ConvertUnits, CreateGroupingWorkspace, DeleteWorkspace, Divide, EditInstrumentGeometry, \
-    GetIPTS, Load, LoadDiffCal, LoadEventNexus, LoadMask, LoadIsawDetCal, LoadNexusProcessed, \
-    Minus, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, ReplaceSpecialValues, SaveAscii, \
-    SaveFocusedXYE, SaveGSS, SaveNexusProcessed, mtd
+
+# local
+from mantid.simpleapi import (AlignAndFocusPowder, AlignAndFocusPowderFromFiles, CloneWorkspace, ConvertUnits,
+                              CreateGroupingWorkspace, DeleteWorkspace, Divide, EditInstrumentGeometry, GetIPTS,
+                              Load, LoadDiffCal, LoadEventNexus, LoadMask, LoadIsawDetCal, LoadNexusProcessed,
+                              Minus, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, ReplaceSpecialValues,
+                              SaveAscii, SaveFocusedXYE, SaveGSS, SaveNexusProcessed, mtd)
 
 # 3rd party
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, MultipleFileProperty,
-                        Progress, PropertyMode, WorkspaceProperty)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty,
+                        MultipleFileProperty, Progress, PropertyMode, WorkspaceProperty)
 from mantid.kernel import (Direction, EnabledWhenProperty, FloatArrayProperty, IntArrayBoundedValidator,
                            IntArrayProperty, IntBoundedValidator, Property, PropertyCriterion, StringListValidator)
-from mantid.utils.path import run_file
-import numpy as np
+from mantid.kernel import logger
 
 # standard
+from datetime import datetime
+import json
+from mantid.utils.path import run_file
+import numpy as np
 import os
 from pathlib import Path
 
@@ -177,8 +182,8 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         validator_peak_clipping = IntBoundedValidator(lower=4, upper=15)
         self.declareProperty(name="PeakClippingWindowSize", defaultValue=10, validator=validator_peak_clipping,
-                             doc = "Read live data - requires a saved run in the current IPTS with the same "
-                                   "instrument configuration")
+                             doc="Read live data - requires a saved run in the current IPTS with the same "
+                                 "instrument configuration")
 
         validator_smoothing_range = IntBoundedValidator(lower=1, upper=20)
         self.declareProperty(name="SmoothingRange", defaultValue=10, validator=validator_smoothing_range,
@@ -220,26 +225,30 @@ class SNAPReduce(DataProcessorAlgorithm):
         self.declareProperty(name='EnableConfigurator', defaultValue=False, direction=Direction.Input,
                              doc='Do not reduce, just save the configuration file for autoreduction')
         config_enabled = EnabledWhenProperty('EnableConfigurator', PropertyCriterion.IsNotDefault)
-
         self.declareProperty(FileProperty(name='ConfigSaveDir', defaultValue='',
                                           action=FileAction.OptionalDirectory),
                              doc='Default directory is /SNS/IPTS-XXXX/shared/config where XXXX is the'
                                  'IPTS number of the first input run number')
         self.setPropertySettings('ConfigSaveDir', config_enabled)
-
         property_names = ['EnableConfigurator', 'ConfigSaveDir']
         [self.setPropertyGroup(name, 'Autoreduction Configurator') for name in property_names]
 
     def validateInputs(self):  # noqa: C901  ignore "too complex" warning
         issues = dict()
 
-        def _check_file(property_name):
-            r"""Checks the extension and existence of a file name passed on as a property"""
-            file_name = self.getProperty(property_name).value
-            if len(file_name) <= 0:
-                issues[property_name] = f'{property_name} requires a file'
-            elif not Path(file_name).exists():
-                issues[property_name] = f'{property_name} {file_name} not found'
+        def _check_file(property_name: str) -> None:
+            r"""
+            Checks the extension and existence of or or more files
+            @param property_name : property whose value is the file(s)
+            """
+            file_names = self.getProperty(property_name).value  # could be one file path or a list of file paths
+            if isinstance(file_names, str):  # it's only one file
+                file_names = [file_names, ]
+            for file_name in file_names:
+                if len(file_name) <= 0:
+                    issues[property_name] = f'{property_name} requires a file'
+                elif not Path(file_name).is_file():
+                    issues[property_name] = f'{property_name} {file_name} not found'
 
         # Check files for RunNumbers exist
         for run_number in self.getProperty('RunNumbers').value:
@@ -252,7 +261,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         if not background_property.isDefault:
             run_number = background_property.value
             if run_file(run_number, instrument='SNAP') is None:
-                issues['RunNumbers'] = f'Events file not found for run {run_number}'
+                issues['Background'] = f'Events file not found for run {run_number}'
 
         # cross check masking
         masking = self.getProperty("Masking").value
@@ -275,7 +284,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             _check_file(cal_type_to_file.get(calibration_type))
 
         # Check binning low < x < high
-        low, step, high = self.getProperty('Binning')
+        low, step, high = self.getProperty('Binning').value
         if low >= high:
             issues['Binning'] = f'Binning triad must be Low, Step, High with Low < High'
 
@@ -467,10 +476,10 @@ class SNAPReduce(DataProcessorAlgorithm):
 
     def PyExec(self):
 
-        if self.getProperty('EnableConfigurator') is True:
+        if self.getProperty('EnableConfigurator'):
             self._create_and_save_configuration()
             return  # do not carry out the reduction
-
+        return
         in_Runs = self.getProperty("RunNumbers").value
         progress = Progress(self, 0., .25, 3)
         finalUnits = self.getPropertyValue("FinalUnits")
@@ -646,7 +655,40 @@ class SNAPReduce(DataProcessorAlgorithm):
                 self._exportWorkspace(propName, wkspName)
 
     def _create_and_save_configuration(self):
-        pass
+        logger.notice('Reduction will not be carried out')
+        #
+        # configuration file name and save location
+        #
+        basename = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        dir_name = self.getProperty('ConfigSaveDir').value
+        if len(dir_name) <= 0:  # default directory
+            run_number = self.getProperty('RunNumbers').value[0]  # first run number
+            dir_name = Path(self.get_IPTS_Local(run_number)) / 'shared' / 'autoreduction' / 'configurations'
+            dir_name.mkdir(parents=True, exist_ok=True)  # in case it has not yet been created
+        filename = str(Path(dir_name) / f'{basename}.json')
+        #
+        # Selected algorithm properties as a dictionary
+        #
+        dict_repr = json.loads(str(self)).get('properties')  # representation of the algorithm's properties in a dict
+        for unwanted in ('RunNumbers', 'EnableConfigurator'):  # don't record values for these properties
+            del dict_repr[unwanted]
+        """
+        hack to fix the entry for the default JSON represenation of property DetCalFilename, which is saved as a list of lists
+        Example: "DetCalFilename": [ ["/SNS/SNAP/IPTS-26217/shared/E76p2_W65p3.detcal"],
+                                     ["/SNS/SNAP/IPTS-26217/shared/E76p2_W65p5.detcal"]]
+                 must become:
+                 "DetCalFilename": "/SNS/SNAP/IPTS-26217/shared/E76p2_W65p3.detcal,/SNS/SNAP/IPTS-26217/shared/E76p2_W65p5.detcal"
+        """
+        if 'DetCalFilename' in dict_repr:
+            dict_repr['DetCalFilename'] = ','.join([entry[0] for entry in dict_repr.get('DetCalFilename')])
+        #
+        # Save to file in JSON format
+        #
+        formatted_pretty = json.dumps(dict_repr, sort_keys=True, indent=4)
+        with open(filename, 'w') as f:
+            f.write(formatted_pretty)
+            logger.information(f'Saving configuration to {filename}')
+            logger.debug(f'Configuration contents:\n{formatted_pretty}')
 
 
 AlgorithmFactory.subscribe(SNAPReduce)
