@@ -3,11 +3,7 @@
 # LIB3MF_LIBRARIES libraries to link against
 # LIB3MF_FOUND If false, do not try to use LIB3MF
 
-if (MSVC AND NOT CONDA_BUILD)
-find_path ( LIB3MF_INCLUDE_DIR Bindings/Cpp/lib3mf_abi.hpp HINTS lib3mf/)
-else()
-find_path ( LIB3MF_INCLUDE_DIR Bindings/Cpp/lib3mf_abi.hpp HINTS $ENV{CONDA_PREFIX}/Library/include )
-endif()
+find_path ( LIB3MF_INCLUDE_DIR Bindings/Cpp/lib3mf_abi.hpp PATHS include/lib3mf HINTS $ENV{CONDA_PREFIX}/Library/include)
 
 find_library ( LIB3MF_LIB lib3mf )
 find_library ( LIB3MF_LIB_DEBUG lib3mf_d )
