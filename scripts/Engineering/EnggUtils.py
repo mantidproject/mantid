@@ -10,7 +10,6 @@ from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType
 import mantid.simpleapi as mantid
 from mantid.simpleapi import AnalysisDataService as ADS
 from matplotlib import gridspec
-import matplotlib.pyplot as plt
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 
@@ -125,7 +124,9 @@ def plot_tof_fit(plot_dicts: list, regions: list) -> None:
     n_plots = len(regions)
 
     # Create plot
-    fig = plt.figure()
+    # import pyplot here to stop FindPeakAutomaticTest picking it up
+    from matplotlib.pyplot import figure
+    fig = figure()
     gs = gridspec.GridSpec(2, n_plots)
     bank_axes = [fig.add_subplot(gs[0, n], projection="mantid") for n in range(n_plots)]
     residuals_axes = [fig.add_subplot(gs[1, n], projection="mantid") for n in range(n_plots)]
