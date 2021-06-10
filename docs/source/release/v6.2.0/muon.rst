@@ -22,6 +22,8 @@ Improvements
 - It is now possible to do a vertical resize of the plot in Muon Analysis and Frequency Domain Analysis.
 - The plotting has been updated for better stability.
 - The plotting now has autoscale active by default.
+- Added a table to store phasequads in the phase tab, phasequads also no longer automatically delete themselves
+  when new data is loaded
 
 ALC
 ---
