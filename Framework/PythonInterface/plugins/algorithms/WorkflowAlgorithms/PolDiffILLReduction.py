@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, \
-    PropertyMode, Progress, PythonAlgorithm, WorkspaceGroupProperty, FileAction, \
-    AlgorithmFactory
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
+    MultipleFileProperty, PropertyMode, Progress, PythonAlgorithm, \
+    WorkspaceGroupProperty
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
     LogicOperator, PropertyCriterion, PropertyManagerProperty, StringListValidator
 from mantid.simpleapi import *
@@ -121,24 +121,24 @@ class PolDiffILLReduction(PythonAlgorithm):
                                                      EnabledWhenProperty(vanadium, sample, LogicOperator.Or),
                                                      LogicOperator.Or))
 
-        self.declareProperty(MatrixWorkspaceProperty('EmptyBeamWorkspace', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
+        self.declareProperty(WorkspaceGroupProperty('EmptyBeamWorkspace', '',
+                                                    direction=Direction.Input,
+                                                    optional=PropertyMode.Optional),
                              doc='The name of the empty beam input workspace.')
 
         self.setPropertySettings('EmptyBeamWorkspace', transmission)
 
-        self.declareProperty(MatrixWorkspaceProperty('CadmiumTransmissionWorkspace', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
+        self.declareProperty(WorkspaceGroupProperty('CadmiumTransmissionWorkspace', '',
+                                                    direction=Direction.Input,
+                                                    optional=PropertyMode.Optional),
                              doc='The name of the cadmium transmission input workspace.')
 
         self.setPropertySettings('CadmiumTransmissionWorkspace', EnabledWhenProperty(transmission, beam,
                                                                                           LogicOperator.Or))
 
-        self.declareProperty(MatrixWorkspaceProperty('Transmission', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
+        self.declareProperty(WorkspaceGroupProperty('Transmission', '',
+                                                    direction=Direction.Input,
+                                                    optional=PropertyMode.Optional),
                              doc='The name of the transmission input workspace.')
 
         self.setPropertySettings('Transmission', reduction)
@@ -242,7 +242,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         # extract Monitor2 values
         if 0 in mtd[ws][0].readY(0):
             raise RuntimeError('Cannot calculate transmission; monitor has 0 counts.')
-        if 0 in mtd[beam_ws].readY(0):
+        if 0 in mtd[beam_ws][0].readY(0):
             raise RuntimeError('Cannot calculate transmission; beam monitor has 0 counts.')
         Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
         return ws
@@ -756,10 +756,11 @@ class PolDiffILLReduction(PythonAlgorithm):
             self._normalise(ws)
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
-            empty_ws = self.getPropertyValue('EmptyBeamWorkspace')
-            if not self.getProperty('EmptyBeamWorkspace').isDefault and not self.getProperty('TransmissionInputWorkspace').isDefault:
+            empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
+            if not self.getProperty('EmptyContainerWorkspace').isDefault \
+                    and not self.getProperty('Transmission').isDefault:
                 # Subtracts background if the workspaces for empty container and transmission are provided
-                transmission_ws = self.getPropertyValue('Transmission')
+                transmission_ws = mtd[self.getPropertyValue('Transmission')][0].name()
                 progress.report('Subtracting backgrounds')
                 self._subtract_background(ws, empty_ws, transmission_ws)
 

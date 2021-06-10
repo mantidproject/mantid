@@ -48,7 +48,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
-                            CadmiumTransmissionWorkspace='cadmium_ws_1', EmptyBeamWorkspace='beam_ws_1')
+                            CadmiumTransmissionWorkspace='cadmium_ws', EmptyBeamWorkspace='beam_ws')
         self._check_output(mtd['quartz_transmission'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self.assertAlmostEqual(mtd['quartz_transmission_1'].readY(0)[0], 0.692, delta=1e-3)
         self._check_process_flag(mtd['quartz_transmission'], 'Transmission')
@@ -66,8 +66,8 @@ class PolDiffILLReductionTest(unittest.TestCase):
     def test_quartz(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
-                            EmptyBeamWorkspace='beam_ws_1')
-        PolDiffILLReduction(Run='396939', ProcessAs='Quartz', Transmission='quartz_transmission_1',
+                            EmptyBeamWorkspace='beam_ws')
+        PolDiffILLReduction(Run='396939', ProcessAs='Quartz', Transmission='quartz_transmission',
                             OutputTreatment='Average', OutputWorkspace='quartz')
         self._check_output(mtd['quartz'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['quartz'], 'Quartz')
