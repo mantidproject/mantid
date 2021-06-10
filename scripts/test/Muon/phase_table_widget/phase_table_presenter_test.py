@@ -314,15 +314,41 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.view.warning_popup.assert_not_called()
 
-    def test_remove_phasequad_button(self):
-        return
+    def test_remove_phasequad_button_last_row(self):
         phasequad = MuonPhasequad("test", "table")
         self.view.num_rows = mock.Mock(return_value=1)
         self.view.get_table_item_text = mock.Mock(return_value="test")
+        self.view.get_selected_phasequad_names_and_indexes = mock.Mock(return_value=None)
+        self.view.get_table_contents = mock.Mock(return_value=["test"])
+        self.view.remove_last_row = mock.Mock()
+        self.presenter.add_phasequad_to_analysis = mock.Mock()
+        self.presenter.calculation_finished_notifier = mock.Mock()
         self.presenter.context.group_pair_context._phasequad = [phasequad]
         self.presenter.handle_remove_phasequad_button_clicked()
 
         self.assertEqual(0, len(self.presenter.context.group_pair_context.phasequads))
+        self.presenter.add_phasequad_to_analysis.assert_called_once_with(False, False, phasequad)
+        self.presenter.calculation_finished_notifier.notify_subscribers.assert_called_once_with()
+
+    def test_remove_phasequad_button_selected_rows(self):
+        phasequad_1 = MuonPhasequad("test_1", "table")
+        phasequad_2 = MuonPhasequad("test_2", "table")
+        phasequad_3 = MuonPhasequad("test_3", "table")
+        self.view.num_rows = mock.Mock(return_value=3)
+        self.view.get_table_item_text = mock.Mock(return_value="test")
+        self.view.get_selected_phasequad_names_and_indexes = mock.Mock(return_value=[("test_1", 0), ("test_2", 1)])
+        self.view.remove_phasequad_by_index = mock.Mock()
+        self.presenter.add_phasequad_to_analysis = mock.Mock()
+        self.presenter.calculation_finished_notifier = mock.Mock()
+        self.presenter.context.group_pair_context._phasequad = [phasequad_1, phasequad_2, phasequad_3]
+        self.presenter.handle_remove_phasequad_button_clicked()
+
+        self.assertEqual(1, len(self.presenter.context.group_pair_context.phasequads))
+        self.view.remove_phasequad_by_index.assert_any_call(0)
+        self.view.remove_phasequad_by_index.assert_any_call(1)
+        self.presenter.add_phasequad_to_analysis.assert_any_call(False, False, phasequad_1)
+        self.presenter.add_phasequad_to_analysis.assert_any_call(False, False, phasequad_2)
+        self.assertEqual(2, self.presenter.calculation_finished_notifier.notify_subscribers.call_count)
 
 
 if __name__ == '__main__':

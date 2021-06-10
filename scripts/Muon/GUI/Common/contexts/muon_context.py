@@ -192,7 +192,6 @@ class MuonContext(object):
             with WorkspaceGroupDefinition():
                 for pair_name in self._group_pair_context.pair_names:
                     # Do not want to rename phasequad parts here
-                    # bug here is does not show on graph immediately have to untick and retick analyse
                     if "_Re_" in pair_name or "_Im_" in pair_name:
                         continue
 

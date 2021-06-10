@@ -269,7 +269,7 @@ class PhaseTablePresenter(object):
                 if phasequad.name == name:
                     self.add_phasequad_to_analysis(False, False, phasequad)
                     self.context.group_pair_context.remove_phasequad(phasequad)
-            self.calculation_finished_notifier.notify_subscribers()
+                    self.calculation_finished_notifier.notify_subscribers()
 
     def handle_phasequad_calculation_started(self):
         """Specific handling when calculating phasequad is started"""
