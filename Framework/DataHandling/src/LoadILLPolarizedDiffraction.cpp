@@ -124,7 +124,7 @@ std::map<std::string, std::string> LoadILLPolarizedDiffraction::validateInputs()
  */
 void LoadILLPolarizedDiffraction::exec() {
 
-  Progress progress(this, 0, 1, 2);
+  Progress progress(this, 0, 1, 3);
 
   m_fileName = getPropertyValue("Filename");
   m_outputWorkspaceGroup = std::make_shared<API::WorkspaceGroup>();
@@ -135,6 +135,9 @@ void LoadILLPolarizedDiffraction::exec() {
 
   progress.report("Loading the metadata");
   loadMetaData();
+
+  progress.report("Sorting polarisations");
+  sortPolarisations();
 
   setProperty("OutputWorkspace", m_outputWorkspaceGroup);
 }
@@ -478,6 +481,31 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::transposeMonochromatic(AP
   transpose->setProperty("OutputWorkspace", "__unused_for_child");
   transpose->execute();
   return transpose->getProperty("OutputWorkspace");
+}
+
+/**
+ * Ensures that the order of flipper state values is 'ON' and then 'OFF' for each polarisation orientation
+ */
+void LoadILLPolarizedDiffraction::sortPolarisations() {
+  if (m_outputWorkspaceGroup->getNumberOfEntries() < 2) {
+    return;
+  }
+  auto sortedGroup = std::make_shared<API::WorkspaceGroup>();
+  for (auto workspaceId = 0; workspaceId < (m_outputWorkspaceGroup->getNumberOfEntries() - 1); workspaceId += 2) {
+    MatrixWorkspace_sptr ws1 =
+        std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup->getItem(workspaceId));
+    auto polarisation = ws1->mutableRun().getLogData("POL.actual_stateB1B2")->value();
+    MatrixWorkspace_sptr ws2 =
+        std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup->getItem(workspaceId + 1));
+    if (polarisation != "ON") { // need to reverse order of SF ("ON") and NSF ("OFF")
+      sortedGroup->addWorkspace(ws2);
+      sortedGroup->addWorkspace(ws1);
+    } else {
+      sortedGroup->addWorkspace(ws1);
+      sortedGroup->addWorkspace(ws2);
+    }
+  }
+  m_outputWorkspaceGroup = sortedGroup;
 }
 
 } // namespace DataHandling
