@@ -618,7 +618,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string notes = file.getStrData();
       if (!notes.empty())
-        WS->mutableRun().addProperty("file_notes", notes);
+        WS->mutableRun().addProperty("file_notes", notes, true);
     }
     file.closeData();
   }
@@ -637,7 +637,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
         run = std::to_string(value[0]);
     }
     if (!run.empty()) {
-      WS->mutableRun().addProperty("run_number", run);
+      WS->mutableRun().addProperty("run_number", run, true);
     }
     file.closeData();
   }
@@ -650,7 +650,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
       expId = file.getStrData();
     }
     if (!expId.empty()) {
-      WS->mutableRun().addProperty("experiment_identifier", expId);
+      WS->mutableRun().addProperty("experiment_identifier", expId, true);
     }
     file.closeData();
   }
@@ -706,7 +706,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
       // clang-format on
 
       // set the property
-      WS->mutableRun().addProperty("duration", duration[0], units);
+      WS->mutableRun().addProperty("duration", duration[0], units, true);
     }
     file.closeData();
   }
