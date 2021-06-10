@@ -21,7 +21,7 @@ class ProjectionSurface;
 class ISimpleWidget : public QWidget {
 public:
   ISimpleWidget() {}
-  template <typename T1> ISimpleWidget(T1 arg) : QWidget(arg) {}
+  template <typename... Params> ISimpleWidget(Params &&... params) : QWidget(std::forward<Params>(params)...) {}
 
   /// Assign a surface to draw on
   virtual void setSurface(std::shared_ptr<ProjectionSurface> surface) = 0;
