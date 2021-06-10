@@ -15,6 +15,11 @@ class BasicFittingContext(FittingContext):
 
         self._allow_double_pulse_fitting: bool = allow_double_pulse_fitting
 
+        # A list of FitInformation's detailing all the single fits that have happened including the fits that have been
+        # overridden by an updated fit. The last single fit performed is at the end of the list, and undoing will remove
+        # it.
+        self._single_fits_history: list = []
+
         self._current_dataset_index: int = None
         self._dataset_names: list = []
 
@@ -41,6 +46,37 @@ class BasicFittingContext(FittingContext):
         self._minimizer: str = ""
         self._evaluation_type: str = ""
         self._fit_to_raw: bool = True
+
+    def all_latest_fits(self) -> list:
+        """Returns the latest unique fits for all fitting modes."""
+        return self._latest_unique_fits_in(self._single_fits_history)
+
+    @property
+    def active_fit_history(self) -> list:
+        """Returns the fit history for the currently active fitting mode."""
+        return self._single_fits_history
+
+    @active_fit_history.setter
+    def active_fit_history(self, fit_history: list) -> None:
+        """Sets the fit history for the currently active fitting mode."""
+        self._single_fits_history = fit_history
+
+    def clear(self, removed_fits: list = []) -> None:
+        """Removes all the stored Fits from the context when an ADS clear event happens."""
+        if len(removed_fits) == 0:
+            removed_fits = self.all_latest_fits()
+
+        self._single_fits_history = []
+        self._dataset_indices_for_undo = []
+        self._single_fit_functions_for_undo = []
+        self._fit_statuses_for_undo = []
+        self._chi_squared_for_undo = []
+
+        super().clear(removed_fits)
+
+    def remove_workspace_by_name(self, workspace_name: str) -> None:
+        """Remove a Fit from the history when an ADS delete event happens on one of its output workspaces."""
+        self.remove_fit_by_name(self._single_fits_history, workspace_name)
 
     @property
     def allow_double_pulse_fitting(self) -> bool:

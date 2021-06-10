@@ -246,7 +246,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         """Undoes the previous fit using the saved undo data."""
         super().undo_previous_fit()
 
-        if self.fitting_context.tf_asymmetry_mode:
+        if self.number_of_undos() > 0 and self.fitting_context.tf_asymmetry_mode:
             self.recalculate_tf_asymmetry_functions()
             self._set_all_normalisations(self.fitting_context.normalisations_for_undo.pop())
             self._toggle_all_normalisations_fixed(self.fitting_context.normalisations_fixed_for_undo.pop())

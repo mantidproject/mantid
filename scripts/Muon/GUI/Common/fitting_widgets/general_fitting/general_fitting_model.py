@@ -49,32 +49,6 @@ class GeneralFittingModel(BasicFittingModel):
         current_dataset_index = self.fitting_context.current_dataset_index
         return simultaneous_function.getFunction(current_dataset_index if current_dataset_index is not None else 0)
 
-    def number_of_undos(self) -> int:
-        """Returns the number of previous single fits or simultaneous fits that are saved."""
-        if self.fitting_context.simultaneous_fitting_mode:
-            return len(self.fitting_context.simultaneous_fit_functions_for_undo)
-        else:
-            return super().number_of_undos()
-
-    def save_current_fit_function_to_undo_data(self) -> None:
-        """Saves the current simultaneous fit function, and the single fit functions defined in the base class."""
-        if self.fitting_context.simultaneous_fitting_mode:
-            self.fitting_context.simultaneous_fit_functions_for_undo.append(self._clone_function(
-                self.fitting_context.simultaneous_fit_function))
-            self.fitting_context.simultaneous_fit_statuses_for_undo.append(self.current_fit_status)
-            self.fitting_context.simultaneous_chi_squared_for_undo.append(self.current_chi_squared)
-            self.fitting_context.global_parameters_for_undo.append(self.fitting_context.global_parameters)
-        else:
-            super().save_current_fit_function_to_undo_data()
-
-    def clear_undo_data(self) -> None:
-        """Clears the saved simultaneous fit functions, and the saved single fit functions defined in the base class."""
-        super().clear_undo_data()
-        self.fitting_context.simultaneous_fit_functions_for_undo = []
-        self.fitting_context.simultaneous_fit_statuses_for_undo = []
-        self.fitting_context.simultaneous_chi_squared_for_undo = []
-        self.fitting_context.global_parameters_for_undo = []
-
     @property
     def simultaneous_fitting_mode(self) -> bool:
         """Returns whether or not simultaneous fitting is currently active. If not, single fitting is active."""
@@ -133,9 +107,28 @@ class GeneralFittingModel(BasicFittingModel):
             else:
                 super().automatically_update_function_name()
 
+    def reset_fit_functions(self, new_functions: list) -> None:
+        """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
+        if len(new_functions) == 0 or None in new_functions:
+            self.fitting_context.simultaneous_fit_function = None
+        elif len(new_functions) == 1:
+            self.fitting_context.simultaneous_fit_function = new_functions[0]
+        else:
+            self._create_multi_domain_function_using(new_functions)
+            self._add_global_ties_to_simultaneous_function()
+
+        super().reset_fit_functions(new_functions)
+
+    def number_of_undos(self) -> int:
+        """Returns the number of previous single/simultaneous fits that are saved."""
+        if self.fitting_context.simultaneous_fitting_mode:
+            return len(self.fitting_context.simultaneous_fit_functions_for_undo)
+        else:
+            return super().number_of_undos()
+
     def undo_previous_fit(self) -> None:
         """Undoes the previous fit using the saved undo data."""
-        if self.fitting_context.simultaneous_fitting_mode:
+        if self.number_of_undos() > 0 and self.fitting_context.simultaneous_fitting_mode:
             undo_simultaneous_fit_function = self.fitting_context.simultaneous_fit_functions_for_undo.pop()
             undo_simultaneous_fit_status = self.fitting_context.simultaneous_fit_statuses_for_undo.pop()
             undo_simultaneous_chi_squared = self.fitting_context.simultaneous_chi_squared_for_undo.pop()
@@ -148,17 +141,24 @@ class GeneralFittingModel(BasicFittingModel):
         else:
             super().undo_previous_fit()
 
-    def reset_fit_functions(self, new_functions: list) -> None:
-        """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
-        if len(new_functions) == 0 or None in new_functions:
-            self.fitting_context.simultaneous_fit_function = None
-        elif len(new_functions) == 1:
-            self.fitting_context.simultaneous_fit_function = new_functions[0]
+    def save_current_fit_function_to_undo_data(self) -> None:
+        """Saves the current simultaneous fit function, and the single fit functions defined in the base class."""
+        if self.fitting_context.simultaneous_fitting_mode:
+            self.fitting_context.simultaneous_fit_functions_for_undo.append(self._clone_function(
+                self.fitting_context.simultaneous_fit_function))
+            self.fitting_context.simultaneous_fit_statuses_for_undo.append(self.current_fit_status)
+            self.fitting_context.simultaneous_chi_squared_for_undo.append(self.current_chi_squared)
+            self.fitting_context.global_parameters_for_undo.append(self.fitting_context.global_parameters)
         else:
-            self._create_multi_domain_function_using(new_functions)
-            self._add_global_ties_to_simultaneous_function()
+            super().save_current_fit_function_to_undo_data()
 
-        super().reset_fit_functions(new_functions)
+    def clear_undo_data(self) -> None:
+        """Clears the saved simultaneous fit functions, and the saved single fit functions defined in the base class."""
+        super().clear_undo_data()
+        self.fitting_context.simultaneous_fit_functions_for_undo = []
+        self.fitting_context.simultaneous_fit_statuses_for_undo = []
+        self.fitting_context.simultaneous_chi_squared_for_undo = []
+        self.fitting_context.global_parameters_for_undo = []
 
     def _create_multi_domain_function_using(self, domain_functions: list) -> None:
         """Creates a new MultiDomainFunction using the provided functions corresponding to a domain each."""

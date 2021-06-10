@@ -88,7 +88,7 @@ class ResultsTabPresenter(QObject):
         self.view.set_fit_function_names(self.model.fit_functions())
         self._update_fit_results_view_on_new_fit()
         self._update_logs_view()
-        if self.model._fit_context.fit_list:
+        if self.model._fit_context.all_latest_fits():
             self.view.set_output_results_button_enabled(True)
         else:
             self.view.set_output_results_button_enabled(False)
@@ -96,10 +96,10 @@ class ResultsTabPresenter(QObject):
     def _get_workspace_list(self):
         fit_context = self.model._fit_context
         workspace_list = []
-        fit_list = fit_context.fit_list
+        fit_list = fit_context.all_latest_fits()
         if len(fit_list) == 0:
             return workspace_list, ''
-        for ii in range(1, fit_context._number_of_fits + 1):
+        for ii in range(1, len(fit_list) + 1):
             workspace_list.append(fit_list[-ii].parameter_workspace_name)
         return workspace_list, fit_list[len(fit_list) - 1].fit_function_name
 

@@ -89,7 +89,7 @@ class ResultsTabModel(object):
         format matches that of the ListSelectorPresenter class' model.
         """
         selection = {}
-        for index, fit in enumerate(self._fit_context.fit_list):
+        for index, fit in enumerate(self._fit_context.all_latest_fits()):
             if fit.fit_function_name != self.selected_fit_function():
                 continue
             name = fit.parameters.parameter_workspace_name
@@ -134,7 +134,7 @@ class ResultsTabModel(object):
         """
         self._raise_error_on_incompatible_selection(log_selection,
                                                     results_selection)
-        all_fits = self._fit_context.fit_list
+        all_fits = self._fit_context.all_latest_fits()
         results_table = self._create_empty_results_table(
             log_selection, results_selection, all_fits)
         for _, position in results_selection:
@@ -202,7 +202,7 @@ class ResultsTabModel(object):
         :param results_selection: The selected fit results
         :param results_selection: The selected log values
         """
-        all_fits = self._fit_context.fit_list
+        all_fits = self._fit_context.all_latest_fits()
         missing_msg = []
         for selection in results_selection:
             fit = all_fits[selection[1]]
@@ -221,7 +221,7 @@ class ResultsTabModel(object):
         Raise a RuntimeError if the result selection is invalid.
         :param results_selection: The selected fit results
         """
-        all_fits = self._fit_context.fit_list
+        all_fits = self._fit_context.all_latest_fits()
         nparams_selected = [
             len(all_fits[position].parameters)
             for _, position in results_selection
@@ -293,8 +293,9 @@ class ResultsTabModel(object):
         If there are fits present then set the selected function name or else
         clear it
         """
-        if len(self._fit_context) > 0:
-            function_name = self._fit_context.fit_list[-1].fit_function_name
+        all_fits = self._fit_context.all_latest_fits()
+        if len(all_fits) > 0:
+            function_name = all_fits[-1].fit_function_name
         else:
             function_name = None
 
@@ -309,7 +310,7 @@ class ResultsTabModel(object):
         :param results_selection: The list of selected results
         :return: The parameters for the table
         """
-        first_fit = self._fit_context.fit_list[results_selection[0][1]]
+        first_fit = self._fit_context.all_latest_fits()[results_selection[0][1]]
         return first_fit.parameters
 
 

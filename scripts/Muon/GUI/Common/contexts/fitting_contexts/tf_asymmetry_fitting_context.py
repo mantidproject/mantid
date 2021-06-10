@@ -13,6 +13,12 @@ class TFAsymmetryFittingContext(GeneralFittingContext):
     def __init__(self, allow_double_pulse_fitting: bool = False):
         super(TFAsymmetryFittingContext, self).__init__(allow_double_pulse_fitting)
 
+        # A list of FitInformation's detailing all the TF Asymmetry fits that have happened including the fits that have
+        # been overridden by an updated fit. The last TF Asymmetry fit performed is at the end of the list, and undoing
+        # will remove it.
+        self._tf_asymmetry_single_fits_history: list = []
+        self._tf_asymmetry_simultaneous_fits_history: list = []
+
         self._tf_asymmetry_mode: bool = False
 
         self._tf_asymmetry_single_functions: list = []
@@ -20,6 +26,54 @@ class TFAsymmetryFittingContext(GeneralFittingContext):
 
         self._normalisations_for_undo: list = []
         self._normalisations_fixed_for_undo: list = []
+
+    def all_latest_fits(self):
+        """Returns the latest unique fits for all fitting modes."""
+        latest_tf_single_fits = self._latest_unique_fits_in(self._tf_asymmetry_single_fits_history)
+        latest_tf_simultaneous_fits = self._latest_unique_fits_in(self._tf_asymmetry_simultaneous_fits_history)
+        return super().all_latest_fits() + latest_tf_single_fits + latest_tf_simultaneous_fits
+
+    @property
+    def active_fit_history(self):
+        """Returns the fit history for the currently active fitting mode."""
+        if self.tf_asymmetry_mode:
+            return self._tf_asymmetry_simultaneous_fits_history if self.simultaneous_fitting_mode else \
+                self._tf_asymmetry_single_fits_history
+        else:
+            return self._simultaneous_fits_history if self.simultaneous_fitting_mode else self._single_fits_history
+
+    @active_fit_history.setter
+    def active_fit_history(self, fit_history: list) -> None:
+        """Sets the fit history for the currently active fitting mode."""
+        if self.tf_asymmetry_mode:
+            if self.simultaneous_fitting_mode:
+                self._tf_asymmetry_simultaneous_fits_history = fit_history
+            else:
+                self._tf_asymmetry_single_fits_history = fit_history
+        else:
+            if self.simultaneous_fitting_mode:
+                self._simultaneous_fits_history = fit_history
+            else:
+                self._single_fits_history = fit_history
+
+    def clear(self, removed_fits: list = []):
+        """Removes all the stored Fits from the context when an ADS clear event happens."""
+        if len(removed_fits) == 0:
+            removed_fits = self.all_latest_fits()
+
+        self._tf_asymmetry_single_fits_history = []
+        self._tf_asymmetry_simultaneous_fits_history = []
+
+        self._normalisations_for_undo = []
+        self._normalisations_fixed_for_undo = []
+
+        super().clear(removed_fits)
+
+    def remove_workspace_by_name(self, workspace_name: str) -> None:
+        """Remove a Fit from the history when an ADS delete event happens on one of its output workspaces."""
+        self.remove_fit_by_name(self._tf_asymmetry_single_fits_history, workspace_name)
+        self.remove_fit_by_name(self._tf_asymmetry_simultaneous_fits_history, workspace_name)
+        super().remove_workspace_by_name(workspace_name)
 
     @property
     def tf_asymmetry_mode(self) -> bool:

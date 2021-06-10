@@ -137,7 +137,6 @@ class BasicFittingPresenter:
     def handle_undo_fit_clicked(self) -> None:
         """Handle when undo fit is clicked."""
         self.model.undo_previous_fit()
-        self.model.remove_latest_fit_from_context()
         self.view.set_number_of_undos(self.model.number_of_undos())
 
         self.update_fit_function_in_view_from_model()

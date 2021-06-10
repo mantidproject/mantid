@@ -297,19 +297,37 @@ class FittingContext(object):
     """
 
     def __init__(self):
-        self.fit_list: list = []
-
-        self._number_of_fits: int = 0
-        self._number_of_fits_cache: int = 0
-
         self.new_fit_results_notifier = Observable()
         self.fit_removed_notifier = Observable()
 
-    def __len__(self):
-        """
-        :return: The number of fits in the list
-        """
-        return len(self.fit_list)
+    def all_latest_fits(self) -> None:
+        """Returns the latest fits with unique fit output names for all fitting modes. Override in a child class."""
+        raise NotImplementedError("This needs to be overridden by a child class.")
+
+    @property
+    def active_fit_history(self) -> None:
+        """Returns the fit history for the currently active fitting mode. Override in a child class."""
+        raise NotImplementedError("This needs to be overridden by a child class.")
+
+    @active_fit_history.setter
+    def active_fit_history(self, fit_history: list) -> None:
+        """Sets the fit history for the currently active fitting mode. Override in a child class."""
+        raise NotImplementedError("This needs to be overridden by a child class.")
+
+    def clear(self, removed_fits: list = []):
+        """Removes all the stored Fits from the context."""
+        self.fit_removed_notifier.notify_subscribers(removed_fits)
+
+    def remove_overridden_fits(self) -> None:
+        """Removes the fits in the fit history that have been overridden by a newer fit."""
+        self.active_fit_history = self._latest_unique_fits_in(self.active_fit_history)
+
+    @staticmethod
+    def remove_fit_by_name(fits_history: list, workspace_name: str) -> None:
+        """Remove a Fit from the history when an ADS delete event happens on one of its output workspaces."""
+        for fit in reversed(fits_history):
+            if workspace_name in fit.output_workspace_names or workspace_name == fit.parameter_workspace_name:
+                fits_history.remove(fit)
 
     def add_fit_from_values(self,
                             parameter_workspace,
@@ -332,47 +350,16 @@ class FittingContext(object):
         Add a new fit to the context. Subscribers are notified of the update.
         :param fit: A new FitInformation object
         """
-        if fit not in self.fit_list:
-            self.fit_list.append(fit)
-            self._number_of_fits += 1
-        else:
-            self.update_fit(fit)
-
+        self.active_fit_history.append(fit)
         self.new_fit_results_notifier.notify_subscribers(fit)
-
-    def update_fit(self, updated_fit):
-        """
-        Updates fit parameters of a fit that is currently stored in the context
-        :param updated_fit: A FitInformation object
-        """
-        for fit in self.fit_list:
-            if updated_fit == fit:
-                fit._fit_parameters = updated_fit._fit_parameters
-                return
 
     def fit_function_names(self):
         """
         :return: a list of unique function names used in the fit
         """
-        return list(set([fit.fit_function_name for fit in self.fit_list]))
+        return list(set([fit.fit_function_name for fit in self.all_latest_fits()]))
 
-    def find_output_workspaces_for_input_workspace_name(
-            self, input_workspace_name):
-        """
-        Find the fits in the list whose input workspace matches
-        :param input_workspace_name: The name of the input_workspace
-        :return: A list of matching fits
-        """
-        workspace_list = []
-        for fit in self.fit_list:
-            for index, workspace in enumerate(fit.input_workspaces):
-                if workspace == input_workspace_name:
-                    workspace_list.append(fit.output_workspace_names[index])
-
-        return workspace_list
-
-    def find_fit_for_input_workspace_list_and_function(
-            self, input_workspace_list, fit_function_name):
+    def find_fit_for_input_workspace_list_and_function(self, input_workspace_list, fit_function_name):
         """
         Find the fit in the list whose input workspace matches the input workspace list
         and the specified fit function name
@@ -380,33 +367,11 @@ class FittingContext(object):
         :param fit_function_name: Fit function name
         :return: A matching fit
         """
-        for fit in self.fit_list:
+        for fit in self.all_latest_fits():
             if fit.input_workspaces == input_workspace_list and fit.fit_function_name == fit_function_name:
                 return fit
         else:
             return None
-
-    def remove_workspace_by_name(self, workspace_name):
-        list_of_fits_to_remove = []
-        for fit in self.fit_list:
-            if workspace_name in fit.output_workspace_names or workspace_name == fit.parameter_workspace_name:
-                self._number_of_fits_cache = 0
-                list_of_fits_to_remove.append(fit)
-
-        for fit in list_of_fits_to_remove:
-            index = self.fit_list.index(fit)
-            if index >= len(self.fit_list) - self._number_of_fits:
-                self._number_of_fits -= 1
-            self.fit_list.remove(fit)
-
-    def remove_fits_from_stored_fit_list(self, fits):
-        removed_fits = []
-        for fit in fits:
-            if fit in self.fit_list:
-                self.fit_list.remove(fit)
-                removed_fits += [fit]
-                self._number_of_fits -= 1
-        self.fit_removed_notifier.notify_subscribers(removed_fits)
 
     def log_names(self, filter_fn=None):
         """
@@ -416,32 +381,25 @@ class FittingContext(object):
         FitInformation.log_names
         :return: A list of names of logs
         """
-        return [
-            name for fit in self.fit_list for name in fit.log_names(filter_fn)
-        ]
+        return [name for fit in self.all_latest_fits() for name in fit.log_names(filter_fn)]
 
-    def clear(self):
-        fits_to_remove = self.fit_list.copy()
-        self.remove_fits_from_stored_fit_list(fits_to_remove)
+    def _latest_unique_fits_in(self, fits_history: list) -> list:
+        """Returns a list of fits which all have unique fit output workspaces, and are the most recent of their kind."""
+        if len(fits_history) == 0:
+            return fits_history
 
-    def remove_all_fits(self):
-        removed_fits = self.fit_list
-        self.fit_list = []
-        self._number_of_fits = 0
-        self.fit_removed_notifier.notify_subscribers(removed_fits)
+        latest_fits = []
+        # Reversed because the fits at the end of the list are the most recently performed fits.
+        for fit in reversed(fits_history):
+            if self._is_unique_fit(fit, latest_fits):
+                latest_fits.append(fit)
+        latest_fits.reverse()
+        return latest_fits
 
-    def remove_latest_fit(self):
-        if self.fit_list:
-            removed_fit = self.fit_list[-1]
-            self.fit_list = self.fit_list[:-1]
-            self._number_of_fits -= 1
-            self.fit_removed_notifier.notify_subscribers([removed_fit])
-
-    @property
-    def number_of_fits(self):
-        return self._number_of_fits
-
-    @number_of_fits.setter
-    def number_of_fits(self, value):
-        self._number_of_fits_cache = self._number_of_fits
-        self._number_of_fits = value
+    @staticmethod
+    def _is_unique_fit(fit: FitInformation, unique_fits: list) -> bool:
+        """Returns true if the Fit output does not already exist in the unique_fits list."""
+        for unique_fit in unique_fits:
+            if fit.output_workspace_names == unique_fit.output_workspace_names:
+                return False
+        return True

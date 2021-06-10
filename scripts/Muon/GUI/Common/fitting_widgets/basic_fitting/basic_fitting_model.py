@@ -195,6 +195,19 @@ class BasicFittingModel:
         """Returns the number of previous single fits that are saved."""
         return len(self.fitting_context.single_fit_functions_for_undo)
 
+    def undo_previous_fit(self) -> None:
+        """Undoes the previous fit using the saved undo data."""
+        if self.number_of_undos() > 0:
+            self.fitting_context.active_fit_history.pop()
+            undo_dataset_index = self.fitting_context.dataset_indices_for_undo.pop()
+            undo_fit_function = self.fitting_context.single_fit_functions_for_undo.pop()
+            undo_fit_status = self.fitting_context.fit_statuses_for_undo.pop()
+            undo_chi_squared = self.fitting_context.chi_squared_for_undo.pop()
+
+            self.fitting_context.single_fit_functions[undo_dataset_index] = undo_fit_function
+            self.fitting_context.fit_statuses[undo_dataset_index] = undo_fit_status
+            self.fitting_context.chi_squared[undo_dataset_index] = undo_chi_squared
+
     def save_current_fit_function_to_undo_data(self) -> None:
         """Saves the current single fit function and other data before performing a fit."""
         self.fitting_context.dataset_indices_for_undo.append(self.fitting_context.current_dataset_index)
@@ -205,6 +218,7 @@ class BasicFittingModel:
 
     def clear_undo_data(self) -> None:
         """Clears the undo fit functions and other data for all previous fits."""
+        self.fitting_context.remove_overridden_fits()
         self.fitting_context.dataset_indices_for_undo = []
         self.fitting_context.single_fit_functions_for_undo = []
         self.fitting_context.fit_statuses_for_undo = []
@@ -215,6 +229,7 @@ class BasicFittingModel:
         current_dataset_index = self.fitting_context.current_dataset_index
         for i, dataset_index in reversed(list(enumerate(self.fitting_context.dataset_indices_for_undo))):
             if dataset_index == current_dataset_index:
+                del self.fitting_context.active_fit_history[i]
                 del self.fitting_context.dataset_indices_for_undo[i]
                 del self.fitting_context.single_fit_functions_for_undo[i]
                 del self.fitting_context.fit_statuses_for_undo[i]
@@ -368,28 +383,13 @@ class BasicFittingModel:
                 return x_lower, x_higher
         return self.current_start_x, self.current_end_x
 
-    def undo_previous_fit(self) -> None:
-        """Undoes the previous fit using the saved undo data."""
-        undo_dataset_index = self.fitting_context.dataset_indices_for_undo.pop()
-        undo_fit_function = self.fitting_context.single_fit_functions_for_undo.pop()
-        undo_fit_status = self.fitting_context.fit_statuses_for_undo.pop()
-        undo_chi_squared = self.fitting_context.chi_squared_for_undo.pop()
-
-        self.fitting_context.single_fit_functions[undo_dataset_index] = undo_fit_function
-        self.fitting_context.fit_statuses[undo_dataset_index] = undo_fit_status
-        self.fitting_context.chi_squared[undo_dataset_index] = undo_chi_squared
-
     def update_plot_guess(self) -> None:
         """Updates the guess plot using the current dataset and function."""
         self.fitting_context.guess_workspace_name = self._evaluate_plot_guess(self.plot_guess)
 
     def remove_all_fits_from_context(self) -> None:
         """Removes all fit results from the context."""
-        self.fitting_context.remove_all_fits()
-
-    def remove_latest_fit_from_context(self) -> None:
-        """Removes the most recent fit performed from the fitting context"""
-        self.fitting_context.remove_latest_fit()
+        self.fitting_context.clear()
 
     def reset_current_dataset_index(self) -> None:
         """Resets the current dataset index stored by the context."""
@@ -611,7 +611,6 @@ class BasicFittingModel:
         workspace_name, table_name, table_directory = self._add_single_fit_workspaces_to_ADS(input_workspace,
                                                                                              output_workspace,
                                                                                              covariance_matrix)
-
         self._add_fit_to_context(self._add_workspace_to_ADS(parameters_table, table_name, table_directory),
                                  input_workspace, [workspace_name])
 
