@@ -3,7 +3,7 @@
 # From https://stackoverflow.com/a/9107028 by https://stackoverflow.com/users/1184238/andrew-norrie
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-EXPECTED_MINICONDA_DIR_PATH=~/miniconda3
+EXPECTED_MINICONDA_DIR_PATH=$HOME/miniconda3
 EXPECTED_CONDA_PATH=$EXPECTED_MINICONDA_DIR_PATH/bin/conda
 
 # Ensure conda is installed
@@ -12,7 +12,7 @@ if [[ ! -f $EXPECTED_CONDA_PATH ]]; then
         # Download miniconda
         curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
     fi
-    sh Miniconda3-latest-Linux-x86_64.sh -b
+    sh Miniconda3-latest-Linux-x86_64.sh -b -p $EXPECTED_MINICONDA_DIR_PATH
     rm Miniconda3-latest-Linux-x86_64.sh
 fi
 
