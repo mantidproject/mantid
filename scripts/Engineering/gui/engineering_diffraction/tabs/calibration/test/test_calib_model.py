@@ -14,9 +14,6 @@ from testhelpers import assert_any_call_partial
 
 VANADIUM_NUMBER = "307521"
 CERIUM_NUMBER = "305738"
-INTEGRATED_WORKSPACE_NAME = "engggui_vanadium_integration"
-CURVES_WORKSPACE_NAME = "engggui_vanadium_curves"
-INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"
 TEST_PRM_FILE = "ENGINX_241391_236516_testall_banks.prm"
 class_path = "Engineering.gui.engineering_diffraction.tabs.calibration.model.CalibrationModel"
 file_path = "Engineering.gui.engineering_diffraction.tabs.calibration.model"
@@ -28,17 +25,16 @@ def _convert_units_returns(bank):
     elif bank == '2':
         return "engggui_calibration_bank_2"
     elif bank == 'cropped':
-        return "engggui_calibration_cropped"
+        return "engggui_calibration_Cropped"
 
 
 def _run_calibration_returns(single_output=False):
     calib = [{"difa": 0, "difc": 0, "tzero": 0}, {"difa": 0, "difc": 0, "tzero": 0}]
     calib_single = [{"difa": 0, "difc": 0, "tzero": 0}]
-    curves = [MagicMock(), MagicMock()]
     sample = MagicMock()
     if single_output:
-        return calib_single, curves, sample
-    return calib, curves, sample
+        return calib_single, sample
+    return calib, sample
 
 
 class CalibrationModelTest(unittest.TestCase):
@@ -55,12 +51,11 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".DeleteWorkspace")
     @patch(class_path + ".update_calibration_params_table")
     @patch(class_path + ".create_output_files")
-    @patch(file_path + ".vanadium_corrections.handle_van_curves")
     @patch(file_path + ".Load")
     @patch(file_path + ".path_handling.load_workspace")
     @patch(class_path + ".run_calibration")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_fetch_vanadium_is_called(self, van_corr, calibrate_alg, load_sample, load, handle_vc, output_files,
+    def test_fetch_vanadium_is_called(self, van_corr, calibrate_alg, load_sample, load, output_files,
                                       update_table, delet):
         van_corr.return_value = ("mocked_integration", "mocked_curves")
         calibrate_alg.return_value = _run_calibration_returns()
@@ -95,12 +90,11 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + ".create_output_files")
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    @patch(file_path + ".vanadium_corrections.handle_van_curves")
     @patch(file_path + ".Load")
     @patch(file_path + ".generate_tof_fit_dictionary")
     @patch(file_path + ".plot_tof_fit")
     @patch(class_path + ".run_calibration")
-    def test_plotting_check(self, calib, plot_tof, gen_tof, load, handle_vc, van, sample, output_files, update_table,
+    def test_plotting_check(self, calib, plot_tof, gen_tof, load, van, sample, output_files, update_table,
                             delete):
         calib.return_value = _run_calibration_returns()
         van.return_value = ("A", "B")
@@ -116,12 +110,11 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + ".create_output_files")
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    @patch(file_path + ".vanadium_corrections.handle_van_curves")
     @patch(file_path + ".Load")
     @patch(file_path + ".generate_tof_fit_dictionary")
     @patch(file_path + ".plot_tof_fit")
     @patch(class_path + ".run_calibration")
-    def test_plotting_check_cropped(self, calib, plot_tof_fit, gen_tof, load, handle_vc, van, sample,
+    def test_plotting_check_cropped(self, calib, plot_tof_fit, gen_tof, load, van, sample,
                                     output_files, update_table, delete):
         calib.return_value = _run_calibration_returns(single_output=True)
         van.return_value = ("A", "B")
@@ -137,11 +130,10 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + ".create_output_files")
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    @patch(file_path + ".vanadium_corrections.handle_van_curves")
     @patch(file_path + ".Load")
     @patch(file_path + ".plot_tof_fit")
     @patch(class_path + ".run_calibration")
-    def test_present_RB_number_results_in_user_output_files(self, calib, plot_tof, load, handle_vc, van, sample,
+    def test_present_RB_number_results_in_user_output_files(self, calib, plot_tof, load, van, sample,
                                                             output_files, update_table, delete):
         van.return_value = ("A", "B")
         calib.return_value = _run_calibration_returns()
@@ -157,11 +149,9 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + ".create_output_files")
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    @patch(file_path + ".vanadium_corrections.handle_van_curves")
     @patch(file_path + ".Load")
-    @patch(file_path + ".plot_tof_fit")
     @patch(class_path + ".run_calibration")
-    def test_absent_run_number_results_in_no_user_output_files(self, calib, plot_tof, load, handle_vc,
+    def test_absent_run_number_results_in_no_user_output_files(self, calib, load,
                                                                van, sample, output_files, update_table, delete):
         calib.return_value = _run_calibration_returns()
         van.return_value = ("A", "B")
@@ -172,11 +162,10 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + ".update_calibration_params_table")
     @patch(class_path + ".create_output_files")
     @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + ".vanadium_corrections.handle_van_curves")
     @patch(file_path + ".Load")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
     @patch(class_path + ".run_calibration")
-    def test_calibration_params_table_is_updated(self, calibrate_alg, vanadium_alg, load, handle_vc, load_sample,
+    def test_calibration_params_table_is_updated(self, calibrate_alg, vanadium_alg, load, load_sample,
                                                  output_files, update_table, delete):
         calibrate_alg.return_value = _run_calibration_returns()
         vanadium_alg.return_value = ("A", "B")
@@ -200,7 +189,8 @@ class CalibrationModelTest(unittest.TestCase):
                                        vanadium_path,
                                        "ENGINX",
                                        bank=None,
-                                       spectrum_numbers=None)
+                                       spectrum_numbers=None,
+                                       calfile=None)
 
         self.assertEqual(make_dirs.call_count, 1)
         self.assertEqual(write_file.call_count, 3)
@@ -233,7 +223,7 @@ class CalibrationModelTest(unittest.TestCase):
 
     def test_generate_output_file_name_for_cropped_bank(self):
         filename = self.model._generate_output_file_name("test/20.raw", "test/10.raw", "ENGINX",
-                                                         "cropped")
+                                                         "Cropped")
         self.assertEqual(filename, "ENGINX_20_10_Cropped.prm")
 
     def test_generate_output_file_name_for_invalid_bank(self):
@@ -265,22 +255,16 @@ class CalibrationModelTest(unittest.TestCase):
 
         self.assertEqual(ads.retrieve.call_count, 0)
 
-    @patch(file_path + ".RenameWorkspace")
-    @patch(file_path + ".ReplaceSpecialValues")
-    @patch(file_path + ".EnggEstimateFocussedBackground")
     @patch(file_path + ".DiffractionFocussing")
-    @patch(file_path + ".DeleteWorkspaces")
     @patch(file_path + ".ConvertUnits")
     @patch(file_path + ".ApplyDiffCal")
     @patch(file_path + ".NormaliseByCurrent")
     @patch(file_path + ".Load")
-    @patch(file_path + ".vanadium_corrections.handle_van_curves")
     @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".PDCalibration")
-    def test_run_calibration_no_bank_no_spec_nums(self, pdc, clone_ws, handle_vc, load, nbc, adc, conv, dw, df, eefb,
-                                                  rsv, rw):
+    def test_run_calibration_no_bank_no_spec_nums(self, pdc, clone_ws, load, nbc, adc, conv, df):
         conv.side_effect = [MagicMock(), MagicMock(), "focused_bank_1", "focused_bank_2"]
-        self.model.run_calibration("sample", "vanadium_ws", "vanadium_int", None, None, "full_calib_ws")
+        self.model.run_calibration("sample", None, None, None, "full_calib_ws")
 
         pdc.assert_any_call_partial(InputWorkspace="focused_bank_1",
                                     OutputCalibrationTable="engggui_calibration_bank_1")
@@ -288,49 +272,41 @@ class CalibrationModelTest(unittest.TestCase):
                                     OutputCalibrationTable="engggui_calibration_bank_2")
         self.assertEqual(2, pdc.call_count)
 
-    @patch(file_path + ".RenameWorkspace")
-    @patch(file_path + ".ReplaceSpecialValues")
-    @patch(file_path + ".EnggEstimateFocussedBackground")
     @patch(file_path + ".DiffractionFocussing")
-    @patch(file_path + ".DeleteWorkspaces")
     @patch(file_path + ".ConvertUnits")
     @patch(file_path + ".ApplyDiffCal")
     @patch(file_path + ".NormaliseByCurrent")
     @patch(file_path + ".Load")
-    @patch(file_path + ".vanadium_corrections.handle_van_curves")
     @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".PDCalibration")
-    def test_run_calibration_bank_no_spec_nums(self, pdc, clone_ws, handle_vc, load, nbc, adc, conv, dw, df, eefb, rsv,
-                                               rw):
+    def test_run_calibration_bank_no_spec_nums(self, pdc, clone_ws, load, nbc, adc, conv, df):
         conv.side_effect = [MagicMock(), MagicMock(), "focused_North"]
-        self.model.run_calibration("sample", "vanadium_ws", "vanadium_int", '1', None, "full_calib_ws")
+        self.model.run_calibration("sample", '1', None, None, "full_calib_ws")
 
         pdc.assert_any_call_partial(InputWorkspace="focused_North",
                                     OutputCalibrationTable="engggui_calibration_bank_1")
         self.assertEqual(1, pdc.call_count)
 
-    @patch(file_path + ".RenameWorkspace")
     @patch(file_path + ".create_custom_grouping_workspace")
-    @patch(file_path + ".ReplaceSpecialValues")
-    @patch(file_path + ".EnggEstimateFocussedBackground")
     @patch(file_path + ".DiffractionFocussing")
-    @patch(file_path + ".DeleteWorkspaces")
     @patch(file_path + ".ConvertUnits")
     @patch(file_path + ".ApplyDiffCal")
     @patch(file_path + ".NormaliseByCurrent")
     @patch(file_path + ".Load")
-    @patch(file_path + ".vanadium_corrections.handle_van_curves")
     @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".PDCalibration")
-    def test_run_calibration_no_bank_spec_nums(self, pdc, clone_ws, handle_vc, load, nbc, adc, conv, dw, df, eefb,
-                                               rsv, cgw, rw):
+    def test_run_calibration_no_bank_spec_nums(self, pdc, clone_ws, load, nbc, adc, conv, df,
+                                               cgw):
         conv.side_effect = [MagicMock(), MagicMock(), "focused_Cropped"]
         cgw.return_value = MagicMock()
-        self.model.run_calibration("sample", "vanadium_ws", "vanadium_int", None, '28-98', "full_calib_ws")
+        self.model.run_calibration("sample", None, None, '28-98', "full_calib_ws")
 
         pdc.assert_any_call_partial(InputWorkspace="focused_Cropped",
                                     OutputCalibrationTable="engggui_calibration_Cropped")
         self.assertEqual(1, pdc.call_count)
+
+    def test_run_calibration_custom_calfile(self):
+        self.assertTrue(False)
 
 
 if __name__ == '__main__':

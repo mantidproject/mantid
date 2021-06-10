@@ -37,14 +37,6 @@ class FocusModelTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
-    @patch(file_path + ".Load")
-    @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + ".vanadium_corrections.Ads.doesExist")
-    def test_focus_cancelled_if_van_wsp_missing(self, ads_exist, load_sample, load):
-        ads_exist.return_value = False
-        self.model.focus_run("307593", ["1", "2"], False, "ENGINX", "0", None, None)
-        self.assertEqual(load_sample.call_count, 0)
-
     @patch(file_path + ".DeleteWorkspace")
     @patch(file_path + ".Load")
     @patch(file_path + ".FocusModel._output_sample_logs")
@@ -53,12 +45,15 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".FocusModel._whole_inst_prefocus")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
-    def test_focus_run_for_each_bank(self, load_focus, run_focus, prefocus, output, ads, logs, load, delete):
-        ads.retrieve.return_value = "test_wsp"
+    @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
+    def test_focus_run_for_each_bank(self, fetch_van, load_focus, run_focus, prefocus, output, ads, logs, load, delete):
+        ads.retrieve.side_effect = [None, None, None, None, "engggui_calibration_bank_1", "engggui_calibration_bank_2"]
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
+        fetch_van.return_value = ("mocked_integ", "mocked_curves")
+        van_path = "fake/van/path"
 
-        self.model.focus_run(["305761"], banks, False, "ENGINX", "0", None, None)
+        self.model.focus_run(["305761"], van_path, banks, False, "ENGINX", "0", None, None)
 
         self.assertEqual(len(banks), run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
@@ -74,18 +69,22 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".FocusModel._whole_inst_prefocus")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
-    def test_focus_run_for_custom_spectra(self, load_focus, run_focus, prefocus, output, ads, logs, load, delete, cgw):
+    @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
+    def test_focus_run_for_custom_spectra(self,fetch_van, load_focus, run_focus, prefocus, output, ads, logs, load,
+                                          delete, cgw):
         ads.retrieve.return_value = "test_wsp"
         spectra = "20-50"
+        fetch_van.return_value = ("mocked_integ", "mocked_curves")
+        van_path = "fake/van/path"
         load_focus.return_value = "mocked_sample"
         cgw.return_value = "custom_grouping_wsp"
 
-        self.model.focus_run(["305761"], None, False, "ENGINX", "0", spectra, None)
+        self.model.focus_run(["305761"], van_path, None, False, "ENGINX", "0", spectra, None)
 
         self.assertEqual(1, run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
                                      "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "Cropped",
-                                     "test_wsp", DF_KWARG_CUSTOM, "engggui_calibration_Cropped")
+                                     "test_wsp", DF_KWARG_CUSTOM, "test_wsp")
 
     @patch(file_path + ".DeleteWorkspace")
     @patch(file_path + ".Load")
@@ -101,10 +100,11 @@ class FocusModelTest(unittest.TestCase):
                                         load, delete):
         ads.doesExist.return_value = True
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
+        van_path = "fake/van/path"
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
 
-        self.model.focus_run(["305761"], banks, True, "ENGINX", "0", None, None)
+        self.model.focus_run(["305761"], van_path, banks, True, "ENGINX", "0", None, None)
 
         self.assertEqual(1, plot_focus.call_count)
 

@@ -62,8 +62,9 @@ class FocusPresenter(object):
         :param spectrum_numbers: Optional parameter to crop to a specific list of spectrum numbers.
         :param custom_cal: Optional parameter to crop with a user-provided calibration file.
         """
+        van_path = self.current_calibration.get_vanadium()
         self.worker = AsyncTask(self.model.focus_run,
-                                (focus_paths, banks, plot_output, self.instrument, rb_num, spectrum_numbers,
+                                (focus_paths, van_path, banks, plot_output, self.instrument, rb_num, spectrum_numbers,
                                  custom_cal),
                                 error_cb=self._on_worker_error,
                                 finished_cb=self._on_worker_success)

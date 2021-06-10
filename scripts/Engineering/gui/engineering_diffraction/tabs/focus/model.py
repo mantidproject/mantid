@@ -14,11 +14,13 @@ from Engineering.gui.engineering_diffraction.settings.settings_helper import get
 from Engineering.EnggUtils import create_custom_grouping_workspace
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
     Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, DeleteWorkspace, ApplyDiffCal, \
-    ConvertUnits, ReplaceSpecialValues
+    ConvertUnits, ReplaceSpecialValues, EnggEstimateFocussedBackground
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
-FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
+FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_"
 CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
+REGION_CALIB_WS_PREFIX = "engggui_calibration_"
+CURVES_PREFIX = "engggui_curves_"
 
 NORTH_BANK_CAL = "EnginX_NorthBank.cal"
 SOUTH_BANK_CAL = "EnginX_SouthBank.cal"
@@ -33,10 +35,12 @@ class FocusModel(object):
     def get_last_path(self):
         return self._last_path
 
-    def focus_run(self, sample_paths, banks, plot_output, instrument, rb_num, spectrum_numbers, custom_cal):
+    def focus_run(self, sample_paths: list, vanadium_path: str, banks, plot_output: bool, instrument: str,
+                  rb_num, spectrum_numbers, custom_cal) -> None:
         """
         Focus some data using the current calibration.
         :param sample_paths: The paths to the data to be focused.
+        :param vanadium_path: Path to the vanadium file from the current calibration
         :param banks: The banks that should be focused.
         :param plot_output: True if the output should be plotted.
         :param instrument: The instrument that the data came from.
@@ -54,82 +58,65 @@ class FocusModel(object):
                 return
         else:
             full_calib_workspace = Ads.retrieve("full_inst_calib")
-        if not Ads.doesExist(vanadium_corrections.INTEGRATED_WORKSPACE_NAME) and not Ads.doesExist(
-                vanadium_corrections.CURVES_WORKSPACE_NAME):
-            return
-        integration_workspace = Ads.retrieve(vanadium_corrections.INTEGRATED_WORKSPACE_NAME)
-        curves_workspace = Ads.retrieve(vanadium_corrections.CURVES_WORKSPACE_NAME)
-        output_workspaces = []  # List of collated workspaces to plot.
-        df_kwarg, name, region_calib = None, None, None
-        if spectrum_numbers:
+        if not vanadium_corrections.check_workspaces_exist():
+            van_integration_ws, van_processed_inst_ws = vanadium_corrections.fetch_correction_workspaces(vanadium_path,
+                                                                                                         instrument)
+        else:
+            van_integration_ws = Ads.retrieve(vanadium_corrections.INTEGRATED_WORKSPACE_NAME)
+            van_processed_inst_ws = Ads.retrieve(vanadium_corrections.PROCESSED_WORKSPACE_NAME)
+
+        # identify region(s) of interest to focus over
+        regions_dict = dict()  # dict mapping str: roi -> dict: grouping kwarg
+        if (spectrum_numbers or custom_cal) is None:
+            # region of interest is one or both banks
+            for bank_no in banks:
+                df_kwarg = {"GroupingFileName": NORTH_BANK_CAL} if bank_no == '1' else \
+                    {"GroupingFileName": SOUTH_BANK_CAL}
+                bank = "bank_" + bank_no
+                regions_dict[bank] = df_kwarg
+        elif spectrum_numbers:
+            # region of interest to be specified by specific spectra range(s)
             inst_ws = path_handling.load_workspace(sample_paths[0])
             grp_ws = create_custom_grouping_workspace(spectrum_numbers, inst_ws)
             df_kwarg = {"GroupingWorkspace": grp_ws}
-            region_calib = "engggui_calibration_Cropped"
-            name = 'Cropped'
+            regions_dict["Cropped"] = df_kwarg
         elif custom_cal:
+            # region of interest to be specified by user provided custom calfile
             df_kwarg = {"GroupingFileName": custom_cal}
-            region_calib = "engggui_calibration_Custom"
-            name = 'Custom'
-        if df_kwarg:
-            # check correct region calibration exists
-            if not Ads.doesExist(region_calib):
-                logger.warning(f"Cannot focus as the region calibration workspace \"{region_calib}\" is not "
-                               f"present.")
+            regions_dict["Custom"] = df_kwarg
+        # check correct region calibration(s) exists
+        for region in regions_dict:
+            if not self._check_region_calib_ws_exists(region):
                 return
-            for sample_path in sample_paths:
-                sample_workspace = path_handling.load_workspace(sample_path)
-                run_no = path_handling.get_run_number_from_path(sample_path, instrument)
-                tof_output_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + name
-                dspacing_output_name = tof_output_name + "_dSpacing"
-                # perform prefocus operations on whole instrument workspace
-                prefocus_success = self._whole_inst_prefocus(sample_workspace, integration_workspace,
-                                                             full_calib_workspace)
-                if not prefocus_success:
-                    continue
-                # perform focus over chosen region of interest
-                self._run_focus(sample_workspace, tof_output_name, curves_workspace, df_kwarg, region_calib)
-                output_workspaces.append([tof_output_name])
-                self._save_output(instrument, sample_path, "Cropped", tof_output_name, rb_num)
-                self._save_output(instrument, sample_path, "Cropped", dspacing_output_name, rb_num)
-                self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
-            # remove created grouping workspace if present
-            if Ads.doesExist("grp_ws"):
-                DeleteWorkspace("grp_ws")
-        else:
-            for sample_path in sample_paths:
-                sample_workspace = path_handling.load_workspace(sample_path)
-                run_no = path_handling.get_run_number_from_path(sample_path, instrument)
-                workspaces_for_run = []
-                # perform prefocus operations on whole instrument workspace
-                prefocus_success = self._whole_inst_prefocus(sample_workspace, integration_workspace,
-                                                             full_calib_workspace)
-                if not prefocus_success:
-                    continue
-                # perform focus over chosen banks
-                for name in banks:
-                    tof_output_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)
-                    dspacing_output_name = tof_output_name + "_dSpacing"
-                    if name == '1':
-                        df_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
-                        region_calib = "engggui_calibration_bank_1"
-                    else:
-                        df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
-                        region_calib = "engggui_calibration_bank_2"
-                    # check correct region calibration exists
-                    if not Ads.doesExist(region_calib):
-                        logger.warning(f"Cannot focus as the region calibration workspace \"{region_calib}\" is not "
-                                       f"present.")
-                        return
-                    self._run_focus(sample_workspace, tof_output_name, curves_workspace, df_kwarg, region_calib)
-                    workspaces_for_run.append(tof_output_name)
-                    # Save the output to the file system.
-                    self._save_output(instrument, sample_path, name, tof_output_name, rb_num)
-                    self._save_output(instrument, sample_path, name, dspacing_output_name, rb_num)
-                output_workspaces.append(workspaces_for_run)
-                self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
-                DeleteWorkspace(sample_workspace)
 
+        # loop over samples provided, focus each over region(s) specified in regions_dict
+        output_workspaces = []  # List of collated workspaces to plot.
+        for sample_path in sample_paths:
+            sample_workspace = path_handling.load_workspace(sample_path)
+            run_no = path_handling.get_run_number_from_path(sample_path, instrument)
+            # perform prefocus operations on whole instrument workspace
+            prefocus_success = self._whole_inst_prefocus(sample_workspace, van_integration_ws,
+                                                         full_calib_workspace)
+            if not prefocus_success:
+                continue
+            sample_plots = []  # if both banks focused, pass list with both so plotted on same figure
+            for region, grouping_kwarg in regions_dict.items():
+                tof_output_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + region
+                dspacing_output_name = tof_output_name + "_dSpacing"
+                region_calib_ws = self._get_region_calib_ws(region)
+                curves = self._get_van_curves_for_roi(region, van_processed_inst_ws, grouping_kwarg)
+                # perform focus over chosen region of interest
+                self._run_focus(sample_workspace, tof_output_name, curves, grouping_kwarg,
+                                region_calib_ws)
+                sample_plots.append(tof_output_name)
+                self._save_output(instrument, sample_path, region, tof_output_name, rb_num)
+                self._save_output(instrument, sample_path, region, dspacing_output_name, rb_num)
+                self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
+            output_workspaces.append(sample_plots)
+            DeleteWorkspace(sample_workspace)
+        # remove created grouping workspace if present
+        if Ads.doesExist("grp_ws"):
+            DeleteWorkspace("grp_ws")
         # Plot the output
         if plot_output:
             for ws_names in output_workspaces:
@@ -162,22 +149,23 @@ class FocusModel(object):
     @staticmethod
     def _run_focus(input_workspace,
                    tof_output_name,
-                   vanadium_curves_ws,
-                   df_kwarg,
+                   curves,
+                   grouping_kwarg,
                    region_calib) -> None:
         """Focus the processed full instrument workspace over the chosen region of interest
         :param input_workspace: Processed full instrument workspace converted to dSpacing
         :param tof_output_name: Name for the time-of-flight output workspace
-        :param vanadium_curves_ws: Workspace containing the vanadium curves
-        :param df_kwarg: kwarg to pass to DiffractionFocussing specifying the region of interest
+        :param curves: Workspace containing the vanadium curves for this region of interest
+        :param grouping_kwarg: kwarg to pass to DiffractionFocussing specifying the region of interest
         :param region_calib: Region of interest calibration workspace (table ws output from PDCalibration)
         """
         # rename workspace prior to focussing to avoid errors later
         dspacing_output_name = tof_output_name + "_dSpacing"
-        # focus over specified region of interest
+        # focus sample over specified region of interest
         focused_sample = DiffractionFocussing(InputWorkspace=input_workspace, OutputWorkspace=dspacing_output_name,
-                                              **df_kwarg)
-        curves_rebinned = RebinToWorkspace(WorkspaceToRebin=vanadium_curves_ws, WorkspaceToMatch=focused_sample)
+                                              **grouping_kwarg)
+        curves_rebinned = RebinToWorkspace(WorkspaceToRebin=curves, WorkspaceToMatch=focused_sample)
+        # flux correction - divide focused sample data by rebinned focused vanadium curve data
         Divide(LHSWorkspace=focused_sample, RHSWorkspace=curves_rebinned, OutputWorkspace=focused_sample,
                AllowDifferentNumberSpectra=True)
         # apply calibration from specified region of interest
@@ -185,6 +173,52 @@ class FocusModel(object):
         # output in both dSpacing and TOF
         ConvertUnits(InputWorkspace=focused_sample, OutputWorkspace=tof_output_name, Target='TOF')
         DeleteWorkspace(curves_rebinned)
+
+    @staticmethod
+    def _get_van_curves_for_roi(region: str, van_processed_inst_ws, grouping_kwarg: dict):  # -> Workspace
+        """
+        Retrieve vanadium curves for this roi from the ADS if they exist, create them if not
+        :param region: String describing region of interest
+        :param van_processed_inst_ws: Processed instrument workspace of this vanadium run
+        :param grouping_kwarg: Keyword argument defining roi to pass to DiffractionFocussing
+        :return: Curves workspace for this roi
+        """
+        curves_roi_name = CURVES_PREFIX + region
+        # check if van curves for roi in ADS (should exist if not first run in session)
+        if Ads.doesExist(curves_roi_name):
+            return Ads.retrieve(curves_roi_name)
+        else:
+            # focus processed instrument ws over specified region of interest, iot produce vanadium curves for roi
+            focused_curves = DiffractionFocussing(InputWorkspace=van_processed_inst_ws, OutputWorkspace=curves_roi_name,
+                                                  **grouping_kwarg)
+            EnggEstimateFocussedBackground(InputWorkspace=focused_curves,
+                                           OutputWorkspace=focused_curves,
+                                           NIterations='15', XWindow=0.03)
+            return focused_curves
+
+    @staticmethod
+    def _get_region_calib_ws(region: str):  # -> Workspace
+        """
+        Retrieve region calibration workspace from the ADS
+        :param region: String describing region of interest
+        :return: Region calibration workspace
+        """
+        ws_name = REGION_CALIB_WS_PREFIX + region
+        return Ads.retrieve(ws_name)
+
+    @staticmethod
+    def _check_region_calib_ws_exists(region: str) -> bool:
+        """
+        Check that the required workspace for use in focussing the provided region of interest exist in the ADS
+        :param region: String describing region of interest
+        :return: True if present, False if not
+        """
+        region_ws_name = REGION_CALIB_WS_PREFIX + region
+        present = Ads.doesExist(region_ws_name)
+        if not present:
+            logger.warning(f"Cannot focus as the region calibration workspace \"{region_ws_name}\" is not "
+                           f"present.")
+        return present
 
     @staticmethod
     def _plot_focused_workspaces(focused_workspaces):
