@@ -355,7 +355,7 @@ MatrixWorkspace_sptr GetEi2::extractSpectrum(size_t ws_index, const double start
 
 /**
  * Calculate the width of the peak within the given region
- * @param data_ws :: The workspace congaing the window around the peak
+ * @param data_ws :: The workspace containing the window around the peak
  * @param prominence :: The factor that the peak must be above the error to
  * count as a peak
  * @param peak_x :: An output vector containing just the X values of the peak
@@ -532,8 +532,10 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
                       << "half-height point will not be as accurate.\n";
       ip1--;
     }
-    // similarly, noise may cause two points around the
-    while (peak_y[ip1] == peak_y[ip2]) { // TODO: should be smoothing with running average here
+    // Similarly, noise may cause the points at ip1 and ip2 around the half-height region to have the
+    // same y-values. If the values of y at ip1 and ip2 are equal, it will result in a divide-by-zero
+    // in the calculation of xp_hh below. Shift the index ip1 until the heights are no longer equal.
+    while (peak_y[ip1] == peak_y[ip2]) {
       g_log.warning() << "A peak with a constant values on the trailing edge has "
                          "been found. The estimation of the "
                       << "half-height point will not be as accurate.\n";
@@ -575,7 +577,10 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
                       << "half-height point will not be as accurate.\n";
       im1++;
     }
-    while (peak_y[im1] == peak_y[im2]) { // TODO: should be smoothing with running average here
+    // Similarly, noise may cause the points at im1 and im2 around the half-height region to have the
+    // same y-values. If the values of y at im1 and im2 are equal, it will result in a divide-by-zero
+    // in the calculation of xp_hh below. Shift the index im1 until the heights are no longer equal.
+    while (peak_y[im1] == peak_y[im2]) {
       g_log.warning() << "A peak with a constant values on the rising edge has "
                          "been found. The estimation of the "
                       << "half-height point will not be as accurate.\n";
