@@ -9,6 +9,8 @@ from mantid.api import *
 from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType
 import mantid.simpleapi as mantid
 from mantid.simpleapi import AnalysisDataService as ADS
+from matplotlib import gridspec
+import matplotlib.pyplot as plt
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 
@@ -96,6 +98,44 @@ def generate_tof_fit_dictionary(bank, cal_name=None) -> dict:
 
     return {'x': expected_d_peaks_x, 'y': fitted_tof_peaks_y, 'e': tof_peaks_error_e, 'y2': calculated_tof_peaks_y2,
             'r': residuals}
+
+
+def plot_tof_fit(plot_dicts: list, regions: list) -> None:
+    """
+    Plot fitted tof peaks against calculated tof peaks to show quality of calibration. Residuals also plotted.
+    :param regions: list of string names of regions of interest calibrated
+    :param plot_dicts: list of dictionaries containing data to plot, see EnggUtils.generate_tof_fit_dictionary
+    :return: None
+    """
+    def _add_plot_to_axes(ax, plot_dict, bank):
+        ax.errorbar(plot_dict['x'], plot_dict['y'], yerr=plot_dict['e'], capsize=2, marker=".", color='b',
+                    label="Peaks Fitted", ls="None")
+        ax.plot(plot_dict['x'], plot_dict['y2'], linestyle="-", marker="None", color='r', label="TOF Quadratic Fit")
+        ax.set_title("Engg Gui TOF Peaks " + str(bank))
+        ax.legend()
+        ax.set_xlabel("")  # hide here as set automatically
+        ax.set_ylabel("Fitted Peaks Centre (TOF, \u03BCs)")
+
+    def _add_residuals_to_axes(ax, plot_dict):
+        ax.errorbar(plot_dict['x'], plot_dict['r'], yerr=plot_dict['e'], color='b', marker='.', capsize=2, ls="None")
+        ax.axhline(color='r')
+        ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
+        ax.set_ylabel("Residuals (TOF, \u03BCs)")
+
+    n_plots = len(regions)
+
+    # Create plot
+    fig = plt.figure()
+    gs = gridspec.GridSpec(2, n_plots)
+    bank_axes = [fig.add_subplot(gs[0, n], projection="mantid") for n in range(n_plots)]
+    residuals_axes = [fig.add_subplot(gs[1, n], projection="mantid") for n in range(n_plots)]
+
+    for ax, plot_dict, bank in zip(bank_axes, plot_dicts, regions):
+        _add_plot_to_axes(ax, plot_dict, bank)
+    for ax, plot_dict in zip(residuals_axes, plot_dicts):
+        _add_residuals_to_axes(ax, plot_dict)
+    fig.tight_layout()
+    fig.show()
 
 
 def convert_single_value_dSpacing_to_TOF(d, diff_consts_ws):
