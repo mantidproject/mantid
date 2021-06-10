@@ -48,7 +48,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
-                            CadmiumTransmissionInputWorkspace='cadmium_ws_1', BeamInputWorkspace='beam_ws_1',)
+                            CadmiumTransmissionWorkspace='cadmium_ws_1', EmptyBeamWorkspace='beam_ws_1')
         self._check_output(mtd['quartz_transmission'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self.assertAlmostEqual(mtd['quartz_transmission_1'].readY(0)[0], 0.692, delta=1e-3)
         self._check_process_flag(mtd['quartz_transmission'], 'Transmission')
@@ -66,8 +66,8 @@ class PolDiffILLReductionTest(unittest.TestCase):
     def test_quartz(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
-                            BeamInputWorkspace='beam_ws_1')
-        PolDiffILLReduction(Run='396939', ProcessAs='Quartz', TransmissionInputWorkspace='quartz_transmission_1',
+                            EmptyBeamWorkspace='beam_ws_1')
+        PolDiffILLReduction(Run='396939', ProcessAs='Quartz', Transmission='quartz_transmission_1',
                             OutputTreatment='Average', OutputWorkspace='quartz')
         self._check_output(mtd['quartz'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['quartz'], 'Quartz')
@@ -88,7 +88,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             'ContainerChemicalFormula': 'Al', 'ContainerDensity': 2.7,
                             'ContainerInnerRadius': 0.1, 'ContainerOuterRadius': 2.51, 'EventsPerPoint':1000}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium_annulus',
-                            EmptyInputWorkspace='container_ws',
+                            EmptyContainerWorkspace='container_ws',
                             SampleAndEnvironmentProperties=sampleProperties,
                             SelfAttenuationMethod='MonteCarlo',
                             SampleGeometry='Annulus',

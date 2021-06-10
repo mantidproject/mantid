@@ -41,11 +41,11 @@ class PolDiffILLReduction(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
         process = self.getPropertyValue('ProcessAs')
-        if process == 'Transmission' and self.getProperty('BeamInputWorkspace').isDefault:
-            issues['BeamInputWorkspace'] = 'Beam input workspace is mandatory for transmission calculation.'
+        if process == 'Transmission' and self.getProperty('EmptyBeamWorkspace').isDefault:
+            issues['EmptyBeamWorkspace'] = 'Empty beam workspace input is mandatory for transmission calculation.'
 
-        if process == 'Quartz' and self.getProperty('TransmissionInputWorkspace').isDefault:
-            issues['TransmissionInputWorkspace'] = 'Quartz transmission is mandatory for polarisation correction calculation.'
+        if process == 'Quartz' and self.getProperty('Transmission').isDefault:
+            issues['Transmission'] = 'Quartz transmission is mandatory for polarisation correction calculation.'
 
         if process == 'Sample' or process == 'Vanadium':
             if len(self.getProperty('SampleAndEnvironmentProperties').value) == 0:
@@ -111,51 +111,51 @@ class PolDiffILLReduction(PythonAlgorithm):
         scan = EnabledWhenProperty(reduction, EnabledWhenProperty(cadmium, empty, LogicOperator.Or),
                                    LogicOperator.Or)
 
-        self.declareProperty(WorkspaceGroupProperty('CadmiumInputWorkspace', '',
+        self.declareProperty(WorkspaceGroupProperty('CadmiumWorkspace', '',
                                                     direction=Direction.Input,
                                                     optional=PropertyMode.Optional),
                              doc='The name of the cadmium workspace group.')
 
-        self.setPropertySettings('CadmiumInputWorkspace',
+        self.setPropertySettings('CadmiumWorkspace',
                                  EnabledWhenProperty(quartz,
                                                      EnabledWhenProperty(vanadium, sample, LogicOperator.Or),
                                                      LogicOperator.Or))
 
-        self.declareProperty(MatrixWorkspaceProperty('BeamInputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('EmptyBeamWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='The name of the empty beam input workspace.')
 
-        self.setPropertySettings('BeamInputWorkspace', transmission)
+        self.setPropertySettings('EmptyBeamWorkspace', transmission)
 
-        self.declareProperty(MatrixWorkspaceProperty('CadmiumTransmissionInputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('CadmiumTransmissionWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='The name of the cadmium transmission input workspace.')
 
-        self.setPropertySettings('CadmiumTransmissionInputWorkspace', EnabledWhenProperty(transmission, beam,
+        self.setPropertySettings('CadmiumTransmissionWorkspace', EnabledWhenProperty(transmission, beam,
                                                                                           LogicOperator.Or))
 
-        self.declareProperty(MatrixWorkspaceProperty('TransmissionInputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('Transmission', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='The name of the transmission input workspace.')
 
-        self.setPropertySettings('TransmissionInputWorkspace', reduction)
+        self.setPropertySettings('Transmission', reduction)
 
-        self.declareProperty(WorkspaceGroupProperty('EmptyInputWorkspace', '',
+        self.declareProperty(WorkspaceGroupProperty('EmptyContainerWorkspace', '',
                                                     direction=Direction.Input,
                                                     optional=PropertyMode.Optional),
                              doc='The name of the empty (container) workspace.')
 
-        self.setPropertySettings('EmptyInputWorkspace', reduction)
+        self.setPropertySettings('EmptyContainerWorkspace', reduction)
 
-        self.declareProperty(WorkspaceGroupProperty('QuartzInputWorkspace', '',
+        self.declareProperty(WorkspaceGroupProperty('QuartzWorkspace', '',
                                                     direction=Direction.Input,
                                                     optional=PropertyMode.Optional),
                              doc='The name of the polarisation efficiency correction workspace.')
 
-        self.setPropertySettings('QuartzInputWorkspace',
+        self.setPropertySettings('QuartzWorkspace',
                                  EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
         self.declareProperty(name="OutputTreatment",
@@ -301,7 +301,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _subtract_background(self, ws, empty_ws, transmission_ws):
         """Subtracts empty container and cadmium absorber scaled by transmission."""
-        cadmium_ws = self.getPropertyValue('CadmiumInputWorkspace')
+        cadmium_ws = self.getPropertyValue('CadmiumWorkspace')
         if cadmium_ws == "":
             return ws
         unit_ws = 'unit_ws'
@@ -742,13 +742,13 @@ class PolDiffILLReduction(PythonAlgorithm):
         if process in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
                 self._merge_polarisations(ws, average_detectors=True)
-            cadmium_transmission_ws = self.getPropertyValue('CadmiumTransmissionInputWorkspace')
+            cadmium_transmission_ws = self.getPropertyValue('CadmiumTransmissionWorkspace')
             if cadmium_transmission_ws:
                 Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_transmission_ws, OutputWorkspace=ws)
             monID = 100001 # monitor 2
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=ws)
             if process in ['Transmission']:
-                beam_ws = self.getPropertyValue('BeamInputWorkspace')
+                beam_ws = self.getPropertyValue('EmptyBeamWorkspace')
                 progress.report('Calculating transmission')
                 self._calculate_transmission(ws, beam_ws)
         else:
@@ -756,10 +756,10 @@ class PolDiffILLReduction(PythonAlgorithm):
             self._normalise(ws)
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
-            empty_ws = self.getPropertyValue('EmptyInputWorkspace')
-            if not self.getProperty('EmptyInputWorkspace').isDefault and not self.getProperty('TransmissionInputWorkspace').isDefault:
+            empty_ws = self.getPropertyValue('EmptyBeamWorkspace')
+            if not self.getProperty('EmptyBeamWorkspace').isDefault and not self.getProperty('TransmissionInputWorkspace').isDefault:
                 # Subtracts background if the workspaces for empty container and transmission are provided
-                transmission_ws = self.getPropertyValue('TransmissionInputWorkspace')
+                transmission_ws = self.getPropertyValue('Transmission')
                 progress.report('Subtracting backgrounds')
                 self._subtract_background(ws, empty_ws, transmission_ws)
 
@@ -768,7 +768,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 self._calculate_polarising_efficiencies(ws)
 
             if process in ['Vanadium', 'Sample']:
-                pol_eff_ws = self.getPropertyValue('QuartzInputWorkspace')
+                pol_eff_ws = self.getPropertyValue('QuartzWorkspace')
                 if pol_eff_ws:
                     progress.report('Applying polarisation corrections')
                     self._apply_polarisation_corrections(ws, pol_eff_ws)
