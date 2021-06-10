@@ -58,7 +58,7 @@ terminate_xvfb_sessions
 # System discovery
 ###############################################################################
 USE_CORE_DUMPS=true
-if [[ ${JOB_NAME} == *master-conda* ]]; then
+if [[ ${JOB_NAME} == *master_conda* ]]; then
     ON_CONDA=true
     elif [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${NODE_LABELS} == *scilin7* ]]; then
     ON_RHEL7=true
