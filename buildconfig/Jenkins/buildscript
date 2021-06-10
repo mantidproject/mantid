@@ -97,7 +97,7 @@ git clean -d -x --force --exclude=${BUILD_DIR_REL} --exclude=".Xauthority-*"
 # Print out the versions of things we are using
 ###############################################################################
 # we use cmake3 on rhel because cmake is too old
-if [ $(command -v cmake3) ] && [[ !$ON_CONDA ]]; then
+if [ $(command -v cmake3) ] && [[ ! $ON_CONDA ]]; then
     CMAKE_EXE=cmake3
     CPACK_EXE=cpack3
     CTEST_EXE=ctest3

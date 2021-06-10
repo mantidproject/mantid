@@ -3,8 +3,11 @@
 # From https://stackoverflow.com/a/9107028 by https://stackoverflow.com/users/1184238/andrew-norrie
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+EXPECTED_MINICONDA_DIR_PATH=~/miniconda3
+EXPECTED_CONDA_PATH=$EXPECTED_MINICONDA_DIR_PATH/bin/conda
+
 # Ensure conda is installed
-if ! conda --version; then
+if [[ ! -f $EXPECTED_CONDA_PATH ]]; then
     if [[ ! -f Miniconda3-latest-Linux-x86_64.sh ]]; then
         # Download miniconda
         curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -12,9 +15,6 @@ if ! conda --version; then
     sh Miniconda3-latest-Linux-x86_64.sh -b
     rm Miniconda3-latest-Linux-x86_64.sh
 fi
-
-EXPECTED_MINICONDA_DIR_PATH=~/miniconda3
-EXPECTED_CONDA_PATH=$EXPECTED_MINICONDA_DIR_PATH/bin/conda
 
 # With miniconda we can grab the mantid environment if it doesn't already exist
 ENVS=$($EXPECTED_CONDA_PATH env list)
