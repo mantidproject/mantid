@@ -152,6 +152,9 @@ class CodeEditorTabWidget(QTabWidget):
         if self.last_tab_clicked < 0:
             return
 
+        if Qt.MiddleButton == event.button():
+            self.tabCloseRequested.emit(self.last_tab_clicked)
+        
         QTabWidget(self).mousePressEvent(event)
 
     def tab_was_clicked(self, tab_index):

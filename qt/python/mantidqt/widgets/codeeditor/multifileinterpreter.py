@@ -156,7 +156,7 @@ class MultiPythonFileInterpreter(QWidget):
             line_count = content.count(linesep)
             interpreter.editor.setCursorPosition(line_count,0)
 
-        # Replace the button on the tab bar so icon isn't weird.
+        # Replace close button with mdi.close icon to improve OS visual consistency
         close_button = QPushButton(self)
         close_button.setFlat(True)
         close_button.setIcon(get_icon("mdi.close", "black", 1.35))
