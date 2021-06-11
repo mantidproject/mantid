@@ -242,6 +242,11 @@ measured with empty container and cadmium absorber, respectively.
 
 In the case where either absorber or empty container inputs are not provided, this correction is not performed.
 
+The data can be processed individually for all polarisation orientations available in the provided sample, or alternatively, the processing is done on averaged
+data. To process data averaged over polarisation orienantions, `OutputTreatment` property needs to be set to `AveragePol`. The alternative averaging is done
+over twoTheta positions of detectors, when `OutputTreatment` is set to `AverageTwoTheta`. In the latter case, the data is processed individually and averaged
+after polarisation correction is calculated.
+
 Finally, the polariser-analyser efficiency can be calculated, using the following formula:
 
 .. math:: \phi = \frac{\dot{I_{B}}(00) - \dot{I_{B}}(01)}{(2f_{p}-1) \dot{I_{B}}(00) + \dot{I_{B}}(01)},
@@ -316,7 +321,7 @@ Below is the relevant workflow diagram describing reduction steps of the quartz 
         CadmiumWorkspace='cadmium_ws',
         EmptyContainerWorkspace='empty_ws',
         Transmission='quartz_transmission',
-        OutputTreatment='Average',
+        OutputTreatment='AveragePol',
         ProcessAs='Quartz'
     )
 
@@ -353,7 +358,9 @@ nuclear-spin-incoherent cross-section can be derived, this cross-section can be 
 In this case, the vanadium cross-section is unnecessary.
 
 For the best results of using the reduced vanadium data as input for sample data normalisation, the `OutputTreatment` property of the
-:ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` algorithm needs to be set to `Sum`.
+:ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` algorithm needs to be set to `Sum`. Alternatively, it is possible to inspect data
+for diagnostic purposes by setting the `OutputTreatment` property to either `AveragePol` for averaging over polarisation orientations,
+or `AverageTwoTheta` to obtain an average over twoTheta positions.
 
 
 Reduction workflow
@@ -538,7 +545,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
         CadmiumWorkspace='cadmium_ws',
         EmptyContainerWorkspace='empty_ws',
         Transmission='quartz_transmission',
-        OutputTreatment='Average',
+        OutputTreatment='AveragePol',
         ProcessAs='Quartz'
     )
 
@@ -724,7 +731,7 @@ Sample normalisation
         CadmiumWorkspace='cadmium_ws',
         EmptyContainerWorkspace='empty_ws',
         Transmission='quartz_transmission',
-        OutputTreatment='Average',
+        OutputTreatment='AveragePol',
         ProcessAs='Quartz'
     )
 

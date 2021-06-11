@@ -55,7 +55,14 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
     def d7_reduction_test_vanadium_average(self):
         PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_average',
                             SampleAndEnvironmentProperties=self._sampleProperties,
-                            OutputTreatment='Average')
+                            OutputTreatment='AveragePol')
+        self._check_output(mtd['vanadium_average'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['vanadium_average'], 'Vanadium')
+
+    def d7_reduction_test_vanadium_average_2theta(self):
+        PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_average',
+                            SampleAndEnvironmentProperties=self._sampleProperties,
+                            OutputTreatment='AverageTwoTheta')
         self._check_output(mtd['vanadium_average'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_average'], 'Vanadium')
 
@@ -68,7 +75,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws')
         PolDiffILLReduction(Run='396939,397000', ProcessAs='Quartz', OutputWorkspace='pol_corrections',
                             Transmission='quartz_transmission',
-                            CadmiumTransmissionWorkspace='cadmium_ws', OutputTreatment='Average')
+                            CadmiumTransmissionWorkspace='cadmium_ws', OutputTreatment='AveragePol')
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
                             CadmiumTransmissionWorkspace='cadmium_ws',
                             EmptyBeamWorkspace='beam_ws')
@@ -237,7 +244,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws')
         PolDiffILLReduction(Run='396939,397000', ProcessAs='Quartz', OutputWorkspace='pol_corrections',
                             Transmission='quartz_transmission',
-                            CadmiumTransmissionWorkspace='cadmium_ws', OutputTreatment='Average')
+                            CadmiumTransmissionWorkspace='cadmium_ws', OutputTreatment='AveragePol')
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
                             CadmiumTransmissionWorkspace='cadmium_ws',
                             EmptyBeamWorkspace='beam_ws')

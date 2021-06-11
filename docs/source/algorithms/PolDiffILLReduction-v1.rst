@@ -250,7 +250,7 @@ This example below performs a complete reduction for D7 data.
         EmptyContainerInputWorkspace='empty_ws',
         # Transmission='0.95', # transmission can be also provided as a string with desired value
         Transmission='quartz_transmission',
-        OutputTreatment='Average',
+        OutputTreatment='AveragePol',
         ProcessAs='Quartz'
     )
 

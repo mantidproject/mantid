@@ -179,7 +179,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.declareProperty(name="OutputTreatment",
                              defaultValue="Individual",
-                             validator=StringListValidator(["Individual", "Average", "Sum"]),
+                             validator=StringListValidator(["Individual", "AveragePol", "AverageTwoTheta", "Sum"]),
                              direction=Direction.Input,
                              doc="Which treatment of the provided scan should be used to create output.")
 
@@ -297,6 +297,26 @@ class PolDiffILLReduction(PythonAlgorithm):
                 raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
                                    + "The provided input does not fit in any of these measurement types.")
 
+    def _merge_twoTheta_positions(self, ws):
+        """Merges data according to common 2theta values, available from metadata."""
+        numors = dict()
+        for name in mtd[ws].getNames():
+            two_theta_orientation = mtd[name].getRun().getLogData('2theta.requested').value
+            if two_theta_orientation in numors:
+                numors[two_theta_orientation].append(name)
+            else:
+                numors[two_theta_orientation] = list()
+        merged_group = []
+        for key in numors:
+            merged_ws = "{}_{}".format(ws, key)
+            merged_group.append(merged_ws)
+            MergeRuns(InputWorkspaces=numors[key], OutputWorkspace=merged_ws)
+            CreateSingleValuedWorkspace(DataValue=len(numors[key]), OutputWorkspace='norm')
+            Divide(LHSWorkspace=output_ws, RHSWorkspace='norm', OutputWorkspace=merged_ws)
+        DeleteWorkspaces(WorkspaceList=['norm', ws])
+        GroupWorkspaces(InputWorkspaces=merged_group, OutputWorkspace=ws)
+        return ws
+
     def _merge_polarisations(self, ws, average_detectors=False):
         """Merges workspaces with the same polarisation inside the provided WorkspaceGroup either
         by using SumOverlappingTubes or averaging entries for each detector depending on the status
@@ -394,7 +414,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         names_to_delete = [flipper_corr_ws]
         index = 0
 
-        if self.getProperty('OutputTreatment').value == 'Average':
+        if self.getProperty('OutputTreatment').value == 'AveragePol':
             ws = self._merge_polarisations(ws, average_detectors=True)
         for entry_no in range(1, mtd[ws].getNumberOfEntries()+1, nMeasurementsPerPOL):
             # two polarizer-analyzer states, fixed flipper_eff
@@ -435,6 +455,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         DeleteWorkspaces(WorkspaceList=names_to_delete)
         RenameWorkspace(InputWorkspace=tmp_group_name, OutputWorkspace=ws)
         GroupWorkspaces(InputWorkspaces=flip_ratio_names, OutputWorkspace='flipping_ratios')
+        if self.getProperty('OutputTreatment').value == 'AverageTwoTheta':
+            ws = self._merge_twoTheta_positions(ws)
         return ws
 
     def _detector_analyser_energy_efficiency(self, ws):
@@ -721,10 +743,11 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
-
         vanadium_expected_cross_section = 0.404 # barns
         norm_name = ws + "_norm"
-        if self.getProperty('AbsoluteNormalisation').value:
+        absolute_normalisation = self.getProperty('AbsoluteNormalisation').value
+        output_treatment = self.getPropertyValue('OutputTreatment')
+        if absolute_normalisation:
             # expected total cross-section of unpolarised neutrons in V is 1/3 * sum of all measured c-s,
             # and normalised to 0.404 barns times the number of moles of V:
             CreateSingleValuedWorkspace(DataValue=3.0 * vanadium_expected_cross_section
@@ -733,7 +756,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         else:
             CreateSingleValuedWorkspace(DataValue=3.0, OutputWorkspace=norm_name)
         to_remove = [norm_name]
-        if self.getPropertyValue('OutputTreatment') == 'Sum':
+        if output_treatment == 'Sum':
             self._merge_polarisations(ws, average_detectors=True)
             tmp_name = '{}_1'.format(self.getPropertyValue('OutputWorkspace'))
             RenameWorkspace(InputWorkspace=mtd[ws][0].name(), OutputWorkspace=tmp_name)
@@ -744,9 +767,11 @@ class PolDiffILLReduction(PythonAlgorithm):
             Divide(LHSWorkspace=tmp_name, RHSWorkspace=norm_name, OutputWorkspace=tmp_name)
             GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
         else:
-            if self.getPropertyValue('OutputTreatment') == 'Average':
+            if output_treatment == 'AveragePol':
                 self._merge_polarisations(ws, average_detectors=True)
-            if self.getProperty('AbsoluteNormalisation').value:
+            elif output_treatment == 'AverageTwoTheta':
+                self._merge_twoTheta_positions(ws)
+            if absolute_normalisation:
                 Divide(LHSWorkspace=ws, RHSWorkspace=norm_name, OutputWorkspace=ws)
         DeleteWorkspaces(WorkspaceList=to_remove)
         return ws
@@ -765,6 +790,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _finalize(self, ws, process, progress):
+        if process not in ['Vanadium'] and  self.getProperty('OutputTreatment').value == 'AverageTwoTheta':
+            ws = self._merge_twoTheta_positions(ws)
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws][0].getRun().addProperty('ProcessedAs', process, True)
