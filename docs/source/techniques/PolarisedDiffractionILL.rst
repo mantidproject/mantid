@@ -381,8 +381,9 @@ and :math:`\dot{I_{B}}(0)` and :math:`\dot{I_{B}}(1)` are the events with the fl
 Self-attenuation correction
 ---------------------------
 
-There are three ways the self-attenuation of a sample can be taken into account in the implemented D7 reduction: `Numerical`, `MonteCarlo`, and `User`.
-In all three cases, the correction is applied to data with :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` algorithm.
+There are several ways the self-attenuation of a sample can be taken into account in the implemented D7 reduction: `None`, `Transmission`, `Numerical`, `MonteCarlo`, and `User`.
+In the first case, no corrections are calculated nor applied to data. In the second, the transmission value is used to scale all detector counts by the transmission value.
+In the three final cases, the correction is applied to data with :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` algorithm.
 
 The `User` option depends on the self-attenuation parameters provided by the user through `SampleSelfAttenuationFactors` property of the :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`
 algorithm. This option allows to study the self-attenuation of a sample that can have arbitrary shape separately from running the reduction algorithm,

@@ -82,6 +82,13 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         self._check_output(mtd['vanadium_full'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_full'], 'Vanadium')
 
+    def d7_reduction_test_vanadium_individual_transmission_attenuation(self):
+        PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_ind_transmission_att',
+                            SelfAttenuationMethod='Transmission', SampleGeometry="None", Transmission='0.95',
+                            SampleAndEnvironmentProperties=self._sampleProperties, OutputTreatment='Individual')
+        self._check_output(mtd['vanadium_ind_transmission_att'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['vanadium_ind_transmission_att'], 'Vanadium')
+
     def d7_reduction_test_vanadium_individual_flat_plate_numerical(self):
         PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_ind_num_flat_plate',
                             SelfAttenuationMethod='Numerical', SampleGeometry="FlatPlate",
@@ -298,6 +305,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         self.d7_reduction_test_vanadium_average()
         self.d7_reduction_test_vanadium_sum()
         self.d7_reduction_test_vanadium_full_reduction()
+        self.d7_reduction_test_vanadium_individual_transmission_attenuation()
         self.d7_reduction_test_vanadium_individual_flat_plate_numerical()
         self.d7_reduction_test_vanadium_individual_flat_plate_monte_carlo()
         self.d7_reduction_test_vanadium_individual_cylinder_numerical()

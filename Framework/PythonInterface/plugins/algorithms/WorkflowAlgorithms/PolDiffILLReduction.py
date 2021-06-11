@@ -38,6 +38,7 @@ class PolDiffILLReduction(PythonAlgorithm):
     def name(self):
         return 'PolDiffILLReduction'
 
+    # flake8: noqa: C901
     def validateInputs(self):
         issues = dict()
 
@@ -62,8 +63,16 @@ class PolDiffILLReduction(PythonAlgorithm):
             if len(self.getProperty('SampleAndEnvironmentProperties').value) == 0:
                 issues['SampleAndEnvironmentProperties'] = 'Sample parameters need to be defined.'
 
-            if ( self.getPropertyValue('SelfAttenuationMethod') == 'User'
-                 and self.getProperty('SampleSelfAttenuationFactors').isDefault):
+            if self.getPropertyValue('SelfAttenuationMethod') == 'Transmission':
+                if self.getProperty('Transmission').isDefault:
+                    issues['Transmission'] = 'Transmission value or workspace needs to be provided for' \
+                                             ' this self-attenuation approach.'
+                if self.getPropertyValue('SampleGeometry') != 'None':
+                    issues['SampleGeometry'] = 'Sample geometry cannot be taken into account in this ' \
+                                               'self-attenuation approach.'
+
+            if (self.getPropertyValue('SelfAttenuationMethod') == 'User'
+                    and self.getProperty('SampleSelfAttenuationFactors').isDefault):
                 issues['User'] = 'WorkspaceGroup containing sample self-attenuation factors must be provided in this mode'
                 issues['SampleSelfAttenuationFactors'] = issues['User']
 
@@ -184,7 +193,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.declareProperty(name="SelfAttenuationMethod",
                              defaultValue="None",
-                             validator=StringListValidator(["None", "Numerical", "MonteCarlo", "User"]),
+                             validator=StringListValidator(["None", "Transmission", "Numerical", "MonteCarlo", "User"]),
                              direction=Direction.Input,
                              doc="Which approach to calculate (or not) the self-attenuation correction factors to be used.")
         self.setPropertySettings('SelfAttenuationMethod', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
@@ -649,7 +658,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             ConvertToHistogram(InputWorkspace=entry, OutputWorkspace=entry)
         return attenuation_ws
 
-    def _match_attenuation_workspace(self, sample_entry, attenuation_ws):
+    @staticmethod
+    def _match_attenuation_workspace(sample_entry, attenuation_ws):
         correction_ws = attenuation_ws + '_matched_corr'
         CloneWorkspace(InputWorkspace=attenuation_ws, OutputWorkspace=correction_ws)
         converted_entry = sample_entry + '_converted'
@@ -673,11 +683,16 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Applies the self-attenuation correction based on the Palmaan-Pings Monte-Carlo calculation, taking into account
         the sample's material, shape, and dimensions."""
 
-        if (self.getPropertyValue('SelfAttenuationMethod') in ['MonteCarlo', 'Numerical']
+        attenuation_method = self.getPropertyValue('SelfAttenuationMethod')
+        if (attenuation_method in ['MonteCarlo', 'Numerical']
                 and self.getPropertyValue('SampleGeometry') != 'None'):
             attenuation_ws = self._calculate_attenuation_factors(sample_ws)
-        elif self.getPropertyValue('SelfAttenuationMethod') == 'User':
+        elif attenuation_method == 'User':
             attenuation_ws = self.getPropertyValue('SampleSelfAttenuationFactors')
+        elif attenuation_method == 'Transmission':
+            transmission_ws = self._get_transmission(sample_ws)
+            Divide(LHSWorkspace=sample_ws, RHSWorkspace=transmission_ws, OutputWorkspace=sample_ws)
+            return sample_ws
         for entry_no, entry in enumerate(mtd[sample_ws]):
             if ( (self._method_data_structure == 'Uniaxial' and entry_no % 2 == 0)
                  or (self._method_data_structure == 'XYZ' and entry_no % 6 == 0)

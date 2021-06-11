@@ -81,7 +81,7 @@ Sample-only keys:
 - *Height*
 
 The SampleMass needs to be defined, as well as the FormulaUnitMass, even when the self-attenuation is not taken into account. The other
-parameters are required when the self-attenuation is calculated.
+parameters are required when the self-attenuation coefficients are calculated.
 
 Container-only keys:
 
