@@ -61,7 +61,8 @@ Different input properties can be specified depending on the value of **ProcessA
 All the input workspace properties above are optional, unless bolded.
 For example, if processing as sample, if a empty container and cadmium absorber inputs are specified, subtraction will be performed, if not, the step will be skipped.
 The rare exceptions are when processing as transmission, when beam input workspace is mandatory, and to calculate polarising efficiencies,
-where input from transmission is indispensable.
+where input from transmission is indispensable. Transmission however can be provided also as a string containing floating point value of desired tranmission, that needs
+to be in the range (0, 1].
 
 SampleAndEnvironmentProperties
 ##############################
@@ -247,6 +248,7 @@ This example below performs a complete reduction for D7 data.
         OutputWorkspace='pol_corrections',
         CadmiumInputWorkspace='cadmium_ws',
         EmptyContainerInputWorkspace='empty_ws',
+        # Transmission='0.95', # transmission can be also provided as a string with desired value
         Transmission='quartz_transmission',
         OutputTreatment='Average',
         ProcessAs='Quartz'
