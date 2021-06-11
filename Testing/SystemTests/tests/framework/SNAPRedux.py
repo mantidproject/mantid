@@ -5,8 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
+
+import json
 import systemtesting
-from mantid.simpleapi import *
+import tempfile
+from mantid.simpleapi import CreateGroupingWorkspace, RenameWorkspace, SNAPReduce
 import os
 
 
@@ -42,7 +45,20 @@ def do_cleanup():
     return True
 
 
+def _assert_reduction_configuration(properties_in):
+    r"""
+    @param properties_in : dictionary with property names and values
+    """
+    with tempfile.TemporaryDirectory as save_dir:
+        SNAPReduce(EnableConfigurator=True, ConfigSaveDir=save_dir, **properties_in)
+        config_file = str(save_dir.glob('*.json')[0])  # the JSON file created by SNAPReduce
+        properties_out = json.load(open(config_file, 'r'))
+        for p in properties_out:  # the reciprocal for loop is not true
+            assert p in properties_in
+
+
 class SNAP_short(systemtesting.MantidSystemTest):
+
     def skipTests(self):
         return _skip_test()
 
@@ -57,10 +73,11 @@ class SNAP_short(systemtesting.MantidSystemTest):
 
     def runTest(self):
         # run the actual code
-        SNAPReduce(RunNumbers='34172', Masking='Horizontal', Binning='0.7,-0.004,5.5',
-                   Normalization='Extracted from Data', PeakClippingWindowSize=7,
-                   SmoothingRange=5, GroupDetectorsBy='2_4 Grouping',
-                   SaveData=True, OutputDirectory=getSaveDir())
+        kwargs = dict(RunNumbers='34172', Masking='Horizontal', Binning='0.7,-0.004,5.5',
+                      Normalization='Extracted from Data', PeakClippingWindowSize=7,
+                      SmoothingRange=5, GroupDetectorsBy='2_4 Grouping', SaveData=True, OutputDirectory=getSaveDir())
+        _assert_reduction_configuration(kwargs)
+        SNAPReduce(**kwargs)
 
     def validate(self):
         self.tolerance = 1.0e-2
@@ -84,11 +101,14 @@ class SNAP_short_detcal(systemtesting.MantidSystemTest):
 
     def runTest(self):
         # run the actual code
-        SNAPReduce(RunNumbers='34172', Masking='Horizontal', Binning='0.7,-0.004,5.5',
-                   Calibration='DetCal File', DetCalFilename='SNAP_34172.DetCal',
-                   Normalization='Extracted from Data', PeakClippingWindowSize=7,
-                   SmoothingRange=5, GroupDetectorsBy='2_4 Grouping',
-                   SaveData=True, OutputDirectory=getSaveDir())
+
+        kwargs = dict(RunNumbers='34172', Masking='Horizontal', Binning='0.7,-0.004,5.5',
+                      Calibration='DetCal File', DetCalFilename='SNAP_34172.DetCal',
+                      Normalization='Extracted from Data', PeakClippingWindowSize=7,
+                      SmoothingRange=5, GroupDetectorsBy='2_4 Grouping',
+                      SaveData=True, OutputDirectory=getSaveDir())
+        _assert_reduction_configuration(kwargs)
+        SNAPReduce(**kwargs)
 
     def validate(self):
         self.tolerance = 1.0e-2
@@ -100,22 +120,20 @@ class SNAP_short_detcal(systemtesting.MantidSystemTest):
 class Simple(systemtesting.MantidSystemTest):
     # this test is very similar to AlignAndFocusPowderFromFilesTest.ChunkingCompare
     def runTest(self):
-        # 11MB file
-        kwargs = {'RunNumbers':'45874',
-                  'GroupDetectorsBy':'Banks',
-                  'Binning':(.5,-.004,7)}
+        # 11MB file, process in 4 chunks
+        kwargs = {'RunNumbers': '45874', 'GroupDetectorsBy': 'Banks',  'Binning': [.5, -.004, 7], 'MaxChunkSize': .01}
 
         # create grouping for two output spectra
         CreateGroupingWorkspace(InstrumentFilename='SNAP_Definition.xml',
                                 GroupDetectorsBy='Group',
                                 OutputWorkspace='SNAP_grouping')
-
-        # process in 4 chunks
-        SNAPReduce(MaxChunkSize=.01, **kwargs)
+        _assert_reduction_configuration(kwargs)
+        SNAPReduce(**kwargs)
         RenameWorkspace(InputWorkspace='SNAP_45874_Banks_red', OutputWorkspace='with_chunks')
 
         # process without chunks
-        SNAPReduce(MaxChunkSize=0, **kwargs)
+        kwargs['MaxChunkSize'] = 0
+        SNAPReduce(**kwargs)
         RenameWorkspace(InputWorkspace='SNAP_45874_Banks_red', OutputWorkspace='no_chunks')
 
     def validateMethod(self):

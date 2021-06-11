@@ -670,8 +670,10 @@ class SNAPReduce(DataProcessorAlgorithm):
         # Selected algorithm properties as a dictionary
         #
         dict_repr = json.loads(str(self)).get('properties')  # representation of the algorithm's properties in a dict
-        for unwanted in ('RunNumbers', 'EnableConfigurator'):  # don't record values for these properties
-            del dict_repr[unwanted]
+        # Remove not wanted properties
+        for not_wanted in ('RunNumbers', 'OutputDirectory', 'EnableConfigurator', 'ConfigSaveDir'):
+            if not_wanted in dict_repr:
+                del dict_repr[not_wanted]
         """
         hack to fix the entry for the default JSON represenation of property DetCalFilename, which is saved as a list of lists
         Example: "DetCalFilename": [ ["/SNS/SNAP/IPTS-26217/shared/E76p2_W65p3.detcal"],
