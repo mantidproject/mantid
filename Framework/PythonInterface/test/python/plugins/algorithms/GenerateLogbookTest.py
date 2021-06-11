@@ -63,7 +63,7 @@ class GenerateLogbookTest(unittest.TestCase):
         GenerateLogbook(Directory=self._data_directory,
                         OutputWorkspace='custom_logbook_w_summing', Facility='ILL', Instrument='D7',
                         NumorRange="396990:396993", CustomEntries='/entry0/acquisition_mode',
-                        OptionalHeaders='polarisation')
+                        OptionalHeaders='wavelength')
         self._check_output('custom_logbook_w_summing', numberEntries=3, numberColumns=9)
 
     def test_d7_save_csv(self):
