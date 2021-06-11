@@ -12,12 +12,73 @@ Description
 This peakshape function is designed to be used to fit time-of-flight
 peaks. In particular this function is the convolution of the
 Ikeda-Carpender function, which aims to model the neutron pulse shape
-from a moderator, and a pseudo-Voigt that model any broading to the peak
+from a moderator, and a pseudo-Voigt that models any broadening to the peak
 due to sample properties etc.
 
-The Ikeda-Carpender function is (Ref [1])
+The Ikeda-Carpender function is (Ref [1,3])
 
-.. math:: \frac{\alpha}{2} \left\{ (1-R)*(\alpha t)^2e^{-\alpha t} + 2R\frac{\alpha^2\beta}{(\alpha-\beta)^3} \right\}
+.. math:: N \left[ (1-\eta)\Omega_G + \eta \Omega_L \right]
+
+where :math:`\Omega_G` and :math:`\Omega_L` are the Gaussian and Lorentzian parts of the function, respectively:
+
+.. math:: \Omega_G = N_u e^u erfc(y_u) + N_v e^v erfc(y_v) + N_s e^s erfc(y_s) + N_r e^r erfc(y_r)
+
+.. math:: \Omega_L = -\frac{2}{\pi} \left[ N_u Im[e^{z_u}E_1(z_u)] + N_v Im[e^{z_v}E_1(z_v)] + N_s Im[e^{z_s}E_1(z_s)] + N_r Im[e^{z_r}E_1(z_r)]  \right]
+
+:math:`erfc` is the complementary error function, :math:`E_1` is the complex exponential integral, and :math:`Im` is the imaginary component.
+
+The parameters used above are defined as:
+
+.. math:: k = 0.5
+
+.. math:: \alpha = \frac{1}{\alpha_0 + \lambda \alpha_1}
+
+.. math:: \alpha^- = \alpha(1 - k)
+
+.. math:: \alpha^+ = \alpha(1 + k)
+
+.. math:: x = \alpha^- - \beta
+
+.. math:: y = \alpha - \beta
+
+.. math:: z = \alpha^+ - \beta
+
+.. math:: z_s = -\alpha dt + i\frac{1}{2} \alpha \gamma
+
+.. math:: z_u = -\alpha^- dt + i\frac{1}{2} \alpha^- \gamma = (1-k)z_s
+
+.. math:: z_v = -\alpha^+ dt + i\frac{1}{2} \alpha^+ \gamma = (1+k)z_s
+
+.. math:: z_r = -\beta dt + i\frac{1}{2} \beta \gamma
+
+.. math:: u = \frac{1}{2} \alpha^- (\alpha^- \sigma^2 - 2dt)
+
+.. math:: v = \frac{1}{2} \alpha^+ (\alpha^+ \sigma^2 - 2dt)
+
+.. math:: s = \frac{1}{2} \alpha (\alpha \sigma^2 - 2dt)
+
+.. math:: r = \frac{1}{2} \beta (\beta \sigma^2 - 2dt)
+
+.. math:: N = \frac{1}{4} \alpha \frac{(1-k^2)}{k^2}
+
+.. math:: N_u = 1 - R \frac{\alpha^-}{x}
+
+.. math:: N_v = 1 - R \frac{\alpha^+}{z}
+
+.. math:: N_s = -2(1 - R\frac{\alpha}{y})
+
+.. math:: N_r = 2R\alpha^2\beta \frac{k^2}{xyz}
+
+.. math:: y_u = \frac{ (\alpha^- \sigma^2 - dt) }{\sqrt{2\sigma^2}}
+
+.. math:: y_v = \frac{ (\alpha^+ \sigma^2 - dt) }{\sqrt{2\sigma^2}}
+
+.. math:: y_s = \frac{ (\alpha \sigma^2 - dt) }{\sqrt{2\sigma^2}}
+
+.. math:: y_r = \frac{ (\beta \sigma^2 - dt) }{\sqrt{2\sigma^2}}
+
+
+
 
 where :math:`\alpha` and :math:`\beta` are the fast and slow neutron
 decay constants respectively, :math:`R` a maxing coefficient that
@@ -62,7 +123,8 @@ References:
 #. S. Ikeda and J. M. Carpenter, `Nuclear Inst. and Meth. in Phys. Res.
    A239, 536 (1985) <http://dx.doi.org/10.1016/0168-9002(85)90033-6>`_
 #. Fullprof manual, see http://www.ill.eu/sites/fullprof/
-
+#. J. Rodriguez-Carvajal, `Using FullProf to analyze Time of Flight
+   Neutron Powder Diffraction data <http://mill2.chem.ucl.ac.uk/ccp/web-mirrors/plotr/Tutorials&Documents/TOF_FullProf.pdf>`_
 The figure below illustrate this peakshape function fitted to a TOF
 peak:
 
