@@ -43,6 +43,7 @@ public:
 private:
   // Overridden Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
   double fitSpectra(const int64_t s);
