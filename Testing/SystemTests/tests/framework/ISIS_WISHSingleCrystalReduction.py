@@ -10,12 +10,14 @@ from systemtesting import MantidSystemTest
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import (ConvertUnits, LoadRaw, FilterPeaks, PredictPeaks, SetUB, SaveIsawPeaks, MaskBTP,
                               LoadEmptyInstrument, AddPeak, CreatePeaksWorkspace, CreateMDWorkspace, IntegratePeaksMD,
-                              CropWorkspace, NormaliseByCurrent, ReplaceSpecialValues, NormaliseToMonitor,
+                              CropWorkspace, NormaliseByCurrent, ReplaceSpecialValues, NormaliseToMonitor, LoadIsawUB,
                               CreateSampleShape, SetSampleMaterial, AbsorptionCorrection, Divide, SmoothNeighbours,
-                              SmoothData, LoadNexus, RebinToWorkspace, ConvertToDiffractionMDWorkspace)
+                              SmoothData, LoadNexus, RebinToWorkspace, ConvertToDiffractionMDWorkspace, LoadMD,
+                              PredictFractionalPeaks, CombinePeaksWorkspaces, SaveReflections)
 from mantid import config
 import numpy as np
 import os
+from SaveReflections import num_modulation_vectors
 
 
 class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
@@ -177,6 +179,7 @@ class WISHNormaliseDataAndCreateMDWorkspaceTest(MantidSystemTest):
     This tests the loading and normalisation of data, incl. correction for detector efficiency using vanadium and
     creation of MD workspace
     """
+
     def cleanup(self):
         ADS.clear()
 
@@ -198,6 +201,55 @@ class WISHNormaliseDataAndCreateMDWorkspaceTest(MantidSystemTest):
         return "wsMD", "WISH38237_MD.nxs"
 
 
+class WISHIntegrateSatellitePeaksTest(MantidSystemTest):
+    """
+    This tests the loading and normalisation of data, incl. correction for detector efficiency using vanadium and
+    creation of MD workspace
+    """
+
+    def cleanup(self):
+        ADS.clear()
+
+    def runTest(self):
+        # Load raw data (bank 1)
+        wsMD = LoadMD("WISH38237_MD.nxs")  # default so doesn't get overwrite van
+        # For each mod vec, predict and integrate peaks and combine
+        qs = [(0.15, 0, 0.3), (-0.15, 0, 0.3)]
+        self._all_pks = CreatePeaksWorkspace(InstrumentWorkspace=wsMD, NumberOfPeaks=0, OutputWorkspace="all_pks")
+        LoadIsawUB(InputWorkspace=self._all_pks, Filename='Wish_Diffuse_Scattering_ISAW_UB.mat')
+        # PredictPeaks
+        parent = PredictPeaks(InputWorkspace=self._all_pks, WavelengthMin=0.8, WavelengthMax=9.3, MinDSpacing=0.5,
+                              ReflectionCondition="primitive")
+        self._pfps = []
+        for iq, q in enumerate(qs):
+            pfp = PredictFractionalPeaks(Peaks=parent, IncludeAllPeaksInRange=True, Hmin=0, Hmax=0, Kmin=1, Kmax=1,
+                                         Lmin=0, Lmax=1, ReflectionCondition='Primitive', MaxOrder=1,
+                                         ModVector1=",".join([str(qi) for qi in q]), FracPeaks=f'pfp_{iq}')
+            FilterPeaks(InputWorkspace=pfp, OutputWorkspace=pfp, FilterVariable='Wavelength',
+                        FilterValue=9.3)  # should get rid of one peak in q1 table
+            FilterPeaks(InputWorkspace=pfp, OutputWorkspace=pfp, FilterVariable='Wavelength',
+                        FilterValue=0.8, Operator='>')
+            IntegratePeaksMD(InputWorkspace=wsMD, PeakRadius='0.1', BackgroundInnerRadius='0.1',
+                             BackgroundOuterRadius='0.15', PeaksWorkspace=pfp, OutputWorkspace=pfp,
+                             IntegrateIfOnEdge=False, UseOnePercentBackgroundCorrection=False)
+            SaveReflections(InputWorkspace=pfp, Filename=f'WISH_IntegratedSatellite_q{iq}.int', Format='Jana')
+            CombinePeaksWorkspaces(LHSWorkspace=self._all_pks, RHSWorkspace=pfp, OutputWorkspace=self._all_pks)
+            self._pfps.append(pfp)
+        SaveReflections(InputWorkspace=self._all_pks, Filename='WISH_IntegratedSatellite_q1_q2.int', Format='Jana')
+
+    def validate(self):
+        # check number of peaks and modulation vectors is as expected
+        for pfp in self._pfps:
+            self.assertEqual(1, pfp.getNumberPeaks())
+            self.assertEqual(1, num_modulation_vectors(pfp))
+        self.assertEqual(2, self._all_pks.getNumberPeaks())
+        self.assertEqual(2, num_modulation_vectors(self._all_pks))
+        # check files produced (don't need to check files as that should be covered by SaveReflections unit tests)
+        for suffix in ["q1", "q2", "q1_q2"]:
+            self.assertTrue(os.path.isfile(os.path.join(config['defaultsave.directory'],
+                                                        'WISH_IntegratedSatellite_{suffix}.int')))
+
+
 def load_data_and_normalise(filename, spectrumMin=1, spectrumMax=19461, outputWorkspace="sample"):
     """
     Function to load in raw data, crop and normalise
@@ -208,7 +260,7 @@ def load_data_and_normalise(filename, spectrumMin=1, spectrumMax=19461, outputWo
     :return: normalised and cropped data with xunit wavelength (excl. monitors)
     """
     sample, mon = LoadRaw(Filename=filename, SpectrumMin=spectrumMin, SpectrumMax=spectrumMax,
-                           LoadMonitors="Separate", OutputWorkspace=outputWorkspace)
+                          LoadMonitors="Separate", OutputWorkspace=outputWorkspace)
     for ws in [sample, mon]:
         CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=6000, XMax=99000)
         NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
