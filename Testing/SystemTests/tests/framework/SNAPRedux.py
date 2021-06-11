@@ -57,7 +57,7 @@ def _assert_reduction_configuration(properties_in):
             assert p in properties_in
 
 
-class SNAP_short(systemtesting.MantidSystemTest):
+class SNAPReduxShort(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return _skip_test()
@@ -67,9 +67,7 @@ class SNAP_short(systemtesting.MantidSystemTest):
         return True
 
     def requiredFiles(self):
-        files = []
-        files.append("SNAP_34172_event.nxs")
-        return files
+        return ['SNAP_34172_event.nxs']
 
     def runTest(self):
         # run the actual code
@@ -83,10 +81,10 @@ class SNAP_short(systemtesting.MantidSystemTest):
         self.tolerance = 1.0e-2
         self.disableChecking.append('Instrument')  # doesn't validate correctly
         # default validation of workspace to processed nexus is right
-        return ('SNAP_34172_2_4_Grouping_nor','SNAP_34172_2_4_Grouping_nor.nxs')
+        return 'SNAP_34172_2_4_Grouping_nor', 'SNAP_34172_2_4_Grouping_nor.nxs'
 
 
-class SNAP_short_detcal(systemtesting.MantidSystemTest):
+class SNAPReduxShortDetcal(systemtesting.MantidSystemTest):
     def skipTests(self):
         return _skip_test()
 
@@ -95,9 +93,7 @@ class SNAP_short_detcal(systemtesting.MantidSystemTest):
         return True
 
     def requiredFiles(self):
-        files = []
-        files.append("SNAP_34172_event.nxs")
-        return files
+        return ['SNAP_34172_event.nxs']
 
     def runTest(self):
         # run the actual code
@@ -114,10 +110,10 @@ class SNAP_short_detcal(systemtesting.MantidSystemTest):
         self.tolerance = 1.0e-2
         self.disableChecking.append('Instrument')  # doesn't validate correctly
         # default validation of workspace to processed nexus is right
-        return ('SNAP_34172_2_4_Grouping_nor','SNAP_34172_2_4_Grouping_nor.nxs')
+        return 'SNAP_34172_2_4_Grouping_nor', 'SNAP_34172_2_4_Grouping_nor.nxs'
 
 
-class Simple(systemtesting.MantidSystemTest):
+class SNAPReduxSimple(systemtesting.MantidSystemTest):
     # this test is very similar to AlignAndFocusPowderFromFilesTest.ChunkingCompare
     def runTest(self):
         # 11MB file, process in 4 chunks
@@ -141,4 +137,4 @@ class Simple(systemtesting.MantidSystemTest):
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
-        return ('with_chunks', 'no_chunks')
+        return 'with_chunks', 'no_chunks'
