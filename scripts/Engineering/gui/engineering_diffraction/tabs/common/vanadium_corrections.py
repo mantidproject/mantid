@@ -81,12 +81,11 @@ def _calculate_vanadium_correction(vanadium_path):
                      "Could not run Load algorithm with vanadium run number: "
                      + str(vanadium_path) + ". Error description: " + str(e))
         raise RuntimeError
-    NormaliseByCurrent(InputWorkspace=van_ws, OutputWorkspace=van_ws)
+    ws = NormaliseByCurrent(InputWorkspace=van_ws, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)
     # sensitivity correction for van
-    Integration(InputWorkspace=van_ws, OutputWorkspace=van_ws)
-    van_ws /= van_ws.blocksize()
-    RenameWorkspace(InputWorkspace=van_ws, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)
-    return van_ws
+    integ_ws = Integration(InputWorkspace=ws, OutputWorkspace=ws)
+    integ_ws /= van_ws.blocksize()
+    return integ_ws
 
 
 def save_van_workspace(workspace, output_path):
