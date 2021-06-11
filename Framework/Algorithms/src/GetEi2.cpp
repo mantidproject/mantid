@@ -532,8 +532,8 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
       // Shift the index ip1 until the heights are no longer equal. This avoids the divide-by-zero.
       while (peak_y[ip1] == peak_y[ip2]) {
         ip1--;
-        if (ip1 < 0)
-          throw std::invalid_argument("Trailing edge values are equal until the start of the peak");
+        if (ip1 < ipk_int)
+          throw std::invalid_argument("Trailing edge values are equal until up to the peak centre.");
       }
     }
 
@@ -570,8 +570,8 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
       // Shift the index ip1 until the heights are no longer equal. This avoids the divide-by-zero.
       while (peak_y[im1] == peak_y[im2]) {
         im1++;
-        if (im1 >= nyvals)
-          throw std::invalid_argument("The rising edge values are equal up to the end of the peak");
+        if (im1 >= ipk_int)
+          throw std::invalid_argument("The rising edge values are equal up to the peak centre.");
       }
     }
 
