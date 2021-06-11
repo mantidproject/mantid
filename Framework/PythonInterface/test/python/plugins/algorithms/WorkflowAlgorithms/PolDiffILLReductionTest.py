@@ -72,6 +72,17 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_output(mtd['quartz'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['quartz'], 'Quartz')
 
+    def test_quartz_transmission_as_value(self):
+        PolDiffILLReduction(Run='396917', ProcessAs='Empty', OutputWorkspace='container_ws')
+        quartz_transmission = '0.95124'
+        PolDiffILLReduction(Run='396939', ProcessAs='Quartz', OutputWorkspace='quartz',
+                            Transmission=quartz_transmission, OutputTreatment='Average',
+                            EmptyContainerWorkspace='container_ws')
+        self.assertTrue('quartz_transmission' in mtd)
+        self.assertTrue(mtd['quartz_transmission'].readY(0)[0] == float(quartz_transmission))
+        self._check_output(mtd['quartz'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['quartz'], 'Quartz')
+
     def test_vanadium(self):
         sampleProperties = {'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',

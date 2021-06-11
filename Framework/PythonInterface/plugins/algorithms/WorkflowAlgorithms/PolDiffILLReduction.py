@@ -40,6 +40,17 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
+
+        if not self.getProperty('Transmission').isDefault:
+            ws_name = self.getPropertyValue('Transmission')
+            if ws_name not in mtd:
+                try:
+                    transmission_value = float(ws_name)
+                    if transmission_value < 0 or transmission_value > 1:
+                        issues['Transmission'] = 'The provided transmission value is outside [0, 1] range.'
+                except ValueError:
+                    issues['Transmission'] = 'The provided transmission cannot be understood as a number.'
+
         process = self.getPropertyValue('ProcessAs')
         if process == 'Transmission' and self.getProperty('EmptyBeamWorkspace').isDefault:
             issues['EmptyBeamWorkspace'] = 'Empty beam workspace input is mandatory for transmission calculation.'
@@ -136,10 +147,9 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings('CadmiumTransmissionWorkspace', EnabledWhenProperty(transmission, beam,
                                                                                           LogicOperator.Or))
 
-        self.declareProperty(WorkspaceGroupProperty('Transmission', '',
-                                                    direction=Direction.Input,
-                                                    optional=PropertyMode.Optional),
-                             doc='The name of the transmission input workspace.')
+        self.declareProperty('Transmission', '',
+                             doc='The name of the transmission input workspace or a string with desired '
+                                 'transmission value.')
 
         self.setPropertySettings('Transmission', reduction)
 
@@ -298,6 +308,17 @@ class PolDiffILLReduction(PythonAlgorithm):
             DeleteWorkspaces(WorkspaceList=ws)
             GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)
         return ws
+
+    def _get_transmission(self, sample_ws):
+        """Extracts MatrixWorkspace with transmission value from the provided WorkspaceGroup name or creates a single
+        valued workspace in case a floating point number has been provided instead of a workspace group name."""
+        transmission = self.getPropertyValue('Transmission')
+        if transmission in mtd:
+            transmission_ws = mtd[transmission][0].name()
+        else:
+            transmission_ws = sample_ws[2:] + '_transmission'
+            CreateSingleValuedWorkspace(DataValue=float(transmission), OutputWorkspace=transmission_ws)
+        return transmission_ws
 
     def _subtract_background(self, ws, empty_ws, transmission_ws):
         """Subtracts empty container and cadmium absorber scaled by transmission."""
@@ -760,7 +781,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             if not self.getProperty('EmptyContainerWorkspace').isDefault \
                     and not self.getProperty('Transmission').isDefault:
                 # Subtracts background if the workspaces for empty container and transmission are provided
-                transmission_ws = mtd[self.getPropertyValue('Transmission')][0].name()
+                transmission_ws = self._get_transmission(ws)
                 progress.report('Subtracting backgrounds')
                 self._subtract_background(ws, empty_ws, transmission_ws)
 
