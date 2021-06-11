@@ -272,7 +272,7 @@ public:
     double yPeak = yValues[iPeak];
     double halfHeight = yPeak * 0.5;
 
-    // Find index of the point before y goes below half-height.
+    // Find index of the point before y goes below half-height on the trailing edge.
     int nValues = static_cast<int>(yValues.size());
     int iBeforeHalfHeight = 0;
     for (int i = iPeak; i < nValues; ++i) {
@@ -287,6 +287,45 @@ public:
     yValues[iBeforeHalfHeight] = halfHeight;
     yValues[iBeforeHalfHeight + 3] = halfHeight + 1;
     yValues[iBeforeHalfHeight + 4] = yValues[iBeforeHalfHeight];
+
+    // This algorithm needs a name attached to the workspace
+    const std::string outputName("eitestNoisyData");
+    AnalysisDataService::Instance().add(outputName, testWS);
+
+    IAlgorithm_sptr alg;
+    TS_ASSERT_THROWS_NOTHING(alg = GetEiTestHelper::runGetEiUsingTestMonitors(outputName, 15.0, false));
+
+    AnalysisDataService::Instance().remove(outputName);
+  }
+
+  /**
+   * Modify the test workspace so that one of the monitors has a local maximum on the leading edge
+   * of the peak. Preivously, this would result in a divide-by-zero error.
+   */
+  void testNoisyDataOnLeadingEdge() {
+    MatrixWorkspace_sptr testWS = GetEiTestHelper::createTestWorkspaceWithMonitors();
+
+    auto &yValues = testWS->mutableY(0);
+    // Find index of peak value and calcualte half height.
+    int iPeak = std::max_element(yValues.cbegin(), yValues.cend()) - yValues.begin();
+    double yPeak = yValues[iPeak];
+    double halfHeight = yPeak * 0.5;
+
+    // Find index of the point after y goes below half-height on the leading edge.
+    int nValues = static_cast<int>(yValues.size());
+    int iAfterHalfHeight = 0;
+    for (int i = iPeak; i >= 0; --i) {
+      if (yValues[i] < halfHeight) {
+        iAfterHalfHeight = i + 1;
+        break;
+      }
+    }
+
+    // To recreate the bug, need to have the value at ip == half height, a point before it
+    // with a greater value and the point just before that equal to half-height.
+    yValues[iAfterHalfHeight] = halfHeight;
+    yValues[iAfterHalfHeight - 3] = halfHeight + 1;
+    yValues[iAfterHalfHeight - 4] = yValues[iAfterHalfHeight];
 
     // This algorithm needs a name attached to the workspace
     const std::string outputName("eitestNoisyData");
