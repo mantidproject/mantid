@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 # From https://stackoverflow.com/a/9107028 by https://stackoverflow.com/users/1184238/andrew-norrie
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
