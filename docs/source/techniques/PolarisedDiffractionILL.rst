@@ -801,7 +801,7 @@ Output:
 
 .. testoutput:: ExPolarisedDifffractionSampleFull
 
-   Sample transmission is 0.962
+   Sample transmission is 0.963
    The reduced sample data contains 12 entries with 132 spectra and 1 bins.
    The normalised sample data contains 6 entries with 1 spectrum and 134 bins.
 

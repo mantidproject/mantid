@@ -309,7 +309,7 @@ Output:
     Cadmium absorber monitor 2 rate as a ratio of empty beam is 0.011
     Quartz transmission is 0.700
     Vanadium transmission is 0.886
-    Sample transmission is 0.962
+    Sample transmission is 0.963
 
 .. testcleanup:: ExPolDiffILLReduction
 

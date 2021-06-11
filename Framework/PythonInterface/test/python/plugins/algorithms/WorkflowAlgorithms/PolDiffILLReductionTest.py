@@ -36,13 +36,19 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws')
         self._check_output(mtd['cadmium_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['cadmium_ws'], 'Cadmium')
-        self.assertAlmostEqual(mtd['cadmium_ws_1'].readY(0)[0], 116, delta=1)
+        self.assertAlmostEqual(mtd['cadmium_ws_1'].readY(0)[0], 0.06, delta=1e-3)
+
+    def test_absorber_transmission_norm_by_time(self):
+        PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws', NormaliseBy='Time')
+        self._check_output(mtd['cadmium_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['cadmium_ws'], 'Cadmium')
+        self.assertAlmostEqual(mtd['cadmium_ws_1'].readY(0)[0], 0.773, delta=1e-3)
 
     def test_beam(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         self._check_output(mtd['beam_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['beam_ws'], 'Beam')
-        self.assertAlmostEqual(mtd['beam_ws_1'].readY(0)[0], 10769, delta=1)
+        self.assertAlmostEqual(mtd['beam_ws_1'].readY(0)[0], 5.566, delta=1e-3)
 
     def test_transmission(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')

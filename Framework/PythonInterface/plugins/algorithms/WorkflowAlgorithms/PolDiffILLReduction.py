@@ -229,22 +229,11 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('InstrumentCalibration', scan)
 
-    @staticmethod
-    def _normalise(ws):
-        """Normalises the provided WorkspaceGroup to the monitor 1."""
-        for entry in mtd[ws]:
-            mon = ws + '_mon'
-            ExtractMonitors(InputWorkspace=entry, DetectorWorkspace=entry,
-                            MonitorWorkspace=mon)
-            if 0 in mtd[mon].readY(0):
-                raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
-            else:
-                CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0]/1000.0,
-                                            ErrorValue=np.sqrt(mtd[mon].readY(0)[0]/1000.0),
-                                            OutputWorkspace=mon)
-                Divide(LHSWorkspace=entry, RHSWorkspace=mon, OutputWorkspace=entry)
-                DeleteWorkspace(Workspace=mon)
-        return ws
+        self.declareProperty(name="NormaliseBy",
+                             defaultValue="Monitor",
+                             validator=StringListValidator(["Monitor", "Time"]),
+                             direction=Direction.Input,
+                             doc="What normalisation approach to use on data.")
 
     @staticmethod
     def _calculate_transmission(ws, beam_ws):
@@ -255,6 +244,34 @@ class PolDiffILLReduction(PythonAlgorithm):
         if 0 in mtd[beam_ws][0].readY(0):
             raise RuntimeError('Cannot calculate transmission; beam monitor has 0 counts.')
         Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
+        return ws
+
+    def _normalise(self, ws):
+        """Normalises the provided WorkspaceGroup to the monitor 1 or time and simultaneously removes monitors."""
+        normaliseBy = self.getPropertyValue('NormaliseBy')
+        transmissionProcess = self.getPropertyValue("ProcessAs") in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']
+        for entry in mtd[ws]:
+            mon = ws + '_mon'
+            norm = entry.name() + '_norm'
+            detectors = entry.name()
+            ExtractMonitors(InputWorkspace=entry, DetectorWorkspace=detectors,
+                            MonitorWorkspace=mon)
+            if normaliseBy == 'Monitor':
+                if 0 in mtd[mon].readY(0):
+                    raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
+                else:
+                    CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0]/1000.0,
+                                                ErrorValue=np.sqrt(mtd[mon].readE(0)[0]/1000.0),
+                                                OutputWorkspace=norm)
+            if normaliseBy == 'Time':
+                duration = float(entry.getRun().getLogData('duration').value)
+                CreateSingleValuedWorkspace(DataValue=duration,
+                                            OutputWorkspace=norm)
+            if transmissionProcess:
+                Divide(LHSWorkspace=mon, RHSWorkspace=norm, OutputWorkspace=entry)
+            else:
+                Divide(LHSWorkspace=detectors, RHSWorkspace=norm, OutputWorkspace=entry)
+            DeleteWorkspaces(WorkspaceList=[mon, norm])
         return ws
 
     def _figure_out_measurement_method(self, ws):
@@ -762,18 +779,23 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         if process in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
-                self._merge_polarisations(ws, average_detectors=True)
+                tmp_ws = ws + '_tmp'
+                MergeRuns(InputWorkspaces=ws, OutputWorkspace=tmp_ws)
+                DeleteWorkspaces(WorkspaceList=ws)
+                GroupWorkspaces(InputWorkspaces=tmp_ws, OutputWorkspace=ws)
+            progress.report('Normalising to monitor/time')
+            self._normalise(ws)
             cadmium_transmission_ws = self.getPropertyValue('CadmiumTransmissionWorkspace')
             if cadmium_transmission_ws:
                 Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_transmission_ws, OutputWorkspace=ws)
-            monID = 100001 # monitor 2
+            monID = 100001  # monitor 2
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=ws)
             if process in ['Transmission']:
                 beam_ws = self.getPropertyValue('EmptyBeamWorkspace')
                 progress.report('Calculating transmission')
                 self._calculate_transmission(ws, beam_ws)
         else:
-            progress.report('Normalising to monitor')
+            progress.report('Normalising to monitor/time')
             self._normalise(ws)
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
