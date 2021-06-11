@@ -268,14 +268,14 @@ public:
 
     auto &yValues = testWS->mutableY(0);
     // Find index of peak value and calcualte half height.
-    int iPeak = std::max_element(yValues.cbegin(), yValues.cend()) - yValues.begin();
+    int64_t iPeak = std::max_element(yValues.cbegin(), yValues.cend()) - yValues.begin();
     double yPeak = yValues[iPeak];
     double halfHeight = yPeak * 0.5;
 
     // Find index of the point before y goes below half-height on the trailing edge.
     int nValues = static_cast<int>(yValues.size());
-    int iBeforeHalfHeight = 0;
-    for (int i = iPeak; i < nValues; ++i) {
+    int64_t iBeforeHalfHeight = 0;
+    for (int64_t i = iPeak; i < nValues; ++i) {
       if (yValues[i] < halfHeight) {
         iBeforeHalfHeight = i - 1;
         break;
@@ -307,14 +307,13 @@ public:
 
     auto &yValues = testWS->mutableY(0);
     // Find index of peak value and calcualte half height.
-    int iPeak = std::max_element(yValues.cbegin(), yValues.cend()) - yValues.begin();
+    int64_t iPeak = std::max_element(yValues.cbegin(), yValues.cend()) - yValues.begin();
     double yPeak = yValues[iPeak];
     double halfHeight = yPeak * 0.5;
 
     // Find index of the point after y goes below half-height on the leading edge.
-    int nValues = static_cast<int>(yValues.size());
-    int iAfterHalfHeight = 0;
-    for (int i = iPeak; i >= 0; --i) {
+    int64_t iAfterHalfHeight = 0;
+    for (int64_t i = iPeak; i >= 0; --i) {
       if (yValues[i] < halfHeight) {
         iAfterHalfHeight = i + 1;
         break;
