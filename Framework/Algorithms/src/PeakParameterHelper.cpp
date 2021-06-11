@@ -7,6 +7,10 @@
 
 #include "MantidAlgorithms/PeakParameterHelper.h"
 
+#ifdef _WIN32
+#include <BaseTsd.h>
+#endif
+
 using namespace Mantid;
 using namespace Mantid::API;
 using Mantid::HistogramData::Histogram;
