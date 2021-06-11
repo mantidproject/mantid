@@ -23,7 +23,7 @@ Improvements
 Bugfixes
 ########
 
-- Fix rare divide-by zero error when running :ref:`GetEi <algm-GetEi2>` on noisy data.
+- Fix rare divide-by zero error when running :ref:`GetEi <algm-GetEi>` on noisy data.
 
 
 Fit Functions
