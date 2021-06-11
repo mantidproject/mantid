@@ -123,6 +123,12 @@ public slots:
   /// Links help button to wiki page
   virtual void help() = 0;
 
+  /**
+   * Updates the axis labels of the plot
+   * @param xAxisLabel :: Label to be used for the x axis
+   */
+  virtual void updateAxisLabels(std::string &xAxisLabel) = 0;
+
 signals:
   /// Fit requested
   void fitRequested();

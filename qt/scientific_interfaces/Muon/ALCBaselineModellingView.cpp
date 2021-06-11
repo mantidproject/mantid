@@ -69,6 +69,7 @@ void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr workspace, std:
 
   m_ui.dataPlot->clear();
   m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black, kwargs);
+  m_ui.dataPlot->setOverrideAxisLabel(MantidQt::MantidWidgets::AxisID::XBottom, "XLabel");
 }
 
 void ALCBaselineModellingView::setCorrectedCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
@@ -199,6 +200,13 @@ void ALCBaselineModellingView::setSelectorValues(RangeSelector *selector,
 
 void ALCBaselineModellingView::help() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"), QString("muon"));
+}
+
+void ALCBaselineModellingView::updateAxisLabels(std::string &xAxisLabel) {
+  m_ui.dataPlot->setOverrideAxisLabel(MantidQt::MantidWidgets::AxisID::XBottom, xAxisLabel.c_str());
+  m_ui.dataPlot->setOverrideAxisLabel(MantidQt::MantidWidgets::AxisID::YLeft, "Asymmetry");
+  m_ui.correctedPlot->setOverrideAxisLabel(MantidQt::MantidWidgets::AxisID::XBottom, xAxisLabel.c_str());
+  m_ui.correctedPlot->setOverrideAxisLabel(MantidQt::MantidWidgets::AxisID::YLeft, "Asymmetry");
 }
 
 void ALCBaselineModellingView::emitFitRequested() { emit fitRequested(); }

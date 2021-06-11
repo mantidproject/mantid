@@ -47,6 +47,7 @@ public slots:
   void help() override;
   void plotGuess() override;
   void changePlotGuessState(bool plotted) override;
+  void updateAxisLabels(std::string newAxisLabel) override;
 
 private:
   /// The widget used

@@ -133,5 +133,9 @@ void ALCPeakFittingView::changePlotGuessState(bool plotted) {
   m_ui.plotGuess->setText(plotted ? "Remove guess" : "Plot guess");
 }
 
+void ALCPeakFittingView::updateAxisLabels(std::string newAxisLabel) {
+  m_ui.plot->setOverrideAxisLabel(MantidQt::MantidWidgets::AxisID::XBottom, newAxisLabel.c_str());
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

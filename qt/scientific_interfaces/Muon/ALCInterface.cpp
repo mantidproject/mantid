@@ -70,7 +70,8 @@ void ALCInterface::closeEvent(QCloseEvent *event) {
 ALCInterface::ALCInterface(QWidget *parent)
     : UserSubWindow(parent), m_ui(), m_baselineModellingView(nullptr), m_peakFittingView(nullptr),
       m_dataLoading(nullptr), m_baselineModelling(nullptr), m_peakFitting(nullptr),
-      m_baselineModellingModel(new ALCBaselineModellingModel()), m_peakFittingModel(new ALCPeakFittingModel()) {}
+      m_baselineModellingModel(new ALCBaselineModellingModel()), m_peakFittingModel(new ALCPeakFittingModel()),
+      m_externalPlotter(std::make_unique<ExternalPlotter>()) {}
 
 void ALCInterface::initLayout() {
   m_ui.setupUi(this);
@@ -79,6 +80,7 @@ void ALCInterface::initLayout() {
   connect(m_ui.previousStep, SIGNAL(clicked()), SLOT(previousStep()));
   connect(m_ui.exportResults, SIGNAL(clicked()), SLOT(exportResults()));
   connect(m_ui.importResults, SIGNAL(clicked()), SLOT(importResults()));
+  connect(m_ui.externalPlotButton, SIGNAL(clicked()), SLOT(externalPlotRequested()));
 
   auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
   m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
@@ -95,6 +97,7 @@ void ALCInterface::initLayout() {
 
   connect(m_dataLoading, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
   connect(m_baselineModellingModel, SIGNAL(correctedDataChanged()), SLOT(updatePeakData()));
+  connect(m_dataLoading, SIGNAL(updateAxisLabels(std::string)), SLOT(updateAxisLabels(std::string)));
 
   assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
 
@@ -282,6 +285,46 @@ void ALCInterface::importPeakData(const std::string &workspaceName) {
     } else {
       m_peakFittingModel->setData(peaksWS);
     }
+  }
+}
+
+void ALCInterface::updateAxisLabels(std::string newAxisLabel) {
+  m_baselineModellingView->updateAxisLabels(newAxisLabel);
+  m_peakFittingView->updateAxisLabels(newAxisLabel);
+}
+
+void ALCInterface::externalPlotRequested() {
+  MatrixWorkspace_sptr data;
+  MantidQt::Widgets::Common::Python::Object fig;
+  QHash<QString, QVariant> kwargs;
+  switch (m_ui.stepView->currentIndex()) {
+  case 0:
+    data = m_dataLoading->exportWorkspace();
+    if (data) {
+      kwargs.insert("marker", QString(".").toLatin1().constData());
+      kwargs.insert("linestyle", QString("None").toLatin1().constData());
+      AnalysisDataService::Instance().addOrReplace("ALCResults_Loaded_Data", data);
+      m_externalPlotter->plotSpectra("ALCResults_Loaded_Data", "0", true, kwargs);
+    }
+    break;
+  case 1: // Spec 0 = Data, Spec 1 = Calc, Spec 2 = Diff
+    data = m_baselineModellingModel->exportWorkspace();
+    if (data) {
+      kwargs.insert("marker", QString(".").toLatin1().constData());
+      kwargs.insert("linestyle", QString("None").toLatin1().constData());
+      AnalysisDataService::Instance().addOrReplace("ALCResults_Baseline_Workspace", data);
+      m_externalPlotter->plotSpectra("ALCResults_Baseline_Workspace", "0", false, kwargs);
+    }
+    break;
+  case 2:
+    data = m_peakFittingModel->exportWorkspace();
+    if (data) {
+      kwargs.insert("marker", QString(".").toLatin1().constData());
+      kwargs.insert("linestyle", QString("None").toLatin1().constData());
+      AnalysisDataService::Instance().addOrReplace("ALCResults_Peaks_Workspace", data);
+      m_externalPlotter->plotSpectra("ALCResults_Peaks_Workspace", "0", false, kwargs);
+    }
+    break;
   }
 }
 

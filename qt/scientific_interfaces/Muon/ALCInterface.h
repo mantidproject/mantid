@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
 #include "MantidKernel/System.h"
 
-#include "DllConfig.h"
-
+#include "ExternalPlotter.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
 #include "ui_ALCInterface.h"
@@ -53,6 +53,8 @@ private slots:
 
   void updateBaselineData();
   void updatePeakData();
+  void updateAxisLabels(std::string newAxisLabels);
+  void externalPlotRequested();
 
 private:
   void importLoadedData(const std::string &workspaceName);
@@ -80,6 +82,9 @@ private:
 
   /// Format of the label at the bottom
   static const QString LABEL_FORMAT;
+
+  /// External plotter
+  std::unique_ptr<ExternalPlotter> m_externalPlotter;
 };
 
 } // namespace CustomInterfaces

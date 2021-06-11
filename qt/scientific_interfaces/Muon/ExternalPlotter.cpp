@@ -4,11 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "ExternalPlotter.h"
 //#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 
-#include "ExternalPlotter.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
 
@@ -116,11 +116,16 @@ ExternalPlotter::~ExternalPlotter() {}
  * @param workspaceIndices The indices within the workspace to plot (e.g.
  * '0-2,5,7-10')
  */
-void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices,
-                                  bool errorBars) {
+void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars,
+                                  boost::optional<QHash<QString, QVariant>> kwargs) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
-    workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(workspaceIndices),
-                  errorBars, boost::none);
+    if (kwargs) {
+      workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(workspaceIndices),
+                    errorBars, kwargs);
+    } else {
+      workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(workspaceIndices),
+                    errorBars, boost::none);
+    }
   }
 }
 

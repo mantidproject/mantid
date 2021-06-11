@@ -89,6 +89,8 @@ public slots:
   /// Changes button state
   virtual void changePlotGuessState(bool plotted) = 0;
 
+  virtual void updateAxisLabels(std::string newAxisLabel) = 0;
+
 signals:
   /// Request to perform peak fitting
   void fitRequested();
