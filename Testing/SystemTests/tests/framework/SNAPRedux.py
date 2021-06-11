@@ -49,7 +49,7 @@ def _assert_reduction_configuration(properties_in):
     r"""
     @param properties_in : dictionary with property names and values
     """
-    with tempfile.TemporaryDirectory as save_dir:
+    with tempfile.TemporaryDirectory() as save_dir:
         SNAPReduce(EnableConfigurator=True, ConfigSaveDir=save_dir, **properties_in)
         config_file = str(save_dir.glob('*.json')[0])  # the JSON file created by SNAPReduce
         properties_out = json.load(open(config_file, 'r'))
