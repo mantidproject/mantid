@@ -246,8 +246,8 @@ This example below performs a complete reduction for D7 data.
     PolDiffILLReduction(
         Run='396939',
         OutputWorkspace='pol_corrections',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyContainerInputWorkspace='empty_ws',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
         # Transmission='0.95', # transmission can be also provided as a string with desired value
         Transmission='quartz_transmission',
         OutputTreatment='AveragePol',
@@ -271,7 +271,7 @@ This example below performs a complete reduction for D7 data.
         CadmiumWorkspace='cadmium_ws',
         EmptyContainerWorkspace='empty_ws',
         Transmission='vanadium_transmission',
-        QuartzInputWorkspace='pol_corrections',
+        QuartzWorkspace='pol_corrections',
         OutputTreatment='Sum',
         SampleGeometry='None',
         SampleAndEnvironmentProperties=vanadium_dictionary,
