@@ -8,13 +8,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CrossCorrelate.h"
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidAlgorithms/CrossCorrelate.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "CrossCorrelateTestData.h"
 
@@ -25,7 +25,6 @@ using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::CountStandardDeviations;
 
-
 class CrossCorrelateTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being
@@ -35,28 +34,26 @@ public:
   static void destroySuite(CrossCorrelateTest *suite) { delete suite; }
 
   /* print default test gaussian data */
-  void test_default_gaussian_data()
-  {
+  void test_default_gaussian_data() {
     CrossCorrelateTestData test_data;
 
     test_data.print_workspace();
 
     MatrixWorkspace_sptr m = test_data.get_workspace();
 
-    TS_ASSERT_EQUALS( true, m != nullptr );
+    TS_ASSERT_EQUALS(true, m != nullptr);
   }
 
   /* currently, there is something wrong with this - codomain is always zero */
   /* print default test b2bExp data */
-  void test_default_b2bExp()
-  {
-    CrossCorrelateTestData test_data( CrossCorrelateTestData::b2bexp_default_111 );
+  void test_default_b2bExp() {
+    CrossCorrelateTestData test_data(CrossCorrelateTestData::b2bexp_default_111);
 
     test_data.print_workspace();
 
     MatrixWorkspace_sptr m = test_data.get_workspace();
 
-    TS_ASSERT_EQUALS( true, m != nullptr );
+    TS_ASSERT_EQUALS(true, m != nullptr);
   }
 
   void testValidInput() {
