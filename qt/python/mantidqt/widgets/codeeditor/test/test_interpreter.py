@@ -54,7 +54,7 @@ class PythonFileInterpreterTest(unittest.TestCase):
                 self.assertEqual(w.clear_key_binding(key_combo), None,
                                  msg=fail_msg)
 
-    @mock.patch("mantidqt.utils.asynchronous.Receiver.on_error")
+    @mock.patch("mantidqt.utils.asynchronous._Receiver.on_error")
     def test_variables_reset(self, mock_on_error):
         w = PythonFileInterpreter(content='x=\'this is a string\'\r\nprint(x)')
         w.sig_editor_modified = mock.MagicMock()
