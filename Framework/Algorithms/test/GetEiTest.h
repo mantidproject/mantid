@@ -258,6 +258,45 @@ public:
 
     AnalysisDataService::Instance().remove(outws_name);
   }
+
+  /**
+   * Modify the test workspace so that one of the monitors has a local maximum on the trailing edge
+   * of the peak. Preivously, this would result in a divide-by-zero error.
+   */
+  void testNoisyDataOnTrailingEdge() {
+    MatrixWorkspace_sptr testWS = GetEiTestHelper::createTestWorkspaceWithMonitors();
+
+    auto &yValues = testWS->mutableY(0);
+    // Find index of peak value and calcualte half height.
+    int iPeak = std::max_element(yValues.cbegin(), yValues.cend()) - yValues.begin();
+    double yPeak = yValues[iPeak];
+    double halfHeight = yPeak * 0.5;
+
+    // Find index of the point before y goes below half-height.
+    int nValues = static_cast<int>(yValues.size());
+    int iBeforeHalfHeight = 0;
+    for (int i = iPeak; i < nValues; ++i) {
+      if (yValues[i] < halfHeight) {
+        iBeforeHalfHeight = i - 1;
+        break;
+      }
+    }
+
+    // To recreate the bug, need to have the value at ip == half height, a point after it
+    // with a greater value and the point just after that equal to half-height.
+    yValues[iBeforeHalfHeight] = halfHeight;
+    yValues[iBeforeHalfHeight + 3] = halfHeight + 1;
+    yValues[iBeforeHalfHeight + 4] = yValues[iBeforeHalfHeight];
+
+    // This algorithm needs a name attached to the workspace
+    const std::string outputName("eitestNoisyData");
+    AnalysisDataService::Instance().add(outputName, testWS);
+
+    IAlgorithm_sptr alg;
+    TS_ASSERT_THROWS_NOTHING(alg = GetEiTestHelper::runGetEiUsingTestMonitors(outputName, 15.0, false));
+
+    AnalysisDataService::Instance().remove(outputName);
+  }
 };
 
 class GetEiTestPerformance : public CxxTest::TestSuite {
