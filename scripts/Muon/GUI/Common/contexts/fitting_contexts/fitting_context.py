@@ -10,8 +10,7 @@ import re
 import numpy as np
 
 from mantidqt.utils.observer_pattern import Observable
-from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
-
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 # Magic values for names of columns in the fit parameter table
 NAME_COL = 'Name'
@@ -179,38 +178,47 @@ class FitInformation(object):
     """Data-object encapsulating a single fit"""
 
     def __init__(self,
-                 parameter_workspace,
-                 fit_function_name,
-                 input_workspace,
-                 output_workspace_names,
-                 global_parameters=None,
-                 tf_asymmetry_fit=False):
+                 input_workspace_names: list,
+                 fit_function_name: str,
+                 output_workspaces: list,
+                 parameter_workspace: MuonWorkspaceWrapper,
+                 covariance_workspace: MuonWorkspaceWrapper,
+                 global_parameters: list = None,
+                 tf_asymmetry_fit: bool = False):
         """
-        :param parameter_workspace: The workspace wrapper
-        that contains all of the parameters from the fit
-        :param fit_function_name: The name of the function used
-        :param input_workspace: The name or list of names
-        of the workspace(s) containing the original data
-        :param output_workspace_names: A list containing the names of the output workspaces containing the fits
-        :param global_parameters: An optional list of parameters
-        that were tied together during the fit
+        :param input_workspace_names: A list of input workspace names containing the original data.
+        :param fit_function_name: The name of the function used.
+        :param output_workspaces: A list of MuonWorkspaceWrapper's containing the output workspaces.
+        :param parameter_workspace: A MuonWorkspaceWrapper containing the parameter workspace.
+        :param covariance_workspace: A MuonWorkspaceWrapper containing the covariance workspace.
+        :param global_parameters: An optional list of global parameters that were tied together during the fit.
         :param tf_asymmetry_fit: An optional flag indicating whether the data is from a TF Asymmetry fit or not.
         """
-        self._fit_parameters = FitParameters(parameter_workspace,
-                                             global_parameters)
-        self.fit_function_name = fit_function_name
-        self.input_workspaces = [input_workspace] if isinstance(
-            input_workspace, str) else input_workspace
-        self.output_workspace_names = [output_workspace_names] if isinstance(
-            output_workspace_names, str) else output_workspace_names
-        self.tf_asymmetry_fit = tf_asymmetry_fit
+        self.input_workspaces: list = input_workspace_names
+        self.fit_function_name: str = fit_function_name
+        self.output_workspaces: list = output_workspaces
+        self.parameter_workspace: MuonWorkspaceWrapper = parameter_workspace
+        self.covariance_workspace: MuonWorkspaceWrapper = covariance_workspace
+        self.tf_asymmetry_fit: bool = tf_asymmetry_fit
+
+        self._fit_parameters = FitParameters(self.parameter_workspace, global_parameters)
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
-        return self.parameter_workspace_name == other.parameter_workspace_name and \
+        return self.input_workspaces == other.input_workspaces and \
             self.fit_function_name == other.fit_function_name and \
-            self.input_workspaces == other.input_workspaces and \
-            self.output_workspace_names == other.output_workspace_names
+            self.output_workspace_names() == other.output_workspace_names() and \
+            self.parameter_workspace.workspace_name == other.parameter_workspace.workspace_name and \
+            self.covariance_workspace.workspace_name == other.covariance_workspace.workspace_name and \
+            self.tf_asymmetry_fit == other.tf_asymmetry_fit
+
+    def output_workspaces_objects(self) -> list:
+        """Returns a list of output workspaces."""
+        return [output_workspace.workspace for output_workspace in self.output_workspaces]
+
+    def output_workspace_names(self) -> list:
+        """Returns a list of the output workspace names."""
+        return [output_workspace.workspace_name for output_workspace in self.output_workspaces]
 
     @property
     def parameters(self):
@@ -218,7 +226,7 @@ class FitInformation(object):
 
     @property
     def parameter_workspace_name(self):
-        return self._fit_parameters.parameter_workspace_name
+        return self.parameter_workspace.workspace_name
 
     def log_names(self, filter_fn=None):
         """
@@ -232,8 +240,8 @@ class FitInformation(object):
         filter_fn = filter_fn if filter_fn is not None else lambda x: True
 
         all_names = []
-        for ws_name in self.output_workspace_names:
-            logs = retrieve_ws(ws_name).run().getLogData()
+        for output_workspace in self.output_workspaces_objects():
+            logs = output_workspace.run().getLogData()
             all_names.extend([log.name for log in logs if filter_fn(log)])
 
         return all_names
@@ -243,8 +251,8 @@ class FitInformation(object):
         :param log_name: A string name
         :return: True if the log exists on all of the input workspaces False, otherwise
         """
-        for ws_name in self.output_workspace_names:
-            run = retrieve_ws(ws_name).run()
+        for output_workspace in self.output_workspaces_objects():
+            run = output_workspace.run()
             if not run.hasProperty(log_name):
                 return False
 
@@ -262,8 +270,8 @@ class FitInformation(object):
         :return: A single double value
         """
 
-        def value_from_workspace(wksp_name):
-            run = retrieve_ws(wksp_name).run()
+        def value_from_workspace(output_workspace):
+            run = output_workspace.run()
             prop = run.getProperty(log_name)
             if hasattr(prop, 'timeAverageValue'):
                 return prop.timeAverageValue()
@@ -273,10 +281,7 @@ class FitInformation(object):
                 except ValueError:
                     return prop.valueAsStr
 
-        values = [
-            value_from_workspace(wksp_name)
-            for wksp_name in self.output_workspace_names
-        ]
+        values = [value_from_workspace(output_workspace) for output_workspace in self.output_workspaces_objects()]
         try:
             return np.mean(values)
         except TypeError:
@@ -326,26 +331,31 @@ class FittingContext(object):
     def remove_fit_by_name(fits_history: list, workspace_name: str) -> None:
         """Remove a Fit from the history when an ADS delete event happens on one of its output workspaces."""
         for fit in reversed(fits_history):
-            if workspace_name in fit.output_workspace_names or workspace_name == fit.parameter_workspace_name:
+            if workspace_name in fit.output_workspace_names() or workspace_name == fit.parameter_workspace_name:
                 fits_history.remove(fit)
 
     def add_fit_from_values(self,
-                            parameter_workspace,
-                            fit_function_name,
-                            input_workspace,
-                            output_workspace_names,
-                            global_parameters=None,
-                            tf_asymmetry_fit=False):
+                            input_workspace_names: list,
+                            fit_function_name: str,
+                            output_workspaces: list,
+                            parameter_workspace: MuonWorkspaceWrapper,
+                            covariance_workspace: MuonWorkspaceWrapper,
+                            global_parameters: list = None,
+                            tf_asymmetry_fit: bool = False) -> None:
         """
         Add a new fit information object based on the raw values.
-        See FitInformation constructor for details are arguments.
+        :param input_workspace_names: A list of input workspace names containing the original data.
+        :param fit_function_name: The name of the function used.
+        :param output_workspaces: A list of MuonWorkspaceWrapper's containing the output workspaces.
+        :param parameter_workspace: A MuonWorkspaceWrapper containing the parameter workspace.
+        :param covariance_workspace: A MuonWorkspaceWrapper containing the covariance workspace.
+        :param global_parameters: An optional list of global parameters that were tied together during the fit.
+        :param tf_asymmetry_fit: An optional flag indicating whether the data is from a TF Asymmetry fit or not.
         """
-        self.add_fit(
-            FitInformation(parameter_workspace, fit_function_name,
-                           input_workspace, output_workspace_names,
-                           global_parameters, tf_asymmetry_fit))
+        self.add_fit(FitInformation(input_workspace_names, fit_function_name, output_workspaces, parameter_workspace,
+                                    covariance_workspace, global_parameters, tf_asymmetry_fit))
 
-    def add_fit(self, fit):
+    def add_fit(self, fit: FitInformation) -> None:
         """
         Add a new fit to the context. Subscribers are notified of the update.
         :param fit: A new FitInformation object
@@ -353,7 +363,7 @@ class FittingContext(object):
         self.active_fit_history.append(fit)
         self.new_fit_results_notifier.notify_subscribers(fit)
 
-    def fit_function_names(self):
+    def fit_function_names(self) -> list:
         """
         :return: a list of unique function names used in the fit
         """
@@ -400,6 +410,6 @@ class FittingContext(object):
     def _is_unique_fit(fit: FitInformation, unique_fits: list) -> bool:
         """Returns true if the Fit output does not already exist in the unique_fits list."""
         for unique_fit in unique_fits:
-            if fit.output_workspace_names == unique_fit.output_workspace_names:
+            if fit == unique_fit:
                 return False
         return True

@@ -7,7 +7,10 @@
 from mantid.api import AnalysisDataService, IFunction, MultiDomainFunction
 from mantid.simpleapi import RenameWorkspace, CopyLogs
 
-from Muon.GUI.Common.ADSHandler.workspace_naming import (create_fitted_workspace_name,
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+from Muon.GUI.Common.ADSHandler.workspace_naming import (create_covariance_matrix_name,
+                                                         create_fitted_workspace_name,
                                                          create_multi_domain_fitted_workspace_name,
                                                          create_parameter_table_name,
                                                          get_run_numbers_as_string_from_workspace_name)
@@ -310,11 +313,12 @@ class GeneralFittingModel(BasicFittingModel):
 
     def _do_simultaneous_fit(self, parameters: dict, global_parameters: list) -> tuple:
         """Performs a simultaneous fit and returns the resulting function, status and chi squared."""
-        output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
+        output_group_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
             self._do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameters)
 
         self._add_simultaneous_fit_results_to_ADS_and_context(parameters["InputWorkspace"], parameter_table,
-                                                              output_workspace, covariance_matrix, global_parameters)
+                                                              output_group_workspace, covariance_matrix,
+                                                              global_parameters)
         return function, fit_status, chi_squared
 
     def _do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(self, parameters: dict) -> tuple:
@@ -348,32 +352,30 @@ class GeneralFittingModel(BasicFittingModel):
         return params
 
     def _add_simultaneous_fit_results_to_ADS_and_context(self, input_workspace_names: list, parameter_table,
-                                                         output_workspace, covariance_matrix,
+                                                         output_group_workspace, covariance_matrix,
                                                          global_parameters: list) -> None:
         """Adds the results of a simultaneous fit to the ADS and fitting context."""
-        if self.fitting_context.number_of_datasets > 1:
-            workspace_names, table_name, table_directory = self._add_multiple_fit_workspaces_to_ADS(
-                input_workspace_names, output_workspace, covariance_matrix)
-        else:
-            workspace_name, table_name, table_directory = self._add_single_fit_workspaces_to_ADS(
-                input_workspace_names[0], output_workspace, covariance_matrix)
-            workspace_names = [workspace_name]
+        function_name = self.fitting_context.function_name
 
-        self._add_fit_to_context(self._add_workspace_to_ADS(parameter_table, table_name, table_directory),
-                                 input_workspace_names, workspace_names, global_parameters)
+        output_workspace_wraps, directory = self._create_output_workspace_wraps(input_workspace_names, function_name,
+                                                                                output_group_workspace)
 
-    def _add_multiple_fit_workspaces_to_ADS(self, input_workspace_names: list, output_workspace, covariance_matrix):
-        """Adds the results of a simultaneous fit to the ADS and fitting context if multiple workspaces were fitted."""
-        suffix = self.fitting_context.function_name
-        workspace_names, workspace_directory = create_multi_domain_fitted_workspace_name(input_workspace_names[0],
-                                                                                         suffix)
-        table_name, table_directory = create_parameter_table_name(input_workspace_names[0] + "+ ...", suffix)
+        parameter_table_name, _ = create_parameter_table_name(input_workspace_names[0] + "+ ...", function_name)
+        covariance_matrix_name, _ = create_covariance_matrix_name(input_workspace_names[0] + "+ ...", function_name)
 
-        self._add_workspace_to_ADS(output_workspace, workspace_names, "")
-        workspace_names = self._rename_members_of_fitted_workspace_group(input_workspace_names, workspace_names)
-        self._add_workspace_to_ADS(covariance_matrix, workspace_names[0] + "_CovarianceMatrix", table_directory)
+        parameter_workspace_wrap = self._add_workspace_to_ADS(parameter_table, parameter_table_name, directory)
+        covariance_workspace_wrap = self._add_workspace_to_ADS(covariance_matrix, covariance_matrix_name, directory)
 
-        return workspace_names, table_name, table_directory
+        self._add_fit_to_context(input_workspace_names, output_workspace_wraps, parameter_workspace_wrap,
+                                 covariance_workspace_wrap, global_parameters)
+
+    def _add_fit_to_context(self, input_workspace_names: list, output_workspaces: list,
+                            parameter_workspace: MuonWorkspaceWrapper, covariance_workspace: MuonWorkspaceWrapper,
+                            global_parameters: list = None) -> None:
+        """Adds the results of a single or simultaneous fit to the context."""
+        self.fitting_context.add_fit_from_values(input_workspace_names, self.fitting_context.function_name,
+                                                 output_workspaces, parameter_workspace, covariance_workspace,
+                                                 global_parameters)
 
     def _get_names_in_group_workspace(self, group_name: str) -> list:
         """Returns the names of the workspaces existing within a group workspace."""
@@ -382,8 +384,32 @@ class GeneralFittingModel(BasicFittingModel):
         else:
             return []
 
+    def _create_output_workspace_wraps(self, input_workspace_names: list, function_name: str, output_group_workspace) -> tuple:
+        """Returns a list of MuonWorkspaceWrapper objects containing the fitted output workspaces"""
+        if self.fitting_context.number_of_datasets > 1:
+            output_group_name, directory = create_multi_domain_fitted_workspace_name(input_workspace_names[0],
+                                                                                     function_name)
+            output_workspace_wraps = self._create_output_workspace_wraps_for_a_multi_domain_fit(input_workspace_names,
+                                                                                                output_group_workspace,
+                                                                                                output_group_name)
+        else:
+            output_workspace_name, directory = create_fitted_workspace_name(input_workspace_names[0], function_name)
+            output_workspace_wrap = self._add_workspace_to_ADS(output_group_workspace, output_workspace_name, directory)
+            output_workspace_wraps = [output_workspace_wrap]
+        return output_workspace_wraps, directory
+
+    def _create_output_workspace_wraps_for_a_multi_domain_fit(self, input_workspace_names: list, output_group_workspace,
+                                                              output_group_name: str) -> list:
+        """Returns a list of MuonWorkspaceWrapper objects containing the fitted output workspaces for many domains."""
+        self._add_workspace_to_ADS(output_group_workspace, output_group_name, "")
+        output_workspace_names = self._rename_members_of_fitted_workspace_group(input_workspace_names,
+                                                                                output_group_name)
+
+        return [MuonWorkspaceWrapper(retrieve_ws(workspace_name)) for workspace_name in output_workspace_names]
+
     def _rename_members_of_fitted_workspace_group(self, input_workspace_names: list, group_workspace: str) -> list:
-        """Renames the fit result workspaces within a group workspace."""
+        """Renames the output workspaces within a group workspace. The Fit algorithm returns an output group when
+        doing a fit over multiple domains (i.e. for a simultaneous fit)."""
         self.context.ads_observer.observeRename(False)
         output_names = [self._rename_workspace(input_name, workspace_name) for input_name, workspace_name in
                         zip(input_workspace_names, self._get_names_in_group_workspace(group_workspace))]

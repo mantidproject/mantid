@@ -8,6 +8,7 @@ from mantid import AlgorithmManager, logger
 from mantid.api import IFunction
 from mantid.simpleapi import CopyLogs, ConvertFitFunctionForMuonTFAsymmetry
 
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_fitted_workspace_name,
                                                          create_multi_domain_fitted_workspace_name,
                                                          get_diff_asymmetry_name, get_group_asymmetry_name,
@@ -278,7 +279,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     def get_fit_function_parameters(self) -> list:
         """Returns the names of the fit parameters in the fit functions."""
         parameters = super().get_fit_function_parameters()
-        if self.fitting_context.tf_asymmetry_mode:
+        if self.fitting_context.tf_asymmetry_mode and self.fitting_context.number_of_datasets > 0:
             if self.fitting_context.simultaneous_fitting_mode:
                 return self._add_normalisation_to_parameters_for_simultaneous_fitting(
                     parameters, self._get_normalisation_parameter_name_for_simultaneous_domain)
@@ -710,12 +711,13 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         """Returns a list of unnormalised workspaces to be used within a TF Asymmetry fit."""
         return self.context.group_pair_context.get_unormalisised_workspace_list(normalised_workspaces)
 
-    def _add_fit_to_context(self, parameter_workspace, input_workspaces, output_workspaces,
+    def _add_fit_to_context(self, input_workspace_names: list, output_workspaces: list,
+                            parameter_workspace: MuonWorkspaceWrapper, covariance_workspace: MuonWorkspaceWrapper,
                             global_parameters: list = None) -> None:
-        """Adds the results of a fit to the context. Overrides the method in BasicFittingModel."""
-        self.context.fitting_context.add_fit_from_values(parameter_workspace, self.fitting_context.function_name,
-                                                         input_workspaces, output_workspaces, global_parameters,
-                                                         self.fitting_context.tf_asymmetry_mode)
+        """Adds the results of a single/simultaneous tf asymmetry fit to the context."""
+        self.context.fitting_context.add_fit_from_values(input_workspace_names, self.fitting_context.function_name,
+                                                         output_workspaces, parameter_workspace, covariance_workspace,
+                                                         global_parameters, self.fitting_context.tf_asymmetry_mode)
 
     """
     Methods used by the Sequential Fitting Tab

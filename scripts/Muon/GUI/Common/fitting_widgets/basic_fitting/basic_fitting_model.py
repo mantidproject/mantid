@@ -9,7 +9,8 @@ from mantid.api import CompositeFunction, IAlgorithm, IFunction
 from mantid.simpleapi import CopyLogs, EvaluateFunction
 
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
-from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name, create_parameter_table_name
+from Muon.GUI.Common.ADSHandler.workspace_naming import (create_covariance_matrix_name, create_fitted_workspace_name,
+                                                         create_parameter_table_name)
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
@@ -605,32 +606,27 @@ class BasicFittingModel:
         second_pulse_weighting = 1 / (1 + decay)
         return first_pulse_weighting, second_pulse_weighting
 
-    def _add_single_fit_results_to_ADS_and_context(self, input_workspace, parameters_table, output_workspace,
+    def _add_single_fit_results_to_ADS_and_context(self, input_workspace_name: str, parameters_table, output_workspace,
                                                    covariance_matrix) -> None:
         """Adds the results of a single fit to the ADS and context."""
-        workspace_name, table_name, table_directory = self._add_single_fit_workspaces_to_ADS(input_workspace,
-                                                                                             output_workspace,
-                                                                                             covariance_matrix)
-        self._add_fit_to_context(self._add_workspace_to_ADS(parameters_table, table_name, table_directory),
-                                 input_workspace, [workspace_name])
-
-    def _add_single_fit_workspaces_to_ADS(self, input_workspace, output_workspace, covariance_matrix) -> tuple:
-        """Adds the results of a single fit to the ADS."""
         function_name = self.fitting_context.function_name
 
-        workspace_name, workspace_directory = create_fitted_workspace_name(input_workspace, function_name)
-        table_name, table_directory = create_parameter_table_name(input_workspace, function_name)
+        output_workspace_name, directory = create_fitted_workspace_name(input_workspace_name, function_name)
+        parameter_table_name, _ = create_parameter_table_name(input_workspace_name, function_name)
+        covariance_matrix_name, _ = create_covariance_matrix_name(input_workspace_name, function_name)
 
-        self._add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
-        self._add_workspace_to_ADS(covariance_matrix, workspace_name + '_CovarianceMatrix', table_directory)
+        output_workspace_wrap = self._add_workspace_to_ADS(output_workspace, output_workspace_name, directory)
+        parameter_workspace_wrap = self._add_workspace_to_ADS(parameters_table, parameter_table_name, directory)
+        covariance_workspace_wrap = self._add_workspace_to_ADS(covariance_matrix, covariance_matrix_name, directory)
 
-        return workspace_name, table_name, table_directory
+        self._add_fit_to_context([input_workspace_name], [output_workspace_wrap], parameter_workspace_wrap,
+                                 covariance_workspace_wrap)
 
-    def _add_fit_to_context(self, parameter_workspace, input_workspaces, output_workspaces,
-                            global_parameters: list = None) -> None:
+    def _add_fit_to_context(self, input_workspace_names: list, output_workspaces: list,
+                            parameter_workspace: MuonWorkspaceWrapper, covariance_workspace: MuonWorkspaceWrapper) -> None:
         """Adds the results of a single fit to the context."""
-        self.fitting_context.add_fit_from_values(parameter_workspace, self.fitting_context.function_name,
-                                                 input_workspaces, output_workspaces, global_parameters)
+        self.fitting_context.add_fit_from_values(input_workspace_names, self.fitting_context.function_name,
+                                                 output_workspaces, parameter_workspace, covariance_workspace)
 
     def _create_fit_plot_information(self, workspace_names: list, function_name: str) -> list:
         """Creates the FitPlotInformation storing fit data to be plotted in the plot widget."""
