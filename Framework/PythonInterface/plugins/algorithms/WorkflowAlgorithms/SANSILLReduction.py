@@ -483,7 +483,6 @@ class SANSILLReduction(PythonAlgorithm):
             else:
                 Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws, WarnOnZeroDivide=False)
             AddSampleLog(Workspace=ws, LogText='True', LogType='String', LogName='NormalisedByFlux')
-            self._do_rescale_flux(ws, flux_in)
         reference_ws = self.getProperty('ReferenceInputWorkspace').value
         if reference_ws:
             if not self._check_processed_flag(reference_ws, 'Sample'):
