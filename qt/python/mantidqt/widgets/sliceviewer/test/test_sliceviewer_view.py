@@ -9,7 +9,7 @@
 import io
 import sys
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import matplotlib as mpl
 from matplotlib.colors import Normalize
@@ -327,6 +327,15 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assertEqual(pres.view.data_view.get_axes_limits()[0], (xmin, xmax))
 
+    def test_close_event(self):
+        ws = CreateSampleWorkspace()
+        pres = SliceViewer(ws)
+        self.assert_widget_created()
+        pres.clear_observer = MagicMock()
+
+        pres.view.close()
+
+        pres.clear_observer.assert_called()
 
 # private helper functions
 

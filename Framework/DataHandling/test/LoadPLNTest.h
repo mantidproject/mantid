@@ -41,7 +41,7 @@ public:
     // missing event file - should fail execution
     std::string inputFile = "PLN0044464.hdf";
     algToBeTested.setPropertyValue("Filename", inputFile);
-    algToBeTested.setPropertyValue("BinaryEventPath", "./");
+    algToBeTested.setPropertyValue("BinaryEventPath", "../");
     TS_ASSERT(!algToBeTested.execute());
 
     // should succeed now

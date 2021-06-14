@@ -11,6 +11,7 @@ from unittest.mock import call, patch, MagicMock, Mock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.settings.general.presenter import GeneralSettings, GeneralProperties
+from workbench.config import SAVE_STATE_VERSION
 from qtpy.QtCore import Qt
 
 
@@ -354,7 +355,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         calls = [call(GeneralProperties.USER_LAYOUT.value), call(GeneralProperties.USER_LAYOUT.value)]
         mock_CONF.get.assert_has_calls(calls)
-        mock_parent.saveState.assert_called_once_with()
+        mock_parent.saveState.assert_called_once_with(SAVE_STATE_VERSION)
         mock_parent.populate_layout_menu.assert_called_once_with()
 
     @patch(WORKBENCH_CONF_CLASSPATH)
@@ -374,7 +375,7 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter.load_layout()
 
         mock_CONF.get.assert_called_once_with(GeneralProperties.USER_LAYOUT.value)
-        mock_parent.restoreState.assert_called_once_with(test_dict['a'])
+        mock_parent.restoreState.assert_called_once_with(test_dict['a'], SAVE_STATE_VERSION)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_delete_layout(self, mock_CONF):

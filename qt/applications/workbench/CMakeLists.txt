@@ -142,11 +142,12 @@ endif()
 # Testing
 set(TEST_FILES
     workbench/config/test/test_user.py
-    workbench/test/mainwindowtest.py
+    workbench/test/test_mainwindow.py
     workbench/test/test_import.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratoraxes.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorcolorfills.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfigure.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlegend.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlines.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorutils.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfitting.py
@@ -163,6 +164,7 @@ set(TEST_FILES
     workbench/plugins/test/test_jupyterconsole.py
     workbench/plugins/test/test_workspacewidget.py
     workbench/utils/test/test_workspacehistorygeneration.py
+    workbench/widgets/about/test/test_about_presenter.py
     workbench/widgets/plotselector/test/test_plotselector_model.py
     workbench/widgets/plotselector/test/test_plotselector_presenter.py
     workbench/widgets/plotselector/test/test_plotselector_view.py

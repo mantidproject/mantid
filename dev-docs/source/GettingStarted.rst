@@ -52,6 +52,11 @@ Unfortunately CMake can't find it out of the box and the following steps are req
 * create a new string value named ``InstallPath`` within this key and set the value
   to point to the install directory of Graphviz.
 
+Windows Subsystem for Linux (WSL2)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is also possible to install a Linux subsystem within Windows by following :ref:`these <WindowsSubsystemForLinux>` instructions. This step is optional.
+
 Linux
 -----
 
@@ -73,7 +78,24 @@ Red Hat/Cent OS/Fedora
   yum install mantid-developer
 
   # Install pre-commit
-  pip install pre-commit --user
+  pip3 install pre-commit --user
+
+
+On fedora, the ``yum`` commands should be replaced with ``dnf``.
+For systems with default python3 the ``pip3`` command can be replaced with ``pip``, but it should work either way.
+
+Make sure you install `devtoolset-7 <https://developer.mantidproject.org/BuildingWithCMake.html#from-the-command-line>`_ as described in the link.
+
+Now you can `get the mantid code <https://developer.mantidproject.org/GettingStarted.html#getting-the-mantid-code>`_, and build it:
+
+.. code-block:: sh
+
+  mkdir build
+  cd build
+  scl enable devtoolset-7 "cmake3 [mantid source]"
+  cmake3 --build .
+
+See the instructions on :ref:`this <RunningTheUnitTests>` page to run the Mantid unit tests.
 
 Ubuntu 18.04
 ~~~~~~~~~~~~
@@ -87,16 +109,29 @@ Ubuntu 18.04
 
 .. code-block:: sh
 
-   apt install gdebi-core
-   gdebi ~/Downloads/mantid-developer.X.Y.Z.deb
+  apt install gdebi-core
+  gdebi ~/Downloads/mantid-developer.X.Y.Z.deb
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
 Install pre-commit for use in our current developer workflow
+
 .. code-block:: sh
+
   pip install pre-commit --user
 
 if you wish to setup eclipse for use developing mantid, then instructions can be found :ref:`here <Eclipse>`.
+
+Now you can `get the mantid code <https://developer.mantidproject.org/GettingStarted.html#getting-the-mantid-code>`_, and build it:
+
+.. code-block:: sh
+
+  mkdir build
+  cd build
+  cmake -GNinja [mantid source]
+  cmake --build .
+
+See the instructions on :ref:`this <RunningTheUnitTests>` page to run the Mantid unit tests.
 
 Ubuntu 20.04
 ~~~~~~~~~~~~
@@ -160,19 +195,23 @@ Ubuntu 20.04
      python3-toml \
      python3-yaml
 
-and passing the `-DENABLE_MANTIDPLOT=OFF` option to the cmake command line or selecting this in the cmake GUI.
 
 Install pre-commit for use in our current developer workflow
+
 .. code-block:: sh
-  pip install pre-commit --user
+
+   pip install pre-commit --user
+
 
 OSX
 ---
 The build environment on OS X is described here :ref:`BuildingOnOSX`.
 
 Install pre-commit for use in our current developer workflow
+
 .. code-block:: sh
-  brew install pre-commit
+
+   brew install pre-commit
 
 Docker
 ------
@@ -197,6 +236,31 @@ There are a number of URLs via which the code can be checked out using various p
 
     git clone git@github.com:mantidproject/mantid.git
 
+Alternatively, one can use the ``https`` protocol for cloning the repository.
+This requires one to supply an authentication token when pushing or re-type their password.
+
+.. code-block:: sh
+
+    git clone https://github.com/mantidproject/mantid.git
+
+
+Custom git setup for inside the ORNL firewall:
+----------------------------------------------
+
+Due to security configuration at ORNL one needs to do additional configuration to access github from within the lab.
+One option is to use the ``https`` protocol listed above
+The alternative is to "corkscrew the snowman" which allows for using the ``git`` protocol by modifying the ssh configuration.
+Corkscrew can be installed from your package manager, or it is a single ``c`` file found on github.
+Add the following lines to ``~/.ssh/config``:
+
+.. code:: bash
+
+    ProxyCommand corkscrew snowman.ornl.gov 3128 %h %p
+    Host github.com
+
+
+If you need further help, ask another developer at the facility how to configure the corkscrew option.
+
 
 Setting up GitHub
 #################
@@ -206,8 +270,8 @@ Building Mantid
 ###############
 See :ref:`BuildingWithCMake` for information about building Mantid.
 
-Archive access
-##############
+Archive access - ISIS
+#####################
 
 It is very convenient to be able to access the data archive directly.
 At ISIS, this is automatically done on the Windows machines, however OSX and Linux

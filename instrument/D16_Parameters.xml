@@ -29,47 +29,51 @@
 
       <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
       <parameter name="logbook_default_parameters" type="string">
-	<value val="SampleDescription:/entry0/experiment_identifier,
-		    TotalTime:/entry0/duration,
-		    RateMonitor1:/entry0/monitor1/monrate,
-		    TotalCountsDet:/entry0/instrument/Detector1/detsum,
-		    RateCountsDet:/entry0/instrument/Detector1/detrate,
-		    StartTime:/entry0/start_time,
-		    Wavelength:/entry0/instrument/Beam/wavelength,
-		    Attenuator:/entry0/instrument/attenuator/attenuation_value,
-		    Det:/entry0/instrument/Det/value" />
+	<value val="SampleDescription:/entry0/experiment_identifier:s,
+		    TotalTime:/entry0/duration:f,
+		    RateMonitor1:/entry0/monitor1/monrate:f,
+		    TotalCountsDet:/entry0/instrument/Detector1/detsum:d,
+		    RateCountsDet:/entry0/instrument/Detector1/detrate:f,
+		    StartTime:/entry0/start_time:s,
+		    Wavelength:/entry0/instrument/Beam/wavelength:f,
+		    Attenuator:/entry0/instrument/attenuator/attenuation_value:f,
+		    Det:/entry0/instrument/Det/value:f" />
       </parameter>
       <parameter name="logbook_optional_parameters" type="string">
-	<value val="AcquisitionMode:/entry0/acquisition_mode,
-		    Mode:/entry0/mode,
-		    BeamStopYOffset:/entry0/instrument/BStopY/offset_value,
-		    BeamStopYValue:/entry0/instrument/BStopY/value,
-		    BeamStopXOffset:/entry0/instrument/BStopX/offset_value,
-		    BeamStopXValue:/entry0/instrument/BStopX/value,
-		    BeamstopX:/entry0/instrument/beamstop/bx_actual,
-		    BeamstopY:/entry0/instrument/beamstop/by_actual,
-		    TotalCountsMonitor1:/entry0/monitor1/monsum,
-		    TotalCountsMonitor2:/entry0/monitor2/monsum,
-		    RateMonitor2:/entry0/monitor2/monrate,
-		    ReactorPower:/entry0/reactor_power,
-		    Omega:/entry0/instrument/Omega/value,
-		    OmegaOffset:/entry0/instrument/Omega/offset_value,
-		    Phi:/entry0/instrument/Phi/value,
-		    PhiOffset:/entry0/instrument/Phi/offset_value,
-		    Khi:/entry0/instrument/Khi/value,
-		    KhiOffset:/entry0/instrument/Khi/offset_value,
-		    Str:/entry0/instrument/Str/value,
-		    StrOffset:/entry0/instrument/Str/offset_value,
-		    Slitr:/entry0/instrument/Slitr/value,
-		    SlitrOffset:/entry0/instrument/Slitr/offset_value,
-		    SampleTemperature:/entry0/sample/temperature,
-		    SetpointTemperature:/entry0/sample/setpoint_temperature,
-		    RegulationTemperature:/entry0/sample/regulation_temperature,
-		    Bath1Temperature:/entry0/sample/bath1_regulation_temperature,
-		    Bath2Temperature:/entry0/sample/bath2_regulation_temperature,
-		    SampleChangerPos:/entry0/instrument/VirtualSampleChanger/sample_changer_slot_value" />
+	<value val="AcquisitionMode:/entry0/acquisition_mode:d,
+		    Mode:/entry0/mode:d,
+		    BeamStopYOffset:/entry0/instrument/BStopY/offset_value:f,
+		    BeamStopYValue:/entry0/instrument/BStopY/value:f,
+		    BeamStopXOffset:/entry0/instrument/BStopX/offset_value:f,
+		    BeamStopXValue:/entry0/instrument/BStopX/value:f,
+		    BeamstopX:/entry0/instrument/beamstop/bx_actual:f,
+		    BeamstopY:/entry0/instrument/beamstop/by_actual:f,
+		    TotalCountsMonitor1:/entry0/monitor1/monsum:d,
+		    TotalCountsMonitor2:/entry0/monitor2/monsum:d,
+		    RateMonitor2:/entry0/monitor2/monrate:f,
+		    ReactorPower:/entry0/reactor_power:f,
+		    Omega:/entry0/instrument/Omega/value:f,
+		    OmegaOffset:/entry0/instrument/Omega/offset_value:f,
+		    Phi:/entry0/instrument/Phi/value:f,
+		    PhiOffset:/entry0/instrument/Phi/offset_value:f,
+		    Khi:/entry0/instrument/Khi/value:f,
+		    KhiOffset:/entry0/instrument/Khi/offset_value:f,
+		    Str:/entry0/instrument/Str/value:f,
+		    StrOffset:/entry0/instrument/Str/offset_value:f,
+		    Slitr:/entry0/instrument/Slitr/value:f,
+		    SlitrOffset:/entry0/instrument/Slitr/offset_value:f,
+		    SampleTemperature:/entry0/sample/temperature:f,
+		    SetpointTemperature:/entry0/sample/setpoint_temperature:f,
+		    RegulationTemperature:/entry0/sample/regulation_temperature:f,
+		    Bath1Temperature:/entry0/sample/bath1_regulation_temperature:f,
+		    Bath2Temperature:/entry0/sample/bath2_regulation_temperature:f,
+		    SampleChangerPos:/entry0/instrument/VirtualSampleChanger/sample_changer_slot_value:f" />
       </parameter>
-
+      <parameter name="log_list_to_save" type="string">
+	<value val="facility,instrument.name,experiment_identifier,
+		    start_time,end_time,numor_list,processedAs,
+		    wavelength,sample_transmission_numors,L2"/>
+      </parameter>
     </component-link>
 
 </parameter-file>

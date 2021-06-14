@@ -22,7 +22,7 @@ using namespace MantidWidgets;
 using IndirectFitDataCollectionType = IndexCollectionType<TableDatasetIndex, std::unique_ptr<IndirectFitData>>;
 
 /*
-    IIndirectFitData - Specifies an interface for updating, querying and
+   IIndirectFitDataModel - Specifies an interface for updating, querying and
    accessing the raw data in IndirectFitAnalysisTabs
 */
 class MANTIDQT_INDIRECT_DLL IIndirectFitDataModel {

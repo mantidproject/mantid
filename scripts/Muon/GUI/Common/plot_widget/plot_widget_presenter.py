@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Dict, List
 from Muon.GUI.Common.ADSHandler.workspace_naming import remove_rebin_from_name, add_rebin_to_name
-from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import FitPlotInformation
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import ExternalPlottingModel
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_view import ExternalPlottingView
@@ -15,7 +15,7 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_inter
 from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel
 from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetViewInterface
-from Muon.GUI.Common.contexts.muon_gui_context import PlotMode
+from Muon.GUI.Common.contexts.plotting_context import PlotMode
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from mantid.dataobjects import Workspace2D
 
@@ -39,7 +39,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._view = view
         self._model = model
         self.context = context
-        self._get_selected_fit_workspaces = get_selected_fit_workspaces
+        self._get_selected_fit_workspaces  = get_selected_fit_workspaces
         # figure presenter - the common presenter talks to this through an interface
         self._figure_presenter = figure_presenter
         self._external_plotting_view = external_plotting_view if external_plotting_view else ExternalPlottingView()
@@ -48,6 +48,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         # gui observers
         self._setup_gui_observers()
         self._setup_view_connections()
+        self.enable_observer = GenericObserver(self.enableView)
+        self.disable_observer = GenericObserver(self.disableView)
 
         self.update_view_from_model()
 
@@ -121,16 +123,10 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             self._view.enable_plot_type_combo()
             self._view.hide_plot_diff()
             self.update_plot()
-            self.fitting_plot_range = self._figure_presenter.get_plot_x_range()
-            self._figure_presenter.set_plot_range(self.data_plot_range)
         elif plot_mode == PlotMode.Fitting:
             self._view.disable_plot_type_combo()
             self._view.show_plot_diff()
             self.update_plot()
-            self.data_plot_range = self._figure_presenter.get_plot_x_range()
-            self._figure_presenter.set_plot_range(self.fitting_plot_range)
-
-        self._figure_presenter.autoscale_y_axes()
 
     def handle_plot_mode_changed_for_frequency_domain_analysis(self, plot_mode : PlotMode):
         if plot_mode == self.context.gui_context['PlotMode']:
@@ -151,10 +147,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         elif plot_mode == PlotMode.Fitting:
             self._view.disable_plot_type_combo()
             self._view.show_plot_diff()
-            self._view.disable_tile_plotting_options()
-            self._view.disable_plot_raw_option()
             self.data_plot_tiled_state = self._view.is_tiled_plot()
-            self._view.set_is_tiled_plot(False)
             self.update_plot()
             self.data_plot_range = self._figure_presenter.get_plot_x_range()
             self._figure_presenter.set_plot_range(self.fitting_plot_range)
@@ -340,7 +333,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             if plot_raw and not fit_raw_data:
                 ws_list.append(remove_rebin_from_name(workspace_name))
             # raw data but want binned plot
-            elif not plot_raw and  fit_raw_data:
+            elif not plot_raw and fit_raw_data:
                 ws_list.append(add_rebin_to_name(workspace_name))
             else:
                 ws_list.append(workspace_name)
@@ -363,10 +356,11 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
                                                                                      self._view.get_plot_type())
 
+        # Disables plot view when clear all is pressed
         if workspace_list:
-            self._view.setEnabled(True)
+            self.enableView()
         else:
-            self._view.setEnabled(False)
+            self.disableView()
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=hold_on, autoscale=autoscale)
 
     def _check_if_counts_and_groups_selected(self):
@@ -377,3 +371,9 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
                 'Pair workspaces have no counts workspace, plotting Asymmetry')
             return True
         return False
+
+    def enableView(self):
+        self._view.setEnabled(True)
+
+    def disableView(self):
+        self._view.setEnabled(False)

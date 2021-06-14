@@ -6,9 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#
 from qtpy.QtWidgets import QWidget, QProgressBar
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Slot, Signal
 
 NORMAL_STYLE = """
 QProgressBar::chunk {
@@ -48,15 +47,16 @@ def from_critical_to_normal(critical: int, current_value: int, new_value: int) -
 
 
 class MemoryView(QWidget):
+    set_value = Signal(int, float, float)
     """
     Initializes and updates the view of memory(progress) bar.
     """
     def __init__(self, parent):
         super(MemoryView, self).__init__(parent)
-
         self.critical = CRITICAL_PERCENTAGE
         self.memory_bar = QProgressBar(self)
         self.memory_bar.setAlignment(Qt.AlignCenter)
+        self.set_value.connect(self._set_value)
 
     def set_bar_color(self, current_value: int, new_value: int):
         """
@@ -71,7 +71,11 @@ class MemoryView(QWidget):
         else:
             pass
 
-    def set_value(self, new_value: int, mem_used: float, mem_avail: float):
+    def invoke_set_value(self, new_value: int, mem_used: float, mem_avail: float):
+        self.set_value.emit(new_value, mem_used, mem_avail)
+
+    @Slot(int, float, float)
+    def _set_value(self, new_value, mem_used, mem_avail):
         """
         Receives memory usage information passed by memory presenter
         and updates the displayed content as well as the style if needed

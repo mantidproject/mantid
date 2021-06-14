@@ -400,13 +400,17 @@ def run_added_loader(loader, file_information, is_transmission, period, parent_a
     workspace_monitors = []
     number_of_periods = file_information.get_number_of_periods()
 
-    # Dealing with added event data or histogram data is vastly different, hence we need to separate paths
     if file_information.is_event_mode():
         if is_transmission:
-            raise RuntimeError("SANSLoad: Cannot load event-mode data for transmission calculation. Attempted to "
-                               "load the file {0} which is event-based as transmission "
-                               "data.".format(file_information.get_file_name()))
-        workspaces, workspace_monitors = extract_event_data(loader, number_of_periods, period)
+            if number_of_periods > 1:
+                raise RuntimeError("A multiperiod transmission file is not currently supported")
+            _, trans_monitors = extract_event_data(loader, number_of_periods, period)
+            # Despite the fact transmission runs are only monitors, existing code places
+            # them into workspace as they are the only relevant data (from LoadNexusMonitors)
+            # so we need to match the convention
+            workspaces.extend(trans_monitors)
+        else:
+            workspaces, workspace_monitors = extract_event_data(loader, number_of_periods, period)
     else:
         # In the case of histogram data we need to consider the following.
         # The data is combined with the monitors since we load with LoadNexusProcessed. Hence we need to split the
@@ -439,7 +443,6 @@ def loader_for_added_isis_nexus(file_information, is_transmission, period, paren
     :param parent_alg: a handle to the parent algorithm
     :return: the name of the load algorithm and the selected load options
     """
-    _ = is_transmission  # noqa
     loader_name = "LoadNexusProcessed"
     loader_options = {"Filename": file_information.get_file_name(),
                       "OutputWorkspace": EMPTY_NAME,

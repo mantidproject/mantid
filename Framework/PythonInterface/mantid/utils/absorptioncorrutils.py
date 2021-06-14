@@ -452,9 +452,9 @@ def create_absorption_input(
     absName = metaws
     if metaws is None:
         absName = '__{}_abs'.format(_getBasename(filename))
-        allowed_log = " ".join([
+        allowed_log = ",".join([
             'SampleFormula', 'SampleDensity', "BL11A:CS:ITEMS:HeightInContainerUnits",
-            "SampleContainer"
+            "SampleContainer", "SampleMass"
         ])
         Load(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True, AllowList=allowed_log)
 

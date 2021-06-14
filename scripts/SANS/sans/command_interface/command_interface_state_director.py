@@ -528,11 +528,12 @@ class CommandInterfaceStateDirector(object):
         wavelength_step_type = command.values[3]
         new_state_entries = {LimitsId.WAVELENGTH: simple_range(start=wavelength_low, stop=wavelength_high,
                                                                step=wavelength_step, step_type=wavelength_step_type)}
+
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_wavrange(self, command):
-        wavelength_low = command.values[0]
-        wavelength_high = command.values[1]
+        wav_min = command.values[0]
+        wav_max = command.values[1]
         full_wavelength_range = command.values[2]
         reduction_mode = command.values[3]
 
@@ -543,13 +544,13 @@ class CommandInterfaceStateDirector(object):
         # something is wrong
         if self._processed_state_obj and self._processed_state_obj.wavelength:
             existing_wavelength = self._processed_state_obj.wavelength
-            new_wavelength_low = wavelength_low if wavelength_low else existing_wavelength.wavelength_low
-            new_wavelength_high = wavelength_high if wavelength_high else existing_wavelength.wavelength_high
-            new_range = simple_range(start=new_wavelength_low, stop=new_wavelength_high,
-                                     step=existing_wavelength.wavelength_step,
+            new_wav_min = wav_min if wav_min else existing_wavelength.wavelength_interval.wavelength_full_range[0]
+            new_wav_max = wav_max if wav_max else existing_wavelength.wavelength_interval.wavelength_full_range[1]
+            new_range = simple_range(start=new_wav_min, stop=new_wav_max,
+                                     step=existing_wavelength.wavelength_interval.wavelength_step,
                                      step_type=existing_wavelength.wavelength_step_type)
 
-            if wavelength_low is not None or wavelength_high is not None:
+            if wav_min is not None or wav_max is not None:
                 copied_entry = {LimitsId.WAVELENGTH: new_range}
                 self.add_to_processed_state_settings(copied_entry)
         else:

@@ -112,8 +112,8 @@ namespace CustomInterfaces {
 IndirectTab::IndirectTab(QObject *parent)
     : QObject(parent), m_properties(), m_dblManager(new QtDoublePropertyManager()),
       m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
-      m_dblEdFac(new DoubleEditorFactory()), m_pythonRunner(), m_tabStartTime(DateAndTime::getCurrentTime()),
-      m_tabEndTime(DateAndTime::maximum()), m_plotter(std::make_unique<IndirectPlotter>(this)) {
+      m_dblEdFac(new DoubleEditorFactory()), m_tabStartTime(DateAndTime::getCurrentTime()),
+      m_tabEndTime(DateAndTime::maximum()), m_plotter(std::make_unique<ExternalPlotter>()) {
   m_parentWidget = dynamic_cast<QWidget *>(parent);
 
   m_batchAlgoRunner = new MantidQt::API::BatchAlgorithmRunner(m_parentWidget);
@@ -125,8 +125,6 @@ IndirectTab::IndirectTab(QObject *parent)
   m_valPosDbl->setBottom(tolerance);
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmFinished(bool)));
-  connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString &, bool)), this,
-          SIGNAL(runAsPythonScript(const QString &, bool)));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -281,15 +279,6 @@ QStringList IndirectTab::getCorrectionsWSSuffixes(std::string const &interfaceNa
 }
 
 /**
- * Used to run python code
- *
- * @param pythonCode The python code to run
- */
-void IndirectTab::runPythonCode(std::string const &pythonCode) {
-  m_pythonRunner.runPythonCode(QString::fromStdString(pythonCode));
-}
-
-/**
  * Configures the SaveNexusProcessed algorithm to save a workspace in the
  * default save directory and adds the algorithm to the batch queue.
  *
@@ -364,7 +353,7 @@ void IndirectTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min, QtPro
   m_dblManager->setMaximum(min, bounds.second);
   m_dblManager->setMinimum(max, bounds.first);
   m_dblManager->setMaximum(max, bounds.second);
-  rs->setRange(bounds.first, bounds.second);
+  rs->setBounds(bounds.first, bounds.second);
 }
 
 /**
@@ -561,17 +550,6 @@ void IndirectTab::algorithmFinished(bool error) {
   if (error) {
     emit showMessageBox("Error running algorithm. \nSee results log for details.");
   }
-}
-
-/**
- * Run Python code and return anything printed to stdout.
- *
- * @param code Python code to execute
- * @param no_output Enable to ignore any output
- * @returns What was printed to stdout
- */
-QString IndirectTab::runPythonCode(const QString &code, bool no_output) {
-  return m_pythonRunner.runPythonCode(code, no_output);
 }
 
 /**

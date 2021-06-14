@@ -210,6 +210,11 @@ void IndirectFitPlotView::setFitRangeMaximum(double maximum) {
   selector->setMaximum(maximum);
 }
 
+void IndirectFitPlotView::setFitRangeBounds(std::pair<double, double> const &bounds) {
+  auto selector = m_topPlot->getRangeSelector("FitRange");
+  selector->setBounds(bounds.first, bounds.second);
+}
+
 void IndirectFitPlotView::appendToDataSelection(const std::string &dataName) {
   MantidQt::API::SignalBlocker blocker(m_plotForm->cbDataSelection);
   m_plotForm->cbDataSelection->addItem(QString::fromStdString(dataName));
@@ -284,6 +289,7 @@ void IndirectFitPlotView::setHWHMMinimum(double maximum) {
 
 void IndirectFitPlotView::addFitRangeSelector() {
   auto fitRangeSelector = m_topPlot->addRangeSelector("FitRange");
+  fitRangeSelector->setBounds(-1.0, 1.0);
 
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this, SIGNAL(startXChanged(double)));
   connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this, SIGNAL(endXChanged(double)));
@@ -310,6 +316,7 @@ void IndirectFitPlotView::setBackgroundBounds() {
 
 void IndirectFitPlotView::addHWHMRangeSelector() {
   auto hwhmRangeSelector = m_topPlot->addRangeSelector("HWHM");
+  hwhmRangeSelector->setBounds(-1.0, 1.0);
   hwhmRangeSelector->setColour(Qt::red);
   hwhmRangeSelector->setRange(0.0, 0.0);
   hwhmRangeSelector->setVisible(false);

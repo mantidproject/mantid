@@ -21,8 +21,6 @@
 #include "MantidGeometry/Crystal/HKLGenerator.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/math/special_functions/round.hpp>
 
@@ -36,8 +34,6 @@ using namespace Mantid::Kernel;
 namespace Crystal {
 
 // handy shortcuts
-using Mantid::DataObjects::Peak_uptr;
-using Mantid::Geometry::IPeak_uptr;
 
 DECLARE_ALGORITHM(PredictSatellitePeaks)
 
@@ -49,25 +45,16 @@ PredictSatellitePeaks::PredictSatellitePeaks() : m_qConventionFactor(qConvention
 /// Initialise the properties
 void PredictSatellitePeaks::init() {
   auto latticeValidator = std::make_shared<OrientedLatticeValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("Peaks", "", Direction::Input, latticeValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("Peaks", "", Direction::Input, latticeValidator),
                   "Workspace of Peaks with orientation matrix that indexed the peaks and "
                   "instrument loaded");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("SatellitePeaks", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("SatellitePeaks", "", Direction::Output),
                   "Workspace of Peaks with peaks with fractional h,k, and/or l values");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(string("ModVector1"), "0.0,0.0,0.0"),
-                  "Offsets for h, k, l directions ");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(string("ModVector2"), "0.0,0.0,0.0"),
-                  "Offsets for h, k, l directions ");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(string("ModVector3"), "0.0,0.0,0.0"),
-                  "Offsets for h, k, l directions ");
-  declareProperty(std::make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
-                  "Maximum order to apply ModVectors. Default = 0");
+
+  ModulationProperties::appendTo(this);
 
   declareProperty("GetModVectorsFromUB", false, "If false Modulation Vectors will be read from input");
-
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("CrossTerms", false, Direction::Input),
-                  "Include cross terms (false)");
 
   declareProperty("IncludeIntegerHKL", true, "If false order 0 peaks are not included in workspace (integer HKL)");
 
@@ -83,7 +70,7 @@ void PredictSatellitePeaks::init() {
                   "Maximum wavelength limit at which to start looking for "
                   "single-crystal peaks.");
   declareProperty(std::make_unique<PropertyWithValue<double>>("MinDSpacing", 0.1, Direction::Input),
-                  "Minimum d-spacing of peaks to consider. Default = 1.0");
+                  "Minimum d-spacing of peaks to consider. Default = 0.1");
   declareProperty(std::make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0, Direction::Input),
                   "Maximum d-spacing of peaks to consider");
 
@@ -103,18 +90,19 @@ void PredictSatellitePeaks::init() {
 void PredictSatellitePeaks::exec() {
   bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
   Peaks = getProperty("Peaks");
+
   if (!Peaks)
-    throw std::invalid_argument("Input workspace is not a PeaksWorkspace. Type=" + Peaks->id());
+    throw std::invalid_argument("Input workspace is not a IPeaksWorkspace. Type=" + Peaks->id());
   if (!includePeaksInRange) {
     exec_peaks();
     return;
   }
 
-  V3D offsets1 = getOffsetVector("ModVector1");
-  V3D offsets2 = getOffsetVector("ModVector2");
-  V3D offsets3 = getOffsetVector("ModVector3");
-  int maxOrder = getProperty("MaxOrder");
-  bool crossTerms = getProperty("CrossTerms");
+  V3D offsets1 = getOffsetVector(ModulationProperties::ModVector1);
+  V3D offsets2 = getOffsetVector(ModulationProperties::ModVector2);
+  V3D offsets3 = getOffsetVector(ModulationProperties::ModVector3);
+  int maxOrder = getProperty(ModulationProperties::MaxOrder);
+  bool crossTerms = getProperty(ModulationProperties::CrossTerms);
   bool includeOrderZero = getProperty("IncludeIntegerHKL");
   // boolean for only including order zero once
   bool notOrderZero = false;
@@ -140,8 +128,8 @@ void PredictSatellitePeaks::exec() {
 
   const auto instrument = Peaks->getInstrument();
 
-  outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks());
-  outPeaks->setInstrument(instrument);
+  outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks(Peaks->id()));
+  outPeaks->copyExperimentInfoFrom(Peaks.get());
   outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
 
   Kernel::Matrix<double> goniometer;
@@ -213,11 +201,11 @@ void PredictSatellitePeaks::exec() {
 
 void PredictSatellitePeaks::exec_peaks() {
 
-  V3D offsets1 = getOffsetVector("ModVector1");
-  V3D offsets2 = getOffsetVector("ModVector2");
-  V3D offsets3 = getOffsetVector("ModVector3");
-  int maxOrder = getProperty("MaxOrder");
-  bool crossTerms = getProperty("CrossTerms");
+  V3D offsets1 = getOffsetVector(ModulationProperties::ModVector1);
+  V3D offsets2 = getOffsetVector(ModulationProperties::ModVector2);
+  V3D offsets3 = getOffsetVector(ModulationProperties::ModVector3);
+  int maxOrder = getProperty(ModulationProperties::MaxOrder);
+  bool crossTerms = getProperty(ModulationProperties::CrossTerms);
 
   API::Sample sample = Peaks->mutableSample();
 
@@ -251,8 +239,8 @@ void PredictSatellitePeaks::exec_peaks() {
 
   const auto instrument = Peaks->getInstrument();
 
-  outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks());
-  outPeaks->setInstrument(instrument);
+  outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks(Peaks->id()));
+  outPeaks->copyExperimentInfoFrom(Peaks.get());
   outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
 
   vector<vector<int>> AlreadyDonePeaks;
@@ -260,12 +248,15 @@ void PredictSatellitePeaks::exec_peaks() {
   outPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1, true);
   outPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2, true);
   outPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3, true);
-  std::vector<Peak> peaks = Peaks->getPeaks();
-  for (auto it = peaks.begin(); it != peaks.end(); ++it) {
-    auto peak = *it;
-    Kernel::Matrix<double> const peak_goniometer_matrix = peak.getGoniometerMatrix();
-    int run_number = peak.getRunNumber();
-    V3D hkl = peak.getHKL();
+
+  for (int i = 0; i < static_cast<int>(Peaks->getNumberPeaks()); ++i) {
+
+    Kernel::Matrix<double> const peak_goniometer_matrix = Peaks->getPeak(i).getGoniometerMatrix();
+
+    int run_number = Peaks->getPeak(i).getRunNumber();
+
+    V3D hkl = Peaks->getPeak(i).getHKL();
+
     if (crossTerms) {
       predictOffsetsWithCrossTerms(offsets1, offsets2, offsets3, maxOrder, run_number, peak_goniometer_matrix, hkl,
                                    lambdaFilter, includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
@@ -284,7 +275,12 @@ void PredictSatellitePeaks::exec_peaks() {
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
   criteria.emplace_back("RunNumber", true);
-  criteria.emplace_back("BankName", true);
+
+  workspace_type_enum const workspace_type = determine_workspace_type(Peaks);
+  if (workspace_type == workspace_type_enum::regular_peaks) {
+    criteria.emplace_back("BankName", true);
+  }
+
   criteria.emplace_back("h", true);
   criteria.emplace_back("k", true);
   criteria.emplace_back("l", true);
@@ -297,14 +293,27 @@ void PredictSatellitePeaks::exec_peaks() {
   setProperty("SatellitePeaks", outPeaks);
 }
 
+PredictSatellitePeaks::workspace_type_enum
+PredictSatellitePeaks::determine_workspace_type(API::IPeaksWorkspace_sptr const &iPeaksWorkspace) const {
+  if (std::dynamic_pointer_cast<PeaksWorkspace>(iPeaksWorkspace) != nullptr) {
+    return workspace_type_enum::regular_peaks;
+  }
+
+  else if (std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(iPeaksWorkspace) != nullptr) {
+    return workspace_type_enum::lean_elastic_peaks;
+  }
+
+  else {
+    return workspace_type_enum::invalid;
+  }
+}
+
 void PredictSatellitePeaks::predictOffsets(int indexModulatedVector, V3D offsets, int &maxOrder, int RunNumber,
                                            Kernel::Matrix<double> const &goniometer, V3D &hkl,
                                            HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
                                            bool &includeOrderZero, vector<vector<int>> &AlreadyDonePeaks) {
   if (offsets == V3D(0, 0, 0) && !includeOrderZero)
     return;
-  const Kernel::DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
-  Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
   for (int order = -maxOrder; order <= maxOrder; order++) {
     if (order == 0 && !includeOrderZero)
       continue; // exclude order 0
@@ -314,37 +323,12 @@ void PredictSatellitePeaks::predictOffsets(int indexModulatedVector, V3D offsets
     if (!lambdaFilter.isAllowed(satelliteHKL) && includePeaksInRange)
       continue;
 
-    Kernel::V3D Qs = goniometer * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
+    std::shared_ptr<IPeak> satellite_iPeak = createPeakForOutputWorkspace(goniometer, satelliteHKL);
 
-    // Check if Q is non-physical
-    if (Qs.Z() * m_qConventionFactor <= 0)
-      continue;
-
-    IPeak_uptr iPeak = Peaks->createPeak(Qs, 1);
-    Peak_uptr peak(static_cast<DataObjects::Peak *>(iPeak.release()));
-
-    peak->setGoniometerMatrix(goniometer);
-
-    if (!peak->findDetector(tracer))
-      continue;
-    vector<int> SavPk{RunNumber, boost::math::iround(1000.0 * satelliteHKL[0]),
-                      boost::math::iround(1000.0 * satelliteHKL[1]), boost::math::iround(1000.0 * satelliteHKL[2])};
-
-    bool foundPeak = binary_search(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
-
-    if (!foundPeak) {
-      AlreadyDonePeaks.emplace_back(SavPk);
-    } else {
-      continue;
-    }
-
-    peak->setHKL(satelliteHKL * m_qConventionFactor);
-    peak->setIntHKL(hkl * m_qConventionFactor);
-    peak->setRunNumber(RunNumber);
     V3D mnp;
     mnp[indexModulatedVector] = order;
-    peak->setIntMNP(mnp * m_qConventionFactor);
-    outPeaks->addPeak(*peak);
+
+    addPeakToOutputWorkspace(satellite_iPeak, goniometer, hkl, satelliteHKL, RunNumber, AlreadyDonePeaks, mnp);
   }
 }
 
@@ -356,8 +340,6 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(V3D offsets1, V3D offse
                                                          vector<vector<int>> &AlreadyDonePeaks) {
   if (offsets1 == V3D(0, 0, 0) && offsets2 == V3D(0, 0, 0) && offsets3 == V3D(0, 0, 0) && !includeOrderZero)
     return;
-  const Kernel::DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
-  Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
   DblMatrix offsetsMat(3, 3);
   offsetsMat.setColumn(0, offsets1);
   offsetsMat.setColumn(1, offsets2);
@@ -382,36 +364,85 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(V3D offsets1, V3D offse
         if (!lambdaFilter.isAllowed(satelliteHKL) && includePeaksInRange)
           continue;
 
-        Kernel::V3D Qs = peak_goniometer_matrix * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
+        std::shared_ptr<IPeak> satellite_iPeak = createPeakForOutputWorkspace(peak_goniometer_matrix, satelliteHKL);
 
-        // Check if Q is non-physical
-        if (Qs.Z() * m_qConventionFactor <= 0)
-          continue;
-
-        IPeak_uptr iPeak(Peaks->createPeak(Qs, 1));
-        Peak_uptr peak(static_cast<DataObjects::Peak *>(iPeak.release()));
-
-        peak->setGoniometerMatrix(peak_goniometer_matrix);
-
-        if (!peak->findDetector(tracer))
-          continue;
-        vector<int> SavPk{RunNumber, boost::math::iround(1000.0 * satelliteHKL[0]),
-                          boost::math::iround(1000.0 * satelliteHKL[1]), boost::math::iround(1000.0 * satelliteHKL[2])};
-
-        bool foundPeak = binary_search(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
-
-        if (!foundPeak) {
-          AlreadyDonePeaks.emplace_back(SavPk);
-        } else {
-          continue;
-        }
-
-        peak->setHKL(satelliteHKL * m_qConventionFactor);
-        peak->setIntHKL(hkl * m_qConventionFactor);
-        peak->setRunNumber(RunNumber);
-        peak->setIntMNP(V3D(m, n, p) * m_qConventionFactor);
-        outPeaks->addPeak(*peak);
+        addPeakToOutputWorkspace(satellite_iPeak, peak_goniometer_matrix, hkl, satelliteHKL, RunNumber,
+                                 AlreadyDonePeaks, mnp);
       }
+}
+
+std::shared_ptr<Geometry::IPeak>
+PredictSatellitePeaks::createPeakForOutputWorkspace(Kernel::Matrix<double> const &peak_goniometer_matrix,
+                                                    Kernel::V3D const &satelliteHKL) {
+  workspace_type_enum workspace_type = determine_workspace_type(Peaks);
+
+  const Kernel::DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
+  if (workspace_type == workspace_type_enum::regular_peaks) {
+    Kernel::V3D const Qs = peak_goniometer_matrix * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
+
+    // Check if Q is non-physical
+    if (Qs.Z() * m_qConventionFactor <= 0)
+      return nullptr;
+
+    std::shared_ptr<IPeak> satellite_iPeak = Peaks->createPeak(Qs, 1);
+
+    return satellite_iPeak;
+  }
+
+  else if (workspace_type == workspace_type_enum::lean_elastic_peaks) {
+    Kernel::V3D const Qs = UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
+
+    std::shared_ptr<IPeak> satellite_iPeak = Peaks->createPeakQSample(Qs);
+
+    return satellite_iPeak;
+  }
+
+  else
+    return nullptr;
+}
+
+void PredictSatellitePeaks::addPeakToOutputWorkspace(std::shared_ptr<IPeak> satellite_iPeak,
+                                                     Kernel::Matrix<double> const &peak_goniometer_matrix,
+                                                     Kernel::V3D const &hkl, Kernel::V3D const &satelliteHKL,
+                                                     int const RunNumber,
+                                                     std::vector<std::vector<int>> &AlreadyDonePeaks,
+                                                     Kernel::V3D const &mnp) {
+  if (satellite_iPeak == nullptr)
+    return;
+
+  workspace_type_enum const workspace_type = determine_workspace_type(Peaks);
+
+  if (workspace_type == workspace_type_enum::regular_peaks) {
+    Geometry::InstrumentRayTracer const tracer(Peaks->getInstrument());
+
+    std::shared_ptr<Peak> const peak = std::dynamic_pointer_cast<Peak>(satellite_iPeak);
+
+    if (!peak->findDetector(tracer))
+      return;
+  }
+
+  std::vector<int> const SavPk{RunNumber, boost::math::iround(1000.0 * satelliteHKL[0]),
+                               boost::math::iround(1000.0 * satelliteHKL[1]),
+                               boost::math::iround(1000.0 * satelliteHKL[2])};
+
+  bool const foundPeak = binary_search(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
+
+  if (!foundPeak) {
+    AlreadyDonePeaks.emplace_back(SavPk);
+  }
+
+  else
+    return;
+
+  satellite_iPeak->setGoniometerMatrix(peak_goniometer_matrix);
+  satellite_iPeak->setHKL(satelliteHKL * m_qConventionFactor);
+  satellite_iPeak->setIntHKL(hkl * m_qConventionFactor);
+  satellite_iPeak->setRunNumber(RunNumber);
+  satellite_iPeak->setIntMNP(mnp * m_qConventionFactor);
+
+  outPeaks->addPeak(*satellite_iPeak);
+
+  return;
 }
 
 V3D PredictSatellitePeaks::getOffsetVector(const std::string &label) {

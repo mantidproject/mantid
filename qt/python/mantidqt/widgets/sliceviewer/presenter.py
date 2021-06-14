@@ -72,8 +72,6 @@ class SliceViewer(ObservingPresenter):
         self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
                                                    self.ADS_cleared, self.delete_workspace)
 
-        self.view.destroyed.connect(self._on_view_destroyed)
-
     def new_plot_MDH(self):
         """
         Tell the view to display a new plot of an MDHistoWorkspace
@@ -201,8 +199,14 @@ class SliceViewer(ObservingPresenter):
 
     def show_all_data_requested(self):
         """Instructs the view to show all data"""
-        self.set_axes_limits(*self.model.get_dim_limits(self.get_slicepoint(),
-                                                        self.view.data_view.dimensions.transpose))
+        if self.model.is_ragged_matrix_plotted():
+            # get limits from full extent of image (which was calculated by looping over all spectra excl. monitors)
+            x0, x1, y0, y1 = self.view.data_view.get_full_extent()
+            limits = ((x0, x1), (y0, y1))
+        else:
+            # otherwise query data model based on slice info and transpose
+            limits = self.model.get_dim_limits(self.get_slicepoint(), self.view.data_view.dimensions.transpose)
+        self.set_axes_limits(*limits)
 
     def set_axes_limits(self, xlim, ylim, auto_transform=True):
         """Set the axes limits on the view.
@@ -231,6 +235,8 @@ class SliceViewer(ObservingPresenter):
         data_view = self.view.data_view
         if state:
             data_view.add_line_plots(tool, self)
+            if data_view.track_cursor_checked():
+                data_view._line_plots.connect()
         else:
             data_view.deactivate_tool(ToolItemText.REGIONSELECTION)
             data_view.remove_line_plots()
@@ -407,16 +413,32 @@ class SliceViewer(ObservingPresenter):
         self.view.emit_close()
 
     def clear_observer(self):
+        """Called by ObservingView on close event"""
         self.ads_observer = None
         if self._peaks_presenter is not None:
             self._peaks_presenter.clear_observer()
 
+    def add_delete_peak(self, event):
+        if self._peaks_presenter is not None:
+            if event.inaxes:
+                sliceinfo = self.get_sliceinfo()
+                self._logger.debug(f"Coordinates selected x={event.xdata} y={event.ydata} z={sliceinfo.z_value}")
+                pos = sliceinfo.inverse_transform([event.xdata, event.ydata, sliceinfo.z_value])
+                self._logger.debug(f"Coordinates transformed into {sliceinfo.frame} frame, pos={pos}")
+                self._peaks_presenter.add_delete_peak(pos)
+                self.view.data_view.canvas.draw_idle()
+
+    def deactivate_zoom_pan(self):
+        self.view.data_view.deactivate_zoom_pan()
+
+    def deactivate_peak_adding(self, active):
+        if active and self._peaks_presenter is not None:
+            self._peaks_presenter.deactivate_peak_add_delete()
+
     # private api
     def _create_peaks_presenter_if_necessary(self):
         if self._peaks_presenter is None:
-            self._peaks_presenter = \
-                PeaksViewerCollectionPresenter(self.view.peaks_view)
-
+            self._peaks_presenter = PeaksViewerCollectionPresenter(self.view.peaks_view)
         return self._peaks_presenter
 
     def _call_peaks_presenter_if_created(self, attr, *args, **kwargs):
@@ -461,6 +483,3 @@ class SliceViewer(ObservingPresenter):
     def _close_view_with_message(self, message: str):
         self.view.emit_close()  # inherited from ObservingView
         self._logger.warning(message)
-
-    def _on_view_destroyed(self):
-        self.clear_observer()

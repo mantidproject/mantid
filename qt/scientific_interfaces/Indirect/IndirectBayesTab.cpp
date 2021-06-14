@@ -27,14 +27,6 @@ IndirectBayesTab::~IndirectBayesTab() { m_propTree->unsetFactoryForManager(m_dbl
 void IndirectBayesTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
 /**
- * Emits a signal to run a python script using the method in the parent
- * UserSubWindow
- *
- * @param pyInput :: A string of python code to execute
- */
-void IndirectBayesTab::runPythonScript(const QString &pyInput) { emit runAsPythonScript(pyInput, true); }
-
-/**
  * Format the tree widget so its easier to read the contents. It changes the
  * background colour and item indentation.
  *

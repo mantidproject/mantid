@@ -65,14 +65,18 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.view.fit_table.set_fit_workspaces.assert_called_with(run_list, group_pair_list)
 
     def test_handle_fit_function_changed_correctly_updates_fit_table_parameters(self):
+        parameters = ['A', 'Sigma', 'Frequency', 'Phi']
         fit_values = [0.2, 0.2, 0.1, 0]
+        self.model.get_fit_function_parameters = mock.Mock(return_value=parameters)
+        self.model.get_all_fit_function_parameter_values_for = mock.Mock(return_value=fit_values)
+        self.model.get_all_fit_functions = mock.Mock(return_value=[None, None])
+
         self._setup_test_fit_function(fit_values)
         self.view.fit_table.get_number_of_fits.return_value = 2
 
         self.presenter.handle_fit_function_updated()
 
-        self.view.fit_table.set_parameters_and_values.assert_called_once_with(['A', 'Sigma', 'Frequency', 'Phi'],
-                                                                              [fit_values, fit_values])
+        self.view.fit_table.set_parameters_and_values.assert_called_once_with(parameters, [fit_values, fit_values])
 
     def test_handle_fit_started_updates_view(self):
         self.presenter.handle_fit_started()
@@ -92,17 +96,21 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
     @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
     def test_handle_fit_selected_correctly_sets_up_fit(self, mock_function_tools):
         workspace = "EMU20884; Group; fwd; Asymmetry"
+        parameter_values = [0.2, 0.1, 0, 0]
         self.view.fit_table.get_selected_rows = mock.MagicMock(return_value=[0])
         self._setup_test_fit_function([0.2, 0.1, 0, 0])
-        self.presenter.get_workspaces_for_row_in_fit_table = mock.MagicMock(return_value=workspace)
+        self.presenter.get_workspaces_for_row_in_fit_table = mock.MagicMock(return_value=[workspace])
+        self.view.fit_table.get_fit_parameter_values_from_row = mock.MagicMock(return_value=parameter_values)
+        self.model.check_datasets_are_tf_asymmetry_compliant = mock.MagicMock(return_value=(True, ""))
 
         self.presenter.handle_fit_selected_pressed()
 
-        mock_function_tools.partial.assert_called_once_with(self.model.evaluate_sequential_fit, [workspace], False)
+        mock_function_tools.partial.assert_called_once_with(self.model.perform_sequential_fit, [[workspace]],
+                                                            [parameter_values], False)
 
     @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
     def test_handle_fit_selected_does_nothing_if_fit_function_is_none(self, mock_function_tools):
-        self.model.fit_function = None
+        self.model.get_active_fit_function = mock.Mock(return_value=None)
         self.view.fit_table.get_selected_rows = mock.MagicMock(return_value=[0, 1])
 
         self.presenter.handle_fit_selected_pressed()
@@ -122,28 +130,33 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         selected_row = 2
         fit_values = [0.6, 0.9, 0.1, 1]
         fit_function = self._setup_test_fit_function(fit_values)
+        self.model.get_all_fit_function_parameter_values_for = mock.Mock(return_value=fit_values)
         self.presenter.fitting_calculation_model.result = ([fit_function], ['Success'], [1.07])
         self.presenter.selected_rows = [selected_row]
 
         self.presenter.handle_seq_fit_finished()
 
-        self.view.fit_table.set_parameter_values_for_row.assert_called_once_with(2, [0.6, 0.9, 0.1, 1])
+        self.view.fit_table.set_parameter_values_for_row.assert_called_once_with(2, fit_values)
         self.view.fit_table.set_fit_quality.assert_called_once_with(2, 'Success', 1.07)
         self.view.fit_selected_button.setEnabled.assert_called_once_with(True)
 
     @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
     def test_handle_sequential_fit_correctly_sets_up_fit(self, mock_function_tools):
         workspaces = ["EMU20884; Group; fwd; Asymmetry"]
+        parameters_values = [0.2, 0.2, 0.1, 0]
         number_of_entries = 3
-        self._setup_test_fit_function([0.2, 0.2, 0.1, 0])
+        self._setup_test_fit_function(parameters_values)
         self.view.fit_table.get_number_of_fits = mock.MagicMock(return_value=number_of_entries)
+        self.view.fit_table.get_fit_parameter_values_from_row = mock.Mock(return_value=parameters_values)
         self.presenter.get_workspaces_for_row_in_fit_table = mock.MagicMock(return_value=workspaces)
+        self.model.check_datasets_are_tf_asymmetry_compliant = mock.MagicMock(return_value=(True, ""))
 
         self.presenter.handle_sequential_fit_pressed()
 
         self.assertEqual(self.presenter.get_workspaces_for_row_in_fit_table.call_count, number_of_entries)
-        mock_function_tools.partial.assert_called_once_with(self.model.evaluate_sequential_fit,
-                                                            [workspaces] * number_of_entries, False)
+        mock_function_tools.partial.assert_called_once_with(self.model.perform_sequential_fit,
+                                                            [workspaces] * number_of_entries,
+                                                            [parameters_values] * number_of_entries, False)
 
     @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
     def test_handle_sequential_fit_does_nothing_if_fit_function_is_none(self, mock_function_tools):
@@ -161,6 +174,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         fit_status = ['Success'] * num_fits
         fit_quality = [1.3, 2.4, 1.9]
         self.presenter.fitting_calculation_model.result = (fit_functions, fit_status, fit_quality)
+        self.model.get_all_fit_function_parameter_values_for = mock.Mock(return_value=values)
 
         self.presenter.handle_seq_fit_finished()
 

@@ -488,7 +488,11 @@ class DrillView(QMainWindow):
         """
         Open the export dialog.
         """
+        self.setDisabled(True)
         dialog = DrillExportDialog(self)
+        dialog.finished.connect(
+                lambda : self.setDisabled(False)
+                )
         self._presenter.onShowExportDialog(dialog)
         dialog.show()
 

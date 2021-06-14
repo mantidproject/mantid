@@ -8,6 +8,7 @@
 
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/Material.h"
 #include "MantidPythonInterface/core/Copyable.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -18,6 +19,7 @@
 
 using Mantid::API::Sample;
 using Mantid::Geometry::OrientedLattice;
+using Mantid::Geometry::SampleEnvironment;
 using Mantid::Kernel::Material; // NOLINT
 using namespace boost::python;
 
@@ -63,8 +65,12 @@ void export_Sample() {
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")), "Set the width in mm.")
       .def("getShape", &Sample::getShape, arg("self"), "Returns a shape of a Sample object.",
            return_value_policy<reference_existing_object>())
+      .def("setShape", &Sample::setShape, arg("self"), "Set shape of Sample object.")
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
            "Returns True if the sample has an environment defined")
+      .def("getEnvironment", &Sample::getEnvironment, return_value_policy<reference_existing_object>(), arg("self"),
+           "Returns the sample environment")
+      .def("setEnvironment", &Sample::setEnvironment, (arg("self"), arg("env")), "Set the sample environment")
       // -------------------------Operators
       // -------------------------------------
       .def("__len__", &Sample::size, arg("self"), "Gets the number of samples in this collection")

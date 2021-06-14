@@ -147,6 +147,8 @@ void ConvertHFIRSCDtoMDE::init() {
                   "this list will be ignored");
   // Box controller properties. These are the defaults
   this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
+  declareProperty(std::make_unique<PropertyWithValue<double>>("ObliquityParallaxCoefficient", 1.0, Direction::Input),
+                  "Geometrical correction for shift in vertical beam position due to wide beam.");
   declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -200,13 +202,21 @@ void ConvertHFIRSCDtoMDE::exec() {
   auto mdws_mdevt_3 = std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(outputWS);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
+  double cop = this->getProperty("ObliquityParallaxCoefficient");
+  float coeff = static_cast<float>(cop);
+
   float k = boost::math::float_constants::two_pi / static_cast<float>(wavelength);
+  // check convention to determine the sign of k
+  std::string convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  if (convention == "Crystallography") {
+    k *= -1.f;
+  }
   std::vector<Eigen::Vector3f> q_lab_pre;
   q_lab_pre.reserve(azimuthal.size());
   for (size_t m = 0; m < azimuthal.size(); ++m) {
     auto twotheta_f = static_cast<float>(twotheta[m]);
     auto azimuthal_f = static_cast<float>(azimuthal[m]);
-    q_lab_pre.push_back({-sin(twotheta_f) * cos(azimuthal_f) * k, -sin(twotheta_f) * sin(azimuthal_f) * k,
+    q_lab_pre.push_back({-sin(twotheta_f) * cos(azimuthal_f) * k, -sin(twotheta_f) * sin(azimuthal_f) * k * coeff,
                          (1.f - cos(twotheta_f)) * k});
   }
   const auto run = inputWS->getExperimentInfo(0)->run();

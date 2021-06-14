@@ -26,7 +26,7 @@ public:
     TS_ASSERT_EQUALS(a.getNumDims(), 3);
     TS_ASSERT_EQUALS(a.getSignal(), 1.0);
     TS_ASSERT_EQUALS(a.getErrorSquared(), 1.0);
-    TS_ASSERT_EQUALS(a.getRunIndex(), 0);
+    TS_ASSERT_EQUALS(a.getExpInfoIndex(), 0);
     TS_ASSERT_EQUALS(a.getGoniometerIndex(), 0);
     TS_ASSERT_EQUALS(a.getDetectorID(), 0);
 
@@ -34,7 +34,7 @@ public:
     TS_ASSERT_EQUALS(b.getNumDims(), 4);
     TS_ASSERT_EQUALS(b.getSignal(), 2.5);
     TS_ASSERT_EQUALS(b.getErrorSquared(), 1.5);
-    TS_ASSERT_EQUALS(b.getRunIndex(), 0);
+    TS_ASSERT_EQUALS(b.getExpInfoIndex(), 0);
     TS_ASSERT_EQUALS(b.getGoniometerIndex(), 0);
     TS_ASSERT_EQUALS(b.getDetectorID(), 0);
 
@@ -51,7 +51,7 @@ public:
     TS_ASSERT_EQUALS(b.getNumDims(), 3);
     TS_ASSERT_EQUALS(b.getSignal(), 2.5);
     TS_ASSERT_EQUALS(b.getErrorSquared(), 1.5);
-    TS_ASSERT_EQUALS(b.getRunIndex(), 123);
+    TS_ASSERT_EQUALS(b.getExpInfoIndex(), 123);
     TS_ASSERT_EQUALS(b.getGoniometerIndex(), 42);
     TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
   }
@@ -65,7 +65,7 @@ public:
     TS_ASSERT_EQUALS(b.getCenter(0), 0.125);
     TS_ASSERT_EQUALS(b.getCenter(1), 1.25);
     TS_ASSERT_EQUALS(b.getCenter(2), 2.5);
-    TS_ASSERT_EQUALS(b.getRunIndex(), 123);
+    TS_ASSERT_EQUALS(b.getExpInfoIndex(), 123);
     TS_ASSERT_EQUALS(b.getGoniometerIndex(), 42);
     TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
   }
@@ -79,7 +79,7 @@ public:
     TS_ASSERT_EQUALS(a.getNumDims(), 3);
     TS_ASSERT_EQUALS(a.getSignal(), 2.5);
     TS_ASSERT_EQUALS(a.getErrorSquared(), 1.5);
-    TS_ASSERT_EQUALS(a.getRunIndex(), 123);
+    TS_ASSERT_EQUALS(a.getExpInfoIndex(), 123);
     TS_ASSERT_EQUALS(a.getGoniometerIndex(), 42);
     TS_ASSERT_EQUALS(a.getDetectorID(), 456789);
     TS_ASSERT_EQUALS(a.getCenter(0), 0.125);
@@ -154,7 +154,7 @@ public:
 
       events[i].setSignal(static_cast<float>(i));
       events[i].setErrorSquared(static_cast<float>(i * i));
-      events[i].setRunIndex(uint16_t(i / 10));
+      events[i].setExpInfoIndex(uint16_t(i / 10));
       events[i].setGoniometerIndex(uint16_t(i / 10));
       events[i].setDetectorId(uint32_t(i));
       sumGuess += double(i);
@@ -178,7 +178,7 @@ public:
     for (size_t i = 0; i < nPoints; i++) {
       TS_ASSERT_DELTA(events[i].getSignal(), data[ncols * i + 0], 1.e-6);
       TS_ASSERT_DELTA(events[i].getErrorSquared(), data[ncols * i + 1], 1.e-6);
-      TS_ASSERT_EQUALS(events[i].getRunIndex(), uint16_t(data[ncols * i + 2]));
+      TS_ASSERT_EQUALS(events[i].getExpInfoIndex(), uint16_t(data[ncols * i + 2]));
       TS_ASSERT_EQUALS(events[i].getGoniometerIndex(), uint16_t(data[ncols * i + 3]));
       TS_ASSERT_EQUALS(events[i].getDetectorID(), uint32_t(data[ncols * i + 4]));
 
@@ -196,7 +196,7 @@ public:
     for (size_t i = 0; i < nPoints; i++) {
       TS_ASSERT_DELTA(events[i].getSignal(), transfEvents[i].getSignal(), 1.e-6);
       TS_ASSERT_DELTA(events[i].getErrorSquared(), transfEvents[i].getErrorSquared(), 1.e-6);
-      TS_ASSERT_EQUALS(events[i].getRunIndex(), transfEvents[i].getRunIndex());
+      TS_ASSERT_EQUALS(events[i].getExpInfoIndex(), transfEvents[i].getExpInfoIndex());
       TS_ASSERT_EQUALS(events[i].getGoniometerIndex(), transfEvents[i].getGoniometerIndex());
       TS_ASSERT_EQUALS(events[i].getDetectorID(), transfEvents[i].getDetectorID());
 
@@ -244,23 +244,23 @@ public:
   void test_create_MDEvent3() {
     float signal(1.5);
     float error(2.5);
-    uint16_t runIndex = 123;
+    uint16_t expInfoIndex = 123;
     uint16_t goniometerIndex(42);
     uint16_t detectorId = 45678;
     Mantid::coord_t center[3] = {1.25, 2.5, 3.5};
     for (size_t i = 0; i < num; i++)
-      events3.emplace_back(MDEvent<3>(signal, error, runIndex, goniometerIndex, detectorId, center));
+      events3.emplace_back(MDEvent<3>(signal, error, expInfoIndex, goniometerIndex, detectorId, center));
   }
 
   void test_create_MDEvent4() {
     float signal(1.5);
     float error(2.5);
-    uint16_t runIndex = 123;
+    uint16_t expInfoIndex = 123;
     uint16_t goniometerIndex(42);
     uint16_t detectorId = 45678;
     Mantid::coord_t center[4] = {1.25, 2.5, 3.5, 4.75};
     for (size_t i = 0; i < num; i++)
-      events4.emplace_back(MDEvent<4>(signal, error, runIndex, goniometerIndex, detectorId, center));
+      events4.emplace_back(MDEvent<4>(signal, error, expInfoIndex, goniometerIndex, detectorId, center));
   }
 
   void test_create_MDLeanEvent3() {
@@ -317,7 +317,7 @@ public:
 
       events[i].setSignal(static_cast<float>(i));
       events[i].setErrorSquared(static_cast<float>(i * i));
-      events[i].setRunIndex(uint16_t(i / 10));
+      events[i].setExpInfoIndex(uint16_t(i / 10));
       events[i].setGoniometerIndex(uint16_t(i / 10));
       events[i].setDetectorId(uint32_t(i));
       sumGuess += double(i);

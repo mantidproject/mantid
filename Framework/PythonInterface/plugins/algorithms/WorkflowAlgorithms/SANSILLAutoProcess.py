@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
     WorkspaceGroupProperty, FileAction
-from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty
+from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntBoundedValidator
 from mantid.simpleapi import *
 import numpy as np
 from os import path
@@ -102,6 +102,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
     radius = None
     thickness = None
     theta_dependent = None
+    solvent = None
+    n_wedges = None
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -133,6 +135,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         mask_dim = len(self.mask)
         sens_dim = len(self.sensitivity)
         ref_dim = len(self.reference)
+        solv_dim = len(self.solvent)
         maxqxy_dim = len(self.maxqxy)
         deltaq_dim = len(self.deltaq)
         radius_dim = len(self.radius)
@@ -165,6 +168,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if radius_dim != sample_dim and radius_dim > 1:
             result['BeamRadius'] = \
                     message_value.format('BeamRadius', radius_dim, sample_dim)
+        if solv_dim != sample_dim and solv_dim > 1:
+            result['SolventFiles'] = \
+                    message.format('Solvent', solv_dim, sample_dim)
 
         # transmission runs checks
         str_dim = len(self.stransmission.split(','))
@@ -204,6 +210,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             .replace(' ', '').split(',')
         self.reference = self.getPropertyValue('ReferenceFiles') \
             .replace(' ', '').split(',')
+        self.solvent = self.getPropertyValue('SolventFiles') \
+            .replace(' ', '').split(',')
         self.output = self.getPropertyValue('OutputWorkspace')
         self.output_panels = self.output + "_panels"
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
@@ -218,6 +226,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.maxqxy = self.getPropertyValue('MaxQxy').split(',')
         self.deltaq = self.getPropertyValue('DeltaQ').split(',')
         self.output_type = self.getPropertyValue('OutputType')
+        self.stitch_reference_index = self.getProperty('StitchReferenceIndex').value
 
     def PyInit(self):
 
@@ -299,6 +308,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('ReferenceFiles', '',
                              doc='File(s) or workspaces containing the corrected water data (in 2D) for absolute normalisation.')
 
+        self.declareProperty('SolventFiles', '',
+                             doc='File(s) or workspaces containing the corrected solvent data (in 2D) for solvent subtraction.')
+
         self.declareProperty(MatrixWorkspaceProperty('SensitivityOutputWorkspace', '',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
@@ -326,6 +338,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('DefaultMaskFile', 'Options')
         self.setPropertyGroup('MaskFiles', 'Options')
         self.setPropertyGroup('ReferenceFiles', 'Options')
+        self.setPropertyGroup('SolventFiles', 'Options')
         self.setPropertyGroup('SensitivityOutputWorkspace', 'Options')
         self.setPropertyGroup('NormaliseBy', 'Options')
         self.setPropertyGroup('SampleThickness', 'Options')
@@ -357,9 +370,14 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('SensitivityWithOffsets', False,
                              'Whether the sensitivity data has been measured with different horizontal offsets.')
 
+        self.declareProperty('StitchReferenceIndex', defaultValue=1,
+                             validator=IntBoundedValidator(lower=0),
+                             doc='Index of reference workspace during stitching.')
+
+        self.copyProperties('SANSILLIntegration', ['ShapeTable'])
+
     # flake8: noqa: C901
     def PyExec(self):
-
         self.setUp()
         outputSamples = []
         outputWedges = []
@@ -405,7 +423,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             try:
                 stitched = self.output + "_stitched"
                 Stitch1DMany(InputWorkspaces=outputSamples,
-                             OutputWorkspace=stitched)
+                             OutputWorkspace=stitched,
+                             ScaleRHSWorkspace=True,
+                             IndexOfReference=self.stitch_reference_index)
                 outputSamples.append(stitched)
             except RuntimeError as re:
                 self.log().warning("Unable to stitch automatically, consider "
@@ -448,13 +468,17 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         # stitch if possible and group
         for i in range(len(outputWedges[0])):
             inWs = [outputWedges[d][i] for d in range(self.dimensionality)]
-            try:
-                stitched = self.output + "_wedge_" + str(i + 1) + "_stitched"
-                Stitch1DMany(InputWorkspaces=inWs, OutputWorkspace=stitched)
-                inWs.append(stitched)
-            except RuntimeError as re:
-                self.log().warning("Unable to stitch automatically, consider "
-                                   "stitching manually: " + str(re))
+            if len(inWs) > 1:
+                try:
+                    stitched = self.output + "_wedge_" + str(i + 1) + "_stitched"
+                    Stitch1DMany(InputWorkspaces=inWs,
+                                 OutputWorkspace=stitched,
+                                 ScaleRHSWorkspace=True,
+                                 IndexOfReference=self.stitch_reference_index)
+                    inWs.append(stitched)
+                except RuntimeError as re:
+                    self.log().warning("Unable to stitch automatically, consider "
+                                       "stitching manually: " + str(re))
             GroupWorkspaces(InputWorkspaces=inWs,
                             OutputWorkspace=self.output + "_wedge_" + str(i + 1))
 
@@ -724,7 +748,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             LoadNexusProcessed(Filename=mask, OutputWorkspace=mask_name)
         # sensitivity
         sens_input = ''
-        ref_input = ''
         if self.sensitivity:
             sens = (self.sensitivity[i]
                     if len(self.sensitivity) == self.dimensionality
@@ -738,6 +761,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                    OutputWorkspace=sensitivity_name)
 
         # reference
+        ref_input = ''
         if self.reference:
             reference = (self.reference[i]
                          if len(self.reference) == self.dimensionality
@@ -749,6 +773,20 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             if load_reference:
                 LoadNexusProcessed(Filename=reference,
                                    OutputWorkspace=reference_name)
+
+        # solvent
+        solv_input = ''
+        if self.solvent:
+            solvent = (self.solvent[i]
+                       if len(self.solvent) == self.dimensionality
+                       else self.solvent[0])
+            [load_solvent, solvent_name] = \
+                needs_loading(solvent, 'Solvent')
+            solv_input = solvent_name
+            self.progress.report('Loading solvent')
+            if load_solvent:
+                LoadNexusProcessed(Filename=solvent,
+                                   OutputWorkspace=solvent_name)
 
         # get correct transmission
         if len(sample_transmission_names) > 1:
@@ -781,6 +819,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 SensitivityInputWorkspace=sens_input,
                 SensitivityOutputWorkspace=output_sens,
                 FluxInputWorkspace=flux_name,
+                SolventInputWorkspace=solv_input,
                 NormaliseBy=self.normalise,
                 ThetaDependent=self.theta_dependent,
                 SampleThickness=
@@ -796,7 +835,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         else:
             panel_ws_group = ""
 
-        if self.n_wedges and self.output_type == "I(Q)":
+        if (self.n_wedges or self.getPropertyValue("ShapeTable")) and self.output_type == "I(Q)":
             output_wedges = self.output + "_wedge_d" + str(i + 1)
         else:
             output_wedges = ""
@@ -827,13 +866,15 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                         if len(self.deltaq) == self.dimensionality
                         else self.deltaq[0]),
                 IQxQyLogBinning=self.getProperty('IQxQyLogBinning').value,
-                WavelengthRange=self.getProperty('WavelengthRange').value
+                WavelengthRange=self.getProperty('WavelengthRange').value,
+                ShapeTable=self.getPropertyValue('ShapeTable')
                 )
 
         ConvertToPointData(InputWorkspace=output_sample, OutputWorkspace=output_sample)
 
         # wedges ungrouping and renaming
         if output_wedges:
+            self.n_wedges = mtd[output_wedges].size()
             wedges_old_names = [output_wedges + "_" + str(w + 1)
                                 for w in range(self.n_wedges)]
             wedges_new_names = [self.output + "_wedge_" + str(w + 1)

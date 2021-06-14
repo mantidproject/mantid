@@ -13,10 +13,11 @@ import pathlib
 import re
 from typing import List, Optional, Tuple, Union
 
-from mantid.dataobjects import EventWorkspace, TableWorkspace,  Workspace2D
+from mantid.dataobjects import EventWorkspace, MaskWorkspace, TableWorkspace,  Workspace2D
 from mantid.api import mtd, Workspace, WorkspaceGroup
 from mantid.kernel import logger
-from mantid.simpleapi import CreateEmptyTableWorkspace, SaveNexusProcessed, LoadNexusProcessed
+from mantid.simpleapi import (ClearMaskFlag, CreateEmptyTableWorkspace, ExtractMask, LoadEmptyInstrument,
+                              LoadNexusProcessed, MaskDetectors, SaveNexusProcessed)
 
 # Functions exposed to the general user (public) API
 __all__ = ['day_stamp', 'load_calibration_set', 'new_corelli_calibration', 'save_calibration_set']
@@ -454,10 +455,34 @@ def new_corelli_calibration(database_path: str,
     return [file_paths[x] for x in ('calibration', 'mask', 'manifest')]
 
 
+def _table_to_workspace(input_workspace: Union[str, TableWorkspace],
+                        output_workspace: Optional[str] = None) -> MaskWorkspace:
+    r"""
+    @brief Convert a CORELLI calibration mask table to a MaskWorkspace
+
+    :param input_workspace : the table containing the detector ID's for the masked detectors
+    :param output_workspace : name of the output MaskWorkspace
+
+    :return: handle to the MaskWorkspace
+    """
+    table_handle = mtd[str(input_workspace)]
+    detectors_masked = table_handle.column(0)  # list of masked detectors
+    if output_workspace is None:
+        output_workspace = str(input_workspace)
+    LoadEmptyInstrument(InstrumentName='CORELLI', OutputWorkspace=output_workspace)
+    ClearMaskFlag(Workspace=output_workspace)  # for good measure
+    MaskDetectors(Workspace=output_workspace, DetectorList=detectors_masked)  # output_workspace is a Workspace2D
+    # output_workspace is converted to a MaskWorkspace, where the Y-values of the spectra are now either 0 or 1
+    ExtractMask(InputWorkspace=output_workspace, OutputWorkspace=output_workspace)
+    return mtd[output_workspace]
+
+
 def load_calibration_set(input_workspace: Union[str, Workspace],
                          database_path: str,
                          output_calibration_name: str = 'calibration',
-                         output_mask_name: str = 'mask') -> Tuple[Optional[TableWorkspace], Optional[TableWorkspace]]:
+                         output_mask_name: str = 'mask',
+                         mask_format: str = 'MaskWorkspace') -> Tuple[Optional[TableWorkspace],
+                                                                      Optional[TableWorkspace]]:
     r"""
     Retrieve an instrument calibration and instrument mask.
 
@@ -469,9 +494,15 @@ def load_calibration_set(input_workspace: Union[str, Workspace],
     :param database_path: absolute path to the instrument calibration tables
     :param output_calibration_name: name of the TableWorkspace containing the calibrated pixel positions
     :param output_mask_name: name of the TableWorkspace containing the uncalibrated pixels to be masked
-    :return: calibration and mask tables. Returns `None` for each of these tables if a suitable
+    :param mask_format: return the mask either as a 'MaskWorkspace' or as 'TableWorkspace/
+
+    :return: calibration TableWorkspdce and mask MaskWorkspace. Returns `None` for each of these if a suitable
         calibration file is not found in the database.
     """
+    valid_mask_formats = ('MaskWorkspace', 'TableWorkspace')
+    if mask_format not in valid_mask_formats:
+        raise ValueError(f'mask_format must be one of {valid_mask_formats}')
+
     workspace_names = {'calibration': output_calibration_name, 'mask': output_mask_name}
     run_start = day_stamp(input_workspace)  # day when the experiment associated to `input_workspace` was started
     instrument_tables = {'calibration': None, 'mask': None}  # store the calibration and mask instrument tables
@@ -502,6 +533,9 @@ def load_calibration_set(input_workspace: Union[str, Workspace],
             logger.notice(f'Found {filename} for {str(input_workspace)} with run start {run_start}')
             instrument_tables[table_type] = LoadNexusProcessed(Filename=filename,
                                                                OutputWorkspace=workspace_names[table_type])
+            # Additional step to convert the mask TableWorkspace to a MaskWorkspace
+            if table_type == 'mask' and mask_format=='MaskWorkspace':
+                instrument_tables[table_type] = _table_to_workspace(workspace_names[table_type])
         else:
             message = f'No {table_type} file found for {str(input_workspace)} with run start {run_start}. '
             if len(available_dates) > 0:

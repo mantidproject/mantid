@@ -5,14 +5,26 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-few-public-methods
+import numpy as np
 import systemtesting
-from mantid.simpleapi import *
+from mantid.simpleapi import (HB3AAdjustSampleNorm, HB3AFindPeaks,
+                              HB3AIntegratePeaks, HB3APredictPeaks,
+                              mtd, DeleteWorkspaces,
+                              CreateMDWorkspace, LoadEmptyInstrument,
+                              AddTimeSeriesLog, SetUB,
+                              FakeMDEventData, FindPeaksMD,
+                              ShowPossibleCells, FindUBUsingFFT,
+                              OptimizeLatticeForCellType,
+                              SelectCellOfType, HasUB)
+from mantid.kernel import V3D
+from mantid.geometry import OrientedLattice, SpaceGroupFactory
 
 
 class SingleFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
         ws_name = 'SingleFileFindPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3AFindPeaks(InputWorkspace=ws_name+'_data',
@@ -45,6 +57,7 @@ class SingleFilePredictPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
         ws_name = 'SingleFilePredictPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3APredictPeaks(InputWorkspace=ws_name+"_data",
@@ -75,6 +88,7 @@ class SingleFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemT
     def runTest(self):
         ws_name = 'SingleFilePredictPeaksUBFromFindPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3AFindPeaks(InputWorkspace=ws_name+'_data',
@@ -112,6 +126,7 @@ class MultiFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
         ws_name = 'MultiFileFindPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3AFindPeaks(InputWorkspace=ws_name+'_data',
@@ -167,6 +182,7 @@ class MultiFilePredictPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
         ws_name = 'MultiFilePredictPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3APredictPeaks(InputWorkspace=ws_name+"_data",
@@ -222,6 +238,7 @@ class MultiFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemTe
     def runTest(self):
         ws_name = 'MultiFilePredictPeaksUBFromFindPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3AFindPeaks(InputWorkspace=ws_name+'_data',
@@ -284,3 +301,122 @@ class MultiFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemTe
                           ws_name+'_found_peaks',
                           ws_name+'_peaks',
                           ws_name+'_integrated'])
+
+
+class SatellitePeaksFakeData(systemtesting.MantidSystemTest):
+    def runTest(self):
+        # Na Mn Cl3
+        # R -3 H (148)
+        # 6.592 6.592 18.585177 90 90 120
+
+        # UB/wavelength from /HFIR/HB3A/IPTS-25470/shared/autoreduce/HB3A_exp0769_scan0040.nxs
+
+        ub = np.array([[ 1.20297e-01,  1.70416e-01,  1.43000e-04],
+                       [ 8.16000e-04, -8.16000e-04,  5.38040e-02],
+                       [ 1.27324e-01, -4.05110e-02, -4.81000e-04]])
+
+        wavelength = 1.553
+
+        # create fake MDEventWorkspace, similar to what is expected from exp769 after loading with HB3AAdjustSampleNorm
+        MD_Q_sample = CreateMDWorkspace(Dimensions='3', Extents='-5,5,-5,5,-5,5',
+                                        Names='Q_sample_x,Q_sample_y,Q_sample_z',
+                                        Units='rlu,rlu,rlu',
+                                        Frames='QSample,QSample,QSample')
+
+        inst = LoadEmptyInstrument(InstrumentName='HB3A')
+        AddTimeSeriesLog(inst, 'omega', '2010-01-01T00:00:00', 0.)
+        AddTimeSeriesLog(inst, 'phi', '2010-01-01T00:00:00', 0.)
+        AddTimeSeriesLog(inst, 'chi', '2010-01-01T00:00:00', 0.)
+        MD_Q_sample.addExperimentInfo(inst)
+        SetUB(MD_Q_sample, UB=ub)
+
+        ol=OrientedLattice()
+        ol.setUB(ub)
+
+        sg = SpaceGroupFactory.createSpaceGroup("R -3")
+
+        hkl= []
+        sat_hkl = []
+
+        for h in range(0, 6):
+            for k in range(0, 6):
+                for l in range(0, 11):
+                    if sg.isAllowedReflection([h,k,l]):
+                        if h == k == l == 0:
+                            continue
+                        q = V3D(h, k, l)
+                        q_sample = ol.qFromHKL(q)
+                        if not np.any(np.array(q_sample) > 5):
+                            hkl.append(q)
+                            FakeMDEventData(MD_Q_sample, PeakParams='1000,{},{},{},0.05'.format(*q_sample))
+                        # satellite peaks at 0,0,+1.5
+                        q = V3D(h, k, l+1.5)
+                        q_sample = ol.qFromHKL(q)
+                        if not np.any(np.array(q_sample) > 5):
+                            sat_hkl.append(q)
+                            FakeMDEventData(MD_Q_sample, PeakParams='100,{},{},{},0.02'.format(*q_sample))
+                        # satellite peaks at 0,0,-1.5
+                        q = V3D(h, k, l-1.5)
+                        q_sample = ol.qFromHKL(q)
+                        if not np.any(np.array(q_sample) > 5):
+                            sat_hkl.append(q)
+                            FakeMDEventData(MD_Q_sample, PeakParams='100,{},{},{},0.02'.format(*q_sample))
+
+        # Check that this fake workpsace gives us the expected UB
+        peaks = FindPeaksMD(MD_Q_sample, PeakDistanceThreshold=1, OutputType='LeanElasticPeak')
+        FindUBUsingFFT(peaks, MinD=5, MaxD=20)
+        ShowPossibleCells(peaks)
+        SelectCellOfType(peaks, CellType='Rhombohedral', Centering='R', Apply=True)
+        OptimizeLatticeForCellType(peaks, CellType='Hexagonal', Apply=True)
+        found_ol = peaks.sample().getOrientedLattice()
+        self.assertAlmostEqual(found_ol.a(), 6.592, places=2)
+        self.assertAlmostEqual(found_ol.b(), 6.592, places=2)
+        self.assertAlmostEqual(found_ol.c(), 18.585177, places=2)
+        self.assertAlmostEqual(found_ol.alpha(), 90)
+        self.assertAlmostEqual(found_ol.beta(), 90)
+        self.assertAlmostEqual(found_ol.gamma(), 120)
+
+        # nuclear peaks
+        predict = HB3APredictPeaks(MD_Q_sample, Wavelength=wavelength,
+                                   ReflectionCondition='Rhombohedrally centred, obverse',
+                                   SatellitePeaks=True, IncludeIntegerHKL=True)
+        predict = HB3AIntegratePeaks(MD_Q_sample, predict, 0.25)
+
+        self.assertEqual(predict.getNumberPeaks(), 66)
+        # check that the found peaks are expected
+        for n in range(predict.getNumberPeaks()):
+            HKL = predict.getPeak(n).getHKL()
+            self.assertTrue(HKL in hkl, msg=f"Peak {n} with HKL={HKL}")
+
+        # magnetic peaks
+        satellites = HB3APredictPeaks(MD_Q_sample, Wavelength=wavelength,
+                                      ReflectionCondition='Rhombohedrally centred, obverse',
+                                      SatellitePeaks=True,
+                                      ModVector1='0,0,1.5',
+                                      MaxOrder=1,
+                                      IncludeIntegerHKL=False)
+        satellites = HB3AIntegratePeaks(MD_Q_sample, satellites, 0.1)
+
+        self.assertEqual(satellites.getNumberPeaks(), 80)
+        # check that the found peaks are expected
+        for n in range(satellites.getNumberPeaks()):
+            HKL = satellites.getPeak(n).getHKL()
+            self.assertTrue(HKL in sat_hkl, msg=f"Peak {n} with HKL={HKL}")
+
+
+class HB3AFindPeaksTest(systemtesting.MantidSystemTest):
+    # test moved from unittests because of large memory usage
+    def runTest(self):
+        # Test with vanadium normalization to make sure UB matrix and peaks can still be found
+
+        norm = HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs",
+                                    VanadiumFile="HB3A_exp0722_scan0220.nxs",
+                                    NormaliseBy='None')
+        peaks = HB3AFindPeaks(InputWorkspace=norm,
+                              CellType="Orthorhombic",
+                              Centering="F",
+                              PeakDistanceThreshold=0.25,
+                              Wavelength=1.008)
+        # Verify UB and peaks were found
+        self.assertTrue(HasUB(peaks))
+        self.assertGreater(peaks.getNumberPeaks(), 0)

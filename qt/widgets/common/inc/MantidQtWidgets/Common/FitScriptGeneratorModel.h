@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -59,10 +60,15 @@ public:
   [[nodiscard]] std::string getEquivalentFunctionIndexForDomain(std::string const &workspaceName,
                                                                 WorkspaceIndex workspaceIndex,
                                                                 std::string const &functionIndex) const override;
+  [[nodiscard]] std::string getEquivalentFunctionIndexForDomain(FitDomainIndex domainIndex,
+                                                                std::string const &functionIndex) const override;
   [[nodiscard]] std::string getEquivalentParameterTieForDomain(std::string const &workspaceName,
                                                                WorkspaceIndex workspaceIndex,
                                                                std::string const &fullParameter,
                                                                std::string const &fullTie) const override;
+  [[nodiscard]] std::string getAdjustedFunctionIndex(std::string const &parameter) const override;
+  [[nodiscard]] std::string getFullParameter(FitDomainIndex domainIndex, std::string const &parameter) const override;
+  [[nodiscard]] std::string getFullTie(FitDomainIndex domainIndex, std::string const &tie) const override;
 
   void updateParameterValue(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                             std::string const &fullParameter, double newValue) override;
@@ -90,6 +96,29 @@ public:
 
   [[nodiscard]] bool isSimultaneousMode() const override;
 
+  [[nodiscard]] bool hasParameter(FitDomainIndex domainIndex, std::string const &fullParameter) const override;
+
+  void setParameterValue(FitDomainIndex domainIndex, std::string const &fullParameter, double value) override;
+  void setParameterFixed(FitDomainIndex domainIndex, std::string const &fullParameter, bool fix) override;
+  void setParameterTie(FitDomainIndex domainIndex, std::string const &fullParameter, std::string const &tie) override;
+  void setParameterConstraint(FitDomainIndex domainIndex, std::string const &fullParameter,
+                              std::string const &constraint) override;
+
+  [[nodiscard]] std::string getDomainName(FitDomainIndex domainIndex) const override;
+  [[nodiscard]] double getParameterValue(FitDomainIndex domainIndex, std::string const &fullParameter) const override;
+  [[nodiscard]] bool isParameterFixed(FitDomainIndex domainIndex, std::string const &fullParameter) const override;
+  [[nodiscard]] std::string getParameterTie(FitDomainIndex domainIndex,
+                                            std::string const &fullParameter) const override;
+  [[nodiscard]] std::string getParameterConstraint(FitDomainIndex domainIndex,
+                                                   std::string const &fullParameter) const override;
+
+  [[nodiscard]] inline std::size_t numberOfDomains() const noexcept override { return m_fitDomains.size(); }
+
+  std::tuple<bool, std::string> isValid() const override;
+
+  std::string generatePythonFitScript(std::tuple<std::string, std::string, std::string, std::string> const &fitOptions,
+                                      std::string const &filepath = "") override;
+
 private:
   [[nodiscard]] FitDomainIndex findDomainIndex(std::string const &workspaceName, WorkspaceIndex workspaceIndex) const;
   [[nodiscard]] std::vector<std::unique_ptr<FitDomain>>::const_iterator
@@ -98,7 +127,6 @@ private:
   [[nodiscard]] std::string getEquivalentParameterTieForDomain(FitDomainIndex domainIndex,
                                                                std::string const &fullParameter,
                                                                std::string const &fullTie) const;
-  [[nodiscard]] std::string getAdjustedFunctionIndex(std::string const &parameter) const;
 
   void updateParameterTie(FitDomainIndex domainIndex, std::string const &fullParameter, std::string const &fullTie);
   void updateLocalParameterTie(FitDomainIndex domainIndex, std::string const &fullParameter,
@@ -109,8 +137,6 @@ private:
   void updateParameterValuesWithLocalTieTo(FitDomainIndex domainIndex, std::string const &parameter, double newValue);
   void updateParameterValuesWithGlobalTieTo(std::string const &fullParameter, double newValue);
   void updateParameterValueInGlobalTie(GlobalTie const &globalTie, double newValue);
-
-  [[nodiscard]] double getParameterValue(FitDomainIndex domainIndex, std::string const &fullParameter) const;
 
   [[nodiscard]] bool validParameter(std::string const &fullParameter) const;
   [[nodiscard]] bool validParameter(FitDomainIndex domainIndex, std::string const &fullParameter) const;
@@ -125,14 +151,28 @@ private:
   [[nodiscard]] std::vector<GlobalTie>::const_iterator findGlobalTie(std::string const &fullParameter) const;
   void checkGlobalTies();
 
-  [[nodiscard]] inline std::size_t numberOfDomains() const noexcept { return m_fitDomains.size(); }
-
   void checkParameterIsInAllDomains(std::string const &globalParameter) const;
   void checkGlobalParameterhasNoTies(std::string const &globalParameter) const;
   void checkParameterIsNotGlobal(std::string const &fullParameter) const;
 
   void tryToAdjustParameterInGlobalTieIfInvalidated(GlobalTie &globalTie);
   void tryToAdjustTieInGlobalTieIfInvalidated(GlobalTie &globalTie);
+
+  template <typename Getter>
+  auto getParameterProperty(Getter &&func, FitDomainIndex domainIndex, std::string const &fullParameter) const;
+
+  [[nodiscard]] bool checkFunctionExistsInAllDomains() const;
+  [[nodiscard]] bool checkFunctionIsSameForAllDomains() const;
+  [[nodiscard]] std::string generatePermissibleWarnings() const;
+
+  [[nodiscard]] std::vector<std::string> getInputWorkspaces() const;
+  [[nodiscard]] std::vector<std::size_t> getWorkspaceIndices() const;
+  [[nodiscard]] std::vector<double> getStartXs() const;
+  [[nodiscard]] std::vector<double> getEndXs() const;
+
+  template <typename T, typename Function> std::vector<T> transformDomains(Function const &func) const;
+
+  [[nodiscard]] Mantid::API::IFunction_sptr getFunction() const;
 
   IFitScriptGeneratorPresenter *m_presenter;
   std::vector<std::unique_ptr<FitDomain>> m_fitDomains;
@@ -142,6 +182,16 @@ private:
   std::vector<GlobalTie> m_globalTies;
   FittingMode m_fittingMode;
 };
+
+template <typename Getter>
+auto FitScriptGeneratorModel::getParameterProperty(Getter &&func, FitDomainIndex domainIndex,
+                                                   std::string const &fullParameter) const {
+  auto const parameter = getAdjustedFunctionIndex(fullParameter);
+  if (domainIndex.value < numberOfDomains())
+    return std::invoke(std::forward<Getter>(func), m_fitDomains[domainIndex.value], parameter);
+
+  throw std::runtime_error("The domain index provided does not exist.");
+}
 
 } // namespace MantidWidgets
 } // namespace MantidQt

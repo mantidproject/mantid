@@ -52,8 +52,8 @@ class EAGroupingTabPresenterTest(unittest.TestCase):
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
         run = 9999
         self.context.data_context._loaded_data.add_data(run=[run], workspace=grpws)
-        loadedData = self.context.data_context._loaded_data
-        self.context.group_context.reset_group_to_default(loadedData)
+        loaded_data = self.context.data_context._loaded_data
+        self.context.group_context.reset_group_to_default(loaded_data)
 
     def tearDown(self):
         self.obj = None
@@ -82,6 +82,30 @@ class EAGroupingTabPresenterTest(unittest.TestCase):
         self.presenter.on_clear_requested()
 
         self.assertEqual(self.grouping_table_view.num_rows(), 0)
+
+    def test_handle_data_loaded_when_data_loaded(self):
+        self.presenter._model.is_data_loaded = mock.Mock()
+        self.presenter._model.is_data_loaded.return_value = True
+        self.presenter.update_view_from_model = mock.Mock()
+        self.presenter.update_description_text = mock.Mock()
+        self.presenter.plot_default_groups = mock.Mock()
+
+        self.presenter.handle_new_data_loaded()
+
+        # Assert statements
+        self.presenter.update_view_from_model.assert_called_once()
+        self.presenter.update_description_text.assert_called_once()
+        self.presenter.plot_default_groups.assert_called_once()
+
+    def test_handle_data_loaded_when_data_not_loaded(self):
+        self.presenter._model.is_data_loaded = mock.Mock()
+        self.presenter._model.is_data_loaded.return_value = False
+        self.presenter.on_clear_requested = mock.Mock()
+
+        self.presenter.handle_new_data_loaded()
+
+        # Assert statements
+        self.presenter.on_clear_requested.assert_called_once()
 
 
 if __name__ == '__main__':

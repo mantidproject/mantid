@@ -131,13 +131,19 @@ bool NumericAxis::equalWithinTolerance(const Axis &axis2, const double tolerance
   return std::equal(m_values.begin(), m_values.end(), spec2->m_values.begin(), comparison);
 }
 
-/** Returns a text label which shows the value at index and identifies the
- *  type of the axis.
- *  @param index :: The index of an axis value
- *  @return the label of the requested axis
+/** Returns a text label which shows the value corresponding to a bin index.
+ *  @param index :: The index of the bin, matches with the index of the value
+ *  @return the formatted string
  */
-std::string NumericAxis::label(const std::size_t &index) const {
-  std::string numberLabel = boost::str(boost::format("%.13f") % (*this)(index));
+std::string NumericAxis::label(const std::size_t &index) const { return formatLabel((*this)(index)); }
+
+/**
+ * @brief Formats a numeric label to a string
+ * @param value: the numeric value of the label
+ * @return formatted value as string
+ */
+std::string NumericAxis::formatLabel(const double value) const {
+  std::string numberLabel = boost::str(boost::format("%.13f") % value);
 
   // Remove all zeros up to the decimal place or a non zero value
   auto it = numberLabel.end() - 1;

@@ -10,7 +10,9 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -41,14 +43,15 @@ FileEventDataListener::FileEventDataListener()
     } else {
       auto loader = FileLoaderRegistry::Instance().chooseLoader(m_filename);
       m_loaderName = loader->name();
-      if (m_loaderName.find("Nexus") != std::string::npos &&
-          (m_loaderName.find("Pre") != std::string::npos || m_loaderName.find("Event") != std::string::npos)) {
-        if (m_loaderName.find("Pre") != std::string::npos && m_loaderName.find("Event") != std::string::npos) {
-          m_filePropName = "EventFilename";
-          m_canLoadMonitors = false;
-        }
+      if (m_loaderName == "LoadEventPreNexus") {
+        m_filePropName = "EventFilename";
+        m_canLoadMonitors = false;
+      } else if (m_loaderName == "LoadEventNexus") {
+        m_filePropName = "Filename";
+        m_canLoadMonitors = true;
       } else {
-        g_log.error("No loader for " + m_filename + " that supports chunking. The algorithm will fail.");
+        g_log.error("No loader for " + m_filename + " that supports chunking (found loader '" + m_loaderName +
+                    "'). The algorithm will fail.");
       }
     }
   }
@@ -129,7 +132,7 @@ std::shared_ptr<Workspace> FileEventDataListener::extractData() {
   // If the loading of the chunk isn't finished, then we need to wait
   m_chunkload->wait();
   if (!m_chunkload->data()) {
-    throw std::runtime_error("LoadEventPreNexus failed for some reason.");
+    throw std::runtime_error(m_loaderName + " failed for some reason with file '" + m_filename + "'.");
   }
   // The loading succeeded: get the workspace from the ADS.
   MatrixWorkspace_sptr chunk = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tempWSname);
@@ -147,6 +150,17 @@ std::shared_ptr<Workspace> FileEventDataListener::extractData() {
   }
 
   m_runNumber = chunk->getRunNumber();
+
+  if (m_loaderName == "LoadEventNexus") {
+    // Scale the proton charge by the number of chunks
+    TimeSeriesProperty<double> *pcharge = chunk->mutableRun().getTimeSeriesProperty<double>("proton_charge");
+    auto values = pcharge->valuesAsVector();
+    for (auto &value : values) {
+      value /= m_numChunks;
+    }
+    pcharge->replaceValues(pcharge->timesAsVector(), values);
+    chunk->mutableRun().integrateProtonCharge();
+  }
 
   return chunk;
 }

@@ -120,10 +120,6 @@ class SNAPReduce(DataProcessorAlgorithm):
         self.declareProperty('Background', Property.EMPTY_INT,
                              doc='Background to subtract from each individual run')
 
-        self.declareProperty("LiveData", False,
-                             "Read live data - requires a saved run in the current IPTS "
-                             + "with the same Instrument configuration as the live run")
-
         mask = ["None", "Horizontal", "Vertical",
                 "Masking Workspace", "Custom - xml masking file"]
         self.declareProperty("Masking", "None", StringListValidator(mask),
@@ -213,9 +209,6 @@ class SNAPReduce(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-
-        if self.getProperty('LiveData').value:
-            issues['LiveData'] = 'Live data is not currently supported'
 
         # cross check masking
         masking = self.getProperty("Masking").value

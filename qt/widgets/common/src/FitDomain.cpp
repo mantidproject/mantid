@@ -55,6 +55,10 @@ FitDomain::FitDomain(std::string const &workspaceName, WorkspaceIndex workspaceI
     : m_workspaceName(workspaceName), m_workspaceIndex(workspaceIndex), m_startX(startX), m_endX(endX),
       m_function(nullptr) {}
 
+std::string FitDomain::domainName() const {
+  return m_workspaceName + " (" + std::to_string(m_workspaceIndex.value) + ")";
+}
+
 bool FitDomain::setStartX(double startX) {
   auto const validStartX = isValidStartX(startX);
   if (validStartX)
@@ -183,6 +187,47 @@ bool FitDomain::isParameterActive(std::string const &parameter) const {
   if (hasParameter(parameter))
     return m_function->getParameterStatus(m_function->parameterIndex(parameter)) == IFunction::ParameterStatus::Active;
   return false;
+}
+
+void FitDomain::setParameterFixed(std::string const &parameter, bool fix) const {
+  if (!hasParameter(parameter))
+    throw std::runtime_error("The parameter does not exist in this domain.");
+
+  if (fix) {
+    m_function->tie(parameter, std::to_string(getParameterValue(parameter)));
+  } else {
+    m_function->removeTie(m_function->parameterIndex(parameter));
+  }
+}
+
+bool FitDomain::isParameterFixed(std::string const &parameter) const {
+  if (hasParameter(parameter)) {
+    return m_function->getParameterStatus(m_function->parameterIndex(parameter)) == IFunction::ParameterStatus::Fixed;
+  }
+  throw std::runtime_error("The parameter does not exist in this domain.");
+}
+
+std::string FitDomain::getParameterTie(std::string const &parameter) const {
+  if (hasParameter(parameter)) {
+    auto const parameterIndex = m_function->parameterIndex(parameter);
+    if (auto const tie = m_function->getTie(parameterIndex)) {
+      auto const tieStr = tie->asString();
+      auto const equalsIndex = tieStr.find("=");
+      if (equalsIndex != std::string::npos)
+        return tieStr.substr(equalsIndex + 1);
+    }
+    return "";
+  }
+  throw std::runtime_error("The parameter does not exist in this domain.");
+}
+
+std::string FitDomain::getParameterConstraint(std::string const &parameter) const {
+  if (hasParameter(parameter)) {
+    auto const parameterIndex = m_function->parameterIndex(parameter);
+    auto const constraint = m_function->getConstraint(parameterIndex);
+    return constraint ? constraint->asString() : "";
+  }
+  throw std::runtime_error("The parameter does not exist in this domain.");
 }
 
 void FitDomain::clearParameterTie(std::string const &parameter) {

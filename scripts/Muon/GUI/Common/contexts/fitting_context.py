@@ -182,7 +182,8 @@ class FitInformation(object):
                  fit_function_name,
                  input_workspace,
                  output_workspace_names,
-                 global_parameters=None):
+                 global_parameters=None,
+                 tf_asymmetry_fit=False):
         """
         :param parameter_workspace: The workspace wrapper
         that contains all of the parameters from the fit
@@ -192,6 +193,7 @@ class FitInformation(object):
         :param output_workspace_names: A list containing the names of the output workspaces containing the fits
         :param global_parameters: An optional list of parameters
         that were tied together during the fit
+        :param tf_asymmetry_fit: An optional flag indicating whether the data is from a TF Asymmetry fit or not.
         """
         self._fit_parameters = FitParameters(parameter_workspace,
                                              global_parameters)
@@ -200,6 +202,7 @@ class FitInformation(object):
             input_workspace, str) else input_workspace
         self.output_workspace_names = [output_workspace_names] if isinstance(
             output_workspace_names, str) else output_workspace_names
+        self.tf_asymmetry_fit = tf_asymmetry_fit
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
@@ -318,7 +321,8 @@ class FittingContext(object):
                             fit_function_name,
                             input_workspace,
                             output_workspace_names,
-                            global_parameters=None):
+                            global_parameters=None,
+                            tf_asymmetry_fit=False):
         """
         Add a new fit information object based on the raw values.
         See FitInformation constructor for details are arguments.
@@ -326,7 +330,7 @@ class FittingContext(object):
         self.add_fit(
             FitInformation(parameter_workspace, fit_function_name,
                            input_workspace, output_workspace_names,
-                           global_parameters))
+                           global_parameters, tf_asymmetry_fit))
 
     def add_fit(self, fit):
         """
@@ -433,6 +437,12 @@ class FittingContext(object):
     def clear(self):
         fits_to_remove = self.fit_list.copy()
         self.remove_fits_from_stored_fit_list(fits_to_remove)
+
+    def remove_all_fits(self):
+        removed_fits = self.fit_list
+        self.fit_list = []
+        self._number_of_fits = 0
+        self.fit_removed_notifier.notify_subscribers(removed_fits)
 
     def remove_latest_fit(self):
         if self.fit_list:

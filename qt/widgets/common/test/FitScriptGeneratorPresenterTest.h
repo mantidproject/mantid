@@ -117,7 +117,7 @@ public:
     EXPECT_CALL(*m_model, getGlobalParameters()).Times(1);
     EXPECT_CALL(*m_view, setGlobalParameters(VectorSize(0u))).Times(1);
 
-    m_presenter->notifyPresenter(ViewEvent::RemoveClicked);
+    m_presenter->notifyPresenter(ViewEvent::RemoveDomainClicked);
   }
 
   void test_that_a_add_domain_event_will_attempt_to_add_a_domain_in_the_view_and_model() {
@@ -135,7 +135,7 @@ public:
     EXPECT_CALL(*m_view, addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX)).Times(1);
     EXPECT_CALL(*m_model, addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX)).Times(1);
 
-    m_presenter->notifyPresenter(ViewEvent::AddClicked);
+    m_presenter->notifyPresenter(ViewEvent::AddDomainClicked);
   }
 
   void test_that_changing_a_start_x_will_update_its_value_in_the_model_when_the_x_value_is_valid() {
@@ -476,6 +476,54 @@ public:
     EXPECT_CALL(*m_view, setGlobalParameters(VectorSize(globalParameters.size()))).Times(1);
 
     m_presenter->setGlobalParameters(globalParameters);
+  }
+
+  void test_that_handleGenerateScriptToFileClicked_will_set_a_success_message_if_the_model_data_is_valid() {
+    std::tuple<bool, std::string> const validation = {true, ""};
+    std::string const filepath = "C:/filename.py";
+    std::string const message = "Successfully generated fit script to file '" + filepath + "'";
+    ON_CALL(*m_model, isValid()).WillByDefault(Return(validation));
+    ON_CALL(*m_view, filepath()).WillByDefault(Return(filepath));
+
+    EXPECT_CALL(*m_model, isValid()).Times(1);
+    EXPECT_CALL(*m_view, filepath()).Times(1);
+    EXPECT_CALL(*m_view, fitOptions()).Times(1);
+    EXPECT_CALL(*m_view, setSuccessText(message)).Times(1);
+
+    m_presenter->notifyPresenter(ViewEvent::GenerateScriptToFileClicked);
+  }
+
+  void test_that_handleGenerateScriptToFileClicked_will_display_a_message_if_a_warning_is_returned() {
+    std::tuple<bool, std::string> const validation = {false, "Warning!"};
+    ON_CALL(*m_model, isValid()).WillByDefault(Return(validation));
+
+    EXPECT_CALL(*m_model, isValid()).Times(1);
+    EXPECT_CALL(*m_view, displayWarning("Warning!")).Times(1);
+
+    m_presenter->notifyPresenter(ViewEvent::GenerateScriptToFileClicked);
+  }
+
+  void test_that_handleGenerateScriptToClipboardClicked_will_set_a_success_message_if_the_model_data_is_valid() {
+    std::tuple<bool, std::string> const validation = {true, ""};
+    std::string const message = "Successfully generated fit script to clipboard";
+    ON_CALL(*m_model, isValid()).WillByDefault(Return(validation));
+
+    EXPECT_CALL(*m_model, isValid()).Times(1);
+    EXPECT_CALL(*m_view, fitOptions()).Times(1);
+    EXPECT_CALL(*m_view, saveTextToClipboard("# mock python script")).Times(1);
+    EXPECT_CALL(*m_view, setSuccessText(message)).Times(1);
+
+    m_presenter->notifyPresenter(ViewEvent::GenerateScriptToClipboardClicked);
+  }
+
+  void test_that_handleGenerateScriptToClipboardClicked_will_display_a_message_if_a_warning_is_returned() {
+    std::tuple<bool, std::string> const validation = {false, "Warning!"};
+    ON_CALL(*m_model, isValid()).WillByDefault(Return(validation));
+
+    EXPECT_CALL(*m_model, isValid()).Times(1);
+    EXPECT_CALL(*m_view, displayWarning("Warning!")).Times(1);
+
+    m_presenter->notifyPresenter(ViewEvent::GenerateScriptToClipboardClicked);
   }
 
 private:

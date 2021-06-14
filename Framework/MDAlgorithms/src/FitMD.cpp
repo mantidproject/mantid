@@ -215,8 +215,8 @@ std::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(const std::str
     for (size_t i = 0; i < numEvents; ++i) {
       coord_t centers[4] = {inputIter->getInnerPosition(i, 0), inputIter->getInnerPosition(i, 1),
                             inputIter->getInnerPosition(i, 2), inputIter->getInnerPosition(i, 3)};
-      mdWS->addEvent(MDEvent<4>(signal, errorSq, inputIter->getInnerRunIndex(i), inputIter->getInnerGoniometerIndex(i),
-                                inputIter->getInnerDetectorID(i), centers));
+      mdWS->addEvent(MDEvent<4>(signal, errorSq, inputIter->getInnerExpInfoIndex(i),
+                                inputIter->getInnerGoniometerIndex(i), inputIter->getInnerDetectorID(i), centers));
     }
     ++resultValueIndex;
   } while (inputIter->next());

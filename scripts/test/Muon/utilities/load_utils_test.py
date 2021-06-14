@@ -11,6 +11,7 @@ import unittest
 from mantid import simpleapi
 from mantid.kernel import ConfigService
 from mantid.api import AnalysisDataService, ITableWorkspace
+from unittest import mock
 
 
 def create_simple_workspace(data_x, data_y, run_number=0):
@@ -81,13 +82,27 @@ class MuonFileUtilsTest(unittest.TestCase):
         ConfigService.Instance().setString("default.facility", " ")
 
     def test_load_workspace_from_filename_for_file_path(self):
-        filename = 'PSI'+ os.sep + 'run_1529_templs0.mon'
+        filename = 'PSI' + os.sep + 'run_1529_templs0.mon'
         inputs = {
               "DeadTimeTable": "__notUsed",
               "DetectorGroupingTable": "__notUsed"}
 
-        alg, _ = utils.create_load_algorithm(filename,inputs)
+        alg, _ = utils.create_load_algorithm(filename, inputs)
         self.assertTrue(filename in alg.getProperty("Filename").value)
+
+    @mock.patch('Muon.GUI.Common.utilities.load_utils.CloneWorkspace')
+    def test_combine_loaded_runs_for_psi_data(self, clone_mock):
+        workspace = mock.MagicMock()
+        workspace.workspace.name = "name"
+        model = mock.MagicMock()
+        model._data_context.num_periods = mock.Mock(return_value=1)
+        # Workspace is missing DeadTimeTable and DetectorGroupingTable which should be handled without raising
+        model._loaded_data_store.get_data = mock.Mock(return_value={"workspace": {"OutputWorkspace": workspace,
+                                                                                  "MainFieldDirection": 0,
+                                                                                  "TimeZero": 0, "FirstGoodData": 0,
+                                                                                  "DataDeadTimeTable": "dtt"}})
+        run_list = [1529]
+        utils.combine_loaded_runs(model, run_list)
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
@@ -38,20 +39,59 @@ private:
   std::string QDimensionNameQSample(int i);
   std::map<std::string, std::string> getBinParameters();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
+  void createBackgroundNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
+
+  /// Bin(MD) input MDE workspace
   DataObjects::MDHistoWorkspace_sptr binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
+
+  /// Bin(MD) input Background workspace
+  DataObjects::MDHistoWorkspace_sptr binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
+
+  /// build symmetry matrix
+  Mantid::Kernel::DblMatrix buildSymmetryMatrix(const Geometry::SymmetryOperation &so);
+  void determineBasisVector(const size_t &qindex, const std::string &value, const Kernel::DblMatrix &Qtransform,
+                            std::vector<double> &projection, std::stringstream &basisVector,
+                            std::vector<size_t> &qDimensionIndices);
+  inline void setQUnit(const std::vector<size_t> &qDimensionIndices,
+                       Mantid::DataObjects::MDHistoWorkspace_sptr outputMDHWS);
+
   std::vector<coord_t> getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex = 0) const;
+
   void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
                               uint16_t expInfoIndex, size_t soIndex);
+
   void calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta, const double phi,
                               const Kernel::DblMatrix &transform, double lowvalue, double highvalue);
+
   void calcIntegralsForIntersections(const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
+
                                      size_t sp, std::vector<double> &yValues);
+
+  void calcDiffractionIntersectionIntegral(std::vector<std::array<double, 4>> &intersections,
+                                           std::vector<double> &xValues, std::vector<double> &yValues,
+                                           const API::MatrixWorkspace &integrFlux, const size_t &wsIdx);
+
+  Mantid::Kernel::DblMatrix calQTransform(const Mantid::API::ExperimentInfo &currentExpInfo,
+                                          const Geometry::SymmetryOperation &so);
+
+  void calcSingleDetectorNorm(const std::vector<std::array<double, 4>> &intersections, const double &solid,
+                              std::vector<double> &yValues, const size_t &vmdDims, std::vector<coord_t> &pos,
+                              std::vector<coord_t> &posNew, std::vector<std::atomic<signal_t>> &signalArray,
+                              const double &solidBkgd, std::vector<std::atomic<signal_t>> &bkgdSignalArray);
+
+  API::IMDWorkspace_sptr divideMD(API::IMDHistoWorkspace_sptr lhs, API::IMDHistoWorkspace_sptr rhs,
+                                  const std::string &outputwsname, const double &startProgress,
+                                  const double &endProgress);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
+  DataObjects::MDHistoWorkspace_sptr m_bkgdNormWS;
   /// Input workspace
   API::IMDEventWorkspace_sptr m_inputWS;
+  /// Input background workspace
+  API::IMDEventWorkspace_sptr m_backgroundWS;
+
   /// flag for reciprocal lattice units
   bool m_isRLU;
   /// The projection vectors

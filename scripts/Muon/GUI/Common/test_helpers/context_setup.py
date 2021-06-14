@@ -11,6 +11,7 @@ from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContex
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
+from Muon.GUI.Common.contexts.plotting_context import PlottingContext
 from Muon.GUI.Common.contexts.fitting_context import FittingContext
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
 from Muon.GUI.ElementalAnalysis2.context.data_context import DataContext
@@ -27,11 +28,13 @@ def setup_context_for_tests(parent_object):
     parent_object.group_context = MuonGroupPairContext(parent_object.data_context.check_group_contains_valid_detectors)
     parent_object.phase_table_context = PhaseTableContext()
     parent_object.fitting_context = FittingContext()
+    parent_object.plotting_context = PlottingContext()
     parent_object.context = DataAnalysisContext(muon_data_context=parent_object.data_context,
                                                 muon_group_context=parent_object.group_context,
                                                 muon_gui_context=parent_object.gui_context,
                                                 muon_phase_context=parent_object.phase_table_context,
-                                                fitting_context=parent_object.fitting_context)
+                                                fitting_context=parent_object.fitting_context,
+                                                plotting_context=parent_object.plotting_context)
 
 
 def setup_context(freq=False):
@@ -43,19 +46,24 @@ def setup_context(freq=False):
     phase_table_context = PhaseTableContext()
     fitting_context = FittingContext()
     freq_context = FrequencyContext()
+    freq_plotting_context = PlottingContext()
+    plotting_context = PlottingContext()
     if freq:
         return FrequencyDomainAnalysisContext(muon_data_context=data_context,
                                               muon_group_context=group_context,
                                               muon_gui_context=gui_context,
                                               muon_phase_context=phase_table_context,
                                               fitting_context=fitting_context,
-                                              frequency_context=freq_context)
+                                              frequency_context=freq_context,
+                                              freq_plotting_context=freq_plotting_context,
+                                              plotting_context=plotting_context)
     else:
         return DataAnalysisContext(muon_data_context=data_context,
                                    muon_group_context=group_context,
                                    muon_gui_context=gui_context,
                                    muon_phase_context=phase_table_context,
-                                   fitting_context=fitting_context)
+                                   fitting_context=fitting_context,
+                                   plotting_context=plotting_context)
 
 
 def setup_context_for_ea_tests(parent_object):
@@ -63,4 +71,5 @@ def setup_context_for_ea_tests(parent_object):
     parent_object.data_context = DataContext(load_data=parent_object.loaded_data)
     parent_object.gui_context = MuonGuiContext()
     parent_object.group_context = EAGroupContext(parent_object.data_context.check_group_contains_valid_detectors)
-    parent_object.context = ElementalAnalysisContext(parent_object.data_context,parent_object.group_context, parent_object.gui_context)
+    parent_object.context = ElementalAnalysisContext(parent_object.data_context,parent_object.group_context,
+                                                     parent_object.gui_context)

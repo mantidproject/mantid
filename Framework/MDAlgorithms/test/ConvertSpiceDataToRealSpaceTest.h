@@ -155,12 +155,12 @@ public:
     Mantid::detid_t detid61 = mditer->getInnerDetectorID(61);
     TS_ASSERT_EQUALS(detid61, 18);
 
-    // Run index
-    uint16_t run0 = mditer->getInnerRunIndex(0);
+    // experiment info index
+    uint16_t run0 = mditer->getInnerExpInfoIndex(0);
     TS_ASSERT_EQUALS(run0, 1);
-    uint16_t run1 = mditer->getInnerRunIndex(44);
+    uint16_t run1 = mditer->getInnerExpInfoIndex(44);
     TS_ASSERT_EQUALS(run1, 2);
-    uint16_t runLast = mditer->getInnerRunIndex(44 * 61 - 1);
+    uint16_t runLast = mditer->getInnerExpInfoIndex(44 * 61 - 1);
     TS_ASSERT_EQUALS(runLast, 61);
 
     // Verify the ldetector's position as 2theta angle
@@ -337,12 +337,12 @@ public:
     Mantid::detid_t detid61 = mditer->getInnerDetectorID(61);
     TS_ASSERT_EQUALS(detid61, 18);
 
-    // Run index
-    uint16_t run0 = mditer->getInnerRunIndex(0);
+    // experiment info index
+    uint16_t run0 = mditer->getInnerExpInfoIndex(0);
     TS_ASSERT_EQUALS(run0, 1);
-    uint16_t run1 = mditer->getInnerRunIndex(44);
+    uint16_t run1 = mditer->getInnerExpInfoIndex(44);
     TS_ASSERT_EQUALS(run1, 2);
-    uint16_t runLast = mditer->getInnerRunIndex(44 * 61 - 1);
+    uint16_t runLast = mditer->getInnerExpInfoIndex(44 * 61 - 1);
     TS_ASSERT_EQUALS(runLast, 61);
 
     // Verify the ldetector's position as 2theta angle

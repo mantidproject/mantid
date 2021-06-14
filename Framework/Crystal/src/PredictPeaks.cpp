@@ -427,7 +427,10 @@ void PredictPeaks::setRunNumberFromInputWorkspace(const ExperimentInfo_sptr &inW
 
 /// Checks that the beam direction is +Z, throws exception otherwise.
 void PredictPeaks::checkBeamDirection() const {
-  V3D samplePos = m_inst->getSample()->getPos();
+  const auto sample = m_inst->getSample();
+  if (!sample)
+    throw std::runtime_error("Instrument sample position has not been set");
+  const V3D samplePos = sample->getPos();
 
   // L1 path and direction
   V3D beamDir = m_inst->getSource()->getPos() - samplePos;

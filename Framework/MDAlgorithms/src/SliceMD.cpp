@@ -87,7 +87,7 @@ template <size_t nd, size_t ond> inline void copyEvent(const MDLeanEvent<nd> &sr
  */
 template <size_t nd, size_t ond> inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent) {
   newEvent.setDetectorId(srcEvent.getDetectorID());
-  newEvent.setRunIndex(srcEvent.getRunIndex());
+  newEvent.setExpInfoIndex(srcEvent.getExpInfoIndex());
 }
 
 //----------------------------------------------------------------------------------------------

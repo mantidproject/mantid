@@ -5,12 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 # std imports
+import numpy as np
 import unittest
 from unittest.mock import MagicMock, create_autospec, patch
 
 # thirdparty imports
-from mantid.api import MatrixWorkspace, SpecialCoordinateSystem
+from mantid.api import MatrixWorkspace
 from mantid.dataobjects import PeaksWorkspace
+from mantid.kernel import SpecialCoordinateSystem
 from numpy.testing import assert_allclose
 
 # local imports
@@ -88,6 +90,13 @@ class PeaksViewerModelTest(unittest.TestCase):
         peak0.getHKL.assert_not_called()
         self.assertEqual([1, None, None], slicepoint)
 
+    def test_delete_peak(self):
+        peak_centers = [[1.0, 0.0, 0.0], [1.0, 1.0, 0.0]]
+        model = create_peaks_viewer_model(centers=peak_centers, fg_color="red")
+        assert model.delete_peak(np.array([1.0, 0.9, 0.1]), SpecialCoordinateSystem.QLab) == 1
+        assert model.delete_peak(np.array([1.1, 0.0, 0.1]), SpecialCoordinateSystem.QSample) == 0
+        assert model.delete_peak(np.array([0.0, 0.0, 0.0]), SpecialCoordinateSystem.QSample) == 0
+
     def test_viewlimits(self):
         visible_peak_center, invisible_center = (0.5, 0.2, 0.25), (0.4, 0.3, 25)
         model, mock_painter = draw_peaks(
@@ -106,6 +115,17 @@ class PeaksViewerModelTest(unittest.TestCase):
 
         self.assertEqual((None, None), xlim)
         self.assertEqual((None, None), ylim)
+
+    def test_peaks_workspace_add_peak(self):
+        peaks_workspace = create_autospec(PeaksWorkspace)
+        model = PeaksViewerModel(peaks_workspace, 'b', '1.0')
+
+        model.add_peak([1, 1, 1], SpecialCoordinateSystem.QLab)
+        peaks_workspace.addPeak.assert_called_with([1, 1, 1], SpecialCoordinateSystem.QLab)
+        model.add_peak([2, 2, 2], SpecialCoordinateSystem.QSample)
+        peaks_workspace.addPeak.assert_called_with([2, 2, 2], SpecialCoordinateSystem.QSample)
+        model.add_peak([3, 3, 3], SpecialCoordinateSystem.HKL)
+        peaks_workspace.addPeak.assert_called_with([3, 3, 3], SpecialCoordinateSystem.HKL)
 
     # -------------------------- Failure Tests --------------------------------
     def test_model_accepts_only_peaks_workspaces(self):

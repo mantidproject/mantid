@@ -1,0 +1,36 @@
+"""This module provides a Builder and Project for sip-build.
+It disables building such that only the bindings are generated, allowing
+us to add the generated files to an external builder as part of a regular
+CMake target
+"""
+from sipbuild import Builder, Project
+
+
+class NoOpBuilder(Builder):
+    """A 'Builder' that does nothing but satisfy the required interface"""
+    def build_executable(self, buildable, *, fatal=True):
+        """ Build an executable from a BuildableExecutable object and return
+        the relative pathname of the executable.
+        """
+        return None
+
+    def build_project(self, target_dir, *, wheel_tag=None):
+        """ Build the project. """
+        return None
+
+    def install_project(self, target_dir, *, wheel_tag=None):
+        """ Install the project into a target directory. """
+        return None
+
+
+class ExternalBuilderProject(Project):
+    """Define a Project that uses
+    a no-op builder such that we only generate the
+    bindings but leave building to an external entity
+    """
+    def __init__(self):
+        """Initializes the class with the NoOpBuilder instance and lets
+        the base class do the rest
+        """
+        super().__init__()
+        self.builder_factory = NoOpBuilder

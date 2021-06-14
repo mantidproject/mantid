@@ -82,6 +82,8 @@ public:
   virtual bool operator==(const Axis &) const = 0;
 
   /// Returns a text label of for a value
+  /// Note that the index here is not the index of a value, but the effective
+  /// index of the bin
   virtual std::string label(const std::size_t &index) const = 0;
 
 protected:

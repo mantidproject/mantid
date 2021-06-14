@@ -18,7 +18,7 @@ from Muon.GUI.Common.difference_table_widget.difference_widget_presenter import 
 
 
 class GroupingTabWidget(object):
-    def __init__(self, context):
+    def __init__(self, context, parent=None):
 
         self.group_tab_model = GroupingTabModel(context)
 
@@ -34,6 +34,6 @@ class GroupingTabWidget(object):
         self.group_tab_presenter = GroupingTabPresenter(self.group_tab_view,
                                                         self.group_tab_model,
                                                         self.grouping_table_widget,
-                                                        self.pairing_table_widget, self.diff_table)
+                                                        self.pairing_table_widget, self.diff_table, parent)
 
         context.update_view_from_model_notifier.add_subscriber(self.group_tab_presenter.update_view_from_model_observer)

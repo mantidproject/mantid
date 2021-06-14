@@ -15,6 +15,7 @@
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <QObject>
@@ -35,8 +36,8 @@ class EXPORT_OPT_MANTIDQT_COMMON IFitScriptGeneratorView : public API::MantidWid
 
 public:
   enum class Event {
-    RemoveClicked,
-    AddClicked,
+    RemoveDomainClicked,
+    AddDomainClicked,
     StartXChanged,
     EndXChanged,
     SelectionChanged,
@@ -49,7 +50,11 @@ public:
     ParameterConstraintRemoved,
     ParameterConstraintChanged,
     GlobalParametersChanged,
-    FittingModeChanged
+    EditLocalParameterClicked,
+    EditLocalParameterFinished,
+    FittingModeChanged,
+    GenerateScriptToFileClicked,
+    GenerateScriptToClipboardClicked
   };
 
   IFitScriptGeneratorView(QWidget *parent = nullptr) : API::MantidWidget(parent) {}
@@ -79,6 +84,19 @@ public:
   [[nodiscard]] virtual std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces() = 0;
   [[nodiscard]] virtual std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const = 0;
 
+  virtual void openEditLocalParameterDialog(std::string const &parameter,
+                                            std::vector<std::string> const &workspaceNames,
+                                            std::vector<std::string> const &domainNames,
+                                            std::vector<double> const &values, std::vector<bool> const &fixes,
+                                            std::vector<std::string> const &ties,
+                                            std::vector<std::string> const &constraints) = 0;
+  virtual std::tuple<std::string, std::vector<double>, std::vector<bool>, std::vector<std::string>,
+                     std::vector<std::string>>
+  getEditLocalParameterResults() const = 0;
+
+  [[nodiscard]] virtual std::tuple<std::string, std::string, std::string, std::string> fitOptions() const = 0;
+  [[nodiscard]] virtual std::string filepath() const = 0;
+
   virtual void resetSelection() = 0;
 
   virtual bool applyFunctionChangesToAll() const = 0;
@@ -93,12 +111,17 @@ public:
 
   virtual void displayWarning(std::string const &message) = 0;
 
+  virtual void setSuccessText(std::string const &text) = 0;
+  virtual void saveTextToClipboard(std::string const &text) const = 0;
+
 public:
   /// Testing accessors
   virtual FitScriptGeneratorDataTable *tableWidget() const = 0;
   virtual QPushButton *removeButton() const = 0;
   virtual QPushButton *addWorkspaceButton() const = 0;
   virtual AddWorkspaceDialog *addWorkspaceDialog() const = 0;
+  virtual QPushButton *generateScriptToFileButton() const = 0;
+  virtual QPushButton *generateScriptToClipboardButton() const = 0;
 };
 
 } // namespace MantidWidgets

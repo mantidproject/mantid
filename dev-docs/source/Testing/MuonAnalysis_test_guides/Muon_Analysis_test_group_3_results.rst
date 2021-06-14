@@ -21,7 +21,7 @@ The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
 
 -----------
 
-.. _test_1:
+.. _test_1_muon_group:
 
 Test 1: Individual And Co-Added Fits
 ------------------------------------
@@ -40,30 +40,30 @@ Test 1: Individual And Co-Added Fits
 - This should look a little something like this:
 
 .. image:: /images/MuonAnalysisTests/results_test1_table.png
-	:align: center
-	:alt: results_test1_table.png
-	:width: 600
+   :align: center
+   :alt: results_test1_table.png
+   :width: 600
 
 - Click **Output Results**
 - In the main workbench window, in the workspace toolbox, open the results
   table
 - The table should have four rows, one for each individual fit
 - **sample_temp** should be correctly expresses as an average for the co-added
-  runs, in this case the average is ``190`` (``180+190+200/3``)
+  runs, in this case the average is ``190`` (``(180+190+200)/3``)
 - There should be several pairs of columns, one for each parameter and one for
   the error of the parameter, plus a final column called
   **Cost function value**
 - The table should look similar to this:
 
 .. image:: /images/MuonAnalysisTests/results_test1.png
-  :align: center
+   :align: center
 
 Test 2: Sequential Fits And Simultaneous Fits
 ---------------------------------------------
 
 *Time required 5-10 minutes*
 
-- For this test we will use the same **Function Name** as in :ref:`test_1`
+- For this test we will use the same **Function Name** as in :ref:`test_1_muon_group`
   (*FlatBackground,Abragam*)
 - Change the **Table Name** to ``SeqFitOfSimFits``
 - Click **Unselect All** for the workspaces table
@@ -72,9 +72,9 @@ Test 2: Sequential Fits And Simultaneous Fits
 - At this point the table should look something like this:
 
 .. image:: /images/MuonAnalysisTests/results_test2_table.png
-	:align: center
-	:alt: results_test2_table.png
-	:width: 600
+   :align: center
+   :alt: results_test2_table.png
+   :width: 600
 
 - Click **Output Results**
 - In the main workbench window, in the workspace toolbox, open the results
@@ -89,9 +89,9 @@ Test 2: Sequential Fits And Simultaneous Fits
 - The table should look similar to this:
 
 .. image:: /images/MuonAnalysisTests/results_test2.png
-  :align: center
-	:alt: results_test2.png
-	:width: 600
+   :align: center
+   :alt: results_test2.png
+   :width: 600
 
 Test 3: TF Asymmetry Results
 ----------------------------
@@ -107,16 +107,14 @@ Test 3: TF Asymmetry Results
 - The table should look like this:
 
 .. image:: /images/MuonAnalysisTests/results_test3_table.png
-	:align: center
-	:alt: results_test3_table.png
-	:width: 600
+   :align: center
+   :alt: results_test3_table.png
+   :width: 600
 
 - Click **Output Results**
 - There should be 12 rows and a column for **Field_Danfysik**, like this:
 
 .. image:: /images/MuonAnalysisTests/results_test3.png
-	:align: center
-	:alt: results_test3.png
-	:width: 600
-
-
+   :align: center
+   :alt: results_test3.png
+   :width: 600

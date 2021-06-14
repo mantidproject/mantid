@@ -14,6 +14,7 @@ import io
 import sys
 import re
 from functools import wraps
+
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
@@ -138,7 +139,8 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
     def renameHandle(self, oldName, newName):
         """
         Called when the ADS has renamed a workspace.
-        If this workspace is attached to this figure then the figure name is updated
+        If this workspace is attached to this figure then the figure name is updated, as are the artists names and
+        axis creation arguments
         :param oldName: The old name of the workspace.
         :param newName: The new name of the workspace
         """
@@ -146,7 +148,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
             if isinstance(ax, MantidAxes):
                 ws = AnalysisDataService.retrieve(newName)
                 if isinstance(ws, MatrixWorkspace):
-                    ax.rename_workspace_artists(newName, oldName)
+                    ax.rename_workspace(newName, oldName)
                 elif isinstance(ws, ITableWorkspace):
                     ax.wsName = newName
                 ax.make_legend()
@@ -316,8 +318,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         if self.toolbar:
             self.toolbar.destroy()
+
         self._ads_observer.observeAll(False)
-        del self._ads_observer
+        self._ads_observer = None
         # disconnect window events before calling Gcf.destroy. window.close is not guaranteed to
         # delete the object and do this for us. On macOS it was observed that closing the figure window
         # would produce an extraneous activated event that would add a new figure to the plots list

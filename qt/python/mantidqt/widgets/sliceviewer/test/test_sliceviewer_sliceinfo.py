@@ -9,7 +9,7 @@
 import unittest
 
 # 3rd party
-from mantid.api import SpecialCoordinateSystem
+from mantid.kernel import SpecialCoordinateSystem
 
 # local imports
 from mantidqt.widgets.sliceviewer.sliceinfo import SliceInfo
@@ -91,12 +91,51 @@ class SliceInfoTest(unittest.TestCase):
         self.assertEqual(frame_point[0], slice_frame[2])
         self.assertEqual(slice_pt, info.z_value)
 
+    def test_inverse_transform_selects_dimensions_correctly_when_not_transposed(self):
+        # Set slice info such that display(X,Y) = data(Y,Z)
+        slice_pt = 0.5
+        info = SliceInfo(
+            frame=SpecialCoordinateSystem.HKL,
+            point=(slice_pt, None, None),
+            transpose=False,
+            range=[(-15, 15), None, None],
+            qflags=[True, True, True])
+
+        slice_frame = (0.5, 1.0, -1.5)
+        data_frame = info.inverse_transform(slice_frame)
+
+        self.assertEqual(data_frame[0], slice_frame[2])
+        self.assertEqual(data_frame[1], slice_frame[0])
+        self.assertEqual(data_frame[2], slice_frame[1])
+        self.assertEqual(slice_pt, info.z_value)
+
+    def test_inverse_transform_selects_dimensions_correctly_when_transposed(self):
+        # Set slice info such that display(X,Y) = data(Z,Y)
+        slice_pt = 0.5
+        info = SliceInfo(
+            frame=SpecialCoordinateSystem.HKL,
+            point=(slice_pt, None, None),
+            transpose=True,
+            range=[(-15, 15), None, None],
+            qflags=[True, True, True])
+
+        frame_point = (-1.5, 1.0, 0.5)
+        slice_frame = info.inverse_transform(frame_point)
+
+        self.assertEqual(frame_point[0], slice_frame[2])
+        self.assertEqual(frame_point[1], slice_frame[1])
+        self.assertEqual(frame_point[2], slice_frame[0])
+        self.assertEqual(slice_pt, info.z_value)
+
     def test_transform_respects_nonortho_tr_if_given(self):
         # Set slice info such that display(X,Y) = data(Z,Y)
 
         class FakeTransform:
             def tr(self, x, y):
                 return x + 1, y - 1
+
+            def inv_tr(self, x, y):
+                pass
 
         info = SliceInfo(
             frame=SpecialCoordinateSystem.HKL,

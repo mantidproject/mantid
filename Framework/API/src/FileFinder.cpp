@@ -43,6 +43,11 @@ Mantid::Kernel::Logger g_log("FileFinder");
  * @returns true if extension contains a "*", else false.
  */
 bool containsWildCard(const std::string &ext) { return std::string::npos != ext.find('*'); }
+
+bool isASCII(const std::string &str) {
+  return !std::any_of(str.cbegin(), str.cend(), [](char c) { return static_cast<unsigned char>(c) > 127; });
+}
+
 } // namespace
 
 namespace Mantid {
@@ -420,6 +425,9 @@ std::string FileFinderImpl::findRun(const std::string &hintstr, const std::vecto
     }
   }
 
+  if (filename.empty())
+    return "";
+
   // Look first at the original filename then for case variations. This is
   // important
   // on platforms where file names ARE case sensitive.
@@ -491,6 +499,18 @@ void FileFinderImpl::getUniqueExtensions(const std::vector<std::string> &extensi
 }
 
 /**
+ * Performs validation on the search text entered into the File Finder. It will
+ * return an error message if a problem is found.
+ * @param searchText :: The text to validate.
+ * @return An error message if something is invalid.
+ */
+std::string FileFinderImpl::validateRuns(const std::string &searchText) const {
+  if (!isASCII(searchText))
+    return "An unsupported non-ASCII character was found in the search text.";
+  return "";
+}
+
+/**
  * Find a list of files file given a hint. Calls findRun internally.
  * @param hintstr :: Comma separated list of hints to findRun method.
  *  Can also include ranges of runs, e.g. 123-135 or equivalently 123-35.
@@ -507,6 +527,10 @@ void FileFinderImpl::getUniqueExtensions(const std::vector<std::string> &extensi
  */
 std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, const std::vector<std::string> &exts,
                                                   const bool useExtsOnly) const {
+  auto const error = validateRuns(hintstr);
+  if (!error.empty())
+    throw std::invalid_argument(error);
+
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "findRuns hint = " << hint << "\n";
   std::vector<std::string> res;
@@ -515,6 +539,7 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
   static const boost::regex digits("[0-9]+");
   auto h = hints.begin();
 
+  std::string instrSName;
   for (; h != hints.end(); ++h) {
     // Quick check for a filename
     bool fileSuspected = false;
@@ -535,6 +560,9 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
       throw std::invalid_argument("Malformed range of runs: " + *h);
     } else if ((range.count() == 2) && (!fileSuspected)) {
       std::pair<std::string, std::string> p1 = toInstrumentAndNumber(range[0]);
+      if (boost::algorithm::istarts_with(hint, "PG3")) {
+        instrSName = "PG3";
+      }
       std::string run = p1.second;
       size_t nZero = run.size(); // zero padding
       if (range[1].size() > nZero) {
@@ -577,7 +605,13 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
           }
         }
 
-        std::string path = findRun(p1.first + run, exts, useExtsOnly);
+        std::string path;
+        if (boost::algorithm::istarts_with(hint, "PG3")) {
+          path = findRun(instrSName + run, exts, useExtsOnly);
+        } else {
+          path = findRun(p1.first + run, exts, useExtsOnly);
+        }
+
         if (!path.empty()) {
           // Cache successfully found path and extension
           auto tempPath = Poco::Path(path);
@@ -589,7 +623,18 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
         }
       }
     } else {
-      std::string path = findRun(*h, exts, useExtsOnly);
+      std::string path;
+      // Special check for "PG3", to cope with situation like '48314,48316'.
+      if (boost::algorithm::istarts_with(hint, "PG3")) {
+        if (h == hints.begin()) {
+          instrSName = "PG3";
+          path = findRun(*h, exts, useExtsOnly);
+        } else {
+          path = findRun(instrSName + *h, exts, useExtsOnly);
+        }
+      } else {
+        path = findRun(*h, exts, useExtsOnly);
+      }
       if (!path.empty()) {
         res.emplace_back(path);
       } else {

@@ -28,7 +28,7 @@ class D11_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
         data_dirs = config['datasearch.directories'].split(';')
         test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d11_dir = 'ILL/D11'
+        d11_dir = os.path.join('ILL', 'D11')
         if 'ILL' in test_data_dir:
             d11_dir = 'D11'
         self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d11_dir))
@@ -65,7 +65,7 @@ class D11B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
         data_dirs = config['datasearch.directories'].split(';')
         test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d11b_dir = 'ILL/D11B'
+        d11b_dir = os.path.join('ILL', 'D11B')
         if 'ILL' in test_data_dir:
             d11b_dir = 'D11B'
         self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d11b_dir))
@@ -103,7 +103,7 @@ class D22_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
         data_dirs = config['datasearch.directories'].split(';')
         test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d22_dir = 'ILL/D22'
+        d22_dir = os.path.join('ILL', 'D22')
         if 'ILL' in test_data_dir:
             d22_dir = 'D22'
         self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d22_dir))
@@ -141,7 +141,7 @@ class D22B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
         data_dirs = config['datasearch.directories'].split(';')
         test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d22b_dir = 'ILL/D22B'
+        d22b_dir = os.path.join('ILL', 'D22B')
         if 'ILL' in test_data_dir:
             d22b_dir = 'D22B'
         self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d22b_dir))
@@ -179,7 +179,7 @@ class IN4_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
         data_dirs = config['datasearch.directories'].split(';')
         test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        in4_dir = 'ILL/IN4'
+        in4_dir = os.path.join('ILL', 'IN4')
         if 'ILL' in test_data_dir:
             in4_dir = 'IN4'
         self._data_directory = os.path.abspath(os.path.join(test_data_dir,  in4_dir))
@@ -217,7 +217,7 @@ class IN5_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
         data_dirs = config['datasearch.directories'].split(';')
         test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        in5_dir = 'ILL/IN5'
+        in5_dir = os.path.join('ILL', 'IN5')
         if 'ILL' in test_data_dir:
             in5_dir = 'IN5'
         self._data_directory = os.path.abspath(os.path.join(test_data_dir,  in5_dir))
@@ -255,7 +255,7 @@ class IN6_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
         data_dirs = config['datasearch.directories'].split(';')
         test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        in6_dir = 'ILL/IN6'
+        in6_dir = os.path.join('ILL', 'IN6')
         if 'ILL' in test_data_dir:
             in6_dir = 'IN6'
         self._data_directory = os.path.abspath(os.path.join(test_data_dir,  in6_dir))
@@ -293,7 +293,7 @@ class D33_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
         data_dirs = config['datasearch.directories'].split(';')
         test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d33_dir = 'ILL/D33'
+        d33_dir = os.path.join('ILL', 'D33')
         if 'ILL' in test_data_dir:
             d33_dir = 'D33'
         self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d33_dir))
@@ -331,10 +331,10 @@ class D16_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
         data_dirs = config['datasearch.directories'].split(';')
         test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d33_dir = 'ILL/D16'
+        d16_dir = os.path.join('ILL', 'D16')
         if 'ILL' in test_data_dir:
-            d33_dir = 'D16'
-        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d33_dir))
+            d16_dir = 'D16'
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d16_dir))
 
     def cleanup(self):
         mtd.clear()

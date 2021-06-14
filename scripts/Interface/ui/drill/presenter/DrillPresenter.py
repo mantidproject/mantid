@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import re
+import os
 
 from qtpy.QtWidgets import QFileDialog, QMessageBox
 
@@ -45,6 +46,7 @@ class DrillPresenter:
         """
         self.model = DrillModel()
         self.view = view
+        self.view.setWindowTitle("Untitled [*]")
         self._invalidCells = set()
         self._processError = set()
         self._customOptions = set()
@@ -397,6 +399,7 @@ class DrillPresenter:
 
         self.model.setInstrument(instrument)
         self.model.resetIOFile()
+        self.view.setWindowTitle("Untitled [*]")
         self._syncViewHeader()
         self._syncViewTable()
 
@@ -412,6 +415,7 @@ class DrillPresenter:
 
         self.model.setAcquisitionMode(mode)
         self.model.resetIOFile()
+        self.view.setWindowTitle("Untitled [*]")
         self._syncViewHeader()
         self._syncViewTable()
 
@@ -424,11 +428,14 @@ class DrillPresenter:
                                                "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
+        self.view.blockSignals(True)
         self.model.setIOFile(filename[0])
+        self.view.setWindowTitle(os.path.split(filename[0])[1] + " [*]")
         self.model.importRundexData()
         self._syncViewHeader()
         self._syncViewTable()
         self.view.setWindowModified(False)
+        self.view.blockSignals(False)
 
     def onSave(self):
         """
@@ -453,6 +460,7 @@ class DrillPresenter:
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
+        self.view.setWindowTitle(os.path.split(filename[0])[1] + " [*]")
         self.model.setVisualSettings(self.view.getVisualSettings())
         self.model.exportRundexData()
         self.view.setWindowModified(False)
@@ -463,6 +471,7 @@ class DrillPresenter:
         generates automatically its fields on the basis of settings types. It
         also connects the differents signals to get validation of user inputs.
         """
+        self.view.setDisabled(True)
         sw = DrillSettingsDialog(self.view)
         types, values, doc = self.model.getSettingsTypes()
         sw.initWidgets(types, values, doc)
@@ -479,6 +488,9 @@ class DrillPresenter:
                 )
         sw.accepted.connect(
                 lambda : self.model.setSettings(sw.getSettings())
+                )
+        sw.finished.connect(
+                lambda : self.view.setDisabled(False)
                 )
         sw.show()
 
@@ -510,6 +522,7 @@ class DrillPresenter:
             self._saveDataQuestion()
         self.model.clear()
         self.model.resetIOFile()
+        self.view.setWindowTitle("Untitled [*]")
         self._syncViewHeader()
         self._syncViewTable()
 
@@ -568,3 +581,4 @@ class DrillPresenter:
         if vs:
             self.view.setVisualSettings(vs)
         self.view.blockSignals(False)
+        self.view.setWindowModified(False)

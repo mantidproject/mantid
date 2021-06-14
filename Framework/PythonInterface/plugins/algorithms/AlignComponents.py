@@ -28,6 +28,17 @@ class AlignComponents(PythonAlgorithm):
     _optionsList = ["Xposition", "Yposition", "Zposition", "AlphaRotation", "BetaRotation", "GammaRotation"]
     adjustment_items = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
                         'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
+    r"""Items featuring the changes in position and orientation for each bank
+    - DeltaR: change in distance from Component to Sample (in mili-meter)
+    - DeltaX: change in X-coordinate of Component (in mili-meter)
+    - DeltaY: change in Y-coordinate of Component (in mili-meter)
+    - DeltaZ: change in Z-coordinate of Component (in mili-meter)
+    Changes in Euler Angles are understood once a Euler convention is selected. If `YXZ` is selected, then:
+    - DeltaAlpha: change in rotation around the Y-axis (in degrees)
+    - DeltaBeta: change in rotation around the X-axis (in degrees)
+    - DeltaGamma: change in rotation around the Z-axis (in degrees)
+    """
+    displacement_items = ['ComponentName', 'DeltaR', 'DeltaX', 'DeltaY', 'DeltaZ', 'DeltaAlpha', 'DeltaBeta', 'DeltaGamma']
     _optionsDict = {}
     _initialPos = None
     _move = False
@@ -72,6 +83,19 @@ class AlignComponents(PythonAlgorithm):
         [self.setPropertyGroup(name, 'Reference and Input Data') for name in properties]
 
         #
+        # Output Tables
+        self.declareProperty(
+            "AdjustmentsTable", "", direction=Direction.Input,
+            doc="Name of output table containing optimized locations and orientations for each component")
+
+        self.declareProperty(
+            "DisplacementsTable", "", direction=Direction.Input,
+            doc="Name of output table containing changes in position and euler angles for each bank component")
+
+        properties = ["AdjustmentsTable", "DisplacementsTable"]
+        [self.setPropertyGroup(name, 'Output Tables') for name in properties]
+
+        #
         # Selection of the instrument and mask
         self.declareProperty(
             MatrixWorkspaceProperty("MaskWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
@@ -96,10 +120,6 @@ class AlignComponents(PythonAlgorithm):
         #
         # Components
         self.declareProperty(
-            "AdjustmentsTable", "", direction=Direction.Input,
-            doc="Name of output table containing optimized locations and orientations for each component")
-
-        self.declareProperty(
             name="FitSourcePosition", defaultValue=False,
             doc="Fit the source position, changes L1 (source to sample) distance. "
                 "Uses entire instrument. Occurs before Components are Aligned.")
@@ -113,7 +133,7 @@ class AlignComponents(PythonAlgorithm):
             StringArrayProperty("ComponentList", direction=Direction.Input),
             doc="Comma separated list on instrument components to refine.")
 
-        properties = ["AdjustmentsTable", "FitSourcePosition", "FitSamplePosition", "ComponentList"]
+        properties = ["FitSourcePosition", "FitSamplePosition", "ComponentList"]
         [self.setPropertyGroup(name, 'Declaration of Components') for name in properties]
 
         #
@@ -253,7 +273,7 @@ class AlignComponents(PythonAlgorithm):
             return round(the_number, precision - len(str(int(the_number))))
 
         for column_name, peak_position in zip(column_names, sorted(peak_positions)):
-            if (float(column_name[1:]) - with_precision(peak_position, 5)) > 1.e-5:
+            if (float(column_name[1:]) - with_precision(peak_position, 5)) > 1.e-3:
                 issues['PeakCentersTofTable'] = f'{column_name} and {peak_position} differ up to precision 5'
 
         maskWS: MaskWorkspace = self.getProperty("MaskWorkspace").value
@@ -334,12 +354,21 @@ class AlignComponents(PythonAlgorithm):
 
         input_workspace = self.getProperty('InputWorkspace').value
 
+        # Table containing the optimized absolute locations and orientations for each component
         adjustments_table_name = self.getProperty('AdjustmentsTable').value
         if len(adjustments_table_name) > 0:
             adjustments_table = self._initialize_adjustments_table(adjustments_table_name)
             saving_adjustments = True
         else:
             saving_adjustments = False
+
+        # Table containing the relative changes in position and euler angles for each bank component
+        displacements_table_name = self.getProperty('DisplacementsTable').value
+        if len(displacements_table_name) > 0:
+            displacements_table = self._initialize_displacements_table(displacements_table_name)
+            saving_displacements = True
+        else:
+            saving_displacements = False
 
         self._eulerConvention = self.getProperty('EulerConvention').value
 
@@ -359,6 +388,7 @@ class AlignComponents(PythonAlgorithm):
             self._optionsDict[rotation_option] = False
 
         # First fit L1 if selected for Source and/or Sample
+        sample_position_begin = api.mtd[wks_name].getInstrument().getSample().getPos()
         for component in "Source", "Sample":  # fit first the source position, then the sample position
             if self.getProperty("Fit"+component+"Position").value:
                 self._move = True
@@ -408,6 +438,7 @@ class AlignComponents(PythonAlgorithm):
                 comp = api.mtd[wks_name].getInstrument().getComponentByName(componentName)
                 logger.notice("Finished " + componentName + " Final position is " + str(comp.getPos()))
                 self._move = False
+        sample_position_end = api.mtd[wks_name].getInstrument().getSample().getPos()
 
         # Now fit all the remaining components, if any
         components = self.getProperty("ComponentList").value
@@ -420,9 +451,8 @@ class AlignComponents(PythonAlgorithm):
         self._rotate = any([self._optionsDict[r] for r in ('AlphaRotation', 'BetaRotation', 'GammaRotation')])
 
         prog = Progress(self, start=0, end=1, nreports=len(components))
-        get_component = api.mtd[wks_name].getInstrument().getComponentByName  # shortcut
         for component in components:
-            comp = get_component(component)
+            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)
             firstDetID = self._getFirstDetID(comp)
             firstIndex = detID.index(firstDetID)  # a row index in the input TOFS table
             lastDetID = self._getLastDetID(comp)
@@ -438,6 +468,9 @@ class AlignComponents(PythonAlgorithm):
             x0List = []
             self._initialPos = [comp.getPos().getX(), comp.getPos().getY(), comp.getPos().getZ(),
                                 eulerAngles[0], eulerAngles[1], eulerAngles[2]]
+
+            # Distance between the original position of the sample and the original position of the component
+            comp_sample_distance_begin = (comp.getPos() - sample_position_begin).norm()
 
             boundsList = []
 
@@ -465,13 +498,21 @@ class AlignComponents(PythonAlgorithm):
             # Apply the results to the output workspace
             xmap = self._mapOptions(results.x)
 
+            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)  # adjusted component
+            # Distance between the adjusted position of the sample and the adjusted position of the component
+            comp_sample_distance_end = (comp.getPos() - sample_position_end).norm()
+
             component_adjustments = [0.] * 7  # 3 for translation, 3 for rotation axis, 1 for rotation angle
+            component_displacements = [0.] * 7 # 1 for distnace, 3 for translation, 3 for Euler angles
+            component_displacements[0] = 1000 * (comp_sample_distance_end - comp_sample_distance_begin)  # in mili-meters
 
             if self._move:
                 kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False, EnableLogging=False)
                 api.MoveInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace
                 api.MoveInstrumentComponent(output_workspace, component, **kwargs)  # adjust workspace
                 component_adjustments[:3] = xmap[:3]
+                for i in range(3):
+                    component_displacements[i+1] = 1000 * (xmap[i] - self._initialPos[i])  # in mili-meters
 
             if self._rotate:
                 (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5], self._eulerConvention)
@@ -479,12 +520,16 @@ class AlignComponents(PythonAlgorithm):
                 api.RotateInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace
                 api.RotateInstrumentComponent(output_workspace, component, **kwargs)  # adjust workspace
                 component_adjustments[3:] = [rotx, roty, rotz, rotw]
+                for i in range(3, 6):
+                    component_displacements[i+1] = xmap[i] - self._initialPos[i]  # in degrees
 
             if saving_adjustments and (self._move or self._rotate):
                 adjustments_table.addRow([component] + component_adjustments)
 
+            if saving_displacements and (self._move or self._rotate):
+                displacements_table.addRow([component] + component_displacements)
+
             # Need to grab the component object again, as things have changed
-            comp = get_component(component)
             logger.notice("Finished " + comp.getFullName() + " Final position is " + str(comp.getPos())
                           + " Final rotation is " + str(comp.getRotation().getEulerAngles(self._eulerConvention)))
 
@@ -496,10 +541,22 @@ class AlignComponents(PythonAlgorithm):
     def _initialize_adjustments_table(self, table_name):
         r"""Create a table with appropriate column names for saving the adjustments to each component"""
         table = api.CreateEmptyTableWorkspace(OutputWorkspace=table_name)
-        item_types = ['str',
-                      'double', 'double', 'double',
-                      'double', 'double', 'double', 'double']
+        item_types = ['str',  # component name
+                      'double', 'double', 'double',  # cartesian coordinates
+                      'double', 'double', 'double',  # direction cosines of axis of rotation
+                      'double']  # angle of rotation
         for column_name, column_type in zip(self.adjustment_items, item_types):
+            table.addColumn(name=column_name, type=column_type)
+        return table
+
+    def _initialize_displacements_table(self, table_name):
+        r"""Create a table with appropriate column names for saving the relative displacements to each component"""
+        table = api.CreateEmptyTableWorkspace(OutputWorkspace=table_name)
+        item_types = ['str',  # component name
+                      'double',  # change in the distance between the component and the sample
+                      'double', 'double', 'double',  # relative displacement in cartesian coordinates
+                      'double', 'double', 'double']  # relative displacement in Euler angles
+        for column_name, column_type in zip(self.displacement_items, item_types):
             table.addColumn(name=column_name, type=column_type)
         return table
 

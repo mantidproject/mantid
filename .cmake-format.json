@@ -92,11 +92,11 @@
         "MODULE_OUTPUT_DIR": 1,
         "PYQT_VERSION": 1,
         "FOLDER": 1,
-        "SIP_SRCS": "+",
+        "SIP_SRC": 1,
         "HEADER_DEPS": "+",
         "INCLUDE_DIRS": "+",
         "LINK_LIBS": "+",
-        "INSTALL_DIRS": "+",
+        "INSTALL_DIR": "+",
         "OSX_INSTALL_RPATH": "+",
         "LINUX_INSTALL_RPATH": "+"
       }

@@ -66,15 +66,17 @@ This method is an expansion of the Uniaxial method, that requires measurements o
 
 .. math::
 
-      M = 2 \cdot \left(2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} - \left(\frac{d\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} - \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} \right)
+      T &= \frac{1}{3} \cdot \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}}  \right)
 
-.. math::
+      M_{\text{nsf}} &= 2 \cdot \left(2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} - \left(\frac{d\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} - \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} \right)
 
-      N = \frac{1}{6} \cdot \left(2 \cdot \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{d\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} \right) - \left( \left( \frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left( \frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left( \frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} \right) \right)
+      M_{\text{sf}} &= 2 \cdot \left(\left(\frac{d\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} -2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} \right)
 
-.. math::
+      M_{\text{av}} &= \frac{1}{2} \cdot \left( M_{\text{nsf}} + M_{\text{sf}} \right)
 
-      I = \frac{1}{2} \cdot \left(\left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} - M \right)
+      N &= \frac{1}{6} \cdot \left(2 \cdot \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} \right) - \left( \left( \frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left( \frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left( \frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} \right) \right)
+
+      I &= \frac{1}{2} \cdot \left(\left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} \right) - M_{\text{av}}
 
 3. 10-point
 
@@ -88,21 +90,17 @@ where :math:`\alpha` is the Sharpf angle, which for elastic scattering is equal 
 
 .. math::
 
-   M_{1} = (2 c_{0} - 4) \cdot \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + (2c_{0} + 2) \cdot \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2-4c_{0}) \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
+   M_{1} &= (2 c_{0} - 4) \cdot \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + (2c_{0} + 2) \cdot \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2-4c_{0}) \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
 
-.. math::
+   M_{2} &= (2 c_{4} - 4) \cdot \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2c_{4} + 2) \cdot \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2-4c_{4}) \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
 
-   M_{2} = (2 c_{4} - 4) \cdot \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2c_{4} + 2) \cdot \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2-4c_{4}) \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
-
-.. math::
-
-   M = M_{1} \cdot \text{cos}(2\alpha) + M_{2} \cdot \text{sin}(2\alpha),
+   M &= M_{1} \cdot \text{cos}(2\alpha) + M_{2} \cdot \text{sin}(2\alpha),
 
 where :math:`c_{0} = \text{cos}^{2} \alpha` and :math:`c_{4} = \text{cos}^{2} (\alpha - \frac{\pi}{4})`
 
 .. math::
 
-   N = \frac{1}{12} \cdot \left(2 \cdot \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{nsf}} \right) - \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}d\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{sf}} \right) \right)
+   N = \frac{1}{12} \cdot \left(2 \cdot \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{nsf}} \right) \\ - \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}d\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{sf}} \right) \right)
 
 .. math::
 
@@ -124,13 +122,13 @@ where `I` is the sample intensity distribution corrected for all effects, and `D
 
 1. Vanadium
 
-If the data is to be expressed in absolute units, the normalisation factor is the reduced vanadium data, normalised by the number of formula units in the sample :math:`N_{S}`:
+If the data is to be expressed in absolute units, the normalisation factor is the reduced vanadium data, normalised by the number of moles of the sample material :math:`N_{S}`:
 
-.. math:: D (\#, \pm \text{, chn/t/meV)} = \frac{1}{N_{S}} \cdot V (\#, \pm \text{, chn/t/meV)}
+.. math:: D (\#, \pm \text{, chn/t/meV)} = \frac{1}{N_{S}} \cdot \frac{1}{V (\#, \pm \text{, chn/t/meV)}}
 
 If data is not to be expressed in absolute units, the normalisation factor depends only on the vanadium input:
 
-.. math:: D (\#, \pm \text{, chn/t/meV)} = \frac{V (\#, \pm \text{, chn/t/meV)}}{\text{max}(V (\#, \pm \text{, chn/t/meV)})}
+.. math:: D (\#, \pm \text{, chn/t/meV)} = \frac{\text{max}(V (\#, \pm \text{, chn/t/meV)})}{V (\#, \pm \text{, chn/t/meV)}}
 
 2. Paramagnetic
 
@@ -161,12 +159,12 @@ Usage
 
 .. testcode:: ExD7AbsoluteCrossSections_XYZ_separation
 
-   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
+   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 50.942}
 
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz') # loads already reduced data
    D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
                            SampleAndEnvironmentProperties=sampleProperties,
-                           OutputWorkspace='xyz')
+                           OutputTreatment='Merge', OutputWorkspace='xyz')
    print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
    Integration(InputWorkspace=mtd['xyz'][1], OutputWorkspace='sum_coherent')
    Integration(InputWorkspace=mtd['xyz'][2], OutputWorkspace='sum_incoherent')
@@ -178,7 +176,7 @@ Output:
 .. testoutput:: ExD7AbsoluteCrossSections_XYZ_separation
 
    Number of separated cross-sections: 6
-   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 105.8
+   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 170.0
 
 .. testcleanup:: ExD7AbsoluteCrossSections_XYZ_separation
 

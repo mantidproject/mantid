@@ -1,3 +1,32 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+// This file defines the Python bindings for the
+// _common library.
+%Module(name=_commonqt5)
+
+%UnitCode
+#if defined(_MSC_VER)
+  # pragma warning( disable: 4290 )
+#elif defined(__GNUC__) && !defined(__clang__)
+  // We need default visibility for this module so that
+  // python can see the init function.
+  #pragma GCC visibility push(default)
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wpedantic"
+  #if __GNUC__ >= 5
+    #pragma GCC diagnostic ignored "-Wsuggest-override"
+  #endif
+#endif
+%End
+
+// PyQt5 widgets
+%Import QtGui/QtGuimod.sip
+%Import QtWidgets/QtWidgetsmod.sip
+
 %ModuleCode
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/Message.h"
@@ -10,9 +39,15 @@ using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::Batch;
 %End
 
-%Include ../common_sip/exceptions.sip
-%Include ../common_sip/string.sip
-%Include ../common_sip/vector.sip
+// Remove namespace qualifiers in generated code. We control
+// the package layout separately in Python
+%HideNamespace(name=MantidQt)
+%HideNamespace(name=MantidQt::MantidWidgets)
+%HideNamespace(name=MantidQt::MantidWidgets::Batch)
+
+%Include ../sip/exceptions.sip
+%Include ../sip/string.sip
+%Include ../sip/vector.sip
 
 %InitialisationCode
 qRegisterMetaType<std::string>("StdString");
@@ -176,8 +211,6 @@ private:
   ScriptEditor(const ScriptEditor&);
 };
 
-%If (Qt_5_0_0 -)
-
 class AlgorithmProgressWidget : QWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
@@ -200,9 +233,6 @@ public:
 private:
   CodeExecution(const CodeExecution&);
 };
-
-%End // end >= Qt5
-
 
 class AlgorithmDialog: QDialog {
 %TypeHeaderCode
@@ -642,12 +672,10 @@ public:
 // RowLocation needs to be wrapped in a SIP namespace class
 // otherwise it cannot be recognised as a type when passed into a signal
 // e.g. in JobTreeViewSignalAdapter's cellTextChanged signal
-namespace MantidQt
-{
-namespace MantidWidgets
-{
-namespace Batch
-{
+// The namespace is hidden so that it is not visible to the outside world.
+namespace MantidQt {
+namespace MantidWidgets {
+namespace Batch {
 
 class RowLocation
 {
@@ -677,9 +705,9 @@ public:
   bool operator>=(const MantidQt::MantidWidgets::Batch::RowLocation& other);
 };
 
-}; // Batch
-}; // MantidWidgets
-}; // MantidQt
+};
+};
+};
 
 class RowPredicate {
 %TypeHeaderCode
@@ -869,6 +897,7 @@ using namespace MantidQt::API;
 public:
     FunctionBrowser(QWidget *parent = nullptr, bool multi = false);
     FunctionTreeView *view() const;
+    void setStretchLastColumn(bool stretch);
     void setFunction(const QString &funStr);
     QString getFunctionString();
     QString getFitFunctionString() const;

@@ -86,6 +86,20 @@ In our example, we have adjusted the moderator and banks 42 and 87.
 - ``XdirectionCosine``, ``YdirectionCosine``, ``ZdirectionCosine``: direction cosines in the lab's frame of reference. They define a rotation axis to set the orientation of ``ComponentName``.
 - ``RotationAngle``: rotate this many degrees around the previous rotation axis to set the orientation of ``ComponentName``.
 
+While ``LaB6_adjustments`` contains absolute position and orientation values, table ``LaB6_displacements`` lists
+changes in position and orientation for each Bank, as follows:
+
+- `DeltaR`: change in distance from Component to Sample (in mili-meter)
+- `DeltaX`: change in X-coordinate of Component (in mili-meter)
+- `DeltaY`: change in Y-coordinate of Component (in mili-meter)
+- `DeltaZ`: change in Z-coordinate of Component (in mili-meter)
+- `DeltaAlpha`: change in rotation around the Y-axis (in degrees)
+- `DeltaBeta`: change in rotation around the X-axis (in degrees)
+- `DeltaGamma`: change in rotation around the Z-axis (in degrees)
+
+Option `FixY=True` will result in `DeltaY=0` for all banks. Similarly, option `FixYaw=True` will result in
+`DeltaGamma=0` for all banks.
+
 The diagnostics workspaces are stored within ``WorkspaceGroup LaB6_bank_adjustment_diagnostics``. These are:
 
 - ``LaB6_PDCalibration_peaks_original`` and ``LaB6_PDCalibration_peaks_adjustments`` contains one fitted-intensity spectrum per bank versus ``d-spacing`` before and after the banks are adjusted.

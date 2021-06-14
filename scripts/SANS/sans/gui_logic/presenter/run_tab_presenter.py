@@ -416,9 +416,10 @@ class RunTabPresenter(PresenterCommon):
                 SettingsAdjustmentModel(all_states=user_file_items))
             # 5. Update the views.
             self.update_view_from_model()
-            self._beam_centre_presenter.update_centre_positions(self._model)
 
-            self._beam_centre_presenter.on_update_rows()
+            self._beam_centre_presenter.copy_centre_positions(self._model)
+            self._beam_centre_presenter.update_centre_positions()
+
             self._masking_table_presenter.on_update_rows()
             self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
 
@@ -476,6 +477,8 @@ class RunTabPresenter(PresenterCommon):
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
+        self.on_update_rows()
+
     def _add_multiple_rows_to_table_model(self, rows):
         self._table_model.add_multiple_table_entries(table_index_model_list=rows)
 
@@ -526,6 +529,7 @@ class RunTabPresenter(PresenterCommon):
 
     def on_instrument_changed(self):
         self._setup_instrument_specific_settings()
+        self._beam_centre_presenter.on_update_instrument(self.instrument)
 
     # ----------------------------------------------------------------------------------------------
     # Processing
@@ -1137,11 +1141,11 @@ class RunTabPresenter(PresenterCommon):
             self._set_on_custom_model("event_slices", state_model)
             self._set_on_custom_model("event_binning", state_model)
 
-            self._set_on_custom_model("wavelength_step_type", state_model)
             self._set_on_custom_model("wavelength_min", state_model)
             self._set_on_custom_model("wavelength_max", state_model)
-            self._set_on_custom_model("wavelength_step", state_model)
             self._set_on_custom_model("wavelength_range", state_model)
+            self._set_on_custom_model("wavelength_step", state_model)
+            self._set_on_custom_model("wavelength_step_type", state_model)
 
             self._set_on_custom_model("absolute_scale", state_model)
             self._set_on_custom_model("z_offset", state_model)

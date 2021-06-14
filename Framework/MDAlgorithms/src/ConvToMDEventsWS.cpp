@@ -23,7 +23,7 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   UnitsConversionHelper localUnitConv(m_UnitConversion);
 
   uint32_t detID = m_detID[workspaceIndex];
-  uint16_t runIndexLoc = m_RunIndex;
+  uint16_t expInfoIndexLoc = m_ExpInfoIndex;
 
   std::vector<coord_t> locCoord(m_Coord);
   // set up unit conversion and calculate up all coordinates, which depend on
@@ -36,13 +36,13 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   // MD events coordinates buffer
   std::vector<coord_t> allCoord;
   std::vector<float> sig_err;             // array for signal and error.
-  std::vector<uint16_t> run_index;        // Buffer for run index for each event
+  std::vector<uint16_t> expInfoIndex;     // Buffer for associated experiment-info index for each event
   std::vector<uint16_t> goniometer_index; // Buffer for goniometer index for each event
   std::vector<uint32_t> det_ids;          // Buffer of det Id-s for each event
 
   allCoord.reserve(this->m_NDims * numEvents);
   sig_err.reserve(2 * numEvents);
-  run_index.reserve(numEvents);
+  expInfoIndex.reserve(numEvents);
   goniometer_index.reserve(numEvents);
   det_ids.reserve(numEvents);
 
@@ -62,15 +62,15 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
 
     sig_err.emplace_back(static_cast<float>(signal));
     sig_err.emplace_back(static_cast<float>(errorSq));
-    run_index.emplace_back(runIndexLoc);
+    expInfoIndex.emplace_back(expInfoIndexLoc);
     goniometer_index.emplace_back(0); // default value
     det_ids.emplace_back(detID);
     allCoord.insert(allCoord.end(), locCoord.begin(), locCoord.end());
   }
 
   // Add them to the MDEW
-  size_t n_added_events = run_index.size();
-  m_OutWSWrapper->addMDData(sig_err, run_index, goniometer_index, det_ids, allCoord, n_added_events);
+  size_t n_added_events = expInfoIndex.size();
+  m_OutWSWrapper->addMDData(sig_err, expInfoIndex, goniometer_index, det_ids, allCoord, n_added_events);
   return n_added_events;
 }
 

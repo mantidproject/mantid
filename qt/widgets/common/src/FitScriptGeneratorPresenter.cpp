@@ -41,11 +41,11 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, std::s
     UNUSED_ARG(arg2);
 
   switch (event) {
-  case ViewEvent::RemoveClicked:
-    handleRemoveClicked();
+  case ViewEvent::RemoveDomainClicked:
+    handleRemoveDomainClicked();
     return;
-  case ViewEvent::AddClicked:
-    handleAddWorkspaceClicked();
+  case ViewEvent::AddDomainClicked:
+    handleAddDomainClicked();
     return;
   case ViewEvent::StartXChanged:
     handleStartXChanged();
@@ -80,6 +80,18 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, std::s
   case ViewEvent::ParameterConstraintChanged:
     handleParameterConstraintChanged(arg1, arg2);
     return;
+  case ViewEvent::EditLocalParameterClicked:
+    handleEditLocalParameterClicked(arg1);
+    return;
+  case ViewEvent::EditLocalParameterFinished:
+    handleEditLocalParameterFinished();
+    return;
+  case ViewEvent::GenerateScriptToFileClicked:
+    handleGenerateScriptToFileClicked();
+    return;
+  case ViewEvent::GenerateScriptToClipboardClicked:
+    handleGenerateScriptToClipboardClicked();
+    return;
   default:
     throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
   }
@@ -107,7 +119,7 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, Fittin
 
 void FitScriptGeneratorPresenter::openFitScriptGenerator() { m_view->show(); }
 
-void FitScriptGeneratorPresenter::handleRemoveClicked() {
+void FitScriptGeneratorPresenter::handleRemoveDomainClicked() {
   for (auto const &index : m_view->selectedRows()) {
     auto const workspaceName = m_view->workspaceName(index);
     auto const workspaceIndex = m_view->workspaceIndex(index);
@@ -119,7 +131,7 @@ void FitScriptGeneratorPresenter::handleRemoveClicked() {
   handleSelectionChanged();
 }
 
-void FitScriptGeneratorPresenter::handleAddWorkspaceClicked() {
+void FitScriptGeneratorPresenter::handleAddDomainClicked() {
   if (m_view->openAddWorkspaceDialog()) {
     auto const workspaces = m_view->getDialogWorkspaces();
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
@@ -198,9 +210,38 @@ void FitScriptGeneratorPresenter::handleGlobalParametersChanged(std::vector<std:
   handleSelectionChanged();
 }
 
+void FitScriptGeneratorPresenter::handleEditLocalParameterClicked(std::string const &parameter) {
+  std::vector<std::string> workspaceNames, domainNames, ties, constraints;
+  std::vector<double> values;
+  std::vector<bool> fixes;
+  insertLocalParameterData(parameter, workspaceNames, domainNames, values, fixes, ties, constraints);
+
+  m_view->openEditLocalParameterDialog(m_model->getAdjustedFunctionIndex(parameter), workspaceNames, domainNames,
+                                       values, fixes, ties, constraints);
+}
+
+void FitScriptGeneratorPresenter::handleEditLocalParameterFinished() {
+  auto const [parameter, values, fixes, ties, constraints] = m_view->getEditLocalParameterResults();
+
+  auto const domainIndices = getDomainsWithLocalParameter(parameter);
+  for (auto i = 0u; i < values.size(); ++i) {
+    setLocalParameterDataForDomain(domainIndices[i], parameter, values[i], fixes[i], ties[i], constraints[i]);
+  }
+
+  handleSelectionChanged();
+}
+
 void FitScriptGeneratorPresenter::handleFittingModeChanged(FittingMode fittingMode) {
   m_model->setFittingMode(fittingMode);
   handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleGenerateScriptToFileClicked() {
+  generateFitScript(&FitScriptGeneratorPresenter::generateScriptToFile);
+}
+
+void FitScriptGeneratorPresenter::handleGenerateScriptToClipboardClicked() {
+  generateFitScript(&FitScriptGeneratorPresenter::generateScriptToClipboard);
 }
 
 void FitScriptGeneratorPresenter::setGlobalTies(std::vector<GlobalTie> const &globalTies) {
@@ -374,6 +415,63 @@ std::vector<FitDomainIndex> FitScriptGeneratorPresenter::getRowIndices() const {
   return m_view->applyFunctionChangesToAll() ? m_view->allRows() : m_view->selectedRows();
 }
 
+void FitScriptGeneratorPresenter::insertLocalParameterData(std::string const &parameter,
+                                                           std::vector<std::string> &workspaceNames,
+                                                           std::vector<std::string> &domainNames,
+                                                           std::vector<double> &values, std::vector<bool> &fixes,
+                                                           std::vector<std::string> &ties,
+                                                           std::vector<std::string> &constraints) const {
+  auto domainIndices = m_view->allRows();
+  std::reverse(domainIndices.begin(), domainIndices.end());
+  for (auto const domainIndex : domainIndices) {
+    insertLocalParameterDataForDomain(domainIndex, parameter, workspaceNames, domainNames, values, fixes, ties,
+                                      constraints);
+  }
+}
+
+void FitScriptGeneratorPresenter::insertLocalParameterDataForDomain(
+    FitDomainIndex domainIndex, std::string const &parameter, std::vector<std::string> &workspaceNames,
+    std::vector<std::string> &domainNames, std::vector<double> &values, std::vector<bool> &fixes,
+    std::vector<std::string> &ties, std::vector<std::string> &constraints) const {
+  if (m_model->hasParameter(domainIndex, parameter)) {
+    workspaceNames.emplace_back(m_view->workspaceName(domainIndex));
+    domainNames.emplace_back(m_model->getDomainName(domainIndex));
+    values.emplace_back(m_model->getParameterValue(domainIndex, parameter));
+    fixes.emplace_back(m_model->isParameterFixed(domainIndex, parameter));
+    ties.emplace_back(m_model->getParameterTie(domainIndex, parameter));
+    constraints.emplace_back(m_model->getParameterConstraint(domainIndex, parameter));
+  }
+}
+
+void FitScriptGeneratorPresenter::setLocalParameterDataForDomain(FitDomainIndex domainIndex,
+                                                                 std::string const &parameter, double value, bool fix,
+                                                                 std::string const &tie,
+                                                                 std::string const &constraint) {
+  auto const fullParameter = m_model->getFullParameter(domainIndex, parameter);
+
+  if (m_model->hasParameter(domainIndex, fullParameter)) {
+    m_model->setParameterValue(domainIndex, fullParameter, value);
+    m_model->setParameterTie(domainIndex, fullParameter, tie);
+    m_model->setParameterConstraint(domainIndex, fullParameter, constraint);
+
+    if (tie.empty())
+      m_model->setParameterFixed(domainIndex, fullParameter, fix);
+  }
+}
+
+std::vector<FitDomainIndex>
+FitScriptGeneratorPresenter::getDomainsWithLocalParameter(std::string const &parameter) const {
+  auto const doesNotHaveParameter = [&](FitDomainIndex domainIndex) {
+    return !m_model->hasParameter(domainIndex, m_model->getFullParameter(domainIndex, parameter));
+  };
+
+  auto domainIndices = m_view->allRows();
+  domainIndices.erase(std::remove_if(domainIndices.begin(), domainIndices.end(), doesNotHaveParameter),
+                      domainIndices.end());
+  std::reverse(domainIndices.begin(), domainIndices.end());
+  return domainIndices;
+}
+
 std::tuple<std::string, std::string> FitScriptGeneratorPresenter::convertFunctionIndexOfParameterTie(
     std::string const &workspaceName, WorkspaceIndex workspaceIndex, std::string const &parameter,
     std::string const &tie) const {
@@ -389,6 +487,32 @@ void FitScriptGeneratorPresenter::checkForWarningMessages() {
     std::copy(m_warnings.cbegin(), m_warnings.cend(), std::ostream_iterator<std::string>(ss, "\n"));
     m_view->displayWarning(ss.str());
     m_warnings.clear();
+  }
+}
+
+template <typename Generator> void FitScriptGeneratorPresenter::generateFitScript(Generator &&func) const {
+  auto const [valid, message] = m_model->isValid();
+
+  if (!message.empty())
+    m_view->displayWarning(message);
+
+  if (valid)
+    std::invoke(std::forward<Generator>(func), this);
+}
+
+void FitScriptGeneratorPresenter::generateScriptToFile() const {
+  auto const filepath = m_view->filepath();
+  if (!filepath.empty()) {
+    m_model->generatePythonFitScript(m_view->fitOptions(), filepath);
+    m_view->setSuccessText("Successfully generated fit script to file '" + filepath + "'");
+  }
+}
+
+void FitScriptGeneratorPresenter::generateScriptToClipboard() const {
+  auto const scriptText = m_model->generatePythonFitScript(m_view->fitOptions());
+  if (!scriptText.empty()) {
+    m_view->saveTextToClipboard(scriptText);
+    m_view->setSuccessText("Successfully generated fit script to clipboard");
   }
 }
 

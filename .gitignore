@@ -187,3 +187,6 @@ Third_Party/
 win64/
 dbg/
 rel/
+
+# NFS files
+*.nfs*

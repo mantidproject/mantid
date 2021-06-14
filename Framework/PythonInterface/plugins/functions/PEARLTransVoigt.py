@@ -75,7 +75,7 @@ class PEARLTransVoigt(IFunction1D):
         #
         # Legacy background function included from Transfit v1
         # Define background function
-        bg = bg0 + bg1 ** xvals + bg2 * xvals * xvals
+        bg = bg0 + bg1 * xvals + bg2 * xvals * xvals
         # Correct using Beer's law to fit measured absorption, not Xsection
         # np.sqrt(np.log(2)) replaced with 1 as legacy
         width = 1 / gaussFWHM

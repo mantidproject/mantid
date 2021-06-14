@@ -910,12 +910,25 @@ if(ENABLE_WORKBENCH)
 
 endif()
 
+# If not sip header is defined we need to generate one with sip-module
+if (SIP_INCLUDE_DIR AND EXISTS ${SIP_INCLUDE_DIR}/sip.h)
+  set(_sip_include_dir ${SIP_INCLUDE_DIR})
+else()
+  set(_sip_include_dir ${CMAKE_CURRENT_BINARY_DIR})
+  # The final module name makes no difference here - we just want the api
+  add_custom_command(OUTPUT ${_sip_include_dir}/sip.h
+    COMMAND ${SIP_MODULE_EXECUTABLE} ARGS --sip-h
+      --abi-version ${PYQT5_SIP_ABI_VERSION} --target-dir=${_sip_include_dir} dummymodulename
+    COMMENT "Generating sip.h for common widgets target"
+  )
+endif()
+
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsCommon
   QT_VERSION 5
   SRC ${QT5_SRC_FILES}
   MOC ${QT5_MOC_FILES}
-  NOMOC ${QT5_INC_FILES}
+  NOMOC ${QT5_INC_FILES} ${_sip_include_dir}/sip.h
   UI ${QT5_UI_FILES}
   DEFS
     IN_MANTIDQT_COMMON
@@ -927,6 +940,7 @@ mtd_add_qt_library(
     inc
   SYSTEM_INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
+    ${_sip_include_dir}
   LINK_LIBS
     ${TARGET_LIBRARIES}
     PUBLIC

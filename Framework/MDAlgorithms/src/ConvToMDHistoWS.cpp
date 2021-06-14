@@ -64,7 +64,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
 
   // allocate temporary buffer for MD Events data
   std::vector<float> sig_err(2 * m_bufferSize);         // array for signal and error.
-  std::vector<uint16_t> run_index(m_bufferSize);        // Buffer run index for each event
+  std::vector<uint16_t> expInfoIndex(m_bufferSize);     // Buffer associated experiment-info index for each event
   std::vector<uint16_t> goniometer_index(m_bufferSize); // Buffer goniometer index for each event
   std::vector<uint32_t> det_ids(m_bufferSize);          // Buffer of det Id-s for each event
 
@@ -126,7 +126,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
       // coppy all data into data buffer for future transformation into events;
       sig_err[2 * nBufEvents + 0] = float(signal);
       sig_err[2 * nBufEvents + 1] = float(errorSq);
-      run_index[nBufEvents] = m_RunIndex;
+      expInfoIndex[nBufEvents] = m_ExpInfoIndex;
       goniometer_index[nBufEvents] = 0; // default value
       det_ids[nBufEvents] = det_id;
 
@@ -136,7 +136,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
       // calculate number of events
       nBufEvents++;
       if (nBufEvents >= m_bufferSize) {
-        m_OutWSWrapper->addMDData(sig_err, run_index, goniometer_index, det_ids, allCoord, nBufEvents);
+        m_OutWSWrapper->addMDData(sig_err, expInfoIndex, goniometer_index, det_ids, allCoord, nBufEvents);
         nAddedEvents += nBufEvents;
         // reset buffer counts
         n_coordinates = 0;
@@ -146,7 +146,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
   }   // end detectors loop;
 
   if (nBufEvents > 0) {
-    m_OutWSWrapper->addMDData(sig_err, run_index, goniometer_index, det_ids, allCoord, nBufEvents);
+    m_OutWSWrapper->addMDData(sig_err, expInfoIndex, goniometer_index, det_ids, allCoord, nBufEvents);
     nAddedEvents += nBufEvents;
     nBufEvents = 0;
   }

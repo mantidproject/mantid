@@ -381,7 +381,7 @@ size_t Run::addGoniometer(const Geometry::Goniometer &goniometer) {
 void Run::clearGoniometers() { m_goniometers.clear(); }
 
 //-----------------------------------------------------------------------------------------------
-/** Get the Goniometer for the given run index
+/** Get the Goniometer for the given associated experiment-info index
  *
  * @param index :: index of the run to get.
  * @return goniometer
@@ -393,7 +393,7 @@ const Geometry::Goniometer &Run::getGoniometer(const size_t index) const {
 }
 
 //-----------------------------------------------------------------------------------------------
-/** Get the non-const Goniometer for the given run index
+/** Get the non-const Goniometer for the given associated experiment-info index
  *
  * @param index :: index of the run to get.
  * @return goniometer

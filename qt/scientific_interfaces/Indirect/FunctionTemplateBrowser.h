@@ -43,7 +43,7 @@ using namespace MantidWidgets;
 class MANTIDQT_INDIRECT_DLL FunctionTemplateBrowser : public QWidget {
   Q_OBJECT
 public:
-  FunctionTemplateBrowser(QWidget *parent);
+  FunctionTemplateBrowser(QWidget *parent = nullptr);
   virtual ~FunctionTemplateBrowser();
   void init();
 
@@ -86,7 +86,7 @@ protected slots:
   virtual void parameterButtonClicked(QtProperty *) = 0;
 
 private:
-  void createBrowser();
+  virtual void createBrowser();
   virtual void createProperties() = 0;
 
 protected:

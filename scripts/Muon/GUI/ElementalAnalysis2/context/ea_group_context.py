@@ -8,7 +8,8 @@
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from mantidqt.utils.observer_pattern import GenericObservable
 
-INVALID_STRINGS_FOR_GROUP_NAMES = ["EA_Rebinned_Fixed", "EA_Rebinned_Variable"]
+INVALID_STRINGS_FOR_GROUP_NAMES = ["EA_Rebinned_Fixed", "EA_Rebinned_Variable", "peaks", "refitted_peaks",
+                                   "with_errors", "matches"]
 
 
 def get_default_grouping(loadedData):
@@ -23,22 +24,22 @@ def get_default_grouping(loadedData):
     for run_item in run_list:
         for workspace in loadedData.get_data(run=run_item)["workspace"]:
             group_name = str(workspace)
+            if not is_group_valid(group_name):
+                continue
             detector_name = (group_name.split(';', 1)[-1].lstrip()).split('_', 1)[0]
             run_number = str(run_item).replace('[', '').replace(']', '')
             groups += [EAGroup(group_name=group_name, detector=detector_name, run_number=run_number)]
     return groups
 
 
-def check_if_group_is_valid(group_name):
+def is_group_valid(group_name):
     """
         format of group name is run; Detector x , where x is an integer between 1 and 4 inclusively, if workspace has
         anything else at the end it may be invalid so function checks if trailing string makes name is invalid
     """
-    split_group_name = (group_name.split(';', 1)[-1].lstrip()).split('_', 1)
-    if len(split_group_name) == 1:
-        return True
-    if "_".join(split_group_name[1:]) in INVALID_STRINGS_FOR_GROUP_NAMES:
-        return False
+    for suffix in INVALID_STRINGS_FOR_GROUP_NAMES:
+        if group_name.endswith(suffix):
+            return False
     return True
 
 
@@ -87,7 +88,7 @@ class EAGroupContext(object):
                     group_name = str(workspace)
                     # For single workspace names the detector is found by taking everything after ; in the name
                     # For co-added workspaces the detector is found by taking everything before _
-                    if not check_if_group_is_valid(group_name):
+                    if not is_group_valid(group_name):
                         continue
                     detector_name = (group_name.split(';', 1)[-1].lstrip()).split('_', 1)[0]
                     run_number = str(run_item).replace('[', '').replace(']', '')
@@ -96,7 +97,7 @@ class EAGroupContext(object):
 
     def add_group(self, group):
         """this adds groups to the grouping tab that are not already loaded"""
-        if group._group_name not in self.group_names:
+        if group._group_name not in self.group_names and is_group_valid(group._group_name):
             self._groups.append(group)
         return group
 

@@ -197,9 +197,9 @@ public:
     // This should set parameters of the inelastic part
     DiffRotDiscreteCircle func;
     func.init();
-    func.setParameter("Intensity", I);
-    func.setParameter("Radius", R);
-    func.setParameter("Decay", tao);
+    func.setParameter("f1.Intensity", I);
+    func.setParameter("f1.Radius", R);
+    func.setParameter("f1.Decay", tao);
 
     // check the parameter of the inelastic part
     auto ifunc = std::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(func.getFunction(1));
@@ -223,9 +223,9 @@ public:
     // nano-seconds. Intensities have arbitrary units
     std::string funtion_string = "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,"
                                  "Height=1,PeakCentre=0,Sigma=20,ties=(Height=1,PeakCentre=0,Sigma=20);("
-                                 "name=DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.20092,Intensity=47."
+                                 "name=DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.20092,f1.Intensity=47."
                                  "014,"
-                                 "Radius=1.567,Decay=0.07567))";
+                                 "f1.Radius=1.567,f1.Decay=0.07567))";
 
     // Initialize the fit function in the Fit algorithm
     Algorithms::Fit fitalg;
@@ -243,8 +243,8 @@ public:
     funtion_string = "(composite=Convolution,FixResolution=true,NumDeriv=true;"
                      "name=Gaussian,Height=1,PeakCentre=0,Sigma=20,ties=("
                      "Height=1,PeakCentre=0,Sigma=20);(name="
-                     "DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.20092,Intensity="
-                     "20.0,Radius=1.567,Decay=0.1))";
+                     "DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.20092,f1.Intensity="
+                     "20.0,f1.Radius=1.567,f1.Decay=0.1))";
     fitalg.setProperty("Function", funtion_string);
     fitalg.setProperty("InputWorkspace", data_workspace);
     fitalg.setPropertyValue("WorkspaceIndex", "0");
@@ -275,11 +275,11 @@ public:
 
     // check the parameters of the DiffRotDiscreteCircle
     Mantid::API::IFunction_sptr fitalg_structure_factor = fitalg_conv->getFunction(1);
-    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Intensity"), 47.014,
+    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("f1.Intensity"), 47.014,
                     47.014 * 0.05); // allow for a small percent variation
-    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Radius"), 1.567,
+    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("f1.Radius"), 1.567,
                     1.567 * 0.05); // allow for a small percent variation
-    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Decay"), 0.07567,
+    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("f1.Decay"), 0.07567,
                     7.567 * 0.05); // allow for a small percent variation
     // std::cout << "\nGOAL: Intensity = 47.014,  Radius = 1.567,  Decay =
     // 0.07567\n"; // only for debugging purposes

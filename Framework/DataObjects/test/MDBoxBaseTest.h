@@ -87,7 +87,7 @@ public:
   /// Add a single event
   size_t addEventUnsafe(const MDE & /*point*/) override { return 0; }
   size_t buildAndAddEvents(const std::vector<signal_t> & /*sigErrSq*/, const std::vector<coord_t> & /*Coord*/,
-                           const std::vector<uint16_t> & /*runIndex*/,
+                           const std::vector<uint16_t> & /*expInfoIndex*/,
                            const std::vector<uint16_t> & /*goniometerIndex*/,
                            const std::vector<uint32_t> & /*detectorId*/) override {
     return 0;
@@ -107,7 +107,7 @@ public:
   void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) override{};
   // virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL){};
   void calculateCentroid(coord_t * /*centroid*/) const override{};
-  void calculateCentroid(coord_t * /*centroid*/, const int /*runindex*/) const override{};
+  void calculateCentroid(coord_t * /*centroid*/, const int /*expInfoIndex*/) const override{};
   coord_t *getCentroid() const override { return nullptr; };
   void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/,
                        signal_t & /*signal*/, signal_t & /*errorSquared*/, const coord_t /*innerRadiusSquared*/,

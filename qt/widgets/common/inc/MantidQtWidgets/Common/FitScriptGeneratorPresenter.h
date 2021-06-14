@@ -44,8 +44,8 @@ public:
   void setGlobalParameters(std::vector<GlobalParameter> const &globalParameters) override;
 
 private:
-  void handleRemoveClicked();
-  void handleAddWorkspaceClicked();
+  void handleRemoveDomainClicked();
+  void handleAddDomainClicked();
   void handleSelectionChanged();
   void handleStartXChanged();
   void handleEndXChanged();
@@ -58,7 +58,11 @@ private:
   void handleParameterConstraintRemoved(std::string const &parameter);
   void handleParameterConstraintChanged(std::string const &functionIndex, std::string const &constraint);
   void handleGlobalParametersChanged(std::vector<std::string> const &globalParameters);
+  void handleEditLocalParameterClicked(std::string const &parameter);
+  void handleEditLocalParameterFinished();
   void handleFittingModeChanged(FittingMode fittingMode);
+  void handleGenerateScriptToFileClicked();
+  void handleGenerateScriptToClipboardClicked();
 
   void setWorkspaces(QStringList const &workspaceNames, double startX, double endX);
   void addWorkspaces(std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
@@ -104,12 +108,31 @@ private:
 
   [[nodiscard]] std::vector<FitDomainIndex> getRowIndices() const;
 
+  void insertLocalParameterData(std::string const &parameter, std::vector<std::string> &workspaceNames,
+                                std::vector<std::string> &domainNames, std::vector<double> &values,
+                                std::vector<bool> &fixes, std::vector<std::string> &ties,
+                                std::vector<std::string> &constraints) const;
+  void insertLocalParameterDataForDomain(FitDomainIndex domainIndex, std::string const &parameter,
+                                         std::vector<std::string> &workspaceNames,
+                                         std::vector<std::string> &domainNames, std::vector<double> &values,
+                                         std::vector<bool> &fixes, std::vector<std::string> &ties,
+                                         std::vector<std::string> &constraints) const;
+
+  void setLocalParameterDataForDomain(FitDomainIndex domainIndex, std::string const &parameter, double value, bool fix,
+                                      std::string const &tie, std::string const &constraint);
+
+  std::vector<FitDomainIndex> getDomainsWithLocalParameter(std::string const &parameter) const;
+
   std::tuple<std::string, std::string> convertFunctionIndexOfParameterTie(std::string const &workspaceName,
                                                                           WorkspaceIndex workspaceIndex,
                                                                           std::string const &parameter,
                                                                           std::string const &tie) const;
 
   void checkForWarningMessages();
+
+  template <typename Generator> void generateFitScript(Generator &&func) const;
+  void generateScriptToFile() const;
+  void generateScriptToClipboard() const;
 
   std::vector<std::string> m_warnings;
 

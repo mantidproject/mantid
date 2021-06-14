@@ -15,6 +15,7 @@ import os
 
 from mantid.api import FrameworkManager
 from mantid.kernel import ConfigService, logger
+from workbench.config import SAVE_STATE_VERSION
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.utils.windowfinder import find_window
 from workbench.widgets.about.presenter import AboutPresenter
@@ -79,8 +80,6 @@ QApplication.processEvents(QEventLoop.AllEvents)
 
 class MainWindow(QMainWindow):
     DOCKOPTIONS = QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks
-    # list of custom interfaces that are not qt4/qt5 compatible
-    PYTHON_GUI_BLACKLIST = ['Frequency_Domain_Analysis_Old.py']
 
     def __init__(self):
         QMainWindow.__init__(self)
@@ -129,6 +128,8 @@ class MainWindow(QMainWindow):
         self.interface_manager = None
         self.interface_executor = None
         self.interface_list = None
+
+        self.could_restore_state = False
 
     def setup(self):
         # menus must be done first so they can be filled by the
@@ -356,10 +357,7 @@ class MainWindow(QMainWindow):
             interface.setObjectName(object_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
             parent, flags = get_window_config()
-            if submenu == "Indirect":
-                # always make indirect interfaces children of workbench
-                interface.setParent(self, interface.windowFlags())
-            else:
+            if parent:
                 interface.setParent(parent, flags)
             interface.show()
         else:
@@ -431,9 +429,6 @@ class MainWindow(QMainWindow):
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
                 logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
                 continue
-            if scriptname in self.PYTHON_GUI_BLACKLIST:
-                logger.information('Not adding gui "{}"'.format(scriptname))
-                continue
             interfaces.setdefault(key, []).append(scriptname)
 
         return interfaces, registers_to_run
@@ -482,7 +477,7 @@ class MainWindow(QMainWindow):
     def create_load_layout_action(self, layout_name, layout):
         action_load_layout = create_action(self,
                                            layout_name,
-                                           on_triggered=lambda: self.restoreState(layout))
+                                           on_triggered=lambda: self.attempt_to_restore_state(layout))
         return action_load_layout
 
     def prep_window_for_reset(self):
@@ -557,21 +552,22 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
-        if self.project.is_saving or self.project.is_loading:
-            event.ignore()
-            self.project.inform_user_not_possible()
-            return
-
-        # Check whether or not to save project
-        if not self.project.saved:
-            # Offer save
-            if self.project.offer_save(self):
-                # Cancel has been clicked
+        if self.project is not None:
+            if self.project.is_saving or self.project.is_loading:
                 event.ignore()
+                self.project.inform_user_not_possible()
                 return
 
+            # Check whether or not to save project
+            if not self.project.saved:
+                # Offer save
+                if self.project.offer_save(self):
+                    # Cancel has been clicked
+                    event.ignore()
+                    return
+
         # Close editors
-        if self.editor.app_closing():
+        if self.editor is None or self.editor.app_closing():
             # write out any changes to the mantid config file
             ConfigService.saveConfig(ConfigService.getUserFilename())
             # write current window information to global settings object
@@ -587,11 +583,17 @@ class MainWindow(QMainWindow):
 
             # Kill the project recovery thread and don't restart should a save be in progress and clear out current
             # recovery checkpoint as it is closing properly
-            self.project_recovery.stop_recovery_thread()
-            self.project_recovery.closing_workbench = True
-            self.project_recovery.remove_current_pid_folder()
+            if self.project_recovery is not None:
+                self.project_recovery.stop_recovery_thread()
+                self.project_recovery.closing_workbench = True
+                self.project_recovery.remove_current_pid_folder()
 
-            self.interface_manager.closeHelpWindow()
+            # Cancel memory widget thread
+            if self.memorywidget is not None:
+                self.memorywidget.presenter.cancel_memory_update()
+
+            if self.interface_manager is not None:
+                self.interface_manager.closeHelpWindow()
 
             event.accept()
         else:
@@ -746,7 +748,10 @@ class MainWindow(QMainWindow):
 
         # restore window state
         if settings.has('MainWindow/state'):
-            self.restoreState(settings.get('MainWindow/state'))
+            if not self.restoreState(settings.get('MainWindow/state'), SAVE_STATE_VERSION):
+                logger.warning(
+                    "The previous layout of workbench is not compatible with this version, reverting to default layout."
+                )
         else:
             self.setWindowState(Qt.WindowMaximized)
 
@@ -759,7 +764,7 @@ class MainWindow(QMainWindow):
     def writeSettings(self, settings):
         settings.set('MainWindow/size', self.size())  # QSize
         settings.set('MainWindow/position', self.pos())  # QPoint
-        settings.set('MainWindow/state', self.saveState())  # QByteArray
+        settings.set('MainWindow/state', self.saveState(SAVE_STATE_VERSION))  # QByteArray
 
         # write out settings for children
         AlgorithmInputHistory().writeSettings(settings)
@@ -770,3 +775,28 @@ class MainWindow(QMainWindow):
     def override_python_input(self):
         """Replace python input with a call to a qinputdialog"""
         builtins.input = QAppThreadCall(input_qinputdialog)
+
+    def attempt_to_restore_state(self, state):
+        if self.restoreState(state, SAVE_STATE_VERSION):
+            return
+
+        # The version number of the supplied state is older than the current version
+        reply = QMessageBox.question(
+            self,
+            "Layout Restoration",
+            "The selected layout is incompatible with this version of Workbench. Workbench will attempt to restore "
+            "the layout, but it may appear differently from before.\nDo you wish to continue?",
+            QMessageBox.Yes | QMessageBox.No)
+        if not reply == QMessageBox.Yes:
+            return
+
+        for version in range(0, SAVE_STATE_VERSION):
+            if self.restoreState(state, version):
+                QMessageBox.information(
+                    self,
+                    "Success",
+                    "The layout was successfully restored.\nTo hide this warning in the future, delete the old "
+                    "layout in File > Settings, and save this as a new layout."
+                )
+                return
+        QMessageBox.warning(self, "Failure", "The layout was unable to be restored.", QMessageBox.Ok)

@@ -219,6 +219,24 @@ public:
     }
   }
 
+  void testPseudoVoigtIntensityError() {
+    const double center{4.};
+    const double intensity{2000.};
+    const double fwhm{0.7};
+    const double mixing{0.8};
+    IPeakFunction_sptr pv = getInitializedPV(center, intensity, fwhm, mixing);
+
+    FunctionDomain1DVector domain(m_xValues);
+    FunctionValues values(domain);
+
+    pv->function(domain, values);
+
+    // check integration
+    double num_intensity = numerical_integrate_pv(center, intensity, fwhm, mixing);
+    TS_ASSERT_DELTA(num_intensity, intensity, 1.);
+    TS_ASSERT_EQUALS(pv->intensityError(), pv->getError("Intensity"));
+  }
+
   /** Compare numerical derivative and analytical derivatives for eta
    * @brief testPseudoVoigtDerivativesVaringMixing: test derivative on eta
    * (mixing)

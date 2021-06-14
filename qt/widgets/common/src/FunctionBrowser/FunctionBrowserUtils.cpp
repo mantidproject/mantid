@@ -48,6 +48,10 @@ IFunction_sptr getFunctionWithPrefix(const QString &prefix, const IFunction_sptr
   return getFunctionWithPrefix(prefix.mid(j + 1), compFun->getFunction(funIndex));
 }
 
+std::pair<QString, int> splitFunctionPrefix(const std::string &prefix) {
+  return splitFunctionPrefix(QString::fromStdString(prefix));
+}
+
 std::pair<QString, int> splitFunctionPrefix(const QString &prefix) {
   if (prefix.isEmpty())
     return std::make_pair("", -1);

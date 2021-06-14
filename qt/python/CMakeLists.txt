@@ -123,6 +123,7 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
         mantidqt/widgets/samplematerialdialog/test/test_samplematerial_presenter.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
+        mantidqt/widgets/sliceviewer/test/test_sliceviewer_imageinfowidget.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_movemousecursor.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
@@ -130,18 +131,19 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_transform.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_zoom.py
+        mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_actions.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_view.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksviewercollectionpresenter.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectormodel.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectorpresenter.py
+        mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_sliceviewer_add_delete_peaks_integration.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_alpha.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_draw.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_painter.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_nonintegrated.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_ellipsoid.py
-        mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_spherical.py
         mantidqt/widgets/test/test_jupyterconsole.py
         mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_view.py
         mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_presenter.py
