@@ -18,7 +18,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "Spectroscopy"; }
   std::string acquisition() const override { return "Count"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
 };
 
@@ -28,7 +27,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "Spectroscopy"; }
   std::string acquisition() const override { return "TOFCount"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
 };
 
@@ -38,7 +36,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "Spectroscopy"; }
   std::string acquisition() const override { return "ScanCount"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
@@ -48,7 +45,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "Spectroscopy"; }
   std::string acquisition() const override { return "TOFCount"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
@@ -58,7 +54,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "Spectroscopy"; }
   std::string acquisition() const override { return ""; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::IVIEW; }
 };
 
@@ -69,7 +64,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "SANS"; }
   std::string acquisition() const override { return ""; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::IVIEW; }
 };
 
@@ -79,7 +73,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "SANS"; }
   std::string acquisition() const override { return ""; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::IVIEW; }
 };
 
@@ -90,7 +83,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "Diffraction"; }
   std::string acquisition() const override { return "Count"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
 };
 
@@ -100,7 +92,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "Diffraction"; }
   std::string acquisition() const override { return "DetectorScan"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
 };
 
@@ -111,7 +102,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "Reflectometry"; }
   std::string acquisition() const override { return "TOFCount"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
@@ -121,7 +111,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "Reflectometry"; }
   std::string acquisition() const override { return "TOFCount"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
@@ -132,7 +121,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "BackScattering"; }
   std::string acquisition() const override { return "DopplerSpectroscopy"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
@@ -142,7 +130,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "BackScattering"; }
   std::string acquisition() const override { return "DopplerDiffraction"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
 };
 
@@ -152,7 +139,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "BackScattering"; }
   std::string acquisition() const override { return "BatsSpectroscopy"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
@@ -162,7 +148,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "BackScattering"; }
   std::string acquisition() const override { return "BatsDiffraction"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
@@ -173,7 +158,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "PowderDiffraction"; }
   std::string acquisition() const override { return "Count"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
 };
 
@@ -183,7 +167,6 @@ public:
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "PowderDiffraction"; }
   std::string acquisition() const override { return "TOFCount"; }
-  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
