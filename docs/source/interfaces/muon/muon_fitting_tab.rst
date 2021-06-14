@@ -23,11 +23,10 @@ Fit function browser
    :height: 125px
 
 Right clicking in the central box will bring up a context menu for adding or removing functions.
-The fitting browser here is similar to that used in the :ref:`Multi-dataset Fitting Interface <Multi-dataset-Fitting-Interface>`.
 
 **Property** This is a list of property names, individual functions can be collapsed down for greater legibility.
 
-**Value** This lists the initial guesses for variables within fitting functions. Variables can be fixed for a given fit
+**Value** This lists the initial guesses for variables within fitting functions.Variables can be fixed for a given fit
 from the edit paramiter values dialog box (the ellipsis to the right of the value box).
 
 **Global** If we are performing a simultaneous fit, parameters for each workspace in the fit can be tied by checking this box.
@@ -49,5 +48,5 @@ If it is unchecked it will use the rebinned data as specified on the home tab.
 Used By
 ^^^^^^^
 
-:ref:`Muon Analysis <MuonAnalysis_2-ref>`
-:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`
+:ref:`Muon Analysis <Muon_Analysis-ref>`
+:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>`

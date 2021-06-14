@@ -7,15 +7,13 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IPythonRunner.h"
-#include "IndirectPlotter.h"
+#include "ExternalPlotter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
@@ -60,7 +58,7 @@ Provided common functionality of all indirect interface tabs.
 @author Dan Nixon
 @date 08/10/2014
 */
-class MANTIDQT_INDIRECT_DLL IndirectTab : public QObject, public IPyRunner {
+class MANTIDQT_INDIRECT_DLL IndirectTab : public QObject {
   Q_OBJECT
 
 public:
@@ -82,9 +80,6 @@ public:
   QStringList getContainerWSSuffixes(std::string const &interfaceName) const;
   QStringList getCorrectionsFBSuffixes(std::string const &interfaceName) const;
   QStringList getCorrectionsWSSuffixes(std::string const &interfaceName) const;
-
-  /// Used to run python code
-  void runPythonCode(std::string const &pythonCode) override;
 
   void displayWarning(std::string const &message);
 
@@ -181,9 +176,6 @@ protected:
   /// from the GUI
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
 
-  /// Use a Python runner for when we need the output of a script
-  MantidQt::API::PythonRunner m_pythonRunner;
-
   /// Validator for int inputs
   QIntValidator *m_valInt;
   /// Validator for double inputs
@@ -195,7 +187,7 @@ protected:
   Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
 
-  std::unique_ptr<IndirectPlotter> m_plotter;
+  std::unique_ptr<ExternalPlotter> m_plotter;
 
 private:
   std::string getInterfaceProperty(std::string const &interfaceName, std::string const &propertyName,
@@ -217,8 +209,6 @@ private slots:
 signals:
   /// Send signal to parent window to show a message box to user
   void showMessageBox(const QString &message);
-  /// Run a python script
-  void runAsPythonScript(const QString &code, bool noOutput = false);
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

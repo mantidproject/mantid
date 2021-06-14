@@ -483,7 +483,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::correctDetectorPositions(Ma
   MatrixWorkspace_sptr corrected = inputWS;
 
   for (const auto &detector : detectorSet) {
-    IAlgorithm_sptr alg = createChildAlgorithm("SpecularReflectionPositionCorrect");
+    auto alg = createChildAlgorithm("SpecularReflectionPositionCorrect");
     alg->setProperty("InputWorkspace", corrected);
     alg->setProperty("TwoTheta", twoTheta);
     alg->setProperty("DetectorCorrectionType", correctionType);
@@ -510,7 +510,7 @@ double ReflectometryReductionOneAuto3::calculateTheta(const MatrixWorkspace_sptr
   if (detectorsOfInterest.empty())
     return 0.0;
 
-  IAlgorithm_sptr alg = createChildAlgorithm("SpecularReflectionCalculateTheta");
+  auto alg = createChildAlgorithm("SpecularReflectionCalculateTheta");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setProperty("DetectorComponentName", detectorsOfInterest[0]);
   alg->execute();
@@ -612,7 +612,7 @@ boost::optional<double> ReflectometryReductionOneAuto3::getQStep(const MatrixWor
                                "this algorithm.");
     }
 
-    IAlgorithm_sptr calcRes = createChildAlgorithm("NRCalculateSlitResolution");
+    auto calcRes = createChildAlgorithm("NRCalculateSlitResolution");
     calcRes->setProperty("Workspace", inputWS);
     calcRes->setProperty("TwoTheta", 2 * theta);
     calcRes->execute();
@@ -635,7 +635,7 @@ boost::optional<double> ReflectometryReductionOneAuto3::getQStep(const MatrixWor
  */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto3::rebin(const MatrixWorkspace_sptr &inputWS,
                                                            const RebinParams &params) {
-  IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
+  auto algRebin = createChildAlgorithm("Rebin");
   algRebin->initialize();
   algRebin->setProperty("InputWorkspace", inputWS);
   algRebin->setProperty("OutputWorkspace", inputWS);
@@ -657,7 +657,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::scale(MatrixWorkspace_sptr 
     return inputWS;
 
   double scaleFactor = getProperty("ScaleFactor");
-  IAlgorithm_sptr algScale = createChildAlgorithm("Scale");
+  auto algScale = createChildAlgorithm("Scale");
   algScale->initialize();
   algScale->setProperty("InputWorkspace", inputWS);
   algScale->setProperty("OutputWorkspace", inputWS);
@@ -679,7 +679,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::cropQ(MatrixWorkspace_sptr 
   if (params.qMinIsDefault && params.qMaxIsDefault)
     return inputWS;
 
-  IAlgorithm_sptr algCrop = createChildAlgorithm("CropWorkspace");
+  auto algCrop = createChildAlgorithm("CropWorkspace");
   algCrop->initialize();
   algCrop->setProperty("InputWorkspace", inputWS);
   algCrop->setProperty("OutputWorkspace", inputWS);

@@ -19,7 +19,7 @@ General
 - Facility and Default Instrument: These settings control the default settings used
   for Mantid interfaces that require a facility or instrument. This can be set outside
   of settings by changing the instrument in other interfaces, such as
-  `Muon Analysis 2 <MuonAnalysis_2-ref>`_.
+  `Muon Analysis 2 <Muon_Analysis-ref>`_.
 - Workspaces: This controls the visibility of workspaces whose names begin with ``__``.
 - Confirmations and Notifications: These settings enable and disable confirmation boxes to save scripts
   and projects and error notifications.

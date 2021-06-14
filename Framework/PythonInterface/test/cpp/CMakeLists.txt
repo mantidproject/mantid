@@ -34,6 +34,8 @@ if(CXXTEST_FOUND)
                         PythonInterfaceCore
                         PythonKernelModule
                         PythonAPIModule
+                        ${OpenGL_LIBRARIES}
+                        ${TBB_LIBRARIES}
                         ${Boost_LIBRARIES}
                         ${POCO_LIBRARIES})
 

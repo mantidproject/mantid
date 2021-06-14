@@ -4,15 +4,14 @@
 Mantid 6.1.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/ReleaseNotesIndex_v6_1.png
    :class: screenshot
-   :width: 385px
+   :width: 440px
    :align: right
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
 
 We are proud to announce version 6.1.0 of Mantid.
 
@@ -20,6 +19,7 @@ This release includes several improvements to the user experience, notably a new
 and an additional setting to the window behaviour of plots and interfaces.
 
 Other highlights from this release include:
+
 - A new LeanElasticPeak object for constant wavelength instruments that is supported in existing algorithms for e.g. peak prediction and integration.
 - Added setting to allow user to select Floating/On Top behaviour.
 - Sectors drawn in the instrument viewer can now be used to define wedges for azimuthal averaging of 2D SANS data using :ref:`Q1DWeighted <algm-Q1DWeighted>`.
@@ -89,6 +89,6 @@ For a full list of all issues addressed during this release please see the `GitH
 
 .. _forum: https://forum.mantidproject.org
 
-.. _GitHub milestone: https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release Release 6.1"+is%3Amerged
+.. _GitHub milestone: https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release+6.1"+is%3Amerged
 
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v6.1.0

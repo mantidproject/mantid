@@ -19,6 +19,7 @@ class PlottingCanvasModelTest(unittest.TestCase):
 
     def test_create_workspace_plot_information_calls_get_plot_axis_correctly(self):
         self.model._get_workspace_plot_axis = mock.MagicMock(return_value=1)
+        self.model._is_guess_workspace = mock.MagicMock(return_value=True)
         test_ws_names = ["MUSR62260; Group; fwd", "MUSR62260; Group; fwd"]
         test_indies = [0, 0]
         self.model.create_workspace_plot_information(test_ws_names, test_indies, errors=False)
@@ -31,6 +32,7 @@ class PlottingCanvasModelTest(unittest.TestCase):
         axis = 2
         self.model._get_workspace_plot_axis = mock.MagicMock(return_value=2)
         self.model.create_plot_information = mock.MagicMock()
+        self.model._is_guess_workspace = mock.MagicMock(return_value=False)
         test_ws_names = ["MUSR62260; Group; fwd", "MUSR62260; Group; fwd"]
         test_indies = [0, 0]
         self.model.create_workspace_plot_information(test_ws_names, test_indies, errors=False)

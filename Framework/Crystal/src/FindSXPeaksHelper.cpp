@@ -15,7 +15,10 @@
 
 #include "MantidTypes/SpectrumDefinition.h"
 
+#define BOOST_ALLOW_DEPRECATED_HEADERS
 #include <boost/graph/adjacency_list.hpp>
+#undef BOOST_ALLOW_DEPRECATED_HEADERS
+
 #include <boost/graph/connected_components.hpp>
 #include <cmath>
 

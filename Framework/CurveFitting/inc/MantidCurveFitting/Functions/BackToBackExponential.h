@@ -48,6 +48,7 @@ public:
   double fwhm() const override;
   void setFwhm(const double w) override;
   double intensity() const override { return getParameter("I"); }
+  double intensityError() const override { return getError("I"); }
   void setIntensity(const double newIntensity) override { setParameter("I", newIntensity); }
   std::string getWidthParameterName() const override { return "S"; }
 

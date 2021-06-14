@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import MultiDomainFunction
+from mantid.api import IFunction, MultiDomainFunction
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObservable, GenericObserver
 from mantidqt.widgets.fitscriptgenerator import (FittingMode, FitScriptGeneratorModel, FitScriptGeneratorPresenter,
                                                  FitScriptGeneratorView)
@@ -28,6 +28,9 @@ class BasicFittingPresenter:
 
         self.initialize_model_options()
 
+        # This prevents plotting the wrong data when selecting different group/pairs on the grouping tab
+        self._update_plot = True
+
         self.thread_success = True
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
@@ -42,6 +45,9 @@ class BasicFittingPresenter:
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
         self.update_view_from_model_observer = GenericObserverWithArgPassing(
             self.handle_ads_clear_or_remove_workspace_event)
+        self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
+        self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
+        self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
 
         self.fsg_model = None
         self.fsg_view = None
@@ -52,6 +58,7 @@ class BasicFittingPresenter:
         self.view.set_slot_for_undo_fit_clicked(self.handle_undo_fit_clicked)
         self.view.set_slot_for_plot_guess_changed(self.handle_plot_guess_changed)
         self.view.set_slot_for_fit_name_changed(self.handle_function_name_changed_by_user)
+        self.view.set_slot_for_dataset_changed(self.handle_dataset_name_changed)
         self.view.set_slot_for_function_structure_changed(self.handle_function_structure_changed)
         self.view.set_slot_for_function_parameter_changed(
             lambda function_index, parameter: self.handle_function_parameter_changed(function_index, parameter))
@@ -93,6 +100,27 @@ class BasicFittingPresenter:
             self.disable_fitting_notifier.notify_subscribers()
         else:
             self.enable_editing_notifier.notify_subscribers()
+
+    def handle_instrument_changed(self) -> None:
+        """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
+        self._update_plot = False
+        self.update_and_reset_all_data()
+        self._update_plot = True
+        self.clear_cached_fit_functions()
+        self.model.remove_all_fits_from_context()
+
+    def handle_selected_group_pair_changed(self) -> None:
+        """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
+        self._update_plot = False
+        self.update_and_reset_all_data()
+        self._update_plot = True
+
+    def handle_pulse_type_changed(self, updated_variables: dict) -> None:
+        """Handles when double pulse mode is switched on and switches to normal fitting mode."""
+        if "DoublePulseEnabled" in updated_variables:
+            self._update_plot = False
+            self.update_and_reset_all_data()
+            self._update_plot = True
 
     def handle_plot_mode_changed(self, plot_mode: PlotMode) -> None:
         """Handles when the tab has been changed. Updates the plot guess."""
@@ -146,9 +174,16 @@ class BasicFittingPresenter:
         self.view.enable_undo_fit(True)
         self.view.plot_guess = False
 
-    def handle_fitting_finished(self) -> None:
+    def handle_fitting_finished(self, fit_function, fit_status, chi_squared) -> None:
         """Handle when fitting is finished."""
-        raise NotImplementedError("This method must be overridden by a child class.")
+        self.update_fit_statuses_and_chi_squared_in_model(fit_status, chi_squared)
+        self.update_fit_function_in_model(fit_function)
+
+        self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        self.update_fit_function_in_view_from_model()
+
+        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+        self.fit_parameter_changed_notifier.notify_subscribers()
 
     def handle_error(self, error: str) -> None:
         """Handle when an error occurs while fitting."""
@@ -161,6 +196,18 @@ class BasicFittingPresenter:
         fitting_mode = FittingMode.SIMULTANEOUS if self.model.simultaneous_fitting_mode else FittingMode.SEQUENTIAL
         self._open_fit_script_generator_interface(self.model.dataset_names, fitting_mode,
                                                   self._get_fit_browser_options())
+
+    def handle_dataset_name_changed(self) -> None:
+        """Handle when the display workspace combo box is changed."""
+        self.model.current_dataset_index = self.view.current_dataset_index
+
+        self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        self.update_fit_function_in_view_from_model()
+        self.update_start_and_end_x_in_view_from_model()
+
+        if self._update_plot:
+            self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+            self.model.update_plot_guess(self.view.plot_guess)
 
     def handle_function_name_changed_by_user(self) -> None:
         """Handle when the fit name is changed by the user."""
@@ -208,8 +255,13 @@ class BasicFittingPresenter:
         if self.view.start_x > self.view.end_x:
             self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
             self.model.current_end_x = self.view.end_x
+        elif self.view.start_x == self.view.end_x:
+            self.view.start_x = self.model.current_start_x
 
         self.model.current_start_x = self.view.start_x
+
+        self._check_start_x_is_within_x_limits()
+        self._check_end_x_is_within_x_limits()
 
         self.model.update_plot_guess(self.view.plot_guess)
 
@@ -218,8 +270,13 @@ class BasicFittingPresenter:
         if self.view.end_x < self.view.start_x:
             self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
             self.model.current_start_x = self.view.start_x
+        elif self.view.end_x == self.view.start_x:
+            self.view.end_x = self.model.current_end_x
 
         self.model.current_end_x = self.view.end_x
+
+        self._check_start_x_is_within_x_limits()
+        self._check_end_x_is_within_x_limits()
 
         self.model.update_plot_guess(self.view.plot_guess)
 
@@ -244,6 +301,11 @@ class BasicFittingPresenter:
         self.view.start_x = self.model.current_start_x
         self.view.end_x = self.model.current_end_x
 
+    def set_selected_dataset(self, dataset_name: str) -> None:
+        """Sets the workspace to be displayed in the view programmatically."""
+        # Triggers handle_dataset_name_changed which updates the model
+        self.view.current_dataset_name = dataset_name
+
     def set_current_dataset_index(self, dataset_index: int) -> None:
         """Set the current dataset index in the model and view."""
         self.model.current_dataset_index = dataset_index
@@ -256,17 +318,29 @@ class BasicFittingPresenter:
 
     def update_and_reset_all_data(self) -> None:
         """Updates the various data displayed in the fitting widget. Resets and clears previous fit information."""
-        raise NotImplementedError("This method must be overridden by a child class.")
+        # Triggers handle_dataset_name_changed
+        self.update_dataset_names_in_view_and_model()
 
     def update_dataset_names_in_view_and_model(self) -> None:
         """Updates the datasets currently displayed. The simultaneous fit by specifier must be updated before this."""
         self.model.dataset_names = self.model.get_workspace_names_to_display_from_context()
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
+        self.view.update_dataset_name_combo_box(self.model.dataset_names)
+        self.model.current_dataset_index = self.view.current_dataset_index
+
+    def update_fit_statuses_and_chi_squared_in_model(self, fit_status: str, chi_squared: float) -> None:
+        """Updates the fit status and chi squared stored in the model. This is used after a fit."""
+        self.model.current_fit_status = fit_status
+        self.model.current_chi_squared = chi_squared
+
+    def update_fit_function_in_model(self, fit_function: IFunction) -> None:
+        """Updates the fit function stored in the model. This is used after a fit."""
+        self.model.current_single_fit_function = fit_function
 
     def update_fit_function_in_view_from_model(self) -> None:
         """Updates the parameters of a fit function shown in the view."""
         self.view.set_current_dataset_index(self.model.current_dataset_index)
-        self.view.update_fit_function(self.model.get_active_fit_function(), self.model.global_parameters)
+        self.view.update_fit_function(self.model.get_active_fit_function())
 
     def update_fit_functions_in_model_from_view(self) -> None:
         """Updates the fit functions stored in the model using the view."""
@@ -282,6 +356,27 @@ class BasicFittingPresenter:
         self.view.update_local_fit_status_and_chi_squared(self.model.current_fit_status,
                                                           self.model.current_chi_squared)
         self.view.update_global_fit_status(self.model.fit_statuses, self.model.current_dataset_index)
+
+    def update_start_and_end_x_in_view_from_model(self) -> None:
+        """Updates the start and end x in the view using the current values in the model."""
+        self.view.start_x = self.model.current_start_x
+        self.view.end_x = self.model.current_end_x
+
+    def _check_start_x_is_within_x_limits(self) -> None:
+        """Checks the Start X is within the x limits of the current dataset. If not it is set to one of the limits."""
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+        if self.view.start_x < x_lower:
+            self.view.start_x = x_lower
+        elif self.view.start_x > x_upper:
+            self.view.start_x = x_upper
+
+    def _check_end_x_is_within_x_limits(self) -> None:
+        """Checks the End X is within the x limits of the current dataset. If not it is set to one of the limits."""
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+        if self.view.end_x < x_lower:
+            self.view.end_x = x_lower
+        elif self.view.end_x > x_upper:
+            self.view.end_x = x_upper
 
     def _get_single_fit_functions_from_view(self) -> list:
         """Returns the fit functions corresponding to each domain as a list."""

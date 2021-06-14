@@ -16,7 +16,6 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Optional
 
-from qtpy import PYQT4
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
@@ -46,16 +45,7 @@ from sans.gui_logic.presenter.settings_adjustment_presenter import SettingsAdjus
 from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
 from sans.sans_batch import SANSCentreFinder
 from sans.state.AllStates import AllStates
-
-IN_MANTIDPLOT = False
-if PYQT4:
-    try:
-        from mantidplot import graph, newGraph
-        IN_MANTIDPLOT = True
-    except ImportError:
-        pass
-else:
-    from mantid.plots.plotfunctions import get_plot_fig
+from mantid.plots.plotfunctions import get_plot_fig
 
 row_state_to_colour_mapping = {RowState.UNPROCESSED: '#FFFFFF', RowState.PROCESSED: '#d0f4d0',
                                RowState.ERROR: '#accbff'}
@@ -416,9 +406,10 @@ class RunTabPresenter(PresenterCommon):
                 SettingsAdjustmentModel(all_states=user_file_items))
             # 5. Update the views.
             self.update_view_from_model()
-            self._beam_centre_presenter.update_centre_positions(self._model)
 
-            self._beam_centre_presenter.on_update_rows()
+            self._beam_centre_presenter.copy_centre_positions(self._model)
+            self._beam_centre_presenter.update_centre_positions()
+
             self._masking_table_presenter.on_update_rows()
             self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
 
@@ -476,6 +467,8 @@ class RunTabPresenter(PresenterCommon):
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
+        self.on_update_rows()
+
     def _add_multiple_rows_to_table_model(self, rows):
         self._table_model.add_multiple_table_entries(table_index_model_list=rows)
 
@@ -526,6 +519,7 @@ class RunTabPresenter(PresenterCommon):
 
     def on_instrument_changed(self):
         self._setup_instrument_specific_settings()
+        self._beam_centre_presenter.on_update_instrument(self.instrument)
 
     # ----------------------------------------------------------------------------------------------
     # Processing
@@ -536,15 +530,11 @@ class RunTabPresenter(PresenterCommon):
         Plot a graph if continuous output specified.
         """
         if self._view.plot_results:
-            if IN_MANTIDPLOT:
-                if not graph(self.output_graph):
-                    newGraph(self.output_graph)
-            elif not PYQT4:
-                ax_properties = {'yscale': 'log',
-                                 'xscale': 'log'}
-                fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
-                fig.show()
-                self.output_fig = fig
+            ax_properties = {'yscale': 'log',
+                             'xscale': 'log'}
+            fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
+            fig.show()
+            self.output_fig = fig
 
     def _set_progress_bar(self, current, number_steps):
         """
@@ -581,14 +571,11 @@ class RunTabPresenter(PresenterCommon):
             self._plot_graph()
             save_can = self._view.save_can
 
-            # MantidPlot and Workbench have different approaches to plotting
-            output_graph = self.output_graph if PYQT4 else self.output_fig
-
             self.batch_process_runner.process_states(row_index_pair, self.get_states,
                                                      self._view.use_optimizations,
                                                      self._view.output_mode,
                                                      self._view.plot_results,
-                                                     output_graph,
+                                                     self.output_fig,
                                                      save_can)
 
         except Exception as e:

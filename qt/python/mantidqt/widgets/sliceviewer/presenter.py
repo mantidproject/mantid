@@ -418,12 +418,27 @@ class SliceViewer(ObservingPresenter):
         if self._peaks_presenter is not None:
             self._peaks_presenter.clear_observer()
 
+    def add_delete_peak(self, event):
+        if self._peaks_presenter is not None:
+            if event.inaxes:
+                sliceinfo = self.get_sliceinfo()
+                self._logger.debug(f"Coordinates selected x={event.xdata} y={event.ydata} z={sliceinfo.z_value}")
+                pos = sliceinfo.inverse_transform([event.xdata, event.ydata, sliceinfo.z_value])
+                self._logger.debug(f"Coordinates transformed into {sliceinfo.frame} frame, pos={pos}")
+                self._peaks_presenter.add_delete_peak(pos)
+                self.view.data_view.canvas.draw_idle()
+
+    def deactivate_zoom_pan(self):
+        self.view.data_view.deactivate_zoom_pan()
+
+    def deactivate_peak_adding(self, active):
+        if active and self._peaks_presenter is not None:
+            self._peaks_presenter.deactivate_peak_add_delete()
+
     # private api
     def _create_peaks_presenter_if_necessary(self):
         if self._peaks_presenter is None:
-            self._peaks_presenter = \
-                PeaksViewerCollectionPresenter(self.view.peaks_view)
-
+            self._peaks_presenter = PeaksViewerCollectionPresenter(self.view.peaks_view)
         return self._peaks_presenter
 
     def _call_peaks_presenter_if_created(self, attr, *args, **kwargs):

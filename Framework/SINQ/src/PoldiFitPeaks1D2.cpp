@@ -254,7 +254,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks1D2::fitPeaks(const PoldiPeakCollection_sp
     int nMin = getBestChebyshevPolynomialDegree(dataWorkspace, currentRange);
 
     if (nMin > -1) {
-      IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, currentRange, nMin);
+      auto fit = getFitAlgorithm(dataWorkspace, currentRange, nMin);
       fit->execute();
 
       IFunction_sptr fitFunction = fit->getProperty("Function");
@@ -285,7 +285,7 @@ int PoldiFitPeaks1D2::getBestChebyshevPolynomialDegree(const Workspace2D_sptr &d
     int n = 0;
 
     while ((n < 3)) {
-      IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, range, n);
+      auto fit = getFitAlgorithm(dataWorkspace, range, n);
       bool fitSuccess = fit->execute();
 
       if (fitSuccess) {
@@ -365,7 +365,7 @@ IAlgorithm_sptr PoldiFitPeaks1D2::getFitAlgorithm(const Workspace2D_sptr &dataWo
                                                   int n) {
   IFunction_sptr rangeProfile = getRangeProfile(range, n);
 
-  IAlgorithm_sptr fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
+  auto fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
   fitAlgorithm->setProperty("CreateOutput", true);
   fitAlgorithm->setProperty("Output", "FitPeaks1D");
   fitAlgorithm->setProperty("CalcErrors", true);

@@ -518,6 +518,7 @@ target_link_libraries(Kernel
                       ${NETWORK_LIBRARIES}
                       span
                       ${HDF5_LIBRARIES}
+                      Json
                       )
 if(WIN32)
   target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage

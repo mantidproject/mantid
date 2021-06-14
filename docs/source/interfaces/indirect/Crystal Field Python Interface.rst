@@ -170,10 +170,10 @@ Alternatively, the x-values can be taken from a workspace::
   sp = cf.getSpectrum(ws, i)
 
 
-Plotting in MantidPlot
+Plotting
 ----------------------
 
-To plot a spectrum using MantidPlot's graphing facilities `CrystalField` has method `plot`. It has the same arguments as `getSpectrum`
+To plot a spectrum using the graphing facilities of Mantid `CrystalField` has method `plot`. It has the same arguments as `getSpectrum`
 and opens a window with a plot, e.g.::
 
   cf.plot()

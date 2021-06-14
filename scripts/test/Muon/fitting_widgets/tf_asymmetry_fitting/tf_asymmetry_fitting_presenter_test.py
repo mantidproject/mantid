@@ -422,6 +422,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.model.reset_start_xs_and_end_xs = mock.Mock()
         self.model.reset_fit_statuses_and_chi_squared = mock.Mock()
         self.model.reset_fit_functions = mock.Mock()
+        self.model.x_limits_of_workspace = mock.Mock(return_value=(self.start_x, self.end_x))
         self.model.retrieve_first_good_data_from_run = mock.Mock(return_value=self.start_x)
         self.model.get_active_fit_function = mock.Mock(return_value=self.fit_function)
         self.model.get_active_workspace_names = mock.Mock(return_value=[self.dataset_names[self.current_dataset_index]])
