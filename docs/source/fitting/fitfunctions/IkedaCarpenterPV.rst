@@ -11,11 +11,11 @@ Description
 
 This peakshape function is designed to be used to fit time-of-flight
 peaks. In particular this function is the convolution of the
-Ikeda-Carpender function, which aims to model the neutron pulse shape
+Ikeda-Carpenter function (Ref [1]), which aims to model the neutron pulse shape
 from a moderator, and a pseudo-Voigt that models any broadening to the peak
 due to sample properties etc.
 
-The Ikeda-Carpender function is (Ref [1,3])
+The convolution of the Ikeda-Carpenter function with psuedo-Voigt is (Ref [3])
 
 .. math:: N \left[ (1-\eta)\Omega_G + \eta \Omega_L \right]
 
@@ -27,65 +27,24 @@ where :math:`\Omega_G` and :math:`\Omega_L` are the Gaussian and Lorentzian part
 
 :math:`erfc` is the complementary error function, :math:`E_1` is the complex exponential integral, and :math:`Im` is the imaginary component.
 
-The parameters used above are defined as:
+The parameters used above are defined as (from Panel 13 of Ref [3]):
 
-.. math:: k = 0.5
++------------------------------------+------------------------------------------------------------------------+--------------------------------------------------------------+------------------------------------------------------+---------------------------------------------------------------------+
+| .. math:: k = 0.05                 | .. math:: z_s = -\alpha dt + i\frac{1}{2} \alpha \gamma                | .. math:: u = \frac{1}{2} \alpha^- (\alpha^- \sigma^2 - 2dt) | .. math:: N = \frac{1}{4} \alpha \frac{(1-k^2)}{k^2} | .. math:: y_u = \frac{ (\alpha^- \sigma^2 - dt) }{\sqrt{2\sigma^2}} |
+| .. math:: \alpha^- = \alpha(1 - k) | .. math:: z_u = -\alpha^- dt + i\frac{1}{2} \alpha^- \gamma = (1-k)z_s | .. math:: v = \frac{1}{2} \alpha^+ (\alpha^+ \sigma^2 - 2dt) | .. math:: N_u = 1 - R \frac{\alpha^-}{x}             | .. math:: y_v = \frac{ (\alpha^+ \sigma^2 - dt) }{\sqrt{2\sigma^2}} |
+| .. math:: \alpha^+ = \alpha(1 + k) | .. math:: z_v = -\alpha^+ dt + i\frac{1}{2} \alpha^+ \gamma = (1+k)z_s | .. math:: s = \frac{1}{2} \alpha (\alpha \sigma^2 - 2dt)     | .. math:: N_v = 1 - R \frac{\alpha^+}{z}             | .. math:: y_s = \frac{ (\alpha \sigma^2 - dt) }{\sqrt{2\sigma^2}}   |
+| .. math:: x = \alpha^- - \beta     | .. math:: z_r = -\beta dt + i\frac{1}{2} \beta \gamma                  | .. math:: r = \frac{1}{2} \beta (\beta \sigma^2 - 2dt)       | .. math:: N_s = -2(1 - R\frac{\alpha}{y})            | .. math:: y_r = \frac{ (\beta \sigma^2 - dt) }{\sqrt{2\sigma^2}}    |
+| .. math:: y = \alpha - \beta       |                                                                        |                                                              | .. math:: N_r = 2R\alpha^2\beta \frac{k^2}{xyz}      |                                                                     |
+| .. math:: z = \alpha^+ - \beta     |                                                                        |                                                              |                                                      |                                                                     |
++------------------------------------+------------------------------------------------------------------------+--------------------------------------------------------------+------------------------------------------------------+---------------------------------------------------------------------+
 
-.. math:: \alpha = \frac{1}{\alpha_0 + \lambda \alpha_1}
-
-.. math:: \alpha^- = \alpha(1 - k)
-
-.. math:: \alpha^+ = \alpha(1 + k)
-
-.. math:: x = \alpha^- - \beta
-
-.. math:: y = \alpha - \beta
-
-.. math:: z = \alpha^+ - \beta
-
-.. math:: z_s = -\alpha dt + i\frac{1}{2} \alpha \gamma
-
-.. math:: z_u = -\alpha^- dt + i\frac{1}{2} \alpha^- \gamma = (1-k)z_s
-
-.. math:: z_v = -\alpha^+ dt + i\frac{1}{2} \alpha^+ \gamma = (1+k)z_s
-
-.. math:: z_r = -\beta dt + i\frac{1}{2} \beta \gamma
-
-.. math:: u = \frac{1}{2} \alpha^- (\alpha^- \sigma^2 - 2dt)
-
-.. math:: v = \frac{1}{2} \alpha^+ (\alpha^+ \sigma^2 - 2dt)
-
-.. math:: s = \frac{1}{2} \alpha (\alpha \sigma^2 - 2dt)
-
-.. math:: r = \frac{1}{2} \beta (\beta \sigma^2 - 2dt)
-
-.. math:: N = \frac{1}{4} \alpha \frac{(1-k^2)}{k^2}
-
-.. math:: N_u = 1 - R \frac{\alpha^-}{x}
-
-.. math:: N_v = 1 - R \frac{\alpha^+}{z}
-
-.. math:: N_s = -2(1 - R\frac{\alpha}{y})
-
-.. math:: N_r = 2R\alpha^2\beta \frac{k^2}{xyz}
-
-.. math:: y_u = \frac{ (\alpha^- \sigma^2 - dt) }{\sqrt{2\sigma^2}}
-
-.. math:: y_v = \frac{ (\alpha^+ \sigma^2 - dt) }{\sqrt{2\sigma^2}}
-
-.. math:: y_s = \frac{ (\alpha \sigma^2 - dt) }{\sqrt{2\sigma^2}}
-
-.. math:: y_r = \frac{ (\beta \sigma^2 - dt) }{\sqrt{2\sigma^2}}
-
-
-
-
-where :math:`\alpha` and :math:`\beta` are the fast and slow neutron
-decay constants respectively, :math:`R` a maxing coefficient that
-relates to the moderator temperature and :math:`t` is time.
+where :math:`dt = T_i - T_h` is the shift in microseconds with respect to the Bragg position,
+:math:`\alpha` and :math:`\beta` are the fast and slow neutron
+decay constants respectively, and :math:`R` is a maxing coefficient that
+relates to the moderator temperature.
 :math:`\alpha` and :math:`R` are further modelled to depend on
 wavelength and using the notation in the Fullprof manual (Ref [2]) the
-refineable Ikeda-Carpender parameters are Alpha0, Alpha1, Beta0 and
+refineable Ikeda-Carpenter parameters are Alpha0, Alpha1, Beta0 and
 Kappa and these are defined as
 
 .. math:: \alpha=1/(\mbox{Alpha0}+\lambda*\mbox{Alpha1})
@@ -115,8 +74,8 @@ parameters of this fitting function see
 `CreateIkedaCarpenterParameters <http://www.mantidproject.org/CreateIkedaCarpenterParameters>`_.
 
 The implementation of the IkedaCarpenterPV peakshape function here
-follows the analytical expression for this function as presented in the
-Fullprof manual, see Ref[2].
+follows the analytical expression for this function as presented in Panels 13-17
+of Ref[3].
 
 References:
 
@@ -125,6 +84,7 @@ References:
 #. Fullprof manual, see http://www.ill.eu/sites/fullprof/
 #. J. Rodriguez-Carvajal, `Using FullProf to analyze Time of Flight
    Neutron Powder Diffraction data <http://mill2.chem.ucl.ac.uk/ccp/web-mirrors/plotr/Tutorials&Documents/TOF_FullProf.pdf>`_
+
 The figure below illustrate this peakshape function fitted to a TOF
 peak:
 
