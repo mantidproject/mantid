@@ -8,13 +8,13 @@
 import unittest
 from unittest import mock
 
-from mantidqt.widgets.superplot.SuperplotPresenter import SuperplotPresenter
+from mantidqt.widgets.superplot.presenter import SuperplotPresenter
 
 
 class SuperplotPresenterTest(unittest.TestCase):
 
     def setUp(self):
-        py_module = "mantidqt.widgets.superplot.SuperplotPresenter"
+        py_module = "mantidqt.widgets.superplot.presenter"
 
         patch = mock.patch(py_module + ".SuperplotView")
         self.m_view = patch.start()

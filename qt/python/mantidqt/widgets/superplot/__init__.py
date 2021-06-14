@@ -5,4 +5,4 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from .SuperplotPresenter import SuperplotPresenter as Superplot
+from .presenter import SuperplotPresenter as Superplot
