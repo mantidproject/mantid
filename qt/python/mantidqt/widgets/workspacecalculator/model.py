@@ -217,6 +217,16 @@ class WorkspaceCalculatorModel:
             Scale(InputWorkspace=self._rhs_ws, Factor=self._rhs_scale, OutputWorkspace=rhs_ws)
         return lhs_ws, rhs_ws
 
+    @staticmethod
+    def _regularize_output_names(output_ws):
+        """Regularizes the workspace names in the output group, according to the group name
+        and workspace index in the group. Only needed for workspace groups, otherwise the name
+        is already correct."""
+        if isinstance(mtd[output_ws], WorkspaceGroup):
+            for entry_no, entry in enumerate(mtd[output_ws]):
+                ordered_name = "{}_{}".format(output_ws, entry_no)
+                RenameWorkspace(InputWorkspace=entry, OutputWorkspace=ordered_name)
+
     def performOperation(self):
         lhs_valid, rhs_valid, err_msg = self.validateInputs()
         if err_msg != str():
@@ -250,6 +260,8 @@ class WorkspaceCalculatorModel:
                     Divide(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
         except (RuntimeError, ValueError) as err:
             return False, False, str(err)
+        else:
+            self._regularize_output_names(self._output_ws)
         finally:
             DeleteWorkspaces(WorkspaceList=[lhs_ws, rhs_ws])
         return True, True, ""
