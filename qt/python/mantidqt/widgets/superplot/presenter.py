@@ -80,7 +80,7 @@ class SuperplotPresenter:
         artists = axes.get_tracked_artists()
         if not artists:
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
-                                          self.BIN_MODE_TEXT])
+                                            self.BIN_MODE_TEXT])
         else:
             try:
                 args = axes.creation_args
@@ -171,7 +171,7 @@ class SuperplotPresenter:
         if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
             mode = self._view.get_mode()
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
-                                          self.BIN_MODE_TEXT])
+                                            self.BIN_MODE_TEXT])
             self._view.set_mode(mode)
         self._view.set_selection(selection)
         self._update_spectrum_slider()
@@ -370,7 +370,7 @@ class SuperplotPresenter:
         self._model.remove_data(ws_name, index)
         if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
-                                          self.BIN_MODE_TEXT])
+                                            self.BIN_MODE_TEXT])
             self._view.set_mode(mode)
         if ws_name in selection:
             if index in selection[ws_name]:
