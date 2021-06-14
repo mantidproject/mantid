@@ -203,45 +203,52 @@ class WISHIntegrateSatellitePeaksTest(MantidSystemTest):
 
     def cleanup(self):
         ADS.clear()
+        try:
+            os.path.remove(self._peaks_file)
+        except:
+            pass
 
     def runTest(self):
         # Load raw data (bank 1)
         wsMD = LoadMD("WISH38237_MD.nxs")  # default so doesn't get overwrite van
         # For each mod vec, predict and integrate peaks and combine
         qs = [(0.15, 0, 0.3), (-0.15, 0, 0.3)]
-        self._all_pks = CreatePeaksWorkspace(InstrumentWorkspace=wsMD, NumberOfPeaks=0, OutputWorkspace="all_pks")
-        LoadIsawUB(InputWorkspace=self._all_pks, Filename='Wish_Diffuse_Scattering_ISAW_UB.mat')
+        all_pks = CreatePeaksWorkspace(InstrumentWorkspace=wsMD, NumberOfPeaks=0, OutputWorkspace="all_pks")
+        LoadIsawUB(InputWorkspace=all_pks, Filename='Wish_Diffuse_Scattering_ISAW_UB.mat')
         # PredictPeaks
-        parent = PredictPeaks(InputWorkspace=self._all_pks, WavelengthMin=0.8, WavelengthMax=9.3, MinDSpacing=0.5,
-                              ReflectionCondition="primitive")
+        parent = PredictPeaks(InputWorkspace=all_pks, WavelengthMin=0.8, WavelengthMax=9.3, MinDSpacing=0.5,
+                              ReflectionCondition="Primitive")
         self._pfps = []
+        self._saved_files = []
+        # One could predict two modulations at once but here we capture the use of CombinePeaksWorkspace which is used
+        # in the WISH workflow for combining peaks from different runs
         for iq, q in enumerate(qs):
-            pfp = PredictFractionalPeaks(Peaks=parent, IncludeAllPeaksInRange=True, Hmin=0, Hmax=0, Kmin=1, Kmax=1,
-                                         Lmin=0, Lmax=1, ReflectionCondition='Primitive', MaxOrder=1,
-                                         ModVector1=",".join([str(qi) for qi in q]), FracPeaks=f'pfp_{iq}')
-            FilterPeaks(InputWorkspace=pfp, OutputWorkspace=pfp, FilterVariable='Wavelength',
-                        FilterValue=9.3)  # should get rid of one peak in q1 table
-            FilterPeaks(InputWorkspace=pfp, OutputWorkspace=pfp, FilterVariable='Wavelength',
+            wsname = f'pfp_{iq}'
+            PredictFractionalPeaks(Peaks=parent, IncludeAllPeaksInRange=True, Hmin=0, Hmax=0, Kmin=1, Kmax=1,
+                                   Lmin=0, Lmax=1, ReflectionCondition='Primitive', MaxOrder=1,
+                                   ModVector1=",".join([str(qi) for qi in q]), FracPeaks=wsname)
+            FilterPeaks(InputWorkspace=wsname, OutputWorkspace=wsname, FilterVariable='Wavelength',
+                        FilterValue=9.3, Operator='<')  # should get rid of one peak in q1 table
+            FilterPeaks(InputWorkspace=wsname, OutputWorkspace=wsname, FilterVariable='Wavelength',
                         FilterValue=0.8, Operator='>')
             IntegratePeaksMD(InputWorkspace=wsMD, PeakRadius='0.1', BackgroundInnerRadius='0.1',
-                             BackgroundOuterRadius='0.15', PeaksWorkspace=pfp, OutputWorkspace=pfp,
+                             BackgroundOuterRadius='0.15', PeaksWorkspace=wsname, OutputWorkspace=wsname,
                              IntegrateIfOnEdge=False, UseOnePercentBackgroundCorrection=False)
-            SaveReflections(InputWorkspace=pfp, Filename=f'WISH_IntegratedSatellite_q{iq}.int', Format='Jana')
-            CombinePeaksWorkspaces(LHSWorkspace=self._all_pks, RHSWorkspace=pfp, OutputWorkspace=self._all_pks)
-            self._pfps.append(pfp)
-        SaveReflections(InputWorkspace=self._all_pks, Filename='WISH_IntegratedSatellite_q1_q2.int', Format='Jana')
+            all_pks = CombinePeaksWorkspaces(LHSWorkspace=all_pks, RHSWorkspace=wsname)
+            self._pfps.append(ADS.retrieve(wsname))
+        self._filepath = os.path.join(config['defaultsave.directory'], 'WISH_IntegratedSatellite.int')
+        SaveReflections(InputWorkspace=all_pks, Filename=self._filepath, Format='Jana')
+        self._all_pks = all_pks
 
     def validate(self):
         # check number of peaks and modulation vectors is as expected
-        for pfp in self._pfps:
+        for ip, pfp in enumerate(self._pfps):
             self.assertEqual(1, pfp.getNumberPeaks())
             self.assertEqual(1, num_modulation_vectors(pfp))
         self.assertEqual(2, self._all_pks.getNumberPeaks())
         self.assertEqual(2, num_modulation_vectors(self._all_pks))
         # check files produced (don't need to check files as that should be covered by SaveReflections unit tests)
-        for suffix in ["q1", "q2", "q1_q2"]:
-            self.assertTrue(os.path.isfile(os.path.join(config['defaultsave.directory'],
-                                                        'WISH_IntegratedSatellite_{suffix}.int')))
+        self.assertTrue(os.path.isfile(self._filepath))
 
 
 def load_data_and_normalise(filename, spectrumMin=1, spectrumMax=19461, outputWorkspace="sample"):
