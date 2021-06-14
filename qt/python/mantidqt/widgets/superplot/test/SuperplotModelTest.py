@@ -10,13 +10,13 @@ from unittest import mock
 
 from mantid.api import WorkspaceGroup
 
-from mantidqt.widgets.superplot.SuperplotModel import SuperplotModel
+from mantidqt.widgets.superplot.model import SuperplotModel
 
 
 class SuperplotModelTest(unittest.TestCase):
 
     def setUp(self):
-        py_module = "mantidqt.widgets.superplot.SuperplotModel"
+        py_module = "mantidqt.widgets.superplot.model"
 
         patch = mock.patch(py_module + ".SuperplotAdsObserver")
         self.m_obs = patch.start()

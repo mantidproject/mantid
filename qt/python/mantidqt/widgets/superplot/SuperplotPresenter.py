@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from .SuperplotView import SuperplotView
-from .SuperplotModel import SuperplotModel
+from .model import SuperplotModel
 
 from mantid.api import mtd
 from mantid.plots.utility import MantidAxType
