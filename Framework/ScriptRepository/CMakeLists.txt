@@ -9,7 +9,7 @@ set(INC_FILES
 set(TEST_FILES
     ScriptRepositoryTestImpl.h)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRCS_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS
