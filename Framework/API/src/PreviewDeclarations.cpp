@@ -166,7 +166,26 @@ public:
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
-// TODO SCAN
+// Powder diffraction
+class PowderDiffractionCountDiffractionCurve : public API::IPreview {
+public:
+  std::string name() const override { return "DiffractionCurve"; }
+  std::string facility() const override { return "ILL"; }
+  std::string technique() const override { return "PowderDiffraction"; }
+  std::string acquisition() const override { return "Count"; }
+  std::string geometry() const override { return ""; }
+  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
+};
+
+class PowderDiffractionTOFCountRawDataInChannels : public API::IPreview {
+public:
+  std::string name() const override { return "RawDataInChannels"; }
+  std::string facility() const override { return "ILL"; }
+  std::string technique() const override { return "PowderDiffraction"; }
+  std::string acquisition() const override { return "TOFCount"; }
+  std::string geometry() const override { return ""; }
+  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
+};
 
 // Previews actual declaration
 DECLARE_PREVIEW(SpecCountDiffractionCurve)
@@ -189,10 +208,7 @@ DECLARE_PREVIEW(BackScatteringDopplerDiffractionDiffractionCurve)
 DECLARE_PREVIEW(BackScatteringBatsSpectroscopyRawDataInChannels)
 DECLARE_PREVIEW(BackScatteringBatsDiffractionRawDataInChannels)
 
-DECLARE_PREVIEW(PDIFFMonoRawDataPlot1D)
-DECLARE_PREVIEW(PDIFFTOFRawDataSliceViewer)
-DECLARE_PREVIEW(PDIFFTOFRawDataPlot1D)
-DECLARE_PREVIEW(PDIFFTOFRawDataPlot2D)
-
+DECLARE_PREVIEW(PowderDiffractionCountDiffractionCurve)
+DECLARE_PREVIEW(PowderDiffractionTOFCountRawDataInChannels)
 } // namespace DataHandling
 } // namespace Mantid
