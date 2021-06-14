@@ -123,7 +123,7 @@ void EQSANSPatchSensitivity::exec() {
 
   // Call Calculate efficiency to renormalize
   progress(0.91, "Renormalizing");
-  IAlgorithm_sptr effAlg = createChildAlgorithm("CalculateEfficiency", 0.91, 1, true, 1);
+  auto effAlg = createChildAlgorithm("CalculateEfficiency", 0.91, 1, true, 1);
   effAlg->setProperty("InputWorkspace", inputWS);
   effAlg->setProperty("OutputWorkspace", inputWS);
   effAlg->execute();

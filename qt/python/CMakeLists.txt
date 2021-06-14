@@ -131,12 +131,14 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_transform.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_zoom.py
+        mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_actions.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_view.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksviewercollectionpresenter.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectormodel.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectorpresenter.py
+        mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_sliceviewer_add_delete_peaks_integration.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_alpha.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_draw.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_painter.py

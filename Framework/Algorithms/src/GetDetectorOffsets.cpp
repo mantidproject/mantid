@@ -9,7 +9,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -32,8 +35,8 @@ using namespace DataObjects;
  */
 void GetDetectorOffsets::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                                        std::make_shared<WorkspaceUnitValidator>("dSpacing")),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+
                   "A 2D workspace with X values of d-spacing");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
@@ -57,15 +60,29 @@ void GetDetectorOffsets::init() {
                   "The function type for fitting the peaks.");
   declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
 
-  std::vector<std::string> modes{"Relative", "Absolute"};
+  /* Signed mode calculates offset in number of bins */
+  std::vector<std::string> modes{"Relative", "Absolute", "Signed"};
 
   declareProperty("OffsetMode", "Relative", std::make_shared<StringListValidator>(modes),
-                  "Whether to calculate a relative or absolute offset");
+                  "Whether to calculate a relative, absolute, or signed offset");
   declareProperty("DIdeal", 2.0, mustBePositive,
                   "The known peak centre value from the NIST standard "
                   "information, this is only used in Absolute OffsetMode.");
 }
 
+std::map<std::string, std::string> GetDetectorOffsets::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  const auto unit = inputWS->getAxis(0)->unit()->caption();
+  const auto unitErrorMsg =
+      "GetDetectorOffsets only supports input workspaces with units 'Bins of Shift' or 'd-Spacing', your unit was : " +
+      unit;
+  if (unit != "Bins of Shift" && unit != "d-Spacing") {
+    result["InputWorkspace"] = unitErrorMsg;
+  }
+  return result;
+}
 //-----------------------------------------------------------------------------------------
 /** Executes the algorithm
  *
@@ -82,10 +99,18 @@ void GetDetectorOffsets::exec() {
   m_dreference = getProperty("DReference");
   m_step = getProperty("Step");
 
-  std::string mode = getProperty("OffsetMode");
-  bool isAbsolute = false;
-  if (mode == "Absolute") {
-    isAbsolute = true;
+  std::string mode_str = getProperty("OffsetMode");
+
+  if (mode_str == "Absolute") {
+    mode = offset_mode::absolute_offset;
+  }
+
+  else if (mode_str == "Relative") {
+    mode = offset_mode::relative_offset;
+  }
+
+  else if (mode_str == "Signed") {
+    mode = offset_mode::signed_offset;
   }
 
   m_dideal = getProperty("DIdeal");
@@ -105,7 +130,7 @@ void GetDetectorOffsets::exec() {
   for (int64_t wi = 0; wi < nspec; ++wi) {
     PARALLEL_START_INTERUPT_REGION
     // Fit the peak
-    double offset = fitSpectra(wi, isAbsolute);
+    double offset = fitSpectra(wi);
     double mask = 0.0;
     if (std::abs(offset) > m_maxOffset) {
       offset = 0.0;
@@ -149,7 +174,7 @@ void GetDetectorOffsets::exec() {
   std::string filename = getProperty("GroupingFileName");
   if (!filename.empty()) {
     progress(0.9, "Saving .cal file");
-    IAlgorithm_sptr childAlg = createChildAlgorithm("SaveCalFile");
+    auto childAlg = createChildAlgorithm("SaveCalFile");
     childAlg->setProperty("OffsetsWorkspace", outputW);
     childAlg->setProperty("MaskWorkspace", maskWS);
     childAlg->setPropertyValue("Filename", filename);
@@ -161,10 +186,9 @@ void GetDetectorOffsets::exec() {
 /** Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
  *
  *  @param s :: The Workspace Index to fit
- *  @param isAbsolbute :: Whether to calculate an absolute offset
  *  @return The calculated offset value
  */
-double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
+double GetDetectorOffsets::fitSpectra(const int64_t s) {
   // Find point of peak centre
   const auto &yValues = inputW->y(s);
   auto it = std::max_element(yValues.cbegin(), yValues.cend());
@@ -204,16 +228,33 @@ double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
 
   // std::vector<double> params = fit_alg->getProperty("Parameters");
   API::IFunction_sptr function = fit_alg->getProperty("Function");
-  double offset = function->getParameter(3); // params[3]; // f1.PeakCentre
-  offset = -1. * offset * m_step / (m_dreference + offset * m_step);
-  // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
-  // negative
 
-  if (isAbsolbute) {
+  double offset = function->getParameter(3); // params[3]; // f1.PeakCentre
+
+  if (mode == offset_mode::signed_offset) {
+    // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
+    // negative
+    offset *= -1;
+  }
+
+  /* offset relative to the reference */
+  else if (mode == offset_mode::relative_offset) {
+    // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
+    // negative
+    offset = -1. * offset * m_step / (m_dreference + offset * m_step);
+  }
+
+  /* Offset relative to the ideal */
+  else if (mode == offset_mode::absolute_offset) {
+
+    offset = -1. * offset * m_step / (m_dreference + offset * m_step);
+
     // translated from(DIdeal - FittedPeakCentre)/(FittedPeakCentre)
     // given by Matt Tucker in ticket #10642
+
     offset += (m_dideal - m_dreference) / m_dreference;
   }
+
   return offset;
 }
 

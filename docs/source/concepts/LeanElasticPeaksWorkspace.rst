@@ -116,7 +116,7 @@ Viewing a LeanElasticPeaksWorkspace
 -----------------------------------
 
 * Double-click a LeanElasticPeaksWorkspace to see the full list of data of each Peak object.
-* The LeanElasticPeaksWorkspace can be overlay onto of data using the Mantid Workbench Sliceviewer
+* The LeanElasticPeaksWorkspace can be overlay onto of data using :ref:`sliceviewer`.
 
 The LeanElasticPeak Object
 --------------------------

@@ -63,13 +63,14 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(self.view.fit_controls.global_fit_status_label.text(), "2 of 5 fits failed")
 
     def test_that_the_view_has_been_initialized_with_the_raw_data_option_shown_when_it_is_not_a_frequency_domain(self):
-        self.view = BasicFittingView(is_frequency_domain=False)
+        self.view = BasicFittingView()
         self.view.show()
 
         self.assertTrue(not self.view.fit_function_options.fit_options_table.isRowHidden(RAW_DATA_TABLE_ROW))
 
     def test_that_the_view_has_been_initialized_with_the_raw_data_option_hidden_when_it_is_a_frequency_domain(self):
-        self.view = BasicFittingView(is_frequency_domain=True)
+        self.view = BasicFittingView()
+        self.view.hide_fit_raw_checkbox()
         self.view.show()
 
         self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(RAW_DATA_TABLE_ROW))
@@ -103,7 +104,7 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.view.set_datasets_in_function_browser(dataset_names)
 
-        self.assertEqual(self.view.number_of_datasets(), 3)
+        self.assertEqual(self.view.fit_function_options.number_of_datasets(), 3)
 
     def test_that_set_current_dataset_index_will_set_the_current_dataset_index_in_the_function_browser(self):
         dataset_names = ["Name1", "Name2", "Name3"]

@@ -496,6 +496,7 @@ public:
     %MethodCode
     sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->ifun());
     %End
+    bool hasTies();
     void setHasPlot(bool);
     QString functionPrefix() const;
     PropertyHandler * findHandler(SIP_PYOBJECT);

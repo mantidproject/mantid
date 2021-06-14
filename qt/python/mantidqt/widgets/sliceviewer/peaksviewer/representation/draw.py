@@ -7,18 +7,24 @@
 
 # local imports
 from .noshape import NonIntegratedPeakRepresentation
-from .ellipsoid import EllipsoidalIntergratedPeakRepresentation
+from .ellipsoid import EllipsoidalIntegratedPeakRepresentation
+from .painter import MplPainter, Painted
+# 3rd party
+from mantid.geometry import PeakShape
+from mantidqt.widgets.sliceviewer.sliceinfo import SliceInfo
+# standard library
+from typing import Sequence
 
 # map shape names to representation classes
 # the strings need to match whatever Peak.getPeakShape.shapeName returns
 _PEAK_REPRESENTATION_FACTORY = {
     "none": NonIntegratedPeakRepresentation,
-    "spherical": EllipsoidalIntergratedPeakRepresentation,
-    "ellipsoid": EllipsoidalIntergratedPeakRepresentation
+    "spherical": EllipsoidalIntegratedPeakRepresentation,
+    "ellipsoid": EllipsoidalIntegratedPeakRepresentation
 }
 
 
-def _get_factory(peak_shape):
+def _get_factory(peak_shape: PeakShape):
     """
     :param peak_shape: A PeakShape object
     :return: A factory object with a create method able to
@@ -34,7 +40,12 @@ def _get_factory(peak_shape):
         return NonIntegratedPeakRepresentation
 
 
-def draw_peak_representation(peak_origin, peak_shape, slice_info, painter, fg_color, bg_color):
+def draw_peak_representation(peak_origin: Sequence,
+                             peak_shape: PeakShape,
+                             slice_info: SliceInfo,
+                             painter: MplPainter,
+                             fg_color: str,
+                             bg_color: str) -> Painted:
     """
     A factory function to create an appropriate PeakRepresentation
     object for a peak and draw it.

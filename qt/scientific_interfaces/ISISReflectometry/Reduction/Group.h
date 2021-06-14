@@ -32,7 +32,6 @@ public:
   bool requiresProcessing(bool reprocessFailed) const override;
   bool requiresPostprocessing(bool reprocessFailed) const;
   std::string postprocessedWorkspaceName() const;
-  std::vector<std::string> workspaceNamesToPostprocess() const;
   void setOutputNames(std::vector<std::string> const &outputNames) override;
   void resetOutputs() override;
 
@@ -42,7 +41,6 @@ public:
   int insertRowSortedByAngle(boost::optional<Row> const &row);
   void removeRow(int rowIndex);
   void updateRow(int rowIndex, boost::optional<Row> const &row);
-  bool allRowsAreValid() const;
 
   int totalItems() const override;
   int completedItems() const override;

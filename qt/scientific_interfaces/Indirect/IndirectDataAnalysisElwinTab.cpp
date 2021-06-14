@@ -87,7 +87,7 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_elwTree(nullptr) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
 }
 
 IndirectDataAnalysisElwinTab::~IndirectDataAnalysisElwinTab() {
