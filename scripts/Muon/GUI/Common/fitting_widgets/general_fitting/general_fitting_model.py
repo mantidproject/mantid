@@ -132,9 +132,7 @@ class GeneralFittingModel(BasicFittingModel):
     def undo_previous_fit(self) -> None:
         """Undoes the previous fit using the saved undo data."""
         if self.number_of_undos() > 0 and self.fitting_context.simultaneous_fitting_mode:
-            self.context.ads_observer.observeDelete(False)
             self.fitting_context.undo_previous_fit()
-            self.context.ads_observer.observeDelete(True)
 
             undo_simultaneous_fit_function = self.fitting_context.simultaneous_fit_functions_for_undo.pop()
             undo_simultaneous_fit_status = self.fitting_context.simultaneous_fit_statuses_for_undo.pop()

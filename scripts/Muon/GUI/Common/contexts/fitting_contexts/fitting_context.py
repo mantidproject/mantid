@@ -11,7 +11,7 @@ import numpy as np
 
 from mantid.api import WorkspaceGroup
 from mantidqt.utils.observer_pattern import Observable
-from Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, remove_ws_if_present
+from Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads
 from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name
 from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
@@ -423,22 +423,9 @@ class FittingContext(object):
         """
         removed_fit = self.active_fit_history.pop()
 
-        self._remove_fit_from_ads(removed_fit)
         fit_found = self._add_next_identical_fit_to_the_ads(removed_fit)
-
         if not fit_found:
             self.fit_removed_notifier.notify_subscribers([removed_fit])
-
-    @staticmethod
-    def _remove_fit_from_ads(undone_fit: FitInformation) -> None:
-        """
-        Removes the undone fit from the ADS.
-        :param undone_fit: The Fot that was just undone by the user.
-        """
-        for output_workspace_name in undone_fit.output_workspace_names():
-            remove_ws_if_present(output_workspace_name)
-        remove_ws_if_present(undone_fit.parameter_workspace.workspace_name)
-        remove_ws_if_present(undone_fit.covariance_workspace.workspace_name)
 
     def _add_next_identical_fit_to_the_ads(self, undone_fit: FitInformation) -> bool:
         """
