@@ -718,18 +718,18 @@
   </instrument>
 
   <instrument name="D2B">
-    <technique>Powder diffraction</technique>
+    <technique>PowderDiffraction</technique>
     <acquisition>DetectorScan</acquisition>
   </instrument>
 
   <instrument name="D20">
-    <technique>Powder diffraction</technique>
+    <technique>PowderDiffraction</technique>
     <acquisition>Count</acquisition>
     <acquisition>DetectorScan</acquisition>
   </instrument>
 
   <instrument name="D1B">
-    <technique>Powder diffraction</technique>
+    <technique>PowderDiffraction</technique>
     <acquisition>Count</acquisition>
   </instrument>
 
