@@ -26,7 +26,7 @@ Operation options
 The options are to perform the four basic arithmetic operations, namely
 addition (`+`), subtraction (`-`), multiplication (`*`), and division (`/`),
 as well as weighted mean  of the inputs (`WM`). It is not possible to perform
-the latter over a mixted input consisting of :ref:`WorkspaceGroup`
+the latter over a mixed input consisting of :ref:`WorkspaceGroup`
 and non-group workspace types.
 
 The output of the operation, if successful, is placed in the ADS with the chosen
