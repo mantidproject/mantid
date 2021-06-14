@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from .SuperplotView import SuperplotView
+from .view import SuperplotView
 from .model import SuperplotModel
 
 from mantid.api import mtd

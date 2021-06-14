@@ -11,7 +11,7 @@ import sys
 
 from qtpy.QtWidgets import QApplication
 
-from mantidqt.widgets.superplot.SuperplotView import SuperplotView
+from mantidqt.widgets.superplot.view import SuperplotView
 
 
 qapp = QApplication(sys.argv)
@@ -20,7 +20,7 @@ qapp = QApplication(sys.argv)
 class SuperplotViewTest(unittest.TestCase):
 
     def setUp(self):
-        py_module = "mantidqt.widgets.superplot.SuperplotView"
+        py_module = "mantidqt.widgets.superplot.view"
 
         patch = mock.patch(py_module + ".SuperplotViewSide")
         self.m_dock_side = patch.start()
