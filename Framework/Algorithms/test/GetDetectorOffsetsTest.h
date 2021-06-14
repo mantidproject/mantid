@@ -201,7 +201,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMax", "20"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaxOffset", "10"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OffsetMode", "Signed"));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DIdeal", "3.5"));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
 
@@ -210,7 +209,7 @@ public:
     if (!output)
       return;
 
-    TS_ASSERT_DELTA(output->y(0)[0], -1, 0.0001);
+    TS_ASSERT_DELTA(output->y(0)[0], -6.22677, 0.0001);
 
     AnalysisDataService::Instance().remove(outputWS);
 
