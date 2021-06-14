@@ -9,7 +9,7 @@ from qtpy.QtCore import QObject, Signal
 
 from mantid.api import mtd, WorkspaceGroup
 
-from .SuperplotAdsObserver import SuperplotAdsObserver
+from .ads_observer import SuperplotAdsObserver
 
 
 class SuperplotModel(QObject):
