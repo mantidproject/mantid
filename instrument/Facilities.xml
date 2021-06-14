@@ -687,8 +687,7 @@
   </instrument>
 
   <instrument name="IN16B">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+    <technique>Backscattering</technique>
     <acquisition>DopplerSpectroscopy</acquisition>
     <acquisition>BatsSpectroscopy</acquisition>
     <acquisition>DopplerDiffraction</acquisition>
