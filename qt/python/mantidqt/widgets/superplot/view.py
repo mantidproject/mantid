@@ -19,7 +19,7 @@ import os
 
 class SuperplotViewSide(QDockWidget):
 
-    UI = "superplotSide.ui"
+    UI = "side_dock_widget.ui"
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -41,7 +41,7 @@ class SuperplotViewSide(QDockWidget):
 
 class SuperplotViewBottom(QDockWidget):
 
-    UI = "superplotBottom.ui"
+    UI = "bottom_dock_widget.ui"
 
     def __init__(self, parent=None):
         super().__init__(parent)
