@@ -6,9 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
 import math
-import os
 import re
-import sys
 
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, Workspace
@@ -60,26 +58,6 @@ class BaseInstrument(object):
         if "SANS2D_Definition_Tubes" in self.idf_path:
             return "SANS2DTUBES"
         return self._NAME
-
-    def view(self, workspace_name=None):
-        """
-            Opens Mantidplot's InstrumentView displaying the current instrument. This
-            empty instrument created contained in the named workspace (a default name
-            is generated if this the argument is left blank) unless the workspace already
-            exists and then it's contents are displayed
-            @param workspace_name: the name of the workspace to create and/or display
-        """
-        if workspace_name is None:
-            workspace_name = self._NAME + '_instrument_view'
-            self.load_empty(workspace_name)
-        elif not AnalysisDataService.doesExist(workspace_name):
-            self.load_empty(workspace_name)
-
-        import mantidplot
-        instrument_win = mantidplot.getInstrumentView(workspace_name)
-        instrument_win.show()
-
-        return workspace_name
 
     def load_empty(self, workspace_name=None):
         """
