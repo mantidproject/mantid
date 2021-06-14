@@ -104,34 +104,24 @@ public:
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
 };
 
-// REFL
-class REFLRawDataPlot1D : public API::IPreview {
+// Reflectometry
+class ReflectometryTOFCountRawDataInTOF : public API::IPreview {
 public:
-  std::string name() const override { return "Plot1DSpectrum | RawData"; }
+  std::string name() const override { return "RawDataInTOF"; }
   std::string facility() const override { return "ILL"; }
-  std::string technique() const override { return "REFL"; }
-  std::string acquisition() const override { return "TOF"; }
-  std::string geometry() const override { return "1D"; }
-  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
+  std::string technique() const override { return "Reflectometry"; }
+  std::string acquisition() const override { return "TOFCount"; }
+  std::string geometry() const override { return ""; }
+  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
-class REFLRawDataSliceViewer : public API::IPreview {
+class ReflectometryTOFCountRawDataInWavelength : public API::IPreview {
 public:
-  std::string name() const override { return "SliceViewer | RawData"; }
+  std::string name() const override { return "RawDataInWavelength"; }
   std::string facility() const override { return "ILL"; }
-  std::string technique() const override { return "REFL"; }
-  std::string acquisition() const override { return "TOF"; }
-  std::string geometry() const override { return "1D"; }
-  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::SVIEW; }
-};
-
-class REFLRawDataPlot2D : public API::IPreview {
-public:
-  std::string name() const override { return "Plot2D | RawData"; }
-  std::string facility() const override { return "ILL"; }
-  std::string technique() const override { return "REFL"; }
-  std::string acquisition() const override { return "TOF"; }
-  std::string geometry() const override { return "1D"; }
+  std::string technique() const override { return "Reflectometry"; }
+  std::string acquisition() const override { return "TOFCount"; }
+  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
@@ -153,14 +143,13 @@ DECLARE_PREVIEW(SANSAllSolidAngleNormInstrumentView)
 DECLARE_PREVIEW(DiffractionCountDiffractionCurve)
 DECLARE_PREVIEW(DiffractionDetectorScanDiffractionCurve)
 
+DECLARE_PREVIEW(ReflectometryTOFCountRawDataInTOF)
+DECLARE_PREVIEW(ReflectometryTOFCountRawDataInWavelength)
+
 DECLARE_PREVIEW(PDIFFMonoRawDataPlot1D)
 DECLARE_PREVIEW(PDIFFTOFRawDataSliceViewer)
 DECLARE_PREVIEW(PDIFFTOFRawDataPlot1D)
 DECLARE_PREVIEW(PDIFFTOFRawDataPlot2D)
-
-DECLARE_PREVIEW(REFLRawDataSliceViewer)
-DECLARE_PREVIEW(REFLRawDataPlot1D)
-DECLARE_PREVIEW(REFLRawDataPlot2D)
 
 } // namespace DataHandling
 } // namespace Mantid
