@@ -63,67 +63,25 @@ public:
 };
 
 // SANS
-class SANSMonoRawDataInstrumentView : public API::IPreview {
+class SANSAllRawDataInstrumentView : public API::IPreview {
 public:
-  std::string name() const override { return "IView | RawData"; }
+  std::string name() const override { return "RawDataInstrumentView"; }
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "SANS"; }
-  std::string acquisition() const override { return "Mono"; }
-  std::string geometry() const override { return "2D"; }
+  std::string acquisition() const override { return ""; }
+  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::IVIEW; }
 };
 
-class SANSTOFRawDataPlot2D : public API::IPreview {
+class SANSAllSolidAngleNormInstrumentView : public API::IPreview {
 public:
-  std::string name() const override { return "Plot2D | RawData"; }
+  std::string name() const override { return "SolidAngleNormInstrumentView"; }
   std::string facility() const override { return "ILL"; }
   std::string technique() const override { return "SANS"; }
-  std::string acquisition() const override { return "TOF"; }
-  std::string geometry() const override { return "2D"; }
-  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
-};
-
-class SANSTOFRawDataPlot1D : public API::IPreview {
-public:
-  std::string name() const override { return "Plot1DSpectrum | RawData"; }
-  std::string facility() const override { return "ILL"; }
-  std::string technique() const override { return "SANS"; }
-  std::string acquisition() const override { return "TOF"; }
-  std::string geometry() const override { return "2D"; }
-  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
-};
-
-class SANSTOFRawDataInstrumentView : public API::IPreview {
-public:
-  std::string name() const override { return "IView | RawData"; }
-  std::string facility() const override { return "ILL"; }
-  std::string technique() const override { return "SANS"; }
-  std::string acquisition() const override { return "TOF"; }
-  std::string geometry() const override { return "2D"; }
+  std::string acquisition() const override { return ""; }
+  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::IVIEW; }
 };
-
-class SANSTOFRawDataSliceViewer : public API::IPreview {
-public:
-  std::string name() const override { return "SliceViewer | RawData"; }
-  std::string facility() const override { return "ILL"; }
-  std::string technique() const override { return "SANS"; }
-  std::string acquisition() const override { return "TOF"; }
-  std::string geometry() const override { return "2D"; }
-  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::SVIEW; }
-};
-
-/*class SANSOScanRawDataInstrumentView : public API::IPreview {
-public:
-  std::string name() const override { return "IView | RawData"; }
-  std::string facility() const override { return "ILL"; }
-  std::string technique() const override { return "SANS"; }
-  std::string acquisition() const override { return "OScan"; }
-  std::string geometry() const override { return "2D"; }
-  API::IPreview::PreviewType type() const override {
-    return API::IPreview::PreviewType::IVIEW;
-  }
-};*/
 
 // PDIFF
 class PDIFFTOFRawDataPlot1D : public API::IPreview {
@@ -212,11 +170,8 @@ DECLARE_PREVIEW(SpecScanCountDiffractionCurveScan)
 DECLARE_PREVIEW(SpecTOFCountPowderGrouping)
 DECLARE_PREVIEW(SpecAllRawDataInstrumentView)
 
-DECLARE_PREVIEW(SANSMonoRawDataInstrumentView)
-DECLARE_PREVIEW(SANSTOFRawDataInstrumentView)
-DECLARE_PREVIEW(SANSTOFRawDataSliceViewer)
-DECLARE_PREVIEW(SANSTOFRawDataPlot1D)
-DECLARE_PREVIEW(SANSTOFRawDataPlot2D)
+DECLARE_PREVIEW(SANSAllRawDataInstrumentView)
+DECLARE_PREVIEW(SANSAllSolidAngleNormInstrumentView)
 
 DECLARE_PREVIEW(PDIFFMonoRawDataPlot1D)
 DECLARE_PREVIEW(PDIFFTOFRawDataSliceViewer)
