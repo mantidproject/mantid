@@ -30,7 +30,7 @@ class WorkspaceCalculatorWidget(PluginWidget):
         self.main.add_dockwidget(self)
 
     def get_plugin_title(self):
-        return "Calculator"
+        return "Workspace Calculator"
 
     def readSettings(self, _):
         pass
