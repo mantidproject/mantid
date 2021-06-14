@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 #
-from qtpy.QtWidgets import QVBoxLayout
+from qtpy.QtWidgets import QVBoxLayout, QSizePolicy
 
 from mantidqt.widgets.workspacecalculator.presenter import WorkspaceCalculator
 from workbench.plugins.base import PluginWidget
@@ -23,6 +23,7 @@ class WorkspaceCalculatorWidget(PluginWidget):
         layout.addWidget(self.workspacecalculatorwidget.view)
         layout.sizeHint()
         self.setLayout(layout)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 
     # ----------------- Plugin API --------------------
 
