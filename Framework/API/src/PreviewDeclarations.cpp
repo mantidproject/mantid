@@ -125,8 +125,46 @@ public:
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
-// BACK
-// TODO
+// BackScattering
+class BackScatteringDopplerSpectroscopyRawDataInChannels : public API::IPreview {
+public:
+  std::string name() const override { return "RawDataInChannels"; }
+  std::string facility() const override { return "ILL"; }
+  std::string technique() const override { return "BackScattering"; }
+  std::string acquisition() const override { return "DopplerSpectroscopy"; }
+  std::string geometry() const override { return ""; }
+  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
+};
+
+class BackScatteringDopplerDiffractionDiffractionCurve : public API::IPreview {
+public:
+  std::string name() const override { return "DiffractionCurve"; }
+  std::string facility() const override { return "ILL"; }
+  std::string technique() const override { return "BackScattering"; }
+  std::string acquisition() const override { return "DopplerDiffraction"; }
+  std::string geometry() const override { return ""; }
+  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
+};
+
+class BackScatteringBatsSpectroscopyRawDataInChannels : public API::IPreview {
+public:
+  std::string name() const override { return "RawDataInChannels"; }
+  std::string facility() const override { return "ILL"; }
+  std::string technique() const override { return "BackScattering"; }
+  std::string acquisition() const override { return "BatsSpectroscopy"; }
+  std::string geometry() const override { return ""; }
+  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
+};
+
+class BackScatteringBatsDiffractionRawDataInChannels : public API::IPreview {
+public:
+  std::string name() const override { return "RawDataInChannels"; }
+  std::string facility() const override { return "ILL"; }
+  std::string technique() const override { return "BackScattering"; }
+  std::string acquisition() const override { return "BatsDiffraction"; }
+  std::string geometry() const override { return ""; }
+  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
+};
 
 // TODO SCAN
 
@@ -145,6 +183,11 @@ DECLARE_PREVIEW(DiffractionDetectorScanDiffractionCurve)
 
 DECLARE_PREVIEW(ReflectometryTOFCountRawDataInTOF)
 DECLARE_PREVIEW(ReflectometryTOFCountRawDataInWavelength)
+
+DECLARE_PREVIEW(BackScatteringDopplerSpectroscopyRawDataInChannels)
+DECLARE_PREVIEW(BackScatteringDopplerDiffractionDiffractionCurve)
+DECLARE_PREVIEW(BackScatteringBatsSpectroscopyRawDataInChannels)
+DECLARE_PREVIEW(BackScatteringBatsDiffractionRawDataInChannels)
 
 DECLARE_PREVIEW(PDIFFMonoRawDataPlot1D)
 DECLARE_PREVIEW(PDIFFTOFRawDataSliceViewer)
