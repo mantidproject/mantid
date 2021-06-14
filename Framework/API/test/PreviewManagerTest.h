@@ -25,7 +25,6 @@ public:
   std::string facility() const override { return "TestFacility"; }
   std::string technique() const override { return "SANS"; }
   std::string acquisition() const override { return "Mono"; }
-  std::string geometry() const override { return "1D"; }
 
 private:
   Workspace_sptr preview(Workspace_sptr ws) const override { return ws->clone(); }

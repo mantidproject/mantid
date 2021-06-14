@@ -38,7 +38,6 @@ void export_IPreview() {
       .def("name", &IPreview::name, arg("self"), "Get the name of the preview.")
       .def("facility", &IPreview::facility, arg("self"), "Get the facility of the preview")
       .def("technique", &IPreview::technique, arg("self"), "Get the technique of the preview.")
-      .def("geometry", &IPreview::geometry, arg("self"), "Get the geometry of the instrument")
       .def("type", &IPreview::type, arg("self"), "Get the type of the preview.")
       .def("acquisition", &IPreview::acquisition, arg("self"), "Get the acquisition mode of the preview")
       .def("view", view, (arg("self"), arg("ws")), "Perform the preview operation on the workspace.");

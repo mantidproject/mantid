@@ -112,7 +112,7 @@ class RawDataExplorerPresenter(QObject):
         technique = config.getInstrument(self.model.instrument).techniques()[0]
         acquisition = self.get_current_acquisition()
 
-        preview = self.preview_manager.getPreview(facility, technique, acquisition, "2D", preview_name)
+        preview = self.preview_manager.getPreview(facility, technique, acquisition, preview_name)
         # TODO get the geometry attribute from the facility file; this means adding another getter and
         #  propagating the change through the preview manager (?)
         return preview.type()
