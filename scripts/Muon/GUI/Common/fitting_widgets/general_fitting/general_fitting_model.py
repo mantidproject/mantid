@@ -8,7 +8,6 @@ from mantid.api import AnalysisDataService, IFunction, MultiDomainFunction
 from mantid.simpleapi import RenameWorkspace, CopyLogs
 
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import (create_covariance_matrix_name,
                                                          create_fitted_workspace_name,
                                                          create_multi_domain_fitted_workspace_name,
@@ -18,6 +17,7 @@ from Muon.GUI.Common.contexts.fitting_contexts.general_fitting_context import Ge
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
 from Muon.GUI.Common.utilities.algorithm_utils import run_simultaneous_Fit
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
 class GeneralFittingModel(BasicFittingModel):
@@ -132,6 +132,10 @@ class GeneralFittingModel(BasicFittingModel):
     def undo_previous_fit(self) -> None:
         """Undoes the previous fit using the saved undo data."""
         if self.number_of_undos() > 0 and self.fitting_context.simultaneous_fitting_mode:
+            self.context.ads_observer.observeDelete(False)
+            self.fitting_context.undo_previous_fit()
+            self.context.ads_observer.observeDelete(True)
+
             undo_simultaneous_fit_function = self.fitting_context.simultaneous_fit_functions_for_undo.pop()
             undo_simultaneous_fit_status = self.fitting_context.simultaneous_fit_statuses_for_undo.pop()
             undo_simultaneous_chi_squared = self.fitting_context.simultaneous_chi_squared_for_undo.pop()
@@ -363,14 +367,17 @@ class GeneralFittingModel(BasicFittingModel):
         parameter_table_name, _ = create_parameter_table_name(input_workspace_names[0] + "+ ...", function_name)
         covariance_matrix_name, _ = create_covariance_matrix_name(input_workspace_names[0] + "+ ...", function_name)
 
-        parameter_workspace_wrap = self._add_workspace_to_ADS(parameter_table, parameter_table_name, directory)
-        covariance_workspace_wrap = self._add_workspace_to_ADS(covariance_matrix, covariance_matrix_name, directory)
+        self._add_workspace_to_ADS(parameter_table, parameter_table_name, directory)
+        self._add_workspace_to_ADS(covariance_matrix, covariance_matrix_name, directory)
+
+        parameter_workspace_wrap = StaticWorkspaceWrapper(parameter_table_name, retrieve_ws(parameter_table_name))
+        covariance_workspace_wrap = StaticWorkspaceWrapper(covariance_matrix_name, retrieve_ws(covariance_matrix_name))
 
         self._add_fit_to_context(input_workspace_names, output_workspace_wraps, parameter_workspace_wrap,
                                  covariance_workspace_wrap, global_parameters)
 
     def _add_fit_to_context(self, input_workspace_names: list, output_workspaces: list,
-                            parameter_workspace: MuonWorkspaceWrapper, covariance_workspace: MuonWorkspaceWrapper,
+                            parameter_workspace: StaticWorkspaceWrapper, covariance_workspace: StaticWorkspaceWrapper,
                             global_parameters: list = None) -> None:
         """Adds the results of a single or simultaneous fit to the context."""
         self.fitting_context.add_fit_from_values(input_workspace_names, self.fitting_context.function_name,
@@ -385,7 +392,7 @@ class GeneralFittingModel(BasicFittingModel):
             return []
 
     def _create_output_workspace_wraps(self, input_workspace_names: list, function_name: str, output_group_workspace) -> tuple:
-        """Returns a list of MuonWorkspaceWrapper objects containing the fitted output workspaces"""
+        """Returns a list of StaticWorkspaceWrapper objects containing the fitted output workspaces"""
         if self.fitting_context.number_of_datasets > 1:
             output_group_name, directory = create_multi_domain_fitted_workspace_name(input_workspace_names[0],
                                                                                      function_name)
@@ -394,18 +401,19 @@ class GeneralFittingModel(BasicFittingModel):
                                                                                                 output_group_name)
         else:
             output_workspace_name, directory = create_fitted_workspace_name(input_workspace_names[0], function_name)
-            output_workspace_wrap = self._add_workspace_to_ADS(output_group_workspace, output_workspace_name, directory)
-            output_workspace_wraps = [output_workspace_wrap]
+            self._add_workspace_to_ADS(output_group_workspace, output_workspace_name, directory)
+            output_workspace_wraps = [StaticWorkspaceWrapper(output_workspace_name, retrieve_ws(output_workspace_name))]
         return output_workspace_wraps, directory
 
     def _create_output_workspace_wraps_for_a_multi_domain_fit(self, input_workspace_names: list, output_group_workspace,
                                                               output_group_name: str) -> list:
-        """Returns a list of MuonWorkspaceWrapper objects containing the fitted output workspaces for many domains."""
+        """Returns a list of StaticWorkspaceWrapper objects containing the fitted output workspaces for many domains."""
         self._add_workspace_to_ADS(output_group_workspace, output_group_name, "")
         output_workspace_names = self._rename_members_of_fitted_workspace_group(input_workspace_names,
                                                                                 output_group_name)
 
-        return [MuonWorkspaceWrapper(retrieve_ws(workspace_name)) for workspace_name in output_workspace_names]
+        return [StaticWorkspaceWrapper(workspace_name, retrieve_ws(workspace_name))
+                for workspace_name in output_workspace_names]
 
     def _rename_members_of_fitted_workspace_group(self, input_workspace_names: list, group_workspace: str) -> list:
         """Renames the output workspaces within a group workspace. The Fit algorithm returns an output group when

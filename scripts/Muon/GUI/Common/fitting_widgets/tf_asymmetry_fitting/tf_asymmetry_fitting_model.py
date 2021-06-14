@@ -8,7 +8,6 @@ from mantid import AlgorithmManager, logger
 from mantid.api import IFunction
 from mantid.simpleapi import CopyLogs, ConvertFitFunctionForMuonTFAsymmetry
 
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_fitted_workspace_name,
                                                          create_multi_domain_fitted_workspace_name,
                                                          get_diff_asymmetry_name, get_group_asymmetry_name,
@@ -21,6 +20,7 @@ from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import DE
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
 from Muon.GUI.Common.utilities.algorithm_utils import run_CalculateMuonAsymmetry
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 DEFAULT_NORMALISATION = 0.0
 DEFAULT_NORMALISATION_ERROR = 0.0
@@ -712,7 +712,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         return self.context.group_pair_context.get_unormalisised_workspace_list(normalised_workspaces)
 
     def _add_fit_to_context(self, input_workspace_names: list, output_workspaces: list,
-                            parameter_workspace: MuonWorkspaceWrapper, covariance_workspace: MuonWorkspaceWrapper,
+                            parameter_workspace: StaticWorkspaceWrapper, covariance_workspace: StaticWorkspaceWrapper,
                             global_parameters: list = None) -> None:
         """Adds the results of a single/simultaneous tf asymmetry fit to the context."""
         self.context.fitting_context.add_fit_from_values(input_workspace_names, self.fitting_context.function_name,

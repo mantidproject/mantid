@@ -16,6 +16,7 @@ from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import Basi
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 import math
 import re
@@ -199,7 +200,10 @@ class BasicFittingModel:
     def undo_previous_fit(self) -> None:
         """Undoes the previous fit using the saved undo data."""
         if self.number_of_undos() > 0:
-            self.fitting_context.active_fit_history.pop()
+            self.context.ads_observer.observeDelete(False)
+            self.fitting_context.undo_previous_fit()
+            self.context.ads_observer.observeDelete(True)
+
             undo_dataset_index = self.fitting_context.dataset_indices_for_undo.pop()
             undo_fit_function = self.fitting_context.single_fit_functions_for_undo.pop()
             undo_fit_status = self.fitting_context.fit_statuses_for_undo.pop()
@@ -615,15 +619,19 @@ class BasicFittingModel:
         parameter_table_name, _ = create_parameter_table_name(input_workspace_name, function_name)
         covariance_matrix_name, _ = create_covariance_matrix_name(input_workspace_name, function_name)
 
-        output_workspace_wrap = self._add_workspace_to_ADS(output_workspace, output_workspace_name, directory)
-        parameter_workspace_wrap = self._add_workspace_to_ADS(parameters_table, parameter_table_name, directory)
-        covariance_workspace_wrap = self._add_workspace_to_ADS(covariance_matrix, covariance_matrix_name, directory)
+        self._add_workspace_to_ADS(output_workspace, output_workspace_name, directory)
+        self._add_workspace_to_ADS(parameters_table, parameter_table_name, directory)
+        self._add_workspace_to_ADS(covariance_matrix, covariance_matrix_name, directory)
+
+        output_workspace_wrap = StaticWorkspaceWrapper(output_workspace_name, retrieve_ws(output_workspace_name))
+        parameter_workspace_wrap = StaticWorkspaceWrapper(parameter_table_name, retrieve_ws(parameter_table_name))
+        covariance_workspace_wrap = StaticWorkspaceWrapper(covariance_matrix_name, retrieve_ws(covariance_matrix_name))
 
         self._add_fit_to_context([input_workspace_name], [output_workspace_wrap], parameter_workspace_wrap,
                                  covariance_workspace_wrap)
 
     def _add_fit_to_context(self, input_workspace_names: list, output_workspaces: list,
-                            parameter_workspace: MuonWorkspaceWrapper, covariance_workspace: MuonWorkspaceWrapper) -> None:
+                            parameter_workspace: StaticWorkspaceWrapper, covariance_workspace: StaticWorkspaceWrapper) -> None:
         """Adds the results of a single fit to the context."""
         self.fitting_context.add_fit_from_values(input_workspace_names, self.fitting_context.function_name,
                                                  output_workspaces, parameter_workspace, covariance_workspace)

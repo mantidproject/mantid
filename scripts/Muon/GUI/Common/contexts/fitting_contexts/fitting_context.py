@@ -9,8 +9,11 @@ import re
 
 import numpy as np
 
+from mantid.api import WorkspaceGroup
 from mantidqt.utils.observer_pattern import Observable
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+from Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, remove_ws_if_present
+from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 # Magic values for names of columns in the fit parameter table
 NAME_COL = 'Name'
@@ -181,24 +184,24 @@ class FitInformation(object):
                  input_workspace_names: list,
                  fit_function_name: str,
                  output_workspaces: list,
-                 parameter_workspace: MuonWorkspaceWrapper,
-                 covariance_workspace: MuonWorkspaceWrapper,
+                 parameter_workspace: StaticWorkspaceWrapper,
+                 covariance_workspace: StaticWorkspaceWrapper,
                  global_parameters: list = None,
                  tf_asymmetry_fit: bool = False):
         """
         :param input_workspace_names: A list of input workspace names containing the original data.
         :param fit_function_name: The name of the function used.
-        :param output_workspaces: A list of MuonWorkspaceWrapper's containing the output workspaces.
-        :param parameter_workspace: A MuonWorkspaceWrapper containing the parameter workspace.
-        :param covariance_workspace: A MuonWorkspaceWrapper containing the covariance workspace.
+        :param output_workspaces: A list of StaticWorkspaceWrapper's containing the output workspaces.
+        :param parameter_workspace: A StaticWorkspaceWrapper containing the parameter workspace.
+        :param covariance_workspace: A StaticWorkspaceWrapper containing the covariance workspace.
         :param global_parameters: An optional list of global parameters that were tied together during the fit.
         :param tf_asymmetry_fit: An optional flag indicating whether the data is from a TF Asymmetry fit or not.
         """
         self.input_workspaces: list = input_workspace_names
         self.fit_function_name: str = fit_function_name
         self.output_workspaces: list = output_workspaces
-        self.parameter_workspace: MuonWorkspaceWrapper = parameter_workspace
-        self.covariance_workspace: MuonWorkspaceWrapper = covariance_workspace
+        self.parameter_workspace: StaticWorkspaceWrapper = parameter_workspace
+        self.covariance_workspace: StaticWorkspaceWrapper = covariance_workspace
         self.tf_asymmetry_fit: bool = tf_asymmetry_fit
 
         self._fit_parameters = FitParameters(self.parameter_workspace, global_parameters)
@@ -213,12 +216,17 @@ class FitInformation(object):
             self.tf_asymmetry_fit == other.tf_asymmetry_fit
 
     def output_workspaces_objects(self) -> list:
-        """Returns a list of output workspaces."""
+        """Returns a list of output workspaces. Do not try place these objects into the ADS as they are not copied."""
         return [output_workspace.workspace for output_workspace in self.output_workspaces]
 
     def output_workspace_names(self) -> list:
         """Returns a list of the output workspace names."""
         return [output_workspace.workspace_name for output_workspace in self.output_workspaces]
+
+    def output_group_name(self) -> str:
+        """Returns the name of the WorkspaceGroup that contains the output workspaces from a fit."""
+        _, directory = create_fitted_workspace_name(self.input_workspaces[0], self.fit_function_name)
+        return directory[:-1]
 
     @property
     def parameters(self):
@@ -227,6 +235,21 @@ class FitInformation(object):
     @property
     def parameter_workspace_name(self):
         return self.parameter_workspace.workspace_name
+
+    def add_copy_to_ads(self) -> None:
+        """Adds the output workspaces for this fit to the ADS. Must be a copy so the fit history remains a history."""
+        workspace_group = WorkspaceGroup()
+        add_ws_to_ads(self.output_group_name(), workspace_group)
+
+        for output_workspace in self.output_workspaces:
+            add_ws_to_ads(output_workspace.workspace_name, output_workspace.workspace_copy())
+            workspace_group.add(output_workspace.workspace_name)
+
+        add_ws_to_ads(self.parameter_workspace.workspace_name, self.parameter_workspace.workspace_copy())
+        workspace_group.add(self.parameter_workspace.workspace_name)
+
+        add_ws_to_ads(self.covariance_workspace.workspace_name, self.covariance_workspace.workspace_copy())
+        workspace_group.add(self.covariance_workspace.workspace_name)
 
     def log_names(self, filter_fn=None):
         """
@@ -338,17 +361,17 @@ class FittingContext(object):
                             input_workspace_names: list,
                             fit_function_name: str,
                             output_workspaces: list,
-                            parameter_workspace: MuonWorkspaceWrapper,
-                            covariance_workspace: MuonWorkspaceWrapper,
+                            parameter_workspace: StaticWorkspaceWrapper,
+                            covariance_workspace: StaticWorkspaceWrapper,
                             global_parameters: list = None,
                             tf_asymmetry_fit: bool = False) -> None:
         """
         Add a new fit information object based on the raw values.
         :param input_workspace_names: A list of input workspace names containing the original data.
         :param fit_function_name: The name of the function used.
-        :param output_workspaces: A list of MuonWorkspaceWrapper's containing the output workspaces.
-        :param parameter_workspace: A MuonWorkspaceWrapper containing the parameter workspace.
-        :param covariance_workspace: A MuonWorkspaceWrapper containing the covariance workspace.
+        :param output_workspaces: A list of StaticWorkspaceWrapper's containing the output workspaces.
+        :param parameter_workspace: A StaticWorkspaceWrapper containing the parameter workspace.
+        :param covariance_workspace: A StaticWorkspaceWrapper containing the covariance workspace.
         :param global_parameters: An optional list of global parameters that were tied together during the fit.
         :param tf_asymmetry_fit: An optional flag indicating whether the data is from a TF Asymmetry fit or not.
         """
@@ -392,6 +415,43 @@ class FittingContext(object):
         :return: A list of names of logs
         """
         return [name for fit in self.all_latest_fits() for name in fit.log_names(filter_fn)]
+
+    def undo_previous_fit(self) -> None:
+        """
+        Undoes the Fit stored at the top of the fit history. If an identical fit exists further back in the history,
+        then its workspaces are loaded into the ADS. Otherwise, the Results tab is notified to remove the fit.
+        """
+        removed_fit = self.active_fit_history.pop()
+
+        self._remove_fit_from_ads(removed_fit)
+        fit_found = self._add_next_identical_fit_to_the_ads(removed_fit)
+
+        if not fit_found:
+            self.fit_removed_notifier.notify_subscribers([removed_fit])
+
+    @staticmethod
+    def _remove_fit_from_ads(undone_fit: FitInformation) -> None:
+        """
+        Removes the undone fit from the ADS.
+        :param undone_fit: The Fot that was just undone by the user.
+        """
+        for output_workspace_name in undone_fit.output_workspace_names():
+            remove_ws_if_present(output_workspace_name)
+        remove_ws_if_present(undone_fit.parameter_workspace.workspace_name)
+        remove_ws_if_present(undone_fit.covariance_workspace.workspace_name)
+
+    def _add_next_identical_fit_to_the_ads(self, undone_fit: FitInformation) -> bool:
+        """
+        Adds the next fit in the history that is identical to the undone fit back into the ADS. The history is reversed
+        because the end of the list contains the most recent fits.
+        :param undone_fit: The Fit that was just undone by the user.
+        :returns True if an identical fit was found in the history and added back into the ADS.
+        """
+        for fit in reversed(self.active_fit_history):
+            if fit == undone_fit:
+                fit.add_copy_to_ads()
+                return True
+        return False
 
     def _latest_unique_fits_in(self, fits_history: list) -> list:
         """Returns a list of fits which all have unique fit output workspaces, and are the most recent of their kind."""
