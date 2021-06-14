@@ -102,7 +102,7 @@ class WorkspaceNamingTest(unittest.TestCase):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function_name = "GausOsc"
         expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;GausOsc/'
-        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted Parameters;GausOsc'
+        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;GausOsc; Parameters'
 
         name, directory = create_parameter_table_name(input_workspace_name, trial_function_name)
 
@@ -112,7 +112,7 @@ class WorkspaceNamingTest(unittest.TestCase):
     def test_create_multi_domain_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function_name = 'Polynomial'
-        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;Polynomial/'
+        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted;Polynomial/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted;Polynomial'
 
         name, directory = create_multi_domain_fitted_workspace_name(input_workspace_name, trial_function_name)

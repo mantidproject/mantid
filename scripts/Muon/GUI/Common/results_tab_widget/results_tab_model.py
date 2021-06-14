@@ -205,14 +205,15 @@ class ResultsTabModel(object):
         all_fits = self._fit_context.all_latest_fits()
         missing_msg = []
         for selection in results_selection:
-            fit = all_fits[selection[1]]
-            missing = []
-            for log_name in log_selection:
-                if not fit.has_log(log_name):
-                    missing.append(log_name)
-            if missing:
-                missing_msg.append("  Fit '{}' is missing the logs {}".format(
-                    fit.parameters.parameter_workspace_name, missing))
+            if selection[1] < len(all_fits):
+                fit = all_fits[selection[1]]
+                missing = []
+                for log_name in log_selection:
+                    if not fit.has_log(log_name):
+                        missing.append(log_name)
+                if missing:
+                    missing_msg.append("  Fit '{}' is missing the logs {}".format(
+                        fit.parameters.parameter_workspace_name, missing))
         if missing_msg:
             raise RuntimeError("The logs for each selected fit do not match:\n" + "\n".join(missing_msg))
 

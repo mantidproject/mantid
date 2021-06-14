@@ -26,7 +26,10 @@ class TFAsymmetryFittingContextTest(unittest.TestCase):
         self.assertEqual(self.fitting_context.start_xs, [])
         self.assertEqual(self.fitting_context.end_xs, [])
         self.assertEqual(self.fitting_context.single_fit_functions, [])
-        self.assertEqual(self.fitting_context.single_fit_functions_cache, [])
+        self.assertEqual(self.fitting_context.dataset_indices_for_undo, [])
+        self.assertEqual(self.fitting_context.single_fit_functions_for_undo, [])
+        self.assertEqual(self.fitting_context.fit_statuses_for_undo, [])
+        self.assertEqual(self.fitting_context.chi_squared_for_undo, [])
         self.assertEqual(self.fitting_context.fit_statuses, [])
         self.assertEqual(self.fitting_context.chi_squared, [])
         self.assertEqual(self.fitting_context.plot_guess, False)
@@ -38,7 +41,10 @@ class TFAsymmetryFittingContextTest(unittest.TestCase):
         self.assertTrue(self.fitting_context.fit_to_raw)
 
         self.assertEqual(self.fitting_context.simultaneous_fit_function, None)
-        self.assertEqual(self.fitting_context.simultaneous_fit_function_cache, None)
+        self.assertEqual(self.fitting_context.simultaneous_fit_functions_for_undo, [])
+        self.assertEqual(self.fitting_context.normalisations_for_undo, [])
+        self.assertEqual(self.fitting_context.normalisations_fixed_for_undo, [])
+
         self.assertTrue(not self.fitting_context.simultaneous_fitting_mode)
         self.assertEqual(self.fitting_context.simultaneous_fit_by, "")
         self.assertEqual(self.fitting_context.simultaneous_fit_by_specifier, "")

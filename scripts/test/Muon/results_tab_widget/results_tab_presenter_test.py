@@ -94,7 +94,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
         self.mock_model._fit_context.fit_list = []
         presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
         presenter.on_new_fit_performed()
-        expected_calls = [mock.call(False), mock.call(False)]  # Called once in init of view and once on new fit
+        expected_calls = [mock.call(False), mock.call(True)]  # Called once in init of view and once on new fit
 
         self.mock_view.set_output_results_button_enabled.assert_has_calls(expected_calls)
 
