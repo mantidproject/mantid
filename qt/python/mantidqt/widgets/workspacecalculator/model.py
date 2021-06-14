@@ -7,8 +7,11 @@
 #  This file is part of the mantid workbench.
 #
 #
-from mantid.simpleapi import (Divide, DivideMD, Minus, MinusMD, mtd, Multiply, MultiplyMD,
-                              Plus, PlusMD, WeightedMean, WeightedMeanMD)
+from mantid.simpleapi import (CloneWorkspace, CreateSingleValuedWorkspace,
+                              DeleteWorkspaces, DeleteWorkspace, Divide,
+                              DivideMD, Minus, MinusMD, mtd, Multiply, MultiplyMD,
+                              Plus, PlusMD, RenameWorkspace, Scale,
+                              WeightedMean, WeightedMeanMD)
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid.dataobjects import MDHistoWorkspace, WorkspaceSingleValue
 from mantid.kernel import logger as log
@@ -185,31 +188,33 @@ class WorkspaceCalculatorModel:
         return lhs_valid, rhs_valid, err_msg
 
     @staticmethod
-    def _scale_md_group(ws_group, scale):
-        md_group = mtd[ws_group].clone()
-        for entry in md_group:
-            entry *= scale
-        return md_group
+    def _scale_md_group(ws_group, scale_ws):
+        for entry in mtd[ws_group]:
+            MultiplyMD(LHSWorkspace=entry, RHSWorkspace=scale_ws, OutputWorkspace=entry)
+
+    def _scale_md(self, ws_name, scale):
+        scale_ws = 'scale_ws'
+        CreateSingleValuedWorkspace(DataValue=scale, OutputWorkspace=scale_ws)
+        if isinstance(mtd[ws_name], WorkspaceGroup):
+            ws_name = self._scale_md_group(ws_name, scale_ws)
+        else:
+            MultiplyMD(LHSWorkspace=ws_name, RHSWorkspace=scale_ws, OutputWorkspace=ws_name)
+        DeleteWorkspace(Workspace=scale_ws)
 
     def _scale_input_workspaces(self):
+        lhs_ws = self._lhs_ws + '_tmp'
+        CloneWorkspace(InputWorkspace=self._lhs_ws, OutputWorkspace=lhs_ws)
+        rhs_ws = self._rhs_ws + '_tmp'
+        CloneWorkspace(InputWorkspace=self._rhs_ws, OutputWorkspace=rhs_ws)
 
-        def scale_ws(ws_name, scale):
-            return mtd[ws_name] * scale
-
-        if (self._md_lhs or self._md_rhs
-                and (isinstance(mtd[self._lhs_ws], WorkspaceGroup)
-                     or isinstance(mtd[self._rhs_ws], WorkspaceGroup))):
-            if isinstance(mtd[self._lhs_ws], WorkspaceGroup):
-                lhs_ws = self._scale_md_group(self._lhs_ws, self._lhs_scale)
-            else:
-                lhs_ws = scale_ws(self._lhs_ws, self._lhs_scale)
-            if isinstance(mtd[self._rhs_ws], WorkspaceGroup):
-                rhs_ws = self._scale_md_group(self._rhs_ws, self._rhs_scale)
-            else:
-                rhs_ws = scale_ws(self._rhs_ws, self._rhs_scale)
+        if self._md_lhs:
+            self._scale_md(lhs_ws, self._lhs_scale)
         else:
-            lhs_ws = scale_ws(self._lhs_ws, self._lhs_scale)
-            rhs_ws = scale_ws(self._rhs_ws, self._rhs_scale)
+            Scale(InputWorkspace=self._lhs_ws, Factor=self._lhs_scale, OutputWorkspace=lhs_ws)
+        if self._md_rhs:
+            self._scale_md(rhs_ws, self._rhs_scale)
+        else:
+            Scale(InputWorkspace=self._rhs_ws, Factor=self._rhs_scale, OutputWorkspace=rhs_ws)
         return lhs_ws, rhs_ws
 
     def performOperation(self):
@@ -245,4 +250,6 @@ class WorkspaceCalculatorModel:
                     Divide(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
         except (RuntimeError, ValueError) as err:
             return False, False, str(err)
+        finally:
+            DeleteWorkspaces(WorkspaceList=[lhs_ws, rhs_ws])
         return True, True, ""
