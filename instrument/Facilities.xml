@@ -653,26 +653,20 @@
   <timezone>Europe/Paris</timezone>
 
   <instrument name="IN4">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Disk chopper time-of-flight spectrometer IN4</technique>
+    <technique>Spectroscopy</technique>
     <acquisition>Count</acquisition>
     <acquisition>TOFCount</acquisition>
   </instrument>
 
   <instrument name="IN5">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Disk chopper time-of-flight spectrometer IN5</technique>
+    <technique>Spectroscopy</technique>
     <acquisition>Count</acquisition>
     <acquisition>TOFCount</acquisition>
     <acquisition>ScanCount</acquisition>
   </instrument>
 
   <instrument name="IN6">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Cold neutron time-focussing time-of-flight spectrometer</technique>
+    <technique>Spectroscopy</technique>
     <acquisition>Count</acquisition>
     <acquisition>TOFCount</acquisition>
   </instrument>
@@ -755,18 +749,14 @@
   </instrument>
 
   <instrument name="PANTHER">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Disk chopper time-of-flight spectrometer PANTHER</technique>
+    <technique>Spectroscopy</technique>
     <acquisition>Count</acquisition>
     <acquisition>TOFCount</acquisition>
     <acquisition>ScanCount</acquisition>
   </instrument>
 
   <instrument name="SHARP">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Disk chopper time-of-flight spectrometer</technique>
+    <technique>Spectroscopy</technique>
     <acquisition>Count</acquisition>
     <acquisition>TOFCount</acquisition>
     <acquisition>ScanCount</acquisition>
