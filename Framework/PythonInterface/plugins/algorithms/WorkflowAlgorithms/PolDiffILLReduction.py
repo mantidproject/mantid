@@ -535,8 +535,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         kwargs = dict()
         if 'BeamWidth' in self._sampleAndEnvironmentProperties: # else depends on the sample geometry
             kwargs['BeamWidth'] = self._sampleAndEnvironmentProperties['BeamWidth'].value
-        kwargs['SampleDensityType'] = 'Number Density'
-        kwargs['SampleNumberDensityUnit'] = 'Formula Units'
+        kwargs['SampleDensityType'] = 'Mass Density'
         kwargs['ContainerDensityType'] = 'Number Density'
         kwargs['ContainerNumberDensityUnit'] = 'Formula Units'
         kwargs['SampleDensity'] = self._sampleAndEnvironmentProperties['SampleDensity'].value
@@ -620,50 +619,43 @@ class PolDiffILLReduction(PythonAlgorithm):
         kwargs = self._prepare_arguments()
         sample_geometry_type = self.getPropertyValue('SampleGeometry')
         if attenuation_method == 'Numerical':
+            sample_material_info = {'ChemicalFormula': kwargs['SampleChemicalFormula'],
+                                    'MassDensity': kwargs['SampleDensity']}
+            container_material_info = {'ChemicalFormula': kwargs['ContainerChemicalFormula'],
+                                       'MassDensity': kwargs['ContainerDensity']}
             if sample_geometry_type == 'FlatPlate':
                 SetSample(InputWorkspace=mock_geometry_ws,
                           Geometry={'Shape': 'FlatPlate', 'Height': kwargs['Height'],
                                     'Width': kwargs['SampleWidth'], 'Thick': kwargs['SampleThickness'],
                                     'Center': [0., 0., 0.]},
-                          Material={'ChemicalFormula': kwargs['SampleChemicalFormula'],
-                                    'NumberDensity': kwargs['SampleDensity']},
+                          Material=sample_material_info,
                           ContainerGeometry={'Shape': 'FlatPlateHolder', 'Height': kwargs['Height'],
                                              'Width': kwargs['SampleWidth'], 'Thick': kwargs['SampleThickness'],
                                              'FrontThick': kwargs['ContainerFrontThickness'],
                                              'BackThick': kwargs['ContainerBackThickness'],
                                              'Center': [0., 0., 0.]},
-                          ContainerMaterial={'ChemicalFormula': kwargs['ContainerChemicalFormula'],
-                                             'NumberDensity': kwargs['ContainerDensity'],
-                                             'NumberDensityUnit': kwargs['ContainerNumberDensityUnit']})
+                          ContainerMaterial=container_material_info)
             if sample_geometry_type in ['Cylinder']:
                 SetSample(InputWorkspace=mock_geometry_ws,
                           Geometry={'Shape': 'Cylinder', 'Height': kwargs['Height'],
                                     'Radius': kwargs['SampleRadius']},
-                          Material={'ChemicalFormula': kwargs['SampleChemicalFormula'],
-                                    'SampleNumberDensity': kwargs['SampleDensity'],
-                                    'NumberDensityUnit': kwargs['SampleNumberDensityUnit']},
+                          Material=sample_material_info,
                           ContainerGeometry={'Shape': 'HollowCylinder', 'Height': kwargs['Height'],
                                              'InnerRadius': kwargs['SampleRadius'],
                                              'OuterRadius': kwargs['ContainerRadius']},
-                          ContainerMaterial={'ChemicalFormula': kwargs['ContainerChemicalFormula'],
-                                             'SampleNumberDensity': kwargs['ContainerDensity'],
-                                             'NumberDensityUnit': kwargs['ContainerNumberDensityUnit']})
+                          ContainerMaterial=container_material_info)
             elif sample_geometry_type in ['Annulus']:
                 SetSample(InputWorkspace=mock_geometry_ws,
                           Geometry={"Shape": "HollowCylinder", "Height": kwargs['Height'],
                                     "InnerRadius": kwargs['SampleInnerRadius'],
                                     "OuterRadius": kwargs['SampleOuterRadius']},
-                          Material={"ChemicalFormula": kwargs['SampleChemicalFormula'],
-                                    "SampleNumberDensity": kwargs['SampleDensity'],
-                                    'NumberDensityUnit': kwargs['SampleNumberDensityUnit']},
+                          Material=sample_material_info,
                           ContainerGeometry={"Shape": 'HollowCylinderHolder', 'Height': kwargs['Height'],
                                              'InnerRadius': kwargs['ContainerInnerRadius'],
                                              'InnerOuterRadius': kwargs['SampleInnerRadius'],
                                              'OuterInnerRadius': kwargs['SampleOuterRadius'],
                                              'OuterRadius': kwargs['ContainerOuterRadius']},
-                          ContainerMaterial={"ChemicalFormula": kwargs['ContainerChemicalFormula'],
-                                             "SampleNumberDensity": kwargs['ContainerDensity'],
-                                             'NumberDensityUnit': kwargs['ContainerNumberDensityUnit']})
+                          ContainerMaterial=container_material_info)
 
             PaalmanPingsAbsorptionCorrection(InputWorkspace=mock_geometry_ws, OutputWorkspace=attenuation_ws,
                                              ElementSize=kwargs['ElementSize'])
