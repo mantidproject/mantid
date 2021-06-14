@@ -35,6 +35,7 @@ import sys
 import mantid
 # This is a simple API so give access to the aliases by default as well
 from mantid import api as _api, kernel as _kernel
+from mantid import apiVersion  # noqa: F401
 from mantid.kernel import plugins as _plugin_helper
 from mantid.kernel.funcinspect import customise_func as _customise_func, lhs_info as _lhs_info, \
     replace_signature as _replace_signature, LazyFunctionSignature
@@ -549,7 +550,7 @@ def RenameWorkspace(*args, **kwargs):
     _set_logging_option(algm, arguments)
     algm.setAlwaysStoreInADS(True)
     # does not make sense otherwise, this overwrites even the __STORE_ADS_DEFAULT__
-    if __STORE_KEYWORD__ in arguments and not (arguments[__STORE_KEYWORD__]):
+    if __STORE_KEYWORD__ in arguments and not (arguments[__STORE_KEYWORD__] is True):
         raise KeyError("RenameWorkspace operates only on named workspaces in ADS.")
 
     for key, val in arguments.items():
