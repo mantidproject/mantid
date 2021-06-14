@@ -209,11 +209,11 @@ class EAAutoTabView(QtWidgets.QWidget):
 
         return parameters
 
-    def add_options_to_find_peak_comboboxes(self, workspaces):
+    def add_options_to_find_peak_combobox(self, workspaces):
         self.find_peaks_workspaces = workspaces
-        self.update_find_peak_comboboxes()
+        self.update_find_peak_combobox()
 
-    def update_find_peak_comboboxes(self):
+    def update_find_peak_combobox(self):
         self.group_combobox.clear()
         self.group_combobox.addItems(sorted(list(self.find_peaks_workspaces)))
         self.on_group_combobox_changed()

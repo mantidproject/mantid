@@ -1,5 +1,6 @@
 import unittest
 import unittest.mock as mock
+from copy import deepcopy
 from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter import EAAutoTabPresenter
 
 
@@ -46,7 +47,6 @@ class EAAutoTabPresenterTest(unittest.TestCase):
 
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.message_box.warning")
     def test_show_table_with_invalid_string(self, mock_warning):
-
         self.presenter.show_table("mock_table")
 
         # Assert statement
@@ -82,27 +82,28 @@ class EAAutoTabPresenterTest(unittest.TestCase):
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.retrieve_ws")
     def test_update_view(self, mock_retrieve_ws):
         mock_group = mock.Mock()
-        get_names_return_value = ["mock_refitted_peaks", "mock_peaks", "mock_matches", "mock_workspace",
-                                  "fake_refitted_peaks", "fake_peaks", "fake_matches", "fake_workspace"]
-        mock_group.getNames.return_value = get_names_return_value
+        get_names_return_value = ["test;mock_refitted_peaks", "test;mock_peaks", "test;mock_matches",
+                                  "test;mock_workspace",
+                                  "test;fake_refitted_peaks", "test;fake_peaks", "test;fake_matches",
+                                  "test;fake_workspace"]
+
+        mock_group.getNames = lambda: deepcopy(get_names_return_value)
         mock_retrieve_ws.return_value = mock_group
-        self.presenter.context.group_context.group_names = ["mock_group1", "mock_group2"]
-        self.presenter.model.split_run_and_detector.return_value = ["mock"]
+
+        self.presenter.context.group_context.group_names = ["mock; detector 1", "mock; detector 2"]
+        self.presenter.model.split_run_and_detector = lambda x: x.split(";")
         self.presenter.model.current_peak_table_info = {"workspace": "mock_peak_info", "number_of_peaks": 0}
 
         self.presenter.update_view()
-
         # Assert statement
-        self.presenter.view.add_options_to_find_peak_combobox.assert_called_once_with(["mock", "mock_group1",
-                                                                                       "mock_group2"])
+        self.presenter.view.add_options_to_find_peak_combobox.assert_called_once_with({'mock': ['All', ' detector 1',
+                                                                                                ' detector 2']})
 
-        self.presenter.view.add_options_to_show_peak_combobox.assert_called_once_with(["fake_peaks",
-                                                                                       "fake_refitted_peaks",
-                                                                                       "mock_peaks",
-                                                                                       "mock_refitted_peaks"])
+        self.presenter.view.add_options_to_show_peak_combobox.assert_called_once_with({'test': [
+            'test;mock_refitted_peaks', 'test;mock_peaks', 'test;fake_refitted_peaks', 'test;fake_peaks']})
 
-        self.presenter.view.add_options_to_show_matches_combobox.assert_called_once_with(
-            sorted(get_names_return_value*2))
+        self.presenter.view.add_options_to_show_matches_combobox.assert_called_once_with({'test':
+                                                                                              get_names_return_value * 2})
 
         self.presenter.view.set_peak_info.assert_called_once_with(workspace="mock_peak_info", number_of_peaks=0)
 

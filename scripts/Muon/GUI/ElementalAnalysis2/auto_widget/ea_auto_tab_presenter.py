@@ -93,17 +93,12 @@ class EAAutoTabPresenter(object):
         show_peaks_options = {}
         show_matches_options = {}
         all_runs = list(find_peak_workspaces)
+
         for run in all_runs:
             group_ws = retrieve_ws(run)
             workspace_names = group_ws.getNames()
             for name in workspace_names:
-                if name.endswith(REFITTED_PEAKS_WS_SUFFIX):
-                    if name.split(";")[0] in show_peaks_options:
-                        show_peaks_options[name.split(";")[0]] = [name]
-                    else:
-                        show_peaks_options[name.split(";")[0]].append(name)
-                    continue
-                if name.endswith(PEAKS_WS_SUFFIX):
+                if name.endswith(REFITTED_PEAKS_WS_SUFFIX) or name.endswith(PEAKS_WS_SUFFIX):
                     if name.split(";")[0] not in show_peaks_options:
                         show_peaks_options[name.split(";")[0]] = [name]
                     else:
@@ -116,7 +111,7 @@ class EAAutoTabPresenter(object):
                     else:
                         show_matches_options[name.split(";")[0]].extend(matches_group.getNames())
 
-        self.view.add_options_to_find_peak_comboboxes(find_peak_workspaces)
+        self.view.add_options_to_find_peak_combobox(find_peak_workspaces)
         self.view.add_options_to_show_peak_combobox(show_peaks_options)
         self.view.add_options_to_show_matches_combobox(show_matches_options)
 
