@@ -16,7 +16,6 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Optional
 
-from qtpy import PYQT4
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
@@ -46,16 +45,7 @@ from sans.gui_logic.presenter.settings_adjustment_presenter import SettingsAdjus
 from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
 from sans.sans_batch import SANSCentreFinder
 from sans.state.AllStates import AllStates
-
-IN_MANTIDPLOT = False
-if PYQT4:
-    try:
-        from mantidplot import graph, newGraph
-        IN_MANTIDPLOT = True
-    except ImportError:
-        pass
-else:
-    from mantid.plots.plotfunctions import get_plot_fig
+from mantid.plots.plotfunctions import get_plot_fig
 
 row_state_to_colour_mapping = {RowState.UNPROCESSED: '#FFFFFF', RowState.PROCESSED: '#d0f4d0',
                                RowState.ERROR: '#accbff'}
@@ -540,15 +530,11 @@ class RunTabPresenter(PresenterCommon):
         Plot a graph if continuous output specified.
         """
         if self._view.plot_results:
-            if IN_MANTIDPLOT:
-                if not graph(self.output_graph):
-                    newGraph(self.output_graph)
-            elif not PYQT4:
-                ax_properties = {'yscale': 'log',
-                                 'xscale': 'log'}
-                fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
-                fig.show()
-                self.output_fig = fig
+            ax_properties = {'yscale': 'log',
+                             'xscale': 'log'}
+            fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
+            fig.show()
+            self.output_fig = fig
 
     def _set_progress_bar(self, current, number_steps):
         """
@@ -585,14 +571,11 @@ class RunTabPresenter(PresenterCommon):
             self._plot_graph()
             save_can = self._view.save_can
 
-            # MantidPlot and Workbench have different approaches to plotting
-            output_graph = self.output_graph if PYQT4 else self.output_fig
-
             self.batch_process_runner.process_states(row_index_pair, self.get_states,
                                                      self._view.use_optimizations,
                                                      self._view.output_mode,
                                                      self._view.plot_results,
-                                                     output_graph,
+                                                     self.output_fig,
                                                      save_can)
 
         except Exception as e:

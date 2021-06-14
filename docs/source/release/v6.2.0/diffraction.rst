@@ -21,6 +21,7 @@ Improvements
 
 Bugfixes
 ########
+- fix d-spacing calculation when parabolic model is selected.
 
 Engineering Diffraction
 -----------------------
@@ -40,5 +41,6 @@ Improvements
 
 Bugfixes
 ########
+- Expand the Q space search radius in DetectorSearcher to avoid missing peaks when using :ref:`PredictPeaks <algm-PredictPeaks>`.
 
 :ref:`Release 6.2.0 <v6.2.0>`

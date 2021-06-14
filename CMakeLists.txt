@@ -137,6 +137,7 @@ option(CXXTEST_ADD_PERFORMANCE
 add_subdirectory(Framework)
 
 include_directories(Framework/Kernel/inc)
+include_directories(Framework/Json/inc)
 include_directories(Framework/HistogramData/inc)
 include_directories(Framework/Indexing/inc)
 include_directories(Framework/Parallel/inc)
