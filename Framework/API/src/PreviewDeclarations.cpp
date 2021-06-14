@@ -83,44 +83,24 @@ public:
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::IVIEW; }
 };
 
-// PDIFF
-class PDIFFTOFRawDataPlot1D : public API::IPreview {
+// Diffraction
+class DiffractionCountDiffractionCurve : public API::IPreview {
 public:
-  std::string name() const override { return "Plot1DSpectrum | RawData"; }
+  std::string name() const override { return "DiffractionCurve"; }
   std::string facility() const override { return "ILL"; }
-  std::string technique() const override { return "PDIFF"; }
-  std::string acquisition() const override { return "TOF"; }
-  std::string geometry() const override { return "1D"; }
+  std::string technique() const override { return "Diffraction"; }
+  std::string acquisition() const override { return "Count"; }
+  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
 };
 
-class PDIFFTOFRawDataPlot2D : public API::IPreview {
+class DiffractionDetectorScanDiffractionCurve : public API::IPreview {
 public:
-  std::string name() const override { return "Plot2D | RawData"; }
+  std::string name() const override { return "DiffractionCurve"; }
   std::string facility() const override { return "ILL"; }
-  std::string technique() const override { return "PDIFF"; }
-  std::string acquisition() const override { return "TOF"; }
-  std::string geometry() const override { return "1D"; }
-  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
-};
-
-class PDIFFTOFRawDataSliceViewer : public API::IPreview {
-public:
-  std::string name() const override { return "SliceViewer | RawData"; }
-  std::string facility() const override { return "ILL"; }
-  std::string technique() const override { return "PDIFF"; }
-  std::string acquisition() const override { return "TOF"; }
-  std::string geometry() const override { return "1D"; }
-  API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::SVIEW; }
-};
-
-class PDIFFMonoRawDataPlot1D : public API::IPreview {
-public:
-  std::string name() const override { return "Plot1DBin | RawData"; }
-  std::string facility() const override { return "ILL"; }
-  std::string technique() const override { return "PDIFF"; }
-  std::string acquisition() const override { return "Mono"; }
-  std::string geometry() const override { return "1D"; }
+  std::string technique() const override { return "Diffraction"; }
+  std::string acquisition() const override { return "DetectorScan"; }
+  std::string geometry() const override { return ""; }
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT1D; }
 };
 
@@ -155,9 +135,6 @@ public:
   API::IPreview::PreviewType type() const override { return API::IPreview::PreviewType::PLOT2D; }
 };
 
-// DIFF
-// TODO
-
 // BACK
 // TODO
 
@@ -172,6 +149,9 @@ DECLARE_PREVIEW(SpecAllRawDataInstrumentView)
 
 DECLARE_PREVIEW(SANSAllRawDataInstrumentView)
 DECLARE_PREVIEW(SANSAllSolidAngleNormInstrumentView)
+
+DECLARE_PREVIEW(DiffractionCountDiffractionCurve)
+DECLARE_PREVIEW(DiffractionDetectorScanDiffractionCurve)
 
 DECLARE_PREVIEW(PDIFFMonoRawDataPlot1D)
 DECLARE_PREVIEW(PDIFFTOFRawDataSliceViewer)
