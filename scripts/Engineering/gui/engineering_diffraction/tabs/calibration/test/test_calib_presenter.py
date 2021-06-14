@@ -40,8 +40,10 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
-        self.presenter.cropping_widget.is_custom.return_value = False
+        self.presenter.cropping_widget.get_custom_calfile_enabled.return_value = False
+        self.presenter.cropping_widget.get_custom_spectra_enabled.return_value = False
         self.presenter.cropping_widget.get_bank.return_value = "bank"
+        self.presenter.cropping_widget.get_custom_calfile.return_value = None
 
         self.presenter.on_calibrate_clicked()
         worker_method.assert_called_with("307521", "305738", True, None, bank="bank")
@@ -53,7 +55,8 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
-        self.presenter.cropping_widget.is_custom.return_value = True
+        self.presenter.cropping_widget.get_custom_calfile_enabled.return_value = False
+        self.presenter.cropping_widget.get_custom_spectra_enabled.return_value = True
         self.presenter.cropping_widget.get_custom_spectra.return_value = "1-56,401-809"
 
         self.presenter.on_calibrate_clicked()
@@ -97,7 +100,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.is_searching.return_value = False
         self.view.get_load_checked.return_value = False
         validator.return_value = True
-        self.presenter.cropping_widget.is_valid_custom_spectra.return_value = False
+        self.presenter.cropping_widget.is_spectra_valid.return_value = False
 
         self.presenter.on_calibrate_clicked()
         worker_method.assert_not_called()

@@ -11,7 +11,8 @@ import systemtesting
 import mantid.simpleapi as simple
 
 from mantid import config
-from Engineering.EnginX import main
+#from Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
+#from Engineering.gui.engineering_diffraction.tabs.focus.model import FocusModel
 
 DIRS = config['datasearch.directories'].split(';')
 ref_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))),

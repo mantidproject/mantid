@@ -9,7 +9,7 @@ from copy import deepcopy
 
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
-from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_widget import CroppingWidget
+from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_presenter import CroppingPresenter
 
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
@@ -33,7 +33,7 @@ class CalibrationPresenter(object):
         self.rb_num = None
 
         # Cropping Options
-        self.cropping_widget = CroppingWidget(self.view, view=self.view.get_cropping_widget())
+        self.cropping_widget = CroppingPresenter(parent=self.view, view=self.view.get_cropping_widget())
         self.show_cropping(False)
 
     def connect_view_signals(self):
@@ -86,18 +86,19 @@ class CalibrationPresenter(object):
                                 error_cb=self._on_error,
                                 success_cb=self._on_success)
         self.pending_calibration.set_calibration(vanadium_path, sample_path, self.instrument)
+        self.pending_calibration.set_crop_info(bank, spectrum_numbers, calfile)
         self.set_calibrate_controls_enabled(False)
         self.worker.start()
 
     def start_cropped_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num):
-        if self.cropping_widget.is_custom_calfile():
+        if self.cropping_widget.get_custom_calfile_enabled():
             calfile = self.cropping_widget.get_custom_calfile()
             self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num, calfile=calfile)
-        elif self.cropping_widget.is_custom_spectra():
+        elif self.cropping_widget.get_custom_spectra_enabled():
             spec_nums = self.cropping_widget.get_custom_spectra()
             self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num, spectrum_numbers=spec_nums)
         else:
-            bank = self.cropping_widget.get_bank()
+            bank = str(self.cropping_widget.get_bank())
             self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num, bank=bank)
 
     def set_current_calibration(self, success_info=None):
@@ -129,10 +130,10 @@ class CalibrationPresenter(object):
             create_error_message(self.view, "Check run numbers/path is valid.")
             return False
         if self.view.get_crop_checked():
-            if self.cropping_widget.is_custom_calfile() and not self.cropping_widget.is_valid_custom_calfile():
+            if self.cropping_widget.get_custom_calfile_enabled() and not self.cropping_widget.is_calfile_valid():
                 create_error_message(self.view, "Check custom calfile path is valid.")
                 return False
-            if self.cropping_widget.is_custom_spectra() and not self.cropping_widget.is_valid_custom_spectra():
+            if self.cropping_widget.get_custom_spectra_enabled() and not self.cropping_widget.is_spectra_valid():
                 create_error_message(self.view, "Check custom spectra are valid.")
                 return False
         return True

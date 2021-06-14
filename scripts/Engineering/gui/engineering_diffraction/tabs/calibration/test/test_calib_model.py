@@ -262,8 +262,10 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".Load")
     @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".PDCalibration")
-    def test_run_calibration_no_bank_no_spec_nums(self, pdc, clone_ws, load, nbc, adc, conv, df):
-        conv.side_effect = [MagicMock(), MagicMock(), "focused_bank_1", "focused_bank_2"]
+    @patch(file_path + ".Ads")
+    def test_run_calibration_no_bank_no_spec_nums(self, ads, pdc, clone_ws, load, nbc, adc, conv, df):
+        df.side_effect = ["focused_bank_1", "focused_bank_2"]
+        ads.retrieve.return_value = MagicMock()
         self.model.run_calibration("sample", None, None, None, "full_calib_ws")
 
         pdc.assert_any_call_partial(InputWorkspace="focused_bank_1",
@@ -279,11 +281,13 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".Load")
     @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".PDCalibration")
-    def test_run_calibration_bank_no_spec_nums(self, pdc, clone_ws, load, nbc, adc, conv, df):
-        conv.side_effect = [MagicMock(), MagicMock(), "focused_North"]
+    @patch(file_path + ".Ads")
+    def test_run_calibration_bank_no_spec_nums(self, ads, pdc, clone_ws, load, nbc, adc, conv, df):
+        df.side_effect = ["focused_bank_1"]
+        ads.retrieve.return_value = MagicMock()
         self.model.run_calibration("sample", '1', None, None, "full_calib_ws")
 
-        pdc.assert_any_call_partial(InputWorkspace="focused_North",
+        pdc.assert_any_call_partial(InputWorkspace="focused_bank_1",
                                     OutputCalibrationTable="engggui_calibration_bank_1")
         self.assertEqual(1, pdc.call_count)
 
@@ -295,18 +299,34 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".Load")
     @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".PDCalibration")
-    def test_run_calibration_no_bank_spec_nums(self, pdc, clone_ws, load, nbc, adc, conv, df,
+    @patch(file_path + ".Ads")
+    def test_run_calibration_no_bank_spec_nums(self, ads, pdc, clone_ws, load, nbc, adc, conv, df,
                                                cgw):
-        conv.side_effect = [MagicMock(), MagicMock(), "focused_Cropped"]
-        cgw.return_value = MagicMock()
+        df.side_effect = ["focused_Cropped"]
+        ads.retrieve.return_value = MagicMock()
         self.model.run_calibration("sample", None, None, '28-98', "full_calib_ws")
 
         pdc.assert_any_call_partial(InputWorkspace="focused_Cropped",
                                     OutputCalibrationTable="engggui_calibration_Cropped")
         self.assertEqual(1, pdc.call_count)
 
-    def test_run_calibration_custom_calfile(self):
-        self.assertTrue(False)
+    @patch(file_path + ".create_custom_grouping_workspace")
+    @patch(file_path + ".DiffractionFocussing")
+    @patch(file_path + ".ConvertUnits")
+    @patch(file_path + ".ApplyDiffCal")
+    @patch(file_path + ".NormaliseByCurrent")
+    @patch(file_path + ".Load")
+    @patch(file_path + ".CloneWorkspace")
+    @patch(file_path + ".PDCalibration")
+    @patch(file_path + ".Ads")
+    def test_run_calibration_custom_calfile(self, ads, pdc, clone_ws, load, nbc, adc, conv, df, cgw):
+        df.side_effect = ["focused_Custom"]
+        ads.retrieve.return_value = MagicMock()
+        self.model.run_calibration("sample", None, "/stuff/mycalfile.cal", None, "full_calib_ws")
+
+        pdc.assert_any_call_partial(InputWorkspace="focused_Custom",
+                                    OutputCalibrationTable="engggui_calibration_Custom")
+        self.assertEqual(1, pdc.call_count)
 
 
 if __name__ == '__main__':

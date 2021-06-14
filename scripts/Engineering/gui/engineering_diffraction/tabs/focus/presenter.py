@@ -5,11 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
+from os import path
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message, \
     CalibrationObserver
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
-from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_widget import CroppingWidget
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
 
@@ -29,16 +29,11 @@ class FocusPresenter(object):
         # Connect view signals to local methods.
         self.view.set_on_focus_clicked(self.on_focus_clicked)
         self.view.set_enable_controls_connection(self.set_focus_controls_enabled)
-        self.view.set_on_check_cropping_state_changed(self.show_cropping)
 
         # Variables from other GUI tabs.
         self.current_calibration = CalibrationInfo()
         self.instrument = "ENGINX"
         self.rb_num = None
-
-        # Cropping Options
-        self.cropping_widget = CroppingWidget(self.view, view=self.view.get_cropping_widget())
-        self.show_cropping(False)
 
     def add_focus_subscriber(self, obs):
         self.focus_run_notifier.add_subscriber(obs)
@@ -46,7 +41,7 @@ class FocusPresenter(object):
     def on_focus_clicked(self):
         if not self._validate():
             return
-        banks, spectrum_numbers, calfile = self._get_banks()
+        banks, spectrum_numbers, calfile = self.current_calibration.get_crop_info()
         focus_paths = self.view.get_focus_filenames()
         if self._number_of_files_warning(focus_paths):
             self.start_focus_worker(focus_paths, banks, self.view.get_plot_output(), self.rb_num, spectrum_numbers,
@@ -104,9 +99,6 @@ class FocusPresenter(object):
                 "Please make sure the selected instrument matches instrument for the current calibration.\n"
                 "The instrument for the current calibration is: " + self.current_calibration.get_instrument())
             return False
-        if self.view.get_crop_checked() and not self.cropping_widget.is_valid_custom_spectra():
-            create_error_message(self.view, "Check cropping values are valid.")
-            return False
         return True
 
     def _number_of_files_warning(self, paths):
@@ -126,19 +118,6 @@ class FocusPresenter(object):
         self.view.set_focus_button_enabled(enabled)
         self.view.set_plot_output_enabled(enabled)
 
-    def _get_banks(self):  # -> bank_number(s), spectrum_numbers, calfile
-        bank, spec_nums, calfile = None, None, None
-        if self.view.get_crop_checked():
-            if self.cropping_widget.is_custom_calfile():
-                calfile = self.cropping_widget.get_custom_calfile()
-            elif self.cropping_widget.is_custom_spectra():
-                spec_nums = self.cropping_widget.get_custom_spectra()
-            else:
-                bank = [self.cropping_widget.get_bank()]
-            return bank, spec_nums, calfile
-        else:
-            return ["1", "2"], None, None
-
     def emit_enable_button_signal(self):
         self.view.sig_enable_controls.emit(True)
 
@@ -148,6 +127,23 @@ class FocusPresenter(object):
         :param calibration: The new current calibration.
         """
         self.current_calibration = calibration
+        region_text = self._create_region_of_interest_text(calibration)
+        self.view.set_region_display_text(region_text)
 
-    def show_cropping(self, visible):
-        self.view.set_cropping_widget_visibility(visible)
+    @staticmethod
+    def _create_region_of_interest_text(calibration_info) -> str:
+        """
+        Create a string to describe the region of interest for display to the user on this tab
+        :param calibration_info: calibration_info object for the calibration that has just been created
+        :return: String describing the region of interest
+        """
+        banks, spectrum_numbers, calfile = calibration_info.get_crop_info()
+        if calfile is not None:
+            filename = path.basename(calfile)
+            return str(filename)
+        elif spectrum_numbers is not None:
+            return "Spectra " + str(spectrum_numbers)
+        elif len(banks) == 1:
+            return "North Bank" if banks[0] == '1' else "South Bank"
+        else:
+            return "North and South Banks"

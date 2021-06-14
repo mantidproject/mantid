@@ -4,19 +4,22 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_view import CroppingView
+from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_model import CroppingModel
 
 
 class CroppingPresenter(object):
-    def __init__(self, model, view):
-        self.model = model
-        self.view = view
+    def __init__(self, parent, view=None, model=None):
+        self.parent = parent
+        self.model = model if model else CroppingModel()
+        self.view = view if view else CroppingView(parent)
 
         self.bank = 0
         self.custom_spectra_enabled = False
-        self.custom_spectra = ""
+        self.custom_spectra = None
         self.spectra_valid = True
         self.custom_calfile_enabled = True
-        self.custom_calfile = ""
+        self.custom_calfile = None
         self.calfile_valid = True
 
         # Connect view signals to local functions
@@ -55,11 +58,15 @@ class CroppingPresenter(object):
         self.calfile_valid = valid
         if valid:
             self.custom_calfile = self.view.get_custom_calfile()
+        else:
+            self.custom_calfile = None
 
     def on_spectra_changed(self, text):
         error, value = self.model.validate_and_clean_spectrum_numbers(text)
         if error == "":
             self.custom_spectra = value
+        else:
+            self.custom_spectra = None
         self.set_invalid_spectra_status(error)
 
     # Getters
@@ -103,14 +110,6 @@ class CroppingPresenter(object):
             self.calfile_valid = True
             self.on_spectra_changed(self.view.get_custom_spectra_text())
             self.view.set_custom_spectra_widget_visible()
-
-    def set_invalid_calfile_status(self, text):
-        if text:
-            self.view.set_custom_invalid_indicator_visible(text)
-            self.calfile_valid = False
-        else:
-            self.view.set_custom_invalid_indicator_hidden()
-            self.calfile_valid = True
 
     def set_invalid_spectra_status(self, text):
         if text:

@@ -57,26 +57,22 @@ def get_diffractometer_constants_from_workspace(ws):
     return diff_consts
 
 
-def generate_tof_fit_dictionary(bank, cal_name=None) -> dict:
+def generate_tof_fit_dictionary(cal_name=None) -> dict:
     """
     Generate a dictionary of data to plot showing the results of the calibration
-    :param bank: Name of the bank, None if not a single bank calibration
     :param cal_name: Name of the region of interest of the calibration
     :return: dict, keys: x = expected peaks (dSpacing), y = fitted peaks (TOF), e = y error data,
                          y2 = calculated peaks (TOF), r = residuals (y - y2)
     """
-    if not (bank or cal_name):
+    if not cal_name:
         generate_tof_fit_dictionary("bank_1")
         generate_tof_fit_dictionary("bank_2")
-    if bank[-1:] == '1':  # bank_1
+    if cal_name[-1:] == '1':  # bank_1
         diag_ws_name = "diag_bank_1"
-    elif bank[-1:] == '2':
+    elif cal_name[-1:] == '2':
         diag_ws_name = "diag_bank_2"
     else:
-        if cal_name is None:
-            diag_ws_name = "diag_Cropped"
-        else:
-            diag_ws_name = "diag_" + cal_name
+        diag_ws_name = "diag_" + cal_name
     fitparam_ws_name = diag_ws_name + "_fitparam"
     fitted_ws_name = diag_ws_name + "_fitted"
     fiterror_ws_name = diag_ws_name + "_fiterror"
