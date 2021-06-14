@@ -32,11 +32,7 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
     """
 
     def requiredFiles(self):
-        return ["WISH00038237.raw", "WISHPredictedSingleCrystalPeaks.nxs"]
-
-    def requiredMemoryMB(self):
-        # Need lots of memory for full WISH dataset
-        return 24000
+        return ["WISHPredictedSingleCrystalPeaks.nxs"]
 
     def cleanup(self):
         ADS.clear()
@@ -46,8 +42,7 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
             pass
 
     def runTest(self):
-        ws = LoadRaw(Filename='WISH00038237.raw', OutputWorkspace='38237')
-        ws = ConvertUnits(ws, 'dSpacing', OutputWorkspace='38237')
+        ws = LoadEmptyInstrument(InstrumentName='WISH')
         UB = np.array([[-0.00601763, 0.07397297, 0.05865706],
                        [0.05373321, 0.050198, -0.05651455],
                        [-0.07822144, 0.0295911, -0.04489172]])
@@ -63,8 +58,8 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
         SaveIsawPeaks(self._peaks, Filename='WISHSXReductionPeaksTest.peaks')
 
     def validate(self):
-        self.assertEqual(self._peaks.rowCount(), 510)
-        self.assertEqual(self._filtered.rowCount(), 6)
+        self.assertEqual(self._peaks.rowCount(), 527)
+        self.assertEqual(self._filtered.rowCount(), 7)
 
         # The peak at [-5 -1 -7] is known to fall between the gaps of WISH's tubes
         # Specifically check this one is predicted to exist because past bugs have
@@ -79,7 +74,6 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
             if peak == expected:
                 expected_peak_found = True
                 break
-        # endfor
         self.assertTrue(expected_peak_found, msg="Peak at {} expected but it was not found".format(expected))
         self._peaks_file = os.path.join(config['defaultsave.directory'], 'WISHSXReductionPeaksTest.peaks')
         self.assertTrue(os.path.isfile(self._peaks_file))
