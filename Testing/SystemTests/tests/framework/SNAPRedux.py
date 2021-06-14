@@ -54,7 +54,7 @@ def _assert_reduction_configuration(properties_in):
         config_files = [str(filename) for filename in Path(save_dir).glob('*.json')]
         properties_out = json.load(open(config_files[0], 'r'))
         for p in properties_out:  # the reciprocal for loop is not true
-            assert p in properties_in
+            assert p in properties_in, f'Property {p} not found in the set of properties passed on to SNAPReduce'
 
 
 class SNAPReduxShort(systemtesting.MantidSystemTest):

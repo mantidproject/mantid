@@ -14,8 +14,8 @@ from typing import Optional, Union
 
 
 def run_file(run_number: Union[str, int],
-               instrument: Optional[str] = None,
-               oncat: Optional[bool] = True) -> Optional[None]:
+             instrument: Optional[str] = None,
+             oncat: Optional[bool] = True) -> Optional[None]:
     r"""
     @brief Test whether the file for a run number exists.
     @details Search first the datasearch directories and if file is not found, use the locations
@@ -25,6 +25,12 @@ def run_file(run_number: Union[str, int],
     @param oncat : whether to use the ONCat archiving service
     @returns None if file not found, otherwise absolute path to events file
     """
+    if isinstance(run_number, str):  # verify run_number represents a positive integer number
+        try:
+            int(run_number)
+        except ValueError:
+            raise ValueError(f'{run_number} does not represent a number')
+        assert int(run_number) > 0, f'{run_number} does not represent an positive integer number'
     if instrument is None:
         instrument = config['default.instrument']
     root_name = f'{instrument}_{run_number}'
