@@ -15,7 +15,7 @@ Guides
    :hidden:
 
    DeveloperAccounts
-   GettingStarted
+   GettingStarted/GettingStarted
    BuildingOnOSX
    BuildingWithCMake
    Standards/index
