@@ -26,6 +26,7 @@ New and Improved
 - Plot legends can be shown or hidden from the plot context menu.
 - The plot config dialog notifies the user when there has been an error applying the config to the plot, and allows them to change the config further.
 - When fitting a plot, selecting the peak type will only update the default peak shape in the settings if the "Set as global default" checkbox is ticked.
+- Added help button to the sliceviewer
 
 Bugfixes
 --------
