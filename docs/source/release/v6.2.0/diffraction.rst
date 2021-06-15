@@ -25,6 +25,15 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+New features
+############
+
+Improvements
+############
+
+Bugfixes
+########
+- The help button on the Engineering Diffraction interface points to the correct page, having been broken in the last release
 
 Single Crystal Diffraction
 --------------------------
