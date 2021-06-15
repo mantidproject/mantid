@@ -19,7 +19,7 @@ def calculate_pressure(d_spacing, temp):
     a = 1.0584E-02  # volume fit parameter
     b = 3.493E-06  # volume fit parameter
     k00 = 41.731  # zero pressure bulk modulus at (0) (GPa)
-    c = -2.5444E-05  # bulk modulus fit parameter
+    c = -2.5444E-02  # bulk modulus fit parameter
     d = -2.7567E-06  # bulk modulus fit parameter
     k00p = 5.3925  # K' at (0)
     e = 0.00111  # K' fit parameter
@@ -28,13 +28,13 @@ def calculate_pressure(d_spacing, temp):
     ltemp = temp - 300
 
     v_quad = (v00 + a * ltemp + b * (ltemp ** 2))
-    k_quad = (k00 + c * ltemp + d * (ltemp ** 2))
-    factor = k00p + e * temp
+    k_quad = (k00 + (c * ltemp) + (d * (ltemp ** 2)))
+    factor = k00p + (e * temp)
 
     return 1.5 * k_quad * (((v_calc / v_quad) ** (-2 / 3)) - 1) * (1 + ((v_calc / v_quad) ** (-2 / 3) - 1)) ** (5 / 2) \
-        * (1 + ((3 / 2) * (factor - 4) * ((((v_calc / v_quad) ** (-2 / 3)) - 1) / 2)))\
-        + ((3 / 2) * (((k_quad*k00pp) + (factor - 4) * (factor - 3) + (35 / 9))
-                      * ((((v_calc / v_quad) ** (-2 / 3))-1) / 2) ** 2))
+        * ((1 + ((3 / 2) * (factor - 4) * ((((v_calc / v_quad) ** (-2 / 3)) - 1) / 2)))
+           + ((3 / 2) * (((k_quad * k00pp) + (factor - 4) * (factor - 3) + (35 / 9))
+                         * ((((v_calc / v_quad) ** (-2 / 3)) - 1) / 2) ** 2)))
 
 
 class LeadPressureCalc(PythonAlgorithm):
