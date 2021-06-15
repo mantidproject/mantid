@@ -138,14 +138,27 @@ configure_file(
 
 # The IDE may not be installed as we could be just using the build tools
 if(EXISTS ${MSVC_IDE_LOCATION}/devenv.exe)
+  if (CONDA_BUILD)
+  configure_file(
+    ${WINDOWS_BUILDCONFIG}/visual-studio_conda.bat.in
+    ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY
+  )
+  else()
   configure_file(
     ${WINDOWS_BUILDCONFIG}/visual-studio.bat.in
     ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY
   )
+  endif()
 endif()
+if (CONDA_BUILD)
+configure_file(
+  ${WINDOWS_BUILDCONFIG}/pycharm_conda.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY
+)
+else()
 configure_file(
   ${WINDOWS_BUILDCONFIG}/pycharm.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY
 )
+endif()
 
 # ##############################################################################
 # Configure Mantid startup scripts

@@ -7,6 +7,7 @@ channels:
 dependencies:
   - boost=1.75.* # Also pulls in boost-cpp
   - cmake>=3.20.*
+  - conda-wrappers
   - doxygen>=1.9.*
   - eigen=3.3.*
   - graphviz>=2.47.0
