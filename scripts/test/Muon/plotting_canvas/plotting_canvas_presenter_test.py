@@ -463,19 +463,19 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
 
     def test_should_update_all(self):
         selected_subplots = ["fwd", "bwd"]
-        self.options.get_selection_index = 0
+        self.options.get_selection_index.return_value = 0
 
         self.assertTrue(self.presenter.should_update_all(selected_subplots))
 
     def test_should_update_all_one_plot(self):
         selected_subplots = ["one"]
-        self.options.get_selection_index = 0
+        self.options.get_selection_index.return_value = 0
 
         self.assertTrue(self.presenter.should_update_all(selected_subplots))
 
     def test_should_update_all_false(self):
         selected_subplots = ["fwd"]
-        self.options.get_selection_index = 1
+        self.options.get_selection_index.return_value = 1
 
         self.assertFalse(self.presenter.should_update_all(selected_subplots))
 
