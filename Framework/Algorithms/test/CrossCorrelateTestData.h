@@ -15,7 +15,9 @@
 
 using namespace Mantid;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::CurveFitting::Functions::Gaussian;
 
 /* define the types of transforms that can be applied to
    a 1D function */
@@ -32,6 +34,22 @@ public:
   double scalar;
 };
 
+// Algorithm to force Gaussian1D to be run by simplex algorithm
+class SimplexGaussian : public Gaussian {
+public:
+  ~SimplexGaussian() override {}
+  std::string name() const override { return "Gaussian"; }
+
+protected:
+  void functionDerivMW(Jacobian *out, const double *xValues, const size_t nData) {
+    UNUSED_ARG(out);
+    UNUSED_ARG(xValues);
+    UNUSED_ARG(nData);
+    throw Exception::NotImplementedError("No derivative function provided");
+  }
+};
+
+DECLARE_FUNCTION(SimplexGaussian)
 /*
   Create fake data to test cross correlation
 
@@ -271,8 +289,8 @@ CrossCorrelateTestData::CrossCorrelateTestData(std::string function_specifier, i
 
   /* create the function that will operate on a discrete domain */
   function = std::make_shared<API::CompositeFunction>();
-  function->addFunction(
-      std::dynamic_pointer_cast<IPeakFunction>(API::FunctionFactory::Instance().createInitialized(function_specifier)));
+  const auto functionInstance = API::FunctionFactory::Instance().createInitialized(function_specifier);
+  function->addFunction(std::dynamic_pointer_cast<IPeakFunction>(functionInstance));
 
   /* create discrete domain */
   std::vector<double> symmetric_domain(domain_size);
