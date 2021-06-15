@@ -209,7 +209,7 @@ public:
     if (!output)
       return;
 
-    TS_ASSERT_DELTA(output->y(0)[0], -6.22677, 0.0001);
+    TS_ASSERT_DELTA(output->y(0)[0], -6.22677, 0.01);
 
     AnalysisDataService::Instance().remove(outputWS);
 
