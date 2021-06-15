@@ -59,8 +59,7 @@ MantidGLWidget::~MantidGLWidget() {}
 
 void MantidGLWidget::setSurface(std::shared_ptr<ProjectionSurface> surface) {
   m_surface = std::move(surface);
-  connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()),
-          Qt::QueuedConnection);
+  connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()), Qt::QueuedConnection);
   m_firstFrame = true;
 }
 
@@ -79,9 +78,8 @@ void MantidGLWidget::initializeGL() {
 
   // Clear the memory buffers
   QColor bgColor = currentBackgroundColor();
-  glClearColor(GLclampf(bgColor.red() / 255.0),
-               GLclampf(bgColor.green() / 255.0),
-               GLclampf(bgColor.blue() / 255.0), 1.0);
+  glClearColor(GLclampf(bgColor.red() / 255.0), GLclampf(bgColor.green() / 255.0), GLclampf(bgColor.blue() / 255.0),
+               1.0);
 }
 
 void MantidGLWidget::setRenderingOptions() {
@@ -230,8 +228,7 @@ void MantidGLWidget::keyReleaseEvent(QKeyEvent *event) {
  */
 void MantidGLWidget::setBackgroundColor(const QColor &input) {
   makeCurrent();
-  glClearColor(GLclampf(input.red() / 255.0), GLclampf(input.green() / 255.0),
-               GLclampf(input.blue() / 255.0), 1.0);
+  glClearColor(GLclampf(input.red() / 255.0), GLclampf(input.green() / 255.0), GLclampf(input.blue() / 255.0), 1.0);
   OpenGLError::check("MantidGLWidget::setBackgroundColor");
   if (m_surface) {
     m_surface->setBackgroundColor(input);
@@ -309,6 +306,7 @@ void MantidGLWidget::updateView(bool picking) {
 void MantidGLWidget::updateDetectors() {
   if (m_surface) {
     m_surface->updateDetectors();
+    m_surface->draw(this);
     update();
   }
 }
