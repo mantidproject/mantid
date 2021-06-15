@@ -278,7 +278,13 @@ class CrystalField(object):
             # Even a single spectrum when used in conjunction with physical properties
             # is treated as a multi-spectra and the number of spectra includes the number
             # of physical properties. However, only spectra have the peaks.
-            for i in range(self.NumberOfSpectra - len(self.PhysicalProperty)):
+            len_physical_properties = 0
+            if self._physprop is not None:
+                if isinstance(self._physprop, list):
+                    len_physical_properties = len(self._physprop)
+                else:
+                    len_physical_properties = 1
+            for i in range(self.NumberOfSpectra - len_physical_properties):
                 self._peaks.append(PeaksFunction(self.crystalFieldFunction, 'f%s.' % i, 1))
         else:
             self._peaks = PeaksFunction(self.crystalFieldFunction, '', 0)
