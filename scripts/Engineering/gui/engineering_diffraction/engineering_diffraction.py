@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from qtpy import QtCore, QtWidgets
-
 from mantidqt.icons import get_icon
+from mantid.kernel import ConfigService
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqt.utils.qt import load_ui
 from Engineering.gui.engineering_diffraction.presenter import EngineeringDiffractionPresenter
@@ -28,6 +28,9 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
             super(EngineeringDiffractionGui, self).__init__(parent, window_flags)
         else:
             super(EngineeringDiffractionGui, self).__init__(parent)
+
+        # save initial default peak function so can reset on closing UI
+        self._initial_peak_fun = ConfigService.getString("curvefitting.defaultPeak")
 
         # Main Window
         self.setupUi(self)
@@ -94,6 +97,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.savedir_label.setText(savedir_text)
 
     def closeEvent(self, _):
+        ConfigService.setString("curvefitting.defaultPeak", self._initial_peak_fun)  # reset peak function
         self.presenter.handle_close()
 
     def get_rb_no(self):
