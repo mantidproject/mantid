@@ -166,6 +166,7 @@ endfunction()
 
 # Find python interpreter
 set(MINIMUM_PYTHON_VERSION 3.6)
+set(Python3_ROOT_DIR $ENV{CONDA_PREFIX})
 find_package(Python ${MINIMUM_PYTHON_VERSION} REQUIRED
              COMPONENTS Interpreter Development NumPy)
 # If anything external uses find_package(PythonInterp) then make sure it finds the correct version and executable
