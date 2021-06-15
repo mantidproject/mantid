@@ -399,7 +399,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def setup_phase_quad_changed_notifier(self):
         self.phase_tab.phase_table_presenter.phasequad_calculation_complete_notifier.add_subscriber(
-            self.transform.phasequad_observer)
+            self.transform.phase_quad_observer)
 
     def setup_phase_table_changed_notifier(self):
         self.phase_tab.phase_table_presenter.phase_table_calculation_complete_notifier.add_subscriber(

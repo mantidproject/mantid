@@ -394,10 +394,10 @@ class PhaseTableView(QtWidgets.QWidget):
     def get_table_contents(self):
         if self._updating:
             return []
-        ret = [None for _ in range(self.num_rows())]
+        return_table = [None for _ in range(self.num_rows())]
         for row in range(self.num_rows()):
-            ret[row] = str(self.phasequad_table.item(row, 0).text())
-        return ret
+            return_table[row] = str(self.phasequad_table.item(row, 0).text())
+        return return_table
 
     def remove_phasequad_by_index(self, index):
         self.phasequad_table.removeRow(index)

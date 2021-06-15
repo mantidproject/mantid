@@ -15,7 +15,7 @@ from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calcu
     estimate_group_asymmetry_data, run_pre_processing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 from Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws, apply_deadtime, \
-    calculate_diff_data, run_CropWorkspace
+    calculate_diff_data, run_crop_workspace
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
@@ -305,8 +305,8 @@ class MuonContext(object):
         parameters['InputWorkspace'] = self._run_deadtime(run_string, ws_name)
         runs = self._data_context.current_runs
         if runs:
-            parameters['InputWorkspace'] = run_CropWorkspace(ws_name, self.first_good_data(runs[0]),
-                                                             self.last_good_data(runs[0]))
+            parameters['InputWorkspace'] = run_crop_workspace(ws_name, self.first_good_data(runs[0]),
+                                                              self.last_good_data(runs[0]))
 
         phase_quad = run_PhaseQuad(parameters, ws_name)
         phase_quad = self._run_rebin(phase_quad, rebin)
