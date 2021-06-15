@@ -152,7 +152,7 @@ def parseCommandline(args):
         options.runner = 'StdioPrinter'
 
     files = setFiles(args)
-    if len(files) is 0 and not options.root:
+    if len(files) == 0 and not options.root:
         print(parser.error("No input files found"))
     return files
 
