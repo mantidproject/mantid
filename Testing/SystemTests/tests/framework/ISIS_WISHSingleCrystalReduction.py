@@ -13,7 +13,8 @@ from mantid.simpleapi import (ConvertUnits, LoadRaw, FilterPeaks, PredictPeaks, 
                               CropWorkspace, NormaliseByCurrent, ReplaceSpecialValues, NormaliseToMonitor, LoadIsawUB,
                               CreateSampleShape, SetSampleMaterial, AbsorptionCorrection, Divide, SmoothNeighbours,
                               SmoothData, LoadNexus, RebinToWorkspace, ConvertToDiffractionMDWorkspace, LoadMD,
-                              PredictFractionalPeaks, CombinePeaksWorkspaces, SaveReflections)
+                              PredictFractionalPeaks, CombinePeaksWorkspaces, SaveReflections, BinMD,
+                              ConvertMDHistoToMatrixWorkspace)
 from mantid import config
 import numpy as np
 import os
@@ -188,11 +189,16 @@ class WISHNormaliseDataAndCreateMDWorkspaceTest(MantidSystemTest):
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              InfinityValue=0, BigNumberThreshold=1e15, SmallNumberThreshold=-1e15)
         # Convert to Diffraction MD and Lorentz Correction
-        ConvertToDiffractionMDWorkspace(InputWorkspace=ws, OutputWorkspace='wsMD',
-                                        LorentzCorrection=True, OneEventPerBin=False)
+        wsMD = ConvertToDiffractionMDWorkspace(InputWorkspace=ws, LorentzCorrection=True, OneEventPerBin=False)
+        # BinMD to 2D object and convert to histo so can compare saved workspace
+        wsMD_2Dcut = BinMD(InputWorkspace=wsMD, AxisAligned=False, BasisVector0='Q_lab_x,Angstrom^-1,1.0,0.0,0.0',
+                           BasisVector1='Q_lab_y,Angstrom^-1,0.0,1.0,0.0',
+                           BasisVector2='Q_lab_z,Angstrom^-1,0.0,0.0,1.0',
+                           OutputExtents='0.2,0.8,-0.4,0.4,0.05,0.1', OutputBins='50,50,1')
+        ConvertMDHistoToMatrixWorkspace(InputWorkspace=wsMD_2Dcut, outputWorkspace="wsHisto_2Dcut")
 
     def validate(self):
-        return "wsMD", "WISH38237_MD.nxs"
+        return "wsHisto_2Dcut", "WISH38237_MD_2Dcut.nxs"
 
 
 class WISHIntegrateSatellitePeaksTest(MantidSystemTest):
