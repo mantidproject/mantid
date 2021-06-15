@@ -26,9 +26,13 @@ class DrillTableWidget(QTableWidget):
     """
     _columns = None
 
+    """
+    True if the table has been disabled.
+    """
+    _disabled = False
+
     def __init__(self, parent=None):
         super(DrillTableWidget, self).__init__(parent)
-        self._disabled = False
         self._columns = list()
         header = DrillHeaderView(self)
         header.setSectionsClickable(True)
