@@ -247,13 +247,37 @@ void MaskPeaksWorkspace::getTofRange(double &tofMin, double &tofMax, const doubl
     tofMax = tofPeak + m_tofMax;
   }
 }
+
+/**
+ * @brief
+ *
+ * @param bankName
+ * @param col
+ * @param row
+ * @return int
+ */
 int MaskPeaksWorkspace::findPixelID(const std::string &bankName, int col, int row) {
   Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
   std::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
+
   if (parent->type() == "RectangularDetector") {
     std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
+    return pixel->getID();
+  } else if (Iptr->getName().compare("CORELLI") == 0) {
+    // Checking for CORELLI
+    // pixel full name example
+    //      /CORELLI/A row/bank10/sixteenpack/tube10/pixel23
+    //                                ^ the extra layer that makes CORELLI different from WISH
+    std::ostringstream pixelString;
+    pixelString << parent->getFullName() // /CORELLI/A row/bank10
+                << "/sixteenpack"        // /sixteenpack
+                << "/tube" << col        // /tube10
+                << "/pixel" << row;      // /pixel23
+    std::shared_ptr<const Geometry::IComponent> component = Iptr->getComponentByName(pixelString.str());
+    std::shared_ptr<const Detector> pixel = std::dynamic_pointer_cast<const Detector>(component);
+    //
     return pixel->getID();
   } else {
     std::string bankName0 = bankName;
