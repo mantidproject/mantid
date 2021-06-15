@@ -310,10 +310,10 @@ class CrystalFieldTests(unittest.TestCase):
         cf.PeakShape = 'Lorentzian'
         cf.PhysicalProperty = [
             PhysicalProperties('susc', Hdir=[1, 0, 0], Inverse=True, Unit='cgs', Lambda=0.01, Chi0=0.001)]
-        cf.peaks.tieAll('FWHM=20.0', 5)
-        self.assertFalse(cf.function.getParameterValue('f0.f1.FWHM') == 20.0)
-        self.assertFalse(cf.function.getParameterValue('f0.f3.FWHM') == 20.0)
-        self.assertFalse(cf.function.getParameterValue('f0.f5.FWHM') == 20.0)
+        cf.peaks[0].tieAll('FWHM=20.0', 5)
+        self.assertTrue(cf.function.getParameterValue('f0.f1.FWHM') == 20.0)
+        self.assertTrue(cf.function.getParameterValue('f0.f3.FWHM') == 20.0)
+        self.assertTrue(cf.function.getParameterValue('f0.f5.FWHM') == 20.0)
 
     def test_api_CrystalField_when_using_cubic_crystal_structures(self):
         from CrystalField import CrystalField
