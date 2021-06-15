@@ -7,13 +7,12 @@
 from qtpy import QtWidgets
 
 from mantidqt.utils.qt import load_ui
-#from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetViewInterface
 import Muon.GUI.Common.message_box as message_box
 
-ui_plotting_view, _ = load_ui(__file__, "base_pane_view.ui")
+ui_plotting_view, widget = load_ui(__file__, "base_pane_view.ui")
 
 
-class BasePaneView(QtWidgets.QWidget, ui_plotting_view):
+class BasePaneView(widget, ui_plotting_view):
 
     @staticmethod
     def warning_popup(message):
@@ -37,8 +36,7 @@ class BasePaneView(QtWidgets.QWidget, ui_plotting_view):
         """
         self.plot_type_combo.blockSignals(True)
         self.plot_type_combo.clear()
-        for option in options:
-            self.plot_type_combo.addItem(option)
+        self.plot_type_combo.addItems(options)
         self.plot_type_combo.blockSignals(False)
 
     def setup_tiled_by_options(self, options):

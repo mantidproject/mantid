@@ -13,7 +13,7 @@ class BasePaneModel(object):
 
     @staticmethod
     def _generate_run_indices(workspace_list):
-        indices = [0 for _ in workspace_list]
+        indices = [0]*len(workspace_list)
         return indices
 
     def get_workspaces_to_plot(self, is_raw, plot_type):

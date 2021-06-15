@@ -148,7 +148,6 @@ class BasePanePresenter():
 
     def handle_use_raw_workspaces_changed(self):
         self.check_if_can_use_rebin()
-        return
 
     def check_if_can_use_rebin(self):
         if not self._view.is_raw_plot() and not self.context._do_rebin():
