@@ -16,11 +16,9 @@ class ModelFittingContext(BasicFittingContext):
         self._current_result_table_index: int = None
 
         self._x_parameters: dict = {}
-        self._x_selected_parameter: str = None
 
         self._y_parameters: dict = {}
         self._y_parameter_errors: dict = {}
-        self._y_selected_parameter: str = None
 
     @property
     def result_table_names(self) -> list:
@@ -40,12 +38,11 @@ class ModelFittingContext(BasicFittingContext):
     @current_result_table_index.setter
     def current_result_table_index(self, index: int) -> None:
         """Sets the index of the currently selected result table."""
-        if index is not None and index >= self.number_of_result_tables:
+        if index is not None and index >= self.number_of_result_tables():
             raise RuntimeError(f"The provided result table index ({index}) is too large.")
 
         self._current_result_table_index = index
 
-    @property
     def number_of_result_tables(self) -> int:
         """Returns the number of result tables which are held by the context."""
         return len(self._result_table_names)

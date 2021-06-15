@@ -39,10 +39,6 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         """Initialize the TFAsymmetryFittingModel with emtpy fit data."""
         super(TFAsymmetryFittingModel, self).__init__(context, fitting_context)
 
-        self._tf_asymmetry_mode = False
-        self._tf_asymmetry_single_functions = []
-        self._tf_asymmetry_simultaneous_function = None
-
     @GeneralFittingModel.dataset_names.setter
     def dataset_names(self, names: list) -> None:
         """Sets the dataset names stored by the model. Resets the other fitting data."""

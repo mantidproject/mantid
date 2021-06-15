@@ -8,6 +8,8 @@ from mantid.api import WorkspaceGroup
 from mantid.simpleapi import CreateWorkspace
 
 from Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, check_if_workspace_exist, retrieve_ws
+from Muon.GUI.Common.ADSHandler.workspace_naming import (create_model_fitting_parameter_combination_name,
+                                                         create_model_fitting_parameters_group_name)
 from Muon.GUI.Common.contexts.fitting_contexts.model_fitting_context import ModelFittingContext
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
@@ -41,6 +43,7 @@ class ModelFittingModel(BasicFittingModel):
     def result_table_names(self, table_names: list) -> None:
         """Sets the names of the results tables loaded into the model fitting tab."""
         self.fitting_context.result_table_names = table_names
+        self._reset_current_result_table_index()
 
     @property
     def current_result_table_name(self) -> str:
@@ -51,20 +54,21 @@ class ModelFittingModel(BasicFittingModel):
         else:
             return None
 
-    @property
-    def number_of_result_tables(self):
-        """Returns the number of result tables which are held by the context."""
-        return self.fitting_context.number_of_result_tables
-
     def parameter_combination_workspace_name(self, x_parameter: str, y_parameter: str) -> str:
         """Returns the workspace name being used for a particular parameter combination."""
         results_table_name = self.current_result_table_name
-        return results_table_name + "_" + x_parameter + "_" + y_parameter if results_table_name is not None else None
+        if results_table_name is not None:
+            return create_model_fitting_parameter_combination_name(results_table_name, x_parameter, y_parameter)
+        else:
+            return None
 
     def parameter_combination_group_name(self):
         """Returns the workspace group name being used to store the current parameter combinations."""
         results_table_name = self.current_result_table_name
-        return results_table_name + "_Parameter_Combinations" if results_table_name is not None else None
+        if results_table_name is not None:
+            return create_model_fitting_parameters_group_name(results_table_name)
+        else:
+            return None
 
     def get_workspace_names_to_display_from_context(self) -> list:
         """Returns the names of results tables to display in the view."""
@@ -180,3 +184,11 @@ class ModelFittingModel(BasicFittingModel):
         """Returns the first good data value from a workspace."""
         x_lower, _ = self.x_limits_of_workspace(workspace_name)
         return x_lower
+
+    def _reset_current_result_table_index(self) -> None:
+        """Resets the current result table index stored by the context."""
+        if self.fitting_context.number_of_result_tables() == 0:
+            self.fitting_context.current_result_table_index = None
+        elif self.fitting_context.current_result_table_index is None or \
+                self.fitting_context.current_result_table_index >= self.fitting_context.number_of_result_tables():
+            self.fitting_context.current_result_table_index = 0

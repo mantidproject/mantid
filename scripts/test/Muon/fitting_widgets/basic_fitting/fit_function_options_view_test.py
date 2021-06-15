@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.api import FrameworkManager
+from mantid.api import FrameworkManager, FunctionFactory
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
@@ -126,6 +126,12 @@ class FitFunctionOptionsViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.view.update_function_browser_parameters(simultaneous_mode, None)
         self.assertEqual(self.view.fit_object, None)
+
+    def test_that_set_fit_function_will_set_the_function_in_the_browser(self):
+        fit_function = FunctionFactory.createFunction("FlatBackground")
+
+        self.view.set_fit_function(fit_function)
+        self.assertEqual(str(self.view.current_fit_function()), str(fit_function))
 
     def test_that_it_is_possible_to_set_the_start_x_to_a_different_value(self):
         new_value = 5.0
