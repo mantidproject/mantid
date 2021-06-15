@@ -203,8 +203,9 @@ class WISHNormaliseDataAndCreateMDWorkspaceTest(MantidSystemTest):
 
 class WISHIntegrateSatellitePeaksTest(MantidSystemTest):
     """
-    This tests the loading and normalisation of data, incl. correction for detector efficiency using vanadium and
-    creation of MD workspace
+    This tests the integration of predicted satellite peaks. One could predict two modulations at once but here we
+    capture the use of CombinePeaksWorkspace which is used in the WISH workflow in other instances (e.g. for combining
+    peaks from different runs)
     """
 
     def cleanup(self):
@@ -226,8 +227,6 @@ class WISHIntegrateSatellitePeaksTest(MantidSystemTest):
                               ReflectionCondition="Primitive")
         self._pfps = []
         self._saved_files = []
-        # One could predict two modulations at once but here we capture the use of CombinePeaksWorkspace which is used
-        # in the WISH workflow for combining peaks from different runs
         for iq, q in enumerate(qs):
             wsname = f'pfp_{iq}'
             PredictFractionalPeaks(Peaks=parent, IncludeAllPeaksInRange=True, Hmin=0, Hmax=0, Kmin=1, Kmax=1,
