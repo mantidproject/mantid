@@ -614,27 +614,3 @@ class DrillModel(QObject):
             list(dict(str:str)): samples
         """
         return self.samples
-
-    def getRowsContents(self):
-        """
-        Get all the samples as a table, 1 sample per row.
-
-        Returns:
-            list(list(str)): table contents
-        """
-        rows = list()
-        for sample in self.samples:
-            params = sample.getParameters()
-            row = list()
-            for column in self.columns[:-1]:
-                if column in params:
-                    row.append(str(params[column]))
-                else:
-                    row.append("")
-            if self.columns[-1] in params:
-                options = list()
-                for (k, v) in params[self.columns[-1]].items():
-                    options.append(str(k) + "=" + str(v))
-                row.append(';'.join(options))
-            rows.append(row)
-        return rows
