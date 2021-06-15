@@ -5,13 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include <list>
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/ConvertDiffCal.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::Algorithms::ConvertDiffCal;
@@ -48,24 +51,24 @@ public:
 
     fake_entry( int detector_id,
                 int workspace_type,
-                int mask,
-                double diffc,
-                double diffa = 0,
+                double difc,
+                int mask = fake_entry::unmasked,
+                double difa = 0,
                 double tzero = 0 )
       :
       detector_id(detector_id),
       workspace_type(workspace_type),
+      difc(difc),
       mask(mask),
-      diffc(diffc),
-      diffa(diffa),
+      difa(difa),
       tzero(tzero)
     {}
 
     int detector_id;
     int workspace_type;
+    double difc;
     int mask;
-    double diffc;
-    double diffa;
+    double difa;
     double tzero;
   };
 
@@ -74,18 +77,74 @@ public:
   {
     public:
 
-    fake_workspaces( OffsetsWorkspace_sptr offsets, ITableWorkspace_sptr calibration_table );
+    fake_workspaces( OffsetsWorkspace_sptr offsets, ITableWorkspace_sptr calibration_table )
+      :
+      offsets( offsets ),
+      calibration_table( calibration_table )
+    {}
 
     OffsetsWorkspace_sptr offsets;
 
     ITableWorkspace_sptr calibration_table; 
   };
 
-  fake_workspaces generate_test_data( std::vector< class fake_entry > const &entries )
+  fake_workspaces generate_test_data( std::list< class fake_entry > const &entries )
   {
-    OffsetsWorkspace_sptr offsets;
+    Mantid::Geometry::Instrument_sptr instrument =
+    std::make_shared<Mantid::Geometry::Instrument>();
 
-    ITableWorkspace_sptr calibration_table; 
+    ITableWorkspace_sptr calibration_table =
+    std::make_shared<Mantid::DataObjects::TableWorkspace>(); 
+    calibration_table->addColumn("int", "detid");
+    calibration_table->addColumn("double", "difc");
+    calibration_table->addColumn("double", "difa");
+    calibration_table->addColumn("double", "tzero");
+
+    /* loop to add detectors and ids to instrument */
+    for( auto const &entry : entries )
+    {
+      /* add an entry to the fake offset workspace by adding a detector there */
+      if( entry.workspace_type == fake_entry::offset )
+      {
+        /* create a detector. Is this a memory leak? Idk. Depends what instrument does with it */
+        Mantid::Geometry::Detector *det =
+        new Mantid::Geometry::Detector("point-detector", entry.detector_id, nullptr);
+        instrument->add(det);
+        instrument->markAsDetector(det);
+      }
+
+      /* add an entry to the fake calibration workspace */
+      else if( entry.workspace_type == fake_entry::calibration )
+      {
+        Mantid::API::TableRow new_row = calibration_table->appendRow();
+        new_row << entry.detector_id << entry.difc << entry.difa << entry.tzero;
+      }
+    }
+
+    /* create an offset workspace with the instrument */
+    OffsetsWorkspace_sptr offsets = std::make_shared<OffsetsWorkspace>(instrument);
+    Mantid::Geometry::DetectorInfo &d_info = offsets->mutableDetectorInfo();
+
+    /* Loop to apply masks */
+    for( auto const &entry : entries )
+    {
+      if( entry.workspace_type == fake_entry::offset )
+      {
+        size_t internal_index = d_info.indexOf( entry.detector_id );
+
+        if( entry.mask == fake_entry::masked )
+        {
+          d_info.setMasked( internal_index, true );
+        }
+
+        else if( entry.mask == fake_entry::unmasked )
+        {
+          d_info.setMasked( internal_index, false );
+        }
+
+        offsets->setValue( entry.detector_id, entry.difc );
+      }
+    }
 
     return fake_workspaces( offsets, calibration_table );
   }
@@ -101,50 +160,62 @@ public:
      * 3. Update documentation
      * */
 
-    /*
-     * test implementation guide:
-     * 2 entries in the table that are not in the offset workspace - propagate exactly
-     * 2 entries in the offset workspace that are not in the table
-     * 3 entries in the offset table that are nonzero and non-masked to update.
-     * 1 entry that is zero but not masked
-     * 1 entry that is masked but not zero
-     * */
+    /* specify contents of fake workspaces */
+    std::list< class fake_entry > fake_entries =
+    {
+      /* 2 entries in the table that are not in the offset workspace - should be propagated */
+      fake_entry( 5, fake_entry::calibration, 5 ),
+      fake_entry( 6, fake_entry::calibration, 5 ),
 
-    auto instr = ComponentCreationHelper::createMinimalInstrument(V3D(0., 0., -10.), // source
-                                                                  V3D(0., 0., 0.),   // sample
-                                                                  V3D(1., 0., 0.));  // detector
+      /* 2 entries in the offset workspace that are not in the table - should be updated */
+      fake_entry( 0,  fake_entry::offset, 1.0, fake_entry::unmasked ),
+      fake_entry( 1,  fake_entry::offset, 1.0, fake_entry::unmasked ),
+      /* entry that is zero but not masked - should not be updated */
+      fake_entry( 2, fake_entry::offset, 0, fake_entry::unmasked ),
+      /* entry that is nonzero but masked - should not be updated */
+      fake_entry( 3, fake_entry::offset, 3, fake_entry::masked ),
+      /* 2 entries that exist in both. Existing values should be updated */
+      fake_entry( 4, fake_entry::offset, 4, fake_entry::unmasked ),
+      fake_entry( 7, fake_entry::offset, 7, fake_entry::unmasked ),
 
-    Mantid::Geometry::Detector *det = 
-    new Mantid::Geometry::Detector("point-detector", 420 /*detector id*/, nullptr);
-    instr->add(det);
-    instr->markAsDetector(det);
+      /* 2 entries that exists in both - this one should be updated */
+      fake_entry( 4, fake_entry::calibration, 4 ),
+      fake_entry( 7, fake_entry::calibration, 7 ),
+    };
 
-    /* create an offset workspace based on the instrument */
-    OffsetsWorkspace_sptr offsets = std::make_shared<OffsetsWorkspace>(instr);
+    /* generate fake workspaces */
+    class fake_workspaces fake_workspaces =
+    generate_test_data( fake_entries );
 
-    /* Extract the detector ids */
-    std::cout << "detector ids:" << std::endl;
-    Mantid::Geometry::DetectorInfo &d_info = offsets->mutableDetectorInfo();
+    /* Print offsets workspace to make sure everything is there */
+    Mantid::Geometry::DetectorInfo &d_info = fake_workspaces.offsets->mutableDetectorInfo();
     std::vector< int > const &detector_ids = d_info.detectorIDs();
+    std::cout << "offsets workspace contents:" << std::endl;
     for( auto id : detector_ids )
     {
-      /* set them to be masked */
       size_t internal_index = d_info.indexOf( id );
-      std::cout << id << " at " << internal_index << std::endl;
 
-      /* check if masked */
-      std::cout << "before, d_info.isMasked(" << internal_index << "): "
-                << d_info.isMasked(internal_index) << std::endl;
-      /* mask it */
-      d_info.setMasked( internal_index, true );
-      std::cout << "after, d_info.isMasked(" << internal_index << "): "
-                << d_info.isMasked(internal_index) << std::endl;
-      /* set the value to something different */
-      double value = 27;  
-      offsets->setValue( id, value );
-      std::cout << "detector id " << id << "'s value: " << offsets->getValue( id )
-                << std::endl;
+      std::cout << "id: " << id 
+                << " masked: " << d_info.isMasked( internal_index )
+                << " value: " << fake_workspaces.offsets->getValue( id ) << std::endl;
     }
+    std::cout << std::endl;
+
+    /* print calibration table to make sure everything is there */
+    std::vector< int > column =
+    fake_workspaces.calibration_table->getColumn( 0 )->numeric_fill<int>();
+    std::cout << "calibration table:" << std::endl;
+    for( auto i : column )
+    {
+      std::cout << "id: " << i << std::endl;
+    }
+    std::cout << std::endl;
+
+    /* In ConvertDiffCal, you will need to create a mapping of detector_id to vector index:
+     * this will allow you to easily see if a detector is in the calibration table column */
+    /* what will be the time complexity of this? */
+    /* Captain! Check the output and create TS_ASSERT statements where they belong */
+    /* create asserts that expect correct outcomes */
 
     TS_ASSERT( false );
   }
