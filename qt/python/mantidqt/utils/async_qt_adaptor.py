@@ -7,8 +7,8 @@
 from functools import wraps
 from typing import Any, Optional, Callable
 
-from PyQt5 import QtCore
-from PyQt5.QtCore import QObject, pyqtSignal
+from qtpy import QtCore
+from qtpy.QtCore import QObject, Signal
 
 from mantidqt.utils.asynchronous import AsyncTask, AsyncTaskFailure, AsyncTaskSuccess
 from mantid.kernel import Logger
@@ -107,9 +107,9 @@ class _QtSignals(QObject):
     """
     Wrapper class for the signals used to translate from Python threading -> Qt Signals/Slots
     """
-    success_signal = pyqtSignal(AsyncTaskSuccess)
-    error_signal = pyqtSignal(AsyncTaskFailure)
-    finished_signal = pyqtSignal()
+    success_signal = Signal(AsyncTaskSuccess)
+    error_signal = Signal(AsyncTaskFailure)
+    finished_signal = Signal()
 
 
 ErrorCbType = Optional[Callable[[AsyncTaskFailure], None]]
@@ -164,7 +164,7 @@ class AsyncTaskQtAdaptor(AsyncTask):
         )
 
     @staticmethod
-    def _wrap_signal(signal: pyqtSignal, slot: Optional[Callable]) -> Optional[Callable]:
+    def _wrap_signal(signal: Signal, slot: Optional[Callable]) -> Optional[Callable]:
         """
         Wraps a given signal so that the thread calls emit rather than the target directly.
         This allows us to complete the slot on the target, rather than trying
