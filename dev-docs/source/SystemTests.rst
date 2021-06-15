@@ -247,7 +247,7 @@ a new Python configuration with the script path set to ``runSystemtests.py``
 This is found in ``/Testing/SystemTests/Scripts/runSystemTests.py``
 
 The parameters for the configuration can be set just like the command line
-args when running the tests from the ``systemtest.bat`` script, e.g pass
+args when running the tests from the ``systemtest.bat``/``systemtest`` script, e.g pass
 ``-R="EnginX"`` to run all tests containing the string ``EnginX`` in their
 name.
 

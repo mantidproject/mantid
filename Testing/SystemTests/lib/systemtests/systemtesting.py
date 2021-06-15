@@ -1072,7 +1072,7 @@ class TestManager(object):
                 return False
         return True
 
-    def executeTests(self, tests_done=None, status_dict=None):
+    def executeTests(self, tests_done=None):
         # Get the defined tests
         for suite in self._tests:
             if self.__shouldTest(suite):
@@ -1090,20 +1090,23 @@ class TestManager(object):
                     suite.reportResults(self._reporters, tests_done.value)
             else:
                 # tests_done=None indicates running tests on parent thread, no need to worry about the Lock
+                status_dict = dict()
                 if not self._clean:
                     sum_tests = self._passedTests + self._skippedTests + self._failedTests
                     suite.reportResults(self._reporters, sum_tests)
                     status_dict.update(suite.getMapResultNameToStatus())
+                return status_dict
             self._lastTestRun += 1
 
     def replaceRunner(self, new_runner):
         self._runner = new_runner
 
-    def executeTestsListUnderCurrentProcess(self, tests_to_run, status_dict):
+    def executeTestsListUnderCurrentProcess(self, tests_to_run):
         """This is used when running the tests under the current process, removing the test executable so that the
          provided test list is run under the current python process"""
         self._tests = tests_to_run
-        self.executeTests(status_dict=status_dict)
+        status_dict = self.executeTests()
+        return status_dict
 
     def getTestResultStats(self):
         """Return the numbers of skipped, failed, and total tests to be used for result and output collation"""

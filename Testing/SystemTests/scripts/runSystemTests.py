@@ -221,7 +221,8 @@ def main():
                 print(f"Test module {modname} has {mod_test_counts} test{test_suffix}:")
                 for suite in suite_list:
                     print(f"    - {suite._fqtestname}")
-            tmgr.executeTestsListUnderCurrentProcess(suite_list, status_dict)
+            mod_status_dict = tmgr.executeTestsListUnderCurrentProcess(suite_list)
+            status_dict.update(mod_status_dict)
         skipped_tests, failed_tests, total_tests = tmgr.getTestResultStats()
         success = failed_tests == 0
     else:
