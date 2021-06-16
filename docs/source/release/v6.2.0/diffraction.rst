@@ -39,6 +39,7 @@ Improvements
 ############
 - Find detector in peaks will check which det is closer when dealing with peak-in-gap situation for tube-type detectors.
 - Existing :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now provides better calibration of panel orientation for flat panel detectors.
+- Existing :ref:`MaskPeaksWorkspace <algm-MaskPeaksWorkspace-v1>` now also supports tube-type detectors used at the CORELLI instrument.
 
 Bugfixes
 ########
