@@ -281,7 +281,7 @@ CrossCorrelateTestData::CrossCorrelateTestData(std::string function_specifier, i
                                                std::initializer_list<class TransformSpecifier> l)
     : domain_radius(domain_radius), num_functions(l.size() + 1) {
   /* allocate the workspace but do not populate yet */
-  int domain_size = domain_radius * 2 + 1;
+  int domain_size = this->domain_radius * 2 + 1;
 
   /* domain will represent points not bins, so the domain and co-domain are
      of identical size (as opposed to domain being co_domain_size + 1 ) */
