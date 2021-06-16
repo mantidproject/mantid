@@ -13,6 +13,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <cfloat>
+#include <limits>
 #include <sstream>
 
 namespace Mantid {
@@ -653,6 +654,7 @@ double dSpacing::singleToTOF(const double x) const {
 }
 
 double dSpacing::singleFromTOF(const double tof) const {
+  // dealing with various edge cases
   if (!isInitialized())
     throw std::runtime_error("dSpacingBase::singleFromTOF called before object "
                              "has been initialized.");
@@ -670,19 +672,51 @@ double dSpacing::singleFromTOF(const double tof) const {
     throw std::runtime_error("Cannot convert to d spacing. Quadratic doesn't "
                              "have a positive root");
   }
-  // and then solve quadratic using Muller formula
-  double sqrtTerm;
-  if (difa == 0) {
-    // avoid costly sqrt even though formula reduces to this
-    sqrtTerm = difc;
+
+  // --------------------
+  //  solve for dpsacing
+  // --------------------
+  // NOTE: stupid explicity is the beauty
+  static constexpr double EPSILON = std::numeric_limits<double>::epsilon();
+  if (std::abs(difa) < EPSILON) {
+    // TOF = DIFA * d^2 + DIFC * d + T0
+    // 0.0 = DIFA * d^2 + DIFC * d + (T0 - TOF)
+    // degenerates to
+    // TOF = DIFC * d + T0
+    // gives us
+    // d = (TOF - T0) / DIFC
+    //
+    // NOTE: DIFC is always positive!!!
+    return (tof - tzero) / difc;
   } else {
-    sqrtTerm = sqrt(difc * difc - 4 * difa * (tzero - tof));
+    // TOF = DIFA * d^2 + DIFC * d + T0
+    // 0.0 = DIFA * d^2 + DIFC * d + (T0 - TOF)
+    // solve for this quadratic equation, we have
+    //       -DIFC + SQRT(DIFC^2 - 4*DIFA*(T0 - TOF))
+    // d = -------------------------------------------
+    //                  2*DIFA
+    // and
+    //       -DIFC - SQRT(DIFC^2 - 4*DIFA*(T0 - TOF))
+    // d = -------------------------------------------
+    //                  2*DIFA
+    // NOTE:
+    //   bottom line is that d has to be a positive number that is closer to 0
+    double sqrtTerm = sqrt(difc * difc - 4 * difa * (tzero - tof));
+    double d1 = 0.5 / difa * (-difc + sqrtTerm);
+    double d2 = 0.5 / difa * (-difc - sqrtTerm);
+    double dspacing;
+    //
+    if (d1 * d2 < 0.0) {
+      dspacing = std::max(d1, d2);
+    } else {
+      d1 = std::max(0.0, d1);
+      d2 = std::max(0.0, d2);
+      dspacing = std::min(d1, d2);
+    }
+    return dspacing;
   }
-  if (sqrtTerm < difc)
-    return (tof - tzero) / (0.5 * (difc - sqrtTerm));
-  else
-    return (tof - tzero) / (0.5 * (difc + sqrtTerm));
 }
+
 double dSpacing::conversionTOFMin() const {
   // quadratic only has a min if difa is positive
   if (difa > 0) {
@@ -697,6 +731,7 @@ double dSpacing::conversionTOFMin() const {
     return TOFmin;
   }
 }
+
 double dSpacing::conversionTOFMax() const {
   // quadratic only has a max if difa is negative
   if (difa < 0) {

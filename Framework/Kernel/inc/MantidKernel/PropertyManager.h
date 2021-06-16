@@ -105,10 +105,11 @@ public:
   bool operator==(const PropertyManager &other) const;
   bool operator!=(const PropertyManager &other) const;
 
+  Property *getPointerToProperty(const std::string &name) const override;
+
 protected:
   friend class PropertyManagerOwner;
 
-  Property *getPointerToProperty(const std::string &name) const override;
   Property *getPointerToPropertyOrdinal(const int &index) const override;
   Property *getPointerToPropertyOrNull(const std::string &name) const;
 

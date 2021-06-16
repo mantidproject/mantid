@@ -2,6 +2,7 @@
 
 set ( TEST_PY_FILES
    ADSHandler/workspace_naming_test.py
+   basic_fitting_context_test.py
    elemental_analysis/elemental_analysis_test.py
    elemental_analysis/name_generator_test.py
    elemental_analysis/detectors_presenter_test.py
@@ -50,6 +51,7 @@ set ( TEST_PY_FILES
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_view_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_mode_switcher_view_test.py
    frequency_domain_context_test.py
+   general_fitting_context_test.py
    grouping_tab/calculate_pair_and_group_test.py
    grouping_tab/difference_table_presenter_test.py
    grouping_tab/difference_table_selector_test.py
@@ -99,6 +101,7 @@ set ( TEST_PY_FILES
    results_tab_widget/results_tab_presenter_test.py
    seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
    seq_fitting_tab_widget/sequential_table_test.py
+   tf_asymmetry_fitting_context_test.py
    transform_widget_test.py
    utilities/load_utils_test.py
    utilities/muon_base_pair_test.py

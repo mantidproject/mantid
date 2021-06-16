@@ -37,6 +37,9 @@ class BasicFittingPresenter:
         self.disable_fitting_notifier = GenericObservable()
         self.fitting_calculation_model = None
 
+        self.remove_plot_guess_notifier = GenericObservable()
+        self.update_plot_guess_notifier = GenericObservable()
+
         self.fit_function_changed_notifier = GenericObservable()
         self.fit_parameter_changed_notifier = GenericObservable()
         self.selected_fit_results_changed = GenericObservable()
@@ -93,7 +96,7 @@ class BasicFittingPresenter:
         """Handle when new data has been loaded into the interface."""
         self.update_and_reset_all_data()
 
-        self.view.plot_guess = False
+        self.view.plot_guess, self.model.plot_guess = False, False
         self.clear_cached_fit_functions()
 
         if self.model.number_of_datasets == 0:
@@ -125,11 +128,12 @@ class BasicFittingPresenter:
     def handle_plot_mode_changed(self, plot_mode: PlotMode) -> None:
         """Handles when the tab has been changed. Updates the plot guess."""
         if plot_mode == PlotMode.Fitting:
-            self.model.update_plot_guess(self.view.plot_guess)
+            self.update_plot_guess()
 
     def handle_plot_guess_changed(self) -> None:
         """Handle when plot guess is ticked or un-ticked."""
-        self.model.update_plot_guess(self.view.plot_guess)
+        self.model.plot_guess = self.view.plot_guess
+        self.update_plot_guess()
 
     def handle_undo_fit_clicked(self) -> None:
         """Handle when undo fit is clicked."""
@@ -140,9 +144,8 @@ class BasicFittingPresenter:
         self.update_fit_function_in_view_from_model()
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
 
-        self.model.update_plot_guess(self.view.plot_guess)
-
         self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+        self.update_plot_guess()
 
     def handle_fit_clicked(self) -> None:
         """Handle when the fit button is clicked."""
@@ -172,7 +175,7 @@ class BasicFittingPresenter:
 
         self.handle_fitting_finished(fit_function, fit_status, fit_chi_squared)
         self.view.enable_undo_fit(True)
-        self.view.plot_guess = False
+        self.view.plot_guess, self.model.plot_guess = False, False
 
     def handle_fitting_finished(self, fit_function, fit_status, chi_squared) -> None:
         """Handle when fitting is finished."""
@@ -207,7 +210,7 @@ class BasicFittingPresenter:
 
         if self._update_plot:
             self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
-            self.model.update_plot_guess(self.view.plot_guess)
+            self.update_plot_guess()
 
     def handle_function_name_changed_by_user(self) -> None:
         """Handle when the fit name is changed by the user."""
@@ -233,7 +236,7 @@ class BasicFittingPresenter:
 
         self.reset_fit_status_and_chi_squared_information()
 
-        self.model.update_plot_guess(self.view.plot_guess)
+        self.update_plot_guess()
 
         self.fit_function_changed_notifier.notify_subscribers()
 
@@ -245,7 +248,7 @@ class BasicFittingPresenter:
         full_parameter = f"{function_index}{parameter}"
         self.model.update_parameter_value(full_parameter, self.view.parameter_value(full_parameter))
 
-        self.model.update_plot_guess(self.view.plot_guess)
+        self.update_plot_guess()
 
         self.fit_function_changed_notifier.notify_subscribers()
         self.fit_parameter_changed_notifier.notify_subscribers()
@@ -263,7 +266,7 @@ class BasicFittingPresenter:
         self._check_start_x_is_within_x_limits()
         self._check_end_x_is_within_x_limits()
 
-        self.model.update_plot_guess(self.view.plot_guess)
+        self.update_plot_guess()
 
     def handle_end_x_updated(self) -> None:
         """Handle when the end X is changed."""
@@ -278,7 +281,7 @@ class BasicFittingPresenter:
         self._check_start_x_is_within_x_limits()
         self._check_end_x_is_within_x_limits()
 
-        self.model.update_plot_guess(self.view.plot_guess)
+        self.update_plot_guess()
 
     def handle_use_rebin_changed(self) -> None:
         """Handle the Fit to raw data checkbox state change."""
@@ -361,6 +364,12 @@ class BasicFittingPresenter:
         """Updates the start and end x in the view using the current values in the model."""
         self.view.start_x = self.model.current_start_x
         self.view.end_x = self.model.current_end_x
+
+    def update_plot_guess(self) -> None:
+        """Updates the guess plot using the current dataset and function."""
+        self.remove_plot_guess_notifier.notify_subscribers()
+        self.model.update_plot_guess()
+        self.update_plot_guess_notifier.notify_subscribers()
 
     def _check_start_x_is_within_x_limits(self) -> None:
         """Checks the Start X is within the x limits of the current dataset. If not it is set to one of the limits."""

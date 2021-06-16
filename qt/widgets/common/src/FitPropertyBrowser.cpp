@@ -1549,14 +1549,12 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    const std::string funStr = getFunctionString();
-
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     if (isHistogramFit()) {
       alg->setProperty("EvaluationType", "Histogram");
     }
-    alg->setPropertyValue("Function", funStr);
+    alg->setPropertyValue("Function", compositeFunction()->asString());
     alg->setProperty("InputWorkspace", ws);
     auto tbl = std::dynamic_pointer_cast<ITableWorkspace>(ws);
     if (!tbl) {

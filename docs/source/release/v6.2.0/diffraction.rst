@@ -18,12 +18,16 @@ Improvements
 ############
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` major interface update along with enabling the calibration of T0 and sample position.
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` minor interface update that allows fine control of bank rotation calibration.
+- :ref:`SNAPReduce <algm-SNAPReduce-v1>` permits saving selected property names and values to file, to aid autoreduction.
 
 Bugfixes
 ########
+- fix d-spacing calculation when parabolic model is selected.
 
 Engineering Diffraction
 -----------------------
+- The workflows for Calibration and Focussing in the EnggDiffraction GUI and EnginX scripts have been replaced to make use of faster, better tested C++ algorithms (PDCalibration).
+- The following algorithms have been deprecated, and will likely be removed entirely in the next release: EnggCalibrate, EnggCalibrateFull, EnggFocus, EnggVanadiumCorrections
 
 Single Crystal Diffraction
 --------------------------
@@ -40,5 +44,6 @@ Improvements
 
 Bugfixes
 ########
+- Expand the Q space search radius in DetectorSearcher to avoid missing peaks when using :ref:`PredictPeaks <algm-PredictPeaks>`.
 
 :ref:`Release 6.2.0 <v6.2.0>`
