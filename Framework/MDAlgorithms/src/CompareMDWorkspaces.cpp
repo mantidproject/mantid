@@ -63,10 +63,7 @@ public:
 
   float getError() const { return mError; }
 
-  bool operator()(SimpleMDEvent &event1, const SimpleMDEvent &event2) {
-    // std::cout << "() is called\n";
-    return event1 < event2;
-  }
+  bool operator()(SimpleMDEvent &event1, const SimpleMDEvent &event2) { return event1 < event2; }
 
   /**
    * @brief override operator <
@@ -168,8 +165,6 @@ public:
   }
 
   SimpleMDEvent &operator=(const SimpleMDEvent &event2) {
-
-    //        std::cout << " Assigning = is called.... \n";
     // coordiate
     size_t numdirs = mCoordinates.size();
     for (size_t i = 0; i < numdirs; ++i)
@@ -407,26 +402,29 @@ void CompareMDWorkspaces::compareMDWorkspaces(typename MDEventWorkspace<MDE, nd>
               events_vec2.push_back(se2);
             }
 
-            // sort events and compare
+            // sort events for comparing
             std::sort(events_vec1.begin(), events_vec1.end());
             std::sort(events_vec2.begin(), events_vec2.end());
 
+            // compare MEEvents
             bool same = true;
-            std::string diffmessage("Box " + std::to_string(ibox) + ": ");
-
+            std::string diffmessage("Box " + std::to_string(ibox) + " Events: ");
             for (size_t i = 0; i < events_vec1.size(); ++i) {
               try {
+                // coordinate
                 for (size_t d = 0; d < nd; ++d) {
                   compareTol(events_vec1[i].getCenter(d), events_vec2[i].getCenter(d),
                              "dim " + std::to_string(d) + " ");
                 }
+                // signal
                 compareTol(events_vec1[i].getSignal(), events_vec2[i].getSignal(), "");
+                // error
                 compareTol(events_vec1[i].getError(), events_vec2[i].getError(), "");
               } catch (CompareFailsException &e) {
                 g_log.information() << "Box " << ibox << " Event " << i << ": " << e.what()
                                     << "\n    [ws1] " + events_vec1[i].str() << "\n    [ws2] : " + events_vec2[i].str()
                                     << "\n";
-                diffmessage += " Event " + std::to_string(i) + ", ";
+                diffmessage += std::to_string(i) + ", ";
                 same = false;
               }
             }
