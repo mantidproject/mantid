@@ -11,7 +11,6 @@ set(
   ALCPeakFittingModel.cpp
   ALCPeakFittingPresenter.cpp
   ALCPeakFittingView.cpp
-  ExternalPlotter.cpp
   MuonAnalysisHelper.cpp
 )
 
@@ -22,7 +21,6 @@ set(
   ALCDataLoadingPresenter.h
   ALCInterface.h
   ALCPeakFittingPresenter.h
-  ExternalPlotter.h
   IALCBaselineModellingView.h
   IALCBaselineModellingModel.h
   IALCDataLoadingView.h
@@ -44,7 +42,6 @@ set(
   ALCPeakFittingPresenter.h
   ALCPeakFittingView.h
   DllConfig.h
-  ExternalPlotter.h
   IALCBaselineModellingModel.h
   IALCBaselineModellingView.h
   IALCDataLoadingView.h

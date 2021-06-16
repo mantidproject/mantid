@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "ExternalPlotter.h"
+#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"

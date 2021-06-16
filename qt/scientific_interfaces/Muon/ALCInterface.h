@@ -9,8 +9,8 @@
 #include "DllConfig.h"
 #include "MantidKernel/System.h"
 
-#include "ExternalPlotter.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 
 #include "ui_ALCInterface.h"
 
@@ -83,7 +83,7 @@ private:
   static const QString LABEL_FORMAT;
 
   /// External plotter
-  std::unique_ptr<ExternalPlotter> m_externalPlotter;
+  std::unique_ptr<Widgets::MplCpp::ExternalPlotter> m_externalPlotter;
 };
 
 } // namespace CustomInterfaces

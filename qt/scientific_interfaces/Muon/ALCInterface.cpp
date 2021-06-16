@@ -71,7 +71,7 @@ ALCInterface::ALCInterface(QWidget *parent)
     : UserSubWindow(parent), m_ui(), m_baselineModellingView(nullptr), m_peakFittingView(nullptr),
       m_dataLoading(nullptr), m_baselineModelling(nullptr), m_peakFitting(nullptr),
       m_baselineModellingModel(new ALCBaselineModellingModel()), m_peakFittingModel(new ALCPeakFittingModel()),
-      m_externalPlotter(std::make_unique<ExternalPlotter>()) {}
+      m_externalPlotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()) {}
 
 void ALCInterface::initLayout() {
   m_ui.setupUi(this);
@@ -289,29 +289,44 @@ void ALCInterface::importPeakData(const std::string &workspaceName) {
 
 void ALCInterface::externalPlotRequested() {
   MatrixWorkspace_sptr data;
-  QHash<QString, QVariant> kwargs;
+  std::vector<QHash<QString, QVariant>> kwargs;
   switch (m_ui.stepView->currentIndex()) {
   case 0:
     data = m_dataLoading->exportWorkspace();
     if (data) {
-      kwargs.insert("marker", QString(".").toLatin1().constData());
-      kwargs.insert("linestyle", QString("None").toLatin1().constData());
+      kwargs.emplace_back(QHash<QString, QVariant>());
+      kwargs[0].insert("marker", QString(".").toLatin1().constData());
+      kwargs[0].insert("linestyle", QString("None").toLatin1().constData());
       AnalysisDataService::Instance().addOrReplace("ALC_External_Plot_Loaded_Data", data);
-      m_externalPlotter->plotSpectra("ALC_External_Plot_Loaded_Data", "0", true, kwargs);
+      m_externalPlotter->plotSpectra("ALC_External_Plot_Loaded_Data", "0", true, kwargs[0]);
     }
     break;
   case 1: // Spec 0 = Data, Spec 1 = Calc, Spec 2 = Diff
     data = m_baselineModellingModel->exportWorkspace();
     if (data) {
       AnalysisDataService::Instance().addOrReplace("ALC_External_Plot_Baseline_Workspace", data);
-      m_externalPlotter->plotSpectra("ALC_External_Plot_Baseline_Workspace", "0, 1", false);
+      kwargs.emplace_back(QHash<QString, QVariant>());
+      kwargs[0].insert("marker", QString(".").toLatin1().constData());
+      kwargs[0].insert("linestyle", QString("None").toLatin1().constData());
+      kwargs.emplace_back(QHash<QString, QVariant>());
+      kwargs[1].insert("marker", QString("None").toLatin1().constData());
+      m_externalPlotter->plotCorrespondingSpectra(std::vector<std::string>{2, "ALC_External_Plot_Baseline_Workspace"},
+                                                  std::vector<int>{0, 1}, false, kwargs,
+                                                  std::vector<bool>{true, false});
     }
     break;
   case 2: // Spec 0 = Data, Spec 1 = Calc, Spec 2 = Diff
     data = m_peakFittingModel->exportWorkspace();
     if (data) {
       AnalysisDataService::Instance().addOrReplace("ALC_External_Plot_Peaks_Workspace", data);
-      m_externalPlotter->plotSpectra("ALC_External_Plot_Peaks_Workspace", "0, 1", false, kwargs);
+      kwargs.emplace_back(QHash<QString, QVariant>());
+      kwargs[0].insert("marker", QString(".").toLatin1().constData());
+      kwargs[0].insert("linestyle", QString("None").toLatin1().constData());
+      kwargs.emplace_back(QHash<QString, QVariant>());
+      kwargs[1].insert("marker", QString("None").toLatin1().constData());
+      m_externalPlotter->plotCorrespondingSpectra(std::vector<std::string>{2, "ALC_External_Plot_Peaks_Workspace"},
+                                                  std::vector<int>{0, 1}, false, kwargs,
+                                                  std::vector<bool>{true, false});
     }
     break;
   }

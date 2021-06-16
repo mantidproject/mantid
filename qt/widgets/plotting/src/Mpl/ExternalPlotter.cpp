@@ -4,13 +4,12 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ExternalPlotter.h"
-//#include "IndirectSettingsHelper.h"
-
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
+#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 
 #include <QHash>
 #include <QString>
@@ -81,7 +80,7 @@ using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
 
 boost::optional<Python::Object> workbenchPlot(QStringList const &workspaceNames, std::vector<int> const &indices,
-                                              bool errorBars,
+                                              bool errorBars, bool overplot = false,
                                               boost::optional<QHash<QString, QVariant>> kwargs = boost::none,
                                               boost::optional<Python::Object> figure = boost::none) {
   QHash<QString, QVariant> plotKwargs;
@@ -93,7 +92,7 @@ boost::optional<Python::Object> workbenchPlot(QStringList const &workspaceNames,
   using MantidQt::Widgets::MplCpp::plot;
   try {
     return plot(workspaceNames, boost::none, indices, std::move(figure), plotKwargs, boost::none, boost::none,
-                errorBars);
+                errorBars, overplot);
   } catch (PythonException const &ex) {
     g_log.error() << ex.what();
     return boost::none;
@@ -103,7 +102,8 @@ boost::optional<Python::Object> workbenchPlot(QStringList const &workspaceNames,
 } // namespace
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace Widgets {
+namespace MplCpp {
 
 ExternalPlotter::ExternalPlotter() {}
 
@@ -121,10 +121,10 @@ void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string 
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
     if (kwargs) {
       workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(workspaceIndices),
-                    errorBars, kwargs);
+                    errorBars, false, kwargs);
     } else {
       workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(workspaceIndices),
-                    errorBars, boost::none);
+                    errorBars);
     }
   }
 }
@@ -137,16 +137,35 @@ void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string 
  * @param workspaceIndices List of indices to plot
  */
 void ExternalPlotter::plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
-                                               std::vector<int> const &workspaceIndices, bool errorBars) {
+                                               std::vector<int> const &workspaceIndices, bool errorBars,
+                                               boost::optional<std::vector<QHash<QString, QVariant>>> kwargs,
+                                               boost::optional<std::vector<bool>> errorBarsPerSpectra) {
   if (workspaceNames.empty() || workspaceIndices.empty())
     return;
   if (workspaceNames.size() > 1 && workspaceNames.size() != workspaceIndices.size())
     return;
-  auto figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])), {workspaceIndices[0]}, errorBars);
-  for (auto i = 1u; i < workspaceNames.size(); ++i) {
-    if (figure)
-      figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])), {workspaceIndices[i]}, errorBars,
-                             boost::none, figure.get());
+  if (!errorBarsPerSpectra)
+    errorBarsPerSpectra = std::vector<bool>(workspaceIndices.size(), errorBars);
+  else if (errorBarsPerSpectra->size() != workspaceIndices.size())
+    return;
+  if (kwargs) {
+    if (kwargs->size() != workspaceIndices.size())
+      return;
+    auto figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])), {workspaceIndices[0]},
+                                errorBarsPerSpectra.get()[0], false, kwargs.get()[0]);
+    for (auto i = 1u; i < workspaceNames.size(); ++i) {
+      if (figure)
+        figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])), {workspaceIndices[i]},
+                               errorBarsPerSpectra.get()[i], true, kwargs.get()[i], figure.get());
+    }
+  } else {
+    auto figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])), {workspaceIndices[0]},
+                                errorBarsPerSpectra.get()[0], false);
+    for (auto i = 1u; i < workspaceNames.size(); ++i) {
+      if (figure)
+        figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])), {workspaceIndices[i]},
+                               errorBarsPerSpectra.get()[i], true, boost::none, figure.get());
+    }
   }
 }
 
@@ -162,7 +181,7 @@ void ExternalPlotter::plotBins(std::string const &workspaceName, std::string con
     QHash<QString, QVariant> plotKwargs;
     plotKwargs["axis"] = static_cast<int>(MantidAxType::Bin);
     workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(binIndices), errorBars,
-                  plotKwargs);
+                  false, plotKwargs);
   }
 }
 
@@ -259,6 +278,6 @@ bool ExternalPlotter::validateBins(const MatrixWorkspace_const_sptr &workspace, 
   auto const lastIndex = std::stoul(splitStringBy(binIndices, ",-").back());
   return lastIndex < numberOfBins;
 }
-
-} // namespace CustomInterfaces
+} // namespace MplCpp
+} // namespace Widgets
 } // namespace MantidQt
