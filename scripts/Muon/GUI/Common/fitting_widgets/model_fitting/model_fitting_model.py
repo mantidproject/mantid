@@ -54,6 +54,22 @@ class ModelFittingModel(BasicFittingModel):
         else:
             return None
 
+    def x_parameters(self) -> list:
+        """Returns the X parameters that are stored by the fitting context."""
+        return list(self.fitting_context.x_parameters.keys())
+
+    def y_parameters(self) -> list:
+        """Returns the Y parameters that are stored by the fitting context."""
+        return list(self.fitting_context.y_parameters.keys())
+
+    def get_first_x_parameter_not(self, parameter: str) -> str:
+        """Returns the first X parameter that is not the same as the parameter provided."""
+        return self._get_first_parameter_from_list_not(self.x_parameters(), parameter)
+
+    def get_first_y_parameter_not(self, parameter: str) -> str:
+        """Returns the first Y parameter that is not the same as the parameter provided."""
+        return self._get_first_parameter_from_list_not(self.y_parameters(), parameter)
+
     def parameter_combination_workspace_name(self, x_parameter: str, y_parameter: str) -> str:
         """Returns the workspace name being used for a particular parameter combination."""
         results_table_name = self.current_result_table_name
@@ -85,7 +101,7 @@ class ModelFittingModel(BasicFittingModel):
         workspace_group = self._create_workspace_group_to_store_combination_workspaces()
         if workspace_group is not None:
             self.dataset_names = self._create_matrix_workspaces_for_parameter_combinations(workspace_group)
-            return self.fitting_context.x_parameters.keys(), self.fitting_context.y_parameters.keys()
+            return self.x_parameters(), self.y_parameters()
         else:
             return [], []
 
@@ -131,21 +147,24 @@ class ModelFittingModel(BasicFittingModel):
     def _create_matrix_workspaces_for_parameter_combinations(self, workspace_group: WorkspaceGroup) -> list:
         """Creates a MatrixWorkspace for each parameter combination. These are the workspaces that will be fitted."""
         workspace_names = []
-        for x_parameter_name in self.fitting_context.x_parameters.keys():
-            for y_parameter_name in self.fitting_context.y_parameters.keys():
-                x_values = self._convert_str_column_values_to_int(x_parameter_name, self.fitting_context.x_parameters)
-                y_values = self._convert_str_column_values_to_int(y_parameter_name, self.fitting_context.y_parameters)
-                y_errors = self.fitting_context.y_parameter_errors[y_parameter_name]
+        for x_parameter_name in self.x_parameters():
+            for y_parameter_name in self.y_parameters():
+                if x_parameter_name != y_parameter_name:
+                    x_values = self._convert_str_column_values_to_int(x_parameter_name,
+                                                                      self.fitting_context.x_parameters)
+                    y_values = self._convert_str_column_values_to_int(y_parameter_name,
+                                                                      self.fitting_context.y_parameters)
+                    y_errors = self.fitting_context.y_parameter_errors[y_parameter_name]
 
-                # Sort the data based on the x_values being in ascending order
-                x_values, y_values, y_errors = zip(*sorted(zip(x_values, y_values, y_errors)))
+                    # Sort the data based on the x_values being in ascending order
+                    x_values, y_values, y_errors = zip(*sorted(zip(x_values, y_values, y_errors)))
 
-                output_name = self.parameter_combination_workspace_name(x_parameter_name, y_parameter_name)
-                if not self._parameter_combination_workspace_exists(output_name, x_values, y_values, y_errors):
-                    CreateWorkspace(DataX=x_values, DataY=y_values, DataE=y_errors, OutputWorkspace=output_name)
-                    workspace_group.add(output_name)
+                    output_name = self.parameter_combination_workspace_name(x_parameter_name, y_parameter_name)
+                    if not self._parameter_combination_workspace_exists(output_name, x_values, y_values, y_errors):
+                        CreateWorkspace(DataX=x_values, DataY=y_values, DataE=y_errors, OutputWorkspace=output_name)
+                        workspace_group.add(output_name)
 
-                workspace_names.append(output_name)
+                    workspace_names.append(output_name)
 
         return workspace_names
 
@@ -192,3 +211,10 @@ class ModelFittingModel(BasicFittingModel):
         elif self.fitting_context.current_result_table_index is None or \
                 self.fitting_context.current_result_table_index >= self.fitting_context.number_of_result_tables():
             self.fitting_context.current_result_table_index = 0
+
+    @staticmethod
+    def _get_first_parameter_from_list_not(parameters: list, parameter: str) -> str:
+        """Returns the first parameter in the list that is not the same as the parameter provided."""
+        if parameter in parameters:
+            parameters.remove(parameter)
+        return parameters[0] if len(parameters) > 0 else None

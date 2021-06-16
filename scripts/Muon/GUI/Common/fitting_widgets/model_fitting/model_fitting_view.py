@@ -46,13 +46,25 @@ class ModelFittingView(BasicFittingView):
         """Update the data in the results table combo box."""
         self.model_fitting_data_selector.update_result_table_names(table_names)
 
-    def update_x_and_y_parameters(self, x_parameters: list, y_parameters: list) -> None:
-        """Update the available X and Y parameters in the relevant combo boxes."""
-        self.model_fitting_data_selector.update_x_and_y_parameters(x_parameters, y_parameters)
+    def update_x_parameters(self, x_parameters: list, emit_signal: bool = False) -> None:
+        """Update the available X parameters."""
+        self.model_fitting_data_selector.update_x_parameters(x_parameters, emit_signal)
+
+    def update_y_parameters(self, y_parameters: list, emit_signal: bool = False) -> None:
+        """Update the available Y parameters."""
+        self.model_fitting_data_selector.update_y_parameters(y_parameters, emit_signal)
 
     def update_fit_function(self, fit_function: IFunction) -> None:
         """Updates the fit function shown in the view."""
         self.fit_function_options.set_fit_function(fit_function)
+
+    def set_selected_x_parameter(self, x_parameter: str) -> None:
+        """Sets the selected X parameter."""
+        self.model_fitting_data_selector.set_selected_x_parameter(x_parameter)
+
+    def set_selected_y_parameter(self, y_parameter: str) -> None:
+        """Sets the selected Y parameter."""
+        self.model_fitting_data_selector.set_selected_y_parameter(y_parameter)
 
     @property
     def current_result_table_index(self) -> str:

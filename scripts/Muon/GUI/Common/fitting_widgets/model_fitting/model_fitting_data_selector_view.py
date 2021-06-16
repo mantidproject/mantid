@@ -47,18 +47,51 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
         """Update the data in the parameter display combo box."""
         self.result_table_selector.update_dataset_name_combo_box(table_names)
 
-    def update_x_and_y_parameters(self, x_parameters: list, y_parameters: list) -> None:
-        """Update the available X and Y parameters in the relevant combo boxes."""
+    def update_x_parameters(self, x_parameters: list, emit_signal: bool = False) -> None:
+        """Update the available X parameters."""
+        old_x_parameter = self.x_selector.currentText()
+
         self.x_selector.blockSignals(True)
-        self.y_selector.blockSignals(True)
-
         self.x_selector.clear()
-        self.y_selector.clear()
         self.x_selector.addItems(x_parameters)
-        self.y_selector.addItems(y_parameters)
-
         self.x_selector.blockSignals(False)
+
+        new_index = self.set_selected_x_parameter(old_x_parameter)
+
+        if emit_signal:
+            # Signal is emitted manually in case the index has not changed (but the loaded parameter may be different)
+            self.x_selector.currentIndexChanged.emit(new_index)
+
+    def update_y_parameters(self, y_parameters: list, emit_signal: bool = False) -> None:
+        """Update the available Y parameters."""
+        old_y_parameter = self.y_selector.currentText()
+
+        self.y_selector.blockSignals(True)
+        self.y_selector.clear()
+        self.y_selector.addItems(y_parameters)
         self.y_selector.blockSignals(False)
+
+        new_index = self.set_selected_y_parameter(old_y_parameter)
+
+        if emit_signal:
+            # Signal is emitted manually in case the index has not changed (but the loaded parameter may be different)
+            self.y_selector.currentIndexChanged.emit(new_index)
+
+    def set_selected_x_parameter(self, x_parameter: str) -> int:
+        """Sets the selected X parameter."""
+        new_index = self.x_selector.findText(x_parameter)
+        self.x_selector.blockSignals(True)
+        self.x_selector.setCurrentIndex(new_index if new_index != -1 else 0)
+        self.x_selector.blockSignals(False)
+        return new_index
+
+    def set_selected_y_parameter(self, y_parameter: str) -> int:
+        """Sets the selected Y parameter."""
+        new_index = self.y_selector.findText(y_parameter)
+        self.y_selector.blockSignals(True)
+        self.y_selector.setCurrentIndex(new_index if new_index != -1 else 0)
+        self.y_selector.blockSignals(False)
+        return new_index
 
     def number_of_result_tables(self) -> int:
         """Returns the number of result tables loaded into the widget."""

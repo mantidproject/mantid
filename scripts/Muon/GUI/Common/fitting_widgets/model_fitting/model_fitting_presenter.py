@@ -27,8 +27,8 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.results_table_created_observer = GenericObserverWithArgPassing(self.handle_new_results_table_created)
 
         self.view.set_slot_for_results_table_changed(self.handle_results_table_changed)
-        self.view.set_slot_for_selected_x_changed(self.handle_selected_x_and_y_changed)
-        self.view.set_slot_for_selected_y_changed(self.handle_selected_x_and_y_changed)
+        self.view.set_slot_for_selected_x_changed(self.handle_selected_x_changed)
+        self.view.set_slot_for_selected_y_changed(self.handle_selected_y_changed)
 
     def handle_new_results_table_created(self, new_results_table_name: str) -> None:
         """Handles when a new results table is created and added to the results context."""
@@ -43,12 +43,21 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.model.current_result_table_index = self.view.current_result_table_index
         self._create_parameter_combination_workspaces()
 
-    def handle_selected_x_and_y_changed(self) -> None:
-        """Handles when the selected X and Y parameters are changed."""
-        dataset_name = self.model.parameter_combination_workspace_name(self.view.x_parameter(), self.view.y_parameter())
-        if dataset_name is not None:
-            self.model.current_dataset_index = self.model.dataset_names.index(dataset_name)
-            self.view.current_dataset_name = dataset_name
+    def handle_selected_x_changed(self) -> None:
+        """Handles when the selected X parameter is changed."""
+        x_parameter = self.view.x_parameter()
+        if x_parameter == self.view.y_parameter():
+            self.view.set_selected_y_parameter(self.model.get_first_y_parameter_not(x_parameter))
+
+        self.update_selected_parameter_combination_workspace()
+
+    def handle_selected_y_changed(self) -> None:
+        """Handles when the selected Y parameter is changed."""
+        y_parameter = self.view.y_parameter()
+        if y_parameter == self.view.x_parameter():
+            self.view.set_selected_x_parameter(self.model.get_first_x_parameter_not(y_parameter))
+
+        self.update_selected_parameter_combination_workspace()
 
     def handle_parameter_combinations_started(self) -> None:
         """Handle when the creation of matrix workspaces starts for all the different parameter combinations."""
@@ -65,15 +74,17 @@ class ModelFittingPresenter(BasicFittingPresenter):
         if len(x_parameters) == 0 or len(y_parameters) == 0:
             return
 
-        self.handle_parameter_combinations_created_successfully(x_parameters, y_parameters)
+        self.handle_parameter_combinations_created_successfully()
 
-    def handle_parameter_combinations_created_successfully(self, x_parameters: list, y_parameters: list) -> None:
+    def handle_parameter_combinations_created_successfully(self) -> None:
         """Handles when the parameter combination workspaces have been created successfully."""
-        self.view.update_x_and_y_parameters(x_parameters, y_parameters)
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
         self.view.update_dataset_name_combo_box(self.model.dataset_names)
 
-        self.handle_selected_x_and_y_changed()
+        # Initially, the y parameters should be updated before the x parameters.
+        self.view.update_y_parameters(self.model.y_parameters())
+        # Triggers handle_selected_x_changed
+        self.view.update_x_parameters(self.model.x_parameters(), emit_signal=True)
 
     def handle_parameter_combinations_error(self, error: str) -> None:
         """Handle when an error occurs while creating workspaces for the different parameter combinations."""
@@ -113,6 +124,13 @@ class ModelFittingPresenter(BasicFittingPresenter):
     def update_fit_functions_in_model_from_view(self) -> None:
         """Update the fit function in the model only for the currently selected dataset."""
         self.model.current_single_fit_function = self.view.current_fit_function()
+
+    def update_selected_parameter_combination_workspace(self) -> None:
+        """Updates the selected parameter combination based on the selected X and Y parameters."""
+        dataset_name = self.model.parameter_combination_workspace_name(self.view.x_parameter(), self.view.y_parameter())
+        if dataset_name is not None:
+            self.model.current_dataset_index = self.model.dataset_names.index(dataset_name)
+            self.view.current_dataset_name = dataset_name
 
     def reset_fit_status_and_chi_squared_information(self) -> None:
         """Reset the fit status and chi squared only for the currently selected dataset."""
