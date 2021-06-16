@@ -1,4 +1,4 @@
-name: mantid
+name: mantid-developer
 
 channels:
   - conda-forge
