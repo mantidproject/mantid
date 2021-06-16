@@ -53,7 +53,6 @@ private slots:
 
   void updateBaselineData();
   void updatePeakData();
-  void updateAxisLabels(std::string newAxisLabels);
   void externalPlotRequested();
 
 private:

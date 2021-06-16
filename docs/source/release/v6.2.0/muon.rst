@@ -13,6 +13,14 @@ Improvements
 
 - It is now possible to do a vertical resize of the plot in Muon Analysis and Frequency Domain Analysis.
 
+ALC
+---
+
+New Features
+############
+
+- Added an external plot button to the ALC interface which will plot in workbench the current tab's plot
+
 Elemental Analysis
 ------------------
 

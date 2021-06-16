@@ -97,7 +97,6 @@ void ALCInterface::initLayout() {
 
   connect(m_dataLoading, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
   connect(m_baselineModellingModel, SIGNAL(correctedDataChanged()), SLOT(updatePeakData()));
-  connect(m_dataLoading, SIGNAL(updateAxisLabels(std::string)), SLOT(updateAxisLabels(std::string)));
 
   assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
 
@@ -288,14 +287,8 @@ void ALCInterface::importPeakData(const std::string &workspaceName) {
   }
 }
 
-void ALCInterface::updateAxisLabels(std::string newAxisLabel) {
-  m_baselineModellingView->updateAxisLabels(newAxisLabel);
-  m_peakFittingView->updateAxisLabels(newAxisLabel);
-}
-
 void ALCInterface::externalPlotRequested() {
   MatrixWorkspace_sptr data;
-  MantidQt::Widgets::Common::Python::Object fig;
   QHash<QString, QVariant> kwargs;
   switch (m_ui.stepView->currentIndex()) {
   case 0:
@@ -303,26 +296,22 @@ void ALCInterface::externalPlotRequested() {
     if (data) {
       kwargs.insert("marker", QString(".").toLatin1().constData());
       kwargs.insert("linestyle", QString("None").toLatin1().constData());
-      AnalysisDataService::Instance().addOrReplace("ALCResults_Loaded_Data", data);
-      m_externalPlotter->plotSpectra("ALCResults_Loaded_Data", "0", true, kwargs);
+      AnalysisDataService::Instance().addOrReplace("ALC_External_Plot_Loaded_Data", data);
+      m_externalPlotter->plotSpectra("ALC_External_Plot_Loaded_Data", "0", true, kwargs);
     }
     break;
   case 1: // Spec 0 = Data, Spec 1 = Calc, Spec 2 = Diff
     data = m_baselineModellingModel->exportWorkspace();
     if (data) {
-      kwargs.insert("marker", QString(".").toLatin1().constData());
-      kwargs.insert("linestyle", QString("None").toLatin1().constData());
-      AnalysisDataService::Instance().addOrReplace("ALCResults_Baseline_Workspace", data);
-      m_externalPlotter->plotSpectra("ALCResults_Baseline_Workspace", "0", false, kwargs);
+      AnalysisDataService::Instance().addOrReplace("ALC_External_Plot_Baseline_Workspace", data);
+      m_externalPlotter->plotSpectra("ALC_External_Plot_Baseline_Workspace", "0, 1", false);
     }
     break;
-  case 2:
+  case 2: // Spec 0 = Data, Spec 1 = Calc, Spec 2 = Diff
     data = m_peakFittingModel->exportWorkspace();
     if (data) {
-      kwargs.insert("marker", QString(".").toLatin1().constData());
-      kwargs.insert("linestyle", QString("None").toLatin1().constData());
-      AnalysisDataService::Instance().addOrReplace("ALCResults_Peaks_Workspace", data);
-      m_externalPlotter->plotSpectra("ALCResults_Peaks_Workspace", "0", false, kwargs);
+      AnalysisDataService::Instance().addOrReplace("ALC_External_Plot_Peaks_Workspace", data);
+      m_externalPlotter->plotSpectra("ALC_External_Plot_Peaks_Workspace", "0, 1", false, kwargs);
     }
     break;
   }

@@ -156,7 +156,6 @@ void ALCBaselineModellingPresenter::onSectionSelectorModified(int index) {
 void ALCBaselineModellingPresenter::updateDataCurve() {
   if (auto dataWs = m_model->data()) {
     m_view->setDataCurve(dataWs);
-    m_view->updateAxisLabels(std::string{"iamalabel"});
     // Delete all section selectors
     int noRows = m_view->noOfSectionRows() - 1;
     for (int j = noRows; j > -1; --j) {

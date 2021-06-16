@@ -142,7 +142,6 @@ void ExternalPlotter::plotCorrespondingSpectra(std::vector<std::string> const &w
     return;
   if (workspaceNames.size() > 1 && workspaceNames.size() != workspaceIndices.size())
     return;
-
   auto figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])), {workspaceIndices[0]}, errorBars);
   for (auto i = 1u; i < workspaceNames.size(); ++i) {
     if (figure)

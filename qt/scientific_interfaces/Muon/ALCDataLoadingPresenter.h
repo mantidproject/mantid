@@ -75,9 +75,6 @@ signals:
   /// Signal emitted when data get changed
   void dataChanged();
 
-  /// Signal emitted when new data is loaded
-  void updateAxisLabels(std::string newAxisLabels);
-
 protected:
   /// Signal emitted when timer event occurs
   void timerEvent(QTimerEvent *timeup) override;

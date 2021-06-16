@@ -51,7 +51,6 @@ public slots:
   void updateSectionSelector(int index, SectionSelector values) override;
   void displayError(const QString &message) override;
   void help() override;
-  void updateAxisLabels(std::string &xAxisLabel) override;
   // -- End of IALCBaselineModellingView interface
   // -------------------------------------------------
 

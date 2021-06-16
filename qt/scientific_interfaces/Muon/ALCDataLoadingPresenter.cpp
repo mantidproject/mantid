@@ -8,12 +8,9 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitLabel.h"
 
 #include "ALCLatestFileFinder.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
@@ -251,18 +248,11 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
     } else {
       assert(m_loadedData->getNumberHistograms() == 4);
     }
-
-    // Before plotting update x unit label
-    // m_loadedData->getAxis(0)->setUnit("Empty")->setLabel("","");
-
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)
     m_view->setDataCurve(m_loadedData);
 
     emit dataChanged();
-
-    // Update axis labels
-    // emit updateAxisLabels(m_view->log());
 
   } catch (const std::invalid_argument &e) {
     throw std::runtime_error(e.what()); // Caught in handle load request
@@ -384,8 +374,6 @@ void ALCDataLoadingPresenter::setData(const MatrixWorkspace_sptr &data) {
     m_loadedData = data;
     // Plot the data
     m_view->setDataCurve(m_loadedData);
-    // Update axis labels
-    // emit updateAxisLabels(m_view->log());
 
   } else {
     std::invalid_argument("Cannot load an empty workspace");

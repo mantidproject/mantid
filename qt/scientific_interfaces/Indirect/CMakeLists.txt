@@ -160,7 +160,6 @@ set(
         IndirectPlotOptionsView.h
         IndirectSassena.h
         IndirectSettings.h
-        IndirectSettingsHelper.h
         IndirectSettingsPresenter.h
         IndirectSettingsView.h
         IndirectSimulation.h
@@ -199,6 +198,7 @@ set(
         IndirectFitOutputModel.h
         IndirectFunctionBrowser/ConvFunctionModel.h
         IndirectPlotOptionsModel.h
+        IndirectSettingsHelper.h
         IqtFitModel.h
         MSDFitModel.h
         Notifier.h
