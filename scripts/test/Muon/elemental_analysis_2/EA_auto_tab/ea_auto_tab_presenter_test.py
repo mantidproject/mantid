@@ -2,12 +2,26 @@ import unittest
 import unittest.mock as mock
 from copy import deepcopy
 from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter import EAAutoTabPresenter
+from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
+from Muon.GUI.ElementalAnalysis2.context.ea_group_context import EAGroupContext
+from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
+from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model import PEAKS_WS_SUFFIX, MATCH_GROUP_WS_SUFFIX
 
 
 class EAAutoTabPresenterTest(unittest.TestCase):
 
     def setUp(self):
-        self.presenter = EAAutoTabPresenter(mock.Mock(), mock.Mock(), mock.Mock(), mock.Mock())
+        workspaces = ["9999; Detector 1", "9999; Detector 2", "9999; Detector 3", "9999; Detector 4"]
+        self.group_context = EAGroupContext()
+        for group_name in workspaces:
+            group = EAGroup(group_name, group_name.split(";")[1].strip(),
+                            group_name.split(";")[0].strip())
+            group.update_peak_table("9999", group_name + PEAKS_WS_SUFFIX)
+            group.update_matches_table("9999", group_name + MATCH_GROUP_WS_SUFFIX)
+            self.group_context.add_group(group)
+
+        self.context = ElementalAnalysisContext(None, self.group_context)
+        self.presenter = EAAutoTabPresenter(self.context, mock.Mock(), mock.Mock(), mock.Mock())
 
     def test_run_find_peak_algorithms_if_parameters_is_None(self):
         self.presenter.view.get_parameters_for_find_peaks.return_value = None
@@ -90,20 +104,23 @@ class EAAutoTabPresenterTest(unittest.TestCase):
         mock_group.getNames = lambda: deepcopy(get_names_return_value)
         mock_retrieve_ws.return_value = mock_group
 
-        self.presenter.context.group_context.group_names = ["mock; detector 1", "mock; detector 2"]
-        self.presenter.model.split_run_and_detector = lambda x: x.split(";")
         self.presenter.model.current_peak_table_info = {"workspace": "mock_peak_info", "number_of_peaks": 0}
 
         self.presenter.update_view()
         # Assert statement
-        self.presenter.view.add_options_to_find_peak_combobox.assert_called_once_with({'mock': ['All', ' detector 1',
-                                                                                                ' detector 2']})
+        self.presenter.view.add_options_to_find_peak_combobox.assert_called_once_with({'9999': ['All', 'Detector 1',
+                                                                                                'Detector 2',
+                                                                                                'Detector 3',
+                                                                                                'Detector 4']})
 
-        self.presenter.view.add_options_to_show_peak_combobox.assert_called_once_with({'test': [
-            'test;mock_refitted_peaks', 'test;mock_peaks', 'test;fake_refitted_peaks', 'test;fake_peaks']})
+        self.presenter.view.add_options_to_show_peak_combobox.assert_called_once_with({'9999':
+                                                                                           ['9999; Detector 1_peaks',
+                                                                                            '9999; Detector 2_peaks',
+                                                                                            '9999; Detector 3_peaks',
+                                                                                            '9999; Detector 4_peaks']})
 
-        self.presenter.view.add_options_to_show_matches_combobox.assert_called_once_with({'test':
-                                                                                              get_names_return_value * 2})
+        self.presenter.view.add_options_to_show_matches_combobox.assert_called_once_with({'9999':
+                                                                                          get_names_return_value * 4})
 
         self.presenter.view.set_peak_info.assert_called_once_with(workspace="mock_peak_info", number_of_peaks=0)
 
