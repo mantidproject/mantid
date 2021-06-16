@@ -14,10 +14,17 @@ if(APPLE OR WIN32)
     INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
   )
   # Allow VS to start workbench for debugging
+  if (NOT CONDA_BUILD)
   set_target_properties(workbench PROPERTIES
                         VS_DEBUGGER_COMMAND $<$<BOOL:${WIN32}>:${Python_EXECUTABLE}>
                         VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${MSVC_BIN_DIR}/workbench-script.pyw>
                         VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
+  else()
+  set_target_properties(workbench PROPERTIES
+  VS_DEBUGGER_COMMAND $<$<BOOL:${WIN32}>:$ENV{CONDA_PREFIX}/Scripts/wrappers/conda/python.bat>
+  VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${MSVC_BIN_DIR}/workbench-script.pyw>
+  VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
+  endif()
 else()
   add_python_package(workbench
     EXECUTABLE

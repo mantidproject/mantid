@@ -116,7 +116,7 @@ else()
 endif()
 
 # Setup debugger environment to launch in VS without setting paths
-if (NOT CONDA)
+if (NOT CONDA_BUILD)
   set(MSVC_PATHS "${THIRD_PARTY_DIR}/bin$<SEMICOLON>${THIRD_PARTY_DIR}/lib/qt5/bin$<SEMICOLON>%PATH%")
 else()
   set(MSVC_PATHS "$ENV{CONDA_PREFIX}/Library/bin$<SEMICOLON>$ENV{CONDA_PREFIX}/Library/lib$<SEMICOLON>%PATH%")
