@@ -37,7 +37,7 @@ private:
                                 const Mantid::DataObjects::MDHistoWorkspace_sptr &ws2);
 
   template <typename MDE, size_t nd>
-  void compareMDWorkspaces(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  void compareMDEventWorkspaces(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   template <typename T> void compare(T a, T b, const std::string &message);
 

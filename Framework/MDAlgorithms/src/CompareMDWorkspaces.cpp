@@ -306,7 +306,7 @@ void CompareMDWorkspaces::compareMDHistoWorkspaces(const Mantid::DataObjects::MD
  * @param ws ::  MDEventWorkspace to compare
  */
 template <typename MDE, size_t nd>
-void CompareMDWorkspaces::compareMDWorkspaces(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
+void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
   typename MDEventWorkspace<MDE, nd>::sptr ws2 = std::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(inWS2);
   if (!ws1 || !ws2)
     throw std::runtime_error("Incompatible workspace types passed to PlusMD.");
@@ -486,7 +486,7 @@ void CompareMDWorkspaces::doComparison() {
     if (histo1 && histo2) {
       this->compareMDHistoWorkspaces(histo1, histo2);
     } else if (event1 && event2) {
-      CALL_MDEVENT_FUNCTION(this->compareMDWorkspaces, event1);
+      CALL_MDEVENT_FUNCTION(this->compareMDEventWorkspaces, event1);
     } else
       m_result = "Workspaces are of different types.";
   } catch (CompareFailsException &e) {
