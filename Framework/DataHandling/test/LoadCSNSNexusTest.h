@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source,
 //     Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADCSNSNEXUSTEST_H_
-#define LOADCSNSNEXUSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -94,5 +93,3 @@ private:
   std::string inputFile;
   std::string outputSpace;
 };
-
-#endif /*LOADCSNSNEXUSTEST_H_*/
