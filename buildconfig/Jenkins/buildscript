@@ -480,3 +480,5 @@ if [[ ${DO_SYSTEMTESTS} == true ]]; then
         $SCRIPT_DIR/systemtests
     fi
 fi
+# Shim for compatibility
+script_full_path=$(dirname "$0")
