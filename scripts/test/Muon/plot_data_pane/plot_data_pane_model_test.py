@@ -74,8 +74,9 @@ class PlotDataPaneModelTest(unittest.TestCase):
 
     def test_get_workspaces_to_plot(self):
         self.model.get_time_workspaces_to_plot = mock.Mock(return_value="test")
+        self.context.group_pair_context.add_group(MuonGroup(group_name="bwd", detector_ids=[2]))
+        self.context.group_pair_context.add_group(MuonGroup(group_name="top", detector_ids=[3]))
         self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]
-
         self.model.get_workspaces_to_plot(True, "Counts")
         self.assertEqual(self.model.get_time_workspaces_to_plot.call_count,3)
         self.model.get_time_workspaces_to_plot.assert_any_call("fwd", True, "Counts")
@@ -117,6 +118,9 @@ class PlotDataPaneModelTest(unittest.TestCase):
         self.assertEqual(keys, ['62260-62261'])
 
     def test_create_tiled_keys_returns_correctly_for_tiled_by_group(self):
+
+        self.context.group_pair_context.add_group(MuonGroup(group_name="bwd", detector_ids=[2]))
+        self.context.group_pair_context.add_group(MuonGroup(group_name="top", detector_ids=[3]))
         self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]
         runs = [[62260], [62261]]
         self.context.data_context.current_runs = runs
