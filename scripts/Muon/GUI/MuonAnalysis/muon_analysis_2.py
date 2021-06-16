@@ -38,7 +38,7 @@ from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 TAB_ORDER = ["Home", "Grouping", "Phase Table", "Fitting", "Sequential Fitting", "Results", "Model Fitting"]
-SHOW_MODEL_FITTING = True
+SHOW_MODEL_FITTING = False
 
 
 def check_facility():
@@ -199,7 +199,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         if TAB_ORDER[index] in ["Home", "Grouping", "Phase Table"]:  # Plot all the selected data
             plot_mode = PlotMode.Data
         # Plot the displayed workspace
-        elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting", "Model Fitting"]:
+        elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting"]:
             plot_mode = PlotMode.Fitting
         else:
             return
