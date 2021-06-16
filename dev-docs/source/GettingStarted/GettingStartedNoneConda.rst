@@ -4,9 +4,6 @@
 Getting Started without Conda
 =============================
 
-.. contents::
-  :local:
-
 Environment
 ###########
 
@@ -52,21 +49,13 @@ Unfortunately CMake can't find it out of the box and the following steps are req
 * create a new string value named ``InstallPath`` within this key and set the value
   to point to the install directory of Graphviz.
 
+Windows Subsystem for Linux (WSL2)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is also possible to install a Linux subsystem within Windows by following :ref:`these <WindowsSubsystemForLinux>` instructions. This step is optional.
+
 Linux
 -----
-
-The goal of this section is to (in broad terms) get to the state where one can build and run a subset of tests
-
-.. code-block:: sh
-
-   git clone git@github.com:mantidproject/mantid.git
-   cd mantid
-   mkdir build  # this makes an in-source build
-   cd build
-   cmake3 -GNinja ../  # wrap in scl enable on RHEL7
-   ninja all AlgorithmsTest  # ninja-build on RHEL7
-   ctest -R ^AlgorithmsTest --output-on-failure
-
 
 Red Hat/Cent OS/Fedora
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -92,6 +81,18 @@ Red Hat/Cent OS/Fedora
 On fedora, the ``yum`` commands should be replaced with ``dnf``.
 For systems with default python3 the ``pip3`` command can be replaced with ``pip``, but it should work either way.
 
+Make sure you install `devtoolset-7 <https://developer.mantidproject.org/BuildingWithCMake.html#from-the-command-line>`_ as described in the link.
+
+Now you can `get the mantid code <https://developer.mantidproject.org/GettingStarted.html#getting-the-mantid-code>`_, and build it:
+
+.. code-block:: sh
+
+  mkdir build
+  cd build
+  scl enable devtoolset-7 "cmake3 [mantid source]"
+  cmake3 --build .
+
+See the instructions on :ref:`this <RunningTheUnitTests>` page to run the Mantid unit tests.
 
 Ubuntu 18.04
 ~~~~~~~~~~~~
@@ -105,8 +106,8 @@ Ubuntu 18.04
 
 .. code-block:: sh
 
-   apt install gdebi-core
-   gdebi ~/Downloads/mantid-developer.X.Y.Z.deb
+  apt install gdebi-core
+  gdebi ~/Downloads/mantid-developer.X.Y.Z.deb
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
@@ -114,9 +115,20 @@ Install pre-commit for use in our current developer workflow
 
 .. code-block:: sh
 
-   pip install pre-commit --user
+  pip install pre-commit --user
 
 if you wish to setup eclipse for use developing mantid, then instructions can be found :ref:`here <Eclipse>`.
+
+Now you can :ref:`here <Getting the Mantid code>`, and build it:
+
+.. code-block:: sh
+
+  mkdir build
+  cd build
+  cmake -GNinja [mantid source]
+  cmake --build .
+
+See the instructions on :ref:`this <RunningTheUnitTests>` page to run the Mantid unit tests.
 
 Ubuntu 20.04
 ~~~~~~~~~~~~
@@ -152,3 +164,23 @@ build environment. This will give you an out of the box working build
 environment, Python 3 (where available) and ccache.
 
 More details and instructions can be found at the GitHub link above.
+
+Getting the Mantid code
+#######################
+We use `Git <https://git-scm.com/>`_ as our version control system (VCS). The master copies of our repositories are located at `GitHub <http://github.com/mantidproject>`_. We have a number of repositories, of which the main one (the one containing all the source code for Mantid itself) is called simply `mantid <http://github.com/mantidproject/mantid>`_.
+
+If you are not already set up with Git, you can follow these `instructions <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_.
+
+There are a number of URLs via which the code can be checked out using various protocols. The easiest way to get the one you want is to select the protocol you want on the right side of the `mantid <http://github.com/mantidproject/mantid>`_ repository page on github and copy the url into your clipboard. The way to clone the repository via ssh on the command line, into a directory called Mantid, is:
+
+.. code-block:: sh
+
+    git clone git@github.com:mantidproject/mantid.git
+
+Alternatively, one can use the ``https`` protocol for cloning the repository.
+This requires one to supply an authentication token when pushing or re-type their password.
+
+.. code-block:: sh
+
+    git clone https://github.com/mantidproject/mantid.git
+
