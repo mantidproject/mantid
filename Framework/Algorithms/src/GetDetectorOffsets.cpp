@@ -219,10 +219,12 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
     int result = estimatePeakParameters(histogram, std::pair<size_t, size_t>(start_index, stop_index), peakFunction,
                                         bkgdFunction, true, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
     if (result != PeakFitResult::GOOD) {
-      g_log.debug() << "bad result for observing peak parameters, using default peak height and loc\n";
+      g_log.debug() << "ws index: " << s
+                    << " bad result for observing peak parameters, using default peak height and loc\n";
     }
   } else {
-    g_log.debug() << "range size is zero in estimatePeakParameters, using default peak height and loc\n";
+    g_log.notice() << "ws index: " << s
+                   << " range size is zero in estimatePeakParameters, using default peak height and loc\n";
   }
 
   IAlgorithm_sptr fit_alg;

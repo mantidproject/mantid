@@ -121,6 +121,10 @@ double observePeakFwhm(const Histogram &histogram, FunctionValues &bkgd_values, 
     double area = 0.0;
     // integrate using Newton's method
     for (size_t i = 0; i < numPoints; ++i) {
+      // skip counting area if negative to give a better fwhm estimate
+      if (y_vec[istart + i] < 0.0) {
+        continue;
+      }
       const auto yavg = 0.5 * (y_vec[istart + i] - bkgd_values.getCalculated(i) + y_vec[istart + i + 1] -
                                bkgd_values.getCalculated(i + 1));
       const auto dx = x_vec[istart + i + 1] - x_vec[istart + i];
