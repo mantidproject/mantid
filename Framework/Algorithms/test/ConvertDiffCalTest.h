@@ -90,8 +90,9 @@ public:
 
   fake_workspaces generate_test_data( std::list< class fake_entry > const &entries )
   {
+    Mantid::Kernel::V3D place_holder(0, 0, 0);
     Mantid::Geometry::Instrument_sptr instrument =
-    std::make_shared<Mantid::Geometry::Instrument>();
+    ComponentCreationHelper::createEmptyInstrument();
 
     ITableWorkspace_sptr calibration_table =
     std::make_shared<Mantid::DataObjects::TableWorkspace>(); 
@@ -161,22 +162,23 @@ public:
      * */
 
     /* specify contents of fake workspaces */
+    /* intentionally unsorted */
     std::list< class fake_entry > fake_entries =
     {
       /* 2 entries in the table that are not in the offset workspace - should be propagated */
       fake_entry( 5, fake_entry::calibration, 5 ),
-      fake_entry( 6, fake_entry::calibration, 5 ),
+      fake_entry( 6, fake_entry::calibration, 6 ),
 
       /* 2 entries in the offset workspace that are not in the table - should be updated */
-      fake_entry( 0,  fake_entry::offset, 1.0, fake_entry::unmasked ),
       fake_entry( 1,  fake_entry::offset, 1.0, fake_entry::unmasked ),
-      /* entry that is zero but not masked - should not be updated */
-      fake_entry( 2, fake_entry::offset, 0, fake_entry::unmasked ),
+      fake_entry( 0,  fake_entry::offset, 1.0, fake_entry::unmasked ),
       /* entry that is nonzero but masked - should not be updated */
       fake_entry( 3, fake_entry::offset, 3, fake_entry::masked ),
+      /* entry that is zero but not masked - should not be updated */
+      fake_entry( 2, fake_entry::offset, 0, fake_entry::unmasked ),
       /* 2 entries that exist in both. Existing values should be updated */
-      fake_entry( 4, fake_entry::offset, 4, fake_entry::unmasked ),
       fake_entry( 7, fake_entry::offset, 7, fake_entry::unmasked ),
+      fake_entry( 4, fake_entry::offset, 4, fake_entry::unmasked ),
 
       /* 2 entries that exists in both - this one should be updated */
       fake_entry( 4, fake_entry::calibration, 4 ),
@@ -214,8 +216,76 @@ public:
     /* In ConvertDiffCal, you will need to create a mapping of detector_id to vector index:
      * this will allow you to easily see if a detector is in the calibration table column */
     /* what will be the time complexity of this? */
-    /* Captain! Check the output and create TS_ASSERT statements where they belong */
-    /* create asserts that expect correct outcomes */
+    /* New code */
+    ConvertDiffCal alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", fake_workspaces.offsets));
+    std::string updated_calibration_table_name("updated_calibration_table");
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace",
+                                                  updated_calibration_table_name));
+    /* Captain! Set the previous_calibration property to the fake calibration workspace */
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service. TODO: Change to your desired
+    // type
+    Workspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance()
+                                  .retrieveWS<Workspace>(updated_calibration_table_name));
+    TS_ASSERT(ws);
+    if (!ws) return;
+    auto updated_calibration_table = std::dynamic_pointer_cast<ITableWorkspace>(ws);
+    TS_ASSERT(updated_calibration_table);
+
+    /* Get detector_ids */
+    auto detector_id_column = updated_calibration_table->getColumn(0);
+    /* check size: 4 existing entries from the offsets workspace and 2 new ones from the previous
+     * calibration */
+    int correct_size = 6;
+    TS_ASSERT_EQUALS( detector_id_column->size(), correct_size );
+    auto difc_column = updated_calibration_table->getColumn( 1 );
+    TS_ASSERT_EQUALS( difc_column->size(), correct_size );
+
+    TS_ASSERT_EQUALS(detector_id_column->toDouble( 0 ), 0);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble( 1 ), 1);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble( 2 ), 4);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble( 3 ), 5);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble( 4 ), 6);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble( 5 ), 7);
+    /* check difc: */
+    TS_ASSERT_EQUALS(difc_column->toDouble( 0 ), 0 ); // not sure the next 2 will surely be 0
+    TS_ASSERT_EQUALS(difc_column->toDouble( 1 ), 0 );
+    TS_ASSERT_EQUALS(difc_column->toDouble( 2 ), ); // detector id 4 should be updated
+    TS_ASSERT_EQUALS(difc_column->toDouble( 3 ), 5 ); // detector id 5 should be propagated
+    TS_ASSERT_EQUALS(difc_column->toDouble( 4 ), 6 ); // detector id 6 should be propagated
+    TS_ASSERT_EQUALS(difc_column->toDouble( 5 ), ); // detector id 7 should be updated
+    /* end new code */
+
+    /* Captain! Asserts section. New code */
+    /* We can expect that the results will be sorted on detector_id. What should be there? */
+    /* 
+     * detector_id difc ...
+     * 0 (calculate for the first time) - what will the values be?
+     * 1 (calculate for the first time) - what will the values be?
+     * 2 (do nothing, ignore) - will not be in the final calibration table
+     * 3 (do nothing, ignore) - will not be in the final calibration table
+     * 4 (update table entry)
+     * 5 (unchanged, propagate)
+     * 6 (unchanged, propagate)
+     * 7 (update table entry)
+     * */
+    /* ConvertDiffCal changes:
+     * Iterate throught the offsets workspace. For each entry:
+     * if masked or zero, do nothing. Do not update.
+     * otherwise...
+     * search the previous_calibration.
+     * if present...
+     * simply update the entry there with the linear equation described in the task
+     * if not present...
+     * create a new diffc entry in the calibration_table as before
+     * */
+    /* end new code */
 
     TS_ASSERT( false );
   }
