@@ -14,28 +14,22 @@
 #include <boost/iostreams/stream.hpp>
 
 namespace { // anonymous namespace
-class PyStdoutSink {
+
+// https://stackoverflow.com/questions/772355/how-to-inherit-from-stdostream
+class PyStdoutSink : private std::streambuf, public std::ostream {
 public:
-  typedef char char_type;
-  typedef boost::iostreams::sink_tag category;
+  PyStdoutSink() : std::ostream(this) {}
 
-  std::streamsize write(const char *s, std::streamsize n) {
-    // PySys_WriteStdout truncates to 1000 chars
-    static const std::streamsize MAXSIZE = 1000;
-
-    std::streamsize written = std::min(n, MAXSIZE);
-    PySys_WriteStdout((boost::format("%%.%1%s") % written).str().c_str(), s);
-
-    return written;
+private:
+  int overflow(int c) override {
+    PySys_WriteStdout("%c", c);
+    return 0;
   }
 };
 
-// wrapper of that sink to be a stream
-PyStdoutSink pyStdoutSinkInstance = PyStdoutSink(); // needs to be initialized separately
-boost::iostreams::stream<PyStdoutSink> PyStdout(pyStdoutSinkInstance);
-
+PyStdoutSink pyOstream = PyStdoutSink();
 } // anonymous namespace
 
 namespace Poco {
-PythonStdoutChannel::PythonStdoutChannel() : ConsoleChannel(PyStdout) {}
+PythonStdoutChannel::PythonStdoutChannel() : ConsoleChannel(pyOstream) {}
 } // namespace Poco
