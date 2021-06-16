@@ -26,6 +26,8 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+- The workflows for Calibration and Focussing in the EnggDiffraction GUI and EnginX scripts have been replaced to make use of faster, better tested C++ algorithms (PDCalibration).
+- The following algorithms have been deprecated, and will likely be removed entirely in the next release: EnggCalibrate, EnggCalibrateFull, EnggFocus, EnggVanadiumCorrections
 
 Single Crystal Diffraction
 --------------------------

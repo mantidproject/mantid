@@ -14,11 +14,16 @@ import mantid.plots  # noqa
 import Engineering.EnggUtils as Utils
 import mantid.simpleapi as simple
 
+NORTH_BANK_CAL = "EnginX_NorthBank.cal"
+SOUTH_BANK_CAL = "EnginX_SouthBank.cal"
+
 
 def main(vanadium_run, user, focus_run, **kwargs):
     """
-    sets up all defaults, then calls run
-
+    This is the main method to be called by an external user wishing to use this library. Based on user input, this
+    can run the whole workflow of vanadium correction calculations, calibration and focussing of ENGINX data, or make
+    use of preexisting workspaces to perform only a part of the workflow. See keyword argument descriptions below for
+    information on configuring the flow of execution of these scripts.
 
     @param vanadium_run :: the run number of the vanadium to be used
     @param user :: the username to save under
@@ -27,6 +32,7 @@ def main(vanadium_run, user, focus_run, **kwargs):
         ceria_run (string): the run number of the ceria to use
         force_vanadium (bool): forces creation of vanadium even if one for the run already exists
         force_cal (bool) : forces creation of calibration files
+        full_inst_calib_path (string) : path to the full instrument calibration file used in calibration and focussing
         crop_type (string): what method of cropping to use
         crop_name (string): what to call the cropped bank workspace
         crop_on (string): the bank of spectrum to crop on if cropping
@@ -41,8 +47,16 @@ def main(vanadium_run, user, focus_run, **kwargs):
     ceria_run = kwargs.get("ceria_run", "241391")
 
     # force parameters
-    do_van = kwargs.get("force_vanadium", False)
-    do_cal = kwargs.get("force_cal", False)
+    force_van = kwargs.get("force_vanadium", False)
+    force_cal = kwargs.get("force_cal", False)
+
+    # full instrument_calibration
+    try:
+        full_inst_calib = simple.Load(Filename=kwargs.get("full_inst_calib_path", None),
+                                      OutputWorkspace="full_inst_calib")
+    except ValueError as e:
+        print("Failed to load full_instrument_calibration, please provide a valid path. Error: " + str(e))
+        return
 
     # cropping parameters
     cropped = kwargs.get("crop_type", None)
@@ -80,18 +94,21 @@ def main(vanadium_run, user, focus_run, **kwargs):
         focus_directory = focus_general
 
     # call methods with set parameters
-    run(ceria_run, do_cal, do_van, vanadium_run, calibration_directory, calibration_general, cropped, crop_name,
-        crop_on, focus_directory, focus_general, do_pre_process, params, time_period, focus_run, grouping_file)
+    run(ceria_run, force_cal, force_van, full_inst_calib, vanadium_run, calibration_directory, calibration_general, cropped,
+        crop_name, crop_on, focus_directory, focus_general, do_pre_process, params, time_period, focus_run,
+        grouping_file)
 
 
-def run(ceria_run, do_cal, do_van, van_run, calibration_directory, calibration_general, cropped, crop_name, crop_on,
-        focus_directory, focus_general, do_pre_process, params, time_period, focus_run, grouping_file):
+def run(ceria_run, do_cal, do_van, full_inst_calib, van_run, calibration_directory, calibration_general, cropped,
+        crop_name, crop_on, focus_directory, focus_general, do_pre_process, params, time_period, focus_run,
+        grouping_file):
     """
     calls methods needed based off of inputs
 
     @param ceria_run :: the run number of the ceria to use
     @param do_cal :: whether or not to force running calibration
     @param do_van :: whether or not to force calculating the vanadium
+    @param full_inst_calib :: workspace containing the full instrument calibration
     @param van_run :: run number to use for the vanadium
     @param calibration_directory :: the users calibration directory
     @param calibration_general :: the non-user specific calibration directory
@@ -99,10 +116,10 @@ def run(ceria_run, do_cal, do_van, van_run, calibration_directory, calibration_g
     @param crop_name :: how to name cropped banks
     @param cropped :: the cropping method to use
     @param focus_directory :: the users focus directory
-    @param focus_general :: the non-user specificfocus directory
+    @param focus_general :: the non-user specific focus directory
     @param do_pre_process:: whether or not to pre-process before focussing
-    @param params :: list of pararmeters to use for rebinning
-    @param time_period :: time perriod to old binning
+    @param params :: list of parameters to use for rebinning
+    @param time_period :: time period to old binning
     @param focus_run :: run number to focus
     @param grouping_file :: grouping file to use with texture mode
 
@@ -111,57 +128,86 @@ def run(ceria_run, do_cal, do_van, van_run, calibration_directory, calibration_g
 
     # check whether creating a vanadium is required or requested
     if (not os.path.isfile(_get_van_names(van_run, calibration_directory)[0])) or do_van:
-        create_vanadium(van_run, calibration_directory)
+        create_vanadium_integration(van_run, calibration_directory)
 
     # find the file names of calibration files that would be created by this run
-    cal_endings = {"banks": ["all_banks", "bank_{}".format(crop_on)],
-                   "spectra": ["all_banks", "bank_{}".format(crop_name)],
+    cal_endings = {"banks": ["all_banks", f"bank_{crop_on}"],
+                   "spectra": ["all_banks", f"bank_{crop_name}"],
                    None: ["all_banks", "bank_North", "bank_South"]}
-    expected_cals = ["ENGINX_{0}_{1}_{2}.prm".format(van_run, ceria_run, i) for i in cal_endings.get(cropped)]
+    expected_cals = [f"ENGINX_{van_run}_{ceria_run}_{ending}.prm" for ending in cal_endings.get(cropped)]
     expected_cals_present = [os.path.isfile(os.path.join(calibration_directory, cal_file)) for cal_file in
                              expected_cals]
+    pdcal_table_endings = {"banks": [f"bank_{crop_on}"],
+                           "spectra": ["cropped"],
+                           None: ["bank_North", "bank_South"]}
+    expected_pdcal_tables = [f"ENGINX_{van_run}_{ceria_run}_{ending}.nxs" for ending in
+                             pdcal_table_endings.get(cropped)]
+    expected_tables_present = [os.path.isfile(os.path.join(calibration_directory, cal_file)) for cal_file in
+                               expected_pdcal_tables]
 
     # if the calibration files that this run would create are not present, or the user has requested it, create the
     # calibration files
-    if not all(expected_cals_present) or do_cal:
-        create_calibration(ceria_run, van_run, calibration_directory, calibration_general, cropped, crop_name, crop_on)
+    if not all(expected_cals_present) or not all(expected_tables_present) or do_cal:
+        create_calibration(ceria_run, van_run, full_inst_calib, calibration_directory, calibration_general, cropped,
+                           crop_name, crop_on)
+    else:
+        ending_to_load = {"banks": f"bank_{crop_on}",
+                          "spectra": crop_name,
+                          None: "all_banks"}
+        file_name = os.path.join(calibration_directory,
+                                 f"ENGINX_{van_run}_{ceria_run}_{ending_to_load.get(cropped)}.prm")
+        Utils.load_relevant_pdcal_outputs(file_name, "engg")
 
     # if a focus is requested, run the focus
     if focus_run is not None:
-        focus(focus_run, van_run, calibration_directory, focus_directory, focus_general, do_pre_process, params,
-              time_period, grouping_file, cropped, crop_on)
+        focus(focus_run, van_run, full_inst_calib, calibration_directory, focus_directory, focus_general,
+              do_pre_process, params, time_period, grouping_file, cropped, crop_on)
 
 
-def create_vanadium(van_run, calibration_directory):
+def create_vanadium_integration(van_run, calibration_directory):
     """
-    create the vanadium run for the run number set of the object
+    create the vanadium integration for the run number set of the object
 
     @param van_run :: the run number for the vanadium
     @param calibration_directory :: the directory to save the output to
     """
     # find and load the vanadium
     van_file = _gen_filename(van_run)
-    van_curves_file, van_int_file = _get_van_names(van_run, calibration_directory)
+    _, van_int_file = _get_van_names(van_run, calibration_directory)
     van_name = "eng_vanadium_ws"
-    simple.Load(van_file, OutputWorkspace=van_name)
+    van_ws = simple.Load(van_file, OutputWorkspace=van_name)
 
-    # make the vanadium corrections
-    simple.EnggVanadiumCorrections(VanadiumWorkspace=van_name,
-                                   OutIntegrationWorkspace="eng_vanadium_integration",
-                                   OutCurvesWorkspace="eng_vanadium_curves")
-
+    # make the integration workspace
+    simple.NormaliseByCurrent(InputWorkspace=van_ws, OutputWorkspace=van_ws)
+    # sensitivity correction for van
+    ws_van_int = simple.Integration(InputWorkspace=van_ws)
+    ws_van_int /= van_ws.blocksize()
     # save out the vanadium and delete the original workspace
-    simple.SaveNexus("eng_vanadium_integration", van_int_file)
-    simple.SaveNexus("eng_vanadium_curves", van_curves_file)
+    simple.SaveNexus(ws_van_int, van_int_file)
     simple.DeleteWorkspace(van_name)
+    simple.DeleteWorkspace(ws_van_int)
+    simple.DeleteWorkspace(van_ws)
 
 
-def create_calibration(ceria_run, van_run, calibration_directory, calibration_general, cropped, crop_name, crop_on):
+def handle_van_curves(van_curves, van_path):
+    if len(van_curves) == 2:
+        curves_ws = simple.AppendSpectra(InputWorkspace1=van_curves[0], InputWorkspace2=van_curves[1])
+        simple.DeleteWorkspace(van_curves[1])
+    else:
+        curves_ws = van_curves[0]
+    simple.SaveNexus(curves_ws, van_path)
+    simple.DeleteWorkspace(van_curves[0])
+    simple.DeleteWorkspace(curves_ws)
+
+
+def create_calibration(ceria_run, van_run, full_inst_calib, calibration_directory, calibration_general, cropped,
+                       crop_name, crop_on):
     """
     create the calibration files
 
     @param ceria_run :: the run number of the ceria to use
     @param van_run :: the run number of the vanadium to use
+    @param full_inst_calib :: workspace containing the full instrument calibration
     @param calibration_directory :: the user specific directory to save to
     @param calibration_general :: the general directory to save to
     @param cropped :: the cropping method to use
@@ -175,125 +221,232 @@ def create_calibration(ceria_run, van_run, calibration_directory, calibration_ge
     # Check if the calibration should be cropped, and if so what cropping method to use
     if cropped is not None:
         if cropped == "banks":
-            create_calibration_cropped_file(ceria_run, van_run, van_curves_file, van_int_file, calibration_directory,
-                                            calibration_general, False, crop_name, crop_on)
+            create_calibration_files(ceria_run, van_run, full_inst_calib, van_int_file, van_curves_file,
+                                     calibration_directory, calibration_general, False, crop_name, crop_on)
         elif cropped == "spectra":
-            create_calibration_cropped_file(ceria_run, van_run, van_curves_file, van_int_file, calibration_directory,
-                                            calibration_general, True, crop_name, crop_on)
+            create_calibration_files(ceria_run, van_run, full_inst_calib, van_int_file, van_curves_file,
+                                     calibration_directory, calibration_general, True, crop_name, crop_on)
     else:
-        create_calibration_files(ceria_run, van_run, van_curves_file, van_int_file, calibration_directory,
-                                 calibration_general)
+        create_calibration_files(ceria_run, van_run, full_inst_calib, van_int_file, van_curves_file,
+                                 calibration_directory, calibration_general, False, crop_name, 'both')
 
 
-def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, calibration_directory, calibration_general,
-                                    use_spectrum_number, crop_name, spec_nos):
+def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_curves_file, calibration_directory,
+                             calibration_general, use_spectrum_number, crop_name, spec_nos):
     """
-    create and save a cropped calibration file
+    create and save a calibration
 
     @param ceria_run :: run number for the ceria used
     @param van_run :: the run number of the vanadium to use
-    @param curve_van :: name of the vanadium curves workspace
     @param int_van :: name of the integrated vanadium workspace
-    @param calibration_directory :: the user specific calibration directory to save to
-    @param calibration_general :: the general calibration dirrecory
-    @param use_spectrum_number :: whether or not to crop using spectrum numbers  or banks
-    @param crop_name :: name of the output workspace
-    @param spec_nos :: the value to crop on, either a spectra number, or a bank
-
-    """
-    van_curves_ws, van_integrated_ws = load_van_files(curve_van, int_van)
-    ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="eng_calib")
-    # check which cropping method to use
-    if use_spectrum_number:
-        param_tbl_name = crop_name if crop_name is not None else "cropped"
-        # run the calibration cropping on spectrum number
-        output = simple.EnggCalibrate(InputWorkspace=ceria_ws, VanIntegrationWorkspace=van_integrated_ws,
-                                      VanCurvesWorkspace=van_curves_ws, SpectrumNumbers=str(spec_nos),
-                                      FittedPeaks=param_tbl_name,
-                                      OutputParametersTableName=param_tbl_name)
-        # get the values needed for saving out the .prm files
-        difc = [output.DIFC]
-        tzero = [output.TZERO]
-        difa = [output.DIFA]
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [param_tbl_name],
-                         tzero, difc, difa)
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
-                         "bank_{}".format(param_tbl_name), [param_tbl_name], tzero, difc, difa)
-    else:
-        # work out which bank number to crop on, then calibrate
-        if spec_nos.lower() == "north":
-            param_tbl_name = "engg_calibration_bank_1"
-            bank = 1
-        else:
-            param_tbl_name = "engg_calibration_bank_2"
-            bank = 2
-        output = simple.EnggCalibrate(InputWorkspace=ceria_ws, VanIntegrationWorkspace=van_integrated_ws,
-                                      VanCurvesWorkspace=van_curves_ws, Bank=str(bank), FittedPeaks=param_tbl_name,
-                                      OutputParametersTableName=param_tbl_name)
-        # get the values needed for saving out the .prm files
-        difc = [output.DIFC]
-        tzero = [output.TZERO]
-        difa = [output.DIFA]
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [spec_nos], tzero,
-                         difc, difa)
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "bank_{}".format(spec_nos),
-                         [spec_nos], tzero, difc, difa)
-    # create the table workspace containing the parameters
-    create_params_table(difc, tzero, difa)
-    create_difc_zero_workspace(difc, tzero, spec_nos, param_tbl_name)
-
-
-def create_calibration_files(ceria_run, van_run, curve_van, int_van, calibration_directory, calibration_general):
-    """
-    create the calibration files for an uncropped run
-
-    @param ceria_run :: the run number of the ceria
-    @param van_run :: the run number of the vanadium
-    @param curve_van :: the vanadium curves workspace
-    @param int_van :: the integrated vanadium workspace
+    @param full_inst_calib :: workspace containing the full instrument calibration
+    @param van_curves_file :: path to save vanadium curves to
     @param calibration_directory :: the user specific calibration directory to save to
     @param calibration_general :: the general calibration directory
-
+    @param use_spectrum_number :: whether or not to crop using spectrum numbers or banks
+    @param crop_name :: name of the output workspace
+    @param spec_nos :: the value to crop on, either a spectra number, or a bank
     """
-    van_curves_ws, van_integrated_ws = load_van_files(curve_van, int_van)
-    ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="eng_calib")
-    difcs = []
-    tzeros = []
-    difas = []
-    banks = 3
+    van_integrated_ws = load_van_integration_file(int_van)
+    ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="engg_calib")
+    van_file = _gen_filename(van_run)
+    van_ws = simple.Load(Filename=van_file)
     bank_names = ["North", "South"]
-    # loop through the banks, calibrating both
-    for i in range(1, banks):
-        param_tbl_name = "engg_calibration_bank_{}".format(i)
-        output = simple.EnggCalibrate(InputWorkspace=ceria_ws, VanIntegrationWorkspace=van_integrated_ws,
-                                      VanCurvesWorkspace=van_curves_ws, Bank=str(i), FittedPeaks=param_tbl_name,
-                                      OutputParametersTableName=param_tbl_name)
-        # add the needed outputs to a list
-        difcs.append(output.DIFC)
-        tzeros.append(output.TZERO)
-        difas.append(output.DIFA)
-        # save out the ones needed for this loop
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
-                         "bank_{}".format(bank_names[i - 1]), [bank_names[i - 1]],
-                         [tzeros[i - 1]], [difcs[i - 1]], [difas[i - 1]])
-    # save out the total version, then create the table of params
-    save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names, tzeros,
-                     difcs, difas)
-    create_params_table(difcs, tzeros, difas)
-    create_difc_zero_workspace(difcs, tzeros, "", None)
+    # check which cropping method to use
+
+    if use_spectrum_number:
+        spectrum_numbers = spec_nos
+        bank = None
+    else:
+        if spec_nos.lower() == "north" or spec_nos == '1':
+            spectrum_numbers = None
+            bank = '1'
+        elif spec_nos.lower() == "south" or spec_nos == '2':
+            spectrum_numbers = None
+            bank = '2'
+        else:
+            spectrum_numbers = None
+            bank = None
+
+    output, curves = run_calibration(sample_ws=ceria_ws,
+                                     vanadium_workspace=van_ws,
+                                     van_integration=van_integrated_ws,
+                                     bank=bank,
+                                     spectrum_numbers=spectrum_numbers,
+                                     full_inst_calib=full_inst_calib)
+    handle_van_curves(curves, van_curves_file)
+    if len(output) == 1:
+        # get the values needed for saving out the .prm files
+        difa = [output[0]['difa']]
+        difc = [output[0]['difc']]
+        tzero = [output[0]['tzero']]
+        if bank is None and spectrum_numbers is None:
+            save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [crop_name],
+                             tzero, difc, difa)
+        if spectrum_numbers is not None:
+            save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
+                             "bank_cropped", [crop_name], tzero, difc, difa)
+        else:
+            save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
+                             "bank_{}".format(spec_nos), [crop_name], tzero, difc, difa)
+        # create the table workspace containing the parameters
+        param_tbl_name = crop_name if crop_name is not None else "Cropped"
+        create_params_table(difc, tzero, difa)
+        plot_dict = Utils.generate_tof_fit_dictionary(spec_nos, param_tbl_name)
+        Utils.plot_tof_fit([plot_dict], [param_tbl_name])
+    else:
+        difas = [row['difa'] for row in output]
+        difcs = [row['difc'] for row in output]
+        tzeros = [row['tzero'] for row in output]
+        plot_dicts = list()
+        for i in range(1, 3):
+            save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
+                             f"bank_{i}", [bank_names[i - 1]],
+                             [tzeros[i - 1]], [difcs[i - 1]], [difas[i - 1]])
+            plot_dicts.append(Utils.generate_tof_fit_dictionary(f"bank_{i}", ""))
+        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names,
+                         tzeros, difcs, difas)
+        # create the table workspace containing the parameters
+        create_params_table(difcs, tzeros, difas)
+        Utils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
 
 
-def load_van_files(curves_van, ints_van):
+def run_calibration(sample_ws,
+                    vanadium_workspace,
+                    van_integration,
+                    bank,
+                    spectrum_numbers,
+                    full_inst_calib):
     """
-    load the vanadium files passed in
+    Creates Engineering calibration files with PDCalibration
+    :param sample_ws: The workspace with the sample data.
+    :param vanadium_workspace: The workspace with the vanadium data
+    :param van_integration: The integration values from the vanadium corrections
+    :param bank: The bank to crop to, both if none.
+    :param spectrum_numbers: The spectrum numbers to crop to, no crop if none.
+    :param full_inst_calib : workspace containing the full instrument calibration
+    :return: The calibration output files, the vanadium curves workspace(s), and a clone of the sample file
+    """
 
-    @param curves_van :: the path to the vanadium curves file
+    def run_pd_calibration(kwargs_to_pass):
+        return simple.PDCalibration(**kwargs_to_pass)
+
+    def focus_and_make_van_curves(ceria_d, vanadium_d, grouping_kwarg):
+        # focus ceria
+        focused_ceria = simple.DiffractionFocussing(InputWorkspace=ceria_d, **grouping_kwarg)
+        simple.ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)
+        tof_focused = simple.ConvertUnits(InputWorkspace=focused_ceria, Target='TOF')
+
+        # focus van data
+        focused_van = simple.DiffractionFocussing(InputWorkspace=vanadium_d, **grouping_kwarg)
+
+        background_van = simple.EnggEstimateFocussedBackground(InputWorkspace=focused_van, NIterations='15',
+                                                               XWindow=0.03)
+
+        simple.DeleteWorkspace(focused_ceria)
+        simple.DeleteWorkspace(focused_van)
+
+        return tof_focused, background_van
+
+    def ws_initial_process(ws):
+        """Run some processing common to both the sample and vanadium workspaces"""
+        simple.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+        simple.ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=full_inst_calib)
+        simple.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='dSpacing')
+        return ws
+
+    def calibrate_region_of_interest(roi, df_kwarg):
+        focused_roi, curves_roi = focus_and_make_van_curves(ws_d, ws_van_d, df_kwarg)
+        simple.RenameWorkspace(curves_roi, ("curves_" + roi))
+        curves_output.append(curves_roi)
+
+        # final calibration of focused data
+        kwargs["InputWorkspace"] = focused_roi
+        kwargs["OutputCalibrationTable"] = "engg_calibration_" + roi
+        kwargs["DiagnosticWorkspaces"] = "diag_" + roi
+
+        cal_roi = run_pd_calibration(kwargs)[0]
+        cal_output[roi] = cal_roi
+
+    # need to clone the data as PDCalibration rebins
+    sample_raw = simple.CloneWorkspace(InputWorkspace=sample_ws)
+
+    ws_van = simple.CloneWorkspace(vanadium_workspace)
+    ws_van_d = ws_initial_process(ws_van)
+    # sensitivity correction
+    ws_van_d /= van_integration
+    simple.ReplaceSpecialValues(InputWorkspace=ws_van_d, OutputWorkspace=ws_van_d, NaNValue=0, InfinityValue=0)
+
+    ws_d = ws_initial_process(sample_ws)
+
+    simple.DeleteWorkspace(van_integration)
+
+    kwargs = {
+        "PeakPositions": Utils.default_ceria_expected_peaks(final=True),
+        "TofBinning": [15500, -0.0003, 52000],  # using a finer binning now have better stats
+        "PeakWindow": 0.04,
+        "MinimumPeakHeight": 0.5,
+        "PeakFunction": 'BackToBackExponential',
+        "CalibrationParameters": 'DIFC+TZERO+DIFA',
+        "UseChiSq": True
+    }
+    cal_output = dict()
+    curves_output = list()
+
+    if spectrum_numbers is None:
+        if bank == '1' or bank is None:
+            df_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
+            calibrate_region_of_interest("bank_1", df_kwarg)
+
+        if bank == '2' or bank is None:
+            df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
+            calibrate_region_of_interest("bank_2", df_kwarg)
+    else:
+        grp_ws = Utils.create_custom_grouping_workspace(spectrum_numbers, sample_raw)
+        df_kwarg = {"GroupingWorkspace": grp_ws}
+        calibrate_region_of_interest("Cropped", df_kwarg)
+
+    simple.DeleteWorkspace(sample_raw)
+    simple.DeleteWorkspace(ws_van)
+    simple.DeleteWorkspace("tof_focused")
+
+    cal_params = list()
+    # in the output calfile, rows are present for all detids, only read one from the region of interest
+    bank_1_read_row = 0
+    bank_2_read_row = 1200
+    for bank_cal in cal_output:
+        if bank_cal == "bank_1":
+            read = bank_1_read_row
+        elif bank_cal == "bank_2":
+            read = bank_2_read_row
+        else:
+            read = int(Utils.create_spectrum_list_from_string(spectrum_numbers)[0])  # this can be int64
+        row = cal_output[bank_cal].row(read)
+        current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
+        cal_params.append(current_fit_params)
+    return cal_params, curves_output
+
+
+def load_van_integration_file(ints_van):
+    """
+    load the vanadium integration file passed in
+
     @param ints_van:: the path to the integrated vanadium file
 
     """
-    van_curves_ws = simple.Load(curves_van, OutputWorkspace="curves_van")
     van_integrated_ws = simple.Load(ints_van, OutputWorkspace="int_van")
-    return van_curves_ws, van_integrated_ws
+    return van_integrated_ws
+
+
+def load_van_curves_file(curves_van):
+    """
+    load the vanadium curves file passed in
+
+    @param curves_van:: the path to the integrated vanadium file
+
+    """
+    van_curves_ws = simple.Load(curves_van, OutputWorkspace="curves_van")
+    return van_curves_ws
 
 
 def save_calibration(ceria_run, van_run, calibration_directory, calibration_general, name, bank_names, zeros, difcs,
@@ -312,25 +465,37 @@ def save_calibration(ceria_run, van_run, calibration_directory, calibration_gene
     @param zeros :: the list of tzero values to save
 
     """
-
-    gsas_iparm_fname = os.path.join(calibration_directory, "ENGINX_" + van_run + "_" + ceria_run + "_" + name + ".prm")
-    # work out what template to use
+    file_save_prefix = os.path.join(calibration_directory, "ENGINX_" + van_run + "_" + ceria_run + "_")
+    gsas_iparm_fname = file_save_prefix + name + ".prm"
+    pdcals_to_save = dict()  # fname: workspace
+    # work out what template to use, and which PDCalibration files to save
     if name == "all_banks":
         template_file = None
-    elif name == "bank_South":
+        pdcals_to_save[file_save_prefix + "bank_North.nxs"] = 'engg_calibration_bank_1'
+        pdcals_to_save[file_save_prefix + "bank_South.nxs"] = 'engg_calibration_bank_2'
+    elif name == "bank_2":
         template_file = "template_ENGINX_241391_236516_South_bank.prm"
-    else:
+        pdcals_to_save[file_save_prefix + "bank_South.nxs"] = 'engg_calibration_bank_2'
+    elif name == "bank_1":
         template_file = "template_ENGINX_241391_236516_North_bank.prm"
+        pdcals_to_save[file_save_prefix + "bank_North.nxs"] = 'engg_calibration_bank_1'
+    else:  # cropped uses North bank template
+        template_file = "template_ENGINX_241391_236516_North_bank.prm"
+        pdcals_to_save[file_save_prefix + "cropped.nxs"] = 'engg_calibration_cropped'
     # write out the param file to the users directory
 
     Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difa=difas, difc=difcs,
                                         tzero=zeros, ceria_run=ceria_run, vanadium_run=van_run,
                                         template_file=template_file)
+    for fname, ws in pdcals_to_save.items():
+        simple.SaveNexus(InputWorkspace=ws, Filename=fname)
     if not calibration_general == calibration_directory:
         # copy the param file to the general directory
         if not os.path.exists(calibration_general):
             os.makedirs(calibration_general)
         copy2(gsas_iparm_fname, calibration_general)
+        for fname in pdcals_to_save.keys():
+            copy2(fname, calibration_general)
 
 
 def create_params_table(difc, tzero, difa):
@@ -353,66 +518,6 @@ def create_params_table(difc, tzero, difa):
     for i in range(len(difc)):
         next_row = {"bankid": i, "difc": difc[i], "difa": difa[i], "tzero": tzero[i]}
         param_table.addRow(next_row)
-
-
-def create_difc_zero_workspace(difc, tzero, crop_on, name):
-    """
-    create a workspace that can be used to plot the expected peaks against the fitted ones
-
-    @param difc :: the list of difc values to add to the table
-    @param tzero :: the list of tzero values to add to the table
-    @param crop_on :: where the cropping occured, either a bank, a spectra, or empty
-    @param name :: the name of a cropped workspace to use, if it is a non default name
-
-    """
-    plot_spec_num = False
-    # check what banks to use
-    banks = [1]
-    correction = 0
-    if crop_on == "":
-        banks = [1, 2]
-    elif crop_on.lower() == "south":
-        correction = 1
-    elif not crop_on == "":
-        plot_spec_num = True
-
-    # loop through used banks
-    for i in banks:
-        actual_i = correction + i
-        # retrieve required workspace
-        if not plot_spec_num:
-            bank_ws = simple.AnalysisDataService.retrieve("engg_calibration_bank_{}".format(actual_i))
-        else:
-            bank_ws = simple.AnalysisDataService.retrieve(name)
-
-        # get the data to be used
-        x_val = []
-        y_val = []
-        y2_val = []
-        for irow in range(0, bank_ws.rowCount()):
-            x_val.append(bank_ws.cell(irow, 0))
-            y_val.append(bank_ws.cell(irow, 5))
-            y2_val.append(x_val[irow] * difc[i - 1] + tzero[i - 1])
-
-        # create workspaces to temporary hold the data
-        simple.CreateWorkspace(OutputWorkspace="ws1", DataX=x_val, DataY=y_val,
-                               UnitX="Expected Peaks Centre(dSpacing, A)",
-                               YUnitLabel="Fitted Peaks Centre(TOF, us)")
-        simple.CreateWorkspace(OutputWorkspace="ws2", DataX=x_val, DataY=y2_val)
-
-        # get correct name for output
-        if not plot_spec_num:
-            name = actual_i
-        output_name = "Engg difc Zero Peaks Bank {}".format(name)
-
-        # use the two workspaces to creat the output
-        output = simple.AppendSpectra(InputWorkspace1="ws1", InputWorkspace2="ws2",
-                                      OutputWorkspace=output_name)
-        plot_calibration(output, output_name)
-
-    # remove the left-over workspaces
-    simple.DeleteWorkspace("ws1")
-    simple.DeleteWorkspace("ws2")
 
 
 def plot_calibration(workspace, name):
@@ -447,7 +552,7 @@ def plot_calibration(workspace, name):
     fig.show()
 
 
-def focus(run_no, van_run, calibration_directory, focus_directory, focus_general, do_pre_process, params, time_period,
+def focus(run_no, van_run, full_inst_calib, calibration_directory, focus_directory, focus_general, do_pre_process, params, time_period,
           grouping_file, cropped, crop_on):
     """
 
@@ -455,6 +560,7 @@ def focus(run_no, van_run, calibration_directory, focus_directory, focus_general
 
     @param run_no :: the run number of the run to focus
     @param van_run :: the run number of the vanadium to use
+    @param full_inst_calib :: workspace containing the full instrument calibration
     @param calibration_directory :: the user specific calibration directory to load from
     @param focus_directory :: the user specific focus directory to save to
     @param focus_general :: the general focus directory to save to
@@ -470,28 +576,56 @@ def focus(run_no, van_run, calibration_directory, focus_directory, focus_general
     # if a grouping file is passed in then focus in texture mode
     if grouping_file is not None:
         grouping_file = os.path.join(calibration_directory, grouping_file)
-        focus_texture_mode(run_no, van_curves_file, van_int_file, focus_directory, focus_general, do_pre_process,
+        focus_texture_mode(run_no, van_curves_file, van_int_file, full_inst_calib, focus_directory, focus_general, do_pre_process,
                            params, time_period, grouping_file)
     # if no texture mode was passed in check if the file should be cropped, and if so what cropping method to use
     elif cropped is not None:
         if cropped == "banks":
-            focus_cropped(run_no, van_curves_file, van_int_file, focus_directory, focus_general, do_pre_process, params,
+            focus_cropped(run_no, van_curves_file, van_int_file, full_inst_calib, focus_directory, focus_general, do_pre_process, params,
                           time_period, crop_on, False)
         elif cropped == "spectra":
-            focus_cropped(run_no, van_curves_file, van_int_file, focus_directory, focus_general, do_pre_process, params,
+            focus_cropped(run_no, van_curves_file, van_int_file, full_inst_calib, focus_directory, focus_general, do_pre_process, params,
                           time_period, crop_on, True)
     else:
-        focus_whole(run_no, van_curves_file, van_int_file, focus_directory, focus_general, do_pre_process, params,
+        focus_whole(run_no, van_curves_file, van_int_file, full_inst_calib, focus_directory, focus_general, do_pre_process, params,
                     time_period)
 
 
-def focus_whole(run_number, van_curves, van_int, focus_directory, focus_general, do_pre_process, params, time_period):
+def _run_focus(input_workspace,
+               tof_output_name,
+               vanadium_integration_ws,
+               vanadium_curves_ws,
+               df_kwarg,
+               full_calib,
+               region_calib):
+    simple.NormaliseByCurrent(InputWorkspace=input_workspace, OutputWorkspace=input_workspace)
+    input_workspace /= vanadium_integration_ws
+    simple.ReplaceSpecialValues(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, NaNValue=0,
+                                InfinityValue=0)
+    simple.ApplyDiffCal(InstrumentWorkspace=input_workspace, CalibrationWorkspace=full_calib)
+    ws_d = simple.ConvertUnits(InputWorkspace=input_workspace, Target='dSpacing')
+    focused_sample = simple.DiffractionFocussing(InputWorkspace=ws_d, **df_kwarg)
+    curves_rebinned = simple.RebinToWorkspace(WorkspaceToRebin=vanadium_curves_ws, WorkspaceToMatch=focused_sample)
+    normalised = simple.Divide(LHSWorkspace=focused_sample, RHSWorkspace=curves_rebinned,
+                               AllowDifferentNumberSpectra=True)
+    simple.ApplyDiffCal(InstrumentWorkspace=normalised, CalibrationWorkspace=region_calib)
+    dspacing_output_name = tof_output_name + "_dSpacing"
+    simple.CloneWorkspace(InputWorkspace=normalised, OutputWorkspace=dspacing_output_name)
+    simple.ConvertUnits(InputWorkspace=normalised, OutputWorkspace=tof_output_name, Target='TOF')
+    simple.DeleteWorkspace(curves_rebinned)
+    simple.DeleteWorkspace(focused_sample)
+    simple.DeleteWorkspace(normalised)
+    simple.DeleteWorkspace(ws_d)
+
+
+def focus_whole(run_number, van_curves, van_int, full_inst_calib, focus_directory, focus_general, do_pre_process, params, time_period):
     """
     focus a whole run with no cropping
 
     @param run_number :: the run nuumber to focus
     @param van_curves :: the path to the vanadium curves file
     @param van_int :: the path to the integrated vanadium file
+    @param full_inst_calib :: workspace containing the full instrument calibration
     @param focus_directory :: the user specific focus directory to save to
     @param focus_general :: the general focus directory to save to
     @param do_pre_process :: whether or not to pre-process the run before focussing it
@@ -502,15 +636,24 @@ def focus_whole(run_number, van_curves, van_int, focus_directory, focus_general,
     van_curves_ws, van_integrated_ws, ws_to_focus = _prepare_focus(run_number, van_curves, van_int, do_pre_process,
                                                                    params, time_period)
     # loop through both banks, focus and save them
-    for i in range(1, 3):
-        output_ws = "engg_focus_output_bank_{}".format(i)
-        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
-                         VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
-                         Bank=str(i))
-        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_{}{{}}", str(i))
+    for bank_no in range(1, 3):
+        sample_ws_clone = simple.CloneWorkspace(ws_to_focus)
+        curves_ws_clone = simple.CloneWorkspace(van_curves_ws)
+        tof_output_name = "engg_focus_output_bank_{}".format(bank_no)
+        dspacing_output_name = tof_output_name + "_dSpacing"
+        cal_file = NORTH_BANK_CAL if bank_no == 1 else SOUTH_BANK_CAL
+        region_calib = 'engg_calibration_bank_1' if bank_no == 1 else 'engg_calibration_bank_2'
+        df_kwarg = {"GroupingFileName": cal_file}
+        _run_focus(input_workspace=sample_ws_clone, tof_output_name=tof_output_name, region_calib=region_calib,
+                   vanadium_integration_ws=van_integrated_ws, vanadium_curves_ws=curves_ws_clone, df_kwarg=df_kwarg,
+                   full_calib=full_inst_calib)
+        _save_out(run_number, focus_directory, focus_general, tof_output_name, "ENGINX_{}_{}{{}}", str(bank_no))
+        _save_out(run_number, focus_directory, focus_general, dspacing_output_name, "ENGINX_{}_{}{{}}", str(bank_no))
+        simple.DeleteWorkspace(sample_ws_clone)
+        simple.DeleteWorkspace(curves_ws_clone)
 
 
-def focus_cropped(run_number, van_curves, van_int, focus_directory, focus_general, do_pre_process, params, time_period,
+def focus_cropped(run_number, van_curves, van_int, full_inst_calib, focus_directory, focus_general, do_pre_process, params, time_period,
                   crop_on,
                   use_spectra):
     """
@@ -518,6 +661,7 @@ def focus_cropped(run_number, van_curves, van_int, focus_directory, focus_genera
 
     @param van_curves :: the path to the vanadium curves file
     @param van_int :: the path to the integrated vanadium file
+    @param full_inst_calib :: workspace containing the full instrument calibration
     @param run_number :: the run nuumber to focus
     @param focus_directory :: the user specific focus directory to save to
     @param focus_general :: the general focus directory to save to
@@ -530,35 +674,50 @@ def focus_cropped(run_number, van_curves, van_int, focus_directory, focus_genera
     """
     van_curves_ws, van_integrated_ws, ws_to_focus = _prepare_focus(run_number, van_curves, van_int, do_pre_process,
                                                                    params, time_period)
-    output_ws = "engg_focus_output{0}{1}"
+    tof_output_name = "engg_focus_output{0}{1}"
+    sample_ws_clone = simple.CloneWorkspace(ws_to_focus)
+    curves_ws_clone = simple.CloneWorkspace(van_curves_ws)
     # check whether to crop on bank or spectra
     if not use_spectra:
         # get the bank to crop on, focus and save it out
         bank = {"North": "1",
                 "South": "2"}
-        output_ws = output_ws.format("_bank_", bank.get(crop_on))
-        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
-                         VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
-                         Bank=bank.get(crop_on))
-        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_{}{{}}", crop_on)
+        bank_no = bank.get(crop_on)
+        cal_file = NORTH_BANK_CAL if bank_no == 1 else SOUTH_BANK_CAL
+        region_calib = 'engg_calibration_bank_1' if bank_no == 1 else 'engg_calibration_bank_2'
+        df_kwarg = {"GroupingFileName": cal_file}
+        tof_output_name = tof_output_name.format("_bank_", bank_no)
+        dspacing_output_name = tof_output_name + "_dSpacing"
+        _run_focus(input_workspace=sample_ws_clone, tof_output_name=tof_output_name, vanadium_integration_ws=van_integrated_ws,
+                   vanadium_curves_ws=curves_ws_clone, df_kwarg=df_kwarg, full_calib=full_inst_calib,
+                   region_calib=region_calib)
+        _save_out(run_number, focus_directory, focus_general, tof_output_name, "ENGINX_{}_{}{{}}", crop_on)
+        _save_out(run_number, focus_directory, focus_general, dspacing_output_name, "ENGINX_{}_{}{{}}", crop_on)
     else:
         # crop on the spectra passed in, focus and save it out
-        output_ws = output_ws.format("", "")
-        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
-                         VanIntegrationWorkspace=van_integrated_ws,
-                         VanCurvesWorkspace=van_curves_ws, SpectrumNumbers=crop_on)
-        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_bank_{}{{}}", "cropped")
+        tof_output_name = tof_output_name.format("_", "cropped")
+        dspacing_output_name = tof_output_name + "_dSpacing"
+        grp_ws = Utils.create_custom_grouping_workspace(crop_on, ws_to_focus)
+        df_kwarg = {"GroupingWorkspace": grp_ws}
+        region_calib = 'engg_calibration_cropped'
+        _run_focus(input_workspace=sample_ws_clone, tof_output_name=tof_output_name, vanadium_integration_ws=van_integrated_ws,
+                   vanadium_curves_ws=curves_ws_clone, df_kwarg=df_kwarg, region_calib=region_calib,
+                   full_calib=full_inst_calib)
+        _save_out(run_number, focus_directory, focus_general, tof_output_name, "ENGINX_{}_bank_{}{{}}", "cropped")
+        _save_out(run_number, focus_directory, focus_general, dspacing_output_name, "ENGINX_{}_bank_{}{{}}", "cropped")
+    simple.DeleteWorkspace(sample_ws_clone)
+    simple.DeleteWorkspace(curves_ws_clone)
 
 
-def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_general, do_pre_process, params,
-                       time_period,
-                       dg_file):
+def focus_texture_mode(run_number, van_curves, van_int, full_inst_calib, focus_directory, focus_general, do_pre_process, params,
+                       time_period, dg_file):
     """
     perform a texture mode focusing using the grouping csv file
 
-    @param run_number :: the run nuumber to focus
+    @param run_number :: the run number to focus
     @param van_curves :: the path to the vanadium curves file
     @param van_int :: the path to the integrated vanadium file
+    @param full_inst_calib :: workspace containing the full instrument calibration
     @param focus_directory :: the user specific focus directory to save to
     @param focus_general :: the general focus directory to save to
     @param do_pre_process :: whether or not to pre-process the run before focussing it
@@ -578,14 +737,22 @@ def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_g
         for row in group_reader:
             banks.update({row[0]: ','.join(row[1:])})
 
-    # loop through the banks described in the csv, focusing and saing them out
+    # loop through the banks described in the csv, focusing and saving them out
     for bank in banks:
-        output_ws = "engg_focusing_output_ws_texture_bank_{}"
-        output_ws = output_ws.format(bank)
-        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
-                         VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
-                         SpectrumNumbers=banks.get(bank))
-        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_texture_{}{{}}", bank)
+        sample_ws_clone = simple.CloneWorkspace(ws_to_focus)
+        curves_ws_clone = simple.CloneWorkspace(van_curves_ws)
+        tof_output_name = "engg_focusing_output_ws_texture_bank_{}"
+        tof_output_name = tof_output_name.format(bank)
+        dspacing_output_name = tof_output_name + "_dSpacing"
+        grp_ws = Utils.create_custom_grouping_workspace(banks[bank], ws_to_focus)
+        df_kwarg = {"GroupingWorkspace": grp_ws}
+        _run_focus(input_workspace=sample_ws_clone, tof_output_name=tof_output_name, region_calib=full_inst_calib,
+                   vanadium_curves_ws=curves_ws_clone, full_calib=full_inst_calib, df_kwarg=df_kwarg,
+                   vanadium_integration_ws=van_integrated_ws)
+        _save_out(run_number, focus_directory, focus_general, tof_output_name, "ENGINX_{}_texture_{}{{}}", bank)
+        _save_out(run_number, focus_directory, focus_general, dspacing_output_name, "ENGINX_{}_texture_{}{{}}", bank)
+        simple.DeleteWorkspace(sample_ws_clone)
+        simple.DeleteWorkspace(curves_ws_clone)
 
 
 def _prepare_focus(run_number, van_curves, van_int, do_pre_process, params, time_period):
@@ -600,7 +767,8 @@ def _prepare_focus(run_number, van_curves, van_int, do_pre_process, params, time
     @param time_period :: the time period for pre-processing
 
     """
-    van_curves_ws, van_integrated_ws = load_van_files(van_curves, van_int)
+    van_curves_ws = load_van_curves_file(van_curves)
+    van_integrated_ws = load_van_integration_file(van_int)
     if do_pre_process:
         ws_to_focus = pre_process(_gen_filename(run_number), params, time_period)
     else:
@@ -616,7 +784,7 @@ def _save_out(run_number, focus_directory, focus_general, output, enginx_file_na
     @param focus_directory :: the user directory to save to
     @param focus_general :: the general folder to copy the saved out files to
     @param output :: the workspace to save
-    @param enginx_file_name_format :: the nameing scheme of the files
+    @param enginx_file_name_format :: the naming scheme of the files
     @param bank_id :: the bank being saved
 
     """
