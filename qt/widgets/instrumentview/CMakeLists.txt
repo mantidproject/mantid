@@ -61,6 +61,7 @@ set(
   inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h
   inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h
   inc/MantidQtWidgets/InstrumentView/CollapsiblePanel.h
+  inc/MantidQtWidgets/InstrumentView/IMantidGLWidget.h
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h
@@ -71,6 +72,7 @@ set(
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h
+  inc/MantidQtWidgets/InstrumentView/ISimpleWidget.h
   inc/MantidQtWidgets/InstrumentView/MantidGLWidget.h
   inc/MantidQtWidgets/InstrumentView/PeakOverlay.h
   inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h

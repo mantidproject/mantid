@@ -12,7 +12,7 @@ from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from unittest import mock
 
-from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformation, FitParameters
+from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FittingContext, FitInformation, FitParameters
 
 
 def create_test_workspace(ws_name=None,
@@ -85,15 +85,6 @@ def create_test_fit_parameters(test_parameters, global_parameters=None):
 class FittingContextTest(unittest.TestCase):
     def setUp(self):
         self.fitting_context = FittingContext()
-
-    def test_context_constructor_accepts_fit_list(self):
-        fit_list = [
-            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock(),
-                           mock.MagicMock())
-        ]
-        context = FittingContext(fit_list)
-
-        self.assertEqual(fit_list, context.fit_list)
 
     def test_len_gives_length_of_fit_list(self):
         self.assertEqual(0, len(self.fitting_context))
