@@ -738,6 +738,7 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::F
     return;
 
   int state = 0;
+  int invalidEvents = 0;
   uint32_t c;
   while ((c = static_cast<uint32_t>(tarFile.read_byte())) != static_cast<uint32_t>(-1)) {
 
@@ -786,6 +787,7 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::F
         // cannot ignore the dt contrbition even if the event
         // is out of bounds as it is used in the encoding process
         tof += static_cast<int>(dt) * 0.1;
+        invalidEvents++;
       } else {
         // conversion from 100 nanoseconds to 1 microsecond
         tof += static_cast<int>(dt) * 0.1;
@@ -795,6 +797,9 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::F
 
       progTracker.update(tarFile.selected_position());
     }
+  }
+  if (invalidEvents > 0) {
+    g_log.warning() << "BILBY loader dropped " << invalidEvents << " invalid event(s)" << std::endl;
   }
 }
 
