@@ -410,28 +410,25 @@ void CompareMDWorkspaces::compareMDWorkspaces(typename MDEventWorkspace<MDE, nd>
             std::sort(events_vec2.begin(), events_vec2.end());
 
             bool same = true;
-            // set hard tolerance
-            m_tolerance = 1E-5;
+            std::string diffmessage("");
 
             for (size_t i = 0; i < events_vec1.size(); ++i) {
               try {
+                for (size_t d = 0; d < nd; ++d) {
+                  compareTol(events1[i].getCenter(d), events2[i].getCenter(d), "");
+                }
                 compareTol(events_vec1[i].getSignal(), events_vec2[i].getSignal(), "");
                 compareTol(events_vec1[i].getError(), events_vec2[i].getError(), "");
               } catch (CompareFailsException &) {
                 // FIXME - .. convert log_error to error messages
-                g_log.error() << "Box " << ibox << " Event " << i << " signal difference = "
-                              << fabs(events_vec1[i].getSignal() - events_vec2[i].getSignal()) << "\n";
-                g_log.error() << "Box " << ibox << " Event (Detailed) " << i << "  :  " << events_vec1[i].str()
-                              << " ... " << events_vec2[i].str() << "\n";
+                diffmessage += "Box " + std::to_string(ibox) + " Event " + std::to_string(i) + ":  [ws1] " +
+                               events_vec1[i].str() + "; [ws2] MDEvent: " + events_vec2[i].str() + "\n";
                 same = false;
               }
             }
 
             if (!same) {
-              // FIXME - add error message
-              // ...
-
-              throw CompareFailsException("MDEvents are not the same");
+              throw CompareFailsException("MDEvents are not the same!\n" + diffmessage);
             }
           }
         } catch (CompareFailsException &) {
@@ -509,6 +506,7 @@ void CompareMDWorkspaces::exec() {
     this->setProperty("Equals", false);
   } else {
     m_result = "Success!";
+    g_log.notice("The workspaces did match");
     this->setProperty("Equals", true);
   }
   setProperty("Result", m_result);
