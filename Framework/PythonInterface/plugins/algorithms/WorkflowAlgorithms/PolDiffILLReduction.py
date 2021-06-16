@@ -154,7 +154,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                              doc='The name of the cadmium transmission input workspace.')
 
         self.setPropertySettings('CadmiumTransmissionWorkspace', EnabledWhenProperty(transmission, beam,
-                                                                                          LogicOperator.Or))
+                                                                                     LogicOperator.Or))
 
         self.declareProperty('Transmission', '',
                              doc='The name of the transmission input workspace or a string with desired '
@@ -179,7 +179,8 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.declareProperty(name="OutputTreatment",
                              defaultValue="Individual",
-                             validator=StringListValidator(["Individual", "AveragePol", "AverageTwoTheta", "Sum"]),
+                             validator=StringListValidator(["Individual", "IndividualXY", "AveragePol",
+                                                            "AverageTwoTheta", "Sum"]),
                              direction=Direction.Input,
                              doc="Which treatment of the provided scan should be used to create output.")
 
@@ -254,6 +255,24 @@ class PolDiffILLReduction(PythonAlgorithm):
             raise RuntimeError('Cannot calculate transmission; beam monitor has 0 counts.')
         Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
         return ws
+
+    @staticmethod
+    def _merge_all_inputs(ws):
+        """Merges all reduced data into a single workspace which allows to display all points
+        as a function of TwoTheta."""
+        ConvertSpectrumAxis(InputWorkspace=ws, Target='SignedTheta', OutputWorkspace=ws,
+                            OrderAxis=False)
+        ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
+        tmp_ws = ws + '_tmp'
+        CloneWorkspace(InputWorkspace=mtd[ws][0], OutputWorkspace=tmp_ws)
+        for entry_no, entry in enumerate(mtd[ws]):
+            if entry_no == 0:
+                continue
+            AppendSpectra(InputWorkspace1=tmp_ws, InputWorkspace2=entry, OutputWorkspace=tmp_ws)
+        Transpose(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws)
+        SortXAxis(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws)
+        DeleteWorkspace(Workspace=ws)
+        GroupWorkspaces(InputWorkspaces=tmp_ws, OutputWorkspace=ws)
 
     def _normalise(self, ws):
         """Normalises the provided WorkspaceGroup to the monitor 1 or time and simultaneously removes monitors."""
@@ -782,11 +801,14 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _finalize(self, ws, process, progress):
-        if process not in ['Vanadium'] and  self.getProperty('OutputTreatment').value == 'AverageTwoTheta':
+        output_treatment = self.getPropertyValue('OutputTreatment')
+        if process not in ['Vanadium'] and output_treatment == 'AverageTwoTheta':
             ws = self._merge_twoTheta_positions(ws)
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws][0].getRun().addProperty('ProcessedAs', process, True)
+        if output_treatment == 'IndividualXY':
+            self._merge_all_inputs(ws)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
 

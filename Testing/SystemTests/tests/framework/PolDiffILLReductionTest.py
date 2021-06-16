@@ -66,6 +66,13 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         self._check_output(mtd['vanadium_average'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_average'], 'Vanadium')
 
+    def d7_reduction_test_vanadium_scatter(self):
+        PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_scatter',
+                            SampleAndEnvironmentProperties=self._sampleProperties,
+                            OutputTreatment='IndividualXY')
+        self._check_output(mtd['vanadium_full'], 264, 1, 1, 'Momentum transfer', 'Momentum transfer', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['vanadium_scatter'], 'Vanadium')
+
     def d7_reduction_test_vanadium_full_reduction(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
