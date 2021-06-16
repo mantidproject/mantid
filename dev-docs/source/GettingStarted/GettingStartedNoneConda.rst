@@ -4,9 +4,6 @@
 Getting Started without Conda
 =============================
 
-.. contents::
-  :local:
-
 Environment
 ###########
 
@@ -122,7 +119,7 @@ Install pre-commit for use in our current developer workflow
 
 if you wish to setup eclipse for use developing mantid, then instructions can be found :ref:`here <Eclipse>`.
 
-Now you can `get the mantid code <https://developer.mantidproject.org/GettingStarted.html#getting-the-mantid-code>`_, and build it:
+Now you can :ref:`here <Getting the Mantid code>`, and build it:
 
 .. code-block:: sh
 
@@ -167,3 +164,23 @@ build environment. This will give you an out of the box working build
 environment, Python 3 (where available) and ccache.
 
 More details and instructions can be found at the GitHub link above.
+
+Getting the Mantid code
+#######################
+We use `Git <https://git-scm.com/>`_ as our version control system (VCS). The master copies of our repositories are located at `GitHub <http://github.com/mantidproject>`_. We have a number of repositories, of which the main one (the one containing all the source code for Mantid itself) is called simply `mantid <http://github.com/mantidproject/mantid>`_.
+
+If you are not already set up with Git, you can follow these `instructions <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_.
+
+There are a number of URLs via which the code can be checked out using various protocols. The easiest way to get the one you want is to select the protocol you want on the right side of the `mantid <http://github.com/mantidproject/mantid>`_ repository page on github and copy the url into your clipboard. The way to clone the repository via ssh on the command line, into a directory called Mantid, is:
+
+.. code-block:: sh
+
+    git clone git@github.com:mantidproject/mantid.git
+
+Alternatively, one can use the ``https`` protocol for cloning the repository.
+This requires one to supply an authentication token when pushing or re-type their password.
+
+.. code-block:: sh
+
+    git clone https://github.com/mantidproject/mantid.git
+

@@ -1,18 +1,15 @@
 .. _GettingStartedConda:
 
-=====================
-Getting Started Conda
-=====================
-
-.. contents::
-  :local:
+==========================
+Getting Started with Conda
+==========================
 
 .. toctree::
-
    :hidden:
-   GettingStartedLinux
-   GettingStartedWindows
-   GettingStartedOSX
+
+   GettingStartedCondaLinux
+   GettingStartedCondaWindows
+   GettingStartedCondaOSX
 
 
 Environment
@@ -25,6 +22,7 @@ This is where we will run through the instructions for Windows, MacOS, Debian (U
   * Download and install Mambaforge (a stripped down version of Conda that defaults to Condaforge, combined with mamba to improve environment resolution time).
 
 Navigate to the dedicated page for each OS
+##########################################
 * Windows: :ref:`GettingStartedCondaWindows`
 * Linux: :ref:`GettingStartedCondaLinux`
 * MacOS: :ref:`GettingStartedCondaOSX`
