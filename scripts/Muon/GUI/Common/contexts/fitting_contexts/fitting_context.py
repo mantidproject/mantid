@@ -324,6 +324,11 @@ class FittingContext(object):
     """
 
     def __init__(self):
+        # A dictionary containing the fit histories for different fitting modes. The key should represent a fitting
+        # mode, and the value should be a list of FitInformation's indicating all the fits that have been done up to
+        # this point
+        self._fit_history: dict = {}
+
         self.new_fit_results_notifier = Observable()
         self.fit_removed_notifier = Observable()
 

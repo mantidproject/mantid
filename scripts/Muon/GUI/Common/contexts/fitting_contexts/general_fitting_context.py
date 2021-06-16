@@ -5,7 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction
-from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
+from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext, SINGLE_FITS_KEY
+
+SIMULTANEOUS_FITS_KEY = "SimultaneousFits"
 
 
 class GeneralFittingContext(BasicFittingContext):
@@ -16,7 +18,7 @@ class GeneralFittingContext(BasicFittingContext):
         # A list of FitInformation's detailing all the simultaneous fits that have happened including the fits that have
         # been overridden by an updated fit. The last simultaneous fit performed is at the end of the list, and undoing
         # will remove it.
-        self._simultaneous_fits_history: list = []
+        self._fit_history[SIMULTANEOUS_FITS_KEY] = []
 
         self._simultaneous_fitting_mode: bool = False
 
@@ -35,27 +37,24 @@ class GeneralFittingContext(BasicFittingContext):
 
     def all_latest_fits(self):
         """Returns the latest unique fits for all fitting modes."""
-        return super().all_latest_fits() + self._latest_unique_fits_in(self._simultaneous_fits_history)
+        return super().all_latest_fits() + self._latest_unique_fits_in(self._fit_history[SIMULTANEOUS_FITS_KEY])
 
     @property
     def active_fit_history(self):
         """Returns the fit history for the currently active fitting mode."""
-        return self._simultaneous_fits_history if self.simultaneous_fitting_mode else self._single_fits_history
+        return self._fit_history[SIMULTANEOUS_FITS_KEY if self.simultaneous_fitting_mode else SINGLE_FITS_KEY]
 
     @active_fit_history.setter
     def active_fit_history(self, fit_history: list) -> None:
         """Sets the fit history for the currently active fitting mode."""
-        if self.simultaneous_fitting_mode:
-            self._simultaneous_fits_history = fit_history
-        else:
-            self._single_fits_history = fit_history
+        self._fit_history[SIMULTANEOUS_FITS_KEY if self.simultaneous_fitting_mode else SINGLE_FITS_KEY] = fit_history
 
     def clear(self, removed_fits: list = []):
         """Removes all the stored Fits from the context when an ADS clear event happens."""
         if len(removed_fits) == 0:
             removed_fits = self.all_latest_fits()
 
-        self._simultaneous_fits_history = []
+        self._fit_history[SIMULTANEOUS_FITS_KEY] = []
         self._simultaneous_fit_functions_for_undo = []
         self._simultaneous_fit_statuses_for_undo = []
         self._simultaneous_chi_squared_for_undo = []
@@ -65,7 +64,7 @@ class GeneralFittingContext(BasicFittingContext):
 
     def remove_workspace_by_name(self, workspace_name: str) -> None:
         """Remove a Fit from the history when an ADS delete event happens on one of its output workspaces."""
-        self.remove_fit_by_name(self._simultaneous_fits_history, workspace_name)
+        self.remove_fit_by_name(self._fit_history[SIMULTANEOUS_FITS_KEY], workspace_name)
         super().remove_workspace_by_name(workspace_name)
 
     @property
