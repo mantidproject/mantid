@@ -53,6 +53,9 @@ using namespace MantidQt::MantidWidgets::Batch;
 qRegisterMetaType<std::string>("StdString");
 qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 qRegisterMetaType<Message>("Message");
+qRegisterMetaType<QList<QPersistentModelIndex>>("QList<QPersistentModelIndex>");
+qRegisterMetaType<QAbstractItemModel::LayoutChangeHint>("QAbstractItemModel::LayoutChangeHint");
+qRegisterMetaType<QVector<int>>("QVector<int>");
 %End
 
 
