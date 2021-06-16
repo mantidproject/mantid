@@ -16,18 +16,16 @@
 namespace { // anonymous namespace
 
 // https://stackoverflow.com/questions/772355/how-to-inherit-from-stdostream
-class PyStdoutSink : private std::streambuf, public std::ostream {
-public:
-  PyStdoutSink() : std::ostream(this) {}
-
-private:
+class PyStdoutBuf : public std::streambuf {
+protected:
   int overflow(int c) override {
     PySys_WriteStdout("%c", c);
     return 0;
   }
 };
 
-PyStdoutSink pyOstream = PyStdoutSink();
+auto pyStreambuf = new PyStdoutBuf;
+auto pyOstream = std::ostream(pyStreambuf);
 } // anonymous namespace
 
 namespace Poco {
