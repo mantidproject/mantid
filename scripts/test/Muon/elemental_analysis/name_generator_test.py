@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
 
 from Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
 
@@ -14,14 +13,9 @@ class NameGeneratorTest(unittest.TestCase):
     def exception_produced(self, element, name, err_value, err_type):
         with self.assertRaises(TypeError) as err:
             gen_name(element, name)
-            if sys.version_info[:2] < (3, 0):
-                self.assertEqual(str(err.exception),
-                                 "{} expected element to be 'str', found '<type '{}'>' instead"
-                                 .format(err_value, err_type))
-            else:
-                self.assertEqual(str(err.exception),
-                                 "{} expected element to be 'str', found '<class '{}'>' instead"
-                                 .format(err_value, err_type))
+            self.assertEqual(str(err.exception),
+                             "{} expected element to be 'str', found '<class '{}'>' instead"
+                             .format(err_value, err_type))
 
     def test_that_gen_name_returns_name_if_it_contains_element(self):
         element_name = 'name2'

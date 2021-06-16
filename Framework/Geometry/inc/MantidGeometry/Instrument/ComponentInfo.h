@@ -83,6 +83,7 @@ public:
   QuadrilateralComponent quadrilateralComponent(const size_t componentIndex) const;
   size_t indexOf(Geometry::IComponent *id) const;
   size_t indexOfAny(const std::string &name) const;
+  bool uniqueName(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;
   Kernel::V3D position(const size_t componentIndex) const;
   Kernel::V3D position(const std::pair<size_t, size_t> index) const;

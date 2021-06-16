@@ -13,6 +13,8 @@ This algorithm calculates the attenuation factors in the Paalman Pings formalism
 
 Three simple shapes are supported: *FlatPlate*, *Cylinder*, and *Annulus*. Each shape is defined by the corresponding set of geometric parameters.
 
+If the *Preset* shape option is chosen, the algorithm will use the sample and container shapes defined in the workspace.
+
 Inelastic, quasielastic and elastic measurements are supported, both for direct and indirect geometry instruments.
 
 *Height* is a common property for the sample and container regardless the shape.
@@ -57,9 +59,6 @@ The corrections should be applied by the :ref:`ApplyPaalmanPingsCorrection <algm
 
   All the shape arguments are supposed to be in centimeters.
 
-.. note::
-
-  This algorithm does not support predefined shapes or materials yet.
 
 Usage
 -----
@@ -79,16 +78,8 @@ Usage
     SetInstrumentParameter(sample_ws, ComponentName=inst_name,
         ParameterName='Efixed', ParameterType='Number', Value='4.1')
 
-    container_ws = CreateSampleWorkspace(Function="Quasielastic",
-                                         XUnit="Wavelength",
-                                         XMin=-0.5,
-                                         XMax=0.5,
-                                         BinWidth=0.01)
-    SetInstrumentParameter(container_ws, ComponentName=inst_name,
-        ParameterName='Efixed', ParameterType='Number', Value='4.1')
-
     corrections = PaalmanPingsMonteCarloAbsorption(
-            SampleWorkspace=sample_ws,
+            InputWorkspace=sample_ws,
             Shape='FlatPlate',
             BeamHeight=2.0,
             BeamWidth=2.0,
@@ -97,7 +88,6 @@ Usage
             SampleThickness=0.1,
             SampleChemicalFormula='H2-O',
             SampleDensity=1.0,
-            ContainerWorkspace=container_ws,
             ContainerFrontThickness=0.02,
             ContainerBackThickness=0.02,
             ContainerChemicalFormula='V',
@@ -141,16 +131,8 @@ Usage
     SetInstrumentParameter(sample_ws, ComponentName=inst_name,
         ParameterName='Efixed', ParameterType='Number', Value='4.1')
 
-    container_ws = CreateSampleWorkspace(Function="Quasielastic",
-                                         XUnit="Wavelength",
-                                         XMin=-0.5,
-                                         XMax=0.5,
-                                         BinWidth=0.01)
-    SetInstrumentParameter(container_ws, ComponentName=inst_name,
-        ParameterName='Efixed', ParameterType='Number', Value='4.1')
-
     corrections = PaalmanPingsMonteCarloAbsorption(
-            SampleWorkspace=sample_ws,
+            InputWorkspace=sample_ws,
             Shape='Cylinder',
             BeamHeight=2.0,
             BeamWidth=2.0,
@@ -158,7 +140,6 @@ Usage
             SampleRadius=0.2,
             SampleChemicalFormula='H2-O',
             SampleDensity=1.0,
-            ContainerWorkspace=container_ws,
             ContainerRadius=0.22,
             ContainerChemicalFormula='V',
             ContainerDensity=6.0,
@@ -201,16 +182,8 @@ Usage
     SetInstrumentParameter(sample_ws, ComponentName=inst_name,
         ParameterName='Efixed', ParameterType='Number', Value='4.1')
 
-    container_ws = CreateSampleWorkspace(Function="Quasielastic",
-                                         XUnit="Wavelength",
-                                         XMin=-0.5,
-                                         XMax=0.5,
-                                         BinWidth=0.01)
-    SetInstrumentParameter(container_ws, ComponentName=inst_name,
-        ParameterName='Efixed', ParameterType='Number', Value='4.1')
-
     corrections = PaalmanPingsMonteCarloAbsorption(
-            SampleWorkspace=sample_ws,
+            InputWorkspace=sample_ws,
             Shape='Annulus',
             BeamHeight=2.0,
             BeamWidth=2.0,
@@ -219,7 +192,6 @@ Usage
             SampleOuterRadius=0.4,
             SampleChemicalFormula='H2-O',
             SampleDensity=1.0,
-            ContainerWorkspace=container_ws,
             ContainerInnerRadius=0.19,
             ContainerOuterRadius=0.41,
             ContainerChemicalFormula='V',
@@ -242,6 +214,67 @@ Usage
     mtd.clear()
 
 .. testoutput:: Annulus
+
+    Y-Unit Label of annulus_corr_ass: Attenuation factor
+    Y-Unit Label of annulus_corr_assc: Attenuation factor
+    Y-Unit Label of annulus_corr_acsc: Attenuation factor
+    Y-Unit Label of annulus_corr_acc: Attenuation factor
+
+**Example - Preset Shape**
+
+.. testcode:: Preset
+
+    sample_ws = CreateSampleWorkspace(Function="Quasielastic",
+                                      XUnit="Wavelength",
+                                      XMin=-0.5,
+                                      XMax=0.5,
+                                      BinWidth=0.01)
+    # Efixed is generally defined as part of the IDF for real data.
+    # Fake it here
+    inst_name = sample_ws.getInstrument().getName()
+    SetInstrumentParameter(sample_ws, ComponentName=inst_name,
+        ParameterName='Efixed', ParameterType='Number', Value='4.1')
+
+    # define example geometries for the Sample and Container
+    SetSample(sample_ws, Geometry={'Shape': 'Cylinder', 'Height': 4.0, 'Radius': 2.0, 'Center': [0.,0.,0.]},
+                Material={'ChemicalFormula': 'Ni', 'MassDensity': 7.0},
+                ContainerGeometry={'Shape': 'HollowCylinder', 'Height': 4.0, 'InnerRadius': 2.0,
+                'OuterRadius': 3.5},
+                ContainerMaterial={'ChemicalFormula': 'V'})
+
+    corrections = PaalmanPingsMonteCarloAbsorption(
+            InputWorkspace=sample_ws,
+            Shape='Preset',
+            BeamHeight=2.0,
+            BeamWidth=2.0,
+            CorrectionsWorkspace='annulus_corr'
+        )
+
+    # alternatively, run the corrections with the sample material overridden but preset shape used
+    corrections = PaalmanPingsMonteCarloAbsorption(
+            InputWorkspace=sample_ws,
+            Shape='Preset',
+            BeamHeight=2.0,
+            BeamWidth=2.0,
+            SampleChemicalFormula='H2-O',
+            SampleDensity=1.0,
+            CorrectionsWorkspace='annulus_corr'
+        )
+
+    ass_ws = corrections[0]
+    assc_ws = corrections[1]
+    acsc_ws = corrections[2]
+    acc_ws = corrections[3]
+
+    print("Y-Unit Label of " + str(ass_ws.getName()) + ": " + str(ass_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(assc_ws.getName()) + ": " + str(assc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acsc_ws.getName()) + ": " + str(acsc_ws.YUnitLabel()))
+    print("Y-Unit Label of " + str(acc_ws.getName()) + ": " + str(acc_ws.YUnitLabel()))
+
+.. testcleanup:: Preset
+    mtd.clear()
+
+.. testoutput:: Preset
 
     Y-Unit Label of annulus_corr_ass: Attenuation factor
     Y-Unit Label of annulus_corr_assc: Attenuation factor

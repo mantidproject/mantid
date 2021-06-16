@@ -132,7 +132,10 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ISISDiagnostics::~ISISDiagnostics() {}
+ISISDiagnostics::~ISISDiagnostics() {
+  m_propTrees["SlicePropTree"]->unsetFactoryForManager(m_dblManager);
+  m_propTrees["SlicePropTree"]->unsetFactoryForManager(m_blnManager);
+}
 
 void ISISDiagnostics::setup() {}
 

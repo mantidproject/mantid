@@ -262,7 +262,6 @@ def toMilestoneName(version):
 
 def addToReleaseList(release_root, version):
     filename = os.path.join(release_root, 'index.rst')
-    newversion = '   %s <%s/index>\n' % (version, version)
 
     # read in the entire old version
     with open(filename, 'r') as handle:
@@ -273,9 +272,9 @@ def addToReleaseList(release_root, version):
         search_for_insertion = True
         for i in range(len(oldtext)):
             line = oldtext[i].strip()
-            if search_for_insertion and line.startswith('v') and line.endswith('/index>'):
+            if search_for_insertion and line.startswith('* :doc:`v') and line.endswith('/index>`'):
                 if version not in line:
-                    handle.write(newversion)
+                    handle.write(f"* :doc:`{version} <{version}/index>`\n")
                 search_for_insertion = False
             handle.write(oldtext[i])
 

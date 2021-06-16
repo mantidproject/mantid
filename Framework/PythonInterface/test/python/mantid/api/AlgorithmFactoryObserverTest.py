@@ -10,13 +10,7 @@ import unittest
 import sys
 
 from mantid.api import AlgorithmFactory, AlgorithmFactoryObserver, PythonAlgorithm
-
-if sys.version_info.major >= 3:
-    # Python 3 and above
-    from unittest import mock
-else:
-    # Python 2
-    import mock
+from unittest import mock
 
 
 class ToyAlgorithm(PythonAlgorithm):

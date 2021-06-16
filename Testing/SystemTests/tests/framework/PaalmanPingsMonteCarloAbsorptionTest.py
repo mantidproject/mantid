@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
-from mantid.simpleapi import PaalmanPingsMonteCarloAbsorption, Load, mtd
+from mantid.simpleapi import PaalmanPingsMonteCarloAbsorption, Load, mtd, SetSample
 
 
 class FlatPlateTest(systemtesting.MantidSystemTest):
@@ -16,7 +16,6 @@ class FlatPlateTest(systemtesting.MantidSystemTest):
 
     def setUp(self):
         Load(Filename='irs26176_graphite002_red.nxs', OutputWorkspace='sample')
-        Load(Filename='irs26173_graphite002_red.nxs', OutputWorkspace='container')
 
     def cleanup(self):
         mtd.clear()
@@ -28,7 +27,7 @@ class FlatPlateTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         PaalmanPingsMonteCarloAbsorption(
-            SampleWorkspace='sample',
+            InputWorkspace='sample',
             Shape='FlatPlate',
             BeamHeight=2.0,
             BeamWidth=2.0,
@@ -37,12 +36,12 @@ class FlatPlateTest(systemtesting.MantidSystemTest):
             SampleThickness=0.1,
             SampleChemicalFormula='H2-O',
             SampleDensity=1.0,
-            ContainerWorkspace='container',
             ContainerFrontThickness=0.02,
             ContainerBackThickness=0.02,
             ContainerChemicalFormula='V',
             ContainerDensity=6.0,
-            CorrectionsWorkspace='flat_plate_corr'
+            CorrectionsWorkspace='flat_plate_corr',
+            EventsPerPoint = 5000
         )
 
 
@@ -54,7 +53,6 @@ class CylinderTest(systemtesting.MantidSystemTest):
 
     def setUp(self):
         Load(Filename='irs26176_graphite002_red.nxs', OutputWorkspace='sample')
-        Load(Filename='irs26173_graphite002_red.nxs', OutputWorkspace='container')
 
     def cleanup(self):
         mtd.clear()
@@ -66,7 +64,7 @@ class CylinderTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         PaalmanPingsMonteCarloAbsorption(
-            SampleWorkspace='sample',
+            InputWorkspace='sample',
             Shape='Cylinder',
             BeamHeight=2.0,
             BeamWidth=2.0,
@@ -74,11 +72,11 @@ class CylinderTest(systemtesting.MantidSystemTest):
             SampleRadius=0.2,
             SampleChemicalFormula='H2-O',
             SampleDensity=1.0,
-            ContainerWorkspace='container',
             ContainerRadius=0.22,
             ContainerChemicalFormula='V',
             ContainerDensity=6.0,
-            CorrectionsWorkspace='cylinder_corr'
+            CorrectionsWorkspace='cylinder_corr',
+            EventsPerPoint=5000
         )
 
 
@@ -90,7 +88,6 @@ class AnnulusTest(systemtesting.MantidSystemTest):
 
     def setUp(self):
         Load(Filename='irs26176_graphite002_red.nxs', OutputWorkspace='sample')
-        Load(Filename='irs26173_graphite002_red.nxs', OutputWorkspace='container')
 
     def cleanup(self):
         mtd.clear()
@@ -102,7 +99,7 @@ class AnnulusTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         PaalmanPingsMonteCarloAbsorption(
-            SampleWorkspace='sample',
+            InputWorkspace='sample',
             Shape='Annulus',
             BeamHeight=2.0,
             BeamWidth=2.0,
@@ -111,11 +108,47 @@ class AnnulusTest(systemtesting.MantidSystemTest):
             SampleOuterRadius=0.4,
             SampleChemicalFormula='H2-O',
             SampleDensity=1.0,
-            ContainerWorkspace='container',
             ContainerInnerRadius=0.19,
             ContainerOuterRadius=0.41,
             ContainerChemicalFormula='V',
             ContainerDensity=6.0,
             CorrectionsWorkspace='annulus_corr',
+            EventsPerPoint=10000
+        )
+
+
+class PresetTest(systemtesting.MantidSystemTest):
+
+    def __init__(self):
+        super(PresetTest, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        Load(Filename='irs26176_graphite002_red.nxs', OutputWorkspace='sample')
+        SetSample(InputWorkspace='sample', Geometry={'Shape': 'FlatPlate', 'Height': 2.0,
+                                                     'Width': 2.0, 'Thick': 0.1,
+                                                     'Center': [0.,0.,0.]},
+                  Material={'ChemicalFormula': 'H2-O', 'MassDensity': 1.0},
+                  ContainerGeometry={'Shape': 'FlatPlateHolder', 'Height': 2.0,
+                                     'Width': 2.0, 'Thick': 0.1, 'FrontThick': 0.02, 'BackThick': 0.02,
+                                     'Center': [0.,0.,0.]},
+                  ContainerMaterial={'ChemicalFormula': 'V',
+                                     'MassDensity': 6.0})
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        return ['preset_corr', 'irs_PP_MC_flat_plate.nxs']
+
+    def runTest(self):
+        PaalmanPingsMonteCarloAbsorption(
+            InputWorkspace='sample',
+            Shape='Preset',
+            BeamHeight=2.0,
+            BeamWidth=2.0,
+            CorrectionsWorkspace='preset_corr',
             EventsPerPoint=5000
         )

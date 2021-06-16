@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,too-many-branches
+# pylint: disable=invalid-name,too-many-branches
 """A script for generating DataCite DOI's for Mantid releases, to be called by
 a Jenkins job during the release process.  When given a major, minor and patch
 release number along with username and password credentials, it will build a
@@ -97,8 +97,8 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
     '''
     # The root resource node must contain the various schema information.
     root = ET.Element('resource')
-    root.set('xmlns',              'http://datacite.org/schema/kernel-3')
-    root.set('xmlns:xsi',          'http://www.w3.org/2001/XMLSchema-instance')
+    root.set('xmlns', 'http://datacite.org/schema/kernel-3')
+    root.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
     root.set('xsi:schemaLocation', 'http://datacite.org/schema/kernel-3 ht'
              + 'tp://schema.datacite.org/meta/kernel-3'
              + '/metadata.xsd')
@@ -214,13 +214,13 @@ def _http_request(body, method, url, options, content_type=None):
 
     args = [
         'curl',
-        '--user',    options.username + ':' + options.password,
+        '--user', options.username + ':' + options.password,
         # The bodies of HTTP messages must be encoded:
-        '--data',    body.encode('utf-8'),
+        '--data', body,
         '--request', method,
     ]
     if content_type is not None:
-        args.extend(['--header',  content_type,])
+        args.extend(['--header', content_type, ])
 
     if 'http_proxy' in os.environ:
         args.extend(['--proxy', os.environ['http_proxy']])
@@ -233,8 +233,9 @@ def _http_request(body, method, url, options, content_type=None):
 
     args.append(url)
 
-    proc = subprocess.Popen(args,stdout=subprocess.PIPE)
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     result = proc.stdout.readlines()
+    result = [x.decode() for x in result]
 
     print("Server Response: " + str(result))
     return result
@@ -247,10 +248,10 @@ def delete_doi(base, doi, options):
     '''
     print("\nAttempting to delete the meta data for:" + doi)
     result = _http_request(
-        body    = '',
-        method  = 'DELETE',
-        url     = base + "metadata/" + doi,
-        options = options
+        body='',
+        method='DELETE',
+        url=base + "metadata/" + doi,
+        options=options
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
@@ -258,10 +259,10 @@ def delete_doi(base, doi, options):
 
     print("\nAttempting to point " + doi + " to invalid page.")
     result = _http_request(
-        body    = 'doi=' + doi + '\n' + 'url=' + INVALID_URL,
-        method  = "PUT",
-        url     = base + "doi/" + doi,
-        options = options
+        body='doi=' + doi + '\n' + 'url=' + INVALID_URL,
+        method="PUT",
+        url=base + "doi/" + doi,
+        options=options
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
@@ -275,10 +276,10 @@ def create_or_update_metadata(xml_form, base, doi, options):
     '''
     print("\nAttempting to create / update metadata:")
     result = _http_request(
-        body    = xml_form,
-        method  = "POST",
-        url     = base + "metadata",
-        options = options,
+        body=xml_form,
+        method="POST",
+        url=base + "metadata",
+        options=options,
         content_type=XML_CONTENT_HEADER
     )
 
@@ -295,11 +296,11 @@ def create_or_update_doi(base, doi, destination, options):
     print('DOI = ' + doi)
     print('URL = ' + destination)
     result = _http_request(
-        body    = 'doi=' + doi + '\n' + 'url=' + destination,
-        method  = "PUT",
-        url     = base + "doi/" + doi,
-        options = options,
-        content_type = XML_CONTENT_HEADER
+        body='doi=' + doi + '\n' + 'url=' + destination,
+        method="PUT",
+        url=base + "doi/" + doi,
+        options=options,
+        content_type=XML_CONTENT_HEADER
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
@@ -315,10 +316,10 @@ def check_if_doi_exists(base, doi, destination, options):
     '''
     print("\nChecking if \"" + base + "doi/" + doi + "\" DOI exists.")
     result = _http_request(
-        body    = '',
-        method  = 'GET',
-        url     = base + "doi/" + doi,
-        options = options
+        body=b'',
+        method='GET',
+        url=base + "doi/" + doi,
+        options=options
     )
 
     if result[0] == 'DOI not found' or result[0] == INVALID_URL:
@@ -338,7 +339,7 @@ def check_for_curl():
     # See if a call to 'curl --version' gives us a successful return code,
     # else raise an exception.
     try:
-        proc = subprocess.Popen(['curl', '--version'],stdout=subprocess.PIPE)
+        proc = subprocess.Popen(['curl', '--version'], stdout=subprocess.PIPE)
         proc.wait()
         if proc.returncode == 0:
             found = True
@@ -351,7 +352,7 @@ def check_for_curl():
         raise RuntimeError('This script requires that cURL be installed and available on the PATH.')
 
 
-def get_urls_for_doi(version_str,  shortened_version_str,
+def get_urls_for_doi(version_str, shortened_version_str,
                      prev_version_str, shortened_prev_version_str):
     # Beginning with v3.6.0 the release notes moved to docs.mantidproject.org but
     # the transition happened after the release so the following rules apply
@@ -363,25 +364,25 @@ def get_urls_for_doi(version_str,  shortened_version_str,
     wiki_rel_notes_url = 'http://www.mantidproject.org/Release_Notes_{0}'
 
     if major > 3 or (major == 3 and minor >= 7):
-        destination = sphinx_rel_notes_url.format('v' + version_str, 'v'+ version_str)
-        prev_destination = sphinx_rel_notes_url.format('v' + prev_version_str, 'v'+ prev_version_str)
+        destination = sphinx_rel_notes_url.format('v' + version_str, 'v' + version_str)
+        prev_destination = sphinx_rel_notes_url.format('v' + prev_version_str, 'v' + prev_version_str)
     elif major == 3:
         if minor == 5:
             if patch >= 2:
-                destination = sphinx_rel_notes_url.format('nightly', 'v'+ version_str)
+                destination = sphinx_rel_notes_url.format('nightly', 'v' + version_str)
             if patch == 2:
                 prev_destination = wiki_rel_notes_url.format(shortened_prev_version_str)
             else:
-                prev_destination = sphinx_rel_notes_url.format('nightly', 'v'+ prev_version_str)
+                prev_destination = sphinx_rel_notes_url.format('nightly', 'v' + prev_version_str)
         elif minor == 6:
             if patch >= 1:
-                destination = sphinx_rel_notes_url.format('v' + version_str, 'v'+ version_str)
+                destination = sphinx_rel_notes_url.format('v' + version_str, 'v' + version_str)
             else:
-                destination = sphinx_rel_notes_url.format('nightly', 'v'+ version_str)
+                destination = sphinx_rel_notes_url.format('nightly', 'v' + version_str)
             if patch >= 2:
-                prev_destination = sphinx_rel_notes_url.format('v' + prev_version_str, 'v'+ prev_version_str)
+                prev_destination = sphinx_rel_notes_url.format('v' + prev_version_str, 'v' + prev_version_str)
             else:
-                prev_destination = sphinx_rel_notes_url.format('nightly', 'v'+ prev_version_str)
+                prev_destination = sphinx_rel_notes_url.format('nightly', 'v' + prev_version_str)
         else:
             destination = wiki_rel_notes_url.format(shortened_version_str)
             prev_destination = wiki_rel_notes_url.format(shortened_prev_version_str)
@@ -420,7 +421,7 @@ def run(args):
         doi = main_doi
         prev_doi = ''
         has_previous_version = False
-    else: # Incremental release DOI.
+    else:  # Incremental release DOI.
         prev_doi = '10.5286/Software/Mantid' + shortened_prev_version_str
         doi = '10.5286/Software/Mantid' + shortened_version_str
 
@@ -462,7 +463,7 @@ def run(args):
             args
         )
 
-        relationships = { main_doi : 'IsPartOf' }
+        relationships = {main_doi: 'IsPartOf'}
         if has_previous_version:
             relationships[prev_doi] = 'IsNewVersionOf'
 
@@ -482,8 +483,8 @@ def run(args):
         # was found to have a DOI.
         if has_previous_version:
             prev_relationships = {
-                main_doi : 'IsPartOf',
-                doi      : 'IsPreviousVersionOf'
+                main_doi: 'IsPartOf',
+                doi: 'IsPreviousVersionOf'
             }
 
             prev_creator_name_list = authors.authors_under_git_tag(prev_tag)
@@ -503,14 +504,14 @@ def run(args):
 
     # Print out a custom success message, depending on the initial options.
     if not args.test:
-        method        = "resolved"
-        doi_add       = 'http://dx.doi.org/' + doi
-        meta_add      = 'https://mds.datacite.org/metadata/' + doi
+        method = "resolved"
+        doi_add = 'http://dx.doi.org/' + doi
+        meta_add = 'https://mds.datacite.org/metadata/' + doi
         prev_meta_add = 'https://mds.datacite.org/metadata/' + prev_doi
     else:
-        method        = "inspected"
-        doi_add       = 'https://test.datacite.org/mds/doi/' + doi
-        meta_add      = 'https://test.datacite.org/mds/metadata/' + doi
+        method = "inspected"
+        doi_add = 'https://test.datacite.org/mds/doi/' + doi
+        meta_add = 'https://test.datacite.org/mds/metadata/' + doi
         prev_meta_add = 'https://test.datacite.org/mds/metadata/' + prev_doi
 
     if has_previous_version:

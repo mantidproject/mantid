@@ -145,7 +145,7 @@ public:
     TS_ASSERT_EQUALS(B.getRadius(), 1);
     TS_ASSERT_EQUALS(B.getNormal(), V3D(0, 1, 0));
 
-    std::vector<V3D> pntOut;
+    Line::PType pntOut;
     A.intersect(pntOut, B);
 
     // forward only solution for cylinders
@@ -167,7 +167,7 @@ public:
     TS_ASSERT_EQUALS(B.getRadius(), 1);
     TS_ASSERT_EQUALS(B.getNormal(), V3D(0, 1, 0));
 
-    std::vector<V3D> pntOut;
+    Line::PType pntOut;
     A.intersect(pntOut, B);
 
     TS_ASSERT_EQUALS(pntOut.size(), 2);
@@ -186,7 +186,7 @@ public:
 
     Plane B;
     TS_ASSERT_EQUALS(B.setSurface("px 5 0 0"), 0);
-    std::vector<V3D> pntOut;
+    Line::PType pntOut;
     A.intersect(pntOut, B);
 
     TS_ASSERT_EQUALS(pntOut.size(), 1);
@@ -203,7 +203,7 @@ public:
 
     Sphere B;
     B.setSurface("s 0.0 0.0 0.0 2");
-    std::vector<V3D> pntOut;
+    Line::PType pntOut;
     A.intersect(pntOut, B);
     // forward only solutions
     TS_ASSERT_EQUALS(pntOut.size(), 1);
@@ -220,7 +220,7 @@ public:
 
     Sphere B;
     B.setSurface("s 0.0 0.0 0.0 2");
-    std::vector<V3D> pntOut;
+    Line::PType pntOut;
     A.intersect(pntOut, B);
     TS_ASSERT_EQUALS(pntOut.size(), 2);
     auto itr = pntOut.begin();

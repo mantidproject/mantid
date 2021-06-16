@@ -6,7 +6,7 @@ Project Recovery
 What is it?
 -----------
 
-If Mantid crashes for some reason, we have introduced the functionality to attempt to recover the state that Mantid was in prior to the crash.
+If MantidWorkbench crashes for some reason, we have introduced the functionality to attempt to recover the state that Mantid was in prior to the crash.
 
 Project recovery is a key part of our efforts to make Mantid as stable and reliable as possible.
 
@@ -27,7 +27,7 @@ If Mantid has crashed, then on the subsequent reboot you will be presented with 
 
 You can choose to attempt a full recovery, to open a recovery script or not to attempt a recovery. Full recovery will attempt to recover all workspaces present at the time of the crash as well as additional dialogs like plots or data windows. Script mode will attempt to construct a script that contains the history of all workspaces at the time of the crash.
 
-If full project recovery runs successfully the scripting window will remain open in MantidPlot. It is safe to close this after a recovery.
+If full project recovery runs successfully the scripting window will remain open in MantidWorkbench. It is safe to close this after a recovery.
 
 If Project Recovery fails to run successfully it will open a GUI that will give users the option to select a specific checkpoint, try the last checkpoint again, open a specific checkpoint in a script window or start mantid normally without any project recovery occuring. (See image)
 

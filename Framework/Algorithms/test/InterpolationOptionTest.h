@@ -58,7 +58,7 @@ public:
   void test_Apply_With_CSpline_Succeeds() {
     InterpolationOption interpolateOptEnum;
     // Set by enum
-    interpolateOptEnum.set(InterpolationOption::Value::CSpline);
+    interpolateOptEnum.set(InterpolationOption::Value::CSpline, false, false);
 
     Histogram inOut(Points(7, LinearGenerator(0, 0.5)), Counts({-3, 0, -4, 0, 4, 0, 3}));
     const Histogram input(inOut);
@@ -69,7 +69,7 @@ public:
 
     // Set by string
     InterpolationOption interpolateOptStr;
-    interpolateOptStr.set("CSpline");
+    interpolateOptStr.set("CSpline", false, false);
 
     Histogram inOutStr(input);
     interpolateOptStr.applyInplace(inOutStr, 2);
@@ -82,23 +82,23 @@ public:
   //----------------------------------------------------------------------------
   void test_set_From_String_Throws_With_Unknown_Type() {
     InterpolationOption interpolateOpt;
-    TS_ASSERT_THROWS(interpolateOpt.set("Unknown"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(interpolateOpt.set("Unknown", false, false), const std::invalid_argument &);
   }
 
   void test_set_From_String_Throws_With_Empty_String() {
     InterpolationOption interpolateOpt;
-    TS_ASSERT_THROWS(interpolateOpt.set(""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(interpolateOpt.set("", false, false), const std::invalid_argument &);
   }
 
   void test_validateInputSize() {
     using namespace Mantid::HistogramData;
     auto minSize = minSizeForCSplineInterpolation();
     InterpolationOption opt;
-    opt.set("CSpline");
+    opt.set("CSpline", false, false);
     TS_ASSERT(opt.validateInputSize(minSize).empty())
     TS_ASSERT(!opt.validateInputSize(minSize - 1).empty())
     minSize = minSizeForLinearInterpolation();
-    opt.set("Linear");
+    opt.set("Linear", false, false);
     TS_ASSERT(opt.validateInputSize(minSize).empty())
     TS_ASSERT(!opt.validateInputSize(minSize - 1).empty())
   }

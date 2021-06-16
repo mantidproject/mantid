@@ -12,7 +12,9 @@ Description
 A Voigt function is a convolution between a Lorentzian and Gaussian and
 is defined as:
 
-.. math:: V(X,Y) = \frac{Y}{\pi}\int_{-\infty}^{+\infty}dz\frac{exp^{-z^2}}{Y^2 + (X - z)^2}
+.. math::
+
+   V(X,Y) = \frac{Y}{\pi}\int_{-\infty}^{+\infty}dz\frac{\exp^{-z^2}}{Y^2 + (X - z)^2},
 
 where
 

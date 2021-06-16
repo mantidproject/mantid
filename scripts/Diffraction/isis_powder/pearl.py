@@ -44,6 +44,7 @@ class Pearl(AbstractInst):
     def create_vanadium(self, **kwargs):
         kwargs[
             "perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
+
         with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_in_cycle")):
             if str(self._inst_settings.tt_mode).lower() == "all":
                 for new_tt_mode in ["tt35", "tt70", "tt88"]:
@@ -105,7 +106,7 @@ class Pearl(AbstractInst):
             add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
                 [self._inst_settings.tt_mode]
 
-            self._cached_run_details[run_number_string_key].update_spline(
+            self._cached_run_details[run_number_string_key].update_file_paths(
                 self._inst_settings, add_spline)
         yield
         # reset instrument settings
@@ -115,8 +116,7 @@ class Pearl(AbstractInst):
         add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
             [self._inst_settings.tt_mode]
 
-        self._cached_run_details[run_number_string_key].update_spline(self._inst_settings,
-                                                                      add_spline)
+        self._cached_run_details[run_number_string_key].update_file_paths(self._inst_settings, add_spline)
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round

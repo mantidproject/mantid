@@ -60,7 +60,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             geometry_type = self.getPropertyValue('SampleGeometry')
             required_keys = ['FormulaUnits', 'SampleMass', 'FormulaUnitMass']
             if geometry_type != 'None':
-                required_keys += ['SampleChemicalFormula', 'SampleDensity', 'BeamHeight', 'BeamWidth', 'ContainerDensity',
+                required_keys += ['SampleChemicalFormula', 'SampleDensity', 'ContainerDensity',
                                   'ContainerChemicalFormula']
             if geometry_type == 'FlatPlate':
                 required_keys += ['Height', 'SampleWidth', 'SampleThickness', 'SampleAngle', 'ContainerFrontThickness',
@@ -68,7 +68,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             if geometry_type == 'Cylinder':
                 required_keys += ['Height', 'SampleRadius', 'ContainerRadius']
             if geometry_type == 'Annulus':
-                required_keys += ['Height', 'SampleInnerRadius', 'SampleOuterRadius', 'ContainerInnerRadius', 'ContainerOuterRadius']
+                required_keys += ['Height', 'SampleInnerRadius', 'SampleOuterRadius', 'ContainerInnerRadius',
+                                  'ContainerOuterRadius']
 
             if self.getPropertyValue('SelfAttenuationMethod') == 'MonteCarlo':
                 required_keys += ['EventsPerPoint']
@@ -86,7 +87,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
                              doc='File path of run(s).')
 
-        options = ['Absorber', 'EmptyBeam', 'BeamWithAbsorber', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample']
+        options = ['Cadmium', 'EmptyBeam', 'BeamWithCadmium', 'Transmission', 'Empty', 'Quartz',
+                   'Vanadium', 'Sample']
 
         self.declareProperty(name='ProcessAs',
                              defaultValue='Sample',
@@ -97,22 +99,24 @@ class PolDiffILLReduction(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='The output workspace based on the value of ProcessAs.')
 
-        absorber = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Absorber')
+        cadmium = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Cadmium')
         beam = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'EmptyBeam')
-        container = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Container')
+        empty = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Empty')
         sample = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Sample')
         quartz = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Quartz')
         transmission = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Transmission')
         vanadium = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Vanadium')
-        reduction = EnabledWhenProperty(quartz, EnabledWhenProperty(vanadium, sample, LogicOperator.Or), LogicOperator.Or)
-        scan = EnabledWhenProperty(reduction, EnabledWhenProperty(absorber, container, LogicOperator.Or), LogicOperator.Or)
+        reduction = EnabledWhenProperty(quartz, EnabledWhenProperty(vanadium, sample, LogicOperator.Or),
+                                        LogicOperator.Or)
+        scan = EnabledWhenProperty(reduction, EnabledWhenProperty(cadmium, empty, LogicOperator.Or),
+                                   LogicOperator.Or)
 
-        self.declareProperty(WorkspaceGroupProperty('AbsorberInputWorkspace', '',
+        self.declareProperty(WorkspaceGroupProperty('CadmiumInputWorkspace', '',
                                                     direction=Direction.Input,
                                                     optional=PropertyMode.Optional),
-                             doc='The name of the absorber workspace group.')
+                             doc='The name of the cadmium workspace group.')
 
-        self.setPropertySettings('AbsorberInputWorkspace',
+        self.setPropertySettings('CadmiumInputWorkspace',
                                  EnabledWhenProperty(quartz,
                                                      EnabledWhenProperty(vanadium, sample, LogicOperator.Or),
                                                      LogicOperator.Or))
@@ -124,12 +128,13 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('BeamInputWorkspace', transmission)
 
-        self.declareProperty(MatrixWorkspaceProperty('AbsorberTransmissionInputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('CadmiumTransmissionInputWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='The name of the absorber transmission input workspace.')
+                             doc='The name of the cadmium transmission input workspace.')
 
-        self.setPropertySettings('AbsorberTransmissionInputWorkspace', EnabledWhenProperty(transmission, beam, LogicOperator.Or))
+        self.setPropertySettings('CadmiumTransmissionInputWorkspace', EnabledWhenProperty(transmission, beam,
+                                                                                          LogicOperator.Or))
 
         self.declareProperty(MatrixWorkspaceProperty('TransmissionInputWorkspace', '',
                                                      direction=Direction.Input,
@@ -138,12 +143,12 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('TransmissionInputWorkspace', reduction)
 
-        self.declareProperty(WorkspaceGroupProperty('ContainerInputWorkspace', '',
+        self.declareProperty(WorkspaceGroupProperty('EmptyInputWorkspace', '',
                                                     direction=Direction.Input,
                                                     optional=PropertyMode.Optional),
-                             doc='The name of the container workspace.')
+                             doc='The name of the empty (container) workspace.')
 
-        self.setPropertySettings('ContainerInputWorkspace', reduction)
+        self.setPropertySettings('EmptyInputWorkspace', reduction)
 
         self.declareProperty(WorkspaceGroupProperty('QuartzInputWorkspace', '',
                                                     direction=Direction.Input,
@@ -163,6 +168,9 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.declareProperty('ClearCache', True,
                              doc='Whether or not to clear the cache of intermediate workspaces.')
+
+        self.declareProperty('AbsoluteNormalisation', True,
+                             doc='Whether or not to perform normalisation to absolute units.')
 
         self.declareProperty(name="SelfAttenuationMethod",
                              defaultValue="None",
@@ -201,7 +209,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.")
 
-        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment', PropertyCriterion.IsEqualTo, 'Sum'))
+        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment',
+                                                                               PropertyCriterion.IsEqualTo, 'Sum'))
 
         self.declareProperty(FileProperty('InstrumentCalibration', '',
                                           action=FileAction.OptionalLoad,
@@ -213,14 +222,15 @@ class PolDiffILLReduction(PythonAlgorithm):
     @staticmethod
     def _normalise(ws):
         """Normalises the provided WorkspaceGroup to the monitor 1."""
-        for entry_no, entry in enumerate(mtd[ws]):
+        for entry in mtd[ws]:
             mon = ws + '_mon'
             ExtractMonitors(InputWorkspace=entry, DetectorWorkspace=entry,
                             MonitorWorkspace=mon)
             if 0 in mtd[mon].readY(0):
                 raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
             else:
-                CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0], ErrorValue=mtd[mon].readE(0)[0],
+                CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0]/1000.0,
+                                            ErrorValue=np.sqrt(mtd[mon].readY(0)[0]/1000.0),
                                             OutputWorkspace=mon)
                 Divide(LHSWorkspace=entry, RHSWorkspace=mon, OutputWorkspace=entry)
                 DeleteWorkspace(Workspace=mon)
@@ -237,13 +247,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
         return ws
 
-    @staticmethod
-    def _enforce_uniform_units(origin_ws, target_ws):
-        for entry_tuple in zip(mtd[origin_ws], mtd[target_ws]):
-            entry_origin, entry_target = entry_tuple
-            if entry_origin.YUnit() != entry_target.YUnit():
-                entry_target.setYUnit(entry_origin.YUnit())
-
     def _figure_out_measurement_method(self, ws):
         """Figures out the measurement method based on the structure of the input files."""
         entries_per_numor = mtd[ws].getNumberOfEntries() / len(self.getPropertyValue('Run').split(','))
@@ -254,13 +257,14 @@ class PolDiffILLReduction(PythonAlgorithm):
         elif entries_per_numor == 2:
             self._method_data_structure = 'Uniaxial'
         else:
-            if self.getPropertyValue("ProcessAs") not in ['EmptyBeam', 'BeamWithAbsorber', 'Transmission']:
+            if self.getPropertyValue("ProcessAs") not in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']:
                 raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
                                    + "The provided input does not fit in any of these measurement types.")
 
     def _merge_polarisations(self, ws, average_detectors=False):
-        """Merges workspaces with the same polarisation inside the provided WorkspaceGroup either by using SumOverlappingTubes
-        or averaging entries for each detector depending on the status of the sumOverDetectors flag."""
+        """Merges workspaces with the same polarisation inside the provided WorkspaceGroup either
+        by using SumOverlappingTubes or averaging entries for each detector depending on the status
+        of the sumOverDetectors flag."""
         pol_directions = set()
         numors = set()
         for name in mtd[ws].getNames():
@@ -281,49 +285,51 @@ class PolDiffILLReduction(PythonAlgorithm):
                     else:
                         list_pol.append('{0}_{1}'.format(numor, direction))
                 if average_detectors:
-                    CreateSingleValuedWorkspace(DataValue=len(numors), OutputWorkspace='norm')
-                    Divide(LHSWorkspace=name, RHSWorkspace='norm', OutputWorkspace=name)
-                    DeleteWorkspace(Workspace='norm')
+                    norm_name = name + '_norm'
+                    CreateSingleValuedWorkspace(DataValue=len(numors), OutputWorkspace=norm_name)
+                    Divide(LHSWorkspace=name, RHSWorkspace=norm_name, OutputWorkspace=name)
+                    DeleteWorkspace(Workspace=norm_name)
                 else:
                     SumOverlappingTubes(','.join(list_pol), OutputWorkspace=name,
-                                        OutputType='1D', ScatteringAngleBinning=self.getProperty('ScatteringAngleBinSize').value,
+                                        OutputType='1D',
+                                        ScatteringAngleBinning=self.getProperty('ScatteringAngleBinSize').value,
                                         Normalise=True, HeightAxis='-0.1,0.1')
                 names_list.append(name)
             DeleteWorkspaces(WorkspaceList=ws)
             GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)
         return ws
 
-    def _subtract_background(self, ws, container_ws, transmission_ws):
-        """Subtracts empty container and absorber scaled by transmission."""
-        absorber_ws = self.getPropertyValue('AbsorberInputWorkspace')
-        if absorber_ws == "":
+    def _subtract_background(self, ws, empty_ws, transmission_ws):
+        """Subtracts empty container and cadmium absorber scaled by transmission."""
+        cadmium_ws = self.getPropertyValue('CadmiumInputWorkspace')
+        if cadmium_ws == "":
             return ws
         unit_ws = 'unit_ws'
         CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=unit_ws)
         background_ws = 'background_ws'
         tmp_names = [unit_ws, background_ws]
         nMeasurements = self._data_structure_helper()
-        singleContainerPerPOL = mtd[container_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
-        singleAbsorberPerPOL = mtd[container_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
+        singleEmptyPerPOL = mtd[empty_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
+        singleCadmiumPerPOL = mtd[empty_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
         for entry_no, entry in enumerate(mtd[ws]):
-            if singleContainerPerPOL:
-                container_entry = mtd[container_ws][entry_no % nMeasurements].name()
+            if singleEmptyPerPOL:
+                empty_entry = mtd[empty_ws][entry_no % nMeasurements].name()
             else:
-                container_entry = mtd[container_ws][entry_no].name()
-            if singleAbsorberPerPOL:
-                absorber_entry = mtd[absorber_ws][entry_no % nMeasurements].name()
+                empty_entry = mtd[empty_ws][entry_no].name()
+            if singleCadmiumPerPOL:
+                cadmium_entry = mtd[cadmium_ws][entry_no % nMeasurements].name()
             else:
-                absorber_entry = mtd[absorber_ws][entry_no].name()
-            container_corr = container_entry + '_corr'
-            tmp_names.append(container_corr)
-            Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=container_entry, OutputWorkspace=container_corr)
+                cadmium_entry = mtd[cadmium_ws][entry_no].name()
+            empty_corr = empty_entry + '_corr'
+            tmp_names.append(empty_corr)
+            Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=empty_entry, OutputWorkspace=empty_corr)
             transmission_corr = transmission_ws + '_corr'
             tmp_names.append(transmission_corr)
             Minus(LHSWorkspace=unit_ws, RHSWorkspace=transmission_ws, OutputWorkspace=transmission_corr)
-            absorber_corr = absorber_entry + '_corr'
-            tmp_names.append(absorber_corr)
-            Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=absorber_entry, OutputWorkspace=absorber_corr)
-            Plus(LHSWorkspace=container_corr, RHSWorkspace=absorber_corr, OutputWorkspace=background_ws)
+            cadmium_corr = cadmium_entry + '_corr'
+            tmp_names.append(cadmium_corr)
+            Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=cadmium_entry, OutputWorkspace=cadmium_corr)
+            Plus(LHSWorkspace=empty_corr, RHSWorkspace=cadmium_corr, OutputWorkspace=background_ws)
             Minus(LHSWorkspace=entry,
                   RHSWorkspace=background_ws,
                   OutputWorkspace=entry)
@@ -336,7 +342,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         flipper_corr_ws = 'flipper_corr_ws'
         CreateSingleValuedWorkspace(DataValue=(2*flipper_eff-1), OutputWorkspace=flipper_corr_ws)
         nMeasurementsPerPOL = 2
-        tmp_names = []
+        pol_eff_names = []
+        flip_ratio_names = []
         names_to_delete = [flipper_corr_ws]
         index = 0
 
@@ -344,9 +351,20 @@ class PolDiffILLReduction(PythonAlgorithm):
             ws = self._merge_polarisations(ws, average_detectors=True)
         for entry_no in range(1, mtd[ws].getNumberOfEntries()+1, nMeasurementsPerPOL):
             # two polarizer-analyzer states, fixed flipper_eff
-            ws_00 = mtd[ws][entry_no].name()
-            ws_01 = mtd[ws][entry_no-1].name()
-            tmp_name = '{0}_{1}_{2}'.format(ws[2:], mtd[ws_00].getRun().getLogData('POL.actual_state').value, index)
+            ws_00 = mtd[ws][entry_no].name() # spin-flip
+            ws_01 = mtd[ws][entry_no-1].name() # no spin-flip
+            pol_eff_name = '{0}_{1}_{2}'.format(ws[2:],
+                                                mtd[ws_00].getRun().getLogData('POL.actual_state').value,
+                                                index)
+            flip_ratio_name = 'flip_ratio_{0}_{1}_{2}'.format(ws[2:],
+                                                              mtd[ws_00].getRun().getLogData('POL.actual_state').value,
+                                                              index)
+            # calculates the simple flipping ratio
+            Divide(LHSWorkspace=ws_00,
+                   RHSWorkspace=ws_01,
+                   OutputWorkspace=flip_ratio_name)
+            mtd[flip_ratio_name].setYUnitLabel("{}".format("Flipping ratio"))
+            flip_ratio_names.append(flip_ratio_name)
             Minus(LHSWorkspace=ws_00, RHSWorkspace=ws_01, OutputWorkspace='nominator')
             ws_00_corr = ws_00 + '_corr'
             names_to_delete.append(ws_00_corr)
@@ -354,8 +372,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             Plus(LHSWorkspace=ws_00_corr, RHSWorkspace=ws_01, OutputWorkspace='denominator')
             Divide(LHSWorkspace='nominator',
                    RHSWorkspace='denominator',
-                   OutputWorkspace=tmp_name)
-            tmp_names.append(tmp_name)
+                   OutputWorkspace=pol_eff_name)
+            mtd[pol_eff_name].setYUnitLabel("{}".format("Polarizing efficiency"))
+            pol_eff_names.append(pol_eff_name)
             if self._method_data_structure == 'Uniaxial' and entry_no % 2 == 1:
                 index += 1
             elif self._method_data_structure == 'XYZ' and entry_no % 6 == 5:
@@ -363,10 +382,12 @@ class PolDiffILLReduction(PythonAlgorithm):
             elif self._method_data_structure == '10p' and entry_no % 10 == 9:
                 index += 1
         names_to_delete += ['nominator', 'denominator']
-        GroupWorkspaces(InputWorkspaces=tmp_names, OutputWorkspace='tmp')
+        tmp_group_name = '{0}_tmp'.format(ws)
+        GroupWorkspaces(InputWorkspaces=pol_eff_names, OutputWorkspace=tmp_group_name)
+        names_to_delete.append(ws)
         DeleteWorkspaces(WorkspaceList=names_to_delete)
-        DeleteWorkspace(Workspace=ws)
-        RenameWorkspace(InputWorkspace='tmp', OutputWorkspace=ws)
+        RenameWorkspace(InputWorkspace=tmp_group_name, OutputWorkspace=ws)
+        GroupWorkspaces(InputWorkspaces=flip_ratio_names, OutputWorkspace='flipping_ratios')
         return ws
 
     def _detector_analyser_energy_efficiency(self, ws):
@@ -431,7 +452,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             neutron_mass = physical_constants['neutron mass'][0]  # in kg
             wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
             joules_to_mev = 1e3 / physical_constants['electron volt'][0]
-            self._sampleAndEnvironmentProperties['InitialEnergy'] = joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
+            self._sampleAndEnvironmentProperties['InitialEnergy'] = \
+                joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
 
         if 'NMoles' not in self._sampleAndEnvironmentProperties:
             sample_mass = self._sampleAndEnvironmentProperties['SampleMass'].value
@@ -443,20 +465,26 @@ class PolDiffILLReduction(PythonAlgorithm):
         attenuation_method = self.getPropertyValue('SelfAttenuationMethod')
         sample_geometry_type = self.getPropertyValue('SampleGeometry')
         kwargs = dict()
-        kwargs['BeamHeight'] = self._sampleAndEnvironmentProperties['BeamHeight'].value
-        kwargs['BeamWidth'] = self._sampleAndEnvironmentProperties['BeamWidth'].value
+        if 'BeamWidth' in self._sampleAndEnvironmentProperties: # else depends on the sample geometry
+            kwargs['BeamWidth'] = self._sampleAndEnvironmentProperties['BeamWidth'].value
         kwargs['SampleDensityType'] = 'Number Density'
         kwargs['SampleNumberDensityUnit'] = 'Formula Units'
         kwargs['ContainerDensityType'] = 'Number Density'
         kwargs['ContainerNumberDensityUnit'] = 'Formula Units'
         kwargs['SampleDensity'] = self._sampleAndEnvironmentProperties['SampleDensity'].value
         kwargs['Height'] = self._sampleAndEnvironmentProperties['Height'].value
+        if 'BeamHeight' in self._sampleAndEnvironmentProperties:
+            kwargs['BeamHeight'] = self._sampleAndEnvironmentProperties['BeamHeight'].value
+        else:
+            kwargs['BeamHeight'] = kwargs['Height'] * 1.1 # slightly larger than the sample
         kwargs['SampleChemicalFormula'] = self._sampleAndEnvironmentProperties['SampleChemicalFormula'].value
         if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
             kwargs['ContainerChemicalFormula'] = self._sampleAndEnvironmentProperties['ContainerChemicalFormula'].value
             kwargs['ContainerDensity'] = self._sampleAndEnvironmentProperties['ContainerDensity'].value
         if sample_geometry_type == 'FlatPlate':
             kwargs['SampleWidth'] = self._sampleAndEnvironmentProperties['SampleWidth'].value
+            if 'BeamWidth' not in kwargs:
+                kwargs['BeamWidth'] = kwargs['SampleWidth'] * 1.1
             kwargs['SampleThickness'] = self._sampleAndEnvironmentProperties['SampleThickness'].value
             kwargs['SampleAngle'] = self._sampleAndEnvironmentProperties['SampleAngle'].value
             if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
@@ -465,11 +493,15 @@ class PolDiffILLReduction(PythonAlgorithm):
                 kwargs['ContainerBackThickness'] = self._sampleAndEnvironmentProperties['ContainerBackThickness'].value
         elif sample_geometry_type == 'Cylinder':
             kwargs['SampleRadius'] = self._sampleAndEnvironmentProperties['SampleRadius'].value
+            if 'BeamWidth' not in kwargs:
+                kwargs['BeamWidth'] = kwargs['SampleRadius'] * 1.1
             if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerRadius'] = self._sampleAndEnvironmentProperties['ContainerRadius'].value
         elif sample_geometry_type == 'Annulus':
             kwargs['SampleInnerRadius'] = self._sampleAndEnvironmentProperties['SampleInnerRadius'].value
             kwargs['SampleOuterRadius'] = self._sampleAndEnvironmentProperties['SampleOuterRadius'].value
+            if 'BeamWidth' not in kwargs:
+                kwargs['BeamWidth'] = kwargs['SampleOuterRadius'] * 1.1
             if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerInnerRadius'] = self._sampleAndEnvironmentProperties['ContainerInnerRadius'].value
                 kwargs['ContainerOuterRadius'] = self._sampleAndEnvironmentProperties['ContainerOuterRadius'].value
@@ -568,12 +600,11 @@ class PolDiffILLReduction(PythonAlgorithm):
             PaalmanPingsAbsorptionCorrection(InputWorkspace=mock_geometry_ws, OutputWorkspace=attenuation_ws,
                                              ElementSize=kwargs['ElementSize'])
         elif attenuation_method == 'MonteCarlo':
-            PaalmanPingsMonteCarloAbsorption(SampleWorkspace=mock_geometry_ws,
+            PaalmanPingsMonteCarloAbsorption(InputWorkspace=mock_geometry_ws,
                                              Shape=sample_geometry_type,
                                              CorrectionsWorkspace=attenuation_ws,
-                                             ContainerWorkspace=mock_geometry_ws,
                                              **kwargs)
-        if self.getPropertyValue('ClearCache'):
+        if self.getProperty('ClearCache').value:
             DeleteWorkspace(Workspace=mock_geometry_ws)
         ConvertSpectrumAxis(InputWorkspace=attenuation_ws, Target="SignedTheta", OutputWorkspace=attenuation_ws)
         Transpose(InputWorkspace=attenuation_ws, OutputWorkspace=attenuation_ws)
@@ -584,25 +615,32 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _match_attenuation_workspace(self, sample_entry, attenuation_ws):
         correction_ws = attenuation_ws + '_matched_corr'
         CloneWorkspace(InputWorkspace=attenuation_ws, OutputWorkspace=correction_ws)
-        spectrum_axis = mtd[sample_entry].getAxis(1)
+        converted_entry = sample_entry + '_converted'
+        CloneWorkspace(InputWorkspace=sample_entry, OutputWorkspace=converted_entry)
+        ConvertSpectrumAxis(InputWorkspace=converted_entry, Target='SignedTheta', OutputWorkspace=converted_entry)
+        Transpose(InputWorkspace=converted_entry, OutputWorkspace=converted_entry)
+        ConvertAxisByFormula(InputWorkspace=converted_entry, Axis='X', Formula='-x', OutputWorkspace=converted_entry)
         for entry_no, entry in enumerate(mtd[correction_ws]):
             origin_ws_name = mtd[attenuation_ws][entry_no].name()
             factor_name = origin_ws_name[origin_ws_name.rfind("_"):]
-            RenameWorkspace(InputWorkspace=entry, OutputWorkspace=entry.name()[:-1] + factor_name)
-            RebinToWorkspace(WorkspaceToRebin=entry, WorkspaceToMatch=sample_entry, OutputWorkspace=entry)
-            Transpose(InputWorkspace=entry, OutputWorkspace=entry)
-            entry.replaceAxis(1, spectrum_axis)
+            matched_ws = entry.name()[:-1] + factor_name
+            RenameWorkspace(InputWorkspace=entry, OutputWorkspace=matched_ws)
+            ConvertToPointData(InputWorkspace=matched_ws, OutputWorkspace=matched_ws)
+            SplineInterpolation(WorkspaceToMatch=converted_entry, WorkspaceToInterpolate=matched_ws,
+                                OutputWorkspace=matched_ws, OutputWorkspaceDeriv='')
+            Transpose(InputWorkspace=matched_ws, OutputWorkspace=matched_ws)
+        DeleteWorkspace(Workspace=converted_entry)
         return correction_ws
 
-    def _apply_self_attenuation_correction(self, sample_ws, container_ws):
+    def _apply_self_attenuation_correction(self, sample_ws, empty_ws):
         """Applies the self-attenuation correction based on the Palmaan-Pings Monte-Carlo calculation, taking into account
         the sample's material, shape, and dimensions."""
 
-        if self.getPropertyValue('SelfAttenuationMethod') in ['MonteCarlo', 'Numerical']:
+        if (self.getPropertyValue('SelfAttenuationMethod') in ['MonteCarlo', 'Numerical']
+                and self.getPropertyValue('SampleGeometry') != 'None'):
             attenuation_ws = self._calculate_attenuation_factors(sample_ws)
         elif self.getPropertyValue('SelfAttenuationMethod') == 'User':
             attenuation_ws = self.getPropertyValue('SampleSelfAttenuationFactors')
-        self._enforce_uniform_units(sample_ws, container_ws)
         for entry_no, entry in enumerate(mtd[sample_ws]):
             if ( (self._method_data_structure == 'Uniaxial' and entry_no % 2 == 0)
                  or (self._method_data_structure == 'XYZ' and entry_no % 6 == 0)
@@ -610,10 +648,12 @@ class PolDiffILLReduction(PythonAlgorithm):
                 correction_ws = self._match_attenuation_workspace(entry.name(), attenuation_ws)
             ApplyPaalmanPingsCorrection(SampleWorkspace=entry,
                                         CorrectionsWorkspace=correction_ws,
-                                        CanWorkspace=mtd[container_ws][entry_no],
                                         OutputWorkspace=entry)
-        if self.getPropertyValue('ClearCache'):
-            DeleteWorkspaces(WorkspaceList=[correction_ws, attenuation_ws])
+        if self.getProperty('ClearCache').value:
+            ws_to_delete = [correction_ws, attenuation_ws]
+            if 'corrected' in mtd: # coming from ApplyPaalmanPingsCorrection
+                ws_to_delete.append('corrected')
+            DeleteWorkspaces(WorkspaceList=ws_to_delete)
         return sample_ws
 
     def _data_structure_helper(self):
@@ -631,27 +671,32 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Performs normalisation of the vanadium data to the expected cross-section."""
 
         vanadium_expected_cross_section = 0.404 # barns
-        CreateSingleValuedWorkspace(DataValue=3.0 * vanadium_expected_cross_section
-                                    * self._sampleAndEnvironmentProperties['NMoles'].value,
-                                    OutputWorkspace='norm')
+        norm_name = ws + "_norm"
+        if self.getProperty('AbsoluteNormalisation').value:
+            # expected total cross-section of unpolarised neutrons in V is 1/3 * sum of all measured c-s,
+            # and normalised to 0.404 barns times the number of moles of V:
+            CreateSingleValuedWorkspace(DataValue=3.0 * vanadium_expected_cross_section
+                                        * self._sampleAndEnvironmentProperties['NMoles'].value,
+                                        OutputWorkspace=norm_name)
+        else:
+            CreateSingleValuedWorkspace(DataValue=3.0, OutputWorkspace=norm_name)
+        to_remove = [norm_name]
         if self.getPropertyValue('OutputTreatment') == 'Sum':
+            self._merge_polarisations(ws, average_detectors=True)
             tmp_name = '{}_1'.format(self.getPropertyValue('OutputWorkspace'))
             RenameWorkspace(InputWorkspace=mtd[ws][0].name(), OutputWorkspace=tmp_name)
-            to_remove = ['norm']
             for entry_no in range(1, mtd[ws].getNumberOfEntries()):
                 ws_name = mtd[ws][entry_no].name()
                 Plus(LHSWorkspace=tmp_name, RHSWorkspace=ws_name, OutputWorkspace=tmp_name)
                 to_remove.append(ws_name)
-            # expected total cross-section of unpolarised neutrons in V is 1/3 * sum of all measured c-s,
-            # and normalised to 0.404 barns times the number of moles of V:
-            Divide(LHSWorkspace='norm', RHSWorkspace=tmp_name, OutputWorkspace=tmp_name)
-            DeleteWorkspaces(WorkspaceList=to_remove)
+            Divide(LHSWorkspace=tmp_name, RHSWorkspace=norm_name, OutputWorkspace=tmp_name)
             GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
         else:
             if self.getPropertyValue('OutputTreatment') == 'Average':
                 self._merge_polarisations(ws, average_detectors=True)
-            Divide(LHSWorkspace='norm', RHSWorkspace=ws, OutputWorkspace=ws)
-            DeleteWorkspace(Workspace='norm')
+            if self.getProperty('AbsoluteNormalisation').value:
+                Divide(LHSWorkspace=ws, RHSWorkspace=norm_name, OutputWorkspace=ws)
+        DeleteWorkspaces(WorkspaceList=to_remove)
         return ws
 
     def _set_units(self, ws, process):
@@ -661,6 +706,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             self._merge_polarisations(ws, average_detectors=(self.getPropertyValue('OutputTreatment') == 'Average'))
 
         for entry in mtd[ws]:
+            if not self.getProperty('AbsoluteNormalisation').value:
+                unit = 'Intensity'
+                unit_symbol = ''
             entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
 
@@ -673,7 +721,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
-        processes = ['Absorber', 'EmptyBeam', 'BeamWithAbsorber', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample']
+        processes = ['Cadmium', 'EmptyBeam', 'BeamWithCadmium', 'Transmission', 'Empty', 'Quartz', 'Vanadium', 'Sample']
         nReports = [3, 2, 2, 3, 3, 3, 10, 10]
         progress = Progress(self, start=0.0, end=1.0, nreports=nReports[processes.index(process)])
         ws = '__' + self.getPropertyValue('OutputWorkspace')
@@ -692,12 +740,12 @@ class PolDiffILLReduction(PythonAlgorithm):
             raise RuntimeError("TOF data reduction is not supported at the moment.")
         self._figure_out_measurement_method(ws)
 
-        if process in ['EmptyBeam', 'BeamWithAbsorber', 'Transmission']:
+        if process in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
                 self._merge_polarisations(ws, average_detectors=True)
-            absorber_transmission_ws = self.getPropertyValue('AbsorberTransmissionInputWorkspace')
-            if absorber_transmission_ws:
-                Minus(LHSWorkspace=ws, RHSWorkspace=absorber_transmission_ws, OutputWorkspace=ws)
+            cadmium_transmission_ws = self.getPropertyValue('CadmiumTransmissionInputWorkspace')
+            if cadmium_transmission_ws:
+                Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_transmission_ws, OutputWorkspace=ws)
             monID = 100001 # monitor 2
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=ws)
             if process in ['Transmission']:
@@ -709,12 +757,12 @@ class PolDiffILLReduction(PythonAlgorithm):
             self._normalise(ws)
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
-            container_ws = self.getPropertyValue('ContainerInputWorkspace')
-            if not self.getProperty('ContainerInputWorkspace').isDefault and not self.getProperty('TransmissionInputWorkspace').isDefault:
-                # Subtracts background if the workspaces for container and transmission are provided
+            empty_ws = self.getPropertyValue('EmptyInputWorkspace')
+            if not self.getProperty('EmptyInputWorkspace').isDefault and not self.getProperty('TransmissionInputWorkspace').isDefault:
+                # Subtracts background if the workspaces for empty container and transmission are provided
                 transmission_ws = self.getPropertyValue('TransmissionInputWorkspace')
                 progress.report('Subtracting backgrounds')
-                self._subtract_background(ws, container_ws, transmission_ws)
+                self._subtract_background(ws, empty_ws, transmission_ws)
 
             if process == 'Quartz':
                 progress.report('Calculating polarising efficiencies')
@@ -726,9 +774,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                     progress.report('Applying polarisation corrections')
                     self._apply_polarisation_corrections(ws, pol_eff_ws)
                 self._read_experiment_properties(ws)
-                if self.getPropertyValue('SelfAttenuationMethod') != 'None' and container_ws != '':
+                if self.getPropertyValue('SelfAttenuationMethod') != 'None' and empty_ws != '':
                     progress.report('Applying self-attenuation correction')
-                    self._apply_self_attenuation_correction(ws, container_ws)
+                    self._apply_self_attenuation_correction(ws, empty_ws)
                 if process == 'Vanadium':
                     progress.report('Normalising vanadium output')
                     self._normalise_vanadium(ws)

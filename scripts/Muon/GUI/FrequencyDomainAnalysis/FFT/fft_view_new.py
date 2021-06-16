@@ -49,18 +49,20 @@ class FFTView(QtWidgets.QWidget):
             self.Im_box_row,
             "Imaginary Data")
         self.Im_box = table_utils.addCheckBoxToTable(
-            self.FFTTable, True, self.Im_box_row)
+            self.FFTTable, False, self.Im_box_row)
 
         table_utils.setRowName(self.FFTTable, 2, "Imaginary Workspace")
         self.Im_ws = table_utils.addComboToTable(self.FFTTable, 2, options)
+        self.FFTTable.hideRow(2)
 
         self.shift_box_row = 3
         table_utils.setRowName(self.FFTTable, self.shift_box_row, "Auto shift")
         self.shift_box = table_utils.addCheckBoxToTable(
             self.FFTTable, True, self.shift_box_row)
+        self.FFTTable.hideRow(3)
 
         table_utils.setRowName(self.FFTTable, 4, "Shift")
-        self.shift = table_utils.addDoubleToTable(self.FFTTable, 0.0, 4)
+        self.shift, _ = table_utils.addDoubleToTable(self.FFTTable, 0.0, 4)
         self.FFTTable.hideRow(4)
 
         table_utils.setRowName(self.FFTTable, 5, "Use Raw data")
@@ -89,7 +91,7 @@ class FFTView(QtWidgets.QWidget):
             self.FFTTableA,
             1,
             "Decay Constant (micro seconds)")
-        self.decay = table_utils.addDoubleToTable(self.FFTTableA, 4.4, 1)
+        self.decay, _ = table_utils.addDoubleToTable(self.FFTTableA, 4.4, 1)
 
         table_utils.setRowName(self.FFTTableA, 2, "Negative Padding")
         self.negativePadding = table_utils.addCheckBoxToTable(

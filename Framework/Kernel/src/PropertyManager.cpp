@@ -275,6 +275,15 @@ void PropertyManager::declareOrReplaceProperty(std::unique_ptr<Property> p, cons
   m_properties[key] = std::move(p);
 }
 
+/** Reset property values back to initial values (blank or default values)
+ */
+void PropertyManager::resetProperties() {
+  for (auto &prop : getProperties()) {
+    if (!prop->isDefault())
+      prop->setValue(prop->getDefault());
+  }
+}
+
 //-----------------------------------------------------------------------------------------------
 /** Set the ordered list of properties by one string of values, separated by
  *semicolons.
@@ -566,11 +575,8 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
 
 //-----------------------------------------------------------------------------------------------
 /** Return the property manager serialized as a json object.
- * Note that this method does not serialize WorkspacePropertys with workspaces
- * not
- * in the ADS.
- * @param withDefaultValues :: If true then the value of default parameters
- * will be included
+ * Note that this method does not serialize WorkspaceProperties with workspaces not in the ADS.
+ * @param withDefaultValues :: If true then the value of default parameters will be included
  * @returns A serialized version of the manager
  */
 ::Json::Value PropertyManager::asJson(bool withDefaultValues) const {

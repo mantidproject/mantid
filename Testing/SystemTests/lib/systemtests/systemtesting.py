@@ -131,6 +131,8 @@ class MantidSystemTest(unittest.TestCase):
         The overriding method should return a pair of strings. This could be two workspace
         names, e.g. return 'workspace1','workspace2', or a workspace name and a nexus
         filename (which must have nxs suffix), e.g. return 'workspace1','GEM00001.nxs'.
+        If validating with WorkspaceToNexus, may return a series of workspaces and
+        nexus filenames, e.g. 'workspace1','GEM00001.nxs','workspace2','GEM00002.nxs'.
         '''
         return None
 
@@ -295,7 +297,8 @@ class MantidSystemTest(unittest.TestCase):
     def validateWorkspaceToNeXus(self):
         '''
         Assumes the second item from self.validate() is a nexus file and loads it
-        to compare to the supplied workspace.
+        to compare to the supplied workspace. Also supports sequential series of
+        comparisons between workspaces and nexus files
         '''
         valNames = list(self.validate())
         numRezToCheck = len(valNames)

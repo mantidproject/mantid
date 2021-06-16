@@ -9,7 +9,7 @@
 #
 from mantid.kernel import ConfigService
 from mantidqt.widgets import instrumentselector
-from workbench.config import CONF
+from workbench.config import CONF, SAVE_STATE_VERSION
 from workbench.widgets.settings.general.view import GeneralSettingsView
 
 from qtpy.QtCore import Qt
@@ -231,7 +231,7 @@ class GeneralSettings(object):
         filename = self.view.new_layout_name.text()
         if filename != "":
             layout_dict = self.get_layout_dict()
-            layout_dict[filename] = self.parent.saveState()
+            layout_dict[filename] = self.parent.saveState(SAVE_STATE_VERSION)
             CONF.set(GeneralProperties.USER_LAYOUT.value, layout_dict)
             self.view.new_layout_name.clear()
             self.fill_layout_display()
@@ -242,7 +242,7 @@ class GeneralSettings(object):
         if hasattr(item, "text"):
             layout = item.text()
             layout_dict = self.get_layout_dict()
-            self.parent.restoreState(layout_dict[layout])
+            self.parent.restoreState(layout_dict[layout], SAVE_STATE_VERSION)
 
     def delete_layout(self):
         item = self.view.layout_display.currentItem()

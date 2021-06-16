@@ -84,5 +84,18 @@ size_t BinEdgeAxis::indexOfValue(const double value) const {
   return Mantid::Kernel::VectorHelper::indexOfValueFromEdges(m_values, value);
 }
 
+/** Returns a text label which shows the value at the given bin index.
+ * Note that the bin index doesn't match the index in the value array for this
+ * type of axis. The value array has one more element than number of bins.
+ * @param index :: The bin index of the bin edge axis
+ * @return string of the center of that bin
+ * @throw IndexError if the bin index is out of range
+ */
+std::string BinEdgeAxis::label(const std::size_t &index) const {
+  if (index >= length() - 1) {
+    throw Kernel::Exception::IndexError(index, length() - 2, "BinEdgeAxis: Bin index out of range.");
+  }
+  return formatLabel(((*this)(index) + (*this)(index + 1)) / 2);
+}
 } // namespace API
 } // namespace Mantid

@@ -64,8 +64,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='The name of the workspace containing the entire YIG scan.')
-
-        self.declareProperty(FileProperty('YIGPeaksFile', '',
+        default_d7_yig_file = os.path.join(config.getInstrumentDirectory(), 'D7_YIG_peaks.xml')
+        self.declareProperty(FileProperty('YIGPeaksFile', default_d7_yig_file,
                                           action=FileAction.Load,
                                           extensions=['.xml']),
                              doc='The file name with all YIG peaks in d-spacing.')
@@ -132,13 +132,15 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         self._minDistance = self.getProperty("MinimalDistanceBetweenPeaks").value
 
         # load the chosen YIG scan
-        fit_output_name = self.getPropertyValue('FitOutputWorkspace')
+        fit_output_name = \
+            self.getPropertyValue('FitOutputWorkspace') \
+            if not self.getProperty('FitOutputWorkspace').isDefault else 'calibration'
         conjoined_scan = "conjoined_input_{}".format(fit_output_name)
         if self.getProperty('InputWorkspace').isDefault:
             self._get_scan_data(fit_output_name, progress)
         else:
             input_name = self.getPropertyValue('InputWorkspace')
-            RenameWorkspace(InputWorkspace=input_name, OutputWorkspace=conjoined_scan)
+            CloneWorkspace(InputWorkspace=input_name, OutputWorkspace=conjoined_scan)
             progress.report(2, 'Loading YIG scan data')
         if not self.getProperty("BankOffsets").isDefault:
             offsets = self.getProperty("BankOffsets").value
@@ -258,9 +260,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
 
     def _load_yig_peaks(self, ws):
         """Loads YIG peaks provided as an XML Instrument Parameter File"""
-        parameterFilename = self.getPropertyValue('YIGPeaksFile')
         ClearInstrumentParameters(Workspace=ws) #in case other IPF was loaded there before
-        LoadParameterFile(Workspace=ws, Filename=parameterFilename)
+        parameterFilename = self.getProperty('YIGPeaksFile')
+        LoadParameterFile(Workspace=ws, Filename=parameterFilename.value)
         yig_d_set = set()
         instrument = mtd[ws].getInstrument().getComponentByName('detector')
         for param_name in instrument.getParameterNames(True):
@@ -371,12 +373,12 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             results_e = np.zeros(max_n_peaks)
             single_spectrum_peaks = yig_peaks[pixel_no]
             ws_name = 'pixel_{}'.format(pixel_no)
+            fit_function = [background]
             if len(single_spectrum_peaks) >= 1:
                 if fitting_method == 'Individual':
                     ws_name += '_peak_{}'
                 peak_no = 0
                 function_no = 0
-                fit_function = [background]
                 fit_constraints = []
                 for peak_intensity, peak_centre_guess, peak_centre_expected in single_spectrum_peaks:
                     function_no += 1
@@ -526,6 +528,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         gradients and offsets.
         Returns a list of pixel positions relative to their
         respective bank"""
+
+        chi2 = parameter_table.row(parameter_table.rowCount()-1)['Value']
         intitial_wavelength = self.getProperty('ApproximateWavelength').value
         wavelength = parameter_table.column(1)[1] * intitial_wavelength
         if parameter_table.column(1)[0] == 0:
@@ -560,6 +564,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         self.log().notice('The bank2 gradient is: {0:.3f}'.format(bank2_slope))
         self.log().notice('The bank3 gradient is: {0:.3f}'.format(bank3_slope))
         self.log().notice('The bank4 gradient is: {0:.3f}'.format(bank4_slope))
+        self.log().notice('The fit chi2 is: {0:.3f}'.format(chi2))
         return wavelength, pixel_offsets, bank_offsets, bank_slopes
 
     def _prettify(self, elem):

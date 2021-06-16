@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import WorkspaceGroup
+from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.simpleapi import DeleteWorkspace
 
 
@@ -34,7 +34,7 @@ def combine_loaded_runs(model, run_list):
                             new_ws = new_ws + workspace_to_add
                 add_detector_workspace_to_group(co_add_workspace, new_ws, new_ws_name, detector, finished_detectors,
                                                 ws_remove)
-    finalise_groupworkspace(co_add_workspace, co_add_workspace_name, ws_remove)
+    finalise_groupworkspace(model, co_add_workspace, co_add_workspace_name, ws_remove)
 
 
 def check_for_unused_detectors(run_detectors, finished_detectors):
@@ -52,11 +52,13 @@ def add_detector_workspace_to_group(grpws, new_ws, new_ws_name, detector, finish
     ws_list.append(new_ws_name)
 
 
-def finalise_groupworkspace(grpws, grpws_name, ws_list):
+def finalise_groupworkspace(model, grpws, grpws_name, ws_list):
     """
        Adds the groupworkspace with suitable name and removes any unnecessary workspaces
     """
     grpws.clone(OutputWorkspace=grpws_name)
+    model._loaded_data_store.add_data(run=[grpws_name], workspace=AnalysisDataService.retrieve(grpws_name))
+    model._data_context._loaded_data.add_data(run=[grpws_name], workspace=AnalysisDataService.retrieve(grpws_name))
     for ws in ws_list:
         DeleteWorkspace(ws)
 

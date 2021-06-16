@@ -184,9 +184,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
       NXstatus getinfo_status;
 
       if ((opengroup_status = NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
-
-        if (std::string(nxclass) != "ILL_data_scan_vars") {
-
+        if (std::string(nxclass) != "ILL_data_scan_vars" && std::string(nxclass) != "NXill_data_scan_vars") {
           // Go down to one level, if the group is known to nexus
           std::string p_nxname(nxname); // current names can be useful for next level
           std::string p_nxclass(nxclass);

@@ -127,8 +127,6 @@ int FunctionMultiDomainPresenter::getNumberOfDatasets() const { return m_model->
 int FunctionMultiDomainPresenter::getCurrentDataset() const { return m_model->currentDomainIndex(); }
 
 void FunctionMultiDomainPresenter::setCurrentDataset(int index) {
-  if (!m_model->hasFunction())
-    return;
   m_model->setCurrentDomainIndex(index);
   updateViewFromModel();
 }
@@ -271,10 +269,16 @@ void FunctionMultiDomainPresenter::clear() {
   m_view->clear();
   emit functionStructureChanged();
 }
+
 void FunctionMultiDomainPresenter::setColumnSizes(int s0, int s1, int s2) {
   auto treeView = dynamic_cast<FunctionTreeView *>(m_view);
   if (treeView)
     treeView->setColumnSizes(s0, s1, s2);
+}
+
+void FunctionMultiDomainPresenter::setStretchLastColumn(bool stretch) {
+  if (auto treeView = dynamic_cast<FunctionTreeView *>(m_view))
+    treeView->setStretchLastColumn(stretch);
 }
 
 void FunctionMultiDomainPresenter::setErrorsEnabled(bool enabled) { m_view->setErrorsEnabled(enabled); }

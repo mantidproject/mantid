@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="VULCAN" valid-from="2021-02-11">
+<!--Rough estimates based on diamond test data (with only 3 peaks!)-->
+<!--DO NOT USE FOR REFINEMENTS-->
+
+<component-link name="bank21" >
+  <parameter name="BackToBackExponential:S" type="fitting">
+    <formula eq="sqrt(687.5895*centre^2 + 0*centre^4)" unit="dSpacing" result-unit="TOF" />
+  </parameter> 
+  <parameter name="BackToBackExponential:A" type="fitting">
+    <formula eq="(0.1764/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>   
+  <parameter name="BackToBackExponential:B" type="fitting">
+    <formula eq="(0.0316+0.0050/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>  
+</component-link>
+
+<component-link name="bank22" >
+  <parameter name="BackToBackExponential:S" type="fitting">
+    <formula eq="sqrt(687.5895*centre^2 + 0*centre^4)" unit="dSpacing" result-unit="TOF" />
+  </parameter> 
+  <parameter name="BackToBackExponential:A" type="fitting">
+    <formula eq="(0.1764/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>   
+  <parameter name="BackToBackExponential:B" type="fitting">
+    <formula eq="(0.0316+0.0050/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>  
+</component-link>
+
+<component-link name="bank23" >
+  <parameter name="BackToBackExponential:S" type="fitting">
+    <formula eq="sqrt(687.5895*centre^2 + 0*centre^4)" unit="dSpacing" result-unit="TOF" />
+  </parameter> 
+  <parameter name="BackToBackExponential:A" type="fitting">
+    <formula eq="(0.1764/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>   
+  <parameter name="BackToBackExponential:B" type="fitting">
+    <formula eq="(0.0316+0.0050/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>  
+</component-link>
+
+<component-link name="bank26" >
+  <parameter name="BackToBackExponential:S" type="fitting">
+    <formula eq="sqrt(687.5895*centre^2 + 0*centre^4)" unit="dSpacing" result-unit="TOF" />
+  </parameter> 
+  <parameter name="BackToBackExponential:A" type="fitting">
+    <formula eq="(0.1764/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>   
+  <parameter name="BackToBackExponential:B" type="fitting">
+    <formula eq="(0.0316+0.0050/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>  
+</component-link>
+
+<component-link name="bank27" >
+  <parameter name="BackToBackExponential:S" type="fitting">
+    <formula eq="sqrt(687.5895*centre^2 + 0*centre^4)" unit="dSpacing" result-unit="TOF" />
+  </parameter> 
+  <parameter name="BackToBackExponential:A" type="fitting">
+    <formula eq="(0.1764/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>   
+  <parameter name="BackToBackExponential:B" type="fitting">
+    <formula eq="(0.0316+0.0050/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>  
+</component-link>
+
+<component-link name="bank28" >
+  <parameter name="BackToBackExponential:S" type="fitting">
+    <formula eq="sqrt(687.5895*centre^2 + 0*centre^4)" unit="dSpacing" result-unit="TOF" />
+  </parameter> 
+  <parameter name="BackToBackExponential:A" type="fitting">
+    <formula eq="(0.1764/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>   
+  <parameter name="BackToBackExponential:B" type="fitting">
+    <formula eq="(0.0316+0.0050/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>  
+</component-link>
+
+<component-link name="bank4" >
+  <parameter name="BackToBackExponential:S" type="fitting">
+    <formula eq="sqrt(86.5322*centre^2 + 0*centre^4)" unit="dSpacing" result-unit="TOF" />
+  </parameter> 
+  <parameter name="BackToBackExponential:A" type="fitting">
+    <formula eq="(0.1378/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>   
+  <parameter name="BackToBackExponential:B" type="fitting">
+    <formula eq="(0.0348+0.0050/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>  
+</component-link>
+
+
+</parameter-file>

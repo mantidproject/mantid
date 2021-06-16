@@ -45,6 +45,7 @@ std::string instrument_path(const std::string &local_name) {
   return Kernel::ConfigService::Instance().getFullPath(local_name, true, Poco::Glob::GLOB_DEFAULT);
 }
 } // namespace
+
 class NexusGeometryParserTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -52,11 +53,12 @@ public:
   static NexusGeometryParserTest *createSuite() { return new NexusGeometryParserTest(); }
   static void destroySuite(NexusGeometryParserTest *suite) { delete suite; }
 
-  std::unique_ptr<const Mantid::Geometry::Instrument> makeTestInstrument() {
+  static std::unique_ptr<const Mantid::Geometry::Instrument> makeTestInstrument() {
     const auto fullpath = instrument_path("unit_testing/SMALLFAKE_example_geometry.hdf5");
 
     return NexusGeometryParser::createInstrument(fullpath, std::make_unique<MockLogger>());
   }
+
   void test_basic_instrument_information() {
     auto instrument = makeTestInstrument();
     auto beamline = extractBeamline(*instrument);
@@ -139,7 +141,6 @@ public:
   }
 
   void test_shape_cylinder_shape() {
-
     auto instrument = makeTestInstrument();
     auto beamline = extractBeamline(*instrument);
     auto componentInfo = std::move(beamline.first);
@@ -159,7 +160,6 @@ public:
   }
 
   void test_mesh_shape() {
-
     auto instrument = makeTestInstrument();
     auto beamline = extractBeamline(*instrument);
     auto componentInfo = std::move(beamline.first);
@@ -181,7 +181,6 @@ public:
     TS_ASSERT_DELTA(shapeBB.zMax() - shapeBB.zMin(), 2.0, 1e-9);
   }
   void test_pixel_shape_as_mesh() {
-
     auto instrument = NexusGeometryParser::createInstrument(instrument_path("unit_testing/DETGEOM_example_1.nxs"),
                                                             std::make_unique<testing::NiceMock<MockLogger>>());
     auto beamline = extractBeamline(*instrument);
@@ -200,6 +199,7 @@ public:
     TS_ASSERT_EQUALS(shape1Mesh->numberOfTriangles(), 2);
     TS_ASSERT_EQUALS(shape1Mesh->numberOfVertices(), 4);
   }
+
   void test_pixel_shape_as_cylinders() {
     auto instrument = NexusGeometryParser::createInstrument(instrument_path("unit_testing/DETGEOM_example_2.nxs"),
                                                             std::make_unique<testing::NiceMock<MockLogger>>());
@@ -223,6 +223,7 @@ public:
     TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().radius(), shape2Cylinder->shapeInfo().radius());
     TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().height(), shape2Cylinder->shapeInfo().height());
   }
+
   void test_detector_shape_as_mesh() {
     auto instrument = NexusGeometryParser::createInstrument(instrument_path("unit_testing/DETGEOM_example_3.nxs"),
                                                             std::make_unique<testing::NiceMock<MockLogger>>());
@@ -243,6 +244,7 @@ public:
     TS_ASSERT_EQUALS(shape2Mesh->numberOfTriangles(), 1);
     TS_ASSERT_EQUALS(shape2Mesh->numberOfVertices(), 3);
   }
+
   void test_detector_shape_as_cylinders() {
     auto instrument = NexusGeometryParser::createInstrument(instrument_path("unit_testing/DETGEOM_example_4.nxs"),
                                                             std::make_unique<testing::NiceMock<MockLogger>>());
@@ -275,6 +277,69 @@ public:
     TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().height(), 0.4);
     TS_ASSERT_EQUALS(shape2Cylinder->shapeInfo().height(), 0.3); // 0.3
     TS_ASSERT_EQUALS(shape3Cylinder->shapeInfo().height(), 0.2); // 0.5- 0.3
+  }
+
+  void test_parse_detector_shape_with_3d_pixels() {
+    // GIVEN a NeXus file describing a detector with two octahedral voxels
+    // with:
+    //   - detector numbers of 0 and 1
+    //   - pixel location defined in x_pixel_offset, y_pixel_offset,
+    //     z_pixel_offset datasets as [1.1, 2.2, -2.0] and [1.1, 2.2, 0.0]
+    //     w.r.t. detector origin
+    //   - detector position defined as [2, 0, 2] w.r.t. coord system origin
+    //
+    // Multiple faces in the mesh are mapped to the same detector number,
+    // thus defining a 3D pixel
+    // Unlike 2D pixel case, pixel offset datasets must be present in the file.
+    // The parser will not try to calculate the centre of mass of the polyhedron
+    // to use as the pixel position as this is computationally expensive and
+    // possibly not even the "correct" pixel position for some detector types
+    const std::string filename = "unit_testing/VOXEL_example.nxs";
+    const int expectedDetectorNumber1 = 0;
+    const int expectedDetectorNumber2 = 1;
+    const auto expectedPosition1 = Eigen::Vector3d{3.1, 2.2, 0.0};
+    const auto expectedPosition2 = Eigen::Vector3d{3.1, 2.2, 2.0};
+
+    // WHEN the NeXus geometry is parsed
+    const auto instrument = NexusGeometryParser::createInstrument(instrument_path(filename),
+                                                                  std::make_unique<testing::NiceMock<MockLogger>>());
+
+    // THEN the voxels are successfully parsed, locations match
+    // offsets datasets from file, and shape has expected characteristics
+    const auto parsedBeamline = extractBeamline(*instrument);
+    const auto &parsedDetInfo = *parsedBeamline.second;
+    TS_ASSERT_EQUALS(parsedDetInfo.size(), 2);
+
+    const auto detectorInfo = extractDetectorInfo(*instrument);
+    const auto voxelPosition1 =
+        Kernel::toVector3d(detectorInfo->position(detectorInfo->indexOf(expectedDetectorNumber1)));
+    TS_ASSERT(voxelPosition1.isApprox(expectedPosition1));
+    const auto voxelPosition2 =
+        Kernel::toVector3d(detectorInfo->position(detectorInfo->indexOf(expectedDetectorNumber2)));
+    TS_ASSERT(voxelPosition2.isApprox(expectedPosition2));
+
+    // Check shape of each of the two voxels
+    const auto &parsedCompInfo = *parsedBeamline.first;
+    const std::array<size_t, 2> pixelIndices{0, 1};
+    for (const auto pixelIndex : pixelIndices) {
+      const auto &parsedShape = parsedCompInfo.shape(pixelIndex);
+      const auto *parsedShapeMesh = dynamic_cast<const Geometry::MeshObject *>(&parsedShape);
+      // Check it looks like it might define an enclosed volume:
+      TS_ASSERT(parsedShapeMesh->hasValidShape());
+      // The voxel is a regular octahedron, which can be treated as 2
+      // square-based pyramids connected at their bases
+      // Volume is therefore 2 * a^2 * h/3
+      // where a is base edge and h is pyramid height
+      // Corners of the octahedron are at unit cartesian positions:
+      // [1.0, 0.0, 0.0], [0.0, 1.0, 0.0] and so on, therefore
+      // a = sqrt(1^2 + 1^2) and h = 1
+      // 2 * sqrt(1^2 + 1^2)^2 * 1/3 = 4/3
+      const double expectedVolume = 1.33;
+      TS_ASSERT_DELTA(parsedShapeMesh->volume(), expectedVolume, 0.01);
+      // Each face of the octahedron is a triangle,
+      // therefore expect mesh to be composed of 8 triangles
+      TS_ASSERT_EQUALS(parsedShapeMesh->numberOfTriangles(), 8);
+    }
   }
 };
 

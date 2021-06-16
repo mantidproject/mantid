@@ -480,7 +480,7 @@ private:
   createTestInstance(const std::shared_ptr<Mantid::LiveData::IKafkaBroker> &broker) {
     using namespace Mantid::LiveData;
 
-    KafkaEventStreamDecoder testInstance(broker, "", "", "", "", "", "", 0);
+    KafkaEventStreamDecoder testInstance(broker, "", "", "", "", "", 0);
     return KafkaTesting::KafkaTestThreadHelper<KafkaEventStreamDecoder>(std::move(testInstance));
   }
 

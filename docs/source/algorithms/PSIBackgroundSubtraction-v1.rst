@@ -74,6 +74,46 @@ Output:
       20.  20.  20.  20.  20.  20.  20.  20.  20.  20.  20.  20.  20.  20.  20.
       20.  20.  20.  20.  20.  20.  20.  20.  20.  20.]
 
+.. testcode:: CalculateBackgroundWithAdditionalFunction
+
+    import numpy as np
+
+    # Generate shifted ExpDecay data
+    A = 1200
+    Background = 20
+    Lambda = 0.5
+    time = np.linspace(0, 10, 500)
+    func = lambda t: A*np.exp(-Lambda*t) + Background + 0.5*A*np.sin(50.0*t)
+    counts = np.array([func(ti) for ti in time])
+
+    # Create workspaces
+    input_workspace = CreateWorkspace(time, counts)
+    input_workspace.setYUnit("Counts")
+    run = input_workspace.getRun()
+    run.addProperty("First good spectra 0", 10, "None", True)
+    run.addProperty("Last good spectra 0", 99, "None", True)
+    workspace_copy = input_workspace.clone()
+
+    # Run PSIBackgroundSubtraction Algorithm
+    function = "name=GausOsc,A=500,Sigma=0.2,Frequency=40,Phi=0"
+    PSIBackgroundSubtraction(input_workspace, StartX=5, EndX=10, Function=function)
+
+    # Find the difference between the workspaces
+    workspace_diff = Minus(workspace_copy, input_workspace)
+    diffs = np.round(workspace_diff.readY(0), 4)
+    # The counts in workspace diff should be a flat line corresponding to the background
+    print("Difference in first count is: {}".format(diffs[0]))
+    print("Difference in middle count is: {}".format(diffs[int(len(diffs)/2)]))
+    print("Difference in last count is: {}".format(diffs[-1]))
+
+Output:
+
+.. testoutput:: CalculateBackgroundWithAdditionalFunction
+
+    Difference in first count is: 20.0
+    Difference in middle count is: 20.0
+    Difference in last count is: 20.0
+
 .. categories::
 
 .. sourcelink::

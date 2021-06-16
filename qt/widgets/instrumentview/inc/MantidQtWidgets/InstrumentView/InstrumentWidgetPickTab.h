@@ -91,6 +91,7 @@ public:
   void loadSettings(const QSettings &settings) override;
   bool addToDisplayContextMenu(QMenu & /*unused*/) const override;
   void selectTool(const ToolType tool);
+  SelectionType getSelectionType() const { return m_selectionType; }
   std::shared_ptr<ProjectionSurface> getSurface() const;
   const InstrumentWidget *getInstrumentWidget() const;
   void clearWidgets();
@@ -136,8 +137,8 @@ private:
   QPushButton *m_zoom;  ///< Button switching on navigation mode
   QPushButton *m_one;   ///< Button switching on single detector selection mode
   QPushButton *m_tube; ///< Button switching on detector's parent selection mode
-  QPushButton *m_peak; ///< Button switching on peak creation mode
-  QPushButton *m_peakSelect;  ///< Button switching on peak selection mode
+  QPushButton *m_peakAdd;     ///< Button switching on peak creation mode
+  QPushButton *m_peakErase;   ///< Button switching on peak erase mode
   QPushButton *m_peakCompare; ///< Button switching on peak comparison mode
   QPushButton *m_peakAlign;   ///< Button switching on peak alignment mode
   QPushButton *m_rectangle;   ///< Button switching on drawing a rectangular

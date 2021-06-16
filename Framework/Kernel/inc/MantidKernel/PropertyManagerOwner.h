@@ -41,7 +41,7 @@ public:
 
   // Function to declare properties (i.e. store them)
   void declareOrReplaceProperty(std::unique_ptr<Property> p, const std::string &doc = "") override;
-
+  void resetProperties() override;
   using IPropertyManager::declareProperty;
 
   // Sets all the declared properties from

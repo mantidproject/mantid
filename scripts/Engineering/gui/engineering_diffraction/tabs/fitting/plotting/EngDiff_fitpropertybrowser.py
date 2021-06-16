@@ -43,7 +43,9 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         dict_str = self.getFitAlgorithmParameters()
         if dict_str:
             # evaluate string to make a dict (replace case of bool values)
-            return eval(dict_str.replace('true', 'True').replace('false', 'False'))
+            fitprop = eval(dict_str.replace('true', 'True').replace('false', 'False'))
+            fitprop['peak_centre_params'] = self._get_center_param_names()
+            return fitprop
         else:
             # if no fit has been performed
             return None
@@ -53,17 +55,21 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         Get algorithm parameters currently displayed in the UI browser (incl. defaults that user cannot change)
         :return: dict in style of self.getFitAlgorithmParameters()
         """
-        fitprop = {'properties': {'InputWorkspace': self.workspaceName(),
-                                  'Output': self.outputName(),
-                                  'StartX': self.startX(),
-                                  'EndX': self.endX(),
-                                  'Function': self.getFunctionString(),
-                                  'ConvolveMembers': True,
-                                  'OutputCompositeMembers': True}}
-        exclude = self.getExcludeRange()
-        if exclude:
-            fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
-        return fitprop
+        try:
+            fitprop = {'properties': {'InputWorkspace': self.workspaceName(),
+                                      'Output': self.outputName(),
+                                      'StartX': self.startX(),
+                                      'EndX': self.endX(),
+                                      'Function': self.getFunctionString(),
+                                      'ConvolveMembers': True,
+                                      'OutputCompositeMembers': True}}
+            exclude = self.getExcludeRange()
+            if exclude:
+                fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
+            fitprop['peak_centre_params'] = self._get_center_param_names()
+            return fitprop
+        except BaseException:  # The cpp passes up an 'unknown' error if getFunctionString() fails, i.e. if no fit
+            return None
 
     def save_current_setup(self, name):
         self.executeCustomSetupRemove(name)
@@ -102,6 +108,16 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
                 pass
         return allowed_spectra
 
+    def _get_center_param_names(self):
+        peak_prefixes = self.getPeakPrefixes()
+        peak_center_params = []
+        for peak_pre in peak_prefixes:
+            handler = self.getPeakHandler(peak_pre)
+            func_name_prefixed = handler.functionName()
+            func_name = func_name_prefixed.split('-')[1]  # separate the prefix from the function name
+            peak_center_params.append(func_name + '_' + self.getCentreParameterNameOf(peak_pre))
+        return peak_center_params
+
     @Slot(str)
     def fitting_done_slot(self, name):
         """
@@ -112,14 +128,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         self.do_plot(ws, plot_diff=self.plotDiff())
         self.fit_result_ws_name = name
         self.save_current_setup(self.workspaceName())
-        peak_prefixes = self.getPeakPrefixes()
-        peak_center_params = []
-        for peak_pre in peak_prefixes:
-            handler = self.getPeakHandler(peak_pre)
-            func_name_prefixed = handler.functionName()
-            func_name = func_name_prefixed.split('-')[1]  # separate the prefix from the function name
-            peak_center_params.append(func_name + '_' + self.getCentreParameterNameOf(peak_pre))
-        self.fit_notifier.notify_subscribers([self.get_fitprop(), peak_center_params])  # needs to be passed a list
+        self.fit_notifier.notify_subscribers([self.get_fitprop()])
 
     @Slot()
     def function_changed_slot(self):

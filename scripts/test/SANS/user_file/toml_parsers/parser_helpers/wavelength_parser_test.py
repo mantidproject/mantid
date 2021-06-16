@@ -51,7 +51,7 @@ class WavelengthParserTest(unittest.TestCase):
             self.assertEqual(wav_low, i.wavelength_low)
             self.assertEqual(range_type, i.wavelength_step_type)
             if step_size:
-                self.assertEqual(step_size, i.wavelength_step)
+                self.assertEqual(step_size, i.wavelength_interval.wavelength_step)
 
     def test_linear_wavelength_setting(self):
         input_dict = {"binning": {"wavelength": {"type": "Lin",

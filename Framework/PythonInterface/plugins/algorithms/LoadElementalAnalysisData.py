@@ -12,7 +12,8 @@ from mantid import config
 from mantid.api import AlgorithmFactory, AnalysisDataService, PythonAlgorithm, TextAxis, WorkspaceGroup, \
     WorkspaceGroupProperty
 from mantid.kernel import Direction, IntBoundedValidator
-from mantid.simpleapi import ConvertToHistogram, ConvertToPointData, DeleteWorkspace, LoadAscii, WorkspaceFactory
+from mantid.simpleapi import ConvertToHistogram, ConvertToPointData, DeleteWorkspace, LoadAscii, WorkspaceFactory, \
+    CropWorkspaceRagged
 
 
 TYPE_KEYS = {"10": "Prompt", "20": "Delayed", "99": "Total"}
@@ -60,7 +61,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         workspaces = unique_workspaces
 
         self.format_workspace(workspaces)
-        self.merge_workspaces(workspaces.values())
+        self.merge_and_crop_workspaces(workspaces.values())
 
     def pad_run(self):
         """ Pads run number: i.e. 123 -> 00123; 2695 -> 02695 """
@@ -94,7 +95,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
             workspace = LoadAscii(path, OutputWorkspace=output)
             workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
 
-    def merge_workspaces(self, workspaces):
+    def merge_and_crop_workspaces(self, workspaces):
         """ where workspaces is a tuple of form:
                 (filepath, ws name)
         """
@@ -120,6 +121,16 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                 # create merged workspace
                 merged_ws = self.create_merged_workspace(workspace_list)
                 ConvertToHistogram(InputWorkspace=merged_ws, OutputWorkspace=detector)
+                minX, maxX = [], []
+                ws = AnalysisDataService.retrieve(detector)
+                for i in range(ws.getNumberHistograms()):
+                    xdata = ws.readX(i)
+                    minX.append(xdata[0])
+                    if i == 2:
+                        maxX.append(xdata[-1])
+                    else:
+                        maxX.append(xdata[-1] - 1)
+                CropWorkspaceRagged(InputWorkspace=detector, OutputWorkspace=detector, xmin = minX, xmax = maxX)
                 overall_ws.addWorkspace(AnalysisDataService.retrieve(detector))
         self.setProperty("GroupWorkspace", overall_ws)
 

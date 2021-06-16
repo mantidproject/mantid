@@ -9,7 +9,6 @@
 
 import os
 import shutil
-import sys
 import tempfile
 import unittest
 
@@ -20,8 +19,7 @@ from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.utils.testing.strict_mock import StrictContextManagerMock
 from workbench.projectrecovery.projectrecovery import ProjectRecovery
 
-if sys.version_info.major >= 3:
-    unicode = str
+unicode = str
 
 
 def add_main_window_mock(loader):

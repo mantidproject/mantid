@@ -46,9 +46,9 @@ createCylinderShape(const std::map<int, std::shared_ptr<Geometry::Surface>> &sur
 }
 
 void createTrianglesFromPolygon(const std::vector<uint32_t> &windingOrder, std::vector<uint32_t> &triangularFaces,
-                                int &startOfFace, int &endOfFace) {
+                                int &startOfFace, const int &endOfFace, int &windingOrderReached) {
   int polygonOrder = endOfFace - startOfFace;
-  auto first = windingOrder.begin() + startOfFace;
+  auto first = windingOrder.begin() + windingOrderReached;
 
   triangularFaces.reserve(triangularFaces.size() + 3 * polygonOrder);
   for (int polygonVertex = 1; polygonVertex < polygonOrder - 1; ++polygonVertex) {
@@ -56,6 +56,7 @@ void createTrianglesFromPolygon(const std::vector<uint32_t> &windingOrder, std::
     triangularFaces.emplace_back(*(first + polygonVertex));
     triangularFaces.emplace_back(*(first + polygonVertex + 1));
   }
+  windingOrderReached += polygonOrder;
   startOfFace = endOfFace; // start of the next face
 }
 
@@ -69,16 +70,17 @@ std::vector<uint32_t> createTriangularFaces(const std::vector<uint32_t> &faceInd
   // the face normal by right-hand rule
   std::vector<uint32_t> triangularFaces;
 
-  int startOfFace = 0;
+  auto startOfFace = static_cast<int>(faceIndices[0]);
   int endOfFace = 0;
+  int windingOrderReached = 0;
   for (auto it = faceIndices.begin() + 1; it != faceIndices.end(); ++it) {
-    endOfFace = *it;
-    createTrianglesFromPolygon(windingOrder, triangularFaces, startOfFace, endOfFace);
+    endOfFace = static_cast<int>(*it);
+    createTrianglesFromPolygon(windingOrder, triangularFaces, startOfFace, endOfFace, windingOrderReached);
   }
 
   // and the last face
-  endOfFace = static_cast<int>(windingOrder.size());
-  createTrianglesFromPolygon(windingOrder, triangularFaces, startOfFace, endOfFace);
+  endOfFace = startOfFace + static_cast<int>(windingOrder.size()) - windingOrderReached;
+  createTrianglesFromPolygon(windingOrder, triangularFaces, startOfFace, endOfFace, windingOrderReached);
 
   return triangularFaces;
 }

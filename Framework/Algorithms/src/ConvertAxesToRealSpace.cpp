@@ -84,7 +84,7 @@ void ConvertAxesToRealSpace::exec() {
   axisVector[1].label = vAxis;
   axisVector[1].bins = getProperty("NumberVerticalBins");
   for (int axisIndex = 0; axisIndex < 2; ++axisIndex) {
-    axisVector[axisIndex].max = std::numeric_limits<double>::min();
+    axisVector[axisIndex].max = std::numeric_limits<double>::lowest();
     axisVector[axisIndex].min = std::numeric_limits<double>::max();
   }
 

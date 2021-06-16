@@ -8,6 +8,8 @@ Mantid Workbench Changes
 New and Improved
 ----------------
 
+- Peaks can now be added or removed from a PeaksWorkspace using the :ref:`peaks overlay <sliceviewer_peaks_overlay>` in :ref:`sliceviewer`.
+
 Bugfixes
 --------
 

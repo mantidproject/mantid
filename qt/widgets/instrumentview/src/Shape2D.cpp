@@ -1200,6 +1200,9 @@ Shape2D *Shape2DSector::loadFromProject(const std::string &lines) {
  * @return a string representing the state of the sector
  */
 std::string Shape2DSector::saveToProject() const {
+  // WARNING: Q1DWeighted heavily depends on the format of this function's
+  // output (via "Save Shapes to table" in the instrument viewer draw tab).
+  // Modify with great caution.
   API::TSVSerialiser tsv;
 
   tsv.writeLine("Type") << "sector";

@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import FitPlotInformation
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import ExternalPlottingModel
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_view import ExternalPlottingView
 from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel
@@ -318,7 +318,7 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.presenter.plot_all_selected_data(False, False)
         self.view.setEnabled.assert_called_once_with(True)
 
-    def test_tab_disbaled_with_no_data_loaded(self):
+    def test_tab_disabled_with_no_data_loaded(self):
         self.model.get_workspace_list_and_indices_to_plot.return_value = [[], indices]
         self.presenter.plot_all_selected_data(False, False)
         self.view.setEnabled.assert_called_once_with(False)

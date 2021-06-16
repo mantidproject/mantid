@@ -172,5 +172,37 @@ int LoadMuonNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   return 0; // Not to be used but LoadMuonNexus2, which inherits from this will
 }
 
+/**
+ * Create Algorithm to add a sample log to a workspace
+ */
+Mantid::API::Algorithm_sptr LoadMuonNexus::createSampleLogAlgorithm(DataObjects::Workspace2D_sptr &ws) {
+  Mantid::API::Algorithm_sptr logAlg = createChildAlgorithm("AddSampleLog");
+  logAlg->setProperty("Workspace", ws);
+  return logAlg;
+}
+
+/**
+ * Function to add a single int as a sample log to a workspace
+ */
+void LoadMuonNexus::addToSampleLog(const std::string &logName, const int logNumber, DataObjects::Workspace2D_sptr &ws) {
+  auto alg = createSampleLogAlgorithm(ws);
+  alg->setProperty("LogType", "Number");
+  alg->setProperty("NumberType", "Int");
+  alg->setProperty("LogName", logName);
+  alg->setProperty("LogText", std::to_string(logNumber));
+  alg->executeAsChildAlg();
+}
+
+/**
+ * Fucntion to add a single string as a sample log to a workspace
+ */
+void LoadMuonNexus::addToSampleLog(const std::string &logName, const std::string logString,
+                                   DataObjects::Workspace2D_sptr &ws) {
+  auto alg = createSampleLogAlgorithm(ws);
+  alg->setProperty("LogType", "String");
+  alg->setProperty("LogName", logName);
+  alg->setProperty("LogText", logString);
+  alg->executeAsChildAlg();
+}
 } // namespace DataHandling
 } // namespace Mantid

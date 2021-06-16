@@ -15,6 +15,7 @@ from functools import partial
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import ConfigService, UsageService, version_str as mantid_version_str
 from mantidqt.utils.qt import plugins
+import mantidqt.utils.qt as qtutils
 
 # Find Qt plugins for development builds on some platforms
 plugins.setup_library_paths()
@@ -81,11 +82,13 @@ def initialize():
 
     :return: A reference to the existing application instance
     """
-    if sys.version_info.major >= 3 and sys.platform == 'win32':
+    if sys.platform == 'win32':
         # Tornado requires WindowsSelectorEventLoop
         # https://www.tornadoweb.org/en/stable/#installation
         import asyncio
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    if sys.platform == 'darwin':
+        qtutils.force_layer_backing_BigSur()
 
     app = qapplication()
 

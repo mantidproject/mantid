@@ -399,10 +399,12 @@ public:
    * to unsorted
    * @param hiddenState Whether to include hidden objects, Defaults to
    * Auto which checks the current configuration to determine behavior.
+   * @param contain Include only object names that contain this string.
    * @return A vector of strings containing object names in the ADS
    */
   std::vector<std::string> getObjectNames(DataServiceSort sortState = DataServiceSort::Unsorted,
-                                          DataServiceHidden hiddenState = DataServiceHidden::Auto) const {
+                                          DataServiceHidden hiddenState = DataServiceHidden::Auto,
+                                          const std::string &contain = "") const {
 
     std::vector<std::string> foundNames;
 
@@ -421,7 +423,11 @@ public:
       std::lock_guard<std::recursive_mutex> _lock(m_mutex);
       foundNames.reserve(datamap.size());
       for (const auto &item : datamap) {
-        foundNames.emplace_back(item.first);
+        if (contain.empty()) {
+          foundNames.emplace_back(item.first);
+        } else if (item.first.find(contain) != std::string::npos) {
+          foundNames.emplace_back(item.first);
+        }
       }
       // Lock released at end of scope here
     } else {
@@ -430,7 +436,11 @@ public:
       for (const auto &item : datamap) {
         if (!isHiddenDataServiceObject(item.first)) {
           // This item is not hidden add it
-          foundNames.emplace_back(item.first);
+          if (contain.empty()) {
+            foundNames.emplace_back(item.first);
+          } else if (item.first.find(contain) != std::string::npos) {
+            foundNames.emplace_back(item.first);
+          }
         }
       }
       // Lock released at end of scope here

@@ -57,9 +57,12 @@ FUNC_BAD_NAME = ("Muon_ExpDecayOscTest")
 FUNC_BAD_PARAMS = {
     "Bk2BkExpConvPV":("TOF_h"),
     "CubicSpline":("y0", "y1", "y2"),
-    "DiffRotDiscreteCircle":("f0.Height", "f0.Radius", "f0.Centre"),
-    "DiffSphere":("f0.Height", "f0.Radius", "f0.Centre"),
-    "IsoRotDiff":("f0.Height", "f0.Radius", "f0.Centre"),
+    "DiffRotDiscreteCircle":("f0.Height", "f0.Radius", "f0.Centre",
+                             "f1.Intensity", "f1.Radius", "f1.Decay", "f1.Shift"),
+    "DiffSphere":("f0.Height", "f0.Radius", "f0.Centre",
+                  "f1.Intensity", "f1.Radius", "f1.Diffusion", "f1.Shift"),
+    "IsoRotDiff":("f0.Height", "f0.Radius", "f0.Centre",
+                  "f1.Height", "f1.Radius", "f1.Tau", "f1.Centre"),
     "LatticeErrors":("p0", "p1", "p2", "p3", "p4", "p5"),
     "Muon_ExpDecayOscTest":("lambda", "frequency", "phi"),
     "SCDPanelErrors":("f0_detWidthScale", "f0_detHeightScale",
@@ -75,7 +78,7 @@ FUNC_BAD_PARAMS = {
                             "f4.Amplitude","f4.PeakCentre","f4.FWHM","f5.Amplitude","f5.PeakCentre","f5.FWHM"),
     "CrystalFieldMultiSpectrum":("f0.f0.A0","f0.f1.Amplitude","f0.f1.PeakCentre","f0.f1.FWHM",
                                  "f0.f2.Amplitude","f0.f2.PeakCentre","f0.f2.FWHM")
-    }
+}
 
 
 class Algorithms(systemtesting.MantidSystemTest):

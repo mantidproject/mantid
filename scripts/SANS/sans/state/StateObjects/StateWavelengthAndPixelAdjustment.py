@@ -13,8 +13,9 @@ import json
 
 from sans.common.enums import (RangeStepType, DetectorType)
 from sans.state.JsonSerializable import JsonSerializable
+from sans.state.StateObjects.wavelength_interval import WavelengthInterval
 from sans.state.automatic_setters import automatic_setters
-from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
+from sans.state.state_functions import (one_is_none, validation_message)
 
 
 class StateAdjustmentFiles(metaclass=JsonSerializable):
@@ -36,9 +37,7 @@ class StateAdjustmentFiles(metaclass=JsonSerializable):
 class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
     def __init__(self):
         super(StateWavelengthAndPixelAdjustment, self).__init__()
-        self.wavelength_low = None  # : List[Float] (Positive)
-        self.wavelength_high = None  # : List[Float] (Positive)
-        self.wavelength_step = None  # : Float (Positive)
+        self.wavelength_interval: WavelengthInterval = WavelengthInterval()
         self.wavelength_step_type = RangeStepType.NOT_SET
 
         self.idf_path = None  # : Str()
@@ -60,12 +59,10 @@ class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
     def validate(self):
         is_invalid = {}
 
-        if one_is_none([self.wavelength_low, self.wavelength_high, self.wavelength_step, self.wavelength_step_type]):
+        if one_is_none([self.wavelength_interval, self.wavelength_step_type]):
             entry = validation_message("A wavelength entry has not been set.",
                                        "Make sure that all entries are set.",
-                                       {"wavelength_low": self.wavelength_low,
-                                        "wavelength_high": self.wavelength_high,
-                                        "wavelength_step": self.wavelength_step,
+                                       {"wavelength_low": self.wavelength_interval,
                                         "wavelength_step_type": self.wavelength_step_type})
             is_invalid.update(entry)
 
@@ -73,13 +70,6 @@ class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
             entry = validation_message("A wavelength entry has not been set.",
                                        "Make sure that all entries are set.",
                                        {"wavelength_step_type": self.wavelength_step_type})
-            is_invalid.update(entry)
-
-        if is_not_none_and_first_larger_than_second([self.wavelength_low, self.wavelength_high]):
-            entry = validation_message("Incorrect wavelength bounds.",
-                                       "Make sure that lower wavelength bound is smaller then upper bound.",
-                                       {"wavelength_low": self.wavelength_low,
-                                        "wavelength_high": self.wavelength_high})
             is_invalid.update(entry)
 
         try:

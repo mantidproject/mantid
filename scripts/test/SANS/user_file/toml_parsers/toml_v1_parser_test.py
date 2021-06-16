@@ -113,7 +113,7 @@ class TomlV1ParserTest(unittest.TestCase):
             wavelength = self._setup_parser(wavelength_dict).get_state_wavelength()
             self.assertEqual([1.1], wavelength.wavelength_low)
             self.assertEqual([2.2], wavelength.wavelength_high)
-            self.assertEqual(0.1, wavelength.wavelength_step)
+            self.assertEqual(0.1, wavelength.wavelength_interval.wavelength_step)
             self.assertEqual(RangeStepType(bin_type), wavelength.wavelength_step_type)
 
         one_d_reduction_q_dict = {"binning": {"1d_reduction": {"binning": "1.0, 0.1, 2.0, -0.2, 3.0",
@@ -237,12 +237,18 @@ class TomlV1ParserTest(unittest.TestCase):
         q_resolution_dict["moderator_file"] = mock.NonCallableMock()
         q_resolution_dict["source_aperture"] = 1
         q_resolution_dict["delta_r"] = 2
+        q_resolution_dict["h1"], q_resolution_dict["h2"] = 3, 4
+        q_resolution_dict["w1"], q_resolution_dict["w2"] = 5, 6
 
         q_resolution = self._setup_parser(top_level_dict).get_state_convert_to_q()
 
         self.assertEqual(True, q_resolution.use_q_resolution)
         self.assertEqual(1, q_resolution.q_resolution_a1)
         self.assertEqual(2, q_resolution.q_resolution_delta_r)
+        self.assertEqual(3, q_resolution.q_resolution_h1)
+        self.assertEqual(4, q_resolution.q_resolution_h2)
+        self.assertEqual(5, q_resolution.q_resolution_w1)
+        self.assertEqual(6, q_resolution.q_resolution_w2)
         self.assertEqual(q_resolution_dict["moderator_file"], q_resolution.moderator_file)
 
     def test_gravity(self):

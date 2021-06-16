@@ -52,22 +52,29 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         self._check_output(mtd['vanadium_sum'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_sum'], 'Vanadium')
 
+    def d7_reduction_test_vanadium_average(self):
+        PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_average',
+                            SampleAndEnvironmentProperties=self._sampleProperties,
+                            OutputTreatment='Average')
+        self._check_output(mtd['vanadium_average'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['vanadium_average'], 'Vanadium')
+
     def d7_reduction_test_vanadium_full_reduction(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
                             BeamInputWorkspace='beam_ws_1')
-        PolDiffILLReduction(Run='396917,396918', ProcessAs='Container', OutputWorkspace='container_ws')
-        PolDiffILLReduction(Run='396928,396929', ProcessAs='Absorber', OutputWorkspace='absorber_ws')
-        PolDiffILLReduction(Run='396991', ProcessAs='BeamWithAbsorber', OutputWorkspace='cadmium_ws')
+        PolDiffILLReduction(Run='396917,396918', ProcessAs='Empty', OutputWorkspace='container_ws')
+        PolDiffILLReduction(Run='396928,396929', ProcessAs='Cadmium', OutputWorkspace='absorber_ws')
+        PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws')
         PolDiffILLReduction(Run='396939,397000', ProcessAs='Quartz', OutputWorkspace='pol_corrections',
                             TransmissionInputWorkspace='quartz_transmission_1',
-                            AbsorberTransmissionInputWorkspace='cadmium_ws_1', OutputTreatment='Average')
+                            CadmiumTransmissionInputWorkspace='cadmium_ws_1', OutputTreatment='Average')
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
-                            AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+                            CadmiumTransmissionInputWorkspace='cadmium_ws_1',
                             BeamInputWorkspace='beam_ws_1')
         PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_full',
-                            AbsorberInputWorkspace='absorber_ws',
-                            ContainerInputWorkspace='container_ws',
+                            CadmiumInputWorkspace='absorber_ws',
+                            EmptyInputWorkspace='container_ws',
                             TransmissionInputWorkspace='vanadium_transmission_1',
                             QuartzInputWorkspace='pol_corrections',
                             SampleAndEnvironmentProperties=self._sampleProperties,
@@ -170,7 +177,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         D7AbsoluteCrossSections(InputWorkspace='sample_individual', OutputWorkspace='sample_individual_not_normalised',
                                 CrossSectionSeparationMethod='XYZ',
                                 NormalisationMethod='None',
-                                OutputTreatment='Sum',
+                                OutputTreatment='Merge',
                                 OutputUnits='Q',
                                 SampleAndEnvironmentProperties=self._sampleProperties)
         self._check_output(mtd['sample_individual_not_normalised'], 263, 1, 6, 'q', 'MomentumTransfer', 'Height',
@@ -185,7 +192,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         D7AbsoluteCrossSections(InputWorkspace='sample_individual', OutputWorkspace='sample_individual_incoherent',
                                 CrossSectionSeparationMethod='XYZ',
                                 NormalisationMethod='Incoherent',
-                                OutputTreatment='Sum',
+                                OutputTreatment='Merge',
                                 OutputUnits='TwoTheta',
                                 SampleAndEnvironmentProperties=self._sampleProperties)
         self._check_output(mtd['sample_individual_incoherent'], 263, 1, 6, 'Scattering Angle', 'Label', 'Height',
@@ -218,28 +225,28 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
                             BeamInputWorkspace='beam_ws_1')
-        PolDiffILLReduction(Run='396917,396918', ProcessAs='Container', OutputWorkspace='container_ws')
-        PolDiffILLReduction(Run='396928,396929', ProcessAs='Absorber', OutputWorkspace='absorber_ws')
-        PolDiffILLReduction(Run='396991', ProcessAs='BeamWithAbsorber', OutputWorkspace='cadmium_ws')
+        PolDiffILLReduction(Run='396917,396918', ProcessAs='Empty', OutputWorkspace='container_ws')
+        PolDiffILLReduction(Run='396928,396929', ProcessAs='Cadmium', OutputWorkspace='absorber_ws')
+        PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws')
         PolDiffILLReduction(Run='396939,397000', ProcessAs='Quartz', OutputWorkspace='pol_corrections',
                             TransmissionInputWorkspace='quartz_transmission_1',
-                            AbsorberTransmissionInputWorkspace='cadmium_ws_1', OutputTreatment='Average')
+                            CadmiumTransmissionInputWorkspace='cadmium_ws_1', OutputTreatment='Average')
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
-                            AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+                            CadmiumTransmissionInputWorkspace='cadmium_ws_1',
                             BeamInputWorkspace='beam_ws_1')
         PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_full',
-                            AbsorberInputWorkspace='absorber_ws',
-                            ContainerInputWorkspace='container_ws',
+                            CadmiumInputWorkspace='absorber_ws',
+                            EmptyInputWorkspace='container_ws',
                             TransmissionInputWorkspace='vanadium_transmission_1',
                             QuartzInputWorkspace='pol_corrections',
                             SampleAndEnvironmentProperties=self._sampleProperties,
                             OutputTreatment='Sum')
         PolDiffILLReduction(Run='396986,396987', ProcessAs='Transmission', OutputWorkspace='sample_transmission',
-                            AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+                            CadmiumTransmissionInputWorkspace='cadmium_ws_1',
                             BeamInputWorkspace='beam_ws_1')
         PolDiffILLReduction(Run='397004,397005', ProcessAs='Sample', OutputWorkspace='sample_full',
-                            AbsorberInputWorkspace='absorber_ws',
-                            ContainerInputWorkspace='container_ws',
+                            CadmiumInputWorkspace='absorber_ws',
+                            EmptyInputWorkspace='container_ws',
                             TransmissionInputWorkspace='vanadium_transmission_1',
                             QuartzInputWorkspace='pol_corrections',
                             SampleAndEnvironmentProperties=self._sampleProperties,
@@ -251,7 +258,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                                 CrossSectionSeparationMethod='XYZ',
                                 VanadiumInputWorkspace='vanadium_full',
                                 NormalisationMethod='Vanadium',
-                                OutputTreatment='Sum',
+                                OutputTreatment='Merge',
                                 OutputUnits='Q',
                                 SampleAndEnvironmentProperties=self._sampleProperties,
                                 AbsoluteUnitsNormalisation=True)
@@ -288,6 +295,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         self.d7_reduction_test_vanadium_individual()
+        self.d7_reduction_test_vanadium_average()
         self.d7_reduction_test_vanadium_sum()
         self.d7_reduction_test_vanadium_full_reduction()
         self.d7_reduction_test_vanadium_individual_flat_plate_numerical()

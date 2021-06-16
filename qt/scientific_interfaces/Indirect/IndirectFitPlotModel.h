@@ -49,7 +49,6 @@ public:
   double calculateHWHMMaximum(double minimum) const;
   double calculateHWHMMinimum(double maximum) const;
   bool canCalculateGuess() const;
-  bool isResolutionLoaded() const;
 
   void setActiveIndex(TableDatasetIndex index);
   void setActiveSpectrum(WorkspaceIndex spectrum);
@@ -88,6 +87,8 @@ private:
                                                   double endX, int startIndex, int endIndex) const;
 
   void deleteWorkspace(const std::string &name) const;
+
+  bool isResolutionLoaded() const;
 
   IndirectFittingModel *m_fittingModel;
   TableDatasetIndex m_activeIndex;

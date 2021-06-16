@@ -387,6 +387,18 @@ void SetSample::assertNonNegative(std::map<std::string, std::string> &errors, co
   }
 }
 
+/**
+ * @brief Checks if a json dictionary parameter is populated or not
+ * @param dict map
+ */
+bool SetSample::isDictionaryPopulated(const PropertyManager_const_sptr &dict) const {
+  bool isPopulated = false;
+  if (dict)
+    if (dict->propertyCount() > 0)
+      isPopulated = true;
+  return isPopulated;
+}
+
 /// Validate the inputs against each other @see Algorithm::validateInputs
 std::map<std::string, std::string> SetSample::validateInputs() {
   std::map<std::string, std::string> errors;
@@ -414,7 +426,12 @@ std::map<std::string, std::string> SetSample::validateInputs() {
                                                             &ShapeArgs::RADIUS, &ShapeArgs::INNER_RADIUS,
                                                             &ShapeArgs::OUTER_RADIUS}};
 
-  if (environArgs) {
+  if (!isDictionaryPopulated(geomArgs) && !isDictionaryPopulated(materialArgs) && !isDictionaryPopulated(environArgs) &&
+      !isDictionaryPopulated(canGeomArgs) && !isDictionaryPopulated(canMaterialArgs)) {
+    errors["Geometry"] = "At least one of the input parameters must be populated";
+  }
+
+  if (isDictionaryPopulated(environArgs)) {
     if (!existsAndNotEmptyString(*environArgs, SEArgs::NAME)) {
       errors[PropertyNames::ENVIRONMENT] = "Environment flags require a non-empty 'Name' entry.";
     } else {
@@ -422,27 +439,27 @@ std::map<std::string, std::string> SetSample::validateInputs() {
       // validate the sample settings, since only the overriding properties
       // are specified. Hence we just make sure that whatever is specified is
       // at least positive
-      if (geomArgs) {
+      if (isDictionaryPopulated(geomArgs)) {
         assertNonNegative(errors, *geomArgs, PropertyNames::GEOMETRY, positiveValues);
       }
     }
   } else {
     // We cannot strictly require geometry and material to be defined
     // simultaneously; it can be that one is defined at a later time
-    if (geomArgs) {
+    if (isDictionaryPopulated(geomArgs)) {
       assertNonNegative(errors, *geomArgs, PropertyNames::GEOMETRY, positiveValues);
       validateGeometry(errors, *geomArgs, PropertyNames::GEOMETRY);
     }
-    if (materialArgs) {
+    if (isDictionaryPopulated(materialArgs)) {
       validateMaterial(errors, *materialArgs, PropertyNames::MATERIAL);
     }
   }
-  if (canGeomArgs) {
+  if (isDictionaryPopulated(canGeomArgs)) {
     assertNonNegative(errors, *canGeomArgs, PropertyNames::CONTAINER_GEOMETRY, positiveValues);
     validateGeometry(errors, *canGeomArgs, PropertyNames::CONTAINER_GEOMETRY);
   }
 
-  if (canMaterialArgs) {
+  if (isDictionaryPopulated(canMaterialArgs)) {
     validateMaterial(errors, *canMaterialArgs, PropertyNames::CONTAINER_MATERIAL);
   }
   return errors;
@@ -493,14 +510,14 @@ void SetSample::exec() {
   // defines a sample geometry then we can process the Geometry flags
   // combined with this
   const SampleEnvironment *sampleEnviron(nullptr);
-  if (environArgs) {
+  if (isDictionaryPopulated(environArgs)) {
     sampleEnviron = setSampleEnvironmentFromFile(*experimentInfo, environArgs);
-  } else if (canGeometryArgs) {
+  } else if (isDictionaryPopulated(canGeometryArgs)) {
     setSampleEnvironmentFromXML(*experimentInfo, canGeometryArgs, canMaterialArgs);
   }
 
   double sampleVolume = 0.;
-  if (geometryArgs || sampleEnviron) {
+  if (isDictionaryPopulated(geometryArgs) || sampleEnviron) {
     setSampleShape(*experimentInfo, geometryArgs, sampleEnviron);
     if (experimentInfo->sample().getShape().hasValidShape()) {
       // get the volume back out to use in setting the material
@@ -509,7 +526,7 @@ void SetSample::exec() {
   }
 
   // Finally the material arguments
-  if (materialArgs) {
+  if (isDictionaryPopulated(materialArgs)) {
     PropertyManager materialArgsCompatible = materialSettingsEnsureLegacyCompatibility(*materialArgs);
     // add the sample volume if it was defined/determined
     if (sampleVolume > 0.) {

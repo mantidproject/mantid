@@ -68,6 +68,7 @@ template <> std::shared_ptr<IFunction> PythonObjectInstantiator<IFunction>::crea
   instancePtr.reset(instancePtr.get(), GILSharedPtrDeleter(*deleter));
   return instancePtr;
 }
+
 } // namespace PythonInterface
 } // namespace Mantid
 
@@ -135,6 +136,23 @@ PyObject *getPeakFunctionNames(FunctionFactoryImpl &self) {
   }
 
   return registered;
+}
+
+//------------------------------------------------------------------------------------------------------
+/**
+ * Return an IPeakFunction (if possible to cast from IFunction)
+ * @param self :: Enables it to be called as a member function on the
+ * FunctionFactory class
+ * @param name :: Peak function name
+ */
+Mantid::API::IPeakFunction_sptr createPeakFunction(FunctionFactoryImpl &self, const std::string &name) {
+
+  auto fun = self.createFunction(name);
+  auto peakFun = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(fun);
+  if (!peakFun) {
+    throw std::invalid_argument(name + " is not a PeakFunction");
+  }
+  return peakFun;
 }
 
 //------------------------------------------------------------------------------------------------------
@@ -220,5 +238,6 @@ void export_FunctionFactory() {
            "Returns a list of the currently available background functions")
       .def("getPeakFunctionNames", &getPeakFunctionNames, arg("self"),
            "Returns a list of the currently available peak functions")
+      .def("createPeakFunction", &createPeakFunction, (arg("self"), arg("name")), "Return pointer to peak function.")
       .staticmethod("Instance");
 }

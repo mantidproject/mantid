@@ -807,11 +807,12 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # -----------------------------------------------------------
     reduction_mode = state.reduction.reduction_mode
     is_group = is_part_of_reduced_output_workspace_group(state)
+    wav_range = state.wavelength.wavelength_interval.wavelength_full_range
     if reduction_mode != ReductionMode.ALL:
-        _, output_workspace_base_name = get_output_name(state, reduction_mode, is_group)
+        _, output_workspace_base_name = get_output_name(state, reduction_mode, is_group, wav_range)
     else:
-        _, output_workspace_base_name_hab = get_output_name(state, ReductionMode.HAB, is_group)
-        _, output_workspace_base_name_lab = get_output_name(state, ReductionMode.LAB, is_group)
+        _, output_workspace_base_name_hab = get_output_name(state, ReductionMode.HAB, is_group, wav_range)
+        _, output_workspace_base_name_lab = get_output_name(state, ReductionMode.LAB, is_group, wav_range)
         output_workspace_base_name = [output_workspace_base_name_lab, output_workspace_base_name_hab]
     return output_workspace_base_name
 
