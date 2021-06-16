@@ -21,6 +21,12 @@ Improvements
 
 - :ref:`CreateSampleWorkspace <algm-CreateSampleWorkspace>` has new property InstrumentName.
 
+Bugfixes
+########
+
+- Fix rare divide-by zero error when running :ref:`GetEi <algm-GetEi>` on noisy data.
+
+
 Fit Functions
 -------------
 - new method `IPeakFunction::intensityError` calculates the error in the integrated intensity of the peak due to uncertainties in the values of the fit parameters.

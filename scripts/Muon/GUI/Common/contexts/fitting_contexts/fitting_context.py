@@ -7,10 +7,11 @@
 from collections import OrderedDict
 import re
 
-from mantid.api import AnalysisDataService
 import numpy as np
 
 from mantidqt.utils.observer_pattern import Observable
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
+
 
 # Magic values for names of columns in the fit parameter table
 NAME_COL = 'Name'
@@ -232,7 +233,7 @@ class FitInformation(object):
 
         all_names = []
         for ws_name in self.output_workspace_names:
-            logs = _run(ws_name).getLogData()
+            logs = retrieve_ws(ws_name).run().getLogData()
             all_names.extend([log.name for log in logs if filter_fn(log)])
 
         return all_names
@@ -243,7 +244,7 @@ class FitInformation(object):
         :return: True if the log exists on all of the input workspaces False, otherwise
         """
         for ws_name in self.output_workspace_names:
-            run = _run(ws_name)
+            run = retrieve_ws(ws_name).run()
             if not run.hasProperty(log_name):
                 return False
 
@@ -260,10 +261,9 @@ class FitInformation(object):
         :param log_name: The name of an existing log
         :return: A single double value
         """
-        ads = AnalysisDataService.Instance()
 
         def value_from_workspace(wksp_name):
-            run = ads.retrieve(wksp_name).run()
+            run = retrieve_ws(wksp_name).run()
             prop = run.getProperty(log_name)
             if hasattr(prop, 'timeAverageValue'):
                 return prop.timeAverageValue()
@@ -296,19 +296,14 @@ class FittingContext(object):
        - function names
     """
 
-    def __init__(self, fit_list=None):
-        self.fit_list = fit_list if fit_list is not None else []
-        # Register callbacks with this object to observe when new fits
-        # are added
+    def __init__(self):
+        self.fit_list: list = []
+
+        self._number_of_fits: int = 0
+        self._number_of_fits_cache: int = 0
+
         self.new_fit_results_notifier = Observable()
         self.fit_removed_notifier = Observable()
-        self.plot_guess_notifier = Observable()
-        self._number_of_fits = 0
-        self._number_of_fits_cache = 0
-        self._plot_guess = False
-        self._guess = None
-        self._fit_raw = True
-        self._fit_type = "Single"
 
     def __len__(self):
         """
@@ -354,15 +349,6 @@ class FittingContext(object):
             if updated_fit == fit:
                 fit._fit_parameters = updated_fit._fit_parameters
                 return
-
-    def notify_plot_guess_changed(self, plot_guess, guess_ws):
-        # First remove the previous plot_guess from plot
-        self.plot_guess = False
-        self.plot_guess_notifier.notify_subscribers()
-
-        self.plot_guess = plot_guess
-        self.guess_ws = guess_ws
-        self.plot_guess_notifier.notify_subscribers()
 
     def fit_function_names(self):
         """
@@ -459,44 +445,3 @@ class FittingContext(object):
     def number_of_fits(self, value):
         self._number_of_fits_cache = self._number_of_fits
         self._number_of_fits = value
-
-    @property
-    def fit_type(self):
-        return self._fit_type
-
-    @fit_type.setter
-    def fit_type(self, fit_type):
-        self._fit_type = fit_type
-
-    @property
-    def plot_guess(self):
-        return self._plot_guess
-
-    @plot_guess.setter
-    def plot_guess(self, value):
-        self._plot_guess = value
-
-    @property
-    def fit_raw(self):
-        return self._fit_raw
-
-    @fit_raw.setter
-    def fit_raw(self, value):
-        self._fit_raw = value
-
-    @property
-    def guess_ws(self):
-        return self._guess
-
-    @guess_ws.setter
-    def guess_ws(self, value):
-        self._guess = value
-
-
-# Private functions
-def _run(ws_name):
-    """
-    :param ws_name: A workspace name in the ADS
-    :return: A list of the log data for a workspace
-    """
-    return AnalysisDataService.Instance().retrieve(ws_name).run()

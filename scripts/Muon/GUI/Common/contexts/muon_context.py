@@ -419,6 +419,9 @@ class MuonContext(object):
                (self.gui_context['RebinType'] == 'Variable'
                 and 'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
 
+    def do_double_pulse_fit(self):
+        return "DoublePulseEnabled" in self.gui_context and self.gui_context["DoublePulseEnabled"]
+
     def get_detectors_excluded_from_default_grouping_tables(self):
         groups, _, _ = get_default_grouping(
             self.data_context.current_workspace, self.data_context.instrument,
@@ -529,6 +532,24 @@ class MuonContext(object):
                 equivalent_list.append(equivalent_group_pair)
 
         return equivalent_list
+
+    def get_workspace_names_for(self, runs: str, groups_and_pairs: list, fit_to_raw: bool) -> list:
+        """Returns the workspace names of the loaded data for the provided runs and groups/pairs."""
+        workspace_names = []
+        for run in self.get_runs(runs):
+            for group_and_pair in groups_and_pairs:
+                workspace_names += self.get_workspace_names_of_data_with_run(run, group_and_pair, fit_to_raw)
+
+        return workspace_names
+
+    def get_workspace_names_of_data_with_run(self, run: int, group_and_pair: str, fit_to_raw: bool):
+        """Returns the workspace names of the loaded data with the provided run and group/pair."""
+        group, pair = self.get_group_and_pair(group_and_pair)
+
+        group_names = self.group_pair_context.get_group_workspace_names([run], group, not fit_to_raw)
+        pair_names = self.group_pair_context.get_pair_workspace_names([run], pair, not fit_to_raw)
+
+        return group_names + pair_names
 
     def remove_workspace(self, workspace):
         # required as the renameHandler returns a name instead of a workspace.

@@ -17,7 +17,7 @@ from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContex
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.contexts.plotting_context import PlottingContext, PlotMode
-from Muon.GUI.Common.contexts.fitting_context import FittingContext
+from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
@@ -85,7 +85,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.group_pair_context = MuonGroupPairContext(
             self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
-        self.fitting_context = FittingContext()
+        self.fitting_context = BasicFittingContext(allow_double_pulse_fitting=True)
 
         self.frequency_context = FrequencyContext()
 
@@ -404,7 +404,11 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_context.new_fit_results_notifier.add_subscriber(
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
 
-        self.fitting_context.plot_guess_notifier.add_subscriber(self.plot_widget.presenter.plot_guess_observer)
+        self.fitting_tab.fitting_tab_presenter.remove_plot_guess_notifier.add_subscriber(
+            self.plot_widget.presenter.remove_plot_guess_observer)
+
+        self.fitting_tab.fitting_tab_presenter.update_plot_guess_notifier.add_subscriber(
+            self.plot_widget.presenter.update_plot_guess_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

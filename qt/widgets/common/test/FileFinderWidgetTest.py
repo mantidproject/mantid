@@ -7,7 +7,6 @@
 import sys
 import unittest
 from PyQt4 import QtCore, QtGui
-import mantid
 import mantidqtpython
 
 # Create the application only once per test; otherwise I get a segfault
@@ -33,7 +32,8 @@ class FileFinderWidgetTest(unittest.TestCase):
         app.exec_()
 
     def test_creation(self):
-        self.assertTrue(isinstance(self.mwrunfiles,mantidqtpython.MantidQt.API.FileFinderWidget), "Created object is not an instance of FileFinderWidget")
+        self.assertTrue(isinstance(self.mwrunfiles,mantidqtpython.MantidQt.API.FileFinderWidget),
+                        "Created object is not an instance of FileFinderWidget")
 
     def test_lineedit_text(self):
         self.assertEqual(len(self.mwrunfiles.text()), 0)
@@ -44,6 +44,7 @@ class FileFinderWidgetTest(unittest.TestCase):
         self.assertFalse(self.mwrunfiles.isValid())
         self.mwrunfiles.setUserInput("CNCS7860")
         self.assertEqual(self.mwrunfiles.text(), "CNCS7860")
+
 
 if __name__ == '__main__':
     unittest.main()

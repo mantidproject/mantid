@@ -20,8 +20,8 @@ def cache_subtree(cache, root, path):
 
     current_date_str = None
 
-    date_regex = re.compile('\d\d\d\d\-\d\d\-\d\d')
-    filename_regex = re.compile('[\/\w,\s\-\_]+\.[A-Za-z]+')
+    date_regex = re.compile(r'\d\d\d\d\-\d\d\-\d\d')
+    filename_regex = re.compile(r'[\/\w,\s\-\_]+\.[A-Za-z]+')
 
     for line in proc.stdout:
         line = str(line.decode('utf-8')).strip()

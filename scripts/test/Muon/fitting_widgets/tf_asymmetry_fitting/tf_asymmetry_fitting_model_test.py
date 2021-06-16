@@ -43,7 +43,8 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         FrameworkManager.Instance()
 
     def setUp(self):
-        self.model = TFAsymmetryFittingModel(setup_context())
+        context = setup_context()
+        self.model = TFAsymmetryFittingModel(context, context.fitting_context)
         self.dataset_names = ["EMU20884; Group; fwd; Asymmetry", "EMU20884; Group; top; Asymmetry"]
         self.tf_non_compliant_dataset_names = ["EMU20884; Group; fwd; Asymmetry", "EMU20884; Pair Asym; long; Asymmetry"]
         self.fit_function = FunctionFactory.createFunction("FlatBackground")

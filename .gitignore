@@ -169,6 +169,7 @@ Desktop.ini
 
 # VSCode
 .vscode/
+.cache/
 .clangd/
 XDG_CACHE_HOME/
 # The file that contains metadata for VSCode Workspace
