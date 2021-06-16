@@ -209,10 +209,10 @@ std::vector<double> CrossCorrelateTestData::apply_function(std::vector<double> &
   function->function(domain_oop, co_domain_oop);
 
   /* invalidate FunctionDomain1DVector and get underlying data primitive */
-  domain = std::move(domain_oop.getVector());
+  domain = domain_oop.getVector();
 
   /* invalidate FunctionValues object and get underlying data primitive */
-  auto co_domain = std::move(co_domain_oop.toVector());
+  auto co_domain = co_domain_oop.toVector();
 
   return co_domain;
 }

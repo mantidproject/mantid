@@ -169,7 +169,7 @@ void CrossCorrelate::exec() {
     // convert dspacing to bins, where maxDSpaceShift is at least 0.1
     const auto maxBins = std::max(0.0 + maxDSpaceShift * 2, 0.1) / inputWS->getDimension(0)->getBinWidth();
     // calc range based on max bins
-    shiftCorrection = std::max(0.0, abs((-numReferenceY + 2) - (numReferenceY - 2)) - maxBins) / 2;
+    shiftCorrection = (int)std::max(0.0, abs((-numReferenceY + 2) - (numReferenceY - 2)) - maxBins) / 2;
   }
 
   const int numPoints = 2 * (numReferenceY - shiftCorrection) - 3;
