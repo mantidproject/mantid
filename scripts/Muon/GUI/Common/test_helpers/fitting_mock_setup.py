@@ -83,3 +83,40 @@ def add_mock_methods_to_general_fitting_view(view):
     view.set_slot_for_simultaneous_fit_by_changed = mock.Mock()
     view.set_slot_for_simultaneous_fit_by_specifier_changed = mock.Mock()
     return view
+
+
+def add_mock_methods_to_model_fitting_view(view):
+    view = add_mock_methods_to_basic_fitting_view(view)
+
+    view.set_slot_for_results_table_changed = mock.Mock()
+    view.set_slot_for_selected_x_changed = mock.Mock()
+    view.set_slot_for_selected_y_changed = mock.Mock()
+
+    view.add_results_table_name = mock.Mock()
+    view.update_result_table_names = mock.Mock()
+    view.update_x_and_y_parameters = mock.Mock()
+    view.update_fit_function = mock.Mock()
+    view.x_parameter = mock.Mock(return_value="A0")
+    view.y_parameter = mock.Mock(return_value="A1")
+    view.enable_view = mock.Mock()
+
+    return view
+
+
+def add_mock_methods_to_model_fitting_model(model, dataset_names, current_dataset_index, fit_function, start_x, end_x,
+                                            fit_status, chi_squared, param_combination_name, param_group_name,
+                                            results_table_names, x_parameters, y_parameters):
+    model = add_mock_methods_to_basic_fitting_model(model, dataset_names, current_dataset_index, fit_function, start_x,
+                                                    end_x, fit_status, chi_squared)
+
+    model.parameter_combination_workspace_name = mock.Mock(return_value=param_combination_name)
+    model.parameter_combination_group_name = mock.Mock(return_value=param_group_name)
+    model.get_workspace_names_to_display_from_context = mock.Mock(return_value=results_table_names)
+    model.create_x_and_y_parameter_combination_workspaces = mock.Mock(return_value=(x_parameters, y_parameters))
+
+    return model
+
+
+def add_mock_methods_to_model_fitting_presenter(presenter):
+    presenter = add_mock_methods_to_basic_fitting_presenter(presenter)
+    return presenter

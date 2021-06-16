@@ -92,7 +92,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.automatically_update_function_name()
 
         if self.model.get_active_fit_function() is None:
-            self.clear_current_cached_fit_function()
+            self.clear_current_fit_function_for_undo()
             self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
         self.reset_fit_status_and_chi_squared_information()
@@ -119,7 +119,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.model.reset_current_fit_status_and_chi_squared()
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
 
-    def clear_current_cached_fit_function(self) -> None:
+    def clear_current_fit_function_for_undo(self) -> None:
         """Clear the cached fit function for the currently selected dataset."""
         self.model.clear_undo_data_for_current_dataset_index()
         self.view.set_number_of_undos(self.model.number_of_undos())

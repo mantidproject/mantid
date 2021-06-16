@@ -47,6 +47,8 @@ set ( TEST_PY_FILES
    fitting_widgets/general_fitting/general_fitting_view_test.py
    fitting_widgets/model_fitting/model_fitting_data_selector_view_test.py
    fitting_widgets/model_fitting/model_fitting_model_test.py
+   fitting_widgets/model_fitting/model_fitting_presenter_test.py
+   fitting_widgets/model_fitting/model_fitting_view_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_model_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_options_view_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_presenter_test.py
