@@ -67,10 +67,8 @@ class WorkspaceCalculator():
         if parameters == dict():
             return
         valid_lhs, valid_rhs, err_msg = self.model.updateParameters(**parameters)
-        if valid_lhs != self.view.label_validation_lhs.isVisible():
-            self.view.setValidationLabel(ws="LHS", validationValue=valid_lhs, tooltip=err_msg)
-        if valid_rhs != self.view.label_validation_rhs.isVisible():
-            self.view.setValidationLabel(ws="RHS", validationValue=valid_rhs, tooltip=err_msg)
+        self.view.setValidationLabel(ws="LHS", validationValue=valid_lhs, tooltip=err_msg)
+        self.view.setValidationLabel(ws="RHS", validationValue=valid_rhs, tooltip=err_msg)
         if valid_lhs and valid_rhs:
             valid_lhs, valid_rhs, err_msg = self.model.performOperation()
             if valid_lhs != self.view.label_validation_lhs.isVisible():
