@@ -595,6 +595,9 @@ class MainWindow(QMainWindow):
             if self.interface_manager is not None:
                 self.interface_manager.closeHelpWindow()
 
+            if self.workspacecalculator is not None:
+                self.workspacecalculator.view.closeEvent(event)
+
             event.accept()
         else:
             # Cancel was pressed when closing an editor

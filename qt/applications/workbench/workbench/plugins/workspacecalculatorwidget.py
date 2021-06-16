@@ -22,6 +22,7 @@ class WorkspaceCalculatorWidget(PluginWidget):
         layout = QVBoxLayout()
         layout.addWidget(self.workspacecalculatorwidget.view)
         layout.sizeHint()
+        self.view = self.workspacecalculatorwidget.view
         self.setLayout(layout)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 
