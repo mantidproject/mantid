@@ -77,6 +77,9 @@ local.properties
 #Test results
 *.log
 
+#Coverage results
+*.gcov
+
 # Build results
 build/
 /[Rr]elease/
