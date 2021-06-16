@@ -253,12 +253,11 @@ class FitInformation(object):
 
     def log_names(self, filter_fn=None):
         """
-        The names of the logs on the workspaces
-        associated with this fit.
+        The names of the logs on the workspaces associated with this fit.
 
-        :filter_fn: An optional unary function to filter the names out. It should accept a log
-        and return True if the log should be accepted
-        :return: A list of names
+        :filter_fn: An optional unary function to filter the names out. It should accept a log (e.g. a Mantid Kernel
+        Property object) and return True if the log should be accepted.
+        :return: A list of log names such as ["sample_temp", "sample_magn_field"]
         """
         filter_fn = filter_fn if filter_fn is not None else lambda x: True
 
@@ -448,15 +447,7 @@ class FittingContext(object):
         latest_fits = []
         # Reversed because the fits at the end of the list are the most recently performed fits.
         for fit in reversed(fits_history):
-            if self._is_unique_fit(fit, latest_fits):
+            if fit not in latest_fits:
                 latest_fits.append(fit)
         latest_fits.reverse()
         return latest_fits
-
-    @staticmethod
-    def _is_unique_fit(fit: FitInformation, unique_fits: list) -> bool:
-        """Returns true if the Fit output does not already exist in the unique_fits list."""
-        for unique_fit in unique_fits:
-            if fit == unique_fit:
-                return False
-        return True

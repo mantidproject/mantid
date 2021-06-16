@@ -172,15 +172,14 @@ class ModelFittingModel(BasicFittingModel):
         """Returns true if a parameter combination workspace exists and contains the same data."""
         if check_if_workspace_exist(workspace_name):
             workspace = retrieve_ws(workspace_name)
-            return self._data_is_equal(workspace.dataX(0), x_values) \
-                   and self._data_is_equal(workspace.dataY(0), y_values) \
-                   and self._data_is_equal(workspace.dataE(0), y_errors)
+            return self._lists_are_equal(workspace.dataX(0), x_values) \
+                   and self._lists_are_equal(workspace.dataY(0), y_values) \
+                   and self._lists_are_equal(workspace.dataE(0), y_errors)
         return False
 
-    @staticmethod
-    def _data_is_equal(list1: list, list2: list) -> bool:
+    def _lists_are_equal(self, list1: list, list2: list) -> bool:
         """Returns true if the two lists containing x, y or error data are equal to five decimal places."""
-        return all([f"{i:.5f}" == f"{j:.5f}" for i, j in zip(list1, list2)])
+        return all([self.is_equal_to_n_decimals(i, j, 5) for i, j in zip(list1, list2)])
 
     @staticmethod
     def _convert_str_column_values_to_int(parameter_name: str, parameter_values: list) -> list:

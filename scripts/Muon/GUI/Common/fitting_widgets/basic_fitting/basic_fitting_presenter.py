@@ -409,7 +409,7 @@ class BasicFittingPresenter:
         if self.view.start_x < x_lower:
             self.view.start_x = x_lower
         elif self.view.start_x > x_upper:
-            if not self._is_equal_to_three_decimals(self.view.end_x, x_upper):
+            if not self.model.is_equal_to_n_decimals(self.view.end_x, x_upper, 3):
                 self.view.start_x, self.view.end_x = self.view.end_x, x_upper
             else:
                 self.view.start_x = self.model.current_start_x
@@ -422,7 +422,7 @@ class BasicFittingPresenter:
         """Checks that the new end X is valid. If it isn't, the start and end X is adjusted."""
         x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
         if self.view.end_x < x_lower:
-            if not self._is_equal_to_three_decimals(self.view.start_x, x_lower):
+            if not self.model.is_equal_to_n_decimals(self.view.start_x, x_lower, 3):
                 self.view.start_x, self.view.end_x = x_lower, self.view.start_x
             else:
                 self.view.end_x = self.model.current_end_x
@@ -432,8 +432,3 @@ class BasicFittingPresenter:
             self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
         elif self.view.end_x == self.view.start_x:
             self.view.end_x = self.model.current_end_x
-
-    @staticmethod
-    def _is_equal_to_three_decimals(value1: float, value2: float) -> bool:
-        """Checks that two floats are equal up to three decimal places."""
-        return f"{value1:.3f}" == f"{value2:.3f}"
