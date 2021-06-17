@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 #
 
-from qtpy.QtWidgets import QFileDialog, QWidget, QHeaderView
+from qtpy.QtWidgets import QFileDialog, QWidget, QHeaderView, QFileSystemModel
 from qtpy.QtCore import *
 
 from mantidqt.utils.qt import load_ui
@@ -22,6 +22,11 @@ class RawDataExplorerView(QWidget):
     The view for the raw data explorer widget.
     """
 
+    """
+    List of filters for the file system tree widget.
+    """
+    _FILE_SYSTEM_FILTERS = ["*.nxs"]
+
     file_tree_path_changed = Signal(str)
 
     def __init__(self, presenter, parent=None):
@@ -34,6 +39,18 @@ class RawDataExplorerView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setup_connections()
 
+        # tree widget setup
+        file_model = QFileSystemModel()
+        file_model.setNameFilters(self._FILE_SYSTEM_FILTERS)
+        file_model.setNameFilterDisables(0)
+        file_model.setRootPath("/")
+        self.fileTree.setModel(file_model)
+        self.fileTree.header().hideSection(2)
+        self.fileTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.fileTree.header().setSectionResizeMode(1, QHeaderView.Fixed)
+        self.fileTree.header().setSectionResizeMode(2, QHeaderView.Fixed)
+        self.fileTree.header().setSectionResizeMode(3, QHeaderView.Fixed)
+
     def closeEvent(self, event):
         self.deleteLater()
         super(RawDataExplorerView, self).closeEvent(event)
@@ -43,19 +60,6 @@ class RawDataExplorerView(QWidget):
         Set up connections between signals and slots in the view.
         """
         self.browse.clicked.connect(self.show_directory_manager)
-
-    def set_file_model(self, file_model):
-        """
-        Set the QFileSystemModel behind the tree view
-        @param file_model : the file model, a QFileSystemModel object
-        """
-        self.fileTree.setModel(file_model)
-        self.fileTree.header().hideSection(2)
-
-        self.fileTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.fileTree.header().setSectionResizeMode(1, QHeaderView.Fixed)
-        self.fileTree.header().setSectionResizeMode(2, QHeaderView.Fixed)
-        self.fileTree.header().setSectionResizeMode(3, QHeaderView.Fixed)
 
     def show_directory_manager(self):
         """
