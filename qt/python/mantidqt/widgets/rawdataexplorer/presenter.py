@@ -44,6 +44,9 @@ class PreviewPresenter:
         if preview_type == PreviewType.IVIEW:
             self._view = PreviewView(PreviewView.IVIEW, self)
             self._view.show_workspace(workspace_name)
+        if preview_type == PreviewType.SVIEW:
+            self._view = PreviewView(PreviewView.SVIEW, self)
+            self._view.show_workspace(workspace_name)
 
         self._model.sig_workspace_changed.connect(self.on_workspace_changed)
 
