@@ -121,6 +121,35 @@ class RawDataExplorerModel(QObject):
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
 
+    def modify_preview(self, filenames, instrument, acquisition_mode, preview_name):
+        """
+        Modify the last preview of the same type. If none is found, a new
+        preview is opened.
+        """
+        technique = config.getInstrument(instrument).techniques()[0]
+        preview = PreviewManager.Instance().getPreview("ILL", technique,
+                                                       acquisition_mode,
+                                                       preview_name)
+
+        if not preview:
+            return
+
+        # TODO Plus/Minus if several workspaces
+        if len(filenames) != 1:
+            return
+
+        for filename in filenames:
+            ws_name = path.basename(filename)[:-4]
+            if not mtd.doesExist(ws_name):
+                Load(Filename=filename, OutputWorkspace=ws_name)
+        for i in range(len(self._previews) - 1, -1, -1):
+            if self._previews[i].get_preview_type() == preview.type():
+                self._previews[i].set_workspace_name(ws_name)
+                return
+        preview_model = PreviewModel(preview.type(), ws_name)
+        self._previews.append(preview_model)
+        self.sig_new_preview.emit(preview_model)
+
     def del_preview(self, previewModel):
         """
         Delete a preview model.
