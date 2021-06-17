@@ -99,6 +99,8 @@ def add_mock_methods_to_model_fitting_view(view):
     view.x_parameter = mock.Mock(return_value="A0")
     view.y_parameter = mock.Mock(return_value="A1")
     view.enable_view = mock.Mock()
+    view.set_selected_x_parameter = mock.Mock()
+    view.set_selected_y_parameter = mock.Mock()
 
     return view
 
@@ -113,6 +115,10 @@ def add_mock_methods_to_model_fitting_model(model, dataset_names, current_datase
     model.parameter_combination_group_name = mock.Mock(return_value=param_group_name)
     model.get_workspace_names_to_display_from_context = mock.Mock(return_value=results_table_names)
     model.create_x_and_y_parameter_combination_workspaces = mock.Mock(return_value=(x_parameters, y_parameters))
+    model.get_first_x_parameter_not = mock.Mock(return_value="A0")
+    model.get_first_y_parameter_not = mock.Mock(return_value="A1")
+    model.x_parameters = mock.Mock(return_value=x_parameters)
+    model.y_parameters = mock.Mock(return_value=y_parameters)
 
     return model
 

@@ -127,14 +127,14 @@ class WorkspaceNamingTest(unittest.TestCase):
 
         name = create_model_fitting_parameter_combination_name(results_table_name, x_parameter, y_parameter)
 
-        self.assertEqual(name, "Result1_A0_A1")
+        self.assertEqual(name, "Result1; A0 vs A1")
 
     def test_create_model_fitting_parameters_group_name(self):
         results_table_name = "Result1"
 
         name = create_model_fitting_parameters_group_name(results_table_name)
 
-        self.assertEqual(name, "Result1_Parameter_Combinations")
+        self.assertEqual(name, "Result1; Parameter Combinations")
 
     def test_create_multi_domain_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'

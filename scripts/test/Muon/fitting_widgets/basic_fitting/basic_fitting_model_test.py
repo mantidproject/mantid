@@ -322,9 +322,11 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.current_dataset_index = 0
         self.model.save_current_fit_function_to_undo_data()
+        self.assertEqual(self.model.number_of_undos(), 1)
 
         self.model.current_dataset_index = 1
         self.model.save_current_fit_function_to_undo_data()
+        self.assertEqual(self.model.number_of_undos(), 2)
 
         self.model.single_fit_functions = [None, None]
         self.model.fit_statuses = [None, None]

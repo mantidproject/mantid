@@ -25,7 +25,7 @@ class ModelFittingPresenterTest(unittest.TestCase):
         FrameworkManager.Instance()
 
     def setUp(self):
-        self.dataset_names = ["Results1_A0_A1", "Results1_A1_A0"]
+        self.dataset_names = ["Results1; A0 vs A1", "Results1; A1 vs A0"]
         self.current_dataset_index = 0
         self.start_x = 0.0
         self.end_x = 15.0
@@ -39,8 +39,8 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self.fit_function = FunctionFactory.createFunction("FlatBackground")
         self.single_fit_functions = [self.fit_function.clone(), self.fit_function.clone()]
 
-        self.param_combination_name = "Results1_A0_A1"
-        self.param_group_name = "Results1_Parameter_Combinations"
+        self.param_combination_name = "Results1; A0 vs A1"
+        self.param_group_name = "Results1; Parameter Combinations"
         self.result_table_names = ["Results1", "Results2"]
         self.x_parameters = ["A0", "A1"]
         self.y_parameters = ["A0", "A1"]
@@ -114,38 +114,66 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self.mock_model_current_result_table_index.assert_called_once_with(0)
         self.presenter._create_parameter_combination_workspaces.assert_called_once_with()
 
-    def test_that_handle_selected_x_and_y_changed_will_not_set_the_view_dataset_if_none_is_returned(self):
-        self.model.parameter_combination_workspace_name = mock.Mock(return_value=None)
-        self.presenter.handle_selected_x_and_y_changed()
+    def test_that_handle_selected_x_changed_will_find_a_different_y_parameter_if_it_matches_x(self):
+        self.presenter.update_selected_parameter_combination_workspace = mock.Mock()
+        self.view.y_parameter = mock.Mock(return_value="A0")
+
+        self.presenter.handle_selected_x_changed()
+
+        self.view.x_parameter.assert_called_once_with()
+        self.view.y_parameter.assert_called_once_with()
+        self.model.get_first_y_parameter_not.assert_called_once_with("A0")
+        self.view.set_selected_y_parameter.assert_called_once_with("A1")
+
+        self.presenter.update_selected_parameter_combination_workspace.assert_called_once_with()
+
+    def test_that_handle_selected_x_changed_will_not_find_a_different_y_parameter_if_it_is_different_to_x(self):
+        self.presenter.update_selected_parameter_combination_workspace = mock.Mock()
+
+        self.presenter.handle_selected_x_changed()
+
+        self.view.x_parameter.assert_called_once_with()
+        self.view.y_parameter.assert_called_once_with()
+        self.assertEqual(self.model.get_first_y_parameter_not.call_count, 0)
+        self.assertEqual(self.view.set_selected_y_parameter.call_count, 0)
+
+        self.presenter.update_selected_parameter_combination_workspace.assert_called_once_with()
+
+    def test_that_handle_selected_y_changed_will_find_a_different_x_parameter_if_it_matches_y(self):
+        self.presenter.update_selected_parameter_combination_workspace = mock.Mock()
+        self.view.x_parameter = mock.Mock(return_value="A1")
+
+        self.presenter.handle_selected_y_changed()
 
         self.view.y_parameter.assert_called_once_with()
         self.view.x_parameter.assert_called_once_with()
-        self.model.parameter_combination_workspace_name.assert_called_once_with("A0", "A1")
+        self.model.get_first_x_parameter_not.assert_called_once_with("A1")
+        self.view.set_selected_x_parameter.assert_called_once_with("A0")
 
-        self.assertEqual(self.mock_view_current_dataset_name.call_count, 0)
+        self.presenter.update_selected_parameter_combination_workspace.assert_called_once_with()
 
-    def test_that_handle_selected_x_and_y_changed_will_set_the_view_dataset(self):
-        self.presenter.handle_selected_x_and_y_changed()
+    def test_that_handle_selected_y_changed_will_not_find_a_different_x_parameter_if_it_is_different_to_y(self):
+        self.presenter.update_selected_parameter_combination_workspace = mock.Mock()
+
+        self.presenter.handle_selected_y_changed()
 
         self.view.y_parameter.assert_called_once_with()
         self.view.x_parameter.assert_called_once_with()
-        self.model.parameter_combination_workspace_name.assert_called_once_with("A0", "A1")
+        self.assertEqual(self.model.get_first_x_parameter_not.call_count, 0)
+        self.assertEqual(self.view.set_selected_x_parameter.call_count, 0)
 
-        self.mock_model_dataset_names.assert_called_once_with()
-        self.mock_model_current_dataset_index.assert_called_once_with(0)
-        self.mock_view_current_dataset_name.assert_called_once_with("Results1_A0_A1")
+        self.presenter.update_selected_parameter_combination_workspace.assert_called_once_with()
 
     def test_that_handle_parameter_combinations_created_successfully_will_update_the_view(self):
         self.presenter.handle_selected_x_and_y_changed = mock.Mock()
 
-        self.presenter.handle_parameter_combinations_created_successfully(self.x_parameters, self.y_parameters)
+        self.presenter.handle_parameter_combinations_created_successfully()
 
-        self.view.update_x_and_y_parameters.assert_called_once_with(self.x_parameters, self.y_parameters)
         self.mock_model_dataset_names.assert_has_calls([mock.call(), mock.call()])
         self.view.set_datasets_in_function_browser.assert_called_once_with(self.dataset_names)
         self.view.update_dataset_name_combo_box.assert_called_once_with(self.dataset_names)
-
-        self.presenter.handle_selected_x_and_y_changed.assert_called_once_with()
+        self.view.update_y_parameters.assert_called_once_with(self.y_parameters)
+        self.view.update_x_parameters.assert_called_once_with(self.x_parameters, emit_signal=True)
 
     def test_that_handle_parameter_combinations_error_will_show_a_warning_in_the_view(self):
         error = "Error message"
@@ -174,6 +202,13 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self.model.get_workspace_names_to_display_from_context.assert_called_once_with()
         self.mock_model_result_table_names.assert_has_calls([mock.call(self.result_table_names), mock.call()])
         self.view.update_result_table_names.assert_called_once_with(self.result_table_names)
+
+    def test_that_update_selected_parameter_combination_workspace_calls_the_expected_methods(self):
+        self.presenter.update_selected_parameter_combination_workspace()
+
+        self.mock_model_dataset_names.assert_called_once_with()
+        self.mock_model_current_dataset_index.assert_called_once_with(0)
+        self.mock_view_current_dataset_name.assert_called_once_with(self.param_combination_name)
 
     def test_that_clear_current_fit_function_for_undo_will_only_clear_the_current_function(self):
         self.presenter.clear_current_fit_function_for_undo()

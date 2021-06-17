@@ -64,7 +64,8 @@ class ModelFittingViewTest(unittest.TestCase, QtWidgetFinder):
         x_parameters = ["workspace_name", "A0", "A1"]
         y_parameters = ["workspace_name", "A0", "A1", "Chi Squared"]
 
-        self.view.update_x_and_y_parameters(x_parameters, y_parameters)
+        self.view.update_x_parameters(x_parameters)
+        self.view.update_y_parameters(y_parameters)
 
         x_data = [self.view.model_fitting_data_selector.x_selector.itemText(i)
                   for i in range(self.view.model_fitting_data_selector.x_selector.count())]

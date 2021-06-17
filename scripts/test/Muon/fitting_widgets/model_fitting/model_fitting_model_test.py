@@ -112,14 +112,14 @@ class ModelFittingModelTest(unittest.TestCase):
 
     def test_that_parameter_combination_workspace_name_returns_the_expected_name_for_the_provided_parameters(self):
         self.model.result_table_names = self.result_table_names
-        self.assertEqual(self.model.parameter_combination_workspace_name("A0", "A1"), "Result1_A0_A1")
+        self.assertEqual(self.model.parameter_combination_workspace_name("A0", "A1"), "Result1; A0 vs A1")
 
     def test_that_parameter_combination_workspace_name_returns_none_when_there_are_no_results_tables(self):
         self.assertEqual(self.model.parameter_combination_workspace_name("A0", "A1"), None)
 
     def test_that_parameter_combination_group_name_returns_the_expected_name_for_the_provided_parameters(self):
         self.model.result_table_names = self.result_table_names
-        self.assertEqual(self.model.parameter_combination_group_name(), "Result1_Parameter_Combinations")
+        self.assertEqual(self.model.parameter_combination_group_name(), "Result1; Parameter Combinations")
 
     def test_that_parameter_combination_group_name_returns_none_when_there_are_no_results_tables(self):
         self.assertEqual(self.model.parameter_combination_group_name(), None)
@@ -164,16 +164,16 @@ class ModelFittingModelTest(unittest.TestCase):
 
         self.model.create_x_and_y_parameter_combination_workspaces()
 
-        self.assertTrue(check_if_workspace_exist("Result1_Parameter_Combinations"))
-        self.assertTrue(check_if_workspace_exist("Result1_workspace_name_workspace_name"))
-        self.assertTrue(check_if_workspace_exist("Result1_workspace_name_A0"))
-        self.assertTrue(check_if_workspace_exist("Result1_workspace_name_A1"))
-        self.assertTrue(check_if_workspace_exist("Result1_A0_A0"))
-        self.assertTrue(check_if_workspace_exist("Result1_A0_workspace_name"))
-        self.assertTrue(check_if_workspace_exist("Result1_A0_A1"))
-        self.assertTrue(check_if_workspace_exist("Result1_A1_A1"))
-        self.assertTrue(check_if_workspace_exist("Result1_A1_workspace_name"))
-        self.assertTrue(check_if_workspace_exist("Result1_A1_A0"))
+        self.assertTrue(check_if_workspace_exist("Result1; Parameter Combinations"))
+        self.assertTrue(not check_if_workspace_exist("Result1; workspace_name vs workspace_name"))
+        self.assertTrue(check_if_workspace_exist("Result1; workspace_name vs A0"))
+        self.assertTrue(check_if_workspace_exist("Result1; workspace_name vs A1"))
+        self.assertTrue(not check_if_workspace_exist("Result1; A0 vs A0"))
+        self.assertTrue(check_if_workspace_exist("Result1; A0 vs workspace_name"))
+        self.assertTrue(check_if_workspace_exist("Result1; A0 vs A1"))
+        self.assertTrue(not check_if_workspace_exist("Result1; A1 vs A1"))
+        self.assertTrue(check_if_workspace_exist("Result1; A1 vs workspace_name"))
+        self.assertTrue(check_if_workspace_exist("Result1; A1 vs A0"))
 
 
 if __name__ == '__main__':

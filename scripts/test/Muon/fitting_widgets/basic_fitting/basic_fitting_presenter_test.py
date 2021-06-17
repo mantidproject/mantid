@@ -294,6 +294,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
     def test_that_handle_start_x_updated_will_use_the_max_start_x_when_the_set_start_x_is_too_large(self):
         x_upper = -0.1
         self.model.x_limits_of_workspace = mock.Mock(return_value=(self.start_x, x_upper))
+        self.model.is_equal_to_n_decimals = mock.Mock(return_value=False)
 
         self.presenter.handle_start_x_updated()
 
