@@ -275,6 +275,48 @@ class PolDiffILLReduction(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=tmp_ws, OutputWorkspace=ws)
 
     @staticmethod
+    def _merge_twoTheta_positions(ws):
+        """Merges data according to common 2theta values, available from metadata."""
+        numors = dict()
+        for name in mtd[ws].getNames():
+            two_theta_orientation = mtd[name].getRun().getLogData('2theta.requested').value
+            if two_theta_orientation in numors:
+                numors[two_theta_orientation].append(name)
+            else:
+                numors[two_theta_orientation] = list()
+        merged_group = []
+        for key in numors:
+            merged_ws = "{}_{}".format(ws, key)
+            merged_group.append(merged_ws)
+            MergeRuns(InputWorkspaces=numors[key], OutputWorkspace=merged_ws)
+            CreateSingleValuedWorkspace(DataValue=len(numors[key]), OutputWorkspace='norm')
+            Divide(LHSWorkspace=output_ws, RHSWorkspace='norm', OutputWorkspace=merged_ws)
+        DeleteWorkspaces(WorkspaceList=['norm', ws])
+        GroupWorkspaces(InputWorkspaces=merged_group, OutputWorkspace=ws)
+        return ws
+
+    @staticmethod
+    def _match_attenuation_workspace(sample_entry, attenuation_ws):
+        correction_ws = attenuation_ws + '_matched_corr'
+        CloneWorkspace(InputWorkspace=attenuation_ws, OutputWorkspace=correction_ws)
+        converted_entry = sample_entry + '_converted'
+        CloneWorkspace(InputWorkspace=sample_entry, OutputWorkspace=converted_entry)
+        ConvertSpectrumAxis(InputWorkspace=converted_entry, Target='SignedTheta', OutputWorkspace=converted_entry)
+        Transpose(InputWorkspace=converted_entry, OutputWorkspace=converted_entry)
+        ConvertAxisByFormula(InputWorkspace=converted_entry, Axis='X', Formula='-x', OutputWorkspace=converted_entry)
+        for entry_no, entry in enumerate(mtd[correction_ws]):
+            origin_ws_name = mtd[attenuation_ws][entry_no].name()
+            factor_name = origin_ws_name[origin_ws_name.rfind("_"):]
+            matched_ws = entry.name()[:-1] + factor_name
+            RenameWorkspace(InputWorkspace=entry, OutputWorkspace=matched_ws)
+            ConvertToPointData(InputWorkspace=matched_ws, OutputWorkspace=matched_ws)
+            SplineInterpolation(WorkspaceToMatch=converted_entry, WorkspaceToInterpolate=matched_ws,
+                                OutputWorkspace=matched_ws, OutputWorkspaceDeriv='')
+            Transpose(InputWorkspace=matched_ws, OutputWorkspace=matched_ws)
+        DeleteWorkspace(Workspace=converted_entry)
+        return correction_ws
+
+    @staticmethod
     def _rename_input_with_polarisation_info(ws):
         """Renames workspaces in the input workspace group to bear more information about the polarisation
         orientation, namely direction and the flipper state than the default '_index'."""
@@ -327,26 +369,6 @@ class PolDiffILLReduction(PythonAlgorithm):
             if self.getPropertyValue("ProcessAs") not in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']:
                 raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
                                    + "The provided input does not fit in any of these measurement types.")
-
-    def _merge_twoTheta_positions(self, ws):
-        """Merges data according to common 2theta values, available from metadata."""
-        numors = dict()
-        for name in mtd[ws].getNames():
-            two_theta_orientation = mtd[name].getRun().getLogData('2theta.requested').value
-            if two_theta_orientation in numors:
-                numors[two_theta_orientation].append(name)
-            else:
-                numors[two_theta_orientation] = list()
-        merged_group = []
-        for key in numors:
-            merged_ws = "{}_{}".format(ws, key)
-            merged_group.append(merged_ws)
-            MergeRuns(InputWorkspaces=numors[key], OutputWorkspace=merged_ws)
-            CreateSingleValuedWorkspace(DataValue=len(numors[key]), OutputWorkspace='norm')
-            Divide(LHSWorkspace=output_ws, RHSWorkspace='norm', OutputWorkspace=merged_ws)
-        DeleteWorkspaces(WorkspaceList=['norm', ws])
-        GroupWorkspaces(InputWorkspaces=merged_group, OutputWorkspace=ws)
-        return ws
 
     def _merge_polarisations(self, ws, average_detectors=False):
         """Merges workspaces with the same polarisation inside the provided WorkspaceGroup either
@@ -703,27 +725,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         for entry in mtd[attenuation_ws]:
             ConvertToHistogram(InputWorkspace=entry, OutputWorkspace=entry)
         return attenuation_ws
-
-    @staticmethod
-    def _match_attenuation_workspace(sample_entry, attenuation_ws):
-        correction_ws = attenuation_ws + '_matched_corr'
-        CloneWorkspace(InputWorkspace=attenuation_ws, OutputWorkspace=correction_ws)
-        converted_entry = sample_entry + '_converted'
-        CloneWorkspace(InputWorkspace=sample_entry, OutputWorkspace=converted_entry)
-        ConvertSpectrumAxis(InputWorkspace=converted_entry, Target='SignedTheta', OutputWorkspace=converted_entry)
-        Transpose(InputWorkspace=converted_entry, OutputWorkspace=converted_entry)
-        ConvertAxisByFormula(InputWorkspace=converted_entry, Axis='X', Formula='-x', OutputWorkspace=converted_entry)
-        for entry_no, entry in enumerate(mtd[correction_ws]):
-            origin_ws_name = mtd[attenuation_ws][entry_no].name()
-            factor_name = origin_ws_name[origin_ws_name.rfind("_"):]
-            matched_ws = entry.name()[:-1] + factor_name
-            RenameWorkspace(InputWorkspace=entry, OutputWorkspace=matched_ws)
-            ConvertToPointData(InputWorkspace=matched_ws, OutputWorkspace=matched_ws)
-            SplineInterpolation(WorkspaceToMatch=converted_entry, WorkspaceToInterpolate=matched_ws,
-                                OutputWorkspace=matched_ws, OutputWorkspaceDeriv='')
-            Transpose(InputWorkspace=matched_ws, OutputWorkspace=matched_ws)
-        DeleteWorkspace(Workspace=converted_entry)
-        return correction_ws
 
     def _apply_self_attenuation_correction(self, sample_ws, empty_ws):
         """Applies the self-attenuation correction based on the Palmaan-Pings Monte-Carlo calculation, taking into account
