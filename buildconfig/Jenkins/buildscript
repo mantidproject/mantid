@@ -337,11 +337,12 @@ if [ -e $BUILD_DIR/CMakeCache.txt ]; then
 fi
 
 ###############################################################################
-# Conda prefix
+# Conda requirements
 ###############################################################################
 
 if [ ${ON_CONDA} ]; then
     CMAKE_PREFIX="-DCMAKE_PREFIX_PATH=${CONDA_PREFIX}"
+    CLEANBUILD=true
 fi
 
 ###############################################################################
