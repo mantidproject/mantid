@@ -34,6 +34,7 @@ Improvements
 Bugfixes
 ########
 - Sequential fitting in the EngDiff UI now uses the output of the last successful fit (as opposed to the previous fit) as the initial parameters for the next fit.
+- An empty Engineering Diffraction interface is no longer saved if the user saves a project having previously had the interface open at some point in that session
 
 
 Single Crystal Diffraction
