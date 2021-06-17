@@ -199,6 +199,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             result['NumberOfWedges'] = "For I(Phi,Q) processing, the number " \
                                        "of wedges must be different from 0."
 
+        if self.getPropertyValue('OutputWorkspace')[0].isdigit():
+            result['OutputWorkspace'] = "Output workspace name must be alphanumeric, it should start with a letter."
+
         return result
 
     def validateQRanges(self):

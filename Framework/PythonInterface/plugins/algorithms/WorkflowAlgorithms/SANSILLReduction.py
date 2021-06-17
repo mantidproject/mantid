@@ -844,7 +844,7 @@ class SANSILLReduction(PythonAlgorithm):
     def _split_kinetic_frames(self, ws):
         n_frames = mtd[ws].blocksize()
         n_hist = mtd[ws].getNumberHistograms()
-        wavelength = mtd[ws].getRun().getLogData('wavelength').value
+        wavelength = round(mtd[ws].getRun().getLogData('wavelength').value * 100) / 100
         wave_bins = [wavelength * 0.9, wavelength * 1.1]
         frames = []
         for frame_index in range(n_frames):
