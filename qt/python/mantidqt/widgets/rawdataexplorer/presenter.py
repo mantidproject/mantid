@@ -55,9 +55,6 @@ class RawDataExplorerPresenter(QObject):
 
         self.view.accumulate.stateChanged.connect(self.on_accumulate_checked)
 
-        self.view.fileTree.clicked.connect(self.model.on_file_clicked)
-        self.view.fileTree.doubleClicked.connect(self.model.on_file_clicked)
-
         self.view.instrumentSelector.currentIndexChanged.connect(self.model.on_instrument_changed)
         self.view.previewType.currentIndexChanged.connect(self.populate_targets)
         self.view.acquisitionType.currentIndexChanged.connect(self.populate_previews)
@@ -113,6 +110,15 @@ class RawDataExplorerPresenter(QObject):
         # TODO get the geometry attribute from the facility file; this means adding another getter and
         #  propagating the change through the preview manager (?)
         return preview.type()
+
+    def on_selection_changed(self):
+        """
+        Triggered when the selection changed in the file system widget.
+        """
+        selection = self.view.get_selection()
+        target_type = self.view.get_current_target()
+        acquision_mode = self.view.get_current_acquisition()
+        preview_name = self.view.get_current_preview()
 
     def show_ws(self, ws_to_show):
         """

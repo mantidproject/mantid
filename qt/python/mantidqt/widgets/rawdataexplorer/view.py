@@ -16,6 +16,8 @@ from mantid.simpleapi import *
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
 from mantidqt.plotting.functions import pcolormesh
 
+from os import path
+
 
 class RawDataExplorerView(QWidget):
     """
@@ -27,6 +29,16 @@ class RawDataExplorerView(QWidget):
     """
     _FILE_SYSTEM_FILTERS = ["*.nxs"]
 
+    """
+    Presenter.
+    """
+    _presenter = None
+
+    """
+    List of selected files in the tree widget.
+    """
+    _current_selection = None
+
     file_tree_path_changed = Signal(str)
 
     def __init__(self, presenter, parent=None):
@@ -34,7 +46,9 @@ class RawDataExplorerView(QWidget):
 
         self.ui = load_ui(__file__, 'rawdataexplorer.ui', baseinstance=self)
 
-        self.presenter = presenter
+        self._presenter = presenter
+
+        self._current_selection = set()
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setup_connections()
@@ -50,10 +64,38 @@ class RawDataExplorerView(QWidget):
         self.fileTree.header().setSectionResizeMode(1, QHeaderView.Fixed)
         self.fileTree.header().setSectionResizeMode(2, QHeaderView.Fixed)
         self.fileTree.header().setSectionResizeMode(3, QHeaderView.Fixed)
+        self.fileTree.clicked.connect(self.on_file_clicked)
 
     def closeEvent(self, event):
         self.deleteLater()
         super(RawDataExplorerView, self).closeEvent(event)
+
+    def get_selection(self):
+        """
+        Get the selected files. The set contains the full path of the files and
+        the files match the tree widget name filter.
+        @return (set(str)): selected filenames
+        """
+        return self._current_selection
+
+    def on_file_clicked(self, index):
+        """
+        Triggered when a file is clicked in the tree widget. This method check
+        the selected items and sends a signal if it changed.
+        """
+        selection_model = self.fileTree.selectionModel()
+        file_model = self.fileTree.model()
+        selected_indexes = selection_model.selectedRows()
+        selection = set()
+        for index in selected_indexes:
+            file_path = file_model.filePath(index)
+            if not path.isfile(file_path):
+                continue
+            if file_path not in selection:
+                selection.add(file_path)
+        if selection != self._current_selection:
+            self._current_selection = selection
+            self._presenter.on_selection_changed()
 
     def setup_connections(self):
         """
