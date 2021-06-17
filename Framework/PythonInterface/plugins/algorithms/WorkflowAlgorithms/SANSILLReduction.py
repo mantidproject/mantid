@@ -268,18 +268,19 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('SolventInputWorkspace', sample)
 
-    def _normalise(self, ws):
+    def _normalise(self, ws, monID=None):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
             @param ws : the input workspace
         """
         normalise_by = self.getPropertyValue('NormaliseBy')
-        if self._instrument == "D33":
-            monID = 500000
-        elif self._instrument == "D16":
-            monID = 500001
-        else:
-            monID = 100000
+        if monID is None:
+            if self._instrument == "D33":
+                monID = 500000
+            elif self._instrument == "D16":
+                monID = 500001
+            else:
+                monID = 100000
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
@@ -860,10 +861,11 @@ class SANSILLReduction(PythonAlgorithm):
     def _process_kinetic_sample(self, ws):
 
         if self.getPropertyValue('NormaliseBy') == 'Timer':
-            self.log().warning('Unable to normalise by time for kinetic counts since duration is not available in the file, '
-                               'switching to normalisation by monitor.')
+            # trick the normalise to use the second monitor which contains the durations per frame
             self.setPropertyValue('NormaliseBy', 'Monitor')
-        self._normalise(ws)
+            self._normalise(ws, 100001)
+        else:
+            self._normalise(ws)
         group_name = ws
         frames = self._split_kinetic_frames(ws)
         frames_to_group = []

@@ -317,9 +317,18 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
   nextIndex = loadDataFromTubes(dataLeft, m_defaultBinning, nextIndex, type);
   nextIndex = loadDataFromTubes(dataRight, m_defaultBinning, nextIndex, type);
   nextIndex = loadDataFromMonitors(firstEntry, nextIndex, type);
-  if (dataCenter.dim2() != 1) {
-    // there is no 2nd monitor in kinetic, so we load the first monitor once again to preserve the dimensions
+  if (dataCenter.dim2() != 1 && nextIndex < numberOfHistograms) {
+    // there are a few runs with no 2nd monitor in kinetic, so we load the first monitor once again to preserve the
+    // dimensions and x-axis
     nextIndex = loadDataFromMonitors(firstEntry, nextIndex, type);
+  }
+  // hijack the second monitor spectrum to store per-frame durations to enable time normalisation
+  if (dataCenter.dim2() != 1) {
+    NXFloat durations = firstEntry.openNXFloat("slices");
+    durations.load();
+    float *durations_p = durations();
+    const HistogramData::Counts histoCounts(durations_p, durations_p + dataCenter.dim2());
+    m_localWorkspace->setCounts(nextIndex - 1, std::move(histoCounts));
   }
 }
 
