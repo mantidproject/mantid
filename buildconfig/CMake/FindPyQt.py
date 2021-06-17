@@ -110,6 +110,7 @@ def find_conda_env():
         return True, os.environ['CONDA_PREFIX']
     return False, None
 
+
 def main():
     # parse command line
     args = get_options()
