@@ -15,19 +15,29 @@
 
 namespace { // anonymous namespace
 
-// https://stackoverflow.com/questions/772355/how-to-inherit-from-stdostream
-class PyStdoutBuf : public std::streambuf {
-protected:
-  int overflow(int c) override {
-    PySys_WriteStdout("%c", c);
-    return 0;
+class PyStdoutSink {
+public:
+  typedef char char_type;
+  typedef boost::iostreams::sink_tag category;
+
+  std::streamsize write(const char *s, std::streamsize n) {
+    // PySys_WriteStdout truncates to 1000 chars
+    static const std::streamsize MAXSIZE = 1000;
+
+    std::streamsize written = std::min(n, MAXSIZE);
+    PySys_WriteStdout((boost::format("%%.%1%s") % written).str().c_str(), s);
+
+    return written;
   }
 };
 
-auto pyStreambuf = new PyStdoutBuf;
-auto pyOstream = std::ostream(pyStreambuf);
+// wrapper of that sink to be a stream
+PyStdoutSink pyStdoutSinkInstance = PyStdoutSink(); // needs to be initialized separately
+boost::iostreams::stream<PyStdoutSink> PyStdout(pyStdoutSinkInstance);
+
 } // anonymous namespace
 
 namespace Poco {
-PythonStdoutChannel::PythonStdoutChannel() : ConsoleChannel(pyOstream) {}
+PythonStdoutChannel::PythonStdoutChannel() : ConsoleChannel(PyStdout) {}
+PyStdoutChannel::PyStdoutChannel() : PyStdoutChannel::PyOstream(), ConsoleChannel(m_ostream) {}
 } // namespace Poco

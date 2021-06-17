@@ -18,7 +18,9 @@
 #pragma once
 
 #include "MantidPythonInterface/core/DllConfig.h"
+#include "MantidPythonInterface/core/WrapPython.h"
 #include <Poco/ConsoleChannel.h>
+#include <iostream>
 
 namespace Poco {
 
@@ -27,4 +29,27 @@ public:
   /// Constructor for PythonStdoutChannel
   PythonStdoutChannel();
 };
+
+/// std::ostream that redirects to PySys_WriteStdout
+class MANTID_PYTHONINTERFACE_CORE_DLL PyOstream {
+public:
+  PyOstream() : m_ostream(new PyStdoutBuf){};
+  std::ostream m_ostream;
+
+private:
+  /// https://stackoverflow.com/questions/772355/how-to-inherit-from-stdostream
+  class PyStdoutBuf : public std::streambuf {
+  protected:
+    int overflow(int c) override {
+      PySys_WriteStdout("%c", c);
+      return 0;
+    }
+  };
+};
+
+class MANTID_PYTHONINTERFACE_CORE_DLL PyStdoutChannel : public PyOstream, public ConsoleChannel {
+public:
+  PyStdoutChannel();
+};
+
 } // namespace Poco
