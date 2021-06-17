@@ -183,6 +183,14 @@ class FocusModel(object):
                AllowDifferentNumberSpectra=True)
         # apply calibration from specified region of interest
         ApplyDiffCal(InstrumentWorkspace=focused_sample, CalibrationWorkspace=region_calib)
+        # set bankid for use in fit tab
+        run = focused_sample.getRun()
+        if region_calib == "engggui_calibration_bank_1":
+            run.addProperty("bankid", 1, True)
+        elif region_calib == "engggui_calibration_bank_2":
+            run.addProperty("bankid", 2, True)
+        else:
+            run.addProperty("bankid", 3, True)
         # output in both dSpacing and TOF
         ConvertUnits(InputWorkspace=focused_sample, OutputWorkspace=tof_output_name, Target='TOF')
         DeleteWorkspace(curves_rebinned)
