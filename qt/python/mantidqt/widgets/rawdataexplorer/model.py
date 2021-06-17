@@ -38,6 +38,9 @@ class RawDataExplorerModel(QObject):
         self.presenter.populate_acquisitions()
         # TODO emit a signal to modify both preview manager and target
 
+    def new_preview(self, filename, instrument, acquisition_mode, preview_name):
+        pass
+
     def on_file_clicked(self, file_index):
         """
         Slot triggered by clicking on a file. If it is not loaded already, tries to do so.
