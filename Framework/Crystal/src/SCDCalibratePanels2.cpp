@@ -107,29 +107,22 @@ void SCDCalibratePanels2::init() {
   // ----- L1 -----
   // --------------
   declareProperty("CalibrateL1", true, "Change the L1(source to sample) distance");
-  declareProperty("ToleranceL1", 5e-4, mustBeNonNegative, "Delta L1 below this value (in meter) is treated as 0.0");
   declareProperty("SearchRadiusL1", 0.1, mustBeNonNegative,
                   "Search radius of delta L1 in meters, which is used to constrain optimization search space"
                   "when calibrating L1");
   // editability
-  setPropertySettings("ToleranceL1", std::make_unique<EnabledWhenProperty>("CalibrateL1", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchRadiusL1", std::make_unique<EnabledWhenProperty>("CalibrateL1", IS_EQUAL_TO, "1"));
   // grouping
   setPropertyGroup("CalibrateL1", CALIBRATION);
-  setPropertyGroup("ToleranceL1", CALIBRATION);
   setPropertyGroup("SearchRadiusL1", CALIBRATION);
   // ----------------
   // ----- bank -----
   // ----------------
   declareProperty("CalibrateBanks", false, "Calibrate position and orientation of each bank.");
-  declareProperty("ToleranceTransBank", 1e-6, mustBeNonNegative,
-                  "Delta translation of bank (in meter) below this value is treated as 0.0");
   declareProperty(
       "SearchRadiusTransBank", 5e-2, mustBeNonNegative,
       "This is the search radius (in meter) when calibrating component translations, used to constrain optimization"
       "search space when calibration translation of banks");
-  declareProperty("ToleranceRotBank", 1e-3, mustBeNonNegative,
-                  "Misorientation of bank (in deg) below this value is treated as 0.0");
   declareProperty("SearchradiusRotXBank", 1.0, mustBeNonNegative,
                   "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
                   "optimization search space");
@@ -140,10 +133,8 @@ void SCDCalibratePanels2::init() {
                   "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
                   "optimization search space");
   // editability
-  setPropertySettings("ToleranceTransBank", std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchRadiusTransBank",
                       std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
-  setPropertySettings("ToleranceRotBank", std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchradiusRotXBank",
                       std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchradiusRotYBank",
@@ -152,9 +143,7 @@ void SCDCalibratePanels2::init() {
                       std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
   // grouping
   setPropertyGroup("CalibrateBanks", CALIBRATION);
-  setPropertyGroup("ToleranceTransBank", CALIBRATION);
   setPropertyGroup("SearchRadiusTransBank", CALIBRATION);
-  setPropertyGroup("ToleranceRotBank", CALIBRATION);
   setPropertyGroup("SearchradiusRotXBank", CALIBRATION);
   setPropertyGroup("SearchradiusRotYBank", CALIBRATION);
   setPropertyGroup("SearchradiusRotZBank", CALIBRATION);
@@ -162,33 +151,24 @@ void SCDCalibratePanels2::init() {
   // ----- T0 -----
   // --------------
   declareProperty("CalibrateT0", false, "Calibrate the T0 (initial TOF)");
-  declareProperty("ToleranceT0", 1e-3, mustBeNonNegative,
-                  "Shift of initial TOF (in ms) below this value is treated as 0.0");
   declareProperty("SearchRadiusT0", 10.0, mustBeNonNegative,
                   "Search radius of T0 (in ms), used to constrain optimization search space");
   // editability
-  setPropertySettings("ToleranceT0", std::make_unique<EnabledWhenProperty>("CalibrateT0", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchRadiusT0", std::make_unique<EnabledWhenProperty>("CalibrateT0", IS_EQUAL_TO, "1"));
   // grouping
   setPropertyGroup("CalibrateT0", CALIBRATION);
-  setPropertyGroup("ToleranceT0", CALIBRATION);
   setPropertyGroup("SearchRadiusT0", CALIBRATION);
   // ---------------------
   // ----- samplePos -----
   // ---------------------
   declareProperty("TuneSamplePosition", false, "Fine tunning sample position");
-  declareProperty("ToleranceSamplePos", 1e-6, mustBeNonNegative,
-                  "Sample position change (in meter) below this value is treated as 0.0");
   declareProperty("SearchRadiusSamplePos", 0.1, mustBeNonNegative,
                   "Search radius of sample position change (in meters), used to constrain optimization search space");
   // editability
-  setPropertySettings("ToleranceSamplePos",
-                      std::make_unique<EnabledWhenProperty>("TuneSamplePosition", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchRadiusSamplePos",
                       std::make_unique<EnabledWhenProperty>("TuneSamplePosition", IS_EQUAL_TO, "1"));
   // grouping
   setPropertyGroup("TuneSamplePosition", CALIBRATION);
-  setPropertyGroup("ToleranceSamplePos", CALIBRATION);
   setPropertyGroup("SearchRadiusSamplePos", CALIBRATION);
 
   // Output options group
@@ -465,7 +445,6 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   ITableWorkspace_sptr rst = fitL1_alg->getProperty("OutputParameters");
   // get results for L1
   double dL1_optimized = rst->getRef<double>("Value", 2);
-  double tor_dL1 = getProperty("ToleranceL1");
 
   // get results for T0 (optional)
   double dT0_optimized = rst->getRef<double>("Value", 6);
