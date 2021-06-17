@@ -249,10 +249,14 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 RenameWorkspace(InputWorkspace=data_incoherent, OutputWorkspace=incoherent_cs)
                 separated_cs.append(incoherent_cs)
             elif nMeasurements == 6 or nMeasurements == 10:
-                sigma_y_sf = mtd[ws][entry_no+2]
-                sigma_y_nsf = mtd[ws][entry_no+3]
-                sigma_x_sf = mtd[ws][entry_no+4]
-                sigma_x_nsf = mtd[ws][entry_no+5]
+                sigma_x_sf = mtd[ws][entry_no+2]
+                sigma_x_nsf = mtd[ws][entry_no+3]
+                sigma_y_sf = mtd[ws][entry_no+4]
+                sigma_y_nsf = mtd[ws][entry_no+5]
+                if any(["Y" in ws_name for ws_name in [sigma_x_sf.name(), sigma_x_nsf.name()]]):
+                    # if the order of X and Y polarisations is different than assumed, swap
+                    sigma_x_sf,  sigma_y_sf = sigma_y_sf, sigma_x_sf
+                    sigma_x_nsf, sigma_y_nsf = sigma_y_nsf, sigma_x_nsf
                 average_magnetic_cs = numor + '_AverageMagnetic'
                 sf_magnetic_cs = numor + '_SFMagnetic'
                 nsf_magnetic_cs = numor + '_NSFMagnetic'
