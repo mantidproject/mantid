@@ -36,7 +36,10 @@ def needs_processing(property_value, process_reduction_type):
         run_number = get_run_number(property_value)
         ws_name = run_number + '_' + process_reduction_type
         if mtd.doesExist(ws_name):
-            run = mtd[ws_name].getRun()
+            if isinstance(mtd[ws_name], WorkspaceGroup):
+                run = mtd[ws_name][0].getRun()
+            else:
+                run = mtd[ws_name].getRun()
             if run.hasProperty('ProcessedAs'):
                 process = run.getLogData('ProcessedAs').value
                 if process == process_reduction_type:
