@@ -10,6 +10,7 @@ from os import path
 from qtpy.QtCore import *
 
 from mantid.simpleapi import Load, config, mtd, Plus, Minus
+from mantid.api import PreviewManager
 
 
 class PreviewModel(QObject):
@@ -62,6 +63,18 @@ class RawDataExplorerModel(QObject):
     Model for the RawDataExplorer widget
     """
 
+    """
+    Signal that a preview model has been added.
+    Args:
+        PreviewModel: the new preview model
+    """
+    sig_new_preview = Signal(PreviewModel)
+
+    """
+    List of the current previews.
+    """
+    _previews = None
+
     def __init__(self, presenter):
         """
         Initialise the model
@@ -69,6 +82,8 @@ class RawDataExplorerModel(QObject):
         """
         super().__init__()
         self.presenter = presenter
+
+        self._previews = list()
 
         self.instrument = config["default.instrument"]
 
@@ -83,8 +98,28 @@ class RawDataExplorerModel(QObject):
         self.presenter.populate_acquisitions()
         # TODO emit a signal to modify both preview manager and target
 
-    def new_preview(self, filename, instrument, acquisition_mode, preview_name):
-        pass
+    def new_preview(self, filenames, instrument, acquisition_mode, preview_name):
+        """
+        Add a preview to the model.
+        """
+        technique = config.getInstrument(instrument).techniques()[0]
+        preview = PreviewManager.Instance().getPreview("ILL", technique,
+                                                       acquisition_mode,
+                                                       preview_name)
+        if not preview:
+            return
+
+        # TODO Plus/Minus if several workspaces
+        if len(filenames) != 1:
+            return
+
+        for filename in filenames:
+            ws_name = path.basename(filename)[:-4]
+            if not mtd.doesExist(ws_name):
+                Load(Filename=filename, OutputWorkspace=ws_name)
+        preview_model = PreviewModel(preview.type(), ws_name)
+        self._previews.append(preview_model)
+        self.sig_new_preview.emit(preview_model)
 
     def on_file_clicked(self, file_index):
         """
