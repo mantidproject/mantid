@@ -1564,10 +1564,11 @@ class RunDescriptor(PropDescriptor):
 
         # remove normalised background
         Minus(ws,ebg_local_name,OutputWorkspace = ws.name(),ClearRHSWorkspace=copy_created)
-        if ebg_local_name in mtd:
-            DeleteWorkspace(ebg_local_name)
-        if ebg_local_name+'_monitors' in mtd:
-            DeleteWorkspace(ebg_local_name+'_monitors')
+        if copy_created:
+            if ebg_local_name in mtd:
+                DeleteWorkspace(ebg_local_name)
+            if ebg_local_name+'_monitors' in mtd:
+                DeleteWorkspace(ebg_local_name+'_monitors')
 
         AddSampleLog(Workspace=ws,LogName="empty_bg_removed",LogText=str(ebg_local_name))
         RunDescriptor._logger('**** Empty instrument background {0} has been removed from workspace {1}'.
