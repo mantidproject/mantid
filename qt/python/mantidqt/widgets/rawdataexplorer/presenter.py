@@ -165,7 +165,12 @@ class RawDataExplorerPresenter(QObject):
         instrument = self.view.get_current_instrument()
         acquision_mode = self.view.get_current_acquisition()
         preview_name = self.view.get_current_preview()
-        self.model.new_preview(selection, instrument, acquision_mode, preview_name)
+        self.view.fileTree.setCursor(Qt.BusyCursor)
+        if self.view.get_current_target() == "New":
+            self.model.new_preview(selection, instrument, acquision_mode, preview_name)
+        else:
+            self.model.modify_preview(selection, instrument, acquision_mode, preview_name)
+        self.view.fileTree.unsetCursor()
 
     def on_new_preview(self, previewModel):
         """
