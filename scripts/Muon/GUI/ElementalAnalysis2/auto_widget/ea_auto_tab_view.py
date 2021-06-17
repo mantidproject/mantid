@@ -149,7 +149,9 @@ class EAAutoTabView(QtWidgets.QWidget):
 
         self.show_peaks_table_combobox = QtWidgets.QComboBox(self)
         self.show_peaks_group_table_combobox = QtWidgets.QComboBox(self)
+        self.show_peaks_group_table_combobox.setSizePolicy(size_policy)
         self.show_peaks_table_button = QtWidgets.QPushButton(" Show peaks ", self)
+        self.show_peaks_table_button.setSizePolicy(size_policy)
 
         self.show_peaks_hlayout.addWidget(self.show_peaks_group_table_combobox)
         self.show_peaks_hlayout.addWidget(self.show_peaks_table_combobox)
@@ -157,7 +159,9 @@ class EAAutoTabView(QtWidgets.QWidget):
 
         self.show_matches_table_combobox = QtWidgets.QComboBox(self)
         self.show_matches_group_table_combobox = QtWidgets.QComboBox(self)
+        self.show_matches_group_table_combobox.setSizePolicy(size_policy)
         self.show_matches_table_button = QtWidgets.QPushButton(" Show matches ", self)
+        self.show_matches_table_button.setSizePolicy(size_policy)
 
         self.show_matches_hlayout.addWidget(self.show_matches_group_table_combobox)
         self.show_matches_hlayout.addWidget(self.show_matches_table_combobox)
