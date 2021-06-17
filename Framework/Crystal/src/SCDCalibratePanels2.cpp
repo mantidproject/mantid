@@ -466,19 +466,10 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   // get results for L1
   double dL1_optimized = rst->getRef<double>("Value", 2);
   double tor_dL1 = getProperty("ToleranceL1");
-  if (std::abs(dL1_optimized) < std::abs(tor_dL1)) {
-    calilog << "-- Fit L1 results below tolerance, zero it\n";
-    dL1_optimized = 0.0;
-  }
+
   // get results for T0 (optional)
   double dT0_optimized = rst->getRef<double>("Value", 6);
-  double tor_dT0 = getProperty("ToleranceT0");
-  if (caliT0) {
-    if (std::abs(dT0_optimized) < std::abs(tor_dT0)) {
-      calilog << "-- Fit dT0 = " << dT0_optimized << " is below tolerance(" << tor_dT0 << "), zero it\n";
-      dT0_optimized = 0.0;
-    }
-  }
+
   // get results for sample pos
   // NOTE:
   //    if samplePos is not part of calibration, we will get zeros here, which means zero
@@ -486,18 +477,6 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   double dsx_optimized = rst->getRef<double>("Value", 7);
   double dsy_optimized = rst->getRef<double>("Value", 8);
   double dsz_optimized = rst->getRef<double>("Value", 9);
-  double tor_dsp = getProperty("ToleranceSamplePos");
-  tor_dsp = std::abs(tor_dsp);
-  if (tuneSamplepos) {
-    if ((std::abs(dsx_optimized) < tor_dsp) && (std::abs(dsy_optimized) < tor_dsp) &&
-        (std::abs(dsz_optimized) < tor_dsp)) {
-      calilog << "-- Tune SamplePos = (" << dsx_optimized << "," << dsy_optimized << "," << dsz_optimized
-              << ") is below tolerance (" << tor_dsp << "), zero it\n";
-      dsx_optimized = 0.0;
-      dsy_optimized = 0.0;
-      dsz_optimized = 0.0;
-    }
-  }
 
   // apply the cali results (for output cali table and file)
   adjustComponent(0.0, 0.0, dL1_optimized, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
@@ -619,76 +598,11 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     double drz = rstFitBank->getRef<double>("Value", 5);
 
     //-- step 4: update the instrument with optimization results
-    //           if the fit results are above the tolerance/threshold
     std::string bn = bankname;
     std::ostringstream calilog;
     if (pws->getInstrument()->getName().compare("CORELLI") == 0) {
       bn.append("/sixteenpack");
     }
-    // check if translation results need zeroing
-    double tolerance_translation = getProperty("ToleranceTransBank");
-    tolerance_translation = std::abs(tolerance_translation);
-    // NOTE:
-    // if the translation vector is effectively a zero vector, we should make it a
-    // proper one.
-    if ((std::abs(dx) < tolerance_translation) && // is dx<tor?
-        (std::abs(dy) < tolerance_translation) && // is dy<tor?
-        (std::abs(dz) < tolerance_translation)    // is dz<tor?
-    ) {
-      calilog << "-- Fit " << bn << " translation below tolerance, zero (dx, dy, dz)\n";
-      dx = 0.0;
-      dy = 0.0;
-      dz = 0.0;
-    }
-    // NOTE:
-    // if the translation vector has one component that is hitting the search bounds, the
-    // optimization setting is too tight and we should inform the users about this issue,
-    // and cowardly reject this results by zero the vector
-    double ddx = std::abs(std::abs(dx) - searchRadiusTran);
-    double ddy = std::abs(std::abs(dy) - searchRadiusTran);
-    double ddz = std::abs(std::abs(dz) - searchRadiusTran);
-    if ((ddx < tolerance_translation) || // is dx too close to search bounds?
-        (ddy < tolerance_translation) || // is dy too close to search bounds?
-        (ddz < tolerance_translation)    // is dz too close to search bounds?
-    ) {
-      calilog << "-- Fit " << bn << " translation hitting search bounds, please increase bounds.\n"
-              << "       also, cowardly refusing calibration results by zeroing (dx, dy, dz)\n";
-      dx = 0.0;
-      dy = 0.0;
-      dz = 0.0;
-    }
-
-    // check if rotation results need zeroing
-    double tolerance_rotation = getProperty("ToleranceRotBank");
-    tolerance_rotation = std::abs(tolerance_rotation);
-    // NOTE:
-    // if all components of the Euler angle vector is pratically zero, let's make it official
-    if ((std::abs(drx) < tolerance_rotation) && //
-        (std::abs(dry) < tolerance_rotation) && //
-        (std::abs(drz) < tolerance_rotation)    //
-    ) {
-      calilog << "-- Fit " << bn << " rotatoin below tolerance, zero (drx, dry, drz)\n";
-      drx = 0.0;
-      dry = 0.0;
-      drz = 0.0;
-    }
-    // NOTE:
-    // if any components of the resulting Euler angle is hitting the search bounds, we should warn
-    // the user (so that they can increase search bounds) and cowardly refuse the calibration results
-    double ddrx = std::abs(std::abs(drx) - searchRadiusRotX);
-    double ddry = std::abs(std::abs(dry) - searchRadiusRotY);
-    double ddrz = std::abs(std::abs(drz) - searchRadiusRotZ);
-    if ((ddrx < tolerance_rotation) || // is rotx hitting the search bounds?
-        (ddry < tolerance_rotation) || // is roty hitting the search bounds?
-        (ddrz < tolerance_rotation)    // is rotz hitting the search bounds?
-    ) {
-      calilog << "-- Fit " << bn << " rotation hitting bounds, please increase search radius.\n"
-              << "       also, cowardly refusing calibration results by zeroing (drx, dry, drz)\n";
-      drx = 0.0;
-      dry = 0.0;
-      drz = 0.0;
-    }
-
     // update instrument for output
     adjustComponent(dx, dy, dz, drx, dry, drz, bn, pws);
     // logging
@@ -757,15 +671,10 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   fitT0_alg->executeAsChildAlg();
 
   //-- parse output
+  std::ostringstream calilog;
   double chi2OverDOF = fitT0_alg->getProperty("OutputChi2overDoF");
   ITableWorkspace_sptr rst = fitT0_alg->getProperty("OutputParameters");
   double dT0_optimized = rst->getRef<double>("Value", 6);
-  double tor_dT0 = getProperty("ToleranceT0");
-  std::ostringstream calilog;
-  if (std::abs(dT0_optimized) < std::abs(tor_dT0)) {
-    calilog << "-- Fit dT0 = " << dT0_optimized << " is below tolerance(" << tor_dT0 << "), zero it\n";
-    dT0_optimized = 0.0;
-  }
 
   // apply calibration results (for output file and caliTable)
   m_T0 = dT0_optimized;
@@ -816,22 +725,12 @@ void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWork
   fitSamplePos_alg->executeAsChildAlg();
 
   //-- parse output
+  std::ostringstream calilog;
   double chi2OverDOF = fitSamplePos_alg->getProperty("OutputChi2overDoF");
   ITableWorkspace_sptr rst = fitSamplePos_alg->getProperty("OutputParameters");
   double dsx_optimized = rst->getRef<double>("Value", 7);
   double dsy_optimized = rst->getRef<double>("Value", 8);
   double dsz_optimized = rst->getRef<double>("Value", 9);
-  double tor_dsp = getProperty("ToleranceSamplePos");
-  tor_dsp = std::abs(tor_dsp);
-  std::ostringstream calilog;
-  if ((std::abs(dsx_optimized) < tor_dsp) && (std::abs(dsy_optimized) < tor_dsp) &&
-      (std::abs(dsz_optimized) < tor_dsp)) {
-    calilog << "-- Tune SamplePos = (" << dsx_optimized << "," << dsy_optimized << "," << dsz_optimized
-            << ") is below tolerance (" << tor_dsp << "), zero it\n";
-    dsx_optimized = 0.0;
-    dsy_optimized = 0.0;
-    dsz_optimized = 0.0;
-  }
 
   // apply the calibration results to pws for ouptut file
   adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 0.0, 0.0, 0.0, "sample-position", pws);
