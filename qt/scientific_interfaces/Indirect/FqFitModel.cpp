@@ -282,8 +282,8 @@ void FqFitModel::setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataInde
              // existing spectra list.
       auto spectra_vec = std::vector<std::size_t>({eisfSpectra[eisfIndex]});
       auto spectra = getSpectra(dataIndex);
-      for (size_t i = 0; i < spectra.size().value; i++) {
-        spectra_vec.push_back(spectra[i].value);
+      for (auto i : spectra) {
+        spectra_vec.push_back(i.value);
       }
       setSpectra(createSpectra(spectra_vec), dataIndex);
     }
