@@ -33,6 +33,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.setupUi(self)
         self.tabs = self.tab_main
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
 
