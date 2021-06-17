@@ -19,6 +19,58 @@ from mantidqt.plotting.functions import pcolormesh
 from os import path
 
 
+class PreviewView:
+
+    """
+    Type of the preview when the instrument viewer widget is used to show the
+    data.
+    """
+    IVIEW = "instrument_viewer"
+
+    """
+    Type the preview.
+    """
+    _type  = None
+
+    """
+    Presenter.
+    """
+    _presenter = None
+
+    """
+    Reference to the visualisation widet.
+    """
+    _widget = None
+
+    def __init__(self, preview_type, presenter):
+        self._type = preview_type
+        self._presenter = presenter
+
+    def show_workspace(self, workspace_name):
+        """
+        Show the workspace on the adapted widget.
+        @param workspace_name (str): name of the workspace
+        """
+        if self._type == self.IVIEW:
+            self._widget = get_instrumentview(workspace_name)
+            self._widget.show_view()
+            self._widget.container.closing.connect(self.on_close)
+
+    def change_workspace(self, workspace_name):
+        """
+        Change the workspace displayed by the current widget.
+        @param workspace_name (str): name of the new workspace
+        """
+        if self._type == self.IVIEW:
+            self._widget.replace_workspace(workspace_name)
+
+    def on_close(self):
+        """
+        Triggered when the widget is closed.
+        """
+        self._presenter.close_preview()
+
+
 class RawDataExplorerView(QWidget):
     """
     The view for the raw data explorer widget.
