@@ -57,7 +57,7 @@ class FittingDataModel(object):
         self._last_added = []
         filenames = [name.strip() for name in filenames_string.split(",")]
         for filename in filenames:
-            ws_name = self._generate_workspace_name(filename, xunit)
+            ws_name = self._generate_workspace_name(filename)
             if ws_name not in self._loaded_workspaces:
                 try:
                     if not ADS.doesExist(ws_name):
@@ -366,5 +366,5 @@ class FittingDataModel(object):
         [ws_table.setCell(irow, icol, row[icol]) for icol in range(0, len(row))]
 
     @staticmethod
-    def _generate_workspace_name(filepath, xunit):
-        return path.splitext(path.split(filepath)[1])[0] + '_' + xunit
+    def _generate_workspace_name(filepath):
+        return path.splitext(path.split(filepath)[1])[0]
