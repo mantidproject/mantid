@@ -233,7 +233,7 @@ class VASPLoader(AbInitioLoader):
         return float(line_str.split()[-4]) * imaginary_factor
 
     @staticmethod
-    def _read_vasprun(filename: str,
+    def _read_vasprun(filename: str,    # noqa: C901
                       diagonalize: bool = False,
                       apply_sum_rule: bool = False) -> Dict[str, Any]:
 
@@ -289,6 +289,28 @@ class VASPLoader(AbInitioLoader):
                                dtype=FLOAT_TYPE)
         if len(positions.shape) != 2 or positions.shape[1] != 3:
             raise AssertionError("Positions in XML 'finalpos' don't look like an Nx3 array.")
+
+        try:
+            selective_varray = _find_or_error(structure_block, 'varray', name='selective')
+        except ValueError:
+            # No selective dynamics (i.e. no frozen atoms)
+            selective_varray = None
+
+        if selective_varray:
+            def _collapse_bools(bools):
+                if bools == ['T', 'T', 'T']:
+                    return True
+                elif bools == ['F', 'F', 'F']:
+                    return False
+                else:
+                    raise ValueError(f"Found unsupported selective dynamics constraint {' '.join(bools)} "
+                                     "in vasprun.xml; only 'T T T' or 'F F F' can be used.")
+
+            selective_bools = np.asarray(list(map(_collapse_bools,
+                                                  [_to_text(v).split()
+                                                   for v in selective_varray.findall('v')])),
+                                         dtype=bool)
+            positions = positions[selective_bools]
 
         atom_info = _find_or_error(root, 'atominfo')
 
