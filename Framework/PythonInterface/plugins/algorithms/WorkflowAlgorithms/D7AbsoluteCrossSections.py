@@ -482,6 +482,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         return output_ws
 
     def _set_units(self, ws, nMeasurements):
+        """Sets units for the output workspace."""
         output_unit = self.getPropertyValue('OutputUnits')
         unit_symbol = 'barn / sr / formula unit'
         unit = r'd$\sigma$/d$\Omega$'
@@ -552,6 +553,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         return ws
 
     def _call_sum_data(self, input_name, output_name=''):
+        """Wrapper around SumOverlappingTubes algorithm."""
         if output_name == '':
             output_name = input_name
         SumOverlappingTubes(InputWorkspaces=input_name, OutputWorkspace=output_name,
