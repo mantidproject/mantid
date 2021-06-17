@@ -1520,7 +1520,7 @@ class RunDescriptor(PropDescriptor):
             # The RD and background workspaces are different if it is just binning or difference is in monitors
             # we can deal with the issue
             preserve_events = False
-            # workspace type. Events or Histogramm
+            # workspace type. Events or Histogram
             if isinstance(ws,EventWorkspace):
                 preserve_events = True
             # background workspace will be modified. Use copy
@@ -1556,23 +1556,25 @@ class RunDescriptor(PropDescriptor):
             ebg_current = ebg_ws.run().getProperty('gd_prtn_chrg').value
             ws_current = ws.run().getProperty('gd_prtn_chrg').value
             # normalize by current
-            ebg_ws  =  ebg_ws*(ws_current/ebg_current)
+            wsm = CreateSingleValuedWorkspace(DataValue=ws_current/ebg_current)
+            Multiply(LHSWorkspace=ebg_local_name, RHSWorkspace=wsm, OutputWorkspace=ebg_local_name)
+            DeleteWorkspace(wsm)
         # End normalization check
 
         # remove normalised background
-        Minus(ws,ebg_ws  ,OutputWorkspace = ws.name(),ClearRHSWorkspace=copy_created)
+        Minus(ws,ebg_local_name,OutputWorkspace = ws.name(),ClearRHSWorkspace=copy_created)
         if copy_created:
             DeleteWorkspace(ebg_local_name)
             if ebg_local_name+'_monitors' in mtd:
                 DeleteWorkspace(ebg_local_name+'_monitors')
 
-        AddSampleLog(Workspace=ws,LogName="empty_bg_removed",LogText=str(ebg_ws.name()))
+        AddSampleLog(Workspace=ws,LogName="empty_bg_removed",LogText=str(ebg_local_name))
         RunDescriptor._logger('**** Empty instrument background {0} has been removed from workspace {1}'.
                               format(bg_name,ws.name()),'information')
     #
     @staticmethod
     def _check_normalised_and_normalise(input_ws,do_normalise = False):
-        "Check if input workpsace is normalised and normalise it if do_normalise==True"
+        "Check if input workspace is normalised and normalise it if do_normalise==True"
         normalised_log = "DirectInelasticReductionNormalisedBy"
         if input_ws.run().hasProperty(normalised_log):
             if input_ws.run().getProperty(normalised_log).value != 'current':
