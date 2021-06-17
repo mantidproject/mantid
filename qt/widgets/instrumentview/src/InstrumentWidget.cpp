@@ -111,20 +111,15 @@ public:
 /**
  * Constructor.
  */
-InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
-                                   bool resetGeometry, bool autoscaling,
-                                   double scaleMin, double scaleMax,
-                                   bool setDefaultView)
-    : QWidget(parent), WorkspaceObserver(), m_InstrumentDisplay(nullptr),
-      m_simpleDisplay(nullptr), m_workspaceName(wsName),
-      m_instrumentActor(nullptr), m_surfaceType(FULL3D),
-      m_savedialog_dir(QString::fromStdString(
-          Mantid::Kernel::ConfigService::Instance().getString(
-              "defaultsave.directory"))),
-      mViewChanged(false), m_blocked(false),
-      m_instrumentDisplayContextMenuOn(false),
-      m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}),
-      m_wsReplace(false), m_help(nullptr) {
+InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool resetGeometry, bool autoscaling,
+                                   double scaleMin, double scaleMax, bool setDefaultView,
+                                   std::unique_ptr<ISimpleWidget> simpleDisplay)
+    : QWidget(parent), WorkspaceObserver(), m_InstrumentDisplay(nullptr), m_simpleDisplay(std::move(simpleDisplay)),
+      m_workspaceName(wsName), m_instrumentActor(nullptr), m_surfaceType(FULL3D),
+      m_savedialog_dir(
+          QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
+      mViewChanged(false), m_blocked(false), m_instrumentDisplayContextMenuOn(false),
+      m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr) {
   setFocusPolicy(Qt::StrongFocus);
   m_mainLayout = new QVBoxLayout(this);
   auto *controlPanelLayout = new QSplitter(Qt::Horizontal);
@@ -143,13 +138,14 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
           SLOT(enableLighting(bool)));
 
   // Create simple display widget
-  m_simpleDisplay = new SimpleWidget(this);
+  if (!m_simpleDisplay)
+    m_simpleDisplay = std::make_unique<SimpleWidget>(this);
   m_simpleDisplay->installEventFilter(this);
 
   QWidget *aWidget = new QWidget(this);
   m_instrumentDisplayLayout = new QStackedLayout(aWidget);
   m_instrumentDisplayLayout->addWidget(m_InstrumentDisplay);
-  m_instrumentDisplayLayout->addWidget(m_simpleDisplay);
+  m_instrumentDisplayLayout->addWidget(m_simpleDisplay.get());
 
   controlPanelLayout->addWidget(aWidget);
 
@@ -1098,7 +1094,7 @@ void InstrumentWidget::dropEvent(QDropEvent *e) {
 bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
   if (ev->type() == QEvent::ContextMenu &&
       (dynamic_cast<MantidGLWidget *>(obj) == m_InstrumentDisplay ||
-       dynamic_cast<SimpleWidget *>(obj) == m_simpleDisplay) &&
+       dynamic_cast<SimpleWidget *>(obj) == m_simpleDisplay.get()) &&
       getSurface() && getSurface()->canShowContextMenu()) {
     // an ugly way of preventing the curve in the pick tab's miniplot
     // disappearing when
@@ -1291,7 +1287,7 @@ QSize InstrumentWidget::glWidgetDimensions() {
   if (m_InstrumentDisplay)
     return sizeinLogicalPixels(m_InstrumentDisplay);
   else if (m_simpleDisplay)
-    return sizeinLogicalPixels(m_simpleDisplay);
+    return sizeinLogicalPixels(m_simpleDisplay.get());
   else
     return QSize(0, 0);
 }

@@ -13,16 +13,19 @@
 #include "MockSimpleWidget.h"
 
 #include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 #include <memory>
 
 using namespace MantidQt::MantidWidgets;
-
+using testing::StrictMock;
 class InstrumentWidgetTest : public CxxTest::TestSuite {
 public:
-  void setUp() override {
-    std::unique_ptr<ISimpleWidget> simpleFixture = std::make_unique<MockSimpleWidget>();
-    std::unique_ptr<IMantidGLWidget> glFixture = std::make_unique<MockMantidGLWidget>();
-  }
+  using MockedSimple = StrictMock<MockSimpleWidget>;
 
-  void test_stub() { TS_ASSERT(true); }
+  void test_constructor() {
+    auto simpleFixture = std::make_unique<MockedSimple>();
+
+    // InstrumentWidget(args,  std::move(simpleFixture));
+    //    EXPECT_CALL(*simpleFixture, getSurface()).Times(1);
+  }
 };
