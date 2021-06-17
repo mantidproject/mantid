@@ -87,6 +87,9 @@ class FittingContextTest(unittest.TestCase):
     def setUp(self):
         self.fitting_context = FittingContext()
 
+        self.mock_active_fit_history = mock.PropertyMock(return_value=[])
+        type(self.fitting_context).active_fit_history = self.mock_active_fit_history
+
     def test_items_can_be_added_to_fitting_context(self):
         fit_information_object = FitInformation(mock.MagicMock(),
                                                 'MuonGuassOsc',
@@ -94,8 +97,6 @@ class FittingContextTest(unittest.TestCase):
                                                 mock.MagicMock(),
                                                 mock.MagicMock())
 
-        self.mock_active_fit_history = mock.PropertyMock(return_value=[])
-        type(self.fitting_context).active_fit_history = self.mock_active_fit_history
         self.fitting_context.all_latest_fits = mock.MagicMock(return_value=[fit_information_object])
 
         self.fitting_context.add_fit(fit_information_object)
@@ -106,8 +107,6 @@ class FittingContextTest(unittest.TestCase):
     def test_fitfunctions_gives_list_of_unique_function_names(self):
         test_fit_function = 'MuonGuassOsc'
 
-        self.mock_active_fit_history = mock.PropertyMock(return_value=[])
-        type(self.fitting_context).active_fit_history = self.mock_active_fit_history
         self.fitting_context.all_latest_fits = mock.MagicMock(return_value=[FitInformation(mock.MagicMock(),
                                                                                            test_fit_function,
                                                                                            mock.MagicMock(),
@@ -135,8 +134,6 @@ class FittingContextTest(unittest.TestCase):
         fit_information_object = FitInformation(mock.MagicMock(), fit_function_name, mock.MagicMock(),
                                                 mock.MagicMock(), mock.MagicMock())
 
-        self.mock_active_fit_history = mock.PropertyMock(return_value=[])
-        type(self.fitting_context).active_fit_history = self.mock_active_fit_history
         self.fitting_context.all_latest_fits = mock.MagicMock(return_value=[fit_information_object])
 
         self.fitting_context.add_fit_from_values(mock.MagicMock(), fit_function_name, mock.MagicMock(),
@@ -155,8 +152,6 @@ class FittingContextTest(unittest.TestCase):
         fit_information_object = FitInformation([input_workspace], fit_function_name, mock.MagicMock(),
                                                 parameter_workspace, mock.MagicMock(), global_params)
 
-        self.mock_active_fit_history = mock.PropertyMock(return_value=[])
-        type(self.fitting_context).active_fit_history = self.mock_active_fit_history
         self.fitting_context.all_latest_fits = mock.MagicMock(return_value=[fit_information_object])
 
         self.fitting_context.add_fit_from_values([input_workspace], fit_function_name, mock.MagicMock(),

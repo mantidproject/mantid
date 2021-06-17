@@ -134,6 +134,7 @@ class BasicFittingContextTest(unittest.TestCase):
         self.assertEqual(self.fitting_context.active_fit_history[1], fit2)
         self.assertEqual(self.fitting_context.active_fit_history[2], fit3)
 
+        # fit3 == fit1 and fit3 is more recent, so 'all_latest_fits' will only return the most recent unique fits.
         self.assertEqual(self.fitting_context.all_latest_fits()[0], fit2)
         self.assertEqual(self.fitting_context.all_latest_fits()[1], fit3)
 
