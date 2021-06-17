@@ -12,6 +12,51 @@ from qtpy.QtCore import *
 from mantid.simpleapi import Load, config, mtd, Plus, Minus
 
 
+class PreviewModel(QObject):
+
+    """
+    Type of the preview.
+    """
+    _type  = None
+
+    """
+    Name of the current workspace.
+    """
+    _workspace_name = None
+
+    """
+    Sent when the workspace is changed.
+    """
+    sig_workspace_changed = Signal()
+
+    def __init__(self, preview_type, workspace_name):
+        super().__init__()
+        self._type = preview_type
+        self._workspace_name = workspace_name
+
+    def get_preview_type(self):
+        """
+        Get the type of the preview.
+        @return (PreviewType): preview type
+        """
+        return self._type
+
+    def set_workspace_name(self, workspace_name):
+        """
+        Set the workspace. This function raises the corresponding signal.
+        @param workspace_name (str): name of the workspace
+        """
+        self._workspace_name = workspace_name
+        self.sig_workspace_changed.emit()
+
+    def get_workspace_name(self):
+        """
+        Get the name of the current workspace.
+        @return (str): name
+        """
+        return self._workspace_name
+
+
 class RawDataExplorerModel(QObject):
     """
     Model for the RawDataExplorer widget
