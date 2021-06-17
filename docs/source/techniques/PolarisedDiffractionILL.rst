@@ -140,11 +140,11 @@ To save time in this iterative process, `InputWorkspace` property can be specifi
 Transmission calculation
 ========================
 
-The transmission (T) is calculated using counts measured by monitor 2 (M2), and according to the following formula:
+The transmission (T) is calculated using counts measured by monitor 2 (M2) normalised to either measurement time or monitor 1, and according to the following formula:
 
 .. math:: T = \frac{S - E_{Cd}}{E - E_{Cd}},
 
-where :math:`S` is M2 counts measured with the current sample, :math:`E_{Cd}` is counts when cadmium absorber is measured, and :math:`E` is counts from the direct beam.
+where :math:`S` is normalised M2 counts measured with the current sample, :math:`E_{Cd}` is normalised counts when cadmium absorber is measured, and :math:`E` is normalised counts from the direct beam.
 
 The measurement of the cadmium absorber is optional and does not have to be provided as input for the transmission to be calculated. However, it allows
 to take into account dark currents in the readout system electronics and thus this measurement is advised to be included in transmission calculations.
@@ -152,6 +152,9 @@ to take into account dark currents in the readout system electronics and thus th
 It is possible to provide more than one numor as input for the transmission calculation. In such a case, the input workspaces are averaged.
 
 The output of the transmission calculation is given as a :ref:`WorkspaceGroup <WorkspaceGroup>` with a single workspace containing a single value of the calculated polarisation.
+
+Instead of running the transmission calculation it is also possible to either provide a workspace with a single value or a floating-point value for the transmission to the workflows
+that require transmission.
 
 Workflow diagrams and working example
 -------------------------------------
@@ -232,12 +235,12 @@ differences in the polarizing efficiency and choosing the quartz to have the sam
 is not a problem, as the correction is given by a ratio and there is no spin-flip scattering to depolarize the beam. The polarization efficiencies
 are calculated from ratios of non-spin-flip to spin-flip scattering, hence absolute numbers are not necessary.
 
-First, the data is normalised to monitor 1 (M1). Then, if the necessary inputs of empty container and absorber (please note this is a different measurement
-than mentioned in the `Transmission` section) measurements are provided, the background can be subtracted from the data:
+First, the data is normalised to monitor 1 (M1) or measurement time. Then, if the necessary inputs of empty container and absorber (please note
+this is a different measurement than mentioned in the `Transmission` section) measurements are provided, the background can be subtracted from the data:
 
 .. math:: \dot{I_{B}} = \dot{I} - T\dot{E} - (1-T) \dot{C},
 
-where :math:`\dot{I}` denotes monitor-normalised quartz data, :math:`T` is transmission, and :math:`\dot{E}` and :math:`\dot{C}` are the normalised counts
+where :math:`\dot{I}` denotes monitor or time-normalised quartz data, :math:`T` is transmission, and :math:`\dot{E}` and :math:`\dot{C}` are the normalised counts
 measured with empty container and cadmium absorber, respectively.
 
 In the case where either absorber or empty container inputs are not provided, this correction is not performed.
@@ -366,7 +369,7 @@ or `AverageTwoTheta` to obtain an average over twoTheta positions.
 Reduction workflow
 ------------------
 
-The first two steps of the reduction of vanadium data are the same as for quartz, with normalisation to the monitor and background
+The first two steps of the reduction of vanadium data are the same as for quartz, with normalisation to the monitor or time, and background
 subtraction (provided the necessary inputs). The polarisation efficiency of the instrument can be corrected using the previously reduced
 quartz data. The correction is applied according to the following formula:
 
@@ -592,7 +595,7 @@ Output:
 Sample data reduction
 =====================
 
-The sample data reduction follows the same steps of monitor normalisation, background subtraction, polarisation correction, and
+The sample data reduction follows the same steps of monitor or time normalisation, background subtraction, polarisation correction, and
 self-attenuation correction as vanadium data reduction. Should the self-attenuation correction be taken into account, the relevant
 sample and environment parameters need to be defined in a dictionary that is provided to `SampleAndEnvironmentProperty` with
 keys described in the vanadium reduction section.
