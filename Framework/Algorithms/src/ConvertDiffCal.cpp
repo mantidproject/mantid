@@ -54,6 +54,12 @@ void ConvertDiffCal::init() {
                   "OffsetsWorkspace containing the calibration offsets.");
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
+
+  declareProperty( std::make_unique<WorkspaceProperty<ITableWorkspace>>
+                   ("PreviousCalibration", "", Direction::Input, API::PropertyMode::Optional),
+                   "A calibration table used as a cache for creating the OutputWorkspace. "
+                   "Effectively, this algorithm applies partial updates to this table and "
+                   "returns it as the OutputWorkspace" );
 }
 
 /**
@@ -114,19 +120,123 @@ double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t 
   return 1. / factor;
 }
 
+/**
+ * @param offsetsWS
+ * @param index
+ * @param spectrumInfo
+ * @return The offset adjusted value of DIFC
+ */
+double calculateDIFCNew( Mantid::Geometry::DetectorInfo const &d_info,
+                         double offset,
+                         int index ) {
+
+  double twotheta;
+  try {
+    twotheta = d_info.twoTheta(index); //we can pass in the internal index too, and d_info
+  } catch (std::runtime_error &) {
+    // Choose an arbitrary angle if detector 2theta determination fails.
+    twotheta = 0.;
+  }
+  // the factor returned is what is needed to convert TOF->d-spacing
+  // the table is supposed to be filled with DIFC which goes the other way
+  const double factor =
+      Mantid::Geometry::Conversion::tofToDSpacingFactor(d_info.l1(),
+                                                        d_info.l2(index),
+                                                        twotheta,
+                                                        offset);
+  return 1. / factor;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ConvertDiffCal::exec() {
   OffsetsWorkspace_const_sptr offsetsWS = getProperty("OffsetsWorkspace");
 
-  // initial setup of new style config
-  ITableWorkspace_sptr configWksp = std::make_shared<TableWorkspace>();
-  configWksp->addColumn("int", "detid");
-  configWksp->addColumn("double", "difc");
-  configWksp->addColumn("double", "difa");
-  configWksp->addColumn("double", "tzero");
+  /* If a previous calibration is provided, initialize the output calibration table
+   * with it */
+  ITableWorkspace_sptr configWksp;
 
+  ITableWorkspace_sptr previous_calibration = getProperty("PreviousCalibration");
+
+  std::vector< std::string > correct_columns{ "detid", "difc", "difa", "tzero" };
+  if( previous_calibration )
+  {
+    /* validate correct format */
+    std::vector<std::string> column_names = previous_calibration->getColumnNames();
+    if( column_names != correct_columns )
+    {
+      throw std::runtime_error("PreviousCalibration table's column names do not match expected "
+                               "format");
+    }
+
+    configWksp = previous_calibration->clone();
+  }
+
+  else
+  {
+    // initial setup of new style config
+    configWksp = std::make_shared<TableWorkspace>();
+
+    configWksp->addColumn("int", correct_columns[0]);
+    configWksp->addColumn("double", correct_columns[1]);
+    configWksp->addColumn("double", correct_columns[2]);
+    configWksp->addColumn("double", correct_columns[3]);
+  }
+
+  /* Captain! New code */
+  /* obtain detector ids from the previous calibration workspace */
+  std::unordered_map< int, int > id_to_row;
+  if( previous_calibration )
+  {
+    std::vector< int > previous_calibration_ids =
+    previous_calibration->getColumn( 0 )->numeric_fill<int>();
+
+    int row = 0;
+
+    for( auto id : previous_calibration_ids )
+    {
+      id_to_row[ id ] = row++;
+    }
+  }
+
+  /* iterate through all detectors in the offsets workspace */
+  Mantid::Geometry::DetectorInfo const &d_info = offsetsWS->detectorInfo();
+  std::vector<int> const &detector_ids = d_info.detectorIDs();
+  for( auto id : detector_ids )
+  {
+    size_t internal_index = d_info.indexOf( id );
+
+    /* only update non-masked, non zero-offset entries */
+    double new_offset_value = offsetsWS->getValue( id );
+    if( !d_info.isMasked( internal_index ) && new_offset_value != 0 )
+    {
+      /* check for the detector id in the calibration table */
+      auto row_to_update = id_to_row.find( id );
+      /* if it is found, update it according to a simple linear equation: */
+      if( row_to_update != id_to_row.end() )
+      {
+        /* Captain! This is causing an issue. False out this if statement and run the test */
+        /* Get the row and update the difc value in the first column */
+        double &value_to_update =
+        configWksp->cell<double>( row_to_update->second, 1 );
+
+        value_to_update = value_to_update / ( 1 + new_offset_value );
+      }
+
+      /* It was not found: calculate the value as before with calculateDiffc */
+      else
+      {
+        API::TableRow newrow = configWksp->appendRow();
+
+        newrow << id << calculateDIFCNew( d_info, new_offset_value, internal_index ) 
+               << 0.0 << 0.0;
+      }
+    }
+  }
+  /* End new code */
+
+  /*
   // create values in the table
   const size_t numberOfSpectra = offsetsWS->getNumberHistograms();
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
@@ -141,6 +251,7 @@ void ConvertDiffCal::exec() {
 
     progress.report();
   }
+  */
 
   // sort the results
   IAlgorithm_sptr sortTable = createChildAlgorithm("SortTableWorkspace");

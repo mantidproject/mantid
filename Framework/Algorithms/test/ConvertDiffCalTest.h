@@ -124,6 +124,7 @@ public:
 
     /* create an offset workspace with the instrument */
     OffsetsWorkspace_sptr offsets = std::make_shared<OffsetsWorkspace>(instrument);
+    /* Captain! */
     Mantid::Geometry::DetectorInfo &d_info = offsets->mutableDetectorInfo();
 
     /* Loop to apply masks */
@@ -224,7 +225,10 @@ public:
     std::string updated_calibration_table_name("updated_calibration_table");
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace",
                                                   updated_calibration_table_name));
-    /* Captain! Set the previous_calibration property to the fake calibration workspace */
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty( "PreviousCalibration",
+                                              fake_workspaces.calibration_table));
+
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -254,12 +258,12 @@ public:
     TS_ASSERT_EQUALS(detector_id_column->toDouble( 4 ), 6);
     TS_ASSERT_EQUALS(detector_id_column->toDouble( 5 ), 7);
     /* check difc: */
-    TS_ASSERT_EQUALS(difc_column->toDouble( 0 ), 0 ); // not sure the next 2 will surely be 0
+    TS_ASSERT_EQUALS(difc_column->toDouble( 0 ), 0 ); // not sure the next 2 will surely be 0?
     TS_ASSERT_EQUALS(difc_column->toDouble( 1 ), 0 );
-    TS_ASSERT_EQUALS(difc_column->toDouble( 2 ), ); // detector id 4 should be updated
+    TS_ASSERT_EQUALS(difc_column->toDouble( 2 ), 4.0 / 5.0 ); // detector id 4 should be updated
     TS_ASSERT_EQUALS(difc_column->toDouble( 3 ), 5 ); // detector id 5 should be propagated
     TS_ASSERT_EQUALS(difc_column->toDouble( 4 ), 6 ); // detector id 6 should be propagated
-    TS_ASSERT_EQUALS(difc_column->toDouble( 5 ), ); // detector id 7 should be updated
+    TS_ASSERT_EQUALS(difc_column->toDouble( 5 ), 7.0 / 8.0 ); // detector id 7 should be updated
     /* end new code */
 
     /* Captain! Asserts section. New code */
