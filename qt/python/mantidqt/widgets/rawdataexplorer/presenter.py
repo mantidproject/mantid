@@ -89,6 +89,8 @@ class RawDataExplorerPresenter(QObject):
 
         self.setup_connections()
 
+        self.model.sig_new_preview.connect(self.on_new_preview)
+
     def setup_connections(self):
         """
         Set up the connections between signals and slots in the widget.
@@ -164,6 +166,13 @@ class RawDataExplorerPresenter(QObject):
         acquision_mode = self.view.get_current_acquisition()
         preview_name = self.view.get_current_preview()
         self.model.new_preview(selection, instrument, acquision_mode, preview_name)
+
+    def on_new_preview(self, previewModel):
+        """
+        Triggered when a new preview model has been added to the model. This is
+        creating a dedicated MVP for this preview.
+        """
+        PreviewPresenter(self.model, previewModel)
 
     def show_ws(self, ws_to_show):
         """
