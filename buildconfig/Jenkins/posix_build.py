@@ -31,7 +31,7 @@ from shutil import which
 
 
 def _run_command(command: str, exceptions=True, **kwargs) -> subprocess.CompletedProcess:
-    print(f"+{command}")
+    print(f"+{command}", flush=True)
 
     parsed_command = command.split(' ')
     parsed_command = list(filter(None, parsed_command))
@@ -76,7 +76,7 @@ def run_with_xvfb(command: str, **kwargs):
         xvfb_template = ["xvfb-run", "-e", "/dev/stderr", "--server-args=-core -noreset -screen 0 640x480x24",
                          f"--server-num={XVFB_SERVER_NUM}"]
         xvfb_template.extend(parsed_command)
-        print(f"+{' '.join(xvfb_template)}")
+        print(f"+{' '.join(xvfb_template)}", flush=True)
         return subprocess.run(xvfb_template, check=True, universal_newlines=True, **kwargs)
 
 

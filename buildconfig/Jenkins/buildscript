@@ -10,4 +10,5 @@ then
     scl_command="scl enable devtoolset-7 -- "
 fi
 
-$scl_command python3 $script_full_path/posix_build.py
+# -u : Run Python without output buffering so output matches subprocess stdout
+$scl_command python3 -u $script_full_path/posix_build.py
