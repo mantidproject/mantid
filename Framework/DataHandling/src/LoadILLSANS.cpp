@@ -294,14 +294,33 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
                           dataLeft.dim0() * dataLeft.dim1()) +
       N_MONITORS;
 
-  createEmptyWorkspace(numberOfHistograms, 1);
+  if (dataCenter.dim2() != 1) {
+    createEmptyWorkspace(numberOfHistograms, dataCenter.dim2(), MultichannelType::KINETIC);
+  } else {
+    createEmptyWorkspace(numberOfHistograms, 1);
+  }
   loadMetaData(firstEntry, instrumentPath);
 
+  // we need to adjust the default binning after loadmetadata
+  if (dataCenter.dim2() != 1) {
+    std::vector<double> frames(dataCenter.dim2(), 0);
+    for (int i = 0; i < dataCenter.dim2(); ++i) {
+      frames[i] = i;
+    }
+    m_defaultBinning.resize(dataCenter.dim2());
+    std::copy(frames.cbegin(), frames.cend(), m_defaultBinning.begin());
+  }
+
+  MultichannelType type = (dataCenter.dim2() != 1) ? MultichannelType::KINETIC : MultichannelType::TOF;
   size_t nextIndex;
-  nextIndex = loadDataFromTubes(dataCenter, m_defaultBinning, 0);
-  nextIndex = loadDataFromTubes(dataLeft, m_defaultBinning, nextIndex);
-  nextIndex = loadDataFromTubes(dataRight, m_defaultBinning, nextIndex);
-  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
+  nextIndex = loadDataFromTubes(dataCenter, m_defaultBinning, 0, type);
+  nextIndex = loadDataFromTubes(dataLeft, m_defaultBinning, nextIndex, type);
+  nextIndex = loadDataFromTubes(dataRight, m_defaultBinning, nextIndex, type);
+  nextIndex = loadDataFromMonitors(firstEntry, nextIndex, type);
+  if (dataCenter.dim2() != 1) {
+    // there is no 2nd monitor in kinetic, so we load the first monitor once again to preserve the dimensions
+    nextIndex = loadDataFromMonitors(firstEntry, nextIndex, type);
+  }
 }
 
 /**
@@ -443,7 +462,7 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::string
   nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
 }
 
-size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex) {
+size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex, const MultichannelType type) {
 
   // let's find the monitors; should be monitor1 and monitor2
   for (std::vector<NXClassInfo>::const_iterator it = firstEntry.groups().begin(); it != firstEntry.groups().end();
@@ -454,15 +473,22 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
       data.load();
       g_log.debug() << "Monitor: " << it->nxname << " dims = " << data.dim0() << "x" << data.dim1() << "x"
                     << data.dim2() << '\n';
-      const size_t vectorSize = data.dim2() + 1;
-      HistogramData::BinEdges histoBinEdges(vectorSize, HistogramData::LinearGenerator(0.0, 1));
-      if (!m_isTOF) { // Not TOF
-        histoBinEdges = HistogramData::BinEdges(m_defaultBinning);
-      }
       const HistogramData::Counts histoCounts(data(), data() + data.dim2());
-      m_localWorkspace->setHistogram(firstIndex, std::move(histoBinEdges), std::move(histoCounts));
-      if (m_isD16Omega) {
-        m_localWorkspace->setPoints(firstIndex, HistogramData::Points(histoBinEdges));
+      m_localWorkspace->setCounts(firstIndex, std::move(histoCounts));
+      const HistogramData::CountVariances histoVariances(data(), data() + data.dim2());
+      m_localWorkspace->setCountVariances(firstIndex, std::move(histoVariances));
+
+      if (m_isTOF) {
+        HistogramData::BinEdges histoBinEdges(data.dim2() + 1, HistogramData::LinearGenerator(0.0, 1));
+        m_localWorkspace->setBinEdges(firstIndex, std::move(histoBinEdges));
+      } else {
+        if (type != MultichannelType::KINETIC && !m_isD16Omega) {
+          HistogramData::BinEdges histoBinEdges = HistogramData::BinEdges(m_defaultBinning);
+          m_localWorkspace->setBinEdges(firstIndex, std::move(histoBinEdges));
+        } else {
+          HistogramData::Points histoPoints = HistogramData::Points(m_defaultBinning);
+          m_localWorkspace->setPoints(firstIndex, std::move(histoPoints));
+        }
       }
       // Add average monitor counts to a property:
       double averageMonitorCounts = std::accumulate(data(), data() + data.dim2(), 0) / static_cast<double>(data.dim2());
@@ -477,24 +503,20 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
   return firstIndex;
 }
 
-size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<double> &timeBinning,
-                                      size_t firstIndex = 0) {
-
-  // Workaround to get the number of tubes / pixels
+size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<double> &timeBinning, size_t firstIndex = 0,
+                                      const MultichannelType type) {
   int numberOfTubes;
-  int histogramWidth;
+  int numberOfChannels;
+  int numberOfPixelsPerTube = data.dim1();
 
   if (m_isD16Omega) {
     // D16 with omega scan case
     numberOfTubes = data.dim2();
-    histogramWidth = data.dim0();
+    numberOfChannels = data.dim0();
   } else {
     numberOfTubes = data.dim0();
-    histogramWidth = data.dim2();
+    numberOfChannels = data.dim2();
   }
-
-  const int numberOfPixelsPerTube = data.dim1();
-  const HistogramData::BinEdges binEdges(timeBinning);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
   for (int i = 0; i < numberOfTubes; ++i) {
@@ -506,11 +528,17 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
         data_p = &data(i, j, 0);
       }
       const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
-      const HistogramData::Counts histoCounts(data_p, data_p + histogramWidth);
-      m_localWorkspace->setHistogram(index, binEdges, std::move(histoCounts));
-      if (m_isD16Omega) {
-        const HistogramData::Points histoPoints(binEdges);
+      const HistogramData::Counts histoCounts(data_p, data_p + numberOfChannels);
+      const HistogramData::CountVariances histoVariances(data_p, data_p + numberOfChannels);
+      m_localWorkspace->setCounts(index, std::move(histoCounts));
+      m_localWorkspace->setCountVariances(index, std::move(histoVariances));
+
+      if (m_isD16Omega || type == MultichannelType::KINETIC) {
+        const HistogramData::Points histoPoints(timeBinning);
         m_localWorkspace->setPoints(index, std::move(histoPoints));
+      } else {
+        const HistogramData::BinEdges binEdges(timeBinning);
+        m_localWorkspace->setBinEdges(index, std::move(binEdges));
       }
     }
   }
@@ -522,11 +550,16 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
  * Create a workspace without any data in it
  * @param numberOfHistograms : number of spectra
  * @param numberOfChannels : number of TOF channels
+ * @param type : type of the multichannel workspace (TOF (default) or Kinetic)
  */
-void LoadILLSANS::createEmptyWorkspace(const size_t numberOfHistograms, const size_t numberOfChannels) {
-  m_localWorkspace =
-      WorkspaceFactory::Instance().create("Workspace2D", numberOfHistograms, numberOfChannels + 1, numberOfChannels);
-  m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+void LoadILLSANS::createEmptyWorkspace(const size_t numberOfHistograms, const size_t numberOfChannels,
+                                       const MultichannelType type) {
+  m_localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", numberOfHistograms,
+                                                         numberOfChannels + ((type == MultichannelType::TOF) ? 1 : 0),
+                                                         numberOfChannels);
+  if (type == MultichannelType::TOF) {
+    m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+  }
   m_localWorkspace->setYUnitLabel("Counts");
 }
 
