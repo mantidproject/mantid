@@ -8,24 +8,42 @@
 
 #include "IMantidGLWidget.h"
 #include "ISimpleWidget.h"
+#include "InstrumentWidget.h"
 
 #include "MockMantidGLWidget.h"
 #include "MockSimpleWidget.h"
+
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <memory>
 
 using namespace MantidQt::MantidWidgets;
-using testing::StrictMock;
+using namespace testing;
+using Mantid::API::AnalysisDataService;
+using Mantid::API::FrameworkManager;
+
 class InstrumentWidgetTest : public CxxTest::TestSuite {
 public:
-  using MockedSimple = StrictMock<MockSimpleWidget>;
+  static InstrumentWidgetTest *createSuite() { return new InstrumentWidgetTest(); }
+  static void destroySuite(InstrumentWidgetTest *suite) { delete suite; }
+
+  void setUp() override {
+    FrameworkManager::Instance();
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 2);
+    AnalysisDataService::Instance().addOrReplace("test_ws", ws);
+  }
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void test_constructor() {
-    auto simpleFixture = std::make_unique<MockedSimple>();
+    auto simpleFixture = std::make_unique<StrictMock<MockSimpleWidget>>();
+    EXPECT_CALL(*simpleFixture, setSurface(_)).Times(1);
+    EXPECT_CALL(*simpleFixture, updateView(IsTrue())).Times(1);
 
-    // InstrumentWidget(args,  std::move(simpleFixture));
-    //    EXPECT_CALL(*simpleFixture, getSurface()).Times(1);
+    InstrumentWidget("test_ws", nullptr, true, true, 0.0, 0.0, true, std::move(simpleFixture));
   }
 };
