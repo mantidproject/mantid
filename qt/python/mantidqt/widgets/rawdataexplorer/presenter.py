@@ -117,6 +117,7 @@ class RawDataExplorerPresenter(QObject):
         """
         selection = self.view.get_selection()
         target_type = self.view.get_current_target()
+        instrument = self.view.get_current_instrument()
         acquision_mode = self.view.get_current_acquisition()
         preview_name = self.view.get_current_preview()
 
