@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
-    WorkspaceGroupProperty, FileAction
+    WorkspaceGroupProperty, FileAction, WorkspaceGroup
 from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntBoundedValidator
 from mantid.simpleapi import *
 import numpy as np
@@ -437,10 +437,17 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         # rename to a user friendly naming scheme
         for i in range(len(outputSamples)):
-            suffix = self.createCustomSuffix(outputSamples[i])
-            RenameWorkspace(InputWorkspace=outputSamples[i],
-                            OutputWorkspace=outputSamples[i] + suffix)
-            outputSamples[i] += suffix
+            if isinstance(mtd[outputSamples[i]], WorkspaceGroup): #kinetic
+                for ws in mtd[outputSamples[i]]:
+                    ws_name = ws.getName()
+                    suffix = self.createCustomSuffix(ws_name)
+                    RenameWorkspace(InputWorkspace=ws_name,
+                                    OutputWorkspace=ws_name + suffix)
+            else:
+                suffix = self.createCustomSuffix(outputSamples[i])
+                RenameWorkspace(InputWorkspace=outputSamples[i],
+                                OutputWorkspace=outputSamples[i] + suffix)
+                outputSamples[i] += suffix
 
         # try to stitch automatically
         if len(outputSamples) > 1 and self.getPropertyValue('OutputType') == 'I(Q)':

@@ -854,7 +854,7 @@ class SANSILLReduction(PythonAlgorithm):
             mtd[frame_name].getAxis(0).setUnit('Wavelength')
             for s in range(n_hist):
                 mtd[frame_name].setX(s, wave_bins)
-        DeleteWorkspace(ws)
+        RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         return frames
 
     def _process_kinetic_sample(self, ws):
