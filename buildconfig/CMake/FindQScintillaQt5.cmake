@@ -49,7 +49,7 @@ function(find_qscintilla qt_version)
     NAMES ${_qsci_lib_names_debug}
     PATHS $ENV{CONDA_PREFIX} ${_qsci_lib_paths} ${_default_path_opt})
 
-  message("Conda Prefix: $ENV{CONDA_PREFIX}\n_qsci_lib_paths: ${_qsci_lib_paths}\ndefault_path_opt: ${_default_path_opt}")
+  message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}\n CMAKE_SYSTEM_PREFIX_PATH: ${CMAKE_SYSTEM_PREFIX_PATH}\n Conda Prefix: $ENV{CONDA_PREFIX}\n_qsci_lib_paths: ${_qsci_lib_paths}\ndefault_path_opt: ${_default_path_opt}")
 
   if(${_include_var} AND ${_library_var})
     if(NOT QScintillaQt${qt_version}_FIND_QUIETLY)
