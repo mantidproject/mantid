@@ -8,7 +8,7 @@
 #
 
 from .model import RawDataExplorerModel
-from .view import RawDataExplorerView
+from .view import RawDataExplorerView, PreviewView
 
 from qtpy.QtWidgets import QAbstractItemView
 from qtpy.QtCore import *
@@ -16,6 +16,49 @@ import os.path
 
 from mantid.simpleapi import config, mtd
 from mantid.api import IPreview, PreviewManager, PreviewType
+
+
+class PreviewPresenter:
+
+    """
+    Associated view.
+    """
+    _view = None
+
+    """
+    Raw data explorer main model.
+    """
+    _main_model = None
+
+    """
+    Preview model.
+    """
+    _model = None
+
+    def __init__(self, main_model, model):
+        self._main_model = main_model
+        self._model = model
+
+        preview_type = self._model.get_preview_type()
+        workspace_name = self._model.get_workspace_name()
+        if preview_type == PreviewType.IVIEW:
+            self._view = PreviewView(PreviewView.IVIEW, self)
+            self._view.show_workspace(workspace_name)
+
+        self._model.sig_workspace_changed.connect(self.on_workspace_changed)
+
+    def close_preview(self):
+        """
+        Triggered when the view is closed.
+        """
+        self._main_model.del_preview(self._model)
+
+    def on_workspace_changed(self):
+        """
+        Triggered when the workspace in the model is modified.
+        """
+        ws_name = self._model.get_workspace_name()
+        self._view.change_workspace(ws_name)
 
 
 class RawDataExplorerPresenter(QObject):
