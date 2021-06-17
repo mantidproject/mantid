@@ -109,6 +109,11 @@ ExternalPlotter::ExternalPlotter() {}
 
 ExternalPlotter::~ExternalPlotter() {}
 
+void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices,
+                                  bool errorBars) {
+  return plotSpectra(workspaceName, workspaceIndices, errorBars, boost::none);
+}
+
 /**
  * Produces an external plot of workspace spectra
  *

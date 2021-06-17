@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
-#include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include <QtGlobal>
 
 /*
@@ -30,11 +30,11 @@ constexpr static const char *MPL_QT_BACKEND = "matplotlib.backends.backend_qt5ag
 
 namespace MantidQt {
 namespace Widgets {
-namespace MplCpp {
+namespace Common {
 
 /// Import and return the backend module for this version of Qt
-MANTID_MPLCPP_DLL Common::Python::Object backendModule();
+EXPORT_OPT_MANTIDQT_COMMON Common::Python::Object backendModule();
 
-} // namespace MplCpp
+} // namespace Common
 } // namespace Widgets
 } // namespace MantidQt

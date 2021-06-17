@@ -9,6 +9,7 @@ set(
   src/AlgorithmSelectorWidget.cpp
   src/AlternateCSPythonLexer.cpp
   src/ConvolutionFunctionModel.cpp
+  src/BackendQt.cpp
   src/BasicFitOptionsBrowser.cpp
   src/BatchAlgorithmRunner.cpp
   src/BoolPropertyWidget.cpp
@@ -350,6 +351,7 @@ set(
   src/AlgorithmPropertiesWidget.cpp
   src/AlgorithmRunner.cpp
   src/AlternateCSPythonLexer.cpp
+  src/BackendQt.cpp
   src/BatchAlgorithmRunner.cpp
   src/BoolPropertyWidget.cpp
   src/DropEventHelper.cpp

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/PanZoomTool.h"
 #include "MantidPythonInterface/core/CallMethod.h"
-#include "MantidQtWidgets/MplCpp/BackendQt.h"
+#include "MantidQtWidgets/Common/BackendQt.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
 using Mantid::PythonInterface::callMethodNoCheck;
@@ -35,7 +35,7 @@ constexpr auto TOOLBAR_PAN_METHOD = "pan";
 /// Return the matplotlib NavigationToolbar type appropriate
 /// for our backend. It is returned hidden
 Python::Object mplNavigationToolbar(FigureCanvasQt *canvas) {
-  const auto backend = backendModule();
+  const auto backend = MantidQt::Widgets::Common::backendModule();
   bool showCoordinates(false);
   auto obj = Python::Object(backend.attr(TOOLBAR_CLS)(canvas->pyobj(), canvas->pyobj(), showCoordinates));
   obj.attr("hide")();

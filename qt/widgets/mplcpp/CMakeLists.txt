@@ -3,7 +3,6 @@ set(
   LIB_SRCS
   src/Artist.cpp
   src/Axes.cpp
-  src/BackendQt.cpp
   src/Colors.cpp
   src/ColorbarWidget.cpp
   src/Colormap.cpp

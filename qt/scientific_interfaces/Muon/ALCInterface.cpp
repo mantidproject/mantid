@@ -294,10 +294,10 @@ void ALCInterface::externalPlotRequested() {
   case 0:
     data = m_dataLoading->exportWorkspace();
     if (data) {
+      AnalysisDataService::Instance().addOrReplace("ALC_External_Plot_Loaded_Data", data);
       kwargs.emplace_back(QHash<QString, QVariant>());
       kwargs[0].insert("marker", QString(".").toLatin1().constData());
       kwargs[0].insert("linestyle", QString("None").toLatin1().constData());
-      AnalysisDataService::Instance().addOrReplace("ALC_External_Plot_Loaded_Data", data);
       m_externalPlotter->plotSpectra("ALC_External_Plot_Loaded_Data", "0", true, kwargs[0]);
     }
     break;

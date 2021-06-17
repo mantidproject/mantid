@@ -60,7 +60,6 @@ mtd_add_qt_library(
 set(TEST_FILES
   test/ContourPreviewPlotTest.h
   test/ExternalPlotterTest.h
-  test/PlottingTestInitialization.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
@@ -70,13 +69,13 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE
 mtd_add_qt_tests(
   TARGET_NAME MantidQtWidgetsPlottingTest
   QT_VERSION 5
-  SRC
-    ${TEST_FILES}
   INCLUDE_DIRS
     inc
     ../common/inc
     ../../../Framework/DataObjects/inc
     ../../../Framework/TestHelpers/inc
+  SRC
+    ${TEST_FILES}
   TEST_HELPER_SRCS
     ../../../Framework/TestHelpers/src/TearDownWorld.cpp
     ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
@@ -87,10 +86,12 @@ mtd_add_qt_tests(
     DataObjects
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
+    PythonInterfaceCore
     gmock
     Python::Python
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsPlotting
-  PARENT_DEPENDENCIES GUITests
+  PARENT_DEPENDENCIES
+    GUITests
 )

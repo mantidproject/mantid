@@ -31,8 +31,9 @@ public:
   ExternalPlotter();
   virtual ~ExternalPlotter();
 
+  virtual void plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars);
   virtual void plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars,
-                           boost::optional<QHash<QString, QVariant>> kwargs = boost::none);
+                           boost::optional<QHash<QString, QVariant>> kwargs);
   virtual void plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
                                         std::vector<int> const &workspaceIndices, bool errorBars,
                                         boost::optional<std::vector<QHash<QString, QVariant>>> kwargs = boost::none,

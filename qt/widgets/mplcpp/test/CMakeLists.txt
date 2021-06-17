@@ -6,7 +6,6 @@ set(TEST_FILES
     ColorConverterTest.h
     ColorsTest.h
     CyclerTest.h
-    ExternalPlotterTest.h
     FigureTest.h
     FigureCanvasQtTest.h
     Line2DTest.h
