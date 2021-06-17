@@ -363,17 +363,26 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
     auto *gridbox1 = dynamic_cast<MDGridBox<MDE, nd> *>(box1);
     auto *gridbox2 = dynamic_cast<MDGridBox<MDE, nd> *>(box2);
     if (gridbox1 && gridbox2) {
+      // MDGridBox: compare box size on each dimension
       for (size_t d = 0; d < nd; d++)
         this->compareTol(gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), "Box sizes do not match");
-    }
+    } else {
+      // Could be both MDBoxes (with events)
+      auto *mdbox1 = dynamic_cast<MDBox<MDE, nd> *>(box1);
+      auto *mdbox2 = dynamic_cast<MDBox<MDE, nd> *>(box2);
+      g_log.debug() << "Box " << ibox << "ws1 npoints = " << box1->getNPoints()
+                    << "; ws2 npoints = " << box2->getNPoints() << "\n";
 
-    // Are both MDBoxes (with events)
-    auto *mdbox1 = dynamic_cast<MDBox<MDE, nd> *>(box1);
-    auto *mdbox2 = dynamic_cast<MDBox<MDE, nd> *>(box2);
-    g_log.debug() << "Box " << ibox << "ws1 npoints = " << box1->getNPoints()
-                  << "; ws2 npoints = " << box2->getNPoints() << "\n";
+      // Rule out the case if one and only one box is MDBox
+      if (mdbox1 && !mdbox2) {
+        // workspace 2's is MDBox but workspace 1 is not
+        throw CompareFailsException("Worksapce 2's Box " + std::to_string(ibox) + " is not MDBox");
+      } else if (!mdbox1 && mdbox2) {
+        // workspace 2's is MDBox but workspace 1 is not
+        throw CompareFailsException("Worksapce 1's Box " + std::to_string(ibox) + " is not MDBox");
+      }
 
-    if (mdbox1 && mdbox2) {
+      // Both boxes are MDBoxes:
       if (m_CheckEvents) {
         const std::vector<MDE> &events1 = mdbox1->getConstEvents();
         const std::vector<MDE> &events2 = mdbox2->getConstEvents();
@@ -388,10 +397,8 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
 
             // convert MDEvents vectors to SimpleMDEvent vectors for comparison
             for (size_t i = 0; i < events1.size(); i++) {
-
               std::vector<float> centers1;
               std::vector<float> centers2;
-
               for (size_t d = 0; d < nd; d++) {
                 centers1.push_back(events1[i].getCenter(d));
                 centers2.push_back(events2[i].getCenter(d));
@@ -408,7 +415,7 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
 
             // compare MEEvents
             bool same = true;
-            std::string diffmessage("Box " + std::to_string(ibox) + " Events: ");
+            size_t numdiff = 0;
             for (size_t i = 0; i < events_vec1.size(); ++i) {
               try {
                 // coordinate
@@ -421,15 +428,17 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
                 // error
                 compareTol(events_vec1[i].getError(), events_vec2[i].getError(), "");
               } catch (CompareFailsException &e) {
-                g_log.information() << "Box " << ibox << " Event " << i << ": " << e.what()
-                                    << "\n    [ws1] " + events_vec1[i].str() << "\n    [ws2] : " + events_vec2[i].str()
-                                    << "\n";
-                diffmessage += std::to_string(i) + ", ";
+                g_log.debug() << "Box " << ibox << " Event " << i << ": " << e.what()
+                              << "\n    [ws1] " + events_vec1[i].str() << "\n    [ws2] : " + events_vec2[i].str()
+                              << "\n";
+                numdiff++;
                 same = false;
               }
             }
 
             if (!same) {
+              std::string diffmessage("Box " + std::to_string(ibox) +
+                                      " Number of different MDEvents =  " + std::to_string(numdiff));
               throw CompareFailsException("MDEvents are not the same!\n" + diffmessage);
             }
           }
@@ -441,15 +450,7 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
         }
         mdbox1->releaseEvents();
         mdbox2->releaseEvents();
-      } // Don't compare if BoxStructureOnly
-    } else if (mdbox1) {
-      // workspace 2's is MDBox but workspace 1 is not
-      throw CompareFailsException("Worksapce 2's Box " + std::to_string(ibox) + " is not MDBox");
-    } else if (mdbox2) {
-      // workspace 2's is MDBox but workspace 1 is not
-      throw CompareFailsException("Worksapce 1's Box " + std::to_string(ibox) + " is not MDBox");
-    } else {
-      g_log.warning() << "Both workspace 1 and 2 have Box " << ibox << " that cannot be cast to MDBox.\n";
+      }
     }
   }
 }
