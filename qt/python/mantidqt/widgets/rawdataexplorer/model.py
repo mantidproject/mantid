@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 from os import path
-from qtpy.QtWidgets import QFileSystemModel
 from qtpy.QtCore import *
 
 from mantid.simpleapi import Load, config, mtd, Plus, Minus
@@ -25,11 +24,6 @@ class RawDataExplorerModel(QObject):
         """
         super().__init__()
         self.presenter = presenter
-
-        model_filter = ["*.nxs"]
-        self.file_model = QFileSystemModel()
-        self.file_model.setNameFilters(model_filter)
-        self.file_model.setNameFilterDisables(0)
 
         self.instrument = config["default.instrument"]
 

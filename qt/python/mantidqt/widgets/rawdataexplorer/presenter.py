@@ -39,7 +39,6 @@ class RawDataExplorerPresenter(QObject):
         # TODO remember previous one ? set to some default directory ? ManageUserDirectory ?
         self.working_dir = "~/mantid/build/ExternalData/Testing/Data/UnitTest/ILL"
 
-        self.view.set_file_model(self.model.file_model)
         self.set_working_directory(self.working_dir)
         self.preview_manager = PreviewManager.Instance()
 
@@ -70,8 +69,6 @@ class RawDataExplorerPresenter(QObject):
         """
         self.working_dir = new_working_directory
         self.view.repositoryPath.setText(self.working_dir)
-        self.model.file_model.setRootPath(self.working_dir)
-        self.view.fileTree.setRootIndex(self.model.file_model.index(self.working_dir))
 
     def on_file_dialog_choice(self, new_directory):
         """
