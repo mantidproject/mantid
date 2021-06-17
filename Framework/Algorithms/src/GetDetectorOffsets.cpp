@@ -60,6 +60,8 @@ void GetDetectorOffsets::init() {
   declareProperty("PeakFunction", "Gaussian",
                   std::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<IPeakFunction>()),
                   "The function type for fitting the peaks.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("EstimateFWHM", true),
+                  "Whether to esimate FWHM of peak function when estimating fit parameters");
   declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
 
   /* Signed mode calculates offset in number of bins */
@@ -100,6 +102,7 @@ void GetDetectorOffsets::exec() {
     throw std::runtime_error("Must specify m_Xmin<m_Xmax");
   m_dreference = getProperty("DReference");
   m_step = getProperty("Step");
+  m_estimateFWHM = getProperty("EstimateFWHM");
 
   std::string mode_str = getProperty("OffsetMode");
 
@@ -217,7 +220,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
     auto bkgdFunction = std::dynamic_pointer_cast<IBackgroundFunction>(fun_ptr->getFunction(0));
     auto peakFunction = std::dynamic_pointer_cast<IPeakFunction>(fun_ptr->getFunction(1));
     int result = estimatePeakParameters(histogram, std::pair<size_t, size_t>(start_index, stop_index), peakFunction,
-                                        bkgdFunction, true, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
+                                        bkgdFunction, m_estimateFWHM, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
     if (result != PeakFitResult::GOOD) {
       g_log.debug() << "ws index: " << s
                     << " bad result for observing peak parameters, using default peak height and loc\n";

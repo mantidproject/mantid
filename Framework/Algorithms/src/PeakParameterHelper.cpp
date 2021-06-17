@@ -185,8 +185,6 @@ int estimatePeakParameters(const Histogram &histogram, const std::pair<size_t, s
 
   // use values from background to locate FWHM
   peakfunction->setHeight(peak_height);
-  // FIXME - there are multiple occasions in FitPeaks that setCentre is called.
-  // Is there any way to centralize this?
   peakfunction->setCentre(peak_center);
 
   // Estimate FHWM (peak width)
@@ -194,7 +192,6 @@ int estimatePeakParameters(const Histogram &histogram, const std::pair<size_t, s
     const double peak_fwhm = observePeakFwhm(histogram, bkgd_values, peak_center_index, peak_window.first,
                                              peak_window.second, peakWidthEstimateApproach, peakWidthPercentage);
     if (peak_fwhm > 0.0) {
-      // g_log.debug() << "Peak function " << peakfunction->name() << " still set estimated FWHM\n";
       peakfunction->setFwhm(peak_fwhm);
     }
   }
