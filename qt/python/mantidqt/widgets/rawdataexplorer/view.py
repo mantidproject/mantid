@@ -171,6 +171,12 @@ class RawDataExplorerView(QWidget):
             return presenter.view
 
     # Combobox getters
+    def get_current_instrument(self):
+        """
+        @return the name of the currently selected instrument.
+        """
+        return self.instrumentSelector.currentText()
+
     def get_current_preview(self):
         """
         @return the name of the currently selected preview type, as a string.
