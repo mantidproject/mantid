@@ -120,6 +120,7 @@ class RawDataExplorerPresenter(QObject):
         instrument = self.view.get_current_instrument()
         acquision_mode = self.view.get_current_acquisition()
         preview_name = self.view.get_current_preview()
+        self.model.new_preview(selection, instrument, acquision_mode, preview_name)
 
     def show_ws(self, ws_to_show):
         """
