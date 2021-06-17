@@ -1510,8 +1510,7 @@ class RunDescriptor(PropDescriptor):
             return
         RunDescriptor._logger('**** Removing empty instrument background from workspace {0}: '
                               .format(ws.name()),'information')
-
-        copy_created  = False
+        copy_created = False
         # the name of the original background workspace used as source for background
         bg_name = ebg_ws.name()
         ebg_local_name = bg_name
@@ -1524,9 +1523,9 @@ class RunDescriptor(PropDescriptor):
             if isinstance(ws,EventWorkspace):
                 preserve_events = True
             # background workspace will be modified. Use copy
-            copy_created = True
             ebg_local_name = 'ebg_ws_rebinned'
             ebg_ws = RebinToWorkspace(ebg_ws,ws,PreserveEvents = preserve_events,OutputWorkspace=ebg_local_name)
+            copy_created = True
 
             if ebg_ws.getNumberHistograms() != ws.getNumberHistograms():
                 if RunDescriptor._holder.load_monitors_with_workspace:
@@ -1553,20 +1552,22 @@ class RunDescriptor(PropDescriptor):
                 ebg_ws,bg_normalised = self._check_normalised_and_normalise(ebg_ws,True)
         else:
             # Get dose for both workspaces. Normalisation will occur later
+            ebg_local_name = 'ebg_ws_rat_normalized'
             ebg_current = ebg_ws.run().getProperty('gd_prtn_chrg').value
             ws_current = ws.run().getProperty('gd_prtn_chrg').value
-            # normalize by current
+            # normalize by current ratio
             wsm = CreateSingleValuedWorkspace(DataValue=ws_current/ebg_current)
-            Multiply(LHSWorkspace=ebg_local_name, RHSWorkspace=wsm, OutputWorkspace=ebg_local_name)
+            copy_created = True
+            Multiply(LHSWorkspace=ebg_ws, RHSWorkspace=wsm, OutputWorkspace=ebg_local_name)
             DeleteWorkspace(wsm)
         # End normalization check
 
         # remove normalised background
         Minus(ws,ebg_local_name,OutputWorkspace = ws.name(),ClearRHSWorkspace=copy_created)
-        if copy_created:
+        if ebg_local_name in mtd:
             DeleteWorkspace(ebg_local_name)
-            if ebg_local_name+'_monitors' in mtd:
-                DeleteWorkspace(ebg_local_name+'_monitors')
+        if ebg_local_name+'_monitors' in mtd:
+            DeleteWorkspace(ebg_local_name+'_monitors')
 
         AddSampleLog(Workspace=ws,LogName="empty_bg_removed",LogText=str(ebg_local_name))
         RunDescriptor._logger('**** Empty instrument background {0} has been removed from workspace {1}'.
