@@ -87,10 +87,15 @@ class ModelFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(self.view.current_result_table_index, 2)
 
     def test_that_the_view_is_not_enabled_if_results_tables_do_not_exist(self):
-        self.view.disable_view()
-        self.assertTrue(not self.view.isEnabled())
-
+        self.view.update_result_table_names(["Name1", "Name2", "Name3"])
         self.view.enable_view()
+
+        self.assertTrue(self.view.isEnabled())
+
+        self.view.disable_view()
+        self.view.update_result_table_names([])
+        self.view.enable_view()
+
         self.assertTrue(not self.view.isEnabled())
 
     def test_that_the_view_is_enabled_if_results_tables_exist(self):

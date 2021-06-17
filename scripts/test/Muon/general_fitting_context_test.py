@@ -69,14 +69,22 @@ class GeneralFittingContextTest(unittest.TestCase):
         self.fitting_context.simultaneous_fit_function = None
 
     def test_that_clear_will_clear_the_undo_data_and_active_fits_list(self):
-        self.fitting_context.active_fit_history = [mock.Mock(), mock.Mock()]
         self.fitting_context.simultaneous_fitting_mode = True
+        self.fitting_context.active_fit_history = [mock.Mock(), mock.Mock()]
         self.fitting_context.dataset_indices_for_undo = [0, 1]
         self.fitting_context.single_fit_functions_for_undo = [mock.Mock(), mock.Mock()]
         self.fitting_context.fit_statuses_for_undo = ["Success", "Fail"]
         self.fitting_context.chi_squared_for_undo = [2.2, 3.3]
 
         self.fitting_context.simultaneous_fit_functions_for_undo = [mock.Mock(), mock.Mock()]
+
+        self.assertEqual(len(self.fitting_context.active_fit_history), 2)
+        self.assertEqual(len(self.fitting_context.all_latest_fits()), 2)
+        self.assertEqual(len(self.fitting_context.dataset_indices_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.single_fit_functions_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.fit_statuses_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.chi_squared_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.simultaneous_fit_functions_for_undo), 2)
 
         self.fitting_context.clear()
 

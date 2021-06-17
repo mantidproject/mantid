@@ -69,13 +69,12 @@ class ModelFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.result_table_names, self.result_table_names)
 
     def test_that_current_result_table_index_will_change_which_results_table_is_selected(self):
-        self.model.result_table_names = self.result_table_names
-        self.assertEqual(self.model.current_result_table_name,
-                         self.result_table_names[self.model.current_result_table_index])
+        self.model.result_table_names = ["Result1", "Result2", "Result3", "Result4", "Result5", "Result6"]
 
-        self.model.current_result_table_index = 1
-        self.assertEqual(self.model.current_result_table_name,
-                         self.result_table_names[self.model.current_result_table_index])
+        for table_index in range(len(self.model.result_table_names)):
+            self.model.current_result_table_index = table_index
+            self.assertEqual(self.model.current_result_table_name,
+                             self.model.result_table_names[self.model.current_result_table_index])
 
     def test_that_current_result_table_name_will_return_none_when_there_are_no_results_tables_loaded(self):
         self.assertEqual(self.model.current_result_table_name, None)
@@ -165,15 +164,17 @@ class ModelFittingModelTest(unittest.TestCase):
         self.model.create_x_and_y_parameter_combination_workspaces()
 
         self.assertTrue(check_if_workspace_exist("Result1; Parameter Combinations"))
-        self.assertTrue(not check_if_workspace_exist("Result1; workspace_name vs workspace_name"))
+
         self.assertTrue(check_if_workspace_exist("Result1; workspace_name vs A0"))
         self.assertTrue(check_if_workspace_exist("Result1; workspace_name vs A1"))
-        self.assertTrue(not check_if_workspace_exist("Result1; A0 vs A0"))
         self.assertTrue(check_if_workspace_exist("Result1; A0 vs workspace_name"))
         self.assertTrue(check_if_workspace_exist("Result1; A0 vs A1"))
-        self.assertTrue(not check_if_workspace_exist("Result1; A1 vs A1"))
         self.assertTrue(check_if_workspace_exist("Result1; A1 vs workspace_name"))
         self.assertTrue(check_if_workspace_exist("Result1; A1 vs A0"))
+
+        self.assertTrue(not check_if_workspace_exist("Result1; workspace_name vs workspace_name"))
+        self.assertTrue(not check_if_workspace_exist("Result1; A0 vs A0"))
+        self.assertTrue(not check_if_workspace_exist("Result1; A1 vs A1"))
 
 
 if __name__ == '__main__':

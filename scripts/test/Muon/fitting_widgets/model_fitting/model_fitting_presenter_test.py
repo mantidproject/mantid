@@ -49,6 +49,12 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self._setup_mock_model()
         self._setup_presenter()
 
+    def tearDown(self):
+        self.presenter = None
+        self.model = None
+        self.view = None
+
+    def test_that_the_presenter_init_calls_the_expected_methods(self):
         self.mock_view_minimizer.assert_called_once_with()
         self.mock_view_evaluation_type.assert_called_once_with()
         self.mock_view_fit_to_raw.assert_called_once_with()
@@ -71,11 +77,6 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.set_slot_for_results_table_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_selected_x_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_selected_y_changed.call_count, 1)
-
-    def tearDown(self):
-        self.presenter = None
-        self.model = None
-        self.view = None
 
     def test_that_handle_new_results_table_created_will_append_a_results_table_name_if_it_does_not_exist_already(self):
         new_table = "Results3"

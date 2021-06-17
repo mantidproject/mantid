@@ -62,8 +62,11 @@ class ModelFittingContextTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             self.fitting_context.current_result_table_index = 4
 
-    def test_that_current_result_table_index_will_not_raise_if_there_are_no_datasets_and_none_is_provided(self):
-        self.fitting_context.current_result_table_index = None
+    def test_that_current_result_table_index_will_not_raise_a_runtime_error_if_theres_no_datasets_and_none_is_provided(self):
+        try:
+            self.fitting_context.current_result_table_index = None
+        except RuntimeError:
+            self.fail("This should not have raised an exception.")
 
     def test_that_number_of_result_tables_will_return_the_expected_number_of_results_tables(self):
         self.assertEqual(self.fitting_context.number_of_result_tables(), 0)
@@ -77,6 +80,13 @@ class ModelFittingContextTest(unittest.TestCase):
         self.fitting_context.single_fit_functions_for_undo = [mock.Mock(), mock.Mock()]
         self.fitting_context.fit_statuses_for_undo = ["Success", "Fail"]
         self.fitting_context.chi_squared_for_undo = [2.2, 3.3]
+
+        self.assertEqual(len(self.fitting_context.active_fit_history), 2)
+        self.assertEqual(len(self.fitting_context.all_latest_fits()), 2)
+        self.assertEqual(len(self.fitting_context.dataset_indices_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.single_fit_functions_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.fit_statuses_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.chi_squared_for_undo), 2)
 
         self.fitting_context.clear()
 

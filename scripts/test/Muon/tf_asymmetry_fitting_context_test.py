@@ -69,6 +69,16 @@ class TFAsymmetryFittingContextTest(unittest.TestCase):
         self.fitting_context.normalisations_for_undo = [1.0, 2.0]
         self.fitting_context.normalisations_fixed_for_undo = [True, False]
 
+        self.assertEqual(len(self.fitting_context.active_fit_history), 2)
+        self.assertEqual(len(self.fitting_context.all_latest_fits()), 2)
+        self.assertEqual(len(self.fitting_context.dataset_indices_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.single_fit_functions_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.fit_statuses_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.chi_squared_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.simultaneous_fit_functions_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.normalisations_for_undo), 2)
+        self.assertEqual(len(self.fitting_context.normalisations_fixed_for_undo), 2)
+
         self.fitting_context.clear()
 
         self.assertEqual(self.fitting_context.active_fit_history, [])
