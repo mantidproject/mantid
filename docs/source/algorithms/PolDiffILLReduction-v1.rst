@@ -19,6 +19,8 @@ The common mandatory input is a run file (numor), or a list of them. In case a l
 the data is treated individually up to the point of background subtraction, and then can be either left as a list, each detector can averaged over the scan,
 or all data from the scan can summed.
 
+The input data is renamed, and a suffix is added to each numor containing information about the polarisation direction ('Z', 'X', 'Y', etc.) and the flipper state ('ON', 'OFF').
+
 Most of the corrections, such as background subtraction or polarisation correction, are optional and their inclusion depends on the provided inputs and set flags.
 However, it is mandatory to provide basic information about the vanadium and sample, such as mass, chemical formula, and either density or number density.
 

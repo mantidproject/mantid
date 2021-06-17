@@ -176,11 +176,13 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              doc='Whether or not to delete intermediate workspaces.')
 
     def _data_structure_helper(self, ws):
+        """Returns the number of polarisation orientations present in the data and checks against the chosen
+        cross-section separation method if it is feasible with the given data structure."""
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
         measurements = set()
-        for name in mtd[ws].getNames():
-            last_underscore = name.rfind("_")
-            measurements.add(name[last_underscore+1:])
+        for name in mtd[ws].getNames():  # ws name suffix is now: '_POL_FLIPPER_STATE'
+            slast_underscore = name.rfind("_", 0, name.rfind("_"))
+            measurements.add(name[slast_underscore+1:])
         nMeasurements = len(measurements)
         error_msg = "The provided data cannot support {} measurement cross-section separation."
         if nMeasurements == 10:
@@ -228,13 +230,14 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             second_xyz_ws = self.getPropertyValue('RotatedXYZWorkspace')
         tmp_names = set()
         separated_cs = []
-
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
             sigma_z_sf = mtd[ws][entry_no]
             sigma_z_nsf = mtd[ws][entry_no+1]
-            total_cs = mtd[ws][entry_no].name() + '_Total'
-            nuclear_cs = mtd[ws][entry_no].name() + '_Coherent'
-            incoherent_cs = mtd[ws][entry_no].name() + '_Incoherent'
+            numor = mtd[ws][entry_no].name()
+            numor = numor[:numor.find("_")]
+            total_cs = numor + '_Total'
+            nuclear_cs = numor + '_Coherent'
+            incoherent_cs = numor + '_Incoherent'
             if nMeasurements == 2:
                 data_total = sigma_z_nsf + sigma_z_sf
                 RenameWorkspace(InputWorkspace=data_total, OutputWorkspace=total_cs)
@@ -250,9 +253,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 sigma_y_nsf = mtd[ws][entry_no+3]
                 sigma_x_sf = mtd[ws][entry_no+4]
                 sigma_x_nsf = mtd[ws][entry_no+5]
-                average_magnetic_cs = mtd[ws][entry_no].name() + '_AverageMagnetic'
-                sf_magnetic_cs = mtd[ws][entry_no].name() + '_SFMagnetic'
-                nsf_magnetic_cs = mtd[ws][entry_no].name() + '_NSFMagnetic'
+                average_magnetic_cs = numor + '_AverageMagnetic'
+                sf_magnetic_cs = numor + '_SFMagnetic'
+                nsf_magnetic_cs = numor + '_NSFMagnetic'
                 if nMeasurements == 6 and user_method == 'XYZ':
                     # Total cross-section:
                     data_total = (sigma_z_nsf + sigma_x_nsf + sigma_y_nsf + sigma_z_sf + sigma_x_sf + sigma_y_sf) / 3.0
@@ -481,7 +484,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         self._set_as_distribution(ws)
         if output_unit == 'TwoTheta':
             if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
-                self._merge_polarisations(ws)
+                self._merge_data(ws)
                 ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula='-x')
             else:
                 ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta', OrderAxis=False)
@@ -489,7 +492,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
         elif output_unit == 'Q':
             if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
-                self._merge_polarisations(ws)
+                self._merge_data(ws)
                 wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value # in Angstrom
                 # flips axis sign and converts detector 2theta to momentum exchange
                 formula = '4*pi*sin(-0.5*pi*x/180.0)/{}'.format(wavelength)
@@ -513,27 +516,32 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             mtd[ws].setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
 
-    def _merge_polarisations(self, ws):
-        pol_directions = set()
-        numors = set()
+    def _merge_data(self, ws):
+        """Averages data belonging to the same polarisation direction and flipper state, or cross-section type."""
+        # assumed naming scheme: numor_pol-dir_flipper-state_cross-section(optional)_normalised(optional)
+        possible_polarisations = ["ZPO", "YPO", "XPO"]  # assuming current uniaxial and XYZ NeXus style
+        merging_keys = dict()
         for name in mtd[ws].getNames():
-            last_underscore = name.rfind("_")
-            if name[last_underscore+1:] == 'normalised':
-                short_name = name[:last_underscore]
-                second_last = short_name.rfind("_")
-                numors.add(short_name[:second_last])
-                pol_directions.add(short_name[second_last + 1:]+name[last_underscore:])
+            first_under = name.find("_")
+            non_numor_info = name[first_under+1:]
+            next_under = non_numor_info.find("_")
+            if any([pol in non_numor_info for pol in possible_polarisations]):
+                # polarisation direction and flipper state need to be extracted from the name
+                afternext_under = 1 + next_under + non_numor_info[next_under+1:].find("_")
+                key = non_numor_info[:afternext_under]
             else:
-                numors.add(name[:last_underscore])
-                pol_directions.add(name[last_underscore + 1:])
-        if len(numors) > 1:
-            names_list = []
-            for direction in sorted(list(pol_directions)):
-                name = '{0}_{1}'.format(ws, direction)
-                list_pol = []
-                for numor in numors:
-                    list_pol.append('{0}_{1}'.format(numor, direction))
-                self._call_sum_data(input_name=','.join(list_pol), output_name=name)
+                if next_under < 1:
+                    key = non_numor_info
+                else:
+                    key = non_numor_info[:next_under]
+            if key not in merging_keys:
+                merging_keys[key] = list()
+            merging_keys[key].append(name)
+        if len(merging_keys) > 1:
+            names_list = list()
+            for key in merging_keys:
+                name = '{0}_{1}'.format(ws, key)
+                self._call_sum_data(input_name=merging_keys[key], output_name=name)
                 names_list.append(name)
             DeleteWorkspaces(WorkspaceList=ws)
             GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)

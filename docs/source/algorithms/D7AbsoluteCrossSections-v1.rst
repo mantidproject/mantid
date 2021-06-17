@@ -175,7 +175,7 @@ Output:
 .. testoutput:: ExD7AbsoluteCrossSections_XYZ_separation
 
    Number of separated cross-sections: 6
-   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 170.0
+   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 11.9
 
 .. testcleanup:: ExD7AbsoluteCrossSections_XYZ_separation
 

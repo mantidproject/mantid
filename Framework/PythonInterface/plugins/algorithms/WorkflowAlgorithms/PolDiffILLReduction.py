@@ -274,6 +274,18 @@ class PolDiffILLReduction(PythonAlgorithm):
         DeleteWorkspace(Workspace=ws)
         GroupWorkspaces(InputWorkspaces=tmp_ws, OutputWorkspace=ws)
 
+    @staticmethod
+    def _rename_input_with_polarisation_info(ws):
+        """Renames workspaces in the input workspace group to bear more information about the polarisation
+        orientation, namely direction and the flipper state than the default '_index'."""
+        for entry in mtd[ws]:
+            numor = entry.name()
+            numor = numor[:numor.rfind("_")]
+            direction = entry.getRun().getLogData("POL.actual_state").value
+            flipper_state = entry.getRun().getLogData("POL.actual_stateB1B2").value
+            new_name = "{0}_{1}_{2}".format(numor, direction, flipper_state)
+            RenameWorkspace(InputWorkspace=entry, OutputWorkspace=new_name)
+
     def _normalise(self, ws):
         """Normalises the provided WorkspaceGroup to the monitor 1 or time and simultaneously removes monitors."""
         normaliseBy = self.getPropertyValue('NormaliseBy')
@@ -340,15 +352,16 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Merges workspaces with the same polarisation inside the provided WorkspaceGroup either
         by using SumOverlappingTubes or averaging entries for each detector depending on the status
         of the sumOverDetectors flag."""
-        pol_directions = set()
+        pol_directions = list()
         numors = set()
         for name in mtd[ws].getNames():
-            last_underscore = name.rfind("_")
-            numors.add(name[:last_underscore])
-            pol_directions.add(name[last_underscore+1:])
+            slast_underscore = name.rfind("_", 0, name.rfind("_"))
+            numors.add(name[:slast_underscore])
+            if name[slast_underscore+1:] not in pol_directions:
+                pol_directions.append(name[slast_underscore+1:])
         if len(numors) > 1:
             names_list = []
-            for direction in sorted(list(pol_directions)):
+            for direction in pol_directions:
                 name = '{0}_{1}'.format(ws, direction)
                 list_pol = []
                 for numor in numors:
@@ -851,6 +864,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 progress.report('Calculating transmission')
                 self._calculate_transmission(ws, beam_ws)
         else:
+            self._rename_input_with_polarisation_info(ws)
             progress.report('Normalising to monitor/time')
             self._normalise(ws)
 
