@@ -28,6 +28,11 @@ class PreviewView:
     IVIEW = "instrument_viewer"
 
     """
+    Type of the preview when the slice viewer widget is used to show the data.
+    """
+    SVIEW = "slice_viewer"
+
+    """
     Type the preview.
     """
     _type  = None
@@ -55,6 +60,10 @@ class PreviewView:
             self._widget = get_instrumentview(workspace_name)
             self._widget.show_view()
             self._widget.container.closing.connect(self.on_close)
+        if self._type == self.SVIEW:
+            self._widget = SliceViewer(ws=mtd[workspace_name])
+            self._widget.view.show()
+            self._widget.view.close_signal.connect(self.on_close)
 
     def change_workspace(self, workspace_name):
         """
@@ -63,6 +72,8 @@ class PreviewView:
         """
         if self._type == self.IVIEW:
             self._widget.replace_workspace(workspace_name)
+        if self._type == self.SVIEW:
+            return
 
     def on_close(self):
         """
