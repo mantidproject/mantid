@@ -121,6 +121,13 @@ class RawDataExplorerModel(QObject):
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
 
+    def del_preview(self, previewModel):
+        """
+        Delete a preview model.
+        @param preview_model(PreviewModel): reference to the model.
+        """
+        self._previews.remove(previewModel)
+
     def on_file_clicked(self, file_index):
         """
         Slot triggered by clicking on a file. If it is not loaded already, tries to do so.
