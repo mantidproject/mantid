@@ -326,9 +326,10 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
   if (dataCenter.dim2() != 1) {
     NXFloat durations = firstEntry.openNXFloat("slices");
     durations.load();
-    float *durations_p = durations();
-    const HistogramData::Counts histoCounts(durations_p, durations_p + dataCenter.dim2());
+    const HistogramData::Counts histoCounts(durations(), durations() + dataCenter.dim2());
     m_localWorkspace->setCounts(nextIndex - 1, std::move(histoCounts));
+    m_localWorkspace->setCountVariances(nextIndex - 1,
+                                        HistogramData::CountVariances(std::vector<double>(dataCenter.dim2(), 0)));
   }
 }
 
