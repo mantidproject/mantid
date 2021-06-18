@@ -122,16 +122,16 @@ class SuperplotPresenter:
             self._model.add_workspace(ws_name)
             self._model.add_data(ws_name, spec_index)
 
-    def on_visibility_changed(self, state):
+    def on_visibility_changed(self, visible):
         """
         Triggered when the visibility of the superplot widget changed. This
         funcion rescale the figure to be sure that the axis and labels are not
         hidden behind the dockwidgets.
 
         Args:
-            state (bool): True if the widget is now visible
+            visible (bool): True if the widget is now visible
         """
-        if state:
+        if visible:
             try:
                 self._canvas.figure.tight_layout()
             except:
