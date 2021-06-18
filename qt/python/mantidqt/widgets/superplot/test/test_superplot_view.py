@@ -184,7 +184,7 @@ class SuperplotViewTest(unittest.TestCase):
     def test_get_spectrum_disabled(self):
         widget = self.m_dock_bottom.spectrumSlider
         widget.isEnabled.return_value = True
-        self.assertFalse(self.view.is_spectrum_disabled())
+        self.assertFalse(self.view.is_spectrum_selection_disabled())
         widget.isEnabled.assert_called_once()
 
     def test_set_spectrum_slider_max(self):
