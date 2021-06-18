@@ -3,17 +3,34 @@
 # Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_model import BasePaneModel
 from Muon.GUI.Common.ADSHandler.workspace_naming import *
 
 
-class PlotDataPaneModel(BasePaneModel):
+class PlotTimeFitPaneModel(BasePaneModel):
 
     def __init__(self, context):
-        super().__init__(context,"Plot Data")
-        self.context.plot_panes_context[self.name].set_defaults([0.,15.], [-0.3, 0.3])
+        super().__init__(context,"Fit Data")
+
+    @staticmethod
+    def get_fit_workspace_and_indices(fit, with_diff=True):
+        if fit is None:
+            return [], []
+        workspaces = []
+        indices = []
+        for workspace_name in fit.output_workspace_names:
+            first_fit_index = 1  # calc
+            if fit.tf_asymmetry_fit:
+                first_fit_index = 3
+            second_fit_index = 2  # Diff
+            workspaces.append(workspace_name)
+            indices.append(first_fit_index)
+            if with_diff:
+                workspaces.append(workspace_name)
+                indices.append(second_fit_index)
+
+        return workspaces, indices
 
     def get_time_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
         """
@@ -143,3 +160,6 @@ class PlotDataPaneModel(BasePaneModel):
         elif MAXENT_STR in workspace_name:
             label = ''.join([';', MAXENT_STR])
         return label
+
+    def _is_guess_workspace(self, workspace_name):
+        return self.context.guess_workspace_prefix in workspace_name

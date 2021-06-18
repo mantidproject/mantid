@@ -208,6 +208,17 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         else:
             return [], [] # no subplots are available
 
+    def set_subplot_selection(self, selection):
+        selected_subplots, indices = self._get_selected_subplots_from_quick_edit_widget()
+        index = 0
+        if selection[0] in selected_subplots:
+            # index 0 is all and should never be a subplot name
+            # the selected subplots are the list of subplots (excludes all option)
+            # so manually add one to the index
+            index = selected_subplots.index(selection[0]) + 1
+        self._options_presenter.set_selection_by_index(index)
+        self._handle_subplot_changed_in_quick_edit_widget()
+
     def _get_axes_limits_from_quick_edit_widget(self):
         xlims = self._options_presenter.get_plot_x_range()
         ylims = self._options_presenter.get_plot_y_range()
@@ -247,6 +258,11 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         """Sets the x range of all the plots"""
         self._options_presenter.set_plot_x_range(range)
         self._handle_xlim_changed_in_quick_edit_options(range)
+
+    def set_plot_y_range(self, range):
+        """Sets the x range of all the plots"""
+        self._options_presenter.set_plot_y_range(range)
+        self._handle_ylim_changed_in_quick_edit_options(range)
 
     def _update_quick_edit_widget(self):
         self._update_quick_widget_subplots_menu()
@@ -305,6 +321,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.set_autoscale(state)
         if state:
             self._options_presenter.disable_yaxis_changer()
+            self.force_autoscale()
         else:
             self._options_presenter.enable_yaxis_changer()
 
