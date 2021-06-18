@@ -50,8 +50,8 @@ class SuperplotModelTest(unittest.TestCase):
         self.assertEqual(self.model._workspaces, ["ws1", "ws2"])
         self.m_mtd.__getitem__.return_value = mock.Mock(spec=WorkspaceGroup)
         self.m_mtd.__getitem__.return_value.getNames.return_value = ["ws2",
-                                                                    "ws3",
-                                                                    "ws4"]
+                                                                     "ws3",
+                                                                     "ws4"]
         self.model.add_workspace("g1")
         self.assertEqual(self.model._workspaces, ["ws1", "ws2", "ws3", "ws4"])
 
