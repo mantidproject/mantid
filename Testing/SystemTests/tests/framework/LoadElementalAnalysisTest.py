@@ -49,7 +49,7 @@ class LoadElementalAnalysisTest(systemtesting.MantidSystemTest):
         # Check that the Bin 4083 of the Total spectra of the workspace of Detecror 4 is 120.457
         detector4_ws = AnalysisDataService.retrieve('9999; Detector 4')
         self.assertAlmostEqual(detector4_ws.readY(2)[4083], 120.457, places=4)
-        self.assertAlmostEqual(detector4_ws.readE(2)[4083], 10.9752, places=4)
+        self.assertAlmostEqual(detector4_ws.readE(2)[4083], 10.9753, places=4)
         # Check that the directory output is not empty
         self.assertIsNotNone(ws[1])
 
