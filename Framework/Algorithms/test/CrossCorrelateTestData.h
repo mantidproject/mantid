@@ -132,13 +132,24 @@ std::vector<double> evaluateFunction(std::shared_ptr<IFunction> function, std::v
 CompositeFunction_sptr createCompositeB2BExp(const int spectrumIndex) {
   CompositeFunction_sptr function = std::make_shared<CompositeFunction>();
 
-  if (spectrumIndex > 0) {
+  // values for reference spectrum that may be changed for the others
+  double shift_in_d{0.};
+  double height_111{100.};
+  double height_220{200.};
+  double height_311{300.};
+  if (spectrumIndex == 0) {
+    // reference spectrum
+  } else if (spectrumIndex == 1) {
+    // horizontal shift in the data
+    // peak heights are unchanged
+    shift_in_d = .1;
+  } else {
     throw std::runtime_error("Logic for this spectrum index has not been written");
   }
 
-  function->addFunction(createPeakFunction(PeakIndex::POS_111, 100, B2BEXP_POSITION_111));
-  function->addFunction(createPeakFunction(PeakIndex::POS_220, 100, B2BEXP_POSITION_220));
-  function->addFunction(createPeakFunction(PeakIndex::POS_311, 100, B2BEXP_POSITION_311));
+  function->addFunction(createPeakFunction(PeakIndex::POS_111, height_111, B2BEXP_POSITION_111 + shift_in_d));
+  function->addFunction(createPeakFunction(PeakIndex::POS_220, height_220, B2BEXP_POSITION_220 + shift_in_d));
+  function->addFunction(createPeakFunction(PeakIndex::POS_311, height_311, B2BEXP_POSITION_311 + shift_in_d));
 
   return function;
 }
