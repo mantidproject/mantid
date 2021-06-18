@@ -43,6 +43,8 @@ public:
     auto simpleFixture = std::make_unique<StrictMock<MockSimpleWidget>>();
     EXPECT_CALL(*simpleFixture, setSurface(_)).Times(1);
     EXPECT_CALL(*simpleFixture, updateView(IsTrue())).Times(1);
+    EXPECT_CALL(*simpleFixture, qtInstallEventFilter(_)).Times(1);
+    EXPECT_CALL(*simpleFixture, qtUpdate()).Times(1);
 
     InstrumentWidget("test_ws", nullptr, true, true, 0.0, 0.0, true, std::move(simpleFixture));
   }

@@ -8,7 +8,8 @@
 #pragma once
 
 #include "ISimpleWidget.h"
-#include "MantidKernel/WarningSuppressions.h"
+
+#include <QObject>
 #include <gmock/gmock.h>
 
 namespace MantidQt::MantidWidgets {
@@ -22,5 +23,7 @@ public:
   MOCK_METHOD(void, saveToFile, (const QString &), (override));
 
   // Qt overrides
+  MOCK_METHOD(void, qtInstallEventFilter, (QObject *), (override));
+  MOCK_METHOD(void, qtUpdate, (), (override));
 };
 } // namespace MantidQt::MantidWidgets

@@ -140,7 +140,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
   // Create simple display widget
   if (!m_simpleDisplay)
     m_simpleDisplay = std::make_unique<SimpleWidget>(this);
-  m_simpleDisplay->installEventFilter(this);
+  m_simpleDisplay->qtInstallEventFilter(this);
 
   QWidget *aWidget = new QWidget(this);
   m_instrumentDisplayLayout = new QStackedLayout(aWidget);
@@ -1264,7 +1264,7 @@ void InstrumentWidget::setSurface(ProjectionSurface *surface) {
   }
   if (m_simpleDisplay) {
     m_simpleDisplay->setSurface(sharedSurface);
-    m_simpleDisplay->update();
+    m_simpleDisplay->qtUpdate();
   }
   auto *unwrappedSurface = dynamic_cast<UnwrappedSurface *>(surface);
   if (unwrappedSurface) {

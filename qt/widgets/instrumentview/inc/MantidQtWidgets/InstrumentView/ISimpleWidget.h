@@ -33,6 +33,10 @@ public:
   virtual void updateDetectors() = 0;
   /// Save the image into a file
   virtual void saveToFile(const QString &filename) = 0;
+
+  // Qt overrides
+  virtual void qtInstallEventFilter(QObject *arg) { installEventFilter(arg); }
+  virtual void qtUpdate() { update(); }
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
