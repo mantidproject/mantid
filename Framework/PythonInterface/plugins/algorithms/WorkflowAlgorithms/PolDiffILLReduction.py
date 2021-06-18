@@ -826,9 +826,13 @@ class PolDiffILLReduction(PythonAlgorithm):
         if output_treatment == 'IndividualXY':
             self._merge_all_inputs(ws)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])  # renames group as a whole
-        for entry in mtd[ws[2:]]:  # renames individual ws in case they still contain __
-            if entry.name()[:2] == "__":
-                RenameWorkspace(InputWorkspace=entry, OutputWorkspace=entry.name()[2:])
+        if process in ['Vanadium', 'Sample']:
+            for entry in mtd[ws[2:]]:  # renames individual ws to contain the output name
+                entry_name = entry.name()
+                if entry_name[:2] == "__":
+                    entry_name = entry_name[2:]
+                output_name = self.getPropertyValue("OutputWorkspace")
+                RenameWorkspace(InputWorkspace=entry, OutputWorkspace="{}_{}".format(output_name, entry_name))
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
 
     def PyExec(self):

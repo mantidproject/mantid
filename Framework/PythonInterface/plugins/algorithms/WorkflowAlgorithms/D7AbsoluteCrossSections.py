@@ -55,6 +55,15 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             entry.setDistribution(True)
         return ws
 
+    @staticmethod
+    def _extract_numor(name):
+        word_list = name.split("_")
+        numor = name  # fail case to ensure unique name
+        for word in word_list:
+            if word.isnumeric():
+                numor = word
+        return numor
+
     def category(self):
         return 'ILL\\Diffraction'
 
@@ -233,8 +242,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
             sigma_z_sf = mtd[ws][entry_no]
             sigma_z_nsf = mtd[ws][entry_no+1]
-            numor = mtd[ws][entry_no].name()
-            numor = numor[:numor.find("_")]
+            numor = self._extract_numor(mtd[ws][entry_no].name())
             total_cs = numor + '_Total'
             nuclear_cs = numor + '_Coherent'
             incoherent_cs = numor + '_Incoherent'
@@ -524,21 +532,28 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def _merge_data(self, ws):
         """Averages data belonging to the same polarisation direction and flipper state, or cross-section type."""
         # assumed naming scheme: numor_pol-dir_flipper-state_cross-section(optional)_normalised(optional)
+        cs_present = not self.getProperty("CrossSectionSeparationMethod").isDefault
         possible_polarisations = ["ZPO", "YPO", "XPO"]  # assuming current uniaxial and XYZ NeXus style
+        flipper_states = ["_ON", "_OFF"]
         merging_keys = dict()
         for name in mtd[ws].getNames():
-            first_under = name.find("_")
-            non_numor_info = name[first_under+1:]
-            next_under = non_numor_info.find("_")
-            if any([pol in non_numor_info for pol in possible_polarisations]):
-                # polarisation direction and flipper state need to be extracted from the name
-                afternext_under = 1 + next_under + non_numor_info[next_under+1:].find("_")
-                key = non_numor_info[:afternext_under]
-            else:
-                if next_under < 1:
+            if cs_present:
+                non_numor_info = name[name.find("_")+1:]
+                next_underscore = non_numor_info.find("_")
+                if next_underscore < 1:
                     key = non_numor_info
                 else:
-                    key = non_numor_info[:next_under]
+                    key = non_numor_info[:next_underscore]
+            else:
+                key = ""
+                for pol in possible_polarisations:
+                    if pol in name:
+                        key = pol
+                        break
+                if flipper_states[0] in name:
+                    key += flipper_states[0]
+                else:
+                    key += flipper_states[1]
             if key not in merging_keys:
                 merging_keys[key] = list()
             merging_keys[key].append(name)
