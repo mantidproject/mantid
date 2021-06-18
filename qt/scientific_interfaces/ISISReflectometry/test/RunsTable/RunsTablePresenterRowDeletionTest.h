@@ -28,9 +28,9 @@ public:
 
   void testUpdatesViewWhenRowDeletedFromDirectSelection() {
     auto reductionJobs = twoGroupsWithARowModel();
-    selectedRowLocationsAre(m_jobs, {location(0, 0)});
-
     EXPECT_CALL(m_jobs, removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation>({location(0, 0)})));
+
+    selectedRowLocationsAre(m_jobs, {location(0, 0)});
 
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyDeleteRowRequested();
@@ -65,10 +65,10 @@ public:
 
   void testUpdatesViewWhenRowDeletedFromMultiSelection() {
     auto reductionJobs = oneGroupWithTwoRowsModel();
-    selectedRowLocationsAre(m_jobs, {location(0, 0), location(0, 1)});
-
+    EXPECT_CALL(m_jobs, removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation>({location(0)})));
     EXPECT_CALL(m_jobs,
                 removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation>({location(0, 0), location(0, 1)})));
+    selectedRowLocationsAre(m_jobs, {location(0, 0), location(0, 1)});
 
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyDeleteRowRequested();
