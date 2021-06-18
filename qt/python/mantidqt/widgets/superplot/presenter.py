@@ -184,7 +184,7 @@ class SuperplotPresenter:
             self._view.set_spectrum_spin_box_max(0)
             self._view.set_spectrum_disabled(True)
             return
-        maximum = None
+        maximum_dimension_size = None
         position = None
         mode = self._view.get_mode()
         for ws_name in selection:
@@ -200,19 +200,19 @@ class SuperplotPresenter:
                     self._view.set_spectrum_disabled(True)
                     return
             if mode == self.SPECTRUM_MODE_TEXT:
-                value = ws.getNumberHistograms()
+                dimension_size = ws.getNumberHistograms()
             else:
-                value = ws.blocksize()
-            if maximum is None:
-                maximum = value
-            elif value < maximum:
-                maximum = value
-        if position is None or position >= maximum:
+                dimension_size = ws.blocksize()
+            if maximum_dimension_size is None:
+                maximum_dimension_size = dimension_size
+            elif dimension_size < maximum_dimension_size:
+                maximum_dimension_size = dimension_size
+        if position is None or position >= maximum_dimension_size:
             position = 0
         self._view.set_spectrum_disabled(False)
-        self._view.set_spectrum_slider_max(maximum - 1)
+        self._view.set_spectrum_slider_max(maximum_dimension_size - 1)
         self._view.set_spectrum_slider_position(position)
-        self._view.set_spectrum_spin_box_max(maximum - 1)
+        self._view.set_spectrum_spin_box_max(maximum_dimension_size - 1)
         self._view.set_spectrum_spin_box_value(position)
 
     def _update_hold_button(self):
