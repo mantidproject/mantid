@@ -98,11 +98,11 @@ endif()
 find_package(TBB REQUIRED)
 
 # We probably don't want this to run on every build.
-option(COVERALLS "Generate coveralls data" OFF)
+option(COVERAGE "Generate coverage data" OFF)
 
-if(COVERALLS)
-  include(Coveralls)
-  coveralls_turn_on_coverage()
+if(COVERAGE)
+  include(Coverage)
+  coverage_turn_on()
 endif()
 
 if(ENABLE_WORKBENCH)
@@ -137,6 +137,7 @@ option(CXXTEST_ADD_PERFORMANCE
 add_subdirectory(Framework)
 
 include_directories(Framework/Kernel/inc)
+include_directories(Framework/Json/inc)
 include_directories(Framework/HistogramData/inc)
 include_directories(Framework/Indexing/inc)
 include_directories(Framework/Parallel/inc)
@@ -199,7 +200,7 @@ endif()
 # System test data target
 add_subdirectory(Testing/SystemTests/scripts)
 
-if(COVERALLS)
+if(COVERAGE)
   get_property(ALL_SRCS GLOBAL PROPERTY COVERAGE_SRCS)
   set(SRCS_FILE "")
   foreach(SRC ${ALL_SRCS})
@@ -212,7 +213,7 @@ if(COVERALLS)
                    SRCS_FILE)
   set(SRCS_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/sources.txt")
   file(WRITE ${SRCS_FILENAME} ${SRCS_FILE})
-  coveralls_setup(${SRCS_FILENAME} OFF "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
+  coverage_setup(${SRCS_FILENAME} OFF "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 endif()
 
 # Installation settings

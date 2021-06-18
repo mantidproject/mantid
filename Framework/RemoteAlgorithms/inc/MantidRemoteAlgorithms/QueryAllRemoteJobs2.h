@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
@@ -15,7 +16,7 @@ namespace RemoteAlgorithms {
 Query status information about all jobs running on a (remote) compute
 resource.
 */
-class DLLExport QueryAllRemoteJobs2 : public Mantid::API::Algorithm {
+class DLLExport QueryAllRemoteJobs2 : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "QueryAllRemoteJobs"; }

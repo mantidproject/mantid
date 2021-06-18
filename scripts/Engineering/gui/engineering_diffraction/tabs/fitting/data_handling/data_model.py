@@ -199,8 +199,10 @@ class FittingDataModel(object):
     def update_fit(self, fit_props):
         for fit_prop in fit_props:
             wsname = fit_prop['properties']['InputWorkspace']
-            self._fit_results[wsname] = {'model': fit_prop['properties']['Function']}
+            self._fit_results[wsname] = {'model': fit_prop['properties']['Function'],
+                                         'status': fit_prop['status']}
             self._fit_results[wsname]['results'] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
+            self._fit_results[wsname]
             fnames = [x.split('=')[-1] for x in findall('name=[^,]*', fit_prop['properties']['Function'])]
             # get num params for each function (first elem empty as str begins with 'name=')
             # need to remove ties and constraints which are enclosed in ()
@@ -261,10 +263,12 @@ class FittingDataModel(object):
         model = CreateEmptyTableWorkspace(OutputWorkspace='model')
         model.addColumn(type="str", name="Workspace")
         model.addColumn(type="float", name="chisq/DOF")  # always is for LM minimiser (users can't change)
+        model.addColumn(type="str", name="status")
         model.addColumn(type="str", name="Model")
         for iws, wsname in enumerate(self._loaded_workspaces.keys()):
             if wsname in self._fit_results:
-                row = [wsname, self._fit_results[wsname]['costFunction'], self._fit_results[wsname]['model']]
+                row = [wsname, self._fit_results[wsname]['costFunction'],
+                       self._fit_results[wsname]['status'], self._fit_results[wsname]['model']]
                 self.write_table_row(model, row, iws)
             else:
                 self.write_table_row(model, ['', nan, ''], iws)

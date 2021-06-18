@@ -270,7 +270,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
     outss << m_dataWS->x(0)[i] << "\t\t" << m_dataWS->y(0)[i] << "\t\t" << m_dataWS->e(0)[i] << '\n';
   g_log.debug() << "Input Peak Position Workspace To Fit: \n" << outss.str() << '\n';
 
-  API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
+  auto fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
 
   fitalg->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(m_Function));
@@ -350,7 +350,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
 /** Fit function to data
  */
 bool RefinePowderInstrumentParameters::fitFunction(const IFunction_sptr &func, double &gslchi2) {
-  API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
+  auto fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
 
   fitalg->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(func));
@@ -390,7 +390,7 @@ double RefinePowderInstrumentParameters::calculateFunctionStatistic(const IFunct
   }
 
   // 2. Call a non fit refine
-  API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
+  auto fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
 
   fitalg->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(func));

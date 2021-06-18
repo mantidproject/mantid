@@ -5,14 +5,18 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-VERSION = "1.0"
 
 import os
 import sys
 
-FRONTMATTER = """// If you get the message  "This application has failed to start because MSVCR80.dll was not found. Re-installing the application may fix this problem."
-// when running to run this main.cpp in debug mode then try to uncomment the line below (see also http://blogs.msdn.com/dsvc/archive/2008/08/07/part-2-troubleshooting-vc-side-by-side-problems.aspx for more details)
-//#pragma comment(linker, "\"/manifestdependency:type='Win32' name='Microsoft.VC80.CRT' version='8.0.50608.0' processorArchitecture='X86' publicKeyToken='1fc8b3b9a1e18e3b' \"")
+VERSION = "1.0"
+
+FRONTMATTER = """// If you get the message  "This application has failed to start because MSVCR80.dll was not found.
+// Re-installing the application may fix this problem."
+// when running to run this main.cpp in debug mode then try to uncomment the line below (see also
+// http://blogs.msdn.com/dsvc/archive/2008/08/07/part-2-troubleshooting-vc-side-by-side-problems.aspx for more details)
+//#pragma comment(linker, "\"/manifestdependency:type='Win32' name='Microsoft.VC80.CRT' version='8.0.50608.0'
+// processorArchitecture='X86' publicKeyToken='1fc8b3b9a1e18e3b' \"")
 
 #include <iomanip>
 #include "MantidAPI/FrameworkManager.h"
@@ -60,6 +64,7 @@ BACKMATTER = """
 }
 """
 
+
 class Writer:
     def __init__(self, filename=None, overwrite=False, debug=False):
         if debug:
@@ -68,12 +73,13 @@ class Writer:
             filename = os.path.abspath(filename)
             if os.path.exists(filename) and not overwrite:
                 raise RuntimeError("To overwrite file use '--overwrite' flag")
-            print "Creating file '%s'" % filename
+            print("Creating file '%s'" % filename)
             self.__handle = open(filename, 'w')
 
     def write(self):
         self.__handle.write(FRONTMATTER)
         self.__handle.write(BACKMATTER)
+
 
 if __name__ == "__main__":
     import optparse

@@ -496,6 +496,7 @@ public:
     %MethodCode
     sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->ifun());
     %End
+    bool hasTies();
     void setHasPlot(bool);
     QString functionPrefix() const;
     PropertyHandler * findHandler(SIP_PYOBJECT);
@@ -558,6 +559,7 @@ public:
     void postDeleteHandle(const std::string &wsName);
     void removeWorkspaceAndSpectra(const std::string &wsName);
     std::string getFitAlgorithmParameters() const;
+    std::string getFitAlgorithmOutputStatus() const;
     PropertyHandler * currentHandler() const;
 
     SIP_PYOBJECT defaultPeakType();

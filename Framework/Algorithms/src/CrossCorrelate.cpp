@@ -8,13 +8,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CrossCorrelate.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include <boost/iterator/counting_iterator.hpp>
 #include <numeric>
@@ -236,6 +240,11 @@ void CrossCorrelate::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  out->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+  Unit_sptr unit = out->getAxis(0)->unit();
+  std::shared_ptr<Units::Label> label = std::dynamic_pointer_cast<Units::Label>(unit);
+  label->setLabel("Bins of Shift", "\\mathbb{Z}");
 
   setProperty("OutputWorkspace", out);
 }

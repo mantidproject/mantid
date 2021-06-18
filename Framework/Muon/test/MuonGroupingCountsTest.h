@@ -48,7 +48,7 @@ IAlgorithm_sptr algorithmWithoutOptionalPropertiesSet(const std::string &inputWS
 // i.e. just the input workspace and group name.
 IAlgorithm_sptr setUpAlgorithmWithoutOptionalProperties(const WorkspaceGroup_sptr &ws, const std::string &name) {
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   alg->setProperty("GroupName", name);
   return alg;
 }
@@ -56,7 +56,7 @@ IAlgorithm_sptr setUpAlgorithmWithoutOptionalProperties(const WorkspaceGroup_spt
 // Set up algorithm with GroupName applied
 IAlgorithm_sptr setUpAlgorithmWithGroupName(const WorkspaceGroup_sptr &ws, const std::string &name) {
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   alg->setProperty("GroupName", name);
   return alg;
 }
@@ -65,7 +65,7 @@ IAlgorithm_sptr setUpAlgorithmWithGroupName(const WorkspaceGroup_sptr &ws, const
 IAlgorithm_sptr setUpAlgorithmWithGroupNameAndDetectors(const WorkspaceGroup_sptr &ws, const std::string &name,
                                                         const std::vector<int> &detectors) {
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   alg->setProperty("GroupName", name);
   alg->setProperty("Grouping", detectors);
   return alg;

@@ -90,7 +90,7 @@ public:
     // Verify
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
 
-    bool equals = compareMDEvents(outputname, gold_detail_balanced_merged_name);
+    bool equals = compareMDEvents(outputname, gold_detail_balanced_merged_name, false);
     TS_ASSERT(equals);
 
     // clean up
@@ -349,7 +349,7 @@ private:
   /**
    * @brief compare MD events
    */
-  bool compareMDEvents(const std::string &ws1, const std::string &ws2) {
+  bool compareMDEvents(const std::string &ws1, const std::string &ws2, const bool &checkBoxID = true) {
     // Compare number of MDEvents
     API::IMDEventWorkspace_sptr md1 =
         std::dynamic_pointer_cast<IMDEventWorkspace>(API::AnalysisDataService::Instance().retrieve(ws1));
@@ -368,6 +368,7 @@ private:
     compare_alg.setPropertyValue("Workspace2", ws2);
     compare_alg.setProperty("Tolerance", 0.0001);
     compare_alg.setProperty("CheckEvents", false);
+    compare_alg.setProperty("IgnoreBoxID", !checkBoxID);
     compare_alg.execute();
     TS_ASSERT(compare_alg.isExecuted());
 

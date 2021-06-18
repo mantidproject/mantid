@@ -13,5 +13,4 @@ Useful links
  * Developer site: https://developer.mantidproject.org
 
 [![Build Status](https://builds.mantidproject.org/job/master_incremental/badge/icon)](https://builds.mantidproject.org/job/master_incremental/)
-[![Coverage Status](https://coveralls.io/repos/mantidproject/mantid/badge.svg?branch=master)](https://coveralls.io/r/mantidproject/mantid?branch=master)
 [![Coverity Scan Build Status](https://img.shields.io/coverity/scan/335.svg)](https://scan.coverity.com/projects/335)

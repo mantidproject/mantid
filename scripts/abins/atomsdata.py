@@ -62,7 +62,12 @@ class AtomsData(collections.abc.Sequence):
 
         # "symbol"
         if not item["symbol"] in abins.constants.ALL_SYMBOLS:
-            raise ValueError("Invalid value of symbol.")
+            # Check is symbol was loaded as type bytes
+            utf8_symbol = item["symbol"].decode("utf-8")
+            if utf8_symbol in abins.constants.ALL_SYMBOLS:
+                item["symbol"] = utf8_symbol
+            else:
+                raise ValueError("Invalid value of symbol.")
 
         # "coord"
         coord = item["coord"]
