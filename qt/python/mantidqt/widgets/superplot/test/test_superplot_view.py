@@ -165,10 +165,14 @@ class SuperplotViewTest(unittest.TestCase):
         self.m_dock_side.workspacesList.findItems.return_value = [ws1]
         self.assertEqual(self.view.get_spectra_list("wsName"), [1, 2])
 
-    def test_check_hold_button(self):
-        widget = self.m_dock_bottom.holdButton
-        self.view.check_hold_button(True)
-        widget.setChecked.assert_called_once_with(True)
+    def test_set_hold_button_text(self):
+        self.view.set_hold_button_text("test")
+        self.m_dock_bottom.holdButton.setText.assert_called_once_with("test")
+
+    def test_get_hold_button_text(self):
+        self.m_dock_bottom.holdButton.text.return_value = "test"
+        text = self.view.get_hold_button_text()
+        self.assertEqual(text, "test")
 
     def test_set_spectrum_disabled(self):
         widget1 = self.m_dock_bottom.spectrumSlider
