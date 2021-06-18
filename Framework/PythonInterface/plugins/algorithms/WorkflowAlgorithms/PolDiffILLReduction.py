@@ -802,22 +802,23 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _set_units(self, ws, process):
-        unit_symbol = 'barn / sr / formula unit'
-        unit = r'd$\sigma$/d$\Omega$'
-        if process == 'Sample' and self.getPropertyValue('OutputTreatment') in  ['Average','Sum']:
-            self._merge_polarisations(ws, average_detectors=(self.getPropertyValue('OutputTreatment') == 'Average'))
-
+        unit_symbol = ''
+        unit = 'Normalised Intensity'
+        if process == 'Vanadium' and self.getProperty('AbsoluteNormalisation').value:
+            unit_symbol = r'$\frac{sr \cdot \mathrm{formula unit} }{0.404 \mathrm{barn} }$'
+            unit = 'Normalisation factor'
         for entry in mtd[ws]:
-            if not self.getProperty('AbsoluteNormalisation').value:
-                unit = 'Intensity'
-                unit_symbol = ''
             entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
 
-    def _finalize(self, ws, process, progress):
+    def _finalize(self, ws, process):
         output_treatment = self.getPropertyValue('OutputTreatment')
-        if process not in ['Vanadium'] and output_treatment == 'AverageTwoTheta':
-            ws = self._merge_twoTheta_positions(ws)
+        if process not in ['Vanadium']:
+            if output_treatment == 'AverageTwoTheta':
+                ws = self._merge_twoTheta_positions(ws)
+            if self.getPropertyValue('OutputTreatment') in ['AveragePol', 'Sum']:
+                self._merge_polarisations(ws, average_detectors=(self.getPropertyValue('OutputTreatment')
+                                                                 == 'AveragePol'))
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws][0].getRun().addProperty('ProcessedAs', process, True)
@@ -896,7 +897,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     self._normalise_vanadium(ws)
                 self._set_units(ws, process)
 
-        self._finalize(ws, process, progress)
+        self._finalize(ws, process)
 
 
 AlgorithmFactory.subscribe(PolDiffILLReduction)
