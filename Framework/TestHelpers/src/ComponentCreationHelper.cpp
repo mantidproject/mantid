@@ -670,7 +670,7 @@ Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels, double 
 Instrument_sptr createEmptyInstrument() {
   Instrument_sptr instrument = std::make_shared<Instrument>();
 
-  V3D place_holder_pos( 0, 0, 0 );
+  V3D place_holder_pos(0, 0, 0);
 
   // A source
   ObjComponent *place_holder_0 = new ObjComponent("place_holder");
@@ -681,7 +681,7 @@ Instrument_sptr createEmptyInstrument() {
 
   // A sample
   Component *place_holder_1 = new Component("place_holder");
-  place_holder_1->setPos( place_holder_pos );
+  place_holder_1->setPos(place_holder_pos);
   instrument->add(place_holder_1);
   instrument->markAsSamplePos(place_holder_1);
 

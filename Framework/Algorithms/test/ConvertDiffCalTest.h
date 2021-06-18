@@ -87,7 +87,7 @@ public:
 
     OffsetsWorkspace_sptr offsets;
 
-    ITableWorkspace_sptr calibration_table; 
+    ITableWorkspace_sptr calibration_table;
   };
 
   fake_workspaces generate_test_data( std::list< class fake_entry > const &entries )
@@ -97,7 +97,7 @@ public:
     ComponentCreationHelper::createEmptyInstrument();
 
     ITableWorkspace_sptr calibration_table =
-    std::make_shared<Mantid::DataObjects::TableWorkspace>(); 
+    std::make_shared<Mantid::DataObjects::TableWorkspace>();
 
     calibration_table->addColumn("int", "detid");
     calibration_table->addColumn("double", "difc");
@@ -228,7 +228,7 @@ public:
     TS_ASSERT_EQUALS(detector_id_column->toDouble( 5 ), 7);
 
     /* check difc: */
-    TS_ASSERT_EQUALS(difc_column->toDouble( 0 ), 0 ); 
+    TS_ASSERT_EQUALS(difc_column->toDouble( 0 ), 0 );
     TS_ASSERT_EQUALS(difc_column->toDouble( 1 ), 0 );
     TS_ASSERT_EQUALS(difc_column->toDouble( 2 ), 4.0 / 5.0 ); // detector id 4 should be updated
     TS_ASSERT_EQUALS(difc_column->toDouble( 3 ), 5 ); // detector id 5 should be propagated

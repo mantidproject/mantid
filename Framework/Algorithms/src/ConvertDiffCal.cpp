@@ -55,11 +55,11 @@ void ConvertDiffCal::init() {
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
-  declareProperty( std::make_unique<WorkspaceProperty<ITableWorkspace>>
-                   ("PreviousCalibration", "", Direction::Input, API::PropertyMode::Optional),
-                   "A calibration table used as a cache for creating the OutputWorkspace. "
-                   "Effectively, this algorithm applies partial updates to this table and "
-                   "returns it as the OutputWorkspace" );
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("PreviousCalibration", "", Direction::Input,
+                                                                       API::PropertyMode::Optional),
+                  "A calibration table used as a cache for creating the OutputWorkspace. "
+                  "Effectively, this algorithm applies partial updates to this table and "
+                  "returns it as the OutputWorkspace");
 }
 
 /**
@@ -98,17 +98,15 @@ double getOffset(const OffsetsWorkspace_const_sptr &offsetsWS, const detid_t det
 
 /**
  * @param d_info - detector info
- * @param offset - d-spacing offset of the detector 
+ * @param offset - d-spacing offset of the detector
  * @param index - index of the detector in the detector info object
  * @return The offset adjusted value of DIFC
  */
-double calculateDIFC( Mantid::Geometry::DetectorInfo const &d_info,
-                         double offset,
-                         size_t index ) {
+double calculateDIFC(Mantid::Geometry::DetectorInfo const &d_info, double offset, size_t index) {
 
   double twotheta;
   try {
-    twotheta = d_info.twoTheta(index); //we can pass in the internal index too, and d_info
+    twotheta = d_info.twoTheta(index); // we can pass in the internal index too, and d_info
   } catch (std::runtime_error &) {
     // Choose an arbitrary angle if detector 2theta determination fails.
     twotheta = 0.;
@@ -116,10 +114,7 @@ double calculateDIFC( Mantid::Geometry::DetectorInfo const &d_info,
   // the factor returned is what is needed to convert TOF->d-spacing
   // the table is supposed to be filled with DIFC which goes the other way
   const double factor =
-      Mantid::Geometry::Conversion::tofToDSpacingFactor(d_info.l1(),
-                                                        d_info.l2(index),
-                                                        twotheta,
-                                                        offset);
+      Mantid::Geometry::Conversion::tofToDSpacingFactor(d_info.l1(), d_info.l2(index), twotheta, offset);
   return 1. / factor;
 }
 
@@ -135,13 +130,11 @@ void ConvertDiffCal::exec() {
 
   ITableWorkspace_sptr previous_calibration = getProperty("PreviousCalibration");
 
-  std::vector< std::string > correct_columns{ "detid", "difc", "difa", "tzero" };
-  if( previous_calibration )
-  {
+  std::vector<std::string> correct_columns{"detid", "difc", "difa", "tzero"};
+  if (previous_calibration) {
     /* validate correct format */
     std::vector<std::string> column_names = previous_calibration->getColumnNames();
-    if( column_names != correct_columns )
-    {
+    if (column_names != correct_columns) {
       throw std::runtime_error("PreviousCalibration table's column names do not match expected "
                                "format");
     }
@@ -149,8 +142,7 @@ void ConvertDiffCal::exec() {
     configWksp = previous_calibration->clone();
   }
 
-  else
-  {
+  else {
     // initial setup of new style config
     configWksp = std::make_shared<TableWorkspace>();
 
@@ -161,51 +153,43 @@ void ConvertDiffCal::exec() {
   }
 
   /* obtain detector ids from the previous calibration workspace */
-  std::unordered_map< int, int > id_to_row;
-  if( previous_calibration )
-  {
-    std::vector< int > previous_calibration_ids =
-    previous_calibration->getColumn( 0 )->numeric_fill<int>();
+  std::unordered_map<int, int> id_to_row;
+  if (previous_calibration) {
+    std::vector<int> previous_calibration_ids = previous_calibration->getColumn(0)->numeric_fill<int>();
 
     int row = 0;
 
-    for( auto id : previous_calibration_ids )
-    {
-      id_to_row[ id ] = row++;
+    for (auto id : previous_calibration_ids) {
+      id_to_row[id] = row++;
     }
   }
 
   /* iterate through all detectors in the offsets workspace */
   Mantid::Geometry::DetectorInfo const &d_info = offsetsWS->detectorInfo();
   auto const &detector_ids = d_info.detectorIDs();
-  Progress progress(this, 0.0, 1.0, detector_ids.size() );
-  for( auto id : detector_ids )
-  {
-    size_t internal_index = d_info.indexOf( id );
+  Progress progress(this, 0.0, 1.0, detector_ids.size());
+  for (auto id : detector_ids) {
+    size_t internal_index = d_info.indexOf(id);
 
     /* only update non-masked, non zero-offset entries */
-    double new_offset_value = offsetsWS->getValue( id );
-    if( !d_info.isMasked( internal_index ) && new_offset_value != 0 )
-    {
+    double new_offset_value = offsetsWS->getValue(id);
+    if (!d_info.isMasked(internal_index) && new_offset_value != 0) {
       /* check for the detector id in the calibration table */
-      auto row_to_update = id_to_row.find( id );
+      auto row_to_update = id_to_row.find(id);
       /* if it is found, update it according to a simple linear equation: */
-      if( row_to_update != id_to_row.end() )
-      {
+      if (row_to_update != id_to_row.end()) {
         /* Get the row and update the difc value in the first column */
-        double &value_to_update =
-        configWksp->cell<double>( row_to_update->second, 1 );
+        double &value_to_update = configWksp->cell<double>(row_to_update->second, 1);
 
-        value_to_update = value_to_update / ( 1 + new_offset_value );
+        value_to_update = value_to_update / (1 + new_offset_value);
       }
 
       /* It was not found: calculate the value as before with calculateDiffc */
-      else
-      {
+      else {
         API::TableRow newrow = configWksp->appendRow();
 
         newrow << static_cast<int>(id);
-        newrow << calculateDIFC( d_info, new_offset_value, internal_index ); 
+        newrow << calculateDIFC(d_info, new_offset_value, internal_index);
         newrow << 0.0;
         newrow << 0.0;
       }
