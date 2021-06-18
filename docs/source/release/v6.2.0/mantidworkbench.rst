@@ -15,5 +15,6 @@ Bugfixes
 --------
 
 - Scroll bars added to about dialog if screen resolution is too low.
+- Fixed missing 'on top' windowing behaviour for the matrix and table workspace data displays.
 
 :ref:`Release 6.2.0 <v6.2.0>`
