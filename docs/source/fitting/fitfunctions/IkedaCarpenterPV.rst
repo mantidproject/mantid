@@ -43,7 +43,7 @@ where :math:`dt = T_i - T_h` is the shift in microseconds with respect to the Br
 decay constants respectively, and :math:`R` is a maxing coefficient that
 relates to the moderator temperature.
 :math:`\alpha` and :math:`R` are further modelled to depend on
-wavelength and using the notation in the Fullprof manual (Ref [2]) the
+wavelength and using the notation in the Fullprof manual (Ref [2]). The
 refineable Ikeda-Carpenter parameters are Alpha0, Alpha1, Beta0 and
 Kappa and these are defined as
 
