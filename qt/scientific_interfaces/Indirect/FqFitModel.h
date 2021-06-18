@@ -23,13 +23,15 @@ class MANTIDQT_INDIRECT_DLL FqFitModel : public IndirectFittingModel {
 public:
   FqFitModel();
   using IndirectFittingModel::addWorkspace;
-
   void addWorkspace(const std::string &workspaceName, const int &spectrum_index);
   void removeWorkspace(TableDatasetIndex index) override;
-
   bool isMultiFit() const override;
 
   std::string getFitParameterName(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
+
+  std::vector<std::string> getWidths(FqFitParameters parameters) const;
+  std::vector<std::string> getEISF(FqFitParameters parameters) const;
+
   boost::optional<std::size_t> getWidthSpectrum(std::size_t widthIndex, TableDatasetIndex dataIndex) const;
   boost::optional<std::size_t> getEISFSpectrum(std::size_t eisfIndex, TableDatasetIndex dataIndex) const;
   void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex, bool single = true);
