@@ -7,7 +7,7 @@
 
 import unittest
 from Calibration.tofpd import group_calibration
-from mantid.simpleapi import (CreateSampleWorkspace,
+from mantid.simpleapi import (CreateSampleWorkspace, MaskDetectors,
                               MoveInstrumentComponent, ScaleX, Rebin, ConvertUnits,
                               LoadDetectorsGroupingFile)
 from numpy.testing import assert_allclose
@@ -20,15 +20,17 @@ class TestGroupCalibration(unittest.TestCase):
             "name=Gaussian, PeakCentre=1, Height=100, Sigma=0.01;" + \
             "name=Gaussian, PeakCentre=4, Height=100, Sigma=0.01"
         ws = CreateSampleWorkspace("Event","User Defined", myFunc, BankPixelWidth=1,
-                                   XUnit='dSpacing', XMax=5, BinWidth=0.001, NumEvents=100000, NumBanks=6)
-        for n in range(1,7):
+                                   XUnit='dSpacing', XMax=5, BinWidth=0.001, NumEvents=100000, NumBanks=8)
+        for n in range(1,9):
             MoveInstrumentComponent(ws, ComponentName=f'bank{n}', X=1, Y=0, Z=1, RelativePosition=False)
+
+        MaskDetectors(ws, WorkspaceIndexList=[3,7])
 
         ws = ScaleX(ws, Factor=1.05, IndexMin=1, IndexMax=1)
         ws = ScaleX(ws, Factor=0.95, IndexMin=2, IndexMax=2)
-        ws = ScaleX(ws, Factor=1.05, IndexMin=3, IndexMax=5)
-        ws = ScaleX(ws, Factor=1.02, IndexMin=4, IndexMax=4)
-        ws = ScaleX(ws, Factor=0.98, IndexMin=5, IndexMax=5)
+        ws = ScaleX(ws, Factor=1.05, IndexMin=4, IndexMax=6)
+        ws = ScaleX(ws, Factor=1.02, IndexMin=5, IndexMax=5)
+        ws = ScaleX(ws, Factor=0.98, IndexMin=6, IndexMax=6)
         ws = Rebin(ws, '0,0.001,5')
         ws_tof = ConvertUnits(ws, Target='TOF')
         ws_tof = Rebin(ws_tof, '1000,10,10000')
@@ -41,8 +43,8 @@ class TestGroupCalibration(unittest.TestCase):
         groupingFileContent = \
             """<?xml version="1.0" encoding="UTF-8" ?>
             <detector-grouping>
-            <group ID="1"> <detids>1,2,3</detids> </group>
-            <group ID="2"> <detids>4,5,6</detids> </group>
+            <group ID="1"> <detids>1,2,3,4</detids> </group>
+            <group ID="2"> <detids>5,6,7,8</detids> </group>
             </detector-grouping>
             """
 
@@ -66,8 +68,10 @@ class TestGroupCalibration(unittest.TestCase):
                          starting_difc/(0.95),
                          starting_difc/(1.05),
                          starting_difc,
+                         starting_difc,
                          starting_difc/(0.98),
-                         starting_difc/(1.02)], rtol=0.003)
+                         starting_difc/(1.02),
+                         starting_difc], rtol=0.003)
 
         diffcal = group_calibration.pdcalibration_groups(ws_tof,
                                                          groups,
@@ -80,9 +84,11 @@ class TestGroupCalibration(unittest.TestCase):
                         [starting_difc,
                          starting_difc/(0.95),
                          starting_difc/(1.05),
+                         0,
                          starting_difc/(0.95),
                          starting_difc/(0.95*0.98),
-                         starting_difc/(0.95*1.02)], rtol=0.004)
+                         starting_difc/(0.95*1.02),
+                         0], rtol=0.004)
 
 
 if __name__ == '__main__':
