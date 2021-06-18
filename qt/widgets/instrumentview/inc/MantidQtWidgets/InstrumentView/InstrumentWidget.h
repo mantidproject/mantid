@@ -97,7 +97,8 @@ public:
 
   explicit InstrumentWidget(const QString &wsName, QWidget *parent = nullptr, bool resetGeometry = true,
                             bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
-                            bool setDefaultView = true, std::unique_ptr<ISimpleWidget> simpleDisplay = nullptr);
+                            bool setDefaultView = true, std::unique_ptr<ISimpleWidget> simpleDisplay = nullptr,
+                            std::unique_ptr<IMantidGLWidget> instrumentDisplay = nullptr);
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;
@@ -276,7 +277,7 @@ protected:
   InstrumentWidgetPickTab *m_pickTab;
   XIntegrationControl *m_xIntegration;
   /// The OpenGL widget to display the instrument
-  IMantidGLWidget *m_InstrumentDisplay;
+  std::unique_ptr<IMantidGLWidget> m_InstrumentDisplay;
   /// The simple widget to display the instrument
   std::unique_ptr<ISimpleWidget> m_simpleDisplay;
 
