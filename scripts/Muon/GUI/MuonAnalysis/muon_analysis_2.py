@@ -11,6 +11,7 @@ from distutils.version import LooseVersion
 from mantid.kernel import ConfigServiceImpl
 
 import Muon.GUI.Common.message_box as message_box
+from Muon.GUI.Common.contexts.corrections_context import CorrectionsContext
 from Muon.GUI.Common.contexts.data_analysis_context import DataAnalysisContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
@@ -25,6 +26,7 @@ from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabW
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.corrections_tab_widget.corrections_tab_widget import CorrectionsTabWidget
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.model_fitting_tab_widget.model_fitting_tab_widget import ModelFittingTabWidget
 from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_widget import SeqFittingTabWidget
@@ -37,7 +39,8 @@ from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
-TAB_ORDER = ["Home", "Grouping", "Phase Table", "Fitting", "Sequential Fitting", "Results", "Model Fitting"]
+TAB_ORDER = ["Home", "Grouping", "Corrections", "Phase Table", "Fitting", "Sequential Fitting", "Results",
+             "Model Fitting"]
 SHOW_MODEL_FITTING = False
 
 
@@ -83,6 +86,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.gui_context = MuonGuiContext()
         self.group_pair_context = MuonGroupPairContext(
             self.data_context.check_group_contains_valid_detectors)
+        self.corrections_context = CorrectionsContext()
         self.phase_context = PhaseTableContext()
         self.fitting_context = TFAsymmetryFittingContext(allow_double_pulse_fitting=True)
         self.results_context = ResultsContext()
@@ -91,6 +95,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.context = DataAnalysisContext(muon_data_context=self.data_context,
                                            muon_gui_context=self.gui_context,
                                            muon_group_context=self.group_pair_context,
+                                           corrections_context=self.corrections_context,
                                            fitting_context=self.fitting_context,
                                            results_context=self.results_context,
                                            model_fitting_context=self.model_fitting_context,
@@ -121,6 +126,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
         self.home_tab = HomeTabWidget(self.context, self)
         self.grouping_tab_widget = GroupingTabWidget(self.context, parent)
+        self.corrections_tab = CorrectionsTabWidget(self.context, self)
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
@@ -183,6 +189,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs = DetachableTabWidget(self)
         self.tabs.addTabWithOrder(self.home_tab.home_tab_view, 'Home')
         self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
+        self.tabs.addTabWithOrder(self.corrections_tab.corrections_tab_view, "Corrections")
         self.tabs.addTabWithOrder(self.phase_tab.phase_table_view, 'Phase Table')
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
         self.tabs.addTabWithOrder(self.seq_fitting_tab.seq_fitting_tab_view, 'Sequential Fitting')
