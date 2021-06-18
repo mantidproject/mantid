@@ -180,7 +180,7 @@ private:
     const double D_MAX{2.3};
     const double D_DELTA{0.01};
     const int NUM_BINS = static_cast<int>((D_MAX - D_MIN) / D_DELTA);
-    const int NUM_HIST{1}; // TODO change to 4
+    const int NUM_HIST{2}; // TODO change to 4
 
     // create the x-axis
     BinEdges xEdges(NUM_BINS + 1, HistogramData::LinearGenerator(D_MIN, D_DELTA));
