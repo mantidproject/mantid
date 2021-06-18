@@ -20,6 +20,129 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using Mantid::CurveFitting::Functions::Gaussian;
 
+namespace { // anonymous
+/*
+
+Code to generate parameters for b2bexpconvpv:
+
+  import numpy as np
+
+  diam_d = {"111": 2.05995, "220": 1.26146, "311": 1.07577}
+
+  alp = 0.791431E-01
+  beta0 = 0.580874E-01
+  beta1 = 0.947427E-01
+  sig0 = 0.0E+00
+  sig1 = 0.157741E+03
+  sig2 = 0.402182E+02
+  gamma1 = 0.302644E+01
+
+  print("===============================================")
+  print("Back-to-back shape parameters for diamond peaks")
+  print("===============================================")
+  for key, item in diam_d.items():
+    A = alp / item
+    B = beta0 + beta1 / item**4
+    S = np.sqrt(sig0 + sig1 * item**2 + sig2 * item**4)
+    Gamma = gamma1 * item
+
+    print("\n--------------------")
+    print("({0:3s})".format(key))
+    print("--------------------")
+    print("A = {0:<10.5F}".format(A))
+    print("B = {0:<10.5F}".format(B))
+    print("S = {0:<10.5F}".format(S))
+    print("Gamma = {0:<10.5F}".format(Gamma))
+    print("===============================================")
+
+  Result:
+
+    ===============================================
+    Back-to-back shape parameters for diamond peaks
+    ===============================================
+
+    --------------------
+    (111)
+    --------------------
+    A = 0.03842
+    B = 0.06335
+    S = 37.33017
+    Gamma = 6.23432
+    ===============================================
+
+    --------------------
+    (220)
+    --------------------
+    A = 0.06274
+    B = 0.09550
+    S = 18.78430
+    Gamma = 3.81773
+    ===============================================
+
+    --------------------
+    (311)
+    --------------------
+    A = 0.07357
+    B = 0.12883
+    S = 15.37579
+    Gamma = 3.25575
+    ===============================================
+*/
+
+// these are intentionally missing "Intensity" and "X0" (center)
+const std::string B2BEXP_SHAPE_111 = "name=Bk2BkExpConvPV,Alpha=0.03842,Beta=0.06335,Sigma2=37.33017,Gamma = "
+                                     "6.23432,Intensity=100";
+const std::string B2BEXP_SHAPE_220 = "name=Bk2BkExpConvPV,Alpha=0.06274,Beta=0.09550,Sigma2=18.78430,Gamma=3."
+                                     "81773";
+const std::string B2BEXP_SHAPE_311 = "name=Bk2BkExpConvPV,Alpha=0.07357,Beta=0.12883,Sigma2=15.37579,Gamma=3."
+                                     "25575,Intensity=100";
+
+const double B2BEXP_POSITION_111 = 2.05995;
+const double B2BEXP_POSITION_220 = 1.26146;
+const double B2BEXP_POSITION_311 = 1.07577;
+
+enum class PeakIndex : int { POS_111, POS_220, POS_311 };
+
+std::shared_ptr<IFunction> createPeakFunction(const PeakIndex peak_index, const double intensity,
+                                              const double position) {
+  std::stringstream peak;
+  if (peak_index == PeakIndex::POS_111) {
+    peak << B2BEXP_SHAPE_111;
+  } else if (peak_index == PeakIndex::POS_220) {
+    peak << B2BEXP_SHAPE_220;
+  } else if (peak_index == PeakIndex::POS_311) {
+    peak << B2BEXP_SHAPE_311;
+  } else {
+    throw std::runtime_error("Developer forgot a peak index");
+  }
+  peak << ",Intensity=" << intensity << ",X0=" << position;
+
+  return FunctionFactory::Instance().createInitialized(peak.str());
+}
+
+std::vector<double> evaluateFunction(std::shared_ptr<IFunction> function, std::vector<double> &xValues) {
+  FunctionDomain1DVector fd(xValues);
+  FunctionValues fv(fd);
+  function->function(fd, fv);
+  return fv.toVector();
+}
+
+} // anonymous namespace
+
+CompositeFunction_sptr createCompositeB2BExp(const int spectrumIndex) {
+  CompositeFunction_sptr function = std::make_shared<CompositeFunction>();
+
+  if (spectrumIndex > 0) {
+    throw std::runtime_error("Logic for this spectrum index has not been written");
+  }
+
+  function->addFunction(createPeakFunction(PeakIndex::POS_111, 100, B2BEXP_POSITION_111));
+  function->addFunction(createPeakFunction(PeakIndex::POS_220, 100, B2BEXP_POSITION_220));
+  function->addFunction(createPeakFunction(PeakIndex::POS_311, 100, B2BEXP_POSITION_311));
+
+  return function;
+}
+
 /* define the types of transforms that can be applied to
    a 1D function */
 enum class transforms : int { domain_scale, domain_translate, co_domain_scale, co_domain_translate };
@@ -67,84 +190,6 @@ DECLARE_FUNCTION(SimplexGaussian)
 class CrossCorrelateTestData {
 public:
   inline static std::string const gaussian_default = "name=Gaussian,Height=20,Sigma=4";
-
-  /*
-
-  Code to generate parameters for b2bexpconvpv:
-
-    import numpy as np
-
-    diam_d = {"111": 2.05995, "220": 1.26146, "311": 1.07577}
-
-    alp = 0.791431E-01
-    beta0 = 0.580874E-01
-    beta1 = 0.947427E-01
-    sig0 = 0.0E+00
-    sig1 = 0.157741E+03
-    sig2 = 0.402182E+02
-    gamma1 = 0.302644E+01
-
-    print("===============================================")
-    print("Back-to-back shape parameters for diamond peaks")
-    print("===============================================")
-    for key, item in diam_d.items():
-      A = alp / item
-      B = beta0 + beta1 / item**4
-      S = np.sqrt(sig0 + sig1 * item**2 + sig2 * item**4)
-      Gamma = gamma1 * item
-
-      print("\n--------------------")
-      print("({0:3s})".format(key))
-      print("--------------------")
-      print("A = {0:<10.5F}".format(A))
-      print("B = {0:<10.5F}".format(B))
-      print("S = {0:<10.5F}".format(S))
-      print("Gamma = {0:<10.5F}".format(Gamma))
-      print("===============================================")
-
-    Result:
-
-      ===============================================
-      Back-to-back shape parameters for diamond peaks
-      ===============================================
-
-      --------------------
-      (111)
-      --------------------
-      A = 0.03842
-      B = 0.06335
-      S = 37.33017
-      Gamma = 6.23432
-      ===============================================
-
-      --------------------
-      (220)
-      --------------------
-      A = 0.06274
-      B = 0.09550
-      S = 18.78430
-      Gamma = 3.81773
-      ===============================================
-
-      --------------------
-      (311)
-      --------------------
-      A = 0.07357
-      B = 0.12883
-      S = 15.37579
-      Gamma = 3.25575
-      ===============================================
-  */
-
-  inline static std::string const b2bexp_default_111 =
-      "name=Bk2BkExpConvPV,Alpha=0.03842,Beta=0.06335,Sigma2=37.33017,Gamma = "
-      "6.23432,Intensity=100";
-  inline static std::string const b2bexp_default_220 =
-      "name=Bk2BkExpConvPV,Alpha=0.06274,Beta=0.09550,Sigma2=18.78430,Gamma=3."
-      "81773,Intensity=100";
-  inline static std::string const b2bexp_default_311 =
-      "name=Bk2BkExpConvPV,Alpha=0.07357,Beta=0.12883,Sigma2=15.37579,Gamma=3."
-      "25575,Intensity=100";
 
   /* Specify default values */
   CrossCorrelateTestData(std::string function_specifier = gaussian_default, int domain_radius = 20,
@@ -279,21 +324,6 @@ void CrossCorrelateTestData::print_workspace() {
   }
 }
 
-MatrixWorkspace_sptr convertToHistogram(const MatrixWorkspace_sptr inWS) {
-  ConvertToHistogram alg;
-
-  // setup alg
-  alg->initialize();
-  alg->setRethrows(true);
-  alg->setProperty("InputWorkspace", inWS);
-  alg->setProperty("OutputWorkspace", inWS);
-
-  // run alg
-  alg->execute();
-  inWS = alg->getProperty("OutputWorkspace");
-  return inWS;
-}
-
 CrossCorrelateTestData::CrossCorrelateTestData(std::string function_specifier, int domain_radius,
                                                std::initializer_list<class TransformSpecifier> l)
     : domain_radius(domain_radius), num_functions(l.size() + 1) {
@@ -320,7 +350,7 @@ CrossCorrelateTestData::CrossCorrelateTestData(std::string function_specifier, i
   std::vector<double> errorDomain(co_domain.size(), 0.0);
   workspace->mutableE(0).assign(errorDomain.begin(), errorDomain.end());
 
-  workspace = convertToHistogram(workspace);
+  // workspace = convertToHistogram(workspace);
 
   /* iterate through the initializer list and handle all the objects */
   int workspace_index = 1;

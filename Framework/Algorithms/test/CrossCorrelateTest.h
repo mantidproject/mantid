@@ -38,19 +38,6 @@ public:
     CrossCorrelateTestData test_data;
 
     test_data.print_workspace();
-
-    MatrixWorkspace_sptr m = test_data.get_workspace();
-
-    TS_ASSERT_EQUALS(true, m != nullptr);
-  }
-
-  /* currently, there is something wrong with this - codomain is always zero */
-  /* print default test b2bExp data */
-  void test_default_b2bExp() {
-    CrossCorrelateTestData test_data(CrossCorrelateTestData::b2bexp_default_111);
-
-    test_data.print_workspace();
-
     MatrixWorkspace_sptr m = test_data.get_workspace();
 
     TS_ASSERT_EQUALS(true, m != nullptr);
@@ -107,6 +94,8 @@ public:
   void testMaxDSpaceShift() {
     CrossCorrelate alg;
     CrossCorrelateTestData test_data;
+    auto inputWS = makeFakeWorkspace3Peaks();
+    TS_ASSERT(inputWS != nullptr);
 
     test_data.print_workspace();
 
@@ -171,6 +160,34 @@ private:
 
       // offset the x values for the next spectrum
       xValues += 0.5;
+    }
+
+    return ws;
+  }
+
+  const MatrixWorkspace_sptr makeFakeWorkspace3Peaks() {
+    const double D_MIN{0.9};
+    const double D_MAX{2.3};
+    const double D_DELTA{0.01};
+    const int NUM_BINS = static_cast<int>((D_MAX - D_MIN) / D_DELTA);
+    const int NUM_HIST{1}; // TODO change to 4
+
+    // create the x-axis
+    BinEdges xEdges(NUM_BINS + 1, HistogramData::LinearGenerator(D_MIN, D_DELTA));
+    std::vector<double> xValues(cbegin(xEdges), cend(xEdges) - 1);
+    // create the uncertainties
+    CountStandardDeviations e1(NUM_BINS, sqrt(3.0)); // arbitrary
+
+    // create workspace to put everything into
+    MatrixWorkspace_sptr ws = createWorkspace<Workspace2D>(NUM_HIST, NUM_BINS + 1, NUM_BINS);
+    ws->getAxis(0)->setUnit("dSpacing");
+
+    // loop over the spectra
+    // which spectra is which is coded in createcompositeB2BExp
+    for (int spectrumIndex = 0; spectrumIndex < NUM_HIST; ++spectrumIndex) {
+      auto compositefunction = createCompositeB2BExp(spectrumIndex);
+      ws->setBinEdges(spectrumIndex, xEdges);
+      ws->setCounts(spectrumIndex, evaluateFunction(compositefunction, xValues));
     }
 
     return ws;
