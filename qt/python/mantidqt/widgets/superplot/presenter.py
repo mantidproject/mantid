@@ -185,7 +185,7 @@ class SuperplotPresenter:
             self._view.set_spectrum_slider_max(0)
             self._view.set_spectrum_spin_box_value(0)
             self._view.set_spectrum_spin_box_max(0)
-            self._view.set_spectrum_disabled(True)
+            self._view.set_spectrum_selection_disabled(True)
             self._view.set_hold_button_text("")
             return
         maximum_dimension_size = None
@@ -201,7 +201,7 @@ class SuperplotPresenter:
                     self._view.set_spectrum_slider_max(0)
                     self._view.set_spectrum_spin_box_value(0)
                     self._view.set_spectrum_spin_box_max(0)
-                    self._view.set_spectrum_disabled(True)
+                    self._view.set_spectrum_selection_disabled(True)
                     return
             if mode == self.SPECTRUM_MODE_TEXT:
                 dimension_size = ws.getNumberHistograms()
@@ -213,7 +213,7 @@ class SuperplotPresenter:
                 maximum_dimension_size = dimension_size
         if position is None or position >= maximum_dimension_size:
             position = 0
-        self._view.set_spectrum_disabled(False)
+        self._view.set_spectrum_selection_disabled(False)
         self._view.set_spectrum_slider_max(maximum_dimension_size - 1)
         self._view.set_spectrum_slider_position(position)
         self._view.set_spectrum_spin_box_max(maximum_dimension_size - 1)
@@ -281,7 +281,7 @@ class SuperplotPresenter:
         # add selection to plot
         for ws_name, spectra in selection.items():
             if (current_spectrum_index not in spectra
-               and not self._view.is_spectrum_disabled()):
+               and not self._view.is_spectrum_selection_disabled()):
                 spectra.append(current_spectrum_index)
             for sp in spectra:
                 if sp == -1:
@@ -380,7 +380,7 @@ class SuperplotPresenter:
         """
         Add the selected ws, sp pair to the plot.
         """
-        if self._view.is_spectrum_disabled():
+        if self._view.is_spectrum_selection_disabled():
             return
         selection = self._view.get_selection()
         spectrum_index = self._view.get_spectrum_slider_position()
@@ -407,7 +407,7 @@ class SuperplotPresenter:
         spectrum_index = self._view.get_spectrum_slider_position()
         mode = self._view.get_mode()
         for ws_name in selection:
-            if not self._view.is_spectrum_disabled():
+            if not self._view.is_spectrum_selection_disabled():
                 self._model.remove_data(ws_name, spectrum_index)
             else:
                 for spectrum in selection[ws_name]:

@@ -174,10 +174,10 @@ class SuperplotViewTest(unittest.TestCase):
         text = self.view.get_hold_button_text()
         self.assertEqual(text, "test")
 
-    def test_set_spectrum_disabled(self):
+    def test_set_spectrum_selection_disabled(self):
         widget1 = self.m_dock_bottom.spectrumSlider
         widget2 = self.m_dock_bottom.spectrumSpinBox
-        self.view.set_spectrum_disabled(True)
+        self.view.set_spectrum_selection_disabled(True)
         widget1.setDisabled.assert_called_once_with(True)
         widget2.setDisabled.assert_called_once_with(True)
 

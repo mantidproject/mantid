@@ -111,7 +111,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_view.set_spectrum_slider_max.assert_called_once_with(0)
         self.m_view.set_spectrum_spin_box_value.assert_called_once_with(0)
         self.m_view.set_spectrum_spin_box_max.assert_called_once_with(0)
-        self.m_view.set_spectrum_disabled.assert_called_once_with(True)
+        self.m_view.set_spectrum_selection_disabled.assert_called_once_with(True)
         self.m_view.reset_mock()
         ws = mock.Mock()
         ws.getNumberHistograms.return_value = 50
@@ -121,7 +121,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_view.get_selection.return_value = {"ws1": [10]}
         self.presenter._update_spectrum_slider()
         ws.getNumberHistograms.assert_called_once()
-        self.m_view.set_spectrum_disabled.assert_called_once_with(False)
+        self.m_view.set_spectrum_selection_disabled.assert_called_once_with(False)
         self.m_view.set_spectrum_slider_max.assert_called_once_with(49)
         self.m_view.set_spectrum_slider_position.assert_called_once_with(10)
         self.m_view.set_spectrum_spin_box_max.assert_called_once_with(49)
@@ -238,7 +238,7 @@ class SuperplotPresenterTest(unittest.TestCase):
     def test_on_hold(self):
         self.presenter._update_list = mock.Mock()
         self.presenter._update_plot = mock.Mock()
-        self.m_view.is_spectrum_disabled.return_value = False
+        self.m_view.is_spectrum_selection_disabled.return_value = False
         self.m_view.get_selection.return_value = {"ws1": [1], "ws2": [2]}
         self.m_view.get_spectrum_slider_position.return_value = 10
         self.m_view.get_mode.return_value = self.presenter.SPECTRUM_MODE_TEXT
@@ -258,7 +258,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter._update_list = mock.Mock()
         self.presenter._update_plot = mock.Mock()
         self.presenter._update_spectrum_slider = mock.Mock()
-        self.m_view.is_spectrum_disabled.return_value = False
+        self.m_view.is_spectrum_selection_disabled.return_value = False
         self.m_view.get_selection.return_value = {"ws1": [], "ws2": []}
         self.m_view.get_spectrum_slider_position.return_value = 10
         self.presenter._on_un_hold()
