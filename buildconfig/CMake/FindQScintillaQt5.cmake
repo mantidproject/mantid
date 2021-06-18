@@ -25,8 +25,10 @@ function(find_qscintilla qt_version)
   else()
     list(APPEND _qsci_include_paths /usr/local/opt/qscintilla2/include)
     list(APPEND _qsci_lib_paths /usr/local/opt/qscintilla2/lib)
-    list(APPEND _qsci_include_paths $ENV{CONDA_PREFIX}/lib/include/qt)
-    list(APPEND _qsci_lib_paths $ENV{CONDA_PREFIX}/lib)
+    if (EXISTS “$ENV{CONDA_PREFIX}”)
+      list(APPEND _qsci_include_paths $ENV{CONDA_PREFIX}/lib/include/qt)
+      list(APPEND _qsci_lib_paths $ENV{CONDA_PREFIX}/lib)
+    endif()
   endif()
 
   set(_include_var QSCINTILLA_QT${qt_version}_INCLUDE_DIR)
@@ -36,7 +38,7 @@ function(find_qscintilla qt_version)
     PATHS ${_qsci_include_paths}
     NO_DEFAULT_PATH)
   set(_library_var QSCINTILLA_QT${qt_version}_LIBRARY)
-  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR EXISTS “$ENV{CONDA_PREFIX}”)
     set(_default_path_opt NO_DEFAULT_PATH)
   endif()
   find_library(
@@ -47,7 +49,7 @@ function(find_qscintilla qt_version)
   find_library(
     ${_library_var_debug}
     NAMES ${_qsci_lib_names_debug}
-    PATHS $ENV{CONDA_PREFIX} ${_qsci_lib_paths} ${_default_path_opt})
+    PATHS ${_qsci_lib_paths} ${_default_path_opt})
 
   message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}\n CMAKE_SYSTEM_PREFIX_PATH: ${CMAKE_SYSTEM_PREFIX_PATH}\n Conda Prefix: $ENV{CONDA_PREFIX}\n_qsci_lib_paths: ${_qsci_lib_paths}\ndefault_path_opt: ${_default_path_opt}")
 
