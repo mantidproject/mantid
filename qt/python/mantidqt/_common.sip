@@ -559,6 +559,7 @@ public:
     void postDeleteHandle(const std::string &wsName);
     void removeWorkspaceAndSpectra(const std::string &wsName);
     std::string getFitAlgorithmParameters() const;
+    std::string getFitAlgorithmOutputStatus() const;
     PropertyHandler * currentHandler() const;
 
     SIP_PYOBJECT defaultPeakType();

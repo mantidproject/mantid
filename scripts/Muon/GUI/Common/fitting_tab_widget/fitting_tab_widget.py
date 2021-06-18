@@ -26,12 +26,12 @@ class FittingTabWidget(object):
         if is_frequency_domain:
             self.fitting_tab_view = BasicFittingView(parent)
             self.fitting_tab_view.hide_fit_raw_checkbox()
-            self.fitting_tab_model = BasicFittingModel(context)
+            self.fitting_tab_model = BasicFittingModel(context, context.fitting_context)
             self.fitting_tab_presenter = BasicFittingPresenter(self.fitting_tab_view, self.fitting_tab_model)
         else:
             self.fitting_tab_view = TFAsymmetryFittingView(parent)
             self.fitting_tab_view.set_start_and_end_x_labels("Time Start", "Time End")
-            self.fitting_tab_model = TFAsymmetryFittingModel(context)
+            self.fitting_tab_model = TFAsymmetryFittingModel(context, context.fitting_context)
             self.fitting_tab_presenter = TFAsymmetryFittingPresenter(self.fitting_tab_view, self.fitting_tab_model)
 
         self.fitting_tab_presenter.disable_fitting_notifier.add_subscriber(self.fitting_tab_view.disable_tab_observer)

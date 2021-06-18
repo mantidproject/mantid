@@ -155,20 +155,23 @@ class MuonGroupPairContext(object):
         return self.groups + self.pairs + self.diffs
 
     @property
-    def selected_pairs(self):
-        return self._selected_pairs
+    def selected_groups(self) -> list:
+        """Returns the selected group names. Ensures the order of the returned group names is correct."""
+        return [group.name for group in self.groups if group.name in self._selected_groups]
 
     @property
-    def selected_groups(self):
-        return self._selected_groups
+    def selected_pairs(self) -> list:
+        """Returns the selected pair names. Ensures the order of the returned pair names is correct."""
+        return [pair.name for pair in self.pairs if pair.name in self._selected_pairs]
 
     @property
-    def selected_diffs(self):
-        return self._selected_diffs
+    def selected_diffs(self) -> list:
+        """Returns the selected diff names. Ensures the order of the returned diff names is correct."""
+        return [diff.name for diff in self.diffs if diff.name in self._selected_diffs]
 
     @property
     def selected_groups_and_pairs(self):
-        return self.selected_groups+self.selected_pairs+self.selected_diffs
+        return self.selected_groups + self.selected_pairs + self.selected_diffs
 
     def clear(self):
         self.clear_groups()
