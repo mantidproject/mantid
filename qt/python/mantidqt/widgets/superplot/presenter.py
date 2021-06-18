@@ -112,8 +112,7 @@ class SuperplotPresenter:
                 self._plot_function = args[0]["function"]
 
         for artist in artists:
-            ws, spec_index = \
-                    axes.get_artists_workspace_and_workspace_index(artist)
+            ws, spec_index = axes.get_artists_workspace_and_workspace_index(artist)
             if spec_index is None:
                 i = artists.index(artist)
                 if i >= len(args):
