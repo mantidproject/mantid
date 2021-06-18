@@ -183,7 +183,7 @@ void FqFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
     setDataIndexToCurrentWorkspace(fqFitDialog);
     // here we can say that we are in multiple mode so we can append the spectra
     // to the current one and then setspectra
-    // setModelSpectrum(fqFitDialog->parameterNameIndex());
+    setModelSpectrum(fqFitDialog->parameterNameIndex());
     updateActiveDataIndex();
   }
 }

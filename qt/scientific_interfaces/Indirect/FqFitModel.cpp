@@ -208,7 +208,7 @@ void FqFitModel::addWorkspace(const std::string &workspaceName, const int &spect
     throw std::invalid_argument("Workspace contains only one data point.");
 
   const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, single_spectra);
-  IndirectFittingModel::addWorkspace(hwhmWorkspace->getName(), FunctionModelSpectra(spectra));
+  IndirectFittingModel::addWorkspace(hwhmWorkspace->getName(), FunctionModelSpectra(""));
 }
 
 void FqFitModel::removeWorkspace(TableDatasetIndex index) {
@@ -301,18 +301,6 @@ bool FqFitModel::isMultiFit() const {
   if (getNumberOfWorkspaces() == TableDatasetIndex{0})
     return false;
   return !allWorkspacesEqual(getWorkspace(TableDatasetIndex{0}));
-}
-
-std::vector<std::string> FqFitModel::getWidths(FqFitParameters parameters) const {
-  if (!parameters.widths.empty())
-    return parameters.widths;
-  return std::vector<std::string>();
-}
-
-std::vector<std::string> FqFitModel::getEISF(FqFitParameters parameters) const {
-  if (!parameters.eisf.empty())
-    return parameters.eisf;
-  return std::vector<std::string>();
 }
 
 boost::optional<std::size_t> FqFitModel::getWidthSpectrum(std::size_t widthIndex, TableDatasetIndex dataIndex) const {

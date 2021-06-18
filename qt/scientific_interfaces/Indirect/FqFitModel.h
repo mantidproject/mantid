@@ -29,9 +29,6 @@ public:
 
   std::string getFitParameterName(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
 
-  std::vector<std::string> getWidths(FqFitParameters parameters) const;
-  std::vector<std::string> getEISF(FqFitParameters parameters) const;
-
   boost::optional<std::size_t> getWidthSpectrum(std::size_t widthIndex, TableDatasetIndex dataIndex) const;
   boost::optional<std::size_t> getEISFSpectrum(std::size_t eisfIndex, TableDatasetIndex dataIndex) const;
   void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex, bool single = true);
