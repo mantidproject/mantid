@@ -16,6 +16,8 @@ class SuperplotPresenter:
 
     BIN_MODE_TEXT = "Bin"
     SPECTRUM_MODE_TEXT = "Spectrum"
+    HOLD_BUTTON_TEXT_CHECKED = "Remove"
+    HOLD_BUTTON_TEXT_UNCHECKED = "Add"
     _view = None
     _model = None
     _canvas = None
@@ -49,6 +51,7 @@ class SuperplotPresenter:
                     selection[ws] = [sp]
         self._view.set_selection(selection)
         self._update_spectrum_slider()
+        self._update_hold_button()
 
     def get_side_view(self):
         return self._view.get_side_widget()
@@ -183,6 +186,7 @@ class SuperplotPresenter:
             self._view.set_spectrum_spin_box_value(0)
             self._view.set_spectrum_spin_box_max(0)
             self._view.set_spectrum_disabled(True)
+            self._view.set_hold_button_text("")
             return
         maximum_dimension_size = None
         position = None
@@ -221,15 +225,15 @@ class SuperplotPresenter:
         """
         selection = self._view.get_selection()
         if not selection:
-            self._view.check_hold_button(False)
+            self._view.set_hold_button_text(self.HOLD_BUTTON_TEXT_UNCHECKED)
             return
         index = self._view.get_spectrum_slider_position()
         plotted_data = self._model.get_plotted_data()
         for ws in selection:
             if (ws, index) not in plotted_data:
-                self._view.check_hold_button(False)
+                self._view.set_hold_button_text(self.HOLD_BUTTON_TEXT_UNCHECKED)
                 return
-        self._view.check_hold_button(True)
+        self._view.set_hold_button_text(self.HOLD_BUTTON_TEXT_CHECKED)
 
     def _update_list(self):
         """
@@ -383,13 +387,14 @@ class SuperplotPresenter:
         mode = self._view.get_mode()
         for ws_name in selection:
             self._model.add_data(ws_name, spectrum_index)
+            selection[ws_name] = [spectrum_index]
         if mode == self.SPECTRUM_MODE_TEXT:
             self._model.set_spectrum_mode()
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT])
         else:
             self._model.set_bin_mode()
             self._view.set_available_modes([self.BIN_MODE_TEXT])
-        self._view.check_hold_button(False)
+        self._view.set_hold_button_text(self.HOLD_BUTTON_TEXT_CHECKED)
         self._update_list()
         self._view.set_selection(selection)
         self._update_plot()
@@ -415,17 +420,17 @@ class SuperplotPresenter:
         self._update_spectrum_slider()
         self._update_plot()
 
-    def on_hold_button_toggled(self, state):
+    def on_hold_button_clicked(self):
         """
         Triggered when the hold button state changed.
 
         Args:
             state (bool): status of the two state button
         """
-        if state:
-            self._on_hold()
-        else:
+        if self._view.get_hold_button_text() == self.HOLD_BUTTON_TEXT_CHECKED:
             self._on_un_hold()
+        else:
+            self._on_hold()
 
     def on_mode_changed(self, mode):
         """

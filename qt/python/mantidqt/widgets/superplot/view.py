@@ -196,8 +196,8 @@ class SuperplotView(QWidget):
         side.workspacesList.itemSelectionChanged.connect(
                 self._presenter.on_workspace_selection_changed)
         bottom = self._bottom_view
-        bottom.holdButton.toggled.connect(
-                self._presenter.on_hold_button_toggled)
+        bottom.holdButton.clicked.connect(
+                self._presenter.on_hold_button_clicked)
         bottom.spectrumSlider.valueChanged.connect(
                 self._presenter.on_spectrum_slider_moved)
         bottom.spectrumSpinBox.valueChanged.connect(
