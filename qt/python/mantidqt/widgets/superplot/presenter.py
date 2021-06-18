@@ -118,7 +118,7 @@ class SuperplotPresenter:
                 i = artists.index(artist)
                 if i >= len(args):
                     i = 0
-                specIndex = args[i]["wkspIndex"]
+                spec_index = args[i]["wkspIndex"]
             ws_name = ws.name()
             self._model.add_workspace(ws_name)
             self._model.add_data(ws_name, spec_index)
