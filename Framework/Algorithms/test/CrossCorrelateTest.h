@@ -95,19 +95,13 @@ public:
     // perhaps traversal is unnecessary?
     const auto yVector = outWS->y(0);
     const auto xVector = outWS->x(0);
-    const int yLength = (int)yVector.size();
-    double peakVal = -DBL_MAX;
-    int peakIndex = 0;
-    for (int i = 0; i < yLength; ++i) {
-      if (yVector[i] > peakVal) {
-        peakVal = yVector[i];
-        peakIndex = i;
-      }
-    }
+    const auto peakIter = std::max_element(yVector.cbegin(), yVector.cend());
+    const auto peakIndex = static_cast<size_t>(peakIter - yVector.cbegin());
 
     // if the peak index matches up then we are good.
-    TS_ASSERT_EQUALS(peakIndex, yLength / 2);
-    TS_ASSERT_EQUALS(peakIndex, xVector[B2BEXP_POSITION_220]);
+    TS_ASSERT_EQUALS(peakIndex, yVector.size() / 2); // probably doesn't matter
+    TS_ASSERT_EQUALS(outWS->x(0)[peakIndex], 0.);
+    // TODO check other spectra
   }
 
   void testInputXLength2() {
@@ -197,13 +191,13 @@ private:
     return ws;
   }
 
-  void setupAlgorithmPropsBasic(CrossCorrelate &alg, const double xmin, const double xmax) {
+  void setupAlgorithmPropsBasic(CrossCorrelate &alg, const double xmin, const double xmax, const size_t numSpectra) {
     // set up the algorithm
     if (!alg.isInitialized())
       alg.initialize();
     alg.setChild(true);
     alg.setProperty("OutputWorkspace", "outWS");
-    alg.setProperty("WorkspaceIndexMax", 4);
+    alg.setProperty("WorkspaceIndexMax", static_cast<int>(numSpectra - 1));
     alg.setProperty("XMin", xmin);
     alg.setProperty("XMax", xmax);
   }
@@ -224,7 +218,7 @@ private:
                       const double maxDSpaceShift = 0.) {
 
     // create the workspace
-    setupAlgorithmPropsBasic(alg, xmin, xmax);
+    setupAlgorithmPropsBasic(alg, xmin, xmax, inWS->getNumberHistograms());
     alg.setProperty("InputWorkspace", inWS);
     if (maxDSpaceShift > 0.)
       alg.setProperty("MaxDspaceShift", maxDSpaceShift);
