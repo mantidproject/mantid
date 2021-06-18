@@ -125,7 +125,7 @@ class SuperplotModel(QObject):
 
     def set_spectrum_mode(self):
         """
-        Set the plot mode to 'spectra'.
+        Set the plot mode to 'spectrum'.
         """
         self._plot_mode = self.SPECTRUM_MODE
 
