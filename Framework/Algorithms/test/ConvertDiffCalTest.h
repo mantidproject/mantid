@@ -24,7 +24,9 @@ using Mantid::DataObjects::OffsetsWorkspace_sptr;
 using Mantid::Kernel::V3D;
 
 class ConvertDiffCalTest : public CxxTest::TestSuite {
+
 public:
+
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ConvertDiffCalTest *createSuite() { return new ConvertDiffCalTest(); }
@@ -45,7 +47,7 @@ public:
     {
       offset, /* fake entry specifies an entry in the fake input offsets workspace */
       masked, /* fake entry specifies masked offset workspace entry */
-      unmasked,
+      unmasked, /* fake entry specifies an unmasked offset workspace entry */
       calibration, /* fake entry specifies an entry in the input calibration table */
     };
 
@@ -96,6 +98,7 @@ public:
 
     ITableWorkspace_sptr calibration_table =
     std::make_shared<Mantid::DataObjects::TableWorkspace>(); 
+
     calibration_table->addColumn("int", "detid");
     calibration_table->addColumn("double", "difc");
     calibration_table->addColumn("double", "difa");
@@ -110,7 +113,9 @@ public:
         /* create a detector. Is this a memory leak? Idk. Depends what instrument does with it */
         Mantid::Geometry::Detector *det =
         new Mantid::Geometry::Detector("point-detector", entry.detector_id, nullptr);
+
         instrument->add(det);
+
         instrument->markAsDetector(det);
       }
 
@@ -118,13 +123,13 @@ public:
       else if( entry.workspace_type == fake_entry::calibration )
       {
         Mantid::API::TableRow new_row = calibration_table->appendRow();
+
         new_row << entry.detector_id << entry.difc << entry.difa << entry.tzero;
       }
     }
 
     /* create an offset workspace with the instrument */
     OffsetsWorkspace_sptr offsets = std::make_shared<OffsetsWorkspace>(instrument);
-    /* Captain! */
     Mantid::Geometry::DetectorInfo &d_info = offsets->mutableDetectorInfo();
 
     /* Loop to apply masks */
@@ -181,34 +186,6 @@ public:
     class fake_workspaces fake_workspaces =
     generate_test_data( fake_entries );
 
-    /* Print offsets workspace to make sure everything is there */
-    Mantid::Geometry::DetectorInfo &d_info = fake_workspaces.offsets->mutableDetectorInfo();
-    std::vector< int > const &detector_ids = d_info.detectorIDs();
-    std::cout << "offsets workspace contents:" << std::endl;
-    for( auto id : detector_ids )
-    {
-      size_t internal_index = d_info.indexOf( id );
-
-      std::cout << "id: " << id 
-                << " masked: " << d_info.isMasked( internal_index )
-                << " value: " << fake_workspaces.offsets->getValue( id ) << std::endl;
-    }
-    std::cout << std::endl;
-
-    /* print calibration table to make sure everything is there */
-    std::cout << "previous calibration table:" << std::endl;
-    for( size_t r = 0; r < fake_workspaces.calibration_table->rowCount(); ++r )
-    {
-      std::cout << "id: " << fake_workspaces.calibration_table->cell<int>( r, 0 )
-                << " difc: " << fake_workspaces.calibration_table->cell<double>( r, 1 )
-                << std::endl;
-    }
-    std::cout << std::endl;
-
-    /* In ConvertDiffCal, you will need to create a mapping of detector_id to vector index:
-     * this will allow you to easily see if a detector is in the calibration table column */
-    /* what will be the time complexity of this? */
-    /* New code */
     ConvertDiffCal alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
@@ -230,6 +207,7 @@ public:
                                   .retrieveWS<Workspace>(updated_calibration_table_name));
     TS_ASSERT(ws);
     if (!ws) return;
+
     auto updated_calibration_table = std::dynamic_pointer_cast<ITableWorkspace>(ws);
     TS_ASSERT(updated_calibration_table);
 
@@ -248,57 +226,28 @@ public:
     TS_ASSERT_EQUALS(detector_id_column->toDouble( 3 ), 5);
     TS_ASSERT_EQUALS(detector_id_column->toDouble( 4 ), 6);
     TS_ASSERT_EQUALS(detector_id_column->toDouble( 5 ), 7);
+
     /* check difc: */
-    TS_ASSERT_EQUALS(difc_column->toDouble( 0 ), 0 ); // not sure the next 2 will surely be 0?
+    TS_ASSERT_EQUALS(difc_column->toDouble( 0 ), 0 ); 
     TS_ASSERT_EQUALS(difc_column->toDouble( 1 ), 0 );
     TS_ASSERT_EQUALS(difc_column->toDouble( 2 ), 4.0 / 5.0 ); // detector id 4 should be updated
     TS_ASSERT_EQUALS(difc_column->toDouble( 3 ), 5 ); // detector id 5 should be propagated
     TS_ASSERT_EQUALS(difc_column->toDouble( 4 ), 6 ); // detector id 6 should be propagated
     TS_ASSERT_EQUALS(difc_column->toDouble( 5 ), 7.0 / 8.0 ); // detector id 7 should be updated
-    /* end new code */
-
-    /* Captain! Asserts section. New code */
-    /* We can expect that the results will be sorted on detector_id. What should be there? */
-    /* 
-     * detector_id difc ...
-     * 0 (calculate for the first time) - what will the values be?
-     * 1 (calculate for the first time) - what will the values be?
-     * 2 (do nothing, ignore) - will not be in the final calibration table
-     * 3 (do nothing, ignore) - will not be in the final calibration table
-     * 4 (update table entry)
-     * 5 (unchanged, propagate)
-     * 6 (unchanged, propagate)
-     * 7 (update table entry)
-     * */
-    /* ConvertDiffCal changes:
-     * Iterate throught the offsets workspace. For each entry:
-     * if masked or zero, do nothing. Do not update.
-     * otherwise...
-     * search the previous_calibration.
-     * if present...
-     * simply update the entry there with the linear equation described in the task
-     * if not present...
-     * create a new diffc entry in the calibration_table as before
-     * */
-    /* end new code */
-
-    /* Captain! Print out the final output calibration table to make sure everything is there */
-    std::cout << "updated calibration table:" << std::endl;
-    for( size_t r = 0; r < updated_calibration_table->rowCount(); ++r )
-    {
-      std::cout << "id: " << updated_calibration_table->cell<int>( r, 0 )
-                << " difc: " << updated_calibration_table->cell<double>( r, 1 ) << std::endl;
-    }
-    std::cout << std::endl;
   }
 
   void test_exec() {
+
     // Create a fake offsets workspace
     auto instr = ComponentCreationHelper::createMinimalInstrument(V3D(0., 0., -10.), // source
                                                                   V3D(0., 0., 0.),   // sample
                                                                   V3D(1., 0., 0.));  // detector
+
     OffsetsWorkspace_sptr offsets = std::make_shared<OffsetsWorkspace>(instr);
-    offsets->setValue(1, 0.); // wksp_index=0, detid=1
+
+    /* Offsets of zero are ignored by default - before this convention, this unit test was using
+     * an offset of zero. Changing it from zero to epsilon gets the test to pass */
+    offsets->setValue(1, 0.000001); // wksp_index=0, detid=1
 
     // Name of the output workspace.
     std::string outWSName("ConvertDiffCalTest_OutputWS");
@@ -330,6 +279,7 @@ public:
 
     auto detid = table->getColumn("detid");
     TS_ASSERT(detid);
+    TS_ASSERT_EQUALS(detid->size(), 1 );
     TS_ASSERT_EQUALS(detid->toDouble(0), 1.);
 
     auto difc = table->getColumn("difc");

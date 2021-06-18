@@ -97,38 +97,14 @@ double getOffset(const OffsetsWorkspace_const_sptr &offsetsWS, const detid_t det
 }
 
 /**
- * @param offsetsWS
- * @param index
- * @param spectrumInfo
+ * @param d_info - detector info
+ * @param offset - d-spacing offset of the detector 
+ * @param index - index of the detector in the detector info object
  * @return The offset adjusted value of DIFC
  */
-double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t index,
-                     const Mantid::API::SpectrumInfo &spectrumInfo) {
-  const detid_t detid = getDetID(offsetsWS, index);
-  const double offset = getOffset(offsetsWS, detid);
-  double twotheta;
-  try {
-    twotheta = spectrumInfo.twoTheta(index);
-  } catch (std::runtime_error &) {
-    // Choose an arbitrary angle if detector 2theta determination fails.
-    twotheta = 0.;
-  }
-  // the factor returned is what is needed to convert TOF->d-spacing
-  // the table is supposed to be filled with DIFC which goes the other way
-  const double factor =
-      Mantid::Geometry::Conversion::tofToDSpacingFactor(spectrumInfo.l1(), spectrumInfo.l2(index), twotheta, offset);
-  return 1. / factor;
-}
-
-/**
- * @param offsetsWS
- * @param index
- * @param spectrumInfo
- * @return The offset adjusted value of DIFC
- */
-double calculateDIFCNew( Mantid::Geometry::DetectorInfo const &d_info,
+double calculateDIFC( Mantid::Geometry::DetectorInfo const &d_info,
                          double offset,
-                         int index ) {
+                         size_t index ) {
 
   double twotheta;
   try {
@@ -184,7 +160,6 @@ void ConvertDiffCal::exec() {
     configWksp->addColumn("double", correct_columns[3]);
   }
 
-  /* Captain! New code */
   /* obtain detector ids from the previous calibration workspace */
   std::unordered_map< int, int > id_to_row;
   if( previous_calibration )
@@ -202,7 +177,8 @@ void ConvertDiffCal::exec() {
 
   /* iterate through all detectors in the offsets workspace */
   Mantid::Geometry::DetectorInfo const &d_info = offsetsWS->detectorInfo();
-  std::vector<int> const &detector_ids = d_info.detectorIDs();
+  auto const &detector_ids = d_info.detectorIDs();
+  Progress progress(this, 0.0, 1.0, detector_ids.size() );
   for( auto id : detector_ids )
   {
     size_t internal_index = d_info.indexOf( id );
@@ -216,7 +192,6 @@ void ConvertDiffCal::exec() {
       /* if it is found, update it according to a simple linear equation: */
       if( row_to_update != id_to_row.end() )
       {
-        /* Captain! This is causing an issue. False out this if statement and run the test */
         /* Get the row and update the difc value in the first column */
         double &value_to_update =
         configWksp->cell<double>( row_to_update->second, 1 );
@@ -229,29 +204,14 @@ void ConvertDiffCal::exec() {
       {
         API::TableRow newrow = configWksp->appendRow();
 
-        newrow << id << calculateDIFCNew( d_info, new_offset_value, internal_index ) 
-               << 0.0 << 0.0;
+        newrow << static_cast<int>(id);
+        newrow << calculateDIFC( d_info, new_offset_value, internal_index ); 
+        newrow << 0.0;
+        newrow << 0.0;
       }
     }
-  }
-  /* End new code */
-
-  /*
-  // create values in the table
-  const size_t numberOfSpectra = offsetsWS->getNumberHistograms();
-  Progress progress(this, 0.0, 1.0, numberOfSpectra);
-
-  const Mantid::API::SpectrumInfo &spectrumInfo = offsetsWS->spectrumInfo();
-  for (size_t i = 0; i < numberOfSpectra; ++i) {
-    API::TableRow newrow = configWksp->appendRow();
-    newrow << static_cast<int>(getDetID(offsetsWS, i));
-    newrow << calculateDIFC(offsetsWS, i, spectrumInfo);
-    newrow << 0.; // difa
-    newrow << 0.; // tzero
-
     progress.report();
   }
-  */
 
   // sort the results
   IAlgorithm_sptr sortTable = createChildAlgorithm("SortTableWorkspace");
