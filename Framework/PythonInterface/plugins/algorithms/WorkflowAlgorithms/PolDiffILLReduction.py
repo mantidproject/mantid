@@ -404,6 +404,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                                         OutputType='1D',
                                         ScatteringAngleBinning=self.getProperty('ScatteringAngleBinSize').value,
                                         Normalise=True, HeightAxis='-0.1,0.1')
+                    ConvertAxisByFormula(InputWorkspace=name, OutputWorkspace=name, Axis="X", Formula="-x")
                 names_list.append(name)
             DeleteWorkspaces(WorkspaceList=ws)
             GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)
