@@ -153,15 +153,6 @@ public:
 
   void test_partial_update()
   {
-    /*
-     * Code implementation guide:
-     * 0. Add new property: previous calibration. Add it to the documentation.
-     * 1. Copy previous calibration workspace to output. How? is there a copy constructor?
-     * 2. Iterate through input offset workspace. Check if the detector id is masked.
-     *    check if calculated offset is zero. If non-masked an non-zero, recalculate as before.
-     * 3. Update documentation
-     * */
-
     /* specify contents of fake workspaces */
     /* intentionally unsorted */
     std::list< class fake_entry > fake_entries =
@@ -205,12 +196,12 @@ public:
     std::cout << std::endl;
 
     /* print calibration table to make sure everything is there */
-    std::vector< int > column =
-    fake_workspaces.calibration_table->getColumn( 0 )->numeric_fill<int>();
-    std::cout << "calibration table:" << std::endl;
-    for( auto i : column )
+    std::cout << "previous calibration table:" << std::endl;
+    for( size_t r = 0; r < fake_workspaces.calibration_table->rowCount(); ++r )
     {
-      std::cout << "id: " << i << std::endl;
+      std::cout << "id: " << fake_workspaces.calibration_table->cell<int>( r, 0 )
+                << " difc: " << fake_workspaces.calibration_table->cell<double>( r, 1 )
+                << std::endl;
     }
     std::cout << std::endl;
 
@@ -291,7 +282,14 @@ public:
      * */
     /* end new code */
 
-    TS_ASSERT( false );
+    /* Captain! Print out the final output calibration table to make sure everything is there */
+    std::cout << "updated calibration table:" << std::endl;
+    for( size_t r = 0; r < updated_calibration_table->rowCount(); ++r )
+    {
+      std::cout << "id: " << updated_calibration_table->cell<int>( r, 0 )
+                << " difc: " << updated_calibration_table->cell<double>( r, 1 ) << std::endl;
+    }
+    std::cout << std::endl;
   }
 
   void test_exec() {
