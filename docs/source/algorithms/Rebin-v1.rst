@@ -15,6 +15,11 @@ defines new boundaries in intervals :math:`x_i-x_{i+1}\,`. Positive
 create logarithmic binning using the formula
 :math:`x(j+1)=x(j)(1+|\Delta x_i|)\,`
 
+If UseReverseLogarithmic is set to True, the negative values create reverse logarithmic binning, i.e. a binning whose
+bins are first big and then get exponentially smaller as they become close to the end of the specified interval.
+The formula used is :math:`x(j) = (1+|\Delta x_i\|)^j * (x_{i+1} - f) + f` where :math:`f` is the last time of the
+workspace.
+
 This algorithms is useful both in data reduction, but also in remapping
 :ref:`ragged workspace <Ragged_Workspace>` to a regular set of bin
 boundaries.
@@ -87,6 +92,8 @@ following will happen:
 
 Hence the actual *Param* string used is "0, 2, 4, 3, 10".
 
+This flag is ignored by the UseReverseLogarithmic flag on logarithmic bin, ie reverse logarithmic splits will not
+necessarily begin with a full bin, no matter this flag. Other splits still follow the normal behavior though.
 
 .. _rebin-usage:
 
@@ -134,6 +141,26 @@ Output:
 .. testoutput:: ExHistLog
 
    The 2nd and 3rd rebinned X values are: [ 1.5   2.25]
+
+**Example - Reverse logarithmic rebinning:**
+
+.. testcode:: ExHistRevLog
+
+   # create histogram workspace
+   dataX = [1,2,3,4,5,6,7,8,9,10] # or use dataX=range(1,11)
+   dataY = [1,2,3,4,5,6,7,8,9] # or use dataY=range(1,10)
+   ws = CreateWorkspace(dataX, dataY)
+
+   # rebin from min to max - 1 with reverse logarithmic bins of 1
+   ws = Rebin(ws, "1, -1, 9")
+
+   print("The rebinned X values are: {}".format(ws.readX(0)))
+
+Output:
+
+.. testoutput:: ExHistRevLog
+
+   The rebinned X values are: [ 1. 2. 6. 8. 9.]
 
 **Example - custom two regions rebinning:**
 

@@ -21,6 +21,7 @@ Improvements
 
 - :ref:`CreateSampleWorkspace <algm-CreateSampleWorkspace>` has new property InstrumentName.
 - Event nexuses produced at ILL can now be loaded using :ref:`LoadEventNexus <algm-LoadEventNexus>`.
+- :ref:`Rebin <algm-Rebin>` now support reverse logarithmic binning.
 
 Fit Functions
 -------------
