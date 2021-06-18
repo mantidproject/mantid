@@ -199,7 +199,7 @@ void FqFitModel::addWorkspace(const std::string &workspaceName, const int &spect
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addFqFitParameters(workspace.get(), name);
   const auto spectrum = getSpectrum(parameters);
-  std::string spectra = std::to_string(parameters.widthSpectra[spectrum_index]);
+  // std::string spectra = std::to_string(parameters.widthSpectra[spectrum_index]);
   const std::vector<std::size_t> single_spectra = {parameters.widthSpectra[spectrum_index]};
   if (!spectrum)
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
