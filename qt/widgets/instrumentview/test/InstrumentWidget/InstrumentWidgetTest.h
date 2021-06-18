@@ -31,6 +31,8 @@ public:
   static InstrumentWidgetTest *createSuite() { return new InstrumentWidgetTest(); }
   static void destroySuite(InstrumentWidgetTest *suite) { delete suite; }
 
+  using SimpleMock = StrictMock<MockSimpleWidget>;
+
   void setUp() override {
     FrameworkManager::Instance();
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 2);
@@ -39,13 +41,28 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void test_constructor() {
-    auto simpleFixture = std::make_unique<StrictMock<MockSimpleWidget>>();
-    EXPECT_CALL(*simpleFixture, setSurface(_)).Times(1);
-    EXPECT_CALL(*simpleFixture, updateView(IsTrue())).Times(1);
-    EXPECT_CALL(*simpleFixture, qtInstallEventFilter(_)).Times(1);
-    EXPECT_CALL(*simpleFixture, qtUpdate()).Times(1);
+  void test_constructor_simple_widget() { auto instance = construct(makeSimple()); }
 
-    InstrumentWidget("test_ws", nullptr, true, true, 0.0, 0.0, true, std::move(simpleFixture));
+  void test_save_image() {
+    const auto inputName = QString::fromStdString("testFilename");
+    const auto expectedName = inputName + ".png";
+
+    auto simpleMock = makeSimple();
+    EXPECT_CALL(*simpleMock, saveToFile(expectedName)).Times(1);
+
+    auto widget = construct(std::move(simpleMock));
+    widget.saveImage(inputName);
+  }
+
+private:
+  std::unique_ptr<SimpleMock> makeSimple() const { return std::make_unique<SimpleMock>(); }
+
+  InstrumentWidget construct(std::unique_ptr<SimpleMock> mock) const {
+    EXPECT_CALL(*mock, setSurface(_)).Times(1);
+    EXPECT_CALL(*mock, updateView(IsTrue())).Times(1);
+    EXPECT_CALL(*mock, qtInstallEventFilter(_)).Times(1);
+    EXPECT_CALL(*mock, qtUpdate()).Times(1);
+
+    return InstrumentWidget("test_ws", nullptr, true, true, 0.0, 0.0, true, std::move(mock));
   }
 };
