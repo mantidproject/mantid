@@ -104,6 +104,19 @@ public:
     TS_ASSERT_DELTA(outY1[0], -1.0, 1e-6);
   }
 
+  void testMaxDSpaceShift() {
+    CrossCorrelate alg;
+    CrossCorrelateTestData test_data;
+
+    test_data.print_workspace();
+
+    TS_ASSERT_LESS_THAN(2, test_data.get_workspace()->y(0).size());
+    TS_ASSERT_EQUALS(test_data.get_workspace()->y(0).size(), test_data.get_workspace()->x(0).size() - 1);
+    TS_ASSERT_EQUALS(test_data.get_workspace()->y(0).size(), test_data.get_workspace()->e(0).size())
+    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, test_data.get_workspace(), 0.0, 4.0, 5);
+    const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inWS);
+  }
+
   void testInputXLength2() {
     // this throws because at least 3 X values are required
     CrossCorrelate alg;
@@ -163,6 +176,18 @@ private:
     return ws;
   }
 
+  void setupAlgorithmPropsBasic(CrossCorrelate &alg, const double xmin, const double xmax) {
+    // set up the algorithm
+    if (!alg.isInitialized())
+      alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("ReferenceSpectra", 0);
+    alg.setProperty("WorkspaceIndexMin", 0);
+    alg.setProperty("WorkspaceIndexMax", 1);
+    alg.setProperty("XMin", xmin);
+    alg.setProperty("XMax", xmax);
+  }
   // Initialise the algorithm and set the properties. Creates a fake workspace
   // for the input and returns it.
   MatrixWorkspace_const_sptr setupAlgorithm(CrossCorrelate &alg, const double xmin, const double xmax) {
@@ -170,17 +195,21 @@ private:
     // create the workspace
     const MatrixWorkspace_sptr inWS = makeFakeWorkspace();
 
-    // set up the algorithm
-    if (!alg.isInitialized())
-      alg.initialize();
-    alg.setChild(true);
+    setupAlgorithmPropsBasic(alg, xmin, xmax);
     alg.setProperty("InputWorkspace", inWS);
-    alg.setProperty("OutputWorkspace", "outWS");
-    alg.setProperty("ReferenceSpectra", 0);
-    alg.setProperty("WorkspaceIndexMin", 0);
-    alg.setProperty("WorkspaceIndexMax", 1);
-    alg.setProperty("XMin", xmin);
-    alg.setProperty("XMax", xmax);
+
+    return inWS;
+  }
+
+  // Initialise the algorithm and set the properties. Creates a fake workspace
+  // for the input and returns it.
+  MatrixWorkspace_const_sptr setupAlgorithm(CrossCorrelate &alg, const MatrixWorkspace_sptr inWS, const double xmin,
+                                            const double xmax, const double maxDSpaceShift) {
+
+    // create the workspace
+    setupAlgorithmPropsBasic(alg, xmin, xmax);
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("MaxDspaceShift", maxDSpaceShift);
 
     return inWS;
   }

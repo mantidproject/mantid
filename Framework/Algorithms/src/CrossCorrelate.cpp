@@ -8,6 +8,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CrossCorrelate.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
@@ -67,6 +68,7 @@ using namespace HistogramData;
 void CrossCorrelate::init() {
   auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<API::WorkspaceUnitValidator>("dSpacing");
+  wsValidator->add<API::HistogramValidator>();
   wsValidator->add<API::RawCountValidator>();
 
   // Input and output workspaces
@@ -211,6 +213,11 @@ void CrossCorrelate::exec() {
     // Now rebin on the grid of referenceSpectra
     std::vector<double> tempY(numReferenceY);
     std::vector<double> tempE(numReferenceY);
+
+    g_log.information("sizing :" + std::to_string(numReferenceY) + " " + std::to_string(referenceXVector.size()));
+    g_log.information("old y size :" + std::to_string(inputYVector.size()));
+    g_log.information("old e size :" + std::to_string(inputEVector.size()));
+    g_log.information("old x size :" + std::to_string(inputXVector.size()));
     VectorHelper::rebin(inputXVector.rawData(), inputYVector.rawData(), inputEVector.rawData(), referenceXVector, tempY,
                         tempE, isDistribution);
     const auto tempVar = subtractMean(tempY, tempE);

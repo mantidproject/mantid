@@ -11,6 +11,7 @@
 #include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
@@ -148,10 +149,11 @@ public:
   /* Specify default values */
   CrossCorrelateTestData(std::string function_specifier = gaussian_default, int domain_radius = 20,
                          std::initializer_list<class TransformSpecifier> l = {
-                             TransformSpecifier(transforms::domain_translate, 2),
-                             TransformSpecifier(transforms::domain_scale, 2),
-                             TransformSpecifier(transforms::co_domain_translate, 2),
-                             TransformSpecifier(transforms::co_domain_scale, 2)});
+                             // TransformSpecifier(transforms::domain_translate, 10),
+                             // TransformSpecifier(transforms::domain_scale, 10),
+                             // TransformSpecifier(transforms::co_domain_translate, 10),
+                             // TransformSpecifier(transforms::co_domain_scale, 10)
+                         });
 
   MatrixWorkspace_sptr get_workspace() { return workspace; }
 
@@ -277,6 +279,21 @@ void CrossCorrelateTestData::print_workspace() {
   }
 }
 
+MatrixWorkspace_sptr convertToHistogram(const MatrixWorkspace_sptr inWS) {
+  ConvertToHistogram alg;
+
+  // setup alg
+  alg->initialize();
+  alg->setRethrows(true);
+  alg->setProperty("InputWorkspace", inWS);
+  alg->setProperty("OutputWorkspace", inWS);
+
+  // run alg
+  alg->execute();
+  inWS = alg->getProperty("OutputWorkspace");
+  return inWS;
+}
+
 CrossCorrelateTestData::CrossCorrelateTestData(std::string function_specifier, int domain_radius,
                                                std::initializer_list<class TransformSpecifier> l)
     : domain_radius(domain_radius), num_functions(l.size() + 1) {
@@ -299,6 +316,11 @@ CrossCorrelateTestData::CrossCorrelateTestData(std::string function_specifier, i
   /* create the reference spectrum at the first index */
   std::vector<double> co_domain = apply_function(symmetric_domain);
   assign_to_workspace(0, symmetric_domain, co_domain);
+
+  std::vector<double> errorDomain(co_domain.size(), 0.0);
+  workspace->mutableE(0).assign(errorDomain.begin(), errorDomain.end());
+
+  workspace = convertToHistogram(workspace);
 
   /* iterate through the initializer list and handle all the objects */
   int workspace_index = 1;
@@ -326,4 +348,6 @@ CrossCorrelateTestData::CrossCorrelateTestData(std::string function_specifier, i
 
     ++workspace_index;
   }
+
+  workspace->getAxis(0)->setUnit("dSpacing");
 }
