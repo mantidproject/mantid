@@ -56,6 +56,14 @@ class CorrectionsModel:
         """Sets the dead time source to be 'None'."""
         self.context.gui_context.update_and_send_signal(DeadTimeSource="None", DeadTimeTable=None)
 
+    def is_dead_time_source_from_data_file(self) -> bool:
+        """Returns true if the dead time should be retrieved from a data file."""
+        return self.context.gui_context["DeadTimeSource"] == "FromFile"
+
+    def is_dead_time_source_from_workspace(self) -> bool:
+        """Returns true if the dead time should be retrieved from a workspace."""
+        return self.context.gui_context["DeadTimeSource"] == "FromADS"
+
     def validate_selected_dead_time_workspace(self, table_name: str) -> str:
         """Validates the selected dead time workspace. Returns a string containing an error message if its invalid."""
         if check_if_workspace_exist(table_name):

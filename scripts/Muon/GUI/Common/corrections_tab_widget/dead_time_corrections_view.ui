@@ -41,14 +41,14 @@ color: grey; }
       <property name="topMargin">
        <number>14</number>
       </property>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="dead_time_workspace_label">
         <property name="text">
          <string>Dead Time Workspace:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QComboBox" name="dead_time_workspace_selector">
         <property name="toolTip">
          <string>Select a table which is loaded into the ADS.</string>
@@ -60,20 +60,56 @@ color: grey; }
         </item>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="dead_time_info_label">
-        <property name="minimumSize">
+      <item row="2" column="2">
+       <spacer name="dead_time_workspace_spacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
          <size>
           <width>180</width>
-          <height>180</height>
+          <height>20</height>
          </size>
         </property>
+       </spacer>
+      </item>
+      <item row="3" column="1">
+       <widget class="QPushButton" name="dead_time_browse_button">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Browse for a .nxs file to load dead times from. If valid, the dead times will be saved as a table, and automatically selected as the dead time for the current data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
-         <string>No loaded dead time</string>
+         <string>Browse</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="3" column="2">
+       <spacer name="dead_time_browse_spacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>180</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="dead_time_other_file_label">
+        <property name="text">
+         <string>From other file:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
        <widget class="QComboBox" name="dead_time_from_selector">
         <item>
          <property name="text">
@@ -97,61 +133,25 @@ color: grey; }
         </item>
        </widget>
       </item>
-      <item row="0" column="0">
+      <item row="1" column="2">
+       <widget class="QLabel" name="dead_time_info_label">
+        <property name="minimumSize">
+         <size>
+          <width>180</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>No loaded dead time</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
        <widget class="QLabel" name="dead_time_label">
         <property name="text">
          <string>Dead Time:</string>
         </property>
        </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="dead_time_other_file_label">
-        <property name="text">
-         <string>From other file:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QPushButton" name="dead_time_browse_button">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Browse for a .nxs file to load dead times from. If valid, the dead times will be saved as a table, and automatically selected as the dead time for the current data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string>Browse</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <spacer name="dead_time_workspace_spacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>180</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="2" column="2">
-       <spacer name="dead_time_browse_spacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>180</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>

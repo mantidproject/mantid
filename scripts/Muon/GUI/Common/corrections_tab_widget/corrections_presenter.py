@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantidqt.utils.observer_pattern import GenericObserver
+
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
 from Muon.GUI.Common.corrections_tab_widget.corrections_view import CorrectionsView
 from Muon.GUI.Common.utilities.load_utils import get_table_workspace_names_from_ADS, load_dead_time_from_filename
@@ -22,6 +24,24 @@ class CorrectionsPresenter:
         self.view.set_slot_for_dead_time_from_selector_changed(self.handle_dead_time_from_selector_changed)
         self.view.set_slot_for_dead_time_workspace_selector_changed(self.handle_dead_time_workspace_selector_changed)
         self.view.set_slot_for_dead_time_file_browse_clicked(self.handle_dead_time_browse_clicked)
+
+        self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
+        self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
+
+        self.handle_dead_time_from_selector_changed()
+
+    def update_view_from_model(self) -> None:
+        """Updates the view based on the settings saved in the model."""
+        if self.model.is_dead_time_source_from_data_file():
+            self.view.set_dead_time_from_data_file_selected()
+        elif self.model.is_dead_time_source_from_workspace():
+            self.view.set_dead_time_from_workspace_selected()
+
+        self.handle_dead_time_from_selector_changed()
+
+    def handle_instrument_changed(self):
+        """User changes the selected instrument."""
+        self.model.set_dead_time_source_to_from_file()
 
     def handle_dead_time_from_selector_changed(self) -> None:
         """Handles when the location where the dead time should be retrieved from changes."""

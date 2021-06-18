@@ -20,5 +20,5 @@ class CorrectionsTabWidget(object):
         self.corrections_tab_model = CorrectionsModel(context, context.corrections_context)
         self.corrections_tab_presenter = CorrectionsPresenter(self.corrections_tab_view, self.corrections_tab_model)
 
-        # context.update_view_from_model_notifier.add_subscriber(
-        #     self.model_fitting_tab_presenter.update_view_from_model_observer)
+        context.update_view_from_model_notifier.add_subscriber(
+            self.corrections_tab_presenter.update_view_from_model_observer)
