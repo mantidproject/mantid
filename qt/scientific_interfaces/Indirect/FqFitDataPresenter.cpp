@@ -35,7 +35,7 @@ FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *
   showParameterComboBoxes();
 }
 
-void FqFitDataPresenter::handleSampleLoaded(const QString &workspaceName, FqFitParameters parameters) {
+void FqFitDataPresenter::handleSampleLoaded(const QString &workspaceName, FqFitParameters &parameters) {
   setModelWorkspace(workspaceName);
   updateAvailableParameterTypes(parameters);
   updateAvailableParameters(parameters);
@@ -78,11 +78,11 @@ void FqFitDataPresenter::updateActiveDataIndex() { m_dataIndex = m_fqFitModel->g
 
 void FqFitDataPresenter::updateActiveDataIndex(int index) { m_dataIndex = index; }
 
-void FqFitDataPresenter::updateAvailableParameters(FqFitParameters parameters) {
+void FqFitDataPresenter::updateAvailableParameters(FqFitParameters &parameters) {
   updateAvailableParameters(m_cbParameterType->currentText(), parameters);
 }
 
-void FqFitDataPresenter::updateAvailableParameters(const QString &type, FqFitParameters parameters) {
+void FqFitDataPresenter::updateAvailableParameters(const QString &type, FqFitParameters &parameters) {
   if (type == "Width")
     setAvailableParameters(parameters.widths);
   else if (type == "EISF")
@@ -94,7 +94,7 @@ void FqFitDataPresenter::updateAvailableParameters(const QString &type, FqFitPar
     setSingleModelSpectrum(m_cbParameter->currentIndex());
 }
 
-void FqFitDataPresenter::updateAvailableParameterTypes(FqFitParameters parameters) {
+void FqFitDataPresenter::updateAvailableParameterTypes(FqFitParameters &parameters) {
   MantidQt::API::SignalBlocker blocker(m_cbParameterType);
   m_cbParameterType->clear();
   for (const auto &type : getParameterTypes(parameters))
@@ -117,7 +117,7 @@ void FqFitDataPresenter::setAvailableParameters(const std::vector<std::string> &
 
 void FqFitDataPresenter::setParameterLabel(const QString &parameter) { m_lbParameter->setText(parameter + ":"); }
 
-void FqFitDataPresenter::handleParameterTypeChanged(const QString &parameter, FqFitParameters parameter1) {
+void FqFitDataPresenter::handleParameterTypeChanged(const QString &parameter, FqFitParameters &parameter1) {
   m_lbParameter->setText(parameter + ":");
   updateAvailableParameters(parameter, parameter1);
   emit dataChanged();
@@ -157,12 +157,12 @@ void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog,
     dialog->setParameterNames({});
 }
 
-void FqFitDataPresenter::updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters parameters) {
+void FqFitDataPresenter::updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters) {
   setDataIndexToCurrentWorkspace(dialog);
   dialog->setParameterTypes(getParameterTypes(parameters));
 }
 
-std::vector<std::string> FqFitDataPresenter::getParameterTypes(FqFitParameters parameters) const {
+std::vector<std::string> FqFitDataPresenter::getParameterTypes(FqFitParameters &parameters) const {
   std::vector<std::string> types;
   if (!parameters.widths.empty())
     types.emplace_back("Width");

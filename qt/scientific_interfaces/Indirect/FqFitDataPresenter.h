@@ -30,9 +30,9 @@ public:
 private slots:
   void hideParameterComboBoxes();
   void showParameterComboBoxes();
-  void updateAvailableParameters(FqFitParameters parameters);
-  void updateAvailableParameterTypes(FqFitParameters parameters);
-  void updateAvailableParameters(const QString &type, FqFitParameters parameters);
+  void updateAvailableParameters(FqFitParameters &parameters);
+  void updateAvailableParameterTypes(FqFitParameters &parameters);
+  void updateAvailableParameters(const QString &type, FqFitParameters &parameters);
   void updateParameterSelectionEnabled();
   void setParameterLabel(const QString &parameter);
   void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type);
@@ -41,7 +41,7 @@ private slots:
   void updateActiveDataIndex();
   void updateActiveDataIndex(int index);
   void setSingleModelSpectrum(int index);
-  void handleParameterTypeChanged(const QString &parameter, FqFitParameters parameter1);
+  void handleParameterTypeChanged(const QString &parameter, FqFitParameters &parameter1);
   void handleSpectrumSelectionChanged(int parameterIndex);
   void handleMultipleInputSelected();
   void handleSingleInputSelected();
@@ -50,7 +50,7 @@ signals:
   void spectrumChanged(WorkspaceIndex);
 
 protected slots:
-  void handleSampleLoaded(const QString &, FqFitParameters parameters);
+  void handleSampleLoaded(const QString &, FqFitParameters &parameters);
 
 private:
   void setAvailableParameters(const std::vector<std::string> &parameters);
@@ -58,8 +58,8 @@ private:
   void closeDialog() override;
   std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
   void updateParameterOptions(FqFitAddWorkspaceDialog *dialog, FqFitParameters parameters);
-  void updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters parameters);
-  std::vector<std::string> getParameterTypes(FqFitParameters parameters) const;
+  void updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters);
+  std::vector<std::string> getParameterTypes(FqFitParameters &parameters) const;
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
   void setDataIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
