@@ -11,6 +11,7 @@
 #include "InstrumentWidget.h"
 
 #include "MockMantidGLWidget.h"
+#include "MockProjectionSurface.h"
 #include "MockSimpleWidget.h"
 
 #include "MantidAPI/AnalysisDataService.h"
