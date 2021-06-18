@@ -33,16 +33,6 @@ public:
   static CrossCorrelateTest *createSuite() { return new CrossCorrelateTest(); }
   static void destroySuite(CrossCorrelateTest *suite) { delete suite; }
 
-  /* print default test gaussian data */
-  void test_default_gaussian_data() {
-    CrossCorrelateTestData test_data;
-
-    test_data.print_workspace();
-    MatrixWorkspace_sptr m = test_data.get_workspace();
-
-    TS_ASSERT_EQUALS(true, m != nullptr);
-  }
-
   void testValidInput() {
     // setup and run the algorithm (includes basic checks)
     CrossCorrelate alg;
@@ -93,17 +83,14 @@ public:
 
   void testMaxDSpaceShift() {
     CrossCorrelate alg;
-    CrossCorrelateTestData test_data;
-    auto inputWS = makeFakeWorkspace3Peaks();
+    // TODO need a duplicate test for other shape
+    auto inputWS = makeFakeWorkspace3Peaks(PeakShapeEnum::GAUSSIAN);
     TS_ASSERT(inputWS != nullptr);
 
-    test_data.print_workspace();
-
-    TS_ASSERT_LESS_THAN(2, test_data.get_workspace()->y(0).size());
-    TS_ASSERT_EQUALS(test_data.get_workspace()->y(0).size(), test_data.get_workspace()->x(0).size() - 1);
-    TS_ASSERT_EQUALS(test_data.get_workspace()->y(0).size(), test_data.get_workspace()->e(0).size())
-    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, test_data.get_workspace(), 0.0, 4.0, 5);
+    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, inputWS, 0.0, 4.0, 5);
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inWS);
+
+    // TODO add validation
   }
 
   void testInputXLength2() {
@@ -165,12 +152,12 @@ private:
     return ws;
   }
 
-  const MatrixWorkspace_sptr makeFakeWorkspace3Peaks() {
+  const MatrixWorkspace_sptr makeFakeWorkspace3Peaks(const PeakShapeEnum shape) {
     const double D_MIN{0.9};
     const double D_MAX{2.3};
     const double D_DELTA{0.01};
     const int NUM_BINS = static_cast<int>((D_MAX - D_MIN) / D_DELTA);
-    const int NUM_HIST{2}; // TODO change to 4
+    const int NUM_HIST{5};
 
     // create the x-axis
     BinEdges xEdges(NUM_BINS + 1, HistogramData::LinearGenerator(D_MIN, D_DELTA));
@@ -185,7 +172,7 @@ private:
     // loop over the spectra
     // which spectra is which is coded in createcompositeB2BExp
     for (int spectrumIndex = 0; spectrumIndex < NUM_HIST; ++spectrumIndex) {
-      auto compositefunction = createCompositeB2BExp(spectrumIndex);
+      auto compositefunction = createCompositeB2BExp(shape, spectrumIndex);
       ws->setBinEdges(spectrumIndex, xEdges);
       ws->setCounts(spectrumIndex, evaluateFunction(compositefunction, xValues));
     }
