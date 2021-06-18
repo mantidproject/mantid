@@ -209,7 +209,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
     @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.setPeakFwhmOf')
     @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.isParameterExplicitlySetOf')
     @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.getWidthParameterNameOf')
-    def _set_peak_initial_fwhm(self, mock_getWidthName, mock_parameterSet, mock_setFwhm):
+    def test_set_peak_initial_fwhm(self, mock_getWidthName, mock_parameterSet, mock_setFwhm):
         property_browser = self._create_widget()
         mock_getWidthName.side_effect = lambda prefix: "S" if prefix == "f0" else ""
         mock_parameterSet.return_value = True

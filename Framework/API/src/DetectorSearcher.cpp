@@ -7,6 +7,7 @@
 #include "MantidAPI/DetectorSearcher.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/NearestNeighbours.h"
 
 #include <tuple>
@@ -15,6 +16,10 @@ using Mantid::Geometry::InstrumentRayTracer;
 using Mantid::Kernel::V3D;
 using namespace Mantid;
 using namespace Mantid::API;
+
+namespace {
+Kernel::Logger g_log("DetectorSearcher");
+}
 
 double getQSign() {
   const auto convention = Kernel::ConfigService::Instance().getString("Q.convention");
@@ -146,16 +151,22 @@ DetectorSearcher::DetectorSearchResult DetectorSearcher::searchUsingInstrumentRa
 DetectorSearcher::DetectorSearchResult DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
   const auto detectorDir = convertQtoDirection(q);
   // find where this Q vector should intersect with "extended" space
-  const auto neighbours = m_detectorCacheSearch->findNearest(Eigen::Vector3d(q[0], q[1], q[2]), 5);
-  if (neighbours.empty())
+  // NOTE: increase the Nneighbors from 5 to 11 to cover a wide extended space
+  const auto neighbours = m_detectorCacheSearch->findNearest(Eigen::Vector3d(q[0], q[1], q[2]), 11);
+
+  // check if neighboring is empty
+  if (neighbours.empty()) {
+    g_log.information() << "empty neighbor list for given Q\n";
     return std::make_tuple(false, 0);
+  }
 
   const auto result = checkInteceptWithNeighbours(detectorDir, neighbours);
   const auto hitDetector = std::get<0>(result);
   const auto index = std::get<1>(result);
 
-  if (hitDetector)
+  if (hitDetector) {
     return std::make_tuple(true, m_indexMap[index]);
+  }
 
   // Tube Gap Parameter specifically applies to tube instruments
   if (!hitDetector && m_instrument->hasParameter("tube-gap")) {

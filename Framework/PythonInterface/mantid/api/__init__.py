@@ -22,7 +22,7 @@ import_mantid_cext('._api', 'mantid.api', globals())
 ###############################################################################
 # Attach additional operators to workspaces
 ###############################################################################
-from mantid.api import _workspaceops
+from mantid.api import _workspaceops  # noqa: E402
 
 _workspaceops.attach_binary_operators_to_workspace()
 _workspaceops.attach_unary_operators_to_workspace()
@@ -33,10 +33,10 @@ _workspaceops.attach_tableworkspaceiterator()
 # Must be imported AFTER all the api members
 # have been added to the mantid.api namespace above!
 ###############################################################################
-from mantid.api import _adsimports
+from mantid.api import _adsimports  # noqa: E402, F401
 
 
 ###############################################################################
 # Make aliases accessible in this namespace
 ###############################################################################
-from mantid.api._aliases import *
+from mantid.api._aliases import *  # noqa: E402, F401

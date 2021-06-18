@@ -115,6 +115,12 @@ if [[ ${JOB_NAME} == *clean* || ${JOB_NAME} == *clang_tidy* ]]; then
     CLEANBUILD=true
 fi
 
+if [[ ${JOB_NAME} == *coverage* ]]; then
+    COVERAGE=ON
+else
+    COVERAGE=OFF
+fi
+
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
     PRBUILD=true
 fi
@@ -358,7 +364,8 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} ${TURN_OFF_CMAKE_SYSTEM} .."
+
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DCOVERAGE=${COVERAGE} -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} ${TURN_OFF_CMAKE_SYSTEM} .."
 
 ###############################################################################
 # Coverity build should exit early

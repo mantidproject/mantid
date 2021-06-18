@@ -57,7 +57,7 @@ class CalibrationPresenter(object):
             if not self.validate_path():
                 return
             filename = self.view.get_path_filename()
-            instrument, vanadium_file, sample_file = self.model.load_existing_gsas_parameters(
+            instrument, vanadium_file, sample_file = self.model.load_existing_calibration_files(
                 filename)
             self.pending_calibration.set_calibration(vanadium_file, sample_file, instrument)
             self.set_current_calibration()

@@ -51,7 +51,7 @@ class FocusPresenter(object):
         if self._number_of_files_warning(focus_paths):
             self.start_focus_worker(focus_paths, banks, self.view.get_plot_output(), self.rb_num, spectrum_numbers)
 
-    def start_focus_worker(self, focus_paths, banks, plot_output, rb_num, spectrum_numbers=None):
+    def start_focus_worker(self, focus_paths, banks, plot_output, rb_num, spectrum_numbers=None, custom_cal=None):
         """
         Focus data in a separate thread to stop the main GUI from hanging.
         :param focus_paths: List of paths to the files containing the data to focus.
@@ -59,9 +59,11 @@ class FocusPresenter(object):
         :param plot_output: True if the output should be plotted.
         :param rb_num: The RB Number from the main window (often an experiment id)
         :param spectrum_numbers: Optional parameter to crop to a specific list of spectrum numbers.
+        :param custom_cal: TODO
         """
         self.worker = AsyncTask(self.model.focus_run,
-                                (focus_paths, banks, plot_output, self.instrument, rb_num, spectrum_numbers),
+                                (focus_paths, banks, plot_output, self.instrument, rb_num, spectrum_numbers,
+                                 custom_cal),
                                 error_cb=self._on_worker_error,
                                 finished_cb=self._on_worker_success)
         self.set_focus_controls_enabled(False)

@@ -1593,7 +1593,6 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     observeFinish(alg);
     alg->executeAsync();
     m_fitAlgParameters = alg->toString();
-
   } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
@@ -1635,8 +1634,9 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
     std::string out = alg->getProperty("OutputWorkspace");
     emit algorithmFinished(QString::fromStdString(out));
   }
-  // Update Status string
-  auto status = QString::fromStdString(alg->getPropertyValue("OutputStatus"));
+  // Update Status string in member variable (so can be retrieved)
+  m_fitAlgOutputStatus = alg->getPropertyValue("OutputStatus");
+  auto status = QString::fromStdString(m_fitAlgOutputStatus);
   emit fitResultsChanged(status);
   // update Quality string
   if (m_displayActionQuality->isChecked()) {
@@ -1644,9 +1644,7 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
     std::string costFunction = alg->getProperty("CostFunction");
     std::shared_ptr<Mantid::API::ICostFunction> costfun =
         Mantid::API::CostFunctionFactory::Instance().create(costFunction);
-    if (status != "success") {
-      status = "failed";
-    }
+    status = (status == "success") ? "success" : "failed";
     emit changeWindowTitle(QString("Fit Function (") + costfun->shortName().c_str() + " = " + QString::number(quality) +
                            ", " + status + ")");
   } else
@@ -3209,6 +3207,11 @@ QStringList FitPropertyBrowser::getParameterNames() const {
  * Get Fit Algorithm parameters
  */
 std::string FitPropertyBrowser::getFitAlgorithmParameters() const { return m_fitAlgParameters; }
+
+/**=================================================================================================
+ * Get Fit Algorithm output statuss
+ */
+std::string FitPropertyBrowser::getFitAlgorithmOutputStatus() const { return m_fitAlgOutputStatus; }
 
 /**=================================================================================================
  * Show online function help

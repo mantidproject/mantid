@@ -73,7 +73,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             self.handle_added_or_removed_group_or_pair_to_plot)
         self.instrument_observer = GenericObserver(self.handle_instrument_changed)
         self.plot_selected_fit_observer = GenericObserverWithArgPassing(self.handle_plot_selected_fits)
-        self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
+        self.remove_plot_guess_observer = GenericObserver(self.handle_remove_plot_guess)
+        self.update_plot_guess_observer = GenericObserver(self.handle_update_plot_guess)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_changed)
         self.new_data_loaded_observer = GenericObserver(self.handle_data_updated)
         self.plot_type_changed_notifier = GenericObservable()
@@ -328,7 +329,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         if type(workspace_names) != list:
             workspace_list = [workspace_names]
         for workspace_name in workspace_list:
-            fit_raw_data = self.context.fitting_context.fit_raw
+            fit_raw_data = self.context.fitting_context.fit_to_raw
             # binned data but want raw plot
             if plot_raw and not fit_raw_data:
                 ws_list.append(remove_rebin_from_name(workspace_name))
@@ -339,14 +340,13 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
                 ws_list.append(workspace_name)
         return ws_list
 
-    def handle_plot_guess_changed(self):
-        if self.context.fitting_context.guess_ws is None:
-            return
+    def handle_remove_plot_guess(self):
+        if self.context.fitting_context.guess_workspace_name is not None:
+            self._figure_presenter.remove_workspace_names_from_plot([self.context.fitting_context.guess_workspace_name])
 
-        if self.context.fitting_context.plot_guess:
-            self._figure_presenter.plot_guess_workspace(self.context.fitting_context.guess_ws)
-        else:
-            self._figure_presenter.remove_workspace_names_from_plot([self.context.fitting_context.guess_ws])
+    def handle_update_plot_guess(self):
+        if self.context.fitting_context.guess_workspace_name is not None and self.context.fitting_context.plot_guess:
+            self._figure_presenter.plot_guess_workspace(self.context.fitting_context.guess_workspace_name)
 
     def plot_all_selected_data(self, autoscale, hold_on):
         """Plots all selected run data e.g runs and groups
