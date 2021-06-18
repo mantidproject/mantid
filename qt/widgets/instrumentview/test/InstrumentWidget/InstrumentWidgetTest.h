@@ -54,6 +54,14 @@ public:
     widget.saveImage(inputName);
   }
 
+  void test_update_instrument_detectors() {
+    auto simpleMock = makeSimple();
+    EXPECT_CALL(*simpleMock, updateDetectors()).Times(1);
+
+    auto widget = construct(std::move(simpleMock));
+    widget.updateInstrumentDetectors();
+  }
+
 private:
   std::unique_ptr<SimpleMock> makeSimple() const { return std::make_unique<SimpleMock>(); }
 
