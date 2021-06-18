@@ -202,9 +202,7 @@ void CrossCorrelate::exec() {
     size_t wsIndex = indexes[currentSpecIndex]; // Get the ws index from the table
     // Copy spectra info from input Workspace
     out->getSpectrum(currentSpecIndex).copyInfoFrom(inputWS->getSpectrum(wsIndex));
-
     out->setSharedX(currentSpecIndex, out->sharedX(0));
-
     // Get temp referenceSpectras
     const auto &inputXVector = inputWS->x(wsIndex);
     const auto &inputYVector = inputWS->y(wsIndex);
@@ -214,10 +212,10 @@ void CrossCorrelate::exec() {
     std::vector<double> tempY(numReferenceY);
     std::vector<double> tempE(numReferenceY);
 
-    g_log.information("sizing :" + std::to_string(numReferenceY) + " " + std::to_string(referenceXVector.size()));
-    g_log.information("old y size :" + std::to_string(inputYVector.size()));
-    g_log.information("old e size :" + std::to_string(inputEVector.size()));
-    g_log.information("old x size :" + std::to_string(inputXVector.size()));
+    // g_log.information("sizing :" + std::to_string(numReferenceY) + " " + std::to_string(referenceXVector.size()));
+    // g_log.information("old y size :" + std::to_string(inputYVector.size()));
+    // g_log.information("old e size :" + std::to_string(inputEVector.size()));
+    // g_log.information("old x size :" + std::to_string(inputXVector.size()));
     VectorHelper::rebin(inputXVector.rawData(), inputYVector.rawData(), inputEVector.rawData(), referenceXVector, tempY,
                         tempE, isDistribution);
     const auto tempVar = subtractMean(tempY, tempE);

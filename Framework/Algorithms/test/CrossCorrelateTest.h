@@ -91,10 +91,13 @@ public:
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inWS);
 
     // test that the expected peak of crossCorrelateTestData is correct
+    // but also check for the expected/not expected existence of other peaks
+    // perhaps traversal is unnecessary?
     const auto yVector = outWS->y(0);
+    const auto xVector = outWS->x(0);
     const int yLength = (int)yVector.size();
     double peakVal = -DBL_MAX;
-    int peakIndex = std::nan("");
+    int peakIndex = 0;
     for (int i = 0; i < yLength; ++i) {
       if (yVector[i] > peakVal) {
         peakVal = yVector[i];
@@ -104,6 +107,7 @@ public:
 
     // if the peak index matches up then we are good.
     TS_ASSERT_EQUALS(peakIndex, yLength / 2);
+    TS_ASSERT_EQUALS(peakIndex, xVector[B2BEXP_POSITION_220]);
   }
 
   void testInputXLength2() {
@@ -189,7 +193,7 @@ private:
       ws->setBinEdges(spectrumIndex, xEdges);
       ws->setCounts(spectrumIndex, evaluateFunction(compositefunction, xValues));
     }
-
+    ws->rebuildSpectraMapping();
     return ws;
   }
 
@@ -199,9 +203,7 @@ private:
       alg.initialize();
     alg.setChild(true);
     alg.setProperty("OutputWorkspace", "outWS");
-    alg.setProperty("ReferenceSpectra", 0);
-    alg.setProperty("WorkspaceIndexMin", 0);
-    alg.setProperty("WorkspaceIndexMax", 1);
+    alg.setProperty("WorkspaceIndexMax", 4);
     alg.setProperty("XMin", xmin);
     alg.setProperty("XMax", xmax);
   }
