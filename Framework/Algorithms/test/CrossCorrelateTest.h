@@ -87,8 +87,8 @@ public:
     auto inputWS = makeFakeWorkspace3Peaks(PeakShapeEnum::GAUSSIAN);
     TS_ASSERT(inputWS != nullptr);
 
-    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, inputWS, 0.0, 4.0, 5);
-    const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inWS);
+    setupAlgorithm(alg, 0.0, 4.0, inputWS, 5);
+    const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inputWS);
 
     // test that the expected peak of crossCorrelateTestData is correct
     // but also check for the expected/not expected existence of other peaks
@@ -214,22 +214,20 @@ private:
     // create the workspace
     const MatrixWorkspace_sptr inWS = makeFakeWorkspace();
 
-    setupAlgorithmPropsBasic(alg, xmin, xmax);
-    alg.setProperty("InputWorkspace", inWS);
+    setupAlgorithm(alg, xmin, xmax, inWS);
 
     return inWS;
   }
 
   // Initialise the algorithm and set the properties, using the provided ws as input
-  MatrixWorkspace_const_sptr setupAlgorithm(CrossCorrelate &alg, const MatrixWorkspace_sptr inWS, const double xmin,
-                                            const double xmax, const double maxDSpaceShift) {
+  void setupAlgorithm(CrossCorrelate &alg, const double xmin, const double xmax, const MatrixWorkspace_sptr inWS,
+                      const double maxDSpaceShift = 0.) {
 
     // create the workspace
     setupAlgorithmPropsBasic(alg, xmin, xmax);
     alg.setProperty("InputWorkspace", inWS);
-    alg.setProperty("MaxDspaceShift", maxDSpaceShift);
-
-    return inWS;
+    if (maxDSpaceShift > 0.)
+      alg.setProperty("MaxDspaceShift", maxDSpaceShift);
   }
 
   // Run the algorithm and do some basic checks. Returns the output workspace.
