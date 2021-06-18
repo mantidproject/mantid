@@ -132,12 +132,14 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_view.get_selection.return_value = {"ws1": []}
         self.m_view.get_spectrum_slider_position.return_value = 10
         self.presenter._update_hold_button()
-        self.m_view.check_hold_button.assert_called_once_with(False)
+        self.m_view.set_hold_button_text.assert_called_once_with(
+                self.presenter.HOLD_BUTTON_TEXT_UNCHECKED)
         self.m_view.reset_mock()
         self.m_view.get_selection.return_value = {"ws2": []}
         self.m_view.get_spectrum_slider_position.return_value = 2
         self.presenter._update_hold_button()
-        self.m_view.check_hold_button.assert_called_once_with(True)
+        self.m_view.set_hold_button_text.assert_called_once_with(
+                self.presenter.HOLD_BUTTON_TEXT_CHECKED)
 
     def test_update_list(self):
         self.m_model.get_workspaces.return_value = ["ws1", "ws2", "ws5"]
@@ -246,8 +248,8 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_model.set_spectrum_mode.assert_called_once()
         self.presenter._update_list.assert_called_once()
         self.presenter._update_plot.assert_called_once()
-        self.m_view.set_selection.assert_called_once_with({"ws1": [1],
-                                                           "ws2": [2]})
+        self.m_view.set_selection.assert_called_once_with({"ws1": [10],
+                                                           "ws2": [10]})
         self.m_view.get_mode.return_value = self.presenter.BIN_MODE_TEXT
         self.presenter._on_hold()
         self.m_model.set_bin_mode.assert_called_once()
@@ -266,14 +268,18 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter._update_plot.assert_called_once()
         self.presenter._update_spectrum_slider.assert_called_once()
 
-    def test_on_hold_button_toggled(self):
+    def test_on_hold_button_clicked(self):
         self.presenter._on_hold = mock.Mock()
         self.presenter._on_un_hold = mock.Mock()
-        self.presenter.on_hold_button_toggled(True)
-        self.presenter._on_hold.assert_called_once()
-        self.presenter._on_un_hold.assert_not_called
-        self.presenter.on_hold_button_toggled(False)
+        self.m_view.get_hold_button_text = mock.Mock()
+        self.m_view.get_hold_button_text.return_value = \
+            self.presenter.HOLD_BUTTON_TEXT_CHECKED
+        self.presenter.on_hold_button_clicked()
         self.presenter._on_un_hold.assert_called_once()
+        self.m_view.get_hold_button_text.return_value = \
+            self.presenter.HOLD_BUTTON_TEXT_UNCHECKED
+        self.presenter.on_hold_button_clicked()
+        self.presenter._on_hold.assert_called_once()
 
     def test_on_mode_changed(self):
         self.presenter._update_spectrum_slider = mock.Mock()
