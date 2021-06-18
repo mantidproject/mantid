@@ -97,13 +97,23 @@ public:
     auto inputWS = makeFakeWorkspace3Peaks();
     TS_ASSERT(inputWS != nullptr);
 
-    test_data.print_workspace();
-
-    TS_ASSERT_LESS_THAN(2, test_data.get_workspace()->y(0).size());
-    TS_ASSERT_EQUALS(test_data.get_workspace()->y(0).size(), test_data.get_workspace()->x(0).size() - 1);
-    TS_ASSERT_EQUALS(test_data.get_workspace()->y(0).size(), test_data.get_workspace()->e(0).size())
-    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, test_data.get_workspace(), 0.0, 4.0, 5);
+    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, inputWS, 0.0, 4.0, 5);
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inWS);
+
+    // test that the expected peak of crossCorrelateTestData is correct
+    const auto yVector = outWS->y(0);
+    const int yLength = (int)yVector.size();
+    double peakVal = -DBL_MAX;
+    int peakIndex = std::nan("");
+    for (int i = 0; i < yLength; ++i) {
+      if (yVector[i] > peakVal) {
+        peakVal = yVector[i];
+        peakIndex = i;
+      }
+    }
+
+    // if the peak index matches up then we are good.
+    TS_ASSERT_EQUALS(peakIndex, yLength / 2);
   }
 
   void testInputXLength2() {
@@ -218,8 +228,7 @@ private:
     return inWS;
   }
 
-  // Initialise the algorithm and set the properties. Creates a fake workspace
-  // for the input and returns it.
+  // Initialise the algorithm and set the properties, using the provided ws as input
   MatrixWorkspace_const_sptr setupAlgorithm(CrossCorrelate &alg, const MatrixWorkspace_sptr inWS, const double xmin,
                                             const double xmax, const double maxDSpaceShift) {
 

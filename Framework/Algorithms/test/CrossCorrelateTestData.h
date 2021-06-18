@@ -8,6 +8,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAlgorithms/ConvertToHistogram.h"
 #include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidKernel/System.h"
@@ -324,6 +325,20 @@ void CrossCorrelateTestData::print_workspace() {
   }
 }
 
+MatrixWorkspace_sptr convertToHistogram(const MatrixWorkspace_sptr inWS) {
+  Algorithms::ConvertToHistogram alg;
+
+  // setup alg
+  alg.initialize();
+  alg.setRethrows(true);
+  alg.setProperty("InputWorkspace", inWS);
+  alg.setProperty("OutputWorkspace", "outWS");
+
+  // run alg
+  alg.execute();
+  return alg.getProperty("OutputWorkspace");
+}
+
 CrossCorrelateTestData::CrossCorrelateTestData(std::string function_specifier, int domain_radius,
                                                std::initializer_list<class TransformSpecifier> l)
     : domain_radius(domain_radius), num_functions(l.size() + 1) {
@@ -349,8 +364,6 @@ CrossCorrelateTestData::CrossCorrelateTestData(std::string function_specifier, i
 
   std::vector<double> errorDomain(co_domain.size(), 0.0);
   workspace->mutableE(0).assign(errorDomain.begin(), errorDomain.end());
-
-  // workspace = convertToHistogram(workspace);
 
   /* iterate through the initializer list and handle all the objects */
   int workspace_index = 1;
@@ -380,4 +393,5 @@ CrossCorrelateTestData::CrossCorrelateTestData(std::string function_specifier, i
   }
 
   workspace->getAxis(0)->setUnit("dSpacing");
+  // workspace = convertToHistogram(workspace);
 }
