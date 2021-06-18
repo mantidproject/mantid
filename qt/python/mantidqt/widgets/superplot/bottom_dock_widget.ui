@@ -35,12 +35,6 @@
       <property name="toolTip">
        <string>Click hold or press Space to persist (hold) or remove (unhold) a curve in the plot</string>
       </property>
-      <property name="text">
-       <string>Hold</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
      </widget>
     </item>
     <item row="1" column="4">

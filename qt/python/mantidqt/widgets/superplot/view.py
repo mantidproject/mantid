@@ -352,17 +352,23 @@ class SuperplotView(QWidget):
             nums.append(ws_item.child(i).get_spectrum_index())
         return nums
 
-    def check_hold_button(self, state):
+    def set_hold_button_text(self, text):
         """
-        Set the check state of the hold button. This function does not trigger
-        the button signals.
+        Set the text of the hold button.
 
         Args:
-            state (bool): check state
+            text (str): text
         """
-        self._bottom_view.holdButton.blockSignals(True)
-        self._bottom_view.holdButton.setChecked(state)
-        self._bottom_view.holdButton.blockSignals(False)
+        self._bottom_view.holdButton.setText(text)
+
+    def get_hold_button_text(self):
+        """
+        Get the text of the hold button.
+
+        Returns:
+            str: text
+        """
+        return self._bottom_view.holdButton.text()
 
     def set_spectrum_disabled(self, state):
         """
