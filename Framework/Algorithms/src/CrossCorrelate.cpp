@@ -120,15 +120,13 @@ void CrossCorrelate::exec() {
   // Indexes of all spectra in range
   std::vector<size_t> indexes(boost::make_counting_iterator(wsIndexMin), boost::make_counting_iterator(wsIndexMax + 1));
 
-  std::ostringstream message;
   if (numSpectra == 0) {
-    message << "No Workspaces in range between" << wsIndexMin << " and " << wsIndexMax;
+    std::ostringstream message;
+    message << "No spectra in range between" << wsIndexMin << " and " << wsIndexMax;
     throw std::runtime_error(message.str());
   }
   // Output messageage information
-  message << "There are " << numSpectra << " Workspaces in the range\n";
-  g_log.information(message.str());
-  message.str("");
+  g_log.information() << "There are " << numSpectra << " spectra in the range\n";
 
   // checdataIndex that the data range specified madataIndexes sense
   if (xmin >= xmax)
@@ -157,9 +155,7 @@ void CrossCorrelate::exec() {
   std::vector<double> referenceEVector(referenceSpectraE.cbegin() + rangeStartCorrection,
                                        referenceSpectraE.cbegin() + (rangeEndCorrection - 1));
 
-  message << "min max " << referenceXVector.front() << " " << referenceXVector.back();
-  g_log.information(message.str());
-  message.str("");
+  g_log.information() << "min max " << referenceXVector.front() << " " << referenceXVector.back() << '\n';
 
   // Now start the real stuff
   // Create a 2DWorkspace that will hold the result
