@@ -67,7 +67,7 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
     rbParams[2] = xmax;
     if ((rbParams[1] < 0.) && (xmin < 0.) && (xmax > 0.)) {
       std::stringstream msg;
-      msg << "Cannot create logorithmic binning that changes sign (xmin=" << xmin << ", xmax=" << xmax << ")";
+      msg << "Cannot create logarithmic binning that changes sign (xmin=" << xmin << ", xmax=" << xmax << ")";
       throw std::runtime_error(msg.str());
     }
   }
@@ -89,31 +89,27 @@ void Rebin::init() {
 
   declareProperty(std::make_unique<ArrayProperty<double>>("Params", std::make_shared<RebinParamsValidator>()),
                   "A comma separated list of first bin boundary, width, last bin boundary. "
-                  "Optionally "
-                  "this can be followed by a comma and more widths and last boundary "
-                  "pairs. "
-                  "Optionally this can also be a single number, which is the bin width. "
-                  "In this case, the boundary of binning will be determined by minimum and "
-                  "maximum TOF "
-                  "values among all events, or previous binning boundary, in case of event "
-                  "Workspace, or "
-                  "non-event Workspace, respectively. Negative width values indicate "
-                  "logarithmic binning. ");
+                  "Optionally this can be followed by a comma and more widths and last boundary pairs."
+                  "Optionally this can also be a single number, which is the bin width. In this case, the boundary of "
+                  "binning will be determined by minimum and maximum TOF values among all events, or previous binning "
+                  "boundary, in case of event Workspace, or non-event Workspace, respectively."
+                  "Negative width values indicate logarithmic binning.");
 
   declareProperty("PreserveEvents", true,
-                  "Keep the output workspace as an EventWorkspace, "
-                  "if the input has events. If the input and output EventWorkspace "
-                  "names are the same, only the X bins are set, which is very quick. If "
-                  "false, "
-                  "then the workspace gets converted to a Workspace2D histogram.");
+                  "Keep the output workspace as an EventWorkspace, if the input has events. If the input and output "
+                  "EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the "
+                  "workspace gets converted to a Workspace2D histogram.");
 
-  declareProperty("FullBinsOnly", false, "Omit the final bin if it's width is smaller than the step size");
+  declareProperty("FullBinsOnly", false, "Omit the final bin if its width is smaller than the step size");
 
   declareProperty("IgnoreBinErrors", false,
-                  "Ignore errors related to "
-                  "zero/negative bin widths in "
-                  "input/output workspaces. When ignored, the signal and "
-                  "errors are set to zero");
+                  "Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the "
+                  "signal and errors are set to zero");
+
+  declareProperty("UseReverseLogarithmic", false,
+                  "For logarithmic intervals, the splitting starts from the end and go back to the start, ie the bins "
+                  "are bigger at the start and exponentially reduces until they reach the end. For these bins, the "
+                  "FullBinsOnly flag is ignored.");
 }
 
 /** Executes the rebin algorithm
@@ -141,11 +137,16 @@ void Rebin::exec() {
   const auto histnumber = static_cast<int>(inputWS->getNumberHistograms());
 
   bool fullBinsOnly = getProperty("FullBinsOnly");
+  bool useReverseLog = getProperty("UseReverseLogarithmic");
+
+  double xmin = 0.;
+  double xmax = 0.;
+  inputWS->getXMinMax(xmin, xmax);
 
   HistogramData::BinEdges XValues_new(0);
   // create new output X axis
-  static_cast<void>(
-      VectorHelper::createAxisFromRebinParams(rbParams, XValues_new.mutableRawData(), true, fullBinsOnly));
+  static_cast<void>(VectorHelper::createAxisFromRebinParams(rbParams, XValues_new.mutableRawData(), true, fullBinsOnly,
+                                                            xmin, xmax, useReverseLog));
 
   // Now, determine if the input workspace is actually an EventWorkspace
   EventWorkspace_const_sptr eventInputWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
