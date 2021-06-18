@@ -52,9 +52,9 @@ At least two separate measurements along the same axis with opposite spin orient
 
 .. math::
 
-      N = 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} - \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}}
+      N &= \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} - \frac{1}{2} \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}}
 
-      I = 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} - \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
+      I &= \frac{3}{2} \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}}
 
 
 In this case, the magnetic cross-section cannot be separated from data.
