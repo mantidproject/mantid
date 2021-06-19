@@ -88,7 +88,7 @@ public:
         // larger than epsilon and relative difference less than epsilon
         equal = true;
         less = false;
-      } else if (fabs(mCoordinates[i]) < 1E-7 && diff < 1E-7) {
+      } else if (fabs(mCoordinates[i]) < 1E-7 && fabs(diff) < 1E-7) {
         // less than epsilon and absolute difference less than epsilon
         equal = true;
         less = false;
@@ -124,45 +124,45 @@ public:
 
   bool operator()(const SimpleMDEvent &lx, const SimpleMDEvent &rx) const { return lx < rx; }
 
-  bool operator>(const SimpleMDEvent &event2) {
+  //  bool operator>(const SimpleMDEvent &event2) {
 
-    // compare coordinates
-    size_t numdirs = mCoordinates.size();
-    for (size_t i = 0; i < numdirs; ++i) {
-      if (mCoordinates[i] <= event2.mCoordinates[i])
-        return false;
-    }
+  //    // compare coordinates
+  //    size_t numdirs = mCoordinates.size();
+  //    for (size_t i = 0; i < numdirs; ++i) {
+  //      if (mCoordinates[i] <= event2.mCoordinates[i])
+  //        return false;
+  //    }
 
-    // signal
-    if (mSignal <= event2.mSignal)
-      return false;
+  //    // signal
+  //    if (mSignal <= event2.mSignal)
+  //      return false;
 
-    // error
-    if (mError <= event2.mError)
-      return false;
+  //    // error
+  //    if (mError <= event2.mError)
+  //      return false;
 
-    return true;
-  }
+  //    return true;
+  //  }
 
-  bool operator==(const SimpleMDEvent &event2) {
+  //  bool operator==(const SimpleMDEvent &event2) {
 
-    // compare coordinates
-    size_t numdirs = mCoordinates.size();
-    for (size_t i = 0; i < numdirs; ++i) {
-      if (mCoordinates[i] != event2.mCoordinates[i])
-        return false;
-    }
+  //    // compare coordinates
+  //    size_t numdirs = mCoordinates.size();
+  //    for (size_t i = 0; i < numdirs; ++i) {
+  //      if (mCoordinates[i] != event2.mCoordinates[i])
+  //        return false;
+  //    }
 
-    // signal
-    if (mSignal != event2.mSignal)
-      return false;
+  //    // signal
+  //    if (mSignal != event2.mSignal)
+  //      return false;
 
-    // error
-    if (mError != event2.mError)
-      return false;
+  //    // error
+  //    if (mError != event2.mError)
+  //      return false;
 
-    return true;
-  }
+  //    return true;
+  //  }
 
   SimpleMDEvent &operator=(const SimpleMDEvent &event2) {
     // coordiate
@@ -397,8 +397,8 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
 
             // convert MDEvents vectors to SimpleMDEvent vectors for comparison
             for (size_t i = 0; i < events1.size(); i++) {
-              std::vector<float> centers1;
-              std::vector<float> centers2;
+              std::vector<float> centers1(nd);
+              std::vector<float> centers2(nd);
               for (size_t d = 0; d < nd; d++) {
                 centers1.push_back(events1[i].getCenter(d));
                 centers2.push_back(events2[i].getCenter(d));

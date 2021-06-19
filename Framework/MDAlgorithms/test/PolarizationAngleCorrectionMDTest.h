@@ -88,7 +88,7 @@ public:
     // Verify
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
 
-    bool compare_events(false);
+    bool compare_events(true);
     bool equals = compareMDEvents(outputname, mGoldCorrectedQLabWSName, compare_events);
     TS_ASSERT(equals);
 
@@ -118,7 +118,7 @@ public:
     // Verify
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
 
-    bool equals = compareMDEvents(outputname, mGoldCorrectedQSampleWSName, false);
+    bool equals = compareMDEvents(outputname, mGoldCorrectedQSampleWSName, true);
     TS_ASSERT(equals);
 
     // Clean up
@@ -148,7 +148,7 @@ public:
     // Verify
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
 
-    bool equals = compareMDEvents(outputname, mGoldCorrectedQSampleMergedWSName, false);
+    bool equals = compareMDEvents(outputname, mGoldCorrectedQSampleMergedWSName, true);
     TS_ASSERT(equals);
 
     // clean up
