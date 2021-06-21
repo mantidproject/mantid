@@ -33,6 +33,49 @@ class DirectILLAutoProcess(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
+        run_no_err = 'Wrong number of {0} runs: {1}. Provide one or as many as '\
+                     'sample runs: {2}.'
+        runs_sample = len(self.getPropertyValue('Runs'))
+        if not self.getProperty('EmptyContainerWorkspace').isDefault:
+            runs_container = mtd[self.getPropertyValue('EmptyContainerWorkspace')].getNumberOfEntries()
+            if runs_container != 1 and runs_container > runs_sample:
+                issues['BeamRuns'] = run_no_err.format('EmptyContainerWorkspace', runs_container, runs_sample)
+
+        grouping_err_msg = 'Only one grouping method can be specified.'
+        if self.getProperty('DetectorGrouping').isDefault:
+            if not self.getProperty('GroupPixelsBy').isDefault \
+                    and not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
+                issues['GroupPixelsBy'] = grouping_err_msg
+                issues[common.PROP_GROUPING_ANGLE_STEP] = grouping_err_msg
+        else:
+            if not self.getProperty('GroupPixelsBy').isDefault:
+                issues['DetectorGrouping'] = grouping_err_msg
+                issues['GroupPixelsBy'] = grouping_err_msg
+            if not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
+                issues['DetectorGrouping'] = grouping_err_msg
+                issues[common.PROP_GROUPING_ANGLE_STEP] = grouping_err_msg
+
+        if self.getProperty('IncidentEnergyCalibration').value and self.getProperty('IncidentEnergy').isDefault:
+            issues['IncidentEnergy'] = 'Please provide a value for the incident energy in meV.'
+
+        if self.getProperty('ElasticChannelCalibration').value and self.getProperty('ElasticChannelEnergy').isDefault:
+            issues['ElasticChannelEnergy'] = 'Please provide a value for the elastic channel energy in meV.'
+
+        if self.getProperty('MaskWithVanadium').value and self.getProperty('VanadiumWorkspace').isDefault:
+            issues['VanadiumWorkspace'] = 'Please provide a vanadium input for a masking reference.'
+
+        if self.getPropertyValue('AbsorptionCorrection') != 'None':
+            if self.getProperty('SampleMaterial').isDefault:
+                issues['SampleMaterial'] = 'Please define sample material.'
+            if self.getProperty('SampleShape').isDefault:
+                issues['SampleShape'] = 'Please define sample shape.'
+            if self.getProperty('SampleGeometry').isDefault:
+                issues['SampleGeometry'] = 'Please define sample geometry.'
+            if self.getProperty('ContainerMaterial').isDefault:
+                issues['ContainerMaterial'] = 'Please define container material.'
+            if self.getProperty('ContainerGeometry').isDefault:
+                issues['ContainerGeometry'] = 'Please define container geometry.'
+
         return issues
 
     def PyInit(self):
