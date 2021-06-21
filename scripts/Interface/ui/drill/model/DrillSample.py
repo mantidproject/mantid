@@ -15,6 +15,21 @@ from .DrillParameter import DrillParameter
 class DrillSample(QObject):
 
     """
+    Status of sample when its processing is done.
+    """
+    STATUS_PROCESSED = "processing_done"
+
+    """
+    Status of the sample when its processing ended with an error.
+    """
+    STATUS_ERROR = "processing_error"
+
+    """
+    Status of the sample when its processing is running.
+    """
+    STATUS_PENDING = "processing"
+
+    """
     Processing parameters.
     """
     _parameters = None
@@ -49,22 +64,12 @@ class DrillSample(QObject):
     """
     _master = None
 
+    _status = None
+
     """
     Controller for the parameters.
     """
     _controller = None
-
-    """
-    Triggered when the processing of the sample started.
-    """
-    processStarted = Signal()
-
-    """
-    Triggered when the processing of the sample finished.
-    Args:
-        int: return code. 0: success; -1: error
-    """
-    processDone = Signal(int)
 
     """
     Sent if the group changed.
@@ -77,6 +82,11 @@ class DrillSample(QObject):
         DrillParameter: the new parameter
     """
     newParameter = Signal(DrillParameter)
+
+    """
+    Signals that the status of the sample changed.
+    """
+    statusChanged = Signal()
 
     def __init__(self, index):
         """
@@ -224,8 +234,11 @@ class DrillSample(QObject):
         """
         parameter = DrillParameter(name)
         parameter.setController(self._controller)
+        parameter.valueChanged.connect(self.onParameterChanged)
         self._parameters[name] = parameter
         self.newParameter.emit(parameter)
+        self._status = None
+        self.statusChanged.emit()
         return parameter
 
     def delParameter(self, name):
@@ -237,6 +250,16 @@ class DrillSample(QObject):
         """
         if name in self._parameters:
             del self._parameters[name]
+            self._status = None
+            self.statusChanged.emit()
+
+    def onParameterChanged(self):
+        """
+        Triggered when a parameter changed its value. This function udpates the
+        sample status.
+        """
+        self._status = None
+        self.statusChanged.emit()
 
     def getParameter(self, name):
         """
@@ -271,7 +294,8 @@ class DrillSample(QObject):
         """
         logger.information("Starting of sample {0} processing"
                            .format(self._index + 1))
-        self.processStarted.emit()
+        self._status = self.STATUS_PENDING
+        self.statusChanged.emit()
 
     def onProcessSuccess(self):
         """
@@ -279,7 +303,8 @@ class DrillSample(QObject):
         """
         logger.information("Processing of sample {0} finished with sucess"
                            .format(self._index + 1))
-        self.processDone.emit(0)
+        self._status = self.STATUS_PROCESSED
+        self.statusChanged.emit()
 
     def onProcessError(self, msg):
         """
@@ -290,4 +315,24 @@ class DrillSample(QObject):
         """
         logger.error("Error while processing sample {0}: {1}"
                      .format(self._index + 1, msg))
-        self.processDone.emit(-1)
+        self._status = self.STATUS_ERROR
+        self.statusChanged.emit()
+
+    def setStatus(self, status):
+        """
+        Set the sample status. Must be one of STATUS_PROCESSED, STATUS_ERROR,
+        STATUS_PENDING or None.
+
+        Args:
+            str: sample status
+        """
+        self._status = status
+
+    def getStatus(self):
+        """
+        Get the sample status.
+
+        Returns:
+            str: sample status
+        """
+        return self._status
