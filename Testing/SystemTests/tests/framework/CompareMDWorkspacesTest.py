@@ -14,59 +14,77 @@ import systemtesting
 from mantid.simpleapi import *
 
 
-# class CompareMDWorkspacesTest(systemtesting.MantidSystemTest):
-#
-#     def requiredFiles(self):
-#         return []
-#
-#     def requiredMemoryMB(self):
-#         return 4000
-#
-#     def cleanup(self):
-#         if os.path.exists(self.nxspeFile):
-#             os.remove(self.nxspeFile)
-#         if os.path.exists(self.vanFile1):
-#             os.remove(self.vanFile1)
-#         if os.path.exists(self.vanFile0):
-#             os.remove(self.vanFile0)
-#         return True
-#
-#     def runTest(self):
-#
-#         ev_ws_1 = CreateSampleWorkspace(WorkspaceType='Event',
-#                                       Function='Flat background',
-#                                       XUnit='TOF',
-#                                       XMin=-9,
-#                                       XMax=9,
-#                                       BinWidth=1,
-#                                       NumEvents=54,
-#                                       NumBanks=1,
-#                                       BankPixelWidth=1)
-#         ev_ws_2 = ChangeBinOffset(InputWorkspace=ev_ws_1, Offset=0.1)
-#
-#         md_1 = ConvertToMD(InputWorkspace=ev_ws_1,
-#                            dEAnalysisMode='Elastic',
-#                            MinValues='-10',
-#                            MaxValues='10',
-#                            SplitInto='1',
-#                            MaxRecursionDepth=1)
-#
-#         md_2 = ConvertToMD(InputWorkspace=ev_ws_2,
-#                            dEAnalysisMode='Elastic',
-#                            MinValues='-10',
-#                            MaxValues='10',
-#                            SplitInto='1',
-#                            MaxRecursionDepth=1)
-#
-#         r = CompareMDWorkspaces(Workspace1='md_1', Workspace2='md_2', Tolerance=0.000001, CheckEvents=True, IgnoreBoxID=False)
-#
-#         merged_1 = MergeMD(InputWorkspaces='md_1, md_2', SplitInto=1, MaxRecursionDepth=1)
-#         merged_2 = MergeMD(InputWorkspaces='md_2, md_1', SplitInto=1, MaxRecursionDepth=1)
-#         res_ok = CompareMDWorkspaces(Workspace1=merged_1, Workspace2=merged_2, CheckEvents=True)
-#         print(res_ok)
-#         merged_3 = md_1+md_1
-#         res_bad = CompareMDWorkspaces(Workspace1=merged_1, Workspace2=merged_3, CheckEvents=True, Tolerance=1E-4)
-#         print(res_bad)
+class CompareMDWorkspacesTest(systemtesting.MantidSystemTest):
+
+    compare_result_1 = ''
+    compare_result_2 = ''
+    compare_result_3 = ''
+
+    def requiredFiles(self):
+        return []
+
+    def requiredMemoryMB(self):
+        return 4000
+
+    def cleanup(self):
+
+        for ws_name in ['md_1', 'md_2', 'ev_ws_1', 'ev_ws_2']:
+            if mtd.doesExist(ws_name):
+                mtd.remove(ws_name)
+
+        return True
+
+    def runTest(self):
+        # create saple workspace 1
+        ev_ws_1 = CreateSampleWorkspace(WorkspaceType='Event',
+                                        Function='Flat background',
+                                        XUnit='TOF',
+                                        XMin=-9,
+                                        XMax=9,
+                                        BinWidth=1,
+                                        NumEvents=54,
+                                        NumBanks=1,
+                                        BankPixelWidth=1)
+
+        md_1 = ConvertToMD(InputWorkspace=ev_ws_1,
+                           dEAnalysisMode='Elastic',
+                           MinValues='-10',
+                           MaxValues='10',
+                           SplitInto='1',
+                           MaxRecursionDepth=1)
+
+        # create saple workspace 1
+        ev_ws_2 = ChangeBinOffset(InputWorkspace=ev_ws_1, Offset=0.1)
+
+        md_2 = ConvertToMD(InputWorkspace=ev_ws_2,
+                           dEAnalysisMode='Elastic',
+                           MinValues='-10',
+                           MaxValues='10',
+                           SplitInto='1',
+                           MaxRecursionDepth=1)
+        print(md_2)
+
+        # compare md1 and md2
+        self.compare_result_1 = CompareMDWorkspaces(Workspace1='md_1', Workspace2='md_2',
+                                                    Tolerance=0.000001, CheckEvents=True,
+                                                    IgnoreBoxID=False)
+
+        # merge some MD workspaces
+        merged_1 = MergeMD(InputWorkspaces='md_1, md_2', SplitInto=1, MaxRecursionDepth=1)
+        merged_2 = MergeMD(InputWorkspaces='md_2, md_1', SplitInto=1, MaxRecursionDepth=1)
+
+        # compare
+        self.compare_result_2 = CompareMDWorkspaces(Workspace1=merged_1, Workspace2=merged_2, CheckEvents=True)
+
+        # create merge3
+        merged_3 = md_1 + md_1
+        # compare
+        self.compare_reuslt_3 = CompareMDWorkspaces(Workspace1=merged_1, Workspace2=merged_3, CheckEvents=True,
+                                                    Tolerance=1E-7)
+
+    def validate(self):
+        self.assertTrue(self.compare_result_1 is not None)
+        self.assertTrue(self.compare_result_1.Equals)
 
 
 class ARCSReductionTest(systemtesting.MantidSystemTest):
