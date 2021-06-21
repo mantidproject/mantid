@@ -317,6 +317,20 @@ bool FqFitModel::isMultiFit() const {
   return !allWorkspacesEqual(getWorkspace(TableDatasetIndex{0}));
 }
 
+std::vector<std::string> FqFitModel::getWidths(TableDatasetIndex dataIndex) const {
+  const auto parameters = findFqFitParameters(dataIndex);
+  if (parameters != m_fqFitParameters.end())
+    return parameters->second.widths;
+  return std::vector<std::string>();
+}
+
+std::vector<std::string> FqFitModel::getEISF(TableDatasetIndex dataIndex) const {
+  const auto parameters = findFqFitParameters(dataIndex);
+  if (parameters != m_fqFitParameters.end())
+    return parameters->second.eisf;
+  return std::vector<std::string>();
+}
+
 boost::optional<std::size_t> FqFitModel::getWidthSpectrum(std::size_t widthIndex, TableDatasetIndex dataIndex) const {
   const auto parameters = findFqFitParameters(dataIndex);
   if (parameters != m_fqFitParameters.end() && parameters->second.widthSpectra.size() > widthIndex)

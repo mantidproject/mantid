@@ -26,10 +26,12 @@ public:
   void addWorkspace(const std::string &workspaceName, const int &spectrum_index);
   void addWorkspace(const std::string &workspaceName) override;
   void removeWorkspace(TableDatasetIndex index) override;
+
   bool isMultiFit() const override;
 
   std::string getFitParameterName(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
-
+  std::vector<std::string> getWidths(TableDatasetIndex dataIndex) const;
+  std::vector<std::string> getEISF(TableDatasetIndex dataIndex) const;
   boost::optional<std::size_t> getWidthSpectrum(std::size_t widthIndex, TableDatasetIndex dataIndex) const;
   boost::optional<std::size_t> getEISFSpectrum(std::size_t eisfIndex, TableDatasetIndex dataIndex) const;
   void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex, bool single = true);

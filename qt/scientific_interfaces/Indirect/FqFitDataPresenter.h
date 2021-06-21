@@ -30,9 +30,12 @@ public:
 private slots:
   void hideParameterComboBoxes();
   void showParameterComboBoxes();
-  void updateAvailableParameters(FqFitParameters &parameters);
+  /* void updateAvailableParameters(FqFitParameters &parameters);
+   void updateAvailableParameters(const QString &type, FqFitParameters &parameters);*/
+  void updateAvailableParameters();
+  void updateAvailableParameters(const QString &type);
+  // void updateAvailableParameterTypes();
   void updateAvailableParameterTypes(FqFitParameters &parameters);
-  void updateAvailableParameters(const QString &type, FqFitParameters &parameters);
   void updateParameterSelectionEnabled();
   void setParameterLabel(const QString &parameter);
   void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type);
@@ -41,7 +44,8 @@ private slots:
   void updateActiveDataIndex();
   void updateActiveDataIndex(int index);
   void setSingleModelSpectrum(int index);
-  void handleParameterTypeChanged(const QString &parameter, FqFitParameters &parameter1);
+  /* void handleParameterTypeChanged(const QString &parameter, FqFitParameters &parameter1);*/
+  void handleParameterTypeChanged(const QString &parameter);
   void handleSpectrumSelectionChanged(int parameterIndex);
   void handleMultipleInputSelected();
   void handleSingleInputSelected();

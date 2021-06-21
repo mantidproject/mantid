@@ -26,7 +26,7 @@ FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *
   connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveDataIndex()));
 
   connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(handleParameterTypeChanged(const QString &, FqFitParameters parameter)));
+          SLOT(handleParameterTypeChanged(const QString &)));
   connect(cbParameter, SIGNAL(currentIndexChanged(int)), this, SLOT(handleSpectrumSelectionChanged(int)));
 
   updateParameterSelectionEnabled();
@@ -41,7 +41,7 @@ void FqFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
   auto parameters = m_fqFitModel->createFqFitParameters(workspace.get());
   setModelWorkspace(workspaceName);
   updateAvailableParameterTypes(parameters);
-  updateAvailableParameters(parameters);
+  updateAvailableParameters();
   updateParameterSelectionEnabled();
   setModelSpectrum(0);
   emit dataChanged();
@@ -81,15 +81,13 @@ void FqFitDataPresenter::updateActiveDataIndex() { m_dataIndex = m_fqFitModel->g
 
 void FqFitDataPresenter::updateActiveDataIndex(int index) { m_dataIndex = index; }
 
-void FqFitDataPresenter::updateAvailableParameters(FqFitParameters &parameters) {
-  updateAvailableParameters(m_cbParameterType->currentText(), parameters);
-}
+void FqFitDataPresenter::updateAvailableParameters() { updateAvailableParameters(m_cbParameterType->currentText()); }
 
-void FqFitDataPresenter::updateAvailableParameters(const QString &type, FqFitParameters &parameters) {
+void FqFitDataPresenter::updateAvailableParameters(const QString &type) {
   if (type == "Width")
-    setAvailableParameters(parameters.widths);
+    setAvailableParameters(m_fqFitModel->getWidths(TableDatasetIndex{0}));
   else if (type == "EISF")
-    setAvailableParameters(parameters.eisf);
+    setAvailableParameters(m_fqFitModel->getEISF(TableDatasetIndex{0}));
   else
     setAvailableParameters({});
 
@@ -120,9 +118,9 @@ void FqFitDataPresenter::setAvailableParameters(const std::vector<std::string> &
 
 void FqFitDataPresenter::setParameterLabel(const QString &parameter) { m_lbParameter->setText(parameter + ":"); }
 
-void FqFitDataPresenter::handleParameterTypeChanged(const QString &parameter, FqFitParameters &parameter1) {
+void FqFitDataPresenter::handleParameterTypeChanged(const QString &parameter) {
   m_lbParameter->setText(parameter + ":");
-  updateAvailableParameters(parameter, parameter1);
+  updateAvailableParameters(parameter);
   emit dataChanged();
   auto dataType = parameter == QString("Width") ? DataType::WIDTH : DataType::EISF;
   m_notifier.notify([&dataType](IFQFitObserver &obs) { obs.updateAvailableFunctions(availableFits.at(dataType)); });

@@ -93,6 +93,20 @@ public:
         "f1.FWHM");
   }
 
+  void test_that_getWidths_will_return_the_width_parameter_names() {
+    addWorkspacesToModel(m_workspace);
+
+    TS_ASSERT_EQUALS(m_model->getWidths(TableDatasetIndex{0})[0], "f1.Width");
+    TS_ASSERT_EQUALS(m_model->getWidths(TableDatasetIndex{0})[1], "f1.FWHM");
+  }
+
+  void test_that_getEISF_will_return_the_EISF_parameter_names() {
+    addWorkspacesToModel(m_workspace);
+
+    TS_ASSERT_EQUALS(m_model->getEISF(TableDatasetIndex{0})[0], "f0.EISF");
+    TS_ASSERT_EQUALS(m_model->getEISF(TableDatasetIndex{0})[1], "f1.EISF");
+  }
+
   void test_that_getWidthSpectrum_will_return_the_width_spectrum_number() {
     addWorkspacesToModel(m_workspace);
 
