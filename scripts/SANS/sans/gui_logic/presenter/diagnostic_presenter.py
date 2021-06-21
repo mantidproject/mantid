@@ -91,3 +91,7 @@ class DiagnosticsPagePresenter:
 
     def on_processing_finished(self):
         self._view.enable_integrals()
+
+    def on_processing_success(self, output):
+        # We don't do anything with this currently
+        pass

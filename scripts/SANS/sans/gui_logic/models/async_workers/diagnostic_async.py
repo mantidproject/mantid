@@ -8,6 +8,7 @@ from mantid import AnalysisDataService
 from mantid.api import AlgorithmPropertyWithValue
 from mantid.simpleapi import SumSpectra, ConvertAxesToRealSpace
 from mantidqt.utils.async_qt_adaptor import IQtAsync, qt_async_task
+from mantidqt.utils.asynchronous import AsyncTaskSuccess
 from sans.algorithm_detail.batch_execution import provide_loaded_data, create_unmanaged_algorithm, add_to_group
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
@@ -31,6 +32,9 @@ class DiagnosticsAsync(IQtAsync):
 
     def finished_cb_slot(self) -> None:
         self._parent_presenter.on_processing_finished()
+
+    def success_cb_slot(self, result: AsyncTaskSuccess) -> None:
+        self._parent_presenter.on_processing_success(output=result.output)
 
     @qt_async_task
     def run_integral(self, integral_ranges, mask, integral, detector, state):
