@@ -25,7 +25,7 @@ class DrillSettingsDialogTest(unittest.TestCase):
         self.mSetting = patch.start()
         self.addCleanup(patch.stop)
 
-        self.dialog = DrillSettingsDialog()
+        self.dialog = DrillSettingsDialog(mock.Mock())
         self.dialog.formLayout = mock.Mock()
 
     def test_init(self):
