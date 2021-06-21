@@ -402,6 +402,8 @@ class DrillModel(QObject):
         """
         sample = self.samples[sampleIndex]
         groupName = sample.getGroupName()
+        if groupName is None:
+            return
         for s in self._getSamplesFromGroup(groupName):
             if s.isMaster():
                 s.setMaster(False)
