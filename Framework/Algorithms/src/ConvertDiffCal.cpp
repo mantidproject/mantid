@@ -98,16 +98,18 @@ double getOffset(const OffsetsWorkspace_const_sptr &offsetsWS, const detid_t det
 }
 
 /**
- * @param d_info - detector info
- * @param offset - d-spacing offset of the detector
- * @param index - index of the detector in the detector info object
+ * @param offsetsWS
+ * @param index
+ * @param spectrumInfo
  * @return The offset adjusted value of DIFC
  */
-double calculateDIFC(Mantid::Geometry::DetectorInfo const &d_info, double offset, size_t index) {
-
+double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t index,
+                     const Mantid::API::SpectrumInfo &spectrumInfo) {
+  const detid_t detid = getDetID(offsetsWS, index);
+  const double offset = getOffset(offsetsWS, detid);
   double twotheta;
   try {
-    twotheta = d_info.twoTheta(index); // we can pass in the internal index too, and d_info
+    twotheta = spectrumInfo.twoTheta(index);
   } catch (std::runtime_error &) {
     // Choose an arbitrary angle if detector 2theta determination fails.
     twotheta = 0.;
@@ -115,7 +117,7 @@ double calculateDIFC(Mantid::Geometry::DetectorInfo const &d_info, double offset
   // the factor returned is what is needed to convert TOF->d-spacing
   // the table is supposed to be filled with DIFC which goes the other way
   const double factor =
-      Mantid::Geometry::Conversion::tofToDSpacingFactor(d_info.l1(), d_info.l2(index), twotheta, offset);
+      Mantid::Geometry::Conversion::tofToDSpacingFactor(spectrumInfo.l1(), spectrumInfo.l2(index), twotheta, offset);
   return 1. / factor;
 }
 
@@ -165,36 +167,48 @@ void ConvertDiffCal::exec() {
     }
   }
 
-  /* iterate through all detectors in the offsets workspace */
+  // create values in the table
+  const size_t numberOfSpectra = offsetsWS->getNumberHistograms();
+  Progress progress(this, 0.0, 1.0, numberOfSpectra);
+
+  const Mantid::API::SpectrumInfo &spectrumInfo = offsetsWS->spectrumInfo();
   Mantid::Geometry::DetectorInfo const &d_info = offsetsWS->detectorInfo();
-  auto const &detector_ids = d_info.detectorIDs();
-  Progress progress(this, 0.0, 1.0, detector_ids.size());
-  for (auto id : detector_ids) {
-    size_t internal_index = d_info.indexOf(id);
+  for (size_t i = 0; i < numberOfSpectra; ++i) {
 
-    /* only update non-masked, non zero-offset entries */
-    double new_offset_value = offsetsWS->getValue(id);
-    if (!d_info.isMasked(internal_index)) {
-      /* check for the detector id in the calibration table */
-      auto row_to_update = id_to_row.find(id);
-      /* if it is found, update it according to a simple linear equation: */
-      if (row_to_update != id_to_row.end()) {
+    /* obtain detector id for this spectra */
+    detid_t detector_id = getDetID(offsetsWS, i);
+    size_t internal_index = d_info.indexOf(detector_id);
+    /* obtain the mask */
+    if (!d_info.isMasked(internal_index))
+    {
+      /* find the detector id's offset value in the offset workspace */
+      double new_offset_value = offsetsWS->getValue(detector_id);
+
+      /* search for it in the table */
+      auto iter = id_to_row.find(detector_id);
+
+      /* if it is found, update the correct row in the output table */
+      if( iter != id_to_row.end() )
+      {
         /* Get the row and update the difc value in the first column */
-        double &value_to_update = configWksp->cell<double>(row_to_update->second, 1);
+        int row_to_update = iter->second;
 
-        value_to_update = value_to_update / (1 + new_offset_value);
+        double &difc_value_to_update = configWksp->cell<double>(row_to_update, 1);
+
+        difc_value_to_update = difc_value_to_update / (1 + new_offset_value);
       }
 
-      /* It was not found: calculate the value as before with calculateDiffc */
-      else {
+      /* value was not found in PreviousCalibration - calculate from experiment's geometry */
+      else
+      {
         API::TableRow newrow = configWksp->appendRow();
-
-        newrow << static_cast<int>(id);
-        newrow << calculateDIFC(d_info, new_offset_value, internal_index);
-        newrow << 0.0;
-        newrow << 0.0;
+        newrow << static_cast<int>(detector_id);
+        newrow << calculateDIFC(offsetsWS, i, spectrumInfo);
+        newrow << 0.; // difa
+        newrow << 0.; // tzero
       }
     }
+
     progress.report();
   }
 
