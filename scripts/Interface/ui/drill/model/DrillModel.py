@@ -385,7 +385,8 @@ class DrillModel(QObject):
             groupName (str): name of the group
         """
         self.ungroupSamples(sampleIndexes)
-        samples = [sample.getIndex() for sample in self._getSamplesFromGroup(groupName)]
+        samples = [sample.getIndex() for sample
+                   in self._getSamplesFromGroup(groupName)]
         samples += sampleIndexes
         self.groupSamples(samples, groupName)
 
