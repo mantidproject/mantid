@@ -14,10 +14,10 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include <Poco/AutoPtr.h>
 #include <Poco/Logger.h>
+#include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
 
 // standard
-#include <filesystem>
 #include <fstream>
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
@@ -64,7 +64,7 @@ public:
     std::string script = "import sys\n"
                          "stdout_old = sys.stdout\n"                          // backup the standard file descriptor
                          "sys.stdout = open('TEMPFILE', 'w', buffering=1)\n"; // redirection, small buffe needed
-    auto tmpFilePath = std::filesystem::temp_directory_path() / "testPySysWriteStdout.txt";
+    auto tmpFilePath = boost::filesystem::temp_directory_path() / "testPySysWriteStdout.txt";
     replaceSubstring(script, "TEMPFILE", tmpFilePath.string());
     PyRun_SimpleString(script.c_str()); // execute the python script
 
@@ -84,7 +84,7 @@ public:
     std::getline(logFile, message);
     TS_ASSERT_EQUALS(message, loggedMessage)
     logFile.close();
-    std::filesystem::remove(tmpFilePath);
+    boost::filesystem::remove(tmpFilePath);
 
     // restore the channel
     Poco::Logger::root().setChannel(channelOld);
