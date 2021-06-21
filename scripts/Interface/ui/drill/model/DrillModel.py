@@ -93,9 +93,7 @@ class DrillModel(QObject):
         self.rundexIO = None
         self.exportModel = None
 
-        # set the instrument and default acquisition mode
         self.tasksPool = DrillAlgorithmPool()
-        self.setInstrument(config['default.instrument'], log=False)
 
         # setup the thread pool
         self.tasksPool.signals.taskStarted.connect(self._onTaskStarted)
