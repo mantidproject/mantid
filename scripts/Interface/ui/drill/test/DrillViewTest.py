@@ -193,28 +193,17 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.eraseCell.assert_has_calls(calls)
 
     def test_addRowAfter(self):
-        # add one row (defautlt value)
         self.view.table.getLastSelectedRow.return_value = 0
-        self.view.add_row_after()
-        self.view.table.getLastRow.assert_not_called()
-        self.view.table.addRow.assert_called_once_with(1)
+        self.view.addRowAfter()
+        self.mPresenter.return_value.onRowAdded.assert_called_once_with(1)
+        pass
 
-        self.view.table.reset_mock()
-        self.view.table.getLastSelectedRow.return_value = -1
-        self.view.table.getLastRow.return_value = 0
-        self.view.add_row_after()
-        self.view.table.getLastSelectedRow.assert_called_once()
-        self.view.table.getLastRow.assert_called_once()
-        self.view.table.addRow.assert_called_once_with(1)
-
-        # add many rows
-        self.view.table.reset_mock()
+    def test_addRowsAdter(self):
+        self.view.table.getLastSelectedRow.return_value = 0
         self.view.nrows = mock.Mock()
-        self.view.nrows.value.return_value = 15
-        self.view.table.getLastSelectedRow.return_value = 0
-        self.view.add_row_after()
-        calls = [mock.call(n) for n in range(1, 16)]
-        self.view.table.addRow.assert_has_calls(calls)
+        self.view.nrows.value.return_value = 10
+        self.view.addRowsAfter()
+        self.mPresenter.assert_called()
 
     def test_delSelectedRows(self):
         # no selection
@@ -340,22 +329,6 @@ class DrillViewTest(unittest.TestCase):
     def test_setRowError(self):
         self.view.setRowError(0)
         self.view.table.setRowBackground.assert_called_once()
-
-    def test_setCellOk(self):
-        self.view.table.rowCount.return_value = 1
-        self.view.columns = ["test"]
-        self.view.setCellOk(1, "test1")
-        self.view.table.removeCellBackground.assert_not_called()
-        self.view.setCellOk(0, "test")
-        self.view.table.removeCellBackground.assert_called_once()
-
-    def test_setCellError(self):
-        self.view.table.rowCount.return_value = 1
-        self.view.columns = ["test"]
-        self.view.setCellError(1, "test1", "")
-        self.view.table.setCellBackground.assert_not_called()
-        self.view.setCellError(0, "test", "")
-        self.view.table.setCellBackground.assert_called_once()
 
     def test_setVisualSettings(self):
         self.view.columns = ["test"]
