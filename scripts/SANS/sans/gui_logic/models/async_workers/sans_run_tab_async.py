@@ -58,7 +58,7 @@ class SansRunTabAsync(IQtAsync):
 
             try:
                 out_scale_factors, out_shift_factors = \
-                    self.batch_processor(state, use_optimizations,
+                    self.batch_processor([state.all_states], use_optimizations,
                                          output_mode, plot_results, output_graph, save_can)
             except Exception as e:
                 self._mark_row_error(row, e)
