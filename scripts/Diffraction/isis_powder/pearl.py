@@ -179,7 +179,10 @@ class Pearl(AbstractInst):
         return new_workspace_names
 
     def _get_instrument_bin_widths(self):
-        return self._inst_settings.focused_bin_widths
+        if self._inst_settings.tt_mode=="custom":
+            return self._inst_settings.custom_focused_bin_widths
+        else:
+            return self._inst_settings.focused_bin_widths
 
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         if not output_mode:
@@ -220,8 +223,12 @@ class Pearl(AbstractInst):
         return grouped_d_spacing, None
 
     def _crop_banks_to_user_tof(self, focused_banks):
-        return common.crop_banks_using_crop_list(focused_banks,
-                                                 self._inst_settings.tof_cropping_values)
+        if self._inst_settings.tt_mode=="custom":
+            return common.crop_banks_using_crop_list(focused_banks,
+                                                     self._inst_settings.custom_tof_cropping_values)
+        else:
+            return common.crop_banks_using_crop_list(focused_banks,
+                                                     self._inst_settings.tof_cropping_values)
 
     def _crop_raw_to_expected_tof_range(self, ws_to_crop):
         out_ws = common.crop_in_tof(ws_to_crop=ws_to_crop,
