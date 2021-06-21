@@ -184,7 +184,7 @@ signals:
   /// User has finished editing the runs
   void runsEditingFinishedSignal();
 
-  /// New data have been loaded
+  /// New data has been loaded
   void dataChanged();
 
   /// Instrument has been changed
@@ -198,6 +198,9 @@ signals:
 
   /// Runs Auto Add state changed
   void autoAddToggledSignal(bool);
+
+  /// Period Info Button Clicked
+  void periodInfoClicked();
 };
 
 } // namespace CustomInterfaces

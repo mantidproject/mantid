@@ -26,20 +26,23 @@
 #include <algorithm>
 #include <sstream>
 
+#include <boost/variant.hpp>
+
 namespace {
 const int RUNS_WARNING_LIMIT = 200;
 }
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-
 using namespace MantidQt::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_numDetectors(0), m_loadingData(false), m_directoryChanged(false), m_timerID(),
-      m_lastRunLoadedAuto(-2), m_filesLoaded(), m_wasLastAutoRange(false), m_previousFirstRun("") {}
+    : m_view(view), m_periodInfo(std::make_unique<MuonPeriodInfo>()), m_numDetectors(0), m_loadingData(false),
+      m_directoryChanged(false), m_timerID(), m_lastRunLoadedAuto(-2), m_filesLoaded(), m_wasLastAutoRange(false),
+      m_previousFirstRun("") {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
@@ -51,6 +54,7 @@ void ALCDataLoadingPresenter::initialize() {
   connect(m_view, SIGNAL(manageDirectoriesClicked()), SLOT(handleManageDirectories()));
   connect(m_view, SIGNAL(runsFoundSignal()), SLOT(handleRunsFound()));
   connect(m_view, SIGNAL(autoAddToggledSignal(bool)), SLOT(startWatching(bool)));
+  connect(m_view, SIGNAL(periodInfoClicked()), SLOT(handlePeriodInfoClicked()));
   connect(&m_watcher, SIGNAL(directoryChanged(const QString &)), SLOT(updateDirectoryChangedFlag(const QString &)));
 }
 
@@ -92,6 +96,7 @@ void ALCDataLoadingPresenter::handleRunsFound() {
   } catch (const std::runtime_error &errroUpdateInfo) {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError(errroUpdateInfo.what());
+    m_periodInfo->clear();
   }
 }
 
@@ -129,6 +134,9 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
     // If alpha empty, default used is 1 so update interface
     if (m_view->getAlphaValue() == "1.0" && m_view->isAlphaEnabled())
       m_view->setAlphaValue("1.0");
+
+    // Set new title of period info widget
+    m_periodInfo->setWidgetTitleRuns(m_view->getInstrument() + m_view->getRunsText());
   } catch (const std::runtime_error &errorLoadFiles) {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError(errorLoadFiles.what());
@@ -336,6 +344,9 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     m_view->enableAlpha(false);
     m_view->showAlphaMessage(true);
   }
+
+  // Update available period info
+  updateAvailablePeriodInfo(ws);
 
   // Set time limits if this is the first data loaded (will both be zero)
   if (auto timeLimits = m_view->timeRange()) {
@@ -545,6 +556,31 @@ void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
 
       m_directoryChanged = false;
     }
+  }
+}
+
+/**
+ * Called when a user presses the Period Info button
+ * Adds the correct information to the widget if data has been loaded, then dispalys the widget
+ * If the widget is already on show raise to the top
+ */
+void ALCDataLoadingPresenter::handlePeriodInfoClicked() {
+  m_periodInfo->show();
+  m_periodInfo->raise();
+}
+
+void ALCDataLoadingPresenter::updateAvailablePeriodInfo(MatrixWorkspace_const_sptr &ws) {
+  // Clear any current information
+  m_periodInfo->clear();
+
+  auto periodSequences = MuonPeriodInfo::readSampleLog(ws, "period_sequences", "ALC");
+  if (!periodSequences.empty())
+    m_periodInfo->setNumberOfSequences(std::stoi(periodSequences));
+  auto namesLog = MuonPeriodInfo::readSampleLog(ws, "period_labels", "ALC");
+  if (!namesLog.empty()) {
+    auto names = MuonPeriodInfo::parseSampleLog(namesLog, ";");
+    for (const auto &name : names)
+      m_periodInfo->addPeriodToTable(name);
   }
 }
 
