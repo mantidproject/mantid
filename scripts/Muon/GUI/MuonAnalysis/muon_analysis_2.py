@@ -153,6 +153,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.setup_grouping_changed_observers()
 
+        self.setup_corrections_changed_observers()
+
         self.setup_instrument_changed_notifier()
 
         self.setup_group_calculation_enable_notifier()
@@ -257,6 +259,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.grouping_tab_widget.group_tab_presenter.loadObserver)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.corrections_tab.corrections_tab_presenter.load_observer)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.phase_tab.phase_table_presenter.run_change_observer)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
@@ -345,6 +350,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
             self.phase_tab.phase_table_presenter.group_change_observer)
+
+    def setup_corrections_changed_observers(self):
+        self.corrections_tab.corrections_tab_presenter.perform_corrections_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
 
     def setup_instrument_changed_notifier(self):
         self.context.data_context.instrumentNotifier.add_subscriber(

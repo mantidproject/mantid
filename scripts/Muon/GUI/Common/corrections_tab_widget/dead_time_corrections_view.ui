@@ -43,8 +43,20 @@ color: grey; }
       </property>
       <item row="2" column="0">
        <widget class="QLabel" name="dead_time_workspace_label">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
-         <string>Dead Time Workspace:</string>
+         <string>Workspace:</string>
         </property>
        </widget>
       </item>
@@ -104,8 +116,20 @@ color: grey; }
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="dead_time_other_file_label">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
-         <string>From other file:</string>
+         <string>Other file:</string>
         </property>
        </widget>
       </item>
@@ -148,6 +172,18 @@ color: grey; }
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="dead_time_label">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>Dead Time:</string>
         </property>

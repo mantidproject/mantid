@@ -144,7 +144,7 @@ class BasicFittingView(ui_form, base_widget):
         return self.workspace_selector.number_of_datasets()
 
     @property
-    def current_dataset_index(self) -> str:
+    def current_dataset_index(self) -> int:
         """Returns the index of the currently displayed dataset."""
         return self.workspace_selector.current_dataset_index
 

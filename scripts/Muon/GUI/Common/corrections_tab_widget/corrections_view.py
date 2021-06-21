@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.corrections_tab_widget.dead_time_corrections_view import DeadTimeCorrectionsView
+from Muon.GUI.Common.fitting_widgets.basic_fitting.workspace_selector_view import WorkspaceSelectorView
 from Muon.GUI.Common.message_box import warning
 
 from qtpy.QtWidgets import QWidget
@@ -23,6 +24,12 @@ class CorrectionsView(widget, ui_form):
         super(CorrectionsView, self).__init__(parent)
         self.setupUi(self)
 
+        self.run_selector = WorkspaceSelectorView(self)
+        self.run_selector.set_workspace_combo_box_label("Run:")
+        self.run_selector.workspace_combo_box_label.setMinimumWidth(50)
+        self.run_selector.workspace_combo_box_label.setMaximumWidth(50)
+        self.run_selector_layout.addWidget(self.run_selector)
+
         self.dead_time_corrections_view = DeadTimeCorrectionsView(self)
         self.dead_time_layout.addWidget(self.dead_time_corrections_view)
 
@@ -37,6 +44,14 @@ class CorrectionsView(widget, ui_form):
     def set_slot_for_dead_time_file_browse_clicked(self, slot) -> None:
         """Sets the slot for the dead time file browse button being clicked."""
         self.dead_time_corrections_view.set_slot_for_dead_time_file_browse_clicked(slot)
+
+    def update_run_selector_combo_box(self, runs: list) -> None:
+        """Update the data in the run selector combo box."""
+        self.run_selector.update_dataset_name_combo_box(runs)
+
+    def current_run_index(self) -> int:
+        """Returns the index of the currently displayed run number."""
+        return self.run_selector.current_dataset_index
 
     def set_dead_time_data_info_visible(self, visible: bool) -> None:
         """Sets the Dead Time Info label as being visible or hidden."""
