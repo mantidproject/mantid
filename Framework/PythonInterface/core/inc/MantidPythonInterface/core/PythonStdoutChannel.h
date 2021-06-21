@@ -33,9 +33,7 @@ public:
 /// std::ostream that redirects to PySys_WriteStdout
 class MANTID_PYTHONINTERFACE_CORE_DLL PyOstream {
 public:
-  PyOstream() : m_ostream(new PyStdoutBuf) {
-    m_ostream.setf(std::ios::unitbuf); // unbuffered output
-  }
+  PyOstream() : m_ostream(new PyStdoutBuf) {}
   std::ostream m_ostream;
 
 private:
