@@ -121,7 +121,6 @@ class DrillModel(QObject):
             instrument (str): instrument name
         """
         self.samples = list()
-        self.columns = list()
         self.visualSettings = dict()
         self.instrument = None
         self.acquisitionMode = None
@@ -169,7 +168,6 @@ class DrillModel(QObject):
         if mode in RundexSettings.VISUAL_SETTINGS:
             self.visualSettings = RundexSettings.VISUAL_SETTINGS[mode]
         self.acquisitionMode = mode
-        self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
         self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
         if self.acquisitionMode in RundexSettings.THREADS_NUMBER:
             nThreads = RundexSettings.THREADS_NUMBER[self.acquisitionMode]
