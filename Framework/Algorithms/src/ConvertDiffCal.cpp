@@ -52,14 +52,15 @@ const std::string ConvertDiffCal::summary() const { return "Convert diffraction 
 void ConvertDiffCal::init() {
   declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OffsetsWorkspace", "", Direction::Input),
                   "OffsetsWorkspace containing the calibration offsets.");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "An output workspace.");
 
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("PreviousCalibration", "", Direction::Input,
                                                                        API::PropertyMode::Optional),
                   "A calibration table used as a cache for creating the OutputWorkspace. "
                   "Effectively, this algorithm applies partial updates to this table and "
                   "returns it as the OutputWorkspace");
+
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "An output workspace.");
 }
 
 /**
