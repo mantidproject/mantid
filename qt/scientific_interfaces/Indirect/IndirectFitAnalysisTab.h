@@ -15,7 +15,6 @@
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFitPropertyBrowser.h"
 #include "IndirectFittingModel.h"
-#include "IndirectSpectrumSelectionPresenter.h"
 #include "IndirectSpectrumSelectionView.h"
 
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
@@ -46,7 +45,6 @@ public:
 
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
   void setPlotView(IIndirectFitPlotView *view);
-  void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
   void setOutputOptionsView(IIndirectFitOutputOptionsView *view);
   void setFitPropertyBrowser(IndirectFitPropertyBrowser *browser);
   TableDatasetIndex getSelectedDataIndex() const;
@@ -90,7 +88,6 @@ private:
   virtual void setupFitTab() = 0;
   virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   void connectPlotPresenter();
-  void connectSpectrumPresenter();
   void connectFitPropertyBrowser();
   void connectDataPresenter();
   void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
@@ -105,7 +102,6 @@ private:
   void updateParameterEstimationData();
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
-  std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
   TableDatasetIndex m_currentTableDatasetIndex;
@@ -118,7 +114,6 @@ protected slots:
   void updateDataInTable();
   void tableStartXChanged(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
   void tableEndXChanged(double endX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
-  void tableExcludeChanged(const std::string &exclude, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
   void startXChanged(double startX);
   void endXChanged(double endX);
   void updateFitOutput(bool error);
@@ -139,13 +134,10 @@ protected slots:
 
 private slots:
   void plotSelectedSpectra();
-  void respondToChangeOfSpectraRange(TableDatasetIndex index);
   void respondToSingleResolutionLoaded();
   void respondToDataChanged();
   void respondToDataAdded();
   void respondToDataRemoved();
-  void respondToSelectedFitDataChanged(TableDatasetIndex index);
-  void respondToNoFitDataSelected();
   void respondToPlotSpectrumChanged(WorkspaceIndex);
   void respondToFwhmChanged(double);
   void respondToBackgroundChanged(double value);

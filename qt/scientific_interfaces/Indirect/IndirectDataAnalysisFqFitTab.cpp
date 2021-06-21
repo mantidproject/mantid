@@ -51,8 +51,6 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setFitDataPresenter(
       std::make_unique<FqFitDataPresenter>(m_FqFittingModel, m_uiForm->dockArea->m_fitDataView, templateBrowser));
-
-  setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
 
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
@@ -63,9 +61,6 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
 }
 
 void IndirectDataAnalysisFqFitTab::setupFitTab() {
-  m_uiForm->svSpectrumView->hideSpectrumSelector();
-  m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
-
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this, SLOT(updateModelFitTypeString()));
 }

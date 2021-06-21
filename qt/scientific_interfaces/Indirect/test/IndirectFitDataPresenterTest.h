@@ -185,8 +185,7 @@ public:
     m_presenter = std::make_unique<IndirectFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()));
 
     TS_ASSERT(m_model->getFitDataModel());
-
-    SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
+    m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", createWorkspace(5));
     m_model->addWorkspace("WorkspaceName");
   }
 
@@ -239,26 +238,6 @@ public:
     TS_ASSERT_EQUALS(m_presenter->getResolutionFBSuffices(), suffices);
   }
 
-  void test_that_setStartX_with_TableDatasetIndex_alters_endX_column() {
-    double startX = 1.0;
-    m_presenter->setStartX();
-    assertValueIsGlobal(START_X_COLUMN, startX);
-  }
-
-  void test_that_setEndX_with_TableDatasetIndex_alters_endX_column() {
-    double endX = 1.0;
-    m_presenter->setEndX();
-    assertValueIsGlobal(END_X_COLUMN, endX);
-  }
-
-  void test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
-    TableItem const excludeRegion("2-3");
-
-    m_presenter->setExclude(excludeRegion.asString(), TableDatasetIndex{0}, IDA::WorkspaceIndex{0});
-
-    assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
-  }
-
   void test_getDataForParameterEstimation_uses_selector_to_get_from_model() {
     EstimationDataSelector selector = getEstimationDataSelector();
 
@@ -289,5 +268,5 @@ private:
   std::unique_ptr<MockIndirectFitDataTableModel> m_model;
   std::unique_ptr<IndirectFitDataPresenter> m_presenter;
 
-  SetUpADSWithWorkspace *m_ads;
+  std::unique_ptr<SetUpADSWithWorkspace> m_ads;
 };

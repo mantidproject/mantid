@@ -80,7 +80,7 @@ void IndirectFitDataPresenter::showAddWorkspaceDialog() {
   if (!m_addWorkspaceDialog)
     m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
   m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
-  m_addWorkspaceDialog->setFBSuffices(getSampleWSSuffices());
+  m_addWorkspaceDialog->setFBSuffices(getSampleFBSuffices());
   m_addWorkspaceDialog->updateSelectedSpectra();
   m_addWorkspaceDialog->show();
   connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
