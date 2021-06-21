@@ -179,8 +179,7 @@ void ConvertDiffCal::exec() {
     detid_t detector_id = getDetID(offsetsWS, i);
     size_t internal_index = d_info.indexOf(detector_id);
     /* obtain the mask */
-    if (!d_info.isMasked(internal_index))
-    {
+    if (!d_info.isMasked(internal_index)) {
       /* find the detector id's offset value in the offset workspace */
       double new_offset_value = offsetsWS->getValue(detector_id);
 
@@ -188,8 +187,7 @@ void ConvertDiffCal::exec() {
       auto iter = id_to_row.find(detector_id);
 
       /* if it is found, update the correct row in the output table */
-      if( iter != id_to_row.end() )
-      {
+      if (iter != id_to_row.end()) {
         /* Get the row and update the difc value in the first column */
         int row_to_update = iter->second;
 
@@ -199,8 +197,7 @@ void ConvertDiffCal::exec() {
       }
 
       /* value was not found in PreviousCalibration - calculate from experiment's geometry */
-      else
-      {
+      else {
         API::TableRow newrow = configWksp->appendRow();
         newrow << static_cast<int>(detector_id);
         newrow << calculateDIFC(offsetsWS, i, spectrumInfo);
