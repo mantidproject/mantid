@@ -57,7 +57,7 @@ class PlotTimeFitPanePresenter(BasePanePresenter):
 
     def handle_use_raw_workspaces_changed(self):
         if self.check_if_can_use_rebin():
-            self.handle_plot_selected_fits(self._current_fit_info, autoscale)
+            self.handle_plot_selected_fits(self._current_fit_info)
 
     def handle_data_updated(self, autoscale=True, hold_on=False):
         self.handle_plot_selected_fits(self._current_fit_info, autoscale)

@@ -76,7 +76,6 @@ class BasePanePresenter():
         workspace_name = workspace.name()
         plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
         if workspace_name in plotted_workspaces:
-            print("mmmm ADS", workspace_name)
             self._figure_presenter.replace_workspace_in_plot(workspace)
 
     def handle_workspace_deleted_from_ads(self, workspace: Workspace2D):

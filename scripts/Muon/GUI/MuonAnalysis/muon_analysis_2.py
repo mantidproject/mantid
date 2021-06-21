@@ -17,7 +17,7 @@ from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContex
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.fitting_contexts.tf_asymmetry_fitting_context import TFAsymmetryFittingContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
-from Muon.GUI.Common.contexts.plotting_context import PlotPanesContext
+from Muon.GUI.Common.contexts.plot_pane_context import PlotPanesContext
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget

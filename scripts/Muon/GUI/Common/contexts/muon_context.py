@@ -28,10 +28,6 @@ from Muon.GUI.Common.muon_diff import MuonDiff
 from typing import List
 
 
-MUON_ANALYSIS_DEFAULT_X_RANGE = [0.0, 15.0]
-MUON_ANALYSIS_DEFAULT_Y_RANGE = [-0.3, 0.3]
-
-
 class MuonContext(object):
     def __init__(self, muon_data_context=None, muon_gui_context=None,
                  muon_group_context=None, base_directory='Muon Data', muon_phase_context=None,
@@ -44,7 +40,6 @@ class MuonContext(object):
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix
         self._plot_panes_context= plot_panes_context
-        #self._plotting_context.set_defaults(MUON_ANALYSIS_DEFAULT_X_RANGE, MUON_ANALYSIS_DEFAULT_Y_RANGE)
         self.ads_observer = MuonContextADSObserver(
             self.remove_workspace,
             self.clear_context,
@@ -79,10 +74,6 @@ class MuonContext(object):
     @property
     def phase_context(self):
         return self._phase_context
-
-    #@property
-    #def default_data_plot_range(self):
-    #    return self._plotting_context.default_xlims
 
     def num_periods(self, run):
         return self._data_context.num_periods(run)

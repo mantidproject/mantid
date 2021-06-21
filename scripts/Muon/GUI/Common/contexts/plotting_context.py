@@ -9,7 +9,7 @@ from Muon.GUI.Common.contexts.plot_edit_context import PlotEditContext
 from typing import List
 from enum import Enum
 
-
+# do we need these?
 PlotModeStrings = ['Plot Data', 'Plot Fits']
 
 
@@ -170,14 +170,3 @@ class PlottingContext(object):
             self.add_subplot(name, index)
         else:
             self._subplots[name].set_axis(index)
-
-
-class PlotPanesContext(object):
-    def __init__(self):
-        self._plotting_context = {}
-
-    def add_pane(self, name):
-        self._plotting_context[name] = PlottingContext()
-
-    def __getitem__(self, name):
-        return self._plotting_context[name]
