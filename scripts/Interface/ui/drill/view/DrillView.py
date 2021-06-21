@@ -525,6 +525,15 @@ class DrillView(QMainWindow):
         self.modeSelector.setCurrentText(mode)
         self.modeSelector.blockSignals(False)
 
+    def getAcquisitionMode(self):
+        """
+        Get the selected acquistion mode.
+
+        Returns:
+            str: acquisition mode
+        """
+        return self.modeSelector.currentText()
+
     def setCycleAndExperiment(self, cycle, experiment):
         """
         Set the cycle number and the experiment ID.
