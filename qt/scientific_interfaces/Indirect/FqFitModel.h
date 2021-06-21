@@ -24,6 +24,7 @@ public:
   FqFitModel();
   using IndirectFittingModel::addWorkspace;
   void addWorkspace(const std::string &workspaceName, const int &spectrum_index);
+  void addWorkspace(const std::string &workspaceName) override;
   void removeWorkspace(TableDatasetIndex index) override;
   bool isMultiFit() const override;
 
