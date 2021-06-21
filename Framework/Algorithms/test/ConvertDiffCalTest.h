@@ -71,7 +71,6 @@ public:
   };
 
   fake_workspaces generate_test_data(std::list<class fake_entry> const &entries) {
-    Mantid::Kernel::V3D place_holder(0, 0, 0);
     Mantid::Geometry::Instrument_sptr instrument = ComponentCreationHelper::createEmptyInstrument();
 
     ITableWorkspace_sptr calibration_table = std::make_shared<Mantid::DataObjects::TableWorkspace>();
