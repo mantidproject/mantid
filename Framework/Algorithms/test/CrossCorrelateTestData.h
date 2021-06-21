@@ -103,7 +103,7 @@ const double B2BEXP_POSITION_311 = 1.07577;
 enum class PeakIndex : int { POS_111, POS_220, POS_311 };
 
 std::shared_ptr<IFunction> createPeakFunction(const PeakShapeEnum shape, const PeakIndex peak_index,
-                                              const double intensity, const double position) {
+                                              const double intensity, const double d) {
   std::stringstream peak;
   if (shape == PeakShapeEnum::B2BEXP) {
     peak << "name=Bk2BkExpConvPV,";
@@ -116,10 +116,10 @@ std::shared_ptr<IFunction> createPeakFunction(const PeakShapeEnum shape, const P
     } else {
       throw std::runtime_error("Developer forgot a peak index");
     }
-    peak << ",Intensity=" << intensity << ",X0=" << position;
+    peak << ",Intensity=" << intensity << ",X0=" << d * 1434.66 + d * d * -1.88 + 2.25;
   } else if (shape == PeakShapeEnum::GAUSSIAN) {
     // all Gaussians are hard coded to same arbitrary width
-    peak << "name=Gaussian,Sigma=0.1,Height=" << intensity << ",PeakCentre=" << position;
+    peak << "name=Gaussian,Sigma=10,Height=" << intensity << ",PeakCentre=" << d * 1434.66 + d * d * -1.88 + 2.25;
   }
 
   return FunctionFactory::Instance().createInitialized(peak.str());
@@ -139,7 +139,7 @@ CompositeFunction_sptr createCompositeB2BExp(const PeakShapeEnum shape, const in
 
   // values for reference spectrum that may be changed for the others
   double shift_in_d{0.};
-  double scale_in_d{0.};
+  double scale_in_d{1.};
   double horizontal_shift{0.};
   double height_111{100.};
   double height_220{200.};
@@ -175,7 +175,7 @@ CompositeFunction_sptr createCompositeB2BExp(const PeakShapeEnum shape, const in
   if (horizontal_shift > 0.) {
     std::stringstream background;
     background << "name=FlatBackground,A0=" << horizontal_shift;
-    FunctionFactory::Instance().createInitialized(background.str());
+    function->addFunction(FunctionFactory::Instance().createInitialized(background.str()));
   }
 
   return function;

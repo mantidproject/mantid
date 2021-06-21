@@ -172,7 +172,12 @@ private:
 
     // create the x-axis
     BinEdges xEdges(NUM_BINS + 1, HistogramData::LinearGenerator(D_MIN, D_DELTA));
-    std::vector<double> xValues(cbegin(xEdges), cend(xEdges) - 1);
+    auto xPoints = HistogramData::Points(xEdges);
+
+    std::vector<double> TOFvalues;
+    std::transform(cbegin(xPoints), cend(xPoints), std::back_inserter(TOFvalues),
+                   [](double d) -> double { return d * 1434.66 + d * d * -1.88 + 2.25; });
+
     // create the uncertainties
     CountStandardDeviations e1(NUM_BINS, sqrt(3.0)); // arbitrary
 
@@ -185,9 +190,10 @@ private:
     for (int spectrumIndex = 0; spectrumIndex < NUM_HIST; ++spectrumIndex) {
       auto compositefunction = createCompositeB2BExp(shape, spectrumIndex);
       ws->setBinEdges(spectrumIndex, xEdges);
-      ws->setCounts(spectrumIndex, evaluateFunction(compositefunction, xValues));
+      ws->setCounts(spectrumIndex, evaluateFunction(compositefunction, TOFvalues));
     }
     ws->rebuildSpectraMapping();
+
     return ws;
   }
 
