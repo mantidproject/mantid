@@ -33,11 +33,14 @@ public:
 /// std::ostream that redirects to PySys_WriteStdout
 class MANTID_PYTHONINTERFACE_CORE_DLL PyOstream {
 public:
-  PyOstream() : m_ostream(new PyStdoutBuf){};
+  PyOstream() : m_ostream(new PyStdoutBuf) {
+    m_ostream.setf(std::ios::unitbuf); // unbuffered output
+  }
   std::ostream m_ostream;
 
 private:
   /// https://stackoverflow.com/questions/772355/how-to-inherit-from-stdostream
+  /// Also much better implemented in pybind11::iostream::pythonbuff
   class PyStdoutBuf : public std::streambuf {
   protected:
     int overflow(int c) override {
