@@ -23,8 +23,6 @@ namespace {
 
 std::vector<std::string> getParameterLabels() { return {"f0.EISF", "f1.Width", "f1.FWHM", "f1.EISF"}; }
 
-std::vector<std::string> getNoWidthLabels() { return {"f0.EISF", "f1.EISF"}; }
-
 std::vector<std::string> getNoEISFLabels() { return {"f1.Width", "f1.FWHM"}; }
 
 } // namespace
