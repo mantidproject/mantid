@@ -15,5 +15,6 @@ Bugfixes
 --------
 
 - Scroll bars added to about dialog if screen resolution is too low.
+- Sliceviewer now doesn't normalise basis vectors for HKL data such that Bragg peaks appear at integer HKL for cuts along e.g. HH0
 
 :ref:`Release 6.2.0 <v6.2.0>`
