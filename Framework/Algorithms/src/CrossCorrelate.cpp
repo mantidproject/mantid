@@ -130,7 +130,7 @@ void CrossCorrelate::exec() {
 
   // checdataIndex that the data range specified madataIndexes sense
   if (xmin >= xmax)
-    throw std::runtime_error("Must specify xmin < xmax");
+    throw std::runtime_error("Must specify xmin < xmax, " + std::to_string(xmin) + " vs " + std::to_string(xmax));
 
   // TadataIndexe a copy of  the referenceSpectra spectrum
   auto &referenceSpectraE = inputWS->e(index_ref);
@@ -164,6 +164,11 @@ void CrossCorrelate::exec() {
   // max the shift
   int shiftCorrection = 0;
   if (maxDSpaceShift != EMPTY_DBL()) {
+    if (xmax - xmin < maxDSpaceShift)
+      g_log.warning() << "maxDSpaceShift(" << std::to_string(maxDSpaceShift)
+                      << ") is larger than specified range of xmin(" << xmin << ") to xmax(" << xmax
+                      << "), please make it smaller or removed it entirely!";
+
     // convert dspacing to bins, where maxDSpaceShift is at least 0.1
     const auto maxBins = std::max(0.0 + maxDSpaceShift * 2, 0.1) / inputWS->getDimension(0)->getBinWidth();
     // calc range based on max bins
@@ -208,10 +213,6 @@ void CrossCorrelate::exec() {
     std::vector<double> tempY(numReferenceY);
     std::vector<double> tempE(numReferenceY);
 
-    // g_log.information("sizing :" + std::to_string(numReferenceY) + " " + std::to_string(referenceXVector.size()));
-    // g_log.information("old y size :" + std::to_string(inputYVector.size()));
-    // g_log.information("old e size :" + std::to_string(inputEVector.size()));
-    // g_log.information("old x size :" + std::to_string(inputXVector.size()));
     VectorHelper::rebin(inputXVector.rawData(), inputYVector.rawData(), inputEVector.rawData(), referenceXVector, tempY,
                         tempE, isDistribution);
     const auto tempVar = subtractMean(tempY, tempE);

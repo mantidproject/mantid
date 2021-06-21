@@ -81,27 +81,44 @@ public:
     TS_ASSERT_DELTA(outY1[0], -1.0, 1e-6);
   }
 
-  void testMaxDSpaceShift() {
+  void testMaxDSpaceShiftGaussian() {
     CrossCorrelate alg;
     // TODO need a duplicate test for other shape
     auto inputWS = makeFakeWorkspace3Peaks(PeakShapeEnum::GAUSSIAN);
     TS_ASSERT(inputWS != nullptr);
 
-    setupAlgorithm(alg, 0.0, 4.0, inputWS, 5);
+    setupAlgorithm(alg, 0.9, 2.3, inputWS, 0.1);
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inputWS);
 
-    // test that the expected peak of crossCorrelateTestData is correct
-    // but also check for the expected/not expected existence of other peaks
-    // perhaps traversal is unnecessary?
-    const auto yVector = outWS->y(0);
-    const auto xVector = outWS->x(0);
-    const auto peakIter = std::max_element(yVector.cbegin(), yVector.cend());
-    const auto peakIndex = static_cast<size_t>(peakIter - yVector.cbegin());
+    int spectraIndex = 0;
+    testSpectra(outWS, spectraIndex++, 0.);
+    // It will be in number of bins where 1 bin is 0.01, so 10 bins is equal to a shift of 0.1
+    testSpectra(outWS, spectraIndex++, 10);
+    // The base values for the other spectra intensity are multiplyied by 1.1, in the next spectra,
+    // the base values range from 1-2, meaning it is effectively adding .1-.2 offset, approx the same result as above
+    testSpectra(outWS, spectraIndex++, 11);
+    testSpectra(outWS, spectraIndex++, 0.);
+    testSpectra(outWS, spectraIndex++, 0.);
+  }
 
-    // if the peak index matches up then we are good.
-    TS_ASSERT_EQUALS(peakIndex, yVector.size() / 2); // probably doesn't matter
-    TS_ASSERT_EQUALS(outWS->x(0)[peakIndex], 0.);
-    // TODO check other spectra
+  void testMaxDSpaceShiftB2BExp() {
+    CrossCorrelate alg;
+    // TODO need a duplicate test for other shape
+    auto inputWS = makeFakeWorkspace3Peaks(PeakShapeEnum::B2BEXP);
+    TS_ASSERT(inputWS != nullptr);
+
+    setupAlgorithm(alg, 0.9, 2.3, inputWS, 0.1);
+    const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inputWS);
+
+    int spectraIndex = 0;
+    testSpectra(outWS, spectraIndex++, 0.);
+    // It will be in number of bins where 1 bin is 0.01, so 10 bins is equal to a shift of 0.1
+    testSpectra(outWS, spectraIndex++, 10);
+    // The base values for the other spectra intensity are multiplyied by 1.1, in the next spectra,
+    // the base values range from 1-2, meaning it is effectively adding .1-.2 offset, approx the same result as above
+    testSpectra(outWS, spectraIndex++, 11);
+    testSpectra(outWS, spectraIndex++, 0.);
+    testSpectra(outWS, spectraIndex++, 0.);
   }
 
   void testInputXLength2() {
@@ -147,7 +164,7 @@ private:
     }
 
     // create the workspace
-    const int nHist = 2;
+    const int nHist = 5;
     const MatrixWorkspace_sptr ws = createWorkspace<Workspace2D>(nHist, nBins + 1, nBins);
     ws->getAxis(0)->setUnit("dSpacing");
 
@@ -247,4 +264,17 @@ private:
   // Run the algorithm with invalid input and check that it throws a runtime
   // error
   void runAlgorithmThrows(CrossCorrelate &alg) { TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &); }
+
+  // test output workspace for a given spectra index
+  void testSpectra(const MatrixWorkspace_const_sptr outWS, const int spectraIndex, const double positionVal) {
+    std::cout << "Checking index " << spectraIndex << std::endl;
+    // test that the expected peak of crossCorrelateTestData is correct
+    // but also check for the expected/not expected existence of other peaks
+    const auto yVector = outWS->y(spectraIndex);
+    const auto xVector = outWS->x(spectraIndex);
+    const auto peakIter = std::max_element(yVector.cbegin(), yVector.cend());
+    const auto peakIndex = static_cast<size_t>(peakIter - yVector.cbegin());
+
+    TS_ASSERT_DELTA(xVector[peakIndex], positionVal, 1e-6);
+  }
 };

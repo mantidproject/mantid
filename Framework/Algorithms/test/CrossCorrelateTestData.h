@@ -121,7 +121,7 @@ std::shared_ptr<IFunction> createPeakFunction(const PeakShapeEnum shape, const P
     // all Gaussians are hard coded to same arbitrary width
     peak << "name=Gaussian,Sigma=10,Height=" << intensity << ",PeakCentre=" << d * 1434.66 + d * d * -1.88 + 2.25;
   }
-
+  std::cout << peak.str() << std::endl;
   return FunctionFactory::Instance().createInitialized(peak.str());
 }
 
@@ -144,9 +144,10 @@ CompositeFunction_sptr createCompositeB2BExp(const PeakShapeEnum shape, const in
   double height_111{100.};
   double height_220{200.};
   double height_311{300.};
+
   if (spectrumIndex == 0) { // expected value = 0.
     // reference spectrum
-  } else if (spectrumIndex == 1) { // expected value = .1
+  } else if (spectrumIndex == 1) { // expected value = .1, or about 10 bins
     // additive shift in d-spacing from the reference
     // peak heights are unchanged
     shift_in_d = .1;
