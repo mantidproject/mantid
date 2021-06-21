@@ -18,6 +18,7 @@
 #pragma once
 
 #include "MantidPythonInterface/core/DllConfig.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/WrapPython.h"
 #include <Poco/ConsoleChannel.h>
 #include <iostream>
@@ -42,6 +43,7 @@ private:
   class PyStdoutBuf : public std::streambuf {
   protected:
     int overflow(int c) override {
+      Mantid::PythonInterface::GlobalInterpreterLock gil;
       PySys_WriteStdout("%c", c);
       return 0;
     }
