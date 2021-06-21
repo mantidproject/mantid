@@ -35,7 +35,10 @@ FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *
   showParameterComboBoxes();
 }
 
-void FqFitDataPresenter::handleSampleLoaded(const QString &workspaceName, FqFitParameters &parameters) {
+void FqFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
+  const auto workspaceName1 = workspaceName.toStdString();
+  auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName1);
+  auto parameters = m_fqFitModel->createFqFitParameters(workspace.get());
   setModelWorkspace(workspaceName);
   updateAvailableParameterTypes(parameters);
   updateAvailableParameters(parameters);

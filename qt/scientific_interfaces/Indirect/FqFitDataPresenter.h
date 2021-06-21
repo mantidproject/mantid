@@ -50,7 +50,7 @@ signals:
   void spectrumChanged(WorkspaceIndex);
 
 protected slots:
-  void handleSampleLoaded(const QString &, FqFitParameters &parameters);
+  void handleSampleLoaded(const QString &) override;
 
 private:
   void setAvailableParameters(const std::vector<std::string> &parameters);
