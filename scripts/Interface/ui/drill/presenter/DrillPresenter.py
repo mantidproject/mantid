@@ -10,6 +10,8 @@ import os
 
 from qtpy.QtWidgets import QFileDialog, QMessageBox
 
+from mantid.kernel import config
+
 from ..model.DrillModel import DrillModel
 from ..model.configurations import RundexSettings
 from .DrillExportPresenter import DrillExportPresenter
@@ -45,6 +47,8 @@ class DrillPresenter:
         self.view.setWindowTitle("Untitled [*]")
         self._invalidCells = set()
         self._customOptions = set()
+        self.model.setInstrument(config["default.instrument"], log=False)
+        self.model.setAcquisitionMode(self.view.getAcquisitionMode())
 
         # view signals connection
         self.view.instrumentChanged.connect(self.instrumentChanged)
