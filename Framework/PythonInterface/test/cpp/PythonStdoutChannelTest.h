@@ -86,9 +86,7 @@ public:
     logFile.close();
     boost::filesystem::remove(tmpFilePath);
 
-    // restore the channel
-    Poco::Logger::root().setChannel(channelOld);
-    std::cout << "It is finished!\n";
+    Poco::Logger::root().setChannel(channelOld); // restore the channel
   }
 
 private:
