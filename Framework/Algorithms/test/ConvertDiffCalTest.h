@@ -136,10 +136,9 @@ public:
         /* 2 entries in the offset workspace that are not in the table - should be updated */
         fake_entry(1, fake_entry::offset, 1.0, fake_entry::unmasked),
         fake_entry(0, fake_entry::offset, 1.0, fake_entry::unmasked),
-        /* entry that is nonzero but masked - should not be updated */
+        /* entries that are masked - should not be updated */
         fake_entry(3, fake_entry::offset, 3, fake_entry::masked),
-        /* entry that is zero but not masked - should not be updated */
-        fake_entry(2, fake_entry::offset, 0, fake_entry::unmasked),
+        fake_entry(2, fake_entry::offset, 0, fake_entry::masked),
         /* 2 entries that exist in both. Existing values should be updated */
         fake_entry(7, fake_entry::offset, 7, fake_entry::unmasked),
         fake_entry(4, fake_entry::offset, 4, fake_entry::unmasked),
@@ -212,7 +211,7 @@ public:
 
     /* Offsets of zero are ignored by default - before this convention, this unit test was using
      * an offset of zero. Changing it from zero to epsilon gets the test to pass */
-    offsets->setValue(1, 0.000001); // wksp_index=0, detid=1
+    offsets->setValue(1, 0); // wksp_index=0, detid=1
 
     // Name of the output workspace.
     std::string outWSName("ConvertDiffCalTest_OutputWS");

@@ -173,7 +173,7 @@ void ConvertDiffCal::exec() {
 
     /* only update non-masked, non zero-offset entries */
     double new_offset_value = offsetsWS->getValue(id);
-    if (!d_info.isMasked(internal_index) && new_offset_value != 0) {
+    if ( !d_info.isMasked(internal_index) ) {
       /* check for the detector id in the calibration table */
       auto row_to_update = id_to_row.find(id);
       /* if it is found, update it according to a simple linear equation: */
