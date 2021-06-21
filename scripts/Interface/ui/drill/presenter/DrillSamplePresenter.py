@@ -33,8 +33,7 @@ class DrillSamplePresenter:
         self._sample = sample
         self._sample.groupChanged.connect(self.onGroupChanged)
         self._sample.newParameter.connect(self.onNewParameter)
-        self._sample.processStarted.connect(self.onProcessStarted)
-        self._sample.processDone.connect(self.onProcessDone)
+        self._sample.statusChanged.connect(self.onStatusChanged)
         self._table.addSamplePresenter(self, self._sample.getIndex())
 
     def onNewItem(self, name, item):
@@ -94,22 +93,18 @@ class DrillSamplePresenter:
             self._table.setRowLabel(index, groupName + str(groupIndex + 1),
                                     bold=isMaster)
 
-    def onProcessStarted(self):
+    def onStatusChanged(self):
         """
-        Triggered when the sample processing started.
-        """
-        index = self._sample.getIndex()
-        self._table.setRowBackground(index, self.PROCESSING_COLOR)
-
-    def onProcessDone(self, code):
-        """
-        Triggered when the sample processing ended.
-
-        Args:
-            code (int): return code. 0: success, -1: error
+        Triggered when the status of the sample changed. This function
+        colors the associated row in accordance to this status.
         """
         index = self._sample.getIndex()
-        if code == 0:
+        status = self._sample.getStatus()
+        if status is None:
+            self._table.removeRowBackground(index)
+        elif status == self._sample.STATUS_PROCESSED:
             self._table.setRowBackground(index, self.OK_COLOR)
-        else:
+        elif status == self._sample.STATUS_ERROR:
             self._table.setRowBackground(index, self.ERROR_COLOR)
+        elif status == self._sample.STATUS_PENDING:
+            self._table.setRowBackground(index, self.PROCESSING_COLOR)
