@@ -57,13 +57,13 @@ class FittingDataModel(object):
         self._last_added = []
         filenames = [name.strip() for name in filenames_string.split(",")]
         for filename in filenames:
-            ws_name = self._generate_workspace_name(filename)
+            ws_name = self._generate_workspace_name(filename, xunit)
             if ws_name not in self._loaded_workspaces:
                 try:
                     if not ADS.doesExist(ws_name):
                         ws = Load(filename, OutputWorkspace=ws_name)
-                        if xunit != "TOF":
-                            ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws_name, Target=xunit)
+                        # temporary fix to ensure unit of ws matches unit box (which will soon be removed)
+                        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws_name, Target=xunit)
                     else:
                         ws = ADS.retrieve(ws_name)
                     if ws.getNumberHistograms() == 1:
@@ -366,5 +366,10 @@ class FittingDataModel(object):
         [ws_table.setCell(irow, icol, row[icol]) for icol in range(0, len(row))]
 
     @staticmethod
-    def _generate_workspace_name(filepath):
-        return path.splitext(path.split(filepath)[1])[0]
+    def _generate_workspace_name(filepath, xunit):
+        wsname = path.splitext(path.split(filepath)[1])[0]
+        # remove unit from fname if present as will convert unit to xunit in combo box temporarily until it is removed
+        # Once combo box removed we can get unit from workspace post-loading (and call RenameWorkspace)
+        if wsname.endswith('_TOF') or wsname.endswith('_dSpacing'):
+            wsname = '_'.join(wsname.split('_')[0:-1])
+        return wsname + '_' + xunit
