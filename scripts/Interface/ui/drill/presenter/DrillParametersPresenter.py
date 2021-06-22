@@ -74,41 +74,41 @@ class DrillParametersPresenter:
             # if value is empty, delete the prenter
             self._item.setPresenter(None)
             return
+        text = ""
         parameters = dict()
         for param in value.split(';'):
             if param and '=' not in param:
-                self.setInvalidItem("Please provide semicolon separated "
-                                    "key=value pairs.")
-                return
+                QMessageBox.warning(self._table, "Error", "Please provide "
+                                    "semicolon separated key=value pairs.")
+                break
             try:
                 name = param.split("=")[0].strip()
                 value = param.split("=")[1].strip()
             except:
-                self.setInvalidItem("Please provide semicolon separated "
-                                    "key=value pairs.")
-                return
+                QMessageBox.warning(self._table, "Error", "Please provide "
+                                    "semicolon separated key=value pairs.")
+                break
             if name in parameters:
                 QMessageBox.warning(self._table, "Error", "Parameter \"{}\" "
                                     "provided several times. Only the first "
                                     "one will be used.".format(name))
-                continue
+                break
             if self._table.itemFromName(self._sample.getIndex(), name):
                 QMessageBox.warning(self._table, "Error", "Use the dedicated "
                                     "column to set the value of \"{}\". This "
                                     "one will be ignored.".format(name))
-                continue
+                break
             if isinstance(value, str) and value.lower() == "true":
                 value = True
             if isinstance(value, str) and value.lower() == "false":
                 value = False
-            parameters[name] = value
-        self._table.blockSignals(True)
-        self._item.setText("")
-        self._table.blockSignals(False)
-        for name, value in parameters.items():
             p = self._sample.addParameter(name)
             p.checked.connect(self.onChecked)
             p.setValue(value)
+            text += str(name) + '=' + str(value) + ';'
+        self._table.blockSignals(True)
+        self._item.setText(text[:-1])
+        self._table.blockSignals(False)
 
     def onChecked(self):
         """
@@ -141,7 +141,8 @@ class DrillParametersPresenter:
         """
         text = ""
         for name in self._parameters:
-            value = self._sample.getParameter(name).getValue()
+            param = self._sample.getParameter(name)
+            value = param.getValue()
             text += name
             text += '='
             text += str(value)
