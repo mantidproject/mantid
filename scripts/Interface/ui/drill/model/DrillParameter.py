@@ -60,6 +60,11 @@ class DrillParameter(QObject):
     _valid = False
 
     """
+    Error message associated to an invalid state.
+    """
+    _validationErrorMsg = None
+
+    """
     Sent when the parameter value has been checked.
     """
     checked = Signal()
@@ -72,6 +77,7 @@ class DrillParameter(QObject):
     def __init__(self, name):
         super().__init__()
         self._name = name
+        self._validationErrorMsg = ""
 
     def setController(self, controller):
         """
