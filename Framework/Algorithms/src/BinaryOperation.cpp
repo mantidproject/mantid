@@ -161,7 +161,9 @@ void BinaryOperation::exec() {
 
   // Get the output workspace
   m_out = getProperty(outputPropName());
-  m_eout = std::dynamic_pointer_cast<EventWorkspace>(m_out);
+  if (m_elhs) {
+    m_eout = std::dynamic_pointer_cast<EventWorkspace>(m_out);
+  }
 
   // Make a check of what will be needed to setup the workspaces, based on the
   // input types.
