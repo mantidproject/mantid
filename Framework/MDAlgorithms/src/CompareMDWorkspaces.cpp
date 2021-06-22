@@ -308,6 +308,12 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
 
     API::IMDNode *box1 = boxes1[ibox];
     API::IMDNode *box2 = boxes2[ibox];
+
+    if (!box1 || !box2) {
+      g_log.error("Box " + std::to_string(ibox) + " has Null nodes");
+      continue;
+    }
+
     g_log.debug() << "Box " << ibox << "ws1 npoints = " << box1->getNPoints()
                   << "; ws2 npoints = " << box2->getNPoints() << "\n";
 
