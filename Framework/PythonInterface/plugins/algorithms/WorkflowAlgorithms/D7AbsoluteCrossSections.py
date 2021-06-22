@@ -195,13 +195,13 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         nMeasurements = len(measurements)
         error_msg = "The provided data cannot support {} measurement cross-section separation."
         if nMeasurements == 10:
-            nComponents = 3
+            nComponents = 6  # Total, Nuclear Coherent, Spin-incoherent, SF Magnetic, NSF Magnetic, Average Magnetic
         elif nMeasurements == 6:
-            nComponents = 3
+            nComponents = 6  # Total, Nuclear Coherent, Spin-incoherent, SF Magnetic, NSF Magnetic, Average Magnetic
             if user_method == '10p' and self.getProperty('RotatedXYZWorkspace').isDefault:
                 raise RuntimeError(error_msg.format(user_method))
         elif nMeasurements == 2:
-            nComponents = 2
+            nComponents = 3  # Total, Nuclear Coherent, Spin-incoherent
             if user_method == '10p':
                 raise RuntimeError(error_msg.format(user_method))
             if user_method == 'XYZ':
@@ -227,10 +227,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
             self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass)
 
-    def _cross_section_separation(self, ws, nMeasurements, nComponents):
+    def _cross_section_separation(self, ws, nMeasurements):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
         current sample. The method used is based on either the user's choice or the provided data structure."""
-        DEG_2_RAD =  np.pi / 180.0
+        DEG_2_RAD = np.pi / 180.0
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
         n_detectors = mtd[ws][0].getNumberHistograms()
         double_xyz_method = False
@@ -462,28 +462,45 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             DeleteWorkspaces(to_clean)
         return det_efficiency_ws
 
-    def _normalise_sample_data(self, sample_ws, det_efficiency_ws):
+    def _find_matching_twoTheta(self, sample_ws, det_eff_ws):
+        sample_twoTheta = str(mtd[sample_ws].getRun().getLogData('2theta.requested').value)
+        matched_no = 0
+        for entry_no, entry in enumerate(mtd[det_eff_ws]):
+            if sample_twoTheta in entry.name():
+                matched_no = entry_no
+                break
+        return matched_no
+
+    def _normalise_sample_data(self, sample_ws, det_efficiency_ws, nMeasurements, nComponents):
         """Normalises the sample data using the detector efficiency calibration workspace."""
 
-        normalisation_method = self.getPropertyValue('NormalisationMethod')
-
-        single_efficiency_per_POL = False
-        if mtd[sample_ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
-            single_efficiency_per_POL = True
+        single_eff_per_numor = False
+        single_eff = False
+        eff_entries = mtd[det_efficiency_ws].getNumberOfEntries()
+        sample_entries = mtd[sample_ws].getNumberOfEntries()
+        single_eff_per_twoTheta = False
+        if eff_entries == 1:
+            single_eff = True
+        elif eff_entries != mtd[sample_ws].getNumberOfEntries() \
+                and eff_entries == (sample_entries / nComponents):
+            single_eff_per_numor = True
+        elif (sample_entries / eff_entries / nComponents) % 2 == 0:
+            single_eff_per_twoTheta = True
         tmp_names = []
         for entry_no, entry in enumerate(mtd[sample_ws]):
-            det_eff_entry_no = int(entry_no / 2)
-            if normalisation_method == 'Vanadium':
-                det_eff_entry_no = 0
-            elif single_efficiency_per_POL:
-                det_eff_entry_no = int(entry_no / 2)
-                if entry_no % 2 != 0:
-                    det_eff_entry_no -= 1
-
+            det_eff_no = entry_no
+            if single_eff:
+                det_eff_no = 0
+            elif single_eff_per_numor:
+                det_eff_no = entry_no % nMeasurements
+            elif single_eff_per_twoTheta:
+                det_eff_no = self._find_matching_twoTheta(entry.name(), det_efficiency_ws)
+            elif det_eff_no >= eff_entries:
+                det_eff_no = det_eff_no % eff_entries
             ws_name = entry.name() + '_normalised'
             tmp_names.append(ws_name)
             Divide(LHSWorkspace=entry,
-                   RHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
+                   RHSWorkspace=mtd[det_efficiency_ws][det_eff_no],
                    OutputWorkspace=ws_name)
         output_ws = self.getPropertyValue('OutputWorkspace')
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_ws)
@@ -533,7 +550,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         """Averages data belonging to the same polarisation direction and flipper state, or cross-section type."""
         # assumed naming scheme: numor_pol-dir_flipper-state_cross-section(optional)_normalised(optional)
         cs_present = not self.getProperty("CrossSectionSeparationMethod").isDefault
-        possible_polarisations = ["ZPO", "YPO", "XPO"]  # assuming current uniaxial and XYZ NeXus style
+        possible_polarisations = ["ZPO", "YPO", "XPO", "XMYPO", "XPYPO"]  # 10p is approximate, no data atm
         flipper_states = ["_ON", "_OFF"]
         merging_keys = dict()
         for name in mtd[ws].getNames():
@@ -593,16 +610,16 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         nMeasurements, nComponents = self._data_structure_helper(input_ws)
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if self.getPropertyValue('CrossSectionSeparationMethod') == 'None':
-            if normalisation_method =='Vanadium':
+            if normalisation_method == 'Vanadium':
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
-                output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
+                output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws, nMeasurements, nComponents)
                 if self.getProperty('ClearCache').value:
                     DeleteWorkspace(det_efficiency_ws)
             else:
                 CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws)
         else:
-            component_ws = self._cross_section_separation(input_ws, nMeasurements, nComponents)
+            component_ws = self._cross_section_separation(input_ws, nMeasurements)
             self._set_as_distribution(component_ws)
             if normalisation_method != 'None':
                 if normalisation_method == 'Vanadium':
@@ -610,7 +627,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 else:
                     det_efficiency_input = component_ws
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
-                output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws)
+                output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws, nMeasurements, nComponents)
                 if self.getProperty('ClearCache').value:
                     DeleteWorkspaces(WorkspaceList=[component_ws, det_efficiency_ws])
             else:
