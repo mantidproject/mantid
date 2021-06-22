@@ -274,7 +274,6 @@ class DrillView(QMainWindow):
         exp = self.experimentId.text()
         if (cycle and exp):
             self.cycleAndExperimentChanged.emit(cycle, exp)
-        self.setWindowModified(True)
 
     def copySelectedCells(self):
         """
@@ -387,7 +386,6 @@ class DrillView(QMainWindow):
         for row in rows:
             self.table.deleteRow(row)
             self.rowDeleted.emit(row)
-            self.setWindowModified(True)
 
     def helpWindow(self):
         """
@@ -533,7 +531,6 @@ class DrillView(QMainWindow):
         self.menuAddRemoveColumn.aboutToShow.connect(
                 lambda : self.setAddRemoveColumnMenu(columns))
         self.table.resizeColumnsToContents()
-        self.setWindowModified(False)
 
     def setAddRemoveColumnMenu(self, columns):
         """
