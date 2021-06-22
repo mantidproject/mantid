@@ -12,7 +12,7 @@ from Muon.GUI.Common.utilities import table_utils
 
 from qtpy.QtWidgets import QWidget
 
-ui_fit_function_options, _ = load_ui(__file__, "fit_function_options.ui")
+ui_form, base_widget = load_ui(__file__, "fit_function_options.ui")
 
 ALLOWED_MINIMIZERS = ["Levenberg-Marquardt", "BFGS", "Conjugate gradient (Fletcher-Reeves imp.)",
                       "Conjugate gradient (Polak-Ribiere imp.)", "Damped GaussNewton",
@@ -24,13 +24,13 @@ RAW_DATA_TABLE_ROW = 3
 EVALUATE_AS_TABLE_ROW = 4
 
 
-class FitFunctionOptionsView(QWidget, ui_fit_function_options):
+class FitFunctionOptionsView(ui_form, base_widget):
     """
     The FitFunctionOptionsView includes the Function Name line edit, FunctionBrowser and the fitting options table
     widget. It also holds the Fit Status and Chi Squared labels.
     """
 
-    def __init__(self, parent: QWidget = None, is_frequency_domain: bool = False):
+    def __init__(self, parent: QWidget = None):
         """Initializes the FitFunctionOptionsView and sets up the fit options table and FunctionBrowser."""
         super(FitFunctionOptionsView, self).__init__(parent)
         self.setupUi(self)
@@ -50,11 +50,6 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         self.function_browser.setErrorsEnabled(True)
         self.function_browser.hideGlobalCheckbox()
         self.function_browser.setStretchLastColumn(True)
-
-        if is_frequency_domain:
-            self.fit_options_table.hideRow(RAW_DATA_TABLE_ROW)
-            table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, "Start X")
-            table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, "End X")
 
     def set_slot_for_fit_name_changed(self, slot) -> None:
         """Connect the slot for the fit name being changed by the user."""
@@ -222,6 +217,15 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         self.function_browser.hideGlobalCheckbox()
         self.function_browser.setGlobalParameters([])
 
+    def hide_fit_raw_checkbox(self) -> None:
+        """Hides the Fit Raw checkbox in the fitting options."""
+        self.fit_options_table.hideRow(RAW_DATA_TABLE_ROW)
+
+    def set_start_and_end_x_labels(self, start_x_label: str, end_x_label: str) -> None:
+        """Sets the labels to use for the start and end X labels in the fit options table."""
+        table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, start_x_label)
+        table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, end_x_label)
+
     def _setup_fit_options_table(self) -> None:
         """Setup the fit options table with the appropriate options."""
         self.fit_options_table.setRowCount(5)
@@ -231,11 +235,11 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         self.fit_options_table.horizontalHeader().setStretchLastSection(True)
         self.fit_options_table.setHorizontalHeaderLabels(["Property", "Value"])
 
-        table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, "Time Start")
+        table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, "Start X")
         self.start_x_line_edit, self.start_x_validator = table_utils.addDoubleToTable(self.fit_options_table, 0.0,
                                                                                       START_X_TABLE_ROW, 1)
 
-        table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, "Time End")
+        table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, "End X")
         self.end_x_line_edit, self.end_x_validator = table_utils.addDoubleToTable(self.fit_options_table, 15.0,
                                                                                   END_X_TABLE_ROW, 1)
 

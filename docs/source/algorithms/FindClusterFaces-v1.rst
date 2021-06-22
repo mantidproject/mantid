@@ -10,7 +10,7 @@ Description
 -----------
 
 Algorithm takes an image workspace (a.k.a
-`IMDHistoWorkspace <http://www.mantidproject.org/IMDHistoWorkspace>`_) and determines the faces of
+:ref:`IMDHistoWorkspace <mantid.api.IMDHistoWorkspace>`) and determines the faces of
 the clusters contained within the image. The image is expected to be a
 labeled image workspace outputted from
 :ref:`algm-IntegratePeaksUsingClusters`. The

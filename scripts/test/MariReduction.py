@@ -298,7 +298,7 @@ def main(input_file=None, output_directory=None):
     return output_folder
 
 
-if __name__ == "__main__" or __name__ == "__builtin__":
+if __name__ == "__main__" or __name__ == "__builtin__" or __name__ == "mantidqt.widgets.codeeditor.execution":
     # -------------------------------------------------------------------------------------------------#
     # SECTION USED TO RUN REDUCTION FROM MANTID SCRIPT WINDOW #
     # -------------------------------------------------------------------------------------------------#

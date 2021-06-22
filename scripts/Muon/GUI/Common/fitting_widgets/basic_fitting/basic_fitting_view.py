@@ -10,27 +10,30 @@ from mantidqt.utils.qt import load_ui
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_controls_view import FitControlsView
 from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import FitFunctionOptionsView
+from Muon.GUI.Common.fitting_widgets.basic_fitting.workspace_selector_view import WorkspaceSelectorView
 from Muon.GUI.Common.message_box import warning
 
 from qtpy.QtWidgets import QWidget
 
-ui_fitting_layout, _ = load_ui(__file__, "fitting_layout.ui")
+ui_form, base_widget = load_ui(__file__, "fitting_layout.ui")
 
 
-class BasicFittingView(QWidget, ui_fitting_layout):
+class BasicFittingView(ui_form, base_widget):
     """
     The BasicFittingView has a FitControlsView and a FitFunctionOptionsView. It can be used for Single Fitting.
     """
 
-    def __init__(self, parent: QWidget = None, is_frequency_domain: bool = False):
+    def __init__(self, parent: QWidget = None):
         """Initialize the BasicFittingView and create the FitControlsView and a FitFunctionOptionsView."""
         super(BasicFittingView, self).__init__(parent)
         self.setupUi(self)
 
         self.fit_controls = FitControlsView(self)
-        self.fit_function_options = FitFunctionOptionsView(self, is_frequency_domain)
+        self.workspace_selector = WorkspaceSelectorView(self)
+        self.fit_function_options = FitFunctionOptionsView(self)
 
         self.fit_controls_layout.addWidget(self.fit_controls)
+        self.workspace_selector_layout.addWidget(self.workspace_selector)
         self.fit_function_options_layout.addWidget(self.fit_function_options)
 
         self.disable_tab_observer = GenericObserver(self.disable_view)
@@ -53,6 +56,10 @@ class BasicFittingView(QWidget, ui_fitting_layout):
     def set_slot_for_plot_guess_changed(self, slot) -> None:
         """Connect the slot for the Plot Guess checkbox."""
         self.fit_controls.set_slot_for_plot_guess_changed(slot)
+
+    def set_slot_for_dataset_changed(self, slot) -> None:
+        """Connect the slot for the display workspace combo box being changed."""
+        self.workspace_selector.set_slot_for_dataset_changed(slot)
 
     def set_slot_for_fit_name_changed(self, slot) -> None:
         """Connect the slot for the fit name being changed by the user."""
@@ -86,6 +93,10 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         """Connect the slot for the Use raw option."""
         self.fit_function_options.set_slot_for_use_raw_changed(slot)
 
+    def set_workspace_combo_box_label(self, text: str) -> None:
+        """Sets the label text next to the workspace selector combobox."""
+        self.workspace_selector.set_workspace_combo_box_label(text)
+
     def set_datasets_in_function_browser(self, dataset_names: list) -> None:
         """Sets the datasets stored in the FunctionBrowser."""
         self.fit_function_options.set_datasets_in_function_browser(dataset_names)
@@ -94,6 +105,10 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         """Sets the index of the current dataset."""
         if dataset_index is not None:
             self.fit_function_options.set_current_dataset_index(dataset_index)
+
+    def update_dataset_name_combo_box(self, dataset_names: list) -> None:
+        """Update the data in the parameter display combo box."""
+        self.workspace_selector.update_dataset_name_combo_box(dataset_names)
 
     def update_local_fit_status_and_chi_squared(self, fit_status: str, chi_squared: float) -> None:
         """Updates the view to show the status and results from a fit."""
@@ -109,6 +124,25 @@ class BasicFittingView(QWidget, ui_fitting_layout):
     def update_fit_function(self, fit_function: IFunction) -> None:
         """Updates the parameters of a fit function shown in the view."""
         self.fit_function_options.update_function_browser_parameters(False, fit_function)
+
+    @property
+    def current_dataset_name(self) -> str:
+        """Returns the selected dataset name."""
+        return self.workspace_selector.current_dataset_name
+
+    @current_dataset_name.setter
+    def current_dataset_name(self, dataset_name: str) -> None:
+        """Sets the currently selected dataset name."""
+        self.workspace_selector.current_dataset_name = dataset_name
+
+    def number_of_datasets(self) -> int:
+        """Returns the number of dataset names loaded into the widget."""
+        return self.workspace_selector.number_of_datasets()
+
+    @property
+    def current_dataset_index(self) -> str:
+        """Returns the index of the currently displayed dataset."""
+        return self.workspace_selector.current_dataset_index
 
     @property
     def fit_object(self) -> IFunction:
@@ -179,10 +213,6 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         """Sets the function name being used."""
         self.fit_function_options.function_name = function_name
 
-    def number_of_datasets(self) -> int:
-        """Returns the number of dataset names loaded into the widget."""
-        return self.fit_function_options.number_of_datasets()
-
     def warning_popup(self, message: str) -> None:
         """Displays a warning message."""
         warning(message, parent=self)
@@ -203,6 +233,14 @@ class BasicFittingView(QWidget, ui_fitting_layout):
     def switch_to_single(self) -> None:
         """Switches the view to single fit mode."""
         self.fit_function_options.switch_to_single()
+
+    def hide_fit_raw_checkbox(self) -> None:
+        """Hides the Fit Raw checkbox in the fitting options."""
+        self.fit_function_options.hide_fit_raw_checkbox()
+
+    def set_start_and_end_x_labels(self, start_x_label: str, end_x_label: str) -> None:
+        """Sets the labels to use for the start and end X labels in the fit options table."""
+        self.fit_function_options.set_start_and_end_x_labels(start_x_label, end_x_label)
 
     def disable_view(self) -> None:
         """Disable all widgets in this fitting widget."""

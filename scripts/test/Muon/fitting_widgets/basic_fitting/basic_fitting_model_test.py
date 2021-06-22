@@ -21,7 +21,8 @@ class BasicFittingModelTest(unittest.TestCase):
         FrameworkManager.Instance()
 
     def setUp(self):
-        self.model = BasicFittingModel(setup_context())
+        context = setup_context()
+        self.model = BasicFittingModel(context, context.fitting_context)
         self.dataset_names = ["Name1", "Name2"]
         self.fit_function = FunctionFactory.createFunction("FlatBackground")
         self.single_fit_functions = [self.fit_function.clone(), self.fit_function.clone()]
@@ -301,9 +302,6 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.assertEqual(self.model.function_name, " FuncName")
 
-    def test_that_simultaneous_fitting_mode_returns_false(self):
-        self.assertTrue(not self.model.simultaneous_fitting_mode)
-
     def test_that_use_cached_function_will_replace_the_single_functions_with_the_cached_functions(self):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = [self.fit_function, None]
@@ -379,8 +377,8 @@ class BasicFittingModelTest(unittest.TestCase):
         self.assertEqual(len(self.model.single_fit_functions), 1)
         self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=0")
 
-    def test_that_retrieve_first_good_data_from_run_will_return_the_default_start_x_if_it_cannot_find_the_workspace(self):
-        self.assertEqual(self.model.retrieve_first_good_data_from_run("WorkspaceName"), DEFAULT_START_X)
+    def test_that_retrieve_first_good_data_from_will_return_the_default_start_x_if_it_cannot_find_the_workspace(self):
+        self.assertEqual(self.model.retrieve_first_good_data_from("WorkspaceName"), DEFAULT_START_X)
 
     def test_that_get_active_fit_function_returns_the_currently_selected_fit_function(self):
         self.model.dataset_names = self.dataset_names
@@ -399,22 +397,25 @@ class BasicFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.get_active_fit_results(), [])
 
     def test_update_plot_guess_will_evaluate_the_function(self):
+        guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = self.single_fit_functions
         self.model.start_xs = [0.0, 1.0]
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
+        self.model.plot_guess = True
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
+        self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
         with mock.patch('Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.EvaluateFunction') as mock_evaluate:
             self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
-            self.model.update_plot_guess(True)
+            self.model.update_plot_guess()
             mock_evaluate.assert_called_with(InputWorkspace=self.model.current_dataset_name,
                                              Function=self.model.current_single_fit_function,
                                              StartX=self.model.current_start_x,
                                              EndX=self.model.current_end_x,
-                                             OutputWorkspace="__frequency_domain_analysis_fitting_guessName1")
+                                             OutputWorkspace=guess_workspace_name)
 
     @mock.patch('Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.EvaluateFunction')
     def test_update_plot_guess_notifies_subscribers_with_the_guess_workspace_name_if_plot_guess_is_true(self, mock_evaluate):
@@ -424,17 +425,23 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.start_xs = [0.0, 1.0]
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
+        self.model.plot_guess = True
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
-        self.model.update_plot_guess(True)
+        self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
+        self.mock_context_guess_workspace_name = mock.PropertyMock(return_value=guess_workspace_name)
+        type(self.model.fitting_context).guess_workspace_name = self.mock_context_guess_workspace_name
+        self.model.update_plot_guess()
+
         mock_evaluate.assert_called_with(InputWorkspace=self.model.current_dataset_name,
                                          Function=self.model.current_single_fit_function,
                                          StartX=self.model.current_start_x,
                                          EndX=self.model.current_end_x,
                                          OutputWorkspace=guess_workspace_name)
-        self.assertEqual(1, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
-        self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(True, guess_workspace_name)
+
+        self.assertEqual(1, self.mock_context_guess_workspace_name.call_count)
+        self.mock_context_guess_workspace_name.assert_called_with(guess_workspace_name)
 
     def test_update_plot_guess_notifies_subscribers_with_the_guess_workspace_name_as_none_if_plot_guess_is_false(self):
         self.model.dataset_names = self.dataset_names
@@ -442,29 +449,35 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.start_xs = [0.0, 1.0]
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
+        self.model.plot_guess = False
 
         self.model.context = mock.Mock()
-        self.model.update_plot_guess(False)
+        self.mock_context_guess_workspace_name = mock.PropertyMock(return_value=None)
+        type(self.model.fitting_context).guess_workspace_name = self.mock_context_guess_workspace_name
+        self.model.update_plot_guess()
 
-        self.assertEqual(1, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
-        self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(False, None)
+        self.assertEqual(1, self.mock_context_guess_workspace_name.call_count)
+        self.mock_context_guess_workspace_name.assert_called_with(None)
 
     def test_update_plot_guess_will_evaluate_the_function_when_in_double_fit_mode(self):
+        guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = self.single_fit_functions
         self.model.start_xs = [0.0, 1.0]
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
+        self.model.plot_guess = True
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=True)
         self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
         self.model._evaluate_double_pulse_function = mock.Mock()
 
-        self.model.update_plot_guess(True)
+        self.model.update_plot_guess()
 
         self.model._evaluate_double_pulse_function.assert_called_once_with(
-            self.model.current_single_fit_function, "__frequency_domain_analysis_fitting_guessName1")
+            self.model.current_single_fit_function, guess_workspace_name)
 
     def test_perform_fit_will_call_the_correct_function_for_a_single_fit(self):
         self.model.dataset_names = self.dataset_names

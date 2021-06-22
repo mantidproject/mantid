@@ -25,7 +25,7 @@ MuSR Changes
 New
 ###
 
-* :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>` GUI added to Workbench.
+* :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>` GUI added to Workbench.
 * :ref:`Muon ALC GUI <MuonALC-ref>` added to Workbench.
 * Added phase tab for calculating :ref:`phase tables <algm-CalMuonDetectorPhases>` and :ref:`PhaseQuad <algm-PhaseQuad>`
   workspaces to Frequency Domain Analysis GUI.

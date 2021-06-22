@@ -64,6 +64,7 @@ This was last updated for Release 5.1. Check if the organiser has considered if 
     Script Editor / Interpreter,:r:`Y`,,,:o:`Y`,"Check basic functionality, such as checking the buttons/options at the top of SE, running algorithms, accessing workspace properties in both environments. Does autocompletion work for mantid algorithms/numpy/matplotlib? :ref:`02_scripts`"
     MantidPython and Jupyter Notebook,:r:`Y`,:b:`Y`,:g:`Y`,,"Open MantidPython and a Jupyter Notebook. Check you can import mantid.simpleapi and run a script/notebook. `Click here <https://www.mantidproject.org/Using_IPython_Notebook>`_ for Further Instructions and an example Notebook (You may need to rename without spaces)"
     Memory Widget,:r:`Y`,:b:`Y`,:g:`Y`,:o:`Y`,"Check that the System Memory Usage widget updates at a frequency of no more than once every two seconds, ideally on a system with limited resourses. Check that the default position of the widget is in the top right, in the same column as the Messages widget."
+    Script Repository,,:b:`Y`,:g:`Y`,:o:`Y`,"Test downloading and uploading scripts to the Script Repository. Try to move the Script Repository to another folder. Check out `this <http://www.mantidproject.org/ScriptRepository>`__ page for more information."
 
 .. csv-table:: Larger tasks
     :widths: 10 20 5 5 5 5 50

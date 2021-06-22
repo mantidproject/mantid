@@ -56,7 +56,7 @@ IAlgorithm_sptr setUpAlgorithmWithoutOptionalProperties(const WorkspaceGroup_spt
   const std::vector<int> group2 = {3, 4};
 
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName, name, group1, group2);
+  auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName, name, group1, group2);
   return alg;
 }
 
@@ -64,7 +64,7 @@ IAlgorithm_sptr setUpAlgorithmWithoutOptionalProperties(const WorkspaceGroup_spt
 IAlgorithm_sptr setUpAlgorithmWithGroups(const WorkspaceGroup_sptr &ws, const std::vector<int> &group1,
                                          const std::vector<int> &group2) {
   setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName, "pair1", group1, group2);
+  auto alg = algorithmWithoutOptionalPropertiesSet(setup.inputWSName, "pair1", group1, group2);
   return alg;
 }
 

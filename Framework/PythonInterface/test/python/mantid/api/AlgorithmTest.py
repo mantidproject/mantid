@@ -60,7 +60,7 @@ class AlgorithmTest(unittest.TestCase):
 
         as_str = str(alg)
         self.assertEqual(as_str, '{"name":"CreateWorkspace","properties":{"DataX":[1.5,2.5,3.5],"DataY":[1.5,2.5,3.5],'
-                          '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
+                          '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}')
 
     def test_execute_succeeds_with_unicode_props(self):
         data = [1.5,2.5,3.5]
@@ -80,7 +80,7 @@ class AlgorithmTest(unittest.TestCase):
 
         as_str = str(alg)
         self.assertEqual(as_str, '{"name":"CreateWorkspace","properties":{"DataX":[1.5,2.5,3.5],"DataY":[1.5,2.5,3.5],'
-                          '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
+                          '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}')
 
     def test_execute_succeeds_with_unicode_kwargs(self):
         props = json.loads('{"DryRun":true}') # this is always unicode

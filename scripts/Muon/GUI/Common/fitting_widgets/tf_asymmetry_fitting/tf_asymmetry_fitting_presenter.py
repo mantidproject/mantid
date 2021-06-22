@@ -79,14 +79,14 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
         if self._update_plot:
             self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
-            self.model.update_plot_guess(self.view.plot_guess)
+            self.update_plot_guess()
 
         self.fitting_mode_changed_notifier.notify_subscribers()
 
     def handle_normalisation_changed(self) -> None:
         """Handles when the normalisation line edit has been changed by the user."""
         self.model.set_current_normalisation(self.view.normalisation)
-        self.model.update_plot_guess(self.view.plot_guess)
+        self.update_plot_guess()
 
         self.fit_parameter_changed_notifier.notify_subscribers()
 
