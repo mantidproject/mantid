@@ -10,17 +10,23 @@ from Muon.GUI.Common.corrections_tab_widget.corrections_model import Corrections
 from Muon.GUI.Common.corrections_tab_widget.corrections_view import CorrectionsView
 from Muon.GUI.Common.utilities.load_utils import get_table_workspace_names_from_ADS, load_dead_time_from_filename
 
+from qtpy.QtCore import QMetaObject, QObject, Slot
 
-class CorrectionsPresenter:
+
+class CorrectionsPresenter(QObject):
     """
     The CorrectionsPresenter has a CorrectionsView and CorrectionsModel.
     """
 
     def __init__(self, view: CorrectionsView, model: CorrectionsModel):
         """Initialize the CorrectionsPresenter. Sets up the slots and event observers."""
+        super(CorrectionsPresenter, self).__init__()
         self.view = view
         self.model = model
 
+        self.initialize_model_options()
+
+        self.view.set_slot_for_run_selector_changed(self.handle_run_selector_changed)
         self.view.set_slot_for_dead_time_from_selector_changed(self.handle_dead_time_from_selector_changed)
         self.view.set_slot_for_dead_time_workspace_selector_changed(self.handle_dead_time_workspace_selector_changed)
         self.view.set_slot_for_dead_time_file_browse_clicked(self.handle_dead_time_browse_clicked)
@@ -28,8 +34,13 @@ class CorrectionsPresenter:
         self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
         self.load_observer = GenericObserver(self.handle_runs_loaded)
+        self.corrections_complete_observer = GenericObserver(self.handle_corrections_complete)
 
         self.perform_corrections_notifier = GenericObservable()
+
+    def initialize_model_options(self) -> None:
+        """Initialise the model with the default fitting options."""
+        self.model.set_dead_time_source_to_from_file()
 
     def update_view_from_model(self) -> None:
         """Updates the view based on the settings saved in the model."""
@@ -38,18 +49,24 @@ class CorrectionsPresenter:
         elif self.model.is_dead_time_source_from_workspace():
             self.view.set_dead_time_from_workspace_selected()
 
-        self.handle_dead_time_from_selector_changed()
-
     def handle_instrument_changed(self) -> None:
         """User changes the selected instrument."""
         self.set_dead_time_source_to_from_file()
 
     def handle_runs_loaded(self) -> None:
-        """Handles when new run numbers are loaded."""
+        """Handles when new run numbers are loaded. QMetaObject is required so its executed on the GUI thread."""
+        QMetaObject.invokeMethod(self, "_handle_runs_loaded")
+
+    @Slot()
+    def _handle_runs_loaded(self) -> None:
+        """Handles when new run numbers are loaded from the GUI thread."""
         self.model.update_run_numbers()
         self.view.update_run_selector_combo_box(self.model.run_numbers())
         self.model.set_current_run_index(self.view.current_run_index())
 
+    def handle_run_selector_changed(self) -> None:
+        """Handles when the run selector is changed."""
+        self.model.set_current_run_index(self.view.current_run_index())
         self._set_dead_time_info_text_using_average()
 
     def handle_dead_time_from_selector_changed(self) -> None:
@@ -115,26 +132,24 @@ class CorrectionsPresenter:
             else:
                 self.view.warning_popup("File does not appear to contain dead time data.")
 
+    def handle_corrections_complete(self) -> None:
+        """When the corrections have been calculated, update the displayed dead time averages."""
+        self._set_dead_time_info_text_using_average()
+
     def set_dead_time_source_to_from_file(self) -> None:
         """Sets the dead time source to be from the data file and notifies the GUI to recalculate the corrections."""
         self.model.set_dead_time_source_to_from_file()
         self.perform_corrections_notifier.notify_subscribers()
-
-        self._set_dead_time_info_text_using_average()
 
     def set_dead_time_source_to_from_ADS(self) -> None:
         """Sets the dead time source to be the ADS and notifies the GUI to recalculate the corrections."""
         self.model.set_dead_time_source_to_from_ADS(self.view.selected_dead_time_workspace())
         self.perform_corrections_notifier.notify_subscribers()
 
-        self._set_dead_time_info_text_using_average()
-
     def set_dead_time_source_to_none(self) -> None:
         """Sets the dead time source to be none and notifies the GUI to recalculate the corrections."""
         self.model.set_dead_time_source_to_none()
         self.perform_corrections_notifier.notify_subscribers()
-
-        self._set_dead_time_info_text_using_average()
 
     def _set_dead_time_info_text_using_average(self) -> None:
         """Sets the dead time average and range text to zero."""

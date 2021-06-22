@@ -33,6 +33,10 @@ class CorrectionsView(widget, ui_form):
         self.dead_time_corrections_view = DeadTimeCorrectionsView(self)
         self.dead_time_layout.addWidget(self.dead_time_corrections_view)
 
+    def set_slot_for_run_selector_changed(self, slot) -> None:
+        """Connect the slot for the Run Selector combobox"""
+        self.run_selector.set_slot_for_dataset_changed(slot)
+
     def set_slot_for_dead_time_from_selector_changed(self, slot) -> None:
         """Connect the slot for the Dead Time Selector Combobox."""
         self.dead_time_corrections_view.set_slot_for_dead_time_from_selector_changed(slot)
