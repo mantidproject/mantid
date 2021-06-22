@@ -117,18 +117,11 @@ class DrillTableWidget(QTableWidget):
         Args:
             item (DrillTableItem): the item
         """
-        if item.text() == "":
-            if item.getPresenter() is not None:
-                row = item.row()
-                col = item.column()
-                self._samplePresenters[row].onDelItem(self._columns[col])
-                self.takeItem(row, col)
-        else:
-            if item.getPresenter() is None:
-                row = item.row()
-                col = item.column()
-                self._samplePresenters[row].onNewItem(self._columns[col], item)
-            item.signals.dataChanged.emit()
+        if item.getPresenter() is None:
+            row = item.row()
+            col = item.column()
+            self._samplePresenters[row].onNewItem(self._columns[col], item)
+        item.signals.dataChanged.emit()
 
     def itemFromName(self, row, name):
         """

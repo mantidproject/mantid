@@ -17,15 +17,21 @@ class DrillParameterPresenter:
     _item = None
 
     """
+    Reference to the sample model (DrillSample).
+    """
+    _sample = None
+
+    """
     Reference to the parameter model.
     """
     _parameter = None
 
     ERROR_COLOR = "#3fff0000"
 
-    def __init__(self, item, parameter):
+    def __init__(self, item, sample, parameter):
         self._item = item
         self._item.setPresenter(self)
+        self._sample = sample
         self._parameter = parameter
         self._parameter.checked.connect(self.onChecked)
         self._item.signals.dataChanged.connect(self.onDataChanged)
@@ -37,7 +43,14 @@ class DrillParameterPresenter:
         the changes to the model.
         """
         value = self._item.text()
-        self._parameter.setValue(value)
+        if value == "":
+            # if value is empty, delete the parameter and the presenter
+            self._sample.delParameter(self._parameter.getName())
+            self._parameter = None
+            self._item.setPresenter(None)
+        else:
+            # else, propagate the value
+            self._parameter.setValue(value)
 
     def onChecked(self):
         """
