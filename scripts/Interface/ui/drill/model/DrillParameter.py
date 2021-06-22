@@ -57,7 +57,7 @@ class DrillParameter(QObject):
     """
     Validation state of the parameter value.
     """
-    _valid = False
+    _valid = True
 
     """
     Error message associated to an invalid state.
