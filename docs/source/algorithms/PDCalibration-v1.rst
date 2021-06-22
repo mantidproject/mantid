@@ -95,6 +95,8 @@ Output:
 
 **Example - PDCalibration with BackToBackExponential fit function**
 
+The following example shows how to use PDCalibration with the BackToBackExponential fit function. The fit works best if sensible initial values for the parameters are specified in an instrument definition or parameter file (for more details, see the :ref:`fitting parameters <Using fitting parameter>` documentation):
+
 .. code-block:: python
 
    Load(Filename=r'ENGINX00193749.nxs', OutputWorkspace='193749')
