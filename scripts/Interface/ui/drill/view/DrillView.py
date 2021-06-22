@@ -557,16 +557,6 @@ class DrillView(QMainWindow):
         """
         return self.table.getAllRows()
 
-    def getCellContents(self, row, column):
-        """
-        Get the contents of a specific cell.
-
-        Args:
-            row (int): row index
-            column (str): column name
-        """
-        return self.table.getCellContents(row, self.columns.index(column))
-
     def setAddRemoveColumnMenu(self, columns):
         """
         Fill the "add/remove column" menu. This function is triggered each time
@@ -590,19 +580,6 @@ class DrillView(QMainWindow):
 
         self.menuAddRemoveColumn.triggered.connect(
                 lambda action: self.table.toggleColumnVisibility(action.text()))
-
-    def setCellContents(self, row, column, value):
-        """
-        Set the contents of a specific cell.
-
-        Args:
-            row (int): row index
-            column (str): column name
-            value (str): column contents
-        """
-        if row >= self.table.rowCount() or column not in self.columns:
-            return
-        self.table.setCellContents(row, self.columns.index(column), value)
 
     def set_progress(self, n, nmax):
         """
