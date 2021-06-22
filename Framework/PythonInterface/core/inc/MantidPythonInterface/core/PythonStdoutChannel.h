@@ -17,13 +17,30 @@
 
 #pragma once
 
+// local includes
 #include "MantidPythonInterface/core/DllConfig.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/WrapPython.h"
+
+// 3rd-party includes
+#include "MantidKernel/StdoutChannel.h"
 #include <Poco/ConsoleChannel.h>
+#include <pybind11/iostream.h>
+
+// standard includes
 #include <iostream>
 
 namespace Poco {
+
+class MANTID_PYTHONINTERFACE_CORE_DLL PyBindStdoutChannel : public StdoutChannel {
+
+public:
+  /// Constructor for PythonStdoutChannel
+  PyBindStdoutChannel() : StdoutChannel() {}
+
+private:
+  pybind11::scoped_ostream_redirect m_redirect;
+};
 
 class MANTID_PYTHONINTERFACE_CORE_DLL PythonStdoutChannel : public ConsoleChannel {
 public:
