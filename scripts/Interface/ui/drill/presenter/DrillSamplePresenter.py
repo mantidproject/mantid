@@ -49,7 +49,6 @@ class DrillSamplePresenter:
             presenter = DrillParametersPresenter(item, self._sample)
         else:
             parameter = self._sample.addParameter(name)
-            parameter.setValue(item.text())
 
     def onDelItem(self, name):
         """
