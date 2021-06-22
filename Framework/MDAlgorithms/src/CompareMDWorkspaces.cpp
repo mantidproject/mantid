@@ -40,6 +40,10 @@ private:
   float mError;
 
 public:
+  /// static tolerance
+  static float s_tolerance;
+  // static float s_tolerance {static_cast<float>(1E-7)};
+
   SimpleMDEvent(const std::vector<float> &coordinates, const float &signal, const float &error)
       : mCoordinates(coordinates), mSignal(signal), mError(error) {}
 
@@ -84,11 +88,11 @@ public:
       // equal is hard to tell
       coord_t diff = mCoordinates[i] - event2.mCoordinates[i];
 
-      if (fabs(mCoordinates[i]) > 1E-7 && fabs(diff / mCoordinates[i]) < 1E-6) {
+      if (fabs(mCoordinates[i]) > s_tolerance && fabs(diff / mCoordinates[i]) < s_tolerance * 10.) {
         // larger than epsilon and relative difference less than epsilon
         equal = true;
         less = false;
-      } else if (fabs(mCoordinates[i]) < 1E-7 && fabs(diff) < 1E-7) {
+      } else if (fabs(mCoordinates[i]) < s_tolerance && fabs(diff) < s_tolerance) {
         // less than epsilon and absolute difference less than epsilon
         equal = true;
         less = false;
@@ -124,46 +128,6 @@ public:
 
   bool operator()(const SimpleMDEvent &lx, const SimpleMDEvent &rx) const { return lx < rx; }
 
-  //  bool operator>(const SimpleMDEvent &event2) {
-
-  //    // compare coordinates
-  //    size_t numdirs = mCoordinates.size();
-  //    for (size_t i = 0; i < numdirs; ++i) {
-  //      if (mCoordinates[i] <= event2.mCoordinates[i])
-  //        return false;
-  //    }
-
-  //    // signal
-  //    if (mSignal <= event2.mSignal)
-  //      return false;
-
-  //    // error
-  //    if (mError <= event2.mError)
-  //      return false;
-
-  //    return true;
-  //  }
-
-  //  bool operator==(const SimpleMDEvent &event2) {
-
-  //    // compare coordinates
-  //    size_t numdirs = mCoordinates.size();
-  //    for (size_t i = 0; i < numdirs; ++i) {
-  //      if (mCoordinates[i] != event2.mCoordinates[i])
-  //        return false;
-  //    }
-
-  //    // signal
-  //    if (mSignal != event2.mSignal)
-  //      return false;
-
-  //    // error
-  //    if (mError != event2.mError)
-  //      return false;
-
-  //    return true;
-  //  }
-
   SimpleMDEvent &operator=(const SimpleMDEvent &event2) {
     // coordiate
     size_t numdirs = mCoordinates.size();
@@ -177,6 +141,9 @@ public:
   }
 };
 
+float SimpleMDEvent::s_tolerance(static_cast<float>(1E-7));
+
+//----------------------------------------------------------------------------------------------
 bool compareSimpleEvents(SimpleMDEvent &self, const SimpleMDEvent &other) { return (self < other); }
 
 // Register the algorithm into the AlgorithmFactory
@@ -193,8 +160,6 @@ int CompareMDWorkspaces::version() const { return 1; }
 const std::string CompareMDWorkspaces::category() const { return "MDAlgorithms\\Utility\\Workspaces"; }
 
 //----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CompareMDWorkspaces::init() {
@@ -204,6 +169,8 @@ void CompareMDWorkspaces::init() {
                   "Second MDWorkspace to compare.");
 
   declareProperty("Tolerance", 0.0, "The maximum amount by which values may differ between the workspaces.");
+  declareProperty("MDEventTolerance", 1E-7,
+                  "The maximum amount by which values may differ between 2 MDEvents to compare.");
   declareProperty("CheckEvents", true,
                   "Whether to compare each MDEvent. If "
                   "False, will only look at the box "
@@ -325,10 +292,11 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
 
   bool boxes_same(true);
   std::string errormessage("");
+  int num_boxes = static_cast<int>(boxes1.size());
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-  for (size_t ibox = 0; ibox < boxes1.size(); ibox++) {
+  for (int ibox = 0; ibox < num_boxes; ibox++) {
     PARALLEL_START_INTERUPT_REGION
     // No need to compare because the boxes are not same already
     if (!boxes_same) {
@@ -344,7 +312,7 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
                   << "; ws2 npoints = " << box2->getNPoints() << "\n";
 
     try {
-      CompareMDWorkspaces::compare2Boxes<MDE, nd>(box1, box2, ibox);
+      CompareMDWorkspaces::compare2Boxes<MDE, nd>(box1, box2, static_cast<size_t>(ibox));
     } catch (CompareFailsException &err) {
       local_fail = true;
       local_error += err.what();
@@ -501,6 +469,10 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
 void CompareMDWorkspaces::doComparison() {
   m_tolerance = getProperty("Tolerance");
   m_CheckEvents = getProperty("CheckEvents");
+  if (m_CheckEvents) {
+    double x = getProperty("MDEventTolerance");
+    SimpleMDEvent::s_tolerance = static_cast<float>(x);
+  }
 
   IMDWorkspace_sptr ws1 = getProperty("Workspace1");
   IMDWorkspace_sptr ws2 = getProperty("Workspace2");
