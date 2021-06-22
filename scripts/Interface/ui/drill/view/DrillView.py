@@ -131,11 +131,6 @@ class DrillView(QMainWindow):
     """
     automaticFilling = Signal()
 
-    # colors for the table rows
-    OK_COLOR = "#3f00ff00"
-    ERROR_COLOR = "#3fff0000"
-    PROCESSING_COLOR = "#3fffff00"
-
     def __init__(self, parent=None, window_flags=None):
         super(DrillView, self).__init__(parent)
         if window_flags:
@@ -657,42 +652,6 @@ class DrillView(QMainWindow):
             self.table.setCursor(Qt.WaitCursor)
         else:
             self.table.setCursor(Qt.ArrowCursor)
-
-    def unsetRowBackground(self, row):
-        """
-        Remove any background for a specific row.
-
-        Args:
-            row (int): row index
-        """
-        self.table.removeRowBackground(row)
-
-    def setRowProcessing(self, row):
-        """
-        Set a row as currently processing.
-
-        Args:
-            row (int): the row index
-        """
-        self.table.setRowBackground(row, self.PROCESSING_COLOR)
-
-    def setRowDone(self, row):
-        """
-        Set a row as done with success.
-
-        Args:
-            row (int): the row index
-        """
-        self.table.setRowBackground(row, self.OK_COLOR)
-
-    def setRowError(self, row):
-        """
-        Set a row as done with error.
-
-        Args:
-            row (int): the row index
-        """
-        self.table.setRowBackground(row, self.ERROR_COLOR)
 
     def setVisualSettings(self, visualSettings):
         """
