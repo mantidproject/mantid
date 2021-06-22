@@ -323,136 +323,161 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
   this->compare(boxes1.size(), boxes2.size(), "Workspaces do not have the same number of boxes. " + boxinfo);
   g_log.information(boxinfo);
 
+  bool boxes_same(true);
+  std::string errormessage("");
+
   for (size_t ibox = 0; ibox < boxes1.size(); ibox++) {
+
+    // No need to compare because the boxes are not same already
+    if (!boxes_same) {
+      continue;
+    }
 
     API::IMDNode *box1 = boxes1[ibox];
     API::IMDNode *box2 = boxes2[ibox];
+    g_log.debug() << "Box " << ibox << "ws1 npoints = " << box1->getNPoints()
+                  << "; ws2 npoints = " << box2->getNPoints() << "\n";
 
+    try {
+      CompareMDWorkspaces::compare2Boxes<MDE, nd>(box1, box2, ibox);
+    } catch (CompareFailsException &err) {
+      boxes_same = false;
+      errormessage += err.what();
+    }
+  } // for box
+
+  // throw altogether
+  if (!boxes_same) {
+    throw CompareFailsException(errormessage);
+  }
+}
+
+template <typename MDE, size_t nd>
+void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, size_t ibox) {
+
+  if (m_CompareBoxID)
+    this->compare(box1->getID(), box2->getID(), "Boxes have different ID");
+  else {
+    if (box1->getID() != box2->getID())
+      g_log.debug() << " Boxes N: " << ibox << " have box ID: " << box1->getID() << " and " << box2->getID()
+                    << " correspondingly\n";
+  }
+  this->compare(size_t(box1->getDepth()), size_t(box2->getDepth()), "Boxes are at a different depth");
+  this->compare(box1->getNumChildren(), box2->getNumChildren(), "Boxes do not have the same number of children");
+
+  for (size_t i = 0; i < box1->getNumChildren(); i++) {
     if (m_CompareBoxID)
-      this->compare(box1->getID(), box2->getID(), "Boxes have different ID");
+      this->compare(box1->getChild(i)->getID(), box2->getChild(i)->getID(), "Child of boxes do not match IDs");
     else {
       if (box1->getID() != box2->getID())
-        g_log.debug() << " Boxes N: " << ibox << " have box ID: " << box1->getID() << " and " << box2->getID()
-                      << " correspondingly\n";
-    }
-    this->compare(size_t(box1->getDepth()), size_t(box2->getDepth()), "Boxes are at a different depth");
-    this->compare(box1->getNumChildren(), box2->getNumChildren(), "Boxes do not have the same number of children");
-
-    for (size_t i = 0; i < box1->getNumChildren(); i++) {
-      if (m_CompareBoxID)
-        this->compare(box1->getChild(i)->getID(), box2->getChild(i)->getID(), "Child of boxes do not match IDs");
-      else {
-        if (box1->getID() != box2->getID())
-          g_log.debug() << " Boxes N: " << ibox << " children N: " << i
-                        << " have box ID: " << box1->getChild(i)->getID() << " and " << box2->getChild(i)->getID()
-                        << " correspondingly\n";
-      }
-    }
-
-    for (size_t d = 0; d < nd; d++) {
-      this->compareTol(box1->getExtents(d).getMin(), box2->getExtents(d).getMin(), "Extents of box do not match");
-      this->compareTol(box1->getExtents(d).getMax(), box2->getExtents(d).getMax(), "Extents of box do not match");
-    }
-    this->compareTol(box1->getInverseVolume(), box2->getInverseVolume(), "Box inverse volume does not match");
-    this->compareTol(box1->getSignal(), box2->getSignal(), "Box signal does not match");
-    this->compareTol(box1->getErrorSquared(), box2->getErrorSquared(), "Box error squared does not match");
-    if (m_CheckEvents)
-      this->compare(box1->getNPoints(), box2->getNPoints(), "Number of points in box does not match");
-
-    // Are both MDGridBoxes ?
-    auto *gridbox1 = dynamic_cast<MDGridBox<MDE, nd> *>(box1);
-    auto *gridbox2 = dynamic_cast<MDGridBox<MDE, nd> *>(box2);
-    if (gridbox1 && gridbox2) {
-      // MDGridBox: compare box size on each dimension
-      for (size_t d = 0; d < nd; d++)
-        this->compareTol(gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), "Box sizes do not match");
-    } else {
-      // Could be both MDBoxes (with events)
-      auto *mdbox1 = dynamic_cast<MDBox<MDE, nd> *>(box1);
-      auto *mdbox2 = dynamic_cast<MDBox<MDE, nd> *>(box2);
-      g_log.debug() << "Box " << ibox << "ws1 npoints = " << box1->getNPoints()
-                    << "; ws2 npoints = " << box2->getNPoints() << "\n";
-
-      // Rule out the case if one and only one box is MDBox
-      if (mdbox1 && !mdbox2) {
-        // workspace 2's is MDBox but workspace 1 is not
-        throw CompareFailsException("Worksapce 2's Box " + std::to_string(ibox) + " is not MDBox");
-      } else if (!mdbox1 && mdbox2) {
-        // workspace 2's is MDBox but workspace 1 is not
-        throw CompareFailsException("Worksapce 1's Box " + std::to_string(ibox) + " is not MDBox");
-      }
-
-      // Both boxes are MDBoxes:
-      if (m_CheckEvents) {
-        const std::vector<MDE> &events1 = mdbox1->getConstEvents();
-        const std::vector<MDE> &events2 = mdbox2->getConstEvents();
-
-        try {
-          this->compare(events1.size(), events2.size(), "Box event vectors are not the same length");
-
-          if (events1.size() == events2.size() && events1.size() > 2) {
-
-            std::vector<SimpleMDEvent> events_vec1;
-            std::vector<SimpleMDEvent> events_vec2;
-
-            // convert MDEvents vectors to SimpleMDEvent vectors for comparison
-            for (size_t i = 0; i < events1.size(); i++) {
-              std::vector<float> centers1(nd);
-              std::vector<float> centers2(nd);
-              for (size_t d = 0; d < nd; d++) {
-                centers1[d] = events1[i].getCenter(d);
-                centers2[d] = events2[i].getCenter(d);
-              }
-              SimpleMDEvent se1(centers1, events1[i].getSignal(), events1[i].getErrorSquared());
-              SimpleMDEvent se2(centers2, events2[i].getSignal(), events2[i].getErrorSquared());
-              events_vec1.push_back(se1);
-              events_vec2.push_back(se2);
-            }
-
-            // sort events for comparing
-            std::sort(events_vec1.begin(), events_vec1.end());
-            std::sort(events_vec2.begin(), events_vec2.end());
-
-            // compare MEEvents
-            bool same = true;
-            size_t numdiff = 0;
-            for (size_t i = 0; i < events_vec1.size(); ++i) {
-              try {
-                // coordinate
-                for (size_t d = 0; d < nd; ++d) {
-                  compareTol(events_vec1[i].getCenter(d), events_vec2[i].getCenter(d),
-                             "dim " + std::to_string(d) + " ");
-                }
-                // signal
-                compareTol(events_vec1[i].getSignal(), events_vec2[i].getSignal(), "");
-                // error
-                compareTol(events_vec1[i].getError(), events_vec2[i].getError(), "");
-              } catch (CompareFailsException &e) {
-                g_log.debug() << "Box " << ibox << " Event " << i << ": " << e.what()
-                              << "\n    [ws1] : " + events_vec1[i].str() << "\n    [ws2] : " + events_vec2[i].str()
-                              << "\n";
-                numdiff++;
-                same = false;
-              }
-            }
-
-            if (!same) {
-              std::string diffmessage("Box " + std::to_string(ibox) +
-                                      " Number of different MDEvents =  " + std::to_string(numdiff));
-              throw CompareFailsException("MDEvents are not the same!\n" + diffmessage);
-            }
-          }
-        } catch (CompareFailsException &) {
-          // Boxes must release events if the check fails
-          mdbox1->releaseEvents();
-          mdbox2->releaseEvents();
-          throw;
-        }
-        mdbox1->releaseEvents();
-        mdbox2->releaseEvents();
-      }
+        g_log.debug() << " Boxes N: " << ibox << " children N: " << i << " have box ID: " << box1->getChild(i)->getID()
+                      << " and " << box2->getChild(i)->getID() << " correspondingly\n";
     }
   }
+
+  for (size_t d = 0; d < nd; d++) {
+    this->compareTol(box1->getExtents(d).getMin(), box2->getExtents(d).getMin(), "Extents of box do not match");
+    this->compareTol(box1->getExtents(d).getMax(), box2->getExtents(d).getMax(), "Extents of box do not match");
+  }
+  this->compareTol(box1->getInverseVolume(), box2->getInverseVolume(), "Box inverse volume does not match");
+  this->compareTol(box1->getSignal(), box2->getSignal(), "Box signal does not match");
+  this->compareTol(box1->getErrorSquared(), box2->getErrorSquared(), "Box error squared does not match");
+  if (m_CheckEvents)
+    this->compare(box1->getNPoints(), box2->getNPoints(), "Number of points in box does not match");
+
+  // Are both MDGridBoxes ?
+  auto *gridbox1 = dynamic_cast<MDGridBox<MDE, nd> *>(box1);
+  auto *gridbox2 = dynamic_cast<MDGridBox<MDE, nd> *>(box2);
+  if (gridbox1 && gridbox2) {
+    // MDGridBox: compare box size on each dimension
+    for (size_t d = 0; d < nd; d++)
+      this->compareTol(gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), "Box sizes do not match");
+  } else {
+    // Could be both MDBoxes (with events)
+    auto *mdbox1 = dynamic_cast<MDBox<MDE, nd> *>(box1);
+    auto *mdbox2 = dynamic_cast<MDBox<MDE, nd> *>(box2);
+    g_log.debug() << "Box " << ibox << "ws1 npoints = " << box1->getNPoints()
+                  << "; ws2 npoints = " << box2->getNPoints() << "\n";
+
+    // Rule out the case if one and only one box is MDBox
+    if (mdbox1 && !mdbox2) {
+      // workspace 2's is MDBox but workspace 1 is not
+      throw CompareFailsException("Worksapce 2's Box " + std::to_string(ibox) + " is not MDBox");
+    } else if (!mdbox1 && mdbox2) {
+      // workspace 2's is MDBox but workspace 1 is not
+      throw CompareFailsException("Worksapce 1's Box " + std::to_string(ibox) + " is not MDBox");
+    }
+
+    // Both boxes are MDBoxes:
+    if (m_CheckEvents) {
+      const std::vector<MDE> &events1 = mdbox1->getConstEvents();
+      const std::vector<MDE> &events2 = mdbox2->getConstEvents();
+
+      try {
+        this->compare(events1.size(), events2.size(), "Box event vectors are not the same length");
+
+        if (events1.size() == events2.size() && events1.size() > 2) {
+
+          std::vector<SimpleMDEvent> events_vec1;
+          std::vector<SimpleMDEvent> events_vec2;
+
+          // convert MDEvents vectors to SimpleMDEvent vectors for comparison
+          for (size_t i = 0; i < events1.size(); i++) {
+            std::vector<float> centers1(nd);
+            std::vector<float> centers2(nd);
+            for (size_t d = 0; d < nd; d++) {
+              centers1[d] = events1[i].getCenter(d);
+              centers2[d] = events2[i].getCenter(d);
+            }
+            SimpleMDEvent se1(centers1, events1[i].getSignal(), events1[i].getErrorSquared());
+            SimpleMDEvent se2(centers2, events2[i].getSignal(), events2[i].getErrorSquared());
+            events_vec1.push_back(se1);
+            events_vec2.push_back(se2);
+          }
+
+          // sort events for comparing
+          std::sort(events_vec1.begin(), events_vec1.end());
+          std::sort(events_vec2.begin(), events_vec2.end());
+
+          // compare MEEvents
+          bool same = true;
+          size_t numdiff = 0;
+          for (size_t i = 0; i < events_vec1.size(); ++i) {
+            try {
+              // coordinate
+              for (size_t d = 0; d < nd; ++d) {
+                compareTol(events_vec1[i].getCenter(d), events_vec2[i].getCenter(d), "dim " + std::to_string(d) + " ");
+              }
+              // signal
+              compareTol(events_vec1[i].getSignal(), events_vec2[i].getSignal(), "");
+              // error
+              compareTol(events_vec1[i].getError(), events_vec2[i].getError(), "");
+            } catch (CompareFailsException &e) {
+              g_log.debug() << "Box " << ibox << " Event " << i << ": " << e.what()
+                            << "\n    [ws1] : " + events_vec1[i].str() << "\n    [ws2] : " + events_vec2[i].str()
+                            << "\n";
+              numdiff++;
+              same = false;
+            }
+          }
+
+          if (!same) {
+            std::string diffmessage("Box " + std::to_string(ibox) +
+                                    " Number of different MDEvents =  " + std::to_string(numdiff));
+            throw CompareFailsException("MDEvents are not the same!\n" + diffmessage);
+          }
+        }
+      } catch (CompareFailsException &) {
+        // Boxes must release events if the check fails
+        mdbox1->releaseEvents();
+        mdbox2->releaseEvents();
+        // Rethrow with the same type of error message!
+        throw;
+      }
+      mdbox1->releaseEvents();
+      mdbox2->releaseEvents();
+    } // if check events
+  }   // if-else for MDGridBox or MDBox
 }
 
 //----------------------------------------------------------------------------------------------
