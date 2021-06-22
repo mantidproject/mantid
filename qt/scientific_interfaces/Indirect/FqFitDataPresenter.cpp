@@ -36,8 +36,8 @@ FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *
 }
 
 void FqFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
-  const auto workspaceName1 = workspaceName.toStdString();
-  auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName1);
+  auto workspace =
+      Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
   auto parameters = m_fqFitModel->createFqFitParameters(workspace.get());
   setModelWorkspace(workspaceName);
   updateAvailableParameterTypes(parameters);
@@ -126,11 +126,11 @@ void FqFitDataPresenter::handleParameterTypeChanged(const QString &parameter) {
   m_notifier.notify([&dataType](IFQFitObserver &obs) { obs.updateAvailableFunctions(availableFits.at(dataType)); });
 }
 
-void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspace) {
+void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
   FqFitParameters parameters;
   try {
-    auto workspace1 = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspace);
-    parameters = m_fqFitModel->createFqFitParameters(workspace1.get());
+    auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+    parameters = m_fqFitModel->createFqFitParameters(workspace.get());
     dialog->enableParameterSelection();
   } catch (const std::invalid_argument &) {
     dialog->disableParameterSelection();

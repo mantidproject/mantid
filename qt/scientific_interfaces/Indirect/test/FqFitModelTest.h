@@ -23,6 +23,8 @@ namespace {
 
 std::vector<std::string> getParameterLabels() { return {"f0.EISF", "f1.Width", "f1.FWHM", "f1.EISF"}; }
 
+std::vector<std::string> getNoWidthLabels() { return {"f0.EISF", "f1.EISF"}; }
+
 std::vector<std::string> getNoEISFLabels() { return {"f1.Width", "f1.FWHM"}; }
 
 } // namespace
@@ -91,11 +93,29 @@ public:
         "f1.FWHM");
   }
 
+  void test_that_getWidth_will_return_an_empty_vector_if_there_are_no_Widths() {
+    auto const workspace2 = createWorkspaceWithTextAxis(2, getNoWidthLabels());
+    m_ads->addOrReplace("Name2", workspace2);
+
+    addWorkspacesToModel(m_workspace, workspace2);
+
+    TS_ASSERT(m_model->getWidths(TableDatasetIndex{1}).empty());
+  }
+
   void test_that_getWidths_will_return_the_width_parameter_names() {
     addWorkspacesToModel(m_workspace);
 
     TS_ASSERT_EQUALS(m_model->getWidths(TableDatasetIndex{0})[0], "f1.Width");
     TS_ASSERT_EQUALS(m_model->getWidths(TableDatasetIndex{0})[1], "f1.FWHM");
+  }
+
+  void test_that_getEISF_will_return_an_empty_vector_if_there_are_no_EISFs() {
+    auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
+    m_ads->addOrReplace("Name2", workspace2);
+
+    addWorkspacesToModel(m_workspace, workspace2);
+
+    TS_ASSERT(m_model->getEISF(TableDatasetIndex{1}).empty());
   }
 
   void test_that_getEISF_will_return_the_EISF_parameter_names() {
