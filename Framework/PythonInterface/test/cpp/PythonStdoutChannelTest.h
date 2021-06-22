@@ -32,8 +32,7 @@ public:
   static PythonStdoutChannelTest *createSuite() { return new PythonStdoutChannelTest(); }
   static void destroySuite(PythonStdoutChannelTest *suite) { delete suite; }
 
-  void testConstructor() { PyStdoutChannel(); }
-  void testConstructor2() { PyBindStdoutChannel(); }
+  void testConstructor() { PythonStdoutChannel(); }
 
   void testStream() {
     // set the root logger's channel to a PyStdoutChannel
@@ -59,7 +58,7 @@ public:
   void testPySysWriteStdout() {
     // set the root logger's channel to a PyStdoutChannel
     Poco::Channel *channelOld = Poco::Logger::root().getChannel();
-    Poco::AutoPtr<Poco::PyStdoutChannel> channelNew(new PyStdoutChannel);
+    Poco::AutoPtr<Poco::PythonStdoutChannel> channelNew(new PythonStdoutChannel);
     Poco::Logger::root().setChannel(channelNew);
 
     // redirect python's sys.stdout to a temporary file, using a python script
@@ -87,42 +86,6 @@ public:
     TS_ASSERT_EQUALS(message, loggedMessage)
     logFile.close();
     boost::filesystem::remove(tmpFilePath);
-
-    Poco::Logger::root().setChannel(channelOld); // restore the channel
-  }
-
-  /// write log message to a file via redirection of python sys.stdout
-  void testPySysWriteStdout2() {
-    // set the root logger's channel to a PyStdoutChannel
-    Poco::Channel *channelOld = Poco::Logger::root().getChannel();
-    Poco::AutoPtr<Poco::PyBindStdoutChannel> channelNew(new PyBindStdoutChannel);
-    Poco::Logger::root().setChannel(channelNew);
-
-    // redirect python's sys.stdout to a temporary file, using a python script
-    std::string script = "import sys\n"
-                         "stdout_old = sys.stdout\n"                          // backup the standard file descriptor
-                         "sys.stdout = open('TEMPFILE', 'w', buffering=1)\n"; // redirection, small buffe needed
-    auto tmpFilePath = boost::filesystem::temp_directory_path() / "testPySysWriteStdout.txt";
-    replaceSubstring(script, "TEMPFILE", tmpFilePath.string());
-    PyRun_SimpleString(script.c_str()); // execute the python script
-
-    // log a message with the root logger that now uses the PyStdoutChannel
-    Mantid::Kernel::Logger log("");
-    std::string loggedMessage("Error Message");
-    log.error() << loggedMessage << "\n"; // log -> PySys_WriteStdout -> sys.stdout -> tmpFile
-
-    // Now reassign the standard file descriptor to sys.stdout
-    std::string revert = "sys.stdout.close()\n"       // close tmpFile
-                         "sys.stdout = stdout_old\n"; // reassign original file descriptor
-    PyRun_SimpleString(revert.c_str());
-
-    // Fetch the log message from tmpFile
-    std::ifstream logFile(tmpFilePath.string());
-    std::string message;
-    std::getline(logFile, message);
-    TS_ASSERT_EQUALS(message, loggedMessage)
-    logFile.close();
-    // boost::filesystem::remove(tmpFilePath);
 
     Poco::Logger::root().setChannel(channelOld); // restore the channel
   }

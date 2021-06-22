@@ -25,13 +25,14 @@
 // 3rd-party includes
 #include "MantidKernel/StdoutChannel.h"
 #include <Poco/ConsoleChannel.h>
-#include <pybind11/iostream.h>
+//#include <pybind11/iostream.h>
 
 // standard includes
 #include <iostream>
 
 namespace Poco {
 
+/* /// Store in case class PythonStdoutChannel is not up to the task and needs to be replace with this class
 class MANTID_PYTHONINTERFACE_CORE_DLL PyBindStdoutChannel : public StdoutChannel {
 
 public:
@@ -41,6 +42,7 @@ public:
 private:
   pybind11::scoped_ostream_redirect m_redirect;
 };
+*/
 
 class MANTID_PYTHONINTERFACE_CORE_DLL PythonStdoutChannel : public ConsoleChannel {
 public:
@@ -60,10 +62,10 @@ private:
   class PyStdoutBuf : public std::streambuf {
   protected:
     int overflow(int c) override {
-      Mantid::PythonInterface::GlobalInterpreterLock gil;
+      Mantid::PythonInterface::GlobalInterpreterLock gil; // acquire the GIL
       PySys_WriteStdout("%c", c);
       return 0;
-    }
+    } // release the GIL
   };
 };
 
