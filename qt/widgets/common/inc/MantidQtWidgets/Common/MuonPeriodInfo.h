@@ -21,11 +21,14 @@ class EXPORT_OPT_MANTIDQT_COMMON MuonPeriodInfo : public QWidget {
   Q_OBJECT
 
 public:
-  static std::string readSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws, const std::string &logName,
-                                   const std::string &interfaceName);
+  static std::string readSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws, const std::string &logName);
   static std::vector<std::string> parseSampleLog(const std::string &log, const std::string &delim);
+  static std::vector<std::vector<std::string>> makeCorrections(std::vector<std::vector<std::string>> &logs);
   explicit MuonPeriodInfo(QWidget *parent = nullptr);
-  void addPeriodToTable(const std::string &name);
+  void addPeriodToTable(const std::string &name, const std::string &type, const std::string &frames,
+                        const std::string &total_frames, const std::string &counts, const std::string &tag);
+  std::vector<std::vector<std::string>> getInfo(Mantid::API::MatrixWorkspace_const_sptr ws);
+  void addInfo(Mantid::API::MatrixWorkspace_const_sptr ws);
   void setWidgetTitleRuns(const std::string &title);
   void setNumberOfSequences(const int numberOfSequences);
   int getNumberOfSequences() const;

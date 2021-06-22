@@ -26,8 +26,6 @@
 #include <algorithm>
 #include <sstream>
 
-#include <boost/variant.hpp>
-
 namespace {
 const int RUNS_WARNING_LIMIT = 200;
 }
@@ -134,9 +132,6 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
     // If alpha empty, default used is 1 so update interface
     if (m_view->getAlphaValue() == "1.0" && m_view->isAlphaEnabled())
       m_view->setAlphaValue("1.0");
-
-    // Set new title of period info widget
-    m_periodInfo->setWidgetTitleRuns(m_view->getInstrument() + m_view->getRunsText());
   } catch (const std::runtime_error &errorLoadFiles) {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError(errorLoadFiles.what());
@@ -561,27 +556,25 @@ void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
 
 /**
  * Called when a user presses the Period Info button
- * Adds the correct information to the widget if data has been loaded, then dispalys the widget
- * If the widget is already on show raise to the top
+ * Shows the widget, if the widget is already on show raise to the top
  */
 void ALCDataLoadingPresenter::handlePeriodInfoClicked() {
   m_periodInfo->show();
   m_periodInfo->raise();
 }
 
+/**
+ * Update the Muon Period Info widget with the latest period info from the given workspace
+ * @param ws :: The workspace to read the period info from
+ */
 void ALCDataLoadingPresenter::updateAvailablePeriodInfo(MatrixWorkspace_const_sptr &ws) {
+
   // Clear any current information
   m_periodInfo->clear();
 
-  auto periodSequences = MuonPeriodInfo::readSampleLog(ws, "period_sequences", "ALC");
-  if (!periodSequences.empty())
-    m_periodInfo->setNumberOfSequences(std::stoi(periodSequences));
-  auto namesLog = MuonPeriodInfo::readSampleLog(ws, "period_labels", "ALC");
-  if (!namesLog.empty()) {
-    auto names = MuonPeriodInfo::parseSampleLog(namesLog, ";");
-    for (const auto &name : names)
-      m_periodInfo->addPeriodToTable(name);
-  }
+  // Read in all logs and add to widget
+  m_periodInfo->addInfo(ws);
+  m_periodInfo->setWidgetTitleRuns(m_view->getInstrument() + m_view->getRunsText());
 }
 
 } // namespace CustomInterfaces
