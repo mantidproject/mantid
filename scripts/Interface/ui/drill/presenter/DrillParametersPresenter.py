@@ -5,11 +5,17 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from qtpy.QtWidgets import QMessageBox
 from qtpy.QtGui import QBrush, QColor
 from qtpy.QtCore import *
 
 
 class DrillParametersPresenter:
+
+    """
+    Reference to the table model (QTableWidget).
+    """
+    _table = None
 
     """
     Reference to the QTableWidgetItem.
@@ -28,7 +34,8 @@ class DrillParametersPresenter:
 
     ERROR_COLOR = "#3fff0000"
 
-    def __init__(self, item, sample):
+    def __init__(self, table, item, sample):
+        self._table = table
         self._item = item
         self._item.setPresenter(self)
         self._sample = sample
@@ -62,31 +69,55 @@ class DrillParametersPresenter:
 
         # use the actual value
         value = self._item.text()
+        parameters = dict()
         for param in value.split(';'):
             if param and '=' not in param:
-                self.onInvalid("Please provide semicolon separated key=value "
-                               "pairs.")
+                self.setInvalidItem("Please provide semicolon separated "
+                                    "key=value pairs.")
                 return
             try:
                 name = param.split("=")[0].strip()
                 value = param.split("=")[1].strip()
             except:
-                self.onInvalid("Please provide semicolon separated key=value "
-                               "pairs.")
+                self.setInvalidItem("Please provide semicolon separated "
+                                    "key=value pairs.")
                 return
-            if name in self._parameters:
-                self.onInvalid("Same parameter provided several times. Only "
-                               "the first value will be used.")
+            if name in parameters:
+                QMessageBox.warning(self._table, "Error", "Parameter \"{}\" "
+                                    "provided several times. Only the first "
+                                    "one will be used.".format(name))
+                continue
+            if self._table.itemFromName(self._sample.getIndex(), name):
+                QMessageBox.warning(self._table, "Error", "Use the dedicated "
+                                    "column to set the value of \"{}\". This "
+                                    "one will be ignored.".format(name))
                 continue
             if isinstance(value, str) and value.lower() == "true":
                 value = True
             if isinstance(value, str) and value.lower() == "false":
                 value = False
-            parameter = self._sample.addParameter(name)
-            parameter.invalid.connect(self.onInvalid)
-            parameter.setValue(value)
+            parameters[name] = value
+        self._table.blockSignals(True)
+        self._item.setText("")
+        self._table.blockSignals(False)
+        for name, value in parameters.items():
+            p = self._sample.addParameter(name)
+            p.checked.connect(self.onChecked)
+            p.setValue(value)
 
-    def onInvalid(self, msg):
+    def onChecked(self):
+        """
+        Triggered when one of the parameters has been checked. This methods
+        colors the associated cell if invalid.
+        """
+        for name in self._parameters:
+            p = self._sample.getParameter(name)
+            if not p.isValid():
+                msg = p.getErrorMessage()
+                self.setInvalidItem(msg)
+                return
+
+    def setInvalidItem(self, msg):
         """
         Triggered when the parameter is invalid.
 
