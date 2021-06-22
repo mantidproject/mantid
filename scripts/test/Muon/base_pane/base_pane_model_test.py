@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_model import BasePaneModel
+from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantidqt.utils.qt.testing import start_qapplication
 
 
@@ -13,7 +14,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 class BasePaneModelTest(unittest.TestCase):
 
     def setUp(self):
-        self.model = BasePaneModel(context=None)
+        self.model = BasePaneModel(context=setup_context(False))
 
     def test_get_workspace_to_plot(self):
         self.assertEqual(self.model.get_workspaces_to_plot(True,True),[])

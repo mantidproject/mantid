@@ -55,7 +55,6 @@ def setup_context(freq=False):
                                               muon_phase_context=phase_table_context,
                                               fitting_context=BasicFittingContext(allow_double_pulse_fitting=True),
                                               frequency_context=freq_context,
-                                              freq_plotting_context=freq_plotting_context,
                                               plot_panes_context=plot_panes_context)
     else:
         return DataAnalysisContext(muon_data_context=data_context,

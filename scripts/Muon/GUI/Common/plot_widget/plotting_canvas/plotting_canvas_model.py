@@ -102,6 +102,7 @@ class PlottingCanvasModel(object):
         :return: A WorkspacePlotInformation instance describing the data to be plotted
         """
         axis = self._util._get_workspace_plot_axis(guess_ws_name, self._axes_workspace_map)
+
         return WorkspacePlotInformation(workspace_name=guess_ws_name, index=1, axis=axis,
                                         normalised=self._normalised,
                                         errors=False, label=FIT_FUNCTION_GUESS_LABEL)
