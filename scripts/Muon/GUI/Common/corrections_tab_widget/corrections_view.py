@@ -4,7 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantidqt.utils.observer_pattern import GenericObserver
 from mantidqt.utils.qt import load_ui
+
 from Muon.GUI.Common.corrections_tab_widget.dead_time_corrections_view import DeadTimeCorrectionsView
 from Muon.GUI.Common.fitting_widgets.basic_fitting.workspace_selector_view import WorkspaceSelectorView
 from Muon.GUI.Common.message_box import warning
@@ -32,6 +34,11 @@ class CorrectionsView(widget, ui_form):
 
         self.dead_time_corrections_view = DeadTimeCorrectionsView(self)
         self.dead_time_layout.addWidget(self.dead_time_corrections_view)
+
+        self.disable_tab_observer = GenericObserver(self.disable_view)
+        self.enable_tab_observer = GenericObserver(self.enable_view)
+
+        self.disable_view()
 
     def set_slot_for_run_selector_changed(self, slot) -> None:
         """Connect the slot for the Run Selector combobox"""
@@ -125,3 +132,11 @@ class CorrectionsView(widget, ui_form):
     def warning_popup(self, message: str) -> None:
         """Displays a warning message."""
         warning(message, parent=self)
+
+    def disable_view(self) -> None:
+        """Disable all widgets in this corrections view."""
+        self.setEnabled(False)
+
+    def enable_view(self) -> None:
+        """Enable all widgets in this corrections view."""
+        self.setEnabled(self.run_selector.number_of_datasets() != 0)

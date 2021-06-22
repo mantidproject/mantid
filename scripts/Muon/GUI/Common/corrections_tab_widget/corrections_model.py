@@ -24,6 +24,11 @@ class CorrectionsModel:
         self._data_context = data_context
         self._corrections_context = corrections_context
 
+    @property
+    def number_of_runs(self) -> int:
+        """Returns the number of runs currently loaded into the context."""
+        return len(self._corrections_context.run_numbers)
+
     def run_numbers(self) -> list:
         """Returns a list of run numbers from the context as strings."""
         return [str(run) for run in self._corrections_context.run_numbers]
@@ -92,7 +97,7 @@ class CorrectionsModel:
         self._corrections_context.dead_time_source = DEAD_TIME_FROM_FILE
         self._corrections_context.dead_time_table_name = None
 
-    def set_dead_time_source_to_from_ADS(self, table_name: str) -> None:
+    def set_dead_time_source_to_from_ads(self, table_name: str) -> None:
         """Sets the dead time source to be 'FromADS'."""
         if table_name == "None":
             self.set_dead_time_source_to_none()

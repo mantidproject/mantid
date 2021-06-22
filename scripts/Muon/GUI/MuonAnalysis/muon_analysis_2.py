@@ -217,6 +217,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.disable_notifier.add_subscriber(
             self.home_tab.home_tab_widget.disable_observer)
 
+        self.disable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.disable_tab_observer)
+
+        self.disable_notifier.add_subscriber(self.corrections_tab.corrections_tab_view.disable_tab_observer)
+
         self.disable_notifier.add_subscriber(self.load_widget.load_widget.disable_observer)
 
         self.disable_notifier.add_subscriber(self.fitting_tab.fitting_tab_view.disable_tab_observer)
@@ -230,11 +234,11 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.disable_notifier.add_subscriber(self.seq_fitting_tab.seq_fitting_tab_presenter.disable_tab_observer)
 
-        self.disable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.disable_tab_observer)
-
     def setup_enable_notifier(self):
 
         self.enable_notifier.add_subscriber(self.home_tab.home_tab_widget.enable_observer)
+
+        self.enable_notifier.add_subscriber(self.corrections_tab.corrections_tab_view.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.load_widget.load_widget.enable_observer)
 
@@ -379,6 +383,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
             self.enable_observer)
 
+        self.corrections_tab.corrections_tab_presenter.enable_editing_notifier.add_subscriber(
+            self.enable_observer)
+
         self.fitting_tab.fitting_tab_presenter.enable_editing_notifier.add_subscriber(
             self.enable_observer)
 
@@ -392,6 +399,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
     def setup_group_calculation_disabler_notifier(self):
 
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.disable_observer)
+
+        self.corrections_tab.corrections_tab_presenter.disable_editing_notifier.add_subscriber(
             self.disable_observer)
 
         self.fitting_tab.fitting_tab_presenter.disable_editing_notifier.add_subscriber(
