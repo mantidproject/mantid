@@ -42,7 +42,7 @@ public:
     // We should get a peak at ~400
     TS_ASSERT_THROWS_NOTHING(peak.function(x, y));
     TS_ASSERT_DELTA(y[0], 0.0000, 1e-4);
-    TS_ASSERT_DELTA(y[50], 2.7983, 1e-4);
+    TS_ASSERT_DELTA(y[50], 2.8101, 1e-4);
     TS_ASSERT_DELTA(y[99], 0.0000, 1e-4);
   }
 };

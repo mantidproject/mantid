@@ -32,6 +32,7 @@ New features
 Improvements
 ############
 
+- Fix the issue with the evaluation of exponential integral for E1 function which will be used for peak profile functions :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>` and :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>`.
 - New motor convention for HB2A implemented in :ref:`HB2AReduce <algm-HB2AReduce>`.
 - :ref:`FitPeaks <algm-FitPeaks>` can now fit multiple peaks in the same spectrum with a :ref:`BackToBackExponential <func-BackToBackExponential>` starting from user specified parameters.
 - :ref:`PDCalibration <algm-PDCalibration>` now initialises the parameters A,B and S of the :ref:`BackToBackExponential <func-BackToBackExponential>` function if corresponding coefficients are in the instrument parameter.xml file.
