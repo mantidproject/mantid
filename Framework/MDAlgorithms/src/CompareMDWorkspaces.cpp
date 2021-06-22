@@ -326,12 +326,17 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
   bool boxes_same(true);
   std::string errormessage("");
 
+  // cppcheck-suppress syntaxError
+  PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (size_t ibox = 0; ibox < boxes1.size(); ibox++) {
-
+    PARALLEL_START_INTERUPT_REGION
     // No need to compare because the boxes are not same already
     if (!boxes_same) {
       continue;
     }
+
+    bool local_fail(false);
+    std::string local_error("");
 
     API::IMDNode *box1 = boxes1[ibox];
     API::IMDNode *box2 = boxes2[ibox];
@@ -341,10 +346,20 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
     try {
       CompareMDWorkspaces::compare2Boxes<MDE, nd>(box1, box2, ibox);
     } catch (CompareFailsException &err) {
-      boxes_same = false;
-      errormessage += err.what();
+      local_fail = true;
+      local_error += err.what();
     }
+
+    PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
+      if (local_fail) {
+        boxes_same = false;
+        errormessage += local_error;
+      }
+    }
+
+    PARALLEL_END_INTERUPT_REGION
   } // for box
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // throw altogether
   if (!boxes_same) {
