@@ -9,6 +9,10 @@
       <value val="1.0 - exp(-13.153/sqrt(e))" />
     </parameter>
 
+    <parameter name="sample_logs_sum" type="string">
+      <value val="duration" />
+    </parameter>
+
     <!-- Distance from the sample of odd and even detectors, and the Fermi chopper in metres -->
     <parameter name="sample_distance_chopper" type="number">
       <value val="0.48" />
