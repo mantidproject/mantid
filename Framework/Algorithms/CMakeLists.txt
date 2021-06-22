@@ -786,6 +786,7 @@ set(TEST_FILES
     CropWorkspaceRaggedTest.h
     CropWorkspaceTest.h
     CrossCorrelateTest.h
+    CrossCorrelateTestData.h
     CuboidGaugeVolumeAbsorptionTest.h
     CylinderAbsorptionTest.h
     DeadTimeCorrectionTest.h
