@@ -39,6 +39,10 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
         """Connect the slot for when the selected Y changes."""
         self.y_selector.currentIndexChanged.connect(slot)
 
+    def result_table_names(self) -> list:
+        """Returns a list of result table names currently loaded into model fitting."""
+        return self.result_table_selector.dataset_names
+
     def add_results_table_name(self, results_table_name: str) -> None:
         """Add a results table to the results table combo box."""
         self.result_table_selector.add_dataset_name(results_table_name)

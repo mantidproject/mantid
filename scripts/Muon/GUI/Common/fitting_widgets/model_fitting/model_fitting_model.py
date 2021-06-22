@@ -101,9 +101,8 @@ class ModelFittingModel(BasicFittingModel):
         workspace_group = self._create_workspace_group_to_store_combination_workspaces()
         if workspace_group is not None:
             self.dataset_names = self._create_matrix_workspaces_for_parameter_combinations(workspace_group)
-            return self.x_parameters(), self.y_parameters()
         else:
-            return [], []
+            self.dataset_names = []
 
     def _extract_x_and_y_from_current_result_table(self) -> None:
         """Extracts the X, Y and error values from the currently selected result table and saves them in the context."""

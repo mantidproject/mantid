@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
+from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
 from Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_model import ModelFittingModel
 from Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_view import ModelFittingView
@@ -41,7 +42,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
     def handle_results_table_changed(self) -> None:
         """Handles when the selected results table has changed, and discovers the possible X's and Y's."""
         self.model.current_result_table_index = self.view.current_result_table_index
-        self._create_parameter_combination_workspaces()
+        self._create_parameter_combination_workspaces(self.handle_parameter_combinations_finished)
 
     def handle_selected_x_changed(self) -> None:
         """Handles when the selected X parameter is changed."""
@@ -70,11 +71,12 @@ class ModelFittingPresenter(BasicFittingPresenter):
         if not self.parameter_combination_thread_success:
             return
 
-        x_parameters, y_parameters = self.parameter_combinations_creator.result
-        if len(x_parameters) == 0 or len(y_parameters) == 0:
-            return
-
         self.handle_parameter_combinations_created_successfully()
+
+    def handle_parameter_combinations_finished_before_fit(self) -> None:
+        """Handle when the creation of the parameter combinations finishes, and then performs a fit."""
+        self.handle_parameter_combinations_finished()
+        super().handle_fit_clicked()
 
     def handle_parameter_combinations_created_successfully(self) -> None:
         """Handles when the parameter combination workspaces have been created successfully."""
@@ -115,11 +117,20 @@ class ModelFittingPresenter(BasicFittingPresenter):
         # Required to update the function browser to display the errors when first adding a function.
         self.view.set_current_dataset_index(self.model.current_dataset_index)
 
+    def handle_fit_clicked(self) -> None:
+        """Handle when the fit button is clicked."""
+        current_dataset_name = self.model.current_dataset_name
+        if current_dataset_name is not None and not check_if_workspace_exist(current_dataset_name):
+            self._create_parameter_combination_workspaces(self.handle_parameter_combinations_finished_before_fit)
+        else:
+            super().handle_fit_clicked()
+
     def update_dataset_names_in_view_and_model(self) -> None:
         """Updates the results tables currently displayed."""
         self.model.result_table_names = self.model.get_workspace_names_to_display_from_context()
-        # Triggers handle_results_table_changed
-        self.view.update_result_table_names(self.model.result_table_names)
+        if self.model.result_table_names != self.view.result_table_names():
+            # Triggers handle_results_table_changed
+            self.view.update_result_table_names(self.model.result_table_names)
 
     def update_fit_functions_in_model_from_view(self) -> None:
         """Update the fit function in the model only for the currently selected dataset."""
@@ -142,13 +153,13 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.model.clear_undo_data_for_current_dataset_index()
         self.view.set_number_of_undos(self.model.number_of_undos())
 
-    def _create_parameter_combination_workspaces(self) -> None:
+    def _create_parameter_combination_workspaces(self, finished_callback) -> None:
         """Creates a matrix workspace for each possible parameter combination to be used for fitting."""
         try:
             self.parameter_combination_thread = self._create_parameter_combinations_thread(
                 self.model.create_x_and_y_parameter_combination_workspaces)
             self.parameter_combination_thread.threadWrapperSetUp(self.handle_parameter_combinations_started,
-                                                                 self.handle_parameter_combinations_finished,
+                                                                 finished_callback,
                                                                  self.handle_parameter_combinations_error)
             self.parameter_combination_thread.start()
         except ValueError as error:

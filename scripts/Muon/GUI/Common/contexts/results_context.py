@@ -26,3 +26,8 @@ class ResultsContext:
         """Add a results table to the stored list of results tables."""
         if table_name not in self._result_table_names and check_if_workspace_exist(table_name):
             self._result_table_names.append(table_name)
+
+    def remove_workspace_by_name(self, workspace_name: str) -> None:
+        """Removes a results table after and ADS deletion event."""
+        if workspace_name in self._result_table_names:
+            self._result_table_names.remove(workspace_name)

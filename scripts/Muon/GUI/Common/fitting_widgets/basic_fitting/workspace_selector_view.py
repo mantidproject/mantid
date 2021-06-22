@@ -29,6 +29,11 @@ class WorkspaceSelectorView(ui_form, base_widget):
         """Connect the slot for the display workspace combo box being changed."""
         self.dataset_name_combo_box.currentIndexChanged.connect(slot)
 
+    @property
+    def dataset_names(self) -> list:
+        """Returns a list of dataset names currently in the combobox."""
+        return [self.dataset_name_combo_box.itemText(i) for i in range(self.dataset_name_combo_box.count())]
+
     def add_dataset_name(self, dataset_name: str) -> None:
         """Adds a dataset to the combo box. Only emits currentIndexChanged if the new dataset is now selected."""
         self.dataset_name_combo_box.blockSignals(True)
