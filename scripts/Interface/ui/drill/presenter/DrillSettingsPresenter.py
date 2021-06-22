@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from ..model.DrillParameter import DrillParameter
 from ..view.DrillSettingsDialog import DrillSettingsDialog
 
 
