@@ -394,43 +394,6 @@ class DrillView(QMainWindow):
             self.rowDeleted.emit(row)
             self.setWindowModified(True)
 
-    def updateLabelsFromGroups(self, groups, masters):
-        """
-        Update all the row labels from the current groups.
-
-        Args:
-            groups (dict(str:set(int))): group name and rows
-            master (dict(str:int)): group name and master row
-        """
-        for row in range(self.table.rowCount()):
-            self.table.delRowLabel(row)
-        for groupName,rows in groups.items():
-            rowName = 1
-            for row in sorted(rows):
-                if groupName in masters and masters[groupName] == row:
-                    _bold = True
-                    _tooltip = "This is the master row of the group {}" \
-                               .format(groupName)
-                else:
-                    _bold = False
-                    _tooltip = "This row belongs to the sample group {}" \
-                               .format(groupName)
-                self.table.setRowLabel(row, groupName + str(rowName),
-                                       _bold, _tooltip)
-                rowName += 1
-
-    def getRowLabel(self, row):
-        """
-        Get the visual label of a row.
-
-        Args:
-            row(int): row index
-
-        Returns:
-            str: row label
-        """
-        return self.table.getRowLabel(row)
-
     def helpWindow(self):
         """
         Popup the help window.
