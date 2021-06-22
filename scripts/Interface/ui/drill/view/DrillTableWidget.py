@@ -57,6 +57,18 @@ class DrillTableWidget(QTableWidget):
 
         self.itemChanged.connect(self.onItemChanged)
 
+    def setWindowModified(self, state):
+        """
+        Propagate the windowModified flag to the parents.
+
+        Args:
+            state (bool): if True, the window is modified
+        """
+        widget = self
+        while widget.parent():
+            widget = widget.parent()
+            widget.setWindowModified(state)
+
     def addSamplePresenter(self, presenter, index):
         """
         Add a sample presenter.

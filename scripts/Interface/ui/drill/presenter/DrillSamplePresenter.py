@@ -50,6 +50,7 @@ class DrillSamplePresenter:
                                                  self._sample)
         else:
             parameter = self._sample.addParameter(name)
+        self._table.setWindowModified(True)
 
     def onNewParameter(self, parameter):
         """
@@ -84,6 +85,7 @@ class DrillSamplePresenter:
             groupIndex = self._sample.getGroupIndex()
             self._table.setRowLabel(index, groupName + str(groupIndex + 1),
                                     bold=isMaster)
+        self._table.setWindowModified(True)
 
     def onStatusChanged(self):
         """
