@@ -64,10 +64,6 @@ class CorrectionsView(widget, ui_form):
         """Returns the currently displayed run number string."""
         return self.run_selector.current_dataset_name
 
-    def set_dead_time_data_info_visible(self, visible: bool) -> None:
-        """Sets the Dead Time Info label as being visible or hidden."""
-        self.dead_time_corrections_view.set_dead_time_data_info_visible(visible)
-
     def set_dead_time_workspace_selector_visible(self, visible: bool) -> None:
         """Sets the Dead Time File Loaded widgets as being visible or hidden."""
         self.dead_time_corrections_view.set_dead_time_workspace_selector_visible(visible)

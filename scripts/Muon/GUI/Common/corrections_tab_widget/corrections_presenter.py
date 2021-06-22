@@ -77,27 +77,23 @@ class CorrectionsPresenter(QObject):
     def handle_run_selector_changed(self) -> None:
         """Handles when the run selector is changed."""
         self.model.set_current_run_string(self.view.current_run_string())
-        self._set_dead_time_info_text_using_average()
+        self.update_dead_time_info_text_in_view()
 
     def handle_dead_time_from_selector_changed(self) -> None:
         """Handles when the location where the dead time should be retrieved from changes."""
         if self.view.is_dead_time_from_data_file_selected():
             self._handle_dead_time_from_data_file_selected()
-            self.view.set_dead_time_data_info_visible(True)
             self.view.set_dead_time_workspace_selector_visible(False)
             self.view.set_dead_time_other_file_visible(False)
         elif self.view.is_dead_time_from_workspace_selected():
             self._handle_dead_time_from_workspace_selected()
-            self.view.set_dead_time_data_info_visible(True)
             self.view.set_dead_time_workspace_selector_visible(True)
             self.view.set_dead_time_other_file_visible(False)
         elif self.view.is_dead_time_from_other_file_selected():
-            self.view.set_dead_time_data_info_visible(False)
             self.view.set_dead_time_workspace_selector_visible(False)
             self.view.set_dead_time_other_file_visible(True)
         else:
             self._handle_dead_time_from_none_selected()
-            self.view.set_dead_time_data_info_visible(False)
             self.view.set_dead_time_workspace_selector_visible(False)
             self.view.set_dead_time_other_file_visible(False)
 
@@ -114,7 +110,7 @@ class CorrectionsPresenter(QObject):
         """Handles when the dead time is none is initially selected."""
         self.set_dead_time_source_to_none()
 
-    def handle_dead_time_workspace_selector_changed(self):
+    def handle_dead_time_workspace_selector_changed(self) -> None:
         """The user changes the selected Table Workspace to use as dead time."""
         table_name = self.view.selected_dead_time_workspace()
         if table_name == "None" or table_name == "":
@@ -132,7 +128,7 @@ class CorrectionsPresenter(QObject):
         # Triggers handle_dead_time_from_selector_changed
         self.view.set_dead_time_from_data_file_selected()
 
-    def handle_dead_time_browse_clicked(self):
+    def handle_dead_time_browse_clicked(self) -> None:
         """User selects the option to Browse for a nexus file to load dead times from."""
         filename = self.view.show_file_browser_and_return_selection(["nxs"], [""], multiple_files=False)[0]
         if filename != "":
@@ -144,7 +140,14 @@ class CorrectionsPresenter(QObject):
 
     def handle_corrections_complete(self) -> None:
         """When the corrections have been calculated, update the displayed dead time averages."""
-        self._set_dead_time_info_text_using_average()
+        self.update_dead_time_info_text_in_view()
+
+    def update_dead_time_info_text_in_view(self) -> None:
+        """Update the dead time info label in the view."""
+        if self.model.is_dead_time_source_from_data_file() or self.model.is_dead_time_source_from_workspace():
+            self.view.set_dead_time_average_and_range(self.model.dead_times_range(), self.model.dead_times_average())
+        else:
+            self.view.set_dead_time_info_text("No dead time correction")
 
     def set_dead_time_source_to_from_file(self) -> None:
         """Sets the dead time source to be from the data file and notifies the GUI to recalculate the corrections."""
@@ -166,7 +169,3 @@ class CorrectionsPresenter(QObject):
         self.disable_editing_notifier.notify_subscribers()
         self.perform_corrections_notifier.notify_subscribers()
         self.enable_editing_notifier.notify_subscribers()
-
-    def _set_dead_time_info_text_using_average(self) -> None:
-        """Sets the dead time average and range text to zero."""
-        self.view.set_dead_time_average_and_range(self.model.dead_times_range(), self.model.dead_times_average())

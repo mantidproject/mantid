@@ -41,10 +41,6 @@ class DeadTimeCorrectionsView(widget, ui_form):
         """Sets the slot for the dead time file browse button being clicked."""
         self.dead_time_browse_button.clicked.connect(slot)
 
-    def set_dead_time_data_info_visible(self, visible: bool) -> None:
-        """Sets the Dead Time Info label as being visible or hidden."""
-        self.dead_time_info_label.setVisible(visible)
-
     def set_dead_time_workspace_selector_visible(self, visible: bool) -> None:
         """Sets the Dead Time File Loaded widgets as being visible or hidden."""
         self.dead_time_workspace_label.setVisible(visible)
