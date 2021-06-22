@@ -2,6 +2,8 @@
 
 set ( TEST_PY_FILES
    ADSHandler/workspace_naming_test.py
+   base_pane/base_pane_model_test.py
+   base_pane/base_pane_presenter_test.py
    basic_fitting_context_test.py
    elemental_analysis/elemental_analysis_test.py
    elemental_analysis/name_generator_test.py
@@ -92,6 +94,8 @@ set ( TEST_PY_FILES
    muon_period_info_widget_test.py
    phase_table_widget/phase_table_context_test.py
    phase_table_widget/phase_table_presenter_test.py
+   plot_data_pane/plot_data_pane_model_test.py
+   plot_data_pane/plot_data_pane_presenter_test.py
    plot_widget/plot_widget_model_test.py
    plot_widget/plot_widget_presenter_test.py
    plotting_canvas/plot_color_queue_test.py

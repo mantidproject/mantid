@@ -23,10 +23,10 @@ class ProjectionSurface;
 */
 
 class IMantidGLWidget : public QGLWidget {
-  Q_OBJECT
 public:
   IMantidGLWidget() {}
   template <typename... Params> IMantidGLWidget(Params &&... params) : QGLWidget(std::forward<Params>(params)...) {}
+  virtual ~IMantidGLWidget() = default;
 
   virtual void setSurface(std::shared_ptr<ProjectionSurface> surface) = 0;
   virtual std::shared_ptr<ProjectionSurface> getSurface() = 0;

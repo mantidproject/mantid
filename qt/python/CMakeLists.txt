@@ -73,6 +73,7 @@ if(ENABLE_WORKBENCH)
       mantidqt/project/test/test_workspacesaver.py
       mantidqt/project/test/test_projectparser_mantidplot.py
       mantidqt/utils/test/test_async.py
+      mantidqt/utils/test/test_async_qt_adaptor.py
       mantidqt/utils/test/test_modal_tester.py
       mantidqt/utils/test/test_qt_utils.py
       mantidqt/utils/test/test_writetosignal.py
