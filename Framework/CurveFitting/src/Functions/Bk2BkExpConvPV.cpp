@@ -189,12 +189,26 @@ double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha, do
 }
 
 /** Implementation of complex integral E_1
+ *
+ *  The algorithm originates from the following reference,
+ *
+ *  Shanjie Zhang, Jianming Jin,
+ *  Computation of Special Functions,
+ *  Wiley, 1996,
+ *  ISBN: 0-471-11963-6,
+ *  LC: QA351.C45.
+ *
+ *  Also, refre to the following link for its implementation in Fortran,
+ *
+ *  https://people.sc.fsu.edu/~jburkardt/f_src/special_functions/special_functions.f90
+ *
  */
 std::complex<double> Bk2BkExpConvPV::E1(std::complex<double> z) const {
   std::complex<double> e1;
 
   double rz = real(z);
   double az = abs(z);
+  double eL = 0.5772156649015328;
 
   if (fabs(az) < 1.0E-8) {
     // If z = 0, then the result is infinity... diverge!
@@ -206,9 +220,9 @@ std::complex<double> Bk2BkExpConvPV::E1(std::complex<double> z) const {
     e1 = r;
     std::complex<double> cr = r;
 
-    for (size_t k = 0; k < 150; ++k) {
+    for (size_t k = 1; k <= 150; ++k) {
       auto dk = double(k);
-      cr = -cr * dk * z / ((dk + 2.0) * (dk + 2.0));
+      cr = -cr * dk * z / ((dk + 1.0) * (dk + 1.0));
       e1 += cr;
       if (abs(cr) < abs(e1) * 1.0E-15) {
         // cr is converged to zero
@@ -216,12 +230,12 @@ std::complex<double> Bk2BkExpConvPV::E1(std::complex<double> z) const {
       }
     } // ENDFOR k
 
-    e1 = -e1 - log(z) + (z * e1);
+    e1 = -eL - log(z) + (z * e1);
   } else {
     std::complex<double> ct0(0.0, 0.0);
     for (int k = 120; k > 0; --k) {
       std::complex<double> dk(double(k), 0.0);
-      ct0 = dk / (10.0 + dk / (z + ct0));
+      ct0 = dk / (1.0 + dk / (z + ct0));
     } // ENDFOR k
 
     e1 = 1.0 / (z + ct0);
