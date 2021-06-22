@@ -149,7 +149,7 @@ class DrillView(QMainWindow):
         self.buffer = list()  # for cells cut-copy-paste
         self.bufferShape = tuple() # (n_rows, n_columns) shape of self.buffer
 
-        self._presenter = DrillPresenter(self)
+        self._presenter = DrillPresenter(self, self.table)
 
     def setup_header(self):
         """
