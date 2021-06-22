@@ -77,6 +77,11 @@ class DrillView(QMainWindow):
     setMasterRow = Signal()
 
     """
+    Sent to remove the master row status.
+    """
+    unsetMasterRow = Signal()
+
+    """
     Sent when the user asks to process the selected row(s).
     """
     process = Signal()
@@ -460,6 +465,9 @@ class DrillView(QMainWindow):
         elif (event.key() == Qt.Key_M
                 and event.modifiers() == Qt.ControlModifier):
             self.setMasterRow.emit()
+        elif (event.key() == Qt.Key_M
+                and event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier):
+            self.unsetMasterRow.emit()
 
     def show_directory_manager(self):
         """
