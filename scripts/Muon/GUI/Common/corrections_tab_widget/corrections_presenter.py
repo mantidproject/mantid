@@ -66,18 +66,17 @@ class CorrectionsPresenter(QObject):
     @Slot()
     def _handle_runs_loaded(self) -> None:
         """Handles when new run numbers are loaded from the GUI thread."""
-        self.model.update_run_numbers()
-        self.view.update_run_selector_combo_box(self.model.run_numbers())
-        self.model.set_current_run_index(self.view.current_run_index())
+        self.view.update_run_selector_combo_box(self.model.run_number_strings())
+        self.model.set_current_run_string(self.view.current_run_string())
 
-        if self.model.number_of_runs == 0:
+        if self.model.number_of_run_strings == 0:
             self.view.disable_view()
         else:
             self.view.enable_view()
 
     def handle_run_selector_changed(self) -> None:
         """Handles when the run selector is changed."""
-        self.model.set_current_run_index(self.view.current_run_index())
+        self.model.set_current_run_string(self.view.current_run_string())
         self._set_dead_time_info_text_using_average()
 
     def handle_dead_time_from_selector_changed(self) -> None:

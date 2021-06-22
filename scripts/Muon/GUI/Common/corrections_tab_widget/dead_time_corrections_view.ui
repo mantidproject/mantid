@@ -56,7 +56,7 @@ color: grey; }
          </size>
         </property>
         <property name="text">
-         <string>Workspace:</string>
+         <string>Workspace :</string>
         </property>
        </widget>
       </item>
@@ -129,7 +129,7 @@ color: grey; }
          </size>
         </property>
         <property name="text">
-         <string>Other file:</string>
+         <string>Other file :</string>
         </property>
        </widget>
       </item>
@@ -185,7 +185,7 @@ color: grey; }
          </size>
         </property>
         <property name="text">
-         <string>Dead Time:</string>
+         <string>Dead Time :</string>
         </property>
        </widget>
       </item>

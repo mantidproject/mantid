@@ -27,7 +27,7 @@ class CorrectionsView(widget, ui_form):
         self.setupUi(self)
 
         self.run_selector = WorkspaceSelectorView(self)
-        self.run_selector.set_workspace_combo_box_label("Run:")
+        self.run_selector.set_workspace_combo_box_label("Runs :")
         self.run_selector.workspace_combo_box_label.setMinimumWidth(50)
         self.run_selector.workspace_combo_box_label.setMaximumWidth(50)
         self.run_selector_layout.addWidget(self.run_selector)
@@ -60,9 +60,9 @@ class CorrectionsView(widget, ui_form):
         """Update the data in the run selector combo box."""
         self.run_selector.update_dataset_name_combo_box(runs)
 
-    def current_run_index(self) -> int:
-        """Returns the index of the currently displayed run number."""
-        return self.run_selector.current_dataset_index
+    def current_run_string(self) -> int:
+        """Returns the currently displayed run number string."""
+        return self.run_selector.current_dataset_name
 
     def set_dead_time_data_info_visible(self, visible: bool) -> None:
         """Sets the Dead Time Info label as being visible or hidden."""

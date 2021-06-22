@@ -8,6 +8,7 @@ from mantid.api import ITableWorkspace
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
 from Muon.GUI.Common.contexts.corrections_context import CorrectionsContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 DEAD_TIME_FROM_FILE = "FromFile"
 DEAD_TIME_FROM_ADS = "FromADS"
@@ -25,38 +26,24 @@ class CorrectionsModel:
         self._corrections_context = corrections_context
 
     @property
-    def number_of_runs(self) -> int:
+    def number_of_run_strings(self) -> int:
         """Returns the number of runs currently loaded into the context."""
-        return len(self._corrections_context.run_numbers)
+        return len(self._data_context.current_runs)
 
-    def run_numbers(self) -> list:
-        """Returns a list of run numbers from the context as strings."""
-        return [str(run) for run in self._corrections_context.run_numbers]
+    def run_number_strings(self) -> list:
+        """Returns a list of run number strings from the context. Its a string because of co-add mode."""
+        return [run_list_to_string(run_list) for run_list in self._data_context.current_runs]
 
     def current_runs(self) -> list:
         """Returns the currently selected run number in a list. If co-add is selected, there are multiple runs."""
-        current_run_number_index = self._corrections_context.current_run_number_index
-        if current_run_number_index is not None:
-            runs = self._data_context.current_runs
-            return runs[current_run_number_index] if current_run_number_index < len(runs) else runs[0]
-        else:
-            return None
+        for run_list in self._data_context.current_runs:
+            if run_list_to_string(run_list) == self._corrections_context.current_run_string:
+                return run_list
+        return None
 
-    def update_run_numbers(self) -> None:
-        """Updates the runs held by the corrections context when the data context has changed."""
-        flattened_runs = [run for runs_list in self._data_context.current_runs for run in runs_list]
-        self._corrections_context.run_numbers = flattened_runs
-
-        self.reset_current_run_number_index()
-
-    def reset_current_run_number_index(self) -> None:
-        """Resets the current run number index stored by the context."""
-        number_of_runs = self._corrections_context.number_of_run_numbers
-        self._corrections_context.current_run_number_index = None if number_of_runs == 0 else 0
-
-    def set_current_run_index(self, run_index: int) -> None:
-        """Set the index of the currently selected run number."""
-        self._corrections_context.current_run_number_index = run_index
+    def set_current_run_string(self, run_string: str) -> None:
+        """Sets the currently selected run string shown in the view."""
+        self._corrections_context.current_run_string = run_string if run_string != "" else None
 
     def dead_times_average(self) -> float:
         """Returns the average dead time for the currently selected run."""
