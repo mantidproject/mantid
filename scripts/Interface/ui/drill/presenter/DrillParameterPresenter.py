@@ -27,8 +27,7 @@ class DrillParameterPresenter:
         self._item = item
         self._item.setPresenter(self)
         self._parameter = parameter
-        self._parameter.valid.connect(self.onValid)
-        self._parameter.invalid.connect(self.onInvalid)
+        self._parameter.checked.connect(self.onChecked)
         self._item.signals.dataChanged.connect(self.onDataChanged)
         self._parameter.valueChanged.connect(self.onValueChanged)
 
@@ -40,26 +39,21 @@ class DrillParameterPresenter:
         value = self._item.text()
         self._parameter.setValue(value)
 
-    def onValid(self):
+    def onChecked(self):
         """
-        Triggered when the parameter is valid.
+        Triggered when the parameter has been checked. This methods colors the
+        table item accordingly.
         """
+        valid = self._parameter.isValid()
         self._item.signals.blockSignals(True)
-        self._item.setData(Qt.BackgroundRole, None)
-        self._item.setToolTip("")
-        self._item.signals.blockSignals(False)
-
-    def onInvalid(self, msg):
-        """
-        Triggered when the parameter is invalid.
-
-        Args:
-            msg (str): error message associated to the invalid state
-        """
-        self._item.signals.blockSignals(True)
-        brush = QBrush(QColor(self.ERROR_COLOR))
-        self._item.setBackground(brush)
-        self._item.setToolTip(msg)
+        if not valid:
+            msg = self._parameter.getErrorMessage()
+            brush = QBrush(QColor(self.ERROR_COLOR))
+            self._item.setBackground(brush)
+            self._item.setToolTip(msg)
+        else:
+            self._item.setData(Qt.BackgroundRole, None)
+            self._item.setToolTip("")
         self._item.signals.blockSignals(False)
 
     def onValueChanged(self):
