@@ -226,7 +226,9 @@ class DrillPresenter:
         """
         Handles the processing of selected rows.
         """
-        rows = self.view.getSelectedRows()
+        rows = self._table.getSelectedRows()
+        if not rows:
+            rows = self._table.getRowsFromSelectedCells()
         if not rows:
             rows = self.view.getAllRows()
         self._process(rows)
@@ -236,7 +238,9 @@ class DrillPresenter:
         Handles the processing of selected groups.
         """
         groups = self.model.getSamplesGroups()
-        selectedRows = self.view.getSelectedRows()
+        selectedRows = self._table.getSelectedRows()
+        if not selectedRows:
+            selectedRows = self._table.getRowsFromSelectedCells()
         rows = set()
         for row in selectedRows:
             for group in groups:

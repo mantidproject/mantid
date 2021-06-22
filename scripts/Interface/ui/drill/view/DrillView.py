@@ -535,19 +535,6 @@ class DrillView(QMainWindow):
         self.table.resizeColumnsToContents()
         self.setWindowModified(False)
 
-    def getSelectedRows(self):
-        """
-        Get the list of selected row indexes. If the user did not select any
-        full row, the selected rows are extracted from the selected cells.
-
-        Returns:
-            list(int): row indexes
-        """
-        rows = self.table.getSelectedRows()
-        if not rows:
-            rows = self.table.getRowsFromSelectedCells()
-        return rows
-
     def getAllRows(self):
         """
         Get the list of all row indexes.
