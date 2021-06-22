@@ -372,12 +372,13 @@ class DrillPresenter:
 
     def settingsWindow(self):
         """
-        Show the setting window. This function creates a special dialog that
-        generates automatically its fields on the basis of settings types. It
-        also connects the differents signals to get validation of user inputs.
+        Show the settings dialog.
         """
-        parameters = self.model.getParameters()
-        presenter = DrillSettingsPresenter(self.view, parameters)
+        allParameters = self.model.getParameters()
+        settingNames = RundexSettings.SETTINGS[self.model.getAcquisitionMode()]
+        settings = [parameter for parameter in self.model.getParameters()
+                    if parameter.getName() in settingNames]
+        DrillSettingsPresenter(self.view, settings)
 
     def onShowExportDialog(self, dialog):
         exportModel = self.model.getExportModel()
