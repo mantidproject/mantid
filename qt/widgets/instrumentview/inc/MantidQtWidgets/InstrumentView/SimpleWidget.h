@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <QWidget>
+#include "ISimpleWidget.h"
 
+#include <QString>
+#include <QWidget>
 #include <memory>
 
 namespace MantidQt {
@@ -18,21 +20,21 @@ class ProjectionSurface;
 /**
  * A simple widget for drawing unwrapped instrument images.
  */
-class SimpleWidget : public QWidget {
+class SimpleWidget final : public ISimpleWidget {
 public:
   /// Constructor
   explicit SimpleWidget(QWidget *parent);
   ~SimpleWidget() override;
   /// Assign a surface to draw on
-  void setSurface(std::shared_ptr<ProjectionSurface> surface);
+  void setSurface(std::shared_ptr<ProjectionSurface> surface) override;
   /// Return the surface
-  std::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
+  std::shared_ptr<ProjectionSurface> getSurface() override { return m_surface; }
   /// Redraw the view
-  void updateView(bool picking = true);
+  void updateView(bool picking = true) override;
   /// Update the detector information (count values) and redraw
-  void updateDetectors();
+  void updateDetectors() override;
   /// Save the image into a file
-  void saveToFile(const QString &filename);
+  void saveToFile(const QString &filename) override;
 
 protected:
   void paintEvent(QPaintEvent * /*unused*/) override;

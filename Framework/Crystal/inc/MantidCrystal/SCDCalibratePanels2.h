@@ -12,6 +12,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 #include <boost/container/flat_set.hpp>
+#include <limits>
 
 namespace Mantid {
 namespace Crystal {
@@ -99,8 +100,8 @@ private:
   Mantid::API::MatrixWorkspace_sptr getIdealQSampleAsHistogram1D(Mantid::API::IPeaksWorkspace_sptr pws);
 
   /// Helper functions for adjusting components
-  void adjustComponent(double dx, double dy, double dz, double rvx, double rvy, double rvz, double rang,
-                       std::string cmptName, Mantid::API::IPeaksWorkspace_sptr &pws);
+  void adjustComponent(double dx, double dy, double dz, double drx, double dry, double drz, std::string cmptName,
+                       Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Generate a Table workspace to store the calibration results
   Mantid::API::ITableWorkspace_sptr generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument);
@@ -128,6 +129,7 @@ private:
   bool LOGCHILDALG{true};
   const int MINIMUM_PEAKS_PER_BANK{6};
   const double PI{3.1415926535897932384626433832795028841971693993751058209};
+  static constexpr double Tolerance = std::numeric_limits<double>::epsilon();
 
   // Column names and types
   const std::string calibrationTableColumnNames[8] = {"ComponentName",    "Xposition",        "Yposition",

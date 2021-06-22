@@ -15,6 +15,7 @@ from functools import partial
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import ConfigService, UsageService, version_str as mantid_version_str
 from mantidqt.utils.qt import plugins
+import mantidqt.utils.qt as qtutils
 
 # Find Qt plugins for development builds on some platforms
 plugins.setup_library_paths()
@@ -87,17 +88,7 @@ def initialize():
         import asyncio
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     if sys.platform == 'darwin':
-        # Force layer-backing on macOS >= Big Sur (11)
-        # or the application hangs
-        # A fix inside Qt is yet to be released:
-        # https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=commitdiff;h=c5d904639dbd690a36306e2b455610029704d821
-        # A complication with Big Sur numbering means we check for 10.16 and 11:
-        #   https://eclecticlight.co/2020/08/13/macos-version-numbering-isnt-so-simple/
-        from distutils.version import LooseVersion
-        import platform
-        mac_vers = LooseVersion(platform.mac_ver()[0])
-        if mac_vers >= '11' or mac_vers == '10.16':
-            os.environ['QT_MAC_WANTS_LAYER'] = '1'
+        qtutils.force_layer_backing_BigSur()
 
     app = qapplication()
 

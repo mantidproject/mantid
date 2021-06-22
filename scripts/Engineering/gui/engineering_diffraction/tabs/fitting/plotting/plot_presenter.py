@@ -50,18 +50,26 @@ class FittingPlotPresenter(object):
 
     def do_sequential_fit(self, ws_list):
         fitprop_list = []
+        prev_fitprop = self.view.read_fitprop_from_browser()
         for ws in ws_list:
             logger.notice(f'Starting to fit workspace {ws}')
-            fitprop = self.view.read_fitprop_from_browser()
+            fitprop = deepcopy(prev_fitprop)
             # update I/O workspace name
             fitprop['properties']['Output'] = ws
             fitprop['properties']['InputWorkspace'] = ws
             # do fit
             fit_output = Fit(**fitprop['properties'])
-            fitprop['properties']['Function'] = str(fit_output.Function.fun)
-            # save setup in fitprop browser (updates browser for next iteration of loop)
-            self.view.update_browser(fit_output.OutputStatus, fitprop['properties']['Function'], ws)
-            # append a deep copy to output list
-            fitprop_list.append(deepcopy(fitprop))
+            # update results
+            fitprop['status'] = fit_output.OutputStatus
+            funcstr = str(fit_output.Function.fun)
+            fitprop['properties']['Function'] = funcstr
+            if "success" in fitprop['status'].lower():
+                # update function in prev fitprop to use for next workspace
+                prev_fitprop['properties']['Function'] = funcstr
+            # update last fit in fit browser and save setup
+            self.view.update_browser(fit_output.OutputStatus, funcstr, ws)
+            # append a deep copy to output list (will be initial parameters if not successful)
+            fitprop_list.append(fitprop)
+
         logger.notice('Sequential fitting finished.')
         self.seq_fit_done_notifier.notify_subscribers(fitprop_list)

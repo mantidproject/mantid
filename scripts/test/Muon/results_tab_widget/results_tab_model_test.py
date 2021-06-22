@@ -11,7 +11,8 @@ from collections import OrderedDict
 from copy import deepcopy
 from unittest import mock
 
-from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformation
+from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
+from Muon.GUI.Common.contexts.fitting_contexts.tf_asymmetry_fitting_context import TFAsymmetryFittingContext
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
     DEFAULT_TABLE_NAME, ResultsTabModel, TableColumnType)
 from mantidqt.utils.qt.testing import start_qapplication
@@ -84,7 +85,7 @@ def create_test_model(input_workspaces,
     for fit, workspace_name in zip(fits, input_workspaces):
         add_logs(workspace_name, logs)
 
-    fitting_context = FittingContext()
+    fitting_context = TFAsymmetryFittingContext()
     for fit in fits:
         fitting_context.add_fit(fit)
     return fitting_context, ResultsTabModel(fitting_context)
@@ -141,36 +142,35 @@ class ResultsTabModelTest(unittest.TestCase):
 
     # ------------------------- success tests ----------------------------
     def test_default_model_has_results_table_name(self):
-        model = ResultsTabModel(FittingContext())
+        model = ResultsTabModel(TFAsymmetryFittingContext())
         self.assertEqual(model.results_table_name(), DEFAULT_TABLE_NAME)
 
     def test_updating_model_results_table_name(self):
         table_name = 'table_name'
-        model = ResultsTabModel(FittingContext())
+        model = ResultsTabModel(TFAsymmetryFittingContext())
         model.set_results_table_name(table_name)
 
         self.assertEqual(model.results_table_name(), table_name)
 
     def test_default_model_has_no_selected_function_without_fits(self):
-        model = ResultsTabModel(FittingContext())
+        model = ResultsTabModel(TFAsymmetryFittingContext())
 
         self.assertTrue(model.selected_fit_function() is None)
 
     def test_updating_model_selected_fit_function(self):
-        model = ResultsTabModel(FittingContext())
+        model = ResultsTabModel(TFAsymmetryFittingContext())
         new_selection = 'func2'
         model.set_selected_fit_function(new_selection)
 
         self.assertEqual(model.selected_fit_function(), new_selection)
 
     def test_model_returns_fit_functions_from_context(self):
-        _, model = create_test_model(('ws1',), 'func1', self.parameters, [],
-                                     self.logs)
+        _, model = create_test_model(['ws1'], 'func1', self.parameters, [], self.logs)
 
         self.assertEqual(['func1'], model.fit_functions())
 
     def test_model_returns_no_fit_selection_if_no_fits_present(self):
-        model = ResultsTabModel(FittingContext())
+        model = ResultsTabModel(TFAsymmetryFittingContext())
         self.assertEqual(0, len(model.fit_selection({})))
 
     def test_model_creates_fit_selection_given_no_existing_state(self):
@@ -196,7 +196,7 @@ class ResultsTabModelTest(unittest.TestCase):
                          model.fit_selection(orig_list_state))
 
     def test_model_returns_no_log_selection_if_no_fits_present(self):
-        model = ResultsTabModel(FittingContext())
+        model = ResultsTabModel(TFAsymmetryFittingContext())
         self.assertEqual(0, len(model.log_selection({})))
 
     def test_model_combines_existing_log_selection(self):
@@ -323,7 +323,10 @@ class ResultsTabModelTest(unittest.TestCase):
         parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)),
                                   ('Cost function value', (1.5, 0))])
         fits_func2 = create_test_fits(('ws2',), 'func2', parameters, [])
-        model = ResultsTabModel(FittingContext(fits_func1 + fits_func2))
+
+        fitting_context = TFAsymmetryFittingContext()
+        fitting_context.fit_list = fits_func1 + fits_func2
+        model = ResultsTabModel(fitting_context)
 
         selected_results = [('ws1', 0), ('ws2', 1)]
         self.assertRaises(RuntimeError, model.create_results_table, [],
@@ -339,7 +342,10 @@ class ResultsTabModelTest(unittest.TestCase):
                                         'func1',
                                         parameters, [],
                                         global_parameters=['Height'])
-        model = ResultsTabModel(FittingContext(fits_func1 + fits_globals))
+
+        fitting_context = TFAsymmetryFittingContext()
+        fitting_context.fit_list = fits_func1 + fits_globals
+        model = ResultsTabModel(fitting_context)
 
         selected_results = [('ws1', 0), ('ws2', 1)]
         self.assertRaises(RuntimeError, model.create_results_table, [],
@@ -355,7 +361,10 @@ class ResultsTabModelTest(unittest.TestCase):
 
         fits_logs2 = create_test_fits(('ws2',), 'func1', parameters, output_workspace_names=('ws2',))
         add_logs(fits_logs2[0].input_workspaces[0], logs[2:])
-        model = ResultsTabModel(FittingContext(fits_logs1 + fits_logs2))
+
+        fitting_context = TFAsymmetryFittingContext()
+        fitting_context.fit_list = fits_logs1 + fits_logs2
+        model = ResultsTabModel(fitting_context)
 
         selected_results = [('ws1', 0), ('ws2', 1)]
         selected_logs = ['log1', 'log3']
@@ -370,7 +379,10 @@ class ResultsTabModelTest(unittest.TestCase):
         parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)),
                                   ('Cost function value', (1.5, 0))])
         fits_func2 = create_test_fits(('ws2',), 'func2', parameters, [])
-        model = ResultsTabModel(FittingContext(fits_func1 + fits_func2))
+
+        fitting_context = TFAsymmetryFittingContext()
+        fitting_context.fit_list = fits_func1 + fits_func2
+        model = ResultsTabModel(fitting_context)
 
         model.on_new_fit_performed()
 

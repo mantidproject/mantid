@@ -183,8 +183,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
         self.presenter.update_start_and_end_x_in_view_from_model.assert_called_once_with()
 
-        self.mock_view_plot_guess.assert_called_once_with()
-        self.model.update_plot_guess.assert_called_once_with(self.plot_guess)
+        self.model.update_plot_guess.assert_called_once_with()
 
         self.presenter.selected_fit_results_changed.notify_subscribers.assert_called_once_with([])
 
@@ -394,6 +393,8 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         type(self.model).end_xs = self.mock_model_end_xs
         self.mock_model_current_end_x = mock.PropertyMock(return_value=self.end_x)
         type(self.model).current_end_x = self.mock_model_current_end_x
+        self.mock_model_plot_guess = mock.PropertyMock(return_value=self.plot_guess)
+        type(self.model).plot_guess = self.mock_model_plot_guess
         self.mock_model_minimizer = mock.PropertyMock(return_value=self.minimizer)
         type(self.model).minimizer = self.mock_model_minimizer
         self.mock_model_evaluation_type = mock.PropertyMock(return_value=self.evaluation_type)

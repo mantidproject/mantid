@@ -137,13 +137,16 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
         presenter = PeaksViewerCollectionPresenter(MagicMock())
         presenter.overlay_peaksworkspaces = MagicMock()
         presenter.workspace_names = MagicMock(return_value=["ws"])
-        presenter.remove_peaksworkspace = MagicMock(
-            side_effect=lambda ws_name: presenter.workspace_names().remove(ws_name))
+
+        def remove_peaks(ws_name):
+            presenter.workspace_names().remove(ws_name)
+            return 1
+        presenter.remove_peaksworkspace = MagicMock(side_effect=remove_peaks)
 
         presenter.replace_handle("ws", None)
 
         presenter.remove_peaksworkspace.assert_called_once_with("ws")
-        presenter.overlay_peaksworkspaces.assert_called_once_with(["ws"])
+        presenter.overlay_peaksworkspaces.assert_called_once_with(["ws"], index=1)
 
     def test_ensure_delete_handle_removes_workspace(self, _):
         presenter = PeaksViewerCollectionPresenter(MagicMock())
@@ -169,14 +172,17 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
     def test_ensure_rename_handle_removes_and_re_adds_the_new_workspace_name(self, _):
         presenter = PeaksViewerCollectionPresenter(MagicMock())
         presenter.workspace_names = MagicMock(return_value=["ws"])
-        presenter.remove_peaksworkspace = MagicMock(
-            side_effect=lambda ws_name: presenter.workspace_names().remove(ws_name))
+
+        def remove_peaks(ws_name):
+            presenter.workspace_names().remove(ws_name)
+            return 7
+        presenter.remove_peaksworkspace = MagicMock(side_effect=remove_peaks)
         presenter.overlay_peaksworkspaces = MagicMock()
 
         presenter.rename_handle("ws", "ws1")
 
         presenter.remove_peaksworkspace.assert_called_once_with("ws")
-        presenter.overlay_peaksworkspaces.assert_called_once_with(["ws1"])
+        presenter.overlay_peaksworkspaces.assert_called_once_with(["ws1"], index=7)
 
     def test_ensure_clear_observer_sets_observer_to_none(self, _):
         presenter = PeaksViewerCollectionPresenter(MagicMock())
@@ -185,6 +191,25 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
         presenter.clear_observer()
 
         self.assertEqual(presenter._ads_observer, None)
+
+    def test_adding_peak(self, _):
+        view = MagicMock()
+        presenter = PeaksViewerCollectionPresenter(view)
+
+        # test deactivating peak adding mode from sliceviewer
+        presenter.deactivate_peak_add_delete()
+        view.peak_actions_view.deactivate_peak_adding.assert_called_once()
+
+        # test adding peak to peaksworkspace
+        presenter.child_presenter = MagicMock()
+        presenter.add_delete_peak([1, 2, 3])
+        presenter.child_presenter().add_peak.assert_called_once_with([1, 2, 3])
+
+        # test deactivate_zoom_pan
+        presenter.deactivate_zoom_pan(False)
+        view.deactivate_zoom_pan.assert_not_called()
+        presenter.deactivate_zoom_pan(True)
+        view.deactivate_zoom_pan.assert_called_once()
 
 
 if __name__ == '__main__':

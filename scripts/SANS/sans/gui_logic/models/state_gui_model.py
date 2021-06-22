@@ -15,7 +15,8 @@ from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStep
 from sans.common.general_functions import get_ranges_from_event_slice_setting
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.AllStates import AllStates
-from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
+from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter, apply_selective_view_scaling,
+                                       undo_selective_view_scaling)
 from sans.user_file.parser_helpers.wavelength_parser import parse_range_wavelength
 
 
@@ -109,46 +110,54 @@ class StateGuiModel(ModelCommon):
     # ==================================================================================================================
     # ==================================================================================================================
     @property
+    @apply_selective_view_scaling
     def lab_pos_1(self):
         val = self._all_states.move.detectors[DetectorType.LAB.value].sample_centre_pos1
-        return meter_2_millimeter(self._get_val_or_default(val, 0))
+        return self._get_val_or_default(val, 0)
 
     @lab_pos_1.setter
+    @undo_selective_view_scaling
     def lab_pos_1(self, value):
-        self._all_states.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = millimeter_2_meter(value)
+        self._all_states.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = value
 
     @property
+    @apply_selective_view_scaling
     def lab_pos_2(self):
         val = self._all_states.move.detectors[DetectorType.LAB.value].sample_centre_pos2
-        return meter_2_millimeter(self._get_val_or_default(val, 0))
+        return self._get_val_or_default(val, 0)
 
     @lab_pos_2.setter
+    @undo_selective_view_scaling
     def lab_pos_2(self, value):
-        self._all_states.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = millimeter_2_meter(value)
+        self._all_states.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = value
 
     @property
+    @apply_selective_view_scaling
     def hab_pos_1(self):
         val = None
         if DetectorType.HAB.value in self._all_states.move.detectors:
             val = self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos1
-        return meter_2_millimeter(self._get_val_or_default(val, 0))
+        return self._get_val_or_default(val, 0)
 
     @hab_pos_1.setter
+    @undo_selective_view_scaling
     def hab_pos_1(self, value):
         if DetectorType.HAB.value in self._all_states.move.detectors:
-            self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = millimeter_2_meter(value)
+            self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = value
 
     @property
+    @apply_selective_view_scaling
     def hab_pos_2(self):
         val = None
         if DetectorType.HAB.value in self._all_states.move.detectors:
             val = self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos2
-        return meter_2_millimeter(self._get_val_or_default(val, 0))
+        return self._get_val_or_default(val, 0)
 
     @hab_pos_2.setter
+    @undo_selective_view_scaling
     def hab_pos_2(self, value):
         if DetectorType.HAB.value in self._all_states.move.detectors:
-            self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = millimeter_2_meter(value)
+            self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = value
 
     # ==================================================================================================================
     # ==================================================================================================================

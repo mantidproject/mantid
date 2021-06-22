@@ -39,6 +39,7 @@ private:
   size_t m_bin_product = 0;
   Mantid::Geometry::MDFrame_uptr createMDFrame(const std::string &frame, const std::string &unit);
   bool checkIfFrameValid(const std::string &frame, const std::vector<std::string> &targetFrames);
+  std::vector<std::string> parseNames(const std::string &names_string);
 };
 
 } // namespace MDAlgorithms

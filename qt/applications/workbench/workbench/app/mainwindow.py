@@ -68,8 +68,7 @@ def _get_splash_image():
 
 SPLASH = QSplashScreen(_get_splash_image(), Qt.WindowStaysOnTopHint)
 SPLASH.show()
-SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
-                   | Qt.AlignAbsolute, QColor(Qt.black))
+SPLASH.showMessage("Starting...",  int(Qt.AlignBottom) | int(Qt.AlignLeft) | int(Qt.AlignAbsolute), QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -226,7 +225,7 @@ class MainWindow(QMainWindow):
         if not self.splash:
             return
         if msg:
-            self.splash.showMessage(msg, Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute,
+            self.splash.showMessage(msg, int(Qt.AlignBottom) | int(Qt.AlignLeft) | int(Qt.AlignAbsolute),
                                     QColor(Qt.black))
         QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -546,21 +545,22 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
-        if self.project.is_saving or self.project.is_loading:
-            event.ignore()
-            self.project.inform_user_not_possible()
-            return
-
-        # Check whether or not to save project
-        if not self.project.saved:
-            # Offer save
-            if self.project.offer_save(self):
-                # Cancel has been clicked
+        if self.project is not None:
+            if self.project.is_saving or self.project.is_loading:
                 event.ignore()
+                self.project.inform_user_not_possible()
                 return
 
+            # Check whether or not to save project
+            if not self.project.saved:
+                # Offer save
+                if self.project.offer_save(self):
+                    # Cancel has been clicked
+                    event.ignore()
+                    return
+
         # Close editors
-        if self.editor.app_closing():
+        if self.editor is None or self.editor.app_closing():
             # write out any changes to the mantid config file
             ConfigService.saveConfig(ConfigService.getUserFilename())
             # write current window information to global settings object
@@ -576,11 +576,17 @@ class MainWindow(QMainWindow):
 
             # Kill the project recovery thread and don't restart should a save be in progress and clear out current
             # recovery checkpoint as it is closing properly
-            self.project_recovery.stop_recovery_thread()
-            self.project_recovery.closing_workbench = True
-            self.project_recovery.remove_current_pid_folder()
+            if self.project_recovery is not None:
+                self.project_recovery.stop_recovery_thread()
+                self.project_recovery.closing_workbench = True
+                self.project_recovery.remove_current_pid_folder()
 
-            self.interface_manager.closeHelpWindow()
+            # Cancel memory widget thread
+            if self.memorywidget is not None:
+                self.memorywidget.presenter.cancel_memory_update()
+
+            if self.interface_manager is not None:
+                self.interface_manager.closeHelpWindow()
 
             event.accept()
         else:
