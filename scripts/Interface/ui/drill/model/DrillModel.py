@@ -7,7 +7,6 @@
 
 import os
 import sys
-import numpy
 
 from qtpy.QtCore import QObject, Signal, QThread
 
