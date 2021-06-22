@@ -10,7 +10,6 @@ import json
 from mantid.kernel import *
 
 from .configurations import RundexSettings
-from .DrillSample import DrillSample
 
 
 class DrillRundexIO:
