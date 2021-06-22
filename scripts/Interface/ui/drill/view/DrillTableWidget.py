@@ -118,7 +118,7 @@ class DrillTableWidget(QTableWidget):
             item (DrillTableItem): the item
         """
         if item.text() == "":
-            if item.getPresenter is not None:
+            if item.getPresenter() is not None:
                 row = item.row()
                 col = item.column()
                 self._samplePresenters[row].onDelItem(self._columns[col])
