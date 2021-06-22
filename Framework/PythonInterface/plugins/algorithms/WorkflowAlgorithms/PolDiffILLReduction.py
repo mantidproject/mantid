@@ -418,6 +418,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Extracts MatrixWorkspace with transmission value from the provided WorkspaceGroup name or creates a single
         valued workspace in case a floating point number has been provided instead of a workspace group name."""
         transmission = self.getPropertyValue('Transmission')
+        if transmission == "":
+            return None
         if transmission in mtd:
             transmission_ws = mtd[transmission][0].name()
         else:
@@ -425,37 +427,68 @@ class PolDiffILLReduction(PythonAlgorithm):
             CreateSingleValuedWorkspace(DataValue=float(transmission), OutputWorkspace=transmission_ws)
         return transmission_ws
 
-    def _subtract_background(self, ws, empty_ws, transmission_ws):
+    def _subtract_background(self, ws, transmission_ws):
         """Subtracts empty container and cadmium absorber scaled by transmission."""
-        cadmium_ws = self.getPropertyValue('CadmiumWorkspace')
-        if cadmium_ws == "":
-            return ws
         unit_ws = 'unit_ws'
         CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=unit_ws)
-        background_ws = 'background_ws'
-        tmp_names = [unit_ws, background_ws]
+        tmp_names = [unit_ws]
+        transmission_corr = transmission_ws + '_corr'
+        Minus(LHSWorkspace=unit_ws, RHSWorkspace=transmission_ws, OutputWorkspace=transmission_corr)
+        tmp_names.append(transmission_corr)
+
         nMeasurements = self._data_structure_helper()
-        singleEmptyPerPOL = mtd[empty_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
-        singleCadmiumPerPOL = mtd[cadmium_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
+        cadmium_present = True
+        cadmium_ws = self.getPropertyValue('CadmiumWorkspace')
+        if cadmium_ws == "":
+            cadmium_present = False
+        else:
+            max_cadmium_entry = mtd[cadmium_ws].getNumberOfEntries()
+            singleCadmiumPerPOL = mtd[cadmium_ws].getNumberOfEntries() == nMeasurements
+        empty_present = True
+        empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
+        if empty_ws == "":
+            empty_present = False
+        else:
+            max_empty_entry = mtd[empty_ws].getNumberOfEntries()
+            singleEmptyPerPOL = mtd[empty_ws].getNumberOfEntries() == nMeasurements
+        if not empty_present and not cadmium_present:
+            DeleteWorkspaces(WorkspaceList=tmp_names)
+            return
+
+        background_ws = 'background_ws'
+        tmp_names.append(background_ws)
         for entry_no, entry in enumerate(mtd[ws]):
-            if singleEmptyPerPOL:
-                empty_entry = mtd[empty_ws][entry_no % nMeasurements].name()
+            empty_no = entry_no
+            cadmium_no = entry_no
+            if empty_present:
+                if singleEmptyPerPOL:
+                    empty_no = entry_no % nMeasurements
+                else:
+                    if entry_no >= max_empty_entry:
+                        empty_no = entry_no % max_empty_entry
+                empty_entry = mtd[empty_ws][empty_no].name()
+                empty_corr = empty_entry + '_corr'
+                tmp_names.append(empty_corr)
+                Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=empty_entry, OutputWorkspace=empty_corr)
+            if cadmium_present:
+                if singleCadmiumPerPOL:
+                    cadmium_no = entry_no % nMeasurements
+                else:
+                    if entry_no >= max_cadmium_entry:
+                        cadmium_no = entry_no % max_cadmium_entry
+                cadmium_entry = mtd[cadmium_ws][cadmium_no].name()
+                cadmium_corr = cadmium_entry + '_corr'
+                tmp_names.append(cadmium_corr)
+                Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=cadmium_entry, OutputWorkspace=cadmium_corr)
+            if empty_present and cadmium_present:
+                Plus(LHSWorkspace=empty_corr, RHSWorkspace=cadmium_corr, OutputWorkspace=background_ws)
             else:
-                empty_entry = mtd[empty_ws][entry_no].name()
-            if singleCadmiumPerPOL:
-                cadmium_entry = mtd[cadmium_ws][entry_no % nMeasurements].name()
-            else:
-                cadmium_entry = mtd[cadmium_ws][entry_no].name()
-            empty_corr = empty_entry + '_corr'
-            tmp_names.append(empty_corr)
-            Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=empty_entry, OutputWorkspace=empty_corr)
-            transmission_corr = transmission_ws + '_corr'
-            tmp_names.append(transmission_corr)
-            Minus(LHSWorkspace=unit_ws, RHSWorkspace=transmission_ws, OutputWorkspace=transmission_corr)
-            cadmium_corr = cadmium_entry + '_corr'
-            tmp_names.append(cadmium_corr)
-            Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=cadmium_entry, OutputWorkspace=cadmium_corr)
-            Plus(LHSWorkspace=empty_corr, RHSWorkspace=cadmium_corr, OutputWorkspace=background_ws)
+                if empty_present:
+                    tmp_names.pop()
+                    RenameWorkspace(InputWorkspace=empty_corr, OutputWorkspace=background_ws)
+                else:
+                    tmp_names.pop()
+                    RenameWorkspace(InputWorkspace=cadmium_corr, OutputWorkspace=background_ws)
             Minus(LHSWorkspace=entry,
                   RHSWorkspace=background_ws,
                   OutputWorkspace=entry)
@@ -883,13 +916,11 @@ class PolDiffILLReduction(PythonAlgorithm):
             self._normalise(ws)
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
-            empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
-            if not self.getProperty('EmptyContainerWorkspace').isDefault \
-                    and not self.getProperty('Transmission').isDefault:
-                # Subtracts background if the workspaces for empty container and transmission are provided
-                transmission_ws = self._get_transmission(ws)
-                progress.report('Subtracting backgrounds')
-                self._subtract_background(ws, empty_ws, transmission_ws)
+            # Subtracts background if the transmission and either empty container or cadmium are provided
+            transmission_ws = self._get_transmission(ws)
+            progress.report('Subtracting backgrounds')
+            if transmission_ws:
+                self._subtract_background(ws, transmission_ws)
 
             if process == 'Quartz':
                 progress.report('Calculating polarising efficiencies')
@@ -901,6 +932,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     progress.report('Applying polarisation corrections')
                     self._apply_polarisation_corrections(ws, pol_eff_ws)
                 self._read_experiment_properties(ws)
+                empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
                 if self.getPropertyValue('SelfAttenuationMethod') != 'None' and empty_ws != '':
                     progress.report('Applying self-attenuation correction')
                     self._apply_self_attenuation_correction(ws, empty_ws)
