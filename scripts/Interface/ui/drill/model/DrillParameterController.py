@@ -76,7 +76,7 @@ class DrillParameterController(threading.Thread):
         while self._running:
             try:
                 p = self._paramQueue.get(timeout=0.1)
-                time.sleep(0.001)
+                time.sleep(0.01)
                 try:
                     pName = p.getName()
                     pValue = p.getValue()
