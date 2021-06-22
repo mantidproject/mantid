@@ -804,18 +804,20 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
-        vanadium_expected_cross_section = 0.404 # barns
+        vanadium_expected_cross_section = 0.404  # barns
         norm_name = ws + "_norm"
+        polarisation_directions = 0.5 * self._data_structure_helper()
         absolute_normalisation = self.getProperty('AbsoluteNormalisation').value
         output_treatment = self.getPropertyValue('OutputTreatment')
         if absolute_normalisation:
-            # expected total cross-section of unpolarised neutrons in V is 1/3 * sum of all measured c-s,
-            # and normalised to 0.404 barns times the number of moles of V:
-            CreateSingleValuedWorkspace(DataValue=3.0 * vanadium_expected_cross_section
+            # expected total cross-section of unpolarised neutrons in V is 1/N sum of N polarisation directions (flipper
+            # ON and OFF), for uniaxial: N = 1, for 6-p: N = 3,  and normalised to 0.404 barns times the number
+            # of moles of V:
+            CreateSingleValuedWorkspace(DataValue=polarisation_directions * vanadium_expected_cross_section
                                         * self._sampleAndEnvironmentProperties['NMoles'].value,
                                         OutputWorkspace=norm_name)
         else:
-            CreateSingleValuedWorkspace(DataValue=3.0, OutputWorkspace=norm_name)
+            CreateSingleValuedWorkspace(DataValue=polarisation_directions, OutputWorkspace=norm_name)
         to_remove = [norm_name]
         if output_treatment == 'Sum':
             self._merge_polarisations(ws, average_detectors=True)
