@@ -34,6 +34,11 @@ include(GoogleTest)
 include(PyUnitTest)
 enable_testing()
 
+# build f2py fortran routines
+if (F2PY_ROUTINES)
+include(f2pylibraries)
+endif()
+
 # We want shared libraries everywhere
 set(BUILD_SHARED_LIBS On)
 
