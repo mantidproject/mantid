@@ -276,6 +276,18 @@ class DrillSample(QObject):
         else:
             return None
 
+    def isValid(self):
+        """
+        Check if all the parameters are valid.
+
+        Returns:
+            bool: True if the sample is valid
+        """
+        for _, param in self._parameters.items():
+            if not param.isValid():
+                return False
+        return True
+
     def getParameterValues(self):
         """
         Get the parameters as a dictionnary.

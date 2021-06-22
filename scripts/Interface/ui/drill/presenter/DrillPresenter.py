@@ -23,12 +23,6 @@ from .DrillSettingsPresenter import DrillSettingsPresenter
 class DrillPresenter:
 
     """
-    Set of invalid cells. This is used to avoid the submission of invalid
-    parameters for processing.
-    """
-    _invalidCells = set()
-
-    """
     Set of custom options. Used to keep an history of the previous values.
     """
     _customOptions = set()
@@ -45,7 +39,6 @@ class DrillPresenter:
         self.model = DrillModel()
         self.view = view
         self.view.setWindowTitle("Untitled [*]")
-        self._invalidCells = set()
         self._customOptions = set()
         self.model.setInstrument(config["default.instrument"], log=False)
         self.model.setAcquisitionMode(self.view.getAcquisitionMode())
@@ -249,14 +242,13 @@ class DrillPresenter:
         """
         if not rows:
             return
-        for cell in self._invalidCells:
-            if cell[0] in rows:
-                QMessageBox.warning(self.view, "Error", "Please check the "
-                                    "parameters value before processing.")
-                return
         self.view.set_disabled(True)
         self.view.set_progress(0, 100)
-        self.model.process(rows)
+        result = self.model.process(rows)
+        if not result:
+            QMessageBox.warning(self.view, "Error", "Please check the "
+                                "parameters value before processing.")
+            self.view.set_disabled(False)
 
     def stopProcessing(self):
         """
