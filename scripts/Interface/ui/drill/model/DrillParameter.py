@@ -60,16 +60,9 @@ class DrillParameter(QObject):
     _valid = False
 
     """
-    Sent when the parameter is valid.
+    Sent when the parameter value has been checked.
     """
-    valid = Signal()
-
-    """
-    Sent when the parameter is invalid.
-    Args:
-        str: error message
-    """
-    invalid = Signal(str)
+    checked = Signal()
 
     """
     Sent when the parameter value changed.
@@ -162,22 +155,20 @@ class DrillParameter(QObject):
         """
         return self._value
 
-    def setValid(self):
+    def setValidationState(self, valid, msg=""):
         """
-        Set the parameter as valid.
-        """
-        self._valid = True
-        self.valid.emit()
-
-    def setInvalid(self, msg):
-        """
-        Set the parameter as invalid.
+        Set the parameter validation state.
 
         Args:
-            msg (str): error message
+            valid (bool): True if the parameter is valid
+            msg (str): optional error message
         """
-        self._valid = False
-        self.invalid.emit(msg)
+        self._valid = valid
+        if not valid:
+            self._validationErrorMsg = msg
+        else:
+            self._validationErrorMsg = None
+        self.checked.emit()
 
     def isValid(self):
         """
@@ -187,6 +178,15 @@ class DrillParameter(QObject):
             bool: True if the parameter is valid
         """
         return self._valid
+
+    def getErrorMessage(self):
+        """
+        Get the error message associated with an invalid state.
+
+        Returns:
+            str: error message
+        """
+        return self._validationErrorMsg
 
     def getType(self):
         """
