@@ -93,13 +93,14 @@ public:
         "f1.FWHM");
   }
 
-  void test_that_getWidth_will_return_an_empty_vector_if_there_are_no_Widths() {
+  void test_that_zeroWidths_returns_true_if_the_workspace_contains_no_widths() {
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoWidthLabels());
     m_ads->addOrReplace("Name2", workspace2);
+    addWorkspacesToModel(m_workspace);
 
-    addWorkspacesToModel(m_workspace, workspace2);
-
+    TS_ASSERT_THROWS(addWorkspacesToModel(workspace2), std::invalid_argument const &);
     TS_ASSERT(m_model->getWidths(TableDatasetIndex{1}).empty());
+    TS_ASSERT(!m_model->getWidthSpectrum(0, TableDatasetIndex{1}));
   }
 
   void test_that_getWidths_will_return_the_width_parameter_names() {
