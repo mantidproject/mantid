@@ -280,18 +280,22 @@ class PolDiffILLReduction(PythonAlgorithm):
         numors = dict()
         for name in mtd[ws].getNames():
             two_theta_orientation = mtd[name].getRun().getLogData('2theta.requested').value
-            if two_theta_orientation in numors:
-                numors[two_theta_orientation].append(name)
-            else:
+            if two_theta_orientation not in numors:
                 numors[two_theta_orientation] = list()
+            numors[two_theta_orientation].append(name)
         merged_group = []
+        to_remove = ['norm']
         for key in numors:
-            merged_ws = "{}_{}".format(ws, key)
+            merged_ws = "{}_{}_deg".format(ws, key)
             merged_group.append(merged_ws)
-            MergeRuns(InputWorkspaces=numors[key], OutputWorkspace=merged_ws)
+            if len(numors[key]) < 2:
+                RenameWorkspace(InputWorkspace=numors[key][0], OutputWorkspace=merged_ws)
+            else:
+                MergeRuns(InputWorkspaces=numors[key], OutputWorkspace=merged_ws)
+                to_remove.extend(numors[key])
             CreateSingleValuedWorkspace(DataValue=len(numors[key]), OutputWorkspace='norm')
-            Divide(LHSWorkspace=output_ws, RHSWorkspace='norm', OutputWorkspace=merged_ws)
-        DeleteWorkspaces(WorkspaceList=['norm', ws])
+            Divide(LHSWorkspace=merged_ws, RHSWorkspace='norm', OutputWorkspace=merged_ws)
+        DeleteWorkspaces(WorkspaceList=to_remove)
         GroupWorkspaces(InputWorkspaces=merged_group, OutputWorkspace=ws)
         return ws
 
