@@ -392,21 +392,23 @@ class DrillModel(QObject):
         samples += sampleIndexes
         self.groupSamples(samples, groupName)
 
-    def setGroupMaster(self, sampleIndex):
+    def setGroupMaster(self, sampleIndex, state):
         """
-        Set the sample as master for its group.
+        Set/unset the sample as master for its group.
 
         Args:
             sampleIndex (int): sample index
+            state (bool): True to set the master sample
         """
         sample = self.samples[sampleIndex]
         groupName = sample.getGroupName()
-        if groupName is None:
+        if groupName is None or sample.isMaster() == state:
             return
-        for s in self._getSamplesFromGroup(groupName):
-            if s.isMaster():
-                s.setMaster(False)
-        self.samples[sampleIndex].setMaster(True)
+        if state:
+            for s in self._getSamplesFromGroup(groupName):
+                if s.isMaster():
+                    s.setMaster(False)
+        sample.setMaster(state)
 
     def getProcessingParameters(self, index):
         """

@@ -53,6 +53,7 @@ class DrillPresenter:
         self.view.groupSelectedRows.connect(self.onGroupSelectedRows)
         self.view.ungroupSelectedRows.connect(self.onUngroupSelectedRows)
         self.view.setMasterRow.connect(self.onSetMasterRow)
+        self.view.unsetMasterRow.connect(self.onUnsetMasterRow)
         self.view.process.connect(self.onProcess)
         self.view.processGroup.connect(self.onProcessGroup)
         self.view.processAll.connect(self.onProcessAll)
@@ -201,7 +202,18 @@ class DrillPresenter:
         if len(rows) != 1:
             return
         row = rows[0]
-        self.model.setGroupMaster(row)
+        self.model.setGroupMaster(row, True)
+        self.view.setWindowModified(True)
+
+    def onUnsetMasterRow(self):
+        """
+        Triggered when a master row is unset.
+        """
+        rows = self.view.table.getRowsFromSelectedCells()
+        if len(rows) != 1:
+            return
+        row = rows[0]
+        self.model.setGroupMaster(row, False)
         self.view.setWindowModified(True)
 
     def onProcess(self):
