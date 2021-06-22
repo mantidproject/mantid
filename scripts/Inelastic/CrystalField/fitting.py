@@ -1228,8 +1228,6 @@ class CrystalFieldSite(object):
                     params['sp'+str(x)+'.IntensityScaling'] = self.crystalField.IntensityScaling[x]
             if differentIntensities:
                 warnings.warn('Mismatch between IntensityScaling values of CrystalField objects', RuntimeWarning)
-        params['ion0.IntensityScaling'] = abundances[0]
-        params['ion1.IntensityScaling'] = abundances[1]
         if self.crystalField.ResolutionModel is None:
             FWHM = [self.crystalField._getFWHM(x) for x in range(self.crystalField.NumberOfSpectra)]
             return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHM = FWHM,
