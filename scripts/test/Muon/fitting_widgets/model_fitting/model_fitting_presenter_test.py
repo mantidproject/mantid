@@ -108,12 +108,14 @@ class ModelFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_results_table_changed_will_attempt_to_create_the_parameter_combination_tables(self):
         self.presenter._create_parameter_combination_workspaces = mock.Mock()
+        self.presenter.handle_parameter_combinations_finished = mock.Mock()
 
         self.presenter.handle_results_table_changed()
 
         self.mock_view_current_result_table_index.assert_called_once_with()
         self.mock_model_current_result_table_index.assert_called_once_with(0)
-        self.presenter._create_parameter_combination_workspaces.assert_called_once_with()
+        self.presenter._create_parameter_combination_workspaces.assert_called_once_with(
+            self.presenter.handle_parameter_combinations_finished)
 
     def test_that_handle_selected_x_changed_will_find_a_different_y_parameter_if_it_matches_x(self):
         self.presenter.update_selected_parameter_combination_workspace = mock.Mock()

@@ -138,7 +138,9 @@ class ModelFittingModelTest(unittest.TestCase):
         table = create_results_table()
         add_ws_to_ads("Result1", table)
 
-        x_parameters, y_parameters = self.model.create_x_and_y_parameter_combination_workspaces()
+        self.model.create_x_and_y_parameter_combination_workspaces()
+        x_parameters = self.model.x_parameters()
+        y_parameters = self.model.y_parameters()
 
         self.assertEqual(list(x_parameters), ["workspace_name", "A0", "A1"])
         self.assertEqual(list(y_parameters), ["workspace_name", "A0", "A1"])
