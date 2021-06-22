@@ -205,9 +205,9 @@ private:
     // loop over the spectra
     // which spectra is which is coded in createcompositeB2BExp
     for (int spectrumIndex = 0; spectrumIndex < NUM_HIST; ++spectrumIndex) {
-      auto compositefunction = CrossCorrelateTestData::createCompositeB2BExp(shape, spectrumIndex);
+      auto compositefunction = createCompositeB2BExp(shape, spectrumIndex);
       ws->setBinEdges(spectrumIndex, xEdges);
-      ws->setCounts(spectrumIndex, CrossCorrelateTestData::evaluateFunction(compositefunction, TOFvalues));
+      ws->setCounts(spectrumIndex, evaluateFunction(compositefunction, TOFvalues));
     }
     ws->rebuildSpectraMapping();
 
