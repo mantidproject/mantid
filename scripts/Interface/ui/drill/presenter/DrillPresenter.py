@@ -230,7 +230,7 @@ class DrillPresenter:
         if not rows:
             rows = self._table.getRowsFromSelectedCells()
         if not rows:
-            rows = self.view.getAllRows()
+            rows = self._table.getAllRows()
         self._process(rows)
 
     def onProcessGroup(self):
@@ -252,7 +252,7 @@ class DrillPresenter:
         """
         Handles the processing of all rows.
         """
-        rows = self.view.getAllRows()
+        rows = self._table.getAllRows()
         self._process(rows)
 
     def _process(self, rows):
