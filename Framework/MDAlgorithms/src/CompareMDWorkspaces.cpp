@@ -400,8 +400,8 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
               std::vector<float> centers1(nd);
               std::vector<float> centers2(nd);
               for (size_t d = 0; d < nd; d++) {
-                centers1.push_back(events1[i].getCenter(d));
-                centers2.push_back(events2[i].getCenter(d));
+                centers1[d] = events1[i].getCenter(d);
+                centers2[d] = events2[i].getCenter(d);
               }
               SimpleMDEvent se1(centers1, events1[i].getSignal(), events1[i].getErrorSquared());
               SimpleMDEvent se2(centers2, events2[i].getSignal(), events2[i].getErrorSquared());
@@ -429,7 +429,7 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
                 compareTol(events_vec1[i].getError(), events_vec2[i].getError(), "");
               } catch (CompareFailsException &e) {
                 g_log.debug() << "Box " << ibox << " Event " << i << ": " << e.what()
-                              << "\n    [ws1] " + events_vec1[i].str() << "\n    [ws2] : " + events_vec2[i].str()
+                              << "\n    [ws1] : " + events_vec1[i].str() << "\n    [ws2] : " + events_vec2[i].str()
                               << "\n";
                 numdiff++;
                 same = false;
