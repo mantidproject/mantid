@@ -352,7 +352,9 @@ class DrillModel(QObject):
         for group in modifiedGroups:
             i = 0
             for s in self._getSamplesFromGroup(group):
+                master = s.isMaster()
                 s.setGroup(group, i)
+                s.setMaster(master)
                 i += 1
 
     def ungroupSamples(self, sampleIndexes):
