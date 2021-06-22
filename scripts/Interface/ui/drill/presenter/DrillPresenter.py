@@ -27,7 +27,12 @@ class DrillPresenter:
     """
     _customOptions = set()
 
-    def __init__(self, view):
+    """
+    Reference to the Drill table.
+    """
+    _table = None
+
+    def __init__(self, mainView, tableView):
         """
         Initialize the presenter by giving a view and a model. This method
         connects all the view and model signals.
@@ -37,7 +42,8 @@ class DrillPresenter:
             view (DrillView): the view
         """
         self.model = DrillModel()
-        self.view = view
+        self.view = mainView
+        self._table = tableView
         self.view.setWindowTitle("Untitled [*]")
         self._customOptions = set()
         self.model.setInstrument(config["default.instrument"], log=False)
@@ -94,8 +100,8 @@ class DrillPresenter:
         Args:
             sample (DrillSample): the new sample
         """
-        self.view.table.addRow(sample.getIndex())
-        DrillSamplePresenter(self.view.table, sample)
+        self._table.addRow(sample.getIndex())
+        DrillSamplePresenter(self._table, sample)
 
     def onAutomaticFilling(self):
         """
@@ -163,9 +169,9 @@ class DrillPresenter:
             return value
 
         increment = self.view.increment.value()
-        cells = self.view.table.getSelectedCells()
+        cells = self._table.getSelectedCells()
         # check if increment should append along columns
-        columnIncrement = (len(self.view.table.getRowsFromSelectedCells()) > 1)
+        columnIncrement = (len(self._table.getRowsFromSelectedCells()) > 1)
         if not cells:
             return
         # increment or copy the content of the previous cell
@@ -173,16 +179,16 @@ class DrillPresenter:
             # if we increment along columns and this is a new column
             if columnIncrement and cells[i][1] != cells[i-1][1]:
                 continue
-            contents = self.view.table.getCellContents(cells[i-1][0],
-                                                       cells[i-1][1])
-            self.view.table.setCellContents(cells[i][0], cells[i][1],
-                                            inc(contents, increment))
+            contents = self._table.getCellContents(cells[i-1][0],
+                                                   cells[i-1][1])
+            self._table.setCellContents(cells[i][0], cells[i][1],
+                                        inc(contents, increment))
 
     def onGroupSelectedRows(self):
         """
         Triggered when the view request the creation of a group.
         """
-        rows = self.view.table.getRowsFromSelectedCells()
+        rows = self._table.getRowsFromSelectedCells()
         self.model.groupSamples(rows)
         self.view.setWindowModified(True)
 
@@ -190,7 +196,7 @@ class DrillPresenter:
         """
         Triggered when the view request the removing of row from their group(s).
         """
-        rows = self.view.table.getRowsFromSelectedCells()
+        rows = self._table.getRowsFromSelectedCells()
         self.model.ungroupSamples(rows)
         self.view.setWindowModified(True)
 
@@ -198,7 +204,7 @@ class DrillPresenter:
         """
         Triggered when a master row is set for a group.
         """
-        rows = self.view.table.getRowsFromSelectedCells()
+        rows = self._table.getRowsFromSelectedCells()
         if len(rows) != 1:
             return
         row = rows[0]
@@ -209,7 +215,7 @@ class DrillPresenter:
         """
         Triggered when a master row is unset.
         """
-        rows = self.view.table.getRowsFromSelectedCells()
+        rows = self._table.getRowsFromSelectedCells()
         if len(rows) != 1:
             return
         row = rows[0]
