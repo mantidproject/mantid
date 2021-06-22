@@ -45,6 +45,10 @@ class DrillParameterPresenter:
         value = self._item.text()
         if value == "":
             # if value is empty, delete the parameter and the presenter
+            self._item.signals.blockSignals(True)
+            self._item.setData(Qt.BackgroundRole, None)
+            self._item.setToolTip("")
+            self._item.signals.blockSignals(False)
             self._sample.delParameter(self._parameter.getName())
             self._parameter = None
             self._item.setPresenter(None)
