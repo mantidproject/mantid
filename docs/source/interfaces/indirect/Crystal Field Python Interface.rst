@@ -583,7 +583,7 @@ When fitting multiple ions to multiple spectra the `IntensityScaling` factor is 
 of the respective ion and the respective spectrum.
 
 The `IntensityScaling` factors for the spectra are preserved from the `CrystalField` objects in the combination. If only
-one of the `CrystalField` objects has `IntensityScaling` values set these used for the `CrystalFieldMultiSite` object.
+one of the `CrystalField` objects has `IntensityScaling` values set these are used for the `CrystalFieldMultiSite` object.
 In case of different settings for the original `CrystalField` objects the values for the object defining ion0 are used
 and a warning about this mismatch displayed.
 
