@@ -69,6 +69,10 @@ class DrillParametersPresenter:
 
         # use the actual value
         value = self._item.text()
+        if value == "":
+            # if value is empty, delete the prenter
+            self._item.setPresenter(None)
+            return
         parameters = dict()
         for param in value.split(';'):
             if param and '=' not in param:
