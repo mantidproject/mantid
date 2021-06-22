@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import NamedTuple, List
-from Muon.GUI.Common.ADSHandler.workspace_naming import *
+
 
 FIT_FUNCTION_GUESS_LABEL = "Fit function guess"
 
@@ -35,7 +35,6 @@ class PlottingCanvasModel(object):
         self._axes_workspace_map = {}
         self._util = util
         # Options from the view
-        self._tiled_by = "Group/Pair"
         self._is_tiled = False
         self._errors = False
         self._normalised = False
@@ -68,7 +67,7 @@ class PlottingCanvasModel(object):
 
         return workspace_plot_information
 
-    def update_tiled_axis_map(self, tiled_keys: List[str], tiled_by_type: str):
+    def update_tiled_axis_map(self, tiled_keys: List[str]):
         """
         Updates the map containing the {tiled_key: axis}. This map is used to assign
         each WorkspacePlotInformation to the correct tiled.
@@ -77,7 +76,6 @@ class PlottingCanvasModel(object):
         """
         self._is_tiled = True
         self._axes_workspace_map = {}
-        self._tiled_by = tiled_by_type
         for axis_number, key in enumerate(tiled_keys):
             self._axes_workspace_map[key] = axis_number
 
@@ -113,34 +111,3 @@ class PlottingCanvasModel(object):
             return ''
         else:
             return list(self._axes_workspace_map.keys())
-
-    @staticmethod
-    def _get_rebin_label(workspace_name):
-        if REBIN_STR in workspace_name:
-            return ''.join([';', REBIN_STR])
-        else:
-            return ''
-
-    @staticmethod
-    def _get_freq_lebel(workspace_name):
-        label = ''
-        if FFT_STR in workspace_name:
-            label = ''.join([';', get_fft_component_from_workspace_name(workspace_name)])
-        elif MAXENT_STR in workspace_name:
-            label = ''.join([';', MAXENT_STR])
-        return label
-
-    @staticmethod
-    def _get_fit_label(workspace_name, index):
-        label = ''
-        fit_function_name = get_fit_function_name_from_workspace(workspace_name)
-        if fit_function_name:
-            if index in [1, 3]:
-                workspace_type = 'Calc'
-            elif index == 2:
-                workspace_type = 'Diff'
-            label = ''.join([';', fit_function_name, ';', workspace_type])
-        return label
-
-    def _get_workspace_plot_axis(self,workspace_name):
-        return self._util._get_workspace_plot_axis(workspace_name, self._axes_workspace_map)

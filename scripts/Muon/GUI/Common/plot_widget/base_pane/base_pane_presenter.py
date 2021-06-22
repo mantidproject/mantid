@@ -175,7 +175,7 @@ class BasePanePresenter():
             tiled_by = self._view.tiled_by()
             self.context.plot_panes_context[self.name].set_tiled_by(tiled_by)
             keys = self._model.create_tiled_keys(tiled_by)
-            self._figure_presenter.convert_plot_to_tiled_plot(keys, tiled_by)
+            self._figure_presenter.convert_plot_to_tiled_plot(keys)
         else:
             self._figure_presenter.convert_plot_to_single_plot()
 
@@ -189,12 +189,12 @@ class BasePanePresenter():
         tiled_by = self._view.tiled_by()
         self.context.plot_panes_context[self.name].set_tiled_by(tiled_by)
         keys = self._model.create_tiled_keys(tiled_by)
-        self._figure_presenter.convert_plot_to_tiled_plot(keys, tiled_by)
+        self._figure_presenter.convert_plot_to_tiled_plot(keys)
 
     def _update_tile_plot(self):
         if self._view.is_tiled_plot():
             tiled_by = self._view.tiled_by()
             self.context.plot_panes_context[self.name].set_tiled_by(tiled_by)
             keys = self._model.create_tiled_keys(tiled_by)
-            self._figure_presenter.create_tiled_plot(keys, tiled_by)
+            self._figure_presenter.create_tiled_plot(keys)
             self._figure_presenter._handle_autoscale_y_axes()

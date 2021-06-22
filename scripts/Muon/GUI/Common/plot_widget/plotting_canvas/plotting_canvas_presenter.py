@@ -56,11 +56,11 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         """Replot a workspace in the plot with a different error_state"""
         self._view.replot_workspace_with_error_state(workspace_name, error_state)
 
-    def convert_plot_to_tiled_plot(self, keys, tiled_by):
+    def convert_plot_to_tiled_plot(self, keys):
         """Converts the current plot into a tiled plot specified by the keys and tiled by type
         In then replots the existing data on the new tiles"""
         workspaces, indices = self._view.plotted_workspaces_and_indices
-        self.create_tiled_plot(keys, tiled_by)
+        self.create_tiled_plot(keys)
         self.plot_workspaces(workspaces, indices, hold_on=False, autoscale=False)
 
     def convert_plot_to_single_plot(self):
@@ -74,9 +74,9 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._context.clear_subplots()
         self._options_presenter.clear_subplots()
 
-    def create_tiled_plot(self, keys, tiled_by):
+    def create_tiled_plot(self, keys):
         """Creates a blank tiled plot specified by the keys and tiled by type"""
-        self._model.update_tiled_axis_map(keys, tiled_by)
+        self._model.update_tiled_axis_map(keys)
         self.clear_subplots()
         num_axes = len(keys) if len(keys) > 0 else 1
         self._view.create_new_plot_canvas(num_axes)
