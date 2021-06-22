@@ -201,8 +201,8 @@ Wednesday, 2 weeks & 3 days
 ---------------------------
 
 *  Before sending an email to users regarding the beginning of beta testing, ensure that
-   the Usage data *.zip file containing usage data is up-to-date. This is done by
-   downloading the current *.zip from sourceforge, adding any missing files, and
+   the Usage data .zip file containing usage data is up-to-date. This is done by
+   downloading the current .zip from sourceforge, adding any missing files, and
    resending it.
 *  Send an email to beta test users explaining where to download the installers and how
    to report issues (cc the Local Project Managers so they can organise a similar message
@@ -232,10 +232,14 @@ Monday, Release Day
 
 After the Technical Release Manager has finished their release day tasks:
 
-*  Send an email, including the text of the release notes, to the following lists
-  *  ``nobugs@nobugsconference.org``
-  *  ``news@neutronsources.org``
-  *  ``neutron@neutronsources.org``
+*  Send an email, including the text of the release notes, to the following lists, replacing <at> with the appropriate sign:
+
+   ``nobugs<at>nobugsconference.org``
+
+   ``news<at>neutronsources.org``
+
+   ``neutron<at>neutronsources.org``
+
 *  Also post the contents of the message to the *\#announcements* channel on
    Slack.
 *  Create a new item on the forum news.
