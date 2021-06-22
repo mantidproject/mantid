@@ -32,8 +32,7 @@ class DrillSettingsPresenter:
         doc = dict()
         for p in parameters:
             name = p.getName()
-            p.valid.connect(lambda name=name: self.onValid(name))
-            p.invalid.connect(lambda msg, name=name: self.onInvalid(name, msg))
+            p.checked.connect(self.onChecked)
             self._parameters[name] = p
             types[name] = p.getType()
             values[name] = p.getAllowedValues()
@@ -58,24 +57,15 @@ class DrillSettingsPresenter:
         value = self._dialog.getSettingValue(parameterName)
         self._parameters[parameterName].setValue(value)
 
-    def onValid(self, parameterName):
+    def onChecked(self):
         """
-        Triggered when the parameter value is valid.
-
-        Args:
-            parameterName (str): name of the parameter
+        Triggered when a parameter has been checked.
         """
-        self._dialog.onSettingValidation(parameterName, True)
-
-    def onInvalid(self, ParameterName, msg):
-        """
-        Triggered when the parameter value is invalid.
-
-        Args:
-            parameterName (str): name of the parameter
-            msg (str): error message
-        """
-        self._dialog.onSettingValidation(ParameterName, False, msg)
+        for name, p in self._parameters.items():
+            if p.isValid():
+                self._dialog.onSettingValidation(name, True)
+            else:
+                self._dialog.onSettingValidation(name, False)
 
     def onRejected(self):
         """
