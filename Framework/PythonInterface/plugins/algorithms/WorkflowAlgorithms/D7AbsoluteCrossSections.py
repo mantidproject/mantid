@@ -576,6 +576,16 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                             Normalise=True, HeightAxis='-0.1,0.1')
         return output_name
 
+    def _set_output_names(self, output_ws):
+        for entry in mtd[output_ws]:  # renames individual ws to contain the output name
+            entry_name = entry.name()
+            if entry_name[:2] == "__":
+                entry_name = entry_name[2:]
+            output_name = self.getPropertyValue("OutputWorkspace")
+            if output_name not in entry_name:
+                new_name = "{}_{}".format(output_name, entry_name)
+                RenameWorkspace(InputWorkspace=entry, OutputWorkspace=new_name)
+
     def PyExec(self):
         input_ws = self.getPropertyValue('InputWorkspace')
         output_ws = self.getPropertyValue('OutputWorkspace')
@@ -607,6 +617,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 RenameWorkspace(InputWorkspace=component_ws, OutputWorkspace=output_ws)
         self._set_units(output_ws, nMeasurements)
         self._set_as_distribution(output_ws)
+        self._set_output_names(output_ws)
         self.setProperty('OutputWorkspace', mtd[output_ws])
 
 
