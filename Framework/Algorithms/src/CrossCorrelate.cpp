@@ -167,7 +167,8 @@ void CrossCorrelate::exec() {
     if (xmax - xmin < maxDSpaceShift)
       g_log.warning() << "maxDSpaceShift(" << std::to_string(maxDSpaceShift)
                       << ") is larger than specified range of xmin(" << xmin << ") to xmax(" << xmax
-                      << "), please make it smaller or removed it entirely!";
+                      << "), please make it smaller or removed it entirely!"
+                      << "\n";
 
     // convert dspacing to bins, where maxDSpaceShift is at least 0.1
     const auto maxBins = std::max(0.0 + maxDSpaceShift * 2, 0.1) / inputWS->getDimension(0)->getBinWidth();
