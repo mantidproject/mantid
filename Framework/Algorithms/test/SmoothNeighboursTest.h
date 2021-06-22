@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -371,6 +373,88 @@ public:
     TS_ASSERT_EQUALS("Rectangular Detectors", propSumPixelsX->getGroup());
     TS_ASSERT_EQUALS("Rectangular Detectors", propSumPixelsY->getGroup());
     TS_ASSERT_EQUALS("Rectangular Detectors", propZeroEdgePixels->getGroup());
+  }
+
+  void test_WISH() {
+    auto algo = AlgorithmManager::Instance().create("LoadRaw");
+    algo->setPropertyValue("Filename", "WISH/input/11_4/WISH00019612.raw");
+    algo->setPropertyValue("SpectrumMin", "1");
+    algo->setPropertyValue("SpectrumMax", "19461");
+    algo->setPropertyValue("LoadMonitors", "Separate");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("CropWorkspace");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612");
+    algo->setPropertyValue("XMin", "6000");
+    algo->setPropertyValue("XMax", "99000");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("CropWorkspace");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612_monitors");
+    algo->setPropertyValue("XMin", "6000");
+    algo->setPropertyValue("XMax", "99000");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612_monitors");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("NormaliseByCurrent");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("NormaliseByCurrent");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612_monitors");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612_monitors");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("ConvertUnits");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612");
+    algo->setPropertyValue("Target", "Wavelength");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("ConvertUnits");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612_monitors");
+    algo->setPropertyValue("Target", "Wavelength");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612_monitors");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("NormaliseToMonitor");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612");
+    algo->setPropertyValue("MonitorWorkspaceIndex", "3");
+    algo->setPropertyValue("MonitorWorkspace", "WISH00019612_monitors");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("ReplaceSpecialValues");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612");
+    algo->setPropertyValue("NaNValue", "0");
+    algo->setPropertyValue("InfinityValue", "0");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("CropWorkspace");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612");
+    algo->setPropertyValue("XMin", "0.8");
+    algo->setPropertyValue("XMax", "9.3");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    MatrixWorkspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("WISH00019612"));
+
+    specnum_t inSpec = workspace->getSpectrum(19397).getSpectrumNo();
+
+    API::WorkspaceNearestNeighbourInfo neighbourInfo(*workspace, true, 8);
+    // Step one - Get the number of specified neighbours
+    SpectraDistanceMap insideGrid = neighbourInfo.getNeighboursExact(inSpec);
+    std::vector<specnum_t> expectedSpecNums{19146, 19147, 19274, 19275, 19276, 19277, 19402, 19404};
+    int i = 0;
+    for (std::map<specnum_t, Kernel::V3D>::iterator it = insideGrid.begin(); it != insideGrid.end(); ++it) {
+      TS_ASSERT_EQUALS(it->first, expectedSpecNums[i]);
+      i++;
+    }
   }
 };
 
