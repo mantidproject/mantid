@@ -447,18 +447,25 @@ class DrillModel(QObject):
 
     def process(self, elements):
         """
-        Start samples processing.
+        Start samples processing. The method first checks that all the samples
+        are valid and if yes, submit them to the processing.
 
         Args:
             elements (list(int)): list of sample indexes to be processed
+
+        Returns:
+            bool: True if all samples are valid and submitted to processing
         """
         tasks = list()
         for e in elements:
             if (e >= len(self.samples)) or (not self.samples[e]):
                 continue
+            if not self.samples[e].isValid():
+                return False
             kwargs = self.getProcessingParameters(e)
             tasks.append(DrillTask(str(e), self.algorithm, **kwargs))
         self.tasksPool.addProcesses(tasks)
+        return True
 
     def _onTaskStarted(self, ref):
         """

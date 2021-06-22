@@ -55,6 +55,11 @@ class DrillParameter(QObject):
     _controller = None
 
     """
+    Validation state of the parameter value.
+    """
+    _valid = False
+
+    """
     Sent when the parameter is valid.
     """
     valid = Signal()
@@ -156,6 +161,32 @@ class DrillParameter(QObject):
             (any): value
         """
         return self._value
+
+    def setValid(self):
+        """
+        Set the parameter as valid.
+        """
+        self._valid = True
+        self.valid.emit()
+
+    def setInvalid(self, msg):
+        """
+        Set the parameter as invalid.
+
+        Args:
+            msg (str): error message
+        """
+        self._valid = False
+        self.invalid.emit(msg)
+
+    def isValid(self):
+        """
+        Check if the parameter is valid.
+
+        Returns:
+            bool: True if the parameter is valid
+        """
+        return self._valid
 
     def getType(self):
         """
