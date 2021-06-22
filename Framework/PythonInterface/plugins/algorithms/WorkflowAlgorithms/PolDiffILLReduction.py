@@ -547,8 +547,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         DeleteWorkspaces(WorkspaceList=names_to_delete)
         RenameWorkspace(InputWorkspace=tmp_group_name, OutputWorkspace=ws)
         GroupWorkspaces(InputWorkspaces=flip_ratio_names, OutputWorkspace='flipping_ratios')
-        if self.getProperty('OutputTreatment').value == 'AverageTwoTheta':
-            ws = self._merge_twoTheta_positions(ws)
         return ws
 
     def _detector_analyser_energy_efficiency(self, ws):
