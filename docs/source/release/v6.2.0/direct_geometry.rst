@@ -17,4 +17,14 @@ New Algorithms
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Improvements
+############
+
+- Added documentation and warning messages in the :ref:`Crystal Field Python Interface` related to IntensityScaling
+
+BugFixes
+########
+
+- Fixed a bug in the :ref:`Crystal Field Python Interface` which prevented the application of IntensityScaling factors
+
 :ref:`Release 6.2.0 <v6.2.0>`
