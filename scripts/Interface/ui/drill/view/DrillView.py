@@ -535,15 +535,6 @@ class DrillView(QMainWindow):
         self.table.resizeColumnsToContents()
         self.setWindowModified(False)
 
-    def getAllRows(self):
-        """
-        Get the list of all row indexes.
-
-        Returns:
-            list(int): row indexes
-        """
-        return self.table.getAllRows()
-
     def setAddRemoveColumnMenu(self, columns):
         """
         Fill the "add/remove column" menu. This function is triggered each time
