@@ -24,6 +24,10 @@ using Mantid::CurveFitting::Functions::Gaussian;
 
 enum class PeakShapeEnum : int { B2BEXP, GAUSSIAN };
 
+const double DIFC = 1434.66;
+const double DIFA = -1.88;
+const double T0 = 2.25;
+
 namespace { // anonymous
 /*
 Code to generate parameters for b2bexpconvpv:
@@ -117,10 +121,10 @@ std::shared_ptr<IFunction> createPeakFunction(const PeakShapeEnum shape, const P
     } else {
       throw std::runtime_error("Developer forgot a peak index");
     }
-    peak << ",Intensity=" << intensity << ",X0=" << d * 1434.66 + d * d * -1.88 + 2.25;
+    peak << ",Intensity=" << intensity << ",X0=" << d * DIFC + d * d * DIFA + T0;
   } else if (shape == PeakShapeEnum::GAUSSIAN) {
     // all Gaussians are hard coded to same arbitrary width
-    peak << "name=Gaussian,Sigma=10,Height=" << intensity << ",PeakCentre=" << d * 1434.66 + d * d * -1.88 + 2.25;
+    peak << "name=Gaussian,Sigma=10,Height=" << intensity << ",PeakCentre=" << d * DIFC + d * d * DIFA + T0;
   }
   std::cout << peak.str() << std::endl;
   return FunctionFactory::Instance().createInitialized(peak.str());
@@ -180,7 +184,11 @@ public:
     return function;
   }
   static std::vector<double> evaluateFunction(std::shared_ptr<IFunction> function, std::vector<double> &xValues) {
-    FunctionDomain1DVector domain(xValues);
+    std::vector<double> TOFvalues;
+    std::transform(xValues.begin(), xValues.end(), std::back_inserter(TOFvalues),
+                   [](double d) -> double { return d * DIFC + d * d * DIFA + T0; });
+
+    FunctionDomain1DVector domain(TOFvalues);
     FunctionValues values(domain);
     function->function(domain, values);
     return values.toVector();
