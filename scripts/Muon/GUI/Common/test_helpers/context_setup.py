@@ -11,7 +11,7 @@ from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContex
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
-from Muon.GUI.Common.contexts.plotting_context import PlottingContext
+from Muon.GUI.Common.contexts.plot_pane_context import PlotPanesContext
 from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
 from Muon.GUI.Common.contexts.fitting_contexts.tf_asymmetry_fitting_context import TFAsymmetryFittingContext
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
@@ -29,13 +29,13 @@ def setup_context_for_tests(parent_object):
     parent_object.group_context = MuonGroupPairContext(parent_object.data_context.check_group_contains_valid_detectors)
     parent_object.phase_table_context = PhaseTableContext()
     parent_object.fitting_context = TFAsymmetryFittingContext(allow_double_pulse_fitting=True)
-    parent_object.plotting_context = PlottingContext()
+    parent_object.plot_panes_context = PlotPanesContext()
     parent_object.context = DataAnalysisContext(muon_data_context=parent_object.data_context,
                                                 muon_group_context=parent_object.group_context,
                                                 muon_gui_context=parent_object.gui_context,
                                                 muon_phase_context=parent_object.phase_table_context,
                                                 fitting_context=parent_object.fitting_context,
-                                                plotting_context=parent_object.plotting_context)
+                                                plot_panes_context=parent_object.plot_panes_context)
 
 
 def setup_context(freq=False):
@@ -46,8 +46,8 @@ def setup_context(freq=False):
     group_context = MuonGroupPairContext(data_context.check_group_contains_valid_detectors)
     phase_table_context = PhaseTableContext()
     freq_context = FrequencyContext()
-    freq_plotting_context = PlottingContext()
-    plotting_context = PlottingContext()
+    plot_panes_context = PlotPanesContext()
+
     if freq:
         return FrequencyDomainAnalysisContext(muon_data_context=data_context,
                                               muon_group_context=group_context,
@@ -56,14 +56,14 @@ def setup_context(freq=False):
                                               fitting_context=BasicFittingContext(allow_double_pulse_fitting=True),
                                               frequency_context=freq_context,
                                               freq_plotting_context=freq_plotting_context,
-                                              plotting_context=plotting_context)
+                                              plot_panes_context=plot_panes_context)
     else:
         return DataAnalysisContext(muon_data_context=data_context,
                                    muon_group_context=group_context,
                                    muon_gui_context=gui_context,
                                    muon_phase_context=phase_table_context,
                                    fitting_context=TFAsymmetryFittingContext(allow_double_pulse_fitting=True),
-                                   plotting_context=plotting_context)
+                                   plot_panes_context=plot_panes_context)
 
 
 def setup_context_for_ea_tests(parent_object):
