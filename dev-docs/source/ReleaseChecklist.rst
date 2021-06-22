@@ -64,12 +64,12 @@ Monday then the names of the days will have to be changed.
 | | **Tuesday**,                  | Beta Testing Ends         | Blocker bug fixes, Testing, Release Notes,    | | :ref:`Release Editor <release-editor-checklist>`                       |
 | | 4 days                        |                           | Maintenance Tasks & Next release development  | | :ref:`Release Manager <release-manager-checklist>`                     |
 +---------------------------------+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+
-| | **Friday**,                   | | Release Eve             | Blocker bug fixes, Testing, Release Notes,    | | :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` |
-| | 1 day                         | | Smoke Testing           | Maintenance Tasks & Next release development  | | :ref:`Release Manager <release-manager-checklist>`                     |
+| | **Friday**,                   | | Release Eve             | Blocker bug fixes, Testing & Packaging        | | :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` |
+| | 1 day                         | | Smoke Testing           |                                               | | :ref:`Release Manager <release-manager-checklist>`                     |
 |                                 |                           |                                               | | :ref:`Technical Release Manager <technical-release-manager-checklist>` |
 +---------------------------------+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+
-| | **Monday**,                   | Release Day               | Blocker bug fixes, Testing, Release Notes,    | | :ref:`Release Manager <release-manager-checklist>`                     |
-| | Release Day                   |                           | Maintenance Tasks & Next release development  | | :ref:`Technical Release Manager <technical-release-manager-checklist>` |
+| | **Monday**,                   | Release Day               | Blocker bug fixes, Testing & Release          | | :ref:`Release Manager <release-manager-checklist>`                     |
+| | Release Day                   |                           | Announcements                                 | | :ref:`Technical Release Manager <technical-release-manager-checklist>` |
 +---------------------------------+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+
 
 .. _local-project-managers-checklist:
@@ -323,8 +323,9 @@ We are now ready to create the release candidates ready for Smoke testing.
 *  On the ``release-next`` branch, create a PR to update the `major & minor
    <https://github.com/mantidproject/mantid/blob/master/buildconfig/CMake/VersionNumber.cmake>`__
    versions accordingly. Also, uncomment ``VERSION_PATCH`` and set it to ``0``.
-*  Merge ``release-next`` branch back to ``master``
-*  On the ``master`` branch, create a PR to comment out the ``VERSION_PATCH``.
+*  Locally, merge the ``release-next`` branch back to ``master``, and then comment out the
+   ``VERSION_PATCH`` on the ``master`` branch. Commit and push these changes directly to the remote
+   ``master`` without making a PR.
 *  Build the `release kit builds <https://builds.mantidproject.org/view/Release%20Pipeline/>`__
    and set the ``PACKAGE_SUFFIX`` parameter to an empty string
 *  Liase with the Quality Assurance Manager to announce the creation of the Smoke testing
