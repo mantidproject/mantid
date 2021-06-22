@@ -46,3 +46,4 @@ completed much faster than they were in MantidPlot.
     * :ref:`WorkbenchWorkspaceHistoryWindow` displays the algorithms that have been applied to a workspace
     * :ref:`Plotting <plotting>` describes how mantid workspaces have been integrated with the matplotlib framework and
       how to create these plots via scripts.
+    * :ref:`WorkbenchWorkspaceCalculator` describes briefly the workspace calculator plugin.
