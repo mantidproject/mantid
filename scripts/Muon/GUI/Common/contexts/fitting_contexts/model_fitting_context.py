@@ -16,6 +16,7 @@ class ModelFittingContext(BasicFittingContext):
         self._current_result_table_index: int = None
 
         self._x_parameters: dict = {}
+        self._x_parameter_errors: dict = {}
 
         self._y_parameters: dict = {}
         self._y_parameter_errors: dict = {}
@@ -48,27 +49,37 @@ class ModelFittingContext(BasicFittingContext):
         return len(self._result_table_names)
 
     @property
-    def x_parameters(self) -> list:
+    def x_parameters(self) -> dict:
         """Returns the available x parameters for the selected results table."""
         return self._x_parameters
 
     @x_parameters.setter
-    def x_parameters(self, parameters: list) -> None:
+    def x_parameters(self, parameters: dict) -> None:
         """Sets the available x parameters for the selected results table."""
         self._x_parameters = parameters
 
     @property
-    def y_parameters(self) -> list:
+    def x_parameter_errors(self) -> dict:
+        """Returns the available x parameter errors for the selected results table."""
+        return self._x_parameter_errors
+
+    @x_parameter_errors.setter
+    def x_parameter_errors(self, errors: dict) -> None:
+        """Sets the available x parameter errors for the selected results table."""
+        self._x_parameter_errors = errors
+
+    @property
+    def y_parameters(self) -> dict:
         """Returns the available y parameters for the selected results table."""
         return self._y_parameters
 
     @y_parameters.setter
-    def y_parameters(self, parameters: list) -> None:
+    def y_parameters(self, parameters: dict) -> None:
         """Sets the available y parameters for the selected results table."""
         self._y_parameters = parameters
 
     @property
-    def y_parameter_errors(self) -> list:
+    def y_parameter_errors(self) -> dict:
         """Returns the available y parameter errors for the selected results table."""
         return self._y_parameter_errors
 

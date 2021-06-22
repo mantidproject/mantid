@@ -93,6 +93,7 @@ class ModelFittingModel(BasicFittingModel):
     def create_x_and_y_parameter_combination_workspaces(self) -> None:
         """Discovers the available X and Y parameters, and creates a MatrixWorkspace for each parameter combination."""
         self.fitting_context.x_parameters = {}
+        self.fitting_context.x_parameter_errors = {}
         self.fitting_context.y_parameters = {}
         self.fitting_context.y_parameter_errors = {}
 
@@ -121,12 +122,16 @@ class ModelFittingModel(BasicFittingModel):
             self.fitting_context.x_parameters[column_name] = values
             self.fitting_context.y_parameters[column_name] = values
         else:
+            self.fitting_context.x_parameter_errors[column_name.replace("Error", "")] = values
             self.fitting_context.y_parameter_errors[column_name.replace("Error", "")] = values
 
     def _populate_empty_parameter_errors(self, number_of_data_points: int) -> None:
         """Populates the Y parameter errors with zeros if they are empty. For instance, workspace_name has no errors."""
+        x_parameter_error_names = self.fitting_context.x_parameter_errors.keys()
         y_parameter_error_names = self.fitting_context.y_parameter_errors.keys()
         for parameter_name in self.fitting_context.y_parameters.keys():
+            if parameter_name not in x_parameter_error_names:
+                self.fitting_context.x_parameter_errors[parameter_name] = [0.0] * number_of_data_points
             if parameter_name not in y_parameter_error_names:
                 self.fitting_context.y_parameter_errors[parameter_name] = [0.0] * number_of_data_points
 
@@ -151,16 +156,18 @@ class ModelFittingModel(BasicFittingModel):
                 if x_parameter_name != y_parameter_name:
                     x_values = self._convert_str_column_values_to_int(x_parameter_name,
                                                                       self.fitting_context.x_parameters)
+                    x_errors = self.fitting_context.x_parameter_errors[x_parameter_name]
                     y_values = self._convert_str_column_values_to_int(y_parameter_name,
                                                                       self.fitting_context.y_parameters)
                     y_errors = self.fitting_context.y_parameter_errors[y_parameter_name]
 
                     # Sort the data based on the x_values being in ascending order
-                    x_values, y_values, y_errors = zip(*sorted(zip(x_values, y_values, y_errors)))
+                    x_values, x_errors, y_values, y_errors = zip(*sorted(zip(x_values, x_errors, y_values, y_errors)))
 
                     output_name = self.parameter_combination_workspace_name(x_parameter_name, y_parameter_name)
                     if not self._parameter_combination_workspace_exists(output_name, x_values, y_values, y_errors):
-                        CreateWorkspace(DataX=x_values, DataY=y_values, DataE=y_errors, OutputWorkspace=output_name)
+                        CreateWorkspace(DataX=x_values, Dx=x_errors, DataY=y_values, DataE=y_errors,
+                                        OutputWorkspace=output_name)
                         workspace_group.add(output_name)
 
                     workspace_names.append(output_name)
