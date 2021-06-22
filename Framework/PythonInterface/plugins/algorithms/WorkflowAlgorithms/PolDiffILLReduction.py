@@ -346,7 +346,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                                                 ErrorValue=np.sqrt(mtd[mon].readE(0)[0]/1000.0),
                                                 OutputWorkspace=norm)
             if normaliseBy == 'Time':
-                duration = float(entry.getRun().getLogData('duration').value)
+                duration = float(entry.getRun().getLogData('duration').value)*100.0
                 CreateSingleValuedWorkspace(DataValue=duration,
                                             OutputWorkspace=norm)
             if transmissionProcess:
