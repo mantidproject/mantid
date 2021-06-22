@@ -323,9 +323,9 @@ We are now ready to create the release candidates ready for Smoke testing.
 *  On the ``release-next`` branch, create a PR to update the `major & minor
    <https://github.com/mantidproject/mantid/blob/master/buildconfig/CMake/VersionNumber.cmake>`__
    versions accordingly. Also, uncomment ``VERSION_PATCH`` and set it to ``0``.
-*  Locally, merge the ``release-next`` branch back to ``master``, and then comment out the
-   ``VERSION_PATCH`` on the ``master`` branch. Commit and push these changes directly to the remote
-   ``master`` without making a PR.
+*  Ask a gatekeeper to: merge the ``release-next`` branch back to ``master`` locally, and then comment
+   out the ``VERSION_PATCH`` on the ``master`` branch. They should then commit and push these changes
+   directly to the remote ``master`` without making a PR.
 *  Build the `release kit builds <https://builds.mantidproject.org/view/Release%20Pipeline/>`__
    and set the ``PACKAGE_SUFFIX`` parameter to an empty string
 *  Liase with the Quality Assurance Manager to announce the creation of the Smoke testing
