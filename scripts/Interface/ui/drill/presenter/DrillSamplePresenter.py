@@ -46,7 +46,7 @@ class DrillSamplePresenter:
             item (QTableWidgetItem): new item
         """
         if name == self.CUSTOM_OPTIONS:
-            presenter = DrillParametersPresenter(item, self._sample)
+            DrillParametersPresenter(self._table, item, self._sample)
         else:
             parameter = self._sample.addParameter(name)
 
@@ -73,7 +73,8 @@ class DrillSamplePresenter:
                                             self.CUSTOM_OPTIONS)
             presenter = item.getPresenter()
             if presenter is None:
-                presenter = DrillParametersPresenter(item, self._sample)
+                presenter = DrillParametersPresenter(self._table, item,
+                                                     self._sample)
             presenter.addParameter(parameter.getName())
         else:
             DrillParameterPresenter(item, parameter)
