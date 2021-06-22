@@ -237,8 +237,9 @@ class DrillSample(QObject):
         parameter.valueChanged.connect(self.onParameterChanged)
         self._parameters[name] = parameter
         self.newParameter.emit(parameter)
-        self._status = None
-        self.statusChanged.emit()
+        if self._status is not None:
+            self._status = None
+            self.statusChanged.emit()
         return parameter
 
     def delParameter(self, name):
@@ -250,16 +251,18 @@ class DrillSample(QObject):
         """
         if name in self._parameters:
             del self._parameters[name]
-            self._status = None
-            self.statusChanged.emit()
+            if self._status is not None:
+                self._status = None
+                self.statusChanged.emit()
 
     def onParameterChanged(self):
         """
         Triggered when a parameter changed its value. This function udpates the
         sample status.
         """
-        self._status = None
-        self.statusChanged.emit()
+        if self._status is not None:
+            self._status = None
+            self.statusChanged.emit()
 
     def getParameter(self, name):
         """
