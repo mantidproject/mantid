@@ -51,6 +51,7 @@ class DrillParametersPresenter:
         """
         self._parameters.append(name)
         parameter = self._sample.getParameter(name)
+        parameter.checked.connect(self.onChecked)
         parameter.valueChanged.connect(self.onValueChanged)
 
     def onDataChanged(self):
