@@ -137,7 +137,7 @@ class BlockingAsyncTaskWithCallback(AsyncTask):
         self.success_cb = create_callback(success_cb)
         self.error_cb = create_callback(error_cb)
 
-        self.recv = _Receiver(success_cb=self.success_cb, error_cb=self.error_cb)
+        self.recv = _Receiver(success_cb=success_cb, error_cb=error_cb)
         self.task = AsyncTask(target, args, kwargs, success_cb=self.recv.on_success, error_cb=self.recv.on_error)
 
     def start(self):

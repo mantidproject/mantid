@@ -135,6 +135,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
 
         self.presenter.update_and_reset_all_data.assert_called_with()
         self.mock_view_plot_guess.assert_called_once_with(False)
+        self.mock_model_plot_guess.assert_called_once_with(False)
         self.presenter.clear_cached_fit_functions.assert_called_with()
         self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
         self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 1)
@@ -150,6 +151,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
 
         self.presenter.update_and_reset_all_data.assert_called_with()
         self.mock_view_plot_guess.assert_called_once_with(False)
+        self.mock_model_plot_guess.assert_called_once_with(False)
         self.presenter.clear_cached_fit_functions.assert_called_with()
         self.presenter.disable_fitting_notifier.notify_subscribers.assert_called_once_with()
         self.mock_view_tf_asymmetry_mode.assert_called_with(False)
@@ -203,7 +205,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.presenter.clear_cached_fit_functions.assert_called_once_with()
         self.presenter.automatically_update_function_name.assert_called_once_with()
 
-        self.mock_view_plot_guess.assert_called_once_with()
         self.model.update_plot_guess(self.plot_guess)
 
     def test_that_handle_normalisation_changed_sets_the_normalisation_in_the_model_and_updates_the_guess(self):
@@ -212,7 +213,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.mock_view_normalisation.assert_called_with()
         self.model.set_current_normalisation.assert_called_once_with(self.normalisation)
 
-        self.mock_view_plot_guess.assert_called_once_with()
         self.model.update_plot_guess(self.plot_guess)
 
     def test_that_update_and_reset_all_data_will_attempt_to_update_the_tf_asymmetry_functions(self):
@@ -364,6 +364,8 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         type(self.model).end_xs = self.mock_model_end_xs
         self.mock_model_current_end_x = mock.PropertyMock(return_value=self.end_x)
         type(self.model).current_end_x = self.mock_model_current_end_x
+        self.mock_model_plot_guess = mock.PropertyMock(return_value=self.plot_guess)
+        type(self.model).plot_guess = self.mock_model_plot_guess
         self.mock_model_minimizer = mock.PropertyMock(return_value=self.minimizer)
         type(self.model).minimizer = self.mock_model_minimizer
         self.mock_model_evaluation_type = mock.PropertyMock(return_value=self.evaluation_type)

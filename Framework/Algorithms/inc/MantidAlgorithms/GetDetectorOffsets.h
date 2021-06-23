@@ -62,7 +62,8 @@ private:
   offset_mode mode;
   double m_dideal = 0.0; ///< The known peak centre value from the NIST standard
   /// information
-  double m_step = 0.0; ///< The step size
+  double m_step = 0.0;        ///< The step size
+  bool m_estimateFWHM = true; ///< Flag to estimate fwhm fit parameter
 };
 } // namespace Algorithms
 } // namespace Mantid

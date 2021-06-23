@@ -31,10 +31,9 @@ if args[1] == "yes":
 else:
     designer = False
 
-
 dialogclassname = algname + "Dialog"
 
-headerfile = open(dialogclassname+".h", 'w')
+headerfile = open(dialogclassname + ".h", 'w')
 
 # header file
 headerfile.write("#ifndef MANTIDQTCUSTOMDIALOGS_" + string.upper(dialogclassname) + "_H_\n"
@@ -51,10 +50,10 @@ headerfile.write("#include \"MantidQtAPI/AlgorithmDialog.h\"\n\n"
                  "namespace CustomDialogs\n"
                  "{\n"
                  "class " + dialogclassname + " : public MantidQt::API::AlgorithmDialog\n"
-                 "{\n"
-                 "  Q_OBJECT\n\n"
-                 "public:\n"
-                 "  /// Default Constructor\n"
+                                              "{\n"
+                                              "  Q_OBJECT\n\n"
+                                              "public:\n"
+                                              "  /// Default Constructor\n"
                  + "  " + dialogclassname + "(QWidget *parent = 0);\n\n"
                  "private:\n"
                  "  /// Initialize the layout\n"
@@ -107,8 +106,5 @@ if designer:
 sourcefile.write("}\n\n"
                  "/// Parse input when the dialog is accepted\n"
                  "void " + dialogclassname + "::parseInput()\n"
-                 "{\n"
-                 "}\n")
-
-
-
+                                             "{\n"
+                                             "}\n")
