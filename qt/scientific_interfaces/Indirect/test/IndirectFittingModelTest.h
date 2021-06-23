@@ -33,6 +33,8 @@ MultiDomainFunction_sptr getFunction(std::string const &functionString) {
   return FunctionFactory::Instance().createInitializedMultiDomainFunction(functionString, 1);
 }
 
+auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
+
 /// A dummy model used to inherit the methods which need testing
 class DummyModel : public MantidQt::CustomInterfaces::IDA::IndirectFittingModel {
 public:
@@ -57,7 +59,7 @@ void addWorkspacesToModel(std::unique_ptr<DummyModel> &model, int const &numberO
 template <typename Name, typename... Names>
 void addWorkspacesToModel(std::unique_ptr<DummyModel> &model, int const &numberOfSpectra, Name const &workspaceName,
                           Names const &...workspaceNames) {
-  Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName, createWorkspace(numberOfSpectra));
+  ads_instance.addOrReplace(workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
   addWorkspacesToModel(model, numberOfSpectra, workspaceNames...);
 }

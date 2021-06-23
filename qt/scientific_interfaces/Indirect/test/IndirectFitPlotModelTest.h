@@ -29,6 +29,8 @@ using ConvolutionFitSequential = Algorithms::ConvolutionFit<Algorithms::QENSFitS
 
 namespace {
 
+auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
+
 /// The name of the conjoined input and guess workspaces
 std::string const INPUT_AND_GUESS_NAME = "__QENSInputAndGuess";
 
@@ -100,7 +102,7 @@ void setFittingFunction(IndirectFittingModel *model, std::string const &function
 IndirectFittingModel *getEmptyDummyModel() { return new DummyModel(); }
 
 void addWorkspaceToModel(IndirectFittingModel *model, int const &numberOfSpectra, std::string workspaceName) {
-  Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName, createWorkspace(numberOfSpectra));
+  ads_instance.addOrReplace(workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
 }
 template <class FitModel>

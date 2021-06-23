@@ -10,6 +10,10 @@
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
+namespace {
+auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
+}
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -25,79 +29,16 @@ FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *
   m_notifier.subscribe(SingleFunctionTemplateBrowser);
 }
 
-void FqFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
-  auto workspace =
-      Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
-  auto parameters = m_fqFitModel->createFqFitParameters(workspace.get());
-  setModelWorkspace(workspaceName);
-  updateAvailableParameterTypes(parameters);
-  updateAvailableParameters();
-  updateParameterSelectionEnabled();
-  setModelSpectrum(0);
-  emit dataChanged();
-  emit dataChanged();
-  emit updateAvailableFitTypes();
-}
-
-void FqFitDataPresenter::handleMultipleInputSelected() {
-  m_notifier.notify([](IFQFitObserver &obs) { obs.updateAvailableFunctions(availableFits.at(DataType::ALL)); });
-}
-
 void FqFitDataPresenter::setActiveParameterType(const std::string &type) { m_activeParameterType = type; }
 
 void FqFitDataPresenter::updateActiveDataIndex() { m_dataIndex = m_fqFitModel->getNumberOfWorkspaces(); }
 
 void FqFitDataPresenter::updateActiveDataIndex(int index) { m_dataIndex = index; }
 
-void FqFitDataPresenter::updateAvailableParameters() { updateAvailableParameters(m_cbParameterType->currentText()); }
-
-void FqFitDataPresenter::updateAvailableParameters(const QString &type) {
-  if (type == "Width")
-    setAvailableParameters(m_fqFitModel->getWidths(TableDatasetIndex{0}));
-  else if (type == "EISF")
-    setAvailableParameters(m_fqFitModel->getEISF(TableDatasetIndex{0}));
-  else
-    setAvailableParameters({});
-
-  if (!type.isEmpty())
-    setSingleModelSpectrum(m_cbParameter->currentIndex());
-}
-
-void FqFitDataPresenter::updateAvailableParameterTypes(FqFitParameters &parameters) {
-  MantidQt::API::SignalBlocker blocker(m_cbParameterType);
-  m_cbParameterType->clear();
-  for (const auto &type : getParameterTypes(parameters))
-    m_cbParameterType->addItem(QString::fromStdString(type));
-}
-
-void FqFitDataPresenter::updateParameterSelectionEnabled() {
-  const auto enabled = m_fqFitModel->getNumberOfWorkspaces() > TableDatasetIndex{0};
-  m_cbParameter->setEnabled(enabled);
-  m_cbParameterType->setEnabled(enabled);
-  m_lbParameter->setEnabled(enabled);
-}
-
-void FqFitDataPresenter::setAvailableParameters(const std::vector<std::string> &parameters) {
-  MantidQt::API::SignalBlocker blocker(m_cbParameter);
-  m_cbParameter->clear();
-  for (const auto &parameter : parameters)
-    m_cbParameter->addItem(QString::fromStdString(parameter));
-}
-
-void FqFitDataPresenter::setParameterLabel(const QString &parameter) { m_lbParameter->setText(parameter + ":"); }
-
-void FqFitDataPresenter::handleParameterTypeChanged(const QString &parameter) {
-  m_lbParameter->setText(parameter + ":");
-  updateAvailableParameters(parameter);
-  emit dataChanged();
-  auto dataType = parameter == QString("Width") ? DataType::WIDTH : DataType::EISF;
-  m_notifier.notify([&dataType](IFQFitObserver &obs) { obs.updateAvailableFunctions(availableFits.at(dataType)); });
-}
-
 void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
   FqFitParameters parameters;
   try {
-    auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+    auto workspace = ads_instance.retrieveWS<MatrixWorkspace>(workspaceName);
     parameters = m_fqFitModel->createFqFitParameters(workspace.get());
     dialog->enableParameterSelection();
   } catch (const std::invalid_argument &) {
@@ -109,7 +50,7 @@ void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog
 
 void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
   const auto workspaceName = dialog->workspaceName();
-  auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+  auto workspace = ads_instance.retrieveWS<MatrixWorkspace>(workspaceName);
   const auto parameter = m_fqFitModel->createFqFitParameters(workspace.get());
   setActiveParameterType(type);
   updateParameterOptions(dialog, parameter);

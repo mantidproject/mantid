@@ -16,6 +16,8 @@ using namespace MantidQt::MantidWidgets;
 
 namespace {
 
+auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
+
 bool equivalentWorkspaces(const Mantid::API::MatrixWorkspace_const_sptr &lhs,
                           const Mantid::API::MatrixWorkspace_const_sptr &rhs) {
   if (!lhs || !rhs)
@@ -25,9 +27,7 @@ bool equivalentWorkspaces(const Mantid::API::MatrixWorkspace_const_sptr &lhs,
   return lhs->getName() == rhs->getName();
 }
 
-bool doesExistInADS(std::string const &workspaceName) {
-  return Mantid::API::AnalysisDataService::Instance().doesExist(workspaceName);
-}
+bool doesExistInADS(std::string const &workspaceName) { return ads_instance.doesExist(workspaceName); }
 } // namespace
 
 namespace MantidQt {
@@ -114,7 +114,7 @@ std::vector<std::pair<std::string, size_t>> IndirectFitDataTableModel::getResolu
 
 void IndirectFitDataTableModel::setResolution(const std::string &name, TableDatasetIndex index) {
   if (!name.empty() && doesExistInADS(name)) {
-    const auto resolution = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name);
+    const auto resolution = ads_instance.retrieveWS<Mantid::API::MatrixWorkspace>(name);
     if (m_resolutions->size() > index.value) {
       m_resolutions->at(index.value) = resolution;
     } else if (m_resolutions->size() == index.value) {
@@ -152,14 +152,14 @@ std::vector<std::string> IndirectFitDataTableModel::getWorkspaceNames() const {
 }
 
 void IndirectFitDataTableModel::addWorkspace(const std::string &workspaceName) {
-  auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
+  auto ws = ads_instance.retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
   addWorkspace(ws, FunctionModelSpectra(WorkspaceIndex{0}, WorkspaceIndex{ws->getNumberHistograms() - 1}));
 }
 
 void IndirectFitDataTableModel::addWorkspace(const std::string &workspaceName, const std::string &spectra) {
   if (spectra.empty())
     throw std::runtime_error("Fitting Data must consist of one or more spectra.");
-  if (workspaceName.empty() || !Mantid::API::AnalysisDataService::Instance().doesExist(workspaceName))
+  if (workspaceName.empty() || !ads_instance.doesExist(workspaceName))
     throw std::runtime_error("A valid sample file needs to be selected.");
 
   try {
@@ -170,7 +170,7 @@ void IndirectFitDataTableModel::addWorkspace(const std::string &workspaceName, c
 }
 
 void IndirectFitDataTableModel::addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) {
-  auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
+  auto ws = ads_instance.retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
   addWorkspace(ws, spectra);
 }
 

@@ -34,6 +34,7 @@ using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectTab");
+auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
 
 double roundToPrecision(double value, double precision) { return value - std::remainder(value, precision); }
 
@@ -472,8 +473,7 @@ double IndirectTab::getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws) {
  *found)
  */
 bool IndirectTab::getResolutionRangeFromWs(const QString &workspace, QPair<double, double> &res) {
-  auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::MatrixWorkspace>(
-      workspace.toStdString());
+  auto ws = ads_instance.retrieveWS<const Mantid::API::MatrixWorkspace>(workspace.toStdString());
   return getResolutionRangeFromWs(ws, res);
 }
 

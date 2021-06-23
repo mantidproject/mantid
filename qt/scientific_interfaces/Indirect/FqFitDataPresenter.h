@@ -27,13 +27,6 @@ public:
   FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view, IFQFitObserver *SingleFunctionTemplateBrowser);
 
 private slots:
-  void hideParameterComboBoxes();
-  void showParameterComboBoxes();
-  void updateAvailableParameters();
-  void updateAvailableParameters(const QString &type);
-  void updateAvailableParameterTypes(FqFitParameters &parameters);
-  void updateParameterSelectionEnabled();
-  void setParameterLabel(const QString &parameter);
   void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type);
   void setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspace);
   void setActiveParameterType(const std::string &type);
