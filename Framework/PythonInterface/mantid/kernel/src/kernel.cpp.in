@@ -51,9 +51,7 @@ BOOST_PYTHON_MODULE(_kernel) {
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
     "PythonStdoutChannel",
     new Poco::Instantiator<Poco::PythonStdoutChannel, Poco::Channel>);
-  Poco::LoggingFactory::defaultFactory().registerChannelClass(
-      "PyStdoutChannel", new Poco::Instantiator<Poco::PyStdoutChannel, Poco::Channel>);
-  /* // Store in case class PythonStdoutChannel is not up to the task and needs to be replace with this class
+  /* // Store in case class PythonStdoutChannel is not up to the task and needs to be replaced with this class
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
       "PyBindStdoutChannel", new Poco::Instantiator<Poco::PyBindStdoutChannel, Poco::Channel>);
       */

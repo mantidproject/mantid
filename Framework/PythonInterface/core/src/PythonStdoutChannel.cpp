@@ -40,5 +40,4 @@ boost::iostreams::stream<PyStdoutSink> PyStdoutStream(pyStdoutSinkInstance);
 
 namespace Poco {
 PythonStdoutChannel::PythonStdoutChannel() : ConsoleChannel(PyStdoutStream) {}
-PyStdoutChannel::PyStdoutChannel() : PyStdoutChannel::PyOstream(), ConsoleChannel(m_ostream) {}
 } // namespace Poco

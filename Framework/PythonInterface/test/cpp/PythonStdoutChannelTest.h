@@ -21,8 +21,6 @@
 #include <fstream>
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
-using Poco::PyBindStdoutChannel;
-using Poco::PyStdoutChannel;
 using Poco::PythonStdoutChannel;
 
 class PythonStdoutChannelTest : public CxxTest::TestSuite {
@@ -34,29 +32,9 @@ public:
 
   void testConstructor() { PythonStdoutChannel(); }
 
-  void testStream() {
-    // set the root logger's channel to a PyStdoutChannel
-    Poco::Channel *channelOld = Poco::Logger::root().getChannel();
-    Poco::AutoPtr<Poco::PyStdoutChannel> channelNew(new PyStdoutChannel);
-    Poco::Logger::root().setChannel(channelNew);
-
-    // substitute channel's stream buffer with the buffer of a string stream
-    std::stringstream recorder;
-    std::streambuf *bufferNew = recorder.rdbuf();
-    channelNew->m_ostream.rdbuf(bufferNew); // now channel will output to recorder's string object
-
-    // log a message with the root logger. It should be stored in recorder's string object
-    Mantid::Kernel::Logger log("");
-    log.error() << "Error Message\n";
-    TS_ASSERT_EQUALS(recorder.str(), "Error Message\n")
-
-    // restore the channel
-    Poco::Logger::root().setChannel(channelOld);
-  }
-
   /// write log message to a file via redirection of python sys.stdout
   void testPySysWriteStdout() {
-    // set the root logger's channel to a PyStdoutChannel
+    // set the root logger's channel to a PythonStdoutChannel
     Poco::Channel *channelOld = Poco::Logger::root().getChannel();
     Poco::AutoPtr<Poco::PythonStdoutChannel> channelNew(new PythonStdoutChannel);
     Poco::Logger::root().setChannel(channelNew);
@@ -69,10 +47,10 @@ public:
     replaceSubstring(script, "TEMPFILE", tmpFilePath.string());
     PyRun_SimpleString(script.c_str()); // execute the python script
 
-    // log a message with the root logger that now uses the PyStdoutChannel
+    // log a message with the root logger that now uses the PythonStdoutChannel
     Mantid::Kernel::Logger log("");
     std::string loggedMessage("Error Message");
-    log.error() << loggedMessage << "\n"; // log -> PySys_WriteStdout -> sys.stdout -> tmpFile
+    log.error() << loggedMessage << "\n";
 
     // Now reassign the standard file descriptor to sys.stdout
     std::string revert = "sys.stdout.close()\n"       // close tmpFile
