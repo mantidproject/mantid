@@ -66,6 +66,8 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # =================
 
     def set_file_last(self, filepath):
+        if not filepath:
+            return
         self.finder_data.setUserInput(filepath)
         directory, discard = path.split(filepath)
         self.finder_data.setLastDirectory(directory)

@@ -16,10 +16,11 @@ namespace IDA {
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view)
     : IndirectFitDataPresenter(
-          model, view, std::make_unique<IndirectDataTablePresenter>(model->getFitDataModel(), view->getDataTable())) {}
+          model, view,
+          std::make_unique<IndirectFitDataTablePresenter>(model->getFitDataModel(), view->getDataTable())) {}
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view,
-                                                   std::unique_ptr<IndirectDataTablePresenter> tablePresenter)
+                                                   std::unique_ptr<IndirectFitDataTablePresenter> tablePresenter)
     : m_model(model), m_view(view), m_tablePresenter(std::move(tablePresenter)) {
   observeReplace(true);
 

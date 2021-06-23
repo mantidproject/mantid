@@ -142,7 +142,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
     Run1HasOrientedLattice = false;
 
     const std::string fft("FindUBUsingFFT");
-    API::IAlgorithm_sptr findUB = this->createChildAlgorithm(fft);
+    auto findUB = createChildAlgorithm(fft);
     findUB->initialize();
     findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", getProperty("PeaksWorkspace1"));
     findUB->setProperty("MIND", static_cast<double>(getProperty("MIND")));

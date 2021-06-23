@@ -444,7 +444,7 @@ class DrillModel(QObject):
             value (str): new value
         """
         self.samples[sampleIndex].changeParameter(name, value)
-        if (value == "DEFAULT") or not value:
+        if (value == "DEFAULT") or value == "":
             self.paramOk.emit(sampleIndex, name)
         else:
             self.checkParameter(name, value, sampleIndex)

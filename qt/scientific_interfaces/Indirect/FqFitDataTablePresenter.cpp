@@ -28,7 +28,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 FqFitDataTablePresenter::FqFitDataTablePresenter(FqFitModel *model, QTableWidget *dataTable)
-    : IndirectDataTablePresenter(model->getFitDataModel(), dataTable, FqFitHeaders()) {
+    : IndirectFitDataTablePresenter(model->getFitDataModel(), dataTable, FqFitHeaders()) {
   auto header = dataTable->horizontalHeader();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(1, QHeaderView::Stretch);
@@ -46,7 +46,7 @@ int FqFitDataTablePresenter::endXColumn() const { return 4; }
 int FqFitDataTablePresenter::excludeColumn() const { return 5; }
 
 void FqFitDataTablePresenter::addTableEntry(FitDomainIndex row) {
-  IndirectDataTablePresenter::addTableEntry(row);
+  IndirectFitDataTablePresenter::addTableEntry(row);
 
   auto subIndices = m_model->getSubIndices(row);
   const auto workspace = m_model->getWorkspace(subIndices.first);

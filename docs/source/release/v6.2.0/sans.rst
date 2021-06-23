@@ -22,5 +22,6 @@ Bugfixes
 Improvements
 ############
 
+- :ref:The ANSTO Bilby loader `LoadBBY <algm-LoadBBY>` logs the occurence of invalid events detected in the file as a warning.
 
 :ref:`Release 6.2.0 <v6.2.0>`

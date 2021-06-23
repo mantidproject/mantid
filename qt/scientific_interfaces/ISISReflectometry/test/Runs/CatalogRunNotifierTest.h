@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
+
 #include "../../../ISISReflectometry/GUI/Runs/CatalogRunNotifier.h"
 #include "../ReflMockObjects.h"
 #include "../Runs/MockRunsView.h"

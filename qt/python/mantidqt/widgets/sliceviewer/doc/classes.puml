@@ -1,0 +1,100 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+TableWorkspaceDataPresenterStandard -|> TableWorkspaceDataPresenterBase
+PeaksViewerModel -|> TableWorkspaceDisplayModel
+PeaksViewerModel --o TableWorkspaceDataPresenterBase
+PeaksViewerPresenter *-- PeaksViewerModel
+PeaksViewerPresenter *-- PeaksWorkspaceDataPresenter
+PeaksWorkspaceDataPresenter -|> TableWorkspaceDataPresenterStandard
+PeaksViewerView o--* PeaksViewerPresenter
+PeaksViewerView o-- _PeaksWorkspaceTableView
+_PeaksWorkspaceTableView --o TableWorkspaceDataPresenterBase
+_LessThanOperatorSortFilterModel -|> QSortFilterModel
+_PeaksWorkspaceTableView o-- _LessThanOperatorSortFilterModel
+_PeaksWorkspaceTableView -|> TableWorkspaceDisplayView
+SlicerView --o PeaksViewerView
+TableWorkspaceDisplayView -|> QTableView
+QTableView -|> QAbstractItemView
+PeaksViewerCollectionView o-- SlicerView
+PeaksViewerCollectionView *-- PeaksViewerView
+PeaksViewerCollectionPresenter *-- PeaksViewerPresenter
+PeaksViewerCollectionPresenter *-- PeaksViewerCollectionView
+
+'mantidqt/widgets/workspacedisplay/table/model.py
+class TableWorkspaceDisplayModel{
+ITableWorkspace ws
+delete_rows(selected_rows)
+}
+
+class TableWorkspaceDisplayView{
+presenter = None
+QStandardItemModel table_model
+}
+class QTableView
+class QAbstractItemView
+
+class TableWorkspaceDataPresenterStandard{
+}
+
+class TableWorkspaceDataPresenterBase{
+PeaksViewerModel model
+_PeaksWorkspaceTableView view
+}
+
+'slicerviewer.py'
+class SlicerView {
+}
+
+'peaksviewer/model.py
+class PeaksViewerModel{
+Painted[] _representations
+}
+
+class _LessThanOperatorSortFilterModel{
+less_than()
+}
+
+class QSortFilterModel{
+}
+
+'peaksviewer/view.py
+class _PeaksWorkspaceTableView{
+PeaksViewerView _key_handler
+_LessThanOperatorSortFilterModel proxy_model
+QAbstractItemModel source_model
+}
+
+class PeaksViewerView{
+MPLPainter _painter
+SliceViewer _slice_info_provider
+QGroupBox _group_box
+PeaksViewerPresenter _child_presenter
+_PeaksWorkspaceTableView _table_view
+}
+
+class PeaksViewerCollectionView {
+MPLPainter _painter
+SlicerView _slice_info_provider
+QVBoxLayout[PeaksViewerView] _peaks_layout
+PeaksViewerView append_peaksviewer()
+remove_peaksviewer(PeaksViewerView)
+}
+
+'peaksviewer/presenter.py
+class PeaksWorkspaceDataPresenter{
+create_items(Union[float, str] data)
+}
+
+class PeaksViewerPresenter{
+PeaksViewerModel _model
+PeaksViewerView _view
+PeaksWorkspaceDataPresenter _peaks_table_presenter
+}
+
+class PeaksViewerCollectionPresenter {
+PeaksViewerPresenter[] _child_presenters
+PeaksViewerCollectionView _view
+}
+
+@enduml

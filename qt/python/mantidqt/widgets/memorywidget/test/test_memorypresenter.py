@@ -31,7 +31,7 @@ class MemoryPresenterTest(unittest.TestCase):
         self.view.memory_bar = mock.Mock()
         self.view.memory_bar.value.return_value = 0
         self.view.set_bar_color = mock.Mock()
-        self.view.set_value = mock.Mock()
+        self.view.invoke_set_value = mock.Mock()
 
     def test_presenter(self):
         self.presenter.cancel_memory_update()
@@ -45,7 +45,7 @@ class MemoryPresenterTest(unittest.TestCase):
     def test_memory_usage_is_updated_based_on_a_constant(self):
         # Sleep for just longer than the default so the test can run
         time.sleep(TIME_INTERVAL_MEMORY_USAGE_UPDATE + 0.5)
-        self.assertGreater(self.view.set_value.call_count, 1)
+        self.assertGreater(self.view.invoke_set_value.call_count, 1)
 
 
 if __name__ == "__main__":
