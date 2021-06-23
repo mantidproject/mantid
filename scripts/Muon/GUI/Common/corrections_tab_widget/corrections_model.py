@@ -21,7 +21,7 @@ class CorrectionsModel:
     """
 
     def __init__(self, data_context: MuonDataContext, corrections_context: CorrectionsContext):
-        """Initialize the CorrectionsModel with emtpy data."""
+        """Initialize the CorrectionsModel with empty data."""
         self._data_context = data_context
         self._corrections_context = corrections_context
 
@@ -115,17 +115,18 @@ class CorrectionsModel:
             table = retrieve_ws(table_name)
             return self._validate_dead_time_table(table)
         else:
-            return f"Workspace {table_name} does not exist in the ADS."
+            return f"Workspace '{table_name}' does not exist in the ADS."
 
     def _validate_dead_time_table(self, table: ITableWorkspace) -> str:
         """Validates that the dead time table provided has the expected format."""
         if not isinstance(table, ITableWorkspace):
             return "The dead time table selected is not a Table Workspace."
         column_names = table.getColumnNames()
+        number_of_rows = table.rowCount()
         if len(column_names) != 2:
             return f"Expected 2 columns, found {str(max(0, len(column_names)))} columns."
         if column_names[0] != "spectrum" or column_names[1] != DEAD_TIME_TABLE_KEY:
             return f"Columns have incorrect names."
-        if table.rowCount() != self._data_context.current_workspace.getNumberHistograms():
-            return "The number of histograms does not match the number of rows in dead time table."
+        if number_of_rows != self._data_context.current_workspace.getNumberHistograms():
+            return f"The number of histograms does not match the number of rows in dead time table ({number_of_rows})."
         return ""
