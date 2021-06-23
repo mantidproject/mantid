@@ -438,8 +438,8 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
           g_log.notice("[MAC] Trace " + std::to_string(ibox) + " ... Flag2");
 
           // sort events for comparing
-          std::sort(events_vec1.begin(), events_vec1.end());
-          std::sort(events_vec2.begin(), events_vec2.end());
+          // SPEC105 Temporary -- std::sort(events_vec1.begin(), events_vec1.end());
+          // SPEC105 Temporary -- std::sort(events_vec2.begin(), events_vec2.end());
 
           g_log.notice("[MAC] Trace " + std::to_string(ibox) + " ... Flag3");
           // compare MEEvents
@@ -462,11 +462,12 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
               numdiff++;
               same = false;
             }
-          }
+          } // Foreach event
 
           if (!same) {
             std::string diffmessage("Box " + std::to_string(ibox) +
                                     " Number of different MDEvents =  " + std::to_string(numdiff));
+            g_log.notice("[MAC] Throw " + diffmessage);
             throw CompareFailsException("MDEvents are not the same!\n" + diffmessage);
           }
         }
