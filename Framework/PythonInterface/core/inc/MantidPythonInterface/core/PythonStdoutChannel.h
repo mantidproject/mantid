@@ -37,7 +37,8 @@ public:
   PythonStdoutChannel();
 };
 
-/* /// Store in case class PythonStdoutChannel is not up to the task and needs to be replaced with this class
+/*
+// TODO: this channel should replace PythonStdoutChannel when we adopt pybind11 because of robust GIL management
 class MANTID_PYTHONINTERFACE_CORE_DLL PyBindStdoutChannel : public StdoutChannel {
 
 public:
