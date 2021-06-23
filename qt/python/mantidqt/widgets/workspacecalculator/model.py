@@ -14,7 +14,6 @@ from mantid.simpleapi import (CloneWorkspace, CreateSingleValuedWorkspace,
                               WeightedMean, WeightedMeanMD)
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid.dataobjects import MDHistoWorkspace, WorkspaceSingleValue
-from mantid.kernel import logger as log
 
 
 class WorkspaceCalculatorModel:
@@ -89,12 +88,10 @@ class WorkspaceCalculatorModel:
         for entry in mtd[group_name]:
             if isinstance(entry, MDHistoWorkspace):
                 if md_check is not None and not md_check:
-                    log.error(multi_dim_err_msg)
                     return multi_dim_err_msg
                 md_check = True
             else:
                 if md_check:
-                    log.error(multi_dim_err_msg)
                     return multi_dim_err_msg
                 md_check = False
         if info == 'LHS':
@@ -115,15 +112,12 @@ class WorkspaceCalculatorModel:
         else:
             if self._md_lhs and (not isinstance(mtd[self._lhs_ws], MDHistoWorkspace)
                                  and not isinstance(mtd[self._lhs_ws], WorkspaceSingleValue)):
-                log.error(multi_dim_err_msg)
                 err_msg = multi_dim_err_msg
             if self._md_lhs and (not isinstance(mtd[self._lhs_ws], MDHistoWorkspace)
                                  and not isinstance(mtd[self._lhs_ws], WorkspaceSingleValue)):
-                log.error(multi_dim_err_msg)
                 err_msg = multi_dim_err_msg
         if (self._md_lhs != self._md_rhs and (not isinstance(mtd[self._lhs_ws], WorkspaceSingleValue)
                                               and not isinstance(mtd[self._rhs_ws], WorkspaceSingleValue))):
-            log.error(multi_dim_err_msg)
             err_msg = multi_dim_err_msg
         return err_msg == str(), err_msg
 
@@ -132,8 +126,6 @@ class WorkspaceCalculatorModel:
             mtd[ws]
         except KeyError:
             err_msg = "The {} input workspace does not exist.".format(info)
-            if ws is not None:
-                log.error(err_msg)
             return False, err_msg
         if isinstance(mtd[ws], WorkspaceGroup):
             err_msg = self._check_group_for_md(ws, info)

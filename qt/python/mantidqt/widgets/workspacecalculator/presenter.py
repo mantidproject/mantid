@@ -10,7 +10,6 @@
 
 from .model import WorkspaceCalculatorModel
 from .view import WorkspaceCalculatorView
-from mantid.kernel import logger as log
 
 
 class WorkspaceCalculator():
@@ -36,8 +35,7 @@ class WorkspaceCalculator():
         try:
             parameters['lhs_scale'] = float(self.view.lhs_scaling.text())
             parameters['rhs_scale'] = float(self.view.rhs_scaling.text())
-        except ValueError as err:
-            log.error(str(err))
+        except ValueError:
             return
         parameters['lhs_ws'] = self.view.lhs_ws.currentText()
         parameters['rhs_ws'] = self.view.rhs_ws.currentText()
