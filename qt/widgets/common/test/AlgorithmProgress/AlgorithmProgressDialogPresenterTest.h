@@ -62,7 +62,10 @@ public:
     AlgorithmFactory::Instance().subscribe<Mantid::Algorithms::ManualProgressReporter>();
     return new AlgorithmProgressDialogPresenterTest();
   }
-  static void destroySuite(AlgorithmProgressDialogPresenterTest *suite) { delete suite; }
+  static void destroySuite(AlgorithmProgressDialogPresenterTest *suite) {
+    AlgorithmFactory::Instance().unsubscribe(NAME_MANUALRPOGRESSREPORTER, 1);
+    delete suite;
+  }
 
   /** This test runs the dev algorithm and sees if it was
    *  currectly tracked during start/updates/end
