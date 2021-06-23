@@ -38,6 +38,11 @@ class PreviewView:
     PLOT2D = "plot_2d"
 
     """
+    Type of the preview when the 1d plot is used to show the data.
+    """
+    PLOT1D = "plot_1d"
+
+    """
     Type the preview.
     """
     _type  = None
@@ -89,6 +94,9 @@ class PreviewView:
         if self._type == self.PLOT2D:
             self._widget = pcolormesh([workspace_name])
             self._widget.canvas.mpl_connect("close_event", self.on_close)
+        if self._type == self.PLOT1D:
+            self._widget = plotBin(workspace_name, 0, error_bars=True)
+            self._widget.canvas.mpl_connect("close_event", self.on_close)
 
     def change_workspace(self, workspace_name):
         """
@@ -101,6 +109,9 @@ class PreviewView:
             return
         if self._type == self.PLOT2D:
             pcolormesh([workspace_name], self._widget)
+        if self._type == self.PLOT1D:
+            plotBin(workspace_name, 0, error_bars=True, window=self._widget,
+                    clearWindow=True)
 
     def on_close(self, event=None):
         """
