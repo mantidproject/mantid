@@ -28,7 +28,7 @@ using Mantid::HistogramData::CountStandardDeviations;
 
 namespace {
 // THIS CODE IS COMPLETELY UNNECESSARY, BUT MAKE THE FUNCTION FACTORY WORK
-class HackyGaussian : public Gaussian {
+class DLLExport HackyGaussian : public Gaussian {
 public:
   ~HackyGaussian() override {}
   std::string name() const override { return "Gaussian"; }
