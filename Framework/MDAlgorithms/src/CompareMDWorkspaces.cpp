@@ -319,7 +319,7 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
                    << "; ws2 npoints = " << box2->getNPoints() << "\n";
 
     try {
-      CompareMDWorkspaces::compare2Boxes<MDE, nd>(box1, box2, static_cast<size_t>(ibox));
+      compare2Boxes<MDE, nd>(box1, box2, static_cast<size_t>(ibox));
     } catch (CompareFailsException &err) {
       local_fail = true;
       local_error += err.what();
@@ -344,6 +344,8 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
 
 template <typename MDE, size_t nd>
 void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, size_t ibox) {
+
+  g_log.notice("[MAC] Compare 2 boxes with index " + std::to_string(ibox));
 
   if (m_CompareBoxID)
     this->compare(box1->getID(), box2->getID(), "Boxes have different ID");
