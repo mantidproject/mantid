@@ -29,13 +29,13 @@ public:
 
   bool isMultiFit() const override;
 
-  std::string getFitParameterName(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
-  std::vector<std::string> getWidths(TableDatasetIndex dataIndex) const;
-  std::vector<std::string> getEISF(TableDatasetIndex dataIndex) const;
-  boost::optional<std::size_t> getWidthSpectrum(std::size_t widthIndex, TableDatasetIndex dataIndex) const;
-  boost::optional<std::size_t> getEISFSpectrum(std::size_t eisfIndex, TableDatasetIndex dataIndex) const;
-  void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex, bool single = true);
-  void setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataIndex, bool single = true);
+  std::string getFitParameterName(WorkspaceID dataIndex, WorkspaceIndex spectrum) const;
+  std::vector<std::string> getWidths(WorkspaceID dataIndex) const;
+  std::vector<std::string> getEISF(WorkspaceID dataIndex) const;
+  boost::optional<std::size_t> getWidthSpectrum(std::size_t widthIndex, WorkspaceID dataIndex) const;
+  boost::optional<std::size_t> getEISFSpectrum(std::size_t eisfIndex, WorkspaceID dataIndex) const;
+  void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true);
+  void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true);
   FqFitParameters createFqFitParameters(Mantid::API::MatrixWorkspace *workspace);
 
 private:

@@ -295,7 +295,7 @@ void FqFitModel::setActiveEISF(std::size_t eisfIndex, WorkspaceID workspaceID, b
     } else { // In multiple mode the spectra needs to be appending on the
              // existing spectra list.
       auto spectra_vec = std::vector<std::size_t>({eisfSpectra[eisfIndex]});
-      auto spectra = getSpectra(dataIndex);
+      auto spectra = getSpectra(workspaceID);
       for (auto i : spectra) {
         if ((std::find(spectra_vec.begin(), spectra_vec.end(), i.value) == spectra_vec.end())) {
           spectra_vec.push_back(i.value);
