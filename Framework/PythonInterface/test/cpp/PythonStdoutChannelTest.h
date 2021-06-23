@@ -41,8 +41,8 @@ public:
 
     // redirect python's sys.stdout to a temporary file, using a python script
     std::string script = "import sys\n"
-                         "stdout_old = sys.stdout\n"                          // backup the standard file descriptor
-                         "sys.stdout = open('TEMPFILE', 'w', buffering=1)\n"; // redirection, small buffe needed
+                         "stdout_old = sys.stdout\n"                           // backup the standard file descriptor
+                         "sys.stdout = open(r'TEMPFILE', 'w', buffering=1)\n"; // redirection, small buffer needed
     auto tmpFilePath = boost::filesystem::temp_directory_path() / "testPySysWriteStdout.txt";
     replaceSubstring(script, "TEMPFILE", tmpFilePath.string());
     PyRun_SimpleString(script.c_str()); // execute the python script
