@@ -511,14 +511,14 @@ public:
     TS_ASSERT_EQUALS(m_scale[1], 0.0099093322347372226);
     TS_ASSERT_EQUALS(m_scale[2], 0.011487383212974045);
 
-    ANNpointArray dataPoints = annAllocPts(nhist, 3);
+    ANNpointArray dataPoints = annAllocPts(static_cast<int>(nhist), 3);
     std::vector<specnum_t> spectrumNumbers2;
     spectrumNumbers2.reserve(nhist);
     for (size_t i = 0; i < nhist; ++i)
       spectrumNumbers2.emplace_back(workspace->getSpectrum(i).getSpectrumNo());
     int pointNo = 0;
     for (const auto i : indices) {
-      const specnum_t spectrum = spectrumNumbers2[i];
+      // const specnum_t spectrum = spectrumNumbers2[i];
       V3D pos = specInfo.position(i) / m_scale;
       dataPoints[pointNo][0] = pos.X();
       dataPoints[pointNo][1] = pos.Y();
