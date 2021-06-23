@@ -30,21 +30,21 @@ using namespace Mantid::MDAlgorithms;
  */
 class SaveMDTest : public CxxTest::TestSuite {
 public:
-  void test_Init() {
+  void Ptest_Init() {
     SaveMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec() { do_test_exec(23, "SaveMDTest.nxs"); }
+  void Ptest_exec() { do_test_exec(23, "SaveMDTest.nxs"); }
 
-  void test_exec_noEvents() { do_test_exec(0, "SaveMDTest_noEvents.nxs"); }
+  void Ptest_exec_noEvents() { do_test_exec(0, "SaveMDTest_noEvents.nxs"); }
 
   // new 1
-  void test_MakeFileBacked() { do_test_exec(23, "SaveMDTest.nxs", true); }
+  void Ptest_MakeFileBacked() { do_test_exec(23, "SaveMDTest.nxs", true); }
 
   // new 2
-  void test_MakeFileBacked_then_UpdateFileBackEnd() { do_test_exec(23, "SaveMDTest_updating.nxs", true, true); }
+  void Ptest_MakeFileBacked_then_UpdateFileBackEnd() { do_test_exec(23, "SaveMDTest_updating.nxs", true, true); }
 
   // new 3
   void test_MakeFileBacked_then_save_under_other_file_name() {
@@ -169,15 +169,17 @@ public:
       auto ws_cast = std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(reference_out_ws);
 
       // Compare the loaded and original workspace
-      // Temporary - auto compare_alg =
-      // Mantid::API::AlgorithmManager::Instance().createUnmanaged("CompareMDWorkspaces"); Temporary -
-      // compare_alg->setChild(true); Temporary - compare_alg->initialize(); Temporary -
-      // compare_alg->setProperty("Workspace1", ws); Temporary - compare_alg->setProperty("Workspace2",
-      // reference_out_ws); Temporary - compare_alg->setProperty("Tolerance", 0.00001); Temporary -
-      // compare_alg->setProperty("CheckEvents", true); Temporary - compare_alg->setProperty("IgnoreBoxID", true);
-      // Temporary - TS_ASSERT_THROWS_NOTHING(compare_alg->execute());
-      // Temporary - bool is_equal = compare_alg->getProperty("Equals");
-      // Temporary - TS_ASSERT(is_equal);
+      auto compare_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CompareMDWorkspaces");
+      compare_alg->setChild(true);
+      compare_alg->initialize();
+      compare_alg->setProperty("Workspace1", ws);
+      compare_alg->setProperty("Workspace2", reference_out_ws);
+      compare_alg->setProperty("Tolerance", 0.00001);
+      compare_alg->setProperty("CheckEvents", true);
+      compare_alg->setProperty("IgnoreBoxID", true);
+      TS_ASSERT_THROWS_NOTHING(compare_alg->execute());
+      bool is_equal = compare_alg->getProperty("Equals");
+      TS_ASSERT(is_equal);
     }
 
     // Clean up file and other file
@@ -190,7 +192,7 @@ public:
       Poco::File(originalFileName).remove();
   }
 
-  void test_saveExpInfo() {
+  void Ptest_saveExpInfo() {
     std::string filename("MultiExperSaveTest.nxs");
     // Make a 1D MDEventWorkspace
     MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
@@ -231,7 +233,7 @@ public:
       Poco::File(this_filename).remove();
   }
 
-  void test_saveAffine() {
+  void Ptest_saveAffine() {
     std::string filename("MDAffineSaveTest.nxs");
     // Make a 4D MDEventWorkspace
     MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
@@ -281,7 +283,7 @@ public:
       Poco::File(filename).remove();
   }
 
-  void test_histo2() {
+  void Ptest_histo2() {
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 2, 10, 10.0, 3.5, "histo2", 4.5);
     doTestHisto(ws);
   }
@@ -304,7 +306,7 @@ public:
     ws->refreshCache();
   }
 
-  void test_exec_3D() {
+  void Ptest_exec_3D() {
     SaveMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

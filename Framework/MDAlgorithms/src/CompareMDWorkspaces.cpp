@@ -286,9 +286,9 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
   std::stringstream ess;
   ess << "Workspace1 has " << boxes1.size() << " boxes; Workspace2 has " << boxes2.size() << " boxes";
   std::string boxinfo(ess.str());
+  g_log.notice(boxinfo);
 
   this->compare(boxes1.size(), boxes2.size(), "Workspaces do not have the same number of boxes. " + boxinfo);
-  g_log.information(boxinfo);
 
   bool boxes_same(true);
   std::string errormessage("");
@@ -314,8 +314,9 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
       continue;
     }
 
-    g_log.debug() << "Box " << ibox << "ws1 npoints = " << box1->getNPoints()
-                  << "; ws2 npoints = " << box2->getNPoints() << "\n";
+    g_log.notice() << "[MAC] "
+                   << "Box " << ibox << " ws1 npoints = " << box1->getNPoints()
+                   << "; ws2 npoints = " << box2->getNPoints() << "\n";
 
     try {
       CompareMDWorkspaces::compare2Boxes<MDE, nd>(box1, box2, static_cast<size_t>(ibox));
@@ -324,7 +325,7 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
       local_error += err.what();
     }
 
-    PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
+    PARALLEL_CRITICAL(CompareMDWorkspaces_WriteOutput) {
       if (local_fail) {
         boxes_same = false;
         errormessage += local_error;
@@ -381,6 +382,7 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
     // MDGridBox: compare box size on each dimension
     for (size_t d = 0; d < nd; d++)
       this->compareTol(gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), "Box sizes do not match");
+    g_log.notice("[MAC] Box " + std::to_string(ibox) + " are MDGridBox");
   } else {
     // Could be both MDBoxes (with events)
     auto *mdbox1 = dynamic_cast<MDBox<MDE, nd> *>(box1);
@@ -395,6 +397,10 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
     } else if (!mdbox1 && mdbox2) {
       // workspace 2's is MDBox but workspace 1 is not
       throw CompareFailsException("Worksapce 1's Box " + std::to_string(ibox) + " is not MDBox");
+    } else if (!mdbox1 && !mdbox2) {
+      //
+      g_log.notice("[MAC] This is not supposed to happen");
+      throw CompareFailsException("Workspace 1 and 2 are not MDGridBox or MDBox");
     }
 
     // Both boxes are MDBoxes:
@@ -404,6 +410,8 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
 
       try {
         this->compare(events1.size(), events2.size(), "Box event vectors are not the same length");
+        g_log.notice("[MAC] " + std::to_string(ibox) + " ws1 |events| = " + std::to_string(events1.size()) +
+                     ", ws2 |events| = " + std::to_string(events2.size()));
 
         if (events1.size() == events2.size() && events1.size() > 2) {
 
