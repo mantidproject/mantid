@@ -68,7 +68,7 @@ class PowderReduceP2DTest(sytemtesting.MantidSystemTest):
         return 'ValidateAscii'
 
     def validate(self):
-        self._test_dir + '/PowderReduceP2D_sam'
+        return 'PowderReduceP2D_Test.p2d', 'PowderReduceP2D_reference.p2d'
 
     def _sampleEventData(self):
         """path to sample event data used for testing the algorithm"""
@@ -139,6 +139,9 @@ class PowderReduceP2DTest(sytemtesting.MantidSystemTest):
 
     def _loadReference(self):
         return "Path/to/reference/file.p2d"
+
+    def _outputFile(self):
+        return 'PowderReduceP2D_Test'
 
 
 if __name__ == '__main__':
