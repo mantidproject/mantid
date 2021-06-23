@@ -58,10 +58,10 @@ public:
   // Neighbouring spectra by
   std::map<specnum_t, Mantid::Kernel::V3D> neighbours(specnum_t spectrum) const;
 
-protected:
+  // protected:
   std::vector<size_t> getSpectraDetectors();
 
-private:
+  // private:
   /// A reference to the SpectrumInfo
   const SpectrumInfo &m_spectrumInfo;
   /// Vector of spectrum numbers
