@@ -52,8 +52,25 @@ class PreviewView:
     """
     _widget = None
 
-    def __init__(self, preview_type, presenter):
+    def __init__(self):
+        pass
+
+    def set_type(self, preview_type):
+        """
+        Set the preview type.
+
+        Args:
+            preview_type (str): preview type
+        """
         self._type = preview_type
+
+    def set_presenter(self, presenter):
+        """
+        Set the presenter.
+
+        Args:
+            presenter (PreviewPresenter): presenter
+        """
         self._presenter = presenter
 
     def show_workspace(self, workspace_name):
@@ -112,6 +129,11 @@ class RawDataExplorerView(QWidget):
     """
     _current_selection = None
 
+    """
+    List of preview views.
+    """
+    _previews = None
+
     file_tree_path_changed = Signal(str)
 
     def __init__(self, presenter, parent=None):
@@ -122,6 +144,8 @@ class RawDataExplorerView(QWidget):
         self._presenter = presenter
 
         self._current_selection = set()
+
+        self._previews = list()
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setup_connections()
@@ -142,6 +166,26 @@ class RawDataExplorerView(QWidget):
     def closeEvent(self, event):
         self.deleteLater()
         super(RawDataExplorerView, self).closeEvent(event)
+
+    def add_preview(self):
+        """
+        Add a new preview.
+
+        Returns:
+            PreviewView: new preview
+        """
+        preview = PreviewView()
+        self._previews.append(preview)
+        return preview
+
+    def del_preview(self, preview):
+        """
+        Remove a preview.
+
+        Args:
+            preview (PreviewView): preview to be removed
+        """
+        self._previews.remove(preview)
 
     def get_selection(self):
         """

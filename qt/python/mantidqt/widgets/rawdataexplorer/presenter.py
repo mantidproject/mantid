@@ -21,6 +21,11 @@ from mantid.api import IPreview, PreviewManager, PreviewType
 class PreviewPresenter:
 
     """
+    Raw data explorer main view.
+    """
+    _main_view = None
+
+    """
     Associated view.
     """
     _view = None
@@ -35,21 +40,23 @@ class PreviewPresenter:
     """
     _model = None
 
-    def __init__(self, main_model, model):
+    def __init__(self, main_view, view, main_model, model):
+        self._main_view = main_view
+        self._view = view
+        view.set_presenter(self)
         self._main_model = main_model
         self._model = model
 
         preview_type = self._model.get_preview_type()
-        workspace_name = self._model.get_workspace_name()
         if preview_type == PreviewType.IVIEW:
-            self._view = PreviewView(PreviewView.IVIEW, self)
-            self._view.show_workspace(workspace_name)
+            self._view.set_type(PreviewView.IVIEW)
         if preview_type == PreviewType.SVIEW:
-            self._view = PreviewView(PreviewView.SVIEW, self)
-            self._view.show_workspace(workspace_name)
+            self._view.set_type(PreviewView.SVIEW)
         if preview_type == PreviewType.PLOT2D:
-            self._view = PreviewView(PreviewView.PLOT2D, self)
-            self._view.show_workspace(workspace_name)
+            self._view.set_type(PreviewView.PLOT2D)
+
+        workspace_name = self._model.get_workspace_name()
+        self._view.show_workspace(workspace_name)
 
         self._model.sig_workspace_changed.connect(self.on_workspace_changed)
 
@@ -57,6 +64,7 @@ class PreviewPresenter:
         """
         Triggered when the view is closed.
         """
+        self._main_view.del_preview(self._view)
         self._main_model.del_preview(self._model)
 
     def on_workspace_changed(self):
@@ -183,7 +191,8 @@ class RawDataExplorerPresenter(QObject):
         Triggered when a new preview model has been added to the model. This is
         creating a dedicated MVP for this preview.
         """
-        PreviewPresenter(self.model, previewModel)
+        view = self.view.add_preview()
+        PreviewPresenter(self.view, view, self.model, previewModel)
 
     def show_ws(self, ws_to_show):
         """
