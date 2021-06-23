@@ -377,7 +377,7 @@ public:
 
   void test_WISH() {
     auto algo = AlgorithmManager::Instance().create("LoadRaw");
-    algo->setPropertyValue("Filename", "../SystemTest/WISH/input/11_4/WISH00019612.raw");
+    algo->setPropertyValue("Filename", "WISH00019612.raw");
     algo->setPropertyValue("SpectrumMin", "1");
     algo->setPropertyValue("SpectrumMax", "19461");
     algo->setPropertyValue("LoadMonitors", "Separate");
