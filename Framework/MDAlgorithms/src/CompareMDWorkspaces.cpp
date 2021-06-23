@@ -295,10 +295,10 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
   int num_boxes = static_cast<int>(boxes1.size());
   // workspace with file backed cannot work with OpenMP
   // segmentation fault is generated on Mac build
-  bool condition_holds = ws1->isFileBacked() || ws2->isFileBacked();
+  bool filebacked = ws1->isFileBacked() && ws2->isFileBacked();
 
   // cppcheck-suppress syntaxError
-  PRAGMA_OMP( parallel for if (condition_holds))
+  PRAGMA_OMP( parallel for if (!filebacked))
   for (int ibox = 0; ibox < num_boxes; ibox++) {
     PARALLEL_START_INTERUPT_REGION
     // No need to compare because the boxes are not same already
