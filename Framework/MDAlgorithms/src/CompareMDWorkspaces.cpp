@@ -295,7 +295,8 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
   int num_boxes = static_cast<int>(boxes1.size());
 
   // cppcheck-suppress syntaxError
-  PRAGMA_OMP(parallel for schedule(dynamic, 1) )
+  bool condition_holds(false);
+  PRAGMA_OMP(parallel for schedule(dynamic, 1) if (condition_holds))
   for (int ibox = 0; ibox < num_boxes; ibox++) {
     PARALLEL_START_INTERUPT_REGION
     // No need to compare because the boxes are not same already

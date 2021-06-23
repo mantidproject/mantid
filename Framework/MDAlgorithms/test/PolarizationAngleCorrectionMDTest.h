@@ -411,6 +411,7 @@ private:
     compare_alg.setPropertyValue("Workspace2", ws2);
     compare_alg.setProperty("Tolerance", 0.001);
     compare_alg.setProperty("CheckEvents", compare_events);
+    compare_alg.setProperty("IgnoreBoxID", true);
     compare_alg.execute();
     TS_ASSERT(compare_alg.isExecuted());
 
