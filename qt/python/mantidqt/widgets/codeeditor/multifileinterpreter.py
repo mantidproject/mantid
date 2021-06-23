@@ -160,7 +160,7 @@ class MultiPythonFileInterpreter(QWidget):
         close_button = QPushButton(self)
         close_button.setFlat(True)
         close_button.setIcon(get_icon("mdi.close", "black", 1.35))
-        close_button.clicked.connect(lambda tab_index=tab_idx: self.close_tab(tab_index))
+        close_button.clicked.connect(lambda: self.close_tab(tab_idx))
         self._tabs.tabBar().setTabButton(tab_idx, QTabBar.RightSide, close_button)
 
         return tab_idx
