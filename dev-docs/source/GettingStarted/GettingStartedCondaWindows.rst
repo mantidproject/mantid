@@ -50,12 +50,13 @@ Configure CMake and generate build files
 
 * Still using the terminal or powershell prompt from the last step and in your source directory.
 * Run ``conda activate mantid`` to activate your conda environment.
-* Create your build directory with ``mkdir build`` and navigate to it with ``cd build``
-* Inside of your build directory run ``cmake --preset=win``
+* Navigate back to your source directory using ``cd mantid`` if you used the default name during cloning from git.
+* Inside of your source directory run ``cmake --preset=win``
 
-    * Alternatively if you don't want to have your build folder in your source then call this command (THESE ARE PENDING AND LIKELY TO CHANGE): ``cmake {SOURCE} -G"Visual Studio 16 2019" -DCMAKE_PREFIX_PATH=${CONDA_PREFIX} -DCONDA_BUILD=true -DHDF5_DIR${CONDA_PREFIX}/Library/cmake/hdf5``
+    * Alternatively if you don't want to have your build folder in your source then pass the ``-B`` argument, overriding the preset, to cmake: ``cmake {SOURCE} --preset=win -B {BUILD_DIR}``
 
-Compile and Build using Visual Studio *UNDER CONSTRUCTION*
+
+Compile and Build using Visual Studio
 ----------------------------------------------------------
 
-* Temp: Open visual studio with ``visualstudio.bat`` then click build.
+* Open visual studio with ``visualstudio.bat`` then click build.

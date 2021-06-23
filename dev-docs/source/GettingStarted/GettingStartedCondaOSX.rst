@@ -30,10 +30,10 @@ Configure CMake and generate build files
 ----------------------------------------
 * Still using the terminal.
 * Run ``conda activate mantid`` to activate your conda environment.
-* Create your build directory with ``mkdir build`` and navigate to it with ``cd build``
-* Inside of your build directory run ``cmake --preset=osx``
+* Navigate back to your source directory using ``cd mantid`` if you used the default name during cloning from git.
+* Inside of your source directory run ``cmake --preset=osx``
 
-    * Alternatively if you don't want to have your build folder in your source then pass these arguments to cmake: ``cmake {SOURCE} -GNinja -DCMAKE_FIND_FRAMEWORK=LAST -DCMAKE_PREFIX_PATH=${CONDA_PREFIX} -DUSE_PYTHON_DYNAMIC_LIB=OFF -DQt5_DIR=${CONDA_PREFIX}/lib/cmake/qt5 -DHDF5_ROOT=${CONDA_PREFIX} -DOPENSSL_ROOT=${CONDA_PREFIX}``
+    * Alternatively if you don't want to have your build folder in your source then pass the ``-B`` argument, overriding the preset, to cmake: ``cmake {SOURCE} --preset=linux -B {BUILD_DIR}``
 
 How to build
 -------------

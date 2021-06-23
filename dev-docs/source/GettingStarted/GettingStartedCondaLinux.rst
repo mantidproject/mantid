@@ -31,8 +31,10 @@ Configure CMake and generate build files
 ----------------------------------------
 * Still using the terminal.
 * Run ``conda activate mantid`` to activate your conda environment.
-* Create your build directory with ``mkdir mantid-build`` and navigate to it with ``cd mantid-build``
-* Inside of your build directory run ``cmake {SOURCE} -GNinja`` add ``-DCMAKE_BUILD_TYPE=Debug`` if you want it to be built in debug.
+* Navigate back to your source directory using ``cd mantid`` if you used the default name during cloning from git.
+* Inside of your source directory run ``cmake --preset=linux``
+
+    * Alternatively if you don't want to have your build folder in your source then pass the ``-B`` argument, overriding the preset, to cmake: ``cmake {SOURCE} --preset=linux -B {BUILD_DIR}``
 
 How to build
 -------------
