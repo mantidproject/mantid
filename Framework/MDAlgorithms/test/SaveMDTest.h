@@ -44,10 +44,10 @@ public:
   void test_MakeFileBacked() { do_test_exec(23, "SaveMDTest.nxs", true); }
 
   // new 2
-  void test_MakeFileBacked_then_UpdateFileBackEnd() { do_test_exec(23, "SaveMDTest_updating.nxs", true, true); }
+  void Badtest_MakeFileBacked_then_UpdateFileBackEnd() { do_test_exec(23, "SaveMDTest_updating.nxs", true, true); }
 
   // new 3
-  void test_MakeFileBacked_then_save_under_other_file_name() {
+  void Ntest_MakeFileBacked_then_save_under_other_file_name() {
     do_test_exec(23, "SaveMDTest_other_file_name_test.nxs", true, false, true);
   }
 
