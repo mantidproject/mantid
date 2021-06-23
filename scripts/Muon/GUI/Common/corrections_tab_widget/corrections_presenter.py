@@ -90,6 +90,7 @@ class CorrectionsPresenter(QObject):
             self.view.set_dead_time_workspace_selector_visible(True)
             self.view.set_dead_time_other_file_visible(False)
         elif self.view.is_dead_time_from_other_file_selected():
+            self._handle_dead_time_from_none_selected()
             self.view.set_dead_time_workspace_selector_visible(False)
             self.view.set_dead_time_other_file_visible(True)
         else:
@@ -134,6 +135,7 @@ class CorrectionsPresenter(QObject):
         if filename != "":
             name = load_dead_time_from_filename(filename)
             if name != "":
+                self.view.populate_dead_time_workspace_selector(get_table_workspace_names_from_ADS())
                 self.view.switch_to_using_a_dead_time_table_workspace(name)
             else:
                 self.view.warning_popup("File does not appear to contain dead time data.")

@@ -79,13 +79,13 @@ class DeadTimeCorrectionsView(widget, ui_form):
         """Returns the currently selected dead time table workspace in the workspace selector."""
         return str(self.dead_time_workspace_selector.currentText())
 
-    def set_selected_dead_time_workspace(self, table_name):
+    def set_selected_dead_time_workspace(self, table_name: str) -> None:
         """Sets the currently selected dead time table workspace in the workspace selector."""
+        self.dead_time_workspace_selector.blockSignals(True)
         index = self.dead_time_workspace_selector.findText(table_name)
-        found = index != -1
-        if found:
-            self.dead_time_file_selector.setCurrentIndex(index)
-        return found
+        if index != -1:
+            self.dead_time_workspace_selector.setCurrentIndex(index)
+        self.dead_time_workspace_selector.blockSignals(False)
 
     def set_dead_time_average_and_range(self, limits: tuple, average: float) -> None:
         """Sets the average dead time and its range in the info label."""
@@ -97,9 +97,17 @@ class DeadTimeCorrectionsView(widget, ui_form):
 
     def populate_dead_time_workspace_selector(self, table_names: list) -> None:
         """Populates the dead time workspace selector with all the names of Table workspaces found in the ADS."""
+        old_name = self.dead_time_workspace_selector.currentText()
+
         self.dead_time_workspace_selector.blockSignals(True)
+
         self.dead_time_workspace_selector.clear()
         self.dead_time_workspace_selector.addItems(["None"] + table_names)
+
+        new_index = self.dead_time_workspace_selector.findText(old_name)
+        new_index = new_index if new_index != -1 else 0
+        self.dead_time_workspace_selector.setCurrentIndex(new_index)
+
         self.dead_time_workspace_selector.blockSignals(False)
 
     def show_file_browser_and_return_selection(self, extensions: list, search_directories: list,

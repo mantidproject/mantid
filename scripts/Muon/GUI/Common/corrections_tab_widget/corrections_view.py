@@ -96,12 +96,6 @@ class CorrectionsView(widget, ui_form):
         """Returns the currently selected dead time table workspace in the workspace selector."""
         return self.dead_time_corrections_view.selected_dead_time_workspace()
 
-    def set_selected_dead_time_workspace(self, table_name) -> str:
-        """Returns the currently selected dead time table workspace in the workspace selector."""
-        found = self.dead_time_corrections_view.set_selected_dead_time_workspace(table_name)
-        if not found:
-            self.warning_popup("Dead time table cannot be loaded.")
-
     def set_dead_time_average_and_range(self, limits: tuple, average: float) -> None:
         """Sets the average dead time and its range in the info label."""
         self.dead_time_corrections_view.set_dead_time_average_and_range(limits, average)
@@ -122,8 +116,8 @@ class CorrectionsView(widget, ui_form):
 
     def switch_to_using_a_dead_time_table_workspace(self, table_name: str) -> None:
         """Switch the view to the 'from table workspace' option and provide the table name."""
+        self.dead_time_corrections_view.set_selected_dead_time_workspace(table_name)
         self.set_dead_time_from_workspace_selected()
-        self.set_selected_dead_time_workspace(table_name)
 
     def warning_popup(self, message: str) -> None:
         """Displays a warning message."""
