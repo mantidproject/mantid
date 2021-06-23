@@ -33,6 +33,11 @@ class PreviewView:
     SVIEW = "slice_viewer"
 
     """
+    Type of the preview when the 2d plot is used to show the data.
+    """
+    PLOT2D = "plot_2d"
+
+    """
     Type the preview.
     """
     _type  = None
@@ -64,6 +69,9 @@ class PreviewView:
             self._widget = SliceViewer(ws=mtd[workspace_name])
             self._widget.view.show()
             self._widget.view.close_signal.connect(self.on_close)
+        if self._type == self.PLOT2D:
+            self._widget = pcolormesh([workspace_name])
+            self._widget.canvas.mpl_connect("close_event", self.on_close)
 
     def change_workspace(self, workspace_name):
         """
@@ -74,8 +82,10 @@ class PreviewView:
             self._widget.replace_workspace(workspace_name)
         if self._type == self.SVIEW:
             return
+        if self._type == self.PLOT2D:
+            pcolormesh([workspace_name], self._widget)
 
-    def on_close(self):
+    def on_close(self, event=None):
         """
         Triggered when the widget is closed.
         """
