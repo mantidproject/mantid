@@ -8,7 +8,7 @@ from collections import OrderedDict
 import unittest
 
 from unittest import mock
-from Muon.GUI.Common.contexts.fitting_context import FitParameters
+from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitParameters
 
 
 def create_test_fit_parameters(test_parameters, global_parameters=None):

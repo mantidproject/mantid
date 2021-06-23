@@ -43,7 +43,7 @@ class FrequencyDomainAnalysisContext(MuonContext):
             runs='All', group_and_pair=groups_and_pairs, rebin=not use_raw)
         return workspace_options
 
-    def get_names_of_workspaces_to_fit(self, runs='', group_and_pair='',
+    def get_workspace_names_for(self, runs='', group_and_pair='',
                                        phasequad=False, rebin=False):
 
         return self.get_names_of_frequency_domain_workspaces_to_fit(
@@ -51,10 +51,12 @@ class FrequencyDomainAnalysisContext(MuonContext):
 
     def get_names_of_frequency_domain_workspaces_to_fit(
             self, runs='', group_and_pair='', frequency_type="None"):
-        group, pair = self.get_group_and_pair(group_and_pair)
         run_list = self.get_runs(runs)
-        names = self._frequency_context.get_frequency_workspace_names(
-            run_list, group, pair, frequency_type)
+        names=[]
+        for group_pair in group_and_pair:
+            group, pair = self.get_group_and_pair(group_pair)
+            names += self._frequency_context.get_frequency_workspace_names(
+                run_list, group, pair, frequency_type)
         return names
 
     def get_names_of_time_domain_workspaces_to_fit(

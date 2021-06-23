@@ -7,10 +7,12 @@ Developer Accounts
 .. contents::
   :local:
 
-User Names
-----------
+Unique Profiles
+---------------
 
-Simple, easy to recognise user names are preferred. For example "Nick Draper", or if spaces are not allowed "NickDraper".
+Simple, easy to recognise user names are preferred. For example "Martyn Gigg", or if spaces are not allowed "MartynGigg".
+
+Also, add your own unique and fun profile image on Slack, Github, the Forum and everywhere to make you more recognisable. Many people choose a pet, cartoon or something they're obsessed with, such as tea!
 
 Account Creation
 ----------------
@@ -22,6 +24,7 @@ Account Creation
 	+ Set up Git on your workstation; see `this guide <https://help.github.com/articles/set-up-git/>`__.
 	+ The Git workflow is described on the :ref:`GitWorkflow` page.
 - If based at ISIS, please sign up for a `User Facilities account <https://users.facilities.rl.ac.uk/>`__ that among other things, grants access to IDAaaS.
+- Sign up for an account on the **Mantid Help Forum**; follow `this link <https://forum.mantidproject.org/>`__. We recommend using your Github account to sign up on the forum!
 
 Introducing Yourself
 --------------------

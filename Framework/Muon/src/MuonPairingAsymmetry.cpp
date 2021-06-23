@@ -348,7 +348,7 @@ MatrixWorkspace_sptr MuonPairingAsymmetry::pairAsymmetryCalc(const MatrixWorkspa
   const std::vector<int> fwdSpectra = {0};
   const std::vector<int> bwdSpectra = {1};
 
-  IAlgorithm_sptr alg = this->createChildAlgorithm("AsymmetryCalc");
+  auto alg = createChildAlgorithm("AsymmetryCalc");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setProperty("ForwardSpectra", fwdSpectra);
   alg->setProperty("BackwardSpectra", bwdSpectra);
@@ -372,7 +372,7 @@ void MuonPairingAsymmetry::setPairAsymmetrySampleLogs(const MatrixWorkspace_sptr
 MatrixWorkspace_sptr MuonPairingAsymmetry::appendSpectra(const MatrixWorkspace_sptr &inputWS1,
                                                          const MatrixWorkspace_sptr &inputWS2) {
 
-  IAlgorithm_sptr alg = this->createChildAlgorithm("AppendSpectra");
+  auto alg = createChildAlgorithm("AppendSpectra");
   alg->setProperty("InputWorkspace1", inputWS1);
   alg->setProperty("InputWorkspace2", inputWS2);
   alg->setProperty("ValidateInputs", true);

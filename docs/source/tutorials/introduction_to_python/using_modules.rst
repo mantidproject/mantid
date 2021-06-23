@@ -185,6 +185,8 @@ os.path
                                       # this machine where [MYUSERNAME] is
                                       # replaced with the login
 
+.. _NumPyIntroduction:
+
 Numpy Introduction
 ------------------
 

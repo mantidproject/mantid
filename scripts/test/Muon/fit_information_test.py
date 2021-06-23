@@ -10,7 +10,7 @@ from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from unittest import mock
 
-from Muon.GUI.Common.contexts.fitting_context import FitInformation
+from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 
 
 def create_test_workspace(ws_name=None,

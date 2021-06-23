@@ -15,7 +15,7 @@ from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetVie
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
     PlottingCanvasPresenterInterface
 from Muon.GUI.Common.plot_widget.plot_widget_presenter import PlotWidgetPresenterCommon
-from Muon.GUI.Common.contexts.fitting_context import FitInformation
+from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from mantid import AnalysisDataService
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateWorkspace
@@ -293,24 +293,24 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.external_plotting_view.show.assert_called_once()
 
     def test_match_raw_selection_True_True(self):
-        self.context.fitting_context.fit_raw = True
+        self.context.fitting_context.fit_to_raw = True
         ws_names = ['MUSR62260; Group; bottom; Asymmetry; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_names, True), ws_names)
 
     def test_match_raw_selection_True_False(self):
-        self.context.fitting_context.fit_raw = True
+        self.context.fitting_context.fit_to_raw = True
         ws_names = ['MUSR62260; Group; bottom; Asymmetry; MA']
         ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_names, False), ws_rebin_names)
 
     def test_match_raw_selection_False_True(self):
-        self.context.fitting_context.fit_raw = False
+        self.context.fitting_context.fit_to_raw = False
         ws_names = ['MUSR62260; Group; bottom; Asymmetry; MA']
         ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_rebin_names, True), ws_names)
 
     def test_match_raw_selection_False_False(self):
-        self.context.fitting_context.fit_raw = False
+        self.context.fitting_context.fit_to_raw = False
         ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_rebin_names, False), ws_rebin_names)
 
