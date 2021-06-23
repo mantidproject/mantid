@@ -153,6 +153,8 @@ def bank_overlay(
     # prep
     if generate_report:
         pp = PdfPages(os.path.join(saveto, figname))
+    else:
+        figname = os.path.join(saveto, "{}_" + figname)
     # compute the delta
     pltdata_delta = calc_overlay_delta(
         pltdata_eng=pltdata_eng,
@@ -211,6 +213,12 @@ def bank_overlay(
         ip2 = InsetPosition(ax_delta, [1.05, 0, 0.05, 1])
         cax_delta.set_axes_locator(ip2)
         fig.colorbar(view_delta, cax=cax_delta, ax=[ax_delta])
+
+        # save the image
+        if generate_report:
+            fig.savefig(pp, format="pdf")
+        else:
+            fig.savefig(figname.format(bn))
 
         # display
         if show_plots:
@@ -386,4 +394,4 @@ def SCDCalibratePanels2PanelDiagnosticsPlot(
 
 
 if __name__ == "__main__":
-    pass
+    logging.warning("This module cannot be run as a script.")
