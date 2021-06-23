@@ -480,8 +480,7 @@ public:
     // test the algorithm using the IkedaCarpenterPV peak function
     const double ref_difc = 2208.287616521762;
 
-    const std::vector<double> dValues{0.3117, 0.3257, 0.3499, 0.4205, 0.4645, 0.4768, 0.4996, 0.5150, 0.5441, 0.5642,
-                                      0.5947, 0.6307, .6866,  .7283,  .8185,  .8920,  1.0758, 1.2615, 2.0599};
+    const std::vector<double> dValues{0.3117, 0.4996, 0.7283, 1.2615, 2.0599};
 
     std::stringstream function;
     for (const auto &val : dValues) {
@@ -535,7 +534,7 @@ public:
     TS_ASSERT(calTable);
     Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
     std::vector<int> detIDs = col0->data();
-    TS_ASSERT_DELTA(calTable->cell<double>(0, 1), ref_difc, 1E-5);
+    TS_ASSERT_DELTA(calTable->cell<double>(0, 1), ref_difc, 1E-2);
   }
 };
 
