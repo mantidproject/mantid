@@ -40,11 +40,14 @@ public:
 
   void test_exec_noEvents() { do_test_exec(0, "SaveMDTest_noEvents.nxs"); }
 
-  void Ntest_MakeFileBacked() { do_test_exec(23, "SaveMDTest.nxs", true); }
+  // new 1
+  void test_MakeFileBacked() { do_test_exec(23, "SaveMDTest.nxs", true); }
 
-  void Ntest_MakeFileBacked_then_UpdateFileBackEnd() { do_test_exec(23, "SaveMDTest_updating.nxs", true, true); }
+  // new 2
+  void test_MakeFileBacked_then_UpdateFileBackEnd() { do_test_exec(23, "SaveMDTest_updating.nxs", true, true); }
 
-  void Ntest_MakeFileBacked_then_save_under_other_file_name() {
+  // new 3
+  void test_MakeFileBacked_then_save_under_other_file_name() {
     do_test_exec(23, "SaveMDTest_other_file_name_test.nxs", true, false, true);
   }
 
