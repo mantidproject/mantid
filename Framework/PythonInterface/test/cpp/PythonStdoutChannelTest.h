@@ -11,7 +11,6 @@
 
 // 3rd party
 #include "MantidKernel/Logger.h"
-#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include <Poco/AutoPtr.h>
 #include <Poco/Logger.h>
 #include <boost/filesystem.hpp>
@@ -20,7 +19,6 @@
 // standard
 #include <fstream>
 
-using Mantid::PythonInterface::GlobalInterpreterLock;
 using Poco::PythonStdoutChannel;
 
 class PythonStdoutChannelTest : public CxxTest::TestSuite {

@@ -4,14 +4,18 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+
+// local includes
 #include "MantidPythonInterface/core/PythonStdoutChannel.h"
+
+// 3rd-party includes
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/WrapPython.h"
-
-#include <iostream> // streamsize
-
 #include <boost/format.hpp>
 #include <boost/iostreams/categories.hpp> // sink_tag
 #include <boost/iostreams/stream.hpp>
+
+#include <iostream> // streamsize
 
 namespace { // anonymous namespace
 

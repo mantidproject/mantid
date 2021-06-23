@@ -19,7 +19,6 @@
 
 // local includes
 #include "MantidPythonInterface/core/DllConfig.h"
-#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/WrapPython.h"
 
 // 3rd-party includes
