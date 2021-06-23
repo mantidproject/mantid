@@ -32,7 +32,6 @@ class CodeEditorTabWidget(QTabWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
         self.setMovable(True)
-        self.setTabsClosable(True)
         self.setDocumentMode(True)
 
         self.last_tab_clicked = 0
