@@ -8,8 +8,11 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
+#include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidAlgorithms/SmoothNeighbours.h"
+#include "MantidKernel/ANN/ANN.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -455,8 +458,98 @@ public:
       TS_ASSERT_EQUALS(it->first, expectedSpecNums[i]);
       i++;
     }
+
+    std::vector<specnum_t> spectrumNumbers;
+    const auto nhist = workspace->getNumberHistograms();
+    spectrumNumbers.reserve(nhist);
+    for (size_t i = 0; i < nhist; ++i)
+      spectrumNumbers.emplace_back(workspace->getSpectrum(i).getSpectrumNo());
+
+    auto m_nearestNeighbours =
+        std::make_unique<WorkspaceNearestNeighbours>(8, workspace->spectrumInfo(), std::move(spectrumNumbers), true);
+    SpectraDistanceMap insideGrid2 = m_nearestNeighbours->neighbours(inSpec);
+    i = 0;
+    for (std::map<specnum_t, Kernel::V3D>::iterator it = insideGrid2.begin(); it != insideGrid2.end(); ++it) {
+      TS_ASSERT_EQUALS(it->first, expectedSpecNums[i]);
+      i++;
+    }
+
+    // check WorkspaceNearestNeighbours::build()
+    TS_ASSERT_EQUALS(m_nearestNeighbours->m_specToVertex.size(), 19456);
+    TS_ASSERT_EQUALS(m_nearestNeighbours->m_specToVertex[19403], 19397);
+    auto vertex = m_nearestNeighbours->m_specToVertex.find(19403);
+    std::pair<WorkspaceNearestNeighbours::Graph::adjacency_iterator,
+              WorkspaceNearestNeighbours::Graph::adjacency_iterator>
+        adjacent = boost::adjacent_vertices(vertex->second, m_nearestNeighbours->m_graph);
+    WorkspaceNearestNeighbours::Graph::adjacency_iterator adjIt;
+    std::vector<int> specNs;
+    for (adjIt = adjacent.first; adjIt != adjacent.second; adjIt++) {
+      WorkspaceNearestNeighbours::Vertex nearest = (*adjIt);
+      auto nrSpec = specnum_t(m_nearestNeighbours->m_vertexID[nearest]);
+      specNs.push_back(nrSpec);
+    }
+    TS_ASSERT_EQUALS(specNs[0], 19275);
+    TS_ASSERT_EQUALS(specNs[1], 19404);
+    TS_ASSERT_EQUALS(specNs[2], 19402);
+    TS_ASSERT_EQUALS(specNs[3], 19276);
+    TS_ASSERT_EQUALS(specNs[4], 19274);
+    TS_ASSERT_EQUALS(specNs[5], 19147);
+    TS_ASSERT_EQUALS(specNs[6], 19277);
+    TS_ASSERT_EQUALS(specNs[7], 19146);
+
+    const auto indices = m_nearestNeighbours->getSpectraDetectors();
+    TS_ASSERT_EQUALS(indices.size(), 19456);
+
+    Mantid::API::SpectrumInfo specInfo = workspace->spectrumInfo();
+    Mantid::Geometry::BoundingBox bbox;
+    // Base the scaling on the first detector, should be adequate but we can look
+    // at this
+    const auto &firstDet = specInfo.detector(indices.front());
+    firstDet.getBoundingBox(bbox);
+    auto m_scale = V3D(bbox.width());
+    TS_ASSERT_EQUALS(m_scale[0], 0.011467840514357563);
+    TS_ASSERT_EQUALS(m_scale[1], 0.0099093322347372226);
+    TS_ASSERT_EQUALS(m_scale[2], 0.011487383212974045);
+
+    ANNpointArray dataPoints = annAllocPts(nhist, 3);
+    std::vector<specnum_t> spectrumNumbers2;
+    spectrumNumbers2.reserve(nhist);
+    for (size_t i = 0; i < nhist; ++i)
+      spectrumNumbers2.emplace_back(workspace->getSpectrum(i).getSpectrumNo());
+    int pointNo = 0;
+    for (const auto i : indices) {
+      const specnum_t spectrum = spectrumNumbers2[i];
+      V3D pos = specInfo.position(i) / m_scale;
+      dataPoints[pointNo][0] = pos.X();
+      dataPoints[pointNo][1] = pos.Y();
+      dataPoints[pointNo][2] = pos.Z();
+      ++pointNo;
+    }
+    auto annTree = std::make_unique<ANNkd_tree>(dataPoints, nhist, 3);
+
+    // Run the nearest neighbour search on each detector, reusing the arrays
+    // Set size initially to avoid array index error when testing in debug mode
+    std::vector<ANNidx> nnIndexList(8);
+    std::vector<ANNdist> nnDistList(8);
+    ANNpoint scaledPos = dataPoints[19397];
+    annTree->annkSearch(scaledPos,          // Point to search nearest neighbours of
+                        8,                  // Number of neighbours to find (8)
+                        nnIndexList.data(), // Index list of results
+                        nnDistList.data(),  // List of distances to each of these
+                        0.0);               // Error bound (?) is this the radius to search in?
+
+    TS_ASSERT_EQUALS(nnIndexList[0], 19269);
+    TS_ASSERT_EQUALS(nnIndexList[1], 19398);
+    TS_ASSERT_EQUALS(nnIndexList[2], 19396);
+    TS_ASSERT_EQUALS(nnIndexList[3], 19270);
+    TS_ASSERT_EQUALS(nnIndexList[4], 19268);
+    TS_ASSERT_EQUALS(nnIndexList[5], 19141);
+    TS_ASSERT_EQUALS(nnIndexList[6], 19271);
+    TS_ASSERT_EQUALS(nnIndexList[7], 19140);
   }
-};
+}
+
+;
 
 class SmoothNeighboursTestPerformance : public CxxTest::TestSuite {
 public:
