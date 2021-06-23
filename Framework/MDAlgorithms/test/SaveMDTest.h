@@ -44,10 +44,10 @@ public:
   void test_MakeFileBacked() { do_test_exec(23, "SaveMDTest.nxs", true); }
 
   // new 2
-  void Badtest_MakeFileBacked_then_UpdateFileBackEnd() { do_test_exec(23, "SaveMDTest_updating.nxs", true, true); }
+  void test_MakeFileBacked_then_UpdateFileBackEnd() { do_test_exec(23, "SaveMDTest_updating.nxs", true, true); }
 
   // new 3
-  void Ntest_MakeFileBacked_then_save_under_other_file_name() {
+  void Badtest_MakeFileBacked_then_save_under_other_file_name() {
     do_test_exec(23, "SaveMDTest_other_file_name_test.nxs", true, false, true);
   }
 
@@ -192,7 +192,7 @@ public:
       Poco::File(originalFileName).remove();
   }
 
-  void Ntest_saveExpInfo() {
+  void test_saveExpInfo() {
     std::string filename("MultiExperSaveTest.nxs");
     // Make a 1D MDEventWorkspace
     MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
@@ -233,7 +233,7 @@ public:
       Poco::File(this_filename).remove();
   }
 
-  void Ntest_saveAffine() {
+  void test_saveAffine() {
     std::string filename("MDAffineSaveTest.nxs");
     // Make a 4D MDEventWorkspace
     MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
@@ -306,7 +306,7 @@ public:
     ws->refreshCache();
   }
 
-  void Ntest_exec_3D() {
+  void test_exec_3D() {
     SaveMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
