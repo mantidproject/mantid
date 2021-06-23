@@ -287,7 +287,7 @@ class SData(collections.abc.Sequence):
             kernel = fundamental_spectrum * abins.parameters.autoconvolution['scale'] / np.sum(fundamental_spectrum)
 
             for order_index in range(highest_existing_order, max_order):
-                spectrum = convolve(atom_data['s'][f'order_{order_index}'], kernel, mode='same')
+                spectrum = convolve(atom_data['s'][f'order_{order_index}'], kernel, mode='full')[:fundamental_spectrum.size]
                 self._data[atom_key]['s'][f'order_{order_index + 1}'] = spectrum
 
     def check_thresholds(self, return_cases: bool = False,
