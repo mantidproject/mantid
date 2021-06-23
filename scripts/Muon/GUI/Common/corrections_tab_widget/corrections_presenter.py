@@ -133,12 +133,10 @@ class CorrectionsPresenter(QObject):
         """User selects the option to Browse for a nexus file to load dead times from."""
         filename = self.view.show_file_browser_and_return_selection(["nxs"], [""], multiple_files=False)[0]
         if filename != "":
-            name = load_dead_time_from_filename(filename)
-            if name != "":
+            name = self._load_file_containing_dead_time(filename)
+            if name is not None:
                 self.view.populate_dead_time_workspace_selector(get_table_workspace_names_from_ADS())
                 self.view.switch_to_using_a_dead_time_table_workspace(name)
-            else:
-                self.view.warning_popup("File does not appear to contain dead time data.")
 
     def handle_corrections_complete(self) -> None:
         """When the corrections have been calculated, update the displayed dead time averages."""
@@ -165,6 +163,19 @@ class CorrectionsPresenter(QObject):
         """Sets the dead time source to be none and notifies the GUI to recalculate the corrections."""
         self.model.set_dead_time_source_to_none()
         self._notify_perform_dead_time_corrections()
+
+    def _load_file_containing_dead_time(self, filename: str) -> str:
+        """Attempts to load a Nexus cycle file containing a dead time table workspace."""
+        try:
+            name = load_dead_time_from_filename(filename)
+        except Exception:
+            self.view.warning_popup("The file provided has an unexpected format. A Nexus cycle file must be provided.")
+            return None
+
+        if name == "":
+            self.view.warning_popup("The file provided does not contain dead time data.")
+            return None
+        return name
 
     def _notify_perform_dead_time_corrections(self) -> None:
         """A notification event to trigger the calculation of the dead time corrections."""
