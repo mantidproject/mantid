@@ -415,10 +415,12 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
         g_log.notice("[MAC] " + std::to_string(ibox) + " ws1 |events| = " + std::to_string(events1.size()) +
                      ", ws2 |events| = " + std::to_string(events2.size()));
 
-        if (events1.size() == events2.size() && events1.size() > 2) {
+        if (events1.size() == events2.size() && events1.size() > 0) {
 
           std::vector<SimpleMDEvent> events_vec1;
           std::vector<SimpleMDEvent> events_vec2;
+
+          g_log.notice("[MAC] Trace " + std::to_sting(ibox) + " ... Flag1");
 
           // convert MDEvents vectors to SimpleMDEvent vectors for comparison
           for (size_t i = 0; i < events1.size(); i++) {
@@ -433,11 +435,13 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
             events_vec1.push_back(se1);
             events_vec2.push_back(se2);
           }
+          g_log.notice("[MAC] Trace " + std::to_sting(ibox) + " ... Flag2");
 
           // sort events for comparing
           std::sort(events_vec1.begin(), events_vec1.end());
           std::sort(events_vec2.begin(), events_vec2.end());
 
+          g_log.notice("[MAC] Trace " + std::to_sting(ibox) + " ... Flag3");
           // compare MEEvents
           bool same = true;
           size_t numdiff = 0;
@@ -476,7 +480,8 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
       mdbox1->releaseEvents();
       mdbox2->releaseEvents();
     } // if check events
-  }   // if-else for MDGridBox or MDBox
+    g_log.notice("[MAC] Trace " + std::to_sting(ibox) + " ... Flag6");
+  } // if-else for MDGridBox or MDBox
 }
 
 //----------------------------------------------------------------------------------------------
