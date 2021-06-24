@@ -290,50 +290,111 @@ void ALCInterface::importPeakData(const std::string &workspaceName) {
  * Handles when External Plot is pressed on the ALC interface
  */
 void ALCInterface::externalPlotRequested() {
-  MatrixWorkspace_sptr data;
   // Get current step to determine what data to externally plot
   switch (m_ui.stepView->currentIndex()) {
   case DataLoading:
-    data = m_dataLoading->exportWorkspace();
-    if (data)
-      externallyPlot(data, std::vector<std::string>{"ALC_External_Plot_Loaded_Data"}, std::vector<int>{0},
-                     std::vector<bool>{true});
+    externalPlotDataLoading();
     break;
   case BaselineModel:
-    data = m_baselineModellingModel->exportWorkspace();
-    if (data)
-      externallyPlot(data, std::vector<std::string>{2, "ALC_External_Plot_Baseline_Workspace"}, std::vector<int>{0, 1},
-                     std::vector<bool>{true, false});
+    externalPlotBaselineModel();
     break;
   case PeakFitting:
-    data = m_peakFittingModel->exportWorkspace();
-    if (data)
-      externallyPlot(data, std::vector<std::string>{2, "ALC_External_Plot_Peaks_Workspace"}, std::vector<int>{0, 1},
-                     std::vector<bool>{true, false});
+    externalPlotPeakFitting();
     break;
   }
 }
 
 /**
- * Plots in workbench the data given
- * Spec 0 = Data
- * Spec 1 = Calc
- * Spec 2 = Diff
+ * Plots in workbench the single workspace from the data given
  * @param data The workspace to add to the ADS before plotting
- * @param workspaceName List of names of workspaces to plot
+ * @param workspaceName The names of workspace to plot
+ * @param workspaceIndices String list of indices to plot (e.g.
+ * '0-2,5,7-10')
+ * @param errorBars Boolean to add/remove error bars to plot
+ * @param kwargs The kwargs used when plotting the workspace
+ */
+void ALCInterface::externallyPlotWorkspace(MatrixWorkspace_sptr &data, std::string const &workspaceName,
+                                           std::string const &workspaceIndices, bool errorBars,
+                                           boost::optional<QHash<QString, QVariant>> const &kwargs) {
+  AnalysisDataService::Instance().addOrReplace(workspaceName, data);
+  m_externalPlotter->plotSpectra(workspaceName, workspaceIndices, errorBars, kwargs);
+}
+
+/**
+ * Plots in workbench all the provided workspaces from the data given
+ * @param data The workspace to add to the ADS before plotting
+ * @param workspaceNames List of names of workspaces to plot
  * @param workspaceIndices List of indices to plot
  * @param errorBars List of booleans to add/remove error bars to each line individually
+ * @param kwargs The kwargs used when plotting each of the workspaces
  */
-void ALCInterface::externallyPlot(MatrixWorkspace_sptr &data, std::vector<std::string> const &workspaceNames,
-                                  std::vector<int> const &workspaceIndices, std::vector<bool> const &errorBars) {
-  // Create kwargs for styling each type of spectra
-  std::vector<boost::optional<QHash<QString, QVariant>>> spectraKwargs(
-      2, QHash<QString, QVariant>()); // Diff currently never plotted so no kwargs needed
-  spectraKwargs[0]->insert("marker", QString(".").toLatin1().constData());
-  spectraKwargs[0]->insert("linestyle", QString("None").toLatin1().constData());
-  spectraKwargs[1]->insert("marker", QString("None").toLatin1().constData());
+void ALCInterface::externallyPlotWorkspaces(MatrixWorkspace_sptr &data, std::vector<std::string> const &workspaceNames,
+                                            std::vector<int> const &workspaceIndices,
+                                            std::vector<bool> const &errorBars,
+                                            std::vector<boost::optional<QHash<QString, QVariant>>> const &kwargs) {
   AnalysisDataService::Instance().addOrReplace(workspaceNames[0], data);
-  m_externalPlotter->plotCorrespondingSpectra(workspaceNames, workspaceIndices, errorBars, spectraKwargs);
+  m_externalPlotter->plotCorrespondingSpectra(workspaceNames, workspaceIndices, errorBars, kwargs);
+}
+
+/**
+ * Handle Data Loading external plot requested. Will plot the loaded data if available
+ */
+void ALCInterface::externalPlotDataLoading() {
+  auto data = m_dataLoading->exportWorkspace();
+  if (data) {
+    QHash<QString, QVariant> kwargs;
+    kwargs.insert("marker", QString(".").toLatin1().constData());
+    kwargs.insert("linestyle", QString("None").toLatin1().constData());
+    externallyPlotWorkspace(data, "ALC_External_Plot_Loaded_Data", "0", true, kwargs);
+  } else
+    logger.warning("Load some data before externally plotting");
+}
+
+/**
+ * Handle Baseline Model external plot requested. Will plot the baseline model data if available otherwise will plot the
+ * loaded data if available
+ */
+void ALCInterface::externalPlotBaselineModel() {
+  auto data = m_baselineModellingModel->exportWorkspace();
+  if (data) {
+    std::vector<boost::optional<QHash<QString, QVariant>>> kwargs(2, QHash<QString, QVariant>());
+    kwargs[0]->insert("marker", QString(".").toLatin1().constData());
+    kwargs[0]->insert("linestyle", QString("None").toLatin1().constData());
+    kwargs[1]->insert("marker", QString("None").toLatin1().constData());
+    externallyPlotWorkspaces(data, std::vector<std::string>{2, "ALC_External_Plot_Baseline_Workspace"},
+                             std::vector<int>{0, 1}, std::vector<bool>{true, false}, kwargs);
+  } else {
+    // If we don't have a baseline model workspace, try to plot the raw data from the data loading tab
+    externalPlotDataLoading();
+  }
+}
+
+/**
+ * Handle Baseline Model external plot requested. Will plot the peak fitting data if available otherwise will plot the
+ * corrected data from the baseline model if available
+ */
+void ALCInterface::externalPlotPeakFitting() {
+  auto data = m_peakFittingModel->exportWorkspace();
+  if (data) {
+    std::vector<boost::optional<QHash<QString, QVariant>>> kwargs(2, QHash<QString, QVariant>());
+    kwargs[0]->insert("marker", QString(".").toLatin1().constData());
+    kwargs[0]->insert("linestyle", QString("None").toLatin1().constData());
+    kwargs[1]->insert("marker", QString("None").toLatin1().constData());
+    externallyPlotWorkspaces(data, std::vector<std::string>{2, "ALC_External_Plot_Peaks_Workspace"},
+                             std::vector<int>{0, 1}, std::vector<bool>{true, false}, kwargs);
+  } else {
+    // If we don't have a peaks fit workspace, try to plot the raw peak data from the baseline model workspace (diff
+    // spec (2))
+    data = m_baselineModellingModel->exportWorkspace();
+    if (data) {
+      // Plot the diff spec from the baseline model workspace
+      QHash<QString, QVariant> kwargs;
+      kwargs.insert("marker", QString(".").toLatin1().constData());
+      kwargs.insert("linestyle", QString("None").toLatin1().constData());
+      externallyPlotWorkspace(data, "ALC_External_Plot_Baseline_Workspace", "2", true, kwargs);
+    } else
+      logger.warning("Perform a baseline fit before externally plotting");
+  }
 }
 
 } // namespace CustomInterfaces
