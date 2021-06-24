@@ -12,7 +12,8 @@ from qtpy.QtWidgets import QApplication, QVBoxLayout
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting import functions
-from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names, plot_md_ws_from_names
+from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names, plot_md_ws_from_names, \
+                                        superplot_from_names
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import CreateDetectorTable
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
@@ -80,8 +81,7 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.plotContourClicked.connect(
             partial(self._do_plot_3D, plot_type='contour'))
         self.workspacewidget.sampleMaterialClicked.connect(self._do_sample_material)
-        self.workspacewidget.superplotClicked.connect(
-                partial(self._do_plot_spectrum, errors=False, overplot=False, superplot=True))
+        self.workspacewidget.superplotClicked.connect(self._do_superplot)
         self.workspacewidget.contextMenuAboutToShow.connect(
             self._on_context_menu)
 
@@ -110,8 +110,16 @@ class WorkspaceWidget(PluginWidget):
         ableToOverplot = can_overplot()
         self.workspacewidget.setOverplotDisabled(not ableToOverplot)
 
-    def _do_plot_spectrum(self, names, errors, overplot, advanced=False,
-                          superplot=False):
+    def _do_superplot(self, names):
+        """
+        Open an empty plot with the superplot started and the selected
+        workspaces selected.
+
+        :param names: A list of workspace names
+        """
+        superplot_from_names(names)
+
+    def _do_plot_spectrum(self, names, errors, overplot, advanced=False):
         """
         Plot spectra from the selected workspaces
 
@@ -123,8 +131,7 @@ class WorkspaceWidget(PluginWidget):
                          the spectra selector dialog.
         """
         try:
-            plot_from_names(names, errors, overplot, advanced=advanced,
-                            superplot=superplot)
+            plot_from_names(names, errors, overplot, advanced=advanced)
         except RuntimeError as re:
             logger.error(str(re))
 
