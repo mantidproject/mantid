@@ -1,25 +1,4 @@
-# The following line helps with future compatibility with Python 3
-# print must now be used as a function, e.g print('Hello','World')
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-# import mantid algorithms, numpy and matplotlib
-from mantid.simpleapi import *
-import matplotlib.pyplot as plt
-import numpy as np
-
-
-'''
-ws = CreateSampleWorkspace('Event', 'Powder Diffraction')
-AddSampleLog('ws', 'gd_prtn_chrg', '305.718178022222', 'Number')
-for i in range(0,500):
-    AddTimeSeriesLog('ws', 'proton_charge', '2010-01-01T00:00:00', '20346430.0')
-    AddTimeSeriesLog('ws', 'frequency', '2010-01-01T00:00:00', '60.0')
-'''
-
 import systemtesting
-import tempfile
-import shutil
-import os
-import numpy as np
 from mantid.simpleapi import PowderReduceP2D
 
 
@@ -54,8 +33,7 @@ class PowderReduceP2DTest(sytemtesting.MantidSystemTest):
     def runTest(self):
         powder_reduce_P2D = PowderReduceP2D(SampleData=self._sample, OutputFile=self._outputFile, DoIntensityCorrection = True,
                                             VanaData = self._vana, DoBackgroundCorrection = True, EmptyData = self._empty,
-                                            DoEdgebinning = False, dSpaceBinning = self._dSpaceBinning,
-                                            dPerpendicularBinning = self._dPerpendicularBinning, CalFile = self._calFile,
+                                            DoEdgebinning = False, CalFile = self._calFile,
                                             TwoThetaMin = self._twoThetaMin, TwoThetaMax = self._twoThetaMax,
                                             WavelengthCenter = self._wavelengthCenter, LambdaMin = self._lambdaMin,
                                             LambdaMax = self._lambdaMax, DMin = self._dMin, DMax = self._dMax, DpMin = self._dpMin,
