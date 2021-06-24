@@ -212,7 +212,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # shows/hides the separator positioned immediately after the action
         for i, toolbar_action in enumerate(self.actions()):
             if toolbar_action == action:
-                self.actions()[i + 1].setVisible(enabled)
+                separator = self.actions()[i + 1]
+                if separator and separator.isSeparator():
+                    separator.setVisible(enabled)
                 break
 
     def set_buttons_visiblity(self, fig):
