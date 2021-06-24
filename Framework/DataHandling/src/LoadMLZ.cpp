@@ -321,7 +321,7 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
 
   // set instrument parameter Efixed, catch error, but don't stop
   try {
-    IAlgorithm_sptr setPar = createChildAlgorithm("SetInstrumentParameter");
+    auto setPar = createChildAlgorithm("SetInstrumentParameter");
     setPar->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
     setPar->setProperty("ParameterName", "Efixed");
     setPar->setProperty("ParameterType", "Number");
@@ -389,7 +389,7 @@ void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
  * Run the Child Algorithm LoadInstrument.
  */
 void LoadMLZ::runLoadInstrument() {
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {

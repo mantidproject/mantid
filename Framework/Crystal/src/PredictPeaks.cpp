@@ -316,11 +316,21 @@ void PredictPeaks::exec() {
       goniometer.calcFromQSampleAndWavelength(q_sample, wavelength, flipX, innerGoniometer);
       std::vector<double> angles = goniometer.getEulerAngles("YZY");
       double angle = innerGoniometer ? angles[2] : angles[0];
+      DblMatrix orientedUB = goniometer.getR() * ub;
+
+      // NOTE: use standard formula
+      // qLab = goniometerMatirx * qSample
+      //      = goniometerMatirx * (2pi * UB * hkl * signConvention)
+      V3D q_lab = goniometer.getR() * q_sample;
+      // NOTE: use standard formula
+      //             4pi                  4pi |Q^lab_z|
+      // lambda = --------- sin(theta) = ----------------
+      //            Q^lab                    |Q^lab|^2
+      double lambda = (4.0 * M_PI * std::abs(q_lab.Z())) / q_lab.norm2();
+
       if (!std::isfinite(angle) || angle < angleMin || angle > angleMax)
         continue;
-      DblMatrix orientedUB = goniometer.getR() * ub;
-      V3D q_lab = orientedUB * possibleHKL;
-      double lambda = (2.0 * q_lab.Z()) / (q_lab.norm2());
+
       if (std::abs(wavelength - lambda) < 0.01) {
         g_log.information() << "Found goniometer rotation to be in YZY convention [" << angles[0] << ", " << angles[1]
                             << ". " << angles[2] << "] degrees for Q sample = " << q_sample << "\n";
@@ -569,9 +579,9 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl, const DblMatrix &ori
   if (hitDetector) {
     // peak hit a detector to add it to the list
     peak = std::make_unique<Peak>(m_inst, det.getID(), wl);
-    if (!peak->getDetector())
+    if (!peak->getDetector()) {
       return;
-
+    }
   } else if (useExtendedDetectorSpace) {
     // use extended detector space to try and guess peak position
     const auto returnedComponent = m_inst->getComponentByName("extended-detector-space");

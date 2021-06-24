@@ -15,7 +15,7 @@ set(TEST_FILES
     SpectrumDefinitionTest.h
     TofEventTest.h)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS

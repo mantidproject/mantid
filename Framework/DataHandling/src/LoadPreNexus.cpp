@@ -146,7 +146,7 @@ void LoadPreNexus::exec() {
     else
       temp_wsname = "__" + wsname + "_temp__";
 
-    IAlgorithm_sptr alg = this->createChildAlgorithm("LoadEventPreNexus", prog_start, prog_start + prog_delta);
+    auto alg = createChildAlgorithm("LoadEventPreNexus", prog_start, prog_start + prog_delta);
     alg->setProperty("EventFilename", dataDir + eventFilenames[i]);
     alg->setProperty("MappingFilename", mapfile);
     alg->setProperty("ChunkNumber", chunkNumber);
@@ -278,7 +278,7 @@ void LoadPreNexus::runLoadNexusLogs(const string &runinfo, const string &dataDir
   for (auto &possibility : possibilities) {
     if (Poco::File(possibility).exists()) {
       g_log.information() << "Loading logs from \"" << possibility << "\"\n";
-      IAlgorithm_sptr alg = this->createChildAlgorithm("LoadNexusLogs", prog_start, prog_stop);
+      auto alg = createChildAlgorithm("LoadNexusLogs", prog_start, prog_stop);
       alg->setProperty("Workspace", m_outputWorkspace);
       alg->setProperty("Filename", possibility);
       alg->setProperty("OverwriteLogs", false);
@@ -306,7 +306,7 @@ void LoadPreNexus::runLoadMonitors(const double prog_start, const double prog_st
   mon_wsname.append("_monitors");
 
   try {
-    IAlgorithm_sptr alg = this->createChildAlgorithm("LoadPreNexusMonitors", prog_start, prog_stop);
+    auto alg = createChildAlgorithm("LoadPreNexusMonitors", prog_start, prog_stop);
     alg->setPropertyValue("RunInfoFilename", this->getProperty(RUNINFO_PARAM));
     alg->setPropertyValue("OutputWorkspace", mon_wsname);
     alg->executeAsChildAlg();

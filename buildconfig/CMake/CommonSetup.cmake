@@ -69,7 +69,7 @@ find_package(
   Boost ${BOOST_VERSION_REQUIRED} REQUIRED
   COMPONENTS date_time regex serialization filesystem system
 )
-add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB)
+add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 # Need this defined globally for our log time values
 add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
 # Silence issues with deprecated allocator methods in boost regex

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+
 #include "../../../ISISReflectometry/Reduction/Group.h"
 #include "../../../ISISReflectometry/Reduction/ReductionWorkspaces.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"

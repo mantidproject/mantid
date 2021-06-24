@@ -435,7 +435,7 @@ void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes, const st
  */
 void LoadILLTOF2::runLoadInstrument() {
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   loadInst->setPropertyValue("InstrumentName", m_instrumentName);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);

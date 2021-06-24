@@ -162,8 +162,7 @@ void PeakIntensityVsRadius::exec() {
       InnerRadius = BackgroundInnerFactor * radius;
 
     // Run the integrate algo with this background
-    IAlgorithm_sptr alg =
-        this->createChildAlgorithm("IntegratePeaksMD", progStep * double(step), progStep *double(step + 1), false);
+    auto alg = createChildAlgorithm("IntegratePeaksMD", progStep * double(step), progStep *double(step + 1), false);
     alg->setProperty("InputWorkspace", inWS);
     alg->setProperty("PeaksWorkspace", peaksWS);
     alg->setProperty<std::vector<double>>("PeakRadius", {radius});

@@ -102,17 +102,44 @@ class WorkspaceNamingTest(unittest.TestCase):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function_name = "GausOsc"
         expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;GausOsc/'
-        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted Parameters;GausOsc'
+        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;GausOsc; Parameters'
 
         name, directory = create_parameter_table_name(input_workspace_name, trial_function_name)
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
 
+    def test_create_covariance_matrix_name(self):
+        input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
+        trial_function_name = "GausOsc"
+        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;GausOsc/'
+        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;GausOsc; Normalised Covariance Matrix'
+
+        name, directory = create_covariance_matrix_name(input_workspace_name, trial_function_name)
+
+        self.assertEqual(name, expected_workspace_name)
+        self.assertEqual(directory, expected_directory_name)
+
+    def test_create_model_fitting_parameter_combination_name(self):
+        results_table_name = "Result1"
+        x_parameter = "A0"
+        y_parameter = "A1"
+
+        name = create_model_fitting_parameter_combination_name(results_table_name, x_parameter, y_parameter)
+
+        self.assertEqual(name, "Result1; A0 vs A1")
+
+    def test_create_model_fitting_parameters_group_name(self):
+        results_table_name = "Result1"
+
+        name = create_model_fitting_parameters_group_name(results_table_name)
+
+        self.assertEqual(name, "Result1; Parameter Combinations")
+
     def test_create_multi_domain_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function_name = 'Polynomial'
-        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;Polynomial/'
+        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted;Polynomial/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted;Polynomial'
 
         name, directory = create_multi_domain_fitted_workspace_name(input_workspace_name, trial_function_name)

@@ -73,6 +73,7 @@ if(ENABLE_WORKBENCH)
       mantidqt/project/test/test_workspacesaver.py
       mantidqt/project/test/test_projectparser_mantidplot.py
       mantidqt/utils/test/test_async.py
+      mantidqt/utils/test/test_async_qt_adaptor.py
       mantidqt/utils/test/test_modal_tester.py
       mantidqt/utils/test/test_qt_utils.py
       mantidqt/utils/test/test_writetosignal.py
@@ -148,6 +149,9 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/superplot/test/test_superplot_presenter.py
         mantidqt/widgets/superplot/test/test_superplot_view.py
         mantidqt/widgets/test/test_jupyterconsole.py
+        mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_view.py
+        mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_presenter.py
+        mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_model.py
         mantidqt/widgets/workspacedisplay/test/test_data_copier.py
         mantidqt/widgets/workspacedisplay/test/test_workspacedisplay_view.py
         mantidqt/widgets/workspacedisplay/test/test_user_notifier.py

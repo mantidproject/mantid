@@ -36,7 +36,6 @@ set(
         IndirectDataAnalysisTab.cpp
         IndirectDataReduction.cpp
         IndirectDataReductionTab.cpp
-        IndirectDataTablePresenter.cpp
         IndirectDataValidationHelper.cpp
         IndirectDiffractionReduction.cpp
         IndirectDockWidgetArea.cpp
@@ -44,6 +43,7 @@ set(
         IndirectFitAnalysisTab.cpp
         IndirectFitData.cpp
         IndirectFitDataPresenter.cpp
+	IndirectFitDataTablePresenter.cpp
         IndirectFitDataView.cpp
         IndirectFitOutputOptionsModel.cpp
         IndirectFitOutputOptionsPresenter.cpp
@@ -134,12 +134,12 @@ set(
         IndirectDataAnalysisTab.h
         IndirectDataReduction.h
         IndirectDataReductionTab.h
-        IndirectDataTablePresenter.h
         IndirectDockWidgetArea.h
         IndirectDiffractionReduction.h
         IndirectEditResultsDialog.h
         IndirectFitAnalysisTab.h
         IndirectFitDataPresenter.h
+	IndirectFitDataTablePresenter.h
         IndirectFitDataView.h
         IndirectFitOutputOptionsPresenter.h
         IndirectFitOutputOptionsView.h
@@ -276,7 +276,7 @@ mtd_add_qt_library(
         PythonInterfaceCore
         ${POCO_LIBRARIES}
         ${Boost_LIBRARIES}
-        ${PYTHON_LIBRARIES}
+        Python::Python
         Qt5::Concurrent
         Qt5::Xml
         MTD_QT_LINK_LIBS
