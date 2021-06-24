@@ -10,10 +10,10 @@
 import unittest
 from unittest import mock
 
-from PyQt5 import sip  # not available in QtPy
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 from qtpy.QtWidgets import QApplication, QTabBar
+import sip
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
