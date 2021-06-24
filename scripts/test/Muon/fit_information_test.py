@@ -11,6 +11,7 @@ from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from unittest import mock
 
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
 def create_test_workspace(ws_name=None,
@@ -51,24 +52,25 @@ class FitInformationTest(unittest.TestCase):
         AnalysisDataService.Instance().clear()
 
     def test_equality_with_no_globals(self):
-        fit_info = FitInformation(mock.MagicMock(), 'MuonGuassOsc',
-                                  mock.MagicMock(), mock.MagicMock())
+        fit_info = FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock(), mock.MagicMock(),
+                                  mock.MagicMock())
         self.assertEqual(fit_info, fit_info)
 
     def test_equality_with_globals(self):
         fit_info = FitInformation(mock.MagicMock(), 'MuonGuassOsc',
-                                  mock.MagicMock(), mock.MagicMock(), ['A'])
+                                  mock.MagicMock(), mock.MagicMock(), mock.MagicMock(), ['A'])
         self.assertEqual(fit_info, fit_info)
 
     def test_inequality_with_globals(self):
         fit_info1 = FitInformation(mock.MagicMock(), 'MuonGuassOsc',
-                                   mock.MagicMock(), ['A'])
+                                   mock.MagicMock(), mock.MagicMock(), ['A'])
         fit_info2 = FitInformation(mock.MagicMock(), 'MuonGuassOsc',
-                                   mock.MagicMock(), ['B'])
+                                   mock.MagicMock(), mock.MagicMock(), ['B'])
         self.assertNotEqual(fit_info1, fit_info2)
 
     def test_empty_global_parameters_if_none_specified(self):
         fit_information_object = FitInformation(mock.MagicMock(),
+                                                mock.MagicMock(),
                                                 mock.MagicMock(),
                                                 mock.MagicMock(),
                                                 mock.MagicMock())
@@ -80,6 +82,7 @@ class FitInformationTest(unittest.TestCase):
         fit_information_object = FitInformation(mock.MagicMock(),
                                                 mock.MagicMock(),
                                                 mock.MagicMock(),
+                                                mock.MagicMock(),
                                                 mock.MagicMock(), ['A'])
 
         self.assertEqual(['A'],
@@ -87,15 +90,15 @@ class FitInformationTest(unittest.TestCase):
 
     def test_parameters_are_readonly(self):
         fit_info = FitInformation(mock.MagicMock(), mock.MagicMock(),
-                                  mock.MagicMock(), mock.MagicMock())
+                                  mock.MagicMock(), mock.MagicMock(), mock.MagicMock())
 
         self.assertRaises(AttributeError, setattr, fit_info, "parameters",
                           mock.MagicMock())
 
     def test_logs_from_workspace_without_logs_returns_emtpy_list(self):
         fake_ws = create_test_workspace()
-        fit = FitInformation(mock.MagicMock(), 'func1', fake_ws.name(),
-                             fake_ws.name())
+        fit = FitInformation(mock.MagicMock(), 'func1', [StaticWorkspaceWrapper(fake_ws.name(), fake_ws)],
+                             mock.MagicMock(), mock.MagicMock())
 
         allowed_logs = fit.log_names()
         self.assertEqual(0, len(allowed_logs))
@@ -104,8 +107,8 @@ class FitInformationTest(unittest.TestCase):
         time_series_logs = (('ts_1', (1., )), ('ts_2', (3., )))
         single_value_logs = (('sv_1', 'val1'), ('sv_2', 'val2'))
         fake_ws = create_test_workspace(time_series_logs=time_series_logs)
-        fit = FitInformation(mock.MagicMock(), 'func1', fake_ws.name(),
-                             fake_ws.name())
+        fit = FitInformation(mock.MagicMock(), 'func1', [StaticWorkspaceWrapper(fake_ws.name(), fake_ws)],
+                             mock.MagicMock(), mock.MagicMock())
 
         log_names = fit.log_names()
         for name, _ in time_series_logs:
@@ -124,7 +127,8 @@ class FitInformationTest(unittest.TestCase):
         fake2 = create_test_workspace(
             ws_name='fake2', time_series_logs=time_series_logs[2:])
         fit = FitInformation(mock.MagicMock(), 'func1',
-                             [fake1.name(), fake2.name()], [fake1.name(), fake2.name()])
+                             [StaticWorkspaceWrapper(fake1.name(), fake1),
+                              StaticWorkspaceWrapper(fake2.name(), fake2)], mock.MagicMock(), mock.MagicMock())
 
         log_names = fit.log_names()
         self.assertEqual(len(time_series_logs), len(log_names))
@@ -137,8 +141,8 @@ class FitInformationTest(unittest.TestCase):
                             ('ts_4', [3.]))
         fake1 = create_test_workspace(
             ws_name='fake1', time_series_logs=time_series_logs)
-        fit = FitInformation(mock.MagicMock(), 'func1', fake1.name(),
-                             fake1.name())
+        fit = FitInformation(mock.MagicMock(), 'func1', [StaticWorkspaceWrapper(fake1.name(), fake1)],
+                             mock.MagicMock(), mock.MagicMock())
 
         log_names = fit.log_names(lambda log: log.name == 'ts_1')
         self.assertEqual(1, len(log_names))
@@ -151,7 +155,8 @@ class FitInformationTest(unittest.TestCase):
         fake2 = create_test_workspace(
             ws_name='fake2', time_series_logs=time_series_logs)
         fit = FitInformation(mock.MagicMock(), 'func1',
-                             [fake1.name(), fake2.name()], [fake1.name(), fake2.name()])
+                             [StaticWorkspaceWrapper(fake1.name(), fake1),
+                              StaticWorkspaceWrapper(fake2.name(), fake2)], mock.MagicMock(), mock.MagicMock())
 
         self.assertTrue(fit.has_log('ts_1'))
 
@@ -161,7 +166,8 @@ class FitInformationTest(unittest.TestCase):
             ws_name='fake1', time_series_logs=time_series_logs)
         fake2 = create_test_workspace(ws_name='fake2')
         fit = FitInformation(mock.MagicMock(), 'func1',
-                             [fake1.name(), fake2.name()], [fake1.name(), fake2.name()])
+                             [StaticWorkspaceWrapper(fake1.name(), fake1),
+                              StaticWorkspaceWrapper(fake2.name(), fake2)], mock.MagicMock(), mock.MagicMock())
 
         self.assertFalse(
             fit.has_log('ts_1'),
@@ -171,8 +177,8 @@ class FitInformationTest(unittest.TestCase):
         single_value_logs = [('sv_1', '5')]
         fake1 = create_test_workspace(
             ws_name='fake1', string_value_logs=single_value_logs)
-        fit = FitInformation(mock.MagicMock(), 'func1', [fake1.name()],
-                             [fake1.name()])
+        fit = FitInformation(mock.MagicMock(), 'func1', [StaticWorkspaceWrapper(fake1.name(), fake1)],
+                             mock.MagicMock(), mock.MagicMock())
 
         self.assertEqual(
             float(single_value_logs[0][1]),
@@ -185,7 +191,8 @@ class FitInformationTest(unittest.TestCase):
              ("2000-05-01T12:00:10", 20.),
              ("2000-05-01T12:05:00", 30.)))]
         fake1 = create_test_workspace('fake1', time_series_logs)
-        fit = FitInformation(mock.MagicMock(), 'func1', [fake1.name()], [fake1.name()], )
+        fit = FitInformation(mock.MagicMock(), 'func1', [StaticWorkspaceWrapper(fake1.name(), fake1)],
+                             mock.MagicMock(), mock.MagicMock())
 
         time_average = (10 * 5 + 290 * 20) / 300.
         self.assertAlmostEqual(time_average, fit.log_value('ts_1'), places=6)
@@ -202,8 +209,9 @@ class FitInformationTest(unittest.TestCase):
              ("2000-05-01T12:01:45", 30.),
              ("2000-05-01T12:05:00", 40.)))]
         fake2 = create_test_workspace('fake2', time_series_logs2)
-        fit = FitInformation(mock.MagicMock(), 'func1',
-                             [fake1.name(), fake2.name()], [fake1.name(), fake2.name()])
+        fit = FitInformation(mock.MagicMock(), 'func1', [StaticWorkspaceWrapper(fake1.name(), fake1),
+                                                         StaticWorkspaceWrapper(fake2.name(), fake2)],
+                             mock.MagicMock(), mock.MagicMock())
 
         time_average1 = (10 * 5 + 290 * 20) / 300.
         time_average2 = (75 * 10 + 195 * 30) / 270.

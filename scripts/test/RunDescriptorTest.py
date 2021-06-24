@@ -755,6 +755,6 @@ class RunDescriptorTest(unittest.TestCase):
 
 
 if __name__ == "__main__" or __name__ == "mantidqt.widgets.codeeditor.execution":
-    tester=RunDescriptorTest('test_remove_background_matching_workspaces')
-    tester.run()
-    #unittest.main()
+    #tester=RunDescriptorTest('test_remove_background_matching_workspaces')
+    #tester.run()
+    unittest.main()

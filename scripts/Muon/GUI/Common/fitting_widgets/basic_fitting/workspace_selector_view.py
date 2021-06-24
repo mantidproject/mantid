@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.qt import load_ui
 
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget
 
 ui_form, base_widget = load_ui(__file__, "workspace_selector.ui")
@@ -29,6 +30,21 @@ class WorkspaceSelectorView(ui_form, base_widget):
         """Connect the slot for the display workspace combo box being changed."""
         self.dataset_name_combo_box.currentIndexChanged.connect(slot)
 
+    @property
+    def dataset_names(self) -> list:
+        """Returns a list of dataset names currently in the combobox."""
+        return [self.dataset_name_combo_box.itemText(i) for i in range(self.dataset_name_combo_box.count())]
+
+    def add_dataset_name(self, dataset_name: str) -> None:
+        """Adds a dataset to the combo box. Only emits currentIndexChanged if the new dataset is now selected."""
+        self.dataset_name_combo_box.blockSignals(True)
+        self.dataset_name_combo_box.addItem(dataset_name)
+        self.update_dataset_names_combo_box_tooltips()
+        self.dataset_name_combo_box.blockSignals(False)
+
+        if self.dataset_name_combo_box.currentText() == dataset_name:
+            self.dataset_name_combo_box.currentIndexChanged.emit(self.dataset_name_combo_box.currentIndex())
+
     def update_dataset_name_combo_box(self, dataset_names: list) -> None:
         """Update the data in the parameter display combo box."""
         old_name = self.dataset_name_combo_box.currentText()
@@ -50,7 +66,13 @@ class WorkspaceSelectorView(ui_form, base_widget):
         self.dataset_name_combo_box.blockSignals(True)
         self.dataset_name_combo_box.clear()
         self.dataset_name_combo_box.addItems(dataset_names)
+        self.update_dataset_names_combo_box_tooltips()
         self.dataset_name_combo_box.blockSignals(False)
+
+    def update_dataset_names_combo_box_tooltips(self) -> None:
+        """Update the tooltips for the dataset name combobox."""
+        for i, dataset_name in enumerate(self.dataset_names):
+            self.dataset_name_combo_box.setItemData(i, dataset_name, Qt.ToolTipRole)
 
     def increment_dataset_name_combo_box(self) -> None:
         """Increment the parameter display combo box."""

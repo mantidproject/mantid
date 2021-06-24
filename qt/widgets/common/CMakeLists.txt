@@ -1102,6 +1102,7 @@ mtd_add_qt_tests(
     DataObjects
     gmock
     Qt5::Test
+    Python::Python
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )

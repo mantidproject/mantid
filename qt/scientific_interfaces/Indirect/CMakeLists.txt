@@ -276,7 +276,7 @@ mtd_add_qt_library(
         PythonInterfaceCore
         ${POCO_LIBRARIES}
         ${Boost_LIBRARIES}
-        ${PYTHON_LIBRARIES}
+        Python::Python
         Qt5::Concurrent
         Qt5::Xml
         MTD_QT_LINK_LIBS

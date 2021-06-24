@@ -34,9 +34,20 @@ class FitControlsViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.plot_guess = True
         self.assertTrue(self.view.plot_guess)
 
-    def test_that_the_undo_fit_button_can_be_enabled_as_expected(self):
-        self.view.enable_undo_fit(True)
+    def test_that_the_undo_fit_button_can_be_enabled_when_you_set_more_than_zero_undos(self):
+        self.view.set_number_of_undos(2)
         self.assertTrue(self.view.undo_fit_button.isEnabled())
+
+    def test_that_the_undo_fit_button_can_be_enabled_when_you_set_one_undos(self):
+        self.view.set_number_of_undos(1)
+        self.assertTrue(self.view.undo_fit_button.isEnabled())
+
+    def test_that_the_undo_fit_button_can_be_disabled_when_you_set_zero_undos(self):
+        self.view.set_number_of_undos(2)
+        self.assertTrue(self.view.undo_fit_button.isEnabled())
+
+        self.view.set_number_of_undos(0)
+        self.assertTrue(not self.view.undo_fit_button.isEnabled())
 
     def test_that_update_global_fit_status_label_will_display_no_fit_if_the_success_list_is_empty(self):
         success_list = []

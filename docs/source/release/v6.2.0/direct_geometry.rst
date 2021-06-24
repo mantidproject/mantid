@@ -22,8 +22,13 @@ New Algorithms
 CrystalField
 ------------
 
+Improvements
+############
+- Added documentation and warning messages in the :ref:`Crystal Field Python Interface` related to IntensityScaling
+
 BugFixes
 ########
 - A bug has been fixed in the plot methods for CrystalField and CrystalFieldMultiSite
+- Fixed a bug in the :ref:`Crystal Field Python Interface` which prevented the application of IntensityScaling factors
 
 :ref:`Release 6.2.0 <v6.2.0>`
