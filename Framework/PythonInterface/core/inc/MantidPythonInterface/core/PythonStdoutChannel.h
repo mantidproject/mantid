@@ -24,10 +24,6 @@
 // 3rd-party includes
 #include "MantidKernel/StdoutChannel.h"
 #include <Poco/ConsoleChannel.h>
-//#include <pybind11/iostream.h>
-
-// standard includes
-#include <iostream>
 
 namespace Poco {
 
