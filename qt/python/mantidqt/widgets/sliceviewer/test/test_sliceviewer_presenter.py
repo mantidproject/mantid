@@ -29,6 +29,7 @@ from mantidqt.widgets.sliceviewer.view import SliceViewerView, SliceViewerDataVi
 
 def _create_presenter(model, view, mock_sliceinfo_cls, enable_nonortho_axes, supports_nonortho):
     model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDH)
+    model.is_ragged_matrix_plotted.return_value = False
     model.get_dim_limits.return_value = ((-1, 1), (-2, 2))
     data_view_mock = view.data_view
     data_view_mock.plot_MDH = mock.Mock()
@@ -69,6 +70,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view.dimensions = mock.Mock()
         data_view.norm_opts = mock.Mock()
         data_view.image_info_widget = mock.Mock()
+        data_view.canvas = mock.Mock()
         data_view.nonorthogonal_mode = False
         data_view.nonortho_transform = None
         data_view.get_axes_limits.return_value = None
@@ -205,6 +207,7 @@ class SliceViewerTest(unittest.TestCase):
     def test_non_orthogonal_axes_toggled_on(self, _):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDE)
         self.model.get_dim_limits.return_value = ((-1, 1), (-2, 2))
+        self.model.is_ragged_matrix_plotted.return_value = False
         data_view_mock = self.view.data_view
         data_view_mock.plot_MDH = mock.Mock()
 
@@ -247,8 +250,9 @@ class SliceViewerTest(unittest.TestCase):
             (mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION)))
 
     @patch("sip.isdeleted", return_value=False)
-    def test_request_to_show_all_data_sets_correct_limits_on_view(self, _):
+    def test_request_to_show_all_data_sets_correct_limits_on_view_MD(self, _):
         presenter = SliceViewer(None, model=self.model, view=self.view)
+        self.model.is_ragged_matrix_plotted.return_value = False
         self.model.get_dim_limits.return_value = ((-1, 1), (-2, 2))
 
         presenter.show_all_data_requested()
@@ -256,6 +260,19 @@ class SliceViewerTest(unittest.TestCase):
         data_view = self.view.data_view
         self.model.get_dim_limits.assert_called_once_with([None, None, 0.5],
                                                           data_view.dimensions.transpose)
+        data_view.get_full_extent.assert_not_called()
+        data_view.set_axes_limits.assert_called_once_with((-1, 1), (-2, 2))
+
+    @patch("sip.isdeleted", return_value=False)
+    def test_request_to_show_all_data_sets_correct_limits_on_view_ragged_matrix(self, _):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        self.model.is_ragged_matrix_plotted.return_value = True
+        self.view.data_view.get_full_extent.return_value = [-1, 1, -2, 2]
+
+        presenter.show_all_data_requested()
+
+        data_view = self.view.data_view
+        self.model.get_dim_limits.assert_not_called()
         data_view.set_axes_limits.assert_called_once_with((-1, 1), (-2, 2))
 
     @patch("sip.isdeleted", return_value=False)
@@ -483,6 +500,33 @@ class SliceViewerTest(unittest.TestCase):
 
         # Will raise exception if misbehaving.
         presenter.clear_observer()
+
+    @patch("sip.isdeleted", return_value=False)
+    @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
+    @mock.patch("mantidqt.widgets.sliceviewer.presenter.PeaksViewerCollectionPresenter",
+                spec=PeaksViewerCollectionPresenter)
+    def test_peak_add_delete_event(self, mock_peaks_presenter, mock_sliceinfo_cls, _):
+        mock_sliceinfo_cls().inverse_transform = mock.Mock(side_effect=lambda pos: pos[::-1])
+        mock_sliceinfo_cls().z_value = 3
+
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock_sliceinfo_cls,
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=True)
+        presenter._peaks_presenter = mock_peaks_presenter
+
+        event = mock.Mock()
+        event.inaxes = True
+        event.xdata = 1.0
+        event.ydata = 2.0
+
+        presenter.add_delete_peak(event)
+
+        mock_sliceinfo_cls.get_sliceinfo.assert_not_called()
+
+        mock_peaks_presenter.add_delete_peak.assert_called_once_with([3, 2, 1])
+        self.view.data_view.canvas.draw_idle.assert_called_once()
 
 
 if __name__ == '__main__':

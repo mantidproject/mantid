@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import FitPlotInformation
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import ExternalPlottingModel
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_view import ExternalPlottingView
 from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel
@@ -15,8 +15,11 @@ from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetVie
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
     PlottingCanvasPresenterInterface
 from Muon.GUI.Common.plot_widget.plot_widget_presenter import PlotWidgetPresenterCommon
-from Muon.GUI.Common.contexts.fitting_context import FitInformation
+from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
+
 from mantid import AnalysisDataService
+from mantid.api import WorkspaceFactory
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateWorkspace
 
@@ -248,9 +251,12 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.figure_presenter.create_single_plot.assert_called_once()
 
     def test_handle_plot_selected_fits_correctly_calls_plot(self):
+        workspace = WorkspaceFactory.create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+        table_workspace = WorkspaceFactory.createTable()
         fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
-                             ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
+                             [StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA', workspace)],
+                             StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA; Fitted', table_workspace),
+                             mock.Mock())
 
         self.model.get_fit_workspace_and_indices.return_value = [["MUSR62260; Group; bottom; Asymmetry; MA; Fitted"],
                                                                  [1]]
@@ -266,9 +272,12 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
                                                                       hold_on=False, autoscale=False)
 
     def test_handle_plot_selected_fits_correctly_calls_model(self):
+        workspace = WorkspaceFactory.create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+        table_workspace = WorkspaceFactory.createTable()
         fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
-                             ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
+                             [StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA', workspace)],
+                             StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA; Fitted', table_workspace),
+                             mock.Mock())
 
         self.model.get_fit_workspace_and_indices.return_value = [["MUSR62260; Group; bottom; Asymmetry; MA; Fitted"],
                                                                  [1]]
@@ -293,24 +302,24 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.external_plotting_view.show.assert_called_once()
 
     def test_match_raw_selection_True_True(self):
-        self.context.fitting_context.fit_raw = True
+        self.context.fitting_context.fit_to_raw = True
         ws_names = ['MUSR62260; Group; bottom; Asymmetry; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_names, True), ws_names)
 
     def test_match_raw_selection_True_False(self):
-        self.context.fitting_context.fit_raw = True
+        self.context.fitting_context.fit_to_raw = True
         ws_names = ['MUSR62260; Group; bottom; Asymmetry; MA']
         ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_names, False), ws_rebin_names)
 
     def test_match_raw_selection_False_True(self):
-        self.context.fitting_context.fit_raw = False
+        self.context.fitting_context.fit_to_raw = False
         ws_names = ['MUSR62260; Group; bottom; Asymmetry; MA']
         ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_rebin_names, True), ws_names)
 
     def test_match_raw_selection_False_False(self):
-        self.context.fitting_context.fit_raw = False
+        self.context.fitting_context.fit_to_raw = False
         ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_rebin_names, False), ws_rebin_names)
 
@@ -318,7 +327,7 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.presenter.plot_all_selected_data(False, False)
         self.view.setEnabled.assert_called_once_with(True)
 
-    def test_tab_disbaled_with_no_data_loaded(self):
+    def test_tab_disabled_with_no_data_loaded(self):
         self.model.get_workspace_list_and_indices_to_plot.return_value = [[], indices]
         self.presenter.plot_all_selected_data(False, False)
         self.view.setEnabled.assert_called_once_with(False)

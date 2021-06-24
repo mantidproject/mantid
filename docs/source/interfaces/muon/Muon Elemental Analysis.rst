@@ -9,7 +9,7 @@ Muon Elemental Analysis
 Interface overview
 ------------------
 The interface is used to compare data from the Muon detector with the emission spectra of given elements. The interface
-can be accessed from the main menu in MantidPlot and workbench: *Interfaces → Muon → Elemental Analysis*.
+can be accessed from the main menu in MantidWorkbench and workbench: *Interfaces → Muon → Elemental Analysis*.
 
 .. image:: ../../images/MuonElementalAnalysis.png
   :align: center

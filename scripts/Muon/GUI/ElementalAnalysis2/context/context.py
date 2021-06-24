@@ -11,6 +11,9 @@ from mantid.simpleapi import Rebin
 from Muon.GUI.Common import message_box
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, remove_ws_if_present
 
+REBINNED_FIXED_WS_SUFFIX = "_EA_Rebinned_Fixed"
+REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
+
 
 class ElementalAnalysisContext(object):
 
@@ -57,7 +60,7 @@ class ElementalAnalysisContext(object):
             workspace_name = workspace.name()
 
         self.data_context.remove_workspace_by_name(workspace_name)
-        self.group_context.remove_workspace_by_name(workspace_name)
+        self.group_context.remove_group(workspace_name)
         self.gui_context.remove_workspace_by_name(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
 
@@ -79,11 +82,11 @@ class ElementalAnalysisContext(object):
         message_box.warning(str(error), None)
 
     def _run_rebin(self, name, rebin_type, params):
-
+        rebined_run_name = None
         if rebin_type == "Fixed":
-            rebined_run_name = str(name) + "_EA_Rebinned_Fixed"
+            rebined_run_name = str(name) + REBINNED_FIXED_WS_SUFFIX
         if rebin_type == "Variable":
-            rebined_run_name = str(name) + "_EA_Rebinned_Variable"
+            rebined_run_name = str(name) + REBINNED_VARIABLE_WS_SUFFIX
 
         remove_ws_if_present(rebined_run_name)
 

@@ -76,6 +76,9 @@ public:
   std::tuple<std::string, std::vector<double>, std::vector<bool>, std::vector<std::string>, std::vector<std::string>>
   getEditLocalParameterResults() const override;
 
+  [[nodiscard]] std::tuple<std::string, std::string, std::string, std::string> fitOptions() const override;
+  [[nodiscard]] std::string filepath() const override;
+
   void resetSelection() override;
 
   bool applyFunctionChangesToAll() const override;
@@ -90,16 +93,21 @@ public:
 
   void displayWarning(std::string const &message) override;
 
+  void setSuccessText(std::string const &text) override;
+  void saveTextToClipboard(std::string const &text) const override;
+
 public:
   /// Testing accessors
   FitScriptGeneratorDataTable *tableWidget() const override { return m_dataTable.get(); }
-  QPushButton *removeButton() const override { return m_ui.pbRemove; }
-  QPushButton *addWorkspaceButton() const override { return m_ui.pbAddWorkspace; }
+  QPushButton *removeButton() const override { return m_ui.pbRemoveDomain; }
+  QPushButton *addWorkspaceButton() const override { return m_ui.pbAddDomain; }
   AddWorkspaceDialog *addWorkspaceDialog() const override { return m_dialog.get(); }
+  QPushButton *generateScriptToFileButton() const override { return m_ui.pbGenerateScriptToFile; }
+  QPushButton *generateScriptToClipboardButton() const override { return m_ui.pbGenerateScriptToClipboard; }
 
 private slots:
-  void onRemoveClicked();
-  void onAddWorkspaceClicked();
+  void onRemoveDomainClicked();
+  void onAddDomainClicked();
   void onCellChanged(int row, int column);
   void onItemSelected();
   void onFunctionRemoved(QString const &function);
@@ -116,6 +124,8 @@ private slots:
   void onFittingModeChanged(FittingMode fittingMode);
   void onEditLocalParameterClicked(QString const &parameter);
   void onEditLocalParameterFinished(int result);
+  void onGenerateScriptToFileClicked();
+  void onGenerateScriptToClipboardClicked();
 
 private:
   void connectUiSignals();

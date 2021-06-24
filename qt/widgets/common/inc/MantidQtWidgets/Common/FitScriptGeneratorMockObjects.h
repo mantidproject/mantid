@@ -95,6 +95,9 @@ public:
   MOCK_CONST_METHOD0(getEditLocalParameterResults, std::tuple<std::string, std::vector<double>, std::vector<bool>,
                                                               std::vector<std::string>, std::vector<std::string>>());
 
+  MOCK_CONST_METHOD0(fitOptions, std::tuple<std::string, std::string, std::string, std::string>());
+  MOCK_CONST_METHOD0(filepath, std::string());
+
   MOCK_METHOD0(resetSelection, void());
 
   MOCK_CONST_METHOD0(applyFunctionChangesToAll, bool());
@@ -113,6 +116,11 @@ public:
   MOCK_CONST_METHOD0(removeButton, QPushButton *());
   MOCK_CONST_METHOD0(addWorkspaceButton, QPushButton *());
   MOCK_CONST_METHOD0(addWorkspaceDialog, AddWorkspaceDialog *());
+  MOCK_CONST_METHOD0(generateScriptToFileButton, QPushButton *());
+  MOCK_CONST_METHOD0(generateScriptToClipboardButton, QPushButton *());
+
+  MOCK_METHOD1(setSuccessText, void(std::string const &text));
+  MOCK_CONST_METHOD1(saveTextToClipboard, void(std::string const &text));
 };
 
 class MockFitScriptGeneratorModel : public IFitScriptGeneratorModel {
@@ -208,6 +216,14 @@ public:
 
   MOCK_CONST_METHOD0(getGlobalTies, std::vector<GlobalTie>());
   MOCK_CONST_METHOD0(getGlobalParameters, std::vector<GlobalParameter>());
+
+  MOCK_CONST_METHOD0(isValid, std::tuple<bool, std::string>());
+
+  std::string generatePythonFitScript(
+      [[maybe_unused]] std::tuple<std::string, std::string, std::string, std::string> const &fitOptions,
+      [[maybe_unused]] std::string const &filepath = "") override {
+    return "# mock python script";
+  }
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

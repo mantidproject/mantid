@@ -35,7 +35,7 @@ class HomeRunInfoWidgetPresenter(HomeTabSubWidget):
         self._view.add_text_line("Average Temperature (K)   : "+str(self._model.get_average_temperature()))
         self._view.add_text_line(self.create_text_line("Sample Temperature (K)   ", "sample_temp"))
         self._view.add_text_line(self.create_text_line("Sample Magnetic Field (G)", "sample_magn_field"))
-        self._view.add_text_line("Number of Periods         : " + str(self._model.get_periods()))
+        self._view.add_text_line("Number of DAQ Periods     : " + str(self._model.get_periods()))
 
     def create_text_line(self, name, log_name):
         log = self._model.get_log_value(log_name)

@@ -770,7 +770,7 @@ class MantidAxesTest(unittest.TestCase):
         ws_artist = self.ax.tracked_workspaces["ws"][0]
         artist = ws_artist._artists[0]
         self.assertEqual(artist.get_label(), expected_name)
-        self.ax.rename_workspace_artists(new_name="new_name", old_name="ws")
+        self.ax.rename_workspace(new_name="new_name", old_name="ws")
         self.assertEqual(artist.get_label(), expected_new_name)
 
     def test_rename_workspace_relabels_curve_if_default_label_for_numeric_axis(self):
@@ -780,7 +780,7 @@ class MantidAxesTest(unittest.TestCase):
         ws_artist = self.ax.tracked_workspaces["ws2d_histo"][0]
         artist = ws_artist._artists[0]
         self.assertEqual(artist.get_label(), expected_name)
-        self.ax.rename_workspace_artists(new_name="new_name", old_name="ws2d_histo")
+        self.ax.rename_workspace(new_name="new_name", old_name="ws2d_histo")
         self.assertEqual(artist.get_label(), expected_new_name)
 
     def test_rename_workspace_does_not_relabel_curve_if_name_not_default(self):
@@ -790,8 +790,15 @@ class MantidAxesTest(unittest.TestCase):
         ws_artist = self.ax.tracked_workspaces["ws"][0]
         artist = ws_artist._artists[0]
         artist.set_label(new_label)
-        self.ax.rename_workspace_artists(new_name="new_name", old_name="ws")
+        self.ax.rename_workspace(new_name="new_name", old_name="ws")
         self.assertEqual(artist.get_label(), new_label)
+
+    def test_rename_workspace_updates_creation_args(self):
+        ws = CreateSampleWorkspace()
+        self.ax.plot(ws, specNum=2)
+        self.assertEqual("ws", self.ax.creation_args[0]["workspaces"])
+        self.ax.rename_workspace(new_name="new_name", old_name="ws")
+        self.assertEqual("new_name", self.ax.creation_args[0]["workspaces"])
 
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {

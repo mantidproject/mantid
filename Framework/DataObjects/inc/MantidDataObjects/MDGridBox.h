@@ -131,11 +131,11 @@ public:
   /*--------------->  EVENTS from event data
    * <-------------------------------------------------------------*/
   void buildAndAddEvent(const signal_t Signal, const signal_t errorSq, const std::vector<coord_t> &point,
-                        uint16_t runIndex, uint16_t goniometerIndex, uint32_t detectorId) override;
+                        uint16_t expInfoIndex, uint16_t goniometerIndex, uint32_t detectorId) override;
   void buildAndAddEventUnsafe(const signal_t Signal, const signal_t errorSq, const std::vector<coord_t> &point,
-                              uint16_t runIndex, uint16_t goniometerIndex, uint32_t detectorId) override;
+                              uint16_t expInfoIndex, uint16_t goniometerIndex, uint32_t detectorId) override;
   size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq, const std::vector<coord_t> &Coord,
-                           const std::vector<uint16_t> &runIndex, const std::vector<uint16_t> &goniometerIndex,
+                           const std::vector<uint16_t> &expInfoIndex, const std::vector<uint16_t> &goniometerIndex,
                            const std::vector<uint32_t> &detectorId) override;
   //----------------------------------------------------------------------------------------------------------------------
 
@@ -180,7 +180,7 @@ public:
   //-------------------------------------------------------------------------
   /** The function used to satisfy IMDNode interface but the physical meaning is
    * unclear */
-  void calculateCentroid(coord_t * /*centroid*/, const int /*runindex*/) const override {
+  void calculateCentroid(coord_t * /*centroid*/, const int /*expInfoIndex*/) const override {
     throw(std::runtime_error("This function should not be called on MDGridBox "
                              "(as its meaning for MDbox is dubious too)"));
   }

@@ -17,7 +17,7 @@ void export_MultipleExperimentInfos() {
       .def("getExperimentInfo",
            (ExperimentInfo_sptr(MultipleExperimentInfos::*)(const uint16_t)) &
                MultipleExperimentInfos::getExperimentInfo,
-           (arg("self"), arg("run_index")), "Return the experiment info at the given index.")
+           (arg("self"), arg("expInfoIndex")), "Return the experiment info at the given index.")
       .def("addExperimentInfo", &MultipleExperimentInfos::addExperimentInfo, (arg("self"), arg("ExperimentalInfo")),
            "Add a new :class:`~mantid.api.ExperimentInfo` to this "
            ":class:`~mantid.api.IMDWorkspace`")

@@ -7,10 +7,12 @@ Developer Accounts
 .. contents::
   :local:
 
-User Names
-----------
+Unique Profiles
+---------------
 
-Simple, easy to recognise user names are preferred. For example "Nick Draper", or if spaces are not allowed "NickDraper".
+Simple, easy to recognise user names are preferred. For example "Martyn Gigg", or if spaces are not allowed "MartynGigg".
+
+Also, add your own unique and fun profile image on Slack, Github, the Forum and everywhere to make you more recognisable. Many people choose a pet, cartoon or something they're obsessed with, such as tea!
 
 Account Creation
 ----------------
@@ -18,24 +20,12 @@ Account Creation
 - Sign up for the **Mantid Slack** channel; follow `this link <https://mantid.slack.com/>`__.
 - If you don't already have one, sign up for a **Github** account; follow `this link <https://github.com/>`__.
 	+ Remember that your username should be easily identifiable.
-	+ Contact one of the "Owners" on `this list <https://github.com/orgs/mantidproject/people?query=role%3Aowner>`__ to add you to the developer team.
+        + You must have `two-factor authentication <https://docs.github.com/en/github/authenticating-to-github/securing-your-account-with-two-factor-authentication-2fa>`__ enabled.
+        + Contact one of the "Owners" on `this list <https://github.com/orgs/mantidproject/people?query=role%3Aowner>`__ to add you to the developer team.
 	+ Set up Git on your workstation; see `this guide <https://help.github.com/articles/set-up-git/>`__.
 	+ The Git workflow is described on the :ref:`GitWorkflow` page.
 - If based at ISIS, please sign up for a `User Facilities account <https://users.facilities.rl.ac.uk/>`__ that among other things, grants access to IDAaaS.
-
-SNS Git
--------
-
-If you are based at SNS, in order to be able to ssh out of the lab, you need to do the following:
-
-- Install "Corkscrew" using your package manager.
-- Add the following lines to ~/.ssh/config:
-
-
-.. code:: bash
-
-    ProxyCommand corkscrew snowman.ornl.gov 3128 %h %p
-    Host github.com
+- Sign up for an account on the **Mantid Help Forum**; follow `this link <https://forum.mantidproject.org/>`__. We recommend using your Github account to sign up on the forum!
 
 Introducing Yourself
 --------------------

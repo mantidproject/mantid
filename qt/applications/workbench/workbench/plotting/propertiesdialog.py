@@ -152,7 +152,7 @@ class AxisEditor(PropertiesEditorBase):
         # Ensure that only floats can be entered
         self.ui.editor_min.setValidator(QDoubleValidator())
         self.ui.editor_max.setValidator(QDoubleValidator())
-        if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe]:
+        if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.ui.logBox.hide()
             self.ui.gridBox.hide()
         self.ui.editor_format.addItem('Decimal Format')

@@ -11,7 +11,7 @@ from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel as Plo
 
 
 class PlotWidget(object):
-    def __init__(self, context=None, get_selected_fit_workspaces=lambda: [], parent=None):
+    def __init__(self, context=None, get_active_fit_results=lambda: [], parent=None):
         # The plotting canvas widget
         self.plotting_canvas_widget = PlottingCanvasWidget(parent, context=context)
         # The UI view
@@ -23,7 +23,7 @@ class PlotWidget(object):
                                                    self.model,
                                                    context,
                                                    self.plotting_canvas_widget.presenter,
-                                                   get_selected_fit_workspaces)
+                                                   get_active_fit_results)
 
         context.update_plots_notifier.add_subscriber(self.presenter.workspace_replaced_in_ads_observer)
         context.deleted_plots_notifier.add_subscriber(self.presenter.workspace_deleted_from_ads_observer)

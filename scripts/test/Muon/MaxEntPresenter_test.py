@@ -9,8 +9,8 @@ import unittest
 from unittest import mock
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter_new
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view_new
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
 
 
@@ -24,7 +24,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.model = mock.create_autospec(maxent_model.MaxEntWrapper, spec_set=True)
 
         # View
-        self.view = mock.create_autospec(maxent_view_new.MaxEntView, spec_set=True)
+        self.view = mock.create_autospec(maxent_view.MaxEntView, spec_set=True)
         # signals
         # needed for connect in presenter
         self.view.maxEntButtonSignal = mock.Mock()
@@ -43,7 +43,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.view.fit_dead_times = False
 
         # Presenter
-        self.presenter = maxent_presenter_new.MaxEntPresenter(self.view, self.context)
+        self.presenter = maxent_presenter.MaxEntPresenter(self.view, self.context)
 
         # make thread
         self.thread = mock.create_autospec(thread_model.ThreadModel)

@@ -83,7 +83,7 @@ public:
 
   virtual signal_t getNumEventsFraction() const;
 
-  uint16_t getInnerRunIndex(size_t index) const override;
+  uint16_t getInnerExpInfoIndex(size_t index) const override;
 
   uint16_t getInnerGoniometerIndex(size_t index) const override;
 

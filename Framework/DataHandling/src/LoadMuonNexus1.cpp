@@ -231,6 +231,13 @@ void LoadMuonNexus1::exec() {
     }
     addPeriodLog(localWorkspace, period);
     addGoodFrames(localWorkspace, period, nxload.t_nper);
+    addToSampleLog("period_sequences", nxload.m_numPeriodSequences, localWorkspace);
+    addToSampleLog("period_labels", nxload.m_periodNames, localWorkspace);
+    addToSampleLog("period_type", nxload.m_periodTypes, localWorkspace);
+    addToSampleLog("frames_period_requested", nxload.m_framesPeriodsRequested, localWorkspace);
+    addToSampleLog("frames_period_raw", nxload.m_framesPeriodsRaw, localWorkspace);
+    addToSampleLog("period_output", nxload.m_periodsOutput, localWorkspace);
+    addToSampleLog("total_counts_period", nxload.m_periodsCounts, localWorkspace);
 
     size_t counter = 0;
     for (auto i = m_spec_min; i < m_spec_max; ++i) {
@@ -628,18 +635,16 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo, MuonN
   // For Nexus, not sure if above is the case, hence give all data for now
 
   // Create and fill another vector for the X axis
-  auto timeChannels = new float[lengthIn + 1]();
-  nxload.getTimeChannels(timeChannels, static_cast<int>(lengthIn + 1));
+  std::vector<float> timeChannels(lengthIn + 1);
+  nxload.getTimeChannels(timeChannels.data(), static_cast<int>(lengthIn + 1));
   // Put the read in array into a vector (inside a shared pointer)
-
-  localWorkspace->setHistogram(hist, BinEdges(timeChannels, timeChannels + lengthIn + 1),
-                               Counts(nxload.counts + i * lengthIn, nxload.counts + i * lengthIn + lengthIn));
+  localWorkspace->setHistogram(
+      hist, BinEdges(timeChannels.data(), timeChannels.data() + lengthIn + 1),
+      Counts(nxload.m_counts.begin() + i * lengthIn, nxload.m_counts.begin() + i * lengthIn + lengthIn));
 
   localWorkspace->getSpectrum(hist).setSpectrumNo(specNo);
   // Muon v1 files: always a one-to-one mapping between spectra and detectors
   localWorkspace->getSpectrum(hist).setDetectorID(static_cast<detid_t>(specNo));
-  // Clean up
-  delete[] timeChannels;
 }
 
 /**  Log the run details from the file
@@ -693,7 +698,7 @@ void LoadMuonNexus1::loadRunDetails(const DataObjects::Workspace2D_sptr &localWo
 
 /// Run the LoadLog Child Algorithm
 void LoadMuonNexus1::runLoadLog(const DataObjects::Workspace2D_sptr &localWorkspace) {
-  IAlgorithm_sptr loadLog = createChildAlgorithm("LoadMuonLog");
+  auto loadLog = createChildAlgorithm("LoadMuonLog");
   // Pass through the same input filename
   loadLog->setPropertyValue("Filename", m_filename);
   // Set the workspace property to be the same one filled above

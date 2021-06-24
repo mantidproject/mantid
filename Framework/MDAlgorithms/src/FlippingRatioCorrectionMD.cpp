@@ -118,7 +118,7 @@ void FlippingRatioCorrectionMD::exec() {
   }
   // Create workspaces by cloning
   API::IMDWorkspace_sptr outputWS1, outputWS2;
-  API::IAlgorithm_sptr cloneMD = createChildAlgorithm("CloneMDWorkspace", 0, 0.25, true);
+  auto cloneMD = createChildAlgorithm("CloneMDWorkspace", 0, 0.25, true);
   cloneMD->setRethrows(true);
   cloneMD->setProperty("InputWorkspace", inWS);
   cloneMD->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace1"));
@@ -169,7 +169,7 @@ void FlippingRatioCorrectionMD::executeTemplatedMDE(typename Mantid::DataObjects
       auto &events = box->getEvents();
       const bool hasEvents = !events.empty();
       for (auto &event : events) {
-        const auto ind = static_cast<size_t>(event.getRunIndex());
+        const auto ind = static_cast<size_t>(event.getExpInfoIndex());
         const auto scalar = static_cast<float>(m_factor[ind]);
         const auto scalarSquared = static_cast<float>(m_factor[ind] * m_factor[ind]);
         // Multiply weight by a scalar, propagating error

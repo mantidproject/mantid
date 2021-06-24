@@ -13,6 +13,7 @@
 * :ref:`Basic_1D_Plots`
 * :ref:`Waterfall_Plots`
 * :ref:`Colorfill_Plots`
+* :ref:`Mesh_Plots`
 
 
 **General Plot Help**

@@ -87,7 +87,7 @@ template <size_t nd, size_t ond> inline void copyEvent(const MDLeanEvent<nd> &sr
  */
 template <size_t nd, size_t ond> inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent) {
   newEvent.setDetectorId(srcEvent.getDetectorID());
-  newEvent.setRunIndex(srcEvent.getRunIndex());
+  newEvent.setExpInfoIndex(srcEvent.getExpInfoIndex());
 }
 
 //----------------------------------------------------------------------------------------------
@@ -143,7 +143,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     // First save to the NXS file
     g_log.notice() << "Running SaveMD to create file back-end\n";
-    IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
+    auto alg = createChildAlgorithm("SaveMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("InputWorkspace", outWS);
     alg->setProperty("MakeFileBacked", true);
@@ -252,7 +252,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (outWS->isFileBacked()) {
     // Update the file-back-end
     g_log.notice() << "Running SaveMD\n";
-    IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
+    auto alg = createChildAlgorithm("SaveMD");
     alg->setProperty("UpdateFileBackEnd", true);
     alg->setProperty("InputWorkspace", outWS);
     alg->executeAsChildAlg();

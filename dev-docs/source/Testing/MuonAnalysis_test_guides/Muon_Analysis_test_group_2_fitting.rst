@@ -22,7 +22,7 @@ The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
 
 -----------
 
-.. _test_1:
+.. _test_1_muon_fit:
 
 Test 1: Individual Fit
 ----------------------
@@ -54,7 +54,7 @@ Test 1: Individual Fit
 
 -----------
 
-.. _test_2:
+.. _test_2_muon_fit:
 
 Test 2: Sequential Fit
 ----------------------
@@ -67,26 +67,29 @@ Test 2: Sequential Fit
 	- Right click the empty table area; Select **Add Function**
 	- Add a **Flat Background** (*Background* > *Flat Background*)
 	- Similarly, add **Abragam** (*Muon* > *MuonSpecific* > *Abragam*)
-	- Set ``Omega = 8.5`` and ``Tau = 0.4``
 	- Set ``Time Start = 0.113`` and ``Time End = 15``
 - Go to the **Sequential Fitting** tab
 	- Click **Sequentially fit all**, all fits should succeed
 	- Select each row in the table and see that the plot updates corrctly
-	- Select the first row, and change ``Omega = 9.0`` and ``Tau = 0.2`` in the
-	  table
+	- Select the first row, and change ``A = -0.2`` and ``Phi = 1.5`` in the
+	  table (this just rotates the phase)
 	- Then click **Fit selected**. This should update the fit for run ``20918``
 	  but the other fits should remain the same
+	- Then set the radio button to **Inital parameters for each fit** and click  **Sequentially fit all**
+	- Only the first row should have negative values for ``A``
+	- Then set the radio button to **Parameters from previous fit** and click  **Sequentially fit all**
+	- All rows should now have negative values for ``A``
 
 -----------
 
-.. _test_3:
+.. _test_3_muon_fit:
 
 Test 3: Co-added Fit
 --------------------
 
 **Time required 5 minutes**
 
-- Following :ref:`test_2`, in the *Loading* section, check **Co-Add** to load
+- Following :ref:`test_2_muon_fit`, in the *Loading* section, check **Co-Add** to load
   ``20918-20`` as one run
 - Go to **Fitting** tab
 	- In the **Select Workspace** drop-down, there should only be one workspace
@@ -106,7 +109,7 @@ Test 4: Simultaneous Fit Across Runs
 
 **Time required 5 minutes**
 
-- Following :ref:`test_3`, uncheck **Co-Add**
+- Following :ref:`test_3_muon_fit`, uncheck **Co-Add**
 - Go to the **Fitting** tab
 	- Check the **Simultaneous fit over** checkbox, and change from **Run**
 	  to **Group/Pair**
@@ -154,8 +157,7 @@ Test 6: Sequential Fit of Simultaneous Fits
 - Load runs ``20918-20`` again
 - Keep the same set up as :ref:`test_5` in the **Grouping** and **Fitting**
   tab
-- With **Simultaneous fit over** still checked, go to the
-  **Sequential Fitting** tab
+- With **Simultaneous fit over** still checked, go to the **Sequential Fitting** tab
 	- Click **Sequentially fit all**
 	- This should fit the **fwd** and **bwd** groups simultaneously for each
 	  run in sequence; ``20918``, ``20919``, ``20920``
@@ -175,8 +177,10 @@ that has multiple periods.
 - Go back to the **Home** tab and set *Instrument* to **MUSR**
 - Load run ``15189``
 - Go to the **Grouping** tab
-	- There should now be four groups, two **fwd** and two **bwd**, and two
-	  pairs
+	- There should now be four groups, two **fwd** and two **bwd**, two
+	  pairs and one difference
+	- Pressing the **Periods** button will create a new window with some details on each period (e.g. name, type, frames and counts).
+	  There will be two rows
 - Go to the **Fitting** tab
 	- Remove any existing functions (Right click *Composite function* > *Remove function*)
 	- Make sure **Simultaneous fit over** is checked and is over **Run**
@@ -200,27 +204,27 @@ Test 8: TF Asymmetry Fit
 - Now load run ``62260``
 - There should be a warning to say **MainFieldDirection** has changed
 - Go to the **Grouping** tab
+	- Some of the groups and pairs should be highlighted in red (anything with a number 2 in the name)
 	- Click the **Default** button to reset the grouping and pairing tables
 	- Check **Analyse (plot/fit)** for the **fwd** group only
 - Go to the **Fitting** tab
 	- Clear the fitting function as before, and uncheck
 	  **Simultaneous fit over**
-	- Add **GausOsc** (*Muon* > *MuonGeneric* > *GausOsc*)
-	- Set ``Frequency = 1.3``
-	- In the bottom table, enable **TF Asymmetry Mode**
+	- Add **GausOsc** (*Muon* > *MuonGeneric* > *GausOsc*) and a **FlatBackground** (*Background* > *Flat Background*)
+	- Set ``Frequency = 1.0``
 	- Click **Fit**
-	- Look at the fitting parameters and see **Flat Background** is non-zero.
-	- Instead disable **TF Asymmetry Mode**
-	- Clear the remaining fitting functions
-	- Add **GausOsc** (*Muon* > *MuonGeneric* > *GausOsc*) and set
-	  ``Frequency = 1.3`` as before
+	- Look at the fitting parameters and see **Flat Background** is non-zero
+	- Remove the **FlatBackground**
+	- Change the fitting type to **TF Asymmetry** (at the top of the tab)
+	- Click **Fit**
+	- Change the fitting type to **Normal** (at the top of the tab)
 	- Now add **Flat Background** (*Background* > *Flat Background*)
 	- Click **Fit**
 	- Now check the parameters for flat background, they should be closer to 0
 
 ------------
 
-.. _test_9::
+.. _test_9:
 
 Test 9: Simultaneous TF Asymmetry Fits
 --------------------------------------
@@ -236,10 +240,9 @@ Test 9: Simultaneous TF Asymmetry Fits
 	- Add **GausOsc** (*Muon* > *MuonGeneric* > *GausOsc*) and set
 	  ``Frequency = 1.3``
 	- Tick the **Global** checkbox for **Frequency** and **Sigma**
-	- Enable **TF Asymmetry Mode**
+	- Set the fitting mode to **TF Asymmetry**
 	- Click **Fit**
-	- Check that all values for the flat background are different to each other
-- Before moving to the final test, disable **TF Asymmetry Mode**
+	- Check that all values for the **norm** (just below the data selector) are different to each other
 
 -------------------------------------
 
@@ -248,14 +251,18 @@ Test 10: Sequential TF Asymmetry Fits
 
 **Time required 10 minutes**
 
-- Load runs ``62260-2`` (still using *Instrument* **MUSR**)
+- Load runs ``62262-4`` (still using *Instrument* **MUSR**)
 - In the **Fitting** tab
-	- Uncheck **Simultaneous fit over**
+    - Clear the fitting functions
 	- Add **GausOsc** (*Muon* > *MuonGeneric* > *GausOsc*) and set
 	  ``Frequency = 1.3``
-	- Enable **TF Asymmetry Mode**
 - Go to the **Sequential Fitting** tab
+	- There should be 3 rows and you should have 4 **N0** values on each row (the normalizations)
 	- Click **Sequentially fit all**
 	- In the **Plotting Window**, check **Tile plot by** and change to **Run**
 	  from **Group/Pair**
 	- You should be able to select each row in the table to see each individual fit
+	- Go to the fitting tab and set the fitting mode to **Normal**
+	- Add a **Flat Background** (*Background* > *Flat Background*)
+	- Go to the sequential fitting tab and press **Sequentially fit all**
+	- The background values should all be zero (small)

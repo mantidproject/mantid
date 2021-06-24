@@ -63,6 +63,16 @@ If "NumScanPoints" > 1 then a scanning workspace is created, that is one with ti
 indexed positions and rotations. The scan is set up such that for each scan point
 all the detectors are rotated by 1 degree around the sample.
 
+The following algorithm properties belong to a property group called "Instrument",
+and appear in the following order:
+NumMonitors
+BankDistanceFromSample
+SourceDistanceFromSample
+NumBanks
+BankPixelWidth
+PixelWidth
+PixelSpacing
+
 Usage
 -----
 

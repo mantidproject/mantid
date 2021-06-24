@@ -200,7 +200,7 @@ set(TEST_FILES
     PredictFractionalPeaksTest.h
     PredictPeaksTest.h
     PredictSatellitePeaksTest.h
-    # SCDCalibratePanels2Test.h
+    SCDCalibratePanels2Test.h
     SCDCalibratePanelsTest.h
     SaveHKLTest.h
     SaveIsawPeaksTest.h
@@ -224,7 +224,7 @@ if(UNITY_BUILD)
   enable_unity_build(Crystal SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS

@@ -156,14 +156,14 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
  *
  * @param srcEvent :: the source event, being copied
  * @param newEvent :: the destination event
- * @param runIndexOffset :: offset to be added to the runIndex
+ * @param expInfoIndexOffset :: offset to be added to the expInfoIndex
  */
 template <size_t nd, size_t ond>
-inline void copyEvent(const MDLeanEvent<nd> &srcEvent, MDLeanEvent<ond> &newEvent, const uint16_t runIndexOffset) {
+inline void copyEvent(const MDLeanEvent<nd> &srcEvent, MDLeanEvent<ond> &newEvent, const uint16_t expInfoIndexOffset) {
   // Nothing extra copy - this is no-op
   UNUSED_ARG(srcEvent);
   UNUSED_ARG(newEvent);
-  UNUSED_ARG(runIndexOffset);
+  UNUSED_ARG(expInfoIndexOffset);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -172,12 +172,12 @@ inline void copyEvent(const MDLeanEvent<nd> &srcEvent, MDLeanEvent<ond> &newEven
  *
  * @param srcEvent :: the source event, being copied
  * @param newEvent :: the destination event
- * @param runIndexOffset :: offset to be added to the runIndex
+ * @param expInfoIndexOffset :: offset to be added to the expInfoIndex
  */
 template <size_t nd, size_t ond>
-inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent, const uint16_t runIndexOffset) {
+inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent, const uint16_t expInfoIndexOffset) {
   newEvent.setDetectorId(srcEvent.getDetectorID());
-  newEvent.setRunIndex(static_cast<uint16_t>(srcEvent.getRunIndex() + runIndexOffset));
+  newEvent.setExpInfoIndex(static_cast<uint16_t>(srcEvent.getExpInfoIndex() + expInfoIndexOffset));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -195,7 +195,7 @@ template <typename MDE, size_t nd> void MergeMD::doPlus(typename MDEventWorkspac
   MDBoxBase<MDE, nd> *box1 = ws1->getBox();
   MDBoxBase<MDE, nd> *box2 = ws2->getBox();
 
-  uint16_t runIndexOffset = experimentInfoNo.back();
+  uint16_t expInfoIndexOffset = experimentInfoNo.back();
   experimentInfoNo.pop_back();
 
   // How many events you started with
@@ -227,7 +227,7 @@ template <typename MDE, size_t nd> void MergeMD::doPlus(typename MDEventWorkspac
           // Create the event
           MDE newEvent(it->getSignal(), it->getErrorSquared(), it->getCenter());
           // Copy extra data, if any
-          copyEvent(*it, newEvent, runIndexOffset);
+          copyEvent(*it, newEvent, expInfoIndexOffset);
           // Add it to the workspace
           box1->addEvent(newEvent);
         }

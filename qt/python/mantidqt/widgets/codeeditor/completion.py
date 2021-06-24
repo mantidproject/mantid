@@ -91,18 +91,25 @@ def get_function_spec(func):
     :returns: A string containing the function specification
     """
     try:
-        argspec = getfullargspec(func)
-    except TypeError:
         try:
-            args_obj = inspect.getargs(func.__code__)
-            argspec = ArgSpec(args_obj.args, args_obj.varargs, args_obj.varkw, defaults=None)
-        except (TypeError, AttributeError, ValueError):
-            if inspect.isbuiltin(func):
-                argspec = get_builtin_argspec(func)
-                if not argspec:
+            argspec = getfullargspec(func)
+        except TypeError:
+            try:
+                args_obj = inspect.getargs(func.__code__)
+                argspec = ArgSpec(args_obj.args, args_obj.varargs, args_obj.varkw, defaults=None)
+            except (TypeError, AttributeError, ValueError):
+                if inspect.isbuiltin(func):
+                    argspec = get_builtin_argspec(func)
+                    if not argspec:
+                        return ''
+                else:
                     return ''
-            else:
-                return ''
+    except Exception:
+        # It's hard to determine all possible exception types that could happen
+        # above. We don't want errors if we can't generate completion so just
+        # bail out
+        return ''
+
     # mantid algorithm functions have varargs set not args
     args = argspec[0]
     if args:

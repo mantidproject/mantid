@@ -410,7 +410,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   std::vector<double> v = getProperty("HKL2");
 
   // load empty DNS instrument to access L1 and L2
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadAlg->setChild(true);
   loadAlg->setLogging(false);
   loadAlg->initialize();
@@ -501,7 +501,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
 
   // Go though each element of m_data to convert to MDEvent
   for (ExpData ds : m_data) {
-    uint16_t runindex = 0;
+    uint16_t expInfoIndex = 0;
     signal_t norm_signal(ds.norm);
     signal_t norm_error = std::sqrt(m_normfactor * norm_signal);
     double ki = 2.0 * M_PI / ds.wavelength;
@@ -551,10 +551,10 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
             millerindex[3] = static_cast<float>(dE);
             PARALLEL_CRITICAL(addValues) {
               inserter.insertMDEvent(static_cast<float>(signal), static_cast<float>(error * error),
-                                     static_cast<uint16_t>(runindex), 0, detid, millerindex.data());
+                                     static_cast<uint16_t>(expInfoIndex), 0, detid, millerindex.data());
 
               norm_inserter.insertMDEvent(static_cast<float>(norm_signal), static_cast<float>(norm_error * norm_error),
-                                          static_cast<uint16_t>(runindex), 0, detid, millerindex.data());
+                                          static_cast<uint16_t>(expInfoIndex), 0, detid, millerindex.data());
             }
           }
           PARALLEL_END_INTERUPT_REGION
@@ -585,7 +585,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::None;
 
   // load empty DNS instrument to access L1 and L2
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadAlg->setChild(true);
   loadAlg->setLogging(false);
   loadAlg->initialize();
@@ -654,7 +654,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
 
   // Go though each element of m_data to convert to MDEvent
   for (ExpData ds : m_data) {
-    uint16_t runindex = 0;
+    uint16_t expInfoIndex = 0;
     signal_t norm_signal(ds.norm);
     signal_t norm_error = std::sqrt(m_normfactor * norm_signal);
     for (size_t i = 0; i < ds.detID.size(); i++) {
@@ -694,10 +694,10 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
           datapoint[2] = static_cast<float>(tof1 + tof2);
           PARALLEL_CRITICAL(addValues) {
             inserter.insertMDEvent(static_cast<float>(signal), static_cast<float>(error * error),
-                                   static_cast<uint16_t>(runindex), 0, detid, datapoint.data());
+                                   static_cast<uint16_t>(expInfoIndex), 0, detid, datapoint.data());
 
             norm_inserter.insertMDEvent(static_cast<float>(norm_signal), static_cast<float>(norm_error * norm_error),
-                                        static_cast<uint16_t>(runindex), 0, detid, datapoint.data());
+                                        static_cast<uint16_t>(expInfoIndex), 0, detid, datapoint.data());
           }
           PARALLEL_END_INTERUPT_REGION
         }

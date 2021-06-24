@@ -27,13 +27,19 @@ else()
   )
 endif()
 
+if (APPLE AND NOT "${Python_W_EXECUTABLE}" STREQUAL "")
+set(WORKBENCH_PYTHON_EXECUTABLE ${Python_W_EXECUTABLE})
+else()
+set(WORKBENCH_PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+endif()
+
 # Wrapper launchers: See mantidworkbench.cpp:main for their function
 if(APPLE OR WIN32)
   # development version
   add_executable(MantidWorkbench mantidworkbench.cpp)
   target_compile_definitions(MantidWorkbench
     PRIVATE
-    -DPYTHON_EXECUTABLE_PATH="${Python_EXECUTABLE}")
+    -DPYTHON_EXECUTABLE_PATH="${WORKBENCH_PYTHON_EXECUTABLE}")
   target_link_libraries(MantidWorkbench PRIVATE Boost::filesystem)
   set_target_properties(MantidWorkbench PROPERTIES
                         VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
@@ -142,11 +148,12 @@ endif()
 # Testing
 set(TEST_FILES
     workbench/config/test/test_user.py
-    workbench/test/mainwindowtest.py
+    workbench/test/test_mainwindow.py
     workbench/test/test_import.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratoraxes.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorcolorfills.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfigure.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlegend.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlines.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorutils.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfitting.py
@@ -163,6 +170,7 @@ set(TEST_FILES
     workbench/plugins/test/test_jupyterconsole.py
     workbench/plugins/test/test_workspacewidget.py
     workbench/utils/test/test_workspacehistorygeneration.py
+    workbench/widgets/about/test/test_about_presenter.py
     workbench/widgets/plotselector/test/test_plotselector_model.py
     workbench/widgets/plotselector/test/test_plotselector_presenter.py
     workbench/widgets/plotselector/test/test_plotselector_view.py

@@ -5,12 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import uuid
 from unittest import mock
 
-from mantid.api import WorkspaceGroup
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.api import WorkspaceGroup, AnalysisDataService
+from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 from sans.algorithm_detail.batch_execution import (get_all_names_to_save, get_transmission_names_to_save,
-                                                   ReductionPackage, select_reduction_alg, save_workspace_to_file)
+                                                   ReductionPackage, select_reduction_alg, save_workspace_to_file,
+                                                   delete_reduced_workspaces)
 from sans.common.enums import SaveType
 
 
@@ -300,6 +302,55 @@ class GetAllNamesToSaveTest(unittest.TestCase):
                             "Transmission": transmission_name,
                             "TransmissionCan": transmission_can_name}
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
+
+
+class DeleteMethodsTest(unittest.TestCase):
+    def setUp(self):
+        self._ads_names = []
+
+    def _create_ads_sample_workspaces(self):
+        ws_ptrs = []
+        for i in range(2):
+            self._ads_names.append(str(uuid.uuid4()))
+            ws_ptrs.append(CreateSampleWorkspace(OutputWorkspace=self._ads_names[-1]))
+        ws_group = GroupWorkspaces(InputWorkspaces=ws_ptrs, OutputWorkspace=str(uuid.uuid4()))
+        return ws_group
+
+    @staticmethod
+    def _create_non_ads_sample_workspaces():
+        ws_group = WorkspaceGroup()
+        for i in range(2):
+            ws_group.addWorkspace(CreateSampleWorkspace(OutputWorkspace=str(uuid.uuid4()),
+                                  StoreInADS=False))
+        return ws_group
+
+    @staticmethod
+    def _pack_reduction_package(create_method):
+        package = mock.NonCallableMock()
+        package.calculated_transmission = create_method()
+        package.calculated_transmission_can = create_method()
+        package.unfitted_transmission = create_method()
+        package.unfitted_transmission_can = create_method()
+        return package
+
+    def test_delete_reduced_workspace_in_ads(self):
+        package = self._pack_reduction_package(self._create_ads_sample_workspaces)
+        current_ads_names = AnalysisDataService.getObjectNames()
+        self.assertTrue(all(name in current_ads_names for name in self._ads_names))
+        delete_reduced_workspaces(reduction_packages=[package], include_non_transmission=False)
+        current_ads_names = AnalysisDataService.getObjectNames()
+        self.assertFalse(all(name in current_ads_names for name in self._ads_names))
+
+    def test_delete_reduced_workspaces_not_in_ads(self):
+        package = self._pack_reduction_package(self._create_non_ads_sample_workspaces)
+        delete_reduced_workspaces(reduction_packages=[package], include_non_transmission=False)
+
+        # Pick two at random to check
+        for i in package.unfitted_transmission.getNames():
+            self.assertFalse(i)
+
+        for i in package.calculated_transmission_can.getNames():
+            self.assertFalse(i)
 
 
 if __name__ == '__main__':

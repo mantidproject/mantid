@@ -20,6 +20,7 @@ using Mantid::SpectrumDefinition;
 using Mantid::API::SpectrumInfo;
 using Mantid::API::SpectrumInfoItem;
 using Mantid::API::SpectrumInfoIterator;
+using Mantid::Kernel::UnitParametersMap;
 using Mantid::PythonInterface::SpectrumInfoPythonIterator;
 using namespace boost::python;
 
@@ -79,5 +80,10 @@ void export_SpectrumInfo() {
            "Returns the SpectrumDefinition of the spectrum with the given "
            "index.")
       .def("detectorCount", &SpectrumInfo::detectorCount, arg("self"),
-           "Returns the total number of detectors used across spectrum info.");
+           "Returns the total number of detectors used across spectrum info.")
+      .def("difcUncalibrated", &SpectrumInfo::difcUncalibrated, (arg("self"), arg("index")),
+           "Return the uncalibrated difc diffractometer constant")
+      .def("diffractometerConstants",
+           (UnitParametersMap(SpectrumInfo::*)(const size_t) const) & SpectrumInfo::diffractometerConstants,
+           (arg("self"), arg("index")), "Return the diffractometer constants");
 }

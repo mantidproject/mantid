@@ -13,6 +13,7 @@ from mantid.api import (
     IEventWorkspace,
     WorkspaceProperty,
     WorkspaceGroup,
+    ADSValidator,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (
@@ -38,9 +39,12 @@ from mantid.simpleapi import (
 from mantid.kernel import (
     StringListValidator,
     Direction,
+    Elastic,
     Property,
     FloatBoundedValidator,
+    IntBoundedValidator,
     StringArrayProperty,
+    UnitConversion,
 )
 
 
@@ -75,7 +79,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 "InputWorkspace",
                 "",
                 direction=Direction.Input,
-                # validator=ADSValidator(),
+                validator=ADSValidator(),
             ),
             doc="The main input workspace[s].",
         )
@@ -117,9 +121,28 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             doc="The mask from this workspace will be applied before reduction",
         )
 
-        self.copyProperties("ConvertSpectrumAxis", ["Target", "EFixed"])
+        self.declareProperty(
+            "Wavelength",
+            1.4865,  # A
+            FloatBoundedValidator(lower=0.0),  # must be positive
+            "Wavelength to set the workspace (A)",
+        )
 
-        self.copyProperties("ResampleX", ["XMin", "XMax", "NumberBins", "LogBinning"])
+        self.declareProperty(
+            "Target",
+            "",
+            StringListValidator(["Theta", "ElasticQ", "ElasticDSpacing"]),
+            "The unit to which spectrum axis is converted to",
+        )
+
+        self.copyProperties("ResampleX", ["XMin", "XMax", "LogBinning"])
+
+        self.declareProperty(
+            "NumberBins",
+            1000,
+            IntBoundedValidator(lower=1),  # need at least one bin
+            "Number of bins to split up each spectrum into.",
+        )
 
         self.declareProperty(
             "NormaliseBy",
@@ -192,9 +215,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
             # background
             if bkg:
-                _ws_bkg_resampled = self._resample_background(
-                    bkg, _wsn, _mskn, xMin, xMax, _ws_cal_resampled
-                )
+                _ws_bkg_resampled = self._resample_background(bkg, _wsn, _mskn, xMin, xMax, _ws_cal_resampled)
 
                 Minus(
                     LHSWorkspace=_wsn,
@@ -249,11 +270,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         self.setProperty("OutputWorkspace", outWS)
 
         # Step_4: remove temp workspaces
-        [
-            DeleteWorkspace(ws, EnableLogging=False)
-            for ws in self.temp_workspace_list
-            if mtd.doesExist(ws)
-        ]
+        [DeleteWorkspace(ws, EnableLogging=False) for ws in self.temp_workspace_list if mtd.doesExist(ws)]
 
     def _expand_groups(self):
         """expand workspace groups"""
@@ -284,11 +301,10 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             else:
                 raise ValueError(f"Unknown normalize type: {normaliseBy}")
 
-    def _to_spectrum_axis(
-        self, workspace_in, workspace_out, mask, instrument_donor=None
-    ):
+    def _to_spectrum_axis(self, workspace_in, workspace_out, mask, instrument_donor=None):
         target = self.getProperty("Target").value
-        e_fixed = self.getProperty("EFixed").value
+        wavelength = self.getProperty("Wavelength").value
+        e_fixed = UnitConversion.run('Wavelength', 'Energy', wavelength, 0, 0, 0, Elastic, 0)
 
         ExtractUnmaskedSpectra(
             InputWorkspace=workspace_in,
@@ -327,9 +343,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
         return workspace_out
 
-    def _to_spectrum_axis_resample(
-        self, workspace_in, workspace_out, mask, instrument_donor, x_min, x_max
-    ):
+    def _to_spectrum_axis_resample(self, workspace_in, workspace_out, mask, instrument_donor, x_min, x_max):
         # common part of converting axis
         self._to_spectrum_axis(workspace_in, workspace_out, mask, instrument_donor)
 
@@ -356,16 +370,12 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         # BEGIN_FOR: located_global_xMin&xMax
         output_workspaces = [f"{outname}{n+1}" for n in range(len(input_workspaces))]
         mask_workspaces = []
-        for n, (_wksp_in, _wksp_out) in enumerate(
-            zip(input_workspaces, output_workspaces)
-        ):
+        for n, (_wksp_in, _wksp_out) in enumerate(zip(input_workspaces, output_workspaces)):
             _wksp_in = str(_wksp_in)
             _mask_n = f"__mask_{n}"  # mask for n-th
             self.temp_workspace_list.append(_mask_n)  # cleanup later
 
-            ExtractMask(
-                InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False
-            )
+            ExtractMask(InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False)
             if mask_angle != Property.EMPTY_DBL:
                 MaskAngle(
                     Workspace=_mask_n,
@@ -426,9 +436,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         """Perform resample on calibration"""
         cal = self.getProperty("CalibrationWorkspace").valueAsStr
 
-        return self._to_spectrum_axis_resample(
-            cal, "_ws_cal", mask_name, current_workspace, x_min, x_max
-        )
+        return self._to_spectrum_axis_resample(cal, "_ws_cal", mask_name, current_workspace, x_min, x_max)
 
     def _resample_background(
         self,
@@ -445,9 +453,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         outname = str(current_background) + str(current_workspace)
         self.temp_workspace_list.append(outname)
 
-        self._to_spectrum_axis_resample(
-            current_background, outname, make_name, current_workspace, x_min, x_max
-        )
+        self._to_spectrum_axis_resample(current_background, outname, make_name, current_workspace, x_min, x_max)
 
         if resampled_calibration:
             Divide(

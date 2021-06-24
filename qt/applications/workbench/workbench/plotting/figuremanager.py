@@ -139,7 +139,8 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
     def renameHandle(self, oldName, newName):
         """
         Called when the ADS has renamed a workspace.
-        If this workspace is attached to this figure then the figure name is updated
+        If this workspace is attached to this figure then the figure name is updated, as are the artists names and
+        axis creation arguments
         :param oldName: The old name of the workspace.
         :param newName: The new name of the workspace
         """
@@ -147,7 +148,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
             if isinstance(ax, MantidAxes):
                 ws = AnalysisDataService.retrieve(newName)
                 if isinstance(ws, MatrixWorkspace):
-                    ax.rename_workspace_artists(newName, oldName)
+                    ax.rename_workspace(newName, oldName)
                 elif isinstance(ws, ITableWorkspace):
                     ax.wsName = newName
                 ax.make_legend()

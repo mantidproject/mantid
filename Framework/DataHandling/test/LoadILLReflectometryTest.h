@@ -29,10 +29,10 @@ class LoadILLReflectometryTest : public CxxTest::TestSuite {
 private:
   const std::string m_d17DirectBeamFile{"ILL/D17/317369.nxs"};
   const std::string m_d17File{"ILL/D17/317370.nxs"};
-  const std::string m_d17Cycle203File{"ILL/D17/564343.nxs"};
-  const std::string m_figaroFile{"ILL/Figaro/598488.nxs"};
   const std::string m_d17File_2018{"ILL/D17/000001.nxs"};
-  const std::string m_figaroFile_2018{"ILL/Figaro/000002.nxs"};
+  const std::string m_d17Cycle203File{"ILL/D17/564343.nxs"};
+  const std::string m_figaroDirectBeamFile{"ILL/Figaro/709922.nxs"};
+  const std::string m_figaroReflectedBeamFile{"ILL/Figaro/709886.nxs"};
   // Name of the default output workspace
   const std::string m_outWSName{"LoadILLReflectometryTest_OutputWS"};
 
@@ -122,7 +122,7 @@ public:
 
   void testExecD17() { loadSpecific(m_d17File, m_outWSName, emptyProperties()); }
 
-  void testExecFigaro() { loadSpecific(m_figaroFile, m_outWSName, emptyProperties()); }
+  void testExecFigaro() { loadSpecific(m_figaroDirectBeamFile, m_outWSName, emptyProperties()); }
 
   void testTOFD17() {
     MatrixWorkspace_sptr output;
@@ -174,19 +174,19 @@ public:
     MatrixWorkspace_sptr output;
     auto prop = emptyProperties();
     prop.emplace_back("XUnit", "TimeOfFlight");
-    getWorkspaceFor(output, m_figaroFile, m_outWSName, prop);
+    getWorkspaceFor(output, m_figaroDirectBeamFile, m_outWSName, prop);
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "TOF")
     const auto &run = output->run();
     const auto channelWidth = run.getPropertyValueAsType<double>("PSD.time_of_flight_0");
     const auto channelCount = static_cast<size_t>(run.getPropertyValueAsType<double>("PSD.time_of_flight_1"));
     const auto tofDelay = run.getPropertyValueAsType<double>("PSD.time_of_flight_2") +
-                          run.getPropertyValueAsType<double>("Theta.edelay_delay");
+                          run.getPropertyValueAsType<double>("MainParameters.edelay_delay");
     // Using choppers 1 and 4.
-    const auto chopper1Speed = run.getPropertyValueAsType<double>("CH1.rotation_speed");
+    const auto chopper1Speed = run.getPropertyValueAsType<double>("chopper1.rotation_speed");
     const double chopper1Phase{0.}; // The value in NeXus is trash.
-    const auto chopper2Phase = run.getPropertyValueAsType<double>("CH4.phase");
+    const auto chopper2Phase = run.getPropertyValueAsType<double>("chopper2.phase");
     const auto pOffset = run.getPropertyValueAsType<double>("CollAngle.poff");
-    const auto openOffset = run.getPropertyValueAsType<double>("CollAngle.openOffset");
+    const auto openOffset = run.getPropertyValueAsType<double>("CollAngle.open_offset");
     const auto tof0 =
         tofDelay - 60e6 * (pOffset - 45. + chopper2Phase - chopper1Phase + openOffset) / (2. * 360. * chopper1Speed);
     TS_ASSERT_EQUALS(output->blocksize(), channelCount)
@@ -200,11 +200,11 @@ public:
     TS_ASSERT_EQUALS(run.getProperty("PSD.time_of_flight_0")->units(), "")
     TS_ASSERT_EQUALS(run.getProperty("PSD.time_of_flight_1")->units(), "")
     TS_ASSERT_EQUALS(run.getProperty("PSD.time_of_flight_2")->units(), "")
-    TS_ASSERT_EQUALS(run.getProperty("Theta.edelay_delay")->units(), "microsec")
-    TS_ASSERT_EQUALS(run.getProperty("CH1.rotation_speed")->units(), "rpm")
-    TS_ASSERT_EQUALS(run.getProperty("CH4.phase")->units(), "degree")
-    TS_ASSERT_EQUALS(run.getProperty("CollAngle.poff")->units(), "uu")
-    TS_ASSERT_EQUALS(run.getProperty("CollAngle.openOffset")->units(), "uu")
+    TS_ASSERT_EQUALS(run.getProperty("MainParameters.edelay_delay")->units(), "usec")
+    TS_ASSERT_EQUALS(run.getProperty("chopper1.rotation_speed")->units(), "rpm")
+    TS_ASSERT_EQUALS(run.getProperty("chopper2.phase")->units(), "deg")
+    TS_ASSERT_EQUALS(run.getProperty("CollAngle.poff")->units(), "deg")
+    TS_ASSERT_EQUALS(run.getProperty("CollAngle.open_offset")->units(), "deg")
   }
 
   void testSampleAndSourcePositionsD17() {
@@ -236,11 +236,11 @@ public:
     MatrixWorkspace_sptr output;
     auto prop = emptyProperties();
     prop.emplace_back("Xunit", "TimeOfFlight");
-    getWorkspaceFor(output, m_figaroFile, m_outWSName, prop);
+    getWorkspaceFor(output, m_figaroDirectBeamFile, m_outWSName, prop);
     const auto &run = output->run();
     const auto chopperCentre = run.getPropertyValueAsType<double>("ChopperSetting.chopperpair_sample_distance") * 1.e-3;
     const auto incomingDeflectionAngle = run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle");
-    const auto sampleZOffset = run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") * 1.e-3;
+    const auto sampleZOffset = run.getPropertyValueAsType<double>("Theta.sample_horizontal_offset") * 1.e-3;
     const auto sourceSample = chopperCentre + sampleZOffset / std::cos(incomingDeflectionAngle / 180. * M_PI);
     const auto &spectrumInfo = output->spectrumInfo();
     const auto l1 = spectrumInfo.l1();
@@ -253,8 +253,8 @@ public:
     TS_ASSERT_EQUALS(sourcePos.X(), 0.)
     TS_ASSERT_EQUALS(sourcePos.Y(), 0.)
     TS_ASSERT_EQUALS(sourcePos.Z(), -sourceSample)
-    TS_ASSERT_EQUALS(run.getProperty("CollAngle.actual_coll_angle")->units(), "uu")
-    TS_ASSERT_EQUALS(run.getProperty("Theta.sampleHorizontalOffset")->units(), "mm")
+    TS_ASSERT_EQUALS(run.getProperty("CollAngle.actual_coll_angle")->units(), "deg")
+    TS_ASSERT_EQUALS(run.getProperty("Theta.sample_horizontal_offset")->units(), "mm")
     TS_ASSERT_EQUALS(run.getProperty("ChopperSetting.chopperpair_sample_distance")->units(), "mm")
   }
 
@@ -290,12 +290,12 @@ public:
     auto prop = emptyProperties();
     prop.emplace_back("Measurement", "ReflectedBeam");
     prop.emplace_back("BraggAngle", "1.5");
-    getWorkspaceFor(output, m_figaroFile, m_outWSName, prop);
+    getWorkspaceFor(output, m_figaroReflectedBeamFile, m_outWSName, prop);
     const auto &spectrumInfo = output->spectrumInfo();
     const auto &run = output->run();
     const double centre = run.getPropertyValueAsType<double>("reduction.line_position");
-    TS_ASSERT_DELTA(centre, 173.38, 0.001);
-    const double centreAngle = (spectrumInfo.twoTheta(173) + spectrumInfo.twoTheta(174)) / 2;
+    TS_ASSERT_DELTA(centre, 62.834, 0.001);
+    const double centreAngle = (spectrumInfo.twoTheta(62) + spectrumInfo.twoTheta(63)) / 2;
     TS_ASSERT_DELTA(centreAngle * 180 / M_PI, 3., 0.1);
   }
 
@@ -303,12 +303,12 @@ public:
     MatrixWorkspace_sptr output;
     auto prop = emptyProperties();
     prop.emplace_back("Measurement", "DirectBeam");
-    getWorkspaceFor(output, m_figaroFile, m_outWSName, prop);
+    getWorkspaceFor(output, m_figaroDirectBeamFile, m_outWSName, prop);
     const auto &spectrumInfo = output->spectrumInfo();
     const auto &run = output->run();
     const double centre = run.getPropertyValueAsType<double>("reduction.line_position");
-    TS_ASSERT_DELTA(centre, 173.38, 0.001);
-    const double centreAngle = (spectrumInfo.twoTheta(173) + spectrumInfo.twoTheta(174)) / 2;
+    TS_ASSERT_DELTA(centre, 62.589, 0.001);
+    const double centreAngle = (spectrumInfo.twoTheta(62) + spectrumInfo.twoTheta(63)) / 2;
     TS_ASSERT_DELTA(centreAngle * 180 / M_PI, 0., 0.1);
   }
 
@@ -321,7 +321,7 @@ public:
 
   void testPropertiesFigaro() {
     MatrixWorkspace_sptr output;
-    getWorkspaceFor(output, m_figaroFile, m_outWSName, emptyProperties());
+    getWorkspaceFor(output, m_figaroDirectBeamFile, m_outWSName, emptyProperties());
     commonProperties(output, "FIGARO");
   }
 
@@ -334,16 +334,16 @@ public:
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", this->m_figaroFile_2018))
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", this->m_figaroDirectBeamFile))
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", this->m_outWSName))
     TS_ASSERT_THROWS_NOTHING(loader.execute())
     TS_ASSERT(loader.isExecuted())
     const auto output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(this->m_outWSName);
     const auto &run = output->run();
     TS_ASSERT(output)
-    TS_ASSERT_EQUALS(run.getProperty("Distance.edelay_delay")->units(),
-                     "microsec") // a time in the distance field!
-    TS_ASSERT_EQUALS(run.getProperty("Distance.inter-slit_distance")->units(), "mm")
+    TS_ASSERT_EQUALS(run.getProperty("MainParameters.edelay_delay")->units(),
+                     "usec") // a time in the distance field!
+    TS_ASSERT_EQUALS(run.getProperty("Distance.S2_S3")->units(), "mm")
   }
 
   void testSourceAndSampleLocationsFigaro() {
@@ -353,16 +353,16 @@ public:
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", this->m_figaroFile_2018))
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", this->m_figaroDirectBeamFile))
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", this->m_outWSName))
     TS_ASSERT_THROWS_NOTHING(loader.execute())
     TS_ASSERT(loader.isExecuted())
     const auto output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(this->m_outWSName);
     TS_ASSERT(output)
     const auto &run = output->run();
-    TS_ASSERT_EQUALS(run.getProperty("Distance.D1")->units(), "mm")
-    TS_ASSERT_EQUALS(run.getProperty("Distance.D0")->units(), "mm")
-    TS_ASSERT_EQUALS(run.getProperty("Distance.dist_chop_samp")->units(), "mm")
+    TS_ASSERT_EQUALS(run.getProperty("Distance.sample_DH1")->units(), "mm")
+    TS_ASSERT_EQUALS(run.getProperty("Distance.sample_DH2")->units(), "mm")
+    TS_ASSERT_EQUALS(run.getProperty("Distance.Sample_CenterOfDetector_distance")->units(), "mm")
   }
 
   void testSourceAndSampleLocationsD17() {
@@ -387,14 +387,14 @@ public:
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", this->m_figaroFile_2018))
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", this->m_figaroDirectBeamFile))
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", this->m_outWSName))
     TS_ASSERT_THROWS_NOTHING(loader.execute())
     TS_ASSERT(loader.isExecuted())
     const auto output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(this->m_outWSName);
     TS_ASSERT(output)
-    const auto v1 = loader.doubleFromRun("Theta.sampleHorizontalOffset");
-    const auto v2 = loader.doubleFromRun("Distance.sampleHorizontalOffset");
+    const auto v1 = loader.doubleFromRun("Theta.sample_horizontal_offset");
+    const auto v2 = loader.doubleFromRun("Distance.sample_changer_horizontal_offset");
     TS_ASSERT_EQUALS(v1, v2)
     // Unused variables -> if used in future they may simplify the loader
     TS_ASSERT_EQUALS(loader.doubleFromRun("Theta.actual_directDan"), 0.)
@@ -447,21 +447,21 @@ public:
 
   void testSlitConfigurationFigaro() {
     MatrixWorkspace_sptr output;
-    getWorkspaceFor(output, m_figaroFile, m_outWSName, emptyProperties());
+    getWorkspaceFor(output, m_figaroDirectBeamFile, m_outWSName, emptyProperties());
     auto instrument = output->getInstrument();
     auto slit1 = instrument->getComponentByName("slit2");
     auto slit2 = instrument->getComponentByName("slit3");
     const auto &run = output->run();
-    // The S3 position is missing in the NeXus file; use a hard-coded value.
-    const double collimationAngle = run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") / 180. * M_PI;
-    const double sampleOffset = output->run().getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") * 1e-3;
-    const double slitZOffset = sampleOffset / std::cos(collimationAngle);
-    const double S3z = -0.368 - slitZOffset;
-    const double slitSeparation = run.getPropertyValueAsType<double>("Theta.inter-slit_distance") * 1e-3;
-    const double S2z = S3z - slitSeparation;
-    TS_ASSERT_EQUALS(slit1->getPos(), V3D(0.0, 0.0, S2z))
-    TS_ASSERT_EQUALS(slit2->getPos(), V3D(0.0, 0.0, S3z))
-    TS_ASSERT_EQUALS(run.getProperty("Theta.inter-slit_distance")->units(), "mm")
+    const double s2z = run.getPropertyValueAsType<double>("Distance.S2_Sample") * 1e-3;
+    const double s3z = run.getPropertyValueAsType<double>("Distance.S3_Sample") * 1e-3;
+    const double s23 = run.getPropertyValueAsType<double>("Distance.S2_S3") * 1e-3;
+    const double ds = s2z - s3z;
+    TS_ASSERT_DELTA(s2z, 2.412, 1e-3);
+    TS_ASSERT_DELTA(s3z, 0.247, 1e-3);
+    TS_ASSERT_DELTA(ds, s23, 1e-3);
+    TS_ASSERT_EQUALS(run.getProperty("Distance.S2_S3")->units(), "mm")
+    TS_ASSERT_EQUALS(run.getProperty("Distance.S2_Sample")->units(), "mm")
+    TS_ASSERT_EQUALS(run.getProperty("Distance.S3_Sample")->units(), "mm")
   }
 };
 

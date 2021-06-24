@@ -18,7 +18,7 @@ TABLE_COLUMN_FLAGS = {'workspace_name': QtCore.Qt.ItemIsSelectable | QtCore.Qt.I
                       'detector': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
                       'to_analyse': QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
                       'rebin': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
-                      'rebin_options': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable}
+                      'rebin_options': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled}
 
 
 class EAGroupingTableView(QtWidgets.QWidget):
@@ -272,13 +272,29 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
     def rebin_fixed_chosen(self, row):
         steps, ok = QtWidgets.QInputDialog.getText(self, 'Steps',
-                                                   'Enter the new bin width:')
-
+                                                   'Rebinning creates a new workspace.\n'
+                                                   'Enter the new bin width for a new workspace:')
+        if not ok:
+            self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
+            return
+        if not steps.strip():
+            self.warning_popup("Rebin parameters not given")
+            self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
+            return
+        try:
+            steps = float(steps)
+        except ValueError:
+            self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
+            self.warning_popup("Given rebin step is invalid")
+            return
         steps_text = "Steps: " + str(steps)
-        self.grouping_table.setItem(row, 5, QTableWidgetItem(steps_text))
+        table_item = QTableWidgetItem(steps_text)
+        table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])
+        self.grouping_table.setItem(row, 5, table_item)
 
     def rebin_variable_chosen(self, row):
         steps, ok = QtWidgets.QInputDialog.getText(self, 'Bin Boundaries',
+                                                   'Rebinning creates a new workspace.\n'
                                                    'A comma separated list of first bin boundary, width, last bin '
                                                    'boundary.\n'
                                                    'Optionally this can be followed by a comma and more widths and last'
@@ -290,8 +306,22 @@ class EAGroupingTableView(QtWidgets.QWidget):
                                                    '2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n'
                                                    '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then '
                                                    'steps of 200 to 20,000')
+        if not ok:
+            self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
+            return
+        if not steps.strip():
+            self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
+            self.warning_popup("Rebin parameters not given")
+            return
         bin_text = "Bin Boundaries: " + str(steps)
-        self.grouping_table.setItem(row, 5, QTableWidgetItem(bin_text))
+        table_item = QTableWidgetItem(bin_text)
+        table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])
+        self.grouping_table.setItem(row, 5, table_item)
+
+    def rebin_none_chosen(self, row):
+        table_item = QTableWidgetItem("")
+        table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])
+        self.grouping_table.setItem(row, 5, table_item)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Enabling and disabling editing and updating of the widget

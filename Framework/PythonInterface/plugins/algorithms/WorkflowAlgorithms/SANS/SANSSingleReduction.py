@@ -257,7 +257,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
         for bundle in completed_event_slices:
             reduction_mode = bundle.output_bundle.reduction_mode
             output_workspace = bundle.output_bundle.output_workspace
-            if bundle.data_type is DataType.CAN:
+            if bundle.output_bundle.data_type is DataType.CAN:
                 if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
                     if reduction_mode is ReductionMode.LAB:
                         lab_cans.addWorkspace(output_workspace)
@@ -266,7 +266,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
                     else:
                         raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
                                            " be set with a can.".format(reduction_mode))
-            elif bundle.data_type is DataType.SAMPLE:
+            elif bundle.output_bundle.data_type is DataType.SAMPLE:
                 if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
                     if reduction_mode is ReductionMode.LAB:
                         lab_samples.addWorkspace(output_workspace)
@@ -283,7 +283,6 @@ class SANSSingleReduction(SANSSingleReductionBase):
     def set_transmission_workspaces_on_output(self, completed_event_slices, fit_state):
         calc_can, calc_sample = WorkspaceGroup(), WorkspaceGroup()
         unfit_can, unfit_sample = WorkspaceGroup(), WorkspaceGroup()
-
         output_hab_or_lab = None
         for bundle in completed_event_slices:
             if output_hab_or_lab is not None and output_hab_or_lab != bundle.output_bundle.reduction_mode:

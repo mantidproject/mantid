@@ -57,8 +57,16 @@ message(
 # headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 
-# Set Qt5 dir according to homebrew location
-set(Qt5_DIR /usr/local/opt/qt/lib/cmake/Qt5)
+# Guess at Qt5 dir according to homebrew locations, unless already specified
+if(NOT Qt5_DIR)
+  message(STATUS "No Qt5 directory specified, guessing in default Homebrew locations")
+  foreach(_qtdir /usr/local/opt/qt@5/lib/cmake/Qt5 /usr/local/opt/qt/lib/cmake/Qt5)
+    if(EXISTS ${_qtdir})
+      set(Qt5_DIR ${_qtdir})
+      break()
+    endif()
+  endforeach()
+endif()
 
 # Python flags
 set(PY_VER "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}")
@@ -116,9 +124,9 @@ set(PLUGINS_DIR plugins)
 # Mac-specific installation setup
 # ##############################################################################
 # use homebrew OpenSSL package
-if(NOT OPENSSL_ROOT_DIR)
-  set(OPENSSL_ROOT_DIR /usr/local/opt/openssl)
-endif(NOT OPENSSL_ROOT_DIR)
+if(NOT OPENSSL_ROOT)
+  set(OPENSSL_ROOT /usr/local/opt/openssl)
+endif(NOT OPENSSL_ROOT)
 
 if(NOT HDF5_ROOT)
     set(HDF5_ROOT /usr/local/opt/hdf5) # Only for homebrew!

@@ -26,6 +26,7 @@ INVALID_CHARS_REGEX = _re.compile(r"[^0-9a-zA-Z_]")
 # Starts with a number
 LEADING_NUMS_REGEX = _re.compile(r"^[0-9]")
 
+
 def _importAll(mtd):
     """
         Creates a named variable in the globals dictionary
@@ -74,14 +75,17 @@ def _importAll(mtd):
     # Update the caller's dictionary
     locals_.update(vars)
 
+
 def is_valid_identifier(name):
     """
     Returns True if the given string
     is a valid variable name in Python
     """
-    if _keyword.iskeyword(name): return False
+    if _keyword.iskeyword(name):
+        return False
     # If the regex matches it is a valid identifier in Python 2.x
     return IDENT_REGEX.match(name) is not None
+
 
 # Attach to ADS as importAll
 setattr(AnalysisDataServiceImpl, "importAll", _importAll)

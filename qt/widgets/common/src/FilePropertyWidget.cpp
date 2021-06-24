@@ -25,6 +25,9 @@ FilePropertyWidget::FilePropertyWidget(Mantid::Kernel::Property *prop, QWidget *
 
   // Create a browse button
   m_browseButton = new QPushButton(tr("Browse"), m_parent);
+  // Make current value visible
+  this->setValue(QString::fromStdString(m_prop->value()));
+  // Make sure the connection comes after updating any values
   connect(m_browseButton, SIGNAL(clicked()), this, SLOT(browseClicked()));
   m_widgets.push_back(m_browseButton);
 

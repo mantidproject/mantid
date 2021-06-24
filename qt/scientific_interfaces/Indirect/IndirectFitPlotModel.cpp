@@ -138,12 +138,12 @@ void IndirectFitPlotModel::setEndX(double endX) {
 
 void IndirectFitPlotModel::setFWHM(double fwhm) {
   m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeIndex);
-  setFunctionParameters(m_fittingModel->getFittingFunction(), "Peak", "FWHM", fwhm);
+  setFunctionParameters(m_fittingModel->getFitFunction(), "Peak", "FWHM", fwhm);
 }
 
 void IndirectFitPlotModel::setBackground(double background) {
   m_fittingModel->setDefaultParameterValue("A0", background, m_activeIndex);
-  setFirstBackground(m_fittingModel->getFittingFunction(), background);
+  setFirstBackground(m_fittingModel->getFitFunction(), background);
 }
 
 void IndirectFitPlotModel::deleteExternalGuessWorkspace() {
@@ -173,7 +173,7 @@ TableDatasetIndex IndirectFitPlotModel::getActiveDataIndex() const { return m_ac
 
 WorkspaceIndex IndirectFitPlotModel::getActiveSpectrum() const { return m_activeSpectrum; }
 
-TableDatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const { return m_fittingModel->numberOfWorkspaces(); }
+TableDatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const { return m_fittingModel->getNumberOfWorkspaces(); }
 
 FitDomainIndex IndirectFitPlotModel::getActiveDomainIndex() const {
   FitDomainIndex index{0};
@@ -203,14 +203,14 @@ std::string IndirectFitPlotModel::getFitDataName(TableDatasetIndex index) const 
 std::string IndirectFitPlotModel::getFitDataName() const { return getFitDataName(m_activeIndex); }
 
 std::string IndirectFitPlotModel::getLastFitDataName() const {
-  auto const workspaceCount = m_fittingModel->numberOfWorkspaces();
+  auto const workspaceCount = m_fittingModel->getNumberOfWorkspaces();
   if (workspaceCount.value > 0)
     return getFitDataName(workspaceCount - TableDatasetIndex{1});
   return "";
 }
 
 boost::optional<double> IndirectFitPlotModel::getFirstHWHM() const {
-  auto fwhm = findFirstFWHM(m_fittingModel->getFittingFunction());
+  auto fwhm = findFirstFWHM(m_fittingModel->getFitFunction());
   if (fwhm) {
     return *fwhm / 2.0;
   }
@@ -218,7 +218,7 @@ boost::optional<double> IndirectFitPlotModel::getFirstHWHM() const {
 }
 
 boost::optional<double> IndirectFitPlotModel::getFirstPeakCentre() const {
-  return findFirstPeakCentre(m_fittingModel->getFittingFunction());
+  return findFirstPeakCentre(m_fittingModel->getFitFunction());
 }
 
 boost::optional<double> IndirectFitPlotModel::getFirstBackgroundLevel() const {
@@ -226,7 +226,7 @@ boost::optional<double> IndirectFitPlotModel::getFirstBackgroundLevel() const {
   if (spectra.empty())
     return boost::optional<double>();
   auto index = spectra.indexOf(m_activeSpectrum);
-  IFunction_sptr fun = m_fittingModel->getFittingFunction();
+  IFunction_sptr fun = m_fittingModel->getFitFunction();
   if (!fun)
     return boost::optional<double>();
   return findFirstBackgroundLevel(fun->getFunction(index.value));
@@ -243,7 +243,7 @@ double IndirectFitPlotModel::calculateHWHMMinimum(double maximum) const {
 }
 
 bool IndirectFitPlotModel::canCalculateGuess() const {
-  const auto function = m_fittingModel->getFittingFunction();
+  const auto function = m_fittingModel->getFitFunction();
   if (!function)
     return false;
 

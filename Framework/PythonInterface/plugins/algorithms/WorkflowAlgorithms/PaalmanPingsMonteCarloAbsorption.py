@@ -16,15 +16,14 @@ import os.path
 
 class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
     # General variables
+    _input_ws = None
     _emode = None
     _efixed = None
     _general_kwargs = None
     _shape = None
     _height = None
     _isis_instrument = None
-    _override_shape = None
     _has_container = None
-    _override_sample_material_only = None
 
     # Sample variables
     _sample_angle = None
@@ -38,7 +37,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
     _sample_thickness = None
     _sample_unit = None
     _sample_width = None
-    _input_ws = None
+    _sample_shape = None
 
     # Container variables
     _container_angle = None
@@ -51,6 +50,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
     _container_outer_radius = None
     _container_thickness = None
     _container_width = None
+    _sample_env = None
 
     # Output workspaces
     _ass_ws = None
@@ -152,7 +152,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='SampleCenter', defaultValue=0.0,
                              doc='Center of the sample environment')
         self.declareProperty(name='SampleAngle', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
+                             validator=FloatBoundedValidator(-180.0, 180.0),
                              doc='Angle of the sample environment with respect to the beam (degrees)')
 
         self.setPropertySettings('SampleWidth', flat_plate_visible)
@@ -312,12 +312,12 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         progess_steps = 1. if not self._has_can else 0.25
         input_wave_ws = self._convert_to_wavelength(self._input_ws)
         self._set_beam(input_wave_ws)
-        if self._override_shape:
-            # make sure there is no container defined at this point
-            self._set_sample(input_wave_ws, ['Sample'])
-        elif self._is_override_sample_material_only:
-            # in this instance, setsample will not be called again so this material change only needs to happen once
-            self._set_sample_material_only(input_wave_ws)
+
+        self._sample_shape = input_wave_ws.sample().getShape()
+        if input_wave_ws.sample().hasEnvironment():
+            self._sample_env = input_wave_ws.sample().getEnvironment()
+        # make sure there is no container defined at this point
+        self._set_sample(input_wave_ws, ['Sample'])
         monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
                                                     startProgress=0, endProgress=progess_steps)
         self._set_algorithm_properties(monte_carlo_alg, self._monte_carlo_kwargs)
@@ -331,8 +331,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self._output_ws = self._group_ws([ass_ws])
 
         if self._has_can:
-            if self._override_shape:
-                self._set_sample(input_wave_ws, ['Sample', 'Container'])
+            self._set_sample(input_wave_ws, ['Sample', 'Container'])
             monte_carlo_alg_ssc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
                                                             startProgress=progess_steps, endProgress=2*progess_steps)
             self._set_algorithm_properties(monte_carlo_alg_ssc, self._monte_carlo_kwargs)
@@ -344,8 +343,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             assc_ws = self._convert_from_wavelength(assc_ws)
             mtd.addOrReplace(self._assc_ws_name, assc_ws)
 
-            if self._override_shape:
-                self._set_sample(input_wave_ws, ['Container'])
+            self._set_sample(input_wave_ws, ['Container'])
             monte_carlo_alg_cc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
                                                            startProgress=2*progess_steps, endProgress=3*progess_steps)
             self._set_algorithm_properties(monte_carlo_alg_cc, self._monte_carlo_kwargs)
@@ -357,8 +355,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             acc_ws = self._convert_from_wavelength(acc_ws)
             mtd.addOrReplace(self._acc_ws_name, acc_ws)
 
-            if self._override_shape:
-                self._set_sample(input_wave_ws, ['Sample', 'Container'])
+            self._set_sample(input_wave_ws, ['Sample', 'Container'])
             monte_carlo_alg_csc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
                                                             startProgress=3*progess_steps, endProgress=1.)
             self._set_algorithm_properties(monte_carlo_alg_csc, self._monte_carlo_kwargs)
@@ -383,83 +380,82 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                                               'Height': self._beam_height})
         set_beam_alg.execute()
 
-    def _set_sample_material_only(self, ws):
-        # this exists for the case in which the user wants to use preexisting sample/can geometries but override the
-        # sample material properties
-        set_sample_alg = self.createChildAlgorithm("SetSample", enableLogging=False)
-        set_sample_alg.setProperty("InputWorkspace", ws)
-        sample_material = self._set_material_dict('sample')
-        set_sample_alg.setProperty("Material", sample_material)
-        set_sample_alg.execute()
-
     def _set_sample(self, ws, components):
-        # this is to ensure that there is no historic remnant of the sample or container that can affect the attenuation
-        # from the other hand this does not allow for sample nor container shape nor material to be already defined
         ws.setSample(Sample())
-        set_sample_alg = self.createChildAlgorithm("SetSample", enableLogging=False)
-        set_sample_alg.setProperty("InputWorkspace", ws)
+
+        sample_geometry = dict()
+        sample_material = dict()
+        container_geometry = dict()
+        container_material = dict()
 
         if 'Sample' in components:
-            sample_geometry = dict()
-            sample_geometry['Height'] = self._height
+            if self._shape == 'Preset':
+                ws.sample().setShape(self._sample_shape)
+            else:
+                sample_geometry['Height'] = self._height
 
-            if self._shape == 'FlatPlate':
-                sample_geometry['Shape'] = 'FlatPlate'
-                sample_geometry['Width'] = self._sample_width
-                sample_geometry['Thick'] = self._sample_thickness
-                sample_geometry['Center'] = [0.0, 0.0, self._sample_center]
-                sample_geometry['Angle'] = self._sample_angle
+                if self._shape == 'FlatPlate':
+                    sample_geometry['Shape'] = 'FlatPlate'
+                    sample_geometry['Width'] = self._sample_width
+                    sample_geometry['Thick'] = self._sample_thickness
+                    sample_geometry['Center'] = [0.0, 0.0, self._sample_center]
+                    sample_geometry['Angle'] = self._sample_angle
 
-            if self._shape == 'Cylinder':
-                sample_geometry['Shape'] = 'Cylinder'
-                sample_geometry['Radius'] = self._sample_radius
-                sample_geometry['Center'] = [0.0, 0.0, 0.0]
+                if self._shape == 'Cylinder':
+                    sample_geometry['Shape'] = 'Cylinder'
+                    sample_geometry['Radius'] = self._sample_radius
+                    sample_geometry['Center'] = [0.0, 0.0, 0.0]
 
-            if self._shape == 'Annulus':
-                sample_geometry['Shape'] = 'HollowCylinder'
-                sample_geometry['InnerRadius'] = self._sample_inner_radius
-                sample_geometry['OuterRadius'] = self._sample_outer_radius
-                sample_geometry['Center'] = [0.0, 0.0, 0.0]
+                if self._shape == 'Annulus':
+                    sample_geometry['Shape'] = 'HollowCylinder'
+                    sample_geometry['InnerRadius'] = self._sample_inner_radius
+                    sample_geometry['OuterRadius'] = self._sample_outer_radius
+                    sample_geometry['Center'] = [0.0, 0.0, 0.0]
 
-            set_sample_alg.setProperty("Geometry", sample_geometry)
-
+            # may want to override material even if shape=Preset
             sample_material = self._set_material_dict('sample')
-            set_sample_alg.setProperty("Material", sample_material)
 
         if 'Container' in components:
-            container_geometry = dict()
-            container_geometry['Height'] = self._height
+            if self._shape == 'Preset':
+                ws.sample().setEnvironment(self._sample_env)
+            else:
+                container_geometry['Height'] = self._height
 
-            if self._shape == 'FlatPlate':
-                container_geometry['Shape'] = 'FlatPlateHolder'
-                container_geometry['Width'] = self._sample_width
-                # we need to know the thickness and the centre of the sample as well,
-                # in order to calculate the centre offsets for the container panels
-                container_geometry['Thick'] = self._sample_thickness
-                container_geometry['Center'] = [0.0, 0.0, self._sample_center]
-                container_geometry['Angle'] = self._sample_angle
-                container_geometry['FrontThick'] = self._container_front_thickness
-                container_geometry['BackThick'] = self._container_back_thickness
+                if self._shape == 'FlatPlate':
+                    container_geometry['Shape'] = 'FlatPlateHolder'
+                    container_geometry['Width'] = self._sample_width
+                    # we need to know the thickness and the centre of the sample as well,
+                    # in order to calculate the centre offsets for the container panels
+                    container_geometry['Thick'] = self._sample_thickness
+                    container_geometry['Center'] = [0.0, 0.0, self._sample_center]
+                    container_geometry['Angle'] = self._sample_angle
+                    container_geometry['FrontThick'] = self._container_front_thickness
+                    container_geometry['BackThick'] = self._container_back_thickness
 
-            if self._shape == 'Cylinder':
-                container_geometry['Shape'] = 'HollowCylinder'
-                container_geometry['InnerRadius'] = self._sample_radius
-                container_geometry['OuterRadius'] = self._container_radius
-                container_geometry['Center'] = [0.0, 0.0, 0.0]
+                if self._shape == 'Cylinder':
+                    container_geometry['Shape'] = 'HollowCylinder'
+                    container_geometry['InnerRadius'] = self._sample_radius
+                    container_geometry['OuterRadius'] = self._container_radius
+                    container_geometry['Center'] = [0.0, 0.0, 0.0]
 
-            if self._shape == 'Annulus':
-                container_geometry['Shape'] = 'HollowCylinderHolder'
-                container_geometry['InnerRadius'] = self._container_inner_radius
-                container_geometry['InnerOuterRadius'] = self._sample_inner_radius
-                container_geometry['OuterInnerRadius'] = self._sample_outer_radius
-                container_geometry['OuterRadius'] = self._container_outer_radius
-                container_geometry['Center'] = [0.0, 0.0, 0.0]
+                if self._shape == 'Annulus':
+                    container_geometry['Shape'] = 'HollowCylinderHolder'
+                    container_geometry['InnerRadius'] = self._container_inner_radius
+                    container_geometry['InnerOuterRadius'] = self._sample_inner_radius
+                    container_geometry['OuterInnerRadius'] = self._sample_outer_radius
+                    container_geometry['OuterRadius'] = self._container_outer_radius
+                    container_geometry['Center'] = [0.0, 0.0, 0.0]
 
+                container_material = self._set_material_dict('container')
+
+        if sample_geometry or sample_material or container_geometry or container_material:
+            set_sample_alg = self.createChildAlgorithm("SetSample", enableLogging=False)
+            set_sample_alg.setProperty("InputWorkspace", ws)
+            set_sample_alg.setProperty("Geometry", sample_geometry)
+            set_sample_alg.setProperty("Material", sample_material)
             set_sample_alg.setProperty("ContainerGeometry", container_geometry)
-
-            container_material = self._set_material_dict('container')
             set_sample_alg.setProperty("ContainerMaterial", container_material)
-        set_sample_alg.execute()
+            set_sample_alg.execute()
 
     def _set_material_dict(self, name):
         def get_attribute(attr_name):
@@ -532,10 +528,8 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self._container_density = self.getProperty('ContainerDensity').value
 
         self._shape = self.getProperty('Shape').value
-        self._override_shape = (self._shape != 'Preset')
-        self._is_override_sample_material_only = bool(self._set_material_dict('sample'))
 
-        if self._override_shape:
+        if self._shape != 'Preset':
             self._height = self.getProperty('Height').value
             if self._shape == 'FlatPlate':
                 self._sample_width = self.getProperty('SampleWidth').value

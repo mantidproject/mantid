@@ -24,7 +24,7 @@ creation is outlined in :ref:`issue_tracking`.
    SliceViewer/SliceViewer
    MuonAnalysis_test_guides/index
    MuonInterface/MuonTesting
-   ElementalAnalysis/ElementalAnalysisGUITests
+   ElementalAnalysis/ElementalAnalysisTests
    IndirectInelastic/IndirectInelasticAcceptanceTests
    EngineeringDiffraction/EngineeringDiffractionTestGuide
    ErrorReporter-ProjectRecovery/ErrorReporterTesting
@@ -32,4 +32,3 @@ creation is outlined in :ref:`issue_tracking`.
    LiveData/LiveDataTests
    ReflectometryGUI/ReflectometryGUITests
    SANSGUI/SANSGUITests
-

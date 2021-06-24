@@ -25,7 +25,7 @@ class MarkedColumns:
         :param remove_from: List of lists from which the column index will be removed
         :return:
         """
-        removed_cols=[]
+        removed_cols = []
         for list in remove_from:
             try:
                 # remove all (for error cols there could be more than one match)

@@ -13,6 +13,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/ChangeBinOffset.h"
 #include "MantidAlgorithms/ConvertToMatrixWorkspace.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/CropWorkspace.h"
@@ -23,6 +24,7 @@
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidKernel/Unit.h"
 
+using Mantid::Algorithms::ChangeBinOffset;
 using Mantid::Algorithms::ConvertToMatrixWorkspace;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::CropWorkspace;
@@ -84,6 +86,15 @@ void createSampleWS() {
   createSampleWS.setProperty("PixelSpacing", .02); // 2cm pixels
   createSampleWS.setPropertyValue("OutputWorkspace", "PDCalibrationTest_WS");
   createSampleWS.execute();
+
+  // In order to make it same as before CreateSampleWorkspace is fixed by shifting TOF back -TOF_MIN
+  // such that peaks' positions will be kept unchanged.
+  ChangeBinOffset changeBinOffset;
+  changeBinOffset.initialize();
+  changeBinOffset.setPropertyValue("InputWorkspace", "PDCalibrationTest_WS");
+  changeBinOffset.setPropertyValue("OutputWorkspace", "PDCalibrationTest_WS");
+  changeBinOffset.setProperty("Offset", -1 * TOF_MIN);
+  changeBinOffset.execute();
 
   // move it to the right place - DIFC of this location vary from 5308 to 5405
   RotateInstrumentComponent rotateInstr;

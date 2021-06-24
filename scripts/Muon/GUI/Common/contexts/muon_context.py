@@ -19,7 +19,7 @@ from Muon.GUI.Common.muon_base_pair import MuonBasePair
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
-from Muon.GUI.Common.contexts.muon_gui_context import PlotMode
+from Muon.GUI.Common.contexts.plotting_context import PlotMode
 from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper, WorkspaceGroupDefinition
 from mantidqt.utils.observer_pattern import Observable
@@ -29,20 +29,25 @@ from typing import List
 
 
 MUON_ANALYSIS_DEFAULT_X_RANGE = [0.0, 15.0]
+MUON_ANALYSIS_DEFAULT_Y_RANGE = [-0.3, 0.3]
 
 
 class MuonContext(object):
     def __init__(self, muon_data_context=None, muon_gui_context=None,
                  muon_group_context=None, base_directory='Muon Data', muon_phase_context=None,
-                 workspace_suffix=' MA', fitting_context=None, frequency_context=None):
+                 workspace_suffix=' MA', fitting_context=None, results_context=None, model_fitting_context=None,
+                 plotting_context=None, frequency_context=None):
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
         self._phase_context = muon_phase_context
         self.fitting_context = fitting_context
+        self.results_context = results_context
+        self.model_fitting_context = model_fitting_context
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix
-
+        self._plotting_context= plotting_context
+        self._plotting_context.set_defaults(MUON_ANALYSIS_DEFAULT_X_RANGE, MUON_ANALYSIS_DEFAULT_Y_RANGE)
         self.ads_observer = MuonContextADSObserver(
             self.remove_workspace,
             self.clear_context,
@@ -57,6 +62,10 @@ class MuonContext(object):
         self.update_view_from_model_notifier = Observable()
         self.update_plots_notifier = Observable()
         self.deleted_plots_notifier = Observable()
+
+    @property
+    def plotting_context(self):
+        return self._plotting_context
 
     @property
     def data_context(self):
@@ -76,7 +85,7 @@ class MuonContext(object):
 
     @property
     def default_data_plot_range(self):
-        return MUON_ANALYSIS_DEFAULT_X_RANGE
+        return self._plotting_context.default_xlims
 
     def num_periods(self, run):
         return self._data_context.num_periods(run)
@@ -413,6 +422,9 @@ class MuonContext(object):
                (self.gui_context['RebinType'] == 'Variable'
                 and 'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
 
+    def do_double_pulse_fit(self):
+        return "DoublePulseEnabled" in self.gui_context and self.gui_context["DoublePulseEnabled"]
+
     def get_detectors_excluded_from_default_grouping_tables(self):
         groups, _, _ = get_default_grouping(
             self.data_context.current_workspace, self.data_context.instrument,
@@ -524,6 +536,24 @@ class MuonContext(object):
 
         return equivalent_list
 
+    def get_workspace_names_for(self, runs: str, groups_and_pairs: list, fit_to_raw: bool) -> list:
+        """Returns the workspace names of the loaded data for the provided runs and groups/pairs."""
+        workspace_names = []
+        for run in self.get_runs(runs):
+            for group_and_pair in groups_and_pairs:
+                workspace_names += self.get_workspace_names_of_data_with_run(run, group_and_pair, fit_to_raw)
+
+        return workspace_names
+
+    def get_workspace_names_of_data_with_run(self, run: int, group_and_pair: str, fit_to_raw: bool):
+        """Returns the workspace names of the loaded data with the provided run and group/pair."""
+        group, pair = self.get_group_and_pair(group_and_pair)
+
+        group_names = self.group_pair_context.get_group_workspace_names([run], group, not fit_to_raw)
+        pair_names = self.group_pair_context.get_pair_workspace_names([run], pair, not fit_to_raw)
+
+        return group_names + pair_names
+
     def remove_workspace(self, workspace):
         # required as the renameHandler returns a name instead of a workspace.
         if isinstance(workspace, str):
@@ -535,6 +565,7 @@ class MuonContext(object):
         self.group_pair_context.remove_workspace_by_name(workspace_name)
         self.phase_context.remove_workspace_by_name(workspace_name)
         self.fitting_context.remove_workspace_by_name(workspace_name)
+        self.results_context.remove_workspace_by_name(workspace_name)
         self.gui_context.remove_workspace_by_name(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
         self.deleted_plots_notifier.notify_subscribers(workspace)

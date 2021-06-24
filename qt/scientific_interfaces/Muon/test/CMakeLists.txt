@@ -6,7 +6,9 @@ set(
   ALCDataLoadingPresenterTest.h
   ALCLatestFileFinderTest.h
   ALCPeakFittingModelTest.h
-  ALCPeakFittingPresenterTest.h)
+  ALCPeakFittingPresenterTest.h
+  MuonAnalysisHelperTest.h
+)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
     ${CMAKE_CURRENT_LIST_DIR}/InterfacesMuonTestInitialization.h)
@@ -32,7 +34,7 @@ mtd_add_qt_tests(
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     PythonInterfaceCore
-    ${PYTHON_LIBRARIES}
+    Python::Python
   QT5_LINK_LIBS
     Qt5::Test
     Qt5::OpenGL

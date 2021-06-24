@@ -1,4 +1,5 @@
 set(SRC_FILES
+    src/SetValueWhenProperty.cpp
     src/ANN_complete.cpp
     src/ArrayBoundedValidator.cpp
     src/ArrayLengthValidator.cpp
@@ -139,6 +140,7 @@ set(SRC_UNITY_IGNORE_FILES
     src/System.cpp)
 
 set(INC_FILES
+    inc/MantidKernel/SetValueWhenProperty.h
     inc/MantidKernel/ANN/ANN.h
     inc/MantidKernel/ANN/ANNperf.h
     inc/MantidKernel/ANN/ANNx.h
@@ -449,7 +451,7 @@ set(TEST_FILES
     VisibleWhenPropertyTest.h
     WriteLockTest.h)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS
@@ -516,6 +518,7 @@ target_link_libraries(Kernel
                       ${NETWORK_LIBRARIES}
                       span
                       ${HDF5_LIBRARIES}
+                      Json
                       )
 if(WIN32)
   target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage

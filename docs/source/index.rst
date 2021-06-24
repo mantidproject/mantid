@@ -34,10 +34,10 @@
 Mantid
 ======
 
-The Mantid Framework has been created to visualise, manipulate and analyse neutron and muon scattering data. Mantid can be used though several Graphical User Interfaces (GUI) and programming languages, including:
+The Mantid Framework has been created to visualise, manipulate and analyse neutron and muon scattering data.
+Mantid can be used though several Graphical User Interfaces (GUI) and programming languages, including:
 
-* `MantidPlot <https://www.mantidproject.org/MantidPlot:_Help>`_, the original interface supporting a wide range of techniques and visualisation approaches.
-* :ref:`MantidWorkbench <workbench>`, A modern interface with growing supports for a list of techniques.
+* :ref:`MantidWorkbench <workbench>`, A modern general-purpose interface supporting a wide range of techniques and visualisation approaches.
 * Autoreduction services at specific facilities, including ISIS and the `SNS <https://monitor.sns.gov>`_.
 * API's for :ref:`Python <pythonapi>` and `C++ <http://doxygen.mantidproject.org/>`_.
 
@@ -52,10 +52,10 @@ Documentation
 This is the documentation for Mantid |release|.
 
 **Getting Started:**
-  * :ref:`mantid_basic_course`, takes you through installing and basic use of Mantid through Mantidplot, including loading, visualising and fitting data.
+  * :ref:`mantid_basic_course`, takes you through installing and basic use of Mantid through MantidWorkbench, including loading, visualising and fitting data.
   * :ref:`training`, links to further self paced courses and learning resources.
-  * :ref:`Mantid Matplotlib Plot Gallery and Examples <plotting>`, details of how to make pretty plots and manioukate them via Python.
-  * :ref:`muon_GUI_course`, focuses on the reduction and analysis of muon data collected from any of the ISIS muon spectrometers via a Graphical User Interface (GUI).
+  * :ref:`Mantid Matplotlib Plot Gallery and Examples <plotting>`, details of how to make pretty plots and manipulate them via Python.
+  * :ref:`muon_GUI_course`, focuses on the reduction and analysis of muon data collected from any of the ISIS Muon spectrometers via a Graphical User Interface (GUI).
 
 **Reference Documentation:**
   * :ref:`Algorithms List`, specific details for all of our algorithms including descriptions of all inputs and parameters .

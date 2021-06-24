@@ -11,7 +11,6 @@
 #include "MantidAPI/ILatticeFunction.h"
 #include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>

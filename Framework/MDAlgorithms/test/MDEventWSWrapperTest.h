@@ -70,12 +70,12 @@ public:
     allCoord[0] = -0.5;
 
     std::vector<float> sig_err(2 * n_MDev, 2);
-    std::vector<uint16_t> run_index(n_MDev, 2);
+    std::vector<uint16_t> expInfoIndex(n_MDev, 2);
     std::vector<uint16_t> goniometer_index(n_MDev, 42);
     std::vector<uint32_t> det_ids(n_MDev, 5);
 
     TSM_ASSERT_THROWS_NOTHING("should be fine",
-                              pWSWrap->addMDData(sig_err, run_index, goniometer_index, det_ids, allCoord, n_MDev));
+                              pWSWrap->addMDData(sig_err, expInfoIndex, goniometer_index, det_ids, allCoord, n_MDev));
 
     TSM_ASSERT_THROWS_NOTHING("should be fine", pWSWrap->pWorkspace()->refreshCache());
 

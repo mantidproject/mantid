@@ -7,8 +7,7 @@
 import unittest
 from mantid.api import FileFinder
 from unittest import mock
-from mantidqt.utils.qt.testing import start_qapplication
-from qtpy.QtWidgets import QWidget
+from unittest.mock import call
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_model import HomeRunInfoWidgetModel
@@ -19,20 +18,18 @@ from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
-@start_qapplication
 class HomeTabRunInfoPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.obj = QWidget()
         setup_context_for_tests(self)
         self.data_context.instrument = 'MUSR'
-        self.view = HomeRunInfoWidgetView(self.obj)
+
+        self.view = mock.Mock(spec=HomeRunInfoWidgetView)
+        self.view.clear = mock.Mock()
+        self.view.warning_popup = mock.Mock()
+        self.view.add_text_line = mock.Mock()
+
         self.model = HomeRunInfoWidgetModel(self.context)
         self.presenter = HomeRunInfoWidgetPresenter(self.view, self.model)
-
-        self.view.warning_popup = mock.MagicMock()
-
-    def tearDown(self):
-        self.obj = None
 
     def test_runinfo_correct(self):
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
@@ -46,14 +43,22 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
 
         self.presenter.update_view_from_model()
 
-        expected_string_list = ['Instrument:MUSR', 'Run:22725', 'Title:FeTeSeT=1F=100', 'Comment:FCfirstsample',
-                                'Start:2009-03-24T04:18:58', 'End:2009-03-24T04:56:26', 'Counts(MEv):20.076704',
-                                'GoodFrames:88540', 'CountsperGoodFrame:226.753',
-                                'CountsperGoodFrameperdet:3.543', 'AverageTemperature(K):19.69992',
-                                'SampleTemperature(K):1.0', 'SampleMagneticField(G):100.0',
-                                'NumberofPeriods:1']
+        expected = [call("Instrument                : MUSR"),
+                    call("Run                       : 22725"),
+                    call("Title                     : FeTeSe T=1 F=100"),
+                    call("Comment                   : FC first sample"),
+                    call("Start                     : 2009-03-24T04:18:58"),
+                    call("End                       : 2009-03-24T04:56:26"),
+                    call("Counts (MEv)              : 20.076704"),
+                    call("Good Frames               : 88540"),
+                    call("Counts per Good Frame     : 226.753"),
+                    call("Counts per Good Frame per det : 3.543"),
+                    call("Average Temperature (K)   : 19.69992"),
+                    call("Sample Temperature (K)    : 1.0"),
+                    call("Sample Magnetic Field (G) : 100.0"),
+                    call("Number of DAQ Periods     : 1")]
 
-        self.assertEqual(str(self.view.run_info_box.toPlainText()).replace(' ', '').splitlines(), expected_string_list)
+        self.assertEqual(self.view.add_text_line.call_args_list, expected)
 
 
 if __name__ == '__main__':

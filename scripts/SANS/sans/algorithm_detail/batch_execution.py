@@ -238,38 +238,7 @@ def plot_workspace(reduction_package, output_graph):
     :param output_graph: Name to the plot window
     """
     plotting_module = get_plotting_module()
-    if hasattr(plotting_module, 'graph'):
-        plot_workspace_mantidplot(reduction_package, output_graph, plotting_module)
-    else:
-        plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
-
-
-def plot_workspace_mantidplot(reduction_package, output_graph, plotting_module):
-    """
-    Plotting continuous output when on MantidPlot
-    This function should be deleted if and when MantidPlot is no longer a part of Mantid
-
-    :param reduction_package: An object containing the reduced workspaces
-    :param output_graph: Name to the plot window
-    :param plotting_module: The MantidPlot plotting module
-    """
-    plotSpectrum, graph = plotting_module.plotSpectrum, plotting_module.graph
-
-    if reduction_package.reduction_mode == ReductionMode.ALL:
-        graph_handle = plotSpectrum([reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
-                                    window=graph(output_graph), clearWindow=True)
-        graph_handle.activeLayer().logLogAxes()
-    elif reduction_package.reduction_mode == ReductionMode.HAB:
-        graph_handle = plotSpectrum(reduction_package.reduced_hab, 0, window=graph(output_graph), clearWindow=True)
-        graph_handle.activeLayer().logLogAxes()
-    elif reduction_package.reduction_mode == ReductionMode.LAB:
-        graph_handle = plotSpectrum(reduction_package.reduced_lab, 0, window=graph(output_graph), clearWindow=True)
-        graph_handle.activeLayer().logLogAxes()
-    elif reduction_package.reduction_mode == ReductionMode.MERGED:
-        graph_handle = plotSpectrum([reduction_package.reduced_merged,
-                                     reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
-                                    window=graph(output_graph), clearWindow=True)
-        graph_handle.activeLayer().logLogAxes()
+    plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
 
 
 def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
@@ -284,18 +253,20 @@ def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
 
     plot_kwargs = {"scalex": True,
                    "scaley": True}
+    ax_options = {"xscale": "linear", "yscale": "linear"}
+
     if reduction_package.reduction_mode == ReductionMode.ALL:
         plot([reduction_package.reduced_hab, reduction_package.reduced_lab],
-             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs, ax_properties=ax_options)
     elif reduction_package.reduction_mode == ReductionMode.HAB:
         plot([reduction_package.reduced_hab],
-             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs, ax_properties=ax_options)
     elif reduction_package.reduction_mode == ReductionMode.LAB:
         plot([reduction_package.reduced_lab],
-             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs, ax_properties=ax_options)
     elif reduction_package.reduction_mode == ReductionMode.MERGED:
         plot([reduction_package.reduced_merged, reduction_package.reduced_hab, reduction_package.reduced_lab],
-             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs, ax_properties=ax_options)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1149,7 +1120,7 @@ def delete_reduced_workspaces(reduction_packages, include_non_transmission=True)
     def _delete_workspaces(_delete_alg, _workspaces):
         for _workspace in _workspaces:
             if _workspace is not None:
-                _delete_alg.setProperty("Workspace", _workspace.name())
+                _delete_alg.setProperty("Workspace", _workspace)
                 _delete_alg.execute()
     # Get all names which were saved out to workspaces
     # Delete each workspace

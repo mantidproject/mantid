@@ -64,7 +64,8 @@ bool MonIDPropChanger::isEnabled(const IPropertyManager *algo) const {
 
 // method checks if other properties have changed and these changes affected
 // MonID property
-bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo) const {
+bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName) const {
+  UNUSED_ARG(changedPropName);
   // is enabled is based on other properties:
   if (!is_enabled)
     return false;
@@ -286,7 +287,7 @@ void NormaliseToMonitor::exec() {
  */
 MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectra(const MatrixWorkspace_sptr &ws,
                                                                const std::vector<std::size_t> &workspaceIndexes) {
-  IAlgorithm_sptr childAlg = createChildAlgorithm("ExtractSpectra");
+  auto childAlg = createChildAlgorithm("ExtractSpectra");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
   childAlg->setProperty("WorkspaceIndexList", workspaceIndexes);
   childAlg->executeAsChildAlg();
@@ -531,7 +532,7 @@ void NormaliseToMonitor::normaliseByIntegratedCount(const MatrixWorkspace_sptr &
   if (!isSingleCountWorkspace) {
     // Add up all the bins so it's just effectively a series of values with
     // errors
-    IAlgorithm_sptr integrate = createChildAlgorithm("Integration");
+    auto integrate = createChildAlgorithm("Integration");
     integrate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_monitor);
     integrate->setProperty("RangeLower", m_integrationMin);
     integrate->setProperty("RangeUpper", m_integrationMax);
@@ -544,7 +545,7 @@ void NormaliseToMonitor::normaliseByIntegratedCount(const MatrixWorkspace_sptr &
 
   if (inputEvent) {
     // Run the divide algorithm explicitly to enable progress reporting
-    IAlgorithm_sptr divide = createChildAlgorithm("Divide", 0.0, 1.0);
+    auto divide = createChildAlgorithm("Divide", 0.0, 1.0);
     divide->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", inputWorkspace);
     divide->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", m_monitor);
     divide->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWorkspace);

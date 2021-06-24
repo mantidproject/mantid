@@ -27,6 +27,7 @@
 #include <vector>
 
 #include <QApplication>
+#include <QClipboard>
 #include <QListView>
 #include <QTableWidget>
 #include <QtTest>
@@ -94,7 +95,7 @@ public:
   void test_that_clicking_the_remove_button_will_notify_the_presenter() {
     openFitScriptGeneratorWidget();
 
-    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::RemoveClicked, "", "")).Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::RemoveDomainClicked, "", "")).Times(1);
 
     QTest::mouseClick(m_view->removeButton(), Qt::LeftButton);
     QApplication::sendPostedEvents();
@@ -103,7 +104,7 @@ public:
   void test_that_clicking_the_add_workspace_button_will_notify_the_presenter() {
     openFitScriptGeneratorWidget();
 
-    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::AddClicked, "", "")).Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::AddDomainClicked, "", "")).Times(1);
 
     QTest::mouseClick(m_view->addWorkspaceButton(), Qt::LeftButton);
     QApplication::sendPostedEvents();
@@ -304,6 +305,44 @@ public:
 
     auto const startX = m_view->startX(FitDomainIndex(rowIndex));
     TS_ASSERT_EQUALS(startX, 0.0);
+  }
+
+  void test_that_clicking_the_generate_script_file_button_will_notify_the_presenter() {
+    openFitScriptGeneratorWidget();
+
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::GenerateScriptToFileClicked, "", "")).Times(1);
+
+    QTest::mouseClick(m_view->generateScriptToFileButton(), Qt::LeftButton);
+    QApplication::sendPostedEvents();
+  }
+
+  void test_that_clicking_the_generate_script_to_clipboard_button_will_notify_the_presenter() {
+    openFitScriptGeneratorWidget();
+
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::GenerateScriptToClipboardClicked, "", "")).Times(1);
+
+    QTest::mouseClick(m_view->generateScriptToClipboardButton(), Qt::LeftButton);
+    QApplication::sendPostedEvents();
+  }
+
+  void test_that_saveTextToClipboard_will_save_the_provided_text_to_the_clipboard() {
+    std::string const message("This is a copied message");
+    openFitScriptGeneratorWidget();
+
+    m_view->saveTextToClipboard(message);
+
+    TS_ASSERT_EQUALS(QApplication::clipboard()->text().toStdString(), message);
+  }
+
+  void test_that_fitOptions_returns_the_default_fitting_options() {
+    openFitScriptGeneratorWidget();
+
+    auto const [maxIterations, minimizer, costFunction, evaluationType] = m_view->fitOptions();
+
+    TS_ASSERT_EQUALS(maxIterations, "500");
+    TS_ASSERT_EQUALS(minimizer, "Levenberg-Marquardt");
+    TS_ASSERT_EQUALS(costFunction, "Least squares");
+    TS_ASSERT_EQUALS(evaluationType, "CentrePoint");
   }
 
 private:

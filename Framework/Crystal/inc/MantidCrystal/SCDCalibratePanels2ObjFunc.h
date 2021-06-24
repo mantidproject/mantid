@@ -32,24 +32,26 @@ public:
   /// base objective function
   void function1D(double *out, const double *xValues, const size_t order) const override;
 
-  void setPeakWorkspace(Mantid::API::IPeaksWorkspace_sptr &pws, const std::string componentName);
+  void setPeakWorkspace(Mantid::API::IPeaksWorkspace_sptr &pws, const std::string componentName,
+                        const std::vector<double> tofs);
 
 private:
   /// temp workspace holder
   mutable std::string m_cmpt;
   mutable Mantid::API::IPeaksWorkspace_sptr m_pws;
   mutable int n_iter;
+  mutable std::vector<double> m_tofs;
 
   const bool LOGCHILDALG{false};
   const Mantid::Kernel::V3D UNSET_HKL{0, 0, 0};
-  const double PI{3.1415926535897932384626433832795028841971693993751058209};
+  // const double PI{3.1415926535897932384626433832795028841971693993751058209};
 
   /// helper functions
   Mantid::API::IPeaksWorkspace_sptr moveInstruentComponentBy(double deltaX, double deltaY, double deltaZ,
                                                              std::string componentName,
                                                              Mantid::API::IPeaksWorkspace_sptr &pws) const;
 
-  Mantid::API::IPeaksWorkspace_sptr rotateInstrumentComponentBy(double rotVx, double rotVy, double rotVz, double rotAng,
+  Mantid::API::IPeaksWorkspace_sptr rotateInstrumentComponentBy(double rotX, double rotY, double rotZ,
                                                                 std::string componentName,
                                                                 Mantid::API::IPeaksWorkspace_sptr &pws) const;
 };

@@ -138,7 +138,7 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void test_runIndex() {
+  void test_expInfoIndex() {
     // Name of the output workspace.
     std::string outWSName("MergeMDTest_OutputWS");
 

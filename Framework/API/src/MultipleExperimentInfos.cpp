@@ -28,34 +28,34 @@ MultipleExperimentInfos::MultipleExperimentInfos(const MultipleExperimentInfos &
 }
 
 //-----------------------------------------------------------------------------------------------
-/** Get the ExperimentInfo for the given run Index
+/** Get the ExperimentInfo for the given Experiment-Info Index
  *
- * @param runIndex :: 0-based index of the run to get.
+ * @param expInfoIndex :: 0-based index of the run to get.
  * @return shared ptr to the ExperimentInfo class
  */
-ExperimentInfo_sptr MultipleExperimentInfos::getExperimentInfo(const uint16_t runIndex) {
-  if (size_t(runIndex) >= m_expInfos.size())
-    throw std::invalid_argument("MDWorkspace::getExperimentInfo(): runIndex is out of range.");
-  return m_expInfos[runIndex];
+ExperimentInfo_sptr MultipleExperimentInfos::getExperimentInfo(const uint16_t expInfoIndex) {
+  if (size_t(expInfoIndex) >= m_expInfos.size())
+    throw std::invalid_argument("MDWorkspace::getExperimentInfo(): expInfoIndex is out of range.");
+  return m_expInfos[expInfoIndex];
 }
 
 //-----------------------------------------------------------------------------------------------
-/** Get the ExperimentInfo for the given run Index
+/** Get the ExperimentInfo for the given Experiment-Info Index
  *
- * @param runIndex :: 0-based index of the run to get.
+ * @param expInfoIndex :: 0-based index of the run to get.
  * @return shared ptr to the ExperimentInfo class
  */
-ExperimentInfo_const_sptr MultipleExperimentInfos::getExperimentInfo(const uint16_t runIndex) const {
-  if (size_t(runIndex) >= m_expInfos.size())
-    throw std::invalid_argument("MDWorkspace::getExperimentInfo() const: runIndex is out of range.");
-  return m_expInfos[runIndex];
+ExperimentInfo_const_sptr MultipleExperimentInfos::getExperimentInfo(const uint16_t expInfoIndex) const {
+  if (size_t(expInfoIndex) >= m_expInfos.size())
+    throw std::invalid_argument("MDWorkspace::getExperimentInfo() const: expInfoIndex is out of range.");
+  return m_expInfos[expInfoIndex];
 }
 
 //-----------------------------------------------------------------------------------------------
 /** Add a new ExperimentInfo to this MDEventWorkspace
  *
  * @param ei :: shared ptr to the ExperimentInfo class to add
- * @return the runIndex at which it was added
+ * @return the expInfoIndex at which it was added
  * @throw std::runtime_error if you reach the limit of 65536 entries.
  */
 uint16_t MultipleExperimentInfos::addExperimentInfo(const ExperimentInfo_sptr &ei) {
@@ -69,13 +69,13 @@ uint16_t MultipleExperimentInfos::addExperimentInfo(const ExperimentInfo_sptr &e
 //-----------------------------------------------------------------------------------------------
 /** Replace the ExperimentInfo entry at a given place
  *
- * @param runIndex :: 0-based index of the run to replace
+ * @param expInfoIndex :: 0-based index of the run to replace
  * @param ei :: shared ptr to the ExperimentInfo class to add
  */
-void MultipleExperimentInfos::setExperimentInfo(const uint16_t runIndex, ExperimentInfo_sptr ei) {
-  if (size_t(runIndex) >= m_expInfos.size())
-    throw std::invalid_argument("MDEventWorkspace::setExperimentInfo(): runIndex is out of range.");
-  m_expInfos[runIndex] = std::move(ei);
+void MultipleExperimentInfos::setExperimentInfo(const uint16_t expInfoIndex, ExperimentInfo_sptr ei) {
+  if (size_t(expInfoIndex) >= m_expInfos.size())
+    throw std::invalid_argument("MDEventWorkspace::setExperimentInfo(): expInfoIndex is out of range.");
+  m_expInfos[expInfoIndex] = std::move(ei);
 }
 
 //-----------------------------------------------------------------------------------------------

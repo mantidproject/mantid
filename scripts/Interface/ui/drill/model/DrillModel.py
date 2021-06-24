@@ -205,6 +205,8 @@ class DrillModel(QObject):
         self.groups = dict()
         self.masterSamples = dict()
         self.visualSettings = dict()
+        if mode in RundexSettings.VISUAL_SETTINGS:
+            self.visualSettings = RundexSettings.VISUAL_SETTINGS[mode]
         self.acquisitionMode = mode
         self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
         self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
@@ -410,8 +412,10 @@ class DrillModel(QObject):
         for s in self.settings:
             p = alg.getProperty(s)
             v = p.value
-            if (isinstance(v, numpy.ndarray)):
+            if isinstance(v, numpy.ndarray):
                 self.settings[s] = v.tolist()
+            elif v is None:
+                self.settings[s] = ""
             else:
                 self.settings[s] = v
 
@@ -440,7 +444,7 @@ class DrillModel(QObject):
             value (str): new value
         """
         self.samples[sampleIndex].changeParameter(name, value)
-        if (value == "DEFAULT") or not value:
+        if (value == "DEFAULT") or value == "":
             self.paramOk.emit(sampleIndex, name)
         else:
             self.checkParameter(name, value, sampleIndex)

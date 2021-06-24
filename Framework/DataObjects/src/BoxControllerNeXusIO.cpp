@@ -22,7 +22,7 @@ namespace DataObjects {
 // Default headers(attributes) describing the contents of the data, written by
 // this class
 const char *EventHeaders[] = {"signal, errorSquared, center (each dim.)",
-                              "signal, errorSquared, runIndex, goniometerIndex, detectorId, center (each "
+                              "signal, errorSquared, expInfoIndex, goniometerIndex, detectorId, center (each "
                               "dim.)"};
 
 std::string BoxControllerNeXusIO::g_EventGroupName("event_data");
@@ -417,7 +417,7 @@ void BoxControllerNeXusIO::adjustEventDataBlock(std::vector<FloatOrDouble> &Bloc
       size_t blockCounter(0);
       size_t backupBlockCounter(0);
       for (size_t i = 0; i < eventCount; i++) {
-        // signal, error, and runIndex occupy the first three data items
+        // signal, error, and expInfoIndex occupy the first three data items
         for (size_t j = 0; j < 3; j++) {
           Block[blockCounter] = backupBlock[backupBlockCounter];
           blockCounter++;
@@ -445,7 +445,7 @@ void BoxControllerNeXusIO::adjustEventDataBlock(std::vector<FloatOrDouble> &Bloc
       size_t blockCounter(0);
       size_t backupBlockCounter(0);
       for (size_t i = 0; i < eventCount; i++) {
-        // signal, error, and runIndex occupy the first three data items
+        // signal, error, and expInfoIndex occupy the first three data items
         for (size_t j = 0; j < 3; j++) {
           Block[blockCounter] = backupBlock[backupBlockCounter];
           blockCounter++;

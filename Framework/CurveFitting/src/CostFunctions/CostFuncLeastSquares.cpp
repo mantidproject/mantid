@@ -80,6 +80,7 @@ void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function, API:
   for (size_t ip = 0; ip < np; ++ip) {
     if (!function->isActive(ip))
       continue;
+
     double d = 0.0;
     for (size_t i = 0; i < ny; ++i) {
       double calc = values->getCalculated(i);
@@ -96,6 +97,9 @@ void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function, API:
       m_der.set(iActiveP, der + d);
     }
     ++iActiveP;
+
+    if (iActiveP >= m_der.size())
+      break;
   }
 
   PARALLEL_ATOMIC
@@ -128,8 +132,14 @@ void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function, API:
         }
       }
       ++i2;
+
+      if (i2 >= m_hessian.size2())
+        break;
     }
     ++i1;
+
+    if (i1 >= m_hessian.size1())
+      break;
   }
 }
 

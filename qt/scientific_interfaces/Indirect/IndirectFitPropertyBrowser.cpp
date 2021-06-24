@@ -40,6 +40,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+struct ScopedSignalBlocker {
+  // block signals on construction
+  ScopedSignalBlocker(QWidget *myObject) : m_object(myObject) { m_object->blockSignals(true); }
+  // enable signals on destruction
+  ~ScopedSignalBlocker() { m_object->blockSignals(false); }
+  QWidget *m_object;
+};
+
 /**
  * Constructor
  * @param parent :: The parent widget - must be an ApplicationWindow
@@ -116,6 +124,7 @@ QStringList IndirectFitPropertyBrowser::getLocalParameters() const {
 
 void IndirectFitPropertyBrowser::syncFullBrowserWithTemplate() {
   auto const fun = m_templateBrowser->getFunction();
+  auto signalBlocker = ScopedSignalBlocker(m_functionBrowser);
   if (fun) {
     m_functionBrowser->setFunction(fun);
     m_functionBrowser->updateMultiDatasetParameters(*m_templateBrowser->getGlobalFunction());
@@ -126,6 +135,7 @@ void IndirectFitPropertyBrowser::syncFullBrowserWithTemplate() {
 
 void IndirectFitPropertyBrowser::syncTemplateBrowserWithFull() {
   auto const funStr = m_functionBrowser->getFunctionString();
+  auto signalBlocker = ScopedSignalBlocker(m_templateBrowser);
   if (auto const fun = m_functionBrowser->getGlobalFunction()) {
     m_templateBrowser->setFunction(funStr);
     m_templateBrowser->updateMultiDatasetParameters(*fun);
@@ -181,7 +191,7 @@ void IndirectFitPropertyBrowser::setFunction(const QString &funStr) {
   }
 }
 
-MultiDomainFunction_sptr IndirectFitPropertyBrowser::getFittingFunction() const {
+MultiDomainFunction_sptr IndirectFitPropertyBrowser::getFitFunction() const {
   try {
     if (getNumberOfDatasets() > 0) {
       return getGlobalFunction();
@@ -333,7 +343,7 @@ void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
 }
 
 void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
-  if (m_functionBrowser->getNumberOfDatasets() == 0)
+  if (getNumberOfDatasets() == 0)
     return;
   updateFitStatus(i);
   if (isFullFunctionBrowserActive()) {
@@ -344,7 +354,11 @@ void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
 }
 
 FitDomainIndex IndirectFitPropertyBrowser::currentDataset() const {
-  return FitDomainIndex{static_cast<size_t>(m_functionBrowser->getCurrentDataset())};
+  if (isFullFunctionBrowserActive()) {
+    return FitDomainIndex{static_cast<size_t>(m_functionBrowser->getCurrentDataset())};
+  } else {
+    return FitDomainIndex{static_cast<size_t>(m_templateBrowser->getCurrentDataset())};
+  }
 }
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(

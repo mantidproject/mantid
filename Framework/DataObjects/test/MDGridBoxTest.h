@@ -193,7 +193,7 @@ public:
 
     std::vector<signal_t> sigErr(20);
     std::vector<coord_t> coord(10);
-    std::vector<uint16_t> runIndex;
+    std::vector<uint16_t> expInfoIndex;
     std::vector<uint16_t> goniometerIndex;
     std::vector<uint32_t> detID;
 
@@ -203,7 +203,7 @@ public:
       coord[i] = events[i].getCenter(0);
     }
 
-    g->buildAndAddEvents(sigErr, coord, runIndex, goniometerIndex, detID);
+    g->buildAndAddEvents(sigErr, coord, expInfoIndex, goniometerIndex, detID);
 
     for (size_t i = 0; i < 10; i++) {
       MDBox<MDLeanEvent<1>, 1> *box = dynamic_cast<MDBox<MDLeanEvent<1>, 1> *>(boxes[i]);

@@ -25,6 +25,7 @@
 #include <QIcon>
 #include <QLabel>
 #include <QPushButton>
+#include <QTreeWidget>
 #include <QVBoxLayout>
 
 namespace MantidQt {
@@ -74,6 +75,7 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent, const std::vector<st
   // Construct the QTreeWidget based on the map information of categories and
   // their respective fit functions.
   constructFunctionTree(categories, restrictions);
+  setMinimumHeightOfFunctionTree();
 
   connect(m_form->fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
           SLOT(functionDoubleClicked(QTreeWidgetItem *)));
@@ -168,6 +170,19 @@ void SelectFunctionDialog::constructFunctionTree(
 }
 
 SelectFunctionDialog::~SelectFunctionDialog() { delete m_form; }
+
+/**
+ * Sets the minimum height of the function tree to ensure that all catagories are visible when the dialog is opened.
+ * This method ensures the correct minimum size is used for any screen resolution.
+ */
+void SelectFunctionDialog::setMinimumHeightOfFunctionTree() {
+  auto const numberOfTopLevelItems = m_form->fitTree->topLevelItemCount();
+  if (numberOfTopLevelItems > 0) {
+    auto const firstItem = m_form->fitTree->topLevelItem(0);
+    auto const itemHeight = m_form->fitTree->visualItemRect(firstItem).height();
+    m_form->fitTree->setMinimumHeight(itemHeight * numberOfTopLevelItems);
+  }
+}
 
 /**
  * Return selected function

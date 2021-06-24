@@ -15,14 +15,18 @@ from Muon.GUI.Common.contexts.data_analysis_context import DataAnalysisContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
-from Muon.GUI.Common.contexts.fitting_context import FittingContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext, PlotMode
+from Muon.GUI.Common.contexts.results_context import ResultsContext
+from Muon.GUI.Common.contexts.fitting_contexts.model_fitting_context import ModelFittingContext
+from Muon.GUI.Common.contexts.fitting_contexts.tf_asymmetry_fitting_context import TFAsymmetryFittingContext
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.contexts.plotting_context import PlottingContext, PlotMode
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
+from Muon.GUI.Common.model_fitting_tab_widget.model_fitting_tab_widget import ModelFittingTabWidget
 from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_widget import SeqFittingTabWidget
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 from Muon.GUI.Common.phase_table_widget.phase_table_widget import PhaseTabWidget
@@ -33,7 +37,8 @@ from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
-TAB_ORDER = ["Home", "Grouping", "Phase Table", "Fitting", "Sequential Fitting", "Results"]
+TAB_ORDER = ["Home", "Grouping", "Phase Table", "Fitting", "Sequential Fitting", "Results", "Model Fitting"]
+SHOW_MODEL_FITTING = False
 
 
 def check_facility():
@@ -79,20 +84,26 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.group_pair_context = MuonGroupPairContext(
             self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
-        self.fitting_context = FittingContext()
-
+        self.fitting_context = TFAsymmetryFittingContext(allow_double_pulse_fitting=True)
+        self.results_context = ResultsContext()
+        self.model_fitting_context = ModelFittingContext(allow_double_pulse_fitting=False)
+        self.plotting_context = PlottingContext()
         self.context = DataAnalysisContext(muon_data_context=self.data_context,
                                            muon_gui_context=self.gui_context,
                                            muon_group_context=self.group_pair_context,
                                            fitting_context=self.fitting_context,
-                                           muon_phase_context=self.phase_context)
+                                           results_context=self.results_context,
+                                           model_fitting_context=self.model_fitting_context,
+                                           muon_phase_context=self.phase_context,
+                                           plotting_context=self.plotting_context)
 
         # create the Dockable plot widget
         self.fitting_tab = FittingTabWidget(self.context, self)
-        self.plot_widget = PlotWidget(self.context,self.fitting_tab.fitting_tab_presenter.get_selected_fit_workspaces, parent=self)
+        self.plot_widget = PlotWidget(self.context, self.fitting_tab.fitting_tab_model.get_active_fit_results,
+                                      parent=self)
         self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
                                                               plotting_widget=self.plot_widget.view)
-        self.dockable_plot_widget_window.setMinimumWidth(575)
+        self.dockable_plot_widget_window.setMinimumWidth(800)
 
         # Add dock widget to main Muon analysis window
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget_window)
@@ -110,10 +121,13 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         # set up other widgets
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
         self.home_tab = HomeTabWidget(self.context, self)
-        self.grouping_tab_widget = GroupingTabWidget(self.context)
+        self.grouping_tab_widget = GroupingTabWidget(self.context, parent)
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
+
+        if SHOW_MODEL_FITTING:
+            self.model_fitting_tab = ModelFittingTabWidget(self.context, self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget("Muon Analysis 2")
@@ -152,6 +166,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.setup_on_recalulation_finished_notifier()
 
+        if SHOW_MODEL_FITTING:
+            self.setup_results_notifier()
+
         self.context.data_context.message_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.message_observer)
 
@@ -166,13 +183,14 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         """
         self.tabs = DetachableTabWidget(self)
         self.tabs.addTabWithOrder(self.home_tab.home_tab_view, 'Home')
-        self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view,
-                                  'Grouping')
-        self.tabs.addTabWithOrder(self.phase_tab.phase_table_view,
-                                  'Phase Table')
+        self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
+        self.tabs.addTabWithOrder(self.phase_tab.phase_table_view, 'Phase Table')
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
         self.tabs.addTabWithOrder(self.seq_fitting_tab.seq_fitting_tab_view, 'Sequential Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
+        if SHOW_MODEL_FITTING:
+            self.tabs.addTabWithOrder(self.model_fitting_tab.model_fitting_tab_view, 'Model Fitting')
+
         self.update_plot_observer = GenericObserver(self.plot_widget.presenter.update_plot)
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
 
@@ -187,6 +205,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             return
 
         self.plot_widget.presenter.handle_plot_mode_changed(plot_mode)
+        self.fitting_tab.fitting_tab_presenter.handle_plot_mode_changed(plot_mode)
 
     def setup_disable_notifier(self):
 
@@ -195,7 +214,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.disable_notifier.add_subscriber(self.load_widget.load_widget.disable_observer)
 
-        self.disable_notifier.add_subscriber(self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
+        self.disable_notifier.add_subscriber(self.fitting_tab.fitting_tab_view.disable_tab_observer)
+
+        if SHOW_MODEL_FITTING:
+            self.disable_notifier.add_subscriber(self.model_fitting_tab.model_fitting_tab_view.disable_tab_observer)
 
         self.disable_notifier.add_subscriber(self.phase_tab.phase_table_presenter.disable_tab_observer)
 
@@ -205,13 +227,18 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.disable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.disable_tab_observer)
 
+        self.disable_notifier.add_subscriber(self.plot_widget.presenter.disable_observer)
+
     def setup_enable_notifier(self):
 
         self.enable_notifier.add_subscriber(self.home_tab.home_tab_widget.enable_observer)
 
         self.enable_notifier.add_subscriber(self.load_widget.load_widget.enable_observer)
 
-        self.enable_notifier.add_subscriber(self.fitting_tab.fitting_tab_presenter.enable_tab_observer)
+        self.enable_notifier.add_subscriber(self.fitting_tab.fitting_tab_view.enable_tab_observer)
+
+        if SHOW_MODEL_FITTING:
+            self.enable_notifier.add_subscriber(self.model_fitting_tab.model_fitting_tab_view.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.phase_tab.phase_table_presenter.enable_tab_observer)
 
@@ -220,6 +247,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.enable_notifier.add_subscriber(self.seq_fitting_tab.seq_fitting_tab_presenter.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.enable_tab_observer)
+
+        self.enable_notifier.add_subscriber(self.plot_widget.presenter.enable_observer)
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
@@ -232,7 +261,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.phase_tab.phase_table_presenter.run_change_observer)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
-            self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
+            self.fitting_tab.fitting_tab_view.disable_tab_observer)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.disable_tab_observer)
@@ -296,10 +325,19 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_tab.fitting_tab_presenter.fit_parameter_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.fit_parameter_updated_observer)
 
-        self.fitting_tab.fitting_tab_presenter.fit_type_changed_notifier.add_subscriber(
+        self.seq_fitting_tab.seq_fitting_tab_presenter.fit_parameter_changed_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.fit_parameter_updated_observer)
+
+        self.seq_fitting_tab.seq_fitting_tab_presenter.sequential_fit_finished_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.sequential_fit_finished_observer)
+
+        self.fitting_tab.fitting_tab_presenter.fitting_mode_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.fit_type_changed_observer)
 
-        self.fitting_tab.fitting_tab_presenter.selected_single_fit_notifier.add_subscriber(
+        self.fitting_tab.fitting_tab_presenter.simultaneous_fit_by_specifier_changed.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
+
+        self.fitting_tab.fitting_tab_presenter.selected_fit_results_changed.add_subscriber(
             self.plot_widget.presenter.plot_selected_fit_observer)
 
         self.seq_fitting_tab.seq_fitting_tab_presenter.selected_sequential_fit_notifier.add_subscriber(
@@ -342,6 +380,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_tab.phase_table_presenter.enable_editing_notifier.add_subscriber(
             self.enable_observer)
 
+        if SHOW_MODEL_FITTING:
+            self.model_fitting_tab.model_fitting_tab_presenter.enable_editing_notifier.add_subscriber(
+                self.enable_observer)
+
     def setup_group_calculation_disabler_notifier(self):
 
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
@@ -353,6 +395,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_tab.phase_table_presenter.disable_editing_notifier.add_subscriber(
             self.disable_observer)
 
+        if SHOW_MODEL_FITTING:
+            self.model_fitting_tab.model_fitting_tab_presenter.disable_editing_notifier.add_subscriber(
+                self.disable_observer)
+
     def setup_on_load_enabler(self):
         self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
             self.home_tab.home_tab_widget.enable_observer)
@@ -361,7 +407,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.grouping_tab_widget.group_tab_presenter.enable_observer)
 
         self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
-            self.fitting_tab.fitting_tab_presenter.enable_tab_observer)
+            self.fitting_tab.fitting_tab_view.enable_tab_observer)
 
     def setup_on_load_disabler(self):
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
@@ -371,7 +417,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.grouping_tab_widget.group_tab_presenter.disable_observer)
 
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
-            self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
+            self.fitting_tab.fitting_tab_view.disable_tab_observer)
 
     def setup_on_recalulation_finished_notifier(self):
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
@@ -394,12 +440,21 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_context.new_fit_results_notifier.add_subscriber(
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
 
-        self.fitting_context.plot_guess_notifier.add_subscriber(
-            self.plot_widget.presenter.plot_guess_observer)
+        self.fitting_tab.fitting_tab_presenter.remove_plot_guess_notifier.add_subscriber(
+            self.plot_widget.presenter.remove_plot_guess_observer)
+
+        self.fitting_tab.fitting_tab_presenter.update_plot_guess_notifier.add_subscriber(
+            self.plot_widget.presenter.update_plot_guess_observer)
+
+    def setup_results_notifier(self):
+        """Connect results tab to the model fitting tab."""
+        self.results_tab.results_tab_presenter.results_table_created_notifier.add_subscriber(
+            self.model_fitting_tab.model_fitting_tab_presenter.results_table_created_observer)
 
     def closeEvent(self, event):
         self.removeDockWidget(self.dockable_plot_widget_window)
         self.tabs.closeEvent(event)
         self.context.ads_observer.unsubscribe()
         self.context.ads_observer = None
+        self.grouping_tab_widget.group_tab_presenter.closePeriodInfoWidget()
         super(MuonAnalysisGui, self).closeEvent(event)

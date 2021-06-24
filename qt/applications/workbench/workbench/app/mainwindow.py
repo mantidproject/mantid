@@ -15,6 +15,7 @@ import os
 
 from mantid.api import FrameworkManager
 from mantid.kernel import ConfigService, logger
+from workbench.config import SAVE_STATE_VERSION
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.utils.windowfinder import find_window
 from workbench.widgets.about.presenter import AboutPresenter
@@ -67,8 +68,7 @@ def _get_splash_image():
 
 SPLASH = QSplashScreen(_get_splash_image(), Qt.WindowStaysOnTopHint)
 SPLASH.show()
-SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
-                   | Qt.AlignAbsolute, QColor(Qt.black))
+SPLASH.showMessage("Starting...",  int(Qt.AlignBottom) | int(Qt.AlignLeft) | int(Qt.AlignAbsolute), QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -79,8 +79,6 @@ QApplication.processEvents(QEventLoop.AllEvents)
 
 class MainWindow(QMainWindow):
     DOCKOPTIONS = QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks
-    # list of custom interfaces that are not qt4/qt5 compatible
-    PYTHON_GUI_BLACKLIST = ['Frequency_Domain_Analysis_Old.py']
 
     def __init__(self):
         QMainWindow.__init__(self)
@@ -94,6 +92,7 @@ class MainWindow(QMainWindow):
         self.messagedisplay = None
         self.ipythonconsole = None
         self.workspacewidget = None
+        self.workspacecalculator = None
         self.editor = None
         self.algorithm_selector = None
         self.plot_selector = None
@@ -128,6 +127,8 @@ class MainWindow(QMainWindow):
         self.interface_manager = None
         self.interface_executor = None
         self.interface_list = None
+
+        self.could_restore_state = False
 
     def setup(self):
         # menus must be done first so they can be filled by the
@@ -190,6 +191,11 @@ class MainWindow(QMainWindow):
         self.algorithm_selector.algorithm_selector.set_get_selected_workspace_fn(
             self.workspacewidget.workspacewidget.getSelectedWorkspaceNames)
 
+        from workbench.plugins.workspacecalculatorwidget import WorkspaceCalculatorWidget
+        self.workspacecalculator = WorkspaceCalculatorWidget(self)
+        self.workspacecalculator.register_plugin()
+        self.widgets.append(self.workspacecalculator)
+
         # Set up the project, recovery and interface manager objects
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
         self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
@@ -225,7 +231,7 @@ class MainWindow(QMainWindow):
         if not self.splash:
             return
         if msg:
-            self.splash.showMessage(msg, Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute,
+            self.splash.showMessage(msg, int(Qt.AlignBottom) | int(Qt.AlignLeft) | int(Qt.AlignAbsolute),
                                     QColor(Qt.black))
         QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -350,10 +356,7 @@ class MainWindow(QMainWindow):
             interface.setObjectName(object_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
             parent, flags = get_window_config()
-            if submenu == "Indirect":
-                # always make indirect interfaces children of workbench
-                interface.setParent(self, interface.windowFlags())
-            else:
+            if parent:
                 interface.setParent(parent, flags)
             interface.show()
         else:
@@ -425,9 +428,6 @@ class MainWindow(QMainWindow):
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
                 logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
                 continue
-            if scriptname in self.PYTHON_GUI_BLACKLIST:
-                logger.information('Not adding gui "{}"'.format(scriptname))
-                continue
             interfaces.setdefault(key, []).append(scriptname)
 
         return interfaces, registers_to_run
@@ -476,7 +476,7 @@ class MainWindow(QMainWindow):
     def create_load_layout_action(self, layout_name, layout):
         action_load_layout = create_action(self,
                                            layout_name,
-                                           on_triggered=lambda: self.restoreState(layout))
+                                           on_triggered=lambda: self.attempt_to_restore_state(layout))
         return action_load_layout
 
     def prep_window_for_reset(self):
@@ -497,7 +497,7 @@ class MainWindow(QMainWindow):
         editor = self.editor
         algorithm_selector = self.algorithm_selector
         plot_selector = self.plot_selector
-
+        workspacecalculator = self.workspacecalculator
         # If more than two rows are needed in a column,
         # arrange_layout function needs to be revisited.
         # In the first column, there are three widgets in two rows
@@ -507,7 +507,7 @@ class MainWindow(QMainWindow):
                 # column 0
                 [[workspacewidget], [algorithm_selector, plot_selector]],
                 # column 1
-                [[editor, ipython]],
+                [[editor, ipython], [workspacecalculator]],
                 # column 2
                 [[memorywidget], [logmessages]]
             ],
@@ -551,21 +551,22 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
-        if self.project.is_saving or self.project.is_loading:
-            event.ignore()
-            self.project.inform_user_not_possible()
-            return
-
-        # Check whether or not to save project
-        if not self.project.saved:
-            # Offer save
-            if self.project.offer_save(self):
-                # Cancel has been clicked
+        if self.project is not None:
+            if self.project.is_saving or self.project.is_loading:
                 event.ignore()
+                self.project.inform_user_not_possible()
                 return
 
+            # Check whether or not to save project
+            if not self.project.saved:
+                # Offer save
+                if self.project.offer_save(self):
+                    # Cancel has been clicked
+                    event.ignore()
+                    return
+
         # Close editors
-        if self.editor.app_closing():
+        if self.editor is None or self.editor.app_closing():
             # write out any changes to the mantid config file
             ConfigService.saveConfig(ConfigService.getUserFilename())
             # write current window information to global settings object
@@ -581,11 +582,20 @@ class MainWindow(QMainWindow):
 
             # Kill the project recovery thread and don't restart should a save be in progress and clear out current
             # recovery checkpoint as it is closing properly
-            self.project_recovery.stop_recovery_thread()
-            self.project_recovery.closing_workbench = True
-            self.project_recovery.remove_current_pid_folder()
+            if self.project_recovery is not None:
+                self.project_recovery.stop_recovery_thread()
+                self.project_recovery.closing_workbench = True
+                self.project_recovery.remove_current_pid_folder()
 
-            self.interface_manager.closeHelpWindow()
+            # Cancel memory widget thread
+            if self.memorywidget is not None:
+                self.memorywidget.presenter.cancel_memory_update()
+
+            if self.interface_manager is not None:
+                self.interface_manager.closeHelpWindow()
+
+            if self.workspacecalculator is not None:
+                self.workspacecalculator.view.closeEvent(event)
 
             event.accept()
         else:
@@ -740,7 +750,10 @@ class MainWindow(QMainWindow):
 
         # restore window state
         if settings.has('MainWindow/state'):
-            self.restoreState(settings.get('MainWindow/state'))
+            if not self.restoreState(settings.get('MainWindow/state'), SAVE_STATE_VERSION):
+                logger.warning(
+                    "The previous layout of workbench is not compatible with this version, reverting to default layout."
+                )
         else:
             self.setWindowState(Qt.WindowMaximized)
 
@@ -753,7 +766,7 @@ class MainWindow(QMainWindow):
     def writeSettings(self, settings):
         settings.set('MainWindow/size', self.size())  # QSize
         settings.set('MainWindow/position', self.pos())  # QPoint
-        settings.set('MainWindow/state', self.saveState())  # QByteArray
+        settings.set('MainWindow/state', self.saveState(SAVE_STATE_VERSION))  # QByteArray
 
         # write out settings for children
         AlgorithmInputHistory().writeSettings(settings)
@@ -764,3 +777,28 @@ class MainWindow(QMainWindow):
     def override_python_input(self):
         """Replace python input with a call to a qinputdialog"""
         builtins.input = QAppThreadCall(input_qinputdialog)
+
+    def attempt_to_restore_state(self, state):
+        if self.restoreState(state, SAVE_STATE_VERSION):
+            return
+
+        # The version number of the supplied state is older than the current version
+        reply = QMessageBox.question(
+            self,
+            "Layout Restoration",
+            "The selected layout is incompatible with this version of Workbench. Workbench will attempt to restore "
+            "the layout, but it may appear differently from before.\nDo you wish to continue?",
+            QMessageBox.Yes | QMessageBox.No)
+        if not reply == QMessageBox.Yes:
+            return
+
+        for version in range(0, SAVE_STATE_VERSION):
+            if self.restoreState(state, version):
+                QMessageBox.information(
+                    self,
+                    "Success",
+                    "The layout was successfully restored.\nTo hide this warning in the future, delete the old "
+                    "layout in File > Settings, and save this as a new layout."
+                )
+                return
+        QMessageBox.warning(self, "Failure", "The layout was unable to be restored.", QMessageBox.Ok)

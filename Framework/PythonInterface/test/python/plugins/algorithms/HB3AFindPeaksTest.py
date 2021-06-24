@@ -21,7 +21,7 @@ class HB3AFindPeaksTest(unittest.TestCase):
         # Loads in the testing files to workspaces to reduce testing overhead for multiple tests
         if self._data_ws is None:
             name = "HB3A_exp0724"
-            HB3AAdjustSampleNorm(Filename=",".join(f for f in self._files), OutputWorkspace=name)
+            HB3AAdjustSampleNorm(Filename=",".join(f for f in self._files), OutputWorkspace=name, NormaliseBy='None')
             self._data_ws = name
 
     def test_find_ub_peaks(self):
@@ -73,22 +73,6 @@ class HB3AFindPeaksTest(unittest.TestCase):
             self.assertTrue(HasUB(ws))
             # Check that peaks were actually found
             self.assertTrue(ws.getNumberPeaks() > 0)
-
-    def test_find_ub_van_norm(self):
-        # Test with vanadium normalization to make sure UB matrix and peaks can still be found
-        if self._data_ws is not None:
-            mtd.clear()
-
-        norm = HB3AAdjustSampleNorm(Filename=self._files[0],
-                                    VanadiumFile="HB3A_exp0722_scan0220.nxs")
-        peaks = HB3AFindPeaks(InputWorkspace=norm,
-                              CellType="Orthorhombic",
-                              Centering="F",
-                              PeakDistanceThreshold=0.25,
-                              Wavelength=1.008)
-        # Verify UB and peaks were found
-        self.assertTrue(HasUB(peaks))
-        self.assertGreater(peaks.getNumberPeaks(), 0)
 
 
 if __name__ == '__main__':
