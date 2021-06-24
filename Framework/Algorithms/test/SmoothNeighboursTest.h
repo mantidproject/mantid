@@ -387,7 +387,7 @@ public:
     algo->setPropertyValue("OutputWorkspace", "WISH00019612");
     algo->execute();
 
-    algo = AlgorithmManager::Instance().create("CropWorkspace");
+    /*algo = AlgorithmManager::Instance().create("CropWorkspace");
     algo->setPropertyValue("InputWorkspace", "WISH00019612");
     algo->setPropertyValue("XMin", "6000");
     algo->setPropertyValue("XMax", "99000");
@@ -442,7 +442,7 @@ public:
     algo->setPropertyValue("XMin", "0.8");
     algo->setPropertyValue("XMax", "9.3");
     algo->setPropertyValue("OutputWorkspace", "WISH00019612");
-    algo->execute();
+    algo->execute();*/
 
     MatrixWorkspace_sptr workspace;
     TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("WISH00019612"));
@@ -525,7 +525,7 @@ public:
       dataPoints[pointNo][2] = pos.Z();
       ++pointNo;
     }
-    auto annTree = std::make_unique<ANNkd_tree>(dataPoints, nhist, 3);
+    auto annTree = std::make_unique<ANNkd_tree>(dataPoints, static_cast<int>(nhist), 3);
 
     // Run the nearest neighbour search on each detector, reusing the arrays
     // Set size initially to avoid array index error when testing in debug mode
