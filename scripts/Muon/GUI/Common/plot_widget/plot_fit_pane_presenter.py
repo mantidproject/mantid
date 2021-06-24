@@ -32,6 +32,7 @@ class PlotFitPanePresenter(BasePanePresenter):
         if fit_information_list:
             self._current_fit_info = fit_information_list
             for fit_information in fit_information_list:
+                print("moo", fit_information)
                 fit = fit_information.fit
                 fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit,with_diff)
                 workspace_list += self.match_raw_selection(fit_information.input_workspaces,raw) + fit_workspaces

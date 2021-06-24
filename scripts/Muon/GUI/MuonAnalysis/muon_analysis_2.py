@@ -87,7 +87,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_context = TFAsymmetryFittingContext(allow_double_pulse_fitting=True)
         self.results_context = ResultsContext()
         self.model_fitting_context = ModelFittingContext(allow_double_pulse_fitting=False)
-        self.plot_panes_context = PlotPanesContext())
+        self.plot_panes_context = PlotPanesContext()
         self.context = DataAnalysisContext(muon_data_context=self.data_context,
                                            muon_gui_context=self.gui_context,
                                            muon_group_context=self.group_pair_context,

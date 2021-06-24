@@ -19,7 +19,7 @@ class PlotFreqFitPaneModel(BasePaneModel):
             return [], []
         workspaces = []
         indices = []
-        for workspace_name in fit.output_workspace_names:
+        for workspace_name in fit.output_workspace_names():
             first_fit_index = 1  # calc
             second_fit_index = 2  # Diff
             workspaces.append(workspace_name)

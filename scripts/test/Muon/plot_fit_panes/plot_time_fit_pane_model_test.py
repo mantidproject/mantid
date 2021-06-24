@@ -16,6 +16,9 @@ class MockFitInfo(object):
         self.fit = "FlatBackground"
         self.input_workspaces = name
 
+    def output_workspace_names(self):
+        return self.input_workspaces
+
 
 @start_qapplication
 class PlotTimeFitPaneModelTest(unittest.TestCase):

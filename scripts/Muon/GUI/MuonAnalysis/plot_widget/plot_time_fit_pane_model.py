@@ -19,7 +19,7 @@ class PlotTimeFitPaneModel(PlotGroupPairModel):
             return [], []
         workspaces = []
         indices = []
-        for workspace_name in fit.output_workspace_names:
+        for workspace_name in fit.output_workspace_names():
             first_fit_index = 1  # calc
             if fit.tf_asymmetry_fit:
                 first_fit_index = 3
