@@ -66,6 +66,7 @@ private:
   std::complex<double> E1(std::complex<double> z) const;
 
   void calHandEta(double sigma2, double gamma, double &H, double &eta) const;
+  double expWidth() const;
 
   mutable double mFWHM;
 };
