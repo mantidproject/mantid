@@ -74,9 +74,11 @@ double Bk2BkExpConvPV::height() const {
  * Get approximate peak width.
  */
 double Bk2BkExpConvPV::fwhm() const {
-  // intrinsic width of B2B exp
-  auto s = std::sqrt(getParameter("Sigma2"));
-  auto w0 = expWidth();
+  // get sigma of Gauss with dame FWHM as voigt (H)
+  double H, eta;
+  calHandEta(getParameter("Sigma2"), getParameter("Gamma"), H, eta);
+  const auto s = H / (2 * sqrt(2 * M_LN2));
+  const auto w0 = expWidth();
   // Gaussian and B2B exp widths don't add in quadrature. The following
   // tends to gaussian at large S and at S=0 is equal to the intrinsic width of
   // the B2B exp (good to <3% for typical params)
@@ -89,18 +91,21 @@ double Bk2BkExpConvPV::fwhm() const {
  * @param w :: New value for the width.
  */
 void Bk2BkExpConvPV::setFwhm(const double w) {
-  setParameter("Gamma", 0); // so essentially have B2Bexp
   const auto h0 = height();
   const auto w0 = expWidth();
   if (w > w0) {
     const auto a = 0.5 * M_LN2;
     const auto b = 2 * sqrt(2 * M_LN2);
-    // calculate new value of S (from solving eq in fwhm func)
-    const auto sigma = w0 * (gsl_sf_lambert_W0(-(a / b) * exp(-(a / b) * (w / w0))) / a + (w / w0) / b);
-    setParameter("Sigma2", sigma * sigma);
+    // Can calculate FWHM of voigt (from FWHM of Gauss componeont from Eq. in BackToBackExponential)
+    // From Eq. in calHandEta assuming FWHM of Gauss and Lorz are equal fwhm_pv = 1.6364*fwhm_gauss
+    const auto fwhm_gauss =
+        b * w0 * (gsl_sf_lambert_W0(-(a / b) * exp(-(a / b) * (w / w0))) / a + (w / w0) / b) / 1.6364;
+    setParameter("Sigma2", std::pow(fwhm_gauss / b, 2));
+    setParameter("Gamma", fwhm_gauss / 2);
   } else {
     // set to some small number relative to w0
     setParameter("Sigma2", 1e-6);
+    setParameter("Gamma", 1e-6);
   }
   setHeight(h0);
 }
@@ -185,7 +190,7 @@ double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha, do
   if (eta < 1.0E-8) {
     omega2 = 0.0;
   } else {
-    omega2 = 2 * N * eta / M_PI * (imag(exp(p) * E1(p)) + imag(exp(q) * E1(q)));
+    omega2 = (2 * N * eta / M_PI) * (imag(exp(p) * E1(p)) + imag(exp(q) * E1(q)));
   }
   double omega = omega1 - omega2;
 
