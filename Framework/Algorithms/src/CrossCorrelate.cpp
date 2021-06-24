@@ -91,11 +91,11 @@ void CrossCorrelate::init() {
   declareProperty("WorkspaceIndexMax", 0, mustBePositive,
                   " The workspace index of the last member of the range of "
                   "spectra to cross-correlate against.");
-  // max is .1
-  declareProperty("MaxDSpaceShift", EMPTY_DBL(), "Optional float for maximum shift to calculate (in d-spacing)");
   // Only the data in the range X_min, X_max will be used
   declareProperty("XMin", 0.0, "The starting point of the region to be cross correlated.");
   declareProperty("XMax", 0.0, "The ending point of the region to be cross correlated.");
+  // max is .1
+  declareProperty("MaxDSpaceShift", EMPTY_DBL(), "Optional float for maximum shift to calculate (in d-spacing)");
 }
 
 /** Executes the algorithm
