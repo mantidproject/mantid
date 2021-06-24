@@ -764,6 +764,10 @@ Function InstallOptionsPage
 FunctionEnd
 
 ; Required for Windows 10 "Apps & features" uninstall workaround.
+@CPACK_NSIS_ADDITIONAL_INCLUDE_DIR@
+@CPACK_NSIS_ADDITIONAL_PLUGIN_ANSI_DIR@
+@CPACK_NSIS_ADDITIONAL_PLUGIN_UNICODE_DIR@
+
 !include "UAC.nsh"
 !include "StdUtils.nsh"
 
