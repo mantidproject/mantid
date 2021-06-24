@@ -250,13 +250,13 @@ void Bk2BkExpConvPV::geneatePeak(double *out, const double *xValues, const size_
 
 void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double &H, double &eta) const {
   // 1. Calculate H
-  double H_G = sqrt(8.0 * sigma2 * M_LN2);
-  double H_L = gamma;
+  double H_G = sqrt(8.0 * sigma2 * M_LN2); // FWHM Gauss
+  double H_L = 2 * gamma;                  // FWHM lorz
 
   double temp1 = std::pow(H_L, 5) + 0.07842 * H_G * std::pow(H_L, 4) + 4.47163 * std::pow(H_G, 2) * std::pow(H_L, 3) +
                  2.42843 * std::pow(H_G, 3) * std::pow(H_L, 2) + 2.69269 * std::pow(H_G, 4) * H_L + std::pow(H_G, 5);
 
-  H = std::pow(temp1, 0.2);
+  H = std::pow(temp1, 0.2); // FWHM of PV
 
   // 2. Calculate eta
   double gam_pv = H_L / H;
