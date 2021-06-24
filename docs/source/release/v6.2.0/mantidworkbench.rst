@@ -18,5 +18,6 @@ Bugfixes
 
 - Scroll bars added to about dialog if screen resolution is too low.
 - Sliceviewer now doesn't normalise basis vectors for HKL data such that Bragg peaks appear at integer HKL for cuts along e.g. HH0
+- Uninstalling from Windows "Apps & features" list will now run the uninstaller as the current Windows user and delete all shortcuts.
 
 :ref:`Release 6.2.0 <v6.2.0>`
