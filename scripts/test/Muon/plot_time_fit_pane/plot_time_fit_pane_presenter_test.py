@@ -17,6 +17,12 @@ from mantid import AnalysisDataService
 from mantidqt.utils.qt.testing import start_qapplication
 
 
+class MockFitInfo(object):
+    def __init__(self, name):
+        self.fit = "FlatBackground"
+        self.input_workspaces = name
+
+
 @start_qapplication
 class PlotTimeFitPanePresenterrTest(unittest.TestCase):
 
@@ -37,113 +43,54 @@ class PlotTimeFitPanePresenterrTest(unittest.TestCase):
     def tearDown(self):
         AnalysisDataService.Instance().clear()
 
-    def test_handle_data_type_changed_pair_selected(self):
-        self.presenter._check_if_counts_and_pairs_selected = mock.Mock(return_value=True)
-        self.presenter.handle_data_updated = mock.Mock()
-        self.figure_presenter.force_autoscale = mock.Mock()
-
-        self.presenter.handle_data_type_changed()
-
-        self.presenter.handle_data_updated.assert_not_called()
-        self.figure_presenter.force_autoscale.assert_not_called()
-
-    def test_handle_data_type_changed_group_selected(self):
-        self.presenter._check_if_counts_and_pairs_selected = mock.Mock(return_value=False)
-        self.presenter.handle_data_updated = mock.Mock()
-        self.figure_presenter.force_autoscale = mock.Mock()
-
-        self.presenter.handle_data_type_changed()
-
-        self.presenter.handle_data_updated.assert_called_once_with(autoscale=True, hold_on=False)
-        self.figure_presenter.force_autoscale.assert_called_once()
-
-    def test_check_if_counts_and_pairs_selected_true(self):
-        self.context.group_pair_context.selected_pairs = ["long"]
-        self.view.get_plot_type.return_value = "Counts"
-
-        state = self.presenter._check_if_counts_and_pairs_selected()
-        self.assertEqual(state, True)
-        self.view.set_plot_type.assert_called_once_with("Asymmetry")
-        self.view.warning_popup.assert_called_once()
-
-    def test_check_if_counts_and_pairs_selected_false(self):
-        self.context.group_pair_context.selected_pairs = []
-        self.view.get_plot_type.return_value = "Counts"
-
-        state = self.presenter._check_if_counts_and_pairs_selected()
-        self.assertEqual(state, False)
-        self.view.set_plot_type.assert_not_called()
-        self.view.warning_popup.assert_not_called()
-
-    def test_handle_data_updated(self):
-        self.model.get_workspace_list_and_indices_to_plot.return_value = ["fwd","bwd"],[0,1]
-        self.presenter.add_list_to_plot = mock.Mock()
-        self.view.is_raw_plot.return_value = True
-        self.view.get_plot_type.return_value = "Counts"
-
-        self.presenter.handle_data_updated(True, False)
-
-        self.model.get_workspace_list_and_indices_to_plot.assert_called_once_with(True, "Counts")
-        self.presenter.add_list_to_plot.assert_called_once_with(["fwd","bwd"],[0,1], hold=False, autoscale=True)
-
-    def test_handle_added_or_removed_group_or_pair_to_plot_add(self):
-        self.presenter.handle_added_group_or_pair_to_plot = mock.Mock()
-        self.presenter.handle_removed_group_or_pair_from_plot = mock.Mock()
-
-        info = {"is_added": True, "name":"fwd"}
-        self.presenter.handle_added_or_removed_group_or_pair_to_plot(info)
-
-        self.presenter.handle_added_group_or_pair_to_plot.assert_called_once_with()
-        self.presenter.handle_removed_group_or_pair_from_plot.assert_not_called()
-
-    def test_handle_added_or_removed_group_or_pair_to_plot_removed(self):
-        self.presenter.handle_added_group_or_pair_to_plot = mock.Mock()
-        self.presenter.handle_removed_group_or_pair_from_plot = mock.Mock()
-
-        info = {"is_added": False, "name":"fwd"}
-        self.presenter.handle_added_or_removed_group_or_pair_to_plot(info)
-
-        self.presenter.handle_added_group_or_pair_to_plot.assert_not_called()
-        self.presenter.handle_removed_group_or_pair_from_plot.assert_called_once_with("fwd")
-
-    def test_handle_added_group_or_pair_to_plot_safe(self):
-        self.presenter.__check_if_counts_and_pairs_selected = mock.Mock(return_value=False)
-        self.presenter.handle_data_updated = mock.Mock()
-
-        self.presenter.handle_added_group_or_pair_to_plot()
-        self.presenter.handle_data_updated.assert_called_once()
-
-    def test_handle_added_group_or_pair_to_plot_unsafe(self):
-        self.presenter._check_if_counts_and_pairs_selected = mock.Mock(return_value=True)
-        self.presenter.handle_data_updated = mock.Mock()
-
-        self.presenter.handle_added_group_or_pair_to_plot()
-        self.presenter.handle_data_updated.assert_not_called()
-
-    def test_handle_removed_group_pair_from_plot(self):
-        self.model.get_workspaces_to_remove.return_value = ["EMU52; fwd"]
-        self.presenter.remove_list_from_plot = mock.Mock()
-        self.presenter.handle_data_updated = mock.Mock()
-        self.view.is_raw_plot.return_value = True
-        self.view.get_plot_type.return_value = "Counts"
-
-        self.presenter.handle_removed_group_or_pair_from_plot("fwd")
-        self.presenter.remove_list_from_plot.assert_called_once_with(["EMU52; fwd"])
-        self.presenter.handle_data_updated.assert_called_once()
+    def test_handle_plot_selected_fit(self):
+        fits = []
+        a= MockFitInfo(["unit", "test"])
+        fits.append(a)
+        self.model.get_fit_workspace_and_indices = mock.MagicMock(return_value=(["fit"], [0,1]))
+        self.view.is_raw_plot.return_value = mock.MagicMock(False)
+        self.view.is_plot_diff.return_value = mock.MagicMock(False)
+        self.figure_presenter.plot_workspaces = mock.MagicMock()
+        self.presenter.handle_plot_selected_fits(fits)
 
     def test_handle_use_raw_workspace_changed(self):
         self.presenter.check_if_can_use_rebin = mock.Mock(return_value=True)
-        self.presenter.handle_data_updated = mock.Mock()
+        self.presenter.handle_plot_selected_fits = mock.Mock()
+        self.presenter._current_fit_info = mock.Mock()
 
         self.presenter.handle_use_raw_workspaces_changed()
-        self.presenter.handle_data_updated.assert_called_once()
+        self.presenter.handle_plot_selected_fits.assert_called_once_with(self.presenter._current_fit_info)
 
     def test_handle_use_raw_workspace_changed_fail(self):
         self.presenter.check_if_can_use_rebin = mock.Mock(return_value=False)
-        self.presenter.handle_data_updated = mock.Mock()
+        self.presenter.handle_plot_selected_fits = mock.Mock()
 
         self.presenter.handle_use_raw_workspaces_changed()
-        self.presenter.handle_data_updated.assert_not_called()
+        self.presenter.handle_plot_selected_fits.assert_not_called()
+
+    def test_match_raw_selection(self):
+        self.context.fitting_context._fit_to_raw = True
+        name1 = "MUSR62260; Group; unit; Asymmetry; MA"
+        names = self.presenter.match_raw_selection([name1], False)
+        self.assertEqual(names, ["MUSR62260; Group; unit; Asymmetry; Rebin; MA"])
+
+    def test_match_raw_selection_fit_rebin(self):
+        self.context.fitting_context._fit_to_raw = False
+        name1 = "MUSR62260; Group; unit; Asymmetry; MA"
+        names = self.presenter.match_raw_selection([name1], False)
+        self.assertEqual(names, ["MUSR62260; Group; unit; Asymmetry; Rebin; MA"])
+
+    def test_match_raw_selection_plot_raw(self):
+        self.context.fitting_context._fit_to_raw = True
+        name1 = "MUSR62260; Group; unit; Asymmetry; MA"
+        names = self.presenter.match_raw_selection([name1], True)
+        self.assertEqual(names, ["MUSR62260; Group; unit; Asymmetry; MA"])
+
+    def test_match_raw_selection_fit_rebin_plot_raw(self):
+        self.context.fitting_context._fit_to_raw = False
+        name1 = "MUSR62260; Group; unit; Asymmetry; MA"
+        names = self.presenter.match_raw_selection([name1], True)
+        self.assertEqual(names, ["MUSR62260; Group; unit; Asymmetry; MA"])
 
 
 if __name__ == '__main__':

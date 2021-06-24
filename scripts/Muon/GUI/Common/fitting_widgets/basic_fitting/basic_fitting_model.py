@@ -501,7 +501,6 @@ class BasicFittingModel:
     def get_workspace_names_to_display_from_context(self) -> list:
         """Returns the workspace names to display in the view based on the selected run and group/pair options."""
         runs, groups_and_pairs = self.get_selected_runs_groups_and_pairs()
-        print("hi")
         workspace_names = self.context.get_workspace_names_for(runs, groups_and_pairs, self.fitting_context.fit_to_raw)
 
         return self._check_data_exists(workspace_names)

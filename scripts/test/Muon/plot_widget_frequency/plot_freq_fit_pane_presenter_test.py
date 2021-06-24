@@ -37,44 +37,6 @@ class PlotFreqFitPanePresenterrTest(unittest.TestCase):
     def tearDown(self):
         AnalysisDataService.Instance().clear()
 
-    def test_handle_data_type_changed_pair_selected(self):
-        self.presenter._check_if_counts_and_pairs_selected = mock.Mock(return_value=True)
-        self.presenter.handle_data_updated = mock.Mock()
-        self.figure_presenter.force_autoscale = mock.Mock()
-
-        self.presenter.handle_data_type_changed()
-
-        self.presenter.handle_data_updated.assert_not_called()
-        self.figure_presenter.force_autoscale.assert_not_called()
-
-    def test_handle_data_type_changed_group_selected(self):
-        self.presenter._check_if_counts_and_pairs_selected = mock.Mock(return_value=False)
-        self.presenter.handle_data_updated = mock.Mock()
-        self.figure_presenter.force_autoscale = mock.Mock()
-
-        self.presenter.handle_data_type_changed()
-
-        self.presenter.handle_data_updated.assert_called_once_with(autoscale=True, hold_on=False)
-        self.figure_presenter.force_autoscale.assert_called_once()
-
-    def test_check_if_counts_and_pairs_selected_true(self):
-        self.context.group_pair_context.selected_pairs = ["long"]
-        self.view.get_plot_type.return_value = "Counts"
-
-        state = self.presenter._check_if_counts_and_pairs_selected()
-        self.assertEqual(state, True)
-        self.view.set_plot_type.assert_called_once_with("Asymmetry")
-        self.view.warning_popup.assert_called_once()
-
-    def test_check_if_counts_and_pairs_selected_false(self):
-        self.context.group_pair_context.selected_pairs = []
-        self.view.get_plot_type.return_value = "Counts"
-
-        state = self.presenter._check_if_counts_and_pairs_selected()
-        self.assertEqual(state, False)
-        self.view.set_plot_type.assert_not_called()
-        self.view.warning_popup.assert_not_called()
-
     def test_handle_data_updated(self):
         self.model.get_workspace_list_and_indices_to_plot.return_value = ["fwd","bwd"],[0,1]
         self.presenter.add_list_to_plot = mock.Mock()
@@ -85,51 +47,6 @@ class PlotFreqFitPanePresenterrTest(unittest.TestCase):
 
         self.model.get_workspace_list_and_indices_to_plot.assert_called_once_with(True, "Counts")
         self.presenter.add_list_to_plot.assert_called_once_with(["fwd","bwd"],[0,1], hold=False, autoscale=True)
-
-    def test_handle_added_or_removed_group_or_pair_to_plot_add(self):
-        self.presenter.handle_added_group_or_pair_to_plot = mock.Mock()
-        self.presenter.handle_removed_group_or_pair_from_plot = mock.Mock()
-
-        info = {"is_added": True, "name":"fwd"}
-        self.presenter.handle_added_or_removed_group_or_pair_to_plot(info)
-
-        self.presenter.handle_added_group_or_pair_to_plot.assert_called_once_with()
-        self.presenter.handle_removed_group_or_pair_from_plot.assert_not_called()
-
-    def test_handle_added_or_removed_group_or_pair_to_plot_removed(self):
-        self.presenter.handle_added_group_or_pair_to_plot = mock.Mock()
-        self.presenter.handle_removed_group_or_pair_from_plot = mock.Mock()
-
-        info = {"is_added": False, "name":"fwd"}
-        self.presenter.handle_added_or_removed_group_or_pair_to_plot(info)
-
-        self.presenter.handle_added_group_or_pair_to_plot.assert_not_called()
-        self.presenter.handle_removed_group_or_pair_from_plot.assert_called_once_with("fwd")
-
-    def test_handle_added_group_or_pair_to_plot_safe(self):
-        self.presenter.__check_if_counts_and_pairs_selected = mock.Mock(return_value=False)
-        self.presenter.handle_data_updated = mock.Mock()
-
-        self.presenter.handle_added_group_or_pair_to_plot()
-        self.presenter.handle_data_updated.assert_called_once()
-
-    def test_handle_added_group_or_pair_to_plot_unsafe(self):
-        self.presenter._check_if_counts_and_pairs_selected = mock.Mock(return_value=True)
-        self.presenter.handle_data_updated = mock.Mock()
-
-        self.presenter.handle_added_group_or_pair_to_plot()
-        self.presenter.handle_data_updated.assert_not_called()
-
-    def test_handle_removed_group_pair_from_plot(self):
-        self.model.get_workspaces_to_remove.return_value = ["EMU52; fwd"]
-        self.presenter.remove_list_from_plot = mock.Mock()
-        self.presenter.handle_data_updated = mock.Mock()
-        self.view.is_raw_plot.return_value = True
-        self.view.get_plot_type.return_value = "Counts"
-
-        self.presenter.handle_removed_group_or_pair_from_plot("fwd")
-        self.presenter.remove_list_from_plot.assert_called_once_with(["EMU52; fwd"])
-        self.presenter.handle_data_updated.assert_called_once()
 
     def test_handle_use_raw_workspace_changed(self):
         self.presenter.check_if_can_use_rebin = mock.Mock(return_value=True)

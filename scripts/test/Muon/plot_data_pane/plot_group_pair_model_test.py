@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from unittest import mock
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.plot_widget.data_pane.plot_group_pair_model import PlotGroupPairModel
 from mantidqt.utils.qt.testing import start_qapplication
@@ -24,7 +23,12 @@ class PlotGroupPairModelTest(unittest.TestCase):
         cls.context.ads_observer = None
 
     def setUp(self):
-        self.model = PlotGroupPairModel(context=self.context, "test")
+        self.model = PlotGroupPairModel(context=self.context, name="test")
+        self.context.group_pair_context._groups = []
+        self.context.group_pair_context._pairs = []
+        self.context.group_pair_context._selected_pairs = []
+
+        self.context.group_pair_context.add_group(MuonGroup(group_name="fwd", detector_ids=[1]))
         self.context.group_pair_context.add_group(MuonGroup(group_name="bwd", detector_ids=[2]))
         self.context.group_pair_context.add_group(MuonGroup(group_name="top", detector_ids=[3]))
         self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]

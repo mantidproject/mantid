@@ -6,10 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
-from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_model import PlotTimeFitPaneModel
 from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+
+
+class MockFitInfo(object):
+    def __init__(self, name):
+        self.fit = "FlatBackground"
+        self.input_workspaces = name
 
 
 @start_qapplication
@@ -25,108 +30,46 @@ class PlotTimeFitPaneModelTest(unittest.TestCase):
 
     def setUp(self):
         self.model = PlotTimeFitPaneModel(context=self.context)
-        test_group = MuonGroup(group_name="fwd", detector_ids=[1, 2, 3, 4, 5])
-        self.context.group_pair_context._groups = [test_group]
-        self.context.group_pair_context._pairs = []
-        self.context.group_pair_context._selected_groups = ["fwd"]
-        self.context.group_pair_context._selected_pairs = []
 
-    def test_get_workspace_to_plot_time(self):
-        runs = [[62260]]
-        self.context.data_context.current_runs = runs
-        self.context.group_pair_context["fwd"].get_asymmetry_workspace_names = mock.MagicMock()
+    def test_get_fit_ws_and_indicies(self):
+        fit = mock.MagicMock()
+        fit.output_workspace_names = ["test", "unit"]
+        fit.tf_asymmetry_fit = False
 
-        self.model.get_time_workspaces_to_plot("fwd", True, "Asymmetry")
+        ws, indices = self.model.get_fit_workspace_and_indices(fit, False)
 
-        self.assertEqual(self.context.group_pair_context["fwd"].get_asymmetry_workspace_names.call_count, 1)
-        self.context.group_pair_context["fwd"].get_asymmetry_workspace_names.assert_called_once_with(runs)
+        self.assertEqual(ws, ["test", "unit"])
+        self.assertEqual(indices, [1,1])
 
-    def test_get_workspace_to_plot_time_rebin(self):
-        runs = [[62260]]
-        self.context.data_context.current_runs = runs
-        self.context.group_pair_context["fwd"].get_asymmetry_workspace_names = mock.MagicMock()
-        self.context.group_pair_context["fwd"].get_asymmetry_workspace_names_rebinned = mock.MagicMock()
+    def test_get_fit_ws_and_indicies_with_diff(self):
+        fit = mock.MagicMock()
+        fit.output_workspace_names = ["test", "unit"]
+        fit.tf_asymmetry_fit = False
 
-        self.model.get_time_workspaces_to_plot("fwd", False, "Asymmetry")
+        ws, indices = self.model.get_fit_workspace_and_indices(fit, True)
 
-        self.assertEqual(self.context.group_pair_context["fwd"].get_asymmetry_workspace_names.call_count, 0)
-        self.assertEqual(self.context.group_pair_context["fwd"].get_asymmetry_workspace_names_rebinned.call_count, 1)
-        self.context.group_pair_context["fwd"].get_asymmetry_workspace_names_rebinned.assert_called_once_with(runs)
+        self.assertEqual(ws, ["test", "test", "unit", "unit"])
+        self.assertEqual(indices, [1,2,1,2])
 
-    def test_get_workspace_to_plot_time_counts(self):
-        runs = [[62260]]
-        self.context.data_context.current_runs = runs
-        self.context.group_pair_context["fwd"].get_asymmetry_workspace_names = mock.MagicMock()
+    def test_get_fit_ws_and_indicies_TF(self):
+        fit = mock.MagicMock()
+        fit.output_workspace_names = ["test", "unit"]
+        fit.tf_asymmetry_fit = True
 
-        ws_list = self.model.get_time_workspaces_to_plot("fwd", True, "Counts")
+        ws, indices = self.model.get_fit_workspace_and_indices(fit, False)
 
-        self.assertEqual([], ws_list)
+        self.assertEqual(ws, ["test", "unit"])
+        self.assertEqual(indices, [3,3])
 
-    def test_get_workspace_and_indices_for_group_or_pair_returns_correctly(self):
-        self.model.get_time_workspaces_to_plot = mock.Mock(return_value=["62260;bwd"])
-        expected_workspaces = ['62260;bwd']
-        expected_indices = [0]
+    def test_get_fit_ws_and_indicies_with_diff_TF(self):
+        fit = mock.MagicMock()
+        fit.output_workspace_names = ["test", "unit"]
+        fit.tf_asymmetry_fit = True
 
-        workspaces, indices = self.model.get_workspace_and_indices_for_group_or_pair("bwd", True, "Asymmetry")
+        ws, indices = self.model.get_fit_workspace_and_indices(fit, True)
 
-        self.assertEqual(workspaces, expected_workspaces)
-        self.assertEqual(expected_indices, indices)
-
-    def test_get_workspaces_to_plot(self):
-        self.model.get_time_workspaces_to_plot = mock.Mock(return_value="test")
-        self.context.group_pair_context.add_group(MuonGroup(group_name="bwd", detector_ids=[2]))
-        self.context.group_pair_context.add_group(MuonGroup(group_name="top", detector_ids=[3]))
-        self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]
-        self.model.get_workspaces_to_plot(True, "Counts")
-        self.assertEqual(self.model.get_time_workspaces_to_plot.call_count,3)
-        self.model.get_time_workspaces_to_plot.assert_any_call("fwd", True, "Counts")
-        self.model.get_time_workspaces_to_plot.assert_any_call("bwd", True, "Counts")
-        self.model.get_time_workspaces_to_plot.assert_any_call("top", True, "Counts")
-
-    def test_get_workspace_list_and_indices_to_plot(self):
-        self.model.get_workspaces_to_plot = mock.Mock(return_value=["test"])
-        self.model._generate_run_indices = mock.Mock(return_value=[0])
-
-        self.model.get_workspace_list_and_indices_to_plot(True,"Counts")
-        self.model.get_workspaces_to_plot.assert_called_once_with(True, "Counts")
-        self.model._generate_run_indices.assert_called_once_with(["test"])
-
-    def test_get_workspaces_to_remove(self):
-        self.model.get_time_workspaces_to_plot = mock.Mock(return_value="test")
-        names = ["fwd", "bwd", "top"]
-
-        self.model.get_workspaces_to_remove(names, True, "Counts")
-        self.assertEqual(self.model.get_time_workspaces_to_plot.call_count,3)
-        self.model.get_time_workspaces_to_plot.assert_any_call("fwd", True, "Counts")
-        self.model.get_time_workspaces_to_plot.assert_any_call("bwd", True, "Counts")
-        self.model.get_time_workspaces_to_plot.assert_any_call("top", True, "Counts")
-
-    def test_create_tiled_keys_returns_correctly_for_tiled_by_run(self):
-        self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]
-        runs = [[62260], [62261]]
-        self.context.data_context.current_runs = runs
-        keys = self.model.create_tiled_keys("Run")
-
-        self.assertEqual(keys, ['62260', '62261'])
-
-    def test_create_tiled_keys_returns_correctly_for_summed_runs_tiled_by_run(self):
-        self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]
-        runs = [[62260, 62261]]
-        self.context.data_context.current_runs = runs
-        keys = self.model.create_tiled_keys("Run")
-
-        self.assertEqual(keys, ['62260-62261'])
-
-    def test_create_tiled_keys_returns_correctly_for_tiled_by_group(self):
-
-        self.context.group_pair_context.add_group(MuonGroup(group_name="bwd", detector_ids=[2]))
-        self.context.group_pair_context.add_group(MuonGroup(group_name="top", detector_ids=[3]))
-        self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]
-        runs = [[62260], [62261]]
-        self.context.data_context.current_runs = runs
-        keys = self.model.create_tiled_keys("Group/Pair")
-
-        self.assertEqual(keys, ["fwd", "bwd", "top"])
+        self.assertEqual(ws, ["test", "test", "unit", "unit"])
+        self.assertEqual(indices, [3,2,3,2])
 
 
 if __name__ == '__main__':

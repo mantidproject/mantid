@@ -28,10 +28,12 @@ class PlotFreqFitPanePresenter(BasePanePresenter):
         """
         workspace_list = []
         indices = []
+        print("hi")
         raw = self._view.is_raw_plot()
         with_diff = self._view.is_plot_diff()
         if fit_information_list:
             self._current_fit_info = fit_information_list
+            print("moo", fit_information_list)
             for fit_information in fit_information_list:
                 fit = fit_information.fit
                 fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit,with_diff)
