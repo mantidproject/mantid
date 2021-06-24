@@ -118,7 +118,7 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
     @mock.patch('workbench.plugins.workspacewidget.plot_from_names', autospec=True)
     def test_plot_with_plot_spectrum(self, mock_plot_from_names):
         self.ws_widget._do_plot_spectrum([self.ws_names[0]], False, False)
-        mock_plot_from_names.assert_called_once_with([self.ws_names[0]], False, False, advanced=False, superplot=False)
+        mock_plot_from_names.assert_called_once_with([self.ws_names[0]], False, False, advanced=False)
 
     @mock.patch('workbench.plugins.workspacewidget.plot_md_ws_from_names', autospec=True)
     def test_plot_with_1d_mdhistoworkspace(self, mock_plot_md_from_names):
@@ -133,7 +133,7 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
     @mock.patch('workbench.plugins.workspacewidget.plot_from_names', autospec=True)
     def test_plot_with_plot_advanced(self, mock_plot_from_names):
         self.ws_widget._do_plot_spectrum([self.ws_names[0]], False, False, advanced=True)
-        mock_plot_from_names.assert_called_once_with([self.ws_names[0]], False, False, advanced=True, superplot=False)
+        mock_plot_from_names.assert_called_once_with([self.ws_names[0]], False, False, advanced=True)
 
     @mock.patch('mantidqt.plotting.functions.plot_contour', autospec=True)
     def test_plot_with_plot_contour(self, mock_plot_contour):
