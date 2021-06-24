@@ -28,6 +28,7 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.finder_path.setLabelText("Path")
         self.finder_path.isForRunFiles(False)
         self.finder_path.setEnabled(False)
+        self.finder_path.setFileExtensions([".prm"])
 
     # =================
     # Slot Connectors

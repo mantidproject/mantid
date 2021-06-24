@@ -22,9 +22,14 @@ New Algorithms
 CrystalField
 ------------
 
+Improvements
+############
+- Added documentation and warning messages in the :ref:`Crystal Field Python Interface` related to IntensityScaling
+
 BugFixes
 ########
 - A bug has been fixed in the plot methods for CrystalField and CrystalFieldMultiSite
+- Fixed a bug in the :ref:`Crystal Field Python Interface` which prevented the application of IntensityScaling factors
 - Peaks are (re)set upon rebuilding the single spectrum function as a multi-spectrum function
   due to the physical properties. This re-setting peaks is needed to maintain the intended ties.
 

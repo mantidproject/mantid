@@ -87,6 +87,15 @@ class WorkspaceSelectorViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.current_dataset_name = "Does not exist"
         self.assertEqual(self.view.current_dataset_name, selected_dataset)
 
+    def test_that_add_dataset_name_will_add_a_name_to_the_end_of_the_datasets(self):
+        dataset_names = ["Name1", "Name2", "Name3"]
+
+        self.view.update_dataset_name_combo_box(dataset_names)
+        self.assertEqual(self.view.number_of_datasets(), 3)
+
+        self.view.add_dataset_name("Name4")
+        self.assertEqual(self.view.number_of_datasets(), 4)
+
     def test_that_number_of_datasets_will_return_the_expected_number_of_datasets(self):
         dataset_names = ["Name1", "Name2", "Name3"]
 

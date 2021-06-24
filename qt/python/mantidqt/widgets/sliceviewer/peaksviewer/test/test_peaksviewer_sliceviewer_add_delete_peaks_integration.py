@@ -9,10 +9,13 @@
 import unittest
 from unittest.mock import Mock
 
-from mantidqt.widgets.sliceviewer.presenter import SliceViewer
-from mantidqt.utils.qt.testing import start_qapplication
-from mantid.simpleapi import CreatePeaksWorkspace, CreateMDWorkspace, SetUB, mtd
-import numpy as np
+import matplotlib
+matplotlib.use("agg")
+
+from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
+from mantidqt.utils.qt.testing import start_qapplication  # noqa: E402
+from mantid.simpleapi import CreatePeaksWorkspace, CreateMDWorkspace, SetUB, mtd  # noqa: E402
+import numpy as np  # noqa: E402
 
 
 @start_qapplication

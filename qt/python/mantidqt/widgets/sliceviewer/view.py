@@ -463,7 +463,6 @@ class SliceViewerDataView(QWidget):
         else:
             return None
 
-
     def set_axes_limits(self, xlim, ylim):
         """
         Set the view limits on the image axes to the given extents. Assume the

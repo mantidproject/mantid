@@ -1012,6 +1012,8 @@ class CrystalField(object):
         from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         if isinstance(other, CrystalFieldMultiSite):
             return other.__radd__(self)
+        elif isinstance(other, CrystalFieldSite):
+            return other.__add__(self)
         if isinstance(other, CrystalField):
             ions = [self.Ion, other.Ion]
             symmetries = [self.Symmetry, other.Symmetry]
@@ -1020,6 +1022,9 @@ class CrystalField(object):
             for bparam in CrystalField.field_parameter_names:
                 params['ion0.' + bparam] = self[bparam]
                 params['ion1.' + bparam] = other[bparam]
+            if self.NumberOfSpectra > 1:
+                for x in range(self.NumberOfSpectra):
+                    params['sp'+str(x)+'.IntensityScaling'] = self.IntensityScaling[x]
             ties = {}
             fixes = []
             for prefix, obj in {'ion0.':self, 'ion1.':other}.items():
@@ -1212,7 +1217,6 @@ class CrystalFieldSite(object):
             return other.__radd__(self)
         else:
             raise TypeError('Unsupported operand type(s) for +: CrystalFieldSite and %s' % other.__class__.__name__)
-
         ions = [self.crystalField.Ion, other.Ion]
         symmetries = [self.crystalField.Symmetry, other.Symmetry]
         temperatures = [self.crystalField._getTemperature(x) for x in range(self.crystalField.NumberOfSpectra)]
@@ -1220,6 +1224,18 @@ class CrystalFieldSite(object):
         for bparam in CrystalField.field_parameter_names:
             params['ion0.' + bparam] = self.crystalField[bparam]
             params['ion1.' + bparam] = other[bparam]
+        if self.crystalField.NumberOfSpectra > 1:
+            differentIntensities = False
+            for x in range(self.crystalField.NumberOfSpectra):
+                if self.crystalField.IntensityScaling[x] is not other.IntensityScaling[x] and other.IntensityScaling[x] != 1.0:
+                    if self.crystalField.IntensityScaling[x] == 1.0:
+                        params['sp'+str(x)+'.IntensityScaling'] = other.IntensityScaling[x]
+                    else:
+                        differentIntensities = True
+                else:
+                    params['sp'+str(x)+'.IntensityScaling'] = self.crystalField.IntensityScaling[x]
+            if differentIntensities:
+                warnings.warn('Mismatch between IntensityScaling values of CrystalField objects', RuntimeWarning)
         if self.crystalField.ResolutionModel is None:
             FWHM = [self.crystalField._getFWHM(x) for x in range(self.crystalField.NumberOfSpectra)]
             return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHM = FWHM,
@@ -1238,6 +1254,7 @@ class CrystalFieldFit(object):
 
     def __init__(self, Model=None, Temperature=None, FWHM=None, InputWorkspace=None,
                  ResolutionModel=None, **kwargs):
+        from mantid.kernel import logger
         self.model = Model
         if Temperature is not None:
             self.model.Temperature = Temperature
@@ -1250,6 +1267,10 @@ class CrystalFieldFit(object):
         self._fit_properties = kwargs
         self._function = None
         self._estimated_parameters = None
+        if self.model.NumberOfSpectra == 1:
+            logger.notice("Fit single spectrum")
+        else:
+            logger.notice("Fit multiple spectra")
 
     def fit(self):
         """

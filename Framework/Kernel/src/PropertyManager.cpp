@@ -575,11 +575,8 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
 
 //-----------------------------------------------------------------------------------------------
 /** Return the property manager serialized as a json object.
- * Note that this method does not serialize WorkspacePropertys with workspaces
- * not
- * in the ADS.
- * @param withDefaultValues :: If true then the value of default parameters
- * will be included
+ * Note that this method does not serialize WorkspaceProperties with workspaces not in the ADS.
+ * @param withDefaultValues :: If true then the value of default parameters will be included
  * @returns A serialized version of the manager
  */
 ::Json::Value PropertyManager::asJson(bool withDefaultValues) const {
