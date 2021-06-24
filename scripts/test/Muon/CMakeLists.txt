@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
    basic_fitting_context_test.py
    corrections_context_test.py
    corrections_tab_widget/corrections_model_test.py
+   corrections_tab_widget/corrections_presenter_test.py
    corrections_tab_widget/corrections_view_test.py
    corrections_tab_widget/dead_time_corrections_view_test.py
    elemental_analysis/elemental_analysis_test.py
