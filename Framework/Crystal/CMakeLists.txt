@@ -11,6 +11,7 @@ set(SRC_FILES
     src/CombinePeaksWorkspaces.cpp
     src/CompositeCluster.cpp
     src/ConnectedComponentLabeling.cpp
+    src/ConvertPeaksWorkspace.cpp
     src/CountReflections.cpp
     src/DiffPeaksWorkspaces.cpp
     src/DisjointElement.cpp
@@ -87,6 +88,7 @@ set(INC_FILES
     inc/MantidCrystal/CombinePeaksWorkspaces.h
     inc/MantidCrystal/CompositeCluster.h
     inc/MantidCrystal/ConnectedComponentLabeling.h
+    inc/MantidCrystal/ConvertPeaksWorkspace.h
     inc/MantidCrystal/CountReflections.h
     inc/MantidCrystal/DiffPeaksWorkspaces.h
     inc/MantidCrystal/DisjointElement.h
@@ -163,6 +165,7 @@ set(TEST_FILES
     CombinePeaksWorkspacesTest.h
     CompositeClusterTest.h
     ConnectedComponentLabelingTest.h
+    ConvertPeaksWorkspaceTest.h
     DiffPeaksWorkspacesTest.h
     DisjointElementTest.h
     FilterPeaksTest.h
