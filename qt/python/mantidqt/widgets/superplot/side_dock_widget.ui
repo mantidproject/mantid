@@ -42,7 +42,7 @@
       </column>
       <column>
        <property name="text">
-        <string notr="true">Unhold</string>
+        <string notr="true">Remove</string>
        </property>
       </column>
      </widget>
