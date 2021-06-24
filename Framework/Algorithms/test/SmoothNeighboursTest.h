@@ -529,11 +529,11 @@ public:
 
     // Run the nearest neighbour search on each detector, reusing the arrays
     // Set size initially to avoid array index error when testing in debug mode
-    std::vector<ANNidx> nnIndexList(8);
-    std::vector<ANNdist> nnDistList(8);
+    std::vector<ANNidx> nnIndexList(9);
+    std::vector<ANNdist> nnDistList(9);
     ANNpoint scaledPos = dataPoints[19397];
     annTree->annkSearch(scaledPos,          // Point to search nearest neighbours of
-                        8,                  // Number of neighbours to find (8)
+                        9,                  // Number of neighbours to find
                         nnIndexList.data(), // Index list of results
                         nnDistList.data(),  // List of distances to each of these
                         0.0);               // Error bound (?) is this the radius to search in?
@@ -546,15 +546,17 @@ public:
     TS_ASSERT_EQUALS(nnIndexList[5], 19141);
     TS_ASSERT_EQUALS(nnIndexList[6], 19271);
     TS_ASSERT_EQUALS(nnIndexList[7], 19140);
+    TS_ASSERT_EQUALS(nnIndexList[8], 19142);
 
-    TS_ASSERT_EQUALS(nnDistList[0], 0.59042046182435803);
-    TS_ASSERT_EQUALS(nnDistList[1], 0.67358344667063597);
-    TS_ASSERT_EQUALS(nnDistList[2], 0.67358344667063674);
-    TS_ASSERT_EQUALS(nnDistList[3], 0.76706550105551297);
-    TS_ASSERT_EQUALS(nnDistList[4], 1.7609423159344773);
-    TS_ASSERT_EQUALS(nnDistList[5], 1.9952666377146773);
-    TS_ASSERT_EQUALS(nnDistList[6], 2.2908774336279398);
-    TS_ASSERT_EQUALS(nnDistList[7], 2.6688500843853133);
+    TS_ASSERT_DELTA(nnDistList[0], 0.59042046182435803, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(nnDistList[1], 0.67358344667063597, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(nnDistList[2], 0.67358344667063674, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(nnDistList[3], 0.76706550105551297, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(nnDistList[4], 1.7609423159344773, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(nnDistList[5], 1.9952666377146773, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(nnDistList[6], 2.2908774336279398, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(nnDistList[7], 2.6688500843853133, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(nnDistList[8], 2.6688500843853147, std::numeric_limits<double>::epsilon()); // different in 15th dp
   }
 }
 
