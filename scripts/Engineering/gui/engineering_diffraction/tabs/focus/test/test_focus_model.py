@@ -146,7 +146,7 @@ class FocusModelTest(unittest.TestCase):
     def test_save_output_files_with_no_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
         output_file = path.join(path_handling.get_output_path(), "Focus",
-                                "ENGINX_123_bank_North.nxs")
+                                "ENGINX_123_North_TOF.nxs")
 
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
                                 mocked_workspace, None)
@@ -202,9 +202,9 @@ class FocusModelTest(unittest.TestCase):
     def test_last_path_updates_with_no_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
         output_file = path.join(path_handling.get_output_path(), "Focus",
-                                "ENGINX_123_bank_North.nxs")
+                                "ENGINX_123_North_TOF.nxs")
 
-        self.model._last_path_ws = 'ENGINX_123_bank_North.nxs'
+        self.model._last_path_ws = 'ENGINX_123_North_TOF.nxs'
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
                                 mocked_workspace, None)
 
@@ -216,9 +216,10 @@ class FocusModelTest(unittest.TestCase):
     def test_last_path_updates_with_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
         rb_num = '2'
-        output_file = path.join(path_handling.get_output_path(), "User", rb_num, "Focus", "ENGINX_123_bank_North.nxs")
+        output_file = path.join(path_handling.get_output_path(), "User", rb_num, "Focus",
+                                "ENGINX_123_North_TOF.nxs")
 
-        self.model._last_path_ws = 'ENGINX_123_bank_North.nxs'
+        self.model._last_path_ws = 'ENGINX_123_North_TOF.nxs'
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
                                 mocked_workspace, rb_num)
 

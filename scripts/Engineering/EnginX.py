@@ -292,7 +292,7 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
         # create the table workspace containing the parameters
         param_tbl_name = crop_name if crop_name is not None else "Cropped"
         create_params_table(difc, tzero, difa)
-        plot_dict = Utils.generate_tof_fit_dictionary(spec_nos, param_tbl_name)
+        plot_dict = Utils.generate_tof_fit_dictionary(param_tbl_name)
         Utils.plot_tof_fit([plot_dict], [param_tbl_name])
     else:
         difas = [row['difa'] for row in output]
@@ -303,7 +303,7 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
             save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
                              f"bank_{i}", [bank_names[i - 1]],
                              [tzeros[i - 1]], [difcs[i - 1]], [difas[i - 1]])
-            plot_dicts.append(Utils.generate_tof_fit_dictionary(f"bank_{i}", ""))
+            plot_dicts.append(Utils.generate_tof_fit_dictionary(f"bank_{i}"))
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names,
                          tzeros, difcs, difas)
         # create the table workspace containing the parameters
