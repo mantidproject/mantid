@@ -10,8 +10,8 @@ from Muon.GUI.Common.plot_widget.main_plot_widget_presenter import MainPlotWidge
 from Muon.GUI.Common.plot_widget.main_plot_widget_view import MainPlotWidgetView
 from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_model import PlotDataPaneModel
 from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_presenter import PlotDataPanePresenter
-from Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_presenter import PlotTimeFitPanePresenter
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
+from Muon.GUI.Common.plot_widget.plot_fit_pane_presenter import PlotFitPanePresenter
 from Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_model import PlotTimeFitPaneModel
 
 
@@ -42,7 +42,7 @@ class MuonAnalysisPlotWidget(object):
 
         self.data_mode = PlotDataPanePresenter(self._view1, self.data_model,
                                                context,self.plotting_canvas_widgets[self.data_model.name].presenter)
-        self.fit_mode = PlotTimeFitPanePresenter(self._view2, self.fit_model,
+        self.fit_mode = PlotFitPanePresenter(self._view2, self.fit_model,
                                                  context,self.plotting_canvas_widgets[self.fit_model.name].presenter)
 
         self.presenter = MainPlotWidgetPresenter(self.view,

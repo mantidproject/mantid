@@ -8,7 +8,7 @@ from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWith
 from Muon.GUI.Common.ADSHandler.workspace_naming import remove_rebin_from_name, add_rebin_to_name
 
 
-class PlotTimeFitPanePresenter(BasePanePresenter):
+class PlotFitPanePresenter(BasePanePresenter):
 
     def __init__(self, view, model, context,figure_presenter):
         super().__init__(view, model, context,figure_presenter)

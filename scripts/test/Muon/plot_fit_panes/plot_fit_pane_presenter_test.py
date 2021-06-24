@@ -9,7 +9,7 @@ from unittest import mock
 
 from Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_model import PlotTimeFitPaneModel
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
-from Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_presenter import PlotTimeFitPanePresenter
+from Muon.GUI.Common.plot_widget.plot_fit_pane_presenter import PlotFitPanePresenter
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
     PlottingCanvasPresenterInterface
 from mantid import AnalysisDataService
@@ -24,7 +24,7 @@ class MockFitInfo(object):
 
 
 @start_qapplication
-class PlotTimeFitPanePresenterrTest(unittest.TestCase):
+class PlotFitPanePresenterrTest(unittest.TestCase):
 
     def setUp(self):
         self.context = mock.MagicMock()
@@ -34,10 +34,7 @@ class PlotTimeFitPanePresenterrTest(unittest.TestCase):
         self.view.warning_popup = mock.MagicMock()
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
 
-        self.context.group_pair_context.selected_groups = ['bottom']
-        self.context.group_pair_context.selected_pairs = []
-
-        self.presenter = PlotTimeFitPanePresenter(view=self.view, model=self.model, context=self.context,
+        self.presenter = PlotFitPanePresenter(view=self.view, model=self.model, context=self.context,
                                                    figure_presenter=self.figure_presenter)
 
     def tearDown(self):
