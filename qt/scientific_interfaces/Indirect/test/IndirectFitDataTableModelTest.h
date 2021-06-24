@@ -40,7 +40,7 @@ public:
     ads_instance.addOrReplace("data workspace 2", std::move(dataWorkspace2));
     m_fitData->addWorkspace("data workspace 1");
     m_fitData->addWorkspace("data workspace 2");
-    m_fitData->setResolution("resolution workspace", TableDatasetIndex{0});
+    m_fitData->setResolution("resolution workspace", WorkspaceID{0});
   }
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
@@ -50,19 +50,19 @@ public:
   void test_hasWorkspace_returns_false_for_ws_in_model() { TS_ASSERT(!m_fitData->hasWorkspace("fake workspace")); }
 
   void test_getWorkspace_returns_nullptr_is_outside_of_range() {
-    TS_ASSERT_EQUALS(m_fitData->getWorkspace(TableDatasetIndex{2}), nullptr);
+    TS_ASSERT_EQUALS(m_fitData->getWorkspace(WorkspaceID{2}), nullptr);
   }
 
   void test_getWorkspace_returns_ws_in_range() {
-    TS_ASSERT_EQUALS(m_fitData->getWorkspace(TableDatasetIndex{0})->getName(), "data workspace 1");
+    TS_ASSERT_EQUALS(m_fitData->getWorkspace(WorkspaceID{0})->getName(), "data workspace 1");
   }
 
   void test_getSpectra_returns_empty_spectra_is_outside_of_range() {
-    TS_ASSERT_EQUALS(m_fitData->getSpectra(TableDatasetIndex{2}).getString(), "");
+    TS_ASSERT_EQUALS(m_fitData->getSpectra(WorkspaceID{2}).getString(), "");
   }
 
   void test_getSpectra_returns_spectra_in_range() {
-    TS_ASSERT_EQUALS(m_fitData->getSpectra(TableDatasetIndex{0}).getString(), "0-3");
+    TS_ASSERT_EQUALS(m_fitData->getSpectra(WorkspaceID{0}).getString(), "0-3");
   }
 
   void test_isMultiFit_returns_false_for_more_single_ws() {
@@ -72,7 +72,7 @@ public:
     ads_instance.addOrReplace("resolution workspace", std::move(resolutionWorkspace));
     ads_instance.addOrReplace("data workspace", std::move(dataWorkspace));
     singleFitData->addWorkspace("data workspace");
-    singleFitData->setResolution("resolution workspace", TableDatasetIndex{0});
+    singleFitData->setResolution("resolution workspace", WorkspaceID{0});
     TS_ASSERT(!singleFitData->isMultiFit());
   }
 
@@ -87,16 +87,16 @@ public:
   }
 
   void test_getNumberOfSpectra_returns_correct_number_of_spectra() {
-    TS_ASSERT_EQUALS(m_fitData->getNumberOfSpectra(TableDatasetIndex{0}), 4);
+    TS_ASSERT_EQUALS(m_fitData->getNumberOfSpectra(WorkspaceID{0}), 4);
     auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(5, 5);
     ads_instance.addOrReplace("data workspace 3", std::move(dataWorkspace));
     m_fitData->addWorkspace("data workspace 3");
-    TS_ASSERT_EQUALS(m_fitData->getNumberOfSpectra(TableDatasetIndex{2}), 5);
+    TS_ASSERT_EQUALS(m_fitData->getNumberOfSpectra(WorkspaceID{2}), 5);
   }
 
   void test_getNumberOfSpectra_raise_error_when_out_of_ws_range() {
-    TS_ASSERT_EQUALS(m_fitData->getNumberOfSpectra(TableDatasetIndex{0}), 4);
-    TS_ASSERT_THROWS(m_fitData->getNumberOfSpectra(TableDatasetIndex{2}), const std::runtime_error &);
+    TS_ASSERT_EQUALS(m_fitData->getNumberOfSpectra(WorkspaceID{0}), 4);
+    TS_ASSERT_THROWS(m_fitData->getNumberOfSpectra(WorkspaceID{2}), const std::runtime_error &);
   }
 
   void test_getnumberOfDomains_returns_total_spectra_of_all_data() {
@@ -104,11 +104,11 @@ public:
   }
 
   void test_getDomainIndex_calculates_correct_value() {
-    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(0), WorkspaceIndex(0)), FitDomainIndex{0});
-    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(0), WorkspaceIndex(1)), FitDomainIndex{1});
-    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(0), WorkspaceIndex(2)), FitDomainIndex{2});
-    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(0), WorkspaceIndex(3)), FitDomainIndex{3});
-    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(TableDatasetIndex(1), WorkspaceIndex(0)), FitDomainIndex{4});
+    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(WorkspaceID(0), WorkspaceIndex(0)), FitDomainIndex{0});
+    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(WorkspaceID(0), WorkspaceIndex(1)), FitDomainIndex{1});
+    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(WorkspaceID(0), WorkspaceIndex(2)), FitDomainIndex{2});
+    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(WorkspaceID(0), WorkspaceIndex(3)), FitDomainIndex{3});
+    TS_ASSERT_EQUALS(m_fitData->getDomainIndex(WorkspaceID(1), WorkspaceIndex(0)), FitDomainIndex{4});
   }
 
   void test_getQValuesForData_returns_correct_value() {
@@ -147,29 +147,29 @@ public:
 
   void test_removeWorkspace_functions_as_required() {
     std::vector<std::string> wsNames = {"data workspace 1"};
-    m_fitData->removeWorkspace(TableDatasetIndex{1});
+    m_fitData->removeWorkspace(WorkspaceID{1});
     TS_ASSERT_EQUALS(m_fitData->getWorkspaceNames(), wsNames);
   }
 
   void test_removeDataByIndex_removes_only_single_spectra() {
     m_fitData->removeDataByIndex(FitDomainIndex{2});
     TS_ASSERT(m_fitData->hasWorkspace("data workspace 1"));
-    TS_ASSERT_EQUALS(m_fitData->getSpectra(TableDatasetIndex{0}).getString(), "0-1,3");
+    TS_ASSERT_EQUALS(m_fitData->getSpectra(WorkspaceID{0}).getString(), "0-1,3");
   }
 
   void test_getExcludeRegion_returns_range_for_spectra() {
     std::vector<double> exclusionVector = {0.1, 0.3};
     auto excludeString = "0.100,0.300";
     m_fitData->setExcludeRegion(excludeString, FitDomainIndex{0});
-    TS_ASSERT_EQUALS(m_fitData->getExcludeRegion(TableDatasetIndex{0}, WorkspaceIndex{0}), excludeString);
-    TS_ASSERT_EQUALS(m_fitData->getExcludeRegionVector(TableDatasetIndex{0}, WorkspaceIndex{0}), exclusionVector);
+    TS_ASSERT_EQUALS(m_fitData->getExcludeRegion(WorkspaceID{0}, WorkspaceIndex{0}), excludeString);
+    TS_ASSERT_EQUALS(m_fitData->getExcludeRegionVector(WorkspaceID{0}, WorkspaceIndex{0}), exclusionVector);
     TS_ASSERT_EQUALS(m_fitData->getExcludeRegion(FitDomainIndex{0}), excludeString);
     TS_ASSERT_EQUALS(m_fitData->getExcludeRegionVector(FitDomainIndex{0}), exclusionVector);
   }
 
   void test_getFittingRange_returns_range_for_spectra() {
     std::pair<double, double> fittingPair = {0.0, 5.0};
-    TS_ASSERT_EQUALS(m_fitData->getFittingRange(TableDatasetIndex{0}, WorkspaceIndex{0}), fittingPair);
+    TS_ASSERT_EQUALS(m_fitData->getFittingRange(WorkspaceID{0}, WorkspaceIndex{0}), fittingPair);
     TS_ASSERT_EQUALS(m_fitData->getFittingRange(FitDomainIndex{0}), fittingPair);
   }
 
@@ -187,13 +187,13 @@ public:
   }
 
   void test_that_setting_spectra_on_non_existent_workspace_throws_exception() {
-    TS_ASSERT_THROWS(m_fitData->setSpectra("1", TableDatasetIndex{2}), const std::out_of_range &)
-    TS_ASSERT_THROWS(m_fitData->setSpectra(FunctionModelSpectra("1"), TableDatasetIndex{2}), const std::out_of_range &)
+    TS_ASSERT_THROWS(m_fitData->setSpectra("1", WorkspaceID{2}), const std::out_of_range &)
+    TS_ASSERT_THROWS(m_fitData->setSpectra(FunctionModelSpectra("1"), WorkspaceID{2}), const std::out_of_range &)
   }
 
   void test_that_setting_startX_on_non_existent_workspace_throws_exception() {
-    TS_ASSERT_THROWS(m_fitData->setStartX(0, TableDatasetIndex{2}), const std::out_of_range &)
-    TS_ASSERT_THROWS(m_fitData->setStartX(0, TableDatasetIndex{2}, WorkspaceIndex{10}), const std::out_of_range &)
+    TS_ASSERT_THROWS(m_fitData->setStartX(0, WorkspaceID{2}), const std::out_of_range &)
+    TS_ASSERT_THROWS(m_fitData->setStartX(0, WorkspaceID{2}, WorkspaceIndex{10}), const std::out_of_range &)
   }
 
 private:

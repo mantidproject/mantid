@@ -435,8 +435,7 @@ public:
   void test_that_getQValues() {
     auto const workspace = createWorkspaceWithInelasticInstrument(10);
     FunctionModelSpectra const spec =
-        FunctionModelSpectra(MantidQt::CustomInterfaces::WorkspaceIndex{0},
-                             MantidQt::CustomInterfaces::WorkspaceIndex{workspace->getNumberHistograms() - 1});
+        FunctionModelSpectra(WorkspaceIndex{0}, WorkspaceIndex{workspace->getNumberHistograms() - 1});
     auto data = std::make_unique<IndirectFitData>(IndirectFitData(workspace, spec));
     auto spectrumInfo = workspace->spectrumInfo();
     auto detID = spectrumInfo.detector(0).getID();

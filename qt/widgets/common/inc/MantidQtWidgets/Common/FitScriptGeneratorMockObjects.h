@@ -144,37 +144,31 @@ public:
                      Mantid::API::IFunction_sptr(std::string const &workspaceName, WorkspaceIndex workspaceIndex));
 
   MOCK_CONST_METHOD3(getEquivalentFunctionIndexForDomain,
-                     std::string(std::string const &workspaceName,
-                                 MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
+                     std::string(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                  std::string const &functionIndex));
   MOCK_CONST_METHOD2(getEquivalentFunctionIndexForDomain,
                      std::string(MantidQt::MantidWidgets::FitDomainIndex, std::string const &functionIndex));
   MOCK_CONST_METHOD4(getEquivalentParameterTieForDomain,
-                     std::string(std::string const &workspaceName,
-                                 MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
+                     std::string(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                  std::string const &fullParameter, std::string const &fullTie));
   MOCK_CONST_METHOD1(getAdjustedFunctionIndex, std::string(std::string const &parameter));
   MOCK_CONST_METHOD2(getFullParameter,
                      std::string(MantidQt::MantidWidgets::FitDomainIndex, std::string const &parameter));
   MOCK_CONST_METHOD2(getFullTie, std::string(MantidQt::MantidWidgets::FitDomainIndex, std::string const &tie));
 
-  MOCK_METHOD4(updateParameterValue,
-               void(std::string const &workspaceName, MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
-                    std::string const &fullParameter, double newValue));
+  MOCK_METHOD4(updateParameterValue, void(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+                                          std::string const &fullParameter, double newValue));
   MOCK_METHOD4(updateAttributeValue,
-               void(std::string const &workspaceName, MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
-                    std::string const &fullAttribute, Mantid::API::IFunction::Attribute const &newValue));
+               void(std::string const &workspaceName, WorkspaceIndex workspaceIndex, std::string const &fullAttribute,
+                    Mantid::API::IFunction::Attribute const &newValue));
 
-  MOCK_METHOD4(updateParameterTie,
-               void(std::string const &workspaceName, MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
-                    std::string const &fullParameter, std::string const &tie));
+  MOCK_METHOD4(updateParameterTie, void(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+                                        std::string const &fullParameter, std::string const &tie));
 
   MOCK_METHOD3(removeParameterConstraint,
-               void(std::string const &workspaceName, MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
-                    std::string const &fullParameter));
-  MOCK_METHOD4(updateParameterConstraint,
-               void(std::string const &workspaceName, MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
-                    std::string const &functionIndex, std::string const &constraint));
+               void(std::string const &workspaceName, WorkspaceIndex workspaceIndex, std::string const &fullParameter));
+  MOCK_METHOD4(updateParameterConstraint, void(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+                                               std::string const &functionIndex, std::string const &constraint));
 
   MOCK_METHOD1(setGlobalParameters, void(std::vector<std::string> const &parameters));
 

@@ -49,7 +49,7 @@ MultiDomainFunction_sptr getFunctionWithWorkspaceName(std::string const &workspa
 class MockIndirectFitPlotView : public IIndirectFitPlotView {
 public:
   /// Signals
-  void emitSelectedFitDataChanged(WorkspaceID workspaceID) { emit selectedFitDataChanged(index); }
+  void emitSelectedFitDataChanged(WorkspaceID workspaceID) { emit selectedFitDataChanged(workspaceID); }
 
   void emitPlotCurrentPreview() { emit plotCurrentPreview(); }
 
@@ -154,7 +154,7 @@ private:
   std::string sequentialFitOutputName() const override { return ""; };
   std::string simultaneousFitOutputName() const override { return ""; };
   std::string singleFitOutputName(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override {
-    UNUSED_ARG(index);
+    UNUSED_ARG(workspaceID);
     UNUSED_ARG(spectrum);
     return "";
   };

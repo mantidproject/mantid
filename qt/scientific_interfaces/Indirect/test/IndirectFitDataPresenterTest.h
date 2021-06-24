@@ -126,7 +126,7 @@ private:
   std::string sequentialFitOutputName() const { return ""; };
   std::string simultaneousFitOutputName() const { return ""; };
   std::string singleFitOutputName(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
-    UNUSED_ARG(index);
+    UNUSED_ARG(workspaceID);
     UNUSED_ARG(spectrum);
     return "";
   };
