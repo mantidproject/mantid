@@ -13,11 +13,13 @@ from unittest import mock
 
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from Muon.GUI.Common.contexts.fitting_contexts.tf_asymmetry_fitting_context import TFAsymmetryFittingContext
+from Muon.GUI.Common.contexts.results_context import ResultsContext
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
     DEFAULT_TABLE_NAME, ResultsTabModel, TableColumnType)
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 from mantidqt.utils.qt.testing import start_qapplication
 
-from mantid.api import AnalysisDataService, ITableWorkspace
+from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty
 from mantid.simpleapi import Load
 
@@ -42,8 +44,10 @@ def create_test_fits(input_workspaces,
     :param global_parameters: An optional list of tied parameters
     :return: A list of Fits
     """
+    workspace = WorkspaceFactory.create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+
     output_workspace_names = output_workspace_names if output_workspace_names is not None else [
-        'test-output-ws'
+        StaticWorkspaceWrapper('test-output-ws', workspace)
     ]
     # Convert parameters to fit table-like structure
     fit_table = [{
@@ -58,8 +62,8 @@ def create_test_fits(input_workspaces,
         parameter_workspace.workspace.__iter__.return_value = fit_table
         parameter_workspace.workspace_name = name + '_Parameters'
         fits.append(
-            FitInformation(parameter_workspace, function_name, name,
-                           output_workspace_names, global_parameters))
+            FitInformation([name], function_name, output_workspace_names, parameter_workspace, mock.Mock(),
+                           global_parameters))
 
     return fits
 
@@ -88,7 +92,7 @@ def create_test_model(input_workspaces,
     fitting_context = TFAsymmetryFittingContext()
     for fit in fits:
         fitting_context.add_fit(fit)
-    return fitting_context, ResultsTabModel(fitting_context)
+    return fitting_context, ResultsTabModel(fitting_context, ResultsContext())
 
 
 def add_logs(workspace_name, logs):
@@ -142,23 +146,23 @@ class ResultsTabModelTest(unittest.TestCase):
 
     # ------------------------- success tests ----------------------------
     def test_default_model_has_results_table_name(self):
-        model = ResultsTabModel(TFAsymmetryFittingContext())
+        model = ResultsTabModel(TFAsymmetryFittingContext(), ResultsContext())
         self.assertEqual(model.results_table_name(), DEFAULT_TABLE_NAME)
 
     def test_updating_model_results_table_name(self):
         table_name = 'table_name'
-        model = ResultsTabModel(TFAsymmetryFittingContext())
+        model = ResultsTabModel(TFAsymmetryFittingContext(), ResultsContext())
         model.set_results_table_name(table_name)
 
         self.assertEqual(model.results_table_name(), table_name)
 
     def test_default_model_has_no_selected_function_without_fits(self):
-        model = ResultsTabModel(TFAsymmetryFittingContext())
+        model = ResultsTabModel(TFAsymmetryFittingContext(), ResultsContext())
 
         self.assertTrue(model.selected_fit_function() is None)
 
     def test_updating_model_selected_fit_function(self):
-        model = ResultsTabModel(TFAsymmetryFittingContext())
+        model = ResultsTabModel(TFAsymmetryFittingContext(), ResultsContext())
         new_selection = 'func2'
         model.set_selected_fit_function(new_selection)
 
@@ -170,12 +174,11 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertEqual(['func1'], model.fit_functions())
 
     def test_model_returns_no_fit_selection_if_no_fits_present(self):
-        model = ResultsTabModel(TFAsymmetryFittingContext())
+        model = ResultsTabModel(TFAsymmetryFittingContext(), ResultsContext())
         self.assertEqual(0, len(model.fit_selection({})))
 
     def test_model_creates_fit_selection_given_no_existing_state(self):
-        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters,
-                                     [], self.logs)
+        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters, logs=self.logs)
 
         expected_list_state = {
             'ws1_Parameters': [0, False, True],
@@ -184,8 +187,7 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertDictEqual(expected_list_state, model.fit_selection({}))
 
     def test_model_creates_fit_selection_given_existing_state(self):
-        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters,
-                                     [], self.logs)
+        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters, logs=self.logs)
 
         orig_list_state = ["ws2_Parameters"]
         expected_list_state = {
@@ -196,7 +198,7 @@ class ResultsTabModelTest(unittest.TestCase):
                          model.fit_selection(orig_list_state))
 
     def test_model_returns_no_log_selection_if_no_fits_present(self):
-        model = ResultsTabModel(TFAsymmetryFittingContext())
+        model = ResultsTabModel(TFAsymmetryFittingContext(), ResultsContext())
         self.assertEqual(0, len(model.log_selection({})))
 
     def test_model_combines_existing_log_selection(self):
@@ -221,7 +223,7 @@ class ResultsTabModelTest(unittest.TestCase):
                              model.log_selection(existing_selection))
 
     def test_create_results_table_with_no_logs_or_global_parameters(self):
-        _, model = create_test_model(('ws1',), 'func1', self.parameters, [])
+        _, model = create_test_model(('ws1',), 'func1', self.parameters)
         logs = []
         selected_results = [('ws1', 0)]
         table = model.create_results_table(logs, selected_results)
@@ -251,7 +253,10 @@ class ResultsTabModelTest(unittest.TestCase):
                                             model.results_table_name())
 
     def test_create_results_table_with_logs_selected(self):
-        _, model = create_test_model(('ws1',), 'func1', self.parameters, ('ws1',),
+        workspace = WorkspaceFactory.create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+        workspace.mutableRun().addProperty("sample_temp", 50, True)
+        workspace.mutableRun().addProperty("sample_magn_field", 2, True)
+        _, model = create_test_model(('ws1',), 'func1', self.parameters, [StaticWorkspaceWrapper('ws1', workspace)],
                                      self.logs)
         selected_results = [('ws1', 0)]
         table = model.create_results_table(self.log_names, selected_results)
@@ -286,8 +291,7 @@ class ResultsTabModelTest(unittest.TestCase):
     def test_create_results_table_with_fit_with_global_parameters(self):
         logs = []
         global_parameters = ['Height']
-        _, model = create_test_model(('simul-1',), 'func1', self.parameters,
-                                     [], logs, global_parameters)
+        _, model = create_test_model(('simul-1',), 'func1', self.parameters, logs=logs, global_parameters=global_parameters)
         selected_results = [('simul-1', 0)]
         table = model.create_results_table(logs, selected_results)
 
@@ -318,18 +322,18 @@ class ResultsTabModelTest(unittest.TestCase):
             self):
         parameters = OrderedDict([('Height', (100, 0.1)),
                                   ('Cost function value', (1.5, 0))])
-        fits_func1 = create_test_fits(('ws1',), 'func1', parameters, [])
+        fits_func1 = create_test_fits(('ws1',), 'func1', parameters)
 
         parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)),
                                   ('Cost function value', (1.5, 0))])
-        fits_func2 = create_test_fits(('ws2',), 'func2', parameters, [])
+        fits_func2 = create_test_fits(('ws2',), 'func2', parameters)
 
         fitting_context = TFAsymmetryFittingContext()
         fitting_context.fit_list = fits_func1 + fits_func2
-        model = ResultsTabModel(fitting_context)
+        model = ResultsTabModel(fitting_context, ResultsContext())
 
         selected_results = [('ws1', 0), ('ws2', 1)]
-        self.assertRaises(RuntimeError, model.create_results_table, [],
+        self.assertRaises(IndexError, model.create_results_table, [],
                           selected_results)
 
     def test_create_results_table_with_mixed_global_non_global_raises_error(
@@ -337,52 +341,57 @@ class ResultsTabModelTest(unittest.TestCase):
         parameters = OrderedDict([('f0.Height', (100, 0.1)),
                                   ('f1.Height', (90, 0.001)),
                                   ('Cost function value', (1.5, 0))])
-        fits_func1 = create_test_fits(('ws1',), 'func1', parameters, [])
+        fits_func1 = create_test_fits(('ws1',), 'func1', parameters)
         fits_globals = create_test_fits(('ws2',),
                                         'func1',
-                                        parameters, [],
+                                        parameters,
                                         global_parameters=['Height'])
 
         fitting_context = TFAsymmetryFittingContext()
         fitting_context.fit_list = fits_func1 + fits_globals
-        model = ResultsTabModel(fitting_context)
+        model = ResultsTabModel(fitting_context, ResultsContext())
 
         selected_results = [('ws1', 0), ('ws2', 1)]
-        self.assertRaises(RuntimeError, model.create_results_table, [],
+        self.assertRaises(IndexError, model.create_results_table, [],
                           selected_results)
 
-    def test_create_results_table_with_logs_missing_from_some_workspaces_raises(
-            self):
+    def test_create_results_table_with_logs_missing_from_some_workspaces_raises(self):
+        workspace = WorkspaceFactory.create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+
         parameters = OrderedDict([('f0.Height', (100, 0.1))])
         logs = [('log1', (1., 2.)), ('log2', (3., 4.)), ('log3', (4., 5.)),
                 ('log4', (5., 6.))]
-        fits_logs1 = create_test_fits(('ws1',), 'func1', parameters, output_workspace_names=('ws1',))
+        fits_logs1 = create_test_fits(('ws1',), 'func1', parameters,
+                                      output_workspace_names=[StaticWorkspaceWrapper('test-ws1-ws', workspace)])
         add_logs(fits_logs1[0].input_workspaces[0], logs[:2])
 
-        fits_logs2 = create_test_fits(('ws2',), 'func1', parameters, output_workspace_names=('ws2',))
+        fits_logs2 = create_test_fits(('ws2',), 'func1', parameters,
+                                      output_workspace_names=[StaticWorkspaceWrapper('test-ws2-ws', workspace)])
         add_logs(fits_logs2[0].input_workspaces[0], logs[2:])
 
         fitting_context = TFAsymmetryFittingContext()
         fitting_context.fit_list = fits_logs1 + fits_logs2
-        model = ResultsTabModel(fitting_context)
+        model = ResultsTabModel(fitting_context, ResultsContext())
 
         selected_results = [('ws1', 0), ('ws2', 1)]
         selected_logs = ['log1', 'log3']
-        self.assertRaises(RuntimeError, model.create_results_table,
+        self.assertRaises(IndexError, model.create_results_table,
                           selected_logs, selected_results)
 
     def test_that_when_new_fit_is_performed_function_name_is_set_to_lastest_fit_name(self):
         parameters = OrderedDict([('Height', (100, 0.1)),
                                   ('Cost function value', (1.5, 0))])
-        fits_func1 = create_test_fits(('ws1',), 'func1', parameters, [])
+        fits_func1 = create_test_fits(('ws1',), 'func1', parameters)
 
         parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)),
                                   ('Cost function value', (1.5, 0))])
-        fits_func2 = create_test_fits(('ws2',), 'func2', parameters, [])
+        fits_func2 = create_test_fits(('ws2',), 'func2', parameters)
 
         fitting_context = TFAsymmetryFittingContext()
-        fitting_context.fit_list = fits_func1 + fits_func2
-        model = ResultsTabModel(fitting_context)
+        fits = fits_func1 + fits_func2
+        for fit in fits:
+            fitting_context.add_fit(fit)
+        model = ResultsTabModel(fitting_context, ResultsContext())
 
         model.on_new_fit_performed()
 

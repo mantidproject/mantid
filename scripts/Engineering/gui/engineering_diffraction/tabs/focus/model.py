@@ -92,7 +92,7 @@ class FocusModel(object):
                 self._run_focus(sample_workspace, tof_output_name, curves_workspace, df_kwarg, region_calib)
                 output_workspaces.append([tof_output_name])
                 self._save_output(instrument, sample_path, "Cropped", tof_output_name, rb_num)
-                self._save_output(instrument, sample_path, "Cropped", dspacing_output_name, rb_num)
+                self._save_output(instrument, sample_path, "Cropped", dspacing_output_name, rb_num, unit="dSpacing")
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
             # remove created grouping workspace if present
             if Ads.doesExist("grp_ws"):
@@ -126,7 +126,7 @@ class FocusModel(object):
                     workspaces_for_run.append(tof_output_name)
                     # Save the output to the file system.
                     self._save_output(instrument, sample_path, name, tof_output_name, rb_num)
-                    self._save_output(instrument, sample_path, name, dspacing_output_name, rb_num)
+                    self._save_output(instrument, sample_path, name, dspacing_output_name, rb_num, unit="dSpacing")
                 output_workspaces.append(workspaces_for_run)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
                 DeleteWorkspace(sample_workspace)
@@ -183,6 +183,14 @@ class FocusModel(object):
                AllowDifferentNumberSpectra=True)
         # apply calibration from specified region of interest
         ApplyDiffCal(InstrumentWorkspace=focused_sample, CalibrationWorkspace=region_calib)
+        # set bankid for use in fit tab
+        run = focused_sample.getRun()
+        if region_calib == "engggui_calibration_bank_1":
+            run.addProperty("bankid", 1, True)
+        elif region_calib == "engggui_calibration_bank_2":
+            run.addProperty("bankid", 2, True)
+        else:
+            run.addProperty("bankid", 3, True)
         # output in both dSpacing and TOF
         ConvertUnits(InputWorkspace=focused_sample, OutputWorkspace=tof_output_name, Target='TOF')
         DeleteWorkspace(curves_rebinned)
@@ -200,7 +208,7 @@ class FocusModel(object):
             ax.set_title(ws_name)
         fig.show()
 
-    def _save_output(self, instrument, sample_path, bank, sample_workspace, rb_num):
+    def _save_output(self, instrument, sample_path, bank, sample_workspace, rb_num, unit="TOF"):
         """
         Save a focused workspace to the file system. Saves separate copies to a User directory if an rb number has
         been set.
@@ -211,11 +219,11 @@ class FocusModel(object):
         :param rb_num: Usually an experiment id, defines the name of the user directory.
         """
         self._save_focused_output_files_as_nexus(instrument, sample_path, bank, sample_workspace,
-                                                 rb_num)
+                                                 rb_num, unit)
         self._save_focused_output_files_as_gss(instrument, sample_path, bank, sample_workspace,
-                                               rb_num)
+                                               rb_num, unit)
         self._save_focused_output_files_as_topas_xye(instrument, sample_path, bank, sample_workspace,
-                                                     rb_num)
+                                                     rb_num, unit)
         output_path = path.join(path_handling.get_output_path(), 'Focus')
         logger.notice(f"\n\nFocus files saved to: \"{output_path}\"\n\n")
         if rb_num:
@@ -226,22 +234,21 @@ class FocusModel(object):
             self._last_path = path.join(self._last_path, self._last_path_ws)
 
     def _save_focused_output_files_as_gss(self, instrument, sample_path, bank, sample_workspace,
-                                          rb_num):
+                                          rb_num, unit):
         gss_output_path = path.join(
             path_handling.get_output_path(), "Focus",
-            self._generate_output_file_name(instrument, sample_path, bank, ".gss"))
+            self._generate_output_file_name(instrument, sample_path, bank, unit, ".gss"))
         SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
         if rb_num:
             gss_output_path = path.join(
                 path_handling.get_output_path(), "User", rb_num, "Focus",
-                self._generate_output_file_name(instrument, sample_path, bank, ".gss"))
+                self._generate_output_file_name(instrument, sample_path, bank, unit, ".gss"))
             SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
 
     def _save_focused_output_files_as_nexus(self, instrument, sample_path, bank, sample_workspace,
-                                            rb_num):
-        file_name = self._generate_output_file_name(instrument, sample_path, bank, ".nxs")
-        nexus_output_path = path.join(
-            path_handling.get_output_path(), "Focus", file_name)
+                                            rb_num, unit):
+        file_name = self._generate_output_file_name(instrument, sample_path, bank, unit, ".nxs")
+        nexus_output_path = path.join(path_handling.get_output_path(), "Focus", file_name)
         SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
         if rb_num:
             nexus_output_path = path.join(
@@ -250,10 +257,10 @@ class FocusModel(object):
         self._last_path_ws = file_name
 
     def _save_focused_output_files_as_topas_xye(self, instrument, sample_path, bank,
-                                                sample_workspace, rb_num):
+                                                sample_workspace, rb_num, unit):
         xye_output_path = path.join(
             path_handling.get_output_path(), "Focus",
-            self._generate_output_file_name(instrument, sample_path, bank, ".abc"))
+            self._generate_output_file_name(instrument, sample_path, bank, unit, ".abc"))
         SaveFocusedXYE(InputWorkspace=sample_workspace,
                        Filename=xye_output_path,
                        SplitFiles=False,
@@ -261,7 +268,7 @@ class FocusModel(object):
         if rb_num:
             xye_output_path = path.join(
                 path_handling.get_output_path(), "User", rb_num, "Focus",
-                self._generate_output_file_name(instrument, sample_path, bank, ".abc"))
+                self._generate_output_file_name(instrument, sample_path, bank, unit, ".abc"))
             SaveFocusedXYE(InputWorkspace=sample_workspace,
                            Filename=xye_output_path,
                            SplitFiles=False,
@@ -298,6 +305,6 @@ class FocusModel(object):
             write_to_file()
 
     @staticmethod
-    def _generate_output_file_name(instrument, sample_path, bank, suffix):
+    def _generate_output_file_name(instrument, sample_path, bank, unit, suffix):
         run_no = path_handling.get_run_number_from_path(sample_path, instrument)
-        return instrument + "_" + run_no + "_bank_" + bank + suffix
+        return instrument + '_' + run_no + '_' + "bank_" + bank + '_' + unit + suffix

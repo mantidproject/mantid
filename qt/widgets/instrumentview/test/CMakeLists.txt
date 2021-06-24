@@ -34,12 +34,12 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
   LINK_LIBS
+    Python::Python
     ${CORE_MANTIDLIBS}
     PythonInterfaceCore
     DataObjects
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
     gmock
   QT5_LINK_LIBS Qt5::OpenGL
   MTD_QT_LINK_LIBS

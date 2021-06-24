@@ -19,6 +19,7 @@ Improvements
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` major interface update along with enabling the calibration of T0 and sample position.
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` minor interface update that allows fine control of bank rotation calibration.
 - :ref:`SNAPReduce <algm-SNAPReduce-v1>` permits saving selected property names and values to file, to aid autoreduction.
+- improve performance of :ref:`ApplyDiffCal <algm-ApplyDiffCal>` on large instruments eg WISH. This in turn improves the performance of :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`
 
 Bugfixes
 ########
@@ -26,6 +27,15 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+New features
+############
+
+Improvements
+############
+
+Bugfixes
+########
+- The help button on the Engineering Diffraction interface points to the correct page, having been broken in the last release
 
 Improvements
 ############

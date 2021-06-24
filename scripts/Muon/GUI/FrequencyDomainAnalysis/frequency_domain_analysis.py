@@ -18,6 +18,7 @@ from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.contexts.plot_pane_context import PlotPanesContext
 from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
+from Muon.GUI.Common.contexts.results_context import ResultsContext
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
@@ -85,6 +86,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
         self.fitting_context = BasicFittingContext(allow_double_pulse_fitting=True)
+        self.results_context = ResultsContext()
 
         self.frequency_context = FrequencyContext()
 
@@ -92,7 +94,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             muon_data_context=self.data_context, muon_gui_context=self.gui_context,
             muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context,
             plot_panes_context=self.plot_panes_context,
-            fitting_context=self.fitting_context, frequency_context = self.frequency_context)
+            fitting_context=self.fitting_context, results_context=self.results_context,
+            frequency_context=self.frequency_context)
 
         # create the dockable widget
         self.fitting_tab = FittingTabWidget(self.context, self)

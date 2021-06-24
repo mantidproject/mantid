@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 from mantid.simpleapi import GroupWorkspaces
+from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist
 
 
 # A singleton metaclass, required for the WorkspaceGroupDefinition class.
@@ -35,9 +35,11 @@ class WorkspaceGroupDefinition(metaclass=Singleton):
 
     def execute_grouping(self):
         if not self.__saveState:
+            self._remove_non_existing_workspaces()
             for group_name, workspace_set in self.grouping.items():
                 workspace_list = list(workspace_set)
-                GroupWorkspaces(InputWorkspaces=workspace_list, OutputWorkspace=group_name)
+                if len(workspace_list) > 0:
+                    GroupWorkspaces(InputWorkspaces=workspace_list, OutputWorkspace=group_name)
 
     def new_workspace_group(self, group_name):
         if group_name not in self.grouping:
@@ -47,6 +49,12 @@ class WorkspaceGroupDefinition(metaclass=Singleton):
         self.new_workspace_group(group_name)
         for workspace_name in workspace_names:
             self.grouping[group_name].add(workspace_name)
+
+    def _remove_non_existing_workspaces(self):
+        for group_name, workspace_set in self.grouping.items():
+            for workspace_name in list(workspace_set):
+                if not check_if_workspace_exist(workspace_name):
+                    self.grouping[group_name].remove(workspace_name)
 
     def __enter__(self):
         self.__saveState = True

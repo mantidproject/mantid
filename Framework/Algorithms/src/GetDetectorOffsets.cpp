@@ -14,6 +14,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/PeakParameterHelper.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -26,6 +27,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(GetDetectorOffsets)
 
 using namespace Kernel;
+using namespace Algorithms::PeakParameterHelper;
 using namespace API;
 using std::size_t;
 using namespace DataObjects;
@@ -58,6 +60,8 @@ void GetDetectorOffsets::init() {
   declareProperty("PeakFunction", "Gaussian",
                   std::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<IPeakFunction>()),
                   "The function type for fitting the peaks.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("EstimateFWHM", false),
+                  "Whether to esimate FWHM of peak function when estimating fit parameters");
   declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
 
   /* Signed mode calculates offset in number of bins */
@@ -98,6 +102,7 @@ void GetDetectorOffsets::exec() {
     throw std::runtime_error("Must specify m_Xmin<m_Xmax");
   m_dreference = getProperty("DReference");
   m_step = getProperty("Step");
+  m_estimateFWHM = getProperty("EstimateFWHM");
 
   std::string mode_str = getProperty("OffsetMode");
 
@@ -192,12 +197,38 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   // Find point of peak centre
   const auto &yValues = inputW->y(s);
   auto it = std::max_element(yValues.cbegin(), yValues.cend());
-  const double peakHeight = *it;
+
+  // Set the default peak height and location
+  double peakHeight = *it;
   const double peakLoc = inputW->x(s)[it - yValues.begin()];
+
   // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
   // Pixel with large offset will be masked
   if (std::isnan(peakHeight))
     return (1000.);
+
+  IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
+
+  // Try to observe the peak height and location
+  const auto &histogram = inputW->histogram(s);
+  const auto &vector_x = histogram.points();
+  const auto start_index = findXIndex(vector_x, m_Xmin);
+  const auto stop_index = findXIndex(vector_x, m_Xmax, start_index);
+  // observe parameters if we found a peak range, otherwise use defaults
+  if (start_index != stop_index) {
+    // create a background function
+    auto bkgdFunction = std::dynamic_pointer_cast<IBackgroundFunction>(fun_ptr->getFunction(0));
+    auto peakFunction = std::dynamic_pointer_cast<IPeakFunction>(fun_ptr->getFunction(1));
+    int result = estimatePeakParameters(histogram, std::pair<size_t, size_t>(start_index, stop_index), peakFunction,
+                                        bkgdFunction, m_estimateFWHM, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
+    if (result != PeakFitResult::GOOD) {
+      g_log.debug() << "ws index: " << s
+                    << " bad result for observing peak parameters, using default peak height and loc\n";
+    }
+  } else {
+    g_log.notice() << "ws index: " << s
+                   << " range size is zero in estimatePeakParameters, using default peak height and loc\n";
+  }
 
   IAlgorithm_sptr fit_alg;
   try {
@@ -207,8 +238,8 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
     g_log.error("Can't locate Fit algorithm");
     throw;
   }
-  auto fun = createFunction(peakHeight, peakLoc);
-  fit_alg->setProperty("Function", fun);
+
+  fit_alg->setProperty("Function", fun_ptr);
 
   fit_alg->setProperty("InputWorkspace", inputW);
   fit_alg->setProperty<int>("WorkspaceIndex",
@@ -217,9 +248,6 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   fit_alg->setProperty("EndX", m_Xmax);
   fit_alg->setProperty("MaxIterations", 100);
 
-  IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
-
-  fit_alg->setProperty("Function", fun_ptr);
   fit_alg->executeAsChildAlg();
   std::string fitStatus = fit_alg->getProperty("OutputStatus");
   // Pixel with large offset will be masked
