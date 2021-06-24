@@ -12,7 +12,7 @@ MAMBAFORGE_SCRIPT_NAME=Mambaforge-$(uname)-$(uname -m).sh
 if [[ ! -f $EXPECTED_CONDA_PATH ]]; then
     if [[ ! -f $MAMBAFORGE_SCRIPT_NAME ]]; then
         # Download miniconda
-        curl -O https://github.com/conda-forge/miniforge/releases/latest/download/$MAMBAFORGE_SCRIPT_NAME
+        curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/$MAMBAFORGE_SCRIPT_NAME
     fi
     bash $MAMBAFORGE_SCRIPT_NAME -b
     rm $MAMBAFORGE_SCRIPT_NAME
