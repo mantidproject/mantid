@@ -527,19 +527,14 @@ Intensity scaling for multiple ions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 For multiple ions there are two options for creating a `CrystalFieldMultiSite` object. Either two `CrystalField` objects
 are combined or a `CrystalFieldMultiSite` object is created directly.
-Please note that the first `CrystalField` object with a scaling factor is set as ion0 when combining two `CrystalField`
-objects::
+The following example::
 
     cf = cf1 + 0.5*cf2
 
-creates a `CrystalFieldMultiSite` object with `cf2` as ion0 and `cf1` as ion1. It is worth mentioning that in case of two
-`CrystalField` objects with a scaling factor the scaling factor of the second object is ignored::
+creates a `CrystalFieldMultiSite` object with `cf1` as ion0 and `cf2` as ion1. It is also possible to have scaling factors
+for both `CrystalField` objects::
 
     cf = 2*cf1 + 3*cf2
-
-results in the same `CrystalFieldMultiSite` object as::
-
-    cf = 2*cf1 + cf2
 
 After combining `CrystalField` objects to a `CrystalFieldMultiSite` object further changes to the original `CrystalField`
 objects are not reflected in the `CrystalFieldMultiSite` object. Furthermore, the `CrystalFieldMultiSite` object does not
@@ -564,7 +559,7 @@ results in the following `CrystalFieldMultiSite` object and tie::
     cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1], abundances=[2.0, 1.0]
                                 parameters={'ion0.B20':0.377,'ion0.B22':3.9,'ion0.B40':-0.03,'ion0.B42':-0.116,'ion0.B44':-0.125,
                                             'ion1.B20':0.377,'ion1.B22':3.9,'ion1.B40':-0.03,'ion1.B42':-0.116,'ion1.B44':-0.125})
-    cfms.ties({'ion0.IntensityScaling' : '0.5*ion1.IntensityScaling'})
+    cfms.ties({'ion1.IntensityScaling' : '0.5*ion0.IntensityScaling'})
 
 In addition to creating the equivalent `CrystalFieldMultiSite` object the coefficient is used to set a tie for the
 `IntensityScaling` parameter of ion0 relative to the `IntensityScaling` parameter of ion1. For the tie the coefficient of
@@ -574,8 +569,7 @@ expression are stored as `abundances`.
 Creating the `CrystalFieldMultiSite` object directly allows for more flexibility. First of all, instead of setting values
 for `abundances` it is possible to set the tie directly. Furthermore, if no ties for `IntensityScaling` are required this can
 be achieved by not defining any `abundances` in the constructor. Without a tie the `IntensityScaling` parameters for each ion
-can be set individually. Please note that setting values for `IntensityScaling` in the `CrystalFieldMultiSite` constructor
-will fix the respective parameter to the specified value and not just initialize it as for the `CrystalField` object..
+can be set individually to an initial value and might vary during the fitting process.
 
 Multiple ions fitted to multiple spectra
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -596,7 +590,7 @@ Creating the `CrystalFieldMultiSite` object directly allows to set each of the `
                                             'ion0.IntensityScaling':3.0, 'ion1.IntensityScaling':2.0,
                                             'sp0.IntensityScaling':1.5, 'sp1.IntensityScaling':0.007})
 
-As in the single spectra case `IntensityScaling` values are fixed to the set value or to 1 if there is no setting. The
+As in the single spectra case `IntensityScaling` values are initial values and default to 1 if there is no setting. The
 ties can either be added directly or by adding the corresponding `abundances` with a value per ion in the constructor.
 
 

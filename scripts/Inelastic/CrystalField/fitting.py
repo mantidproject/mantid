@@ -1005,41 +1005,9 @@ class CrystalField(object):
         if isinstance(other, CrystalFieldMultiSite):
             return other.__radd__(self)
         elif isinstance(other, CrystalFieldSite):
-            return other.__add__(self)
+            return (1.0*self).__add__(other)
         if isinstance(other, CrystalField):
-            ions = [self.Ion, other.Ion]
-            symmetries = [self.Symmetry, other.Symmetry]
-            params = {}
-            temperatures = [self._getTemperature(x) for x in range(self.NumberOfSpectra)]
-            for bparam in CrystalField.field_parameter_names:
-                params['ion0.' + bparam] = self[bparam]
-                params['ion1.' + bparam] = other[bparam]
-            if self.NumberOfSpectra > 1:
-                for x in range(self.NumberOfSpectra):
-                    params['sp'+str(x)+'.IntensityScaling'] = self.IntensityScaling[x]
-            ties = {}
-            fixes = []
-            for prefix, obj in {'ion0.':self, 'ion1.':other}.items():
-                tiestr = obj.function.getTies()
-                if tiestr:
-                    for tiepair in [tie.split('=') for tie in tiestr.split(',')]:
-                        ties[prefix + tiepair[0]] = tiepair[1]
-                for par_id in [id for id in range(obj.function.nParams()) if obj.function.isFixed(id)]:
-                    parName = obj.function.getParamName(par_id)
-                    if obj.background is not None:
-                        parName = parName.split('.')[-1]
-                    if parName not in self.field_parameter_names:
-                        continue
-                    fixes.append(prefix + parName)
-            if self._resolutionModel is None:
-                fwhms = [self._getFWHM(x) for x in range(self.NumberOfSpectra)]
-                return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
-                                             FWHM = fwhms, parameters=params, abundances=[1.0, 1.0],
-                                             ties = ties, fixedParameters = fixes)
-            else:
-                return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
-                                             ResolutionModel=self._resolutionModel, parameters=params,
-                                             abundances=[1.0, 1.0], ties = ties, fixedParameters = fixes)
+            return (1.0*self).__add__(1.0*other)
 
     def __mul__(self, factor):
         ffactor = float(factor)
@@ -1201,7 +1169,7 @@ class CrystalFieldSite(object):
         from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         from CrystalField import CrystalField
         if isinstance(other, CrystalField):
-            abundances = [self.abundance, 1.0]
+            return self.__add__(1.0*other)
         elif isinstance(other, CrystalFieldSite):
             abundances = [self.abundance, other.abundance]
             other = other.crystalField
@@ -1216,6 +1184,9 @@ class CrystalFieldSite(object):
         for bparam in CrystalField.field_parameter_names:
             params['ion0.' + bparam] = self.crystalField[bparam]
             params['ion1.' + bparam] = other[bparam]
+        # Check IntensityScaling settings in original objects
+        # If only one has IntensityScaling settings use these for CrystalFieldMultiSite object
+        # Warn if both objects have IntensityScaling settings and these are not equal
         if self.crystalField.NumberOfSpectra > 1:
             differentIntensities = False
             for x in range(self.crystalField.NumberOfSpectra):
@@ -1228,14 +1199,31 @@ class CrystalFieldSite(object):
                     params['sp'+str(x)+'.IntensityScaling'] = self.crystalField.IntensityScaling[x]
             if differentIntensities:
                 warnings.warn('Mismatch between IntensityScaling values of CrystalField objects', RuntimeWarning)
+        # Preserve fixes and ties
+        ties = {}
+        fixes = []
+        for prefix, obj in {'ion0.':self.crystalField, 'ion1.':other}.items():
+            tiestr = obj.function.getTies()
+            if tiestr:
+                for tiepair in [tie.split('=') for tie in tiestr.split(',')]:
+                    ties[prefix + tiepair[0]] = tiepair[1]
+            for par_id in [id for id in range(obj.function.nParams()) if obj.function.isFixed(id)]:
+                parName = obj.function.getParamName(par_id)
+                if obj.background is not None:
+                    parName = parName.split('.')[-1]
+                if parName not in self.crystalField.field_parameter_names:
+                    continue
+                fixes.append(prefix + parName)
         if self.crystalField.ResolutionModel is None:
             FWHM = [self.crystalField._getFWHM(x) for x in range(self.crystalField.NumberOfSpectra)]
-            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHM = FWHM,
-                                         abundances=abundances, parameters=params)
+            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHM=FWHM,
+                                         abundances=abundances, parameters=params, ties=ties,
+                                         fixedParameters = fixes)
         else:
             return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
                                          ResolutionModel=self.crystalField.ResolutionModel,
-                                         abundances=abundances, parameters=params)
+                                         abundances=abundances, parameters=params, ties=ties,
+                                         fixedParameters = fixes)
 
 
 #pylint: disable=too-few-public-methods
