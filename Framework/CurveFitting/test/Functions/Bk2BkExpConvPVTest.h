@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 
-#include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
 #include "MantidCurveFitting/Functions/BackToBackExponential.h"
+#include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
 
 using namespace Mantid::CurveFitting::Functions;
 
