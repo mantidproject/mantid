@@ -10,7 +10,7 @@ EXPECTED_CONDA_PATH=$EXPECTED_MINICONDA_DIR_PATH/bin/conda
 if [[ ! -f $EXPECTED_CONDA_PATH ]]; then
     if [[ ! -f Mambaforge-Linux-x86_64.sh ]]; then
         # Download miniconda
-        curl -O https://github.com/conda-forge/miniforge/releases/download/4.10.1-5/Mambaforge-Linux-x86_64.sh
+        curl -O "https://github.com/conda-forge/miniforge/releases/download/4.10.1-5/Mambaforge-Linux-x86_64.sh"
     fi
     sh Mambaforge-Linux-x86_64.sh -b -p $EXPECTED_MINICONDA_DIR_PATH
     rm Mambaforge-Linux-x86_64.sh
