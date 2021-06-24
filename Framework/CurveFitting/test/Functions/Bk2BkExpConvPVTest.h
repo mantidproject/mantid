@@ -10,6 +10,7 @@
 #include <fstream>
 
 #include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
+#include "MantidCurveFitting/Functions/BackToBackExponential.h"
 
 using namespace Mantid::CurveFitting::Functions;
 
@@ -44,5 +45,36 @@ public:
     TS_ASSERT_DELTA(y[0], 0.0000, 1e-4);
     TS_ASSERT_DELTA(y[50], 2.7983, 1e-4);
     TS_ASSERT_DELTA(y[99], 0.0000, 1e-4);
+
+    // When gamma is 0, `Bk2BkExpConvPV` should give same result
+    // as `BackToBackExponential`.
+    BackToBackExponential peak_b2bExp;
+    peak_b2bExp.initialize();
+    peak_b2bExp.setParameter("I", 100.0);
+    peak_b2bExp.setParameter("X0", 400.0);
+    peak_b2bExp.setParameter("A", 1.0);
+    peak_b2bExp.setParameter("B", 1.5);
+    // Attention here to the sigma parameter for `BackToBackExponential`
+    // and sigma^2 parameter for `Bk2BkExpConvPV`. We may need to change
+    // the input parameter for `Bk2BkExpConvPV` to be sigma as well.
+    peak_b2bExp.setParameter("S", sqrt(200.0));
+
+    Mantid::API::FunctionValues y_b2bExp(x);
+
+    TS_ASSERT_THROWS_NOTHING(peak_b2bExp.function(x, y_b2bExp));
+    TS_ASSERT_DELTA(y[0], y_b2bExp[0], 1e-4);
+    TS_ASSERT_DELTA(y[50], y_b2bExp[50], 1e-4);
+    TS_ASSERT_DELTA(y[99], y_b2bExp[99], 1e-4);
+
+    // We need a test for non-zero gamma since otherwise the testing
+    // for the exponential integral part is ignored. Given gamma = 1.0,
+    // We still have a peak ~400 but the values are slightly different as
+    // compared to when gamma = 0.
+    peak.setParameter("Gamma", 1.0);
+
+    TS_ASSERT_THROWS_NOTHING(peak.function(x, y));
+    TS_ASSERT_DELTA(y[0], 0.002106, 1e-6);
+    TS_ASSERT_DELTA(y[50], 2.7609, 1e-4);
+    TS_ASSERT_DELTA(y[99], 0.002079, 1e-6);
   }
 };
