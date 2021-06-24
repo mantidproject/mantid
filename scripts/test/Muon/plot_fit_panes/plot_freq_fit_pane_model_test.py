@@ -5,10 +5,19 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from unittest import mock
 from Muon.GUI.FrequencyDomainAnalysis.plot_widget.plot_freq_fit_pane_model import PlotFreqFitPaneModel
 from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+
+
+class MockFitInfo(object):
+    def __init__(self, name):
+        self.fit = "FlatBackground"
+        self.tf_asymmetry_fit = False
+        self.input_workspaces = name
+
+    def output_workspace_names(self):
+        return self.input_workspaces
 
 
 @start_qapplication
@@ -26,9 +35,7 @@ class PlotFreqFitPaneModelTest(unittest.TestCase):
         self.model = PlotFreqFitPaneModel(context=self.context)
 
     def test_get_fit_ws_and_indicies(self):
-        fit = mock.MagicMock()
-        fit.output_workspace_names = ["test", "unit"]
-        fit.tf_asymmetry_fit = False
+        fit = MockFitInfo(["test", "unit"])
 
         ws, indices = self.model.get_fit_workspace_and_indices(fit, False)
 
@@ -36,9 +43,7 @@ class PlotFreqFitPaneModelTest(unittest.TestCase):
         self.assertEqual(indices, [1,1])
 
     def test_get_fit_ws_and_indicies_with_diff(self):
-        fit = mock.MagicMock()
-        fit.output_workspace_names = ["test", "unit"]
-        fit.tf_asymmetry_fit = False
+        fit = MockFitInfo(["test", "unit"])
 
         ws, indices = self.model.get_fit_workspace_and_indices(fit, True)
 
