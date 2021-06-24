@@ -6,14 +6,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EXPECTED_MINICONDA_DIR_PATH=$HOME/mambaforge
 EXPECTED_CONDA_PATH=$EXPECTED_MINICONDA_DIR_PATH/bin/conda
 
+MAMBAFORGE_SCRIPT_NAME=Mambaforge-$(uname)-$(uname -m).sh
+
 # Ensure conda is installed
 if [[ ! -f $EXPECTED_CONDA_PATH ]]; then
-    if [[ ! -f Mambaforge-Linux-x86_64.sh ]]; then
+    if [[ ! -f $MAMBAFORGE_SCRIPT_NAME ]]; then
         # Download miniconda
-        curl -O "https://github.com/conda-forge/miniforge/releases/download/4.10.1-5/Mambaforge-Linux-x86_64.sh"
+        curl -O https://github.com/conda-forge/miniforge/releases/latest/download/$MAMBAFORGE_SCRIPT_NAME
     fi
-    sh Mambaforge-Linux-x86_64.sh -b -p $EXPECTED_MINICONDA_DIR_PATH
-    rm Mambaforge-Linux-x86_64.sh
+    bash $MAMBAFORGE_SCRIPT_NAME -b
+    rm $MAMBAFORGE_SCRIPT_NAME
 fi
 
 # With miniconda we can grab the mantid environment if it doesn't already exist
