@@ -53,6 +53,26 @@ class SuperplotPresenter:
         self._update_spectrum_slider()
         self._update_hold_button()
 
+    def set_workspaces(self, workspaces):
+        """
+        Instead of synchronization with the current plot, this function can be
+        used to set the list of workspaces to be handled by the superplot.
+
+        Args:
+            workspaces (list(str)): workspace names
+        """
+        plotted_workspaces = self._model.get_workspaces()
+        for workspace in plotted_workspaces:
+            self._model.del_workspace(workspace)
+        for workspace in workspaces:
+            self._model.add_workspace(workspace)
+        self._update_list()
+        selection = {name: [-1] for name in workspaces}
+        self._view.set_selection(selection)
+        self._update_spectrum_slider()
+        self._update_hold_button()
+        self._update_plot()
+
     def get_side_view(self):
         return self._view.get_side_widget()
 
