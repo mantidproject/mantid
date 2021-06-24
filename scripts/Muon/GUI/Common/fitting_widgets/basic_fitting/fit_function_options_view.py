@@ -112,6 +112,18 @@ class FitFunctionOptionsView(ui_form, base_widget):
         """Sets the index of the current dataset."""
         self.function_browser.setCurrentDataset(dataset_index)
 
+    def set_fit_function(self, fit_function: IFunction) -> None:
+        """Set the fit function shown in the view."""
+        self.function_browser.blockSignals(True)
+        if fit_function is None:
+            self.function_browser.setFunction("")
+        else:
+            self.function_browser.setFunction(str(fit_function))
+            # Required to update the parameter errors as they are not stored in the function string
+            self.function_browser.updateParameters(fit_function)
+        self.function_browser.blockSignals(False)
+        self.function_browser.setErrorsEnabled(True)
+
     def update_function_browser_parameters(self, is_simultaneous_fit: bool, fit_function: IFunction,
                                            global_parameters: list = []) -> None:
         """Updates the parameters in the function browser."""
@@ -133,6 +145,10 @@ class FitFunctionOptionsView(ui_form, base_widget):
         """Returns the global fitting function."""
         return self.function_browser.getGlobalFunction()
 
+    def current_fit_function(self) -> IFunction:
+        """Returns the current fitting function in the view."""
+        return self.function_browser.getFunction()
+
     @property
     def minimizer(self) -> str:
         """Returns the selected minimizer."""
@@ -146,9 +162,8 @@ class FitFunctionOptionsView(ui_form, base_widget):
     @start_x.setter
     def start_x(self, value: float) -> None:
         """Sets the selected start X."""
-        if value <= self.end_x:
-            self.start_x_validator.last_valid_value = f"{value:.3f}"
-            self.start_x_line_edit.setText(f"{value:.3f}")
+        self.start_x_validator.last_valid_value = f"{value:.3f}"
+        self.start_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def end_x(self) -> float:
@@ -158,9 +173,8 @@ class FitFunctionOptionsView(ui_form, base_widget):
     @end_x.setter
     def end_x(self, value: float) -> None:
         """Sets the selected end X."""
-        if value >= self.start_x:
-            self.end_x_validator.last_valid_value = f"{value:.3f}"
-            self.end_x_line_edit.setText(f"{value:.3f}")
+        self.end_x_validator.last_valid_value = f"{value:.3f}"
+        self.end_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def evaluation_type(self) -> str:

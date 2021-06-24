@@ -36,9 +36,9 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.plot_guess = True
         self.assertTrue(self.view.plot_guess)
 
-    def test_that_the_undo_fit_button_can_be_enabled_as_expected(self):
+    def test_that_the_undo_fit_button_can_be_enabled_as_expected_when_the_number_of_undos_is_above_zero(self):
         self.view.enable_view()
-        self.view.enable_undo_fit(True)
+        self.view.set_number_of_undos(2)
         self.assertTrue(self.view.fit_controls.undo_fit_button.isEnabled())
 
     def test_that_update_global_fit_status_label_will_display_no_fit_if_the_success_list_is_empty(self):
@@ -141,28 +141,12 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assertEqual(self.view.start_x, new_value)
 
-    def test_that_the_start_x_will_not_be_set_to_a_different_value_if_it_is_larger_than_the_end_x(self):
-        new_start_x = 6.0
-
-        self.view.end_x = 5.0
-        self.view.start_x = new_start_x
-
-        self.assertNotEqual(self.view.start_x, new_start_x)
-
     def test_that_it_is_possible_to_set_the_end_x_to_a_different_value(self):
         new_value = 5.0
 
         self.view.end_x = new_value
 
         self.assertEqual(self.view.end_x, new_value)
-
-    def test_that_the_end_x_will_not_be_set_to_a_different_value_if_it_is_smaller_than_the_start_x(self):
-        new_end_x = 4.0
-
-        self.view.start_x = 5.0
-        self.view.end_x = new_end_x
-
-        self.assertNotEqual(self.view.end_x, new_end_x)
 
     def test_that_the_fit_to_raw_checkbox_value_can_be_changed_as_expected(self):
         self.view.fit_to_raw = False

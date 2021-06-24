@@ -963,6 +963,10 @@ public:
          return NULL;
       }
     %End
+    SIP_PYOBJECT getFunction();
+    %MethodCode
+      sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunction());
+    %End
     SIP_PYOBJECT getGlobalFunction();
     %MethodCode
       sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getGlobalFunction());
