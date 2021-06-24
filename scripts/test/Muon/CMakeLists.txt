@@ -47,6 +47,10 @@ set ( TEST_PY_FILES
    fitting_widgets/general_fitting/general_fitting_presenter_test.py
    fitting_widgets/general_fitting/general_fitting_options_view_test.py
    fitting_widgets/general_fitting/general_fitting_view_test.py
+   fitting_widgets/model_fitting/model_fitting_data_selector_view_test.py
+   fitting_widgets/model_fitting/model_fitting_model_test.py
+   fitting_widgets/model_fitting/model_fitting_presenter_test.py
+   fitting_widgets/model_fitting/model_fitting_view_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_model_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_options_view_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_presenter_test.py
@@ -86,6 +90,7 @@ set ( TEST_PY_FILES
    max_ent_presenter_load_interaction_test.py
    MaxEntModel_test.py
    MaxEntPresenter_test.py
+   model_fitting_context_test.py
    muon_context_test.py
    muon_context_with_frequency_test.py
    muon_data_context_test.py
@@ -101,6 +106,7 @@ set ( TEST_PY_FILES
    plotting_canvas/plot_color_queue_test.py
    plotting_canvas/plotting_canvas_model_test.py
    plotting_canvas/plotting_canvas_presenter_test.py
+   results_context_test.py
    results_tab_widget/results_tab_model_test.py
    results_tab_widget/results_tab_presenter_test.py
    seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py

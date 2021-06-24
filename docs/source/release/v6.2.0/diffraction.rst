@@ -38,7 +38,7 @@ Improvements
 Bugfixes
 ########
 - Sequential fitting in the EngDiff UI now uses the output of the last successful fit (as opposed to the previous fit) as the initial parameters for the next fit.
-
+- The help button on the Engineering Diffraction interface points to the correct page, having been broken in the last release
 
 Single Crystal Diffraction
 --------------------------

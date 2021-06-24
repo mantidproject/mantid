@@ -22,8 +22,6 @@ class FitControlsView(ui_form, base_widget):
         super(FitControlsView, self).__init__(parent)
         self.setupUi(self)
 
-        self.enable_undo_fit(False)
-
         # Comment out this line to show the 'Fit Generator' button
         self.fit_generator_button.hide()
 
@@ -43,6 +41,11 @@ class FitControlsView(ui_form, base_widget):
         """Connect the slot for the Plot Guess checkbox."""
         self.plot_guess_checkbox.stateChanged.connect(slot)
 
+    def set_number_of_undos(self, number_of_undos: int) -> None:
+        """Sets the allowed number of 'Undo Fit' events."""
+        self.undo_fit_button.setText(f"Undo Fit ({number_of_undos})")
+        self.undo_fit_button.setEnabled(number_of_undos != 0)
+
     @property
     def plot_guess(self) -> bool:
         """Returns true if plot guess is ticked."""
@@ -52,10 +55,6 @@ class FitControlsView(ui_form, base_widget):
     def plot_guess(self, check: bool) -> None:
         """Sets whether or not plot guess is ticked."""
         self.plot_guess_checkbox.setChecked(check)
-
-    def enable_undo_fit(self, enable: bool) -> None:
-        """Sets whether or not undo fit is enabled."""
-        self.undo_fit_button.setEnabled(enable)
 
     def update_global_fit_status_label(self, fit_success: list) -> None:
         """Updates the global fit status label."""
