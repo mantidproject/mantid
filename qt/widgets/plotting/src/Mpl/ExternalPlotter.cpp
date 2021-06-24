@@ -109,6 +109,9 @@ ExternalPlotter::ExternalPlotter() {}
 
 ExternalPlotter::~ExternalPlotter() {}
 
+/**
+ * Calls plotSpectra with no kwargs
+ */
 void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices,
                                   bool errorBars) {
   return plotSpectra(workspaceName, workspaceIndices, errorBars, boost::none);
@@ -120,18 +123,26 @@ void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string 
  * @param workspaceName The name of the workspace to plot
  * @param workspaceIndices The indices within the workspace to plot (e.g.
  * '0-2,5,7-10')
+ * @param errorBars Boolean value to add/remove erorr bars
+ * @param kwargs The kwargs to be used when plotting the workspace
  */
 void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars,
-                                  boost::optional<QHash<QString, QVariant>> kwargs) {
+                                  boost::optional<QHash<QString, QVariant>> const &kwargs) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
-    if (kwargs) {
-      workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(workspaceIndices),
-                    errorBars, false, kwargs);
-    } else {
-      workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(workspaceIndices),
-                    errorBars);
-    }
+    workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(workspaceIndices),
+                  errorBars, false, kwargs);
   }
+}
+
+/**
+ * Calls plotCorrespondingSpectra with no kwargs
+ */
+void ExternalPlotter::plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
+                                               std::vector<int> const &workspaceIndices,
+                                               std::vector<bool> const &errorBars) {
+  return plotCorrespondingSpectra(
+      workspaceNames, workspaceIndices, errorBars,
+      std::vector<boost::optional<QHash<QString, QVariant>>>(workspaceNames.size(), boost::none));
 }
 
 /**
@@ -140,37 +151,25 @@ void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string 
  *
  * @param workspaceNames List of names of workspaces to plot
  * @param workspaceIndices List of indices to plot
+ * @param errorBars List of booleans to add/remove error bars to each workspace individually
+ * @param kwargs The kwargs to be used when plotting each workspace
  */
 void ExternalPlotter::plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
-                                               std::vector<int> const &workspaceIndices, bool errorBars,
-                                               boost::optional<std::vector<QHash<QString, QVariant>>> kwargs,
-                                               boost::optional<std::vector<bool>> errorBarsPerSpectra) {
-  if (workspaceNames.empty() || workspaceIndices.empty())
+                                               std::vector<int> const &workspaceIndices,
+                                               std::vector<bool> const &errorBars,
+                                               std::vector<boost::optional<QHash<QString, QVariant>>> const &kwargs) {
+  if (workspaceNames.empty() || workspaceIndices.empty() || errorBars.empty() || kwargs.empty())
     return;
-  if (workspaceNames.size() > 1 && workspaceNames.size() != workspaceIndices.size())
+  auto const numberOfPlots = workspaceNames.size();
+  if (numberOfPlots > 1 &&
+      (workspaceIndices.size() != numberOfPlots || errorBars.size() != numberOfPlots || kwargs.size() != numberOfPlots))
     return;
-  if (!errorBarsPerSpectra)
-    errorBarsPerSpectra = std::vector<bool>(workspaceIndices.size(), errorBars);
-  else if (errorBarsPerSpectra->size() != workspaceIndices.size())
-    return;
-  if (kwargs) {
-    if (kwargs->size() != workspaceIndices.size())
-      return;
-    auto figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])), {workspaceIndices[0]},
-                                errorBarsPerSpectra.get()[0], false, kwargs.get()[0]);
-    for (auto i = 1u; i < workspaceNames.size(); ++i) {
-      if (figure)
-        figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])), {workspaceIndices[i]},
-                               errorBarsPerSpectra.get()[i], true, kwargs.get()[i], figure.get());
-    }
-  } else {
-    auto figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])), {workspaceIndices[0]},
-                                errorBarsPerSpectra.get()[0], false);
-    for (auto i = 1u; i < workspaceNames.size(); ++i) {
-      if (figure)
-        figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])), {workspaceIndices[i]},
-                               errorBarsPerSpectra.get()[i], true, boost::none, figure.get());
-    }
+  auto figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])), {workspaceIndices[0]},
+                              errorBars[0], false, kwargs[0]);
+  for (auto i = 1u; i < workspaceNames.size(); ++i) {
+    if (figure)
+      figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])), {workspaceIndices[i]},
+                             errorBars[i], true, kwargs[i], figure.get());
   }
 }
 

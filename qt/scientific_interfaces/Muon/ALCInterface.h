@@ -9,6 +9,7 @@
 #include "DllConfig.h"
 #include "MantidKernel/System.h"
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 
@@ -59,6 +60,8 @@ private:
   void importLoadedData(const std::string &workspaceName);
   void importBaselineData(const std::string &workspaceName);
   void importPeakData(const std::string &workspaceName);
+  void externallyPlot(Mantid::API::MatrixWorkspace_sptr &data, std::vector<std::string> const &workspaceNames,
+                      std::vector<int> const &workspaceIndices, std::vector<bool> const &errorBars);
 
   /// UI form
   Ui::ALCInterface m_ui;
@@ -84,6 +87,9 @@ private:
 
   /// External plotter
   std::unique_ptr<Widgets::MplCpp::ExternalPlotter> m_externalPlotter;
+
+  /// Steps of the ALC interface
+  enum Steps { DataLoading = 0, BaselineModel = 1, PeakFitting = 2 };
 };
 
 } // namespace CustomInterfaces

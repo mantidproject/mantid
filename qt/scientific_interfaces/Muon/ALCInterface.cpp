@@ -39,7 +39,6 @@ MatrixWorkspace_sptr getWorkspace(const std::string &workspaceName) {
     return nullptr;
   }
 }
-
 } // namespace
 
 namespace MantidQt {
@@ -287,49 +286,54 @@ void ALCInterface::importPeakData(const std::string &workspaceName) {
   }
 }
 
+/**
+ * Handles when External Plot is pressed on the ALC interface
+ */
 void ALCInterface::externalPlotRequested() {
   MatrixWorkspace_sptr data;
-  std::vector<QHash<QString, QVariant>> kwargs;
+  // Get current step to determine what data to externally plot
   switch (m_ui.stepView->currentIndex()) {
-  case 0:
+  case DataLoading:
     data = m_dataLoading->exportWorkspace();
-    if (data) {
-      AnalysisDataService::Instance().addOrReplace("ALC_External_Plot_Loaded_Data", data);
-      kwargs.emplace_back(QHash<QString, QVariant>());
-      kwargs[0].insert("marker", QString(".").toLatin1().constData());
-      kwargs[0].insert("linestyle", QString("None").toLatin1().constData());
-      m_externalPlotter->plotSpectra("ALC_External_Plot_Loaded_Data", "0", true, kwargs[0]);
-    }
+    if (data)
+      externallyPlot(data, std::vector<std::string>{"ALC_External_Plot_Loaded_Data"}, std::vector<int>{0},
+                     std::vector<bool>{true});
     break;
-  case 1: // Spec 0 = Data, Spec 1 = Calc, Spec 2 = Diff
+  case BaselineModel:
     data = m_baselineModellingModel->exportWorkspace();
-    if (data) {
-      AnalysisDataService::Instance().addOrReplace("ALC_External_Plot_Baseline_Workspace", data);
-      kwargs.emplace_back(QHash<QString, QVariant>());
-      kwargs[0].insert("marker", QString(".").toLatin1().constData());
-      kwargs[0].insert("linestyle", QString("None").toLatin1().constData());
-      kwargs.emplace_back(QHash<QString, QVariant>());
-      kwargs[1].insert("marker", QString("None").toLatin1().constData());
-      m_externalPlotter->plotCorrespondingSpectra(std::vector<std::string>{2, "ALC_External_Plot_Baseline_Workspace"},
-                                                  std::vector<int>{0, 1}, false, kwargs,
-                                                  std::vector<bool>{true, false});
-    }
+    if (data)
+      externallyPlot(data, std::vector<std::string>{2, "ALC_External_Plot_Baseline_Workspace"}, std::vector<int>{0, 1},
+                     std::vector<bool>{true, false});
     break;
-  case 2: // Spec 0 = Data, Spec 1 = Calc, Spec 2 = Diff
+  case PeakFitting:
     data = m_peakFittingModel->exportWorkspace();
-    if (data) {
-      AnalysisDataService::Instance().addOrReplace("ALC_External_Plot_Peaks_Workspace", data);
-      kwargs.emplace_back(QHash<QString, QVariant>());
-      kwargs[0].insert("marker", QString(".").toLatin1().constData());
-      kwargs[0].insert("linestyle", QString("None").toLatin1().constData());
-      kwargs.emplace_back(QHash<QString, QVariant>());
-      kwargs[1].insert("marker", QString("None").toLatin1().constData());
-      m_externalPlotter->plotCorrespondingSpectra(std::vector<std::string>{2, "ALC_External_Plot_Peaks_Workspace"},
-                                                  std::vector<int>{0, 1}, false, kwargs,
-                                                  std::vector<bool>{true, false});
-    }
+    if (data)
+      externallyPlot(data, std::vector<std::string>{2, "ALC_External_Plot_Peaks_Workspace"}, std::vector<int>{0, 1},
+                     std::vector<bool>{true, false});
     break;
   }
+}
+
+/**
+ * Plots in workbench the data given
+ * Spec 0 = Data
+ * Spec 1 = Calc
+ * Spec 2 = Diff
+ * @param data The workspace to add to the ADS before plotting
+ * @param workspaceName List of names of workspaces to plot
+ * @param workspaceIndices List of indices to plot
+ * @param errorBars List of booleans to add/remove error bars to each line individually
+ */
+void ALCInterface::externallyPlot(MatrixWorkspace_sptr &data, std::vector<std::string> const &workspaceNames,
+                                  std::vector<int> const &workspaceIndices, std::vector<bool> const &errorBars) {
+  // Create kwargs for styling each type of spectra
+  std::vector<boost::optional<QHash<QString, QVariant>>> spectraKwargs(
+      2, QHash<QString, QVariant>()); // Diff currently never plotted so no kwargs needed
+  spectraKwargs[0]->insert("marker", QString(".").toLatin1().constData());
+  spectraKwargs[0]->insert("linestyle", QString("None").toLatin1().constData());
+  spectraKwargs[1]->insert("marker", QString("None").toLatin1().constData());
+  AnalysisDataService::Instance().addOrReplace(workspaceNames[0], data);
+  m_externalPlotter->plotCorrespondingSpectra(workspaceNames, workspaceIndices, errorBars, spectraKwargs);
 }
 
 } // namespace CustomInterfaces

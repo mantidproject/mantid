@@ -33,11 +33,12 @@ public:
 
   virtual void plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars);
   virtual void plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars,
-                           boost::optional<QHash<QString, QVariant>> kwargs);
+                           boost::optional<QHash<QString, QVariant>> const &kwargs);
   virtual void plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
-                                        std::vector<int> const &workspaceIndices, bool errorBars,
-                                        boost::optional<std::vector<QHash<QString, QVariant>>> kwargs = boost::none,
-                                        boost::optional<std::vector<bool>> errorBarsPerSpectra = boost::none);
+                                        std::vector<int> const &workspaceIndices, std::vector<bool> const &errorBars);
+  virtual void plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
+                                        std::vector<int> const &workspaceIndices, std::vector<bool> const &errorBars,
+                                        std::vector<boost::optional<QHash<QString, QVariant>>> const &kwargs);
   virtual void plotBins(std::string const &workspaceName, std::string const &binIndices, bool errorBars);
   virtual void plotContour(std::string const &workspaceName);
   virtual void plotTiled(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars);
