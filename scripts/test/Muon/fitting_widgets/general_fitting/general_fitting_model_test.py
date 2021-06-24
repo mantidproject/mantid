@@ -38,7 +38,7 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.start_xs, [])
         self.assertEqual(self.model.end_xs, [])
         self.assertEqual(self.model.single_fit_functions, [])
-        self.assertEqual(self.model.single_fit_functions_cache, [])
+        self.assertEqual(self.model.fitting_context.single_fit_functions_for_undo, [])
         self.assertEqual(self.model.fit_statuses, [])
         self.assertEqual(self.model.chi_squared, [])
         self.assertEqual(self.model.function_name, "")
@@ -48,7 +48,7 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertTrue(self.model.fit_to_raw)
 
         self.assertEqual(self.model.simultaneous_fit_function, None)
-        self.assertEqual(self.model.simultaneous_fit_function_cache, None)
+        self.assertEqual(self.model.fitting_context.simultaneous_fit_functions_for_undo, [])
         self.assertTrue(not self.model.simultaneous_fitting_mode)
         self.assertEqual(self.model.simultaneous_fit_by, "")
         self.assertEqual(self.model.simultaneous_fit_by_specifier, "")
@@ -85,38 +85,29 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(str(self.model.simultaneous_fit_function_cache), str(self.simultaneous_fit_function))
 
-    def test_that_caching_the_simultaneous_fit_function_to_an_ifunction_will_raise_if_the_number_of_datasets_is_zero(self):
-        self.assertEqual(self.model.number_of_datasets, 0)
-        with self.assertRaises(RuntimeError):
-            self.model.simultaneous_fit_function_cache = self.simultaneous_fit_function
-
-    def test_that_caching_the_simultaneous_fit_function_to_a_none_will_not_raise_if_the_number_of_functions_is_zero(self):
-        self.assertEqual(self.model.number_of_datasets, 0)
-        self.model.simultaneous_fit_function_cache = None
-
     def test_that_cache_the_current_fit_functions_will_cache_the_simultaneous_and_single_fit_functions(self):
         self.model.dataset_names = self.dataset_names
-        self.model.single_fit_functions = self.single_fit_functions
+        self.model.simultaneous_fitting_mode = True
         self.model.simultaneous_fit_function = self.simultaneous_fit_function
 
-        self.model.cache_the_current_fit_functions()
+        self.model.save_current_fit_function_to_undo_data()
 
-        self.assertEqual(str(self.model.single_fit_functions_cache[0]), str(self.model.single_fit_functions[0]))
-        self.assertEqual(str(self.model.single_fit_functions_cache[1]), str(self.model.single_fit_functions[1]))
-        self.assertEqual(str(self.model.simultaneous_fit_function_cache), str(self.model.simultaneous_fit_function))
+        self.assertEqual(str(self.model.fitting_context.simultaneous_fit_functions_for_undo[0]), str(self.model.simultaneous_fit_function))
 
-    def test_that_clear_the_fit_function_cache_will_clear_the_simultaneous_and_single_fit_functions(self):
+    def test_that_clear_undo_data_will_clear_the_simultaneous_fit_functions(self):
         self.model.dataset_names = self.dataset_names
-        self.model.single_fit_functions_cache = self.single_fit_functions
-        self.model.simultaneous_fit_function_cache = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
 
-        self.assertEqual(len(self.model.single_fit_functions_cache), 2)
-        self.assertEqual(self.model.simultaneous_fit_function_cache, self.simultaneous_fit_function)
+        self.model.save_current_fit_function_to_undo_data()
 
-        self.model.clear_cached_fit_functions()
+        self.assertEqual(len(self.model.fitting_context.simultaneous_fit_functions_for_undo), 1)
+        self.assertEqual(str(self.model.fitting_context.simultaneous_fit_functions_for_undo[0]),
+                         str(self.simultaneous_fit_function))
 
-        self.assertEqual(self.model.single_fit_functions_cache, [None, None])
-        self.assertEqual(self.model.simultaneous_fit_function_cache, None)
+        self.model.clear_undo_data()
+
+        self.assertEqual(self.model.fitting_context.simultaneous_fit_functions_for_undo, [])
 
     def test_that_the_simultaneous_fitting_mode_can_be_changed_as_expected(self):
         self.assertTrue(not self.model.simultaneous_fitting_mode)
@@ -201,17 +192,16 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.function_name, " FlatBackground,ExpDecay")
 
     def test_that_use_cached_function_will_replace_the_simultaneous_and_single_functions_with_the_cached_functions(self):
+        self.model.fitting_context.undo_previous_fit = mock.Mock()
+
         self.model.dataset_names = self.dataset_names
-        self.model.single_fit_functions = [self.fit_function, None]
         self.model.simultaneous_fit_function = self.simultaneous_fit_function
-        self.model.cache_the_current_fit_functions()
-        self.model.single_fit_functions = [None, None]
+        self.model.simultaneous_fitting_mode = True
+        self.model.save_current_fit_function_to_undo_data()
         self.model.simultaneous_fit_function = None
 
-        self.model.use_cached_function()
+        self.model.undo_previous_fit()
 
-        self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=0")
-        self.assertEqual(self.model.single_fit_functions[1], None)
         self.assertEqual(str(self.model.simultaneous_fit_function), str(self.simultaneous_fit_function))
 
     def test_that_update_parameter_value_will_update_the_value_of_a_parameter_in_single_fit_mode(self):

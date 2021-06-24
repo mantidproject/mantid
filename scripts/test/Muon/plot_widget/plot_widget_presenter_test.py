@@ -16,7 +16,10 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_inter
     PlottingCanvasPresenterInterface
 from Muon.GUI.Common.plot_widget.plot_widget_presenter import PlotWidgetPresenterCommon
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
+
 from mantid import AnalysisDataService
+from mantid.api import WorkspaceFactory
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateWorkspace
 
@@ -248,9 +251,12 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.figure_presenter.create_single_plot.assert_called_once()
 
     def test_handle_plot_selected_fits_correctly_calls_plot(self):
+        workspace = WorkspaceFactory.create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+        table_workspace = WorkspaceFactory.createTable()
         fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
-                             ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
+                             [StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA', workspace)],
+                             StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA; Fitted', table_workspace),
+                             mock.Mock())
 
         self.model.get_fit_workspace_and_indices.return_value = [["MUSR62260; Group; bottom; Asymmetry; MA; Fitted"],
                                                                  [1]]
@@ -266,9 +272,12 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
                                                                       hold_on=False, autoscale=False)
 
     def test_handle_plot_selected_fits_correctly_calls_model(self):
+        workspace = WorkspaceFactory.create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+        table_workspace = WorkspaceFactory.createTable()
         fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
-                             ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
+                             [StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA', workspace)],
+                             StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA; Fitted', table_workspace),
+                             mock.Mock())
 
         self.model.get_fit_workspace_and_indices.return_value = [["MUSR62260; Group; bottom; Asymmetry; MA; Fitted"],
                                                                  [1]]

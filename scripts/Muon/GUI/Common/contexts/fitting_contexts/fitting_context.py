@@ -9,9 +9,11 @@ import re
 
 import numpy as np
 
+from mantid.api import WorkspaceGroup
 from mantidqt.utils.observer_pattern import Observable
-from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
-
+from Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads
+from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 # Magic values for names of columns in the fit parameter table
 NAME_COL = 'Name'
@@ -179,38 +181,52 @@ class FitInformation(object):
     """Data-object encapsulating a single fit"""
 
     def __init__(self,
-                 parameter_workspace,
-                 fit_function_name,
-                 input_workspace,
-                 output_workspace_names,
-                 global_parameters=None,
-                 tf_asymmetry_fit=False):
+                 input_workspace_names: list,
+                 fit_function_name: str,
+                 output_workspaces: list,
+                 parameter_workspace: StaticWorkspaceWrapper,
+                 covariance_workspace: StaticWorkspaceWrapper,
+                 global_parameters: list = None,
+                 tf_asymmetry_fit: bool = False):
         """
-        :param parameter_workspace: The workspace wrapper
-        that contains all of the parameters from the fit
-        :param fit_function_name: The name of the function used
-        :param input_workspace: The name or list of names
-        of the workspace(s) containing the original data
-        :param output_workspace_names: A list containing the names of the output workspaces containing the fits
-        :param global_parameters: An optional list of parameters
-        that were tied together during the fit
+        :param input_workspace_names: A list of input workspace names containing the original data.
+        :param fit_function_name: The name of the function used.
+        :param output_workspaces: A list of StaticWorkspaceWrapper's containing the output workspaces.
+        :param parameter_workspace: A StaticWorkspaceWrapper containing the parameter workspace.
+        :param covariance_workspace: A StaticWorkspaceWrapper containing the covariance workspace.
+        :param global_parameters: An optional list of global parameters that were tied together during the fit.
         :param tf_asymmetry_fit: An optional flag indicating whether the data is from a TF Asymmetry fit or not.
         """
-        self._fit_parameters = FitParameters(parameter_workspace,
-                                             global_parameters)
-        self.fit_function_name = fit_function_name
-        self.input_workspaces = [input_workspace] if isinstance(
-            input_workspace, str) else input_workspace
-        self.output_workspace_names = [output_workspace_names] if isinstance(
-            output_workspace_names, str) else output_workspace_names
-        self.tf_asymmetry_fit = tf_asymmetry_fit
+        self.input_workspaces: list = input_workspace_names
+        self.fit_function_name: str = fit_function_name
+        self.output_workspaces: list = output_workspaces
+        self.parameter_workspace: StaticWorkspaceWrapper = parameter_workspace
+        self.covariance_workspace: StaticWorkspaceWrapper = covariance_workspace
+        self.tf_asymmetry_fit: bool = tf_asymmetry_fit
+
+        self._fit_parameters = FitParameters(self.parameter_workspace, global_parameters)
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
-        return self.parameter_workspace_name == other.parameter_workspace_name and \
+        return self.input_workspaces == other.input_workspaces and \
             self.fit_function_name == other.fit_function_name and \
-            self.input_workspaces == other.input_workspaces and \
-            self.output_workspace_names == other.output_workspace_names
+            self.output_workspace_names() == other.output_workspace_names() and \
+            self.parameter_workspace.workspace_name == other.parameter_workspace.workspace_name and \
+            self.covariance_workspace.workspace_name == other.covariance_workspace.workspace_name and \
+            self.tf_asymmetry_fit == other.tf_asymmetry_fit
+
+    def output_workspaces_objects(self) -> list:
+        """Returns a list of output workspaces. Do not try place these objects into the ADS as they are not copied."""
+        return [output_workspace.workspace for output_workspace in self.output_workspaces]
+
+    def output_workspace_names(self) -> list:
+        """Returns a list of the output workspace names."""
+        return [output_workspace.workspace_name for output_workspace in self.output_workspaces]
+
+    def output_group_name(self) -> str:
+        """Returns the name of the WorkspaceGroup that contains the output workspaces from a fit."""
+        _, directory = create_fitted_workspace_name(self.input_workspaces[0], self.fit_function_name)
+        return directory[:-1]
 
     @property
     def parameters(self):
@@ -218,22 +234,36 @@ class FitInformation(object):
 
     @property
     def parameter_workspace_name(self):
-        return self._fit_parameters.parameter_workspace_name
+        return self.parameter_workspace.workspace_name
+
+    def add_copy_to_ads(self) -> None:
+        """Adds the output workspaces for this fit to the ADS. Must be a copy so the fit history remains a history."""
+        workspace_group = WorkspaceGroup()
+        add_ws_to_ads(self.output_group_name(), workspace_group)
+
+        for output_workspace in self.output_workspaces:
+            add_ws_to_ads(output_workspace.workspace_name, output_workspace.workspace_copy())
+            workspace_group.add(output_workspace.workspace_name)
+
+        add_ws_to_ads(self.parameter_workspace.workspace_name, self.parameter_workspace.workspace_copy())
+        workspace_group.add(self.parameter_workspace.workspace_name)
+
+        add_ws_to_ads(self.covariance_workspace.workspace_name, self.covariance_workspace.workspace_copy())
+        workspace_group.add(self.covariance_workspace.workspace_name)
 
     def log_names(self, filter_fn=None):
         """
-        The names of the logs on the workspaces
-        associated with this fit.
+        The names of the logs on the workspaces associated with this fit.
 
-        :filter_fn: An optional unary function to filter the names out. It should accept a log
-        and return True if the log should be accepted
-        :return: A list of names
+        :filter_fn: An optional unary function to filter the names out. It should accept a log (e.g. a Mantid Kernel
+        Property object) and return True if the log should be accepted.
+        :return: A list of log names such as ["sample_temp", "sample_magn_field"]
         """
         filter_fn = filter_fn if filter_fn is not None else lambda x: True
 
         all_names = []
-        for ws_name in self.output_workspace_names:
-            logs = retrieve_ws(ws_name).run().getLogData()
+        for output_workspace in self.output_workspaces_objects():
+            logs = output_workspace.run().getLogData()
             all_names.extend([log.name for log in logs if filter_fn(log)])
 
         return all_names
@@ -243,8 +273,8 @@ class FitInformation(object):
         :param log_name: A string name
         :return: True if the log exists on all of the input workspaces False, otherwise
         """
-        for ws_name in self.output_workspace_names:
-            run = retrieve_ws(ws_name).run()
+        for output_workspace in self.output_workspaces_objects():
+            run = output_workspace.run()
             if not run.hasProperty(log_name):
                 return False
 
@@ -262,8 +292,8 @@ class FitInformation(object):
         :return: A single double value
         """
 
-        def value_from_workspace(wksp_name):
-            run = retrieve_ws(wksp_name).run()
+        def value_from_workspace(output_workspace):
+            run = output_workspace.run()
             prop = run.getProperty(log_name)
             if hasattr(prop, 'timeAverageValue'):
                 return prop.timeAverageValue()
@@ -273,10 +303,7 @@ class FitInformation(object):
                 except ValueError:
                     return prop.valueAsStr
 
-        values = [
-            value_from_workspace(wksp_name)
-            for wksp_name in self.output_workspace_names
-        ]
+        values = [value_from_workspace(output_workspace) for output_workspace in self.output_workspaces_objects()]
         try:
             return np.mean(values)
         except TypeError:
@@ -297,82 +324,79 @@ class FittingContext(object):
     """
 
     def __init__(self):
-        self.fit_list: list = []
-
-        self._number_of_fits: int = 0
-        self._number_of_fits_cache: int = 0
+        # A dictionary containing the fit histories for different fitting modes. The key should represent a fitting
+        # mode, and the value should be a list of FitInformation's indicating all the fits that have been done up to
+        # this point
+        self._fit_history: dict = {}
 
         self.new_fit_results_notifier = Observable()
         self.fit_removed_notifier = Observable()
 
-    def __len__(self):
-        """
-        :return: The number of fits in the list
-        """
-        return len(self.fit_list)
+    def all_latest_fits(self) -> None:
+        """Returns the latest fits with unique fit output names for all fitting modes. Override in a child class."""
+        raise NotImplementedError("This needs to be overridden by a child class.")
+
+    @property
+    def active_fit_history(self) -> None:
+        """Returns the fit history for the currently active fitting mode. Override in a child class."""
+        raise NotImplementedError("This needs to be overridden by a child class.")
+
+    @active_fit_history.setter
+    def active_fit_history(self, fit_history: list) -> None:
+        """Sets the fit history for the currently active fitting mode. Override in a child class."""
+        raise NotImplementedError("This needs to be overridden by a child class.")
+
+    def clear(self, removed_fits: list = []):
+        """Removes all the stored Fits from the context."""
+        self.fit_removed_notifier.notify_subscribers(removed_fits)
+
+    def remove_overridden_fits(self) -> None:
+        """Removes the fits in the fit history that have been overridden by a newer fit."""
+        self.active_fit_history = self._latest_unique_fits_in(self.active_fit_history)
+
+    @staticmethod
+    def remove_fit_by_name(fits_history: list, workspace_name: str) -> None:
+        """Remove a Fit from the history when an ADS delete event happens on one of its output workspaces."""
+        for fit in reversed(fits_history):
+            if workspace_name in fit.output_workspace_names() or workspace_name == fit.parameter_workspace_name:
+                fits_history.remove(fit)
 
     def add_fit_from_values(self,
-                            parameter_workspace,
-                            fit_function_name,
-                            input_workspace,
-                            output_workspace_names,
-                            global_parameters=None,
-                            tf_asymmetry_fit=False):
+                            input_workspace_names: list,
+                            fit_function_name: str,
+                            output_workspaces: list,
+                            parameter_workspace: StaticWorkspaceWrapper,
+                            covariance_workspace: StaticWorkspaceWrapper,
+                            global_parameters: list = None,
+                            tf_asymmetry_fit: bool = False) -> None:
         """
         Add a new fit information object based on the raw values.
-        See FitInformation constructor for details are arguments.
+        :param input_workspace_names: A list of input workspace names containing the original data.
+        :param fit_function_name: The name of the function used.
+        :param output_workspaces: A list of StaticWorkspaceWrapper's containing the output workspaces.
+        :param parameter_workspace: A StaticWorkspaceWrapper containing the parameter workspace.
+        :param covariance_workspace: A StaticWorkspaceWrapper containing the covariance workspace.
+        :param global_parameters: An optional list of global parameters that were tied together during the fit.
+        :param tf_asymmetry_fit: An optional flag indicating whether the data is from a TF Asymmetry fit or not.
         """
-        self.add_fit(
-            FitInformation(parameter_workspace, fit_function_name,
-                           input_workspace, output_workspace_names,
-                           global_parameters, tf_asymmetry_fit))
+        self.add_fit(FitInformation(input_workspace_names, fit_function_name, output_workspaces, parameter_workspace,
+                                    covariance_workspace, global_parameters, tf_asymmetry_fit))
 
-    def add_fit(self, fit):
+    def add_fit(self, fit: FitInformation) -> None:
         """
         Add a new fit to the context. Subscribers are notified of the update.
         :param fit: A new FitInformation object
         """
-        if fit not in self.fit_list:
-            self.fit_list.append(fit)
-            self._number_of_fits += 1
-        else:
-            self.update_fit(fit)
-
+        self.active_fit_history.append(fit)
         self.new_fit_results_notifier.notify_subscribers(fit)
 
-    def update_fit(self, updated_fit):
-        """
-        Updates fit parameters of a fit that is currently stored in the context
-        :param updated_fit: A FitInformation object
-        """
-        for fit in self.fit_list:
-            if updated_fit == fit:
-                fit._fit_parameters = updated_fit._fit_parameters
-                return
-
-    def fit_function_names(self):
+    def fit_function_names(self) -> list:
         """
         :return: a list of unique function names used in the fit
         """
-        return list(set([fit.fit_function_name for fit in self.fit_list]))
+        return list(set([fit.fit_function_name for fit in self.all_latest_fits()]))
 
-    def find_output_workspaces_for_input_workspace_name(
-            self, input_workspace_name):
-        """
-        Find the fits in the list whose input workspace matches
-        :param input_workspace_name: The name of the input_workspace
-        :return: A list of matching fits
-        """
-        workspace_list = []
-        for fit in self.fit_list:
-            for index, workspace in enumerate(fit.input_workspaces):
-                if workspace == input_workspace_name:
-                    workspace_list.append(fit.output_workspace_names[index])
-
-        return workspace_list
-
-    def find_fit_for_input_workspace_list_and_function(
-            self, input_workspace_list, fit_function_name):
+    def find_fit_for_input_workspace_list_and_function(self, input_workspace_list, fit_function_name):
         """
         Find the fit in the list whose input workspace matches the input workspace list
         and the specified fit function name
@@ -380,33 +404,11 @@ class FittingContext(object):
         :param fit_function_name: Fit function name
         :return: A matching fit
         """
-        for fit in self.fit_list:
+        for fit in self.all_latest_fits():
             if fit.input_workspaces == input_workspace_list and fit.fit_function_name == fit_function_name:
                 return fit
         else:
             return None
-
-    def remove_workspace_by_name(self, workspace_name):
-        list_of_fits_to_remove = []
-        for fit in self.fit_list:
-            if workspace_name in fit.output_workspace_names or workspace_name == fit.parameter_workspace_name:
-                self._number_of_fits_cache = 0
-                list_of_fits_to_remove.append(fit)
-
-        for fit in list_of_fits_to_remove:
-            index = self.fit_list.index(fit)
-            if index >= len(self.fit_list) - self._number_of_fits:
-                self._number_of_fits -= 1
-            self.fit_list.remove(fit)
-
-    def remove_fits_from_stored_fit_list(self, fits):
-        removed_fits = []
-        for fit in fits:
-            if fit in self.fit_list:
-                self.fit_list.remove(fit)
-                removed_fits += [fit]
-                self._number_of_fits -= 1
-        self.fit_removed_notifier.notify_subscribers(removed_fits)
 
     def log_names(self, filter_fn=None):
         """
@@ -416,32 +418,41 @@ class FittingContext(object):
         FitInformation.log_names
         :return: A list of names of logs
         """
-        return [
-            name for fit in self.fit_list for name in fit.log_names(filter_fn)
-        ]
+        return [name for fit in self.all_latest_fits() for name in fit.log_names(filter_fn)]
 
-    def clear(self):
-        fits_to_remove = self.fit_list.copy()
-        self.remove_fits_from_stored_fit_list(fits_to_remove)
+    def undo_previous_fit(self) -> None:
+        """
+        Undoes the Fit stored at the top of the fit history. If an identical fit exists further back in the history,
+        then its workspaces are loaded into the ADS. Otherwise, the Results tab is notified to remove the fit.
+        """
+        removed_fit = self.active_fit_history.pop()
 
-    def remove_all_fits(self):
-        removed_fits = self.fit_list
-        self.fit_list = []
-        self._number_of_fits = 0
-        self.fit_removed_notifier.notify_subscribers(removed_fits)
-
-    def remove_latest_fit(self):
-        if self.fit_list:
-            removed_fit = self.fit_list[-1]
-            self.fit_list = self.fit_list[:-1]
-            self._number_of_fits -= 1
+        fit_found = self._add_next_identical_fit_to_the_ads(removed_fit)
+        if not fit_found:
             self.fit_removed_notifier.notify_subscribers([removed_fit])
 
-    @property
-    def number_of_fits(self):
-        return self._number_of_fits
+    def _add_next_identical_fit_to_the_ads(self, undone_fit: FitInformation) -> bool:
+        """
+        Adds the next fit in the history that is identical to the undone fit back into the ADS. The history is reversed
+        because the end of the list contains the most recent fits.
+        :param undone_fit: The Fit that was just undone by the user.
+        :returns True if an identical fit was found in the history and added back into the ADS.
+        """
+        for fit in reversed(self.active_fit_history):
+            if fit == undone_fit:
+                fit.add_copy_to_ads()
+                return True
+        return False
 
-    @number_of_fits.setter
-    def number_of_fits(self, value):
-        self._number_of_fits_cache = self._number_of_fits
-        self._number_of_fits = value
+    def _latest_unique_fits_in(self, fits_history: list) -> list:
+        """Returns a list of fits which all have unique fit output workspaces, and are the most recent of their kind."""
+        if len(fits_history) == 0:
+            return fits_history
+
+        latest_fits = []
+        # Reversed because the fits at the end of the list are the most recently performed fits.
+        for fit in reversed(fits_history):
+            if fit not in latest_fits:
+                latest_fits.append(fit)
+        latest_fits.reverse()
+        return latest_fits

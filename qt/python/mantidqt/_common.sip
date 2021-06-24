@@ -53,6 +53,9 @@ using namespace MantidQt::MantidWidgets::Batch;
 qRegisterMetaType<std::string>("StdString");
 qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 qRegisterMetaType<Message>("Message");
+qRegisterMetaType<QList<QPersistentModelIndex>>("QList<QPersistentModelIndex>");
+qRegisterMetaType<QAbstractItemModel::LayoutChangeHint>("QAbstractItemModel::LayoutChangeHint");
+qRegisterMetaType<QVector<int>>("QVector<int>");
 %End
 
 
@@ -959,6 +962,10 @@ public:
          sipRaiseUnknownException();
          return NULL;
       }
+    %End
+    SIP_PYOBJECT getFunction();
+    %MethodCode
+      sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunction());
     %End
     SIP_PYOBJECT getGlobalFunction();
     %MethodCode

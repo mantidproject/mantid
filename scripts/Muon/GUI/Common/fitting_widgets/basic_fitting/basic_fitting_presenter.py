@@ -34,7 +34,6 @@ class BasicFittingPresenter:
         self.thread_success = True
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
-        self.disable_fitting_notifier = GenericObservable()
         self.fitting_calculation_model = None
 
         self.remove_plot_guess_notifier = GenericObservable()
@@ -82,7 +81,7 @@ class BasicFittingPresenter:
         self.update_and_reset_all_data()
 
         if self.model.number_of_datasets == 0:
-            self.disable_fitting_notifier.notify_subscribers()
+            self.view.disable_view()
         else:
             self.enable_editing_notifier.notify_subscribers()
 
@@ -97,10 +96,10 @@ class BasicFittingPresenter:
         self.update_and_reset_all_data()
 
         self.view.plot_guess, self.model.plot_guess = False, False
-        self.clear_cached_fit_functions()
+        self.clear_undo_data()
 
         if self.model.number_of_datasets == 0:
-            self.disable_fitting_notifier.notify_subscribers()
+            self.view.disable_view()
         else:
             self.enable_editing_notifier.notify_subscribers()
 
@@ -109,7 +108,7 @@ class BasicFittingPresenter:
         self._update_plot = False
         self.update_and_reset_all_data()
         self._update_plot = True
-        self.clear_cached_fit_functions()
+        self.clear_undo_data()
         self.model.remove_all_fits_from_context()
 
     def handle_selected_group_pair_changed(self) -> None:
@@ -137,9 +136,8 @@ class BasicFittingPresenter:
 
     def handle_undo_fit_clicked(self) -> None:
         """Handle when undo fit is clicked."""
-        self.model.use_cached_function()
-        self.clear_cached_fit_functions()
-        self.model.remove_latest_fit_from_context()
+        self.model.undo_previous_fit()
+        self.view.set_number_of_undos(self.model.number_of_undos())
 
         self.update_fit_function_in_view_from_model()
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
@@ -155,7 +153,7 @@ class BasicFittingPresenter:
         if not self.view.fit_object:
             return
 
-        self.model.cache_the_current_fit_functions()
+        self.model.save_current_fit_function_to_undo_data()
         self._perform_fit()
 
     def handle_started(self) -> None:
@@ -170,11 +168,11 @@ class BasicFittingPresenter:
             return
 
         fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
-        if any([not fit_function, not fit_status, not fit_chi_squared]):
+        if any([not fit_function, not fit_status, fit_chi_squared != 0.0 and not fit_chi_squared]):
             return
 
         self.handle_fitting_finished(fit_function, fit_status, fit_chi_squared)
-        self.view.enable_undo_fit(True)
+        self.view.set_number_of_undos(self.model.number_of_undos())
         self.view.plot_guess, self.model.plot_guess = False, False
 
     def handle_fitting_finished(self, fit_function, fit_status, chi_squared) -> None:
@@ -231,7 +229,7 @@ class BasicFittingPresenter:
         self.automatically_update_function_name()
 
         if self.model.get_active_fit_function() is None:
-            self.clear_cached_fit_functions()
+            self.clear_undo_data()
             self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
         self.reset_fit_status_and_chi_squared_information()
@@ -255,31 +253,19 @@ class BasicFittingPresenter:
 
     def handle_start_x_updated(self) -> None:
         """Handle when the start X is changed."""
-        if self.view.start_x > self.view.end_x:
-            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
-            self.model.current_end_x = self.view.end_x
-        elif self.view.start_x == self.view.end_x:
-            self.view.start_x = self.model.current_start_x
+        self._check_start_x_is_valid()
 
         self.model.current_start_x = self.view.start_x
-
-        self._check_start_x_is_within_x_limits()
-        self._check_end_x_is_within_x_limits()
+        self.model.current_end_x = self.view.end_x
 
         self.update_plot_guess()
 
     def handle_end_x_updated(self) -> None:
         """Handle when the end X is changed."""
-        if self.view.end_x < self.view.start_x:
-            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
-            self.model.current_start_x = self.view.start_x
-        elif self.view.end_x == self.view.start_x:
-            self.view.end_x = self.model.current_end_x
+        self._check_end_x_is_valid()
 
+        self.model.current_start_x = self.view.start_x
         self.model.current_end_x = self.view.end_x
-
-        self._check_start_x_is_within_x_limits()
-        self._check_end_x_is_within_x_limits()
 
         self.update_plot_guess()
 
@@ -288,10 +274,10 @@ class BasicFittingPresenter:
         if self._check_rebin_options():
             self.model.fit_to_raw = self.view.fit_to_raw
 
-    def clear_cached_fit_functions(self) -> None:
-        """Clear the cached fit functions."""
-        self.view.enable_undo_fit(False)
-        self.model.clear_cached_fit_functions()
+    def clear_undo_data(self) -> None:
+        """Clear all the previously saved undo fit functions and other data."""
+        self.model.clear_undo_data()
+        self.view.set_number_of_undos(self.model.number_of_undos())
 
     def reset_fit_status_and_chi_squared_information(self) -> None:
         """Clear the fit status and chi squared information in the view and model."""
@@ -325,7 +311,7 @@ class BasicFittingPresenter:
         self.update_dataset_names_in_view_and_model()
 
     def update_dataset_names_in_view_and_model(self) -> None:
-        """Updates the datasets currently displayed. The simultaneous fit by specifier must be updated before this."""
+        """Updates the datasets currently displayed."""
         self.model.dataset_names = self.model.get_workspace_names_to_display_from_context()
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
         self.view.update_dataset_name_combo_box(self.model.dataset_names)
@@ -371,22 +357,6 @@ class BasicFittingPresenter:
         self.model.update_plot_guess()
         self.update_plot_guess_notifier.notify_subscribers()
 
-    def _check_start_x_is_within_x_limits(self) -> None:
-        """Checks the Start X is within the x limits of the current dataset. If not it is set to one of the limits."""
-        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
-        if self.view.start_x < x_lower:
-            self.view.start_x = x_lower
-        elif self.view.start_x > x_upper:
-            self.view.start_x = x_upper
-
-    def _check_end_x_is_within_x_limits(self) -> None:
-        """Checks the End X is within the x limits of the current dataset. If not it is set to one of the limits."""
-        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
-        if self.view.end_x < x_lower:
-            self.view.end_x = x_lower
-        elif self.view.end_x > x_upper:
-            self.view.end_x = x_upper
-
     def _get_single_fit_functions_from_view(self) -> list:
         """Returns the fit functions corresponding to each domain as a list."""
         if self.view.fit_object:
@@ -402,7 +372,7 @@ class BasicFittingPresenter:
     def _perform_fit(self) -> None:
         """Perform the fit in a thread."""
         try:
-            self.calculation_thread = self._create_thread(self.model.perform_fit)
+            self.calculation_thread = self._create_fitting_thread(self.model.perform_fit)
             self.calculation_thread.threadWrapperSetUp(self.handle_started,
                                                        self.handle_finished,
                                                        self.handle_error)
@@ -410,7 +380,7 @@ class BasicFittingPresenter:
         except ValueError as error:
             self.view.warning_popup(error)
 
-    def _create_thread(self, callback) -> ThreadModel:
+    def _create_fitting_thread(self, callback) -> ThreadModel:
         """Create a thread for fitting."""
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
         return ThreadModel(self.fitting_calculation_model)
@@ -432,3 +402,33 @@ class BasicFittingPresenter:
             self.view.warning_popup("No rebin options specified.")
             return False
         return True
+
+    def _check_start_x_is_valid(self) -> None:
+        """Checks that the new start X is valid. If it isn't, the start and end X is adjusted."""
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+        if self.view.start_x < x_lower:
+            self.view.start_x = x_lower
+        elif self.view.start_x > x_upper:
+            if not self.model.is_equal_to_n_decimals(self.view.end_x, x_upper, 3):
+                self.view.start_x, self.view.end_x = self.view.end_x, x_upper
+            else:
+                self.view.start_x = self.model.current_start_x
+        elif self.view.start_x > self.view.end_x:
+            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
+        elif self.view.start_x == self.view.end_x:
+            self.view.start_x = self.model.current_start_x
+
+    def _check_end_x_is_valid(self) -> None:
+        """Checks that the new end X is valid. If it isn't, the start and end X is adjusted."""
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+        if self.view.end_x < x_lower:
+            if not self.model.is_equal_to_n_decimals(self.view.start_x, x_lower, 3):
+                self.view.start_x, self.view.end_x = x_lower, self.view.start_x
+            else:
+                self.view.end_x = self.model.current_end_x
+        elif self.view.end_x > x_upper:
+            self.view.end_x = x_upper
+        elif self.view.end_x < self.view.start_x:
+            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
+        elif self.view.end_x == self.view.start_x:
+            self.view.end_x = self.model.current_end_x

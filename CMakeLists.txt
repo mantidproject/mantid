@@ -1,6 +1,5 @@
-# CMake version check. 3.14 mimimum available from EPEL.
-# 3.15 is required on Windows, but is not available in EPEL yet.
-cmake_minimum_required(VERSION 3.14)
+# CMake version check.
+cmake_minimum_required(VERSION 3.16)
 
 # Define the project name.
 project(Mantid)

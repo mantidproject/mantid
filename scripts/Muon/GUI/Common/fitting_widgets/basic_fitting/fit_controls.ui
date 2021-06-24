@@ -69,8 +69,11 @@
       </item>
       <item>
        <widget class="QPushButton" name="undo_fit_button">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
-         <string>Undo Fit</string>
+         <string>Undo Fit (0)</string>
         </property>
        </widget>
       </item>
