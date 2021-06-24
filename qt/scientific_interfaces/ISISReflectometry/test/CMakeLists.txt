@@ -63,7 +63,7 @@ mtd_add_qt_tests(
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     PythonInterfaceCore
-    ${PYTHON_LIBRARIES}
+    Python::Python
   MTD_QT_LINK_LIBS
     MantidScientificInterfacesISISReflectometry
     MantidQtWidgetsCommon

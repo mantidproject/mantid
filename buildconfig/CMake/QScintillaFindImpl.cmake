@@ -53,6 +53,8 @@ function (find_qscintilla qt_version)
         ${THIRD_PARTY_DIR}/lib/qt5/lib
       )
     elseif ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
+      list(APPEND _qsci_include_paths $ENV{CONDA_PREFIX}/include/qt)
+      list(APPEND _qsci_lib_paths $ENV{CONDA_PREFIX}/lib)
       list ( APPEND _qsci_include_paths /usr/local/opt/qscintilla2/include )
       list ( APPEND _qsci_lib_paths /usr/local/opt/qscintilla2/lib )
     endif ()
