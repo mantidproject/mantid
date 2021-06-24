@@ -188,6 +188,13 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # Show/hide the separator between this button and help button / waterfall options
         self.toggle_separator_visibility(action, on)
 
+    def set_superplot_enabled(self, on):
+        action = self._actions['toggle_superplot']
+        action.setEnabled(on)
+        action.setVisible(on)
+        # Show/hide the separator between this button and help button / waterfall options
+        self.toggle_separator_visibility(action, on)
+
     def waterfall_offset_amount(self):
         self.sig_waterfall_offset_amount_triggered.emit()
 
@@ -220,6 +227,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     def set_buttons_visiblity(self, fig):
         if figure_type(fig) not in [FigureType.Line, FigureType.Errorbar] or len(fig.get_axes()) > 1:
             self.set_fit_enabled(False)
+            self.set_superplot_enabled(False)
 
         # if any of the lines are a sample log plot disable fitting
         for ax in fig.get_axes():
