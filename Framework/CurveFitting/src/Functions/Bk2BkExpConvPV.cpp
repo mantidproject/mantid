@@ -183,7 +183,7 @@ double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha, do
   if (eta < 1.0E-8) {
     omega2 = 0.0;
   } else {
-    omega2 = 2 * N * eta / M_PI * (imag(exp(p) * exponentialIntegral(p)) + imag(exp(q) * exponentialIntegral(q)));
+    omega2 = 2 * N * eta / M_PI * (imag(exponentialIntegral(p)) + imag(exponentialIntegral(q)));
   }
   double omega = omega1 - omega2;
 
