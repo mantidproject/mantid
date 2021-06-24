@@ -59,7 +59,6 @@ signals:
   void plotContourClicked(const QStringList &workspaceNames);
   void sampleMaterialClicked(const QStringList &workspaceNames);
   void superplotClicked(const QStringList &workspaceNames);
-  void superplotWithErrsClicked(const QStringList &workspaceNames);
   void contextMenuAboutToShow(void);
 
   void workspaceDoubleClicked(const QString &workspaceName);
@@ -94,14 +93,12 @@ private slots:
   void onOverPlotMDHistoWorkspaceWithErrorsClicked();
   void onSampleMaterialClicked();
   void onSuperplotClicked();
-  void onSuperplotWithErrsClicked();
 
 private:
   QAction *m_plotSpectrum, *m_plotBin, *m_overplotSpectrum, *m_plotSpectrumWithErrs, *m_overplotSpectrumWithErrs,
       *m_plotColorfill, *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData, *m_showAlgorithmHistory,
       *m_showDetectors, *m_plotAdvanced, *m_plotSurface, *m_plotWireframe, *m_plotContour, *m_plotMDHisto1D,
-      *m_overplotMDHisto1D, *m_plotMDHisto1DWithErrs, *m_overplotMDHisto1DWithErrs, *m_sampleMaterial, *m_superplot,
-      *m_superplotWithErrs;
+      *m_overplotMDHisto1D, *m_plotMDHisto1DWithErrs, *m_overplotMDHisto1DWithErrs, *m_sampleMaterial, *m_superplot;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

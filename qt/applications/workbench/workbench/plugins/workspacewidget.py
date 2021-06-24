@@ -82,8 +82,6 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.sampleMaterialClicked.connect(self._do_sample_material)
         self.workspacewidget.superplotClicked.connect(
                 partial(self._do_plot_spectrum, errors=False, overplot=False, superplot=True))
-        self.workspacewidget.superplotWithErrsClicked.connect(
-                partial(self._do_plot_spectrum, errors=True, overplot=False, superplot=True))
         self.workspacewidget.contextMenuAboutToShow.connect(
             self._on_context_menu)
 
