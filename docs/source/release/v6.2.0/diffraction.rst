@@ -27,6 +27,9 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+New features
+############
+- Added serial fit capability to fitting tab in EngDiff UI - this fits all loaded workspaces with same initial parameters.
 
 Improvements
 ############
