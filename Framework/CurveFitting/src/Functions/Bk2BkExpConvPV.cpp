@@ -32,11 +32,6 @@ Kernel::Logger g_log("Bk2BkExpConvPV");
 
 DECLARE_FUNCTION(Bk2BkExpConvPV)
 
-// ----------------------------
-/** Constructor and Desctructor
- */
-Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0) {}
-
 /** Initialize:  declare paraemters
  */
 void Bk2BkExpConvPV::init() {
@@ -89,11 +84,13 @@ double Bk2BkExpConvPV::fwhm() const {
 }
 
 /**
- * Set new peak width approximately.
+ * Set new peak width approximately using same mapping in BackToBackExponential
+ * (i.e. set gamma=0).
  * @param w :: New value for the width.
  */
 void Bk2BkExpConvPV::setFwhm(const double w) {
-  // TO-DO reset height post setFwhm
+  setParameter("Gamma", 0); // so essentially have B2Bexp
+  const auto h0 = height();
   const auto w0 = expWidth();
   if (w > w0) {
     const auto a = 0.5 * M_LN2;
@@ -101,13 +98,11 @@ void Bk2BkExpConvPV::setFwhm(const double w) {
     // calculate new value of S (from solving eq in fwhm func)
     const auto sigma = w0 * (gsl_sf_lambert_W0(-(a / b) * exp(-(a / b) * (w / w0))) / a + (w / w0) / b);
     setParameter("Sigma2", sigma * sigma);
-    // set Lorz component to have same FWHM as Gauss
-    setParameter("Gamma", 1.775 * sigma);
   } else {
     // set to some small number relative to w0
     setParameter("Sigma2", 1e-6);
-    setParameter("Gamma", 1e-6);
   }
+  setHeight(h0);
 }
 
 /** Set peak center
@@ -120,18 +115,6 @@ double Bk2BkExpConvPV::centre() const { return getParameter("X0"); }
 
 void Bk2BkExpConvPV::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
                                         double endX) {
-  // if (workspace) {
-  //  // convert alpha and beta to correct units so inital guess is resonable
-  //  auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
-  //  const auto centre = getParameter("X0");
-  //  const auto scaleFactor = centre / convertValue(centre, tof, workspace, wi);
-  //  if (scaleFactor != 0) {
-  //    if (isActive(parameterIndex("Alpha")))
-  //      setParameter("Alpha", getParameter("Alpha") / scaleFactor);
-  //    if (isActive(parameterIndex("Beta")))
-  //      setParameter("Beta", getParameter("Beta") / scaleFactor);
-  //  }
-  //}
   IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
 }
 
@@ -269,8 +252,6 @@ void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double &H, double &
                  2.42843 * std::pow(H_G, 3) * std::pow(H_L, 2) + 2.69269 * std::pow(H_G, 4) * H_L + std::pow(H_G, 5);
 
   H = std::pow(temp1, 0.2);
-
-  mFWHM = H;
 
   // 2. Calculate eta
   double gam_pv = H_L / H;
