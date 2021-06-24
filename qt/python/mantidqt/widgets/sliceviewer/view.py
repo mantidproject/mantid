@@ -78,6 +78,7 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.setSpacing(0)
 
         self.image_info_widget = ImageInfoWidget(self)
+        self.image_info_widget.setToolTip("Information about the selected pixel")
         self.track_cursor = QCheckBox("Track Cursor", self)
         self.track_cursor.setToolTip(
             "Update the image readout table when the cursor is over the plot. "
@@ -111,6 +112,13 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.addWidget(self.colorbar_label)
         norm_scale = self.get_default_scale_norm()
         self.colorbar = ColorbarWidget(self, norm_scale)
+        self.colorbar.cmap.setToolTip("Colormap options")
+        self.colorbar.crev.setToolTip("Reverse colormap")
+        self.colorbar.norm.setToolTip("Colormap normalisation options")
+        self.colorbar.powerscale.setToolTip("Power colormap scale")
+        self.colorbar.cmax.setToolTip("Colormap maximum limit")
+        self.colorbar.cmin.setToolTip("Colormap minimum limit")
+        self.colorbar.autoscale.setToolTip("Automatically changes colormap limits when zooming on the plot")
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
         self.colorbar.scaleNormChanged.connect(self.scale_norm_changed)
