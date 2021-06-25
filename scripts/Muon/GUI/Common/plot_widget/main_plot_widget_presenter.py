@@ -24,9 +24,6 @@ class MainPlotWidgetPresenter(HomeTabSubWidget):
         self._view.add_panes(self._plot_modes)
         self._current_plot_mode = self._view.get_plot_mode
         self._plot_modes[self._current_plot_mode].show()
-        # gui observers
-        self._setup_gui_observers()
-        self._setup_view_connections()
 
     def set_plot_mode_changed_slot(self, slot):
         self._view.plot_mode_change_connect(slot)
@@ -37,38 +34,19 @@ class MainPlotWidgetPresenter(HomeTabSubWidget):
 
     @property
     def data_changed_observers(self):
-        observers = []
-        for mode in list(self._plot_modes.keys()):
-            observers.append(self._plot_modes[mode].data_changed_observer)
-        return observers
+        return [self._plot_modes[mode].data_changed_observer for mode in list(self._plot_modes.keys())]
 
     @property
     def rebin_options_set_observers(self):
-        observers = []
-        for mode in list(self._plot_modes.keys()):
-            observers.append(self._plot_modes[mode].rebin_options_set_observer)
-        return observers
+        return [self._plot_modes[mode].rebin_options_set_observer for mode in list(self._plot_modes.keys())]
 
     @property
     def workspace_replaced_in_ads_observers(self):
-        observers = []
-        for mode in list(self._plot_modes.keys()):
-            observers.append(self._plot_modes[mode].workspace_replaced_in_ads_observer)
-        return observers
+        return [self._plot_modes[mode].workspace_replaced_in_ads_observer for mode in list(self._plot_modes.keys())]
 
     @property
     def workspace_deleted_from_ads_observers(self):
-        observers = []
-        for mode in list(self._plot_modes.keys()):
-            observers.append(self._plot_modes[mode].workspace_deleted_from_ads_observer)
-        return observers
-
-    def _setup_gui_observers(self):
-        """"Setup GUI observers, e.g fit observers"""
-        return
-
-    def _setup_view_connections(self):
-        return #self._view.on_plot_mode_changed(self.handle_plot_mode_changed_by_user)
+        return [self._plot_modes[mode].workspace_deleted_from_ads_observer for mode in list(self._plot_modes.keys())]
 
     def show(self, plot_mode):
         self._plot_modes[plot_mode].show()

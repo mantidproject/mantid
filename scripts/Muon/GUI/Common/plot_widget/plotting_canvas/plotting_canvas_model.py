@@ -30,10 +30,10 @@ class WorkspacePlotInformation(NamedTuple):
 
 class PlottingCanvasModel(object):
 
-    def __init__(self, util):
+    def __init__(self, plot_model):
         self._user_axis_limits = None
         self._axes_workspace_map = {}
-        self._util = util
+        self._plot_model = plot_model
         # Options from the view
         self._is_tiled = False
         self._errors = False
@@ -59,8 +59,8 @@ class PlottingCanvasModel(object):
         """
         workspace_plot_information = []
         for workspace_name, index in zip(input_workspace_names, input_indices):
-            axis = self._util._get_workspace_plot_axis(workspace_name, self._axes_workspace_map)
-            if not self._util._is_guess_workspace(workspace_name):
+            axis = self._plot_model._get_workspace_plot_axis(workspace_name, self._axes_workspace_map)
+            if not self._plot_model._is_guess_workspace(workspace_name):
                 workspace_plot_information += [self.create_plot_information(workspace_name, index, axis, errors)]
             else:
                 workspace_plot_information += [self.create_plot_information_for_guess_ws(workspace_name)]
@@ -90,7 +90,7 @@ class PlottingCanvasModel(object):
         :param errors: Boolean stating whether errors are to be plotted
         :return: A WorkspacePlotInformation instance desciribng the data to be plotted
         """
-        label = self._util._create_workspace_label(workspace_name, index)
+        label = self._plot_model._create_workspace_label(workspace_name, index)
         return WorkspacePlotInformation(workspace_name=workspace_name, index=index, axis=axis,
                                         normalised=self._normalised,
                                         errors=errors, label=label)
@@ -101,7 +101,7 @@ class PlottingCanvasModel(object):
         :param guess_ws_name: The workspace name for the fit function guess
         :return: A WorkspacePlotInformation instance describing the data to be plotted
         """
-        axis = self._util._get_workspace_plot_axis(guess_ws_name, self._axes_workspace_map)
+        axis = self._plot_model._get_workspace_plot_axis(guess_ws_name, self._axes_workspace_map)
 
         return WorkspacePlotInformation(workspace_name=guess_ws_name, index=1, axis=axis,
                                         normalised=self._normalised,

@@ -11,7 +11,7 @@ class PlotDataPaneModel(PlotGroupPairModel):
 
     def __init__(self, context):
         super().__init__(context,"Plot Data")
-        self.context.plot_panes_context[self.name].set_defaults([0.,15.], [-0.3, 0.3])
+        self.context.plot_panes_context[self.name].set_defaults([0., 15.0], [-0.3, 0.3])
 
     def get_time_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
         """

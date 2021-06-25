@@ -3,7 +3,7 @@
 # Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-from Muon.GUI.Common.plot_widget.plot_fit_pane_presenter import PlotFitPanePresenter
+from Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_presenter import PlotFitPanePresenter
 
 
 class PlotFreqFitPanePresenter(PlotFitPanePresenter):

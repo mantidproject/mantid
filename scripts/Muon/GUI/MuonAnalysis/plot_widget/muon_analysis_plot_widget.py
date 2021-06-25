@@ -11,7 +11,7 @@ from Muon.GUI.Common.plot_widget.main_plot_widget_view import MainPlotWidgetView
 from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_model import PlotDataPaneModel
 from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_presenter import PlotDataPanePresenter
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
-from Muon.GUI.Common.plot_widget.plot_fit_pane_presenter import PlotFitPanePresenter
+from Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_presenter import PlotFitPanePresenter
 from Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_model import PlotTimeFitPaneModel
 
 

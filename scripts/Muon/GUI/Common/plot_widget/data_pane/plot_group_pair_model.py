@@ -27,11 +27,11 @@ class PlotGroupPairModel(BasePaneModel):
         instrument = self.context.data_context.instrument
         rebin_label = self._get_rebin_label(workspace_name)
         if not self.context.plot_panes_context[self.name]._is_tiled:
-            return "".join([instrument, run, ';', group, rebin_label])
+            return f"{instrument}{run};{group}{rebin_label}"
         if self.context.plot_panes_context[self.name].is_tiled_by == "Group/Pair":
-            return "".join([run, rebin_label])
+            return f"{run}{rebin_label}"
         else:
-            return "".join([group, rebin_label])
+            return f"{group}{rebin_label}"
 
     def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map):
         if not self.context.plot_panes_context[self.name]._is_tiled:

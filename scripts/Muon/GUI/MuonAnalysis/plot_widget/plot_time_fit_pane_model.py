@@ -4,14 +4,19 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 from Muon.GUI.Common.plot_widget.data_pane.plot_group_pair_model import PlotGroupPairModel
-from Muon.GUI.Common.ADSHandler.workspace_naming import *
+from Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_model import PlotFitPaneModel
+
+from Muon.GUI.Common.ADSHandler.workspace_naming import (get_fit_function_name_from_workspace,
+                                                         get_group_or_pair_from_name,
+                                                         get_run_numbers_as_string_from_workspace_name)
 
 
-class PlotTimeFitPaneModel(PlotGroupPairModel):
+class PlotTimeFitPaneModel(PlotGroupPairModel, PlotFitPaneModel):
 
     def __init__(self, context):
-        super().__init__(context,"Fit Data")
-        self.context.plot_panes_context[self.name].set_defaults([0.,15.], [-0.3, 0.3])
+        super().__init__(context, "Fit Data")
+        end_x = self.context.default_end_x
+        self.context.plot_panes_context[self.name].set_defaults([0.,end_x], [-0.3, 0.3])
 
     @staticmethod
     def get_fit_workspace_and_indices(fit, with_diff=True):
@@ -56,6 +61,3 @@ class PlotTimeFitPaneModel(PlotGroupPairModel):
                 workspace_type = 'Diff'
             label = ''.join([';', fit_function_name, ';', workspace_type])
         return label
-
-    def _is_guess_workspace(self, workspace_name):
-        return self.context.guess_workspace_prefix in workspace_name
