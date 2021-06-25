@@ -62,6 +62,7 @@ def pdcalibration_groups(data_ws,
     ApplyDiffCal(data_ws, CalibrationWorkspace=cc_diffcal)
     ConvertUnits(data_ws, Target='dSpacing', OutputWorkspace='_tmp_data_aligned')
     DiffractionFocussing('_tmp_data_aligned', GroupingWorkspace=group_ws, OutputWorkspace='_tmp_data_aligned_focussed')
+    ApplyDiffCal('_tmp_data_aligned_focussed', ClearCalibration=True)
     ConvertUnits('_tmp_data_aligned_focussed', Target='TOF', OutputWorkspace='_tmp_data_aligned_focussed')
 
     PDCalibration(InputWorkspace='_tmp_data_aligned_focussed',
@@ -90,30 +91,11 @@ def pdcalibration_groups(data_ws,
         if ind:
             grouped_det_to_difc[detid] = specInfo.difcUncalibrated(ind[0])
 
-    if previous_calibration:
-        previous_calibration_det_to_difc = dict(zip(previous_calibration.column('detid'), previous_calibration.column('difc')))
-
-        eng_det_to_difc = {}
-        specInfo = data_ws.spectrumInfo()
-        for detid in cc_and_pd_diffcal.column('detid'):
-            ind = list(data_ws.getIndicesFromDetectorIDs([detid]))
-            if ind:
-                eng_det_to_difc[detid] = specInfo.difcUncalibrated(ind[0])
-
-        for n, detid in enumerate(cc_and_pd_diffcal.column('detid')):
-            if detid in cc_det_to_difc and detid in grouped_det_to_difc:
-                cc_and_pd_diffcal.setCell(n, 1,
-                                          pd_diffcal.cell(n, 1)
-                                          * cc_det_to_difc[detid]
-                                          * eng_det_to_difc[detid]
-                                          / grouped_det_to_difc[detid]
-                                          / previous_calibration_det_to_difc[detid])
-    else:
-        for n, detid in enumerate(cc_and_pd_diffcal.column('detid')):
-            if detid in cc_det_to_difc and detid in grouped_det_to_difc:
-                cc_and_pd_diffcal.setCell(n, 1,
-                                          pd_diffcal.cell(n, 1)
-                                          * cc_det_to_difc[detid]
-                                          / grouped_det_to_difc[detid])
+    for n, detid in enumerate(cc_and_pd_diffcal.column('detid')):
+        if detid in cc_det_to_difc and detid in grouped_det_to_difc:
+            cc_and_pd_diffcal.setCell(n, 1,
+                                      pd_diffcal.cell(n, 1)
+                                      * cc_det_to_difc[detid]
+                                      / grouped_det_to_difc[detid])
 
     return mtd[f'{output_basename}_cc_pd_diffcal']
