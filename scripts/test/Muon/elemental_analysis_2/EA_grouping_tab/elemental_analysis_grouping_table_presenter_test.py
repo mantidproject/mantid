@@ -166,7 +166,6 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         # Tests
         self.presenter._view.get_table_item.assert_has_calls([mock.call(1, 5), mock.call(1, 0)])
-        self.assertEqual(self.presenter.update_model_from_view.call_count, 1)
         self.assertEqual(self.presenter.notify_data_changed.call_count, 0)
         self.assertEqual(self.presenter.update_view_from_model.call_count, 0)
         self.assertEqual(mock_text.call_count, 2)
@@ -186,7 +185,6 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         # Tests
         self.presenter._view.get_table_item.assert_has_calls([mock.call(4, 5), mock.call(4, 0)])
-        self.assertEqual(self.presenter.update_model_from_view.call_count, 1)
         self.assertEqual(self.presenter.notify_data_changed.call_count, 0)
         self.assertEqual(self.presenter.update_view_from_model.call_count, 0)
         self.assertEqual(mock_text.call_count, 2)

@@ -75,7 +75,6 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.start_xs, [])
         self.assertEqual(self.model.end_xs, [])
         self.assertEqual(self.model.single_fit_functions, [])
-        self.assertEqual(self.model.single_fit_functions_cache, [])
         self.assertEqual(self.model.fit_statuses, [])
         self.assertEqual(self.model.chi_squared, [])
         self.assertEqual(self.model.function_name, "")
@@ -85,7 +84,6 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.assertTrue(self.model.fit_to_raw)
 
         self.assertEqual(self.model.simultaneous_fit_function, None)
-        self.assertEqual(self.model.simultaneous_fit_function_cache, None)
         self.assertTrue(not self.model.simultaneous_fitting_mode)
         self.assertEqual(self.model.simultaneous_fit_by, "")
         self.assertEqual(self.model.simultaneous_fit_by_specifier, "")
@@ -292,11 +290,11 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         self.model.update_parameter_value("A0", new_value)
 
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[0]), [5.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[1]), [0.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_single_functions[0]),
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[0])[0], [5.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[1])[0], [0.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_single_functions[0])[0],
                          [0.0, 0.0, 5.0, 0.2, 0.2])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_single_functions[1]),
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_single_functions[1])[0],
                          [0.0, 0.0, 0.0, 0.2, 0.2])
 
     def test_that_update_parameter_value_will_set_the_value_of_the_correct_parameter_when_in_simultaneous_fit_mode(self):
@@ -310,9 +308,9 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         self.model.update_parameter_value("A0", new_value)
 
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function),
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function)[0],
                          [new_value, 0.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_simultaneous_function),
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_simultaneous_function)[0],
                          [0.0, 0.0, new_value, 0.2, 0.2, 0.0, 0.0, 0.0, 0.2, 0.2])
 
     def test_that_automatically_update_function_name_will_set_the_correct_name_for_tf_and_single_fit_mode(self):
@@ -358,9 +356,9 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.model.simultaneous_fit_function = self.simultaneous_fit_function
         self.model.tf_asymmetry_simultaneous_function = self.tf_simultaneous_fit_function
 
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function),
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function)[0],
                          [0.0, 0.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_simultaneous_function),
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_simultaneous_function)[0],
                          [0.0, 0.0, 0.0, 0.2, 0.2, 0.0, 0.0, 0.0, 0.2, 0.2])
 
     def test_perform_fit_will_call_the_correct_function_for_a_tf_single_fit(self):
@@ -407,9 +405,9 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         self.model._set_normalisation_for_dataset(self.model.dataset_names[1], normalisation)
 
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.tf_single_fit_functions[0]),
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.tf_single_fit_functions[0])[0],
                          [0.0, 0.0, 0.0, 0.2, 0.2])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.tf_single_fit_functions[1]),
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.tf_single_fit_functions[1])[0],
                          [normalisation, 0.0, 0.0, 0.2, 0.2])
 
     def test_that_set_normalisation_for_dataset_will_set_the_normalisation_as_expected_in_simultaneous_fit_mode(self):
@@ -422,7 +420,7 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         self.model._set_normalisation_for_dataset(self.model.dataset_names[1], normalisation)
 
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_simultaneous_function),
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_simultaneous_function)[0],
                          [0.0, 0.0, 0.0, 0.2, 0.2, normalisation, 0.0, 0.0, 0.2, 0.2])
 
     def test_that_get_all_fit_functions_will_return_the_tf_single_functions_when_in_single_fit_tf_asymmetry_mode(self):
@@ -598,8 +596,8 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs.assert_called_once_with()
 
     def test_that_get_fit_function_parameter_values_will_return_the_parameter_values_in_the_specified_function(self):
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.single_fit_functions[0]), [0.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.simultaneous_fit_function), [0.0, 0.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.single_fit_functions[0])[0], [0.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.simultaneous_fit_function)[0], [0.0, 0.0])
 
     def test_that_update_ws_fit_function_parameters_will_update_the_parameters_for_the_specified_dataset_in_single_mode(self):
         self.model.dataset_names = self.dataset_names
@@ -608,8 +606,8 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         self.model.update_ws_fit_function_parameters(self.model.dataset_names[:1], [1.0])
 
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[0]), [1.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[1]), [0.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[0])[0], [1.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[1])[0], [0.0])
 
     def test_that_update_ws_fit_function_parameters_will_update_the_parameters_when_in_simultaneous_mode(self):
         self.model.dataset_names = self.dataset_names
@@ -617,10 +615,12 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.model.simultaneous_fitting_mode = True
 
         self.model.update_ws_fit_function_parameters(self.model.dataset_names[:1], [1.0, 0.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function), [1.0, 0.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function),
+                         ([1.0, 0.0], [0.0, 0.0]))
 
         self.model.update_ws_fit_function_parameters(self.model.dataset_names[1:], [1.0, 2.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function), [1.0, 2.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function),
+                         ([1.0, 2.0], [0.0, 0.0]))
 
     def test_that_update_ws_fit_function_parameters_will_update_the_parameters_when_in_TF_asymmetry_simultaneous_mode(self):
         normalisation1, normalisation2 = 1.345, 2.345
@@ -633,7 +633,7 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.model.tf_asymmetry_mode = True
 
         self.model.update_ws_fit_function_parameters(self.dataset_names, [normalisation1, param1, normalisation2, param2])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_simultaneous_function),
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_simultaneous_function)[0],
                          [normalisation1, 0.0, param1, 0.2, 0.2, normalisation2, 0.0, param2, 0.2, 0.2])
 
     def test_get_fit_workspace_names_from_groups_and_runs_when_fit_to_raw_is_false(self):

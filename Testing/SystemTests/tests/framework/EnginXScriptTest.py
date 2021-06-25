@@ -31,8 +31,12 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-3
-        return ("engg_focus_output_bank_1", "engg_focusing_output_ws_bank_1.nxs",
-                "engg_focus_output_bank_2", "engg_focusing_output_ws_bank_2.nxs")
+        if systemtesting.using_gsl_v1():
+            return ("engg_focus_output_bank_1", "engg_focusing_output_ws_bank_1_gsl1.nxs",
+                    "engg_focus_output_bank_2", "engg_focusing_output_ws_bank_2_gsl1.nxs")
+        else:
+            return ("engg_focus_output_bank_1", "engg_focusing_output_ws_bank_1.nxs",
+                    "engg_focus_output_bank_2", "engg_focusing_output_ws_bank_2.nxs")
 
     def cleanup(self):
         simple.mtd.clear()

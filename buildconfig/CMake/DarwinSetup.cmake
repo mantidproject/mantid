@@ -124,9 +124,9 @@ set(PLUGINS_DIR plugins)
 # Mac-specific installation setup
 # ##############################################################################
 # use homebrew OpenSSL package
-if(NOT OPENSSL_ROOT_DIR)
-  set(OPENSSL_ROOT_DIR /usr/local/opt/openssl)
-endif(NOT OPENSSL_ROOT_DIR)
+if(NOT OPENSSL_ROOT)
+  set(OPENSSL_ROOT /usr/local/opt/openssl)
+endif(NOT OPENSSL_ROOT)
 
 if(NOT HDF5_ROOT)
     set(HDF5_ROOT /usr/local/opt/hdf5) # Only for homebrew!

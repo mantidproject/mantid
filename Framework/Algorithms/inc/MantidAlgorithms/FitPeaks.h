@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -15,6 +14,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidAlgorithms/PeakParameterHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
@@ -112,9 +112,6 @@ private:
   std::vector<double> getExpectedPeakPositions(size_t wi);
   std::pair<double, double> getPeakFitWindow(size_t wi, size_t ipeak);
 
-  enum EstimatePeakWidth { NoEstimation, Observation, InstrumentResolution };
-  enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
-
   /// suites of method to fit peaks
   std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fitPeaks();
 
@@ -161,20 +158,7 @@ private:
   API::MatrixWorkspace_sptr createMatrixWorkspace(const std::vector<double> &vec_x, const std::vector<double> &vec_y,
                                                   const std::vector<double> &vec_e);
 
-  /// Estimate peak parameters by 'observation'
-  int estimatePeakParameters(const HistogramData::Histogram &histogram, const std::pair<size_t, size_t> &peak_window,
-                             const API::IPeakFunction_sptr &peakfunction,
-                             const API::IBackgroundFunction_sptr &bkgdfunction, bool observe_peak_width);
-
   bool decideToEstimatePeakParams(const bool firstPeakInSpectrum, const API::IPeakFunction_sptr &peak_function);
-
-  /// observe peak center
-  int observePeakCenter(const HistogramData::Histogram &histogram, API::FunctionValues &bkgd_values, size_t start_index,
-                        size_t stop_index, double &peak_center, size_t &peak_center_index, double &peak_height);
-
-  /// Observe peak width
-  double observePeakFwhm(const HistogramData::Histogram &histogram, API::FunctionValues &bkgd_values, size_t ipeak,
-                         size_t istart, size_t istop);
 
   /// Process the result from fitting a single peak
   bool processSinglePeakFitResult(size_t wsindex, size_t peakindex, const double cost,
@@ -261,7 +245,7 @@ private:
 
   /// Flag for observing peak width: there are 3 states (1) no estimation (2)
   /// from 'observation' (3) calculated from instrument resolution
-  EstimatePeakWidth m_peakWidthEstimateApproach;
+  Algorithms::PeakParameterHelper::EstimatePeakWidth m_peakWidthEstimateApproach;
   bool m_constrainPeaksPosition;
 
   /// peak windows

@@ -146,6 +146,9 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_nonintegrated.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_ellipsoid.py
         mantidqt/widgets/test/test_jupyterconsole.py
+        mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_view.py
+        mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_presenter.py
+        mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_model.py
         mantidqt/widgets/workspacedisplay/test/test_data_copier.py
         mantidqt/widgets/workspacedisplay/test/test_workspacedisplay_view.py
         mantidqt/widgets/workspacedisplay/test/test_user_notifier.py

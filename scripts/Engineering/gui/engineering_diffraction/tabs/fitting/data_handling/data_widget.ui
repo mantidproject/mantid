@@ -232,6 +232,16 @@ QGroupBox:title {
           </property>
          </widget>
         </item>
+		<item row="0" column="4">
+         <widget class="QPushButton" name="button_SerialFit">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+		   <string>Serial Fit</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
