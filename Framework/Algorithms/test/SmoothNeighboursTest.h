@@ -568,6 +568,11 @@ public:
     TS_ASSERT_DELTA(nnDistList[8], 2.6688500843853147,
                     std::numeric_limits<double>::epsilon() * (nnDistList[8] + 2.6688500843853147));
 
+    Mantid::Kernel::Logger g_log("SmoothNeighboursTest");
+    for (int i = 0; i < 9; i++)
+      g_log.error() << "nnIndexList[" << i << "]=" << nnIndexList[i] << std::setprecision(17) << ", nnDistList[" << i
+                    << "]=" << nnDistList[i] << std::endl;
+
     // std::cout<<std::numeric_limits<double>::epsilon()<<std::endl;
     // std::cout<<std::abs(nnDistList[8]-nnDistList[7])<<std::endl;
     // TS_ASSERT(std::abs(nnDistList[8]-nnDistList[7])<std::numeric_limits<double>::epsilon()*(nnDistList[7]+nnDistList[8]));
