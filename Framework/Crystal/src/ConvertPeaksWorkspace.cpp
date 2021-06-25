@@ -100,7 +100,7 @@ void ConvertPeaksWorkspace::exec() {
 /**
  * @brief make a LeanElasticPeaksWorkspace using peaks from a regular PeaksWorkspace
  *
- * @param pws
+ * @param ipws input PeaksWorkspace as IPeaksWorkspace_sptr
  * @return IPeaksWorkspace_sptr
  */
 IPeaksWorkspace_sptr ConvertPeaksWorkspace::makeLeanElasticPeaksWorkspace(IPeaksWorkspace_sptr ipws) {
@@ -131,8 +131,8 @@ IPeaksWorkspace_sptr ConvertPeaksWorkspace::makeLeanElasticPeaksWorkspace(IPeaks
 /**
  * @brief Build a regular PeaksWorkspace using peaks from a LeanElasticPeaksWorkspace and the provided instrument
  *
- * @param lpws
- * @param instrument
+ * @param ipws input LeanElasticPeaksWorkspace as IPeaksWorkspace_sptr
+ * @param ws donor PeaksWorkspace to provide instrument and ExperimentInfo
  * @return IPeaksWorkspace_sptr
  */
 IPeaksWorkspace_sptr ConvertPeaksWorkspace::makePeaksWorkspace(IPeaksWorkspace_sptr ipws, IPeaksWorkspace_sptr ws) {
