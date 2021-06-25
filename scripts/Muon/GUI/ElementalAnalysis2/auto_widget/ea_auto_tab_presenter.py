@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_table import EAAutoPopupTable
-from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model import REFITTED_PEAKS_WS_SUFFIX, PEAKS_WS_SUFFIX, \
-    MATCH_GROUP_WS_SUFFIX
 from mantidqt.utils.observer_pattern import GenericObserver
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, check_if_workspace_exist
 from Muon.GUI.Common import message_box
@@ -28,8 +26,8 @@ class EAAutoTabPresenter(object):
     def setup_notifier(self):
         self.view.find_peaks_notifier.add_subscriber(self.find_peaks_observer)
         self.view.show_peaks_table_notifier.add_subscriber(self.show_peaks_table_observer)
-        self.view.show_match_table_notifier.add_subscriber(self.show_match_table_observer)
-        self.view.clear_match_table_notifier.add_subscriber(self.clear_match_table_observer)
+        self.view.show_matches_table_notifier.add_subscriber(self.show_matches_table_observer)
+        self.view.clear_matches_table_notifier.add_subscriber(self.clear_matches_table_observer)
         self.model.update_match_table_notifier.add_subscriber(self.update_match_table_observer)
         self.model.update_view_notifier.add_subscriber(self.update_view_observer)
 
@@ -37,9 +35,9 @@ class EAAutoTabPresenter(object):
         self.find_peaks_observer = GenericObserver(self.run_find_peak_algorithms)
         self.show_peaks_table_observer = GenericObserver(
             lambda: self.show_table(self.view.show_peaks_table_combobox.currentText()))
-        self.show_match_table_observer = GenericObserver(
-            lambda: self.show_table(self.view.show_match_table_combobox.currentText()))
-        self.clear_match_table_observer = GenericObserver(self.clear_match_table)
+        self.show_matches_table_observer = GenericObserver(
+            lambda: self.show_table(self.view.show_matches_table_combobox.currentText()))
+        self.clear_matches_table_observer = GenericObserver(self.clear_match_table)
         self.update_match_table_observer = GenericObserver(self.update_match_table)
         self.update_view_observer = GenericObserver(self.update_view)
 
@@ -80,31 +78,31 @@ class EAAutoTabPresenter(object):
         Checks context for loaded workspaces and add to values find peak combobox
         Checks all tables in load run's groups and add to show peaks and show matches combobox
         """
-        group_names = self.context.group_context.group_names
-        all_runs = []
-        for group in group_names:
-            all_runs.append(self.model.split_run_and_detector(group)[0])
+        find_peak_workspaces = {}
+        show_peaks_options = {}
+        show_matches_options = {}
 
-        show_peaks_options = []
-        show_matches_option = []
-        all_runs = list(set(all_runs))
-        for run in all_runs:
-            group_ws = retrieve_ws(run)
-            workspace_names = group_ws.getNames()
-            for name in workspace_names:
-                if name.endswith(REFITTED_PEAKS_WS_SUFFIX):
-                    show_peaks_options.append(name)
-                    continue
-                if name.endswith(PEAKS_WS_SUFFIX):
-                    show_peaks_options.append(name)
-                    continue
-                if name.endswith(MATCH_GROUP_WS_SUFFIX):
-                    matches_group = retrieve_ws(name)
-                    show_matches_option += matches_group.getNames()
+        for group in self.context.group_context.groups:
+            run = group.run_number
+            if run not in find_peak_workspaces:
+                find_peak_workspaces[run] = ["All"]
 
-        self.view.add_options_to_find_peak_combobox(sorted(group_names + all_runs))
-        self.view.add_options_to_show_peak_combobox(sorted(show_peaks_options))
-        self.view.add_options_to_show_matches_combobox(sorted(show_matches_option))
+            find_peak_workspaces[run].append(group.detector)
+
+            if group.is_peak_table_present():
+                if run not in show_peaks_options:
+                    show_peaks_options[run] = []
+                show_peaks_options[run].append(group.get_peak_table(run))
+
+            if group.is_matches_table_present():
+                if run not in show_matches_options:
+                    show_matches_options[run] = []
+                matches_group_workspace = retrieve_ws(group.get_matches_table(run))
+                show_matches_options[run].extend(matches_group_workspace.getNames())
+
+        self.view.add_options_to_find_peak_combobox(find_peak_workspaces)
+        self.view.add_options_to_show_peak_combobox(show_peaks_options)
+        self.view.add_options_to_show_matches_combobox(show_matches_options)
 
         peak_label_info = self.model.current_peak_table_info
         # Update peak info label

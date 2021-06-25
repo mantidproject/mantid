@@ -17,6 +17,15 @@ from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.test_helper.test_director import TestDirector
 
 
+# Test merge reductions
+# This fits the high angle workspace to the low angle workspace
+# By construction of the data, the HAB is shifted up by 4, with a gradient of 2x the LAB
+# Results in the following data:
+# HAB y[x=0] = 5.0
+# LAB y[x=1] = 1.0
+# HAB y[x=2] = 13
+# LAB y[x=2] = 5
+# .......
 class MergeReductionsTest(unittest.TestCase):
     @staticmethod
     def create_1D_workspace(data_x, data_y):
@@ -68,26 +77,34 @@ class MergeReductionsTest(unittest.TestCase):
 
     @staticmethod
     def _provide_data(state):
+        # Generate data for the tests, we generate data with the following rules
+        # sample_lab : Linear data y = 2 + 2x
+        # sample_lab : uniform data y = 1
+        # sample_hab : Linear data y = 6 + 4*x
+        # sample_norm : uniform data y = 1
+        # can_lab, can_hab : uniform data y = 1
+
         # Create data for sample
         data_x_lab = list(range(0, 10))
-        data_y_lab_count = [2.]*10
-        data_y_lab_norm = [1.] * 10
+        data_y_lab_count = [2 + 2*x for x in data_x_lab]
+        data_y_lab_norm = [1]*10
 
         data_x_hab = list(range(0, 10))
-        data_y_hab_count = [3.] * 10
-        data_y_hab_norm = [4.] * 10
+        data_y_hab_count = [6 + 4*x for x in data_x_hab]
+        data_y_hab_norm = [1]*10
+
         sample_lab, sample_hab = MergeReductionsTest._create_workspaces(state, DataType.SAMPLE, data_x_lab,
                                                                         data_y_lab_count, data_y_lab_norm,
                                                                         data_x_hab, data_y_hab_count, data_y_hab_norm)
-
         # Create data for can
         data_x_lab = list(range(0, 10))
-        data_y_lab_count = [5.]*10
-        data_y_lab_norm = [6.] * 10
+        data_y_lab_count = [1]*10
+        data_y_lab_norm = [1]*10
 
         data_x_hab = list(range(0, 10))
-        data_y_hab_count = [7.] * 10
-        data_y_hab_norm = [8.] * 10
+        data_y_hab_count = [1]*10
+        data_y_hab_norm = [1]*10
+
         can_lab, can_hab = MergeReductionsTest._create_workspaces(state, DataType.CAN, data_x_lab,
                                                                   data_y_lab_count, data_y_lab_norm,
                                                                   data_x_hab, data_y_hab_count, data_y_hab_norm)
@@ -113,10 +130,10 @@ class MergeReductionsTest(unittest.TestCase):
         self.assertTrue(isinstance(merger, ISIS1DMerger))
 
     def test_that_can_merge_without_fitting(self):
-        # Arrange
+        # Without fitting, the scale and shift returned will be identical to the input
         fit_type = FitModeForMerge.NO_FIT
-        scale_input = 32.0
-        shift_input = 12.65
+        scale_input = 0.5
+        shift_input = -1.5
         state = self._get_simple_state(fit_type, scale_input, shift_input)
         merge_factory = MergeFactory()
         merger = merge_factory.create_merger(state)
@@ -139,10 +156,16 @@ class MergeReductionsTest(unittest.TestCase):
         self.assertEqual(merged_workspace.blocksize(),  10)
 
     def test_that_can_merge_fitting(self):
-        # Arrange
+        # If we fit both, we required that
+        # 1 = f0.A0 + scaling*5    : @ x  = 0
+        # 5 = f0.A0 + scaling*13   : @ x  = 2
+        # This is a linear problem, in 2 variables, i.e. it has 1 unique solution: scaling = 0.5 : f0.A0 = -1.5
+        # returning shift is f0.A0/scaling = -3
         fit_type = FitModeForMerge.BOTH
-        scale_input = 1.67
-        shift_input = 2.7
+        scale_input = 0.4
+        shift_input = -1
+        expected_scale = 0.5
+        expected_shift = -1.5/0.5
         state = self._get_simple_state(fit_type, scale_input, shift_input)
         merge_factory = MergeFactory()
         merger = merge_factory.create_merger(state)
@@ -162,14 +185,15 @@ class MergeReductionsTest(unittest.TestCase):
         shift = result.shift
         self.assertNotEqual(scale,  scale_input)
         self.assertNotEqual(shift,  shift_input)
-        self.assertTrue(abs(scale - (-15.0)) < 1e-4)
-        self.assertTrue(abs(shift - 0.0472222222222) < 1e-4)
+        self.assertTrue(abs(scale - expected_scale) < 1e-4)
+        self.assertTrue(abs(shift - expected_shift) < 1e-4)
 
     def test_that_can_merge_with_shift_only_fitting(self):
-        # Arrange
+        # Same argument as above, tie scale to 0.5 and fit shift : should result in shift of -3
         fit_type = FitModeForMerge.SHIFT_ONLY
-        scale_input = 1.67
-        shift_input = 2.7
+        scale_input = 0.5
+        shift_input = -1.0
+        expected_shift = -3
         state = self._get_simple_state(fit_type, scale_input, shift_input)
         merge_factory = MergeFactory()
         merger = merge_factory.create_merger(state)
@@ -189,13 +213,14 @@ class MergeReductionsTest(unittest.TestCase):
 
         self.assertNotEqual(shift,  shift_input)
         self.assertTrue(abs(scale - scale_input) < 1e-4)
-        self.assertTrue(abs(shift - 0.823602794411) < 1e-4)
+        self.assertTrue(abs(shift - expected_shift ) < 1e-4)
 
     def test_that_can_merge_with_scale_only_fitting(self):
-        # Arrange
+        # Same arguments as above, tie shift to -3 and fit scale : should result in scale of 0.5
         fit_type = FitModeForMerge.SCALE_ONLY
-        scale_input = 1.67
-        shift_input = 2.7
+        scale_input = 0.1
+        shift_input = -3
+        expected_scale = 0.5
         state = self._get_simple_state(fit_type, scale_input, shift_input)
         merge_factory = MergeFactory()
         merger = merge_factory.create_merger(state)
@@ -214,7 +239,7 @@ class MergeReductionsTest(unittest.TestCase):
         shift = result.shift
 
         self.assertNotEqual(scale,  scale_input)
-        self.assertLess(abs(scale-1.0), 1e-4)
+        self.assertLess(abs(scale - expected_scale), 1e-4)
         self.assertLess(abs(shift-shift_input), 1e-4)
 
 

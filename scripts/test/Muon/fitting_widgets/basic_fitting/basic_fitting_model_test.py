@@ -36,7 +36,10 @@ class BasicFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.start_xs, [])
         self.assertEqual(self.model.end_xs, [])
         self.assertEqual(self.model.single_fit_functions, [])
-        self.assertEqual(self.model.single_fit_functions_cache, [])
+        self.assertEqual(self.model.fitting_context.dataset_indices_for_undo, [])
+        self.assertEqual(self.model.fitting_context.single_fit_functions_for_undo, [])
+        self.assertEqual(self.model.fitting_context.fit_statuses_for_undo, [])
+        self.assertEqual(self.model.fitting_context.chi_squared_for_undo, [])
         self.assertEqual(self.model.fit_statuses, [])
         self.assertEqual(self.model.chi_squared, [])
         self.assertEqual(self.model.function_name, "")
@@ -60,6 +63,8 @@ class BasicFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.end_xs, [4.0, 5.0])
 
     def test_that_the_currently_selected_start_and_end_xs_are_used_for_when_a_larger_number_of_new_datasets_are_loaded(self):
+        self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 10.0))
+
         self.model.dataset_names = self.dataset_names
         self.model.current_dataset_index = 1
         self.model.start_xs = [2.0, 3.0]
@@ -223,12 +228,18 @@ class BasicFittingModelTest(unittest.TestCase):
     def test_that_cache_the_single_fit_functions_will_cache_the_fit_functions_in_the_model(self):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = [self.fit_function, None]
+        self.model.fit_statuses = ["Success", "Fail"]
+        self.model.chi_squared = [2.0, 1.0]
 
-        self.model.cache_the_current_fit_functions()
+        self.model.save_current_fit_function_to_undo_data()
+        self.model.current_dataset_index = 1
+        self.model.save_current_fit_function_to_undo_data()
 
         self.assertEqual(len(self.model.single_fit_functions), 2)
-        self.assertEqual(str(self.model.single_fit_functions_cache[0]), "name=FlatBackground,A0=0")
-        self.assertEqual(self.model.single_fit_functions_cache[1], None)
+        self.assertEqual(self.model.fitting_context.dataset_indices_for_undo, [0, 1])
+        self.assertEqual(str(self.model.fitting_context.single_fit_functions_for_undo[0]), "name=FlatBackground,A0=0")
+        self.assertEqual(self.model.fitting_context.fit_statuses_for_undo, ["Success", "Fail"])
+        self.assertEqual(self.model.fitting_context.chi_squared_for_undo, [2.0, 1.0])
 
     def test_that_clear_cached_fit_functions_will_clear_the_cache_of_fit_functions(self):
         self.model.dataset_names = self.dataset_names
@@ -236,14 +247,13 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.fit_statuses = ["success", None]
         self.model.chi_squared = [1.0, None]
 
-        self.model.cache_the_current_fit_functions()
-        self.model.clear_cached_fit_functions()
+        self.model.save_current_fit_function_to_undo_data()
+        self.model.clear_undo_data()
 
-        self.assertEqual(len(self.model.single_fit_functions), 2)
-        self.assertEqual(self.model.single_fit_functions_cache[0], None)
-        self.assertEqual(self.model.single_fit_functions_cache[1], None)
-        self.assertEqual(self.model.fit_statuses_cache, [None, None])
-        self.assertEqual(self.model.chi_squared_cache, [None, None])
+        self.assertEqual(len(self.model.fitting_context.single_fit_functions), 2)
+        self.assertEqual(self.model.fitting_context.single_fit_functions_for_undo, [])
+        self.assertEqual(self.model.fitting_context.fit_statuses_for_undo, [])
+        self.assertEqual(self.model.fitting_context.chi_squared_for_undo, [])
 
     def test_that_setting_the_fit_statuses_will_raise_if_the_number_of_fit_statuses_is_not_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
@@ -302,17 +312,28 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.assertEqual(self.model.function_name, " FuncName")
 
-    def test_that_use_cached_function_will_replace_the_single_functions_with_the_cached_functions(self):
+    def test_that_undo_previous_fit_will_replace_the_single_functions_with_the_cached_functions(self):
+        self.model.fitting_context.undo_previous_fit = mock.Mock()
+
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = [self.fit_function, None]
         self.model.fit_statuses = ["success", "success"]
         self.model.chi_squared = [1.0, 2.0]
-        self.model.cache_the_current_fit_functions()
+
+        self.model.current_dataset_index = 0
+        self.model.save_current_fit_function_to_undo_data()
+        self.assertEqual(self.model.number_of_undos(), 1)
+
+        self.model.current_dataset_index = 1
+        self.model.save_current_fit_function_to_undo_data()
+        self.assertEqual(self.model.number_of_undos(), 2)
+
         self.model.single_fit_functions = [None, None]
         self.model.fit_statuses = [None, None]
         self.model.chi_squared = [None, None]
 
-        self.model.use_cached_function()
+        self.model.undo_previous_fit()
+        self.model.undo_previous_fit()
 
         self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=0")
         self.assertEqual(self.model.single_fit_functions[1], None)
@@ -457,7 +478,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.update_plot_guess()
 
         self.assertEqual(1, self.mock_context_guess_workspace_name.call_count)
-        self.mock_context_guess_workspace_name.assert_called_with(None)
+        self.mock_context_guess_workspace_name.assert_called_with("")
 
     def test_update_plot_guess_will_evaluate_the_function_when_in_double_fit_mode(self):
         guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"

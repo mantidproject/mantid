@@ -52,6 +52,13 @@ const std::string ConvertDiffCal::summary() const { return "Convert diffraction 
 void ConvertDiffCal::init() {
   declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OffsetsWorkspace", "", Direction::Input),
                   "OffsetsWorkspace containing the calibration offsets.");
+
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("PreviousCalibration", "", Direction::Input,
+                                                                       API::PropertyMode::Optional),
+                  "A calibration table used as a cache for creating the OutputWorkspace. "
+                  "Effectively, this algorithm applies partial updates to this table and "
+                  "returns it as the OutputWorkspace");
+
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -120,24 +127,84 @@ double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t 
 void ConvertDiffCal::exec() {
   OffsetsWorkspace_const_sptr offsetsWS = getProperty("OffsetsWorkspace");
 
-  // initial setup of new style config
-  ITableWorkspace_sptr configWksp = std::make_shared<TableWorkspace>();
-  configWksp->addColumn("int", "detid");
-  configWksp->addColumn("double", "difc");
-  configWksp->addColumn("double", "difa");
-  configWksp->addColumn("double", "tzero");
+  /* If a previous calibration is provided, initialize the output calibration table
+   * with it */
+  ITableWorkspace_sptr configWksp;
+
+  ITableWorkspace_sptr previous_calibration = getProperty("PreviousCalibration");
+
+  std::vector<std::string> correct_columns{"detid", "difc", "difa", "tzero"};
+  if (previous_calibration) {
+    /* validate correct format */
+    std::vector<std::string> column_names = previous_calibration->getColumnNames();
+    if (column_names != correct_columns) {
+      throw std::runtime_error("PreviousCalibration table's column names do not match expected "
+                               "format");
+    }
+
+    configWksp = previous_calibration->clone();
+  }
+
+  else {
+    // initial setup of new style config
+    configWksp = std::make_shared<TableWorkspace>();
+
+    configWksp->addColumn("int", correct_columns[0]);
+    configWksp->addColumn("double", correct_columns[1]);
+    configWksp->addColumn("double", correct_columns[2]);
+    configWksp->addColumn("double", correct_columns[3]);
+  }
+
+  /* obtain detector ids from the previous calibration workspace */
+  std::unordered_map<int, int> id_to_row;
+  if (previous_calibration) {
+    std::vector<int> previous_calibration_ids = previous_calibration->getColumn(0)->numeric_fill<int>();
+
+    int row = 0;
+
+    for (auto id : previous_calibration_ids) {
+      id_to_row[id] = row++;
+    }
+  }
 
   // create values in the table
   const size_t numberOfSpectra = offsetsWS->getNumberHistograms();
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
   const Mantid::API::SpectrumInfo &spectrumInfo = offsetsWS->spectrumInfo();
+  Mantid::Geometry::DetectorInfo const &d_info = offsetsWS->detectorInfo();
   for (size_t i = 0; i < numberOfSpectra; ++i) {
-    API::TableRow newrow = configWksp->appendRow();
-    newrow << static_cast<int>(getDetID(offsetsWS, i));
-    newrow << calculateDIFC(offsetsWS, i, spectrumInfo);
-    newrow << 0.; // difa
-    newrow << 0.; // tzero
+
+    /* obtain detector id for this spectra */
+    detid_t detector_id = getDetID(offsetsWS, i);
+    size_t internal_index = d_info.indexOf(detector_id);
+    /* obtain the mask */
+    if (!d_info.isMasked(internal_index)) {
+      /* find the detector id's offset value in the offset workspace */
+      double new_offset_value = offsetsWS->getValue(detector_id);
+
+      /* search for it in the table */
+      auto iter = id_to_row.find(detector_id);
+
+      /* if it is found, update the correct row in the output table */
+      if (iter != id_to_row.end()) {
+        /* Get the row and update the difc value in the first column */
+        int row_to_update = iter->second;
+
+        double &difc_value_to_update = configWksp->cell<double>(row_to_update, 1);
+
+        difc_value_to_update = difc_value_to_update / (1 + new_offset_value);
+      }
+
+      /* value was not found in PreviousCalibration - calculate from experiment's geometry */
+      else {
+        API::TableRow newrow = configWksp->appendRow();
+        newrow << static_cast<int>(detector_id);
+        newrow << calculateDIFC(offsetsWS, i, spectrumInfo);
+        newrow << 0.; // difa
+        newrow << 0.; // tzero
+      }
+    }
 
     progress.report();
   }

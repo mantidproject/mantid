@@ -82,13 +82,13 @@ class GeneralFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_instrument_changed_will_update_and_reset_the_data(self):
         self.presenter.update_and_reset_all_data = mock.Mock()
-        self.presenter.clear_cached_fit_functions = mock.Mock()
+        self.presenter.clear_undo_data = mock.Mock()
         self.presenter.model.remove_all_fits_from_context = mock.Mock()
 
         self.presenter.handle_instrument_changed()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.presenter.clear_cached_fit_functions.assert_called_once_with()
+        self.presenter.clear_undo_data.assert_called_once_with()
         self.presenter.model.remove_all_fits_from_context.assert_called_once_with()
 
     def test_that_handle_pulse_type_changed_will_update_and_reset_the_data_if_it_contains_DoublePulseEnabled(self):
@@ -130,7 +130,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.update_dataset_names_in_view_and_model = mock.Mock()
         self.presenter.reset_start_xs_and_end_xs = mock.Mock()
         self.presenter.reset_fit_status_and_chi_squared_information = mock.Mock()
-        self.presenter.clear_cached_fit_functions = mock.Mock()
+        self.presenter.clear_undo_data = mock.Mock()
 
         self.presenter.handle_fitting_mode_changed()
 
@@ -141,7 +141,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.update_fit_functions_in_model_from_view.assert_called_once_with()
         self.presenter.update_dataset_names_in_view_and_model.assert_called_once_with()
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
-        self.presenter.clear_cached_fit_functions.assert_called_once_with()
+        self.presenter.clear_undo_data.assert_called_once_with()
         self.presenter.fitting_mode_changed_notifier.notify_subscribers.assert_called_once_with()
         self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
 
@@ -157,7 +157,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
     def test_that_handle_simultaneous_fit_by_specifier_changed_will_update_the_model(self):
         self.presenter.update_dataset_names_in_view_and_model = mock.Mock()
         self.presenter.reset_fit_status_and_chi_squared_information = mock.Mock()
-        self.presenter.clear_cached_fit_functions = mock.Mock()
+        self.presenter.clear_undo_data = mock.Mock()
 
         self.presenter.handle_simultaneous_fit_by_specifier_changed()
 
@@ -166,7 +166,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
 
         self.presenter.update_dataset_names_in_view_and_model.assert_called_once_with()
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
-        self.presenter.clear_cached_fit_functions.assert_called_once_with()
+        self.presenter.clear_undo_data.assert_called_once_with()
         self.presenter.simultaneous_fit_by_specifier_changed.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_dataset_name_changed_will_update_the_model_and_view(self):
@@ -441,7 +441,6 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         # Mock unimplemented methods and notifiers
         self.presenter.disable_editing_notifier.notify_subscribers = mock.Mock()
         self.presenter.enable_editing_notifier.notify_subscribers = mock.Mock()
-        self.presenter.disable_fitting_notifier.notify_subscribers = mock.Mock()
         self.presenter.selected_fit_results_changed.notify_subscribers = mock.Mock()
         self.presenter.fit_function_changed_notifier.notify_subscribers = mock.Mock()
         self.presenter.fit_parameter_changed_notifier.notify_subscribers = mock.Mock()

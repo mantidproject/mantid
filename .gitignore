@@ -13,6 +13,9 @@ cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 
+# Ignore CMakeUserPresets
+CMakeUserPresets.json
+
 
 # Compiled Object files
 *.slo
@@ -76,6 +79,9 @@ local.properties
 
 #Test results
 *.log
+
+#Coverage results
+*.gcov
 
 # Build results
 build/
