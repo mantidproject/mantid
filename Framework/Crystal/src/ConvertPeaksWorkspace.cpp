@@ -41,9 +41,9 @@ void ConvertPeaksWorkspace::init() {
                   "Workspace of Indexed Peaks");
 
   // donor workspace if going from lean to regular
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InstrumentWorkpace", "", Direction::Input,
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("InstrumentWorkpace", "", Direction::Input,
                                                                        PropertyMode::Optional),
-                  "Donor workspace with instrument for up-casting LeanPeaksWorkspace to PeaksWorkspace");
+                  "Donor PeaksWorkspace with instrument for conversion");
 
   // output
   declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
@@ -61,13 +61,11 @@ std::map<std::string, std::string> ConvertPeaksWorkspace::validateInputs() {
   IPeaksWorkspace_sptr ipws = getProperty("PeakWorkspace");
   PeaksWorkspace_sptr pws = std::dynamic_pointer_cast<PeaksWorkspace>(ipws);
   LeanElasticPeaksWorkspace_sptr lpws = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(ipws);
-  MatrixWorkspace_sptr ws = getProperty("InstrumentWorkpace");
 
   // case I: missing instrument when converting to PeaksWorkspace
   if (lpws && !pws) {
-    if (ws->getInstrument()) {
-      issues["InstrumentWorkpace"] = "InstrumentWorkspace must have a valid instrument attached to assist the "
-                                     "conversion from LeanElasticPeaksWorkspace to PeaksWorkspace.";
+    if (getPointerToProperty("InstrumentWorkpace")->isDefault()) {
+      issues["InstrumentWorkpace"] = "Need a PeaksWorkspace with proper instrument attached to assist conversion.";
     }
   }
 
@@ -91,9 +89,8 @@ void ConvertPeaksWorkspace::exec() {
     setProperty("OutputWorkspace", outpws);
   } else {
     g_log.notice() << "LeanElasticPeaksWorkspace -> PeaksWorkspace\n";
-    MatrixWorkspace_sptr ws = getProperty("InstrumentWorkpace");
-    Instrument_const_sptr inst = ws->getInstrument();
-    IPeaksWorkspace_sptr outpws = makePeaksWorkspace(ipws, inst);
+    IPeaksWorkspace_sptr ws = getProperty("InstrumentWorkpace");
+    IPeaksWorkspace_sptr outpws = makePeaksWorkspace(ipws, ws);
     setProperty("OutputWorkspace", outpws);
   }
 
@@ -116,7 +113,7 @@ IPeaksWorkspace_sptr ConvertPeaksWorkspace::makeLeanElasticPeaksWorkspace(IPeaks
 
   // down casting Peaks to LeanElasticPeaks
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
-    LeanElasticPeak lpk(pws->getPeak(i).getQSampleFrame(), pws->getPeak(i).getWavelength());
+    LeanElasticPeak lpk(pws->getPeak(i));
     // NOTE:
     // Peak level info requires explicit copying
     lpk.setRunNumber(pws->getPeak(i).getRunNumber());
@@ -138,16 +135,20 @@ IPeaksWorkspace_sptr ConvertPeaksWorkspace::makeLeanElasticPeaksWorkspace(IPeaks
  * @param instrument
  * @return IPeaksWorkspace_sptr
  */
-IPeaksWorkspace_sptr ConvertPeaksWorkspace::makePeaksWorkspace(IPeaksWorkspace_sptr ipws,
-                                                               Instrument_const_sptr &instrument) {
+IPeaksWorkspace_sptr ConvertPeaksWorkspace::makePeaksWorkspace(IPeaksWorkspace_sptr ipws, IPeaksWorkspace_sptr ws) {
   // prep
   LeanElasticPeaksWorkspace_sptr lpws = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(ipws);
   PeaksWorkspace_sptr pws = std::make_shared<PeaksWorkspace>();
+  Instrument_const_sptr inst = ws->getInstrument();
+
+  ExperimentInfo_sptr inputExperimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+  pws->copyExperimentInfoFrom(inputExperimentInfo.get());
 
   // up casting LeanElasticPeaks to Peaks
-  // NOTE:
-  //   - use instrument provided
-  //   - check for negative wavelength, log a warning if needed
+  for (int i = 0; i < lpws->getNumberPeaks(); ++i) {
+    Peak pk(lpws->getPeak(i), inst);
+    pws->addPeak(pk);
+  }
 
   //
   IPeaksWorkspace_sptr outpws = std::dynamic_pointer_cast<IPeaksWorkspace>(pws);
