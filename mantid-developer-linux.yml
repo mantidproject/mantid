@@ -55,6 +55,8 @@ dependencies:
 
   # Needed for test suite on Linux
   - pciutils-libs-cos7-x86_64>=3.5.1
+  - pciutils-devel-cos7-x86_64>=3.5.1
+  - pciutils-cos7-x86_64>=3.5.1
   - xorg-libxcomposite>=0.4.5
   - xorg-libxcursor>=1.2.0
   - xorg-libxdamage>=1.1.5
