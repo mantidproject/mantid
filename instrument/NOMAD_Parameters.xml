@@ -14,7 +14,7 @@
 
     </component-link>
 
-    <component-link name="bank1" >
+    <component-link name="Group1" >
         <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
             <formula eq="3.938" result-unit="TOF"/>
         </parameter>
@@ -32,7 +32,7 @@
         </parameter>
     </component-link>
 
-    <component-link name="bank2" >
+    <component-link name="Group2" >
         <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
             <formula eq="0.0" result-unit="TOF"/>
         </parameter>
@@ -50,7 +50,7 @@
         </parameter>
     </component-link>
 
-    <component-link name="bank3" >
+    <component-link name="Group3" >
         <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
             <formula eq="0.00691" result-unit="TOF"/>
         </parameter>
@@ -68,7 +68,7 @@
         </parameter>
     </component-link>
 
-    <component-link name="bank4" >
+    <component-link name="Group4" >
         <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
             <formula eq="0.0" result-unit="TOF"/>
         </parameter>
@@ -86,7 +86,7 @@
         </parameter>
     </component-link>
 
-    <component-link name="bank5" >
+    <component-link name="Group5" >
         <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
             <formula eq="0.15" result-unit="TOF"/>
         </parameter>
@@ -104,7 +104,7 @@
         </parameter>
     </component-link>
 
-    <component-link name="bank6" >
+    <component-link name="Group6" >
         <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
             <formula eq="0.65" result-unit="TOF"/>
         </parameter>
