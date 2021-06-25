@@ -1,10 +1,12 @@
 #!/bin/bash
 
+# This script expects a environment variable called $WORKSPACE to be set.
+
 # From https://stackoverflow.com/a/9107028 by https://stackoverflow.com/users/1184238/andrew-norrie
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-EXPECTED_MINICONDA_DIR_PATH=$HOME/mambaforge
-EXPECTED_CONDA_PATH=$EXPECTED_MINICONDA_DIR_PATH/bin/conda
+EXPECTED_MAMBAFORGE_PATH=$HOME/mambaforge
+EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/conda
 
 MAMBAFORGE_SCRIPT_NAME=Mambaforge-$(uname)-$(uname -m).sh
 
@@ -20,16 +22,12 @@ fi
 
 # With miniconda we can grab the mantid environment if it doesn't already exist
 ENVS=$($EXPECTED_CONDA_PATH env list)
-if [[ ! $ENVS = *"$EXPECTED_MINICONDA_DIR_PATH/envs/mantid"* ]]; then
+if [[ ! $ENVS = *"$EXPECTED_MAMBAFORGE_PATH/envs/mantid"* ]]; then
     # THIS IS JUST A TEST PATH:
     $EXPECTED_CONDA_PATH env create -f $SCRIPT_DIR/../../mantid-developer-linux.yml
 else
     echo "Conda environment already setup."
 fi
-
-# Deal with a known issue in Ubuntu for Conda which violates syntax in dash
-sed -i "s/function _get_sourced_filename() {/_get_sourced_filename() {/gi" $HOME/mambaforge/envs/mantid/etc/conda/activate.d/activate-binutils_linux-64.sh
-sed -i "s/function _tc_activation() {/_tc_activation() {/gi" $HOME/mambaforge/envs/mantid/etc/conda/activate.d/activate-binutils_linux-64.sh
 
 echo "Conda is now configured, and setup."
 exit
