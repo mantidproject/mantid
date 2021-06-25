@@ -1003,7 +1003,7 @@ class CrystalField(object):
     def __add__(self, other):
         from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         if isinstance(other, CrystalFieldMultiSite):
-            return (1.0*self).__radd__(other)
+            return (other).__radd__(self)
         elif isinstance(other, CrystalFieldSite):
             return (1.0*self).__add__(other)
         if isinstance(other, CrystalField):
@@ -1174,7 +1174,7 @@ class CrystalFieldSite(object):
             abundances = [self.abundance, other.abundance]
             other = other.crystalField
         elif isinstance(other, CrystalFieldMultiSite):
-            return self.__radd__(other)
+            return other.__radd__(self)
         else:
             raise TypeError('Unsupported operand type(s) for +: CrystalFieldSite and %s' % other.__class__.__name__)
         ions = [self.crystalField.Ion, other.Ion]
