@@ -466,14 +466,14 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         sample_twoTheta = str(mtd[sample_ws].getRun().getLogData('2theta.requested').value)
         matched_no = 0
         for entry_no, entry in enumerate(mtd[det_eff_ws]):
-            if sample_twoTheta in entry.name():
+            det_eff_twoTheta = str(entry.getRun().getLogData('2theta.requested').value)
+            if sample_twoTheta == det_eff_twoTheta:
                 matched_no = entry_no
                 break
         return matched_no
 
     def _normalise_sample_data(self, sample_ws, det_efficiency_ws, nMeasurements, nComponents):
         """Normalises the sample data using the detector efficiency calibration workspace."""
-
         single_eff_per_numor = False
         single_eff = False
         eff_entries = mtd[det_efficiency_ws].getNumberOfEntries()
@@ -484,7 +484,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         elif eff_entries != mtd[sample_ws].getNumberOfEntries() \
                 and eff_entries == (sample_entries / nComponents):
             single_eff_per_numor = True
-        elif (sample_entries / eff_entries / nComponents) % 2 == 0:
+        elif (sample_entries / nComponents) % eff_entries == 0:
             single_eff_per_twoTheta = True
         tmp_names = []
         for entry_no, entry in enumerate(mtd[sample_ws]):
