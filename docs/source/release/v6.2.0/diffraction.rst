@@ -36,6 +36,7 @@ New features
 - New algorithm :ref:`ApplyInstrumentToPeaks <algm-ApplyInstrumentToPeaks>` to update the instrument of peaks within a PeaksWorkspace.
 - New plotting script that provides diagnostic plots of SCDCalibratePanels output.
 - New plotting script that provides diagnositc plots of SCDCalibratePanels2 on a per panel/bank basis.
+- New algorithm :ref:`ConvertPeaksWorkspace <algm-ConvertPeaksWorkspace>` for quick conversion between PeaksWorkspace and LeanElasticPeaksWorkspace.
 
 Improvements
 ############
