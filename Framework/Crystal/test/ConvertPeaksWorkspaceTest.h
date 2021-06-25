@@ -49,16 +49,31 @@ public:
     LeanElasticPeaksWorkspace_sptr lpws = make_lpws();
     g_log.notice() << lpws->getPeak(0).getQSampleFrame() << "\n" << lpws->getPeak(0).getWavelength() << "\n";
 
-    // TODO
-    // add calling to the convertor
+    // call the convertor
+    ConvertPeaksWorkspace alg;
+    alg.initialize();
+    alg.setProperty("PeakWorkspace", pws);
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    IPeaksWorkspace_sptr lpws_from_pws = alg.getProperty("OutputWorkspace");
+    // what to check?
   }
 
   void test_LeanElasticPeaksWorkspace_to_PeaksWorkspace() {
     PeaksWorkspace_sptr pws = make_pws();
     LeanElasticPeaksWorkspace_sptr lpws = make_lpws();
 
-    // TODO
-    // add calling to the convertor
+    // call the convertor
+    ConvertPeaksWorkspace alg;
+    alg.initialize();
+    alg.setProperty("PeakWorkspace", lpws);
+    alg.setProperty("InstrumentWorkpace", pws->getInstrument());
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    IPeaksWorkspace_sptr pws_from_lpws = alg.getProperty("OutputWorkspace");
+    // what to check?
   }
 
 private:
