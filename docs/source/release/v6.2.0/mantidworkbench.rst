@@ -19,5 +19,6 @@ Bugfixes
 - Scroll bars added to about dialog if screen resolution is too low.
 - Fixed missing 'on top' windowing behaviour for the matrix and table workspace data displays.
 - Sliceviewer now doesn't normalise basis vectors for HKL data such that Bragg peaks appear at integer HKL for cuts along e.g. HH0
+- Fixed a bug where parameters wouldn't update in the fit property browser when fitting a single function with ties.
 
 :ref:`Release 6.2.0 <v6.2.0>`
