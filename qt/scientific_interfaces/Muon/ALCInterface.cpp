@@ -39,6 +39,24 @@ MatrixWorkspace_sptr getWorkspace(const std::string &workspaceName) {
     return nullptr;
   }
 }
+
+QHash<QString, QVariant> createPointKwargs() {
+  QHash<QString, QVariant> kwargs{{"marker", "."}, {"linestyle", "None"}};
+  return kwargs;
+}
+
+QHash<QString, QVariant> createLineKwargs() {
+  QHash<QString, QVariant> kwargs{{"marker", "None"}};
+  return kwargs;
+}
+
+std::vector<boost::optional<QHash<QString, QVariant>>> createPointAndLineKwargs() {
+  std::vector<boost::optional<QHash<QString, QVariant>>> kwargs;
+  kwargs.emplace_back(createPointKwargs());
+  kwargs.emplace_back(createLineKwargs());
+  return kwargs;
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -307,7 +325,7 @@ void ALCInterface::externalPlotRequested() {
 /**
  * Plots in workbench the single workspace from the data given
  * @param data The workspace to add to the ADS before plotting
- * @param workspaceName The names of workspace to plot
+ * @param workspaceName The name of workspace to plot
  * @param workspaceIndices String list of indices to plot (e.g.
  * '0-2,5,7-10')
  * @param errorBars Boolean to add/remove error bars to plot
@@ -340,12 +358,8 @@ void ALCInterface::externallyPlotWorkspaces(MatrixWorkspace_sptr &data, std::vec
  * Handle Data Loading external plot requested. Will plot the loaded data if available
  */
 void ALCInterface::externalPlotDataLoading() {
-  auto data = m_dataLoading->exportWorkspace();
-  if (data) {
-    QHash<QString, QVariant> kwargs;
-    kwargs.insert("marker", QString(".").toLatin1().constData());
-    kwargs.insert("linestyle", QString("None").toLatin1().constData());
-    externallyPlotWorkspace(data, "ALC_External_Plot_Loaded_Data", "0", true, kwargs);
+  if (auto data = m_dataLoading->exportWorkspace()) {
+    externallyPlotWorkspace(data, "ALC_External_Plot_Loaded_Data", "0", true, createPointKwargs());
   } else
     logger.warning("Load some data before externally plotting");
 }
@@ -355,14 +369,9 @@ void ALCInterface::externalPlotDataLoading() {
  * loaded data if available
  */
 void ALCInterface::externalPlotBaselineModel() {
-  auto data = m_baselineModellingModel->exportWorkspace();
-  if (data) {
-    std::vector<boost::optional<QHash<QString, QVariant>>> kwargs(2, QHash<QString, QVariant>());
-    kwargs[0]->insert("marker", QString(".").toLatin1().constData());
-    kwargs[0]->insert("linestyle", QString("None").toLatin1().constData());
-    kwargs[1]->insert("marker", QString("None").toLatin1().constData());
+  if (auto data = m_baselineModellingModel->exportWorkspace()) {
     externallyPlotWorkspaces(data, std::vector<std::string>{2, "ALC_External_Plot_Baseline_Workspace"},
-                             std::vector<int>{0, 1}, std::vector<bool>{true, false}, kwargs);
+                             std::vector<int>{0, 1}, std::vector<bool>{true, false}, createPointAndLineKwargs());
   } else {
     // If we don't have a baseline model workspace, try to plot the raw data from the data loading tab
     externalPlotDataLoading();
@@ -374,24 +383,15 @@ void ALCInterface::externalPlotBaselineModel() {
  * corrected data from the baseline model if available
  */
 void ALCInterface::externalPlotPeakFitting() {
-  auto data = m_peakFittingModel->exportWorkspace();
-  if (data) {
-    std::vector<boost::optional<QHash<QString, QVariant>>> kwargs(2, QHash<QString, QVariant>());
-    kwargs[0]->insert("marker", QString(".").toLatin1().constData());
-    kwargs[0]->insert("linestyle", QString("None").toLatin1().constData());
-    kwargs[1]->insert("marker", QString("None").toLatin1().constData());
+  if (auto data = m_peakFittingModel->exportWorkspace()) {
     externallyPlotWorkspaces(data, std::vector<std::string>{2, "ALC_External_Plot_Peaks_Workspace"},
-                             std::vector<int>{0, 1}, std::vector<bool>{true, false}, kwargs);
+                             std::vector<int>{0, 1}, std::vector<bool>{true, false}, createPointAndLineKwargs());
   } else {
     // If we don't have a peaks fit workspace, try to plot the raw peak data from the baseline model workspace (diff
     // spec (2))
-    data = m_baselineModellingModel->exportWorkspace();
-    if (data) {
+    if (auto data = m_baselineModellingModel->exportWorkspace()) {
       // Plot the diff spec from the baseline model workspace
-      QHash<QString, QVariant> kwargs;
-      kwargs.insert("marker", QString(".").toLatin1().constData());
-      kwargs.insert("linestyle", QString("None").toLatin1().constData());
-      externallyPlotWorkspace(data, "ALC_External_Plot_Baseline_Workspace", "2", true, kwargs);
+      externallyPlotWorkspace(data, "ALC_External_Plot_Baseline_Workspace", "2", true, createPointKwargs());
     } else
       logger.warning("Perform a baseline fit before externally plotting");
   }
