@@ -32,7 +32,7 @@ class PlotFitPaneModelTest(unittest.TestCase):
         cls.context.ads_observer = None
 
     def setUp(self):
-        self.model = PlotFitPaneModel(context=self.context, "test")
+        self.model = PlotFitPaneModel(context=self.context, name="test")
 
     def test_get_fit_ws_and_indicies(self):
         fit = MockFitInfo(["test", "unit"])
