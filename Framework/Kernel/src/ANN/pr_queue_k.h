@@ -121,14 +121,14 @@ public:
         g_log.error() << "kv=" << setprecision(17) << kv << std::endl;
         g_log.error() << "inf=" << inf << std::endl;
         g_log.error() << setprecision(17) << std::abs(mk[i - 1].key - kv) << std::endl;
-        g_log.error() << setprecision(17) << 10 * std::numeric_limits<double>::epsilon() * (mk[i - 1].key + kv)
+        g_log.error() << setprecision(17) << 100 * std::numeric_limits<double>::epsilon() * (mk[i - 1].key + kv)
                       << std::endl;
         bool testvar =
-            (std::abs(mk[i - 1].key - kv) < (10 * std::numeric_limits<double>::epsilon() * (mk[i - 1].key + kv)));
+            (std::abs(mk[i - 1].key - kv) < (100 * std::numeric_limits<double>::epsilon() * (mk[i - 1].key + kv)));
         g_log.error() << "testvar=" << testvar << std::endl;
         g_log.error() << std::endl;
       }
-      if (std::abs(mk[i - 1].key - kv) < (10 * std::numeric_limits<double>::epsilon() * (mk[i - 1].key + kv))) {
+      if (std::abs(mk[i - 1].key - kv) < (100 * std::numeric_limits<double>::epsilon() * (mk[i - 1].key + kv))) {
         if (mk[i - 1].info > inf)
           mk[i] = mk[i - 1];
         else
