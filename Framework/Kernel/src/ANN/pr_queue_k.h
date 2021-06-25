@@ -115,8 +115,8 @@ public:
       // if the values are v close together base the sort order on the info
       // This avoids any differences in the sort order across platforms due to different
       // floating point handling of double
-      if ((std::abs(mk[i - 1].key - kv) < (std::numeric_limits<double>::epsilon() * (mk[i - 1].key + kv))) &&
-          (mk[i - 1].info < inf))
+      if ((std::abs(mk[i - 1].key - kv) < (10 * std::numeric_limits<double>::epsilon() * (mk[i - 1].key + kv))) &&
+          (mk[i - 1].info > inf))
         mk[i] = mk[i - 1];
       else if (mk[i - 1].key > kv)
         mk[i] = mk[i - 1];

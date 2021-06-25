@@ -548,15 +548,29 @@ public:
     TS_ASSERT_EQUALS(nnIndexList[7], 19140);
     TS_ASSERT_EQUALS(nnIndexList[8], 19142);
 
-    TS_ASSERT_DELTA(nnDistList[0], 0.59042046182435803, std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(nnDistList[1], 0.67358344667063597, std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(nnDistList[2], 0.67358344667063674, std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(nnDistList[3], 0.76706550105551297, std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(nnDistList[4], 1.7609423159344773, std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(nnDistList[5], 1.9952666377146773, std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(nnDistList[6], 2.2908774336279398, std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(nnDistList[7], 2.6688500843853133, std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(nnDistList[8], 2.6688500843853147, std::numeric_limits<double>::epsilon()); // different in 15th dp
+    TS_ASSERT_DELTA(nnDistList[0], 0.59042046182435803,
+                    std::numeric_limits<double>::epsilon() * (nnDistList[0] + 0.59042046182435803));
+    TS_ASSERT_DELTA(nnDistList[1], 0.67358344667063597,
+                    std::numeric_limits<double>::epsilon() * (nnDistList[1] + 0.67358344667063597));
+    TS_ASSERT_DELTA(nnDistList[2], 0.67358344667063674,
+                    std::numeric_limits<double>::epsilon() * (nnDistList[2] + 0.67358344667063674));
+    TS_ASSERT_DELTA(nnDistList[3], 0.76706550105551297,
+                    std::numeric_limits<double>::epsilon() * (nnDistList[3] + 0.76706550105551297));
+    TS_ASSERT_DELTA(nnDistList[4], 1.7609423159344773,
+                    std::numeric_limits<double>::epsilon() * (nnDistList[4] + 1.7609423159344773));
+    TS_ASSERT_DELTA(nnDistList[5], 1.9952666377146773,
+                    std::numeric_limits<double>::epsilon() * (nnDistList[5] + 1.9952666377146773));
+    TS_ASSERT_DELTA(nnDistList[6], 2.2908774336279398,
+                    std::numeric_limits<double>::epsilon() * (nnDistList[6] + 2.2908774336279398));
+    // 8th and 9th neighbour distances only different in 15th dp
+    TS_ASSERT_DELTA(nnDistList[7], 2.6688500843853133,
+                    std::numeric_limits<double>::epsilon() * (nnDistList[7] + 2.6688500843853133));
+    TS_ASSERT_DELTA(nnDistList[8], 2.6688500843853147,
+                    std::numeric_limits<double>::epsilon() * (nnDistList[8] + 2.6688500843853147));
+
+    // std::cout<<std::numeric_limits<double>::epsilon()<<std::endl;
+    // std::cout<<std::abs(nnDistList[8]-nnDistList[7])<<std::endl;
+    // TS_ASSERT(std::abs(nnDistList[8]-nnDistList[7])<std::numeric_limits<double>::epsilon()*(nnDistList[7]+nnDistList[8]));
   }
 }
 
