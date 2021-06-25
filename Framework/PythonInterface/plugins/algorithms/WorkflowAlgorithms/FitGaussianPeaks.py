@@ -186,7 +186,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         data_table.addColumn(type='float', name='error sigma')
         data_table.addColumn(type='float', name='area')
         data_table.addColumn(type='float', name='error area')
-        if param is not None:
+        if type(param) is type(data_table):
             for i in range(param.rowCount() // 3):
                 height = param.row(3 * i)
                 centre = param.row(3 * i + 1)
@@ -285,6 +285,9 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
             rside = 5 + lside
         x_range = xvals[lside:rside]
         y_range = yvals[lside:rside]
+        if len(x_range) < 5:
+            self.log().warning(f"Peak at {xvals[centre]} cannot be fitted")
+            return None
         # The function least_squares should not be used as it is not present in scipy < 1.1.0
         # Using the mantid fitting function will not produce an equally good result here
         p_est = scipy.optimize.leastsq(
@@ -306,7 +309,10 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
             win_size = int(self._estimate_sigma * len(xvals) / (max(xvals) - min(xvals)))
             if win_size < 2:
                 win_size = 2
-            centre, height, sigma = tuple(self.estimate_single_parameters(xvals, yvals, pid, win_size))
+            params = self.estimate_single_parameters(xvals, yvals, pid, win_size)
+            if params is None:
+                continue
+            centre, height, sigma = params
             if sigma < self._min_sigma:
                 centre = xvals[pid]
                 height = yvals[pid]
