@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidCrystal/ConvertPeaksWorkspace.h"
 #include "MantidDataObjects/LeanElasticPeak.h"
@@ -46,18 +47,28 @@ public:
 
   void test_PeaksWorkspace_to_LeanElasticPeaksWorkspace() {
     PeaksWorkspace_sptr pws = make_pws();
-    LeanElasticPeaksWorkspace_sptr lpws = make_lpws();
-    g_log.notice() << lpws->getPeak(0).getQSampleFrame() << "\n" << lpws->getPeak(0).getWavelength() << "\n";
+    // AnalysisDataService::Instance().add("pws", pws);
 
     // call the convertor
     ConvertPeaksWorkspace alg;
     alg.initialize();
     alg.setProperty("PeakWorkspace", pws);
+    alg.setProperty("OutputWorkspace", "outpws");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    IPeaksWorkspace_sptr lpws_from_pws = alg.getProperty("OutputWorkspace");
-    // what to check?
+    // check
+    IPeaksWorkspace_sptr lpws_from_pws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>("outpws");
+    std::ostringstream msg;
+    msg << "Qsample_pws = " << pws->getPeak(0).getQSampleFrame() << "\n"
+        << "Qsample_lpws = " << lpws_from_pws->getPeak(0).getQSampleFrame() << "\n"
+        << "Lmabda_pws = " << pws->getPeak(0).getWavelength() << "\n"
+        << "Lmabda_lpws = " << lpws_from_pws->getPeak(0).getWavelength() << "\n";
+    g_log.notice() << msg.str();
+    for (size_t i = 0; i < 3; ++i) {
+      TS_ASSERT_DELTA(pws->getPeak(0).getQSampleFrame()[i], lpws_from_pws->getPeak(0).getQSampleFrame()[i], 1e-6);
+    }
+    TS_ASSERT_DELTA(pws->getPeak(0).getWavelength(), lpws_from_pws->getPeak(0).getWavelength(), 1e-6);
   }
 
   void test_LeanElasticPeaksWorkspace_to_PeaksWorkspace() {
@@ -68,12 +79,13 @@ public:
     ConvertPeaksWorkspace alg;
     alg.initialize();
     alg.setProperty("PeakWorkspace", lpws);
-    alg.setProperty("InstrumentWorkpace", pws->getInstrument());
+    alg.setProperty("InstrumentWorkpace", pws);
+    alg.setProperty("OutputWorkspace", "outpws");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    IPeaksWorkspace_sptr pws_from_lpws = alg.getProperty("OutputWorkspace");
-    // what to check?
+    // check
+    IPeaksWorkspace_sptr lpws_from_pws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>("outpws");
   }
 
 private:
