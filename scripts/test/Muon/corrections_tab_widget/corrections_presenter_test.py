@@ -225,6 +225,7 @@ class CorrectionsPresenterTest(unittest.TestCase):
     def test_that_handle_dead_time_browse_clicked_will_populate_the_workspace_selector_if_a_file_loads_successfully(self):
         filename = "HIFI00084447.nxs"
         self.view.show_file_browser_and_return_selection = mock.Mock(return_value=[filename, ""])
+        self.model.validate_selected_dead_time_workspace = mock.Mock(return_value="")
         self.presenter._load_file_containing_dead_time = mock.Mock(return_value=filename)
 
         self.presenter.handle_dead_time_browse_clicked()

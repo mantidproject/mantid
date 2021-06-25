@@ -121,6 +121,7 @@ class CorrectionsPresenter(QObject):
             if error == "":
                 self.set_dead_time_source_to_from_ads()
             else:
+                self.view.set_selected_dead_time_workspace("None")
                 self._handle_selected_table_is_invalid()
                 self.view.warning_popup(error)
 
@@ -136,7 +137,11 @@ class CorrectionsPresenter(QObject):
             name = self._load_file_containing_dead_time(filename)
             if name is not None:
                 self.view.populate_dead_time_workspace_selector(get_table_workspace_names_from_ADS())
-                self.view.switch_to_using_a_dead_time_table_workspace(name)
+                error = self.model.validate_selected_dead_time_workspace(name)
+                if error == "":
+                    self.view.switch_to_using_a_dead_time_table_workspace(name)
+                else:
+                    self.view.warning_popup(error)
 
     def handle_corrections_complete(self) -> None:
         """When the corrections have been calculated, update the displayed dead time averages."""

@@ -116,8 +116,12 @@ class CorrectionsView(widget, ui_form):
 
     def switch_to_using_a_dead_time_table_workspace(self, table_name: str) -> None:
         """Switch the view to the 'from table workspace' option and provide the table name."""
-        self.dead_time_corrections_view.set_selected_dead_time_workspace(table_name)
+        self.set_selected_dead_time_workspace(table_name)
         self.set_dead_time_from_workspace_selected()
+
+    def set_selected_dead_time_workspace(self, table_name: str) -> None:
+        """Sets the selected table workspace in the workspace selector."""
+        self.dead_time_corrections_view.set_selected_dead_time_workspace(table_name)
 
     def warning_popup(self, message: str) -> None:
         """Displays a warning message."""
