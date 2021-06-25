@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_model import BasePaneModel
-from Muon.GUI.Common.ADSHandler.workspace_naming import *
+from Muon.GUI.Common.ADSHandler.workspace_naming import (get_group_or_pair_from_name, REBIN_STR,
+                                                         get_run_numbers_as_string_from_workspace_name)
 
 
 class PlotGroupPairModel(BasePaneModel):

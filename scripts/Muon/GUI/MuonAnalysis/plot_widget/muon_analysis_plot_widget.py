@@ -25,10 +25,10 @@ class MuonAnalysisPlotWidget(object):
         self.plotting_canvas_widgets = {}
         self.plotting_canvas_widgets[self.data_model.name] = PlottingCanvasWidget(parent, context=
                                                                                   context.plot_panes_context[self.data_model.name],
-                                                                                  util=self.data_model)
+                                                                                  plot_model=self.data_model)
         self.plotting_canvas_widgets[self.fit_model.name] = PlottingCanvasWidget(parent, context=
                                                                                  context.plot_panes_context[self.fit_model.name],
-                                                                                 util=self.fit_model)
+                                                                                 plot_model=self.fit_model)
         # The UI view
         self._view1 = BasePaneView(parent)
         self._view1.add_canvas_widget(self.plotting_canvas_widgets[self.data_model.name].widget)

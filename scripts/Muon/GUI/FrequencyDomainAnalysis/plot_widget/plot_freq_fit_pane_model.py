@@ -34,7 +34,7 @@ class PlotFreqFitPaneModel(PlotFitPaneModel):
     def _get_freq_lebel(workspace_name):
         label = ''
         if FFT_STR in workspace_name:
-            label = ''.join([';', get_fft_component_from_workspace_name(workspace_name)])
+            label = f";{get_fft_component_from_workspace_name(workspace_name)}"
         elif MAXENT_STR in workspace_name:
             label = f';{MAXENT_STR}'
         return label

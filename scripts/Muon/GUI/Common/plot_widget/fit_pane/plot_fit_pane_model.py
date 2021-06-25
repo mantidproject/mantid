@@ -43,7 +43,7 @@ class PlotFitPaneModel(BasePaneModel):
                 workspace_type = 'Calc'
             elif index == 2:
                 workspace_type = 'Diff'
-            label = ''.join([';', fit_function_name, ';', workspace_type])
+            label = f";{fit_function_name};{workspace_type}"
         return label
 
     def _is_guess_workspace(self, workspace_name):
