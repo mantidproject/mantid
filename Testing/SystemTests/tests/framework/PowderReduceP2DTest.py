@@ -27,8 +27,8 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         self.FWHM = self._FWHM()
         self.tolerance = self._tolerance()
 
-        self.reference = _loadReference()
-        self.outputFile = _outputFile()
+        self.reference = self._loadReference()
+        self.outputFile = self._outputFile()
 
     def runTest(self):
         powder_reduce_P2D = PowderReduceP2D(SampleData=self.sample, OutputFile=self.outputFile, DoIntensityCorrection = True,
