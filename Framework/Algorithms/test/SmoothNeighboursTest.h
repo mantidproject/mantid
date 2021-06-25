@@ -539,8 +539,8 @@ public:
                         0.0);               // Error bound (?) is this the radius to search in?
 
     TS_ASSERT_EQUALS(nnIndexList[0], 19269);
-    TS_ASSERT_EQUALS(nnIndexList[1], 19398);
-    TS_ASSERT_EQUALS(nnIndexList[2], 19396);
+    TS_ASSERT_EQUALS(nnIndexList[1], 19396);
+    TS_ASSERT_EQUALS(nnIndexList[2], 19398);
     TS_ASSERT_EQUALS(nnIndexList[3], 19270);
     TS_ASSERT_EQUALS(nnIndexList[4], 19268);
     TS_ASSERT_EQUALS(nnIndexList[5], 19141);
@@ -550,10 +550,10 @@ public:
 
     TS_ASSERT_DELTA(nnDistList[0], 0.59042046182435803,
                     std::numeric_limits<double>::epsilon() * (nnDistList[0] + 0.59042046182435803));
-    TS_ASSERT_DELTA(nnDistList[1], 0.67358344667063597,
-                    std::numeric_limits<double>::epsilon() * (nnDistList[1] + 0.67358344667063597));
-    TS_ASSERT_DELTA(nnDistList[2], 0.67358344667063674,
-                    std::numeric_limits<double>::epsilon() * (nnDistList[2] + 0.67358344667063674));
+    TS_ASSERT_DELTA(nnDistList[1], 0.67358344667063674,
+                    std::numeric_limits<double>::epsilon() * (nnDistList[1] + 0.6735834466706367));
+    TS_ASSERT_DELTA(nnDistList[2], 0.67358344667063597,
+                    std::numeric_limits<double>::epsilon() * (nnDistList[2] + 0.673583446670635974));
     TS_ASSERT_DELTA(nnDistList[3], 0.76706550105551297,
                     std::numeric_limits<double>::epsilon() * (nnDistList[3] + 0.76706550105551297));
     TS_ASSERT_DELTA(nnDistList[4], 1.7609423159344773,
