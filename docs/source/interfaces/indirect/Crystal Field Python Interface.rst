@@ -536,6 +536,8 @@ for both `CrystalField` objects::
 
     cf = 2*cf1 + 3*cf2
 
+The scaling factors are also used as the `IntensityScaling` setting for the respective ion.
+
 After combining `CrystalField` objects to a `CrystalFieldMultiSite` object further changes to the original `CrystalField`
 objects are not reflected in the `CrystalFieldMultiSite` object. Furthermore, the `CrystalFieldMultiSite` object does not
 have a set function for `IntensityScaling` parameters. As a consequence, it is not possible to set these parameters later
@@ -544,8 +546,7 @@ as for the `CrystalField` object.
 Multiple ions fitted to a single spectrum
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 When combining two `CrystalField` objects for a single spectrum to a `CrystalFieldMultiSite` object the original values
-for `IntensityScaling` are ignored. Since only the coefficient of the first object is used, the 'IntensityScaling' for ion1
-always defaults to 1::
+for `IntensityScaling` are ignored::
 
     params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
           'Temperature': [44.0], 'FWHM': [1.1], 'IntensityScaling': [0.2]}
@@ -558,11 +559,12 @@ results in the following `CrystalFieldMultiSite` object and tie::
     from CrystalField import CrystalFieldMultiSite
     cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1], abundances=[2.0, 1.0]
                                 parameters={'ion0.B20':0.377,'ion0.B22':3.9,'ion0.B40':-0.03,'ion0.B42':-0.116,'ion0.B44':-0.125,
-                                            'ion1.B20':0.377,'ion1.B22':3.9,'ion1.B40':-0.03,'ion1.B42':-0.116,'ion1.B44':-0.125})
+                                            'ion1.B20':0.377,'ion1.B22':3.9,'ion1.B40':-0.03,'ion1.B42':-0.116,'ion1.B44':-0.125,
+                                            `ion0.IntensityScaling`:2.0,`ion1.IntensityScaling`:1.0})
     cfms.ties({'ion1.IntensityScaling' : '0.5*ion0.IntensityScaling'})
 
 In addition to creating the equivalent `CrystalFieldMultiSite` object the coefficient is used to set a tie for the
-`IntensityScaling` parameter of ion0 relative to the `IntensityScaling` parameter of ion1. For the tie the coefficient of
+`IntensityScaling` parameter of ion1 relative to the `IntensityScaling` parameter of ion0. For the tie the coefficient of
 the respective ion is divided by the coefficient of the ion with the greatest coefficient. The coefficients from the combining
 expression are stored as `abundances`.
 

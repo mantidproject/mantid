@@ -1003,7 +1003,7 @@ class CrystalField(object):
     def __add__(self, other):
         from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         if isinstance(other, CrystalFieldMultiSite):
-            return other.__radd__(self)
+            return (1.0*self).__radd__(other)
         elif isinstance(other, CrystalFieldSite):
             return (1.0*self).__add__(other)
         if isinstance(other, CrystalField):
@@ -1174,7 +1174,7 @@ class CrystalFieldSite(object):
             abundances = [self.abundance, other.abundance]
             other = other.crystalField
         elif isinstance(other, CrystalFieldMultiSite):
-            return other.__radd__(self)
+            return self.__radd__(other)
         else:
             raise TypeError('Unsupported operand type(s) for +: CrystalFieldSite and %s' % other.__class__.__name__)
         ions = [self.crystalField.Ion, other.Ion]
@@ -1184,6 +1184,8 @@ class CrystalFieldSite(object):
         for bparam in CrystalField.field_parameter_names:
             params['ion0.' + bparam] = self.crystalField[bparam]
             params['ion1.' + bparam] = other[bparam]
+        params['ion0.IntensityScaling'] = abundances[0]
+        params['ion1.IntensityScaling'] = abundances[1]
         # Check IntensityScaling settings in original objects
         # If only one has IntensityScaling settings use these for CrystalFieldMultiSite object
         # Warn if both objects have IntensityScaling settings and these are not equal
