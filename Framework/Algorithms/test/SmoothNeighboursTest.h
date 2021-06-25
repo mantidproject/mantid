@@ -573,8 +573,8 @@ public:
       g_log.error() << "nnIndexList[" << i << "]=" << nnIndexList[i] << std::setprecision(17) << ", nnDistList[" << i
                     << "]=" << nnDistList[i] << std::endl;
 
-    // std::cout<<std::numeric_limits<double>::epsilon()<<std::endl;
-    // std::cout<<std::abs(nnDistList[8]-nnDistList[7])<<std::endl;
+    g_log.error() << std::setprecision(17) << "epsilon=" << std::numeric_limits<double>::epsilon() << std::endl;
+    g_log.error() << std::setprecision(17) << std::abs(nnDistList[8] - nnDistList[7]) << std::endl;
     // TS_ASSERT(std::abs(nnDistList[8]-nnDistList[7])<std::numeric_limits<double>::epsilon()*(nnDistList[7]+nnDistList[8]));
   }
 }
