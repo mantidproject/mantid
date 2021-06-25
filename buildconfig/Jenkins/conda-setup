@@ -27,5 +27,9 @@ else
     echo "Conda environment already setup."
 fi
 
+# Deal with a known issue in Ubuntu for Conda which violates syntax in dash
+sed -i "s/function _get_sourced_filename() {/_get_sourced_filename() {/gi" $HOME/mambaforge/envs/mantid/etc/conda/activate.d/activate-binutils_linux-64.sh
+sed -i "s/function _tc_activation() {/_tc_activation() {/gi" $HOME/mambaforge/envs/mantid/etc/conda/activate.d/activate-binutils_linux-64.sh
+
 echo "Conda is now configured, and setup."
 exit
