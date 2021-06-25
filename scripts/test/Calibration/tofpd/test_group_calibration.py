@@ -20,9 +20,8 @@ def create_test_ws_and_group():
     ws = CreateSampleWorkspace("Event","User Defined", myFunc, BankPixelWidth=1,
                                XUnit='dSpacing', XMax=5, BinWidth=0.001, NumEvents=100000, NumBanks=8)
     for n in range(1,5):
-        MoveInstrumentComponent(ws, ComponentName=f'bank{n}', X=1, Y=0, Z=1, RelativePosition=False)
-    for n in range(5,9):
-        MoveInstrumentComponent(ws, ComponentName=f'bank{n}', X=2, Y=0, Z=2, RelativePosition=False)
+        MoveInstrumentComponent(ws, ComponentName=f'bank{n}', X=1+n/10, Y=0, Z=1+n/10, RelativePosition=False)
+        MoveInstrumentComponent(ws, ComponentName=f'bank{n+4}', X=2+n/10, Y=0, Z=2+n/10, RelativePosition=False)
 
     MaskDetectors(ws, WorkspaceIndexList=[3,7])
 
@@ -60,8 +59,7 @@ class TestGroupCalibration(unittest.TestCase):
         output_workspace_basename = 'test_from_eng'
 
         # same for all spectra in group
-        starting_difc1 = ws.spectrumInfo().difcUncalibrated(0)
-        starting_difc2 = ws.spectrumInfo().difcUncalibrated(4)
+        starting_difc = [ws.spectrumInfo().difcUncalibrated(i) for i in range(ws.getNumberHistograms())]
 
         cc_diffcal = group_calibration.cc_calibrate_groups(ws,
                                                            groups,
@@ -72,12 +70,12 @@ class TestGroupCalibration(unittest.TestCase):
                                                            Xmax=2.25)
 
         assert_allclose(cc_diffcal.column('difc'),
-                        [starting_difc1,
-                         starting_difc1/0.95,
-                         starting_difc1/1.05,
-                         starting_difc2,
-                         starting_difc2/0.98,
-                         starting_difc2/1.02], rtol=0.005)
+                        [starting_difc[0],
+                         starting_difc[1]/0.95,
+                         starting_difc[2]/1.05,
+                         starting_difc[4],
+                         starting_difc[5]/0.98,
+                         starting_difc[6]/1.02], rtol=0.005)
 
         diffcal = group_calibration.pdcalibration_groups(ws,
                                                          groups,
@@ -87,13 +85,13 @@ class TestGroupCalibration(unittest.TestCase):
                                                          PeakWindow=0.4)
 
         assert_allclose(diffcal.column('difc'),
-                        [starting_difc1,
-                         starting_difc1/0.95,
-                         starting_difc1/1.05,
+                        [starting_difc[0],
+                         starting_difc[1]/0.95,
+                         starting_difc[2]/1.05,
                          0,
-                         starting_difc2/0.95,
-                         starting_difc2/(0.95*0.98),
-                         starting_difc2/(0.95*1.02),
+                         starting_difc[4]/0.95,
+                         starting_difc[5]/(0.95*0.98),
+                         starting_difc[6]/(0.95*1.02),
                          0], rtol=0.005)
 
     def test_from_prev_cal(self):
@@ -103,8 +101,7 @@ class TestGroupCalibration(unittest.TestCase):
         output_workspace_basename = 'test_from_eng_prev_cal'
 
         # same for all spectra in group
-        starting_difc1 = ws.spectrumInfo().difcUncalibrated(0)
-        starting_difc2 = ws.spectrumInfo().difcUncalibrated(4)
+        starting_difc = [ws.spectrumInfo().difcUncalibrated(i) for i in range(ws.getNumberHistograms())]
 
         previous_diffcal = CreateEmptyTableWorkspace()
 
@@ -113,14 +110,14 @@ class TestGroupCalibration(unittest.TestCase):
         previous_diffcal.addColumn("double", "difa")
         previous_diffcal.addColumn("double", "tzero")
 
-        previous_diffcal.addRow([1, starting_difc1*1.01, 0, 0])
-        previous_diffcal.addRow([2, starting_difc1*1.01, 0, 0])
-        previous_diffcal.addRow([3, starting_difc1*1.01, 0, 0])
-        previous_diffcal.addRow([4, starting_difc1*1.01, 0, 0])
-        previous_diffcal.addRow([5, starting_difc2*1.01, 0, 0])
-        previous_diffcal.addRow([6, starting_difc2*1.01, 0, 0])
-        previous_diffcal.addRow([7, starting_difc2*1.01, 0, 0])
-        previous_diffcal.addRow([8, starting_difc2*1.01, 0, 0])
+        previous_diffcal.addRow([1, starting_difc[0]*1.01, 0, 0])
+        previous_diffcal.addRow([2, starting_difc[1]*1.01, 0, 0])
+        previous_diffcal.addRow([3, starting_difc[2]*1.01, 0, 0])
+        previous_diffcal.addRow([4, starting_difc[3]*1.01, 0, 0])
+        previous_diffcal.addRow([5, starting_difc[4]*1.01, 0, 0])
+        previous_diffcal.addRow([6, starting_difc[5]*1.01, 0, 0])
+        previous_diffcal.addRow([7, starting_difc[6]*1.01, 0, 0])
+        previous_diffcal.addRow([8, starting_difc[7]*1.01, 0, 0])
 
         cc_diffcal = group_calibration.cc_calibrate_groups(ws,
                                                            groups,
@@ -132,14 +129,14 @@ class TestGroupCalibration(unittest.TestCase):
                                                            Xmax=2.25)
 
         assert_allclose(cc_diffcal.column('difc'),
-                        [starting_difc1*1.01,
-                         starting_difc1*1.01/0.95,
-                         starting_difc1*1.01/1.05,
-                         starting_difc1*1.01,
-                         starting_difc2*1.01,
-                         starting_difc2*1.01/0.98,
-                         starting_difc2*1.01/1.02,
-                         starting_difc2*1.01], rtol=0.005)
+                        [starting_difc[0]*1.01,
+                         starting_difc[1]*1.01/0.95,
+                         starting_difc[2]*1.01/1.05,
+                         starting_difc[3]*1.01,
+                         starting_difc[4]*1.01,
+                         starting_difc[5]*1.01/0.98,
+                         starting_difc[6]*1.01/1.02,
+                         starting_difc[7]*1.01], rtol=0.005)
 
         diffcal = group_calibration.pdcalibration_groups(ws,
                                                          groups,
@@ -150,14 +147,14 @@ class TestGroupCalibration(unittest.TestCase):
                                                          PeakWindow=0.4)
 
         assert_allclose(diffcal.column('difc'),
-                        [starting_difc1,
-                         starting_difc1/0.95,
-                         starting_difc1/1.05,
-                         starting_difc1*1.01,
-                         starting_difc2/0.95,
-                         starting_difc2/(0.95*0.98),
-                         starting_difc2/(0.95*1.02),
-                         starting_difc2*1.01], rtol=0.005)
+                        [starting_difc[0],
+                         starting_difc[1]/0.95,
+                         starting_difc[2]/1.05,
+                         starting_difc[3]*1.01,
+                         starting_difc[4]/0.95,
+                         starting_difc[5]/(0.95*0.98),
+                         starting_difc[6]/(0.95*1.02),
+                         starting_difc[7]*1.01], rtol=0.005)
 
 
 if __name__ == '__main__':
