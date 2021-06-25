@@ -136,7 +136,7 @@ class CorrectionsModelTest(unittest.TestCase):
         LoadMuonNexus(Filename="MUSR00022725.nxs", OutputWorkspace="output_ws", DeadTimeTable=dead_time_table_name)
 
         self.assertEqual(self.model.validate_selected_dead_time_workspace(dead_time_table_name),
-                         "The number of histograms does not match the number of rows in dead time table (64).")
+                         "The number of histograms does not match the number of rows in dead time table (62 != 64).")
 
     def test_that_validate_selected_dead_time_workspace_will_return_an_error_when_the_workspace_is_not_in_the_ADS(self):
         dead_time_table_name = "dead_time_table"
