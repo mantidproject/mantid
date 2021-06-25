@@ -85,7 +85,19 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // check
-    IPeaksWorkspace_sptr lpws_from_pws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>("outpws");
+    IPeaksWorkspace_sptr pws_from_lpws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>("outpws");
+    std::ostringstream msg;
+    msg << "Qsample_pws = " << lpws->getPeak(0).getQSampleFrame() << "\n"
+        << "Qsample_lpws = " << pws_from_lpws->getPeak(0).getQSampleFrame() << "\n"
+        << "Lmabda_pws = " << lpws->getPeak(0).getWavelength() << "\n"
+        << "Lmabda_lpws = " << pws_from_lpws->getPeak(0).getWavelength() << "\n";
+    g_log.notice() << msg.str();
+    // NOTE:
+    // QSample will vary slighly after the casting
+    for (size_t i = 0; i < 3; ++i) {
+      TS_ASSERT_DELTA(lpws->getPeak(0).getQSampleFrame()[i], pws_from_lpws->getPeak(0).getQSampleFrame()[i], 1e-4);
+    }
+    TS_ASSERT_DELTA(lpws->getPeak(0).getWavelength(), pws_from_lpws->getPeak(0).getWavelength(), 1e-6);
   }
 
 private:

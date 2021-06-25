@@ -146,8 +146,18 @@ IPeaksWorkspace_sptr ConvertPeaksWorkspace::makePeaksWorkspace(IPeaksWorkspace_s
 
   // up casting LeanElasticPeaks to Peaks
   for (int i = 0; i < lpws->getNumberPeaks(); ++i) {
-    Peak pk(lpws->getPeak(i), inst);
-    pws->addPeak(pk);
+    // NOTE:
+    // This try-catch block here
+    //  - For cases where incorrect goniometer settings leads to a negative wavelength.
+    //  - Have a slightly negative impact on runtime. For example, with a testing pws with 7k peaks
+    //     - with try-catch: runtime ~ 50s
+    //     - without try-catch: runtime ~ 38s
+    try {
+      Peak pk(lpws->getPeak(i), inst);
+      pws->addPeak(pk);
+    } catch (const std::invalid_argument &errmsg) {
+      g_log.warning() << errmsg.what() << "\n";
+    }
   }
 
   //
