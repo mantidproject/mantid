@@ -20,7 +20,7 @@ def cc_calibrate_groups(data_ws,
     # skip group 0 because this is eveything that wasn't included in a group
     group_list = np.unique(group_ws.extractY())
 
-    for n, group in enumerate(group_list):
+    for group in group_list:
         indexes = np.where(group_ws.extractY().flatten() == group)[0]
         ExtractSpectra(data_d, WorkspaceIndexList=indexes, OutputWorkspace=f'_tmp_group_{group}')
         ExtractUnmaskedSpectra(f'_tmp_group_{group}', OutputWorkspace=f'_tmp_group_{group}')
@@ -74,6 +74,7 @@ def pdcalibration_groups(data_ws,
                   OutputCalibrationTable=f'{output_basename}_pd_diffcal',
                   DiagnosticWorkspaces=f'{output_basename}_pd_diag')
 
+    # Everything below will all be replaced by be the new CombineDiffCal algorithm
     pd_diffcal = mtd[f'{output_basename}_pd_diffcal']
 
     cc_and_pd_diffcal = CloneWorkspace(f'{output_basename}_pd_diffcal', OutputWorkspace=f'{output_basename}_cc_pd_diffcal')
@@ -81,23 +82,23 @@ def pdcalibration_groups(data_ws,
     cc_det_to_difc = dict(zip(cc_diffcal.column('detid'), cc_diffcal.column('difc')))
 
     grouped = mtd['_tmp_data_aligned_focussed']
-    si = grouped.spectrumInfo()
+    specInfo = grouped.spectrumInfo()
     grouped_det_to_difc = {}
 
     for detid in cc_and_pd_diffcal.column('detid'):
-        ind = list(grouped.getIndicesFromDetectorIDs([1]))
+        ind = list(grouped.getIndicesFromDetectorIDs([detid]))
         if ind:
-            grouped_det_to_difc[detid] = si.difcUncalibrated(ind[0])
+            grouped_det_to_difc[detid] = specInfo.difcUncalibrated(ind[0])
 
     if previous_calibration:
         previous_calibration_det_to_difc = dict(zip(previous_calibration.column('detid'), previous_calibration.column('difc')))
-        eng_det_to_difc = {}
 
-        si = data_ws.spectrumInfo()
+        eng_det_to_difc = {}
+        specInfo = data_ws.spectrumInfo()
         for detid in cc_and_pd_diffcal.column('detid'):
-            ind = list(data_ws.getIndicesFromDetectorIDs([1]))
+            ind = list(data_ws.getIndicesFromDetectorIDs([detid]))
             if ind:
-                eng_det_to_difc[detid] = si.difcUncalibrated(ind[0])
+                eng_det_to_difc[detid] = specInfo.difcUncalibrated(ind[0])
 
         for n, detid in enumerate(cc_and_pd_diffcal.column('detid')):
             if detid in cc_det_to_difc and detid in grouped_det_to_difc:
