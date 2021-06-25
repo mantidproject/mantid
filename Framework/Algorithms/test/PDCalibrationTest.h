@@ -19,6 +19,7 @@
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAlgorithms/PDCalibration.h"
 #include "MantidDataHandling/GroupDetectors2.h"
+#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataHandling/RotateInstrumentComponent.h"
 #include "MantidDataObjects/TableColumn.h"
@@ -37,6 +38,7 @@ using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_const_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::DataHandling::GroupDetectors2;
+using Mantid::DataHandling::LoadParameterFile;
 using Mantid::DataHandling::MoveInstrumentComponent;
 using Mantid::DataHandling::RotateInstrumentComponent;
 
@@ -480,7 +482,8 @@ public:
     // test the algorithm using the IkedaCarpenterPV peak function
     const double ref_difc = 2208.287616521762;
 
-    const std::vector<double> dValues{0.3117, 0.4996, 0.7283, 1.2615, 2.0599};
+    const std::vector<double> dValues{0.3117, 0.3257, 0.3499, 0.4205, 0.4645, 0.4768, 0.4996, 0.5150, 0.5441, 0.5642,
+                                      0.5947, 0.6307, .6866,  .7283,  .8185,  .8920,  1.0758, 1.2615, 2.0599};
 
     std::stringstream function;
     for (const auto &val : dValues) {
@@ -502,6 +505,42 @@ public:
     TS_ASSERT_THROWS_NOTHING(wsalg.setProperty("NumBanks", 1));
     TS_ASSERT_THROWS_NOTHING(wsalg.execute());
     TS_ASSERT(wsalg.isExecuted());
+
+    const std::string params = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                               "<parameter-file instrument=\"basic_rect\" valid-from=\"1900-01-31T23:59:59\">\n"
+                               "<component-link name=\"basic_rect\">\n"
+                               "<parameter name=\"IkedaCarpenterPV:Alpha0\" type=\"fitting\" >\n"
+                               "       <formula eq=\"1.6\" result-unit=\"TOF\"/>\n"
+                               "        <fixed />\n"
+                               "</parameter>\n"
+                               "<parameter name=\"IkedaCarpenterPV:Alpha1\" type=\"fitting\" >\n"
+                               "        <formula eq=\"1.5\" result-unit=\"TOF\"/>\n"
+                               "        <fixed />\n"
+                               "</parameter>\n"
+                               "<parameter name=\"IkedaCarpenterPV:Beta0\" type=\"fitting\" >\n"
+                               "        <formula eq=\"31.7927\" result-unit=\"TOF\"/>\n"
+                               "        <fixed />\n"
+                               "</parameter>\n"
+                               "<parameter name=\"IkedaCarpenterPV:Kappa\" type=\"fitting\" >\n"
+                               "        <formula eq=\"0.1\"/>\n"
+                               "        <fixed />\n"
+                               "</parameter>\n"
+                               "    <parameter name=\"IkedaCarpenterPV:SigmaSquared\" type=\"fitting\">\n"
+                               "        <formula eq=\"1.0\" unit=\"dSpacing\" result-unit=\"TOF^2\"/>\n"
+                               "    </parameter>\n"
+                               "    <parameter name=\"IkedaCarpenterPV:Gamma\" type=\"fitting\">\n"
+                               "        <formula eq=\"1.0\" unit=\"dSpacing\" result-unit=\"TOF\"/>\n"
+                               "    </parameter>\n"
+                               "</component-link>\n"
+                               "</parameter-file>";
+
+    LoadParameterFile paramalg;
+    TS_ASSERT_THROWS_NOTHING(paramalg.initialize());
+    TS_ASSERT(paramalg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(paramalg.setPropertyValue("Workspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(paramalg.setPropertyValue("ParameterXML", params));
+    TS_ASSERT_THROWS_NOTHING(paramalg.execute());
+    TS_ASSERT(paramalg.isExecuted());
 
     MatrixWorkspace_const_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws");
     TS_ASSERT(ws);
@@ -534,7 +573,7 @@ public:
     TS_ASSERT(calTable);
     Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
     std::vector<int> detIDs = col0->data();
-    TS_ASSERT_DELTA(calTable->cell<double>(0, 1), ref_difc, 1E-2);
+    TS_ASSERT_DELTA(calTable->cell<double>(0, 1), ref_difc, 1E-2 * ref_difc);
   }
 };
 
