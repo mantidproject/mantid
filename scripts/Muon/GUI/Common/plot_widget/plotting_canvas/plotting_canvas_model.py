@@ -107,6 +107,9 @@ class PlottingCanvasModel(object):
                                         normalised=self._normalised,
                                         errors=False, label=FIT_FUNCTION_GUESS_LABEL)
 
+    def _get_workspace_plot_axis(self, workspace_name):
+        return self._plot_model._get_workspace_plot_axis(workspace_name, self._axes_workspace_map)
+
     def create_axes_titles(self):
         if not self._is_tiled:
             return ''

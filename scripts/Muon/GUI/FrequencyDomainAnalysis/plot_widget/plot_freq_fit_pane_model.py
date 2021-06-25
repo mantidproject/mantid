@@ -30,6 +30,9 @@ class PlotFreqFitPaneModel(PlotFitPaneModel):
         else:
             return f"{group}{fit_label}{freq_label}"
 
+    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map):
+        return 0
+
     @staticmethod
     def _get_freq_lebel(workspace_name):
         label = ''

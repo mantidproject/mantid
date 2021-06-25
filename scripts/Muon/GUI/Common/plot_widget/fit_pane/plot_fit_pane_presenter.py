@@ -17,9 +17,14 @@ class PlotFitPanePresenter(BasePanePresenter):
         self.update_view()
         self._current_fit_info = None
         self._view.enable_tile_plotting_options()
+        self._view.on_plot_diff_checkbox_changed(self.plot_diff_changed)
+
         self.plot_selected_fit_observer = GenericObserverWithArgPassing(self.handle_plot_selected_fits)
         self.remove_plot_guess_observer = GenericObserver(self.handle_remove_plot_guess)
         self.update_plot_guess_observer = GenericObserver(self.handle_update_plot_guess)
+
+    def plot_diff_changed(self):
+        self.handle_plot_selected_fits(self._current_fit_info)
 
     def handle_plot_selected_fits(self, fit_information_list, autoscale=False):
         """Plots a list of selected fit workspaces (obtained from fit and seq fit tabs).
