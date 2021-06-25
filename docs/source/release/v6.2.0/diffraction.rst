@@ -16,6 +16,7 @@ New features
 
 Improvements
 ############
+- :ref:`ConvertDiffCal <algm-ConvertDiffCal-v1>` now optionally updates a previous calibration when converting offsets.
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` major interface update along with enabling the calibration of T0 and sample position.
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` minor interface update that allows fine control of bank rotation calibration.
 - :ref:`SNAPReduce <algm-SNAPReduce-v1>` permits saving selected property names and values to file, to aid autoreduction.
@@ -29,13 +30,7 @@ Engineering Diffraction
 -----------------------
 New features
 ############
-
-Improvements
-############
-
-Bugfixes
-########
-- The help button on the Engineering Diffraction interface points to the correct page, having been broken in the last release
+- Added serial fit capability to fitting tab in EngDiff UI - this fits all loaded workspaces with same initial parameters.
 
 Improvements
 ############
@@ -44,7 +39,8 @@ Improvements
 Bugfixes
 ########
 - Sequential fitting in the EngDiff UI now uses the output of the last successful fit (as opposed to the previous fit) as the initial parameters for the next fit.
-
+- An empty Engineering Diffraction interface is no longer saved if the user saves a project having previously had the interface open at some point in that session
+- The help button on the Engineering Diffraction interface points to the correct page, having been broken in the last release
 
 Single Crystal Diffraction
 --------------------------
