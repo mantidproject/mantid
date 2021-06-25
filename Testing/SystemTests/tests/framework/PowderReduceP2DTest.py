@@ -2,44 +2,44 @@ import systemtesting
 from mantid.simpleapi import PowderReduceP2D
 
 
-class PowderReduceP2DTest(sytemtesting.MantidSystemTest):
+class PowderReduceP2DTest(systemtesting.MantidSystemTest):
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)
         self.tolerance = 1e-6
-        setUp()
+        self.setUp()
 
     def setUp(self):
-        self._sample = _sampleEventData()
-        self._vana = _vanadiumEvent_Data()
-        self._empty = _emptyEventData()
-        self._calFile = _calFile()
-        self._twoThetaMin = _twoThetaMin()
-        self._twoThetaMax = _twoThetaMax()
-        self._wavelengthCenter = _wavelengthCenter()
-        self._lambdaMin = _lambdaMin()
-        self._lambdaMax = _lambdaMax()
-        self._dMin = _dMin()
-        self._dMax = _dMax()
-        self._dpMin = _dPMin()
-        self._dpMax = _dpMax()
-        self._dSpaceBinning = _dSpaceBinning()
-        self._dPerpendiclarBinning = _dPerpendicularBinning()
-        self._FWHM = _FWHM()
-        self._tolerance = _tolerance()
+        self.sample = self._sampleEventData()
+        self.vana = self._vanadiumEvent_Data()
+        self.empty = self._emptyEventData()
+        self.calFile = self._calFile()
+        self.twoThetaMin = self._twoThetaMin()
+        self.twoThetaMax = self._twoThetaMax()
+        self.wavelengthCenter = self._wavelengthCenter()
+        self.lambdaMin = self._lambdaMin()
+        self.lambdaMax = self._lambdaMax()
+        self.dMin = self._dMin()
+        self.dMax = self._dMax()
+        self.dpMin = self._dPMin()
+        self.dpMax = self._dpMax()
+        self.dSpaceBinning = self._dSpaceBinning()
+        self.dPerpendiclarBinning = self._dPerpendicularBinning()
+        self.FWHM = self._FWHM()
+        self.tolerance = self._tolerance()
 
         self._reference = _loadReference()
         self._outputFile = _outputFile()
 
     def runTest(self):
-        powder_reduce_P2D = PowderReduceP2D(SampleData=self._sample, OutputFile=self._outputFile, DoIntensityCorrection = True,
-                                            VanaData = self._vana, DoBackgroundCorrection = True, EmptyData = self._empty,
-                                            DoEdgebinning = False, CalFile = self._calFile,
-                                            TwoThetaMin = self._twoThetaMin, TwoThetaMax = self._twoThetaMax,
-                                            WavelengthCenter = self._wavelengthCenter, LambdaMin = self._lambdaMin,
-                                            LambdaMax = self._lambdaMax, DMin = self._dMin, DMax = self._dMax, DpMin = self._dpMin,
-                                            DpMax = self._dpMax, dSpaceBinning = self._dSpaceBinning,
-                                            dPerpendicularBinning = self._dPerpendicularBining, FWHM = self._FWHM,
-                                            Tolerance = self._tolerance)
+        powder_reduce_P2D = PowderReduceP2D(SampleData=self.sample, OutputFile=self.outputFile, DoIntensityCorrection = True,
+                                            VanaData = self.vana, DoBackgroundCorrection = True, EmptyData = self.empty,
+                                            DoEdgebinning = False, CalFile = self.calFile,
+                                            TwoThetaMin = self.twoThetaMin, TwoThetaMax = self.twoThetaMax,
+                                            WavelengthCenter = self.wavelengthCenter, LambdaMin = self.lambdaMin,
+                                            LambdaMax = self.lambdaMax, DMin = self.dMin, DMax = self.dMax, DpMin = self.dpMin,
+                                            DpMax = self.dpMax, dSpaceBinning = self.dSpaceBinning,
+                                            dPerpendicularBinning = self.dPerpendicularBining, FWHM = self.FWHM,
+                                            Tolerance = self.tolerance)
         powder_reduce_P2D.powder_reduce_P2D()
 
     def validateMethod(self):
@@ -62,6 +62,7 @@ class PowderReduceP2DTest(sytemtesting.MantidSystemTest):
 
     def _calFile(self):
         """path to calibration File used for testing the algorithm"""
+        return 'PG3_FERNS_d4832_2011_08_24.cal'
 
     def _twoThetaMin(self):
         """2theta min used for testing the algorithm"""

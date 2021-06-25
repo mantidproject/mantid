@@ -520,6 +520,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         getLoadParameters()
         getFindDetectorsParParamters()
         getFilterBadPulsesParameters()
+        getRemovePromptPulseParameters()
         getLoadDiffCalParameters()
         getMaskDetectorsParameters()
         getAlignDetectorsParameters()
