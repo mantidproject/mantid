@@ -20,7 +20,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         self.lambdaMax = self._lambdaMax()
         self.dMin = self._dMin()
         self.dMax = self._dMax()
-        self.dpMin = self._dPMin()
+        self.dpMin = self._dpMin()
         self.dpMax = self._dpMax()
         self.dSpaceBinning = self._dSpaceBinning()
         self.dPerpendiclarBinning = self._dPerpendicularBinning()
