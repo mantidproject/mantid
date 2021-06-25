@@ -26,6 +26,7 @@
 
 #include "MantidKernel/ANN/ANNperf.h" // performance evaluation
 #include "MantidKernel/ANN/ANNx.h"    // all ANN includes
+#include "MantidKernel/Logger.h"
 
 //----------------------------------------------------------------------
 //	Basic types
@@ -115,6 +116,18 @@ public:
       // if the values are v close together base the sort order on the info
       // This avoids any differences in the sort order across platforms due to different
       // floating point handling of double
+      Mantid::Kernel::Logger g_log("pr_queue_k.h");
+      if ((inf == 19140) || (inf == 19142)) {
+        g_log.error() << "kv=" << setprecision(17) << kv << std::endl;
+        g_log.error() << "inf=" << inf << std::endl;
+        g_log.error() << setprecision(17) << std::abs(mk[i - 1].key - kv) << std::endl;
+        g_log.error() << setprecision(17) << 10 * std::numeric_limits<double>::epsilon() * (mk[i - 1].key + kv)
+                      << std::endl;
+        bool testvar =
+            (std::abs(mk[i - 1].key - kv) < (10 * std::numeric_limits<double>::epsilon() * (mk[i - 1].key + kv)));
+        g_log.error() << "testvar=" << testvar << std::endl;
+        g_log.error() << std::endl;
+      }
       if ((std::abs(mk[i - 1].key - kv) < (10 * std::numeric_limits<double>::epsilon() * (mk[i - 1].key + kv))) &&
           (mk[i - 1].info > inf))
         mk[i] = mk[i - 1];
