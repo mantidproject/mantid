@@ -10,7 +10,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
 
     def setUp(self):
         self.sample = self._sampleEventData()
-        self.vana = self._vanadiumEvent_Data()
+        self.vana = self._vanadiumEventData()
         self.empty = self._emptyEventData()
         self.calFile = self._calFile()
         self.twoThetaMin = self._twoThetaMin()
@@ -27,8 +27,8 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         self.FWHM = self._FWHM()
         self.tolerance = self._tolerance()
 
-        self._reference = _loadReference()
-        self._outputFile = _outputFile()
+        self.reference = _loadReference()
+        self.outputFile = _outputFile()
 
     def runTest(self):
         powder_reduce_P2D = PowderReduceP2D(SampleData=self.sample, OutputFile=self.outputFile, DoIntensityCorrection = True,
@@ -46,7 +46,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         return 'ValidateAscii'
 
     def validate(self):
-        return 'PowderReduceP2D_Test.p2d', 'PowderReduceP2D_reference.p2d'
+        return self.outputFile + '.p2d', self.reference
 
     def _sampleEventData(self):
         """path to sample event data used for testing the algorithm"""
@@ -117,7 +117,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         return 4
 
     def _loadReference(self):
-        return "Path/to/reference/file.p2d"
+        return 'PowderReduceP2D_reference.p2d'
 
     def _outputFile(self):
         return 'PowderReduceP2D_Test'
