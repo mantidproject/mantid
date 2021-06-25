@@ -26,7 +26,7 @@ class CorrectionsModelTest(unittest.TestCase):
         self.runs = [[84447], [84448], [84449]]
         self.coadd_runs = [[84447, 84448, 84449]]
 
-    def _setup_for_non_coadd_mode(self):
+    def _setup_for_multiple_runs(self):
         self.mock_current_runs = mock.PropertyMock(return_value=self.runs)
         type(self.model._data_context).current_runs = self.mock_current_runs
 
@@ -39,15 +39,15 @@ class CorrectionsModelTest(unittest.TestCase):
         AnalysisDataService.clear()
 
     def test_that_number_of_run_strings_returns_the_expected_number_of_runs_when_not_in_coadd_mode(self):
-        self._setup_for_non_coadd_mode()
-        self.assertEqual(self.model.number_of_run_strings, 3)
+        self._setup_for_multiple_runs()
+        self.assertEqual(self.model.number_of_run_strings, len(self.runs))
 
     def test_that_number_of_run_strings_returns_the_expected_number_of_runs_when_in_coadd_mode(self):
         self._setup_for_coadd_mode()
-        self.assertEqual(self.model.number_of_run_strings, 1)
+        self.assertEqual(self.model.number_of_run_strings, len(self.coadd_runs))
 
     def test_that_run_number_strings_returns_the_expected_run_number_strings_when_not_in_coadd_mode(self):
-        self._setup_for_non_coadd_mode()
+        self._setup_for_multiple_runs()
         self.assertEqual(self.model.run_number_strings(), ["84447", "84448", "84449"])
 
     def test_that_run_number_strings_returns_the_expected_run_number_strings_when_in_coadd_mode(self):
@@ -58,7 +58,7 @@ class CorrectionsModelTest(unittest.TestCase):
         self.assertEqual(self.model.current_runs(), None)
 
     def test_that_current_runs_returns_the_runs_list_corresponding_to_the_currently_selected_string_in_non_coadd_mode(self):
-        self._setup_for_non_coadd_mode()
+        self._setup_for_multiple_runs()
 
         self.model.set_current_run_string("84448")
 
@@ -103,19 +103,13 @@ class CorrectionsModelTest(unittest.TestCase):
         self.assertEqual(self.model._corrections_context.dead_time_table_name, None)
         self.assertTrue(self.model.is_dead_time_source_from_none())
 
-    def test_that_dead_times_average_will_return_the_expected_dead_time_average(self):
+    def test_that_dead_times_average_will_return_the_expected_dead_time_average_and_range(self):
         dead_time_table_name = "dead_time_table"
         LoadMuonNexus(Filename="MUSR00022725.nxs", OutputWorkspace="output_ws", DeadTimeTable=dead_time_table_name)
 
         self.model.set_dead_time_source_to_from_ads(dead_time_table_name)
 
         self.assertAlmostEqual(self.model.dead_times_average(), 0.010244, 6)
-
-    def test_that_dead_times_range_will_return_the_expected_dead_time_range(self):
-        dead_time_table_name = "dead_time_table"
-        LoadMuonNexus(Filename="MUSR00022725.nxs", OutputWorkspace="output_ws", DeadTimeTable=dead_time_table_name)
-
-        self.model.set_dead_time_source_to_from_ads(dead_time_table_name)
 
         dead_time_range = self.model.dead_times_range()
         self.assertAlmostEqual(dead_time_range[0], 0.000035, 6)
@@ -136,7 +130,7 @@ class CorrectionsModelTest(unittest.TestCase):
         LoadMuonNexus(Filename="MUSR00022725.nxs", OutputWorkspace="output_ws", DeadTimeTable=dead_time_table_name)
 
         self.assertEqual(self.model.validate_selected_dead_time_workspace(dead_time_table_name),
-                         "The number of histograms does not match the number of rows in dead time table (62 != 64).")
+                         "The number of histograms (62) does not match the number of rows (64) in dead time table.")
 
     def test_that_validate_selected_dead_time_workspace_will_return_an_error_when_the_workspace_is_not_in_the_ADS(self):
         dead_time_table_name = "dead_time_table"

@@ -130,6 +130,6 @@ class CorrectionsModel:
         number_of_rows = table.rowCount()
         number_of_histograms = self._data_context.current_workspace.getNumberHistograms()
         if number_of_rows != number_of_histograms:
-            return f"The number of histograms does not match the number of rows in dead time table " \
-                   f"({number_of_histograms} != {number_of_rows})."
+            return f"The number of histograms ({number_of_histograms}) does not match the number of rows " \
+                   f"({number_of_rows}) in dead time table."
         return ""

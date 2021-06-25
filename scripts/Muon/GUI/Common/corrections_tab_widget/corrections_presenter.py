@@ -83,20 +83,16 @@ class CorrectionsPresenter(QObject):
         """Handles when the location where the dead time should be retrieved from changes."""
         if self.view.is_dead_time_from_data_file_selected():
             self._handle_dead_time_from_data_file_selected()
-            self.view.set_dead_time_workspace_selector_visible(False)
-            self.view.set_dead_time_other_file_visible(False)
+            self._set_dead_time_widgets_visible(False, False)
         elif self.view.is_dead_time_from_workspace_selected():
             self._handle_dead_time_from_workspace_selected()
-            self.view.set_dead_time_workspace_selector_visible(True)
-            self.view.set_dead_time_other_file_visible(False)
+            self._set_dead_time_widgets_visible(True, False)
         elif self.view.is_dead_time_from_other_file_selected():
             self._handle_dead_time_from_none_selected()
-            self.view.set_dead_time_workspace_selector_visible(False)
-            self.view.set_dead_time_other_file_visible(True)
+            self._set_dead_time_widgets_visible(False, True)
         else:
             self._handle_dead_time_from_none_selected()
-            self.view.set_dead_time_workspace_selector_visible(False)
-            self.view.set_dead_time_other_file_visible(False)
+            self._set_dead_time_widgets_visible(False, False)
 
     def _handle_dead_time_from_data_file_selected(self) -> None:
         """Handles when the dead time from data file is initially selected."""
@@ -168,6 +164,11 @@ class CorrectionsPresenter(QObject):
         """Sets the dead time source to be none and notifies the GUI to recalculate the corrections."""
         self.model.set_dead_time_source_to_none()
         self._notify_perform_dead_time_corrections()
+
+    def _set_dead_time_widgets_visible(self, workspace_mode_visible: bool, other_file_mode_visible: bool) -> None:
+        """Sets which dead time widgets are visible."""
+        self.view.set_dead_time_workspace_selector_visible(workspace_mode_visible)
+        self.view.set_dead_time_other_file_visible(other_file_mode_visible)
 
     def _load_file_containing_dead_time(self, filename: str) -> str:
         """Attempts to load a Nexus cycle file containing a dead time table workspace."""
