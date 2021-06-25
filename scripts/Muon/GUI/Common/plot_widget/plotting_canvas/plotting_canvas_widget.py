@@ -39,7 +39,6 @@ class PlottingCanvasWidget(object):
             self._presenter.set_autoscale(auto)
             self._presenter.set_plot_y_range(y_range)
         self._presenter.set_errors(errors)
-        #self._presenter.update_range()
 
     @property
     def presenter(self):

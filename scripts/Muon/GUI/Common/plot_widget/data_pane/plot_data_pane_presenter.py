@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_presenter import BasePanePresenter
-from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing#, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
 
 class PlotDataPanePresenter(BasePanePresenter):

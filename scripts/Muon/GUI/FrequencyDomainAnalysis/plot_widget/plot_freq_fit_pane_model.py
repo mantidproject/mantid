@@ -49,7 +49,7 @@ class PlotFreqFitPaneModel(BasePaneModel):
         if FFT_STR in workspace_name:
             label = ''.join([';', get_fft_component_from_workspace_name(workspace_name)])
         elif MAXENT_STR in workspace_name:
-            label = ''.join([';', MAXENT_STR])
+            label = f';{MAXENT_STR}'
         return label
 
     @staticmethod
@@ -61,7 +61,7 @@ class PlotFreqFitPaneModel(BasePaneModel):
                 workspace_type = 'Calc'
             elif index == 2:
                 workspace_type = 'Diff'
-            label = ''.join([';', fit_function_name, ';', workspace_type])
+            label = f';{fit_function_name};{workspace_type}'
         return label
 
     def _is_guess_workspace(self, workspace_name):

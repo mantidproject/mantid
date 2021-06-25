@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_presenter import BasePanePresenter
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing#, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.ADSHandler.workspace_naming import remove_rebin_from_name, add_rebin_to_name
 
 
@@ -32,7 +32,6 @@ class PlotFitPanePresenter(BasePanePresenter):
         if fit_information_list:
             self._current_fit_info = fit_information_list
             for fit_information in fit_information_list:
-                print("moo", fit_information)
                 fit = fit_information.fit
                 fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit,with_diff)
                 workspace_list += self.match_raw_selection(fit_information.input_workspaces,raw) + fit_workspaces

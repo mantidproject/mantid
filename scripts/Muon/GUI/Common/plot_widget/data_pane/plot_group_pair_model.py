@@ -50,6 +50,6 @@ class PlotGroupPairModel(BasePaneModel):
     @staticmethod
     def _get_rebin_label(workspace_name):
         if REBIN_STR in workspace_name:
-            return ''.join([';', REBIN_STR])
+            return ';' + REBIN_STR
         else:
             return ''
