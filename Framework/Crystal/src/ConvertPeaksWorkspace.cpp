@@ -41,7 +41,7 @@ void ConvertPeaksWorkspace::init() {
                   "Workspace of Indexed Peaks");
 
   // donor workspace if going from lean to regular
-  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("InstrumentWorkpace", "", Direction::Input,
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("InstrumentWorkspace", "", Direction::Input,
                                                                        PropertyMode::Optional),
                   "Donor PeaksWorkspace with instrument for conversion");
 
@@ -64,8 +64,8 @@ std::map<std::string, std::string> ConvertPeaksWorkspace::validateInputs() {
 
   // case I: missing instrument when converting to PeaksWorkspace
   if (lpws && !pws) {
-    if (getPointerToProperty("InstrumentWorkpace")->isDefault()) {
-      issues["InstrumentWorkpace"] = "Need a PeaksWorkspace with proper instrument attached to assist conversion.";
+    if (getPointerToProperty("InstrumentWorkspace")->isDefault()) {
+      issues["InstrumentWorkspace"] = "Need a PeaksWorkspace with proper instrument attached to assist conversion.";
     }
   }
 
@@ -89,7 +89,7 @@ void ConvertPeaksWorkspace::exec() {
     setProperty("OutputWorkspace", outpws);
   } else {
     g_log.notice() << "LeanElasticPeaksWorkspace -> PeaksWorkspace\n";
-    IPeaksWorkspace_sptr ws = getProperty("InstrumentWorkpace");
+    IPeaksWorkspace_sptr ws = getProperty("InstrumentWorkspace");
     IPeaksWorkspace_sptr outpws = makePeaksWorkspace(ipws, ws);
     setProperty("OutputWorkspace", outpws);
   }
