@@ -65,7 +65,7 @@ private:
 
   /// LeanElasticPeaksWorkspace -> PeaksWorkspace
   Mantid::API::IPeaksWorkspace_sptr makePeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr ipws,
-                                                       Mantid::API::IPeaksWorkspace_sptr ws);
+                                                       Mantid::API::Workspace_sptr ws);
 };
 
 } // namespace Crystal

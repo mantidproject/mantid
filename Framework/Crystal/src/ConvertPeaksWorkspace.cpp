@@ -41,8 +41,8 @@ void ConvertPeaksWorkspace::init() {
                   "Workspace of Indexed Peaks");
 
   // donor workspace if going from lean to regular
-  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("InstrumentWorkspace", "", Direction::Input,
-                                                                       PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InstrumentWorkspace", "", Direction::Input,
+                                                                 PropertyMode::Optional),
                   "Donor PeaksWorkspace with instrument for conversion");
 
   // output
@@ -89,7 +89,7 @@ void ConvertPeaksWorkspace::exec() {
     setProperty("OutputWorkspace", outpws);
   } else {
     g_log.notice() << "LeanElasticPeaksWorkspace -> PeaksWorkspace\n";
-    IPeaksWorkspace_sptr ws = getProperty("InstrumentWorkspace");
+    Workspace_sptr ws = getProperty("InstrumentWorkspace");
     IPeaksWorkspace_sptr outpws = makePeaksWorkspace(ipws, ws);
     setProperty("OutputWorkspace", outpws);
   }
@@ -129,14 +129,15 @@ IPeaksWorkspace_sptr ConvertPeaksWorkspace::makeLeanElasticPeaksWorkspace(IPeaks
  * @param ws donor PeaksWorkspace to provide instrument and ExperimentInfo
  * @return IPeaksWorkspace_sptr
  */
-IPeaksWorkspace_sptr ConvertPeaksWorkspace::makePeaksWorkspace(IPeaksWorkspace_sptr ipws, IPeaksWorkspace_sptr ws) {
+IPeaksWorkspace_sptr ConvertPeaksWorkspace::makePeaksWorkspace(IPeaksWorkspace_sptr ipws, Workspace_sptr ws) {
   // prep
   LeanElasticPeaksWorkspace_sptr lpws = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(ipws);
   PeaksWorkspace_sptr pws = std::make_shared<PeaksWorkspace>();
-  Instrument_const_sptr inst = ws->getInstrument();
+  // Instrument_const_sptr inst = ws->getInstrument();
 
   ExperimentInfo_sptr inputExperimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(ws);
   pws->copyExperimentInfoFrom(inputExperimentInfo.get());
+  Instrument_const_sptr inst = inputExperimentInfo->getInstrument();
 
   // up casting LeanElasticPeaks to Peaks
   for (int i = 0; i < lpws->getNumberPeaks(); ++i) {
