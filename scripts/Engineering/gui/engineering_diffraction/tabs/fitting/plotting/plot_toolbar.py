@@ -4,14 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from matplotlib.backends.qt_compat import is_pyqt5
 from mantidqt.icons import get_icon
 from qtpy import QtWidgets, QtCore
-
-if is_pyqt5():
-    from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-else:
-    from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 
 
 class FittingPlotToolbar(NavigationToolbar2QT):

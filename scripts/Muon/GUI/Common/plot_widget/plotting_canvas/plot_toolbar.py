@@ -4,17 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from matplotlib.backends.qt_compat import is_pyqt5
 from mantidqt.icons import get_icon
 from qtpy import QtCore, QtWidgets
 from mantidqt.utils.observer_pattern import GenericObservable
-
-if is_pyqt5():
-    from matplotlib.backends.backend_qt5agg import (
-        NavigationToolbar2QT as NavigationToolbar)
-else:
-    from matplotlib.backends.backend_qt4agg import (
-        NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 
 
 class PlotToolbar(NavigationToolbar):
