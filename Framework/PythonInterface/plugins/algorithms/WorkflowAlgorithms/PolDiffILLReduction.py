@@ -331,11 +331,14 @@ class PolDiffILLReduction(PythonAlgorithm):
         background_ws = 'background_ws'
         tmp_names = [unit_ws, background_ws]
         nMeasurements = self._data_structure_helper()
-        singleEmptyPerPOL = mtd[empty_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
+        singleEmpty = mtd[empty_ws].getNumberOfEntries() == 1
+        singleEmptyPerPOL = mtd[empty_ws].getNumberOfEntries() % nMeasurements == 0
         if cadmium_present:
             singleCadmiumPerPOL = mtd[empty_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
         for entry_no, entry in enumerate(mtd[ws]):
-            if singleEmptyPerPOL:
+            if singleEmpty:
+                empty_entry = mtd[empty_ws][0].name()
+            elif singleEmptyPerPOL:
                 empty_entry = mtd[empty_ws][entry_no % nMeasurements].name()
             else:
                 empty_entry = mtd[empty_ws][entry_no].name()
