@@ -305,7 +305,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.canvas.draw_idle()
 
         if self.toolbar:
-            self.toolbar.set_buttons_visiblity(self.canvas.figure)
+            self.toolbar.set_buttons_visibility(self.canvas.figure)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler

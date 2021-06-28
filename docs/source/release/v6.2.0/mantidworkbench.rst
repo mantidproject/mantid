@@ -16,6 +16,7 @@ New and Improved
 Bugfixes
 --------
 
+- "Grid" checkbox in "Edit axis" dialog, and "Grids on/off" toolbar button will now have the correct checked state when running a plot script with major grid lines.
 - Scroll bars added to about dialog if screen resolution is too low.
 - Fixed missing 'on top' windowing behaviour for the matrix and table workspace data displays.
 - Sliceviewer now doesn't normalise basis vectors for HKL data such that Bragg peaks appear at integer HKL for cuts along e.g. HH0
