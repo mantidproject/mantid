@@ -512,7 +512,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         is_single_crystal = self.getPropertyValue('MeasurementTechnique') == 'SingleCrystal'
-        if is_single_crystal and normalisation_method == 'Vanadium':
+        if is_single_crystal and normalisation_method == 'Vanadium' \
+                and mtd[sample_ws][0].getNumberHistograms() == 2 * mtd[det_efficiency_ws][0].getNumberHistograms():
             # the length of the spectrum axis is twice the size of Vanadium, as data comes from two omega scans
             AppendSpectra(InputWorkspace1=det_efficiency_ws, InputWorkspace2=det_efficiency_ws,
                           OutputWorkspace=det_efficiency_ws)
