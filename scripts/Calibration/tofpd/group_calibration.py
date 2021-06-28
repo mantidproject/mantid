@@ -1,32 +1,38 @@
 import numpy as np
-from mantid.simpleapi import (ConvertUnits, ExtractSpectra, CloneWorkspace, Rebin,
-                              ExtractUnmaskedSpectra, CrossCorrelate, GetDetectorOffsets,
-                              ConvertDiffCal, mtd, ApplyDiffCal, DiffractionFocussing, PDCalibration)
+from mantid.simpleapi import (ConvertUnits, ExtractSpectra,
+                              CloneWorkspace, Rebin,
+                              ExtractUnmaskedSpectra, CrossCorrelate,
+                              GetDetectorOffsets, ConvertDiffCal, mtd,
+                              ApplyDiffCal, DiffractionFocussing,
+                              PDCalibration)
 
 
 def cc_calibrate_groups(data_ws,
                         group_ws,
                         output_basename,
                         previous_calibration=None,
-                        Step = 0.001,
+                        Step=0.001,
                         DReference=1.2615,
                         Xmin=1.22,
-                        Xmax=1.30):
+                        Xmax=1.30,
+                        MaxDSpaceShift=None):
     if previous_calibration:
         ApplyDiffCal(data_ws, CalibrationWorkspace=previous_calibration)
 
     data_d = ConvertUnits(data_ws, Target='dSpacing')
 
-    # skip group 0 because this is eveything that wasn't included in a group
     group_list = np.unique(group_ws.extractY())
 
     for group in group_list:
         indexes = np.where(group_ws.extractY().flatten() == group)[0]
         ExtractSpectra(data_d, WorkspaceIndexList=indexes, OutputWorkspace=f'_tmp_group_{group}')
         ExtractUnmaskedSpectra(f'_tmp_group_{group}', OutputWorkspace=f'_tmp_group_{group}')
+        if mtd[f'_tmp_group_{group}'].getNumberHistograms() < 2:
+            continue
         Rebin(f'_tmp_group_{group}', Params=f'{Xmin},{Step},{Xmax}', OutputWorkspace=f'_tmp_group_{group}')
         CrossCorrelate(f'_tmp_group_{group}',
                        Xmin=Xmin, XMax=Xmax,
+                       MaxDSpaceShift=MaxDSpaceShift,
                        WorkspaceIndexMin=0,
                        WorkspaceIndexMax=mtd[f'_tmp_group_{group}'].getNumberHistograms()-1,
                        OutputWorkspace=f'_tmp_group_{group}_cc')
@@ -55,7 +61,7 @@ def pdcalibration_groups(data_ws,
                                         0.5947,0.6307,0.6866,0.7283,0.8185,
                                         0.8920,1.0758,1.2615,2.0599), # diamond
                          TofBinning=(300,-.001,16666.7),
-                         PeakFunction='Gaussian',
+                         PeakFunction='IkedaCarpenterPV',
                          PeakWindow=0.1,
                          PeakWidthPercent=None):
 
@@ -99,3 +105,26 @@ def pdcalibration_groups(data_ws,
                                       / grouped_det_to_difc[detid])
 
     return mtd[f'{output_basename}_cc_pd_diffcal']
+
+
+def do_group_calibration(ws,
+                         groups,
+                         previous_calibration=None,
+                         output_workspace_basename = "_tmp_group_calibration",
+                         cc_kwargs={},
+                         pdcal_kwargs={}):
+
+    cc_diffcal = cc_calibrate_groups(ws,
+                                     groups,
+                                     output_workspace_basename,
+                                     previous_calibration,
+                                     **cc_kwargs)
+
+    diffcal = pdcalibration_groups(ws,
+                                   groups,
+                                   cc_diffcal,
+                                   output_workspace_basename,
+                                   previous_calibration,
+                                   **pdcal_kwargs)
+
+    return diffcal

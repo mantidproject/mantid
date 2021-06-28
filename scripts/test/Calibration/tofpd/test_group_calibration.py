@@ -58,13 +58,11 @@ class TestGroupCalibration(unittest.TestCase):
 
         output_workspace_basename = 'test_from_eng'
 
-        # same for all spectra in group
         starting_difc = [ws.spectrumInfo().difcUncalibrated(i) for i in range(ws.getNumberHistograms())]
 
         cc_diffcal = group_calibration.cc_calibrate_groups(ws,
                                                            groups,
                                                            output_workspace_basename,
-                                                           Step=0.001,
                                                            DReference=2.0,
                                                            Xmin=1.75,
                                                            Xmax=2.25)
@@ -82,6 +80,7 @@ class TestGroupCalibration(unittest.TestCase):
                                                          cc_diffcal,
                                                          output_workspace_basename,
                                                          PeakPositions = [1.0, 2.0, 4.0],
+                                                         PeakFunction='Gaussian',
                                                          PeakWindow=0.4)
 
         assert_allclose(diffcal.column('difc'),
@@ -100,7 +99,6 @@ class TestGroupCalibration(unittest.TestCase):
 
         output_workspace_basename = 'test_from_eng_prev_cal'
 
-        # same for all spectra in group
         starting_difc = [ws.spectrumInfo().difcUncalibrated(i) for i in range(ws.getNumberHistograms())]
 
         previous_diffcal = CreateEmptyTableWorkspace()
@@ -123,7 +121,6 @@ class TestGroupCalibration(unittest.TestCase):
                                                            groups,
                                                            output_workspace_basename,
                                                            previous_calibration=previous_diffcal,
-                                                           Step=0.001,
                                                            DReference=2.0,
                                                            Xmin=1.75,
                                                            Xmax=2.25)
@@ -144,7 +141,55 @@ class TestGroupCalibration(unittest.TestCase):
                                                          output_workspace_basename,
                                                          previous_calibration=previous_diffcal,
                                                          PeakPositions = [1.0, 2.0, 4.0],
+                                                         PeakFunction='Gaussian',
                                                          PeakWindow=0.4)
+
+        assert_allclose(diffcal.column('difc'),
+                        [starting_difc[0],
+                         starting_difc[1]/0.95,
+                         starting_difc[2]/1.05,
+                         starting_difc[3]*1.01,
+                         starting_difc[4]/0.95,
+                         starting_difc[5]/(0.95*0.98),
+                         starting_difc[6]/(0.95*1.02),
+                         starting_difc[7]*1.01], rtol=0.005)
+
+    def test_di_group_calibration(self):
+        ws, groups = create_test_ws_and_group()
+
+        starting_difc = [ws.spectrumInfo().difcUncalibrated(i) for i in range(ws.getNumberHistograms())]
+
+        previous_diffcal = CreateEmptyTableWorkspace()
+
+        previous_diffcal.addColumn("int", "detid")
+        previous_diffcal.addColumn("double", "difc")
+        previous_diffcal.addColumn("double", "difa")
+        previous_diffcal.addColumn("double", "tzero")
+
+        previous_diffcal.addRow([1, starting_difc[0]*1.01, 0, 0])
+        previous_diffcal.addRow([2, starting_difc[1]*1.01, 0, 0])
+        previous_diffcal.addRow([3, starting_difc[2]*1.01, 0, 0])
+        previous_diffcal.addRow([4, starting_difc[3]*1.01, 0, 0])
+        previous_diffcal.addRow([5, starting_difc[4]*1.01, 0, 0])
+        previous_diffcal.addRow([6, starting_difc[5]*1.01, 0, 0])
+        previous_diffcal.addRow([7, starting_difc[6]*1.01, 0, 0])
+        previous_diffcal.addRow([8, starting_difc[7]*1.01, 0, 0])
+
+        diffcal = group_calibration.do_group_calibration(ws,
+                                                         groups,
+                                                         previous_calibration=previous_diffcal,
+                                                         output_workspace_basename = "group_calibration",
+                                                         cc_kwargs={
+                                                             "Step": 0.001,
+                                                             "DReference": 2.0,
+                                                             "Xmin": 1.75,
+                                                             "Xmax": 2.25},
+                                                         pdcal_kwargs={
+                                                             "PeakPositions": [1.0, 2.0, 4.0],
+                                                             "TofBinning": [300,-.001,16666.7],
+                                                             "PeakFunction": 'Gaussian',
+                                                             "PeakWindow": 0.4,
+                                                             "PeakWidthPercent": None})
 
         assert_allclose(diffcal.column('difc'),
                         [starting_difc[0],
