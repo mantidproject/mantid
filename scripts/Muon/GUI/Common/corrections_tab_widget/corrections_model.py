@@ -8,10 +8,6 @@ from Muon.GUI.Common.contexts.corrections_context import CorrectionsContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
-DEAD_TIME_FROM_FILE = "FromFile"
-DEAD_TIME_FROM_ADS = "FromADS"
-DEAD_TIME_TABLE_KEY = "dead-time"
-
 
 class CorrectionsModel:
     """
