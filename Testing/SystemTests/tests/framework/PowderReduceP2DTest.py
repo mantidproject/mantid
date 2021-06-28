@@ -37,7 +37,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         self.outputFile = self._outputFile()
 
     def runTest(self):
-        powder_reduce_P2D = PowderReduceP2D(SampleData=self.sample, OutputFile=self.outputFile, DoIntensityCorrection = True,
+        PowderReduceP2D(SampleData=self.sample, OutputFile=self.outputFile, DoIntensityCorrection = True,
                                             VanaData = self.vana, DoBackgroundCorrection = True, EmptyData = self.empty,
                                             DoEdgebinning = False, CalFile = self.calFile,
                                             TwoThetaMin = self.twoThetaMin, TwoThetaMax = self.twoThetaMax,
@@ -46,7 +46,6 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
                                             DpMax = self.dpMax, dSpaceBinning = self.dSpaceBinning,
                                             dPerpendicularBinning = self.dPerpendicularBinning, FWHM = self.FWHM,
                                             Tolerance = self.tolerance)
-        powder_reduce_P2D.powder_reduce_P2D()
 
     def validateMethod(self):
         return 'ValidateAscii'
