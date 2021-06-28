@@ -5,6 +5,15 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
+Muon Analysis 2
+---------------------------------------------
+
+Improvements
+############
+
+- When running the Dynamic Kubo Toyabe fit function you should now be able to see the BinWidth to 3 decimal places.
+
+
 Muon Analysis 2 and Frequency Domain Analysis
 ---------------------------------------------
 
