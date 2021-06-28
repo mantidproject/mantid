@@ -274,7 +274,14 @@ class SPowderSemiEmpiricalCalculator:
         """
         if self.progress_reporter:
             self.progress_reporter.setNumSteps(len(self._instrument.get_angles())
-                                               * (self._num_k * self._num_atoms + 1))
+                                               * (self._num_k * self._num_atoms + 1)
+                                               # Autoconvolution message if appropriate
+                                               + (1 if self._autoconvolution else 0)
+                                               # Isotropic DW message if appropriate
+                                               + (1 if (isotropic_fundamentals
+                                                        or (self._quantum_order_num > 1)
+                                                        or self._autoconvolution)
+                                                  else 0))
 
         sdata_by_angle = []
         for angle in self._instrument.get_angles():
@@ -336,13 +343,22 @@ class SPowderSemiEmpiricalCalculator:
                                                         sdata=sdata, min_order=min_order)
 
         if autoconvolution:
+            max_dw_order = abins.parameters.autoconvolution['max_order']
+            self._report_progress(f"Finished calculating SData to order {self._quantum_order_num} by "
+                                  f"analytic powder-averaging. "
+                                  f"Adding autoconvolution data up to order {max_dw_order}.",
+                                  reporter=self.progress_reporter)
             sdata.add_autoconvolution_spectra()
             sdata = sdata.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
-            max_dw_order = abins.parameters.autoconvolution['max_order']
+
         else:
+            self._report_progress(f"Finished calculating SData to order {self._quantum_order_num} by analytic powder-averaging.",
+                                  reporter=self.progress_reporter)
             max_dw_order = self._quantum_order_num
 
         if isotropic_fundamentals or (self._quantum_order_num > 1) or autoconvolution:
+            self._report_progress(f"Applying isotropic Debye-Waller factor to orders {min_order} and above.",
+                                  reporter=self.progress_reporter)
             iso_dw = self.calculate_isotropic_dw(angle=angle)
             sdata.apply_dw(iso_dw, min_order=min_order, max_order=max_dw_order)
 
@@ -479,7 +495,7 @@ class SPowderSemiEmpiricalCalculator:
         assert min_order in (1, 2)  # Cannot start higher than 2; need information about combinations
 
         for atom_index in range(self._num_atoms):
-            self._report_progress(msg=f'Calculating S for atom {atom_index}, k-point {k_index}',
+            self._report_progress(msg=f'Calculating S for atom {atom_index}, k-point {k_index}, {angle} degrees',
                                   reporter=self.progress_reporter)
             self._calculate_s_powder_one_atom(atom_index=atom_index, k_index=k_index, angle=angle,
                                               sdata=sdata, bins=bins, min_order=min_order)
