@@ -9,7 +9,8 @@
 Description
 -----------
 
-This algorithm provides bi-directional conversion between regular PeaksWorkspace and LeanElasticPeaksWorkspace.
+This algorithm provides bi-directional conversion between regular :ref:`PeaksWorkspace <PeaksWorkspace>`
+and :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
 
 When casting a PeaksWorkspace into a LeanElasticPeaksWorkspace, information related to detector
 (DetID, BankName, Row, Col) is discarded.
