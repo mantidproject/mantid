@@ -11,7 +11,7 @@ from mantid.simpleapi import PowderReduceP2D
 class PowderReduceP2DTest(systemtesting.MantidSystemTest):
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)
-        self.tolerance = 1e-2
+        self.tolerance = 1e-6
         self.setUp()
 
     def setUp(self):
