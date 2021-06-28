@@ -34,7 +34,5 @@ class FittingTabWidget(object):
             self.fitting_tab_model = TFAsymmetryFittingModel(context, context.fitting_context)
             self.fitting_tab_presenter = TFAsymmetryFittingPresenter(self.fitting_tab_view, self.fitting_tab_model)
 
-        self.fitting_tab_presenter.disable_fitting_notifier.add_subscriber(self.fitting_tab_view.disable_tab_observer)
-
         context.update_view_from_model_notifier.add_subscriber(
             self.fitting_tab_presenter.update_view_from_model_observer)

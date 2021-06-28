@@ -177,8 +177,11 @@ class FittingDataModel(object):
         else:
             self.clear_logs()
 
+    def get_ws_list(self):
+        return list(self._loaded_workspaces.keys())
+
     def get_ws_sorted_by_primary_log(self):
-        ws_list = list(self._loaded_workspaces.keys())
+        ws_list = self.get_ws_list()
         tof_ws_inds = [ind for ind, ws in enumerate(ws_list) if
                        self._loaded_workspaces[ws].getAxis(0).getUnit().caption() == 'Time-of-flight']
         primary_log = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,

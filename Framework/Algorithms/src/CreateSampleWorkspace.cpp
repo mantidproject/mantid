@@ -438,10 +438,8 @@ std::vector<double> CreateSampleWorkspace::evalFunction(const std::string &funct
   FunctionValues fv(fd);
   func_sptr->function(fd, fv);
 
-  std::vector<double> results;
-  results.resize(xSize);
+  auto results = fv.toVector();
   for (size_t x = 0; x < xSize; ++x) {
-    results[x] = fv.getCalculated(x);
     if (noiseScale != 0) {
       results[x] += ((m_randGen->nextValue() - 0.5) * noiseScale);
     }

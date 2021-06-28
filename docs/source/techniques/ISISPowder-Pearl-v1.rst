@@ -344,6 +344,17 @@ Example Input:
   # Notice the filename always ends in .yaml
   pearl_example = Pearl(config_file=r"C:\path\to\file\configuration.yaml", ...)
 
+.. _custom_grouping_filename_pearl_isis-powder-diffraction-ref:
+
+custom_grouping_filename
+^^^^^^^^^^^^^^^^^^^^^^^^
+The name of a custom grouping cal file to use. The file needs to be located
+within top level of the :ref:`calibration_directory_pearl_isis-powder-diffraction-ref`
+
+..  code-block:: python
+
+  custom_grouping_filename: "DAC_group.cal"
+
 .. _do_absorb_corrections_pearl_isis-powder-diffraction-ref:
 
 do_absorb_corrections
@@ -604,12 +615,15 @@ see the following:
 - :ref:`tt35_grouping_filename_pearl_isis-powder-diffraction-ref`
 - :ref:`tt70_grouping_filename_pearl_isis-powder-diffraction-ref`
 - :ref:`tt88_grouping_filename_pearl_isis-powder-diffraction-ref`
+- :ref:`custom_grouping_filename_pearl_isis-powder-diffraction-ref`
 
-Accepted values are: **tt35**, **tt70** and **tt80**
+Accepted values are: **tt35**, **tt70**, **tt80** and custom
 
 When calling :ref:`create_vanadium_pearl_isis-powder-diffraction-ref`
-**all** can be used to implicitly process all of the supported
+**all** can be used to implicitly process all of the ttXX
 values indicated above.
+
+When the custom tt_mode is used a focus mode of "Mods" is always used
 
 Example Input:
 
@@ -769,6 +783,29 @@ set to the following:
 
   cross_corr_x_min: 1.8
 
+.. _custom_focused_bin_widths_pearl_isis-powder-diffraction-ref:
+
+custom_focused_bin_widths
+^^^^^^^^^^^^^^^^^^^^^^^^^
+The dt-upon-t binning for the focused data when using tt_mode=custom
+
+On PEARL this is set to -0.0006 for all banks in the custom grouping file
+
+.. _custom_focused_cropping_values_pearl_isis-powder-diffraction-ref:
+
+custom_focused_cropping_values
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Indicates a list of TOF values to crop the focused workspace
+which was created by :ref:`focus_pearl_isis-powder-diffraction-ref`
+on a bank by bank basis when using tt_mode=custom
+
+.. _focused_bin_widths_pearl_isis-powder-diffraction-ref:
+
+focused_bin_widths
+^^^^^^^^^^^^^^^^^^
+The dt-upon-t binning for the focused data.
+
+On PEARL this is set to -0.0006 for all 14 banks
 
 .. _focused_cropping_values_pearl_isis-powder-diffraction-ref:
 
