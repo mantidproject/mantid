@@ -114,12 +114,6 @@ IPeaksWorkspace_sptr ConvertPeaksWorkspace::makeLeanElasticPeaksWorkspace(IPeaks
   // down casting Peaks to LeanElasticPeaks
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
     LeanElasticPeak lpk(pws->getPeak(i));
-    // NOTE:
-    // Peak level info requires explicit copying
-    lpk.setRunNumber(pws->getPeak(i).getRunNumber());
-    lpk.setHKL(pws->getPeak(i).getHKL());
-    lpk.setGoniometerMatrix(pws->getPeak(i).getGoniometerMatrix());
-    //
     lpws->addPeak(lpk);
   }
 
