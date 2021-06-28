@@ -44,7 +44,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
                                             WavelengthCenter = self.wavelengthCenter, LambdaMin = self.lambdaMin,
                                             LambdaMax = self.lambdaMax, DMin = self.dMin, DMax = self.dMax, DpMin = self.dpMin,
                                             DpMax = self.dpMax, dSpaceBinning = self.dSpaceBinning,
-                                            dPerpendicularBinning = self.dPerpendicularBining, FWHM = self.FWHM,
+                                            dPerpendicularBinning = self.dPerpendicularBinning, FWHM = self.FWHM,
                                             Tolerance = self.tolerance)
         powder_reduce_P2D.powder_reduce_P2D()
 
