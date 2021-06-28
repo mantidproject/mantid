@@ -8,7 +8,7 @@
         </parameter>
 
         <parameter name="IkedaCarpenterPV:Kappa" type="fitting">
-            <formula eq="0.1"/>
+            <formula eq="0.1" result-unit="TOF"/>
             <fixed />
         </parameter>
 
