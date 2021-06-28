@@ -5,7 +5,7 @@ include(FetchContent)
 
 FetchContent_Declare(
   3rdpartysources
-  GIT_REPOSITORY https://github.com/stephensmith25/3rdpartysources
+  GIT_REPOSITORY https://github.com/mantidproject/3rdpartysources
   GIT_TAG        master
   GIT_SHALLOW    TRUE
 )
