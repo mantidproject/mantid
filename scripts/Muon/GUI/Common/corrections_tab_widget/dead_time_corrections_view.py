@@ -115,3 +115,8 @@ class DeadTimeCorrectionsView(widget, ui_form):
         """Opens the file browser and returns the selected file name."""
         return show_file_browser_and_return_selection(self, filter_for_extensions(extensions), search_directories,
                                                       multiple_files)
+
+    def switch_to_using_a_dead_time_table_workspace(self, table_name: str) -> None:
+        """Switch the view to the 'from table workspace' option and provide the table name."""
+        self.set_selected_dead_time_workspace(table_name)
+        self.set_dead_time_from_workspace_selected()
