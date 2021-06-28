@@ -87,7 +87,6 @@ public:
   void removeBackground();
   bool hasBackground() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
-  void setResolution(std::string const &name, WorkspaceID const &workspaceIndex);
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void setQValues(const std::vector<double> &qValues);
 

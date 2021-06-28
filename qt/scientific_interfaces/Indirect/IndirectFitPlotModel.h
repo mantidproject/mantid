@@ -91,8 +91,8 @@ private:
   bool isResolutionLoaded() const;
 
   IndirectFittingModel *m_fittingModel;
-  WorkspaceID m_activeWorkspaceIndex;
-  WorkspaceIndex m_activeSpectrumIndex;
+  WorkspaceID m_activeWorkspaceID;
+  WorkspaceIndex m_activeWorkspaceIndex;
 };
 
 } // namespace IDA

@@ -104,7 +104,7 @@ private:
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
-  WorkspaceID m_activeWorkspaceIndex;
+  WorkspaceID m_activeWorkspaceID;
   WorkspaceIndex m_activeSpectrumIndex;
 
 protected slots:
@@ -138,7 +138,7 @@ private slots:
   void respondToDataChanged();
   void respondToDataAdded();
   void respondToDataRemoved();
-  void respondToPlotSpectrumChanged(WorkspaceIndex);
+  void respondToPlotSpectrumChanged();
   void respondToFwhmChanged(double);
   void respondToBackgroundChanged(double value);
 

@@ -47,7 +47,7 @@ private:
   std::vector<std::string> getParameterTypes(FqFitParameters &parameters) const;
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
-  void setActiveWorkspaceIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
+  void setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
 
   std::string m_activeParameterType;
   WorkspaceID m_activeWorkspaceID;

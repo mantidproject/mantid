@@ -264,8 +264,9 @@ std::string IndirectFittingModel::getExcludeRegion(WorkspaceID workspaceID, Work
 
 std::vector<std::string> IndirectFittingModel::getWorkspaceNames() const { return m_fitDataModel->getWorkspaceNames(); }
 
-std::vector<double> IndirectFittingModel::getExcludeRegionVector(WorkspaceID workspaceID, WorkspaceIndex index) const {
-  return m_fitDataModel->getExcludeRegionVector(workspaceID, index);
+std::vector<double> IndirectFittingModel::getExcludeRegionVector(WorkspaceID workspaceID,
+                                                                 WorkspaceIndex spectrum) const {
+  return m_fitDataModel->getExcludeRegionVector(workspaceID, spectrum);
 }
 
 std::string IndirectFittingModel::createDisplayName(WorkspaceID workspaceID) const {

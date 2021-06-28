@@ -252,8 +252,6 @@ void ConvFunctionModel::updateParameterEstimationData(DataForParameterEstimation
   m_estimationData = std::move(data);
 }
 
-void ConvFunctionModel::setResolution(std::string const &name, WorkspaceID const &workspaceIndex) { setModel(); }
-
 void ConvFunctionModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   m_fitResolutions = fitResolutions;
   setModel();

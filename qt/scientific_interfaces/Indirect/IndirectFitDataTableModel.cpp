@@ -278,9 +278,9 @@ void IndirectFitDataTableModel::removeDataByIndex(FitDomainIndex fitDomainIndex)
 }
 
 std::vector<double> IndirectFitDataTableModel::getExcludeRegionVector(WorkspaceID workspaceID,
-                                                                      WorkspaceIndex index) const {
+                                                                      WorkspaceIndex spectrum) const {
   auto fitData = m_fittingData->at(workspaceID.value);
-  return fitData.excludeRegionsVector(index);
+  return fitData.excludeRegionsVector(spectrum);
 }
 
 Mantid::API::MatrixWorkspace_sptr IndirectFitDataTableModel::getWorkspace(FitDomainIndex index) const {
@@ -321,8 +321,8 @@ std::pair<WorkspaceID, WorkspaceIndex> IndirectFitDataTableModel::getSubIndices(
     for (size_t workspaceIndex = 0; workspaceIndex < m_fittingData->at(workspaceID).spectra().size().value;
          workspaceIndex++) {
       if (sum == index.value) {
-        WorkspaceIndex spectraIndex = m_fittingData->at(workspaceID).spectra()[FitDomainIndex{workspaceIndex}];
-        return std::make_pair(WorkspaceID{workspaceID}, spectraIndex);
+        WorkspaceIndex spectrum = m_fittingData->at(workspaceID).spectra()[FitDomainIndex{workspaceIndex}];
+        return std::make_pair(WorkspaceID{workspaceID}, spectrum);
       }
       sum++;
     }

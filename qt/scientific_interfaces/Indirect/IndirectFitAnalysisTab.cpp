@@ -106,8 +106,7 @@ void IndirectFitAnalysisTab::connectPlotPresenter() {
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(WorkspaceID)), this,
           SLOT(respondToSelectedFitDataChanged(WorkspaceID)));
   connect(m_plotPresenter.get(), SIGNAL(noFitDataSelected()), this, SLOT(respondToNoFitDataSelected()));
-  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(WorkspaceIndex)), this,
-          SLOT(respondToPlotSpectrumChanged(WorkspaceIndex)));
+  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged()), this, SLOT(respondToPlotSpectrumChanged()));
   connect(m_plotPresenter.get(), SIGNAL(fwhmChanged(double)), this, SLOT(respondToFwhmChanged(double)));
   connect(m_plotPresenter.get(), SIGNAL(backgroundChanged(double)), this, SLOT(respondToBackgroundChanged(double)));
 }
@@ -269,10 +268,10 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateSingleFitOutput(bool)));
 
   if (error) {
-    m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm, m_activeWorkspaceIndex);
+    m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm, m_activeWorkspaceID);
     m_fittingAlgorithm.reset();
   } else
-    m_fittingModel->addSingleFitOutput(m_fittingAlgorithm, m_activeWorkspaceIndex, m_activeSpectrumIndex);
+    m_fittingModel->addSingleFitOutput(m_fittingAlgorithm, m_activeWorkspaceID, m_activeSpectrumIndex);
 }
 
 /**
@@ -431,7 +430,7 @@ void IndirectFitAnalysisTab::singleFit(WorkspaceID workspaceID, WorkspaceIndex s
     enableFitButtons(false);
     enableOutputOptions(false);
     m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
-    m_activeWorkspaceIndex = workspaceID;
+    m_activeWorkspaceID = workspaceID;
     runSingleFit(m_fittingModel->getSingleFit(workspaceID, spectrum));
   }
 }
@@ -645,7 +644,7 @@ void IndirectFitAnalysisTab::respondToDataRemoved() {
   updateParameterEstimationData();
 }
 
-void IndirectFitAnalysisTab::respondToPlotSpectrumChanged(WorkspaceIndex) {
+void IndirectFitAnalysisTab::respondToPlotSpectrumChanged() {
   auto const index = m_plotPresenter->getSelectedDomainIndex();
   m_fitPropertyBrowser->setCurrentDataset(index);
 }

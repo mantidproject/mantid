@@ -60,7 +60,7 @@ public slots:
 signals:
   void selectedFitDataChanged(WorkspaceID /*_t1*/);
   void noFitDataSelected();
-  void plotSpectrumChanged(WorkspaceIndex /*_t1*/);
+  void plotSpectrumChanged();
   void fitSingleSpectrum(WorkspaceID /*_t1*/, WorkspaceIndex /*_t2*/);
   void startXChanged(double /*_t1*/);
   void endXChanged(double /*_t1*/);

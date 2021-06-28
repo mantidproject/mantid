@@ -27,10 +27,10 @@ void ConvFitDataPresenter::setModelResolution(const QString &name) {
   setModelResolution(name.toStdString(), index);
 }
 
-void ConvFitDataPresenter::setModelResolution(std::string const &name, WorkspaceID const &workspaceIndex) {
+void ConvFitDataPresenter::setModelResolution(std::string const &name, WorkspaceID const &workspaceID) {
   try {
-    m_convModel->setResolution(name, workspaceIndex);
-    emit modelResolutionAdded(name, workspaceIndex);
+    m_convModel->setResolution(name, workspaceID);
+    emit modelResolutionAdded(name, workspaceID);
   } catch (std::exception const &ex) {
     displayWarning(ex.what());
   }

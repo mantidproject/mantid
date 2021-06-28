@@ -57,7 +57,7 @@ void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dia
 }
 
 void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog, FqFitParameters parameter) {
-  setActiveWorkspaceIndexToCurrentWorkspace(dialog);
+  setActiveWorkspaceIDToCurrentWorkspace(dialog);
   setActiveParameterType(dialog->parameterType());
   if (m_activeParameterType == "Width")
     dialog->setParameterNames(parameter.widths);
@@ -68,7 +68,7 @@ void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog,
 }
 
 void FqFitDataPresenter::updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters) {
-  setActiveWorkspaceIndexToCurrentWorkspace(dialog);
+  setActiveWorkspaceIDToCurrentWorkspace(dialog);
   dialog->setParameterTypes(getParameterTypes(parameters));
 }
 
@@ -90,11 +90,8 @@ void FqFitDataPresenter::addWorkspace(IndirectFittingModel *model, const std::st
 void FqFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
   if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
     m_fqFitModel->addWorkspace(fqFitDialog->workspaceName(), fqFitDialog->parameterNameIndex());
-    setActiveWorkspaceIndexToCurrentWorkspace(fqFitDialog);
-    // here we can say that we are in multiple mode so we can append the spectra
-    // to the current one and then setspectra
+    setActiveWorkspaceIDToCurrentWorkspace(fqFitDialog);
     setModelSpectrum(fqFitDialog->parameterNameIndex());
-    updateActiveWorkspaceID();
   }
 }
 
@@ -107,7 +104,7 @@ void FqFitDataPresenter::setModelSpectrum(int index) {
     m_fqFitModel->setActiveEISF(static_cast<std::size_t>(index), m_activeWorkspaceID, false);
 }
 
-void FqFitDataPresenter::setActiveWorkspaceIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog) {
+void FqFitDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog) {
   //  update active data index with correct index based on the workspace name
   //  and the vector in m_fitDataModel which is in the base class
   //  indirectFittingModel get table workspace index

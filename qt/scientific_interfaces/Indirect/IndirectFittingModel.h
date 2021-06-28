@@ -73,9 +73,7 @@ public:
   virtual void setEndX(double endX, WorkspaceID workspaceID) override;
   virtual std::pair<double, double> getFittingRange(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
-  virtual std::string getExcludeRegion(WorkspaceID workspaceID, WorkspaceIndex index) const override;
-
-  // Functions concerned with naming
+  virtual std::string getExcludeRegion(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
 
   // IIndirectFittingModel
   bool isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;

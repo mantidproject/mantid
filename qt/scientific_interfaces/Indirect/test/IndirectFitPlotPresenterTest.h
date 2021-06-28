@@ -402,11 +402,6 @@ public:
   /// Unit Tests that test the methods and slots
   ///----------------------------------------------------------------------
 
-  void test_that_getSelectedSpectrumIndex_will_get_the_selected_spectrum_from_the_view() {
-    EXPECT_CALL(*m_view, getSelectedSpectrumIndex()).Times(1).WillOnce(Return(FitDomainIndex(0)));
-    m_presenter->getSelectedSpectrumIndex();
-  }
-
   void test_that_setActiveSpectrum_will_set_the_spectrum_in_view_and_model() {
     EXPECT_CALL(*m_view, setPlotSpectrum(WorkspaceIndex{3})).Times(1);
 
