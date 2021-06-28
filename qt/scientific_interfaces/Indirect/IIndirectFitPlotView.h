@@ -28,13 +28,9 @@ public:
   virtual void watchADS(bool watch) = 0;
 
   virtual WorkspaceIndex getSelectedSpectrum() const = 0;
-  virtual FitDomainIndex getSelectedSpectrumIndex() const = 0;
   virtual WorkspaceID getSelectedDataIndex() const = 0;
   virtual WorkspaceID dataSelectionSize() const = 0;
   virtual bool isPlotGuessChecked() const = 0;
-
-  virtual void hideMultipleDataSelection() = 0;
-  virtual void showMultipleDataSelection() = 0;
 
   virtual void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) = 0;
   virtual void setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,

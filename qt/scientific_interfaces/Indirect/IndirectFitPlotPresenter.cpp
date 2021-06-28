@@ -81,8 +81,6 @@ WorkspaceID IndirectFitPlotPresenter::getSelectedDataIndex() const { return m_mo
 
 WorkspaceIndex IndirectFitPlotPresenter::getSelectedSpectrum() const { return m_model->getActiveSpectrum(); }
 
-FitDomainIndex IndirectFitPlotPresenter::getSelectedSpectrumIndex() const { return m_view->getSelectedSpectrumIndex(); }
-
 FitDomainIndex IndirectFitPlotPresenter::getSelectedDomainIndex() const { return m_model->getActiveDomainIndex(); }
 
 bool IndirectFitPlotPresenter::isCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
@@ -105,10 +103,6 @@ void IndirectFitPlotPresenter::setModelEndX(double endX) { m_model->setEndX(endX
 void IndirectFitPlotPresenter::setModelHWHM(double minimum, double maximum) { m_model->setFWHM(maximum - minimum); }
 
 void IndirectFitPlotPresenter::setModelBackground(double background) { m_model->setBackground(background); }
-
-void IndirectFitPlotPresenter::hideMultipleDataSelection() { m_view->hideMultipleDataSelection(); }
-
-void IndirectFitPlotPresenter::showMultipleDataSelection() { m_view->showMultipleDataSelection(); }
 
 void IndirectFitPlotPresenter::setStartX(double startX) { m_view->setFitRangeMinimum(startX); }
 

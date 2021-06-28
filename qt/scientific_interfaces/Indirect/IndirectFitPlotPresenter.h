@@ -30,7 +30,6 @@ public:
 
   WorkspaceID getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
-  FitDomainIndex getSelectedSpectrumIndex() const;
   FitDomainIndex getSelectedDomainIndex() const;
   bool isCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
 
@@ -43,8 +42,6 @@ public slots:
   void setStartX(double /*startX*/);
   void setEndX(double /*endX*/);
   void updatePlotSpectrum(WorkspaceIndex spectrum);
-  void hideMultipleDataSelection();
-  void showMultipleDataSelection();
   void updateRangeSelectors();
   void appendLastDataToSelection();
   void updateSelectedDataName();

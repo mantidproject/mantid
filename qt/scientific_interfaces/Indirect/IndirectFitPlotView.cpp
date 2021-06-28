@@ -50,7 +50,6 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   // Create a Splitter and place two plots within the splitter layout
   createSplitterWithPlots();
 
-  m_plotForm->cbDataSelection->hide();
   addFitRangeSelector();
   addBackgroundRangeSelector();
   addHWHMRangeSelector();
@@ -133,13 +132,6 @@ WorkspaceIndex IndirectFitPlotView::getSelectedSpectrum() const {
   return WorkspaceIndex{0};
 }
 
-FitDomainIndex IndirectFitPlotView::getSelectedSpectrumIndex() const {
-  if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
-    return FitDomainIndex{
-        static_cast<size_t>(m_plotForm->spPlotSpectrum->value() - m_plotForm->spPlotSpectrum->minimum())};
-  return FitDomainIndex{static_cast<size_t>(m_plotForm->cbPlotSpectrum->currentIndex())};
-}
-
 WorkspaceID IndirectFitPlotView::getSelectedDataIndex() const {
   return WorkspaceID{static_cast<size_t>(m_plotForm->cbDataSelection->currentIndex())};
 }
@@ -149,10 +141,6 @@ WorkspaceID IndirectFitPlotView::dataSelectionSize() const {
 }
 
 bool IndirectFitPlotView::isPlotGuessChecked() const { return m_plotForm->ckPlotGuess->isChecked(); }
-
-void IndirectFitPlotView::hideMultipleDataSelection() { m_plotForm->cbDataSelection->hide(); }
-
-void IndirectFitPlotView::showMultipleDataSelection() { m_plotForm->cbDataSelection->show(); }
 
 void IndirectFitPlotView::setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
   m_plotForm->swPlotSpectrum->setCurrentIndex(0);

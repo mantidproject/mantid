@@ -77,9 +77,6 @@ public:
   MOCK_CONST_METHOD0(dataSelectionSize, WorkspaceID());
   MOCK_CONST_METHOD0(isPlotGuessChecked, bool());
 
-  MOCK_METHOD0(hideMultipleDataSelection, void());
-  MOCK_METHOD0(showMultipleDataSelection, void());
-
   MOCK_METHOD2(setAvailableSpectra, void(WorkspaceIndex minimum, WorkspaceIndex maximum));
   MOCK_METHOD2(setAvailableSpectra, void(std::vector<WorkspaceIndex>::const_iterator const &from,
                                          std::vector<WorkspaceIndex>::const_iterator const &to));
@@ -453,16 +450,6 @@ public:
 
     ON_CALL(*m_fittingModel, getNumberOfWorkspaces()).WillByDefault(Return(1));
     TS_ASSERT_EQUALS(m_presenter->getSelectedDomainIndex(), FitDomainIndex{3});
-  }
-
-  void test_that_hideMultipleDataSelection_will_call_hideMultipleDataSelection_in_the_view() {
-    EXPECT_CALL(*m_view, hideMultipleDataSelection()).Times(1);
-    m_presenter->hideMultipleDataSelection();
-  }
-
-  void test_that_showMultipleDataSelection_will_call_showMultipleDataSelection_in_the_view() {
-    EXPECT_CALL(*m_view, showMultipleDataSelection()).Times(1);
-    m_presenter->showMultipleDataSelection();
   }
 
   void test_that_updateRangeSelectors_will_update_the_background_selector() {
