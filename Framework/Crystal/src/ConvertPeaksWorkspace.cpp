@@ -43,7 +43,7 @@ void ConvertPeaksWorkspace::init() {
   // donor workspace if going from lean to regular
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InstrumentWorkspace", "", Direction::Input,
                                                                  PropertyMode::Optional),
-                  "Donor PeaksWorkspace with instrument for conversion");
+                  "Donor Workspace with instrument for conversion");
 
   // output
   declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
@@ -66,6 +66,15 @@ std::map<std::string, std::string> ConvertPeaksWorkspace::validateInputs() {
   if (lpws && !pws) {
     if (getPointerToProperty("InstrumentWorkspace")->isDefault()) {
       issues["InstrumentWorkspace"] = "Need a PeaksWorkspace with proper instrument attached to assist conversion.";
+    }
+  }
+
+  // case II: instrument cannot be found within donor workspace
+  if (lpws && !pws) {
+    Workspace_sptr ws = getProperty("InstrumentWorkspace");
+    ExperimentInfo_sptr inputExperimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+    if (!inputExperimentInfo) {
+      issues["InstrumentWorkspace"] = "Invalid instrument found in donor workspace.";
     }
   }
 
