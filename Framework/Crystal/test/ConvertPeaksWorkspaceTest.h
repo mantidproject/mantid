@@ -79,7 +79,7 @@ public:
     ConvertPeaksWorkspace alg;
     alg.initialize();
     alg.setProperty("PeakWorkspace", lpws);
-    alg.setProperty("InstrumentWorkpace", pws);
+    alg.setProperty("InstrumentWorkspace", pws);
     alg.setProperty("OutputWorkspace", "outpws");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
