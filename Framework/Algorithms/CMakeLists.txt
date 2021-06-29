@@ -1017,7 +1017,7 @@ set(TEST_PY_FILES
 
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python ${TEST_PY_FILES})
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS

@@ -590,7 +590,7 @@ void LoadEventPreNexus2::runLoadInstrument(const std::string &eventfilename,
   instrument = instrument.substr(0, pos);
 
   // do the actual work
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   loadInst->setPropertyValue("InstrumentName", instrument);

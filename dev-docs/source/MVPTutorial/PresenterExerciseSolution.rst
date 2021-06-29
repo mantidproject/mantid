@@ -9,7 +9,6 @@ View
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
     from qtpy import QtWidgets, QtCore, QtGui
 
 
@@ -89,8 +88,6 @@ Presenter
 
 .. code-block:: python
 
-    from __future__ import (absolute_import ,division, print_function)
-
     class Presenter(object):
 
         # pass the view and model into the presenter
@@ -112,7 +109,6 @@ Main module
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
     from qtpy import QtWidgets, QtCore, QtGui
 
     import sys

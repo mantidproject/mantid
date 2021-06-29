@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import math
+import warnings
+
 import numpy as np
 from scipy import constants
 
@@ -15,6 +17,7 @@ from scipy import constants
 # power expansion in terms of FUNDAMENTALS and overtones
 # S(Q, n * omega) \simeq (Q^2 * U^2)^n / n! exp(-Q^2 * U^2)
 # n = 1, 2, 3.....
+from scipy.constants import ConstantWarning
 
 FUNDAMENTALS = 1  # value of fundamental parameter  (n = 1)
 FIRST_OVERTONE = 1 + FUNDAMENTALS  # value of first overtone (n = 2)
@@ -71,8 +74,8 @@ ATOM_PREFIX = "atom"
 FLOAT_ID = np.dtype(np.float64).num
 FLOAT_TYPE = np.dtype(np.float64)
 
-COMPLEX_ID = np.dtype(np.complex).num
-COMPLEX_TYPE = np.dtype(np.complex)
+COMPLEX_ID = np.dtype(complex).num
+COMPLEX_TYPE = np.dtype(complex)
 
 INT_ID = np.dtype(np.uint32).num
 INT_TYPE = np.dtype(np.uint32)
@@ -85,7 +88,12 @@ HIGHER_ORDER_QUANTUM_EVENTS_DIM = HIGHER_ORDER_QUANTUM_EVENTS
 S_LAST_INDEX = 1
 
 # construction of aCLIMAX constant which is used to evaluate mean square displacement (u)
-H_BAR = constants.codata.value("Planck constant over 2 pi")  # H_BAR =  1.0545718e-34 [J s] = [kg m^2 / s ]
+with warnings.catch_warnings(record=True) as warning_list:
+    warnings.simplefilter("always")
+    H_BAR = constants.codata.value("Planck constant over 2 pi")  # H_BAR =  1.0545718e-34 [J s] = [kg m^2 / s ]
+    if len(warning_list) >= 1 and isinstance(warning_list[0].message, ConstantWarning):
+        H_BAR = constants.hbar  # H_BAR =  1.0545718e-34 [J s] = [kg m^2 / s ]
+
 H_BAR_DECOMPOSITION = math.frexp(H_BAR)
 
 M2_TO_ANGSTROM2 = 1.0 / constants.angstrom ** 2  # m^2 = 10^20 A^2

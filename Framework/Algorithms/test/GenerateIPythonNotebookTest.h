@@ -64,13 +64,14 @@ public:
     create_test_workspace(workspaceName);
 
     std::string result[] = {"{",
-                            "   \"metadata\" : {",
-                            R"(      "name" : "Mantid Notebook")",
-                            "   },",
-                            "   \"nbformat\" : 3,",
-                            "   \"nbformat_minor\" : 0,",
-                            "   \"worksheets\" : [",
-                            "      {"};
+                            " \"metadata\" : ",
+                            " {",
+                            "  \"name\" : \"Mantid Notebook\"",
+                            " },",
+                            " \"nbformat\" : 3,",
+                            " \"nbformat_minor\" : 0,",
+                            " \"worksheets\" : ",
+                            "  {"};
 
     // Set up and execute the algorithm.
     GenerateIPythonNotebook alg;
@@ -98,14 +99,14 @@ public:
     }
 
     // Check that the expected lines do appear in the output
-    for (auto const expected_line : result) {
+    for (auto const &expected_line : result) {
       TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), expected_line) != notebookLines.cend())
     }
 
     // Verify that if we set the content of NotebookText that it is set
     // correctly.
-    alg.setPropertyValue("NotebookText", result[5]);
-    TS_ASSERT_EQUALS(alg.getPropertyValue("NotebookText"), "   \"nbformat_minor\" : 0,");
+    alg.setPropertyValue("NotebookText", result[6]);
+    TS_ASSERT_EQUALS(alg.getPropertyValue("NotebookText"), " \"nbformat_minor\" : 0,");
 
     file.close();
     if (Poco::File(filename).exists())

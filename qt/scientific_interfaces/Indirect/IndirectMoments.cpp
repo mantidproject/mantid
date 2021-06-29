@@ -27,7 +27,7 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra, "0,2,4"));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra, "0,2,4"));
 
   const unsigned int NUM_DECIMALS = 6;
 
