@@ -82,7 +82,6 @@ void CombineDiffCal::exec() {
 
   Mantid::API::TableRow groupedCalibrationRow = groupedCalibrationWS->getFirstRow();
   Mantid::API::TableRow pixelCalibrationRow = pixelCalibrationWS->getFirstRow();
-  int calibrationIndex = 0;
   do {
     double value = (groupedCalibrationRow.Double(1) /
                     calibrationWS->spectrumInfo().diffractometerConstants(calibrationWS->getIndicesFromDetectorIDs(
