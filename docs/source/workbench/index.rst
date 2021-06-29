@@ -47,3 +47,4 @@ completed much faster than they were in MantidPlot.
     * :ref:`Plotting <plotting>` describes how mantid workspaces have been integrated with the matplotlib framework and
       how to create these plots via scripts.
     * :ref:`WorkbenchWorkspaceCalculator` describes briefly the workspace calculator plugin.
+    * :ref:`WorkbenchSuperplot`: Decorator widget of the plot window that provides tools to overplot data.
