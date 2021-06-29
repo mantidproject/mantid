@@ -333,8 +333,12 @@ class PolDiffILLReduction(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=entry, OutputWorkspace=new_name)
 
     def _normalise(self, ws):
-        """Normalises the provided WorkspaceGroup to the monitor 1 or time and simultaneously removes monitors."""
+        """Normalises the provided WorkspaceGroup to the monitor 1 or time and simultaneously removes monitors.
+        In case the input group is used to calculate transmission, the output contains normalised monitors rather
+        than normalised detectors."""
         normaliseBy = self.getPropertyValue('NormaliseBy')
+        # the following factor to scale normalisation comes from legacy LAMP reduction code
+        lampCompatibilityFactor = 1000.0 if normaliseBy == 'Monitor' else 100.0
         transmissionProcess = self.getPropertyValue("ProcessAs") in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']
         for entry in mtd[ws]:
             mon = ws + '_mon'
@@ -346,11 +350,11 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if 0 in mtd[mon].readY(0):
                     raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
                 else:
-                    CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0]/1000.0,
-                                                ErrorValue=np.sqrt(mtd[mon].readE(0)[0]/1000.0),
+                    CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0] / lampCompatibilityFactor,
+                                                ErrorValue=np.sqrt(mtd[mon].readE(0)[0] / lampCompatibilityFactor),
                                                 OutputWorkspace=norm)
             if normaliseBy == 'Time':
-                duration = float(entry.getRun().getLogData('duration').value)*100.0
+                duration = float(entry.getRun().getLogData('duration').value) * lampCompatibilityFactor
                 CreateSingleValuedWorkspace(DataValue=duration,
                                             OutputWorkspace=norm)
             if transmissionProcess:
