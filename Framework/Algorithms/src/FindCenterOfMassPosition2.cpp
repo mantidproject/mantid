@@ -99,7 +99,7 @@ void FindCenterOfMassPosition2::exec() {
       e_values[i] = err_i;
     }
 
-    IAlgorithm_sptr algo = createChildAlgorithm("CreateWorkspace", 0.7, 1.0);
+    auto algo = createChildAlgorithm("CreateWorkspace", 0.7, 1.0);
     algo->setProperty<std::vector<double>>("DataX", std::vector<double>(2, 0.0));
     algo->setProperty<std::vector<double>>("DataY", y_values);
     algo->setProperty<std::vector<double>>("DataE", e_values);
@@ -110,7 +110,7 @@ void FindCenterOfMassPosition2::exec() {
     WorkspaceFactory::Instance().initializeFromParent(*inputWSWvl, *inputWS, false);
   } else {
     // Sum up all the wavelength bins
-    IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
+    auto childAlg = createChildAlgorithm("Integration");
     childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWSWvl);
     childAlg->executeAsChildAlg();
     inputWS = childAlg->getProperty("OutputWorkspace");

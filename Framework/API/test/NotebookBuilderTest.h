@@ -149,10 +149,8 @@ public:
   }
 
   void test_Build_Simple() {
-    std::string result = "               \"input\" : "
-                         "\"TopLevelAlgorithm(InputWorkspace='test_input_"
-                         "workspace', "
-                         "OutputWorkspace='test_output_workspace')\",";
+    std::string result = "     \"input\" : \"TopLevelAlgorithm(InputWorkspace=\'test_input_workspace\', "
+                         "OutputWorkspace=\'test_output_workspace\')\",";
     std::shared_ptr<WorkspaceTester> input = std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
@@ -183,8 +181,8 @@ public:
   }
 
   void test_Build_Unrolled() {
-    std::string result_markdown = R"(               "source" : "Child algorithms of TopLevelAlgorithm")";
-    std::string result_code = "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
+    std::string result_markdown = "     \"source\" : \"Child algorithms of TopLevelAlgorithm\"";
+    std::string result_code = "     \"input\" : \"BasicAlgorithm(PropertyA=\'FirstOne\')\",";
 
     std::shared_ptr<WorkspaceTester> input = std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
@@ -219,8 +217,8 @@ public:
   }
 
   void test_Partially_Unrolled() {
-    std::string result_markdown = R"(               "source" : "Child algorithms of TopLevelAlgorithm")";
-    std::string result_code = "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
+    std::string result_markdown = "     \"source\" : \"Child algorithms of TopLevelAlgorithm\"";
+    std::string result_code = "     \"input\" : \"BasicAlgorithm(PropertyA=\'FirstOne\')\",";
 
     std::shared_ptr<WorkspaceTester> input = std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
@@ -266,10 +264,8 @@ public:
   void test_Build_Simple_with_backslash() {
     // checks that property values with \ get prefixed with r, eg.
     // filename=r'c:\test\data.txt'
-    std::string result = "               \"input\" : "
-                         "\"TopLevelAlgorithm(InputWorkspace=r'test_inp\\\\ut_"
-                         "workspace', "
-                         "OutputWorkspace='test_output_workspace')\",";
+    std::string result = "     \"input\" : \"TopLevelAlgorithm(InputWorkspace=r\'test_inp\\\\ut_workspace\', "
+                         "OutputWorkspace=\'test_output_workspace\')\",";
     std::shared_ptr<WorkspaceTester> input = std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_inp\\ut_workspace", input);
 

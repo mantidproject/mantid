@@ -53,6 +53,9 @@ using namespace MantidQt::MantidWidgets::Batch;
 qRegisterMetaType<std::string>("StdString");
 qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 qRegisterMetaType<Message>("Message");
+qRegisterMetaType<QList<QPersistentModelIndex>>("QList<QPersistentModelIndex>");
+qRegisterMetaType<QAbstractItemModel::LayoutChangeHint>("QAbstractItemModel::LayoutChangeHint");
+qRegisterMetaType<QVector<int>>("QVector<int>");
 %End
 
 
@@ -496,6 +499,7 @@ public:
     %MethodCode
     sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->ifun());
     %End
+    bool hasTies();
     void setHasPlot(bool);
     QString functionPrefix() const;
     PropertyHandler * findHandler(SIP_PYOBJECT);
@@ -558,6 +562,7 @@ public:
     void postDeleteHandle(const std::string &wsName);
     void removeWorkspaceAndSpectra(const std::string &wsName);
     std::string getFitAlgorithmParameters() const;
+    std::string getFitAlgorithmOutputStatus() const;
     PropertyHandler * currentHandler() const;
 
     SIP_PYOBJECT defaultPeakType();
@@ -958,6 +963,10 @@ public:
          return NULL;
       }
     %End
+    SIP_PYOBJECT getFunction();
+    %MethodCode
+      sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunction());
+    %End
     SIP_PYOBJECT getGlobalFunction();
     %MethodCode
       sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getGlobalFunction());
@@ -1098,6 +1107,7 @@ class WorkspaceSelector : QComboBox
 %End
 public:
     WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
+    void setWorkspaceTypes(const QStringList &types);
     void setOptional(bool optional);
 };
 

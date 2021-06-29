@@ -47,7 +47,7 @@ void CloneWorkspace::exec() {
     setProperty("OutputWorkspace", outputWS);
   } else if (inputMD) {
     // Call the CloneMDWorkspace algo to handle MDEventWorkspace
-    IAlgorithm_sptr alg = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 1.0, true);
+    auto alg = createChildAlgorithm("CloneMDWorkspace", 0.0, 1.0, true);
     alg->setProperty("InputWorkspace", inputMD);
     alg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
     alg->executeAsChildAlg();

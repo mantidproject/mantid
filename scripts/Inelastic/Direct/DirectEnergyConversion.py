@@ -447,6 +447,10 @@ class DirectEnergyConversion(object):
             n_spectra = 0
         prop_man.log(header.format(n_spectra,n_masked_spectra),'notice')
 #--------------------------------------------------------------------------------------------------
+#       Remove emtpy background if one is defined
+#--------------------------------------------------------------------------------------------------
+        self.remove_empty_background(masking)
+#--------------------------------------------------------------------------------------------------
 #  now reduction
 #--------------------------------------------------------------------------------------------------
         # ISIS or GUI motor stuff
@@ -577,6 +581,30 @@ class DirectEnergyConversion(object):
 
         self.clean_up_convert_to_energy(start_time)
         return result
+
+#------------------------------------------------------------------------------------------
+    def remove_empty_background(self,masking_ws=None):
+        """Remove empty background from the workspaces, described by RunDescriptors, specified here
+           Inputs:
+           masking_ws -- if provided, mask empty background workspace before extracting it from
+                         workspaces requested
+        """
+        prop_man = self.prop_man
+        if prop_man.empty_bg_run is None: # Nothing to do. No empty background
+            return
+
+        # list of RunDescriptors to extract and process workspaces
+        rd_to_process = ['sample_run','wb_run','monovan_run','wb_for_monovan_run']
+        # list of Background properties
+        bg_to_process = ['empty_bg_run','empty_bg_run_for_wb','empty_bg_run_for_monovan','empty_bg_run_for_monoWb']
+
+        for rd_name,bg_rd_name in zip(rd_to_process,bg_to_process):
+            rd_prop = prop_man.get_prop_class(rd_name)
+            bg_prop = prop_man.get_prop_class(bg_rd_name)
+            empty_bg_ws = bg_prop.get_workspace()
+            if masking_ws is not None and empty_bg_ws is not None:
+                MaskDetectors(empty_bg_ws, MaskedWorkspace=masking_ws)
+            rd_prop.remove_empty_background(empty_bg_ws)
 
 
 #------------------------------------------------------------------------------------------

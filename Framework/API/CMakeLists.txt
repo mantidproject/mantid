@@ -499,7 +499,7 @@ set(GMOCK_TEST_FILES
     MatrixWorkspaceTest.h
 )
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(
       GLOBAL APPEND PROPERTY COVERAGE_SRCS

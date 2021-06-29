@@ -8,13 +8,13 @@ from mantidqt.utils.qt import load_ui
 
 from qtpy.QtWidgets import QWidget
 
-ui_tf_asymmetry_mode_switcher, _ = load_ui(__file__, "tf_asymmetry_mode_switcher.ui")
+ui_form, base_widget = load_ui(__file__, "tf_asymmetry_mode_switcher.ui")
 
 NORMAL_FITTING_COMBO_INDEX = 0
 TF_ASYMMETRY_FITTING_COMBO_INDEX = 1
 
 
-class TFAsymmetryModeSwitcherView(QWidget, ui_tf_asymmetry_mode_switcher):
+class TFAsymmetryModeSwitcherView(ui_form, base_widget):
     """
     The TFAsymmetryModeSwitcherView has a combo box for switching between normal and TF Asymmetry fitting.
     """

@@ -13,6 +13,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -529,9 +530,8 @@ bool StepScan::runStepScanAlgLive(const std::string &stepScanProperties) {
   IAlgorithm_const_sptr oldMonitorLiveData = m_uiForm.mWRunFiles->stopLiveAlgorithm();
 
   Json::Value root;
-  Json::Reader reader;
 
-  bool parsingSuccessful = reader.parse(stepScanProperties, root);
+  bool parsingSuccessful = Mantid::JsonHelpers::parse(stepScanProperties, &root);
   if (!parsingSuccessful) {
     throw std::runtime_error("Parsing parameters failed for StepScan.");
   }

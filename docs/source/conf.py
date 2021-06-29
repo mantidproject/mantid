@@ -12,15 +12,13 @@
 # and simply amounts to importing readline before a QApplication is created in the screenshots
 # directive
 import sys
-if sys.platform.startswith('linux') or sys.platform == "darwin":
-    import readline
 
 # Workaround module destruction order issues. If Qt is imported after
 # mantid then any active Qt widgets are deleted before the mantid
 # atexit handlers kick in. Some widgets, e.g. WorkspaceSelector,
 # subscribe to mantid notifications and deleting the widget references leaves
 # dangling references in the notification centre that cause a segfault
-import qtpy.QtCore
+import qtpy.QtCore  # noqa: F401
 
 from distutils.version import LooseVersion
 import os

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/CheckMantidVersion.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/GitHubApiHelper.h"
 #include "MantidKernel/MantidVersion.h"
@@ -88,16 +89,16 @@ void CheckMantidVersion::exec() {
 
   bool isNewVersionAvailable = false;
   if (!json.empty()) {
-    Json::Reader r;
     Json::Value root;
-    bool parseOK = r.parse(json, root);
+    std::string jsonErrors;
+    bool parseOK = Mantid::JsonHelpers::parse(json, &root, &jsonErrors);
     if (!parseOK) {
       // just warning. The parser is able to get relevant info even if there are
       // formatting issues like missing quotes or brackets.
       g_log.warning() << "Error found when parsing version information "
                          "retrieved from GitHub as a JSON string. "
                          "Error trying to parse this JSON string: "
-                      << json << "\n. Parsing error details: " << r.getFormattedErrorMessages() << '\n';
+                      << json << "\n. Parsing error details: " << jsonErrors << '\n';
     }
 
     std::string gitHubVersionTag;

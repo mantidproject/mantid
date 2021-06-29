@@ -54,7 +54,6 @@ Usage
 
 .. testcode:: Ex
 
-    from __future__ import print_function
     ws = LoadSassena("loadSassenaExample.h5", TimeUnit=1.0)
     print('workspaces instantiated:  {}'.format(', '.join(ws.getNames())))
     fqtReal = ws[1] # Real part of F(Q,t)

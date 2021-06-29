@@ -18,7 +18,9 @@ This page describes the workflow used in conjunction with `Git
 those who have push access to the repository.
 
 Go `here
-<https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf>`__
+<https://education.github.com/git-cheat-sheet-education.pdf>`__
+or `here
+<https://www.atlassian.com/git/tutorials/atlassian-git-cheatsheet>`__
 for a cheatsheet of Git commands.
 
 Go `here <https://github.com/k88hudson/git-flight-rules>`__ for a
