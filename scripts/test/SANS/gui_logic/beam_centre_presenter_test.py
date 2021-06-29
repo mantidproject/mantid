@@ -88,6 +88,14 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.assertEqual(self.BeamCentreModel.hab_pos_2, self.view.hab_pos_2)
         self.view.set_run_button_to_normal.assert_called_once_with()
 
+    def test_on_update_positions_handles_strings(self):
+        self.BeamCentreModel.lab_pos_1 = "foo"
+        self.BeamCentreModel.lab_pos_2 = ""
+        self.presenter.update_centre_positions()
+
+        self.assertEqual("foo", self.view.lab_pos_1)
+        self.assertEqual("", self.view.lab_pos_2)
+
     def test_that_update_hab_selected_enabled_hab_and_disabled_lab(self):
         self.presenter.set_view(self.view)
         self.presenter.update_hab_selected()

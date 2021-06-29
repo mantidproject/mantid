@@ -20,6 +20,7 @@ Bugfixes
 --------
 
 - The ISIS SANS Interface will now display an error, instead of an unexpected error, if the user does not have permission to save a CSV file to the requested location.
+- The ISIS SANS interface will no longer throw an uncaught exception when a user tries to enter row information without loading a Mask/TOML file.
 
 Improvements
 ############
