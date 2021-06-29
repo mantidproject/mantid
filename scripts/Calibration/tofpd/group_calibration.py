@@ -10,7 +10,7 @@ from mantid.simpleapi import (ConvertUnits, ExtractSpectra,
                               ApplyDiffCal, DiffractionFocussing,
                               PDCalibration, Load, LoadMask,
                               LoadDiffCal, LoadDetectorsGroupingFile,
-                              SaveDiffCal)
+                              SaveDiffCal, DeleteWorkspace)
 
 # Diamond peak positions in d-space
 DIAMOND = (0.3117,0.3257,0.3499,0.4205,0.4645,
@@ -59,28 +59,29 @@ def cc_calibrate_groups(data_ws,
 
     for group in group_list:
         indexes = np.where(group_ws.extractY().flatten() == group)[0]
-        ExtractSpectra(data_d, WorkspaceIndexList=indexes, OutputWorkspace=f'_tmp_group_{group}')
-        ExtractUnmaskedSpectra(f'_tmp_group_{group}', OutputWorkspace=f'_tmp_group_{group}')
-        if mtd[f'_tmp_group_{group}'].getNumberHistograms() < 2:
+        ExtractSpectra(data_d, WorkspaceIndexList=indexes, OutputWorkspace='_tmp_group_cc')
+        ExtractUnmaskedSpectra('_tmp_group_cc', OutputWorkspace='_tmp_group_cc')
+        if mtd['_tmp_group_cc'].getNumberHistograms() < 2:
             continue
-        Rebin(f'_tmp_group_{group}', Params=f'{Xmin},{Step},{Xmax}', OutputWorkspace=f'_tmp_group_{group}')
-        CrossCorrelate(f'_tmp_group_{group}',
+        Rebin('_tmp_group_cc', Params=f'{Xmin},{Step},{Xmax}', OutputWorkspace='_tmp_group_cc')
+        CrossCorrelate('_tmp_group_cc',
                        Xmin=Xmin, XMax=Xmax,
                        MaxDSpaceShift=MaxDSpaceShift,
                        WorkspaceIndexMin=0,
-                       WorkspaceIndexMax=mtd[f'_tmp_group_{group}'].getNumberHistograms()-1,
-                       OutputWorkspace=f'_tmp_group_{group}_cc')
+                       WorkspaceIndexMax=mtd['_tmp_group_cc'].getNumberHistograms()-1,
+                       OutputWorkspace='_tmp_group_cc')
 
         bin_range = (Xmax-Xmin)/Step
-        GetDetectorOffsets(InputWorkspace=f'_tmp_group_{group}_cc',
+        GetDetectorOffsets(InputWorkspace='_tmp_group_cc',
                            Step=Step,
                            Xmin=-bin_range, XMax=bin_range,
                            DReference=DReference,
                            MaxOffset=1,
-                           OutputWorkspace=f'{output_basename}_offsets_{group}')
-        previous_calibration = ConvertDiffCal(f'{output_basename}_offsets_{group}',
+                           OutputWorkspace='_tmp_group_cc')
+        previous_calibration = ConvertDiffCal('_tmp_group_cc',
                                               PreviousCalibration=previous_calibration,
                                               OutputWorkspace=f'{output_basename}_cc_diffcal')
+        DeleteWorkspace('_tmp_group_cc')
 
     return mtd[f'{output_basename}_cc_diffcal']
 
@@ -124,14 +125,14 @@ def pdcalibration_groups(data_ws,
 
     ApplyDiffCal(data_ws, CalibrationWorkspace=cc_diffcal)
     ConvertUnits(data_ws, Target='dSpacing', OutputWorkspace='_tmp_data_aligned')
-    DiffractionFocussing('_tmp_data_aligned', GroupingWorkspace=group_ws, OutputWorkspace='_tmp_data_aligned_focussed')
+    DiffractionFocussing('_tmp_data_aligned', GroupingWorkspace=group_ws, OutputWorkspace='_tmp_data_aligned')
 
     # Remove the following line after new CombineDiffCal algorithm is implemented as that will use the calibrated difc
-    ApplyDiffCal('_tmp_data_aligned_focussed', ClearCalibration=True)
+    ApplyDiffCal('_tmp_data_aligned', ClearCalibration=True)
 
-    ConvertUnits('_tmp_data_aligned_focussed', Target='TOF', OutputWorkspace='_tmp_data_aligned_focussed')
+    ConvertUnits('_tmp_data_aligned', Target='TOF', OutputWorkspace='_tmp_data_aligned')
 
-    PDCalibration(InputWorkspace='_tmp_data_aligned_focussed',
+    PDCalibration(InputWorkspace='_tmp_data_aligned',
                   TofBinning=TofBinning,
                   PreviousCalibrationTable=previous_calibration,
                   PeakFunction=PeakFunction,
@@ -148,7 +149,7 @@ def pdcalibration_groups(data_ws,
 
     cc_det_to_difc = dict(zip(cc_diffcal.column('detid'), cc_diffcal.column('difc')))
 
-    grouped = mtd['_tmp_data_aligned_focussed']
+    grouped = mtd['_tmp_data_aligned']
     specInfo = grouped.spectrumInfo()
     grouped_det_to_difc = {}
 
@@ -163,6 +164,8 @@ def pdcalibration_groups(data_ws,
                                       pd_diffcal.cell(n, 1)
                                       * cc_det_to_difc[detid]
                                       / grouped_det_to_difc[detid])
+
+    DeleteWorkspace('_tmp_data_aligned')
 
     return mtd[f'{output_basename}_cc_pd_diffcal']
 
