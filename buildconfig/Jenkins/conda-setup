@@ -7,13 +7,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 EXPECTED_MAMBAFORGE_PATH=$HOME/mambaforge
 EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/conda
+ENV_NAME="mantid-developer"
 
 MAMBAFORGE_SCRIPT_NAME=Mambaforge-$(uname)-$(uname -m).sh
 
 # Ensure conda is installed
 if [[ ! -f $EXPECTED_CONDA_PATH ]]; then
     if [[ ! -f $MAMBAFORGE_SCRIPT_NAME ]]; then
-        # Download miniconda
+        # Download mambaforge
         URL=https://github.com/conda-forge/miniforge/releases/latest/download/$MAMBAFORGE_SCRIPT_NAME
         if [ -x "$(which curl)" ]; then
             curl -L -O $URL
@@ -30,11 +31,13 @@ fi
 # With miniconda we can grab the mantid environment if it doesn't already exist
 ENVS=$($EXPECTED_CONDA_PATH env list)
 if [[ ! $ENVS = *"$EXPECTED_MAMBAFORGE_PATH/envs/mantid-developer"* ]]; then
-    # THIS IS JUST A TEST PATH:
-    $EXPECTED_CONDA_PATH env create -f $SCRIPT_DIR/../../mantid-developer-linux.yml
+    $EXPECTED_CONDA_PATH env remove -n mantid-developer
 else
     echo "Conda environment already setup."
 fi
+
+# Always create the new environment:
+$EXPECTED_CONDA_PATH env create -f $SCRIPT_DIR/../../mantid-developer-linux.yml
 
 echo "Conda is now configured, and setup."
 exit
