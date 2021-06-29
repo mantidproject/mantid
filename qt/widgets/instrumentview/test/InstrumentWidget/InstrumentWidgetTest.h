@@ -12,11 +12,14 @@
 
 #include "MockMantidGLWidget.h"
 #include "MockProjectionSurface.h"
+#include "MockQtConnect.h"
 #include "MockSimpleWidget.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <QObject>
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -34,6 +37,7 @@ public:
 
   using SimpleMock = StrictMock<MockSimpleWidget>;
   using GLMock = StrictMock<MockMantidGLWidget>;
+  using ConnectMock = StrictMock<MockQtConnect>;
 
   void setUp() override {
     FrameworkManager::Instance();
@@ -43,7 +47,7 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void test_constructor() { auto instance = construct(makeSimple(), makeGL()); }
+  void test_constructor() { auto instance = construct(makeSimple(), makeGL(), makeConnect()); }
 
   void test_save_image_simple_widget() {
     const auto inputName = QString::fromStdString("testFilename");
@@ -52,7 +56,7 @@ public:
     auto simpleMock = makeSimple();
     EXPECT_CALL(*simpleMock, saveToFile(expectedName)).Times(1);
 
-    auto widget = construct(std::move(simpleMock), makeGL());
+    auto widget = construct(std::move(simpleMock), makeGL(), makeConnect());
     widget.saveImage(inputName);
   }
 
@@ -60,7 +64,7 @@ public:
     auto simpleMock = makeSimple();
     EXPECT_CALL(*simpleMock, updateDetectors()).Times(1);
 
-    auto widget = construct(std::move(simpleMock), makeGL());
+    auto widget = construct(std::move(simpleMock), makeGL(), makeConnect());
     widget.updateInstrumentDetectors();
   }
 
@@ -68,7 +72,39 @@ private:
   std::unique_ptr<SimpleMock> makeSimple() const { return std::make_unique<SimpleMock>(); }
   std::unique_ptr<GLMock> makeGL() const { return std::make_unique<GLMock>(); }
 
-  InstrumentWidget construct(std::unique_ptr<SimpleMock> simpleMock, std::unique_ptr<GLMock> glMock) const {
+  void mockConnect(MockQtConnect &mock, const char *signal, const char *slot) const {
+    EXPECT_CALL(mock, connect(_, StrEq(signal), _, StrEq(slot))).Times(1);
+  }
+
+  std::unique_ptr<ConnectMock> makeConnect() const {
+    auto mock = std::make_unique<ConnectMock>();
+    mockConnect(*mock, SIGNAL(enableLighting(bool)), SLOT(enableLighting(bool)));
+
+    mockConnect(*mock, SIGNAL(changed(double, double)), SLOT(setIntegrationRange(double, double)));
+    mockConnect(*mock, SIGNAL(clicked()), SLOT(helpClicked()));
+    mockConnect(*mock, SIGNAL(setAutoscaling(bool)), SLOT(setColorMapAutoscaling(bool)));
+    mockConnect(*mock, SIGNAL(rescaleColorMap()), SLOT(setupColorMap()));
+    mockConnect(*mock, SIGNAL(executeAlgorithm(const QString &, const QString &)),
+                SLOT(executeAlgorithm(const QString &, const QString &)));
+    mockConnect(*mock, SIGNAL(changed(double, double)), SLOT(changedIntegrationRange(double, double)));
+    mockConnect(*mock, SIGNAL(currentChanged(int)), SLOT(tabChanged(int)));
+    mockConnect(*mock, SIGNAL(triggered()), SLOT(clearPeakOverlays()));
+    mockConnect(*mock, SIGNAL(triggered()), SLOT(clearAlignmentPlane()));
+
+    EXPECT_CALL(*mock, connect(_, StrEq(SIGNAL(needSetIntegrationRange(double, double))), _,
+                               StrEq(SLOT(setIntegrationRange(double, double))), Qt::QueuedConnection))
+        .Times(1);
+    mockConnect(*mock, SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),
+                SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
+
+    EXPECT_CALL(*mock,
+                connect(_, StrEq(SIGNAL(updateInfoText())), _, StrEq(SLOT(updateInfoText())), Qt::QueuedConnection))
+        .Times(1);
+    return mock;
+  }
+
+  InstrumentWidget construct(std::unique_ptr<SimpleMock> simpleMock, std::unique_ptr<GLMock> glMock,
+                             std::unique_ptr<ConnectMock> connectMock) const {
     auto surfaceMock = std::make_shared<MockProjectionSurface>();
     EXPECT_CALL(*simpleMock, setSurface(_)).Times(1);
     EXPECT_CALL(*simpleMock, qtInstallEventFilter(_)).Times(1);
@@ -78,7 +114,9 @@ private:
     EXPECT_CALL(*glMock, setBackgroundColor(_)).Times(1);
     EXPECT_CALL(*glMock, getSurface()).Times(24).WillRepeatedly(Return(surfaceMock));
     EXPECT_CALL(*glMock, setSurface(_)).Times(1);
+    EXPECT_CALL(*glMock, currentBackgroundColor()).Times(1);
 
-    return InstrumentWidget("test_ws", nullptr, true, true, 0.0, 0.0, true, std::move(simpleMock), std::move(glMock));
+    return InstrumentWidget("test_ws", nullptr, true, true, 0.0, 0.0, true, std::move(simpleMock), std::move(glMock),
+                            std::move(connectMock));
   }
 };
