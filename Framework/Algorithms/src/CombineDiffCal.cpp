@@ -90,7 +90,6 @@ void CombineDiffCal::exec() {
 
     Mantid::API::TableRow newRow = outputWorkspace->appendRow();
     newRow << pixelCalibrationRow.Int(0) << value;
-    ++calibrationIndex;
   } while (groupedCalibrationRow.next() && pixelCalibrationRow.next());
 
   setProperty("OutputWorkspace", outputWorkspace);
