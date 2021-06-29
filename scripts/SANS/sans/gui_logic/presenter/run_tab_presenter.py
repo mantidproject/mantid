@@ -720,10 +720,14 @@ class RunTabPresenter(PresenterCommon):
             filename = self.display_save_file_box("Save table as", default_filename, "*.csv")
             filename = self._get_filename_to_save(filename)
 
-            if filename:
-                self.sans_logger.information("Starting export of table. Filename: {}".format(filename))
+            if not filename:
+                return
+            self.sans_logger.information("Starting export of table. Filename: {}".format(filename))
+            try:
                 self._csv_parser.save_batch_file(rows=non_empty_rows, file_path=filename)
-                self.sans_logger.information("Table exporting finished.")
+            except (PermissionError, IOError) as e:
+                self.display_errors(error=e, context_msg="Failed to save the .csv file.", use_error_name=True)
+            self.sans_logger.information("Table exporting finished.")
 
     def on_multiperiod_changed(self, show_periods):
         if show_periods:

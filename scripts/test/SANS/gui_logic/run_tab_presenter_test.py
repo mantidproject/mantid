@@ -558,6 +558,17 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(self._mock_csv_parser.save_batch_file.call_count, 1,
                          "_save_batch_file should have been called but was not")
 
+    def test_save_csv_handles_exceptions(self):
+        for exception in [PermissionError(), IOError()]:
+            self.presenter.display_errors = mock.Mock()
+            self._mock_csv_parser.save_batch_file.side_effect = exception
+            self._mock_table.get_non_empty_rows.return_value = BATCH_FILE_TEST_CONTENT_1
+            self._mock_model.batch_file = ""
+            self.presenter.display_save_file_box = mock.Mock(return_value="mocked_file_path")
+
+            self.presenter.on_export_table_clicked()
+            self.presenter.display_errors.assert_called_once()
+
     def test_that_table_not_exported_if_table_is_empty(self):
         self.presenter._export_table = mock.MagicMock()
         self._mock_table.get_non_empty_rows.return_value = []
