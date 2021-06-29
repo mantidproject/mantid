@@ -8,15 +8,27 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/CombineDiffCal.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidDataHandling/ApplyDiffCal.h"
+#include "MantidDataHandling/GroupDetectors2.h"
+
+using namespace Mantid;
+using namespace Mantid::DataObjects;
+using namespace Mantid::API;
+using namespace Mantid::DataHandling;
 using Mantid::Algorithms::CombineDiffCal;
-using Mantid::API::ITableWorkspace_sptr;
+using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::API::TableRow;
 using Mantid::DataObjects::TableWorkspace;
+using Mantid::DataObjects::TableWorkspace_sptr;
 
 class CombineDiffCalTest : public CxxTest::TestSuite {
 public:
@@ -25,24 +37,115 @@ public:
   static CombineDiffCalTest *createSuite() { return new CombineDiffCalTest(); }
   static void destroySuite(CombineDiffCalTest *suite) { delete suite; }
 
-  MatrixWorkspace_sptr create_grouped_workspace() {
-    // CreateSampleWorkspace(OutputWorkspace=name,
-    // XUnit="dSpacing", NumBanks=1) gives 100 spectra with differenct locations
-  }
+  CombineDiffCalTest() { FrameworkManager::Instance(); }
 
-  ITableWorkspace_sptr create_diffcal_table() {
+  DataObjects::TableWorkspace_sptr createPixelCalibrationTable() {
     // create table with correct column names
-    ITableWorkspace_sptr table = std::make_shared<TableWorkspace>();
+    DataObjects::TableWorkspace_sptr table = std::make_shared<DataObjects::TableWorkspace>();
     table->addColumn("int", "detid");
     table->addColumn("double", "difc");
     table->addColumn("double", "difa");
     table->addColumn("double", "tzero");
 
     // fill the values
-    TableRow new_row = table->appendRow();
     //      new_row << entry.detector_id << entry.difc << entry.difa << entry.tzero;
+    TableRow newRow = table->appendRow();
+    newRow << 100 << 1000.0 << 0.0 << 0.0;
+
+    newRow = table->appendRow();
+    newRow << 101 << 1001.0 << 0.0 << 0.0;
+
+    newRow = table->appendRow();
+    newRow << 102 << 1099.0 << 0.0 << 0.0;
+
+    newRow = table->appendRow();
+    newRow << 103 << 1101.0 << 0.0 << 0.0;
 
     return table;
+  }
+
+  DataObjects::TableWorkspace_sptr createGroupedCalibrationTable() {
+    // create table with correct column names
+    DataObjects::TableWorkspace_sptr table = std::make_shared<DataObjects::TableWorkspace>();
+    table->addColumn("int", "detid");
+    table->addColumn("double", "difc");
+    table->addColumn("double", "difa");
+    table->addColumn("double", "tzero");
+
+    // fill the values
+    //      new_row << entry.detector_id << entry.difc << entry.difa << entry.tzero;
+    TableRow newRow = table->appendRow();
+    newRow << 100 << 1000.0 << 0.0 << 0.0;
+
+    newRow = table->appendRow();
+    newRow << 101 << 1001.0 << 0.0 << 0.0;
+
+    newRow = table->appendRow();
+    newRow << 102 << 1110.0 << 0.0 << 0.0;
+
+    newRow = table->appendRow();
+    newRow << 103 << 1110.0 << 0.0 << 0.0;
+
+    return table;
+  }
+
+  DataObjects::TableWorkspace_sptr createCalibrationTableArgs() {
+    // create table with correct column names
+    DataObjects::TableWorkspace_sptr table = std::make_shared<DataObjects::TableWorkspace>();
+    table->addColumn("int", "detid");
+    table->addColumn("double", "difc");
+    table->addColumn("double", "difa");
+    table->addColumn("double", "tzero");
+
+    // fill the values
+    //      new_row << entry.detector_id << entry.difc << entry.difa << entry.tzero;
+    TableRow newRow = table->appendRow();
+    newRow << 100 << 1000.0 << 0.0 << 0.0;
+
+    newRow = table->appendRow();
+    newRow << 101 << 1000.0 << 0.0 << 0.0;
+
+    newRow = table->appendRow();
+    newRow << 102 << 1100.0 << 0.0 << 0.0;
+
+    newRow = table->appendRow();
+    newRow << 103 << 1100.0 << 0.0 << 0.0;
+
+    return table;
+  }
+
+  MatrixWorkspace_sptr createCalibrationWorkspace() {
+    CreateSampleWorkspace createSampleWorkspaceAlgo;
+    createSampleWorkspaceAlgo.setChild(true);
+    createSampleWorkspaceAlgo.initialize();
+    createSampleWorkspaceAlgo.setPropertyValue("OutputWorkspace", "outWSName");
+    createSampleWorkspaceAlgo.execute();
+    MatrixWorkspace_sptr wipWS = createSampleWorkspaceAlgo.getProperty("OutputWorkspace");
+
+    GroupDetectors2 groupDetectorsAlgo;
+    groupDetectorsAlgo.setChild(true);
+    groupDetectorsAlgo.initialize();
+    groupDetectorsAlgo.setProperty("InputWorkspace", wipWS);
+    groupDetectorsAlgo.setProperty("GroupingPattern", "0+1,2+3");
+    groupDetectorsAlgo.setPropertyValue("OutputWorkspace", "outWSName");
+    groupDetectorsAlgo.execute();
+
+    wipWS = groupDetectorsAlgo.getProperty("OutputWorkspace");
+
+    const auto calibrationArgsTable = createCalibrationTableArgs();
+
+    std::string testWorkspaceName = "TestWorkspace";
+    AnalysisDataService::Instance().add(testWorkspaceName, wipWS);
+    const auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(testWorkspaceName);
+
+    ApplyDiffCal applyDiffCalAlgo;
+    applyDiffCalAlgo.setChild(true);
+    applyDiffCalAlgo.initialize();
+    applyDiffCalAlgo.setProperty("InstrumentWorkspace", testWorkspaceName);
+    applyDiffCalAlgo.setProperty("CalibrationWorkspace", calibrationArgsTable);
+    applyDiffCalAlgo.execute();
+
+    return outWS;
   }
 
   void test_init() {
@@ -60,31 +163,38 @@ public:
     // grouped with arb!=group
 
     // test input
-    auto difcal_table_pixel = create_diffcal_table();
-    auto difcal_table_group = create_diffcal_table();
-    // TODO create calibration data
+
+    // fake data to simulate the output of cross correlate PixelCalibration
+    const auto difCalPixelCalibration = createPixelCalibrationTable();
+
+    // fake data to simulate the output of PDCalibration GroupedCalibration
+    const auto difCalGroupedCalibration = createGroupedCalibrationTable();
+
+    // fake data to simulate CalibrationWorkspace
+    const auto diffCalCalibrationWs = createCalibrationWorkspace();
 
     // set up algorithm
     CombineDiffCal alg;
     alg.setChild(true); // Don't put output in ADS by default
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelCalibration", difcal_table_pixel));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupedCalibration", difcal_table_group));
-    // TODO  TS_ASSERT_THROWS_NOTHING( alg.setProperty("CalibrationWorkspace", difcal_table_pixel) );
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelCalibration", difCalPixelCalibration));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupedCalibration", difCalGroupedCalibration));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalibrationWorkspace", diffCalCalibrationWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
 
     // run the algorithm
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    /*
-    // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
-    // be the type using in declareProperty for the "OutputWorkspace" type.
-    // We can't use auto as it's an implicit conversion.
-    Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS);
-    TS_FAIL("TODO: Check the results and remove this line");
-    */
+    DataObjects::TableWorkspace_sptr output = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(output);
+
+    auto difc = output->getColumn("difc");
+    TS_ASSERT(difc);
+    TS_ASSERT_EQUALS(difc->toDouble(0), (1000. / 1000.) * 1000.);
+    TS_ASSERT_EQUALS(difc->toDouble(1), (1001. / 1000.) * 1001.);
+    TS_ASSERT_EQUALS(difc->toDouble(2), (1110. / 1100.) * 1099.);
+    TS_ASSERT_EQUALS(difc->toDouble(3), (1110. / 1100.) * 1101.);
   }
 };

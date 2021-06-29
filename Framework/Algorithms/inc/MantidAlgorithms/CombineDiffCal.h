@@ -12,7 +12,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** CombineDiffCal : TODO: DESCRIPTION
+/** CombineDiffCal : Calibrate groups of pixels after cross correlation so that diffraction peaks can be adjusted to the
+ * correct positions
  */
 class MANTID_ALGORITHMS_DLL CombineDiffCal : public API::Algorithm {
 public:
