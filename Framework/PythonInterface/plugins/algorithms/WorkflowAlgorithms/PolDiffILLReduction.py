@@ -861,12 +861,12 @@ class PolDiffILLReduction(PythonAlgorithm):
         if output_treatment == 'IndividualXY':
             self._merge_all_inputs(ws)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])  # renames group as a whole
+        output_ws = self.getPropertyValue("OutputWorkspace")
         if mtd[ws[2:]].getNumberOfEntries() > 1:
             for entry in mtd[ws[2:]]:  # renames individual ws to contain the output name
                 entry_name = entry.name()
                 if entry_name[:2] == "__":
                     entry_name = entry_name[2:]
-                output_ws = self.getPropertyValue("OutputWorkspace")
                 if output_ws not in entry_name:
                     output_name = "{}_{}".format(output_ws, entry_name)
                 else:
