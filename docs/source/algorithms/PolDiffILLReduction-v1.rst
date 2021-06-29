@@ -66,6 +66,35 @@ The rare exceptions are when processing as transmission, when beam input workspa
 where input from transmission is indispensable. Transmission however can be provided also as a string containing floating point value of desired tranmission, that needs
 to be in the range (0, 1].
 
+OutputTreatment
+---------------
+
+This property of the algorithm allows to decide the treatment and shape of the output of the reduction workflow. There are several options available:
+
+- *Individual*
+- *IndividualXY*
+- *AveragePol*
+- *AverageTwoTheta*
+- *Sum*.
+
+The `Individual` setting will preserve the number of workspaces of the input, allowing to check workspace by workspace how the relevant process reduced the data.
+This is the recommended setting for the sample data processing for the use as input to :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` algorithm.
+
+`IndividualXY` allows to display all measured point on a single plot as a function of a twotheta. This option is indended as a convenient diagnostics, and the output
+obtained with this selection is not a suitable input for further processing in :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`.
+
+`AveragePol` will average the workspaces according to their polarization orientation and the flipper state. The output will contain as many workspaces as there are
+relevant combinations of the polarization and the flipper state, so two workspaces in the case of the uniaxial measurement, six for XYZ, etc. This is the recommended
+setting for processing Quartz.
+
+`AverageTwoTheta` will average the workspaces with the same `2theta.requested` metadata entry. The output will contain as many workspaces as there were different
+requested twotheta positions. This setting is intended only as a convenient diagnostics of the reduction processing, and the output is not suitable for further processing.
+
+`Sum` behaviour depends on the process. For processing Vanadium, it will first average input workspaces according to their polarisation orientation, like in `AveragePol`,
+and then the averaged workspaced will be summed. For different processes, this selection calls :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>` algorithm and will
+display data as a function of twotheta. This is the recommended setting for processing Vanadium; for other process types, the output is not suitable for further processing.
+
+
 SampleAndEnvironmentProperties
 ##############################
 
