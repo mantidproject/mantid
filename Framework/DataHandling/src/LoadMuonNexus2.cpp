@@ -93,7 +93,7 @@ void LoadMuonNexus2::exec() {
     doExec();
   } else {
     // Version 1 or V2
-    IAlgorithm_sptr childAlg = createChildAlgorithm(getLoadAlgName(confidence1, confidenceV2), 0, 1, true, 1);
+    auto childAlg = createChildAlgorithm(getLoadAlgName(confidence1, confidenceV2), 0, 1, true, 1);
     auto loader = std::dynamic_pointer_cast<API::Algorithm>(childAlg);
     loader->copyPropertiesFrom(*this);
     loader->executeAsChildAlg();

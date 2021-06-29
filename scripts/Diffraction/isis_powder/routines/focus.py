@@ -175,7 +175,6 @@ def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
                        for data_ws, van_ws in zip(spectra_list, vanadium_splines)]
         return output_list
     output_list = [_divide_one_spectrum_by_spline(spectra_list[0], vanadium_splines, instrument)]
-    common.remove_intermediate_workspace(vanadium_splines)
     return output_list
 
 

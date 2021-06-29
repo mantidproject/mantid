@@ -179,7 +179,7 @@ void IndirectFitDataTableModel::addWorkspace(const std::string &workspaceName, c
 void IndirectFitDataTableModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                                              const FunctionModelSpectra &spectra) {
   if (!m_fittingData->empty()) {
-    for (auto fitData : *m_fittingData) {
+    for (auto &fitData : *m_fittingData) {
       if (equivalentWorkspaces(workspace, fitData.workspace())) {
         fitData.combine(IndirectFitData(workspace, spectra));
         return;

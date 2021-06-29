@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
@@ -14,7 +15,7 @@ namespace RemoteAlgorithms {
 /**
  Submit a job to be executed on a (remote) compute resource
 */
-class DLLExport SubmitRemoteJob2 : public Mantid::API::Algorithm {
+class DLLExport SubmitRemoteJob2 : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SubmitRemoteJob"; }

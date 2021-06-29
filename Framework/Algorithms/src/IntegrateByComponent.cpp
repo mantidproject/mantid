@@ -60,7 +60,7 @@ void IntegrateByComponent::exec() {
   MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   int parents = getProperty("LevelsUp");
   // Make sure it's integrated
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Integration", 0, 0.2);
+  auto childAlg = createChildAlgorithm("Integration", 0, 0.2);
   childAlg->setProperty("InputWorkspace", inputWS);
   childAlg->setProperty("StartWorkspaceIndex", 0);
   childAlg->setProperty("EndWorkspaceIndex", EMPTY_INT());

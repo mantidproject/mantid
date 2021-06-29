@@ -24,7 +24,7 @@ See the :ref:`Rebin <algm-Rebin>` documentation for details about choosing the `
 Usage
 -----
 
-This algorithm is used as a part of the `SANSReduction <http://www.mantidproject.org/Reduction_for_HFIR_SANS>`_ and :ref:`SANSILLIntegration <algm-SANSILLIntegration>`.
+This algorithm is used as a part of the :ref:`SANSReduction <algm-HFIRSANSReduction-v1>` and :ref:`SANSILLIntegration <algm-SANSILLIntegration>`.
 However, it can also be used directly, provided that the input data is already corrected for all the effects.
 
 I/O

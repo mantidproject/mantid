@@ -20,7 +20,7 @@ class ResultsTabWidget(object):
         """
         self.results_tab_view = ResultsTabView(parent=parent)
         self.results_tab_presenter = ResultsTabPresenter(
-            self.results_tab_view, ResultsTabModel(fit_context))
+            self.results_tab_view, ResultsTabModel(fit_context, context.results_context))
 
         context.update_view_from_model_notifier.add_subscriber(self.results_tab_presenter.update_view_from_model_observer)
         fit_context.fit_removed_notifier.add_subscriber(self.results_tab_presenter.new_fit_performed_observer)

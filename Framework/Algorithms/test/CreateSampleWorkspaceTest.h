@@ -47,7 +47,8 @@ public:
                                              const std::string &function = "", const std::string &userFunction = "",
                                              int numBanks = 2, int bankPixelWidth = 10, int numEvents = 1000,
                                              bool isRandom = false, const std::string &xUnit = "TOF", double xMin = 0.0,
-                                             double xMax = 20000.0, double binWidth = 200.0, int numScanPoints = 1) {
+                                             double xMax = 20000.0, double binWidth = 200.0, int numScanPoints = 1,
+                                             std::string instrName = "basic_rect") {
 
     CreateSampleWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -76,6 +77,8 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinWidth", binWidth));
     if (numScanPoints != 1)
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumScanPoints", numScanPoints))
+    if (instrName != "basic_rect")
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("InstrumentName", instrName))
 
     /* Check the property groups */
     std::vector<Property *> instrument_properties = alg.getPropertiesInGroup("Instrument");
@@ -541,6 +544,15 @@ public:
     }
 
     // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_instrument_name() {
+    std::string outWSName("CreateSampleWorkspaceTest_OutputWS_Instrument_Name");
+    std::string name("testingInstr"); // name of the instrument
+    auto ws = std::dynamic_pointer_cast<IEventWorkspace>(createSampleWorkspace(
+        outWSName, "Event", "Flat background", "", 2, 1, 1000, false, "DeltaE", -10., 19., 0.5, 1, name));
+    TS_ASSERT_EQUALS(ws->getInstrument()->getName(), name)
     AnalysisDataService::Instance().remove(outWSName);
   }
 };
