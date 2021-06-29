@@ -17,16 +17,18 @@ using namespace Mantid::Kernel;
 #define DATA_SIZE 10000000
 std::vector<double> shared_data;
 
-Poco::RWLock _access;
+namespace {
+Poco::RWLock g_mutex;
+}
 
 // Poco::ScopedReadRWLock getReadLock()
 //{
-//  return Poco::ScopedReadRWLock(_access);
+//  return Poco::ScopedReadRWLock(g_mutex);
 //}
 
 void reader() {
   //  std::cout << "Read started\n";
-  Poco::ScopedReadRWLock lock(_access);
+  Poco::ScopedReadRWLock lock(g_mutex);
   //  std::cout << "Read launching\n";
   // do work here, without anyone having exclusive access
   for (double val : shared_data) {
@@ -37,7 +39,7 @@ void reader() {
 
 void unconditional_writer() {
   //  std::cout << "Write started\n";
-  Poco::ScopedWriteRWLock lock(_access);
+  Poco::ScopedWriteRWLock lock(g_mutex);
   //  std::cout << "Write launching\n";
   // do work here, with exclusive access
   shared_data.resize(shared_data.size() + 1, 2.345);
