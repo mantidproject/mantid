@@ -24,6 +24,7 @@ Improvements
 
 Bugfixes
 ########
+- Fix the issue with :ref:`SNSPowderReduction <algm-SNSPowderReduction>` - when invalid height unit is encountered while reading sample log, we should continue by ignoring geometry and rely purely on user input.
 - fix d-spacing calculation when parabolic model is selected.
 
 Engineering Diffraction
