@@ -6,11 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import FindPeaksAutomatic, PeakMatching, GroupWorkspaces
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
-from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, remove_ws
 from Muon.GUI.Common import thread_model, message_box
 from mantidqt.utils.observer_pattern import GenericObservable
 from queue import Queue
-from Muon.GUI.ElementalAnalysis2.context.ea_group_context import is_group_valid
 import copy
 
 """
@@ -100,17 +99,18 @@ class EAAutoTabModel(object):
         workspace = parameters["workspace"]
         run, detector = self.split_run_and_detector(workspace)
         if run is None or detector is None:
-            group = retrieve_ws(workspace)
-            for workspace_name in group.getNames():
-                if is_group_valid(workspace_name):
+            group_workspace = retrieve_ws(workspace)
+            for group in self.context.group_context.groups:
+                if group.run_number == workspace:
+                    workspace_name = group.get_counts_workspace_for_run(workspace, rebin=False)
                     tmp_parameters = copy.deepcopy(parameters)
                     tmp_parameters["workspace"] = workspace_name
-                    if not self._run_find_peak_algorithm(tmp_parameters, group, True):
-                        self._run_peak_matching_algorithm(workspace_name, group)
+                    if not self._run_find_peak_algorithm(tmp_parameters, group_workspace, True):
+                        self._run_peak_matching_algorithm(workspace_name, group_workspace)
         else:
-            group = retrieve_ws(run)
-            self._run_find_peak_algorithm(parameters, group)
-            self._run_peak_matching_algorithm(workspace, group)
+            group_workspace = retrieve_ws(run)
+            self._run_find_peak_algorithm(parameters, group_workspace)
+            self._run_peak_matching_algorithm(workspace, group_workspace)
 
     def _run_find_peak_algorithm(self, parameters, group, delay_errors=False):
         """
@@ -136,7 +136,7 @@ class EAAutoTabModel(object):
 
         return self._handle_find_peak_algorithm_outputs(group, workspace, delay_errors)
 
-    def _run_peak_matching_algorithm(self, workspace, group):
+    def _run_peak_matching_algorithm(self, workspace, group_workspace):
         """
         Run PeakMatching algorithm and adds resulting table workspaces into a matches group workspace, matches group
         workspace is then added is then added to run group workspace.
@@ -147,7 +147,10 @@ class EAAutoTabModel(object):
 
         GroupWorkspaces(InputWorkspaces=match_table_names, OutputWorkspace=workspace + MATCH_GROUP_WS_SUFFIX)
 
-        group.add(workspace + "_matches")
+        group_workspace.add(workspace + MATCH_GROUP_WS_SUFFIX)
+        self.context.group_context[workspace].update_matches_table(group_workspace.name(),
+                                                                   workspace + MATCH_GROUP_WS_SUFFIX)
+
         self.update_match_table(workspace + MATCH_TABLE_WS_SUFFIXES[-1], workspace)
 
     def update_match_table(self, likelihood_table_name, workspace_name):
@@ -163,22 +166,18 @@ class EAAutoTabModel(object):
         entry.append(elements)
         self.table_entries.put(entry)
 
-    def _handle_find_peak_algorithm_outputs(self, group, workspace, delay_errors):
+    def _handle_find_peak_algorithm_outputs(self, group_workspace, workspace, delay_errors):
         ignore_peak_matching = False
-        group.add(workspace + ERRORS_WS_SUFFIX)
-
-        refit_peak_table = retrieve_ws(workspace + REFITTED_PEAKS_WS_SUFFIX)
-        if refit_peak_table.rowCount() != 0:
-            group.add(workspace + REFITTED_PEAKS_WS_SUFFIX)
-        else:
-            refit_peak_table.delete()
+        remove_ws(workspace + ERRORS_WS_SUFFIX)
+        remove_ws(workspace + REFITTED_PEAKS_WS_SUFFIX)
 
         peak_table = retrieve_ws(workspace + PEAKS_WS_SUFFIX)
         number_of_peaks = peak_table.rowCount()
         self.current_peak_table_info["workspace"] = workspace
         self.current_peak_table_info["number_of_peaks"] = number_of_peaks
         if number_of_peaks != 0:
-            group.add(workspace + PEAKS_WS_SUFFIX)
+            group_workspace.add(workspace + PEAKS_WS_SUFFIX)
+            self.context.group_context[workspace].update_peak_table(group_workspace.name(), workspace + PEAKS_WS_SUFFIX)
         else:
             peak_table.delete()
             if delay_errors:

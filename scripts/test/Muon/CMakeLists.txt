@@ -2,6 +2,9 @@
 
 set ( TEST_PY_FILES
    ADSHandler/workspace_naming_test.py
+   base_pane/base_pane_model_test.py
+   base_pane/base_pane_presenter_test.py
+   basic_fitting_context_test.py
    elemental_analysis/elemental_analysis_test.py
    elemental_analysis/name_generator_test.py
    elemental_analysis/detectors_presenter_test.py
@@ -44,12 +47,17 @@ set ( TEST_PY_FILES
    fitting_widgets/general_fitting/general_fitting_presenter_test.py
    fitting_widgets/general_fitting/general_fitting_options_view_test.py
    fitting_widgets/general_fitting/general_fitting_view_test.py
+   fitting_widgets/model_fitting/model_fitting_data_selector_view_test.py
+   fitting_widgets/model_fitting/model_fitting_model_test.py
+   fitting_widgets/model_fitting/model_fitting_presenter_test.py
+   fitting_widgets/model_fitting/model_fitting_view_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_model_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_options_view_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_presenter_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_view_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_mode_switcher_view_test.py
    frequency_domain_context_test.py
+   general_fitting_context_test.py
    grouping_tab/calculate_pair_and_group_test.py
    grouping_tab/difference_table_presenter_test.py
    grouping_tab/difference_table_selector_test.py
@@ -82,6 +90,7 @@ set ( TEST_PY_FILES
    max_ent_presenter_load_interaction_test.py
    MaxEntModel_test.py
    MaxEntPresenter_test.py
+   model_fitting_context_test.py
    muon_context_test.py
    muon_context_with_frequency_test.py
    muon_data_context_test.py
@@ -90,15 +99,19 @@ set ( TEST_PY_FILES
    muon_period_info_widget_test.py
    phase_table_widget/phase_table_context_test.py
    phase_table_widget/phase_table_presenter_test.py
+   plot_data_pane/plot_data_pane_model_test.py
+   plot_data_pane/plot_data_pane_presenter_test.py
    plot_widget/plot_widget_model_test.py
    plot_widget/plot_widget_presenter_test.py
    plotting_canvas/plot_color_queue_test.py
    plotting_canvas/plotting_canvas_model_test.py
    plotting_canvas/plotting_canvas_presenter_test.py
+   results_context_test.py
    results_tab_widget/results_tab_model_test.py
    results_tab_widget/results_tab_presenter_test.py
    seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
    seq_fitting_tab_widget/sequential_table_test.py
+   tf_asymmetry_fitting_context_test.py
    transform_widget_test.py
    utilities/load_utils_test.py
    utilities/muon_base_pair_test.py

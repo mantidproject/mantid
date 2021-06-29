@@ -210,7 +210,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 self.actions()[i + 1].setVisible(enabled)
                 break
 
-    def set_buttons_visiblity(self, fig):
+    def set_buttons_visibility(self, fig):
         if figure_type(fig) not in [FigureType.Line, FigureType.Errorbar] or len(fig.get_axes()) > 1:
             self.set_fit_enabled(False)
 
@@ -245,6 +245,15 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
         if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.adjust_for_3d_plots()
+
+        # Toggle grid on/off button in case plot is created from a script.
+        is_major_grid_on = False
+        for ax in fig.get_axes():
+            is_major_grid_on = ax.xaxis._major_tick_kw['gridOn'] and ax.yaxis._major_tick_kw['gridOn']
+            # If ANY of the axes have no grid, set the button to unchecked.
+            if not is_major_grid_on:
+                break
+        self._actions['toggle_grid'].setChecked(is_major_grid_on)
 
     def is_colormap(self, fig):
         """Identify as a single colopur map if it has a axes, one with the plot and the other the colorbar"""

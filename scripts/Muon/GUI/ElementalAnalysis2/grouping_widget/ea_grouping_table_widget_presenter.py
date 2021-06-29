@@ -133,11 +133,6 @@ class EAGroupingTablePresenter(object):
             self.notify_data_changed()
             return
 
-        try:
-            self.update_model_from_view()
-        except ValueError as error:
-            self._view.warning_popup(error)
-
     def update_model_from_view(self):
         table = self._view.get_table_contents()
         self._model.clear_groups()

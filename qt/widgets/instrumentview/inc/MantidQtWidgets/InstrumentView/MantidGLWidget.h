@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "IMantidGLWidget.h"
 #include "MantidGeometry/IComponent.h"
 
 #include <QGLWidget>
@@ -22,24 +23,24 @@ class ProjectionSurface;
 \brief  OpenGL Qt Widget which renders Mantid Geometry ObjComponents
 */
 
-class MantidGLWidget : public QGLWidget {
+class MantidGLWidget final : public IMantidGLWidget {
   Q_OBJECT
 public:
   explicit MantidGLWidget(QWidget *parent = nullptr); ///< Constructor
   ~MantidGLWidget() override;                         ///< Destructor
-  void setSurface(std::shared_ptr<ProjectionSurface> surface);
-  std::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
+  void setSurface(std::shared_ptr<ProjectionSurface> surface) override;
+  std::shared_ptr<ProjectionSurface> getSurface() override { return m_surface; }
 
-  void setBackgroundColor(const QColor & /*input*/);
-  QColor currentBackgroundColor() const;
-  void saveToFile(const QString &filename);
+  void setBackgroundColor(const QColor & /*input*/) override;
+  QColor currentBackgroundColor() const override;
+  void saveToFile(const QString &filename) override;
   // int getLightingState() const {return m_lightingState;}
 
 public slots:
-  void enableLighting(bool /*on*/);
-  void updateView(bool picking = true);
-  void updateDetectors();
-  void componentSelected(size_t componentIndex);
+  void enableLighting(bool /*on*/) override;
+  void updateView(bool picking = true) override;
+  void updateDetectors() override;
+  void componentSelected(size_t componentIndex) override;
 
 protected:
   void initializeGL() override;
