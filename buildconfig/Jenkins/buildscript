@@ -343,6 +343,13 @@ if [ -e $BUILD_DIR/CMakeCache.txt ]; then
 fi
 
 ###############################################################################
+# Conda R-Path setup
+###############################################################################
+if [ ${ON_CONDA} ]; then
+    CMAKE_RPATH="-DCMAKE_BUILD_RPATH=$CONDA_PREFIX/x86_64-conda-linux-gnu/sysroot/usr/lib64"
+fi
+
+###############################################################################
 # Work in the build directory
 ###############################################################################
 cd $BUILD_DIR
@@ -357,7 +364,7 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 # CMake configuration
 ###############################################################################
 
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DCOVERAGE=${COVERAGE} -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} ${TURN_OFF_CMAKE_SYSTEM} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DCOVERAGE=${COVERAGE} -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} ${TURN_OFF_CMAKE_SYSTEM} ${CMAKE_RPATH} .."
 
 ###############################################################################
 # Coverity build should exit early
