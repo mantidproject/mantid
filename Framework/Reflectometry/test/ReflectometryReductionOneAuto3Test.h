@@ -39,7 +39,7 @@ private:
 
   MatrixWorkspace_sptr loadRun(const std::string &run) {
 
-    auto lAlg = AlgorithmManager::Instance().create("Load");
+    IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
     lAlg->setChild(true);
     lAlg->initialize();
     lAlg->setProperty("Filename", run);

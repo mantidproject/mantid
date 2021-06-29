@@ -88,7 +88,7 @@ void DgsPreprocessData::exec() {
       incidentBeamNorm = "ByCurrent";
     }
     const std::string normAlg = "Normalise" + incidentBeamNorm;
-    auto norm = createChildAlgorithm(normAlg);
+    IAlgorithm_sptr norm = this->createChildAlgorithm(normAlg);
     norm->setProperty("InputWorkspace", inputWS);
     norm->setProperty("OutputWorkspace", outputWS);
     if ("ToMonitor" == incidentBeamNorm) {
@@ -123,7 +123,7 @@ void DgsPreprocessData::exec() {
 
     outputWS = norm->getProperty("OutputWorkspace");
 
-    auto addLog = createChildAlgorithm("AddSampleLog");
+    IAlgorithm_sptr addLog = this->createChildAlgorithm("AddSampleLog");
     addLog->setProperty("Workspace", outputWS);
     addLog->setProperty("LogName", doneLog);
     addLog->setProperty("LogText", normAlg);

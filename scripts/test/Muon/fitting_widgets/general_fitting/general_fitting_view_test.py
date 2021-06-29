@@ -9,9 +9,9 @@ import unittest
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
-from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_view import (GeneralFittingView,
-                                                                                  SIMULTANEOUS_FIT_LABEL,
-                                                                                  SINGLE_FIT_LABEL)
+from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_options_view import (SIMULTANEOUS_FIT_LABEL,
+                                                                                          SINGLE_FIT_LABEL)
+from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_view import GeneralFittingView
 
 from qtpy.QtWidgets import QApplication
 
@@ -28,17 +28,29 @@ class GeneralFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(self.view.close())
         QApplication.sendPostedEvents()
 
-    def test_that_the_view_can_be_initialized_without_an_error(self):
-        self.view = GeneralFittingView()
+    def test_that_the_view_has_been_initialized_with_the_simultaneous_options_shown_when_it_is_not_a_frequency_domain(self):
+        self.view = GeneralFittingView(is_frequency_domain=False)
         self.view.show()
+
+        self.assertTrue(not self.view.general_fitting_options.simul_fit_checkbox.isHidden())
+        self.assertTrue(not self.view.general_fitting_options.simul_fit_by_combo.isHidden())
+        self.assertTrue(not self.view.general_fitting_options.simul_fit_by_specifier.isHidden())
+
+    def test_that_the_view_has_been_initialized_with_the_simultaneous_options_hidden_when_it_is_a_frequency_domain(self):
+        self.view = GeneralFittingView(is_frequency_domain=True)
+        self.view.show()
+
+        self.assertTrue(self.view.general_fitting_options.simul_fit_checkbox.isHidden())
+        self.assertTrue(self.view.general_fitting_options.simul_fit_by_combo.isHidden())
+        self.assertTrue(self.view.general_fitting_options.simul_fit_by_specifier.isHidden())
 
     def test_that_update_dataset_name_combo_box_will_set_the_names_in_the_dataset_name_combobox(self):
         dataset_names = ["Name1", "Name2", "Name3"]
 
         self.view.update_dataset_name_combo_box(dataset_names)
 
-        data = [self.view.workspace_selector.dataset_name_combo_box.itemText(i)
-                for i in range(self.view.workspace_selector.dataset_name_combo_box.count())]
+        data = [self.view.general_fitting_options.dataset_name_combo_box.itemText(i)
+                for i in range(self.view.general_fitting_options.dataset_name_combo_box.count())]
         self.assertTrue(data, dataset_names)
 
     def test_that_update_dataset_name_combo_box_will_select_the_previously_selected_item_if_it_still_exists(self):
@@ -46,7 +58,7 @@ class GeneralFittingViewTest(unittest.TestCase, QtWidgetFinder):
         dataset_names = ["Name1", "Name2", selected_dataset]
 
         self.view.update_dataset_name_combo_box(dataset_names)
-        self.view.workspace_selector.dataset_name_combo_box.setCurrentIndex(2)
+        self.view.general_fitting_options.dataset_name_combo_box.setCurrentIndex(2)
 
         new_dataset_names = ["Name4", selected_dataset, "Name5"]
         self.view.update_dataset_name_combo_box(new_dataset_names)
@@ -101,12 +113,49 @@ class GeneralFittingViewTest(unittest.TestCase, QtWidgetFinder):
 
     def test_that_switch_to_simultaneous_will_change_the_relevant_label(self):
         self.view.switch_to_simultaneous()
-        self.assertEqual(self.view.workspace_selector.workspace_combo_box_label.text(), SIMULTANEOUS_FIT_LABEL)
+        self.assertEqual(self.view.general_fitting_options.workspace_combo_box_label.text(), SIMULTANEOUS_FIT_LABEL)
 
     def test_that_switch_to_single_will_change_the_relevant_label(self):
         self.view.switch_to_simultaneous()
         self.view.switch_to_single()
-        self.assertEqual(self.view.workspace_selector.workspace_combo_box_label.text(), SINGLE_FIT_LABEL)
+        self.assertEqual(self.view.general_fitting_options.workspace_combo_box_label.text(), SINGLE_FIT_LABEL)
+
+    def test_that_hide_simultaneous_fit_options_will_hide_the_simultaneous_fitting_options(self):
+        self.assertTrue(not self.view.general_fitting_options.simul_fit_checkbox.isHidden())
+        self.assertTrue(not self.view.general_fitting_options.simul_fit_by_combo.isHidden())
+        self.assertTrue(not self.view.general_fitting_options.simul_fit_by_specifier.isHidden())
+
+        self.view.hide_simultaneous_fit_options()
+
+        self.assertTrue(self.view.general_fitting_options.simul_fit_checkbox.isHidden())
+        self.assertTrue(self.view.general_fitting_options.simul_fit_by_combo.isHidden())
+        self.assertTrue(self.view.general_fitting_options.simul_fit_by_specifier.isHidden())
+
+    def test_that_enable_simultaneous_fit_options_will_hide_the_simultaneous_fitting_options(self):
+        self.assertTrue(not self.view.general_fitting_options.simul_fit_by_combo.isEnabled())
+        self.assertTrue(not self.view.general_fitting_options.simul_fit_by_specifier.isEnabled())
+
+        self.view.enable_simultaneous_fit_options()
+
+        self.assertTrue(self.view.general_fitting_options.simul_fit_by_combo.isEnabled())
+        self.assertTrue(self.view.general_fitting_options.simul_fit_by_specifier.isEnabled())
+
+    def test_that_disable_simultaneous_fit_options_will_hide_the_simultaneous_fitting_options(self):
+        self.view.enable_simultaneous_fit_options()
+        self.assertTrue(self.view.general_fitting_options.simul_fit_by_combo.isEnabled())
+        self.assertTrue(self.view.general_fitting_options.simul_fit_by_specifier.isEnabled())
+
+        self.view.disable_simultaneous_fit_options()
+
+        self.assertTrue(not self.view.general_fitting_options.simul_fit_by_combo.isEnabled())
+        self.assertTrue(not self.view.general_fitting_options.simul_fit_by_specifier.isEnabled())
+
+    def test_that_is_simultaneous_fit_ticked_will_change_the_fitting_mode_as_expected(self):
+        self.assertTrue(not self.view.general_fitting_options.simul_fit_checkbox.isChecked())
+
+        self.view.is_simultaneous_fit_ticked = True
+
+        self.assertTrue(self.view.general_fitting_options.simul_fit_checkbox.isChecked())
 
     def test_that_setup_fit_by_specifier_will_add_fit_specifiers_to_the_relevant_checkbox(self):
         fit_specifiers = ["long", "fwd", "bwd"]

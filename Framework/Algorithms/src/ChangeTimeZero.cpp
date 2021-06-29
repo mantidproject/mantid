@@ -108,7 +108,7 @@ API::MatrixWorkspace_sptr ChangeTimeZero::createOutputWS(const API::MatrixWorksp
   MatrixWorkspace_sptr output = getProperty("OutputWorkspace");
   // Check whether input == output to see whether a new workspace is required.
   if (input != output) {
-    auto duplicate = createChildAlgorithm("CloneWorkspace", startProgress, stopProgress);
+    IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace", startProgress, stopProgress);
     duplicate->initialize();
     duplicate->setProperty<API::Workspace_sptr>("InputWorkspace", std::dynamic_pointer_cast<API::Workspace>(input));
     duplicate->execute();

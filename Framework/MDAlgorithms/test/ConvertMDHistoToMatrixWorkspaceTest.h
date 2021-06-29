@@ -167,7 +167,7 @@ public:
     auto in_ws = MDEventsTestHelper::makeMDEW<2>(2, -10.0, 10, 3);
 
     // Create a line slice at 45 degrees to the original workspace.
-    auto binMDAlg = AlgorithmManager::Instance().create("BinMD");
+    IAlgorithm_sptr binMDAlg = AlgorithmManager::Instance().create("BinMD");
     binMDAlg->setRethrows(true);
     binMDAlg->initialize();
     binMDAlg->setChild(true);
@@ -239,7 +239,7 @@ public:
     auto in_ws = MDEventsTestHelper::makeMDEW<2>(2, -10.0, 10, 3);
 
     // Create a line slice at degrees to the original workspace.
-    auto binMDAlg = AlgorithmManager::Instance().create("BinMD");
+    IAlgorithm_sptr binMDAlg = AlgorithmManager::Instance().create("BinMD");
     binMDAlg->setRethrows(true);
     binMDAlg->initialize();
     binMDAlg->setChild(true);
@@ -313,7 +313,7 @@ public:
     auto in_ws = MDEventsTestHelper::makeMDEW<2>(2, -10.0, 10, 3);
 
     // Create a line slice at degrees to the original workspace.
-    auto binMDAlg = AlgorithmManager::Instance().create("BinMD");
+    IAlgorithm_sptr binMDAlg = AlgorithmManager::Instance().create("BinMD");
     binMDAlg->setRethrows(true);
     binMDAlg->initialize();
     binMDAlg->setChild(true);

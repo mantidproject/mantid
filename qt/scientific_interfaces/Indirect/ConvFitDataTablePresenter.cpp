@@ -28,7 +28,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 ConvFitDataTablePresenter::ConvFitDataTablePresenter(ConvFitModel *model, QTableWidget *dataTable)
-    : IndirectFitDataTablePresenter(model->getFitDataModel(), dataTable, convFitHeaders()) {
+    : IndirectDataTablePresenter(model->getFitDataModel(), dataTable, convFitHeaders()) {
   auto header = dataTable->horizontalHeader();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(1, QHeaderView::Stretch);
@@ -48,7 +48,7 @@ int ConvFitDataTablePresenter::excludeColumn() const { return 5; }
 std::string ConvFitDataTablePresenter::getResolutionName(FitDomainIndex row) const { return getString(row, 1); }
 
 void ConvFitDataTablePresenter::addTableEntry(FitDomainIndex row) {
-  IndirectFitDataTablePresenter::addTableEntry(row);
+  IndirectDataTablePresenter::addTableEntry(row);
 
   auto resolutionVector = m_model->getResolutionsForFit();
   const auto name = resolutionVector.at(row.value).first;

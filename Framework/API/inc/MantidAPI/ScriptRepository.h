@@ -101,6 +101,9 @@ public:
   ScriptRepoException(const std::string &info = std::string("Unknown Exception"))
       : _system_error(""), _user_info(info), _file_path(""){};
 
+  ScriptRepoException(int err_, const std::string &info = std::string(), const std::string &file = std::string(),
+                      int line = -1);
+
   ScriptRepoException(const std::string &info, const std::string &system, const std::string &file = std::string(),
                       int line = -1);
 

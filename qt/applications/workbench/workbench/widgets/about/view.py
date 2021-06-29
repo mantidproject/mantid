@@ -9,62 +9,18 @@ from PyQt5.QtWidgets import QCommandLinkButton
 from qtpy.QtCore import Qt, QSize
 from qtpy.QtGui import QPixmap, QIcon, QGuiApplication, QPainter
 from qtpy.QtWidgets import QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QLabel, QDialog, \
-    QGroupBox, QFormLayout, QComboBox, QPushButton, QCheckBox, QWidget, QScrollArea
+    QGroupBox, QFormLayout, QComboBox, QPushButton, QCheckBox
 from mantidqt.widgets import instrumentselector
 
 REFERENCE_HEIGHT = 642
 REFERENCE_WIDTH = 745
 REFERENCE_ASPECT_RATIO = REFERENCE_WIDTH / REFERENCE_HEIGHT
-WIDESCREEN_ASPECT_RATIO = 16 / 9
+WIDESCREEN_ASPECT_RATIO = 16/9
 
 
 class AboutView(QDialog):
-    """
-    Dialog that contains the about widget. If the screen is too small, the dialog will use a scroll area,
-    otherwise it will simply contain the about widget.
-    """
-
-    def __init__(self, parent, presenter, version_text, date_text=None):
+    def __init__(self, parent, presenter, version_text, date_text = None):
         super(AboutView, self).__init__(parent)
-        self.presenter = presenter
-        self.about_widget = AboutViewWidget(self, version_text, date_text)
-
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(layout)
-
-        if self.about_widget.is_widget_too_big:
-            self.scroll_area = QScrollArea()
-            self.scroll_area.setWidget(self.about_widget)
-            layout.addWidget(self.scroll_area)
-            self.setMaximumSize(self.about_widget.size())
-
-        else:
-            layout.addWidget(self.about_widget)
-            self.setFixedSize(self.about_widget.size())
-
-    def closeEvent(self, event):
-        self.presenter.save_on_closing()
-        self.deleteLater()
-        super(AboutView, self).closeEvent(event)
-
-    def resizeEvent(self, event):
-        """
-        Hide the scroll bars if the dialog reaches the size of the about widget.
-        """
-        super().resizeEvent(event)
-        if hasattr(self, 'scroll_area'):
-            if self.width() < self.about_widget.width() or self.height() < self.about_widget.height():
-                self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-                self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            else:
-                self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-                self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-
-class AboutViewWidget(QWidget):
-    def __init__(self, parent, version_text, date_text):
-        super(AboutViewWidget, self).__init__(parent)
         self.background_pixmap = QPixmap(':/images/First_use_Background.png')
         self.mantid_pixmap = QPixmap(':/images/mantid_smaller.png')
         self.lbl_version = QLabel()
@@ -81,9 +37,9 @@ class AboutViewWidget(QWidget):
         self.lbl_privacy_policy = QLabel()
         self.chk_do_not_show_until_next_release = QCheckBox()
         self.pb_close = QPushButton()
-        self.is_widget_too_big = False
         self.setupUI()
         self.customize_layout(version_text, date_text)
+        self.presenter = presenter
 
     def paintEvent(self, event):
         scaled_background = self.background_pixmap.scaled(self.rescale_w(self.background_pixmap.width()),
@@ -98,7 +54,7 @@ class AboutViewWidget(QWidget):
         qp = QPainter()
         qp.begin(self)
         qp.drawPixmap(0, 0, scaled_background)
-        qp.drawPixmap(self.width() - scaled_mantid.width(), self.height() - scaled_mantid.height(), scaled_mantid)
+        qp.drawPixmap(self.width() - scaled_mantid.width(), self.height()-scaled_mantid.height(), scaled_mantid)
         qp.end()
 
     def determine_dialog_dimensions(self):
@@ -107,8 +63,8 @@ class AboutViewWidget(QWidget):
 
         screen = None
         try:
-            if hasattr(QGuiApplication, "screenAt"):
-                screen = QGuiApplication.screenAt(self.parent().parent().geometry().center())
+            if hasattr(QGuiApplication,"screenAt"):
+                screen = QGuiApplication.screenAt(self.parent().geometry().center())
             else:
                 # get the screen from the last top level window
                 windows = QGuiApplication.topLevelWindows()
@@ -118,15 +74,15 @@ class AboutViewWidget(QWidget):
             screen = QGuiApplication.primaryScreen()
 
         if screen is not None:
-            screen_width = screen.availableSize().width()
-            screen_height = screen.availableSize().height()
+            screen_width = screen.size().width()
+            screen_height = screen.size().height()
 
             # the proportion of the whole window size for the about screen
             window_scaling = 0.4
             width = int(screen_width * window_scaling)
 
             # also calculate the intended width but using the hieght and a standard screen aspect ratio
-            width_by_height = int(screen_height * WIDESCREEN_ASPECT_RATIO * window_scaling)
+            width_by_height= int(screen_height * WIDESCREEN_ASPECT_RATIO * window_scaling)
             # take the smaller of the width from the screen width and height
             if width_by_height < width:
                 width = width_by_height
@@ -138,9 +94,6 @@ class AboutViewWidget(QWidget):
             # calculate height from the width and aspect ratio
             height = int(width / REFERENCE_ASPECT_RATIO)
 
-            if width > screen_width or height > screen_height:
-                self.is_widget_too_big = True
-
         return width, height
 
     def rescale_w(self, value):
@@ -150,9 +103,9 @@ class AboutViewWidget(QWidget):
         return int(value * (self.height() / REFERENCE_HEIGHT))
 
     def setupUI(self):
-        width, height = self.determine_dialog_dimensions()
+        width, height  = self.determine_dialog_dimensions()
 
-        self.setFixedSize(width, height)
+        self.setMinimumSize(width, height)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.setWindowTitle("About Mantid Workbench")
         self.setStyleSheet(f"""QDialog {{
@@ -175,7 +128,7 @@ QCommandLinkButton:hover {{
 
         # version label section at th etop
         parent_layout = QVBoxLayout()
-        parent_layout.addSpacerItem(QSpacerItem(self.rescale_w(20), self.rescale_h(70), vPolicy=QSizePolicy.Fixed))
+        parent_layout.addSpacerItem(QSpacerItem(self.rescale_w(20),self.rescale_h(70),vPolicy=QSizePolicy.Fixed))
         self.lbl_version.setText("version ")
         self.lbl_version.setIndent(self.rescale_w(115))
         self.lbl_version.setStyleSheet(f"""color: rgb(215, 215, 215);
@@ -183,7 +136,7 @@ font: {self.rescale_w(28)}pt;
 font-weight: bold;
 font-size: {self.rescale_w(28)}px""")
         parent_layout.addWidget(self.lbl_version)
-        parent_layout.addSpacerItem(QSpacerItem(self.rescale_w(20), self.rescale_h(40),
+        parent_layout.addSpacerItem(QSpacerItem(self.rescale_w(20),self.rescale_h(40),
                                                 vPolicy=QSizePolicy.MinimumExpanding))
 
         # split into the two columns
@@ -291,7 +244,7 @@ font: {self.rescale_w(12)}px;
                                         r'Privacy Policy</span></a></p></body></html>')
         self.lbl_privacy_policy.setOpenExternalLinks(False)
         usagelayout.addWidget(self.lbl_privacy_policy)
-        personal_setup_form_layout.addRow(lbl_allow_usage_data, usagelayout)
+        personal_setup_form_layout.addRow(lbl_allow_usage_data,usagelayout)
         grp_personal_setup_layout.addLayout(personal_setup_form_layout)
         right_layout.addWidget(grp_personal_setup)
         right_layout.addSpacerItem(QSpacerItem(self.rescale_w(20), self.rescale_h(40), vPolicy=QSizePolicy.Expanding))
@@ -304,7 +257,7 @@ font: {self.rescale_w(12)}px;
         icon_layout_top.addWidget(self.create_label_with_image(112, 50, ':/images/ISIS_Logo_Transparent.gif'))
         icon_layout_top.addSpacerItem(QSpacerItem(self.rescale_w(10), self.rescale_h(20), hPolicy=QSizePolicy.Fixed))
         icon_layout_top.addWidget(self.create_label_with_image(94, 50, ':/images/ess_logo_transparent_small.png'))
-        icon_layout_top.addSpacerItem(QSpacerItem(self.rescale_w(40), 20, hPolicy=QSizePolicy.Expanding))
+        icon_layout_top.addSpacerItem(QSpacerItem(self.rescale_w(40), 20,hPolicy=QSizePolicy.Expanding))
         right_layout.addLayout(icon_layout_top)
         # Row two
         icon_layout_middle = QHBoxLayout()
@@ -338,9 +291,9 @@ font: {self.rescale_w(12)}px;
         do_not_show_layout = QVBoxLayout()
         do_not_show_layout.setContentsMargins(self.rescale_w(15), 0, 0, 0)
         do_not_show_layout.setSpacing(self.rescale_w(2))
-        do_not_show_layout.addSpacerItem(QSpacerItem(1, self.rescale_h(1), vPolicy=QSizePolicy.Expanding))
+        do_not_show_layout.addSpacerItem(QSpacerItem(1,self.rescale_h(1), vPolicy=QSizePolicy.Expanding))
         lbl_update = QLabel()
-        lbl_update.setMinimumSize(self.rescale_w(400), 0)
+        lbl_update.setMinimumSize(self.rescale_w(400),0)
         lbl_update.setStyleSheet("color: rgb(25,125,25);")
         lbl_update.setText('You can revisit this dialog by selecting "About" on the Help menu.')
         lbl_update.setAlignment(Qt.AlignBottom)
@@ -355,13 +308,13 @@ font: {self.rescale_w(12)}px;
         lbl_do_not_show.setStyleSheet("color: rgb(25,125,25);")
         lbl_do_not_show.setText('Do not show again until next release')
         do_not_show_checkbox_layout.addWidget(lbl_do_not_show)
-        do_not_show_checkbox_layout.addSpacerItem(QSpacerItem(self.rescale_w(40), 10, hPolicy=QSizePolicy.Expanding))
+        do_not_show_checkbox_layout.addSpacerItem(QSpacerItem(self.rescale_w(40),10, hPolicy=QSizePolicy.Expanding))
         do_not_show_layout.addLayout(do_not_show_checkbox_layout)
         footer_layout.addLayout(do_not_show_layout)
 
         # Close button
         close_button_layout = QVBoxLayout()
-        close_button_layout.addSpacerItem(QSpacerItem(20, self.rescale_h(15), vPolicy=QSizePolicy.Expanding))
+        close_button_layout.addSpacerItem(QSpacerItem(20,self.rescale_h(15), vPolicy=QSizePolicy.Expanding))
         self.pb_close.setText("Close")
         self.pb_close.setDefault(True)
         close_button_layout.addWidget(self.pb_close)
@@ -395,3 +348,8 @@ font: {self.rescale_w(12)}px;
             # strip off the first few characters that will be "day, "
             version_label += " ({0})".format(date_text[5:])
         self.lbl_version.setText(self.lbl_version.text() + version_label)
+
+    def closeEvent(self, event):
+        self.presenter.save_on_closing()
+        self.deleteLater()
+        super(AboutView, self).closeEvent(event)

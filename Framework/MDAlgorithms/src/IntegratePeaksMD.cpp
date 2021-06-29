@@ -428,7 +428,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD::integrate(typename MDE
         background_total += y.sum(peakMax);
         errorSquared = std::abs(signal);
       } else {
-        auto findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
+        API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
         findpeaks->setProperty("InputWorkspace", wsProfile2D);
         findpeaks->setProperty<int>("FWHM", 7);
         findpeaks->setProperty<int>("Tolerance", 4);

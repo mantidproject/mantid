@@ -8,10 +8,10 @@ from mantidqt.utils.qt import load_ui
 
 from qtpy.QtWidgets import QWidget
 
-ui_form, base_widget = load_ui(__file__, "fit_controls.ui")
+ui_fit_controls, _ = load_ui(__file__, "fit_controls.ui")
 
 
-class FitControlsView(ui_form, base_widget):
+class FitControlsView(QWidget, ui_fit_controls):
     """
     The FitControlsView includes the Fit, Undo Fit and Fit Script Generator buttons. It also has the Plot Guess
     checkbox, and the global fit status label.
@@ -21,6 +21,8 @@ class FitControlsView(ui_form, base_widget):
         """Initialize the FitControlsView. The Undo Fit button is disabled as no fits exist yet."""
         super(FitControlsView, self).__init__(parent)
         self.setupUi(self)
+
+        self.enable_undo_fit(False)
 
         # Comment out this line to show the 'Fit Generator' button
         self.fit_generator_button.hide()
@@ -41,11 +43,6 @@ class FitControlsView(ui_form, base_widget):
         """Connect the slot for the Plot Guess checkbox."""
         self.plot_guess_checkbox.stateChanged.connect(slot)
 
-    def set_number_of_undos(self, number_of_undos: int) -> None:
-        """Sets the allowed number of 'Undo Fit' events."""
-        self.undo_fit_button.setText(f"Undo Fit ({number_of_undos})")
-        self.undo_fit_button.setEnabled(number_of_undos != 0)
-
     @property
     def plot_guess(self) -> bool:
         """Returns true if plot guess is ticked."""
@@ -55,6 +52,10 @@ class FitControlsView(ui_form, base_widget):
     def plot_guess(self, check: bool) -> None:
         """Sets whether or not plot guess is ticked."""
         self.plot_guess_checkbox.setChecked(check)
+
+    def enable_undo_fit(self, enable: bool) -> None:
+        """Sets whether or not undo fit is enabled."""
+        self.undo_fit_button.setEnabled(enable)
 
     def update_global_fit_status_label(self, fit_success: list) -> None:
         """Updates the global fit status label."""

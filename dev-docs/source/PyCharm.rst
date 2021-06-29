@@ -105,7 +105,9 @@ This can be done in two ways:
        <Mantid Source Directory>\external\src\ThirdParty\bin\mingw;
        <Mantid Source Directory>\external\src\ThirdParty\lib\python3.8;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\plugins;
+       <Mantid Source Directory>\external\src\ThirdParty\lib\qt4\bin;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\bin;
+       <Mantid Source Directory>\external\src\ThirdParty\lib\qt4\lib;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\lib;
        %PATH%
 

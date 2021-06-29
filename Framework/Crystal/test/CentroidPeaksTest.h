@@ -89,7 +89,7 @@ public:
     TS_ASSERT_EQUALS(retVal->getInstrument()->getName(), "MINITOPAZ");
     std::map<int, Geometry::IDetector_const_sptr> dets;
     retVal->getInstrument()->getDetectors(dets);
-    TS_ASSERT_EQUALS(dets.size(), 100 * 100 + 2);
+    TS_ASSERT_EQUALS(dets.size(), 100 * 100);
 
     return retVal;
   }

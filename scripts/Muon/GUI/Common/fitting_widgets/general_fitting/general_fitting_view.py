@@ -11,21 +11,22 @@ from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_options_vie
 
 from qtpy.QtWidgets import QWidget
 
-SINGLE_FIT_LABEL = "Select Workspace"
-SIMULTANEOUS_FIT_LABEL = "Display parameters for"
-
 
 class GeneralFittingView(BasicFittingView):
     """
     The GeneralFittingView derives from the BasicFittingView. It adds the GeneralFittingOptionsView to the widget.
     """
 
-    def __init__(self, parent: QWidget = None):
+    def __init__(self, parent: QWidget = None, is_frequency_domain: bool = False):
         """Initializes the GeneralFittingView, and adds the GeneralFittingOptionsView widget."""
         super(GeneralFittingView, self).__init__(parent)
 
-        self.general_fitting_options = GeneralFittingOptionsView(self)
+        self.general_fitting_options = GeneralFittingOptionsView(self, is_frequency_domain)
         self.general_fitting_options_layout.addWidget(self.general_fitting_options)
+
+    def set_slot_for_dataset_changed(self, slot) -> None:
+        """Connect the slot for the display workspace combo box being changed."""
+        self.general_fitting_options.set_slot_for_dataset_changed(slot)
 
     def set_slot_for_fitting_mode_changed(self, slot) -> None:
         """Connect the slot for the simultaneous fit check box."""
@@ -39,6 +40,10 @@ class GeneralFittingView(BasicFittingView):
         """Connect the slot for the fit specifier combo box being changed."""
         self.general_fitting_options.set_slot_for_simultaneous_fit_by_specifier_changed(slot)
 
+    def update_dataset_name_combo_box(self, dataset_names: list) -> None:
+        """Update the data in the parameter display combo box."""
+        self.general_fitting_options.update_dataset_name_combo_box(dataset_names)
+
     def update_global_fit_status(self, fit_statuses: list, index: int) -> None:
         """Updates the global fit status label."""
         if self.simultaneous_fitting_mode and index is not None:
@@ -51,6 +56,20 @@ class GeneralFittingView(BasicFittingView):
         """Updates the parameters of a fit function shown in the view."""
         self.fit_function_options.update_function_browser_parameters(self.simultaneous_fitting_mode, fit_function,
                                                                      global_parameters)
+
+    @property
+    def current_dataset_name(self) -> str:
+        """Returns the selected dataset name."""
+        return self.general_fitting_options.current_dataset_name
+
+    @current_dataset_name.setter
+    def current_dataset_name(self, dataset_name: str) -> None:
+        """Sets the currently selected dataset name."""
+        self.general_fitting_options.current_dataset_name = dataset_name
+
+    def number_of_datasets(self) -> int:
+        """Returns the number of dataset names loaded into the widget."""
+        return self.general_fitting_options.number_of_datasets()
 
     @property
     def simultaneous_fit_by(self) -> str:
@@ -67,17 +86,24 @@ class GeneralFittingView(BasicFittingView):
         """Returns the run, group or pair name."""
         return self.general_fitting_options.simultaneous_fit_by_specifier
 
+    @property
+    def current_dataset_index(self) -> str:
+        """Returns the index of the currently displayed dataset."""
+        return self.general_fitting_options.current_dataset_index
+
     def switch_to_simultaneous(self) -> None:
         """Switches the view to simultaneous fit mode."""
         super().switch_to_simultaneous()
-        self.set_workspace_combo_box_label(SIMULTANEOUS_FIT_LABEL)
-        self.general_fitting_options.enable_simultaneous_fit_options()
+        self.general_fitting_options.switch_to_simultaneous()
 
     def switch_to_single(self) -> None:
         """Switches the view to single fit mode."""
         super().switch_to_single()
-        self.set_workspace_combo_box_label(SINGLE_FIT_LABEL)
-        self.general_fitting_options.disable_simultaneous_fit_options()
+        self.general_fitting_options.switch_to_single()
+
+    def hide_simultaneous_fit_options(self) -> None:
+        """Hides the simultaneous fit options."""
+        self.general_fitting_options.hide_simultaneous_fit_options()
 
     def disable_simultaneous_fit_options(self) -> None:
         """Disables the simultaneous fit options."""

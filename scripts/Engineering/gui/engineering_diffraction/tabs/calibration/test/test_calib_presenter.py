@@ -190,7 +190,7 @@ class CalibrationPresenterTest(unittest.TestCase):
 
         path.return_value = True
         instrument, van, cer = ("test_ins", "test_van", "test_cer")
-        self.model.load_existing_calibration_files.return_value = instrument, van, cer
+        self.model.load_existing_gsas_parameters.return_value = instrument, van, cer
         current = CalibrationInfo(vanadium_path="old/value",
                                   sample_path="old/cera",
                                   instrument="ENGINX")

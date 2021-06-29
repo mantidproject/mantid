@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from unittest import mock
-from sans.user_file.toml_parsers.toml_v1_schema import TomlSchemaV1Validator, TomlValidationError
+from mantid.py3compat import mock
+from sans.user_file.toml_parsers.toml_v1_schema import TomlSchemaV1Validator
 
 
 class SchemaV1ValidatorTest(unittest.TestCase):
@@ -39,19 +39,19 @@ class SchemaV1ValidatorTest(unittest.TestCase):
     def test_throws_if_unrecognised_top_level_key(self):
         for i in [{"NotRecognised": None}, {"Foo": {"Bar": None}}]:
             obj = TomlSchemaV1Validator(i)
-            with self.assertRaises(TomlValidationError):
+            with self.assertRaises(KeyError):
                 obj.validate()
 
     def test_all_unknown_keys_mentioned(self):
         obj = TomlSchemaV1Validator({"A": None, "B": None})
-        with self.assertRaises(TomlValidationError) as e:
+        with self.assertRaises(KeyError) as e:
             obj.validate()
             self.assertTrue("A" in e)
             self.assertTrue("B" in e)
 
     def test_sub_key_checked(self):
         obj = TomlSchemaV1Validator({"instrument": "Foo"})
-        with self.assertRaises(TomlValidationError):
+        with self.assertRaises(KeyError):
             obj.validate()
 
     def test_valid_key_accepted(self):
@@ -69,9 +69,5 @@ class SchemaV1ValidatorTest(unittest.TestCase):
         obj = TomlSchemaV1Validator(valid_example)
         self.assertIsNone(obj.validate())
 
-        with self.assertRaises(TomlValidationError):
+        with self.assertRaises(KeyError):
             TomlSchemaV1Validator(invalid_example).validate()
-
-
-if __name__ == '__main__':
-    unittest.main()

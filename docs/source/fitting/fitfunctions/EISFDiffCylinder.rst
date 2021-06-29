@@ -38,6 +38,8 @@ Usage
 
 .. testcode:: QdependenceFit
 
+    from __future__ import print_function
+
     q =  [0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5, 1.7, 1.9]
     # A=1.0, R=3.5, L=1.7
     eisf = [0.8327688, 0.60447105, 0.36837178, 0.18538092, 0.07615478,

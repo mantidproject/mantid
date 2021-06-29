@@ -235,7 +235,7 @@ void SaveHKL::exec() {
     // if AddAbsorptionWeightedPathLengths has already been run on the workspace
     // then keep those tbar values
     if (std::all_of(peaks.cbegin(), peaks.cend(), [](auto &p) { return p.getAbsorptionWeightedPathLength() == 0; })) {
-      auto alg = createChildAlgorithm("AddAbsorptionWeightedPathLengths");
+      IAlgorithm_sptr alg = createChildAlgorithm("AddAbsorptionWeightedPathLengths");
       alg->setProperty("InputWorkspace", peaksW);
       alg->setProperty("UseSinglePath", true);
       alg->executeAsChildAlg();
@@ -524,7 +524,7 @@ void SaveHKL::exec() {
 
   bool append = getProperty("AppendFile");
   if (append && Poco::File(filename.c_str()).exists()) {
-    auto load_alg = createChildAlgorithm("LoadHKL");
+    IAlgorithm_sptr load_alg = createChildAlgorithm("LoadHKL");
     load_alg->setPropertyValue("Filename", filename);
     load_alg->setProperty("OutputWorkspace", "peaks");
     load_alg->executeAsChildAlg();
@@ -532,7 +532,7 @@ void SaveHKL::exec() {
     DataObjects::PeaksWorkspace_sptr ws2 = load_alg->getProperty("OutputWorkspace");
     ws2->setInstrument(inst);
 
-    auto plus_alg = createChildAlgorithm("CombinePeaksWorkspaces");
+    IAlgorithm_sptr plus_alg = createChildAlgorithm("CombinePeaksWorkspaces");
     plus_alg->setProperty("LHSWorkspace", peaksW);
     plus_alg->setProperty("RHSWorkspace", ws2);
     plus_alg->executeAsChildAlg();

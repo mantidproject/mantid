@@ -75,7 +75,7 @@ void MaskBinsFromTable::maskBins(const API::MatrixWorkspace_sptr &dataws) {
                 << "\n";
   for (size_t ib = 0; ib < numcalls; ++ib) {
     // Construct algorithm
-    auto maskbins = createChildAlgorithm("MaskBins", 0, 0.3, true);
+    IAlgorithm_sptr maskbins = this->createChildAlgorithm("MaskBins", 0, 0.3, true);
     maskbins->initialize();
 
     // Set properties

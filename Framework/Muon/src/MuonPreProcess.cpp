@@ -202,7 +202,7 @@ MatrixWorkspace_sptr MuonPreProcess::correctWorkspace(MatrixWorkspace_sptr ws) {
 
 MatrixWorkspace_sptr MuonPreProcess::applyDTC(MatrixWorkspace_sptr ws, const TableWorkspace_sptr &dt) {
   if (dt != nullptr) {
-    auto dtc = createChildAlgorithm("ApplyDeadTimeCorr");
+    IAlgorithm_sptr dtc = this->createChildAlgorithm("ApplyDeadTimeCorr");
     dtc->setProperty("InputWorkspace", ws);
     dtc->setProperty("DeadTimeTable", dt);
     dtc->execute();
@@ -214,7 +214,7 @@ MatrixWorkspace_sptr MuonPreProcess::applyDTC(MatrixWorkspace_sptr ws, const Tab
 
 MatrixWorkspace_sptr MuonPreProcess::applyTimeOffset(MatrixWorkspace_sptr ws, const double &offset) {
   if (offset != EMPTY_DBL()) {
-    auto changeOffset = createChildAlgorithm("ChangeBinOffset");
+    IAlgorithm_sptr changeOffset = createChildAlgorithm("ChangeBinOffset");
     changeOffset->setProperty("InputWorkspace", ws);
     changeOffset->setProperty("Offset", offset);
     changeOffset->execute();
@@ -253,7 +253,7 @@ MatrixWorkspace_sptr MuonPreProcess::applyCropping(MatrixWorkspace_sptr ws, cons
 
 MatrixWorkspace_sptr MuonPreProcess::cropWithSingleValues(MatrixWorkspace_sptr ws, const double xMin,
                                                           const double xMax) {
-  auto crop = createChildAlgorithm("CropWorkspace");
+  IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
   crop->setProperty("InputWorkspace", ws);
   if (xMin != EMPTY_DBL())
     crop->setProperty("Xmin", xMin);
@@ -285,7 +285,7 @@ MatrixWorkspace_sptr MuonPreProcess::cropWithVectors(MatrixWorkspace_sptr ws, co
     }
   }
 
-  auto cropRagged = createChildAlgorithm("CropWorkspaceRagged");
+  IAlgorithm_sptr cropRagged = createChildAlgorithm("CropWorkspaceRagged");
   cropRagged->setProperty("InputWorkspace", ws);
   cropRagged->setProperty("XMin", xMinVec);
   cropRagged->setProperty("XMax", xMaxVec);
@@ -295,7 +295,7 @@ MatrixWorkspace_sptr MuonPreProcess::cropWithVectors(MatrixWorkspace_sptr ws, co
 
 MatrixWorkspace_sptr MuonPreProcess::applyRebinning(MatrixWorkspace_sptr ws, const std::vector<double> &rebinArgs) {
   if (!rebinArgs.empty()) {
-    auto rebin = createChildAlgorithm("Rebin");
+    IAlgorithm_sptr rebin = createChildAlgorithm("Rebin");
     rebin->setProperty("InputWorkspace", ws);
     rebin->setProperty("Params", rebinArgs);
     rebin->setProperty("FullBinsOnly", false);
@@ -307,7 +307,7 @@ MatrixWorkspace_sptr MuonPreProcess::applyRebinning(MatrixWorkspace_sptr ws, con
 }
 
 MatrixWorkspace_sptr MuonPreProcess::cloneWorkspace(const MatrixWorkspace_sptr &ws) {
-  auto cloneWorkspace = createChildAlgorithm("CloneWorkspace");
+  IAlgorithm_sptr cloneWorkspace = this->createChildAlgorithm("CloneWorkspace");
   cloneWorkspace->setProperty("InputWorkspace", ws);
   cloneWorkspace->execute();
   Workspace_sptr wsClone = cloneWorkspace->getProperty("OutputWorkspace");

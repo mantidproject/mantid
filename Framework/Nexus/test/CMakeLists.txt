@@ -10,8 +10,7 @@ if(CXXTEST_FOUND)
                         Nexus
                         ${NEXUS_LIBRARIES}
                         ${HDF5_LIBRARIES}
-                        ${HDF5_HL_LIBRARIES}
-                        gmock)
+                        ${HDF5_HL_LIBRARIES})
   add_dependencies(FrameworkTests NexusTest)
   add_dependencies(NexusTest StandardTestData)
   # Add to the 'FrameworkTests' group in VS

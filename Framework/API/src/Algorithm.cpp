@@ -14,7 +14,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 
-#include "MantidJson/Json.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"
@@ -106,13 +105,13 @@ size_t Algorithm::g_execCount = 0;
 
 /// Constructor
 Algorithm::Algorithm()
-    : m_cancel(false), m_parallelException(false), m_log("Algorithm"), g_log(m_log), m_groupSize(0),
-      m_executeAsync(nullptr), m_notificationCenter(nullptr), m_progressObserver(nullptr),
+    : PropertyManagerOwner(), m_cancel(false), m_parallelException(false), m_log("Algorithm"), g_log(m_log),
+      m_groupSize(0), m_executeAsync(nullptr), m_notificationCenter(nullptr), m_progressObserver(nullptr),
       m_executionState(ExecutionState::Uninitialized), m_resultState(ResultState::NotFinished),
       m_isChildAlgorithm(false), m_recordHistoryForChild(false), m_alwaysStoreInADS(true), m_runningAsync(false),
       m_rethrow(false), m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.), m_endChildProgress(0.),
       m_algorithmID(this), m_singleGroup(-1), m_groupsHaveSimilarNames(false), m_inputWorkspaceHistories(),
-      m_communicator(std::make_unique<Parallel::Communicator>()), m_properties() {}
+      m_communicator(std::make_unique<Parallel::Communicator>()) {}
 
 /// Virtual destructor
 Algorithm::~Algorithm() {}
@@ -891,7 +890,11 @@ void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg, const double st
  * a json formatted string.
  * @returns This object serialized as a string
  */
-std::string Algorithm::toString() const { return Mantid::JsonHelpers::jsonToString(toJson()); }
+std::string Algorithm::toString() const {
+  ::Json::FastWriter writer;
+
+  return writer.write(toJson());
+}
 
 /**
  * Serialize this object to a json object)
@@ -902,7 +905,7 @@ std::string Algorithm::toString() const { return Mantid::JsonHelpers::jsonToStri
 
   root["name"] = name();
   root["version"] = this->version();
-  root["properties"] = m_properties.asJson(false);
+  root["properties"] = Kernel::PropertyManagerOwner::asJson(false);
 
   return root;
 }
@@ -918,6 +921,7 @@ std::string Algorithm::toString() const { return Mantid::JsonHelpers::jsonToStri
 IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
   ::Json::Value root;
   ::Json::Value jsonMap;
+  ::Json::FastWriter writer;
 
   auto props = history.getProperties();
   const size_t numProps(props.size());
@@ -932,7 +936,7 @@ IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
   root["version"] = history.version();
   root["properties"] = jsonMap;
 
-  const std::string output = Mantid::JsonHelpers::jsonToString(root);
+  const std::string output = writer.write(root);
   IAlgorithm_sptr alg;
 
   try {
@@ -955,7 +959,8 @@ IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
  */
 IAlgorithm_sptr Algorithm::fromString(const std::string &input) {
   ::Json::Value root;
-  if (Mantid::JsonHelpers::parse(input, &root)) {
+  ::Json::Reader reader;
+  if (reader.parse(input, root)) {
     return fromJson(root);
   } else {
     throw std::runtime_error("Cannot create algorithm, invalid string format.");
@@ -1382,7 +1387,7 @@ bool Algorithm::processGroups() {
     alg_sptr->enableHistoryRecordingForChild(false);
     alg_sptr->setRethrows(true);
 
-    Algorithm *alg = alg_sptr.get();
+    IAlgorithm *alg = alg_sptr.get();
     // Set all non-workspace properties
     this->copyNonWorkspaceProperties(alg, int(entry) + 1);
 
@@ -1893,217 +1898,6 @@ std::string Algorithm::ErrorNotification::name() const { return "ErrorNotificati
 
 const char *Algorithm::CancelException::what() const noexcept { return "Algorithm terminated"; }
 
-/** Add a property to the list of managed properties
- *  @param p :: The property object to add
- *  @param doc :: A description of the property that may be displayed to users
- *  @throw Exception::ExistsError if a property with the given name already
- * exists
- */
-void Algorithm::declareProperty(std::unique_ptr<Property> p, const std::string &doc) {
-  m_properties.declareProperty(std::move(p), doc);
-}
-
-/** Add or replace property in the list of managed properties
- *  @param p :: The property object to add
- *  @param doc :: A description of the property that may be displayed to users
- */
-void Algorithm::declareOrReplaceProperty(std::unique_ptr<Property> p, const std::string &doc) {
-  m_properties.declareOrReplaceProperty(std::move(p), doc);
-}
-
-/** Reset property values back to initial values (blank or default values)
- */
-void Algorithm::resetProperties() { m_properties.resetProperties(); }
-
-/** Set the ordered list of properties by one string of values, separated by
- *semicolons.
- *
- * The string should be a json formatted collection of name value pairs
- *
- *  @param propertiesJson :: The string of property values
- *  @param ignoreProperties :: A set of names of any properties NOT to set
- *      from the propertiesArray
- *  @param createMissing :: If the property does not exist then create it
- *  @throw invalid_argument if error in parameters
- */
-void Algorithm::setProperties(const std::string &propertiesJson,
-                              const std::unordered_set<std::string> &ignoreProperties, bool createMissing) {
-  m_properties.setProperties(propertiesJson, ignoreProperties, createMissing);
-}
-
-/** Sets all the declared properties from a json object
-  @param jsonValue :: A json name value pair collection
-  @param ignoreProperties :: A set of names of any properties NOT to set
-  from the propertiesArray
-  @param createMissing :: If the property does not exist then create it
-*/
-void Algorithm::setProperties(const ::Json::Value &jsonValue, const std::unordered_set<std::string> &ignoreProperties,
-                              bool createMissing) {
-  m_properties.setProperties(jsonValue, ignoreProperties, createMissing);
-}
-
-/** Sets all the declared properties from a string.
-  @param propertiesString :: A list of name = value pairs separated by a
-    semicolon
-  @param ignoreProperties :: A set of names of any properties NOT to set
-  from the propertiesArray
-*/
-void Algorithm::setPropertiesWithString(const std::string &propertiesString,
-                                        const std::unordered_set<std::string> &ignoreProperties) {
-  m_properties.setPropertiesWithString(propertiesString, ignoreProperties);
-}
-
-/** Set the value of a property by string
- *  N.B. bool properties must be set using 1/0 rather than true/false
- *  @param name :: The name of the property (case insensitive)
- *  @param value :: The value to assign to the property
- *  @throw Exception::NotFoundError if the named property is unknown
- *  @throw std::invalid_argument If the value is not valid for the property
- * given
- */
-void Algorithm::setPropertyValue(const std::string &name, const std::string &value) {
-  m_properties.setPropertyValue(name, value);
-  this->afterPropertySet(name);
-}
-
-/** Set the value of a property by Json::Value object
- *  @param name :: The name of the property (case insensitive)
- *  @param value :: The value to assign to the property
- *  @throw Exception::NotFoundError if the named property is unknown
- *  @throw std::invalid_argument If the value is not valid for the property
- * given
- */
-void Algorithm::setPropertyValueFromJson(const std::string &name, const Json::Value &value) {
-  m_properties.setPropertyValueFromJson(name, value);
-  this->afterPropertySet(name);
-}
-
-/** Set the value of a property by an index
- *  N.B. bool properties must be set using 1/0 rather than true/false
- *  @param index :: The index of the property to assign
- *  @param value :: The value to assign to the property
- *  @throw std::runtime_error if the property index is too high
- */
-void Algorithm::setPropertyOrdinal(const int &index, const std::string &value) {
-  m_properties.setPropertyOrdinal(index, value);
-  this->afterPropertySet(m_properties.getPointerToPropertyOrdinal(index)->name());
-}
-
-/** Checks whether the named property is already in the list of managed
- * property.
- *  @param name :: The name of the property (case insensitive)
- *  @return True if the property is already stored
- */
-bool Algorithm::existsProperty(const std::string &name) const { return m_properties.existsProperty(name); }
-
-/** Validates all the properties in the collection
- *  @return True if all properties have a valid value
- */
-bool Algorithm::validateProperties() const { return m_properties.validateProperties(); }
-
-/**
- * Count the number of properties under management
- * @returns The number of properties being managed
- */
-size_t Algorithm::propertyCount() const { return m_properties.propertyCount(); }
-
-/** Get the value of a property as a string
- *  @param name :: The name of the property (case insensitive)
- *  @return The value of the named property
- *  @throw Exception::NotFoundError if the named property is unknown
- */
-std::string Algorithm::getPropertyValue(const std::string &name) const { return m_properties.getPropertyValue(name); }
-
-/** Get a property by name
- *  @param name :: The name of the property (case insensitive)
- *  @return A pointer to the named property
- *  @throw Exception::NotFoundError if the named property is unknown
- */
-Property *Algorithm::getPointerToProperty(const std::string &name) const {
-  return m_properties.getPointerToProperty(name);
-}
-
-/** Get a property by an index
- *  @param index :: The name of the property (case insensitive)
- *  @return A pointer to the named property
- *  @throw std::runtime_error if the property index is too high
- */
-Property *Algorithm::getPointerToPropertyOrdinal(const int &index) const {
-  return m_properties.getPointerToPropertyOrdinal(index);
-}
-
-/** Get the list of managed properties.
- *  The properties will be stored in the order that they were declared.
- *  @return A vector holding pointers to the list of properties
- */
-const std::vector<Property *> &Algorithm::getProperties() const { return m_properties.getProperties(); }
-
-/** Get the value of a property. Allows you to assign directly to a variable of
- *the property's type
- *  (if a supported type).
- *
- *  *** This method does NOT work for assigning to an existing std::string.
- *      In this case you have to use getPropertyValue() instead.
- *      Note that you can, though, construct a local string variable by writing,
- *      e.g. std::string s = getProperty("myProperty"). ***
- *
- *  @param name :: The name of the property
- *  @return The value of the property. Will be cast to the desired type (if a
- *supported type).
- *  @throw std::runtime_error If an attempt is made to assign a property to a
- *different type
- *  @throw Exception::NotFoundError If the property requested does not exist
- */
-IPropertyManager::TypedValue Algorithm::getProperty(const std::string &name) const {
-  return m_properties.getProperty(name);
-}
-
-/**
- * @param name
- * @return True if the property is its default value.
- */
-bool Algorithm::isDefault(const std::string &name) const {
-  return m_properties.getPointerToProperty(name)->isDefault();
-}
-
-/**
- * Return the property manager serialized as a string.
- * The format is propName=value,propName=value,propName=value
- * @param withDefaultValues :: If true then the value of default parameters will
- * be included
- * @returns A stringized version of the manager
- */
-std::string Algorithm::asString(bool withDefaultValues) const { return m_properties.asString(withDefaultValues); }
-/**
- * Return the property manager serialized as a json object.
- * @param withDefaultValues :: If true then the value of default parameters will
- * be included
- * @returns A jsonValue of the manager
- */
-::Json::Value Algorithm::asJson(bool withDefaultValues) const { return m_properties.asJson(withDefaultValues); }
-
-/**
- * Removes the property from properties map.
- * @param name :: Name of the property to be removed.
- *  @param delproperty :: if true, delete the named property
- */
-void Algorithm::removeProperty(const std::string &name, const bool delproperty) {
-  m_properties.removeProperty(name, delproperty);
-}
-
-/**
- * Clears all properties under management
- */
-void Algorithm::clear() { m_properties.clear(); }
-
-/**
- * Override this method to perform a custom action right after a property was
- * set.
- * The argument is the property name. Default - do nothing.
- * @param name :: A property name.
- */
-void Algorithm::afterPropertySet(const std::string &name) { m_properties.afterPropertySet(name); }
-
 } // namespace API
 
 //---------------------------------------------------------------------------
@@ -2145,7 +1939,6 @@ IPropertyManager::getValue<API::IAlgorithm_const_sptr>(const std::string &name) 
     throw std::runtime_error(message);
   }
 }
-
 } // namespace Kernel
 
 } // namespace Mantid

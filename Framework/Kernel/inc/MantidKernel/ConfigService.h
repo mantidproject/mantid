@@ -160,7 +160,7 @@ public:
   // Return the full path to the executable
   std::string getPathToExecutable() const;
   // Check if the path is on a network drive
-  bool isNetworkDrive([[maybe_unused]] const std::string &path);
+  bool isNetworkDrive(const std::string &path);
   //@}
 
   /// Returns the directory where the Mantid.properties file is found.

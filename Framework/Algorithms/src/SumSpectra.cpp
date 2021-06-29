@@ -325,7 +325,7 @@ API::MatrixWorkspace_sptr SumSpectra::replaceSpecialValues() {
     return wksp;
   }
 
-  auto alg = createChildAlgorithm("ReplaceSpecialValues");
+  IAlgorithm_sptr alg = createChildAlgorithm("ReplaceSpecialValues");
   alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", wksp);
   std::string outName = "_" + wksp->getName() + "_clean";
   alg->setProperty("OutputWorkspace", outName);

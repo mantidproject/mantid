@@ -67,7 +67,7 @@ void ExtractFFTSpectrum::exec() {
   for (int i = 0; i < numHists; i++) {
     PARALLEL_START_INTERUPT_REGION
 
-    auto childFFT = createChildAlgorithm("FFT");
+    IAlgorithm_sptr childFFT = createChildAlgorithm("FFT");
     childFFT->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     childFFT->setProperty<int>("Real", i);
     if (inputImagWS) {
@@ -94,7 +94,7 @@ void ExtractFFTSpectrum::exec() {
     // In this case, trim half of the workspace, as these are just zeros.
     const double xMax = outputWS->x(0)[(outputWS->x(0).size() / 2) - 1];
 
-    auto extractSpectra = createChildAlgorithm("ExtractSpectra");
+    IAlgorithm_sptr extractSpectra = createChildAlgorithm("ExtractSpectra");
     extractSpectra->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
     extractSpectra->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
     extractSpectra->setProperty("XMax", xMax);

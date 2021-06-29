@@ -152,7 +152,7 @@ by altering :math:`Q{min}` and the binning scheme.
 Examples
 ######################
 For an example of how Q1D is used see
-:ref:`ISIS SANS data reduction <ISISSANSReductionBackend>`.
+`ISIS SANS data reduction <http://www.mantidproject.org/SANS_ISIS_Data_Reduction>`_.
 
 **References**
 

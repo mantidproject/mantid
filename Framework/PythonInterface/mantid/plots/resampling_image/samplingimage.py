@@ -149,8 +149,8 @@ class SamplingImage(MantidImage):
         If the workspace is large, or ragged, we skip this maxpooling step and set the option as False
         """
         axis = self.ws.getAxis(1)
-        self._maxpooling = (self.ws.getNumberHistograms() <= MAX_HISTOGRAMS and axis.isSpectra()
-                            and not self.ws.isRaggedWorkspace())
+        self._maxpooling = (self.ws.getNumberHistograms() <= MAX_HISTOGRAMS and axis.isSpectra() and
+                            not self.ws.isRaggedWorkspace())
 
 
 def imshow_sampling(axes,

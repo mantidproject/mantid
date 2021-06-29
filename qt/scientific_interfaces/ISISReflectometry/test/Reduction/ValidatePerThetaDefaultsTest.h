@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include "../../../ISISReflectometry/Reduction/ValidatePerThetaDefaults.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>

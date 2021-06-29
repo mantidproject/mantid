@@ -5,12 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Stretch.h"
-#include "IndirectSettingsHelper.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 using namespace Mantid::API;
 
@@ -268,9 +267,9 @@ void Stretch::plotWorkspaces() {
 
     std::string const plotType = m_uiForm.cbPlot->currentText().toStdString();
     if (plotType == "All" || plotType == "Beta")
-      m_plotter->plotSpectra(beta.toStdString(), "0", IndirectSettingsHelper::externalPlotErrorBars());
+      m_plotter->plotSpectra(beta.toStdString(), "0");
     if (plotType == "All" || plotType == "Sigma")
-      m_plotter->plotSpectra(sigma.toStdString(), "0", IndirectSettingsHelper::externalPlotErrorBars());
+      m_plotter->plotSpectra(sigma.toStdString(), "0");
   } else {
     g_log.error("Beta and Sigma workspace were not found and could not be plotted.");
   }
@@ -354,8 +353,7 @@ void Stretch::previewSpecChanged(int value) {
  */
 void Stretch::plotCurrentPreview() {
   if (m_uiForm.ppPlot->hasCurve("Sample")) {
-    m_plotter->plotSpectra(m_uiForm.dsSample->getCurrentDataName().toStdString(), std::to_string(m_previewSpec),
-                           IndirectSettingsHelper::externalPlotErrorBars());
+    m_plotter->plotSpectra(m_uiForm.dsSample->getCurrentDataName().toStdString(), std::to_string(m_previewSpec));
   }
 }
 

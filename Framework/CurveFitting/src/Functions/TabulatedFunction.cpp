@@ -253,7 +253,7 @@ IFunction::Attribute TabulatedFunction::getAttribute(const std::string &attName)
  * @param fname :: The file name
  */
 void TabulatedFunction::load(const std::string &fname) {
-  auto loadAlg = Mantid::API::AlgorithmFactory::Instance().create("Load", -1);
+  IAlgorithm_sptr loadAlg = Mantid::API::AlgorithmFactory::Instance().create("Load", -1);
   loadAlg->initialize();
   loadAlg->setChild(true);
   loadAlg->setLogging(false);

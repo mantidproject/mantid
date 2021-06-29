@@ -352,7 +352,7 @@ void ReflectometryReductionOneAuto2::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   auto instrument = inputWS->getInstrument();
 
-  auto alg = createChildAlgorithm("ReflectometryReductionOne");
+  IAlgorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
@@ -499,7 +499,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(Ma
   MatrixWorkspace_sptr corrected = inputWS;
 
   for (const auto &detector : detectorSet) {
-    auto alg = createChildAlgorithm("SpecularReflectionPositionCorrect");
+    IAlgorithm_sptr alg = createChildAlgorithm("SpecularReflectionPositionCorrect");
     alg->setProperty("InputWorkspace", corrected);
     alg->setProperty("TwoTheta", twoTheta);
     alg->setProperty("DetectorCorrectionType", correctionType);
@@ -527,7 +527,7 @@ double ReflectometryReductionOneAuto2::calculateTheta(const MatrixWorkspace_sptr
   if (detectorsOfInterest.empty())
     return 0.0;
 
-  auto alg = createChildAlgorithm("SpecularReflectionCalculateTheta");
+  IAlgorithm_sptr alg = createChildAlgorithm("SpecularReflectionCalculateTheta");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setProperty("DetectorComponentName", detectorsOfInterest[0]);
   alg->execute();
@@ -631,7 +631,7 @@ boost::optional<double> ReflectometryReductionOneAuto2::getQStep(const MatrixWor
                                "this algorithm.");
     }
 
-    auto calcRes = createChildAlgorithm("NRCalculateSlitResolution");
+    IAlgorithm_sptr calcRes = createChildAlgorithm("NRCalculateSlitResolution");
     calcRes->setProperty("Workspace", inputWS);
     calcRes->setProperty("TwoTheta", 2 * theta);
     calcRes->execute();
@@ -655,7 +655,7 @@ boost::optional<double> ReflectometryReductionOneAuto2::getQStep(const MatrixWor
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::rebinAndScale(const MatrixWorkspace_sptr &inputWS,
                                                                    RebinParams const &params) {
   // Rebin
-  auto algRebin = createChildAlgorithm("Rebin");
+  IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
   algRebin->initialize();
   algRebin->setProperty("InputWorkspace", inputWS);
   algRebin->setProperty("OutputWorkspace", inputWS);
@@ -667,7 +667,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::rebinAndScale(const MatrixW
   Property *scaleProp = getProperty("ScaleFactor");
   if (!scaleProp->isDefault()) {
     double scaleFactor = getProperty("ScaleFactor");
-    auto algScale = createChildAlgorithm("Scale");
+    IAlgorithm_sptr algScale = createChildAlgorithm("Scale");
     algScale->initialize();
     algScale->setProperty("InputWorkspace", IvsQ);
     algScale->setProperty("OutputWorkspace", IvsQ);
@@ -681,7 +681,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::rebinAndScale(const MatrixW
 
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::cropQ(const MatrixWorkspace_sptr &inputWS,
                                                            RebinParams const &params) {
-  auto algCrop = createChildAlgorithm("CropWorkspace");
+  IAlgorithm_sptr algCrop = createChildAlgorithm("CropWorkspace");
   algCrop->initialize();
   algCrop->setProperty("InputWorkspace", inputWS);
   algCrop->setProperty("OutputWorkspace", inputWS);

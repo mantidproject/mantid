@@ -9,7 +9,6 @@ Mantid customizations for the behaviour of the Sphinx autodoc
 extension
 """
 
-
 def skip_member(app, what, name, obj, skip, options):
     """
     Arguments:

@@ -327,7 +327,7 @@ void LoadCanSAS1D::appendDataToOutput(const API::MatrixWorkspace_sptr &newWork, 
  */
 void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name, const API::MatrixWorkspace_sptr &localWorkspace) {
 
-  auto loadInst = createChildAlgorithm("LoadInstrument");
+  API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {

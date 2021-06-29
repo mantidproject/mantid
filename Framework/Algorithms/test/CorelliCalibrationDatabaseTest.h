@@ -235,7 +235,7 @@ private:
     // Name of the output workspace.
     std::string outWSName("CorelliCalibrationDatabaseTest_matrixWS");
 
-    auto lei = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
+    IAlgorithm_sptr lei = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     lei->initialize();
     lei->setPropertyValue("Filename", "CORELLI_Definition.xml");
     lei->setPropertyValue("OutputWorkspace", "CorelliCalibrationDatabaseTest_OutputWS");
@@ -322,7 +322,7 @@ private:
   }
 
   TableWorkspace_sptr loadCSVtoTable(const std::string &csvname, const std::string &tablewsname) {
-    auto loadAsciiAlg = AlgorithmFactory::Instance().create("LoadAscii", 2);
+    IAlgorithm_sptr loadAsciiAlg = AlgorithmFactory::Instance().create("LoadAscii", 2);
     loadAsciiAlg->initialize();
     loadAsciiAlg->setPropertyValue("Filename", csvname);
     loadAsciiAlg->setPropertyValue("OutputWorkspace", tablewsname);

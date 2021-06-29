@@ -17,14 +17,11 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using boost::regex;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -90,8 +87,7 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
   }
   std::vector<double> extents = getProperty("Extents");
   std::vector<int> nbins = getProperty("NumberOfBins");
-  std::string dimensions_string = getPropertyValue("Names");
-  std::vector<std::string> names = parseNames(dimensions_string);
+  std::vector<std::string> names = getProperty("Names");
   std::vector<std::string> units = getProperty("Units");
   std::vector<std::string> frames = getProperty("Frames");
 
@@ -193,30 +189,6 @@ bool ImportMDHistoWorkspaceBase::checkIfFrameValid(const std::string &frame,
                                                    const std::vector<std::string> &targetFrames) {
   return std::any_of(targetFrames.cbegin(), targetFrames.cend(),
                      [&frame](const auto &targetFrame) { return targetFrame == frame; });
-}
-
-/*
- * The list of dimension names often looks like "[H,0,0],[0,K,0]" with "[H,0,0]"
- * being the first dimension but getProperty returns a vector of
- * the string split on every comma
- * This function parses the string, and does not split on commas within brackets
- */
-std::vector<std::string> ImportMDHistoWorkspaceBase::parseNames(const std::string &names_string) {
-
-  // This regex has two parts which are separated by the "|" (or)
-  // The first part matches anything which is bounded by square brackets
-  // unless they contain square brackets (so that it only matches inner pairs)
-  // The second part matches anything that doesn't contain a comma
-  // NB, the order of the two parts matters
-
-  regex expression(R"(\[([^\[]*)\]|[^,]+)");
-
-  boost::sregex_token_iterator iter(names_string.begin(), names_string.end(), expression, 0);
-  boost::sregex_token_iterator end;
-
-  std::vector<std::string> names_result(iter, end);
-
-  return names_result;
 }
 
 } // namespace MDAlgorithms

@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ResNorm.h"
-#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -446,7 +445,7 @@ void ResNorm::plotCurrentPreview() {
     plotWorkspaces.emplace_back("__" + fitWsGroupName + "_scaled");
     plotIndices.emplace_back(0);
   }
-  m_plotter->plotCorrespondingSpectra(plotWorkspaces, plotIndices, IndirectSettingsHelper::externalPlotErrorBars());
+  m_plotter->plotCorrespondingSpectra(plotWorkspaces, plotIndices);
 }
 
 void ResNorm::runClicked() {
@@ -478,13 +477,12 @@ void ResNorm::saveClicked() {
  */
 void ResNorm::plotClicked() {
   setPlotResultIsPlotting(true);
-  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 
   QString const plotOptions = m_uiForm.cbPlot->currentText();
   if (plotOptions == "Intensity" || plotOptions == "All")
-    m_plotter->plotSpectra(m_pythonExportWsName + "_Intensity", "0", errorBars);
+    m_plotter->plotSpectra(m_pythonExportWsName + "_Intensity", "0");
   if (plotOptions == "Stretch" || plotOptions == "All")
-    m_plotter->plotSpectra(m_pythonExportWsName + "_Stretch", "0", errorBars);
+    m_plotter->plotSpectra(m_pythonExportWsName + "_Stretch", "0");
   setPlotResultIsPlotting(false);
 }
 

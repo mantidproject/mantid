@@ -206,7 +206,7 @@ void CalculateTransmission::exec() {
   // Output this data if requested
   const bool outputRaw = getProperty("OutputUnfittedData");
   if (outputRaw) {
-    auto childAlg = createChildAlgorithm("ReplaceSpecialValues");
+    IAlgorithm_sptr childAlg = createChildAlgorithm("ReplaceSpecialValues");
     childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", transmission);
     childAlg->setProperty<double>("NaNValue", 0.0);
     childAlg->setProperty<double>("NaNError", 0.0);
@@ -254,7 +254,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectra(const API::Matri
   const std::string commaIndexList = boost::algorithm::join(indexStrings, ",");
 
   double start = m_done;
-  auto childAlg = createChildAlgorithm("SumSpectra", start, m_done += 0.1);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("SumSpectra", start, m_done += 0.1);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
   childAlg->setPropertyValue("ListOfWorkspaceIndices", commaIndexList);
   childAlg->executeAsChildAlg();
@@ -377,7 +377,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitData(const API::MatrixWorksp
                                                          double &offset) {
   g_log.information("Fitting the experimental transmission curve");
   double start = m_done;
-  auto childAlg = createChildAlgorithm("Fit", start, m_done + 0.9);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit", start, m_done + 0.9);
   auto linearBack = API::FunctionFactory::Instance().createFunction("LinearBackground");
   childAlg->setProperty("Function", linearBack);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
@@ -407,7 +407,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitPolynomial(const API::Matrix
                                                                std::vector<double> &coeficients) {
   g_log.notice("Fitting the experimental transmission curve fitpolyno");
   double start = m_done;
-  auto childAlg = createChildAlgorithm("Fit", start, m_done = 0.9);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit", start, m_done = 0.9);
   auto polyfit = API::FunctionFactory::Instance().createFunction("Polynomial");
   polyfit->setAttributeValue("n", order);
   polyfit->initialize();
@@ -440,7 +440,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitPolynomial(const API::Matrix
 API::MatrixWorkspace_sptr CalculateTransmission::rebin(const std::vector<double> &binParams,
                                                        const API::MatrixWorkspace_sptr &ws) {
   double start = m_done;
-  auto childAlg = createChildAlgorithm("Rebin", start, m_done += 0.05);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin", start, m_done += 0.05);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
   childAlg->setProperty<std::vector<double>>("Params", binParams);
   childAlg->executeAsChildAlg();

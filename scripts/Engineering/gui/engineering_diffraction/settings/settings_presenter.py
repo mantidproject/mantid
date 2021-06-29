@@ -5,16 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from os import path, getcwd
+from os import path
 from mantidqt.utils.observer_pattern import Observable
 
-CALIB_FOLDER = path.join(path.dirname(path.dirname(path.dirname(getcwd()))), "calib")
-DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
 SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
                  "primary_log": str, "sort_ascending": bool}
 
 DEFAULT_SETTINGS = {
-    "full_calibration": path.join(CALIB_FOLDER, DEFAULT_FULL_INST_CALIB),
+    "full_calibration": "",
     "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
     "recalc_vanadium": False,
     "logs": ','.join(

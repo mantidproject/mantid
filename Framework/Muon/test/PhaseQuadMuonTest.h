@@ -63,7 +63,7 @@ void populatePhaseTable(const ITableWorkspace_sptr &phaseTable) {
 IAlgorithm_sptr setupAlg(const MatrixWorkspace_sptr &m_loadedData, bool isChildAlg,
                          const ITableWorkspace_sptr &phaseTable) {
   // Set up PhaseQuad
-  auto phaseQuad = AlgorithmManager::Instance().create("PhaseQuad");
+  IAlgorithm_sptr phaseQuad = AlgorithmManager::Instance().create("PhaseQuad");
   phaseQuad->setChild(isChildAlg);
   phaseQuad->initialize();
   phaseQuad->setProperty("InputWorkspace", m_loadedData);
@@ -118,7 +118,7 @@ MatrixWorkspace_sptr setupWS(const MatrixWorkspace_sptr &m_loadedData) {
 }
 
 MatrixWorkspace_sptr loadMuonDataset() {
-  auto loader = AlgorithmManager::Instance().create("Load");
+  IAlgorithm_sptr loader = AlgorithmManager::Instance().create("Load");
   loader->setChild(true);
   loader->initialize();
   loader->setProperty("Filename", "emu00006473.nxs");
@@ -168,7 +168,7 @@ public:
       }
     }
     // do phase Quad
-    auto phaseQuad = setupAlgDead(ws);
+    IAlgorithm_sptr phaseQuad = setupAlgDead(ws);
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
     TS_ASSERT(phaseQuad->isExecuted());
 
@@ -204,7 +204,7 @@ public:
     TS_ASSERT_DELTA(specImE[50], 0.3360, 0.0001);
   }
   void testExecPhaseTable() {
-    auto phaseQuad = setupAlg(m_loadedData, true);
+    IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true);
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
     TS_ASSERT(phaseQuad->isExecuted());
 
@@ -262,7 +262,7 @@ public:
   }
   void testSwapOrder() {
     std::vector<std::string> names = {"ID", "phase", "Asymm"};
-    auto phaseQuad = setupAlg(m_loadedData, true, names, true);
+    IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true, names, true);
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
     TS_ASSERT(phaseQuad->isExecuted());
 
@@ -302,6 +302,7 @@ private:
 };
 
 class PhaseQuadMuonTestPerformance : public CxxTest::TestSuite {
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests

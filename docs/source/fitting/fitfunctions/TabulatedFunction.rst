@@ -32,6 +32,7 @@ Usage
 
 .. testcode:: Ex
 
+    from __future__ import print_function
     ws1=LoadNexus('tabulatedFunctionExample.nxs')
 
     # Clone the workspace by rescaling and shift

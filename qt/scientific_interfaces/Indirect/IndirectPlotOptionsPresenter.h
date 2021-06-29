@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "IPythonRunner.h"
 #include "IndirectInterface.h"
 #include "IndirectPlotOptionsModel.h"
 #include "IndirectPlotOptionsView.h"
@@ -25,7 +26,7 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject {
 
 public:
   IndirectPlotOptionsPresenter(
-      IndirectPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
+      IndirectPlotOptionsView *view, IPyRunner *pythonRunner, PlotWidget const &plotType = PlotWidget::Spectra,
       std::string const &fixedIndices = "",
       boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
   /// Used by the unit tests so that the view and model can be mocked

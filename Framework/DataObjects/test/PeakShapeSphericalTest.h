@@ -19,7 +19,6 @@
 #include <json/json.h>
 
 #include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidJson/Json.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
 
@@ -158,8 +157,9 @@ public:
     PeakShapeSpherical shape(radius, frame, algorithmName, algorithmVersion);
     const std::string json = shape.toJSON();
 
+    Json::Reader reader;
     Json::Value output;
-    TSM_ASSERT("Should parse as JSON", Mantid::JsonHelpers::parse(json, &output));
+    TSM_ASSERT("Should parse as JSON", reader.parse(json, output));
 
     TS_ASSERT_EQUALS(algorithmName, output["algorithm_name"].asString());
     TS_ASSERT_EQUALS(algorithmVersion, output["algorithm_version"].asInt());
@@ -180,8 +180,9 @@ public:
                              algorithmVersion);
     const std::string json = shape.toJSON();
 
+    Json::Reader reader;
     Json::Value output;
-    TSM_ASSERT("Should parse as JSON", Mantid::JsonHelpers::parse(json, &output));
+    TSM_ASSERT("Should parse as JSON", reader.parse(json, output));
 
     TS_ASSERT_EQUALS(algorithmName, output["algorithm_name"].asString());
     TS_ASSERT_EQUALS(algorithmVersion, output["algorithm_version"].asInt());

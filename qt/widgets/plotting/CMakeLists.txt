@@ -80,7 +80,6 @@ mtd_add_qt_tests(
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     gmock
-    Python::Python
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsPlotting

@@ -743,7 +743,7 @@ template <typename FD> void LoadEMU<FD>::setupDetectorMasks(std::vector<bool> &r
       if (!roi[i])
         maskIndexList[maskIndex++] = i;
 
-    auto maskingAlg = Base::createChildAlgorithm("MaskDetectors");
+    API::IAlgorithm_sptr maskingAlg = Base::createChildAlgorithm("MaskDetectors");
     maskingAlg->setProperty("Workspace", m_localWorkspace);
     maskingAlg->setProperty("WorkspaceIndexList", maskIndexList);
     maskingAlg->executeAsChildAlg();
@@ -1058,7 +1058,7 @@ template <typename FD> void LoadEMU<FD>::loadEnvironParameters(const std::string
 template <typename FD> void LoadEMU<FD>::loadInstrument() {
 
   // loads the IDF and parameter file
-  auto loadInstrumentAlg = Base::createChildAlgorithm("LoadInstrument");
+  API::IAlgorithm_sptr loadInstrumentAlg = Base::createChildAlgorithm("LoadInstrument");
   loadInstrumentAlg->setProperty("Workspace", m_localWorkspace);
   loadInstrumentAlg->setPropertyValue("InstrumentName", "EMUau");
   loadInstrumentAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));

@@ -156,6 +156,7 @@ implementation used for solving crystal structures from powder diffraction data.
     # For this demo example, just one fitting parameter is globally fitted, the peak center of a Gaussian peak
     # Please bear in mind the example here is to demonstrate this algorithm not provide a real global fitting problem
 
+    from __future__ import print_function
     from random import random
     from time import sleep
 

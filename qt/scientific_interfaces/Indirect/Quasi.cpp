@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Quasi.h"
-#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
@@ -341,7 +340,6 @@ void Quasi::handleSampleInputReady(const QString &filename) {
  * Plots the current preview on the miniplot
  */
 void Quasi::plotCurrentPreview() {
-  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 
   if (m_uiForm.ppPlot->hasCurve("fit.1")) {
     QString program = m_uiForm.cbProgram->currentText();
@@ -351,12 +349,11 @@ void Quasi::plotCurrentPreview() {
     auto fitWS = fitName + "_";
     fitWS += std::to_string(m_previewSpec);
     if (program == "Lorentzians")
-      m_plotter->plotSpectra(fitWS, "0-4", errorBars);
+      m_plotter->plotSpectra(fitWS, "0-4");
     else
-      m_plotter->plotSpectra(fitWS, "0-2", errorBars);
+      m_plotter->plotSpectra(fitWS, "0-2");
   } else if (m_uiForm.ppPlot->hasCurve("Sample")) {
-    m_plotter->plotSpectra(m_uiForm.dsSample->getCurrentDataName().toStdString(), std::to_string(m_previewSpec),
-                           errorBars);
+    m_plotter->plotSpectra(m_uiForm.dsSample->getCurrentDataName().toStdString(), std::to_string(m_previewSpec));
   }
 }
 
@@ -501,7 +498,6 @@ int Quasi::displaySaveDirectoryMessage() {
  */
 void Quasi::plotClicked() {
   setPlotResultIsPlotting(true);
-  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 
   // Output options
   std::string const plot = m_uiForm.cbPlot->currentText().toStdString();
@@ -511,7 +507,7 @@ void Quasi::plotClicked() {
     auto const probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
     // Check workspace exists
     IndirectTab::checkADSForPlotSaveWorkspace(probWS, true);
-    m_plotter->plotSpectra(probWS, "1-2", errorBars);
+    m_plotter->plotSpectra(probWS, "1-2");
   }
 
   auto const resultWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
@@ -533,10 +529,10 @@ void Quasi::plotClicked() {
             if (spectraIndices.size() == 3) {
               auto const workspaceIndices = std::to_string(spectraIndices[0]) + "," +
                                             std::to_string(spectraIndices[1]) + "," + std::to_string(spectraIndices[2]);
-              m_plotter->plotSpectra(resultName, workspaceIndices, errorBars);
+              m_plotter->plotSpectra(resultName, workspaceIndices);
             }
           } else
-            m_plotter->plotSpectra(resultName, std::to_string(spectraIndices[0]), errorBars);
+            m_plotter->plotSpectra(resultName, std::to_string(spectraIndices[0]));
         }
       }
     }

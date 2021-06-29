@@ -7,12 +7,19 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Utility for moving a class file to a different project."""
 import argparse
+import datetime
+import os
+import re
+import sys
 
 from cmakelists_utils import *
+
+#======================================================================
 
 
 def move_one(subproject, classname, newproject, newclassname, oldfilename, newfilename, args):
     """Move one file """
+
     # Move the file
     try:
         cmd = "mv " + oldfilename + " " + newfilename
@@ -46,6 +53,8 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
         print(err)
 
 
+
+#======================================================================
 def move_all(subproject, classname, newproject, newclassname, args):
 
     # Directory at base of subproject
@@ -86,7 +95,7 @@ def move_all(subproject, classname, newproject, newclassname, args):
     print("   Files were added to Framework/{}/CMakeLists.txt !".format(newproject))
     print()
 
-
+#======================================================================
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Utility to move a Mantid class from one project to another. '
                                      'Please note, you may still have more fixes to do to get compilation!')
@@ -122,6 +131,7 @@ if __name__ == "__main__":
     parser.add_argument('--project', dest='project',
                         default="Framework",
                         help='The project in which this goes. Default: Framework. Can be MantidQt')
+
 
     args = parser.parse_args()
     subproject = args.subproject

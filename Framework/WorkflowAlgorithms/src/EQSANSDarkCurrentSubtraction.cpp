@@ -146,7 +146,7 @@ void EQSANSDarkCurrentSubtraction::exec() {
   progress.report("Scaling dark current");
 
   // Scale the stored dark current by the counting time
-  auto rebinAlg = createChildAlgorithm("RebinToWorkspace", 0.4, 0.5);
+  IAlgorithm_sptr rebinAlg = createChildAlgorithm("RebinToWorkspace", 0.4, 0.5);
   rebinAlg->setProperty("WorkspaceToRebin", darkWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
   rebinAlg->setProperty("OutputWorkspace", darkWS);
@@ -154,7 +154,7 @@ void EQSANSDarkCurrentSubtraction::exec() {
   MatrixWorkspace_sptr scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
   // Perform subtraction
-  auto scaleAlg = createChildAlgorithm("Scale", 0.5, 0.6);
+  IAlgorithm_sptr scaleAlg = createChildAlgorithm("Scale", 0.5, 0.6);
   scaleAlg->setProperty("InputWorkspace", scaledDarkWS);
   scaleAlg->setProperty("Factor", scaling_factor);
   scaleAlg->setProperty("OutputWorkspace", scaledDarkWS);
@@ -162,7 +162,7 @@ void EQSANSDarkCurrentSubtraction::exec() {
   scaleAlg->executeAsChildAlg();
   scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
-  auto minusAlg = createChildAlgorithm("Minus", 0.6, 0.7);
+  IAlgorithm_sptr minusAlg = createChildAlgorithm("Minus", 0.6, 0.7);
   minusAlg->setProperty("LHSWorkspace", inputWS);
   minusAlg->setProperty("RHSWorkspace", scaledDarkWS);
   const std::string outputWSname = getPropertyValue("OutputWorkspace");

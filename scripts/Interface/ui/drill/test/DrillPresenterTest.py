@@ -8,6 +8,8 @@
 import unittest
 from unittest import mock
 
+from qtpy.QtWidgets import QMessageBox
+
 from Interface.ui.drill.presenter.DrillPresenter import DrillPresenter
 
 
@@ -71,6 +73,7 @@ class DrillPresenterTest(unittest.TestCase):
         calls = [mock.call(1, 0, "17+22,207:307,17:26:2"),
                  mock.call(1, 1, "17+22,207:307,17:26:2")]
         self.view.table.setCellContents.assert_has_calls(calls)
+
 
     def test_onParamOk(self):
         self.view.columns = ["test1", "test2"]

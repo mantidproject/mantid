@@ -276,7 +276,7 @@ std::string CalMuonDetectorPhases::createFittingFunction(double freq, bool fixFr
  */
 API::MatrixWorkspace_sptr CalMuonDetectorPhases::extractDataFromWorkspace(double startTime, double endTime) {
   // Extract counts from startTime to endTime
-  auto crop = createChildAlgorithm("CropWorkspace");
+  API::IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
   crop->setProperty("InputWorkspace", m_inputWS);
   crop->setProperty("XMin", startTime);
   crop->setProperty("XMax", endTime);
@@ -291,7 +291,7 @@ API::MatrixWorkspace_sptr CalMuonDetectorPhases::extractDataFromWorkspace(double
  * @return :: Workspace with decay removed
  */
 API::MatrixWorkspace_sptr CalMuonDetectorPhases::removeExpDecay(const API::MatrixWorkspace_sptr &wsInput) {
-  auto remove = createChildAlgorithm("RemoveExpDecay");
+  API::IAlgorithm_sptr remove = createChildAlgorithm("RemoveExpDecay");
   remove->setProperty("InputWorkspace", wsInput);
   remove->executeAsChildAlg();
   API::MatrixWorkspace_sptr wsRem = remove->getProperty("OutputWorkspace");

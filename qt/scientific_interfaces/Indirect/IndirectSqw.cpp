@@ -56,7 +56,7 @@ namespace CustomInterfaces {
 IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent) : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraContour));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(QString const &)));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sqwAlgDone(bool)));

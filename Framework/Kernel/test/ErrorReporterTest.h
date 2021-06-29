@@ -8,7 +8,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidJson/Json.h"
 #include "MantidKernel/ErrorReporter.h"
 #include <algorithm>
 #include <json/json.h>
@@ -45,8 +44,9 @@ public:
     TestableErrorReporter errorService(name, upTime, "0", false);
     const std::string message = errorService.generateErrorMessage();
 
+    ::Json::Reader reader;
     ::Json::Value root;
-    Mantid::JsonHelpers::parse(message, &root);
+    reader.parse(message, root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
         "ParaView",   "application", "host", "mantidSha1", "mantidVersion", "osArch",  "osName",
@@ -67,8 +67,9 @@ public:
     TestableErrorReporter errorService(name, upTime, "0", true, "name", "email", "textBox");
     const std::string message = errorService.generateErrorMessage();
 
+    ::Json::Reader reader;
     ::Json::Value root;
-    Mantid::JsonHelpers::parse(message, &root);
+    reader.parse(message, root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
         "ParaView",  "application", "host",     "mantidSha1", "mantidVersion", "osArch",  "osName", "osReadable",
@@ -92,8 +93,9 @@ public:
     TestableErrorReporter errorService(name, upTime, "0", true, "name", "email", "textBox", "stacktrace");
     const std::string message = errorService.generateErrorMessage();
 
+    ::Json::Reader reader;
     ::Json::Value root;
-    Mantid::JsonHelpers::parse(message, &root);
+    reader.parse(message, root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
         "ParaView", "application", "host",      "mantidSha1", "mantidVersion", "osArch",
@@ -119,8 +121,9 @@ public:
     TestableErrorReporter errorService(name, upTime, "0", false, "name", "email", "textBox", "stacktrace");
     const std::string message = errorService.generateErrorMessage();
 
+    ::Json::Reader reader;
     ::Json::Value root;
-    Mantid::JsonHelpers::parse(message, &root);
+    reader.parse(message, root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
         "ParaView", "application", "host",      "mantidSha1", "mantidVersion", "osArch",

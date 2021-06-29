@@ -8,7 +8,6 @@
 #include "MantidKernel/Atom.h"
 #include <stdexcept>
 
-#include "MantidJson/Json.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
@@ -168,7 +167,8 @@ BraggScatterer_sptr IsotropicAtomBraggScattererParser::getScatterer(const std::s
     root[properties[i]] = cleanScattererTokens[i];
   }
 
-  std::string initString = Mantid::JsonHelpers::jsonToString(root);
+  ::Json::FastWriter writer;
+  std::string initString = writer.write(root);
 
   return BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", initString);
 }

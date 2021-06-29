@@ -584,62 +584,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, difc}}))
     TS_ASSERT_DELTA(x[0], 2.065172, 0.000001)
     TS_ASSERT(yy == y)
-    x[0] = 1.0;
-    TS_ASSERT_THROWS(d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, -1.0}}), const std::runtime_error &)
   }
 
   void testdSpacing_fromTOFWithDIFATZERO() {
-    // solves the quadratic ax^2 + bx + c =0
-    // where a=difa, b=difc, c=tzero-tof
-    // a>0 and c<0
     std::vector<double> x(1, 2.0), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING(
         d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, 2.0}, {UnitParams::difa, 3.0}, {UnitParams::tzero, 1.0}}))
     TS_ASSERT_DELTA(x[0], 1.0 / 3.0, 0.0001)
     TS_ASSERT(yy == y)
-    // a>0 and c=0
-    x[0] = 1.0;
-    TS_ASSERT_THROWS_NOTHING(
-        d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, 2.0}, {UnitParams::difa, 3.0}, {UnitParams::tzero, 1.0}}))
-    TS_ASSERT_DELTA(x[0], 0.0, 0.0001)
-    TS_ASSERT(yy == y)
-    // a<0 and c=0
     x[0] = 1.0;
     TS_ASSERT_THROWS_NOTHING(
         d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, 3.0}, {UnitParams::difa, -2.0}, {UnitParams::tzero, 1.0}}))
     TS_ASSERT_DELTA(x[0], 1.5, 0.0001)
-    TS_ASSERT(yy == y)
-    // a<0 and c<0 - two positive roots
-    x[0] = 2.0;
-    TS_ASSERT_THROWS_NOTHING(
-        d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, 3.0}, {UnitParams::difa, -2.0}, {UnitParams::tzero, 1.0}}))
-    TS_ASSERT_DELTA(x[0], 0.5, 0.0001)
-    TS_ASSERT(yy == y)
-    x[0] = 2.0;
-    TS_ASSERT_THROWS(
-        d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, 2.0}, {UnitParams::difa, -3.0}, {UnitParams::tzero, 1.0}}),
-        const std::runtime_error &)
-    x[0] = 10000.0;
-    TS_ASSERT_THROWS_NOTHING(
-        d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, 20000.0}, {UnitParams::difa, -1E-10}, {UnitParams::tzero, 1.0}}))
-    TS_ASSERT_DELTA(x[0], 0.49995, 0.0001)
-    TS_ASSERT(yy == y)
-    // Finally check some c>0 for completeness - unlikely to happen
-    // a>0 and c>0
-    x[0] = 1.0;
-    TS_ASSERT_THROWS(
-        d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, 2.0}, {UnitParams::difa, 1.0}, {UnitParams::tzero, 2.0}}),
-        const std::runtime_error &)
-    x[0] = 1.0;
-    TS_ASSERT_THROWS(
-        d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, 2.0}, {UnitParams::difa, 2.0}, {UnitParams::tzero, 2.0}}),
-        const std::runtime_error &)
-    // a<0 and c>0
-    x[0] = 1.0;
-    TS_ASSERT_THROWS_NOTHING(
-        d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, 2.0}, {UnitParams::difa, -3.0}, {UnitParams::tzero, 2.0}}))
-    TS_ASSERT_DELTA(x[0], 1.0, 0.0001)
     TS_ASSERT(yy == y)
   }
 

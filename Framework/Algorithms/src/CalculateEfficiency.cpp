@@ -89,7 +89,7 @@ void CalculateEfficiency::exec() {
   // std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
   // Sum up all the wavelength bins
-  auto childAlg = createChildAlgorithm("Integration", 0.0, 0.2);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Integration", 0.0, 0.2);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
   childAlg->executeAsChildAlg();
   rebinnedWS = childAlg->getProperty("OutputWorkspace");
@@ -235,7 +235,7 @@ void CalculateEfficiency::normalizeDetectors(const MatrixWorkspace_sptr &rebinne
     // Mask detectors that were found to be outside the acceptable efficiency
     // band
     try {
-      auto mask = createChildAlgorithm("MaskDetectors", 0.8, 0.9);
+      IAlgorithm_sptr mask = createChildAlgorithm("MaskDetectors", 0.8, 0.9);
       // First we mask detectors in the output workspace
       mask->setProperty<MatrixWorkspace_sptr>("Workspace", outputWS);
       mask->setProperty<std::vector<size_t>>("WorkspaceIndexList", dets_to_mask);
@@ -361,7 +361,7 @@ void CalculateEfficiency::maskEdges(const MatrixWorkspace_sptr &ws, int left, in
   }
   g_log.debug() << std::endl;
 
-  auto maskAlg = createChildAlgorithm("MaskDetectors");
+  IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
   maskAlg->setChild(true);
   maskAlg->setProperty("Workspace", ws);
   maskAlg->setProperty("DetectorList", IDs);

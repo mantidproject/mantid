@@ -62,21 +62,18 @@ void IndirectDataAnalysisConvFitTab::setupFitTab() {
 
   // Initialise fitTypeStrings
   m_fitStrings["Lorentzian"] = "L";
-  m_fitStrings["StretchedExpFT"] = "SFT";
-  m_fitStrings["TeixeiraWaterSQE"] = "TxWater";
   m_fitStrings["DiffRotDiscreteCircle"] = "DC";
-  m_fitStrings["ElasticDiffRotDiscreteCircle"] = "EDC";
+  m_fitStrings["InelasticDiffSphere"] = "IDS";
   m_fitStrings["InelasticDiffRotDiscreteCircle"] = "IDC";
   m_fitStrings["DiffSphere"] = "DS";
   m_fitStrings["ElasticDiffSphere"] = "EDS";
-  m_fitStrings["InelasticDiffSphere"] = "IDS";
+  m_fitStrings["ElasticDiffRotDiscreteCircle"] = "EDC";
   m_fitStrings["IsoRotDiff"] = "IRD";
-  m_fitStrings["ElasticIsoRotDiff"] = "EIRD";
-  m_fitStrings["InelasticIsoRotDiff"] = "IIRD";
+  m_fitStrings["StretchedExpFT"] = "SFT";
+  m_fitStrings["TeixeiraWaterSQE"] = "TxWater";
 
   auto &functionFactory = FunctionFactory::Instance();
   auto lorentzian = functionFactory.createFunction("Lorentzian");
-  auto stretchedExpFT = functionFactory.createFunction("StretchedExpFT");
   auto teixeiraWater = functionFactory.createFunction("TeixeiraWaterSQE");
 
   auto diffSphere = functionFactory.createFunction("DiffSphere");
@@ -88,8 +85,8 @@ void IndirectDataAnalysisConvFitTab::setupFitTab() {
   auto inelasticDiffRotDiscCircle = functionFactory.createFunction("InelasticDiffRotDiscreteCircle");
 
   auto isoRotDiff = functionFactory.createFunction("IsoRotDiff");
-  auto elasticIsoRotDiff = functionFactory.createFunction("ElasticIsoRotDiff");
-  auto inelasticIsoRotDiff = functionFactory.createFunction("InelasticIsoRotDiff");
+
+  auto stretchedExpFT = functionFactory.createFunction("StretchedExpFT");
 
   auto deltaFunction = functionFactory.createFunction("DeltaFunction");
 

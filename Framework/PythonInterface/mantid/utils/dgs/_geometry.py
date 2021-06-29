@@ -7,6 +7,7 @@
 from collections import namedtuple
 from collections.abc import Mapping
 import functools
+from typing import Any, Tuple
 import numpy as np
 from mantid.geometry import OrientedLattice
 import mantid.kernel as mk
@@ -66,7 +67,7 @@ class ErrorCodes(Enum):
     GONIOMETR = 6
 
 
-def _qangle_validate_inputs(hkl: np.array,  # noqa: C901
+def _qangle_validate_inputs(hkl: np.array,
                             Ei: float or np.array,
                             DeltaE: float or np.array,
                             sign: float or np.array,
@@ -131,11 +132,9 @@ def _qangle_validate_inputs(hkl: np.array,  # noqa: C901
         if vertical_extent[0]<-180 or vertical_extent[1]<vertical_extent[0] or vertical_extent[1]>180:
             raise ValueError(f"Vertical constraints must obey -180 <= vertical_extent[0] ({vertical_extent[0]}) "
                              f"<= vertical_extent[1] ({vertical_extent[1]}) <=180")
-        if horizontal_extent_low[0]<-180 or horizontal_extent_low[1]<horizontal_extent_low[0] \
-                or horizontal_extent_low[1]>180:
+        if horizontal_extent_low[0]<-180 or horizontal_extent_low[1]<horizontal_extent_low[0] or horizontal_extent_low[1]>180:
             raise ValueError(f"Horizontal constraints must obey -180 <= horizontal_extent_low[0]"
-                             f" ({horizontal_extent_low[0]}) <= horizontal_extent_low[1] ({horizontal_extent_low[1]}) "
-                             f"<=180")
+                             f" ({horizontal_extent_low[0]}) <= horizontal_extent_low[1] ({horizontal_extent_low[1]}) <=180")
         if vertical_extent_low[0]<-180 or vertical_extent_low[1]<vertical_extent_low[0] or vertical_extent_low[1]>180:
             raise ValueError(f"Vertical constraints must obey -180 <= vertical_extent_low[0] ({vertical_extent_low[0]}) "
                              f"<= vertical_extent_low[1] ({vertical_extent_low[1]}) <=180")
@@ -146,7 +145,9 @@ def _qangle_validate_inputs(hkl: np.array,  # noqa: C901
             raise ValueError("goniometer_range must be an increasing array, "
                              "with both limits between -180 and 180 degrees")
 
+
     return (Ei, DeltaE, sign, UB)
+
 
 
 @namedtuplefy
@@ -265,18 +266,21 @@ def qangle(*,  # force keyword arguments
     out_plane_Q_angle = np.degrees(out_plane_Q_angle)
 
     if detector_constraints:
-        error_code[((chi < horizontal_extent[0]) | (chi > horizontal_extent[1])
-                   | (delta < vertical_extent[0]) | (delta > vertical_extent[1]))
-                   & (error_code == ErrorCodes.CORRECT)] = ErrorCodes.OUTSIDE_DETECTOR
-        error_code[(chi > horizontal_extent_low[0]) & (chi < horizontal_extent_low[1])
-                   & (delta > vertical_extent_low[0]) & (delta < vertical_extent_low[1])
-                   & (error_code == ErrorCodes.CORRECT)] = ErrorCodes.INSIDE_BEAMSTOP
+        error_code[((chi<horizontal_extent[0]) | (chi>horizontal_extent[1]) |
+                   (delta<vertical_extent[0]) | (delta>vertical_extent[1]))
+                   & (error_code==ErrorCodes.CORRECT)
+                    ] =  ErrorCodes.OUTSIDE_DETECTOR
+        error_code[(chi>horizontal_extent_low[0]) & (chi<horizontal_extent_low[1]) &
+                   (delta>vertical_extent_low[0]) & (delta<vertical_extent_low[1]) & (error_code==ErrorCodes.CORRECT)
+                   ] =  ErrorCodes.INSIDE_BEAMSTOP
 
     if goniometer_constraints:
-        error_code[((omega < goniometer_range[0]) | (omega > goniometer_range[1]))
-                   & (error_code == ErrorCodes.CORRECT)] = ErrorCodes.GONIOMETR
+        error_code[((omega< goniometer_range[0]) | (omega> goniometer_range[1])) & (error_code==ErrorCodes.CORRECT)
+        ] = ErrorCodes.GONIOMETR
 
     return dict(Q_lab_x=Q_lab_x, Q_lab_y=Q_lab_y, Q_lab_z=Q_lab_z,
                 in_plane_Q_angle = in_plane_Q_angle, out_plane_Q_angle = out_plane_Q_angle,
                 in_plane_kf_angle = chi, out_plane_kf_angle = delta,
                 omega=omega, error_code=error_code)
+
+

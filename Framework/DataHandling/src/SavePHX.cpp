@@ -58,7 +58,7 @@ void SavePHX::exec() {
   }
 
   // execute the ChildAlgorithm to calculate the detector's parameters;
-  auto spCalcDetPar = createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
+  IAlgorithm_sptr spCalcDetPar = this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
   spCalcDetPar->initialize();
   spCalcDetPar->setPropertyValue("InputWorkspace", inputWorkspace->getName());
   spCalcDetPar->setPropertyValue("ReturnLinearRanges", "0");

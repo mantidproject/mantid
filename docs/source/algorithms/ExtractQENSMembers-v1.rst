@@ -18,6 +18,8 @@ Usage
 
 .. testcode:: ExExtractQENSMembers
 
+  from __future__ import print_function
+
   # Load sample and resolution files
   sample = Load('irs26176_graphite002_red.nxs', OutputWorkspace='irs26176_graphite002_red')
   resolution = Load('irs26173_graphite002_red.nxs')
@@ -71,6 +73,8 @@ Output:
   irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Lorentzian
 
 .. testcode:: ExExtractQENSMembersProperty
+
+  from __future__ import print_function
 
   # Load sample and resolution files
   sample = Load('irs26176_graphite002_red.nxs', OutputWorkspace='irs26176_graphite002_red')

@@ -118,7 +118,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(const API::MatrixWorkspace_sptr 
 
   // Set up and execute algorithm
   bool showlog = true;
-  auto findpeaks = createChildAlgorithm("FindPeaks", 0.0, 0.2, showlog);
+  API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", 0.0, 0.2, showlog);
   findpeaks->setProperty("InputWorkspace", WS);
   findpeaks->setProperty<int>("FWHM", fwhm);
   findpeaks->setProperty<int>("Tolerance", tolerance);

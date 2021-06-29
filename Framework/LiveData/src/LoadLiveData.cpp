@@ -100,7 +100,7 @@ Mantid::API::Workspace_sptr LoadLiveData::runProcessing(Mantid::API::Workspace_s
   ReadLock _lock(*inputWS);
 
   // Make algorithm and set the properties
-  auto alg = this->makeAlgorithm(PostProcess);
+  IAlgorithm_sptr alg = this->makeAlgorithm(PostProcess);
   if (alg) {
     if (PostProcess)
       g_log.notice() << "Performing post-processing";
@@ -266,7 +266,7 @@ void LoadLiveData::addMatrixWSChunk(const Workspace_sptr &accumWS, const Workspa
   }
 
   // Now do the main workspace
-  auto alg = this->createChildAlgorithm("Plus");
+  IAlgorithm_sptr alg = this->createChildAlgorithm("Plus");
   alg->setProperty("LHSWorkspace", accumWS);
   alg->setProperty("RHSWorkspace", chunkWS);
   alg->setProperty("OutputWorkspace", accumWS);
@@ -289,7 +289,7 @@ void LoadLiveData::addMDWSChunk(Workspace_sptr &accumWS, const Workspace_sptr &c
   ws_names_to_merge.append(", ");
   ws_names_to_merge.append(chunkName);
 
-  auto alg = this->createChildAlgorithm("MergeMD");
+  IAlgorithm_sptr alg = this->createChildAlgorithm("MergeMD");
   alg->setPropertyValue("InputWorkspaces", ws_names_to_merge);
   alg->execute();
 
@@ -374,10 +374,11 @@ void LoadLiveData::appendChunk(const Mantid::API::Workspace_sptr &chunkWS) {
  * @param chunkWS :: processed live data chunk matrix workspace
  */
 Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS, const Workspace_sptr &chunkWS) {
+  IAlgorithm_sptr alg;
   ReadLock _lock1(*accumWS);
   ReadLock _lock2(*chunkWS);
 
-  auto alg = this->createChildAlgorithm("AppendSpectra");
+  alg = this->createChildAlgorithm("AppendSpectra");
   alg->setProperty("InputWorkspace1", accumWS);
   alg->setProperty("InputWorkspace2", chunkWS);
   alg->setProperty("ValidateInputs", false);

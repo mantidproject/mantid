@@ -55,6 +55,7 @@ The value of the momentum transfer :math:`Q` is contained in the loaded data
 
 .. testcode:: SingleSpectrumTeixeiraWaterSQE
 
+    from __future__ import (absolute_import, division, print_function)
     resolution=Load("irs26173_graphite002_res.nxs")
     data=Load("irs26176_graphite002_red.nxs")
     function="""
@@ -90,6 +91,7 @@ The goal is to find out the residence time and the jump length
 
 .. testcode:: ExampleTeixeiraWaterSQE
 
+    from __future__ import (absolute_import, division, print_function)
     import numpy as np
     """Generate resolution function with the following properties:
         1. Gaussian in Energy

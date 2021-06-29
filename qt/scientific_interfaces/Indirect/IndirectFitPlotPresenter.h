@@ -8,8 +8,8 @@
 
 #include "DllConfig.h"
 
-#include "ExternalPlotter.h"
 #include "IndirectFitPlotModel.h"
+#include "IndirectPlotter.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include "IIndirectFitPlotView.h"
@@ -24,7 +24,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
 
 public:
-  IndirectFitPlotPresenter(IndirectFittingModel *model, IIndirectFitPlotView *view);
+  IndirectFitPlotPresenter(IndirectFittingModel *model, IIndirectFitPlotView *view, IPyRunner *pythonRunner = nullptr);
 
   void watchADS(bool watch);
 
@@ -114,7 +114,7 @@ private:
 
   bool m_plotGuessInSeparateWindow;
   QtLazyAsyncRunner<std::function<void()>> m_plotExternalGuessRunner;
-  std::unique_ptr<ExternalPlotter> m_plotter;
+  std::unique_ptr<IndirectPlotter> m_plotter;
 };
 
 } // namespace IDA

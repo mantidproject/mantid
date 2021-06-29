@@ -323,7 +323,7 @@ void LoadNXSPE::exec() {
     std::string instrument_parfile = IDF_filename.substr(0, IDF_filename.find("_Definition")) + "_Parameters.xml";
     if (Poco::File(instrument_parfile).exists()) {
       try {
-        auto loadParamAlg = createChildAlgorithm("LoadParameterFile");
+        IAlgorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
         loadParamAlg->setProperty("Filename", instrument_parfile);
         loadParamAlg->setProperty("Workspace", outputWS);
         loadParamAlg->execute();

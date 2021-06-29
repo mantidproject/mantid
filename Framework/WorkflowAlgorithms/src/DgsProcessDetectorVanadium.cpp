@@ -75,7 +75,7 @@ void DgsProcessDetectorVanadium::exec() {
   MatrixWorkspace_sptr monWS = this->getProperty("InputMonitorWorkspace");
 
   // Normalise result workspace to incident beam parameter
-  auto norm = createChildAlgorithm("DgsPreprocessData");
+  IAlgorithm_sptr norm = this->createChildAlgorithm("DgsPreprocessData");
   norm->setProperty("InputWorkspace", inputWS);
   norm->setProperty("OutputWorkspace", inputWS);
   norm->setProperty("InputMonitorWorkspace", monWS);
@@ -91,7 +91,7 @@ void DgsProcessDetectorVanadium::exec() {
 
   if ("TOF" != detVanIntRangeUnits) {
     // Convert the data to the appropriate units
-    auto cnvun = createChildAlgorithm("ConvertUnits");
+    IAlgorithm_sptr cnvun = this->createChildAlgorithm("ConvertUnits");
     cnvun->setProperty("InputWorkspace", inputWS);
     cnvun->setProperty("OutputWorkspace", inputWS);
     cnvun->setProperty("Target", detVanIntRangeUnits);
@@ -103,7 +103,7 @@ void DgsProcessDetectorVanadium::exec() {
   // Rebin the data (not Integration !?!?!?)
   std::vector<double> binning{detVanIntRangeLow, detVanIntRangeHigh - detVanIntRangeLow, detVanIntRangeHigh};
 
-  auto rebin = createChildAlgorithm("Rebin");
+  IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", inputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
   rebin->setProperty("PreserveEvents", false);
@@ -115,7 +115,7 @@ void DgsProcessDetectorVanadium::exec() {
   MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
   //!!! I see masks here but where is the map workspace used for vanadium
   // grouping (In ISIS)?
-  auto remap = createChildAlgorithm("DgsRemap");
+  IAlgorithm_sptr remap = this->createChildAlgorithm("DgsRemap");
   remap->setProperty("InputWorkspace", outputWS);
   remap->setProperty("OutputWorkspace", outputWS);
   remap->setProperty("MaskWorkspace", maskWS);
@@ -144,7 +144,7 @@ void DgsProcessDetectorVanadium::exec() {
       // Don't save private calculation workspaces
       if (!outputFile.empty() && !boost::starts_with(outputFile, "ChildAlgOutput") &&
           !boost::starts_with(outputFile, "__")) {
-        auto save = createChildAlgorithm("SaveNexus");
+        IAlgorithm_sptr save = this->createChildAlgorithm("SaveNexus");
         save->setProperty("InputWorkspace", outputWS);
         save->setProperty("FileName", outputFile);
         save->execute();

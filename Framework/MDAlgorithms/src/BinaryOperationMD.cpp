@@ -115,7 +115,7 @@ void BinaryOperationMD::exec() {
     // A = A * B. -> we will do A *= B
   } else {
     // C = A + B. -> So first we clone A (lhs) into C
-    auto clone = createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+    IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
     clone->setProperty("InputWorkspace", m_lhs);
     clone->executeAsChildAlg();
     m_out = clone->getProperty("OutputWorkspace");

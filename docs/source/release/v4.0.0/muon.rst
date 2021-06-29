@@ -1,7 +1,7 @@
 ============
 Muon Changes
 ============
-.. image::  ../../images/frequency_domain_analysis_home.png
+.. image::  ../../images/frequency_domain_analysis_2_home.png
    :align: right
    :height: 600px
 
@@ -22,7 +22,7 @@ Interface
 New
 ###
 - `Elemental Analysis` has been added to Muon Interfaces: Includes a selectable Periodic Table and can plot elemental lines against the currently loaded data.
-- New Frequency Domain Analysis GUI added, the original one is now marked as old and is deprecated so may not be included in future releases. See the :ref:`documentation <Frequency_Domain_Analysis-ref>` for more details.
+- New Frequency Domain Analysis GUI added, the original one is now marked as old and is deprecated so may not be included in future releases. See the :ref:`documentation <Frequency_Domain_Analysis_2-ref>` for more details.
 
 Improvements
 ############

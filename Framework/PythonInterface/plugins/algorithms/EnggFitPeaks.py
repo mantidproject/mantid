@@ -8,7 +8,8 @@ import math
 
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import *
+
+import mantid.simpleapi as mantid
 
 
 class EnggFitPeaks(PythonAlgorithm):
@@ -263,23 +264,24 @@ class EnggFitPeaks(PythonAlgorithm):
         peak.setParameter('I', intensity)
 
         # Fit using predicted window and a proper function with approximated initial values
+        fit_alg = self.createChildAlgorithm('Fit')
         fit_function = 'name=LinearBackground;{0}'.format(peak)
+        fit_alg.setProperty('Function', fit_function)
+        fit_alg.setProperty('InputWorkspace', wks)
+        fit_alg.setProperty('WorkspaceIndex', wks_index)
+        fit_alg.setProperty('CreateOutput', True)
+
         (startx, endx) = self._estimate_start_end_fitting_range(center, width)
+        fit_alg.setProperty('StartX', startx)
+        fit_alg.setProperty('EndX', endx)
         self.log().debug("Fitting for peak expected in (d-spacing): {0}, Fitting peak function: "
                          "{1}, with startx: {2}, endx: {3}".
                          format(expected_center, fit_function, startx, endx))
+        fit_alg.execute()
+        param_table = fit_alg.getProperty('OutputParameters').value
+        chi_over_dof = fit_alg.getProperty('OutputChi2overDoF').value
 
-        fit_output = Fit(
-            Function=fit_function,
-            InputWorkspace=wks,
-            WorkspaceIndex=wks_index,
-            CreateOutput=True,
-            StartX=startx,
-            EndX=endx,
-            StoreInADS=False
-        )
-
-        return fit_output.OutputParameters, fit_output.OutputChi2overDoF
+        return param_table, chi_over_dof
 
     def _peaks_from_find_peaks(self, in_wks, expected_peaks_tof, wks_index):
         """
@@ -293,14 +295,14 @@ class EnggFitPeaks(PythonAlgorithm):
         of this list should be the same as the number of expected peaks received.
         """
 
-        # Find approximate peak positions, assuming Gaussian shapes
-        found_peaks = FindPeaks(
-            InputWorkspace=in_wks,
-            PeakPositions=expected_peaks_tof,
-            PeakFunction='Gaussian',
-            WorkspaceIndex=wks_index,
-            StoreInADS=False
-        )
+        # Find approximate peak positions, asumming Gaussian shapes
+        find_peaks_alg = self.createChildAlgorithm('FindPeaks')
+        find_peaks_alg.setProperty('InputWorkspace', in_wks)
+        find_peaks_alg.setProperty('PeakPositions', expected_peaks_tof)
+        find_peaks_alg.setProperty('PeakFunction', 'Gaussian')
+        find_peaks_alg.setProperty('WorkspaceIndex', wks_index)
+        find_peaks_alg.execute()
+        found_peaks = find_peaks_alg.getProperty('PeaksList').value
         return found_peaks
 
     def _expected_peaks_in_d(self, expected_peaks, input_ws):
@@ -326,8 +328,8 @@ class EnggFitPeaks(PythonAlgorithm):
 
     def _convert_peaks_to_d_using_convert_units(self, expected_peaks, input_ws):
         y_values = [1] * (len(expected_peaks) - 1)
-        ws_tof = CreateWorkspace(UnitX="TOF", DataX=expected_peaks, DataY=y_values, ParentWorkspace=input_ws)
-        ws_d = ConvertUnits(InputWorkspace=ws_tof, Target="dSpacing")
+        ws_tof = mantid.CreateWorkspace(UnitX="TOF", DataX=expected_peaks, DataY=y_values, ParentWorkspace=input_ws)
+        ws_d = mantid.ConvertUnits(InputWorkspace=ws_tof, Target="dSpacing")
         return ws_d.readX(0)
 
     def _expected_peaks_in_tof(self, expected_peaks, in_wks, wks_index):
@@ -387,25 +389,28 @@ class EnggFitPeaks(PythonAlgorithm):
         y_vals = [1] * (len(expected_peaks) - 1)
         # Do like: ws_from = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expected_peaks, DataY=yVals,
         #                                         ParentWorkspace=self.getProperty("InputWorkspace").value)
-        ws_from = CreateWorkspace(
-            UnitX='dSpacing',
-            DataX=expected_peaks,
-            DataY=y_vals,
-            ParentWorkspace=in_wks
-        )
+        create_alg = self.createChildAlgorithm("CreateWorkspace")
+        create_alg.setProperty("UnitX", 'dSpacing')
+        create_alg.setProperty("DataX", expected_peaks)
+        create_alg.setProperty("DataY", y_vals)
+        create_alg.setProperty("ParentWorkspace", in_wks)
+        create_alg.execute()
+
+        ws_from = create_alg.getProperty("OutputWorkspace").value
 
         # finally convert units, like: sapi.ConvertUnits(InputWorkspace=ws_from, Target=target_units)
-        try:
-            # note: this implicitly uses default property "EMode" value 'Elastic'
-            target_units = 'TOF'
-            output_ws = ConvertUnits(
-                InputWorkspace=ws_from,
-                Target=target_units
-            )
-        except:
+        conv_alg = self.createChildAlgorithm("ConvertUnits")
+        conv_alg.setProperty("InputWorkspace", ws_from)
+        target_units = 'TOF'
+        conv_alg.setProperty("Target", target_units)
+        # note: this implicitly uses default property "EMode" value 'Elastic'
+        good_exec = conv_alg.execute()
+
+        if not good_exec:
             raise RuntimeError("Conversion of units went wrong. Failed to run ConvertUnits for {0} "
                                "peaks. Details: {1}".format(len(expected_peaks), expected_peaks))
 
+        output_ws = conv_alg.getProperty('OutputWorkspace').value
         peaks_tof = output_ws.readX(0)
         if len(peaks_tof) != len(expected_peaks):
             raise RuntimeError("Conversion of units went wrong. Converted {0} peaks from the "
@@ -457,7 +462,8 @@ class EnggFitPeaks(PythonAlgorithm):
             alg.execute()
             table = alg.getProperty('OutputWorkspace').value
         else:
-            table = CreateEmptyTableWorkspace(OutputWorkspace=tbl_name)
+            import mantid.simpleapi as sapi
+            table = sapi.CreateEmptyTableWorkspace(OutputWorkspace=tbl_name)
 
         table.addColumn('double', 'dSpacing')
 

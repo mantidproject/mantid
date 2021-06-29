@@ -31,7 +31,7 @@ public:
       TableRow row = tw->appendRow();
       row << int(i);
     }
-    auto alg = AlgorithmManager::Instance().create("DeleteTableRows");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("DeleteTableRows");
     alg->setPropertyValue("TableWorkspace", wsName);
     alg->setPropertyValue("Rows", "1,3,5,7,9");
     alg->execute();

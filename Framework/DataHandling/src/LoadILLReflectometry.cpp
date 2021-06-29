@@ -222,7 +222,7 @@ void LoadILLReflectometry::exec() {
 
 /// Run the Child Algorithm LoadInstrument.
 void LoadILLReflectometry::loadInstrument() {
-  auto loadInst = createChildAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   const std::string instrumentName = m_instrument == Supported::D17 ? "D17" : "FIGARO";
   loadInst->setPropertyValue("InstrumentName", instrumentName);
   loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
@@ -551,7 +551,7 @@ double LoadILLReflectometry::reflectometryPeak() {
   if (!isDefault("FitEndWorkspaceIndex")) {
     endIndex = getProperty("FitEndWorkspaceIndex");
   }
-  auto integration = createChildAlgorithm("Integration");
+  IAlgorithm_sptr integration = createChildAlgorithm("Integration");
   integration->initialize();
   integration->setProperty("InputWorkspace", m_localWorkspace);
   integration->setProperty("OutputWorkspace", "__unused_for_child");
@@ -567,7 +567,7 @@ double LoadILLReflectometry::reflectometryPeak() {
   }
   integration->execute();
   MatrixWorkspace_sptr integralWS = integration->getProperty("OutputWorkspace");
-  auto transpose = createChildAlgorithm("Transpose");
+  IAlgorithm_sptr transpose = createChildAlgorithm("Transpose");
   transpose->initialize();
   transpose->setProperty("InputWorkspace", integralWS);
   transpose->setProperty("OutputWorkspace", "__unused_for_child");
@@ -605,7 +605,7 @@ double LoadILLReflectometry::reflectometryPeak() {
   func->setParameter("A1", 0.);
   sum->addFunction(func);
   // call Fit child algorithm
-  auto fit = createChildAlgorithm("Fit");
+  API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
   fit->initialize();
   fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(sum));
   fit->setProperty("InputWorkspace", integralWS);

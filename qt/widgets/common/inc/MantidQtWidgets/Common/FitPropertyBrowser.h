@@ -109,8 +109,6 @@ public:
   QStringList getParameterNames() const;
   // Get parameters used to run the Fit algorithm
   std::string getFitAlgorithmParameters() const;
-  // Get the status string returned from Fit
-  std::string getFitAlgorithmOutputStatus() const;
 
   /// Load function
   void loadFunction(const QString &funcString);
@@ -685,7 +683,6 @@ private:
 
   // Keep a history of the parameters used to run the Fit algorithm
   std::string m_fitAlgParameters;
-  std::string m_fitAlgOutputStatus;
 
   /// If non-empty it contains references to the spectra
   /// allowed to be fitted in this browser:

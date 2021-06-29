@@ -756,7 +756,7 @@ void LoadILLDiffraction::resolveInstrument() {
  * Runs LoadInstrument as child to link the non-moving instrument to workspace
  */
 void LoadILLDiffraction::loadStaticInstrument() {
-  auto loadInst = createChildAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", getInstrumentFilePath(m_instName));
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_outWorkspace);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -770,7 +770,7 @@ void LoadILLDiffraction::loadStaticInstrument() {
  * @return A MatrixWorkspace containing the correct instrument
  */
 MatrixWorkspace_sptr LoadILLDiffraction::loadEmptyInstrument(const std::string &start_time) {
-  auto loadInst = createChildAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("InstrumentName", m_instName);
   auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   auto &run = ws->mutableRun();

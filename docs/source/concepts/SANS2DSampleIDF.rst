@@ -115,7 +115,7 @@ A detailed annotated version of the full ISIS SANS2D IDF
     </type>
 
     <!-- Define one of the monitor types. This monitor is given a physical shape.
-         More specifically here a cylindrical shape. See https://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html
+         More specifically here a cylindrical shape. See http://www.mantidproject.org/HowToDefineGeometricShape
          for all the options for defining a physical shape -->
     <type name="monitor-tbd" is="monitor">
       <cylinder id="some-shape">

@@ -29,7 +29,7 @@ public:
   }
 
   void testExec() {
-    auto *loader = new Mantid::DataHandling::LoadNexus;
+    IAlgorithm *loader = new Mantid::DataHandling::LoadNexus;
     loader->initialize();
     loader->setPropertyValue("Filename", "HRP38692a.nxs"); // HRP382692.raw spectrum range 320-330
 

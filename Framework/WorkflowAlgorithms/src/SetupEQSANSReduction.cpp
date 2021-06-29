@@ -515,7 +515,7 @@ void SetupEQSANSReduction::exec() {
   bool loadMonitors = getProperty("LoadMonitors");
   const std::string monitorRefFile = getPropertyValue("MonitorReferenceFile");
   // If we normalize to monitor, force the loading of monitor data
-  auto normAlg = createChildAlgorithm("EQSANSNormalise");
+  IAlgorithm_sptr normAlg = createChildAlgorithm("EQSANSNormalise");
 
   if (boost::contains(normalization, "BeamProfileAndCharge")) {
     normAlg->setProperty("NormaliseToBeam", true);
@@ -538,7 +538,7 @@ void SetupEQSANSReduction::exec() {
   reductionManager->declareProperty(std::move(normAlgProp));
 
   // Load algorithm
-  auto loadAlg = createChildAlgorithm("EQSANSLoad");
+  IAlgorithm_sptr loadAlg = createChildAlgorithm("EQSANSLoad");
   const bool useConfigBeam = getProperty("UseConfigBeam");
   loadAlg->setProperty("UseConfigBeam", useConfigBeam);
   const bool useConfigTOFCuts = getProperty("UseConfigTOFCuts");
@@ -585,7 +585,7 @@ void SetupEQSANSReduction::exec() {
   // Store dark current algorithm
   const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
   if (!darkCurrentFile.empty()) {
-    auto darkAlg = createChildAlgorithm("EQSANSDarkCurrentSubtraction");
+    IAlgorithm_sptr darkAlg = createChildAlgorithm("EQSANSDarkCurrentSubtraction");
     darkAlg->setProperty("Filename", darkCurrentFile);
     darkAlg->setProperty("OutputDarkCurrentWorkspace", "");
     darkAlg->setPropertyValue("ReductionProperties", reductionManagerName);
@@ -595,7 +595,7 @@ void SetupEQSANSReduction::exec() {
   }
 
   // Store default dark current algorithm
-  auto darkDefaultAlg = createChildAlgorithm("EQSANSDarkCurrentSubtraction");
+  IAlgorithm_sptr darkDefaultAlg = createChildAlgorithm("EQSANSDarkCurrentSubtraction");
   darkDefaultAlg->setProperty("OutputDarkCurrentWorkspace", "");
   darkDefaultAlg->setPropertyValue("ReductionProperties", reductionManagerName);
   auto ddcAlgProp = std::make_unique<AlgorithmProperty>("DefaultDarkCurrentAlgorithm");
@@ -606,7 +606,7 @@ void SetupEQSANSReduction::exec() {
   const bool solidAngleCorrection = getProperty("SolidAngleCorrection");
   if (solidAngleCorrection) {
     const bool detectorTubes = getProperty("DetectorTubes");
-    auto solidAlg = createChildAlgorithm("SANSSolidAngleCorrection");
+    IAlgorithm_sptr solidAlg = createChildAlgorithm("SANSSolidAngleCorrection");
     solidAlg->setProperty("DetectorTubes", detectorTubes);
     auto ssaAlgProp = std::make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
     ssaAlgProp->setValue(solidAlg->toString());
@@ -632,7 +632,7 @@ void SetupEQSANSReduction::exec() {
     if (!beamCenterFile.empty()) {
       const double beamRadius = getProperty("BeamRadius");
 
-      auto ctrAlg = createChildAlgorithm("SANSBeamFinder");
+      IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
       ctrAlg->setProperty("Filename", beamCenterFile);
       ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeamMethod);
       if (!isEmpty(beamRadius))
@@ -656,7 +656,7 @@ void SetupEQSANSReduction::exec() {
   // Geometry correction
   const double thickness = getProperty("SampleThickness");
   if (!isEmpty(thickness)) {
-    auto thickAlg = createChildAlgorithm("NormaliseByThickness");
+    IAlgorithm_sptr thickAlg = createChildAlgorithm("NormaliseByThickness");
     thickAlg->setProperty("SampleThickness", thickness);
 
     auto geomAlgProp = std::make_unique<AlgorithmProperty>("GeometryAlgorithm");
@@ -669,7 +669,7 @@ void SetupEQSANSReduction::exec() {
   const std::string maskEdges = getPropertyValue("MaskedEdges");
   const std::string maskSide = getProperty("MaskedSide");
 
-  auto maskAlg = createChildAlgorithm("SANSMask");
+  IAlgorithm_sptr maskAlg = createChildAlgorithm("SANSMask");
   // The following is broken, try PropertyValue
   maskAlg->setPropertyValue("Facility", "SNS");
   maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
@@ -684,7 +684,7 @@ void SetupEQSANSReduction::exec() {
   if (boost::iequals(absScaleMethod, "Value")) {
     const double absScaleFactor = getProperty("AbsoluteScalingFactor");
 
-    auto absAlg = createChildAlgorithm("SANSAbsoluteScale");
+    IAlgorithm_sptr absAlg = createChildAlgorithm("SANSAbsoluteScale");
     absAlg->setProperty("Method", absScaleMethod);
     absAlg->setProperty("ScalingFactor", absScaleFactor);
     absAlg->setPropertyValue("ReductionProperties", reductionManagerName);
@@ -697,7 +697,7 @@ void SetupEQSANSReduction::exec() {
     const double attTrans = getProperty("AbsoluteScalingAttenuatorTrans");
     const bool applySensitivity = getProperty("AbsoluteScalingApplySensitivity");
 
-    auto absAlg = createChildAlgorithm("SANSAbsoluteScale");
+    IAlgorithm_sptr absAlg = createChildAlgorithm("SANSAbsoluteScale");
     absAlg->setProperty("Method", absScaleMethod);
     absAlg->setProperty("ReferenceDataFilename", absRefFile);
     absAlg->setProperty("BeamstopDiameter", beamDiam);
@@ -719,7 +719,7 @@ void SetupEQSANSReduction::exec() {
     const bool indepBinning = getProperty("IQIndependentBinning");
     const bool scaleResults = getProperty("IQScaleResults");
 
-    auto iqAlg = createChildAlgorithm("EQSANSAzimuthalAverage1D");
+    IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSAzimuthalAverage1D");
     iqAlg->setPropertyValue("NumberOfBins", nBins);
     iqAlg->setProperty("LogBinning", logBinning);
     iqAlg->setProperty("ScaleResults", scaleResults);
@@ -737,7 +737,7 @@ void SetupEQSANSReduction::exec() {
   const bool do2DReduction = getProperty("Do2DReduction");
   if (do2DReduction) {
     const std::string n_bins = getPropertyValue("IQ2DNumberOfBins");
-    auto iqAlg = createChildAlgorithm("EQSANSQ2D");
+    IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSQ2D");
     iqAlg->setPropertyValue("NumberOfBins", n_bins);
     auto xyalgProp = std::make_unique<AlgorithmProperty>("IQXYAlgorithm");
     xyalgProp->setValue(iqAlg->toString());
@@ -764,7 +764,7 @@ void SetupEQSANSReduction::setupSensitivity(const std::shared_ptr<PropertyManage
     const double sensitivityBeamCenterX = getProperty("SensitivityBeamCenterX");
     const double sensitivityBeamCenterY = getProperty("SensitivityBeamCenterY");
 
-    auto effAlg = createChildAlgorithm("SANSSensitivityCorrection");
+    IAlgorithm_sptr effAlg = createChildAlgorithm("SANSSensitivityCorrection");
     effAlg->setProperty("Filename", sensitivityFile);
     effAlg->setProperty("UseSampleDC", useSampleDC);
     effAlg->setProperty("DarkCurrentFile", sensitivityDarkCurrentFile);
@@ -783,7 +783,7 @@ void SetupEQSANSReduction::setupSensitivity(const std::shared_ptr<PropertyManage
       const double sensitivityBeamRadius = getProperty("SensitivityBeamCenterRadius");
       bool useDirectBeam = boost::iequals(centerMethod, "DirectBeam");
       if (!beamCenterFile.empty()) {
-        auto ctrAlg = createChildAlgorithm("SANSBeamFinder");
+        IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeam);
         ctrAlg->setProperty("PersistentCorrection", false);
@@ -821,7 +821,7 @@ void SetupEQSANSReduction::setupTransmission(const std::shared_ptr<PropertyManag
     const double transValue = getProperty("TransmissionValue");
     const double transError = getProperty("TransmissionError");
     if (!isEmpty(transValue) && !isEmpty(transError)) {
-      auto transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
+      IAlgorithm_sptr transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
       transAlg->setProperty("TransmissionValue", transValue);
       transAlg->setProperty("TransmissionError", transError);
       transAlg->setProperty("ThetaDependent", thetaDependentTrans);
@@ -844,7 +844,7 @@ void SetupEQSANSReduction::setupTransmission(const std::shared_ptr<PropertyManag
     const double beamY = getProperty("TransmissionBeamCenterY");
     const std::string centerMethod = getPropertyValue("TransmissionBeamCenterMethod");
 
-    auto transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
+    IAlgorithm_sptr transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
     transAlg->setProperty("FitFramesTogether", fitFramesTogether);
     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
@@ -859,7 +859,7 @@ void SetupEQSANSReduction::setupTransmission(const std::shared_ptr<PropertyManag
     } else if (boost::iequals(centerMethod, "DirectBeam")) {
       const std::string beamCenterFile = getProperty("TransmissionBeamCenterFile");
       if (!beamCenterFile.empty()) {
-        auto ctrAlg = createChildAlgorithm("SANSBeamFinder");
+        IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", true);
         ctrAlg->setProperty("PersistentCorrection", false);
@@ -897,7 +897,7 @@ void SetupEQSANSReduction::setupBackground(const std::shared_ptr<PropertyManager
     const double transValue = getProperty("BckTransmissionValue");
     const double transError = getProperty("BckTransmissionError");
     if (!isEmpty(transValue) && !isEmpty(transError)) {
-      auto transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
+      IAlgorithm_sptr transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
       transAlg->setProperty("TransmissionValue", transValue);
       transAlg->setProperty("TransmissionError", transError);
       transAlg->setProperty("ThetaDependent", bckThetaDependentTrans);
@@ -919,7 +919,7 @@ void SetupEQSANSReduction::setupBackground(const std::shared_ptr<PropertyManager
     const bool useSampleDC = getProperty("TransmissionUseSampleDC");
     const bool fitFramesTogether = getProperty("BckFitFramesTogether");
 
-    auto transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
+    IAlgorithm_sptr transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
     transAlg->setProperty("FitFramesTogether", fitFramesTogether);
     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
@@ -935,7 +935,7 @@ void SetupEQSANSReduction::setupBackground(const std::shared_ptr<PropertyManager
     } else if (boost::iequals(centerMethod, "DirectBeam")) {
       const std::string beamCenterFile = getProperty("BckTransmissionBeamCenterFile");
       if (!beamCenterFile.empty()) {
-        auto ctrAlg = createChildAlgorithm("SANSBeamFinder");
+        IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", true);
         ctrAlg->setProperty("PersistentCorrection", false);

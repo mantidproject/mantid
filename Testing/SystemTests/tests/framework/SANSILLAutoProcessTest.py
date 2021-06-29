@@ -412,59 +412,6 @@ class D11_AutoProcess_CustomStitching_Test(systemtesting.MantidSystemTest):
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
 
 
-class D11B_AutoProcess_DirectBeamResolution_Test(systemtesting.MantidSystemTest):
-    """
-    Tests auto process for D11B with 1 sample at 3 different distances,
-    and with direct beam resolution calculation in place of Mildner-Carpenter.
-    """
-
-    def __init__(self):
-        super(D11B_AutoProcess_DirectBeamResolution_Test, self).__init__()
-        self.setUp()
-
-    def setUp(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D11'
-        config['logging.loggers.root.level'] = 'Warning'
-        config.appendDataSearchSubDir('ILL/D11/')
-        config.appendDataSearchSubDir('ILL/D11B/')
-
-    def cleanup(self):
-        mtd.clear()
-
-    def validate(self):
-        self.tolerance = 1e-3
-        self.tolerance_is_rel_err = True
-        self.disableChecking.append("Instrument")
-        return ['iq_s', 'D11B_AutoProcess_DirectBeamResolution_Test.nxs']
-
-    def runTest(self):
-        beams = '2651,2733,2732'
-        containers = '2653,2693,2713'
-        container_tr = '2673'
-        beam_tr = '2733'
-        samples = '2656,2696,2716'
-        sample_tr = '2735'
-        thickness = 0.2
-
-        # reduce samples
-        SANSILLAutoProcess(
-            SampleRuns=samples,
-            BeamRuns=beams,
-            ContainerRuns=containers,
-            DefaultMaskFile='002692_mask_edges_8m',
-            MaskFiles='002652_mask_bs_2m,002692_mask_bs_8m,002712_mask_bs_28m',
-            SampleTransmissionRuns=sample_tr,
-            ContainerTransmissionRuns=container_tr,
-            TransmissionBeamRuns=beam_tr,
-            SampleThickness=thickness,
-            CalculateResolution='DirectBeam',
-            OutputWorkspace='iq_s',
-            BeamRadius='0.05,0.05,0.05',
-            TransmissionBeamRadius=0.05
-        )
-
-
 class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
     """
     Tests auto process with D33 monochromatic data

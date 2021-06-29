@@ -40,7 +40,7 @@ public:
     // Name of the output workspace.
     std::string outWSName("CorelliCrossCorrelateTest_OutputWS");
 
-    auto lei = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
+    IAlgorithm_sptr lei = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     lei->initialize();
     lei->setPropertyValue("Filename", "CORELLI_Definition.xml");
     lei->setPropertyValue("OutputWorkspace", "CorelliCrossCorrelateTest_OutputWS");

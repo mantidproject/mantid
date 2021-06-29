@@ -58,7 +58,7 @@ public:
     // The angle
     double theta = 90.;
 
-    auto alg = AlgorithmManager::Instance().create("RotateSource");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
     alg->setChild(true);
     alg->setProperty("Workspace", ws);
     alg->setProperty("Angle", theta);
@@ -96,7 +96,7 @@ public:
     // The angle
     double theta = -90.;
 
-    auto alg = AlgorithmManager::Instance().create("RotateSource");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
     alg->setChild(true);
     alg->setProperty("Workspace", ws);
     alg->setProperty("Angle", theta);
@@ -134,7 +134,7 @@ public:
     // The angle
     double theta = 90.;
 
-    auto alg = AlgorithmManager::Instance().create("RotateSource");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
     alg->setChild(true);
     alg->setProperty("Workspace", ws);
     alg->setProperty("Angle", theta);
@@ -172,7 +172,7 @@ public:
     // The angle
     double theta = 90.;
 
-    auto alg = AlgorithmManager::Instance().create("RotateSource");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
     alg->setChild(true);
     alg->setProperty("Workspace", ws);
     alg->setProperty("Angle", theta);

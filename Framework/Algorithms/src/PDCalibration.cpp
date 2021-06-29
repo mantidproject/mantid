@@ -665,7 +665,7 @@ void PDCalibration::exec() {
            chisq += (temp * temp);
            m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) = dspacing;
            m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-               WIDTH_TO_FWHM * (width_vec_full[i] / (2 * difa * dspacing + difc));
+               WIDTH_TO_FWHM * dSpacingUnit.singleFromTOF(width_vec_full[i]);
            m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) = height_vec_full[i];
          }
          m_peakPositionTable->cell<double>(rowIndexOutputPeaks, m_peaksInDspacing.size() + 1) = chisq;
@@ -935,9 +935,9 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std:
     }
   }
 
-  difc = best_difc;
   // check that something actually fit and set to the best result
   if (best_difc > 0. && best_errsum < std::numeric_limits<double>::max()) {
+    difc = best_difc;
     t0 = best_t0;
     difa = best_difa;
   }

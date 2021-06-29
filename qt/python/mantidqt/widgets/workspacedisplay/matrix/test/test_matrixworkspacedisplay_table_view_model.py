@@ -20,6 +20,7 @@ from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModel, \
     MatrixWorkspaceTableViewModelType
 from mantid.simpleapi import CreateWorkspace
+from mantid.kernel import UnitLabel
 
 
 def setup_common_for_test_data():

@@ -26,6 +26,7 @@ The view has the following imports:
 
 .. code-block:: python
 
+    from __future__ import (absolute_import, division, print_function)
     from qtpy import QtWidgets, QtCore, QtGui
     import matplotlib.pyplot as plt
 

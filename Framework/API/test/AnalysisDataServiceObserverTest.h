@@ -95,7 +95,7 @@ public:
   }
 
   void addWorkspaceToADS(const std::string &name = "dummy") {
-    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
+    IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     alg->setChild(true);
     alg->initialize();
     alg->setPropertyValue("OutputWorkspace", name);
@@ -149,7 +149,7 @@ public:
     addWorkspaceToADS("dummy");
 
     m_mockInheritingClass->observeRename();
-    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("RenameWorkspace");
+    IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("RenameWorkspace");
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "dummy");
     alg->setPropertyValue("OutputWorkspace", "dummy2");
@@ -164,7 +164,7 @@ public:
 
     m_mockInheritingClass->observeGroup();
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     alg->initialize();
     alg->setPropertyValue("InputWorkspaces", "dummy,dummy2");
     alg->setPropertyValue("OutputWorkspace", "newGroup");
@@ -177,7 +177,7 @@ public:
     addWorkspaceToADS("dummy");
     addWorkspaceToADS("dummy2");
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     alg->initialize();
     alg->setPropertyValue("InputWorkspaces", "dummy,dummy2");
     alg->setPropertyValue("OutputWorkspace", "newGroup");
@@ -185,7 +185,7 @@ public:
 
     m_mockInheritingClass->observeUnGroup();
 
-    auto alg2 = Mantid::API::AlgorithmManager::Instance().createUnmanaged("UnGroupWorkspace");
+    IAlgorithm_sptr alg2 = Mantid::API::AlgorithmManager::Instance().createUnmanaged("UnGroupWorkspace");
     alg2->initialize();
     alg2->setPropertyValue("InputWorkspace", "newGroup");
     alg2->execute();
@@ -198,7 +198,7 @@ public:
     addWorkspaceToADS("dummy2");
     addWorkspaceToADS("dummy3");
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     alg->initialize();
     alg->setPropertyValue("InputWorkspaces", "dummy,dummy2");
     alg->setPropertyValue("OutputWorkspace", "newGroup");

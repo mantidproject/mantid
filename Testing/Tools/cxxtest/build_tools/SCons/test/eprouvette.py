@@ -7,10 +7,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # vim: encoding=utf-8
 
-import os
-import sys
+import shutil, os, sys
 from os.path import isdir, isfile, islink, join
 from optparse import OptionParser
+from copy import copy
 from subprocess import check_call, CalledProcessError, PIPE
 
 options = None
@@ -24,10 +24,12 @@ def main():
     global args
     global tool_stdout
     """Parse the options and execute the program."""
-    usage = """Usage: %prog [options] [test1 [test2 [...]]]
-     If you provide one or more tests, this will run the provided tests.
-     Otherwise, it will look for tests in the current directory and run them all.
-     """
+    usage = \
+    """Usage: %prog [options] [test1 [test2 [...]]]
+
+    If you provide one or more tests, this will run the provided tests.
+    Otherwise, it will look for tests in the current directory and run them all.
+    """
     # option parsing
     parser = OptionParser(usage)
 
@@ -35,23 +37,24 @@ def main():
             action='run',
             verbose=True)
 
-    parser.add_option("-c", "--clean", action='store_const', const='clean', dest='action',
-                      help="deletes any generated files in the tests")
+    parser.add_option("-c", "--clean",
+            action='store_const', const='clean', dest='action',
+            help="deletes any generated files in the tests")
     parser.add_option("--run",
-                      action='store_const', const='run', dest='action',
-                      help="sets up the environment, compiles and runs the tests")
+            action='store_const', const='run', dest='action',
+            help="sets up the environment, compiles and runs the tests")
     parser.add_option("-v", "--verbose",
-                      action='store_true', dest='verbose',
-                      help="spew out more details")
+            action='store_true', dest='verbose',
+            help="spew out more details")
     parser.add_option("-q", "--quiet",
-                      action='store_false', dest='verbose',
-                      help="spew out only success/failure of tests")
+            action='store_false', dest='verbose',
+            help="spew out only success/failure of tests")
     parser.add_option("--target-dir",
-                      dest='target_dir', action='store', default='./',
-                      help='target directory to look for tests in. default: %default')
+            dest='target_dir', action='store', default='./',
+            help='target directory to look for tests in. default: %default')
     parser.add_option("--debug",
-                      dest='debug', action='store_true', default=False,
-                      help='turn on debug output.')
+            dest='debug', action='store_true', default=False,
+            help='turn on debug output.')
 
     (options, args) = parser.parse_args()
 
@@ -131,7 +134,7 @@ def run_test(t):
     try:
         if opts['type'] == 'scons':
             run_scons(t, opts)
-    except RuntimeError:
+    except RuntimeError as e:
         print("Test {0} failed.".format(t))
         return
 
@@ -212,9 +215,8 @@ def run_scons(t, opts):
         raise e
     os.chdir(cwd)
 
-
 if __name__ == "__main__":
     main()
 
 if not options.verbose:
-    print()  # quiet doesn't output newlines.
+    print() # quiet doesn't output newlines.

@@ -157,7 +157,7 @@ std::vector<Kernel::V3D> XrayAbsorptionCorrection::calculateMuonPos(API::MatrixW
 void XrayAbsorptionCorrection::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = inputWS->clone();
-  auto convtoPoints = createChildAlgorithm("ConvertToPointData");
+  IAlgorithm_sptr convtoPoints = createChildAlgorithm("ConvertToPointData");
   convtoPoints->setProperty("InputWorkspace", inputWS);
   convtoPoints->execute();
   MatrixWorkspace_sptr pointDataWS = convtoPoints->getProperty("OutputWorkspace");

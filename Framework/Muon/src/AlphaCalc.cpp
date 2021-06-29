@@ -73,7 +73,7 @@ void AlphaCalc::exec() {
   // first step is to create two workspaces which groups all forward and
   // backward spectra
 
-  auto groupForward = createChildAlgorithm("GroupDetectors");
+  API::IAlgorithm_sptr groupForward = createChildAlgorithm("GroupDetectors");
   groupForward->setProperty("InputWorkspace", inputWS);
   groupForward->setProperty("OutputWorkspace", "tmp");
   groupForward->setProperty("SpectraList", forwardSpectraList);
@@ -81,7 +81,7 @@ void AlphaCalc::exec() {
   groupForward->execute();
   API::MatrixWorkspace_sptr forwardWS = groupForward->getProperty("OutputWorkspace");
 
-  auto groupBackward = createChildAlgorithm("GroupDetectors");
+  API::IAlgorithm_sptr groupBackward = createChildAlgorithm("GroupDetectors");
   groupBackward->setProperty("InputWorkspace", inputWS);
   groupBackward->setProperty("OutputWorkspace", "tmp");
   groupBackward->setProperty("SpectraList", backwardSpectraList);
@@ -94,7 +94,7 @@ void AlphaCalc::exec() {
   double firstGoodvalue = getProperty("FirstGoodValue");
   double lastGoodvalue = getProperty("LastGoodValue");
 
-  auto integr = createChildAlgorithm("Integration");
+  API::IAlgorithm_sptr integr = createChildAlgorithm("Integration");
   integr->setProperty("InputWorkspace", forwardWS);
   integr->setPropertyValue("OutputWorkspace", "tmp");
   if (firstGoodvalue != EMPTY_DBL())
@@ -115,7 +115,7 @@ void AlphaCalc::exec() {
 
   // calculate sum of backward counts
 
-  auto integrB = createChildAlgorithm("Integration");
+  API::IAlgorithm_sptr integrB = createChildAlgorithm("Integration");
   integrB->setProperty("InputWorkspace", backwardWS);
   integrB->setPropertyValue("OutputWorkspace", "tmp");
   if (firstGoodvalue != EMPTY_DBL())

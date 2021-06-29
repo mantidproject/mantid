@@ -592,7 +592,7 @@ void LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metada
  */
 void LoadSpice2D::runLoadInstrument(const std::string &inst_name, const DataObjects::Workspace2D_sptr &localWorkspace) {
 
-  auto loadInst = createChildAlgorithm("LoadInstrument");
+  API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {

@@ -811,7 +811,7 @@ void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize, int
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromNexus)
 void LoadISISNexus2::runLoadInstrument(DataObjects::Workspace2D_sptr &localWorkspace) {
 
-  auto loadInst = createChildAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
@@ -835,7 +835,7 @@ void LoadISISNexus2::runLoadInstrument(DataObjects::Workspace2D_sptr &localWorks
           pmap.get(localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
       std::string value = updateDets->value<std::string>();
       if (value.substr(0, 8) == "datafile") {
-        auto updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
+        IAlgorithm_sptr updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
         updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
         updateInst->setPropertyValue("Filename", m_filename);
         if (value == "datafile-ignore-phi") {
@@ -892,7 +892,7 @@ void LoadISISNexus2::loadSampleData(DataObjects::Workspace2D_sptr &local_workspa
  *   @param ws :: The workspace to load the logs to.
  */
 void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws) {
-  auto alg = createChildAlgorithm("LoadNexusLogs", 0.0, 0.5);
+  IAlgorithm_sptr alg = createChildAlgorithm("LoadNexusLogs", 0.0, 0.5);
   alg->setPropertyValue("Filename", this->getProperty("Filename"));
   alg->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
   try {

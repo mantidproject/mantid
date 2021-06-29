@@ -62,7 +62,7 @@ void IdentifyNoisyDetectors::exec() {
 
   progress.report("Integrating...");
 
-  auto integ = createChildAlgorithm("Integration");
+  IAlgorithm_sptr integ = createChildAlgorithm("Integration");
   integ->initialize();
   integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWs);
   integ->setProperty<double>("RangeLower", rangeLower);
@@ -73,7 +73,7 @@ void IdentifyNoisyDetectors::exec() {
 
   progress.report("Power...");
 
-  auto power = createChildAlgorithm("Power");
+  IAlgorithm_sptr power = createChildAlgorithm("Power");
   power->initialize();
   power->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWs);
   power->setProperty<double>("Exponent", 2.0);
@@ -94,7 +94,7 @@ void IdentifyNoisyDetectors::exec() {
   MatrixWorkspace_sptr int2 = integ->getProperty("OutputWorkspace");
 
   progress.report("Dividing...");
-  auto algScale = createChildAlgorithm("Scale");
+  IAlgorithm_sptr algScale = createChildAlgorithm("Scale");
   algScale->initialize();
   algScale->setProperty("InputWorkspace", int1);
   algScale->setProperty("OutputWorkspace", int1);

@@ -112,7 +112,7 @@ public:
     IFunction_sptr function = FunctionFactory::Instance().createFunction("PoldiSpectrumLinearBackground");
     function->setParameter("A1", 2.0);
 
-    auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    IAlgorithm_sptr fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
 
     fit->setProperty("Function", function);

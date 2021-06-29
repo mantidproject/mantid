@@ -291,7 +291,7 @@ void UnwrapSNS::getTofRangeData(const bool isEvent) {
 }
 
 void UnwrapSNS::runMaskDetectors() {
-  auto alg = createChildAlgorithm("MaskDetectors");
+  IAlgorithm_sptr alg = createChildAlgorithm("MaskDetectors");
   alg->setProperty<MatrixWorkspace_sptr>("Workspace", this->getProperty("OutputWorkspace"));
   alg->setProperty<MatrixWorkspace_sptr>("MaskedWorkspace", this->getProperty("InputWorkspace"));
   if (!alg->execute())

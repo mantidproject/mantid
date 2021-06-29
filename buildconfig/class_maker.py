@@ -7,15 +7,23 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Utility for generating a class file, header, and test file """
 import argparse
+import sys
+import os
 import datetime
+import re
+import cmakelists_utils
 from cmakelists_utils import *
 
 VERSION = "1.0"
+
+#======================================================================
 
 
 def get_year():
     """returns the current year"""
     return datetime.datetime.now().year
+
+#======================================================================
 
 
 def write_header(subproject, classname, filename, args):
@@ -74,6 +82,7 @@ public:{algorithm_header}}};
     f.close()
 
 
+#======================================================================
 def write_source(subproject, classname, filename, args):
     """Write a class source file"""
     print("Writing source file to", filename)
@@ -152,6 +161,8 @@ namespace {subproject} {{
     f.close()
 
 
+
+#======================================================================
 def write_test(subproject, classname, filename, args):
     """Write a class test file"""
     print("Writing test file to", filename)
@@ -187,7 +198,7 @@ def write_test(subproject, classname, filename, args):
     TS_ASSERT(outputWS);
     TS_FAIL("TODO: Check the results and remove this line");
   }}
-  """.format(algname=classname)
+  """.format(algname=classname);
 
     if not args.alg:
         algorithm_test = ""
@@ -227,6 +238,11 @@ public:
     f.close()
 
 
+
+
+
+
+#======================================================================
 def write_rst(subproject, classname, filename, args):
     """Write an algorithm rst documentation file"""
     print("Writing rst file to", filename)
@@ -284,6 +300,7 @@ Output:
     f.close()
 
 
+#======================================================================
 def generate(subproject, classname, overwrite, args):
 
     # Directory at base of subproject
@@ -330,11 +347,10 @@ def generate(subproject, classname, overwrite, args):
         print("Note: if this algorithm operates on a WorkspaceGroup, please override processGroups()")
         print()
 
-
+#======================================================================
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Utility to create Mantid class files: header, source and test. '
-                                                 'version ' + VERSION)
+    parser = argparse.ArgumentParser(description='Utility to create Mantid class files: header, source and test. version ' + VERSION)
     parser.add_argument('subproject', metavar='SUBPROJECT', type=str,
                         help='The subproject under Framework/; e.g. Kernel')
     parser.add_argument('classname', metavar='CLASSNAME', type=str,
@@ -362,8 +378,7 @@ if __name__ == "__main__":
                         help='Create an Algorithm stub. This adds some methods common to algorithms.')
     parser.add_argument('--subfolder', dest='subfolder',
                         default="",
-                        help='Put the source under a subfolder below the main part of the project, e.g. '
-                             'Geometry/Instrument.')
+                        help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
     parser.add_argument('--project', dest='project',
                         default="Framework",
                         help='The project in which this goes. Default: Framework. Can be MantidQt')

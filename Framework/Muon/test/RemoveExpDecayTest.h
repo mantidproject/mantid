@@ -69,7 +69,7 @@ public:
   RemoveExpDecayTest() { FrameworkManager::Instance(); }
 
   void testInit() {
-    auto alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
     TS_ASSERT(alg->isInitialized())
   }
@@ -78,7 +78,7 @@ public:
 
     auto ws = createWorkspace(1, 50);
 
-    auto alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -93,7 +93,7 @@ public:
 
     auto ws = createWorkspace(2, 50);
 
-    auto alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -136,7 +136,7 @@ public:
 
     auto ws = createWorkspace(2, 50, true);
 
-    auto alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -180,7 +180,7 @@ public:
     auto ws = createWorkspace(2, 50);
 
     // First, run the algorithm without specifying any spectrum
-    auto alg1 = AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr alg1 = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg1->initialize();
     alg1->setChild(true);
     alg1->setProperty("InputWorkspace", ws);
@@ -190,7 +190,7 @@ public:
     MatrixWorkspace_sptr out1 = alg1->getProperty("OutputWorkspace");
 
     // Then run the algorithm on the second spectrum only
-    auto alg2 = AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr alg2 = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg2->initialize();
     alg2->setChild(true);
     alg2->setProperty("InputWorkspace", ws);
@@ -219,7 +219,7 @@ public:
 
     auto ws = createWorkspace(4, 50);
 
-    auto alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);

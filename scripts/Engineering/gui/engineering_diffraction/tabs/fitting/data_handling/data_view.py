@@ -55,9 +55,6 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_on_seq_fit_clicked(self, slot):
         self.button_SeqFit.clicked.connect(slot)
 
-    def set_on_serial_fit_clicked(self, slot):
-        self.button_SerialFit.clicked.connect(slot)
-
     def set_on_table_cell_changed(self, slot):
         self.table_selection.cellChanged.connect(slot)  # Row, Col
 
@@ -69,8 +66,6 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # =================
 
     def set_file_last(self, filepath):
-        if not filepath:
-            return
         self.finder_data.setUserInput(filepath)
         directory, discard = path.split(filepath)
         self.finder_data.setLastDirectory(directory)
@@ -81,9 +76,8 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_inspect_bg_button_enabled(self, enabled):
         self.button_plotBG.setEnabled(enabled)
 
-    def set_fit_buttons_enabled(self, enabled):
+    def set_seq_fit_button_enabled(self, enabled):
         self.button_SeqFit.setEnabled(enabled)
-        self.button_SerialFit.setEnabled(enabled)
 
     def add_table_row(self, run_no, bank, checked, bgsub, niter, xwindow, SG):
         row_no = self.table_selection.rowCount()

@@ -85,7 +85,7 @@ An annotated version of the ISIS LET IDF
     </idlist>
 
     <!-- Define the type monitor, which is given a physical shape.
-         More specifically here a cylindrical shape. See https://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html
+         More specifically here a cylindrical shape. See http://www.mantidproject.org/HowToDefineGeometricShape
          for all the options for defining a physical shape -->
     <type name="monitor" is="monitor">
       <cylinder id="some-shape">
@@ -112,7 +112,7 @@ An annotated version of the ISIS LET IDF
   <!-- Specify the type with name "undulator", which 'is' marked as being the Source.
        Optionally you may define a geometric shape for the Source. In some cases done
        with the purpose to get it to show up in the Mantid Instrument view.
-       See https://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html for more on geometric shapes -->
+       See http://www.mantidproject.org/HowToDefineGeometricShape for more on geometric shapes -->
     <type name="undulator" is="Source">
       <cylinder id="some-shape">
         <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
@@ -279,7 +279,7 @@ An annotated version of the ISIS LET IDF
 
        Note also the 'outline' attribute is used. The attribute is to overcome
        a technical difficulty when displaying and rotating a lot of
-       shapes in Mantid Instrument Viewer. For more information on this see https://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html -->
+       shapes in Mantid Instrument Viewer. For more information on this see www.mantidproject.org/IDF -->
     <type name="LETtube" outline="yes">
       <component type="pixel">
         <locations y="-2.00304" y-end="2.00304" n-elements="1024" />

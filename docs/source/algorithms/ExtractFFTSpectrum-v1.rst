@@ -57,6 +57,7 @@ Usage
 
 .. testcode:: Ex
 
+    from __future__ import print_function
     import numpy
 
     # Functions x and y defined over the time domain: z(t) = x(t) + i * y(t)

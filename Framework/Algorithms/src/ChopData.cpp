@@ -76,7 +76,7 @@ void ChopData::exec() {
 
     // Get ranges
     for (int i = 0; i < chops; i++) {
-      auto integ = createChildAlgorithm("Integration");
+      Mantid::API::IAlgorithm_sptr integ = Mantid::API::Algorithm::createChildAlgorithm("Integration");
       integ->initialize();
       integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", monitorWS);
       integ->setProperty<double>("RangeLower", i * step + rLower);

@@ -13,6 +13,9 @@
 
 
 import inspect as _inspect
+import sys
+
+from inspect import getsource
 
 from mantid.api import AnalysisDataServiceImpl, ITableWorkspace, Workspace, WorkspaceGroup, performBinaryOp
 from mantid.kernel.funcinspect import customise_func, lhs_info, LazyMethodSignature
@@ -56,8 +59,7 @@ def attach_binary_operators_to_workspace():
 
     # Loop through and add each one in turn
     for alg, attributes in operations.items():
-        if type(attributes) == str:
-            attributes = [attributes]
+        if type(attributes) == str: attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg, attr.startswith('__i'), attr.startswith('__r'))
 
@@ -143,8 +145,7 @@ def attach_unary_operators_to_workspace():
     }
     # Loop through and add each one in turn
     for alg, attributes in operations.items():
-        if type(attributes) == str:
-            attributes = [attributes]
+        if type(attributes) == str: attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg)
 

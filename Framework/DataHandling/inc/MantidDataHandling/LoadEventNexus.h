@@ -534,7 +534,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
   }
 
   // do the actual work
-  auto loadInst = alg->createChildAlgorithm("LoadInstrument");
+  Mantid::API::IAlgorithm_sptr loadInst = alg->createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
@@ -573,7 +573,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
       pmap.get(localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
   std::string value = updateDets->value<std::string>();
   if (value.substr(0, 8) == "datafile") {
-    auto updateInst = alg->createChildAlgorithm("UpdateInstrumentFromFile");
+    Mantid::API::IAlgorithm_sptr updateInst = alg->createChildAlgorithm("UpdateInstrumentFromFile");
     updateInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
     updateInst->setPropertyValue("Filename", nexusfilename);
     if (value == "datafile-ignore-phi") {
@@ -767,7 +767,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, T loc
     return false;
   }
 
-  auto loadInst = alg->createChildAlgorithm("LoadIDFFromNexus");
+  Mantid::API::IAlgorithm_sptr loadInst = alg->createChildAlgorithm("LoadIDFFromNexus");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {

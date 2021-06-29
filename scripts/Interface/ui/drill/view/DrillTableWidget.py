@@ -174,7 +174,7 @@ class DrillTableWidget(QTableWidget):
                 continue
             cellsLi.append((i.row(), i.column()))
             cellsVi.append((self.visualRow(i.row()),
-                            self.visualColumn(i.column())))
+                          self.visualColumn(i.column())))
         return sorted(cellsLi, key=lambda i : cellsVi[cellsLi.index(i)][1])
 
     def getSelectionShape(self):

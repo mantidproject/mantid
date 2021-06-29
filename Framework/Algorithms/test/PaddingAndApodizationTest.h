@@ -35,7 +35,7 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
 }
 
 IAlgorithm_sptr setUpAlg() {
-  auto FFTPreProcess = AlgorithmManager::Instance().create("PaddingAndApodization");
+  IAlgorithm_sptr FFTPreProcess = AlgorithmManager::Instance().create("PaddingAndApodization");
   FFTPreProcess->initialize();
   FFTPreProcess->setChild(true);
   FFTPreProcess->setProperty("DecayConstant", 2.0);
@@ -54,7 +54,7 @@ public:
   PaddingAndApodizationTest() { FrameworkManager::Instance(); }
 
   void testInit() {
-    auto alg = setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     TS_ASSERT(alg->isInitialized())
   }
 
@@ -62,7 +62,7 @@ public:
 
     auto ws = createWorkspace(1, 50);
 
-    auto alg = setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
@@ -73,7 +73,7 @@ public:
 
     auto ws = createWorkspace(2, 50);
 
-    auto alg = setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
@@ -102,7 +102,7 @@ public:
 
     // First, run the algorithm without specifying any spectrum
 
-    auto alg1 = setUpAlg();
+    IAlgorithm_sptr alg1 = setUpAlg();
     alg1->setProperty("InputWorkspace", workspaces[0]);
     alg1->execute();
     TS_ASSERT(alg1->isExecuted());
@@ -110,7 +110,7 @@ public:
     workspaces.emplace_back(alg1->getProperty("OutputWorkspace"));
 
     // Then run the algorithm on the second spectrum only
-    auto alg2 = setUpAlg();
+    IAlgorithm_sptr alg2 = setUpAlg();
     alg2->setProperty("InputWorkspace", workspaces[0]);
     alg2->execute();
     TS_ASSERT(alg2->isExecuted());
@@ -130,7 +130,7 @@ public:
   void test_Lorentz() {
 
     auto ws = createWorkspace(1, 50);
-    auto alg = setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("ApodizationFunction", "Lorentz");
     alg->execute();
@@ -151,7 +151,7 @@ public:
   void test_Gaussian() {
 
     auto ws = createWorkspace(1, 50);
-    auto alg = setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("ApodizationFunction", "Gaussian");
     alg->execute();
@@ -172,7 +172,7 @@ public:
   void test_PaddingOne() {
 
     auto ws = createWorkspace(1, 50);
-    auto alg = setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("Padding", 1);
     alg->execute();
@@ -189,7 +189,7 @@ public:
   void test_PaddingTwelve() {
 
     auto ws = createWorkspace(1, 50);
-    auto alg = setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("Padding", 12);
     alg->execute();
@@ -208,7 +208,7 @@ public:
   void test_PaddingOneBothSides() {
 
     auto ws = createWorkspace(1, 50);
-    auto alg = setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("Padding", 1);
     alg->setProperty("NegativePAdding", true);
@@ -227,7 +227,7 @@ public:
   void test_PaddingTwelveBoth() {
 
     auto ws = createWorkspace(1, 50);
-    auto alg = setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("Padding", 12);
     alg->setProperty("NegativePAdding", true);
@@ -247,7 +247,7 @@ public:
   void test_PaddingTwo() {
 
     auto ws = createWorkspace(1, 50);
-    auto alg = setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("Padding", 2);
     alg->setProperty("NegativePAdding", true);
@@ -272,13 +272,13 @@ public:
       yData.emplace_back(double(j));
     }
 
-    auto makeWS = AlgorithmManager::Instance().create("CreateWorkspace");
+    IAlgorithm_sptr makeWS = AlgorithmManager::Instance().create("CreateWorkspace");
     makeWS->setProperty("OutputWorkspace", "pointDataFFT");
     makeWS->setProperty("DataX", xData);
     makeWS->setProperty("DataY", yData);
     makeWS->execute();
 
-    auto alg = setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", "pointDataFFT");
     alg->setProperty("Padding", 1);
     alg->setProperty("NegativePAdding", true);

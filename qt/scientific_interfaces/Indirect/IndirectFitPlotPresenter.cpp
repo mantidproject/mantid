@@ -5,8 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotPresenter.h"
-#include "IndirectSettingsHelper.h"
-
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QTimer>
@@ -28,9 +26,10 @@ struct HoldRedrawing {
 
 using namespace Mantid::API;
 
-IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model, IIndirectFitPlotView *view)
+IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model, IIndirectFitPlotView *view,
+                                                   IPyRunner *pythonRunner)
     : m_model(new IndirectFitPlotModel(model)), m_view(view), m_plotGuessInSeparateWindow(false),
-      m_plotter(std::make_unique<ExternalPlotter>()) {
+      m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {
   connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
           SLOT(handleSelectedFitDataChanged(TableDatasetIndex)));
 
@@ -138,7 +137,7 @@ void IndirectFitPlotPresenter::setHWHMMinimum(double maximum) {
 void IndirectFitPlotPresenter::enablePlotGuessInSeparateWindow() {
   m_plotGuessInSeparateWindow = true;
   const auto inputAndGuess = m_model->appendGuessToInput(m_model->getGuessWorkspace());
-  m_plotter->plotSpectra(inputAndGuess->getName(), "0-1", IndirectSettingsHelper::externalPlotErrorBars());
+  m_plotter->plotSpectra(inputAndGuess->getName(), "0-1");
 }
 
 void IndirectFitPlotPresenter::disablePlotGuessInSeparateWindow() {
@@ -342,11 +341,10 @@ void IndirectFitPlotPresenter::updateBackgroundSelector() {
 
 void IndirectFitPlotPresenter::plotSpectrum(WorkspaceIndex spectrum) const {
   const auto resultWs = m_model->getResultWorkspace();
-  const auto errorBars = IndirectSettingsHelper::externalPlotErrorBars();
   if (resultWs)
-    m_plotter->plotSpectra(resultWs->getName(), "0-2", errorBars);
+    m_plotter->plotSpectra(resultWs->getName(), "0-2");
   else
-    m_plotter->plotSpectra(m_model->getWorkspace()->getName(), std::to_string(spectrum.value), errorBars);
+    m_plotter->plotSpectra(m_model->getWorkspace()->getName(), std::to_string(spectrum.value));
 }
 
 void IndirectFitPlotPresenter::emitFitSingleSpectrum() {

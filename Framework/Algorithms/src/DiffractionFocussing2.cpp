@@ -117,7 +117,7 @@ void DiffractionFocussing2::exec() {
   // --- Do we need to read the grouping workspace? ----
   if (!groupingFileName.empty()) {
     progress(0.01, "Reading grouping file");
-    auto childAlg = createChildAlgorithm("CreateGroupingWorkspace");
+    IAlgorithm_sptr childAlg = createChildAlgorithm("CreateGroupingWorkspace");
     childAlg->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
     childAlg->setProperty("OldCalFilename", groupingFileName);
     childAlg->executeAsChildAlg();

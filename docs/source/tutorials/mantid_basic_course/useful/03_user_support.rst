@@ -38,4 +38,4 @@ At some stage you will inevitably see an Error Reporter. Please provide your nam
 Documentation
 -------------
 
-Most of the functionality of Mantid is encompassed in our User Documentation. You can access it via the :ref:`User Documentation <contents>` and in the drop-down menu "Help > Mantid Help, Algorithms, Concepts".
+Most of the functionality of Mantid is encompassed in our User Documentation. You can access it via the `webpage <https://www.mantidproject.org/Main_Page>`_ and in the drop-down menu "Help > Mantid Help, Algorithms, Concepts".

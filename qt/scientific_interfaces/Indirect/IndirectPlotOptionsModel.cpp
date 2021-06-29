@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectPlotOptionsModel.h"
-#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -114,13 +113,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(
-    boost::optional<std::map<std::string, std::string>> const &availableActions)
+    IPyRunner *pythonRunner, boost::optional<std::map<std::string, std::string>> const &availableActions)
     : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
-      m_workspaceName(boost::none), m_plotter(std::make_unique<ExternalPlotter>()) {}
+      m_workspaceName(boost::none), m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {}
 
 /// Used by the unit tests so that m_plotter can be mocked
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(
-    ExternalPlotter *plotter, boost::optional<std::map<std::string, std::string>> const &availableActions)
+    IndirectPlotter *plotter, boost::optional<std::map<std::string, std::string>> const &availableActions)
     : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
       m_workspaceName(boost::none), m_plotter(std::move(plotter)) {}
 
@@ -199,12 +198,12 @@ void IndirectPlotOptionsModel::plotSpectra() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   if (workspaceName && indicesString)
-    m_plotter->plotSpectra(workspaceName.get(), indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
+    m_plotter->plotSpectra(workspaceName.get(), indicesString.get());
 }
 
 void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
   if (auto const workspaceName = workspace())
-    m_plotter->plotBins(workspaceName.get(), binIndices, IndirectSettingsHelper::externalPlotErrorBars());
+    m_plotter->plotBins(workspaceName.get(), binIndices);
 }
 
 void IndirectPlotOptionsModel::plotContour() {
@@ -216,7 +215,7 @@ void IndirectPlotOptionsModel::plotTiled() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   if (workspaceName && indicesString)
-    m_plotter->plotTiled(workspaceName.get(), indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
+    m_plotter->plotTiled(workspaceName.get(), indicesString.get());
 }
 
 boost::optional<std::string> IndirectPlotOptionsModel::singleDataPoint(MantidAxis const &axisType) const {

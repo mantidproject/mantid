@@ -50,7 +50,7 @@ IAlgorithm_sptr algorithmWithWorkspacePropertiesSet(const std::string &inputWSNa
 IAlgorithm_sptr setUpAlgorithmWithoutOptionalProperties(const WorkspaceGroup_sptr &ws, const std::string &name,
                                                         const std::vector<int> &grouping) {
   setUpADSWithWorkspace setup(ws);
-  auto alg = algorithmWithWorkspacePropertiesSet(setup.inputWSName);
+  IAlgorithm_sptr alg = algorithmWithWorkspacePropertiesSet(setup.inputWSName);
   alg->setProperty("GroupName", name);
   alg->setProperty("Grouping", grouping);
   return alg;
@@ -117,7 +117,7 @@ public:
 
     auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "group1");
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithWorkspacePropertiesSet(setup.inputWSName);
+    IAlgorithm_sptr alg = algorithmWithWorkspacePropertiesSet(setup.inputWSName);
 
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }

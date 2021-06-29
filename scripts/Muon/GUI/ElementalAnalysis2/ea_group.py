@@ -27,9 +27,6 @@ class EAGroup(object):
         self.rebin_option = None
         self._counts_workspace = {}
         self._counts_workspace_rebin = {}
-        self._peak_table = {}
-        self._matches_table = {}
-        self.update_counts_workspace(str(group_name), run_number)
 
     @property
     def workspace(self):
@@ -91,8 +88,7 @@ class EAGroup(object):
             self._counts_workspace.update({run_object: MuonWorkspaceWrapper(counts_workspace)})
 
     def update_counts_workspace(self, counts_workspace, run):
-        run_object = MuonRun(run)
-        self._counts_workspace.update({run_object: MuonWorkspaceWrapper(counts_workspace)})
+        self._counts_workspace.update({run: MuonWorkspaceWrapper(counts_workspace)})
 
     def get_rebined_or_unbinned_version_of_workspace_if_it_exists(self, name):
         for key, value in self._counts_workspace.items():
@@ -104,25 +100,3 @@ class EAGroup(object):
                 return self._counts_workspace[key].workspace_name
 
         return None
-
-    def update_peak_table(self, run, table):
-        run_object = MuonRun(run)
-        self._peak_table.update({run_object: MuonWorkspaceWrapper(table)})
-
-    def update_matches_table(self, run, table):
-        run_object = MuonRun(run)
-        self._matches_table.update({run_object: MuonWorkspaceWrapper(table)})
-
-    def get_peak_table(self, run):
-        run_object = MuonRun(run)
-        return self._peak_table[run_object].workspace_name
-
-    def get_matches_table(self, run):
-        run_object = MuonRun(run)
-        return self._matches_table[run_object].workspace_name
-
-    def is_peak_table_present(self):
-        return bool(self._peak_table)
-
-    def is_matches_table_present(self):
-        return bool(self._matches_table)

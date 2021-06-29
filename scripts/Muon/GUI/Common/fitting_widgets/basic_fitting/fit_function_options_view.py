@@ -12,7 +12,7 @@ from Muon.GUI.Common.utilities import table_utils
 
 from qtpy.QtWidgets import QWidget
 
-ui_form, base_widget = load_ui(__file__, "fit_function_options.ui")
+ui_fit_function_options, _ = load_ui(__file__, "fit_function_options.ui")
 
 ALLOWED_MINIMIZERS = ["Levenberg-Marquardt", "BFGS", "Conjugate gradient (Fletcher-Reeves imp.)",
                       "Conjugate gradient (Polak-Ribiere imp.)", "Damped GaussNewton",
@@ -24,13 +24,13 @@ RAW_DATA_TABLE_ROW = 3
 EVALUATE_AS_TABLE_ROW = 4
 
 
-class FitFunctionOptionsView(ui_form, base_widget):
+class FitFunctionOptionsView(QWidget, ui_fit_function_options):
     """
     The FitFunctionOptionsView includes the Function Name line edit, FunctionBrowser and the fitting options table
     widget. It also holds the Fit Status and Chi Squared labels.
     """
 
-    def __init__(self, parent: QWidget = None):
+    def __init__(self, parent: QWidget = None, is_frequency_domain: bool = False):
         """Initializes the FitFunctionOptionsView and sets up the fit options table and FunctionBrowser."""
         super(FitFunctionOptionsView, self).__init__(parent)
         self.setupUi(self)
@@ -50,6 +50,11 @@ class FitFunctionOptionsView(ui_form, base_widget):
         self.function_browser.setErrorsEnabled(True)
         self.function_browser.hideGlobalCheckbox()
         self.function_browser.setStretchLastColumn(True)
+
+        if is_frequency_domain:
+            self.fit_options_table.hideRow(RAW_DATA_TABLE_ROW)
+            table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, "Start X")
+            table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, "End X")
 
     def set_slot_for_fit_name_changed(self, slot) -> None:
         """Connect the slot for the fit name being changed by the user."""
@@ -112,18 +117,6 @@ class FitFunctionOptionsView(ui_form, base_widget):
         """Sets the index of the current dataset."""
         self.function_browser.setCurrentDataset(dataset_index)
 
-    def set_fit_function(self, fit_function: IFunction) -> None:
-        """Set the fit function shown in the view."""
-        self.function_browser.blockSignals(True)
-        if fit_function is None:
-            self.function_browser.setFunction("")
-        else:
-            self.function_browser.setFunction(str(fit_function))
-            # Required to update the parameter errors as they are not stored in the function string
-            self.function_browser.updateParameters(fit_function)
-        self.function_browser.blockSignals(False)
-        self.function_browser.setErrorsEnabled(True)
-
     def update_function_browser_parameters(self, is_simultaneous_fit: bool, fit_function: IFunction,
                                            global_parameters: list = []) -> None:
         """Updates the parameters in the function browser."""
@@ -145,10 +138,6 @@ class FitFunctionOptionsView(ui_form, base_widget):
         """Returns the global fitting function."""
         return self.function_browser.getGlobalFunction()
 
-    def current_fit_function(self) -> IFunction:
-        """Returns the current fitting function in the view."""
-        return self.function_browser.getFunction()
-
     @property
     def minimizer(self) -> str:
         """Returns the selected minimizer."""
@@ -162,8 +151,9 @@ class FitFunctionOptionsView(ui_form, base_widget):
     @start_x.setter
     def start_x(self, value: float) -> None:
         """Sets the selected start X."""
-        self.start_x_validator.last_valid_value = f"{value:.3f}"
-        self.start_x_line_edit.setText(f"{value:.3f}")
+        if value <= self.end_x:
+            self.start_x_validator.last_valid_value = f"{value:.3f}"
+            self.start_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def end_x(self) -> float:
@@ -173,8 +163,9 @@ class FitFunctionOptionsView(ui_form, base_widget):
     @end_x.setter
     def end_x(self, value: float) -> None:
         """Sets the selected end X."""
-        self.end_x_validator.last_valid_value = f"{value:.3f}"
-        self.end_x_line_edit.setText(f"{value:.3f}")
+        if value >= self.start_x:
+            self.end_x_validator.last_valid_value = f"{value:.3f}"
+            self.end_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def evaluation_type(self) -> str:
@@ -231,15 +222,6 @@ class FitFunctionOptionsView(ui_form, base_widget):
         self.function_browser.hideGlobalCheckbox()
         self.function_browser.setGlobalParameters([])
 
-    def hide_fit_raw_checkbox(self) -> None:
-        """Hides the Fit Raw checkbox in the fitting options."""
-        self.fit_options_table.hideRow(RAW_DATA_TABLE_ROW)
-
-    def set_start_and_end_x_labels(self, start_x_label: str, end_x_label: str) -> None:
-        """Sets the labels to use for the start and end X labels in the fit options table."""
-        table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, start_x_label)
-        table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, end_x_label)
-
     def _setup_fit_options_table(self) -> None:
         """Setup the fit options table with the appropriate options."""
         self.fit_options_table.setRowCount(5)
@@ -249,11 +231,11 @@ class FitFunctionOptionsView(ui_form, base_widget):
         self.fit_options_table.horizontalHeader().setStretchLastSection(True)
         self.fit_options_table.setHorizontalHeaderLabels(["Property", "Value"])
 
-        table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, "Start X")
+        table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, "Time Start")
         self.start_x_line_edit, self.start_x_validator = table_utils.addDoubleToTable(self.fit_options_table, 0.0,
                                                                                       START_X_TABLE_ROW, 1)
 
-        table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, "End X")
+        table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, "Time End")
         self.end_x_line_edit, self.end_x_validator = table_utils.addDoubleToTable(self.fit_options_table, 15.0,
                                                                                   END_X_TABLE_ROW, 1)
 

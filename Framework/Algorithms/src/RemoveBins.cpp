@@ -224,7 +224,7 @@ void RemoveBins::exec() {
 /// Calls CropWorkspace as a Child Algorithm to remove bins from the start or
 /// end of a square workspace
 void RemoveBins::crop(const double &start, const double &end) {
-  auto childAlg = createChildAlgorithm("CropWorkspace");
+  IAlgorithm_sptr childAlg = createChildAlgorithm("CropWorkspace");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
                                               std::const_pointer_cast<MatrixWorkspace>(m_inputWorkspace));
   childAlg->setProperty<double>("XMin", start);

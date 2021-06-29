@@ -196,7 +196,8 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(double
   // Workspace_sptr inputws = std::dynamic_pointer_cast<Workspace>(pws);
 
   // move instrument is really fast, even with zero input
-  auto mv_alg = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
+  IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
+  //
   mv_alg->initialize();
   mv_alg->setChild(true);
   mv_alg->setLogging(LOGCHILDALG);
@@ -225,7 +226,7 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(dou
                                                                              std::string componentName,
                                                                              IPeaksWorkspace_sptr &pws) const {
   // rotate
-  auto rot_alg = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
+  IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
   // around X
   rot_alg->initialize();
   rot_alg->setChild(true);

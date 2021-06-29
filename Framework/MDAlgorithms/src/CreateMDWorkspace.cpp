@@ -201,7 +201,7 @@ void CreateMDWorkspace::exec() {
   if (!filename.empty()) {
     // First save to the NXS file
     g_log.notice() << "Running SaveMD\n";
-    auto alg = createChildAlgorithm("SaveMD");
+    IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("InputWorkspace", std::dynamic_pointer_cast<IMDWorkspace>(out));
     alg->executeAsChildAlg();

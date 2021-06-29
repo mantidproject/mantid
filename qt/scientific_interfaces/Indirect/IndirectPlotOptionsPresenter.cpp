@@ -36,11 +36,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
-    IndirectPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
+    IndirectPlotOptionsView *view, IPyRunner *pythonRunner, PlotWidget const &plotType, std::string const &fixedIndices,
     boost::optional<std::map<std::string, std::string>> const &availableActions)
     : QObject(nullptr), m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view),
-      m_model(std::make_unique<IndirectPlotOptionsModel>(availableActions)) {
+      m_model(std::make_unique<IndirectPlotOptionsModel>(pythonRunner, availableActions)) {
   setupPresenter(plotType, fixedIndices);
 }
 

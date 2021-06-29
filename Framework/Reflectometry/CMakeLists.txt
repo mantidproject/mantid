@@ -73,7 +73,7 @@ set(TEST_PY_FILES
     ReflectometryBackgroundSubtractionTest.py
     ReflectometryReductionOne2Test.py)
 
-if(COVERAGE)
+if(COVERALLS)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS

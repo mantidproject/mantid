@@ -164,7 +164,6 @@ void WorkspaceSelector::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr
   QString name = QString::fromStdString(pNf->objectName());
   if (checkEligibility(name, pNf->object())) {
     addItem(name);
-    model()->sort(0);
   }
 }
 
@@ -197,10 +196,8 @@ void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotificati
   if (eligible) {
     if (index != -1 && newIndex == -1) {
       this->setItemText(index, newName);
-      model()->sort(0);
     } else if (index == -1 && newIndex == -1) {
       addItem(newName);
-      model()->sort(0);
     } else
       removeItem(index);
   } else {
@@ -225,10 +222,9 @@ void WorkspaceSelector::handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNot
   bool inside = (index != -1);
   if ((inside && eligible) || (!inside && !eligible))
     return;
-  else if (!inside && eligible) {
+  else if (!inside && eligible)
     addItem(name);
-    model()->sort(0);
-  } else // (inside && !eligible)
+  else // (inside && !eligible)
     removeItem(index);
 }
 
@@ -300,7 +296,6 @@ void WorkspaceSelector::refresh() {
     }
   }
   this->addItems(namesToAdd);
-  model()->sort(0);
 }
 
 /**

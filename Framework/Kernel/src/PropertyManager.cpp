@@ -8,7 +8,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
-#include "MantidJson/Json.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/LogFilter.h"
@@ -317,9 +316,10 @@ void PropertyManager::setProperties(const std::string &propertiesJson,
  */
 void PropertyManager::setProperties(const std::string &propertiesJson, IPropertyManager *targetPropertyManager,
                                     const std::unordered_set<std::string> &ignoreProperties, bool createMissing) {
+  ::Json::Reader reader;
   ::Json::Value jsonValue;
 
-  if (Mantid::JsonHelpers::parse(propertiesJson, &jsonValue)) {
+  if (reader.parse(propertiesJson, jsonValue)) {
     setProperties(jsonValue, targetPropertyManager, ignoreProperties, createMissing);
   } else {
     throw std::invalid_argument("propertiesArray was not valid json");
@@ -405,9 +405,10 @@ void PropertyManager::setPropertiesWithString(const std::string &propertiesStrin
 */
 void PropertyManager::setPropertiesWithJSONString(const std::string &propertiesString,
                                                   const std::unordered_set<std::string> &ignoreProperties) {
+  ::Json::Reader reader;
   ::Json::Value propertyJson;
 
-  if (Mantid::JsonHelpers::parse(propertiesString, &propertyJson)) {
+  if (reader.parse(propertiesString, propertyJson)) {
     setProperties(propertyJson, ignoreProperties);
   } else {
     throw std::invalid_argument("Could not parse JSON string when trying to set a property from: " + propertiesString);
@@ -566,9 +567,8 @@ std::string PropertyManager::getPropertyValue(const std::string &name) const {
  * @returns A serialized version of the manager
  */
 std::string PropertyManager::asString(bool withDefaultValues) const {
-  Json::StreamWriterBuilder builder;
-  builder.settings_["indentation"] = "";
-  const string output = Json::writeString(builder, asJson(withDefaultValues));
+  ::Json::FastWriter writer;
+  const string output = writer.write(asJson(withDefaultValues));
 
   return output;
 }

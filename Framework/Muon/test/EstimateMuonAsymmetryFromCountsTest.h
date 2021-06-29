@@ -57,7 +57,7 @@ ITableWorkspace_sptr genTable() {
 }
 
 IAlgorithm_sptr setUpAlg(ITableWorkspace_sptr &table) {
-  auto asymmAlg = AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
+  IAlgorithm_sptr asymmAlg = AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
   asymmAlg->initialize();
   asymmAlg->setChild(true);
   asymmAlg->setProperty("NormalizationTable", table);
@@ -79,7 +79,7 @@ public:
 
   void testInit() {
     auto table = genTable();
-    auto alg = setUpAlg(table);
+    IAlgorithm_sptr alg = setUpAlg(table);
     TS_ASSERT(alg->isInitialized())
   }
 
@@ -87,7 +87,7 @@ public:
 
     auto ws = createWorkspace(1, 50);
     auto table = genTable();
-    auto alg = setUpAlg(table);
+    IAlgorithm_sptr alg = setUpAlg(table);
 
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
@@ -100,7 +100,7 @@ public:
 
     auto ws = createWorkspace(2, 50);
     auto table = genTable();
-    auto alg = setUpAlg(table);
+    IAlgorithm_sptr alg = setUpAlg(table);
 
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
@@ -132,7 +132,7 @@ public:
 
     // First, run the algorithm without specifying any spectrum
     auto table = genTable();
-    auto alg1 = setUpAlg(table);
+    IAlgorithm_sptr alg1 = setUpAlg(table);
 
     alg1->setProperty("InputWorkspace", workspaces[0]);
     alg1->setPropertyValue("OutputWorkspace", outputName);
@@ -142,7 +142,7 @@ public:
     workspaces.emplace_back(alg1->getProperty("OutputWorkspace"));
 
     // Then run the algorithm on the second spectrum only
-    auto alg2 = setUpAlg(table);
+    IAlgorithm_sptr alg2 = setUpAlg(table);
 
     alg2->setProperty("InputWorkspace", workspaces[0]);
     alg2->setPropertyValue("OutputWorkspace", outputName);
@@ -167,7 +167,7 @@ public:
     auto ws = createWorkspace(1, 50);
 
     auto table = genTable();
-    auto alg = setUpAlg(table);
+    IAlgorithm_sptr alg = setUpAlg(table);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -180,7 +180,7 @@ public:
     auto ws = createWorkspace(1, 50);
 
     auto table = genTable();
-    auto alg = setUpAlg(table);
+    IAlgorithm_sptr alg = setUpAlg(table);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("StartX", 0.1);
     alg->setProperty("EndX", 0.1);
@@ -191,7 +191,7 @@ public:
     auto ws = createWorkspace(1, 50);
 
     auto table = genTable();
-    auto alg = setUpAlg(table);
+    IAlgorithm_sptr alg = setUpAlg(table);
 
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("StartX", 0.9);
@@ -210,7 +210,7 @@ public:
     coarseWS->mutableRun().addProperty("goodfrm", 10);
 
     auto table = genTable();
-    auto fineAlg = setUpAlg(table);
+    IAlgorithm_sptr fineAlg = setUpAlg(table);
 
     fineAlg->setProperty("WorkspaceName", "fine");
     fineAlg->setProperty("InputWorkspace", fineWS);
@@ -219,7 +219,7 @@ public:
     TS_ASSERT(fineAlg->isExecuted());
     MatrixWorkspace_sptr fineOutWS = fineAlg->getProperty("OutputWorkspace");
 
-    auto coarseAlg = setUpAlg(table);
+    IAlgorithm_sptr coarseAlg = setUpAlg(table);
     coarseAlg->setProperty("InputWorkspace", coarseWS);
     coarseAlg->setProperty("WorkspaceName", "coarse");
     coarseAlg->setPropertyValue("OutputWorkspace", "coarseOutWS");
@@ -248,7 +248,7 @@ public:
     double userNorm = 10.2;
 
     auto table = genTable();
-    auto alg = setUpAlg(table);
+    IAlgorithm_sptr alg = setUpAlg(table);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("NormalizationIn", userNorm);
@@ -274,7 +274,7 @@ public:
     auto ws = createWorkspace(1, 50);
 
     auto table = genTable();
-    auto alg = setUpAlg(table);
+    IAlgorithm_sptr alg = setUpAlg(table);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("OutputUnNormData", true);

@@ -53,7 +53,7 @@ public:
   }
 
   void test_Algorithm_Is_Version_2_LoadSQW() {
-    auto alg = createAlgorithm();
+    IAlgorithm_uptr alg = createAlgorithm();
     TS_ASSERT_EQUALS("LoadSQW", alg->name());
     TS_ASSERT_EQUALS(2, alg->version());
   }
@@ -170,7 +170,7 @@ private:
   }
 
   IAlgorithm_uptr createAlgorithm() {
-    auto alg(std::make_unique<LoadSQW2>());
+    IAlgorithm_uptr alg(std::make_unique<LoadSQW2>());
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("OutputWorkspace", "__unused_value_for_child_algorithm");

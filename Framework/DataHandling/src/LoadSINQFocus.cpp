@@ -229,7 +229,7 @@ void LoadSINQFocus::loadExperimentDetails(NXEntry &entry) {
  */
 void LoadSINQFocus::runLoadInstrument() {
 
-  auto loadInst = createChildAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {

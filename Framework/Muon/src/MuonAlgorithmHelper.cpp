@@ -213,7 +213,7 @@ void groupWorkspaces(const std::string &groupName, const std::vector<std::string
     }
   } else {
     // Doesn't exist or isn't a group -> create/overwrite
-    auto groupingAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    IAlgorithm_sptr groupingAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     groupingAlg->initialize();
     groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
     groupingAlg->setPropertyValue("OutputWorkspace", groupName);
@@ -511,7 +511,7 @@ MatrixWorkspace_sptr sumPeriods(const WorkspaceGroup_sptr &inputWS, const std::v
       auto numPeriods = static_cast<int>(periodsToSum.size());
       for (int i = 1; i < numPeriods; i++) {
         auto RHSWorkspace = inputWS->getItem(periodsToSum[i] - 1);
-        auto alg = AlgorithmManager::Instance().createUnmanaged("Plus");
+        IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("Plus");
         alg->initialize();
         alg->setChild(true);
         alg->setRethrows(true);
@@ -535,7 +535,7 @@ MatrixWorkspace_sptr sumPeriods(const WorkspaceGroup_sptr &inputWS, const std::v
 MatrixWorkspace_sptr subtractWorkspaces(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs) {
   MatrixWorkspace_sptr outWS;
   if (lhs && rhs) {
-    auto alg = AlgorithmManager::Instance().createUnmanaged("Minus");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("Minus");
     alg->initialize();
     alg->setChild(true);
     alg->setRethrows(true);
@@ -557,7 +557,7 @@ MatrixWorkspace_sptr subtractWorkspaces(const MatrixWorkspace_sptr &lhs, const M
 MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS, const int index) {
   MatrixWorkspace_sptr outWS;
   if (inputWS) {
-    auto alg = AlgorithmManager::Instance().createUnmanaged("ExtractSingleSpectrum");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("ExtractSingleSpectrum");
     alg->initialize();
     alg->setChild(true);
     alg->setRethrows(true);
@@ -571,7 +571,7 @@ MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS, const int in
 }
 
 void addSampleLog(const MatrixWorkspace_sptr &workspace, const std::string &logName, const std::string &logValue) {
-  auto alg = AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
   alg->initialize();
   alg->setChild(true);
   alg->setRethrows(true);

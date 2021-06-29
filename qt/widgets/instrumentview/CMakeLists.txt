@@ -103,10 +103,6 @@ set(
   inc/MantidQtWidgets/InstrumentView/GLColor.h
   inc/MantidQtWidgets/InstrumentView/GLObject.h
   inc/MantidQtWidgets/InstrumentView/GridTextureFace.h
-
-  inc/MantidQtWidgets/InstrumentView/ISimpleWidget.h
-  inc/MantidQtWidgets/InstrumentView/IMantidGLWidget.h
-
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h
@@ -234,4 +230,44 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../${WORKBENCH_LIB_DIR}")
 
-add_subdirectory(test)
+# Testing
+set(
+  TEST_FILES
+  test/InstrumentWidgetDecoderTest.h
+  test/InstrumentWidgetEncoderTest.h
+  test/BaseCustomInstrumentPresenterTest.h
+  test/PlotFitAnalysisPaneModelTest.h
+  test/PlotFitAnalysisPanePresenterTest.h
+)
+
+set(CXXTEST_EXTRA_HEADER_INCLUDE
+    "${CMAKE_CURRENT_LIST_DIR}/test/InstrumentViewTestInitialization.h")
+
+mtd_add_qt_tests(
+  TARGET_NAME MantidQtWidgetsInstrumentWidgetTest
+  QT_VERSION 5
+  SRC ${TEST_FILES}
+  INCLUDE_DIRS
+    ../../../Framework/DataObjects/inc
+    ../../../Framework/TestHelpers/inc
+  TEST_HELPER_SRCS
+    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+  LINK_LIBS
+    ${CORE_MANTIDLIBS}
+    PythonInterfaceCore
+    DataObjects
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${PYTHON_LIBRARIES}
+    gmock
+  QT5_LINK_LIBS Qt5::OpenGL
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+    MantidQtWidgetsInstrumentView
+    MantidQtWidgetsMplCpp
+    MantidQtWidgetsPlotting
+  PARENT_DEPENDENCIES GUITests
+)

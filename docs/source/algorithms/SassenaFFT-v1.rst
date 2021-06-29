@@ -66,6 +66,7 @@ Usage
 
 .. testcode:: Ex
 
+    from __future__ import print_function
     ws = LoadSassena("loadSassenaExample.h5", TimeUnit=1.0)
     SassenaFFT(ws, FFTonlyRealPart=1, Temp=1000, DetailedBalance=1)
 

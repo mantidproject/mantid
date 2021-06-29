@@ -451,7 +451,7 @@ set(TEST_FILES
     VisibleWhenPropertyTest.h
     WriteLockTest.h)
 
-if(COVERAGE)
+if(COVERALLS)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS
@@ -518,7 +518,6 @@ target_link_libraries(Kernel
                       ${NETWORK_LIBRARIES}
                       span
                       ${HDF5_LIBRARIES}
-                      Json
                       )
 if(WIN32)
   target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage

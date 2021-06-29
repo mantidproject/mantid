@@ -1268,7 +1268,7 @@ std::string ConfigServiceImpl::getPathToExecutable() const {
  * @param path :: The path to be checked
  * @return True if the path is on a network drive.
  */
-bool ConfigServiceImpl::isNetworkDrive([[maybe_unused]] const std::string &path) {
+bool ConfigServiceImpl::isNetworkDrive(const std::string &path) {
 #ifdef _WIN32
   // if path is relative get the full one
   char buff[MAX_PATH];
@@ -1335,6 +1335,7 @@ bool ConfigServiceImpl::isNetworkDrive([[maybe_unused]] const std::string &path)
   }
   return false;
 #else
+  UNUSED_ARG(path);
   // Not yet implemented for the mac
   return false;
 #endif

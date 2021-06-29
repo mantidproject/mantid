@@ -131,7 +131,7 @@ void AlgorithmManagerImpl::removeById(AlgorithmID id) {
  * @param id :: ID of the algorithm being started
  */
 void AlgorithmManagerImpl::notifyAlgorithmStarting(AlgorithmID id) {
-  auto alg = this->getAlgorithm(id);
+  IAlgorithm_sptr alg = this->getAlgorithm(id);
   if (!alg)
     return;
   notificationCenter.postNotification(new AlgorithmStartingNotification(alg));

@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitAnalysisTab.h"
-#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
@@ -131,7 +130,7 @@ void IndirectFitAnalysisTab::setFitDataPresenter(std::unique_ptr<IndirectFitData
 }
 
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
-  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(m_fittingModel.get(), view);
+  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(m_fittingModel.get(), view, this);
 }
 
 void IndirectFitAnalysisTab::setSpectrumSelectionView(IndirectSpectrumSelectionView *view) {
@@ -438,7 +437,7 @@ void IndirectFitAnalysisTab::plotSelectedSpectra(std::vector<SpectrumToPlot> con
  * @errorBars :: true if you want error bars to be plotted
  */
 void IndirectFitAnalysisTab::plotSpectrum(std::string const &workspaceName, std::size_t const &index) {
-  m_plotter->plotSpectra(workspaceName, std::to_string(index), IndirectSettingsHelper::externalPlotErrorBars());
+  m_plotter->plotSpectra(workspaceName, std::to_string(index));
 }
 
 /**

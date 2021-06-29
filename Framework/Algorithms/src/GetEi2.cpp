@@ -333,7 +333,7 @@ double GetEi2::calculatePeakPosition(size_t ws_index, double t_min, double t_max
  *  @throw invalid_argument if the input workspace does not have common binning
  */
 MatrixWorkspace_sptr GetEi2::extractSpectrum(size_t ws_index, const double start, const double end) {
-  auto childAlg = createChildAlgorithm("CropWorkspace");
+  IAlgorithm_sptr childAlg = createChildAlgorithm("CropWorkspace");
   childAlg->setProperty("InputWorkspace", m_input_ws);
   childAlg->setProperty<int>("StartWorkspaceIndex", static_cast<int>(ws_index));
   childAlg->setProperty<int>("EndWorkspaceIndex", static_cast<int>(ws_index));
@@ -355,7 +355,7 @@ MatrixWorkspace_sptr GetEi2::extractSpectrum(size_t ws_index, const double start
 
 /**
  * Calculate the width of the peak within the given region
- * @param data_ws :: The workspace containing the window around the peak
+ * @param data_ws :: The workspace containg the window around the peak
  * @param prominence :: The factor that the peak must be above the error to
  * count as a peak
  * @param peak_x :: An output vector containing just the X values of the peak
@@ -521,22 +521,17 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
         break;
       }
     }
-    // A broad peak with many local maxima on the side can cause the algorithm to give the same indices for the two
-    // points (ip1 and ip2) either side of the half-width point. Noise may also result in equal y values for different
-    // ip1 and ip2 points which would cause a divide-by-zero error in the xp_hh calculation below. We know the
-    // algorithm isn't perfect so move one index until the y values are differnt.
-    if (peak_y[ip1] == peak_y[ip2]) {
+    // A broad peak with many local maxima on the side can cause the algorithm
+    // to give the same indices
+    // for the two points either side of the half-width point. We know the
+    // algorithm isn't perfect so
+    // move one index such that there is at least a gap.
+    if (ip1 == ip2) {
       g_log.warning() << "A peak with a local maxima on the trailing edge has "
                          "been found. The estimation of the "
                       << "half-height point will not be as accurate.\n";
-      // Shift the index ip1 until the heights are no longer equal. This avoids the divide-by-zero.
-      while (peak_y[ip1] == peak_y[ip2]) {
-        ip1--;
-        if (ip1 < ipk_int)
-          throw std::invalid_argument("Trailing edge values are equal until up to the peak centre.");
-      }
+      ip1--;
     }
-
     xp_hh = peak_x[ip2] + (peak_x[ip1] - peak_x[ip2]) * ((hby2 - peak_y[ip2]) / (peak_y[ip1] - peak_y[ip2]));
   } else {
     xp_hh = peak_x[nyvals - 1];
@@ -547,34 +542,29 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
     int64_t im1(0), im2(0);
     for (int64_t i = ipk_int; i >= 0; --i) {
       if (peak_y[i] < hby2) {
-        im1 = i + 1; // ! before this point the intensity starts to go below
+        im1 = i + 1; // ! after this point the intensity starts to go below
                      // half-height
         break;
       }
     }
     for (int64_t i = 0; i <= ipk_int; ++i) {
       if (peak_y[i] > hby2) {
-        im2 = i - 1; // ! point closest to peak before which the intensity is
+        im2 = i - 1; // ! point closest to peak after which the intensity is
                      // always below half height
         break;
       }
     }
-    // A broad peak with many local maxima on the side can cause the algorithm to give the same indices for the two
-    // points (im1 and im2) either side of the half-width point. Noise may also result in equal y values for different
-    // im1 and im2 points which would cause a divide-by-zero error in the xp_hh calculation below. We know the
-    // algorithm isn't perfect so move one index until the y values are differnt.
-    if (peak_y[im1] == peak_y[im2]) {
+    // A broad peak with many local maxima on the side can cause the algorithm
+    // to give the same indices
+    // for the two points either side of the half-width point. We know the
+    // algorithm isn't perfect so
+    // move one index such that there is at least a gap.
+    if (im1 == im2) {
       g_log.warning() << "A peak with a local maxima on the rising edge has "
                          "been found. The estimation of the "
                       << "half-height point will not be as accurate.\n";
-      // Shift the index ip1 until the heights are no longer equal. This avoids the divide-by-zero.
-      while (peak_y[im1] == peak_y[im2]) {
-        im1++;
-        if (im1 >= ipk_int)
-          throw std::invalid_argument("The rising edge values are equal up to the peak centre.");
-      }
+      im1++;
     }
-
     xm_hh = peak_x[im2] + (peak_x[im1] - peak_x[im2]) * ((hby2 - peak_y[im2]) / (peak_y[im1] - peak_y[im2]));
   } else {
     xm_hh = peak_x.front();
@@ -614,7 +604,7 @@ double GetEi2::calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws,
 */
 API::MatrixWorkspace_sptr GetEi2::rebin(const API::MatrixWorkspace_sptr &monitor_ws, const double first,
                                         const double width, const double end) {
-  auto childAlg = createChildAlgorithm("Rebin");
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty("InputWorkspace", monitor_ws);
   std::ostringstream binParams;
   binParams << first << "," << width << "," << end;

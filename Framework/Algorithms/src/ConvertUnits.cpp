@@ -108,7 +108,7 @@ void ConvertUnits::exec() {
       return;
     } else {
       // Clone the workspace.
-      auto duplicate = createChildAlgorithm("CloneWorkspace", 0.0, 0.6);
+      IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace", 0.0, 0.6);
       duplicate->initialize();
       duplicate->setProperty("InputWorkspace", inputWS);
       duplicate->execute();
@@ -128,7 +128,7 @@ void ConvertUnits::exec() {
       g_log.information("ConvertFromPointData is checked. Running ConvertToHistogram\n");
       // not histogram data
       // ConvertToHistogram
-      auto convToHist = createChildAlgorithm("ConvertToHistogram");
+      IAlgorithm_sptr convToHist = createChildAlgorithm("ConvertToHistogram");
       convToHist->setProperty("InputWorkspace", inputWS);
       convToHist->execute();
       MatrixWorkspace_sptr temp = convToHist->getProperty("OutputWorkspace");
@@ -151,7 +151,7 @@ void ConvertUnits::exec() {
   // If InputWorkspace contained point data, convert back
   if (workspaceWasConverted) {
     g_log.information("ConvertUnits is completed. Running ConvertToPointData.\n");
-    auto convtoPoints = createChildAlgorithm("ConvertToPointData");
+    IAlgorithm_sptr convtoPoints = createChildAlgorithm("ConvertToPointData");
     convtoPoints->setProperty("InputWorkspace", outputWS);
     convtoPoints->execute();
     MatrixWorkspace_sptr temp = convtoPoints->getProperty("OutputWorkspace");
@@ -504,7 +504,7 @@ API::MatrixWorkspace_sptr ConvertUnits::alignBins(const API::MatrixWorkspace_spt
   if (communicator().size() != 1)
     throw std::runtime_error("ConvertUnits: Parallel support for aligning bins not implemented.");
   // Create a Rebin child algorithm
-  auto childAlg = createChildAlgorithm("Rebin");
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   // Next line for EventWorkspaces - needed for as long as in/out set same
   // keeps

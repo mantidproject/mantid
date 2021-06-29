@@ -102,7 +102,7 @@ Example Algorithms
 Writing your own algorithm
 --------------------------
 
-A primer for this is :ref:`here <01_basic_algorithm_structure>`.
+A primer for this is `here <http://www.mantidproject.org/Writing_an_Algorithm>`__.
 
 
 

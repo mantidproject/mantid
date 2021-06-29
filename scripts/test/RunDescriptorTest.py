@@ -7,7 +7,6 @@
 import unittest
 
 from Direct.PropertyManager import PropertyManager
-from Direct.RunDescriptor import *
 
 from mantid import api
 from mantid.simpleapi import *
@@ -621,140 +620,8 @@ class RunDescriptorTest(unittest.TestCase):
         except:
             self.fail()
 
-    def test_remove_background_matching_workspaces(self):
-        wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
-                                     NumBanks=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
-                                     XMin=2000, XMax=20000, BinWidth=1)
-        CloneWorkspace(wksp,OutputWorkspace='bg_ws')
-        AddSampleLog(Workspace=wksp,LogName='gd_prtn_chrg', LogText='10', LogType='Number')
-        AddSampleLog(Workspace='bg_ws',LogName='gd_prtn_chrg', LogText='100', LogType='Number')
-        CloneWorkspace('bg_ws',OutputWorkspace='ref_ws')
 
-        self.assertFalse(wksp.run().hasProperty('empty_bg_removed'))
-
-        propman = self.prop_man
-
-        propman.sample_run = wksp
-        propman.empty_bg_run = 'bg_ws'
-
-        bgws = PropertyManager.empty_bg_run.get_workspace()
-        PropertyManager.sample_run.remove_empty_background(bgws)
-        ws = PropertyManager.sample_run.get_workspace()
-
-        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
-        resWs = 0.9*wksp
-        difr = CompareWorkspaces(resWs,ws)
-        self.assertTrue(difr.Result)
-
-        # the subtaction occurs only once
-        PropertyManager.sample_run.remove_empty_background(bgws)
-        # operation above does nothing
-        ws = PropertyManager.sample_run.get_workspace()
-        difr = CompareWorkspaces(resWs,ws)
-        self.assertTrue(difr.Result)
-        # ensure that bg Workspace remains unchanged
-        bg_ws_restored = PropertyManager.empty_bg_run.get_workspace()
-        difr = CompareWorkspaces(bg_ws_restored,'ref_ws')
-        self.assertTrue(difr.Result)
-
-    def test_add_emptpy_sectra_first(self):
-        CreateSampleWorkspace(OutputWorkspace='wksp',Function='Multiple Peaks', WorkspaceType='Histogram',
-                                     NumBanks=3, NumMonitors=3, BankPixelWidth=1, XUnit='TOF',
-                                     XMin=200, XMax=20000, BinWidth=200)
-        ExtractMonitors(InputWorkspace='wksp', DetectorWorkspace='wksp', MonitorWorkspace='Monitors')
-
-        wksp = mtd['wksp']
-        mod_ws = RunDescriptor._add_empty_spectra(wksp,3,True)
-        self.assertEqual(mod_ws.getNumberHistograms(),6)
-        self.assertEqual('wksp',mod_ws.name())
-
-    def test_add_emptpy_sectra_last(self):
-        CreateSampleWorkspace(OutputWorkspace='wksp',Function='Multiple Peaks', WorkspaceType='Histogram',
-                                     NumBanks=3, NumMonitors=3, BankPixelWidth=1, XUnit='TOF',
-                                     XMin=200, XMax=20000, BinWidth=200)
-        ExtractMonitors(InputWorkspace='wksp', DetectorWorkspace='wksp', MonitorWorkspace='Monitors')
-
-        wksp = mtd['Monitors']
-        mod_ws = RunDescriptor._add_empty_spectra(wksp,3,False)
-        self.assertEqual(mod_ws.getNumberHistograms(),6)
-        self.assertEqual('Monitors',mod_ws.name())
-
-    def test_remove_background_matrix_minus_event(self):
-        # Verify situation if sampe workspace is in histogram mode with monitors loaded with workspace
-        # and background is event workspace with monitors loaded separately
-        wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram',
-                                     NumBanks=3, NumMonitors=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
-                                     XMin=2000, XMax=20000, BinWidth=1)
-        ExtractMonitors(InputWorkspace='wksp', DetectorWorkspace='bg_ws', MonitorWorkspace='refMonitors')
-
-        CloneWorkspace('bg_ws',OutputWorkspace='ref_ws')
-        bg_ws = ConvertToEventWorkspace('bg_ws')
-
-        AddSampleLog(Workspace=wksp,LogName='gd_prtn_chrg', LogText='10', LogType='Number')
-        AddSampleLog(Workspace=bg_ws,LogName='gd_prtn_chrg', LogText='100', LogType='Number')
-
-        self.assertFalse(wksp.run().hasProperty('empty_bg_removed'))
-
-        propman = self.prop_man
-
-        propman.sample_run = wksp
-        propman.empty_bg_run = bg_ws
-
-        bgws = PropertyManager.empty_bg_run.get_workspace()
-        PropertyManager.sample_run.remove_empty_background(bgws)
-        resWs = PropertyManager.sample_run.get_workspace()
-        self.assertTrue(resWs.run().hasProperty('empty_bg_removed'))
-
-        ExtractMonitors(InputWorkspace=resWs, DetectorWorkspace='resWs', MonitorWorkspace='resMonitors')
-        difr_mon = CompareWorkspaces('refMonitors','resMonitors')
-        self.assertTrue(difr_mon.Result)
-
-        ref_ws = mtd['ref_ws']
-
-        # Errors if two matrix workspaces extacted from each other are not extracted
-        ref_ws = ref_ws - 0.1*ref_ws
-
-        resWs = mtd['resWs']
-
-        difr_sample = CompareWorkspaces(ref_ws,resWs,Tolerance=1.e-7)
-        self.assertTrue(difr_sample.Result)
-
-    def test_remove_background_matrix_minus_matrix(self):
-        # Verify situation if sample workspace is in event mode and
-        # and background loaded as a histogram with monitors included
-        bg_ws = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram',
-                                      NumBanks=3, NumMonitors=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
-                                      XMin=2000, XMax=20000, BinWidth=1)
-        ExtractMonitors(InputWorkspace='bg_ws', DetectorWorkspace='sample_run', MonitorWorkspace='refMonitors')
-        ref_ws = CloneWorkspace('sample_run')
-
-        AddSampleLog(Workspace='sample_run',LogName='gd_prtn_chrg', LogText='10', LogType='Number')
-        AddSampleLog(Workspace=bg_ws,LogName='gd_prtn_chrg', LogText='100', LogType='Number')
-
-        wksp = mtd['sample_run']
-        self.assertFalse(wksp.run().hasProperty('empty_bg_removed'))
-
-        propman = self.prop_man
-
-        propman.sample_run = wksp
-        propman.empty_bg_run = bg_ws
-
-        bgws = PropertyManager.empty_bg_run.get_workspace()
-        PropertyManager.sample_run.remove_empty_background(bgws)
-        resWs = PropertyManager.sample_run.get_workspace()
-        self.assertTrue(resWs.run().hasProperty('empty_bg_removed'))
-
-        # Errors if two matrix workspaces extacted from each other are not extracted
-        ref_ws = ref_ws - 0.1*ref_ws
-        difr = CompareWorkspaces(ref_ws,resWs)
-        self.assertTrue(difr.Result)
-        # bg Workspace remains unchanged
-        bg_ws_restored = PropertyManager.empty_bg_run.get_workspace()
-        difr = CompareWorkspaces(bg_ws_restored,bg_ws)
-        self.assertTrue(difr.Result)
-
-
-if __name__ == "__main__" or __name__ == "mantidqt.widgets.codeeditor.execution":
-    #tester=RunDescriptorTest('test_remove_background_matching_workspaces')
-    #tester.run()
+if __name__ == "__main__":
+    #tester=RunDescriptorTest('test_alsk_one_find_another_ext_blocked')
+    #tester.test_alsk_one_find_another_ext_blocked()
     unittest.main()

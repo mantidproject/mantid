@@ -52,10 +52,10 @@ DECLARE_ALGORITHM(VesuvioCalculateMS)
 
 /// Constructor
 VesuvioCalculateMS::VesuvioCalculateMS()
-    : Algorithm(), m_acrossIdx(0), m_upIdx(1), m_beamIdx(3), m_beamDir(), m_srcR2(0.0), m_halfSampleHeight(0.0),
-      m_halfSampleWidth(0.0), m_halfSampleThick(0.0), m_sampleShape(nullptr), m_sampleProps(nullptr), m_detHeight(-1.0),
-      m_detWidth(-1.0), m_detThick(-1.0), m_tmin(-1.0), m_tmax(-1.0), m_delt(-1.0), m_foilRes(-1.0), m_nscatters(0),
-      m_nruns(0), m_nevents(0), m_progress(nullptr), m_inputWS() {}
+    : Algorithm(), m_randgen(nullptr), m_acrossIdx(0), m_upIdx(1), m_beamIdx(3), m_beamDir(), m_srcR2(0.0),
+      m_halfSampleHeight(0.0), m_halfSampleWidth(0.0), m_halfSampleThick(0.0), m_sampleShape(nullptr),
+      m_sampleProps(nullptr), m_detHeight(-1.0), m_detWidth(-1.0), m_detThick(-1.0), m_tmin(-1.0), m_tmax(-1.0),
+      m_delt(-1.0), m_foilRes(-1.0), m_nscatters(0), m_nruns(0), m_nevents(0), m_progress(nullptr), m_inputWS() {}
 
 /**
  * Initialize the algorithm's properties.
@@ -120,18 +120,17 @@ void VesuvioCalculateMS::exec() {
   MatrixWorkspace_sptr totalsc = WorkspaceFactory::Instance().create(m_inputWS);
   MatrixWorkspace_sptr multsc = WorkspaceFactory::Instance().create(m_inputWS);
 
+  // Initialize random number generator
+  m_randgen = std::make_unique<CurveFitting::MSVesuvioHelper::RandomVariateGenerator>(getProperty("Seed"));
+
   // Setup progress
   const size_t nhist = m_inputWS->getNumberHistograms();
   m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nhist * m_nruns * 2);
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
-
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
-  for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+  for (size_t i = 0; i < nhist; ++i) {
 
     // set common X-values
     totalsc->setSharedX(i, m_inputWS->sharedX(i));
-
     multsc->setSharedX(i, m_inputWS->sharedX(i));
 
     // Final detector position
@@ -142,16 +141,10 @@ void VesuvioCalculateMS::exec() {
       continue;
     }
 
-    // Initialize random number generator
-    const int seed = getProperty("Seed");
-    CurveFitting::MSVesuvioHelper::RandomVariateGenerator rng(seed + int(i));
-
     // the output spectrum objects have references to where the data will be
     // stored
-    calculateMS(rng, i, totalsc->getSpectrum(i), multsc->getSpectrum(i));
-    PARALLEL_END_INTERUPT_REGION
+    calculateMS(i, totalsc->getSpectrum(i), multsc->getSpectrum(i));
   }
-  PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("TotalScatteringWS", totalsc);
   setProperty("MultipleScatteringWS", multsc);
@@ -280,15 +273,13 @@ void VesuvioCalculateMS::cacheInputs() {
 /**
  * Calculate the total scattering and contributions from higher-order scattering
  * for given spectrum
- * @param rng A reference to a PseudoRandomNumberGenerator
  * @param wsIndex The index on the input workspace for the chosen spectrum
  * @param totalsc A non-const reference to the spectrum that will contain the
  * total scattering calculation
  * @param multsc A non-const reference to the spectrum that will contain the
  * multiple scattering contribution
  */
-void VesuvioCalculateMS::calculateMS(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng, const size_t wsIndex,
-                                     API::ISpectrum &totalsc, API::ISpectrum &multsc) const {
+void VesuvioCalculateMS::calculateMS(const size_t wsIndex, API::ISpectrum &totalsc, API::ISpectrum &multsc) const {
   // Detector information
   DetectorParams detpar = ConvertToYSpace::getDetectorParameters(m_inputWS, wsIndex);
   detpar.t0 *= 1e6; // t0 in microseconds here
@@ -299,7 +290,7 @@ void VesuvioCalculateMS::calculateMS(CurveFitting::MSVesuvioHelper::RandomVariat
   for (size_t i = 0; i < m_nruns; ++i) {
     m_progress->report("MS calculation: idx=" + std::to_string(wsIndex) + ", run=" + std::to_string(i));
 
-    simulate(rng, detpar, respar, accumulator.newSimulation(m_nscatters, m_inputWS->blocksize()));
+    simulate(detpar, respar, accumulator.newSimulation(m_nscatters, m_inputWS->blocksize()));
 
     m_progress->report("MS calculation: idx=" + std::to_string(wsIndex) + ", run=" + std::to_string(i));
   }
@@ -307,7 +298,6 @@ void VesuvioCalculateMS::calculateMS(CurveFitting::MSVesuvioHelper::RandomVariat
   // Average over all runs and assign to output workspaces
   CurveFitting::MSVesuvioHelper::SimulationWithErrors avgCounts = accumulator.average();
   avgCounts.normalise();
-
   assignToOutput(avgCounts, totalsc, multsc);
 }
 
@@ -315,17 +305,15 @@ void VesuvioCalculateMS::calculateMS(CurveFitting::MSVesuvioHelper::RandomVariat
  * Perform a single simulation of a given number of events for up to a maximum
  * number of
  * scatterings on a chosen detector
- * @param rng A reference to a PseudoRandomNumberGenerator
  * @param detpar Detector information describing the final detector position
  * @param respar Resolution information on the intrument as a whole
  * @param simulCounts Simulation object used to storing the calculated number of
  * counts
  */
-void VesuvioCalculateMS::simulate(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
-                                  const DetectorParams &detpar, const ResolutionParams &respar,
+void VesuvioCalculateMS::simulate(const DetectorParams &detpar, const ResolutionParams &respar,
                                   CurveFitting::MSVesuvioHelper::Simulation &simulCounts) const {
   for (size_t i = 0; i < m_nevents; ++i) {
-    calculateCounts(rng, detpar, respar, simulCounts);
+    calculateCounts(detpar, respar, simulCounts);
   }
 }
 
@@ -364,19 +352,17 @@ void VesuvioCalculateMS::assignToOutput(const CurveFitting::MSVesuvioHelper::Sim
 }
 
 /**
- * @param rng A reference to a PseudoRandomNumberGenerator
  * @param detpar Detector information describing the final detector position
  * @param respar Resolution information on the intrument as a whole
  * @param simulation [Output] Store the calculated counts here
  * @return The sum of the weights for all scatters
  */
-double VesuvioCalculateMS::calculateCounts(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
-                                           const DetectorParams &detpar, const ResolutionParams &respar,
+double VesuvioCalculateMS::calculateCounts(const DetectorParams &detpar, const ResolutionParams &respar,
                                            CurveFitting::MSVesuvioHelper::Simulation &simulation) const {
   double weightSum(0.0);
 
   // moderator coord in lab frame
-  V3D srcPos = generateSrcPos(rng, detpar.l1);
+  V3D srcPos = generateSrcPos(detpar.l1);
   if (fabs(srcPos[m_acrossIdx]) > m_halfSampleWidth || fabs(srcPos[m_upIdx]) > m_halfSampleHeight) {
     return 0.0; // misses sample
   }
@@ -389,8 +375,8 @@ double VesuvioCalculateMS::calculateCounts(CurveFitting::MSVesuvioHelper::Random
 
   const double vel2 = sqrt(detpar.efixed / MASS_TO_MEV);
   const double t2 = detpar.l2 / vel2;
-  en1[0] = generateE0(rng, detpar.l1, t2, weights[0]);
-  tofs[0] = generateTOF(rng, en1[0], respar.dtof,
+  en1[0] = generateE0(detpar.l1, t2, weights[0]);
+  tofs[0] = generateTOF(en1[0], respar.dtof,
                         respar.dl1); // correction for resolution in l1
 
   // Neutron path
@@ -399,7 +385,7 @@ double VesuvioCalculateMS::calculateCounts(CurveFitting::MSVesuvioHelper::Random
   V3D startPos(srcPos);
   neutronDirs[0] = m_beamDir;
 
-  generateScatter(rng, startPos, neutronDirs[0], weights[0], scatterPts[0]);
+  generateScatter(startPos, neutronDirs[0], weights[0], scatterPts[0]);
   double distFromStart = startPos.distance(scatterPts[0]);
   // Compute TOF for first scatter event
   const double vel0 = sqrt(en1[0] / MASS_TO_MEV);
@@ -417,13 +403,13 @@ double VesuvioCalculateMS::calculateCounts(CurveFitting::MSVesuvioHelper::Random
     V3D &newDir = neutronDirs[i];
     size_t ntries(0);
     do {
-      const double randth = acos(2.0 * rng.flat() - 1.0);
-      const double randphi = 2.0 * M_PI * rng.flat();
+      const double randth = acos(2.0 * m_randgen->flat() - 1.0);
+      const double randphi = 2.0 * M_PI * m_randgen->flat();
       newDir.azimuth_polar_SNS(1.0, randphi, randth);
 
       // Update weight
       const double wgt = weights[i];
-      if (generateScatter(rng, prevSc, newDir, weights[i], curSc))
+      if (generateScatter(prevSc, newDir, weights[i], curSc))
         break;
       else {
         weights[i] = wgt; // put it back to what it was
@@ -438,9 +424,7 @@ double VesuvioCalculateMS::calculateCounts(CurveFitting::MSVesuvioHelper::Random
 
     const double scang = newDir.angle(oldDir);
     auto e1range = calculateE1Range(scang, en1[i - 1]);
-
-    en1[i] = e1range.first + rng.flat() * (e1range.second - e1range.first);
-
+    en1[i] = e1range.first + m_randgen->flat() * (e1range.second - e1range.first);
     const double d2sig = partialDiffXSec(en1[i - 1], en1[i], scang);
     double weight = d2sig * 4.0 * M_PI * (e1range.second - e1range.first) / m_sampleProps->totalxsec;
     // accumulate total weight
@@ -456,14 +440,12 @@ double VesuvioCalculateMS::calculateCounts(CurveFitting::MSVesuvioHelper::Random
   const auto &inX = m_inputWS->x(0);
   for (size_t i = 0; i < m_nscatters; ++i) {
     double scang(0.0), distToExit(0.0);
-
-    V3D detPos = generateDetectorPos(rng, detpar.pos, en1[i], scatterPts[i], neutronDirs[i], scang, distToExit);
-
+    V3D detPos = generateDetectorPos(detpar.pos, en1[i], scatterPts[i], neutronDirs[i], scang, distToExit);
     // Weight by probability neutron leaves sample
     double &curWgt = weights[i];
     curWgt *= exp(-m_sampleProps->mu * distToExit);
     // Weight by cross-section for the final energy
-    const double efinal = generateE1(rng, detpar.theta, detpar.efixed, m_foilRes);
+    const double efinal = generateE1(detpar.theta, detpar.efixed, m_foilRes);
     curWgt *= partialDiffXSec(en1[i], efinal, scang) / m_sampleProps->totalxsec;
     // final TOF
     const double veli = sqrt(efinal / MASS_TO_MEV);
@@ -486,16 +468,14 @@ double VesuvioCalculateMS::calculateCounts(CurveFitting::MSVesuvioHelper::Random
 /**
  * Sample from the moderator assuming it can be seen
  * as a cylindrical ring with inner and outer radius
- * @param rng A reference to a PseudoRandomNumberGenerator
  * @param l1 Src-sample distance (m)
  * @returns Position on the moderator of the generated point
  */
-V3D VesuvioCalculateMS::generateSrcPos(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
-                                       const double l1) const {
+V3D VesuvioCalculateMS::generateSrcPos(const double l1) const {
   double radius(-1.0), widthPos(0.0), heightPos(0.0);
   do {
-    widthPos = -m_srcR2 + 2.0 * m_srcR2 * rng.flat();
-    heightPos = -m_srcR2 + 2.0 * m_srcR2 * rng.flat();
+    widthPos = -m_srcR2 + 2.0 * m_srcR2 * m_randgen->flat();
+    heightPos = -m_srcR2 + 2.0 * m_srcR2 * m_randgen->flat();
     using std::sqrt;
     radius = sqrt(widthPos * widthPos + heightPos * heightPos);
   } while (radius > m_srcR2);
@@ -504,21 +484,20 @@ V3D VesuvioCalculateMS::generateSrcPos(CurveFitting::MSVesuvioHelper::RandomVari
   srcPos[m_acrossIdx] = widthPos;
   srcPos[m_upIdx] = heightPos;
   srcPos[m_beamIdx] = -l1;
+
   return srcPos;
 }
 
 /**
  * Generate an incident energy based on a randomly-selected TOF value
  * It is assigned a weight = (2.0*E0/(T-t2))/E0^0.9.
- * @param rng A reference to a PseudoRandomNumberGenerator
  * @param l1 Distance from src to sample (metres)
  * @param t2 Nominal time from sample to detector (seconds)
  * @param weight [Out] Weight factor to modify for the generated energy value
  * @return
  */
-double VesuvioCalculateMS::generateE0(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng, const double l1,
-                                      const double t2, double &weight) const {
-  const double tof = m_tmin + (m_tmax - m_tmin) * rng.flat();
+double VesuvioCalculateMS::generateE0(const double l1, const double t2, double &weight) const {
+  const double tof = m_tmin + (m_tmax - m_tmin) * m_randgen->flat();
   const double t1 = (tof - t2);
   const double vel0 = l1 / t1;
   const double en0 = MASS_TO_MEV * vel0 * vel0;
@@ -533,23 +512,21 @@ double VesuvioCalculateMS::generateE0(CurveFitting::MSVesuvioHelper::RandomVaria
  * Generate an initial tof from this distribution:
  * 1-(0.5*X**2/T0**2+X/T0+1)*EXP(-X/T0), where x is the time and t0
  * is the src-sample time.
- * @param rng A reference to a PseudoRandomNumberGenerator
  * @param dtof Error in time resolution (us)
  * @param en0 Value of the incident energy
  * @param dl1 S.d of moderator to sample distance
  * @return tof Guass TOF modified for asymmetric pulse
  */
-double VesuvioCalculateMS::generateTOF(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng, const double en0,
-                                       const double dtof, const double dl1) const {
+double VesuvioCalculateMS::generateTOF(const double en0, const double dtof, const double dl1) const {
   const double vel1 = sqrt(en0 / MASS_TO_MEV);
   const double dt1 = (dl1 / vel1) * 1e6;
   const double xmin(0.0), xmax(15.0 * dt1);
   double dx = 0.5 * (xmax - xmin);
   // Generate a random y position in th distribution
-  const double yv = rng.flat();
+  const double yv = m_randgen->flat();
 
   double xt(xmin);
-  double tof = rng.gaussian(0.0, dtof);
+  double tof = m_randgen->gaussian(0.0, dtof);
   while (true) {
     xt += dx;
     // Y=1-(0.5*X**2/T0**2+X/T0+1)*EXP(-X/T0)
@@ -570,7 +547,6 @@ double VesuvioCalculateMS::generateTOF(CurveFitting::MSVesuvioHelper::RandomVari
 /**
  * Generate a scatter event and update the weight according to the
  * amount the beam would be attenuted by the sample
- * @param rng A reference to a PseudoRandomNumberGenerator
  * @param startPos Starting position
  * @param direc Direction of travel for the neutron
  * @param weight [InOut] Multiply the incoming weight by the attenuation
@@ -578,8 +554,7 @@ double VesuvioCalculateMS::generateTOF(CurveFitting::MSVesuvioHelper::RandomVari
  * @param scatterPt [Out] Generated scattering point
  * @return True if the scatter event was generated, false otherwise
  */
-bool VesuvioCalculateMS::generateScatter(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
-                                         const Kernel::V3D &startPos, const Kernel::V3D &direc, double &weight,
+bool VesuvioCalculateMS::generateScatter(const Kernel::V3D &startPos, const Kernel::V3D &direc, double &weight,
                                          V3D &scatterPt) const {
   Track scatterTrack(startPos, direc);
   if (m_sampleShape->interceptSurface(scatterTrack) != 1) {
@@ -591,7 +566,7 @@ bool VesuvioCalculateMS::generateScatter(CurveFitting::MSVesuvioHelper::RandomVa
   const double scatterProb = 1.0 - exp(-m_sampleProps->mu * totalObjectDist);
   // Select a random point on the track that is the actual scatter point
   // from the scattering probability distribution
-  const double dist = -log(1.0 - rng.flat() * scatterProb) / m_sampleProps->mu;
+  const double dist = -log(1.0 - m_randgen->flat() * scatterProb) / m_sampleProps->mu;
   const double fraction = dist / totalObjectDist;
   // Scatter point is then entry point + fraction of width in each direction
   scatterPt = link->entryPoint;
@@ -675,7 +650,6 @@ double VesuvioCalculateMS::partialDiffXSec(const double en0, const double en1, c
 
 /**
  * Generate a random position within the final detector in the lab frame
- * @param rng A reference to a PseudoRandomNumberGenerator
  * @param nominalPos The poisiton of the centre point of the detector
  * @param energy The final energy of the neutron
  * @param scatterPt The position of the scatter event that lead to this
@@ -688,8 +662,7 @@ double VesuvioCalculateMS::partialDiffXSec(const double en0, const double en1, c
  * scatter to exit
  * @return A new position in the detector
  */
-V3D VesuvioCalculateMS::generateDetectorPos(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
-                                            const V3D &nominalPos, const double energy, const V3D &scatterPt,
+V3D VesuvioCalculateMS::generateDetectorPos(const V3D &nominalPos, const double energy, const V3D &scatterPt,
                                             const V3D &direcBeforeSc, double &scang, double &distToExit) const {
   // Inverse attenuation length (m-1) for vesuvio det.
   const double mu = 7430.0 / sqrt(energy);
@@ -703,10 +676,10 @@ V3D VesuvioCalculateMS::generateDetectorPos(CurveFitting::MSVesuvioHelper::Rando
     // Beam direction by moving to front of "box"define by detector dimensions
     // and then
     // computing expected distance travelled based on probability
-    detPos[m_beamIdx] = (nominalPos[m_beamIdx] - 0.5 * m_detThick) - (log(1.0 - rng.flat() * ps) / mu);
+    detPos[m_beamIdx] = (nominalPos[m_beamIdx] - 0.5 * m_detThick) - (log(1.0 - m_randgen->flat() * ps) / mu);
     // perturb away from nominal position
-    detPos[m_acrossIdx] = nominalPos[m_acrossIdx] + (rng.flat() - 0.5) * m_detWidth;
-    detPos[m_upIdx] = nominalPos[m_upIdx] + (rng.flat() - 0.5) * m_detHeight;
+    detPos[m_acrossIdx] = nominalPos[m_acrossIdx] + (m_randgen->flat() - 0.5) * m_detWidth;
+    detPos[m_upIdx] = nominalPos[m_upIdx] + (m_randgen->flat() - 0.5) * m_detHeight;
 
     // Distance to exit the sample for this order
     const V3D scToDet = normalize(detPos - scatterPt);
@@ -732,18 +705,16 @@ V3D VesuvioCalculateMS::generateDetectorPos(CurveFitting::MSVesuvioHelper::Rando
 
 /**
  * Generate the final energy of the analyser
- * @param rng A reference to a PseudoRandomNumberGenerator
  * @param angle Detector angle from sample
  * @param e1nom The nominal final energy of the analyzer
  * @param e1res The resoltion in energy of the analyser
  * @return A value for the final energy of the neutron
  */
-double VesuvioCalculateMS::generateE1(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng, const double angle,
-                                      const double e1nom, const double e1res) const {
+double VesuvioCalculateMS::generateE1(const double angle, const double e1nom, const double e1res) const {
   if (e1res == 0.0)
     return e1nom;
 
-  const double randv = rng.flat();
+  const double randv = m_randgen->flat();
   if (e1nom < 5000.0) {
     if (angle > 90.0)
       return CurveFitting::MSVesuvioHelper::finalEnergyAuDD(randv);

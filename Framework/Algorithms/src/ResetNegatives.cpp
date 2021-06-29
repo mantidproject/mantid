@@ -48,7 +48,7 @@ void ResetNegatives::exec() {
   MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
   // get the minimum for each spectrum
-  auto alg = createChildAlgorithm("Min", 0., .1);
+  IAlgorithm_sptr alg = this->createChildAlgorithm("Min", 0., .1);
   alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
   alg->executeAsChildAlg();
   MatrixWorkspace_const_sptr minWS = alg->getProperty("OutputWorkspace");
@@ -68,7 +68,7 @@ void ResetNegatives::exec() {
     g_log.information() << "No values are negative. Copying InputWorkspace to "
                            "OutputWorkspace\n";
     if (inputWS != outputWS) {
-      auto clone = createChildAlgorithm("CloneWorkspace", .1, 1.);
+      IAlgorithm_sptr clone = this->createChildAlgorithm("CloneWorkspace", .1, 1.);
       clone->setProperty<Workspace_sptr>("InputWorkspace", inputWS);
       clone->executeAsChildAlg();
 

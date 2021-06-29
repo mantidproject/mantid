@@ -12,14 +12,15 @@ mantid.py36compat
 Provides a compatibility layer to backport features found in later
 Python versions (3.7 onwards) to Ubuntu 18.04 / RHEL 7
 which are both on Python 3.6.
+
 """
 import sys
 
 __requires_compat = False if sys.version_info[0:2] > (3, 6) else True
 
 if __requires_compat:
-    from ._dataclasses.dataclasses import dataclass, field  # noqa: E402,F401
+    from ._dataclasses.dataclasses import dataclass, field
 else:
-    from dataclasses import dataclass, field  # noqa: E402,F401
+    from dataclasses import dataclass, field
 
 __all__ = "dataclass, field"

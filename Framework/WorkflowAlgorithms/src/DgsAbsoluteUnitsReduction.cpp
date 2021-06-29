@@ -91,7 +91,7 @@ void DgsAbsoluteUnitsReduction::exec() {
   // Process absolute units detector vanadium if necessary
   MatrixWorkspace_sptr absIdetVanWS;
   if (absDetVanWS) {
-    auto detVan = createChildAlgorithm("DgsProcessDetectorVanadium");
+    IAlgorithm_sptr detVan = this->createChildAlgorithm("DgsProcessDetectorVanadium");
     detVan->setProperty("InputWorkspace", absDetVanWS);
     detVan->setProperty("InputMonitorWorkspace", absDetVanMonWS);
     detVan->setProperty("ReductionProperties", reductionManagerName);
@@ -105,7 +105,7 @@ void DgsAbsoluteUnitsReduction::exec() {
   }
 
   const std::string absWsName = absSampleWS->getName() + "_absunits";
-  auto etConv = createChildAlgorithm("DgsConvertToEnergyTransfer");
+  IAlgorithm_sptr etConv = this->createChildAlgorithm("DgsConvertToEnergyTransfer");
   etConv->setProperty("InputWorkspace", absSampleWS);
   etConv->setProperty("InputMonitorWorkspace", absSampleMonWS);
   etConv->setProperty("OutputWorkspace", absWsName);
@@ -137,14 +137,14 @@ void DgsAbsoluteUnitsReduction::exec() {
 
   std::vector<double> params{eMin, eMax - eMin, eMax};
 
-  auto rebin = createChildAlgorithm("Rebin");
+  IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", outputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
   rebin->setProperty("Params", params);
   rebin->executeAsChildAlg();
   outputWS = rebin->getProperty("OutputWorkspace");
 
-  auto cToMWs = createChildAlgorithm("ConvertToMatrixWorkspace");
+  IAlgorithm_sptr cToMWs = this->createChildAlgorithm("ConvertToMatrixWorkspace");
   cToMWs->setProperty("InputWorkspace", outputWS);
   cToMWs->setProperty("OutputWorkspace", outputWS);
   outputWS = cToMWs->getProperty("OutputWorkspace");
@@ -158,7 +158,7 @@ void DgsAbsoluteUnitsReduction::exec() {
   const double vanHi = getDblPropOrParam("AbsUnitsMedianTestHigh", reductionManager, "monovan_hi_frac", outputWS);
   const double vanSigma = getDblPropOrParam("AbsUnitsErrorBarCriterion", reductionManager, "diag_samp_sig", outputWS);
 
-  auto diag = createChildAlgorithm("DetectorDiagnostic");
+  IAlgorithm_sptr diag = this->createChildAlgorithm("DetectorDiagnostic");
   diag->setProperty("InputWorkspace", outputWS);
   diag->setProperty("OutputWorkspace", "absUnitsDiagMask");
   diag->setProperty("LowThreshold", tiny);
@@ -171,18 +171,18 @@ void DgsAbsoluteUnitsReduction::exec() {
   diag->executeAsChildAlg();
   MatrixWorkspace_sptr absMaskWS = diag->getProperty("OutputWorkspace");
 
-  auto mask = createChildAlgorithm("MaskDetectors");
+  IAlgorithm_sptr mask = this->createChildAlgorithm("MaskDetectors");
   mask->setProperty("Workspace", outputWS);
   mask->setProperty("MaskedWorkspace", absMaskWS);
   mask->executeAsChildAlg();
   outputWS = mask->getProperty("Workspace");
 
-  auto cFrmDist = createChildAlgorithm("ConvertFromDistribution");
+  IAlgorithm_sptr cFrmDist = this->createChildAlgorithm("ConvertFromDistribution");
   cFrmDist->setProperty("Workspace", outputWS);
   cFrmDist->executeAsChildAlg();
   outputWS = cFrmDist->getProperty("Workspace");
 
-  auto wMean = createChildAlgorithm("WeightedMeanOfWorkspace");
+  IAlgorithm_sptr wMean = this->createChildAlgorithm("WeightedMeanOfWorkspace");
   wMean->setProperty("InputWorkspace", outputWS);
   wMean->setProperty("OutputWorkspace", outputWS);
   wMean->executeAsChildAlg();

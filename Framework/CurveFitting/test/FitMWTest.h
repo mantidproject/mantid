@@ -148,7 +148,7 @@ void doTestExecPointData(const API::MatrixWorkspace_sptr &ws2, bool performance 
   //--------------------------------------------------//
   if (!performance) {
     // Fit fit1;
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     Mantid::API::IAlgorithm &fit1 = *alg;
     fit1.initialize();
 

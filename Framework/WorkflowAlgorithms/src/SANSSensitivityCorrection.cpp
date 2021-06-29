@@ -151,7 +151,7 @@ void SANSSensitivityCorrection::exec() {
     // workspace...
     if (!floodWS && fileCheck(fileName)) {
       g_log.debug() << "SANSSensitivityCorrection :: Loading sensitivity file: " << fileName << "\n";
-      auto loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
+      IAlgorithm_sptr loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
       loadAlg->executeAsChildAlg();
       Workspace_sptr floodWS_ws = loadAlg->getProperty("OutputWorkspace");
@@ -185,7 +185,7 @@ void SANSSensitivityCorrection::exec() {
       const std::string rawFloodWSName = "__flood_data_" + path.getBaseName();
       MatrixWorkspace_sptr rawFloodWS;
       if (!reductionManager->existsProperty("LoadAlgorithm")) {
-        auto loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
+        IAlgorithm_sptr loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
         loadAlg->setProperty("Filename", fileName);
         if (!isEmpty(center_x) && loadAlg->existsProperty("BeamCenterX"))
           loadAlg->setProperty("BeamCenterX", center_x);
@@ -201,7 +201,7 @@ void SANSSensitivityCorrection::exec() {
         // new proxy and ensure that we don't overwrite existing properties
         IAlgorithm_sptr loadAlg0 = reductionManager->getProperty("LoadAlgorithm");
         const std::string loadString = loadAlg0->toString();
-        auto loadAlg = Algorithm::fromString(loadString);
+        IAlgorithm_sptr loadAlg = Algorithm::fromString(loadString);
         loadAlg->setChild(true);
         loadAlg->setProperty("Filename", fileName);
         loadAlg->setPropertyValue("OutputWorkspace", rawFloodWSName);
@@ -291,7 +291,7 @@ void SANSSensitivityCorrection::exec() {
         if (!isEmpty(floodTransmissionValue)) {
           g_log.debug() << "SANSSensitivityCorrection :: Applying transmission "
                            "to flood field\n";
-          auto transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
+          IAlgorithm_sptr transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
           transAlg->setProperty("InputWorkspace", rawFloodWS);
           transAlg->setProperty("OutputWorkspace", rawFloodWS);
           transAlg->setProperty("TransmissionValue", floodTransmissionValue);
@@ -303,7 +303,7 @@ void SANSSensitivityCorrection::exec() {
         }
 
         // Calculate detector sensitivity
-        auto effAlg = createChildAlgorithm("CalculateEfficiency", -1, -1, true, 1);
+        IAlgorithm_sptr effAlg = createChildAlgorithm("CalculateEfficiency", -1, -1, true, 1);
         effAlg->setProperty("InputWorkspace", rawFloodWS);
 
         const double minEff = getProperty("MinEfficiency");
@@ -351,14 +351,14 @@ void SANSSensitivityCorrection::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   if (inputWS) {
     // Divide sample data by detector efficiency
-    auto divideAlg = createChildAlgorithm("Divide", 0.6, 0.7);
+    IAlgorithm_sptr divideAlg = createChildAlgorithm("Divide", 0.6, 0.7);
     divideAlg->setProperty("LHSWorkspace", inputWS);
     divideAlg->setProperty("RHSWorkspace", floodWS);
     divideAlg->executeAsChildAlg();
     MatrixWorkspace_sptr outputWS = divideAlg->getProperty("OutputWorkspace");
 
     // Copy over the efficiency's masked pixels to the reduced workspace
-    auto maskAlg = createChildAlgorithm("MaskDetectors", 0.75, 0.85);
+    IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors", 0.75, 0.85);
     maskAlg->setProperty("Workspace", outputWS);
     maskAlg->setProperty("MaskedWorkspace", floodWS);
     maskAlg->executeAsChildAlg();

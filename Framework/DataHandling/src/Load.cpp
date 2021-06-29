@@ -121,7 +121,7 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
     std::vector<std::string> fileNames = flattenVecOfVec(getProperty("Filename"));
     // If it's a single file load, then it's fine to change loader.
     if (fileNames.size() == 1) {
-      auto loader = getFileLoader(getPropertyValue(name));
+      IAlgorithm_sptr loader = getFileLoader(getPropertyValue(name));
       assert(loader); // (getFileLoader should throw if no loader is found.)
       declareLoaderProperties(loader);
     }
@@ -131,7 +131,7 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
     // class user (for example
     // "LoadLogFiles") are potentially ambiguous.
     else if (fileNames.size() > 1) {
-      auto loader = getFileLoader(fileNames[0]);
+      IAlgorithm_sptr loader = getFileLoader(fileNames[0]);
 
       // If the first file has a loader ...
       if (loader) {
@@ -329,7 +329,7 @@ void Load::exec() {
   std::vector<std::vector<std::string>> fileNames = getProperty("Filename");
 
   // Test for loading as a single file
-  auto loader = getFileLoader(fileNames[0][0]);
+  IAlgorithm_sptr loader = getFileLoader(fileNames[0][0]);
   auto ifl = std::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(loader);
   auto iflNexus = std::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(loader);
 
@@ -476,7 +476,7 @@ API::IAlgorithm_sptr Load::createLoader(const double startProgress, const double
                                         const bool logging) const {
   std::string name = getPropertyValue("LoaderName");
   int version = getProperty("LoaderVersion");
-  auto loader = API::AlgorithmManager::Instance().createUnmanaged(name, version);
+  API::IAlgorithm_sptr loader = API::AlgorithmManager::Instance().createUnmanaged(name, version);
   loader->initialize();
   if (!loader) {
     throw std::runtime_error("Cannot create loader for \"" + getPropertyValue("Filename") + "\"");
@@ -492,7 +492,7 @@ API::IAlgorithm_sptr Load::createLoader(const double startProgress, const double
  * @param endProgress :: The end progress fraction
  * @param logging:: If true, enable logging
  */
-void Load::setUpLoader(const API::IAlgorithm_sptr &loader, const double startProgress, const double endProgress,
+void Load::setUpLoader(API::IAlgorithm_sptr &loader, const double startProgress, const double endProgress,
                        const bool logging) const {
   // Set as a child so that we are in control of output storage
   loader->setChild(true);
@@ -627,7 +627,7 @@ void Load::cancel() {
  * @returns a pointer to the loaded workspace
  */
 API::Workspace_sptr Load::loadFileToWs(const std::string &fileName, const std::string &wsName) {
-  auto loadAlg = createChildAlgorithm("Load", 1);
+  Mantid::API::IAlgorithm_sptr loadAlg = createChildAlgorithm("Load", 1);
 
   // Get the list properties for the concrete loader load algorithm
   const std::vector<Kernel::Property *> &props = getProperties();
@@ -685,14 +685,14 @@ API::Workspace_sptr Load::plusWs(Workspace_sptr ws1, const Workspace_sptr &ws2) 
       Workspace_sptr group1ChildWs = group1->getItem(*group1ChildWsName);
       Workspace_sptr group2ChildWs = group2->getItem(*group2ChildWsName);
 
-      auto plusAlg = createChildAlgorithm("Plus", 1);
+      Mantid::API::IAlgorithm_sptr plusAlg = createChildAlgorithm("Plus", 1);
       plusAlg->setProperty<Workspace_sptr>("LHSWorkspace", group1ChildWs);
       plusAlg->setProperty<Workspace_sptr>("RHSWorkspace", group2ChildWs);
       plusAlg->setProperty<Workspace_sptr>("OutputWorkspace", group1ChildWs);
       plusAlg->executeAsChildAlg();
     }
   } else if (!group1 && !group2) {
-    auto plusAlg = createChildAlgorithm("Plus", 1);
+    Mantid::API::IAlgorithm_sptr plusAlg = createChildAlgorithm("Plus", 1);
     plusAlg->setProperty<Workspace_sptr>("LHSWorkspace", ws1);
     plusAlg->setProperty<Workspace_sptr>("RHSWorkspace", ws2);
     plusAlg->setProperty<Workspace_sptr>("OutputWorkspace", ws1);
