@@ -201,7 +201,8 @@ void PDCalibration::init() {
                   "Previous calibration table. This overrides results from previous file.");
 
   // properties about peak positions to fit
-  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian", "Lorentzian", "PseudoVoigt"};
+  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian", "Lorentzian", "PseudoVoigt",
+                                     "IkedaCarpenterPV"};
   declareProperty("PeakFunction", "Gaussian", std::make_shared<StringListValidator>(peaktypes));
   vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear", std::make_shared<StringListValidator>(bkgdtypes), "Type of Background.");
