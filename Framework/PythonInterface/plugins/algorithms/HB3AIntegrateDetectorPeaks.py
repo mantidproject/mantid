@@ -7,8 +7,8 @@
 from mantid.api import (AlgorithmFactory, IPeaksWorkspaceProperty,
                         PythonAlgorithm, PropertyMode, ADSValidator,
                         WorkspaceGroup)
-from mantid.kernel import (Direction, IntArrayProperty, IntBoundedValidator,
-                           Property, IntArrayLengthValidator, StringArrayProperty,
+from mantid.kernel import (Direction, EnabledWhenProperty, IntArrayProperty, IntBoundedValidator,
+                           Property, PropertyCriterion, IntArrayLengthValidator, StringArrayProperty,
                            StringListValidator)
 from mantid.simpleapi import (mtd, IntegrateMDHistoWorkspace,
                               CreatePeaksWorkspace, DeleteWorkspace,
@@ -46,10 +46,13 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
         self.declareProperty("NumBackgroundPts", direction=Direction.Input, defaultValue=3,
                              validator=IntBoundedValidator(lower=0),
                              doc="Number of background points from beginning and end of scan to use for background estimation")
+        self.setPropertySettings("NumBackgroundPts", EnabledWhenProperty("Method", PropertyCriterion.IsEqualTo, "Counts"))
 
         self.declareProperty("N", direction=Direction.Input, defaultValue=2,
                              validator=IntBoundedValidator(lower=0),
                              doc="Set of measurements around motor position (+/- N/2*FWHM)")
+        self.setPropertySettings("N",
+                                 EnabledWhenProperty("Method", PropertyCriterion.IsEqualTo, "CountsWithFitting"))
 
         self.declareProperty(IntArrayProperty("LowerLeft", [128, 128], IntArrayLengthValidator(2),
                                               direction=Direction.Input), doc="Region of interest lower-left corner, in detector pixels")
