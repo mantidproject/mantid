@@ -265,7 +265,7 @@ void SaveNXSPE::exec() {
   }
 
   // execute the algorithm to calculate the detector's parameters;
-  IAlgorithm_sptr spCalcDetPar = this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
+  auto spCalcDetPar = createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
 
   spCalcDetPar->initialize();
   spCalcDetPar->setProperty("InputWorkspace", inputWS);

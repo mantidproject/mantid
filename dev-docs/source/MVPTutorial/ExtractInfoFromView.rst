@@ -9,7 +9,6 @@ be used.
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
     from qtpy import QtWidgets, QtCore, QtGui
 
 

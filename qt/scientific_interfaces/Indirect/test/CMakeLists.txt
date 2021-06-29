@@ -4,11 +4,12 @@ set(
   ConvFitDataPresenterTest.h
   ConvFitModelTest.h
   ConvFunctionModelTest.h
+  ExternalPlotterTest.h
   FqFitDataPresenterTest.h
   FqFitModelTest.h
   IDAFunctionParameterEstimationTest.h
   IndirectDataValidationHelperTest.h
-  IndirectDataTablePresenterTest.h
+  IndirectFitDataTablePresenterTest.h
   IndirectFitAnalysisTabTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
@@ -22,7 +23,6 @@ set(
   IndirectFittingModelTest.h
   IndirectPlotOptionsModelTest.h
   IndirectPlotOptionsPresenterTest.h
-  IndirectPlotterTest.h
   IndirectSettingsModelTest.h
   IndirectSettingsPresenterTest.h
   IndirectSpectrumSelectionPresenterTest.h

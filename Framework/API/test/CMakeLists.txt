@@ -30,6 +30,7 @@ if(CXXTEST_FOUND)
                         ${JSONCPP_LIBRARIES}
                         ${NEXUS_LIBRARIES}
                         ${MUPARSER_LIBRARIES}
+                        Python::Python
                         gmock
 )
 

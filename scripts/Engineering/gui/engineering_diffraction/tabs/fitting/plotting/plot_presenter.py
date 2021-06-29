@@ -27,8 +27,8 @@ class FittingPlotPresenter(object):
         self.workspace_added_observer = GenericObserverWithArgPassing(self.add_workspace_to_plot)
         self.workspace_removed_observer = GenericObserverWithArgPassing(self.remove_workspace_from_plot)
         self.all_workspaces_removed_observer = GenericObserver(self.clear_plot)
-        self.seq_fit_started_observer = GenericObserverWithArgPassing(self.do_sequential_fit)
-        self.seq_fit_done_notifier = GenericObservable()
+        self.fit_all_started_observer = GenericObserverWithArgPassing(self.do_fit_all)
+        self.fit_all_done_notifier = GenericObservable()
 
     def add_workspace_to_plot(self, ws):
         axes = self.view.get_axes()
@@ -48,20 +48,28 @@ class FittingPlotPresenter(object):
         self.view.clear_figure()
         self.view.update_fitbrowser()
 
-    def do_sequential_fit(self, ws_list):
+    def do_fit_all(self, ws_list, do_sequential=True):
         fitprop_list = []
+        prev_fitprop = self.view.read_fitprop_from_browser()
         for ws in ws_list:
             logger.notice(f'Starting to fit workspace {ws}')
-            fitprop = self.view.read_fitprop_from_browser()
+            fitprop = deepcopy(prev_fitprop)
             # update I/O workspace name
             fitprop['properties']['Output'] = ws
             fitprop['properties']['InputWorkspace'] = ws
             # do fit
             fit_output = Fit(**fitprop['properties'])
-            fitprop['properties']['Function'] = str(fit_output.Function.fun)
-            # save setup in fitprop browser (updates browser for next iteration of loop)
-            self.view.update_browser(fit_output.OutputStatus, fitprop['properties']['Function'], ws)
-            # append a deep copy to output list
-            fitprop_list.append(deepcopy(fitprop))
+            # update results
+            fitprop['status'] = fit_output.OutputStatus
+            funcstr = str(fit_output.Function.fun)
+            fitprop['properties']['Function'] = funcstr
+            if "success" in fitprop['status'].lower() and do_sequential:
+                # update function in prev fitprop to use for next workspace
+                prev_fitprop['properties']['Function'] = funcstr
+            # update last fit in fit browser and save setup
+            self.view.update_browser(fit_output.OutputStatus, funcstr, ws)
+            # append a deep copy to output list (will be initial parameters if not successful)
+            fitprop_list.append(fitprop)
+
         logger.notice('Sequential fitting finished.')
-        self.seq_fit_done_notifier.notify_subscribers(fitprop_list)
+        self.fit_all_done_notifier.notify_subscribers(fitprop_list)

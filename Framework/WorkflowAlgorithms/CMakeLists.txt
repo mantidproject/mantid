@@ -95,7 +95,7 @@ set(TEST_PY_FILES
     EQSANSQ2DTest.py
     SANSBeamFluxCorrectionTest.py)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS

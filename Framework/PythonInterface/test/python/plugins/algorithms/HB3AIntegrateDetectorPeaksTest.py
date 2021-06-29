@@ -32,7 +32,7 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         self.assertAlmostEqual(peak0.getK(), 0, places=1)
         self.assertAlmostEqual(peak0.getL(), 6, places=1)
         self.assertAlmostEqual(peak0.getIntensity(), 961.6164, delta=1e-5)
-        self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.479567, delta=1e-5)
+        self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.479567, delta=3e-2)
         self.assertAlmostEqual(peak0.getWavelength(), 1.008)
         self.assertAlmostEqual(peak0.getAzimuthal(), -np.pi, delta=2e-5)
         self.assertAlmostEqual(peak0.getScattering(),
@@ -75,7 +75,7 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
                                delta=1e-2)
         self.assertAlmostEqual(peak0.getSigmaIntensity(),
                                10.479567 * np.sin(np.deg2rad(data.getExperimentInfo(0).run()['2theta'].value[0])),
-                               delta=1e-2)
+                               delta=2e-2)
 
         # Optimize Q vector, will change Q-sample but the integration
         # should be the same except the Lorentz correction since the
@@ -86,7 +86,7 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         peak0 = peaks.getPeak(0)
         lorentz = abs(np.cos(peak0.getAzimuthal()) * np.sin(peak0.getScattering()))
         self.assertAlmostEqual(peak0.getIntensity(), 961.6164021216964 * lorentz, delta=1e-2)
-        self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.479567046232615 * lorentz, delta=1e-2)
+        self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.479567046232615 * lorentz, delta=2e-2)
         q_sample = peak0.getQSampleFrame()
         for i in range(3):
             self.assertNotAlmostEqual(q_sample[i], expected_q_sample[i])

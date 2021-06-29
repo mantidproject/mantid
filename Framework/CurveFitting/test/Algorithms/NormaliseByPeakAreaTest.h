@@ -22,7 +22,7 @@ Mantid::API::MatrixWorkspace_sptr createTwoSpectrumWorkspace(double x0 = 50, dou
 }
 
 Mantid::API::IAlgorithm_sptr createAlgorithm() {
-  Mantid::API::IAlgorithm_sptr alg = std::make_shared<NormaliseByPeakArea>();
+  auto alg = std::make_shared<NormaliseByPeakArea>();
   alg->initialize();
   alg->setChild(true);
   alg->setPropertyValue("OutputWorkspace", "__UNUSED__");

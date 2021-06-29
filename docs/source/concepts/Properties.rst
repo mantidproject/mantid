@@ -123,6 +123,8 @@ If a property is empty
    (if there is any)
 -  in a Python API call, then the property's value is left empty.
 
+.. _Properties Directions:
+
 Direction
 ~~~~~~~~~
 

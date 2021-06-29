@@ -161,7 +161,7 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
   }
 
   // Call FlatPlateAbsorption as a Child Algorithm
-  IAlgorithm_sptr childAlg = createChildAlgorithm("FlatPlateAbsorption", 0.0, 0.9);
+  auto childAlg = createChildAlgorithm("FlatPlateAbsorption", 0.0, 0.9);
   // Pass through all the properties
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_inputWS);
   childAlg->setProperty<double>("AttenuationXSection", sigma_atten);

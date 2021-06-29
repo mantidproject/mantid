@@ -22,6 +22,8 @@ Improvements
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` minor interface update that allows fine control of bank rotation calibration.
 - :ref:`PDCalibration <algm-PDCalibration-v1>` has a new option to use the :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` peak function.
 - :ref:`SNAPReduce <algm-SNAPReduce-v1>` permits saving selected property names and values to file, to aid autoreduction.
+- Add a custom ttmode to the PEARL powder diffraction scripts for running with a custom grouping file
+- improve performance of :ref:`ApplyDiffCal <algm-ApplyDiffCal>` on large instruments eg WISH. This in turn improves the performance of :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`
 
 Bugfixes
 ########
@@ -29,6 +31,19 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+New features
+############
+- Added serial fit capability to fitting tab in EngDiff UI - this fits all loaded workspaces with same initial parameters.
+
+Improvements
+############
+- The workflows for Calibration and Focusing in the EnggDiffraction GUI and EnginX scripts have been replaced to make use of faster, better tested C++ algorithms (PDCalibration) - as a result the following algorithms have been deprecated, and will likely be removed entirely in the next release: EnggCalibrate, EnggCalibrateFull, EnggFocus, EnggVanadiumCorrections.
+
+Bugfixes
+########
+- Sequential fitting in the EngDiff UI now uses the output of the last successful fit (as opposed to the previous fit) as the initial parameters for the next fit.
+- An empty Engineering Diffraction interface is no longer saved if the user saves a project having previously had the interface open at some point in that session
+- The help button on the Engineering Diffraction interface points to the correct page, having been broken in the last release
 
 Single Crystal Diffraction
 --------------------------
