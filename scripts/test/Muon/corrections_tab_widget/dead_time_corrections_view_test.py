@@ -90,14 +90,16 @@ class DeadTimeCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
         message = "This is a test message."
         self.view.set_dead_time_info_text(message)
 
+        self.assertEqual(self.view.dead_time_stats_label.text(), "")
         self.assertEqual(self.view.dead_time_info_label.text(), message)
 
     def test_that_set_dead_time_average_and_range_will_set_the_label_to_the_average_dead_time(self):
         average = 2.0021
         limits = (1.0011, 3.0031)
-        self.view.set_dead_time_average_and_range(limits, average)
+        self.view.set_dead_time_average_and_range("84447", limits, average)
 
-        self.assertEqual(self.view.dead_time_info_label.text(), "From 1.001 to 3.003 (ave. 2.002)")
+        self.assertEqual(self.view.dead_time_stats_label.text(), "Dead Time stats for run 84447:")
+        self.assertEqual(self.view.dead_time_info_label.text(), "1.001 to 3.003 (av. 2.002)")
 
 
 if __name__ == '__main__':

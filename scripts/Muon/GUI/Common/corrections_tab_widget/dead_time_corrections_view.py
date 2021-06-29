@@ -87,12 +87,14 @@ class DeadTimeCorrectionsView(widget, ui_form):
             self.dead_time_workspace_selector.setCurrentIndex(index)
         self.dead_time_workspace_selector.blockSignals(False)
 
-    def set_dead_time_average_and_range(self, limits: tuple, average: float) -> None:
+    def set_dead_time_average_and_range(self, run_string: str, limits: tuple, average: float) -> None:
         """Sets the average dead time and its range in the info label."""
-        self.set_dead_time_info_text(f"From {limits[0]:.3f} to {limits[1]:.3f} (ave. {average:.3f})")
+        self.dead_time_stats_label.setText(f"Dead Time stats for run {run_string}:")
+        self.dead_time_info_label.setText(f"{limits[0]:.3f} to {limits[1]:.3f} (av. {average:.3f})")
 
     def set_dead_time_info_text(self, text: str) -> None:
         """Sets the text in the dead time info label."""
+        self.dead_time_stats_label.setText("")
         self.dead_time_info_label.setText(text)
 
     def populate_dead_time_workspace_selector(self, table_names: list) -> None:

@@ -111,7 +111,8 @@ class DeadTimeCorrectionsPresenter:
     def update_dead_time_info_text_in_view(self) -> None:
         """Update the dead time info label in the view."""
         if self.model.is_dead_time_source_from_data_file() or self.model.is_dead_time_source_from_workspace():
-            self.view.set_dead_time_average_and_range(self.model.dead_times_range(), self.model.dead_times_average())
+            self.view.set_dead_time_average_and_range(self._corrections_presenter.current_run_string(),
+                                                      self.model.dead_times_range(), self.model.dead_times_average())
         else:
             self.view.set_dead_time_info_text("No dead time correction")
 

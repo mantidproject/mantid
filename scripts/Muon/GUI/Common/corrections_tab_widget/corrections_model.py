@@ -38,3 +38,7 @@ class CorrectionsModel:
     def set_current_run_string(self, run_string: str) -> None:
         """Sets the currently selected run string shown in the view."""
         self._corrections_context.current_run_string = run_string if run_string != "" else None
+
+    def current_run_string(self) -> str:
+        """Returns the currently selected run string from the context."""
+        return self._corrections_context.current_run_string

@@ -85,6 +85,10 @@ class CorrectionsPresenter(QObject):
         """When the corrections have been calculated, update the displayed correction data."""
         self.dead_time_presenter.handle_corrections_complete()
 
+    def current_run_string(self) -> str:
+        """Returns the currently selected run string."""
+        return self.model.current_run_string()
+
     def warning_popup(self, message: str) -> None:
         """Displays a warning message."""
         self.view.warning_popup(message)
