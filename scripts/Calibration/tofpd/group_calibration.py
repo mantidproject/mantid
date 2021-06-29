@@ -1,10 +1,16 @@
+import sys
+import os
+import json
+import datetime
 import numpy as np
 from mantid.simpleapi import (ConvertUnits, ExtractSpectra,
-                              CloneWorkspace, Rebin,
+                              CloneWorkspace, Rebin, MaskDetectors,
                               ExtractUnmaskedSpectra, CrossCorrelate,
                               GetDetectorOffsets, ConvertDiffCal, mtd,
                               ApplyDiffCal, DiffractionFocussing,
-                              PDCalibration)
+                              PDCalibration, Load, LoadMask,
+                              LoadDiffCal, LoadDetectorsGroupingFile,
+                              SaveDiffCal)
 
 # Diamond peak positions in d-space
 DIAMOND = (0.3117,0.3257,0.3499,0.4205,0.4645,
@@ -119,7 +125,10 @@ def pdcalibration_groups(data_ws,
     ApplyDiffCal(data_ws, CalibrationWorkspace=cc_diffcal)
     ConvertUnits(data_ws, Target='dSpacing', OutputWorkspace='_tmp_data_aligned')
     DiffractionFocussing('_tmp_data_aligned', GroupingWorkspace=group_ws, OutputWorkspace='_tmp_data_aligned_focussed')
+
+    # Remove the following line after new CombineDiffCal algorithm is implemented as that will use the calibrated difc
     ApplyDiffCal('_tmp_data_aligned_focussed', ClearCalibration=True)
+
     ConvertUnits('_tmp_data_aligned_focussed', Target='TOF', OutputWorkspace='_tmp_data_aligned_focussed')
 
     PDCalibration(InputWorkspace='_tmp_data_aligned_focussed',
@@ -161,7 +170,7 @@ def pdcalibration_groups(data_ws,
 def do_group_calibration(data_ws,
                          group_ws,
                          previous_calibration=None,
-                         output_basename = "group_calibration",
+                         output_basename="group_calibration",
                          cc_kwargs={},
                          pdcal_kwargs={}):
     """This just calls cc_calibrate_group then feed that results into
@@ -190,3 +199,80 @@ def do_group_calibration(data_ws,
                                    **pdcal_kwargs)
 
     return diffcal
+
+
+def process_json(json_filename):
+    """This will read a json file, process the data and save the calibration.
+
+    Only ``Calibrant`` and ``Groups`` are required.
+
+    An example input showing every possible options is:
+
+    .. code-block:: JSON
+
+      {
+        "Calibrant": "12345",
+        "Groups": "/path/to/groups.xml",
+        "Mask": "/path/to/mask.xml",
+        "Instrument": "NOM",
+        "Date" : "2019_09_04",
+        "SampleEnvironment": "shifter",
+        "PreviousCalibration": "/path/to/cal.h5",
+        "CalDirectory": "/path/to/output_directory",
+        "CrossCorrelate": {"Step": 0.001,
+                           "DReference: 1.5,
+                           "Xmin": 1.0,
+                           "Xmax": 3.0,
+                           "MaxDSpaceShift": 0.25},
+        "PDCalibration": {"PeakPositions": [1, 2, 3],
+                          "TofBinning": (300,0.001,16666),
+                          "PeakFunction": 'Gaussian',
+                          "PeakWindow": 0.1,
+                          "PeakWidthPercent": 0.001}
+      }
+    """
+    with open(json_filename) as json_file:
+        args = json.load(json_file)
+
+    calibrant = args['Calibrant']
+    groups = args['Groups']
+    sample_env = args.get('SampleEnvironment', 'UnknownSampleEnvironment')
+    mask = args.get('Mask')
+    instrument = args.get('Instrument', 'NOM')
+    cc_kwargs = args.get('CrossCorrelate', {})
+    pdcal_kwargs = args.get('PDCalibration', {})
+    previous_calibration = args.get('PreviousCalibration')
+
+    date = str(args.get('Date', datetime.datetime.now().strftime('%Y_%m_%d')))
+    caldirectory = str(args.get('CalDirectory', os.path.abspath('.')))
+
+    calfilename = f'{caldirectory}/{instrument}_{calibrant}_{date}_{sample_env}.h5'
+    print('going to create calibration file: %s' % calfilename)
+
+    filename = f'{instrument}_{calibrant}'
+
+    ws = Load(filename)
+
+    groups = LoadDetectorsGroupingFile(groups, InputWorkspace=ws)
+
+    if mask:
+        mask = LoadMask(mask)
+        MaskDetectors(ws, MaskedWorkspace=mask)
+
+    if previous_calibration:
+        previous_calibration = LoadDiffCal(previous_calibration,
+                                           MakeGroupingWorkspace=False,
+                                           MakeMaskWorkspace=False)
+
+    diffcal = do_group_calibration(ws,
+                                   groups,
+                                   previous_calibration,
+                                   cc_kwargs=cc_kwargs,
+                                   pdcal_kwargs=pdcal_kwargs)
+
+    SaveDiffCal(diffcal, calfilename)
+
+
+if __name__ == '__main__':
+    infile = os.path.abspath(sys.argv[1])
+    process_json(infile)
