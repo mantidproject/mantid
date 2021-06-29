@@ -7,8 +7,9 @@
 from mantid.api import (AlgorithmFactory, IPeaksWorkspaceProperty,
                         PythonAlgorithm, PropertyMode, ADSValidator,
                         WorkspaceGroup)
-from mantid.kernel import (Direction, IntArrayProperty, Property,
-                           IntArrayLengthValidator, StringArrayProperty)
+from mantid.kernel import (Direction, IntArrayProperty, IntBoundedValidator,
+                           Property, IntArrayLengthValidator, StringArrayProperty,
+                           StringListValidator)
 from mantid.simpleapi import (mtd, IntegrateMDHistoWorkspace,
                               CreatePeaksWorkspace, DeleteWorkspace,
                               AnalysisDataService, SetGoniometer,
@@ -37,6 +38,18 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(StringArrayProperty("InputWorkspace", direction=Direction.Input, validator=ADSValidator()),
                              doc="Workspace or comma-separated workspace list containing input MDHisto scan data.")
+
+        self.declareProperty("Method", direction=Direction.Input, defaultValue="Fitted",
+                             validator=StringListValidator(["Counts", "CountsWithFitting", "Fitted"]),
+                             doc="Integration method to use")
+
+        self.declareProperty("NumBackgroundPts", direction=Direction.Input, defaultValue=3,
+                             validator=IntBoundedValidator(lower=0),
+                             doc="Number of background points from beginning and end of scan to use for background estimation")
+
+        self.declareProperty("N", direction=Direction.Input, defaultValue=2,
+                             validator=IntBoundedValidator(lower=0),
+                             doc="Set of measurements around motor position (+/- N/2*FWHM)")
 
         self.declareProperty(IntArrayProperty("LowerLeft", [128, 128], IntArrayLengthValidator(2),
                                               direction=Direction.Input), doc="Region of interest lower-left corner, in detector pixels")
