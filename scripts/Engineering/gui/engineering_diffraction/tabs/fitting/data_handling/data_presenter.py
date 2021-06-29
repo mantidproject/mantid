@@ -181,6 +181,7 @@ class FittingDataPresenter(object):
     def _handle_table_cell_changed(self, row, col):
         if row in self.row_numbers:
             ws_name = self.row_numbers[row]
+            is_plotted = self.view.get_item_checked(row, 2)
             is_sub = self.view.get_item_checked(row, 3)
             if col == 2:
                 # Plot check box
@@ -197,7 +198,8 @@ class FittingDataPresenter(object):
                     self.plotted.discard(ws_name)
             elif col == 3:
                 # subtract bg col
-                if is_sub or self.view.get_item_checked(row, 2):  # this ensures the sub ws isn't made on load
+                self.model.update_bgsub_status(ws_name, is_sub)
+                if is_sub or is_plotted:  # this ensures the sub ws isn't made on load
                     bg_params = self.view.read_bg_params_from_table(row)
                     self.model.create_or_update_bgsub_ws(ws_name, bg_params)
                     self._update_plotted_ws_with_sub_state(ws_name, is_sub)
