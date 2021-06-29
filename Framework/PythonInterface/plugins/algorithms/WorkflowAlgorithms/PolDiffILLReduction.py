@@ -428,7 +428,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return transmission_ws
 
     def _subtract_background(self, ws, transmission_ws):
-        """Subtracts empty container and cadmium absorber scaled by transmission."""
+        """Subtracts, if provided, empty container and cadmium absorber scaled by transmission."""
         unit_ws = 'unit_ws'
         CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=unit_ws)
         tmp_names = [unit_ws]
@@ -443,14 +443,14 @@ class PolDiffILLReduction(PythonAlgorithm):
             cadmium_present = False
         else:
             max_cadmium_entry = mtd[cadmium_ws].getNumberOfEntries()
-            singleCadmiumPerPOL = mtd[cadmium_ws].getNumberOfEntries() == nMeasurements
+            singleCadmiumPerPOL = max_cadmium_entry == nMeasurements
         empty_present = True
         empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
         if empty_ws == "":
             empty_present = False
         else:
             max_empty_entry = mtd[empty_ws].getNumberOfEntries()
-            singleEmptyPerPOL = mtd[empty_ws].getNumberOfEntries() == nMeasurements
+            singleEmptyPerPOL = max_empty_entry == nMeasurements
         if not empty_present and not cadmium_present:
             DeleteWorkspaces(WorkspaceList=tmp_names)
             return
@@ -463,9 +463,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             if empty_present:
                 if singleEmptyPerPOL:
                     empty_no = entry_no % nMeasurements
-                else:
-                    if entry_no >= max_empty_entry:
-                        empty_no = entry_no % max_empty_entry
+                elif entry_no >= max_empty_entry:
+                    empty_no = entry_no % max_empty_entry
                 empty_entry = mtd[empty_ws][empty_no].name()
                 empty_corr = empty_entry + '_corr'
                 tmp_names.append(empty_corr)
@@ -473,9 +472,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             if cadmium_present:
                 if singleCadmiumPerPOL:
                     cadmium_no = entry_no % nMeasurements
-                else:
-                    if entry_no >= max_cadmium_entry:
-                        cadmium_no = entry_no % max_cadmium_entry
+                elif entry_no >= max_cadmium_entry:
+                    cadmium_no = entry_no % max_cadmium_entry
                 cadmium_entry = mtd[cadmium_ws][cadmium_no].name()
                 cadmium_corr = cadmium_entry + '_corr'
                 tmp_names.append(cadmium_corr)
