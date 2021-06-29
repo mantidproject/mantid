@@ -17,15 +17,17 @@ REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
 
 class ElementalAnalysisContext(object):
 
-    def __init__(self, data_context, ea_group_context=None, muon_gui_context=None, workspace_suffix=' EA'):
+    def __init__(self, data_context, ea_group_context=None, muon_gui_context=None, plot_panes_context=None, workspace_suffix=' EA'):
         self._window_title = "Elemental Analysis 2"
         self.data_context = data_context
         self._gui_context = muon_gui_context
         self._group_context = ea_group_context
+        self._plot_panes_context = plot_panes_context
         self.workspace_suffix = workspace_suffix
 
         self.update_view_from_model_notifier = GenericObservable()
         self.update_plots_notifier = GenericObservable()
+        self.deleted_plots_notifier = GenericObservable()
         self.calculation_started_notifier = GenericObservable()
         self.calculation_finished_notifier = GenericObservable()
 
@@ -36,6 +38,10 @@ class ElementalAnalysisContext(object):
     @property
     def gui_context(self):
         return self._gui_context
+
+    @property
+    def plot_panes_context(self):
+        return self._plot_panes_context
 
     @property
     def group_context(self):
@@ -62,6 +68,7 @@ class ElementalAnalysisContext(object):
         self.data_context.remove_workspace_by_name(workspace_name)
         self.group_context.remove_group(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
+        self.update_plots_notifier.notify_subscribers(workspace_name)
 
     def clear_context(self):
         self.data_context.clear()

@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, QtCore
+from qtpy import QtWidgets, QtCore, QT_VERSION
+from distutils.version import LooseVersion
 
 from Muon.GUI.ElementalAnalysis2.context.ea_group_context import EAGroupContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
@@ -13,11 +14,14 @@ from Muon.GUI.ElementalAnalysis2.context.data_context import DataContext
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.contexts.plot_pane_context import PlotPanesContext
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
 from Muon.GUI.ElementalAnalysis2.load_widget.load_widget import LoadWidget
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_widget import EAGroupingTabWidget
 from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_widget import EAAutoTabWidget
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
+from Muon.GUI.Common.plotting_dock_widget.plotting_dock_widget import PlottingDockWidget
+from Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plot_widget import EAPlotWidget
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
@@ -38,9 +42,23 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.data_context = DataContext(self.loaded_data)
         self.group_context = EAGroupContext(self.data_context.check_group_contains_valid_detectors)
         self.gui_context = MuonGuiContext()
-        self.context = ElementalAnalysisContext(self.data_context, self.group_context, self.gui_context)
+        self.plot_panes_context = PlotPanesContext()
+        self.context = ElementalAnalysisContext(self.data_context, self.group_context, self.gui_context,
+                                                self.plot_panes_context)
         self.current_tab = ''
 
+        self.plot_widget = EAPlotWidget(self.context, parent=self)
+        self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
+                                                              plotting_widget=self.plot_widget.view)
+        self.dockable_plot_widget_window.setMinimumWidth(800)
+
+        # Add dock widget to main Elemental analysis window
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget_window)
+        # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
+        # 0 argument is arbitrary and has no effect on fit widget size
+        # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
+        if QT_VERSION >= LooseVersion("5.6"):
+            self.resizeDocks({self.dockable_plot_widget_window}, {1}, QtCore.Qt.Horizontal)
         # disable and enable notifiers
         self.disable_notifier = GenericObservable()
         self.enable_notifier = GenericObservable()
@@ -92,6 +110,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.fitting_tab, 'Fitting')
 
     def closeEvent(self, event):
+        self.removeDockWidget(self.dockable_plot_widget_window)
         self.tabs.closeEvent(event)
         super(ElementalAnalysisGui, self).closeEvent(event)
 
