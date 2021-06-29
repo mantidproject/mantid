@@ -10,7 +10,9 @@ New and Improved
 
 - Peaks can now be added or removed from a PeaksWorkspace using the :ref:`peaks overlay <sliceviewer_peaks_overlay>` in :ref:`sliceviewer`.
 - The list of eligible workspaces in the `WorkspaceSelector` is now sorted alphabetically
-- New widget and workbench plugin: `WorkspaceCalculator`, allows to perform binary operations and scaling by a floating number on workspaces
+- New widget and workbench plugin: `WorkspaceCalculator`, allows to perform binary operations and scaling by a floating number on workspaces;
+  This will require your widget layout to be reset when starting workbench v6.2.0 for the first time. Previously saved layouts accessible from ``View > User Layouts``
+  may need to be saved again to include the workspace calculator widget.
 - Added tooltips to all the widgets in the Slice Viewer. Please contact the developers if any are missing.
 
 Bugfixes
