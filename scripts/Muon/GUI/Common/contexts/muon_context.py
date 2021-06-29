@@ -29,20 +29,21 @@ from typing import List
 
 
 class MuonContext(object):
-    def __init__(self, muon_data_context=None, muon_gui_context=None,
-                 muon_group_context=None, base_directory='Muon Data', muon_phase_context=None,
-                 workspace_suffix=' MA', fitting_context=None, results_context=None, model_fitting_context=None,
-                 plot_panes_context=None, frequency_context=None):
+
+    def __init__(self, muon_data_context=None, muon_gui_context=None, muon_group_context=None, corrections_context=None,
+                 base_directory='Muon Data', muon_phase_context=None, workspace_suffix=' MA', fitting_context=None,
+                 results_context=None, model_fitting_context=None, plot_panes_context=None, frequency_context=None):
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
+        self._corrections_context = corrections_context
         self._phase_context = muon_phase_context
         self.fitting_context = fitting_context
         self.results_context = results_context
         self.model_fitting_context = model_fitting_context
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix
-        self._plot_panes_context= plot_panes_context
+        self._plot_panes_context = plot_panes_context
         self.ads_observer = MuonContextADSObserver(
             self.remove_workspace,
             self.clear_context,
@@ -73,6 +74,10 @@ class MuonContext(object):
     @property
     def group_pair_context(self):
         return self._group_pair_context
+
+    @property
+    def corrections_context(self):
+        return self._corrections_context
 
     @property
     def phase_context(self):
