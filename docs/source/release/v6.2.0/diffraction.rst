@@ -18,6 +18,10 @@ Improvements
 ############
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` major interface update along with enabling the calibration of T0 and sample position.
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` minor interface update that allows fine control of bank rotation calibration.
+- :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` now sorts the polarization orientations and enforces spin-flip, then non-spin-flip order
+- :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` received a number of improvements: changes names of input workspaces to contain polarization information,
+  transmission can be provided as a number or a workspace group, new data averaging option depending on measurement 2theta, option to display all measured points
+  on a scatter plot, new option for self-attenuation treatment using measured tranmission.
 
 Bugfixes
 ########
