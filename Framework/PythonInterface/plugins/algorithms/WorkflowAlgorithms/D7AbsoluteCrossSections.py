@@ -64,6 +64,19 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 numor = word
         return numor
 
+    @staticmethod
+    def _find_matching_twoTheta(sample_ws, det_eff_ws):
+        """Finds a workspace in the detector efficiency WorkspaceGroup det_eff_ws that matches the twoTheta
+        SampleLog of the sample_ws workspace."""
+        sample_twoTheta = str(mtd[sample_ws].getRun().getLogData('2theta.requested').value)
+        matched_no = 0
+        for entry_no, entry in enumerate(mtd[det_eff_ws]):
+            det_eff_twoTheta = str(entry.getRun().getLogData('2theta.requested').value)
+            if sample_twoTheta == det_eff_twoTheta:
+                matched_no = entry_no
+                break
+        return matched_no
+
     def category(self):
         return 'ILL\\Diffraction'
 
@@ -461,16 +474,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         if self.getProperty('ClearCache').value and len(to_clean) != 0:
             DeleteWorkspaces(to_clean)
         return det_efficiency_ws
-
-    def _find_matching_twoTheta(self, sample_ws, det_eff_ws):
-        sample_twoTheta = str(mtd[sample_ws].getRun().getLogData('2theta.requested').value)
-        matched_no = 0
-        for entry_no, entry in enumerate(mtd[det_eff_ws]):
-            det_eff_twoTheta = str(entry.getRun().getLogData('2theta.requested').value)
-            if sample_twoTheta == det_eff_twoTheta:
-                matched_no = entry_no
-                break
-        return matched_no
 
     def _normalise_sample_data(self, sample_ws, det_efficiency_ws, nMeasurements, nComponents):
         """Normalises the sample data using the detector efficiency calibration workspace."""
