@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 # std imports
+import math
+import numpy as np
 import collections
 from contextlib import contextmanager
 from enum import Enum

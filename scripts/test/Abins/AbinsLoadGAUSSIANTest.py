@@ -13,7 +13,7 @@ import abins.test_helpers
 class AbinsLoadGAUSSIANTest(unittest.TestCase, abins.input.Tester):
 
     def tearDown(self):
-        abins.test_helpers.remove_output_files(list_of_names=["_LoadGAUSSIAN"])
+        abins.test_helpers.remove_output_files(list_of_names=["LoadGAUSSIAN"])
 
         #  *************************** USE CASES ********************************************
 

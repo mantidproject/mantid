@@ -13,7 +13,7 @@
 #include "MantidAPI/EnabledWhenWorkspaceIsType.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
@@ -38,7 +38,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("tester", ws1);
     AnalysisDataService::Instance().addOrReplace("testersub", ws2);
 
-    PropertyManager alg;
+    PropertyManagerOwner alg;
 
     // Start with a regular property
     alg.declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));

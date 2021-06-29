@@ -381,7 +381,7 @@ void CutMD::exec() {
 
     // Either run RebinMD or SliceMD
     const std::string cutAlgName = noPix ? "BinMD" : "SliceMD";
-    auto cutAlg = createChildAlgorithm(cutAlgName, 0.0, 1.0);
+    IAlgorithm_sptr cutAlg = createChildAlgorithm(cutAlgName, 0.0, 1.0);
     cutAlg->initialize();
     cutAlg->setProperty("InputWorkspace", inWS);
     cutAlg->setProperty("OutputWorkspace", "sliced");

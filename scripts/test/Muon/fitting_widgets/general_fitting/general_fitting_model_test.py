@@ -7,8 +7,7 @@
 import unittest
 from unittest import mock
 
-from mantid.api import AnalysisDataService, CompositeFunction, FrameworkManager, FunctionFactory
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.api import CompositeFunction, FrameworkManager, FunctionFactory
 
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
@@ -21,8 +20,7 @@ class GeneralFittingModelTest(unittest.TestCase):
         FrameworkManager.Instance()
 
     def setUp(self):
-        context = setup_context()
-        self.model = GeneralFittingModel(context, context.fitting_context)
+        self.model = GeneralFittingModel(setup_context())
         self.dataset_names = ["Name1", "Name2"]
         self.fit_function = FunctionFactory.createFunction("FlatBackground")
         self.single_fit_functions = [self.fit_function.clone(), self.fit_function.clone()]
@@ -38,7 +36,7 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.start_xs, [])
         self.assertEqual(self.model.end_xs, [])
         self.assertEqual(self.model.single_fit_functions, [])
-        self.assertEqual(self.model.fitting_context.single_fit_functions_for_undo, [])
+        self.assertEqual(self.model.single_fit_functions_cache, [])
         self.assertEqual(self.model.fit_statuses, [])
         self.assertEqual(self.model.chi_squared, [])
         self.assertEqual(self.model.function_name, "")
@@ -48,7 +46,7 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertTrue(self.model.fit_to_raw)
 
         self.assertEqual(self.model.simultaneous_fit_function, None)
-        self.assertEqual(self.model.fitting_context.simultaneous_fit_functions_for_undo, [])
+        self.assertEqual(self.model.simultaneous_fit_function_cache, None)
         self.assertTrue(not self.model.simultaneous_fitting_mode)
         self.assertEqual(self.model.simultaneous_fit_by, "")
         self.assertEqual(self.model.simultaneous_fit_by_specifier, "")
@@ -85,29 +83,38 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(str(self.model.simultaneous_fit_function_cache), str(self.simultaneous_fit_function))
 
+    def test_that_caching_the_simultaneous_fit_function_to_an_ifunction_will_raise_if_the_number_of_datasets_is_zero(self):
+        self.assertEqual(self.model.number_of_datasets, 0)
+        with self.assertRaises(RuntimeError):
+            self.model.simultaneous_fit_function_cache = self.simultaneous_fit_function
+
+    def test_that_caching_the_simultaneous_fit_function_to_a_none_will_not_raise_if_the_number_of_functions_is_zero(self):
+        self.assertEqual(self.model.number_of_datasets, 0)
+        self.model.simultaneous_fit_function_cache = None
+
     def test_that_cache_the_current_fit_functions_will_cache_the_simultaneous_and_single_fit_functions(self):
         self.model.dataset_names = self.dataset_names
-        self.model.simultaneous_fitting_mode = True
+        self.model.single_fit_functions = self.single_fit_functions
         self.model.simultaneous_fit_function = self.simultaneous_fit_function
 
-        self.model.save_current_fit_function_to_undo_data()
+        self.model.cache_the_current_fit_functions()
 
-        self.assertEqual(str(self.model.fitting_context.simultaneous_fit_functions_for_undo[0]), str(self.model.simultaneous_fit_function))
+        self.assertEqual(str(self.model.single_fit_functions_cache[0]), str(self.model.single_fit_functions[0]))
+        self.assertEqual(str(self.model.single_fit_functions_cache[1]), str(self.model.single_fit_functions[1]))
+        self.assertEqual(str(self.model.simultaneous_fit_function_cache), str(self.model.simultaneous_fit_function))
 
-    def test_that_clear_undo_data_will_clear_the_simultaneous_fit_functions(self):
+    def test_that_clear_the_fit_function_cache_will_clear_the_simultaneous_and_single_fit_functions(self):
         self.model.dataset_names = self.dataset_names
-        self.model.simultaneous_fitting_mode = True
-        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.single_fit_functions_cache = self.single_fit_functions
+        self.model.simultaneous_fit_function_cache = self.simultaneous_fit_function
 
-        self.model.save_current_fit_function_to_undo_data()
+        self.assertEqual(len(self.model.single_fit_functions_cache), 2)
+        self.assertEqual(self.model.simultaneous_fit_function_cache, self.simultaneous_fit_function)
 
-        self.assertEqual(len(self.model.fitting_context.simultaneous_fit_functions_for_undo), 1)
-        self.assertEqual(str(self.model.fitting_context.simultaneous_fit_functions_for_undo[0]),
-                         str(self.simultaneous_fit_function))
+        self.model.clear_cached_fit_functions()
 
-        self.model.clear_undo_data()
-
-        self.assertEqual(self.model.fitting_context.simultaneous_fit_functions_for_undo, [])
+        self.assertEqual(self.model.single_fit_functions_cache, [None, None])
+        self.assertEqual(self.model.simultaneous_fit_function_cache, None)
 
     def test_that_the_simultaneous_fitting_mode_can_be_changed_as_expected(self):
         self.assertTrue(not self.model.simultaneous_fitting_mode)
@@ -192,16 +199,17 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.function_name, " FlatBackground,ExpDecay")
 
     def test_that_use_cached_function_will_replace_the_simultaneous_and_single_functions_with_the_cached_functions(self):
-        self.model.fitting_context.undo_previous_fit = mock.Mock()
-
         self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = [self.fit_function, None]
         self.model.simultaneous_fit_function = self.simultaneous_fit_function
-        self.model.simultaneous_fitting_mode = True
-        self.model.save_current_fit_function_to_undo_data()
+        self.model.cache_the_current_fit_functions()
+        self.model.single_fit_functions = [None, None]
         self.model.simultaneous_fit_function = None
 
-        self.model.undo_previous_fit()
+        self.model.use_cached_function()
 
+        self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=0")
+        self.assertEqual(self.model.single_fit_functions[1], None)
         self.assertEqual(str(self.model.simultaneous_fit_function), str(self.simultaneous_fit_function))
 
     def test_that_update_parameter_value_will_update_the_value_of_a_parameter_in_single_fit_mode(self):
@@ -260,48 +268,61 @@ class GeneralFittingModelTest(unittest.TestCase):
     def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_returns_an_empty_list_if_fit_by_is_not_specified(self):
         self.assertEqual(self.model.get_simultaneous_fit_by_specifiers_to_display_from_context(), [])
 
-    def test_that_get_workspace_names_to_display_from_context_will_attempt_to_get_runs_and_groups_for_single_fit_mode(self):
+    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
+                '_get_workspace_names_to_display_from_context')
+    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
+                '_sort_workspace_names')
+    def test_that_get_workspace_names_to_display_from_context_will_attempt_to_get_runs_and_groups_for_single_fit_mode(self,
+                                                                                                                      mock_sort,
+                                                                                                                      mock_get_workspaces):
         workspace_names = ["Name"]
-        workspace = CreateSampleWorkspace()
-        AnalysisDataService.addOrReplace("Name", workspace)
-        runs = "All"
-        group_or_pair = ["long"]
+        runs = ["62260"]
+        group_or_pair = "long"
         self.model.simultaneous_fitting_mode = False
 
-        self.model._get_selected_groups_and_pairs = mock.MagicMock(return_value=(group_or_pair))
+        self.model._get_selected_runs_groups_and_pairs_for_single_fit_mode = \
+            mock.MagicMock(return_value=(runs, [group_or_pair]))
 
-        self.model.context.get_workspace_names_for = mock.MagicMock(return_value=workspace_names)
-        self.model.context.get_workspace_names_of_fit_data_with_run = mock.MagicMock()
+        mock_get_workspaces.return_value = workspace_names
+        mock_sort.return_value = workspace_names
 
         self.assertEqual(self.model.get_workspace_names_to_display_from_context(), workspace_names)
 
-        self.model._get_selected_groups_and_pairs.assert_called_with()
-        self.model.context.get_workspace_names_for.assert_called_with(runs, group_or_pair, True)
+        self.model._get_selected_runs_groups_and_pairs_for_single_fit_mode.assert_called_with()
+        mock_get_workspaces.assert_called_with(runs, group_or_pair)
+        mock_sort.assert_called_with(workspace_names)
 
-        self.assertEqual(1, self.model._get_selected_groups_and_pairs.call_count)
-        self.assertEqual(1, self.model.context.get_workspace_names_for.call_count)
+        self.assertEqual(1, self.model._get_selected_runs_groups_and_pairs_for_single_fit_mode.call_count)
+        self.assertEqual(1, mock_get_workspaces.call_count)
+        self.assertEqual(1, mock_sort.call_count)
 
-    def test_that_get_workspace_names_to_display_will_attempt_to_get_runs_and_groups_for_simultaneous_fit_mode(self):
+    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
+                '_get_workspace_names_to_display_from_context')
+    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
+                '_sort_workspace_names')
+    def test_that_get_workspace_names_to_display_will_attempt_to_get_runs_and_groups_for_simultaneous_fit_mode(self,
+                                                                                                               mock_sort,
+                                                                                                               mock_get_workspaces):
         workspace_names = ["Name"]
-        workspace = CreateSampleWorkspace()
-        AnalysisDataService.addOrReplace("Name", workspace)
         runs = ["62260"]
-        group_or_pair = ["long"]
+        group_or_pair = "long"
         self.model.simultaneous_fitting_mode = True
 
         self.model._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode = \
-            mock.MagicMock(return_value=(runs, group_or_pair))
+            mock.MagicMock(return_value=(runs, [group_or_pair]))
 
-        self.model.context.get_workspace_names_for = mock.MagicMock(return_value=workspace_names)
-        self.model.context.get_workspace_names_of_fit_data_with_run = mock.MagicMock()
+        mock_get_workspaces.return_value = workspace_names
+        mock_sort.return_value = workspace_names
 
         self.assertEqual(self.model.get_workspace_names_to_display_from_context(), workspace_names)
 
         self.model._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode.assert_called_with()
-        self.model.context.get_workspace_names_for.assert_called_with(runs, group_or_pair, True)
+        mock_get_workspaces.assert_called_with(runs, group_or_pair)
+        mock_sort.assert_called_with(workspace_names)
 
         self.assertEqual(1, self.model._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode.call_count)
-        self.assertEqual(1, self.model.context.get_workspace_names_for.call_count)
+        self.assertEqual(1, mock_get_workspaces.call_count)
+        self.assertEqual(1, mock_sort.call_count)
 
     def test_that_get_selected_runs_groups_and_pairs_will_attempt_to_get_runs_and_groups_for_simultaneous_fit_mode(self):
         runs = ["62260"]
@@ -319,21 +340,21 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(1, self.model._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode.call_count)
 
-    def test_that_get_selected_runs_groups_and_pairs_will_attempt_to_get_run_and_groups_for_single_fit_mode(self):
-        run = "62260"
+    def test_that_get_selected_runs_groups_and_pairs_will_attempt_to_get_runs_and_groups_for_single_fit_mode(self):
+        runs = ["62260"]
         group_or_pair = "long"
         self.model.simultaneous_fitting_mode = True
-        self.model.simultaneous_fit_by = "Run"
-        self.model.simultaneous_fit_by_specifier = run
 
-        self.model._get_selected_groups_and_pairs = mock.MagicMock(return_value=[group_or_pair])
+        self.model._get_selected_runs_groups_and_pairs_for_single_fit_mode = \
+            mock.MagicMock(return_value=(runs, [group_or_pair]))
 
         output_runs, output_group_pairs = self.model.get_selected_runs_groups_and_pairs()
-        self.assertEqual(output_runs, run)
+        self.assertEqual(output_runs, runs)
         self.assertEqual(output_group_pairs, [group_or_pair])
 
-        self.model._get_selected_groups_and_pairs.assert_called_with()
-        self.assertEqual(1, self.model._get_selected_groups_and_pairs.call_count)
+        self.model._get_selected_runs_groups_and_pairs_for_single_fit_mode.assert_called_with()
+
+        self.assertEqual(1, self.model._get_selected_runs_groups_and_pairs_for_single_fit_mode.call_count)
 
     def test_that_get_active_fit_function_will_return_the_simultaneous_fit_function_if_in_simultaneous_mode(self):
         self.model.dataset_names = self.dataset_names

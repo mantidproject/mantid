@@ -471,7 +471,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths, const std::str
     // TODO: do this conditional on INSTR='IMAT' when we have proper IMAT .fits
     // files
     try {
-      auto loadInst = createChildAlgorithm("LoadInstrument");
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
       std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
       directoryName = directoryName + "/IMAT_Definition.xml";
       loadInst->setPropertyValue("Filename", directoryName);

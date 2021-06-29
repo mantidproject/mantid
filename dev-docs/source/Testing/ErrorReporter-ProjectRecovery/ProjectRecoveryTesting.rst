@@ -11,17 +11,13 @@ Project Recovery test
 
 *Preparation*
 
-- Before running these tests, open ``File > Settings > General > Project Recovery`` and set ``Enabled`` to true,
-  ``Time between recovery checkpoints`` to 2 seconds and ``Total number of checkpoints`` to 5.
-  Further instructions can be found on the
-  :ref:`Project Recovery concepts page <Project Recovery>`.
-- Download the ISIS sample dataset from the `Downloads page <http://download.mantidproject.org/>`_.
-- `TOPAZ_3132_event.nxs` - available in ``/Testing/Data/SystemTest/``, get this by building the `SystemTestData` target.
-  It should be in ``ExternalData/Testing/Data/SystemTest/``
+- Before running these tests, set project recovery to run every 2 seconds. The instructions for this
+  are on the `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`__.
+- Get the ISIS sample dataset from the `Downloads page <http://download.mantidproject.org/>`_.
+- `TOPAZ_3132_event.nxs` - availabe in ``/Testing/Data/SystemTest/``, get this by building the `SystemTestData` target. It should be in ``ExternalData/Testing/Data/SystemTest/``
 - The files `INTER000*` are in the ISIS sample data
-- Include the directory containing the test files in your Managed User Directories.
-- Set up a save directory to store output for comparison, referred to as ``testing_directory`` below
-- Note that if you have error reporting enabled, simply select ``Do not share information`` in the Error Reporter dialog
+- Make sure that the directory containing the test files is in your User Directories (this can be set on the First Time Startup screen)
+- Set up a directory to store output for comparison, referred to as ``testing_directory`` below
 
 
 **Time required 15 - 30  minutes**
@@ -31,16 +27,15 @@ Project Recovery test
 1. Simple tests
 
 - Open MantidWorkbench
-- Right-click in the Messages Box and set `Log level` to `Debug`
-- Currently, all that should be printed is `Nothing to save`
+- Right-click in the Results Log and set `Log level` to `Debug`
+- The Results Log should be printing `Nothing to save`
 - Run the following command to create a simple workspace:
 
 .. code-block:: python
 
   CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace')
 
-- The Messages box should now be printing `Project Recovery: Saving started` and `Project Recovery: Saving finished` on
-  alternate lines
+- The Results Log should now be printing `Project Recovery: Saving started` and `Project Recovery: Saving finished` on alternate lines
 - Now run this script:
 
 .. code-block:: python
@@ -70,7 +65,7 @@ Project Recovery test
    RenameWorkspace(InputWorkspace='Rename3_fit_Workspace_1_Workspace', OutputWorkspace='Sequential5')
    RenameWorkspace(InputWorkspace='Rename1_fit_Workspace_1_Workspace', OutputWorkspace='Sequential6')
 
-- Wait a few seconds, then provoke a crash by executing the `Segfault` algorithm with ``DryRun`` set to False.
+- Wait a few seconds, then provoke a crash by running `Segfault` from the algorithm window
 - Restart MantidWorkbench
 - You should be presented with the Project Recovery dialog
 - Choose `Yes`
@@ -85,9 +80,7 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
-   # <path-to-test> is the location of a directory for saving workspaces for comparison later
-   # e.g. C:\Users\abc1234\Desktop\test_proj_rec\
+   testing_directory=<path-to-test>   # <path-to-test> is the location of a directory for saving workspaces for comparison later
    CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='0Rebinned')
    for i in range(100):
        RenameWorkspace(InputWorkspace='%sRebinned'%str(i), OutputWorkspace='%sRebinned'%str(i+1))
@@ -95,7 +88,7 @@ Project Recovery test
        CloneWorkspace(InputWorkspace='100Rebinned', OutputWorkspace='%sClone'%str(i))
    SaveCSV(InputWorkspace='299Clone', Filename=testing_directory + 'Clone.csv')
 
-- Wait a few seconds, then provoke a crash by executing the `Segfault` algorithm
+- Wait a few seconds, then provoke a crash by running `Segfault` from the algorithm window
 - Restart MantidWorkbench
 - You should be presented with the Project Recovery dialog
 - Choose `Yes`
@@ -105,9 +98,9 @@ Project Recovery test
 .. code-block:: python
 
    testing_directory=<path-to-test>
-   SaveCSV(InputWorkspace='299Clone', Filename=testing_directory +'Clone_r.csv')
+   SaveCSV(InputWorkspace='299Clone', Filename=testing_directory +'Cloner.csv')
 
-- Compare the contents of `Clone.csv` and `Clone_r.csv`, they should be the same
+- Compare the contents of `Clone.csv` and `Cloner.csv`, they should be the same
 
 ------
 
@@ -154,10 +147,8 @@ Project Recovery test
    ConvertMDHistoToMatrixWorkspace(InputWorkspace='long4', OutputWorkspace='long4_matrix')
    SaveCSV('long4_matrix', testing_directory + '/test_binary_operators.csv')
 
-- Force a crash by executing the `Segfault` algorithm
-- Restart MantidWorkbench
-- You should be presented with the Project Recovery dialog
-- Choose `Yes`
+- Force a crash of Mantid with `Segfault` from the algorithm window
+- On re-loading Mantid choose a full recovery
 
 .. code-block:: python
 
@@ -165,33 +156,29 @@ Project Recovery test
     SaveCSV('Clone_matrix' , testing_directory + '/method_test_r.csv')
     SaveCSV('long4_matrix', testing_directory + '/test_binary_operators_r.csv')
 
-- Compare the contents of ``/test_binary_operators.csv`` and ``/test_binary_operators_r.csv``, they should be the same
-- Compare the contents of ``/method_test.csv`` and ``/method_test_r.csv``, they should be the same
+- Compare the contents of ``/test_binary_operators_r.csv`` and ``/test_binary_operators.csv``, they should be the same
+- Compare the contents of ``/method_test_r.csv`` and ``/method_test_r.csv``, they should be the same
 
 --------
 
 4. Recovering plots and windows
 
 - Open MantidWorkbench - make sure no other instances of MantidWorkbench are running
-- Run the large script from test 1
+- Run the second script from test 1
 - In the workspace window right-click the ``Sequential3`` workspace and choose `Plot spectrum`
 - Choose `Plot All`
-- In the workspace window right-click the ``Sequential1`` workspace and choose `Plot spectrum`
-- Change Plot type from individual to `Tiled`, and again click `Plot all`
-- In the workspace window right-click the ``Rename2`` workspace and select `Show Data`
-- In the top toolbar, navigate to ``Interfaces > Reflectometry`` and open the ``ISIS Reflectometry`` interface
+- In the workspace window right-click the ``Sequential1`` workspace and choose `Plot advanced`
+- Choose `Tiled plot`
+- Drag workspace `Rename2` into the main window
 
 .. image:: ../../images/reporter-test-4.png
 
 
-- Force a crash by executing the `Segfault` algorithm
+- Crash Mantid with `Segfault` from the algorithm window
 - Restart MantidWorkbench
 - You should be presented with the Project Recovery dialog
 - Choose `Yes`
-- Mantid should reload the workspaces and reopen plots and interfaces (including the show data interface).
-  You should see these all reappear in the main screen (they may have been reopened, but minimised).
-
-*(Note at time of writing, only ISIS Reflectometry and Engineering Diffraction are supported by Project Save / Recovery)*
+- Mantid should reload the workspaces and open windows, so you should see the plots and the data in the main screen.
 
 ---------
 
@@ -210,10 +197,10 @@ Project Recovery test
 
   CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='Instance 2')
 
-- Crash the first instance of Mantid with `Segfault`
+- Crash the first instance of Mantid with `Segfault`; choose `Do not share information` in the error dialog
 - Do not exit the second instance of Mantid
 - Restart MantidWorkbench
-- You should be presented with a Project Recovery dialog, offering to attempt a recovery - choose `Yes`
+- You should be presented with a dialog offering to attempt a recovery - choose `Yes`
 - `Instance 1` should appear in the workspace dialog
 
 ---------
@@ -221,13 +208,13 @@ Project Recovery test
 6. Opening script only
 
 - Open MantidWorkbench
-- Run the large script from test 1
+- Run the second script from test 1
 - In the workspace window right-click the ``Sequential3`` workspace and choose `Plot spectrum`
 - Choose `Plot All`
-- Force a crash by executing the `Segfault` algorithm
+- Crash Mantid with `Segfault` from the algorithm window
 - Restart MantidWorkbench
 - You should be presented with the Project Recovery dialog
-- Choose ``Only open in script editor``
+- Choose `Only open in script editor`
 - Mantid should open the script editor, with a script named `ordered_recovery.py`
 - Run this script, it should repopulate the workspaces dialog, but not open any figures
 
@@ -239,12 +226,12 @@ Project Recovery test
 - Run the second script from test 1
 - In the workspace window right-click the ``Sequential3`` workspace and choose `Plot spectrum`
 - Choose `Plot All`
-- Force a crash by executing the `Segfault` algorithm
+- Crash Mantid with `Segfault` from the algorithm window
 - Restart MantidWorkbench
 - You should be presented with the Project Recovery dialog
-- Choose ``Start mantid normally``
+- Choose `Start mantid normally`
 - Mantid should open as normal
-- With the Messages box at Debug level you should see the project saver starting up again
+- With the Results Log in debug level you should see the project saver starting up again
 
 ---------
 
@@ -257,20 +244,13 @@ Project Recovery test
   CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace')
   RenameWorkspace(InputWorkspace='NewWorkspace', OutputWorkspace='Rename2')
 
-- Save the workspace as a `.nxs` file, by highlighting the ``Rename2`` workspace and selecting
-  ``Save > Nexus`` at the top of the Workspaces toolbox.
+- Save the workspace as a `.nxs` file
 - Close Mantid normally
 - Restart MantidWorkbench
 - Re-open the workspace from the saved `.nxs` file
 - Wait for saving
-- Force a crash by executing the `Segfault` algorithm
+- Crash Mantid with `Segfault` from the algorithm window
 - Restart MantidWorkbench
-- Choose ``Only open in script editor``
-- Mantid should open a script named ``ordered_recovery.py`` in the script editor
-- This should contain only the ``Load`` command and no previous history (to see full history, right-click on the
-  workspace and select ``Show History``)
-
-Finally, test out a few ideas of your own. Note that some more niche aspects of plotting are not saved, such as 3D plots,
-and Sliceviewer is also not supported by project save/recovery.
-
-**Complete!** Thank you for testing! Make sure to **raise any issues** you found on Github.
+- Choose `Only open in script editor`
+- Mantid should open the script editor, with a script named `ordered_recovery.py`
+- This file should contain only the ``Load`` command and no previous history

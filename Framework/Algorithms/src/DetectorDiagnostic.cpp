@@ -207,7 +207,7 @@ void DetectorDiagnostic::exec() {
   // Apply hard mask if present
   MatrixWorkspace_sptr hardMaskWS = this->getProperty("HardMaskWorkspace");
   if (hardMaskWS) {
-    auto md = createChildAlgorithm("MaskDetectors");
+    IAlgorithm_sptr md = this->createChildAlgorithm("MaskDetectors");
     md->setProperty("Workspace", inputWS);
     md->setProperty("MaskedWorkspace", hardMaskWS);
     md->executeAsChildAlg();
@@ -228,7 +228,8 @@ void DetectorDiagnostic::exec() {
     double variation = this->getProperty("DetVanRatioVariation");
 
     // run the ChildAlgorithm
-    auto alg = createChildAlgorithm("DetectorEfficiencyVariation", m_fracDone, m_fracDone + m_progStepWidth);
+    IAlgorithm_sptr alg =
+        this->createChildAlgorithm("DetectorEfficiencyVariation", m_fracDone, m_fracDone + m_progStepWidth);
     m_fracDone += m_progStepWidth;
     alg->setProperty("WhiteBeamBase", inputWS);
     alg->setProperty("WhiteBeamCompare", input2WS);
@@ -250,7 +251,8 @@ void DetectorDiagnostic::exec() {
     // apply mask to what we are going to input
     applyMask(totalCountsWS, maskWS);
 
-    auto zeroChk = createChildAlgorithm("FindDetectorsOutsideLimits", m_fracDone, m_fracDone + m_progStepWidth);
+    IAlgorithm_sptr zeroChk =
+        this->createChildAlgorithm("FindDetectorsOutsideLimits", m_fracDone, m_fracDone + m_progStepWidth);
     m_fracDone += m_progStepWidth;
     zeroChk->setProperty("InputWorkspace", totalCountsWS);
     zeroChk->setProperty("StartWorkspaceIndex", m_minIndex);
@@ -275,7 +277,7 @@ void DetectorDiagnostic::exec() {
     bool correctSA = this->getProperty("SampleCorrectForSolidAngle");
 
     // run the ChildAlgorithm
-    auto alg = createChildAlgorithm("MedianDetectorTest", m_fracDone, m_fracDone + m_progStepWidth);
+    IAlgorithm_sptr alg = this->createChildAlgorithm("MedianDetectorTest", m_fracDone, m_fracDone + m_progStepWidth);
     m_fracDone += m_progStepWidth;
     alg->setProperty("InputWorkspace", bkgWS);
     alg->setProperty("StartWorkspaceIndex", m_minIndex);
@@ -301,7 +303,7 @@ void DetectorDiagnostic::exec() {
     int numIgnore = this->getProperty("NIgnoredCentralPixels");
 
     // run the ChildAlgorithm
-    auto alg = createChildAlgorithm("CreatePSDBleedMask", m_fracDone, m_fracDone + m_progStepWidth);
+    IAlgorithm_sptr alg = this->createChildAlgorithm("CreatePSDBleedMask", m_fracDone, m_fracDone + m_progStepWidth);
     m_fracDone += m_progStepWidth;
     alg->setProperty("InputWorkspace", sampleWS);
     alg->setProperty("MaxTubeFramerate", maxTubeFrameRate);
@@ -318,7 +320,7 @@ void DetectorDiagnostic::exec() {
 
   // Extract the mask from the vanadium workspace
   std::vector<int> detList;
-  auto extract = createChildAlgorithm("ExtractMask");
+  IAlgorithm_sptr extract = this->createChildAlgorithm("ExtractMask");
   extract->setProperty("InputWorkspace", inputWS);
   extract->setProperty("OutputWorkspace", "final_mask");
   extract->setProperty("DetectorList", detList);
@@ -334,7 +336,7 @@ void DetectorDiagnostic::exec() {
  * @param maskWS : the workspace containing the masking information
  */
 void DetectorDiagnostic::applyMask(const API::MatrixWorkspace_sptr &inputWS, const API::MatrixWorkspace_sptr &maskWS) {
-  auto maskAlg = createChildAlgorithm("MaskDetectors"); // should set progress bar
+  IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors"); // should set progress bar
   maskAlg->setProperty("Workspace", inputWS);
   maskAlg->setProperty("MaskedWorkspace", maskWS);
   maskAlg->setProperty("StartWorkspaceIndex", m_minIndex);
@@ -356,7 +358,8 @@ API::MatrixWorkspace_sptr DetectorDiagnostic::doDetVanTest(const API::MatrixWork
   double lowThreshold = this->getProperty("LowThreshold");
   double highThreshold = this->getProperty("HighThreshold");
   // run the ChildAlgorithm
-  auto fdol = createChildAlgorithm("FindDetectorsOutsideLimits", m_fracDone, m_fracDone + m_progStepWidth);
+  IAlgorithm_sptr fdol =
+      this->createChildAlgorithm("FindDetectorsOutsideLimits", m_fracDone, m_fracDone + m_progStepWidth);
   m_fracDone += m_progStepWidth;
   fdol->setProperty("InputWorkspace", inputWS);
   fdol->setProperty("OutputWorkspace", localMask);
@@ -386,7 +389,7 @@ API::MatrixWorkspace_sptr DetectorDiagnostic::doDetVanTest(const API::MatrixWork
   this->applyMask(inputWS, localMask);
 
   // run the ChildAlgorithm
-  auto mdt = createChildAlgorithm("MedianDetectorTest", m_fracDone, m_fracDone + m_progStepWidth);
+  IAlgorithm_sptr mdt = this->createChildAlgorithm("MedianDetectorTest", m_fracDone, m_fracDone + m_progStepWidth);
   m_fracDone += m_progStepWidth;
   mdt->setProperty("InputWorkspace", inputWS);
   mdt->setProperty("StartWorkspaceIndex", m_minIndex);
@@ -443,7 +446,7 @@ MatrixWorkspace_sptr DetectorDiagnostic::integrateSpectra(const MatrixWorkspace_
   // actually created to use for further calculations
   // get percentage completed estimates for now, t0 and when we've finished t1
   double t0 = m_fracDone, t1 = advanceProgress(RTGetTotalCounts);
-  auto childAlg = createChildAlgorithm("Integration", t0, t1);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Integration", t0, t1);
   childAlg->setProperty("InputWorkspace", inputWS);
   childAlg->setProperty("StartWorkspaceIndex", indexMin);
   childAlg->setProperty("EndWorkspaceIndex", indexMax);
@@ -626,7 +629,7 @@ API::MatrixWorkspace_sptr DetectorDiagnostic::convertToRate(API::MatrixWorkspace
   g_log.information("Calculating time averaged count rates");
   // get percentage completed estimates for now, t0 and when we've finished t1
   double t0 = m_fracDone, t1 = advanceProgress(RTGetRate);
-  auto childAlg = createChildAlgorithm("ConvertToDistribution", t0, t1);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("ConvertToDistribution", t0, t1);
   childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
   // Now execute the Child Algorithm but allow any exception to bubble up
   childAlg->execute();

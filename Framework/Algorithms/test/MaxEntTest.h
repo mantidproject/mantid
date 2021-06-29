@@ -39,7 +39,7 @@ public:
   static void destroySuite(MaxEntTest *suite) { delete suite; }
 
   void test_init() {
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     TS_ASSERT(alg->isInitialized())
   }
@@ -50,7 +50,7 @@ public:
     int nBins = 10;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -84,7 +84,7 @@ public:
     int nBins = 10;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -119,7 +119,7 @@ public:
     int nBins = 10;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -155,7 +155,7 @@ public:
     int nBins = 10;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -191,7 +191,7 @@ public:
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(5, 10);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -209,7 +209,7 @@ public:
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(5, 10);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -228,7 +228,7 @@ public:
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(5, 10);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -247,7 +247,7 @@ public:
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(6, 10);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -266,7 +266,7 @@ public:
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(6, 10);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -286,7 +286,7 @@ public:
     auto ws = WorkspaceCreationHelper::create2DWorkspace(6, 10);
     auto ws1 = WorkspaceCreationHelper::create2DWorkspace(2, 10);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -310,7 +310,7 @@ public:
     auto ws = WorkspaceCreationHelper::create2DWorkspace(3, 10);
     auto ws1 = WorkspaceCreationHelper::create2DWorkspace(6, 10);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -355,7 +355,7 @@ public:
     constAdjVal[11] = -1.0;
     auto constAdj = createWorkspaceWithYValues(4, 3, constAdjVal);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -390,7 +390,7 @@ public:
 
     auto ws = createWorkspaceReal(50, 0.0, 1);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -427,7 +427,7 @@ public:
 
     auto ws = createWorkspaceReal(50, M_PI / 2.0, 1);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -463,7 +463,7 @@ public:
 
     auto ws = createWorkspaceReal(10, 0.0, 3);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -510,7 +510,7 @@ public:
 
     auto ws = createWorkspaceComplex();
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -541,7 +541,7 @@ public:
 
     auto ws = createWorkspaceComplex();
     //    TS_ASSERT_EQUALS(ws->getNumberHistograms(),0)
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -573,7 +573,7 @@ public:
 
     auto ws = createWorkspaceComplex();
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -607,7 +607,7 @@ public:
 
     auto ws = createWorkspaceReal(npoints, 0.0, 1);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -647,7 +647,7 @@ public:
     auto linAdj = createWorkspaceAdjustments(20, 1.05, 0.00, 0.0, 1);
     auto constAdj = createWorkspaceAdjustments(20, 0.0, 0.1, 0.2, 1);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -688,7 +688,7 @@ public:
     auto linAdj = createWorkspaceAdjustments(10, 1.05, 0.00, 0.0, 3);
     auto constAdj = createWorkspaceAdjustments(10, 0.0, 0.1, 0.2, 3);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -735,7 +735,7 @@ public:
     auto linAdj = createWorkspaceAdjustments(10, 1.05, 0.00, 0.0, 3);
     auto constAdj = createWorkspaceAdjustments(10, 0.0, 0.1, 0.2, 3);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -781,7 +781,7 @@ public:
 
     auto ws = createWorkspaceComplex(20, 0.0, 3, 0.0);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -825,7 +825,7 @@ public:
 
     auto ws = createWorkspaceComplex(20, 0.0, 3, 0.0);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -868,7 +868,7 @@ public:
     auto linAdj = createWorkspaceAdjustments(20, 1.00, 0.05, 0.0, 3);
     auto constAdj = createWorkspaceAdjustments(20, 0.0, 0.10, 0.0, 3);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -914,7 +914,7 @@ public:
 
     auto ws = createWorkspaceReal(npoints, 0.0, 1);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -1009,7 +1009,7 @@ public:
     auto ws = createWorkspaceComplex();
 
     // Run MaxEnt
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -1024,7 +1024,7 @@ public:
     MatrixWorkspace_sptr outWS = alg->getProperty("ReconstructedImage");
 
     // Offset
-    auto scaleX = AlgorithmManager::Instance().create("ScaleX");
+    IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
     scaleX->initialize();
     scaleX->setChild(true);
     scaleX->setProperty("InputWorkspace", ws);
@@ -1048,7 +1048,7 @@ public:
     auto ws = createWorkspaceReal(3, 0.0, 1);
     Points xData{0, 1, 5};
     ws->setPoints(0, xData);
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", ws), const std::invalid_argument &);
@@ -1072,7 +1072,7 @@ public:
     }
     ws->dataX(0)[size] = static_cast<double>(size);
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -1110,7 +1110,7 @@ public:
       ws->dataE(0)[i] = value + 1.0;
     }
 
-    auto alg = AlgorithmManager::Instance().create("MaxEnt");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);

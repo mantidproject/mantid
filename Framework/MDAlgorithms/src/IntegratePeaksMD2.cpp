@@ -775,7 +775,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
         errorSquared = std::fabs(signal);
       } else {
 
-        auto fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
+        IAlgorithm_sptr fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
         // fitAlgorithm->setProperty("CreateOutput", true);
         // fitAlgorithm->setProperty("Output", "FitPeaks1D");
         std::string myFunc = std::string("name=LinearBackground;name=") + profileFunction;
@@ -1240,20 +1240,20 @@ void IntegratePeaksMD2::runMaskDetectors(const Mantid::DataObjects::PeaksWorkspa
                                          const std::string &property, const std::string &values) {
   // For CORELLI do not count as edge if next to another detector bank
   if (property == "Tube" && peakWS->getInstrument()->getName() == "CORELLI") {
-    auto alg = createChildAlgorithm("MaskBTP");
+    IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
     alg->setProperty<Workspace_sptr>("Workspace", peakWS);
     alg->setProperty("Bank", "1,7,12,17,22,27,30,59,63,69,74,79,84,89");
     alg->setProperty(property, "1");
     if (!alg->execute())
       throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
-    auto alg2 = createChildAlgorithm("MaskBTP");
+    IAlgorithm_sptr alg2 = createChildAlgorithm("MaskBTP");
     alg2->setProperty<Workspace_sptr>("Workspace", peakWS);
     alg2->setProperty("Bank", "6,11,16,21,26,29,58,62,68,73,78,83,88,91");
     alg2->setProperty(property, "16");
     if (!alg2->execute())
       throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
   } else {
-    auto alg = createChildAlgorithm("MaskBTP");
+    IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
     alg->setProperty<Workspace_sptr>("Workspace", peakWS);
     alg->setProperty(property, values);
     if (!alg->execute())

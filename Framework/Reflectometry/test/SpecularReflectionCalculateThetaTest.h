@@ -24,7 +24,7 @@ class SpecularReflectionCalculateThetaTest: public CxxTest::TestSuite,
 
 private:
   Mantid::API::IAlgorithm_sptr makeAlgorithm() const {
-    auto alg = std::make_shared<SpecularReflectionCalculateTheta>();
+    IAlgorithm_sptr alg = std::make_shared<SpecularReflectionCalculateTheta>();
     alg->setRethrows(true);
     alg->setChild(true);
     alg->initialize();
@@ -46,21 +46,21 @@ public:
   SpecularReflectionCalculateThetaTest() {}
 
   void test_throws_if_SpectrumNumbersOfDetectors_less_than_zero() {
-    auto alg = makeAlgorithm();
+    IAlgorithm_sptr alg = makeAlgorithm();
     alg->setProperty("InputWorkspace", WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
 
     SpecularReflectionAlgorithmTest::test_throws_if_SpectrumNumbersOfDetectors_less_than_zero(alg);
   }
 
   void test_throws_if_SpectrumNumbersOfDetectors_outside_range() {
-    auto alg = makeAlgorithm();
+    IAlgorithm_sptr alg = makeAlgorithm();
     alg->setProperty("InputWorkspace", WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
 
     SpecularReflectionAlgorithmTest::test_throws_if_SpectrumNumbersOfDetectors_outside_range(alg);
   }
 
   void test_throws_if_DetectorComponentName_unknown() {
-    auto alg = makeAlgorithm();
+    IAlgorithm_sptr alg = makeAlgorithm();
     alg->setProperty("InputWorkspace", WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 1, 1));
 
     SpecularReflectionAlgorithmTest::test_throws_if_DetectorComponentName_unknown(alg);
@@ -89,7 +89,7 @@ public:
     const double currentTwoThetaInRad = 2 * std::atan(sampleToDetectorVerticalOffset / sampleToDetectorBeamOffset);
     const double currentTwoThetaInDeg = currentTwoThetaInRad * (180.0 / M_PI);
 
-    auto alg = this->makeAlgorithm();
+    IAlgorithm_sptr alg = this->makeAlgorithm();
     alg->setProperty("InputWorkspace", toConvert);
     alg->setProperty("DetectorComponentName", "point-detector");
     alg->setProperty("AnalysisMode", "PointDetectorAnalysis");

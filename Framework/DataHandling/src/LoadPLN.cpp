@@ -657,7 +657,7 @@ void LoadPLN::setupDetectorMasks(std::vector<bool> &roi) {
       if (!roi[i])
         maskIndexList[maskIndex++] = i;
 
-    auto maskingAlg = createChildAlgorithm("MaskDetectors");
+    API::IAlgorithm_sptr maskingAlg = createChildAlgorithm("MaskDetectors");
     maskingAlg->setProperty("Workspace", m_localWorkspace);
     maskingAlg->setProperty("WorkspaceIndexList", maskIndexList);
     maskingAlg->executeAsChildAlg();
@@ -795,7 +795,7 @@ void LoadPLN::loadEnvironParameters(const std::string &hdfFile, API::LogManager 
 void LoadPLN::loadInstrument() {
 
   // loads the IDF and parameter file
-  auto loadInstrumentAlg = createChildAlgorithm("LoadInstrument");
+  API::IAlgorithm_sptr loadInstrumentAlg = createChildAlgorithm("LoadInstrument");
   loadInstrumentAlg->setProperty("Workspace", m_localWorkspace);
   loadInstrumentAlg->setPropertyValue("InstrumentName", "PELICAN");
   loadInstrumentAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));

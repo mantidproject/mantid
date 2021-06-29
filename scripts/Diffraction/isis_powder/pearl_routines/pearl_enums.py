@@ -20,4 +20,3 @@ class PEARL_TT_MODES(object):
     tt_35 = "tt35"
     tt_70 = "tt70"
     tt_88 = "tt88"
-    custom = "custom"

@@ -159,7 +159,7 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(const MatrixWo
   const std::vector<int> peakRange{static_cast<int>(peakRangeIndexSet[0]),
                                    static_cast<int>(peakRangeIndexSet[peakRangeIndexSet.size() - 1])};
 
-  auto LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
+  IAlgorithm_sptr LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
   LRBgd->initialize();
   LRBgd->setProperty("InputWorkspace", inputWS);
   LRBgd->setProperty("PeakRange", Strings::toString(peakRange));

@@ -1244,7 +1244,7 @@ void CompareWorkspaces::doMDComparison(const Workspace_sptr &w1, const Workspace
   mdws1 = std::dynamic_pointer_cast<IMDWorkspace>(w1);
   mdws2 = std::dynamic_pointer_cast<IMDWorkspace>(w2);
 
-  auto alg = createChildAlgorithm("CompareMDWorkspaces");
+  IAlgorithm_sptr alg = this->createChildAlgorithm("CompareMDWorkspaces");
   alg->setProperty<IMDWorkspace_sptr>("Workspace1", mdws1);
   alg->setProperty<IMDWorkspace_sptr>("Workspace2", mdws2);
   const double tolerance = getProperty("Tolerance");

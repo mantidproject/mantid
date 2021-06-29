@@ -205,13 +205,10 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   }
 
   // Parse the server JSON response
-  ::Json::CharReaderBuilder readerBuilder;
+  Json::Reader reader;
   Json::Value serverContents;
   Poco::FileStream fileStream(gitHubJson.toString(), std::ios::in);
-
-  std::string errors;
-  Json::parseFromStream(readerBuilder, fileStream, &serverContents, &errors);
-  if (errors.size() != 0) {
+  if (!reader.parse(fileStream, serverContents)) {
     throw std::runtime_error("Unable to parse server JSON file \"" + gitHubJson.toString() + "\"");
   }
   fileStream.close();

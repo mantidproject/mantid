@@ -9,19 +9,19 @@ Writing An Algorithm
 Introduction
 ############
 
-Mantid's :ref:`plugin <Plugin>` architecture has been engineered so that it is easy for a user
+Mantid's `plugin <https://www.mantidproject.org/Plugin>`__ architecture has been engineered so that it is easy for a user
 to write their own algorithm. This page is a primer for the user about to write their first algorithm and assumes no
 great knowledge of C++.
 It covers the basics, with links to more advanced options where appropriate. Note if you are looking to add a
-:ref:`plugin <Plugin>` fit function rather than an algorithm then see
+`plugin <https://www.mantidproject.org/Plugin>`__ fit function rather than an algorithm then see
 `Writing a Fit Function <https://www.mantidproject.org/Writing_a_Fit_Function>`__.
-There is special description for the case when you are looking to add a custom :ref:`MD conversion plugin <WritingCustomConvertToMDTransformation>`.
+There is special description for the case when you are looking to add a custom `MD conversion plugin <WritingCustomConvertToMDTransformation>`__.
 
-Alternatively, you can implement your algorithm in :ref:`Python <emwp_py_fit_funcs>`.
-See :ref:`Python Vs C++ Algorithms <PythonVSCppAlgorithms>` for a comparison of Mantid's
+Alternatively, you can implement your algorithm in `Python <https://www.mantidproject.org/Extending_Mantid_With_Python>`__.
+See `Python Vs C++ Algorithms <https://www.mantidproject.org/Python_Vs_C%2B%2B_Algorithms>`__ for a comparison of Mantid's
 two programming languages.
 
-All :ref:`algorithms <Algorithms List>` in Mantid `inherit <http://en.wikipedia.org/wiki/Inheritance_(computer_science)>`__
+All `algorithms <https://www.mantidproject.org/Algorithm>`__ in Mantid `inherit <http://en.wikipedia.org/wiki/Inheritance_(computer_science)>`__
 from a base ``Algorithm`` class, which provides the support and services required for running a specific
 algorithm and greatly simplifies the process of writing a new one.
 
@@ -116,10 +116,10 @@ For the simple types (integer, double or string), the basic syntax is::
 
    declareProperty("UniquePropertyName",value);
 
-An optional :ref:`validator <Properties Validators>` or
-:ref:`directional argument <Properties Directions>` (input, output or both)
+An optional `validator <https://www.mantidproject.org/Properties#Validators>`__ or
+`directional argument <https://www.mantidproject.org/Properties#Direction>`__ (input, output or both)
 can also be appended. The syntax for other property types (``WorkspaceProperty`` & ``ArrayProperty``) is more
-complex - see the :ref:`properties <Properties>` page or the
+complex - see the `properties <https://www.mantidproject.org/Properties#Direction>`__ page or the
 example algorithms in `UserAlgorithms <https://www.mantidproject.org/UserAlgorithms>`__ for further details.
 
 Execution
@@ -134,7 +134,7 @@ This uses the ``getProperty`` method as follows::
     TYPE myProperty = getProperty("PropertyName");
 
 where ``TYPE`` is the type of the property (``int``, ``double``, ``std::string``, ``std::vector``...). Note that the
-value of a ``WorkspaceProperty`` is a :ref:`shared pointer <Shared Pointer>`
+value of a ``WorkspaceProperty`` is a `shared pointer <https://www.mantidproject.org/Shared_Pointer>`__
 to the workspace, which is referred to as ``Mantid::API::Workspace_sptr`` or ``Mantid::API::Workspace_const_sptr``.
 The latter should be used for input workspaces that will not need to be changed in the course of the algorithm.
 
@@ -168,7 +168,7 @@ Using workspaces
 ----------------
 
 The bulk of most algorithms will involve the manipulation of the data contained in workspaces
-and information on how to interact with these is given :ref:`here <WorkingWithWorkspaces>`.
+and information on how to interact with these is given `here <https://www.mantidproject.org/Interacting_with_Workspaces>`__.
 The more advanced user may also want to refer to the full
 `workspace documentation <http://doxygen.mantidproject.org/nightly/d3/de9/classMantid_1_1API_1_1Workspace.html>`__.
 
@@ -201,7 +201,7 @@ This call will also initialise the algorithm, so the algorithm's properties can 
 Logging
 -------
 
-The ``g_log`` object enables access to the :ref:`logging <Logging>` facilities of Mantid, and is an invaluable
+The ``g_log`` object enables access to the `logging <Logging>`__ facilities of Mantid, and is an invaluable
 tool in understanding the running of your algorithms.
 
 Enhancing asynchronous running
@@ -222,7 +222,7 @@ These will be caught in the base Algorithm class, which will report the failure 
 Validation of inputs
 --------------------
 
-:ref:`Validators <Properties Validators>` allow you to give feedback
+`Validators <https://www.mantidproject.org/Properties#Validators>`__ allow you to give feedback
 to the user if the input of a property is incorrect (for example, typing non-numeric characters
 in a number field).
 

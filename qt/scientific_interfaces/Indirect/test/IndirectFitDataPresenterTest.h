@@ -10,9 +10,9 @@
 #include <gmock/gmock.h>
 
 #include "IIndirectFitDataView.h"
+#include "IndirectDataTablePresenterTest.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitDataTableModel.h"
-#include "IndirectFitDataTablePresenterTest.h"
 #include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
 #include "ParameterEstimation.h"

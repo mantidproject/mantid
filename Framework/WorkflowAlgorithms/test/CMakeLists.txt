@@ -19,8 +19,7 @@ if(CXXTEST_FOUND)
                         WorkflowAlgorithms
                         Algorithms
                         DataHandling
-                        Nexus
-                        gmock)
+                        Nexus)
   add_dependencies(WorkflowAlgorithmsTest CurveFitting)
   add_dependencies(FrameworkTests WorkflowAlgorithmsTest)
   # Test data

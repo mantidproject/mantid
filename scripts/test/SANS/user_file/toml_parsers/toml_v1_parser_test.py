@@ -111,7 +111,8 @@ class TomlV1ParserTest(unittest.TestCase):
         for bin_type in ["Lin", "Log"]:
             wavelength_dict = {"binning": {"wavelength": {"start": 1.1, "step": 0.1, "stop": 2.2, "type": bin_type}}}
             wavelength = self._setup_parser(wavelength_dict).get_state_wavelength()
-            self.assertEqual((1.1, 2.2), wavelength.wavelength_interval.wavelength_full_range)
+            self.assertEqual([1.1], wavelength.wavelength_low)
+            self.assertEqual([2.2], wavelength.wavelength_high)
             self.assertEqual(0.1, wavelength.wavelength_interval.wavelength_step)
             self.assertEqual(RangeStepType(bin_type), wavelength.wavelength_step_type)
 
@@ -145,7 +146,7 @@ class TomlV1ParserTest(unittest.TestCase):
 
         events_dict = top_level_dict["reduction"]["events"]
 
-        expected_binning = "1,1,10"
+        expected_binning = "expected_binning"
         events_dict["binning"] = expected_binning
 
         parsed_obj = self._setup_parser(top_level_dict)
@@ -352,6 +353,11 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual({'2': 800}, calc_transmission.background_TOF_monitor_stop)
 
         top_level_dict["normalisation"]["selected_monitor"] = "NotThere"
+        with self.assertRaises(KeyError):
+            self._setup_parser(top_level_dict)
+
+        del a2_dict["background"]
+        top_level_dict["normalisation"]["selected_monitor"] = "A2"
         with self.assertRaises(KeyError):
             self._setup_parser(top_level_dict)
 

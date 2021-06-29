@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
 
+import mantid.simpleapi as mantid
+
 from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common.message_box import warning
 
@@ -30,7 +32,7 @@ class FFTView(QtWidgets.QWidget):
         # make table
         self.FFTTable = QtWidgets.QTableWidget(self)
         self.FFTTable.resize(800, 800)
-        self.FFTTable.setRowCount(6)
+        self.FFTTable.setRowCount(9)
         self.FFTTable.setColumnCount(2)
         self.FFTTable.setColumnWidth(0, 300)
         self.FFTTable.setColumnWidth(1, 300)
@@ -49,17 +51,15 @@ class FFTView(QtWidgets.QWidget):
             self.Im_box_row,
             "Imaginary Data")
         self.Im_box = table_utils.addCheckBoxToTable(
-            self.FFTTable, False, self.Im_box_row)
+            self.FFTTable, True, self.Im_box_row)
 
         table_utils.setRowName(self.FFTTable, 2, "Imaginary Workspace")
         self.Im_ws = table_utils.addComboToTable(self.FFTTable, 2, options)
-        self.FFTTable.hideRow(2)
 
         self.shift_box_row = 3
         table_utils.setRowName(self.FFTTable, self.shift_box_row, "Auto shift")
         self.shift_box = table_utils.addCheckBoxToTable(
             self.FFTTable, True, self.shift_box_row)
-        self.FFTTable.hideRow(3)
 
         table_utils.setRowName(self.FFTTable, 4, "Shift")
         self.shift, _ = table_utils.addDoubleToTable(self.FFTTable, 0.0, 4)
@@ -67,6 +67,19 @@ class FFTView(QtWidgets.QWidget):
 
         table_utils.setRowName(self.FFTTable, 5, "Use Raw data")
         self.Raw_box = table_utils.addCheckBoxToTable(self.FFTTable, True, 5)
+
+        table_utils.setRowName(self.FFTTable, 6, "First Good Data")
+        self.x0, _ = table_utils.addDoubleToTable(self.FFTTable, 0.1, 6)
+        self.FFTTable.hideRow(6)
+
+        table_utils.setRowName(self.FFTTable, 7, "Last Good Data")
+        self.xN, _ = table_utils.addDoubleToTable(self.FFTTable, 15.0, 7)
+        self.FFTTable.hideRow(7)
+
+        table_utils.setRowName(self.FFTTable, 8, "Construct Phase Table")
+        self.phaseTable_box = table_utils.addCheckBoxToTable(
+            self.FFTTable, True, 8)
+        self.FFTTable.hideRow(8)
 
         self.FFTTable.resizeRowsToContents()
         # make advanced table options
@@ -91,7 +104,7 @@ class FFTView(QtWidgets.QWidget):
             self.FFTTableA,
             1,
             "Decay Constant (micro seconds)")
-        self.decay, _ = table_utils.addDoubleToTable(self.FFTTableA, 4.4, 1)
+        self.decay = table_utils.addDoubleToTable(self.FFTTableA, 4.4, 1)
 
         table_utils.setRowName(self.FFTTableA, 2, "Negative Padding")
         self.negativePadding = table_utils.addCheckBoxToTable(
@@ -124,11 +137,14 @@ class FFTView(QtWidgets.QWidget):
     def getLayout(self):
         return self.grid
 
+  # add data to view
     def addItems(self, options):
         self.ws.clear()
         self.ws.addItems(options)
+        self.ws.addItem("PhaseQuad")
         self.Im_ws.clear()
         self.Im_ws.addItems(options)
+        self.phaseQuadChanged()
 
     def removeIm(self, pattern):
         index = self.Im_ws.findText(pattern)
@@ -137,6 +153,18 @@ class FFTView(QtWidgets.QWidget):
     def removeRe(self, pattern):
         index = self.ws.findText(pattern)
         self.ws.removeItem(index)
+
+    def setReTo(self, name):
+        index = self.ws.findText(name)
+        if index == -1:
+            return
+        self.ws.setCurrentIndex(index)
+
+    def setImTo(self, name):
+        index = self.Im_ws.findText(name)
+        if index == -1:
+            return
+        self.Im_ws.setCurrentIndex(index)
 
     # connect signals
     def phaseCheck(self):
@@ -148,6 +176,12 @@ class FFTView(QtWidgets.QWidget):
     def buttonClick(self):
         self.buttonSignal.emit()
 
+    def getInputWS(self):
+        return self.ws.currentText()
+
+    def getInputImWS(self):
+        return self.Im_ws.currentText()
+
     # responses to commands
     def activateButton(self):
         self.button.setEnabled(True)
@@ -155,11 +189,97 @@ class FFTView(QtWidgets.QWidget):
     def deactivateButton(self):
         self.button.setEnabled(False)
 
+    def setPhaseBox(self):
+        self.FFTTable.setRowHidden(8, "PhaseQuad" not in self.getWS())
+
     def changed(self, box, row):
         self.FFTTable.setRowHidden(row, box.checkState() == QtCore.Qt.Checked)
 
     def changedHideUnTick(self, box, row):
         self.FFTTable.setRowHidden(row, box.checkState() != QtCore.Qt.Checked)
+
+    def phaseQuadChanged(self):
+        # show axis
+        self.FFTTable.setRowHidden(6, "PhaseQuad" not in self.getWS())
+        self.FFTTable.setRowHidden(7, "PhaseQuad" not in self.getWS())
+        # hide complex ws
+        self.FFTTable.setRowHidden(2, "PhaseQuad" in self.getWS())
+
+    # these are for getting inputs
+    def getRunName(self):
+        if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
+            tmpWS = mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
+        else:
+            tmpWS = mantid.AnalysisDataService.retrieve("MuonAnalysis")
+        return tmpWS.getInstrument().getName() + str(tmpWS.getRunNumber()).zfill(8)
+
+    def initFFTInput(self, run=None):
+        inputs = {}
+        inputs[
+            'InputWorkspace'] = "__ReTmp__"  #
+        inputs['Real'] = 0  # always zero
+        out = str(self.ws.currentText()).replace(";", "; ")
+        if run is None:
+            run = self.getRunName()
+        inputs['OutputWorkspace'] = run + ";" + out + ";FFT"
+        inputs["AcceptXRoundingErrors"] = True
+        return inputs
+
+    def addFFTComplex(self, inputs):
+        inputs["InputImagWorkspace"] = "__ImTmp__"
+        inputs["Imaginary"] = 0  # always zero
+
+    def addFFTShift(self, inputs):
+        inputs['AutoShift'] = False
+        inputs['Shift'] = float(self.shift.text())
+
+    def addRaw(self, inputs, key):
+        inputs[key] += "_Raw"
+
+    def getFFTRePhase(self, inputs):
+        inputs['InputWorkspace'] = "__ReTmp__"
+        inputs['Real'] = 0  # always zero
+
+    def getFFTImPhase(self, inputs):
+        inputs['InputImagWorkspace'] = "__ReTmp__"
+        inputs['Imaginary'] = 1
+
+    def initAdvanced(self):
+        inputs = {}
+        inputs["ApodizationFunction"] = str(self.apodization.currentText())
+        inputs["DecayConstant"] = float(self.decay.text())
+        inputs["NegativePadding"] = self.negativePadding.checkState()
+        inputs["Padding"] = int(self.padding.text())
+        return inputs
+
+    def ReAdvanced(self, inputs):
+        inputs['InputWorkspace'] = str(
+            self.ws.currentText()).replace(";",
+                                           "; ")
+        inputs['OutputWorkspace'] = "__ReTmp__"
+
+    def ImAdvanced(self, inputs):
+        inputs['InputWorkspace'] = str(
+            self.Im_ws.currentText()).replace(";",
+                                              "; ")
+        inputs['OutputWorkspace'] = "__ImTmp__"
+
+    def RePhaseAdvanced(self, inputs):
+        inputs['InputWorkspace'] = "__phaseQuad__"
+        inputs['OutputWorkspace'] = "__ReTmp__"
+
+    # get methods (from the GUI)
+    def getWS(self):
+        return str(self.ws.currentText()).replace(";", "; ")
+
+    def isAutoShift(self):
+        return self.shift_box.checkState() == QtCore.Qt.Checked
+
+    def isComplex(self):
+        return self.Im_box.checkState() == QtCore.Qt.Checked
+
+    def isRaw(self):
+        return self.Raw_box.checkState() == QtCore.Qt.Checked
 
     def set_raw_checkbox_state(self, state):
         if state:
@@ -187,62 +307,17 @@ class FFTView(QtWidgets.QWidget):
     def getShiftBox(self):
         return self.shift_box
 
+    def getFirstGoodData(self):
+        return float(self.x0.text())
+
+    def getLastGoodData(self):
+        return (self.xN.text())
+
+    def isNewPhaseTable(self):
+        return self.phaseTable_box.checkState() == QtCore.Qt.Checked
+
+    def isPhaseBoxShown(self):
+        return self.FFTTable.isRowHidden(8)
+
     def warning_popup(self, message):
         warning(message, parent=self)
-
-    @property
-    def workspace(self):
-        return str(self.ws.currentText())
-
-    @workspace.setter
-    def workspace(self, name):
-        index = self.ws.findText(name)
-        if index == -1:
-            return
-        self.ws.setCurrentIndex(index)
-
-    @property
-    def imaginary_workspace(self):
-        return str(self.Im_ws.currentText())
-
-    @imaginary_workspace.setter
-    def imaginary_workspace(self, name):
-        index = self.Im_ws.findText(name)
-        if index == -1:
-            return
-        self.Im_ws.setCurrentIndex(index)
-
-    @property
-    def imaginary_data(self):
-        return self.Im_box.checkState() == QtCore.Qt.Checked
-
-    @imaginary_data.setter
-    def imaginary_data(self, value):
-        if value:
-            self.Im_box.setCheckState(QtCore.Qt.Checked)
-        else:
-            self.Im_box.setCheckState(QtCore.Qt.Unchecked)
-
-    @property
-    def auto_shift(self):
-        return self.shift_box.checkState() == QtCore.Qt.Checked
-
-    @property
-    def use_raw_data(self):
-        return self.Raw_box.checkState() == QtCore.Qt.Checked
-
-    @property
-    def apodization_function(self):
-        return str(self.apodization.currentText())
-
-    @property
-    def decay_constant(self):
-        return float(self.decay.text())
-
-    @property
-    def negative_padding(self):
-        return self.negativePadding.checkState() == QtCore.Qt.Checked
-
-    @property
-    def padding_value(self):
-        return int(self.padding.text())

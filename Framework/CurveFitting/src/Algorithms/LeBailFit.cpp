@@ -693,7 +693,7 @@ API::MatrixWorkspace_sptr LeBailFit::cropWorkspace(const API::MatrixWorkspace_sp
   }
 
   // Crop workspace
-  auto cropalg = createChildAlgorithm("CropWorkspace", -1, -1, true);
+  API::IAlgorithm_sptr cropalg = this->createChildAlgorithm("CropWorkspace", -1, -1, true);
   cropalg->initialize();
 
   cropalg->setProperty("InputWorkspace", inpws);

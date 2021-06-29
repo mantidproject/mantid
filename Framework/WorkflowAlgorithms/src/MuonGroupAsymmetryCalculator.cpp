@@ -95,7 +95,7 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::removeExpDecay(const Workspac
   MatrixWorkspace_sptr outWS;
   // Remove decay
   if (inputWS) {
-    auto asym = AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr asym = AlgorithmManager::Instance().create("RemoveExpDecay");
     asym->setChild(true);
     asym->setProperty("InputWorkspace", inputWS);
     if (index > 0) {
@@ -133,7 +133,7 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::estimateAsymmetry(const Works
   MatrixWorkspace_sptr outWS;
   // calculate asymmetry
   if (inputWS) {
-    auto asym = AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
+    IAlgorithm_sptr asym = AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
     asym->setChild(true);
 
     asym->setProperty("InputWorkspace", inputWS);

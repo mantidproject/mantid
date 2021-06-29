@@ -135,7 +135,7 @@ void PSIBackgroundSubtraction::exec() {
  * @param inputWorkspace ::  Input PSI workspace which is modified inplace
  */
 void PSIBackgroundSubtraction::calculateBackgroundUsingFit(MatrixWorkspace_sptr &inputWorkspace) {
-  auto fit = setupFitAlgorithm(inputWorkspace->getName());
+  IAlgorithm_sptr fit = setupFitAlgorithm(inputWorkspace->getName());
   auto numberOfHistograms = inputWorkspace->getNumberHistograms();
   std::vector<double> backgroundValues(numberOfHistograms);
   for (size_t index = 0; index < numberOfHistograms; ++index) {
@@ -151,7 +151,7 @@ void PSIBackgroundSubtraction::calculateBackgroundUsingFit(MatrixWorkspace_sptr 
     }
   }
   // Create background workspace
-  auto wsAlg = createChildAlgorithm("CreateWorkspace", 0.7, 1.0);
+  IAlgorithm_sptr wsAlg = createChildAlgorithm("CreateWorkspace", 0.7, 1.0);
   wsAlg->setProperty<std::vector<double>>("DataX", std::vector<double>(2, 0.0));
   wsAlg->setProperty<std::vector<double>>("DataY", std::move(backgroundValues));
   wsAlg->setProperty<int>("NSpec", static_cast<int>(numberOfHistograms));
@@ -173,7 +173,7 @@ void PSIBackgroundSubtraction::calculateBackgroundUsingFit(MatrixWorkspace_sptr 
  * @return Initalised fitting algorithm
  */
 IAlgorithm_sptr PSIBackgroundSubtraction::setupFitAlgorithm(const std::string &wsName) {
-  auto fit = createChildAlgorithm("Fit");
+  IAlgorithm_sptr fit = createChildAlgorithm("Fit");
   int maxIterations = getProperty("MaxIterations");
   fit->initialize();
   fit->setProperty("Function", getFunction());

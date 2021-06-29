@@ -22,7 +22,3 @@ def retrieve_ws(name):
 
 def check_if_workspace_exist(name):
     return AnalysisDataService.doesExist(name)
-
-
-def add_ws_to_ads(name, workspace):
-    AnalysisDataService.addOrReplace(name, workspace)

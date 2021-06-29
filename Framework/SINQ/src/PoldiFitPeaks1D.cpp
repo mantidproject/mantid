@@ -138,7 +138,7 @@ void PoldiFitPeaks1D::exec() {
     PoldiPeak_sptr currentPeak = m_peaks->peak(i);
     IFunction_sptr currentProfile = getPeakProfile(currentPeak);
 
-    auto fit = getFitAlgorithm(dataWorkspace, currentPeak, currentProfile);
+    IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, currentPeak, currentProfile);
 
     bool fitSuccess = fit->execute();
 
@@ -161,7 +161,7 @@ IAlgorithm_sptr PoldiFitPeaks1D::getFitAlgorithm(const Workspace2D_sptr &dataWor
 
   std::pair<double, double> xBorders(peak->q() - extent, peak->q() + extent);
 
-  auto fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
+  IAlgorithm_sptr fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
   fitAlgorithm->setProperty("CreateOutput", true);
   fitAlgorithm->setProperty("Output", "FitPeaks1D");
   fitAlgorithm->setProperty("CalcErrors", true);

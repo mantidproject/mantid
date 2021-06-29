@@ -6,6 +6,8 @@ Mocking Exercise Solution
 
 .. code-block:: python
 
+    from __future__ import (absolute_import, division, print_function)
+
     import sys
     import presenter
     import view

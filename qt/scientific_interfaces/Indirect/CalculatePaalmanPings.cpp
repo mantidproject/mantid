@@ -45,8 +45,8 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   std::map<std::string, std::string> actions;
   actions["Plot Spectra"] = "Plot Wavelength";
   actions["Plot Bins"] = "Plot Angle";
-  setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin, "", actions));
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this,
+                                                                               PlotWidget::SpectraBin, "", actions));
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(getBeamWidthFromWorkspace(const QString &)));

@@ -52,13 +52,21 @@ Unfortunately CMake can't find it out of the box and the following steps are req
 * create a new string value named ``InstallPath`` within this key and set the value
   to point to the install directory of Graphviz.
 
-Windows Subsystem for Linux (WSL2)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-It is also possible to install a Linux subsystem within Windows by following :ref:`these <WindowsSubsystemForLinux>` instructions. This step is optional.
-
 Linux
 -----
+
+The goal of this section is to (in broad terms) get to the state where one can build and run a subset of tests
+
+.. code-block:: sh
+
+   git clone git@github.com:mantidproject/mantid.git
+   cd mantid
+   mkdir build  # this makes an in-source build
+   cd build
+   cmake3 -GNinja ../  # wrap in scl enable on RHEL7
+   ninja all AlgorithmsTest  # ninja-build on RHEL7
+   ctest -R ^AlgorithmsTest --output-on-failure
+
 
 Red Hat/Cent OS/Fedora
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -84,18 +92,6 @@ Red Hat/Cent OS/Fedora
 On fedora, the ``yum`` commands should be replaced with ``dnf``.
 For systems with default python3 the ``pip3`` command can be replaced with ``pip``, but it should work either way.
 
-Make sure you install `devtoolset-7 <https://developer.mantidproject.org/BuildingWithCMake.html#from-the-command-line>`_ as described in the link.
-
-Now you can `get the mantid code <https://developer.mantidproject.org/GettingStarted.html#getting-the-mantid-code>`_, and build it:
-
-.. code-block:: sh
-
-  mkdir build
-  cd build
-  scl enable devtoolset-7 "cmake3 [mantid source]"
-  cmake3 --build .
-
-See the instructions on :ref:`this <RunningTheUnitTests>` page to run the Mantid unit tests.
 
 Ubuntu 18.04
 ~~~~~~~~~~~~
@@ -109,8 +105,8 @@ Ubuntu 18.04
 
 .. code-block:: sh
 
-  apt install gdebi-core
-  gdebi ~/Downloads/mantid-developer.X.Y.Z.deb
+   apt install gdebi-core
+   gdebi ~/Downloads/mantid-developer.X.Y.Z.deb
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
@@ -118,20 +114,9 @@ Install pre-commit for use in our current developer workflow
 
 .. code-block:: sh
 
-  pip install pre-commit --user
+   pip install pre-commit --user
 
 if you wish to setup eclipse for use developing mantid, then instructions can be found :ref:`here <Eclipse>`.
-
-Now you can `get the mantid code <https://developer.mantidproject.org/GettingStarted.html#getting-the-mantid-code>`_, and build it:
-
-.. code-block:: sh
-
-  mkdir build
-  cd build
-  cmake -GNinja [mantid source]
-  cmake --build .
-
-See the instructions on :ref:`this <RunningTheUnitTests>` page to run the Mantid unit tests.
 
 Ubuntu 20.04
 ~~~~~~~~~~~~

@@ -257,7 +257,7 @@ void Stitch1DMany::exec() {
       }
     }
 
-    auto groupAlg = createChildAlgorithm("GroupWorkspaces");
+    IAlgorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
     groupAlg->initialize();
     groupAlg->setAlwaysStoreInADS(true);
     groupAlg->setProperty("InputWorkspaces", toGroup);
@@ -298,7 +298,7 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
       scaleRHSWorkspace = true; // after scaling to the desired ws, keep the scaling
     }
 
-    auto alg = createChildAlgorithm("Stitch1D");
+    IAlgorithm_sptr alg = createChildAlgorithm("Stitch1D");
     alg->initialize();
     alg->setProperty("LHSWorkspace", lhsWS);
     alg->setProperty("RHSWorkspace", rhsWS);
@@ -351,7 +351,7 @@ void Stitch1DMany::doStitch1DMany(const size_t period, const bool useManualScale
     outName += "_" + wsName;
   }
 
-  auto alg = createChildAlgorithm("Stitch1DMany");
+  IAlgorithm_sptr alg = createChildAlgorithm("Stitch1DMany");
   alg->initialize();
   alg->setAlwaysStoreInADS(storeInADS);
   alg->setProperty("InputWorkspaces", toProcess);

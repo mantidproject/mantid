@@ -56,7 +56,9 @@ class DrillExportModel:
         Args:
             acquisitionMode (str): acquisition mode
         """
-        self._exportAlgorithms = {k: v for k, v in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
+        self._exportAlgorithms = {k:v
+                for k,v
+                in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
         self._exportExtensions = dict()
         self._exportDocs = dict()
         for a in self._exportAlgorithms.keys():

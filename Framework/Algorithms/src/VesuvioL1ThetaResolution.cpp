@@ -243,7 +243,7 @@ void VesuvioL1ThetaResolution::loadInstrument() {
   const std::string vesuvioIPF = InstrumentFileFinder::getInstrumentFilename("VESUVIO");
 
   // Load an empty VESUVIO instrument workspace
-  auto loadInst = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  IAlgorithm_sptr loadInst = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadInst->initialize();
   loadInst->setChild(true);
   loadInst->setLogging(false);
@@ -284,7 +284,7 @@ void VesuvioL1ThetaResolution::loadInstrument() {
     g_log.debug() << "PAR file header format: " << headerFormat << '\n';
 
     // Update instrument
-    auto updateInst = AlgorithmManager::Instance().create("UpdateInstrumentFromFile");
+    IAlgorithm_sptr updateInst = AlgorithmManager::Instance().create("UpdateInstrumentFromFile");
     updateInst->initialize();
     updateInst->setChild(true);
     updateInst->setLogging(false);
@@ -301,7 +301,7 @@ void VesuvioL1ThetaResolution::loadInstrument() {
   const int specIdxMax = static_cast<int>(m_instWorkspace->getIndexFromSpectrumNumber(getProperty("SpectrumMax")));
 
   // Crop the workspace to just the detectors we are interested in
-  auto crop = AlgorithmManager::Instance().create("CropWorkspace");
+  IAlgorithm_sptr crop = AlgorithmManager::Instance().create("CropWorkspace");
   crop->initialize();
   crop->setChild(true);
   crop->setLogging(false);
@@ -402,7 +402,7 @@ MatrixWorkspace_sptr VesuvioL1ThetaResolution::processDistribution(MatrixWorkspa
   std::stringstream binParams;
   binParams << xMin << "," << binWidth << "," << xMax;
 
-  auto rebin = AlgorithmManager::Instance().create("Rebin");
+  IAlgorithm_sptr rebin = AlgorithmManager::Instance().create("Rebin");
   rebin->initialize();
   rebin->setChild(true);
   rebin->setLogging(false);

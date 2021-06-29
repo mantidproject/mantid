@@ -137,7 +137,7 @@ void LoadMuonNexus::checkOptionalProperties() {
 /// Run the Child Algorithm LoadInstrument
 void LoadMuonNexus::runLoadInstrument(const DataObjects::Workspace2D_sptr &localWorkspace) {
 
-  auto loadInst = createChildAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {

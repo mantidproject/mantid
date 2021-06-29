@@ -586,7 +586,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(const Mat
 
   const std::string corrAlgName = getProperty("CorrectionAlgorithm");
 
-  auto corrAlg = createChildAlgorithm(corrAlgName);
+  IAlgorithm_sptr corrAlg = createChildAlgorithm(corrAlgName);
   corrAlg->initialize();
   if (corrAlgName == "PolynomialCorrection") {
     corrAlg->setPropertyValue("Coefficients", getPropertyValue("Polynomial"));

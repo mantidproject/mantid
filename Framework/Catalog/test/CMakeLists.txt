@@ -9,8 +9,7 @@ if(CXXTEST_FOUND)
   target_link_libraries(CatalogTest
                         LINK_PRIVATE
                         ${MANTIDLIBS}
-                        Catalog
-                        gmock)
+                        Catalog)
   add_dependencies(FrameworkTests CatalogTest)
 
   # Add to the 'FrameworkTests' group in VS

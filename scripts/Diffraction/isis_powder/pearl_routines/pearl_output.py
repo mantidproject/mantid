@@ -14,10 +14,8 @@ from isis_powder.pearl_routines import pearl_algs
 
 def generate_and_save_focus_output(instrument, processed_spectra, run_details, attenuation_filepath, focus_mode):
     output_file_paths = instrument._generate_out_file_paths(run_details=run_details)
-    if instrument._inst_settings.tt_mode=="custom":
-        processed_nexus_files = _focus_mode_mods(output_file_paths=output_file_paths,
-                                                   calibrated_spectra=processed_spectra)
-    elif focus_mode == "all":
+
+    if focus_mode == "all":
         processed_nexus_files = _focus_mode_all(output_file_paths=output_file_paths,
                                                 processed_spectra=processed_spectra,
                                                 attenuation_filepath=attenuation_filepath)
@@ -42,8 +40,7 @@ def _focus_mode_all(output_file_paths, processed_spectra, attenuation_filepath):
     summed_spectra = mantid.MergeRuns(InputWorkspaces=processed_spectra[:9], OutputWorkspace=summed_spectra_name)
     xList = summed_spectra.readX(0)
 
-    summed_spectra = mantid.CropWorkspace(InputWorkspace=summed_spectra, XMin=xList[1], Xmax=xList[-2],
-                                          OutputWorkspace=summed_spectra_name)
+    summed_spectra = mantid.CropWorkspace(InputWorkspace=summed_spectra, XMin=xList[1], Xmax=xList[-2])
     summed_spectra = mantid.Scale(InputWorkspace=summed_spectra, Factor=0.111111111111111,
                                   OutputWorkspace=summed_spectra_name)
     if attenuation_filepath:

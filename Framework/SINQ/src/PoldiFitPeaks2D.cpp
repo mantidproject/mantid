@@ -352,7 +352,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getCountPeakCollection(const PoldiPeak
 PoldiPeak_sptr PoldiFitPeaks2D::getPeakFromPeakFunction(const IPeakFunction_sptr &profileFunction, const V3D &hkl) {
 
   // Use EstimatePeakErrors to calculate errors of FWHM and so on
-  auto errorAlg = createChildAlgorithm("EstimatePeakErrors");
+  IAlgorithm_sptr errorAlg = createChildAlgorithm("EstimatePeakErrors");
   errorAlg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(profileFunction));
   errorAlg->setPropertyValue("OutputWorkspace", "Errors");
   errorAlg->execute();
@@ -581,7 +581,7 @@ std::string PoldiFitPeaks2D::getRefinedStartingCell(const std::string &initialCe
 
   TableWorkspace_sptr peakTable = clone->asTableWorkspace();
 
-  auto fit = createChildAlgorithm("Fit");
+  IAlgorithm_sptr fit = createChildAlgorithm("Fit");
   fit->setProperty("Function", std::static_pointer_cast<IFunction>(latticeFunction));
   fit->setProperty("InputWorkspace", peakTable);
   fit->setProperty("CostFunction", "Unweighted least squares");
@@ -897,7 +897,7 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(const std::vector<PoldiPeakCo
   // And finally background terms
   addBackgroundTerms(mdFunction);
 
-  auto fit = createChildAlgorithm("Fit", -1, -1, true);
+  IAlgorithm_sptr fit = createChildAlgorithm("Fit", -1, -1, true);
 
   if (!fit) {
     throw std::runtime_error("Could not initialize 'Fit'-algorithm.");
@@ -1146,7 +1146,7 @@ void PoldiFitPeaks2D::exec() {
   }
 
   // Perform 2D-fit and return Fit algorithm to extract various information
-  auto fitAlgorithm = calculateSpectrum(peakCollections, ws);
+  IAlgorithm_sptr fitAlgorithm = calculateSpectrum(peakCollections, ws);
 
   // The FitFunction is used to generate...
   IFunction_sptr fitFunction = getFunction(fitAlgorithm);

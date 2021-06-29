@@ -71,7 +71,7 @@ void DgsRemap::exec() {
 void DgsRemap::execMasking(const MatrixWorkspace_sptr &iWS) {
   MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
   if (maskWS) {
-    auto mask = createChildAlgorithm("MaskDetectors");
+    IAlgorithm_sptr mask = this->createChildAlgorithm("MaskDetectors");
     mask->setProperty("Workspace", iWS);
     mask->setProperty("MaskedWorkspace", maskWS);
     mask->executeAsChildAlg();
@@ -86,7 +86,7 @@ void DgsRemap::execGrouping(const MatrixWorkspace_sptr &iWS, MatrixWorkspace_spt
   }
 
   if (groupWS || !oldGroupingFile.empty()) {
-    auto group = createChildAlgorithm("GroupDetectors");
+    IAlgorithm_sptr group = this->createChildAlgorithm("GroupDetectors");
     group->setProperty("InputWorkspace", iWS);
     group->setProperty("OutputWorkspace", iWS);
     if (groupWS) {

@@ -415,7 +415,7 @@ def calc_absorption_corr_using_wksp(
         raise ValueError("Unrecognized absorption correction method '{}'".format(abs_method))
 
 
-def create_absorption_input(   # noqa: C901
+def create_absorption_input(
     filename,
     props,
     num_wl_bins=1000,
@@ -518,8 +518,8 @@ def create_absorption_input(   # noqa: C901
             material['ChemicalFormula'] = absorptionWS.run()['SampleFormula'].lastValue().strip()
         if ("SampleMassDensity" not in material
                 or not material['SampleMassDensity']) and ("SampleDensity" in absorptionWS.run()):
-            if absorptionWS.run()['SampleDensity'].lastValue() != 1.0 \
-                    and absorptionWS.run()['SampleDensity'].lastValue() != 0.0:
+            if (absorptionWS.run()['SampleDensity'].lastValue() !=
+                    1.0) and (absorptionWS.run()['SampleDensity'].lastValue() != 0.0):
                 material['SampleMassDensity'] = absorptionWS.run()['SampleDensity'].lastValue()
             else:
                 material['Mass'] = absorptionWS.run()['SampleMass'].lastValue()

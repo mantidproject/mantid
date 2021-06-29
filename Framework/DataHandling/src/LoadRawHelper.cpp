@@ -546,7 +546,7 @@ void LoadRawHelper::runLoadInstrument(const std::string &fileName, const DataObj
   if (i != std::string::npos)
     instrumentID.erase(i);
 
-  auto loadInst = createChildAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   // Enable progress reporting by Child Algorithm -
   loadInst->addObserver(this->progressObserver());
   setChildStartProgress(progStart);
@@ -581,7 +581,7 @@ void LoadRawHelper::runLoadInstrument(const std::string &fileName, const DataObj
           pmap.get(localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
       std::string value = updateDets->value<std::string>();
       if (value.substr(0, 8) == "datafile") {
-        auto updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
+        IAlgorithm_sptr updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
         updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
         updateInst->setPropertyValue("Filename", fileName);
         updateInst->addObserver(this->progressObserver()); // Enable progress
@@ -617,7 +617,7 @@ void LoadRawHelper::runLoadInstrument(const std::string &fileName, const DataObj
 /// @param localWorkspace :: The workspace to load the instrument for
 void LoadRawHelper::runLoadInstrumentFromRaw(const std::string &fileName,
                                              const DataObjects::Workspace2D_sptr &localWorkspace) {
-  auto loadInst = createChildAlgorithm("LoadInstrumentFromRaw");
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrumentFromRaw");
   loadInst->setPropertyValue("Filename", fileName);
   // Set the workspace property to be the same one filled above
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
@@ -648,7 +648,7 @@ void LoadRawHelper::runLoadMappingTable(const std::string &fileName,
   // Now determine the spectra to detector map calling Child Algorithm
   // LoadMappingTable
   // There is a small penalty in re-opening the raw file but nothing major.
-  auto loadmap = createChildAlgorithm("LoadMappingTable");
+  IAlgorithm_sptr loadmap = createChildAlgorithm("LoadMappingTable");
   loadmap->setPropertyValue("Filename", fileName);
   loadmap->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
   try {
@@ -696,7 +696,7 @@ void LoadRawHelper::runLoadLog(const std::string &fileName, const DataObjects::W
     }
 
     // Create a new object for each log file.
-    auto loadLog = createChildAlgorithm("LoadLog");
+    IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
 
     // Pass through the same input filename
     loadLog->setPropertyValue("Filename", *logPath);

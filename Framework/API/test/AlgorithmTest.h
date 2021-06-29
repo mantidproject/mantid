@@ -348,8 +348,9 @@ public:
     // Set the properties so that we know what they are
     alg.setPropertyValue("prop1", "value1");
     alg.setProperty("prop2", 5);
-    std::string expected =
-        "{\"name\":\"ToyAlgorithm\",\"properties\":{\"prop1\":\"value1\",\"prop2\":5},\"version\":1}";
+    std::string expected = "{\"name\":\"ToyAlgorithm\",\"properties\":{"
+                           "\"prop1\":\"value1\",\"prop2\":5},\"version\":"
+                           "1}\n";
     TS_ASSERT_EQUALS(alg.toString(), expected);
   }
 
@@ -359,30 +360,30 @@ public:
   }
 
   void test_Construction_Via_Valid_String_With_No_Properties() {
-    auto testAlg = runFromString(R"({"name":"ToyAlgorithm"})");
+    IAlgorithm_sptr testAlg = runFromString(R"({"name":"ToyAlgorithm"})");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
   }
 
   void test_Construction_Via_Valid_String_With_Version() {
-    auto testAlg = runFromString("{\"name\":\"ToyAlgorithm\","
-                                 "\"version\":1}");
+    IAlgorithm_sptr testAlg = runFromString("{\"name\":\"ToyAlgorithm\","
+                                            "\"version\":1}");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 1);
   }
 
   void test_Construction_Via_Valid_String_With_Version_And_Empty_Props() {
-    auto testAlg = runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{"
-                                 "},\"version\":1}\n");
+    IAlgorithm_sptr testAlg = runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{"
+                                            "},\"version\":1}\n");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 1);
   }
 
   void test_Construction_Via_Valid_String_With_Set_Properties_And_Version() {
 
-    auto testAlg = runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{\"Binning\":"
-                                 "\"0.2,0.2,1.4\",\"prop1\":\"val1\",\"prop2\":\"8\","
-                                 "\"prop3\":\"10\"},\"version\":2}\n");
+    IAlgorithm_sptr testAlg = runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{\"Binning\":"
+                                            "\"0.2,0.2,1.4\",\"prop1\":\"val1\",\"prop2\":\"8\","
+                                            "\"prop3\":\"10\"},\"version\":2}\n");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
 
@@ -417,8 +418,8 @@ public:
   }
 
   void test_Construction_Via_Valid_String_With_Single_Property_And_Version() {
-    auto testAlg = runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{"
-                                 "\"prop3\":\"10.0\"},\"version\":2}\n");
+    IAlgorithm_sptr testAlg = runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{"
+                                            "\"prop3\":\"10.0\"},\"version\":2}\n");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
 
@@ -437,8 +438,8 @@ public:
   }
 
   void test_Construction_Via_Valid_String_With_Single_Property_Array() {
-    auto testAlg = runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{"
-                                 "\"Binning\":\"0.2,0.2,1.4\"},\"version\":2}\n");
+    IAlgorithm_sptr testAlg = runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{"
+                                            "\"Binning\":\"0.2,0.2,1.4\"},\"version\":2}\n");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
 
@@ -452,7 +453,7 @@ public:
   }
 
   void test_Construction_Via_Valid_String_With_Empty_Properties() {
-    auto testAlg = runFromString(("{\"name\":\"ToyAlgorithm\",\"properties\":{}}\n"));
+    IAlgorithm_sptr testAlg = runFromString(("{\"name\":\"ToyAlgorithm\",\"properties\":{}}\n"));
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
     try {

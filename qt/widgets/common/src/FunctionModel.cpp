@@ -217,7 +217,7 @@ QStringList FunctionModel::getAttributeNames() const {
   QStringList names;
   if (hasFunction()) {
     const auto attributeNames = getCurrentFunction()->getAttributeNames();
-    for (auto const &name : attributeNames) {
+    for (auto const name : attributeNames) {
       names << QString::fromStdString(name);
     }
   }

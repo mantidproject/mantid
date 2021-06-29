@@ -275,7 +275,7 @@ public:
     origWS->sortAll(TOF_SORT, nullptr);
     ws->sortAll(TOF_SORT, nullptr);
 
-    auto alg2 = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+    IAlgorithm_sptr alg2 = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
     alg2->initialize();
     alg2->setProperty<MatrixWorkspace_sptr>("Workspace1", origWS);
     alg2->setProperty<MatrixWorkspace_sptr>("Workspace2", ws);
@@ -1383,7 +1383,7 @@ private:
     }
 
     // Save workspace
-    auto save = AlgorithmManager::Instance().create("SaveNexusProcessed");
+    IAlgorithm_sptr save = AlgorithmManager::Instance().create("SaveNexusProcessed");
     save->initialize();
     TS_ASSERT(save->isInitialized());
     TS_ASSERT_THROWS_NOTHING(save->setProperty("InputWorkspace", inputWs));
@@ -1391,7 +1391,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(save->execute());
 
     // Load workspace
-    auto load = AlgorithmManager::Instance().create("LoadNexusProcessed");
+    IAlgorithm_sptr load = AlgorithmManager::Instance().create("LoadNexusProcessed");
     load->initialize();
     TS_ASSERT(load->isInitialized());
     TS_ASSERT_THROWS_NOTHING(load->setPropertyValue("Filename", "TestSaveAndLoadNexusProcessed.nxs"));
@@ -1452,7 +1452,7 @@ private:
     }
 
     // Save workspace
-    auto save = AlgorithmManager::Instance().create("SaveNexusProcessed");
+    IAlgorithm_sptr save = AlgorithmManager::Instance().create("SaveNexusProcessed");
     save->initialize();
     TS_ASSERT(save->isInitialized());
     TS_ASSERT_THROWS_NOTHING(save->setProperty("InputWorkspace", inputWs));
@@ -1460,7 +1460,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(save->execute());
 
     // Load workspace
-    auto load = AlgorithmManager::Instance().create("LoadNexusProcessed");
+    IAlgorithm_sptr load = AlgorithmManager::Instance().create("LoadNexusProcessed");
     load->initialize();
     TS_ASSERT(load->isInitialized());
     TS_ASSERT_THROWS_NOTHING(load->setPropertyValue("Filename", "TestSaveAndLoadNexusProcessed.nxs"));

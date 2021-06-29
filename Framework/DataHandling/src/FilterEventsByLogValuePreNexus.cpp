@@ -739,7 +739,7 @@ void FilterEventsByLogValuePreNexus::runLoadInstrument(const std::string &eventf
   instrument = instrument.substr(0, pos);
 
   // do the actual work
-  auto loadInst = createChildAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   loadInst->setPropertyValue("InstrumentName", instrument);

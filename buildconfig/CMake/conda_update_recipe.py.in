@@ -31,7 +31,7 @@ def update_meta_yaml(repo_path, recipe_path=None):
     body = content[2:]
     # if nothing changed just exit
     if header == old_header:
-        print("Nothing changed. Skipping.")
+        print "Nothing changed. Skipping."
         return False
     open(path, 'wt').write('\n'.join(header+body))
     return True

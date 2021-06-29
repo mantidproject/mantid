@@ -9,8 +9,6 @@ from sys import platform
 import numpy as np
 from Direct.AbsorptionShapes import *
 from Direct.PropertyManager import PropertyManager
-from Direct.RunDescriptor import RunDescriptor
-
 
 from mantid import api
 from mantid.simpleapi import *
@@ -1296,21 +1294,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         os.remove(test_file)
 
-    #
-    def test_get_property_class(self):
-        propman = self.prop_man
-
-        p1 = propman.get_prop_class('empty_bg_run')
-
-        self.assertTrue(isinstance(p1,RunDescriptor))
-        self.assertEqual(p1._prop_name,'EBG_')
-        self.assertTrue(p1.run_number() is None)
-
-        propman.empty_bg_run = 1024
-        self.assertEqual(p1.run_number(),1024)
-
 
 if __name__ == "__main__":
-    #tester = DirectPropertyManagerTest('test_get_property')
+    #tester = DirectPropertyManagerTest('test_lastrun_log_default')
     #tester.run()
     unittest.main()

@@ -346,7 +346,7 @@ MatrixWorkspace_sptr Integration::getInputWorkspace() {
   if (temp->id() == "RebinnedOutput") {
     // Clean the input workspace in the RebinnedOutput case for nan's and
     // inf's in order to treat the data correctly later.
-    auto alg = createChildAlgorithm("ReplaceSpecialValues");
+    IAlgorithm_sptr alg = this->createChildAlgorithm("ReplaceSpecialValues");
     alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", temp);
     std::string outName = "_" + temp->getName() + "_clean";
     alg->setProperty("OutputWorkspace", outName);

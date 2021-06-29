@@ -35,12 +35,8 @@ if(CXXTEST_FOUND)
                         PythonInterfaceCore
                         PythonKernelModule
                         PythonAPIModule
-                        gmock
-                        ${OpenGL_LIBRARIES}
-                        ${TBB_LIBRARIES}
                         ${Boost_LIBRARIES}
-                        ${POCO_LIBRARIES}
-                        Python::Python)
+                        ${POCO_LIBRARIES})
 
   add_dependencies(FrameworkTests ${_pythoninterface_test_target_name})
   # Add to the 'UnitTests' group in VS

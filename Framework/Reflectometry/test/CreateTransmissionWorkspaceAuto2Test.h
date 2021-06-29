@@ -52,7 +52,7 @@ public:
   CreateTransmissionWorkspaceAuto2Test() {
     FrameworkManager::Instance();
 
-    auto lAlg = AlgorithmManager::Instance().create("Load");
+    IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
     lAlg->setChild(true);
     lAlg->initialize();
     lAlg->setProperty("Filename", "INTER00013463.nxs");
@@ -72,7 +72,7 @@ public:
 
   void test_exec() {
 
-    auto alg = AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
     alg->setRethrows(true);
     alg->initialize();
 

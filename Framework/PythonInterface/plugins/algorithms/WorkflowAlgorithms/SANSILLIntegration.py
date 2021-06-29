@@ -11,7 +11,6 @@ from mantid.kernel import EnabledWhenProperty, FloatArrayProperty, Direction, St
     FloatArrayLengthValidator, CompositeValidator
 from mantid.simpleapi import *
 from MildnerCarpenter import *
-from DirectBeamResolution import *
 import numpy as np
 
 
@@ -23,7 +22,6 @@ class SANSILLIntegration(PythonAlgorithm):
     _resolution = ''
     _masking_criterion = ''
     _lambda_range = []
-    _is_tof = False
 
     def category(self):
         return 'ILL\\SANS'
@@ -83,7 +81,7 @@ class SANSILLIntegration(PythonAlgorithm):
 
         self.declareProperty(name='CalculateResolution',
                              defaultValue='None',
-                             validator=StringListValidator(['MildnerCarpenter', 'DirectBeam', 'None']),
+                             validator=StringListValidator(['MildnerCarpenter', 'None']),
                              doc='Choose to calculate the Q resolution.')
 
         output_iq = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'I(Q)')
@@ -190,8 +188,8 @@ class SANSILLIntegration(PythonAlgorithm):
         self._resolution = self.getPropertyValue('CalculateResolution')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._lambda_range = self.getProperty('WavelengthRange').value
-        self._is_tof = mtd[self._input_ws].getRun().getLogData('tof_mode').value == 'TOF' # D33 only
-        if self._is_tof:
+        is_tof = mtd[self._input_ws].getRun().getLogData('tof_mode').value == 'TOF' # D33 only
+        if is_tof:
             cut_input_ws = self._input_ws+'_cut'
             CropWorkspaceRagged(InputWorkspace=self._input_ws,
                                 OutputWorkspace=cut_input_ws,
@@ -218,7 +216,7 @@ class SANSILLIntegration(PythonAlgorithm):
                 panel_outputs.append(out_ws)
             GroupWorkspaces(InputWorkspaces=panel_outputs, OutputWorkspace=panels_out_ws)
             self.setProperty('PanelOutputWorkspaces', mtd[panels_out_ws])
-        if self._is_tof:
+        if is_tof:
             DeleteWorkspace(self._input_ws)
 
     def _integrate(self, in_ws, out_ws, panel=None):
@@ -329,23 +327,18 @@ class SANSILLIntegration(PythonAlgorithm):
             y3 = instrument.getNumberParameter('y-pixel-size')[0] / 1000
         else:
             raise RuntimeError('Unable to calculate resolution, missing pixel size.')
-        if 'selector.wavelength_res' in run:
-            delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
-        elif 'selector.wave_lenght_res' in run:
-            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # sic! log name for at least some D22 data
-        else:
-            raise RuntimeError("Wavelength resolution log not available.")
+        delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
         if run.hasProperty('collimation.sourceAperture'):
             source_aperture = run.getLogData('collimation.sourceAperture').value
         elif run.hasProperty('collimation.ap_size'):
             source_aperture = str(run.getLogData('collimation.ap_size').value)
-        elif run.hasProperty('collimation.apt_size_1'): # D22
-            source_aperture = str(run.getLogData('collimation.apt_size_1').value)
         else:
             raise RuntimeError('Unable to calculate resolution, missing source aperture size.')
+        is_tof = False
         if not run.hasProperty('tof_mode'):
             self.log().information('No TOF flag available, assuming monochromatic.')
-
+        else:
+            is_tof = run.getLogData('tof_mode').value == 'TOF'
         to_meter = 0.001
         is_rectangular = True
         if 'x' not in source_aperture:
@@ -358,7 +351,7 @@ class SANSILLIntegration(PythonAlgorithm):
             y1 = float(source_aperture[pos2 + 1:pos3]) * to_meter
             x2 = run.getLogData('Beam.sample_ap_x_or_diam').value * to_meter
             y2 = run.getLogData('Beam.sample_ap_y').value * to_meter
-            if self._is_tof:
+            if is_tof:
                 raise RuntimeError('TOF resolution is not supported yet')
             else:
                 self._deltaQ = MonochromaticScalarQCartesian(wavelength, delta_wavelength, x1, y1, x2, y2, x3, y3, l1, l2)
@@ -369,27 +362,10 @@ class SANSILLIntegration(PythonAlgorithm):
                 source_aperture = source_aperture[pos1:pos3]
             r1 = float(source_aperture) * to_meter
             r2 = run.getLogData('Beam.sample_ap_x_or_diam').value * to_meter
-            if self._is_tof:
+            if is_tof:
                 raise RuntimeError('TOF resolution is not supported yet')
             else:
                 self._deltaQ = MonochromaticScalarQCylindric(wavelength, delta_wavelength, r1, r2, x3, y3, l1, l2)
-
-    def _resolution_direct_beam(self):
-        if self._is_tof:
-            raise RuntimeError('TOF resolution is not supported yet')
-        run = mtd[self._input_ws].getRun()
-        wavelength = run.getLogData('wavelength').value
-        if 'selector.wavelength_res' in run:
-            delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
-        elif 'selector.wave_lenght_res' in run:
-            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # sic! log name for at least some D22 data
-        else:
-            raise RuntimeError("Wavelength resolution log not available.")
-        if 'BeamWidthX' in run:
-            beam_width = run.getLogData('BeamWidthX').value
-        else:
-            raise RuntimeError("BeamWidthX log not available. Have you provided empty beam measurement?")
-        self._deltaQ = DirectBeamResolution(wavelength, delta_wavelength, beam_width)
 
     def _integrate_iqxy(self, ws_in, ws_out):
         """
@@ -419,8 +395,6 @@ class SANSILLIntegration(PythonAlgorithm):
         """
         if self._resolution == 'MildnerCarpenter':
             self._setup_mildner_carpenter()
-        elif self._resolution == 'DirectBeam':
-            self._resolution_direct_beam()
         run = mtd[ws_in].getRun()
         q_min_name = 'qmin'
         q_max_name = 'qmax'
@@ -466,7 +440,7 @@ class SANSILLIntegration(PythonAlgorithm):
                 # if there is a shape table, the final number of wedges cannot be known beforehand
                 # (because of possible symmetry issues)
                 n_wedges = mtd[wedge_ws].size()
-            if self._resolution != 'None':
+            if self._resolution == 'MildnerCarpenter':
                 x = mtd[ws_out].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)
@@ -492,7 +466,7 @@ class SANSILLIntegration(PythonAlgorithm):
             ConjoinSpectra(InputWorkspaces=wedge_ws, OutputWorkspace=ws_out)
             mtd[ws_out].replaceAxis(1, azimuth_axis)
             DeleteWorkspace(wedge_ws)
-            if self._resolution != 'None':
+            if self._resolution == 'MildnerCarpenter':
                 x = mtd[ws_out].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)

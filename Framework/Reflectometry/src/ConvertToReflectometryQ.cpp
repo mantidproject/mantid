@@ -411,7 +411,7 @@ MatrixWorkspace_sptr ConvertToReflectometryQ::correctDetectors(MatrixWorkspace_s
 
   MatrixWorkspace_sptr outWS = inputWs;
   for (const auto &component : componentsToMove) {
-    auto alg = createChildAlgorithm("SpecularReflectionPositionCorrect");
+    IAlgorithm_sptr alg = createChildAlgorithm("SpecularReflectionPositionCorrect");
     alg->setProperty("InputWorkspace", outWS);
     alg->setProperty("TwoTheta", theta);
     alg->setProperty("DetectorComponentName", component);

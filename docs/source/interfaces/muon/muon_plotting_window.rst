@@ -49,5 +49,6 @@ Plotting Options
 
 **Errors** Whether to display errors for the workspaces plotted on the selected axes.
 
+
 :ref:`Muon Analysis <Muon_Analysis-ref>`
-:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>`
+:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`

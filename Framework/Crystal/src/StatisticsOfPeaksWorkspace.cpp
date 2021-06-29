@@ -190,7 +190,7 @@ void StatisticsOfPeaksWorkspace::doSortHKL(const Mantid::API::Workspace_sptr &ws
   std::string equivalentIntensities = getPropertyValue("EquivalentIntensities");
   double sigmaCritical = getProperty("SigmaCritical");
   bool weightedZ = getProperty("WeightedZScore");
-  auto statsAlg = createChildAlgorithm("SortHKL");
+  API::IAlgorithm_sptr statsAlg = createChildAlgorithm("SortHKL");
   statsAlg->setProperty("InputWorkspace", ws);
   statsAlg->setPropertyValue("OutputWorkspace", wkspName);
   statsAlg->setPropertyValue("StatisticsTable", tableName);

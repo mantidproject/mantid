@@ -1,9 +1,9 @@
-.. _Frequency_Domain_Analysis-ref:
+.. _Frequency_Domain_Analysis_2-ref:
 
 Frequency Domain Analysis
 =========================
 
-.. image::  ../../images/frequency_domain_analysis.png
+.. image::  ../../images/frequency_domain_analysis_2.png
    :align: right
    :height: 400px
 

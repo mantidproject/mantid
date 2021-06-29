@@ -43,7 +43,7 @@ void RayTracerTester::init() {
 /** Execute the algorithm.
  */
 void RayTracerTester::exec() {
-  auto alg = createChildAlgorithm("LoadEmptyInstrument", 0.0, 0.3, true);
+  IAlgorithm_sptr alg = this->createChildAlgorithm("LoadEmptyInstrument", 0.0, 0.3, true);
   alg->setPropertyValue("Filename", getPropertyValue("Filename"));
   alg->executeAsChildAlg();
 

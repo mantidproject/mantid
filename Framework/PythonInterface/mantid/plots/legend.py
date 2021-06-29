@@ -10,6 +10,8 @@
 """
 Functionality for dealing with legends on plots
 """
+import sys
+
 import matplotlib
 from matplotlib import colors
 from matplotlib.patches import BoxStyle

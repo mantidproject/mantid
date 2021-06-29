@@ -6,11 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/IAlgorithmProgressWidget.h"
 
 #include <boost/enable_shared_from_this.hpp>
 #include <gmock/gmock.h>
 #include <memory>
+
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 using namespace testing;
 using namespace MantidQt::MantidWidgets;
@@ -19,8 +23,15 @@ class QWidget;
 
 class MockAlgorithmProgressWidget : public IAlgorithmProgressWidget {
 public:
-  MOCK_METHOD(void, algorithmStarted, (), (override));
-  MOCK_METHOD(void, algorithmEnded, (), (override));
-  MOCK_METHOD(void, updateProgress, (const double, const QString &, const double, const int), (override));
-  MOCK_METHOD(void, showDetailsDialog, (), (override));
+  MockAlgorithmProgressWidget() {
+    m_presenter = std::make_shared<AlgorithmProgressPresenter>(static_cast<QWidget *>(nullptr), this);
+  }
+  virtual ~MockAlgorithmProgressWidget() {}
+
+  MOCK_METHOD0(algorithmStarted, void());
+  MOCK_METHOD0(algorithmEnded, void());
+  MOCK_METHOD4(updateProgress, void(const double, const QString &, const double, const int));
+  MOCK_METHOD0(showDetailsDialog, void());
+
+  std::shared_ptr<AlgorithmProgressPresenter> m_presenter;
 };

@@ -54,8 +54,8 @@ Click Menus
 |
 |
 
-Options Menu
-------------
+|FigureOptionsGear.png| ptions Menu
+-----------------------------------
 
 .. figure:: /images/PlotOptions.png
    :alt: Plot Options Axes Legend
@@ -97,7 +97,7 @@ Click the generate a script button |GenerateAScript.png| on a 1D Plot:
    axes.set_title('MAR11060')
    axes.set_xlabel('Time-of-flight ($\mu s$)')
    axes.set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes.legend().draggable()
+   axes.legend().set_draggable(True)
 
    plt.show()
 
@@ -116,7 +116,7 @@ Click the generate a script button |GenerateAScript.png| on a 1D Plot:
    axes.set_title('MAR11060')
    axes.set_xlabel('Time-of-flight ($\mu s$)')
    axes.set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes.legend()   #.draggable() # uncomment to set the legend draggable
+   axes.legend()   #.set_draggable(True) # uncomment to set the legend draggable
 
    plt.show()
 
@@ -152,8 +152,8 @@ Click Menus
 |
 |
 
-Options Menu
-------------
+|FigureOptionsGear.png| ptions Menu
+-----------------------------------
 
 Tiled plots are essentially an array of axes (1D plots) on the same figure. As such, when editing them in the Options Menu, you should take care to select the correct set of axes:
 
@@ -182,7 +182,7 @@ Tiled plots are essentially an array of axes (1D plots) on the same figure. As s
 Scripting
 ---------
 
-An example script for a Tiled Plot:
+Click the generate a script button |GenerateAScript.png| on a Tiled Plot:
 
 .. code-block:: python
 
@@ -199,22 +199,22 @@ An example script for a Tiled Plot:
    axes[0][0].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 1', specNum=1)
    axes[0][0].set_xlabel('Time-of-flight ($\mu s$)')
    axes[0][0].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[0][0].legend().draggable()
+   axes[0][0].legend().set_draggable(True)
 
    axes[0][1].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 2', specNum=2)
    axes[0][1].set_xlabel('Time-of-flight ($\mu s$)')
    axes[0][1].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[0][1].legend().draggable()
+   axes[0][1].legend().set_draggable(True)
 
    axes[1][0].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 3', specNum=3)
    axes[1][0].set_xlabel('Time-of-flight ($\mu s$)')
    axes[1][0].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[1][0].legend().draggable()
+   axes[1][0].legend().set_draggable(True)
 
    axes[1][1].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 4', specNum=4)
    axes[1][1].set_xlabel('Time-of-flight ($\mu s$)')
    axes[1][1].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[1][1].legend().draggable()
+   axes[1][1].legend().set_draggable(True)
 
    plt.show()
 
@@ -230,22 +230,22 @@ An example script for a Tiled Plot:
    axes[0][0].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 1', specNum=1)
    axes[0][0].set_xlabel('Time-of-flight ($\mu s$)')
    axes[0][0].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[0][0].legend()   #.draggable() # uncomment to set the legend draggable
+   axes[0][0].legend()   #.set_draggable(True) # uncomment to set the legend draggable
 
    axes[0][1].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 2', specNum=2)
    axes[0][1].set_xlabel('Time-of-flight ($\mu s$)')
    axes[0][1].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[0][1].legend()   #.draggable() # uncomment to set the legend draggable
+   axes[0][1].legend()   #.set_draggable(True) # uncomment to set the legend draggable
 
    axes[1][0].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 3', specNum=3)
    axes[1][0].set_xlabel('Time-of-flight ($\mu s$)')
    axes[1][0].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[1][0].legend()   #.draggable() # uncomment to set the legend draggable
+   axes[1][0].legend()   #.set_draggable(True) # uncomment to set the legend draggable
 
    axes[1][1].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 4', specNum=4)
    axes[1][1].set_xlabel('Time-of-flight ($\mu s$)')
    axes[1][1].set_ylabel('Counts ($\mu s$)$^{-1}$')
-   axes[1][1].legend()   #.draggable() # uncomment to set the legend draggable
+   axes[1][1].legend()   #.set_draggable(True) # uncomment to set the legend draggable
 
    plt.show()
 

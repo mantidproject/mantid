@@ -124,7 +124,7 @@ void RemovePromptPulse::exec() {
     g_log.notice() << "Filtering tmin=" << pulseTime << ", tmax=" << right << " microseconds\n";
 
     // run maskbins to do the work on the first prompt pulse
-    auto algo = createChildAlgorithm("MaskBins");
+    IAlgorithm_sptr algo = this->createChildAlgorithm("MaskBins");
     if (outputWS) {
       algo->setProperty<MatrixWorkspace_sptr>("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(outputWS));
     } else { // should only be first time

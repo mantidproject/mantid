@@ -66,7 +66,7 @@ void ComputeSensitivity::exec() {
   // patch the sensitivity workspace
   const std::string patchWSName = getPropertyValue("PatchWorkspace");
   if (!patchWSName.empty()) {
-    auto patchAlg = createChildAlgorithm("EQSANSPatchSensitivity");
+    IAlgorithm_sptr patchAlg = createChildAlgorithm("EQSANSPatchSensitivity");
     patchAlg->setPropertyValue("PatchWorkspace", patchWSName);
     if (!reductionManager->existsProperty("SensitivityPatchAlgorithm")) {
       reductionManager->declareProperty(std::make_unique<AlgorithmProperty>("SensitivityPatchAlgorithm"));

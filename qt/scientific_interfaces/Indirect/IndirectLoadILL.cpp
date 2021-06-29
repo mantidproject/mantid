@@ -154,8 +154,35 @@ void IndirectLoadILL::run() {
     loadILLData(filename.toStdString(), temporaryName);
     renameWorkspace(temporaryName, getWorkspacePrefix(temporaryName) + "red");
   } else {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+    QString pyInput("");
+    QString pyFunc("");
+    // IN13 has a different loading routine
+    if (instrument == "IN13") {
+      pyFunc = "IN13Start";
+    } else if (ext == "asc") // using ascii files
+    {
+      pyFunc += "IbackStart";
+    } else if (ext == "inx") // using inx files
+    {
+      pyFunc += "InxStart";
+    } else {
+      setRunIsRunning(false);
+      emit showMessageBox("Could not find appropriate loading routine for " + filename);
+      return;
+    }
+
+    pyInput += "from IndirectNeutron import " + pyFunc + "\n";
+    pyInput += pyFunc + "('" + instrument + "','" + filename + "','" + analyser + "','" + reflection + "'," +
+               rejectZero + "," + useMap + ",'" + mapPath +
+               "'"
+               ",'" +
+               plot + "'," + save + ")";
+    runPythonScript(pyInput);
+#else
     emit showMessageBox("IN16B is currently the only instrument supported in "
                         "LoadILL on Mantid Workbench.");
+#endif
   }
 
   setRunIsRunning(false);

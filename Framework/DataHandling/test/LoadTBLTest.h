@@ -40,7 +40,7 @@ public:
     file << ",,,,,,,,,,13462,2.3,13463,0.035,0.3,0.04,2\n";
     file.close();
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -106,7 +106,7 @@ public:
     file << ",,,,,,,,,,13462,2.3,\"13463,13464\",0.035,0.3,0.04,2\n";
     file.close();
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -171,7 +171,7 @@ public:
     file << ",,,,13462,2.3,\"13463,13464\",0.035,0.3,0.04,2\n";
     file.close();
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -196,7 +196,7 @@ public:
     file << ",,,,,,,,,13462,2.3,13463,0.035,0.3,0.04,2,,,,0.04,2\n";
     file.close();
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -221,7 +221,7 @@ public:
     file << ",,,,,,,,,,,,13462,2.3,\"13463,0.035\",0.3,0.04,2,,,,0.04,2\n";
     file.close();
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -240,7 +240,7 @@ public:
          << "14456,0.7,1.443,8.992,1,\n"
          << "18553,0.3,1.233,4.388,3,\n";
     file.close();
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -276,7 +276,7 @@ public:
     std::ofstream file(m_filename.c_str());
     file << "Runs,Angle,Transmission,Energy,Spin,Group,Options\n";
     file.close();
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -299,7 +299,7 @@ public:
     std::ofstream file(m_filename.c_str());
     file.close();
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -323,7 +323,7 @@ public:
     file << ",,,,,,,,,,,,,,,,\n";
     file.close();
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));

@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisTab.h"
-#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -154,18 +153,17 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
   auto previewWs = getPreviewPlotWorkspace();
   auto inputWs = getInputWorkspace();
   auto index = boost::numeric_cast<size_t>(m_selectedSpectrum);
-  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 
   // Check a workspace has been selected
   if (previewWs) {
 
     if (inputWs && previewWs->getName() == inputWs->getName()) {
-      m_plotter->plotSpectra(previewWs->getName(), std::to_string(index), errorBars);
+      m_plotter->plotSpectra(previewWs->getName(), std::to_string(index));
     } else {
-      m_plotter->plotSpectra(previewWs->getName(), "0-2", errorBars);
+      m_plotter->plotSpectra(previewWs->getName(), "0-2");
     }
   } else if (inputWs && index < inputWs->getNumberHistograms()) {
-    m_plotter->plotSpectra(inputWs->getName(), std::to_string(index), errorBars);
+    m_plotter->plotSpectra(inputWs->getName(), std::to_string(index));
   } else
     showMessageBox("Workspace not found - data may not be loaded.");
 }

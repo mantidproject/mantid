@@ -24,8 +24,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         return "EnggVanadiumCorrections"
 
     def summary(self):
-        return ("This algorithm is deprecated as of May 2021, use a workflow with the Integration algorithm instead."
-                "Calculates correction features and / or uses them to correct diffraction data "
+        return ("Calculates correction features and / or uses them to correct diffraction data "
                 "with respect to reference Vanadium data.")
 
     def PyInit(self):
@@ -87,8 +86,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         The sums and fits are done in d-spacing.
         """
-        mantid.logger.warning("EnggVanadiumCorrections is deprecated as of May 2021. Please use a workflow with the "
-                              "Integration algorithm instead.")
+
         ws = self.getProperty('Workspace').value
         vanadium_ws = self.getProperty('VanadiumWorkspace').value
         van_integration_ws = self.getProperty('IntegrationWorkspace').value

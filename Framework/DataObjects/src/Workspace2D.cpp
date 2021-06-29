@@ -204,7 +204,9 @@ void Workspace2D::setImageE(const MantidImage &image, size_t start, bool paralle
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 void Workspace2D::setImageYAndE(const API::MantidImage &imageY, const API::MantidImage &imageE, size_t start,
-                                bool loadAsRectImg, double scale_1, [[maybe_unused]] bool parallelExecution) {
+                                bool loadAsRectImg, double scale_1, bool parallelExecution) {
+  UNUSED_ARG(parallelExecution) // for parallel for
+
   if (imageY.empty() && imageE.empty())
     return;
   if (imageY.empty() && imageE[0].empty())

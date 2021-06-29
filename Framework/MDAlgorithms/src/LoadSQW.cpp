@@ -144,7 +144,7 @@ void LoadSQW::exec() {
                      << " points into memory; this would be "
                         "faster than using a file back-end.\n";
 
-    auto saver = createChildAlgorithm("SaveMD", 0.01, 0.05, true);
+    IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
     saver->setProperty("InputWorkspace", ws);
     saver->setPropertyValue("Filename", m_outputFile);
     // should think about it.
@@ -190,7 +190,7 @@ void LoadSQW::exec() {
 
   if (!m_outputFile.empty()) {
     g_log.notice() << "Starting SaveMD to update the file back-end.\n";
-    auto saver = createChildAlgorithm("SaveMD", 0.76, 1.00);
+    IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD", 0.76, 1.00);
     saver->setProperty("InputWorkspace", ws);
     saver->setProperty("UpdateFileBackEnd", true);
     saver->executeAsChildAlg();

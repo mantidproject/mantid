@@ -284,7 +284,7 @@ public:
     fun->initialize();
     fun->setParameter("Slope", 0.0);
 
-    auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    Mantid::API::IAlgorithm_sptr fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
 
     fit->setProperty("Function", fun);
@@ -327,7 +327,7 @@ public:
       fun->setParameter(i, static_cast<double>(i) + 1.1);
     }
 
-    auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    Mantid::API::IAlgorithm_sptr fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
 
     fit->setProperty("Function", fun);

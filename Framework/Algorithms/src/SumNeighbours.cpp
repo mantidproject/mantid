@@ -83,7 +83,7 @@ void SumNeighbours::exec() {
 
   progress.report("Smoothing Neighbours...");
 
-  auto smooth = createChildAlgorithm("SmoothNeighbours");
+  IAlgorithm_sptr smooth = createChildAlgorithm("SmoothNeighbours");
   smooth->setProperty("InputWorkspace", inWS);
   if (rect) {
     smooth->setProperty("SumPixelsX", SumX);

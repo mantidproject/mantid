@@ -45,6 +45,6 @@ capabilities of Mantid, by developing your own scripts.
 
 * :ref:`mantid_basic_course`
 * :ref:`muon_GUI_course`
-* :ref:`introduction_to_python`
+* `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
 * :ref:`pim_intro`
 * :ref:`emwp_intro`

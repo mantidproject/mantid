@@ -349,7 +349,7 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(const Mantid::Muon::Anal
 
   size_t numGroups = options.grouping.groups.size();
   for (auto i = 0u; i < numGroups; ++i) {
-    auto alg = createChildAlgorithm("ApplyMuonDetectorGrouping");
+    IAlgorithm_sptr alg = this->createChildAlgorithm("ApplyMuonDetectorGrouping");
     if (!this->isLogging())
       alg->setLogging(false);
     alg->setProperty("InputWorkspace", ws->getName());
@@ -385,7 +385,7 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(const Mantid::Muon::Analy
 
   size_t numPairs = options.grouping.pairs.size();
   for (size_t i = 0; i < numPairs; i++) {
-    auto alg = createChildAlgorithm("ApplyMuonDetectorGroupPairing");
+    IAlgorithm_sptr alg = this->createChildAlgorithm("ApplyMuonDetectorGroupPairing");
     if (!this->isLogging())
       alg->setLogging(false);
     alg->setProperty("SpecifyGroupsManually", true);

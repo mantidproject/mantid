@@ -5,10 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
-import unittest
 from unittest import TestCase
-from unittest.mock import call, Mock, patch
 
+from unittest.mock import call, Mock, patch
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.about.presenter import AboutPresenter
@@ -93,8 +92,8 @@ class AboutPresenterTest(TestCase):
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_should_show_on_startup_do_not_show_same_version(self, MockConfigService):
         version_str = "the same every time"
-        with patch(self.QSETTINGS_CLASSPATH, return_value=FakeQSettings(version_str)):
-            with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value=version_str):
+        with patch(self.QSETTINGS_CLASSPATH, return_value = FakeQSettings(version_str)):
+            with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value = version_str):
                 self.assertFalse(AboutPresenter.should_show_on_startup(),
                                  "If do not show is in Qsettings then should_show_on_startup should always be False"
                                  + "for the same version")
@@ -106,8 +105,8 @@ class AboutPresenterTest(TestCase):
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_should_show_on_startup_do_not_show_different_versions(self, MockConfigService):
         version_str = "the same every time"
-        with patch(self.QSETTINGS_CLASSPATH, return_value=FakeQSettings(version_str)):
-            with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value="not the " + version_str):
+        with patch(self.QSETTINGS_CLASSPATH, return_value = FakeQSettings(version_str)):
+            with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value = "not the " + version_str):
                 self.assertTrue(AboutPresenter.should_show_on_startup(),
                                 "If do not show is in Qsettings then should_show_on_startup should always be True"
                                 + " for different versions")
@@ -126,56 +125,47 @@ class AboutPresenterTest(TestCase):
         self.assertEqual(0, mock_ConfigService.setFacility.call_count)
         self.assertEqual(3, mock_ConfigService.getFacility.call_count)
         self.assertEqual(3, mock_ConfigService.mock_facility.name.call_count)
-        self.assert_connected_once(presenter.view.about_widget.cb_facility,
-                                   presenter.view.about_widget.cb_facility.currentTextChanged)
+        self.assert_connected_once(presenter.view.cb_facility, presenter.view.cb_facility.currentTextChanged)
 
     def test_setup_checkbox_signals(self):
         presenter = AboutPresenter(None)
-        about_widget = presenter.view.about_widget
 
-        self.assert_connected_once(about_widget.chk_do_not_show_until_next_release,
-                                   presenter.view.about_widget.chk_do_not_show_until_next_release.stateChanged)
+        self.assert_connected_once(presenter.view.chk_do_not_show_until_next_release,
+                                   presenter.view.chk_do_not_show_until_next_release.stateChanged)
 
-        self.assert_connected_once(about_widget.chk_allow_usage_data,
-                                   about_widget.chk_allow_usage_data.stateChanged)
+        self.assert_connected_once(presenter.view.chk_allow_usage_data,
+                                   presenter.view.chk_allow_usage_data.stateChanged)
 
     def test_setup_button_signals(self):
         presenter = AboutPresenter(None)
-        about_widget = presenter.view.about_widget
 
-        self.assert_connected_once(about_widget.clb_release_notes,
-                                   about_widget.clb_release_notes.clicked)
-        self.assert_connected_once(about_widget.clb_sample_datasets,
-                                   about_widget.clb_sample_datasets.clicked)
-        self.assert_connected_once(about_widget.clb_mantid_introduction,
-                                   about_widget.clb_mantid_introduction.clicked)
-        self.assert_connected_once(about_widget.clb_python_introduction,
-                                   about_widget.clb_python_introduction.clicked)
-        self.assert_connected_once(about_widget.clb_python_in_mantid,
-                                   about_widget.clb_python_in_mantid.clicked)
-        self.assert_connected_once(about_widget.clb_extending_mantid,
-                                   about_widget.clb_extending_mantid.clicked)
-        self.assert_connected_once(about_widget.pb_manage_user_directories,
-                                   about_widget.pb_manage_user_directories.clicked)
-        self.assert_connected_once(about_widget.lbl_privacy_policy,
-                                   about_widget.lbl_privacy_policy.linkActivated)
+        self.assert_connected_once(presenter.view.clb_release_notes,
+                                   presenter.view.clb_release_notes.clicked)
+        self.assert_connected_once(presenter.view.clb_sample_datasets,
+                                   presenter.view.clb_sample_datasets.clicked)
+        self.assert_connected_once(presenter.view.clb_mantid_introduction,
+                                   presenter.view.clb_mantid_introduction.clicked)
+        self.assert_connected_once(presenter.view.clb_python_introduction,
+                                   presenter.view.clb_python_introduction.clicked)
+        self.assert_connected_once(presenter.view.clb_python_in_mantid,
+                                   presenter.view.clb_python_in_mantid.clicked)
+        self.assert_connected_once(presenter.view.clb_extending_mantid,
+                                   presenter.view.clb_extending_mantid.clicked)
+        self.assert_connected_once(presenter.view.pb_manage_user_directories,
+                                   presenter.view.pb_manage_user_directories.clicked)
+        self.assert_connected_once(presenter.view.lbl_privacy_policy,
+                                   presenter.view.lbl_privacy_policy.linkActivated)
 
     def test_setup_link_signals(self):
         presenter = AboutPresenter(None)
-        about_widget = presenter.view.about_widget
 
-        self.assert_connected_once(about_widget.clb_release_notes,
-                                   about_widget.clb_release_notes.clicked)
+        self.assert_connected_once(presenter.view.clb_release_notes,
+                                   presenter.view.clb_release_notes.clicked)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_that_about_presenter_is_instantiated_without_error_when_getFacility_causes_exception(self,
-                                                                                                  MockConfigService):
+    def test_that_about_presenter_is_instantiated_without_error_when_getFacility_causes_exception(self, MockConfigService):
         MockConfigService.getFacility.side_effect = RuntimeError(Mock(status=101), "No facility")
         presenter = AboutPresenter(None)
 
         self.assertEqual(3, MockConfigService.getFacility.call_count)
         self.assertEqual(presenter._get_current_facility(), None)
-
-
-if __name__ == "__main__":
-    unittest.main()

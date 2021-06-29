@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /// Constructor
-SimpleWidget::SimpleWidget(QWidget *parent) : ISimpleWidget(parent) {
+SimpleWidget::SimpleWidget(QWidget *parent) : QWidget(parent) {
   // Receive mouse move events
   setMouseTracking(true);
   // Receive keyboard events
@@ -27,7 +27,8 @@ SimpleWidget::~SimpleWidget() {}
 /// Assign a surface to draw on
 void SimpleWidget::setSurface(std::shared_ptr<ProjectionSurface> surface) {
   m_surface = std::move(surface);
-  connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()), Qt::QueuedConnection);
+  connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()),
+          Qt::QueuedConnection);
 }
 
 /// Redraw the view

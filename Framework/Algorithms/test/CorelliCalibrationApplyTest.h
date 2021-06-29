@@ -47,7 +47,7 @@ public:
 
   void testValidateWS() {
     // get a mock workspace with wrong instrument name
-    auto lei = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
+    IAlgorithm_sptr lei = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     lei->initialize();
     lei->setPropertyValue("Filename", "NOW4_Definition.xml");
     lei->setPropertyValue("OutputWorkspace", "wrongTypeWs");
@@ -111,7 +111,7 @@ private:
     // Name of the output workspace.
     std::string outWSName("correctWs");
 
-    auto lei = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
+    IAlgorithm_sptr lei = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     lei->initialize();
     lei->setPropertyValue("Filename", "CORELLI_Definition.xml");
     lei->setPropertyValue("OutputWorkspace", outWSName);

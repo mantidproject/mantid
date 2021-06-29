@@ -150,7 +150,7 @@ void LoadEmptyInstrument::exec() {
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
 API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument(const std::string &filename,
                                                                  const std::string &instrumentname) {
-  auto loadInst = createChildAlgorithm("LoadInstrument", 0, 0.5);
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument", 0, 0.5);
   loadInst->setPropertyValue("Filename", filename);
   loadInst->setPropertyValue("InstrumentName", instrumentname);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));

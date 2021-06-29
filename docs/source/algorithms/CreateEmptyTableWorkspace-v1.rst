@@ -6,6 +6,8 @@
 
 .. properties::
 
+.. _TableWorkspace Python API: http://www.mantidproject.org/Python_ITableWorkspace_v2
+
 Description
 -----------
 
@@ -13,7 +15,7 @@ Creates an empty table workspace, which you can then populate with items of
 various types.
 
 For a complete list of TableWorkspace methods accessible from Python please see
-the :ref:`mantid.api.ITableWorkspace`.
+the `TableWorkspace Python API`_.
 
 Usage
 -----

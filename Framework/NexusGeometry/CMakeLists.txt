@@ -36,7 +36,7 @@ set(TEST_FILES
     TubeBuilderTest.h
     TubeHelpersTest.h)
 
-if(COVERAGE)
+if(COVERALLS)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS

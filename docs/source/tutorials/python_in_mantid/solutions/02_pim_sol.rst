@@ -66,7 +66,7 @@ B - Plotting ILL Data
     axes.set_xlim([460.0, 600.0])
     axes.set_ylim([1.0, 2000.0])
     axes.set_yscale('log')
-    axes.legend().draggable()
+    axes.legend().set_draggable(True)
 
     plt.show()
 
@@ -90,7 +90,7 @@ B - Plotting ILL Data
     axes.set_xlim([460.0, 600.0])
     axes.set_ylim([1.0, 2000.0])
     axes.set_yscale('log')
-    axes.legend() #.draggable()
+    axes.legend() #.set_draggable(True)
 
     #plt.show()
 
@@ -129,7 +129,7 @@ C - Processing and Plotting SNS Data
     axes.set_ylabel('($\AA$)$^{-1}$')
     axes.set_xlim([2.405, 4.5])
     axes.set_yscale('log')
-    axes.legend() #.draggable()
+    axes.legend() #.set_draggable(True)
 
     #plt.show()
 

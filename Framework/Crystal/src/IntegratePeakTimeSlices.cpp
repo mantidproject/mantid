@@ -1842,7 +1842,8 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data, double &chisqOverD
   bool CalcVars = m_AttributeValues->CalcVariances();
   std::vector<std::pair<double, double>> Bounds;
   std::string Constraints = m_AttributeValues->CalcConstraints(Bounds, CalcVars);
-  auto fit_alg = createChildAlgorithm("Fit");
+  IAlgorithm_sptr fit_alg;
+  fit_alg = createChildAlgorithm("Fit");
   std::string fun_str = CalculateFunctionProperty_Fit();
 
   std::string SSS("   Fit string ");

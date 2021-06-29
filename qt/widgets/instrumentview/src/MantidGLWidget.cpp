@@ -39,7 +39,7 @@ namespace MantidWidgets {
 const Qt::CursorShape cursorShape = Qt::ArrowCursor;
 
 MantidGLWidget::MantidGLWidget(QWidget *parent)
-    : IMantidGLWidget(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel), parent),
+    : QGLWidget(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel), parent),
       // m_polygonMode(SOLID),
       // m_lightingState(0),
       m_isKeyPressed(false), m_firstFrame(true) {
@@ -59,7 +59,8 @@ MantidGLWidget::~MantidGLWidget() {}
 
 void MantidGLWidget::setSurface(std::shared_ptr<ProjectionSurface> surface) {
   m_surface = std::move(surface);
-  connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()), Qt::QueuedConnection);
+  connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()),
+          Qt::QueuedConnection);
   m_firstFrame = true;
 }
 
@@ -78,8 +79,9 @@ void MantidGLWidget::initializeGL() {
 
   // Clear the memory buffers
   QColor bgColor = currentBackgroundColor();
-  glClearColor(GLclampf(bgColor.red() / 255.0), GLclampf(bgColor.green() / 255.0), GLclampf(bgColor.blue() / 255.0),
-               1.0);
+  glClearColor(GLclampf(bgColor.red() / 255.0),
+               GLclampf(bgColor.green() / 255.0),
+               GLclampf(bgColor.blue() / 255.0), 1.0);
 }
 
 void MantidGLWidget::setRenderingOptions() {
@@ -228,7 +230,8 @@ void MantidGLWidget::keyReleaseEvent(QKeyEvent *event) {
  */
 void MantidGLWidget::setBackgroundColor(const QColor &input) {
   makeCurrent();
-  glClearColor(GLclampf(input.red() / 255.0), GLclampf(input.green() / 255.0), GLclampf(input.blue() / 255.0), 1.0);
+  glClearColor(GLclampf(input.red() / 255.0), GLclampf(input.green() / 255.0),
+               GLclampf(input.blue() / 255.0), 1.0);
   OpenGLError::check("MantidGLWidget::setBackgroundColor");
   if (m_surface) {
     m_surface->setBackgroundColor(input);

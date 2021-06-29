@@ -34,7 +34,7 @@ mtd_add_qt_tests(
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     PythonInterfaceCore
-    Python::Python
+    ${PYTHON_LIBRARIES}
   QT5_LINK_LIBS
     Qt5::Test
     Qt5::OpenGL

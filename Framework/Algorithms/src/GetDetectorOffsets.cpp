@@ -179,7 +179,7 @@ void GetDetectorOffsets::exec() {
   std::string filename = getProperty("GroupingFileName");
   if (!filename.empty()) {
     progress(0.9, "Saving .cal file");
-    auto childAlg = createChildAlgorithm("SaveCalFile");
+    IAlgorithm_sptr childAlg = createChildAlgorithm("SaveCalFile");
     childAlg->setProperty("OffsetsWorkspace", outputW);
     childAlg->setProperty("MaskWorkspace", maskWS);
     childAlg->setPropertyValue("Filename", filename);

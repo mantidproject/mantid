@@ -27,7 +27,7 @@ private:
   be overriden in individual tests.
   */
   IAlgorithm_sptr make_standard_algorithm(const std::string &outWSName) {
-    auto alg = std::make_shared<CreateMDHistoWorkspace>();
+    IAlgorithm_sptr alg = std::make_shared<CreateMDHistoWorkspace>();
     alg->initialize();
     alg->setRethrows(true);
     alg->setPropertyValue("SignalInput", "1,2,3");
@@ -60,7 +60,7 @@ public:
 
   void test_throws_if_wrong_number_of_signal_values() {
     std::string outWSName = "test_ws";
-    auto alg = make_standard_algorithm(outWSName);
+    IAlgorithm_sptr alg = make_standard_algorithm(outWSName);
     alg->setProperty("SignalInput",
                      "1"); // Only one signal value provided, but NumberOfBins set to 5!
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
@@ -69,7 +69,7 @@ public:
 
   void test_throws_if_wrong_number_of_error_values() {
     std::string outWSName = "test_ws";
-    auto alg = make_standard_algorithm(outWSName);
+    IAlgorithm_sptr alg = make_standard_algorithm(outWSName);
     alg->setProperty("ErrorInput",
                      "1"); // Only one error value provided, but NumberOfBins set to 5!
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
@@ -78,7 +78,7 @@ public:
 
   void test_throws_if_wrong_number_of_nevents() {
     std::string outWSName = "test_ws";
-    auto alg = make_standard_algorithm(outWSName);
+    IAlgorithm_sptr alg = make_standard_algorithm(outWSName);
     alg->setProperty("NumberOfEvents", "1"); // Only one number of events value
                                              // provided, but NumberOfBins set
                                              // to 5!

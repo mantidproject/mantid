@@ -137,8 +137,7 @@ public:
   Types::Core::DateAndTime getLastPulseTime() const;
 
   /// Returns the y index which corresponds to the X Value provided
-  std::size_t yIndexOfX(const double xValue, const std::size_t &index = 0,
-                        [[maybe_unused]] const double tolerance = 0.0) const;
+  std::size_t yIndexOfX(const double xValue, const std::size_t &index = 0, const double tolerance = 0.0) const;
 
   //----------------------------------------------------------------------
   // DATA ACCESSORS
@@ -471,7 +470,7 @@ private:
                             size_t stop, size_t width, size_t indexStart, size_t indexEnd) const;
   /// Copy data from an image.
   void setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image, size_t start,
-                [[maybe_unused]] bool parallelExecution);
+                bool parallelExecution);
 
   void setIndexInfoWithoutISpectrumUpdate(const Indexing::IndexInfo &indexInfo);
   void buildDefaultSpectrumDefinitions();

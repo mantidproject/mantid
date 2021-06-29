@@ -995,7 +995,7 @@ void LoadSpiceXML2DDet::setXtoLabQ(const API::MatrixWorkspace_sptr &dataws, cons
  */
 void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws, const std::string &idffilename) {
   // load instrument
-  auto loadinst = createChildAlgorithm("LoadInstrument");
+  API::IAlgorithm_sptr loadinst = createChildAlgorithm("LoadInstrument");
   loadinst->initialize();
   loadinst->setProperty("Workspace", matrixws);
   if (!idffilename.empty()) {

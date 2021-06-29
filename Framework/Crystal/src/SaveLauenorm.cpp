@@ -137,7 +137,7 @@ void SaveLauenorm::exec() {
     if (!ws->sample().hasOrientedLattice()) {
 
       const std::string fft("FindUBUsingIndexedPeaks");
-      auto findUB = createChildAlgorithm(fft);
+      API::IAlgorithm_sptr findUB = this->createChildAlgorithm(fft);
       findUB->initialize();
       findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", ws);
       findUB->executeAsChildAlg();

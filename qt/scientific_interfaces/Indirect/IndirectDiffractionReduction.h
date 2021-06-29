@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "IPythonRunner.h"
 #include "IndirectInterface.h"
 #include "IndirectPlotOptionsPresenter.h"
 
@@ -15,7 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IndirectDiffractionReduction : public IndirectInterface {
+class IndirectDiffractionReduction : public IndirectInterface, public IPyRunner {
   Q_OBJECT
 
 public:
@@ -27,6 +28,8 @@ public:
   static std::string name() { return "Diffraction"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Indirect"; }
+  /// Used to run python code
+  void runPythonCode(std::string const &pythonCode) override;
 
 public slots:
   void instrumentSelected(const QString &instrumentName, const QString &analyserName, const QString &reflectionName);

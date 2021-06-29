@@ -85,7 +85,6 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             self.name,
             window_width=window_width,
             window_height=window_height,
-            window_flags=window_flags,
             presenter=self,
         ))
 

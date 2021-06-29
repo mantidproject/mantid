@@ -391,7 +391,7 @@ public:
 
     // Longer, more thorough test
     if (false) {
-      auto load = AlgorithmManager::Instance().create("LoadEventPreNexus", 1);
+      IAlgorithm_sptr load = AlgorithmManager::Instance().create("LoadEventPreNexus", 1);
       load->setPropertyValue("OutputWorkspace", "cncs_pre");
       load->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
       load->setPropertyValue("PulseidFilename", "CNCS_7860_pulseid.dat");

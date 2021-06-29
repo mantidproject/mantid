@@ -30,7 +30,6 @@ class EngineeringDiffractionPresenter(object):
         self.fitting_presenter = None
         self.settings_presenter = None
 
-        self.doc_folder = "diffraction"
         self.doc = "Engineering Diffraction"
 
         # Setup observers
@@ -83,7 +82,7 @@ class EngineeringDiffractionPresenter(object):
         self.fitting_presenter.plot_widget.view.ensure_fit_dock_closed()
 
     def open_help_window(self):
-        InterfaceManager().showCustomInterfaceHelp(self.doc, self.doc_folder)
+        InterfaceManager().showCustomInterfaceHelp(self.doc)
 
     def open_settings(self):
         self.settings_presenter.show()

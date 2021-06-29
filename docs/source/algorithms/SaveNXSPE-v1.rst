@@ -6,10 +6,12 @@
 
 .. properties::
 
+.. _MatrixWorkspace: http://www.mantidproject.org/MatrixWorkspace
+
 Description
 -----------
 
-Saves the given :ref:`MatrixWorkspace` to a file in the NeXus-based 'NXSPE' format.
+Saves the given `MatrixWorkspace`_ to a file in the NeXus-based 'NXSPE' format.
 
 Restrictions on the Input Workspace
 ###################################

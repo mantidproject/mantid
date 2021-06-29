@@ -154,6 +154,37 @@ If this fails
 For this section the guide will show you how to use GDB debugging. Inside the launch.json
 you will want to make your file look something a little like this:
 
+*MantidPlot*
+
+.. code-block:: javascript
+
+    {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "(gdb) Launch",
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "Path/To/Build/Directory/bin/MantidPlot",
+                "args": [],
+                "stopAtEntry": false,
+                "cwd": "${workspaceFolder}",
+                "environment": [],
+                "externalConsole": false,
+                "MIMode": "gdb",
+                "preLaunchTask": "Build Mantid", // This causes the task labelled to be called before
+                "setupCommands": [
+                    {
+                        "description": "Enable pretty-printing for gdb",
+                        "text": "-enable-pretty-printing",
+                        "ignoreFailures": true
+                    }
+                ]
+            }
+        ]
+    }
+
+
 *Workbench*
 
 To debug C++ and start directly into the Workbench, add this to the configuration list in ``launch.json``.
@@ -164,8 +195,8 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
       "name": "(gdb) Workbench C++ Only",
       "type": "cppdbg",
       "request": "launch",
-      "program": "/usr/bin/python3", // Path to your used Python interpreter, here and below
-      "args": ["Path/To/Build/Directory/bin/workbench", "&&","gdb","/usr/bin/python3","$!"], // $! gets the process ID
+      "program": "/usr/bin/python2.7", // Path to your used Python interpreter, here and below
+      "args": ["Path/To/Build/Directory/bin/workbench", "&&","gdb","/usr/bin/python2.7","$!"], // $! gets the process ID
       "stopAtEntry": false,
       "cwd": "Path/To/Build/Directory/bin", // this should point to bin inside the build directory
       "environment": [],
@@ -198,7 +229,7 @@ The launch.json should end up looking a little like this:
                 "name": "(msvc) Launch",
                 "type": "cppvsdbg",
                 "request": "launch",
-                "program": "Path/To/Build/Directory/bin/Debug/MantidWorkbench.exe",
+                "program": "Path/To/Build/Directory/bin/Debug/MantidPlot.exe",
                 "args": [],
                 "stopAtEntry": true,
                 "cwd": "${workspaceFolder}",
@@ -227,15 +258,12 @@ like this:
 .. code-block:: javascript
 
         {
-            "name": "(gdb) Launch Workbench",
+            "name": "(gdb) Attach Workbench Python 2.7",
             "type": "cppdbg",
-            "request": "launch",
-            "program": "/usr/bin/python3",
-            "args": [
-                "/path/to/build/dir/bin/MantidWorkbench"
-            ],
+            "request": "attach",
+            "program": "/usr/bin/python2.7", // Path to your used Python interpreter
+            "processId": "1234", // Replace this with the process ID of workbench
             "MIMode": "gdb",
-            "cwd": "${fileDirname}",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -246,7 +274,7 @@ like this:
         }
 
 - Place this json in the "configurations" list in launch.json
-- Then launch the debug session like any other, note it may be slow to get started.
+- Then launch the debug session like any other
 
 Debugging C++ Tests
 -------------------
@@ -393,16 +421,44 @@ Detailed instructions on how to set this up can be found `here <https://code.vis
 =======================================================
 (Linux only)
 
-The default C++ extension in VS Code provides limited inspection: it has
+The C++ extension in VS Code provides limited inspection: it (currently) has
 warnings disabled and will only emit errors.
 
-Clang can be used to provide live warnings and runs clang-tidy continuously. This helps detect warnings and errors live which are normally only detected whilst building.
+Clang can be used to provide live warnings and will notify on common bugs, like
+implicit casts, which are normally only detected whilst building.
+
+Future versions of clangd (>=10) will also emit clang-tidy warnings as you
+work.
 
 **Setup**
 
-- Install the latest stable `clang ppa <https://apt.llvm.org/>`_
-- Install the clangd extension
-- Install the latest stable clangd, e.g. `clang-tools-n` (where n is the latest version)
-- Go to the clangd settings in VS Code and ensure the correct binary is manually specified
+- Remove the C++ Intellisense extension
+- Remove the C++ extension and install Native Debug to keep C++ debugging OR
+-  Go to the C++ extension settings and disable the following:
+
+  Autocomplete, Enhanced Colorization, Error Squiggles,
+  Experimental Features, IntelliSense Engine, IntelliSense Engine Fallback
+
+- Install the official clangd extension: `vscode-clangd`
+- Install clangd >= 8 which is part of `clang-tools-n`
+  (where n is the latest version)
+- Create a folder for a clang build separate to your main Mantid build.
+  One recommended location is to create it in a folder called **build**
+  within the source folder since this will also be rebuilt by the
+  *CMakeTools* extension, if you have it.
+- Configure this separate folder to use the clang compiler:
+
+.. code-block:: sh
+
+    cd *path/to/clang_build*
+    CXX=clang++ CC=clang cmake *path/to/src* -DPYTHON_EXECTUABLE=/usr/bin/python2  # (or 3)
+    # Note this does not have to build unless you want to!
+
+- Go to the clangd setting in VS Code and add the following argument:
+  `--compile-commands-dir=/path/to/your/clang-build` ensuring that build
+  folder is related to the source folder. This allows clangd to understand
+  the structure of Mantid.
 - Restart VS Code - attempt to write: `int i = (size_t) 1;` and check a warning
   appears.
+- Any errors about unknown types can usually be resolved by briefly opening
+  that header to force clangd to parse the type.

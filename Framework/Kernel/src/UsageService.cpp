@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/UsageService.h"
-#include "MantidJson/Json.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -269,7 +268,8 @@ std::string UsageServiceImpl::generateStartupMessage() {
 
   message["application"] = m_application;
 
-  return Mantid::JsonHelpers::jsonToString(message);
+  ::Json::FastWriter writer;
+  return writer.write(message);
 }
 
 std::string UsageServiceImpl::generateFeatureUsageMessage() {
@@ -292,6 +292,7 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
   }
 
   if (!featureCountMap.empty()) {
+    ::Json::FastWriter writer;
     ::Json::Value features;
     auto message = this->generateFeatureHeader();
     for (auto const &featureItem : featureCountMap) {
@@ -301,7 +302,7 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
     }
     if (!features.empty()) {
       message["features"] = features;
-      return Mantid::JsonHelpers::jsonToString(message);
+      return writer.write(message);
     }
   }
   return "";

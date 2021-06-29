@@ -77,11 +77,12 @@ private:
 
   // load nx dataset
   template <class T> static bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path, T &value);
-  bool loadNXString(NeXus::NXEntry &entry, const std::string &path, std::string &value);
+  static bool loadNXString(NeXus::NXEntry &entry, const std::string &path, std::string &value);
 
   // binary file access
   template <class EventProcessor>
-  void loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::File &tarFile, EventProcessor &eventProcessor);
+  static void loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::File &tarFile,
+                         EventProcessor &eventProcessor);
 };
 
 } // namespace DataHandling

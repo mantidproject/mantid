@@ -205,7 +205,6 @@ public:
   QString updateStructureTooltip();
 
   QMap<QString, QtProperty *> getTies() { return m_ties; };
-  bool hasTies() { return !m_ties.isEmpty(); };
 
 protected slots:
 
@@ -216,7 +215,6 @@ protected:
   void initAttributes();
   void initParameters();
   void initWorkspace();
-  void initTies();
 
 private:
   FitPropertyBrowser *m_browser;

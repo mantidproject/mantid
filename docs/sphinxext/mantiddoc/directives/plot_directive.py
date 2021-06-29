@@ -9,6 +9,7 @@
         ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 """
 from distutils.version import LooseVersion
+from docutils import statemachine
 import os
 import matplotlib.sphinxext.plot_directive as mpl_plot_directive_module
 import sphinx

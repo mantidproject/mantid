@@ -161,7 +161,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
   MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   tempWS->mutableRun().addProperty<std::string>("run_start", date);
 
-  auto loadInst = createChildAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("InstrumentName", C_Instrument);
   loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
@@ -173,7 +173,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
   Geometry::Instrument_const_sptr instr = tempWS->getInstrument();
   outWS->setInstrument(instr);
 
-  auto applyCal = createChildAlgorithm("LoadIsawDetCal");
+  IAlgorithm_sptr applyCal = createChildAlgorithm("LoadIsawDetCal");
   applyCal->initialize();
   applyCal->setProperty("InputWorkspace", outWS);
   applyCal->setProperty("Filename", getPropertyValue("Filename"));
@@ -515,7 +515,7 @@ void LoadIsawPeaks::appendFile(const PeaksWorkspace_sptr &outWS, const std::stri
     prog.report(in.tellg());
   }
   if (m_isModulatedStructure) {
-    auto findUB = createChildAlgorithm("FindUBUsingIndexedPeaks");
+    IAlgorithm_sptr findUB = createChildAlgorithm("FindUBUsingIndexedPeaks");
     findUB->setPropertyValue("ToleranceForSatellite", "0.05");
     findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", outWS);
     findUB->executeAsChildAlg();

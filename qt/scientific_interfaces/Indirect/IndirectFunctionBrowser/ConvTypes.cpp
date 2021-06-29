@@ -18,41 +18,35 @@ using namespace Mantid::API;
 std::map<FitType, bool> FitTypeQDepends = std::map<FitType, bool>({{FitType::None, false},
                                                                    {FitType::TeixeiraWater, true},
                                                                    {FitType::StretchedExpFT, false},
+                                                                   {FitType::IsoRotDiff, true},
                                                                    {FitType::DiffSphere, true},
                                                                    {FitType::ElasticDiffSphere, true},
                                                                    {FitType::InelasticDiffSphere, true},
                                                                    {FitType::DiffRotDiscreteCircle, true},
                                                                    {FitType::InelasticDiffRotDiscreteCircle, true},
-                                                                   {FitType::ElasticDiffRotDiscreteCircle, true},
-                                                                   {FitType::IsoRotDiff, true},
-                                                                   {FitType::ElasticIsoRotDiff, true},
-                                                                   {FitType::InelasticIsoRotDiff, true}});
+                                                                   {FitType::ElasticDiffRotDiscreteCircle, true}});
 
 std::unordered_map<FitType, std::string>
     FitTypeEnumToString({{FitType::TeixeiraWater, "TeixeiraWaterSQE"},
                          {FitType::StretchedExpFT, "StretchedExpFT"},
+                         {FitType::IsoRotDiff, "IsoRotDiff"},
                          {FitType::DiffSphere, "DiffSphere"},
                          {FitType::ElasticDiffSphere, "ElasticDiffSphere"},
                          {FitType::InelasticDiffSphere, "InelasticDiffSphere"},
                          {FitType::DiffRotDiscreteCircle, "DiffRotDiscreteCircle"},
                          {FitType::InelasticDiffRotDiscreteCircle, "InelasticDiffRotDiscreteCircle"},
-                         {FitType::ElasticDiffRotDiscreteCircle, "ElasticDiffRotDiscreteCircle"},
-                         {FitType::IsoRotDiff, "IsoRotDiff"},
-                         {FitType::ElasticIsoRotDiff, "ElasticIsoRotDiff"},
-                         {FitType::InelasticIsoRotDiff, "InelasticIsoRotDiff"}});
+                         {FitType::ElasticDiffRotDiscreteCircle, "ElasticDiffRotDiscreteCircle"}});
 
 std::unordered_map<std::string, FitType>
     FitTypeStringToEnum({{"TeixeiraWaterSQE", FitType::TeixeiraWater},
                          {"StretchedExpFT", FitType::StretchedExpFT},
+                         {"IsoRotDiff", FitType::IsoRotDiff},
                          {"DiffSphere", FitType::DiffSphere},
                          {"ElasticDiffSphere", FitType::ElasticDiffSphere},
                          {"InelasticDiffSphere", FitType::InelasticDiffSphere},
                          {"DiffRotDiscreteCircle", FitType::DiffRotDiscreteCircle},
                          {"InelasticDiffRotDiscreteCircle", FitType::InelasticDiffRotDiscreteCircle},
-                         {"ElasticDiffRotDiscreteCircle", FitType::ElasticDiffRotDiscreteCircle},
-                         {"IsoRotDiff", FitType::IsoRotDiff},
-                         {"ElasticIsoRotDiff", FitType::ElasticIsoRotDiff},
-                         {"InelasticIsoRotDiff", FitType::InelasticIsoRotDiff}});
+                         {"ElasticDiffRotDiscreteCircle", FitType::ElasticDiffRotDiscreteCircle}});
 
 std::map<ParamID, QString> g_paramName{
     {ParamID::LOR1_AMPLITUDE, "Amplitude"},
@@ -75,6 +69,10 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::SE_TAU, "Tau"},
     {ParamID::SE_BETA, "Beta"},
     {ParamID::SE_CENTRE, "Centre"},
+    {ParamID::IRD_HEIGHT, "f1.Height"},
+    {ParamID::IRD_RADIUS, "f1.Radius"},
+    {ParamID::IRD_TAU, "f1.Tau"},
+    {ParamID::IRD_CENTRE, "f1.Centre"},
     {ParamID::DP_INTENSITY, "f1.Intensity"},
     {ParamID::DP_RADIUS, "f1.Radius"},
     {ParamID::DP_DIFFUSION, "f1.Diffusion"},
@@ -97,16 +95,6 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::EDRDC_HEIGHT, "Height"},
     {ParamID::EDRDC_CENTRE, "Centre"},
     {ParamID::EDRDC_RADIUS, "Radius"},
-    {ParamID::IRD_HEIGHT, "f1.Height"},
-    {ParamID::IRD_RADIUS, "f1.Radius"},
-    {ParamID::IRD_TAU, "f1.Tau"},
-    {ParamID::IRD_CENTRE, "f1.Centre"},
-    {ParamID::EIRD_HEIGHT, "Height"},
-    {ParamID::EIRD_RADIUS, "Radius"},
-    {ParamID::IIRD_HEIGHT, "Height"},
-    {ParamID::IIRD_RADIUS, "Radius"},
-    {ParamID::IIRD_TAU, "Tau"},
-    {ParamID::IIRD_CENTRE, "Centre"},
     {ParamID::FLAT_BG_A0, "A0"},
     {ParamID::LINEAR_BG_A0, "A0"},
     {ParamID::LINEAR_BG_A1, "A1"},
@@ -117,6 +105,7 @@ std::map<FitType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<FitType>::g_typ
     {FitType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
     {FitType::TeixeiraWater, {"Teixeira Water", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
     {FitType::StretchedExpFT, {"StretchedExpFT", "StretchedExpFT", {ParamID::SE_HEIGHT, ParamID::SE_CENTRE}}},
+    {FitType::IsoRotDiff, {"IsoRotDiff", "IsoRotDiff", {ParamID::IRD_HEIGHT, ParamID::IRD_CENTRE}}},
     {FitType::DiffSphere, {"DiffSphere", "DiffSphere", {ParamID::DP_INTENSITY, ParamID::DP_SHIFT}}},
     {FitType::ElasticDiffSphere,
      {"ElasticDiffSphere", "ElasticDiffSphere", {ParamID::EDP_HEIGHT, ParamID::EDP_RADIUS}}},
@@ -130,11 +119,6 @@ std::map<FitType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<FitType>::g_typ
       {ParamID::IDRDC_INTENSITY, ParamID::IDRDC_SHIFT}}},
     {FitType::ElasticDiffRotDiscreteCircle,
      {"ElasticDiffRotDiscreteCircle", "ElasticDiffRotDiscreteCircle", {ParamID::EDRDC_HEIGHT, ParamID::EDRDC_RADIUS}}},
-    {FitType::IsoRotDiff, {"IsoRotDiff", "IsoRotDiff", {ParamID::IRD_HEIGHT, ParamID::IRD_CENTRE}}},
-    {FitType::ElasticIsoRotDiff,
-     {"ElasticIsoRotDiff", "ElasticIsoRotDiff", {ParamID::EIRD_HEIGHT, ParamID::EIRD_RADIUS}}},
-    {FitType::InelasticIsoRotDiff,
-     {"InelasticIsoRotDiff", "InelasticIsoRotDiff", {ParamID::IIRD_HEIGHT, ParamID::IIRD_CENTRE}}},
 };
 template <>
 std::map<LorentzianType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<LorentzianType>::g_typeMap{

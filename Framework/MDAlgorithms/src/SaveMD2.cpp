@@ -200,7 +200,7 @@ void SaveMD2::exec() {
 
   if (eventWS) {
     // If event workspace use SaveMD version 1.
-    auto saveMDv1 = createChildAlgorithm("SaveMD", -1, -1, true, 1);
+    IAlgorithm_sptr saveMDv1 = createChildAlgorithm("SaveMD", -1, -1, true, 1);
     saveMDv1->setProperty<IMDWorkspace_sptr>("InputWorkspace", ws);
     saveMDv1->setProperty<std::string>("Filename", getProperty("Filename"));
     saveMDv1->setProperty<bool>("UpdateFileBackEnd", getProperty("UpdateFileBackEnd"));

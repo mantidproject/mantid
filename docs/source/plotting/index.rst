@@ -259,6 +259,7 @@ fashion as the plotting of arrays in matplotlib. Moreover, one can combine the t
 .. plot::
    :include-source:
 
+   from __future__ import division
    import numpy as np
    import matplotlib.pyplot as plt
    from mantid import plots
@@ -317,6 +318,7 @@ and adds a grid
 .. plot::
    :include-source:
 
+   from __future__ import division
    import numpy as np
    import matplotlib.pyplot as plt
    from mantid import plots
@@ -352,6 +354,7 @@ above, but we add a fit, In the bottom part we add the difference.
 .. plot::
    :include-source:
 
+   from __future__ import division
    import numpy as np
    import matplotlib.pyplot as plt
    from mantid import plots
@@ -439,6 +442,7 @@ Both can be found `online <https://www.rapidtables.com/web/color/html-color-code
 .. plot::
    :include-source:
 
+   from __future__ import (absolute_import, division, print_function, unicode_literals)
    import matplotlib.pyplot as plt
    from mantid import plots
    from mantid.simpleapi import *
@@ -467,8 +471,6 @@ Both can be found `online <https://www.rapidtables.com/web/color/html-color-code
 
    fig.suptitle('Line Plots: Color Cycle', fontsize='x-large')
    #fig.show()
-
-.. _custom-colormap-mantidworkbench:
 
 Custom Colormap (MantidWorkbench)
 #################################

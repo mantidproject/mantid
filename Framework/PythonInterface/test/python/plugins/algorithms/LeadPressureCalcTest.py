@@ -73,20 +73,6 @@ class LeadPressureCalcTest(unittest.TestCase):
         self.assertEqual(len(ws.toDict().keys()), 3)
         self.assertNotIn("Pressure Target (GPa)", ws.row(0).keys())
 
-    def test_high_d_low_t(self):
-        d = 2.865
-        temp = 385
-        LeadPressureCalc(d, temp)
-        ws = mtd['LeadPressureCalcResults']
-        self.assertAlmostEqual(0.048, ws.row(0)["Calculated Pressure (GPa)"], 3)
-
-    def test_high_t_low_d(self):
-        d = 2.635
-        temp = 490
-        LeadPressureCalc(d, temp)
-        ws = mtd['LeadPressureCalcResults']
-        self.assertAlmostEqual(20.274, ws.row(0)["Calculated Pressure (GPa)"], 1)  # calc err +- 2.426
-
 
 if __name__ == '__main__':
     unittest.main()

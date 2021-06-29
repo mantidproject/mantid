@@ -145,7 +145,7 @@ public:
     fun->setParameter("h", 1.0);
     fun->setParameter("s", 1.0);
 
-    auto fit = API::AlgorithmManager::Instance().create("Fit");
+    API::IAlgorithm_sptr fit = API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
 
     fit->setProperty("Function", fun);

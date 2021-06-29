@@ -305,13 +305,12 @@ class CrystalFieldMultiSite(object):
 
     def plot(self, *args):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...) with additional name argument"""
-        from mantid.simpleapi import plotSpectrum
+        from mantidplot import plotSpectrum
         ws_name = args[3] if len(args) == 4 else 'CrystalFieldMultiSite_{}'.format(self.Ions)
         xArray, yArray = self.getSpectrum(*args)
-        if len(args) > 0:
-            ws_name += '_{}'.format(args[0])
-            if isinstance(args[0], int):
-                ws_name += '_{}'.format(args[1])
+        ws_name += '_{}'.format(args[0])
+        if isinstance(args[0], int):
+            ws_name += '_{}'.format(args[1])
         makeWorkspace(xArray, yArray, child=False, ws_name=ws_name)
         plotSpectrum(ws_name, 0)
 

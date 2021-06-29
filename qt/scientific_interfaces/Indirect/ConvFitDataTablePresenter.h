@@ -7,7 +7,7 @@
 #pragma once
 
 #include "ConvFitModel.h"
-#include "IndirectFitDataTablePresenter.h"
+#include "IndirectDataTablePresenter.h"
 
 #include <QTableWidget>
 
@@ -21,7 +21,7 @@ namespace IDA {
 /**
   Presenter for a table of convolution fitting data.
 */
-class DLLExport ConvFitDataTablePresenter : public IndirectFitDataTablePresenter {
+class DLLExport ConvFitDataTablePresenter : public IndirectDataTablePresenter {
   Q_OBJECT
 public:
   ConvFitDataTablePresenter(ConvFitModel *model, QTableWidget *dataTable);

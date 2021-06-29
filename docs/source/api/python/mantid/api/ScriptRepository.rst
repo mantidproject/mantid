@@ -1,5 +1,3 @@
-.. _mantid.api.ScriptRepository:
-
 ==================
  ScriptRepository
 ==================

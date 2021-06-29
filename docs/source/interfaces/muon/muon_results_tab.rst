@@ -56,4 +56,4 @@ Used By
 ^^^^^^^
 
 :ref:`Muon Analysis <Muon_Analysis-ref>`
-:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>`
+:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`

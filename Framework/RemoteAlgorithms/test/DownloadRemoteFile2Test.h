@@ -37,6 +37,7 @@ public:
     // can cast to inherited interfaces and base classes
     TS_ASSERT(dynamic_cast<Mantid::RemoteAlgorithms::DownloadRemoteFile2 *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::Algorithm *>(a.get()));
+    TS_ASSERT(dynamic_cast<Mantid::Kernel::PropertyManagerOwner *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::IAlgorithm *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::Kernel::IPropertyManager *>(a.get()));
   }

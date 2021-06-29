@@ -24,7 +24,7 @@ using Mantid::HistogramData::LinearGenerator;
 
 namespace GetEiTestHelper {
 IAlgorithm_sptr runGetEiUsingTestMonitors(const std::string &inputWS, const double energyGuess, const bool fixei) {
-  auto alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
   alg->initialize();
   alg->setPropertyValue("InputWorkspace", inputWS);
   alg->setProperty("Monitor1Spec", 1);
@@ -172,7 +172,7 @@ public:
     const std::string outputName("eitest1");
     AnalysisDataService::Instance().add(outputName, testWS);
 
-    auto alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", outputName);
     alg->setProperty("Monitor2Spec", 2);
@@ -188,7 +188,7 @@ public:
     const std::string outputName("eitest2");
     AnalysisDataService::Instance().add(outputName, testWS);
 
-    auto alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", outputName);
     alg->setProperty("Monitor1Spec", 1);
@@ -206,7 +206,7 @@ public:
     const std::string outputName("eitest2");
     AnalysisDataService::Instance().add(outputName, testWS);
 
-    auto alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", outputName);
     alg->setProperty("Monitor1Spec", 1);
@@ -237,7 +237,7 @@ public:
   }
 
   void testCNCS() {
-    auto ld = AlgorithmManager::Instance().createUnmanaged("LoadNexusMonitors");
+    IAlgorithm_sptr ld = AlgorithmManager::Instance().createUnmanaged("LoadNexusMonitors");
     std::string outws_name = "cncs";
     ld->initialize();
     ld->setPropertyValue("Filename", "CNCS_7860_event.nxs");
@@ -246,7 +246,7 @@ public:
     ld->execute();
     TS_ASSERT(ld->isExecuted());
 
-    auto alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", outws_name);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -257,83 +257,6 @@ public:
     TS_ASSERT_DELTA(tzero, expected_tzero, 1e-04);
 
     AnalysisDataService::Instance().remove(outws_name);
-  }
-
-  /**
-   * Modify the test workspace so that one of the monitors has a local maximum on the trailing edge
-   * of the peak. Preivously, this would result in a divide-by-zero error.
-   */
-  void testNoisyDataOnTrailingEdge() {
-    MatrixWorkspace_sptr testWS = GetEiTestHelper::createTestWorkspaceWithMonitors();
-
-    auto &yValues = testWS->mutableY(0);
-    // Find index of peak value and calcualte half height.
-    int64_t iPeak = std::max_element(yValues.cbegin(), yValues.cend()) - yValues.begin();
-    double yPeak = yValues[iPeak];
-    double halfHeight = yPeak * 0.5;
-
-    // Find index of the point before y goes below half-height on the trailing edge.
-    int nValues = static_cast<int>(yValues.size());
-    int64_t iBeforeHalfHeight = 0;
-    for (int64_t i = iPeak; i < nValues; ++i) {
-      if (yValues[i] < halfHeight) {
-        iBeforeHalfHeight = i - 1;
-        break;
-      }
-    }
-
-    // To recreate the bug, need to have the value at ip == half height, a point after it
-    // with a greater value and the point just after that equal to half-height.
-    yValues[iBeforeHalfHeight] = halfHeight;
-    yValues[iBeforeHalfHeight + 3] = halfHeight + 1;
-    yValues[iBeforeHalfHeight + 4] = yValues[iBeforeHalfHeight];
-
-    // This algorithm needs a name attached to the workspace
-    const std::string outputName("eitestNoisyData");
-    AnalysisDataService::Instance().add(outputName, testWS);
-
-    IAlgorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING(alg = GetEiTestHelper::runGetEiUsingTestMonitors(outputName, 15.0, false));
-
-    AnalysisDataService::Instance().remove(outputName);
-  }
-
-  /**
-   * Modify the test workspace so that one of the monitors has a local maximum on the leading edge
-   * of the peak. Preivously, this would result in a divide-by-zero error.
-   */
-  void testNoisyDataOnLeadingEdge() {
-    MatrixWorkspace_sptr testWS = GetEiTestHelper::createTestWorkspaceWithMonitors();
-
-    auto &yValues = testWS->mutableY(0);
-    // Find index of peak value and calcualte half height.
-    int64_t iPeak = std::max_element(yValues.cbegin(), yValues.cend()) - yValues.begin();
-    double yPeak = yValues[iPeak];
-    double halfHeight = yPeak * 0.5;
-
-    // Find index of the point after y goes below half-height on the leading edge.
-    int64_t iAfterHalfHeight = 0;
-    for (int64_t i = iPeak; i >= 0; --i) {
-      if (yValues[i] < halfHeight) {
-        iAfterHalfHeight = i + 1;
-        break;
-      }
-    }
-
-    // To recreate the bug, need to have the value at ip == half height, a point before it
-    // with a greater value and the point just before that equal to half-height.
-    yValues[iAfterHalfHeight] = halfHeight;
-    yValues[iAfterHalfHeight - 3] = halfHeight + 1;
-    yValues[iAfterHalfHeight - 4] = yValues[iAfterHalfHeight];
-
-    // This algorithm needs a name attached to the workspace
-    const std::string outputName("eitestNoisyData");
-    AnalysisDataService::Instance().add(outputName, testWS);
-
-    IAlgorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING(alg = GetEiTestHelper::runGetEiUsingTestMonitors(outputName, 15.0, false));
-
-    AnalysisDataService::Instance().remove(outputName);
   }
 };
 

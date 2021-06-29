@@ -5,10 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantiddoc.directives.base import BaseDirective  #pylint: disable=unused-import
-from sphinx.locale import _  # noqa: F401
+from sphinx.locale import _  #pylint: disable=unused-import
 import os
 from string import Template
 import subprocess
+
+######################
+#CONFIGURABLE OPTIONS#
+######################
 
 STYLE = dict()
 
@@ -26,6 +30,10 @@ STYLE[
     'algorithm_style'] = 'node[style = "rounded,filled", fillcolor = lightskyblue, shape = rectangle]'
 STYLE['process_style'] = 'node[fillcolor = lightseagreen, shape = rectangle]'
 STYLE['value_style'] = 'node[fontname = "Times-Roman", fillcolor = grey, shape = parallelogram]'
+
+#############################
+#END OF CONFIGURABLE OPTIONS#
+#############################
 
 
 class DiagramDirective(BaseDirective):
@@ -66,14 +74,14 @@ class DiagramDirective(BaseDirective):
         env = self.state.document.settings.env
         diagrams_dir = self.diagrams_dir
         if diagrams_dir is None:
-            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n"
+            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" +
                          "    diagram generation was disabled")
             return []
 
         try:
             dot_executable = os.environ["DOT_EXECUTABLE"]
         except KeyError:
-            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n"
+            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" +
                          "    graphviz not found - diagram could not be rendered.")
             return []
 
@@ -92,8 +100,8 @@ class DiagramDirective(BaseDirective):
         try:
             in_src = open(in_path, 'r').read()
         except Exception:
-            raise RuntimeError("Cannot find dot-file: '" + diagram_name + "' in '"
-                               + os.path.join(env.srcdir, "diagrams"))
+            raise RuntimeError("Cannot find dot-file: '" + diagram_name + "' in '" +
+                               os.path.join(env.srcdir, "diagrams"))
 
         out_src = Template(in_src).substitute(STYLE)
         out_src = out_src.encode()

@@ -211,7 +211,7 @@ void LoadIsawDetCal::exec() {
         if (inputW) {
           API::Run &run = inputW->mutableRun();
           // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
-          auto alg1 = createChildAlgorithm("ChangeBinOffset");
+          IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
           alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
           alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
           if (run.hasProperty("T0")) {
@@ -468,7 +468,7 @@ void LoadIsawDetCal::applyScalings(Workspace_sptr &ws,
                                    const std::vector<ComponentScaling> &rectangularDetectorScalings) {
 
   for (const auto &scaling : rectangularDetectorScalings) {
-    auto alg1 = createChildAlgorithm("ResizeRectangularDetector");
+    IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
     alg1->setProperty<Workspace_sptr>("Workspace", ws);
     alg1->setProperty("ComponentName", scaling.componentName);
     alg1->setProperty("ScaleX", scaling.scaleX);

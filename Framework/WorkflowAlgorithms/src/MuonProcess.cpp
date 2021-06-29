@@ -208,7 +208,7 @@ WorkspaceGroup_sptr MuonProcess::groupWorkspaces(const WorkspaceGroup_sptr &wsGr
     auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
     if (ws) {
       MatrixWorkspace_sptr result;
-      auto group = createChildAlgorithm("MuonGroupDetectors");
+      IAlgorithm_sptr group = createChildAlgorithm("MuonGroupDetectors");
       group->setProperty("InputWorkspace", ws);
       group->setProperty("DetectorGroupingTable", grouping);
       group->execute();
@@ -231,7 +231,7 @@ WorkspaceGroup_sptr MuonProcess::applyDTC(const WorkspaceGroup_sptr &wsGroup, co
     auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
     if (ws) {
       MatrixWorkspace_sptr result;
-      auto dtc = createChildAlgorithm("ApplyDeadTimeCorr");
+      IAlgorithm_sptr dtc = createChildAlgorithm("ApplyDeadTimeCorr");
       dtc->setProperty("InputWorkspace", ws);
       dtc->setProperty("DeadTimeTable", dt);
       dtc->execute();
@@ -281,7 +281,7 @@ MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws, doub
   if (timeZero != EMPTY_DBL()) {
     double offset = loadedTimeZero - timeZero;
 
-    auto changeOffset = createChildAlgorithm("ChangeBinOffset");
+    IAlgorithm_sptr changeOffset = createChildAlgorithm("ChangeBinOffset");
     changeOffset->setProperty("InputWorkspace", ws);
     changeOffset->setProperty("Offset", offset);
     changeOffset->execute();
@@ -292,7 +292,7 @@ MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws, doub
   double Xmin = getProperty("Xmin");
   double Xmax = getProperty("Xmax");
   if (Xmin != EMPTY_DBL() || Xmax != EMPTY_DBL()) {
-    auto crop = createChildAlgorithm("CropWorkspace");
+    IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
     crop->setProperty("InputWorkspace", ws);
 
     if (Xmin != EMPTY_DBL())
@@ -310,7 +310,7 @@ MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws, doub
   // Rebin workspace if need to
   std::vector<double> rebinParams = getProperty("RebinParams");
   if (!rebinParams.empty()) {
-    auto rebin = createChildAlgorithm("Rebin");
+    IAlgorithm_sptr rebin = createChildAlgorithm("Rebin");
     rebin->setProperty("InputWorkspace", ws);
     rebin->setProperty("Params", rebinParams);
     rebin->setProperty("FullBinsOnly", true);

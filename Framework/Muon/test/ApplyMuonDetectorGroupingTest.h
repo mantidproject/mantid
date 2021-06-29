@@ -83,7 +83,7 @@ public:
 
     auto ws = createCountsWorkspace(5, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -93,7 +93,7 @@ public:
 
     auto ws = createCountsWorkspace(5, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("inputGroup"))
@@ -107,7 +107,7 @@ public:
 
     auto ws = createAsymmetryWorkspace(3, 10);
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("AnalysisType", "Asymmetry");
     alg->execute();
 
@@ -122,7 +122,7 @@ public:
 
     auto ws = createCountsWorkspace(3, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->execute();
     WorkspaceGroup_sptr wsGroup =
         std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("inputGroup"));
@@ -135,7 +135,7 @@ public:
 
     auto ws = createCountsWorkspace(1, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("Grouping", "1");
     alg->execute();
 
@@ -184,7 +184,7 @@ public:
 
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(1, 10);
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("AnalysisType", "Asymmetry");
     alg->setProperty("Grouping", "1");
     alg->execute();
@@ -212,7 +212,7 @@ public:
 
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(3, 10);
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("AnalysisType", "Asymmetry");
     alg->setProperty("Grouping", "1,2,3");
     alg->execute();
@@ -242,7 +242,7 @@ public:
     // Period 2 yvalues : 2,3,4,5,6,7,8,9,10,11
     WorkspaceGroup_sptr ws = createMultiPeriodWorkspaceGroup(3, 1, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("Grouping", "1");
     alg->setProperty("SummedPeriods", "1,2");
     alg->execute();
@@ -274,7 +274,7 @@ public:
     // Period 3 y-values : 3,4,5,6,7,8,9,10,11,12
     WorkspaceGroup_sptr ws = createMultiPeriodWorkspaceGroup(3, 1, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("SummedPeriods", "2,3");
     alg->setProperty("SubtractedPeriods", "1");
     alg->setProperty("Grouping", "1");
@@ -307,7 +307,7 @@ public:
 
     auto ws = createAsymmetryWorkspace(1, 10);
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("Grouping", "1");
     alg->setProperty("ApplyDeadTimeCorrection", true);
     alg->setProperty("DeadTimeTable", deadTimeTable);
@@ -337,7 +337,7 @@ public:
 
     auto ws = createCountsWorkspace(3, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("RebinArgs", "0.2");
     alg->execute();
 
@@ -372,7 +372,7 @@ public:
   void test_unNorm_workspaces_named_correctly() {
     auto ws = createCountsWorkspace(3, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
-    auto alg = algorithmWithPropertiesSet("inputData", "inputGroup");
+    Mantid::API::IAlgorithm_sptr alg = algorithmWithPropertiesSet("inputData", "inputGroup");
     alg->setProperty("AnalysisType", "Asymmetry");
     alg->execute();
 

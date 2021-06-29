@@ -1,5 +1,3 @@
-.. _mantid.api.ITableWorkspace:
-
 =================
  ITableWorkspace
 =================

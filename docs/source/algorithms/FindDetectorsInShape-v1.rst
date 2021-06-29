@@ -6,6 +6,8 @@
 
 .. properties::
 
+.. _variety of shapes: http://www.mantidproject.org/HowToDefineGeometricShape
+
 Description
 -----------
 
@@ -14,7 +16,7 @@ instrument and reports back the detector ID of every detector that is
 contained within it. Detectors are only considered if their central location
 point is contained within the shape.
 
-There are a :ref:`HowToDefineGeometricShape` available.
+There are a `variety of shapes`_ available.
 
 Usage
 -----

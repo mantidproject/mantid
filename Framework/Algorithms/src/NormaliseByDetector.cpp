@@ -154,7 +154,7 @@ MatrixWorkspace_sptr NormaliseByDetector::processHistograms(const MatrixWorkspac
   Progress prog(this, 0.0, 1.0, progress_items);
   // Clone the input workspace to create a template for the denominator
   // workspace.
-  auto cloneAlg = createChildAlgorithm("CloneWorkspace", 0.0, 0.1, true);
+  IAlgorithm_sptr cloneAlg = this->createChildAlgorithm("CloneWorkspace", 0.0, 0.1, true);
   cloneAlg->setProperty("InputWorkspace", inWS);
   cloneAlg->setPropertyValue("OutputWorkspace", "temp");
   cloneAlg->executeAsChildAlg();
@@ -191,7 +191,7 @@ void NormaliseByDetector::exec() {
   MatrixWorkspace_sptr denominatorWS = processHistograms(inWS);
 
   // Perform the normalisation.
-  auto divideAlg = createChildAlgorithm("Divide", 0.9, 1.0, true);
+  IAlgorithm_sptr divideAlg = this->createChildAlgorithm("Divide", 0.9, 1.0, true);
   divideAlg->setRethrows(true);
   divideAlg->setProperty("LHSWorkspace", inWS);
   divideAlg->setProperty("RHSWorkspace", denominatorWS);

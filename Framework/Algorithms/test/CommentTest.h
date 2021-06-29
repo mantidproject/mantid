@@ -51,7 +51,7 @@ public:
     if (!outputWS)
       return;
 
-    auto lastAlgorithm = outputWS->getHistory().lastAlgorithm();
+    IAlgorithm_sptr lastAlgorithm = outputWS->getHistory().lastAlgorithm();
 
     TS_ASSERT_EQUALS(lastAlgorithm->getPropertyValue("Workspace"), alg.getPropertyValue("Workspace"));
     TS_ASSERT_EQUALS(lastAlgorithm->getPropertyValue("Text"), alg.getPropertyValue("Text"));

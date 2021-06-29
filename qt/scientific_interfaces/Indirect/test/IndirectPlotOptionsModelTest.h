@@ -82,14 +82,13 @@ std::map<std::string, std::string> customActions() {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock an IndirectTab
-class MockExternalPlotter : public ExternalPlotter {
+class MockIndirectPlotter : public IndirectPlotter {
 public:
   /// Public Methods
-  MOCK_METHOD3(plotSpectra,
-               void(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars));
-  MOCK_METHOD3(plotBins, void(std::string const &workspaceName, std::string const &binIndices, bool errorBars));
+  MOCK_METHOD2(plotSpectra, void(std::string const &workspaceName, std::string const &workspaceIndices));
+  MOCK_METHOD2(plotBins, void(std::string const &workspaceName, std::string const &binIndices));
   MOCK_METHOD1(plotContour, void(std::string const &workspaceName));
-  MOCK_METHOD3(plotTiled, void(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars));
+  MOCK_METHOD2(plotTiled, void(std::string const &workspaceName, std::string const &workspaceIndices));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -106,7 +105,7 @@ public:
   static void destroySuite(IndirectPlotOptionsModelTest *suite) { delete suite; }
 
   void setUp() override {
-    m_plotter = new NiceMock<MockExternalPlotter>();
+    m_plotter = new NiceMock<MockIndirectPlotter>();
     m_model = std::make_unique<IndirectPlotOptionsModel>(m_plotter);
   }
 
@@ -255,7 +254,7 @@ public:
     m_model->setWorkspace(WORKSPACE_NAME);
     m_model->setIndices(WORKSPACE_INDICES);
 
-    EXPECT_CALL(*m_plotter, plotSpectra(WORKSPACE_NAME, WORKSPACE_INDICES, false)).Times(1);
+    EXPECT_CALL(*m_plotter, plotSpectra(WORKSPACE_NAME, WORKSPACE_INDICES)).Times(1);
 
     m_model->plotSpectra();
   }
@@ -264,7 +263,7 @@ public:
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
     m_model->setWorkspace(WORKSPACE_NAME);
 
-    EXPECT_CALL(*m_plotter, plotBins(WORKSPACE_NAME, WORKSPACE_INDICES, false)).Times(1);
+    EXPECT_CALL(*m_plotter, plotBins(WORKSPACE_NAME, WORKSPACE_INDICES)).Times(1);
 
     m_model->plotBins(WORKSPACE_INDICES);
   }
@@ -283,7 +282,7 @@ public:
     m_model->setWorkspace(WORKSPACE_NAME);
     m_model->setIndices(WORKSPACE_INDICES);
 
-    EXPECT_CALL(*m_plotter, plotTiled(WORKSPACE_NAME, WORKSPACE_INDICES, false)).Times(1);
+    EXPECT_CALL(*m_plotter, plotTiled(WORKSPACE_NAME, WORKSPACE_INDICES)).Times(1);
 
     m_model->plotTiled();
   }
@@ -339,7 +338,7 @@ public:
     auto actions = customActions();
 
     tearDown();
-    m_plotter = new NiceMock<MockExternalPlotter>();
+    m_plotter = new NiceMock<MockIndirectPlotter>();
     m_model = std::make_unique<IndirectPlotOptionsModel>(m_plotter, actions);
 
     actions["Plot Contour"] = "Plot Contour";
@@ -351,5 +350,5 @@ private:
   AnalysisDataServiceImpl &m_ads;
 
   std::unique_ptr<IndirectPlotOptionsModel> m_model;
-  MockExternalPlotter *m_plotter;
+  MockIndirectPlotter *m_plotter;
 };

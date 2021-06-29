@@ -31,8 +31,8 @@ private slots:
   void hideParameterComboBoxes();
   void showParameterComboBoxes();
   void updateAvailableParameters();
+  void updateAvailableParameterTypes();
   void updateAvailableParameters(const QString &type);
-  void updateAvailableParameterTypes(FqFitParameters &parameters);
   void updateParameterSelectionEnabled();
   void setParameterLabel(const QString &parameter);
   void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type);
@@ -57,9 +57,9 @@ private:
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   void closeDialog() override;
   std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
-  void updateParameterOptions(FqFitAddWorkspaceDialog *dialog, FqFitParameters parameters);
-  void updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters);
-  std::vector<std::string> getParameterTypes(FqFitParameters &parameters) const;
+  void updateParameterOptions(FqFitAddWorkspaceDialog *dialog);
+  void updateParameterTypes(FqFitAddWorkspaceDialog *dialog);
+  std::vector<std::string> getParameterTypes(TableDatasetIndex dataIndex) const;
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
   void setDataIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog);

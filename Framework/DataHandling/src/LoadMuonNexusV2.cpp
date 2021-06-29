@@ -211,7 +211,7 @@ Workspace_sptr LoadMuonNexusV2::runLoadISISNexus() {
     int globalNumberOfThreads;
   };
   ScopedNumThreadsSetter restoreDefaultThreadsOnExit(1);
-  auto childAlg = createChildAlgorithm("LoadISISNexus", 0, 1, true, 2);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("LoadISISNexus", 0, 1, true, 2);
   declareProperty("LoadMonitors", "Exclude"); // we need to set this property
   auto ISISLoader = std::dynamic_pointer_cast<API::Algorithm>(childAlg);
   ISISLoader->copyPropertiesFrom(*this);

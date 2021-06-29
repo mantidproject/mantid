@@ -32,7 +32,7 @@ public:
   }
 
   void setUp_Event() {
-    auto loader = AlgorithmManager::Instance().create("LoadEventNexus");
+    IAlgorithm_sptr loader = AlgorithmManager::Instance().create("LoadEventNexus");
     loader->initialize();
     loader->setPropertyValue("Filename", "CNCS_7860_event.nxs");
     loader->setPropertyValue("OutputWorkspace", inputWS);

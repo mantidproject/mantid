@@ -125,7 +125,7 @@ void DgsDiagnose::exec() {
   bool isStandAlone = !reductionManager->existsProperty("IncidentEnergyGuess");
 
   // Process the detector vanadium
-  auto detVan = createChildAlgorithm("DgsProcessDetectorVanadium");
+  IAlgorithm_sptr detVan = this->createChildAlgorithm("DgsProcessDetectorVanadium");
   detVan->setProperty("InputWorkspace", detVanWS);
   detVan->setProperty("OutputWorkspace", dvInternal);
   detVan->setProperty("InputMonitorWorkspace", detVanMonWS);
@@ -153,7 +153,7 @@ void DgsDiagnose::exec() {
 
     Workspace_sptr tmp;
     if (!isStandAlone) {
-      auto cloneWs = createChildAlgorithm("CloneWorkspace");
+      IAlgorithm_sptr cloneWs = this->createChildAlgorithm("CloneWorkspace");
       cloneWs->setProperty("InputWorkspace", sampleWS);
       cloneWs->setProperty("OutputWorkspace", sampleInternal);
       cloneWs->executeAsChildAlg();
@@ -161,7 +161,7 @@ void DgsDiagnose::exec() {
       sampleWS = std::static_pointer_cast<MatrixWorkspace>(tmp);
     }
 
-    auto norm = createChildAlgorithm("DgsPreprocessData");
+    IAlgorithm_sptr norm = this->createChildAlgorithm("DgsPreprocessData");
     norm->setProperty("InputWorkspace", sampleWS);
     norm->setProperty("OutputWorkspace", sampleWS);
     norm->setProperty("InputMonitorWorkspace", sampleMonWS);
@@ -173,7 +173,7 @@ void DgsDiagnose::exec() {
   // Create the total counts workspace if necessary
   MatrixWorkspace_sptr totalCountsWS;
   if (rejectZeroBkg) {
-    auto integrate = createChildAlgorithm("Integration");
+    IAlgorithm_sptr integrate = this->createChildAlgorithm("Integration");
     integrate->setProperty("InputWorkspace", sampleWS);
     integrate->setProperty("OutputWorkspace", countsInternal);
     integrate->setProperty("IncludePartialBins", true);
@@ -190,7 +190,7 @@ void DgsDiagnose::exec() {
 
     double rangeEnd = getDblPropOrParam("BackgroundTofEnd", reductionManager, "bkgd-range-max", sampleWS);
 
-    auto integrate = createChildAlgorithm("Integration");
+    IAlgorithm_sptr integrate = this->createChildAlgorithm("Integration");
     integrate->setProperty("InputWorkspace", sampleWS);
     integrate->setProperty("OutputWorkspace", bkgInternal);
     integrate->setProperty("RangeLower", rangeStart);
@@ -201,7 +201,7 @@ void DgsDiagnose::exec() {
 
     // Need to match the units between background and detector vanadium
     const std::string detVanIntRangeUnits = reductionManager->getProperty("DetVanIntRangeUnits");
-    auto cvu = createChildAlgorithm("ConvertUnits");
+    IAlgorithm_sptr cvu = this->createChildAlgorithm("ConvertUnits");
     cvu->setProperty("InputWorkspace", backgroundIntWS);
     cvu->setProperty("OutputWorkspace", backgroundIntWS);
     cvu->setProperty("Target", detVanIntRangeUnits);
@@ -226,7 +226,7 @@ void DgsDiagnose::exec() {
     sampleWS = std::shared_ptr<MatrixWorkspace>();
   }
 
-  auto diag = createChildAlgorithm("DetectorDiagnostic");
+  IAlgorithm_sptr diag = this->createChildAlgorithm("DetectorDiagnostic");
   diag->setProperty("InputWorkspace", dvWS);
   diag->setProperty("DetVanCompare", dvCompWS);
   diag->setProperty("SampleWorkspace", sampleWS);
@@ -269,7 +269,7 @@ void DgsDiagnose::exec() {
       diag->execute();
       if (maskWS) {
         MatrixWorkspace_sptr tmp = diag->getProperty("OutputWorkspace");
-        auto comb = createChildAlgorithm("BinaryOperateMasks");
+        IAlgorithm_sptr comb = createChildAlgorithm("BinaryOperateMasks");
         comb->setProperty("InputWorkspace1", maskWS);
         comb->setProperty("InputWorkspace2", tmp);
         comb->setProperty("OutputWorkspace", maskWS);
@@ -293,7 +293,7 @@ void DgsDiagnose::exec() {
   if (reductionManager->existsProperty("OutputMaskFile")) {
     std::string maskFilename = reductionManager->getPropertyValue("OutputMaskFile");
     if (!maskFilename.empty()) {
-      auto saveNxs = createChildAlgorithm("SaveMask");
+      IAlgorithm_sptr saveNxs = this->createChildAlgorithm("SaveMask");
       saveNxs->setProperty("InputWorkspace", maskWS);
       saveNxs->setProperty("OutputFile", maskFilename);
       saveNxs->execute();

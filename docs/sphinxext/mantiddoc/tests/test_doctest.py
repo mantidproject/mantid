@@ -11,7 +11,6 @@ from mantiddoc.doctest import DocTestOutputParser, TestCaseReport, TestSuiteRepo
 
 import unittest
 
-
 class TestCaseReportTest(unittest.TestCase):
 
     def test_report_stores_expected_attributes_about_test(self):
@@ -51,6 +50,7 @@ class TestCaseReportTest(unittest.TestCase):
         self.assertTrue(report.failed)
         self.assertFalse(report.passed)
 
+#------------------------------------------------------------------------------
 
 class TestSuiteReportTest(unittest.TestCase):
 
@@ -71,8 +71,12 @@ class TestSuiteReportTest(unittest.TestCase):
         self.assertEqual(1, report.nfailed)
         self.assertEqual(2, report.ntests)
 
+    #========================= Failure cases ==================================
+
     def test_report_raises_error_with_empty_tests_cases_list(self):
         self.assertRaises(ValueError, self.__createDummyReport, empty = True)
+
+    #========================= Helpers ========================================
 
     def __createDummyReport(self, empty = False):
         name = "DummySuite"
@@ -85,8 +89,10 @@ class TestSuiteReportTest(unittest.TestCase):
 
         return TestSuiteReport(name, testcases, package)
 
+#------------------------------------------------------------------------------
 
-ALL_PASS_EX = """
+ALL_PASS_EX = \
+"""
 Document: algorithms/AllPassed
 ------------------------------
 2 items passed all tests:
@@ -109,7 +115,8 @@ Doctest summary
 0 failures in cleanup code
 """
 
-TEST_PASS_CLEANUP_FAIL = """
+TEST_PASS_CLEANUP_FAIL = \
+"""
 Document: algorithms/TestPassedCleanupFail
 ------------------------------------------
 **********************************************************************
@@ -144,7 +151,8 @@ Doctest summary
 0 failures in cleanup code
 """
 
-ALL_FAIL_EX = """Document: algorithms/AllFailed
+ALL_FAIL_EX = \
+"""Document: algorithms/AllFailed
 ------------------------------
 **********************************************************************
 File "algorithms/AllFailed.rst", line 127, in Ex2[31]
@@ -186,7 +194,8 @@ Doctest summary
     0 failures in cleanup code
 """
 
-MIX_PASSFAIL_EX = """Document: algorithms/MixPassFail
+MIX_PASSFAIL_EX = \
+"""Document: algorithms/MixPassFail
 --------------------------------
 **********************************************************************
 File "algorithms/MixPassFail.rst", line 143, in default
@@ -227,8 +236,8 @@ Doctest summary
     0 failures in cleanup code
 """
 
-
 class DocTestOutputParserTest(unittest.TestCase):
+
     def test_all_passed_gives_expected_results(self):
         parser = DocTestOutputParser(ALL_PASS_EX, isfile = False)
 
@@ -273,7 +282,8 @@ class DocTestOutputParserTest(unittest.TestCase):
 
         cases = suite.testcases
         expected_names = ["Ex2[31]", "Ex1"]
-        expected_errors = ["""File "algorithms/AllFailed.rst", line 127, in Ex2[31]
+        expected_errors = [
+"""File "algorithms/AllFailed.rst", line 127, in Ex2[31]
 Failed example:
     print "Multi-line failed"
     print "test"
@@ -281,14 +291,15 @@ Expected:
     No match
 Got:
     Multi-line failed
-    test""",
-                           """File "algorithms/AllFailed.rst", line 111, in Ex1
+    test""", # second error
+"""File "algorithms/AllFailed.rst", line 111, in Ex1
 Failed example:
     print "Single line failed test"
 Expected:
     No match
 Got:
-    Single line failed test"""]
+    Single line failed test"""
+]
         # test
         for idx, case in enumerate(cases):
             self.assertTrue(case.failed)
@@ -307,20 +318,22 @@ Got:
 
         cases = suite.testcases
         expected_names = ["Ex3", "default", "default", "Ex1"]
-        expected_errors = ["", "", """File "algorithms/MixPassFail.rst", line 143, in default
+        expected_errors = ["", "", #two passes
+"""File "algorithms/MixPassFail.rst", line 143, in default
 Failed example:
     print "A failed test"
 Expected:
     Not a success
 Got:
     A failed test""",
-                           """File "algorithms/MixPassFail.rst", line 159, in Ex1
+"""File "algorithms/MixPassFail.rst", line 159, in Ex1
 Failed example:
     print "Second failed test"
 Expected:
     Not a success again
 Got:
-    Second failed test"""]
+    Second failed test"""
+]
         # test
         for idx, case in enumerate(cases):
             expected_fail = (expected_errors[idx] != "")
@@ -338,6 +351,8 @@ Got:
         suite = parser.testsuite
         # The other checks should be sufficient if this passes
         self.assertEqual(5, suite.ntests)
+
+    #========================= Failure cases ==================================
 
     def test_no_document_start_gives_valueerror(self):
         self.assertRaises(ValueError, DocTestOutputParser,
@@ -360,6 +375,7 @@ Got:
         self.assertRaises(ValueError, DocTestOutputParser, fail_ex_nosum,
                           isfile = False)
 
+#------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     unittest.main()

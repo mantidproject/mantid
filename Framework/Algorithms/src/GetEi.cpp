@@ -316,7 +316,7 @@ double GetEi::getPeakCentre(const API::MatrixWorkspace_const_sptr &WS, const siz
  *  @throw invalid_argument if the input workspace does not have common binning
  */
 void GetEi::extractSpec(int wsInd, double start, double end) {
-  auto childAlg = createChildAlgorithm("CropWorkspace", 100 * m_fracCompl, 100 * (m_fracCompl + CROP));
+  IAlgorithm_sptr childAlg = createChildAlgorithm("CropWorkspace", 100 * m_fracCompl, 100 * (m_fracCompl + CROP));
   m_fracCompl += CROP;
 
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));

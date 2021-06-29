@@ -23,7 +23,7 @@ This decision was due to the lack of support for Qt4 and the many major problems
 Also, MantidPlot has not received any updates or many bug fixes for the last year, and as such Workbench is a more stable and
 functional user interface in many areas.
 
-We have created a high level `comparison of the functionality <https://archive.mantidproject.org/Workbench_Feature_Comparison>`_
+We have created a high level `comparison of the functionality <https://www.mantidproject.org/Workbench_Feature_Comparison>`_
 to help you easily see some of the differences.
 
 Workbench is much less cluttered but operates very similarly to MantidPlot, so the experience of moving over

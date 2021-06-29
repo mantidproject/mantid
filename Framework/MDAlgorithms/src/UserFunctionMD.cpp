@@ -35,7 +35,10 @@ UserFunctionMD::UserFunctionMD() {
 std::vector<std::string> UserFunctionMD::getAttributeNames() const { return std::vector<std::string>(1, "Formula"); }
 
 /// Has attribute "Formula"
-bool UserFunctionMD::hasAttribute(const std::string &attName) const { return attName == "Formula"; }
+bool UserFunctionMD::hasAttribute(const std::string &attName) const {
+  UNUSED_ARG(attName);
+  return attName == "Formula";
+}
 
 /// Return Formula
 UserFunctionMD::Attribute UserFunctionMD::getAttribute(const std::string &attName) const {

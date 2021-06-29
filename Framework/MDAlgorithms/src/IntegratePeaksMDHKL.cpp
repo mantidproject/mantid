@@ -144,7 +144,7 @@ void IntegratePeaksMDHKL::exec() {
 MDHistoWorkspace_sptr IntegratePeaksMDHKL::normalize(int h, int k, int l, double box, int gridPts,
                                                      const MatrixWorkspace_sptr &flux, const MatrixWorkspace_sptr &sa,
                                                      const IMDEventWorkspace_sptr &ws) {
-  auto normAlg = createChildAlgorithm("MDNormSCD");
+  IAlgorithm_sptr normAlg = createChildAlgorithm("MDNormSCD");
   normAlg->setProperty("InputWorkspace", ws);
   normAlg->setProperty("AlignedDim0", "[H,0,0]," + boost::lexical_cast<std::string>(h - box) + "," +
                                           boost::lexical_cast<std::string>(h + box) + "," + std::to_string(gridPts));
@@ -160,7 +160,7 @@ MDHistoWorkspace_sptr IntegratePeaksMDHKL::normalize(int h, int k, int l, double
   Workspace_sptr mdout = normAlg->getProperty("OutputWorkspace");
   Workspace_sptr mdnorm = normAlg->getProperty("OutputNormalizationWorkspace");
 
-  auto alg = createChildAlgorithm("DivideMD");
+  IAlgorithm_sptr alg = createChildAlgorithm("DivideMD");
   alg->setProperty("LHSWorkspace", mdout);
   alg->setProperty("RHSWorkspace", mdnorm);
   alg->setPropertyValue("OutputWorkspace", "out");
@@ -282,7 +282,7 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts, const MDHistoWork
  */
 MDHistoWorkspace_sptr IntegratePeaksMDHKL::binEvent(int h, int k, int l, double box, int gridPts,
                                                     const IMDWorkspace_sptr &ws) {
-  auto binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
+  IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
   binMD->setProperty("InputWorkspace", ws);
   binMD->setProperty("AlignedDim0", "[H,0,0]," + boost::lexical_cast<std::string>(h - box) + "," +
                                         boost::lexical_cast<std::string>(h + box) + "," + std::to_string(gridPts));
@@ -303,7 +303,7 @@ MDHistoWorkspace_sptr IntegratePeaksMDHKL::binEvent(int h, int k, int l, double 
  * @return MDHistoWorkspace as a result of the binning
  */
 MDHistoWorkspace_sptr IntegratePeaksMDHKL::cropHisto(int h, int k, int l, double box, const IMDWorkspace_sptr &ws) {
-  auto cropMD = createChildAlgorithm("IntegrateMDHistoWorkspace", 0.0, 0.3);
+  IAlgorithm_sptr cropMD = createChildAlgorithm("IntegrateMDHistoWorkspace", 0.0, 0.3);
   cropMD->setProperty("InputWorkspace", ws);
 
   cropMD->setProperty("P1Bin",

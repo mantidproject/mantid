@@ -253,7 +253,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         events_binning = self.get_val(["events", "binning"], reduction_dict, default="")
         if (events_binning and len(events_binning.split(',')) != 3) or \
                 self.instrument is SANSInstrument.ZOOM and not events_binning:
-            raise ValueError(f"Events.binning: Three comma separated values are required, got '{events_binning}'")
+            raise ValueError("Events.binning: Three comma separated values are required")
         self.compatibility.time_rebin_string = events_binning
 
         merge_range_dict = self.get_val(["merged", "merge_range"], reduction_dict)
@@ -376,7 +376,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
         # Mandatory as its subtle if missing
         monitor_spec_num = monitor_dict["spectrum_number"]
-        background = self.get_val("background", monitor_dict)
+        background = self.get_val("background", monitor_dict, )
 
         self.normalize_to_monitor.incident_monitor = monitor_spec_num
 

@@ -210,7 +210,7 @@ void ConvertDiffCal::exec() {
   }
 
   // sort the results
-  auto sortTable = createChildAlgorithm("SortTableWorkspace");
+  IAlgorithm_sptr sortTable = createChildAlgorithm("SortTableWorkspace");
   sortTable->setProperty("InputWorkspace", configWksp);
   sortTable->setProperty("OutputWorkspace", configWksp);
   sortTable->setPropertyValue("Columns", "detid");

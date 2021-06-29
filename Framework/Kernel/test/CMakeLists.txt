@@ -16,7 +16,6 @@ if(CXXTEST_FOUND)
                         PRIVATE
                         Types
                         Kernel
-                        Json
                         ${NEXUS_LIBRARIES}
                         ${Boost_LIBRARIES}
                         ${POCO_LIBRARIES}

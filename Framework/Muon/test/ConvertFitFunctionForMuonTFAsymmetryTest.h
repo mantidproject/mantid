@@ -59,7 +59,7 @@ ITableWorkspace_sptr genTable() {
 }
 
 IAlgorithm_sptr setUpAlg(const std::vector<std::string> &wsNames, const IFunction_sptr &func, bool copyTies = true) {
-  auto asymmAlg = AlgorithmManager::Instance().create("ConvertFitFunctionForMuonTFAsymmetry");
+  IAlgorithm_sptr asymmAlg = AlgorithmManager::Instance().create("ConvertFitFunctionForMuonTFAsymmetry");
   asymmAlg->initialize();
   asymmAlg->setChild(true);
   asymmAlg->setProperty("WorkspaceList", wsNames);
@@ -79,7 +79,7 @@ void genData() {
 
 IFunction_sptr doFit(const IFunction_sptr &func, int iterations, std::vector<std::string> wsNames) {
 
-  auto fit = AlgorithmManager::Instance().create("Fit");
+  IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
   fit->initialize();
   fit->setProperty("Function", func);
   fit->setProperty("InputWorkspace", wsNames[0]);
@@ -111,7 +111,7 @@ public:
     std::vector<std::string> wsNames = {"ws1"};
     IFunction_sptr func =
         FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=2;ties =(f0.A1=2)");
-    auto alg = setUpAlg(wsNames, func);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, func);
     TS_ASSERT(alg->isInitialized())
   }
 
@@ -120,7 +120,7 @@ public:
     std::vector<std::string> wsNames = {"ws1"};
     IFunction_sptr func =
         FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=2;ties =(f0.A1=2)");
-    auto alg = setUpAlg(wsNames, func);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, func);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -130,7 +130,7 @@ public:
     genData();
     std::vector<std::string> wsNames = {"ws1"};
     IFunction_sptr func = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=2;");
-    auto alg = setUpAlg(wsNames, func);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, func);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -147,7 +147,7 @@ public:
     std::vector<std::string> wsNames = {"ws1"};
     IFunction_sptr func =
         FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=2;ties =(f0.A1=2)");
-    auto alg = setUpAlg(wsNames, func);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, func);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -165,7 +165,7 @@ public:
     IFunction_sptr func = FunctionFactory::Instance().createInitialized(
         "name=LinearBackground,A0=0,A1=2;name=LinearBackground,A0=0,A1=4;ties "
         "=(f0.A1=f1.A1)");
-    auto alg = setUpAlg(wsNames, func);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, func);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -184,7 +184,7 @@ public:
     IFunction_sptr func = FunctionFactory::Instance().createInitialized(
         "name=LinearBackground,A0=0,A1=2;name=LinearBackground,A0=0,A1=4;ties "
         "=(f0.A1=f1.A1)");
-    auto alg = setUpAlg(wsNames, func);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, func);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -201,7 +201,7 @@ public:
 
     IFunction_sptr multiFunc = FunctionFactory::Instance().createInitialized(multiFuncString);
 
-    auto alg = setUpAlg(wsNames, multiFunc);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, multiFunc);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -230,7 +230,7 @@ public:
 
     IFunction_sptr multiFunc = FunctionFactory::Instance().createInitialized(multiFuncString);
     multiFunc->addTies("f0.A1=1.5");
-    auto alg = setUpAlg(wsNames, multiFunc);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, multiFunc);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -260,7 +260,7 @@ public:
 
     IFunction_sptr multiFunc = FunctionFactory::Instance().createInitialized(multiFuncString);
     multiFunc->addTies("f0.A1=f1.A1");
-    auto alg = setUpAlg(wsNames, multiFunc);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, multiFunc);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -286,7 +286,7 @@ public:
     genData();
     std::vector<std::string> wsNames = {"ws1"};
     IFunction_sptr func = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=2;");
-    auto alg = setUpAlg(wsNames, func);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, func);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -309,7 +309,7 @@ public:
     std::vector<std::string> wsNames = {"ws1"};
     IFunction_sptr func =
         FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=2;ties =(f0.A1=2)");
-    auto alg = setUpAlg(wsNames, func);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, func);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -333,7 +333,7 @@ public:
     IFunction_sptr func = FunctionFactory::Instance().createInitialized(
         "name=LinearBackground,A0=0,A1=2;name=LinearBackground,A0=0,A1=4;ties "
         "=(f0.A1=f1.A1)");
-    auto alg = setUpAlg(wsNames, func);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, func);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -363,7 +363,7 @@ public:
 
     IFunction_sptr multiFunc = FunctionFactory::Instance().createInitialized(multiFuncString);
 
-    auto alg = setUpAlg(wsNames, multiFunc);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, multiFunc);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -391,7 +391,7 @@ public:
 
     IFunction_sptr multiFunc = FunctionFactory::Instance().createInitialized(multiFuncString);
     multiFunc->addTies("f0.A1=1.5");
-    auto alg = setUpAlg(wsNames, multiFunc);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, multiFunc);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -420,7 +420,7 @@ public:
 
     IFunction_sptr multiFunc = FunctionFactory::Instance().createInitialized(multiFuncString);
     multiFunc->addTies("f0.A1=f1.A1");
-    auto alg = setUpAlg(wsNames, multiFunc);
+    IAlgorithm_sptr alg = setUpAlg(wsNames, multiFunc);
     TS_ASSERT(alg->isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());

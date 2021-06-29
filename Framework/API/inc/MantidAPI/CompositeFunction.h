@@ -209,8 +209,6 @@ public:
   void setParameterStatus(size_t i, ParameterStatus status) override;
   /// Get status of parameter
   ParameterStatus getParameterStatus(size_t i) const override;
-  /// Extract function index and parameter name from a variable name
-  static std::pair<std::string, size_t> parseName(const std::string &varName);
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -226,6 +224,8 @@ protected:
   size_t paramOffset(size_t i) const { return m_paramOffsets[i]; }
 
 private:
+  /// Extract function index and parameter name from a variable name
+  static std::pair<std::string, size_t> parseName(const std::string &varName);
   // get attribute offset from attribute index
   size_t getAttributeOffset(size_t attributeIndex) const;
   /// Pointers to the included functions

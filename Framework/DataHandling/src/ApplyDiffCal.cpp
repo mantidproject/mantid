@@ -131,7 +131,7 @@ std::map<std::string, std::string> ApplyDiffCal::validateInputs() {
 }
 
 void ApplyDiffCal::loadCalFile(const Workspace_sptr &inputWS, const std::string &filename) {
-  auto alg = createChildAlgorithm("LoadDiffCal");
+  IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("Filename", filename);
   alg->setProperty<bool>("MakeCalWorkspace", true);
@@ -192,7 +192,6 @@ void ApplyDiffCal::exec() {
     Column_const_sptr tzeroColumn = m_calibrationWS->getColumn("tzero");
 
     auto detids = instrument->getDetectorIDs();
-    std::sort(detids.begin(), detids.end());
 
     for (size_t i = 0; i < m_calibrationWS->rowCount(); ++i) {
       auto detid = static_cast<detid_t>((*detIdColumn)[i]);
@@ -200,7 +199,9 @@ void ApplyDiffCal::exec() {
       double difa = (*difaColumn)[i];
       double tzero = (*tzeroColumn)[i];
 
-      if (std::binary_search(detids.begin(), detids.end(), detid)) {
+      // auto det = instrument->getDetector(detid);
+      auto it = std::find(detids.begin(), detids.end(), detid);
+      if (it != detids.end()) {
         // found the detector
         auto det = instrument->getDetector(detid);
         paramMap.addDouble(det->getComponentID(), "DIFC", difc);

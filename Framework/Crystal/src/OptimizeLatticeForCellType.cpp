@@ -185,7 +185,7 @@ void OptimizeLatticeForCellType::exec() {
 
     if (apply) {
       // Reindex peaks with new UB
-      auto alg = createChildAlgorithm("IndexPeaks");
+      Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
       alg->setPropertyValue("PeaksWorkspace", i_run->getName());
       alg->setProperty("Tolerance", tolerance);
       alg->executeAsChildAlg();
@@ -196,14 +196,14 @@ void OptimizeLatticeForCellType::exec() {
       if (outputdir.back() != '/')
         outputdir += "/";
       // Save Peaks
-      auto savePks_alg = createChildAlgorithm("SaveIsawPeaks");
+      Mantid::API::IAlgorithm_sptr savePks_alg = createChildAlgorithm("SaveIsawPeaks");
       savePks_alg->setPropertyValue("InputWorkspace", i_run->getName());
       savePks_alg->setProperty("Filename", outputdir + "ls" + i_run->getName() + ".integrate");
       savePks_alg->executeAsChildAlg();
       g_log.notice() << "See output file: " << outputdir + "ls" + i_run->getName() + ".integrate"
                      << "\n";
       // Save UB
-      auto saveUB_alg = createChildAlgorithm("SaveIsawUB");
+      Mantid::API::IAlgorithm_sptr saveUB_alg = createChildAlgorithm("SaveIsawUB");
       saveUB_alg->setPropertyValue("InputWorkspace", i_run->getName());
       saveUB_alg->setProperty("Filename", outputdir + "ls" + i_run->getName() + ".mat");
       saveUB_alg->executeAsChildAlg();

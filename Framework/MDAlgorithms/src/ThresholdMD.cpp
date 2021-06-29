@@ -86,7 +86,7 @@ void ThresholdMD::exec() {
   IMDHistoWorkspace_sptr outWS = getProperty("OutputWorkspace");
   if (outWS != inputWS) {
     g_log.debug("Deep copy input workspace as output workspace.");
-    auto alg = createChildAlgorithm("CloneMDWorkspace");
+    IAlgorithm_sptr alg = createChildAlgorithm("CloneMDWorkspace");
     alg->setProperty("InputWorkspace", inputWS);
     alg->executeAsChildAlg();
     IMDWorkspace_sptr temp = alg->getProperty("OutputWorkspace");

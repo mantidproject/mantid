@@ -256,7 +256,7 @@ void GetDetOffsetsMultiPeaks::exec() {
   std::string filename = getProperty("GroupingFileName");
   if (!filename.empty()) {
     progress(0.9, "Saving .cal file");
-    auto childAlg = createChildAlgorithm("SaveCalFile");
+    IAlgorithm_sptr childAlg = createChildAlgorithm("SaveCalFile");
     childAlg->setProperty("OffsetsWorkspace", m_outputW);
     childAlg->setProperty("MaskWorkspace", m_maskWS);
     childAlg->setPropertyValue("Filename", filename);
@@ -832,7 +832,7 @@ int GetDetOffsetsMultiPeaks::fitSpectra(const int64_t wi, const MatrixWorkspace_
   }
 
   // Fit peaks
-  auto findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
+  API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
   findpeaks->setLoggingOffset(2);
   findpeaks->setProperty("InputWorkspace", inputW);
   findpeaks->setProperty<int>("FWHM", 7);

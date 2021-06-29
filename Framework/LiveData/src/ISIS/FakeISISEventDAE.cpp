@@ -170,7 +170,7 @@ void FakeISISEventDAE::exec() {
   int port = getProperty("Port");
 
   // start the live HistoDAE as well
-  auto histoDAE = createChildAlgorithm("FakeISISHistoDAE", -1.0, -1.0);
+  API::IAlgorithm_sptr histoDAE = createChildAlgorithm("FakeISISHistoDAE", -1.0, -1.0);
   histoDAE->setLoggingOffset(-2); // make most messages from the HistoDAE
                                   // invisible to default logging levels
   histoDAE->setProperty("NPeriods", nper);

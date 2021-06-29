@@ -147,9 +147,8 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
     def update_browser(self, status, func_str, setup_name):
         self.fit_browser.fitResultsChanged.emit(status)
-        self.fit_browser.changeWindowTitle.emit(status)
         # update browser with output function and save setup if successful
-        if "success" in status.lower():
+        if "success" in status:
             self.fit_browser.loadFunction(func_str)
             self.fit_browser.save_current_setup(setup_name)
 

@@ -72,7 +72,7 @@ set(TEST_FILES
     RemoveExpDecayTest.h
     RRFMuonTest.h)
 
-if(COVERAGE)
+if(COVERALLS)
   foreach(loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS

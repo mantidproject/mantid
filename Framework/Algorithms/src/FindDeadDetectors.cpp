@@ -124,7 +124,7 @@ void FindDeadDetectors::exec() {
 MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace() {
   g_log.information() << "Integrating input workspace\n";
 
-  auto childAlg = createChildAlgorithm("Integration");
+  API::IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
   // Now execute integration.
   // pass inputed values straight to Integration, checking must be done there
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));
