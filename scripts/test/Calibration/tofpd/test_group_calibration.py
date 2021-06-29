@@ -178,7 +178,7 @@ class TestGroupCalibration(unittest.TestCase):
         diffcal = group_calibration.do_group_calibration(ws,
                                                          groups,
                                                          previous_calibration=previous_diffcal,
-                                                         output_workspace_basename = "group_calibration",
+                                                         output_basename = "group_calibration",
                                                          cc_kwargs={
                                                              "Step": 0.001,
                                                              "DReference": 2.0,

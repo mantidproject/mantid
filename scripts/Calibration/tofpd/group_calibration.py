@@ -6,16 +6,44 @@ from mantid.simpleapi import (ConvertUnits, ExtractSpectra,
                               ApplyDiffCal, DiffractionFocussing,
                               PDCalibration)
 
+# Diamond peak positions in d-space
+DIAMOND = (0.3117,0.3257,0.3499,0.4205,0.4645,
+           0.4768,0.4996,0.5150,0.5441,0.5642,
+           0.5947,0.6307,0.6866,0.7283,0.8185,
+           0.8920,1.0758,1.2615,2.0599)
+
 
 def cc_calibrate_groups(data_ws,
                         group_ws,
-                        output_basename,
+                        output_basename="_tmp_group_cc_calibration",
                         previous_calibration=None,
                         Step=0.001,
                         DReference=1.2615,
                         Xmin=1.22,
                         Xmax=1.30,
                         MaxDSpaceShift=None):
+    """This will perform the CrossCorrelate/GetDetectorOffsets on a group
+    of detector pixel.
+
+    It works by looping over the different groups in the group_ws,
+    extracting all unmasked spectra of a group, then running
+    CrossCorrelate and GetDetectorOffsets on just that group, and
+    combinning the results at the end.
+
+    The first unmasked spectra of the group will be used for the
+    ReferenceSpectra in CrossCorrelate.
+
+    :param data_ws: Input calibration raw data (in TOF), assumed to already be correctly masked
+    :param group_ws: grouping workspace, e.g. output from LoadDetectorsGroupingFile
+    :param output_basename: Optional name to use for temporay and output workspace
+    :param previous_calibration: Optional previous diffcal workspace
+    :param Step: step size for binning of data and input for GetDetectorOffsets, default 0.001
+    :param DReference: Derefernce parameter for GetDetectorOffsets, default 1.2615
+    :param Xmin: Xmin parameter for CrossCorrelate, default 1.22
+    :param Xmax: Xmax parameter for CrossCorrelate, default 1.30
+    :param MaxDSpaceShift: MaxDSpaceShift paramter for CrossCorrelate, default None
+    :return: Combinned DiffCal workspace from all the different groups
+    """
     if previous_calibration:
         ApplyDiffCal(data_ws, CalibrationWorkspace=previous_calibration)
 
@@ -54,16 +82,39 @@ def cc_calibrate_groups(data_ws,
 def pdcalibration_groups(data_ws,
                          group_ws,
                          cc_diffcal,
-                         output_basename,
+                         output_basename="_tmp_group_pd_calibration",
                          previous_calibration=None,
-                         PeakPositions=(0.3117,0.3257,0.3499,0.4205,0.4645,
-                                        0.4768,0.4996,0.5150,0.5441,0.5642,
-                                        0.5947,0.6307,0.6866,0.7283,0.8185,
-                                        0.8920,1.0758,1.2615,2.0599), # diamond
+                         PeakPositions=DIAMOND,
                          TofBinning=(300,-.001,16666.7),
                          PeakFunction='IkedaCarpenterPV',
                          PeakWindow=0.1,
                          PeakWidthPercent=None):
+    """This will perform PDCalibration of the group data and combine the
+    results with the results of `cc_calibrate_groups`.
+
+    This works by converting the data into d-spacing using the diffcal
+    from the cross-correlation, then grouping the data using
+    DiffractionFocussing after which it's converted back into TOF
+    using an arbitarty diffcal (the combined of all detectors in the
+    group). PDCalibration is performed on this grouped workspace after
+    which the diffcal's are all combined according to
+
+    .. math::
+
+        DIFC_{effective} = DIFC_{PD} * DIFC_{CC} / DIFC_{arbitarty}
+
+    :param data_ws: Input calibration raw data (in TOF), assumed to already be correctly masked
+    :param group_ws: grouping workspace, e.g. output from LoadDetectorsGroupingFile
+    :param cc_diffcal: DiffCal workspace which is the output from cc_calibrate_groups
+    :param output_basename: Optional name to use for temporay and output workspace
+    :param previous_calibration: Optional previous diffcal workspace
+    :param PeakPositions: PeakPositions parameter of PDCalibration, default Diamond peaks
+    :param TofBinning: TofBinning parameter of PDCalibration, default (300,-.001,16666.7)
+    :param PeakFunction: PeakFunction parameter of PDCalibration, default 'IkedaCarpenterPV'
+    :param PeakWindow: PeakWindow parameter of PDCalibration, default 0.1
+    :param PeakWidthPercent: PeakWidthPercent parameter of PDCalibration, default None
+    :return: DiffCal from CrossCorrelate combined with DiffCal from PDCalibration of grouped workspace
+    """
 
     ApplyDiffCal(data_ws, CalibrationWorkspace=cc_diffcal)
     ConvertUnits(data_ws, Target='dSpacing', OutputWorkspace='_tmp_data_aligned')
@@ -107,23 +158,34 @@ def pdcalibration_groups(data_ws,
     return mtd[f'{output_basename}_cc_pd_diffcal']
 
 
-def do_group_calibration(ws,
-                         groups,
+def do_group_calibration(data_ws,
+                         group_ws,
                          previous_calibration=None,
-                         output_workspace_basename = "_tmp_group_calibration",
+                         output_basename = "group_calibration",
                          cc_kwargs={},
                          pdcal_kwargs={}):
+    """This just calls cc_calibrate_group then feed that results into
+    pdcalibration_groups, returning the results.
 
-    cc_diffcal = cc_calibrate_groups(ws,
-                                     groups,
-                                     output_workspace_basename,
+    :param data_ws: Input calibration raw data (in TOF), assumed to already be correctly masked
+    :param group_ws: grouping workspace, e.g. output from LoadDetectorsGroupingFile
+    :param previous_calibration: Optional previous diffcal workspace
+    :param output_basename: name to use for temporay and output workspace, default group_calibration
+    :param cc_kwargs: dict of parameters to pass to cc_calibrate_groups
+    :param pdcal_kwargs: dict of parameters to pass to pdcalibration_groups
+    :return: The final diffcal after running cc_calibrate_groups and  pdcalibration_groups
+    """
+
+    cc_diffcal = cc_calibrate_groups(data_ws,
+                                     group_ws,
+                                     output_basename,
                                      previous_calibration,
                                      **cc_kwargs)
 
-    diffcal = pdcalibration_groups(ws,
-                                   groups,
+    diffcal = pdcalibration_groups(data_ws,
+                                   group_ws,
                                    cc_diffcal,
-                                   output_workspace_basename,
+                                   output_basename,
                                    previous_calibration,
                                    **pdcal_kwargs)
 
