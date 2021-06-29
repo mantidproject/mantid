@@ -11,15 +11,15 @@ from Muon.GUI.Common.plot_widget.main_plot_widget_view import MainPlotWidgetView
 from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_model import PlotDataPaneModel
 from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_presenter import PlotDataPanePresenter
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
-from Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_presenter import PlotFitPanePresenter
-from Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_model import PlotTimeFitPaneModel
+from Muon.GUI.FrequencyDomainAnalysis.plot_widget.plot_freq_fit_pane_model import PlotFreqFitPaneModel
+from Muon.GUI.FrequencyDomainAnalysis.plot_widget.plot_freq_fit_pane_presenter import PlotFreqFitPanePresenter
 
 
-class MuonAnalysisPlotWidget(object):
+class FrequencyAnalysisPlotWidget(object):
     def __init__(self, context=None, get_active_fit_results=lambda: [], parent=None):
 
         self.data_model = PlotDataPaneModel(context)
-        self.fit_model = PlotTimeFitPaneModel(context)
+        self.fit_model = PlotFreqFitPaneModel(context)
 
         # The plotting canvas widgets
         self.plotting_canvas_widgets = {}
@@ -42,7 +42,7 @@ class MuonAnalysisPlotWidget(object):
 
         self.data_mode = PlotDataPanePresenter(self._view1, self.data_model,
                                                context,self.plotting_canvas_widgets[self.data_model.name].presenter)
-        self.fit_mode = PlotFitPanePresenter(self._view2, self.fit_model,
+        self.fit_mode = PlotFreqFitPanePresenter(self._view2, self.fit_model,
                                                  context,self.plotting_canvas_widgets[self.fit_model.name].presenter)
 
         self.presenter = MainPlotWidgetPresenter(self.view,
@@ -60,18 +60,18 @@ class MuonAnalysisPlotWidget(object):
 
     @property
     def data_changed_observers(self):
-        return self.presenter.data_changed_observers
+        return [self.data_mode.data_changed_observer]
 
     @property
     def rebin_options_set_observers(self):
-        return self.presenter.rebin_options_set_observers
+        return [self.data_mode.rebin_options_set_observer]
 
     @property
     def data_index(self):
         return self.view.get_index(self.data_mode.name)
 
     @property
-    def fit_index(self):
+    def frequency_index(self):
         return self.view.get_index(self.fit_mode.name)
 
     def close(self):
@@ -80,7 +80,5 @@ class MuonAnalysisPlotWidget(object):
     def handle_plot_mode_changed_by_user(self):
         old_plot_mode = self._current_plot_mode
         self._current_plot_mode = self.presenter.get_plot_mode
-        selection, x_range, auto, y_range, errors = self.plotting_canvas_widgets[old_plot_mode].get_quick_edit_info
-        self.plotting_canvas_widgets[self._current_plot_mode].set_quick_edit_info(selection, x_range, auto, y_range, errors)
         self.presenter.hide(old_plot_mode)
         self.presenter.show(self._current_plot_mode)

@@ -23,6 +23,7 @@ class PlotDataPanePresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = mock.MagicMock()
         self.model = mock.Mock(spec=PlotDataPaneModel)
+        self.model.name = "data"
         self.view = mock.Mock(spec=BasePaneView)
         self.view.warning_popup = mock.MagicMock()
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)

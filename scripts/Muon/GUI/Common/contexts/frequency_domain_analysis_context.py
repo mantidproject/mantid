@@ -13,26 +13,24 @@ FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_Y_RANGE = [0.0, 1000.0]
 
 class FrequencyDomainAnalysisContext(MuonContext):
     def __init__(self, muon_data_context=None, muon_gui_context=None, muon_group_context=None, fitting_context=None,
-                 results_context=None, muon_phase_context=None, plotting_context=None, frequency_context=None,
+                 results_context=None, muon_phase_context=None, plot_panes_context=None, frequency_context=None,
                  freq_plotting_context=None):
         super().__init__(muon_data_context=muon_data_context, muon_gui_context=muon_gui_context,
-                         muon_group_context=muon_group_context, plotting_context=plotting_context,
+                         muon_group_context=muon_group_context, plot_panes_context=plot_panes_context,
                          fitting_context=fitting_context, results_context=results_context,
                          muon_phase_context=muon_phase_context)
+
         self.workspace_suffix = ' FD'
         self.base_directory = 'Frequency Domain'
-        self._freq_plotting_context = freq_plotting_context
-        self._freq_plotting_context.set_defaults(FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE,
-                                                 FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_Y_RANGE)
         self._frequency_context = frequency_context
 
     @property
     def default_fitting_plot_range(self):
-        return self._freq_plotting_context.default_xlims
+        return FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE
 
     @property
     def default_end_x(self):
-        return self._freq_plotting_context.default_xlims[1]
+        return FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE[1]
 
     @property
     def guess_workspace_prefix(self):
@@ -45,8 +43,7 @@ class FrequencyDomainAnalysisContext(MuonContext):
         return workspace_options
 
     def get_workspace_names_for(self, runs='', group_and_pair='',
-                                       phasequad=False, rebin=False):
-
+                                rebin=False):
         return self.get_names_of_frequency_domain_workspaces_to_fit(
             runs=runs, group_and_pair=group_and_pair, frequency_type=self._frequency_context.plot_type)
 
