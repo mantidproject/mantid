@@ -33,7 +33,7 @@ ENVS=$($EXPECTED_CONDA_PATH env list)
 if [[ ! $ENVS = *"$EXPECTED_MAMBAFORGE_PATH/envs/mantid-developer"* ]]; then
     $EXPECTED_CONDA_PATH env remove -n mantid-developer
 else
-    echo "Conda environment already setup."
+    echo "Conda environment not already present"
 fi
 
 # Always create the new environment:
