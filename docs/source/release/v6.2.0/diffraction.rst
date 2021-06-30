@@ -33,6 +33,7 @@ Engineering Diffraction
 -----------------------
 New features
 ############
+- New setting for default peak function to fit in the Engineering Diffraction interface (initial default is :ref:`BackToBackExponential <func-BackToBackExponential>`).
 - Added serial fit capability to fitting tab in EngDiff UI - this fits all loaded workspaces with same initial parameters.
 
 Improvements
@@ -44,6 +45,7 @@ Bugfixes
 - Sequential fitting in the EngDiff UI now uses the output of the last successful fit (as opposed to the previous fit) as the initial parameters for the next fit.
 - An empty Engineering Diffraction interface is no longer saved if the user saves a project having previously had the interface open at some point in that session
 - The help button on the Engineering Diffraction interface points to the correct page, having been broken in the last release
+
 
 Single Crystal Diffraction
 --------------------------
