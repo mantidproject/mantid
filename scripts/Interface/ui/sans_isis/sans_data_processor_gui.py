@@ -15,6 +15,7 @@ from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
 from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow, QLineEdit)
 from mantid.kernel import (Logger, UsageService, FeatureType)
 from enum import Enum
+
 from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
@@ -33,6 +34,8 @@ from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 from ui.sans_isis.work_handler import WorkHandler
 from ui.sans_isis.modified_qt_field_factory import ModifiedQtFieldFactory
+
+from ui.sans_isis.SansGuiObservable import SansGuiObservable
 
 Ui_SansDataProcessorWindow, _ = load_ui(__file__, "sans_data_processor_window.ui")
 
@@ -196,6 +199,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.export_table_button.setIcon(icons.get_icon("mdi.file-export"))
 
         self._attach_signal_slots()
+        self._create_observables()
 
         # Attach validators
         self._attach_validators()
@@ -220,6 +224,13 @@ class SANSDataProcessorGui(QMainWindow,
 
         modified_field_factory = ModifiedQtFieldFactory(self._on_field_edit)
         modified_field_factory.attach_to_children(self.settings_page)
+
+    def _create_observables(self):
+        self._observable_items = SansGuiObservable()
+        self.can_sas_checkbox.stateChanged.connect(self._observable_items.save_options.notify_subscribers)
+
+    def get_observable(self) -> SansGuiObservable:
+        return self._observable_items
 
     def _setup_progress_bar(self):
         self.batch_progress_bar.setMinimum(0)
