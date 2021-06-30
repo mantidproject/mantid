@@ -9,8 +9,10 @@ from Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_model import PlotFitPane
 class PlotModelFitPaneModel(PlotFitPaneModel):
 
     def __init__(self, context):
-        super().__init__(context, "Model Fit Data")
-        self.context.plot_panes_context[self.name].set_defaults([0., 1.0], [0.0, 1.0])
+        super().__init__(context, "Model Data")
+        self.context.plot_panes_context[self.name].set_defaults([0.0, 1.0], [0.0, 1.0])
+        self.context.plot_panes_context[self.name].set_autoscale_all(True)
+        self.context.plot_panes_context[self.name].set_error_all(True)
 
     def _create_workspace_label(self, workspace_name, index):
         result_table_name = "ResultTable"

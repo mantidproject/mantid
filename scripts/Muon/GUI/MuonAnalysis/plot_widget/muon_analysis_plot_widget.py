@@ -48,9 +48,10 @@ class MuonAnalysisPlotWidget(object):
 
         self.data_mode = PlotDataPanePresenter(self._view1, self.data_model, context,
                                                self.plotting_canvas_widgets[self.data_model.name].presenter)
-        self.fit_mode = PlotFitPanePresenter(self._view2, self.fit_model, context,
+        self.fit_mode = PlotFitPanePresenter(self._view2, self.fit_model, context, context.fitting_context,
                                              self.plotting_canvas_widgets[self.fit_model.name].presenter)
         self.model_fit_mode = PlotModelFitPanePresenter(self._view3, self.model_fit_model, context,
+                                                        context.model_fitting_context,
                                                         self.plotting_canvas_widgets[self.model_fit_model.name].presenter)
 
         self.presenter = MainPlotWidgetPresenter(self.view, [self.data_mode, self.fit_mode, self.model_fit_mode])
@@ -91,7 +92,9 @@ class MuonAnalysisPlotWidget(object):
     def handle_plot_mode_changed_by_user(self):
         old_plot_mode = self._current_plot_mode
         self._current_plot_mode = self.presenter.get_plot_mode
-        selection, x_range, auto, y_range, errors = self.plotting_canvas_widgets[old_plot_mode].get_quick_edit_info
-        self.plotting_canvas_widgets[self._current_plot_mode].set_quick_edit_info(selection, x_range, auto, y_range, errors)
+        if old_plot_mode == self.data_mode.name or old_plot_mode == self.fit_mode.name:
+            pane_to_match = self.fit_mode.name if old_plot_mode == self.data_mode.name else self.data_mode.name
+            selection, x_range, auto, y_range, errors = self.plotting_canvas_widgets[pane_to_match].get_quick_edit_info
+            self.plotting_canvas_widgets[pane_to_match].set_quick_edit_info(selection, x_range, auto, y_range, errors)
         self.presenter.hide(old_plot_mode)
         self.presenter.show(self._current_plot_mode)

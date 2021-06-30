@@ -347,6 +347,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.seq_fitting_tab.seq_fitting_tab_presenter.selected_sequential_fit_notifier.add_subscriber(
             self.plot_widget.fit_mode.plot_selected_fit_observer)
 
+        self.model_fitting_tab.model_fitting_tab_presenter.selected_fit_results_changed.add_subscriber(
+            self.plot_widget.model_fit_mode.plot_selected_fit_observer)
+
     def setup_grouping_changed_observers(self):
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
             self.home_tab.home_tab_widget.groupingObserver)
@@ -463,6 +466,12 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.fitting_tab.fitting_tab_presenter.update_plot_guess_notifier.add_subscriber(
             self.plot_widget.fit_mode.update_plot_guess_observer)
+
+        self.model_fitting_tab.model_fitting_tab_presenter.remove_plot_guess_notifier.add_subscriber(
+            self.plot_widget.model_fit_mode.remove_plot_guess_observer)
+
+        self.model_fitting_tab.model_fitting_tab_presenter.update_plot_guess_notifier.add_subscriber(
+            self.plot_widget.model_fit_mode.update_plot_guess_observer)
 
     def setup_results_notifier(self):
         """Connect results tab to the model fitting tab."""
