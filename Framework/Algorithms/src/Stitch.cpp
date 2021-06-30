@@ -9,6 +9,7 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -215,6 +216,22 @@ void Stitch::exec() {
 }
 
 MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs, const std::string &refName) {
+  std::vector<double> factors;
+  std::vector<std::string> names;
+  for (const auto &wsName : inputs) {
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    if (ws->run().hasProperty("StitchScaleFactor")) {
+      factors.push_back(ws->run().getLogAsSingleValue("StitchScaleFactor"));
+    } else {
+      factors.push_back(1.); // the reference workspace is not scaled
+    }
+    if (ws->run().hasProperty("StitchedWorkspaceName")) {
+      names.push_back(ws->run().getLogData("StitchedWorkspaceName")->value());
+    } else {
+      names.push_back(wsName); // the reference workspace is not cloned
+    }
+  }
+
   // interleave option is equivalent to concatenation followed by sort X axis
   auto joiner = createChildAlgorithm("ConjoinXRuns");
   joiner->setProperty("InputWorkspaces", inputs);
@@ -234,6 +251,11 @@ MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs, const
   sorter->setPropertyValue("OutputWorkspace", "__sorted");
   sorter->execute();
   MatrixWorkspace_sptr sorted = sorter->getProperty("OutputWorkspace");
+  auto &run = sorted->mutableRun();
+  run.removeProperty("StitchedWorkspaceName", true);
+  run.removeProperty("StitchScaleFactor", true);
+  run.addProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>("StitchedWorkspaceNames", names));
+  run.addProperty(std::make_unique<PropertyWithValue<std::vector<double>>>("StitchScaleFactors", factors));
   return sorted;
 }
 
@@ -277,12 +299,17 @@ std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr w
   divider->execute();
   MatrixWorkspace_sptr ratio = divider->getProperty("OutputWorkspace");
 
+  const double scaleFactor = 1 / median(ratio->dataY(0));
+  wsToScale->mutableRun().addProperty(std::make_unique<PropertyWithValue<double>>("StitchScaleFactor", scaleFactor),
+                                      true);
+  wsToScale->mutableRun().addProperty(
+      std::make_unique<PropertyWithValue<std::string>>("StitchedWorkspaceName", wsToScale->getName()), true);
   auto scaler = createChildAlgorithm("Scale");
   scaler->setAlwaysStoreInADS(true);
   scaler->setProperty("InputWorkspace", wsToScale);
   const std::string scaled = "__scaled_" + wsToScale->getName();
   scaler->setPropertyValue("OutputWorkspace", scaled);
-  scaler->setProperty("Factor", 1 / median(ratio->dataY(0)));
+  scaler->setProperty("Factor", scaleFactor);
   scaler->execute();
   return scaled;
 }
