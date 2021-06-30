@@ -13,7 +13,7 @@
 #include "MockMantidGLWidget.h"
 #include "MockProjectionSurface.h"
 #include "MockQtConnect.h"
-#include "MockSimpleWidget.h"
+#include "MockQtDisplay.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -35,7 +35,7 @@ public:
   static InstrumentWidgetTest *createSuite() { return new InstrumentWidgetTest(); }
   static void destroySuite(InstrumentWidgetTest *suite) { delete suite; }
 
-  using SimpleMock = StrictMock<MockSimpleWidget>;
+  using SimpleMock = StrictMock<MockQtDisplay>;
   using GLMock = StrictMock<MockMantidGLWidget>;
   using ConnectMock = StrictMock<MockQtConnect>;
 
