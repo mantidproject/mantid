@@ -15,6 +15,15 @@ from os import path
 import warnings
 
 
+def getSignMaxAbsValInCol(mat):
+    """
+    Used to find most likely permutation of axes to provide consistency with reference UB.
+    :param mat: a 2D array
+    :return out: sign of largest element in each column of abs(matrix)
+    """
+    return np.sign(mat) * (abs(mat) == abs(mat).max(axis=0))
+
+
 class FindGoniometerFromUB(DataProcessorAlgorithm):
 
     def name(self):
@@ -211,7 +220,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
                 # UB' = UB M^-1
                 # HKL' = M HKL
                 minv = np.linalg.inv(matUB[irun]) @ predictedUB
-                minv = self.getSignMaxAbsValInCol(minv)
+                minv = getSignMaxAbsValInCol(minv)
                 # redo angle calculation on permuted UB
                 matUB[irun] = matUB[irun] @ minv
                 chi, phi, u = self.getGonioAngles(matUB[irun], zeroUB, omega[irun])
@@ -248,14 +257,6 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
         gonioTable.addColumn(type="float", name="Phi")
         gonioTable.addColumn(type="V3D", name="GonioAxis")
         return gonioTable
-
-    def getSignMaxAbsValInCol(self, mat):
-        """
-        Used to find most likely permutation of axes to provide consistency with reference UB.
-        :param mat: a 2D array
-        :return out: sign of largest element in each column of abs(matrix)
-        """
-        return np.sign(mat) * (abs(mat) == abs(mat).max(axis=0))
 
     def getSingleAxis(self, r):
         """
