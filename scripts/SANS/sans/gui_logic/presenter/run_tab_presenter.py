@@ -382,7 +382,8 @@ class RunTabPresenter(PresenterCommon):
         return self._model.instrument
 
     def on_save_options_change(self):
-        self._run_tab_model.update_save_types()
+        selected_save_types = self._view.save_types
+        self._run_tab_model.update_save_types(selected_save_types)
 
     def on_user_file_load(self):
         """

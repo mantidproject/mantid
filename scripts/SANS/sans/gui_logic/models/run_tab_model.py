@@ -11,7 +11,7 @@ class RunTabModel:
     def __init__(self):
         self._save_types = SaveOptions()
 
-    def update_save_types(self):
+    def update_save_types(self, selected_types):
         print("Update called")
 
     def get_save_types(self):

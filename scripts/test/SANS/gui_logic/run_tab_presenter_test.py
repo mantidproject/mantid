@@ -210,7 +210,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
     def test_on_save_options_changed_called(self):
         self.view_observers.save_options.notify_subscribers()
-        self.mock_run_tab_model.update_save_types.assert_called_once()
+        self.mock_run_tab_model.update_save_types.assert_called_once_with(self._mock_view.save_types)
 
     def test_that_can_get_state_for_index_if_index_exists(self):
         state_key = mock.NonCallableMock()
