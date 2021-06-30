@@ -9,25 +9,25 @@ from mantidqt.utils.qt import load_ui
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget
 
-ui_form, base_widget = load_ui(__file__, "workspace_selector.ui")
+ui_form, base_widget = load_ui(__file__, "cyclic_data_selector.ui")
 
 
-class WorkspaceSelectorView(ui_form, base_widget):
+class CyclicDataSelectorView(ui_form, base_widget):
     """
-    The WorkspaceSelectorView is the cyclic workspace selector combobox, and is used to choose the workspace that
-    is currently active in an interface.
+    The CyclicDataSelectorView is a combobox used for selecting data with << and >> buttons which allow you to cycle
+    through each data item.
     """
 
     def __init__(self, parent: QWidget = None):
-        """Initialize the WorkspaceSelectorView."""
-        super(WorkspaceSelectorView, self).__init__(parent)
+        """Initialize the CyclicDataSelectorView."""
+        super(CyclicDataSelectorView, self).__init__(parent)
         self.setupUi(self)
 
         self.increment_parameter_display_button.clicked.connect(self.increment_dataset_name_combo_box)
         self.decrement_parameter_display_button.clicked.connect(self.decrement_dataset_name_combo_box)
 
     def set_slot_for_dataset_changed(self, slot) -> None:
-        """Connect the slot for the display workspace combo box being changed."""
+        """Connect the slot for the combo box being changed."""
         self.dataset_name_combo_box.currentIndexChanged.connect(slot)
 
     @property
@@ -46,7 +46,7 @@ class WorkspaceSelectorView(ui_form, base_widget):
             self.dataset_name_combo_box.currentIndexChanged.emit(self.dataset_name_combo_box.currentIndex())
 
     def update_dataset_name_combo_box(self, dataset_names: list) -> None:
-        """Update the data in the parameter display combo box."""
+        """Update the data in the combo box."""
         old_name = self.dataset_name_combo_box.currentText()
 
         self.update_dataset_names_combo_box(dataset_names)
@@ -62,7 +62,7 @@ class WorkspaceSelectorView(ui_form, base_widget):
         self.dataset_name_combo_box.currentIndexChanged.emit(new_index)
 
     def update_dataset_names_combo_box(self, dataset_names: list) -> None:
-        """Update the datasets displayed in the dataset name combobox."""
+        """Update the datasets displayed in the combobox."""
         self.dataset_name_combo_box.blockSignals(True)
         self.dataset_name_combo_box.clear()
         self.dataset_name_combo_box.addItems(dataset_names)
@@ -70,7 +70,7 @@ class WorkspaceSelectorView(ui_form, base_widget):
         self.dataset_name_combo_box.blockSignals(False)
 
     def update_dataset_names_combo_box_tooltips(self) -> None:
-        """Update the tooltips for the dataset name combobox."""
+        """Update the tooltips for the combobox."""
         for i, dataset_name in enumerate(self.dataset_names):
             self.dataset_name_combo_box.setItemData(i, dataset_name, Qt.ToolTipRole)
 
@@ -116,6 +116,11 @@ class WorkspaceSelectorView(ui_form, base_widget):
         current_index = self.dataset_name_combo_box.currentIndex()
         return current_index if current_index != -1 else None
 
-    def set_workspace_combo_box_label(self, text: str) -> None:
-        """Sets the label text next to the workspace selector combobox."""
-        self.workspace_combo_box_label.setText(text)
+    def set_data_combo_box_label(self, text: str) -> None:
+        """Sets the label text next to the data selector combobox."""
+        self.data_combo_box_label.setText(text)
+
+    def set_data_combo_box_label_width(self, width: int) -> None:
+        """Sets the width of the label next to the data selector combobox."""
+        self.run_selector.data_combo_box_label.setMinimumWidth(width)
+        self.run_selector.data_combo_box_label.setMaximumWidth(width)

@@ -10,7 +10,7 @@ from mantidqt.utils.qt import load_ui
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_controls_view import FitControlsView
 from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import FitFunctionOptionsView
-from Muon.GUI.Common.fitting_widgets.basic_fitting.workspace_selector_view import WorkspaceSelectorView
+from Muon.GUI.Common.data_selectors.cyclic_data_selector_view import CyclicDataSelectorView
 from Muon.GUI.Common.message_box import warning
 
 from qtpy.QtWidgets import QWidget
@@ -29,7 +29,7 @@ class BasicFittingView(ui_form, base_widget):
         self.setupUi(self)
 
         self.fit_controls = FitControlsView(self)
-        self.workspace_selector = WorkspaceSelectorView(self)
+        self.workspace_selector = CyclicDataSelectorView(self)
         self.fit_function_options = FitFunctionOptionsView(self)
 
         self.fit_controls_layout.addWidget(self.fit_controls)
@@ -95,7 +95,7 @@ class BasicFittingView(ui_form, base_widget):
 
     def set_workspace_combo_box_label(self, text: str) -> None:
         """Sets the label text next to the workspace selector combobox."""
-        self.workspace_selector.set_workspace_combo_box_label(text)
+        self.workspace_selector.set_data_combo_box_label(text)
 
     def set_datasets_in_function_browser(self, dataset_names: list) -> None:
         """Sets the datasets stored in the FunctionBrowser."""
