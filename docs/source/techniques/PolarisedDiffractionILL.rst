@@ -694,6 +694,7 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396991',
         OutputWorkspace='cadmium_transmission_ws',
+        NormaliseBy='Monitor',
         ProcessAs='BeamWithCadmium'
     )
     # Beam measurement for transmisison
@@ -701,6 +702,7 @@ Sample normalisation
         Run='396983',
         OutputWorkspace='beam_ws',
         CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        NormaliseBy='Monitor',
         ProcessAs='EmptyBeam'
     )
 
@@ -710,6 +712,7 @@ Sample normalisation
         OutputWorkspace='quartz_transmission',
         CadmiumTransmissionWorkspace='cadmium_transmission_ws',
         EmptyBeamWorkspace='beam_ws',
+        NormaliseBy='Monitor',
         ProcessAs='Transmission'
     )
 
@@ -717,6 +720,7 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396917, 396918',
         OutputWorkspace='empty_ws',
+        NormaliseBy='Monitor',
         ProcessAs='Empty'
     )
 
@@ -724,6 +728,7 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396928, 396929',
         OutputWorkspace='cadmium_ws',
+        NormaliseBy='Monitor',
         ProcessAs='Cadmium'
     )
 
@@ -735,6 +740,7 @@ Sample normalisation
         EmptyContainerWorkspace='empty_ws',
         Transmission='quartz_transmission',
         OutputTreatment='AveragePol',
+        NormaliseBy='Monitor',
         ProcessAs='Quartz'
     )
 
@@ -744,6 +750,7 @@ Sample normalisation
         OutputWorkspace='vanadium_transmission',
         CadmiumTransmissionWorkspace='cadmium_transmission_ws',
         EmptyBeamWorkspace='beam_ws',
+        NormaliseBy='Monitor',
         ProcessAs='Transmission'
     )
 
@@ -760,15 +767,17 @@ Sample normalisation
         SampleAndEnvironmentProperties=vanadium_dictionary,
         AbsoluteNormalisation=True,
         InstrumentCalibration=calibration_file,
+        NormaliseBy='Monitor',
         ProcessAs='Vanadium'
     )
     # Sample transmission
     PolDiffILLReduction(
-       Run='396986, 396987',
-       OutputWorkspace='sample_transmission',
-       CadmiumTransmissionWorkspace='cadmium_transmission_ws',
-       EmptyBeamWorkspace='beam_ws',
-       ProcessAs='Transmission'
+        Run='396986, 396987',
+        OutputWorkspace='sample_transmission',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
+        NormaliseBy='Monitor',
+        ProcessAs='Transmission'
     )
     print('Sample transmission is {0:.3f}'.format(mtd['sample_transmission_1'].readY(0)[0]))
 
@@ -785,7 +794,8 @@ Sample normalisation
         SelfAttenuationMethod='Numerical',
         SampleGeometry='Annulus',
         SampleAndEnvironmentProperties=sample_dictionary,
-	ProcessAs='Sample'
+        NormaliseBy='Monitor',
+        ProcessAs='Sample'
     )
     print("The reduced sample data contains {} entries with {} spectra and {} bins.".format(mtd['sample_ws'].getNumberOfEntries(),
 	      mtd['sample_ws'][0].getNumberHistograms(), mtd['sample_ws'][0].blocksize()))
