@@ -54,11 +54,77 @@ void CombineDiffCal::init() {
       "DiffCal table generated from calibrating grouped spectra");
 }
 
+int getTableWorspaceSortDirection(DataObjects::TableWorkspace_sptr ws) {
+  Mantid::API::TableRow row = ws->getFirstRow();
+  int sortDirection = 1;
+  if (ws->rowCount() > 2) {
+    Mantid::API::TableRow lastRow = ws->getRow(ws->rowCount() - 1);
+    if (row.Int(0) > lastRow.Int(0)) {
+      sortDirection = -1;
+    }
+  }
+  return sortDirection;
+}
+
+bool isTableWorkspaceSortedById(DataObjects::TableWorkspace_sptr ws) {
+  Mantid::API::TableRow row = ws->getFirstRow();
+  int sortDirection = getTableWorspaceSortDirection(ws);
+  if (ws->rowCount() > 2) {
+    row.next();
+    Mantid::API::TableRow nextRow = row;
+    row = ws->getFirstRow();
+    do {
+      if (row.Int(0) * sortDirection > nextRow.Int(0) * sortDirection) {
+        return false;
+      }
+    } while (row.next() && nextRow.next());
+  }
+  return true;
+}
+
 std::map<std::string, std::string> CombineDiffCal::validateInputs() {
   std::map<std::string, std::string> results;
 
+  const DataObjects::TableWorkspace_sptr groupedCalibrationWS = getProperty("GroupedCalibration");
+  const DataObjects::TableWorkspace_sptr pixelCalibrationWS = getProperty("PixelCalibration");
+
+  if (!isTableWorkspaceSortedById(groupedCalibrationWS)) {
+    results["GroupedCalibration"] = "Please run SortTableWorkspace on the table submited as 'GroupCalibration'. ";
+  }
+
+  if (!isTableWorkspaceSortedById(pixelCalibrationWS)) {
+    results["PixelCalibration"] = "Please run SortTableWorkspace on the table submited as 'PixelCalibration'. ";
+  }
+
+  if (getTableWorspaceSortDirection(groupedCalibrationWS) != getTableWorspaceSortDirection(pixelCalibrationWS)) {
+    results["GroupedCalibration"] = "'GroupedCalibration's sort direction does not match 'PixelCalibration's sort "
+                                    "direction, flip one of their orders.";
+    results["PixelCalibration"] = "'PixelCalibration's sort direction does not match 'GroupedCalibration's sort "
+                                  "direction, flip one of their orders.";
+  }
+
   return results;
 }
+
+std::shared_ptr<Mantid::API::TableRow> binarySearchForRow(DataObjects::TableWorkspace_sptr ws, int detid) {
+  size_t start = 0;
+  size_t end = ws->rowCount();
+  size_t currentPosition = end / 2;
+  int sortDirection = getTableWorspaceSortDirection(ws);
+  while (end - start > 0) {
+    Mantid::API::TableRow currentRow = ws->getRow(currentPosition);
+    if (currentRow.Int(0) * sortDirection > detid * sortDirection) {
+      end = currentPosition;
+    } else if (currentRow.Int(0) * sortDirection < detid * sortDirection) {
+      start = currentPosition;
+    } else {
+      return std::make_shared<Mantid::API::TableRow>(currentRow);
+    }
+    currentPosition = start + ((end - start) / 2);
+  }
+  return nullptr;
+}
+
 // Per Pixel:
 //
 // DIFC{eff} = (DIFC{pd}/DIFC{arb}) * DIFC{prev}
@@ -79,18 +145,23 @@ void CombineDiffCal::exec() {
   DataObjects::TableWorkspace_sptr outputWorkspace = std::make_shared<DataObjects::TableWorkspace>();
   outputWorkspace->addColumn("int", "detid");
   outputWorkspace->addColumn("double", "difc");
+  outputWorkspace->addColumn("double", "difa");
+  outputWorkspace->addColumn("double", "tzero");
 
   Mantid::API::TableRow groupedCalibrationRow = groupedCalibrationWS->getFirstRow();
-  Mantid::API::TableRow pixelCalibrationRow = pixelCalibrationWS->getFirstRow();
   do {
-    double value = (groupedCalibrationRow.Double(1) /
-                    calibrationWS->spectrumInfo().diffractometerConstants(calibrationWS->getIndicesFromDetectorIDs(
-                        {pixelCalibrationRow.Int(0)})[0])[Kernel::UnitParams::difc]) *
-                   pixelCalibrationRow.Double(1);
+    std::shared_ptr<Mantid::API::TableRow> pixelCalibrationRow =
+        binarySearchForRow(pixelCalibrationWS, groupedCalibrationRow.Int(0));
+    if (pixelCalibrationRow) {
+      double value = (groupedCalibrationRow.Double(1) /
+                      calibrationWS->spectrumInfo().diffractometerConstants(calibrationWS->getIndicesFromDetectorIDs(
+                          {pixelCalibrationRow->Int(0)})[0])[Kernel::UnitParams::difc]) *
+                     pixelCalibrationRow->Double(1);
 
-    Mantid::API::TableRow newRow = outputWorkspace->appendRow();
-    newRow << pixelCalibrationRow.Int(0) << value;
-  } while (groupedCalibrationRow.next() && pixelCalibrationRow.next());
+      Mantid::API::TableRow newRow = outputWorkspace->appendRow();
+      newRow << pixelCalibrationRow->Int(0) << value << 0.0 << 0.0;
+    }
+  } while (groupedCalibrationRow.next());
 
   setProperty("OutputWorkspace", outputWorkspace);
 }

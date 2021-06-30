@@ -39,6 +39,31 @@ public:
 
   CombineDiffCalTest() { FrameworkManager::Instance(); }
 
+  DataObjects::TableWorkspace_sptr createPixelCalibrationTableUnsorted() {
+    // create table with correct column names
+    DataObjects::TableWorkspace_sptr table = std::make_shared<DataObjects::TableWorkspace>();
+    table->addColumn("int", "detid");
+    table->addColumn("double", "difc");
+    table->addColumn("double", "difa");
+    table->addColumn("double", "tzero");
+
+    // fill the values
+    //      new_row << entry.detector_id << entry.difc << entry.difa << entry.tzero;
+    TableRow newRow = table->appendRow();
+    newRow << 102 << 1000.0 << 0.0 << 0.0;
+
+    newRow = table->appendRow();
+    newRow << 100 << 1001.0 << 0.0 << 0.0;
+
+    newRow = table->appendRow();
+    newRow << 101 << 1099.0 << 0.0 << 0.0;
+
+    newRow = table->appendRow();
+    newRow << 103 << 1101.0 << 0.0 << 0.0;
+
+    return table;
+  }
+
   DataObjects::TableWorkspace_sptr createPixelCalibrationTable() {
     // create table with correct column names
     DataObjects::TableWorkspace_sptr table = std::make_shared<DataObjects::TableWorkspace>();
@@ -145,6 +170,8 @@ public:
     applyDiffCalAlgo.setProperty("CalibrationWorkspace", calibrationArgsTable);
     applyDiffCalAlgo.execute();
 
+    AnalysisDataService::Instance().remove(testWorkspaceName);
+
     return outWS;
   }
 
@@ -196,5 +223,31 @@ public:
     TS_ASSERT_EQUALS(difc->toDouble(1), (1001. / 1000.) * 1001.);
     TS_ASSERT_EQUALS(difc->toDouble(2), (1110. / 1100.) * 1099.);
     TS_ASSERT_EQUALS(difc->toDouble(3), (1110. / 1100.) * 1101.);
+  }
+
+  void testSortValidation() {
+    // test input
+
+    // fake data to simulate the output of cross correlate PixelCalibration
+    const auto difCalPixelCalibration = createPixelCalibrationTableUnsorted();
+
+    // fake data to simulate the output of PDCalibration GroupedCalibration
+    const auto difCalGroupedCalibration = createGroupedCalibrationTable();
+
+    // fake data to simulate CalibrationWorkspace
+    const auto diffCalCalibrationWs = createCalibrationWorkspace();
+
+    // set up algorithm
+    CombineDiffCal alg;
+    alg.setChild(true); // Don't put output in ADS by default
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelCalibration", difCalPixelCalibration));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupedCalibration", difCalGroupedCalibration));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalibrationWorkspace", diffCalCalibrationWs));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+
+    // run the algorithm
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 };
