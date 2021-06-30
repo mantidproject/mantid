@@ -55,12 +55,24 @@ public:
   }
 
   void test_constructor() { auto instance = construct(makeSimple(), makeGL(), makeConnect()); }
+
   void test_constructor_gl_disabled() {
     setGl(false);
     auto instance = construct(makeSimple(), makeGL(), makeConnect());
   }
 
-  void test_save_image_simple_widget() {
+  void test_save_image_gl_enabled() {
+    const auto inputName = QString::fromStdString("testFilename");
+    const auto expectedName = inputName + ".png";
+
+    auto glMock = makeGL();
+    EXPECT_CALL(*glMock, saveToFile(expectedName)).Times(1);
+
+    auto widget = construct(makeSimple(), std::move(glMock), makeConnect());
+    widget.saveImage(inputName);
+  }
+
+  void test_save_image_gl_disabled() {
     setGl(false);
     const auto inputName = QString::fromStdString("testFilename");
     const auto expectedName = inputName + ".png";
@@ -72,7 +84,15 @@ public:
     widget.saveImage(inputName);
   }
 
-  void test_update_instrument_detectors() {
+  void test_update_instrument_detectors_gl_enabled() {
+    auto glMock = makeGL();
+    EXPECT_CALL(*glMock, updateDetectors()).Times(1);
+
+    auto widget = construct(makeSimple(), std::move(glMock), makeConnect());
+    widget.updateInstrumentDetectors();
+  }
+
+  void test_update_instrument_detectors_gl_disabled() {
     setGl(false);
     auto simpleMock = makeSimple();
     EXPECT_CALL(*simpleMock, updateDetectors()).Times(1);
