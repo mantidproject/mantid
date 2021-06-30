@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ISimpleWidget.h"
+#include "IQtDisplay.h"
 
 #include <QString>
 #include <QWidget>
@@ -20,7 +20,7 @@ class ProjectionSurface;
 /**
  * A simple widget for drawing unwrapped instrument images.
  */
-class SimpleWidget final : public ISimpleWidget {
+class SimpleWidget final : public IQtDisplay {
 public:
   /// Constructor
   explicit SimpleWidget(QWidget *parent);

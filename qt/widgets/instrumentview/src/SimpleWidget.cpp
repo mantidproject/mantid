@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /// Constructor
-SimpleWidget::SimpleWidget(QWidget *parent) : ISimpleWidget(parent) {
+SimpleWidget::SimpleWidget(QWidget *parent) : IQtDisplay(parent) {
   // Receive mouse move events
   setMouseTracking(true);
   // Receive keyboard events

@@ -8,7 +8,7 @@
 
 #include "DllOption.h"
 #include "IMantidGLWidget.h"
-#include "ISimpleWidget.h"
+#include "IQtDisplay.h"
 #include "InstrumentWidgetTypes.h"
 #include "QtConnect.h"
 #include "UnwrappedSurface.h"
@@ -62,7 +62,7 @@ class ProjectionSurface;
 
 namespace Detail {
 struct Dependencies {
-  std::unique_ptr<ISimpleWidget> simpleDisplay = nullptr;
+  std::unique_ptr<IQtDisplay> simpleDisplay = nullptr;
   std::unique_ptr<IMantidGLWidget> instrumentDisplay = nullptr;
   std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
 };
@@ -289,7 +289,7 @@ protected:
   /// The OpenGL widget to display the instrument
   std::unique_ptr<IMantidGLWidget> m_InstrumentDisplay;
   /// The simple widget to display the instrument
-  std::unique_ptr<ISimpleWidget> m_simpleDisplay;
+  std::unique_ptr<IQtDisplay> m_simpleDisplay;
 
   // Context menu actions
   QAction *m_clearPeakOverlays, *m_clearAlignment;

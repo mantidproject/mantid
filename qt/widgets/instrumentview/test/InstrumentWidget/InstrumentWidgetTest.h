@@ -7,7 +7,7 @@
 #pragma once
 
 #include "IMantidGLWidget.h"
-#include "ISimpleWidget.h"
+#include "IQtDisplay.h"
 #include "InstrumentWidget.h"
 
 #include "MockMantidGLWidget.h"
