@@ -15,6 +15,13 @@ class PlotModelFitPaneModel(PlotFitPaneModel):
         self.context.plot_panes_context[self.name].set_error_all(True)
 
     def _create_workspace_label(self, workspace_name, index):
-        result_table_name = "ResultTable"
-        fit_label = self._get_fit_label(workspace_name, index)
-        return f"{result_table_name};{fit_label}"
+        return f"{workspace_name}{self._get_fit_label(index)}"
+
+    @staticmethod
+    def _get_fit_label(index):
+        if index == 1:
+            return ";Calc"
+        elif index == 2:
+            return ";Diff"
+        else:
+            return ""
