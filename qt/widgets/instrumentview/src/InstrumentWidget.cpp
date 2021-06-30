@@ -113,7 +113,7 @@ public:
 InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool resetGeometry, bool autoscaling,
                                    double scaleMin, double scaleMax, bool setDefaultView, Dependencies deps)
     : QWidget(parent), WorkspaceObserver(), m_InstrumentDisplay(std::move(deps.instrumentDisplay)),
-      m_simpleDisplay(std::move(deps.simpleDisplay)), m_workspaceName(wsName), m_instrumentActor(nullptr),
+      m_qtDisplay(std::move(deps.simpleDisplay)), m_workspaceName(wsName), m_instrumentActor(nullptr),
       m_surfaceType(FULL3D), m_savedialog_dir(QString::fromStdString(
                                  Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
       mViewChanged(false), m_blocked(false), m_instrumentDisplayContextMenuOn(false),
@@ -136,14 +136,14 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
   m_qtConnect->connect(this, SIGNAL(enableLighting(bool)), m_InstrumentDisplay.get(), SLOT(enableLighting(bool)));
 
   // Create simple display widget
-  if (!m_simpleDisplay)
-    m_simpleDisplay = std::make_unique<QtDisplay>(this);
-  m_simpleDisplay->qtInstallEventFilter(this);
+  if (!m_qtDisplay)
+    m_qtDisplay = std::make_unique<QtDisplay>(this);
+  m_qtDisplay->qtInstallEventFilter(this);
 
   QWidget *aWidget = new QWidget(this);
   m_instrumentDisplayLayout = new QStackedLayout(aWidget);
   m_instrumentDisplayLayout->addWidget(m_InstrumentDisplay.get());
-  m_instrumentDisplayLayout->addWidget(m_simpleDisplay.get());
+  m_instrumentDisplayLayout->addWidget(m_qtDisplay.get());
 
   controlPanelLayout->addWidget(aWidget);
 
@@ -829,7 +829,7 @@ void InstrumentWidget::saveImage(QString filename) {
   if (isGLEnabled()) {
     m_InstrumentDisplay->saveToFile(filename);
   } else {
-    m_simpleDisplay->saveToFile(filename);
+    m_qtDisplay->saveToFile(filename);
   }
 }
 
@@ -1036,7 +1036,7 @@ void InstrumentWidget::dropEvent(QDropEvent *e) {
 bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
   if (ev->type() == QEvent::ContextMenu &&
       (dynamic_cast<MantidGLWidget *>(obj) == m_InstrumentDisplay.get() ||
-       dynamic_cast<QtDisplay *>(obj) == m_simpleDisplay.get()) &&
+       dynamic_cast<QtDisplay *>(obj) == m_qtDisplay.get()) &&
       getSurface() && getSurface()->canShowContextMenu()) {
     // an ugly way of preventing the curve in the pick tab's miniplot
     // disappearing when
@@ -1182,8 +1182,8 @@ QString InstrumentWidget::getSurfaceInfoText() const {
 ProjectionSurface_sptr InstrumentWidget::getSurface() const {
   if (m_InstrumentDisplay) {
     return m_InstrumentDisplay->getSurface();
-  } else if (m_simpleDisplay) {
-    return m_simpleDisplay->getSurface();
+  } else if (m_qtDisplay) {
+    return m_qtDisplay->getSurface();
   }
   return ProjectionSurface_sptr();
 }
@@ -1200,9 +1200,9 @@ void InstrumentWidget::setSurface(ProjectionSurface *surface) {
     m_InstrumentDisplay->setSurface(sharedSurface);
     m_InstrumentDisplay->update();
   }
-  if (m_simpleDisplay) {
-    m_simpleDisplay->setSurface(sharedSurface);
-    m_simpleDisplay->qtUpdate();
+  if (m_qtDisplay) {
+    m_qtDisplay->setSurface(sharedSurface);
+    m_qtDisplay->qtUpdate();
   }
   auto *unwrappedSurface = dynamic_cast<UnwrappedSurface *>(surface);
   if (unwrappedSurface) {
@@ -1222,8 +1222,8 @@ QSize InstrumentWidget::glWidgetDimensions() {
 #endif
   if (m_InstrumentDisplay)
     return sizeinLogicalPixels(m_InstrumentDisplay.get());
-  else if (m_simpleDisplay)
-    return sizeinLogicalPixels(m_simpleDisplay.get());
+  else if (m_qtDisplay)
+    return sizeinLogicalPixels(m_qtDisplay.get());
   else
     return QSize(0, 0);
 }
@@ -1237,7 +1237,7 @@ void InstrumentWidget::updateInstrumentView(bool picking) {
       m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget *>(m_InstrumentDisplay.get())) {
     m_InstrumentDisplay->updateView(picking);
   } else {
-    m_simpleDisplay->updateView(picking);
+    m_qtDisplay->updateView(picking);
   }
 }
 
@@ -1248,7 +1248,7 @@ void InstrumentWidget::updateInstrumentDetectors() {
       m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget *>(m_InstrumentDisplay.get())) {
     m_InstrumentDisplay->updateDetectors();
   } else {
-    m_simpleDisplay->updateDetectors();
+    m_qtDisplay->updateDetectors();
   }
   QApplication::restoreOverrideCursor();
 }

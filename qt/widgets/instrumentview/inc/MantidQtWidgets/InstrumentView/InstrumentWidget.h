@@ -57,7 +57,7 @@ class InstrumentWidgetPickTab;
 class InstrumentWidgetTreeTab;
 class CollapsiblePanel;
 class XIntegrationControl;
-class SimpleWidget;
+class QtDisplay;
 class ProjectionSurface;
 
 namespace Detail {
@@ -289,7 +289,7 @@ protected:
   /// The OpenGL widget to display the instrument
   std::unique_ptr<IMantidGLWidget> m_InstrumentDisplay;
   /// The simple widget to display the instrument
-  std::unique_ptr<IQtDisplay> m_simpleDisplay;
+  std::unique_ptr<IQtDisplay> m_qtDisplay;
 
   // Context menu actions
   QAction *m_clearPeakOverlays, *m_clearAlignment;
@@ -304,7 +304,7 @@ protected:
   bool m_useOpenGL;
   /// 3D view or unwrapped
   SurfaceType m_surfaceType;
-  /// Stacked layout managing m_InstrumentDisplay and m_simpleDisplay
+  /// Stacked layout managing m_InstrumentDisplay and m_qtDisplay
   QStackedLayout *m_instrumentDisplayLayout;
   /// spectra index id
   int mSpectraIDSelected;
