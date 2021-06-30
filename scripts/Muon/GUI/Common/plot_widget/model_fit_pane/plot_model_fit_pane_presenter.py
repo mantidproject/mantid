@@ -22,6 +22,7 @@ class PlotModelFitPanePresenter(PlotFitPanePresenter):
 
         self._figure_presenter.set_autoscale(True)
         self._figure_presenter.set_errors(True)
+        self._figure_presenter.set_plot_as_point_data(True)
         self._view.disable_plot_raw_option()
         self._view.hide_plot_type()
         self._view.hide_plot_raw()

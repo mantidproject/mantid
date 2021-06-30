@@ -79,6 +79,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self.setLayout(layout)
 
         self._plot_information_list = []  # type : List[PlotInformation}
+        self._point_data = False
+
+    def set_plot_as_point_data(self, point_data: bool):
+        self._point_data = point_data
 
     @property
     def autoscale_state(self):
@@ -304,6 +308,9 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def _get_plot_kwargs(self, workspace_info: WorkspacePlotInformation):
         label = workspace_info.label
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
+        if self._point_data and workspace_info.index == 0:
+            plot_kwargs["marker"] = "."
+            plot_kwargs["linestyle"] = ""
         return plot_kwargs
 
     def _get_y_axis_autoscale_limits(self, axis):

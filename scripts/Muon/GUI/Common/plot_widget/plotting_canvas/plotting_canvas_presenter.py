@@ -332,6 +332,9 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         else:
             self._options_presenter.enable_yaxis_changer()
 
+    def set_plot_as_point_data(self, point_data: bool):
+        self._view.set_plot_as_point_data(point_data)
+
     def _handle_autoscale_y_axes(self):
         # update the state of autoscale
         selected_subplots, axes = self._get_selected_subplots_from_quick_edit_widget()
