@@ -46,7 +46,7 @@ class EAGroup(object):
             raise AttributeError("Attempting to set workspace to type " + str(
                 type(new_workspace)) + " but should be MuonWorkspaceWrapper")
 
-    def get_counts_workspace_for_run(self, rebin):
+    def get_counts_workspace_for_run(self, rebin=False):
         """
             Returns the name of the counts workspace for a given run
             if the workspace does not exist will raise a KeyError
@@ -96,9 +96,8 @@ class EAGroup(object):
         self._counts_workspace = MuonWorkspaceWrapper(counts_workspace)
 
     def get_rebined_or_unbinned_version_of_workspace_if_it_exists(self):
-        if self._counts_workspace_rebin is not None:
+        if self.is_rebinned_workspace_present():
             return self._counts_workspace_rebin.workspace_name
-
         else:
             return self._counts_workspace.workspace_name
 
@@ -119,3 +118,6 @@ class EAGroup(object):
 
     def is_matches_table_present(self):
         return bool(self._matches_table)
+
+    def is_rebinned_workspace_present(self):
+        return bool(self._counts_workspace_rebin)

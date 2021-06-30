@@ -10,7 +10,8 @@ from Muon.GUI.Common import thread_model
 from mantid.simpleapi import Rebin
 from Muon.GUI.Common import message_box
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, remove_ws_if_present
-#from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
+
+# from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
 
 REBINNED_FIXED_WS_SUFFIX = "_EA_Rebinned_Fixed"
 REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
@@ -102,10 +103,12 @@ class ElementalAnalysisContext(object):
 
         remove_ws_if_present(rebined_run_name)
 
-        workspace = Rebin(InputWorkspace=name, OutputWorkspace=rebined_run_name, Params=params)
-        group = retrieve_ws(name.split(";")[0])
-        group.addWorkspace(workspace)
-        self.group_context[name].update_workspaces(name, workspace, rebin=True)
+        workspace = Rebin(InputWorkspace=self.group_context[name].get_counts_workspace_for_run(),
+                          OutputWorkspace=rebined_run_name, Params=params)
+
+        group_workspace = retrieve_ws(self.group_context[name].run_number)
+        group_workspace.addWorkspace(workspace)
+        self.group_context[name].update_workspaces(str(workspace), rebin=True)
 
     def handle_rebin(self, name, rebin_type, rebin_param):
         self.rebin_model = ThreadModelWrapper(lambda: self._run_rebin(name, rebin_type, rebin_param))

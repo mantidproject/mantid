@@ -85,7 +85,7 @@ class EAPlotDataPanePresenter(BasePanePresenter):
             self.handle_data_updated()
 
     def check_if_can_use_rebin(self):
-        if not self._view.is_raw_plot():
+        if not self._view.is_raw_plot() and not self.check_selected_groups_if_rebinned():
             self._view.set_raw_checkbox_state(True)
             self._view.warning_popup("No rebin options specified")
             return False
@@ -104,3 +104,13 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
         if workspace_name in plotted_workspaces:
             self._figure_presenter.replace_workspace_in_plot(workspace)
+
+    def check_selected_groups_if_rebinned(self):
+        """
+        Checkes if at least one selected groups in context have a rebinned workspace
+        """
+        is_rebinned = []
+        for group_name in self.context.group_context.selected_groups:
+            group = self.context.group_context[group_name]
+            is_rebinned.append(group.is_rebinned_workspace_present())
+        return any(is_rebinned)

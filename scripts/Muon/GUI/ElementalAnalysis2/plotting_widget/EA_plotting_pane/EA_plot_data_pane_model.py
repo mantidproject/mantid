@@ -29,7 +29,9 @@ class EAPlotDataPaneModel(BasePaneModel):
             if is_raw:
                 workspace_list = [self.context.group_context[current_group].get_counts_workspace_for_run(False)]
             else:
-                workspace_list = [self.context.group_context[current_group].get_counts_workspace_for_run(True)]
+                workspace_list = \
+                    [self.context.group_context[
+                         current_group].get_rebined_or_unbinned_version_of_workspace_if_it_exists()]
 
             return workspace_list
         except AttributeError:
@@ -82,7 +84,6 @@ class EAPlotDataPaneModel(BasePaneModel):
         currently_selected = self.context.group_context.selected_groups
         current_plot_range = [-50.0, 1100.0]
         for group in currently_selected:
-            print(self.context.group_context[group].plot_range)
             if self.context.group_context[group].plot_range[1] > current_plot_range[1]:
                 current_plot_range = self.context.group_context[group].plot_range
         return current_plot_range
