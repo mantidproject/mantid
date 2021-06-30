@@ -507,7 +507,7 @@ void LoadHFIRSANS::runLoadInstrument() {
 
   const std::string &instrumentName = m_metadata["Header/Instrument"];
 
-  API::IAlgorithm_sptr loadInstrumentAlgorithm = createChildAlgorithm("LoadInstrument");
+  auto loadInstrumentAlgorithm = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {

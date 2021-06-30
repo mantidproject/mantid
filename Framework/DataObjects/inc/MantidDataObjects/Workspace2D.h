@@ -79,7 +79,7 @@ public:
   void setImageE(const API::MantidImage &image, size_t start = 0, bool parallelExecution = true) override;
   /// Copy the data from an image to this workspace's (Y's) and errors.
   void setImageYAndE(const API::MantidImage &imageY, const API::MantidImage &imageE, size_t start = 0,
-                     bool loadAsRectImg = false, double scale_1 = 1.0, bool parallelExecution = true);
+                     bool loadAsRectImg = false, double scale_1 = 1.0, [[maybe_unused]] bool parallelExecution = true);
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

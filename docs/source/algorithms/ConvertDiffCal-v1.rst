@@ -10,12 +10,25 @@
 Description
 -----------
 
-This algorithm converts diffraction OffsetsWorkspaces to
-:ref:`calibration table <DiffractionCalibrationWorkspace>`. It uses
-the geometry of the OffsetsWorkspace to based the values of
-:math:`DIFC` on. The effective :math:`DIFC` is calculated as
+Generates a :ref:`calibration table <DiffractionCalibrationWorkspace>` based on
+d-spacing detector offsets provided in an OffsetsWorkspace. Optionally updates
+detector calibrations from an existing calibration file. Each detector
+offset in the OffsetsWorkspace is processed as follows:
+
+If the detector is masked, its :math:`DIFC` will not be calculated or updated.
+
+If a PreviousCalibration entry exists for the detector, the detector entry's
+:math:`DIFC` will be updated as follows and reflected in the final calibration table:
+
+.. math:: DIFC_{new} = \frac{DIFC_{old}}{1+offset}
+
+If a prior calibration entry does not exist for the detector, calculate the :math:`DIFC`
+as follows using geometry of the experiment:
 
 .. math:: DIFC = \frac{1}{1+offset}\frac{2m_N}{h} L_{tot} sin \theta
+
+If a detector is present in the PreviousCalibration table but is not found in the
+OffsetsWorkspace, it will be propagated to the output calibration table unchanged.
 
 Usage
 -----

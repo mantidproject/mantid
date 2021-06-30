@@ -33,7 +33,7 @@ public:
 
   void testExec() {
 
-    IAlgorithm_sptr gsd = Mantid::API::AlgorithmManager::Instance().create("GeneralisedSecondDifference", 1);
+    auto gsd = Mantid::API::AlgorithmManager::Instance().create("GeneralisedSecondDifference", 1);
 
     auto x = Points{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     auto y = Counts{0.3, 0.3, 0.3, 0.47, 3.9, 10.3, 3.9, 0.47, 0.3, 0.3};

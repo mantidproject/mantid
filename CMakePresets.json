@@ -1,0 +1,25 @@
+{
+    "version": 1,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 19,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "osx",
+            "displayName": "osx",
+            "description": "Default build options for an OSX conda build",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_FIND_FRAMEWORK": "LAST",
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "USE_PYTHON_DYNAMIC_LIB": "OFF",
+                "Qt5_DIR": "$env{CONDA_PREFIX}/lib/cmake/qt5",
+                "HDF5_ROOT": "$env{CONDA_PREFIX}",
+                "OpenSSL_ROOT": "$env{CONDA_PREFIX}"
+            }
+        }
+    ]
+}

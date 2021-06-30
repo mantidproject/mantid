@@ -158,8 +158,8 @@ class MuonDataContext(object):
 
     def get_loaded_data_for_run(self, run):
         loaded_dict = self._loaded_data.get_data(run=run, instrument=self.instrument)
-        if loaded_dict:
-            return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']
+        if loaded_dict is not None and "workspace" in loaded_dict:
+            return loaded_dict["workspace"]
         else:
             return None
 

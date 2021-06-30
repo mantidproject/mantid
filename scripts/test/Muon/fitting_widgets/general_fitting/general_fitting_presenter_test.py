@@ -82,13 +82,13 @@ class GeneralFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_instrument_changed_will_update_and_reset_the_data(self):
         self.presenter.update_and_reset_all_data = mock.Mock()
-        self.presenter.clear_cached_fit_functions = mock.Mock()
+        self.presenter.clear_undo_data = mock.Mock()
         self.presenter.model.remove_all_fits_from_context = mock.Mock()
 
         self.presenter.handle_instrument_changed()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.presenter.clear_cached_fit_functions.assert_called_once_with()
+        self.presenter.clear_undo_data.assert_called_once_with()
         self.presenter.model.remove_all_fits_from_context.assert_called_once_with()
 
     def test_that_handle_pulse_type_changed_will_update_and_reset_the_data_if_it_contains_DoublePulseEnabled(self):
@@ -130,7 +130,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.update_dataset_names_in_view_and_model = mock.Mock()
         self.presenter.reset_start_xs_and_end_xs = mock.Mock()
         self.presenter.reset_fit_status_and_chi_squared_information = mock.Mock()
-        self.presenter.clear_cached_fit_functions = mock.Mock()
+        self.presenter.clear_undo_data = mock.Mock()
 
         self.presenter.handle_fitting_mode_changed()
 
@@ -141,7 +141,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.update_fit_functions_in_model_from_view.assert_called_once_with()
         self.presenter.update_dataset_names_in_view_and_model.assert_called_once_with()
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
-        self.presenter.clear_cached_fit_functions.assert_called_once_with()
+        self.presenter.clear_undo_data.assert_called_once_with()
         self.presenter.fitting_mode_changed_notifier.notify_subscribers.assert_called_once_with()
         self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
 
@@ -156,9 +156,8 @@ class GeneralFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_simultaneous_fit_by_specifier_changed_will_update_the_model(self):
         self.presenter.update_dataset_names_in_view_and_model = mock.Mock()
-        self.presenter.reset_start_xs_and_end_xs = mock.Mock()
         self.presenter.reset_fit_status_and_chi_squared_information = mock.Mock()
-        self.presenter.clear_cached_fit_functions = mock.Mock()
+        self.presenter.clear_undo_data = mock.Mock()
 
         self.presenter.handle_simultaneous_fit_by_specifier_changed()
 
@@ -166,30 +165,25 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.mock_model_simultaneous_fit_by_specifier.assert_called_with(self.simultaneous_fit_by_specifier)
 
         self.presenter.update_dataset_names_in_view_and_model.assert_called_once_with()
-        self.presenter.reset_start_xs_and_end_xs.assert_called_once_with()
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
-        self.presenter.clear_cached_fit_functions.assert_called_once_with()
+        self.presenter.clear_undo_data.assert_called_once_with()
         self.presenter.simultaneous_fit_by_specifier_changed.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_dataset_name_changed_will_update_the_model_and_view(self):
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
         self.presenter.update_fit_function_in_view_from_model = mock.Mock()
+        self.presenter.update_start_and_end_x_in_view_from_model = mock.Mock()
 
         self.presenter.handle_dataset_name_changed()
 
         self.mock_view_current_dataset_index.assert_called_once_with()
         self.mock_model_current_dataset_index.assert_called_once_with(self.current_dataset_index)
 
-        self.mock_model_current_start_x.assert_called_once_with()
-        self.mock_model_current_end_x.assert_called_once_with()
-        self.mock_view_start_x.assert_called_once_with(self.start_x)
-        self.mock_view_end_x.assert_called_once_with(self.end_x)
-
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
         self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
+        self.presenter.update_start_and_end_x_in_view_from_model.assert_called_once_with()
 
-        self.mock_view_plot_guess.assert_called_once_with()
-        self.model.update_plot_guess.assert_called_once_with(self.plot_guess)
+        self.model.update_plot_guess.assert_called_once_with()
 
         self.presenter.selected_fit_results_changed.notify_subscribers.assert_called_once_with([])
 
@@ -376,8 +370,8 @@ class GeneralFittingPresenterTest(unittest.TestCase):
     def _setup_mock_model(self):
         self.model = mock.Mock(spec=GeneralFittingModel)
         self.model = add_mock_methods_to_basic_fitting_model(self.model, self.dataset_names, self.current_dataset_index,
-                                                             self.fit_function, self.start_x, self.fit_status,
-                                                             self.chi_squared)
+                                                             self.fit_function, self.start_x, self.end_x,
+                                                             self.fit_status, self.chi_squared)
         # Mock the context
         self.model.context = mock.Mock()
 
@@ -399,6 +393,8 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         type(self.model).end_xs = self.mock_model_end_xs
         self.mock_model_current_end_x = mock.PropertyMock(return_value=self.end_x)
         type(self.model).current_end_x = self.mock_model_current_end_x
+        self.mock_model_plot_guess = mock.PropertyMock(return_value=self.plot_guess)
+        type(self.model).plot_guess = self.mock_model_plot_guess
         self.mock_model_minimizer = mock.PropertyMock(return_value=self.minimizer)
         type(self.model).minimizer = self.mock_model_minimizer
         self.mock_model_evaluation_type = mock.PropertyMock(return_value=self.evaluation_type)
@@ -445,7 +441,6 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         # Mock unimplemented methods and notifiers
         self.presenter.disable_editing_notifier.notify_subscribers = mock.Mock()
         self.presenter.enable_editing_notifier.notify_subscribers = mock.Mock()
-        self.presenter.disable_fitting_notifier.notify_subscribers = mock.Mock()
         self.presenter.selected_fit_results_changed.notify_subscribers = mock.Mock()
         self.presenter.fit_function_changed_notifier.notify_subscribers = mock.Mock()
         self.presenter.fit_parameter_changed_notifier.notify_subscribers = mock.Mock()

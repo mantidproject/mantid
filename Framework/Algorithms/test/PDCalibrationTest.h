@@ -13,6 +13,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/ChangeBinOffset.h"
 #include "MantidAlgorithms/ConvertToMatrixWorkspace.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/CropWorkspace.h"
@@ -23,6 +24,7 @@
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidKernel/Unit.h"
 
+using Mantid::Algorithms::ChangeBinOffset;
 using Mantid::Algorithms::ConvertToMatrixWorkspace;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::CropWorkspace;
@@ -84,6 +86,15 @@ void createSampleWS() {
   createSampleWS.setProperty("PixelSpacing", .02); // 2cm pixels
   createSampleWS.setPropertyValue("OutputWorkspace", "PDCalibrationTest_WS");
   createSampleWS.execute();
+
+  // In order to make it same as before CreateSampleWorkspace is fixed by shifting TOF back -TOF_MIN
+  // such that peaks' positions will be kept unchanged.
+  ChangeBinOffset changeBinOffset;
+  changeBinOffset.initialize();
+  changeBinOffset.setPropertyValue("InputWorkspace", "PDCalibrationTest_WS");
+  changeBinOffset.setPropertyValue("OutputWorkspace", "PDCalibrationTest_WS");
+  changeBinOffset.setProperty("Offset", -1 * TOF_MIN);
+  changeBinOffset.execute();
 
   // move it to the right place - DIFC of this location vary from 5308 to 5405
   RotateInstrumentComponent rotateInstr;
@@ -463,6 +474,67 @@ public:
     TS_ASSERT_DELTA(calTable->cell<double>(index + 1, 1), calTable->cell<double>(index, 1), 1E-5); // det 101
     TS_ASSERT_DELTA(calTable->cell<double>(index + 2, 1), calTable->cell<double>(index, 1), 1E-5); // det 102
     TS_ASSERT_DELTA(calTable->cell<double>(index + 3, 1), calTable->cell<double>(index, 1), 1E-5); // det 103
+  }
+
+  void test_exec_ikeda_carpenter() {
+    // test the algorithm using the IkedaCarpenterPV peak function
+    const double ref_difc = 2208.287616521762;
+
+    const std::vector<double> dValues{.8920, 1.0758, 1.2615, 2.0599};
+
+    std::stringstream function;
+    for (const auto &val : dValues) {
+      function << "name=IkedaCarpenterPV, X0=" << ref_difc * val << ", I=50;";
+    }
+
+    CreateSampleWorkspace wsalg;
+    TS_ASSERT_THROWS_NOTHING(wsalg.initialize());
+    TS_ASSERT(wsalg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(wsalg.setPropertyValue("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(wsalg.setPropertyValue("WorkspaceType", "Event"));
+    TS_ASSERT_THROWS_NOTHING(wsalg.setPropertyValue("Function", "User Defined"));
+    TS_ASSERT_THROWS_NOTHING(wsalg.setPropertyValue("UserDefinedFunction", function.str()));
+    TS_ASSERT_THROWS_NOTHING(wsalg.setProperty("XMin", 1.0));
+    TS_ASSERT_THROWS_NOTHING(wsalg.setProperty("XMax", 16666.7));
+    TS_ASSERT_THROWS_NOTHING(wsalg.setProperty("BinWidth", 1.0));
+    TS_ASSERT_THROWS_NOTHING(wsalg.setProperty("NumEvents", 100000));
+    TS_ASSERT_THROWS_NOTHING(wsalg.setProperty("BankPixelWidth", 1));
+    TS_ASSERT_THROWS_NOTHING(wsalg.setProperty("NumBanks", 1));
+    TS_ASSERT_THROWS_NOTHING(wsalg.execute());
+    TS_ASSERT(wsalg.isExecuted());
+
+    MatrixWorkspace_const_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws");
+    TS_ASSERT(ws);
+
+    MoveInstrumentComponent movealg;
+    TS_ASSERT_THROWS_NOTHING(movealg.initialize());
+    TS_ASSERT(movealg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(movealg.setProperty("Workspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(movealg.setPropertyValue("ComponentName", "bank1"));
+    TS_ASSERT_THROWS_NOTHING(movealg.setProperty("X", 1.01));
+    TS_ASSERT_THROWS_NOTHING(movealg.setProperty("Y", 0.0));
+    TS_ASSERT_THROWS_NOTHING(movealg.setProperty("Z", 1.01));
+    TS_ASSERT_THROWS_NOTHING(movealg.setProperty("RelativePosition", false));
+    TS_ASSERT_THROWS_NOTHING(movealg.execute());
+    TS_ASSERT(movealg.isExecuted());
+
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", std::vector<double>{1, 1, 16666}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakFunction", "IkedaCarpenterPV"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputCalibrationTable", "ikeda_cal"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DiagnosticWorkspaces", "ikeda_diag"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("ikeda_cal");
+    TS_ASSERT(calTable);
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+    TS_ASSERT_DELTA(calTable->cell<double>(0, 1), ref_difc, 1E-2 * ref_difc);
   }
 };
 

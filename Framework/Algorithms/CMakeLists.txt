@@ -14,6 +14,7 @@ set(SRC_FILES
     src/ApplyCalibration.cpp
     src/ApplyDetailedBalance.cpp
     src/ApplyFloodWorkspace.cpp
+    src/ApplyInstrumentToPeaks.cpp
     src/ApplyTransmissionCorrection.cpp
     src/AverageLogData.cpp
     src/Bin2DPowderDiffraction.cpp
@@ -225,6 +226,7 @@ set(SRC_FILES
     src/PaddingAndApodization.cpp
     src/ParallaxCorrection.cpp
     src/Pause.cpp
+    src/PeakParameterHelper.cpp
     src/PerformIndexOperations.cpp
     src/Plus.cpp
     src/PointByPointVCorrection.cpp
@@ -349,6 +351,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ApplyCalibration.h
     inc/MantidAlgorithms/ApplyDetailedBalance.h
     inc/MantidAlgorithms/ApplyFloodWorkspace.h
+    inc/MantidAlgorithms/ApplyInstrumentToPeaks.h
     inc/MantidAlgorithms/ApplyTransmissionCorrection.h
     inc/MantidAlgorithms/AverageLogData.h
     inc/MantidAlgorithms/Bin2DPowderDiffraction.h
@@ -564,6 +567,7 @@ set(INC_FILES
     inc/MantidAlgorithms/PaddingAndApodization.h
     inc/MantidAlgorithms/ParallaxCorrection.h
     inc/MantidAlgorithms/Pause.h
+    inc/MantidAlgorithms/PeakParameterHelper.h
     inc/MantidAlgorithms/PerformIndexOperations.h
     inc/MantidAlgorithms/Plus.h
     inc/MantidAlgorithms/PointByPointVCorrection.h
@@ -702,6 +706,7 @@ set(TEST_FILES
     ApplyCalibrationTest.h
     ApplyDetailedBalanceTest.h
     ApplyFloodWorkspaceTest.h
+    ApplyInstrumentToPeaksTest.h
     ApplyTransmissionCorrectionTest.h
     AverageLogDataTest.h
     Bin2DPowderDiffractionTest.h
@@ -785,6 +790,7 @@ set(TEST_FILES
     CropWorkspaceRaggedTest.h
     CropWorkspaceTest.h
     CrossCorrelateTest.h
+    CrossCorrelateTestData.h
     CuboidGaugeVolumeAbsorptionTest.h
     CylinderAbsorptionTest.h
     DeadTimeCorrectionTest.h
@@ -1011,7 +1017,7 @@ set(TEST_PY_FILES
 
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python ${TEST_PY_FILES})
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS

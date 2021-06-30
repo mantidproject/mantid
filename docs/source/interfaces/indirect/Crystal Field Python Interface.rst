@@ -170,10 +170,10 @@ Alternatively, the x-values can be taken from a workspace::
   sp = cf.getSpectrum(ws, i)
 
 
-Plotting in MantidPlot
+Plotting
 ----------------------
 
-To plot a spectrum using MantidPlot's graphing facilities `CrystalField` has method `plot`. It has the same arguments as `getSpectrum`
+To plot a spectrum using the graphing facilities of Mantid `CrystalField` has method `plot`. It has the same arguments as `getSpectrum`
 and opens a window with a plot, e.g.::
 
   cf.plot()
@@ -392,7 +392,7 @@ Multiple Ions
 -------------
 
 If there are multiple ions you can define `CrystalField` objects for each ion separately then add them together to
-create a CrystalFieldMultiSite object::
+create a `CrystalFieldMultiSite` object::
 
     params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
               'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
@@ -477,6 +477,127 @@ can be used like a `CrystalField` object in this way, although `Temperatures` an
     cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2', Temperatures=[25], FWHMs=[1.0], PeakShape='Gaussian',
                                      BmolX=1.0, B40=-0.02)
 
+
+
+Intensity Scaling
+-----------------
+The `IntensityScaling` parameter allows applying of a scale factor to the data. This scale factor is not applied
+immediately but only when a fit is run. As a consequence, a spectrum plotted after setting an `IntensityScaling`
+parameter but before running the fit will remain unchanged. Unlike other parameters the default value for `IntensityScaling`
+is 1 instead of 0.
+
+There are differences on how to use the `IntensityScaling` parameter(s) depending on the use-case:
+
+Single ions fitted to a single spectrum
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+When fitting a single ion symmetry to a single spectrum `IntensityScaling` is set to a single value::
+
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544, Temperature=44.0,
+    FWHM=1.1, IntensityScaling=3.0)
+
+Instead of initializing `IntensityScaling` in the constructor this parameter can also be set later::
+
+    cf.IntensityScaling = 3.0
+
+In both cases `IntensityScaling` is initially set to a value of 3.0 but can be varied during the fitting process. Only
+with a tie on `IntensityScaling` the value remains fixed::
+
+    cf.ties(IntensityScaling = 3.0)
+
+Single ions fitted to multiple spectra
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In case of multiple spectra the `IntensityScaling` parameter is replaced by a list of values. The size of this list must
+match the size of the `Temperature` list::
+
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                  Temperature=[44.0, 50.0], FWHM=[1.1, 0.9], IntensityScaling=[3.0, 0.05])
+
+The parameters for `IntensityScaling` can also be initialized later::
+
+    cf.IntensityScaling=[3.0, 0.05]
+
+When setting a tie the value for an `IntensityScaling` parameter can be set directly using the index of the parameter::
+
+    cf.ties(IntensityScaling1 = 5.0)
+
+In the example above the initial value of the second `IntensityScaling` parameter would be ignored and permanently set
+to 5.
+
+Intensity scaling for multiple ions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For multiple ions there are two options for creating a `CrystalFieldMultiSite` object. Either two `CrystalField` objects
+are combined or a `CrystalFieldMultiSite` object is created directly.
+Please note that the first `CrystalField` object with a scaling factor is set as ion0 when combining two `CrystalField`
+objects::
+
+    cf = cf1 + 0.5*cf2
+
+creates a `CrystalFieldMultiSite` object with `cf2` as ion0 and `cf1` as ion1. It is worth mentioning that in case of two
+`CrystalField` objects with a scaling factor the scaling factor of the second object is ignored::
+
+    cf = 2*cf1 + 3*cf2
+
+results in the same `CrystalFieldMultiSite` object as::
+
+    cf = 2*cf1 + cf2
+
+After combining `CrystalField` objects to a `CrystalFieldMultiSite` object further changes to the original `CrystalField`
+objects are not reflected in the `CrystalFieldMultiSite` object. Furthermore, the `CrystalFieldMultiSite` object does not
+have a set function for `IntensityScaling` parameters. As a consequence, it is not possible to set these parameters later
+as for the `CrystalField` object.
+
+Multiple ions fitted to a single spectrum
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+When combining two `CrystalField` objects for a single spectrum to a `CrystalFieldMultiSite` object the original values
+for `IntensityScaling` are ignored. Since only the coefficient of the first object is used, the 'IntensityScaling' for ion1
+always defaults to 1::
+
+    params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
+          'Temperature': [44.0], 'FWHM': [1.1], 'IntensityScaling': [0.2]}
+    cf1 = CrystalField('Ce', 'C2v', **params)
+    cf2 = CrystalField('Pr', 'C2v', **params)
+    cfms = 2*cf1 + cf2
+
+results in the following `CrystalFieldMultiSite` object and tie::
+
+    from CrystalField import CrystalFieldMultiSite
+    cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1], abundances=[2.0, 1.0]
+                                parameters={'ion0.B20':0.377,'ion0.B22':3.9,'ion0.B40':-0.03,'ion0.B42':-0.116,'ion0.B44':-0.125,
+                                            'ion1.B20':0.377,'ion1.B22':3.9,'ion1.B40':-0.03,'ion1.B42':-0.116,'ion1.B44':-0.125})
+    cfms.ties({'ion0.IntensityScaling' : '0.5*ion1.IntensityScaling'})
+
+In addition to creating the equivalent `CrystalFieldMultiSite` object the coefficient is used to set a tie for the
+`IntensityScaling` parameter of ion0 relative to the `IntensityScaling` parameter of ion1. For the tie the coefficient of
+the respective ion is divided by the coefficient of the ion with the greatest coefficient. The coefficients from the combining
+expression are stored as `abundances`.
+
+Creating the `CrystalFieldMultiSite` object directly allows for more flexibility. First of all, instead of setting values
+for `abundances` it is possible to set the tie directly. Furthermore, if no ties for `IntensityScaling` are required this can
+be achieved by not defining any `abundances` in the constructor. Without a tie the `IntensityScaling` parameters for each ion
+can be set individually. Please note that setting values for `IntensityScaling` in the `CrystalFieldMultiSite` constructor
+will fix the respective parameter to the specified value and not just initialize it as for the `CrystalField` object..
+
+Multiple ions fitted to multiple spectra
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+When fitting multiple ions to multiple spectra the `IntensityScaling` factor is the product of the `IntensityScaling` factor
+of the respective ion and the respective spectrum.
+
+The `IntensityScaling` factors for the spectra are preserved from the `CrystalField` objects in the combination. If only
+one of the `CrystalField` objects has `IntensityScaling` values set these used for the `CrystalFieldMultiSite` object.
+In case of different settings for the original `CrystalField` objects the values for the object defining ion0 are used
+and a warning about this mismatch displayed.
+
+Creating the `CrystalFieldMultiSite` object directly allows to set each of the `IntensityScaling` values individually::
+
+    from CrystalField import CrystalFieldMultiSite
+    cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0, 50.0], FWHMs=[1.1, 0.9],
+                                parameters={'ion0.B20':0.377,'ion0.B22':3.9,'ion0.B40':-0.03,'ion0.B42':-0.116,'ion0.B44':-0.125,
+                                            'ion1.B20':0.377,'ion1.B22':3.9,'ion1.B40':-0.03,'ion1.B42':-0.116,'ion1.B44':-0.125,
+                                            'ion0.IntensityScaling':3.0, 'ion1.IntensityScaling':2.0,
+                                            'sp0.IntensityScaling':1.5, 'sp1.IntensityScaling':0.007})
+
+As in the single spectra case `IntensityScaling` values are fixed to the set value or to 1 if there is no setting. The
+ties can either be added directly or by adding the corresponding `abundances` with a value per ion in the constructor.
 
 
 Finding Initial Parameters

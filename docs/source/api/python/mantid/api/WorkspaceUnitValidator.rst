@@ -1,3 +1,5 @@
+.. _mantid.api.WorkspaceUnitValidator:
+
 ========================
  WorkspaceUnitValidator
 ========================

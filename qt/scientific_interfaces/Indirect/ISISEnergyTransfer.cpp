@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
 #include "IndirectDataValidationHelper.h"
+#include "IndirectSettingsHelper.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -218,7 +220,7 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI, QWidget *pa
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraContour));
 
   // SIGNAL/SLOT CONNECTIONS
   // Update instrument information when a new instrument config is selected
@@ -855,7 +857,7 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
     auto const filename = m_uiForm.dsRunFiles->getFirstFilename();
     QFileInfo const fileInfo(filename);
     auto const name = fileInfo.baseName().toStdString();
-    m_plotter->plotSpectra(name + "_grp", "0");
+    m_plotter->plotSpectra(name + "_grp", "0", IndirectSettingsHelper::externalPlotErrorBars());
   }
   setPlotTimeIsPlotting(false);
 }
@@ -910,10 +912,9 @@ void ISISEnergyTransfer::loadDetailedBalance(std::string const &filename) {
 void ISISEnergyTransfer::runClicked() { runTab(); }
 
 void ISISEnergyTransfer::plotWorkspace(std::string const &workspaceName, std::string const &plotType) {
-
   if (plotType == "Spectra") {
     auto const indices = "0-" + std::to_string(getADSMatrixWorkspace(workspaceName)->getNumberHistograms() - 1);
-    m_plotter->plotSpectra(workspaceName, indices);
+    m_plotter->plotSpectra(workspaceName, indices, IndirectSettingsHelper::externalPlotErrorBars());
   } else if (plotType == "Contour") {
     m_plotter->plotContour(workspaceName);
   }

@@ -7,6 +7,8 @@
 #  This file is part of the mantid package
 # std imports
 import math
+from typing import List
+
 import numpy as np
 from collections.abc import Sequence
 
@@ -16,7 +18,7 @@ from matplotlib.legend import Legend
 import matplotlib as mpl
 
 # local imports
-from mantid.api import AnalysisDataService, MatrixWorkspace
+from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.api import IMDHistoWorkspace
 from mantid.kernel import ConfigService
 from mantid.plots import datafunctions, MantidAxes
@@ -112,7 +114,8 @@ def plot_md_histo_ws(workspaces, errors=False, overplot=False, fig=None, ax_prop
 @manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
-         window_title=None, tiled=False, waterfall=False, log_name=None, log_values=None):
+         window_title=None, tiled=False, waterfall=False, log_name=None,
+         log_values=None, superplot=False):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -126,7 +129,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     will be done on the axis passed in
     :param fig: If not None then use this Figure object to plot
     :param plot_kwargs: Arguments that will be passed onto the plot function
-    :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log'}
+    :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log', 'xscale': 'linear'}
     :param window_title: A string denoting name of the GUI window which holds the graph
     :param tiled: An optional flag controlling whether to do a tiled or overlayed plot
     :param waterfall: An optional flag controlling whether or not to do a waterfall plot
@@ -143,6 +146,10 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     if plot_kwargs is None:
         plot_kwargs = {}
+
+    if any(isinstance(i, WorkspaceGroup) for i in workspaces):
+        workspaces = _unpack_grouped_workspaces(workspaces)
+
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
     workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
 
@@ -206,6 +213,12 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
                     datafunctions.waterfall_update_fill(ax)
 
                 ax.lines += errorbar_cap_lines
+
+    if superplot and not waterfall and not tiled:
+        fig.canvas.manager.superplot_toggle()
+        if not spectrum_nums and not wksp_indices:
+            workspace_names = [ws.getName() for ws in workspaces]
+            fig.canvas.manager.superplot.set_workspaces(workspace_names)
 
     # update and show figure
     return _update_show_figure(fig)
@@ -398,6 +411,14 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
 # -----------------------------------------------------------------------------
 # Private Methods
 # -----------------------------------------------------------------------------
+def _unpack_grouped_workspaces(mixed_list: List):
+    assert isinstance(mixed_list, list), f"Expected list of group + non-group workspaces, got {repr(mixed_list)}"
+    ret = []
+    for ws in mixed_list:
+        ret.extend([i for i in ws]) if isinstance(ws, WorkspaceGroup) else ret.append(ws)
+    return ret
+
+
 def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled=False, overplot=False):
     """Raises a ValueError if any arguments have the incorrect types"""
     if spectrum_nums is not None and wksp_indices is not None:

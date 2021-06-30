@@ -92,11 +92,6 @@ void Group::resetSkipped() {
       row->setSkipped(false);
 }
 
-bool Group::allRowsAreValid() const {
-  return std::all_of(m_rows.cbegin(), m_rows.cend(),
-                     [](boost::optional<Row> const &row) -> bool { return row.is_initialized(); });
-}
-
 std::vector<boost::optional<Row>> const &Group::rows() const { return m_rows; }
 
 std::vector<boost::optional<Row>> &Group::mutableRows() { return m_rows; }

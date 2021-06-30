@@ -92,10 +92,11 @@ class SeqFittingTabPresenter(object):
         self.view.fit_table.block_signals(False)
 
     def handle_sequential_fit_requested(self):
-        if self.model.get_active_fit_function() is None or len(self.selected_rows) == 0:
+        workspace_names = [self.get_workspaces_for_row_in_fit_table(row) for row in self.selected_rows]
+
+        if not self.validate_sequential_fit(workspace_names):
             return
 
-        workspace_names = [self.get_workspaces_for_row_in_fit_table(row) for row in self.selected_rows]
         parameter_values = [self.view.fit_table.get_fit_parameter_values_from_row(row) for row in self.selected_rows]
 
         calculation_function = functools.partial(self.model.perform_sequential_fit, workspace_names, parameter_values,
@@ -133,6 +134,25 @@ class SeqFittingTabPresenter(object):
     def handle_updated_fit_parameter_in_table(self, index):
         self._update_parameter_values_in_fitting_model_for_row(index.row())
         self.fit_parameter_changed_notifier.notify_subscribers()
+
+    def validate_sequential_fit(self, workspace_names):
+        if self.model.get_active_fit_function() is None or len(workspace_names) == 0:
+            self.view.warning_popup("No data or fit function selected for fitting.")
+            return False
+        else:
+            return self._check_tf_asymmetry_compliance(self._flatten_workspace_names(workspace_names))
+
+    def _check_tf_asymmetry_compliance(self, workspace_names):
+        tf_compliant, non_compliant_names = self.model.check_datasets_are_tf_asymmetry_compliant(workspace_names)
+        if self.model.tf_asymmetry_mode and not tf_compliant:
+            self.view.warning_popup(f"Only Groups can be fitted in TF Asymmetry mode. Please unselect the following "
+                                    f"Pairs/Diffs in the grouping tab: {non_compliant_names}")
+            return False
+        return True
+
+    @staticmethod
+    def _flatten_workspace_names(workspaces: list) -> list:
+        return [workspace for fit_workspaces in workspaces for workspace in fit_workspaces]
 
     def _update_parameter_values_in_fitting_model_for_row(self, row):
         workspaces = self.get_workspaces_for_row_in_fit_table(row)

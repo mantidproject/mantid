@@ -73,7 +73,7 @@ Command line interface
 
 In addition to the GUI, there is also a python commandline interface to PyChop.
 This is encapsulated in the ``PyChop2`` class within the ``PyChop`` module. Within
-MantidPlot, to do a single point calculation of the flux and resolution
+Mantid, to do a single point calculation of the flux and resolution
 
 .. code:: python
 

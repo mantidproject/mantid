@@ -3,22 +3,21 @@
 Nexus File
 ==========
 
-A **Nexus file** is a type of data file used by various instruments
-and by MantidPlot. The format appears to be like an XML file plus some
-unprintable characters.
+A **Nexus file** is a common data exchange format for neutron, X-ray,
+and muon experiments.
 
-Mantidplot is capable of loading certain types of Nexus files and of saving certain types of
+Mantid is capable of loading certain types of Nexus files and of saving certain types of
 :ref:`workspace <workspace>` as a Nexus file.  It can also save a
 :ref:`project <project>` as a mantid file plus Nexus files.
 
 Structure
 ---------
 
-The general structure of NEXUS files is explained in http://download.nexusformat.org/doc/html/user_manual.html .
+The general structure of Nexus files is explained in http://download.nexusformat.org/doc/html/user_manual.html .
 
 Here are some specific details:
 
-ISIS uses NEXUS files for both histrogram and event data and SNS uses NEXUS for event data only.
+ISIS uses Nexus files for both histrogram and event data and SNS uses NEXUS for event data only.
 Also both ISIS and SNS use the same structure for event data.
 Hence there are two principal types of NEXUS files loaded by Mantid
 

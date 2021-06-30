@@ -73,7 +73,7 @@ public:
     testInput->setPropertyValue("arg2_param", "5");
     AlgorithmHistory history(testInput);
 
-    IAlgorithm_sptr compareAlg = history.createAlgorithm();
+    auto compareAlg = history.createAlgorithm();
     TS_ASSERT_EQUALS(compareAlg->name(), testInput->name());
     TS_ASSERT_EQUALS(compareAlg->version(), testInput->version());
     TS_ASSERT_EQUALS(compareAlg->category(), testInput->category());
@@ -127,7 +127,7 @@ public:
     int i = 1;
     AlgorithmHistories::iterator it;
     for (it = children.begin(); it != children.end(); ++it, ++i) {
-      IAlgorithm_sptr childAlg = (*it)->createAlgorithm();
+      auto childAlg = (*it)->createAlgorithm();
       std::string index = boost::lexical_cast<std::string>(i);
       TS_ASSERT_EQUALS(childAlg->getPropertyValue("arg1_param"), "child" + index);
 
@@ -136,7 +136,7 @@ public:
       int j = 1;
       AlgorithmHistories::iterator jt;
       for (jt = subchildren.begin(); jt != subchildren.end(); ++j, ++jt) {
-        IAlgorithm_sptr subChildAlg = (*jt)->createAlgorithm();
+        auto subChildAlg = (*jt)->createAlgorithm();
         std::string subindex = boost::lexical_cast<std::string>(j);
         TS_ASSERT_EQUALS(subChildAlg->getPropertyValue("arg1_param"), "subChild" + index + subindex);
       }
@@ -168,7 +168,7 @@ public:
     algHist.addChildHistory(std::make_shared<AlgorithmHistory>(child2));
     algHist.addChildHistory(std::make_shared<AlgorithmHistory>(child3));
 
-    IAlgorithm_sptr alg = algHist.getChildAlgorithm(0);
+    auto alg = algHist.getChildAlgorithm(0);
     TS_ASSERT_EQUALS(alg->name(), testInput->name());
     TS_ASSERT_EQUALS(alg->version(), testInput->version());
     TS_ASSERT_EQUALS(alg->category(), testInput->category());

@@ -110,8 +110,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.initialize())
       TS_ASSERT(alg.isInitialized())
 
-      IAlgorithm_sptr procAlg;
-      procAlg = alg.makeAlgorithm(post > 0);
+      auto procAlg = alg.makeAlgorithm(post > 0);
       TSM_ASSERT("NULL algorithm pointer returned if nothing is specified.", !procAlg);
 
       TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(prefix + "ProcessingAlgorithm", "Rebin"));

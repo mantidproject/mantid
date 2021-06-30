@@ -123,6 +123,8 @@ If a property is empty
    (if there is any)
 -  in a Python API call, then the property's value is left empty.
 
+.. _Properties Directions:
+
 Direction
 ~~~~~~~~~
 
@@ -149,7 +151,7 @@ of a property is suitable for a particular algorithm. If no validator is
 given, then the property can have any value (of the correct type).
 Validators are checked immediately before an algorithm is executed, when
 the value of a property is set (which will fail if it doesn't pass the
-validator) and through the MantidPlot interface to an algorithm.
+validator) and through the GUI interface to an algorithm.
 
 The validators currently included in Mantid are:
 

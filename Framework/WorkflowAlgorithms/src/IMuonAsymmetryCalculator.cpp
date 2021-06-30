@@ -43,7 +43,7 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::sumPeriods(const std::vector<int>
       auto numPeriods = static_cast<int>(periodsToSum.size());
       for (int i = 1; i < numPeriods; i++) {
         auto RHSWorkspace = m_inputWS->getItem(periodsToSum[i] - 1);
-        IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
+        auto alg = AlgorithmManager::Instance().create("Plus");
         alg->setChild(true);
         alg->setProperty("LHSWorkspace", outWS);
         alg->setProperty("RHSWorkspace", RHSWorkspace);
@@ -66,7 +66,7 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::subtractWorkspaces(const MatrixWo
                                                                   const MatrixWorkspace_sptr &rhs) const {
   MatrixWorkspace_sptr outWS;
   if (lhs && rhs) {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Minus");
+    auto alg = AlgorithmManager::Instance().create("Minus");
     alg->setChild(true);
     alg->setProperty("LHSWorkspace", lhs);
     alg->setProperty("RHSWorkspace", rhs);
@@ -86,7 +86,7 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::subtractWorkspaces(const MatrixWo
 MatrixWorkspace_sptr IMuonAsymmetryCalculator::extractSpectrum(const Workspace_sptr &inputWS, const int index) const {
   MatrixWorkspace_sptr outWS;
   if (inputWS) {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+    auto alg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
     alg->setChild(true);
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("WorkspaceIndex", index);

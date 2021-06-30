@@ -303,6 +303,18 @@ class CrystalFieldTests(unittest.TestCase):
         self.assertAlmostEqual(y1[139], 0.17385222868511149, 8)
         self.assertAlmostEqual(y1[142], 0.17671738547959939, 8)
 
+    def test_pseudo_multispectrum_ties(self):
+        from CrystalField import CrystalField, PhysicalProperties
+        cf = CrystalField('Ce', 'C2v', Temperature=[5.0], FWHM=[10.0], B20=0.9607, B22=-1.6, B40=-0.04365, B42=0.2101,
+                          B44=0.393)
+        cf.PeakShape = 'Lorentzian'
+        cf.PhysicalProperty = [
+            PhysicalProperties('susc', Hdir=[1, 0, 0], Inverse=True, Unit='cgs', Lambda=0.01, Chi0=0.001)]
+        cf.peaks[0].tieAll('FWHM=20.0', 5)
+        self.assertTrue(cf.function.getParameterValue('f0.f1.FWHM') == 20.0)
+        self.assertTrue(cf.function.getParameterValue('f0.f3.FWHM') == 20.0)
+        self.assertTrue(cf.function.getParameterValue('f0.f5.FWHM') == 20.0)
+
     def test_api_CrystalField_when_using_cubic_crystal_structures(self):
         from CrystalField import CrystalField
 

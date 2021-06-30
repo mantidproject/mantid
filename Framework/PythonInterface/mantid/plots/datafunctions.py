@@ -35,10 +35,11 @@ from mantid.plots.utility import MantidAxType
 
 
 def validate_args(*args, **kwargs):
-    return len(args) > 0 and (isinstance(args[0], EventWorkspace) or
-                              isinstance(args[0], Workspace2D) or
-                              isinstance(args[0], MDHistoWorkspace) or
-                              isinstance(args[0], MultipleExperimentInfos) and "LogName" in kwargs)
+    return len(args) > 0 and (isinstance(args[0], EventWorkspace)
+                              or isinstance(args[0], Workspace2D)
+                              or isinstance(args[0], MDHistoWorkspace)
+                              or isinstance(args[0], MultipleExperimentInfos)
+                              and "LogName" in kwargs)
 
 
 # ====================================================
@@ -137,8 +138,8 @@ def get_indices(md_workspace, **kwargs):
     if indices and 'label' not in kwargs:
         ws_name = md_workspace.name()
         labels = '; '.join('{0}={1:.4}'.format(md_workspace.getDimension(n).name,
-                                               (md_workspace.getDimension(n).getX(indices[n]) +
-                                                md_workspace.getDimension(n).getX(indices[n] + 1)) / 2)
+                                               (md_workspace.getDimension(n).getX(indices[n])
+                                                + md_workspace.getDimension(n).getX(indices[n] + 1)) / 2)
                            for n in range(md_workspace.getNumDims()) if indices[n] != slice(None))
         if ws_name:
             kwargs['label'] = '{0}: {1}'.format(ws_name, labels)
@@ -601,8 +602,7 @@ def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=No
             interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False,
                                               fill_value="extrapolate")
             # only set values in the range of workspace
-            x_range = np.where((x >= workspace.readX(workspace_index)[0]) &
-                               (x <= workspace.readX(workspace_index)[-1]))
+            x_range = np.where((x >= workspace.readX(workspace_index)[0]) & (x <= workspace.readX(workspace_index)[-1]))
             # set values outside x data to nan
             counts[index, x_range] = interpolation_function(x[x_range])
     counts = np.ma.masked_invalid(counts, copy=False)

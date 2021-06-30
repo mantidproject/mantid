@@ -410,7 +410,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   std::vector<double> v = getProperty("HKL2");
 
   // load empty DNS instrument to access L1 and L2
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadAlg->setChild(true);
   loadAlg->setLogging(false);
   loadAlg->initialize();
@@ -585,7 +585,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::None;
 
   // load empty DNS instrument to access L1 and L2
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadAlg->setChild(true);
   loadAlg->setLogging(false);
   loadAlg->initialize();

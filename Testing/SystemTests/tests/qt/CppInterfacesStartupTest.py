@@ -6,14 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
 
-# Must be imported after systemtesting to avoid an error.
-import sip
-
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.usersubwindowfactory import UserSubWindowFactory
 from mantidqt.utils.qt.testing import get_application
 
 from qtpy.QtCore import Qt
+# Import sip after Qt. Modern versions of PyQt ship an internal sip module
+# located at PyQt5X.sip. Importing PyQt first sets a shim sip module to point
+# to the correct place
+import sip
 
 
 class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
