@@ -443,7 +443,7 @@ class DrillModel(QObject):
             if v is None or v == "DEFAULT":
                 del params[k]
         # add the output workspace param
-        if "OutputWorkspace" not in params:
+        if "OutputWorkspace" not in params or params["OutputWorkspace"] == "":
             params["OutputWorkspace"] = "sample_" + str(index + 1)
         sample.setOutputName(params["OutputWorkspace"])
         return params
