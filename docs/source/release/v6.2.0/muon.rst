@@ -13,6 +13,7 @@ Improvements
 
 - It is now possible to do a vertical resize of the plot in Muon Analysis and Frequency Domain Analysis.
 - The plotting has been updated for better stability.
+- The plotting now has autoscale active by default.
 
 Elemental Analysis
 ------------------
