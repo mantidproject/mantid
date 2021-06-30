@@ -26,7 +26,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/InstrumentView/PanelsSurface.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
-#include "MantidQtWidgets/InstrumentView/SimpleWidget.h"
+#include "MantidQtWidgets/InstrumentView/QtDisplay.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
 #include "MantidQtWidgets/InstrumentView/XIntegrationControl.h"
@@ -137,7 +137,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
 
   // Create simple display widget
   if (!m_simpleDisplay)
-    m_simpleDisplay = std::make_unique<SimpleWidget>(this);
+    m_simpleDisplay = std::make_unique<QtDisplay>(this);
   m_simpleDisplay->qtInstallEventFilter(this);
 
   QWidget *aWidget = new QWidget(this);
@@ -1036,7 +1036,7 @@ void InstrumentWidget::dropEvent(QDropEvent *e) {
 bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
   if (ev->type() == QEvent::ContextMenu &&
       (dynamic_cast<MantidGLWidget *>(obj) == m_InstrumentDisplay.get() ||
-       dynamic_cast<SimpleWidget *>(obj) == m_simpleDisplay.get()) &&
+       dynamic_cast<QtDisplay *>(obj) == m_simpleDisplay.get()) &&
       getSurface() && getSurface()->canShowContextMenu()) {
     // an ugly way of preventing the curve in the pick tab's miniplot
     // disappearing when

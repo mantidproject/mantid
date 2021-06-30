@@ -20,11 +20,11 @@ class ProjectionSurface;
 /**
  * A simple widget for drawing unwrapped instrument images.
  */
-class SimpleWidget final : public IQtDisplay {
+class QtDisplay final : public IQtDisplay {
 public:
   /// Constructor
-  explicit SimpleWidget(QWidget *parent);
-  ~SimpleWidget() override;
+  explicit QtDisplay(QWidget *parent);
+  ~QtDisplay() override;
   /// Assign a surface to draw on
   void setSurface(std::shared_ptr<ProjectionSurface> surface) override;
   /// Return the surface
