@@ -43,13 +43,25 @@ public:
     FrameworkManager::Instance();
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 2);
     AnalysisDataService::Instance().addOrReplace("test_ws", ws);
+    m_glEnabledOriginal = Mantid::Kernel::ConfigService::Instance()
+                              .getValue<bool>("MantidOptions.InstrumentView.UseOpenGL")
+                              .get_value_or(true);
+    setGl(true);
   }
 
-  void tearDown() override { AnalysisDataService::Instance().clear(); }
+  void tearDown() override {
+    AnalysisDataService::Instance().clear();
+    setGl(m_glEnabledOriginal);
+  }
 
   void test_constructor() { auto instance = construct(makeSimple(), makeGL(), makeConnect()); }
+  void test_constructor_gl_disabled() {
+    setGl(false);
+    auto instance = construct(makeSimple(), makeGL(), makeConnect());
+  }
 
   void test_save_image_simple_widget() {
+    setGl(false);
     const auto inputName = QString::fromStdString("testFilename");
     const auto expectedName = inputName + ".png";
 
@@ -61,6 +73,7 @@ public:
   }
 
   void test_update_instrument_detectors() {
+    setGl(false);
     auto simpleMock = makeSimple();
     EXPECT_CALL(*simpleMock, updateDetectors()).Times(1);
 
@@ -69,8 +82,17 @@ public:
   }
 
 private:
+  bool m_glEnabledOriginal = true;
+  bool m_glEnabled = true;
+
   std::unique_ptr<SimpleMock> makeSimple() const { return std::make_unique<SimpleMock>(); }
   std::unique_ptr<GLMock> makeGL() const { return std::make_unique<GLMock>(); }
+
+  void setGl(bool state) {
+    m_glEnabled = state;
+    auto const stateStr = state ? "On" : "Off";
+    Mantid::Kernel::ConfigService::Instance().setString("MantidOptions.InstrumentView.UseOpenGL", stateStr);
+  }
 
   void mockConnect(MockQtConnect &mock, const char *signal, const char *slot) const {
     EXPECT_CALL(mock, connect(_, StrEq(signal), _, StrEq(slot))).Times(1);
@@ -112,7 +134,10 @@ private:
 
     EXPECT_CALL(*glMock, qtInstallEventFilter(_)).Times(1);
     EXPECT_CALL(*glMock, setBackgroundColor(_)).Times(1);
-    EXPECT_CALL(*glMock, getSurface()).Times(24).WillRepeatedly(Return(surfaceMock));
+
+    const int getSurfaceCalls = m_glEnabled ? 22 : 24;
+
+    EXPECT_CALL(*glMock, getSurface()).Times(getSurfaceCalls).WillRepeatedly(Return(surfaceMock));
     EXPECT_CALL(*glMock, setSurface(_)).Times(1);
     EXPECT_CALL(*glMock, currentBackgroundColor()).Times(1);
 
