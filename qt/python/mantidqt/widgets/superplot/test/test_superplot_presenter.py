@@ -266,7 +266,6 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_model.remove_data.assert_has_calls(calls)
         self.presenter._update_list.assert_called_once()
         self.presenter._update_plot.assert_called_once()
-        self.presenter._update_spectrum_slider.assert_called_once()
 
     def test_on_hold_button_clicked(self):
         self.presenter._on_hold = mock.Mock()

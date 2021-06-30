@@ -432,12 +432,14 @@ class SuperplotPresenter:
             else:
                 for spectrum in selection[ws_name]:
                     self._model.remove_data(ws_name, spectrum)
+            selection[ws_name] = [-1]
         if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
                                             self.BIN_MODE_TEXT])
             self._view.set_mode(mode)
         self._update_list()
-        self._update_spectrum_slider()
+        self._update_hold_button()
+        self._view.set_selection(selection)
         self._update_plot()
 
     def on_hold_button_clicked(self):
