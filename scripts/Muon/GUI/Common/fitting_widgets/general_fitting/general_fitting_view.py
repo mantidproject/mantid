@@ -70,13 +70,13 @@ class GeneralFittingView(BasicFittingView):
     def switch_to_simultaneous(self) -> None:
         """Switches the view to simultaneous fit mode."""
         super().switch_to_simultaneous()
-        self.set_data_combo_box_label(SIMULTANEOUS_FIT_LABEL)
+        self.set_workspace_combo_box_label(SIMULTANEOUS_FIT_LABEL)
         self.general_fitting_options.enable_simultaneous_fit_options()
 
     def switch_to_single(self) -> None:
         """Switches the view to single fit mode."""
         super().switch_to_single()
-        self.set_data_combo_box_label(SINGLE_FIT_LABEL)
+        self.set_workspace_combo_box_label(SINGLE_FIT_LABEL)
         self.general_fitting_options.disable_simultaneous_fit_options()
 
     def disable_simultaneous_fit_options(self) -> None:
