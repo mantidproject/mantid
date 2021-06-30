@@ -37,7 +37,6 @@ public:
 
     TS_ASSERT(dynamic_cast<Mantid::RemoteAlgorithms::Authenticate2 *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::Algorithm *>(a.get()));
-    TS_ASSERT(dynamic_cast<Mantid::Kernel::PropertyManagerOwner *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::IAlgorithm *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::Kernel::IPropertyManager *>(a.get()));
   }

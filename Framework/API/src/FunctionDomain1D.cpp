@@ -48,6 +48,20 @@ FunctionDomain1DVector::FunctionDomain1DVector(const std::vector<double> &xvalue
 }
 
 /**
+ * Create a domain from a vector using move semantics - no copy overhead.
+ * @param xvalues :: Vector with function arguments to be moved from.
+ */
+FunctionDomain1DVector::FunctionDomain1DVector(std::vector<double> &&xvalues) : FunctionDomain1D(nullptr, 0) {
+  if (xvalues.empty()) {
+    throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
+  }
+  m_X = std::move(xvalues);
+  /* clear the invalidated object */
+  xvalues.clear();
+  resetData(&m_X[0], m_X.size());
+}
+
+/**
  * Create a domain from a part of a vector.
  * @param from :: Iterator to start copying values from.
  * @param to :: Iterator to the end of the data.

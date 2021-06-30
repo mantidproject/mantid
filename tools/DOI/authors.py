@@ -261,7 +261,21 @@ _translations = {
     'Silke Schomann': 'Schomann, Silke',
     'Jenna Delozier': 'Delozier, Jenna',
     'Cole Kendrick':  'Kendrick, Cole',
-    'Zhang, Chen': 'Zhang, Chen'
+    'Coleman Kendrick': 'Kendrick, Cole',
+    'Zhang, Chen': 'Zhang, Chen',
+    'Chen': 'Zhang, Chen',
+    'srikanthravipati': 'Ravipati, Srikanth',
+    'Srikanth Ravipati': 'Ravipati, Srikanth',
+    'Tom Hampson': 'Hampson, Thomas',
+    'thomashampson': 'Hampson, Thomas',
+    'Michael Walsh': 'Walsh, Michael',
+    'Yuanpeng Zhang': 'Zhang, Yuanpeng',
+    'Zhang Y': 'Zhang, Yuanpeng',
+    'Harry Hughes': 'Hughes, Harry',
+    'stonecoldhughes': 'Hughes, Harry',
+    'Jesse McGaha': 'McGaha, Jesse',
+    'jrmcgaha-dev': 'McGaha, Jesse',
+    'Zachary Morgan': 'Morgan, Zachary'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT

@@ -257,17 +257,32 @@ def get_fit_function_name_from_workspace(workspace_name):
 
 
 def create_multi_domain_fitted_workspace_name(input_workspace, function_name):
-    directory = input_workspace + '; Fitted;' + function_name + '/'
     name = input_workspace + '+ ...; Fitted;' + function_name
+    directory = name + '/'
 
     return name, directory
 
 
 def create_parameter_table_name(input_workspace_name, function_name):
     directory = input_workspace_name + '; Fitted;' + function_name + '/'
-    name = input_workspace_name + '; Fitted Parameters;' + function_name
+    name = input_workspace_name + '; Fitted;' + function_name + '; Parameters'
 
     return name, directory
+
+
+def create_covariance_matrix_name(input_workspace_name, function_name):
+    directory = input_workspace_name + '; Fitted;' + function_name + '/'
+    name = input_workspace_name + '; Fitted;' + function_name + '; Normalised Covariance Matrix'
+
+    return name, directory
+
+
+def create_model_fitting_parameter_combination_name(result_table_name, x_parameter, y_parameter):
+    return result_table_name + "; " + x_parameter + " vs " + y_parameter
+
+
+def create_model_fitting_parameters_group_name(results_table_name):
+    return results_table_name + "; Parameter Combinations"
 
 
 def remove_rebin_from_name(name):

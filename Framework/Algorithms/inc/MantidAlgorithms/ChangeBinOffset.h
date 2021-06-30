@@ -17,7 +17,7 @@ Required Properties:
 <LI> InputWorkspace - The name of the Workspace to take as input </LI>
 <LI> OutputWorkspace - The name of the workspace in which to store the result
 </LI>
-<LI> Offset - The number by which to change the time bins by</LI>
+<LI> Offset - The amount to adjust the time bins. Usually in microseconds</LI>
 </UL>
 
 @author

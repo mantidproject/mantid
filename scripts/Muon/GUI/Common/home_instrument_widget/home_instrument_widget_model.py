@@ -91,13 +91,6 @@ class InstrumentWidgetModel(object):
     def set_double_pulse_enabled(self, enabled):
         self._context.gui_context.update_and_send_non_calculation_signal(DoublePulseEnabled=enabled)
 
-    def get_dead_time_table_from_data(self):
-        dead_time_name = self._data.current_data["DataDeadTimeTable"]
-        return api.AnalysisDataService.retrieve(self._data.current_data["DataDeadTimeTable"]) if dead_time_name else None
-
-    def get_dead_time_table(self):
-        return self._data.dead_time_table
-
     def add_fixed_binning(self, fixed_bin_size):
         self._context.gui_context.update_and_send_signal(RebinFixed=str(fixed_bin_size))
 
@@ -112,40 +105,6 @@ class InstrumentWidgetModel(object):
 
     def update_binning_type(self, rebin_type):
         self._context.gui_context.update_and_send_signal(RebinType=rebin_type)
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Dead Time
-    # ------------------------------------------------------------------------------------------------------------------
-    def check_dead_time_file_selection(self, selection):
-        try:
-            table = api.AnalysisDataServiceImpl.Instance().retrieve(str(selection))
-        except Exception:
-            raise ValueError("Workspace " + str(selection) + " does not exist")
-        assert isinstance(table, ITableWorkspace)
-        # are column names correct?
-        col = table.getColumnNames()
-        if len(col) != 2:
-            raise ValueError("Expected 2 columns, found ", str(max(0, len(col))))
-        if col[0] != "spectrum" or col[1] != "dead-time":
-            raise ValueError("Columns have incorrect names")
-        rows = table.rowCount()
-        if rows != self._data.current_workspace.getNumberHistograms():
-            raise ValueError("Number of histograms do not match number of rows in dead time table")
-        return True
-
-    def set_dead_time_to_none(self):
-        self._context.gui_context.update_and_send_signal(DeadTimeSource='None')
-
-    def set_dead_time_from_data(self):
-        self._context.gui_context.update_and_send_signal(DeadTimeSource='FromFile')
-
-    def set_user_dead_time_from_ADS(self, name):
-        if name == 'None':
-            self._context.gui_context.update_and_send_signal(DeadTimeTable=None)
-            return
-        dtc = api.AnalysisDataService.retrieve(str(name))
-        self._context.gui_context.update_and_send_non_calculation_signal(DeadTimeSource='FromADS')
-        self._context.gui_context.update_and_send_signal(DeadTimeTable=dtc)
 
     def validate_variable_rebin_string(self, variable_rebin_string):
         variable_rebin_list = variable_rebin_string.split(',')

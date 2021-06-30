@@ -45,9 +45,16 @@ Directory holding the SIP C++ header file.
 #]=======================================================================]
 include(FindPackageHandleStandardArgs)
 
+
+if (EXISTS "$ENV{CONDA_PREFIX}")
+set(_path_opt NO_DEFAULT_PATH)
+endif()
+
 # First look for sip-build, indicating the newer v6 build system
-find_program(SIP_BUILD_EXECUTABLE sip-build)
+find_program(SIP_BUILD_EXECUTABLE sip-build ${_path_opt})
+
 if(SIP_BUILD_EXECUTABLE)
+
   # version string
   execute_process(
     COMMAND ${SIP_BUILD_EXECUTABLE} --version

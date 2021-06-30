@@ -15,10 +15,10 @@ from Muon.GUI.Common.message_box import warning
 
 from qtpy.QtWidgets import QWidget
 
-ui_fitting_layout, _ = load_ui(__file__, "fitting_layout.ui")
+ui_form, base_widget = load_ui(__file__, "fitting_layout.ui")
 
 
-class BasicFittingView(QWidget, ui_fitting_layout):
+class BasicFittingView(ui_form, base_widget):
     """
     The BasicFittingView has a FitControlsView and a FitFunctionOptionsView. It can be used for Single Fitting.
     """
@@ -106,6 +106,10 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         if dataset_index is not None:
             self.fit_function_options.set_current_dataset_index(dataset_index)
 
+    def set_number_of_undos(self, number_of_undos: int) -> None:
+        """Sets the allowed number of 'Undo Fit' events."""
+        self.fit_controls.set_number_of_undos(number_of_undos)
+
     def update_dataset_name_combo_box(self, dataset_names: list) -> None:
         """Update the data in the parameter display combo box."""
         self.workspace_selector.update_dataset_name_combo_box(dataset_names)
@@ -140,7 +144,7 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         return self.workspace_selector.number_of_datasets()
 
     @property
-    def current_dataset_index(self) -> str:
+    def current_dataset_index(self) -> int:
         """Returns the index of the currently displayed dataset."""
         return self.workspace_selector.current_dataset_index
 
@@ -148,6 +152,10 @@ class BasicFittingView(QWidget, ui_fitting_layout):
     def fit_object(self) -> IFunction:
         """Returns the global fitting function."""
         return self.fit_function_options.fit_object
+
+    def current_fit_function(self) -> IFunction:
+        """Returns the current fitting function in the view."""
+        return self.fit_function_options.current_fit_function()
 
     @property
     def minimizer(self) -> str:
@@ -198,10 +206,6 @@ class BasicFittingView(QWidget, ui_fitting_layout):
     def plot_guess(self, check: bool) -> None:
         """Sets whether or not plot guess is ticked."""
         self.fit_controls.plot_guess = check
-
-    def enable_undo_fit(self, enable: bool) -> None:
-        """Sets whether or not undo fit is enabled."""
-        self.fit_controls.enable_undo_fit(enable)
 
     @property
     def function_name(self) -> str:

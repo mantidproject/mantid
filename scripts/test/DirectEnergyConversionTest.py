@@ -791,6 +791,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #test = DirectEnergyConversionTest('test_remove_empty_bg_with_normalisation')
+    #test = DirectEnergyConversionTest('test_remove_empty_bg_normalised_both')
     #test.run()
     unittest.main()

@@ -545,6 +545,8 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
     ws_basis = np.eye(ndims)
     output_extents, output_bins = [], []
     params = {'AxisAligned': False}
+    if workspace.getSpecialCoordinateSystem() == SpecialCoordinateSystem.HKL:
+        params['NormalizeBasisVectors'] = False  # Default is True
     for n in range(ndims):
         dimension = workspace.getDimension(n)
         basis_vec_n = _to_str(ws_basis[:, n])

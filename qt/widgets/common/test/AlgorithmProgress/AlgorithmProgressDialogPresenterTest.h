@@ -26,6 +26,36 @@ using namespace testing;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
+using MockViewT = MockAlgorithmProgressDialogWidget;
+
+namespace {
+
+struct AlgorithmProgressDialogMockedTypes {
+  AlgorithmProgressDialogMockedTypes(std::unique_ptr<MockViewT> mockedView) : m_mockedView(std::move(mockedView)) {
+    // This is an extremely complex dependency chain to mock, but unfortunately
+    // legacy code is legacy code....
+    initParentPresenter();
+    m_presenter =
+        std::make_unique<AlgorithmProgressDialogPresenter>(nullptr, m_mockedView.get(), _parentPresenter->model());
+  }
+
+  std::unique_ptr<MockViewT> m_mockedView;
+  std::unique_ptr<AlgorithmProgressDialogPresenter> m_presenter;
+
+private:
+  // If you need to attach mocks to this please move your test to
+  // AlgorithmProgressPresenterTest.h instead, as you're testing an impl detail
+  std::unique_ptr<NiceMock<MockAlgorithmProgressWidget>> _mockedParentView;
+  std::unique_ptr<AlgorithmProgressPresenter> _parentPresenter;
+
+  void initParentPresenter() {
+    _mockedParentView = std::make_unique<NiceMock<MockAlgorithmProgressWidget>>();
+    _parentPresenter = std::make_unique<AlgorithmProgressPresenter>(nullptr, _mockedParentView.get());
+  }
+};
+
+} // namespace
+
 class AlgorithmProgressDialogPresenterTest : public CxxTest::TestSuite {
 public:
   static AlgorithmProgressDialogPresenterTest *createSuite() {
@@ -37,39 +67,23 @@ public:
     delete suite;
   }
 
-  void setUp() override {
-    mockDialogView.reset();
-    // The mock view also creates the presenter, because
-    // so that is passes the correct type into the constructor
-    mockDialogView = std::make_unique<NiceMock<MockAlgorithmProgressDialogWidget>>();
-  }
-
   /** This test runs the dev algorithm and sees if it was
    *  currectly tracked during start/updates/end
    */
   void testAlgorithmIsTrackedCorrectly() {
-    auto mainProgressBar = mockDialogView->mainProgressBar;
-    QString emptyQString;
-
-    //----------
-    // These assertions are actually for the main progress bar
-    // but the algorithm will trigger them too
-    // adding the expected calls prevents a bunch of GMock warnings
-    EXPECT_CALL(*mainProgressBar.get(), algorithmStarted()).Times(1);
-    for (const auto prog : {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0}) {
-      EXPECT_CALL(*mainProgressBar.get(), updateProgress(DoubleEq(prog), emptyQString, 0.0, 0));
-    }
-    EXPECT_CALL(*mainProgressBar.get(), algorithmEnded()).Times(1);
-    // End of assertions for the main progress bar
-    //----------
+    auto mockedView = createMockView();
 
     auto widget = new QTreeWidgetItem();
     auto progressBar = new QProgressBar();
     auto returnPair = std::make_pair(widget, progressBar);
 
     auto alg = AlgorithmManager::Instance().create("ManualProgressReporter");
-    ON_CALL(*mockDialogView.get(), addAlgorithm(alg)).WillByDefault(Return(returnPair));
-    EXPECT_CALL(*mockDialogView.get(), addAlgorithm(alg)).Times(Exactly(1));
+    ON_CALL(*mockedView, addAlgorithm(alg)).WillByDefault(Return(returnPair));
+    EXPECT_CALL(*mockedView, addAlgorithm(alg)).Times(Exactly(1));
+
+    auto mockedTypes = createPresenter(std::move(mockedView));
+
+    QString emptyQString;
 
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT(alg->isInitialized());
@@ -77,33 +91,16 @@ public:
     alg->setRethrows(true);
     alg->execute();
     QCoreApplication::processEvents();
-    TS_ASSERT_EQUALS(size_t{0}, mockDialogView->m_presenter->getNumberTrackedAlgorithms());
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDialogView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mainProgressBar));
+    TS_ASSERT_EQUALS(size_t{0}, mockedTypes.m_presenter->getNumberTrackedAlgorithms());
   }
   /** This tests running algorithms from inside an algorithm
    * and that they are all properly tracked for their lifetime
    * in the dialog
    */
   void testAlgorithmThatRunsOtherAlgorithmsIsTrackedCorrectly() {
-    auto mainProgressBar = mockDialogView->mainProgressBar;
-
     // This is the empty QString that will be
     // passed to update progress from the call
     QString emptyQString;
-
-    //----------
-    // These assertions are actually for the main progress bar
-    // but the algorithm will trigger them too
-    // adding the expected calls prevents a bunch of GMock warnings
-    EXPECT_CALL(*mainProgressBar.get(), algorithmStarted()).Times(1);
-    for (const auto prog : {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0}) {
-      EXPECT_CALL(*mainProgressBar.get(), updateProgress(DoubleEq(prog), emptyQString, 0.0, 0));
-    }
-    EXPECT_CALL(*mainProgressBar.get(), algorithmEnded()).Times(1);
-    // End of assertions for the main progress bar
-    //----------
 
     // changing this will cause the test to fail the assertions
     // on the mainProgressBar, as the expected progress
@@ -120,7 +117,8 @@ public:
     auto widgetPairs = std::vector<std::pair<QTreeWidgetItem *, QProgressBar *>>();
     widgetPairs.reserve(numWidgets);
 
-    auto &expectedCallObject = EXPECT_CALL(*mockDialogView.get(), addAlgorithm(_));
+    auto mockedView = createMockView();
+    auto &expectedCallObject = EXPECT_CALL(*mockedView, addAlgorithm(_));
     // The loop is done numWidgets times, to account for the algorithm
     // that is initialised in this test, as this is the 11th call
     for (int i = 0; i < numWidgets; ++i) {
@@ -136,6 +134,8 @@ public:
       expectedCallObject.WillOnce(Return(pair));
     }
 
+    auto mockedTypes = createPresenter(std::move(mockedView));
+
     auto alg = AlgorithmManager::Instance().create("ManualProgressReporter");
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT(alg->isInitialized());
@@ -144,10 +144,7 @@ public:
     alg->setProperty("StartAnotherAlgorithm", true);
     alg->execute();
     QCoreApplication::processEvents();
-    TS_ASSERT_EQUALS(size_t{0}, mockDialogView->m_presenter->getNumberTrackedAlgorithms());
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDialogView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mainProgressBar));
+    TS_ASSERT_EQUALS(size_t{0}, mockedTypes.m_presenter->getNumberTrackedAlgorithms());
 
     // free the pointers for the widgets
     for (const auto &pair : widgetPairs) {
@@ -158,5 +155,10 @@ public:
   }
 
 private:
-  std::unique_ptr<NiceMock<MockAlgorithmProgressDialogWidget>> mockDialogView;
+  std::unique_ptr<MockViewT> createMockView() { return std::make_unique<MockViewT>(); }
+
+  AlgorithmProgressDialogMockedTypes createPresenter(std::unique_ptr<MockViewT> mockedView) {
+    // Use ownership to force mocks to be set before, avoiding undef behaviour
+    return AlgorithmProgressDialogMockedTypes(std::move(mockedView));
+  }
 };
