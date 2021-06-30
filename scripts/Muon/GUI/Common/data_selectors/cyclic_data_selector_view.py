@@ -122,5 +122,5 @@ class CyclicDataSelectorView(ui_form, base_widget):
 
     def set_data_combo_box_label_width(self, width: int) -> None:
         """Sets the width of the label next to the data selector combobox."""
-        self.run_selector.data_combo_box_label.setMinimumWidth(width)
-        self.run_selector.data_combo_box_label.setMaximumWidth(width)
+        self.data_combo_box_label.setMinimumWidth(width)
+        self.data_combo_box_label.setMaximumWidth(width)
