@@ -27,9 +27,6 @@ class BasicFittingPresenter:
 
         self.initialize_model_options()
 
-        # This prevents plotting the wrong data when selecting different group/pairs on the grouping tab
-        self._update_plot = True
-
         self.thread_success = True
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
@@ -104,24 +101,18 @@ class BasicFittingPresenter:
 
     def handle_instrument_changed(self) -> None:
         """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
-        self._update_plot = False
         self.update_and_reset_all_data()
-        self._update_plot = True
         self.clear_undo_data()
         self.model.remove_all_fits_from_context()
 
     def handle_selected_group_pair_changed(self) -> None:
         """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
-        self._update_plot = False
         self.update_and_reset_all_data()
-        self._update_plot = True
 
     def handle_pulse_type_changed(self, updated_variables: dict) -> None:
         """Handles when double pulse mode is switched on and switches to normal fitting mode."""
         if "DoublePulseEnabled" in updated_variables:
-            self._update_plot = False
             self.update_and_reset_all_data()
-            self._update_plot = True
 
     def handle_plot_guess_changed(self) -> None:
         """Handle when plot guess is ticked or un-ticked."""
@@ -204,9 +195,8 @@ class BasicFittingPresenter:
         self.update_fit_function_in_view_from_model()
         self.update_start_and_end_x_in_view_from_model()
 
-        if self._update_plot:
-            self.update_plot_fit()
-            self.update_plot_guess()
+        self.update_plot_fit()
+        self.update_plot_guess()
 
     def handle_function_name_changed_by_user(self) -> None:
         """Handle when the fit name is changed by the user."""

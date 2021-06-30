@@ -98,8 +98,15 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
     def handle_dataset_name_changed(self) -> None:
         """Handle when the hidden dataset workspace combo box is changed."""
-        super().handle_dataset_name_changed()
+        self.model.current_dataset_index = self.view.current_dataset_index
         self.automatically_update_function_name()
+
+        self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        self.update_fit_function_in_view_from_model()
+        self.update_start_and_end_x_in_view_from_model()
+
+        self.update_plot_fit()
+        self.update_plot_guess()
 
     def handle_function_structure_changed(self) -> None:
         """Handle when the function structure is changed."""

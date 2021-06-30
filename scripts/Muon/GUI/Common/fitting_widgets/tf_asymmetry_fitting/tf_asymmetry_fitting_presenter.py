@@ -77,9 +77,8 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         self.reset_fit_status_and_chi_squared_information()
         self.clear_undo_data()
 
-        if self._update_plot:
-            self.update_plot_fit()
-            self.update_plot_guess()
+        self.update_plot_fit()
+        self.update_plot_guess()
 
         self.fitting_mode_changed_notifier.notify_subscribers()
 
