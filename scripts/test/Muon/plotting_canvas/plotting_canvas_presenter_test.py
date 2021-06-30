@@ -52,6 +52,26 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
     def tearDown(self):
         AnalysisDataService.Instance().clear()
 
+    def test_set_quickedit_from_context(self):
+        state = True
+        ylims = [0,10]
+        xlims = [5, 15]
+        self.context.set_error_all(state)
+        self.context.set_autoscale_all(state)
+        self.context.update_ylim_all(ylime)
+        self.context.update_xlim_all(xlims)
+
+        self.options.set_autoscale = mock.Mock()
+        self.options.set_errors = mock.Mock()
+        self.options.set_plot_x_range = mock.Mock()
+        self.options.set_plot_y_range = mock.Mock()
+
+        self.presenter.set_quickedit_from_context()
+        self.options.set_autoscale.assert_called_once_with(state)
+        self.options.set_errors.assert_called_once_with(state)
+        self.options.set_plot_x_range.assert_called_once_with(xlims)
+        self.options.set_plot_y_range.assert_called_once_with(ylims)
+
     def test_plot_workspaces_removes_workspace_from_plot_if_hold_on_false(self):
         ws_names = ["MUSR6220"]
         ws_indices = [0]
@@ -365,6 +385,7 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.view.redraw_figure = mock.Mock()
         self.view.set_axis_xlimits = mock.Mock()
         self.view.set_axis_ylimits = mock.Mock()
+        self.view.get_axis_limits = mock.Mock(return_value=(xlims[0], xlims[1], ylims[0], ylims[1]))
         self.presenter._get_selected_subplots_from_quick_edit_widget = mock.Mock(return_value=(ws_names, ws_indices))
         self.context.get_xlim = mock.Mock()
         self.context.get_ylim = mock.Mock()
