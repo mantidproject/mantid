@@ -8,7 +8,7 @@ from mantidqt.utils.observer_pattern import GenericObserver
 from mantidqt.utils.qt import load_ui
 
 from Muon.GUI.Common.corrections_tab_widget.dead_time_corrections_view import DeadTimeCorrectionsView
-from Muon.GUI.Common.fitting_widgets.basic_fitting.workspace_selector_view import WorkspaceSelectorView
+from Muon.GUI.Common.data_selectors.cyclic_data_selector_view import CyclicDataSelectorView
 from Muon.GUI.Common.message_box import warning
 
 from qtpy.QtWidgets import QWidget
@@ -26,10 +26,9 @@ class CorrectionsView(widget, ui_form):
         super(CorrectionsView, self).__init__(parent)
         self.setupUi(self)
 
-        self.run_selector = WorkspaceSelectorView(self)
-        self.run_selector.set_workspace_combo_box_label("Runs :")
-        self.run_selector.workspace_combo_box_label.setMinimumWidth(50)
-        self.run_selector.workspace_combo_box_label.setMaximumWidth(50)
+        self.run_selector = CyclicDataSelectorView(self)
+        self.run_selector.set_data_combo_box_label("Runs :")
+        self.run_selector.set_data_combo_box_label_width(50)
         self.run_selector_layout.addWidget(self.run_selector)
 
         self.dead_time_corrections_view = DeadTimeCorrectionsView(self)

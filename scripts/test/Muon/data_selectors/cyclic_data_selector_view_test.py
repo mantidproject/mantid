@@ -9,16 +9,16 @@ import unittest
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
-from Muon.GUI.Common.fitting_widgets.basic_fitting.workspace_selector_view import WorkspaceSelectorView
+from Muon.GUI.Common.data_selectors.cyclic_data_selector_view import CyclicDataSelectorView
 
 from qtpy.QtWidgets import QApplication
 
 
 @start_qapplication
-class WorkspaceSelectorViewTest(unittest.TestCase, QtWidgetFinder):
+class CyclicDataSelectorViewTest(unittest.TestCase, QtWidgetFinder):
 
     def setUp(self):
-        self.view = WorkspaceSelectorView()
+        self.view = CyclicDataSelectorView()
         self.view.show()
         self.assert_widget_created()
 
