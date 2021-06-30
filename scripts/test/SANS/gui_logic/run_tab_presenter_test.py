@@ -198,6 +198,13 @@ class RunTabPresenterTest(unittest.TestCase):
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
+    def test_state_retrieved_from_model(self):
+        self._mock_view.q_1d_step = 1.0
+
+        expected = self.mock_run_tab_model.get_save_types().to_all_states()
+        all_states = self.presenter.update_model_from_view()
+        self.assertEqual(all_states.save_types, expected)
+
     def test_observers_subscribed_to(self):
         mocked_view_observers = mock.create_autospec(SansGuiObservable())
         self._mock_view.get_observable = mock.Mock(return_value=mocked_view_observers)

@@ -1119,10 +1119,11 @@ class RunTabPresenter(PresenterCommon):
         for presenter in self._common_sub_presenters:
             presenter.update_model_from_view()
 
+        state_model.save_types = self._run_tab_model.get_save_types().to_all_states()
+
         try:
             # Run tab view
             self._set_on_custom_model("zero_error_free", state_model)
-            self._set_on_custom_model("save_types", state_model)
             self._set_on_custom_model("compatibility_mode", state_model)
             self._set_on_custom_model("event_slice_optimisation", state_model)
             self._set_on_custom_model("merge_scale", state_model)
