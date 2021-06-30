@@ -116,95 +116,116 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
             scan_axis = run[scan_log].value
             data.setX(0, scan_axis)
 
-            y = data.extractY().flatten()
             x = data.extractX().flatten()
-            function = f"name=FlatBackground, A0={np.nanmin(y)};" \
-                f"name=Gaussian, PeakCentre={x[np.nanargmax(y)]}, Height={np.nanmax(y)-np.nanmin(y)}, Sigma=0.25"
-            constraints = f"f0.A0 > 0, f1.Height > 0, {x.min()} < f1.PeakCentre < {x.max()}"
-            try:
-                fit_result = Fit(function, data, Output=str(data),
-                                 IgnoreInvalidData=True,
-                                 OutputParametersOnly=not output_fit,
-                                 Constraints=constraints,
-                                 StartX=startX, EndX=endX,
-                                 EnableLogging=False)
-            except RuntimeError as e:
-                self.log().warning("Failed to fit workspace {}: {}".format(inWS, e))
+
+            integrated_intensity, integrated_intensity_error = self._fitted_integration(inWS, data, startX, endX,
+                                                                                        chisqmax, scale, output_fit)
+            if integrated_intensity == -1 or integrated_intensity_error == -1:
                 continue
 
-            if fit_result.OutputStatus == 'success' and fit_result.OutputChi2overDoF < chisqmax:
-                __tmp_pw = CreatePeaksWorkspace(OutputType='LeanElasticPeak',
-                                                InstrumentWorkspace=inWS,
-                                                NumberOfPeaks=0,
-                                                EnableLogging=False)
+            __tmp_pw = CreatePeaksWorkspace(OutputType='LeanElasticPeak',
+                                            InstrumentWorkspace=inWS,
+                                            NumberOfPeaks=0,
+                                            EnableLogging=False)
 
-                _, A, x, s, _ = fit_result.OutputParameters.toDict()['Value']
-                _, errA, _, errs, _ = fit_result.OutputParameters.toDict()['Error']
-
-                if scan_log == 'omega':
-                    SetGoniometer(Workspace=__tmp_pw, Axis0=f'{x},0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1',
-                                  EnableLogging=False)
-                else:
-                    SetGoniometer(Workspace=__tmp_pw, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2=f'{x},0,1,0,-1',
-                                  EnableLogging=False)
-
-                peak = __tmp_pw.createPeakHKL([run['h'].getStatistics().median,
-                                               run['k'].getStatistics().median,
-                                               run['l'].getStatistics().median])
-                peak.setWavelength(float(run['wavelength'].value))
-
-                integrated_intensity = A * s * np.sqrt(2*np.pi) * scale
-                peak.setIntensity(integrated_intensity)
-
-                # Convert correlation back into covariance
-                cor_As = (fit_result.OutputNormalisedCovarianceMatrix.cell(1,4)/100
-                          * fit_result.OutputParameters.cell(1,2) * fit_result.OutputParameters.cell(3,2))
-                # σ^2 = 2π (A^2 σ_s^2 + σ_A^2 s^2 + 2 A s σ_As)
-                integrated_intensity_error = np.sqrt(2*np.pi * (A**2 * errs**2 +  s**2 * errA**2 + 2*A*s*cor_As)) * scale
-                peak.setSigmaIntensity(integrated_intensity_error)
-
-                if integrated_intensity/integrated_intensity_error > signalNoiseMin:
-                    __tmp_pw.addPeak(peak)
-
-                    # correct q-vector using CentroidPeaksMD
-                    if optmize_q:
-                        __tmp_q_ws = HB3AAdjustSampleNorm(InputWorkspaces=inWS, NormaliseBy='None', EnableLogging=False)
-                        __tmp_pw = CentroidPeaksMD(__tmp_q_ws, __tmp_pw, EnableLogging=False)
-                        DeleteWorkspace(__tmp_q_ws, EnableLogging=False)
-
-                    if use_lorentz:
-                        # ILL Neutron Data Booklet, Second Edition, Section 2.9, Part 4.1, Equation 7
-                        peak = __tmp_pw.getPeak(0)
-                        lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
-                        peak.setIntensity(peak.getIntensity() * lorentz)
-                        peak.setSigmaIntensity(peak.getSigmaIntensity() * lorentz)
-
-                    CombinePeaksWorkspaces(outWS, __tmp_pw, OutputWorkspace=outWS, EnableLogging=False)
-                    DeleteWorkspace(__tmp_pw, EnableLogging=False)
-
-                    if output_fit:
-                        fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_Workspace', outWS+"_"+inWS+'_Workspace', EnableLogging=False))
-                        fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_Parameters', outWS+"_"+inWS+'_Parameters', EnableLogging=False))
-                        fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_NormalisedCovarianceMatrix',
-                                                                 outWS+"_"+inWS+'_NormalisedCovarianceMatrix', EnableLogging=False))
-                        fit_results.addWorkspace(IntegrateMDHistoWorkspace(InputWorkspace=inWS,
-                                                                           P1Bin=f'{ll[1]},0,{ur[1]}',
-                                                                           P2Bin=f'{ll[0]},0,{ur[0]}',
-                                                                           P3Bin='0,{}'.format(mtd[inWS].getDimension(2).getNBins()),
-                                                                           OutputWorkspace=outWS+"_"+inWS+"_ROI", EnableLogging=False))
-                else:
-                    self.log().warning("Skipping peak from {} because Signal/Noise={:.3f} which is less than {}"
-                                       .format(inWS, integrated_intensity/integrated_intensity_error, signalNoiseMin))
+            if scan_log == 'omega':
+                SetGoniometer(Workspace=__tmp_pw, Axis0=f'{x},0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1',
+                              EnableLogging=False)
             else:
-                self.log().warning("Failed to fit workspace {}: Output Status={}, ChiSq={}".format(inWS,
-                                                                                                   fit_result.OutputStatus,
-                                                                                                   fit_result.OutputChi2overDoF))
+                SetGoniometer(Workspace=__tmp_pw, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2=f'{x},0,1,0,-1',
+                              EnableLogging=False)
+
+            peak = __tmp_pw.createPeakHKL([run['h'].getStatistics().median,
+                                           run['k'].getStatistics().median,
+                                           run['l'].getStatistics().median])
+            peak.setWavelength(float(run['wavelength'].value))
+            peak.setIntensity(integrated_intensity)
+            peak.setSigmaIntensity(integrated_intensity_error)
+
+            if integrated_intensity / integrated_intensity_error > signalNoiseMin:
+                __tmp_pw.addPeak(peak)
+
+                # correct q-vector using CentroidPeaksMD
+                if optmize_q:
+                    __tmp_q_ws = HB3AAdjustSampleNorm(InputWorkspaces=inWS, NormaliseBy='None', EnableLogging=False)
+                    __tmp_pw = CentroidPeaksMD(__tmp_q_ws, __tmp_pw, EnableLogging=False)
+                    DeleteWorkspace(__tmp_q_ws, EnableLogging=False)
+
+                if use_lorentz:
+                    # ILL Neutron Data Booklet, Second Edition, Section 2.9, Part 4.1, Equation 7
+                    peak = __tmp_pw.getPeak(0)
+                    lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
+                    peak.setIntensity(peak.getIntensity() * lorentz)
+                    peak.setSigmaIntensity(peak.getSigmaIntensity() * lorentz)
+
+                CombinePeaksWorkspaces(outWS, __tmp_pw, OutputWorkspace=outWS, EnableLogging=False)
+                DeleteWorkspace(__tmp_pw, EnableLogging=False)
+
+                if output_fit:
+                    fit_results.addWorkspace(RenameWorkspace(tmp_inWS + '_Workspace', outWS + "_" + inWS + '_Workspace',
+                                                             EnableLogging=False))
+                    fit_results.addWorkspace(
+                        RenameWorkspace(tmp_inWS + '_Parameters', outWS + "_" + inWS + '_Parameters',
+                                        EnableLogging=False))
+                    fit_results.addWorkspace(RenameWorkspace(tmp_inWS + '_NormalisedCovarianceMatrix',
+                                                             outWS + "_" + inWS + '_NormalisedCovarianceMatrix',
+                                                             EnableLogging=False))
+                    fit_results.addWorkspace(IntegrateMDHistoWorkspace(InputWorkspace=inWS,
+                                                                       P1Bin=f'{ll[1]},0,{ur[1]}',
+                                                                       P2Bin=f'{ll[0]},0,{ur[0]}',
+                                                                       P3Bin='0,{}'.format(
+                                                                           mtd[inWS].getDimension(2).getNBins()),
+                                                                       OutputWorkspace=outWS + "_" + inWS + "_ROI",
+                                                                       EnableLogging=False))
+            else:
+                self.log().warning("Skipping peak from {} because Signal/Noise={:.3f} which is less than {}"
+                                   .format(inWS, integrated_intensity/integrated_intensity_error, signalNoiseMin))
 
             for tmp_ws in (tmp_inWS, tmp_inWS+'_Workspace', tmp_inWS+'_Parameters', tmp_inWS+'_NormalisedCovarianceMatrix'):
                 if mtd.doesExist(tmp_ws):
                     DeleteWorkspace(tmp_ws, EnableLogging=False)
 
         self.setProperty("OutputWorkspace", mtd[outWS])
+
+    def _fitted_integration(self, inWS, ws, startX, endX, chisqmax, scale_factor, output_fit):
+        y = ws.extractY().flatten()
+        x = ws.extractX().flatten()
+
+        integrated_intensity = -1
+        integrated_intensity_error = -1
+
+        function = f"name=FlatBackground, A0={np.nanmin(y)};" \
+                   f"name=Gaussian, PeakCentre={x[np.nanargmax(y)]}, Height={np.nanmax(y) - np.nanmin(y)}, Sigma=0.25"
+        constraints = f"f0.A0 > 0, f1.Height > 0, {x.min()} < f1.PeakCentre < {x.max()}"
+        try:
+            fit_result = Fit(function, ws, Output=str(ws),
+                             IgnoreInvalidData=True,
+                             OutputParametersOnly=not output_fit,
+                             Constraints=constraints,
+                             StartX=startX, EndX=endX,
+                             EnableLogging=False)
+        except RuntimeError as e:
+            self.log().warning("Failed to fit workspace {}: {}".format(inWS, e))
+            return -1, -1
+
+        if fit_result.OutputStatus == 'success' and fit_result.OutputChi2overDoF < chisqmax:
+            _, A, x, s, _ = fit_result.OutputParameters.toDict()['Value']
+            _, errA, _, errs, _ = fit_result.OutputParameters.toDict()['Error']
+
+            integrated_intensity = A * s * np.sqrt(2 * np.pi) * scale_factor
+
+            # Convert correlation back into covariance
+            cor_As = (fit_result.OutputNormalisedCovarianceMatrix.cell(1, 4) / 100
+                      * fit_result.OutputParameters.cell(1, 2) * fit_result.OutputParameters.cell(3, 2))
+            # σ^2 = 2π (A^2 σ_s^2 + σ_A^2 s^2 + 2 A s σ_As)
+            integrated_intensity_error = np.sqrt(
+                2 * np.pi * (A ** 2 * errs ** 2 + s ** 2 * errA ** 2 + 2 * A * s * cor_As)) * scale_factor
+        else:
+            self.log().warning("Failed to fit workspace {}: Output Status={}, ChiSq={}".format(inWS,
+                                                                                               fit_result.OutputStatus,
+                                                                                               fit_result.OutputChi2overDoF))
+
+        return integrated_intensity, integrated_intensity_error
 
     def _expand_groups(self):
         """expand workspace groups"""
