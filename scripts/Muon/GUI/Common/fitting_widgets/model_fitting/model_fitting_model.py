@@ -167,7 +167,8 @@ class ModelFittingModel(BasicFittingModel):
                     output_name = self.parameter_combination_workspace_name(x_parameter_name, y_parameter_name)
                     if not self._parameter_combination_workspace_exists(output_name, x_values, y_values, y_errors):
                         CreateWorkspace(DataX=x_values, Dx=x_errors, DataY=y_values, DataE=y_errors,
-                                        OutputWorkspace=output_name)
+                                        YUnitLabel=self._create_y_label(y_parameter_name), OutputWorkspace=output_name)
+                        self._set_x_label(output_name, x_parameter_name)
                         workspace_group.add(output_name)
 
                     workspace_names.append(output_name)
@@ -223,3 +224,22 @@ class ModelFittingModel(BasicFittingModel):
         if parameter in parameters:
             parameters.remove(parameter)
         return parameters[0] if len(parameters) > 0 else None
+
+    def _set_x_label(self, workspace_name: str, axis_label: str) -> None:
+        """Sets the label and unit for the X axis of a workspace."""
+        workspace = retrieve_ws(workspace_name)
+        unit = self._get_unit_if_sample_log_exists(axis_label)
+        workspace.getAxis(0).setUnit("Label").setLabel(axis_label, unit)
+
+    def _create_y_label(self, parameter_name: str) -> str:
+        """Returns the string to use for the y label of a workspace."""
+        unit = self._get_unit_if_sample_log_exists(parameter_name)
+        return f"{parameter_name} ({unit})" if unit != "" else f"{parameter_name}"
+
+    def _get_unit_if_sample_log_exists(self, parameter_name: str) -> str:
+        """Returns the units of a sample log if the parameter exists as a sample log."""
+        workspace = self.context.data_context.current_workspace
+        if workspace:
+            run = workspace.run()
+            return run.getLogData(parameter_name).units if run.hasProperty(parameter_name) else ""
+        return ""
