@@ -12,7 +12,6 @@ class RunTabModel:
         self._save_types = SaveOptions()
 
     def update_save_types(self, selected_types: SaveOptions):
-        print("Update called")
         self._save_types = selected_types
         self._save_types.user_modified = True
 
