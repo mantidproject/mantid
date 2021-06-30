@@ -35,7 +35,7 @@ include(PyUnitTest)
 enable_testing()
 
 # build f2py fortran routines
-if (F2PY_ROUTINES)
+if (ENABLE_F2PY_ROUTINES)
 include(f2pylibraries)
 endif()
 
