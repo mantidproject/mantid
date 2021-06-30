@@ -12,6 +12,7 @@ set ( TEST_PY_FILES
    corrections_tab_widget/dead_time_corrections_model_test.py
    corrections_tab_widget/dead_time_corrections_presenter_test.py
    corrections_tab_widget/dead_time_corrections_view_test.py
+   data_selectors/cyclic_data_selector_view_test.py
    elemental_analysis/elemental_analysis_test.py
    elemental_analysis/name_generator_test.py
    elemental_analysis/detectors_presenter_test.py
@@ -49,7 +50,6 @@ set ( TEST_PY_FILES
    fitting_widgets/basic_fitting/basic_fitting_view_test.py
    fitting_widgets/basic_fitting/fit_controls_view_test.py
    fitting_widgets/basic_fitting/fit_function_options_view_test.py
-   fitting_widgets/basic_fitting/workspace_selector_view_test.py
    fitting_widgets/general_fitting/general_fitting_model_test.py
    fitting_widgets/general_fitting/general_fitting_presenter_test.py
    fitting_widgets/general_fitting/general_fitting_options_view_test.py
