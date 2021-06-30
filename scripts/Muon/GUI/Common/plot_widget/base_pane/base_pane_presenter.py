@@ -86,8 +86,6 @@ class BasePanePresenter():
         workspace_name = None
         if type(workspace) is Workspace2D:
             workspace_name = workspace.name()
-        elif type(workspace) is str:
-            workspace_name = workspace
         else:
             return
 
