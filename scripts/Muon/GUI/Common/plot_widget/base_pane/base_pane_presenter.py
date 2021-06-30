@@ -83,7 +83,14 @@ class BasePanePresenter():
         Handles a workspace being deleted from ads by removing the workspace from the plot
         :param workspace: workspace 2D object
         """
-        workspace_name = workspace.name()
+        workspace_name = None
+        if type(workspace) is Workspace2D:
+            workspace_name = workspace.name()
+        elif type(workspace) is str:
+            workspace_name = workspace
+        else:
+            return
+
         plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
         if workspace_name in plotted_workspaces:
             self._figure_presenter.remove_workspace_from_plot(workspace)

@@ -19,7 +19,6 @@ from Muon.GUI.Common.muon_base_pair import MuonBasePair
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
-from Muon.GUI.Common.contexts.plotting_context import PlotMode
 from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper, WorkspaceGroupDefinition
 from mantidqt.utils.observer_pattern import Observable
@@ -51,8 +50,7 @@ class MuonContext(object):
         self.gui_context.update(
             {'DeadTimeSource': 'None',
              'LastGoodDataFromFile': True,
-             'selected_group_pair': '',
-             'PlotMode': PlotMode.Data})
+             'selected_group_pair': ''})
 
         self.update_view_from_model_notifier = Observable()
         self.update_plots_notifier = Observable()

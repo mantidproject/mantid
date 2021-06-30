@@ -9,7 +9,6 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, Gener
 from mantidqt.widgets.fitscriptgenerator import (FittingMode, FitScriptGeneratorModel, FitScriptGeneratorPresenter,
                                                  FitScriptGeneratorView)
 
-from Muon.GUI.Common.contexts.plotting_context import PlotMode
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from Muon.GUI.Common.thread_model import ThreadModel
@@ -123,11 +122,6 @@ class BasicFittingPresenter:
             self._update_plot = False
             self.update_and_reset_all_data()
             self._update_plot = True
-
-    def handle_plot_mode_changed(self, plot_mode: PlotMode) -> None:
-        """Handles when the tab has been changed. Updates the plot guess."""
-        if plot_mode == PlotMode.Fitting:
-            self.update_plot_guess()
 
     def handle_plot_guess_changed(self) -> None:
         """Handle when plot guess is ticked or un-ticked."""
