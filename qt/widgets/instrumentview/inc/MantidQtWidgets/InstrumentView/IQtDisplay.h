@@ -20,7 +20,7 @@ class ProjectionSurface;
  */
 class IQtDisplay : public QWidget {
 public:
-  template <typename... Params> IQtDisplay(Params &&... params) : QWidget(std::forward<Params>(params)...) {}
+  template <typename... Params> IQtDisplay(Params &&...params) : QWidget(std::forward<Params>(params)...) {}
   virtual ~IQtDisplay() = default;
 
   /// Assign a surface to draw on
