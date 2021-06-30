@@ -27,4 +27,6 @@ class SaveOptions:
             ret_val.append(SaveType.NX_CAN_SAS)
         if self.rkh:
             ret_val.append(SaveType.RKH)
+        if not ret_val:
+            ret_val.append(SaveType.NO_TYPE)
         return ret_val
