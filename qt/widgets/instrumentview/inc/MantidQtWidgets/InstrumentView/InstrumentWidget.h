@@ -60,6 +60,15 @@ class XIntegrationControl;
 class SimpleWidget;
 class ProjectionSurface;
 
+namespace Detail {
+struct Dependencies {
+  std::unique_ptr<ISimpleWidget> simpleDisplay = nullptr;
+  std::unique_ptr<IMantidGLWidget> instrumentDisplay = nullptr;
+  std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
+};
+
+} // namespace Detail
+
 /**
 \class  InstrumentWidget
 \brief  This is the main window for the control of display on geometry
@@ -83,6 +92,7 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidget : public QWidget,
   friend class InstrumentWidgetDecoder;
 
 public:
+  using Dependencies = Detail::Dependencies;
   enum SurfaceType {
     FULL3D = 0,
     CYLINDRICAL_X,
@@ -98,9 +108,7 @@ public:
 
   explicit InstrumentWidget(const QString &wsName, QWidget *parent = nullptr, bool resetGeometry = true,
                             bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
-                            bool setDefaultView = true, std::unique_ptr<ISimpleWidget> simpleDisplay = nullptr,
-                            std::unique_ptr<IMantidGLWidget> instrumentDisplay = nullptr,
-                            std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>());
+                            bool setDefaultView = true, Dependencies deps = Dependencies());
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;

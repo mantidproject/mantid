@@ -161,7 +161,8 @@ private:
     EXPECT_CALL(*glMock, setSurface(_)).Times(1);
     EXPECT_CALL(*glMock, currentBackgroundColor()).Times(1);
 
-    return InstrumentWidget("test_ws", nullptr, true, true, 0.0, 0.0, true, std::move(simpleMock), std::move(glMock),
-                            std::move(connectMock));
+    InstrumentWidget::Dependencies deps{std::move(simpleMock), std::move(glMock), std::move(connectMock)};
+
+    return InstrumentWidget("test_ws", nullptr, true, true, 0.0, 0.0, true, std::move(deps));
   }
 };
