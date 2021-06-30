@@ -6,10 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
 
-from mantidqt.MPLwidgets import NavigationToolbar2QT
 from mantidqt.icons import get_icon
 from qtpy.QtCore import Signal, Qt, QSize
-from qtpy.QtWidgets import QLabel, QSizePolicy
+from qtpy.QtWidgets import QLabel, QSizePolicy, QToolBar, QFileDialog, QMessageBox
+from matplotlib.backend_bases import NavigationToolbar2
+from matplotlib import backend_tools
+import matplotlib
+import os
 
 
 class ToolItemText:
@@ -24,7 +27,17 @@ class ToolItemText:
     SAVE = 'Save'
 
 
-class SliceViewerNavigationToolbar(NavigationToolbar2QT):
+# Available cursor types
+cursord = {
+    backend_tools.cursors.MOVE: Qt.SizeAllCursor,
+    backend_tools.cursors.HAND: Qt.PointingHandCursor,
+    backend_tools.cursors.POINTER: Qt.ArrowCursor,
+    backend_tools.cursors.SELECT_REGION: Qt.CrossCursor,
+    backend_tools.cursors.WAIT: Qt.WaitCursor,
+    }
+
+
+class SliceViewerNavigationToolbar(NavigationToolbar2, QToolBar):
 
     gridClicked = Signal(bool)
     homeClicked = Signal()
@@ -35,7 +48,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
     zoomPanClicked = Signal(bool)
     zoomPanFinished = Signal()
 
-    toolitems = (
+    sliceviewer_toolitems = (
         (ToolItemText.HOME, 'Reset original view', 'mdi.home', 'homeClicked', None),
         (ToolItemText.PAN, 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan',
          False),
@@ -56,8 +69,16 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         (ToolItemText.SAVE, 'Save the figure', 'mdi.content-save', 'save_figure', None)
     )
 
-    def _init_toolbar(self):
-        for text, tooltip_text, fa_icon, callback, checked in self.toolitems:
+    def __init__(self, canvas, parent, coordinates=True):
+        """coordinates: should we show the coordinates on the right?"""
+        QToolBar.__init__(self, parent)
+        self.setAllowedAreas(
+            Qt.TopToolBarArea | Qt.BottomToolBarArea)
+
+        self.coordinates = coordinates
+        self._actions = {}  # mapping of toolitem method names to QActions.
+
+        for text, tooltip_text, fa_icon, callback, checked in self.sliceviewer_toolitems:
             if text is None:
                 self.addSeparator()
             else:
@@ -72,13 +93,15 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
 
-        # Add the x,y location widget at the right side of the toolbar
+        # Add the (x, y) location widget at the right side of the toolbar
         # The stretch factor is 1 which means any resizing of the toolbar
         # will resize this label instead of the buttons.
         if self.coordinates:
             self.locLabel = QLabel("", self)
-            self.locLabel.setAlignment(Qt.AlignRight | Qt.AlignTop)
-            self.locLabel.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Ignored))
+            self.locLabel.setAlignment(
+                Qt.AlignRight | Qt.AlignVCenter)
+            self.locLabel.setSizePolicy(
+                QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Ignored))
             labelAction = self.addWidget(self.locLabel)
             labelAction.setVisible(True)
 
@@ -88,22 +111,87 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         # Location of a press event
         self._pressed_xy = None
 
+        NavigationToolbar2.__init__(self, canvas)
+
+    def _init_toolbar(self):
+        # Empty init_toolbar method kept for backwards compatability
+        pass
+
+    def _get_mode(self):
+        if hasattr(self, 'name'):
+            return self.mode.name
+        else:
+            return self.mode
+
+    def _update_buttons_checked(self):
+        # sync button checkstates to match active mode
+        if 'pan' in self._actions:
+            self._actions['pan'].setChecked(self._get_mode() == 'PAN' or self._get_mode() == 'pan/zoom'  )
+        if 'zoom' in self._actions:
+            self._actions['zoom'].setChecked(self._get_mode()  == 'ZOOM' or self._get_mode() == 'zoom rect' )
+
+    def set_cursor(self, cursor):
+        self.canvas.setCursor(cursord[cursor])
+
     def zoom(self, *args):
         super().zoom(*args)
+        self._update_buttons_checked()
         self.zoomPanClicked.emit(bool(self.mode))
 
     def pan(self, *args):
         super().pan(*args)
+        self._update_buttons_checked()
         self.zoomPanClicked.emit(bool(self.mode))
 
-    def press(self, event):
+    def save_figure(self, *args):
+        filetypes = self.canvas.get_supported_filetypes_grouped()
+        sorted_filetypes = sorted(filetypes.items())
+        default_filetype = self.canvas.get_default_filetype()
+
+        startpath = os.path.expanduser(
+            matplotlib.rcParams['savefig.directory'])
+        start = os.path.join(startpath, self.canvas.get_default_filename())
+        filters = []
+        selectedFilter = None
+        for name, exts in sorted_filetypes:
+            exts_list = " ".join(['*.%s' % ext for ext in exts])
+            filter = '%s (%s)' % (name, exts_list)
+            if default_filetype in exts:
+                selectedFilter = filter
+            filters.append(filter)
+        filters = ';;'.join(filters)
+
+        fname, filter = QFileDialog.getSaveFileName(
+            self.canvas.parent(), "Choose a filename to save to", start,
+            filters, selectedFilter)
+        if fname:
+            # Save dir for next time, unless empty str (i.e., use cwd).
+            if startpath != "":
+                matplotlib.rcParams['savefig.directory'] = (
+                    os.path.dirname(fname))
+            try:
+                self.canvas.figure.savefig(fname)
+            except Exception as e:
+                QMessageBox.critical(
+                    self, "Error saving file", str(e),
+                    QMessageBox.Ok, QMessageBox.NoButton)
+
+    def _press_pan_zoom_event(self, event):
         """
         Called by matplotlib after a press event has been handled. Stores the location
         of the event.
         """
         self._pressed_xy = event.x, event.y
 
-    def release(self, event):
+    def press_pan(self, event):
+        super().press_pan(event)
+        self._press_pan_zoom_event(event)
+
+    def press_zoom(self, event):
+        super().press_zoom(event)
+        self._press_pan_zoom_event(event)
+
+    def _release_pan_zoom_event(self, event):
         """
         Called when a zoom/pan event has completed. Mouse must move more than 5 pixels
         to be consider a pan/zoom ending
@@ -118,6 +206,14 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         if ((abs(x - lastx) < 5) or (abs(y - lasty) < 5)):
             return
         self.zoomPanFinished.emit()
+
+    def release_pan(self, event):
+        super().release_pan(event)
+        self._release_pan_zoom_event(event)
+
+    def release_zoom(self, event):
+        super().release_zoom(event)
+        self._release_pan_zoom_event(event)
 
     def set_action_enabled(self, text: str, state: bool):
         """
@@ -148,3 +244,13 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
                         action.trigger()  # ensure view reacts appropriately
                     else:
                         action.setChecked(state)
+
+    def draw_rubberband(self, event, x0, y0, x1, y1):
+        height = self.canvas.figure.bbox.height
+        y1 = height - y1
+        y0 = height - y0
+        rect = [int(val) for val in (x0, y0, x1 - x0, y1 - y0)]
+        self.canvas.drawRectangle(rect)
+
+    def remove_rubberband(self):
+        self.canvas.drawRectangle(None)

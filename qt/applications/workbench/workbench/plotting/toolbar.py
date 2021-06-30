@@ -7,7 +7,6 @@
 #    This file is part of the mantid workbench.
 #
 #
-from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from matplotlib.collections import LineCollection
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
@@ -15,10 +14,11 @@ from mantid.plots import MantidAxes
 from mantid.plots.legend import convert_color_to_hex
 from mantidqt.icons import get_icon
 from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.plotting.MantidToolbar import MantidNavigationToolbar
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 
 
-class WorkbenchNavigationToolbar(NavigationToolbar2QT):
+class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     sig_home_clicked = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal(bool)
     sig_active_triggered = QtCore.Signal()
@@ -65,7 +65,8 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         ('Help', 'Open plotting help documentation', 'mdi.help', 'launch_plot_help', None)
     )
 
-    def _init_toolbar(self):
+    def __init__(self, canvas, parent, coordinates=True):
+        super().__init__(canvas, parent, coordinates)
         for text, tooltip_text, mdi_icon, callback, checked in self.toolitems:
             if text is None:
                 self.addSeparator()
