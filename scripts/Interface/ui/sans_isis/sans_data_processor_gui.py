@@ -21,13 +21,14 @@ from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
 from reduction_gui.reduction.scripter import execute_script
-from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
+from sans.common.enums import (ReductionDimensionality, OutputMode, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
                                        load_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
+from sans.gui_logic.models.POD.save_options import SaveOptions
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.SumRunsModel import SumRunsModel
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
@@ -227,7 +228,8 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _create_observables(self):
         self._observable_items = SansGuiObservable()
-        self.can_sas_checkbox.stateChanged.connect(self._observable_items.save_options.notify_subscribers)
+        for save_checkbox in [self.can_sas_checkbox, self.nx_can_sas_checkbox, self.rkh_checkbox]:
+            save_checkbox.clicked.connect(self._observable_items.save_options.notify_subscribers)
 
     def get_observable(self) -> SansGuiObservable:
         return self._observable_items
@@ -1015,28 +1017,18 @@ class SANSDataProcessorGui(QMainWindow,
     # Save Options
     # -----------------------------------------------------------------
     @property
-    def save_types(self):
-        checked_save_types = []
-        if self.can_sas_checkbox.isChecked():
-            checked_save_types.append(SaveType.CAN_SAS)
-        if self.nx_can_sas_checkbox.isChecked():
-            checked_save_types.append(SaveType.NX_CAN_SAS)
-        if self.rkh_checkbox.isChecked():
-            checked_save_types.append(SaveType.RKH)
-        # If empty, provide the NoType type
-        if not checked_save_types:
-            checked_save_types = [SaveType.NO_TYPE]
-        return checked_save_types
+    def save_types(self) -> SaveOptions:
+        selected_options = SaveOptions()
+        selected_options.can_sas_1d = self.can_sas_checkbox.isChecked()
+        selected_options.nxs_can_sas =  self.nx_can_sas_checkbox.isChecked()
+        selected_options.rkh = self.rkh_checkbox.isChecked()
+        return selected_options
 
     @save_types.setter
-    def save_types(self, values):
-        for value in values:
-            if value is SaveType.CAN_SAS:
-                self.can_sas_checkbox.setChecked(True)
-            elif value is SaveType.NX_CAN_SAS:
-                self.nx_can_sas_checkbox.setChecked(True)
-            elif value is SaveType.RKH:
-                self.rkh_checkbox.setChecked(True)
+    def save_types(self, values: SaveOptions):
+        self.can_sas_checkbox.setChecked(values.can_sas_1d)
+        self.nx_can_sas_checkbox.setChecked(values.nxs_can_sas)
+        self.rkh_checkbox.setChecked(values.rkh)
 
     @property
     def zero_error_free(self):

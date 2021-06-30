@@ -1010,8 +1010,8 @@ class RunTabPresenter(PresenterCommon):
             presenter.update_view_from_model()
 
         # Front tab view
+        self._view.save_types = self._run_tab_model.get_save_types()
         self._set_on_view("zero_error_free")
-        self._set_on_view("save_types")
         self._set_on_view("compatibility_mode")
         self._set_on_view("merge_scale")
         self._set_on_view("merge_shift")

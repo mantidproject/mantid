@@ -72,7 +72,7 @@ class RunTabPresenterTest(unittest.TestCase):
         config["default.facility"] = "ISIS"
 
         self._mock_model = mock.create_autospec(StateGuiModel, spec_set=True)
-        self.mock_run_tab_model = mock.create_autospec(RunTabModel, spec_set=True)
+        self.mock_run_tab_model = mock.create_autospec(RunTabModel(), spec_set=True)
         self._mock_table = mock.create_autospec(TableModel, spec_set=True)
         self._mock_csv_parser = mock.create_autospec(BatchCsvParser, spec_set=True)
         self._mock_view = mock.Mock()
@@ -204,6 +204,10 @@ class RunTabPresenterTest(unittest.TestCase):
         expected = self.mock_run_tab_model.get_save_types().to_all_states()
         all_states = self.presenter.update_model_from_view()
         self.assertEqual(all_states.save_types, expected)
+
+    def test_view_updated_from_model(self):
+        self.presenter.update_view_from_model()
+        self.assertEqual(self.mock_run_tab_model.get_save_types.return_value, self._mock_view.save_types)
 
     def test_observers_subscribed_to(self):
         mocked_view_observers = mock.create_autospec(SansGuiObservable())
