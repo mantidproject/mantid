@@ -42,8 +42,10 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         """
 
     def handle_data_updated(self, autoscale=True, hold_on=False):
-        workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
-                                                                                      self._view.get_plot_type())
+        workspace_list, indicies, plot_range = self._model.get_workspace_list_and_indices_to_plot(
+            self._view.is_raw_plot(),
+            self._view.get_plot_type())
+        self.context.plot_panes_context[self._name].update_xlim("All", plot_range)
         self.add_list_to_plot(workspace_list, indicies, hold=hold_on, autoscale=autoscale)
 
     def handle_added_or_removed_group_to_plot(self, group_info):
@@ -88,3 +90,17 @@ class EAPlotDataPanePresenter(BasePanePresenter):
             self._view.warning_popup("No rebin options specified")
             return False
         return True
+
+    def handle_workspace_replaced_in_ads(self, workspace):
+        """
+        Handles the use raw workspaces being changed (e.g rebinned) in the ADS
+        and updates to the values from recalculation.
+        :param workspace: workspace 2D object
+        """
+        if type(workspace) == str:
+            workspace_name = workspace
+        else:
+            workspace_name = workspace.name()
+        plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
+        if workspace_name in plotted_workspaces:
+            self._figure_presenter.replace_workspace_in_plot(workspace)

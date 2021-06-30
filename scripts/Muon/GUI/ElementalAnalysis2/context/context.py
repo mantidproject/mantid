@@ -10,6 +10,7 @@ from Muon.GUI.Common import thread_model
 from mantid.simpleapi import Rebin
 from Muon.GUI.Common import message_box
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, remove_ws_if_present
+#from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
 
 REBINNED_FIXED_WS_SUFFIX = "_EA_Rebinned_Fixed"
 REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
@@ -17,13 +18,18 @@ REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
 
 class ElementalAnalysisContext(object):
 
-    def __init__(self, data_context, ea_group_context=None, muon_gui_context=None, plot_panes_context=None, workspace_suffix=' EA'):
+    def __init__(self, data_context, ea_group_context=None, muon_gui_context=None, plot_panes_context=None,
+                 workspace_suffix=' EA'):
         self._window_title = "Elemental Analysis 2"
         self.data_context = data_context
         self._gui_context = muon_gui_context
         self._group_context = ea_group_context
         self._plot_panes_context = plot_panes_context
         self.workspace_suffix = workspace_suffix
+        # self.ads_observer = MuonContextADSObserver(
+        #    self.remove_workspace,
+        #    self.clear_context,
+        #    self.workspace_replaced)
 
         self.update_view_from_model_notifier = GenericObservable()
         self.update_plots_notifier = GenericObservable()

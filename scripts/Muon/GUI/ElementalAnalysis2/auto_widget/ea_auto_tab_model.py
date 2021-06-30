@@ -148,8 +148,7 @@ class EAAutoTabModel(object):
         GroupWorkspaces(InputWorkspaces=match_table_names, OutputWorkspace=workspace + MATCH_GROUP_WS_SUFFIX)
 
         group_workspace.add(workspace + MATCH_GROUP_WS_SUFFIX)
-        self.context.group_context[workspace].update_matches_table(group_workspace.name(),
-                                                                   workspace + MATCH_GROUP_WS_SUFFIX)
+        self.context.group_context[workspace].update_matches_table(workspace + MATCH_GROUP_WS_SUFFIX)
 
         self.update_match_table(workspace + MATCH_TABLE_WS_SUFFIXES[-1], workspace)
 
@@ -177,7 +176,7 @@ class EAAutoTabModel(object):
         self.current_peak_table_info["number_of_peaks"] = number_of_peaks
         if number_of_peaks != 0:
             group_workspace.add(workspace + PEAKS_WS_SUFFIX)
-            self.context.group_context[workspace].update_peak_table(group_workspace.name(), workspace + PEAKS_WS_SUFFIX)
+            self.context.group_context[workspace].update_peak_table(workspace + PEAKS_WS_SUFFIX)
         else:
             peak_table.delete()
             if delay_errors:

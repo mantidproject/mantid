@@ -6,13 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import ExternalPlottingModel
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_view import ExternalPlottingView
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing#, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
 from mantid.dataobjects import Workspace2D
 
 
 class BasePanePresenter():
 
-    def __init__(self, view, model, context, figure_presenter, external_plotting_view=None, external_plotting_model=None):
+    def __init__(self, view, model, context, figure_presenter, external_plotting_view=None,
+                 external_plotting_model=None):
 
         self._name = model.name
         self._data_type = [""]
@@ -97,14 +98,14 @@ class BasePanePresenter():
         is_added = plot_info["is_added"]
         name = plot_info["name"]
         if is_added:
-            self.add_list_to_plot([name],[0])
+            self.add_list_to_plot([name], [0])
         else:
             self.remove_list_from_plot([name])
 
-    def add_list_to_plot(self, ws_names, indicies,hold = False, autoscale=False):
+    def add_list_to_plot(self, ws_names, indices, hold=False, autoscale=False):
         self._update_tile_plot()
         plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
-        self._figure_presenter.plot_workspaces(ws_names, indicies, hold, autoscale)
+        self._figure_presenter.plot_workspaces(ws_names, indices, hold, autoscale)
         if plotted_workspaces == []:
             self._figure_presenter.force_autoscale()
 

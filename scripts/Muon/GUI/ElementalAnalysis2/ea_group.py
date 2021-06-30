@@ -5,7 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from Muon.GUI.Common.muon_group import MuonRun
+
+DETECTOR_PLOT_RANGE = {"Detector 1": [-100.0, 8200.0], "Detector 2": [-100.0, 8200.0], "Detector 3": [-50.0, 1100.0],
+                       "Detector 4": [-50.0, 1100.0]}
 
 
 class EAGroup(object):
@@ -25,11 +27,12 @@ class EAGroup(object):
         self.run_number = run_number
         self.rebin_index = 0
         self.rebin_option = None
-        self._counts_workspace = {}
-        self._counts_workspace_rebin = {}
-        self._peak_table = {}
-        self._matches_table = {}
-        self.update_counts_workspace(str(group_name), run_number)
+        self._counts_workspace = None
+        self._counts_workspace_rebin = None
+        self._peak_table = None
+        self._matches_table = None
+        self.update_counts_workspace(str(group_name))
+        self.plot_range = DETECTOR_PLOT_RANGE[self.detector]
 
     @property
     def workspace(self):
@@ -43,15 +46,15 @@ class EAGroup(object):
             raise AttributeError("Attempting to set workspace to type " + str(
                 type(new_workspace)) + " but should be MuonWorkspaceWrapper")
 
-    def get_counts_workspace_for_run(self, run, rebin):
+    def get_counts_workspace_for_run(self, rebin):
         """
             Returns the name of the counts workspace for a given run
             if the workspace does not exist will raise a KeyError
         """
         if rebin:
-            return self._counts_workspace_rebin[MuonRun(run)].workspace_name
+            return self._counts_workspace_rebin.workspace_name
         else:
-            return self._counts_workspace[MuonRun(run)].workspace_name
+            return self._counts_workspace.workspace_name
 
     @property
     def name(self):
@@ -83,43 +86,33 @@ class EAGroup(object):
         else:
             raise ValueError("detectors must be a list of ints.")
 
-    def update_workspaces(self, run, counts_workspace, rebin):
-        run_object = MuonRun(run)
+    def update_workspaces(self, counts_workspace, rebin):
         if rebin:
-            self._counts_workspace_rebin.update({run_object: MuonWorkspaceWrapper(counts_workspace)})
+            self._counts_workspace_rebin = MuonWorkspaceWrapper(counts_workspace)
         else:
-            self._counts_workspace.update({run_object: MuonWorkspaceWrapper(counts_workspace)})
+            self._counts_workspace = MuonWorkspaceWrapper(counts_workspace)
 
-    def update_counts_workspace(self, counts_workspace, run):
-        run_object = MuonRun(run)
-        self._counts_workspace.update({run_object: MuonWorkspaceWrapper(counts_workspace)})
+    def update_counts_workspace(self, counts_workspace):
+        self._counts_workspace = MuonWorkspaceWrapper(counts_workspace)
 
-    def get_rebined_or_unbinned_version_of_workspace_if_it_exists(self, name):
-        for key, value in self._counts_workspace.items():
-            if value.workspace_name == name and key in self._counts_workspace_rebin:
-                return self._counts_workspace_rebin[key].workspace_name
+    def get_rebined_or_unbinned_version_of_workspace_if_it_exists(self):
+        if self._counts_workspace_rebin is not None:
+            return self._counts_workspace_rebin.workspace_name
 
-        for key, value in self._counts_workspace_rebin.items():
-            if value.workspace_name == name and key in self._counts_workspace:
-                return self._counts_workspace[key].workspace_name
+        else:
+            return self._counts_workspace.workspace_name
 
-        return None
+    def update_peak_table(self, table):
+        self._peak_table = MuonWorkspaceWrapper(table)
 
-    def update_peak_table(self, run, table):
-        run_object = MuonRun(run)
-        self._peak_table.update({run_object: MuonWorkspaceWrapper(table)})
+    def update_matches_table(self, table):
+        self._matches_table = MuonWorkspaceWrapper(table)
 
-    def update_matches_table(self, run, table):
-        run_object = MuonRun(run)
-        self._matches_table.update({run_object: MuonWorkspaceWrapper(table)})
+    def get_peak_table(self):
+        return self._peak_table.workspace_name
 
-    def get_peak_table(self, run):
-        run_object = MuonRun(run)
-        return self._peak_table[run_object].workspace_name
-
-    def get_matches_table(self, run):
-        run_object = MuonRun(run)
-        return self._matches_table[run_object].workspace_name
+    def get_matches_table(self):
+        return self._matches_table.workspace_name
 
     def is_peak_table_present(self):
         return bool(self._peak_table)

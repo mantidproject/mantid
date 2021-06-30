@@ -101,6 +101,7 @@ class EAGroupingTablePresenter(object):
         self.handle_update(update_model)
 
     def handle_to_analyse_column_changed(self, col, changed_item, workspace_name):
+
         update_model = True
         if col == INVERSE_GROUP_TABLE_COLUMNS['to_analyse']:
             update_model = False
@@ -161,7 +162,6 @@ class EAGroupingTablePresenter(object):
 
     def to_analyse_data_checkbox_changed(self, state, group_name):
         group_added = True if state == 2 else False
-
         if group_added:
             self._model.add_group_to_analysis(group_name)
         else:
@@ -172,6 +172,6 @@ class EAGroupingTablePresenter(object):
 
     def plot_default_case(self):
         for row in range(self._view.num_rows()):
-            self._view.set_to_analyse_state_quietly(row, True)
+            # self._view.set_to_analyse_state_quietly(row, True)
             group_name = self._view.get_table_item(row, 0).text()
             self._model.add_group_to_analysis(group_name)

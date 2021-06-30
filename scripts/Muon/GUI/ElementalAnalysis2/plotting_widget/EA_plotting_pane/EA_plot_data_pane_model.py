@@ -11,7 +11,7 @@ class EAPlotDataPaneModel(BasePaneModel):
 
     def __init__(self, context):
         super(EAPlotDataPaneModel, self).__init__(context)
-        self.context.plot_panes_context[self.name].set_defaults([-200.0, 8500.0], [-100, 2000])
+        self.context.plot_panes_context[self.name].set_defaults([-100.0, 8200.0], [-100, 2000])
 
     @staticmethod
     def _generate_run_indices(workspace_list):
@@ -27,11 +27,9 @@ class EAPlotDataPaneModel(BasePaneModel):
         """
         try:
             if is_raw:
-                workspace_list = self.context.group_context[current_group].get_counts_workspace_for_run(
-                    self.context.data_context.current_runs, False)
+                workspace_list = [self.context.group_context[current_group].get_counts_workspace_for_run(False)]
             else:
-                workspace_list = self.context.group_context[current_group].get_counts_workspace_for_run(
-                    self.context.data_context.current_runs, True)
+                workspace_list = [self.context.group_context[current_group].get_counts_workspace_for_run(True)]
 
             return workspace_list
         except AttributeError:
@@ -49,7 +47,7 @@ class EAPlotDataPaneModel(BasePaneModel):
             workspace_list += self.get_count_workspaces_to_plot(group, is_raw, plot_type)
         return workspace_list
 
-    def get_workspace_and_indices_for_group_or_pair(self, group, is_raw, plot_type):
+    def get_workspace_and_indices_for_group(self, group, is_raw, plot_type):
         """
          :return: a list of workspace names and corresponding indices to plot
          """
@@ -64,10 +62,10 @@ class EAPlotDataPaneModel(BasePaneModel):
         :param plot_type: plotting type, e.g Counts, Frequency Re
         :return: a list of workspace names
         """
-        currently_selected = self.context.group_context.selected_groups_and_pairs
+        currently_selected = self.context.group_context.selected_groups
         workspace_list = []
-        for group_pair in currently_selected:
-            workspace_list += self.get_count_workspaces_to_plot(group_pair, is_raw, plot_type)
+        for group in currently_selected:
+            workspace_list += self.get_count_workspaces_to_plot(group, is_raw, plot_type)
         return workspace_list
 
     def get_workspace_list_and_indices_to_plot(self, is_raw, plot_type):
@@ -75,6 +73,16 @@ class EAPlotDataPaneModel(BasePaneModel):
          :return: a list of workspace names to plot
          """
         workspace_list = self.get_workspaces_to_plot(is_raw, plot_type)
+        plot_range = self.get_plot_range_from_group()
         indices = self._generate_run_indices(workspace_list)
 
-        return workspace_list, indices
+        return workspace_list, indices, plot_range
+
+    def get_plot_range_from_group(self):
+        currently_selected = self.context.group_context.selected_groups
+        current_plot_range = [-50.0, 1100.0]
+        for group in currently_selected:
+            print(self.context.group_context[group].plot_range)
+            if self.context.group_context[group].plot_range[1] > current_plot_range[1]:
+                current_plot_range = self.context.group_context[group].plot_range
+        return current_plot_range
