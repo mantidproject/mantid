@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/Stitch.h"
@@ -30,7 +31,17 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_NoOverlap() {}
+  void test_NoOverlap() {
+    auto ws1 = sampleWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
+    auto ws2 = sampleWorkspaceOneSpectrum(12, 0.8, 0.9, "ws2");
+    Stitch alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "No overlap is found between the intervals: [0.3,0.7] and [0.8, 0.9]");
+  }
 
   void test_OneWorkspace() {}
 
@@ -58,18 +69,28 @@ public:
 
   void test_CustomOrder() {}
 
+  void test_MultiSpectra() {}
+
+  void test_Ragged() {}
+
+  void test_ManualScaleFactors() {}
+
+  void test_NoScaling() {}
+
+  void test_TiedScaleFactor() {}
+
 private:
-  MatrixWorkspace_sptr sampleWorkspaceOneSpec(size_t nBins, double startX, double endX) {
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nBins, nBins);
-    std::vector<double> x(nBins + 1), y(nBins), e(nBins);
-    const double step = (startX - endX) / nBins;
-    for (size_t ibin = 0; ibin < nBins; ++ibin) {
+  MatrixWorkspace_sptr sampleWorkspaceOneSpectrum(size_t nPoints, double startX, double endX, const std::string &name) {
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nPoints, nPoints);
+    AnalysisDataService::Instance().addOrReplace(name, ws);
+    std::vector<double> x(nPoints), y(nPoints), e(nPoints);
+    const double step = (endX - startX) / (nPoints - 1);
+    for (size_t ibin = 0; ibin < nPoints; ++ibin) {
       x[ibin] = startX + ibin * step;
       y[ibin] = 7 * ibin + 3;
       e[ibin] = std::sqrt(y[ibin]);
     }
-    x[nBins] = endX;
-    ws->setHistogram(0, Histogram(x, y, e));
+    ws->setHistogram(0, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));
     return ws;
   }
 };
