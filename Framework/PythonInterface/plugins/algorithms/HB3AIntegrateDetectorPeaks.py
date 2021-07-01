@@ -128,17 +128,24 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                 fit_result = self._fit_gaussian(inWS, data, x, y, startX, endX, output_fit)
 
                 if fit_result and fit_result.OutputStatus == 'success' and fit_result.OutputChi2overDoF < chisqmax:
-                    B, A, x, s, _ = fit_result.OutputParameters.toDict()['Value']
+                    B, A, peak_centre, sigma, _ = fit_result.OutputParameters.toDict()['Value']
                     _, errA, _, errs, _ = fit_result.OutputParameters.toDict()['Error']
 
-                    integrated_intensity = A * s * np.sqrt(2 * np.pi) * scale
+                    if method == "Fitted":
+                        integrated_intensity = A * sigma * np.sqrt(2 * np.pi) * scale
 
-                    # Convert correlation back into covariance
-                    cor_As = (fit_result.OutputNormalisedCovarianceMatrix.cell(1, 4) / 100
-                              * fit_result.OutputParameters.cell(1, 2) * fit_result.OutputParameters.cell(3, 2))
-                    # σ^2 = 2π (A^2 σ_s^2 + σ_A^2 s^2 + 2 A s σ_As)
-                    integrated_intensity_error = np.sqrt(
-                        2 * np.pi * (A ** 2 * errs ** 2 + s ** 2 * errA ** 2 + 2 * A * s * cor_As)) * scale
+                        # Convert correlation back into covariance
+                        cor_As = (fit_result.OutputNormalisedCovarianceMatrix.cell(1, 4) / 100
+                                  * fit_result.OutputParameters.cell(1, 2) * fit_result.OutputParameters.cell(3, 2))
+                        # σ^2 = 2π (A^2 σ_s^2 + σ_A^2 s^2 + 2 A s σ_As)
+                        integrated_intensity_error = np.sqrt(
+                            2 * np.pi * (A ** 2 * errs ** 2 + sigma ** 2 * errA ** 2 + 2 * A * sigma * cor_As)) * scale
+                    elif method == "CountsWithFitting":
+                        y = y[slice(np.searchsorted(x, peak_centre - 2.3548 * sigma * n / 2),
+                                    np.searchsorted(x, peak_centre + 2.3548 * sigma * n / 2))]
+                        # subtract out the fitted flat background
+                        integrated_intensity = (y.sum() - B * y.size) * scan_step
+                        integrated_intensity_error = np.sum(np.sqrt(y)) * scan_step
                 else:
                     self.log().warning("Failed to fit workspace {}: Output Status={}, ChiSq={}".format(inWS,
                                                                                                        fit_result.OutputStatus,
