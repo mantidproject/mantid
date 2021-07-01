@@ -77,12 +77,16 @@ public:
   FunctionDomain1DVector(const double startX, const double endX, const size_t n);
   /// Constructor.
   FunctionDomain1DVector(const std::vector<double> &xvalues);
+  /// No-copy constructor.
+  FunctionDomain1DVector(std::vector<double> &&xvalues);
   /// Constructor.
   FunctionDomain1DVector(std::vector<double>::const_iterator from, std::vector<double>::const_iterator to);
   /// Copy constructor.
   FunctionDomain1DVector(const FunctionDomain1DVector &);
   /// Copy assignment operator.
   FunctionDomain1DVector &operator=(const FunctionDomain1DVector &);
+  /// Get the underlying vector
+  std::vector<double> getVector() { return m_X; }
 
 protected:
   std::vector<double> m_X; ///< vector of function arguments

@@ -1107,6 +1107,7 @@ class WorkspaceSelector : QComboBox
 %End
 public:
     WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
+    void setWorkspaceTypes(const QStringList &types);
     void setOptional(bool optional);
 };
 

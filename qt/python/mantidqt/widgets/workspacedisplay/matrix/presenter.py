@@ -45,7 +45,8 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.container = container if container else StatusBarView(parent, self.view, self.model.get_name(),
                                                                    window_width=window_width,
                                                                    window_height=window_height,
-                                                                   presenter=self)
+                                                                   presenter=self,
+                                                                   window_flags=window_flags)
 
         super(MatrixWorkspaceDisplay, self).__init__(self.container.status_bar)
         self.plot = plot

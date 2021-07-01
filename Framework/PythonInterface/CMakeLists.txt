@@ -7,7 +7,7 @@ if(CMAKE_COMPILER_IS_GNUCXX
    AND Boost_MINOR_VERSION GREATER "63"
    AND Boost_MINOR_VERSION LESS "66"
 )
-  # Several bugs in boost 1.64-1.65 prevent python modues from loading on gcc
+  # Several bugs in boost 1.64-1.65 prevent python modules from loading on gcc
   # without this definition:   https://github.com/boostorg/python/issues/131
   add_definitions(-DBOOST_PYTHON_USE_GCC_SYMBOL_VISIBILITY)
 endif()

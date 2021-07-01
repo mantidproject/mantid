@@ -27,6 +27,16 @@ Bugfixes
 - Fix rare divide-by zero error when running :ref:`GetEi <algm-GetEi>` on noisy data.
 
 
+Improvements
+############
+
+- :ref:`CrossCorrelate <algm-CrossCorrelate>` has additional parameter to set the maximum d-space shift during cross correlation
+
+Improvements
+############
+
+- :ref:`CrossCorrelate <algm-CrossCorrelate>` has additional parameter to set the maximum d-space shift during cross correlation
+
 Fit Functions
 -------------
 - new method `IPeakFunction::intensityError` calculates the error in the integrated intensity of the peak due to uncertainties in the values of the fit parameters.

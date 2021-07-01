@@ -8,6 +8,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CrossCorrelate.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
@@ -67,6 +68,7 @@ using namespace HistogramData;
 void CrossCorrelate::init() {
   auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<API::WorkspaceUnitValidator>("dSpacing");
+  wsValidator->add<API::HistogramValidator>();
   wsValidator->add<API::RawCountValidator>();
 
   // Input and output workspaces
@@ -82,7 +84,7 @@ void CrossCorrelate::init() {
   declareProperty("ReferenceSpectra", 0, mustBePositive,
                   "The Workspace Index of the spectra to correlate all other "
                   "spectra against. ");
-  // Spectra in the range [min to max] will be cross correlated to reference.
+  // Spectra in the range [min to max] will be cross correlated to referenceSpectra.
   declareProperty("WorkspaceIndexMin", 0, mustBePositive,
                   "The workspace index of the first member of the range of "
                   "spectra to cross-correlate against.");
@@ -92,6 +94,8 @@ void CrossCorrelate::init() {
   // Only the data in the range X_min, X_max will be used
   declareProperty("XMin", 0.0, "The starting point of the region to be cross correlated.");
   declareProperty("XMax", 0.0, "The ending point of the region to be cross correlated.");
+  // max is .1
+  declareProperty("MaxDSpaceShift", EMPTY_DBL(), "Optional float for maximum shift to calculate (in d-spacing)");
 }
 
 /** Executes the algorithm
@@ -100,143 +104,154 @@ void CrossCorrelate::init() {
  */
 void CrossCorrelate::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-
-  int reference = getProperty("ReferenceSpectra");
-  const auto index_ref = static_cast<size_t>(reference);
-
-  // check that the data range specified makes sense
+  double maxDSpaceShift = getProperty("MaxDSpaceShift");
+  int referenceSpectra = getProperty("ReferenceSpectra");
   double xmin = getProperty("XMin");
   double xmax = getProperty("XMax");
-  if (xmin >= xmax)
-    throw std::runtime_error("Must specify xmin < xmax");
+  const int wsIndexMin = getProperty("WorkspaceIndexMin");
+  const int wsIndexMax = getProperty("WorkspaceIndexMax");
 
-  // Now check if the range between x_min and x_max is valid
-  auto &referenceX = inputWS->x(index_ref);
+  const auto index_ref = static_cast<size_t>(referenceSpectra);
+
+  if (wsIndexMin >= wsIndexMax)
+    throw std::runtime_error("Must specify WorkspaceIndexMin<WorkspaceIndexMax");
+  // Get the number of spectra in range wsIndexMin to wsIndexMax
+  int numSpectra = 1 + wsIndexMax - wsIndexMin;
+  // Indexes of all spectra in range
+  std::vector<size_t> indexes(boost::make_counting_iterator(wsIndexMin), boost::make_counting_iterator(wsIndexMax + 1));
+
+  if (numSpectra == 0) {
+    std::ostringstream message;
+    message << "No spectra in range between" << wsIndexMin << " and " << wsIndexMax;
+    throw std::runtime_error(message.str());
+  }
+  // Output messageage information
+  g_log.information() << "There are " << numSpectra << " spectra in the range\n";
+
+  // checdataIndex that the data range specified madataIndexes sense
+  if (xmin >= xmax)
+    throw std::runtime_error("Must specify xmin < xmax, " + std::to_string(xmin) + " vs " + std::to_string(xmax));
+
+  // TadataIndexe a copy of  the referenceSpectra spectrum
+  auto &referenceSpectraE = inputWS->e(index_ref);
+  auto &referenceSpectraX = inputWS->x(index_ref);
+  auto &referenceSpectraY = inputWS->y(index_ref);
+  // Now checdataIndex if the range between x_min and x_max is valid
   using std::placeholders::_1;
-  auto minIt = std::find_if(referenceX.cbegin(), referenceX.cend(), std::bind(std::greater<double>(), _1, xmin));
-  if (minIt == referenceX.cend())
+  auto rangeStart =
+      std::find_if(referenceSpectraX.cbegin(), referenceSpectraX.cend(), std::bind(std::greater<double>(), _1, xmin));
+  if (rangeStart == referenceSpectraX.cend())
     throw std::runtime_error("No data above XMin");
-  auto maxIt = std::find_if(minIt, referenceX.cend(), std::bind(std::greater<double>(), _1, xmax));
-  if (minIt == maxIt)
+  auto rangeEnd = std::find_if(rangeStart, referenceSpectraX.cend(), std::bind(std::greater<double>(), _1, xmax));
+  if (rangeStart == rangeEnd)
     throw std::runtime_error("Range is not valid");
 
-  MantidVec::difference_type difminIt = std::distance(referenceX.cbegin(), minIt);
-  MantidVec::difference_type difmaxIt = std::distance(referenceX.cbegin(), maxIt);
+  MantidVec::difference_type rangeStartCorrection = std::distance(referenceSpectraX.cbegin(), rangeStart);
+  MantidVec::difference_type rangeEndCorrection = std::distance(referenceSpectraX.cbegin(), rangeEnd);
 
-  // Now loop on the spectra in the range spectra_min and spectra_max and get
-  // valid spectra
+  const std::vector<double> referenceXVector(rangeStart, rangeEnd);
+  std::vector<double> referenceYVector(referenceSpectraY.cbegin() + rangeStartCorrection,
+                                       referenceSpectraY.cbegin() + (rangeEndCorrection - 1));
+  std::vector<double> referenceEVector(referenceSpectraE.cbegin() + rangeStartCorrection,
+                                       referenceSpectraE.cbegin() + (rangeEndCorrection - 1));
 
-  const int specmin = getProperty("WorkspaceIndexMin");
-  const int specmax = getProperty("WorkspaceIndexMax");
-  if (specmin >= specmax)
-    throw std::runtime_error("Must specify WorkspaceIndexMin<WorkspaceIndexMax");
-  // Get the number of spectra in range specmin to specmax
-  int nspecs = 1 + specmax - specmin;
-  // Indexes of all spectra in range
-  std::vector<size_t> indexes(boost::make_counting_iterator(specmin), boost::make_counting_iterator(specmax + 1));
-
-  std::ostringstream mess;
-  if (nspecs == 0) {
-    mess << "No Workspaces in range between" << specmin << " and " << specmax;
-    throw std::runtime_error(mess.str());
-  }
-
-  // Output message information
-  mess << "There are " << nspecs << " Workspaces in the range\n";
-  g_log.information(mess.str());
-  mess.str("");
-
-  // Take a copy of  the reference spectrum
-  auto &referenceY = inputWS->y(index_ref);
-  auto &referenceE = inputWS->e(index_ref);
-
-  const std::vector<double> refX(minIt, maxIt);
-  std::vector<double> refY(referenceY.cbegin() + difminIt, referenceY.cbegin() + (difmaxIt - 1));
-  std::vector<double> refE(referenceE.cbegin() + difminIt, referenceE.cbegin() + (difmaxIt - 1));
-
-  mess << "min max " << refX.front() << " " << refX.back();
-  g_log.information(mess.str());
-  mess.str("");
+  g_log.information() << "min max " << referenceXVector.front() << " " << referenceXVector.back() << '\n';
 
   // Now start the real stuff
   // Create a 2DWorkspace that will hold the result
-  const auto nY = static_cast<int>(refY.size());
-  const int npoints = 2 * nY - 3;
-  if (npoints < 1)
+  auto numReferenceY = static_cast<int>(referenceYVector.size());
+
+  // max the shift
+  int shiftCorrection = 0;
+  if (maxDSpaceShift != EMPTY_DBL()) {
+    if (xmax - xmin < maxDSpaceShift)
+      g_log.warning() << "maxDSpaceShift(" << std::to_string(maxDSpaceShift)
+                      << ") is larger than specified range of xmin(" << xmin << ") to xmax(" << xmax
+                      << "), please make it smaller or removed it entirely!"
+                      << "\n";
+
+    // convert dspacing to bins, where maxDSpaceShift is at least 0.1
+    const auto maxBins = std::max(0.0 + maxDSpaceShift * 2, 0.1) / inputWS->getDimension(0)->getBinWidth();
+    // calc range based on max bins
+    shiftCorrection = (int)std::max(0.0, abs((-numReferenceY + 2) - (numReferenceY - 2)) - maxBins) / 2;
+  }
+
+  const int numPoints = 2 * (numReferenceY - shiftCorrection) - 3;
+  if (numPoints < 1)
     throw std::runtime_error("Range is not valid");
 
-  MatrixWorkspace_sptr out = create<HistoWorkspace>(*inputWS, nspecs, Points(npoints));
+  MatrixWorkspace_sptr out = create<HistoWorkspace>(*inputWS, numSpectra, Points(numPoints));
 
-  const auto refVar = subtractMean(refY, refE);
+  const auto referenceVariance = subtractMean(referenceYVector, referenceEVector);
 
-  const double refNorm = 1.0 / sqrt(refVar.y);
-  double refNormE = 0.5 * pow(refNorm, 3) * sqrt(refVar.e);
+  const double referenceNorm = 1.0 / sqrt(referenceVariance.y);
+  double referenceNormE = 0.5 * pow(referenceNorm, 3) * sqrt(referenceVariance.e);
 
   // Now copy the other spectra
-  bool is_distrib = inputWS->isDistribution();
+  bool isDistribution = inputWS->isDistribution();
 
   auto &outX = out->mutableX(0);
   for (int i = 0; i < static_cast<int>(outX.size()); ++i) {
-    outX[i] = static_cast<double>(i - nY + 2);
+    outX[i] = static_cast<double>(i - (numReferenceY - shiftCorrection) + 2);
   }
+
   // Initialise the progress reporting object
-  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nspecs);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numSpectra);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *out))
-  for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
+  for (int currentSpecIndex = 0; currentSpecIndex < numSpectra; ++currentSpecIndex) // Now loop on all spectra
   {
     PARALLEL_START_INTERUPT_REGION
-    size_t wsIndex = indexes[i]; // Get the ws index from the table
+    size_t wsIndex = indexes[currentSpecIndex]; // Get the ws index from the table
     // Copy spectra info from input Workspace
-    out->getSpectrum(i).copyInfoFrom(inputWS->getSpectrum(wsIndex));
+    out->getSpectrum(currentSpecIndex).copyInfoFrom(inputWS->getSpectrum(wsIndex));
+    out->setSharedX(currentSpecIndex, out->sharedX(0));
+    // Get temp referenceSpectras
+    const auto &inputXVector = inputWS->x(wsIndex);
+    const auto &inputYVector = inputWS->y(wsIndex);
+    const auto &inputEVector = inputWS->e(wsIndex);
+    // Copy Y,E data of spec(currentSpecIndex) to temp vector
+    // Now rebin on the grid of referenceSpectra
+    std::vector<double> tempY(numReferenceY);
+    std::vector<double> tempE(numReferenceY);
 
-    out->setSharedX(i, out->sharedX(0));
-
-    // Get temp references
-    const auto &iX = inputWS->x(wsIndex);
-    const auto &iY = inputWS->y(wsIndex);
-    const auto &iE = inputWS->e(wsIndex);
-    // Copy Y,E data of spec(i) to temp vector
-    // Now rebin on the grid of reference spectrum
-    std::vector<double> tempY(nY);
-    std::vector<double> tempE(nY);
-    VectorHelper::rebin(iX.rawData(), iY.rawData(), iE.rawData(), refX, tempY, tempE, is_distrib);
+    VectorHelper::rebin(inputXVector.rawData(), inputYVector.rawData(), inputEVector.rawData(), referenceXVector, tempY,
+                        tempE, isDistribution);
     const auto tempVar = subtractMean(tempY, tempE);
 
     // Calculate the normalisation constant
     const double tempNorm = 1.0 / sqrt(tempVar.y);
     const double tempNormE = 0.5 * pow(tempNorm, 3) * sqrt(tempVar.e);
-    const double normalisation = refNorm * tempNorm;
-    const double normalisationE2 = pow((refNorm * tempNormE), 2) + pow((tempNorm * refNormE), 2);
-    // Get reference to the ouput spectrum
-    auto &outY = out->mutableY(i);
-    auto &outE = out->mutableE(i);
+    const double normalisation = referenceNorm * tempNorm;
+    const double normalisationE2 = pow((referenceNorm * tempNormE), 2) + pow((tempNorm * referenceNormE), 2);
+    // Get referenceSpectr to the ouput spectrum
+    auto &outY = out->mutableY(currentSpecIndex);
+    auto &outE = out->mutableE(currentSpecIndex);
 
-    for (int k = -nY + 2; k <= nY - 2; ++k) {
-      const int kp = abs(k);
+    for (int dataIndex = -numReferenceY + 2 + shiftCorrection; dataIndex <= numReferenceY - 2 - shiftCorrection;
+         ++dataIndex) {
+      const int dataIndexP = abs(dataIndex);
       double val = 0, err2 = 0, x, y, xE, yE;
-      for (int j = nY - 1 - kp; j >= 0; --j) {
-        if (k >= 0) {
-          x = refY[j];
-          y = tempY[j + kp];
-          xE = refE[j];
-          yE = tempE[j + kp];
+      for (int j = numReferenceY - 1 - dataIndexP; j >= 0; --j) {
+        if (dataIndex >= 0) {
+          x = referenceYVector[j];
+          y = tempY[j + dataIndexP];
+          xE = referenceEVector[j];
+          yE = tempE[j + dataIndexP];
         } else {
           x = tempY[j];
-          y = refY[j + kp];
+          y = referenceYVector[j + dataIndexP];
           xE = tempE[j];
-          yE = refE[j + kp];
+          yE = referenceEVector[j + dataIndexP];
         }
         val += (x * y);
         err2 += x * x * yE + y * y * xE;
       }
-      outY[k + nY - 2] = (val * normalisation);
-      outE[k + nY - 2] = sqrt(val * val * normalisationE2 + normalisation * normalisation * err2);
+      outY[dataIndex + numReferenceY - shiftCorrection - 2] = (val * normalisation);
+      outE[dataIndex + numReferenceY - shiftCorrection - 2] =
+          sqrt(val * val * normalisationE2 + normalisation * normalisation * err2);
     }
     // Update progress information
-    // double prog=static_cast<double>(i)/nspecs;
-    // progress(prog);
     m_progress->report();
-    // interruption_point();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION

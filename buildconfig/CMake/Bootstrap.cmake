@@ -175,9 +175,9 @@ set(Python_ADDITIONAL_VERSIONS ${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
 
 # Search for the pythonw executable if it has not already been found
 # Will only look in the folder containing the current python.exe
-if ("${Python_W_EXECUTABLE}" STREQUAL "")
-get_filename_component(Python_Binary_Dir ${PYTHON_EXECUTABLE} DIRECTORY)
-find_program(Python_W_EXECUTABLE PATHS ${Python_Binary_Dir} NAMES pythonw NO_DEFAULT_PATH)
+if (NOT Python_W_EXECUTABLE)
+  get_filename_component(Python_Binary_Dir ${PYTHON_EXECUTABLE} DIRECTORY)
+  find_program(Python_W_EXECUTABLE PATHS ${Python_Binary_Dir} NAMES pythonw NO_DEFAULT_PATH)
 endif()
 
 # Handle switching between previously configured Python verions

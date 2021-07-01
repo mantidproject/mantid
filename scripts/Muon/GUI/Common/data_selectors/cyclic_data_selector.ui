@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>workspace_selector</class>
- <widget class="QWidget" name="workspace_selector">
+ <class>cyclic_data_selector</class>
+ <widget class="QWidget" name="cyclic_data_selector">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -27,7 +27,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLabel" name="workspace_combo_box_label">
+    <widget class="QLabel" name="data_combo_box_label">
      <property name="minimumSize">
       <size>
        <width>250</width>
@@ -41,7 +41,7 @@
       </size>
      </property>
      <property name="text">
-      <string>Select Workspace</string>
+      <string>Select Data</string>
      </property>
     </widget>
    </item>
