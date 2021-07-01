@@ -41,7 +41,6 @@ from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 TAB_ORDER = ["Home", "Grouping", "Corrections", "Phase Table", "Fitting", "Sequential Fitting", "Results",
              "Model Fitting"]
-SHOW_MODEL_FITTING = True
 
 
 def check_facility():
@@ -130,9 +129,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
-
-        if SHOW_MODEL_FITTING:
-            self.model_fitting_tab = ModelFittingTabWidget(self.context, self)
+        self.model_fitting_tab = ModelFittingTabWidget(self.context, self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget("Muon Analysis 2")
@@ -173,8 +170,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.setup_on_recalulation_finished_notifier()
 
-        if SHOW_MODEL_FITTING:
-            self.setup_results_notifier()
+        self.setup_results_notifier()
 
         self.context.data_context.message_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.message_observer)
@@ -196,8 +192,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
         self.tabs.addTabWithOrder(self.seq_fitting_tab.seq_fitting_tab_view, 'Sequential Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
-        if SHOW_MODEL_FITTING:
-            self.tabs.addTabWithOrder(self.model_fitting_tab.model_fitting_tab_view, 'Model Fitting')
+        self.tabs.addTabWithOrder(self.model_fitting_tab.model_fitting_tab_view, 'Model Fitting')
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
 
     def handle_tab_changed(self):
@@ -227,8 +222,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.disable_notifier.add_subscriber(self.fitting_tab.fitting_tab_view.disable_tab_observer)
 
-        if SHOW_MODEL_FITTING:
-            self.disable_notifier.add_subscriber(self.model_fitting_tab.model_fitting_tab_view.disable_tab_observer)
+        self.disable_notifier.add_subscriber(self.model_fitting_tab.model_fitting_tab_view.disable_tab_observer)
 
         self.disable_notifier.add_subscriber(self.phase_tab.phase_table_presenter.disable_tab_observer)
 
@@ -246,8 +240,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.enable_notifier.add_subscriber(self.fitting_tab.fitting_tab_view.enable_tab_observer)
 
-        if SHOW_MODEL_FITTING:
-            self.enable_notifier.add_subscriber(self.model_fitting_tab.model_fitting_tab_view.enable_tab_observer)
+        self.enable_notifier.add_subscriber(self.model_fitting_tab.model_fitting_tab_view.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.phase_tab.phase_table_presenter.enable_tab_observer)
 
@@ -400,9 +393,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_tab.phase_table_presenter.enable_editing_notifier.add_subscriber(
             self.enable_observer)
 
-        if SHOW_MODEL_FITTING:
-            self.model_fitting_tab.model_fitting_tab_presenter.enable_editing_notifier.add_subscriber(
-                self.enable_observer)
+        self.model_fitting_tab.model_fitting_tab_presenter.enable_editing_notifier.add_subscriber(
+            self.enable_observer)
 
     def setup_group_calculation_disabler_notifier(self):
 
@@ -418,9 +410,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_tab.phase_table_presenter.disable_editing_notifier.add_subscriber(
             self.disable_observer)
 
-        if SHOW_MODEL_FITTING:
-            self.model_fitting_tab.model_fitting_tab_presenter.disable_editing_notifier.add_subscriber(
-                self.disable_observer)
+        self.model_fitting_tab.model_fitting_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.disable_observer)
 
     def setup_on_load_enabler(self):
         self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
