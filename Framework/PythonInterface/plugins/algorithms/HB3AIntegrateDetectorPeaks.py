@@ -101,7 +101,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
         optmize_q = self.getProperty("OptimizeQVector").value
         output_fit = self.getProperty("OutputFitResults").value
 
-        if output_fit:
+        if output_fit and method != "Counts":
             fit_results = WorkspaceGroup()
             AnalysisDataService.addOrReplace(outWS+"_fit_results", fit_results)
 

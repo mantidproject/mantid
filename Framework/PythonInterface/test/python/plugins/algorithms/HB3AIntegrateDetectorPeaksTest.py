@@ -122,6 +122,36 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         self.assertAlmostEqual(peak0.getScattering(),
                                np.deg2rad(data.getExperimentInfo(0).run()['2theta'].value[0]), delta=1e-5)
 
+        q_sample = peak0.getQSampleFrame()
+        expected_q_sample = data.getExperimentInfo(0).sample().getOrientedLattice().qFromHKL(peak0.getHKL())
+        for i in range(3):
+            self.assertAlmostEqual(q_sample[i], expected_q_sample[i])
+
+        # Lorentz correction should scale the intensity by `sin(2theta)`
+        peaks = HB3AIntegrateDetectorPeaks(data, Method="Counts", ApplyLorentz=True, OptimizeQVector=False)
+        self.assertEqual(peaks.getNumberPeaks(), 1)
+
+        peak0 = peaks.getPeak(0)
+        self.assertAlmostEqual(peak0.getScattering(),
+                               np.deg2rad(data.getExperimentInfo(0).run()['2theta'].value[0]), delta=1e-5)
+        self.assertAlmostEqual(peak0.getIntensity(),
+                               932.24967 * np.sin(np.deg2rad(data.getExperimentInfo(0).run()['2theta'].value[0])),
+                               delta=1e-2)
+        self.assertAlmostEqual(peak0.getSigmaIntensity(),
+                               29.10343 * np.sin(np.deg2rad(data.getExperimentInfo(0).run()['2theta'].value[0])),
+                               delta=1e-2)
+
+        peaks = HB3AIntegrateDetectorPeaks(data, Method="Counts", ApplyLorentz=True, OptimizeQVector=True)
+        self.assertEqual(peaks.getNumberPeaks(), 1)
+
+        peak0 = peaks.getPeak(0)
+        lorentz = abs(np.cos(peak0.getAzimuthal()) * np.sin(peak0.getScattering()))
+        self.assertAlmostEqual(peak0.getIntensity(), 932.24967 * lorentz, delta=1e-2)
+        self.assertAlmostEqual(peak0.getSigmaIntensity(), 29.10343 * lorentz, delta=1e-2)
+        q_sample = peak0.getQSampleFrame()
+        for i in range(3):
+            self.assertNotAlmostEqual(q_sample[i], expected_q_sample[i])
+
         DeleteWorkspace(data)
         DeleteWorkspace(peaks)
 
@@ -142,6 +172,38 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         self.assertAlmostEqual(peak0.getAzimuthal(), -np.pi, delta=2e-5)
         self.assertAlmostEqual(peak0.getScattering(),
                                np.deg2rad(data.getExperimentInfo(0).run()['2theta'].value[0]), delta=1e-5)
+
+        q_sample = peak0.getQSampleFrame()
+        expected_q_sample = data.getExperimentInfo(0).sample().getOrientedLattice().qFromHKL(peak0.getHKL())
+        for i in range(3):
+            self.assertAlmostEqual(q_sample[i], expected_q_sample[i])
+
+        # Lorentz correction should scale the intensity by `sin(2theta)`
+        peaks = HB3AIntegrateDetectorPeaks(data, Method="CountsWithFitting", ApplyLorentz=True, OptimizeQVector=False,
+                                           ChiSqMax=100)
+        self.assertEqual(peaks.getNumberPeaks(), 1)
+
+        peak0 = peaks.getPeak(0)
+        self.assertAlmostEqual(peak0.getScattering(),
+                               np.deg2rad(data.getExperimentInfo(0).run()['2theta'].value[0]), delta=1e-5)
+        self.assertAlmostEqual(peak0.getIntensity(),
+                               969.778546 * np.sin(np.deg2rad(data.getExperimentInfo(0).run()['2theta'].value[0])),
+                               delta=1e-2)
+        self.assertAlmostEqual(peak0.getSigmaIntensity(),
+                               24.776354 * np.sin(np.deg2rad(data.getExperimentInfo(0).run()['2theta'].value[0])),
+                               delta=1e-2)
+
+        peaks = HB3AIntegrateDetectorPeaks(data, Method="CountsWithFitting", ApplyLorentz=True, OptimizeQVector=True,
+                                           ChiSqMax=100)
+        self.assertEqual(peaks.getNumberPeaks(), 1)
+
+        peak0 = peaks.getPeak(0)
+        lorentz = abs(np.cos(peak0.getAzimuthal()) * np.sin(peak0.getScattering()))
+        self.assertAlmostEqual(peak0.getIntensity(), 969.778546 * lorentz, delta=1e-2)
+        self.assertAlmostEqual(peak0.getSigmaIntensity(), 24.776354 * lorentz, delta=1e-2)
+        q_sample = peak0.getQSampleFrame()
+        for i in range(3):
+            self.assertNotAlmostEqual(q_sample[i], expected_q_sample[i])
 
         DeleteWorkspace(data)
         DeleteWorkspace(peaks)
