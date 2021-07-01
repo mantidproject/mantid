@@ -164,6 +164,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                     self.log().warning("Failed to fit workspace {}: Output Status={}, ChiSq={}".format(inWS,
                                                                                                        fit_result.OutputStatus,
                                                                                                        fit_result.OutputChi2overDoF))
+                    self._delete_tmp_workspaces(str(__tmp_pw), tmp_inWS)
                     continue
             else:
                 integrated_intensity, integrated_intensity_error = self._counts_integration(data, n_bkgr_pts, scan_step)
@@ -192,7 +193,6 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                     peak.setSigmaIntensity(peak.getSigmaIntensity() * lorentz)
 
                 CombinePeaksWorkspaces(outWS, __tmp_pw, OutputWorkspace=outWS, EnableLogging=False)
-                DeleteWorkspace(__tmp_pw, EnableLogging=False)
 
                 if output_fit:
                     fit_results.addWorkspace(RenameWorkspace(tmp_inWS + '_Workspace', outWS + "_" + inWS + '_Workspace',
@@ -214,11 +214,15 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                 self.log().warning("Skipping peak from {} because Signal/Noise={:.3f} which is less than {}"
                                    .format(inWS, integrated_intensity/integrated_intensity_error, signalNoiseMin))
 
-            for tmp_ws in (tmp_inWS, tmp_inWS+'_Workspace', tmp_inWS+'_Parameters', tmp_inWS+'_NormalisedCovarianceMatrix'):
-                if mtd.doesExist(tmp_ws):
-                    DeleteWorkspace(tmp_ws, EnableLogging=False)
+            self._delete_tmp_workspaces(str(__tmp_pw), tmp_inWS)
 
         self.setProperty("OutputWorkspace", mtd[outWS])
+
+    def _delete_tmp_workspaces(self, tmp_peakws, tmp_inWS):
+        for tmp_ws in (tmp_peakws, tmp_inWS, tmp_inWS + '_Workspace', tmp_inWS + '_Parameters',
+                       tmp_inWS + '_NormalisedCovarianceMatrix'):
+            if mtd.doesExist(tmp_ws):
+                DeleteWorkspace(tmp_ws, EnableLogging=False)
 
     def _counts_integration(self, ws, n_background_pts, scan_step):
         y = ws.extractY().flatten()
