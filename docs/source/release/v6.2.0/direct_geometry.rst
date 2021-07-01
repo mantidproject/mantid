@@ -25,6 +25,7 @@ CrystalField
 Improvements
 ############
 - Added documentation and warning messages in the :ref:`Crystal Field Python Interface` related to IntensityScaling
+- The order of detector efficiency correction and rebinning in :ref:`algm-DirectILLReduction` has been inversed
 
 BugFixes
 ########
