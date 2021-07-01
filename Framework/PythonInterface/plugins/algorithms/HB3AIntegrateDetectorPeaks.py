@@ -123,6 +123,11 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
             y = data.extractY().flatten()
             x = data.extractX().flatten()
 
+            __tmp_pw = CreatePeaksWorkspace(OutputType='LeanElasticPeak',
+                                            InstrumentWorkspace=inWS,
+                                            NumberOfPeaks=0,
+                                            EnableLogging=False)
+
             if method != "Counts":
                 # fit against gaussian with flat background for both the Fitted and CountsWithFitting methods
                 fit_result = self._fit_gaussian(inWS, data, x, y, startX, endX, output_fit)
@@ -140,6 +145,15 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                         # σ^2 = 2π (A^2 σ_s^2 + σ_A^2 s^2 + 2 A s σ_As)
                         integrated_intensity_error = np.sqrt(
                             2 * np.pi * (A ** 2 * errs ** 2 + sigma ** 2 * errA ** 2 + 2 * A * sigma * cor_As)) * scale
+
+                        if scan_log == 'omega':
+                            SetGoniometer(Workspace=__tmp_pw, Axis0=f'{peak_centre},0,1,0,-1', Axis1='chi,0,0,1,-1',
+                                          Axis2='phi,0,1,0,-1',
+                                          EnableLogging=False)
+                        else:
+                            SetGoniometer(Workspace=__tmp_pw, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1',
+                                          Axis2=f'{peak_centre},0,1,0,-1',
+                                          EnableLogging=False)
                     elif method == "CountsWithFitting":
                         y = y[slice(np.searchsorted(x, peak_centre - 2.3548 * sigma * n / 2),
                                     np.searchsorted(x, peak_centre + 2.3548 * sigma * n / 2))]
@@ -153,18 +167,6 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                     continue
             else:
                 integrated_intensity, integrated_intensity_error = self._counts_integration(data, n_bkgr_pts, scan_step)
-
-            __tmp_pw = CreatePeaksWorkspace(OutputType='LeanElasticPeak',
-                                            InstrumentWorkspace=inWS,
-                                            NumberOfPeaks=0,
-                                            EnableLogging=False)
-
-            if scan_log == 'omega':
-                SetGoniometer(Workspace=__tmp_pw, Axis0=f'{x},0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1',
-                              EnableLogging=False)
-            else:
-                SetGoniometer(Workspace=__tmp_pw, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2=f'{x},0,1,0,-1',
-                              EnableLogging=False)
 
             peak = __tmp_pw.createPeakHKL([run['h'].getStatistics().median,
                                            run['k'].getStatistics().median,
