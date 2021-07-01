@@ -346,7 +346,7 @@ fi
 # Conda R-Path setup
 ###############################################################################
 if [ ${ON_CONDA} ]; then
-    CMAKE_RPATH="-DCMAKE_BUILD_RPATH=$CONDA_PREFIX/x86_64-conda-linux-gnu/sysroot/usr/lib64"
+    CMAKE_RPATH="-DCMAKE_BUILD_RPATH=${CONDA_PREFIX}/x86_64-conda-linux-gnu/sysroot/usr/lib64"
 fi
 
 ###############################################################################
