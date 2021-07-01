@@ -10,7 +10,7 @@ from mantid.simpleapi import (ConvertUnits, ExtractSpectra,
                               ApplyDiffCal, DiffractionFocussing,
                               PDCalibration, Load, LoadMask,
                               LoadDiffCal, LoadDetectorsGroupingFile,
-                              SaveDiffCal, DeleteWorkspace)
+                              SaveDiffCal, DeleteWorkspace, DeleteTableRows)
 
 # Diamond peak positions in d-space
 DIAMOND = (0.3117,0.3257,0.3499,0.4205,0.4645,
@@ -149,9 +149,22 @@ def pdcalibration_groups(data_ws,
                   DiagnosticWorkspaces=f'{output_basename}_pd_diag')
 
     # Everything below will all be replaced by be the new CombineDiffCal algorithm
-    pd_diffcal = mtd[f'{output_basename}_pd_diffcal']
 
     cc_and_pd_diffcal = CloneWorkspace(f'{output_basename}_pd_diffcal', OutputWorkspace=f'{output_basename}_cc_pd_diffcal')
+
+    # remove masked detectors
+    mask_ws = mtd[f'{output_basename}_pd_diffcal_mask']
+    rows_to_remove = []
+    detid_list = cc_and_pd_diffcal.column('detid')
+    for n in range(mask_ws.getNumberHistograms()):
+        if mask_ws.readY(n)[0] == 1:
+            try:
+                rows_to_remove.append(detid_list.index(mask_ws.getSpectrum(n).getDetectorIDs()[0]))
+            except ValueError:
+                pass
+
+    if rows_to_remove:
+        DeleteTableRows(cc_and_pd_diffcal, Rows=rows_to_remove)
 
     cc_det_to_difc = dict(zip(cc_diffcal.column('detid'), cc_diffcal.column('difc')))
 
@@ -167,7 +180,7 @@ def pdcalibration_groups(data_ws,
     for n, detid in enumerate(cc_and_pd_diffcal.column('detid')):
         if detid in cc_det_to_difc and detid in grouped_det_to_difc:
             cc_and_pd_diffcal.setCell(n, 1,
-                                      pd_diffcal.cell(n, 1)
+                                      cc_and_pd_diffcal.cell(n, 1)
                                       * cc_det_to_difc[detid]
                                       / grouped_det_to_difc[detid])
 
