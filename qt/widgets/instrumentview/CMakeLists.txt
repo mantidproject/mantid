@@ -41,7 +41,7 @@ set(
   src/RotationSurface.cpp
   src/Shape2D.cpp
   src/Shape2DCollection.cpp
-  src/SimpleWidget.cpp
+  src/QtDisplay.cpp
   src/UCorrectionDialog.cpp
   src/UnwrappedCylinder.cpp
   src/UnwrappedDetector.cpp
@@ -104,7 +104,7 @@ set(
   inc/MantidQtWidgets/InstrumentView/GLObject.h
   inc/MantidQtWidgets/InstrumentView/GridTextureFace.h
 
-  inc/MantidQtWidgets/InstrumentView/ISimpleWidget.h
+  inc/MantidQtWidgets/InstrumentView/IQtDisplay.h
   inc/MantidQtWidgets/InstrumentView/IMantidGLWidget.h
 
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
@@ -136,7 +136,7 @@ set(
   inc/MantidQtWidgets/InstrumentView/RotationSurface.h
   inc/MantidQtWidgets/InstrumentView/Shape2D.h
   inc/MantidQtWidgets/InstrumentView/Shape2DCollection.h
-  inc/MantidQtWidgets/InstrumentView/SimpleWidget.h
+  inc/MantidQtWidgets/InstrumentView/QtDisplay.h
   inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.h
   inc/MantidQtWidgets/InstrumentView/UnwrappedCylinder.h
   inc/MantidQtWidgets/InstrumentView/UnwrappedDetector.h
