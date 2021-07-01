@@ -385,8 +385,8 @@ class MuonContext(object):
                 run_string = run_list_to_string(run)
                 loaded_workspace = self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
                                        'OutputWorkspace']
-                loaded_workspace_deadtime_table = self.data_context._loaded_data.get_data(
-                    run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable']
+                loaded_workspace_deadtime_table = self.corrections_context.get_default_dead_time_table_name_for_run(
+                    self.data_context.instrument, run)
                 directory = get_base_data_directory(
                     self,
                     run_string)
@@ -394,8 +394,8 @@ class MuonContext(object):
                 deadtime_name = get_deadtime_data_workspace_name(self.data_context.instrument,
                                                                  str(run[0]), workspace_suffix=self.workspace_suffix)
                 MuonWorkspaceWrapper(loaded_workspace_deadtime_table).show(directory + deadtime_name)
-                self.data_context._loaded_data.get_data(
-                    run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable'] = deadtime_name
+                self.corrections_context.set_default_dead_time_table_name_for_run(self.data_context.instrument, run,
+                                                                                  deadtime_name)
 
                 if len(loaded_workspace) > 1:
                     # Multi-period data

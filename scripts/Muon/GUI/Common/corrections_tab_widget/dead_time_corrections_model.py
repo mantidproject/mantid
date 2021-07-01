@@ -42,14 +42,6 @@ class DeadTimeCorrectionsModel:
         table = retrieve_ws(table_name) if table_name else None
         return table.toDict()[DEAD_TIME_TABLE_KEY] if table is not None else []
 
-    def _get_default_dead_time_table_for_run(self, runs: list) -> str:
-        """Returns the default table to use for dead time corrections for a specific run."""
-        if runs is not None:
-            run_data = self._data_context.get_loaded_data_for_run(runs)
-            return run_data["DataDeadTimeTable"] if run_data is not None else None
-        else:
-            return None
-
     def set_dead_time_source_to_from_file(self) -> None:
         """Sets the dead time source to be 'FromFile'."""
         self._corrections_context.dead_time_source = DEAD_TIME_FROM_FILE
