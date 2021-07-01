@@ -14,8 +14,24 @@ from mantid.plots import MantidAxes
 from mantid.plots.legend import convert_color_to_hex
 from mantidqt.icons import get_icon
 from mantidqt.plotting.figuretype import FigureType, figure_type
-from mantidqt.plotting.MantidToolbar import MantidNavigationToolbar
+from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar, MantidStandardNavigationTools, MantidNavigationTool
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
+
+
+def _create_script_action(self, text, tooltip_text, mdi_icon, *args):
+    # Add a QMenu under the QToolButton for "Create Script"
+    a = self.addAction(get_icon(mdi_icon), text, lambda: None)
+    # This is the only way I could find of getting hold of the QToolButton object
+    button = [child for child in self.children()
+              if isinstance(child, QtWidgets.QToolButton)][-1]
+    menu =  QtWidgets.QMenu("Menu", parent=button)
+    menu.addAction("Script to file",
+                   self.sig_generate_plot_script_file_triggered.emit)
+    menu.addAction("Script to clipboard",
+                   self.sig_generate_plot_script_clipboard_triggered.emit)
+    button.setMenu(menu)
+    button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+    return a
 
 
 class WorkbenchNavigationToolbar(MantidNavigationToolbar):
@@ -37,74 +53,35 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     sig_change_line_collection_colour_triggered = QtCore.Signal(QtGui.QColor)
 
     toolitems = (
-        ('Home', 'Reset axes limits', 'mdi.home', 'on_home_clicked', None),
-        ('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None),
-        ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None),
-        (None, None, None, None, None),
-        ('Pan', 'Pan: L-click \nStretch: R-click', 'mdi.arrow-all', 'pan', False),
-        ('Zoom', 'Zoom \n In: L-click+drag \n Out: R-click+drag', 'mdi.magnify', 'zoom', False),
-        (None, None, None, None, None),
-        ('Grid', 'Grids on/off', 'mdi.grid', 'toggle_grid', False),
-        ('Copy', 'Copy image to clipboard', 'mdi.content-copy', 'copy_to_clipboard', None),
-        ('Save', 'Save image file', 'mdi.content-save', 'save_figure', None),
-        ('Print', 'Print image', 'mdi.printer', 'print_figure', None),
-        (None, None, None, None, None),
-        ('Customize', 'Options menu', 'mdi.settings', 'launch_plot_options', None),
-        (None, None, None, None, None),
-        ('Create Script', 'Generate script to recreate the current figure',
-         'mdi.script-text-outline', 'generate_plot_script', None),
-        (None, None, None, None, None),
-        ('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
-        ('Superplot', 'Open/close superplot tab', None, 'toggle_superplot', False),
-        (None, None, None, None, None),
-        ('Offset', 'Adjust curve offset %', 'mdi.arrow-expand-horizontal',
-         'waterfall_offset_amount', None),
-        ('Reverse Order', 'Reverse curve order', 'mdi.swap-horizontal', 'waterfall_reverse_order', None),
-        ('Fill Area', 'Fill area under curves', 'mdi.format-color-fill', 'waterfall_fill_area', None),
-        (None, None, None, None, None),
-        ('Help', 'Open plotting help documentation', 'mdi.help', 'launch_plot_help', None)
+        MantidNavigationTool('Home', 'Reset axes limits', 'mdi.home', 'on_home_clicked', None),
+        MantidStandardNavigationTools.BACK,
+        MantidStandardNavigationTools.FORWARD,
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidStandardNavigationTools.PAN,
+        MantidStandardNavigationTools.ZOOM,
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Grid', 'Grids on/off', 'mdi.grid', 'toggle_grid', False),
+        MantidNavigationTool('Copy', 'Copy image to clipboard', 'mdi.content-copy', 'copy_to_clipboard', None),
+        MantidStandardNavigationTools.SAVE,
+        MantidNavigationTool('Print', 'Print image', 'mdi.printer', 'print_figure', None),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Customize', 'Options menu', 'mdi.settings', 'launch_plot_options', None),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Create Script', 'Generate script to recreate the current figure',
+                             'mdi.script-text-outline', 'home', None, _create_script_action),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Offset', 'Adjust curve offset %', 'mdi.arrow-expand-horizontal',
+                             'waterfall_offset_amount', None),
+        MantidNavigationTool('Reverse Order', 'Reverse curve order', 'mdi.swap-horizontal', 'waterfall_reverse_order', None),
+        MantidNavigationTool('Fill Area', 'Fill area under curves', 'mdi.format-color-fill', 'waterfall_fill_area', None),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Help', 'Open plotting help documentation', 'mdi.help', 'launch_plot_help', None)
     )
 
     def __init__(self, canvas, parent, coordinates=True):
         super().__init__(canvas, parent, coordinates)
-        for text, tooltip_text, mdi_icon, callback, checked in self.toolitems:
-            if text is None:
-                self.addSeparator()
-            else:
-                if text == 'Create Script':
-                    # Add a QMenu under the QToolButton for "Create Script"
-                    a = self.addAction(get_icon(mdi_icon), text, lambda: None)
-                    # This is the only way I could find of getting hold of the QToolButton object
-                    button = [child for child in self.children()
-                              if isinstance(child, QtWidgets.QToolButton)][-1]
-                    menu = QtWidgets.QMenu("Menu", parent=button)
-                    menu.addAction("Script to file",
-                                   self.sig_generate_plot_script_file_triggered.emit)
-                    menu.addAction("Script to clipboard",
-                                   self.sig_generate_plot_script_clipboard_triggered.emit)
-                    button.setMenu(menu)
-                    button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
-                elif mdi_icon:
-                    a = self.addAction(get_icon(mdi_icon), text, getattr(self, callback))
-                else:
-                    a = self.addAction(text, getattr(self, callback))
-                self._actions[callback] = a
-                if checked is not None:
-                    a.setCheckable(True)
-                    a.setChecked(checked)
-                if tooltip_text is not None:
-                    a.setToolTip(tooltip_text)
-
-        # Add the x,y location widget at the right side of the toolbar
-        # The stretch factor is 1 which means any resizing of the toolbar
-        # will resize this label instead of the buttons.
-        if self.coordinates:
-            self.locLabel = QtWidgets.QLabel("", self)
-            self.locLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
-            self.locLabel.setSizePolicy(
-                QtWidgets.QSizePolicy(QtWidgets.Expanding, QtWidgets.QSizePolicy.Ignored))
-            labelAction = self.addWidget(self.locLabel)
-            labelAction.setVisible(True)
 
         # Adjust icon size or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
