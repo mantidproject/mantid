@@ -17,7 +17,7 @@
 
 namespace MantidQt::MantidWidgets {
 
-class MockMantidGLWidget : public IGLDisplay {
+class MockGLDisplay : public IGLDisplay {
 public:
   MOCK_METHOD(void, setSurface, (std::shared_ptr<ProjectionSurface>), (override));
   MOCK_METHOD(std::shared_ptr<ProjectionSurface>, getSurface, (), (override));
