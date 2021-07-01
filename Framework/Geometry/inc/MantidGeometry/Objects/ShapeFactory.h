@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
 #include <memory>
@@ -106,6 +107,11 @@ private:
   double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
   void createGeometryHandler(Poco::XML::Element *, std::shared_ptr<CSGObject>);
+
+  Kernel::Matrix<double> generateMatrix(double xRotation, double yRotation, double zRotation);
+  Kernel::Matrix<double> generateXRotation(double xRotation);
+  Kernel::Matrix<double> generateYRotation(double yRotation);
+  Kernel::Matrix<double> generateZRotation(double zRotation);
 };
 
 } // namespace Geometry

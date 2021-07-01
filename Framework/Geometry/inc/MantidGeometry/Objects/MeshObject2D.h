@@ -92,6 +92,8 @@ private:
   } m_planeParameters;
 
   void initialize();
+  /// Getter for the shape xml
+  std::string getShapeXML() const override { return ""; }
   /// Triangles are specified by indices into a list of vertices. Offset is
   /// always 3.
   std::vector<uint32_t> m_triangles;

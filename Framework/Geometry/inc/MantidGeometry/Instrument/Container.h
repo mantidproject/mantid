@@ -50,6 +50,9 @@ public:
     return m_shape->cloneWithMaterial(material);
   }
 
+  /// Getter for the shape xml
+  std::string getShapeXML() const override { return ""; }
+
   int getName() const override { return m_shape->getName(); }
 
   int interceptSurface(Geometry::Track &t) const override { return m_shape->interceptSurface(t); }

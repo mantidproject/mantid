@@ -31,6 +31,7 @@
 #include <Poco/Path.h>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <string>
 
 namespace Mantid {
 namespace DataHandling {
@@ -713,7 +714,21 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
     const auto refFrame = experiment.getInstrument()->getReferenceFrame();
     const auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
-      CreateSampleShape::setSampleShape(experiment, xml);
+      // Here the goniometer rotation tag is added, but is only used for a cuboid(flat-plate) or cylinder
+      std::vector<double> rotationMatrix = experiment.run().getGoniometer().getR();
+      std::string xml_s = std::string(xml);
+      std::size_t found = xml_s.find("</");
+      if (found != std::string::npos) {
+        const std::vector<std::string> matrixElementNames = {"a11", "a12", "a13", "a21", "a22",
+                                                             "a23", "a31", "a32", "a33"};
+        std::string goniometerRotation = "   <goniometer ";
+        for (size_t index = 0; index < rotationMatrix.size(); ++index) {
+          goniometerRotation += matrixElementNames[index] + " = '" + std::to_string(rotationMatrix[index]) + "' ";
+        }
+        goniometerRotation += " /> \\ \n";
+        xml_s.insert(found, goniometerRotation);
+      }
+      CreateSampleShape::setSampleShape(experiment, xml_s);
       return;
     }
   }

@@ -6,8 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CopySample.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Material.h"
 
@@ -111,7 +115,8 @@ void CopySample::exec() {
     {
       for (uint16_t i = 0; i < outMDWS->getNumExperimentInfo(); i++)
         copyParameters(sample, outMDWS->getExperimentInfo(i)->mutableSample(), copyName, copyMaterial, copyEnvironment,
-                       copyShape, copyLattice, copyOrientation);
+                       copyShape, copyLattice, copyOrientation,
+                       outMDWS->getExperimentInfo(i)->run().getGoniometer().getR());
     } else // copy to a single sample
     {
       if (static_cast<uint16_t>(outputSampleNumber) > (outMDWS->getNumExperimentInfo() - 1)) {
@@ -120,8 +125,10 @@ void CopySample::exec() {
                         << (outMDWS->getNumExperimentInfo() - 1) << "). Will use sample number 0 instead\n";
         outputSampleNumber = 0;
       }
-      copyParameters(sample, outMDWS->getExperimentInfo(static_cast<uint16_t>(outputSampleNumber))->mutableSample(),
-                     copyName, copyMaterial, copyEnvironment, copyShape, copyLattice, copyOrientation);
+      copyParameters(
+          sample, outMDWS->getExperimentInfo(static_cast<uint16_t>(outputSampleNumber))->mutableSample(), copyName,
+          copyMaterial, copyEnvironment, copyShape, copyLattice, copyOrientation,
+          outMDWS->getExperimentInfo(static_cast<uint16_t>(outputSampleNumber))->run().getGoniometer().getR());
     }
   } else // peaks workspace or matrix workspace
   {
@@ -129,13 +136,14 @@ void CopySample::exec() {
     if (!ei)
       throw std::invalid_argument("Wrong type of output workspace");
     copyParameters(sample, ei->mutableSample(), copyName, copyMaterial, copyEnvironment, copyShape, copyLattice,
-                   copyOrientation);
+                   copyOrientation, ei->run().getGoniometer().getR());
   }
   this->setProperty("OutputWorkspace", outWS);
 }
 
 void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool materialFlag, bool environmentFlag,
-                                bool shapeFlag, bool latticeFlag, bool orientationOnlyFlag) {
+                                bool shapeFlag, bool latticeFlag, bool orientationOnlyFlag,
+                                std::vector<double> rotationMatrix) {
   if (nameFlag)
     to.setName(from.getName());
   if (environmentFlag) {
@@ -150,6 +158,36 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool ma
       rhsMaterial = to.getMaterial();
     }
     auto rhsObject = std::shared_ptr<IObject>(from.getShape().cloneWithMaterial(rhsMaterial));
+
+    if (auto csgObj = std::dynamic_pointer_cast<Geometry::CSGObject>(rhsObject)) {
+      // Rotate CSGObject by goniometer by editing XML, if possible for that shape
+
+      std::string xml = rhsObject->getShapeXML();
+
+      // Delete previous goniometer from xml
+      std::size_t foundGonioTag = xml.find("<goniometer");
+      std::size_t gonioTagLength = xml.find(">", foundGonioTag + 1) - foundGonioTag;
+      xml.erase(foundGonioTag, gonioTagLength);
+
+      // Add newly defined goniometer
+      std::size_t found = xml.find("</");
+      if (found != std::string::npos) {
+        const std::vector<std::string> matrixElementNames = {"a11", "a12", "a13", "a21", "a22",
+                                                             "a23", "a31", "a32", "a33"};
+        std::string goniometerRotation = "<goniometer ";
+        for (size_t index = 0; index < rotationMatrix.size(); ++index) {
+          goniometerRotation += matrixElementNames[index] + " = '" + std::to_string(rotationMatrix[index]) + "' ";
+        }
+        goniometerRotation += " /> \\ \n";
+        xml.insert(found, goniometerRotation);
+      }
+      rhsObject = Geometry::ShapeFactory().createShape(xml, 0);
+    }
+    if (auto meshObj = std::dynamic_pointer_cast<Geometry::MeshObject>(rhsObject)) {
+      // Rotate MeshObject by goniometer
+      std::dynamic_pointer_cast<Geometry::MeshObject>(rhsObject)->rotate(rotationMatrix);
+    }
+
     to.setShape(rhsObject);
     to.setGeometryFlag(from.getGeometryFlag());
     to.setHeight(from.getHeight());

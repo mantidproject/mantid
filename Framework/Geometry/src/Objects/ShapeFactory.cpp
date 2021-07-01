@@ -53,6 +53,16 @@ const V3D DEFAULT_AXIS(0, 0, 1);
 Logger g_log("ShapeFactory");
 } // namespace
 
+namespace {
+std::vector<double> DegreesToRadians(std::vector<double> anglesDegrees) {
+  std::vector<double> anglesRadians;
+  for (auto angle : anglesDegrees) {
+    anglesRadians.push_back(angle * M_PI / 180);
+  }
+  return anglesRadians;
+}
+} // namespace
+
 /** Creates a geometric object directly from a XML shape string
  *
  *  @param shapeXML :: XML shape string
@@ -391,8 +401,10 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem, std::map<int,
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemRadius = getShapeElement(pElem, "radius");
   Element *pElemHeight = getShapeElement(pElem, "height");
+  Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
+  Element *pElem_gonio = getOptionalShapeElement(pElem, "goniometer");
 
-  const V3D normVec = normalize(parsePosition(pElemAxis));
+  V3D normVec = normalize(parsePosition(pElemAxis));
 
   // getDoubleAttribute can throw - put the calls above any new
   const double radius = getDoubleAttribute(pElemRadius, "val");
@@ -402,8 +414,25 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem, std::map<int,
   auto pCylinder = std::make_shared<Cylinder>();
   V3D centreOfBottomBase = parsePosition(pElemBase);
   pCylinder->setCentre(centreOfBottomBase + normVec * (0.5 * height));
-  pCylinder->setNorm(normVec);
   pCylinder->setRadius(radius);
+  // rotate the normal vector by the rotation and goniometer tags
+  if (pElem_rot) {
+    // Apply manual rotation supplied to rotation tag
+    std::vector<double> rotationAngles = DegreesToRadians(parsePosition(pElem_rot));
+    const std::vector<double> rotationMatrix = generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
+    normVec.rotate(rotationMatrix);
+  }
+  if (pElem_gonio) {
+    // Apply automatic rotation due to the goniometer that should not be manually defined by the user
+    // The rotation matrix is defined in the xml in units of radians
+    std::vector<double> rotationMatrix;
+    const std::vector<std::string> matrixElements = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
+    for (std::string elemName : matrixElements) {
+      rotationMatrix.push_back(getDoubleAttribute(pElem_gonio, elemName));
+    }
+    normVec.rotate(rotationMatrix);
+  }
+  pCylinder->setNorm(normVec);
   prim[l_id] = pCylinder;
 
   std::stringstream retAlgebraMatch;
@@ -585,12 +614,15 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
   Element *pElem_depth = getOptionalShapeElement(pElem, "depth");
   Element *pElem_centre = getOptionalShapeElement(pElem, "centre");
   Element *pElem_axis = getOptionalShapeElement(pElem, "axis");
+  Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
+  Element *pElem_gonio = getOptionalShapeElement(pElem, "goniometer");
 
   const bool usingPointSyntax = pElem_lfb && pElem_lft && pElem_lbb && pElem_rfb;
   const bool usingAlternateSyntax = pElem_height && pElem_width && pElem_depth;
 
   const bool usedPointSyntaxField = pElem_lfb || pElem_lft || pElem_lbb || pElem_rfb;
-  const bool usedAlternateSyntaxField = pElem_height || pElem_width || pElem_depth || pElem_centre || pElem_axis;
+  const bool usedAlternateSyntaxField =
+      pElem_height || pElem_width || pElem_depth || pElem_centre || pElem_axis || pElem_rot;
 
   const std::string SYNTAX_ERROR_MSG = "XML element: <" + pElem->tagName() +
                                        "> may contain EITHER corner points (LFB, LFT, LBB and RFB) OR " +
@@ -632,6 +664,32 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
       rotation.rotate(result.lft);
       rotation.rotate(result.lbb);
       rotation.rotate(result.rfb);
+    }
+
+    if (pElem_rot) {
+      // Apply manual rotation supplied to rotation tag
+      std::vector<double> rotationAngles = DegreesToRadians(parsePosition(pElem_rot));
+      const std::vector<double> rotationMatrix =
+          generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
+      result.lfb.rotate(rotationMatrix);
+      result.lft.rotate(rotationMatrix);
+      result.lbb.rotate(rotationMatrix);
+      result.rfb.rotate(rotationMatrix);
+    }
+
+    if (pElem_gonio && usingAlternateSyntax) {
+      // Apply automatic rotation due to the goniometer that should not be manually defined by the user
+      // The rotation matrix is defined in the xml in units of radians
+
+      std::vector<double> rotationMatrix;
+      const std::vector<std::string> matrixElements = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
+      for (std::string elemName : matrixElements) {
+        rotationMatrix.push_back(getDoubleAttribute(pElem_gonio, elemName));
+      }
+      result.lfb.rotate(rotationMatrix);
+      result.lft.rotate(rotationMatrix);
+      result.lbb.rotate(rotationMatrix);
+      result.rfb.rotate(rotationMatrix);
     }
 
     result.lfb += centre;
@@ -1416,5 +1474,56 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem, std::shared_
   geomHandler->setShapeInfo(std::move(shapeInfo));
 }
 
+/**
+ * Generates a rotation Matrix applying the x rotation then y rotation, then z
+ * rotation
+ * @param xRotation The x rotation required in radians
+ * @param yRotation The y rotation required in radians
+ * @param zRotation The z rotation required in radians
+ * @returns a matrix of doubles to use as the rotation matrix
+ */
+Kernel::Matrix<double> ShapeFactory::generateMatrix(double xRotation, double yRotation, double zRotation) {
+  Kernel::Matrix<double> xMatrix = generateXRotation(xRotation);
+  Kernel::Matrix<double> yMatrix = generateYRotation(yRotation);
+  Kernel::Matrix<double> zMatrix = generateZRotation(zRotation);
+
+  return zMatrix * yMatrix * xMatrix;
+}
+
+/**
+ *Generates the x component of the rotation matrix
+ *@param xRotation The x rotation required in radians
+ *@returns a matrix of doubles to use as the x axis rotation matrix
+ */
+Kernel::Matrix<double> ShapeFactory::generateXRotation(double xRotation) {
+  const double sinX = sin(xRotation);
+  const double cosX = cos(xRotation);
+  std::vector<double> matrixList = {1, 0, 0, 0, cosX, -sinX, 0, sinX, cosX};
+  return Kernel::Matrix<double>(matrixList);
+}
+
+/**
+ * Generates the y component of the rotation matrix
+ * @param yRotation The y rotation required in radians
+ * @returns a matrix of doubles to use as the y axis rotation matrix
+ */
+Kernel::Matrix<double> ShapeFactory::generateYRotation(double yRotation) {
+  const double sinY = sin(yRotation);
+  const double cosY = cos(yRotation);
+  std::vector<double> matrixList = {cosY, 0, sinY, 0, 1, 0, -sinY, 0, cosY};
+  return Kernel::Matrix<double>(matrixList);
+}
+
+/**
+ * Generates the z component of the rotation matrix
+ * @param zRotation The z rotation required in radians
+ * @returns a matrix of doubles to use as the z axis rotation matrix
+ */
+Kernel::Matrix<double> ShapeFactory::generateZRotation(double zRotation) {
+  const double sinZ = sin(zRotation);
+  const double cosZ = cos(zRotation);
+  std::vector<double> matrixList = {cosZ, -sinZ, 0, sinZ, cosZ, 0, 0, 0, 1};
+  return Kernel::Matrix<double>(matrixList);
+}
 } // namespace Geometry
 } // namespace Mantid
