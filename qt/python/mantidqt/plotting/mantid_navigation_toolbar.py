@@ -185,7 +185,7 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
                     QMessageBox.Ok, QMessageBox.NoButton)
 
     def set_history_buttons(self):
-        if LooseVersion(matplotlib.__version__) >= LooseVersion("2.2"):
+        if LooseVersion(matplotlib.__version__) >= LooseVersion("2.1.1"):
             can_backward = self._nav_stack._pos > 0
             can_forward = self._nav_stack._pos < len(self._nav_stack._elements) - 1
             if 'back' in self._actions:
