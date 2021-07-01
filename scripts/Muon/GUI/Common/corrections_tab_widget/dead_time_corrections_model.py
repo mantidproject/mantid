@@ -37,7 +37,8 @@ class DeadTimeCorrectionsModel:
 
     def _current_dead_times(self) -> list:
         """Returns a list of dead times for the currently displayed run and dead time mode."""
-        table_name = self._corrections_context.current_dead_time_table_name()
+        table_name = self._corrections_context.current_dead_time_table_name_for_run(
+            self._data_context.instrument, self._corrections_model.current_runs())
         table = retrieve_ws(table_name) if table_name else None
         return table.toDict()[DEAD_TIME_TABLE_KEY] if table is not None else []
 
@@ -52,8 +53,6 @@ class DeadTimeCorrectionsModel:
     def set_dead_time_source_to_from_file(self) -> None:
         """Sets the dead time source to be 'FromFile'."""
         self._corrections_context.dead_time_source = DEAD_TIME_FROM_FILE
-        self._corrections_context.dead_time_table_name_from_file = self._get_default_dead_time_table_for_run(
-            self._corrections_model.current_runs())
         self._corrections_context.dead_time_table_name_from_ads = None
 
     def set_dead_time_source_to_from_ads(self, table_name: str) -> None:
@@ -62,13 +61,11 @@ class DeadTimeCorrectionsModel:
             self.set_dead_time_source_to_none()
         else:
             self._corrections_context.dead_time_source = DEAD_TIME_FROM_ADS
-            self._corrections_context.dead_time_table_name_from_file = None
             self._corrections_context.dead_time_table_name_from_ads = table_name
 
     def set_dead_time_source_to_none(self) -> None:
         """Sets the dead time source to be 'None'."""
         self._corrections_context.dead_time_source = None
-        self._corrections_context.dead_time_table_name_from_file = None
         self._corrections_context.dead_time_table_name_from_ads = None
 
     def is_dead_time_source_from_data_file(self) -> bool:

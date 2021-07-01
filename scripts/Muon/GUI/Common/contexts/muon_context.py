@@ -339,9 +339,12 @@ class MuonContext(object):
                                           run_string,
                                           multi_period=False,
                                           workspace_suffix=self.workspace_suffix)
-        deadtime_table = self.dead_time_table(run_string)
-        if deadtime_table:
-            return apply_deadtime(name, output, deadtime_table)
+        if isinstance(run_string, str):
+            run = wsName.get_first_run_from_run_string(run_string)
+        dead_time_table = self._corrections_context.current_dead_time_table_name_for_run(self.data_context.instrument,
+                                                                                         [float(run)])
+        if dead_time_table:
+            return apply_deadtime(name, output, dead_time_table)
         return name
 
     def _run_rebin(self, name, rebin):
@@ -472,14 +475,6 @@ class MuonContext(object):
                 self.gui_context['LastGoodData'] = round(max(self.data_context.get_loaded_data_for_run(run)
                                                              ["OutputWorkspace"][0].workspace.dataX(0)), 2)
                 return self.gui_context['LastGoodData']
-
-    def dead_time_table(self, run):
-        if self._corrections_context.dead_time_source == "FromFile":
-            if isinstance(run, str):
-                run = wsName.get_first_run_from_run_string(run)
-            return self.data_context.get_loaded_data_for_run([float(run)])["DataDeadTimeTable"]
-        else:
-            return self._corrections_context.current_dead_time_table_name()
 
     def get_group_and_pair(self, group_and_pair):
         if group_and_pair == 'All':

@@ -86,7 +86,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.plot_panes_context = PlotPanesContext()
         self.group_pair_context = MuonGroupPairContext(
             self.data_context.check_group_contains_valid_detectors)
-        self.corrections_context = CorrectionsContext()
+        self.corrections_context = CorrectionsContext(self.loaded_data)
         self.phase_context = PhaseTableContext()
         self.fitting_context = BasicFittingContext(allow_double_pulse_fitting=True)
         self.results_context = ResultsContext()

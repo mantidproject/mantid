@@ -282,7 +282,8 @@ class MuonContextTest(unittest.TestCase):
         self.context.corrections_context.dead_time_source = "FromADS"
         self.context.corrections_context.dead_time_table_name_from_ads = "deadtime_table_name"
 
-        deadtime_table = self.context.dead_time_table([19489])
+        deadtime_table = self.context.corrections_context.current_dead_time_table_name_for_run(
+            self.context.data_context.instrument, [19489])
 
         self.assertEqual(deadtime_table, 'deadtime_table_name')
 
@@ -481,7 +482,7 @@ class MuonContextTest(unittest.TestCase):
         name_mock.return_value = raw_name
         self.context.dead_time_table = mock.Mock(return_value = None)
 
-        result = self.context._run_deadtime("EMU5234", name)
+        result = self.context._run_deadtime("5234", name)
         self.assertEqual(0, apply_mock.call_count)
         self.assertEqual(result, raw_name)
 
@@ -491,10 +492,11 @@ class MuonContextTest(unittest.TestCase):
         name = "EMU5234; PhaseQuad; test_Re__Im_; Rebin; MA"
         raw_name = 'EMU5234_raw_data MA'
         name_mock.return_value = raw_name
-        self.context.dead_time_table = mock.Mock(return_value = "table")
+        self.context.corrections_context.dead_time_source = "FromFile"
+        self.context.corrections_context.get_default_dead_time_table_name_for_run = mock.Mock(return_value = "table")
         apply_mock.return_value = name
 
-        result = self.context._run_deadtime("EMU5234", name)
+        result = self.context._run_deadtime("5234", name)
         apply_mock.assert_called_with(raw_name, name, "table")
         self.assertEqual(result, name)
 
