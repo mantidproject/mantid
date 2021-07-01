@@ -38,7 +38,7 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
     def cleanup(self):
         ADS.clear()
         try:
-            os.path.remove(self._peaks_file)
+            os.remove(self._peaks_file)
         except:
             pass
 
@@ -211,7 +211,7 @@ class WISHIntegrateSatellitePeaksTest(MantidSystemTest):
     def cleanup(self):
         ADS.clear()
         try:
-            os.path.remove(self._peaks_file)
+            os.remove(self._filepath)
         except:
             pass
 
