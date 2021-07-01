@@ -197,6 +197,11 @@ void MuonPeriodInfo::clear() {
 }
 
 /**
+ * @return :: True if the table is empty, False otherwise
+ */
+bool MuonPeriodInfo::isEmpty() const { return m_uiForm.table->rowCount() <= 0; }
+
+/**
  * Set up properties of the widgets table
  */
 void MuonPeriodInfo::setUpTable() {

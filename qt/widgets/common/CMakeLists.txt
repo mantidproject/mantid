@@ -986,6 +986,7 @@ set(
   test/ImageInfoModelMDTest.h
   test/ImageInfoPresenterTest.h
   test/InterfaceManagerTest.h
+  test/MuonPeriodInfoTest.h
   test/NonOrthogonalTest.h
   test/ParseKeyValueStringTest.h
   test/PlotAxisTest.h
@@ -1068,6 +1069,7 @@ set(
   test/ImageInfoPresenterTest.h
   test/InterfaceManagerTest.h
   test/ManageUserDirectoriesTest.h
+  test/MuonPeriodInfoTest.h
   test/QtJSONUtilsTest.h
   test/RepoModelTest.h
   test/Batch/BuildSubtreeItemsTest.h

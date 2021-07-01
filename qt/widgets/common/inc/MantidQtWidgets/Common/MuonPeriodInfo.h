@@ -34,6 +34,7 @@ public:
   int getNumberOfSequences() const;
   int getDAQCount() const;
   void clear();
+  bool isEmpty() const;
 
 private:
   void setUpTable();
