@@ -11,10 +11,12 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/Stitch.h"
 #include "MantidHistogramData/Histogram.h"
 
-using Mantid::Algorithms::Stitch;
+using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
 
@@ -56,7 +58,23 @@ public:
                             "Some invalid Properties found: [ InputWorkspaces ]");
   }
 
-  void test_WorkspaceGroup() {}
+  void test_WorkspaceGroup() {
+    auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
+    auto ws2 = pointDataWorkspaceOneSpectrum(17, 0.8, 0.9, "ws2");
+    GroupWorkspaces grouper;
+    grouper.initialize();
+    grouper.setAlwaysStoreInADS(true);
+    grouper.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"}));
+    grouper.setPropertyValue("OutputWorkspace", "group");
+    grouper.execute();
+
+    Stitch alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "group"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
 
   void test_WorkspacesAndGroupsMixed() {}
 
