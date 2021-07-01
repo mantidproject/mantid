@@ -8,6 +8,7 @@
 
 from mantidqt.icons import get_icon
 
+from qtpy.QtGui import QIcon
 from qtpy.QtCore import Signal, Qt
 from qtpy.QtWidgets import QToolBar, QFileDialog, QMessageBox, QLabel, QSizePolicy
 import matplotlib
@@ -57,6 +58,7 @@ class MantidStandardNavigationTools:
     PAN = MantidNavigationTool('Pan', 'Pan: L-click \nStretch: R-click', 'mdi.arrow-all', 'pan', False)
     SAVE = MantidNavigationTool('Save', 'Save image file', 'mdi.content-save', 'save_figure', None)
     ZOOM = MantidNavigationTool('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False)
+    CONFIGURE = MantidNavigationTool('Subplots', 'Edit subplots', 'mdi.settings', 'configure_subplots', None)
     SEPARATOR = MantidNavigationTool(None, None, None, None, None)
 
 
@@ -208,7 +210,7 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
         image = os.path.join(matplotlib.rcParams['datapath'],
                              'images', 'matplotlib.png')
         dia = SubplotToolQt(self.canvas.figure, self.canvas.parent())
-        dia.setWindowIcon(QtGui.QIcon(image))
+        dia.setWindowIcon(QIcon(image))
         dia.exec_()
 
     def set_action_enabled(self, text: str, state: bool):
