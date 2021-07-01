@@ -109,7 +109,7 @@ std::pair<std::string, herr_t> readStringAttributeN(hid_t attr, char *data) {
     dataString = vdat;
     free(vdat);
   }
-  return std::pair<std::string, herr_t>(data, iRet);
+  return std::pair<std::string, herr_t>(dataString, iRet);
 }
 
 void getGroup(hid_t groupID, std::map<std::string, std::set<std::string>> &allEntries) {
