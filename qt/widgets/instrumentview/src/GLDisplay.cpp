@@ -7,7 +7,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
+#include "MantidQtWidgets/InstrumentView/GLDisplay.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
@@ -38,7 +38,7 @@ namespace MantidWidgets {
 
 const Qt::CursorShape cursorShape = Qt::ArrowCursor;
 
-MantidGLWidget::MantidGLWidget(QWidget *parent)
+GLDisplay::GLDisplay(QWidget *parent)
     : IGLDisplay(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel), parent),
       // m_polygonMode(SOLID),
       // m_lightingState(0),
@@ -55,9 +55,9 @@ MantidGLWidget::MantidGLWidget(QWidget *parent)
   setMouseTracking(true);
 }
 
-MantidGLWidget::~MantidGLWidget() {}
+GLDisplay::~GLDisplay() {}
 
-void MantidGLWidget::setSurface(std::shared_ptr<ProjectionSurface> surface) {
+void GLDisplay::setSurface(std::shared_ptr<ProjectionSurface> surface) {
   m_surface = std::move(surface);
   connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()), Qt::QueuedConnection);
   m_firstFrame = true;
@@ -68,7 +68,7 @@ void MantidGLWidget::setSurface(std::shared_ptr<ProjectionSurface> surface) {
  * the widget
  * is initialized.
  */
-void MantidGLWidget::initializeGL() {
+void GLDisplay::initializeGL() {
   setCursor(cursorShape); // This is to set the initial window mouse cursor to
                           // Hand icon
 
@@ -82,7 +82,7 @@ void MantidGLWidget::initializeGL() {
                1.0);
 }
 
-void MantidGLWidget::setRenderingOptions() {
+void GLDisplay::setRenderingOptions() {
   // Enable depth testing. This only draws points that are not hidden by other
   // objects
   glEnable(GL_DEPTH_TEST);
@@ -106,7 +106,7 @@ void MantidGLWidget::setRenderingOptions() {
  * This is overridden function which is called by Qt when the widget needs to be
  * repainted.
  */
-void MantidGLWidget::paintEvent(QPaintEvent *event) {
+void GLDisplay::paintEvent(QPaintEvent *event) {
   UNUSED_ARG(event)
   makeCurrent();
   if (m_surface) {
@@ -125,7 +125,7 @@ void MantidGLWidget::paintEvent(QPaintEvent *event) {
  * the widget is resized
  * This method resizes the viewport according to the new widget width and height
  */
-void MantidGLWidget::resizeGL(int width, int height) {
+void GLDisplay::resizeGL(int width, int height) {
   if (m_surface) {
     m_surface->resize(width, height);
   }
@@ -134,7 +134,7 @@ void MantidGLWidget::resizeGL(int width, int height) {
 /**
  * Called when a context menu event is recieved
  */
-void MantidGLWidget::contextMenuEvent(QContextMenuEvent *event) {
+void GLDisplay::contextMenuEvent(QContextMenuEvent *event) {
   UNUSED_ARG(event) // avoid compiler warning
 }
 
@@ -148,7 +148,7 @@ void MantidGLWidget::contextMenuEvent(QContextMenuEvent *event) {
  * @param event :: This is the event variable which has the position and button
  * states
  */
-void MantidGLWidget::mousePressEvent(QMouseEvent *event) {
+void GLDisplay::mousePressEvent(QMouseEvent *event) {
   if (m_surface) {
     m_surface->mousePressEvent(event);
   }
@@ -163,7 +163,7 @@ void MantidGLWidget::mousePressEvent(QMouseEvent *event) {
  * @param event :: This is the event variable which has the position and button
  * states
  */
-void MantidGLWidget::mouseMoveEvent(QMouseEvent *event) {
+void GLDisplay::mouseMoveEvent(QMouseEvent *event) {
   if (m_surface) {
     m_surface->mouseMoveEvent(event);
   }
@@ -176,7 +176,7 @@ void MantidGLWidget::mouseMoveEvent(QMouseEvent *event) {
  * @param event :: This is the event variable which has the position and button
  * states
  */
-void MantidGLWidget::mouseReleaseEvent(QMouseEvent *event) {
+void GLDisplay::mouseReleaseEvent(QMouseEvent *event) {
   if (m_surface) {
     m_surface->mouseReleaseEvent(event);
   }
@@ -187,7 +187,7 @@ void MantidGLWidget::mouseReleaseEvent(QMouseEvent *event) {
  * Mouse wheel event to set the zooming in and out
  * @param event :: This is the event variable which has the status of the wheel
  */
-void MantidGLWidget::wheelEvent(QWheelEvent *event) {
+void GLDisplay::wheelEvent(QWheelEvent *event) {
   if (m_surface) {
     m_surface->wheelEvent(event);
   }
@@ -200,7 +200,7 @@ void MantidGLWidget::wheelEvent(QWheelEvent *event) {
  * @param event :: This is the event variable which has the status of the
  * keyboard
  */
-void MantidGLWidget::keyPressEvent(QKeyEvent *event) {
+void GLDisplay::keyPressEvent(QKeyEvent *event) {
   if (m_surface) {
     m_surface->keyPressEvent(event);
   }
@@ -213,23 +213,23 @@ void MantidGLWidget::keyPressEvent(QKeyEvent *event) {
  * @param event :: This is the event variable which has the status of the
  * keyboard
  */
-void MantidGLWidget::keyReleaseEvent(QKeyEvent *event) {
+void GLDisplay::keyReleaseEvent(QKeyEvent *event) {
   releaseKeyboard();
   setCursor(cursorShape);
   m_isKeyPressed = false;
   if (!event->isAutoRepeat()) {
     update();
   }
-  OpenGLError::check("MantidGLWidget::keyReleaseEvent");
+  OpenGLError::check("GLDisplay::keyReleaseEvent");
 }
 
 /**
  * This method set the background color.
  */
-void MantidGLWidget::setBackgroundColor(const QColor &input) {
+void GLDisplay::setBackgroundColor(const QColor &input) {
   makeCurrent();
   glClearColor(GLclampf(input.red() / 255.0), GLclampf(input.green() / 255.0), GLclampf(input.blue() / 255.0), 1.0);
-  OpenGLError::check("MantidGLWidget::setBackgroundColor");
+  OpenGLError::check("GLDisplay::setBackgroundColor");
   if (m_surface) {
     m_surface->setBackgroundColor(input);
     m_surface->updateView(false);
@@ -237,7 +237,7 @@ void MantidGLWidget::setBackgroundColor(const QColor &input) {
   update();
 }
 
-QColor MantidGLWidget::currentBackgroundColor() const {
+QColor GLDisplay::currentBackgroundColor() const {
   return m_surface ? m_surface->getBackgroundColor() : QColor(Qt::black);
 }
 
@@ -245,21 +245,21 @@ QColor MantidGLWidget::currentBackgroundColor() const {
  * This saves the GL scene to a file.
  * @param filename :: The name of the file
  */
-void MantidGLWidget::saveToFile(const QString &filename) {
+void GLDisplay::saveToFile(const QString &filename) {
   if (filename.isEmpty())
     return;
   // It seems QGLWidget grabs the back buffer
   this->swapBuffers(); // temporarily swap the buffers
   QImage image = this->grabFrameBuffer();
   this->swapBuffers(); // swap them back
-  OpenGLError::check("MantidGLWidget::saveToFile");
+  OpenGLError::check("GLDisplay::saveToFile");
   image.save(filename);
 }
 
 /**
  * Resets the widget for new instrument definition
  */
-void MantidGLWidget::resetWidget() {
+void GLDisplay::resetWidget() {
   // setActorCollection(std::shared_ptr<GLActorCollection>(new
   // GLActorCollection()));
 }
@@ -268,23 +268,23 @@ void MantidGLWidget::resetWidget() {
  * Enables / disables lighting on the surfaces that support it.
  * @param on :: Set true to turn lighting on or false to turn it off.
  */
-void MantidGLWidget::enableLighting(bool on) {
+void GLDisplay::enableLighting(bool on) {
   if (m_surface) {
     m_surface->enableLighting(on);
     updateView();
   }
 }
 
-void MantidGLWidget::draw() {
+void GLDisplay::draw() {
   QApplication::setOverrideCursor(Qt::WaitCursor);
   if (m_surface) {
     m_surface->draw(this);
   }
   QApplication::restoreOverrideCursor();
-  OpenGLError::check("MantidGLWidget::drawUnwrapped()");
+  OpenGLError::check("GLDisplay::drawUnwrapped()");
 }
 
-void MantidGLWidget::componentSelected(size_t componentIndex) {
+void GLDisplay::componentSelected(size_t componentIndex) {
   if (m_surface) {
     m_surface->componentSelected(componentIndex);
     m_surface->updateView();
@@ -296,28 +296,28 @@ void MantidGLWidget::componentSelected(size_t componentIndex) {
 /// @param picking :: Set to true to update the picking image regardless the
 /// interaction
 ///   mode of the surface.
-void MantidGLWidget::updateView(bool picking) {
+void GLDisplay::updateView(bool picking) {
   if (m_surface) {
     m_surface->updateView(picking);
     update();
   }
 }
 
-void MantidGLWidget::updateDetectors() {
+void GLDisplay::updateDetectors() {
   if (m_surface) {
     m_surface->updateDetectors();
     update();
   }
 }
 
-void MantidGLWidget::enterEvent(QEvent *ev) {
+void GLDisplay::enterEvent(QEvent *ev) {
   if (m_surface) {
     m_surface->enterEvent(ev);
   }
   update();
 }
 
-void MantidGLWidget::leaveEvent(QEvent *ev) {
+void GLDisplay::leaveEvent(QEvent *ev) {
   // Restore possible override cursor
   while (QApplication::overrideCursor()) {
     QApplication::restoreOverrideCursor();

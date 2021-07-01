@@ -26,7 +26,7 @@ set(
   src/InstrumentRenderer.cpp
   src/InstrumentWidgetTab.cpp
   src/InstrumentWidgetTreeTab.cpp
-  src/MantidGLWidget.cpp
+  src/GLDisplay.cpp
   src/MaskBinsData.cpp
   src/OpenGLError.cpp
   src/PanelsSurface.cpp
@@ -71,7 +71,7 @@ set(
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h
-  inc/MantidQtWidgets/InstrumentView/MantidGLWidget.h
+  inc/MantidQtWidgets/InstrumentView/GLDisplay.h
   inc/MantidQtWidgets/InstrumentView/PeakOverlay.h
   inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h
   inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h
@@ -120,7 +120,7 @@ set(
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTypes.h
-  inc/MantidQtWidgets/InstrumentView/MantidGLWidget.h
+  inc/MantidQtWidgets/InstrumentView/GLDisplay.h
   inc/MantidQtWidgets/InstrumentView/MaskBinsData.h
   inc/MantidQtWidgets/InstrumentView/OpenGLError.h
   inc/MantidQtWidgets/InstrumentView/PanelsSurface.h

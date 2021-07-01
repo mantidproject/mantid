@@ -130,7 +130,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
 
   // Create the display widget
   if (!m_glDisplay)
-    m_glDisplay = std::make_unique<MantidGLWidget>(this);
+    m_glDisplay = std::make_unique<GLDisplay>(this);
   m_glDisplay->qtInstallEventFilter(this);
   m_glDisplay->setMinimumWidth(600);
   m_qtConnect->connect(this, SIGNAL(enableLighting(bool)), m_glDisplay.get(), SLOT(enableLighting(bool)));
@@ -1035,8 +1035,7 @@ void InstrumentWidget::dropEvent(QDropEvent *e) {
  */
 bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
   if (ev->type() == QEvent::ContextMenu &&
-      (dynamic_cast<MantidGLWidget *>(obj) == m_glDisplay.get() ||
-       dynamic_cast<QtDisplay *>(obj) == m_qtDisplay.get()) &&
+      (dynamic_cast<GLDisplay *>(obj) == m_glDisplay.get() || dynamic_cast<QtDisplay *>(obj) == m_qtDisplay.get()) &&
       getSurface() && getSurface()->canShowContextMenu()) {
     // an ugly way of preventing the curve in the pick tab's miniplot
     // disappearing when
