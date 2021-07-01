@@ -256,6 +256,14 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
         self._view.redraw_figure()
 
+    def set_override_x_tick_labels(self, override_x_ticks: list) -> None:
+        """Sets the override x tick labels to use when plotting data."""
+        self._view.set_override_x_tick_labels(override_x_ticks)
+
+    def set_override_y_tick_labels(self, override_y_ticks: list) -> None:
+        """Sets the override y tick labels to use when plotting data."""
+        self._view.set_override_y_tick_labels(override_y_ticks)
+
     def get_plot_x_range(self):
         """Returns the x range of the first plot
         :return: a tuple contained the start and end ranges"""

@@ -25,6 +25,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
         self.parameter_combination_thread_success = True
 
+        self.update_override_tick_labels_notifier = GenericObservable()
         self.update_plot_x_range_notifier = GenericObservable()
 
         self.results_table_created_observer = GenericObserverWithArgPassing(self.handle_new_results_table_created)
@@ -154,6 +155,10 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
     def update_plot_fit(self) -> None:
         """Updates the fit results on the plot using the currently active fit results."""
+        x_tick_labels, y_tick_labels = self.model.get_override_x_and_y_tick_labels(self.view.x_parameter(),
+                                                                                   self.view.y_parameter())
+        self.update_override_tick_labels_notifier.notify_subscribers([x_tick_labels, y_tick_labels])
+
         x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
         self.update_plot_x_range_notifier.notify_subscribers([x_lower, x_upper])
         self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())

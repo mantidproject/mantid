@@ -353,6 +353,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.model_fitting_tab.model_fitting_tab_presenter.update_plot_x_range_notifier.add_subscriber(
             self.plot_widget.model_fit_mode.update_x_range_observer)
 
+        self.model_fitting_tab.model_fitting_tab_presenter.update_override_tick_labels_notifier.add_subscriber(
+            self.plot_widget.model_fit_mode.update_override_tick_labels_observer)
+
     def setup_grouping_changed_observers(self):
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
             self.home_tab.home_tab_widget.groupingObserver)

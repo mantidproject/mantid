@@ -18,6 +18,8 @@ class PlotModelFitPanePresenter(PlotFitPanePresenter):
         self._sort_by = [""]
         self.update_view()
 
+        self.update_override_tick_labels_observer = GenericObserverWithArgPassing(
+            self.update_override_x_and_y_tick_labels)
         self.update_x_range_observer = GenericObserverWithArgPassing(self.update_x_plot_range)
 
         self._figure_presenter.set_autoscale(True)
@@ -28,7 +30,12 @@ class PlotModelFitPanePresenter(PlotFitPanePresenter):
         self._view.hide_plot_raw()
         self._view.hide_tiled_by()
 
-    def update_x_plot_range(self, x_limits: list) -> list:
+    def update_override_x_and_y_tick_labels(self, tick_labels: list) -> None:
+        """Updates the override x and y tick labels to use when plotting data."""
+        self._figure_presenter.set_override_x_tick_labels(tick_labels[0])
+        self._figure_presenter.set_override_y_tick_labels(tick_labels[1])
+
+    def update_x_plot_range(self, x_limits: list) -> None:
         """Updates the x range of a plot using the provided x limits of a workspace."""
         self._figure_presenter.set_plot_range(self._calculate_new_x_range(x_limits))
 

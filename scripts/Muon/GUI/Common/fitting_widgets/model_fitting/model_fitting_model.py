@@ -274,3 +274,19 @@ class ModelFittingModel(BasicFittingModel):
     def _is_in_unit_factory(parameter_name: str) -> bool:
         """Returns true of the provided parameter exists in the UnitFactory."""
         return parameter_name in UnitFactory.getKeys()
+
+    def get_override_x_and_y_tick_labels(self, x_parameter_name: str, y_parameter_name: str) -> tuple:
+        """Returns the override x and y tick labels to use when plotting."""
+        override_x_tick_labels = self._get_override_tick_labels_if_str(x_parameter_name,
+                                                                       self.fitting_context.x_parameters)
+        override_y_tick_labels = self._get_override_tick_labels_if_str(y_parameter_name,
+                                                                       self.fitting_context.y_parameters)
+        return override_x_tick_labels, override_y_tick_labels
+
+    @staticmethod
+    def _get_override_tick_labels_if_str(parameter_name: str, parameters: dict) -> list:
+        """Returns a list of tick labels to use as override labels if the parameter values are strings."""
+        if parameter_name in parameters:
+            parameter_values = parameters[parameter_name]
+            return parameter_values if type(parameter_values[0]) == str else []
+        return []
