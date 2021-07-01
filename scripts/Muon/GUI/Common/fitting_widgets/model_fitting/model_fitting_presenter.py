@@ -84,7 +84,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
     def handle_parameter_combinations_created_successfully(self) -> None:
         """Handles when the parameter combination workspaces have been created successfully."""
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
-        self.view.update_dataset_name_combo_box(self.model.dataset_names)
+        self.view.update_dataset_name_combo_box(self.model.dataset_names, emit_signal=False)
 
         # Initially, the y parameters should be updated before the x parameters.
         self.view.update_y_parameters(self.model.y_parameters())
