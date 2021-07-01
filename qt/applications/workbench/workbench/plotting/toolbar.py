@@ -71,6 +71,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
                              'mdi.script-text-outline', 'generate_plot_script', None, _create_script_action),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
+        MantidNavigationTool('Superplot', 'Open/close superplot tab', None, 'toggle_superplot', False),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool('Offset', 'Adjust curve offset %', 'mdi.arrow-expand-horizontal',
                              'waterfall_offset_amount', None),
