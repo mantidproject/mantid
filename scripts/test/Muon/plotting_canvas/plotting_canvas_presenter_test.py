@@ -58,7 +58,7 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         xlims = [5, 15]
         self.context.set_error_all(state)
         self.context.set_autoscale_all(state)
-        self.context.update_ylim_all(ylime)
+        self.context.update_ylim_all(ylims)
         self.context.update_xlim_all(xlims)
 
         self.options.set_autoscale = mock.Mock()
