@@ -229,6 +229,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             if workspace_name == plotted_workspace_name:
                 axis = self.fig.axes[workspace_plot_info.axis]
                 axis.replace_workspace_artists(workspace)
+                self._set_override_tick_labels(axis)
         self.redraw_figure()
 
     def replot_workspace_with_error_state(self, workspace_name, with_errors: bool):
@@ -259,6 +260,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def set_axes_limits(self, xlim, ylim):
         plt.setp(self.fig.axes, xlim=xlim, ylim=ylim)
+
+    def set_override_axes_tick_labels(self):
+        for axis in self.fig.axes:
+            self._set_override_tick_labels(axis)
 
     def autoscale_y_axes(self):
         ymin = 1e9

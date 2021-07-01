@@ -134,6 +134,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         # check if to force autoscale
         if self._options_presenter.autoscale:
             autoscale = True
+        self._view.set_override_axes_tick_labels()
         self._set_axes_limits_and_titles(autoscale)
 
     def should_update_all(self, selected_subplots):
