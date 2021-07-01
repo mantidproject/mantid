@@ -5,14 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
-from qtpy.QtCore import Signal, Qt
-from qtpy.QtWidgets import QToolBar, QFileDialog, QMessageBox, QLabel, QSizePolicy
-from matplotlib.backend_bases import NavigationToolbar2
-from matplotlib import backend_tools
-import matplotlib
-import os
 
 from mantidqt.icons import get_icon
+
+from qtpy.QtCore import Signal, Qt
+from qtpy.QtWidgets import QToolBar, QFileDialog, QMessageBox, QLabel, QSizePolicy
+import matplotlib
+from matplotlib.backend_bases import NavigationToolbar2
+from matplotlib.backends.backend_qt5 import SubplotToolQt
+from matplotlib import backend_tools
+
+from distutils.version import LooseVersion
+import os
 
 
 class MantidNavigationTool:
@@ -137,6 +141,14 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
     def remove_rubberband(self):
         self.canvas.drawRectangle(None)
 
+    def zoom(self, *args):
+        super().zoom(*args)
+        self._update_buttons_checked()
+
+    def pan(self, *args):
+        super().pan(*args)
+        self._update_buttons_checked()
+
     def save_figure(self, *args):
         filetypes = self.canvas.get_supported_filetypes_grouped()
         sorted_filetypes = sorted(filetypes.items())
@@ -171,12 +183,13 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
                     QMessageBox.Ok, QMessageBox.NoButton)
 
     def set_history_buttons(self):
-        can_backward = self._nav_stack._pos > 0
-        can_forward = self._nav_stack._pos < len(self._nav_stack._elements) - 1
-        if 'back' in self._actions:
-            self._actions['back'].setEnabled(can_backward)
-        if 'forward' in self._actions:
-            self._actions['forward'].setEnabled(can_forward)
+        if LooseVersion(matplotlib.__version__) >= LooseVersion("2.2"):
+            can_backward = self._nav_stack._pos > 0
+            can_forward = self._nav_stack._pos < len(self._nav_stack._elements) - 1
+            if 'back' in self._actions:
+                self._actions['back'].setEnabled(can_backward)
+            if 'forward' in self._actions:
+                self._actions['forward'].setEnabled(can_forward)
 
     def _get_mode(self):
         if hasattr(self, 'name'):
@@ -190,6 +203,13 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
             self._actions['pan'].setChecked(self._get_mode() == 'PAN' or self._get_mode() == 'pan/zoom'  )
         if 'zoom' in self._actions:
             self._actions['zoom'].setChecked(self._get_mode()  == 'ZOOM' or self._get_mode() == 'zoom rect' )
+
+    def configure_subplots(self):
+        image = os.path.join(matplotlib.rcParams['datapath'],
+                             'images', 'matplotlib.png')
+        dia = SubplotToolQt(self.canvas.figure, self.canvas.parent())
+        dia.setWindowIcon(QtGui.QIcon(image))
+        dia.exec_()
 
     def set_action_enabled(self, text: str, state: bool):
         """
