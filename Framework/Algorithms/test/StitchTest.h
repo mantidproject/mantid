@@ -25,6 +25,8 @@ public:
   static StitchTest *createSuite() { return new StitchTest(); }
   static void destroySuite(StitchTest *suite) { delete suite; }
 
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
   void test_Init() {
     Stitch alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -43,7 +45,16 @@ public:
                             "No overlap is found between the intervals: [0.3,0.7] and [0.8, 0.9]");
   }
 
-  void test_OneWorkspace() {}
+  void test_OneWorkspace() {
+    auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
+    Stitch alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1"})));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: [ InputWorkspaces ]");
+  }
 
   void test_WorkspaceGroup() {}
 
