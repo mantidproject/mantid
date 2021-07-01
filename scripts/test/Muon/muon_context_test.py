@@ -279,7 +279,8 @@ class MuonContextTest(unittest.TestCase):
         self.assertEqual(last_good_data, 5)
 
     def test_that_dead_time_table_from_ADS_returns_table_name(self):
-        self.gui_context.update({'DeadTimeSource': 'FromADS', 'DeadTimeTable': 'deadtime_table_name'})
+        self.context.corrections_context.dead_time_source = "FromADS"
+        self.context.corrections_context.dead_time_table_name_from_ads = "deadtime_table_name"
 
         deadtime_table = self.context.dead_time_table([19489])
 
