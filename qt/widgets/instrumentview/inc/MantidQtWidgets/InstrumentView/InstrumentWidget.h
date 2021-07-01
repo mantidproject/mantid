@@ -10,6 +10,7 @@
 #include "IMantidGLWidget.h"
 #include "ISimpleWidget.h"
 #include "InstrumentWidgetTypes.h"
+#include "QtConnect.h"
 #include "UnwrappedSurface.h"
 
 #include "MantidAPI/AlgorithmObserver.h"
@@ -97,7 +98,9 @@ public:
 
   explicit InstrumentWidget(const QString &wsName, QWidget *parent = nullptr, bool resetGeometry = true,
                             bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
-                            bool setDefaultView = true);
+                            bool setDefaultView = true, std::unique_ptr<ISimpleWidget> simpleDisplay = nullptr,
+                            std::unique_ptr<IMantidGLWidget> instrumentDisplay = nullptr,
+                            std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>());
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;
@@ -276,9 +279,9 @@ protected:
   InstrumentWidgetPickTab *m_pickTab;
   XIntegrationControl *m_xIntegration;
   /// The OpenGL widget to display the instrument
-  IMantidGLWidget *m_InstrumentDisplay;
+  std::unique_ptr<IMantidGLWidget> m_InstrumentDisplay;
   /// The simple widget to display the instrument
-  ISimpleWidget *m_simpleDisplay;
+  std::unique_ptr<ISimpleWidget> m_simpleDisplay;
 
   // Context menu actions
   QAction *m_clearPeakOverlays, *m_clearAlignment;
@@ -343,6 +346,9 @@ private:
   bool m_wsReplace;
   QPushButton *m_help;
   QVBoxLayout *m_mainLayout;
+
+  /// Wrapper around Qt connect function so we can mock it
+  std::unique_ptr<QtConnect> m_qtConnect;
 };
 
 } // namespace MantidWidgets
