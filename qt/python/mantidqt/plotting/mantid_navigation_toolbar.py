@@ -207,7 +207,7 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
             self._actions['zoom'].setChecked(self._get_mode()  == 'ZOOM' or self._get_mode() == 'zoom rect' )
 
     def configure_subplots(self):
-        image = os.path.join(matplotlib.rcParams['datapath'],
+        image = os.path.join(matplotlib.get_data_path(),
                              'images', 'matplotlib.png')
         dia = SubplotToolQt(self.canvas.figure, self.canvas.parent())
         dia.setWindowIcon(QIcon(image))
