@@ -63,7 +63,7 @@ class ProjectionSurface;
 namespace Detail {
 struct Dependencies {
   std::unique_ptr<IQtDisplay> qtDisplay = nullptr;
-  std::unique_ptr<IGLDisplay> instrumentDisplay = nullptr;
+  std::unique_ptr<IGLDisplay> glDisplay = nullptr;
   std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
 };
 
