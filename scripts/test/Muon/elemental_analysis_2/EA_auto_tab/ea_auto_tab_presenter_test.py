@@ -16,8 +16,8 @@ class EAAutoTabPresenterTest(unittest.TestCase):
         for group_name in workspaces:
             group = EAGroup(group_name, group_name.split(";")[1].strip(),
                             group_name.split(";")[0].strip())
-            group.update_peak_table("9999", group_name + PEAKS_WS_SUFFIX)
-            group.update_matches_table("9999", group_name + MATCH_GROUP_WS_SUFFIX)
+            group.update_peak_table(group_name + PEAKS_WS_SUFFIX)
+            group.update_matches_table(group_name + MATCH_GROUP_WS_SUFFIX)
             self.group_context.add_group(group)
 
         self.context = ElementalAnalysisContext(None, self.group_context)
@@ -120,7 +120,7 @@ class EAAutoTabPresenterTest(unittest.TestCase):
                                                                                             '9999; Detector 4_peaks']})
 
         self.presenter.view.add_options_to_show_matches_combobox.assert_called_once_with({'9999':
-                                                                                          get_names_return_value * 4})
+                                                                                              get_names_return_value * 4})
 
         self.presenter.view.set_peak_info.assert_called_once_with(workspace="mock_peak_info", number_of_peaks=0)
 

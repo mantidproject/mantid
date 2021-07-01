@@ -102,7 +102,7 @@ class EAAutoTabModel(object):
             group_workspace = retrieve_ws(workspace)
             for group in self.context.group_context.groups:
                 if group.run_number == workspace:
-                    workspace_name = group.get_counts_workspace_for_run(workspace, rebin=False)
+                    workspace_name = group.get_counts_workspace_for_run(rebin=False)
                     tmp_parameters = copy.deepcopy(parameters)
                     tmp_parameters["workspace"] = workspace_name
                     if not self._run_find_peak_algorithm(tmp_parameters, group_workspace, True):

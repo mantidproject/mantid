@@ -25,21 +25,9 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         """
         Handles the data type being changed in the view by plotting the workspaces corresponding to the new data type
         """
-        # if self._check_if_counts_selected():
-        # return
         self.handle_data_updated(autoscale=True, hold_on=False)
         # the data change probably means its the wrong scale
         self._figure_presenter.force_autoscale()
-        """
-        def _check_if_counts_and_pairs_selected(self):
-            if len(self.context.group_pair_context.selected_pairs) != 0 and \
-                    self._view.get_plot_type() == "Counts":
-                self._view.set_plot_type("Asymmetry")
-                self._view.warning_popup(
-                    'Pair workspaces have no counts workspace, plotting Asymmetry')
-                return True
-            return False
-        """
 
     def handle_data_updated(self, autoscale=True, hold_on=False):
         workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
@@ -63,9 +51,6 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         """
         Handles a group being added from the view
         """
-        # unsafe_to_add = self._check_if_counts_and_pairs_selected()
-        # if unsafe_to_add:
-        # return
         self.handle_data_updated()
 
     def handle_removed_group_from_plot(self, group_name: str):
@@ -112,3 +97,11 @@ class EAPlotDataPanePresenter(BasePanePresenter):
             group = self.context.group_context[group_name]
             is_rebinned.append(group.is_rebinned_workspace_present())
         return any(is_rebinned)
+
+    def _update_tile_plot(self):
+        if self._view.is_tiled_plot():
+            tiled_by = self._view.tiled_by()
+            self.context.plot_panes_context[self.name].set_tiled_by(tiled_by)
+            keys = self._model.create_tiled_keys(tiled_by)
+            self._figure_presenter.create_tiled_plot(keys)
+            self._figure_presenter._handle_autoscale_y_axes()

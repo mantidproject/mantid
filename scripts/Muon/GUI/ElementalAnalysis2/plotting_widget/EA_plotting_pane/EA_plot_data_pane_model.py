@@ -5,8 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_model import BasePaneModel
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 SPECTRA_INDICES = {"Delayed": 0, "Prompt": 1, "Total": 2}
+INVERSE_SPECTRA_INDICES = {0: "Delayed", 1: "Prompt", 2: "Total"}
 
 
 class EAPlotDataPaneModel(BasePaneModel):
@@ -77,3 +79,20 @@ class EAPlotDataPaneModel(BasePaneModel):
         indices = self._generate_run_indices(workspace_list, plot_type)
 
         return workspace_list, indices
+
+    def create_tiled_keys(self, tiled_by):
+        if tiled_by == "Detector":
+            detectors_present = []
+            for group_name in self.context.group_context.selected_groups:
+                group = self.context.group_context[group_name]
+                detectors_present.append(group.detector)
+            keys = list(set(detectors_present))
+        else:
+            keys = [run_list_to_string(item) for item in self.context.data_context.current_runs]
+        return keys
+
+    def _create_workspace_label(self, workspace_name, index):
+        return workspace_name + "_" + INVERSE_SPECTRA_INDICES[index]
+
+    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map):
+        return 0
