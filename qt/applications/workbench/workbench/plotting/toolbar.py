@@ -68,7 +68,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         MantidNavigationTool('Customize', 'Options menu', 'mdi.settings', 'launch_plot_options', None),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool('Create Script', 'Generate script to recreate the current figure',
-                             'mdi.script-text-outline', 'home', None, _create_script_action),
+                             'mdi.script-text-outline', 'generate_plot_script', None, _create_script_action),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
         MantidStandardNavigationTools.SEPARATOR,
