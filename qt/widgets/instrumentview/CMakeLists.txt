@@ -105,7 +105,7 @@ set(
   inc/MantidQtWidgets/InstrumentView/GridTextureFace.h
 
   inc/MantidQtWidgets/InstrumentView/IQtDisplay.h
-  inc/MantidQtWidgets/InstrumentView/IMantidGLWidget.h
+  inc/MantidQtWidgets/InstrumentView/IGLDisplay.h
 
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h

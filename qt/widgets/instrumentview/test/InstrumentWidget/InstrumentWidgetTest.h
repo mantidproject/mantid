@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IMantidGLWidget.h"
+#include "IGLDisplay.h"
 #include "IQtDisplay.h"
 #include "InstrumentWidget.h"
 

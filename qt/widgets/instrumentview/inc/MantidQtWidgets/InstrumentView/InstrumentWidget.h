@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
-#include "IMantidGLWidget.h"
+#include "IGLDisplay.h"
 #include "IQtDisplay.h"
 #include "InstrumentWidgetTypes.h"
 #include "QtConnect.h"
@@ -63,7 +63,7 @@ class ProjectionSurface;
 namespace Detail {
 struct Dependencies {
   std::unique_ptr<IQtDisplay> qtDisplay = nullptr;
-  std::unique_ptr<IMantidGLWidget> instrumentDisplay = nullptr;
+  std::unique_ptr<IGLDisplay> instrumentDisplay = nullptr;
   std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
 };
 
@@ -287,7 +287,7 @@ protected:
   InstrumentWidgetPickTab *m_pickTab;
   XIntegrationControl *m_xIntegration;
   /// The OpenGL widget to display the instrument
-  std::unique_ptr<IMantidGLWidget> m_glDisplay;
+  std::unique_ptr<IGLDisplay> m_glDisplay;
   /// The simple widget to display the instrument
   std::unique_ptr<IQtDisplay> m_qtDisplay;
 

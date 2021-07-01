@@ -39,7 +39,7 @@ namespace MantidWidgets {
 const Qt::CursorShape cursorShape = Qt::ArrowCursor;
 
 MantidGLWidget::MantidGLWidget(QWidget *parent)
-    : IMantidGLWidget(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel), parent),
+    : IGLDisplay(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel), parent),
       // m_polygonMode(SOLID),
       // m_lightingState(0),
       m_isKeyPressed(false), m_firstFrame(true) {

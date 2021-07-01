@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IMantidGLWidget.h"
+#include "IGLDisplay.h"
 #include "MantidGeometry/IComponent.h"
 
 #include <QGLWidget>
@@ -23,7 +23,7 @@ class ProjectionSurface;
 \brief  OpenGL Qt Widget which renders Mantid Geometry ObjComponents
 */
 
-class MantidGLWidget final : public IMantidGLWidget {
+class MantidGLWidget final : public IGLDisplay {
   Q_OBJECT
 public:
   explicit MantidGLWidget(QWidget *parent = nullptr); ///< Constructor
