@@ -206,6 +206,8 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(all_states.save_types, expected)
 
     def test_view_updated_from_model(self):
+        # Avoid an error with magic mock not having __round__
+        self.presenter._set_on_view_to_custom_view = mock.Mock()
         self.presenter.update_view_from_model()
         self.assertEqual(self.mock_run_tab_model.get_save_types.return_value, self._mock_view.save_types)
 
