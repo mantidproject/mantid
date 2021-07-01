@@ -112,7 +112,7 @@ public:
  */
 InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool resetGeometry, bool autoscaling,
                                    double scaleMin, double scaleMax, bool setDefaultView, Dependencies deps)
-    : QWidget(parent), WorkspaceObserver(), m_InstrumentDisplay(std::move(deps.instrumentDisplay)),
+    : QWidget(parent), WorkspaceObserver(), m_glDisplay(std::move(deps.instrumentDisplay)),
       m_qtDisplay(std::move(deps.qtDisplay)), m_workspaceName(wsName), m_instrumentActor(nullptr),
       m_surfaceType(FULL3D), m_savedialog_dir(QString::fromStdString(
                                  Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
@@ -129,11 +129,11 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
   controlPanelLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   // Create the display widget
-  if (!m_InstrumentDisplay)
-    m_InstrumentDisplay = std::make_unique<MantidGLWidget>(this);
-  m_InstrumentDisplay->qtInstallEventFilter(this);
-  m_InstrumentDisplay->setMinimumWidth(600);
-  m_qtConnect->connect(this, SIGNAL(enableLighting(bool)), m_InstrumentDisplay.get(), SLOT(enableLighting(bool)));
+  if (!m_glDisplay)
+    m_glDisplay = std::make_unique<MantidGLWidget>(this);
+  m_glDisplay->qtInstallEventFilter(this);
+  m_glDisplay->setMinimumWidth(600);
+  m_qtConnect->connect(this, SIGNAL(enableLighting(bool)), m_glDisplay.get(), SLOT(enableLighting(bool)));
 
   // Create simple display widget
   if (!m_qtDisplay)
@@ -142,7 +142,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
 
   QWidget *aWidget = new QWidget(this);
   m_instrumentDisplayLayout = new QStackedLayout(aWidget);
-  m_instrumentDisplayLayout->addWidget(m_InstrumentDisplay.get());
+  m_instrumentDisplayLayout->addWidget(m_glDisplay.get());
   m_instrumentDisplayLayout->addWidget(m_qtDisplay.get());
 
   controlPanelLayout->addWidget(aWidget);
@@ -827,7 +827,7 @@ void InstrumentWidget::saveImage(QString filename) {
   }
 
   if (isGLEnabled()) {
-    m_InstrumentDisplay->saveToFile(filename);
+    m_glDisplay->saveToFile(filename);
   } else {
     m_qtDisplay->saveToFile(filename);
   }
@@ -862,8 +862,8 @@ void InstrumentWidget::setInfoText(const QString &text) { mInteractionInfo->setT
 void InstrumentWidget::saveSettings() {
   QSettings settings;
   settings.beginGroup(InstrumentWidgetSettingsGroup);
-  if (m_InstrumentDisplay)
-    settings.setValue("BackgroundColor", m_InstrumentDisplay->currentBackgroundColor());
+  if (m_glDisplay)
+    settings.setValue("BackgroundColor", m_glDisplay->currentBackgroundColor());
   auto surface = getSurface();
   if (surface) {
     // if surface is null istrument view wasn't created and there is nothing to
@@ -893,7 +893,7 @@ void InstrumentWidget::finishHandle(const Mantid::API::IAlgorithm *alg) {
   UNUSED_ARG(alg);
   emit needSetIntegrationRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
   // m_instrumentActor->update();
-  // m_InstrumentDisplay->refreshView();
+  // m_glDisplay->refreshView();
 }
 
 void InstrumentWidget::changeScaleType(int type) {
@@ -1028,14 +1028,14 @@ void InstrumentWidget::dropEvent(QDropEvent *e) {
 }
 
 /**
- * Filter events directed to m_InstrumentDisplay and ContextMenuEvent in
+ * Filter events directed to m_glDisplay and ContextMenuEvent in
  * particular.
  * @param obj :: Object which events will be filtered.
  * @param ev :: An ingoing event.
  */
 bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
   if (ev->type() == QEvent::ContextMenu &&
-      (dynamic_cast<MantidGLWidget *>(obj) == m_InstrumentDisplay.get() ||
+      (dynamic_cast<MantidGLWidget *>(obj) == m_glDisplay.get() ||
        dynamic_cast<QtDisplay *>(obj) == m_qtDisplay.get()) &&
       getSurface() && getSurface()->canShowContextMenu()) {
     // an ugly way of preventing the curve in the pick tab's miniplot
@@ -1164,8 +1164,8 @@ void InstrumentWidget::setShowPeakRelativeIntensity(bool on) {
  * @param color :: New background colour.
  */
 void InstrumentWidget::setBackgroundColor(const QColor &color) {
-  if (m_InstrumentDisplay)
-    m_InstrumentDisplay->setBackgroundColor(color);
+  if (m_glDisplay)
+    m_glDisplay->setBackgroundColor(color);
 }
 
 /**
@@ -1180,8 +1180,8 @@ QString InstrumentWidget::getSurfaceInfoText() const {
  * Get pointer to the projection surface
  */
 ProjectionSurface_sptr InstrumentWidget::getSurface() const {
-  if (m_InstrumentDisplay) {
-    return m_InstrumentDisplay->getSurface();
+  if (m_glDisplay) {
+    return m_glDisplay->getSurface();
   } else if (m_qtDisplay) {
     return m_qtDisplay->getSurface();
   }
@@ -1196,9 +1196,9 @@ bool MantidQt::MantidWidgets::InstrumentWidget::isWsBeingReplaced() const { retu
  */
 void InstrumentWidget::setSurface(ProjectionSurface *surface) {
   ProjectionSurface_sptr sharedSurface(surface);
-  if (m_InstrumentDisplay) {
-    m_InstrumentDisplay->setSurface(sharedSurface);
-    m_InstrumentDisplay->update();
+  if (m_glDisplay) {
+    m_glDisplay->setSurface(sharedSurface);
+    m_glDisplay->update();
   }
   if (m_qtDisplay) {
     m_qtDisplay->setSurface(sharedSurface);
@@ -1220,8 +1220,8 @@ QSize InstrumentWidget::glWidgetDimensions() {
     return QSize(w->width() * devicePixelRatio, w->height() * devicePixelRatio);
   };
 #endif
-  if (m_InstrumentDisplay)
-    return sizeinLogicalPixels(m_InstrumentDisplay.get());
+  if (m_glDisplay)
+    return sizeinLogicalPixels(m_glDisplay.get());
   else if (m_qtDisplay)
     return sizeinLogicalPixels(m_qtDisplay.get());
   else
@@ -1233,9 +1233,8 @@ QSize InstrumentWidget::glWidgetDimensions() {
 /// interaction
 ///   mode of the surface.
 void InstrumentWidget::updateInstrumentView(bool picking) {
-  if (m_InstrumentDisplay &&
-      m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget *>(m_InstrumentDisplay.get())) {
-    m_InstrumentDisplay->updateView(picking);
+  if (m_glDisplay && m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget *>(m_glDisplay.get())) {
+    m_glDisplay->updateView(picking);
   } else {
     m_qtDisplay->updateView(picking);
   }
@@ -1244,9 +1243,8 @@ void InstrumentWidget::updateInstrumentView(bool picking) {
 /// Recalculate the colours and redraw the instrument view
 void InstrumentWidget::updateInstrumentDetectors() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  if (m_InstrumentDisplay &&
-      m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget *>(m_InstrumentDisplay.get())) {
-    m_InstrumentDisplay->updateDetectors();
+  if (m_glDisplay && m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget *>(m_glDisplay.get())) {
+    m_glDisplay->updateDetectors();
   } else {
     m_qtDisplay->updateDetectors();
   }

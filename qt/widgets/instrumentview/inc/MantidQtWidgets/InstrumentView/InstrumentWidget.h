@@ -287,7 +287,7 @@ protected:
   InstrumentWidgetPickTab *m_pickTab;
   XIntegrationControl *m_xIntegration;
   /// The OpenGL widget to display the instrument
-  std::unique_ptr<IMantidGLWidget> m_InstrumentDisplay;
+  std::unique_ptr<IMantidGLWidget> m_glDisplay;
   /// The simple widget to display the instrument
   std::unique_ptr<IQtDisplay> m_qtDisplay;
 
@@ -304,7 +304,7 @@ protected:
   bool m_useOpenGL;
   /// 3D view or unwrapped
   SurfaceType m_surfaceType;
-  /// Stacked layout managing m_InstrumentDisplay and m_qtDisplay
+  /// Stacked layout managing m_glDisplay and m_qtDisplay
   QStackedLayout *m_instrumentDisplayLayout;
   /// spectra index id
   int mSpectraIDSelected;
