@@ -53,13 +53,19 @@ def cc_calibrate_groups(data_ws,
     if previous_calibration:
         ApplyDiffCal(data_ws, CalibrationWorkspace=previous_calibration)
 
-    data_d = ConvertUnits(data_ws, Target='dSpacing')
+    data_d = ConvertUnits(data_ws, Target='dSpacing', OutputWorkspace='data_d')
 
     group_list = np.unique(group_ws.extractY())
 
     for group in group_list:
         indexes = np.where(group_ws.extractY().flatten() == group)[0]
-        ExtractSpectra(data_d, WorkspaceIndexList=indexes, OutputWorkspace='_tmp_group_cc')
+        sn = np.array(group_ws.getSpectrumNumbers())[indexes]
+        try:
+            ws_indexes = [data_d.getIndexFromSpectrumNumber(int(i)) for i in sn]
+        except RuntimeError:
+            # data does not contain spectrum in group
+            continue
+        ExtractSpectra(data_d, WorkspaceIndexList=ws_indexes, OutputWorkspace='_tmp_group_cc')
         ExtractUnmaskedSpectra('_tmp_group_cc', OutputWorkspace='_tmp_group_cc')
         if mtd['_tmp_group_cc'].getNumberHistograms() < 2:
             continue
