@@ -240,7 +240,7 @@ ComponentPosition CalibrationTableHandler::getComponentCalibratedPosition(const 
 DataObjects::TableWorkspace_sptr
 CalibrationTableHandler::loadComponentCalibrationTable(const std::string &filename, const std::string &tablewsname) {
   // Get algorithm handler
-  IAlgorithm_sptr loadAsciiAlg = AlgorithmFactory::Instance().create("LoadAscii", 2);
+  auto loadAsciiAlg = AlgorithmFactory::Instance().create("LoadAscii", 2);
   // Set parameters
   if (tablewsname.size() == 0) {
     throw std::runtime_error("Failed to load ASCII as OutputWorkspace name is empty string.");
@@ -295,7 +295,7 @@ TableWorkspace_sptr CalibrationTableHandler::saveCompomentDatabase(const std::st
   // save the updated history of positions to the database file. Will overwrite
   // the file if extant
   // Note: only version 2 of SaveAscii can work with TableWorkspace
-  IAlgorithm_sptr saveAsciiAlg = AlgorithmFactory::Instance().create("SaveAscii", 2);
+  auto saveAsciiAlg = AlgorithmFactory::Instance().create("SaveAscii", 2);
   saveAsciiAlg->initialize();
   saveAsciiAlg->setProperty("InputWorkspace", compcaltable);
   saveAsciiAlg->setProperty("Filename", filename);
@@ -317,7 +317,7 @@ TableWorkspace_sptr CalibrationTableHandler::saveCompomentDatabase(const std::st
  */
 void CalibrationTableHandler::saveCalibrationTable(const std::string &filename) {
   // create algorithm: only version 2 of SaveAscii can work with TableWorkspace
-  IAlgorithm_sptr saveAsciiAlg = AlgorithmFactory::Instance().create("SaveAscii", 2);
+  auto saveAsciiAlg = AlgorithmFactory::Instance().create("SaveAscii", 2);
   saveAsciiAlg->initialize();
   saveAsciiAlg->setProperty("InputWorkspace", mCalibWS);
   saveAsciiAlg->setProperty("Filename", filename);

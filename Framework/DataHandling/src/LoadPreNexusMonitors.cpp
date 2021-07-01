@@ -214,7 +214,7 @@ void LoadPreNexusMonitors::exec() {
 void LoadPreNexusMonitors::runLoadInstrument(const std::string &instrument,
                                              const MatrixWorkspace_sptr &localWorkspace) {
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);

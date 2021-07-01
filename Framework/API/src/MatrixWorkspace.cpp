@@ -1649,7 +1649,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(const coord_t *coords,
   const auto &yVals = this->y(wi);
   double yBinSize(1.0); // only applies for volume normalization & numeric axis
   if (normalization == VolumeNormalization && ax1->isNumeric()) {
-    size_t uVI; // unused vertical index.
+    size_t uVI = 0; // unused vertical index.
     double currentVertical = ax1->operator()(wi, uVI);
     if (wi + 1 == nhist && nhist > 1) // On the boundary, look back to get diff
     {

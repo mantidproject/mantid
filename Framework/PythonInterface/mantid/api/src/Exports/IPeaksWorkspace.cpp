@@ -60,11 +60,21 @@ IPeak *createPeakQSample(IPeaksWorkspace &self, const object &data) {
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
-void addPeak(IPeaksWorkspace &self, const IPeak &peak) { self.addPeak(peak); }
+void addPeak(IPeaksWorkspace &self, const IPeak &peak) {
+  self.addPeak(peak);
+  self.modified();
+}
 
 /// Add a peak with its Q-vector (using a list of numpy array) and the coordinate frm (Qlab, Qsmaple, HKL)
 void addPeak2(IPeaksWorkspace &self, const object &data, const SpecialCoordinateSystem &frame) {
   self.addPeak(PyObjectToV3D(data)(), frame);
+  self.modified();
+}
+
+/// Remove a peak and send an AfterReplaceNotification for subscribed viewers, such as sliceviewer's
+void removePeak(IPeaksWorkspace &self, int peak_num) {
+  self.removePeak(peak_num);
+  self.modified();
 }
 
 /**
@@ -246,8 +256,7 @@ void export_IPeaksWorkspace() {
            "Returns the number of peaks within the workspace")
       .def("addPeak", addPeak, (arg("self"), arg("peak")), "Add a peak to the workspace")
       .def("addPeak", addPeak2, (arg("self"), arg("data"), arg("coord_system")), "Add a peak to the workspace")
-      .def("removePeak", &IPeaksWorkspace::removePeak, (arg("self"), arg("peak_num")),
-           "Remove a peak from the workspace")
+      .def("removePeak", removePeak, (arg("self"), arg("peak_num")), "Remove a peak from the workspace")
       .def("getPeak", &IPeaksWorkspace::getPeakPtr, (arg("self"), arg("peak_num")), return_internal_reference<>(),
            "Returns a peak at the given index")
       .def("createPeak", createPeakQLab, (arg("self"), arg("data")), return_value_policy<manage_new_object>(),

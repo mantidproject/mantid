@@ -93,6 +93,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         """ inputs is a dict mapping filepaths to output names """
         for path, output in inputs.items():
             workspace = LoadAscii(path, OutputWorkspace=output)
+            workspace.setE(0, np.sqrt(workspace.dataY(0)))
             workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
 
     def merge_and_crop_workspaces(self, workspaces):

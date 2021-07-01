@@ -117,6 +117,16 @@ class PeaksViewerPresenterTest(unittest.TestCase):
         mock_model.viewlimits.assert_called_once_with(0)
         self.mock_view.set_axes_limits.assert_called_once_with(*viewlimits, auto_transform=False)
 
+    def test_add_delete_peaks(self, mock_peaks_list_presenter):
+        name = 'ws1'
+        mock_model = create_mock_model(name)
+        self.mock_view.sliceinfo.frame = 'Frame'
+        presenter = PeaksViewerPresenter(mock_model, self.mock_view)
+        presenter.add_peak([1, 2, 3])
+        mock_model.add_peak.assert_called_once_with([1, 2, 3], 'Frame')
+        presenter.delete_peak([1, 2, 3])
+        mock_model.delete_peak.assert_called_once_with([1, 2, 3], 'Frame')
+
 
 if __name__ == '__main__':
     unittest.main()

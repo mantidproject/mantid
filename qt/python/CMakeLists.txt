@@ -73,6 +73,7 @@ if(ENABLE_WORKBENCH)
       mantidqt/project/test/test_workspacesaver.py
       mantidqt/project/test/test_projectparser_mantidplot.py
       mantidqt/utils/test/test_async.py
+      mantidqt/utils/test/test_async_qt_adaptor.py
       mantidqt/utils/test/test_modal_tester.py
       mantidqt/utils/test/test_qt_utils.py
       mantidqt/utils/test/test_writetosignal.py
@@ -131,18 +132,26 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_transform.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_zoom.py
+        mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_actions.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_view.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksviewercollectionpresenter.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectormodel.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectorpresenter.py
+        mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_sliceviewer_add_delete_peaks_integration.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_alpha.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_draw.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_painter.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_nonintegrated.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_ellipsoid.py
+        mantidqt/widgets/superplot/test/test_superplot_model.py
+        mantidqt/widgets/superplot/test/test_superplot_presenter.py
+        mantidqt/widgets/superplot/test/test_superplot_view.py
         mantidqt/widgets/test/test_jupyterconsole.py
+        mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_view.py
+        mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_presenter.py
+        mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_model.py
         mantidqt/widgets/workspacedisplay/test/test_data_copier.py
         mantidqt/widgets/workspacedisplay/test/test_workspacedisplay_view.py
         mantidqt/widgets/workspacedisplay/test/test_user_notifier.py

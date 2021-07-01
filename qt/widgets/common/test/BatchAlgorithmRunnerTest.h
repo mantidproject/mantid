@@ -14,9 +14,17 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MockConfiguredAlgorithm.h"
+
+#include <QSignalSpy>
 
 using namespace Mantid::API;
+using namespace MantidQt::API;
 using MantidQt::API::BatchAlgorithmRunner;
+using testing::NiceMock;
+using testing::Return;
+
+using IConfiguredAlgorithm_sptr = std::shared_ptr<IConfiguredAlgorithm>;
 
 class BatchAlgorithmRunnerTest : public CxxTest::TestSuite {
 public:
@@ -121,12 +129,13 @@ public:
   void test_basicBatchWorkspaceFailure() {
     BatchAlgorithmRunner runner(nullptr);
 
-    inputFromCreateProps["InputWorkspace"] = "BatchAlgorithmRunner_NoWorkspace";
+    auto props = inputFromCreateProps;
+    props["InputWorkspace"] = "BatchAlgorithmRunner_NoWorkspace";
 
     // Add them to the queue
     // Define the input (and inout, if used) WS properties here
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(cropWsAlg, props);
 
     // Run queue
     TS_ASSERT(!runner.executeBatch());
@@ -139,16 +148,205 @@ public:
   void test_basicBatchPropertyFailure() {
     BatchAlgorithmRunner runner(nullptr);
 
-    inputFromCreateProps["NotAValidProperty"] = "sample_data.nxs";
+    auto props = inputFromCreateProps;
+    props["NotAValidProperty"] = "sample_data.nxs";
 
     // Add them to the queue
     // Define the input (and inout, if used) WS properties here
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(cropWsAlg, props);
 
     // Run queue
     TS_ASSERT(!runner.executeBatch());
     TS_ASSERT_EQUALS(runner.queueLength(), 0);
+  }
+
+  /**
+   * Tests setting the entire queue in one call
+   */
+  void test_setQueue() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    auto queue = makeQueueWithThreeMockAlgs();
+    runner.setQueue(queue);
+
+    TS_ASSERT_EQUALS(runner.queueLength(), 3);
+
+    TS_ASSERT(runner.executeBatch());
+    TS_ASSERT_EQUALS(runner.queueLength(), 0);
+  }
+
+  /**
+   * Tests clearing a queue
+   */
+  void test_clearQueue() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    auto queue = makeQueueWithThreeMockAlgs();
+    runner.setQueue(queue);
+    runner.clearQueue();
+
+    TS_ASSERT_EQUALS(runner.queueLength(), 0);
+  }
+
+  /**
+   * The following tests check that notifications are handled
+   */
+
+  void test_completedWithThreeAlgs() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    QSignalSpy batchCompleteSpy(&runner, &BatchAlgorithmRunner::batchComplete);
+    QSignalSpy batchCancelledSpy(&runner, &BatchAlgorithmRunner::batchCancelled);
+    QSignalSpy algStartSpy(&runner, &BatchAlgorithmRunner::algorithmStarted);
+    QSignalSpy algCompleteSpy(&runner, &BatchAlgorithmRunner::algorithmComplete);
+    QSignalSpy algErrorSpy(&runner, &BatchAlgorithmRunner::algorithmError);
+
+    executeThreeAlgs(runner);
+
+    TS_ASSERT_EQUALS(batchCompleteSpy.count(), 1);
+    TS_ASSERT_EQUALS(batchCancelledSpy.count(), 0);
+    TS_ASSERT_EQUALS(algStartSpy.count(), 3);
+    TS_ASSERT_EQUALS(algCompleteSpy.count(), 3);
+    TS_ASSERT_EQUALS(algErrorSpy.count(), 0);
+    // Check the batch error flag is false
+    auto args = batchCompleteSpy.takeFirst();
+    TS_ASSERT_EQUALS(args.at(0).toBool(), false);
+  }
+
+  void test_batchFailedDueToMissingWorkspace() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    QSignalSpy batchCompleteSpy(&runner, &BatchAlgorithmRunner::batchComplete);
+    QSignalSpy batchCancelledSpy(&runner, &BatchAlgorithmRunner::batchCancelled);
+    QSignalSpy algStartSpy(&runner, &BatchAlgorithmRunner::algorithmStarted);
+    QSignalSpy algCompleteSpy(&runner, &BatchAlgorithmRunner::algorithmComplete);
+    QSignalSpy algErrorSpy(&runner, &BatchAlgorithmRunner::algorithmError);
+
+    executeAlgWithMissingWorkspace(runner);
+
+    TS_ASSERT_EQUALS(batchCompleteSpy.count(), 1);
+    TS_ASSERT_EQUALS(batchCancelledSpy.count(), 0);
+    TS_ASSERT_EQUALS(algStartSpy.count(), 1);
+    TS_ASSERT_EQUALS(algCompleteSpy.count(), 1);
+    TS_ASSERT_EQUALS(algErrorSpy.count(), 1);
+    // Check the batch error flag is true
+    auto args = batchCompleteSpy.takeFirst();
+    TS_ASSERT_EQUALS(args.at(0).toBool(), true);
+  }
+
+  void test_batchFailedDueToInvalidProperty() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    QSignalSpy batchCompleteSpy(&runner, &BatchAlgorithmRunner::batchComplete);
+    QSignalSpy batchCancelledSpy(&runner, &BatchAlgorithmRunner::batchCancelled);
+    QSignalSpy algStartSpy(&runner, &BatchAlgorithmRunner::algorithmStarted);
+    QSignalSpy algCompleteSpy(&runner, &BatchAlgorithmRunner::algorithmComplete);
+    QSignalSpy algErrorSpy(&runner, &BatchAlgorithmRunner::algorithmError);
+
+    executeAlgWithInvalidProperty(runner);
+
+    TS_ASSERT_EQUALS(batchCompleteSpy.count(), 1);
+    TS_ASSERT_EQUALS(batchCancelledSpy.count(), 0);
+    TS_ASSERT_EQUALS(algStartSpy.count(), 1);
+    TS_ASSERT_EQUALS(algCompleteSpy.count(), 1);
+    TS_ASSERT_EQUALS(algErrorSpy.count(), 1);
+    // Check the batch error flag is true
+    auto args = batchCompleteSpy.takeFirst();
+    TS_ASSERT_EQUALS(args.at(0).toBool(), true);
+  }
+
+  void test_stopOnFailure() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    QSignalSpy batchCompleteSpy(&runner, &BatchAlgorithmRunner::batchComplete);
+    QSignalSpy batchCancelledSpy(&runner, &BatchAlgorithmRunner::batchCancelled);
+    QSignalSpy algStartSpy(&runner, &BatchAlgorithmRunner::algorithmStarted);
+    QSignalSpy algCompleteSpy(&runner, &BatchAlgorithmRunner::algorithmComplete);
+    QSignalSpy algErrorSpy(&runner, &BatchAlgorithmRunner::algorithmError);
+
+    executeThreeAlgsWithSecondFailing(runner);
+
+    TS_ASSERT_EQUALS(batchCompleteSpy.count(), 1);
+    TS_ASSERT_EQUALS(batchCancelledSpy.count(), 0);
+    // Only the first algorithm completes because it quits after the failure
+    TS_ASSERT_EQUALS(algStartSpy.count(), 1);
+    TS_ASSERT_EQUALS(algCompleteSpy.count(), 1);
+    TS_ASSERT_EQUALS(algErrorSpy.count(), 1);
+    // Check the batch error flag is true
+    auto args = batchCompleteSpy.takeFirst();
+    TS_ASSERT_EQUALS(args.at(0).toBool(), true);
+  }
+
+  void test_continuesIfStopOnFailureIsDisabled() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    QSignalSpy batchCompleteSpy(&runner, &BatchAlgorithmRunner::batchComplete);
+    QSignalSpy batchCancelledSpy(&runner, &BatchAlgorithmRunner::batchCancelled);
+    QSignalSpy algStartSpy(&runner, &BatchAlgorithmRunner::algorithmStarted);
+    QSignalSpy algCompleteSpy(&runner, &BatchAlgorithmRunner::algorithmComplete);
+    QSignalSpy algErrorSpy(&runner, &BatchAlgorithmRunner::algorithmError);
+
+    runner.stopOnFailure(false);
+    executeThreeAlgsWithSecondFailing(runner);
+
+    TS_ASSERT_EQUALS(batchCompleteSpy.count(), 1);
+    TS_ASSERT_EQUALS(batchCancelledSpy.count(), 0);
+    // We continue after the failure so the first and third algorithms both complete
+    TS_ASSERT_EQUALS(algStartSpy.count(), 2);
+    TS_ASSERT_EQUALS(algCompleteSpy.count(), 2);
+    TS_ASSERT_EQUALS(algErrorSpy.count(), 1);
+    // The error flag is false if not stopping on failure
+    auto args = batchCompleteSpy.takeFirst();
+    TS_ASSERT_EQUALS(args.at(0).toBool(), false);
+  }
+
+  void test_cancelBatchWithQueue() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    QSignalSpy batchCompleteSpy(&runner, &BatchAlgorithmRunner::batchComplete);
+    QSignalSpy batchCancelledSpy(&runner, &BatchAlgorithmRunner::batchCancelled);
+    QSignalSpy algStartSpy(&runner, &BatchAlgorithmRunner::algorithmStarted);
+    QSignalSpy algCompleteSpy(&runner, &BatchAlgorithmRunner::algorithmComplete);
+    QSignalSpy algErrorSpy(&runner, &BatchAlgorithmRunner::algorithmError);
+
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+
+    runner.cancelBatch();
+    runner.executeBatch();
+
+    // No algorithms are run if they were in the queue before we cancelled
+    TS_ASSERT_EQUALS(batchCompleteSpy.count(), 0);
+    TS_ASSERT_EQUALS(batchCancelledSpy.count(), 1);
+    TS_ASSERT_EQUALS(algStartSpy.count(), 0);
+    TS_ASSERT_EQUALS(algCompleteSpy.count(), 0);
+    TS_ASSERT_EQUALS(algErrorSpy.count(), 0);
+  }
+
+  void test_cancelBatchWithEmptyQueueThenAddAlgsToQueue() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    QSignalSpy batchCompleteSpy(&runner, &BatchAlgorithmRunner::batchComplete);
+    QSignalSpy batchCancelledSpy(&runner, &BatchAlgorithmRunner::batchCancelled);
+    QSignalSpy algStartSpy(&runner, &BatchAlgorithmRunner::algorithmStarted);
+    QSignalSpy algCompleteSpy(&runner, &BatchAlgorithmRunner::algorithmComplete);
+    QSignalSpy algErrorSpy(&runner, &BatchAlgorithmRunner::algorithmError);
+
+    runner.cancelBatch();
+
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+    runner.executeBatch();
+
+    // The empty queue was cancelled immediately so any subsequent queue is executed as normal
+    TS_ASSERT_EQUALS(batchCompleteSpy.count(), 1);
+    TS_ASSERT_EQUALS(batchCancelledSpy.count(), 1);
+    TS_ASSERT_EQUALS(algStartSpy.count(), 3);
+    TS_ASSERT_EQUALS(algCompleteSpy.count(), 3);
+    TS_ASSERT_EQUALS(algErrorSpy.count(), 0);
   }
 
 private:
@@ -159,4 +357,47 @@ private:
   BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCreateProps;
   BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCropProps;
   BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromScaleProps;
+
+  void executeThreeAlgs(BatchAlgorithmRunner &runner) {
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+    runner.executeBatch();
+  }
+
+  void executeThreeAlgsWithSecondFailing(BatchAlgorithmRunner &runner) {
+    auto props = inputFromCreateProps;
+    props["InputWorkspace"] = "BatchAlgorithmRunner_NoWorkspace";
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, props);
+    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+    runner.executeBatch();
+  }
+
+  void executeAlgWithMissingWorkspace(BatchAlgorithmRunner &runner) {
+    auto props = inputFromCreateProps;
+    props["InputWorkspace"] = "BatchAlgorithmRunner_NoWorkspace";
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, props);
+    runner.executeBatch();
+  }
+
+  void executeAlgWithInvalidProperty(BatchAlgorithmRunner &runner) {
+    auto props = inputFromCreateProps;
+    props["NotAValidProperty"] = "sample_data.nxs";
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, props);
+    runner.executeBatch();
+  }
+
+  BatchAlgorithmRunner::AlgorithmRuntimeProps emptyProperties() {
+    return BatchAlgorithmRunner::AlgorithmRuntimeProps();
+  }
+
+  std::deque<IConfiguredAlgorithm_sptr> makeQueueWithThreeMockAlgs() {
+    auto mockAlg = std::make_shared<NiceMock<MockConfiguredAlgorithm>>();
+    ON_CALL(*mockAlg, algorithm).WillByDefault(Return(createWsAlg));
+    ON_CALL(*mockAlg, properties).WillByDefault(Return(emptyProperties()));
+    return std::deque<IConfiguredAlgorithm_sptr>{mockAlg, mockAlg, mockAlg};
+  }
 };

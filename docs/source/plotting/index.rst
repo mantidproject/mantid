@@ -468,6 +468,8 @@ Both can be found `online <https://www.rapidtables.com/web/color/html-color-code
    fig.suptitle('Line Plots: Color Cycle', fontsize='x-large')
    #fig.show()
 
+.. _custom-colormap-mantidworkbench:
+
 Custom Colormap (MantidWorkbench)
 #################################
 

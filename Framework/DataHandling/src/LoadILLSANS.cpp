@@ -592,7 +592,7 @@ std::string LoadILLSANS::getInstrumentFilePath(const std::string &instName) cons
  */
 void LoadILLSANS::runLoadInstrument() {
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
   if (m_resMode == "nominal") {
     loadInst->setPropertyValue("Filename", getInstrumentFilePath(m_instrumentName));
   } else if (m_resMode == "low") {
@@ -633,7 +633,7 @@ void LoadILLSANS::moveDetectorsD33(const DetectorPosition &detPos) {
  */
 void LoadILLSANS::moveDetectorDistance(double distance, const std::string &componentName) {
 
-  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
+  auto mover = createChildAlgorithm("MoveInstrumentComponent");
   V3D pos = getComponentPosition(componentName);
   mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   mover->setProperty("ComponentName", componentName);
@@ -653,7 +653,7 @@ void LoadILLSANS::moveDetectorDistance(double distance, const std::string &compo
  * @param componentName : "detector"
  */
 void LoadILLSANS::rotateInstrument(double angle, const std::string &componentName) {
-  API::IAlgorithm_sptr rotater = createChildAlgorithm("RotateInstrumentComponent");
+  auto rotater = createChildAlgorithm("RotateInstrumentComponent");
   rotater->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   rotater->setProperty("ComponentName", componentName);
   rotater->setProperty("X", 0.);
@@ -672,7 +672,7 @@ void LoadILLSANS::rotateInstrument(double angle, const std::string &componentNam
  * @param componentName : "detector"
  */
 void LoadILLSANS::placeD16(double angle, double distance, const std::string &componentName) {
-  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
+  auto mover = createChildAlgorithm("MoveInstrumentComponent");
   mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   mover->setProperty("ComponentName", componentName);
   mover->setProperty("X", sin(angle * M_PI / 180) * distance);
@@ -696,7 +696,7 @@ void LoadILLSANS::placeD16(double angle, double distance, const std::string &com
  * @param componentName : the name of the component
  */
 void LoadILLSANS::moveDetectorHorizontal(double shift, const std::string &componentName) {
-  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
+  auto mover = createChildAlgorithm("MoveInstrumentComponent");
   V3D pos = getComponentPosition(componentName);
   mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   mover->setProperty("ComponentName", componentName);
@@ -714,7 +714,7 @@ void LoadILLSANS::moveDetectorHorizontal(double shift, const std::string &compon
  * @param componentName : the name of the component
  */
 void LoadILLSANS::moveDetectorVertical(double shift, const std::string &componentName) {
-  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
+  auto mover = createChildAlgorithm("MoveInstrumentComponent");
   V3D pos = getComponentPosition(componentName);
   mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   mover->setProperty("ComponentName", componentName);
@@ -867,7 +867,7 @@ void LoadILLSANS::adjustTOF() {
  * Used only for D33 in TOF mode
  */
 void LoadILLSANS::moveSource() {
-  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
+  auto mover = createChildAlgorithm("MoveInstrumentComponent");
   mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   mover->setProperty("ComponentName", "moderator");
   mover->setProperty("X", 0.);
