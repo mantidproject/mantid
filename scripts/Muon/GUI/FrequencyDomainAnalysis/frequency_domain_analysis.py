@@ -390,12 +390,10 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
     def setup_on_recalculation_finished_notifier(self):
         for observer in self.plot_widget.data_changed_observers:
             self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(observer)
+            self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
             self.corrections_tab.corrections_tab_presenter.corrections_complete_observer)
-
-        self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(
-            self.update_plot_observer)
 
     def setup_phase_quad_changed_notifier(self):
         self.phase_tab.phase_table_presenter.phasequad_calculation_complete_notifier.add_subscriber(

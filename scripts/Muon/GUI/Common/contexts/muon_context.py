@@ -305,7 +305,7 @@ class MuonContext(object):
         parameters['InputWorkspace'] = self._run_deadtime(run_string, ws_name)
         runs = self._data_context.current_runs
         if runs:
-            parameters['InputWorkspace'] = run_crop_workspace(ws_name, self.first_good_data(runs[0]),
+            parameters['InputWorkspace'] = run_crop_workspace(parameters['InputWorkspace'], self.first_good_data(runs[0]),
                                                               self.last_good_data(runs[0]))
 
         phase_quad = run_PhaseQuad(parameters, ws_name)
@@ -332,10 +332,8 @@ class MuonContext(object):
                 rebin=rebin)
 
     def _run_deadtime(self, run_string, output):
-        name =get_raw_data_workspace_name(self.data_context.instrument,
-                                          run_string,
-                                          multi_period=False,
-                                          workspace_suffix=self.workspace_suffix)
+        name = get_raw_data_workspace_name(self.data_context.instrument, run_string, multi_period=False,
+                                           workspace_suffix=self.workspace_suffix)
         if isinstance(run_string, str):
             run = wsName.get_first_run_from_run_string(run_string)
         dead_time_table = self._corrections_context.current_dead_time_table_name_for_run(self.data_context.instrument,

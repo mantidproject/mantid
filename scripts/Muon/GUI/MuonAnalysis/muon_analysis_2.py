@@ -443,9 +443,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         for observer in self.plot_widget.data_changed_observers:
             self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(observer)
-
-        self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(
-            self.update_plot_observer)
+            self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(observer)
 
     def setup_phase_quad_changed_notifier(self):
         pass

@@ -415,7 +415,8 @@ class MuonContextTest(unittest.TestCase):
     def test_calculate_phasequad(self, crop_mock, split_mock, run_mock):
         table = "test_table"
         phasequad = MuonPhasequad("test", table)
-        self.context._run_deadtime = mock.Mock(return_value='EMU5234_raw_data MA')
+        name = "EMU5234; PhaseQuad; test_Re__Im_; MA"
+        self.context._run_deadtime = mock.Mock(return_value=name)
         self.context.data_context._current_runs = [5234]
         run_mock.side_effect = run_side_effect
         self.context._run_rebin = mock.Mock(side_effect=rebin_side_effect)
@@ -424,7 +425,6 @@ class MuonContextTest(unittest.TestCase):
 
         result = self.context.calculate_phasequad(phasequad, 5234, False)
         # names are wrong due to split mock
-        name = "EMU5234; PhaseQuad; test_Re__Im_; MA"
         self.assertEqual(result, [name+"1", name+"2"])
         self.context._run_rebin.assert_called_with(name, False)
         run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': name}, name)
@@ -436,7 +436,8 @@ class MuonContextTest(unittest.TestCase):
     @mock.patch('Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
     def test_calculate_phasequad_rebin(self, crop_mock, split_mock, run_mock):
         table = "test_table"
-        self.context._run_deadtime = mock.Mock(return_value='EMU5234_raw_data MA')
+        name = "EMU5234; PhaseQuad; test_Re__Im_; Rebin; MA"
+        self.context._run_deadtime = mock.Mock(return_value=name)
         self.context.data_context._current_runs = [5234]
         phasequad = MuonPhasequad("test", table)
         run_mock.side_effect = run_side_effect
@@ -446,7 +447,6 @@ class MuonContextTest(unittest.TestCase):
 
         result = self.context.calculate_phasequad(phasequad, 5234, True)
         # names are wrong due to split mock
-        name = "EMU5234; PhaseQuad; test_Re__Im_; Rebin; MA"
         self.assertEqual(result, [name+"1", name+"2"])
         self.context._run_rebin.assert_called_with(name, True)
         run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': name}, name)
