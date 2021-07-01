@@ -21,6 +21,7 @@ Fit Functions
 
 Data Objects
 ------------
+- **Sample shapes which are CSGObjects can now be plotted. Shapes can also be merged, such as a sphere with a cylindrical hole. For more details see** :ref:`Mesh_Plots`.
 
 Python
 ------
