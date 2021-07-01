@@ -23,7 +23,7 @@ class CorrectionsContext:
     dead_time_table_name_from_ads: str = None
 
     def current_dead_time_table_name(self) -> str:
-        """Returns the name of the dead time table for the currently display run and dead time mode."""
+        """Returns the name of the dead time table for the currently displayed run and dead time mode."""
         if self.dead_time_source == DEAD_TIME_FROM_FILE:
             return self.dead_time_table_name_from_file
         elif self.dead_time_source == DEAD_TIME_FROM_ADS:

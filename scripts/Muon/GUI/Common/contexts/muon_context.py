@@ -559,7 +559,6 @@ class MuonContext(object):
         self.phase_context.remove_workspace_by_name(workspace_name)
         self.fitting_context.remove_workspace_by_name(workspace_name)
         self.results_context.remove_workspace_by_name(workspace_name)
-        self.gui_context.remove_workspace_by_name(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
         self.deleted_plots_notifier.notify_subscribers(workspace)
 
