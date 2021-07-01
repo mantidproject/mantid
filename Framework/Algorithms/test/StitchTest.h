@@ -32,8 +32,8 @@ public:
   }
 
   void test_NoOverlap() {
-    auto ws1 = sampleWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
-    auto ws2 = sampleWorkspaceOneSpectrum(12, 0.8, 0.9, "ws2");
+    auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
+    auto ws2 = pointDataWorkspaceOneSpectrum(17, 0.8, 0.9, "ws2");
     Stitch alg;
     alg.setRethrows(true);
     alg.initialize();
@@ -49,7 +49,17 @@ public:
 
   void test_WorkspacesAndGroupsMixed() {}
 
-  void test_IncompatibleWorkspaces() {}
+  void test_IncompatibleWorkspaces() {
+    auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
+    auto ws2 = histoDataWorkspaceOneSpectrum(11, 0.5, 0.9, "ws2");
+    Stitch alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: [ InputWorkspaces ]");
+  }
 
   void test_NotEnoughOverlap() {}
 
@@ -80,7 +90,8 @@ public:
   void test_TiedScaleFactor() {}
 
 private:
-  MatrixWorkspace_sptr sampleWorkspaceOneSpectrum(size_t nPoints, double startX, double endX, const std::string &name) {
+  MatrixWorkspace_sptr pointDataWorkspaceOneSpectrum(size_t nPoints, double startX, double endX,
+                                                     const std::string &name) {
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nPoints, nPoints);
     AnalysisDataService::Instance().addOrReplace(name, ws);
     std::vector<double> x(nPoints), y(nPoints), e(nPoints);
@@ -91,6 +102,22 @@ private:
       e[ibin] = std::sqrt(y[ibin]);
     }
     ws->setHistogram(0, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));
+    return ws;
+  }
+
+  MatrixWorkspace_sptr histoDataWorkspaceOneSpectrum(size_t nBins, double startX, double endX,
+                                                     const std::string &name) {
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nBins + 1, nBins);
+    AnalysisDataService::Instance().addOrReplace(name, ws);
+    std::vector<double> x(nBins + 1), y(nBins), e(nBins);
+    const double step = (endX - startX) / nBins;
+    for (size_t ibin = 0; ibin < nBins; ++ibin) {
+      x[ibin] = startX + ibin * step;
+      y[ibin] = 7 * ibin + 3;
+      e[ibin] = std::sqrt(y[ibin]);
+    }
+    x[nBins] = endX;
+    ws->setHistogram(0, Histogram(BinEdges(x), Counts(y), CountStandardDeviations(e)));
     return ws;
   }
 };
