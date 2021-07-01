@@ -10,18 +10,19 @@ EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/conda
 ENV_NAME="mantid-developer"
 
 MAMBAFORGE_SCRIPT_NAME=Mambaforge-$(uname)-$(uname -m).sh
+URL=https://github.com/conda-forge/miniforge/releases/latest/download/$MAMBAFORGE_SCRIPT_NAME
 
 # Ensure conda is installed
 if [[ ! -f $EXPECTED_CONDA_PATH ]]; then
     if [[ ! -f $MAMBAFORGE_SCRIPT_NAME ]]; then
         # Download mambaforge
-        URL=https://github.com/conda-forge/miniforge/releases/latest/download/$MAMBAFORGE_SCRIPT_NAME
         if [ -x "$(which curl)" ]; then
             curl -L -O $URL
         elif [ -x "$(which wget)" ] ; then
             wget $URL
         else
             echo "Could not download Conda as wget and curl are not installed."
+            exit 1
         fi
     fi
     bash $MAMBAFORGE_SCRIPT_NAME -b

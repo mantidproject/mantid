@@ -58,15 +58,15 @@ terminate_xvfb_sessions
 # System discovery
 ###############################################################################
 USE_CORE_DUMPS=true
-if [[ ${JOB_NAME} == *master_conda* ]]; then
-    ON_CONDA=true
+if [[ ${JOB_NAME} == *conda* ]]; then
+        ON_CONDA=true
     elif [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${NODE_LABELS} == *scilin7* ]]; then
-    ON_RHEL7=true
+        ON_RHEL7=true
     elif [[ ${NODE_LABELS} == *ubuntu* ]]; then
-    ON_UBUNTU=true
+        ON_UBUNTU=true
     elif [[ ${NODE_LABELS} == *osx* ]]; then
-    ON_MACOS=true
-    USE_CORE_DUMPS=false
+        ON_MACOS=true
+        USE_CORE_DUMPS=false
 fi
 
 # Setup software collections on rhel7 to allow using gcc7
@@ -364,7 +364,7 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 # CMake configuration
 ###############################################################################
 
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DCOVERAGE=${COVERAGE} -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} ${TURN_OFF_CMAKE_SYSTEM} ${CMAKE_RPATH} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DCOVERAGE=${COVERAGE} -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} ${CMAKE_RPATH} .."
 
 ###############################################################################
 # Coverity build should exit early
