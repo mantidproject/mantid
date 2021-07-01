@@ -50,8 +50,7 @@ class MuonContext(object):
             self.workspace_replaced)
 
         self.gui_context.update(
-            {'DeadTimeSource': 'None',
-             'LastGoodDataFromFile': True,
+            {'LastGoodDataFromFile': True,
              'selected_group_pair': '',
              'PlotMode': PlotMode.Data})
 
@@ -475,14 +474,12 @@ class MuonContext(object):
                 return self.gui_context['LastGoodData']
 
     def dead_time_table(self, run):
-        if self.gui_context['DeadTimeSource'] == 'FromADS':
-            return self.gui_context['DeadTimeTable']
-        elif self.gui_context['DeadTimeSource'] == 'FromFile':
+        if self._corrections_context.dead_time_source == "FromFile":
             if isinstance(run, str):
                 run = wsName.get_first_run_from_run_string(run)
             return self.data_context.get_loaded_data_for_run([float(run)])["DataDeadTimeTable"]
-        elif self.gui_context['DeadTimeSource'] == 'None':
-            return None
+        else:
+            return self._corrections_context.current_dead_time_table_name()
 
     def get_group_and_pair(self, group_and_pair):
         if group_and_pair == 'All':

@@ -81,7 +81,7 @@ def _get_pre_processing_params(context, run, rebin):
         if dead_time_source == "FromFile":
             dead_time_table = context.data_context.get_loaded_data_for_run(run)["DataDeadTimeTable"]
         elif dead_time_source == "FromADS":
-            dead_time_table = context.corrections_context.dead_time_table_name
+            dead_time_table = context.corrections_context.dead_time_table_name_from_ads
         else:
             dead_time_table = None
 

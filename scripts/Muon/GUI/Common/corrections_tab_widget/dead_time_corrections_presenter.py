@@ -42,6 +42,8 @@ class DeadTimeCorrectionsPresenter:
 
     def handle_run_selector_changed(self) -> None:
         """Handles when the run selector is changed."""
+        if self.model.is_dead_time_source_from_data_file():
+            self.model.set_dead_time_source_to_from_file()
         self.update_dead_time_info_text_in_view()
 
     def handle_dead_time_from_selector_changed(self) -> None:

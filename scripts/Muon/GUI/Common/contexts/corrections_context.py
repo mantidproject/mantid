@@ -6,6 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.py36compat import dataclass
 
+DEAD_TIME_FROM_FILE = "FromFile"
+DEAD_TIME_FROM_ADS = "FromADS"
+
 
 @dataclass
 class CorrectionsContext:
@@ -16,4 +19,14 @@ class CorrectionsContext:
 
     # The 'dead_time_source' can be "FromFile", "FromADS" or None.
     dead_time_source: str = None
-    dead_time_table_name: str = None
+    dead_time_table_name_from_file: str = None
+    dead_time_table_name_from_ads: str = None
+
+    def current_dead_time_table_name(self) -> str:
+        """Returns the name of the dead time table for the currently display run and dead time mode."""
+        if self.dead_time_source == DEAD_TIME_FROM_FILE:
+            return self.dead_time_table_name_from_file
+        elif self.dead_time_source == DEAD_TIME_FROM_ADS:
+            return self.dead_time_table_name_from_ads
+        else:
+            return None
