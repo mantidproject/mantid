@@ -30,7 +30,7 @@ fi
 
 # With miniconda we can grab the mantid environment if it doesn't already exist
 ENVS=$($EXPECTED_CONDA_PATH env list)
-if [[ ! $ENVS = *"$EXPECTED_MAMBAFORGE_PATH/envs/mantid-developer"* ]]; then
+if [[ $ENVS = *"$EXPECTED_MAMBAFORGE_PATH/envs/mantid-developer"* ]]; then
     $EXPECTED_CONDA_PATH env remove -n mantid-developer
 else
     echo "Conda environment not already present"
