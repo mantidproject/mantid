@@ -12,8 +12,8 @@ class EAPlotDataPanePresenter(BasePanePresenter):
 
     def __init__(self, view, model, context, figure_presenter):
         super(EAPlotDataPanePresenter, self).__init__(view, model, context, figure_presenter)
-        self._data_type = ["Counts"]
-        self._sort_by = ["Group", "Run"]
+        self._data_type = ["Delayed", "Prompt", "Total"]
+        self._sort_by = ["Detector", "Run"]
         self.update_view()
         self._view.enable_plot_type_combo()
         self._view.hide_plot_diff()
@@ -42,10 +42,8 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         """
 
     def handle_data_updated(self, autoscale=True, hold_on=False):
-        workspace_list, indicies, plot_range = self._model.get_workspace_list_and_indices_to_plot(
-            self._view.is_raw_plot(),
-            self._view.get_plot_type())
-        self.context.plot_panes_context[self._name].update_xlim("All", plot_range)
+        workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
+                                                                                      self._view.get_plot_type())
         self.add_list_to_plot(workspace_list, indicies, hold=hold_on, autoscale=autoscale)
 
     def handle_added_or_removed_group_to_plot(self, group_info):

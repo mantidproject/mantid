@@ -6,23 +6,24 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_model import BasePaneModel
 
+SPECTRA_INDICES = {"Delayed": 0, "Prompt": 1, "Total": 2}
+
 
 class EAPlotDataPaneModel(BasePaneModel):
 
     def __init__(self, context):
         super(EAPlotDataPaneModel, self).__init__(context)
-        self.context.plot_panes_context[self.name].set_defaults([-100.0, 8200.0], [-100, 2000])
+        self.context.plot_panes_context[self.name].set_defaults([-10.0, 1000.0], [-100, 2000])
 
     @staticmethod
-    def _generate_run_indices(workspace_list):
-        indices = [2] * len(workspace_list)
+    def _generate_run_indices(workspace_list, plot_type):
+        indices = [SPECTRA_INDICES[plot_type]] * len(workspace_list)
         return indices
 
-    def get_count_workspaces_to_plot(self, current_group, is_raw, plot_type):
+    def get_count_workspaces_to_plot(self, current_group, is_raw):
         """
         :param current_group:
         :param is_raw: Whether to use raw or rebinned data
-        :param plot_type: Whether to plot counts or asymmetry
         :return: a list of workspace names
         """
         try:
@@ -37,53 +38,42 @@ class EAPlotDataPaneModel(BasePaneModel):
         except AttributeError:
             return []
 
-    def get_workspaces_to_remove(self, group_names, is_raw, plot_type):
+    def get_workspaces_to_remove(self, group_names, is_raw):
         """
         :param group_names:
         :param is_raw: Whether to use raw or rebinned data
-        :param plot_type: plotting type, e.g Counts, Frequency Re
         :return: a list of workspace names
         """
         workspace_list = []
         for group in group_names:
-            workspace_list += self.get_count_workspaces_to_plot(group, is_raw, plot_type)
+            workspace_list += self.get_count_workspaces_to_plot(group, is_raw)
         return workspace_list
 
     def get_workspace_and_indices_for_group(self, group, is_raw, plot_type):
         """
          :return: a list of workspace names and corresponding indices to plot
          """
-        workspace_list = self.get_count_workspaces_to_plot(group, is_raw, plot_type)
-        indices = self._generate_run_indices(workspace_list)
+        workspace_list = self.get_count_workspaces_to_plot(group, is_raw)
+        indices = self._generate_run_indices(workspace_list, plot_type)
 
         return workspace_list, indices
 
-    def get_workspaces_to_plot(self, is_raw, plot_type):
+    def get_workspaces_to_plot(self, is_raw):
         """
         :param is_raw: Whether to use raw or rebinned data
-        :param plot_type: plotting type, e.g Counts, Frequency Re
         :return: a list of workspace names
         """
         currently_selected = self.context.group_context.selected_groups
         workspace_list = []
         for group in currently_selected:
-            workspace_list += self.get_count_workspaces_to_plot(group, is_raw, plot_type)
+            workspace_list += self.get_count_workspaces_to_plot(group, is_raw)
         return workspace_list
 
     def get_workspace_list_and_indices_to_plot(self, is_raw, plot_type):
         """
          :return: a list of workspace names to plot
          """
-        workspace_list = self.get_workspaces_to_plot(is_raw, plot_type)
-        plot_range = self.get_plot_range_from_group()
-        indices = self._generate_run_indices(workspace_list)
+        workspace_list = self.get_workspaces_to_plot(is_raw)
+        indices = self._generate_run_indices(workspace_list, plot_type)
 
-        return workspace_list, indices, plot_range
-
-    def get_plot_range_from_group(self):
-        currently_selected = self.context.group_context.selected_groups
-        current_plot_range = [-50.0, 1100.0]
-        for group in currently_selected:
-            if self.context.group_context[group].plot_range[1] > current_plot_range[1]:
-                current_plot_range = self.context.group_context[group].plot_range
-        return current_plot_range
+        return workspace_list, indices
