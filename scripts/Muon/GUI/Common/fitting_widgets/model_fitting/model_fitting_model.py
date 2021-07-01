@@ -197,6 +197,8 @@ class ModelFittingModel(BasicFittingModel):
 
     def _lists_are_equal(self, list1: list, list2: list) -> bool:
         """Returns true if the two lists containing x, y or error data are equal to five decimal places."""
+        if len(list1) != len(list2):
+            return False
         return all([self.is_equal_to_n_decimals(i, j, 5) for i, j in zip(list1, list2)])
 
     @staticmethod
