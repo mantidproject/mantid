@@ -86,6 +86,9 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                              NumberOfPeaks=0,
                              OutputWorkspace=outWS, EnableLogging=False)
 
+        method = self.getProperty("Method").value
+        n_bkgr_pts = self.getProperty("NumBackgroundPts").value
+        n = self.getProperty("N").value
         scale = self.getProperty("ScaleFactor").value
         chisqmax = self.getProperty("ChiSqMax").value
         signalNoiseMin = self.getProperty("SignalNoiseMin").value
@@ -114,12 +117,17 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
             run = mtd[inWS].getExperimentInfo(0).run()
             scan_log = 'omega' if np.isclose(run.getTimeAveragedStd('phi'), 0.0) else 'phi'
             scan_axis = run[scan_log].value
+            scan_step = (scan_axis[-1] - scan_axis[0]) / (scan_axis.size - 1)
             data.setX(0, scan_axis)
 
             x = data.extractX().flatten()
 
-            integrated_intensity, integrated_intensity_error = self._fitted_integration(inWS, data, startX, endX,
-                                                                                        chisqmax, scale, output_fit)
+            if method == "Fitted":
+                integrated_intensity, integrated_intensity_error = self._fitted_integration(inWS, data, startX, endX,
+                                                                                            chisqmax, scale, output_fit)
+            elif method == "Counts":
+                integrated_intensity, integrated_intensity_error = self._counts_integration(data, n_bkgr_pts, scan_step)
+
             if integrated_intensity == -1 or integrated_intensity_error == -1:
                 continue
 
@@ -186,6 +194,13 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                     DeleteWorkspace(tmp_ws, EnableLogging=False)
 
         self.setProperty("OutputWorkspace", mtd[outWS])
+
+    def _counts_integration(self, ws, n_background_pts, scan_step):
+        y = ws.extractY().flatten()
+        avg_background = (y[:n_background_pts].sum() + y[-n_background_pts:].sum()) / (2 * n_background_pts)
+        integrated_intensity = (y.sum() - avg_background * y.size) * scan_step
+        integrated_intensity_error = np.sum(np.sqrt(y)) * scan_step
+        return integrated_intensity, integrated_intensity_error
 
     def _fitted_integration(self, inWS, ws, startX, endX, chisqmax, scale_factor, output_fit):
         y = ws.extractY().flatten()
