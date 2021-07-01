@@ -71,7 +71,8 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
         self.declareProperty("ApplyLorentz", True, doc="If to apply Lorentz Correction to intensity")
 
         self.declareProperty("OutputFitResults", False, doc="This will output the fitting result workspace and a ROI workspace")
-
+        self.setPropertySettings("OutputFitResults",
+                                 EnabledWhenProperty("Method", PropertyCriterion.IsNotEqualTo, "Counts"))
         self.declareProperty("OptimizeQVector", True,
                              doc="This will convert the data to q and optimize the peak location using CentroidPeaksdMD")
 
@@ -194,7 +195,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
 
                 CombinePeaksWorkspaces(outWS, __tmp_pw, OutputWorkspace=outWS, EnableLogging=False)
 
-                if output_fit:
+                if output_fit and method != "Counts":
                     fit_results.addWorkspace(RenameWorkspace(tmp_inWS + '_Workspace', outWS + "_" + inWS + '_Workspace',
                                                              EnableLogging=False))
                     fit_results.addWorkspace(

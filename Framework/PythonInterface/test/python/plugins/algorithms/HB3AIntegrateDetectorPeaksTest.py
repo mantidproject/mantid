@@ -106,7 +106,7 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         DeleteWorkspace(peaks)
 
     def testIntegratePeaksCounts(self):
-        data = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", ScaleByMotorStep=True)
+        data = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", ScaleByMotorStep=False)
 
         peaks = HB3AIntegrateDetectorPeaks(data, Method="Counts", ApplyLorentz=False, OptimizeQVector=False)
         self.assertEqual(peaks.getNumberPeaks(), 1)
@@ -115,8 +115,8 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         self.assertAlmostEqual(peak0.getH(), 0, places=1)
         self.assertAlmostEqual(peak0.getK(), 0, places=1)
         self.assertAlmostEqual(peak0.getL(), 6, places=1)
-        self.assertAlmostEqual(peak0.getIntensity(), 97.05851, delta=1e-5)
-        self.assertAlmostEqual(peak0.getSigmaIntensity(), 8.492146, delta=1e-5)
+        self.assertAlmostEqual(peak0.getIntensity(), 932.24967, delta=1e-5)
+        self.assertAlmostEqual(peak0.getSigmaIntensity(), 29.10343, delta=1e-5)
         self.assertAlmostEqual(peak0.getWavelength(), 1.008)
         self.assertAlmostEqual(peak0.getAzimuthal(), -np.pi, delta=2e-5)
         self.assertAlmostEqual(peak0.getScattering(),
@@ -126,17 +126,18 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         DeleteWorkspace(peaks)
 
     def testIntegratePeaksCountsWithFitting(self):
-        data = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", ScaleByMotorStep=True)
+        data = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", ScaleByMotorStep=False)
 
-        peaks = HB3AIntegrateDetectorPeaks(data, Method="CountsWithFitting", ApplyLorentz=False, OptimizeQVector=False)
+        peaks = HB3AIntegrateDetectorPeaks(data, Method="CountsWithFitting", ApplyLorentz=False, OptimizeQVector=False,
+                                           ChiSqMax=100)
         self.assertEqual(peaks.getNumberPeaks(), 1)
 
         peak0 = peaks.getPeak(0)
         self.assertAlmostEqual(peak0.getH(), 0, places=1)
         self.assertAlmostEqual(peak0.getK(), 0, places=1)
         self.assertAlmostEqual(peak0.getL(), 6, places=1)
-        self.assertAlmostEqual(peak0.getIntensity(), 96.27564, delta=1e-5)
-        self.assertAlmostEqual(peak0.getSigmaIntensity(), 8.193698, delta=1e-5)
+        self.assertAlmostEqual(peak0.getIntensity(), 969.778546, delta=1e-5)
+        self.assertAlmostEqual(peak0.getSigmaIntensity(), 24.776354, delta=1e-5)
         self.assertAlmostEqual(peak0.getWavelength(), 1.008)
         self.assertAlmostEqual(peak0.getAzimuthal(), -np.pi, delta=2e-5)
         self.assertAlmostEqual(peak0.getScattering(),
