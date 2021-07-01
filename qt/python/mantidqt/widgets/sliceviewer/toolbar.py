@@ -7,6 +7,7 @@
 #    This file is part of the mantid workbench.
 
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar, MantidStandardNavigationTools, MantidNavigationTool
+from qtpy.QtWidgets import QApplication
 from qtpy.QtCore import Signal,QSize
 
 
