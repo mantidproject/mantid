@@ -8,12 +8,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidQtWidgets/Common/BackendQt.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
+#include "MantidQtWidgets/MplCpp/BackendQt.h"
 
 #include <QWidget>
 
-using MantidQt::Widgets::Common::backendModule;
+using MantidQt::Widgets::MplCpp::backendModule;
 using namespace MantidQt::Widgets::Common;
 
 class QBackendExtractTest : public CxxTest::TestSuite {

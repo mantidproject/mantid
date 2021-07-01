@@ -15,7 +15,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/WrapPython.h"
-#include "MantidQtWidgets/Common/BackendQt.h"
+#include "MantidQtWidgets/MplCpp/BackendQt.h"
 #include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

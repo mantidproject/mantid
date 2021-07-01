@@ -92,6 +92,7 @@ mtd_add_qt_tests(
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsPlotting
+    MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES
     GUITests
 )

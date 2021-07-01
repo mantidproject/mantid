@@ -4,13 +4,13 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Common/BackendQt.h"
+#include "MantidQtWidgets/MplCpp/BackendQt.h"
 
 using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {
-namespace Common {
+namespace MplCpp {
 
 /// Import and return the backend module for this version of Qt
 Python::Object backendModule() {
@@ -20,6 +20,6 @@ Python::Object backendModule() {
   return Python::NewRef(PyImport_ImportModule(MPL_QT_BACKEND));
 }
 
-} // namespace Common
+} // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt
