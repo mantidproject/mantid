@@ -15,6 +15,7 @@ set(
   src/GLColor.cpp
   src/GLObject.cpp
   src/InstrumentActor.cpp
+  src/InstrumentDisplay.cpp
   src/InstrumentTreeModel.cpp
   src/InstrumentTreeWidget.cpp
   src/InstrumentWidget.cpp
@@ -62,6 +63,7 @@ set(
   inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h
   inc/MantidQtWidgets/InstrumentView/CollapsiblePanel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
+  inc/MantidQtWidgets/InstrumentView/InstrumentDisplay.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidget.h
