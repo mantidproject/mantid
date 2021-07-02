@@ -31,7 +31,8 @@ class FindGlobalBMatrixTest(unittest.TestCase):
                 pk = peaks2.createPeakHKL([h, k, 4])
                 peaks2.addPeak(pk)
 
-        FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89)
+        FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89,
+                          Tolerance=0.15)
 
         # check lattice
         for ws in [peaks1, peaks2]:
@@ -63,7 +64,8 @@ class FindGlobalBMatrixTest(unittest.TestCase):
                 pk = peaks2.createPeak(qlab)
                 peaks2.addPeak(pk)
 
-        FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.15, b=3.95, c=10, alpha=88, beta=88, gamma=89)
+        FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.15, b=3.95, c=10, alpha=88, beta=88, gamma=89,
+                          Tolerance=0.15)
 
         # check lattice
         for ws in [peaks1, peaks2]:

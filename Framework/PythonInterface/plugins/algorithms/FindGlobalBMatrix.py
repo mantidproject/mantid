@@ -61,6 +61,10 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              validator=angleValidator,
                              doc="Lattice angle gamma")
+        self.declareProperty(name="Tolerance", defaultValue=0.15,
+                             direction=Direction.Input,
+                             validator=positiveFloatValidator,
+                             doc="Tolerance to index peaks in in H,K and L")
 
     def validateInputs(self):
         issues = dict()
@@ -90,6 +94,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         alpha = self.getProperty('alpha').value
         beta = self.getProperty('beta').value
         gamma = self.getProperty('gamma').value
+        self.tol = self.getProperty('Tolerance').value
 
         # Find initial UB and use to index peaks in all runs
         prog_reporter.report(1, "Find initial UB for peak indexing")
@@ -161,13 +166,14 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 for ii in range(ws.getNumberPeaks()):
                     pk = ws.getPeak(ii)
                     if pk.getHKL().norm2() > 1e-6:
-                        residsq[ipk] += (np.sum((UB @ pk.getIntHKL() - pk.getQSampleFrame()) ** 2))
+                        residsq[ipk] = (np.sum((UB @ pk.getIntHKL() - pk.getQSampleFrame()) ** 2))
                         ipk += 1
         return np.sqrt(residsq / (ipk + 1))
 
     def child_IndexPeaks(self, PeaksWorkspace, RoundHKLs):
         alg = self.createChildAlgorithm("IndexPeaks", enableLogging=False)
         alg.setProperty("PeaksWorkspace", PeaksWorkspace)
+        alg.setProperty("Tolerance", self.tol)
         alg.setProperty("RoundHKLs", RoundHKLs)
         alg.execute()
         return alg.getProperty("NumIndexed").value
