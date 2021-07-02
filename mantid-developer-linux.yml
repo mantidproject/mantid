@@ -14,6 +14,7 @@ dependencies:
   - gsl=2.6 # Keep gsl a specific version to reduce changes in our fitting
   - h5py>=2.10.0,<3 # Pinned back due to api differences
   - hdf5=1.10.*
+  - ipykernel<6 # Added a hard dependency to deal with an issue caused by ipykernel in v6
   - jemalloc>=5.2.1
   - jsoncpp>=1.9.4,<2
   - librdkafka>=1.6.0
