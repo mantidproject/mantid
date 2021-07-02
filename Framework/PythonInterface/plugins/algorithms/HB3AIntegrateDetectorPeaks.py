@@ -48,10 +48,10 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                              doc="Number of background points from beginning and end of scan to use for background estimation")
         self.setPropertySettings("NumBackgroundPts", EnabledWhenProperty("Method", PropertyCriterion.IsEqualTo, "Counts"))
 
-        self.declareProperty("N", direction=Direction.Input, defaultValue=2,
+        self.declareProperty("NumIntegrationPts", direction=Direction.Input, defaultValue=2,
                              validator=IntBoundedValidator(lower=0),
-                             doc="Set of measurements around motor position (+/- N/2*FWHM)")
-        self.setPropertySettings("N",
+                             doc="Controls integration range (+/- NumIntegrationPts/2*FWHM) defined around motor positions")
+        self.setPropertySettings("NumIntegrationPts",
                                  EnabledWhenProperty("Method", PropertyCriterion.IsEqualTo, "CountsWithFitting"))
 
         self.declareProperty(IntArrayProperty("LowerLeft", [128, 128], IntArrayLengthValidator(2),
@@ -89,7 +89,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
 
         method = self.getProperty("Method").value
         n_bkgr_pts = self.getProperty("NumBackgroundPts").value
-        n = self.getProperty("N").value
+        n_int_pts = self.getProperty("NumIntegrationPts").value
         scale = self.getProperty("ScaleFactor").value
         chisqmax = self.getProperty("ChiSqMax").value
         signalNoiseMin = self.getProperty("SignalNoiseMin").value
@@ -156,8 +156,8 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                                           Axis2=f'{peak_centre},0,1,0,-1',
                                           EnableLogging=False)
                     elif method == "CountsWithFitting":
-                        y = y[slice(np.searchsorted(x, peak_centre - 2.3548 * sigma * n / 2),
-                                    np.searchsorted(x, peak_centre + 2.3548 * sigma * n / 2))]
+                        y = y[slice(np.searchsorted(x, peak_centre - 2.3548 * sigma * n_int_pts / 2),
+                                    np.searchsorted(x, peak_centre + 2.3548 * sigma * n_int_pts / 2))]
                         # subtract out the fitted flat background
                         integrated_intensity = (y.sum() - B * y.size) * scan_step
                         integrated_intensity_error = np.sum(np.sqrt(y)) * scan_step
