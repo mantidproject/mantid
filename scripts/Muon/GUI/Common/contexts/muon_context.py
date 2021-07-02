@@ -50,8 +50,7 @@ class MuonContext(object):
             self.workspace_replaced)
 
         self.gui_context.update(
-            {'DeadTimeSource': 'None',
-             'LastGoodDataFromFile': True,
+            {'LastGoodDataFromFile': True,
              'selected_group_pair': '',
              'PlotMode': PlotMode.Data})
 
@@ -340,9 +339,12 @@ class MuonContext(object):
                                           run_string,
                                           multi_period=False,
                                           workspace_suffix=self.workspace_suffix)
-        deadtime_table = self.dead_time_table(run_string)
-        if deadtime_table:
-            return apply_deadtime(name, output, deadtime_table)
+        if isinstance(run_string, str):
+            run = wsName.get_first_run_from_run_string(run_string)
+        dead_time_table = self._corrections_context.current_dead_time_table_name_for_run(self.data_context.instrument,
+                                                                                         [float(run)])
+        if dead_time_table:
+            return apply_deadtime(name, output, dead_time_table)
         return name
 
     def _run_rebin(self, name, rebin):
@@ -383,8 +385,8 @@ class MuonContext(object):
                 run_string = run_list_to_string(run)
                 loaded_workspace = self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
                                        'OutputWorkspace']
-                loaded_workspace_deadtime_table = self.data_context._loaded_data.get_data(
-                    run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable']
+                loaded_workspace_deadtime_table = self.corrections_context.get_default_dead_time_table_name_for_run(
+                    self.data_context.instrument, run)
                 directory = get_base_data_directory(
                     self,
                     run_string)
@@ -392,8 +394,8 @@ class MuonContext(object):
                 deadtime_name = get_deadtime_data_workspace_name(self.data_context.instrument,
                                                                  str(run[0]), workspace_suffix=self.workspace_suffix)
                 MuonWorkspaceWrapper(loaded_workspace_deadtime_table).show(directory + deadtime_name)
-                self.data_context._loaded_data.get_data(
-                    run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable'] = deadtime_name
+                self.corrections_context.set_default_dead_time_table_name_for_run(self.data_context.instrument, run,
+                                                                                  deadtime_name)
 
                 if len(loaded_workspace) > 1:
                     # Multi-period data
@@ -474,16 +476,6 @@ class MuonContext(object):
                                                              ["OutputWorkspace"][0].workspace.dataX(0)), 2)
                 return self.gui_context['LastGoodData']
 
-    def dead_time_table(self, run):
-        if self.gui_context['DeadTimeSource'] == 'FromADS':
-            return self.gui_context['DeadTimeTable']
-        elif self.gui_context['DeadTimeSource'] == 'FromFile':
-            if isinstance(run, str):
-                run = wsName.get_first_run_from_run_string(run)
-            return self.data_context.get_loaded_data_for_run([float(run)])["DataDeadTimeTable"]
-        elif self.gui_context['DeadTimeSource'] == 'None':
-            return None
-
     def get_group_and_pair(self, group_and_pair):
         if group_and_pair == 'All':
             group = self.group_pair_context.group_names
@@ -562,7 +554,6 @@ class MuonContext(object):
         self.phase_context.remove_workspace_by_name(workspace_name)
         self.fitting_context.remove_workspace_by_name(workspace_name)
         self.results_context.remove_workspace_by_name(workspace_name)
-        self.gui_context.remove_workspace_by_name(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
         self.deleted_plots_notifier.notify_subscribers(workspace)
 
