@@ -149,7 +149,7 @@ void CombineDiffCal::exec() {
   DataObjects::TableWorkspace_sptr presortedPixelCalibrationWS = getProperty("PixelCalibration");
   const API::ITableWorkspace_sptr pixelCalibrationWS = sortTableWorkspace(presortedPixelCalibrationWS);
 
-  const DataObjects::MaskWorkspace_sptr maskedWorkspace = getProperty("MaskWorkspace");
+  const DataObjects::MaskWorkspace_sptr maskWorkspace = getProperty("MaskWorkspace");
 
   DataObjects::TableWorkspace_sptr outputWorkspace = std::make_shared<DataObjects::TableWorkspace>();
   outputWorkspace->addColumn("int", "detid");
@@ -162,7 +162,7 @@ void CombineDiffCal::exec() {
     int detid = groupedCalibrationRow.Int(0);
     bool prevDifValsExist = false;
 
-    if (!(maskedWorkspace && maskedWorkspace->isMasked(detid))) {
+    if (!(maskWorkspace && maskWorkspace->isMasked(detid))) {
       std::shared_ptr<Mantid::API::TableRow> pixelCalibrationRow = binarySearchForRow(pixelCalibrationWS, detid);
       if (pixelCalibrationRow) {
         double difcPD = groupedCalibrationRow.Double(1);
