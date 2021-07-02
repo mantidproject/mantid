@@ -32,7 +32,6 @@ class CodeEditorTabWidget(QTabWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
         self.setMovable(True)
-        self.setTabsClosable(True)
         self.setDocumentMode(True)
 
         self.last_tab_clicked = 0
@@ -151,9 +150,6 @@ class CodeEditorTabWidget(QTabWidget):
         # the user did not click on a tab at all, stop all further mouseEvents processing
         if self.last_tab_clicked < 0:
             return
-
-        if Qt.MiddleButton == event.button():
-            self.tabCloseRequested.emit(self.last_tab_clicked)
 
         QTabWidget(self).mousePressEvent(event)
 
