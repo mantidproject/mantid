@@ -78,13 +78,13 @@ public:
   }
 
   void tearDown() override {
-    AnalysisDataService::Instance().clear();
-
     TS_ASSERT(m_view->close());
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_presenter.get()));
     m_presenter.reset();
     m_view.reset();
+
+    AnalysisDataService::Instance().clear();
   }
 
   void test_opening_the_view_will_create_a_top_level_widget() {
