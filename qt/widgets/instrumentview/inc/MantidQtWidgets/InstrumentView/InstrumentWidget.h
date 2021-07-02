@@ -63,6 +63,7 @@ class ProjectionSurface;
 
 namespace Detail {
 struct Dependencies {
+  std::unique_ptr<IInstrumentDisplay> instrumentDisplay = nullptr;
   std::unique_ptr<IQtDisplay> qtDisplay = nullptr;
   std::unique_ptr<IGLDisplay> glDisplay = nullptr;
   std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
@@ -288,7 +289,7 @@ protected:
   InstrumentWidgetPickTab *m_pickTab;
   XIntegrationControl *m_xIntegration;
 
-  InstrumentDisplay m_instrumentDisplay;
+  std::unique_ptr<IInstrumentDisplay> m_instrumentDisplay;
 
   // Context menu actions
   QAction *m_clearPeakOverlays, *m_clearAlignment;

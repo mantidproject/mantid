@@ -6,26 +6,20 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
 #include "IGLDisplay.h"
-#include "IInstrumentDisplay.h"
 #include "IQtDisplay.h"
 
 #include <memory>
 
 namespace MantidQt::MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentDisplay : public IInstrumentDisplay {
+class IInstrumentDisplay {
 public:
-  InstrumentDisplay(std::unique_ptr<IGLDisplay> glDisplay, std::unique_ptr<IQtDisplay> qtDisplay);
+  virtual ~IInstrumentDisplay() = default;
 
-  IGLDisplay *getGLDisplay() const override;
-  IQtDisplay *getQtDisplay() const override;
+  virtual IGLDisplay *getGLDisplay() const = 0;
+  virtual IQtDisplay *getQtDisplay() const = 0;
 
-  void installEventFilter(QObject *obj) override;
-
-private:
-  std::unique_ptr<IGLDisplay> m_glDisplay;
-  std::unique_ptr<IQtDisplay> m_qtDisplay;
+  virtual void installEventFilter(QObject *obj) = 0;
 };
 } // namespace MantidQt::MantidWidgets
