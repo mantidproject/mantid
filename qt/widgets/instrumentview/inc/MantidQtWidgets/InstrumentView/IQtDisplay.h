@@ -18,10 +18,10 @@ class ProjectionSurface;
 /**
  * An interface for the widget for drawing unwrapped instrument images.
  */
-class ISimpleWidget : public QWidget {
+class IQtDisplay : public QWidget {
 public:
-  template <typename... Params> ISimpleWidget(Params &&... params) : QWidget(std::forward<Params>(params)...) {}
-  virtual ~ISimpleWidget() = default;
+  template <typename... Params> IQtDisplay(Params &&...params) : QWidget(std::forward<Params>(params)...) {}
+  virtual ~IQtDisplay() = default;
 
   /// Assign a surface to draw on
   virtual void setSurface(std::shared_ptr<ProjectionSurface> surface) = 0;
@@ -33,6 +33,10 @@ public:
   virtual void updateDetectors() = 0;
   /// Save the image into a file
   virtual void saveToFile(const QString &filename) = 0;
+
+  // Qt overrides
+  virtual void qtInstallEventFilter(QObject *arg) { installEventFilter(arg); }
+  virtual void qtUpdate() { update(); }
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

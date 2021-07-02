@@ -28,26 +28,22 @@ from Muon.GUI.Common.muon_diff import MuonDiff
 from typing import List
 
 
-MUON_ANALYSIS_DEFAULT_X_RANGE = [0.0, 15.0]
-MUON_ANALYSIS_DEFAULT_Y_RANGE = [-0.3, 0.3]
-
-
 class MuonContext(object):
-    def __init__(self, muon_data_context=None, muon_gui_context=None,
-                 muon_group_context=None, base_directory='Muon Data', muon_phase_context=None,
-                 workspace_suffix=' MA', fitting_context=None, results_context=None, model_fitting_context=None,
-                 plotting_context=None, frequency_context=None):
+
+    def __init__(self, muon_data_context=None, muon_gui_context=None, muon_group_context=None, corrections_context=None,
+                 base_directory='Muon Data', muon_phase_context=None, workspace_suffix=' MA', fitting_context=None,
+                 results_context=None, model_fitting_context=None, plot_panes_context=None, frequency_context=None):
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
+        self._corrections_context = corrections_context
         self._phase_context = muon_phase_context
         self.fitting_context = fitting_context
         self.results_context = results_context
         self.model_fitting_context = model_fitting_context
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix
-        self._plotting_context= plotting_context
-        self._plotting_context.set_defaults(MUON_ANALYSIS_DEFAULT_X_RANGE, MUON_ANALYSIS_DEFAULT_Y_RANGE)
+        self._plot_panes_context = plot_panes_context
         self.ads_observer = MuonContextADSObserver(
             self.remove_workspace,
             self.clear_context,
@@ -64,8 +60,8 @@ class MuonContext(object):
         self.deleted_plots_notifier = Observable()
 
     @property
-    def plotting_context(self):
-        return self._plotting_context
+    def plot_panes_context(self):
+        return self._plot_panes_context
 
     @property
     def data_context(self):
@@ -80,12 +76,12 @@ class MuonContext(object):
         return self._group_pair_context
 
     @property
-    def phase_context(self):
-        return self._phase_context
+    def corrections_context(self):
+        return self._corrections_context
 
     @property
-    def default_data_plot_range(self):
-        return self._plotting_context.default_xlims
+    def phase_context(self):
+        return self._phase_context
 
     def num_periods(self, run):
         return self._data_context.num_periods(run)
