@@ -34,15 +34,15 @@ The quantity :math:`J_n` is calculated by performing the following integration:
 
 .. math::
 
-   J_n &= (\frac{\sigma_s}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{\pi} \sin\theta_i d\theta_i \int_{0}^{2 \pi} d\phi_i (e^{-\mu_T l_{i+1}}) S(Q_i) \sigma_S] e^{-\mu_T l_{out}} S(Q_n) \\
-       &=(\frac{\sigma_s}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{2k} dQ_i \int_{0}^{2 \pi} d\phi_i (e^{-\mu_T l_{i+1}}) \frac{Q_i}{k^2} S(Q_i) \sigma_S] e^{-\mu_T l_{out}} S(Q_n)
+   J_n &= (\frac{\mu}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{\pi} \sin\theta_i d\theta_i \int_{0}^{2 \pi} d\phi_i (e^{-\mu_T l_{i+1}}) S(Q_i)] e^{-\mu_T l_{out}} S(Q_n) \\
+       &=(\frac{\mu_s}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{2k} dQ_i \int_{0}^{2 \pi} d\phi_i (e^{-\mu_T l_{i+1}}) \frac{Q_i}{k^2} S(Q_i)] e^{-\mu_T l_{out}} S(Q_n)
 
 
 The variables :math:`l_i^{max}` represent the maximum path length before the next scatter given a particular phi and theta value (Q). Each :math:`l_i` is actually a function of all of the earlier values for the :math:`l_i`, :math:`\phi` and :math:`Q` variables ie :math:`l_i = l_i(l_1, l_2, ..., l_{i-1}, \phi_1, \phi_2, ..., \phi_i, Q_1, Q_2, ..., Q_i)`
 
 The following substitutions are then performed in order to make it more convenient to evaluate as a Monte Carlo integral:
 
-:math:`t_i = \frac{1-e^{-\mu_T l_i}}{1-e^{\mu_T l_i^{max}}}`
+:math:`t_i = \frac{1-e^{-\mu_T l_i}}{1-e^{-\mu_T l_i^{max}}}`
 
 :math:`p_i = \frac{\phi_i}{2 \pi}`
 
@@ -57,7 +57,7 @@ Using the new variables the integral is:
 This is evaluated as a Monte Carlo integration by selecting random values for the variables :math:`t_i` and :math:`p_i` between 0 and 1 and values for :math:`Q_i` between 0 and 2k.
 A simulated path is traced through the sample to enable the :math:`l_i^{\ max}` values to be calculated. The path is traced by calculating the :math:`l_i`, :math:`\theta` and :math:`\phi` values as follows from the random variables. The code keeps a note of the start coordinates of the current path segment and updates it when moving to the next segment using these randomly selected lengths and directions:
 
-:math:`l_i = -\frac{1}{\mu_T}ln(1-(1-e^{\mu_T l_i^{\ max}})t_i)`
+:math:`l_i = -\frac{1}{\mu_T}ln(1-(1-e^{-\mu_T l_i^{\ max}})t_i)`
 
 :math:`\cos(\theta_i) = 1 - Q_i^2/k^2`
 
