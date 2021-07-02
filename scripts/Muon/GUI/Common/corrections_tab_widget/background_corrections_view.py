@@ -19,6 +19,9 @@ RUN_COLUMN_INDEX = 0
 GROUP_COLUMN_INDEX = 1
 START_X_COLUMN_INDEX = 2
 END_X_COLUMN_INDEX = 3
+A0_COLUMN_INDEX = 4
+HEIGHT_COLUMN_INDEX = 5
+LIFETIME_COLUMN_INDEX = 6
 
 
 class DoubleItemDelegate(QStyledItemDelegate):
@@ -152,31 +155,43 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Returns the Start X associated with the provided Run and Group."""
         return float(self._table_item_value_for(run, group, END_X_COLUMN_INDEX))
 
-    def populate_corrections_table(self, runs: list, groups: list, start_xs: list, end_xs: list) -> None:
+    def populate_corrections_table(self, runs: list, groups: list, start_xs: list, end_xs: list, a0s: list,
+                                   heights: list, lifetimes: list) -> None:
         """Populates the background corrections table with the provided data."""
         self.correction_options_table.blockSignals(True)
         self.correction_options_table.setRowCount(0)
-        for run, group, start_x, end_x in zip(runs, groups, start_xs, end_xs):
-            row_index = self.correction_options_table.rowCount()
-            self.correction_options_table.insertRow(row_index)
-            self.correction_options_table.setItem(row_index, RUN_COLUMN_INDEX, self._create_table_item(run, False))
-            self.correction_options_table.setItem(row_index, GROUP_COLUMN_INDEX, self._create_table_item(group, False))
-            self.correction_options_table.setItem(row_index, START_X_COLUMN_INDEX,
-                                                  self._create_table_item(self._float_to_str(start_x)))
-            self.correction_options_table.setItem(row_index, END_X_COLUMN_INDEX,
-                                                  self._create_table_item(self._float_to_str(end_x)))
+        for run, group, start_x, end_x, a0, height, lifetime in zip(runs, groups, start_xs, end_xs, a0s, heights,
+                                                                    lifetimes):
+            row = self.correction_options_table.rowCount()
+            self.correction_options_table.insertRow(row)
+            self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, self._create_table_item(run, False))
+            self.correction_options_table.setItem(row, GROUP_COLUMN_INDEX, self._create_table_item(group, False))
+            self.correction_options_table.setItem(row, START_X_COLUMN_INDEX, self._create_double_table_item(start_x))
+            self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, self._create_double_table_item(end_x))
+            self.correction_options_table.setItem(row, A0_COLUMN_INDEX,
+                                                  self._create_double_table_item(a0, enabled=False))
+            self.correction_options_table.setItem(row, HEIGHT_COLUMN_INDEX,
+                                                  self._create_double_table_item(height, enabled=False))
+            self.correction_options_table.setItem(row, LIFETIME_COLUMN_INDEX,
+                                                  self._create_double_table_item(lifetime, enabled=False))
         self.correction_options_table.blockSignals(False)
 
     def _setup_corrections_table(self) -> None:
         """Setup the correction options table to have a good layout."""
-        self.correction_options_table.setItemDelegateForColumn(START_X_COLUMN_INDEX,
-                                                               DoubleItemDelegate(self.correction_options_table))
-        self.correction_options_table.setItemDelegateForColumn(END_X_COLUMN_INDEX,
-                                                               DoubleItemDelegate(self.correction_options_table))
+        self._setup_double_item_delegate(START_X_COLUMN_INDEX)
+        self._setup_double_item_delegate(END_X_COLUMN_INDEX)
+        self._setup_double_item_delegate(A0_COLUMN_INDEX)
+        self._setup_double_item_delegate(HEIGHT_COLUMN_INDEX)
+        self._setup_double_item_delegate(LIFETIME_COLUMN_INDEX)
 
         self.correction_options_table.cellChanged.connect(lambda row, column:
                                                           self._on_corrections_table_cell_changed(row, column))
         self.correction_options_table.itemClicked.connect(lambda item: self._on_item_clicked(item))
+
+    def _setup_double_item_delegate(self, column_index: int) -> None:
+        """Sets an items delegate with a QDoubleValidator for the specified column index."""
+        self.correction_options_table.setItemDelegateForColumn(column_index,
+                                                               DoubleItemDelegate(self.correction_options_table))
 
     def _on_item_clicked(self, item: QTableWidgetItem) -> None:
         """Handles when a table cell is clicked."""
@@ -193,13 +208,19 @@ class BackgroundCorrectionsView(widget, ui_form):
         elif column == END_X_COLUMN_INDEX:
             self._handle_end_x_changed()
 
+    def _create_double_table_item(self, value: float, editable: bool = True, enabled: bool = True) -> QTableWidgetItem:
+        """Creates a table item for the corrections options table from a float."""
+        return self._create_table_item(self._float_to_str(value), editable, enabled)
+
     @staticmethod
-    def _create_table_item(text: str, editable: bool = True) -> QTableWidgetItem:
-        """Creates a table item for the corrections options table."""
+    def _create_table_item(text: str, editable: bool = True, enabled: bool = True) -> QTableWidgetItem:
+        """Creates a table item for the corrections options table from a string."""
         item = QTableWidgetItem(text)
         item.setTextAlignment(Qt.AlignCenter)
         if not editable:
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+        if not enabled:
+            item.setFlags(item.flags() ^ Qt.ItemIsEnabled)
         return item
 
     def _set_table_item_value_for(self, run: str, group: str, column_index: int, value: float) -> None:
@@ -207,8 +228,7 @@ class BackgroundCorrectionsView(widget, ui_form):
         row_index = self._table_row_index_of(run, group)
 
         self.correction_options_table.blockSignals(True)
-        self.correction_options_table.setItem(row_index, column_index,
-                                              self._create_table_item(self._float_to_str(value)))
+        self.correction_options_table.setItem(row_index, column_index, self._create_double_table_item(value))
         self.correction_options_table.blockSignals(False)
 
     def _table_item_value_for(self, run: str, group: str, column_index: int) -> str:
@@ -236,7 +256,7 @@ class BackgroundCorrectionsView(widget, ui_form):
         if self._selected_row is not None and self._selected_column is not None:
             self.correction_options_table.blockSignals(True)
             self.correction_options_table.setItem(self._selected_row, self._selected_column,
-                                                  self._create_table_item(self._float_to_str(value)))
+                                                  self._create_double_table_item(value))
             self.correction_options_table.blockSignals(False)
 
     @staticmethod

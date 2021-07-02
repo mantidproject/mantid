@@ -86,8 +86,8 @@ class BackgroundCorrectionsPresenter:
 
     def _update_displayed_corrections_data(self) -> None:
         """Updates the displayed corrections data using the data stored in the model."""
-        runs, groups, start_xs, end_xs = self.model.selected_correction_data()
-        self.view.populate_corrections_table(runs, groups, start_xs, end_xs)
+        runs, groups, start_xs, end_xs, a0s, heights, lifetimes = self.model.selected_correction_data()
+        self.view.populate_corrections_table(runs, groups, start_xs, end_xs, a0s, heights, lifetimes)
 
     def _check_start_x_is_valid_for(self, run: str, group: str) -> None:
         """Checks that the new start X is valid. If it isn't, the start and end X is adjusted."""

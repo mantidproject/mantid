@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.py36compat import dataclass
 
+from mantid.api import FunctionFactory, IFunction
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
 from Muon.GUI.Common.contexts.corrections_context import CorrectionsContext
 from Muon.GUI.Common.contexts.muon_context import MuonContext
@@ -25,8 +26,8 @@ class BackgroundCorrectionData:
     """
     start_x: float = DEFAULT_START_X
     end_x: float = DEFAULT_END_X
-    a0: float = 0.0
-    a0_error: float = 0.0
+    flat_background: IFunction = FunctionFactory.createFunction("FlatBackground")
+    exp_decay: IFunction = FunctionFactory.createFunction("ExpDecay")
 
 
 class BackgroundCorrectionsModel:
@@ -102,20 +103,23 @@ class BackgroundCorrectionsModel:
 
     def selected_correction_data(self) -> tuple:
         """Returns lists of the selected correction data to display in the view."""
-        runs, groups, start_xs, end_xs = self._selected_correction_data_for(self._selected_runs(),
-                                                                            self._selected_groups())
-        return runs, groups, start_xs, end_xs
+        runs, groups, start_xs, end_xs, a0s, heights, lifetimes = self._selected_correction_data_for(
+            self._selected_runs(), self._selected_groups())
+        return runs, groups, start_xs, end_xs, a0s, heights, lifetimes
 
     def _selected_correction_data_for(self, selected_runs: list, selected_groups: list) -> tuple:
         """Returns lists of the selected correction data to display in the view."""
-        runs_list, groups_list, start_xs, end_xs = [], [], [], []
+        runs_list, groups_list, start_xs, end_xs, a0s, heights, lifetimes = [], [], [], [], [], [], []
         for run_group, correction_data in self._corrections_context.background_correction_data.items():
             if run_group[0] in selected_runs and run_group[1] in selected_groups:
                 runs_list.append(run_group[0])
                 groups_list.append(run_group[1])
                 start_xs.append(correction_data.start_x)
                 end_xs.append(correction_data.end_x)
-        return runs_list, groups_list, start_xs, end_xs
+                a0s.append(correction_data.flat_background.getParameterValue("A0"))
+                heights.append(correction_data.exp_decay.getParameterValue("Height"))
+                lifetimes.append(correction_data.exp_decay.getParameterValue("Lifetime"))
+        return runs_list, groups_list, start_xs, end_xs, a0s, heights, lifetimes
 
     def _selected_runs(self) -> list:
         """Returns a list containing the run number strings that are currently selected."""
