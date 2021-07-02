@@ -20,6 +20,9 @@ X_OFFSET = 0.001
 
 @dataclass
 class BackgroundCorrectionData:
+    """
+    The background correction data associated with a specific group of a run.
+    """
     start_x: float = DEFAULT_START_X
     end_x: float = DEFAULT_END_X
     a0: float = 0.0
@@ -90,6 +93,7 @@ class BackgroundCorrectionsModel:
         return f"{value1:.{n_decimals}f}" == f"{value2:.{n_decimals}f}"
 
     def populate_background_corrections_data(self) -> None:
+        """Populates the background correction data dictionary when runs are initially loaded into the interface."""
         self._corrections_context.background_correction_data = {}
         groups = self.group_names()
         for run in self._corrections_model.run_number_strings():

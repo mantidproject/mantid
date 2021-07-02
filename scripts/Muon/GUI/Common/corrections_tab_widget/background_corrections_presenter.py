@@ -35,13 +35,17 @@ class BackgroundCorrectionsPresenter:
         self.model.set_background_correction_mode(BACKGROUND_MODE_NONE)
         self.view.background_correction_mode = BACKGROUND_MODE_NONE
 
+    def handle_runs_loaded(self) -> None:
+        """Handles when new run numbers are loaded into the interface."""
+        self.model.populate_background_corrections_data()
+
     def handle_groups_changed(self) -> None:
         """Handles when the selected groups have changed in the grouping tab."""
         self.view.populate_group_selector(self.model.group_names())
 
     def handle_run_selector_changed(self) -> None:
         """Handles when the run selector is changed."""
-        self._populate_corrections_table()
+        self._update_displayed_corrections_data()
 
     def handle_mode_combo_box_changed(self) -> None:
         """Handles when the background corrections mode is changed."""
@@ -79,10 +83,6 @@ class BackgroundCorrectionsPresenter:
 
         self.model.set_start_x(run, group, self.view.start_x(run, group))
         self.model.set_end_x(run, group, self.view.end_x(run, group))
-
-    def _populate_corrections_table(self) -> None:
-        self.model.populate_background_corrections_data()
-        self._update_displayed_corrections_data()
 
     def _update_displayed_corrections_data(self) -> None:
         """Updates the displayed corrections data using the data stored in the model."""

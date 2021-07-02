@@ -85,6 +85,8 @@ class CorrectionsPresenter(QObject):
         else:
             self.view.enable_view()
 
+        self.background_presenter.handle_runs_loaded()
+
     def handle_groups_changed(self) -> None:
         """Handles when the selected groups have changed in the grouping tab."""
         self.background_presenter.handle_groups_changed()
