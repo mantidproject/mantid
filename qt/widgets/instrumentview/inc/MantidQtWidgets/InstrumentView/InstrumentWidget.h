@@ -9,6 +9,7 @@
 #include "DllOption.h"
 #include "IGLDisplay.h"
 #include "IQtDisplay.h"
+#include "InstrumentDisplay.h"
 #include "InstrumentWidgetTypes.h"
 #include "QtConnect.h"
 #include "UnwrappedSurface.h"
@@ -286,10 +287,8 @@ protected:
   InstrumentWidgetTreeTab *m_treeTab;
   InstrumentWidgetPickTab *m_pickTab;
   XIntegrationControl *m_xIntegration;
-  /// The OpenGL widget to display the instrument
-  std::unique_ptr<IGLDisplay> m_glDisplay;
-  /// The simple widget to display the instrument
-  std::unique_ptr<IQtDisplay> m_qtDisplay;
+
+  InstrumentDisplay m_instrumentDisplay;
 
   // Context menu actions
   QAction *m_clearPeakOverlays, *m_clearAlignment;
