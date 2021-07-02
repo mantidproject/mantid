@@ -128,12 +128,11 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
   controlPanelLayout->addWidget(mControlsTab);
   controlPanelLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-  m_instrumentDisplay.getGLDisplay()->qtInstallEventFilter(this);
+  m_instrumentDisplay.installEventFilter(this);
+
   m_instrumentDisplay.getGLDisplay()->setMinimumWidth(600);
   m_qtConnect->connect(this, SIGNAL(enableLighting(bool)), m_instrumentDisplay.getGLDisplay(),
                        SLOT(enableLighting(bool)));
-
-  m_instrumentDisplay.getQtDisplay()->qtInstallEventFilter(this);
 
   QWidget *aWidget = new QWidget(this);
   m_instrumentDisplayLayout = new QStackedLayout(aWidget);

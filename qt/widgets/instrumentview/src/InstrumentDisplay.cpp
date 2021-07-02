@@ -22,4 +22,9 @@ InstrumentDisplay::InstrumentDisplay(std::unique_ptr<IGLDisplay> glDisplay, std:
 IGLDisplay *InstrumentDisplay::getGLDisplay() const { return m_glDisplay.get(); }
 
 IQtDisplay *InstrumentDisplay::getQtDisplay() const { return m_qtDisplay.get(); }
+
+void InstrumentDisplay::installEventFilter(QObject *obj) {
+  m_glDisplay->qtInstallEventFilter(obj);
+  m_qtDisplay->qtInstallEventFilter(obj);
+}
 } // namespace MantidQt::MantidWidgets

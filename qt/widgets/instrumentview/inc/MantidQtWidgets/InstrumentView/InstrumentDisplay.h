@@ -21,6 +21,8 @@ public:
   IGLDisplay *getGLDisplay() const;
   IQtDisplay *getQtDisplay() const;
 
+  void installEventFilter(QObject *obj);
+
 private:
   std::unique_ptr<IGLDisplay> m_glDisplay;
   std::unique_ptr<IQtDisplay> m_qtDisplay;
