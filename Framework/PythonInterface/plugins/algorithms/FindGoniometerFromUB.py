@@ -24,6 +24,18 @@ def getSignMaxAbsValInCol(mat):
     return np.sign(mat) * (abs(mat) == abs(mat).max(axis=0))
 
 
+def getR(theta, u):
+    """
+    Make a rotation axis for any angle around a supplied axis
+    :param theta: angle of rotation (ccw) around the axis provided
+    :param u: unit vector for axis of rotation
+    :return: R: rotation matrix
+    """
+    w = np.array([[0, -u[2], u[1]], [u[2], 0, -u[0]], [-u[1], u[0], 0]])
+    return np.eye(3, 3) + np.sin(theta * np.pi / 180) * w + (1 - np.cos(theta * np.pi / 180)) * (
+            w @ w)
+
+
 class FindGoniometerFromUB(DataProcessorAlgorithm):
 
     def name(self):
@@ -148,7 +160,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
         gonioTable = self.createGoniometerTable()
 
         # make the UB for omega = 0 from reference
-        zeroUB = self.getR(omega[0], [0, 0, 1]).T @ matUB[0]
+        zeroUB = getR(omega[0], [0, 0, 1]).T @ matUB[0]
         # get relative change in phi in range [0,360)
         dPhiRef = phiRef - phiRef[0]
         dPhiRef = dPhiRef + np.ceil(-dPhiRef / 360) * 360
@@ -214,8 +226,8 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
                 self.log().information("The following UB\n{}\nis not consistent with the reference, attempting to "
                                        "find an axes swap/inversion that make it consistent.")
                 # nominal goniometer axis
-                gonio = self.getR(omegaHand * dOmega, [0, 0, 1]) @ self.getR(-chiRef, [1, 0, 0]) @ [0, 0, 1]
-                predictedUB = self.getR(omega[irun], [0, 0, 1]) @ self.getR(dPhiRef[irun], gonio) @ zeroUB
+                gonio = getR(omegaHand * dOmega, [0, 0, 1]) @ getR(-chiRef, [1, 0, 0]) @ [0, 0, 1]
+                predictedUB = getR(omega[irun], [0, 0, 1]) @ getR(dPhiRef[irun], gonio) @ zeroUB
                 # try a permutation of the UB axes (as in TransformHKL)
                 # UB' = UB M^-1
                 # HKL' = M HKL
@@ -271,17 +283,6 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
             [r[2, 1] - r[1, 2], r[0, 2] - r[2, 0], r[1, 0] - r[0, 1]])
         return phi, u
 
-    def getR(self, theta, u):
-        """
-        Make a rotation axis for any angle around a supplied axis
-        :param theta: angle of rotation (ccw) around the axis provided
-        :param u: unit vector for axis of rotation
-        :return: R: rotation matrix
-        """
-        w = np.array([[0, -u[2], u[1]], [u[2], 0, -u[0]], [-u[1], u[0], 0]])
-        return np.eye(3, 3) + np.sin(theta * np.pi / 180) * w + (1 - np.cos(theta * np.pi / 180)) * (
-                w @ w)
-
     def getGonioAngles(self, aUB, zeroUB, omega):
         """
         Do the inverse of the rotation around the vertical axis between aUB and the zeroUB
@@ -297,7 +298,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
 
         # undo omega rotation between  (recall for a rotation matrix R^-1 = R.T)
         # rOmega rPhi U = U'
-        rPhi = self.getR(omega, [0, 0, 1]).T @ aUB @ np.linalg.inv(zeroUB)
+        rPhi = getR(omega, [0, 0, 1]).T @ aUB @ np.linalg.inv(zeroUB)
         phi, u = self.getSingleAxis(rPhi)
         # force z component to be positive (i.e. vertically upwards)
         if np.sign(u[-1]) < 0:
