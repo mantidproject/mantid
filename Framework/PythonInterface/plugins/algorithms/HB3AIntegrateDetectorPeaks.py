@@ -139,14 +139,14 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                     _, errA, _, errs, _ = fit_result.OutputParameters.toDict()['Error']
 
                     if method == "Fitted":
-                        integrated_intensity = A * sigma * np.sqrt(2 * np.pi) * scale
+                        integrated_intensity = A * sigma * np.sqrt(2 * np.pi)
 
                         # Convert correlation back into covariance
                         cor_As = (fit_result.OutputNormalisedCovarianceMatrix.cell(1, 4) / 100
                                   * fit_result.OutputParameters.cell(1, 2) * fit_result.OutputParameters.cell(3, 2))
                         # σ^2 = 2π (A^2 σ_s^2 + σ_A^2 s^2 + 2 A s σ_As)
                         integrated_intensity_error = np.sqrt(
-                            2 * np.pi * (A ** 2 * errs ** 2 + sigma ** 2 * errA ** 2 + 2 * A * sigma * cor_As)) * scale
+                            2 * np.pi * (A ** 2 * errs ** 2 + sigma ** 2 * errA ** 2 + 2 * A * sigma * cor_As))
 
                         if scan_log == 'omega':
                             SetGoniometer(Workspace=__tmp_pw, Axis0=f'{peak_centre},0,1,0,-1', Axis1='chi,0,0,1,-1',
@@ -170,6 +170,9 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                     continue
             else:
                 integrated_intensity, integrated_intensity_error = self._counts_integration(data, n_bkgr_pts, scan_step)
+
+            integrated_intensity *= scale
+            integrated_intensity_error *= scale
 
             peak = __tmp_pw.createPeakHKL([run['h'].getStatistics().median,
                                            run['k'].getStatistics().median,
@@ -227,8 +230,11 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                 DeleteWorkspace(tmp_ws, EnableLogging=False)
 
     def _counts_integration(self, ws, n_background_pts, scan_step):
+        """simple cuboid integration of detector counts with estimated background subtracted"""
         y = ws.extractY().flatten()
-        avg_background = (y[:n_background_pts].sum() + y[-n_background_pts:].sum()) / (2 * n_background_pts)
+        avg_background = 0.0
+        if n_background_pts != 0:
+            avg_background = (y[:n_background_pts].sum() + y[-n_background_pts:].sum()) / (2 * n_background_pts)
         integrated_intensity = (y.sum() - avg_background * y.size) * scan_step
         integrated_intensity_error = np.sum(np.sqrt(y)) * scan_step
         return integrated_intensity, integrated_intensity_error
