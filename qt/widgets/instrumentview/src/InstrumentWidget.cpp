@@ -1,9 +1,9 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
+//+ Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX - License - Identifier: GPL - 3.0
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -130,14 +130,14 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
 
   // Create the display widget
   if (!m_glDisplay)
-    m_glDisplay = std::make_unique<GLDisplay>(this);
+    m_glDisplay = std::make_unique<GLDisplay>();
   m_glDisplay->qtInstallEventFilter(this);
   m_glDisplay->setMinimumWidth(600);
   m_qtConnect->connect(this, SIGNAL(enableLighting(bool)), m_glDisplay.get(), SLOT(enableLighting(bool)));
 
   // Create simple display widget
   if (!m_qtDisplay)
-    m_qtDisplay = std::make_unique<QtDisplay>(this);
+    m_qtDisplay = std::make_unique<QtDisplay>();
   m_qtDisplay->qtInstallEventFilter(this);
 
   QWidget *aWidget = new QWidget(this);
