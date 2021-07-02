@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>473</width>
-    <height>263</height>
+    <height>251</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,7 +39,7 @@ color: grey; }
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="topMargin">
-       <number>14</number>
+       <number>20</number>
       </property>
       <item row="5" column="1" colspan="2">
        <widget class="QLabel" name="background_info_label">
@@ -57,18 +57,30 @@ color: grey; }
         </property>
        </widget>
       </item>
-      <item row="1" column="1" colspan="2">
-       <widget class="QComboBox" name="mode_combo_box">
-        <item>
-         <property name="text">
-          <string>None</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Auto</string>
-         </property>
-        </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="group_label">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Group :</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="select_function_label">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Select Function :</string>
+        </property>
        </widget>
       </item>
       <item row="2" column="1" colspan="2">
@@ -88,44 +100,6 @@ color: grey; }
         </item>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="select_function_label">
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Select Function :</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="group_label">
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Group :</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="mode_label">
         <property name="minimumSize">
@@ -134,24 +108,9 @@ color: grey; }
           <height>0</height>
          </size>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="text">
          <string>Background :</string>
         </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QComboBox" name="group_combo_box">
-        <item>
-         <property name="text">
-          <string>All</string>
-         </property>
-        </item>
        </widget>
       </item>
       <item row="3" column="2">
@@ -226,6 +185,42 @@ background-color: #c7e0ff;
          </property>
         </column>
        </widget>
+      </item>
+      <item row="1" column="1" colspan="2">
+       <widget class="QComboBox" name="mode_combo_box">
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Auto</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QComboBox" name="group_combo_box">
+        <item>
+         <property name="text">
+          <string>All</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </widget>

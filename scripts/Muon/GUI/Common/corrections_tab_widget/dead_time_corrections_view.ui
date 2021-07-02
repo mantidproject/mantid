@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>475</width>
-    <height>140</height>
+    <height>157</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,7 +39,7 @@ color: grey; }
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="topMargin">
-       <number>14</number>
+       <number>20</number>
       </property>
       <item row="2" column="0">
        <widget class="QLabel" name="dead_time_workspace_label">
@@ -47,12 +47,6 @@ color: grey; }
          <size>
           <width>200</width>
           <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>16777215</height>
          </size>
         </property>
         <property name="text">
@@ -68,12 +62,6 @@ color: grey; }
           <height>0</height>
          </size>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="text">
          <string>Other file :</string>
         </property>
@@ -85,12 +73,6 @@ color: grey; }
          <size>
           <width>200</width>
           <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>16777215</height>
          </size>
         </property>
         <property name="text">
