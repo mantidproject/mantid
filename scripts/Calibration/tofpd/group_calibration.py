@@ -152,10 +152,10 @@ def pdcalibration_groups(data_ws,
 
     cc_and_pd_diffcal = CloneWorkspace(f'{output_basename}_pd_diffcal', OutputWorkspace=f'{output_basename}_cc_pd_diffcal')
 
-    # remove masked detectors
+    # remove PD masked detectors from CC diffcal
     mask_ws = mtd[f'{output_basename}_pd_diffcal_mask']
     rows_to_remove = []
-    detid_list = cc_and_pd_diffcal.column('detid')
+    detid_list = cc_diffcal.column('detid')
     for n in range(mask_ws.getNumberHistograms()):
         if mask_ws.readY(n)[0] == 1:
             try:
@@ -164,7 +164,7 @@ def pdcalibration_groups(data_ws,
                 pass
 
     if rows_to_remove:
-        DeleteTableRows(cc_and_pd_diffcal, Rows=rows_to_remove)
+        DeleteTableRows(cc_diffcal, Rows=rows_to_remove)
 
     cc_det_to_difc = dict(zip(cc_diffcal.column('detid'), cc_diffcal.column('difc')))
 

@@ -87,9 +87,11 @@ class TestGroupCalibration(unittest.TestCase):
                         [starting_difc[0],
                          starting_difc[1]/0.95,
                          starting_difc[2]/1.05,
+                         0,
                          starting_difc[4]/0.95,
                          starting_difc[5]/(0.95*0.98),
-                         starting_difc[6]/(0.95*1.02)], rtol=0.005)
+                         starting_difc[6]/(0.95*1.02),
+                         0], rtol=0.005)
 
     def test_from_prev_cal(self):
 
@@ -146,9 +148,11 @@ class TestGroupCalibration(unittest.TestCase):
                         [starting_difc[0],
                          starting_difc[1]/0.95,
                          starting_difc[2]/1.05,
+                         starting_difc[3]*1.01,
                          starting_difc[4]/0.95,
                          starting_difc[5]/(0.95*0.98),
-                         starting_difc[6]/(0.95*1.02)], rtol=0.005)
+                         starting_difc[6]/(0.95*1.02),
+                         starting_difc[7]*1.01], rtol=0.005)
 
     def test_di_group_calibration(self):
         ws, groups = create_test_ws_and_group()
@@ -191,9 +195,11 @@ class TestGroupCalibration(unittest.TestCase):
                         [starting_difc[0],
                          starting_difc[1]/0.95,
                          starting_difc[2]/1.05,
+                         starting_difc[3]*1.01,
                          starting_difc[4]/0.95,
                          starting_difc[5]/(0.95*0.98),
-                         starting_difc[6]/(0.95*1.02)], rtol=0.005)
+                         starting_difc[6]/(0.95*1.02),
+                         starting_difc[7]*1.01], rtol=0.005)
 
 
 if __name__ == '__main__':
