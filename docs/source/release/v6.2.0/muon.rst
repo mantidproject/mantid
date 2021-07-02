@@ -21,4 +21,9 @@ Improvements
 ############
 - Updated :ref:`LoadElementalAnalysisData <algm-LoadElementalAnalysisData>` algorithm to include Poisson errors for the counts data.
 
+Algorithms
+##########
+
+- Updated :ref:`LoadMuonLog <algm-LoadMuonLog>` to read units for most log values.
+
 :ref:`Release 6.2.0 <v6.2.0>`
