@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "IMantidGLWidget.h"
+#include "IGLDisplay.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <QGLWidget>
@@ -17,7 +17,7 @@
 
 namespace MantidQt::MantidWidgets {
 
-class MockMantidGLWidget : public IMantidGLWidget {
+class MockGLDisplay : public IGLDisplay {
 public:
   MOCK_METHOD(void, setSurface, (std::shared_ptr<ProjectionSurface>), (override));
   MOCK_METHOD(std::shared_ptr<ProjectionSurface>, getSurface, (), (override));

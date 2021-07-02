@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IMantidGLWidget.h"
+#include "IGLDisplay.h"
 #include "IQtDisplay.h"
 #include "InstrumentWidget.h"
 
-#include "MockMantidGLWidget.h"
+#include "MockGLDisplay.h"
 #include "MockProjectionSurface.h"
 #include "MockQtConnect.h"
 #include "MockQtDisplay.h"
@@ -36,7 +36,7 @@ public:
   static void destroySuite(InstrumentWidgetTest *suite) { delete suite; }
 
   using QtMock = StrictMock<MockQtDisplay>;
-  using GLMock = StrictMock<MockMantidGLWidget>;
+  using GLMock = StrictMock<MockGLDisplay>;
   using ConnectMock = StrictMock<MockQtConnect>;
 
   void setUp() override {
