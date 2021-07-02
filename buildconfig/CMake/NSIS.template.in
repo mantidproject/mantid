@@ -699,7 +699,7 @@ Section "-Core installation"
 
   ; Optional registration
   Push "DisplayIcon"
-  Push "$INSTDIR\@CPACK_NSIS_INSTALLED_ICON_NAME@"
+  Push "$INSTDIR\Uninstall.exe"
   Call ConditionalAddToRegisty
   Push "HelpLink"
   Push "@CPACK_NSIS_HELP_LINK@"
