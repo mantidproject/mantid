@@ -5,8 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, Progress, ADSValidator, IPeaksWorkspace)
-from mantid.simpleapi import (AnalysisDataService, FindUBUsingLatticeParameters,
-                              CopySample, IndexPeaks, TransformHKL, CalculateUMatrix, logger)
+from mantid.simpleapi import (AnalysisDataService, logger)
 from mantid.kernel import (Direction, FloatBoundedValidator, StringArrayProperty)
 import numpy as np
 from scipy.optimize import leastsq
@@ -14,28 +13,6 @@ from FindGoniometerFromUB import getSignMaxAbsValInCol
 
 _MIN_NUM_PEAKS = 6  # minimum required to use FindUBUsingLatticeParameters assuming all linearly indep.
 _MIN_NUM_INDEXED_PEAKS = 2  # minimum indexed peaks required for CalculateUMatrix
-
-
-def fobj_lstsq(x0, ws_list):
-    """
-    Calulates sum of square magnitude of difference between qsample and q of integer HKL
-    x0 = [a, b, c, alpha, beta, gamma]
-    """
-    residsq = np.zeros(sum([AnalysisDataService.retrieve(wsname).getNumberPeaks() for wsname in ws_list]))
-    ipk = 0  # normalise by n peaks indexed so no penalty in indexing more peaks
-    for wsname in ws_list:
-        nindexed, *_ = IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=True)
-        if nindexed > _MIN_NUM_INDEXED_PEAKS:
-            CalculateUMatrix(wsname, *x0)
-            nindexed, *_ = IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=False)
-            ws = AnalysisDataService.retrieve(wsname)
-            UB = 2 * np.pi * ws.sample().getOrientedLattice().getUB()
-            for ii in range(ws.getNumberPeaks()):
-                pk = ws.getPeak(ii)
-                if pk.getHKL().norm2() > 1e-6:
-                    residsq[ipk] += (np.sum((UB @ pk.getIntHKL() - pk.getQSampleFrame()) ** 2))
-                    ipk += 1
-    return np.sqrt(residsq / (ipk + 1))
 
 
 class FindGlobalBMatrix(DataProcessorAlgorithm):
@@ -100,6 +77,9 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
     def PyExec(self):
 
+        def fobj(alatt):
+            return self.fobj_lstsq(alatt, valid_ws_list)
+
         # setup progress bar
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=3)
         # Get input
@@ -117,12 +97,12 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         nindexed = 0
         if w_ref.sample().hasOrientedLattice():
             # try use existing UB to index peaks
-            nindexed, *_ = IndexPeaks(PeaksWorkspace=ws_list[0], RoundHKLs=True)
+            nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[0], RoundHKLs=True)
         if nindexed < _MIN_NUM_INDEXED_PEAKS:
             # find a better intitial UB
-            FindUBUsingLatticeParameters(PeaksWorkspace=ws_list[0], a=a, b=b, c=c,
-                                         alpha=alpha, beta=beta, gamma=gamma, FixParameters=False)
-            nindexed, *_ = IndexPeaks(PeaksWorkspace=ws_list[0], RoundHKLs=True)
+            self.child_FindUBUsingLatticeParameters(PeaksWorkspace=ws_list[0], a=a, b=b, c=c,
+                                                    alpha=alpha, beta=beta, gamma=gamma, FixParameters=False)
+            nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[0], RoundHKLs=True)
         if nindexed < _MIN_NUM_INDEXED_PEAKS:
             # can't get good initial UB
             logger.error(f"Could not refine an initla UB from workspace {ws_list[0]}")
@@ -130,22 +110,21 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         # what if indexes less than 2 peaks - it won't
         valid_ws_list = [ws_list[0]]
         for iws, wsname in enumerate(ws_list[1:]):
-            CopySample(InputWorkspace=ws_list[0], OutputWorkspace=wsname,
-                       CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False,
-                       CopyOrientationOnly=True)
-            nindexed, *_ = IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=True)
+            # copy UB and index
+            self.child_CopySample(InputWorkspace=ws_list[0], OutputWorkspace=wsname)
+            nindexed = self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=True)
             if nindexed < _MIN_NUM_INDEXED_PEAKS:
                 # assume gonio matrix is bad - find UB from scratch and transform to preserve indexing
-                FindUBUsingLatticeParameters(PeaksWorkspace=wsname, a=a, b=b, c=c,
-                                             alpha=alpha, beta=beta, gamma=gamma, FixParameters=False)
+                self.child_FindUBUsingLatticeParameters(PeaksWorkspace=wsname, a=a, b=b, c=c,
+                                                        alpha=alpha, beta=beta, gamma=gamma, FixParameters=False)
                 # compare U matrix to perform TransformHKL to preserve indexing
                 w = AnalysisDataService.retrieve(wsname)
                 U_ref = w_ref.sample().getOrientedLattice().getU()
                 U = w.sample().getOrientedLattice().getU()
                 # find transform required ( U_ref = T U)
                 transform = getSignMaxAbsValInCol(np.linalg.inv(U) @ U_ref)
-                TransformHKL(PeaksWorkspace=wsname, HKLTransform=transform, FindError=False)
-                nindexed, *_ = IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=True)
+                self.child_TransformHKL(PeaksWorkspace=wsname, HKLTransform=transform, FindError=False)
+                nindexed = self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=True)
             if nindexed < _MIN_NUM_INDEXED_PEAKS:
                 logger.warning(f"Consistent UB not found for {wsname} - this workspace will be ignored.")
             else:
@@ -153,17 +132,87 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
         # optimize the lattice parameters (i.e. B matrix)
         prog_reporter.report(2, "Optimize B")
-        x0 = [a, b, c, alpha, beta, gamma]  # should get this from ws_list[0] instead
+        alatt0 = [a, b, c, alpha, beta, gamma]  # should get this from ws_list[0] instead
+        alatt, *_, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
 
-        # fractional step size dx/x = np.sqrt(epsfcn) = 1e-4
-        *_, msg, ier = leastsq(fobj_lstsq, x0=x0, args=(valid_ws_list), full_output=True)
         success = ier in [1, 2, 3, 4]
         if success:
-            logger.notice(f"Lattice parameters successfully refined for workspaces: {valid_ws_list}")
+            logger.notice(f"Lattice parameters successfully refined for workspaces: {valid_ws_list}\n"
+                          f"Lattice parameters [a, b, c, alpha, beta, gamma] = {alatt}")
         else:
             logger.warning(f"Error in optimization of lattice parameters: {msg}")
         # complete progress
         prog_reporter.report(3, "Done")
+
+    def fobj_lstsq(self, x0, ws_list):
+        """
+        Calulates sum of square magnitude of difference between qsample and q of integer HKL
+        x0 = [a, b, c, alpha, beta, gamma]
+        """
+        residsq = np.zeros(sum([AnalysisDataService.retrieve(wsname).getNumberPeaks() for wsname in ws_list]))
+        ipk = 0  # normalise by n peaks indexed so no penalty in indexing more peaks
+        for wsname in ws_list:
+            nindexed = self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=True)
+            if nindexed > _MIN_NUM_INDEXED_PEAKS:
+                self.child_CalculateUMatrix(wsname, *x0)
+                self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=False)
+                ws = AnalysisDataService.retrieve(wsname)
+                UB = 2 * np.pi * ws.sample().getOrientedLattice().getUB()
+                for ii in range(ws.getNumberPeaks()):
+                    pk = ws.getPeak(ii)
+                    if pk.getHKL().norm2() > 1e-6:
+                        residsq[ipk] += (np.sum((UB @ pk.getIntHKL() - pk.getQSampleFrame()) ** 2))
+                        ipk += 1
+        return np.sqrt(residsq / (ipk + 1))
+
+    def child_IndexPeaks(self, PeaksWorkspace, RoundHKLs):
+        alg = self.createChildAlgorithm("IndexPeaks", enableLogging=False)
+        alg.setProperty("PeaksWorkspace", PeaksWorkspace)
+        alg.setProperty("RoundHKLs", RoundHKLs)
+        alg.execute()
+        return alg.getProperty("NumIndexed").value
+
+    def child_FindUBUsingLatticeParameters(self, PeaksWorkspace, a, b, c, alpha, beta, gamma, FixParameters=False):
+        alg = self.createChildAlgorithm("FindUBUsingLatticeParameters", enableLogging=False)
+        alg.setProperty("PeaksWorkspace", PeaksWorkspace)
+        alg.setProperty("a", a)
+        alg.setProperty("b", b)
+        alg.setProperty("c", c)
+        alg.setProperty("alpha", alpha)
+        alg.setProperty("beta", beta)
+        alg.setProperty("gamma", gamma)
+        alg.setProperty("FixParameters", FixParameters)
+        alg.execute()
+
+    def child_CalculateUMatrix(self, PeaksWorkspace, a, b, c, alpha, beta, gamma):
+        alg = self.createChildAlgorithm("CalculateUMatrix", enableLogging=False)
+        alg.setProperty("PeaksWorkspace", PeaksWorkspace)
+        alg.setProperty("a", a)
+        alg.setProperty("b", b)
+        alg.setProperty("c", c)
+        alg.setProperty("alpha", alpha)
+        alg.setProperty("beta", beta)
+        alg.setProperty("gamma", gamma)
+        alg.execute()
+
+    def child_TransformHKL(self, PeaksWorkspace, HKLTransform, FindError=False):
+        alg = self.createChildAlgorithm("TransformHKL", enableLogging=False)
+        alg.setProperty("PeaksWorkspace", PeaksWorkspace)
+        alg.setProperty("HKLTransform", HKLTransform)
+        alg.setProperty("FindError", FindError)
+        alg.execute()
+
+    def child_CopySample(self, InputWorkspace, OutputWorkspace, CopyName=False, CopyMaterial=False,
+                         CopyEnvironment=False, CopyShape=False, CopyOrientationOnly=True):
+        alg = self.createChildAlgorithm("CopySample", enableLogging=False)
+        alg.setProperty("InputWorkspace", InputWorkspace)
+        alg.setProperty("OutputWorkspace", OutputWorkspace)
+        alg.setProperty("CopyName", CopyName)
+        alg.setProperty("CopyMaterial", CopyMaterial)
+        alg.setProperty("CopyEnvironment", CopyEnvironment)
+        alg.setProperty("CopyShape", CopyShape)
+        alg.setProperty("CopyOrientationOnly", CopyOrientationOnly)
+        alg.execute()
 
 
 # register algorithm with mantid

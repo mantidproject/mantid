@@ -1,5 +1,4 @@
 import unittest
-from testhelpers import create_algorithm
 from mantid.simpleapi import (FindGlobalBMatrix, AnalysisDataService, SetGoniometer, SetUB, CreatePeaksWorkspace,
                               LoadEmptyInstrument, CloneWorkspace)
 import numpy as np
