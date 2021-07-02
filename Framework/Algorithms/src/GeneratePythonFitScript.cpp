@@ -178,7 +178,7 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
   }
   if (fittingType == "Simultaneous") {
     if (getNumberOfDomainsInFunction(function) != inputWorkspaces.size())
-      errors["Function"] = "The Function provided does not have the same number of domains as there is input "
+      errors["Function"] = "The Function provided does not have the same number of domains as there are input "
                            "workspaces. This is a requirement for Simultaneous fitting.";
   }
 
