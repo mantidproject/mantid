@@ -21,7 +21,7 @@ detector scan, either omega or chi in degrees.
 There are three different methods for integrating the input workspace:
 simple counts summation, simple counts summation with fitted background,
 and a fitted model, which are described in detail at
-:ref:`HFIR Single Crystal Reduction`.
+:ref:`HFIR Single Crystal Reduction <interface-HFIR-Single-Crystal-Reduction>`.
 
 When using `Method=Counts`, the background is estimated by averaging
 data from the first and last scans. The number of scans to include
@@ -33,7 +33,7 @@ just like `Method=Fitting`. However, the peak intensity is instead
 approximated by summing the detector counts over a specific set of
 measurements that are defined by the motor positions in the range of
 :math:`\pm \frac{N}{2} \text{FWHM}`, where `N` is controlled with the
-`NumIntegrationPts` option. The background is removed over the same
+`WidthScale` option. The background is removed over the same
 range using the fitted flat background.
 
 For `Method=Fitted`, the reduced workspace is fitted using
