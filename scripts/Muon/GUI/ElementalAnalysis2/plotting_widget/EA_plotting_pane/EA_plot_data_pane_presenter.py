@@ -87,6 +87,7 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
         if workspace_name in plotted_workspaces:
             self._figure_presenter.replace_workspace_in_plot(workspace)
+        self.handle_data_updated()
 
     def check_selected_groups_if_rebinned(self):
         """
@@ -105,3 +106,14 @@ class EAPlotDataPanePresenter(BasePanePresenter):
             keys = self._model.create_tiled_keys(tiled_by)
             self._figure_presenter.create_tiled_plot(keys)
             self._figure_presenter._handle_autoscale_y_axes()
+
+    def handle_workspace_deleted_from_ads(self, workspace):
+        """
+        Handles a workspace being deleted from ads by removing the workspace from the plot
+        :param workspace: workspace 2D object
+        """
+        workspace_name = workspace.name()
+        plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
+        if workspace_name in plotted_workspaces:
+            self._figure_presenter.remove_workspace_from_plot(workspace)
+        self.handle_data_updated()

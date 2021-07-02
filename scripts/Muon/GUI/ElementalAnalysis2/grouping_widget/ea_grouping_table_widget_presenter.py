@@ -94,19 +94,16 @@ class EAGroupingTablePresenter(object):
         changed_item = self._view.get_table_item(row, col)
         workspace_name = self._view.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS['workspace_name']).text()
 
-        update_model = self.handle_to_analyse_column_changed(col, changed_item, workspace_name)
+        self.handle_to_analyse_column_changed(col, changed_item, workspace_name)
         self.handle_rebin_column_changed(col, row, changed_item)
         self.handle_rebin_option_column_changed(col, changed_item, workspace_name)
 
-        self.handle_update(update_model)
+        self.notify_data_changed()
 
     def handle_to_analyse_column_changed(self, col, changed_item, workspace_name):
 
-        update_model = True
         if col == INVERSE_GROUP_TABLE_COLUMNS['to_analyse']:
-            update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), workspace_name)
-        return update_model
 
     def handle_rebin_column_changed(self, col, row, changed_item):
         if col == INVERSE_GROUP_TABLE_COLUMNS['rebin']:
@@ -130,7 +127,6 @@ class EAGroupingTablePresenter(object):
     def handle_update(self, update_model):
         if not update_model:
             # Reset the view back to model values and exit early as the changes are invalid.
-            self.update_view_from_model()
             self.notify_data_changed()
             return
 

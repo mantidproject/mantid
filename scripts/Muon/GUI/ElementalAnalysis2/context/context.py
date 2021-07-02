@@ -10,8 +10,7 @@ from Muon.GUI.Common import thread_model
 from mantid.simpleapi import Rebin
 from Muon.GUI.Common import message_box
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, remove_ws_if_present
-
-# from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
+from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
 
 REBINNED_FIXED_WS_SUFFIX = "_EA_Rebinned_Fixed"
 REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
@@ -27,10 +26,7 @@ class ElementalAnalysisContext(object):
         self._group_context = ea_group_context
         self._plot_panes_context = plot_panes_context
         self.workspace_suffix = workspace_suffix
-        # self.ads_observer = MuonContextADSObserver(
-        #    self.remove_workspace,
-        #    self.clear_context,
-        #    self.workspace_replaced)
+        self.ads_observer = MuonContextADSObserver(self.remove_workspace, self.clear_context, self.workspace_replaced)
 
         self.update_view_from_model_notifier = GenericObservable()
         self.update_plots_notifier = GenericObservable()
@@ -67,15 +63,12 @@ class ElementalAnalysisContext(object):
 
     def remove_workspace(self, workspace):
         # required as the renameHandler returns a name instead of a workspace.
-        if isinstance(workspace, str):
-            workspace_name = workspace
-        else:
-            workspace_name = workspace.name()
-
-        self.data_context.remove_workspace_by_name(workspace_name)
+        workspace_name = str(workspace)
+        if workspace_name not in self.group_context.group_names:
+            return
         self.group_context.remove_group(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
-        self.update_plots_notifier.notify_subscribers(workspace_name)
+        self.deleted_plots_notifier.notify_subscribers(workspace)
 
     def clear_context(self):
         self.data_context.clear()
@@ -109,6 +102,7 @@ class ElementalAnalysisContext(object):
         group_workspace = retrieve_ws(self.group_context[name].run_number)
         group_workspace.addWorkspace(workspace)
         self.group_context[name].update_workspaces(str(workspace), rebin=True)
+        self.update_plots_notifier.notify_subscribers(workspace)
 
     def handle_rebin(self, name, rebin_type, rebin_param):
         self.rebin_model = ThreadModelWrapper(lambda: self._run_rebin(name, rebin_type, rebin_param))

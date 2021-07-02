@@ -111,8 +111,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.removeDockWidget(self.dockable_plot_widget_window)
-        # self.context.ads_observer.unsubscribe()
-        # self.context.ads_observer = None
+        self.context.ads_observer.unsubscribe()
+        self.context.ads_observer = None
         self.tabs.closeEvent(event)
         super(ElementalAnalysisGui, self).closeEvent(event)
 
@@ -150,6 +150,9 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         for observer in self.plot_widget.data_changed_observers:
             self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(observer)
+
+        for observer in self.plot_widget.workspace_deleted_from_ads_observers:
+            self.context.deleted_plots_notifier.add_subscriber(observer)
 
     def setup_on_load_enabler(self):
         self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(

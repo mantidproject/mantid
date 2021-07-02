@@ -94,7 +94,7 @@ class EAPlotDataPaneModelTest(unittest.TestCase):
         self.context.data_context.current_runs = runs
         keys = self.model.create_tiled_keys("Detector")
 
-        self.assertCountEqual(keys, ["Detector 1", "Detector 2"])
+        self.assertEqual(keys, ["Detector 1", "Detector 2"])
 
 
 if __name__ == '__main__':
