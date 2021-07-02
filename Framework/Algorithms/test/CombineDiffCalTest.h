@@ -50,16 +50,16 @@ public:
     // fill the values
     //      new_row << entry.detector_id << entry.difc << entry.difa << entry.tzero;
     TableRow newRow = table->appendRow();
-    newRow << 102 << 1000.0 << 0.0 << 0.0;
+    newRow << 103 << 1101.0 << 4.0 << 0.0;
 
     newRow = table->appendRow();
-    newRow << 100 << 1001.0 << 0.0 << 0.0;
+    newRow << 100 << 1000.0 << 1.0 << 0.0;
 
     newRow = table->appendRow();
-    newRow << 101 << 1099.0 << 0.0 << 0.0;
+    newRow << 101 << 1001.0 << 2.0 << 0.0;
 
     newRow = table->appendRow();
-    newRow << 103 << 1101.0 << 0.0 << 0.0;
+    newRow << 102 << 1099.0 << 3.0 << 0.0;
 
     return table;
   }
@@ -75,16 +75,16 @@ public:
     // fill the values
     //      new_row << entry.detector_id << entry.difc << entry.difa << entry.tzero;
     TableRow newRow = table->appendRow();
-    newRow << 100 << 1000.0 << 0.0 << 0.0;
+    newRow << 100 << 1000.0 << 1.0 << 0.0;
 
     newRow = table->appendRow();
-    newRow << 101 << 1001.0 << 0.0 << 0.0;
+    newRow << 101 << 1001.0 << 2.0 << 0.0;
 
     newRow = table->appendRow();
-    newRow << 102 << 1099.0 << 0.0 << 0.0;
+    newRow << 102 << 1099.0 << 3.0 << 0.0;
 
     newRow = table->appendRow();
-    newRow << 103 << 1101.0 << 0.0 << 0.0;
+    newRow << 103 << 1101.0 << 4.0 << 0.0;
 
     return table;
   }
@@ -175,6 +175,23 @@ public:
     return outWS;
   }
 
+  void confirmResults(DataObjects::TableWorkspace_sptr output) {
+    // double difc = (difcPD /difcArb) * difcPrev;
+    // double difa = ((difcPD / difcArb) * (difcPD / difcArb)) * difaPrev;
+    auto difc = output->getColumn("difc");
+    TS_ASSERT(difc);
+    TS_ASSERT_EQUALS(difc->toDouble(0), (1000. / 1000.) * 1000.);
+    TS_ASSERT_EQUALS(difc->toDouble(1), (1001. / 1000.) * 1001.);
+    TS_ASSERT_EQUALS(difc->toDouble(2), (1110. / 1100.) * 1099.);
+    TS_ASSERT_EQUALS(difc->toDouble(3), (1110. / 1100.) * 1101.);
+
+    auto difa = output->getColumn("difa");
+    TS_ASSERT_EQUALS(difa->toDouble(0), ((1000. / 1000.) * (1000. / 1000.)) * 1.);
+    TS_ASSERT_EQUALS(difa->toDouble(1), ((1001. / 1000.) * (1001. / 1000.)) * 2.);
+    TS_ASSERT_EQUALS(difa->toDouble(2), ((1110. / 1100.) * (1110. / 1100.)) * 3.);
+    TS_ASSERT_EQUALS(difa->toDouble(3), ((1110. / 1100.) * (1110. / 1100.)) * 4.);
+  }
+
   void test_init() {
     CombineDiffCal alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -217,15 +234,10 @@ public:
     DataObjects::TableWorkspace_sptr output = alg.getProperty("OutputWorkspace");
     TS_ASSERT(output);
 
-    auto difc = output->getColumn("difc");
-    TS_ASSERT(difc);
-    TS_ASSERT_EQUALS(difc->toDouble(0), (1000. / 1000.) * 1000.);
-    TS_ASSERT_EQUALS(difc->toDouble(1), (1001. / 1000.) * 1001.);
-    TS_ASSERT_EQUALS(difc->toDouble(2), (1110. / 1100.) * 1099.);
-    TS_ASSERT_EQUALS(difc->toDouble(3), (1110. / 1100.) * 1101.);
+    confirmResults(output);
   }
 
-  void testSortValidation() {
+  void testUnsorted() {
     // test input
 
     // fake data to simulate the output of cross correlate PixelCalibration
@@ -248,6 +260,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
 
     // run the algorithm
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    DataObjects::TableWorkspace_sptr output = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(output);
+
+    confirmResults(output);
   }
 };
