@@ -45,7 +45,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
                                             LambdaMax = self.lambdaMax, DMin = self.dMin, DMax = self.dMax, DpMin = self.dpMin,
                                             DpMax = self.dpMax, dSpaceBinning = self.dSpaceBinning,
                                             dPerpendicularBinning = self.dPerpendicularBinning, FWHM = self.FWHM,
-                                            Tolerance = self.tolerance)
+                                            Tolerance = self.tolerance, SystemTest = True)
 
     def validateMethod(self):
         return 'ValidateAscii'

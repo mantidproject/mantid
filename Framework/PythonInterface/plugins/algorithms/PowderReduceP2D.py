@@ -66,6 +66,11 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self.declareProperty(FileProperty('OutputFile', '', action=FileAction.Save, direction=Direction.Input),
                                  doc='Output File for p2d Data.')
             self.setPropertyGroup('OutputFile', grp1)
+            self.declareProperty('SystemTest',
+                                 False,
+                                 direction=Direction.Input,
+                                 doc='Set to True if running a system test. Greatly decreases the amount of data used.')
+            self.setPropertyGroup('SystemTest', grp1)
 
         def loadDataRanges():
             # Data range
@@ -389,6 +394,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         def getInputOutputFiles():
             # Output File
             self._outputFile = self.getProperty('OutputFile').value
+            self._SystemTest = self.getProperty('SystemTest').value
             # Names for Workspaces
             self._sampleWS = 'Sample'
             self._vanaWS = 'Vana'
@@ -533,7 +539,10 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
 
     def processData(self, filename, wsName):
         if filename != '':
-            Load(Filename=filename, OutputWorkspace=wsName)
+            if self._SystemTest:
+                Load(Filename=filename, OutputWorkspace=wsName, BankName = 'bank22')
+            else:
+                Load(Filename=filename, OutputWorkspace=wsName)
         FindDetectorsPar(InputWorkspace=wsName,
                          ReturnLinearRanges=self._returnLinearRanges,
                          ParFile=self._parFile,
