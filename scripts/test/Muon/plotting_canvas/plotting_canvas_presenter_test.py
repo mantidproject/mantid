@@ -67,10 +67,10 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.options.set_plot_y_range = mock.Mock()
 
         self.presenter.set_quickedit_from_context()
-        self.options.set_autoscale.assert_called_once_with(state)
-        self.options.set_errors.assert_called_once_with(state)
-        self.options.set_plot_x_range.assert_called_once_with(xlims)
-        self.options.set_plot_y_range.assert_called_once_with(ylims)
+        self.options.set_autoscale.assert_called_with(state)
+        self.options.set_errors.assert_called_with(state)
+        self.options.set_plot_x_range.assert_called_with(xlims)
+        self.options.set_plot_y_range.assert_called_with(ylims)
 
     def test_plot_workspaces_removes_workspace_from_plot_if_hold_on_false(self):
         ws_names = ["MUSR6220"]
