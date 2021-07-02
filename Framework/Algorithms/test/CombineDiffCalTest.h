@@ -13,6 +13,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/CombineDiffCal.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -139,28 +140,32 @@ public:
     return table;
   }
 
-  MatrixWorkspace_sptr createCalibrationWorkspace() {
+  MatrixWorkspace_sptr getInstrumentWorkspace() {
     CreateSampleWorkspace createSampleWorkspaceAlgo;
     createSampleWorkspaceAlgo.setChild(true);
     createSampleWorkspaceAlgo.initialize();
     createSampleWorkspaceAlgo.setPropertyValue("OutputWorkspace", "outWSName");
     createSampleWorkspaceAlgo.execute();
-    MatrixWorkspace_sptr wipWS = createSampleWorkspaceAlgo.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr instrumentWS = createSampleWorkspaceAlgo.getProperty("OutputWorkspace");
 
     GroupDetectors2 groupDetectorsAlgo;
     groupDetectorsAlgo.setChild(true);
     groupDetectorsAlgo.initialize();
-    groupDetectorsAlgo.setProperty("InputWorkspace", wipWS);
+    groupDetectorsAlgo.setProperty("InputWorkspace", instrumentWS);
     groupDetectorsAlgo.setProperty("GroupingPattern", "0+1,2+3");
     groupDetectorsAlgo.setPropertyValue("OutputWorkspace", "outWSName");
     groupDetectorsAlgo.execute();
 
-    wipWS = groupDetectorsAlgo.getProperty("OutputWorkspace");
+    instrumentWS = groupDetectorsAlgo.getProperty("OutputWorkspace");
+    return instrumentWS;
+  }
 
+  MatrixWorkspace_sptr createCalibrationWorkspace() {
+    MatrixWorkspace_sptr instrumentWS = getInstrumentWorkspace();
     const auto calibrationArgsTable = createCalibrationTableArgs();
 
     std::string testWorkspaceName = "TestWorkspace";
-    AnalysisDataService::Instance().add(testWorkspaceName, wipWS);
+    AnalysisDataService::Instance().add(testWorkspaceName, instrumentWS);
     const auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(testWorkspaceName);
 
     ApplyDiffCal applyDiffCalAlgo;
@@ -171,8 +176,33 @@ public:
     applyDiffCalAlgo.execute();
 
     AnalysisDataService::Instance().remove(testWorkspaceName);
-
     return outWS;
+  }
+
+  DataObjects::MaskWorkspace_sptr getMaskWorkspace() {
+    MatrixWorkspace_sptr instrumentWS = getInstrumentWorkspace();
+    // In case of MaskWorkspace
+    DataObjects::MaskWorkspace_sptr maskWS = std::make_shared<DataObjects::MaskWorkspace>(instrumentWS);
+
+    maskWS->setMasked(100, true);
+    maskWS->setMasked(101, true);
+
+    return maskWS;
+  }
+
+  Mantid::API::IAlgorithm_sptr setupAlg(DataObjects::TableWorkspace_sptr difCalPixelCalibration,
+                                        DataObjects::TableWorkspace_sptr difCalGroupedCalibration,
+                                        MatrixWorkspace_sptr diffCalCalibrationWs) {
+    // set up algorithm
+    auto alg = std::make_shared<CombineDiffCal>();
+    alg->setChild(true); // Don't put output in ADS by default
+    TS_ASSERT_THROWS_NOTHING(alg->initialize());
+    TS_ASSERT(alg->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("PixelCalibration", difCalPixelCalibration));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("GroupedCalibration", difCalGroupedCalibration));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("CalibrationWorkspace", diffCalCalibrationWs));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    return alg;
   }
 
   void confirmResults(DataObjects::TableWorkspace_sptr output) {
@@ -188,6 +218,28 @@ public:
     auto difa = output->getColumn("difa");
     TS_ASSERT_EQUALS(difa->toDouble(0), ((1000. / 1000.) * (1000. / 1000.)) * 1.);
     TS_ASSERT_EQUALS(difa->toDouble(1), ((1001. / 1000.) * (1001. / 1000.)) * 2.);
+    TS_ASSERT_EQUALS(difa->toDouble(2), ((1110. / 1100.) * (1110. / 1100.)) * 3.);
+    TS_ASSERT_EQUALS(difa->toDouble(3), ((1110. / 1100.) * (1110. / 1100.)) * 4.);
+  }
+
+  void confirmMaskedResults(DataObjects::TableWorkspace_sptr output) {
+    // double difc = (difcPD /difcArb) * difcPrev;
+    // double difa = ((difcPD / difcArb) * (difcPD / difcArb)) * difaPrev;
+    auto difc = output->getColumn("difc");
+    TS_ASSERT(difc);
+
+    // 1st and 2nd are both masked, since they are grouped together, will take groupcalibration val instead
+    TS_ASSERT_EQUALS(difc->toDouble(0), 1000.);
+    TS_ASSERT_EQUALS(difc->toDouble(1), 1001);
+
+    TS_ASSERT_EQUALS(difc->toDouble(2), (1110. / 1100.) * 1099.);
+    TS_ASSERT_EQUALS(difc->toDouble(3), (1110. / 1100.) * 1101.);
+
+    auto difa = output->getColumn("difa");
+    // 1st and 2nd are both masked, since they are grouped together, will take groupcalibration val instead
+    TS_ASSERT_EQUALS(difa->toDouble(0), 0);
+    TS_ASSERT_EQUALS(difa->toDouble(1), 0);
+
     TS_ASSERT_EQUALS(difa->toDouble(2), ((1110. / 1100.) * (1110. / 1100.)) * 3.);
     TS_ASSERT_EQUALS(difa->toDouble(3), ((1110. / 1100.) * (1110. / 1100.)) * 4.);
   }
@@ -218,20 +270,13 @@ public:
     const auto diffCalCalibrationWs = createCalibrationWorkspace();
 
     // set up algorithm
-    CombineDiffCal alg;
-    alg.setChild(true); // Don't put output in ADS by default
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelCalibration", difCalPixelCalibration));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupedCalibration", difCalGroupedCalibration));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalibrationWorkspace", diffCalCalibrationWs));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    auto alg = setupAlg(difCalPixelCalibration, difCalGroupedCalibration, diffCalCalibrationWs);
 
     // run the algorithm
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
-    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
 
-    DataObjects::TableWorkspace_sptr output = alg.getProperty("OutputWorkspace");
+    DataObjects::TableWorkspace_sptr output = alg->getProperty("OutputWorkspace");
     TS_ASSERT(output);
 
     confirmResults(output);
@@ -250,22 +295,46 @@ public:
     const auto diffCalCalibrationWs = createCalibrationWorkspace();
 
     // set up algorithm
-    CombineDiffCal alg;
-    alg.setChild(true); // Don't put output in ADS by default
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelCalibration", difCalPixelCalibration));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupedCalibration", difCalGroupedCalibration));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalibrationWorkspace", diffCalCalibrationWs));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    auto alg = setupAlg(difCalPixelCalibration, difCalGroupedCalibration, diffCalCalibrationWs);
 
     // run the algorithm
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
-    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
 
-    DataObjects::TableWorkspace_sptr output = alg.getProperty("OutputWorkspace");
+    DataObjects::TableWorkspace_sptr output = alg->getProperty("OutputWorkspace");
     TS_ASSERT(output);
 
     confirmResults(output);
+  }
+
+  void testMasked() {
+
+    // test input
+
+    // fake data to simulate the output of cross correlate PixelCalibration
+    const auto difCalPixelCalibration = createPixelCalibrationTable();
+
+    // fake data to simulate the output of PDCalibration GroupedCalibration
+    const auto difCalGroupedCalibration = createGroupedCalibrationTable();
+
+    // fake data to simulate CalibrationWorkspace
+    const auto diffCalCalibrationWs = createCalibrationWorkspace();
+
+    const auto maskWorkspace = getMaskWorkspace();
+
+    TS_ASSERT(maskWorkspace->isMasked(100));
+
+    // set up algorithm
+    auto alg = setupAlg(difCalPixelCalibration, difCalGroupedCalibration, diffCalCalibrationWs);
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("MaskWorkspace", maskWorkspace));
+
+    // run the algorithm
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+
+    DataObjects::TableWorkspace_sptr output = alg->getProperty("OutputWorkspace");
+    TS_ASSERT(output);
+
+    confirmMaskedResults(output);
   }
 };
