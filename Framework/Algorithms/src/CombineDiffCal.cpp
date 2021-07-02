@@ -47,7 +47,7 @@ void CombineDiffCal::init() {
       std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>("GroupedCalibration", "", Direction::Input),
       "DiffCal table generated from calibrating grouped spectra. This is the source of DIFCgroup.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>("CalibrationWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("CalibrationWorkspace", "", Direction::Input),
       "Workspace where conversion from d-spacing to time-of-flight for each spectrum is determined from. This is the "
       "source of DIFCarb.");
   declareProperty(
@@ -141,7 +141,7 @@ void addRowFromGroupedCalibration(DataObjects::TableWorkspace_sptr ws, Mantid::A
 /** Execute the algorithm.
  */
 void CombineDiffCal::exec() {
-  const DataObjects::Workspace2D_sptr calibrationWS = getProperty("CalibrationWorkspace");
+  const API::MatrixWorkspace_sptr calibrationWS = getProperty("CalibrationWorkspace");
 
   DataObjects::TableWorkspace_sptr presortedGroupedCalibrationWS = getProperty("GroupedCalibration");
   const API::ITableWorkspace_sptr groupedCalibrationWS = sortTableWorkspace(presortedGroupedCalibrationWS);
