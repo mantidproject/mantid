@@ -30,9 +30,10 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         self._figure_presenter.force_autoscale()
 
     def handle_data_updated(self, autoscale=True, hold_on=False):
-        workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
-                                                                                      self._view.get_plot_type())
-        self.add_list_to_plot(workspace_list, indicies, hold=hold_on, autoscale=autoscale)
+        if self.check_if_can_use_rebin():
+            workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
+                                                                                          self._view.get_plot_type())
+            self.add_list_to_plot(workspace_list, indicies, hold=hold_on, autoscale=autoscale)
 
     def handle_added_or_removed_group_to_plot(self, group_info):
         """
@@ -64,8 +65,7 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         self.handle_data_updated()
 
     def handle_use_raw_workspaces_changed(self):
-        if self.check_if_can_use_rebin():
-            self.handle_data_updated()
+        self.handle_data_updated()
 
     def check_if_can_use_rebin(self):
         if not self._view.is_raw_plot() and not self.check_selected_groups_if_rebinned():

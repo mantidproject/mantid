@@ -7,6 +7,8 @@
 
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from mantidqt.utils.observer_pattern import GenericObservable
+from Muon.GUI.ElementalAnalysis2.context.context import REBINNED_VARIABLE_WS_SUFFIX, REBINNED_FIXED_WS_SUFFIX
+from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model import PEAKS_WS_SUFFIX, MATCH_GROUP_WS_SUFFIX
 
 INVALID_STRINGS_FOR_GROUP_NAMES = ["_EA_Rebinned_Fixed", "_EA_Rebinned_Variable", "_peaks", "_refitted_peaks",
                                    "_with_errors", "_matches"]
@@ -128,3 +130,36 @@ class EAGroupContext(object):
         run, detector = workspace_name.split(";")
 
         return run.strip(), detector.strip()
+
+    def remove_workspace_from_group(self, workspace_name):
+        """
+        handles removing workspace from group
+        :param workspace_name : name of workspace removed
+        """
+        if workspace_name.endswith(REBINNED_FIXED_WS_SUFFIX):
+            group_name = workspace_name.replace(REBINNED_FIXED_WS_SUFFIX, "")
+            group = self[group_name]
+            if group is None:
+                return
+            group.remove_rebinned_workspace()
+
+        if workspace_name.endswith(REBINNED_VARIABLE_WS_SUFFIX):
+            group_name = workspace_name.replace(REBINNED_VARIABLE_WS_SUFFIX, "")
+            group = self[group_name]
+            if group is None:
+                return
+            group.remove_rebinned_workspace()
+
+        if workspace_name.endswith(PEAKS_WS_SUFFIX):
+            group_name = workspace_name.replace(PEAKS_WS_SUFFIX, "")
+            group = self[group_name]
+            if group is None:
+                return
+            group.remove_peak_table()
+
+        if workspace_name.endswith(MATCH_GROUP_WS_SUFFIX):
+            group_name = workspace_name.replace(MATCH_GROUP_WS_SUFFIX, "")
+            group = self[group_name]
+            if group is None:
+                return
+            group.remove_matches_group()

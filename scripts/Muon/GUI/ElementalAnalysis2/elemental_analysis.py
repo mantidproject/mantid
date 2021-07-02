@@ -90,6 +90,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.setup_group_calculation_enable_notifier()
         self.setup_group_calculation_disable_notifier()
         self.setup_grouping_changed_observers()
+        self.setup_update_view_notifier()
 
     def setup_dummy(self):
         self.load_widget = LoadWidget(self.loaded_data, self.context, parent=self)
@@ -177,3 +178,9 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.context.calculation_started_notifier.add_subscriber(self.disable_observer)
 
         self.auto_tab.auto_tab_presenter.model.calculation_started_notifier.add_subscriber(self.disable_observer)
+
+    def setup_update_view_notifier(self):
+        self.context.update_view_from_model_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.update_view_from_model_observer)
+        self.context.update_view_from_model_notifier.add_subscriber(
+            self.auto_tab.auto_tab_presenter.update_view_observer)

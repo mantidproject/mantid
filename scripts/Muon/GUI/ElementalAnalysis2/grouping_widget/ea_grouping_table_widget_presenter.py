@@ -82,6 +82,7 @@ class EAGroupingTablePresenter(object):
         for group_name in group_names:
             self._model.remove_group_from_analysis(group_name)
         self._model.remove_groups_by_name(group_names)
+        self.update_view_from_model()
 
     def remove_last_row_in_view_and_model(self):
         if self._view.num_rows() > 0:
@@ -94,16 +95,18 @@ class EAGroupingTablePresenter(object):
         changed_item = self._view.get_table_item(row, col)
         workspace_name = self._view.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS['workspace_name']).text()
 
-        self.handle_to_analyse_column_changed(col, changed_item, workspace_name)
+        update_model = self.handle_to_analyse_column_changed(col, changed_item, workspace_name)
         self.handle_rebin_column_changed(col, row, changed_item)
         self.handle_rebin_option_column_changed(col, changed_item, workspace_name)
 
-        self.notify_data_changed()
+        self.handle_update(update_model)
 
     def handle_to_analyse_column_changed(self, col, changed_item, workspace_name):
-
+        update_model = True
         if col == INVERSE_GROUP_TABLE_COLUMNS['to_analyse']:
+            update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), workspace_name)
+        return update_model
 
     def handle_rebin_column_changed(self, col, row, changed_item):
         if col == INVERSE_GROUP_TABLE_COLUMNS['rebin']:
@@ -119,7 +122,8 @@ class EAGroupingTablePresenter(object):
             params = changed_item.text().split(":")
             if len(params) == 2:
                 if params[0] == "Steps":
-                    self._model.handle_rebin(name=workspace_name, rebin_type="Fixed", rebin_param=float(params[1]))
+                    self._model.handle_rebin(name=workspace_name, rebin_type="Fixed",
+                                             rebin_param=float(params[1][0:-3]))
                 if params[0] == "Bin Boundaries":
                     if len(params[1]) >= 1:
                         self._model.handle_rebin(name=workspace_name, rebin_type="Variable", rebin_param=params[1])
@@ -127,6 +131,7 @@ class EAGroupingTablePresenter(object):
     def handle_update(self, update_model):
         if not update_model:
             # Reset the view back to model values and exit early as the changes are invalid.
+            # self.update_view_from_model()
             self.notify_data_changed()
             return
 
