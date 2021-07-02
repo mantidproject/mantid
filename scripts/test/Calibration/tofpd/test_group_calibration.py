@@ -9,7 +9,7 @@ import unittest
 from Calibration.tofpd import group_calibration
 from mantid.simpleapi import (CreateSampleWorkspace, MaskDetectors,
                               MoveInstrumentComponent, ScaleX, Rebin, ConvertUnits,
-                              LoadDetectorsGroupingFile, CreateEmptyTableWorkspace)
+                              CreateGroupingWorkspace, CreateEmptyTableWorkspace)
 from numpy.testing import assert_allclose
 
 
@@ -33,20 +33,7 @@ def create_test_ws_and_group():
     ws = Rebin(ws, '0,0.001,5')
     ws = ConvertUnits(ws, Target='TOF')
 
-    grouping_file = 'grouping.xml'
-
-    groupingFileContent = \
-        """<?xml version="1.0" encoding="UTF-8" ?>
-<detector-grouping>
-<group ID="1"> <detids>1,2,3,4</detids> </group>
-<group ID="2"> <detids>5,6,7,8</detids> </group>
-</detector-grouping>
-"""
-
-    with open(grouping_file, 'w') as f:
-        f.write( groupingFileContent )
-
-    groups = LoadDetectorsGroupingFile(grouping_file, InputWorkspace=ws)
+    groups, _, _ = CreateGroupingWorkspace(InputWorkspace=ws, ComponentName='basic_rect', CustomGroupingString='1-4,5-8')
 
     return ws, groups
 
