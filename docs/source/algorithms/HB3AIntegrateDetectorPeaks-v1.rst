@@ -14,15 +14,36 @@ reduction workflow, using :ref:`HB3AAdjustSampleNorm
 <algm-HB3AAdjustSampleNorm>` with `OutputType=Detector` which can be
 seen below in the example usage.
 
-This will reduced the input workspace using the region of interest
+This will reduce the input workspace using the region of interest
 provided to create a 1-dimension workspace with an axis that is the
-detector scan, either omega or chi in degrees. This reduced workspace
-is then fitted using :ref:`Fit <algm-Fit>` with a :ref:`flat
-background <func-FlatBackground>` and a :ref:`Gaussian
-<func-Gaussian>`, then the area of the Gaussian is used as the peak
-intensity and added to the output workspace. An optionally fitting
-range of the scan axis can be provided with `StartX` and `EndX` in
-degrees.
+detector scan, either omega or chi in degrees.
+
+There are three different methods for integrating the input workspace:
+simple counts summation, simple counts summation with fitted background,
+and a fitted model, which are described in detail at
+:ref:`HFIR Single Crystal Reduction`.
+
+When using `Method=Counts`, the background is estimated by averaging
+data from the first and last scans. The number of scans to include
+in the background estimation can be specified with `NumBackgroundPts`.
+
+For `Method=CountsWithFitting`, the input is fit to a :ref:`Gaussian
+<func-Gaussian>` with a :ref:`flat background <func-FlatBackground>`,
+just like `Method=Fitting`. However, the peak intensity is instead
+approximated by summing the detector counts over a specific set of
+measurements that are defined by the motor positions in the range of
+:math:`\pm \frac{N}{2} \text{FWHM}`, where `N` is controlled with the
+`NumIntegrationPts` option. The background is removed over the same
+range using the fitted flat background.
+
+For `Method=Fitted`, the reduced workspace is fitted using
+:ref:`Fit <algm-Fit>` with a :ref:`flat background <func-FlatBackground>`
+and a :ref:`Gaussian <func-Gaussian>`, then the area of the Gaussian is
+used as the peak intensity and added to the output workspace.
+
+An optional fitting range of the scan axis can be provided with
+`StartX` and `EndX` in degrees, which is applicable for the
+`CountsWithFitting` and `Fitted` methods.
 
 The `OptimizeQVector` option will convert the input data into Q and
 use :ref:`CentroidPeaksdMD <algm-CentroidPeaksMD>` to find the
