@@ -408,8 +408,8 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.presenter._handle_subplot_changed_in_quick_edit_widget()
 
         self.options.set_plot_x_range.assert_called_once_with(xlims)
-        self.options.set_plot_y_range.assert_called_once_with(ylims)
-        self.options.set_autoscale.assert_called_once_with(False)
+        self.options.set_plot_y_range.assert_called_with(ylims)
+        self.options.set_autoscale.assert_called_once_with(True)
         self.options.set_errors.assert_called_once_with(False)
 
     def test_handle_subplot_changed_specific_sub_plot(self):
