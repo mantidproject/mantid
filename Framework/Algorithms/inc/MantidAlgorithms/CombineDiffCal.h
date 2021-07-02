@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,6 +25,7 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 private:
+  API::ITableWorkspace_sptr sortTableWorkspace(DataObjects::TableWorkspace_sptr &table);
   void init() override;
   void exec() override;
 };
