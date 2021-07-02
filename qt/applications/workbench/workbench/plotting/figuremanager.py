@@ -33,6 +33,7 @@ from mantidqt.io import open_a_file_dialog
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall, force_method_calls_to_qapp_thread
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
+from mantidqt.widgets.superplot import Superplot
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
 from workbench.config import get_window_config
@@ -185,6 +186,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.closing.connect(canvas.close_event)
         self.window.closing.connect(self.destroy)
         self.window.visibility_changed.connect(self.fig_visibility_changed)
+        self.window.resized.connect(self.on_resize)
 
         self.window.setWindowTitle("Figure %d" % num)
         canvas.figure.set_label("Figure %d" % num)
@@ -212,6 +214,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
+            self.toolbar.sig_toggle_superplot_triggered.connect(self.superplot_toggle)
             self.toolbar.sig_copy_to_clipboard_triggered.connect(self.copy_to_clipboard)
             self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
             self.toolbar.sig_plot_help_triggered.connect(self.launch_plot_help)
@@ -246,6 +249,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
+
+        self.superplot = None
+
         # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
         # 0 argument is arbitrary and has no effect on fit widget size
         # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
@@ -305,7 +311,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.canvas.draw_idle()
 
         if self.toolbar:
-            self.toolbar.set_buttons_visiblity(self.canvas.figure)
+            self.toolbar.set_buttons_visibility(self.canvas.figure)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -328,6 +334,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.disconnect()
         self._fig_interaction.disconnect()
         self.window.close()
+        if self.superplot:
+            self.superplot.close()
 
         try:
             Gcf.destroy(self.num)
@@ -336,6 +344,18 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # It seems that when the python session is killed,
             # Gcf can get destroyed before the Gcf.destroy
             # line is run, leading to a useless AttributeError.
+
+    def on_resize(self):
+        """
+        Triggered when the plot window is resized. This method updates the plot
+        layout to fit the actual size.
+        """
+        if self.canvas:
+            try:
+                self.canvas.figure.tight_layout()
+            except:
+                pass
+            self.canvas.draw_idle()
 
     def launch_plot_options(self):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
@@ -379,8 +399,29 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """Toggle fit browser and tool on/off"""
         if self.fit_browser.isVisible():
             self.fit_browser.hide()
+            self.toolbar._actions["toggle_superplot"].setEnabled(True)
         else:
             self.fit_browser.show()
+            self.toolbar._actions["toggle_superplot"].setEnabled(False)
+
+    def superplot_toggle(self):
+        """Toggle superplot dockwidgets on/off"""
+        if self.superplot:
+            self.window.removeDockWidget(self.superplot.get_side_view())
+            self.window.removeDockWidget(self.superplot.get_bottom_view())
+            self.superplot.close()
+            self.superplot = None
+            self.toolbar._actions["toggle_fit"].setEnabled(True)
+            self.toolbar._actions["toggle_superplot"].setChecked(False)
+        else:
+            self.superplot = Superplot(self.canvas, self.window)
+            self.window.addDockWidget(Qt.LeftDockWidgetArea,
+                                      self.superplot.get_side_view())
+            self.window.addDockWidget(Qt.BottomDockWidgetArea,
+                                      self.superplot.get_bottom_view())
+            self.toolbar._actions["toggle_fit"].setEnabled(False)
+            self.toolbar._actions["toggle_superplot"].setChecked(True)
+            self.superplot.get_bottom_view().setFocus()
 
     def handle_fit_browser_close(self):
         """

@@ -1074,6 +1074,7 @@ class TestManager(object):
 
     def executeTests(self, tests_done=None):
         # Get the defined tests
+        status_dict = dict()
         for suite in self._tests:
             if self.__shouldTest(suite):
                 suite.execute(self._runner, self._exclude_in_pr_builds)
@@ -1090,13 +1091,12 @@ class TestManager(object):
                     suite.reportResults(self._reporters, tests_done.value)
             else:
                 # tests_done=None indicates running tests on parent thread, no need to worry about the Lock
-                status_dict = dict()
                 if not self._clean:
                     sum_tests = self._passedTests + self._skippedTests + self._failedTests
                     suite.reportResults(self._reporters, sum_tests)
-                    status_dict.update(suite.getMapResultNameToStatus())
-                return status_dict
+                status_dict.update(suite.getMapResultNameToStatus())
             self._lastTestRun += 1
+        return status_dict
 
     def replaceRunner(self, new_runner):
         self._runner = new_runner

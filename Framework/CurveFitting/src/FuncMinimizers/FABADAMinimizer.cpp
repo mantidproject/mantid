@@ -28,6 +28,8 @@
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/normal_distribution.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
+
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>

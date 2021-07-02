@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/InstrumentView/SimpleWidget.h"
+#include "MantidQtWidgets/InstrumentView/QtDisplay.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 
 #include <QApplication>
@@ -15,17 +15,17 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /// Constructor
-SimpleWidget::SimpleWidget(QWidget *parent) : ISimpleWidget(parent) {
+QtDisplay::QtDisplay(QWidget *parent) : IQtDisplay(parent) {
   // Receive mouse move events
   setMouseTracking(true);
   // Receive keyboard events
   setFocusPolicy(Qt::StrongFocus);
 }
 
-SimpleWidget::~SimpleWidget() {}
+QtDisplay::~QtDisplay() {}
 
 /// Assign a surface to draw on
-void SimpleWidget::setSurface(std::shared_ptr<ProjectionSurface> surface) {
+void QtDisplay::setSurface(std::shared_ptr<ProjectionSurface> surface) {
   m_surface = std::move(surface);
   connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()), Qt::QueuedConnection);
 }
@@ -34,7 +34,7 @@ void SimpleWidget::setSurface(std::shared_ptr<ProjectionSurface> surface) {
 /// @param picking :: Set to true to update the picking image regardless the
 /// interaction
 ///   mode of the surface.
-void SimpleWidget::updateView(bool picking) {
+void QtDisplay::updateView(bool picking) {
   if (m_surface) {
     m_surface->updateView(picking);
     update();
@@ -42,7 +42,7 @@ void SimpleWidget::updateView(bool picking) {
 }
 
 /// Update the detector information (count values) and redraw
-void SimpleWidget::updateDetectors() {
+void QtDisplay::updateDetectors() {
   if (m_surface) {
     m_surface->updateDetectors();
     update();
@@ -53,19 +53,19 @@ void SimpleWidget::updateDetectors() {
  * Save widget content to a file.
  * @param filename :: A file to save to.
  */
-void SimpleWidget::saveToFile(const QString &filename) {
+void QtDisplay::saveToFile(const QString &filename) {
   QPixmap image(size());
   render(&image);
   image.save(filename);
 }
 
-void SimpleWidget::paintEvent(QPaintEvent * /*unused*/) {
+void QtDisplay::paintEvent(QPaintEvent * /*unused*/) {
   if (m_surface) {
     m_surface->drawSimple(this);
   }
 }
 
-void SimpleWidget::resizeEvent(QResizeEvent * /*unused*/) {
+void QtDisplay::resizeEvent(QResizeEvent * /*unused*/) {
   if (m_surface) {
     m_surface->updateView();
   }
@@ -77,7 +77,7 @@ void SimpleWidget::resizeEvent(QResizeEvent * /*unused*/) {
  * @param event :: This is the event variable which has the position and button
  * states
  */
-void SimpleWidget::mousePressEvent(QMouseEvent *event) {
+void QtDisplay::mousePressEvent(QMouseEvent *event) {
   if (m_surface) {
     m_surface->mousePressEvent(event);
   }
@@ -90,7 +90,7 @@ void SimpleWidget::mousePressEvent(QMouseEvent *event) {
  * @param event :: This is the event variable which has the position and button
  * states
  */
-void SimpleWidget::mouseMoveEvent(QMouseEvent *event) {
+void QtDisplay::mouseMoveEvent(QMouseEvent *event) {
   if (m_surface) {
     m_surface->mouseMoveEvent(event);
   }
@@ -103,7 +103,7 @@ void SimpleWidget::mouseMoveEvent(QMouseEvent *event) {
  * @param event :: This is the event variable which has the position and button
  * states
  */
-void SimpleWidget::mouseReleaseEvent(QMouseEvent *event) {
+void QtDisplay::mouseReleaseEvent(QMouseEvent *event) {
   if (m_surface) {
     m_surface->mouseReleaseEvent(event);
   }
@@ -114,7 +114,7 @@ void SimpleWidget::mouseReleaseEvent(QMouseEvent *event) {
  * Mouse wheel event to set the zooming in and out
  * @param event :: This is the event variable which has the status of the wheel
  */
-void SimpleWidget::wheelEvent(QWheelEvent *event) {
+void QtDisplay::wheelEvent(QWheelEvent *event) {
   if (m_surface) {
     m_surface->wheelEvent(event);
   }
@@ -126,21 +126,21 @@ void SimpleWidget::wheelEvent(QWheelEvent *event) {
  * @param event :: This is the event variable which has the status of the
  * keyboard
  */
-void SimpleWidget::keyPressEvent(QKeyEvent *event) {
+void QtDisplay::keyPressEvent(QKeyEvent *event) {
   if (m_surface) {
     m_surface->keyPressEvent(event);
   }
   update();
 }
 
-void SimpleWidget::enterEvent(QEvent *event) {
+void QtDisplay::enterEvent(QEvent *event) {
   if (m_surface) {
     m_surface->enterEvent(event);
   }
   update();
 }
 
-void SimpleWidget::leaveEvent(QEvent *event) {
+void QtDisplay::leaveEvent(QEvent *event) {
   // Restore possible override cursor
   while (QApplication::overrideCursor()) {
     QApplication::restoreOverrideCursor();

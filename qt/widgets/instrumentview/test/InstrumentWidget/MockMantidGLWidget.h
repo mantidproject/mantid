@@ -29,5 +29,10 @@ public:
   MOCK_METHOD(QColor, currentBackgroundColor, (), (const, override));
   MOCK_METHOD(void, enableLighting, (bool), (override));
   MOCK_METHOD(void, componentSelected, (size_t), (override));
+
+  // Qt overrides
+  MOCK_METHOD(void, qtInstallEventFilter, (QObject *), (override));
+  MOCK_METHOD(void, qtUpdate, (), (override));
+  MOCK_METHOD(void, qtSetMinimumWidth, (int), (override));
 };
 } // namespace MantidQt::MantidWidgets

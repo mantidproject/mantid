@@ -25,7 +25,7 @@ class ProjectionSurface;
 class IMantidGLWidget : public QGLWidget {
 public:
   IMantidGLWidget() {}
-  template <typename... Params> IMantidGLWidget(Params &&... params) : QGLWidget(std::forward<Params>(params)...) {}
+  template <typename... Params> IMantidGLWidget(Params &&...params) : QGLWidget(std::forward<Params>(params)...) {}
   virtual ~IMantidGLWidget() = default;
 
   virtual void setSurface(std::shared_ptr<ProjectionSurface> surface) = 0;
@@ -35,6 +35,10 @@ public:
   virtual QColor currentBackgroundColor() const = 0;
   virtual void saveToFile(const QString &filename) = 0;
 
+  // Qt overrides
+  virtual void qtInstallEventFilter(QObject *arg) { installEventFilter(arg); }
+  virtual void qtUpdate() { update(); }
+  virtual void qtSetMinimumWidth(int arg) { setMinimumWidth(arg); }
 public slots:
   virtual void enableLighting(bool /*on*/) = 0;
   virtual void updateView(bool picking = true) = 0;

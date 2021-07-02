@@ -5,6 +5,14 @@ set ( TEST_PY_FILES
    base_pane/base_pane_model_test.py
    base_pane/base_pane_presenter_test.py
    basic_fitting_context_test.py
+   corrections_context_test.py
+   corrections_tab_widget/corrections_model_test.py
+   corrections_tab_widget/corrections_presenter_test.py
+   corrections_tab_widget/corrections_view_test.py
+   corrections_tab_widget/dead_time_corrections_model_test.py
+   corrections_tab_widget/dead_time_corrections_presenter_test.py
+   corrections_tab_widget/dead_time_corrections_view_test.py
+   data_selectors/cyclic_data_selector_view_test.py
    elemental_analysis/elemental_analysis_test.py
    elemental_analysis/name_generator_test.py
    elemental_analysis/detectors_presenter_test.py
@@ -42,7 +50,6 @@ set ( TEST_PY_FILES
    fitting_widgets/basic_fitting/basic_fitting_view_test.py
    fitting_widgets/basic_fitting/fit_controls_view_test.py
    fitting_widgets/basic_fitting/fit_function_options_view_test.py
-   fitting_widgets/basic_fitting/workspace_selector_view_test.py
    fitting_widgets/general_fitting/general_fitting_model_test.py
    fitting_widgets/general_fitting/general_fitting_presenter_test.py
    fitting_widgets/general_fitting/general_fitting_options_view_test.py
@@ -101,6 +108,11 @@ set ( TEST_PY_FILES
    phase_table_widget/phase_table_presenter_test.py
    plot_data_pane/plot_data_pane_model_test.py
    plot_data_pane/plot_data_pane_presenter_test.py
+   plot_data_pane/plot_group_pair_model_test.py
+   plot_fit_panes/plot_fit_pane_model_test.py
+   plot_fit_panes/plot_time_fit_pane_model_test.py
+   plot_fit_panes/plot_fit_pane_presenter_test.py
+   plot_fit_panes/plot_freq_fit_pane_model_test.py
    plot_widget/plot_widget_model_test.py
    plot_widget/plot_widget_presenter_test.py
    plotting_canvas/plot_color_queue_test.py

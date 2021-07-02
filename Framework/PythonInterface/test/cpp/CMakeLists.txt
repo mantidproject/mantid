@@ -5,6 +5,7 @@ set(TEST_FILES
     IPeakFunctionAdapterTest.h
     PropertyWithValueFactoryTest.h
     PythonAlgorithmInstantiatorTest.h
+    PythonStdoutChannelTest.h
     PySequenceToVectorTest.h
     RunPythonScriptTest.h
     ToPyListTest.h)
@@ -34,6 +35,7 @@ if(CXXTEST_FOUND)
                         PythonInterfaceCore
                         PythonKernelModule
                         PythonAPIModule
+                        gmock
                         ${OpenGL_LIBRARIES}
                         ${TBB_LIBRARIES}
                         ${Boost_LIBRARIES}

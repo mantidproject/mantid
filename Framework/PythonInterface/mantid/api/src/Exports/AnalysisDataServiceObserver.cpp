@@ -9,6 +9,7 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
+#include <boost/mpl/vector.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/make_function.hpp>
