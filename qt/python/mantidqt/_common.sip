@@ -1163,3 +1163,21 @@ public:
 
     void openFitScriptGenerator();
 };
+
+// ---------------------------------
+// Muon Period Info
+// ---------------------------------
+
+class MuonPeriodInfo : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MuonPeriodInfo.h"
+%End
+public:
+    MuonPeriodInfo(QWidget *parent = nullptr) /KeywordArgs="All"/;
+    void clear();
+    void setWidgetTitleRuns(const std::string &title);
+    void addPeriodToTable(const std::string &name, const std::string &type, const std::string &frames,
+                                      const std::string &total_frames, const std::string &counts,
+                                      const std::string &tag);
+    //void addInfo(Mantid::API::MatrixWorkspace_const_sptr ws);
+};

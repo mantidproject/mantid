@@ -125,7 +125,7 @@ void MuonPeriodInfo::addInfo(Mantid::API::MatrixWorkspace_const_sptr ws) {
 
   // Get remaining logs and add to table
   auto logs = getInfo(ws);
-  for (int i = 0; i < logs.size(); ++i) {
+  for (int i = 0; i < logs[0].size(); ++i) {
     addPeriodToTable(logs[0][i], logs[1][i], logs[2][i], logs[3][i], logs[4][m_DAQCount], logs[5][i]);
   }
 }

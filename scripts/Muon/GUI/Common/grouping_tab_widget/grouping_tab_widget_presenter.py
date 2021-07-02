@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable,GenericObserver
+from mantidqt.widgets.muonperiodinfo import MuonPeriodInfo
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
@@ -12,7 +13,7 @@ from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
-from Muon.GUI.Common.muon_period_info_widget import MuonPeriodInfoWidget, PERIOD_INFO_NOT_FOUND
+from Muon.GUI.Common.muon_period_info_widget import PERIOD_INFO_NOT_FOUND
 
 CONTEXT_MAP = {"Name": 6,
                "Type": 1,
@@ -43,7 +44,7 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget = grouping_table_widget
         self.pairing_table_widget = pairing_table_widget
         self.diff_table = diff_table
-        self.period_info_widget = MuonPeriodInfoWidget(parent=parent)
+        self.period_info_widget = MuonPeriodInfo(parent=parent)
 
         self._view.set_description_text('')
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
@@ -292,8 +293,21 @@ class GroupingTabPresenter(object):
                 self.grouping_table_widget.plot_default_case()
 
     def handle_period_information_button_clicked(self):
-        if self._model.is_data_loaded() and self.period_info_widget.is_empty():
-            self._add_period_info_to_widget()
+        # if self._model.is_data_loaded() and self.period_info_widget.is_empty():
+        # self.period_info_widget.addInfo(self._model._data.current_workspace)
+        self.period_info_widget.addPeriodToTable("test", "1", "100", "500", "32", "1")
+
+        def _get_runs():
+            runs = self._model._data.current_runs
+            runs_string = ""
+            for run_list in runs:
+                for run in run_list:
+                    if runs_string:
+                        runs_string += ", "
+                    runs_string += str(run)
+            return runs_string
+
+        self.period_info_widget.setWidgetTitleRuns(self._model.instrument + _get_runs())
         self.period_info_widget.show()
         self.period_info_widget.raise_()
 
