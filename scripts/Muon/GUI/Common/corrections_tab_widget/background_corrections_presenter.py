@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from Muon.GUI.Common.contexts.corrections_context import BACKGROUND_MODE_NONE, FLAT_BACKGROUND
 from Muon.GUI.Common.corrections_tab_widget.background_corrections_model import BackgroundCorrectionsModel
-from Muon.GUI.Common.corrections_tab_widget.background_corrections_view import (BackgroundCorrectionsView,
-                                                                                BACKGROUND_MODE_NONE)
+from Muon.GUI.Common.corrections_tab_widget.background_corrections_view import BackgroundCorrectionsView
 
 
 class BackgroundCorrectionsPresenter:
@@ -21,6 +21,7 @@ class BackgroundCorrectionsPresenter:
         self._corrections_presenter = corrections_presenter
 
         self.view.set_slot_for_mode_combo_box_changed(self.handle_mode_combo_box_changed)
+        self.view.set_slot_for_select_function_combo_box_changed(self.handle_select_function_combo_box_changed)
         self.view.set_slot_for_group_combo_box_changed(self.handle_selected_group_changed)
         self.view.set_slot_for_show_all_runs(self.handle_show_all_runs_ticked)
         self.view.set_slot_for_start_x_changed(self.handle_start_x_changed)
@@ -28,12 +29,15 @@ class BackgroundCorrectionsPresenter:
 
     def initialize_model_options(self) -> None:
         """Initialise the model with the default fitting options."""
-        self.model.set_background_correction_mode(BACKGROUND_MODE_NONE)
+        self.model.set_background_correction_mode(self.view.background_correction_mode)
+        self.model.set_selected_function(self.view.selected_function)
 
     def handle_instrument_changed(self) -> None:
         """User changes the selected instrument."""
         self.model.set_background_correction_mode(BACKGROUND_MODE_NONE)
+        self.model.set_selected_function(FLAT_BACKGROUND)
         self.view.background_correction_mode = BACKGROUND_MODE_NONE
+        self.view.selected_function = FLAT_BACKGROUND
 
     def handle_runs_loaded(self) -> None:
         """Handles when new run numbers are loaded into the interface."""
@@ -49,14 +53,13 @@ class BackgroundCorrectionsPresenter:
 
     def handle_mode_combo_box_changed(self) -> None:
         """Handles when the background corrections mode is changed."""
-        self.view.set_background_correction_options_visible(not self.view.is_mode_none())
+        self.model.set_background_correction_mode(self.view.background_correction_mode)
+        self.view.set_background_correction_options_visible(not self.model.is_background_mode_none())
 
-        if self.view.is_mode_auto():
-            self._handle_mode_auto_selected()
-
-    def _handle_mode_auto_selected(self) -> None:
-        """Handles when the background corrections mode is changed to 'Auto'."""
-        pass
+    def handle_select_function_combo_box_changed(self) -> None:
+        """Handles when the selected function is changed."""
+        self.model.set_selected_function(self.view.selected_function)
+        self.view.set_exp_decay_parameters_visible(self.model.is_exp_decay_selected())
 
     def handle_selected_group_changed(self) -> None:
         """Handles when the selected group has changed."""

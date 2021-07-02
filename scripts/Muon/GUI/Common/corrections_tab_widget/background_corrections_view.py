@@ -12,9 +12,6 @@ from qtpy.QtWidgets import QLineEdit, QStyledItemDelegate, QTableWidgetItem, QWi
 
 ui_form, widget = load_ui(__file__, "background_corrections_view.ui")
 
-BACKGROUND_MODE_NONE = "None"
-BACKGROUND_MODE_AUTO = "Auto"
-
 RUN_COLUMN_INDEX = 0
 GROUP_COLUMN_INDEX = 1
 START_X_COLUMN_INDEX = 2
@@ -50,6 +47,7 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._selected_column: int = None
         self._selected_value: str = None
 
+        self.set_exp_decay_parameters_visible(False)
         self.set_background_correction_options_visible(False)
 
         self._handle_start_x_changed = None
@@ -58,6 +56,10 @@ class BackgroundCorrectionsView(widget, ui_form):
     def set_slot_for_mode_combo_box_changed(self, slot) -> None:
         """Connect the slot for the Background corrections mode combo box."""
         self.mode_combo_box.currentIndexChanged.connect(slot)
+
+    def set_slot_for_select_function_combo_box_changed(self, slot) -> None:
+        """Connect the slot for the Select Function combo box changing."""
+        self.function_combo_box.currentIndexChanged.connect(slot)
 
     def set_slot_for_group_combo_box_changed(self, slot) -> None:
         """Connect the slot for the Group selector combo box changing."""
@@ -84,6 +86,11 @@ class BackgroundCorrectionsView(widget, ui_form):
         self.show_all_runs_checkbox.setVisible(visible)
         self.correction_options_table.setVisible(visible)
 
+    def set_exp_decay_parameters_visible(self, visible: bool) -> None:
+        """Sets the Exp Decay parameters in the table widget as visible or hidden."""
+        self.correction_options_table.setColumnHidden(HEIGHT_COLUMN_INDEX, not visible)
+        self.correction_options_table.setColumnHidden(LIFETIME_COLUMN_INDEX, not visible)
+
     @property
     def background_correction_mode(self) -> str:
         """Returns the currently selected background correction mode."""
@@ -96,13 +103,17 @@ class BackgroundCorrectionsView(widget, ui_form):
         if index != -1:
             self.mode_combo_box.setCurrentIndex(index)
 
-    def is_mode_none(self) -> bool:
-        """Returns true if the corrections mode is 'None'."""
-        return self.mode_combo_box.currentText() == BACKGROUND_MODE_NONE
+    @property
+    def selected_function(self) -> str:
+        """Returns the currently selected function in the combo box."""
+        return str(self.function_combo_box.currentText())
 
-    def is_mode_auto(self) -> bool:
-        """Returns true if the corrections mode is 'Auto'."""
-        return self.mode_combo_box.currentText() == BACKGROUND_MODE_AUTO
+    @selected_function.setter
+    def selected_function(self, function: str) -> None:
+        """Sets the currently selected function in the combo box."""
+        index = self.function_combo_box.findText(function)
+        if index != -1:
+            self.function_combo_box.setCurrentIndex(index)
 
     def populate_group_selector(self, groups: list) -> None:
         """Populates the group selector combo box."""

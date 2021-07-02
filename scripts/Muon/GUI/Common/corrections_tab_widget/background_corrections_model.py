@@ -8,7 +8,8 @@ from mantid.py36compat import dataclass
 
 from mantid.api import FunctionFactory, IFunction
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
-from Muon.GUI.Common.contexts.corrections_context import CorrectionsContext
+from Muon.GUI.Common.contexts.corrections_context import (CorrectionsContext, BACKGROUND_MODE_NONE,
+                                                          FLAT_BACKGROUND_AND_EXP_DECAY, RUNS_ALL, GROUPS_ALL)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
 
@@ -46,6 +47,18 @@ class BackgroundCorrectionsModel:
         """Sets the current background correction mode in the context."""
         self._corrections_context.background_corrections_mode = mode
 
+    def is_background_mode_none(self) -> bool:
+        """Returns true if the current background correction mode is none."""
+        return self._corrections_context.background_corrections_mode == BACKGROUND_MODE_NONE
+
+    def set_selected_function(self, selected_function: str) -> None:
+        """Sets the currently selected function which is displayed in the function combo box."""
+        self._corrections_context.selected_function = selected_function
+
+    def is_exp_decay_selected(self) -> bool:
+        """Returns true if the currently selected function includes an exp decay."""
+        return self._corrections_context.selected_function == FLAT_BACKGROUND_AND_EXP_DECAY
+
     def set_selected_group(self, group: str) -> None:
         """Sets the currently selected Group in the context."""
         self._corrections_context.selected_group = group
@@ -56,7 +69,7 @@ class BackgroundCorrectionsModel:
 
     def all_runs(self) -> list:
         """Returns a list of all loaded runs."""
-        return self._context.get_runs("All")
+        return self._context.get_runs(RUNS_ALL)
 
     def group_names(self) -> list:
         """Returns the group names found in the group/pair context."""
@@ -131,7 +144,7 @@ class BackgroundCorrectionsModel:
     def _selected_groups(self) -> list:
         """Returns a list of selected group names."""
         selected_group = self._corrections_context.selected_group
-        return self.group_names() if selected_group == "All" else [selected_group]
+        return self.group_names() if selected_group == GROUPS_ALL else [selected_group]
 
     def _get_counts_workspace_name(self, run_string: str, group: str) -> str:
         """Returns the name of the counts workspace associated with the provided run string and group."""
@@ -175,7 +188,7 @@ class BackgroundCorrectionsModel:
     # def _selected_runs(self) -> list:
     #     """Returns a list containing the run numbers that are currently selected."""
     #     if self._corrections_context.show_all_runs:
-    #         runs_string = "All"
+    #         runs_string = RUNS_ALL
     #     else:
     #         runs_string = self._corrections_context.current_run_string
     #     return self._context.get_runs(runs_string) if runs_string is not None else []
@@ -183,4 +196,4 @@ class BackgroundCorrectionsModel:
     # def _selected_groups(self) -> list:
     #     """Returns a list of selected group names."""
     #     selected_group = self._corrections_context.selected_group
-    #     return self.group_names() if selected_group == "All" else [selected_group]
+    #     return self.group_names() if selected_group == GROUPS_ALL else [selected_group]
