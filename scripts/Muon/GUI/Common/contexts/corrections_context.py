@@ -22,6 +22,15 @@ class CorrectionsContext:
     dead_time_source: str = None
     dead_time_table_name_from_ads: str = None
 
+    # The background corrections mode can be 'None', 'Auto' or 'Manual'
+    background_corrections_mode: str = "None"
+    selected_group: str = "All"
+    show_all_runs: bool = False
+
+    # The background corrections data in each row of the table is mapped to its corresponding Run and Group
+    # i.e. dict(tuple(run, group): BackgroundCorrectionData)
+    background_correction_data = {}
+
     def __init__(self, load_data: MuonLoadData):
         """Initialize the CorrectionsContext and pass in MuonLoadData so that we can access dead time tables."""
         self._loaded_data = load_data

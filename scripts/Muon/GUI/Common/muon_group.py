@@ -51,10 +51,13 @@ class MuonGroup(object):
     if the workspace does not exist will raise a KeyError
     """
     def get_counts_workspace_for_run(self, run, rebin):
-        if rebin:
+        muon_run = MuonRun(run)
+        if rebin and muon_run in self._counts_workspace_rebin:
             return self._counts_workspace_rebin[MuonRun(run)].workspace_name
-        else:
+        elif muon_run in self._counts_workspace:
             return self._counts_workspace[MuonRun(run)].workspace_name
+        else:
+            return None
 
     def get_asymmetry_workspace_for_run(self, run, rebin):
         if rebin:
