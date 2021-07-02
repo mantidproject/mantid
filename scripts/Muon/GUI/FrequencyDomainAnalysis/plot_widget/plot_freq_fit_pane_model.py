@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 from Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_model import PlotFitPaneModel
-from Muon.GUI.Common.ADSHandler.workspace_naming import (FFT_STR,
+from Muon.GUI.Common.ADSHandler.workspace_naming import (FFT_STR, MAXENT_STR,
                                                          get_fft_component_from_workspace_name,
                                                          get_group_or_pair_from_name,
                                                          get_run_numbers_as_string_from_workspace_name)
