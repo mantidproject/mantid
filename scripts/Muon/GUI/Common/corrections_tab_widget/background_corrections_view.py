@@ -7,7 +7,8 @@
 from mantidqt.utils.qt import load_ui
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QTableWidgetItem, QWidget
+from qtpy.QtGui import QDoubleValidator
+from qtpy.QtWidgets import QLineEdit, QStyledItemDelegate, QTableWidgetItem, QWidget
 
 ui_form, widget = load_ui(__file__, "background_corrections_view.ui")
 
@@ -18,6 +19,17 @@ RUN_COLUMN_INDEX = 0
 GROUP_COLUMN_INDEX = 1
 START_X_COLUMN_INDEX = 2
 END_X_COLUMN_INDEX = 3
+
+
+class DoubleItemDelegate(QStyledItemDelegate):
+    """
+    An item delegate that has a QDoubleValidator to validate the data provided.
+    """
+
+    def createEditor(self, parent, option, index):
+        line_edit = QLineEdit(parent)
+        line_edit.setValidator(QDoubleValidator())
+        return line_edit
 
 
 class BackgroundCorrectionsView(widget, ui_form):
@@ -157,6 +169,11 @@ class BackgroundCorrectionsView(widget, ui_form):
 
     def _setup_corrections_table(self) -> None:
         """Setup the correction options table to have a good layout."""
+        self.correction_options_table.setItemDelegateForColumn(START_X_COLUMN_INDEX,
+                                                               DoubleItemDelegate(self.correction_options_table))
+        self.correction_options_table.setItemDelegateForColumn(END_X_COLUMN_INDEX,
+                                                               DoubleItemDelegate(self.correction_options_table))
+
         self.correction_options_table.cellChanged.connect(lambda row, column:
                                                           self._on_corrections_table_cell_changed(row, column))
         self.correction_options_table.itemClicked.connect(lambda item: self._on_item_clicked(item))
