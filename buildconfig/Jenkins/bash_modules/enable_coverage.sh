@@ -1,9 +1,7 @@
 #!/bin/bash
 
 function enable_coverage(){
-    # Appends any coverage settings to the current CMake String passed as a param
-    local EXISTING_OPTS="$1"
-
+    # Returns any coverage settings as a string
     if [[ ${JOB_NAME} == *coverage* ]]; then
         local COVERAGE=ON
         # Since we currently don't support passing a timeout, hardcode it for coverage jobs
@@ -13,7 +11,7 @@ function enable_coverage(){
         local TIMEOUT=300
     fi
 
-    local OPTS="$EXISTING_OPTS -DCOVERAGE=${COVERAGE} -DTESTING_TIMEOUT=${TIMEOUT}"
+    local OPTS="-DCOVERAGE=${COVERAGE} -DTESTING_TIMEOUT=${TIMEOUT}"
     echo "$OPTS"
 }
 
