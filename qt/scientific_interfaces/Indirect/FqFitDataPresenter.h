@@ -54,6 +54,7 @@ private:
 
   FqFitModel *m_fqFitModel;
   Notifier<IFQFitObserver> m_notifier;
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 
 } // namespace IDA

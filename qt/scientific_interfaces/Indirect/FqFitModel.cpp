@@ -18,7 +18,6 @@ namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
 Mantid::Kernel::Logger logger("FqFitModel");
-auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
 
 struct ContainsOneOrMore {
   explicit ContainsOneOrMore(std::vector<std::string> &&substrings) : m_substrings(std::move(substrings)) {}
@@ -191,10 +190,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-FqFitModel::FqFitModel() { m_fitType = FQFIT_STRING; }
+FqFitModel::FqFitModel() : m_adsInstance(Mantid::API::AnalysisDataService::Instance()) { m_fitType = FQFIT_STRING; }
 
 void FqFitModel::addWorkspace(const std::string &workspaceName, const int &spectrum_index) {
-  auto workspace = ads_instance.retrieveWS<MatrixWorkspace>(workspaceName);
+  auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addFqFitParameters(workspace.get(), name);
   const auto spectrum = getSpectrum(parameters);
@@ -210,7 +209,7 @@ void FqFitModel::addWorkspace(const std::string &workspaceName, const int &spect
 }
 
 void FqFitModel::addWorkspace(const std::string &workspaceName) {
-  auto workspace = ads_instance.retrieveWS<MatrixWorkspace>(workspaceName);
+  auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addFqFitParameters(workspace.get(), name);
   const auto spectrum = getSpectrum(parameters);

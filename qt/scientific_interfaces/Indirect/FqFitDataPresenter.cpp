@@ -10,10 +10,6 @@
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
-namespace {
-auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
-}
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -21,8 +17,8 @@ namespace IDA {
 FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view,
                                        IFQFitObserver *SingleFunctionTemplateBrowser)
     : IndirectFitDataPresenter(model, view, std::make_unique<FqFitDataTablePresenter>(model, view->getDataTable())),
-      m_activeParameterType("Width"), m_dataIndex(TableDatasetIndex{0}), m_fqFitModel(model) {
-
+      m_activeParameterType("Width"), m_dataIndex(TableDatasetIndex{0}), m_fqFitModel(model),
+      m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
   connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveDataIndex()));
 
   m_notifier = Notifier<IFQFitObserver>();
@@ -38,7 +34,7 @@ void FqFitDataPresenter::updateActiveDataIndex(int index) { m_dataIndex = index;
 void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
   FqFitParameters parameters;
   try {
-    auto workspace = ads_instance.retrieveWS<MatrixWorkspace>(workspaceName);
+    auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
     parameters = m_fqFitModel->createFqFitParameters(workspace.get());
     dialog->enableParameterSelection();
   } catch (const std::invalid_argument &) {
@@ -50,7 +46,7 @@ void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog
 
 void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
   const auto workspaceName = dialog->workspaceName();
-  auto workspace = ads_instance.retrieveWS<MatrixWorkspace>(workspaceName);
+  auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
   const auto parameter = m_fqFitModel->createFqFitParameters(workspace.get());
   setActiveParameterType(type);
   updateParameterOptions(dialog, parameter);

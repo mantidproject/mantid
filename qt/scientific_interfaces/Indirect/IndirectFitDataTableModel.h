@@ -78,6 +78,7 @@ private:
 
   std::unique_ptr<std::vector<IndirectFitData>> m_fittingDataMultiple;
   std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutionsMultiple;
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 
 } // namespace IDA
