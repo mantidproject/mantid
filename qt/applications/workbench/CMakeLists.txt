@@ -32,6 +32,7 @@ set(WORKBENCH_PYTHON_EXECUTABLE ${Python_W_EXECUTABLE})
 else()
 set(WORKBENCH_PYTHON_EXECUTABLE ${Python_EXECUTABLE})
 endif()
+file(TO_CMAKE_PATH ${WORKBENCH_PYTHON_EXECUTABLE} WORKBENCH_PYTHON_EXECUTABLE)
 
 # Wrapper launchers: See mantidworkbench.cpp:main for their function
 if(APPLE OR WIN32)

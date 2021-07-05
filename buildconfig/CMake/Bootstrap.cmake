@@ -134,17 +134,6 @@ elseif(MSVC AND CONDA_BUILD)
   set(MSVC_PYTHON_EXECUTABLE_DIR
       $ENV{CONDA_PREFIX}
   )
-  set(Python_EXECUTABLE
-      $ENV{CONDA_PREFIX}/python.exe
-  )
-  set(Python_W_EXECUTABLE
-      "${MSVC_PYTHON_EXECUTABLE_DIR}/pythonw.exe"
-      CACHE
-        FILEPATH
-        "The location of the pythonw executable. This suppresses the new terminal window on startup"
-        FORCE
-  )
-
   set(THIRD_PARTY_BIN
       "$ENV{CONDA_PREFIX}/Library/bin;$ENV{CONDA_PREFIX}/Library/lib;${MSVC_PYTHON_EXECUTABLE_DIR}"
   )
