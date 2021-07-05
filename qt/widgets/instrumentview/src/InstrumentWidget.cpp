@@ -119,9 +119,11 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
       mViewChanged(false), m_blocked(false), m_instrumentDisplayContextMenuOn(false),
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr),
       m_qtConnect(std::move(deps.qtConnect)) {
+
+  QWidget *aWidget = new QWidget(this);
   if (!m_instrumentDisplay) {
     m_instrumentDisplay =
-        std::make_unique<InstrumentDisplay>(this, std::move(deps.glDisplay), std::move(deps.qtDisplay));
+        std::make_unique<InstrumentDisplay>(aWidget, std::move(deps.glDisplay), std::move(deps.qtDisplay));
   }
 
   setFocusPolicy(Qt::StrongFocus);
@@ -138,8 +140,6 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
   m_instrumentDisplay->getGLDisplay()->setMinimumWidth(600);
   m_qtConnect->connect(this, SIGNAL(enableLighting(bool)), m_instrumentDisplay->getGLDisplay(),
                        SLOT(enableLighting(bool)));
-
-  QWidget *aWidget = new QWidget(this);
 
   controlPanelLayout->addWidget(aWidget);
 
