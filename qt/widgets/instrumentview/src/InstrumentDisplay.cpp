@@ -45,7 +45,4 @@ void InstrumentDisplay::installEventFilter(QObject *obj) {
   m_glDisplay->qtInstallEventFilter(obj);
   m_qtDisplay->qtInstallEventFilter(obj);
 }
-
-IStackedLayout *InstrumentDisplay::createLayout(QWidget *parent) const { return new StackedLayout(parent); }
-
 } // namespace MantidQt::MantidWidgets

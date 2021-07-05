@@ -27,8 +27,5 @@ public:
   MOCK_METHOD(IGLDisplay *, getGLDisplay, (), (const, override));
   MOCK_METHOD(IQtDisplay *, getQtDisplay, (), (const, override));
   MOCK_METHOD(void, installEventFilter, (QObject * obj), (override));
-
-  // Private methods
-  MOCK_METHOD(IStackedLayout *, createLayout, (QWidget *), (const, override));
 };
 } // namespace MantidQt::MantidWidgets

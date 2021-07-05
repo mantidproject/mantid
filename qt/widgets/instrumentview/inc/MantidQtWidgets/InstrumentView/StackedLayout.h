@@ -14,7 +14,7 @@ class QWidget;
 
 namespace MantidQt::MantidWidgets {
 
-class StackedLayout : public IStackedLayout, public QStackedLayout {
+class StackedLayout final : public IStackedLayout, public QStackedLayout {
 public:
   StackedLayout(QWidget *parent) : QStackedLayout(parent) {}
 

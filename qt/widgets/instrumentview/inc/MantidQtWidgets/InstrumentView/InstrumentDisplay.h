@@ -32,8 +32,6 @@ public:
   void installEventFilter(QObject *obj) override;
 
 private:
-  IStackedLayout *createLayout(QWidget *parent) const override;
-
   std::unique_ptr<IGLDisplay> m_glDisplay;
   std::unique_ptr<IQtDisplay> m_qtDisplay;
 

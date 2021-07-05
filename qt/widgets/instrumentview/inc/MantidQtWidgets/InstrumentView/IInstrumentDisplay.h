@@ -29,8 +29,5 @@ public:
   virtual IQtDisplay *getQtDisplay() const = 0;
 
   virtual void installEventFilter(QObject *obj) = 0;
-
-private:
-  virtual IStackedLayout *createLayout(QWidget *) const = 0;
 };
 } // namespace MantidQt::MantidWidgets
