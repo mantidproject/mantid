@@ -119,7 +119,8 @@ public:
   DataForParameterEstimationCollection
   getDataForParameterEstimation(const EstimationDataSelector &selector) const override;
   void removeFittingData() override;
-  std::unique_ptr<IIndirectFitDataTableModel> m_fitDataModel;
+
+  IIndirectFitDataTableModel *getFitDataModel() override;
 
 protected:
   std::string createOutputName(const std::string &fitMode) const;
@@ -130,6 +131,8 @@ protected:
   virtual std::unordered_map<std::string, std::string> mapDefaultParameterNames() const;
   std::string m_fitType = "FitType";
   std::string m_fitString = "FitString";
+
+  std::unique_ptr<IIndirectFitDataTableModel> m_fitDataModel;
 
 private:
   std::vector<std::string> getWorkspaceNames() const;

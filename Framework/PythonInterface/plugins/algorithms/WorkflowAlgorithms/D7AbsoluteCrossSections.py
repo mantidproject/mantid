@@ -22,15 +22,32 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     _sampleAndEnvironmentProperties = None
 
     @staticmethod
-    def _max_value_per_detector(ws):
+    def _max_value_per_detector(ws, one_per_detector=True):
         if isinstance(mtd[ws], WorkspaceGroup):
             max_values = np.zeros(shape=(mtd[ws][0].getNumberHistograms(),
                                          mtd[ws].getNumberOfEntries()))
+            err_values = np.zeros(shape=(mtd[ws][0].getNumberHistograms(),
+                                         mtd[ws].getNumberOfEntries()))
             for entry_no, entry in enumerate(mtd[ws]):
                 max_values[:, entry_no] = entry.extractY().T
+                err_values[:, entry_no] = entry.extractE().T
         else:
             max_values = mtd[ws].extractY().T
-        return np.amax(max_values, axis=1)
+            err_values = mtd[ws].extractE().T
+        max_values = max_values.flatten()
+        err_values = err_values.flatten()
+        if one_per_detector:
+            indices = np.argmax(max_values, axis=1)
+            values = np.zeros(shape=len(indices))
+            errors = np.zeros(shape=len(indices))
+            for index_no, index in enumerate(indices):
+                values[index_no] = max_values[index]
+                errors[index_no] = err_values[index]
+        else:
+            index = np.argmax(max_values)
+            values = max_values[index]
+            errors = err_values[index]
+        return values, errors
 
     @staticmethod
     def _set_as_distribution(ws):
@@ -129,7 +146,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty(name="OutputTreatment",
                              defaultValue="Individual",
-                             validator=StringListValidator(["Individual", "Sum"]),
+                             validator=StringListValidator(["Individual", "Merge"]),
                              direction=Direction.Input,
                              doc="Which treatment of the provided scan should be used to create output.")
 
@@ -142,7 +159,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.")
 
-        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment', PropertyCriterion.IsEqualTo, 'Sum'))
+        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment', PropertyCriterion.IsEqualTo, 'Merge'))
 
         self.declareProperty(WorkspaceGroupProperty('VanadiumInputWorkspace', '',
                                                     direction=Direction.Input,
@@ -154,6 +171,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty('AbsoluteUnitsNormalisation', True,
                              doc='Whether or not express the output in absolute units.')
+
+        self.declareProperty('ClearCache', True,
+                             doc='Whether or not to delete intermediate workspaces.')
 
     def _data_structure_helper(self, ws):
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
@@ -211,8 +231,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         separated_cs = []
 
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
-            sigma_z_nsf = mtd[ws][entry_no]
-            sigma_z_sf = mtd[ws][entry_no+1]
+            sigma_z_sf = mtd[ws][entry_no]
+            sigma_z_nsf = mtd[ws][entry_no+1]
             total_cs = mtd[ws][entry_no].name() + '_Total'
             nuclear_cs = mtd[ws][entry_no].name() + '_Coherent'
             incoherent_cs = mtd[ws][entry_no].name() + '_Incoherent'
@@ -227,13 +247,13 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 RenameWorkspace(InputWorkspace=data_incoherent, OutputWorkspace=incoherent_cs)
                 separated_cs.append(incoherent_cs)
             elif nMeasurements == 6 or nMeasurements == 10:
-                sigma_y_nsf = mtd[ws][entry_no+2]
-                sigma_y_sf = mtd[ws][entry_no+3]
-                sigma_x_nsf = mtd[ws][entry_no+4]
-                sigma_x_sf = mtd[ws][entry_no+5]
+                sigma_y_sf = mtd[ws][entry_no+2]
+                sigma_y_nsf = mtd[ws][entry_no+3]
+                sigma_x_sf = mtd[ws][entry_no+4]
+                sigma_x_nsf = mtd[ws][entry_no+5]
                 average_magnetic_cs = mtd[ws][entry_no].name() + '_AverageMagnetic'
-                nsf_magnetic_cs = mtd[ws][entry_no].name() + '_NSFMagnetic'
                 sf_magnetic_cs = mtd[ws][entry_no].name() + '_SFMagnetic'
+                nsf_magnetic_cs = mtd[ws][entry_no].name() + '_NSFMagnetic'
                 if nMeasurements == 6 and user_method == 'XYZ':
                     # Total cross-section:
                     data_total = (sigma_z_nsf + sigma_x_nsf + sigma_y_nsf + sigma_z_sf + sigma_x_sf + sigma_y_sf) / 3.0
@@ -242,7 +262,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     # Magnetic component
                     data_nsf_magnetic = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf)
                     data_sf_magnetic = 2.0 * (-2.0 * sigma_z_sf + sigma_x_sf + sigma_y_sf)
-                    data_average_magnetic = 0.5 * (data_nsf_magnetic + data_sf_magnetic)
+                    data_average_magnetic = WeightedMean(InputWorkspace1=data_nsf_magnetic,
+                                                         InputWorkspace2=data_sf_magnetic)
                     # Nuclear coherent component
                     data_nuclear = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
                                     - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
@@ -312,10 +333,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     magnetic_sf_cos2alpha = (-1) * c0_t2_m4 * sigma_x_sf - c0_t2_p2 * sigma_y_sf - mc0_t4_p2 * sigma_z_sf
                     magnetic_nsf_sin2alpha = c4_t2_m4 * sigma_xpy_nsf + c4_t2_p2 * sigma_xmy_nsf + mc4_t4_p2 * sigma_z_nsf
                     magnetic_sf_sin2alpha = (-1) * c4_t2_m4 * sigma_xpy_sf - c4_t2_p2 * sigma_xmy_sf - mc4_t4_p2 * sigma_z_sf
-                    tmp_names.add('magnetic_nsf_cos2alpha')
                     tmp_names.add('magnetic_sf_cos2alpha')
-                    tmp_names.add('magnetic_nsf_sin2alpha')
+                    tmp_names.add('magnetic_nsf_cos2alpha')
                     tmp_names.add('magnetic_sf_sin2alpha')
+                    tmp_names.add('magnetic_nsf_sin2alpha')
 
                     data_nsf_magnetic = magnetic_nsf_cos2alpha * cos_2alpha \
                         + magnetic_nsf_sin2alpha * sin_2alpha
@@ -367,17 +388,21 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 normFactor = self._sampleAndEnvironmentProperties['NMoles'].value
                 CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace=norm_ws)
             else:
-                normalisationFactors = self._max_value_per_detector(cross_section_ws)
-                dataE = np.sqrt(normalisationFactors)
-                entry0 = mtd[cross_section_ws][0]
-                CreateWorkspace(dataX=entry0.readX(0), dataY=normalisationFactors, dataE=dataE,
-                                NSpec=entry0.getNumberHistograms(), OutputWorkspace=norm_ws)
-                mtd[norm_ws].getAxis(0).setUnit(entry0.getAxis(0).getUnit().unitID())
-                mtd[norm_ws].getAxis(1).setUnit(entry0.getAxis(1).getUnit().unitID())
+                normalisationFactors, dataE = self._max_value_per_detector(mtd[cross_section_ws].name(),
+                                                                           one_per_detector=False)
+                unit_ws = 'unit'
+                CreateSingleValuedWorkspace(DataValue=1.0, ErrorValue=0.0,
+                                            OutputWorkspace=unit_ws)
+                maximumFactors_ws = "maximum_vanadium_ws"
+                CreateSingleValuedWorkspace(DataValue=normalisationFactors, ErrorValue=dataE,
+                                            OutputWorkspace=maximumFactors_ws)
+                Divide(LHSWorkspace=unit_ws, RHSWorkspace=maximumFactors_ws, OutputWorkspace=norm_ws)
+                to_clean += [unit_ws, maximumFactors_ws]
+
             to_clean.append(norm_ws)
-            Divide(LHSWorkspace=cross_section_ws,
-                   RHSWorkspace=norm_ws,
-                   OutputWorkspace=det_efficiency_ws)
+            Multiply(LHSWorkspace=cross_section_ws,
+                     RHSWorkspace=norm_ws,
+                     OutputWorkspace=det_efficiency_ws)
         elif calibrationType in  ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':
                 spin = self._sampleAndEnvironmentProperties['SampleSpin'].value
@@ -399,12 +424,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                         normFactor = self._sampleAndEnvironmentProperties['IncoherentCrossSection'].value
                         CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace=norm_ws)
                     else:
-                        normalisationFactors = self._max_value_per_detector(mtd[cross_section_ws].name())
-                        dataE = np.sqrt(normalisationFactors)
-                        if len(normalisationFactors) == 1:
-                            CreateSingleValuedWorkspace(DataValue=normalisationFactors[0],
-                                                        ErrorValue=dataE[0],
-                                                        OutputWorkspace='normalisation_ws')
+                        normalisationFactors, dataE = self._max_value_per_detector(mtd[cross_section_ws].name(),
+                                                                                   one_per_detector=False)
+                        if isinstance(normalisationFactors, float):
+                            CreateSingleValuedWorkspace(DataValue=normalisationFactors,
+                                                        ErrorValue=dataE,
+                                                        OutputWorkspace=norm_ws)
                         else:
                             CreateWorkspace(dataX=mtd[cross_section_ws][1].readX(0), dataY=normalisationFactors,
                                             dataE=dataE,
@@ -417,31 +442,21 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                            OutputWorkspace=ws_name)
                     to_clean.append(norm_ws)
 
-            GroupWorkspaces(tmp_names, OutputWorkspace=det_efficiency_ws)
+            GroupWorkspaces(InputWorkspaces=tmp_names, OutputWorkspace=det_efficiency_ws)
 
-        if len(to_clean) != 0:
+        if self.getProperty('ClearCache').value and len(to_clean) != 0:
             DeleteWorkspaces(to_clean)
-
         return det_efficiency_ws
 
     def _normalise_sample_data(self, sample_ws, det_efficiency_ws):
-        """Normalises the sample data using the detector efficiency calibration workspace"""
-        norm_ws = 'norm_ws'
-        # relative normalisation is always performed
-        relative_norm_ws = sample_ws + '_relative_norm'
-        relative_norm_factor = self._max_value_per_detector(sample_ws)
-        dataE = np.sqrt(relative_norm_factor)
-        entry0 = mtd[sample_ws][0]
-        CreateWorkspace(dataX=entry0.readX(0), dataY=relative_norm_factor, dataE=dataE,
-                        NSpec=entry0.getNumberHistograms(), OutputWorkspace=relative_norm_ws)
-        mtd[relative_norm_ws].getAxis(0).setUnit(entry0.getAxis(0).getUnit().unitID())
-        mtd[relative_norm_ws].getAxis(1).setUnit(entry0.getAxis(1).getUnit().unitID())
+        """Normalises the sample data using the detector efficiency calibration workspace."""
+
+        normalisation_method = self.getPropertyValue('NormalisationMethod')
 
         single_efficiency_per_POL = False
         if mtd[sample_ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
             single_efficiency_per_POL = True
         tmp_names = []
-        normalisation_method = self.getPropertyValue('NormalisationMethod')
         for entry_no, entry in enumerate(mtd[sample_ws]):
             det_eff_entry_no = int(entry_no / 2)
             if normalisation_method == 'Vanadium':
@@ -450,17 +465,15 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 det_eff_entry_no = int(entry_no / 2)
                 if entry_no % 2 != 0:
                     det_eff_entry_no -= 1
+
             ws_name = entry.name() + '_normalised'
             tmp_names.append(ws_name)
-            Multiply(LHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
-                     RHSWorkspace=relative_norm_ws, OutputWorkspace=norm_ws)
             Divide(LHSWorkspace=entry,
-                   RHSWorkspace=norm_ws,
+                   RHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
                    OutputWorkspace=ws_name)
-        output_name = self.getPropertyValue('OutputWorkspace')
-        GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_name)
-        DeleteWorkspaces(WorkspaceList=[relative_norm_ws, norm_ws])
-        return output_name
+        output_ws = self.getPropertyValue('OutputWorkspace')
+        GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_ws)
+        return output_ws
 
     def _set_units(self, ws, nMeasurements):
         output_unit = self.getPropertyValue('OutputUnits')
@@ -468,7 +481,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         unit = r'd$\sigma$/d$\Omega$'
         self._set_as_distribution(ws)
         if output_unit == 'TwoTheta':
-            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
+            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
                 self._merge_polarisations(ws)
                 ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula='-x')
             else:
@@ -476,7 +489,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
         elif output_unit == 'Q':
-            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
+            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
                 self._merge_polarisations(ws)
                 wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value # in Angstrom
                 # flips axis sign and converts detector 2theta to momentum exchange
@@ -491,6 +504,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                     OrderAxis=False)
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
 
+        if self.getPropertyValue('NormalisationMethod') in ['Incoherent', 'Paramagnetic']:
+            unit = 'Normalized intensity'
+            unit_symbol = ''
         if isinstance(mtd[ws], WorkspaceGroup):
             for entry in mtd[ws]:
                 entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
@@ -503,8 +519,14 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         numors = set()
         for name in mtd[ws].getNames():
             last_underscore = name.rfind("_")
-            numors.add(name[:last_underscore])
-            pol_directions.add(name[last_underscore+1:])
+            if name[last_underscore+1:] == 'normalised':
+                short_name = name[:last_underscore]
+                second_last = short_name.rfind("_")
+                numors.add(short_name[:second_last])
+                pol_directions.add(short_name[second_last + 1:]+name[last_underscore:])
+            else:
+                numors.add(name[:last_underscore])
+                pol_directions.add(name[last_underscore + 1:])
         if len(numors) > 1:
             names_list = []
             for direction in sorted(list(pol_directions)):
@@ -537,20 +559,22 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
                 output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
-                DeleteWorkspace(det_efficiency_ws)
+                if self.getProperty('ClearCache').value:
+                    DeleteWorkspace(det_efficiency_ws)
             else:
                 CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws)
         else:
             component_ws = self._cross_section_separation(input_ws, nMeasurements, nComponents)
             self._set_as_distribution(component_ws)
-            if normalisation_method == 'Vanadium':
-                det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
-            else:
-                det_efficiency_input = component_ws
             if normalisation_method != 'None':
+                if normalisation_method == 'Vanadium':
+                    det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
+                else:
+                    det_efficiency_input = component_ws
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
                 output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws)
-                DeleteWorkspaces(WorkspaceList=[component_ws, det_efficiency_ws])
+                if self.getProperty('ClearCache').value:
+                    DeleteWorkspaces(WorkspaceList=[component_ws, det_efficiency_ws])
             else:
                 RenameWorkspace(InputWorkspace=component_ws, OutputWorkspace=output_ws)
         self._set_units(output_ws, nMeasurements)

@@ -17,10 +17,10 @@ namespace IDA {
 IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view)
     : IndirectFitDataPresenter(
           model, view,
-          std::make_unique<IndirectDataTablePresenter>(model->m_fitDataModel.get(), view->getDataTable())) {}
+          std::make_unique<IndirectFitDataTablePresenter>(model->getFitDataModel(), view->getDataTable())) {}
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view,
-                                                   std::unique_ptr<IndirectDataTablePresenter> tablePresenter)
+                                                   std::unique_ptr<IndirectFitDataTablePresenter> tablePresenter)
     : m_model(model), m_view(view), m_tablePresenter(std::move(tablePresenter)) {
   observeReplace(true);
 
@@ -193,6 +193,7 @@ void IndirectFitDataPresenter::closeDialog() {
   disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
   disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
   m_addWorkspaceDialog->close();
+  m_addWorkspaceDialog = nullptr;
 }
 
 void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
@@ -224,6 +225,8 @@ void IndirectFitDataPresenter::updateRanges() {
     m_view->setXRange(range);
   }
 }
+
+std::pair<double, double> IndirectFitDataPresenter::getXRange() const { return m_view->getXRange(); }
 
 void IndirectFitDataPresenter::addModelData(const std::string &name) {
   try {

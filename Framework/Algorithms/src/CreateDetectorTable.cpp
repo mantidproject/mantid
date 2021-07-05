@@ -179,7 +179,7 @@ std::vector<std::pair<std::string, std::string>> createColumns(const bool isScan
   colNames.emplace_back("double", "R");
   colNames.emplace_back("double", "Theta");
   if (calcQ) {
-    colNames.emplace_back("double", "Q");
+    colNames.emplace_back("double", "Q elastic");
   }
   colNames.emplace_back("double", "Phi");
   colNames.emplace_back("str", "Monitor");

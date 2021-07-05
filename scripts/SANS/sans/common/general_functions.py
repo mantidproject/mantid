@@ -12,7 +12,7 @@ from math import (acos, sqrt, degrees)
 import re
 from copy import deepcopy
 import json
-from typing import Tuple
+from typing import Tuple, Optional
 
 import numpy as np
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
@@ -643,6 +643,10 @@ def get_wav_range_from_ws(workspace) -> Tuple[float, float]:
     return range_str.split('-')
 
 
+def wav_range_to_str(wav_range: Tuple[float, float]) -> str:
+    return f"{wav_range[0]}-{wav_range[1]}"
+
+
 def get_standard_output_workspace_name(state, reduction_data_type, wav_range,
                                        include_slice_limits=True, custom_run_name=None):
     """
@@ -869,7 +873,7 @@ def get_instrument(instrument_name):
 # ----------------------------------------------------------------------------------------------------------------------
 # Hashing + ADS
 # ----------------------------------------------------------------------------------------------------------------------
-def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
+def get_state_hash_for_can_reduction(state, reduction_mode, wav_range: Optional[str]=None, partial_type=None):
     """
     Creates a hash for a (modified) state object.
 
@@ -905,6 +909,10 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
 
     # Add a tag for the reduction mode
     state_string = str(new_state_serialized)
+
+    if wav_range:
+        state_string += wav_range
+
     if reduction_mode is ReductionMode.LAB:
         state_string += "LAB"
     elif reduction_mode is ReductionMode.HAB:
@@ -931,7 +939,7 @@ def get_workspace_from_ads_based_on_hash(hash_value):
             return workspace
 
 
-def get_reduced_can_workspace_from_ads(state, output_parts, reduction_mode):
+def get_reduced_can_workspace_from_ads(state, output_parts, reduction_mode, wav_range):
     """
     Get the reduced can workspace from the ADS if it exists else nothing
 
@@ -941,19 +949,19 @@ def get_reduced_can_workspace_from_ads(state, output_parts, reduction_mode):
     :return: a reduced can object or None.
     """
     # Get the standard reduced can workspace)
-    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode)
+    hashed_state = get_state_hash_for_can_reduction(state=state, reduction_mode=reduction_mode, wav_range=wav_range)
     reduced_can = get_workspace_from_ads_based_on_hash(hashed_state)
     reduced_can_count = None
     reduced_can_norm = None
     if output_parts:
-        hashed_state_count = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.COUNT)
+        hashed_state_count = get_state_hash_for_can_reduction(state, reduction_mode, wav_range, OutputParts.COUNT)
         reduced_can_count = get_workspace_from_ads_based_on_hash(hashed_state_count)
-        hashed_state_norm = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.NORM)
+        hashed_state_norm = get_state_hash_for_can_reduction(state, reduction_mode, wav_range, OutputParts.NORM)
         reduced_can_norm = get_workspace_from_ads_based_on_hash(hashed_state_norm)
     return reduced_can, reduced_can_count, reduced_can_norm
 
 
-def get_transmission_workspaces_from_ads(state, reduction_mode):
+def get_transmission_workspaces_from_ads(state, reduction_mode, wav_range):
     """
         Get the reduced can transmission workspace from the ADS if it exists else nothing
 
@@ -961,14 +969,15 @@ def get_transmission_workspaces_from_ads(state, reduction_mode):
         :param reduction_mode: the reduction mode which at this point is either HAB or LAB
         :return: a reduced transmission can object or None.
         """
-    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.CALCULATED)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, wav_range, TransmissionType.CALCULATED)
     calculated_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
-    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.UNFITTED)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, wav_range=None,
+                                                    partial_type=TransmissionType.UNFITTED)
     unfitted_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
     return calculated_transmission, unfitted_transmission
 
 
-def write_hash_into_reduced_can_workspace(state, workspace, reduction_mode, partial_type=None):
+def write_hash_into_reduced_can_workspace(state, workspace, reduction_mode, wav_range:str, partial_type=None):
     """
     Writes the state hash into a reduced can workspace.
 
@@ -977,7 +986,7 @@ def write_hash_into_reduced_can_workspace(state, workspace, reduction_mode, part
     :param reduction_mode: the reduction mode
     :param partial_type: if it is a partial type, then it needs to be specified here.
     """
-    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, partial_type=partial_type)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, wav_range, partial_type=partial_type)
     set_hash(REDUCED_CAN_TAG, hashed_state, workspace)
 
 

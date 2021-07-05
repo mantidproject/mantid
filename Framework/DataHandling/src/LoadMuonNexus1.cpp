@@ -698,7 +698,7 @@ void LoadMuonNexus1::loadRunDetails(const DataObjects::Workspace2D_sptr &localWo
 
 /// Run the LoadLog Child Algorithm
 void LoadMuonNexus1::runLoadLog(const DataObjects::Workspace2D_sptr &localWorkspace) {
-  IAlgorithm_sptr loadLog = createChildAlgorithm("LoadMuonLog");
+  auto loadLog = createChildAlgorithm("LoadMuonLog");
   // Pass through the same input filename
   loadLog->setPropertyValue("Filename", m_filename);
   // Set the workspace property to be the same one filled above

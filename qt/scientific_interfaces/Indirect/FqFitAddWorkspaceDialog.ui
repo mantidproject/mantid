@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>JumpFit Data Selection</string>
+   <string>F(Q) Fit Data Selection</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

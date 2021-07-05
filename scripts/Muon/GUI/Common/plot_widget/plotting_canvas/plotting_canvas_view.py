@@ -7,7 +7,7 @@
 from typing import List
 
 from matplotlib.container import ErrorbarContainer
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 from Muon.GUI.Common.plot_widget.plotting_canvas.plot_toolbar import PlotToolbar
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
@@ -28,7 +28,8 @@ else:
 
 
 # Default color cycle using Matplotlib color codes C0, C1...ect
-DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(10)]
+NUMBER_OF_COLOURS = 10
+DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(NUMBER_OF_COLOURS)]
 
 
 def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
@@ -56,6 +57,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         # create the figure
         self.fig = Figure()
         self.fig.canvas = FigureCanvas(self.fig)
+        self.fig.canvas.setMinimumHeight(500)
         self.toolBar = PlotToolbar(self.fig.canvas, self)
 
         # Create a set of Mantid axis for the figure
@@ -64,11 +66,16 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self._number_of_axes = 1
         self._color_queue = [ColorQueue(DEFAULT_COLOR_CYCLE)]
 
+        # Add a splitter for the plotting canvas and quick edit toolbar
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
+        splitter.addWidget(self.fig.canvas)
+        self._quick_edit = quick_edit
+        splitter.addWidget(self._quick_edit)
+        splitter.setChildrenCollapsible(False)
+
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.toolBar)
-        layout.addWidget(self.fig.canvas)
-        self._quick_edit = quick_edit
-        layout.addWidget(self._quick_edit)
+        layout.addWidget(splitter)
         self.setLayout(layout)
 
         self._plot_information_list = []  # type : List[PlotInformation}
@@ -143,6 +150,9 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                             plot_kwargs=plot_kwargs)
 
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
+        # We reverse the workspace info list so that we can maintain a unique color queue
+        # See _update_color_queue_on_workspace_removal for more
+        workspace_plot_info_list.reverse()
         for workspace_plot_info in workspace_plot_info_list:
             workspace_name = workspace_plot_info.workspace_name
             if not AnalysisDataService.Instance().doesExist(workspace_name):
@@ -182,6 +192,16 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                     color = artist[0].get_color()
                 else:
                     color = artist.get_color()
+                # When we repeat colors we don't want to add colors to the queue if they are already plotted.
+                # We know we are repeating colors if we have more lines than colors, then we check if the color
+                # removed is already the color of an existing line. If it is we don't manually re-add the color
+                # to the queue. This ensures we only plot lines of the same colour if we have more lines
+                # plotted than colours
+                lines = self.fig.axes[axis_number].get_lines()
+                if len(lines) > NUMBER_OF_COLOURS:
+                    current_colors = [line.get_c() for line in lines]
+                    if color in current_colors:
+                        return
                 self._color_queue[axis_number] += color
 
     # Ads observer functions

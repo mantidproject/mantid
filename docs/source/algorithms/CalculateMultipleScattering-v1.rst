@@ -46,7 +46,7 @@ The following substitutions are then performed in order to make it more convenie
 
 :math:`p_i = \frac{\phi_i}{2 \pi}`
 
-:math:`\int_0^{2k} Q_i S(Q_i) dQ = k^2`
+:math:`\int_0^{2k} Q_i S(Q_i) dQ = 2 k^2`
 
 Using the new variables the integral is:
 
@@ -72,7 +72,7 @@ The final Monte Carlo integration that is actually performed by the code is as f
 The purpose of replacing :math:`2 k^2` with :math:`\int Q S(Q) dQ` can now be seen because it avoids the need to multiply by an integration range across :math:`dQ` when converting the integral to a Monte Carlo integration.
 This is useful in the inelastic version of this algorithm where the integration of the structure factor is over two dimensions :math:`Q` and :math:`\omega` and the area of :math:`Q\omega` space that has been integrated over is less obvious.
 
-This is similar to the formulation described in [#MAN]_ except there is no random variable to decide whether a particular scattering event is coherent or incoherent.
+This is similar to the formulation described in the Mancinelli paper except there is no random variable to decide whether a particular scattering event is coherent or incoherent.
 
 Outputs
 #######
@@ -80,12 +80,12 @@ Outputs
 The algorithm outputs a workspace group containing the following workspaces:
 
 - Several workspaces called Scatter_n where n is the number of scattering events considered. Each workspace contains a weight for a specific number of scattering events. The number of scattering events ranges between 1 and the number specified in the NumberOfScatterings parameter
-- A workspace called Scatter_1_NoAbsorb is also created for a scenario where neutrons are scattered once, absorption is assumed to be zero and re-scattering after the simulated scattering event is assumed to be zero. This is the quantity :math:`J_{1}^{*}` described in the Discus manual [#JOH]_
-- A workspace called Scatter_1_n_Summed which is the sum of the Scatter_n workspaces
+- A workspace called Scatter_1_NoAbsorb is also created for a scenario where neutrons are scattered once, absorption is assumed to be zero and re-scattering after the simulated scattering event is assumed to be zero. This is the quantity :math:`J_{1}^{*}` described in the Discus manual
+- A workspace called Scatter_2_n_Summed which is the sum of the Scatter_n workspaces for n > 1
 
 The output can be applied to a workspace containing a real sample measurement in one of two ways:
 
-- subtraction method. :math:`(\sum_{n=2}^{\infty} J_n) I_0` can be subtracted from the real sample measurement where :math:`I_0` is the incident intensity
+- subtraction method. :math:`(\sum_{n=2}^{\infty} J_n) I_0(\lambda)` can be subtracted from the real sample measurement where :math:`I_0(\lambda)` is the incident intensity
 - factor method. The correction can be applied by multiplying the real sample measurement by :math:`J_1/\sum_{n=1}^{\infty} J_n`
 
 The multiple scattering correction should be applied before applying an absorption correction.

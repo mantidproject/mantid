@@ -10,9 +10,9 @@
 #include <gmock/gmock.h>
 
 #include "IIndirectFitDataView.h"
-#include "IndirectDataTablePresenterTest.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitDataTableModel.h"
+#include "IndirectFitDataTablePresenterTest.h"
 #include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
 #include "ParameterEstimation.h"
@@ -55,6 +55,7 @@ public:
   MOCK_METHOD1(setResolutionWSSuffices, void(QStringList const &suffices));
   MOCK_METHOD1(setResolutionFBSuffices, void(QStringList const &suffices));
   MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
+  MOCK_CONST_METHOD0(getXRange, std::pair<double, double>());
   MOCK_METHOD1(setStartX, void(double startX));
   MOCK_METHOD1(setEndX, void(double endX));
 
@@ -71,6 +72,8 @@ public:
 /// Mock object to mock the model
 class MockIndirectFitDataTableModel : public IIndirectFittingModel {
 public:
+  MockIndirectFitDataTableModel() : m_fitDataModel(std::make_unique<MockIndirectDataTableModel>()) {}
+
   /// Public Methods
   MOCK_CONST_METHOD2(isPreviouslyFit, bool(TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
   MOCK_CONST_METHOD0(isInvalidFunction, boost::optional<std::string>());
@@ -149,6 +152,11 @@ public:
 
   MOCK_METHOD0(removeFittingData, void());
 
+  IIndirectFitDataTableModel *getFitDataModel() override { return m_fitDataModel.get(); }
+
+protected:
+  std::unique_ptr<IIndirectFitDataTableModel> m_fitDataModel;
+
 private:
   std::string sequentialFitOutputName() const { return ""; };
   std::string simultaneousFitOutputName() const { return ""; };
@@ -201,10 +209,11 @@ public:
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockIIndirectFitDataView>>();
     m_model = std::make_unique<NiceMock<MockIndirectFitDataTableModel>>();
-    m_model->m_fitDataModel = std::make_unique<MockIndirectDataTableModel>();
     m_table = createEmptyTableWidget(5, 5);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_table.get()));
     m_presenter = std::make_unique<IndirectFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()));
+
+    TS_ASSERT(m_model->getFitDataModel());
 
     SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
     m_model->addWorkspace("WorkspaceName");
@@ -344,6 +353,15 @@ public:
     EXPECT_CALL(*m_model, getDataForParameterEstimation(NoCheck(nullptr))).Times(Exactly(1));
 
     m_presenter->getDataForParameterEstimation(selector);
+  }
+
+  void test_that_getXRange_calls_the_correct_method_in_the_view() {
+    auto const xRange = std::make_pair(0.0, 1.0);
+
+    ON_CALL(*m_view, getXRange()).WillByDefault(Return(xRange));
+    EXPECT_CALL(*m_view, getXRange()).Times(1);
+
+    TS_ASSERT_EQUALS(m_presenter->getXRange(), xRange);
   }
 
 private:

@@ -31,7 +31,7 @@ using Mantid::DataObjects::Workspace2D;
 namespace {
 constexpr int DEFAULT_NPATHS = 1000;
 constexpr int DEFAULT_SEED = 123456789;
-constexpr size_t DEFAULT_NSCATTERINGS = 1;
+constexpr int DEFAULT_NSCATTERINGS = 2;
 constexpr int DEFAULT_LATITUDINAL_DETS = 5;
 constexpr int DEFAULT_LONGITUDINAL_DETS = 10;
 } // namespace
@@ -92,7 +92,7 @@ void CalculateMultipleScattering::init() {
   declareProperty("NeutronPathsMultiple", DEFAULT_NPATHS, positiveInt,
                   "The number of \"neutron\" paths to generate for multiple scattering");
   declareProperty("SeedValue", DEFAULT_SEED, positiveInt, "Seed the random number generator with this value");
-  auto nScatteringsValidator = std::make_shared<Kernel::BoundedValidator<size_t>>();
+  auto nScatteringsValidator = std::make_shared<Kernel::BoundedValidator<int>>();
   nScatteringsValidator->setLower(1);
   nScatteringsValidator->setUpper(5);
   declareProperty("NumberScatterings", DEFAULT_NSCATTERINGS, nScatteringsValidator, "Number of scatterings");
@@ -205,13 +205,13 @@ void CalculateMultipleScattering::exec() {
     const int longitudinalDets = getProperty("NumberOfDetectorColumns");
     sparseWS = createSparseWorkspace(*inputWS, nlambda, latitudinalDets, longitudinalDets);
   }
-  const size_t nScatters = getProperty("NumberScatterings");
+  const int nScatters = getProperty("NumberScatterings");
   std::vector<MatrixWorkspace_sptr> simulationWSs;
   std::vector<MatrixWorkspace_sptr> outputWSs;
 
   auto noAbsOutputWS = createOutputWorkspace(*inputWS);
   auto noAbsSimulationWS = useSparseInstrument ? sparseWS->clone() : noAbsOutputWS;
-  for (size_t i = 0; i < nScatters; i++) {
+  for (int i = 0; i < nScatters; i++) {
     auto outputWS = createOutputWorkspace(*inputWS);
     MatrixWorkspace_sptr simulationWS = useSparseInstrument ? sparseWS->clone() : outputWS;
     simulationWSs.push_back(simulationWS);
@@ -267,7 +267,7 @@ void CalculateMultipleScattering::exec() {
             simulatePaths(nSingleScatterEvents, 1, sample, *instrument, rng, sigmaSSWS, SQWS, kinc, detPos, true);
         noAbsSimulationWS->getSpectrum(i).dataY()[bin] = total;
 
-        for (size_t ne = 0; ne < nScatters; ne++) {
+        for (int ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
           total = simulatePaths(nEvents, ne + 1, sample, *instrument, rng, sigmaSSWS, SQWS, kinc, detPos, false);
@@ -294,7 +294,7 @@ void CalculateMultipleScattering::exec() {
         }
         noAbsOutputWS->setHistogram(i, histnew);
 
-        for (size_t ne = 0; ne < nScatters; ne++) {
+        for (size_t ne = 0; ne < static_cast<size_t>(nScatters); ne++) {
           auto histnew = simulationWSs[ne]->histogram(i);
           if (lambdaStepSize < nbins) {
             interpolateOpt.applyInplace(histnew, lambdaStepSize);
@@ -311,10 +311,12 @@ void CalculateMultipleScattering::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (useSparseInstrument) {
-    const std::string reportMsg = "Interpolating";
+    Poco::Thread::sleep(200); // to ensure prog message changes
+    const std::string reportMsg = "Spatial Interpolation";
+    prog.report(reportMsg);
     interpolateFromSparse(*noAbsOutputWS, *std::dynamic_pointer_cast<SparseWorkspace>(noAbsSimulationWS),
                           interpolateOpt);
-    for (size_t ne = 0; ne < nScatters; ne++) {
+    for (size_t ne = 0; ne < static_cast<size_t>(nScatters); ne++) {
       interpolateFromSparse(*outputWSs[ne], *std::dynamic_pointer_cast<SparseWorkspace>(simulationWSs[ne]),
                             interpolateOpt);
     }
@@ -333,13 +335,15 @@ void CalculateMultipleScattering::exec() {
     wsgroup->addWorkspace(outputWSs[i]);
   }
 
-  auto summedOutput = createOutputWorkspace(*inputWS);
-  for (size_t i = 0; i < outputWSs.size(); i++) {
-    summedOutput = summedOutput + outputWSs[i];
+  if (outputWSs.size() > 1) {
+    auto summedOutput = createOutputWorkspace(*inputWS);
+    for (size_t i = 1; i < outputWSs.size(); i++) {
+      summedOutput = summedOutput + outputWSs[i];
+    }
+    API::AnalysisDataService::Instance().addOrReplace("Scatter_2_" + std::to_string(outputWSs.size()) + "_Summed",
+                                                      summedOutput);
+    wsgroup->addWorkspace(summedOutput);
   }
-  API::AnalysisDataService::Instance().addOrReplace("Scatter_1_" + std::to_string(outputWSs.size()) + "_Summed",
-                                                    summedOutput);
-  wsgroup->addWorkspace(summedOutput);
 
   // set the output property
   setProperty("OutputWorkspace", wsgroup);
@@ -348,7 +352,7 @@ void CalculateMultipleScattering::exec() {
 }
 
 /**
- * Calculate a new mean free path using a k-specific scattering cross section
+ * Calculate a total cross section using a k-specific scattering cross section
  * Note - a separate tabulated scattering cross section is used elsewhere in the
  * calculation
  * @param sigmaSSWS Workspace containing log of scattering cross section as a
@@ -357,8 +361,7 @@ void CalculateMultipleScattering::exec() {
  * @param kinc The incident wavenumber
  * @param specialSingleScatterCalc Boolean indicating whether special single
  * scatter calculation should be performed
- * @return A tuple containing the mean free path (metres), the total cross
- * section (barns)
+ * @return The total cross section
  */
 double CalculateMultipleScattering::new_vector(const MatrixWorkspace_sptr sigmaSSWS, const Material &material,
                                                double kinc, bool specialSingleScatterCalc) {
@@ -437,7 +440,7 @@ double CalculateMultipleScattering::interpolateLogQuadratic(const MatrixWorkspac
  * scatter calculation should be performed
  * @return An average weight across all of the paths
  */
-double CalculateMultipleScattering::simulatePaths(const int nPaths, const size_t nScatters, const Sample &sample,
+double CalculateMultipleScattering::simulatePaths(const int nPaths, const int nScatters, const Sample &sample,
                                                   const Geometry::Instrument &instrument,
                                                   Kernel::PseudoRandomNumberGenerator &rng,
                                                   const MatrixWorkspace_sptr sigmaSSWS, const MatrixWorkspace_sptr SOfQ,
@@ -490,7 +493,7 @@ double CalculateMultipleScattering::simulatePaths(const int nPaths, const size_t
  * a sum of the QSS values across the n-1 multiple scatters
  */
 std::tuple<bool, double, double> CalculateMultipleScattering::scatter(
-    const size_t nScatters, const Sample &sample, const Geometry::Instrument &instrument, const V3D sourcePos,
+    const int nScatters, const Sample &sample, const Geometry::Instrument &instrument, const V3D sourcePos,
     Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total, double scatteringXSection,
     const MatrixWorkspace_sptr SOfQ, const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc) {
   double weight = 1;
@@ -502,7 +505,7 @@ std::tuple<bool, double, double> CalculateMultipleScattering::scatter(
   updateWeightAndPosition(track, weight, vmu, sigma_total, rng);
 
   double QSS = 0;
-  for (size_t is = 0; is < nScatters - 1; is++) {
+  for (int iScat = 0; iScat < nScatters - 1; iScat++) {
     q_dir(track, SOfQ, kinc, scatteringXSection, rng, QSS, weight);
     const int nlinks = sample.getShape().interceptSurface(track);
     m_callsToInterceptSurface++;
@@ -538,28 +541,18 @@ std::tuple<bool, double, double> CalculateMultipleScattering::scatter(
 void CalculateMultipleScattering::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ, const double kinc,
                                         const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng,
                                         double &QSS, double &weight) {
-  auto qvalues = SOfQ->histogram(0).x().rawData();
-  // For elastic just select a q value in range 0 to 2k
-  // The following will eventually be used for inelastic where it's less trivial
-  double QQ, cosT;
-  bool foundQ = false;
-  for (auto m = 0; m < 1000; m++) {
-    QQ = qvalues.back() * rng.nextValue();
-    // T = 2theta
-    cosT = 1 - QQ * QQ / (2 * kinc * kinc);
-    if (abs(cosT) <= 1) {
-      foundQ = true;
-      break;
-    }
-  }
-  if (!foundQ) {
-    throw std::runtime_error("Unable to select a new q for kinc=" + std::to_string(kinc));
-  } else {
-    double SQ = interpolateLogQuadratic(SOfQ, QQ);
-    QSS += QQ * SQ;
-    weight = weight * scatteringXSection * SQ * QQ;
-    updateTrackDirection(track, cosT, rng.nextValue() * 2 * M_PI);
-  }
+  const double kf = kinc; // elastic only so far
+  const double qmin = abs(kf - kinc);
+  const double qrange = 2 * kinc;
+
+  const double QQ = qmin + qrange * rng.nextValue();
+  // T = 2theta
+  const double cosT = (kinc * kinc + kf * kf - QQ * QQ) / (2 * kinc * kf);
+
+  const double SQ = interpolateLogQuadratic(SOfQ, QQ);
+  QSS += QQ * SQ;
+  weight = weight * scatteringXSection * SQ * QQ;
+  updateTrackDirection(track, cosT, rng.nextValue() * 2 * M_PI);
 }
 
 /**
@@ -721,7 +714,7 @@ MatrixWorkspace_sptr CalculateMultipleScattering::createOutputWorkspace(const Ma
   // be treated as a distribution
   outputWS->setDistribution(true);
   outputWS->setYUnit("");
-  outputWS->setYUnitLabel("Scattered Intensity");
+  outputWS->setYUnitLabel("Scattered Weight");
   return outputWS;
 }
 

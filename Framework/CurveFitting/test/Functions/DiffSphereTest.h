@@ -190,9 +190,9 @@ public:
                    << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre="
                       "0.0,Sigma=0.002);"
                    << "name=DiffSphere,Q=" << boost::lexical_cast<std::string>(Q)
-                   << ",Intensity=" << boost::lexical_cast<std::string>(I_0)
-                   << ",Radius=" << boost::lexical_cast<std::string>(R_0)
-                   << ",Diffusion=" << boost::lexical_cast<std::string>(D_0) << ")";
+                   << ",f1.Intensity=" << boost::lexical_cast<std::string>(I_0)
+                   << ",f1.Radius=" << boost::lexical_cast<std::string>(R_0)
+                   << ",f1.Diffusion=" << boost::lexical_cast<std::string>(D_0) << ")";
     fitalg.setProperty("Function", funtion_stream.str());
 
     // Find out whether ties were correctly applied
@@ -233,9 +233,9 @@ public:
                    << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre="
                       "0.0,Sigma=0.002);"
                    << "name=DiffSphere,Q=" << boost::lexical_cast<std::string>(Q)
-                   << ",Intensity=" << boost::lexical_cast<std::string>(I)
-                   << ",Radius=" << boost::lexical_cast<std::string>(R)
-                   << ",Diffusion=" << boost::lexical_cast<std::string>(D) << ")";
+                   << ",f1.Intensity=" << boost::lexical_cast<std::string>(I)
+                   << ",f1.Radius=" << boost::lexical_cast<std::string>(R)
+                   << ",f1.Diffusion=" << boost::lexical_cast<std::string>(D) << ")";
     fitalg.setProperty("Function", funtion_stream.str());
 
     // create the data workspace by evaluating the fit function in the Fit
@@ -271,11 +271,11 @@ public:
     // purposes
 
     // check the parameters of the DiffSphere close to the target parameters
-    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Intensity"), I_0,
+    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("f1.Intensity"), I_0,
                     I_0 * 0.05); // allow for a small percent variation
-    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Radius"), R_0,
+    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("f1.Radius"), R_0,
                     R_0 * 0.05); // allow for a small percent variation
-    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Diffusion"), D_0,
+    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("f1.Diffusion"), D_0,
                     D_0 * 0.05); // allow for a small percent variation
     // std::cout << "\nINITIAL GUESS: Intensity =
     // "<<boost::lexical_cast<std::string>(I)<<",  Radius

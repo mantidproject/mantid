@@ -61,36 +61,40 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
         if obj_dic["encoder_version"] != IO_VERSION:
             logger.error("Engineering Diffraction Interface encoder used different version, restoration may fail")
 
-        ws_names = obj_dic["data_loaded_workspaces"]  # workspaces are in ADS, need restoring into interface
+        ws_names = obj_dic.get("data_loaded_workspaces", None)  # workspaces are in ADS, need restoring into interface
         gui = EngineeringDiffractionGui()
         presenter = gui.presenter
         gui.tabs.setCurrentIndex(obj_dic["current_tab"])
         presenter.settings_presenter.model.set_settings_dict(obj_dic["settings_dict"])
         presenter.settings_presenter.settings = obj_dic["settings_dict"]
-        fit_data_widget = presenter.fitting_presenter.data_widget
-        fit_data_widget.model._bg_params = obj_dic["background_params"]
-        fit_data_widget.model.restore_files(ws_names)
-        fit_data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
-        fit_data_widget.presenter.restore_table()
+        if ws_names is not None:
+            fit_data_widget = presenter.fitting_presenter.data_widget
+            fit_data_widget.model._bg_params = obj_dic["background_params"]
+            fit_data_widget.model.restore_files(ws_names)
+            fit_data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
+            fit_data_widget.presenter.restore_table()
 
-        if obj_dic["fit_results"]:
-            fit_data_widget.model._fit_results = obj_dic["fit_results"]
-            fit_data_widget.model.create_fit_tables()
+            fit_results = obj_dic.get("fit_results", None)
+            if fit_results is not None:
+                fit_data_widget.model._fit_results = fit_results
+                fit_data_widget.model.create_fit_tables()
 
-        if obj_dic["fit_properties"]:
-            fit_browser = presenter.fitting_presenter.plot_widget.view.fit_browser
-            fit_browser.show()  # show the fit browser, default is off
-            fit_props = obj_dic["fit_properties"]["properties"]
-            fit_function = fit_props["Function"]
-            output_name = fit_props["Output"]
-            is_plot_diff = obj_dic["plot_diff"]
-            fit_browser.setWorkspaceName(output_name)
-            fit_browser.setStartX(fit_props["StartX"])
-            fit_browser.setEndX(fit_props["EndX"])
-            fit_browser.loadFunction(fit_function)
-            fit_browser.setOutputName(output_name)
-            ws_name = output_name + '_Workspace'
-            fit_browser.do_plot(ADS.retrieve(ws_name), is_plot_diff)
+            fit_properties = obj_dic.get("fit_properties", None)
+            if fit_properties is not None:
+                fit_browser = presenter.fitting_presenter.plot_widget.view.fit_browser
+                fit_browser.show()  # show the fit browser, default is off
+                presenter.fitting_presenter.plot_widget.view.fit_toggle()  # show the fit browser, default is off
+                fit_props = fit_properties["properties"]
+                fit_function = fit_props["Function"]
+                output_name = fit_props["Output"]
+                is_plot_diff = obj_dic["plot_diff"]
+                fit_browser.setWorkspaceName(output_name)
+                fit_browser.setStartX(fit_props["StartX"])
+                fit_browser.setEndX(fit_props["EndX"])
+                fit_browser.loadFunction(fit_function)
+                fit_browser.setOutputName(output_name)
+                ws_name = output_name + '_Workspace'
+                fit_browser.do_plot(ADS.retrieve(ws_name), is_plot_diff)
         return gui
 
     @classmethod

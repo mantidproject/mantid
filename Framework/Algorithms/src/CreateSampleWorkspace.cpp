@@ -111,6 +111,24 @@ void CreateSampleWorkspace::init() {
                   "Preset options of the data to fill the workspace with");
   declareProperty("UserDefinedFunction", "", "Parameters defining the fitting function and its initial values");
 
+  declareProperty("XUnit", "TOF", "The unit to assign to the XAxis (default:\"TOF\")");
+  declareProperty("XMin", 0.0, "The minimum X axis value (default:0)");
+  declareProperty("XMax", 20000.0, "The maximum X axis value (default:20000)");
+  declareProperty("BinWidth", 200.0, std::make_shared<BoundedValidator<double>>(0, 100000, true),
+                  "The bin width of the X axis (default:200)");
+  declareProperty("NumEvents", 1000, std::make_shared<BoundedValidator<int>>(0, 100000),
+                  "The number of events per detector, this is only used for "
+                  "EventWorkspaces (default:1000)");
+  declareProperty("Random", false, "Whether to randomise the placement of events and data (default:false)");
+
+  declareProperty("NumScanPoints", 1, std::make_shared<BoundedValidator<int>>(0, 360, true),
+                  "Add a number of time indexed detector scan points to the "
+                  "instrument. The detectors are rotated in 1 degree "
+                  "increments around the the sample position in the x-z plane. "
+                  "Minimum (default) is 1 scan point, which gives a "
+                  "non-scanning workspace.");
+
+  declareProperty("InstrumentName", "basic_rect", Direction::Input);
   declareProperty("NumBanks", 2, std::make_shared<BoundedValidator<int>>(0, 100),
                   "The Number of banks in the instrument (default:2)");
   declareProperty("NumMonitors", 0, std::make_shared<BoundedValidator<int>>(0, 100),
@@ -118,30 +136,35 @@ void CreateSampleWorkspace::init() {
   declareProperty("BankPixelWidth", 10, std::make_shared<BoundedValidator<int>>(0, 10000),
                   "The number of pixels in horizontally and vertically in a "
                   "bank (default:10)");
-  declareProperty("NumEvents", 1000, std::make_shared<BoundedValidator<int>>(0, 100000),
-                  "The number of events per detector, this is only used for "
-                  "EventWorkspaces (default:1000)");
-  declareProperty("Random", false, "Whether to randomise the placement of events and data (default:false)");
 
-  declareProperty("XUnit", "TOF", "The unit to assign to the XAxis (default:\"TOF\")");
-  declareProperty("XMin", 0.0, "The minimum X axis value (default:0)");
-  declareProperty("XMax", 20000.0, "The maximum X axis value (default:20000)");
-  declareProperty("BinWidth", 200.0, std::make_shared<BoundedValidator<double>>(0, 100000, true),
-                  "The bin width of the X axis (default:200)");
+  declareProperty("PixelDiameter", 0.008, std::make_shared<BoundedValidator<double>>(0, 0.1),
+                  "Length in meters of one side of a pixel assumed to be square");
+
+  declareProperty("PixelHeight", 0.0002, std::make_shared<BoundedValidator<double>>(0, 0.1),
+                  "Height in meters of the pixel");
+
   declareProperty("PixelSpacing", 0.008, std::make_shared<BoundedValidator<double>>(0, 100000, true),
-                  "The spacing between detector pixels in M (default:0.008)");
+                  "Distance between the center of adjacent pixels in a uniform grid "
+                  "(default: 0.008 meters)");
+
   declareProperty("BankDistanceFromSample", 5.0, std::make_shared<BoundedValidator<double>>(0, 1000, true),
                   "The distance along the beam direction from the sample to "
-                  "bank in M (default:5.0)");
+                  "bank in meters (default:5.0)");
   declareProperty("SourceDistanceFromSample", 10.0, std::make_shared<BoundedValidator<double>>(0, 1000, true),
                   "The distance along the beam direction from the source to "
-                  "the sample in M (default:10.0)");
-  declareProperty("NumScanPoints", 1, std::make_shared<BoundedValidator<int>>(0, 360, true),
-                  "Add a number of time indexed detector scan points to the "
-                  "instrument. The detectors are rotated in 1 degree "
-                  "increments around the the sample position in the x-z plane. "
-                  "Minimum (default) is 1 scan point, which gives a "
-                  "non-scanning workspace.");
+                  "the sample in meters (default:10.0)");
+
+  /* Aggregate properties in groups */
+  std::string instrumentGroupName = "Instrument";
+  setPropertyGroup("InstrumentName", instrumentGroupName);
+  setPropertyGroup("NumMonitors", instrumentGroupName);
+  setPropertyGroup("BankDistanceFromSample", instrumentGroupName);
+  setPropertyGroup("SourceDistanceFromSample", instrumentGroupName);
+  setPropertyGroup("NumBanks", instrumentGroupName);
+  setPropertyGroup("BankPixelWidth", instrumentGroupName);
+  setPropertyGroup("PixelDiameter", instrumentGroupName);
+  setPropertyGroup("PixelHeight", instrumentGroupName);
+  setPropertyGroup("PixelSpacing", instrumentGroupName);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -151,6 +174,7 @@ void CreateSampleWorkspace::exec() {
   const std::string wsType = getProperty("WorkspaceType");
   const std::string preDefinedFunction = getProperty("Function");
   const std::string userDefinedFunction = getProperty("UserDefinedFunction");
+  const std::string instrName = getPropertyValue("InstrumentName");
   const int numBanks = getProperty("NumBanks");
   const int numMonitors = getProperty("NumMonitors");
   const int bankPixelWidth = getProperty("BankPixelWidth");
@@ -160,6 +184,8 @@ void CreateSampleWorkspace::exec() {
   const double xMin = getProperty("XMin");
   const double xMax = getProperty("XMax");
   double binWidth = getProperty("BinWidth");
+  const double pixelDiameter = getProperty("PixelDiameter");
+  const double pixelHeight = getProperty("PixelHeight");
   const double pixelSpacing = getProperty("PixelSpacing");
   const double bankDistanceFromSample = getProperty("BankDistanceFromSample");
   const double sourceSampleDistance = getProperty("SourceDistanceFromSample");
@@ -167,6 +193,13 @@ void CreateSampleWorkspace::exec() {
 
   if (xMax <= xMin) {
     throw std::invalid_argument("XMax must be larger than XMin");
+  }
+
+  if (pixelSpacing < pixelDiameter) {
+    g_log.error() << "PixelSpacing (the distance between pixel centers in the uniform grid)"
+                     "is smaller than the PixelDiameter (square pixel dimension)"
+                  << '\n';
+    throw std::invalid_argument("PixelSpacing must be at least as large as pixelDiameter");
   }
 
   if (binWidth > (xMax - xMin)) {
@@ -200,8 +233,9 @@ void CreateSampleWorkspace::exec() {
   Progress progress(this, 0.0, 1.0, numBanks);
 
   // Create an instrument with one or more rectangular banks.
-  Instrument_sptr inst = createTestInstrumentRectangular(progress, numBanks, numMonitors, bankPixelWidth, pixelSpacing,
-                                                         bankDistanceFromSample, sourceSampleDistance);
+  Instrument_sptr inst =
+      createTestInstrumentRectangular(progress, numBanks, numMonitors, bankPixelWidth, pixelDiameter, pixelHeight,
+                                      pixelSpacing, bankDistanceFromSample, sourceSampleDistance, instrName);
 
   auto numBins = static_cast<int>((xMax - xMin) / binWidth);
 
@@ -361,7 +395,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(int numPixels, i
       auto eventsInBin = static_cast<int>(yValues[i]);
       for (int q = 0; q < eventsInBin; q++) {
         DateAndTime pulseTime = run_start + (m_randGen->nextValue() * hourInSeconds);
-        el += TofEvent((i + m_randGen->nextValue()) * binDelta, pulseTime);
+        el += TofEvent((i + m_randGen->nextValue()) * binDelta + x0, pulseTime);
       }
     }
     workspaceIndex++;
@@ -404,10 +438,8 @@ std::vector<double> CreateSampleWorkspace::evalFunction(const std::string &funct
   FunctionValues fv(fd);
   func_sptr->function(fd, fv);
 
-  std::vector<double> results;
-  results.resize(xSize);
+  auto results = fv.toVector();
   for (size_t x = 0; x < xSize; ++x) {
-    results[x] = fv.getCalculated(x);
     if (noiseScale != 0) {
       results[x] += ((m_randGen->nextValue() - 0.5) * noiseScale);
     }
@@ -443,23 +475,28 @@ void CreateSampleWorkspace::replaceAll(std::string &str, const std::string &from
  * @param numBanks :: number of rectangular banks to create
  * @param numMonitors :: number of monitors to create
  * @param pixels :: number of pixels in each direction.
- * @param pixelSpacing :: padding between pixels
+ * @param pixelDiameter:: width of pixel in relevant dimension
+ * @param pixelHeight :: z-extent of pixel
+ * @param pixelSpacing :: distance between pixel centers
  * @param bankDistanceFromSample :: Distance of first bank from sample (defaults
  *to 5.0m)
  * @param sourceSampleDistance :: The distance from the source to the sample
+ * @param instrName :: Name of the underlying instrument, can be used to mock existing beamlines
  * @returns A shared pointer to the generated instrument
  */
-Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(API::Progress &progress, int numBanks,
-                                                                       int numMonitors, int pixels, double pixelSpacing,
-                                                                       const double bankDistanceFromSample,
-                                                                       const double sourceSampleDistance) {
-  auto testInst = std::make_shared<Instrument>("basic_rect");
+Instrument_sptr
+CreateSampleWorkspace::createTestInstrumentRectangular(API::Progress &progress, int numBanks, int numMonitors,
+                                                       int pixels, double pixelDiameter, double pixelHeight,
+                                                       double pixelSpacing, const double bankDistanceFromSample,
+                                                       const double sourceSampleDistance, const std::string instrName) {
+  auto testInst = std::make_shared<Instrument>(instrName);
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
   testInst->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
-  const double cylRadius(pixelSpacing / 2);
-  const double cylHeight(0.0002);
+  /* Captain! This is wrong */
+  const double cylRadius(pixelDiameter / 2);
+  const double cylHeight(pixelHeight);
   // One object
   auto pixelShape =
       createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.), "pixel-shape");

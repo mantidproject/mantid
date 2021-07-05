@@ -12,6 +12,7 @@ from mantid.simpleapi import *
 from math import fabs
 import numpy as np
 import os
+import re
 
 
 class SANSILLReduction(PythonAlgorithm):
@@ -95,6 +96,23 @@ class SANSILLReduction(PythonAlgorithm):
     def _mask(ws, masked_ws, check_if_masked_detectors=True):
         if not check_if_masked_detectors or masked_ws.detectorInfo().hasMaskedDetectors():
             MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
+
+    @staticmethod
+    def _return_numors(paths):
+        regex_all = r'(\+)'
+        p = re.compile(regex_all)
+        list_entries = []
+        binary_op = []
+        prev_pos = 0
+        for obj in p.finditer(paths):
+            list_entries.append(paths[prev_pos:obj.span()[0]])
+            prev_pos = obj.span()[1]
+            binary_op.append(obj.group())
+        list_entries.append(paths[prev_pos:])  # add the last remaining file
+        list_entries = [os.path.split(entry)[1] for entry in list_entries]
+        binary_op.append('') # there is one fewer binary operator than there are numors
+        list_entries = [entry + operation for entry, operation in zip(list_entries, binary_op)]
+        return ''.join(list_entries)
 
     def PyInit(self):
 
@@ -284,6 +302,74 @@ class SANSILLReduction(PythonAlgorithm):
         # masking however is needed to get more reasonable scales in the instrument view
         MaskDetectors(Workspace=ws, DetectorList=[monID, monID+1])
 
+    def _get_vertical_grouping_pattern(self, ws):
+        """
+        Provides vertical grouping pattern and crops to the main detector panel where counts from the beam are measured.
+        :param ws: Empty beam workspace.
+        """
+        inst_name = mtd[ws].getInstrument().getName()
+        min_id = 0
+        if 'D11' in inst_name:
+            if 'lr' in inst_name:
+                step = 128
+                max_id = 16384
+            elif 'B' in inst_name:
+                CropToComponent(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames='detector_center')
+                max_id = 49152
+                step = 192
+            else:
+                step = 256
+                max_id = 65536
+        elif 'D22' in inst_name:
+            max_id = 32768
+            step = 256
+            if 'lr' in inst_name:
+                step = 128
+                max_id = 16384
+            elif 'B' in inst_name:
+                CropToComponent(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames='detector_back')
+        elif 'D33' in inst_name:
+            CropToComponent(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames='back_detector')
+            max_id = 32768
+            step = 128
+        else:
+            self.log().warning('Instruments other than D11, D22, and D33 are not yet supported.')
+            return
+        return ','.join(["{}-{}".format(start, start + step - 1) for start in range(min_id, max_id, step)])
+
+    def _fit_beam_width(self, input_ws):
+        """
+            Groups detectors vertically and fits the horizontal beam width with a Gaussian distribution to obtain
+            horizontal beam resolution wich is added to sample logs under 'BeamWidthVertical' entry.
+            :param input_ws: Empty beam workspace
+        """
+        tmp_ws = input_ws + '_beam_width'
+        CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=tmp_ws)
+        grouping_pattern = self._get_vertical_grouping_pattern(tmp_ws)
+        if not grouping_pattern: # unsupported instrument
+            return
+        GroupDetectors(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, GroupingPattern=grouping_pattern)
+        ConvertSpectrumAxis(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, Target='SignedInPlaneTwoTheta')
+        Transpose(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws)
+        background = 'name=FlatBackground, A0=1e-4'
+        distribution_width = np.max(mtd[tmp_ws].getAxis(0).extractValues())
+        function = "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}".format(
+            0, np.max(mtd[tmp_ws].getAxis(1).extractValues()), 0.1*distribution_width)
+        constraints = "{0} < f1.PeakCentre < {1}".format(-0.1*distribution_width, 0.1*distribution_width)
+        fit_function = [background, function]
+        fit_output = Fit(Function=';'.join(fit_function),
+                         InputWorkspace=tmp_ws,
+                         Constraints=constraints,
+                         CreateOutput=False,
+                         IgnoreInvalidData=True,
+                         Output=tmp_ws+"_fit_output")
+        param_table = fit_output.OutputParameters
+        beam_width = param_table.column(1)[3] * np.pi / 180.0
+        AddSampleLog(Workspace=input_ws, LogName='BeamWidthX', LogText=str(beam_width), LogType='Number',
+                     LogUnit='rad')
+        DeleteWorkspaces(WorkspaceList=[tmp_ws, tmp_ws+'_fit_output_Parameters', tmp_ws+'_fit_output_Workspace',
+                                        tmp_ws+'_fit_output_NormalisedCovarianceMatrix'])
+
     def _process_beam(self, ws):
         """
             Calculates the beam center's x,y coordinates, and the beam flux
@@ -300,6 +386,7 @@ class SANSILLReduction(PythonAlgorithm):
         DeleteWorkspace(centers)
         if self._mode != 'TOF':
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
+            self._fit_beam_width(input_ws=ws)
         run = mtd[ws].getRun()
         if run.hasProperty('attenuator.attenuation_coefficient'):
             att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
@@ -473,6 +560,12 @@ class SANSILLReduction(PythonAlgorithm):
             AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
             AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
+            if 'BeamWidthX' in beam_ws.getRun():
+                beam_width_x = beam_ws.getRun().getLogData('BeamWidthX').value
+                AddSampleLog(Workspace=ws, LogName='BeamWidthX', LogText=str(beam_width_x), LogType='Number',
+                             LogUnit='rad')
+            else:
+                self.log().warning("Beam width resolution not available.")
         self._check_distances_match(mtd[ws], beam_ws)
         if self._mode != 'TOF':
             self._check_wavelengths_match(mtd[ws], beam_ws)
@@ -589,6 +682,9 @@ class SANSILLReduction(PythonAlgorithm):
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws].getRun().addProperty('ProcessedAs', process, True)
+        mtd[ws].getRun().addProperty('numor_list', self._return_numors(self.getPropertyValue('Run')), True)
+        mtd[ws].getRun().addProperty('sample_transmission_numors',
+                                     self._return_numors(self.getPropertyValue('TransmissionInputWorkspace')), True)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
 

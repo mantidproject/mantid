@@ -155,6 +155,7 @@ class SliceViewerModel:
                        not provided the full extent of each dimension is used
         """
         workspace = self._get_ws()
+
         params, _, __ = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits)
         params['EnableLogging'] = LOG_GET_WS_MDE_ALGORITHM_CALLS
         return BinMD(InputWorkspace=workspace, OutputWorkspace=self._rebinned_name, **params)
@@ -193,6 +194,12 @@ class SliceViewerModel:
         workspace = self._get_ws()
         xdim, ydim = workspace.getDimension(xindex), workspace.getDimension(yindex)
         return (xdim.getMinimum(), xdim.getMaximum()), (ydim.getMinimum(), ydim.getMaximum())
+
+    def is_ragged_matrix_plotted(self):
+        """
+        :return: bool for if workspace is matrix workspace with non common bins
+        """
+        return self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isCommonBins()
 
     def get_dim_info(self, n: int) -> dict:
         """
@@ -538,6 +545,8 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
     ws_basis = np.eye(ndims)
     output_extents, output_bins = [], []
     params = {'AxisAligned': False}
+    if workspace.getSpecialCoordinateSystem() == SpecialCoordinateSystem.HKL:
+        params['NormalizeBasisVectors'] = False  # Default is True
     for n in range(ndims):
         dimension = workspace.getDimension(n)
         basis_vec_n = _to_str(ws_basis[:, n])

@@ -11,12 +11,14 @@ Workbench Main Window
     <style> .blue {color:#0000FF; font-weight:bold} </style>
     <style> .orange {color:#FF8C00; font-weight:bold} </style>
     <style> .purple {color:#A431E6; font-weight:bold} </style>
+    <style> .turquoise {color:#40E0D0; font-weight:bold} </style>
 
 .. role:: red
 .. role:: blue
 .. role:: green
 .. role:: orange
 .. role:: purple
+.. role:: turquoise
 
 Layout
 ======
@@ -34,8 +36,9 @@ As a quick introduction, the main window contains these Toolboxes:
 - :purple:`Plots Toolbox`: Click on the Plots button in the bottom-left to reveal this toolbox. When you plot a graph in Workbench, it can be tracked here.
 - :green:`Script Editor`: Run Python scripts here to control Mantid. Much more functionality with scripts, but beyond the scope of this basic course.
 - :red:`Messages Box`: Any output text, from an algorithm or script. :red:`Errors are displayed here in red`.
+- :turquoise:`System Memory Usage`: Displays the current system memory usage.
 
-**Note** to find out what Mantid version you are using, look at the first message in the :red:`Messages Box`. You can see I'm using Mantid 4.2.0.
+**Note** to find out what Mantid version you are using, look at the first message in the :red:`Messages Box`. You can see I'm using Mantid 6.1.0.
 
 Quick Intro to Workspaces and Bins
 ==================================

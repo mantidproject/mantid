@@ -23,6 +23,8 @@ class ResultsTabPresenterTest(unittest.TestCase):
         self.mock_view.function_selection_changed.connect = mock.MagicMock()
         self.mock_view.results_name_edited.connect = mock.MagicMock()
         self.mock_view.output_results_requested.connect = mock.MagicMock()
+        self.mock_context = mock.MagicMock()
+        self.mock_model._fit_context = self.mock_context
 
     def tearDown(self):
         self.view_patcher.stop()
@@ -86,6 +88,14 @@ class ResultsTabPresenterTest(unittest.TestCase):
             final_ws_list_state)
         self.mock_view.set_output_results_button_enabled.assert_called_once_with(
             True)
+
+    def test_if_no_fits_in_context_then_output_results_is_disabled(self):
+        self.mock_model._fit_context.clear()
+        presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        presenter.on_new_fit_performed()
+        expected_calls = [mock.call(False), mock.call(True)]  # Called once in init of view and once on new fit
+
+        self.mock_view.set_output_results_button_enabled.assert_has_calls(expected_calls)
 
     def test_adding_new_fit_updates_log_values(self):
         existing_selection = {

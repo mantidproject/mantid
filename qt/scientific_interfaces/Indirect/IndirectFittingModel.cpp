@@ -637,6 +637,8 @@ std::vector<std::pair<std::string, size_t>> IndirectFittingModel::getResolutions
   return std::vector<std::pair<std::string, size_t>>();
 }
 
+IIndirectFitDataTableModel *IndirectFittingModel::getFitDataModel() { return m_fitDataModel.get(); }
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

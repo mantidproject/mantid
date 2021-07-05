@@ -117,6 +117,10 @@ void IndirectFitDataView::setXRange(std::pair<double, double> const &range) {
   m_dataForm->dsbEndX->setValue(range.second);
 }
 
+std::pair<double, double> IndirectFitDataView::getXRange() const {
+  return std::make_pair(m_dataForm->dsbStartX->value(), m_dataForm->dsbEndX->value());
+}
+
 void IndirectFitDataView::setStartX(double value) { m_dataForm->dsbStartX->setValue(value); }
 
 void IndirectFitDataView::setEndX(double value) { m_dataForm->dsbEndX->setValue(value); }

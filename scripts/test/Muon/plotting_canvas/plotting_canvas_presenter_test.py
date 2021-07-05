@@ -12,8 +12,6 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import Pl
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter import PlottingCanvasPresenter
 from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import QuickEditWidget
 
-from Muon.GUI.Common.contexts.muon_context import MUON_ANALYSIS_DEFAULT_X_RANGE as DEFAULT_X_LIMITS
-from Muon.GUI.Common.contexts.muon_context import MUON_ANALYSIS_DEFAULT_Y_RANGE as DEFAULT_Y_LIMITS
 from Muon.GUI.Common.contexts.plotting_context import PlottingContext
 
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
@@ -34,6 +32,10 @@ def create_test_workspaces(ws_names):
         y_range = [x * x for x in x_range]
         workspaces += [CreateWorkspace(DataX=x_range, DataY=y_range, OutputWorkspace=name)]
     return workspaces
+
+
+DEFAULT_X_LIMITS = [0.,15.]
+DEFAULT_Y_LIMITS = [-1.,1.]
 
 
 @start_qapplication
@@ -128,15 +130,14 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         ws_names = ["MUSR62260; Group; fwd", "MUSR62260; Group; bwd"]
         ws_indices = [0, 1]
         keys = ["fwd", "bwd"]
-        tiled_by = "Group"
         self.presenter.plot_workspaces = mock.Mock()
         self.presenter.clear_subplots = mock.Mock()
         self.view.plotted_workspaces_and_indices = [ws_names, ws_indices]
 
-        self.presenter.convert_plot_to_tiled_plot(keys, tiled_by)
+        self.presenter.convert_plot_to_tiled_plot(keys)
 
         self.view.create_new_plot_canvas.assert_called_once_with(len(keys))
-        self.model.update_tiled_axis_map.assert_called_once_with(keys, tiled_by)
+        self.model.update_tiled_axis_map.assert_called_once_with(keys)
         self.presenter.clear_subplots.assert_called_once()
         self.presenter.plot_workspaces.assert_called_once_with(ws_names, ws_indices, hold_on=False, autoscale=False)
 
@@ -457,9 +458,27 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.assertEqual(number_of_axes, self.options.add_subplot.call_count)
 
     def test_create_tiled_plot_correctly_handles_empty_key_list(self):
-        self.presenter.create_tiled_plot([], 'Group, Pair')
+        self.presenter.create_tiled_plot([])
 
         self.view.create_new_plot_canvas.assert_called_once_with(1)
+
+    def test_should_update_all(self):
+        selected_subplots = ["fwd", "bwd"]
+        self.options.get_selection_index.return_value = 0
+
+        self.assertTrue(self.presenter.should_update_all(selected_subplots))
+
+    def test_should_update_all_one_plot(self):
+        selected_subplots = ["one"]
+        self.options.get_selection_index.return_value = 0
+
+        self.assertTrue(self.presenter.should_update_all(selected_subplots))
+
+    def test_should_update_all_false(self):
+        selected_subplots = ["fwd"]
+        self.options.get_selection_index.return_value = 1
+
+        self.assertFalse(self.presenter.should_update_all(selected_subplots))
 
 
 if __name__ == '__main__':

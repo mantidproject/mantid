@@ -24,7 +24,6 @@
         <value val="3.75"/>
       </parameter>
       <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
-
       <parameter name="logbook_default_parameters" type="string" visible="false">
 	<value val="SampleDescription:/entry0/sample_description:s,
 		    TotalTime:/entry0/duration:d,
@@ -91,6 +90,12 @@
 		    SampleThickness:/entry0/sample/thickness:f,
 		    SampleApertureWidth:/entry0/D11/Beam/sample_ap_x_or_diam:f,
 		    SampleApertureHeight:/entry0/D11/Beam/sample_ap_y:f" />
+      </parameter>
+      <parameter name="log_list_to_save" type="string">
+	<value val="facility,instrument_name,experiment_identifier,
+		    experiment_title,start_time,end_time,numor_list,
+		    processedAs,wavelength,sample_transmission_numors,
+                    collimation.actual_position,L2"/>
       </parameter>
     </component-link>
 

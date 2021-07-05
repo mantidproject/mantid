@@ -339,18 +339,32 @@ class HB2AReduce(PythonAlgorithm):
                 vcorr_filename = vanadium_filename
         else:  # Find adjacent vcorr file
             # m1 is the monochromator angle
-            # m1 = 0 -> Ge 115, 1.54A
-            # m1 = 9.45 -> Ge 113, 2.41A
+            # m1 = -4.375 -> Ge 117, 1.12 A
+            # m1 = 0 -> Ge 115, 1.54 A
+            # m1 = 9.45 -> Ge 113, 2.41 A
             # colltrans is the collimator position, whether in or out of the beam
-            new_convention = np.datetime64(datetime.datetime(2021, 2, 23))
+            CONVENTION_2021_02 = np.datetime64(datetime.datetime(2021, 2, 23))
+            CONVENTION_2021_04 = np.datetime64(datetime.datetime(2021, 4, 25))
             date_created = self.get_date(metadata)
-            if date_created >= new_convention:
+            if date_created >= CONVENTION_2021_04:
+                if np.isclose(m1, -4.375, atol=0.1):
+                    ge_peak = 117
+                elif np.isclose(m1, 0, atol=0.1):
+                    ge_peak = 115
+                else:
+                    ge_peak = 113
+                vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
+                    exp, ge_peak,
+                    "OUT" if np.isclose(colltrans, 0, atol=0.1) else "IN")
+            elif date_created >= CONVENTION_2021_02:
+                # Convention after `CONVENTION_2021_02`.
                 # colltrans = 0 -> OUT
                 # colltrans = +/-80 -> IN
                 vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
                     exp, 115 if np.isclose(m1, 0, atol=0.1) else 113,
                     "OUT" if np.isclose(colltrans, 0, atol=0.1) else "IN")
-            elif date_created < new_convention:
+            else:
+                # Legacy convention.
                 # colltrans = +/-80 -> OUT
                 # colltrans = 0 -> IN
                 vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(

@@ -112,6 +112,7 @@ public:
   MOCK_METHOD2(setFitRange, void(double minimum, double maximum));
   MOCK_METHOD1(setFitRangeMinimum, void(double minimum));
   MOCK_METHOD1(setFitRangeMaximum, void(double maximum));
+  MOCK_METHOD1(setFitRangeBounds, void(std::pair<double, double> const &bounds));
 
   MOCK_METHOD1(setBackgroundRangeVisible, void(bool visible));
   MOCK_METHOD1(setHWHMRangeVisible, void(bool visible));
@@ -554,6 +555,26 @@ public:
     m_presenter->updateDataSelection();
   }
 
+  void test_updateDataSelection_sets_active_spectra_to_zero() {
+    TableDatasetIndex const index1(0);
+    TableDatasetIndex const index2(1);
+
+    ON_CALL(*m_view, dataSelectionSize()).WillByDefault(Return(TableDatasetIndex(2)));
+    ON_CALL(*m_fittingModel, getNumberOfWorkspaces()).WillByDefault(Return(2));
+    ON_CALL(*m_fittingModel, createDisplayName(TableDatasetIndex(0))).WillByDefault(Return("DisplayName-0"));
+    ON_CALL(*m_fittingModel, createDisplayName(TableDatasetIndex(1))).WillByDefault(Return("DisplayName-1"));
+    ON_CALL(*m_fittingModel, getWorkspace(index1)).WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
+    ON_CALL(*m_fittingModel, getWorkspace(index2)).WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
+
+    EXPECT_CALL(*m_view, clearDataSelection()).Times(1);
+    EXPECT_CALL(*m_view, appendToDataSelection("DisplayName-0")).Times(1);
+    EXPECT_CALL(*m_view, appendToDataSelection("DisplayName-1")).Times(1);
+    EXPECT_CALL(*m_view, setPlotSpectrum(IDA::WorkspaceIndex{0})).Times(2);
+    TS_ASSERT_EQUALS(m_presenter->getSelectedSpectrum(), IDA::WorkspaceIndex{0});
+
+    m_presenter->updateDataSelection();
+  }
+
   void test_updateAvailableSpectra_uses_minmax_if_spectra_is_continuous() {
     auto spectra = FunctionModelSpectra("0-9");
     auto minmax = spectra.getMinMax();
@@ -583,6 +604,14 @@ public:
     EXPECT_CALL(*m_view, enablePlotGuess(false)).Times(1);
 
     m_presenter->updateFit();
+  }
+
+  void test_that_setXBounds_calls_the_correct_method_in_the_view() {
+    auto const bounds = std::make_pair(0.0, 1.0);
+
+    EXPECT_CALL(*m_view, setFitRangeBounds(bounds)).Times(1);
+
+    m_presenter->setXBounds(bounds);
   }
 
 private:

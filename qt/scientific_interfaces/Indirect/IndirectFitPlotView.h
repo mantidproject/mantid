@@ -104,6 +104,7 @@ public:
   void setFitRange(double minimum, double maximum) override;
   void setFitRangeMinimum(double minimum) override;
   void setFitRangeMaximum(double maximum) override;
+  void setFitRangeBounds(std::pair<double, double> const &bounds) override;
 
   void setBackgroundRangeVisible(bool visible) override;
   void setHWHMRangeVisible(bool visible) override;

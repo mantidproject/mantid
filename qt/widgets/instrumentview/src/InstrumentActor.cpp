@@ -800,7 +800,8 @@ void InstrumentActor::initMaskHelper() const {
   } catch (...) {
     // don't know what to do here yet ...
     QMessageBox::warning(nullptr, "Mantid - Warning",
-                         "An error occurred when extracting the mask.", "OK");
+                         "An error occurred when extracting the mask. "
+                         "Instrument Viewer is not supported yet for workspaces containing a detector scan.", "OK");
   }
 }
 
@@ -1058,8 +1059,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
       // Ignore monitors if they are masked on the view
       if (spectrumDefinition.size() == 1 &&
           (std::find(monitorIndices.begin(), monitorIndices.end(), i) !=
-               monitorIndices.end() ||
-           maskWksp->isMasked(static_cast<int>(i))))
+               monitorIndices.end() || (maskWksp && maskWksp->isMasked(static_cast<int>(i)))))
         continue;
 
       auto sum = m_specIntegrs[i];

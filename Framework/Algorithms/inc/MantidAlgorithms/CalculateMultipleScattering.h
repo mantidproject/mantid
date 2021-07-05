@@ -42,7 +42,7 @@ public:
     return {"MayersSampleCorrection", "CarpenterSampleCorrection", "VesuvioCalculateMS"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override { return "CorrectionFunctions\\AbsorptionCorrections"; }
+  const std::string category() const override { return "CorrectionFunctions"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Calculates a multiple scattering correction using a Monte Carlo method";
@@ -64,11 +64,11 @@ private:
   API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   double new_vector(const API::MatrixWorkspace_sptr sigmaSSWS, const Kernel::Material &material, double kinc,
                     bool specialSingleScatterCalc);
-  double simulatePaths(const int nEvents, const size_t nScatters, const API::Sample &sample,
+  double simulatePaths(const int nEvents, const int nScatters, const API::Sample &sample,
                        const Geometry::Instrument &instrument, Kernel::PseudoRandomNumberGenerator &rng,
                        const API::MatrixWorkspace_sptr sigmaSSWS, const API::MatrixWorkspace_sptr SOfQ,
                        const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc);
-  std::tuple<bool, double, double> scatter(const size_t nScatters, const API::Sample &sample,
+  std::tuple<bool, double, double> scatter(const int nScatters, const API::Sample &sample,
                                            const Geometry::Instrument &instrument, Kernel::V3D sourcePos,
                                            Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total,
                                            double scatteringXSection, const API::MatrixWorkspace_sptr SOfQ,

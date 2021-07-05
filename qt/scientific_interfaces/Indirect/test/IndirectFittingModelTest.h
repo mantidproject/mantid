@@ -769,7 +769,7 @@ public:
     auto model = createModelWithSingleWorkspace("wsName", 1);
     auto foo = model->createDisplayName(TableDatasetIndex{0});
 
-    TS_ASSERT_THROWS(model->createDisplayName(TableDatasetIndex{1}), std::runtime_error);
+    TS_ASSERT_THROWS(model->createDisplayName(TableDatasetIndex{1}), const std::runtime_error &);
   }
 
   void test_createDisplayName_produces_correct_format() {

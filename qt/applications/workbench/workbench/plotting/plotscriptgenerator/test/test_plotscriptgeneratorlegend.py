@@ -40,8 +40,6 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
                                       NSpec=2,
                                       OutputWorkspace='test_ws')
 
-        cls.test_font = cls.get_non_default_font()
-
     def setUp(self):
         fig = plt.figure()
         self.ax = fig.add_subplot(1, 1, 1, projection='mantid')
@@ -57,23 +55,20 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
         """
         legend = self.ax.legend(title="Legend title")
         title = legend.get_title()
-        title.set_fontname(self.test_font)
         title.set_color(TEST_FONT_COLOUR)
-        test_font_size = TEST_FONT_SIZE
+        test_font_size = convert_to_point_size(TEST_FONT_SIZE)
         title.set_fontsize(test_font_size)
         title_font_commands = generate_title_font_commands(legend, "legend")
 
         # Default arguments should not appear in the list of commands.
         for value in DEFAULT_TITLE_FONT_KWARGS.values():
             self.assertFalse(any(str(value) in command for command in title_font_commands))
-        # The new font name should appear in the list of commands.
-        self.assertTrue(self.test_font in command for command in title_font_commands)
         # The new colour should appear in the list of commands.
-        self.assertTrue(TEST_FONT_COLOUR in command for command in title_font_commands)
+        self.assertTrue(any(TEST_FONT_COLOUR in command for command in title_font_commands))
         # The new font size should appear in the list of commands.
-        self.assertTrue(test_font_size in command for command in title_font_commands)
-        # There should be three lines of commands (font name, size, and colour).
-        self.assertEqual(3, len(title_font_commands))
+        self.assertTrue(any(str(test_font_size) in command for command in title_font_commands))
+        # There should be two lines of commands (size, and colour).
+        self.assertEqual(2, len(title_font_commands))
 
     def test_label_font_commands(self):
         """
@@ -81,18 +76,15 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
         """
         legend = self.ax.legend()
         for label in legend.get_texts():
-            label.set_fontname(self.test_font)
             label.set_color(TEST_FONT_COLOUR)
         label_font_commands = generate_label_font_commands(legend, "legend")
         # Default arguments should not appear in the list of commands.
         for value in DEFAULT_LABEL_FONT_KWARGS.values():
             self.assertFalse(any(str(value) in command for command in label_font_commands))
-        # The new font name should appear in the list of commands.
-        self.assertTrue(self.test_font in command for command in label_font_commands)
         # The new colour should appear in the list of commands.
-        self.assertTrue(TEST_FONT_COLOUR in command for command in label_font_commands)
-        # There should be two lines of commands, one to set the font name, and the other to set the colour.
-        self.assertEqual(2, len(label_font_commands))
+        self.assertTrue(any(TEST_FONT_COLOUR in command for command in label_font_commands))
+        # There should be only one line of commands (to set the colour).
+        self.assertEqual(1, len(label_font_commands))
 
     def test_legend_kwargs(self):
         """
@@ -155,21 +147,6 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
         visible_command = generate_visible_command(legend, "legend")
         # Should now contain a single entry.
         self.assertEqual(1, len(visible_command))
-
-    @classmethod
-    def get_non_default_font(cls):
-        """
-        Find a font that is different to the default values.
-        """
-        font_list = matplotlib.font_manager.findSystemFonts()
-        for font_name in font_list:
-            if font_name != mpl_default_kwargs['title_font'] and font_name != mpl_default_kwargs['title_font']:
-                # This try-except is for a known matplotlib bug where get_name() causes an error for certain fonts.
-                try:
-                    font = matplotlib.font_manager.FontProperties(fname=font_name).get_name()
-                except RuntimeError:
-                    continue
-                return font
 
 
 if __name__ == '__main__':

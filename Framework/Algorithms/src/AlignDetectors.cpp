@@ -189,7 +189,7 @@ std::map<std::string, std::string> AlignDetectors::validateInputs() {
 }
 
 void AlignDetectors::loadCalFile(const MatrixWorkspace_sptr &inputWS, const std::string &filename) {
-  IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
+  auto alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("Filename", filename);
   alg->setProperty<bool>("MakeCalWorkspace", true);

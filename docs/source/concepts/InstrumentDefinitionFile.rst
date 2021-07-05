@@ -264,7 +264,7 @@ given a 'name', in the above example this name is "bob". If no 'name'
 attribute is specified the name of the <component> defaults to the 'type' string, in
 the above this is "slit". Giving sensible names to components is
 recommended for a number of reasons including
-#. The 'Instrument Tree' view of an instrument in MantidPlot uses these names
+#. The 'Instrument Tree' view of an instrument viewer uses these names
 #. when specifying <parameter>s through  <component-link>s these names are used.
 
 .. _Special types:
@@ -1513,7 +1513,7 @@ Note that both the pointing-up and theta-sign axes cannot be the same as the alo
 ^^^^^^^^^^^^^^
 
 This tag is used to control how the instrument first appears in the
-`Instrument View <http://www.mantidproject.org/MantidPlot:_Instrument_View>`__. Attribute ``view``
+:ref:`Instrument View <InstrumentViewer>`. Attribute ``view``
 defines the type of the view that opens by default. It can have the
 following values: "3D", "cylindrical\_x", "cylindrical\_y",
 "cylindrical\_z", "spherical\_x", "spherical\_y", "spherical\_z". If the

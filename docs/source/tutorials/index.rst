@@ -33,6 +33,7 @@ capabilities of Mantid, by developing your own scripts.
    mantid_basic_course/index
    introduction_to_python/index
    python_in_mantid/index
+   extending_mantid_with_python/index
    muon_GUI_course/index
 
 **Sections:**
@@ -44,6 +45,6 @@ capabilities of Mantid, by developing your own scripts.
 
 * :ref:`mantid_basic_course`
 * :ref:`muon_GUI_course`
-* `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
+* :ref:`introduction_to_python`
 * :ref:`pim_intro`
-* `Extending Mantid with Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
+* :ref:`emwp_intro`

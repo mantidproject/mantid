@@ -30,7 +30,7 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI, QWidget *pa
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
 
   m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppPreviewPlot->setCanvasColour(QColor(240, 240, 240));
@@ -257,8 +257,12 @@ void IndirectSymmetrise::plotNewData(QString const &workspaceName) {
   double symmRange = std::max(fabs(axisRange.first), fabs(axisRange.second));
 
   // Set valid range for range selectors
-  m_uiForm.ppRawPlot->getRangeSelector("NegativeE")->setRange(-symmRange, 0);
-  m_uiForm.ppRawPlot->getRangeSelector("PositiveE")->setRange(0, symmRange);
+  auto negativeESelector = m_uiForm.ppRawPlot->getRangeSelector("NegativeE");
+  negativeESelector->setBounds(axisRange.first, axisRange.second);
+  negativeESelector->setRange(-symmRange, 0);
+  auto positiveESelector = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
+  positiveESelector->setBounds(axisRange.first, axisRange.second);
+  positiveESelector->setRange(0, symmRange);
 
   // Set some default (and valid) values for E range
   m_dblManager->setValue(m_properties["EMax"], axisRange.second);

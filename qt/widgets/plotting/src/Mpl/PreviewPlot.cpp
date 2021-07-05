@@ -57,8 +57,8 @@ namespace MantidWidgets {
 PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
     : QWidget(parent), m_canvas{new FigureCanvasQt(111, MANTID_PROJECTION, parent)}, m_panZoomTool(m_canvas),
       m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced), m_axis("both"), m_style("sci"),
-      m_useOffset(true) {
+      m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced), m_axis("both"), m_style("sci"), m_useOffset(true),
+      m_xAxisScale("linear"), m_yAxisScale("linear") {
   createLayout();
   createActions();
 
@@ -122,6 +122,8 @@ void PreviewPlot::addSpectrum(const QString &lineName, const Mantid::API::Matrix
   removeSpectrum(lineName);
 
   auto axes = m_canvas->gca<MantidAxes>();
+  axes.setXScale(m_xAxisScale.c_str());
+  axes.setYScale(m_yAxisScale.c_str());
   if (m_linesErrorsCache.value(lineName)) {
     m_lines[lineName] = true;
     axes.errorbar(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName, plotKwargs);
@@ -699,17 +701,17 @@ void PreviewPlot::setScaleType(AxisID id, const QString &actionName) {
   switch (id) {
   case AxisID::XBottom:
     axes.setXScale(scaleType.constData());
+    m_xAxisScale = actionName.toLower().toStdString();
     break;
   case AxisID::YLeft:
     axes.setYScale(scaleType.constData());
+    m_yAxisScale = actionName.toLower().toStdString();
     break;
   default:
     break;
   }
 
-  // If linear scale need to reset tick labels
-  if (strcmp(scaleType.constData(), "linear") == 0)
-    tickLabelFormat(m_axis, m_style, m_useOffset);
+  tickLabelFormat(m_axis, m_style, m_useOffset);
 
   this->replot();
 }
@@ -739,12 +741,22 @@ void PreviewPlot::toggleLegend(const bool checked) {
  * calculated as needed, False no offset will be used
  */
 void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
-  m_canvas->gca().tickLabelFormat(axis, style, useOffset);
+  auto axes = m_canvas->gca();
+  const auto formatXTicks = *axis != 'y' && axes.getXScale().toStdString() == "linear";
+  const auto formatYTicks = *axis != 'x' && axes.getYScale().toStdString() == "linear";
 
-  // Need to save parameters to re-format on scale change
-  m_axis = axis;
-  m_style = style;
-  m_useOffset = useOffset;
+  if (formatXTicks)
+    axes.tickLabelFormat(std::string("x").c_str(), style, useOffset);
+
+  if (formatYTicks)
+    axes.tickLabelFormat(std::string("y").c_str(), style, useOffset);
+
+  if (formatXTicks || formatYTicks) {
+    // Need to save parameters to re-format on scale change
+    m_axis = axis;
+    m_style = style;
+    m_useOffset = useOffset;
+  }
 }
 
 } // namespace MantidWidgets

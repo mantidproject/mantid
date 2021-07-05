@@ -46,7 +46,7 @@ void DiffractionFocussing2::init() {
   auto wsValidator = std::make_shared<API::RawCountValidator>();
   declareProperty(
       std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
-      "A 2D workspace with X values of d-spacing/Q-spacing");
+      "A 2D workspace with X values of d-spacing, Q or TOF (TOF support deprecated on 29/04/21)");
   declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
 
@@ -109,10 +109,15 @@ void DiffractionFocussing2::exec() {
     g_log.error() << "UnitID " << unitid << " is not a supported spacing\n";
     throw std::invalid_argument("Workspace Invalid Spacing/UnitID");
   }
+  if (unitid == "TOF") {
+    g_log.error()
+        << "Support for TOF data in DiffractionFocussing is deprecated (on 29/04/21) - use GroupDetectors instead)"
+        << std::endl;
+  }
   // --- Do we need to read the grouping workspace? ----
   if (!groupingFileName.empty()) {
     progress(0.01, "Reading grouping file");
-    IAlgorithm_sptr childAlg = createChildAlgorithm("CreateGroupingWorkspace");
+    auto childAlg = createChildAlgorithm("CreateGroupingWorkspace");
     childAlg->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
     childAlg->setProperty("OldCalFilename", groupingFileName);
     childAlg->executeAsChildAlg();

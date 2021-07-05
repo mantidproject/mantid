@@ -8,7 +8,7 @@
 
 #include "IAddWorkspaceDialog.h"
 #include "IIndirectFitDataView.h"
-#include "IndirectDataTablePresenter.h"
+#include "IndirectFitDataTablePresenter.h"
 #include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
@@ -45,6 +45,8 @@ public:
   void setEndX(double endX, TableDatasetIndex dataIndex);
   void setExclude(const std::string &exclude, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
 
+  std::pair<double, double> getXRange() const;
+
   void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
 
@@ -80,7 +82,7 @@ signals:
 
 protected:
   IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view,
-                           std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
+                           std::unique_ptr<IndirectFitDataTablePresenter> tablePresenter);
   IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
@@ -104,7 +106,7 @@ private:
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IIndirectFittingModel *m_model;
   IIndirectFitDataView *m_view;
-  std::unique_ptr<IndirectDataTablePresenter> m_tablePresenter;
+  std::unique_ptr<IndirectFitDataTablePresenter> m_tablePresenter;
 };
 
 } // namespace IDA

@@ -34,18 +34,18 @@ TEST_FILE = "ENGINX_277208_focused_bank_2.nxs"
 TEST_WS = 'ENGINX_277208_focused_bank_2_TOF'
 FIT_WS = TEST_WS + '_Workspace'
 FIT_DICT = {'peak_centre_params': ['Gaussian_PeakCentre', 'Gaussian_PeakCentre'],
-            'properties': {'InputWorkspace': TEST_WS, 'Output': TEST_WS, 'StartX':
-                           14547.950716043932, 'EndX': 52554.79335660165,
+            'properties': {'InputWorkspace': TEST_WS, 'Output': TEST_WS,
+                           'StartX': 14547.950716043932, 'EndX': 52554.79335660165,
                            'Function': 'name=Gaussian,Height=0.0365604,PeakCentre=37490.'
                                        '4,Sigma=1284.55;name=Gaussian,Height=0.0190721,P'
                                        'eakCentre=21506.1,Sigma=1945.78',
                            'ConvolveMembers': True, 'OutputCompositeMembers': True}}
-FIT_RESULTS = {TEST_WS:
-               {"model": "name=Gaussian,Height=1.04675,PeakCentre=25099.4,Sigma=2178.57", "results":
-                {"Gaussian_Height": [[1.000336497251553, 0.00024401827516182785]], "Gaussian_PeakCentre":
-                 [[29069.5395105562, 1.9174607562252401]], "Gaussian_PeakCentre_dSpacing":
-                 [[1.579551616673174, 0.00010418906829614912]], "Gaussian_Sigma":
-                 [[8644.463151136386, 1.230307889326856]]}, "costFunction": 411.9019047115968}}
+FIT_RESULTS = {TEST_WS: {"model": "name=Gaussian,Height=1.04675,PeakCentre=25099.4,Sigma=2178.57", "status": "success",
+                         "results": {"Gaussian_Height": [[1.000336497251553, 0.00024401827516182785]],
+                                     "Gaussian_PeakCentre": [[29069.5395105562, 1.9174607562252401]],
+                                     "Gaussian_PeakCentre_dSpacing": [[1.579551616673174, 0.00010418906829614912]],
+                                     "Gaussian_Sigma": [[8644.463151136386, 1.230307889326856]]},
+                         "costFunction": 411.9019047115968}}
 SETTINGS_DICT = {
     "full_calibration": "",
     "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
@@ -56,8 +56,8 @@ SETTINGS_DICT = {
     "sort_ascending": False  # this is changed to false to show a deviation from the default
 }
 
-ENCODED_DICT = {'encoder_version': IO_VERSION, 'current_tab': 2, 'data_loaded_workspaces':
-                [TEST_WS], 'plotted_workspaces': [TEST_WS + 'bgsub'], 'fit_properties': FIT_DICT, 'plot_diff': 'True',
+ENCODED_DICT = {'encoder_version': IO_VERSION, 'current_tab': 2, 'data_loaded_workspaces': [TEST_WS],
+                'plotted_workspaces': [TEST_WS + 'bgsub'], 'fit_properties': FIT_DICT, 'plot_diff': 'True',
                 'fit_results': FIT_RESULTS, 'settings_dict': SETTINGS_DICT,
                 'background_params': {TEST_WS: [True, 70, 4000, True]}}
 
@@ -88,7 +88,6 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
         self.mock_tabs.currentIndex.return_value = 0
         self.encoder = EngineeringDiffractionEncoder()
         self.decoder = EngineeringDiffractionDecoder()
-        self.io_version = 1
         self.fit_ws = None
 
     def create_test_focus_presenter(self):
@@ -122,25 +121,25 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
     def test_blank_gui_encodes(self):
         self.mock_tabs.currentIndex.return_value = 0
         test_dic = self.encoder.encode(self.mock_view)
-        self.assertEqual({'encoder_version': self.io_version, 'current_tab': 0, 'settings_dict': SETTINGS_DICT},
+        self.assertEqual({'encoder_version': IO_VERSION, 'current_tab': 0, 'settings_dict': SETTINGS_DICT},
                          test_dic)
 
     def test_loaded_workspaces_encode(self):
         self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
         self.fitprop_browser.read_current_fitprop.return_value = None
         test_dic = self.encoder.encode(self.mock_view)
-        self.assertEqual({'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
-                          [TEST_WS], 'plotted_workspaces': [], 'fit_properties': None, 'fit_results': {},
-                          'settings_dict': SETTINGS_DICT, 'background_params':
-                              {'ENGINX_277208_focused_bank_2_TOF': []}}, test_dic)
+        self.assertEqual({'encoder_version': IO_VERSION, 'current_tab': 0, 'data_loaded_workspaces': [TEST_WS],
+                          'plotted_workspaces': [], 'fit_properties': None, 'fit_results': {},
+                          'settings_dict': SETTINGS_DICT,
+                          'background_params': {'ENGINX_277208_focused_bank_2_TOF': []}}, test_dic)
 
     def test_background_params_encode(self):
         self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
         self.fitprop_browser.read_current_fitprop.return_value = None
         self.presenter.fitting_presenter.data_widget.model._bg_params = {TEST_WS: [True, 70, 4000, True]}
         test_dic = self.encoder.encode(self.mock_view)
-        self.assertEqual({'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
-                          [TEST_WS], 'plotted_workspaces': [], 'fit_properties': None, 'fit_results': {},
+        self.assertEqual({'encoder_version': IO_VERSION, 'current_tab': 0, 'data_loaded_workspaces': [TEST_WS],
+                          'plotted_workspaces': [], 'fit_properties': None, 'fit_results': {},
                           'settings_dict': SETTINGS_DICT,
                           'background_params': {TEST_WS: [True, 70, 4000, True]}}, test_dic)
 
@@ -151,9 +150,9 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
         self.fitprop_browser.plotDiff.return_value = True
         self.presenter.fitting_presenter.data_widget.presenter.plotted = {FIT_WS}
         test_dic = self.encoder.encode(self.mock_view)
-        self.assertEqual({'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
-                          [TEST_WS], 'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT,
-                          'fit_results': FIT_RESULTS, 'plot_diff': 'True', 'settings_dict': SETTINGS_DICT,
+        self.assertEqual({'encoder_version': IO_VERSION, 'current_tab': 0, 'data_loaded_workspaces': [TEST_WS],
+                          'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT, 'fit_results': FIT_RESULTS,
+                          'plot_diff': 'True', 'settings_dict': SETTINGS_DICT,
                           'background_params': {'ENGINX_277208_focused_bank_2_TOF': []}}, test_dic)
 
 
@@ -165,6 +164,11 @@ class EngineeringDiffractionDecoderTest(unittest.TestCase):
         self.decoder = EngineeringDiffractionDecoder()
         _load_test_file()
         _create_fit_workspace()
+
+    def test_blank_gui_decodes(self):
+        blank_dict = {'encoder_version': IO_VERSION, 'current_tab': 0, 'settings_dict': SETTINGS_DICT}
+        self.gui = self.decoder.decode(blank_dict)
+        self.assertEqual(blank_dict, self.encoder.encode(self.gui))
 
     def test_decode_produces_gui_returning_same_dict(self):
         self.gui = self.decoder.decode(ENCODED_DICT)
