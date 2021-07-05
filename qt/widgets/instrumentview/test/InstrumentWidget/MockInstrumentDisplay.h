@@ -13,6 +13,9 @@
 #include <gmock/gmock.h>
 #include <memory>
 
+class QStackedLayout;
+class QWidget;
+
 namespace MantidQt::MantidWidgets {
 
 class MockInstrumentDisplay : public IInstrumentDisplay {
@@ -23,5 +26,8 @@ public:
   MOCK_METHOD(IGLDisplay *, getGLDisplay, (), (const, override));
   MOCK_METHOD(IQtDisplay *, getQtDisplay, (), (const, override));
   MOCK_METHOD(void, installEventFilter, (QObject * obj), (override));
+
+  // Private methods
+  MOCK_METHOD(QStackedLayout *, createLayout, (QWidget *), (const, override));
 };
 } // namespace MantidQt::MantidWidgets

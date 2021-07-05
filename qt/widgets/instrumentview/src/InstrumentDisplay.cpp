@@ -22,7 +22,7 @@ InstrumentDisplay::InstrumentDisplay(std::unique_ptr<IGLDisplay> glDisplay, std:
     m_qtDisplay = std::make_unique<QtDisplay>();
 
   // TODO test this
-  m_instrumentDisplayLayout = new QStackedLayout(parent);
+  m_instrumentDisplayLayout = createLayout(parent);
   m_instrumentDisplayLayout->addWidget(getGLDisplay());
   m_instrumentDisplayLayout->addWidget(getQtDisplay());
 }
@@ -41,4 +41,7 @@ void InstrumentDisplay::installEventFilter(QObject *obj) {
   m_glDisplay->qtInstallEventFilter(obj);
   m_qtDisplay->qtInstallEventFilter(obj);
 }
+
+QStackedLayout *InstrumentDisplay::createLayout(QWidget *parent) const { return new QStackedLayout(parent); }
+
 } // namespace MantidQt::MantidWidgets

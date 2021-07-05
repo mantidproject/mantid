@@ -15,6 +15,7 @@
 
 // Qt forward declarations
 class QStackedLayout;
+class QWidget;
 
 namespace MantidQt::MantidWidgets {
 
@@ -32,7 +33,7 @@ public:
   void installEventFilter(QObject *obj) override;
 
 private:
-  void createStackedLayout(QWidget *parent);
+  QStackedLayout *createLayout(QWidget *parent) const override;
 
   std::unique_ptr<IGLDisplay> m_glDisplay;
   std::unique_ptr<IQtDisplay> m_qtDisplay;

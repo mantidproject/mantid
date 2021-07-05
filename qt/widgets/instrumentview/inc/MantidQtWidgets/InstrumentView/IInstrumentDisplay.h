@@ -11,6 +11,9 @@
 
 #include <memory>
 
+// Qt Forward Declarations
+class QStackedLayout;
+
 namespace MantidQt::MantidWidgets {
 
 class IInstrumentDisplay {
@@ -25,5 +28,8 @@ public:
   virtual IQtDisplay *getQtDisplay() const = 0;
 
   virtual void installEventFilter(QObject *obj) = 0;
+
+private:
+  virtual QStackedLayout *createLayout(QWidget *) const = 0;
 };
 } // namespace MantidQt::MantidWidgets
