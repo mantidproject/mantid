@@ -3,7 +3,7 @@
 
     <component-link name="D22B">
       <!-- The name of the panels for separate I(Q) calculations, the names are from the IDF -->
-      <parameter name="detector_panels" type="string">
+      <parameter name="detector_panels" type="string" visible="false">
         <value val="detector_back,detector_front"/>
       </parameter>
       <!-- Tau coefficient for DeadTimeCorrection, to be applied tube by tube -->
@@ -11,7 +11,7 @@
         <value val="0.0000015" />
       </parameter>
       <!-- Logs to sum when merging the runs -->
-      <parameter name="sample_logs_sum" type="string">
+      <parameter name="sample_logs_sum" type="string" visible="false">
         <value val="time, timer, duration" />
       </parameter>
       <!-- GroupingPattern for DeadTimeCorrection, groups ws indices tube by tube -->
@@ -93,7 +93,7 @@
 		    SampleApertureWidth:/entry0/D22/Beam/sample_ap_x_or_diam:f,
 		    SampleApertureHeight:/entry0/D22/Beam/sample_ap_y:f" />
       </parameter>
-      <parameter name="log_list_to_save" type="string">
+      <parameter name="log_list_to_save" type="string" visible="false">
 	<value val="facility,instrument_name,experiment_identifier,
 		    experiment_title,start_time,end_time,numor_list,
 		    processedAs,wavelength,sample_transmission_numors,
@@ -102,18 +102,18 @@
     </component-link>
     <!-- These parameters are used in ParallaxCorrection algorithm -->
     <component-link name="detector_back">
-        <parameter name="parallax" type="string">
+        <parameter name="parallax" type="string" visible="false">
             <value val="1+0.14*exp(-4*ln(2.)*((t-0.588)/0.414)^2)"/>
         </parameter>
-        <parameter name="direction" type="string">
+        <parameter name="direction" type="string" visible="false">
             <value val="y"/>
         </parameter>
     </component-link>
     <component-link name="detector_front">
-        <parameter name="parallax" type="string">
+        <parameter name="parallax" type="string" visible="false">
             <value val="1+0.14*exp(-4*ln(2.)*((t-0.588)/0.414)^2)"/>
         </parameter>
-        <parameter name="direction" type="string">
+        <parameter name="direction" type="string" visible="false">
             <value val="y"/>
         </parameter>
     </component-link>

@@ -16,7 +16,7 @@
 		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
 			operators -->
-		<parameter name="formula_eff" type="string">
+		<parameter name="formula_eff" type="string" visible="false">
 			<!-- The xml escape sequence &gt; below means 'greater than' -->
 			<value val="e &gt; 5.113 ? 0.94*(1-exp(-3.284/sqrt(e))) : exp(-0.0565/sqrt(e))*(1-exp(-3.284/sqrt(e)))" />
 		</parameter>
@@ -32,41 +32,41 @@
 		<parameter name="scaling_after_monitor_normalisation">
 			<value val="1000" />
 		</parameter>
-		<parameter name="enable_flat_background_subtraction" type="bool">
+		<parameter name="enable_flat_background_subtraction" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="enable_background_diagnostics" type="bool">
+		<parameter name="enable_background_diagnostics" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="enable_elastic_peak_diagnostics" type="bool">
+		<parameter name="enable_elastic_peak_diagnostics" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="elastic_peak_diagnostics_low_threshold" type="number">
+		<parameter name="elastic_peak_diagnostics_low_threshold" type="number" visible="false">
 			<value val="0.45" />
 		</parameter>
-		<parameter name="enable_incident_energy_calibration" type="bool">
+		<parameter name="enable_incident_energy_calibration" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="enable_elastic_peak_fitting" type="bool">
+		<parameter name="enable_elastic_peak_fitting" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="enable_elastic_channel_fitting" type="bool">
+		<parameter name="enable_elastic_channel_fitting" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="Ei_calibration_detectors" type="string">
+		<parameter name="Ei_calibration_detectors" type="string" visible="false">
 			<value val="0-336" />
 		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
 		<parameter name="sample_logs_sum" type="string" visible="false">
 			<value val="Detector.detsum, duration, monitor1.monsum" />
 		</parameter>
-		<parameter name="sample_logs_time_series" type="string">
+		<parameter name="sample_logs_time_series" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn" type="string">
+		<parameter name="sample_logs_warn" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn_tolerances" type="string">
+		<parameter name="sample_logs_warn_tolerances" type="string" visible="false">
 			<value val="1.0" />
 		</parameter>
 		<parameter name="sample_logs_fail" type="string" visible="false">
@@ -75,7 +75,7 @@
 		<parameter name="sample_logs_fail_tolerances" type="string" visible="false">
 			<value val="0, 0, 0, 0.02, 5, 5" />
 		</parameter>
-		<parameter name="temperature_sample_log" type="string">
+		<parameter name="temperature_sample_log" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
 

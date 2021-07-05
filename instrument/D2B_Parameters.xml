@@ -3,12 +3,12 @@
 	<component-link name="D2B">
 
 		<!-- The detector name for the height axis used in SumOverlappingTubes -->
-		<parameter name="detector_for_height_axis" type="string">
+		<parameter name="detector_for_height_axis" type="string" visible="false">
 			<value val="tube_1" />
 		</parameter>
 
 		<!-- The flag for mirroring the angles in SumOverlappingTubes -->
-		<parameter name="mirror_scattering_angles" type="bool">
+		<parameter name="mirror_scattering_angles" type="bool" visible="false">
 			<value val="True" />
 	  </parameter>
 
@@ -23,7 +23,7 @@
 		<parameter name="chi2_ndof" type="float">
 			<value val="0.01" />
 	  </parameter>
-	  <parameter name="log_list_to_save" type="string">
+	  <parameter name="log_list_to_save" type="string" visible="false">
 	    <value val="facility,instrument.name,experiment_identifier,
 			title,start_time,end_time,numor_list,
 			processedAs,wavelength,sample_transmission_numors"/>

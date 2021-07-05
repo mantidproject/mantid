@@ -5,18 +5,18 @@
     <!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
 	 See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
 	 operators -->
-    <parameter name="formula_eff" type="string">
+    <parameter name="formula_eff" type="string" visible="false">
       <value val="1.0 - exp(-13.153/sqrt(e))" />
     </parameter>
 
     <!-- Distance from the sample of odd and even detectors, and the Fermi chopper in metres -->
-    <parameter name="sample_distance_chopper" type="number">
+    <parameter name="sample_distance_chopper" type="number" visible="false">
       <value val="0.48" />
     </parameter>
-    <parameter name="sample_distance_odd" type="number">
+    <parameter name="sample_distance_odd" type="number" visible="false">
       <value val="1.5177" />
     </parameter>
-    <parameter name="sample_distance_even" type="number">
+    <parameter name="sample_distance_even" type="number" visible="false">
       <value val="1.50518" />
     </parameter>
 

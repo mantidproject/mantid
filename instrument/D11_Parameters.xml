@@ -7,11 +7,11 @@
         <value val="0.00000042" />
       </parameter>
       <!-- Logs to sum when merging the runs -->
-      <parameter name="sample_logs_sum" type="string">
+      <parameter name="sample_logs_sum" type="string" visible="false">
         <value val="timer" />
       </parameter>
       <!-- GroupingPattern for DeadTimeCorrection, groups the entire detector-->
-      <parameter name="grouping" type="string">
+      <parameter name="grouping" type="string" visible="false">
         <value val="0-65535"/>
       </parameter>
       <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.
@@ -91,7 +91,7 @@
 		    SampleApertureWidth:/entry0/D11/Beam/sample_ap_x_or_diam:f,
 		    SampleApertureHeight:/entry0/D11/Beam/sample_ap_y:f" />
       </parameter>
-      <parameter name="log_list_to_save" type="string">
+      <parameter name="log_list_to_save" type="string" visible="false">
 	<value val="facility,instrument_name,experiment_identifier,
 		    experiment_title,start_time,end_time,numor_list,
 		    processedAs,wavelength,sample_transmission_numors,

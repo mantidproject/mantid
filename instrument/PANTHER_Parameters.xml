@@ -18,7 +18,7 @@
 		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
 			operators -->
-		<parameter name="formula_eff" type="string">
+		<parameter name="formula_eff" type="string" visible="false">
 			<value val="0.9653 * exp(-0.05202/sqrt(e)) * (1 - exp(-10.983/sqrt(e)))" />
 		</parameter>
 		<parameter name="components-for-backgrounds" type="string" visible="false">
@@ -32,28 +32,28 @@
 		<parameter name="scaling_after_monitor_normalisation">
 			<value val="100000" />
 		</parameter>
-		<parameter name="enable_flat_background_subtraction" type="bool">
+		<parameter name="enable_flat_background_subtraction" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="enable_background_diagnostics" type="bool">
+		<parameter name="enable_background_diagnostics" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="enable_elastic_peak_diagnostics" type="bool">
+		<parameter name="enable_elastic_peak_diagnostics" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="beam_stop_diagnostics_spectra" type="string">
+		<parameter name="beam_stop_diagnostics_spectra" type="string" visible="false">
 			<value val=""/>
 		</parameter>
-		<parameter name="enable_incident_energy_calibration" type="bool">
+		<parameter name="enable_incident_energy_calibration" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="enable_elastic_peak_fitting" type="bool">
+		<parameter name="enable_elastic_peak_fitting" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="enable_elastic_channel_fitting" type="bool">
+		<parameter name="enable_elastic_channel_fitting" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="Workflow.MaskFile" type="string">
+		<parameter name="Workflow.MaskFile" type="string" visible="false">
 			<value val="PANTHER_Mask.xml" />
 		</parameter>
 		<parameter name="Ei_calibration_detectors" type="string" visible="false">
@@ -63,27 +63,27 @@
 		<parameter name="sample_logs_sum" type="string" visible="false">
 			<value val="Detector.detsum, duration, monitor.monsum" />
 		</parameter>
-		<parameter name="sample_logs_time_series" type="string">
+		<parameter name="sample_logs_time_series" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn" type="string">
+		<parameter name="sample_logs_warn" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn_tolerances" type="string">
+		<parameter name="sample_logs_warn_tolerances" type="string" visible="false">
 			<value val="1.0" />
 		</parameter>
 		<parameter name="sample_logs_fail" type="string" visible="false">
 			<value val="monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2" />
 		</parameter>
-		<parameter name="sample_logs_fail_tolerances" type="string">
+		<parameter name="sample_logs_fail_tolerances" type="string" visible="false">
 			<value val="0, 0, 0" />
 		</parameter>
-		<parameter name="temperature_sample_log" type="string">
+		<parameter name="temperature_sample_log" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
 
 		<!-- The detector name for the height axis used in SumOverlappingTubes -->
-		<parameter name="detector_for_height_axis" type="string">
+		<parameter name="detector_for_height_axis" type="string" visible="false">
 			<value val="tube_1" />
 		</parameter>
 
