@@ -121,7 +121,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
       m_qtConnect(std::move(deps.qtConnect)) {
   if (!m_instrumentDisplay) {
     m_instrumentDisplay =
-        std::make_unique<InstrumentDisplay>(std::move(deps.glDisplay), std::move(deps.qtDisplay), this);
+        std::make_unique<InstrumentDisplay>(this, std::move(deps.glDisplay), std::move(deps.qtDisplay));
   }
 
   setFocusPolicy(Qt::StrongFocus);

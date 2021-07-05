@@ -12,6 +12,8 @@ namespace MantidQt::MantidWidgets {
 
 class IStackedLayout {
 public:
+  virtual ~IStackedLayout() = default;
+
   virtual int addWidget(QWidget *) = 0;
   virtual int currentIndex() const = 0;
   virtual QWidget *currentWidget() const = 0;

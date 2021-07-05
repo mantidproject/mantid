@@ -15,16 +15,18 @@ class QWidget;
 
 namespace MantidQt::MantidWidgets {
 
-InstrumentDisplay::InstrumentDisplay(std::unique_ptr<IGLDisplay> glDisplay, std::unique_ptr<IQtDisplay> qtDisplay,
-                                     QWidget *parent)
-    : m_glDisplay(std::move(glDisplay)), m_qtDisplay(std::move(qtDisplay)) {
+InstrumentDisplay::InstrumentDisplay(QWidget *parent, std::unique_ptr<IGLDisplay> glDisplay,
+                                     std::unique_ptr<IQtDisplay> qtDisplay, std::unique_ptr<IStackedLayout> layout)
+    : m_glDisplay(std::move(glDisplay)), m_qtDisplay(std::move(qtDisplay)),
+      m_instrumentDisplayLayout(std::move(layout)) {
   if (!m_glDisplay)
     m_glDisplay = std::make_unique<GLDisplay>();
 
   if (!m_qtDisplay)
     m_qtDisplay = std::make_unique<QtDisplay>();
 
-  m_instrumentDisplayLayout = createLayout(parent);
+  if (!m_instrumentDisplayLayout)
+    m_instrumentDisplayLayout = std::make_unique<StackedLayout>(parent);
   m_instrumentDisplayLayout->addWidget(getGLDisplay());
   m_instrumentDisplayLayout->addWidget(getQtDisplay());
 }

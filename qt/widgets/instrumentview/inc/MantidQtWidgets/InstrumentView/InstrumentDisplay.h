@@ -20,8 +20,8 @@ namespace MantidQt::MantidWidgets {
 
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentDisplay : public IInstrumentDisplay {
 public:
-  InstrumentDisplay(std::unique_ptr<IGLDisplay> glDisplay, std::unique_ptr<IQtDisplay> qtDisplay, QWidget *parent);
-
+  InstrumentDisplay(QWidget *parent, std::unique_ptr<IGLDisplay> glDisplay = nullptr,
+                    std::unique_ptr<IQtDisplay> qtDisplay = nullptr, std::unique_ptr<IStackedLayout> layout = nullptr);
   int currentIndex() const override;
   QWidget *currentWidget() const override;
   void setCurrentIndex(int val) const override;
@@ -38,6 +38,6 @@ private:
   std::unique_ptr<IQtDisplay> m_qtDisplay;
 
   /// Stacked layout managing m_glDisplay and m_qtDisplay
-  IStackedLayout *m_instrumentDisplayLayout;
+  std::unique_ptr<IStackedLayout> m_instrumentDisplayLayout;
 };
 } // namespace MantidQt::MantidWidgets

@@ -22,17 +22,6 @@
 using namespace MantidQt::MantidWidgets;
 using namespace testing;
 
-class FakeInstrumentDisplay : public InstrumentDisplay {
-public:
-  FakeInstrumentDisplay(MockStackedLayout &mockLayout, std::unique_ptr<IGLDisplay> glDisplay,
-                        std::unique_ptr<IQtDisplay> qtDisplay)
-      : InstrumentDisplay(std::move(glDisplay), std::move(qtDisplay), nullptr), m_mockLayout(mockLayout) {}
-  IStackedLayout *createLayout(QWidget *) const override { return &m_mockLayout; }
-
-private:
-  MockStackedLayout &m_mockLayout;
-};
-
 class InstrumentDisplayTest : public CxxTest::TestSuite {
 public:
   static InstrumentDisplayTest *createSuite() { return new InstrumentDisplayTest(); }
@@ -54,17 +43,17 @@ public:
     auto qtMock = makeQtDisplay();
     auto glMock = makeGLDisplay();
 
-    StrictMock<MockStackedLayout> mock;
-    EXPECT_CALL(mock, addWidget(glMock.get())).Times(1);
-    EXPECT_CALL(mock, addWidget(qtMock.get())).Times(1);
+    auto layoutMock = std::make_unique<MockStackedLayout>();
+    EXPECT_CALL(*layoutMock, addWidget(Eq(glMock.get()))).Times(1);
+    EXPECT_CALL(*layoutMock, addWidget(Eq(qtMock.get()))).Times(1);
 
-    FakeInstrumentDisplay fixture(mock, std::move(glMock), std::move(qtMock));
+    InstrumentDisplay fixture(nullptr, std::move(glMock), std::move(qtMock), std::move(layoutMock));
   }
 
 private:
   std::unique_ptr<QtMock> makeQtDisplay() const { return std::make_unique<QtMock>(); }
   std::unique_ptr<GLMock> makeGLDisplay() { return std::make_unique<GLMock>(); }
   InstrumentDisplay makeInstDisplay(std::unique_ptr<GLMock> glMock, std::unique_ptr<QtMock> qtMock) {
-    return InstrumentDisplay(std::move(glMock), std::move(qtMock), nullptr);
+    return InstrumentDisplay(nullptr, std::move(glMock), std::move(qtMock), nullptr);
   }
 };
