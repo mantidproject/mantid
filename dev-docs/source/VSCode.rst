@@ -168,8 +168,11 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
       "args": ["Path/To/Build/Directory/bin/workbench", "&&","gdb","/usr/bin/python3","$!"], // $! gets the process ID
       "stopAtEntry": false,
       "cwd": "Path/To/Build/Directory/bin", // this should point to bin inside the build directory
-      "environment": [],
-      "externalConsole": false,
+      "environment": [
+        {"name":"LD_PRELOAD", "value": "/usr/lib/x86_64-linux-gnu/libjemalloc.so.1"},
+        {"name":"PYTHONPATH", "value": "Path/To/Build/Directory/bin:${env:PYTHONPATH}"}
+      ],
+      "externalConsole": true,
       "MIMode": "gdb",
       "preLaunchTask": "Build Mantid",
       "setupCommands": [
@@ -181,6 +184,7 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
       ]
     }
 
+The correct value for the ``LD_PRELOAD`` environment variable can be found in Path/To/Build/Directory/bin/launch_mantidworkbench.sh.
 
 
 **Windows:**
