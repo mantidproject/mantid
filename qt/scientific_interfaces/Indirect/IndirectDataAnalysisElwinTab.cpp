@@ -89,6 +89,11 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
+  connect(m_uiForm.inputChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
+
+  // data selected changes
+  connect(m_uiForm.page, SIGNAL(filesFoundChanged()), this, SLOT(handleFileInput()));
+  connect(m_uiForm.page_2, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
 }
 
 IndirectDataAnalysisElwinTab::~IndirectDataAnalysisElwinTab() {
@@ -264,6 +269,25 @@ void IndirectDataAnalysisElwinTab::run() {
   m_pythonExportWsName = qSquaredWorkspace;
 }
 
+/**
+ * Handles when the view changes between workspace and file selection
+ *
+ * @param index :: The index the stacked widget has been switched too.
+ */
+void IndirectDataAnalysisElwinTab::handleViewChanged(int index) {
+  // Index indicates which view is visible.
+  m_uiForm.stackedInputWidget->setCurrentIndex(index);
+
+  // 0 is always file view
+  switch (index) {
+  case 0:
+    emit fileViewVisible();
+    break;
+  case 1:
+    emit workspaceViewVisible();
+    break;
+  }
+}
 /**
  * Ungroups the output after the execution of the algorithm
  */

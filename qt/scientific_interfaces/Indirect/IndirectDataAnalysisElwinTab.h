@@ -20,6 +20,12 @@ public:
   IndirectDataAnalysisElwinTab(QWidget *parent = nullptr);
   ~IndirectDataAnalysisElwinTab();
 
+signals:
+  /// Signal emitted when file input is visible
+  void fileViewVisible();
+  /// Signal emitted when workspace selector is visible
+  void workspaceViewVisible();
+
 private:
   void run() override;
   void setup() override;
@@ -56,6 +62,9 @@ private slots:
   void runClicked();
   void saveClicked();
   void updateIntegrationRange();
+
+  /// Slot called when the current view is changed
+  void handleViewChanged(int index);
 };
 } // namespace IDA
 } // namespace CustomInterfaces
