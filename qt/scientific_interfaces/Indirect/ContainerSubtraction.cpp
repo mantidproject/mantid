@@ -371,7 +371,8 @@ void ContainerSubtraction::plotCurrentPreview() {
     indices.emplace_back(index);
   }
 
-  m_plotter->plotCorrespondingSpectra(workspaces, indices, IndirectSettingsHelper::externalPlotErrorBars());
+  m_plotter->plotCorrespondingSpectra(
+      workspaces, indices, std::vector<bool>(workspaces.size(), IndirectSettingsHelper::externalPlotErrorBars()));
 }
 
 /*

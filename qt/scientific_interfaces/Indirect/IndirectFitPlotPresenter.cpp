@@ -12,6 +12,8 @@
 #include <QTimer>
 #include <utility>
 
+using namespace MantidQt::Widgets::MplCpp;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {

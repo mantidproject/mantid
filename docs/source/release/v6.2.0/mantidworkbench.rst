@@ -8,6 +8,12 @@ Mantid Workbench Changes
 New and Improved
 ----------------
 
+- Superplot is a new decorator widget for the plot window. It facilitates over-plotting and manipulation of overplotted data. See :ref:`Superplot documentation <WorkbenchSuperplot>` for more information.
+
+.. figure:: ../../images/superplot_1.png
+    :width: 500px
+    :align: center
+
 - Peaks can now be added or removed from a PeaksWorkspace using the :ref:`peaks overlay <sliceviewer_peaks_overlay>` in :ref:`sliceviewer`.
 - The list of eligible workspaces in the `WorkspaceSelector` is now sorted alphabetically
 - New widget and workbench plugin: `WorkspaceCalculator`, allows to perform binary operations and scaling by a floating number on workspaces
@@ -20,7 +26,9 @@ Bugfixes
 - Scroll bars added to about dialog if screen resolution is too low.
 - Fixed missing 'on top' windowing behaviour for the matrix and table workspace data displays.
 - Sliceviewer now doesn't normalise basis vectors for HKL data such that Bragg peaks appear at integer HKL for cuts along e.g. HH0
+- Uninstalling from Windows "Apps & features" list will now run the uninstaller as the current Windows user and delete all shortcuts.
 - Fixed a bug where parameters wouldn't update in the fit property browser when fitting a single function with ties.
 - Fixed a bug retrieving algorithm history from a workspace when the retrieval methods were chained together.
+- Added missing icon for the uninstaller in Windows "Apps & features" list.
 
 :ref:`Release 6.2.0 <v6.2.0>`

@@ -35,6 +35,7 @@ if(CXXTEST_FOUND)
                         PythonInterfaceCore
                         PythonKernelModule
                         PythonAPIModule
+                        gmock
                         ${OpenGL_LIBRARIES}
                         ${TBB_LIBRARIES}
                         ${Boost_LIBRARIES}
