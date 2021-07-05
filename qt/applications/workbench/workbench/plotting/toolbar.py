@@ -264,7 +264,10 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # Toggle grid on/off button in case plot is created from a script.
         is_major_grid_on = False
         for ax in fig.get_axes():
-            is_major_grid_on = ax.xaxis._major_tick_kw['gridOn'] and ax.yaxis._major_tick_kw['gridOn']
+            if hasattr(ax, 'grid_on'):
+                is_major_grid_on = ax.grid_on()
+            else:
+                is_major_grid_on = ax.xaxis._major_tick_kw.get('gridOn', False) and ax.yaxis._major_tick_kw.get('gridOn', False)
             # If ANY of the axes have no grid, set the button to unchecked.
             if not is_major_grid_on:
                 break
