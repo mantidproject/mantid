@@ -6,4 +6,4 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.qt import import_qt
 
-MuonPeriodInfo = import_qt('.._common', 'mantidqt.widgets.muonperiodinfo', 'MuonPeriodInfo')
+MuonPeriodInfo = import_qt('..._common', 'mantidqt.widgets.muonperiodinfo', 'MuonPeriodInfo')

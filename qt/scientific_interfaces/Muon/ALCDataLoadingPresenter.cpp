@@ -91,9 +91,9 @@ void ALCDataLoadingPresenter::handleRunsFound() {
     m_view->enableLoad(true);
     m_view->setLoadStatus("Successfully found " + m_view->getInstrument() + m_view->getRunsText(), "green");
     m_previousFirstRun = m_view->getInstrument() + m_view->getRunsFirstRunText();
-  } catch (const std::runtime_error &errroUpdateInfo) {
+  } catch (const std::runtime_error &errorUpdateInfo) {
     m_view->setLoadStatus("Error", "red");
-    m_view->displayError(errroUpdateInfo.what());
+    m_view->displayError(errorUpdateInfo.what());
     m_periodInfo->clear();
   }
 }
@@ -297,7 +297,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   m_view->setPath(getPathFromFiles());
 
   // Set logs
-  MatrixWorkspace_const_sptr ws = MuonAnalysisHelper::firstPeriod(loadedWs);
+  const MatrixWorkspace_sptr ws = MuonAnalysisHelper::firstPeriod(loadedWs);
   std::vector<std::string> logs;
 
   const auto &properties = ws->run().getProperties();
@@ -567,7 +567,7 @@ void ALCDataLoadingPresenter::handlePeriodInfoClicked() {
  * Update the Muon Period Info widget with the latest period info from the given workspace
  * @param ws :: The workspace to read the period info from
  */
-void ALCDataLoadingPresenter::updateAvailablePeriodInfo(MatrixWorkspace_const_sptr &ws) {
+void ALCDataLoadingPresenter::updateAvailablePeriodInfo(const MatrixWorkspace_sptr &ws) {
 
   // Clear any current information
   m_periodInfo->clear();

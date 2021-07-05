@@ -8,6 +8,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Logger.h"
 
+#include "boost/algorithm/string.hpp"
+
 #include <QString>
 #include <bitset>
 
@@ -33,14 +35,12 @@ using namespace Mantid::API;
  * Reads a sample log from a workspace
  * @param ws :: The workspace to read the sample log from
  * @param logName :: The name of the sample log to read
- * @param interfaceName :: The name of the interface this function is being used in (used for the logger if sample log
- * cannot be read)
  * @returns :: String value of the sample log, or empty string if log cannot be found
  */
-std::string MuonPeriodInfo::readSampleLog(MatrixWorkspace_const_sptr ws, const std::string &logName) {
+std::string MuonPeriodInfo::readSampleLog(MatrixWorkspace_sptr ws, const std::string &logName) {
   try {
     return ws->run().getLogData(logName)->value();
-  } catch (std::exception e) {
+  } catch (std::runtime_error) {
     Logger("MuonPeriodInfo").warning("Workspace does not contain " + logName);
     return "";
   }
@@ -75,7 +75,7 @@ std::vector<std::vector<std::string>> MuonPeriodInfo::makeCorrections(std::vecto
   }
 
   // Check size of each log and make corrections where needed
-  for (int i = 0; i < logs.size(); ++i) {
+  for (size_t i = 0; i < logs.size(); ++i) {
     if (logs[i].empty()) {
       logs[i] = std::vector<std::string>(maxSize, PERIOD_INFO_NOT_FOUND);
     } else {
@@ -87,7 +87,11 @@ std::vector<std::vector<std::string>> MuonPeriodInfo::makeCorrections(std::vecto
   return logs;
 }
 
-MuonPeriodInfo::MuonPeriodInfo(QWidget *parent) : m_DAQCount(0), m_numberOfSequences(0) {
+/**
+ * Constructor
+ * @param parent :: A pointer to the parent of this widget
+ */
+MuonPeriodInfo::MuonPeriodInfo(QWidget *parent) : QWidget(parent), m_numberOfSequences(-1), m_DAQCount(0) {
   m_uiForm.setupUi(this);
 
   // Set default label text and default title and set up the table columns
@@ -101,7 +105,7 @@ MuonPeriodInfo::MuonPeriodInfo(QWidget *parent) : m_DAQCount(0), m_numberOfSeque
  * @param ws :: Workspace to read sample logs from
  * @return :: A vector containing vectors for each period info read
  */
-std::vector<std::vector<std::string>> MuonPeriodInfo::getInfo(Mantid::API::MatrixWorkspace_const_sptr ws) {
+std::vector<std::vector<std::string>> MuonPeriodInfo::getInfo(MatrixWorkspace_sptr ws) {
   auto names = parseSampleLog(readSampleLog(ws, "period_labels"), ";");
   auto types = parseSampleLog(readSampleLog(ws, "period_type"), ";");
   auto frames = parseSampleLog(readSampleLog(ws, "frames_period_requested"), ";");
@@ -116,18 +120,22 @@ std::vector<std::vector<std::string>> MuonPeriodInfo::getInfo(Mantid::API::Matri
  * Adds all period information from the workspace provided to the widgets table in a readable format
  * @param ws :: The workspace to read the period information from
  */
-void MuonPeriodInfo::addInfo(Mantid::API::MatrixWorkspace_const_sptr ws) {
-  // Read in period sequences
-  const auto numSeq = readSampleLog(ws, "period_sequences");
-  if (!numSeq.empty())
-    setNumberOfSequences(std::stoi(numSeq));
-  else
-    setNumberOfSequences(-1);
+void MuonPeriodInfo::addInfo(const Mantid::API::Workspace_sptr ws) {
+  if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+    // Read in period sequences
+    const auto numSeq = readSampleLog(matrixWS, "period_sequences");
+    if (!numSeq.empty())
+      setNumberOfSequences(std::stoi(numSeq));
+    else
+      setNumberOfSequences(-1);
 
-  // Get remaining logs and add to table
-  auto logs = getInfo(ws);
-  for (int i = 0; i < logs[0].size(); ++i) {
-    addPeriodToTable(logs[0][i], logs[1][i], logs[2][i], logs[3][i], logs[4][m_DAQCount], logs[5][i]);
+    // Get remaining logs and add to table
+    auto logs = getInfo(matrixWS);
+    for (size_t i = 0; i < logs[0].size(); ++i) {
+      addPeriodToTable(logs[0][i], logs[1][i], logs[2][i], logs[3][i], logs[4][m_DAQCount], logs[5][i]);
+    }
+  } else {
+    Logger("MuonPeriodInfo").warning("Could not read workspace");
   }
 }
 
@@ -136,9 +144,9 @@ void MuonPeriodInfo::addInfo(Mantid::API::MatrixWorkspace_const_sptr ws) {
  * @param name :: Name of the period
  * @param type :: Whether the period is DAQ (1) or DWELL (2)
  * @param frames :: Frames period requested
- * @param total_frames ::
+ * @param totalFrames :: Total frames period requested
  * @param counts :: Total counts per period, only applies to DAQ periods
- * @param tags :: String value to convert to binary tag for the period
+ * @param tag :: String value to convert to binary tag for the period
  */
 void MuonPeriodInfo::addPeriodToTable(const std::string &name, const std::string &type, const std::string &frames,
                                       const std::string &totalFrames, const std::string &counts,

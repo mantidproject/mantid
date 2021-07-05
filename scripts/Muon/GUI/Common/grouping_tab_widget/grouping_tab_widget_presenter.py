@@ -290,54 +290,22 @@ class GroupingTabPresenter(object):
         self.period_info_widget.show()
         self.period_info_widget.raise_()
 
-    def _add_period_info_to_widget(self):
-
-        def _parse_logs(log_name):
-            sample_log = self._model._data.get_sample_log(log_name)
-            return sample_log.value.split(";") if sample_log else []
-
-        runs = self._model._data.current_runs
-        runs_string = ""
-        for run_list in runs:
-            for run in run_list:
-                if runs_string:
-                    runs_string += ", "
-                runs_string += str(run)
-        self.period_info_widget.setWidgetTitleRuns(self._model.instrument + runs_string)
-
-        period_sequences_log = self._model._data.get_sample_log("period_sequences")
-        if period_sequences_log:
-            self.period_info_widget.setNumberOfSequences(period_sequences_log.value)
-        else:
-            self.period_info_widget.setNumberOfSequences(-1)
-        names = _parse_logs("period_labels")
-        types = _parse_logs("period_type")
-        frames = _parse_logs("frames_period_requested")
-        total_frames = _parse_logs("frames_period_Raw")
-        counts = _parse_logs("total_counts_period")
-        tags = _parse_logs("period_output")
-
-        names, types, frames, total_frames, counts, tags, count = self._fix_up_period_info_lists([names, types, frames,
-                                                                                                  total_frames, counts,
-                                                                                                  tags])
-        for i in range(count):
-            self.period_info_widget.addPeriodToTable(names[i], types[i], frames[i], total_frames[i], counts[
-                self.period_info_widget.getDAQCount()], tags[i])
-
     def closePeriodInfoWidget(self):
         self.period_info_widget.close()
 
-    def _fix_up_period_info_lists(self, info_list):
-        # First find number of periods
-        lengths_list = [len(i) for i in info_list]
-        count = max(lengths_list)
-        # Then make sure lists are correct size
-        for i, info in enumerate(info_list):
-            if info:
-                info_list[i] += ["Not found"] * (count - len(info))
-            else:
-                info_list[i] = ["Not found"] * count
-        return (*info_list, count)
+    def _add_period_info_to_widget(self):
+        try:
+            self.period_info_widget.addInfo(self._model._data.current_workspace)
+            runs = self._model._data.current_runs
+            runs_string = ""
+            for run_list in runs:
+                for run in run_list:
+                    if runs_string:
+                        runs_string += ", "
+                    runs_string += str(run)
+            self.period_info_widget.setWidgetTitleRuns(self._model.instrument + runs_string)
+        except RuntimeError:
+            self._view.display_warning_box("Could not read period info from the current workspace")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable

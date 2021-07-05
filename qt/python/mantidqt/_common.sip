@@ -1171,16 +1171,29 @@ public:
 class MuonPeriodInfo : QWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/MuonPeriodInfo.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/object.hpp>
+#include <boost/python/handle.hpp>
 %End
 public:
     MuonPeriodInfo(QWidget *parent = nullptr) /KeywordArgs="All"/;
     void clear();
     void setWidgetTitleRuns(const std::string &title);
-    void addPeriodToTable(const std::string &name, const std::string &type, const std::string &frames,
-                                      const std::string &total_frames, const std::string &counts,
-                                      const std::string &tag);
     bool isEmpty() const ;
-    void setNumberOfSequences(const int numberOfSequences);
-    int getDAQCount() const;
-    //void addInfo(Mantid::API::MatrixWorkspace_const_sptr ws);
+    void addInfo(SIP_PYOBJECT);
+    %MethodCode
+    try {
+      using boost::python::extract;
+      using Mantid::PythonInterface::ExtractSharedPtr;
+      sipCpp->addInfo(ExtractSharedPtr<Mantid::API::Workspace>(a0)());
+    } catch(const std::exception & exc) {
+      SIP_BLOCK_THREADS
+      PyErr_SetString(PyExc_RuntimeError, exc.what());
+      SIP_UNBLOCK_THREADS
+      return NULL;
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
 };

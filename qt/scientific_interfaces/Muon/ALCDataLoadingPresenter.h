@@ -100,7 +100,7 @@ private:
   std::string getPathFromFiles() const;
 
   /// Update info on MuonPeriodInfo widget using sample logs from ws
-  void updateAvailablePeriodInfo(Mantid::API::MatrixWorkspace_const_sptr &ws);
+  void updateAvailablePeriodInfo(const Mantid::API::MatrixWorkspace_sptr &ws);
 
   /// View which the object works with
   IALCDataLoadingView *const m_view;

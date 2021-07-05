@@ -30,6 +30,8 @@ New Features
 ############
 
 - Added an external plot button to the ALC interface which will plot in workbench the current tab's plot
+- Added a period info button to the ALC interface which displays a table of period information from the loaded runs
+  (this is equivalent to the periods button in the Muon Analysis and Frequency Domain Analysis Interfaces)
 
 Elemental Analysis
 ------------------
