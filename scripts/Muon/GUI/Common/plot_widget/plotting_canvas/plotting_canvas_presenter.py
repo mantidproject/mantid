@@ -134,7 +134,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         # check if to force autoscale
         if self._options_presenter.autoscale:
             autoscale = True
-        self._view.set_override_axes_tick_labels()
         self._set_axes_limits_and_titles(autoscale)
 
     def should_update_all(self, selected_subplots):
@@ -257,14 +256,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
         self._view.redraw_figure()
 
-    def set_override_x_tick_labels(self, override_x_ticks: list) -> None:
-        """Sets the override x tick labels to use when plotting data."""
-        self._view.set_override_x_tick_labels(override_x_ticks)
-
-    def set_override_y_tick_labels(self, override_y_ticks: list) -> None:
-        """Sets the override y tick labels to use when plotting data."""
-        self._view.set_override_y_tick_labels(override_y_ticks)
-
     def get_plot_x_range(self):
         """Returns the x range of the first plot
         :return: a tuple contained the start and end ranges"""
@@ -340,9 +331,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             self.force_autoscale()
         else:
             self._options_presenter.enable_yaxis_changer()
-
-    def set_plot_as_point_data(self, point_data: bool):
-        self._view.set_plot_as_point_data(point_data)
 
     def _handle_autoscale_y_axes(self):
         # update the state of autoscale

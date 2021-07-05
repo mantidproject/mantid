@@ -81,20 +81,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self.setLayout(layout)
 
         self._plot_information_list = []  # type : List[PlotInformation}
-        self._point_data = False
-        self._override_x_tick_labels = []
-        self._override_y_tick_labels = []
-
-    def set_plot_as_point_data(self, point_data: bool):
-        self._point_data = point_data
-
-    def set_override_x_tick_labels(self, override_x_ticks: list) -> None:
-        """Sets the override x tick labels to use when plotting data."""
-        self._override_x_tick_labels = override_x_ticks
-
-    def set_override_y_tick_labels(self, override_y_ticks: list) -> None:
-        """Sets the override y tick labels to use when plotting data."""
-        self._override_y_tick_labels = override_y_ticks
 
     @property
     def autoscale_state(self):
@@ -163,7 +149,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
             plot_kwargs['color'] = self._color_queue[axis_number]()
             _do_single_plot(ax, workspace, ws_index, errors=errors, plot_kwargs=plot_kwargs)
-            self._set_override_tick_labels(ax)
 
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
         # We reverse the workspace info list so that we can maintain a unique color queue
@@ -229,7 +214,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             if workspace_name == plotted_workspace_name:
                 axis = self.fig.axes[workspace_plot_info.axis]
                 axis.replace_workspace_artists(workspace)
-                self._set_override_tick_labels(axis)
         self.redraw_figure()
 
     def replot_workspace_with_error_state(self, workspace_name, with_errors: bool):
@@ -247,7 +231,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                         plot_kwargs = self._get_plot_kwargs(plot_info)
                         plot_kwargs["color"] = color
                         axis.replot_artist(artist, with_errors, **plot_kwargs)
-                        self._set_override_tick_labels(axis)
         self.redraw_figure()
 
     def set_axis_xlimits(self, axis_number, xlims):
@@ -260,10 +243,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def set_axes_limits(self, xlim, ylim):
         plt.setp(self.fig.axes, xlim=xlim, ylim=ylim)
-
-    def set_override_axes_tick_labels(self):
-        for axis in self.fig.axes:
-            self._set_override_tick_labels(axis)
 
     def autoscale_y_axes(self):
         ymin = 1e9
@@ -326,20 +305,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def _get_plot_kwargs(self, workspace_info: WorkspacePlotInformation):
         label = workspace_info.label
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
-        if self._point_data and workspace_info.index == 0:
-            plot_kwargs["marker"] = "."
-            plot_kwargs["linestyle"] = ""
         return plot_kwargs
-
-    def _set_override_tick_labels(self, axis) -> None:
-        """Sets the override x and y tick labels on the provided axis."""
-        if len(self._override_x_tick_labels) > 0:
-            axis.set_xticks(range(len(self._override_x_tick_labels)))
-            axis.set_xticklabels(self._wrap_labels(self._override_x_tick_labels), fontsize="xx-small", rotation=45,
-                                 ha="right")
-        if len(self._override_y_tick_labels) > 0:
-            axis.set_yticks(range(len(self._override_y_tick_labels)))
-            axis.set_yticklabels(self._wrap_labels(self._override_y_tick_labels), fontsize="xx-small")
 
     @staticmethod
     def _wrap_labels(labels: list) -> list:
