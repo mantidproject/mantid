@@ -17,6 +17,10 @@ class IInstrumentDisplay {
 public:
   virtual ~IInstrumentDisplay() = default;
 
+  virtual int currentIndex() const = 0;
+  virtual QWidget *currentWidget() const = 0;
+  virtual void setCurrentIndex(int val) const = 0;
+
   virtual IGLDisplay *getGLDisplay() const = 0;
   virtual IQtDisplay *getQtDisplay() const = 0;
 

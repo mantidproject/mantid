@@ -304,8 +304,7 @@ protected:
   bool m_useOpenGL;
   /// 3D view or unwrapped
   SurfaceType m_surfaceType;
-  /// Stacked layout managing m_glDisplay and m_qtDisplay
-  QStackedLayout *m_instrumentDisplayLayout;
+
   /// spectra index id
   int mSpectraIDSelected;
   /// detector id

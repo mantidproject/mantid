@@ -120,7 +120,8 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr),
       m_qtConnect(std::move(deps.qtConnect)) {
   if (!m_instrumentDisplay) {
-    m_instrumentDisplay = std::make_unique<InstrumentDisplay>(std::move(deps.glDisplay), std::move(deps.qtDisplay));
+    m_instrumentDisplay =
+        std::make_unique<InstrumentDisplay>(std::move(deps.glDisplay), std::move(deps.qtDisplay), this);
   }
 
   setFocusPolicy(Qt::StrongFocus);
@@ -139,9 +140,6 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
                        SLOT(enableLighting(bool)));
 
   QWidget *aWidget = new QWidget(this);
-  m_instrumentDisplayLayout = new QStackedLayout(aWidget);
-  m_instrumentDisplayLayout->addWidget(m_instrumentDisplay->getGLDisplay());
-  m_instrumentDisplayLayout->addWidget(m_instrumentDisplay->getQtDisplay());
 
   controlPanelLayout->addWidget(aWidget);
 
@@ -1232,7 +1230,7 @@ QSize InstrumentWidget::glWidgetDimensions() {
 ///   mode of the surface.
 void InstrumentWidget::updateInstrumentView(bool picking) {
   if (m_instrumentDisplay->getGLDisplay() &&
-      m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget *>(m_instrumentDisplay->getGLDisplay())) {
+      m_instrumentDisplay->currentWidget() == dynamic_cast<QWidget *>(m_instrumentDisplay->getGLDisplay())) {
     m_instrumentDisplay->getGLDisplay()->updateView(picking);
   } else {
     m_instrumentDisplay->getQtDisplay()->updateView(picking);
@@ -1243,7 +1241,7 @@ void InstrumentWidget::updateInstrumentView(bool picking) {
 void InstrumentWidget::updateInstrumentDetectors() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   if (m_instrumentDisplay->getGLDisplay() &&
-      m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget *>(m_instrumentDisplay->getGLDisplay())) {
+      m_instrumentDisplay->currentWidget() == dynamic_cast<QWidget *>(m_instrumentDisplay->getGLDisplay())) {
     m_instrumentDisplay->getGLDisplay()->updateDetectors();
   } else {
     m_instrumentDisplay->getQtDisplay()->updateDetectors();
@@ -1262,10 +1260,10 @@ void InstrumentWidget::deletePeaksWorkspace(const Mantid::API::IPeaksWorkspace_s
  */
 void InstrumentWidget::selectOpenGLDisplay(bool yes) {
   int widgetIndex = yes ? 0 : 1;
-  const int oldIndex = m_instrumentDisplayLayout->currentIndex();
+  const int oldIndex = m_instrumentDisplay->currentIndex();
   if (oldIndex == widgetIndex)
     return;
-  m_instrumentDisplayLayout->setCurrentIndex(widgetIndex);
+  m_instrumentDisplay->setCurrentIndex(widgetIndex);
   auto surface = getSurface();
   if (surface) {
     surface->updateView();

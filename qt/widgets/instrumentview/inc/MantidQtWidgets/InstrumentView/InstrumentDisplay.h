@@ -13,11 +13,18 @@
 
 #include <memory>
 
+// Qt forward declarations
+class QStackedLayout;
+
 namespace MantidQt::MantidWidgets {
 
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentDisplay : public IInstrumentDisplay {
 public:
-  InstrumentDisplay(std::unique_ptr<IGLDisplay> glDisplay, std::unique_ptr<IQtDisplay> qtDisplay);
+  InstrumentDisplay(std::unique_ptr<IGLDisplay> glDisplay, std::unique_ptr<IQtDisplay> qtDisplay, QWidget *parent);
+
+  int currentIndex() const override;
+  QWidget *currentWidget() const override;
+  void setCurrentIndex(int val) const override;
 
   IGLDisplay *getGLDisplay() const override;
   IQtDisplay *getQtDisplay() const override;
@@ -25,7 +32,12 @@ public:
   void installEventFilter(QObject *obj) override;
 
 private:
+  void createStackedLayout(QWidget *parent);
+
   std::unique_ptr<IGLDisplay> m_glDisplay;
   std::unique_ptr<IQtDisplay> m_qtDisplay;
+
+  /// Stacked layout managing m_glDisplay and m_qtDisplay
+  QStackedLayout *m_instrumentDisplayLayout;
 };
 } // namespace MantidQt::MantidWidgets

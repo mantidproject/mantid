@@ -59,14 +59,14 @@ public:
   void test_constructor() {
     auto qtMock = makeQtDisplay();
     auto glMock = makeGL();
-    auto instance = construct(makeDisplay(), qtMock.release(), glMock.release(), makeConnect());
+    auto instance = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect());
   }
 
   void test_constructor_gl_disabled() {
     setGl(false);
     auto qtMock = makeQtDisplay();
     auto glMock = makeGL();
-    auto instance = construct(makeDisplay(), qtMock.release(), glMock.release(), makeConnect());
+    auto instance = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect());
   }
 
   void test_save_image_gl_enabled() {
@@ -77,7 +77,7 @@ public:
     auto glMock = makeGL();
     EXPECT_CALL(*glMock, saveToFile(expectedName)).Times(1);
 
-    auto widget = construct(makeDisplay(), qtMock.release(), glMock.release(), makeConnect());
+    auto widget = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect());
     widget.saveImage(inputName);
   }
 
@@ -90,16 +90,19 @@ public:
     auto glMock = makeGL();
     EXPECT_CALL(*qtMock, saveToFile(expectedName)).Times(1);
 
-    auto widget = construct(makeDisplay(), qtMock.release(), glMock.release(), makeConnect());
+    auto widget = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect());
     widget.saveImage(inputName);
   }
 
   void test_update_instrument_detectors_gl_enabled() {
     auto qtMock = makeQtDisplay();
     auto glMock = makeGL();
+    auto displayMock = makeDisplay();
     EXPECT_CALL(*glMock, updateDetectors()).Times(1);
+    EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(glMock.get()));
+    // ON_CALL(*displayMock, currentIndex()).WillByDefault(Return(0));
 
-    auto widget = construct(makeDisplay(), qtMock.release(), glMock.release(), makeConnect());
+    auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
     widget.updateInstrumentDetectors();
   }
 
@@ -107,9 +110,11 @@ public:
     setGl(false);
     auto qtMock = makeQtDisplay();
     auto glMock = makeGL();
+    auto displayMock = makeDisplay();
     EXPECT_CALL(*qtMock, updateDetectors()).Times(1);
+    EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
 
-    auto widget = construct(makeDisplay(), qtMock.release(), glMock.release(), makeConnect());
+    auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
     widget.updateInstrumentDetectors();
   }
 

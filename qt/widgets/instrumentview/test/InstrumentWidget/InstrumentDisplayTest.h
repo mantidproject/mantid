@@ -42,6 +42,6 @@ private:
   std::unique_ptr<QtMock> makeQtDisplay() const { return std::make_unique<QtMock>(); }
   std::unique_ptr<GLMock> makeGLDisplay() { return std::make_unique<GLMock>(); }
   InstrumentDisplay makeInstDisplay(std::unique_ptr<GLMock> glMock, std::unique_ptr<QtMock> qtMock) {
-    return InstrumentDisplay(std::move(glMock), std::move(qtMock));
+    return InstrumentDisplay(std::move(glMock), std::move(qtMock), nullptr);
   }
 };
