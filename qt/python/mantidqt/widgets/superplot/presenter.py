@@ -31,6 +31,7 @@ class SuperplotPresenter:
 
         if self.parent:
             self.parent.plot_updated.connect(self.on_plot_updated)
+            self.parent.resized.connect(self.on_resize)
 
         self._model.sig_workspace_deleted.connect(self.on_workspace_deleted)
         self._model.sig_workspace_renamed.connect(self.on_workspace_renamed)
@@ -87,6 +88,16 @@ class SuperplotPresenter:
                 pass
         self._view.close()
         del self._model
+
+    def on_resize(self):
+        """
+        Triggered when the window/dockwidgets is(are) resized.
+        """
+        try:
+            self._canvas.figure.tight_layout()
+        except:
+            pass
+        self._canvas.draw_idle()
 
     def _sync_with_current_plot(self):
         """
