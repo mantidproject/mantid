@@ -94,7 +94,7 @@ public:
     widget.saveImage(inputName);
   }
 
-  void test_update_instrument_detectors_gl_enabled() {
+  void test_update_instrument_detectors_gl_display_selected() {
     auto qtMock = makeQtDisplay();
     auto glMock = makeGL();
     auto displayMock = makeDisplay();
@@ -106,7 +106,33 @@ public:
     widget.updateInstrumentDetectors();
   }
 
+  void test_update_instrument_detectors_qt_display_selected() {
+    auto qtMock = makeQtDisplay();
+    auto glMock = makeGL();
+    auto displayMock = makeDisplay();
+    EXPECT_CALL(*qtMock, updateDetectors()).Times(1);
+    EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
+    // ON_CALL(*displayMock, currentIndex()).WillByDefault(Return(0));
+
+    auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
+    widget.updateInstrumentDetectors();
+  }
+
   void test_update_instrument_detectors_gl_disabled() {
+    // When GL is disabled, but somehow we still have a GL Display, we expect an update on that
+    // This is likely a bug, but we are ensuring bug-compatibility
+    setGl(false);
+    auto qtMock = makeQtDisplay();
+    auto glMock = makeGL();
+    auto displayMock = makeDisplay();
+    EXPECT_CALL(*glMock, updateDetectors()).Times(1);
+    EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(glMock.get()));
+
+    auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
+    widget.updateInstrumentDetectors();
+  }
+
+  void test_update_instrument_detectors_gl_disabled_qt_display_selected() {
     setGl(false);
     auto qtMock = makeQtDisplay();
     auto glMock = makeGL();
