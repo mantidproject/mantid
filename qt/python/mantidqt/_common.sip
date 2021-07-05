@@ -1179,5 +1179,8 @@ public:
     void addPeriodToTable(const std::string &name, const std::string &type, const std::string &frames,
                                       const std::string &total_frames, const std::string &counts,
                                       const std::string &tag);
+    bool isEmpty() const ;
+    void setNumberOfSequences(const int numberOfSequences);
+    int getDAQCount() const;
     //void addInfo(Mantid::API::MatrixWorkspace_const_sptr ws);
 };

@@ -13,14 +13,6 @@ from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
-from Muon.GUI.Common.muon_period_info_widget import PERIOD_INFO_NOT_FOUND
-
-CONTEXT_MAP = {"Name": 6,
-               "Type": 1,
-               "Frames": 2,
-               "Total Good Frames": 3,
-               "Counts": 5,
-               "Tag": 4}
 
 
 class GroupingTabPresenter(object):
@@ -293,21 +285,8 @@ class GroupingTabPresenter(object):
                 self.grouping_table_widget.plot_default_case()
 
     def handle_period_information_button_clicked(self):
-        # if self._model.is_data_loaded() and self.period_info_widget.is_empty():
-        # self.period_info_widget.addInfo(self._model._data.current_workspace)
-        self.period_info_widget.addPeriodToTable("test", "1", "100", "500", "32", "1")
-
-        def _get_runs():
-            runs = self._model._data.current_runs
-            runs_string = ""
-            for run_list in runs:
-                for run in run_list:
-                    if runs_string:
-                        runs_string += ", "
-                    runs_string += str(run)
-            return runs_string
-
-        self.period_info_widget.setWidgetTitleRuns(self._model.instrument + _get_runs())
+        if self._model.is_data_loaded() and self.period_info_widget.isEmpty():
+            self._add_period_info_to_widget()
         self.period_info_widget.show()
         self.period_info_widget.raise_()
 
@@ -324,10 +303,13 @@ class GroupingTabPresenter(object):
                 if runs_string:
                     runs_string += ", "
                 runs_string += str(run)
-        self.period_info_widget.set_title_runs(self._model.instrument + runs_string)
+        self.period_info_widget.setWidgetTitleRuns(self._model.instrument + runs_string)
 
         period_sequences_log = self._model._data.get_sample_log("period_sequences")
-        self.period_info_widget.number_of_sequences = str(period_sequences_log.value) if period_sequences_log else None
+        if period_sequences_log:
+            self.period_info_widget.setNumberOfSequences(period_sequences_log.value)
+        else:
+            self.period_info_widget.setNumberOfSequences(-1)
         names = _parse_logs("period_labels")
         types = _parse_logs("period_type")
         frames = _parse_logs("frames_period_requested")
@@ -339,8 +321,8 @@ class GroupingTabPresenter(object):
                                                                                                   total_frames, counts,
                                                                                                   tags])
         for i in range(count):
-            self.period_info_widget.add_period_to_table(names[i], types[i], frames[i], total_frames[i],
-                                                        counts[self.period_info_widget.daq_count], tags[i])
+            self.period_info_widget.addPeriodToTable(names[i], types[i], frames[i], total_frames[i], counts[
+                self.period_info_widget.getDAQCount()], tags[i])
 
     def closePeriodInfoWidget(self):
         self.period_info_widget.close()
@@ -352,9 +334,9 @@ class GroupingTabPresenter(object):
         # Then make sure lists are correct size
         for i, info in enumerate(info_list):
             if info:
-                info_list[i] += [PERIOD_INFO_NOT_FOUND] * (count - len(info))
+                info_list[i] += ["Not found"] * (count - len(info))
             else:
-                info_list[i] = [PERIOD_INFO_NOT_FOUND] * count
+                info_list[i] = ["Not found"] * count
         return (*info_list, count)
 
     # ------------------------------------------------------------------------------------------------------------------

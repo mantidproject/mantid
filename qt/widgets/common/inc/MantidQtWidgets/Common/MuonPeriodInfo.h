@@ -26,15 +26,18 @@ public:
   static std::vector<std::vector<std::string>> makeCorrections(std::vector<std::vector<std::string>> &logs);
   explicit MuonPeriodInfo(QWidget *parent = nullptr);
   void addPeriodToTable(const std::string &name, const std::string &type, const std::string &frames,
-                        const std::string &total_frames, const std::string &counts, const std::string &tag);
+                        const std::string &totalFrames, const std::string &counts, const std::string &tag);
   std::vector<std::vector<std::string>> getInfo(Mantid::API::MatrixWorkspace_const_sptr ws);
   void addInfo(Mantid::API::MatrixWorkspace_const_sptr ws);
   void setWidgetTitleRuns(const std::string &title);
+  std::string getWidgetTitleRuns() const;
   void setNumberOfSequences(const int numberOfSequences);
   int getNumberOfSequences() const;
+  std::string getNumberOfSequencesString() const;
   int getDAQCount() const;
   void clear();
   bool isEmpty() const;
+  QTableWidget *getTable() const;
 
 private:
   void setUpTable();

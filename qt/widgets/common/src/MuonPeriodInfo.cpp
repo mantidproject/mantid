@@ -119,9 +119,10 @@ std::vector<std::vector<std::string>> MuonPeriodInfo::getInfo(Mantid::API::Matri
 void MuonPeriodInfo::addInfo(Mantid::API::MatrixWorkspace_const_sptr ws) {
   // Read in period sequences
   const auto numSeq = readSampleLog(ws, "period_sequences");
-  if (!numSeq.empty()) {
+  if (!numSeq.empty())
     setNumberOfSequences(std::stoi(numSeq));
-  }
+  else
+    setNumberOfSequences(-1);
 
   // Get remaining logs and add to table
   auto logs = getInfo(ws);
@@ -140,7 +141,7 @@ void MuonPeriodInfo::addInfo(Mantid::API::MatrixWorkspace_const_sptr ws) {
  * @param tags :: String value to convert to binary tag for the period
  */
 void MuonPeriodInfo::addPeriodToTable(const std::string &name, const std::string &type, const std::string &frames,
-                                      const std::string &total_frames, const std::string &counts,
+                                      const std::string &totalFrames, const std::string &counts,
                                       const std::string &tag) {
   const auto row = m_uiForm.table->rowCount();
   m_uiForm.table->insertRow(row);
@@ -157,7 +158,7 @@ void MuonPeriodInfo::addPeriodToTable(const std::string &name, const std::string
     m_uiForm.table->setItem(row, 6, createNewItem(NOT_DAQ_STRING));
   }
   m_uiForm.table->setItem(row, 4, createNewItem(frames));
-  m_uiForm.table->setItem(row, 5, createNewItem(total_frames));
+  m_uiForm.table->setItem(row, 5, createNewItem(totalFrames));
   try {
     m_uiForm.table->setItem(row, 7, createNewItem(std::bitset<4>(std::stoi(tag)).to_string()));
   } catch (...) {
@@ -170,8 +171,13 @@ void MuonPeriodInfo::addPeriodToTable(const std::string &name, const std::string
  * @param title :: The new string value to add to the default title
  */
 void MuonPeriodInfo::setWidgetTitleRuns(const std::string &title) {
-  this->setWindowTitle(QString::fromStdString(DEFAULT_TITLE + title));
+  if (title.empty())
+    this->setWindowTitle(QString::fromStdString(DEFAULT_TITLE));
+  else
+    this->setWindowTitle(QString::fromStdString(DEFAULT_TITLE + title));
 }
+
+std::string MuonPeriodInfo::getWidgetTitleRuns() const { return this->windowTitle().toStdString(); }
 
 /**
  * Sets the numberOfSequences and updates the label of the widget
@@ -179,11 +185,17 @@ void MuonPeriodInfo::setWidgetTitleRuns(const std::string &title) {
  */
 void MuonPeriodInfo::setNumberOfSequences(const int numberOfSequences) {
   m_numberOfSequences = numberOfSequences;
-  m_uiForm.label->setText(
-      QString::fromStdString("Run contains " + std::to_string(numberOfSequences) + " cycles of periods"));
+  if (numberOfSequences < 0)
+    m_uiForm.label->setText(QString::fromStdString(CYCLES_NOT_FOUND));
+  else
+    m_uiForm.label->setText(
+        QString::fromStdString("Run contains " + std::to_string(numberOfSequences) + " cycles of periods"));
 }
 
 int MuonPeriodInfo::getNumberOfSequences() const { return m_numberOfSequences; }
+
+std::string MuonPeriodInfo::getNumberOfSequencesString() const { return m_uiForm.label->text().toStdString(); }
+
 int MuonPeriodInfo::getDAQCount() const { return m_DAQCount; }
 
 /**
@@ -191,7 +203,8 @@ int MuonPeriodInfo::getDAQCount() const { return m_DAQCount; }
  */
 void MuonPeriodInfo::clear() {
   m_DAQCount = 0;
-  m_numberOfSequences = 0;
+  setNumberOfSequences(-1);
+  setWidgetTitleRuns("");
   for (int i = m_uiForm.table->rowCount(); i >= 0; --i)
     m_uiForm.table->removeRow(i);
 }
@@ -200,6 +213,8 @@ void MuonPeriodInfo::clear() {
  * @return :: True if the table is empty, False otherwise
  */
 bool MuonPeriodInfo::isEmpty() const { return m_uiForm.table->rowCount() <= 0; }
+
+QTableWidget *MuonPeriodInfo::getTable() const { return m_uiForm.table; }
 
 /**
  * Set up properties of the widgets table
