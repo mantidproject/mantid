@@ -8,8 +8,6 @@ import numpy as np
 from scipy.special import erf
 from scipy.signal import convolve
 
-import abins.parameters
-
 prebin_required_schemes = ['interpolate', 'interpolate_coarse']
 
 
