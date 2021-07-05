@@ -14,6 +14,3 @@ function enable_coverage(){
     local OPTS="-DCOVERAGE=${COVERAGE} -DTESTING_TIMEOUT=${TIMEOUT}"
     echo "$OPTS"
 }
-
-
-

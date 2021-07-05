@@ -115,8 +115,8 @@ if [[ ${JOB_NAME} == *clean* || ${JOB_NAME} == *clang_tidy* ]]; then
 fi
 
 CMAKE_OPTS=""
-source $MODULES_DIR/enable_coverage.sh
-CMAKE_OPTS=$(enable_coverage $CMAKE_OPTS)
+source "$MODULES_DIR/enable_coverage.sh"
+CMAKE_OPTS="$CMAKE_OPTS $(enable_coverage)"
 
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
     PRBUILD=true
@@ -308,18 +308,10 @@ fi
 # Figure out if were doing a sanitizer build and setup any steps we need
 ###############################################################################
 
-if [[ ${JOB_NAME} == *address* ]]; then
-    SANITIZER_FLAGS="-DUSE_SANITIZER=Address"
+source "$MODULES_DIR/enable_static_analysis.sh"
+SANITIZER_FLAGS=$(enable_static_analysis)
+CMAKE_OPTS="$CMAKE_OPTS $SANITIZER_FLAGS"
 
-elif [[ ${JOB_NAME} == *memory* ]]; then
-    SANITIZER_FLAGS="-DUSE_SANITIZER=memory"
-
-elif [[ ${JOB_NAME} == *thread* ]]; then
-    SANITIZER_FLAGS="-DUSE_SANITIZER=thread"
-
-elif [[ ${JOB_NAME} == *undefined* ]]; then
-    SANITIZER_FLAGS="-DUSE_SANITIZER=undefined"
-fi
 
 if [[ -n "${SANITIZER_FLAGS}" ]]; then
     # Force build to RelWithDebInfo
@@ -339,6 +331,14 @@ if [ -e $BUILD_DIR/CMakeCache.txt ]; then
     CMAKE_GENERATOR=""
 fi
 
+##############################################################################
+# Prep CMake Options
+##############################################################################
+source "$MODULES_DIR/strip_newlines.sh"
+# Echo will append a "\n" which CMake then splits into two seperate invocations
+CMAKE_OPTS=$(strip_newlines "$CMAKE_OPTS")
+
+
 ###############################################################################
 # Work in the build directory
 ###############################################################################
@@ -353,7 +353,7 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} ${CMAKE_OPTS} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} ${CMAKE_OPTS} -DENABLE_PRECOMMIT=OFF -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
 
 ###############################################################################
 # Coverity build should exit early
