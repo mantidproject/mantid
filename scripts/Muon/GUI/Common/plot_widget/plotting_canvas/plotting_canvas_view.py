@@ -15,7 +15,6 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plot_color_queue import ColorQu
 from mantid import AnalysisDataService
 from mantid.plots import legend_set_draggable
 from mantid.plots.plotfunctions import get_plot_fig
-from textwrap import wrap
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,7 +30,6 @@ else:
 # Default color cycle using Matplotlib color codes C0, C1...ect
 NUMBER_OF_COLOURS = 10
 DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(NUMBER_OF_COLOURS)]
-LABEL_WRAP_WIDTH = 30
 
 
 def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
@@ -148,7 +146,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             ax = self.fig.axes[axis_number]
             plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
             plot_kwargs['color'] = self._color_queue[axis_number]()
-            _do_single_plot(ax, workspace, ws_index, errors=errors, plot_kwargs=plot_kwargs)
+            _do_single_plot(ax, workspace, ws_index, errors=errors,
+                            plot_kwargs=plot_kwargs)
 
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
         # We reverse the workspace info list so that we can maintain a unique color queue
@@ -306,11 +305,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         label = workspace_info.label
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
         return plot_kwargs
-
-    @staticmethod
-    def _wrap_labels(labels: list) -> list:
-        """Wraps a list of labels so that every line is at most LABEL_WRAP_WIDTH characters long."""
-        return ["\n".join(wrap(label, LABEL_WRAP_WIDTH)) for label in labels]
 
     def _get_y_axis_autoscale_limits(self, axis):
         x_min, x_max = sorted(axis.get_xlim())

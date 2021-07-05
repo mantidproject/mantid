@@ -79,7 +79,6 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
                                                                   normalised=False, errors=False, label="MUSR62260;fwd")
         self.view.plotted_workspace_information = [ws_plot_info]
         self.model.create_workspace_plot_information = mock.Mock(return_value=[])
-        self.view.set_override_axes_tick_labels = mock.Mock()
         self.presenter._set_axes_limits_and_titles = mock.Mock()
 
         self.presenter.plot_workspaces(workspace_names=ws_names, workspace_indices=ws_indices,
@@ -87,7 +86,6 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
 
         self.view.remove_workspace_info_from_plot.assert_called_once_with([ws_plot_info])
         self.model.create_workspace_plot_information.assert_called_once()
-        self.view.set_override_axes_tick_labels.assert_called_once_with()
 
     def test_plot_workspaces_does_not_replot_existing_workspaces(self):
         ws_names = ["MUSR6220"]
@@ -96,7 +94,6 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
                                                     errors=False, label="MUSR62260;fwd")
         self.view.plotted_workspace_information = [ws_plot_info]
         self.model.create_workspace_plot_information = mock.Mock(return_value=[ws_plot_info])
-        self.view.set_override_axes_tick_labels = mock.Mock()
         self.presenter._set_axes_limits_and_titles = mock.Mock()
 
         self.presenter.plot_workspaces(workspace_names=ws_names, workspace_indices=ws_indices,
@@ -104,7 +101,6 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
 
         self.view.add_workspaces_to_plot.assert_called_once_with([])
         self.model.create_workspace_plot_information.assert_called_once()
-        self.view.set_override_axes_tick_labels.assert_called_once_with()
 
     def test_plot_workspaces_adds_workspaces_to_plot(self):
         ws_names = ["MUSR6220"]
@@ -113,7 +109,6 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
                                                     errors=False, label="MUSR62260;fwd")
         self.view.plotted_workspace_information = []
         self.model.create_workspace_plot_information = mock.Mock(return_value=[ws_plot_info])
-        self.view.set_override_axes_tick_labels = mock.Mock()
         self.presenter._set_axes_limits_and_titles = mock.Mock()
 
         self.presenter.plot_workspaces(workspace_names=ws_names, workspace_indices=ws_indices,
@@ -121,7 +116,6 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
 
         self.view.add_workspaces_to_plot.assert_called_once_with([ws_plot_info])
         self.model.create_workspace_plot_information.assert_called_once()
-        self.view.set_override_axes_tick_labels.assert_called_once_with()
 
     def test_remove_workspace_names_from_plot_calls_passes_on_workspaces_to_view_correctly(self):
         ws_names = ["MUSR62260; Group; fwd", "MUSR62260; Group; bwd"]

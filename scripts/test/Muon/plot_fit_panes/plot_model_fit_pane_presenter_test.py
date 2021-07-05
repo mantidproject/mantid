@@ -38,8 +38,6 @@ class PlotFitPanePresenterTest(unittest.TestCase):
         self.view.hide_tiled_by = mock.Mock()
 
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
-        self.figure_presenter.set_plot_as_point_data = mock.Mock()
-        self.figure_presenter.set_autoscale = mock.Mock()
         self.figure_presenter.set_errors = mock.Mock()
         self.figure_presenter.set_plot_range = mock.Mock()
 
@@ -51,8 +49,6 @@ class PlotFitPanePresenterTest(unittest.TestCase):
         AnalysisDataService.Instance().clear()
 
     def test_that_autoscale_and_errors_are_turned_on(self):
-        self.figure_presenter.set_plot_as_point_data.assert_called_once_with(True)
-        self.figure_presenter.set_autoscale.assert_called_once_with(True)
         self.figure_presenter.set_errors.assert_called_once_with(True)
 
     def test_that_the_expected_options_are_hidden_and_disabled(self):
@@ -61,19 +57,12 @@ class PlotFitPanePresenterTest(unittest.TestCase):
         self.view.hide_plot_raw.assert_called_with()
         self.view.hide_tiled_by.assert_called_with()
 
-    def test_that_calculate_new_x_range_will_add_a_ten_percent_margin_to_the_provided_limits(self):
-        limits = [-1.0, 1.0]
-
-        new_range = self.presenter._calculate_new_x_range(limits)
-
-        self.assertEqual(new_range, (-1.2, 1.2))
-
     def test_that_update_x_plot_range_will_update_the_x_range_with_a_ten_percent_margin(self):
         limits = [-1.0, 1.0]
 
         self.presenter.update_x_plot_range(limits)
 
-        self.figure_presenter.set_plot_range.assert_called_once_with((-1.2, 1.2))
+        self.figure_presenter.set_plot_range.assert_called_once_with([-1.0, 1.0])
 
 
 if __name__ == '__main__':
