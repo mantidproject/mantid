@@ -270,7 +270,7 @@ public:
         return false;
       }
     } else {
-      // Not parametrized = return empty vector
+      // Not parametrized = not visible by default
       return false;
     }
   }
