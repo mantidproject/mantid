@@ -347,7 +347,7 @@ void ParameterMap::add(const std::string &type, const IComponent *comp, const st
                        const std::string &value, const std::string *const pDescription, const std::string &pVisible) {
   auto param = ParameterFactory::create(type, name, pVisible);
   param->fromString(value);
-  this->add(comp, param, pDescription, pVisible);
+  this->add(comp, param, pDescription);
 }
 
 /** Method for adding/replacing a parameter providing shared pointer to it.
@@ -356,21 +356,15 @@ void ParameterMap::add(const std::string &type, const IComponent *comp, const st
  * to it
  * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
  * contents of the string is copied to the parameters memory
- * @param pVisible :: Whether the parameter should be visible in InstrumentViewer
  */
 void ParameterMap::add(const IComponent *comp, const std::shared_ptr<Parameter> &par,
-                       const std::string *const pDescription, const std::string &pVisible) {
+                       const std::string *const pDescription) {
   checkIsNotMaskingParameter(par->name());
   // can not add null pointer
   if (!par)
     return;
   if (pDescription)
     par->setDescription(*pDescription);
-  if (pVisible == "true") {
-    par->setVisible(true);
-  } else {
-    par->setVisible(false);
-  }
 
   auto existing_par = positionOf(comp, par->name().c_str(), "");
   // As this is only an add method it should really throw if it already

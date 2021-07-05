@@ -124,12 +124,12 @@ public:
     auto typedParam = std::dynamic_pointer_cast<ParameterType<T>>(param);
     assert(typedParam); // If not true the factory has created the wrong type
     typedParam->setValue(value);
-    this->add(comp, param, pDescription, pVisible);
+    this->add(comp, param, pDescription);
   }
   /// Method for adding a parameter providing shared pointer to it. The class
   /// stores share pointer and increment ref count to it
   void add(const IComponent *comp, const std::shared_ptr<Parameter> &par,
-           const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
+           const std::string *const pDescription = nullptr);
 
   /** @name Helper methods for adding and updating parameter types  */
   /// Create or adjust "pos" parameter for a component
