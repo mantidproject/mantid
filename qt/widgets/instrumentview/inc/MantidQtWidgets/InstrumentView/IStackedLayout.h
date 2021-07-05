@@ -6,31 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IGLDisplay.h"
-#include "IQtDisplay.h"
-#include "IStackedLayout.h"
-
-#include <memory>
-
-// Qt Forward Declarations
-class QStackedLayout;
+class QWidget;
 
 namespace MantidQt::MantidWidgets {
 
-class IInstrumentDisplay {
+class IStackedLayout {
 public:
-  virtual ~IInstrumentDisplay() = default;
-
+  virtual int addWidget(QWidget *) = 0;
   virtual int currentIndex() const = 0;
   virtual QWidget *currentWidget() const = 0;
-  virtual void setCurrentIndex(int val) const = 0;
-
-  virtual IGLDisplay *getGLDisplay() const = 0;
-  virtual IQtDisplay *getQtDisplay() const = 0;
-
-  virtual void installEventFilter(QObject *obj) = 0;
-
-private:
-  virtual IStackedLayout *createLayout(QWidget *) const = 0;
+  virtual void setCurrentIndex(int) = 0;
 };
 } // namespace MantidQt::MantidWidgets

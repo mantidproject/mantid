@@ -10,11 +10,10 @@
 #include "IGLDisplay.h"
 #include "IInstrumentDisplay.h"
 #include "IQtDisplay.h"
+#include "IStackedLayout.h"
 
 #include <memory>
-
 // Qt forward declarations
-class QStackedLayout;
 class QWidget;
 
 namespace MantidQt::MantidWidgets {
@@ -33,12 +32,12 @@ public:
   void installEventFilter(QObject *obj) override;
 
 private:
-  QStackedLayout *createLayout(QWidget *parent) const override;
+  IStackedLayout *createLayout(QWidget *parent) const override;
 
   std::unique_ptr<IGLDisplay> m_glDisplay;
   std::unique_ptr<IQtDisplay> m_qtDisplay;
 
   /// Stacked layout managing m_glDisplay and m_qtDisplay
-  QStackedLayout *m_instrumentDisplayLayout;
+  IStackedLayout *m_instrumentDisplayLayout;
 };
 } // namespace MantidQt::MantidWidgets

@@ -6,29 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IGLDisplay.h"
-#include "IInstrumentDisplay.h"
-#include "IQtDisplay.h"
+#include "IStackedLayout.h"
 
 #include <gmock/gmock.h>
-#include <memory>
 
-class IStackedLayout;
-class QStackedLayout;
 class QWidget;
 
 namespace MantidQt::MantidWidgets {
-
-class MockInstrumentDisplay : public IInstrumentDisplay {
+class MockStackedLayout : public IStackedLayout {
 public:
+  MOCK_METHOD(int, addWidget, (QWidget *), (override));
   MOCK_METHOD(int, currentIndex, (), (const, override));
   MOCK_METHOD(QWidget *, currentWidget, (), (const, override));
-  MOCK_METHOD(void, setCurrentIndex, (int), (const, override));
-  MOCK_METHOD(IGLDisplay *, getGLDisplay, (), (const, override));
-  MOCK_METHOD(IQtDisplay *, getQtDisplay, (), (const, override));
-  MOCK_METHOD(void, installEventFilter, (QObject * obj), (override));
-
-  // Private methods
-  MOCK_METHOD(IStackedLayout *, createLayout, (QWidget *), (const, override));
+  MOCK_METHOD(void, setCurrentIndex, (int), (override));
 };
 } // namespace MantidQt::MantidWidgets

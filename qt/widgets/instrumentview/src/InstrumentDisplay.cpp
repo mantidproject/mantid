@@ -6,9 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0
 #include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/GLDisplay.h"
+#include "MantidQtWidgets/InstrumentView/IStackedLayout.h"
 #include "MantidQtWidgets/InstrumentView/QtDisplay.h"
+#include "MantidQtWidgets/InstrumentView/StackedLayout.h"
 
-#include <QStackedLayout>
+class QObject;
+class QWidget;
 
 namespace MantidQt::MantidWidgets {
 
@@ -21,7 +24,6 @@ InstrumentDisplay::InstrumentDisplay(std::unique_ptr<IGLDisplay> glDisplay, std:
   if (!m_qtDisplay)
     m_qtDisplay = std::make_unique<QtDisplay>();
 
-  // TODO test this
   m_instrumentDisplayLayout = createLayout(parent);
   m_instrumentDisplayLayout->addWidget(getGLDisplay());
   m_instrumentDisplayLayout->addWidget(getQtDisplay());
@@ -42,6 +44,6 @@ void InstrumentDisplay::installEventFilter(QObject *obj) {
   m_qtDisplay->qtInstallEventFilter(obj);
 }
 
-QStackedLayout *InstrumentDisplay::createLayout(QWidget *parent) const { return new QStackedLayout(parent); }
+IStackedLayout *InstrumentDisplay::createLayout(QWidget *parent) const { return new StackedLayout(parent); }
 
 } // namespace MantidQt::MantidWidgets

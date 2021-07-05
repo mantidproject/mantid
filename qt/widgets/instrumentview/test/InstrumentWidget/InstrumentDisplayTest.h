@@ -11,6 +11,7 @@
 #include "InstrumentDisplay.h"
 #include "MockGLDisplay.h"
 #include "MockQtDisplay.h"
+#include "MockStackedLayout.h"
 
 #include <QObject>
 
@@ -20,6 +21,17 @@
 
 using namespace MantidQt::MantidWidgets;
 using namespace testing;
+
+class FakeInstrumentDisplay : public InstrumentDisplay {
+public:
+  FakeInstrumentDisplay(MockStackedLayout &mockLayout, std::unique_ptr<IGLDisplay> glDisplay,
+                        std::unique_ptr<IQtDisplay> qtDisplay)
+      : InstrumentDisplay(std::move(glDisplay), std::move(qtDisplay), nullptr), m_mockLayout(mockLayout) {}
+  IStackedLayout *createLayout(QWidget *) const override { return &m_mockLayout; }
+
+private:
+  MockStackedLayout &m_mockLayout;
+};
 
 class InstrumentDisplayTest : public CxxTest::TestSuite {
 public:
@@ -36,6 +48,17 @@ public:
     EXPECT_CALL(*glMock, qtInstallEventFilter(IsNull())).Times(1);
     auto instDisplay = makeInstDisplay(std::move(glMock), std::move(qtMock));
     instDisplay.installEventFilter(nullptr);
+  }
+
+  void test_add_widget_in_constructor() {
+    auto qtMock = makeQtDisplay();
+    auto glMock = makeGLDisplay();
+
+    StrictMock<MockStackedLayout> mock;
+    EXPECT_CALL(mock, addWidget(glMock.get())).Times(1);
+    EXPECT_CALL(mock, addWidget(qtMock.get())).Times(1);
+
+    FakeInstrumentDisplay fixture(mock, std::move(glMock), std::move(qtMock));
   }
 
 private:
