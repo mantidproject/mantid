@@ -56,21 +56,28 @@ public:
     setGl(m_glEnabledOriginal);
   }
 
-  void test_constructor() { auto instance = construct(makeDisplay(), makeQtDisplay(), makeGL(), makeConnect()); }
+  void test_constructor() {
+    auto qtMock = makeQtDisplay();
+    auto glMock = makeGL();
+    auto instance = construct(makeDisplay(), qtMock.release(), glMock.release(), makeConnect());
+  }
 
   void test_constructor_gl_disabled() {
     setGl(false);
-    auto instance = construct(makeDisplay(), makeQtDisplay(), makeGL(), makeConnect());
+    auto qtMock = makeQtDisplay();
+    auto glMock = makeGL();
+    auto instance = construct(makeDisplay(), qtMock.release(), glMock.release(), makeConnect());
   }
 
   void test_save_image_gl_enabled() {
     const auto inputName = QString::fromStdString("testFilename");
     const auto expectedName = inputName + ".png";
 
+    auto qtMock = makeQtDisplay();
     auto glMock = makeGL();
     EXPECT_CALL(*glMock, saveToFile(expectedName)).Times(1);
 
-    auto widget = construct(makeDisplay(), makeQtDisplay(), std::move(glMock), makeConnect());
+    auto widget = construct(makeDisplay(), qtMock.release(), glMock.release(), makeConnect());
     widget.saveImage(inputName);
   }
 
@@ -80,26 +87,29 @@ public:
     const auto expectedName = inputName + ".png";
 
     auto qtMock = makeQtDisplay();
+    auto glMock = makeGL();
     EXPECT_CALL(*qtMock, saveToFile(expectedName)).Times(1);
 
-    auto widget = construct(makeDisplay(), std::move(qtMock), makeGL(), makeConnect());
+    auto widget = construct(makeDisplay(), qtMock.release(), glMock.release(), makeConnect());
     widget.saveImage(inputName);
   }
 
   void test_update_instrument_detectors_gl_enabled() {
+    auto qtMock = makeQtDisplay();
     auto glMock = makeGL();
     EXPECT_CALL(*glMock, updateDetectors()).Times(1);
 
-    auto widget = construct(makeDisplay(), makeQtDisplay(), std::move(glMock), makeConnect());
+    auto widget = construct(makeDisplay(), qtMock.release(), glMock.release(), makeConnect());
     widget.updateInstrumentDetectors();
   }
 
   void test_update_instrument_detectors_gl_disabled() {
     setGl(false);
     auto qtMock = makeQtDisplay();
+    auto glMock = makeGL();
     EXPECT_CALL(*qtMock, updateDetectors()).Times(1);
 
-    auto widget = construct(makeDisplay(), std::move(qtMock), makeGL(), makeConnect());
+    auto widget = construct(makeDisplay(), qtMock.release(), glMock.release(), makeConnect());
     widget.updateInstrumentDetectors();
   }
 
@@ -148,28 +158,25 @@ private:
     return mock;
   }
 
-  InstrumentWidget construct(std::unique_ptr<DisplayMock> displayMock, std::unique_ptr<QtMock> qtMock,
-                             std::unique_ptr<GLMock> glMock, std::unique_ptr<ConnectMock> connectMock) const {
-    auto glMockPtr = glMock.get();
-    auto qtMockPtr = qtMock.get();
-    ON_CALL(*displayMock, getGLDisplay()).WillByDefault(Return(glMockPtr));
-    ON_CALL(*displayMock, getQtDisplay()).WillByDefault(Return(qtMockPtr));
+  InstrumentWidget construct(std::unique_ptr<DisplayMock> displayMock, QtMock *qtMock, GLMock *glMock,
+                             std::unique_ptr<ConnectMock> connectMock) const {
+    ON_CALL(*displayMock, getGLDisplay()).WillByDefault(Return(glMock));
+    ON_CALL(*displayMock, getQtDisplay()).WillByDefault(Return(qtMock));
 
     auto surfaceMock = std::make_shared<MockProjectionSurface>();
-    EXPECT_CALL(*qtMockPtr, setSurface(_)).Times(1);
-    EXPECT_CALL(*qtMockPtr, qtUpdate()).Times(1);
-    EXPECT_CALL(*glMockPtr, setBackgroundColor(_)).Times(1);
+    EXPECT_CALL(*qtMock, setSurface(_)).Times(1);
+    EXPECT_CALL(*qtMock, qtUpdate()).Times(1);
+    EXPECT_CALL(*glMock, setBackgroundColor(_)).Times(1);
 
     const int getSurfaceCalls = m_glEnabled ? 22 : 24;
 
-    EXPECT_CALL(*glMockPtr, getSurface()).Times(getSurfaceCalls).WillRepeatedly(Return(surfaceMock));
-    EXPECT_CALL(*glMockPtr, setSurface(_)).Times(1);
-    EXPECT_CALL(*glMockPtr, currentBackgroundColor()).Times(1);
+    EXPECT_CALL(*glMock, getSurface()).Times(getSurfaceCalls).WillRepeatedly(Return(surfaceMock));
+    EXPECT_CALL(*glMock, setSurface(_)).Times(1);
+    EXPECT_CALL(*glMock, currentBackgroundColor()).Times(1);
 
     EXPECT_CALL(*displayMock, installEventFilter(NotNull())).Times(1);
 
-    InstrumentWidget::Dependencies deps{std::move(displayMock), std::move(qtMock), std::move(glMock),
-                                        std::move(connectMock)};
+    InstrumentWidget::Dependencies deps{std::move(displayMock), nullptr, nullptr, std::move(connectMock)};
 
     return InstrumentWidget("test_ws", nullptr, true, true, 0.0, 0.0, true, std::move(deps));
   }
