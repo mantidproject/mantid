@@ -137,6 +137,9 @@ QTableWidget::item:hover {
 background-color: #c7e0ff;
 }</string>
         </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
         <property name="selectionMode">
          <enum>QAbstractItemView::SingleSelection</enum>
         </property>

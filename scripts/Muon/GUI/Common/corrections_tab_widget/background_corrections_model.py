@@ -169,31 +169,3 @@ class BackgroundCorrectionsModel:
                     return x_lower - X_OFFSET, x_higher + X_OFFSET
                 return x_lower, x_higher
         return DEFAULT_X_LOWER, DEFAULT_X_UPPER
-
-    # def get_workspace_names_to_display_from_context(self) -> list:
-    #     """Returns the workspace names to display in the view based on the selected run and group options."""
-    #     runs = self._selected_runs()
-    #     groups = self._selected_groups()
-    #     if runs is not None and len(groups) > 0:
-    #         return self._get_workspace_names_to_display_from_context(runs, groups)
-    #     return []
-    #
-    # def _get_workspace_names_to_display_from_context(self, runs: list, groups: list) -> list:
-    #     """Returns the workspace names to display in the view based on the selected run and group options."""
-    #     workspace_names = []
-    #     for run in runs:
-    #         workspace_names += self._context.group_pair_context.get_group_counts_workspace_names(run, groups)
-    #     return workspace_names
-    #
-    # def _selected_runs(self) -> list:
-    #     """Returns a list containing the run numbers that are currently selected."""
-    #     if self._corrections_context.show_all_runs:
-    #         runs_string = RUNS_ALL
-    #     else:
-    #         runs_string = self._corrections_context.current_run_string
-    #     return self._context.get_runs(runs_string) if runs_string is not None else []
-    #
-    # def _selected_groups(self) -> list:
-    #     """Returns a list of selected group names."""
-    #     selected_group = self._corrections_context.selected_group
-    #     return self.group_names() if selected_group == GROUPS_ALL else [selected_group]
