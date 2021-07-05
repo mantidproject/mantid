@@ -21,6 +21,7 @@ InstrumentDisplay::InstrumentDisplay(std::unique_ptr<IGLDisplay> glDisplay, std:
   if (!m_qtDisplay)
     m_qtDisplay = std::make_unique<QtDisplay>();
 
+  // TODO test this
   m_instrumentDisplayLayout = new QStackedLayout(parent);
   m_instrumentDisplayLayout->addWidget(getGLDisplay());
   m_instrumentDisplayLayout->addWidget(getQtDisplay());
