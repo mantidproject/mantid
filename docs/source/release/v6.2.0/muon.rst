@@ -5,22 +5,26 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
-Muon Analysis 2
----------------------------------------------
+Muon Analysis
+-------------
+
+New Features
+############
+
+- The Model Fitting tab allows you to perform fits across the sample logs and fit parameters stored in your results table.
 
 Improvements
 ############
 
 - When running the Dynamic Kubo Toyabe fit function you should now be able to see the BinWidth to 3 decimal places.
 
-Bug Fixes
+BugFixes
 ############
-- A bug has been fixed in the BinWidth for the Dynamic Kobu Toyabe Fitting Function which caused a crash and did not provide any information about why the value was invalid. Will now revert to last viable BinWidth used and explain why.
+- A bug has been fixed in the BinWidth for the Dynamic Kobu Toyabe Fitting Function which caused a crash and did not provide
+  any information about why the value was invalid. Will now revert to last viable BinWidth used and explain why.
 
-
-
-Muon Analysis 2 and Frequency Domain Analysis
----------------------------------------------
+Muon Analysis and Frequency Domain Analysis
+-------------------------------------------
 
 Improvements
 ############
