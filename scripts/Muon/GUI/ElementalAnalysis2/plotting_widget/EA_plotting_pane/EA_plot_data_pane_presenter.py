@@ -65,7 +65,8 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         self.handle_data_updated()
 
     def handle_use_raw_workspaces_changed(self):
-        self.handle_data_updated()
+        if self.check_if_can_use_rebin():
+            self.handle_data_updated()
 
     def check_if_can_use_rebin(self):
         if not self._view.is_raw_plot() and not self.check_selected_groups_if_rebinned():

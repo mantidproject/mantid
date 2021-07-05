@@ -98,7 +98,6 @@ class EAGroupingTabPresenter(object):
         if self._model.is_data_loaded():
             self.update_view_from_model()
             self.update_description_text()
-            # self.plot_default_groups()
         else:
             self.on_clear_requested()
 

@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_model import PlotDataPaneModel
+from Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plotting_pane.EA_plot_data_pane_model import EAPlotDataPaneModel
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
 from Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plotting_pane.EA_plot_data_pane_presenter import \
     EAPlotDataPanePresenter
@@ -13,11 +13,11 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 
 @start_qapplication
-class PlotDataPanePresenterTest(unittest.TestCase):
+class EAPlotDataPanePresenterTest(unittest.TestCase):
 
     def setUp(self):
         self.context = mock.MagicMock()
-        self.model = mock.Mock(spec=PlotDataPaneModel)
+        self.model = mock.Mock(spec=EAPlotDataPaneModel)
         self.model.name = "data"
         self.view = mock.Mock(spec=BasePaneView)
         self.view.warning_popup = mock.MagicMock()

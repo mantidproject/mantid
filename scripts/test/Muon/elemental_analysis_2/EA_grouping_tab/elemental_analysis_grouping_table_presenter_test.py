@@ -119,10 +119,11 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 1)
         self.assertEqual(len(self.model.groups), 3)
         analyse_checkbox = self.view.get_table_item(0, 3)
+        self.presenter._model.add_group_to_analysis = mock.Mock()
         self.assertEqual(analyse_checkbox.checkState(), 0)
 
         self.presenter.plot_default_case()
-        self.assertEqual(analyse_checkbox.checkState(), 2)
+        self.assertEqual(self.presenter._model.add_group_to_analysis.call_count, 1)
 
     def test_remove_selected_rows_in_view_and_model(self):
         self.test_setup()
@@ -160,7 +161,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.presenter.update_model_from_view = mock.Mock()
         self.presenter._model.handle_rebin = mock.Mock()
         self.presenter._view.get_table_item = mock.Mock()
-        mock_text.return_value = "Steps:3"
+        mock_text.return_value = "Steps:3 KeV"
         self.presenter._view.get_table_item.return_value = QTableWidgetItem()
         self.presenter.handle_data_change(1, 5)
 
@@ -169,7 +170,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.notify_data_changed.call_count, 0)
         self.assertEqual(self.presenter.update_view_from_model.call_count, 0)
         self.assertEqual(mock_text.call_count, 2)
-        self.presenter._model.handle_rebin.assert_has_calls([mock.call(name="Steps:3", rebin_type="Fixed",
+        self.presenter._model.handle_rebin.assert_has_calls([mock.call(name="Steps:3 KeV", rebin_type="Fixed",
                                                                        rebin_param=3)])
 
     @mock.patch("qtpy.QtWidgets.QTableWidgetItem.text")
@@ -349,7 +350,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
     def test_handle_rebin_option_column_with_a_fixed_step(self):
         self.presenter._model.handle_rebin = mock.Mock()
         mock_changed_item = mock.Mock()
-        mock_changed_item.text.return_value = "Steps: 3 "
+        mock_changed_item.text.return_value = "Steps: 3 KeV"
         ws_name = "mock_name"
 
         self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin_options'],

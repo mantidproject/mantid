@@ -7,9 +7,6 @@
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws_if_present, retrieve_ws
 
-DETECTOR_PLOT_RANGE = {"Detector 1": [-100.0, 8200.0], "Detector 2": [-100.0, 8200.0], "Detector 3": [-50.0, 1100.0],
-                       "Detector 4": [-50.0, 1100.0]}
-
 
 class EAGroup(object):
     """
@@ -33,7 +30,6 @@ class EAGroup(object):
         self._peak_table = None
         self._matches_table = None
         self.update_counts_workspace(str(group_name))
-        self.plot_range = DETECTOR_PLOT_RANGE[self.detector]
 
     def __del__(self):
         remove_ws_if_present(self.get_counts_workspace_for_run())
