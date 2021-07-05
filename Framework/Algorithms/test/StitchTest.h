@@ -16,6 +16,8 @@
 #include "MantidAlgorithms/Stitch.h"
 #include "MantidHistogramData/Histogram.h"
 
+#include <math.h>
+
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
@@ -60,7 +62,7 @@ public:
 
   void test_WorkspaceGroup() {
     auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
-    auto ws2 = pointDataWorkspaceOneSpectrum(17, 0.8, 0.9, "ws2");
+    auto ws2 = pointDataWorkspaceOneSpectrum(17, 0.5, 0.9, "ws2");
     GroupWorkspaces grouper;
     grouper.initialize();
     grouper.setAlwaysStoreInADS(true);
@@ -76,8 +78,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
 
-  void test_WorkspacesAndGroupsMixed() {}
-
   void test_IncompatibleWorkspaces() {
     auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
     auto ws2 = histoDataWorkspaceOneSpectrum(11, 0.5, 0.9, "ws2");
@@ -89,6 +89,8 @@ public:
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
                             "Some invalid Properties found: [ InputWorkspaces ]");
   }
+
+  void test_WorkspacesAndGroupsMixed() {}
 
   void test_NotEnoughOverlap() {}
 
