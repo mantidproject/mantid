@@ -91,7 +91,7 @@ std::shared_ptr<Parameter> ParameterFactory::create(const std::string &className
     throw std::runtime_error("ParameterFactory:" + className + " is not registered.\n");
   p->m_name = name;
   p->m_type = className;
-  p->m_visible = true ? visible == "true" : false;
+  p->m_visible = visible == "true" ? true : false;
   return p;
 }
 
