@@ -179,12 +179,7 @@ background-color: #c7e0ff;
         </column>
         <column>
          <property name="text">
-          <string>Height</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Lifetime</string>
+          <string>A0 Error</string>
          </property>
         </column>
        </widget>

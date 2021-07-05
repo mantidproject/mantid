@@ -17,8 +17,7 @@ GROUP_COLUMN_INDEX = 1
 START_X_COLUMN_INDEX = 2
 END_X_COLUMN_INDEX = 3
 A0_COLUMN_INDEX = 4
-HEIGHT_COLUMN_INDEX = 5
-LIFETIME_COLUMN_INDEX = 6
+A0_ERROR_COLUMN_INDEX = 5
 
 
 class DoubleItemDelegate(QStyledItemDelegate):
@@ -47,14 +46,13 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._selected_column: int = None
         self._selected_value: str = None
 
-        self.set_exp_decay_parameters_visible(False)
         self.set_background_correction_options_visible(False)
 
         self._handle_start_x_changed = None
         self._handle_end_x_changed = None
 
         # Disable the background mode combo box while background corrections in still in development
-        self.mode_combo_box.setEnabled(False)
+        # self.mode_combo_box.setEnabled(False)
 
     def set_slot_for_mode_combo_box_changed(self, slot) -> None:
         """Connect the slot for the Background corrections mode combo box."""
@@ -88,11 +86,6 @@ class BackgroundCorrectionsView(widget, ui_form):
         self.group_combo_box.setVisible(visible)
         self.show_all_runs_checkbox.setVisible(visible)
         self.correction_options_table.setVisible(visible)
-
-    def set_exp_decay_parameters_visible(self, visible: bool) -> None:
-        """Sets the Exp Decay parameters in the table widget as visible or hidden."""
-        self.correction_options_table.setColumnHidden(HEIGHT_COLUMN_INDEX, not visible)
-        self.correction_options_table.setColumnHidden(LIFETIME_COLUMN_INDEX, not visible)
 
     @property
     def background_correction_mode(self) -> str:
@@ -170,12 +163,11 @@ class BackgroundCorrectionsView(widget, ui_form):
         return float(self._table_item_value_for(run, group, END_X_COLUMN_INDEX))
 
     def populate_corrections_table(self, runs: list, groups: list, start_xs: list, end_xs: list, a0s: list,
-                                   heights: list, lifetimes: list) -> None:
+                                   a0_errors: list) -> None:
         """Populates the background corrections table with the provided data."""
         self.correction_options_table.blockSignals(True)
         self.correction_options_table.setRowCount(0)
-        for run, group, start_x, end_x, a0, height, lifetime in zip(runs, groups, start_xs, end_xs, a0s, heights,
-                                                                    lifetimes):
+        for run, group, start_x, end_x, a0, a0_error in zip(runs, groups, start_xs, end_xs, a0s, a0_errors):
             row = self.correction_options_table.rowCount()
             self.correction_options_table.insertRow(row)
             self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, self._create_table_item(run, False))
@@ -184,10 +176,8 @@ class BackgroundCorrectionsView(widget, ui_form):
             self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, self._create_double_table_item(end_x))
             self.correction_options_table.setItem(row, A0_COLUMN_INDEX,
                                                   self._create_double_table_item(a0, enabled=False))
-            self.correction_options_table.setItem(row, HEIGHT_COLUMN_INDEX,
-                                                  self._create_double_table_item(height, enabled=False))
-            self.correction_options_table.setItem(row, LIFETIME_COLUMN_INDEX,
-                                                  self._create_double_table_item(lifetime, enabled=False))
+            self.correction_options_table.setItem(row, A0_ERROR_COLUMN_INDEX,
+                                                  self._create_double_table_item(a0_error, enabled=False))
         self.correction_options_table.blockSignals(False)
 
     def _setup_corrections_table(self) -> None:
@@ -195,8 +185,7 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._setup_double_item_delegate(START_X_COLUMN_INDEX)
         self._setup_double_item_delegate(END_X_COLUMN_INDEX)
         self._setup_double_item_delegate(A0_COLUMN_INDEX)
-        self._setup_double_item_delegate(HEIGHT_COLUMN_INDEX)
-        self._setup_double_item_delegate(LIFETIME_COLUMN_INDEX)
+        self._setup_double_item_delegate(A0_ERROR_COLUMN_INDEX)
 
         self.correction_options_table.cellChanged.connect(lambda row, column:
                                                           self._on_corrections_table_cell_changed(row, column))

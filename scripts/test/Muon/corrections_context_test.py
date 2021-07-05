@@ -19,7 +19,7 @@ class CorrectionsContextTest(unittest.TestCase):
 
     def test_that_the_context_has_been_instantiated_with_the_expected_context_data(self):
         self.assertEqual(self.corrections_context.current_run_string, None)
-        self.assertEqual(self.corrections_context.dead_time_source, None)
+        self.assertEqual(self.corrections_context.dead_time_source, "FromFile")
         self.assertEqual(self.corrections_context.dead_time_table_name_from_ads, None)
 
     def test_that_the_current_run_string_can_be_set_as_expected(self):
