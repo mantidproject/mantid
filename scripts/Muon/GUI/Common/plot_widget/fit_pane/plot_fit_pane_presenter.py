@@ -11,6 +11,11 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import remove_rebin_from_name, 
 class PlotFitPanePresenter(BasePanePresenter):
 
     def __init__(self, view, model, context, fitting_context, figure_presenter):
+        """
+        Initializes the PlotFitPanePresenter. The fitting_context is a FittingContext that corresponds to this specific
+        fit pane. For instance it is a ModelFittingContext for the Model Fitting pane, and is a TFAsymmetryFittingContext
+        for the tf asymmetry Fitting pane.
+        """
         super().__init__(view, model, context, figure_presenter)
         self._fitting_context = fitting_context
         self._data_type = ["Asymmetry"]
