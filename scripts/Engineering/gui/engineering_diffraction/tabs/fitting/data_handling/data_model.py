@@ -376,4 +376,3 @@ class FittingDataModel(object):
         if wsname.endswith('_TOF') or wsname.endswith('_dSpacing'):
             wsname = '_'.join(wsname.split('_')[0:-1])
         return wsname + '_' + xunit
-      

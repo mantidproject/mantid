@@ -132,14 +132,6 @@ class FocusModelTest(unittest.TestCase):
         self.model.focus_run("305761", van_path, banks, False, "ENGINX", "0", None, None)
         self.assertEqual(0, plot_focus.call_count)
 
-    # sample_paths:
-    # vanadium_path:
-    # banks:
-    # plot_output:
-    # instrument:
-    # rb_num:
-    # spectrum_numbers:
-    # custom_cal:
     @patch(file_path + ".SaveFocusedXYE")
     @patch(file_path + ".SaveGSS")
     @patch(file_path + ".SaveNexus")
@@ -147,7 +139,6 @@ class FocusModelTest(unittest.TestCase):
         mocked_workspace = "mocked-workspace"
         output_file = path.join(path_handling.get_output_path(), "Focus",
                                 "ENGINX_123_North_TOF.nxs")
-
 
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
                                 mocked_workspace, None)
