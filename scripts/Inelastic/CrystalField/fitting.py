@@ -1201,7 +1201,22 @@ class CrystalFieldSite(object):
                     params['sp'+str(x)+'.IntensityScaling'] = self.crystalField.IntensityScaling[x]
             if differentIntensities:
                 warnings.warn('Mismatch between IntensityScaling values of CrystalField objects', RuntimeWarning)
-        # Preserve fixes and ties
+        # Preserve ties and fixes
+        ties = {}
+        fixes = []
+        ties, fixes = self.getTiesAndFixes(other)
+        if self.crystalField.ResolutionModel is None:
+            FWHM = [self.crystalField._getFWHM(x) for x in range(self.crystalField.NumberOfSpectra)]
+            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHM=FWHM,
+                                         abundances=abundances, parameters=params, ties=ties,
+                                         fixedParameters = fixes)
+        else:
+            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
+                                         ResolutionModel=self.crystalField.ResolutionModel,
+                                         abundances=abundances, parameters=params, ties=ties,
+                                         fixedParameters = fixes)
+
+    def getTiesAndFixes(self, other):
         ties = {}
         fixes = []
         for prefix, obj in {'ion0.':self.crystalField, 'ion1.':other}.items():
@@ -1216,16 +1231,7 @@ class CrystalFieldSite(object):
                 if parName not in self.crystalField.field_parameter_names:
                     continue
                 fixes.append(prefix + parName)
-        if self.crystalField.ResolutionModel is None:
-            FWHM = [self.crystalField._getFWHM(x) for x in range(self.crystalField.NumberOfSpectra)]
-            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHM=FWHM,
-                                         abundances=abundances, parameters=params, ties=ties,
-                                         fixedParameters = fixes)
-        else:
-            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
-                                         ResolutionModel=self.crystalField.ResolutionModel,
-                                         abundances=abundances, parameters=params, ties=ties,
-                                         fixedParameters = fixes)
+        return ties, fixes
 
 
 #pylint: disable=too-few-public-methods
