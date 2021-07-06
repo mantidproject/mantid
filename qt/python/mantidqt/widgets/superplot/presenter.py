@@ -23,12 +23,11 @@ class SuperplotPresenter:
     _canvas = None
     _error_bars = False
 
-    def __init__(self, canvas, parent=None, error_bars=False):
+    def __init__(self, canvas, parent=None):
         self._view = SuperplotView(self, parent)
         self._model = SuperplotModel()
         self._canvas = canvas
         self.parent = parent
-        self._error_bars = error_bars
 
         # fix size of hold button with the longest text
         self._view.set_hold_button_text(self.HOLD_BUTTON_TEXT_CHECKED)
@@ -58,6 +57,16 @@ class SuperplotPresenter:
         self._view.set_selection(selection)
         self._update_spectrum_slider()
         self._update_hold_button()
+
+    def enable_error_bars(self, state):
+        """
+        Enable/disable error bars in plot.
+
+        Args:
+            state (bool): if True, the error bars will be on
+        """
+        self._error_bars = state
+        self._update_plot()
 
     def set_workspaces(self, workspaces):
         """
