@@ -83,6 +83,8 @@ class BasePanePresenter():
         Handles a workspace being deleted from ads by removing the workspace from the plot
         :param workspace: workspace 2D object
         """
+        # this is to allow both MA and FDA to be open at the same time
+        # without this an error is thrown as the ws name is passed as a string
         workspace_name = None
         if type(workspace) is Workspace2D:
             workspace_name = workspace.name()
