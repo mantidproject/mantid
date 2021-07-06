@@ -321,9 +321,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 
-        self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
-            self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
-
         self.fitting_tab.fitting_tab_presenter.fit_function_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.fit_function_updated_observer)
 
@@ -446,6 +443,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         for observer in self.plot_widget.data_changed_observers:
             self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(observer)
+            self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(observer)
 
     def setup_phase_quad_changed_notifier(self):
         pass
