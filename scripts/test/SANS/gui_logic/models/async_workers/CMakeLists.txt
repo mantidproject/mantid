@@ -1,8 +1,8 @@
 add_subdirectory(async_workers)
 
 set(TEST_PY_FILES
-    beam_centre_async_test.py
-    sans_run_tab_async_test.py
+    test_beam_centre_async.py
+    test_sans_run_tab_async.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

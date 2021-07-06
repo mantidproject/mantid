@@ -35,7 +35,7 @@ class IQtAsync:
         self._worker = None
         self._run_synchronously = False
 
-    def set_unit_test_mode(self, value):
+    def set_unit_test_mode(self, value: bool):
         """
         Enables unit test mode to prevent having to deal with race-y tests due
         to threading. Instead it forces the target to run as a blocking call.

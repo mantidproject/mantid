@@ -93,5 +93,5 @@ class DiagnosticsPagePresenter:
         self._view.enable_integrals()
 
     def on_processing_success(self, output):
-        # We don't do anything with this currently
+        # We don't do anything with this in production, but it is replaced with a mock by unit test code
         pass

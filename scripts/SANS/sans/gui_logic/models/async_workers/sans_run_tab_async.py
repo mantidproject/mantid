@@ -95,9 +95,6 @@ class SansRunTabAsync(IQtAsync):
 
     @staticmethod
     def _mark_row_error(row: RowEntries, error: Exception):
-        # We manually have to extract out the traceback, since going to a str for Qt signals will strip this
-        # self._logger.error(''.join(traceback.format_tb(e.__traceback__)))
-        # self._logger.error(str(e))
         row.state = RowState.ERROR
         row.tool_tip = str(error)
 
