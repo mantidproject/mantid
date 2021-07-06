@@ -16,7 +16,7 @@ class PlottingContext(object):
         self._default_ylim = [-10, 10]
         self._xlim_all = self._default_xlim
         self._ylim_all = self._default_ylim
-        self._autoscale_all = False
+        self._autoscale_all = True
         self._errors_all = False
         self._min_y_range = 2.0
         self._y_axis_margin = 20.

@@ -24,6 +24,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
+    sig_toggle_superplot_triggered = QtCore.Signal()
     sig_copy_to_clipboard_triggered = QtCore.Signal()
     sig_plot_options_triggered = QtCore.Signal()
     sig_plot_help_triggered = QtCore.Signal()
@@ -54,6 +55,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
          'mdi.script-text-outline', 'generate_plot_script', None),
         (None, None, None, None, None),
         ('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
+        ('Superplot', 'Open/close superplot tab', None, 'toggle_superplot', False),
         (None, None, None, None, None),
         ('Offset', 'Adjust curve offset %', 'mdi.arrow-expand-horizontal',
          'waterfall_offset_amount', None),
@@ -131,6 +133,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 self.pan()
         self.sig_toggle_fit_triggered.emit()
 
+    def toggle_superplot(self):
+        self.sig_toggle_superplot_triggered.emit()
+
     def trigger_fit_toggle_action(self):
         self._actions['toggle_fit'].trigger()
 
@@ -183,6 +188,13 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # Show/hide the separator between this button and help button / waterfall options
         self.toggle_separator_visibility(action, on)
 
+    def set_superplot_enabled(self, on):
+        action = self._actions['toggle_superplot']
+        action.setEnabled(on)
+        action.setVisible(on)
+        # Show/hide the separator between this button and help button / waterfall options
+        self.toggle_separator_visibility(action, on)
+
     def waterfall_offset_amount(self):
         self.sig_waterfall_offset_amount_triggered.emit()
 
@@ -207,12 +219,15 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # shows/hides the separator positioned immediately after the action
         for i, toolbar_action in enumerate(self.actions()):
             if toolbar_action == action:
-                self.actions()[i + 1].setVisible(enabled)
+                separator = self.actions()[i + 1]
+                if separator and separator.isSeparator():
+                    separator.setVisible(enabled)
                 break
 
     def set_buttons_visibility(self, fig):
         if figure_type(fig) not in [FigureType.Line, FigureType.Errorbar] or len(fig.get_axes()) > 1:
             self.set_fit_enabled(False)
+            self.set_superplot_enabled(False)
 
         # if any of the lines are a sample log plot disable fitting
         for ax in fig.get_axes():

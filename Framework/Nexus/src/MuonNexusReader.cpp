@@ -296,16 +296,19 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
   std::vector<float> values;
   std::vector<std::string> stringValues;
   bool isNumeric(false);
+  std::string units = "";
 
   NeXus::Info info = handle.getInfo();
   if (info.type == NX_FLOAT32 && info.dims.size() == 1) {
     isNumeric = true;
     boost::scoped_array<float> dataVals(new float[info.dims[0]]);
+    handle.getAttr("units", units);
     handle.getData(dataVals.get());
     values.assign(dataVals.get(), dataVals.get() + info.dims[0]);
     stringValues.resize(info.dims[0]); // Leave empty
   } else if (info.type == NX_CHAR && info.dims.size() == 2) {
     boost::scoped_array<char> dataVals(new char[info.dims[0] * info.dims[1] + 1]);
+    handle.getAttr("units", units);
     handle.getData(dataVals.get());
     dataVals[info.dims[0] * info.dims[1]] = 0;
     for (int i = 0; i < info.dims[0]; ++i) {
@@ -343,7 +346,7 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
 
   std::vector<float> tmp(timeVals.get(), timeVals.get() + info.dims[0]);
   m_logTimes.emplace_back(tmp);
-
+  m_logUnits.emplace_back(units);
   m_logType.emplace_back(isNumeric);
   m_logValues.emplace_back(values);
   m_logStringValues.emplace_back(stringValues);
@@ -378,6 +381,8 @@ void MuonNexusReader::getLogStringValues(const int &logNumber, const int &logSeq
 int MuonNexusReader::numberOfLogs() const { return (m_nexusLogCount); }
 
 int MuonNexusReader::getLogLength(const int i) const { return (static_cast<int>(m_logTimes[i].size())); }
+
+std::string MuonNexusReader::logUnits(const int i) const { return (m_logUnits[i]); }
 
 bool MuonNexusReader::logTypeNumeric(const int i) const { return (m_logType[i]); }
 

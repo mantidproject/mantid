@@ -18,15 +18,15 @@ namespace MantidQt {
 namespace MantidWidgets {
 class ProjectionSurface;
 /**
-\class  IMantidGLWidget
+\class  IGLDisplay
 \brief  Interface for the Qt Widget which renders Mantid Geometry ObjComponents
 */
 
-class IMantidGLWidget : public QGLWidget {
+class IGLDisplay : public QGLWidget {
 public:
-  IMantidGLWidget() {}
-  template <typename... Params> IMantidGLWidget(Params &&... params) : QGLWidget(std::forward<Params>(params)...) {}
-  virtual ~IMantidGLWidget() = default;
+  IGLDisplay() {}
+  template <typename... Params> IGLDisplay(Params &&...params) : QGLWidget(std::forward<Params>(params)...) {}
+  virtual ~IGLDisplay() = default;
 
   virtual void setSurface(std::shared_ptr<ProjectionSurface> surface) = 0;
   virtual std::shared_ptr<ProjectionSurface> getSurface() = 0;
@@ -35,6 +35,10 @@ public:
   virtual QColor currentBackgroundColor() const = 0;
   virtual void saveToFile(const QString &filename) = 0;
 
+  // Qt overrides
+  virtual void qtInstallEventFilter(QObject *arg) { installEventFilter(arg); }
+  virtual void qtUpdate() { update(); }
+  virtual void qtSetMinimumWidth(int arg) { setMinimumWidth(arg); }
 public slots:
   virtual void enableLighting(bool /*on*/) = 0;
   virtual void updateView(bool picking = true) = 0;

@@ -167,6 +167,13 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.connect_plot_selection(self._handle_subplot_changed_in_quick_edit_widget)
         self.range_changed_observer = GenericObserver(self.update_range)
         self._view.add_range_changed_subscriber(self.range_changed_observer)
+        self.set_quickedit_from_context()
+
+    def set_quickedit_from_context(self):
+        self._options_presenter.set_autoscale(self._context.get_autoscale_all)
+        self._options_presenter.set_errors(self._context.get_error_all)
+        self._options_presenter.set_plot_x_range(self._context.get_xlim_all)
+        self._options_presenter.set_plot_y_range(self._context.get_ylim_all)
 
     def _handle_subplot_changed_in_quick_edit_widget(self):
         selected_subplots, indices = self._get_selected_subplots_from_quick_edit_widget()
