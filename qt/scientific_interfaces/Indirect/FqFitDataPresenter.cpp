@@ -21,7 +21,7 @@ namespace IDA {
 FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view,
                                        IFQFitObserver *SingleFunctionTemplateBrowser)
     : IndirectFitDataPresenter(model, view, std::make_unique<FqFitDataTablePresenter>(model, view->getDataTable())),
-      m_activeParameterType("Width"), m_dataIndex(TableDatasetIndex{0}), m_fqFitModel(model),
+      m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}), m_fqFitModel(model),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
   connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveDataIndex()));
 
@@ -92,6 +92,7 @@ void FqFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
     m_fqFitModel->addWorkspace(fqFitDialog->workspaceName(), fqFitDialog->parameterNameIndex());
     setActiveWorkspaceIDToCurrentWorkspace(fqFitDialog);
     setModelSpectrum(fqFitDialog->parameterNameIndex());
+    updateActiveWorkspaceID();
   }
 }
 

@@ -110,12 +110,12 @@ std::vector<std::pair<std::string, size_t>> IndirectFitDataTableModel::getResolu
   return resolutionVector;
 }
 
-void IndirectFitDataTableModel::setResolution(const std::string &name, TableDatasetIndex index) {
+void IndirectFitDataTableModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
   if (!name.empty() && m_adsInstance.doesExist(name)) {
     const auto resolution = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(name);
-    if (m_resolutions->size() > index.value) {
-      m_resolutions->at(index.value) = resolution;
-    } else if (m_resolutions->size() == index.value) {
+    if (m_resolutions->size() > workspaceID.value) {
+      m_resolutions->at(workspaceID.value) = resolution;
+    } else if (m_resolutions->size() == workspaceID.value) {
       m_resolutions->emplace_back(resolution);
     } else {
       throw std::out_of_range("Provided resolution index '" + std::to_string(workspaceID.value) +
