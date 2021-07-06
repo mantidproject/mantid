@@ -11,6 +11,8 @@ from mantid.api import *
 from mantid.simpleapi import SaveAscii, logger
 import EnggUtils
 
+ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
+
 
 class EnggCalibrateFull(PythonAlgorithm):
     INDICES_PROP_NAME = 'SpectrumNumbers'
@@ -71,7 +73,7 @@ class EnggCalibrateFull(PythonAlgorithm):
                              "fitting back-to-back exponential functions, the 'X0' column has the fitted "
                              "peak center.")
 
-        self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
+        self.declareProperty("Bank", '', StringListValidator(ENGINX_BANKS),
                              direction=Direction.Input,
                              doc="Which bank to calibrate: It can be specified as 1 or 2, or "
                              "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
