@@ -17,9 +17,9 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
 
 namespace {
 static const std::string INPUT_WORKSPACE_PROPERTY = "InputWorkspaces";
@@ -149,7 +149,7 @@ int Stitch::version() const { return 1; }
 const std::string Stitch::category() const { return "Transforms\\Merging"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string Stitch::summary() const { return "Stitches overlapping spectra from multiple workspaces."; }
+const std::string Stitch::summary() const { return "Stitches overlapping spectra from multiple 2D workspaces."; }
 
 /// Validate the input workspaces for compatibility
 std::map<std::string, std::string> Stitch::validateInputs() {
@@ -245,31 +245,37 @@ void Stitch::exec() {
   const auto combinationBehaviour = getPropertyValue(COMBINATION_BEHAVIOUR_PROPERTY);
   const auto scaleFactorCalculation = getPropertyValue(SCALE_FACTOR_CALCULATION_PROPERTY);
   const auto inputs = RunCombinationHelper::unWrapGroups(getProperty(INPUT_WORKSPACE_PROPERTY));
-  std::transform(inputs.cbegin(), inputs.cend(), std::back_inserter(workspaces),
-                 [](const auto ws) { return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws); });
-  std::sort(workspaces.begin(), workspaces.end(), compareInterval);
-  auto progress = std::make_unique<Progress>(this, 0.0, 1.0, workspaces.size());
-  size_t referenceIndex = 0;
-  if (!isDefault(REFERENCE_WORKSPACE_PROPERTY)) {
-    const auto ref = std::find_if(workspaces.cbegin(), workspaces.cend(),
-                                  [&referenceName](const auto ws) { return ws->getName() == referenceName; });
-    referenceIndex = std::distance(workspaces.cbegin(), ref);
+  if (scaleFactorCalculation == "Manual") {
+    const auto scaled = scaleManual(inputs, getProperty(MANUAL_SCALE_FACTORS_PROPERTY));
+    setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(scaled));
+  } else {
+    std::transform(inputs.cbegin(), inputs.cend(), std::back_inserter(workspaces),
+                   [](const auto ws) { return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws); });
+    std::sort(workspaces.begin(), workspaces.end(), compareInterval);
+    auto progress = std::make_unique<Progress>(this, 0.0, 1.0, workspaces.size());
+    size_t referenceIndex = 0;
+    if (!isDefault(REFERENCE_WORKSPACE_PROPERTY)) {
+      const auto ref = std::find_if(workspaces.cbegin(), workspaces.cend(),
+                                    [&referenceName](const auto ws) { return ws->getName() == referenceName; });
+      referenceIndex = std::distance(workspaces.cbegin(), ref);
+    }
+    size_t leftIterator = referenceIndex, rightIterator = referenceIndex;
+    std::vector<std::string> toStitch(workspaces.size(), "");
+    toStitch[referenceIndex] = workspaces[referenceIndex]->getName();
+    auto scaleFactorWorkspace =
+        initScaleFactorsWorkspace(workspaces[referenceIndex]->getNumberHistograms(), workspaces.size());
+    while (leftIterator > 0) {
+      toStitch[leftIterator - 1] = scale(workspaces[leftIterator], workspaces[leftIterator - 1]);
+      progress->report();
+      --leftIterator;
+    }
+    while (rightIterator < workspaces.size() - 1) {
+      toStitch[rightIterator + 1] = scale(workspaces[rightIterator], workspaces[rightIterator + 1]);
+      progress->report();
+      ++rightIterator;
+    }
+    setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(toStitch, toStitch[referenceIndex]));
   }
-  size_t leftIterator = referenceIndex, rightIterator = referenceIndex;
-  std::vector<std::string> toStitch(workspaces.size(), "");
-  toStitch[referenceIndex] = workspaces[referenceIndex]->getName();
-  while (leftIterator > 0) {
-    toStitch[leftIterator - 1] = scale(workspaces[leftIterator], workspaces[leftIterator - 1]);
-    progress->report();
-    --leftIterator;
-  }
-  while (rightIterator < workspaces.size() - 1) {
-    toStitch[rightIterator + 1] = scale(workspaces[rightIterator], workspaces[rightIterator + 1]);
-    progress->report();
-    ++rightIterator;
-  }
-  setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(toStitch, toStitch[referenceIndex]));
-  progress->report();
 }
 
 MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs, const std::string &refName) {
@@ -344,6 +350,26 @@ std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr w
   scaler->setPropertyValue("OutputWorkspace", scaled);
   scaler->execute();
   return scaled;
+}
+
+MatrixWorkspace_sptr Stitch::initScaleFactorsWorkspace(const size_t nSpectra, const size_t nPoints) {
+  return WorkspaceFactory::Instance().create("Workspace2D", nSpectra, nPoints, nPoints);
+}
+
+std::vector<std::string> Stitch::scaleManual(const std::vector<std::string> &inputs,
+                                             const std::vector<double> &scaleFactors) {
+  std::vector<std::string> result;
+  for (size_t i = 0; i < inputs.size(); ++i) {
+    auto scaler = createChildAlgorithm("Scale");
+    scaler->setAlwaysStoreInADS(true);
+    scaler->setPropertyValue("InputWorkspace", inputs[i]);
+    scaler->setProperty("Factor", scaleFactors[i]);
+    const std::string scaled = "__scaled_" + inputs[i];
+    scaler->setPropertyValue("OutputWorkspace", scaled);
+    scaler->execute();
+    result.emplace_back(scaled);
+  }
+  return result;
 }
 
 } // namespace Algorithms

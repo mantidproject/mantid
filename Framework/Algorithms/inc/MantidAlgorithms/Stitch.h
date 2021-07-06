@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** Stitches overlapping spectra from multiple workspaces.
+/** Stitches overlapping spectra from multiple 2D workspaces.
  */
 class MANTID_ALGORITHMS_DLL Stitch : public API::Algorithm {
 public:
@@ -26,7 +26,9 @@ private:
   void init() override;
   void exec() override;
   std::string scale(Mantid::API::MatrixWorkspace_sptr wsToMatch, Mantid::API::MatrixWorkspace_sptr wsToScale);
-  Mantid::API::MatrixWorkspace_sptr merge(const std::vector<std::string> &workspaces, const std::string &refName);
+  Mantid::API::MatrixWorkspace_sptr merge(const std::vector<std::string> &workspaces, const std::string &refName = "");
+  Mantid::API::MatrixWorkspace_sptr initScaleFactorsWorkspace(const size_t nSpectra, const size_t nPoints);
+  std::vector<std::string> scaleManual(const std::vector<std::string> &inputs, const std::vector<double> &scaleFactors);
 };
 
 } // namespace Algorithms
