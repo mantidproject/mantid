@@ -96,7 +96,7 @@ FitScriptGeneratorView::FitScriptGeneratorView(QWidget *parent, FittingMode fitt
                                                QMap<QString, QString> const &fitOptions)
     : IFitScriptGeneratorView(parent), m_presenter(), m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionTreeView(std::make_unique<FunctionTreeView>(nullptr, true)),
-      m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(nullptr)), m_editLocalParameterDialog(nullptr) {
+      m_fitOptionsBrowser(std::make_unique<FitScriptOptionsBrowser>(nullptr)), m_editLocalParameterDialog(nullptr) {
   m_ui.setupUi(this);
 
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
