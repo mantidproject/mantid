@@ -174,7 +174,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.declareProperty('MaskWorkspace', '',
                              doc='File(s) or workspaces containing the mask.')
 
-        self.declareProperty(IntArrayProperty(name='MaskedTubes', direction=Direction.Input),
+        self.declareProperty(IntArrayProperty(name='MaskedTubes', values=[], direction=Direction.Input),
                              doc='List of tubes to be masked.')
 
         self.declareProperty('MaskThreshold', 0.0, doc='Create a mask with threshold from the ELPReference'
