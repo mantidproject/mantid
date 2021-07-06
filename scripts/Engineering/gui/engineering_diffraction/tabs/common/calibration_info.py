@@ -10,11 +10,13 @@ class CalibrationInfo(object):
     """
     Keeps track of the parameters that went into a calibration created by the engineering diffraction GUI.
     """
-    def __init__(self, vanadium_path=None, sample_path=None, instrument=None, crop_info=None):
+    def __init__(self, vanadium_path=None, sample_path=None, instrument=None, grouping_ws=None, roi_text: str = ""):
         self.vanadium_path = vanadium_path
         self.sample_path = sample_path
         self.instrument = instrument
-        self.crop_info = crop_info
+        self.grouping_ws_name = grouping_ws
+        self.roi_text = roi_text
+        self.bank = None
 
     def set_calibration(self, vanadium_path, sample_path, instrument):
         """
@@ -27,25 +29,71 @@ class CalibrationInfo(object):
         self.sample_path = sample_path
         self.instrument = instrument
 
-    def set_crop_info(self, bank, spec_nums, calfile) -> None:
+    def set_roi_info_load(self, banks: list, grp_ws: str, roi_text: str) -> None:
         """
-        Set the three components that form the possible crop info - banks, custom spectrum numbers, or a custom calfile.
-        All may be None - denoting no crop (calibrate/focus over both banks)
-        :param bank: '1' or '2' representing the North or South bank respectively
-        :param spec_nums: A string representation of range(s) of spectrum numbers
-        :param calfile: A custom calfile
+        TODO
+        :param grp_ws:
+        :param roi_text:
+        :return:
         """
-        if calfile is not None:
-            self.crop_info = None, None, calfile
-        elif spec_nums is not None:
-            self.crop_info = None, spec_nums, None
-        elif bank is None:
-            self.crop_info = ['1', '2'], None, None
-        else:
-            self.crop_info = [bank], None, None
+        self.grouping_ws_name = grp_ws
+        self.roi_text = roi_text
+        self.bank = banks
 
-    def get_crop_info(self):
-        return self.crop_info
+    def set_roi_info(self, bank: list = None, calfile: str = None, spec_nos=None) -> None:
+        """
+        TODO
+        """
+        if bank == '1':
+            self.grouping_ws_name = "NorthBank_grouping"
+            self.bank = ['1']
+            self.roi_text = "North Bank"
+        elif bank == '2':
+            self.grouping_ws_name = "SouthBank_grouping"
+            self.roi_text = "South Bank"
+            self.bank = ['2']
+        elif calfile:
+            self.grouping_ws_name = "Custom_calfile_grouping"
+            self.roi_text = "Custom CalFile"
+            self.bank = None
+        elif spec_nos:
+            self.grouping_ws_name = "Custom_spectra_grouping"
+            self.roi_text = "Custom spectra cropping"
+            self.bank = None
+        elif bank is None:
+            self.grouping_ws_name = None
+            self.roi_text = "North and South Banks"
+            self.bank = ['1', '2']
+
+    def create_focus_roi_dictionary(self) -> dict:
+        """
+        TODO
+        :return: dict mapping region_name -> grp_ws_name
+        """
+        regions = dict()
+        if self.bank:
+            # focus over one or both banks
+            for bank in self.bank:
+                if bank == '1':
+                    roi = "bank_1"
+                    grp_ws = "NorthBank_grouping"
+                elif bank == '2':
+                    roi = "bank_2"
+                    grp_ws = "SouthBank_grouping"
+                else:
+                    raise ValueError
+                regions[roi] = grp_ws
+        elif self.grouping_ws_name:
+            if "calfile" in self.grouping_ws_name:
+                regions["Custom"] = self.grouping_ws_name
+            elif "spectra" in self.grouping_ws_name:
+                regions["Cropped"] = self.grouping_ws_name
+        else:
+            raise ValueError("CalibrationInfo object contains no region-of-interest data")
+        return regions
+
+    def get_roi_text(self):
+        return self.roi_text
 
     def get_vanadium(self):
         return self.vanadium_path

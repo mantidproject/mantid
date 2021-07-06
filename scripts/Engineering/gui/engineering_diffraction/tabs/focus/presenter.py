@@ -5,13 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from os import path
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message, \
     CalibrationObserver
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
+from mantid.kernel import logger
 
 from qtpy.QtWidgets import QMessageBox
 
@@ -41,26 +41,23 @@ class FocusPresenter(object):
     def on_focus_clicked(self):
         if not self._validate():
             return
-        banks, spectrum_numbers, calfile = self.current_calibration.get_crop_info()
+        regions_dict = self.current_calibration.create_focus_roi_dictionary()
         focus_paths = self.view.get_focus_filenames()
         if self._number_of_files_warning(focus_paths):
-            self.start_focus_worker(focus_paths, banks, self.view.get_plot_output(), self.rb_num, spectrum_numbers,
-                                    calfile)
+            self.start_focus_worker(focus_paths, self.view.get_plot_output(), self.rb_num, regions_dict)
 
-    def start_focus_worker(self, focus_paths, banks, plot_output, rb_num, spectrum_numbers=None, custom_cal=None):
+    def start_focus_worker(self, focus_paths: list, plot_output: bool, rb_num: str, regions_dict: dict) -> None:
         """
         Focus data in a separate thread to stop the main GUI from hanging.
         :param focus_paths: List of paths to the files containing the data to focus.
         :param banks: A list of banks that are to be focused.
         :param plot_output: True if the output should be plotted.
         :param rb_num: The RB Number from the main window (often an experiment id)
-        :param spectrum_numbers: Optional parameter to crop to a specific list of spectrum numbers.
-        :param custom_cal: Optional parameter to crop with a user-provided calibration file.
+        TODO
         """
         van_path = self.current_calibration.get_vanadium()
         self.worker = AsyncTask(self.model.focus_run,
-                                (focus_paths, van_path, banks, plot_output, self.instrument, rb_num, spectrum_numbers,
-                                 custom_cal),
+                                (focus_paths, van_path, plot_output, self.instrument, rb_num, regions_dict),
                                 error_cb=self._on_worker_error,
                                 finished_cb=self._on_worker_success)
         self.set_focus_controls_enabled(False)
@@ -111,7 +108,8 @@ class FocusPresenter(object):
         else:
             return True
 
-    def _on_worker_error(self, _):
+    def _on_worker_error(self, error_info):
+        logger.error(str(error_info))
         self.emit_enable_button_signal()
 
     def set_focus_controls_enabled(self, enabled):
@@ -127,23 +125,5 @@ class FocusPresenter(object):
         :param calibration: The new current calibration.
         """
         self.current_calibration = calibration
-        region_text = self._create_region_of_interest_text(calibration)
+        region_text = calibration.get_roi_text()
         self.view.set_region_display_text(region_text)
-
-    @staticmethod
-    def _create_region_of_interest_text(calibration_info) -> str:
-        """
-        Create a string to describe the region of interest for display to the user on this tab
-        :param calibration_info: calibration_info object for the calibration that has just been created
-        :return: String describing the region of interest
-        """
-        banks, spectrum_numbers, calfile = calibration_info.get_crop_info()
-        if calfile is not None:
-            filename = path.basename(calfile)
-            return str(filename)
-        elif spectrum_numbers is not None:
-            return "Spectra " + str(spectrum_numbers)
-        elif len(banks) == 1:
-            return "North Bank" if banks[0] == '1' else "South Bank"
-        else:
-            return "North and South Banks"

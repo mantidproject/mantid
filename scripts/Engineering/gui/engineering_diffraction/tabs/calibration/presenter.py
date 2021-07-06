@@ -57,9 +57,10 @@ class CalibrationPresenter(object):
             if not self.validate_path():
                 return
             filename = self.view.get_path_filename()
-            instrument, vanadium_file, sample_file = self.model.load_existing_calibration_files(
-                filename)
+            instrument, vanadium_file, sample_file, grp_ws_name, roi_text, banks = \
+                self.model.load_existing_calibration_files(filename)
             self.pending_calibration.set_calibration(vanadium_file, sample_file, instrument)
+            self.pending_calibration.set_roi_info_load(banks, grp_ws_name, roi_text)
             self.set_current_calibration()
 
     def start_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num, bank=None, calfile=None,
@@ -86,7 +87,7 @@ class CalibrationPresenter(object):
                                 error_cb=self._on_error,
                                 success_cb=self._on_success)
         self.pending_calibration.set_calibration(vanadium_path, sample_path, self.instrument)
-        self.pending_calibration.set_crop_info(bank, spectrum_numbers, calfile)
+        self.pending_calibration.set_roi_info(bank, calfile, spectrum_numbers)
         self.set_calibrate_controls_enabled(False)
         self.worker.start()
 

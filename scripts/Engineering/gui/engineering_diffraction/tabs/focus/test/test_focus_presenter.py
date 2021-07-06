@@ -19,7 +19,7 @@ class FocusPresenterTest(unittest.TestCase):
         self.view = mock.create_autospec(view.FocusView)
         self.model = mock.create_autospec(model.FocusModel)
         self.presenter = presenter.FocusPresenter(self.model, self.view)
-        self.presenter.current_calibration.set_crop_info(None, None, None)
+        self.presenter.current_calibration.set_roi_info(None, None, None)
 
     @patch(tab_path + ".presenter.check_workspaces_exist")
     @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
@@ -28,7 +28,7 @@ class FocusPresenterTest(unittest.TestCase):
                                                              sample_path="Fake/Path",
                                                              instrument="ENGINX")
         self.view.get_focus_filenames.return_value = "305738"
-        self.presenter.current_calibration.set_crop_info('2', None, None)
+        self.presenter.current_calibration.set_roi_info('2', None, None)
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
         wsp_exists.return_value = True
@@ -43,7 +43,7 @@ class FocusPresenterTest(unittest.TestCase):
                                                              sample_path="Fake/Path",
                                                              instrument="ENGINX")
         self.view.get_focus_filenames.return_value = "305738"
-        self.presenter.current_calibration.set_crop_info(None, "2-45", None)
+        self.presenter.current_calibration.set_roi_info(None, "2-45", None)
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
         wsp_exists.return_value = True

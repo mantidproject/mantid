@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections, path_handling
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
-from Engineering.EnggUtils import create_custom_grouping_workspace
+from Engineering import EnggUtils
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
     Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, DeleteWorkspace, ApplyDiffCal, \
     ConvertUnits, ReplaceSpecialValues, EnggEstimateFocussedBackground
@@ -35,8 +35,8 @@ class FocusModel(object):
     def get_last_path(self):
         return self._last_path
 
-    def focus_run(self, sample_paths: list, vanadium_path: str, banks, plot_output: bool, instrument: str,
-                  rb_num, spectrum_numbers, custom_cal) -> None:
+    def focus_run(self, sample_paths: list, vanadium_path: str, plot_output: bool, instrument: str, rb_num: str,
+                  regions_dict: dict) -> None:
         """
         Focus some data using the current calibration.
         :param sample_paths: The paths to the data to be focused.
@@ -44,9 +44,8 @@ class FocusModel(object):
         :param banks: The banks that should be focused.
         :param plot_output: True if the output should be plotted.
         :param instrument: The instrument that the data came from.
-        :param rb_num: The experiment number, used to create directories. Can be None
-        :param spectrum_numbers: The specific spectra that should be focused. Used instead of banks.
-        :param custom_cal: User defined calibration file to crop the focus to
+        TODO
+        :param regions_dict: dict region name -> grp_ws_name, defining region(s) of interest to focus over
         """
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
@@ -65,28 +64,12 @@ class FocusModel(object):
             van_integration_ws = Ads.retrieve(vanadium_corrections.INTEGRATED_WORKSPACE_NAME)
             van_processed_inst_ws = Ads.retrieve(vanadium_corrections.PROCESSED_WORKSPACE_NAME)
 
-        # identify region(s) of interest to focus over
-        regions_dict = dict()  # dict mapping str: roi -> dict: grouping kwarg
-        if (spectrum_numbers or custom_cal) is None:
-            # region of interest is one or both banks
-            for bank_no in banks:
-                df_kwarg = {"GroupingFileName": NORTH_BANK_CAL} if bank_no == '1' else \
-                    {"GroupingFileName": SOUTH_BANK_CAL}
-                bank = "bank_" + bank_no
-                regions_dict[bank] = df_kwarg
-        elif spectrum_numbers:
-            # region of interest to be specified by specific spectra range(s)
-            inst_ws = path_handling.load_workspace(sample_paths[0])
-            grp_ws = create_custom_grouping_workspace(spectrum_numbers, inst_ws)
-            df_kwarg = {"GroupingWorkspace": grp_ws}
-            regions_dict["Cropped"] = df_kwarg
-        elif custom_cal:
-            # region of interest to be specified by user provided custom calfile
-            df_kwarg = {"GroupingFileName": custom_cal}
-            regions_dict["Custom"] = df_kwarg
-        # check correct region calibration(s) exists
+        # check correct region calibration(s) and grouping workspace(s) exists
+        inst_ws = path_handling.load_workspace(sample_paths[0])
         for region in regions_dict:
-            if not self._check_region_calib_ws_exists(region):
+            calib_exists = self._check_region_calib_ws_exists(region)
+            grouping_exists = self._check_region_grouping_ws_exists(regions_dict[region], inst_ws)
+            if not (calib_exists and grouping_exists):
                 return
 
         # loop over samples provided, focus each over region(s) specified in regions_dict
@@ -150,37 +133,45 @@ class FocusModel(object):
     def _run_focus(input_workspace,
                    tof_output_name,
                    curves,
-                   grouping_kwarg,
+                   grouping_ws,
                    region_calib) -> None:
         """Focus the processed full instrument workspace over the chosen region of interest
         :param input_workspace: Processed full instrument workspace converted to dSpacing
         :param tof_output_name: Name for the time-of-flight output workspace
         :param curves: Workspace containing the vanadium curves for this region of interest
-        :param grouping_kwarg: kwarg to pass to DiffractionFocussing specifying the region of interest
+        :param grouping_ws: TODO
         :param region_calib: Region of interest calibration workspace (table ws output from PDCalibration)
         """
         # rename workspace prior to focussing to avoid errors later
         dspacing_output_name = tof_output_name + "_dSpacing"
         # focus sample over specified region of interest
         focused_sample = DiffractionFocussing(InputWorkspace=input_workspace, OutputWorkspace=dspacing_output_name,
-                                              **grouping_kwarg)
+                                              GroupingWorkspace=grouping_ws)
         curves_rebinned = RebinToWorkspace(WorkspaceToRebin=curves, WorkspaceToMatch=focused_sample)
         # flux correction - divide focused sample data by rebinned focused vanadium curve data
         Divide(LHSWorkspace=focused_sample, RHSWorkspace=curves_rebinned, OutputWorkspace=focused_sample,
                AllowDifferentNumberSpectra=True)
         # apply calibration from specified region of interest
         ApplyDiffCal(InstrumentWorkspace=focused_sample, CalibrationWorkspace=region_calib)
+        # set bankid for use in fit tab
+        run = focused_sample.getRun()
+        if region_calib == "engggui_calibration_bank_1":
+            run.addProperty("bankid", 1, True)
+        elif region_calib == "engggui_calibration_bank_2":
+            run.addProperty("bankid", 2, True)
+        else:
+            run.addProperty("bankid", 3, True)
         # output in both dSpacing and TOF
         ConvertUnits(InputWorkspace=focused_sample, OutputWorkspace=tof_output_name, Target='TOF')
         DeleteWorkspace(curves_rebinned)
 
     @staticmethod
-    def _get_van_curves_for_roi(region: str, van_processed_inst_ws, grouping_kwarg: dict):  # -> Workspace
+    def _get_van_curves_for_roi(region: str, van_processed_inst_ws, grouping_ws):  # -> Workspace
         """
         Retrieve vanadium curves for this roi from the ADS if they exist, create them if not
         :param region: String describing region of interest
         :param van_processed_inst_ws: Processed instrument workspace of this vanadium run
-        :param grouping_kwarg: Keyword argument defining roi to pass to DiffractionFocussing
+        :param grouping_ws: TODO
         :return: Curves workspace for this roi
         """
         curves_roi_name = CURVES_PREFIX + region
@@ -190,7 +181,7 @@ class FocusModel(object):
         else:
             # focus processed instrument ws over specified region of interest, iot produce vanadium curves for roi
             focused_curves = DiffractionFocussing(InputWorkspace=van_processed_inst_ws, OutputWorkspace=curves_roi_name,
-                                                  **grouping_kwarg)
+                                                  GroupingWorkspace=grouping_ws)
             EnggEstimateFocussedBackground(InputWorkspace=focused_curves,
                                            OutputWorkspace=focused_curves,
                                            NIterations='15', XWindow=0.03)
@@ -205,6 +196,28 @@ class FocusModel(object):
         """
         ws_name = REGION_CALIB_WS_PREFIX + region
         return Ads.retrieve(ws_name)
+
+    @staticmethod
+    def _check_region_grouping_ws_exists(grouping_ws_name: str, inst_ws) -> bool:
+        """
+        TODO
+        :param grouping_ws_name:
+        :param inst_ws
+        :return:
+        """
+        if not Ads.doesExist(grouping_ws_name):
+            if "North" in grouping_ws_name:
+                logger.notice("NorthBank grouping workspace not present in ADS, loading")
+                EnggUtils.get_bank_grouping_workspace(1, inst_ws)
+                return True
+            elif "South" in grouping_ws_name:
+                logger.notice("SouthBank grouping workspace not present in ADS, loading")
+                EnggUtils.get_bank_grouping_workspace(2, inst_ws)
+                return True
+            else:
+                logger.warning(f"Cannot focus as the grouping workspace \"{grouping_ws_name}\" is not present.")
+                return False
+        return True
 
     @staticmethod
     def _check_region_calib_ws_exists(region: str) -> bool:

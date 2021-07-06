@@ -6,45 +6,154 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path
 from mantid.api import *
-from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType
+from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logger
 import mantid.simpleapi as mantid
 from mantid.simpleapi import AnalysisDataService as ADS
 from matplotlib import gridspec
-
-ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
+from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
 
 
-def load_relevant_pdcal_outputs(file_path, output_prefix="engggui"):
+def determine_roi_from_prm_fname(file_path: str) -> str:
+    """
+    TODO
+    :param file_path:
+    :return:
+    """
+    # fname has form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
+    # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom"
+    basepath, fname = path.split(file_path)
+    fname_words = fname.split('_')
+    suffix = fname_words[-1]
+    if "banks" in suffix:
+        return "BOTH"
+    elif "1" in suffix:
+        return "bank_1"
+    elif "2" in suffix:
+        return "bank_2"
+    elif "Custom" in suffix:
+        return "Custom"
+    elif "Cropped" in suffix:
+        return "Cropped"
+    else:
+        raise ValueError("Region of interest not recognised from .prm file name")
+
+
+# def generate_grouping_workspace_name(bank=None, calfile=None, spec_nos=None) -> str:
+#     if bank == '1':
+#         return "NorthBank_grouping"
+#     elif bank == '2':
+#         return "SouthBank_grouping"
+#     elif calfile:
+#         return "Custom_calfile_grouping"
+#     elif spec_nos:
+#         return "Custom_spectra_grouping"
+
+
+def load_relevant_calibration_files(file_path, output_prefix="engggui") -> str:
     """
     Determine which pdcal output .nxs files to Load from the .prm file selected, and Load them
     :param file_path: path to the calibration .prm file selected
+    :param output_prefix: TODO
+    :return bank if region of interest is one or both banks, None if not
     """
-    # fname has form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
-    # BANKS can be "all_banks, "bank_North", "bank_South", "cropped"
     basepath, fname = path.split(file_path)
     fname_words = fname.split('_')
     prefix = '_'.join(fname_words[0:3])
-    suffix = fname_words[-1]
-    if "banks" in suffix:
-        path_to_load = path.join(basepath, prefix + "_bank_North.nxs")
+    roi = determine_roi_from_prm_fname(fname)
+    bank = None
+    if roi == "BOTH":
+        path_to_load = path.join(basepath, prefix + "_bank_1.nxs")
         mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_bank_1")
-        path_to_load = path.join(basepath, prefix + "_bank_South.nxs")
+        path_to_load = path.join(basepath, prefix + "_bank_2.nxs")
         mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_bank_2")
-    elif "North" in suffix:
-        path_to_load = path.join(basepath, prefix + "_bank_North.nxs")
-        mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_bank_1")
-    elif "South" in suffix:
-        path_to_load = path.join(basepath, prefix + "_bank_South.nxs")
-        mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_bank_2")
-    elif "Custom" in suffix:  # custom calfile case
+        bank = ['1', '2']
+        return bank
+    elif roi == "bank_1":
+        path_to_load = path.join(basepath, prefix + "_bank_1.nxs")
+        bank = ['1']
+    elif roi == "bank_2":
+        path_to_load = path.join(basepath, prefix + "_bank_2.nxs")
+        bank = ['2']
+    elif roi == "Custom":  # custom calfile case, need to load grouping workspace as well
         path_to_load = path.join(basepath, prefix + "_Custom.nxs")
-        mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_Custom")
-    else:  # custom spectra numbers case
+    else:  # custom spectra numbers case, need to load grouping workspace as well
         path_to_load = path.join(basepath, prefix + "_Cropped.nxs")
-        mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_Cropped")
+    mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_" + roi)
+    return bank
+
+
+def load_custom_grouping_workspace(file_path: str) -> (str, str):
+    """
+    TODO
+    :param path_no_ext:
+    :param region_type:
+    :return:
+    """
+    basepath, fname = path.split(file_path)
+    fname_no_ext = fname[:-4]
+    roi = determine_roi_from_prm_fname(fname)
+    if roi == "Cropped":
+        ws_name = "Cropped_spectra_grouping"
+        roi_text = "Custom spectrum numbers"
+    elif roi == "Custom":
+        ws_name = "Custom_calfile_grouping"
+        roi_text = "Custom calfile"
+    elif roi == "BOTH":
+        # no need to load grouping workspaces for single/both bank calibrations at this time
+        return None, "North and South Banks"
+    elif roi == "bank_1":
+        return None, "North Bank"
+    elif roi == "bank_2":
+        return None, "South Bank"
+    else:
+        raise ValueError("Region not recognised")
+    load_path = path.join(basepath, fname_no_ext + '.xml')
+    mantid.LoadDetectorsGroupingFile(InputFile=load_path, OutputWorkspace=ws_name)
+    return ws_name, roi_text
+
+
+def save_grouping_workspace(grp_ws, directory: str, ceria_path: str, vanadium_path: str, instrument: str,
+                            calfile: str = None, spec_nos=None) -> None:
+    if calfile:
+        name = generate_output_file_name(vanadium_path, ceria_path, instrument, "Custom", '.xml')
+    elif spec_nos:
+        name = generate_output_file_name(vanadium_path, ceria_path, instrument, "Cropped", '.xml')
+    else:
+        logger.warning("No Calfile or Spectra given, no grouping workspace saved")
+        return
+    save_path = path.join(directory, name)
+    mantid.SaveDetectorsGrouping(InputWorkspace=grp_ws, OutputFile=save_path)
+
+
+def generate_output_file_name(vanadium_path, ceria_path, instrument, bank, ext='.prm'):
+    """
+    Generate an output filename in the form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
+    :param vanadium_path: Path to vanadium data file
+    :param ceria_path: Path to ceria data file
+    :param instrument: The instrument in use.
+    :param bank: The bank being saved.
+    :param ext: TODO
+    :return: The filename, the vanadium run number, and ceria run number.
+    """
+    vanadium_no = path_handling.get_run_number_from_path(vanadium_path, instrument)
+    ceria_no = path_handling.get_run_number_from_path(ceria_path, instrument)
+    filename = instrument + "_" + vanadium_no + "_" + ceria_no + "_"
+    if bank == "all":
+        filename = filename + "all_banks" + ext
+    elif bank == "north":
+        filename = filename + "bank_1" + ext
+    elif bank == "south":
+        filename = filename + "bank_2" + ext
+    elif bank == "Cropped":
+        filename = filename + "Cropped" + ext
+    elif bank == "Custom":
+        filename = filename + "Custom" + ext
+    else:
+        raise ValueError("Invalid bank name entered")
+    return filename
 
 
 def get_diffractometer_constants_from_workspace(ws):
@@ -151,8 +260,50 @@ def create_spectrum_list_from_string(str_list):
     return int_list
 
 
-def create_custom_grouping_workspace(str_list, sample_raw):
-    grp_ws, _, _ = mantid.CreateGroupingWorkspace(InputWorkspace=sample_raw)  # blank grouping workspace based on inst
+def get_bank_grouping_workspace(bank: int, sample_raw):  # -> GroupingWorkspace
+    """
+    TODO
+    :param bank:
+    :param sample_raw:
+    :return:
+    """
+    if bank == 1:
+        try:
+            if ADS.doesExist("NorthBank_grouping"):
+                return ADS.retrieve("NorthBank_grouping")
+            grp_ws = mantid.LoadDetectorsGroupingFile(InputFile="ENGINX_North_grouping.xml",
+                                                      OutputWorkspace="NorthBank_grouping")
+            return grp_ws
+        except ValueError:
+            logger.notice("NorthBank grouping file not found in user directories - creating one")
+        bank_name = "NorthBank"
+    elif bank == 2:
+        try:
+            if ADS.doesExist("SouthBank_grouping"):
+                return ADS.retrieve("SouthBank_grouping")
+            grp_ws = mantid.LoadDetectorsGroupingFile(InputFile="ENGINX_South_grouping.xml",
+                                                      OutputWorkspace="SouthBank_grouping")
+            return grp_ws
+        except ValueError:
+            logger.notice("SouthBank grouping file not found in user directories - creating one")
+        bank_name = "SouthBank"
+    else:
+        raise ValueError("Invalid bank number given")
+    ws_name = bank_name + "_grouping"
+    grp_ws, _, _ = mantid.CreateGroupingWorkspace(InputWorkspace=sample_raw, GroupNames=bank_name,
+                                                  OutputWorkspace=ws_name)
+    return grp_ws
+
+
+def create_grouping_workspace_from_calfile(calfile, sample_raw):  # -> GroupingWorkspace
+    ws_name = "Custom_calfile_grouping"
+    grp_ws, _, _ = mantid.CreateGroupingWorkspace(InputWorkspace=sample_raw, OldCalFilename=calfile,
+                                                  OutputWorkspace=ws_name)
+    return grp_ws
+
+
+def create_grouping_workspace_from_spectra_list(str_list, sample_raw):
+    grp_ws, _, _ = mantid.CreateGroupingWorkspace(InputWorkspace=sample_raw, OutputWorkspace="Custom_spectra_grouping")
     int_spectrum_numbers = create_spectrum_list_from_string(str_list)
     for spec in int_spectrum_numbers:
         ws_ind = int(spec - 1)
@@ -177,13 +328,16 @@ def default_ceria_expected_peaks(final=False):
     return _CERIA_EXPECTED_PEAKS_FINAL if final else _CERIA_EXPECTED_PEAKS
 
 
-def get_first_unmasked_specno_from_mask_ws(ws):
+def get_first_unmasked_specno_from_mask_ws(ws) -> int:
     num_spectra = ws.getNumberHistograms()
     for specno in range(num_spectra):
         detid = ws.getDetectorIDs(specno)[0]
         val = ws.getValue(detid)
         if val == 0:
             return specno
+    # if no 0 values, no values have been masked so fits have failed
+    # return first specno to avoid error
+    return 0
 
 
 def read_in_expected_peaks(filename, expected_peaks):

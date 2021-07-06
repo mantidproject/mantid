@@ -9,12 +9,8 @@ from os import path, makedirs
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, DiffractionFocussing, \
-    CreateEmptyTableWorkspace, NormaliseByCurrent, \
-    ConvertUnits, Load, SaveNexus, \
-    ApplyDiffCal
-from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks, \
-    generate_tof_fit_dictionary, plot_tof_fit, \
-    create_custom_grouping_workspace, get_first_unmasked_specno_from_mask_ws, load_relevant_pdcal_outputs
+    CreateEmptyTableWorkspace, NormaliseByCurrent, ConvertUnits, Load, SaveNexus, ApplyDiffCal
+import Engineering.EnggUtils as EnggUtils
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -23,8 +19,6 @@ CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
 
 NORTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_North_bank.prm"
 SOUTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_South_bank.prm"
-NORTH_BANK_CAL = "EnginX_NorthBank.cal"
-SOUTH_BANK_CAL = "EnginX_SouthBank.cal"
 
 
 class CalibrationModel(object):
@@ -58,11 +52,11 @@ class CalibrationModel(object):
         except ValueError:
             logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
             return
-        cal_params, ceria_raw = self.run_calibration(ceria_workspace,
-                                                     bank,
-                                                     calfile,
-                                                     spectrum_numbers,
-                                                     full_calib)
+        cal_params, ceria_raw, grp_ws = self.run_calibration(ceria_workspace,
+                                                             bank,
+                                                             calfile,
+                                                             spectrum_numbers,
+                                                             full_calib)
         if plot_output:
             plot_dicts = list()
             if len(cal_params) == 1:
@@ -72,13 +66,12 @@ class CalibrationModel(object):
                     bank_name = "Cropped"
                 else:
                     bank_name = bank
-                plot_dicts.append(generate_tof_fit_dictionary(bank_name))
-                plot_tof_fit(plot_dicts, [bank_name])
+                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary(bank_name))
+                EnggUtils.plot_tof_fit(plot_dicts, [bank_name])
             else:
-                plot_dicts.append(generate_tof_fit_dictionary("bank_1"))
-                plot_dicts.append(generate_tof_fit_dictionary("bank_2"))
-                plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
-
+                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_1"))
+                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_2"))
+                EnggUtils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
         difa = [row['difa'] for row in cal_params]
         difc = [row['difc'] for row in cal_params]
         tzero = [row['tzero'] for row in cal_params]
@@ -93,6 +86,11 @@ class CalibrationModel(object):
         self.update_calibration_params_table(params_table)
 
         calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
+        if calfile:
+            EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument, calfile=calfile)
+        elif spectrum_numbers:
+            EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument,
+                                              spec_nos=spectrum_numbers)
         self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path, instrument,
                                  bank, spectrum_numbers, calfile)
         if rb_num:
@@ -127,8 +125,9 @@ class CalibrationModel(object):
             logger.error("Invalid file selected: ", file_path)
             return
         vanadium_corrections.fetch_correction_workspaces(instrument+van_no, instrument, is_load=True)
-        load_relevant_pdcal_outputs(file_path)
-        return instrument, van_no, ceria_no
+        bank = EnggUtils.load_relevant_calibration_files(file_path)
+        grp_ws_name, roi_text = EnggUtils.load_custom_grouping_workspace(file_path)
+        return instrument, van_no, ceria_no, grp_ws_name, roi_text, bank
 
     @staticmethod
     def update_calibration_params_table(params_table):
@@ -203,7 +202,7 @@ class CalibrationModel(object):
         ConvertUnits(InputWorkspace=ceria_ws, OutputWorkspace=ceria_ws, Target='dSpacing')
 
         kwargs = {
-            "PeakPositions": default_ceria_expected_peaks(final=True),
+            "PeakPositions": EnggUtils.default_ceria_expected_peaks(final=True),
             "TofBinning": [15500, -0.0003, 52000],  # using a finer binning now have better stats
             "PeakWindow": 0.04,
             "MinimumPeakHeight": 0.5,
@@ -212,32 +211,34 @@ class CalibrationModel(object):
             "UseChiSq": True
         }
         cal_output = dict()
-
+        grp_ws = None
         if (spectrum_numbers or calfile) is None:
             if bank == '1' or bank is None:
-                df_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
-                calibrate_region_of_interest(ceria_ws, "bank_1", df_kwarg, cal_output)
+                grp_ws = EnggUtils.get_bank_grouping_workspace(1, ceria_raw)
+                grouping_kwarg = {"GroupingWorkspace": grp_ws}
+                calibrate_region_of_interest(ceria_ws, "bank_1", grouping_kwarg, cal_output)
             if bank == '2' or bank is None:
-                df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
-                calibrate_region_of_interest(ceria_ws, "bank_2", df_kwarg, cal_output)
+                grp_ws = EnggUtils.get_bank_grouping_workspace(2, ceria_raw)
+                grouping_kwarg = {"GroupingWorkspace": grp_ws}
+                calibrate_region_of_interest(ceria_ws, "bank_2", grouping_kwarg, cal_output)
         elif calfile is None:
-            grp_ws = create_custom_grouping_workspace(spectrum_numbers, ceria_raw)
-            df_kwarg = {"GroupingWorkspace": grp_ws}
-            calibrate_region_of_interest(ceria_ws, "Cropped", df_kwarg, cal_output)
+            grp_ws = EnggUtils.create_grouping_workspace_from_spectra_list(spectrum_numbers, ceria_raw)
+            grouping_kwarg = {"GroupingWorkspace": grp_ws}
+            calibrate_region_of_interest(ceria_ws, "Cropped", grouping_kwarg, cal_output)
         else:
-            df_kwarg = {"GroupingFileName": calfile}
-            calibrate_region_of_interest(ceria_ws, "Custom", df_kwarg, cal_output)
-
+            grp_ws = EnggUtils.create_grouping_workspace_from_calfile(calfile, ceria_raw)
+            grouping_kwarg = {"GroupingWorkspace": grp_ws}
+            calibrate_region_of_interest(ceria_ws, "Custom", grouping_kwarg, cal_output)
         cal_params = list()
         # in the output calfile, rows are present for all detids, only read one from the region of interest
         for bank_cal in cal_output:
             mask_ws_name = "engggui_calibration_" + bank_cal + "_mask"
             mask_ws = Ads.retrieve(mask_ws_name)
-            row_no = get_first_unmasked_specno_from_mask_ws(mask_ws)
+            row_no = EnggUtils.get_first_unmasked_specno_from_mask_ws(mask_ws)
             row = cal_output[bank_cal].row(row_no)
             current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
             cal_params.append(current_fit_params)
-        return cal_params, ceria_raw
+        return cal_params, ceria_raw, grp_ws
 
     def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
                             instrument, bank, spectrum_numbers, calfile):
@@ -267,13 +268,13 @@ class CalibrationModel(object):
             kwargs["bank_names"] = ["North"]
 
         def generate_prm_output_file(difa_list, difc_list, tzero_list, bank_name, kwargs_to_pass):
-            file_path = calibration_dir + self._generate_output_file_name(vanadium_path, ceria_path, instrument,
-                                                                          bank=bank_name)
-            write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, bk2bk_params, **kwargs_to_pass)
+            file_path = calibration_dir + EnggUtils.generate_output_file_name(vanadium_path, ceria_path, instrument,
+                                                                              bank=bank_name)
+            EnggUtils.write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, bk2bk_params, **kwargs_to_pass)
 
         def save_pdcal_output_file(ws_name_suffix, bank_name):
-            file_path = calibration_dir + self._generate_output_file_name(vanadium_path, ceria_path, instrument,
-                                                                          bank=bank_name, ext=".nxs")
+            file_path = calibration_dir + EnggUtils.generate_output_file_name(vanadium_path, ceria_path, instrument,
+                                                                              bank=bank_name, ext=".nxs")
             ws_name = "engggui_calibration_" + ws_name_suffix
             SaveNexus(InputWorkspace=ws_name, Filename=file_path)
 
@@ -339,30 +340,3 @@ class CalibrationModel(object):
     @staticmethod
     def _generate_table_workspace_name(bank_num):
         return "engggui_calibration_bank_" + str(bank_num)
-
-    @staticmethod
-    def _generate_output_file_name(vanadium_path, ceria_path, instrument, bank, ext='.prm'):
-        """
-        Generate an output filename in the form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
-        :param vanadium_path: Path to vanadium data file
-        :param ceria_path: Path to ceria data file
-        :param instrument: The instrument in use.
-        :param bank: The bank being saved.
-        :return: The filename, the vanadium run number, and ceria run number.
-        """
-        vanadium_no = path_handling.get_run_number_from_path(vanadium_path, instrument)
-        ceria_no = path_handling.get_run_number_from_path(ceria_path, instrument)
-        filename = instrument + "_" + vanadium_no + "_" + ceria_no + "_"
-        if bank == "all":
-            filename = filename + "all_banks" + ext
-        elif bank == "north":
-            filename = filename + "bank_1" + ext
-        elif bank == "south":
-            filename = filename + "bank_2" + ext
-        elif bank == "Cropped":
-            filename = filename + "Cropped" + ext
-        elif bank == "Custom":
-            filename = filename + "Custom" + ext
-        else:
-            raise ValueError("Invalid bank name entered")
-        return filename

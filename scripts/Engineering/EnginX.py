@@ -156,7 +156,7 @@ def run(ceria_run, do_cal, do_van, full_inst_calib, van_run, calibration_directo
                           None: "all_banks"}
         file_name = os.path.join(calibration_directory,
                                  f"ENGINX_{van_run}_{ceria_run}_{ending_to_load.get(cropped)}.prm")
-        Utils.load_relevant_pdcal_outputs(file_name, "engg")
+        Utils.load_relevant_calibration_files(file_name, "engg")
 
     # if a focus is requested, run the focus
     if focus_run is not None:
@@ -402,7 +402,7 @@ def run_calibration(sample_ws,
             df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
             calibrate_region_of_interest("bank_2", df_kwarg)
     else:
-        grp_ws = Utils.create_custom_grouping_workspace(spectrum_numbers, sample_raw)
+        grp_ws = Utils.create_grouping_workspace_from_spectra_list(spectrum_numbers, sample_raw)
         df_kwarg = {"GroupingWorkspace": grp_ws}
         calibrate_region_of_interest("Cropped", df_kwarg)
 
@@ -697,7 +697,7 @@ def focus_cropped(run_number, van_curves, van_int, full_inst_calib, focus_direct
         # crop on the spectra passed in, focus and save it out
         tof_output_name = tof_output_name.format("_", "cropped")
         dspacing_output_name = tof_output_name + "_dSpacing"
-        grp_ws = Utils.create_custom_grouping_workspace(crop_on, ws_to_focus)
+        grp_ws = Utils.create_grouping_workspace_from_spectra_list(crop_on, ws_to_focus)
         df_kwarg = {"GroupingWorkspace": grp_ws}
         region_calib = 'engg_calibration_cropped'
         _run_focus(input_workspace=sample_ws_clone, tof_output_name=tof_output_name, vanadium_integration_ws=van_integrated_ws,
@@ -744,7 +744,7 @@ def focus_texture_mode(run_number, van_curves, van_int, full_inst_calib, focus_d
         tof_output_name = "engg_focusing_output_ws_texture_bank_{}"
         tof_output_name = tof_output_name.format(bank)
         dspacing_output_name = tof_output_name + "_dSpacing"
-        grp_ws = Utils.create_custom_grouping_workspace(banks[bank], ws_to_focus)
+        grp_ws = Utils.create_grouping_workspace_from_spectra_list(banks[bank], ws_to_focus)
         df_kwarg = {"GroupingWorkspace": grp_ws}
         _run_focus(input_workspace=sample_ws_clone, tof_output_name=tof_output_name, region_calib=full_inst_calib,
                    vanadium_curves_ws=curves_ws_clone, full_calib=full_inst_calib, df_kwarg=df_kwarg,
