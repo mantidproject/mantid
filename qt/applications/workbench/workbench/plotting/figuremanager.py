@@ -403,6 +403,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         else:
             self.fit_browser.show()
             self.toolbar._actions["toggle_superplot"].setEnabled(False)
+            if not self.fit_browser.isVisible():
+                self.toolbar._actions["toggle_superplot"].setEnabled(True)
 
     def superplot_toggle(self):
         """Toggle superplot dockwidgets on/off"""
