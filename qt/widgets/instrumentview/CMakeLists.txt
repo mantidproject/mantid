@@ -15,6 +15,7 @@ set(
   src/GLColor.cpp
   src/GLObject.cpp
   src/InstrumentActor.cpp
+  src/InstrumentDisplay.cpp
   src/InstrumentTreeModel.cpp
   src/InstrumentTreeWidget.cpp
   src/InstrumentWidget.cpp
@@ -101,13 +102,17 @@ set(
   inc/MantidQtWidgets/InstrumentView/DetXMLFile.h
   inc/MantidQtWidgets/InstrumentView/DllOption.h
   inc/MantidQtWidgets/InstrumentView/GLColor.h
+  inc/MantidQtWidgets/InstrumentView/GLDisplay.h
   inc/MantidQtWidgets/InstrumentView/GLObject.h
   inc/MantidQtWidgets/InstrumentView/GridTextureFace.h
 
-  inc/MantidQtWidgets/InstrumentView/IQtDisplay.h
   inc/MantidQtWidgets/InstrumentView/IGLDisplay.h
+  inc/MantidQtWidgets/InstrumentView/IStackedLayout.h
+  inc/MantidQtWidgets/InstrumentView/IInstrumentDisplay.h
+  inc/MantidQtWidgets/InstrumentView/IQtDisplay.h
 
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
+  inc/MantidQtWidgets/InstrumentView/InstrumentDisplay.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidget.h
@@ -120,7 +125,6 @@ set(
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTypes.h
-  inc/MantidQtWidgets/InstrumentView/GLDisplay.h
   inc/MantidQtWidgets/InstrumentView/MaskBinsData.h
   inc/MantidQtWidgets/InstrumentView/OpenGLError.h
   inc/MantidQtWidgets/InstrumentView/PanelsSurface.h
@@ -136,6 +140,7 @@ set(
   inc/MantidQtWidgets/InstrumentView/RotationSurface.h
   inc/MantidQtWidgets/InstrumentView/Shape2D.h
   inc/MantidQtWidgets/InstrumentView/Shape2DCollection.h
+  inc/MantidQtWidgets/InstrumentView/StackedLayout.h
   inc/MantidQtWidgets/InstrumentView/QtDisplay.h
   inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.h
   inc/MantidQtWidgets/InstrumentView/UnwrappedCylinder.h
