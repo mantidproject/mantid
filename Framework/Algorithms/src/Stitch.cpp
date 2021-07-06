@@ -129,6 +129,16 @@ MatrixWorkspace_sptr medianWorkspace(MatrixWorkspace_sptr ws, bool global = fals
   }
 }
 
+/**
+ * @brief Creates a 2D workspace to host the calculated scale factors
+ * @param nSpectra : number of spectra
+ * @param nPoints : number of points, that is input workspaces
+ * @return a pointer to the workspace
+ */
+MatrixWorkspace_sptr initScaleFactorsWorkspace(const size_t nSpectra, const size_t nPoints) {
+  return WorkspaceFactory::Instance().create("Workspace2D", nSpectra, nPoints, nPoints);
+}
+
 } // namespace
 
 namespace Mantid {
@@ -245,12 +255,17 @@ void Stitch::exec() {
   const auto combinationBehaviour = getPropertyValue(COMBINATION_BEHAVIOUR_PROPERTY);
   const auto scaleFactorCalculation = getPropertyValue(SCALE_FACTOR_CALCULATION_PROPERTY);
   const auto inputs = RunCombinationHelper::unWrapGroups(getProperty(INPUT_WORKSPACE_PROPERTY));
+  MatrixWorkspace_sptr scaleFactorsWorkspace;
   if (scaleFactorCalculation == "Manual") {
-    const auto scaled = scaleManual(inputs, getProperty(MANUAL_SCALE_FACTORS_PROPERTY));
+    scaleFactorsWorkspace = initScaleFactorsWorkspace(1, workspaces.size());
+    const auto scaled = scaleManual(inputs, getProperty(MANUAL_SCALE_FACTORS_PROPERTY), scaleFactorsWorkspace);
     setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(scaled));
   } else {
     std::transform(inputs.cbegin(), inputs.cend(), std::back_inserter(workspaces),
                    [](const auto ws) { return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws); });
+    const size_t nSpectrumInScaleFactors =
+        isDefault(TIE_SCALE_FACTORS_PROPERTY) ? workspaces[0]->getNumberHistograms() : 1;
+    scaleFactorsWorkspace = initScaleFactorsWorkspace(nSpectrumInScaleFactors, workspaces.size());
     std::sort(workspaces.begin(), workspaces.end(), compareInterval);
     auto progress = std::make_unique<Progress>(this, 0.0, 1.0, workspaces.size());
     size_t referenceIndex = 0;
@@ -262,19 +277,22 @@ void Stitch::exec() {
     size_t leftIterator = referenceIndex, rightIterator = referenceIndex;
     std::vector<std::string> toStitch(workspaces.size(), "");
     toStitch[referenceIndex] = workspaces[referenceIndex]->getName();
-    auto scaleFactorWorkspace =
-        initScaleFactorsWorkspace(workspaces[referenceIndex]->getNumberHistograms(), workspaces.size());
     while (leftIterator > 0) {
-      toStitch[leftIterator - 1] = scale(workspaces[leftIterator], workspaces[leftIterator - 1]);
+      toStitch[leftIterator - 1] =
+          scale(workspaces[leftIterator], workspaces[leftIterator - 1], scaleFactorsWorkspace, inputs);
       progress->report();
       --leftIterator;
     }
     while (rightIterator < workspaces.size() - 1) {
-      toStitch[rightIterator + 1] = scale(workspaces[rightIterator], workspaces[rightIterator + 1]);
+      toStitch[rightIterator + 1] =
+          scale(workspaces[rightIterator], workspaces[rightIterator + 1], scaleFactorsWorkspace, inputs);
       progress->report();
       ++rightIterator;
     }
     setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(toStitch, toStitch[referenceIndex]));
+  }
+  if (!isDefault(OUTPUT_SCALE_FACTORS_PROPERTY)) {
+    setProperty(OUTPUT_SCALE_FACTORS_PROPERTY, scaleFactorsWorkspace);
   }
 }
 
@@ -301,7 +319,9 @@ MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs, const
   return sorted;
 }
 
-std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScale) {
+std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScale,
+                          Mantid::API::MatrixWorkspace_sptr scaleFactorsWorkspace,
+                          const std::vector<std::string> &inputs) {
   const auto overlap = getOverlap(wsToMatch, wsToScale);
   auto cropper = createChildAlgorithm("CropWorkspaceRagged");
   cropper->setProperty("XMin", std::vector<double>({overlap.first}));
@@ -349,17 +369,32 @@ std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr w
   const std::string scaled = "__scaled_" + wsToScale->getName();
   scaler->setPropertyValue("OutputWorkspace", scaled);
   scaler->execute();
+
+  recordScaleFactor(scaleFactorsWorkspace, median, wsToScale, inputs);
   return scaled;
 }
 
-MatrixWorkspace_sptr Stitch::initScaleFactorsWorkspace(const size_t nSpectra, const size_t nPoints) {
-  return WorkspaceFactory::Instance().create("Workspace2D", nSpectra, nPoints, nPoints);
+void Stitch::recordScaleFactor(Mantid::API::MatrixWorkspace_sptr scaleFactorWorkspace,
+                               Mantid::API::MatrixWorkspace_sptr medianWorkspace,
+                               Mantid::API::MatrixWorkspace_sptr scaledWorkspace,
+                               const std::vector<std::string> &inputs) {
+
+  const auto it = std::find(inputs.cbegin(), inputs.cend(), scaledWorkspace->getName());
+  const size_t index = std::distance(inputs.cbegin(), it);
+  PARALLEL_FOR_IF(threadSafe(*scaleFactorWorkspace))
+  for (size_t i = 0; i < scaleFactorWorkspace->getNumberHistograms(); ++i) {
+    scaleFactorWorkspace->mutableY(i)[index] = medianWorkspace->readY(i)[0];
+  }
 }
 
 std::vector<std::string> Stitch::scaleManual(const std::vector<std::string> &inputs,
-                                             const std::vector<double> &scaleFactors) {
+                                             const std::vector<double> &scaleFactors,
+                                             MatrixWorkspace_sptr scaleFactorsWorkspace) {
   std::vector<std::string> result;
+  auto &outputFactors = scaleFactorsWorkspace->mutableY(0);
+  PARALLEL_FOR_IF(threadSafe(*scaleFactorsWorkspace))
   for (size_t i = 0; i < inputs.size(); ++i) {
+    outputFactors[i] = scaleFactors[i];
     auto scaler = createChildAlgorithm("Scale");
     scaler->setAlwaysStoreInADS(true);
     scaler->setPropertyValue("InputWorkspace", inputs[i]);
@@ -367,6 +402,7 @@ std::vector<std::string> Stitch::scaleManual(const std::vector<std::string> &inp
     const std::string scaled = "__scaled_" + inputs[i];
     scaler->setPropertyValue("OutputWorkspace", scaled);
     scaler->execute();
+    PARALLEL_CRITICAL(StoringScaledWorkspaceNames)
     result.emplace_back(scaled);
   }
   return result;
