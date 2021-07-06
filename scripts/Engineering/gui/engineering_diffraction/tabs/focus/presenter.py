@@ -50,10 +50,9 @@ class FocusPresenter(object):
         """
         Focus data in a separate thread to stop the main GUI from hanging.
         :param focus_paths: List of paths to the files containing the data to focus.
-        :param banks: A list of banks that are to be focused.
         :param plot_output: True if the output should be plotted.
         :param rb_num: The RB Number from the main window (often an experiment id)
-        TODO
+        :param regions_dict: Dictionary containing the regions to focus over, mapping region_name -> grouping_ws_name
         """
         van_path = self.current_calibration.get_vanadium()
         self.worker = AsyncTask(self.model.focus_run,

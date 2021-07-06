@@ -41,10 +41,9 @@ class FocusModel(object):
         Focus some data using the current calibration.
         :param sample_paths: The paths to the data to be focused.
         :param vanadium_path: Path to the vanadium file from the current calibration
-        :param banks: The banks that should be focused.
         :param plot_output: True if the output should be plotted.
         :param instrument: The instrument that the data came from.
-        TODO
+        :param rb_num: Number to signify the user who is running this focus
         :param regions_dict: dict region name -> grp_ws_name, defining region(s) of interest to focus over
         """
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
@@ -139,7 +138,7 @@ class FocusModel(object):
         :param input_workspace: Processed full instrument workspace converted to dSpacing
         :param tof_output_name: Name for the time-of-flight output workspace
         :param curves: Workspace containing the vanadium curves for this region of interest
-        :param grouping_ws: TODO
+        :param grouping_ws: Grouping workspace to pass to DiffractionFocussing
         :param region_calib: Region of interest calibration workspace (table ws output from PDCalibration)
         """
         # rename workspace prior to focussing to avoid errors later
@@ -171,7 +170,7 @@ class FocusModel(object):
         Retrieve vanadium curves for this roi from the ADS if they exist, create them if not
         :param region: String describing region of interest
         :param van_processed_inst_ws: Processed instrument workspace of this vanadium run
-        :param grouping_ws: TODO
+        :param grouping_ws: Grouping workspace for DiffractionFoucussing
         :return: Curves workspace for this roi
         """
         curves_roi_name = CURVES_PREFIX + region
@@ -200,10 +199,11 @@ class FocusModel(object):
     @staticmethod
     def _check_region_grouping_ws_exists(grouping_ws_name: str, inst_ws) -> bool:
         """
-        TODO
-        :param grouping_ws_name:
-        :param inst_ws
-        :return:
+        Check that the required grouping workspace for this focus exists, and if not present for a North/South bank
+        focus, retrieve them from the user directories or create them (expected if first focus with loaded calibration)
+        :param grouping_ws_name: Name of the grouping workspace whose presence in the ADS is being checked
+        :param inst_ws: Workspace containing the instrument data for use in making a bank grouping workspace
+        :return: True if the required workspace exists (or has just been loaded/created), False if not
         """
         if not Ads.doesExist(grouping_ws_name):
             if "North" in grouping_ws_name:

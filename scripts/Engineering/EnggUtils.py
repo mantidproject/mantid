@@ -18,9 +18,9 @@ ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
 
 def determine_roi_from_prm_fname(file_path: str) -> str:
     """
-    TODO
-    :param file_path:
-    :return:
+    Determine the region of interest from the .prm calibration file that is being loaded
+    :param file_path: Path of the .prm file being loaded
+    :return: String describing the region of interest
     """
     # fname has form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
     # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom"
@@ -41,22 +41,11 @@ def determine_roi_from_prm_fname(file_path: str) -> str:
         raise ValueError("Region of interest not recognised from .prm file name")
 
 
-# def generate_grouping_workspace_name(bank=None, calfile=None, spec_nos=None) -> str:
-#     if bank == '1':
-#         return "NorthBank_grouping"
-#     elif bank == '2':
-#         return "SouthBank_grouping"
-#     elif calfile:
-#         return "Custom_calfile_grouping"
-#     elif spec_nos:
-#         return "Custom_spectra_grouping"
-
-
 def load_relevant_calibration_files(file_path, output_prefix="engggui") -> str:
     """
     Determine which pdcal output .nxs files to Load from the .prm file selected, and Load them
     :param file_path: path to the calibration .prm file selected
-    :param output_prefix: TODO
+    :param output_prefix: Prefix to use when defining the output workspace name
     :return bank if region of interest is one or both banks, None if not
     """
     basepath, fname = path.split(file_path)
@@ -87,10 +76,10 @@ def load_relevant_calibration_files(file_path, output_prefix="engggui") -> str:
 
 def load_custom_grouping_workspace(file_path: str) -> (str, str):
     """
-    TODO
-    :param path_no_ext:
-    :param region_type:
-    :return:
+    Determine the grouping workspace that corresponds to the .prm calibration file being loaded, and if this is a
+    non-bank based region, load and return the saved grouping workspace corresponding to the calibration being loaded.
+    :param file_path: Path to the .prm file being loaded
+    :return: Name of the grouping workspace IF custom, and description of roi for use as display text on the Focus tab
     """
     basepath, fname = path.split(file_path)
     fname_no_ext = fname[:-4]
@@ -135,7 +124,7 @@ def generate_output_file_name(vanadium_path, ceria_path, instrument, bank, ext='
     :param ceria_path: Path to ceria data file
     :param instrument: The instrument in use.
     :param bank: The bank being saved.
-    :param ext: TODO
+    :param ext: Extension to be used on the saved file
     :return: The filename, the vanadium run number, and ceria run number.
     """
     vanadium_no = path_handling.get_run_number_from_path(vanadium_path, instrument)
@@ -262,10 +251,11 @@ def create_spectrum_list_from_string(str_list):
 
 def get_bank_grouping_workspace(bank: int, sample_raw):  # -> GroupingWorkspace
     """
-    TODO
-    :param bank:
-    :param sample_raw:
-    :return:
+    Retrieve the grouping workspace for the North/South bank from the user directories, or create a new one from the
+    sample workspace instrument data if not found
+    :param bank: integer denoting the bank, 1 or 2 for North/South respectively
+    :param sample_raw: Workspace containing the instrument data that can be used to create a new grouping workspace
+    :return: The loaded or created grouping workspace
     """
     if bank == 1:
         try:

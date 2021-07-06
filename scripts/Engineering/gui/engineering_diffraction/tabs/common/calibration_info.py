@@ -31,18 +31,22 @@ class CalibrationInfo(object):
 
     def set_roi_info_load(self, banks: list, grp_ws: str, roi_text: str) -> None:
         """
-        TODO
-        :param grp_ws:
-        :param roi_text:
-        :return:
+        Set the region of interest fields, used in the event that a calibration is being loaded rather than created
+        :param banks: list of banks defining chosen roi, None if Custom or Cropped region
+        :param grp_ws: Name of the grouping workspace
+        :param roi_text: Text to signify this region of interest to be displayed on the Focus tab
         """
         self.grouping_ws_name = grp_ws
         self.roi_text = roi_text
         self.bank = banks
 
-    def set_roi_info(self, bank: list = None, calfile: str = None, spec_nos=None) -> None:
+    def set_roi_info(self, bank: str = None, calfile: str = None, spec_nos=None) -> None:
         """
-        TODO
+        Set the region of interest fields using the inputs to the calibration that has just been run
+        :param bank: Single string bank to identify North (1) or South (2) bank. If None & all other params are None,
+        signifies that both banks are to be treated as a region of interest
+        :param calfile: Custom calfile that can be used to define a region of interest. Can be None
+        :param spec_nos: Custom spectrum number list that can be used to define a region of interest. Can be None
         """
         if bank == '1':
             self.grouping_ws_name = "NorthBank_grouping"
@@ -67,7 +71,8 @@ class CalibrationInfo(object):
 
     def create_focus_roi_dictionary(self) -> dict:
         """
-        TODO
+        With the stored region of interest data, create a dictionary for use in the focussing workflow to define the
+        regions to focus and their corresponding grouping workspace
         :return: dict mapping region_name -> grp_ws_name
         """
         regions = dict()
