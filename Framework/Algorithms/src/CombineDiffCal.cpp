@@ -58,18 +58,6 @@ void CombineDiffCal::init() {
                   "MaskedWorkspace for PixelCalibration");
 }
 
-int getTableWorspaceSortDirection(API::ITableWorkspace_sptr ws) {
-  Mantid::API::TableRow row = ws->getFirstRow();
-  int sortDirection = 1;
-  if (ws->rowCount() > 2) {
-    Mantid::API::TableRow lastRow = ws->getRow(ws->rowCount() - 1);
-    if (row.Int(0) > lastRow.Int(0)) {
-      sortDirection = -1;
-    }
-  }
-  return sortDirection;
-}
-
 /// sort the calibration table according increasing values in column "detid"
 API::ITableWorkspace_sptr CombineDiffCal::sortTableWorkspace(DataObjects::TableWorkspace_sptr &table) {
   auto alg = createChildAlgorithm("SortTableWorkspace");
@@ -82,22 +70,6 @@ API::ITableWorkspace_sptr CombineDiffCal::sortTableWorkspace(DataObjects::TableW
   return alg->getProperty("OutputWorkspace");
 }
 
-bool isTableWorkspaceSortedById(DataObjects::TableWorkspace_sptr ws) {
-  Mantid::API::TableRow row = ws->getFirstRow();
-  int sortDirection = getTableWorspaceSortDirection(ws);
-  if (ws->rowCount() > 2) {
-    row.next();
-    Mantid::API::TableRow nextRow = row;
-    row = ws->getFirstRow();
-    do {
-      if (row.Int(0) * sortDirection > nextRow.Int(0) * sortDirection) {
-        return false;
-      }
-    } while (row.next() && nextRow.next());
-  }
-  return true;
-}
-
 std::map<std::string, std::string> CombineDiffCal::validateInputs() {
   std::map<std::string, std::string> results;
 
@@ -106,19 +78,20 @@ std::map<std::string, std::string> CombineDiffCal::validateInputs() {
 
 std::shared_ptr<Mantid::API::TableRow> binarySearchForRow(API::ITableWorkspace_sptr ws, int detid) {
   size_t start = 0;
-  size_t end = ws->rowCount();
-  size_t currentPosition = end / 2;
-  int sortDirection = getTableWorspaceSortDirection(ws);
-  while (end - start > 0) {
+  size_t end = ws->rowCount() - 1;
+  while (end >= start) {
+    size_t currentPosition = start + ((end - start) / 2);
+
     Mantid::API::TableRow currentRow = ws->getRow(currentPosition);
-    if (currentRow.Int(0) * sortDirection > detid * sortDirection) {
-      end = currentPosition;
-    } else if (currentRow.Int(0) * sortDirection < detid * sortDirection) {
-      start = currentPosition;
+
+    currentRow = ws->getRow(currentPosition);
+    if (currentRow.Int(0) > detid) {
+      end = currentPosition - 1;
+    } else if (currentRow.Int(0) < detid) {
+      start = currentPosition + 1;
     } else {
       return std::make_shared<Mantid::API::TableRow>(currentRow);
     }
-    currentPosition = start + ((end - start) / 2);
   }
   return nullptr;
 }
