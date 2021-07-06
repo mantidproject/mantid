@@ -148,20 +148,22 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                         integrated_intensity_error = np.sqrt(
                             2 * np.pi * (A ** 2 * errs ** 2 + sigma ** 2 * errA ** 2 + 2 * A * sigma * cor_As))
 
-                        if scan_log == 'omega':
-                            SetGoniometer(Workspace=__tmp_pw, Axis0=f'{peak_centre},0,1,0,-1', Axis1='chi,0,0,1,-1',
-                                          Axis2='phi,0,1,0,-1',
-                                          EnableLogging=False)
-                        else:
-                            SetGoniometer(Workspace=__tmp_pw, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1',
-                                          Axis2=f'{peak_centre},0,1,0,-1',
-                                          EnableLogging=False)
                     elif method == "CountsWithFitting":
                         y = y[slice(np.searchsorted(x, peak_centre - 2.3548 * sigma * n_fwhm / 2),
                                     np.searchsorted(x, peak_centre + 2.3548 * sigma * n_fwhm / 2))]
                         # subtract out the fitted flat background
                         integrated_intensity = (y.sum() - B * y.size) * scan_step
                         integrated_intensity_error = np.sum(np.sqrt(y)) * scan_step
+
+                    # update the goniometer position based on the fitted peak center
+                    if scan_log == 'omega':
+                        SetGoniometer(Workspace=__tmp_pw, Axis0=f'{peak_centre},0,1,0,-1', Axis1='chi,0,0,1,-1',
+                                      Axis2='phi,0,1,0,-1',
+                                      EnableLogging=False)
+                    else:
+                        SetGoniometer(Workspace=__tmp_pw, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1',
+                                      Axis2=f'{peak_centre},0,1,0,-1',
+                                      EnableLogging=False)
                 else:
                     self.log().warning("Failed to fit workspace {}: Output Status={}, ChiSq={}".format(inWS,
                                                                                                        fit_result.OutputStatus,
@@ -170,6 +172,11 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                     continue
             else:
                 integrated_intensity, integrated_intensity_error = self._counts_integration(data, n_bkgr_pts, scan_step)
+
+                # set the goniometer position to use the average of the scan
+                SetGoniometer(Workspace=__tmp_pw, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1',
+                              Axis2='phi,0,1,0,-1',
+                              EnableLogging=False)
 
             integrated_intensity *= scale
             integrated_intensity_error *= scale
