@@ -219,8 +219,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         if not spectrum_nums and not wksp_indices:
             workspace_names = [ws.name() for ws in workspaces]
             fig.canvas.manager.superplot.set_workspaces(workspace_names)
-        if errors:
-            fig.canvas.manager.superplot.enable_error_bars(True)
+        fig.canvas.manager.superplot.enable_error_bars(errors)
 
     # update and show figure
     return _update_show_figure(fig)
