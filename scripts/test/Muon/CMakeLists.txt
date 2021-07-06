@@ -113,8 +113,6 @@ set ( TEST_PY_FILES
    plot_fit_panes/plot_time_fit_pane_model_test.py
    plot_fit_panes/plot_fit_pane_presenter_test.py
    plot_fit_panes/plot_freq_fit_pane_model_test.py
-   plot_widget/plot_widget_model_test.py
-   plot_widget/plot_widget_presenter_test.py
    plotting_canvas/plot_color_queue_test.py
    plotting_canvas/plotting_canvas_model_test.py
    plotting_canvas/plotting_canvas_presenter_test.py
