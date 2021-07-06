@@ -52,7 +52,7 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._handle_end_x_changed = None
 
         # Disable the background mode combo box while background corrections in still in development
-        # self.mode_combo_box.setEnabled(False)
+        self.mode_combo_box.setEnabled(False)
 
     def set_slot_for_mode_combo_box_changed(self, slot) -> None:
         """Connect the slot for the Background corrections mode combo box."""
