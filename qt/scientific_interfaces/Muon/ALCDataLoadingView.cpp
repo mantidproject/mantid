@@ -165,7 +165,6 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_
 
   m_ui.dataPlot->clear();
   auto _log = log();
-  m_ui.dataPlot->setOverrideAxisLabel(MantidQt::MantidWidgets::AxisID::XBottom, _log.c_str());
   // If x scale is run number, ensure plain format
   if (log() == "run_number")
     m_ui.dataPlot->tickLabelFormat("x", "plain", false);

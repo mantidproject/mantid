@@ -77,13 +77,8 @@ def _get_pre_processing_params(context, run, rebin):
         _setup_rebin_options(context, pre_process_params, run)
 
     try:
-        if context.gui_context['DeadTimeSource'] == 'FromFile':
-            dead_time_table = context.data_context.get_loaded_data_for_run(run)["DataDeadTimeTable"]
-        elif context.gui_context['DeadTimeSource'] == 'FromADS':
-            dead_time_table = context.gui_context['DeadTimeTable']
-        else:
-            dead_time_table = None
-
+        dead_time_table = context.corrections_context.current_dead_time_table_name_for_run(
+            context.data_context.instrument, run)
         if dead_time_table is not None:
             pre_process_params["DeadTimeTable"] = dead_time_table
     except KeyError:

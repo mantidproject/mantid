@@ -153,6 +153,7 @@ class HB3AIntegratePeaks(PythonAlgorithm):
                 peak = peaks.getPeak(p)
                 lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
                 peak.setIntensity(peak.getIntensity() * lorentz)
+                peak.setSigmaIntensity(peak.getSigmaIntensity() * lorentz)
 
         if remove_0_intensity:
             FilterPeaks(InputWorkspace=peaks_ws_name, OutputWorkspace=peaks_ws_name,

@@ -319,7 +319,7 @@ void LoadBBY::exec() {
       if (!roi[i])
         maskIndexList[maskIndex++] = i;
 
-    API::IAlgorithm_sptr maskingAlg = createChildAlgorithm("MaskDetectors");
+    auto maskingAlg = createChildAlgorithm("MaskDetectors");
     maskingAlg->setProperty("Workspace", eventWS);
     maskingAlg->setProperty("WorkspaceIndexList", maskIndexList);
     maskingAlg->executeAsChildAlg();
@@ -366,7 +366,7 @@ void LoadBBY::exec() {
     AddSinglePointTimeSeriesProperty(logManager, time_str, x.first, x.second);
   }
 
-  API::IAlgorithm_sptr loadInstrumentAlg = createChildAlgorithm("LoadInstrument");
+  auto loadInstrumentAlg = createChildAlgorithm("LoadInstrument");
   loadInstrumentAlg->setProperty("Workspace", eventWS);
   loadInstrumentAlg->setPropertyValue("InstrumentName", "BILBY");
   loadInstrumentAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
@@ -738,6 +738,7 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::F
     return;
 
   int state = 0;
+  int invalidEvents = 0;
   uint32_t c;
   while ((c = static_cast<uint32_t>(tarFile.read_byte())) != static_cast<uint32_t>(-1)) {
 
@@ -783,7 +784,10 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::F
         tof = 0.0;
         eventProcessor.newFrame();
       } else if ((x >= HISTO_BINS_X) || (y >= HISTO_BINS_Y)) {
-        // ignore
+        // cannot ignore the dt contrbition even if the event
+        // is out of bounds as it is used in the encoding process
+        tof += static_cast<int>(dt) * 0.1;
+        invalidEvents++;
       } else {
         // conversion from 100 nanoseconds to 1 microsecond
         tof += static_cast<int>(dt) * 0.1;
@@ -793,6 +797,9 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::F
 
       progTracker.update(tarFile.selected_position());
     }
+  }
+  if (invalidEvents > 0) {
+    g_log.warning() << "BILBY loader dropped " << invalidEvents << " invalid event(s)" << std::endl;
   }
 }
 

@@ -36,9 +36,9 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.plot_guess = True
         self.assertTrue(self.view.plot_guess)
 
-    def test_that_the_undo_fit_button_can_be_enabled_as_expected(self):
+    def test_that_the_undo_fit_button_can_be_enabled_as_expected_when_the_number_of_undos_is_above_zero(self):
         self.view.enable_view()
-        self.view.enable_undo_fit(True)
+        self.view.set_number_of_undos(2)
         self.assertTrue(self.view.fit_controls.undo_fit_button.isEnabled())
 
     def test_that_update_global_fit_status_label_will_display_no_fit_if_the_success_list_is_empty(self):
@@ -63,13 +63,14 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(self.view.fit_controls.global_fit_status_label.text(), "2 of 5 fits failed")
 
     def test_that_the_view_has_been_initialized_with_the_raw_data_option_shown_when_it_is_not_a_frequency_domain(self):
-        self.view = BasicFittingView(is_frequency_domain=False)
+        self.view = BasicFittingView()
         self.view.show()
 
         self.assertTrue(not self.view.fit_function_options.fit_options_table.isRowHidden(RAW_DATA_TABLE_ROW))
 
     def test_that_the_view_has_been_initialized_with_the_raw_data_option_hidden_when_it_is_a_frequency_domain(self):
-        self.view = BasicFittingView(is_frequency_domain=True)
+        self.view = BasicFittingView()
+        self.view.hide_fit_raw_checkbox()
         self.view.show()
 
         self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(RAW_DATA_TABLE_ROW))
@@ -103,7 +104,7 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.view.set_datasets_in_function_browser(dataset_names)
 
-        self.assertEqual(self.view.number_of_datasets(), 3)
+        self.assertEqual(self.view.fit_function_options.number_of_datasets(), 3)
 
     def test_that_set_current_dataset_index_will_set_the_current_dataset_index_in_the_function_browser(self):
         dataset_names = ["Name1", "Name2", "Name3"]
@@ -140,28 +141,12 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assertEqual(self.view.start_x, new_value)
 
-    def test_that_the_start_x_will_not_be_set_to_a_different_value_if_it_is_larger_than_the_end_x(self):
-        new_start_x = 6.0
-
-        self.view.end_x = 5.0
-        self.view.start_x = new_start_x
-
-        self.assertNotEqual(self.view.start_x, new_start_x)
-
     def test_that_it_is_possible_to_set_the_end_x_to_a_different_value(self):
         new_value = 5.0
 
         self.view.end_x = new_value
 
         self.assertEqual(self.view.end_x, new_value)
-
-    def test_that_the_end_x_will_not_be_set_to_a_different_value_if_it_is_smaller_than_the_start_x(self):
-        new_end_x = 4.0
-
-        self.view.start_x = 5.0
-        self.view.end_x = new_end_x
-
-        self.assertNotEqual(self.view.end_x, new_end_x)
 
     def test_that_the_fit_to_raw_checkbox_value_can_be_changed_as_expected(self):
         self.view.fit_to_raw = False

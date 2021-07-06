@@ -7,6 +7,9 @@
 """
 Script to generate the installer for cxxtest.
 """
+import cxxtest
+import glob
+import os
 
 classifiers = """\
 Development Status :: 4 - Beta
@@ -19,9 +22,6 @@ Programming Language :: Python
 Topic :: Software Development :: Libraries :: Python Modules
 """
 
-import cxxtest
-import glob
-import os
 
 def _find_packages(path):
     """
@@ -35,11 +35,12 @@ def _find_packages(path):
     else:
         pkg_list.append(path)
     for root, dirs, files in os.walk(path, topdown=True):
-      if root in pkg_list and "__init__.py" in files:
-         for name in dirs:
-           if os.path.exists(root+os.sep+name+os.sep+"__init__.py"):
-              pkg_list.append(root+os.sep+name)
+        if root in pkg_list and "__init__.py" in files:
+            for name in dirs:
+                if os.path.exists(root+os.sep+name+os.sep+"__init__.py"):
+                    pkg_list.append(root+os.sep+name)
     return map(lambda x:x.replace(os.sep,"."), pkg_list)
+
 
 try:
     from setuptools import setup
@@ -64,4 +65,3 @@ setup(name="cxxtest",
       keywords=['utility'],
       scripts=scripts
       )
-

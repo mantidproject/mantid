@@ -48,6 +48,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         # gui observers
         self._setup_gui_observers()
         self._setup_view_connections()
+        self.enable_observer = GenericObserver(self.enableView)
+        self.disable_observer = GenericObserver(self.disableView)
 
         self.update_view_from_model()
 
@@ -71,7 +73,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             self.handle_added_or_removed_group_or_pair_to_plot)
         self.instrument_observer = GenericObserver(self.handle_instrument_changed)
         self.plot_selected_fit_observer = GenericObserverWithArgPassing(self.handle_plot_selected_fits)
-        self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
+        self.remove_plot_guess_observer = GenericObserver(self.handle_remove_plot_guess)
+        self.update_plot_guess_observer = GenericObserver(self.handle_update_plot_guess)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_changed)
         self.new_data_loaded_observer = GenericObserver(self.handle_data_updated)
         self.plot_type_changed_notifier = GenericObservable()
@@ -326,7 +329,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         if type(workspace_names) != list:
             workspace_list = [workspace_names]
         for workspace_name in workspace_list:
-            fit_raw_data = self.context.fitting_context.fit_raw
+            fit_raw_data = self.context.fitting_context.fit_to_raw
             # binned data but want raw plot
             if plot_raw and not fit_raw_data:
                 ws_list.append(remove_rebin_from_name(workspace_name))
@@ -337,14 +340,13 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
                 ws_list.append(workspace_name)
         return ws_list
 
-    def handle_plot_guess_changed(self):
-        if self.context.fitting_context.guess_ws is None:
-            return
+    def handle_remove_plot_guess(self):
+        if self.context.fitting_context.guess_workspace_name is not None:
+            self._figure_presenter.remove_workspace_names_from_plot([self.context.fitting_context.guess_workspace_name])
 
-        if self.context.fitting_context.plot_guess:
-            self._figure_presenter.plot_guess_workspace(self.context.fitting_context.guess_ws)
-        else:
-            self._figure_presenter.remove_workspace_names_from_plot([self.context.fitting_context.guess_ws])
+    def handle_update_plot_guess(self):
+        if self.context.fitting_context.guess_workspace_name is not None and self.context.fitting_context.plot_guess:
+            self._figure_presenter.plot_guess_workspace(self.context.fitting_context.guess_workspace_name)
 
     def plot_all_selected_data(self, autoscale, hold_on):
         """Plots all selected run data e.g runs and groups
@@ -354,10 +356,11 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
                                                                                      self._view.get_plot_type())
 
+        # Disables plot view when clear all is pressed
         if workspace_list:
-            self._view.setEnabled(True)
+            self.enableView()
         else:
-            self._view.setEnabled(False)
+            self.disableView()
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=hold_on, autoscale=autoscale)
 
     def _check_if_counts_and_groups_selected(self):
@@ -368,3 +371,9 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
                 'Pair workspaces have no counts workspace, plotting Asymmetry')
             return True
         return False
+
+    def enableView(self):
+        self._view.setEnabled(True)
+
+    def disableView(self):
+        self._view.setEnabled(False)

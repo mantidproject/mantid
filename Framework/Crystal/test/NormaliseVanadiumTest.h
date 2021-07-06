@@ -53,7 +53,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   loadInst->initialize();
   loadInst->setPropertyValue("Filename", "unit_testing/MINITOPAZ_Definition.xml");
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
-  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
+  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
   loadInst->execute();
   delete loadInst;
   // Populate the instrument parameters in this workspace - this works around
@@ -89,7 +89,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   TS_ASSERT_EQUALS(retVal->getInstrument()->getName(), "MINITOPAZ");
   std::map<int, Geometry::IDetector_const_sptr> dets;
   retVal->getInstrument()->getDetectors(dets);
-  TS_ASSERT_EQUALS(dets.size(), 100 * 100);
+  TS_ASSERT_EQUALS(dets.size(), 100 * 100 + 2);
 
   return retVal;
 }
@@ -104,7 +104,7 @@ IAlgorithm_sptr createAlgorithm() {
   MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
   inputW->getAxis(0)->setUnit("Wavelength");
 
-  IAlgorithm_sptr alg = std::make_shared<NormaliseVanadium>();
+  auto alg = std::make_shared<NormaliseVanadium>();
   TS_ASSERT_THROWS_NOTHING(alg->initialize())
   TS_ASSERT(alg->isInitialized())
   alg->setProperty("InputWorkspace", inputW);

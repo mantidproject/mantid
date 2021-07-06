@@ -121,17 +121,20 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values,
 
 def strip_bragg_peaks(ws_list_to_correct):
     # TODO move hardcoded spline values into adv. config
+    if len(ws_list_to_correct) == 14:
+        # Strip peaks on banks 1-12 (or 0-11 using 0 based index)
+        for index, ws in enumerate(ws_list_to_correct[:12]):
+            ws_list_to_correct[index] = mantid.StripPeaks(InputWorkspace=ws, OutputWorkspace=ws, FWHM=15, Tolerance=8)
 
-    # Strip peaks on banks 1-12 (or 0-11 using 0 based index)
-    for index, ws in enumerate(ws_list_to_correct[:12]):
-        ws_list_to_correct[index] = mantid.StripPeaks(InputWorkspace=ws, OutputWorkspace=ws, FWHM=15, Tolerance=8)
+        # Banks 13 / 14 have broad peaks which are missed so compensate for that and run twice as peaks are very broad
+        for _ in range(2):
+            ws_list_to_correct[12] = mantid.StripPeaks(InputWorkspace=ws_list_to_correct[12],
+                                                       OutputWorkspace=ws_list_to_correct[12], FWHM=100, Tolerance=10)
 
-    # Banks 13 / 14 have broad peaks which are missed so compensate for that and run twice as peaks are very broad
-    for _ in range(2):
-        ws_list_to_correct[12] = mantid.StripPeaks(InputWorkspace=ws_list_to_correct[12],
-                                                   OutputWorkspace=ws_list_to_correct[12], FWHM=100, Tolerance=10)
-
-        ws_list_to_correct[13] = mantid.StripPeaks(InputWorkspace=ws_list_to_correct[13],
-                                                   OutputWorkspace=ws_list_to_correct[13], FWHM=60, Tolerance=10)
+            ws_list_to_correct[13] = mantid.StripPeaks(InputWorkspace=ws_list_to_correct[13],
+                                                       OutputWorkspace=ws_list_to_correct[13], FWHM=60, Tolerance=10)
+    else:
+        for index, ws in enumerate(ws_list_to_correct):
+            ws_list_to_correct[index] = mantid.StripPeaks(InputWorkspace=ws, OutputWorkspace=ws, FWHM=15, Tolerance=8)
 
     return ws_list_to_correct

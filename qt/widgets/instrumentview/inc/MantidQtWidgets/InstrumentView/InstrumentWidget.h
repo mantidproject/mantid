@@ -7,8 +7,10 @@
 #pragma once
 
 #include "DllOption.h"
+#include "IGLDisplay.h"
+#include "IQtDisplay.h"
 #include "InstrumentWidgetTypes.h"
-#include "MantidGLWidget.h"
+#include "QtConnect.h"
 #include "UnwrappedSurface.h"
 
 #include "MantidAPI/AlgorithmObserver.h"
@@ -55,8 +57,17 @@ class InstrumentWidgetPickTab;
 class InstrumentWidgetTreeTab;
 class CollapsiblePanel;
 class XIntegrationControl;
-class SimpleWidget;
+class QtDisplay;
 class ProjectionSurface;
+
+namespace Detail {
+struct Dependencies {
+  std::unique_ptr<IQtDisplay> qtDisplay = nullptr;
+  std::unique_ptr<IGLDisplay> glDisplay = nullptr;
+  std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
+};
+
+} // namespace Detail
 
 /**
 \class  InstrumentWidget
@@ -71,17 +82,17 @@ http://www.mantidproject.org/MantidPlot:_Instrument_View
 and needs to be updated whenever the instrument view functionality changes.
 
 */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidget
-    : public QWidget,
-      public MantidQt::API::WorkspaceObserver,
-      public Mantid::API::AlgorithmObserver,
-      public InstrumentWidgetTypes {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidget : public QWidget,
+                                                            public MantidQt::API::WorkspaceObserver,
+                                                            public Mantid::API::AlgorithmObserver,
+                                                            public InstrumentWidgetTypes {
   Q_OBJECT
 
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
 
 public:
+  using Dependencies = Detail::Dependencies;
   enum SurfaceType {
     FULL3D = 0,
     CYLINDRICAL_X,
@@ -95,10 +106,9 @@ public:
   };
   enum Tab { RENDER = 0, PICK, MASK, TREE };
 
-  explicit InstrumentWidget(const QString &wsName, QWidget *parent = nullptr,
-                            bool resetGeometry = true, bool autoscaling = true,
-                            double scaleMin = 0.0, double scaleMax = 0.0,
-                            bool setDefaultView = true);
+  explicit InstrumentWidget(const QString &wsName, QWidget *parent = nullptr, bool resetGeometry = true,
+                            bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
+                            bool setDefaultView = true, Dependencies deps = Dependencies());
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;
@@ -128,9 +138,7 @@ public:
   void setScaleType(ColorMap::ScaleType type);
   void setExponent(double nth_power);
   void setViewType(const QString &type);
-  const InstrumentActor &getInstrumentActor() const {
-    return *m_instrumentActor;
-  }
+  const InstrumentActor &getInstrumentActor() const { return *m_instrumentActor; }
   InstrumentActor &getInstrumentActor() { return *m_instrumentActor; }
   void resetInstrument(bool resetGeometry);
   void resetSurface();
@@ -144,24 +152,20 @@ public:
   InstrumentWidgetPickTab *getPickTab(const Tab tab) const;
 
   /// Get a filename for saving
-  QString getSaveFileName(const QString &title, const QString &filters,
-                          QString *selectedFilter = nullptr);
+  QString getSaveFileName(const QString &title, const QString &filters, QString *selectedFilter = nullptr);
   /// Get a name for settings group
   QString getSettingsGroupName() const;
   /// Get a name for a instrument-specific settings group
   QString getInstrumentSettingsGroupName() const;
 
   bool hasWorkspace(const std::string &wsName) const;
-  void handleWorkspaceReplacement(
-      const std::string &wsName,
-      const std::shared_ptr<Mantid::API::Workspace> &workspace);
-  void replaceWorkspace(const std::string &newWs,
-                        const std::string &newInstrumentWindowName);
+  void handleWorkspaceReplacement(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &workspace);
+  void replaceWorkspace(const std::string &newWs, const std::string &newInstrumentWindowName);
 
   /// Get the currently selected tab index
   int getCurrentTab() const;
   /// Decides whether the given tab is the tab currently open
-  bool isCurrentTab(InstrumentWidgetTab* tab) const;
+  bool isCurrentTab(InstrumentWidgetTab *tab) const;
   /// Load the widget from a Mantid project file.
   void loadFromProject(const std::string &lines);
   /// Save the widget to a Mantid projecy file.
@@ -175,10 +179,8 @@ public:
 
 signals:
   void enableLighting(bool /*_t1*/);
-  void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/,
-              bool /*_t3*/);
-  void createDetectorTable(const QString & /*_t1*/,
-                           const std::vector<int> & /*_t2*/, bool /*_t3*/);
+  void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/, bool /*_t3*/);
+  void createDetectorTable(const QString & /*_t1*/, const std::vector<int> & /*_t2*/, bool /*_t3*/);
   void needSetIntegrationRange(double /*_t1*/, double /*_t2*/);
   void surfaceTypeChanged(int /*_t1*/);
   void colorMapChanged();
@@ -247,8 +249,8 @@ private slots:
   void helpClicked();
 
 protected:
-  void init(bool resetGeometry, bool autoscaling, double scaleMin,
-            double scaleMax, bool setDefaultView, bool resetActor = true);
+  void init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax, bool setDefaultView,
+            bool resetActor = true);
   /// Set newly created projection surface
   void setSurface(ProjectionSurface *surface);
   QWidget *createInstrumentTreeTab(QTabWidget *ControlsTab);
@@ -256,8 +258,7 @@ protected:
   void saveSettings();
 
   QString asString(const std::vector<int> &numbers) const;
-  QString confirmDetectorOperation(const QString &opName,
-                                   const QString &inputWS, int ndets);
+  QString confirmDetectorOperation(const QString &opName, const QString &inputWS, int ndets);
   /// Set background color of the instrument display
   void setBackgroundColor(const QColor &color);
   /// Get the surface info string
@@ -286,9 +287,9 @@ protected:
   InstrumentWidgetPickTab *m_pickTab;
   XIntegrationControl *m_xIntegration;
   /// The OpenGL widget to display the instrument
-  MantidGLWidget *m_InstrumentDisplay;
+  std::unique_ptr<IGLDisplay> m_glDisplay;
   /// The simple widget to display the instrument
-  SimpleWidget *m_simpleDisplay;
+  std::unique_ptr<IQtDisplay> m_qtDisplay;
 
   // Context menu actions
   QAction *m_clearPeakOverlays, *m_clearAlignment;
@@ -303,7 +304,7 @@ protected:
   bool m_useOpenGL;
   /// 3D view or unwrapped
   SurfaceType m_surfaceType;
-  /// Stacked layout managing m_InstrumentDisplay and m_simpleDisplay
+  /// Stacked layout managing m_glDisplay and m_qtDisplay
   QStackedLayout *m_instrumentDisplayLayout;
   /// spectra index id
   int mSpectraIDSelected;
@@ -329,14 +330,11 @@ protected:
 
 private:
   /// ADS notification handlers
-  void preDeleteHandle(
-      const std::string &ws_name,
-      const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
-  void afterReplaceHandle(
-      const std::string &wsName,
-      const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
-  void renameHandle(const std::string &oldName,
-                    const std::string &newName) override;
+  void preDeleteHandle(const std::string &ws_name,
+                       const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
+  void afterReplaceHandle(const std::string &wsName,
+                          const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
+  void renameHandle(const std::string &oldName, const std::string &newName) override;
   void clearADSHandle() override;
   /// overlay a peaks workspace on the projection surface
   void overlayPeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &ws);
@@ -356,6 +354,9 @@ private:
   bool m_wsReplace;
   QPushButton *m_help;
   QVBoxLayout *m_mainLayout;
+
+  /// Wrapper around Qt connect function so we can mock it
+  std::unique_ptr<QtConnect> m_qtConnect;
 };
 
 } // namespace MantidWidgets
