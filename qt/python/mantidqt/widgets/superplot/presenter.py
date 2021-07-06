@@ -29,6 +29,11 @@ class SuperplotPresenter:
         self._canvas = canvas
         self.parent = parent
 
+        # fix size of hold button with the longest text
+        self._view.set_hold_button_text(self.HOLD_BUTTON_TEXT_CHECKED)
+        width, height = self._view.get_hold_button_size()
+        self._view.set_hold_button_size(width, height)
+
         if self.parent:
             self.parent.plot_updated.connect(self.on_plot_updated)
 

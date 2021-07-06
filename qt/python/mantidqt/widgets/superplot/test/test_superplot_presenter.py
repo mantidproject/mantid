@@ -42,6 +42,7 @@ class SuperplotPresenterTest(unittest.TestCase):
             ws, sp
         self.m_axes.get_tracked_artists.return_value = [a1]
         self.m_view.get_selection.return_value = {}
+        self.m_view.get_hold_button_size.return_value = 0,0
         self.presenter = SuperplotPresenter(self.m_canvas)
         self.m_view.reset_mock()
         self.m_model.reset_mock()

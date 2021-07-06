@@ -370,6 +370,26 @@ class SuperplotView(QWidget):
         """
         return self._bottom_view.holdButton.text()
 
+    def set_hold_button_size(self, width, height):
+        """
+        Set the hold button fixed size.
+
+        Args:
+            width (int): button width
+            height (int): button height
+        """
+        self._bottom_view.holdButton.setFixedSize(width, height)
+
+    def get_hold_button_size(self):
+        """
+        Get the hold button size.
+
+        Returns:
+            (int, int): button width and height
+        """
+        size = self._bottom_view.holdButton.size()
+        return size.width(), size.height()
+
     def set_spectrum_selection_disabled(self, state):
         """
         Disable/enable the spectrum selection widgets (slider and spinbox).
