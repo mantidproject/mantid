@@ -10,7 +10,6 @@ set(
         ConvFitDataTablePresenter.cpp
         ConvFitModel.cpp
         DensityOfStates.cpp
-        ExternalPlotter.cpp
         FitStatusWidget.cpp
         FqFitAddWorkspaceDialog.cpp
         FqFitDataPresenter.cpp
@@ -108,7 +107,6 @@ set(
         ConvFitDataTablePresenter.h
         CorrectionsTab.h
         DensityOfStates.h
-        ExternalPlotter.h
         FqFitAddWorkspaceDialog.h
         FqFitDataPresenter.h
         FqFitDataTablePresenter.h
@@ -276,7 +274,7 @@ mtd_add_qt_library(
         PythonInterfaceCore
         ${POCO_LIBRARIES}
         ${Boost_LIBRARIES}
-        ${PYTHON_LIBRARIES}
+        Python::Python
         Qt5::Concurrent
         Qt5::Xml
         MTD_QT_LINK_LIBS

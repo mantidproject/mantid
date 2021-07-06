@@ -7,12 +7,14 @@
 import unittest
 from unittest import mock
 
+from mantid.api import WorkspaceFactory
 from Muon.GUI.Common.ADSHandler.workspace_naming import TF_ASYMMETRY_PREFIX
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel, TILED_BY_GROUP_TYPE, TILED_BY_RUN_TYPE
 from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
 @start_qapplication
@@ -80,10 +82,13 @@ class PlotWidgetModelTest(unittest.TestCase):
                                                                                              True, "Re")
 
     def test_get_fit_workspaces_to_plot_returns_correctly(self):
+        workspace = WorkspaceFactory.create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+        table_workspace = WorkspaceFactory.createTable()
         fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
-                             ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
-        expected_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'] * 2
+                             [StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA', workspace)],
+                             StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA; Fitted', table_workspace),
+                             mock.MagicMock())
+        expected_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA'] * 2
         expected_indices = [1, 2]
 
         workspaces, indices = self.model.get_fit_workspace_and_indices(fit)
@@ -92,11 +97,15 @@ class PlotWidgetModelTest(unittest.TestCase):
         self.assertEqual(expected_indices, indices)
 
     def test_get_fit_workspaces_to_plot_returns_correctly_for_tf_fit(self):
+        workspace = WorkspaceFactory.create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+        table_workspace = WorkspaceFactory.createTable()
         fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
-                             ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted' + TF_ASYMMETRY_PREFIX],
+                             [StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA;' + TF_ASYMMETRY_PREFIX,
+                                                     workspace)],
+                             StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA; Fitted' + TF_ASYMMETRY_PREFIX,
+                                                    table_workspace), mock.MagicMock(),
                              tf_asymmetry_fit=True)
-        expected_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted' + TF_ASYMMETRY_PREFIX] * 2
+        expected_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA;' + TF_ASYMMETRY_PREFIX] * 2
         expected_indices = [3, 2]
 
         workspaces, indices = self.model.get_fit_workspace_and_indices(fit)
@@ -105,13 +114,16 @@ class PlotWidgetModelTest(unittest.TestCase):
         self.assertEqual(expected_indices, indices)
 
     def test_get_fit_workspaces_to_plot_returns_correctly_when_plot_diff_is_False(self):
+        workspace = WorkspaceFactory.create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+        table_workspace = WorkspaceFactory.createTable()
         fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
-                             ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
-        expected_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted']
+                             [StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA', workspace)],
+                             StaticWorkspaceWrapper('MUSR62260; Group; bottom; Asymmetry; MA; Fitted', table_workspace),
+                             mock.MagicMock())
+        expected_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA']
         expected_indices = [1]
 
-        workspaces, indices = self.model.get_fit_workspace_and_indices(fit,False)
+        workspaces, indices = self.model.get_fit_workspace_and_indices(fit, False)
 
         self.assertEqual(workspaces, expected_workspaces)
         self.assertEqual(expected_indices, indices)

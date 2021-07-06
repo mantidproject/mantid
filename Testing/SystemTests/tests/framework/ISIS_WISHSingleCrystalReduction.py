@@ -38,7 +38,7 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
     def cleanup(self):
         ADS.clear()
         try:
-            os.path.remove(self._peaks_file)
+            os.remove(self._peaks_file)
         except:
             pass
 
@@ -162,7 +162,7 @@ class WISHProcessVanadiumForNormalisationTest(MantidSystemTest):
         # correct Vanadium run for absorption
         van = Divide(LHSWorkspace=van, RHSWorkspace=abs_cor, OutputWorkspace=van)
         # smooth data
-        SmoothNeighbours(InputWorkspace=van, OutputWorkspace=van, Radius=3)
+        SmoothNeighbours(InputWorkspace=van, OutputWorkspace=van, Radius=3, NumberOfNeighbours=6)
         SmoothData(InputWorkspace=van, OutputWorkspace=van, NPoints=300)
 
     def validate(self):
@@ -211,7 +211,7 @@ class WISHIntegrateSatellitePeaksTest(MantidSystemTest):
     def cleanup(self):
         ADS.clear()
         try:
-            os.path.remove(self._peaks_file)
+            os.remove(self._filepath)
         except:
             pass
 

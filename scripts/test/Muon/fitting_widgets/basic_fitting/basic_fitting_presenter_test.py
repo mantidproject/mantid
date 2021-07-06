@@ -83,7 +83,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.presenter.handle_ads_clear_or_remove_workspace_event()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.presenter.disable_fitting_notifier.notify_subscribers.assert_called_once_with()
+        self.view.disable_view.assert_called_once_with()
 
     def test_that_handle_plot_mode_changed_will_update_the_plot_guess_if_in_fitting_mode(self):
         self.presenter.handle_plot_mode_changed(PlotMode.Fitting)
@@ -99,46 +99,43 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.mock_view_end_x.assert_called_once_with(self.end_x)
 
     def test_that_handle_new_data_loaded_will_attempt_to_reset_all_the_data_and_enable_the_gui(self):
-        self.presenter.clear_cached_fit_functions = mock.Mock()
+        self.presenter.clear_undo_data = mock.Mock()
 
         self.presenter.handle_new_data_loaded()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
         self.mock_view_plot_guess.assert_called_once_with(False)
         self.mock_model_plot_guess.assert_called_once_with(False)
-        self.presenter.clear_cached_fit_functions.assert_called_with()
+        self.presenter.clear_undo_data.assert_called_with()
         self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_new_data_loaded_will_disable_the_tab_if_no_data_is_loaded(self):
+        self.presenter.clear_undo_data = mock.Mock()
         self.mock_model_number_of_datasets = mock.PropertyMock(return_value=0)
         type(self.model).number_of_datasets = self.mock_model_number_of_datasets
-        self.presenter.clear_cached_fit_functions = mock.Mock()
 
         self.presenter.handle_new_data_loaded()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
         self.mock_view_plot_guess.assert_called_once_with(False)
         self.mock_model_plot_guess.assert_called_once_with(False)
-        self.presenter.clear_cached_fit_functions.assert_called_with()
-        self.presenter.disable_fitting_notifier.notify_subscribers.assert_called_once_with()
+        self.presenter.clear_undo_data.assert_called_with()
+        self.view.disable_view.assert_called_once_with()
 
     def test_that_handle_plot_guess_changed_will_update_plot_guess_using_the_model(self):
         self.presenter.handle_plot_guess_changed()
         self.model.update_plot_guess.assert_called_once_with()
 
     def test_that_handle_undo_fit_clicked_will_attempt_to_reset_the_fit_data_and_notify_that_the_data_has_changed(self):
-        self.presenter.clear_cached_fit_functions = mock.Mock()
         self.presenter.update_fit_function_in_view_from_model = mock.Mock()
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
 
         self.presenter.handle_undo_fit_clicked()
 
-        self.model.use_cached_function.assert_called_once_with()
-        self.presenter.clear_cached_fit_functions.assert_called_once_with()
+        self.model.undo_previous_fit.assert_called_once_with()
         self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
         self.model.update_plot_guess.assert_called_once_with()
-        self.model.remove_latest_fit_from_context.assert_called_once_with()
         self.presenter.selected_fit_results_changed.notify_subscribers.assert_called_once_with([])
 
     def test_that_handle_fit_clicked_will_show_a_warning_if_no_data_is_loaded(self):
@@ -165,7 +162,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.presenter.handle_fit_clicked()
 
-        self.model.cache_the_current_fit_functions.assert_called_once_with()
+        self.model.save_current_fit_function_to_undo_data.assert_called_once_with()
         self.presenter._perform_fit.assert_called_once_with()
 
     def test_that_handle_started_will_disable_the_tab(self):
@@ -179,7 +176,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.mock_presenter_get_fit_results.assert_called_once_with()
         self.presenter.handle_fitting_finished.assert_called_once_with(self.fit_function, self.fit_status,
                                                                        self.chi_squared)
-        self.view.enable_undo_fit.assert_called_once_with(True)
+        self.view.set_number_of_undos.assert_called_once_with(1)
         self.mock_view_plot_guess.assert_called_once_with(False)
         self.mock_model_plot_guess.assert_called_once_with(False)
 
@@ -282,7 +279,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.presenter.handle_start_x_updated()
 
-        calls = [mock.call(), mock.call(), mock.call(0.0), mock.call(), mock.call(), mock.call()]
+        calls = [mock.call(), mock.call(), mock.call(), mock.call(), mock.call(0.0), mock.call()]
         self.mock_view_start_x.assert_has_calls(calls)
 
     def test_that_handle_start_x_updated_will_use_the_min_start_x_when_the_set_start_x_is_too_small(self):
@@ -291,15 +288,18 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.presenter.handle_start_x_updated()
 
-        self.mock_view_start_x.assert_called_with(x_lower)
+        calls = [mock.call(), mock.call(3.0), mock.call()]
+        self.mock_view_start_x.assert_has_calls(calls)
 
     def test_that_handle_start_x_updated_will_use_the_max_start_x_when_the_set_start_x_is_too_large(self):
         x_upper = -0.1
         self.model.x_limits_of_workspace = mock.Mock(return_value=(self.start_x, x_upper))
+        self.model.is_equal_to_n_decimals = mock.Mock(return_value=False)
 
         self.presenter.handle_start_x_updated()
 
-        self.mock_view_start_x.assert_called_with(x_upper)
+        calls = [mock.call(), mock.call(), mock.call(15.0), mock.call()]
+        self.mock_view_start_x.assert_has_calls(calls)
 
     def test_that_handle_end_x_updated_will_attempt_to_update_the_end_x_in_the_model(self):
         self.presenter.handle_end_x_updated()
@@ -311,24 +311,8 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.presenter.handle_end_x_updated()
 
-        calls = [mock.call(), mock.call(), mock.call(15.0), mock.call(), mock.call(), mock.call()]
+        calls = [mock.call(), mock.call(), mock.call(), mock.call(), mock.call(15.0), mock.call()]
         self.mock_view_end_x.assert_has_calls(calls)
-
-    def test_that_handle_end_x_updated_will_use_the_min_end_x_when_the_set_end_x_is_too_small(self):
-        x_lower = 16.0
-        self.model.x_limits_of_workspace = mock.Mock(return_value=(x_lower, self.end_x))
-
-        self.presenter.handle_start_x_updated()
-
-        self.mock_view_end_x.assert_called_with(x_lower)
-
-    def test_that_handle_end_x_updated_will_use_the_max_end_x_when_the_set_end_x_is_too_large(self):
-        x_upper = -0.1
-        self.model.x_limits_of_workspace = mock.Mock(return_value=(self.start_x, x_upper))
-
-        self.presenter.handle_end_x_updated()
-
-        self.mock_view_end_x.assert_called_with(x_upper)
 
     def test_that_handle_use_rebin_changed_will_not_update_the_model_if_the_rebin_check_fails(self):
         self.presenter._check_rebin_options = mock.Mock(return_value=False)
@@ -349,10 +333,11 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.assertEqual(self.mock_model_fit_to_raw.call_count, 2)
 
     def test_that_clear_cached_fit_functions_will_clear_the_cache_in_the_model(self):
-        self.presenter.clear_cached_fit_functions()
+        self.model.number_of_undos = mock.Mock(return_value=0)
+        self.presenter.clear_undo_data()
 
-        self.view.enable_undo_fit.assert_called_once_with(False)
-        self.model.clear_cached_fit_functions.assert_called_once_with()
+        self.view.set_number_of_undos.assert_called_once_with(0)
+        self.model.clear_undo_data.assert_called_once_with()
 
     def test_that_reset_fit_status_and_chi_squared_information_will_reset_the_info_in_the_model(self):
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
@@ -528,7 +513,6 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.presenter.update_and_reset_all_data = mock.Mock()
         self.presenter.disable_editing_notifier.notify_subscribers = mock.Mock()
         self.presenter.enable_editing_notifier.notify_subscribers = mock.Mock()
-        self.presenter.disable_fitting_notifier.notify_subscribers = mock.Mock()
         self.presenter.selected_fit_results_changed.notify_subscribers = mock.Mock()
         self.presenter.fit_function_changed_notifier.notify_subscribers = mock.Mock()
         self.presenter.fit_parameter_changed_notifier.notify_subscribers = mock.Mock()

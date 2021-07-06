@@ -226,6 +226,7 @@ set(SRC_FILES
     src/PaddingAndApodization.cpp
     src/ParallaxCorrection.cpp
     src/Pause.cpp
+    src/PeakParameterHelper.cpp
     src/PerformIndexOperations.cpp
     src/Plus.cpp
     src/PointByPointVCorrection.cpp
@@ -565,6 +566,7 @@ set(INC_FILES
     inc/MantidAlgorithms/PaddingAndApodization.h
     inc/MantidAlgorithms/ParallaxCorrection.h
     inc/MantidAlgorithms/Pause.h
+    inc/MantidAlgorithms/PeakParameterHelper.h
     inc/MantidAlgorithms/PerformIndexOperations.h
     inc/MantidAlgorithms/Plus.h
     inc/MantidAlgorithms/PointByPointVCorrection.h
@@ -786,6 +788,7 @@ set(TEST_FILES
     CropWorkspaceRaggedTest.h
     CropWorkspaceTest.h
     CrossCorrelateTest.h
+    CrossCorrelateTestData.h
     CuboidGaugeVolumeAbsorptionTest.h
     CylinderAbsorptionTest.h
     DeadTimeCorrectionTest.h

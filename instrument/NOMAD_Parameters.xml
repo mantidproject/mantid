@@ -1,14 +1,125 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <parameter-file instrument = "NOMAD" valid-from = "2011-08-13T00:00:00">
 
-<component-link name = "NOMAD">
+    <component-link name = "NOMAD">
 
-<parameter name="TS_mapping_file" type="string">
-    <value val="NOM_TS_2010_12_01.dat"/>
-</parameter>
+        <parameter name="TS_mapping_file" type="string">
+            <value val="NOM_TS_2010_12_01.dat"/>
+        </parameter>
 
+        <parameter name="IkedaCarpenterPV:Kappa" type="fitting">
+            <formula eq="0.1" result-unit="TOF"/>
+            <fixed />
+        </parameter>
 
-</component-link>
+    </component-link>
+
+    <component-link name="Group1" >
+        <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+            <formula eq="3.938" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+            <formula eq="16.031" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+            <formula eq="0.050" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+            <formula eq="18789.007*centre^2+1617.648*centre^4" unit="dSpacing" result-unit="TOF^2"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+            <formula eq="3.026*centre" unit="dSpacing" result-unit="TOF"/>
+        </parameter>
+    </component-link>
+
+    <component-link name="Group2" >
+        <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+            <formula eq="0.0" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+            <formula eq="2.349" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+            <formula eq="1.0" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+            <formula eq="411306.734*centre^2+1328.602*centre^4" unit="dSpacing" result-unit="TOF^2"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+            <formula eq="8.210+1.611*centre^2" unit="dSpacing" result-unit="TOF"/>
+        </parameter>
+    </component-link>
+
+    <component-link name="Group3" >
+        <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+            <formula eq="0.00691" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+            <formula eq="0.00182" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+            <formula eq="5.0" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+            <formula eq="152826.265*centre^2+14989.105*centre^4" unit="dSpacing" result-unit="TOF^2"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+            <formula eq="0.144+14.470*centre" unit="dSpacing" result-unit="TOF"/>
+        </parameter>
+    </component-link>
+
+    <component-link name="Group4" >
+        <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+            <formula eq="0.0" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+            <formula eq="0.107" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+            <formula eq="0.05" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+            <formula eq="54125.092*centre^2+13234.202*centre^4" unit="dSpacing" result-unit="TOF^2"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+            <formula eq="2.206+9.482*centre+7.138*centre^2" unit="dSpacing" result-unit="TOF"/>
+        </parameter>
+    </component-link>
+
+    <component-link name="Group5" >
+        <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+            <formula eq="0.15" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+            <formula eq="0.0" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+            <formula eq="0.05" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+            <formula eq="2139.988*centre^2+5.946*centre^4" unit="dSpacing" result-unit="TOF^2"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+            <formula eq="9.534*centre" unit="dSpacing" result-unit="TOF"/>
+        </parameter>
+    </component-link>
+
+    <component-link name="Group6" >
+        <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+            <formula eq="0.65" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+            <formula eq="0.0" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+            <formula eq="1500.0" result-unit="TOF"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+            <formula eq="103645.364*centre^2+977.813*centre^4" unit="dSpacing" result-unit="TOF^2"/>
+        </parameter>
+        <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+            <formula eq="9.564*centre" unit="dSpacing" result-unit="TOF"/>
+        </parameter>
+    </component-link>
 
 </parameter-file>
-

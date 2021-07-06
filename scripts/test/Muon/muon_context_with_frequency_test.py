@@ -61,22 +61,21 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
 
     def test_get_workspace_names_returns_no_time_domain_workspaces(self):
         self.populate_ADS()
-        workspace_list = self.context.get_names_of_workspaces_to_fit('19489', 'fwd, bwd, long', True)
+        workspace_list = self.context.get_workspace_names_for('19489', 'fwd, bwd, long')
         self.assertEqual(Counter(workspace_list),
                          Counter())
 
     def test_get_workspace_names_returns_nothing_if_no_parameters_passed(self):
         self.populate_ADS()
         self.context._frequency_context.plot_type = "All"
-        workspace_list = self.context.get_names_of_workspaces_to_fit()
+        workspace_list = self.context.get_workspace_names_for()
 
         self.assertEqual(workspace_list, [])
 
     def test_get_workspaces_names_copes_with_no_freq_runs(self):
         self.populate_ADS()
         self.context._frequency_context.plot_type = "All"
-        workspace_list = self.context.get_names_of_workspaces_to_fit(runs='19489', group_and_pair='fwd, bwd, long, random, wrong',
-                                                                     phasequad=True)
+        workspace_list = self.context.get_workspace_names_for(runs='19489', group_and_pair='fwd, bwd, long, random, wrong')
 
         self.assertEqual(Counter(workspace_list),
                          Counter([]))
@@ -84,7 +83,7 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
     def test_call_freq_workspace_names(self):
         self.context.get_names_of_frequency_domain_workspaces_to_fit = mock.Mock()
         self.context._frequency_context.plot_type = "All"
-        self.context.get_names_of_workspaces_to_fit(runs='19489', group_and_pair='fwd, bwd')
+        self.context.get_workspace_names_for(runs='19489', group_and_pair='fwd, bwd')
         self.context.get_names_of_frequency_domain_workspaces_to_fit.assert_called_once_with(runs='19489', group_and_pair='fwd, bwd',
                                                                                              frequency_type="All")
 

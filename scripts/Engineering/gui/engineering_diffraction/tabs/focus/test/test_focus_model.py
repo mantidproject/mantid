@@ -148,6 +148,7 @@ class FocusModelTest(unittest.TestCase):
         output_file = path.join(path_handling.get_output_path(), "Focus",
                                 "ENGINX_123_North_TOF.nxs")
 
+
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
                                 mocked_workspace, None)
 
@@ -205,6 +206,7 @@ class FocusModelTest(unittest.TestCase):
                                 "ENGINX_123_North_TOF.nxs")
 
         self.model._last_path_ws = 'ENGINX_123_North_TOF.nxs'
+
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
                                 mocked_workspace, None)
 
@@ -220,6 +222,7 @@ class FocusModelTest(unittest.TestCase):
                                 "ENGINX_123_North_TOF.nxs")
 
         self.model._last_path_ws = 'ENGINX_123_North_TOF.nxs'
+
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
                                 mocked_workspace, rb_num)
 

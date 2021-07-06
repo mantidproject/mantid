@@ -15,7 +15,7 @@ if(MSVC)
   set(THIRD_PARTY_GIT_URL
       "https://github.com/mantidproject/thirdparty-msvc2015.git"
   )
-  set(THIRD_PARTY_GIT_SHA1 913585ad3212c6fa6bd6f9c54cde473fa171ff54)
+  set(THIRD_PARTY_GIT_SHA1 0a4c81cb2a6809125867022d2d5320c22075a0c6)
   set(THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty)
   # Generates a script to do the clone/update in tmp
   set(_project_name ThirdParty)
@@ -172,6 +172,13 @@ find_package(Python ${MINIMUM_PYTHON_VERSION} REQUIRED
 # If anything external uses find_package(PythonInterp) then make sure it finds the correct version and executable
 set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
 set(Python_ADDITIONAL_VERSIONS ${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
+
+# Search for the pythonw executable if it has not already been found
+# Will only look in the folder containing the current python.exe
+if (NOT Python_W_EXECUTABLE)
+  get_filename_component(Python_Binary_Dir ${PYTHON_EXECUTABLE} DIRECTORY)
+  find_program(Python_W_EXECUTABLE PATHS ${Python_Binary_Dir} NAMES pythonw NO_DEFAULT_PATH)
+endif()
 
 # Handle switching between previously configured Python verions
 if(Python_INCLUDE_DIR
