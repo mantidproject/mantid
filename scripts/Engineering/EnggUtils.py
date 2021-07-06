@@ -41,7 +41,7 @@ def determine_roi_from_prm_fname(file_path: str) -> str:
         raise ValueError("Region of interest not recognised from .prm file name")
 
 
-def load_relevant_calibration_files(file_path, output_prefix="engggui") -> str:
+def load_relevant_calibration_files(file_path, output_prefix="engggui") -> list:
     """
     Determine which pdcal output .nxs files to Load from the .prm file selected, and Load them
     :param file_path: path to the calibration .prm file selected

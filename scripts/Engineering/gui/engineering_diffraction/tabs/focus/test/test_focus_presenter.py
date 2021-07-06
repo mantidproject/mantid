@@ -28,13 +28,15 @@ class FocusPresenterTest(unittest.TestCase):
                                                              sample_path="Fake/Path",
                                                              instrument="ENGINX")
         self.view.get_focus_filenames.return_value = "305738"
+        # testing south bank roi info is correctly propagated
         self.presenter.current_calibration.set_roi_info('2', None, None)
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
         wsp_exists.return_value = True
 
         self.presenter.on_focus_clicked()
-        worker.assert_called_with("305738", ["2"], True, None, None, None)
+        grp_dict_south = {'bank_2': 'SouthBank_grouping'}
+        worker.assert_called_with("305738", True, None, grp_dict_south)
 
     @patch(tab_path + ".presenter.check_workspaces_exist")
     @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
@@ -43,13 +45,14 @@ class FocusPresenterTest(unittest.TestCase):
                                                              sample_path="Fake/Path",
                                                              instrument="ENGINX")
         self.view.get_focus_filenames.return_value = "305738"
-        self.presenter.current_calibration.set_roi_info(None, "2-45", None)
+        self.presenter.current_calibration.set_roi_info(None, None, "2-45")
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
         wsp_exists.return_value = True
+        rp_dict_cropped = {'Cropped': 'Custom_spectra_grouping'}
 
         self.presenter.on_focus_clicked()
-        worker.assert_called_with("305738", None, True, None, "2-45", None)
+        worker.assert_called_with("305738", True, None, rp_dict_cropped)
 
     @patch(tab_path + ".presenter.FocusPresenter._validate")
     @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")

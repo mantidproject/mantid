@@ -17,8 +17,8 @@ from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import
 
 file_path = "Engineering.gui.engineering_diffraction.tabs.focus.model"
 
-DF_KWARG_NORTH = {'GroupingFileName': 'EnginX_NorthBank.cal'}
-DF_KWARG_SOUTH = {'GroupingFileName': 'EnginX_SouthBank.cal'}
+DF_KWARG_NORTH = {'GroupingWorkspace': 'NorthBank_grouping'}
+DF_KWARG_SOUTH = {'GroupingWorkspace': 'SouthBank_grouping'}
 DF_KWARG_CUSTOM = {'GroupingWorkspace': 'custom_grouping_wsp'}
 
 
@@ -48,23 +48,22 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
     def test_focus_run_for_each_bank(self, fetch_van, load_focus, run_focus, prefocus, output, ads, logs, load, delete):
         ads.retrieve.side_effect = ["full_calib", "calib_n", "curves_n", "calib_s", "curves_s"]
-        banks = ["1", "2"]
+        regions_dict = {"bank_1": "NorthBank_grouping", "bank_2": "SouthBank_grouping"}
         load_focus.return_value = "mocked_sample"
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         van_path = "fake/van/path"
 
-        self.model.focus_run(["305761"], van_path, banks, False, "ENGINX", "0", None, None)
+        self.model.focus_run(["305761"], van_path, False, "ENGINX", "0", regions_dict)
 
         self.assertEqual(2, run_focus.call_count)
         north_call = call("mocked_sample",
                           "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "bank_1",
-                          "curves_n", DF_KWARG_NORTH, "calib_n")
+                          "curves_n", "NorthBank_grouping", "calib_n")
         south_call = call("mocked_sample",
                           "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "bank_2",
-                          "curves_s", DF_KWARG_SOUTH, "calib_s")
+                          "curves_s", "SouthBank_grouping", "calib_s")
         run_focus.assert_has_calls([north_call, south_call])
 
-    @patch(file_path + ".create_custom_grouping_workspace")
     @patch(file_path + ".DeleteWorkspace")
     @patch(file_path + ".Load")
     @patch(file_path + ".FocusModel._output_sample_logs")
@@ -75,20 +74,19 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
     def test_focus_run_for_custom_spectra(self, fetch_van, load_focus, run_focus, prefocus, output, ads, logs, load,
-                                          delete, cgw):
+                                          delete):
         ads.retrieve.side_effect = ["full_calib", "calib_cropped", "curves_cropped"]
-        spectra = "20-50"
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         van_path = "fake/van/path"
         load_focus.return_value = "mocked_sample"
-        cgw.return_value = "custom_grouping_wsp"
+        regions_dict = {"Cropped": "Custom_spectra_grouping"}
 
-        self.model.focus_run(["305761"], van_path, None, False, "ENGINX", "0", spectra, None)
+        self.model.focus_run(["305761"], van_path, False, "ENGINX", "0", regions_dict)
 
         self.assertEqual(1, run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
                                      "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "Cropped",
-                                     "curves_cropped", DF_KWARG_CUSTOM, "calib_cropped")
+                                     "curves_cropped", "Custom_spectra_grouping", "calib_cropped")
 
     @patch(file_path + ".DeleteWorkspace")
     @patch(file_path + ".Load")
@@ -105,10 +103,10 @@ class FocusModelTest(unittest.TestCase):
         ads.doesExist.return_value = True
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         van_path = "fake/van/path"
-        banks = ["1", "2"]
+        regions_dict = {"bank_1": "NorthBank_grouping", "bank_2": "SouthBank_grouping"}
         load_focus.return_value = "mocked_sample"
 
-        self.model.focus_run(["305761"], van_path, banks, True, "ENGINX", "0", None, None)
+        self.model.focus_run(["305761"], van_path, True, "ENGINX", "0", regions_dict)
 
         self.assertEqual(1, plot_focus.call_count)
 
@@ -126,10 +124,10 @@ class FocusModelTest(unittest.TestCase):
                                                 ads, logs, load, delete):
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         van_path = "fake/van/path"
-        banks = ["1", "2"]
+        regions_dict = {"region1": "grp_ws_name"}
         load_focus.return_value = "mocked_sample"
 
-        self.model.focus_run("305761", van_path, banks, False, "ENGINX", "0", None, None)
+        self.model.focus_run("305761", van_path, False, "ENGINX", "0", regions_dict)
         self.assertEqual(0, plot_focus.call_count)
 
     @patch(file_path + ".SaveFocusedXYE")

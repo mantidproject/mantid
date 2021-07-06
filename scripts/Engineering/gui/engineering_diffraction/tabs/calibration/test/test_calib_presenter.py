@@ -192,12 +192,14 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_load_checked.return_value = True
 
         path.return_value = True
-        instrument, van, cer = ("test_ins", "test_van", "test_cer")
-        self.model.load_existing_calibration_files.return_value = instrument, van, cer
+        instrument, van, cer, grp_ws, roi, banks = ("test_ins", "test_van", "test_cer", "test_grpws", "test_roi",
+                                                    ['test'])
+        self.model.load_existing_calibration_files.return_value = instrument, van, cer, grp_ws, roi, banks
         current = CalibrationInfo(vanadium_path="old/value",
                                   sample_path="old/cera",
                                   instrument="ENGINX")
         new = CalibrationInfo(vanadium_path=van, sample_path=cer, instrument=instrument)
+        new.set_roi_info_load(banks, grp_ws, roi)
         self.presenter.current_calibration = current
 
         self.presenter.on_calibrate_clicked()
