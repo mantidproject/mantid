@@ -339,7 +339,10 @@ class SuperplotPresenter:
 
         if selection or plotted_data:
             axes.set_axis_on()
-            figure.tight_layout()
+            try:
+                figure.tight_layout()
+            except:
+                pass
             legend = axes.legend()
             if legend:
                 legend_set_draggable(legend, True)
