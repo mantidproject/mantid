@@ -118,6 +118,11 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.declareProperty('EmptyContainerScaling', 1.0,
                              doc='Scaling factor for the empty container.')
 
+        self.declareProperty(MatrixWorkspaceProperty('CadmiumWorkspace', '',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='Cadmium absorber workspace.')
+
         self.declareProperty('FlatBackground', "",
                              doc='File(s) or workspaces containing the source to calculate flat background.')
 
