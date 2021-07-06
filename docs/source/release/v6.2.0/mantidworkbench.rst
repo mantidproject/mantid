@@ -28,6 +28,7 @@ Bugfixes
 - Sliceviewer now doesn't normalise basis vectors for HKL data such that Bragg peaks appear at integer HKL for cuts along e.g. HH0
 - Uninstalling from Windows "Apps & features" list will now run the uninstaller as the current Windows user and delete all shortcuts.
 - Fixed a bug where parameters wouldn't update in the fit property browser when fitting a single function with ties.
+- Fixed a bug retrieving algorithm history from a workspace when the retrieval methods were chained together.
 - Added missing icon for the uninstaller in Windows "Apps & features" list.
 
 :ref:`Release 6.2.0 <v6.2.0>`
