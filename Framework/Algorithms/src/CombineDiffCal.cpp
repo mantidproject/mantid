@@ -70,7 +70,7 @@ API::ITableWorkspace_sptr CombineDiffCal::sortTableWorkspace(DataObjects::TableW
   return alg->getProperty("OutputWorkspace");
 }
 
-bool findColumn(const std::vector<std::string> &columnNames, const std::string name) {
+bool findColumn(const std::vector<std::string> &columnNames, const std::string &name) {
   return std::find(columnNames.begin(), columnNames.end(), name) != columnNames.end();
 }
 
