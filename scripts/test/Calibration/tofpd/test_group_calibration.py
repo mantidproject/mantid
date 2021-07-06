@@ -10,7 +10,7 @@ from Calibration.tofpd import group_calibration
 from mantid.simpleapi import (CreateSampleWorkspace, MaskDetectors,
                               MoveInstrumentComponent, ScaleX, Rebin, ConvertUnits,
                               CreateGroupingWorkspace, CreateEmptyTableWorkspace)
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_equal
 
 
 def create_test_ws_and_group():
@@ -62,13 +62,13 @@ class TestGroupCalibration(unittest.TestCase):
                          starting_difc[5]/0.98,
                          starting_difc[6]/1.02], rtol=0.005)
 
-        diffcal = group_calibration.pdcalibration_groups(ws,
-                                                         groups,
-                                                         cc_diffcal,
-                                                         output_workspace_basename,
-                                                         PeakPositions = [1.0, 2.0, 4.0],
-                                                         PeakFunction='Gaussian',
-                                                         PeakWindow=0.4)
+        diffcal, mask = group_calibration.pdcalibration_groups(ws,
+                                                               groups,
+                                                               cc_diffcal,
+                                                               output_workspace_basename,
+                                                               PeakPositions = [1.0, 2.0, 4.0],
+                                                               PeakFunction='Gaussian',
+                                                               PeakWindow=0.4)
 
         assert_allclose(diffcal.column('difc'),
                         [starting_difc[0],
@@ -79,6 +79,15 @@ class TestGroupCalibration(unittest.TestCase):
                          starting_difc[5]/(0.95*0.98),
                          starting_difc[6]/(0.95*1.02),
                          0], rtol=0.005)
+
+        assert_equal(mask.extractY(), [[0],
+                                       [0],
+                                       [0],
+                                       [1],
+                                       [0],
+                                       [0],
+                                       [0],
+                                       [1]])
 
     def test_from_prev_cal(self):
 
@@ -122,14 +131,14 @@ class TestGroupCalibration(unittest.TestCase):
                          starting_difc[6]*1.01/1.02,
                          starting_difc[7]*1.01], rtol=0.005)
 
-        diffcal = group_calibration.pdcalibration_groups(ws,
-                                                         groups,
-                                                         cc_diffcal,
-                                                         output_workspace_basename,
-                                                         previous_calibration=previous_diffcal,
-                                                         PeakPositions = [1.0, 2.0, 4.0],
-                                                         PeakFunction='Gaussian',
-                                                         PeakWindow=0.4)
+        diffcal, mask = group_calibration.pdcalibration_groups(ws,
+                                                               groups,
+                                                               cc_diffcal,
+                                                               output_workspace_basename,
+                                                               previous_calibration=previous_diffcal,
+                                                               PeakPositions = [1.0, 2.0, 4.0],
+                                                               PeakFunction='Gaussian',
+                                                               PeakWindow=0.4)
 
         assert_allclose(diffcal.column('difc'),
                         [starting_difc[0],
@@ -140,6 +149,15 @@ class TestGroupCalibration(unittest.TestCase):
                          starting_difc[5]/(0.95*0.98),
                          starting_difc[6]/(0.95*1.02),
                          starting_difc[7]*1.01], rtol=0.005)
+
+        assert_equal(mask.extractY(), [[0],
+                                       [0],
+                                       [0],
+                                       [1],
+                                       [0],
+                                       [0],
+                                       [0],
+                                       [1]])
 
     def test_di_group_calibration(self):
         ws, groups = create_test_ws_and_group()
@@ -162,21 +180,21 @@ class TestGroupCalibration(unittest.TestCase):
         previous_diffcal.addRow([7, starting_difc[6]*1.01, 0, 0])
         previous_diffcal.addRow([8, starting_difc[7]*1.01, 0, 0])
 
-        diffcal = group_calibration.do_group_calibration(ws,
-                                                         groups,
-                                                         previous_calibration=previous_diffcal,
-                                                         output_basename = "group_calibration",
-                                                         cc_kwargs={
-                                                             "Step": 0.001,
-                                                             "DReference": 2.0,
-                                                             "Xmin": 1.75,
-                                                             "Xmax": 2.25},
-                                                         pdcal_kwargs={
-                                                             "PeakPositions": [1.0, 2.0, 4.0],
-                                                             "TofBinning": [300,-.001,16666.7],
-                                                             "PeakFunction": 'Gaussian',
-                                                             "PeakWindow": 0.4,
-                                                             "PeakWidthPercent": None})
+        diffcal, mask  = group_calibration.do_group_calibration(ws,
+                                                                groups,
+                                                                previous_calibration=previous_diffcal,
+                                                                output_basename = "group_calibration",
+                                                                cc_kwargs={
+                                                                    "Step": 0.001,
+                                                                    "DReference": 2.0,
+                                                                    "Xmin": 1.75,
+                                                                    "Xmax": 2.25},
+                                                                pdcal_kwargs={
+                                                                    "PeakPositions": [1.0, 2.0, 4.0],
+                                                                    "TofBinning": [300,-.001,16666.7],
+                                                                    "PeakFunction": 'Gaussian',
+                                                                    "PeakWindow": 0.4,
+                                                                    "PeakWidthPercent": None})
 
         assert_allclose(diffcal.column('difc'),
                         [starting_difc[0],
@@ -187,6 +205,15 @@ class TestGroupCalibration(unittest.TestCase):
                          starting_difc[5]/(0.95*0.98),
                          starting_difc[6]/(0.95*1.02),
                          starting_difc[7]*1.01], rtol=0.005)
+
+        assert_equal(mask.extractY(), [[0],
+                                       [0],
+                                       [0],
+                                       [1],
+                                       [0],
+                                       [0],
+                                       [0],
+                                       [1]])
 
 
 if __name__ == '__main__':

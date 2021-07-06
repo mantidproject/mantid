@@ -3,14 +3,14 @@ import os
 import json
 import datetime
 import numpy as np
-from mantid.simpleapi import (ConvertUnits, ExtractSpectra,
-                              CloneWorkspace, Rebin, MaskDetectors,
-                              ExtractUnmaskedSpectra, CrossCorrelate,
-                              GetDetectorOffsets, ConvertDiffCal, mtd,
-                              ApplyDiffCal, DiffractionFocussing,
-                              PDCalibration, Load, LoadMask,
+from mantid.simpleapi import (ConvertUnits, ExtractSpectra, Rebin,
+                              MaskDetectors, ExtractUnmaskedSpectra,
+                              CrossCorrelate, GetDetectorOffsets,
+                              ConvertDiffCal, mtd, ApplyDiffCal,
+                              DiffractionFocussing, PDCalibration,
+                              Load, LoadMask, CombineDiffCal,
                               LoadDiffCal, LoadDetectorsGroupingFile,
-                              SaveDiffCal, DeleteWorkspace, DeleteTableRows)
+                              SaveDiffCal, DeleteWorkspace)
 
 # Diamond peak positions in d-space
 DIAMOND = (0.3117,0.3257,0.3499,0.4205,0.4645,
@@ -126,7 +126,7 @@ def pdcalibration_groups(data_ws,
     :param PeakFunction: PeakFunction parameter of PDCalibration, default 'IkedaCarpenterPV'
     :param PeakWindow: PeakWindow parameter of PDCalibration, default 0.1
     :param PeakWidthPercent: PeakWidthPercent parameter of PDCalibration, default None
-    :return: DiffCal from CrossCorrelate combined with DiffCal from PDCalibration of grouped workspace
+    :return: tuple of DiffCal and Mask from CrossCorrelate combined with DiffCal from PDCalibration of grouped workspace
     """
 
     ApplyDiffCal(data_ws, CalibrationWorkspace=cc_diffcal)
@@ -148,45 +148,15 @@ def pdcalibration_groups(data_ws,
                   OutputCalibrationTable=f'{output_basename}_pd_diffcal',
                   DiagnosticWorkspaces=f'{output_basename}_pd_diag')
 
-    # Everything below will all be replaced by be the new CombineDiffCal algorithm
-
-    cc_and_pd_diffcal = CloneWorkspace(f'{output_basename}_pd_diffcal', OutputWorkspace=f'{output_basename}_cc_pd_diffcal')
-
-    # remove PD masked detectors from CC diffcal
-    mask_ws = mtd[f'{output_basename}_pd_diffcal_mask']
-    rows_to_remove = []
-    detid_list = cc_diffcal.column('detid')
-    for n in range(mask_ws.getNumberHistograms()):
-        if mask_ws.readY(n)[0] == 1:
-            try:
-                rows_to_remove.append(detid_list.index(mask_ws.getSpectrum(n).getDetectorIDs()[0]))
-            except ValueError:
-                pass
-
-    if rows_to_remove:
-        DeleteTableRows(cc_diffcal, Rows=rows_to_remove)
-
-    cc_det_to_difc = dict(zip(cc_diffcal.column('detid'), cc_diffcal.column('difc')))
-
-    grouped = mtd['_tmp_data_aligned']
-    specInfo = grouped.spectrumInfo()
-    grouped_det_to_difc = {}
-
-    for detid in cc_and_pd_diffcal.column('detid'):
-        ind = list(grouped.getIndicesFromDetectorIDs([detid]))
-        if ind:
-            grouped_det_to_difc[detid] = specInfo.difcUncalibrated(ind[0])
-
-    for n, detid in enumerate(cc_and_pd_diffcal.column('detid')):
-        if detid in cc_det_to_difc and detid in grouped_det_to_difc:
-            cc_and_pd_diffcal.setCell(n, 1,
-                                      cc_and_pd_diffcal.cell(n, 1)
-                                      * cc_det_to_difc[detid]
-                                      / grouped_det_to_difc[detid])
+    CombineDiffCal(PixelCalibration=cc_diffcal,
+                   GroupedCalibration=f'{output_basename}_pd_diffcal',
+                   CalibrationWorkspace='_tmp_data_aligned',
+                   MaskWorkspace=f'{output_basename}_pd_diffcal_mask',
+                   OutputWorkspace=f'{output_basename}_cc_pd_diffcal')
 
     DeleteWorkspace('_tmp_data_aligned')
 
-    return mtd[f'{output_basename}_cc_pd_diffcal']
+    return mtd[f'{output_basename}_cc_pd_diffcal'], mtd[f'{output_basename}_pd_diffcal_mask']
 
 
 def do_group_calibration(data_ws,
@@ -213,14 +183,14 @@ def do_group_calibration(data_ws,
                                      previous_calibration,
                                      **cc_kwargs)
 
-    diffcal = pdcalibration_groups(data_ws,
-                                   group_ws,
-                                   cc_diffcal,
-                                   output_basename,
-                                   previous_calibration,
-                                   **pdcal_kwargs)
+    diffcal, mask = pdcalibration_groups(data_ws,
+                                         group_ws,
+                                         cc_diffcal,
+                                         output_basename,
+                                         previous_calibration,
+                                         **pdcal_kwargs)
 
-    return diffcal
+    return diffcal, mask
 
 
 def process_json(json_filename):
@@ -286,13 +256,15 @@ def process_json(json_filename):
                                            MakeGroupingWorkspace=False,
                                            MakeMaskWorkspace=False)
 
-    diffcal = do_group_calibration(ws,
-                                   groups,
-                                   previous_calibration,
-                                   cc_kwargs=cc_kwargs,
-                                   pdcal_kwargs=pdcal_kwargs)
+    diffcal, mask = do_group_calibration(ws,
+                                         groups,
+                                         previous_calibration,
+                                         cc_kwargs=cc_kwargs,
+                                         pdcal_kwargs=pdcal_kwargs)
 
-    SaveDiffCal(diffcal, calfilename)
+    SaveDiffCal(CalibrationWorkspace=diffcal,
+                MaskWorkspace=mask,
+                Filename=calfilename)
 
 
 if __name__ == '__main__':

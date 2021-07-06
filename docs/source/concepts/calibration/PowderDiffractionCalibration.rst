@@ -180,12 +180,12 @@ the instrument in groups using a combination of :ref:`CrossCorrelate
 
     from Calibration.tofpd.group_calibration import pdcalibration_groups
 
-    diffcal = pdcalibration_groups(ws,
-                                   groups,
-                                   cc_diffcal,
-                                   PeakPositions = [1.0, 2.0, 3.0],
-                                   PeakFunction='Gaussian',
-                                   PeakWindow=0.4)
+    diffcal, mask = pdcalibration_groups(ws,
+                                         groups,
+                                         cc_diffcal,
+                                         PeakPositions = [1.0, 2.0, 3.0],
+                                         PeakFunction='Gaussian',
+                                         PeakWindow=0.4)
 
     print("DetID DIFC")
     for detid, difc in zip(diffcal.column('detid'), diffcal.column('difc')):
@@ -260,16 +260,16 @@ The same complete calibration can just be run with just ``group_calibration.do_g
 
     from Calibration.tofpd.group_calibration import do_group_calibration
 
-    diffcal = do_group_calibration(ws,
-                                   groups,
-                                   cc_kwargs={
-                                       "DReference": 2.0,
-                                       "Xmin": 1.75,
-                                       "Xmax": 2.25},
-                                   pdcal_kwargs={
-                                       "PeakPositions": [1.0, 2.0, 3.0],
-                                       "PeakFunction": 'Gaussian',
-                                       "PeakWindow": 0.4})
+    diffcal, mask = do_group_calibration(ws,
+                                        groups,
+                                        cc_kwargs={
+                                            "DReference": 2.0,
+                                            "Xmin": 1.75,
+                                            "Xmax": 2.25},
+                                        pdcal_kwargs={
+                                            "PeakPositions": [1.0, 2.0, 3.0],
+                                            "PeakFunction": 'Gaussian',
+                                            "PeakWindow": 0.4})
 
     print("DetID DIFC")
     for detid, difc in zip(diffcal.column('detid'), diffcal.column('difc')):
@@ -284,6 +284,16 @@ The same complete calibration can just be run with just ``group_calibration.do_g
         4 2368.8
         5 2318.3
         6 2269.5
+
+The resulting diffcal can be saved with :ref:`SaveDiffCal
+<algm-SaveDiffCal>`.
+
+.. codeblock::
+
+   SaveDiffCal(CalibrationWorkspace=diffcal,
+               MaskWorkspace=mask,
+               Filename='calibration.h5')
+
 
 Saving and Loading Calibration
 ##############################
