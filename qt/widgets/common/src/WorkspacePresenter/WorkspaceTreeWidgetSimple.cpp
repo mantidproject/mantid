@@ -138,6 +138,8 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addAction(m_superplotWithErrs);
       } else {
         plotSubMenu->addAction(m_plotBin);
+        plotSubMenu->addAction(m_superplot);
+        plotSubMenu->addAction(m_superplotWithErrs);
       }
       plotSubMenu->addSeparator();
       plotSubMenu->addAction(m_plotColorfill);
