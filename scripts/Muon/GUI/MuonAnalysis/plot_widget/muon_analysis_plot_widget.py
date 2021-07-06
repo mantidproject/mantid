@@ -13,6 +13,8 @@ from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_presenter import PlotD
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
 from Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_presenter import PlotFitPanePresenter
 from Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_model import PlotTimeFitPaneModel
+from Muon.GUI.Common.plot_widget.raw_pane.raw_pane_presenter import RawPanePresenter
+from Muon.GUI.Common.plot_widget.raw_pane.raw_pane_model import RawPaneModel
 
 
 class MuonAnalysisPlotWidget(object):
@@ -20,7 +22,7 @@ class MuonAnalysisPlotWidget(object):
 
         self.data_model = PlotDataPaneModel(context)
         self.fit_model = PlotTimeFitPaneModel(context)
-
+        self.raw_model = RawPaneModel(context)
         # The plotting canvas widgets
         self.plotting_canvas_widgets = {}
         self.plotting_canvas_widgets[self.data_model.name] = PlottingCanvasWidget(parent, context=
@@ -29,12 +31,19 @@ class MuonAnalysisPlotWidget(object):
         self.plotting_canvas_widgets[self.fit_model.name] = PlottingCanvasWidget(parent, context=
                                                                                  context.plot_panes_context[self.fit_model.name],
                                                                                  plot_model=self.fit_model)
+        self.plotting_canvas_widgets[self.raw_model.name] = PlottingCanvasWidget(parent, context=
+                                                                                 context.plot_panes_context[self.raw_model.name],
+                                                                                 plot_model=self.raw_model)
         # The UI view
         self._view1 = BasePaneView(parent)
         self._view1.add_canvas_widget(self.plotting_canvas_widgets[self.data_model.name].widget)
 
         self._view2 = BasePaneView(parent)
         self._view2.add_canvas_widget(self.plotting_canvas_widgets[self.fit_model.name].widget)
+
+        self._view3 = BasePaneView(parent)
+        self._view3.add_canvas_widget(self.plotting_canvas_widgets[self.raw_model.name].widget)
+
         # set up presenter
         self.view = MainPlotWidgetView(parent)
         self.model = PlotDataPaneModel(context)
@@ -44,9 +53,11 @@ class MuonAnalysisPlotWidget(object):
                                                context,self.plotting_canvas_widgets[self.data_model.name].presenter)
         self.fit_mode = PlotFitPanePresenter(self._view2, self.fit_model,
                                                  context,self.plotting_canvas_widgets[self.fit_model.name].presenter)
+        self.raw_mode = RawPanePresenter(self._view3, self.raw_model,
+                                                 context,self.plotting_canvas_widgets[self.raw_model.name].presenter)
 
         self.presenter = MainPlotWidgetPresenter(self.view,
-                                                   [self.data_mode, self.fit_mode])
+                                                   [self.data_mode, self.raw_mode, self.fit_mode])
         self._current_plot_mode = self.presenter.get_plot_mode
         self.presenter.set_plot_mode_changed_slot(self.handle_plot_mode_changed_by_user)
 
@@ -74,13 +85,19 @@ class MuonAnalysisPlotWidget(object):
     def fit_index(self):
         return self.view.get_index(self.fit_mode.name)
 
+    @property
+    def raw_index(self):
+        return self.view.get_index(self.raw_mode.name)
+
     def close(self):
         self.view.close()
 
     def handle_plot_mode_changed_by_user(self):
         old_plot_mode = self._current_plot_mode
         self._current_plot_mode = self.presenter.get_plot_mode
-        selection, x_range, auto, y_range, errors = self.plotting_canvas_widgets[old_plot_mode].get_quick_edit_info
-        self.plotting_canvas_widgets[self._current_plot_mode].set_quick_edit_info(selection, x_range, auto, y_range, errors)
+        if old_plot_mode == self.data_mode.name or old_plot_mode == self.fit_mode.name:
+            pane_to_match = self.fit_mode.name if old_plot_mode == self.data_mode.name else self.data_mode.name
+            selection, x_range, auto, y_range, errors = self.plotting_canvas_widgets[pane_to_match].get_quick_edit_info
+            self.plotting_canvas_widgets[pane_to_match].set_quick_edit_info(selection, x_range, auto, y_range, errors)
         self.presenter.hide(old_plot_mode)
         self.presenter.show(self._current_plot_mode)

@@ -29,6 +29,9 @@ class BasePaneView(widget, ui_plotting_view):
     def hide_plot_diff(self):
         self.plot_diff_checkbox.setVisible(False)
 
+    def hide_plot_raw(self):
+        self.plot_raw_checkbox.setVisible(False)
+
     def hide_tiled_by(self):
         self.tiled_by_combo.setVisible(False)
         self.tiled_plot_checkbox.setVisible(False)

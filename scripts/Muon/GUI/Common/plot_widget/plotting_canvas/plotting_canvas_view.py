@@ -47,13 +47,36 @@ def get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max):
     return y_min, y_max
 
 
+def get_num_row_and_col(num_axis):
+    n_r, n_c = 0, 0
+    # num axis is the number of axis in use
+    if np.sqrt(num_axis)**2 == num_axis:
+        n_r = np.sqrt(num_axis)
+        n_c = np.sqrt(num_axis)
+    else:
+        # cols increment first
+        n_c = np.ceil(np.sqrt(num_axis))
+        n_r = n_c
+        if n_c*(n_c-1) >= num_axis:
+            n_r -= 1
+    return n_r, n_c
+
+
+def convert_index_to_row_and_col(index, n_r, n_c):
+    # number of completed rows
+    row = np.floor(index/n_c)
+    col = index - row*(n_c)
+    return row, col
+
+
 class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
-    def __init__(self, quick_edit, min_y_range, y_axis_margin, parent=None):
+    def __init__(self, quick_edit, settings, parent=None):
         super().__init__(parent)
         # later we will allow these to be changed in the settings
-        self._min_y_range = min_y_range
-        self._y_axis_margin = y_axis_margin
+        self._settings = settings
+        self._min_y_range = settings.min_y_range
+        self._y_axis_margin = settings.y_axis_margin
         # create the figure
         self.fig = Figure()
         self.fig.canvas = FigureCanvas(self.fig)
@@ -115,7 +138,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self.fig.clf()
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=num_axes,
                                       fig=self.fig)
-        self.fig.tight_layout()
+        if self._settings.is_condensed:
+            self.fig.subplots_adjust(wspace=0, hspace=0)
+        else:
+            self.fig.tight_layout()
         self.fig.canvas.draw()
 
     def clear_all_workspaces_from_plot(self):
@@ -133,6 +159,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def add_workspaces_to_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
         """Add a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
         The PlotInformation contains the workspace name, workspace index and target axis."""
+        nrows, ncols = get_num_row_and_col(self._number_of_axes)
         for workspace_plot_info in workspace_plot_info_list:
             workspace_name = workspace_plot_info.workspace_name
             try:
@@ -148,6 +175,27 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             plot_kwargs['color'] = self._color_queue[axis_number]()
             _do_single_plot(ax, workspace, ws_index, errors=errors,
                             plot_kwargs=plot_kwargs)
+            if self._settings.is_condensed:
+                self.hide_axis(axis_number, nrows, ncols)
+        #remove labels from empty plots
+        if self._settings.is_condensed:
+            for axis_number in range(int(self._number_of_axes), int(nrows*ncols)):
+                self.hide_axis(axis_number, nrows, ncols)
+
+    def hide_axis(self, axis_number, nrows, ncols):
+        row, col = convert_index_to_row_and_col(axis_number,  nrows, ncols)
+        ax = self.fig.axes[axis_number]
+        if row != nrows-1:
+            labels = ["" for item in ax.get_xticks().tolist()]
+            ax.set_xticklabels(labels)
+            ax.xaxis.label.set_visible(False)
+        if col != 0 and col != ncols-1:
+            labels = ["" for item in ax.get_yticks().tolist()]
+            ax.set_yticklabels(labels)
+            ax.yaxis.label.set_visible(False)
+        elif col == ncols-1 and ncols>1:
+            ax.yaxis.set_label_position('right')
+            ax.yaxis.tick_right()
 
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
         # We reverse the workspace info list so that we can maintain a unique color queue
@@ -278,7 +326,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         axis.set_ylim(bottom, top)
 
     def set_title(self, axis_number, title):
-        if axis_number >= self.number_of_axes:
+        if axis_number >= self.number_of_axes or self._settings.is_condensed:
             return
         axis = self.fig.axes[axis_number]
         axis.set_title(title)
@@ -292,7 +340,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def redraw_figure(self):
         self.fig.canvas.toolbar.update()
         self._redraw_legend()
-        self.fig.tight_layout()
+        if not self._settings.is_condensed:
+            self.fig.tight_layout()
         self.fig.canvas.draw()
 
     def _redraw_legend(self):
@@ -328,6 +377,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             ax.tracked_workspaces.clear()
 
     def resizeEvent(self, event):
+        if self._settings.is_condensed:
+            return
         self.fig.tight_layout()
 
     def add_uncheck_autoscale_subscriber(self, observer):

@@ -170,10 +170,10 @@ class BasePanePresenter():
         If switching to tiled plot, create a new figure based on the number of tiles and replot the data
         If switching from a tiled plot, create a new single figure and replot the data
         """
-        self.context.plot_panes_context[self.name].set_tiled(self._view.is_tiled_plot())
+        self.context.plot_panes_context[self.name].settings.set_tiled(self._view.is_tiled_plot())
         if self._view.is_tiled_plot():
             tiled_by = self._view.tiled_by()
-            self.context.plot_panes_context[self.name].set_tiled_by(tiled_by)
+            self.context.plot_panes_context[self.name].settings.set_tiled_by(tiled_by)
             keys = self._model.create_tiled_keys(tiled_by)
             self._figure_presenter.convert_plot_to_tiled_plot(keys)
         else:
@@ -187,14 +187,14 @@ class BasePanePresenter():
         if not self._view.is_tiled_plot():
             return
         tiled_by = self._view.tiled_by()
-        self.context.plot_panes_context[self.name].set_tiled_by(tiled_by)
+        self.context.plot_panes_context[self.name].settings.set_tiled_by(tiled_by)
         keys = self._model.create_tiled_keys(tiled_by)
         self._figure_presenter.convert_plot_to_tiled_plot(keys)
 
     def _update_tile_plot(self):
         if self._view.is_tiled_plot():
             tiled_by = self._view.tiled_by()
-            self.context.plot_panes_context[self.name].set_tiled_by(tiled_by)
+            self.context.plot_panes_context[self.name].settings.set_tiled_by(tiled_by)
             keys = self._model.create_tiled_keys(tiled_by)
             self._figure_presenter.create_tiled_plot(keys)
             self._figure_presenter._handle_autoscale_y_axes()

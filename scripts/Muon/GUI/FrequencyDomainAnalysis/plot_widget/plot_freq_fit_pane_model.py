@@ -23,14 +23,14 @@ class PlotFreqFitPaneModel(PlotFitPaneModel):
         instrument = self.context.data_context.instrument
         fit_label = self._get_fit_label(workspace_name, index)
         freq_label = self._get_freq_lebel(workspace_name)
-        if not self.context.plot_panes_context[self.name]._is_tiled:
+        if not self.context.plot_panes_context[self.name].settings._is_tiled:
             return f"{instrument}{run};{group}{fit_label}{freq_label}"
-        if self.context.plot_panes_context[self.name].is_tiled_by == "Group/Pair":
+        if self.context.plot_panes_context[self.name].settings.is_tiled_by == "Group/Pair":
             return f"{run}{fit_label}{freq_label}"
         else:
             return f"{group}{fit_label}{freq_label}"
 
-    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map):
+    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map, index = 0):
         return 0
 
     @staticmethod
