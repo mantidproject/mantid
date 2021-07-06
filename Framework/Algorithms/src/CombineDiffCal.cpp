@@ -79,13 +79,13 @@ std::string generateErrorString(const DataObjects::TableWorkspace_sptr ws) {
 
   std::stringstream error;
   if (!findColumn(columnNames, "detid"))
-    error << " detid ";
+    error << "detid ";
   if (!findColumn(columnNames, "difc"))
-    error << " difc ";
+    error << "difc ";
   if (!findColumn(columnNames, "difa"))
-    error << " difa ";
+    error << "difa ";
   if (!findColumn(columnNames, "tzero"))
-    error << " tzero ";
+    error << "tzero ";
 
   return error.str();
 }
@@ -98,11 +98,11 @@ std::map<std::string, std::string> CombineDiffCal::validateInputs() {
 
   const auto groupedResult = generateErrorString(groupedCalibrationWS);
   if (!groupedResult.empty())
-    results["GroupedCalibration"] = "The GroupedCalibration Workspace is missing [" + groupedResult + "]";
+    results["GroupedCalibration"] = "The GroupedCalibration Workspace is missing [ " + groupedResult + "]";
 
   const auto pixelResult = generateErrorString(pixelCalibrationWS);
   if (!pixelResult.empty())
-    results["PixelCalibration"] = "The PixelCalibration Workspace is missing [" + pixelResult + "]";
+    results["PixelCalibration"] = "The PixelCalibration Workspace is missing [ " + pixelResult + "]";
 
   return results;
 }
