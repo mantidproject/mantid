@@ -35,6 +35,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
     incident_energy_ws = None
     elastic_channel_ws = None
     masking = None
+    mask_ws = None
     ebinning_params = None  # energy binning
     output = None
     flat_bkg_scaling = None
@@ -305,10 +306,17 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.setPropertyGroup('GroupPixelsBy', grouping_options_group)
         self.setPropertyGroup(common.PROP_GROUPING_ANGLE_STEP, grouping_options_group)
 
+        self.declareProperty(name='ClearCache',
+                             defaultValue=False,
+                             doc='Whether to clear intermediate workspaces.')
+
     def PyExec(self):
         self.setUp()
         sample_runs = self.getPropertyValue('Runs').split(',')
         output_samples = []
+        if self.masking:
+            self.mask_ws = self._prepare_masks()
+
         for sample in sample_runs:
             ws = self._collect_data(sample, vanadium=self.process == 'Vanadium')
             if self.process in ['Empty', 'Cadmium']:
@@ -342,6 +350,52 @@ class DirectILLAutoProcess(PythonAlgorithm):
             else:
                 self.instrument = instrument
         return ws
+
+    def _prepare_masks(self):
+        """Builds a masking workspace from the provided inputs. Masking using threshold cannot be prepared ahead."""
+        existing_masks = []
+        mask = self.getPropertyValue('MaskWorkspace')
+        if mask != str():
+            mask = self.getPropertyValue('MaskWorkspace')
+            if mask not in mtd:
+                LoadNexusProcessed(Filename=mask, OutputWorkspace=mask)
+            existing_masks.append(mask)
+        mask_tubes = self.getPropertyValue('MaskedTubes')
+        if mask_tubes != str():
+            MaskBTP(Instrument=self.instrument, Tube=self.getPropertyValue(mask_tubes))
+            tube_mask_ws = "{}_masked_tubes".format(self.instrument)
+            RenameWorkspace(InputWorkspace='{}MaskBTP'.format(self.instrument), OutputWorkspace=tube_mask_ws)
+            existing_masks.append(tube_mask_ws)
+
+        mask_angles = self.getProperty('MaskedAngles')
+        if mask_angles != list():
+            masked_angles_ws = '{}_masked_angles'.format(self.instrument)
+            LoadEmptyInstrument(Filename=self.instrument, OutputWorkspace=masked_angles_ws)
+            MaskAngles(Workspace=masked_angles_ws, MinAngle=mask_angles[0], MaxAngle=mask_angles[1])
+            existing_masks.append(masked_angles_ws)
+
+        mask_with_vanadium = self.getProperty('MaskWithVanadium').value
+        if mask_with_vanadium:
+            existing_masks.append(self.vanadium_diagnostics)
+
+        mask_ws = 'mask_ws'
+        if len(existing_masks) > 1:
+            MergeRuns(InputWorkspaces=existing_masks, OutputWorkspace=mask_ws)
+        else:
+            RenameWorkspace(InputWorkspace=existing_masks[0], OutputWorkspace=mask_ws)
+        return mask_ws
+
+    def _apply_mask(self, ws):
+        """Applies selected masks."""
+        MaskWorkspace(InputWorkspace=ws, OutputWorkspace=ws)
+        # masks bins below the chosen threshold, this has to be applied for each ws and cannot be created ahead:
+        if not self.getProperty('MaskThreshold').isDefault:
+            MaskBinsIf(InputWorkspace=ws, OutputWorkspace=ws,
+                       Criterion='y < {}'.format(self.getPropertyValue('MaskThreshold')))
+        return ws
+
+    def _subtract_background(self, ws):
+        pass
 
     def _process_sample(self, ws):
         return ws
