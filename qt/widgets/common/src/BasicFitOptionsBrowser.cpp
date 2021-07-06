@@ -21,6 +21,8 @@ using namespace Mantid::API;
 
 int constexpr DEFAULT_MAX_ITERATIONS = 500;
 QString const DEFAULT_MINIMIZER = "Levenberg-Marquardt";
+QString const DEFAULT_OUTPUT_BASE_NAME = "Output_Fit";
+bool const DEFAULT_PLOT_OUTPUT = true;
 QStringList const EVALUATION_TYPES = {"CentrePoint", "Histogram"};
 QStringList const FITTING_MODES = {"Sequential", "Simultaneous"};
 
@@ -54,20 +56,28 @@ BasicFitOptionsBrowser::BasicFitOptionsBrowser(QWidget *parent)
 }
 
 BasicFitOptionsBrowser::~BasicFitOptionsBrowser() {
+  m_browser->unsetFactoryForManager(m_stringManager);
   m_browser->unsetFactoryForManager(m_intManager);
   m_browser->unsetFactoryForManager(m_enumManager);
+  m_browser->unsetFactoryForManager(m_boolManager);
 }
 
 void BasicFitOptionsBrowser::createBrowser() {
+  m_stringManager = new QtStringPropertyManager(this);
   m_intManager = new QtIntPropertyManager(this);
   m_enumManager = new QtEnumPropertyManager(this);
+  m_boolManager = new QtBoolPropertyManager(this);
 
+  auto *lineEditFactory = new QtLineEditFactory(this);
   auto *spinBoxFactory = new QtSpinBoxFactory(this);
   auto *comboBoxFactory = new QtEnumEditorFactory(this);
+  auto *checkBoxFactory = new QtCheckBoxFactory(this);
 
   m_browser = new QtTreePropertyBrowser(nullptr, QStringList(), false);
+  m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
   m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
+  m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
   m_browser->setMinimumHeight(110);
 
   connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(enumChanged(QtProperty *)));
@@ -83,6 +93,8 @@ void BasicFitOptionsBrowser::createProperties() {
   createMinimizerProperty();
   createCostFunctionProperty();
   createEvaluationTypeProperty();
+  createOutputBaseNameProperty();
+  createPlotOutputProperty();
 }
 
 void BasicFitOptionsBrowser::createFittingModeProperty() {
@@ -135,6 +147,25 @@ void BasicFitOptionsBrowser::createEvaluationTypeProperty() {
               &BasicFitOptionsBrowser::setStringEnumProperty);
 }
 
+void BasicFitOptionsBrowser::createOutputBaseNameProperty() {
+  m_outputBaseName = m_stringManager->addProperty("Output Base Name");
+
+  m_stringManager->setValue(m_outputBaseName, DEFAULT_OUTPUT_BASE_NAME);
+  m_browser->addProperty(m_outputBaseName);
+
+  addProperty("Output Base Name", m_outputBaseName, &BasicFitOptionsBrowser::getStringProperty,
+              &BasicFitOptionsBrowser::setStringProperty);
+}
+
+void BasicFitOptionsBrowser::createPlotOutputProperty() {
+  m_plotOutput = m_boolManager->addProperty("Plot Output");
+
+  m_boolManager->setValue(m_plotOutput, DEFAULT_PLOT_OUTPUT);
+  m_browser->addProperty(m_plotOutput);
+
+  m_propertyNameMap["Plot Output"] = m_plotOutput;
+}
+
 void BasicFitOptionsBrowser::addProperty(std::string const &name, QtProperty *prop, PropertyGetter getter,
                                          PropertySetter setter) {
   m_propertyNameMap[name] = prop;
@@ -154,6 +185,11 @@ std::string BasicFitOptionsBrowser::getProperty(std::string const &name) const {
   return (this->*f)(prop);
 }
 
+bool BasicFitOptionsBrowser::getBoolProperty(std::string const &name) const {
+  auto const prop = getQtPropertyFor(name);
+  return m_boolManager->value(prop);
+}
+
 QtProperty *BasicFitOptionsBrowser::getQtPropertyFor(std::string const &name) const {
   if (!m_propertyNameMap.contains(name)) {
     throw std::runtime_error("Property " + name + " isn't supported by the browser.");
@@ -165,6 +201,14 @@ void BasicFitOptionsBrowser::enumChanged(QtProperty *prop) {
   if (prop == m_fittingMode) {
     emit fittingModeChanged(getFittingMode());
   }
+}
+
+void BasicFitOptionsBrowser::setStringProperty(QtProperty *prop, std::string const &value) {
+  m_stringManager->setValue(prop, QString::fromStdString(value));
+}
+
+std::string BasicFitOptionsBrowser::getStringProperty(QtProperty *prop) const {
+  return m_stringManager->value(prop).toStdString();
 }
 
 void BasicFitOptionsBrowser::setIntProperty(QtProperty *prop, std::string const &value) {

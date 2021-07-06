@@ -412,9 +412,11 @@ FitScriptGeneratorView::getEditLocalParameterResults() const {
           convertToStdVector(m_editLocalParameterDialog->getConstraints())};
 }
 
-std::tuple<std::string, std::string, std::string, std::string> FitScriptGeneratorView::fitOptions() const {
-  return {m_fitOptionsBrowser->getProperty("Max Iterations"), m_fitOptionsBrowser->getProperty("Minimizer"),
-          m_fitOptionsBrowser->getProperty("Cost Function"), m_fitOptionsBrowser->getProperty("Evaluation Type")};
+std::tuple<std::string, std::string, std::string, std::string, std::string, bool>
+FitScriptGeneratorView::fitOptions() const {
+  return {m_fitOptionsBrowser->getProperty("Max Iterations"),   m_fitOptionsBrowser->getProperty("Minimizer"),
+          m_fitOptionsBrowser->getProperty("Cost Function"),    m_fitOptionsBrowser->getProperty("Evaluation Type"),
+          m_fitOptionsBrowser->getProperty("Output Base Name"), m_fitOptionsBrowser->getBoolProperty("Plot Output")};
 }
 
 std::string FitScriptGeneratorView::filepath() const {

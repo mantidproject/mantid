@@ -14,8 +14,10 @@
 
 class QtProperty;
 class QtTreePropertyBrowser;
+class QtStringPropertyManager;
 class QtIntPropertyManager;
 class QtEnumPropertyManager;
+class QtBoolPropertyManager;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -43,6 +45,7 @@ public:
 
   void setProperty(std::string const &name, std::string const &value);
   std::string getProperty(std::string const &name) const;
+  bool getBoolProperty(std::string const &name) const;
 
 signals:
   void fittingModeChanged(FittingMode fittingMode);
@@ -58,8 +61,13 @@ private:
   void createMinimizerProperty();
   void createCostFunctionProperty();
   void createEvaluationTypeProperty();
+  void createOutputBaseNameProperty();
+  void createPlotOutputProperty();
 
   void addProperty(std::string const &name, QtProperty *prop, PropertyGetter getter, PropertySetter setter);
+
+  void setStringProperty(QtProperty *prop, std::string const &value);
+  std::string getStringProperty(QtProperty *prop) const;
 
   void setIntProperty(QtProperty *prop, std::string const &value);
   std::string getIntProperty(QtProperty *prop) const;
@@ -70,8 +78,10 @@ private:
   QtProperty *getQtPropertyFor(std::string const &name) const;
 
   /// Property managers
+  QtStringPropertyManager *m_stringManager;
   QtIntPropertyManager *m_intManager;
   QtEnumPropertyManager *m_enumManager;
+  QtBoolPropertyManager *m_boolManager;
 
   /// Properties
   QtProperty *m_fittingMode;
@@ -79,6 +89,8 @@ private:
   QtProperty *m_minimizer;
   QtProperty *m_costFunction;
   QtProperty *m_evaluationType;
+  QtProperty *m_outputBaseName;
+  QtProperty *m_plotOutput;
 
   /// Qt property browser which displays properties
   QtTreePropertyBrowser *m_browser;

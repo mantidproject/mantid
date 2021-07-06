@@ -85,7 +85,8 @@ public:
   std::tuple<std::string, std::vector<double>, std::vector<bool>, std::vector<std::string>, std::vector<std::string>>
   getEditLocalParameterResults() const override;
 
-  [[nodiscard]] std::tuple<std::string, std::string, std::string, std::string> fitOptions() const override;
+  [[nodiscard]] std::tuple<std::string, std::string, std::string, std::string, std::string, bool>
+  fitOptions() const override;
   [[nodiscard]] std::string filepath() const override;
 
   void resetSelection() override;

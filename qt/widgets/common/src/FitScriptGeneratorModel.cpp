@@ -639,7 +639,8 @@ std::string FitScriptGeneratorModel::generatePermissibleWarnings() const {
 }
 
 std::string FitScriptGeneratorModel::generatePythonFitScript(
-    std::tuple<std::string, std::string, std::string, std::string> const &fitOptions, std::string const &filepath) {
+    std::tuple<std::string, std::string, std::string, std::string, std::string, bool> const &fitOptions,
+    std::string const &filepath) {
   auto generateScript = AlgorithmManager::Instance().create("GeneratePythonFitScript");
   generateScript->initialize();
   generateScript->setProperty("InputWorkspaces", getInputWorkspaces());
@@ -650,11 +651,13 @@ std::string FitScriptGeneratorModel::generatePythonFitScript(
   generateScript->setProperty("FittingType", getFittingType());
   generateScript->setProperty("Function", getFunction());
 
-  auto const [maxIterations, minimizer, costFunction, evaluationType] = fitOptions;
+  auto const [maxIterations, minimizer, costFunction, evaluationType, outputBaseName, plotOutput] = fitOptions;
   generateScript->setProperty("MaxIterations", maxIterations);
   generateScript->setProperty("Minimizer", minimizer);
   generateScript->setProperty("CostFunction", costFunction);
   generateScript->setProperty("EvaluationType", evaluationType);
+  generateScript->setProperty("OutputBaseName", outputBaseName);
+  generateScript->setProperty("PlotOutput", plotOutput);
 
   generateScript->setProperty("Filepath", filepath);
   generateScript->execute();
