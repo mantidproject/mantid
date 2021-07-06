@@ -6,17 +6,39 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import DirectILL_common as common
-from mantid.api import MatrixWorkspaceProperty, MultipleFileProperty, \
-    PropertyMode, PythonAlgorithm, WorkspaceGroupProperty, FileAction, \
-    AlgorithmFactory
+from mantid.api import AlgorithmFactory, FileAction, MatrixWorkspaceProperty, \
+    MultipleFileProperty, PropertyMode, PythonAlgorithm, \
+    WorkspaceGroupProperty
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator, \
     FloatBoundedValidator, IntArrayProperty, Property, PropertyManagerProperty, \
     RebinParamsValidator, StringListValidator
+from mantid.simpleapi import *
+
+from os import path
+
+
+def get_run_number(value):
+    """
+    Extracts the run number from the first run out of the string value of a
+    multiple file property of numors
+    """
+    return path.splitext(path.basename(value.split(',')[0].split('+')[0]))[0]
 
 
 class DirectILLAutoProcess(PythonAlgorithm):
 
-    _instrument = None
+    instrument = None
+    sample = None
+    process = None
+    reduction_type = None
+    incident_energy_calibration = None
+    incident_energy_ws = None
+    elastic_channel_ws = None
+    masking = None
+    ebinning_params = None  # energy binning
+    output = None
+    flat_bkg_scaling = None
+    flat_background = None
 
     def category(self):
         return "{};{}".format(common.CATEGORIES, "ILL\\Auto")
@@ -77,6 +99,30 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 issues['ContainerGeometry'] = 'Please define container geometry.'
 
         return issues
+
+    def setUp(self):
+        self.sample = self.getPropertyValue('Runs').split(',')
+        self.output = self.getPropertyValue('OutputWorkspace')
+        self.process = self.getPropertyValue('ProcessAs')
+        self.reduction_type = self.getPropertyValue('ReductionType')
+        if self.getProperty('IncidentEnergyCalibration').value:
+            self.incident_energy_calibration = 'Energy Calibration ON'
+            self.incident_energy_ws = 'incident_energy_ws'
+            CreateSingleValuedWorkspace(DataValue=self.getProperty('IncidentEnergy').value,
+                                        OutputWorkspace=self.incident_energy_ws)
+        if self.getProperty('ElasticChannelCalibration').value:
+            self.elastic_channel_ws = 'elastic_channel_ws'
+            CreateSingleValuedWorkspace(DataValue=self.getProperty('ElasticChannelCalibration').value,
+                                        OutputWorkspace=self.elastic_channel_ws)
+
+        if (self.getProperty('MaskWorkspace').isDefault and self.getProperty('MaskedTubes').isDefault
+                and self.getProperty('MaskThreshold').isDefault and self.getProperty('MaskedAngles').isDefault
+                and self.getProperty('MaskWithVanadium').isDefault):
+            self.masking = False
+        else:
+            self.masking = True
+        self.flat_bkg_scaling = self.getProperty('FlatBkgScaling')
+        self.ebinning_params = self.getProperty('EnergyBinning')
 
     def PyInit(self):
 
@@ -260,7 +306,45 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.setPropertyGroup(common.PROP_GROUPING_ANGLE_STEP, grouping_options_group)
 
     def PyExec(self):
-        pass
+        self.setUp()
+        sample_runs = self.getPropertyValue('Runs').split(',')
+        output_samples = []
+        for sample in sample_runs:
+            ws = self._collect_data(sample, vanadium=self.process == 'Vanadium')
+            if self.process in ['Empty', 'Cadmium']:
+                pass
+            elif self.process == 'Vanadium':
+                pass
+            elif self.process == 'Sample':
+                ws = self._process_sample(ws)
+                output_samples.append(ws)
+        GroupWorkspaces(InputWorkspaces=output_samples,
+                        OutputWorkspace=self.output)
+        self.setProperty('OutputWorkspace', mtd[self.output])
+
+    def _collect_data(self, sample, vanadium=False):
+        """Loads data if the corresponding workspace does not exist in the ADS."""
+        ws = "{}_{}".format(get_run_number(sample), 'raw')
+        kwargs = dict()
+        if not self.getProperty('FlatBackground').isDefault:
+            kwargs['FlatBkgWorkspace'] = self.getPropertyValue('FlatBackground')
+            kwargs['FlatBkgScaling'] = self.flat_bkg_scaling
+        if ws not in mtd:
+            DirectILLCollectData(Run=sample, OutputWorkspace=ws,
+                                 IncidentEnergyCalibration=self.incident_energy_calibration,
+                                 IncidentEnergyWorkspace=self.incident_energy_ws,
+                                 ElasticChannelWorkspace=self.elastic_channel_ws,
+                                 **kwargs)
+            instrument = mtd[ws].getInstrument().getName()
+            if self.instrument and instrument != self.instrument:
+                self.log().error("Sample data: {} comes from different instruments that the rest of the data:"
+                                 " {} and {}".format(sample, instrument, self.instrument))
+            else:
+                self.instrument = instrument
+        return ws
+
+    def _process_sample(self, ws):
+        return ws
 
 
 AlgorithmFactory.subscribe(DirectILLAutoProcess)
