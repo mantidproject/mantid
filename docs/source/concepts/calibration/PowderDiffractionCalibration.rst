@@ -106,6 +106,9 @@ for selecting between :ref:`GetDetectorOffsets
 <algm-GetDetectorOffsets>` and :ref:`GetDetOffsetsMultiPeaks
 <algm-GetDetOffsetsMultiPeaks>`.
 
+
+.. _calibration_tofpd_group_calibration-ref:
+
 Group Calibration
 ~~~~~~~~~~~~~~~~~
 
@@ -114,6 +117,28 @@ the instrument in groups using a combination of :ref:`CrossCorrelate
 <algm-CrossCorrelate>`, :ref:`GetDetectorOffsets
 <algm-GetDetectorOffsets>` and :ref:`PDCalibration
 <algm-PDCalibration>`.
+
+It works by performing the cross-correlations on only the detectors
+within a group, after which the grouped detectors are merge together
+to use with PDCalibration. The difc from the PDCalibration and
+cross-correlation are combined using :ref:`CombineDiffCal
+<algm-CombineDiffCal>`
+
+The workflow follows these step:
+
+#. Load data, usually diamond
+#. Convert to d-spacing
+#. CrossCorrelate a portion of the instrument according to the group information
+#. GetDetectorOffsets to calculate offsets for individual pixels with a group
+#. ConvertDiffCal to convert these constants to :math:`DIFC_{CC}`
+#. Use :math:`DIFC_{CC}` to convert the origonal data to d-spacing. DiffractionFocus allows for combining a portion of the instrument into a single spectrum for improved statistics
+#. Pick an arbitrary constant, :math:`DIFC_{arb}` to convert this combined spectrum back to time-of-flight
+#. PDCalibration the combined spectrum to determine a conversion constant :math:`DIFC_{PD}`
+#. Do math (below) to combine :math:`DIFC_{CC}`, :math:`DIFC_{arb}`, and :math:`DIFC_{PD}` into a new calibration constant, :math:`DIFC_{eff}`
+
+.. math::
+
+   DIFC_{eff} = \frac{DIFC_{PD}}{DIFC_{arb}} DIFC_{CC}
 
 .. testcode:: group_cal
 
@@ -238,7 +263,8 @@ The evolution in the calibration can be seen with
 .. figure:: /images/tofpd_group_calibration.png
   :align: center
 
-The same complete calibration can just be run with just ``group_calibration.do_group_calibration``.
+The same complete calibration can just be run with just
+``group_calibration.do_group_calibration``.
 
 .. testsetup:: group_cal2
 
@@ -285,10 +311,10 @@ The same complete calibration can just be run with just ``group_calibration.do_g
         5 2318.3
         6 2269.5
 
-The resulting diffcal can be saved with :ref:`SaveDiffCal
-<algm-SaveDiffCal>`.
+The resulting :ref:`diffcal <DiffractionCalibrationWorkspace>` can be
+saved with :ref:`SaveDiffCal <algm-SaveDiffCal>`.
 
-.. codeblock::
+.. code-block:: python
 
    SaveDiffCal(CalibrationWorkspace=diffcal,
                MaskWorkspace=mask,
