@@ -70,11 +70,11 @@ API::ITableWorkspace_sptr CombineDiffCal::sortTableWorkspace(DataObjects::TableW
   return alg->getProperty("OutputWorkspace");
 }
 
-bool findColumn(const std::vector<std::string> columnNames, const std::string name) {
+bool findColumn(const std::vector<std::string> &columnNames, const std::string name) {
   return std::find(columnNames.begin(), columnNames.end(), name) != columnNames.end();
 }
 
-int hasAllExpectedDifcColumns(const DataObjects::TableWorkspace_sptr ws) {
+int isMissingDifcColumns(const DataObjects::TableWorkspace_sptr ws) {
   const std::vector<std::string> columnNames = ws->getColumnNames();
 
   // 0x0000 is success
@@ -115,13 +115,13 @@ std::map<std::string, std::string> CombineDiffCal::validateInputs() {
   const DataObjects::TableWorkspace_sptr groupedCalibrationWS = getProperty("GroupedCalibration");
   const DataObjects::TableWorkspace_sptr pixelCalibrationWS = getProperty("PixelCalibration");
 
-  const int groupedResult = hasAllExpectedDifcColumns(groupedCalibrationWS);
-  if (groupedResult != 0)
+  const int groupedResult = isMissingDifcColumns(groupedCalibrationWS);
+  if (groupedResult)
     results["GroupedCalibration"] =
         "The GroupedCalibration Workspace is missing " + getMissingColumnString(groupedResult);
 
-  const int pixelResult = hasAllExpectedDifcColumns(pixelCalibrationWS);
-  if (pixelResult != 0)
+  const int pixelResult = isMissingDifcColumns(pixelCalibrationWS);
+  if (pixelResult)
     results["PixelCalibration"] = "The PixelCalibration Workspace is missing " + getMissingColumnString(pixelResult);
 
   return results;
