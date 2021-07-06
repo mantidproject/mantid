@@ -70,8 +70,59 @@ API::ITableWorkspace_sptr CombineDiffCal::sortTableWorkspace(DataObjects::TableW
   return alg->getProperty("OutputWorkspace");
 }
 
+bool findColumn(const std::vector<std::string> columnNames, const std::string name) {
+  return std::find(columnNames.begin(), columnNames.end(), name) != columnNames.end();
+}
+
+int hasAllExpectedDifcColumns(const DataObjects::TableWorkspace_sptr ws) {
+  const std::vector<std::string> columnNames = ws->getColumnNames();
+
+  // 0x0000 is success
+  // 0x???1 detid is missing
+  // 0x??1? difc is missing
+  // 0x?1?? difa is missing
+  // 0x1??? tzero is missing
+  int result = 0;
+
+  result = result | (findColumn(columnNames, "detid") ? 0x0000 : 0x0001) |
+           (findColumn(columnNames, "difc") ? 0x0000 : 0x0010) | (findColumn(columnNames, "difa") ? 0x0000 : 0x0100) |
+           (findColumn(columnNames, "tzero") ? 0x0000 : 0x1000);
+
+  return result;
+}
+
+std::string getMissingColumnString(const int flags) {
+  std::string missingColumns = "[";
+  if (flags & 0x0001) {
+    missingColumns.append(" detid ");
+  }
+  if (flags & 0x0010) {
+    missingColumns.append(" difc ");
+  }
+  if (flags & 0x0100) {
+    missingColumns.append(" difa ");
+  }
+  if (flags & 0x1000) {
+    missingColumns.append(" tzero ");
+  }
+  missingColumns.append("]");
+  return missingColumns;
+}
+
 std::map<std::string, std::string> CombineDiffCal::validateInputs() {
   std::map<std::string, std::string> results;
+
+  const DataObjects::TableWorkspace_sptr groupedCalibrationWS = getProperty("GroupedCalibration");
+  const DataObjects::TableWorkspace_sptr pixelCalibrationWS = getProperty("PixelCalibration");
+
+  const int groupedResult = hasAllExpectedDifcColumns(groupedCalibrationWS);
+  if (groupedResult != 0)
+    results["GroupedCalibration"] =
+        "The GroupedCalibration Workspace is missing " + getMissingColumnString(groupedResult);
+
+  const int pixelResult = hasAllExpectedDifcColumns(pixelCalibrationWS);
+  if (pixelResult != 0)
+    results["PixelCalibration"] = "The PixelCalibration Workspace is missing " + getMissingColumnString(pixelResult);
 
   return results;
 }
@@ -144,13 +195,13 @@ void CombineDiffCal::exec() {
         double difcPrev = pixelCalibrationRow->Double(1);
         double difaPrev = pixelCalibrationRow->Double(2);
 
-        double difc = (difcPD / difcArb) * difcPrev;
-        double difa = ((difcPD / difcArb) * (difcPD / difcArb)) * difaPrev;
+        double difcNew = (difcPD / difcArb) * difcPrev;
+        double difaNew = ((difcPD / difcArb) * (difcPD / difcArb)) * difaPrev;
 
-        double tzero = pixelCalibrationRow->Double(3);
+        double tzeroNew = pixelCalibrationRow->Double(3);
 
         Mantid::API::TableRow newRow = outputWorkspace->appendRow();
-        newRow << detid << difc << difa << tzero;
+        newRow << detid << difcNew << difaNew << tzeroNew;
         prevDifValsExist = true;
       }
     }
