@@ -21,13 +21,14 @@ class SuperplotPresenter:
     _view = None
     _model = None
     _canvas = None
-    _plot_function = None
+    _error_bars = False
 
-    def __init__(self, canvas, parent=None):
+    def __init__(self, canvas, parent=None, error_bars=False):
         self._view = SuperplotView(self, parent)
         self._model = SuperplotModel()
         self._canvas = canvas
         self.parent = parent
+        self._error_bars = error_bars
 
         # fix size of hold button with the longest text
         self._view.set_hold_button_text(self.HOLD_BUTTON_TEXT_CHECKED)
@@ -137,7 +138,7 @@ class SuperplotPresenter:
                 self._model.set_spectrum_mode()
                 self._view.set_available_modes([self.SPECTRUM_MODE_TEXT])
             if "function" in args[0]:
-                self._plot_function = args[0]["function"]
+                self._error_bars = (args[0]["function"] == "errorbar")
 
         for artist in artists:
             ws, spec_index = axes.get_artists_workspace_and_workspace_index(artist)
@@ -321,7 +322,7 @@ class SuperplotPresenter:
                         kwargs["axis"] = MantidAxType.BIN
                         kwargs["wkspIndex"] = sp
 
-                    if self._plot_function == "errorbar":
+                    if self._error_bars:
                         lines = axes.errorbar(ws, **kwargs)
                         label = lines.get_label()
                         color = lines.lines[0].get_color()
