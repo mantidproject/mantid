@@ -62,10 +62,17 @@ public:
   }
 
   void test_DAQ_count_increases_as_expected() {
+    // Periods can be DAQ (1) or DWELL (2) indicated by the second argument of the addPeriodToTable method
+    // Add one DAQ period and expect the count to increase
+    TS_ASSERT_EQUALS(0, m_periodInfo->getDAQCount());
     m_periodInfo->addPeriodToTable("state 1", "1", "10", "200", "25", "1");
     TS_ASSERT_EQUALS(1, m_periodInfo->getDAQCount());
+
+    // Now add a DWELL period and expect the count to be the same
     m_periodInfo->addPeriodToTable("state 1 dwell", "2", "10", "200", "25", "1");
     TS_ASSERT_EQUALS(1, m_periodInfo->getDAQCount());
+
+    // Add some final DAQ periods to check count is as expected at the end
     m_periodInfo->addPeriodToTable("state 1", "1", "10", "200", "25", "1");
     m_periodInfo->addPeriodToTable("state 1", "1", "10", "200", "25", "1");
     TS_ASSERT_EQUALS(3, m_periodInfo->getDAQCount());

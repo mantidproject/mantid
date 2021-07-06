@@ -188,8 +188,10 @@ void MuonPeriodInfo::setWidgetTitleRuns(const std::string &title) {
 std::string MuonPeriodInfo::getWidgetTitleRuns() const { return this->windowTitle().toStdString(); }
 
 /**
- * Sets the numberOfSequences and updates the label of the widget
- * @param numberOfSequences :: The new string value for the number of sequences
+ * Sets the numberOfSequences and updates the label of the widget.
+ * A sequence is a complete recording of all periods once, and the number of sequences is how many times this happens
+ * during a run
+ * @param numberOfSequences :: The new value for the number of sequences
  */
 void MuonPeriodInfo::setNumberOfSequences(const int numberOfSequences) {
   m_numberOfSequences = numberOfSequences;

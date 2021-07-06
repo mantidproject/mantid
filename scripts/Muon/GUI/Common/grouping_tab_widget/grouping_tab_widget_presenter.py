@@ -36,7 +36,7 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget = grouping_table_widget
         self.pairing_table_widget = pairing_table_widget
         self.diff_table = diff_table
-        self.period_info_widget = MuonPeriodInfo(parent=parent)
+        self.period_info_widget = MuonPeriodInfo()
 
         self._view.set_description_text('')
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
