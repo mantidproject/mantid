@@ -79,6 +79,8 @@ public:
     m_minimizer = "Levenberg-Marquardt";
     m_costFunction = "Least squares";
     m_evaluationType = "CentrePoint";
+    m_outputBaseName = "Output_Fit";
+    m_plotOutput = true;
 
     m_filepath = ConfigService::Instance().getString("defaultsave.directory") + "TestPythonScript.py";
 
@@ -96,6 +98,8 @@ public:
     m_algorithm->setProperty("Minimizer", m_minimizer);
     m_algorithm->setProperty("CostFunction", m_costFunction);
     m_algorithm->setProperty("EvaluationType", m_evaluationType);
+    m_algorithm->setProperty("OutputBaseName", m_outputBaseName);
+    m_algorithm->setProperty("PlotOutput", m_plotOutput);
   }
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
@@ -184,6 +188,8 @@ private:
   std::string m_minimizer;
   std::string m_costFunction;
   std::string m_evaluationType;
+  std::string m_outputBaseName;
+  bool m_plotOutput;
 
   std::string m_filepath;
 };
