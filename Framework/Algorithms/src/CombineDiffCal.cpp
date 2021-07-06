@@ -74,39 +74,20 @@ bool findColumn(const std::vector<std::string> &columnNames, const std::string &
   return std::find(columnNames.begin(), columnNames.end(), name) != columnNames.end();
 }
 
-int isMissingDifcColumns(const DataObjects::TableWorkspace_sptr ws) {
+std::string generateErrorString(const DataObjects::TableWorkspace_sptr ws) {
   const std::vector<std::string> columnNames = ws->getColumnNames();
 
-  // 0x0000 is success
-  // 0x???1 detid is missing
-  // 0x??1? difc is missing
-  // 0x?1?? difa is missing
-  // 0x1??? tzero is missing
-  int result = 0;
+  std::stringstream error;
+  if (!findColumn(columnNames, "detid"))
+    error << " detid ";
+  if (!findColumn(columnNames, "difc"))
+    error << " difc ";
+  if (!findColumn(columnNames, "difa"))
+    error << " difa ";
+  if (!findColumn(columnNames, "tzero"))
+    error << " tzero ";
 
-  result = result | (findColumn(columnNames, "detid") ? 0x0000 : 0x0001) |
-           (findColumn(columnNames, "difc") ? 0x0000 : 0x0010) | (findColumn(columnNames, "difa") ? 0x0000 : 0x0100) |
-           (findColumn(columnNames, "tzero") ? 0x0000 : 0x1000);
-
-  return result;
-}
-
-std::string getMissingColumnString(const int flags) {
-  std::string missingColumns = "[";
-  if (flags & 0x0001) {
-    missingColumns.append(" detid ");
-  }
-  if (flags & 0x0010) {
-    missingColumns.append(" difc ");
-  }
-  if (flags & 0x0100) {
-    missingColumns.append(" difa ");
-  }
-  if (flags & 0x1000) {
-    missingColumns.append(" tzero ");
-  }
-  missingColumns.append("]");
-  return missingColumns;
+  return error.str();
 }
 
 std::map<std::string, std::string> CombineDiffCal::validateInputs() {
@@ -115,14 +96,13 @@ std::map<std::string, std::string> CombineDiffCal::validateInputs() {
   const DataObjects::TableWorkspace_sptr groupedCalibrationWS = getProperty("GroupedCalibration");
   const DataObjects::TableWorkspace_sptr pixelCalibrationWS = getProperty("PixelCalibration");
 
-  const int groupedResult = isMissingDifcColumns(groupedCalibrationWS);
-  if (groupedResult)
-    results["GroupedCalibration"] =
-        "The GroupedCalibration Workspace is missing " + getMissingColumnString(groupedResult);
+  const auto groupedResult = generateErrorString(groupedCalibrationWS);
+  if (!groupedResult.empty())
+    results["GroupedCalibration"] = "The GroupedCalibration Workspace is missing [" + groupedResult + "]";
 
-  const int pixelResult = isMissingDifcColumns(pixelCalibrationWS);
-  if (pixelResult)
-    results["PixelCalibration"] = "The PixelCalibration Workspace is missing " + getMissingColumnString(pixelResult);
+  const auto pixelResult = generateErrorString(pixelCalibrationWS);
+  if (!pixelResult.empty())
+    results["PixelCalibration"] = "The PixelCalibration Workspace is missing [" + pixelResult + "]";
 
   return results;
 }
