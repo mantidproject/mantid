@@ -18,14 +18,49 @@ This will reduce the input workspace using the region of interest
 provided to create a 1-dimension workspace with an axis that is the
 detector scan, either omega or chi in degrees.
 
+An optional fitting range of the scan axis can be provided with
+`StartX` and `EndX` in degrees, which is applicable for the
+`CountsWithFitting` and `Fitted` methods.
+
+The `OptimizeQVector` option will convert the input data into Q and
+use :ref:`CentroidPeaksdMD <algm-CentroidPeaksMD>` to find the
+correct Q-vector starting from the known HKL and UB matrix of the
+peaks. This will not effect the integration of the peak but allows the
+UB matrix to be refined afterwards.
+
+Integration Methods
+###################
+
 There are three different methods for integrating the input workspace:
 simple counts summation, simple counts summation with fitted background,
-and a fitted model, which are described in detail at
-:ref:`HFIR Single Crystal Reduction <interface-HFIR-Single-Crystal-Reduction>`.
+and a fitted model.
 
-When using `Method=Counts`, the background is estimated by averaging
-data from the first and last scans. The number of scans to include
-in the background estimation can be specified with `NumBackgroundPts`.
+Counts
+++++++
+
+This method uses the simple cuboid integration to approximate the
+integrated peak intensity.
+
+.. math:: I = \sum_i (C_i - B_i) \times \Delta X
+
+where
+  * :math:`C_i` is the normalized detector counts in ROI of measurement *i*
+  * :math:`\Delta X` is the motor step
+  * :math:`B_i` is the estimated background
+
+The error is calculated as
+
+.. math:: \sigma = \sum_i \sqrt{C_i} \cdot \Delta X
+
+The background is estimated by averaging data from the first and last scans:
+
+.. math:: B = \frac{\sum_i^{<pt>}C_i}{|<pt>|}
+
+where :math:`<pt>` is the number of scans to include in the background estimation
+and is specified with the `NumBackgroundPts` option.
+
+CountsWithFitting
++++++++++++++++++
 
 For `Method=CountsWithFitting`, the input is fit to a :ref:`Gaussian
 <func-Gaussian>` with a :ref:`flat background <func-FlatBackground>`,
@@ -36,20 +71,34 @@ measurements that are defined by the motor positions in the range of
 `WidthScale` option. The background is removed over the same
 range using the fitted flat background.
 
+.. math:: I = \sum_i^{<pt>} (C_i - B) \times \Delta X
+
+where
+  *  :math:`C_i` is the normalized detector counts in ROI of measurement *i*
+  *  :math:`\Delta X` is the motor step
+  *  :math:`B_i` is the estimated background
+  *  the set of measurements *<pt>* is defined by the motor positions in the range of :math:`x_0 \pm \frac{N}{2}FWHM`.
+
+     -  usually the default value of *N* is set to 2.
+     -  :math:`FWHM = 2\sqrt{2\ln2}s \approx 2.3548s`
+
+The error is calculated as
+
+.. math:: \sigma = \sum_i \sqrt{C_i} \cdot \Delta X
+
+Fitted
+++++++
+
 For `Method=Fitted`, the reduced workspace is fitted using
 :ref:`Fit <algm-Fit>` with a :ref:`flat background <func-FlatBackground>`
 and a :ref:`Gaussian <func-Gaussian>`, then the area of the Gaussian is
-used as the peak intensity and added to the output workspace.
+used as the peak intensity:
 
-An optional fitting range of the scan axis can be provided with
-`StartX` and `EndX` in degrees, which is applicable for the
-`CountsWithFitting` and `Fitted` methods.
+.. math:: I = A\times s\times\sqrt{2\pi}
 
-The `OptimizeQVector` option will convert the input data into Q and
-use :ref:`CentroidPeaksdMD <algm-CentroidPeaksMD>` to find the
-correct Q-vector starting from the known HKL and UB matrix of the
-peaks. This will not effect the integration of the peak but allows the
-UB matrix to be refined afterwards.
+The error of the intensity is calculated by the propagation of fitted error of *A* and *s*.
+
+.. math:: \sigma_I^2 = 2\pi (A^2\cdot \sigma_s^2 + \sigma_A^2\cdot s^2 + 2\cdot A\cdot s\cdot \sigma_{As})
 
 Usage
 -----
