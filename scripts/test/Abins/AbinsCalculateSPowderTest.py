@@ -7,6 +7,7 @@
 import unittest
 import json
 import numpy as np
+from numpy.testing import assert_almost_equal
 
 import abins
 import abins.input
@@ -87,6 +88,10 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
 
         self._check_data(good_data=good_data["S"], data=calculated_data.extract())
 
+        # Uncomment to write a replacement data file
+        # self._write_data(data=calculated_data.extract(),
+        #                  filename=f'/home/abc/{name}_S.txt')
+
         # check if loading powder data is correct
         new_tester = abins.SCalculatorFactory.init(
             filename=abins.test_helpers.find_file(filename=name + ".phonon"), temperature=self._temperature,
@@ -103,6 +108,12 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
         s_data = self._prepare_data(filename=abins.test_helpers.find_file(filename=filename + "_S.txt"))
 
         return {"DFT": castep_reader.read_vibrational_or_phonon_data(), "S": s_data}
+
+    @staticmethod
+    def _write_data(*, data, filename):
+        from abins.input.tester import Tester
+        with open(filename, 'w') as fd:
+            json.dump(Tester._arrays_to_lists(data), fd, indent=4, sort_keys=True)
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):
@@ -131,14 +142,15 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
 
         good_temp = good_data["frequencies"]
         data_temp = data["frequencies"]
-        self.assertEqual(True, np.allclose(good_temp, data_temp))
+        assert_almost_equal(good_temp, data_temp)
 
         # we need to - 1 because one entry is "frequencies"
         for el in range(len(good_data) - 1):
 
             good_temp = good_data["atom_%s" % el]["s"]["order_%s" % FUNDAMENTALS]
             data_temp = data["atom_%s" % el]["s"]["order_%s" % FUNDAMENTALS]
-            self.assertEqual(True, np.allclose(good_temp, data_temp))
+
+            assert_almost_equal(good_temp, data_temp)
 
 
 if __name__ == '__main__':

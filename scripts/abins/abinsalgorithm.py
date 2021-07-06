@@ -42,6 +42,8 @@ class AbinsAlgorithm:
         # conversion from str to int
         self._num_quantum_order_events = int(self.getProperty("QuantumOrderEventsNumber").value)
 
+        self._max_event_order = self._num_quantum_order_events # This default can be replaced in child class
+
     def set_instrument(self) -> None:
         """Instantiate self._instrument using name and self._instrument_kwargs"""
         instrument_name = self.getProperty("Instrument").value
@@ -397,7 +399,7 @@ class AbinsAlgorithm:
         :returns: mantid workspaces of S for atom (total) and individual quantum orders
         :returntype: list of Workspace2D
         """
-        from abins.constants import ATOM_PREFIX, FUNDAMENTALS, S_LAST_INDEX
+        from abins.constants import ATOM_PREFIX, FUNDAMENTALS
 
         atom_workspaces = []
         s_atom_data.fill(0.0)
@@ -405,7 +407,7 @@ class AbinsAlgorithm:
         symbol = atoms_data[atom_number - 1]["symbol"]
         z_number = Atom(symbol=symbol).z_number
 
-        for i, order in enumerate(range(FUNDAMENTALS, self._num_quantum_order_events + S_LAST_INDEX)):
+        for i, order in enumerate(range(FUNDAMENTALS, self._max_event_order + 1)):
             s_atom_data[i] = s_data[atom_number - 1]["order_%s" % order]
 
         total_s_atom_data = np.sum(s_atom_data, axis=0)
@@ -436,7 +438,7 @@ class AbinsAlgorithm:
             information but is used in-place to save on time instantiating large arrays.
         :param substitution: True if isotope substitution and False otherwise
         """
-        from abins.constants import FUNDAMENTALS, MASS_EPS, PYTHON_INDEX_SHIFT, S_LAST_INDEX
+        from abins.constants import MASS_EPS
 
         atom_workspaces = []
         s_atom_data.fill(0.0)
@@ -449,8 +451,8 @@ class AbinsAlgorithm:
 
                 temp_s_atom_data.fill(0.0)
 
-                for order in range(FUNDAMENTALS, self._num_quantum_order_events + S_LAST_INDEX):
-                    order_indx = order - PYTHON_INDEX_SHIFT
+                for order in range(1, self._max_event_order + 1):
+                    order_indx = order - 1
                     temp_s_order = s_data[atom_index]["order_%s" % order]
                     temp_s_atom_data[order_indx] = temp_s_order
 

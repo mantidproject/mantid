@@ -39,11 +39,25 @@ class PowderData:
 
         self._check_data()
 
+        self._a_traces = {}
+
     def get_a_tensors(self) -> Dict[int, np.ndarray]:
         return self._data["a_tensors"]
 
     def get_b_tensors(self) -> Dict[int, np.ndarray]:
         return self._data["b_tensors"]
+
+    def get_a_traces(self, k_index):
+        if k_index not in self._a_traces:
+            self._calculate_a_traces(k_index)
+        return self._a_traces[k_index]
+
+    def _calculate_a_traces(self, k_index):
+        self._a_traces[k_index] = np.trace(a=self.get_a_tensors()[k_index],
+                                           axis1=1, axis2=2)
+
+    def get_b_traces(self, k_index):
+        return np.trace(a=self.get_b_tensors()[k_index], axis1=2, axis2=3)
 
     def get_frequencies(self) -> np.ndarray:
         return self._data["frequencies"]

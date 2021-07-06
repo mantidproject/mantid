@@ -521,7 +521,6 @@ def interpolated_broadening(sigma=None, points=None, bins=None,
     :returntype: (1D array, 1D array)
 
     """
-
     mix_functions = {'gaussian': {'2': {'lower': [-0.1873, 1.464, -4.079, 3.803],
                                         'upper': [0.2638, -1.968, 5.057, -3.353]},
                                   'sqrt2': {'lower': [-0.6079, 4.101, -9.632, 7.139],
