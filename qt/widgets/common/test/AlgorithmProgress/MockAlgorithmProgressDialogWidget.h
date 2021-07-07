@@ -20,5 +20,6 @@ class QWidget;
 
 class MockAlgorithmProgressDialogWidget : public IAlgorithmProgressDialogWidget {
 public:
+  virtual ~MockAlgorithmProgressDialogWidget() = default;
   MOCK_METHOD((std::pair<QTreeWidgetItem *, QProgressBar *>), addAlgorithm, (Mantid::API::IAlgorithm_sptr), (override));
 };
