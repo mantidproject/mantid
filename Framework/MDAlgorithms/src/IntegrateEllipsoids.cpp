@@ -244,6 +244,55 @@ void IntegrateEllipsoids::init() {
       "Half-length of major axis for the outer ellipsoidal surface of background region of the satellite peak");
 }
 
+/**
+ * @brief validate input properties
+ *
+ * @return std::map<std::string, std::string>
+ */
+std::map<std::string, std::string> IntegrateEllipsoids::validateInputs() {
+  std::map<std::string, std::string> issues;
+
+  // case 1: specified peak and background must be realisitc
+  bool specify_size = getProperty("SpecifySize");
+  double peak_radius = getProperty("PeakSize");
+  double back_inner_radius = getProperty("BackgroundInnerSize");
+  double back_outer_radius = getProperty("BackgroundOuterSize");
+  if (specify_size) {
+    if (back_inner_radius >= back_outer_radius) {
+      issues["SpecifySize"] = "BackgroundInnerSize must be less than BackgroundOuterSize";
+    }
+    if (peak_radius > back_inner_radius) {
+      issues["SpecifySize"] = "PeakSize must be less than or equal to the BackgroundInnerSize";
+    }
+  }
+
+  // case 2: specified satellite peak and background must be realisitc
+  double satellite_radius = (getPointerToProperty("SatelliteRegionRadius")->isDefault())
+                                ? getProperty("RegionRadius")
+                                : getProperty("SatelliteRegionRadius");
+  double satellite_peak_radius = (getPointerToProperty("SatellitePeakSize")->isDefault())
+                                     ? getProperty("PeakSize")
+                                     : getProperty("SatellitePeakSize");
+  double satellite_back_inner_radius = (getPointerToProperty("SatelliteBackgroundInnerSize")->isDefault())
+                                           ? getProperty("BackgroundInnerSize")
+                                           : getProperty("SatelliteBackgroundInnerSize");
+  double satellite_back_outer_radius = (getPointerToProperty("SatelliteBackgroundOuterSize")->isDefault())
+                                           ? getProperty("BackgroundOuterSize")
+                                           : getProperty("SatelliteBackgroundOuterSize");
+  if (specify_size) {
+    if (satellite_back_inner_radius >= satellite_back_outer_radius) {
+      issues["SpecifySize"] = "SatelliteBackgroundInnerSize must be less than SatelliteBackgroundOuterSize";
+    }
+    if (satellite_peak_radius > satellite_back_inner_radius) {
+      issues["SpecifySize"] = "SatellitePeakSize must be less than or equal to the SatelliteBackgroundInnerSize";
+    }
+  }
+
+  // case 3: anything else?
+
+  return issues;
+}
+
 void IntegrateEllipsoids::exec() {
   // get the input workspace
   MatrixWorkspace_sptr wksp = getProperty("InputWorkspace");

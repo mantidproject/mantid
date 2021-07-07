@@ -41,6 +41,8 @@ private:
   void init() override;
   /// Execute the algorithm
   void exec() override;
+  /// Private validator for inputs
+  std::map<std::string, std::string> validateInputs() override;
 
   /**
    * @brief create a list of SlimEvent objects from an events workspace
