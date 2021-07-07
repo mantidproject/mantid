@@ -12,6 +12,7 @@ namespace MantidWidgets {
 class IAlgorithmProgressWidget {
 public:
   IAlgorithmProgressWidget() = default;
+  virtual ~IAlgorithmProgressWidget() = default;
 
   virtual void algorithmStarted() = 0;
   virtual void algorithmEnded() = 0;
