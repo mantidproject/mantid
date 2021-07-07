@@ -11,6 +11,8 @@
 #include "MantidQtWidgets/InstrumentView/QtDisplay.h"
 #include "MantidQtWidgets/InstrumentView/StackedLayout.h"
 
+#include <cassert>
+
 class QObject;
 class QWidget;
 
@@ -48,23 +50,17 @@ void InstrumentDisplay::installEventFilter(QObject *obj) {
 }
 
 ProjectionSurface_sptr InstrumentDisplay::getSurface() const {
-  if (m_glDisplay) {
-    return m_glDisplay->getSurface();
-  } else if (m_qtDisplay) {
-    return m_qtDisplay->getSurface();
-  }
-  return ProjectionSurface_sptr();
+  assert(m_glDisplay);
+  return m_glDisplay->getSurface();
 }
 
 void InstrumentDisplay::setSurface(ProjectionSurface_sptr surface) {
+  assert(m_glDisplay);
+  m_glDisplay->setSurface(surface);
+  m_glDisplay->qtUpdate();
 
-  if (m_glDisplay) {
-    m_glDisplay->setSurface(surface);
-    m_glDisplay->qtUpdate();
-  }
-  if (getQtDisplay()) {
-    m_qtDisplay->setSurface(surface);
-    m_qtDisplay->qtUpdate();
-  }
+  assert(m_qtDisplay);
+  m_qtDisplay->setSurface(surface);
+  m_qtDisplay->qtUpdate();
 }
 } // namespace MantidQt::MantidWidgets
