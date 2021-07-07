@@ -49,7 +49,7 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         mock_get_item.return_value = EAGroup("9999; Detector 1", "detector 1", "9999")
         name = '9999; Detector 1'
         rebinned_name = '9999; Detector 1' + REBINNED_VARIABLE_WS_SUFFIX
-        mock_params = [0, 2, 9]
+        mock_params = "0, 2, 9"
 
         x_data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         y_data = [1, 1, 1, 1, 1, 1, 1, 1, 1]
@@ -264,7 +264,7 @@ class EAGroupContextTest(unittest.TestCase):
     def test_remove_peak_table_from_group(self, mock_remove_matches, mock_remove_peak, mock_remove_rebinned):
         mock_group = EAGroup("9999; Detector 1", "detector 1", "9999")
         self.context.add_group(mock_group)
-        self.context.remove_workspace_from_group('9999; Detector 1_peak_table')
+        self.context.remove_workspace_from_group('9999; Detector 1_EA_peak_table')
         mock_remove_rebinned.assert_not_called()
         mock_remove_peak.aassert_called_once()
         mock_remove_matches.assert_not_called()
@@ -275,7 +275,7 @@ class EAGroupContextTest(unittest.TestCase):
     def test_remove_matches_table_from_group(self, mock_remove_matches, mock_remove_peak, mock_remove_rebinned):
         mock_group = EAGroup("9999; Detector 1", "detector 1", "9999")
         self.context.add_group(mock_group)
-        self.context.remove_workspace_from_group('9999; Detector 1_matches')
+        self.context.remove_workspace_from_group('9999; Detector 1_EA_matches')
         mock_remove_rebinned.assert_not_called()
         mock_remove_peak.aassert_not_called()
         mock_remove_matches.assert_called_once()

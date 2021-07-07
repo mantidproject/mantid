@@ -136,30 +136,20 @@ class EAGroupContext(object):
         handles removing workspace from group
         :param workspace_name : name of workspace removed
         """
-        if workspace_name.endswith(REBINNED_FIXED_WS_SUFFIX):
-            group_name = workspace_name.replace(REBINNED_FIXED_WS_SUFFIX, "")
-            group = self[group_name]
-            if group is None:
-                return
-            group.remove_rebinned_workspace()
+        for name in [REBINNED_FIXED_WS_SUFFIX, REBINNED_VARIABLE_WS_SUFFIX, PEAKS_WS_SUFFIX, MATCH_GROUP_WS_SUFFIX]:
+            if workspace_name.endswith(name):
+                group_name = workspace_name.replace(name, "")
+                group = self[group_name]
+                if group is None:
+                    return
+                if workspace_name.endswith(REBINNED_FIXED_WS_SUFFIX):
+                    group.remove_rebinned_workspace()
 
-        if workspace_name.endswith(REBINNED_VARIABLE_WS_SUFFIX):
-            group_name = workspace_name.replace(REBINNED_VARIABLE_WS_SUFFIX, "")
-            group = self[group_name]
-            if group is None:
-                return
-            group.remove_rebinned_workspace()
+                elif workspace_name.endswith(REBINNED_VARIABLE_WS_SUFFIX):
+                    group.remove_rebinned_workspace()
 
-        if workspace_name.endswith(PEAKS_WS_SUFFIX):
-            group_name = workspace_name.replace(PEAKS_WS_SUFFIX, "")
-            group = self[group_name]
-            if group is None:
-                return
-            group.remove_peak_table()
+                elif workspace_name.endswith(PEAKS_WS_SUFFIX):
+                    group.remove_peak_table()
 
-        if workspace_name.endswith(MATCH_GROUP_WS_SUFFIX):
-            group_name = workspace_name.replace(MATCH_GROUP_WS_SUFFIX, "")
-            group = self[group_name]
-            if group is None:
-                return
-            group.remove_matches_group()
+                elif workspace_name.endswith(MATCH_GROUP_WS_SUFFIX):
+                    group.remove_matches_group()

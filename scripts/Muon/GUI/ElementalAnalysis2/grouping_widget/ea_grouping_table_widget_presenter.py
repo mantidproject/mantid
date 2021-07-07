@@ -95,11 +95,11 @@ class EAGroupingTablePresenter(object):
         changed_item = self._view.get_table_item(row, col)
         workspace_name = self._view.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS['workspace_name']).text()
 
-        update_model = self.handle_to_analyse_column_changed(col, changed_item, workspace_name)
+        to_analyse_changed = self.handle_to_analyse_column_changed(col, changed_item, workspace_name)
         self.handle_rebin_column_changed(col, row, changed_item)
         self.handle_rebin_option_column_changed(col, changed_item, workspace_name)
 
-        self.handle_update(update_model)
+        self.handle_update(to_analyse_changed)
 
     def handle_to_analyse_column_changed(self, col, changed_item, workspace_name):
         update_model = True
@@ -122,8 +122,13 @@ class EAGroupingTablePresenter(object):
             params = changed_item.text().split(":")
             if len(params) == 2:
                 if params[0] == "Steps":
+                    """
+                       param[1] is a string contain a float with the units KeV at the end of the string so units must
+                       be removed
+                    """
                     self._model.handle_rebin(name=workspace_name, rebin_type="Fixed",
                                              rebin_param=float(params[1][0:-3]))
+
                 if params[0] == "Bin Boundaries":
                     if len(params[1]) >= 1:
                         self._model.handle_rebin(name=workspace_name, rebin_type="Variable", rebin_param=params[1])
@@ -131,7 +136,6 @@ class EAGroupingTablePresenter(object):
     def handle_update(self, update_model):
         if not update_model:
             # Reset the view back to model values and exit early as the changes are invalid.
-            # self.update_view_from_model()
             self.notify_data_changed()
             return
 

@@ -45,6 +45,14 @@ class EAPlotDataPaneModel(BasePaneModel):
         :param is_raw: Whether to use raw or rebinned data
         :return: a list of workspace names
         """
+        self.get_workspace_list(group_names, is_raw)
+
+    def get_workspace_list(self, group_names, is_raw):
+        """
+                :param group_names:
+                :param is_raw: Whether to use raw or rebinned data
+                :return: a list of workspace names
+                """
         workspace_list = []
         for group in group_names:
             workspace_list += self.get_count_workspaces_to_plot(group, is_raw)
@@ -65,9 +73,8 @@ class EAPlotDataPaneModel(BasePaneModel):
         :return: a list of workspace names
         """
         currently_selected = self.context.group_context.selected_groups
-        workspace_list = []
-        for group in currently_selected:
-            workspace_list += self.get_count_workspaces_to_plot(group, is_raw)
+        workspace_list = self.get_workspace_list(currently_selected, is_raw)
+
         return workspace_list
 
     def get_workspace_list_and_indices_to_plot(self, is_raw, plot_type):
@@ -90,6 +97,7 @@ class EAPlotDataPaneModel(BasePaneModel):
         else:
             runs_present = []
             for group_name in self.context.group_context.selected_groups:
+                print(group_name)
                 group = self.context.group_context[group_name]
                 runs_present.append(group.run_number)
             keys = sorted(list(set(runs_present)), key=lambda element: int(element))

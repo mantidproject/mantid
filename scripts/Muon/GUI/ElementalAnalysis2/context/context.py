@@ -7,9 +7,10 @@
 from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common import thread_model
-from mantid.simpleapi import Rebin
+from mantid.simpleapi import CloneWorkspace
 from Muon.GUI.Common import message_box
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, remove_ws_if_present
+from Muon.GUI.Common.utilities.algorithm_utils import rebin_ws
 from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver, _catch_exceptions
 
 REBINNED_FIXED_WS_SUFFIX = "_EA_Rebinned_Fixed"
@@ -17,6 +18,9 @@ REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
 
 
 class EAContextADSObserver(MuonContextADSObserver):
+
+    def __init__(self, delete_callback, clear_callback, replace_callback):
+        super(EAContextADSObserver, self).__init__(delete_callback, clear_callback, replace_callback)
 
     @_catch_exceptions
     def deleteHandle(self, workspace_name, workspace):
@@ -39,7 +43,9 @@ class ElementalAnalysisContext(object):
         self._group_context = ea_group_context
         self._plot_panes_context = plot_panes_context
         self.workspace_suffix = workspace_suffix
-        self.ads_observer = EAContextADSObserver(self.remove_workspace, self.clear_context, self.workspace_replaced)
+        self.ads_observer = EAContextADSObserver(delete_callback=self.remove_workspace,
+                                                 clear_callback=self.clear_context,
+                                                 replace_callback=self.workspace_replaced)
 
         self.update_view_from_model_notifier = GenericObservable()
         self.update_plots_notifier = GenericObservable()
@@ -118,10 +124,12 @@ class ElementalAnalysisContext(object):
             rebined_run_name = str(name) + REBINNED_VARIABLE_WS_SUFFIX
 
         remove_ws_if_present(rebined_run_name)
+        raw_workspace = self.group_context[name].get_counts_workspace_for_run()
 
-        workspace = Rebin(InputWorkspace=self.group_context[name].get_counts_workspace_for_run(),
-                          OutputWorkspace=rebined_run_name, Params=params)
+        CloneWorkspace(InputWorkspace=raw_workspace, OutputWorkspace=rebined_run_name)
+        rebin_ws(rebined_run_name, params)
 
+        workspace = retrieve_ws(rebined_run_name)
         group_workspace = retrieve_ws(self.group_context[name].run_number)
         group_workspace.addWorkspace(workspace)
         self.group_context[name].update_workspaces(str(workspace), rebin=True, rebin_index=rebin_index,

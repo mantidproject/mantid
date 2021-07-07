@@ -79,7 +79,6 @@ def run_string_to_list(run_string, max_value=True):
     :max_value: if to use the max number of runs
     :return: list of integers
     """
-    run_string = run_string.replace(" ", "")
     if not validate_run_string(run_string):
         raise IndexError("{} is not a valid run string".format(run_string))
     run_list = []
