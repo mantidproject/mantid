@@ -306,7 +306,6 @@ void MantidGLWidget::updateView(bool picking) {
 void MantidGLWidget::updateDetectors() {
   if (m_surface) {
     m_surface->updateDetectors();
-    m_surface->draw(this);
     update();
   }
 }

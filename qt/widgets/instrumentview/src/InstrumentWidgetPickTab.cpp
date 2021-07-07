@@ -84,7 +84,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 
   // connect to InstrumentWindow signals
   connect(m_instrWidget, SIGNAL(integrationRangeChanged(double, double)), this,
-          SLOT(changedIntegrationRange(double, double)));
+          SLOT(changedIntegrationRange(double, double)), Qt::QueuedConnection);
 
   m_plotSum = true;
 
