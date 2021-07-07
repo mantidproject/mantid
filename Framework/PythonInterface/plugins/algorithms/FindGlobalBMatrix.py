@@ -82,6 +82,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
     def PyExec(self):
 
         def fobj(alatt):
+            """Function to minimise"""
             return self.calcResiduals(alatt, valid_ws_list)
 
         # setup progress bar
@@ -98,6 +99,23 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
         # Find initial UB and use to index peaks in all runs
         prog_reporter.report(1, "Find initial UB for peak indexing")
+        valid_ws_list = self.find_initial_indexing(a, b, c, alpha, beta, gamma, ws_list)
+
+        # optimize the lattice parameters across runs (i.e. B matrix)
+        prog_reporter.report(2, "Optimize B")
+        alatt0 = [a, b, c, alpha, beta, gamma]  # should get this from ws_list[0] instead
+        alatt, *_, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
+        success = ier in [1, 2, 3, 4]
+        if success:
+            logger.notice(f"Lattice parameters successfully refined for workspaces: {valid_ws_list}\n"
+                          f"Lattice parameters [a, b, c, alpha, beta, gamma] = {alatt}")
+        else:
+            logger.warning(f"Error in optimization of lattice parameters: {msg}")
+        # complete progress
+        prog_reporter.report(3, "Done")
+
+    def find_initial_indexing(self, a, b, c, alpha, beta, gamma, ws_list):
+        # check if a UB exists on any run
         w_ref = AnalysisDataService.retrieve(ws_list[0])
         nindexed = 0
         if w_ref.sample().hasOrientedLattice():
@@ -134,19 +152,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 logger.warning(f"Consistent UB not found for {wsname} - this workspace will be ignored.")
             else:
                 valid_ws_list.append(wsname)
-
-        # optimize the lattice parameters (i.e. B matrix)
-        prog_reporter.report(2, "Optimize B")
-        alatt0 = [a, b, c, alpha, beta, gamma]  # should get this from ws_list[0] instead
-        alatt, *_, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
-        success = ier in [1, 2, 3, 4]
-        if success:
-            logger.notice(f"Lattice parameters successfully refined for workspaces: {valid_ws_list}\n"
-                          f"Lattice parameters [a, b, c, alpha, beta, gamma] = {alatt}")
-        else:
-            logger.warning(f"Error in optimization of lattice parameters: {msg}")
-        # complete progress
-        prog_reporter.report(3, "Done")
+        return valid_ws_list
 
     def calcResiduals(self, x0, ws_list):
         """
