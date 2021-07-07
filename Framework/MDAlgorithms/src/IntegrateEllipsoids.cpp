@@ -277,6 +277,20 @@ void IntegrateEllipsoids::exec() {
   double adaptiveQMultiplier = getProperty("AdaptiveQMultiplier");
   double adaptiveQBackgroundMultiplier = 0.0;
   bool useOnePercentBackgroundCorrection = getProperty("UseOnePercentBackgroundCorrection");
+  // satellite related properties
+  // NOTE: fallback to Brag Peak properties if satellite peak related properties are not specified
+  double satellite_radius = (getPointerToProperty("SatelliteRegionRadius")->isDefault())
+                                ? getProperty("RegionRadius")
+                                : getProperty("SatelliteRegionRadius");
+  double satellite_peak_radius = (getPointerToProperty("SatellitePeakSize")->isDefault())
+                                     ? getProperty("PeakSize")
+                                     : getProperty("SatellitePeakSize");
+  double satellite_back_inner_radius = (getPointerToProperty("SatelliteBackgroundInnerSize")->isDefault())
+                                           ? getProperty("BackgroundInnerSize")
+                                           : getProperty("SatelliteBackgroundInnerSize");
+  double satellite_back_outer_radius = (getPointerToProperty("SatelliteBackgroundOuterSize")->isDefault())
+                                           ? getProperty("BackgroundOuterSize")
+                                           : getProperty("SatelliteBackgroundOuterSize");
 
   if (adaptiveQBackground)
     adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
