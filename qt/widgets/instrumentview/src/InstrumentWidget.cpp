@@ -1175,14 +1175,7 @@ QString InstrumentWidget::getSurfaceInfoText() const {
 /**
  * Get pointer to the projection surface
  */
-ProjectionSurface_sptr InstrumentWidget::getSurface() const {
-  if (m_instrumentDisplay->getGLDisplay()) {
-    return m_instrumentDisplay->getGLDisplay()->getSurface();
-  } else if (m_instrumentDisplay->getQtDisplay()) {
-    return m_instrumentDisplay->getQtDisplay()->getSurface();
-  }
-  return ProjectionSurface_sptr();
-}
+ProjectionSurface_sptr InstrumentWidget::getSurface() const { return m_instrumentDisplay->getSurface(); }
 
 bool MantidQt::MantidWidgets::InstrumentWidget::isWsBeingReplaced() const { return m_wsReplace; }
 

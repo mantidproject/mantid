@@ -249,9 +249,9 @@ private:
     const int getSurfaceCalls = m_glEnabled ? 22 : 24;
 
     auto surfaceMock = std::make_shared<MockProjectionSurface>();
-    EXPECT_CALL(*glMock, getSurface()).Times(getSurfaceCalls).WillRepeatedly(Return(surfaceMock));
     EXPECT_CALL(*glMock, currentBackgroundColor()).Times(1);
 
+    EXPECT_CALL(*displayMock, getSurface()).Times(getSurfaceCalls).WillRepeatedly(Return(surfaceMock));
     EXPECT_CALL(*displayMock, setSurfaceProxy(_)).Times(1);
     EXPECT_CALL(*displayMock, installEventFilter(NotNull())).Times(1);
 
