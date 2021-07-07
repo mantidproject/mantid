@@ -82,7 +82,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
     def PyExec(self):
 
         def fobj(alatt):
-            return self.fobj_lstsq(alatt, valid_ws_list)
+            return self.calcResiduals(alatt, valid_ws_list)
 
         # setup progress bar
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=3)
@@ -104,13 +104,13 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             # try use existing UB to index peaks
             nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[0], RoundHKLs=True)
         if nindexed < _MIN_NUM_INDEXED_PEAKS:
-            # find a better intitial UB
+            # find a better initial UB
             self.child_FindUBUsingLatticeParameters(PeaksWorkspace=ws_list[0], a=a, b=b, c=c,
                                                     alpha=alpha, beta=beta, gamma=gamma, FixParameters=False)
             nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[0], RoundHKLs=True)
         if nindexed < _MIN_NUM_INDEXED_PEAKS:
             # can't get good initial UB
-            logger.error(f"Could not refine an initla UB from workspace {ws_list[0]}")
+            logger.error(f"Could not refine an initial UB from workspace {ws_list[0]}")
             return
         # what if indexes less than 2 peaks - it won't
         valid_ws_list = [ws_list[0]]
@@ -126,8 +126,8 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 w = AnalysisDataService.retrieve(wsname)
                 U_ref = w_ref.sample().getOrientedLattice().getU()
                 U = w.sample().getOrientedLattice().getU()
-                # find transform required ( U_ref = T U)
-                transform = getSignMaxAbsValInCol(np.linalg.inv(U) @ U_ref)
+                # find transform required  ( U_ref = U T^-1) - see TransformHKL docs for details
+                transform = np.linalg.inv(getSignMaxAbsValInCol(np.linalg.inv(U) @ U_ref))
                 self.child_TransformHKL(PeaksWorkspace=wsname, HKLTransform=transform, FindError=False)
                 nindexed = self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=True)
             if nindexed < _MIN_NUM_INDEXED_PEAKS:
@@ -139,7 +139,6 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         prog_reporter.report(2, "Optimize B")
         alatt0 = [a, b, c, alpha, beta, gamma]  # should get this from ws_list[0] instead
         alatt, *_, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
-
         success = ier in [1, 2, 3, 4]
         if success:
             logger.notice(f"Lattice parameters successfully refined for workspaces: {valid_ws_list}\n"
@@ -149,7 +148,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         # complete progress
         prog_reporter.report(3, "Done")
 
-    def fobj_lstsq(self, x0, ws_list):
+    def calcResiduals(self, x0, ws_list):
         """
         Calulates sum of square magnitude of difference between qsample and q of integer HKL
         x0 = [a, b, c, alpha, beta, gamma]
