@@ -416,34 +416,53 @@ void IntegrateEllipsoids::exec() {
   double sigi;
   std::vector<double> principalaxis1, principalaxis2, principalaxis3;
   for (size_t i = 0; i < n_peaks; i++) {
-    // TODO:
-    // Need to differenciate between peaks and satellites here,
-    // then figure out a way to integrate accordingly.
+    // grab QLab and check if at origin (skip if at origin)
     const V3D peak_q = peaks[i].getQLabFrame();
-    if (IntegrateQLabEvents::isOrigin(peak_q, radius_m))
+    if (IntegrateQLabEvents::isOrigin(peak_q, radius_m)) {
       continue;
+    }
+    // check if peak is satellite peak
+    const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
     // modulus of Q
     const double lenQpeak = (adaptiveQMultiplier != 0.0) ? peak_q.norm() : 0.0;
-    double adaptiveRadius = adaptiveQMultiplier * lenQpeak + peak_radius;
-    if (adaptiveRadius <= 0.0) {
-      g_log.error() << "Error: Radius for integration sphere of peak " << i << " is negative =  " << adaptiveRadius
-                    << '\n';
+    // compuate adaptive radius
+    double adaptiveRadius = isSatellitePeak ? adaptiveQMultiplier * lenQpeak + satellite_peak_radius
+                                            : adaptiveQMultiplier * lenQpeak + peak_radius;
+    // - error checking for adaptive radius
+    if (adaptiveRadius < 0.0) {
+      std::ostringstream errmsg;
+      errmsg << "Error: Radius for integration sphere of peak " << i << " is negative =  " << adaptiveRadius << '\n';
+      g_log.error() << errmsg.str();
+      // zero the peak
       peaks[i].setIntensity(0.0);
       peaks[i].setSigmaIntensity(0.0);
       PeakRadiusVector[i] = 0.0;
       BackgroundInnerRadiusVector[i] = 0.0;
       BackgroundOuterRadiusVector[i] = 0.0;
+      SatellitePeakRadiusVector[i] = 0.0;
+      SatelliteBackgroundInnerRadiusVector[i] = 0.0;
+      SatelliteBackgroundOuterRadiusVector[i] = 0.0;
       continue;
     }
+    // compute adaptive background radius
+    double adaptiveBack_inner_radius = isSatellitePeak
+                                           ? adaptiveQBackgroundMultiplier * lenQpeak + satellite_back_inner_radius
+                                           : adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
+    double adaptiveBack_outer_radius = isSatellitePeak
+                                           ? adaptiveQBackgroundMultiplier * lenQpeak + satellite_back_outer_radius
+                                           : adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
+    // update records in containers
+    if (isSatellitePeak) {
+      SatellitePeakRadiusVector[i] = adaptiveRadius;
+      SatelliteBackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
+      SatelliteBackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
+    } else {
+      PeakRadiusVector[i] = adaptiveRadius;
+      BackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
+      BackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
+    }
 
-    double adaptiveBack_inner_radius;
-    double adaptiveBack_outer_radius;
-    adaptiveBack_inner_radius = adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
-    adaptiveBack_outer_radius = adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
-    PeakRadiusVector[i] = adaptiveRadius;
-    BackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
-    BackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
-
+    // integrate the peak to get intensity and error
     std::vector<double> axes_radii;
     Mantid::Geometry::PeakShape_const_sptr shape =
         integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
@@ -486,6 +505,7 @@ void IntegrateEllipsoids::exec() {
     wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
 
     if (cutoffIsigI != EMPTY_DBL()) {
+      // Bragg peaks and satellite peaks share the same routine from this point on
       principalaxis1.clear();
       principalaxis2.clear();
       principalaxis3.clear();
@@ -498,9 +518,6 @@ void IntegrateEllipsoids::exec() {
       back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
       // will make the background shell volume equal to the peak region volume.
       for (size_t i = 0; i < n_peaks; i++) {
-        // TODO:
-        // need to figure out a way to differenciate peaks and satellite peaks
-        // then process/integrate accordingly
         const V3D peak_q = peaks[i].getQLabFrame();
         std::vector<double> axes_radii;
         integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
