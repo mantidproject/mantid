@@ -88,8 +88,7 @@ double median(const std::vector<double> &vec) {
   if (vec.empty())
     return 1;
   const size_t s = vec.size();
-  std::vector<double> sorted;
-  sorted.reserve(s);
+  std::vector<double> sorted = vec;
   std::sort(sorted.begin(), sorted.end());
   if (s % 2 == 0) {
     return 0.5 * (sorted[s / 2] + sorted[s / 2 - 1]);
@@ -118,25 +117,31 @@ MatrixWorkspace_sptr medianWorkspace(MatrixWorkspace_sptr ws, bool global = fals
     y = std::vector<double>(1, median(std::move(allY)));
     return out;
   } else {
-    MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create("Workspace2D", ws->getNumberHistograms(), 1, 1);
+    const size_t nSpectra = ws->getNumberHistograms();
+    MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
     PARALLEL_FOR_IF(threadSafe(*ws, *out))
-    for (int i = 0; i < static_cast<int>(ws->getNumberHistograms()); ++i) {
+    for (int i = 0; i < static_cast<int>(nSpectra); ++i) {
       const size_t wsIndex = static_cast<size_t>(i);
       auto &y = out->mutableY(wsIndex);
-      y = std::vector<double>(1, median(ws->mutableY(wsIndex).rawData()));
+      y = std::vector<double>(1, median(ws->readY(wsIndex)));
     }
     return out;
   }
 }
 
 /**
- * @brief Creates a 2D workspace to host the calculated scale factors
+ * @brief Creates a 2D workspace to host the calculated scale factors, initialized to 1s
  * @param nSpectra : number of spectra
  * @param nPoints : number of points, that is input workspaces
  * @return a pointer to the workspace
  */
 MatrixWorkspace_sptr initScaleFactorsWorkspace(const size_t nSpectra, const size_t nPoints) {
-  return WorkspaceFactory::Instance().create("Workspace2D", nSpectra, nPoints, nPoints);
+  MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, nPoints, nPoints);
+  PARALLEL_FOR_IF(threadSafe(*ws))
+  for (int i = 0; i < static_cast<int>(nSpectra); ++i) {
+    ws->mutableY(static_cast<size_t>(i)) = std::vector<double>(nPoints, 1.);
+  }
+  return ws;
 }
 
 } // namespace
@@ -257,7 +262,7 @@ void Stitch::exec() {
   const auto inputs = RunCombinationHelper::unWrapGroups(getProperty(INPUT_WORKSPACE_PROPERTY));
   MatrixWorkspace_sptr scaleFactorsWorkspace;
   if (scaleFactorCalculation == "Manual") {
-    scaleFactorsWorkspace = initScaleFactorsWorkspace(1, workspaces.size());
+    scaleFactorsWorkspace = initScaleFactorsWorkspace(1, inputs.size());
     const auto scaled = scaleManual(inputs, getProperty(MANUAL_SCALE_FACTORS_PROPERTY), scaleFactorsWorkspace);
     setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(scaled));
   } else {
@@ -360,7 +365,7 @@ std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr w
   divider->setPropertyValue("OutputWorkspace", "__ratio");
   divider->execute();
   MatrixWorkspace_sptr ratio = divider->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr median = medianWorkspace(ratio, getProperty(TIE_SCALE_FACTORS_PROPERTY));
+  MatrixWorkspace_sptr median = medianWorkspace(ratio, false);
 
   auto scaler = createChildAlgorithm("Divide");
   scaler->setAlwaysStoreInADS(true);
@@ -383,7 +388,7 @@ void Stitch::recordScaleFactor(Mantid::API::MatrixWorkspace_sptr scaleFactorWork
   const size_t index = std::distance(inputs.cbegin(), it);
   PARALLEL_FOR_IF(threadSafe(*scaleFactorWorkspace))
   for (size_t i = 0; i < scaleFactorWorkspace->getNumberHistograms(); ++i) {
-    scaleFactorWorkspace->mutableY(i)[index] = medianWorkspace->readY(i)[0];
+    scaleFactorWorkspace->mutableY(i)[index] = 1. / medianWorkspace->readY(i)[0];
   }
 }
 
