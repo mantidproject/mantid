@@ -189,6 +189,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.setPropertyGroup('VanadiumWorkspace', additional_inputs_group)
         self.setPropertyGroup('EmptyContainerWorkspace', additional_inputs_group)
         self.setPropertyGroup('EmptyContainerScaling', additional_inputs_group)
+        self.setPropertyGroup('CadmiumWorkspace', additional_inputs_group)
         self.setPropertyGroup('FlatBackground', additional_inputs_group)
         self.setPropertyGroup('FlatBkgScaling', additional_inputs_group)
         self.setPropertyGroup('IncidentEnergyCalibration', additional_inputs_group)
