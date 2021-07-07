@@ -27,7 +27,7 @@ NUMBER_OF_ELEMENTS_DISPLAYED = 3
 REFITTED_PEAKS_WS_SUFFIX = "_EA_refitted_peaks"
 PEAKS_WS_SUFFIX = "_EA_peaks"
 ERRORS_WS_SUFFIX = "_with_errors"
-MATCH_TABLE_WS_SUFFIXES = ["_EA_all_matches", "_EA_primary_matches", "_EA__secondary_matches",
+MATCH_TABLE_WS_SUFFIXES = ["_EA_all_matches", "_EA_primary_matches", "_EA_secondary_matches",
                            "_EA_all_matches_sorted_by_energy", "_EA_likelihood"]
 MATCH_GROUP_WS_SUFFIX = "_EA_matches"
 

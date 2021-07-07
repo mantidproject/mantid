@@ -114,10 +114,11 @@ class EAAutoTabPresenterTest(unittest.TestCase):
                                                                                                 'Detector 4']})
 
         self.presenter.view.add_options_to_show_peak_combobox.assert_called_once_with({'9999':
-                                                                                           ['9999; Detector 1_peaks',
-                                                                                            '9999; Detector 2_peaks',
-                                                                                            '9999; Detector 3_peaks',
-                                                                                            '9999; Detector 4_peaks']})
+                                                                                           ['9999; Detector 1_EA_peaks',
+                                                                                            '9999; Detector 2_EA_peaks',
+                                                                                            '9999; Detector 3_EA_peaks',
+                                                                                            '9999; Detector 4_EA_peaks'
+                                                                                            ]})
 
         self.presenter.view.add_options_to_show_matches_combobox.assert_called_once_with({'9999':
                                                                                               get_names_return_value * 4})
