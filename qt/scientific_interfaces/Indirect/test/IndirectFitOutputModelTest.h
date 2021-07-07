@@ -144,8 +144,8 @@ public:
   }
 
   void test_getParameters_throws_if_no_fitted_data_correct_value() {
-    TS_ASSERT_THROWS(m_model->getParameters(FitDomainIndex{0}), std::invalid_argument);
-    TS_ASSERT_THROWS(m_model->getParameters(FitDomainIndex{6}), std::invalid_argument);
+    TS_ASSERT_THROWS(m_model->getParameters(FitDomainIndex{0}), const std::invalid_argument &);
+    TS_ASSERT_THROWS(m_model->getParameters(FitDomainIndex{6}), const std::invalid_argument &);
   }
 
   void test_getResultLocaton() {
