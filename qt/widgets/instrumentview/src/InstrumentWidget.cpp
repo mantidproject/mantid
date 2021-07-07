@@ -1214,14 +1214,7 @@ QSize InstrumentWidget::glWidgetDimensions() {
 /// @param picking :: Set to true to update the picking image regardless the
 /// interaction
 ///   mode of the surface.
-void InstrumentWidget::updateInstrumentView(bool picking) {
-  if (m_instrumentDisplay->getGLDisplay() &&
-      m_instrumentDisplay->currentWidget() == dynamic_cast<QWidget *>(m_instrumentDisplay->getGLDisplay())) {
-    m_instrumentDisplay->getGLDisplay()->updateView(picking);
-  } else {
-    m_instrumentDisplay->getQtDisplay()->updateView(picking);
-  }
-}
+void InstrumentWidget::updateInstrumentView(bool picking) { m_instrumentDisplay->updateView(picking); }
 
 /// Recalculate the colours and redraw the instrument view
 void InstrumentWidget::updateInstrumentDetectors() {
