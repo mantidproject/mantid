@@ -60,6 +60,9 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.set_on_instrument_changed(self.presenter.focus_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.focus_presenter.set_rb_num)
 
+        # load most recent calibration, if one saved
+        self.presenter.calibration_presenter.load_last_calibration()
+
         # Usage Reporting
         try:
             import mantid
