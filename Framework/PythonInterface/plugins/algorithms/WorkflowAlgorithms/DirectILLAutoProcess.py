@@ -450,8 +450,8 @@ class DirectILLAutoProcess(PythonAlgorithm):
                                    OutputWorkspace=vanadium_integral,
                                    EPPWorkspace=self.vanadium_epp)
 
-        sofq_output = 'SofQ_{}'.format(numor)
-        softw_output = 'SofTW_{}'.format(numor)
+        sofq_output = '{}_SofQ'.format(numor)
+        softw_output = '{}_SofTW'.format(numor)
         DirectILLReduction(InputWorkspace=ws,
                            OutputWorkspace=sofq_output,
                            OutputSofThetaEnergyWorkspace=softw_output,
