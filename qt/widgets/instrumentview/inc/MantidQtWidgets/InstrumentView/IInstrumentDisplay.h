@@ -33,5 +33,7 @@ public:
 
   virtual ProjectionSurface_sptr getSurface() const = 0;
   virtual void setSurface(ProjectionSurface_sptr surface) = 0;
+
+  virtual void updateView(bool picking) = 0;
 };
 } // namespace MantidQt::MantidWidgets

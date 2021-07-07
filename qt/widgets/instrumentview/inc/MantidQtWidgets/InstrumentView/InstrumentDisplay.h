@@ -34,6 +34,8 @@ public:
   ProjectionSurface_sptr getSurface() const override;
   void setSurface(ProjectionSurface_sptr surface) override;
 
+  void updateView(bool picking) override;
+
 private:
   std::unique_ptr<IGLDisplay> m_glDisplay;
   std::unique_ptr<IQtDisplay> m_qtDisplay;

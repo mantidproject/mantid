@@ -63,4 +63,13 @@ void InstrumentDisplay::setSurface(ProjectionSurface_sptr surface) {
   m_qtDisplay->setSurface(surface);
   m_qtDisplay->qtUpdate();
 }
+
+void InstrumentDisplay::updateView(bool picking) {
+  assert(m_glDisplay);
+  if (currentWidget() == dynamic_cast<QWidget *>(m_glDisplay.get())) {
+    m_glDisplay->updateView(picking);
+  } else {
+    m_qtDisplay->updateView(picking);
+  }
+}
 } // namespace MantidQt::MantidWidgets

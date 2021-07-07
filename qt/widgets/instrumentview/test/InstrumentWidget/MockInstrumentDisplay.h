@@ -31,6 +31,7 @@ public:
   MOCK_METHOD(void, installEventFilter, (QObject * obj), (override));
   MOCK_METHOD(ProjectionSurface_sptr, getSurface, (), (const, override));
   MOCK_METHOD(void, setSurfaceProxy, (ProjectionSurface_sptr));
+  MOCK_METHOD(void, updateView, (bool), (override));
 
   void setSurface(ProjectionSurface_sptr surface) override {
     setSurfaceProxy(surface);
