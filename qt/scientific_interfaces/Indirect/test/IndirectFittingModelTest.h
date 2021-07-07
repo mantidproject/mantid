@@ -33,6 +33,8 @@ MultiDomainFunction_sptr getFunction(std::string const &functionString) {
   return FunctionFactory::Instance().createInitializedMultiDomainFunction(functionString, 1);
 }
 
+auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
+
 /// A dummy model used to inherit the methods which need testing
 class DummyModel : public MantidQt::CustomInterfaces::IDA::IndirectFittingModel {
 public:
@@ -57,7 +59,7 @@ void addWorkspacesToModel(std::unique_ptr<DummyModel> &model, int const &numberO
 template <typename Name, typename... Names>
 void addWorkspacesToModel(std::unique_ptr<DummyModel> &model, int const &numberOfSpectra, Name const &workspaceName,
                           Names const &...workspaceNames) {
-  Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName, createWorkspace(numberOfSpectra));
+  ads_instance.addOrReplace(workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
   addWorkspacesToModel(model, numberOfSpectra, workspaceNames...);
 }
@@ -690,12 +692,6 @@ public:
     TS_ASSERT(paramMap.find("f0.f0.f1.f1.Amplitude") != paramMap.end());
     TS_ASSERT(paramMap.at("f0.f0.f1.f0.Amplitude").value == 1.5);
     TS_ASSERT(paramMap.at("f0.f0.f1.f1.Amplitude").value == 1.5);
-  }
-
-  void test_that_switching_input_mode_functions() {
-    auto model = createModelWithSingleWorkspace("Name", 1);
-    TS_ASSERT_THROWS_NOTHING(model->switchToSingleInputMode());
-    TS_ASSERT_THROWS_NOTHING(model->switchToMultipleInputMode());
   }
 
   void test_set_fitting_mode_fucntions() {

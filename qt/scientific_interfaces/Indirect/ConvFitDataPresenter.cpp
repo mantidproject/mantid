@@ -10,15 +10,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 
-namespace {
-using namespace Mantid::API;
-
-bool isWorkspaceLoaded(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-} // namespace
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -26,8 +17,6 @@ namespace IDA {
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view)
     : IndirectFitDataPresenter(model, view, std::make_unique<ConvFitDataTablePresenter>(model, view->getDataTable())),
       m_convModel(model) {
-  setResolutionHidden(false);
-
   connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SLOT(setModelResolution(const QString &)));
   connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SIGNAL(singleResolutionLoaded()));
 }
@@ -62,31 +51,11 @@ void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const &dialog,
   model.addWorkspace(dialog.workspaceName(), dialog.workspaceIndices());
 }
 
-void ConvFitDataPresenter::addModelData(const std::string &name) {
-  IndirectFitDataPresenter::addModelData(name);
-  const auto resolution = getView()->getSelectedResolution();
-  if (!resolution.empty() && isWorkspaceLoaded(resolution)) {
-    auto const index = TableDatasetIndex{0};
-    m_convModel->setResolution(resolution, index);
-    emit modelResolutionAdded(resolution, index);
-  }
-}
-
 std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
-  dialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
-  dialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
+  dialog->setResolutionWSSuffices(getResolutionWSSuffices());
+  dialog->setResolutionFBSuffices(getResolutionFBSuffices());
   return dialog;
-}
-
-void ConvFitDataPresenter::setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) {
-  if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
-    convDialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
-}
-
-void ConvFitDataPresenter::setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) {
-  if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
-    convDialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
 }
 
 } // namespace IDA

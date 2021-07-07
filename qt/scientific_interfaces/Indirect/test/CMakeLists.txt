@@ -24,7 +24,6 @@ set(
   IndirectPlotOptionsPresenterTest.h
   IndirectSettingsModelTest.h
   IndirectSettingsPresenterTest.h
-  IndirectSpectrumSelectionPresenterTest.h
   IqtFitModelTest.h
 )
 

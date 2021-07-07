@@ -113,7 +113,8 @@ IndirectTab::IndirectTab(QObject *parent)
     : QObject(parent), m_properties(), m_dblManager(new QtDoublePropertyManager()),
       m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()), m_tabStartTime(DateAndTime::getCurrentTime()),
-      m_tabEndTime(DateAndTime::maximum()), m_plotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()) {
+      m_tabEndTime(DateAndTime::maximum()), m_plotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()),
+      m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
   m_parentWidget = dynamic_cast<QWidget *>(parent);
 
   m_batchAlgoRunner = new MantidQt::API::BatchAlgorithmRunner(m_parentWidget);
@@ -472,8 +473,7 @@ double IndirectTab::getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws) {
  *found)
  */
 bool IndirectTab::getResolutionRangeFromWs(const QString &workspace, QPair<double, double> &res) {
-  auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::MatrixWorkspace>(
-      workspace.toStdString());
+  auto ws = m_adsInstance.retrieveWS<const Mantid::API::MatrixWorkspace>(workspace.toStdString());
   return getResolutionRangeFromWs(ws, res);
 }
 

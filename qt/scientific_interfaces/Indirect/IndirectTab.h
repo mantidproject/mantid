@@ -188,6 +188,7 @@ protected:
   std::string m_pythonExportWsName;
 
   std::unique_ptr<Widgets::MplCpp::ExternalPlotter> m_plotter;
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 
 private:
   std::string getInterfaceProperty(std::string const &interfaceName, std::string const &propertyName,
