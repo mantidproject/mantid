@@ -95,7 +95,7 @@ class SuperplotPresenter:
         """
         try:
             self._canvas.figure.tight_layout()
-        except:
+        except ValueError:
             pass
         self._canvas.draw_idle()
 
@@ -168,7 +168,7 @@ class SuperplotPresenter:
         if visible:
             try:
                 self._canvas.figure.tight_layout()
-            except:
+            except ValueError:
                 pass
             self._canvas.draw_idle()
 
@@ -341,7 +341,7 @@ class SuperplotPresenter:
             axes.set_axis_on()
             try:
                 figure.tight_layout()
-            except:
+            except ValueError:
                 pass
             legend = axes.legend()
             if legend:
