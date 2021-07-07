@@ -15,6 +15,7 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_present
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view import PeakSelectorView
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_presenter import PeaksPresenter
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
+from Muon.GUI.Common import message_box
 
 
 def gen_name(element, name):
@@ -43,6 +44,9 @@ class PeriodicTableWidget(object):
         self.ptable = PeriodicTablePresenter(self.ptable_view, self.ptable_model)
         self.peakview = PeaksView(parent=self.view)
         self.peakpresenter = PeaksPresenter(self.peakview)
+        self.default_peak_data_label = QtWidgets.QLabel(" Use default peak data")
+        self.default_peak_data_checkbox = QtWidgets.QCheckBox()
+        self.default_peak_data_checkbox.setChecked(True)
         self.element_widgets = {}
         self.element_lines = {}
         self.num_colors = len(mpl.rcParams['axes.prop_cycle'])
@@ -51,6 +55,7 @@ class PeriodicTableWidget(object):
         self.ptable.register_table_rclicked(self.table_right_clicked)
         self._generate_element_widgets()
         self._setup_peaks_widget()
+        self._setup_widget_interface()
 
     def _setup_peaks_widget(self):
         self.peakpresenter.major.setChecked(True)
@@ -65,10 +70,20 @@ class PeriodicTableWidget(object):
         self.peakpresenter.set_deselect_elements_slot(self.deselect_elements)
 
     def _setup_widget_interface(self):
-        horizontal_layout = QtWidgets.QHBoxLayout()
-        horizontal_layout.addWidget(self.ptable_view, alignment=QtCore.Qt.AlignLeft)
-        horizontal_layout.addWidget(self.peakview, alignment=QtCore.Qt.AlignRight)
-        self.view.setLayout(horizontal_layout)
+        vertical_layout = QtWidgets.QVBoxLayout()
+        horizontal_layout1 = QtWidgets.QHBoxLayout()
+        horizontal_layout2 = QtWidgets.QHBoxLayout()
+        horizontal_layout1.addWidget(self.ptable_view, alignment=QtCore.Qt.AlignLeft)
+        horizontal_layout1.addWidget(self.peakview, alignment=QtCore.Qt.AlignRight)
+        horizontal_layout2.insertStretch(1, -1)
+        horizontal_layout2.addWidget(self.default_peak_data_checkbox, alignment=QtCore.Qt.AlignLeft)
+        horizontal_layout2.addWidget(self.default_peak_data_label, alignment=QtCore.Qt.AlignLeft)
+
+        vertical_layout.addLayout(horizontal_layout1)
+        vertical_layout.addLayout(horizontal_layout2)
+        self.view.setLayout(vertical_layout)
+
+        self.default_peak_data_checkbox.clicked.connect(self.handle_peak_data_changed)
 
     # interact with periodic table
     def table_right_clicked(self, item):
@@ -166,7 +181,7 @@ class PeriodicTableWidget(object):
         return color
 
     def _plot_line(self, full_name, x_value, color, element):
-        print(full_name)
+        print(full_name, x_value, color, element)
 
     def electrons_changed(self, electron_peaks):
         for element, selector in self.element_widgets.items():
@@ -197,3 +212,53 @@ class PeriodicTableWidget(object):
         for checkbox in selection:
             checkbox.setChecked(state)
         self._update_peak_data(element)
+
+    # sets data file for periodic table
+    def select_data_file(self):
+
+        filename = QtWidgets.QFileDialog.getOpenFileName()
+        if isinstance(filename, tuple):
+            filename = filename[0]
+        filename = str(filename)
+        if filename:
+            self.ptable.set_peak_datafile(filename)
+        else:
+            self.default_peak_data_checkbox.blockSignals(True)
+            self.default_peak_data_checkbox.setChecked(True)
+            self.default_peak_data_checkbox.blockSignals(False)
+            return
+
+        try:
+            self._generate_element_widgets()
+        except ValueError:
+            message_box.warning(
+                'The file does not contain correctly formatted data, resetting to default data file.'
+                'See "https://docs.mantidproject.org/nightly/interfaces/'
+                'Muon%20Elemental%20Analysis.html" for more information.')
+            self.ptable.set_peak_datafile(None)
+            self._generate_element_widgets()
+            self.default_peak_data_checkbox.blockSignals(True)
+            self.default_peak_data_checkbox.setChecked(True)
+            self.default_peak_data_checkbox.blockSignals(False)
+
+    def _update_checked_data(self):
+        self.major_peaks_changed(self.peakpresenter.major)
+        self.minor_peaks_changed(self.peakpresenter.minor)
+        self.gammas_changed(self.peakpresenter.gamma)
+        self.electrons_changed(self.peakpresenter.electron)
+
+    def handle_peak_data_changed(self):
+        old_lines = deepcopy(list(self.element_lines.keys()))
+
+        if self.default_peak_data_checkbox.checkState():
+            self.ptable.set_peak_datafile(None)
+            self._generate_element_widgets()
+        else:
+            self.select_data_file()
+
+        for element in old_lines:
+            if element in self.element_widgets.keys():
+                self.ptable.select_element(element)
+            else:
+                self._remove_element_lines(element)
+        self._update_checked_data()

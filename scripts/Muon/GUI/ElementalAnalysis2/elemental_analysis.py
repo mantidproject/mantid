@@ -18,7 +18,7 @@ from Muon.GUI.ElementalAnalysis2.load_widget.load_widget import LoadWidget
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_widget import EAGroupingTabWidget
 from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_widget import EAAutoTabWidget
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
-from Muon.GUI.ElementalAnalysis2.periodic_table_widget.periodic_table_widget import PeriodicTableWidget
+from Muon.GUI.ElementalAnalysis2.periodic_table_widget import PeriodicTableWidget
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
