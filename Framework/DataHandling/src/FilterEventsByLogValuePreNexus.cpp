@@ -34,7 +34,11 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+#if BOOST_VERSION < 107100
 #include <boost/timer.hpp>
+#else
+#include <boost/timer/timer.hpp>
+#endif
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
