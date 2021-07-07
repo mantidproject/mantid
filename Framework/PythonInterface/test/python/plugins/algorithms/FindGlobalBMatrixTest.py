@@ -66,9 +66,10 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         self.assert_lattice([peaks1, peaks2], 4.0, 4.0, 10.0, 90.0, 90.0, 90.0, delta_latt=2e-2, delta_angle=2.5e-1)
         self.assert_U_matrix([peaks1, peaks2], np.eye(3), delta=5e-2)
 
+
     def test_requires_more_than_one_peak_workspace(self):
         peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks4")
-        UB = np.diag([1.0 / 3.8, 0.25, 0.1])  # alatt = [3.8, 4, 10]
+        UB = np.diag([0.25, 0.25, 0.1])
         SetUB(peaks1, UB=UB)
         # Add some peaks
         for h in range(0, 3):
@@ -82,9 +83,9 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             alg.execute()
 
-    def test_peak_workspaces_need_at_least_six_peaks(self):
+    def test_peak_workspaces_need_at_least_six_peaks_each(self):
         peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks5")
-        UB = np.diag([1.0 / 3.8, 0.25, 0.1])  # alatt = [3.8, 4, 10]
+        UB = np.diag([0.25, 0.25, 0.1])
         SetUB(peaks1, UB=UB)
         # Add some peaks
         for h in range(0, 5):
@@ -97,7 +98,6 @@ class FindGlobalBMatrixTest(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             alg.execute()
-
 
     def assert_lattice(self, ws_list, a, b, c, alpha=90, beta=90, gamma=90, delta_latt=2e-2, delta_angle=2.5e-1):
         for ws in ws_list:
@@ -115,6 +115,7 @@ class FindGlobalBMatrixTest(unittest.TestCase):
             for ii in range(0, 3):
                 for jj in range(0, 3):
                     self.assertAlmostEqual(UB[ii, jj], refU[ii, jj], delta=delta)
+
 
 if __name__ == '__main__':
     unittest.main()
