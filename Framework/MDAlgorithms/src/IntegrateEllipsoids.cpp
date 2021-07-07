@@ -253,11 +253,15 @@ std::map<std::string, std::string> IntegrateEllipsoids::validateInputs() {
   std::map<std::string, std::string> issues;
 
   // case 1: specified peak and background must be realisitc
+  double radius_m = getProperty("RegionRadius");
   bool specify_size = getProperty("SpecifySize");
   double peak_radius = getProperty("PeakSize");
   double back_inner_radius = getProperty("BackgroundInnerSize");
   double back_outer_radius = getProperty("BackgroundOuterSize");
   if (specify_size) {
+    if (back_outer_radius > radius_m) {
+      issues["SpecifySize"] = "BackgroundOuterSize must be less than or equal to the RegionRadius";
+    }
     if (back_inner_radius >= back_outer_radius) {
       issues["SpecifySize"] = "BackgroundInnerSize must be less than BackgroundOuterSize";
     }
@@ -280,6 +284,9 @@ std::map<std::string, std::string> IntegrateEllipsoids::validateInputs() {
                                            ? getProperty("BackgroundOuterSize")
                                            : getProperty("SatelliteBackgroundOuterSize");
   if (specify_size) {
+    if (satellite_back_outer_radius > satellite_radius) {
+      issues["SpecifySize"] = "SatelliteBackgroundOuterSize must be less than or equal to the SatelliteRegionRadius";
+    }
     if (satellite_back_inner_radius >= satellite_back_outer_radius) {
       issues["SpecifySize"] = "SatelliteBackgroundInnerSize must be less than SatelliteBackgroundOuterSize";
     }
@@ -376,19 +383,14 @@ void IntegrateEllipsoids::exec() {
     }
   }
 
+  // Peak vectors
   std::vector<double> PeakRadiusVector(n_peaks, peak_radius);
   std::vector<double> BackgroundInnerRadiusVector(n_peaks, back_inner_radius);
   std::vector<double> BackgroundOuterRadiusVector(n_peaks, back_outer_radius);
-  if (specify_size) {
-    if (back_outer_radius > radius_m)
-      throw std::runtime_error("BackgroundOuterSize must be less than or equal to the RegionRadius");
-
-    if (back_inner_radius >= back_outer_radius)
-      throw std::runtime_error("BackgroundInnerSize must be less BackgroundOuterSize");
-
-    if (peak_radius > back_inner_radius)
-      throw std::runtime_error("PeakSize must be less than or equal to the BackgroundInnerSize");
-  }
+  // Satellite peak vectors
+  std::vector<double> SatellitePeakRadiusVector(n_peaks, satellite_peak_radius);
+  std::vector<double> SatelliteBackgroundInnerRadiusVector(n_peaks, satellite_back_inner_radius);
+  std::vector<double> SatelliteBackgroundOuterRadiusVector(n_peaks, satellite_back_outer_radius);
 
   // make the integrator
   IntegrateQLabEvents integrator(qList, radius_m, useOnePercentBackgroundCorrection);
@@ -414,11 +416,14 @@ void IntegrateEllipsoids::exec() {
   double sigi;
   std::vector<double> principalaxis1, principalaxis2, principalaxis3;
   for (size_t i = 0; i < n_peaks; i++) {
+    // TODO:
+    // Need to differenciate between peaks and satellites here,
+    // then figure out a way to integrate accordingly.
     const V3D peak_q = peaks[i].getQLabFrame();
     if (IntegrateQLabEvents::isOrigin(peak_q, radius_m))
       continue;
     // modulus of Q
-    const double lenQpeak = adaptiveQMultiplier != 0.0 ? peak_q.norm() : 0.0;
+    const double lenQpeak = (adaptiveQMultiplier != 0.0) ? peak_q.norm() : 0.0;
     double adaptiveRadius = adaptiveQMultiplier * lenQpeak + peak_radius;
     if (adaptiveRadius <= 0.0) {
       g_log.error() << "Error: Radius for integration sphere of peak " << i << " is negative =  " << adaptiveRadius
@@ -493,6 +498,9 @@ void IntegrateEllipsoids::exec() {
       back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
       // will make the background shell volume equal to the peak region volume.
       for (size_t i = 0; i < n_peaks; i++) {
+        // TODO:
+        // need to figure out a way to differenciate peaks and satellite peaks
+        // then process/integrate accordingly
         const V3D peak_q = peaks[i].getQLabFrame();
         std::vector<double> axes_radii;
         integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
@@ -526,6 +534,10 @@ void IntegrateEllipsoids::exec() {
   peak_ws->mutableRun().addProperty("PeakRadius", PeakRadiusVector, true);
   peak_ws->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadiusVector, true);
   peak_ws->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadiusVector, true);
+  // These falgs are related to the satellite peaks and specific to the algorithm.
+  peak_ws->mutableRun().addProperty("SatellitePeakRadius", SatellitePeakRadiusVector, true);
+  peak_ws->mutableRun().addProperty("SatelliteBackgroundInnerRadius", SatelliteBackgroundInnerRadiusVector, true);
+  peak_ws->mutableRun().addProperty("SatelliteBackgroundOuterRadius", SatelliteBackgroundOuterRadiusVector, true);
 
   setProperty("OutputWorkspace", peak_ws);
 }
