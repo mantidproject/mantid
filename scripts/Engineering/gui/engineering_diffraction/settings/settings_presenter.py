@@ -11,7 +11,7 @@ from mantidqt.utils.observer_pattern import Observable
 CALIB_FOLDER = path.join(path.dirname(path.dirname(path.dirname(getcwd()))), "calib")
 DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
 SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
-                 "primary_log": str, "sort_ascending": bool, "default_peak": str}
+                 "primary_log": str, "sort_ascending": bool, "default_peak": str, "rb_number": str}
 
 DEFAULT_SETTINGS = {
     "full_calibration": path.join(CALIB_FOLDER, DEFAULT_FULL_INST_CALIB),
@@ -21,7 +21,8 @@ DEFAULT_SETTINGS = {
         ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
     "primary_log": 'strain',
     "sort_ascending": True,
-    "default_peak": "BackToBackExponential"
+    "default_peak": "BackToBackExponential",
+    "rb_number": ""
 }
 
 ALL_LOGS = ','.join(
