@@ -12,6 +12,7 @@
 namespace MantidQt::MantidWidgets {
 class MockQtConnect : public QtConnect {
 public:
+  virtual ~MockQtConnect() = default;
   MOCK_METHOD(void, connect, (QObject *, const char *, QObject *, const char *), (const, override));
   MOCK_METHOD(void, connect, (QObject *, const char *, QObject *, const char *, Qt::ConnectionType), (const, override));
 };
