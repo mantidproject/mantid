@@ -137,25 +137,24 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         if not foundUB:
             raise RuntimeError("An initial UB could not be found with the provided lattice parameters")
 
-        # copy reference UB to other workspaces
+        # index other runs consistent with reference UB
+        iws_with_valid_UB = [iw for iw, npks in ws_with_UB if npks >= _MIN_NUM_INDEXED_PEAKS]
         iws_unindexed = list(range(len(ws_list)))
         iws_unindexed.pop(iref)
         # loop over copy of iws_unindexed so can remove item from it when indexed a ws
         for iws in iws_unindexed[:]:
-            # copy orientation from sample so as to ensure consistency of indexing
-            self.child_CopySample(InputWorkspace=ws_list[iref], OutputWorkspace=ws_list[iws])
-            nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[iws], RoundHKLs=True)
-            if nindexed < _MIN_NUM_INDEXED_PEAKS:
-                # if gonio matrix is inaccurate we have to find the UB from scratch and transform to preserve indexing
-                self.child_FindUBUsingLatticeParameters(PeaksWorkspace=ws_list[iws], a=a, b=b, c=c,
-                                                        alpha=alpha, beta=beta, gamma=gamma, FixParameters=False)
-                # compare U matrix to perform TransformHKL to preserve indexing
-                U_ref = AnalysisDataService.retrieve(ws_list[iref]).sample().getOrientedLattice().getU()
-                U = AnalysisDataService.retrieve(ws_list[iws]).sample().getOrientedLattice().getU()
-                # find transform required  ( U_ref = U T^-1) - see TransformHKL docs for details
-                transform = np.linalg.inv(getSignMaxAbsValInCol(np.linalg.inv(U) @ U_ref))
-                self.child_TransformHKL(PeaksWorkspace=ws_list[iws], HKLTransform=transform, FindError=False)
+            if iws in iws_with_valid_UB:
+                self.make_UB_consistent(ws_list[iref], ws_list[iws])
+            else:
+                # copy orientation from sample so as to ensure consistency of indexing
+                self.child_CopySample(InputWorkspace=ws_list[iref], OutputWorkspace=ws_list[iws])
                 nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[iws], RoundHKLs=True)
+                if nindexed < _MIN_NUM_INDEXED_PEAKS:
+                    # if gonio matrix is inaccurate we have to find the UB from scratch and transform to preserve indexing
+                    self.child_FindUBUsingLatticeParameters(PeaksWorkspace=ws_list[iws], a=a, b=b, c=c,
+                                                            alpha=alpha, beta=beta, gamma=gamma, FixParameters=False)
+                    self.make_UB_consistent(self, ws_list[iref], ws_list[iws])
+            nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[iws], RoundHKLs=True)
             if nindexed >= _MIN_NUM_INDEXED_PEAKS:
                 iws_unindexed.remove(iws)
 
@@ -163,6 +162,14 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         for iws in iws_unindexed:
             ws = ws_list.pop(iws)
             logger.warning(f"Consistent UB not found for {ws} - this workspace will be ignored.")
+
+    def make_UB_consistent(self, ws_ref, ws):
+        # compare U matrix to perform TransformHKL to preserve indexing
+        U_ref = AnalysisDataService.retrieve(ws_ref).sample().getOrientedLattice().getU()
+        U = AnalysisDataService.retrieve(ws).sample().getOrientedLattice().getU()
+        # find transform required  ( U_ref = U T^-1) - see TransformHKL docs for details
+        transform = np.linalg.inv(getSignMaxAbsValInCol(np.linalg.inv(U) @ U_ref))
+        self.child_TransformHKL(PeaksWorkspace=ws, HKLTransform=transform, FindError=False)
 
     def calcResiduals(self, x0, ws_list):
         """

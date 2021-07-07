@@ -1,7 +1,7 @@
 import unittest
 from testhelpers import create_algorithm
 from mantid.simpleapi import (FindGlobalBMatrix, AnalysisDataService, SetGoniometer, SetUB, CreatePeaksWorkspace,
-                              LoadEmptyInstrument, CloneWorkspace)
+                              LoadEmptyInstrument, CloneWorkspace, TransformHKL)
 import numpy as np
 from FindGoniometerFromUB import getR
 
@@ -66,7 +66,6 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         self.assert_lattice([peaks1, peaks2], 4.0, 4.0, 10.0, 90.0, 90.0, 90.0, delta_latt=2e-2, delta_angle=2.5e-1)
         self.assert_U_matrix([peaks1, peaks2], np.eye(3), delta=5e-2)
 
-
     def test_requires_more_than_one_peak_workspace(self):
         peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks4")
         UB = np.diag([0.25, 0.25, 0.1])
@@ -98,6 +97,29 @@ class FindGlobalBMatrixTest(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             alg.execute()
+
+    def test_performs_correct_transform_to_ensure_consistent_indexing(self):
+        # create peaks tables
+        peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks7")
+        UB = np.diag([0.2, 0.25, 0.1])
+        SetUB(peaks1, UB=UB)
+        # Add some peaks
+        for h in range(0, 3):
+            for k in range(0, 3):
+                pk = peaks1.createPeakHKL([h, k, 4])
+                peaks1.addPeak(pk)
+        # Clone ws and transform
+        peaks2 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks8")
+        peaks2.removePeak(0)  # peaks1 will have most peaks indexed so will used as reference
+        transform = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
+        TransformHKL(PeaksWorkspace=peaks2, HKLTransform=transform, FindError=False)
+
+        FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.15, b=3.95, c=10, alpha=88, beta=88, gamma=89,
+                          Tolerance=0.15)
+
+        # check lattice - shouldn't be effected by error in goniometer
+        self.assert_lattice([peaks1, peaks2], 5.0, 4.0, 10.0, 90.0, 90.0, 90.0, delta_latt=5e-2, delta_angle=2.5e-1)
+        self.assert_U_matrix([peaks1, peaks2], np.eye(3), delta=5e-2)
 
     def assert_lattice(self, ws_list, a, b, c, alpha=90, beta=90, gamma=90, delta_latt=2e-2, delta_angle=2.5e-1):
         for ws in ws_list:
