@@ -47,14 +47,14 @@ void InstrumentDisplay::installEventFilter(QObject *obj) {
   m_qtDisplay->qtInstallEventFilter(obj);
 }
 
-void InstrumentDisplay::setSurface(ProjectionSurface *surface) {
-  ProjectionSurface_sptr sharedSurface(surface);
+void InstrumentDisplay::setSurface(ProjectionSurface_sptr surface) {
+
   if (m_glDisplay) {
-    m_glDisplay->setSurface(sharedSurface);
+    m_glDisplay->setSurface(surface);
     m_glDisplay->qtUpdate();
   }
   if (getQtDisplay()) {
-    m_qtDisplay->setSurface(sharedSurface);
+    m_qtDisplay->setSurface(surface);
     m_qtDisplay->qtUpdate();
   }
 }

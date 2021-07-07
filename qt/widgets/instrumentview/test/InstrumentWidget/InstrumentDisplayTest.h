@@ -60,7 +60,7 @@ public:
     EXPECT_CALL(*qtMock, setSurface(_)).Times(1);
     EXPECT_CALL(*qtMock, qtUpdate()).Times(1);
 
-    auto projection = new MockProjectionSurface;
+    auto projection = std::make_shared<MockProjectionSurface>();
 
     auto inst = makeInstDisplay(std::move(glMock), std::move(qtMock));
     inst.setSurface(projection);

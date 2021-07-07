@@ -31,7 +31,7 @@ public:
 
   void installEventFilter(QObject *obj) override;
 
-  void setSurface(ProjectionSurface *surface) override;
+  void setSurface(ProjectionSurface_sptr surface) override;
 
 private:
   std::unique_ptr<IGLDisplay> m_glDisplay;

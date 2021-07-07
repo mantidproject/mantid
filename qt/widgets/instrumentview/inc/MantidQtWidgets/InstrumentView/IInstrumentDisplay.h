@@ -9,6 +9,7 @@
 #include "IGLDisplay.h"
 #include "IQtDisplay.h"
 #include "IStackedLayout.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 
 #include <memory>
 
@@ -30,6 +31,6 @@ public:
 
   virtual void installEventFilter(QObject *obj) = 0;
 
-  virtual void setSurface(ProjectionSurface *surface) = 0;
+  virtual void setSurface(ProjectionSurface_sptr surface) = 0;
 };
 } // namespace MantidQt::MantidWidgets

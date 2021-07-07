@@ -9,6 +9,7 @@
 #include "IGLDisplay.h"
 #include "IInstrumentDisplay.h"
 #include "IQtDisplay.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 
 #include <gmock/gmock.h>
 #include <memory>
@@ -28,6 +29,6 @@ public:
   MOCK_METHOD(IGLDisplay *, getGLDisplay, (), (const, override));
   MOCK_METHOD(IQtDisplay *, getQtDisplay, (), (const, override));
   MOCK_METHOD(void, installEventFilter, (QObject * obj), (override));
-  MOCK_METHOD(void, setSurface, (ProjectionSurface *), (override));
+  MOCK_METHOD(void, setSurface, (ProjectionSurface_sptr), (override));
 };
 } // namespace MantidQt::MantidWidgets
