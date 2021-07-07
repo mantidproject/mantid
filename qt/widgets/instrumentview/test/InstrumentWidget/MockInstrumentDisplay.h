@@ -21,6 +21,7 @@ namespace MantidQt::MantidWidgets {
 
 class MockInstrumentDisplay : public IInstrumentDisplay {
 public:
+  virtual ~MockInstrumentDisplay() = default;
   MOCK_METHOD(int, currentIndex, (), (const, override));
   MOCK_METHOD(QWidget *, currentWidget, (), (const, override));
   MOCK_METHOD(void, setCurrentIndex, (int), (const, override));

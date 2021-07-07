@@ -15,6 +15,7 @@ class QWidget;
 namespace MantidQt::MantidWidgets {
 class MockStackedLayout : public IStackedLayout {
 public:
+  virtual ~MockStackedLayout() = default;
   MOCK_METHOD(int, addWidget, (QWidget *), (override));
   MOCK_METHOD(int, currentIndex, (), (const, override));
   MOCK_METHOD(QWidget *, currentWidget, (), (const, override));
