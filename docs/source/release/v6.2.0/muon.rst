@@ -8,9 +8,15 @@ MuSR Changes
 Muon Analysis 2
 ---------------------------------------------
 
-BugFixes
+Improvements
+############
+
+- When running the Dynamic Kubo Toyabe fit function you should now be able to see the BinWidth to 3 decimal places.
+
+Bug Fixes
 ############
 - A bug has been fixed in the BinWidth for the Dynamic Kobu Toyabe Fitting Function which caused a crash and did not provide any information about why the value was invalid. Will now revert to last viable BinWidth used and explain why.
+
 
 
 Muon Analysis 2 and Frequency Domain Analysis
