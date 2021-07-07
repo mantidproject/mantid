@@ -769,14 +769,17 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
 }
 
 void InstrumentWidgetPickTab::onRunRebin() {
-  auto alg = AlgorithmManager::Instance().create("Rebin");
-  alg->setProperty("InputWorkspace", m_instrWidget->getWorkspaceNameStdString());
-  alg->setProperty("OutputWorkspace", m_instrWidget->getWorkspaceNameStdString());
-  alg->setProperty("Params", m_rebinParams->text().toStdString());
-  alg->setProperty("UseReverseLogarithmic", m_rebinUseReverseLog->isChecked());
-  alg->execute();
-  std::cout << "Run rebin" << std::endl;
-  updatePlotMultipleDetectors();
+  try {
+    auto alg = AlgorithmManager::Instance().create("Rebin");
+    alg->setProperty("InputWorkspace", m_instrWidget->getWorkspaceNameStdString());
+    alg->setProperty("OutputWorkspace", m_instrWidget->getWorkspaceNameStdString());
+    alg->setProperty("Params", m_rebinParams->text().toStdString());
+    alg->setProperty("PreserveEvents", true);
+    alg->setProperty("UseReverseLogarithmic", m_rebinUseReverseLog->isChecked());
+    alg->execute();
+  } catch (std::exception &e) {
+    QMessageBox::information(this, "Rebin Error", e.what(), "OK");
+  }
 }
 
 /**
