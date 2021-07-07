@@ -371,11 +371,17 @@ void IntegrateEllipsoids::exec() {
   std::vector<Peak> &peaks = peak_ws->getPeaks();
   size_t n_peaks = peak_ws->getNumberPeaks();
   SlimEvents qList;
-  for (size_t i = 0; i < n_peaks; i++) // Note: we skip un-indexed peaks
-  {
+  // Note: we skip un-indexed peaks
+  for (size_t i = 0; i < n_peaks; i++) {
+    // check if peak is satellite peak
+    const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
     const V3D peak_q = peaks[i].getQLabFrame();
-    if (IntegrateQLabEvents::isOrigin(peak_q, radius_m))
-      continue;
+    const bool isOrigin = isSatellitePeak ? IntegrateQLabEvents::isOrigin(peak_q, satellite_radius)
+                                          : IntegrateQLabEvents::isOrigin(peak_q, radius_m);
+    if (isOrigin) {
+      continue; // skip this peak
+    }
+    // add peak Q to list
     V3D hkl(peaks[i].getIntHKL());
     // use tolerance == 1 to just check for (0,0,0,0,0,0)
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
@@ -393,7 +399,9 @@ void IntegrateEllipsoids::exec() {
   std::vector<double> SatelliteBackgroundOuterRadiusVector(n_peaks, satellite_back_outer_radius);
 
   // make the integrator
-  IntegrateQLabEvents integrator(qList, radius_m, useOnePercentBackgroundCorrection);
+  // NOTE: use the larger search radius for both Brag Peaks and satelite peaks
+  const double max_search_radius = std::max(radius_m, satellite_radius);
+  IntegrateQLabEvents integrator(qList, max_search_radius, useOnePercentBackgroundCorrection);
 
   // get the events and add
   // them to the inegrator
@@ -416,13 +424,16 @@ void IntegrateEllipsoids::exec() {
   double sigi;
   std::vector<double> principalaxis1, principalaxis2, principalaxis3;
   for (size_t i = 0; i < n_peaks; i++) {
-    // grab QLab and check if at origin (skip if at origin)
-    const V3D peak_q = peaks[i].getQLabFrame();
-    if (IntegrateQLabEvents::isOrigin(peak_q, radius_m)) {
-      continue;
-    }
     // check if peak is satellite peak
     const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
+    // grab QLabFrame
+    const V3D peak_q = peaks[i].getQLabFrame();
+    // check if peak is origin (skip if true)
+    const bool isOrigin = isSatellitePeak ? IntegrateQLabEvents::isOrigin(peak_q, satellite_radius)
+                                          : IntegrateQLabEvents::isOrigin(peak_q, radius_m);
+    if (isOrigin) {
+      continue;
+    }
     // modulus of Q
     const double lenQpeak = (adaptiveQMultiplier != 0.0) ? peak_q.norm() : 0.0;
     // compuate adaptive radius
