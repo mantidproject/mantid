@@ -45,6 +45,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
     empty = None
     flat_bkg_scaling = None
     flat_background = None
+    to_clean = None
 
     def category(self):
         return "{};{}".format(common.CATEGORIES, "ILL\\Auto")
@@ -111,16 +112,18 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.output = self.getPropertyValue('OutputWorkspace')
         self.process = self.getPropertyValue('ProcessAs')
         self.reduction_type = self.getPropertyValue('ReductionType')
+        self.to_clean = []
         if self.getProperty('IncidentEnergyCalibration').value:
             self.incident_energy_calibration = 'Energy Calibration ON'
             self.incident_energy_ws = 'incident_energy_ws'
             CreateSingleValuedWorkspace(DataValue=self.getProperty('IncidentEnergy').value,
                                         OutputWorkspace=self.incident_energy_ws)
+            self.to_clean.append(self.incident_energy_ws)
         if self.getProperty('ElasticChannelCalibration').value:
             self.elastic_channel_ws = 'elastic_channel_ws'
             CreateSingleValuedWorkspace(DataValue=self.getProperty('ElasticChannelCalibration').value,
                                         OutputWorkspace=self.elastic_channel_ws)
-
+            self.to_clean.append(self.elastic_channel_ws)
         if (self.getProperty('MaskWorkspace').isDefault and self.getProperty('MaskedTubes').isDefault
                 and self.getProperty('MaskThreshold').isDefault and self.getProperty('MaskedAngles').isDefault
                 and self.getProperty('MaskWithVanadium').isDefault):
@@ -337,6 +340,8 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 output_samples.append(ws)
         GroupWorkspaces(InputWorkspaces=output_samples,
                         OutputWorkspace=self.output)
+        if self.getProperty('ClearCache').value:
+            self._final_cleanup()
         self.setProperty('OutputWorkspace', mtd[self.output])
 
     def _collect_data(self, sample, vanadium=False):
@@ -366,6 +371,11 @@ class DirectILLAutoProcess(PythonAlgorithm):
             else:
                 self.instrument = instrument
         return ws
+
+    def _final_cleanup(self):
+        """Performs the clean up of intermediate workspaces that are created and used throughout the code."""
+        if self.to_clean:
+            DeleteWorkspaces(WorkspaceList=self.to_clean)
 
     def _prepare_masks(self):
         """Builds a masking workspace from the provided inputs. Masking using threshold cannot be prepared ahead."""
