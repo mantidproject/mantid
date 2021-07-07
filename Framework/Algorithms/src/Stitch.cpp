@@ -342,21 +342,30 @@ std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr w
   MatrixWorkspace_sptr croppedToScale = cropper->getProperty("OutputWorkspace");
 
   MatrixWorkspace_sptr rebinnedToScale;
-  if (wsToMatch->isHistogramData()) {
-    auto rebinner = createChildAlgorithm("RebinToWorkspace");
-    rebinner->setProperty("WorkspaceToMatch", croppedToMatch);
-    rebinner->setProperty("WorkspaceToRebin", croppedToScale);
-    rebinner->setPropertyValue("OutputWorkspace", "__rebinned");
-    rebinner->execute();
-    rebinnedToScale = rebinner->getProperty("OutputWorkspace");
+  if (croppedToMatch->blocksize() > 1) {
+    if (wsToMatch->isHistogramData()) {
+      auto rebinner = createChildAlgorithm("RebinToWorkspace");
+      rebinner->setProperty("WorkspaceToMatch", croppedToMatch);
+      rebinner->setProperty("WorkspaceToRebin", croppedToScale);
+      rebinner->setPropertyValue("OutputWorkspace", "__rebinned");
+      rebinner->execute();
+      rebinnedToScale = rebinner->getProperty("OutputWorkspace");
+    } else {
+      auto interpolator = createChildAlgorithm("SplineInterpolation");
+      interpolator->setProperty("WorkspaceToMatch", croppedToMatch);
+      interpolator->setProperty("WorkspaceToInterpolate", croppedToScale);
+      interpolator->setProperty("Linear2Points", true);
+      interpolator->setPropertyValue("OutputWorkspace", "__interpolated");
+      interpolator->execute();
+      rebinnedToScale = interpolator->getProperty("OutputWorkspace");
+    }
   } else {
-    auto interpolator = createChildAlgorithm("SplineInterpolation");
-    interpolator->setProperty("WorkspaceToMatch", croppedToMatch);
-    interpolator->setProperty("WorkspaceToInterpolate", croppedToScale);
-    interpolator->setProperty("Linear2Points", true);
-    interpolator->setPropertyValue("OutputWorkspace", "__interpolated");
-    interpolator->execute();
-    rebinnedToScale = interpolator->getProperty("OutputWorkspace");
+    if (croppedToMatch->readX(0) != croppedToScale->readX(0)) {
+      throw std::runtime_error(
+          "Unable to make the ratio; only one overlapping point is found and it is at different x");
+    } else {
+      rebinnedToScale = croppedToScale;
+    }
   }
 
   auto divider = createChildAlgorithm("Divide");
