@@ -125,6 +125,7 @@ private:
   QWidget *m_rebin;
   QLineEdit *m_rebinParams;
   QCheckBox *m_rebinUseReverseLog;
+  QCheckBox *m_rebinSaveToHisto;
   QPushButton *m_runRebin;
 
   QLabel *m_activeTool;          ///< Displays a tip on which tool is currently selected

@@ -102,10 +102,14 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   QGridLayout *rebinLayout = new QGridLayout(m_rebin);
   m_rebinParams = new QLineEdit(m_rebin);
   m_rebinUseReverseLog = new QCheckBox("UseReverseLog", m_rebin);
+  m_rebinSaveToHisto = new QCheckBox("Save as histogram", m_rebin);
+  m_rebinSaveToHisto->setToolTip("Save the data as a histogram. Removes the events. CANNOT BE UNDONE.");
+
   m_runRebin = new QPushButton("Run", m_rebin);
 
   rebinLayout->addWidget(m_rebinParams);
   rebinLayout->addWidget(m_rebinUseReverseLog);
+  rebinLayout->addWidget(m_rebinSaveToHisto);
   rebinLayout->addWidget(m_runRebin);
   connect(m_rebinParams, SIGNAL(returnPressed()), this, SLOT(onRunRebin()));
   connect(m_runRebin, SIGNAL(clicked(bool)), this, SLOT(onRunRebin()));
@@ -311,8 +315,11 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 void InstrumentWidgetPickTab::collapsePlotPanel() {
   if (!m_instrWidget->isIntegrable()) {
     m_plotPanel->collapseCaption();
-  } else
+    m_rebinPanel->collapseCaption();
+  } else {
     m_plotPanel->expandCaption();
+    m_rebinPanel->expandCaption();
+  }
 }
 
 /**
@@ -769,14 +776,17 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
 }
 
 void InstrumentWidgetPickTab::onRunRebin() {
-  auto alg = AlgorithmManager::Instance().create("Rebin");
-  alg->setProperty("InputWorkspace", m_instrWidget->getWorkspaceNameStdString());
-  alg->setProperty("OutputWorkspace", m_instrWidget->getWorkspaceNameStdString());
-  alg->setProperty("Params", m_rebinParams->text().toStdString());
-  alg->setProperty("UseReverseLogarithmic", m_rebinUseReverseLog->isChecked());
-  alg->execute();
-  std::cout << "Run rebin" << std::endl;
-  updatePlotMultipleDetectors();
+  try {
+    auto alg = AlgorithmManager::Instance().create("Rebin");
+    alg->setProperty("InputWorkspace", m_instrWidget->getWorkspaceNameStdString());
+    alg->setProperty("OutputWorkspace", m_instrWidget->getWorkspaceNameStdString());
+    alg->setProperty("Params", m_rebinParams->text().toStdString());
+    alg->setProperty("PreserveEvents", !m_rebinSaveToHisto->isChecked());
+    alg->setProperty("UseReverseLogarithmic", m_rebinUseReverseLog->isChecked());
+    alg->execute();
+  } catch (std::exception &e) {
+    QMessageBox::information(this, "Rebin Error", e.what(), "OK");
+  }
 }
 
 /**
