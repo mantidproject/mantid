@@ -230,6 +230,18 @@ void IntegrateEllipsoids::init() {
                   "If this options is enabled, then the the top 1% of the "
                   "background will be removed"
                   "before the background subtraction.");
+
+  // satellite realted properties
+  declareProperty("SatelliteRegionRadius", EMPTY_DBL(), mustBePositive,
+                  "Only events at most this distance from a satellite peak will be considered when integration");
+  declareProperty("SatellitePeakSize", EMPTY_DBL(), mustBePositive,
+                  "Half-length of major axis for satellite peak ellipsoid");
+  declareProperty(
+      "SatelliteBackgroundInnerSize", EMPTY_DBL(), mustBePositive,
+      "Half-length of major axis for the inner ellipsoidal surface of background region of the satellite peak");
+  declareProperty(
+      "SatelliteBackgroundOuterSize", EMPTY_DBL(), mustBePositive,
+      "Half-length of major axis for the outer ellipsoidal surface of background region of the satellite peak");
 }
 
 void IntegrateEllipsoids::exec() {
