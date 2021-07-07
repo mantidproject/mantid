@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/GLDisplay.h"
 #include "MantidQtWidgets/InstrumentView/IStackedLayout.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/QtDisplay.h"
 #include "MantidQtWidgets/InstrumentView/StackedLayout.h"
 
@@ -44,5 +45,17 @@ IQtDisplay *InstrumentDisplay::getQtDisplay() const { return m_qtDisplay.get(); 
 void InstrumentDisplay::installEventFilter(QObject *obj) {
   m_glDisplay->qtInstallEventFilter(obj);
   m_qtDisplay->qtInstallEventFilter(obj);
+}
+
+void InstrumentDisplay::setSurface(ProjectionSurface *surface) {
+  ProjectionSurface_sptr sharedSurface(surface);
+  if (m_glDisplay) {
+    m_glDisplay->setSurface(sharedSurface);
+    m_glDisplay->qtUpdate();
+  }
+  if (getQtDisplay()) {
+    m_qtDisplay->setSurface(sharedSurface);
+    m_qtDisplay->qtUpdate();
+  }
 }
 } // namespace MantidQt::MantidWidgets

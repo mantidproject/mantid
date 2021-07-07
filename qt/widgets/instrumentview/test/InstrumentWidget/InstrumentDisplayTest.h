@@ -10,6 +10,7 @@
 #include "IQtDisplay.h"
 #include "InstrumentDisplay.h"
 #include "MockGLDisplay.h"
+#include "MockProjectionSurface.h"
 #include "MockQtDisplay.h"
 #include "MockStackedLayout.h"
 
@@ -48,6 +49,21 @@ public:
     EXPECT_CALL(*layoutMock, addWidget(Eq(qtMock.get()))).Times(1);
 
     InstrumentDisplay fixture(nullptr, std::move(glMock), std::move(qtMock), std::move(layoutMock));
+  }
+
+  void test_set_surface() {
+    auto glMock = makeGLDisplay();
+    auto qtMock = makeQtDisplay();
+
+    EXPECT_CALL(*glMock, setSurface(_)).Times(1);
+    EXPECT_CALL(*glMock, qtUpdate()).Times(1);
+    EXPECT_CALL(*qtMock, setSurface(_)).Times(1);
+    EXPECT_CALL(*qtMock, qtUpdate()).Times(1);
+
+    auto projection = new MockProjectionSurface;
+
+    auto inst = makeInstDisplay(std::move(glMock), std::move(qtMock));
+    inst.setSurface(projection);
   }
 
 private:

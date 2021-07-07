@@ -29,5 +29,7 @@ public:
   virtual IQtDisplay *getQtDisplay() const = 0;
 
   virtual void installEventFilter(QObject *obj) = 0;
+
+  virtual void setSurface(ProjectionSurface *surface) = 0;
 };
 } // namespace MantidQt::MantidWidgets
