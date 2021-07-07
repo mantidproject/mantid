@@ -44,7 +44,6 @@ IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
   m_uiForm->setupUi(parent);
   m_convFittingModel = dynamic_cast<ConvFitModel *>(getFittingModel());
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
-  setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(new ConvTemplateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);

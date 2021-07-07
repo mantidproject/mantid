@@ -48,8 +48,7 @@ using namespace Mantid::Geometry;
 namespace MantidQt {
 namespace MantidWidgets {
 Projection3D::Projection3D(const InstrumentActor *rootActor, QSize viewportSize)
-    : ProjectionSurface(rootActor), m_drawAxes(true), m_wireframe(false),
-      m_viewport(std::move(viewportSize)) {
+    : ProjectionSurface(rootActor), m_drawAxes(true), m_wireframe(false), m_viewport(std::move(viewportSize)) {
   V3D minBounds, maxBounds;
   m_instrActor->getBoundingBox(minBounds, maxBounds);
 
@@ -60,19 +59,13 @@ Projection3D::Projection3D(const InstrumentActor *rootActor, QSize viewportSize)
   // create and connect the move input controller
   InputController3DMove *moveController = new InputController3DMove(this);
   setInputController(MoveMode, moveController);
-  connect(moveController, SIGNAL(initTranslation(int, int)), this,
-          SLOT(initTranslation(int, int)));
-  connect(moveController, SIGNAL(translate(int, int)), this,
-          SLOT(translate(int, int)));
-  connect(moveController, SIGNAL(initRotation(int, int)), this,
-          SLOT(initRotation(int, int)));
-  connect(moveController, SIGNAL(rotate(int, int)), this,
-          SLOT(rotate(int, int)));
-  connect(moveController, SIGNAL(initZoom(int, int)), this,
-          SLOT(initZoom(int, int)));
+  connect(moveController, SIGNAL(initTranslation(int, int)), this, SLOT(initTranslation(int, int)));
+  connect(moveController, SIGNAL(translate(int, int)), this, SLOT(translate(int, int)));
+  connect(moveController, SIGNAL(initRotation(int, int)), this, SLOT(initRotation(int, int)));
+  connect(moveController, SIGNAL(rotate(int, int)), this, SLOT(rotate(int, int)));
+  connect(moveController, SIGNAL(initZoom(int, int)), this, SLOT(initZoom(int, int)));
   connect(moveController, SIGNAL(zoom(int, int)), this, SLOT(zoom(int, int)));
-  connect(moveController, SIGNAL(wheelZoom(int, int, int)), this,
-          SLOT(wheelZoom(int, int, int)));
+  connect(moveController, SIGNAL(wheelZoom(int, int, int)), this, SLOT(wheelZoom(int, int, int)));
   connect(moveController, SIGNAL(finish()), this, SLOT(finishMove()));
 }
 
@@ -87,10 +80,9 @@ void Projection3D::resize(int w, int h) {
 }
 
 /**
- * Draw the instrument on MantidGLWidget.
+ * Draw the instrument on GLDisplay.
  */
-void Projection3D::drawSurface(MantidGLWidget * /*widget*/,
-                               bool picking) const {
+void Projection3D::drawSurface(GLDisplay * /*widget*/, bool picking) const {
   OpenGLError::check("GL3DWidget::draw3D()[begin]");
 
   glEnable(GL_DEPTH_TEST);
@@ -223,8 +215,7 @@ void Projection3D::getSelectedDetectors(std::vector<size_t> &detIndices) {
   for (size_t i = 0; i < ndet; ++i) {
     V3D pos = m_instrActor->getDetPos(i);
     m_viewport.transform(pos);
-    if (pos.X() >= xLeft && pos.X() <= xRight && pos.Y() >= yBottom &&
-        pos.Y() <= yTop) {
+    if (pos.X() >= xLeft && pos.X() <= xRight && pos.Y() >= yBottom && pos.Y() <= yTop) {
       detIndices.emplace_back(i);
     }
   }
@@ -299,8 +290,7 @@ void Projection3D::componentSelected(size_t componentIndex) {
     V3D up(0, 0, 1);
     V3D x = up.cross_prod(compDir);
     up = compDir.cross_prod(x);
-    InstrumentActor::BasisRotation(x, up, compDir, V3D(-1, 0, 0), V3D(0, 1, 0),
-                                   V3D(0, 0, -1), rot);
+    InstrumentActor::BasisRotation(x, up, compDir, V3D(-1, 0, 0), V3D(0, 1, 0), V3D(0, 0, -1), rot);
 
     rot.rotate(pos);
   } catch (std::runtime_error &) {
@@ -314,8 +304,7 @@ void Projection3D::componentSelected(size_t componentIndex) {
  */
 QString Projection3D::getInfoText() const {
   if (m_interactionMode == MoveMode) {
-    QString text =
-        "Mouse Buttons: Left -- Rotation, Middle -- Zoom, Right -- Translate.";
+    QString text = "Mouse Buttons: Left -- Rotation, Middle -- Zoom, Right -- Translate.";
     if (m_drawAxes) {
       text += " Axes: X = Red; Y = Green; Z = Blue";
     }
@@ -329,9 +318,7 @@ QString Projection3D::getInfoText() const {
  * @param x :: The x screen coord clicked with the mouse to start translation.
  * @param y :: The y screen coord clicked with the mouse to start translation.
  */
-void Projection3D::initTranslation(int x, int y) {
-  m_viewport.initTranslateFrom(x, y);
-}
+void Projection3D::initTranslation(int x, int y) { m_viewport.initTranslateFrom(x, y); }
 
 /**
  * Translate the view in the surface.
@@ -380,9 +367,7 @@ void Projection3D::wheelZoom(int x, int y, int d) {
  * @param x :: The x screen coord of the mouse pointer.
  * @param y :: The y screen coord of the mouse pointer.
  */
-void Projection3D::initRotation(int x, int y) {
-  m_viewport.initRotationFrom(x, y);
-}
+void Projection3D::initRotation(int x, int y) { m_viewport.initRotationFrom(x, y); }
 
 /**
  * Rotate the view in the surface.
@@ -421,8 +406,7 @@ RectF Projection3D::getSurfaceBounds() const {
 void Projection3D::setLightingModel(bool picking) const {
   // Basic lighting
   if (m_isLightingOn && !picking) {
-    glShadeModel(
-        GL_SMOOTH); // Shade model is smooth (expensive but looks pleasing)
+    glShadeModel(GL_SMOOTH);  // Shade model is smooth (expensive but looks pleasing)
     glEnable(GL_LINE_SMOOTH); // Set line should be drawn smoothly
     glEnable(GL_NORMALIZE);   // Slow normal normalization
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,
@@ -433,8 +417,7 @@ void Projection3D::setLightingModel(bool picking) const {
 
     // First light source - spot light at the origin
     glEnable(GL_LIGHT0); // Enable opengl first light
-    float lamp0_diffuse[4] = {lamp0_intensity, lamp0_intensity, lamp0_intensity,
-                              1.0f};
+    float lamp0_diffuse[4] = {lamp0_intensity, lamp0_intensity, lamp0_intensity, 1.0f};
     float lamp0_ambient[4] = {0.1f, 0.1f, 0.1f, 1.0f};
     glLightfv(GL_LIGHT0, GL_DIFFUSE, lamp0_diffuse);
     glLightfv(GL_LIGHT0, GL_AMBIENT, lamp0_ambient);
@@ -444,8 +427,7 @@ void Projection3D::setLightingModel(bool picking) const {
     // Second light source
     // Its a directional light which follows camera position
     glEnable(GL_LIGHT1); // Enable opengl second light
-    float lamp1_diffuse[4] = {lamp1_intensity, lamp1_intensity, lamp1_intensity,
-                              1.0f};
+    float lamp1_diffuse[4] = {lamp1_intensity, lamp1_intensity, lamp1_intensity, 1.0f};
     glLightfv(GL_LIGHT1, GL_DIFFUSE, lamp1_diffuse);
 
     glEnable(GL_LIGHTING); // Enable overall lighting
@@ -474,8 +456,7 @@ void Projection3D::loadFromProject(const std::string &lines) {
   }
 #else
   Q_UNUSED(lines);
-  throw std::runtime_error(
-      "Projection3D::loadFromProject not implemented for Qt >= 5");
+  throw std::runtime_error("Projection3D::loadFromProject not implemented for Qt >= 5");
 #endif
 }
 
@@ -489,8 +470,7 @@ std::string Projection3D::saveToProject() const {
   tsv.writeSection("Viewport", m_viewport.saveToProject());
   return tsv.outputLines();
 #else
-  throw std::runtime_error(
-      "Projection3D::saveToProject not implemented for Qt >= 5");
+  throw std::runtime_error("Projection3D::saveToProject not implemented for Qt >= 5");
 #endif
 }
 
@@ -501,9 +481,7 @@ void Projection3D::saveShapesToTableWorkspace() {
   // output.
   // Modify with great caution.
   std::shared_ptr<Mantid::API::ITableWorkspace> table =
-      AnalysisDataService::Instance()
-          .retrieveWS<typename Mantid::API::ITableWorkspace>(
-              std::string("MaskShapes"));
+      AnalysisDataService::Instance().retrieveWS<typename Mantid::API::ITableWorkspace>(std::string("MaskShapes"));
   Mantid::API::TableRow row = table->appendRow();
   auto viewPortStr = m_viewport.saveToProject();
   row << std::to_string(-1) << viewPortStr;

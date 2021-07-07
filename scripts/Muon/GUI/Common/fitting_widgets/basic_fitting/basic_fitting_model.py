@@ -9,12 +9,14 @@ from mantid.api import CompositeFunction, IAlgorithm, IFunction
 from mantid.simpleapi import CopyLogs, EvaluateFunction
 
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
-from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name, create_parameter_table_name
+from Muon.GUI.Common.ADSHandler.workspace_naming import (create_covariance_matrix_name, create_fitted_workspace_name,
+                                                         create_parameter_table_name)
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 import math
 import re
@@ -24,6 +26,7 @@ DEFAULT_CHI_SQUARED = 0.0
 DEFAULT_FIT_STATUS = None
 DEFAULT_SINGLE_FIT_FUNCTION = None
 DEFAULT_START_X = 0.0
+X_OFFSET = 0.001
 
 
 def get_function_name_for_composite(composite: CompositeFunction) -> str:
@@ -83,7 +86,7 @@ class BasicFittingModel:
         self.reset_fit_functions(functions)
         self.reset_current_dataset_index()
         self.reset_fit_statuses_and_chi_squared()
-        self.clear_cached_fit_functions()
+        self.clear_undo_data()
 
     @property
     def current_dataset_name(self) -> str:
@@ -190,28 +193,50 @@ class BasicFittingModel:
         else:
             return DEFAULT_SINGLE_FIT_FUNCTION
 
-    @property
-    def single_fit_functions_cache(self) -> list:
-        """Returns the cache of fit functions used for single fitting."""
-        return self.fitting_context.single_fit_functions_cache
+    def number_of_undos(self) -> int:
+        """Returns the number of previous single fits that are saved."""
+        return len(self.fitting_context.single_fit_functions_for_undo)
 
-    @single_fit_functions_cache.setter
-    def single_fit_functions_cache(self, fit_functions: list) -> None:
-        """Sets the cache of fit functions used for single fitting."""
-        self.fitting_context.single_fit_functions_cache = fit_functions
+    def undo_previous_fit(self) -> None:
+        """Undoes the previous fit using the saved undo data."""
+        if self.number_of_undos() > 0:
+            self.fitting_context.undo_previous_fit()
 
-    def cache_the_current_fit_functions(self) -> None:
-        """Caches the existing single fit functions. Used before a fit is performed to save the old state."""
-        self.fitting_context.single_fit_functions_cache = [self._clone_function(function)
-                                                           for function in self.fitting_context.single_fit_functions]
-        self.fitting_context.fit_statuses_cache = self.fitting_context.fit_statuses.copy()
-        self.fitting_context.chi_squared_cache = self.fitting_context.chi_squared.copy()
+            undo_dataset_index = self.fitting_context.dataset_indices_for_undo.pop()
+            undo_fit_function = self.fitting_context.single_fit_functions_for_undo.pop()
+            undo_fit_status = self.fitting_context.fit_statuses_for_undo.pop()
+            undo_chi_squared = self.fitting_context.chi_squared_for_undo.pop()
 
-    def clear_cached_fit_functions(self) -> None:
-        """Clears the cached fit functions and removes all fits from the fitting context."""
-        self.fitting_context.single_fit_functions_cache = [None] * self.fitting_context.number_of_datasets
-        self.fitting_context.fit_statuses_cache = [None] * self.fitting_context.number_of_datasets
-        self.fitting_context.chi_squared_cache = [None] * self.fitting_context.number_of_datasets
+            self.fitting_context.single_fit_functions[undo_dataset_index] = undo_fit_function
+            self.fitting_context.fit_statuses[undo_dataset_index] = undo_fit_status
+            self.fitting_context.chi_squared[undo_dataset_index] = undo_chi_squared
+
+    def save_current_fit_function_to_undo_data(self) -> None:
+        """Saves the current single fit function and other data before performing a fit."""
+        self.fitting_context.dataset_indices_for_undo.append(self.fitting_context.current_dataset_index)
+        self.fitting_context.single_fit_functions_for_undo.append(self._clone_function(
+            self.current_single_fit_function))
+        self.fitting_context.fit_statuses_for_undo.append(self.current_fit_status)
+        self.fitting_context.chi_squared_for_undo.append(self.current_chi_squared)
+
+    def clear_undo_data(self) -> None:
+        """Clears the undo fit functions and other data for all previous fits."""
+        self.fitting_context.remove_overridden_fits()
+        self.fitting_context.dataset_indices_for_undo = []
+        self.fitting_context.single_fit_functions_for_undo = []
+        self.fitting_context.fit_statuses_for_undo = []
+        self.fitting_context.chi_squared_for_undo = []
+
+    def clear_undo_data_for_current_dataset_index(self) -> None:
+        """Clears the undo fit functions and other data for the currently selected index."""
+        current_dataset_index = self.fitting_context.current_dataset_index
+        for i, dataset_index in reversed(list(enumerate(self.fitting_context.dataset_indices_for_undo))):
+            if dataset_index == current_dataset_index:
+                del self.fitting_context.active_fit_history[i]
+                del self.fitting_context.dataset_indices_for_undo[i]
+                del self.fitting_context.single_fit_functions_for_undo[i]
+                del self.fitting_context.fit_statuses_for_undo[i]
+                del self.fitting_context.chi_squared_for_undo[i]
 
     @property
     def fit_statuses(self) -> list:
@@ -222,16 +247,6 @@ class BasicFittingModel:
     def fit_statuses(self, fit_statuses: list) -> None:
         """Sets the value of all fit statuses."""
         self.fitting_context.fit_statuses = fit_statuses
-
-    @property
-    def fit_statuses_cache(self) -> list:
-        """Returns all of the cached fit statuses in a list."""
-        return self.fitting_context.fit_statuses_cache
-
-    @fit_statuses_cache.setter
-    def fit_statuses_cache(self, fit_statuses: list) -> None:
-        """Sets the value of the cached fit statuses."""
-        self.fitting_context.fit_statuses_cache = fit_statuses
 
     @property
     def current_fit_status(self) -> str:
@@ -258,16 +273,6 @@ class BasicFittingModel:
         self.fitting_context.chi_squared = chi_squared
 
     @property
-    def chi_squared_cache(self) -> list:
-        """Returns all of the cached chi squares in a list."""
-        return self.fitting_context.chi_squared_cache
-
-    @chi_squared_cache.setter
-    def chi_squared_cache(self, chi_squared: list) -> None:
-        """Sets the value of the cached fit statuses."""
-        self.fitting_context.chi_squared_cache = chi_squared
-
-    @property
     def current_chi_squared(self) -> float:
         """Returns the chi squared of the dataset that is currently selected."""
         current_dataset_index = self.fitting_context.current_dataset_index
@@ -280,6 +285,16 @@ class BasicFittingModel:
     def current_chi_squared(self, chi_squared: float) -> None:
         """Sets the chi squared of the dataset that is currently selected."""
         self.fitting_context.chi_squared[self.fitting_context.current_dataset_index] = chi_squared
+
+    @property
+    def plot_guess(self) -> bool:
+        """Returns true if plot guess is turned on."""
+        return self.fitting_context.plot_guess
+
+    @plot_guess.setter
+    def plot_guess(self, plot_guess: bool) -> None:
+        """Sets that the plot guess should or should not be plotted."""
+        self.fitting_context.plot_guess = plot_guess
 
     @property
     def plot_guess(self) -> bool:
@@ -344,7 +359,7 @@ class BasicFittingModel:
     @fit_to_raw.setter
     def fit_to_raw(self, fit_to_raw: bool) -> None:
         """Sets the fit to raw property."""
-        if fit_to_raw != self.fit_to_raw:
+        if fit_to_raw != self.fitting_context.fit_to_raw:
             self.fitting_context.fit_to_raw = fit_to_raw
             # Avoids resetting the start/end xs and etc. by not using the dataset_names setter.
             self.fitting_context.dataset_names = self._get_equivalent_binned_or_unbinned_workspaces()
@@ -364,14 +379,12 @@ class BasicFittingModel:
         if workspace_name is not None and check_if_workspace_exist(workspace_name):
             x_data = retrieve_ws(workspace_name).dataX(0)
             if len(x_data) > 0:
-                return x_data[0], x_data[-1]
+                x_data.sort()
+                x_lower, x_higher = x_data[0], x_data[-1]
+                if x_lower == x_higher:
+                    return x_lower - X_OFFSET, x_higher + X_OFFSET
+                return x_lower, x_higher
         return self.current_start_x, self.current_end_x
-
-    def use_cached_function(self) -> None:
-        """Sets the current function as being the cached function."""
-        self.fitting_context.single_fit_functions = self.fitting_context.single_fit_functions_cache
-        self.fitting_context.fit_statuses = self.fitting_context.fit_statuses_cache.copy()
-        self.fitting_context.chi_squared = self.fitting_context.chi_squared_cache.copy()
 
     def update_plot_guess(self) -> None:
         """Updates the guess plot using the current dataset and function."""
@@ -379,14 +392,10 @@ class BasicFittingModel:
 
     def remove_all_fits_from_context(self) -> None:
         """Removes all fit results from the context."""
-        self.fitting_context.remove_all_fits()
-
-    def remove_latest_fit_from_context(self) -> None:
-        """Removes the most recent fit performed from the fitting context"""
-        self.fitting_context.remove_latest_fit()
+        self.fitting_context.clear()
 
     def reset_current_dataset_index(self) -> None:
-        """Resets the current dataset index stored by the model."""
+        """Resets the current dataset index stored by the context."""
         if self.fitting_context.number_of_datasets == 0:
             self.fitting_context.current_dataset_index = None
         elif self.fitting_context.current_dataset_index is None or \
@@ -394,21 +403,34 @@ class BasicFittingModel:
             self.fitting_context.current_dataset_index = 0
 
     def reset_start_xs_and_end_xs(self) -> None:
-        """Resets the start and end Xs stored by the model."""
+        """Resets the start and end Xs stored by the context."""
         self._reset_start_xs()
         self._reset_end_xs()
 
     def reset_fit_statuses_and_chi_squared(self) -> None:
-        """Reset the fit statuses and chi squared stored by the model."""
+        """Reset the fit statuses and chi squared stored by the context."""
         self.fitting_context.fit_statuses = [DEFAULT_FIT_STATUS] * self.fitting_context.number_of_datasets
         self.fitting_context.chi_squared = [DEFAULT_CHI_SQUARED] * self.fitting_context.number_of_datasets
 
+    def reset_current_fit_status_and_chi_squared(self) -> None:
+        """Reset the current fit status and chi squared stored by the context."""
+        self.current_fit_status = DEFAULT_FIT_STATUS
+        self.current_chi_squared = DEFAULT_CHI_SQUARED
+
     def reset_fit_functions(self, new_functions: list) -> None:
         """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
-        self.fitting_context.single_fit_functions = new_functions
+        self.fitting_context.single_fit_functions = [self._clear_function_errors(func) for func in new_functions]
+
+    @staticmethod
+    def _clear_function_errors(function: IFunction) -> IFunction:
+        """Clears the errors of a function by setting them to zero."""
+        if function is not None:
+            for i in range(function.nParams()):
+                function.setError(i, 0.0)
+        return function
 
     def _reset_start_xs(self) -> None:
-        """Resets the start Xs stored by the model."""
+        """Resets the start Xs stored by the context."""
         if self.fitting_context.number_of_datasets > 0:
             self.fitting_context.start_xs = [self.retrieve_first_good_data_from(name)
                                              for name in self.fitting_context.dataset_names]
@@ -416,7 +438,7 @@ class BasicFittingModel:
             self.fitting_context.start_xs = []
 
     def _reset_end_xs(self) -> None:
-        """Resets the end Xs stored by the model."""
+        """Resets the end Xs stored by the context."""
         self.fitting_context.end_xs = [self.current_end_x] * self.fitting_context.number_of_datasets
 
     def _get_new_start_xs_and_end_xs_using_existing_datasets(self, new_dataset_names: list) -> tuple:
@@ -434,7 +456,8 @@ class BasicFittingModel:
         if new_dataset_name in dataset_names:
             return self.fitting_context.start_xs[dataset_names.index(new_dataset_name)]
         else:
-            return self.current_start_x if self.fitting_context.current_dataset_index is not None \
+            x_lower, x_upper = self.x_limits_of_workspace(new_dataset_name)
+            return self.current_start_x if x_lower < self.current_start_x < x_upper \
                 else self.retrieve_first_good_data_from(new_dataset_name)
 
     def _get_new_end_x_for(self, new_dataset_name: str) -> float:
@@ -449,7 +472,7 @@ class BasicFittingModel:
     def _get_new_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
         """Returns the functions to use for the new datasets. It tries to use the existing functions if possible."""
         if len(self.fitting_context.dataset_names) == len(new_dataset_names):
-            return self.fitting_context.single_fit_functions
+            return [self._clear_function_errors(function) for function in self.fitting_context.single_fit_functions]
         else:
             return [self._get_new_function_for(name) for name in new_dataset_names]
 
@@ -457,17 +480,18 @@ class BasicFittingModel:
         """Returns the function to use for the new dataset. It tries to use an existing function if possible."""
         dataset_names = self.fitting_context.dataset_names
         if new_dataset_name in dataset_names:
-            return self._clone_function(
-                self.fitting_context.single_fit_functions[dataset_names.index(new_dataset_name)])
+            return self._clear_function_errors(self._clone_function(
+                self.fitting_context.single_fit_functions[dataset_names.index(new_dataset_name)]))
         else:
-            return self._clone_function(self.current_single_fit_function)
+            return self._clear_function_errors(self._clone_function(self.current_single_fit_function))
 
     def retrieve_first_good_data_from(self, workspace_name: str) -> float:
         """Returns the first good data value from a workspace."""
         try:
             return self.context.first_good_data([float(re.search("[0-9]+", workspace_name).group())])
         except AttributeError:
-            return DEFAULT_START_X
+            x_lower, _ = self.x_limits_of_workspace(workspace_name)
+            return x_lower
 
     def get_fit_function_parameters(self) -> list:
         """Returns the names of the fit parameters in the fit functions."""
@@ -509,6 +533,11 @@ class BasicFittingModel:
     def _check_data_exists(workspace_names: list) -> list:
         """Returns only the workspace names that exist in the ADS."""
         return [workspace_name for workspace_name in workspace_names if check_if_workspace_exist(workspace_name)]
+
+    @staticmethod
+    def is_equal_to_n_decimals(value1: float, value2: float, n_decimals: int) -> bool:
+        """Checks that two floats are equal up to n decimal places."""
+        return f"{value1:.{n_decimals}f}" == f"{value2:.{n_decimals}f}"
 
     def get_selected_runs_groups_and_pairs(self) -> tuple:
         """Returns the runs, groups and pairs to use for single fit mode."""
@@ -584,33 +613,31 @@ class BasicFittingModel:
         second_pulse_weighting = 1 / (1 + decay)
         return first_pulse_weighting, second_pulse_weighting
 
-    def _add_single_fit_results_to_ADS_and_context(self, input_workspace, parameters_table, output_workspace,
+    def _add_single_fit_results_to_ADS_and_context(self, input_workspace_name: str, parameters_table, output_workspace,
                                                    covariance_matrix) -> None:
         """Adds the results of a single fit to the ADS and context."""
-        workspace_name, table_name, table_directory = self._add_single_fit_workspaces_to_ADS(input_workspace,
-                                                                                             output_workspace,
-                                                                                             covariance_matrix)
-
-        self._add_fit_to_context(self._add_workspace_to_ADS(parameters_table, table_name, table_directory),
-                                 input_workspace, [workspace_name])
-
-    def _add_single_fit_workspaces_to_ADS(self, input_workspace, output_workspace, covariance_matrix) -> tuple:
-        """Adds the results of a single fit to the ADS."""
         function_name = self.fitting_context.function_name
 
-        workspace_name, workspace_directory = create_fitted_workspace_name(input_workspace, function_name)
-        table_name, table_directory = create_parameter_table_name(input_workspace, function_name)
+        output_workspace_name, directory = create_fitted_workspace_name(input_workspace_name, function_name)
+        parameter_table_name, _ = create_parameter_table_name(input_workspace_name, function_name)
+        covariance_matrix_name, _ = create_covariance_matrix_name(input_workspace_name, function_name)
 
-        self._add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
-        self._add_workspace_to_ADS(covariance_matrix, workspace_name + '_CovarianceMatrix', table_directory)
+        self._add_workspace_to_ADS(output_workspace, output_workspace_name, directory)
+        self._add_workspace_to_ADS(parameters_table, parameter_table_name, directory)
+        self._add_workspace_to_ADS(covariance_matrix, covariance_matrix_name, directory)
 
-        return workspace_name, table_name, table_directory
+        output_workspace_wrap = StaticWorkspaceWrapper(output_workspace_name, retrieve_ws(output_workspace_name))
+        parameter_workspace_wrap = StaticWorkspaceWrapper(parameter_table_name, retrieve_ws(parameter_table_name))
+        covariance_workspace_wrap = StaticWorkspaceWrapper(covariance_matrix_name, retrieve_ws(covariance_matrix_name))
 
-    def _add_fit_to_context(self, parameter_workspace, input_workspaces, output_workspaces,
-                            global_parameters: list = None) -> None:
+        self._add_fit_to_context([input_workspace_name], [output_workspace_wrap], parameter_workspace_wrap,
+                                 covariance_workspace_wrap)
+
+    def _add_fit_to_context(self, input_workspace_names: list, output_workspaces: list,
+                            parameter_workspace: StaticWorkspaceWrapper, covariance_workspace: StaticWorkspaceWrapper) -> None:
         """Adds the results of a single fit to the context."""
-        self.fitting_context.add_fit_from_values(parameter_workspace, self.fitting_context.function_name,
-                                                 input_workspaces, output_workspaces, global_parameters)
+        self.fitting_context.add_fit_from_values(input_workspace_names, self.fitting_context.function_name,
+                                                 output_workspaces, parameter_workspace, covariance_workspace)
 
     def _create_fit_plot_information(self, workspace_names: list, function_name: str) -> list:
         """Creates the FitPlotInformation storing fit data to be plotted in the plot widget."""
@@ -649,12 +676,12 @@ class BasicFittingModel:
     def _evaluate_plot_guess(self, plot_guess: bool) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
         if not plot_guess or self.current_dataset_name is None:
-            return None
+            return ""
 
         fit_function = self._get_plot_guess_fit_function()
         if fit_function is not None:
             return self._evaluate_function(fit_function, self._get_plot_guess_name())
-        return None
+        return ""
 
     def _evaluate_function(self, fit_function: IFunction, output_workspace: str) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
@@ -669,7 +696,7 @@ class BasicFittingModel:
                                  OutputWorkspace=output_workspace)
         except RuntimeError:
             logger.error("Failed to plot guess.")
-            return None
+            return ""
         return output_workspace
 
     def _evaluate_double_pulse_function(self, fit_function: IFunction, output_workspace: str) -> None:

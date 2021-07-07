@@ -62,8 +62,8 @@ class FittingDataModel(object):
                 try:
                     if not ADS.doesExist(ws_name):
                         ws = Load(filename, OutputWorkspace=ws_name)
-                        if xunit != "TOF":
-                            ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws_name, Target=xunit)
+                        # temporary fix to ensure unit of ws matches unit box (which will soon be removed)
+                        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws_name, Target=xunit)
                     else:
                         ws = ADS.retrieve(ws_name)
                     if ws.getNumberHistograms() == 1:
@@ -177,8 +177,11 @@ class FittingDataModel(object):
         else:
             self.clear_logs()
 
+    def get_ws_list(self):
+        return list(self._loaded_workspaces.keys())
+
     def get_ws_sorted_by_primary_log(self):
-        ws_list = list(self._loaded_workspaces.keys())
+        ws_list = self.get_ws_list()
         tof_ws_inds = [ind for ind, ws in enumerate(ws_list) if
                        self._loaded_workspaces[ws].getAxis(0).getUnit().caption() == 'Time-of-flight']
         primary_log = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
@@ -367,4 +370,9 @@ class FittingDataModel(object):
 
     @staticmethod
     def _generate_workspace_name(filepath, xunit):
-        return path.splitext(path.split(filepath)[1])[0] + '_' + xunit
+        wsname = path.splitext(path.split(filepath)[1])[0]
+        # remove unit from fname if present as will convert unit to xunit in combo box temporarily until it is removed
+        # Once combo box removed we can get unit from workspace post-loading (and call RenameWorkspace)
+        if wsname.endswith('_TOF') or wsname.endswith('_dSpacing'):
+            wsname = '_'.join(wsname.split('_')[0:-1])
+        return wsname + '_' + xunit

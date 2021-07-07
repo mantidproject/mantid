@@ -27,13 +27,19 @@ else()
   )
 endif()
 
+if (APPLE AND Python_W_EXECUTABLE)
+set(WORKBENCH_PYTHON_EXECUTABLE ${Python_W_EXECUTABLE})
+else()
+set(WORKBENCH_PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+endif()
+
 # Wrapper launchers: See mantidworkbench.cpp:main for their function
 if(APPLE OR WIN32)
   # development version
   add_executable(MantidWorkbench mantidworkbench.cpp)
   target_compile_definitions(MantidWorkbench
     PRIVATE
-    -DPYTHON_EXECUTABLE_PATH="${Python_EXECUTABLE}")
+    -DPYTHON_EXECUTABLE_PATH="${WORKBENCH_PYTHON_EXECUTABLE}")
   target_link_libraries(MantidWorkbench PRIVATE Boost::filesystem)
   set_target_properties(MantidWorkbench PROPERTIES
                         VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
@@ -159,6 +165,8 @@ set(TEST_FILES
     workbench/plotting/test/test_globalfiguremanager.py
     workbench/plotting/test/test_propertiesdialog.py
     workbench/plotting/test/test_plothelppages.py
+    workbench/plotting/test/test_toolbar.py
+    workbench/plotting/test/test_utility.py
     workbench/plugins/test/test_editor.py
     workbench/plugins/test/test_exception_handler.py
     workbench/plugins/test/test_jupyterconsole.py

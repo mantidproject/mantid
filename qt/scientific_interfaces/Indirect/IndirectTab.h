@@ -7,7 +7,6 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "ExternalPlotter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -16,6 +15,7 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
+#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
@@ -187,7 +187,8 @@ protected:
   Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
 
-  std::unique_ptr<ExternalPlotter> m_plotter;
+  std::unique_ptr<Widgets::MplCpp::ExternalPlotter> m_plotter;
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 
 private:
   std::string getInterfaceProperty(std::string const &interfaceName, std::string const &propertyName,

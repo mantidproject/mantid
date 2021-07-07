@@ -8,9 +8,16 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Expression.h"
+#include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidAlgorithms/CrossCorrelate.h"
+#include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include "CrossCorrelateTestData.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -18,6 +25,15 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::CountStandardDeviations;
+
+// THIS CODE IS COMPLETELY UNNECESSARY, BUT MAKE THE FUNCTION FACTORY WORK
+class HackyGaussian : public Gaussian {
+public:
+  ~HackyGaussian() override {}
+  std::string name() const override { return "Gaussian"; }
+};
+
+DECLARE_FUNCTION(HackyGaussian)
 
 class CrossCorrelateTest : public CxxTest::TestSuite {
 public:
@@ -75,6 +91,46 @@ public:
     TS_ASSERT_DELTA(outY1[0], -1.0, 1e-6);
   }
 
+  void testMaxDSpaceShiftGaussian() {
+    CrossCorrelate alg;
+    // TODO need a duplicate test for other shape
+    auto inputWS = makeFakeWorkspace3Peaks(PeakShapeEnum::GAUSSIAN);
+    TS_ASSERT(inputWS != nullptr);
+
+    setupAlgorithm(alg, 0.9, 2.3, inputWS, 0.1);
+    const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inputWS);
+
+    int spectraIndex = 0;
+    testSpectra(outWS, spectraIndex++, 0.);
+    // It will be in number of bins where 1 bin is 0.01, so 10 bins is equal to a shift of 0.1
+    testSpectra(outWS, spectraIndex++, 10);
+    // The base values for the other spectra intensity are multiplyied by 1.1, in the next spectra,
+    // the base values range from 1-2, meaning it is effectively adding .1-.2 offset, approx the same result as above
+    testSpectra(outWS, spectraIndex++, 11);
+    testSpectra(outWS, spectraIndex++, 0.);
+    testSpectra(outWS, spectraIndex++, 0.);
+  }
+
+  void testMaxDSpaceShiftB2BExp() {
+    CrossCorrelate alg;
+    // TODO need a duplicate test for other shape
+    auto inputWS = makeFakeWorkspace3Peaks(PeakShapeEnum::B2BEXP);
+    TS_ASSERT(inputWS != nullptr);
+
+    setupAlgorithm(alg, 0.9, 2.3, inputWS, 0.1);
+    const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inputWS);
+
+    int spectraIndex = 0;
+    testSpectra(outWS, spectraIndex++, 0.);
+    // It will be in number of bins where 1 bin is 0.01, so 10 bins is equal to a shift of 0.1
+    testSpectra(outWS, spectraIndex++, 10);
+    // The base values for the other spectra intensity are multiplyied by 1.1, in the next spectra,
+    // the base values range from 1-2, meaning it is effectively adding .1-.2 offset, approx the same result as above
+    testSpectra(outWS, spectraIndex++, 11);
+    testSpectra(outWS, spectraIndex++, 0.);
+    testSpectra(outWS, spectraIndex++, 0.);
+  }
+
   void testInputXLength2() {
     // this throws because at least 3 X values are required
     CrossCorrelate alg;
@@ -118,7 +174,7 @@ private:
     }
 
     // create the workspace
-    const int nHist = 2;
+    const int nHist = 5;
     const MatrixWorkspace_sptr ws = createWorkspace<Workspace2D>(nHist, nBins + 1, nBins);
     ws->getAxis(0)->setUnit("dSpacing");
 
@@ -134,6 +190,47 @@ private:
     return ws;
   }
 
+  const MatrixWorkspace_sptr makeFakeWorkspace3Peaks(const PeakShapeEnum shape) {
+    const double D_MIN{0.9};
+    const double D_MAX{2.3};
+    const double D_DELTA{0.01};
+    const int NUM_BINS = static_cast<int>((D_MAX - D_MIN) / D_DELTA);
+    const int NUM_HIST{5};
+
+    // create the x-axis
+    BinEdges xEdges(NUM_BINS + 1, HistogramData::LinearGenerator(D_MIN, D_DELTA));
+    auto xPoints = HistogramData::Points(xEdges);
+    std::vector<double> xValues(cbegin(xPoints), cend(xPoints));
+
+    // create the uncertainties
+    CountStandardDeviations e1(NUM_BINS, sqrt(3.0)); // arbitrary
+
+    // create workspace to put everything into
+    MatrixWorkspace_sptr ws = createWorkspace<Workspace2D>(NUM_HIST, NUM_BINS + 1, NUM_BINS);
+    ws->getAxis(0)->setUnit("dSpacing");
+
+    // loop over the spectra
+    // which spectra is which is coded in createcompositeB2BExp
+    for (int spectrumIndex = 0; spectrumIndex < NUM_HIST; ++spectrumIndex) {
+      auto compositefunction = CrossCorrelateTestData::createCompositeB2BExp(shape, spectrumIndex);
+      ws->setBinEdges(spectrumIndex, xEdges);
+      ws->setCounts(spectrumIndex, CrossCorrelateTestData::evaluateFunction(compositefunction, xValues));
+    }
+    ws->rebuildSpectraMapping();
+
+    return ws;
+  }
+
+  void setupAlgorithmPropsBasic(CrossCorrelate &alg, const double xmin, const double xmax, const size_t numSpectra) {
+    // set up the algorithm
+    if (!alg.isInitialized())
+      alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("WorkspaceIndexMax", static_cast<int>(numSpectra - 1));
+    alg.setProperty("XMin", xmin);
+    alg.setProperty("XMax", xmax);
+  }
   // Initialise the algorithm and set the properties. Creates a fake workspace
   // for the input and returns it.
   MatrixWorkspace_const_sptr setupAlgorithm(CrossCorrelate &alg, const double xmin, const double xmax) {
@@ -141,19 +238,20 @@ private:
     // create the workspace
     const MatrixWorkspace_sptr inWS = makeFakeWorkspace();
 
-    // set up the algorithm
-    if (!alg.isInitialized())
-      alg.initialize();
-    alg.setChild(true);
-    alg.setProperty("InputWorkspace", inWS);
-    alg.setProperty("OutputWorkspace", "outWS");
-    alg.setProperty("ReferenceSpectra", 0);
-    alg.setProperty("WorkspaceIndexMin", 0);
-    alg.setProperty("WorkspaceIndexMax", 1);
-    alg.setProperty("XMin", xmin);
-    alg.setProperty("XMax", xmax);
+    setupAlgorithm(alg, xmin, xmax, inWS);
 
     return inWS;
+  }
+
+  // Initialise the algorithm and set the properties, using the provided ws as input
+  void setupAlgorithm(CrossCorrelate &alg, const double xmin, const double xmax, const MatrixWorkspace_sptr inWS,
+                      const double maxDSpaceShift = 0.) {
+
+    // create the workspace
+    setupAlgorithmPropsBasic(alg, xmin, xmax, inWS->getNumberHistograms());
+    alg.setProperty("InputWorkspace", inWS);
+    if (maxDSpaceShift > 0.)
+      alg.setProperty("MaxDspaceShift", maxDSpaceShift);
   }
 
   // Run the algorithm and do some basic checks. Returns the output workspace.
@@ -173,4 +271,17 @@ private:
   // Run the algorithm with invalid input and check that it throws a runtime
   // error
   void runAlgorithmThrows(CrossCorrelate &alg) { TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &); }
+
+  // test output workspace for a given spectra index
+  void testSpectra(const MatrixWorkspace_const_sptr outWS, const int spectraIndex, const double positionVal) {
+    std::cout << "Checking index " << spectraIndex << std::endl;
+    // test that the expected peak of crossCorrelateTestData is correct
+    // but also check for the expected/not expected existence of other peaks
+    const auto yVector = outWS->y(spectraIndex);
+    const auto xVector = outWS->x(spectraIndex);
+    const auto peakIter = std::max_element(yVector.cbegin(), yVector.cend());
+    const auto peakIndex = static_cast<size_t>(peakIter - yVector.cbegin());
+
+    TS_ASSERT_DELTA(xVector[peakIndex], positionVal, 1e-6);
+  }
 };

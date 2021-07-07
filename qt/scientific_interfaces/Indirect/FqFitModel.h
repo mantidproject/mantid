@@ -23,12 +23,9 @@ class MANTIDQT_INDIRECT_DLL FqFitModel : public IndirectFittingModel {
 public:
   FqFitModel();
   using IndirectFittingModel::addWorkspace;
-
+  void addWorkspace(const std::string &workspaceName, const int &spectrum_index);
   void addWorkspace(const std::string &workspaceName) override;
   void removeWorkspace(TableDatasetIndex index) override;
-
-  bool zeroWidths(TableDatasetIndex dataIndex) const;
-  bool zeroEISF(TableDatasetIndex dataIndex) const;
 
   bool isMultiFit() const override;
 
@@ -39,6 +36,7 @@ public:
   boost::optional<std::size_t> getEISFSpectrum(std::size_t eisfIndex, TableDatasetIndex dataIndex) const;
   void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex, bool single = true);
   void setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataIndex, bool single = true);
+  FqFitParameters createFqFitParameters(Mantid::API::MatrixWorkspace *workspace);
 
 private:
   bool allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
@@ -48,6 +46,7 @@ private:
   std::string getResultXAxisUnit() const override;
   std::string getResultLogName() const override;
   std::unordered_map<std::string, FqFitParameters> m_fqFitParameters;
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 
 } // namespace IDA

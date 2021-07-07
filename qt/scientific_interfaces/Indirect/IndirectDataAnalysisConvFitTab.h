@@ -8,7 +8,6 @@
 
 #include "ConvFitModel.h"
 #include "IndirectFitAnalysisTab.h"
-#include "IndirectSpectrumSelectionPresenter.h"
 #include "ParameterEstimation.h"
 
 #include "MantidAPI/CompositeFunction.h"

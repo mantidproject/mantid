@@ -29,6 +29,8 @@ class FigureWindow(QMainWindow, ObservingView):
     visibility_changed = Signal()
     show_context_menu = Signal()
     close_signal = Signal()
+    plot_updated = Signal()
+    resized = Signal()
 
     def __init__(self, canvas, parent=None, window_flags=None):
         if window_flags is not None:
@@ -105,6 +107,14 @@ class FigureWindow(QMainWindow, ObservingView):
 
         self._plot_on_here(workspace_names, ax)
         QMainWindow.dropEvent(self, event)
+        self.plot_updated.emit()
+
+    def resizeEvent(self, event):
+        """
+        Override QMainWindow::resizeEvent().
+        """
+        super().resizeEvent(event)
+        self.resized.emit()
 
     # private api
 

@@ -12,14 +12,12 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/Logger.h"
 
-namespace {
-Mantid::Kernel::Logger logger("FqFitModel");
-}
-
 using namespace Mantid::API;
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
+
+Mantid::Kernel::Logger logger("FqFitModel");
 
 struct ContainsOneOrMore {
   explicit ContainsOneOrMore(std::vector<std::string> &&substrings) : m_substrings(std::move(substrings)) {}
@@ -74,18 +72,6 @@ std::string getHWHMName(const std::string &resultName) {
   if (position != std::string::npos)
     return resultName.substr(0, position) + "_HWHM" + resultName.substr(position + 5, resultName.size());
   return resultName + "_HWHM";
-}
-
-FqFitParameters createFqFitParameters(MatrixWorkspace *workspace) {
-  auto foundWidths = findAxisLabels(workspace, ContainsOneOrMore({".Width", ".FWHM"}));
-  auto foundEISF = findAxisLabels(workspace, ContainsOneOrMore({".EISF"}));
-
-  FqFitParameters parameters;
-  parameters.widths = foundWidths.first;
-  parameters.widthSpectra = foundWidths.second;
-  parameters.eisf = foundEISF.first;
-  parameters.eisfSpectra = foundEISF.second;
-  return parameters;
 }
 
 void deleteTemporaryWorkspaces(std::vector<std::string> const &workspaceNames) {
@@ -204,10 +190,26 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-FqFitModel::FqFitModel() { m_fitType = FQFIT_STRING; }
+FqFitModel::FqFitModel() : m_adsInstance(Mantid::API::AnalysisDataService::Instance()) { m_fitType = FQFIT_STRING; }
+
+void FqFitModel::addWorkspace(const std::string &workspaceName, const int &spectrum_index) {
+  auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
+  const auto name = getHWHMName(workspace->getName());
+  const auto parameters = addFqFitParameters(workspace.get(), name);
+  const auto spectrum = getSpectrum(parameters);
+  const std::vector<std::size_t> single_spectra = {parameters.widthSpectra[spectrum_index]};
+  if (!spectrum)
+    throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
+
+  if (workspace->y(0).size() == 1)
+    throw std::invalid_argument("Workspace contains only one data point.");
+
+  const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, single_spectra);
+  IndirectFittingModel::addWorkspace(hwhmWorkspace->getName(), FunctionModelSpectra(""));
+}
 
 void FqFitModel::addWorkspace(const std::string &workspaceName) {
-  auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+  auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addFqFitParameters(workspace.get(), name);
   const auto spectrum = getSpectrum(parameters);
@@ -234,9 +236,19 @@ FqFitParameters &FqFitModel::addFqFitParameters(MatrixWorkspace *workspace, cons
   const auto parameters = createFqFitParameters(workspace);
   if (parameters.widths.empty() && parameters.eisf.empty())
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
-  if (parameters.widths.empty())
-    throw std::invalid_argument("Workspace contains EISF spectra, but no Width spectra.");
   return m_fqFitParameters[hwhmName] = std::move(parameters);
+}
+
+FqFitParameters FqFitModel::createFqFitParameters(MatrixWorkspace *workspace) {
+  auto foundWidths = findAxisLabels(workspace, ContainsOneOrMore({".Width", ".FWHM"}));
+  auto foundEISF = findAxisLabels(workspace, ContainsOneOrMore({".EISF"}));
+
+  FqFitParameters parameters;
+  parameters.widths = foundWidths.first;
+  parameters.widthSpectra = foundWidths.second;
+  parameters.eisf = foundEISF.first;
+  parameters.eisfSpectra = foundEISF.second;
+  return parameters;
 }
 
 std::unordered_map<std::string, FqFitParameters>::const_iterator
@@ -264,7 +276,9 @@ void FqFitModel::setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIn
       auto spectra_vec = std::vector<std::size_t>({widthSpectra[widthIndex]});
       auto spectra = getSpectra(dataIndex);
       for (auto i : spectra) {
-        spectra_vec.push_back(i.value);
+        if ((std::find(spectra_vec.begin(), spectra_vec.end(), i.value) == spectra_vec.end())) {
+          spectra_vec.push_back(i.value);
+        }
       }
       setSpectra(createSpectra(spectra_vec), dataIndex);
     }
@@ -282,27 +296,15 @@ void FqFitModel::setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataInde
              // existing spectra list.
       auto spectra_vec = std::vector<std::size_t>({eisfSpectra[eisfIndex]});
       auto spectra = getSpectra(dataIndex);
-      for (size_t i = 0; i < spectra.size().value; i++) {
-        spectra_vec.push_back(spectra[i].value);
+      for (auto i : spectra) {
+        if ((std::find(spectra_vec.begin(), spectra_vec.end(), i.value) == spectra_vec.end())) {
+          spectra_vec.push_back(i.value);
+        }
       }
       setSpectra(createSpectra(spectra_vec), dataIndex);
     }
   } else
     logger.warning("Invalid EISF index specified.");
-}
-
-bool FqFitModel::zeroWidths(TableDatasetIndex dataIndex) const {
-  const auto parameters = findFqFitParameters(dataIndex);
-  if (parameters != m_fqFitParameters.end())
-    return parameters->second.widths.empty();
-  return true;
-}
-
-bool FqFitModel::zeroEISF(TableDatasetIndex dataIndex) const {
-  const auto parameters = findFqFitParameters(dataIndex);
-  if (parameters != m_fqFitParameters.end())
-    return parameters->second.eisf.empty();
-  return true;
 }
 
 bool FqFitModel::isMultiFit() const {
