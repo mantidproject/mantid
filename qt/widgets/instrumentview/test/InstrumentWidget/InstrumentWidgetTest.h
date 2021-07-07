@@ -244,17 +244,15 @@ private:
     ON_CALL(*displayMock, getGLDisplay()).WillByDefault(Return(glMock));
     ON_CALL(*displayMock, getQtDisplay()).WillByDefault(Return(qtMock));
 
-    auto surfaceMock = std::make_shared<MockProjectionSurface>();
-    EXPECT_CALL(*qtMock, setSurface(_)).Times(1);
-    EXPECT_CALL(*qtMock, qtUpdate()).Times(1);
     EXPECT_CALL(*glMock, setBackgroundColor(_)).Times(1);
 
     const int getSurfaceCalls = m_glEnabled ? 22 : 24;
 
+    auto surfaceMock = std::make_shared<MockProjectionSurface>();
     EXPECT_CALL(*glMock, getSurface()).Times(getSurfaceCalls).WillRepeatedly(Return(surfaceMock));
-    EXPECT_CALL(*glMock, setSurface(_)).Times(1);
     EXPECT_CALL(*glMock, currentBackgroundColor()).Times(1);
 
+    EXPECT_CALL(*displayMock, setSurfaceProxy(_)).Times(1);
     EXPECT_CALL(*displayMock, installEventFilter(NotNull())).Times(1);
 
     InstrumentWidget::Dependencies deps{std::move(displayMock), nullptr, nullptr, std::move(connectMock)};

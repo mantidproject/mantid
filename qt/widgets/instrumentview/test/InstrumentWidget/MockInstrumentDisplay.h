@@ -29,6 +29,16 @@ public:
   MOCK_METHOD(IGLDisplay *, getGLDisplay, (), (const, override));
   MOCK_METHOD(IQtDisplay *, getQtDisplay, (), (const, override));
   MOCK_METHOD(void, installEventFilter, (QObject * obj), (override));
-  MOCK_METHOD(void, setSurface, (ProjectionSurface_sptr), (override));
+  MOCK_METHOD(void, setSurfaceProxy, (ProjectionSurface_sptr));
+
+  void setSurface(ProjectionSurface_sptr surface) override {
+    setSurfaceProxy(surface);
+    m_surface = surface;
+  }
+
+private:
+  // We need to hold onto the sptr, as the calling class expects
+  // this class to manage lifetimes
+  std::shared_ptr<ProjectionSurface> m_surface;
 };
 } // namespace MantidQt::MantidWidgets
