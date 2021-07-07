@@ -31,6 +31,7 @@ public:
 
   virtual void installEventFilter(QObject *obj) = 0;
 
+  virtual ProjectionSurface_sptr getSurface() const = 0;
   virtual void setSurface(ProjectionSurface_sptr surface) = 0;
 };
 } // namespace MantidQt::MantidWidgets

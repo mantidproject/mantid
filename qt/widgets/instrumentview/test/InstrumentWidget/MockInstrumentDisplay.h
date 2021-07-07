@@ -29,6 +29,7 @@ public:
   MOCK_METHOD(IGLDisplay *, getGLDisplay, (), (const, override));
   MOCK_METHOD(IQtDisplay *, getQtDisplay, (), (const, override));
   MOCK_METHOD(void, installEventFilter, (QObject * obj), (override));
+  MOCK_METHOD(ProjectionSurface_sptr, getSurface, (), (const, override));
   MOCK_METHOD(void, setSurfaceProxy, (ProjectionSurface_sptr));
 
   void setSurface(ProjectionSurface_sptr surface) override {

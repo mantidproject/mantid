@@ -31,6 +31,7 @@ public:
 
   void installEventFilter(QObject *obj) override;
 
+  ProjectionSurface_sptr getSurface() const override;
   void setSurface(ProjectionSurface_sptr surface) override;
 
 private:

@@ -47,6 +47,15 @@ void InstrumentDisplay::installEventFilter(QObject *obj) {
   m_qtDisplay->qtInstallEventFilter(obj);
 }
 
+ProjectionSurface_sptr InstrumentDisplay::getSurface() const {
+  if (m_glDisplay) {
+    return m_glDisplay->getSurface();
+  } else if (m_qtDisplay) {
+    return m_qtDisplay->getSurface();
+  }
+  return ProjectionSurface_sptr();
+}
+
 void InstrumentDisplay::setSurface(ProjectionSurface_sptr surface) {
 
   if (m_glDisplay) {

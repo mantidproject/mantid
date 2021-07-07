@@ -51,6 +51,16 @@ public:
     InstrumentDisplay fixture(nullptr, std::move(glMock), std::move(qtMock), std::move(layoutMock));
   }
 
+  void test_get_surface() {
+    auto glMock = makeGLDisplay();
+    auto qtMock = makeQtDisplay();
+
+    EXPECT_CALL(*glMock, getSurface()).Times(1);
+
+    auto inst = makeInstDisplay(std::move(glMock), std::move(qtMock));
+    inst.getSurface();
+  }
+
   void test_set_surface() {
     auto glMock = makeGLDisplay();
     auto qtMock = makeQtDisplay();
@@ -64,6 +74,22 @@ public:
 
     auto inst = makeInstDisplay(std::move(glMock), std::move(qtMock));
     inst.setSurface(projection);
+  }
+
+  void test_get_set_surface_returns_same() {
+    auto glMock = makeGLDisplay();
+    auto qtMock = makeQtDisplay();
+
+    EXPECT_CALL(*glMock, setSurface(_)).Times(1);
+    EXPECT_CALL(*glMock, qtUpdate()).Times(1);
+    EXPECT_CALL(*qtMock, setSurface(_)).Times(1);
+    EXPECT_CALL(*qtMock, qtUpdate()).Times(1);
+
+    auto projection = std::make_shared<MockProjectionSurface>();
+    EXPECT_CALL(*glMock, getSurface()).Times(1).WillOnce(Return(projection));
+    auto inst = makeInstDisplay(std::move(glMock), std::move(qtMock));
+    inst.setSurface(projection);
+    TS_ASSERT_EQUALS(projection, inst.getSurface());
   }
 
 private:
