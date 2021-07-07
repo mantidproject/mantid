@@ -38,6 +38,11 @@ class DirectILLAutoProcess(PythonAlgorithm):
     mask_ws = None
     ebinning_params = None  # energy binning
     output = None
+    vanadium = None
+    vanadium_epp = None
+    vanadium_diagnostics = None
+    vanadium_integral = None
+    empty = None
     flat_bkg_scaling = None
     flat_background = None
 
@@ -124,6 +129,8 @@ class DirectILLAutoProcess(PythonAlgorithm):
             self.masking = True
         self.flat_bkg_scaling = self.getProperty('FlatBkgScaling')
         self.ebinning_params = self.getProperty('EnergyBinning')
+        self.empty = self.getPropertyValue('EmptyContainerWorkspace')
+        self.vanadium = self.getPropertyValue('VanadiumWorkspace')
 
     def PyInit(self):
 
@@ -323,7 +330,8 @@ class DirectILLAutoProcess(PythonAlgorithm):
             if self.process in ['Empty', 'Cadmium']:
                 pass
             elif self.process == 'Vanadium':
-                pass
+                ws_sofq, ws_softw, ws_diag, ws_integral = self._process_vanadium(ws)
+                output_samples.extend([ws_sofq, ws_softw, ws_diag, ws_integral])
             elif self.process == 'Sample':
                 ws = self._process_sample(ws)
                 output_samples.append(ws)
@@ -338,7 +346,14 @@ class DirectILLAutoProcess(PythonAlgorithm):
         if not self.getProperty('FlatBackground').isDefault:
             kwargs['FlatBkgWorkspace'] = self.getPropertyValue('FlatBackground')
             kwargs['FlatBkgScaling'] = self.flat_bkg_scaling
+        if vanadium:
+            kwargs['EPPCreationMethod'] = 'Calculate EPP'
+            kwargs['ElasticChannel'] = 'Elastic Channel AUTO'
+            kwargs['FlatBkg'] = 'Flat Bkg ON'
         if ws not in mtd:
+            if vanadium:
+                self.vanadium_epp = "{}_epp".format(ws)
+                kwargs['OutputEPPWorkspace'] = self.vanadium_epp
             DirectILLCollectData(Run=sample, OutputWorkspace=ws,
                                  IncidentEnergyCalibration=self.incident_energy_calibration,
                                  IncidentEnergyWorkspace=self.incident_energy_ws,
@@ -397,6 +412,45 @@ class DirectILLAutoProcess(PythonAlgorithm):
 
     def _subtract_background(self, ws):
         pass
+
+    def _process_vanadium(self, ws):
+        """Processes vanadium and creates workspaces with diagnostics, integrated vanadium, and reduced vanadium."""
+        to_remove = [ws]
+        numor = ws[:ws.rfind('_')]
+        vanadium_diagnostics = '{}_diag'.format(numor)
+        DirectILLDiagnostics(InputWorkspace=ws,
+                             OutputWorkspace=vanadium_diagnostics,
+                             BeamStopDiagnostics="Beam Stop Diagnostics OFF")
+
+        if self.instrument == 'IN5':
+            van_flat_ws = "{}_flat".format(numor)
+            to_remove.append(van_flat_ws)
+            DirectILLTubeBackground(InputWorkspace=ws,
+                                    DiagnosticsWorkspace=vanadium_diagnostics,
+                                    EPPWorkspace=self.vanadium_epp,
+                                    OutputWorkspace=van_flat_ws)
+            Minus(LHSWorkspace=ws, RHSWorkspace=van_flat_ws,
+                  OutputWorkspace=ws, EnableLogging=False)
+
+        if self.empty:
+            self._subtract_background(ws)
+
+        vanadium_integral = '{}_integral'.format(numor)
+        DirectILLIntegrateVanadium(InputWorkspace=ws,
+                                   OutputWorkspace=vanadium_integral,
+                                   EPPWorkspace=self.vanadium_epp)
+
+        sofq_output = 'SofQ_{}'.format(numor)
+        softw_output = 'SofTW_{}'.format(numor)
+        DirectILLReduction(InputWorkspace=ws,
+                           OutputWorkspace=sofq_output,
+                           OutputSofThetaEnergyWorkspace=softw_output,
+                           IntegratedVanadiumWorkspace=vanadium_integral,
+                           DiagnosticsWorkspace=vanadium_diagnostics)
+
+        if self.getProperty('ClearCache').value:
+            DeleteWorkspaces(WorkspaceList=to_remove)
+        return sofq_output, softw_output, vanadium_diagnostics, vanadium_integral
 
     def _process_sample(self, ws):
         return ws
