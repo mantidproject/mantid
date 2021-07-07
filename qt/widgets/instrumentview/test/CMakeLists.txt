@@ -26,7 +26,6 @@ mtd_add_qt_tests(
   INCLUDE_DIRS
     ${MOCK_HEADER_DIRS}
 
-    ../inc/MantidQtWidgets/InstrumentView
     ../../../../Framework/DataObjects/inc
     ../../../../Framework/TestHelpers/inc
   TEST_HELPER_SRCS

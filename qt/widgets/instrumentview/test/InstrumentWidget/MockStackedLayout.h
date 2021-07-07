@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IStackedLayout.h"
+#include "MantidQtWidgets/InstrumentView/IStackedLayout.h"
 
 #include <gmock/gmock.h>
 
