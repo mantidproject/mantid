@@ -9,11 +9,20 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
+//#include "MantidAlgorithms/FilterBadPulses.h"
+//#include "MantidCrystal/FindUBUsingFFT.h"
+//#include "MantidCrystal/IndexPeaks.h"
+//#include "MantidCrystal/SelectCellOfType.h"
+//#include "MantidCrystal/OptimizeLatticeForCellType.h"
+#include "MantidDataHandling/Load.h"
+#include "MantidDataHandling/LoadIsawDetCal.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidMDAlgorithms/ConvertToMD.h"
+#include "MantidMDAlgorithms/FindPeaksMD.h"
 #include "MantidMDAlgorithms/IntegrateEllipsoids.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/tuple/tuple.hpp>
@@ -22,11 +31,13 @@
 
 using namespace Mantid;
 using namespace Mantid::API;
+// using namespace Mantid::Crystal;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using Mantid::Geometry::IPeak_uptr;
 using namespace Mantid::DataObjects;
+using namespace Mantid::DataHandling;
 using Mantid::DataObjects::Peak;
 using Mantid::DataObjects::Peak_uptr;
 using Mantid::Types::Event::TofEvent;
@@ -398,6 +409,124 @@ public:
     TSM_ASSERT_DELTA("Wrong intensity for peak 3", integratedPeaksWS->getPeak(3).getIntensity(), 16., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4", integratedPeaksWS->getPeak(4).getIntensity(), 12., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5", integratedPeaksWS->getPeak(5).getIntensity(), 13., 0.01);
+  }
+
+  void test_execution_background_shell() {
+    Load loadalg;
+    TS_ASSERT_THROWS_NOTHING(loadalg.initialize());
+    TS_ASSERT_THROWS_NOTHING(loadalg.setProperty("Filename", "TOPAZ_36079.nxs.h5"));
+    TS_ASSERT_THROWS_NOTHING(loadalg.setProperty("FilterByTofMin", 500.0));
+    TS_ASSERT_THROWS_NOTHING(loadalg.setProperty("FilterByTofMax", 16666.0));
+    TS_ASSERT_THROWS_NOTHING(loadalg.setProperty("OutputWorkspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(loadalg.execute());
+    /*
+        FilterBadPulses filteralg;
+        TS_ASSERT_THROWS_NOTHING(filteralg.initialize());
+        TS_ASSERT_THROWS_NOTHING(filteralg.setProperty("InputWorkspace", "TOPAZ_36079_event"));
+        TS_ASSERT_THROWS_NOTHING(filteralg.setProperty("OutputWorkspace", "TOPAZ_36079_event"));
+        TS_ASSERT_THROWS_NOTHING(filteralg.setProperty("LowerCutoff", 25));
+        TS_ASSERT_THROWS_NOTHING(filteralg.execute());
+    */
+    LoadIsawDetCal loadcalalg;
+    TS_ASSERT_THROWS_NOTHING(loadcalalg.initialize());
+    TS_ASSERT_THROWS_NOTHING(loadcalalg.setProperty("Filename", "TOPAZ_2020A.DetCal"));
+    TS_ASSERT_THROWS_NOTHING(loadcalalg.setProperty("InputWorkspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(loadcalalg.execute());
+
+    ConvertToMD convertalg;
+    TS_ASSERT_THROWS_NOTHING(convertalg.initialize());
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("InputWorkspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("OutputWorkspace", "TOPAZ_36079_md"));
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("QDimensions", "Q3D"));
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("dEAnalysisMode", "Elastic"));
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("LorentzCorrection", true));
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("MinValues", {-12, -12, -12}));
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("MaxValues", {12, 12, 12}));
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("SplitInto", 2));
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("SplitThreshold", 50));
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("MaxRecursionDepth", 13));
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("MinRecursionDepth", 7));
+    TS_ASSERT_THROWS_NOTHING(convertalg.execute());
+
+    FindPeaksMD peaksalg;
+    TS_ASSERT_THROWS_NOTHING(peaksalg.initialize());
+    TS_ASSERT_THROWS_NOTHING(peaksalg.setProperty("InputWorkspace", "TOPAZ_36079_md"));
+    TS_ASSERT_THROWS_NOTHING(peaksalg.setProperty("OutputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(peaksalg.setProperty("PeakDistanceThreshold", 0.12025531914893617));
+    TS_ASSERT_THROWS_NOTHING(peaksalg.setProperty("MaxPeaks", 1200));
+    TS_ASSERT_THROWS_NOTHING(peaksalg.setProperty("DensityThresholdFactor", 100));
+    TS_ASSERT_THROWS_NOTHING(peaksalg.setProperty("EdgePixels", 19));
+    TS_ASSERT_THROWS_NOTHING(peaksalg.execute());
+
+    // TODO: the following algorithms are not available from within MDAlgorithms:
+    /*
+    FindUBUsingFFT ubalg;
+    TS_ASSERT_THROWS_NOTHING(ubalg.initialize());
+    TS_ASSERT_THROWS_NOTHING(ubalg.setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(ubalg.setProperty("MinD", 3));
+    TS_ASSERT_THROWS_NOTHING(ubalg.setProperty("MaxD", 7));
+    TS_ASSERT_THROWS_NOTHING(ubalg.setProperty("Tolerance", 0.12));
+    TS_ASSERT_THROWS_NOTHING(ubalg.execute());
+
+    IndexPeaks indexalg;
+    TS_ASSERT_THROWS_NOTHING(indexalg.initialize());
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("Tolerance", 0.12));
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("RoundHKLs", false));
+    TS_ASSERT_THROWS_NOTHING(indexalg.execute());
+
+    SelectCellOfType selectalg;
+    TS_ASSERT_THROWS_NOTHING(selectalg.initialize());
+    TS_ASSERT_THROWS_NOTHING(selectalg.setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(selectalg.setProperty("CellType", "Hexagonal"));
+    TS_ASSERT_THROWS_NOTHING(selectalg.setProperty("Apply", true));
+    TS_ASSERT_THROWS_NOTHING(selectalg.setProperty("TransformationMatrix", {0,1,0,0,0,1,1,0,0}));
+    TS_ASSERT_THROWS_NOTHING(selectalg.execute());
+
+    OptimizeLatticeForCellType optalg;
+    TS_ASSERT_THROWS_NOTHING(optalg.initialize());
+    TS_ASSERT_THROWS_NOTHING(optalg.setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(optalg.setProperty("CellType", "Hexagonal"));
+    TS_ASSERT_THROWS_NOTHING(optalg.setProperty("Apply", true));
+    TS_ASSERT_THROWS_NOTHING(optalg.setProperty("Tolerance", 0.06));
+    TS_ASSERT_THROWS_NOTHING(optalg.setProperty("EdgePixels", 19));
+    TS_ASSERT_THROWS_NOTHING(optalg.execute());
+
+    TS_ASSERT_THROWS_NOTHING(indexalg.initialize());
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("Tolerance", 0.06));
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("ToleranceForSatellite", 0.05));
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("RoundHKLs", false));
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("ModVector1", {0.125, 0.0, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("ModVector2", {0.0, 0.125, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("ModVector3", {-0.125, 0.125, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("MaxOrder", 1));
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("CrossTerms", false));
+    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("SaveModulationInfo", true));
+    TS_ASSERT_THROWS_NOTHING(indexalg.execute());
+    */
+
+    // integrate the data now with satellite background options
+    IntegrateEllipsoids alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "TOPAZ_36079_peaks_integrated"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.085));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.086));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CutoffIsigI", 5));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseOnePercentBackgroundCorrection", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteRegionRadius", 0.08));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatellitePeakSize", 0.085));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteBackgroundInnerSize", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteBackgroundOuterSize", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
+
+    // TODO: add integrated peak checks
   }
 };
 
