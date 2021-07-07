@@ -287,7 +287,7 @@ std::map<std::string, std::string> IntegrateEllipsoids::validateInputs() {
     if (satellite_back_outer_radius > satellite_radius) {
       issues["SpecifySize"] = "SatelliteBackgroundOuterSize must be less than or equal to the SatelliteRegionRadius";
     }
-    if (satellite_back_inner_radius >= satellite_back_outer_radius) {
+    if (satellite_back_inner_radius > satellite_back_outer_radius) {
       issues["SpecifySize"] = "SatelliteBackgroundInnerSize must be less than SatelliteBackgroundOuterSize";
     }
     if (satellite_peak_radius > satellite_back_inner_radius) {
