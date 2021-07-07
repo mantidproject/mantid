@@ -55,7 +55,7 @@ template <int Class> struct IndexType {
 using FitDomainIndex = IndexType<0>;
 // Used to index spectra in workspaces
 using WorkspaceIndex = IndexType<1>;
-// Used to index data by workspace
+// Used to index workspaces within lists of workspaces
 using WorkspaceID = IndexType<2>;
 
 /** A class which wraps a vector so that you supply not only the value

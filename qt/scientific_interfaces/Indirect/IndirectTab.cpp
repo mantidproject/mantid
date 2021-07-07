@@ -34,7 +34,6 @@ using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectTab");
-auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
 
 double roundToPrecision(double value, double precision) { return value - std::remainder(value, precision); }
 

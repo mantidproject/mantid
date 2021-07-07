@@ -49,6 +49,7 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
   auto templateBrowser = new SingleFunctionTemplateBrowser(
       widthFits, std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
+  m_plotPresenter->setXBounds({0.0, 2.0});
   setFitDataPresenter(
       std::make_unique<FqFitDataPresenter>(m_FqFittingModel, m_uiForm->dockArea->m_fitDataView, templateBrowser));
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);

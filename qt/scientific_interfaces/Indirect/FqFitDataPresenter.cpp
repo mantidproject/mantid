@@ -10,10 +10,6 @@
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
-namespace {
-auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
-}
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {

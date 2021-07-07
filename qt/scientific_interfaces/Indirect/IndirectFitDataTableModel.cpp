@@ -16,8 +16,6 @@ using namespace MantidQt::MantidWidgets;
 
 namespace {
 
-auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
-
 bool equivalentWorkspaces(const Mantid::API::MatrixWorkspace_const_sptr &lhs,
                           const Mantid::API::MatrixWorkspace_const_sptr &rhs) {
   if (!lhs || !rhs)
