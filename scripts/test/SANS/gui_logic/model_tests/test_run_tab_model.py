@@ -10,7 +10,7 @@ from sans.gui_logic.models.POD.save_options import SaveOptions
 from sans.gui_logic.models.run_tab_model import RunTabModel
 
 
-class RunTabModelTest(unittest.TestCase):
+class TestRunTabModel(unittest.TestCase):
     def setUp(self) -> None:
         self.model = RunTabModel()
 
