@@ -104,7 +104,8 @@ void FitScriptGeneratorModel::removeDomain(FitDomainIndex domainIndex) {
   if (domainIndex.value > m_fitDomains.size())
     return;
 
-  if (auto const removeIter = m_fitDomains.begin() + domainIndex.value; removeIter != m_fitDomains.cend()) {
+  auto const removeIter = m_fitDomains.begin() + domainIndex.value;
+  if (removeIter != m_fitDomains.cend()) {
     m_fitDomains.erase(removeIter);
     checkGlobalTies();
   }
