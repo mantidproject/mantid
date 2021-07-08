@@ -58,6 +58,19 @@ class SuperplotPresenter:
         self._update_spectrum_slider()
         self._update_hold_button()
 
+    def set_bin_mode(self, state):
+        """
+        Set the plot mode.
+
+        Args:
+            state (bool): if true, bin mode is set, if false, spectrum mode
+        """
+        if state:
+            self._view.set_mode(self.BIN_MODE_TEXT)
+        else:
+            self._view.set_mode(self.SPECTRUM_MODE_TEXT)
+        self._update_plot()
+
     def enable_error_bars(self, state):
         """
         Enable/disable error bars in plot.
