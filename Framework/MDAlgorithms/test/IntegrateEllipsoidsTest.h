@@ -419,14 +419,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(loadalg.setProperty("FilterByTofMax", 16666.0));
     TS_ASSERT_THROWS_NOTHING(loadalg.setProperty("OutputWorkspace", "TOPAZ_36079_event"));
     TS_ASSERT_THROWS_NOTHING(loadalg.execute());
-    /*
-        FilterBadPulses filteralg;
-        TS_ASSERT_THROWS_NOTHING(filteralg.initialize());
-        TS_ASSERT_THROWS_NOTHING(filteralg.setProperty("InputWorkspace", "TOPAZ_36079_event"));
-        TS_ASSERT_THROWS_NOTHING(filteralg.setProperty("OutputWorkspace", "TOPAZ_36079_event"));
-        TS_ASSERT_THROWS_NOTHING(filteralg.setProperty("LowerCutoff", 25));
-        TS_ASSERT_THROWS_NOTHING(filteralg.execute());
-    */
+
+    auto filteralg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("FilterBadPulses");
+    TS_ASSERT_THROWS_NOTHING(filteralg->initialize());
+    TS_ASSERT_THROWS_NOTHING(filteralg->setProperty("InputWorkspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(filteralg->setProperty("OutputWorkspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(filteralg->setProperty("LowerCutoff", 25));
+    TS_ASSERT_THROWS_NOTHING(filteralg->execute());
+
     LoadIsawDetCal loadcalalg;
     TS_ASSERT_THROWS_NOTHING(loadcalalg.initialize());
     TS_ASSERT_THROWS_NOTHING(loadcalalg.setProperty("Filename", "TOPAZ_2020A.DetCal"));
@@ -440,8 +440,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("QDimensions", "Q3D"));
     TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("dEAnalysisMode", "Elastic"));
     TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("LorentzCorrection", true));
-    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("MinValues", {-12, -12, -12}));
-    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("MaxValues", {12, 12, 12}));
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("MinValues", std::vector<double>{-12.0, -12.0, -12.0}));
+    TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("MaxValues", std::vector<double>{12.0, 12.0, 12.0}));
     TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("SplitInto", 2));
     TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("SplitThreshold", 50));
     TS_ASSERT_THROWS_NOTHING(convertalg.setProperty("MaxRecursionDepth", 13));
@@ -458,53 +458,51 @@ public:
     TS_ASSERT_THROWS_NOTHING(peaksalg.setProperty("EdgePixels", 19));
     TS_ASSERT_THROWS_NOTHING(peaksalg.execute());
 
-    // TODO: the following algorithms are not available from within MDAlgorithms:
-    /*
-    FindUBUsingFFT ubalg;
-    TS_ASSERT_THROWS_NOTHING(ubalg.initialize());
-    TS_ASSERT_THROWS_NOTHING(ubalg.setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(ubalg.setProperty("MinD", 3));
-    TS_ASSERT_THROWS_NOTHING(ubalg.setProperty("MaxD", 7));
-    TS_ASSERT_THROWS_NOTHING(ubalg.setProperty("Tolerance", 0.12));
-    TS_ASSERT_THROWS_NOTHING(ubalg.execute());
+    auto ubalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("FindUBUsingFFT");
+    TS_ASSERT_THROWS_NOTHING(ubalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(ubalg->setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(ubalg->setProperty("MinD", 3));
+    TS_ASSERT_THROWS_NOTHING(ubalg->setProperty("MaxD", 7));
+    TS_ASSERT_THROWS_NOTHING(ubalg->setProperty("Tolerance", 0.12));
+    TS_ASSERT_THROWS_NOTHING(ubalg->execute());
 
-    IndexPeaks indexalg;
-    TS_ASSERT_THROWS_NOTHING(indexalg.initialize());
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("Tolerance", 0.12));
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("RoundHKLs", false));
-    TS_ASSERT_THROWS_NOTHING(indexalg.execute());
+    auto indexalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("IndexPeaks");
+    TS_ASSERT_THROWS_NOTHING(indexalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("Tolerance", 0.12));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("RoundHKLs", false));
+    TS_ASSERT_THROWS_NOTHING(indexalg->execute());
 
-    SelectCellOfType selectalg;
-    TS_ASSERT_THROWS_NOTHING(selectalg.initialize());
-    TS_ASSERT_THROWS_NOTHING(selectalg.setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(selectalg.setProperty("CellType", "Hexagonal"));
-    TS_ASSERT_THROWS_NOTHING(selectalg.setProperty("Apply", true));
-    TS_ASSERT_THROWS_NOTHING(selectalg.setProperty("TransformationMatrix", {0,1,0,0,0,1,1,0,0}));
-    TS_ASSERT_THROWS_NOTHING(selectalg.execute());
+    auto selectalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SelectCellOfType");
+    TS_ASSERT_THROWS_NOTHING(selectalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(selectalg->setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(selectalg->setProperty("CellType", "Hexagonal"));
+    TS_ASSERT_THROWS_NOTHING(selectalg->setProperty("Apply", true));
+    TS_ASSERT_THROWS_NOTHING(
+        selectalg->setProperty("TransformationMatrix", std::vector<double>{0, 1, 0, 0, 0, 1, 1, 0, 0}));
+    TS_ASSERT_THROWS_NOTHING(selectalg->execute());
 
-    OptimizeLatticeForCellType optalg;
-    TS_ASSERT_THROWS_NOTHING(optalg.initialize());
-    TS_ASSERT_THROWS_NOTHING(optalg.setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(optalg.setProperty("CellType", "Hexagonal"));
-    TS_ASSERT_THROWS_NOTHING(optalg.setProperty("Apply", true));
-    TS_ASSERT_THROWS_NOTHING(optalg.setProperty("Tolerance", 0.06));
-    TS_ASSERT_THROWS_NOTHING(optalg.setProperty("EdgePixels", 19));
-    TS_ASSERT_THROWS_NOTHING(optalg.execute());
+    auto optalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("OptimizeLatticeForCellType");
+    TS_ASSERT_THROWS_NOTHING(optalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(optalg->setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(optalg->setProperty("CellType", "Hexagonal"));
+    TS_ASSERT_THROWS_NOTHING(optalg->setProperty("Apply", true));
+    TS_ASSERT_THROWS_NOTHING(optalg->setProperty("Tolerance", 0.06));
+    TS_ASSERT_THROWS_NOTHING(optalg->setProperty("EdgePixels", 19));
+    TS_ASSERT_THROWS_NOTHING(optalg->execute());
 
-    TS_ASSERT_THROWS_NOTHING(indexalg.initialize());
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("Tolerance", 0.06));
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("ToleranceForSatellite", 0.05));
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("RoundHKLs", false));
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("ModVector1", {0.125, 0.0, 0.0}));
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("ModVector2", {0.0, 0.125, 0.0}));
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("ModVector3", {-0.125, 0.125, 0.0}));
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("MaxOrder", 1));
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("CrossTerms", false));
-    TS_ASSERT_THROWS_NOTHING(indexalg.setProperty("SaveModulationInfo", true));
-    TS_ASSERT_THROWS_NOTHING(indexalg.execute());
-    */
+    TS_ASSERT_THROWS_NOTHING(indexalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("Tolerance", 0.06));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ToleranceForSatellite", 0.05));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("RoundHKLs", false));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector1", std::vector<double>{0.125, 0.0, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector2", std::vector<double>{0.0, 0.125, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector3", std::vector<double>{-0.125, 0.125, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("MaxOrder", 1));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("CrossTerms", false));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("SaveModulationInfo", true));
+    TS_ASSERT_THROWS_NOTHING(indexalg->execute());
 
     // integrate the data now with satellite background options
     IntegrateEllipsoids alg;
