@@ -169,16 +169,16 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
             filters.append(filter)
         filters = ';;'.join(filters)
 
-        fname, filter = QFileDialog.getSaveFileName(
+        filename, filter = QFileDialog.getSaveFileName(
             self.canvas.parent(), "Choose a filename to save to", start,
             filters, selectedFilter)
-        if fname:
+        if filename:
             # Save dir for next time, unless empty str (i.e., use cwd).
             if startpath != "":
                 matplotlib.rcParams['savefig.directory'] = (
-                    os.path.dirname(fname))
+                    os.path.dirname(filename))
             try:
-                self.canvas.figure.savefig(fname)
+                self.canvas.figure.savefig(filename)
             except Exception as e:
                 QMessageBox.critical(
                     self, "Error saving file", str(e),
