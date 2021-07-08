@@ -5,6 +5,15 @@ from mantid.simpleapi import (FindGlobalBMatrix, AnalysisDataService, SetGoniome
 import numpy as np
 from FindGoniometerFromUB import getR
 
+
+def add_peaksHKL(ws_list, Hs, Ks, L):
+    for h in Hs:
+        for k in Ks:
+            for peaks in ws_list:
+                pk = peaks.createPeakHKL([h, k, L])
+                peaks.addPeak(pk)
+
+
 class FindGlobalBMatrixTest(unittest.TestCase):
 
     def setUp(self):
@@ -25,12 +34,7 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         UB = np.diag([1.0/4.2, 0.25, 0.1])  # alatt = [4.2, 4, 10]
         SetUB(peaks2, UB=UB)
         # Add some peaks
-        for h in range(0, 3):
-            for k in range(0, 3):
-                pk = peaks1.createPeakHKL([h, k, 4])
-                peaks1.addPeak(pk)
-                pk = peaks2.createPeakHKL([h, k, 4])
-                peaks2.addPeak(pk)
+        add_peaksHKL([peaks1, peaks2], range(0, 3), range(0, 3), 4)
 
         FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89,
                           Tolerance=0.15)
@@ -71,10 +75,7 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         UB = np.diag([0.25, 0.25, 0.1])
         SetUB(peaks1, UB=UB)
         # Add some peaks
-        for h in range(0, 3):
-            for k in range(0, 3):
-                pk = peaks1.createPeakHKL([h, k, 4])
-                peaks1.addPeak(pk)
+        add_peaksHKL([peaks1], range(0, 3), range(0, 3), 4)
 
         alg = create_algorithm('FindGlobalBMatrix', PeakWorkspaces=[peaks1],
                                a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15)
@@ -86,10 +87,8 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks5")
         UB = np.diag([0.25, 0.25, 0.1])
         SetUB(peaks1, UB=UB)
-        # Add some peaks
-        for h in range(0, 5):
-            pk = peaks1.createPeakHKL([h, 0, 4])
-            peaks1.addPeak(pk)
+        # Add 5 peaks
+        add_peaksHKL([peaks1], range(0, 5), [0], 4)
         peaks2 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks6")
 
         alg = create_algorithm('FindGlobalBMatrix', PeakWorkspaces=[peaks1, peaks2],
@@ -104,10 +103,7 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         UB = np.diag([0.2, 0.25, 0.1])
         SetUB(peaks1, UB=UB)
         # Add some peaks
-        for h in range(0, 3):
-            for k in range(0, 3):
-                pk = peaks1.createPeakHKL([h, k, 4])
-                peaks1.addPeak(pk)
+        add_peaksHKL([peaks1], range(0, 3), range(0, 3), 4)
         # Clone ws and transform
         peaks2 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks8")
         peaks2.removePeak(0)  # peaks1 will have most peaks indexed so will used as reference

@@ -145,17 +145,19 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         for iws in iws_unindexed[:]:
             if iws in iws_with_valid_UB:
                 self.make_UB_consistent(ws_list[iref], ws_list[iws])
+                foundUB = True  # already know npks >= _MIN_NUM_INDEXED_PEAKS
             else:
                 # copy orientation from sample so as to ensure consistency of indexing
                 self.child_CopySample(InputWorkspace=ws_list[iref], OutputWorkspace=ws_list[iws])
                 nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[iws], RoundHKLs=True)
                 if nindexed < _MIN_NUM_INDEXED_PEAKS:
-                    # if gonio matrix is inaccurate we have to find the UB from scratch and transform to preserve indexing
+                    # if gonio matrix is inaccurate we have to find the UB from scratch and transform to correct HKL
                     self.child_FindUBUsingLatticeParameters(PeaksWorkspace=ws_list[iws], a=a, b=b, c=c,
                                                             alpha=alpha, beta=beta, gamma=gamma, FixParameters=False)
                     self.make_UB_consistent(self, ws_list[iref], ws_list[iws])
-            nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[iws], RoundHKLs=True)
-            if nindexed >= _MIN_NUM_INDEXED_PEAKS:
+                    nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[iws], RoundHKLs=True)
+                    foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
+            if foundUB:
                 iws_unindexed.remove(iws)
 
         # remove unindexed runs from workspaces
