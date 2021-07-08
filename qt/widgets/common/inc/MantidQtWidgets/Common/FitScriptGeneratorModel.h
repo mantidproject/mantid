@@ -117,7 +117,7 @@ public:
 
   [[nodiscard]] inline std::size_t numberOfDomains() const noexcept override { return m_fitDomains.size(); }
 
-  std::tuple<bool, std::string> isValid() const override;
+  std::tuple<bool, std::string> isValid(std::string const &outputBaseName) const override;
 
   std::string generatePythonFitScript(
       std::tuple<std::string, std::string, std::string, std::string, std::string, bool> const &fitOptions,

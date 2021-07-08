@@ -153,7 +153,7 @@ void GeneratePythonFitScript::init() {
   declareProperty("EvaluationType", "CentrePoint", IValidator_sptr(new ListValidator<std::string>(evaluationTypes)),
                   "The EvaluationType to be passed to the Fit algorithm in the Python script.", Direction::Input);
 
-  declareProperty("OutputBaseName", "",
+  declareProperty("OutputBaseName", "Output_Fit",
                   "The OutputBaseName is the base output name to use for the resulting Fit workspaces.");
 
   declareProperty(
@@ -175,6 +175,7 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
   auto const fittingType = getPropertyValue("FittingType");
   auto const filepath = getPropertyValue("Filepath");
   IFunction_sptr function = getProperty("Function");
+  std::string const outputBaseName = getProperty("OutputBaseName");
 
   std::map<std::string, std::string> errors;
   if (workspaceIndices.size() != inputWorkspaces.size())
@@ -192,6 +193,8 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
       errors["Function"] = "The Function provided does not have the same number of domains as there are input "
                            "workspaces. This is a requirement for Simultaneous fitting.";
   }
+  if (outputBaseName.empty())
+    errors["OutputBaseName"] = "The OutputBaseName is empty, please provide a base name for the output fit.";
 
   return errors;
 }

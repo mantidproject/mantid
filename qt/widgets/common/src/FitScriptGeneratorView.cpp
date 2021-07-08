@@ -419,6 +419,10 @@ FitScriptGeneratorView::fitOptions() const {
           m_fitOptionsBrowser->getProperty("Output Base Name"), m_fitOptionsBrowser->getBoolProperty("Plot Output")};
 }
 
+std::string FitScriptGeneratorView::outputBaseName() const {
+  return m_fitOptionsBrowser->getProperty("Output Base Name");
+}
+
 std::string FitScriptGeneratorView::filepath() const {
   auto const defaultDirectory = getDefaultScriptDirectory();
   auto const filePath = QFileDialog::getSaveFileName(this->parentWidget(), tr("Save Script As "), defaultDirectory,

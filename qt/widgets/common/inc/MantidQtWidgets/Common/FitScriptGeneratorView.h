@@ -87,6 +87,7 @@ public:
 
   [[nodiscard]] std::tuple<std::string, std::string, std::string, std::string, std::string, bool>
   fitOptions() const override;
+  [[nodiscard]] std::string outputBaseName() const override;
   [[nodiscard]] std::string filepath() const override;
 
   void resetSelection() override;

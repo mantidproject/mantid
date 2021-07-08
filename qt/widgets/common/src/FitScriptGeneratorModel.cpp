@@ -615,12 +615,15 @@ bool FitScriptGeneratorModel::checkFunctionIsSameForAllDomains() const {
   return std::all_of(m_fitDomains.cbegin(), m_fitDomains.cend(), hasSameFunction);
 }
 
-std::tuple<bool, std::string> FitScriptGeneratorModel::isValid() const {
+std::tuple<bool, std::string> FitScriptGeneratorModel::isValid(std::string const &outputBaseName) const {
   std::string message;
   if (numberOfDomains() == 0u)
     message = "Domain data must be loaded before generating a python script.";
   else if (!checkFunctionExistsInAllDomains())
     message = "A function must exist in ALL domains to generate a python script.";
+
+  if (outputBaseName.empty())
+    message = "The Output Base Name must not be empty, please provide an Output Base Name.";
 
   bool valid(message.empty());
   if (valid)

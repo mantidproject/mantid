@@ -513,7 +513,7 @@ void FitScriptGeneratorPresenter::checkForWarningMessages() {
 }
 
 template <typename Generator> void FitScriptGeneratorPresenter::generateFitScript(Generator &&func) const {
-  auto const [valid, message] = m_model->isValid();
+  auto const [valid, message] = m_model->isValid(m_view->outputBaseName());
 
   if (!message.empty())
     m_view->displayWarning(message);
