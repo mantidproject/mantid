@@ -97,9 +97,11 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.savedir_label.setToolTip(savedir_text)
         self.savedir_label.setText(savedir_text)
 
-    def closeEvent(self, _):
+    def closeEvent(self, event):
         ConfigService.setString("curvefitting.defaultPeak", self._initial_peak_fun)  # reset peak function
         self.presenter.handle_close()
+        self.setParent(None)
+        event.accept()
 
     def get_rb_no(self):
         return self.lineEdit_RBNumber.text()
