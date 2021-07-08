@@ -56,6 +56,7 @@ New features
 - New plotting script that provides diagnostic plots of SCDCalibratePanels output.
 - New plotting script that provides diagnositc plots of SCDCalibratePanels2 on a per panel/bank basis.
 - New algorithm :ref:`ConvertPeaksWorkspace <algm-ConvertPeaksWorkspace>` for quick conversion between PeaksWorkspace and LeanElasticPeaksWorkspace.
+- New algorithm :ref:`FindGlobalBMatrix <algm-FindGlobalBMatrix>` that refines common lattice parameters across peak workspaces from multiple runs with a different U matrix (which encodes the orientation) per run.
 
 Improvements
 ############

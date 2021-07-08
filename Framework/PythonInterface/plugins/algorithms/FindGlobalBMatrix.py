@@ -34,7 +34,8 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         self.declareProperty(
             StringArrayProperty(name="PeakWorkspaces",
                                 direction=Direction.Input, validator=ADSValidator()),
-            doc='List of peak workspaces to use.')
+            doc='List of peak workspaces to use (must be more than'
+                ' two peaks workspaces and each must contain at least 6 peaks.')
         positiveFloatValidator = FloatBoundedValidator(lower=0.0)
         angleValidator = FloatBoundedValidator(lower=0.0, upper=180.0)
         self.declareProperty(name="a", defaultValue=-1.0,
@@ -108,7 +109,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         if success:
             # calculate errors
             dof = sum([self.child_IndexPeaks(ws, RoundHKLs=True) for ws in ws_list]) - len(alatt0)
-            err = np.sqrt(abs(np.diag(cov))*(info['fvec']**2).sum()/dof)
+            err = np.sqrt(abs(np.diag(cov)) * (info['fvec'] ** 2).sum() / dof)
             for wsname in ws_list:
                 ws = AnalysisDataService.retrieve(wsname)
                 ws.sample().getOrientedLattice().setError(*err)
