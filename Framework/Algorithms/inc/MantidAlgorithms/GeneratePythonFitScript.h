@@ -35,8 +35,10 @@ private:
   std::size_t getNumberOfDomainsInFunction(Mantid::API::IFunction_sptr const &function) const;
 
   std::string generateFitScript(std::string const &fittingType) const;
+
+  std::string getFileContents(std::string const &filename) const;
+
   std::string generateVariableSetupCode() const;
-  std::string generateSequentialFitCode() const;
   std::string generateSimultaneousFitCode() const;
   std::string generateFunctionString() const;
 
