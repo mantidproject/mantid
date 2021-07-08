@@ -25,6 +25,26 @@ def get_run_number(value):
     return path.splitext(path.basename(value.split(',')[0].split('+')[0]))[0]
 
 
+def get_vanadium_corrections(vanadium_ws):
+    """
+    Extracts vanadium integral and vanadium diagnostics workspaces from the provided list. If the provided group
+    has only one workspace, then it is assumed it contains vanadium integral. Assumed is the following order
+    of vanadium workspaces for each numor in the group: SofQ, SofTW, diagnostics, integral.
+    :param vanadium_ws: workspace group with processed vanadium
+    :return: vanadium integral and vanadium diagnostics (if exist)
+    """
+    diagnostics = []
+    integrals = []
+    nentries = mtd[vanadium_ws].getNumberOfEntries()
+    if nentries == 1:
+        integrals.append(mtd[vanadium_ws][0].name())
+    else:
+        for index in range(0, nentries, 4):
+            diagnostics.append(mtd[vanadium_ws][index+2].name())
+            integrals.append(mtd[vanadium_ws][index+3].name())
+    return diagnostics, integrals
+
+
 class DirectILLAutoProcess(PythonAlgorithm):
 
     instrument = None
@@ -105,6 +125,9 @@ class DirectILLAutoProcess(PythonAlgorithm):
             if self.getProperty('ContainerGeometry').isDefault:
                 issues['ContainerGeometry'] = 'Please define container geometry.'
 
+        if self.getPropertyValue('ProcessAs') == 'Sample' and self.getProperty('VanadiumWorkspace').isDefault:
+            issues['VanadiumWorkspace'] = 'Vanadium input is required to reduce sample.'
+
         return issues
 
     def setUp(self):
@@ -115,8 +138,9 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.to_clean = []
         if self.getProperty('IncidentEnergyCalibration').value:
             self.incident_energy_calibration = 'Energy Calibration ON'
+            self.incident_energy = self.getProperty('IncidentEnergy').value
             self.incident_energy_ws = 'incident_energy_ws'
-            CreateSingleValuedWorkspace(DataValue=self.getProperty('IncidentEnergy').value,
+            CreateSingleValuedWorkspace(DataValue=self.incident_energy,
                                         OutputWorkspace=self.incident_energy_ws)
             self.to_clean.append(self.incident_energy_ws)
         if self.getProperty('ElasticChannelCalibration').value:
@@ -131,9 +155,11 @@ class DirectILLAutoProcess(PythonAlgorithm):
         else:
             self.masking = True
         self.flat_bkg_scaling = self.getProperty('FlatBkgScaling')
-        self.ebinning_params = self.getProperty('EnergyBinning')
+        self.ebinning_params = self.getProperty('EnergyBinning').value
         self.empty = self.getPropertyValue('EmptyContainerWorkspace')
         self.vanadium = self.getPropertyValue('VanadiumWorkspace')
+        if self.vanadium:
+            self.vanadium_integral, self.vanadium_diagnostics = get_vanadium_corrections(self.vanadium)
 
     def PyInit(self):
 
@@ -328,7 +354,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
         if self.masking:
             self.mask_ws = self._prepare_masks()
 
-        for sample in sample_runs:
+        for sample_no, sample in enumerate(sample_runs):
             ws = self._collect_data(sample, vanadium=self.process == 'Vanadium')
             if self.process in ['Empty', 'Cadmium']:
                 pass
@@ -336,7 +362,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 ws_sofq, ws_softw, ws_diag, ws_integral = self._process_vanadium(ws)
                 output_samples.extend([ws_sofq, ws_softw, ws_diag, ws_integral])
             elif self.process == 'Sample':
-                ws = self._process_sample(ws)
+                ws = self._process_sample(ws, sample_no)
                 output_samples.append(ws)
         GroupWorkspaces(InputWorkspaces=output_samples,
                         OutputWorkspace=self.output)
@@ -359,6 +385,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
             if vanadium:
                 self.vanadium_epp = "{}_epp".format(ws)
                 kwargs['OutputEPPWorkspace'] = self.vanadium_epp
+                self.to_clean.append(self.vanadium_epp)
             DirectILLCollectData(Run=sample, OutputWorkspace=ws,
                                  IncidentEnergyCalibration=self.incident_energy_calibration,
                                  IncidentEnergyWorkspace=self.incident_energy_ws,
@@ -462,8 +489,68 @@ class DirectILLAutoProcess(PythonAlgorithm):
             DeleteWorkspaces(WorkspaceList=to_remove)
         return sofq_output, softw_output, vanadium_diagnostics, vanadium_integral
 
-    def _process_sample(self, ws):
-        return ws
+    def _normalise_sample(self, sample_ws, sample_no, numor):
+        """
+        Normalises sample using vanadium integral, if it has been provided.
+        :param sample_ws: sample being processed
+        :return: Either normalised sample or the input, if vanadium is not provided
+        """
+        normalised_ws = '{}_norm'.format(numor)
+        if self.vanadium_integral:
+            nintegrals = len(self.vanadium_integral)
+            vanadium_no = sample_no
+            if nintegrals == 1:
+                vanadium_no = 0
+            elif sample_no > nintegrals:
+                vanadium_no = sample_no % nintegrals
+            Divide(LHSWorkspace=sample_ws,
+                   RHSWorkspace=self.vanadium_integral[vanadium_no],
+                   OutputWorkspace=normalised_ws)
+        else:
+            normalised_ws = ws
+        return normalised_ws
+
+    def _process_sample(self, ws, sample_no):
+        """Does the sample data reduction for single crystal."""
+        to_remove = [ws]
+        if self.masking:
+            ws = self._apply_mask(ws)
+        if self.empty:
+            self._subtract_background(ws)
+        numor = ws[:ws.rfind('_')]
+        if self.reduction_type == 'SingleCrystal':
+            # normalises to vanadium integral
+            normalised_ws = self._normalise_sample(ws, sample_no, numor)
+            to_remove.append(normalised_ws)
+            # converts to energy
+            corrected_ws = '{}_ene'.format(numor)
+            ConvertUnits(InputWorkspace=normalised_ws, EFixed=self.incident_energy,
+                         Target='DeltaE', EMode='Direct', OutputWorkspace=corrected_ws)
+            to_remove.append(corrected_ws)
+
+            # transforms the distribution into dynamic structure factor
+            CorrectKiKf(InputWorkspace=corrected_ws, EFixed=self.incident_energy,
+                        OutputWorkspace=corrected_ws)
+
+            # corrects for detector efficiency
+            DetectorEfficiencyCorUser(InputWorkspace=corrected_ws, IncidentEnergy=self.incident_energy,
+                                      OutputWorkspace=corrected_ws)
+
+            # rebin in energy or momentum transfer
+            processed_sample = '{}_reb'.format(numor)
+            if self.ebinning_params:
+                Rebin(InputWorkspace=corrected_ws, Params=self.ebinning_params, OutputWorkspace=processed_sample)
+            else:
+                RenameWorkspace(InputWorkspace=corrected_ws, OutputWorkspace=processed_sample)
+                to_remove.pop()
+            # saving of the output is omitted at this point: it is handled by Drill
+        else:  # not implemented yet
+            processed_sample = ws
+
+        if len(to_remove) > 0 and self.getProperty('ClearCache').value:
+            DeleteWorkspaces(WorkspaceList=to_remove)
+
+        return processed_sample
 
 
 AlgorithmFactory.subscribe(DirectILLAutoProcess)
