@@ -11,7 +11,7 @@ from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
 
 class PeriodicTableTabView(QtWidgets.QWidget):
 
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         super(PeriodicTableTabView, self).__init__(parent)
         self.ptable_view = PeriodicTableView(parent=self)
         self.peakview = PeaksView(parent=self)
