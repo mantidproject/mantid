@@ -7,8 +7,9 @@
 #pragma once
 
 #include "DllOption.h"
-#include "IMantidGLWidget.h"
-#include "ISimpleWidget.h"
+#include "IGLDisplay.h"
+#include "IQtDisplay.h"
+#include "InstrumentDisplay.h"
 #include "InstrumentWidgetTypes.h"
 #include "QtConnect.h"
 #include "UnwrappedSurface.h"
@@ -57,8 +58,18 @@ class InstrumentWidgetPickTab;
 class InstrumentWidgetTreeTab;
 class CollapsiblePanel;
 class XIntegrationControl;
-class SimpleWidget;
+class QtDisplay;
 class ProjectionSurface;
+
+namespace Detail {
+struct Dependencies {
+  std::unique_ptr<IInstrumentDisplay> instrumentDisplay = nullptr;
+  std::unique_ptr<IQtDisplay> qtDisplay = nullptr;
+  std::unique_ptr<IGLDisplay> glDisplay = nullptr;
+  std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
+};
+
+} // namespace Detail
 
 /**
 \class  InstrumentWidget
@@ -83,6 +94,7 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidget : public QWidget,
   friend class InstrumentWidgetDecoder;
 
 public:
+  using Dependencies = Detail::Dependencies;
   enum SurfaceType {
     FULL3D = 0,
     CYLINDRICAL_X,
@@ -98,9 +110,7 @@ public:
 
   explicit InstrumentWidget(const QString &wsName, QWidget *parent = nullptr, bool resetGeometry = true,
                             bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
-                            bool setDefaultView = true, std::unique_ptr<ISimpleWidget> simpleDisplay = nullptr,
-                            std::unique_ptr<IMantidGLWidget> instrumentDisplay = nullptr,
-                            std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>());
+                            bool setDefaultView = true, Dependencies deps = Dependencies());
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;
@@ -278,10 +288,8 @@ protected:
   InstrumentWidgetTreeTab *m_treeTab;
   InstrumentWidgetPickTab *m_pickTab;
   XIntegrationControl *m_xIntegration;
-  /// The OpenGL widget to display the instrument
-  std::unique_ptr<IMantidGLWidget> m_InstrumentDisplay;
-  /// The simple widget to display the instrument
-  std::unique_ptr<ISimpleWidget> m_simpleDisplay;
+
+  std::unique_ptr<IInstrumentDisplay> m_instrumentDisplay;
 
   // Context menu actions
   QAction *m_clearPeakOverlays, *m_clearAlignment;
@@ -296,8 +304,7 @@ protected:
   bool m_useOpenGL;
   /// 3D view or unwrapped
   SurfaceType m_surfaceType;
-  /// Stacked layout managing m_InstrumentDisplay and m_simpleDisplay
-  QStackedLayout *m_instrumentDisplayLayout;
+
   /// spectra index id
   int mSpectraIDSelected;
   /// detector id

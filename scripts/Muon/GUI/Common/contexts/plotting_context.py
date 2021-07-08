@@ -8,18 +8,6 @@
 from Muon.GUI.Common.contexts.plot_edit_context import PlotEditContext
 from Muon.GUI.Common.contexts.plot_settings_context import PlotSettingsContext
 from typing import List
-from enum import Enum
-
-# do we need these?
-PlotModeStrings = ['Plot Data', 'Plot Fits']
-
-
-class PlotMode(Enum):
-    Data = 0
-    Fitting = 1
-
-    def __str__(self):
-        return PlotModeStrings[self.value]
 
 
 class PlottingContext(object):
@@ -29,7 +17,7 @@ class PlottingContext(object):
         self._default_ylim = [-10, 10]
         self._xlim_all = self._default_xlim
         self._ylim_all = self._default_ylim
-        self._autoscale_all = False
+        self._autoscale_all = True
         self._errors_all = False
         self._settings = PlotSettingsContext()
 

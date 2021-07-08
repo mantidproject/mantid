@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/GLDisplay.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
-#include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 
@@ -36,8 +36,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace {
 
-QRectF getArea(const UnwrappedDetector &udet, double maxWidth,
-               double maxHeight) {
+QRectF getArea(const UnwrappedDetector &udet, double maxWidth, double maxHeight) {
   auto w = udet.width;
   if (w > maxWidth)
     w = maxWidth;
@@ -52,15 +51,12 @@ QRectF getArea(const UnwrappedDetector &udet, double maxWidth,
  * @param rootActor :: The instrument actor.
  */
 UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor)
-    : ProjectionSurface(rootActor), m_u_min(DBL_MAX), m_u_max(-DBL_MAX),
-      m_v_min(DBL_MAX), m_v_max(-DBL_MAX), m_height_max(0), m_width_max(0),
-      m_flippedView(false), m_startPeakShapes(false) {
+    : ProjectionSurface(rootActor), m_u_min(DBL_MAX), m_u_max(-DBL_MAX), m_v_min(DBL_MAX), m_v_max(-DBL_MAX),
+      m_height_max(0), m_width_max(0), m_flippedView(false), m_startPeakShapes(false) {
   // create and set the move input controller
-  InputControllerMoveUnwrapped *moveController =
-      new InputControllerMoveUnwrapped(this);
+  InputControllerMoveUnwrapped *moveController = new InputControllerMoveUnwrapped(this);
   setInputController(MoveMode, moveController);
-  connect(moveController, SIGNAL(setSelectionRect(QRect)), this,
-          SLOT(setSelectionRect(QRect)));
+  connect(moveController, SIGNAL(setSelectionRect(QRect)), this, SLOT(setSelectionRect(QRect)));
   connect(moveController, SIGNAL(zoom()), this, SLOT(zoom()));
   connect(moveController, SIGNAL(resetZoom()), this, SLOT(resetZoom()));
   connect(moveController, SIGNAL(unzoom()), this, SLOT(unzoom()));
@@ -83,7 +79,7 @@ QString UnwrappedSurface::getDimInfo() const {
  * @param widget :: The widget to draw it on.
  * @param picking :: True if detector is being drawn in the picking mode.
  */
-void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
+void UnwrappedSurface::drawSurface(GLDisplay *widget, bool picking) const {
   // dimensions of the screen to draw on
   int widget_width = widget->width();
   int widget_height = widget->height();
@@ -119,8 +115,8 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
 
   if (OpenGLError::hasError("UnwrappedSurface::drawSurface")) {
     OpenGLError::log() << "glOrtho arguments:\n";
-    OpenGLError::log() << view_left << ',' << view_right << ',' << view_bottom
-                       << ',' << view_top << ',' << -10 << ',' << 10 << '\n';
+    OpenGLError::log() << view_left << ',' << view_right << ',' << view_bottom << ',' << view_top << ',' << -10 << ','
+                       << 10 << '\n';
   }
   glMatrixMode(GL_MODELVIEW);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -159,8 +155,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
     double h = (ih == 0) ? dh : udet.height / 2;
 
     // check that the detector is visible in the current view
-    if (!(m_viewRect.contains(udet.u - w, udet.v - h) ||
-          m_viewRect.contains(udet.u + w, udet.v + h)))
+    if (!(m_viewRect.contains(udet.u - w, udet.v - h) || m_viewRect.contains(udet.u + w, udet.v + h)))
       continue;
 
     // apply the detector's colour
@@ -188,8 +183,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
       rot.getAngleAxis(deg, ax0, ax1, ax2);
       glRotated(deg, ax0, ax1, ax2);
 
-      Mantid::Kernel::V3D scaleFactor =
-          componentInfo.scaleFactor(udet.detIndex);
+      Mantid::Kernel::V3D scaleFactor = componentInfo.scaleFactor(udet.detIndex);
       glScaled(scaleFactor[0], scaleFactor[1], scaleFactor[2]);
 
       m_instrActor->componentInfo().shape(udet.detIndex).draw();
@@ -226,10 +220,8 @@ void UnwrappedSurface::setColor(size_t index, bool picking) const {
   }
 }
 
-bool hasParent(const std::shared_ptr<const Mantid::Geometry::IComponent> &comp,
-               Mantid::Geometry::ComponentID id) {
-  std::shared_ptr<const Mantid::Geometry::IComponent> parent =
-      comp->getParent();
+bool hasParent(const std::shared_ptr<const Mantid::Geometry::IComponent> &comp, Mantid::Geometry::ComponentID id) {
+  std::shared_ptr<const Mantid::Geometry::IComponent> parent = comp->getParent();
   if (!parent)
     return false;
   if (parent->getComponentID() == id)
@@ -288,10 +280,8 @@ void UnwrappedSurface::getSelectedDetectors(std::vector<size_t> &detIndices) {
       int y = rect.y() + j;
       size_t ind = getPickID(x, y);
       if (ind < m_unwrappedDetectors.size()) {
-        uleft =
-            m_unwrappedDetectors[ind].u - m_unwrappedDetectors[ind].width / 2;
-        vtop =
-            m_unwrappedDetectors[ind].v + m_unwrappedDetectors[ind].height / 2;
+        uleft = m_unwrappedDetectors[ind].u - m_unwrappedDetectors[ind].width / 2;
+        vtop = m_unwrappedDetectors[ind].v + m_unwrappedDetectors[ind].height / 2;
         stop = true;
         break;
       }
@@ -307,10 +297,8 @@ void UnwrappedSurface::getSelectedDetectors(std::vector<size_t> &detIndices) {
       int y = rect.y() + j;
       size_t ind = getPickID(x, y);
       if (ind < m_unwrappedDetectors.size()) {
-        uright =
-            m_unwrappedDetectors[ind].u + m_unwrappedDetectors[ind].width / 2;
-        vbottom =
-            m_unwrappedDetectors[ind].v - m_unwrappedDetectors[ind].height / 2;
+        uright = m_unwrappedDetectors[ind].u + m_unwrappedDetectors[ind].width / 2;
+        vbottom = m_unwrappedDetectors[ind].v - m_unwrappedDetectors[ind].height / 2;
         stop = true;
         break;
       }
@@ -321,15 +309,13 @@ void UnwrappedSurface::getSelectedDetectors(std::vector<size_t> &detIndices) {
 
   // select detectors with u,v within the allowed boundaries
   for (auto &udet : m_unwrappedDetectors) {
-    if (udet.u >= uleft && udet.u <= uright && udet.v >= vbottom &&
-        udet.v <= vtop) {
+    if (udet.u >= uleft && udet.u <= uright && udet.v >= vbottom && udet.v <= vtop) {
       detIndices.emplace_back(udet.detIndex);
     }
   }
 }
 
-void UnwrappedSurface::getMaskedDetectors(
-    std::vector<size_t> &detIndices) const {
+void UnwrappedSurface::getMaskedDetectors(std::vector<size_t> &detIndices) const {
   detIndices.clear();
   if (m_maskShapes.isEmpty())
     return;
@@ -361,8 +347,7 @@ RectF UnwrappedSurface::getSurfaceBounds() const { return m_viewRect; }
  * Set a peaks workspace to be drawn ontop of the workspace.
  * @param pws :: A shared pointer to the workspace.
  */
-void UnwrappedSurface::setPeaksWorkspace(
-    const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
+void UnwrappedSurface::setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
   if (!pws) {
     return;
   }
@@ -450,8 +435,7 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
     double w = udet.width / 2;
     double h = udet.height / 2;
 
-    if (!(m_viewRect.contains(udet.u - w, udet.v - h) ||
-          m_viewRect.contains(udet.u + w, udet.v + h)))
+    if (!(m_viewRect.contains(udet.u - w, udet.v - h) || m_viewRect.contains(udet.u + w, udet.v + h)))
       continue;
 
     int u = 0;
@@ -539,8 +523,7 @@ void UnwrappedSurface::unzoom() {
   auto newHeight = oheight / height * oheight;
   auto newLeft = left + width / 2 - newWidth / 2;
   auto newTop = top + height / 2 - newHeight / 2;
-  m_viewRect = RectF(QPointF(newLeft, newTop),
-                     QPointF(newLeft + newWidth, newTop + newHeight));
+  m_viewRect = RectF(QPointF(newLeft, newTop), QPointF(newLeft + newWidth, newTop + newHeight));
 
   updateView();
   emptySelectionRect();
@@ -579,8 +562,7 @@ void UnwrappedSurface::zoom() {
  * @param udet :: detector to unwrap.
  * @param pos :: detector position relative to the sample origin
  */
-void UnwrappedSurface::calcUV(UnwrappedDetector &udet,
-                              Mantid::Kernel::V3D &pos) {
+void UnwrappedSurface::calcUV(UnwrappedDetector &udet, Mantid::Kernel::V3D &pos) {
   this->project(pos, udet.u, udet.v, udet.uscale, udet.vscale);
   calcSize(udet);
 }
@@ -611,10 +593,8 @@ void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
   size *= scale;
 
   Mantid::Kernel::V3D s1(size);
-  Mantid::Kernel::V3D s2 = size + Mantid::Kernel::V3D(-size.X(), 0, 0) -
-                           Mantid::Kernel::V3D(size.X(), 0, 0);
-  Mantid::Kernel::V3D s3 = size + Mantid::Kernel::V3D(0, -size.Y(), 0) -
-                           Mantid::Kernel::V3D(0, size.Y(), 0);
+  Mantid::Kernel::V3D s2 = size + Mantid::Kernel::V3D(-size.X(), 0, 0) - Mantid::Kernel::V3D(size.X(), 0, 0);
+  Mantid::Kernel::V3D s3 = size + Mantid::Kernel::V3D(0, -size.Y(), 0) - Mantid::Kernel::V3D(0, size.Y(), 0);
   // rotate the size vectors to get the dimensions along axes U and V
   R.rotate(s1);
   R.rotate(s2);
@@ -682,8 +662,7 @@ void UnwrappedSurface::loadFromProject(const std::string &lines) {
   }
 #else
   Q_UNUSED(lines);
-  throw std::runtime_error(
-      "UnwrappedSurface::loadFromProject() not implemented for Qt >= 5");
+  throw std::runtime_error("UnwrappedSurface::loadFromProject() not implemented for Qt >= 5");
 #endif
 }
 
@@ -692,8 +671,7 @@ void UnwrappedSurface::loadFromProject(const std::string &lines) {
  * @param name :: name of the workspace to retrieve
  * @return a shared pointer to the fond peaks workspace
  */
-Mantid::API::IPeaksWorkspace_sptr
-UnwrappedSurface::retrievePeaksWorkspace(const std::string &name) const {
+Mantid::API::IPeaksWorkspace_sptr UnwrappedSurface::retrievePeaksWorkspace(const std::string &name) const {
   using namespace Mantid::API;
   Workspace_sptr ws = nullptr;
 
@@ -727,8 +705,7 @@ std::string UnwrappedSurface::saveToProject() const {
 
   return tsv.outputLines();
 #else
-  throw std::runtime_error(
-      "UnwrappedSurface::saveToProject() not implemented for Qt >= 5");
+  throw std::runtime_error("UnwrappedSurface::saveToProject() not implemented for Qt >= 5");
 #endif
 }
 

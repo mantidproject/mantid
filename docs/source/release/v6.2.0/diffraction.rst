@@ -13,6 +13,7 @@ Powder Diffraction
 ------------------
 New features
 ############
+- New algorithm :ref:`CombineDiffCal <algm-CombineDiffCal>` to calibrate groups of pixels after cross correlation so that diffraction peaks can be adjusted to the correct positions
 
 Improvements
 ############
@@ -56,6 +57,7 @@ New features
 - New plotting script that provides diagnostic plots of SCDCalibratePanels output.
 - New plotting script that provides diagnositc plots of SCDCalibratePanels2 on a per panel/bank basis.
 - New algorithm :ref:`ConvertPeaksWorkspace <algm-ConvertPeaksWorkspace>` for quick conversion between PeaksWorkspace and LeanElasticPeaksWorkspace.
+- New definition file for D19 ILL instrument added.
 
 Improvements
 ############

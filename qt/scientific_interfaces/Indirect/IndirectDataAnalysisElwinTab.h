@@ -24,7 +24,7 @@ private:
   void run() override;
   void setup() override;
   bool validate() override;
-  void loadSettings(const QSettings &settings) override;
+  void loadTabSettings(const QSettings &settings);
   void setFileExtensionsByName(bool filter) override;
   void setBrowserWorkspace() override{};
   void setDefaultResolution(const Mantid::API::MatrixWorkspace_const_sptr &ws, const QPair<double, double> &range);

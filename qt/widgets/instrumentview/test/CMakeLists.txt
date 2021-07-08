@@ -7,6 +7,7 @@ set(
   PlotFitAnalysisPaneModelTest.h
   PlotFitAnalysisPanePresenterTest.h
 
+  InstrumentWidget/InstrumentDisplayTest.h
   InstrumentWidget/InstrumentWidgetTest.h
 )
 

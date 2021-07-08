@@ -24,7 +24,7 @@ class MockFitInfo(object):
 
 
 @start_qapplication
-class PlotFitPanePresenterrTest(unittest.TestCase):
+class PlotFitPanePresenterTest(unittest.TestCase):
 
     def setUp(self):
         self.context = mock.MagicMock()
@@ -35,7 +35,8 @@ class PlotFitPanePresenterrTest(unittest.TestCase):
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
 
         self.presenter = PlotFitPanePresenter(view=self.view, model=self.model, context=self.context,
-                                                   figure_presenter=self.figure_presenter)
+                                              fitting_context=self.context.fitting_context,
+                                              figure_presenter=self.figure_presenter)
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
