@@ -111,7 +111,7 @@ make sure you have access to the data archive.
 
 .. code-block:: python
 
-    from mantid.simpleapi import *
+    from mantid.simpleapi import (GroupWorkspace, LoadMuonNexus, MuonGroupingAsymmetry, MuonPreProcess, RenameWorkspace)
 
     LoadMuonNexus(Filename=r'\\isis.cclrc.ac.uk\inst$\ndxmusr\instrument\data\cycle_16_5\MUSR00062260.nxs', OutputWorkspace='MUSR00062260.nxs', DeadTimeTable='MUSR00062260.nxs_deadtime_table', DetectorGroupingTable='__notUsed')
     RenameWorkspace(InputWorkspace='MUSR00062260.nxs_deadtime_table', OutputWorkspace='MUSR62260_deadtime MA')
@@ -152,7 +152,7 @@ make sure you have access to the data archive. This will add a background to the
 .. code-block:: python
 
     from mantid.api import AnalysisDataService
-    from mantid.simpleapi import *
+    from mantid.simpleapi import (CreateWorkspace, GroupWorkspace, LoadMuonNexus, MuonGroupingAsymmetry, MuonPreProcess, Plus, RenameWorkspace)
 
     LoadMuonNexus(Filename=r'\\isis.cclrc.ac.uk\inst$\ndxmusr\instrument\data\cycle_16_5\MUSR00062260.nxs', OutputWorkspace='MUSR00062260.nxs', DeadTimeTable='MUSR00062260.nxs_deadtime_table', DetectorGroupingTable='__notUsed')
     RenameWorkspace(InputWorkspace='MUSR00062260.nxs_deadtime_table', OutputWorkspace='MUSR62260_deadtime MA')
