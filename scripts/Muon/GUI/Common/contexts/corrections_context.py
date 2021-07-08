@@ -5,6 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.py36compat import dataclass
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+
+DEAD_TIME_FROM_FILE = "FromFile"
+DEAD_TIME_FROM_ADS = "FromADS"
 
 
 @dataclass
@@ -16,4 +20,29 @@ class CorrectionsContext:
 
     # The 'dead_time_source' can be "FromFile", "FromADS" or None.
     dead_time_source: str = None
-    dead_time_table_name: str = None
+    dead_time_table_name_from_ads: str = None
+
+    def __init__(self, load_data: MuonLoadData):
+        """Initialize the CorrectionsContext and pass in MuonLoadData so that we can access dead time tables."""
+        self._loaded_data = load_data
+
+    def current_dead_time_table_name_for_run(self, instrument: str, run: list) -> str:
+        """Returns the name of the dead time table for the provided run and the active dead time mode."""
+        if self.dead_time_source == DEAD_TIME_FROM_FILE:
+            return self.get_default_dead_time_table_name_for_run(instrument, run)
+        elif self.dead_time_source == DEAD_TIME_FROM_ADS:
+            return self.dead_time_table_name_from_ads
+        else:
+            return None
+
+    def get_default_dead_time_table_name_for_run(self, instrument: str, run: list) -> str:
+        """Returns the default loaded dead time table for a specific instrument run."""
+        loaded_dict = self._loaded_data.get_data(instrument=instrument, run=run)
+        if loaded_dict is not None and "workspace" in loaded_dict:
+            return loaded_dict["workspace"]["DataDeadTimeTable"]
+        else:
+            return None
+
+    def set_default_dead_time_table_name_for_run(self, instrument: str, run: list, dead_time_name: str) -> None:
+        """Sets the default loaded dead time table for a specific instrument run."""
+        self._loaded_data.get_data(instrument=instrument, run=run)['workspace']['DataDeadTimeTable'] = dead_time_name

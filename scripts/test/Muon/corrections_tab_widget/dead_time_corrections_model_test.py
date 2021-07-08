@@ -43,7 +43,7 @@ class DeadTimeCorrectionsModelTest(unittest.TestCase):
     def test_that_set_dead_time_source_to_from_file_will_set_the_expected_data_in_the_context(self):
         self.model.set_dead_time_source_to_from_file()
         self.assertEqual(self.model._corrections_context.dead_time_source, "FromFile")
-        self.assertEqual(self.model._corrections_context.dead_time_table_name, None)
+        self.assertEqual(self.model._corrections_context.dead_time_table_name_from_ads, None)
         self.assertTrue(self.model.is_dead_time_source_from_data_file())
 
     def test_that_set_dead_time_source_to_from_ads_will_set_the_expected_data_in_the_context(self):
@@ -51,25 +51,25 @@ class DeadTimeCorrectionsModelTest(unittest.TestCase):
         self.model.set_dead_time_source_to_from_ads(table_name)
 
         self.assertEqual(self.model._corrections_context.dead_time_source, "FromADS")
-        self.assertEqual(self.model._corrections_context.dead_time_table_name, table_name)
+        self.assertEqual(self.model._corrections_context.dead_time_table_name_from_ads, table_name)
         self.assertTrue(self.model.is_dead_time_source_from_workspace())
 
     def test_that_set_dead_time_source_to_from_ads_will_set_the_expected_data_in_the_context_to_none(self):
         self.model.set_dead_time_source_to_from_ads("None")
 
         self.assertEqual(self.model._corrections_context.dead_time_source, None)
-        self.assertEqual(self.model._corrections_context.dead_time_table_name, None)
+        self.assertEqual(self.model._corrections_context.dead_time_table_name_from_ads, None)
         self.assertTrue(self.model.is_dead_time_source_from_none())
 
     def test_that_set_dead_time_source_to_none_will_set_the_expected_data_in_the_context_to_none(self):
         self.model.set_dead_time_source_to_from_ads("Table name")
         self.assertTrue(self.model._corrections_context.dead_time_source is not None)
-        self.assertTrue(self.model._corrections_context.dead_time_table_name is not None)
+        self.assertTrue(self.model._corrections_context.dead_time_table_name_from_ads is not None)
 
         self.model.set_dead_time_source_to_none()
 
         self.assertEqual(self.model._corrections_context.dead_time_source, None)
-        self.assertEqual(self.model._corrections_context.dead_time_table_name, None)
+        self.assertEqual(self.model._corrections_context.dead_time_table_name_from_ads, None)
         self.assertTrue(self.model.is_dead_time_source_from_none())
 
     def test_that_dead_times_average_will_return_the_expected_dead_time_average_and_range(self):

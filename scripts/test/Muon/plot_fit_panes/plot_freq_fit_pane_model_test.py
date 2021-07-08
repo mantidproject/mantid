@@ -50,6 +50,18 @@ class PlotFreqFitPaneModelTest(unittest.TestCase):
         self.assertEqual(ws, ["test", "test", "unit", "unit"])
         self.assertEqual(indices, [1,2,1,2])
 
+    def test_get_fft_label(self):
+        ws_name = 'FFT; Re MUSR62260; Pair Asym; long; FD_Re'
+        self.assertEqual(';FFT;Re', self.model._get_freq_label(ws_name))
+
+    def test_get_maxent_label(self):
+        ws_name = 'MUSR62260_raw_data FD; MaxEnt'
+        self.assertEqual(';MaxEnt', self.model._get_freq_label(ws_name))
+
+    def test_get_label_when_not_fft_or_maxent(self):
+        ws_name = 'test'
+        self.assertEqual('', self.model._get_freq_label(ws_name))
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

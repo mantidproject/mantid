@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
@@ -24,6 +24,9 @@ class ModelFittingPresenter(BasicFittingPresenter):
         super(ModelFittingPresenter, self).__init__(view, model)
 
         self.parameter_combination_thread_success = True
+
+        self.update_override_tick_labels_notifier = GenericObservable()
+        self.update_plot_x_range_notifier = GenericObservable()
 
         self.results_table_created_observer = GenericObserverWithArgPassing(self.handle_new_results_table_created)
 
@@ -81,7 +84,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
     def handle_parameter_combinations_created_successfully(self) -> None:
         """Handles when the parameter combination workspaces have been created successfully."""
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
-        self.view.update_dataset_name_combo_box(self.model.dataset_names)
+        self.view.update_dataset_name_combo_box(self.model.dataset_names, emit_signal=False)
 
         # Initially, the y parameters should be updated before the x parameters.
         self.view.update_y_parameters(self.model.y_parameters())
@@ -96,8 +99,15 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
     def handle_dataset_name_changed(self) -> None:
         """Handle when the hidden dataset workspace combo box is changed."""
-        super().handle_dataset_name_changed()
+        self.model.current_dataset_index = self.view.current_dataset_index
         self.automatically_update_function_name()
+
+        self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        self.update_fit_function_in_view_from_model()
+        self.update_start_and_end_x_in_view_from_model()
+
+        self.update_plot_fit()
+        self.update_plot_guess()
 
     def handle_function_structure_changed(self) -> None:
         """Handle when the function structure is changed."""
@@ -106,7 +116,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
         if self.model.get_active_fit_function() is None:
             self.clear_current_fit_function_for_undo()
-            self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+            self.update_plot_fit()
 
         self.reset_fit_status_and_chi_squared_information()
 
@@ -142,6 +152,16 @@ class ModelFittingPresenter(BasicFittingPresenter):
         if dataset_name is not None:
             self.model.current_dataset_index = self.model.dataset_names.index(dataset_name)
             self.view.current_dataset_name = dataset_name
+
+    def update_plot_fit(self) -> None:
+        """Updates the fit results on the plot using the currently active fit results."""
+        x_tick_labels, y_tick_labels = self.model.get_override_x_and_y_tick_labels(self.view.x_parameter(),
+                                                                                   self.view.y_parameter())
+        self.update_override_tick_labels_notifier.notify_subscribers([x_tick_labels, y_tick_labels])
+
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+        self.update_plot_x_range_notifier.notify_subscribers([x_lower, x_upper])
+        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
     def reset_fit_status_and_chi_squared_information(self) -> None:
         """Reset the fit status and chi squared only for the currently selected dataset."""

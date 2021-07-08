@@ -282,6 +282,10 @@ class MuonGroupPairContext(object):
                     self._phasequad.remove(phasequad_obj)
                 return
 
+    def update_phase_tables(self, table):
+        for index, _ in enumerate(self._phasequad):
+            self._phasequad[index].phase_table = table
+
     def add_diff(self, diff):
         assert isinstance(diff, MuonDiff)
         if self._check_name_unique(diff.name):

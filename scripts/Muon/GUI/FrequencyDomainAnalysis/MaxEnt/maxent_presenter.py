@@ -121,8 +121,10 @@ class MaxEntPresenter(object):
         if self.view.phase_table != 'Construct':
             inputs['InputPhaseTable'] = self.view.phase_table
 
-        if self.load.dead_time_table(run):
-            inputs['InputDeadTimeTable'] = self.load.dead_time_table(run)
+        dead_time_table_name = self.load.corrections_context.current_dead_time_table_name_for_run(
+            self.load.data_context.instrument, [run])
+        if dead_time_table_name is not None:
+            inputs['InputDeadTimeTable'] = dead_time_table_name
 
         inputs['FirstGoodTime'] = self.load.first_good_data([run])
 
