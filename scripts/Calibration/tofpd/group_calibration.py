@@ -10,7 +10,7 @@ from mantid.simpleapi import (ConvertUnits, ExtractSpectra, Rebin,
                               DiffractionFocussing, PDCalibration,
                               Load, LoadMask, CombineDiffCal,
                               LoadDiffCal, LoadDetectorsGroupingFile,
-                              SaveDiffCal, DeleteWorkspace)
+                              SaveDiffCal, DeleteWorkspace, logger)
 
 # Diamond peak positions in d-space
 DIAMOND = (0.3117,0.3257,0.3499,0.4205,0.4645,
@@ -48,7 +48,7 @@ def cc_calibrate_groups(data_ws,
     :param Xmin: Xmin parameter for CrossCorrelate, default 1.22
     :param Xmax: Xmax parameter for CrossCorrelate, default 1.30
     :param MaxDSpaceShift: MaxDSpaceShift paramter for CrossCorrelate, default None
-    :return: Combinned DiffCal workspace from all the different groups
+    :return: Combined DiffCal workspace from all the different groups
     """
     if previous_calibration:
         ApplyDiffCal(data_ws, CalibrationWorkspace=previous_calibration)
@@ -132,9 +132,6 @@ def pdcalibration_groups(data_ws,
     ApplyDiffCal(data_ws, CalibrationWorkspace=cc_diffcal)
     ConvertUnits(data_ws, Target='dSpacing', OutputWorkspace='_tmp_data_aligned')
     DiffractionFocussing('_tmp_data_aligned', GroupingWorkspace=group_ws, OutputWorkspace='_tmp_data_aligned')
-
-    # Remove the following line after new CombineDiffCal algorithm is implemented as that will use the calibrated difc
-    ApplyDiffCal('_tmp_data_aligned', ClearCalibration=True)
 
     ConvertUnits('_tmp_data_aligned', Target='TOF', OutputWorkspace='_tmp_data_aligned')
 
@@ -239,7 +236,7 @@ def process_json(json_filename):
     caldirectory = str(args.get('CalDirectory', os.path.abspath('.')))
 
     calfilename = f'{caldirectory}/{instrument}_{calibrant}_{date}_{sample_env}.h5'
-    print('going to create calibration file: %s' % calfilename)
+    logger.information(f'going to create calibration file: {calfilename}')
 
     filename = f'{instrument}_{calibrant}'
 

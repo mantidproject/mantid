@@ -134,11 +134,7 @@ The workflow follows these step:
 #. Use :math:`DIFC_{CC}` to convert the origonal data to d-spacing. DiffractionFocus allows for combining a portion of the instrument into a single spectrum for improved statistics
 #. Pick an arbitrary constant, :math:`DIFC_{arb}` to convert this combined spectrum back to time-of-flight
 #. PDCalibration the combined spectrum to determine a conversion constant :math:`DIFC_{PD}`
-#. Do math (below) to combine :math:`DIFC_{CC}`, :math:`DIFC_{arb}`, and :math:`DIFC_{PD}` into a new calibration constant, :math:`DIFC_{eff}`
-
-.. math::
-
-   DIFC_{eff} = \frac{DIFC_{PD}}{DIFC_{arb}} DIFC_{CC}
+#. Use :ref:`CombineDiffCal <algm-CombineDiffCal>` to combine :math:`DIFC_{CC}`, :math:`DIFC_{arb}`, and :math:`DIFC_{PD}` into a new calibration constant, :math:`DIFC_{eff}`
 
 .. testcode:: group_cal
 
