@@ -53,7 +53,7 @@ Output:
 
    # Fit function as a string
    function = \
-   "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0"
+       "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0"
 
    # Fitting options
    max_iterations = 500
@@ -145,12 +145,12 @@ Output:
 
    # Fit function as a string
    function = \
-   "composite=MultiDomainFunction,NumDeriv=true;" \
-   "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0,$domains=i;" \
-   "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0,$domains=i;" \
-   "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0,$domains=i;" \
-   "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0,$domains=i;" \
-   "ties=(f2.Frequency=f3.Frequency,f1.Frequency=f3.Frequency,f0.Frequency=f3.Frequency)"
+       "composite=MultiDomainFunction,NumDeriv=true;" \
+       "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0,$domains=i;" \
+       "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0,$domains=i;" \
+       "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0,$domains=i;" \
+       "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0,$domains=i;" \
+       "ties=(f2.Frequency=f3.Frequency,f1.Frequency=f3.Frequency,f0.Frequency=f3.Frequency)"
 
    # Fitting options
    max_iterations = 500
@@ -162,13 +162,14 @@ Output:
    input_workspaces = list(input_data.keys())
    domain_data = list(input_data.values())
 
-   fit_output = Fit(Function=function,
-                    InputWorkspace=input_workspaces[0], WorkspaceIndex=domain_data[0][0], StartX=domain_data[0][1], EndX=domain_data[0][2],
-                    InputWorkspace_1=input_workspaces[1], WorkspaceIndex_1=domain_data[1][0], StartX_1=domain_data[1][1], EndX_1=domain_data[1][2],
-                    InputWorkspace_2=input_workspaces[2], WorkspaceIndex_2=domain_data[2][0], StartX_2=domain_data[2][1], EndX_2=domain_data[2][2],
-                    InputWorkspace_3=input_workspaces[3], WorkspaceIndex_3=domain_data[3][0], StartX_3=domain_data[3][1], EndX_3=domain_data[3][2],
-                    MaxIterations=max_iterations, Minimizer=minimizer, CostFunction=cost_function,
-                    EvaluationType=evaluation_type, CreateOutput=True)
+   fit_output = \
+       Fit(Function=function,
+           InputWorkspace=input_workspaces[0], WorkspaceIndex=domain_data[0][0], StartX=domain_data[0][1], EndX=domain_data[0][2],
+           InputWorkspace_1=input_workspaces[1], WorkspaceIndex_1=domain_data[1][0], StartX_1=domain_data[1][1], EndX_1=domain_data[1][2],
+           InputWorkspace_2=input_workspaces[2], WorkspaceIndex_2=domain_data[2][0], StartX_2=domain_data[2][1], EndX_2=domain_data[2][2],
+           InputWorkspace_3=input_workspaces[3], WorkspaceIndex_3=domain_data[3][0], StartX_3=domain_data[3][1], EndX_3=domain_data[3][2],
+           MaxIterations=max_iterations, Minimizer=minimizer, CostFunction=cost_function,
+           EvaluationType=evaluation_type, CreateOutput=True)
 
    output_workspaces = fit_output.OutputWorkspace
 
