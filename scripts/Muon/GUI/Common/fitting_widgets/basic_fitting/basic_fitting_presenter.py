@@ -27,9 +27,6 @@ class BasicFittingPresenter:
 
         self.initialize_model_options()
 
-        # This prevents plotting the wrong data when selecting different group/pairs on the grouping tab
-        self._update_plot = True
-
         self.thread_success = True
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
@@ -104,24 +101,18 @@ class BasicFittingPresenter:
 
     def handle_instrument_changed(self) -> None:
         """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
-        self._update_plot = False
         self.update_and_reset_all_data()
-        self._update_plot = True
         self.clear_undo_data()
         self.model.remove_all_fits_from_context()
 
     def handle_selected_group_pair_changed(self) -> None:
         """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
-        self._update_plot = False
         self.update_and_reset_all_data()
-        self._update_plot = True
 
     def handle_pulse_type_changed(self, updated_variables: dict) -> None:
         """Handles when double pulse mode is switched on and switches to normal fitting mode."""
         if "DoublePulseEnabled" in updated_variables:
-            self._update_plot = False
             self.update_and_reset_all_data()
-            self._update_plot = True
 
     def handle_plot_guess_changed(self) -> None:
         """Handle when plot guess is ticked or un-ticked."""
@@ -136,7 +127,7 @@ class BasicFittingPresenter:
         self.update_fit_function_in_view_from_model()
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
 
-        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+        self.update_plot_fit()
         self.update_plot_guess()
 
     def handle_fit_clicked(self) -> None:
@@ -161,7 +152,11 @@ class BasicFittingPresenter:
         if not self.thread_success:
             return
 
-        fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
+        fit_result = self.fitting_calculation_model.result
+        if fit_result is None:
+            return
+
+        fit_function, fit_status, fit_chi_squared = fit_result
         if any([not fit_function, not fit_status, fit_chi_squared != 0.0 and not fit_chi_squared]):
             return
 
@@ -177,7 +172,7 @@ class BasicFittingPresenter:
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
         self.update_fit_function_in_view_from_model()
 
-        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+        self.update_plot_fit()
         self.fit_parameter_changed_notifier.notify_subscribers()
 
     def handle_error(self, error: str) -> None:
@@ -200,9 +195,8 @@ class BasicFittingPresenter:
         self.update_fit_function_in_view_from_model()
         self.update_start_and_end_x_in_view_from_model()
 
-        if self._update_plot:
-            self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
-            self.update_plot_guess()
+        self.update_plot_fit()
+        self.update_plot_guess()
 
     def handle_function_name_changed_by_user(self) -> None:
         """Handle when the fit name is changed by the user."""
@@ -224,7 +218,7 @@ class BasicFittingPresenter:
 
         if self.model.get_active_fit_function() is None:
             self.clear_undo_data()
-            self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+            self.update_plot_fit()
 
         self.reset_fit_status_and_chi_squared_information()
 
@@ -350,6 +344,10 @@ class BasicFittingPresenter:
         self.remove_plot_guess_notifier.notify_subscribers()
         self.model.update_plot_guess()
         self.update_plot_guess_notifier.notify_subscribers()
+
+    def update_plot_fit(self) -> None:
+        """Updates the fit results on the plot using the currently active fit results."""
+        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
     def _get_single_fit_functions_from_view(self) -> list:
         """Returns the fit functions corresponding to each domain as a list."""
