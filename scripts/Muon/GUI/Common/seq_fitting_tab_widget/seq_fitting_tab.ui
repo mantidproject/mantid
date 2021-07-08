@@ -68,6 +68,13 @@
      </property>
     </widget>
    </item>
+   <item row="5" column="2">
+    <widget class="QRadioButton" name="copy_fit_button">
+     <property name="text">
+      <string>Copy fit parameters to all</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>
