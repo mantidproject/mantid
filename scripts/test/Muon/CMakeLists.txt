@@ -118,6 +118,8 @@ set ( TEST_PY_FILES
    plotting_canvas/plot_color_queue_test.py
    plotting_canvas/plotting_canvas_model_test.py
    plotting_canvas/plotting_canvas_presenter_test.py
+   raw_pane/raw_pane_model_test.py
+   raw_pane/raw_pane_presenter_test.py
    results_context_test.py
    results_tab_widget/results_tab_model_test.py
    results_tab_widget/results_tab_presenter_test.py

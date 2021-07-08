@@ -9,7 +9,7 @@ from Muon.GUI.Common.contexts.plotting_context import PlottingContext
 
 
 class PlotPanesContext(object):
-    def __init__(self,):
+    def __init__(self):
         self._plotting_context = {}
 
     def add_pane(self, name):

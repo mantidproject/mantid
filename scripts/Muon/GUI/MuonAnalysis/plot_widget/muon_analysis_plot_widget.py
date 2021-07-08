@@ -24,7 +24,7 @@ class MuonAnalysisPlotWidget(object):
         self.data_model = PlotDataPaneModel(context)
         self.fit_model = PlotTimeFitPaneModel(context)
         self.raw_model = RawPaneModel(context)
-        self.model_fit_model = PlotModelFitPaneModel(context)  
+        self.model_fit_model = PlotModelFitPaneModel(context)
         # The plotting canvas widgets
         self.plotting_canvas_widgets = {}
         self.plotting_canvas_widgets[self.data_model.name] = PlottingCanvasWidget(parent, context=
@@ -51,7 +51,7 @@ class MuonAnalysisPlotWidget(object):
 
         self._view4 = BasePaneView(parent)
         self._view4.add_canvas_widget(self.plotting_canvas_widgets[self.raw_model.name].widget)
-        
+
         # set up presenter
         self.view = MainPlotWidgetView(parent)
         self.model = PlotDataPaneModel(context)
@@ -60,7 +60,8 @@ class MuonAnalysisPlotWidget(object):
         self.data_mode = PlotDataPanePresenter(self._view1, self.data_model,
                                                context,self.plotting_canvas_widgets[self.data_model.name].presenter)
         self.fit_mode = PlotFitPanePresenter(self._view2, self.fit_model,
-                                                 context,self.plotting_canvas_widgets[self.fit_model.name].presenter)
+                                                 context,context.fitting_context,
+                                             self.plotting_canvas_widgets[self.fit_model.name].presenter)
         self.model_fit_mode = PlotModelFitPanePresenter(self._view3, self.model_fit_model, context,
                                                         context.model_fitting_context,
                                                         self.plotting_canvas_widgets[self.model_fit_model.name].presenter)
