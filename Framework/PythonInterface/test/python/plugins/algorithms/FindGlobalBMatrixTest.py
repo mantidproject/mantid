@@ -14,6 +14,14 @@ def add_peaksHKL(ws_list, Hs, Ks, L):
                 peaks.addPeak(pk)
 
 
+def getBMatrix(ws):
+    return ws.sample().getOrientedLattice().getB()
+
+
+def getUMatrix(ws):
+    return ws.sample().getOrientedLattice().getU()
+
+
 class FindGlobalBMatrixTest(unittest.TestCase):
 
     def setUp(self):
@@ -39,9 +47,10 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89,
                           Tolerance=0.15)
 
-        # check lattice (more transparent than checking B amtrix) - should have average a=4.0
+        # check lattice  - should have average a=4.0
         self.assert_lattice([peaks1, peaks2], 4.0, 4.0, 10.0, 90.0, 90.0, 90.0, delta_latt=2e-2, delta_angle=2.5e-1)
-        self.assert_U_matrix([peaks1, peaks2], np.eye(3), delta=5e-2)
+        self.assert_matrix([peaks1], getBMatrix(peaks2), getBMatrix, delta=1e-10)  # should have same B matrix
+        self.assert_matrix([peaks1, peaks2], np.eye(3), getUMatrix, delta=5e-2)
 
     def test_handles_inaccurate_goniometer(self):
         # create two peak tables with UB corresponding to different lattice constant, a
@@ -68,7 +77,8 @@ class FindGlobalBMatrixTest(unittest.TestCase):
 
         # check lattice - shouldn't be effected by error in goniometer
         self.assert_lattice([peaks1, peaks2], 4.0, 4.0, 10.0, 90.0, 90.0, 90.0, delta_latt=2e-2, delta_angle=2.5e-1)
-        self.assert_U_matrix([peaks1, peaks2], np.eye(3), delta=5e-2)
+        self.assert_matrix([peaks1], getBMatrix(peaks2), getBMatrix, delta=1e-10)  # should have same B matrix
+        self.assert_matrix([peaks1, peaks2], np.eye(3), getUMatrix, delta=5e-2)
 
     def test_requires_more_than_one_peak_workspace(self):
         peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks4")
@@ -115,9 +125,10 @@ class FindGlobalBMatrixTest(unittest.TestCase):
 
         # check lattice - shouldn't be effected by error in goniometer
         self.assert_lattice([peaks1, peaks2], 5.0, 4.0, 10.0, 90.0, 90.0, 90.0, delta_latt=5e-2, delta_angle=2.5e-1)
-        self.assert_U_matrix([peaks1, peaks2], np.eye(3), delta=5e-2)
+        self.assert_matrix([peaks1], getBMatrix(peaks2), getBMatrix, delta=1e-10)  # should have same B matrix
+        self.assert_matrix([peaks1, peaks2], np.eye(3), getUMatrix, delta=5e-2)
 
-    def assert_lattice(self, ws_list, a, b, c, alpha=90, beta=90, gamma=90, delta_latt=2e-2, delta_angle=2.5e-1):
+    def assert_lattice(self, ws_list, a, b, c, alpha, beta, gamma, delta_latt=2e-2, delta_angle=2.5e-1):
         for ws in ws_list:
             cell = ws.sample().getOrientedLattice()
             self.assertAlmostEqual(cell.a(), a, delta=delta_latt)
@@ -127,12 +138,12 @@ class FindGlobalBMatrixTest(unittest.TestCase):
             self.assertAlmostEqual(cell.beta(), beta, delta=delta_angle)
             self.assertAlmostEqual(cell.gamma(), gamma, delta=delta_angle)
 
-    def assert_U_matrix(self, ws_list, refU, delta=5e-2):
+    def assert_matrix(self, ws_list, ref_mat, extract_mat_func, delta=5e-2):
         for ws in ws_list:
-            UB = ws.sample().getOrientedLattice().getU()
+            mat = extract_mat_func(ws)
             for ii in range(0, 3):
                 for jj in range(0, 3):
-                    self.assertAlmostEqual(UB[ii, jj], refU[ii, jj], delta=delta)
+                    self.assertAlmostEqual(mat[ii, jj], ref_mat[ii, jj], delta=delta)
 
 
 if __name__ == '__main__':
