@@ -38,8 +38,8 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
       m_clearObserver(*this, &WorkspaceSelector::handleClearEvent),
       m_renameObserver(*this, &WorkspaceSelector::handleRenameEvent),
       m_replaceObserver(*this, &WorkspaceSelector::handleReplaceEvent), m_init(init), m_workspaceTypes(),
-      m_showHidden(false), m_showGroups(true), m_optional(false), m_binLimits(std::make_pair(0, -1)), m_suffix(),
-      m_algName(), m_algPropName(), m_algorithm() {
+      m_showHidden(false), m_showGroups(true), m_optional(false), m_sorted(false), m_binLimits(std::make_pair(0, -1)),
+      m_suffix(), m_algName(), m_algPropName(), m_algorithm() {
   setEditable(true);
   if (init) {
     Mantid::API::AnalysisDataServiceImpl &ads = Mantid::API::AnalysisDataService::Instance();
@@ -115,6 +115,16 @@ void WorkspaceSelector::setOptional(bool optional) {
   }
 }
 
+bool WorkspaceSelector::isSorted() const { return m_sorted; }
+
+void WorkspaceSelector::setSorted(bool sorted) {
+  if (sorted != m_sorted) {
+    m_sorted = sorted;
+    if (m_init)
+      refresh();
+  }
+}
+
 QStringList WorkspaceSelector::getSuffixes() const { return m_suffix; }
 
 void WorkspaceSelector::setSuffixes(const QStringList &suffix) {
@@ -164,7 +174,9 @@ void WorkspaceSelector::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr
   QString name = QString::fromStdString(pNf->objectName());
   if (checkEligibility(name, pNf->object())) {
     addItem(name);
-    model()->sort(0);
+    if (isSorted()) {
+      model()->sort(0);
+    }
   }
 }
 
@@ -197,10 +209,14 @@ void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotificati
   if (eligible) {
     if (index != -1 && newIndex == -1) {
       this->setItemText(index, newName);
-      model()->sort(0);
+      if (isSorted()) {
+        model()->sort(0);
+      }
     } else if (index == -1 && newIndex == -1) {
       addItem(newName);
-      model()->sort(0);
+      if (isSorted()) {
+        model()->sort(0);
+      }
     } else
       removeItem(index);
   } else {
@@ -227,7 +243,9 @@ void WorkspaceSelector::handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNot
     return;
   else if (!inside && eligible) {
     addItem(name);
-    model()->sort(0);
+    if (isSorted()) {
+      model()->sort(0);
+    }
   } else // (inside && !eligible)
     removeItem(index);
 }
@@ -300,7 +318,9 @@ void WorkspaceSelector::refresh() {
     }
   }
   this->addItems(namesToAdd);
-  model()->sort(0);
+  if (isSorted()) {
+    model()->sort(0);
+  }
 }
 
 /**
