@@ -7,8 +7,11 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/GLDisplay.h"
 #include "MantidQtWidgets/InstrumentView/IStackedLayout.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/QtDisplay.h"
 #include "MantidQtWidgets/InstrumentView/StackedLayout.h"
+
+#include <cassert>
 
 class QObject;
 class QWidget;
@@ -44,5 +47,29 @@ IQtDisplay *InstrumentDisplay::getQtDisplay() const { return m_qtDisplay.get(); 
 void InstrumentDisplay::installEventFilter(QObject *obj) {
   m_glDisplay->qtInstallEventFilter(obj);
   m_qtDisplay->qtInstallEventFilter(obj);
+}
+
+ProjectionSurface_sptr InstrumentDisplay::getSurface() const {
+  assert(m_glDisplay);
+  return m_glDisplay->getSurface();
+}
+
+void InstrumentDisplay::setSurface(ProjectionSurface_sptr surface) {
+  assert(m_glDisplay);
+  m_glDisplay->setSurface(surface);
+  m_glDisplay->qtUpdate();
+
+  assert(m_qtDisplay);
+  m_qtDisplay->setSurface(surface);
+  m_qtDisplay->qtUpdate();
+}
+
+void InstrumentDisplay::updateView(bool picking) {
+  assert(m_glDisplay);
+  if (currentWidget() == dynamic_cast<QWidget *>(m_glDisplay.get())) {
+    m_glDisplay->updateView(picking);
+  } else {
+    m_qtDisplay->updateView(picking);
+  }
 }
 } // namespace MantidQt::MantidWidgets

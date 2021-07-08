@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "QtConnect.h"
+#include "MantidQtWidgets/InstrumentView/QtConnect.h"
+
 #include <gmock/gmock.h>
 
 namespace MantidQt::MantidWidgets {

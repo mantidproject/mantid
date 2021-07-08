@@ -6,9 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IGLDisplay.h"
-#include "IQtDisplay.h"
-#include "IStackedLayout.h"
+#include "MantidQtWidgets/InstrumentView/IGLDisplay.h"
+#include "MantidQtWidgets/InstrumentView/IQtDisplay.h"
+#include "MantidQtWidgets/InstrumentView/IStackedLayout.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 
 #include <memory>
 
@@ -29,5 +30,10 @@ public:
   virtual IQtDisplay *getQtDisplay() const = 0;
 
   virtual void installEventFilter(QObject *obj) = 0;
+
+  virtual ProjectionSurface_sptr getSurface() const = 0;
+  virtual void setSurface(ProjectionSurface_sptr surface) = 0;
+
+  virtual void updateView(bool picking) = 0;
 };
 } // namespace MantidQt::MantidWidgets

@@ -1175,14 +1175,7 @@ QString InstrumentWidget::getSurfaceInfoText() const {
 /**
  * Get pointer to the projection surface
  */
-ProjectionSurface_sptr InstrumentWidget::getSurface() const {
-  if (m_instrumentDisplay->getGLDisplay()) {
-    return m_instrumentDisplay->getGLDisplay()->getSurface();
-  } else if (m_instrumentDisplay->getQtDisplay()) {
-    return m_instrumentDisplay->getQtDisplay()->getSurface();
-  }
-  return ProjectionSurface_sptr();
-}
+ProjectionSurface_sptr InstrumentWidget::getSurface() const { return m_instrumentDisplay->getSurface(); }
 
 bool MantidQt::MantidWidgets::InstrumentWidget::isWsBeingReplaced() const { return m_wsReplace; }
 
@@ -1191,15 +1184,8 @@ bool MantidQt::MantidWidgets::InstrumentWidget::isWsBeingReplaced() const { retu
  * @param surface :: Pointer to the new surace.
  */
 void InstrumentWidget::setSurface(ProjectionSurface *surface) {
-  ProjectionSurface_sptr sharedSurface(surface);
-  if (m_instrumentDisplay->getGLDisplay()) {
-    m_instrumentDisplay->getGLDisplay()->setSurface(sharedSurface);
-    m_instrumentDisplay->getGLDisplay()->update();
-  }
-  if (m_instrumentDisplay->getQtDisplay()) {
-    m_instrumentDisplay->getQtDisplay()->setSurface(sharedSurface);
-    m_instrumentDisplay->getQtDisplay()->qtUpdate();
-  }
+  m_instrumentDisplay->setSurface(ProjectionSurface_sptr(surface));
+
   auto *unwrappedSurface = dynamic_cast<UnwrappedSurface *>(surface);
   if (unwrappedSurface) {
     m_renderTab->flipUnwrappedView(unwrappedSurface->isFlippedView());
@@ -1228,14 +1214,7 @@ QSize InstrumentWidget::glWidgetDimensions() {
 /// @param picking :: Set to true to update the picking image regardless the
 /// interaction
 ///   mode of the surface.
-void InstrumentWidget::updateInstrumentView(bool picking) {
-  if (m_instrumentDisplay->getGLDisplay() &&
-      m_instrumentDisplay->currentWidget() == dynamic_cast<QWidget *>(m_instrumentDisplay->getGLDisplay())) {
-    m_instrumentDisplay->getGLDisplay()->updateView(picking);
-  } else {
-    m_instrumentDisplay->getQtDisplay()->updateView(picking);
-  }
-}
+void InstrumentWidget::updateInstrumentView(bool picking) { m_instrumentDisplay->updateView(picking); }
 
 /// Recalculate the colours and redraw the instrument view
 void InstrumentWidget::updateInstrumentDetectors() {

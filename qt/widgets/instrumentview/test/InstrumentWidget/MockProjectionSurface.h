@@ -6,8 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "GLDisplay.h"
-#include "ProjectionSurface.h"
+#include "MantidQtWidgets/InstrumentView/GLDisplay.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
+
 #include <gmock/gmock.h>
 
 namespace MantidQt::MantidWidgets {

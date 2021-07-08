@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include "IGLDisplay.h"
-#include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/InstrumentView/IGLDisplay.h"
 
 #include <QGLWidget>
 #include <QString>

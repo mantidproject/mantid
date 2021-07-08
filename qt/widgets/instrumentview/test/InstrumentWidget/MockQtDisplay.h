@@ -7,10 +7,11 @@
 
 #pragma once
 
-#include "IQtDisplay.h"
+#include "MantidQtWidgets/InstrumentView/IQtDisplay.h"
 
-#include <QObject>
 #include <gmock/gmock.h>
+
+class QObject;
 
 namespace MantidQt::MantidWidgets {
 
