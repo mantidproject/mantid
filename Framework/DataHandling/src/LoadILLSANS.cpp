@@ -27,6 +27,7 @@
 
 #include <Poco/Path.h>
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <numeric>
 
@@ -492,12 +493,18 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
         HistogramData::BinEdges histoBinEdges(data.dim2() + 1, HistogramData::LinearGenerator(0.0, 1));
         m_localWorkspace->setBinEdges(firstIndex, std::move(histoBinEdges));
       } else {
-        if (type != MultichannelType::KINETIC && !m_isD16Omega) {
-          HistogramData::BinEdges histoBinEdges = HistogramData::BinEdges(m_defaultBinning);
-          m_localWorkspace->setBinEdges(firstIndex, std::move(histoBinEdges));
-        } else {
-          HistogramData::Points histoPoints = HistogramData::Points(m_defaultBinning);
+        if (m_isD16Omega) {
+          HistogramData::Points histoPoints =
+              HistogramData::Points(std::vector<double>(1, 0.5 * (m_defaultBinning[0] + m_defaultBinning[1])));
           m_localWorkspace->setPoints(firstIndex, std::move(histoPoints));
+        } else {
+          if (type != MultichannelType::KINETIC) {
+            HistogramData::BinEdges histoBinEdges = HistogramData::BinEdges(m_defaultBinning);
+            m_localWorkspace->setBinEdges(firstIndex, std::move(histoBinEdges));
+          } else {
+            HistogramData::Points histoPoints = HistogramData::Points(m_defaultBinning);
+            m_localWorkspace->setPoints(firstIndex, std::move(histoPoints));
+          }
         }
       }
       // Add average monitor counts to a property:
@@ -543,12 +550,17 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
       m_localWorkspace->setCounts(index, std::move(histoCounts));
       m_localWorkspace->setCountVariances(index, std::move(histoVariances));
 
-      if (m_isD16Omega || type == MultichannelType::KINETIC) {
-        const HistogramData::Points histoPoints(timeBinning);
+      if (m_isD16Omega) {
+        const HistogramData::Points histoPoints(std::vector<double>(1, 0.5 * (timeBinning[0] + timeBinning[1])));
         m_localWorkspace->setPoints(index, std::move(histoPoints));
       } else {
-        const HistogramData::BinEdges binEdges(timeBinning);
-        m_localWorkspace->setBinEdges(index, std::move(binEdges));
+        if (type == MultichannelType::KINETIC) {
+          const HistogramData::Points histoPoints(timeBinning);
+          m_localWorkspace->setPoints(index, std::move(histoPoints));
+        } else {
+          const HistogramData::BinEdges binEdges(timeBinning);
+          m_localWorkspace->setBinEdges(index, std::move(binEdges));
+        }
       }
     }
   }
@@ -564,9 +576,9 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
  */
 void LoadILLSANS::createEmptyWorkspace(const size_t numberOfHistograms, const size_t numberOfChannels,
                                        const MultichannelType type) {
-  m_localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", numberOfHistograms,
-                                                         numberOfChannels + ((type == MultichannelType::TOF) ? 1 : 0),
-                                                         numberOfChannels);
+  m_localWorkspace = WorkspaceFactory::Instance().create(
+      "Workspace2D", numberOfHistograms, numberOfChannels + ((type == MultichannelType::TOF && !m_isD16Omega) ? 1 : 0),
+      numberOfChannels);
   if (type == MultichannelType::TOF) {
     m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   }

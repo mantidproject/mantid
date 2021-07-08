@@ -270,7 +270,7 @@ class SANSILLReduction(PythonAlgorithm):
 
     def _normalise(self, ws, monID=None):
         """
-            Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
+            Normalizes the workspace by time (SampleLog Timer) or Monitor
             @param ws : the input workspace
         """
         normalise_by = self.getPropertyValue('NormaliseBy')
@@ -752,7 +752,7 @@ class SANSILLReduction(PythonAlgorithm):
         if mtd[ws].blocksize() > 1:
             if mtd[ws].getAxis(0).getUnit().unitID() == 'Wavelength':
                 self._mode = 'TOF'
-            else:
+            elif mtd[ws].getInstrument().getName() != 'D16':
                 self._mode = 'Kinetic'
 
     def PyExec(self):

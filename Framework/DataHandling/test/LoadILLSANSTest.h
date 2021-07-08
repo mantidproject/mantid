@@ -284,7 +284,7 @@ public:
     checkTimeFormat(outputWS);
   }
 
-  void test_D16() {
+  void test_D16_GAMMA() {
     LoadILLSANS alg;
     alg.setChild(true);
     alg.initialize();
@@ -294,6 +294,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
+    TS_ASSERT(outputWS->isHistogramData())
     TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320));
     TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320 + 1));
     const auto &instrument = outputWS->getInstrument();
@@ -326,6 +327,24 @@ public:
     TS_ASSERT_DELTA(xAxis[1], 7.035, 1E-3)
     TS_ASSERT_EQUALS(spec[0], 17)
     TS_ASSERT_DELTA(err[0], sqrt(17), 1E-5)
+    checkTimeFormat(outputWS);
+  }
+
+  void test_D16_OMEGA() {
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "023583.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320));
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320 + 1));
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 320 * 320 + 2);
     checkTimeFormat(outputWS);
   }
 
