@@ -80,7 +80,7 @@ public:
 
   void test_IncompatibleWorkspaces() {
     auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
-    auto ws2 = histoDataWorkspaceOneSpectrum(11, 0.5, 0.9, "ws2");
+    auto ws2 = pointDataWorkspaceMultiSpectrum(3, 11, 0.5, 0.9, "ws2");
     Stitch alg;
     alg.setRethrows(true);
     alg.initialize();
@@ -140,17 +140,6 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ReferenceWorkspace", "ws2"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"));
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-  }
-
-  void test_HistogramData() {
-    auto ws1 = histoDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
-    auto ws2 = histoDataWorkspaceOneSpectrum(17, 0.5, 0.9, "ws2");
-    Stitch alg;
-    alg.setRethrows(true);
-    alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
@@ -274,22 +263,6 @@ private:
       }
       ws->setHistogram(ispec, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));
     }
-    return ws;
-  }
-
-  MatrixWorkspace_sptr histoDataWorkspaceOneSpectrum(size_t nBins, double startX, double endX,
-                                                     const std::string &name) {
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nBins + 1, nBins);
-    AnalysisDataService::Instance().addOrReplace(name, ws);
-    std::vector<double> x(nBins + 1), y(nBins), e(nBins);
-    const double step = (endX - startX) / nBins;
-    for (size_t ibin = 0; ibin < nBins; ++ibin) {
-      x[ibin] = startX + ibin * step;
-      y[ibin] = 7 * ibin + 3;
-      e[ibin] = std::sqrt(y[ibin]);
-    }
-    x[nBins] = endX;
-    ws->setHistogram(0, Histogram(BinEdges(x), Counts(y), CountStandardDeviations(e)));
     return ws;
   }
 };

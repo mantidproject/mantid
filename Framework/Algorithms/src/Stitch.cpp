@@ -216,6 +216,10 @@ std::map<std::string, std::string> Stitch::validateInputs() {
     if (!ws->isCommonBins()) {
       issues[INPUT_WORKSPACE_PROPERTY] += "Workspace " + ws->getName() + " is ragged which is not supported.\n";
     }
+    if (ws->isHistogramData()) {
+      issues[INPUT_WORKSPACE_PROPERTY] +=
+          "Workspace " + ws->getName() + " contains histogram data, only point data are supported.\n";
+    }
   }
   return issues;
 }
