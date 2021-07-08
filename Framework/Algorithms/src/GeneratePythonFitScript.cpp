@@ -84,6 +84,20 @@ std::string getFilepathOfTemplateFile(std::string const &templateFilename) {
   }
 }
 
+std::string getFileContents(std::string const &filename) {
+  std::string filepath = getFilepathOfTemplateFile(filename);
+
+  std::ifstream filestream(filepath);
+  if (!filestream) {
+    filestream.close();
+    throw std::runtime_error("Error occured when attempting to load file: " + filename);
+  }
+
+  std::string fileText((std::istreambuf_iterator<char>(filestream)), std::istreambuf_iterator<char>());
+  filestream.close();
+  return fileText;
+}
+
 } // namespace
 
 namespace Mantid {
@@ -219,20 +233,6 @@ std::string GeneratePythonFitScript::generateFitScript(std::string const &fittin
   return generatedScript;
 }
 
-std::string GeneratePythonFitScript::getFileContents(std::string const &filename) const {
-  std::string filepath = getFilepathOfTemplateFile(filename);
-
-  std::ifstream filestream(filepath);
-  if (!filestream) {
-    filestream.close();
-    throw std::runtime_error("Error occured when attempting to load file: " + filename);
-  }
-
-  std::string fileText((std::istreambuf_iterator<char>(filestream)), std::istreambuf_iterator<char>());
-  filestream.close();
-  return fileText;
-}
-
 std::string GeneratePythonFitScript::generateVariableSetupCode() const {
   std::string code = getFileContents("VariableSetupTemplate.txt");
 
@@ -276,8 +276,8 @@ std::string GeneratePythonFitScript::generateFunctionString() const {
   IFunction_const_sptr function = getProperty("Function");
   auto const functionSplit = splitStringBy(function->asString(), ";");
 
-  std::string code = "\\\n\"";
-  code += joinVector(functionSplit, ";\" \\\n\"");
+  std::string code = "\\\n    \"";
+  code += joinVector(functionSplit, ";\" \\\n    \"");
   code += "\"";
   return code;
 }
