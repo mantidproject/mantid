@@ -59,7 +59,6 @@ signals:
   void startXChanged(double);
   void endXChanged(double, WorkspaceID, WorkspaceIndex);
   void endXChanged(double);
-  void excludeRegionChanged(const std::string &, WorkspaceID, WorkspaceIndex);
   void requestedAddWorkspaceDialog();
 
 protected:

@@ -37,8 +37,6 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFittingModel *model,
           SIGNAL(startXChanged(double, WorkspaceID, WorkspaceIndex)));
   connect(m_tablePresenter.get(), SIGNAL(endXChanged(double, WorkspaceID, WorkspaceIndex)), this,
           SIGNAL(endXChanged(double, WorkspaceID, WorkspaceIndex)));
-  connect(m_tablePresenter.get(), SIGNAL(excludeRegionChanged(const std::string &, WorkspaceID, WorkspaceIndex)), this,
-          SIGNAL(excludeRegionChanged(const std::string &, WorkspaceID, WorkspaceIndex)));
 }
 
 IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }

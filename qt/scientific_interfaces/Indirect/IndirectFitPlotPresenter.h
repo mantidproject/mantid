@@ -59,14 +59,12 @@ public slots:
 
 signals:
   void selectedFitDataChanged(WorkspaceID /*_t1*/);
-  void noFitDataSelected();
   void plotSpectrumChanged();
   void fitSingleSpectrum(WorkspaceID /*_t1*/, WorkspaceIndex /*_t2*/);
   void startXChanged(double /*_t1*/);
   void endXChanged(double /*_t1*/);
   void fwhmChanged(double /*_t1*/);
   void backgroundChanged(double /*_t1*/);
-  void runAsPythonScript(const QString &code, bool noOutput = false);
 
 private slots:
   void setModelStartX(double value);

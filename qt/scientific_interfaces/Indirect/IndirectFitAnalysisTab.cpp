@@ -85,8 +85,6 @@ void IndirectFitAnalysisTab::connectDataPresenter() {
           SLOT(tableStartXChanged(double, WorkspaceID, WorkspaceIndex)));
   connect(m_dataPresenter.get(), SIGNAL(endXChanged(double, WorkspaceID, WorkspaceIndex)), this,
           SLOT(tableEndXChanged(double, WorkspaceID, WorkspaceIndex)));
-  connect(m_dataPresenter.get(), SIGNAL(excludeRegionChanged(const std::string &, WorkspaceID, WorkspaceIndex)), this,
-          SLOT(tableExcludeChanged(const std::string &, WorkspaceID, WorkspaceIndex)));
   connect(m_dataPresenter.get(), SIGNAL(startXChanged(double)), this, SLOT(startXChanged(double)));
   connect(m_dataPresenter.get(), SIGNAL(endXChanged(double)), this, SLOT(endXChanged(double)));
 
@@ -99,13 +97,10 @@ void IndirectFitAnalysisTab::connectDataPresenter() {
 void IndirectFitAnalysisTab::connectPlotPresenter() {
   connect(m_plotPresenter.get(), SIGNAL(fitSingleSpectrum(WorkspaceID, WorkspaceIndex)), this,
           SLOT(singleFit(WorkspaceID, WorkspaceIndex)));
-  connect(m_plotPresenter.get(), SIGNAL(runAsPythonScript(const QString &, bool)), this,
-          SIGNAL(runAsPythonScript(const QString &, bool)));
   connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this, SLOT(updateDataInTable()));
   connect(m_plotPresenter.get(), SIGNAL(endXChanged(double)), this, SLOT(updateDataInTable()));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(WorkspaceID)), this,
-          SLOT(respondToSelectedFitDataChanged(WorkspaceID)));
-  connect(m_plotPresenter.get(), SIGNAL(noFitDataSelected()), this, SLOT(respondToNoFitDataSelected()));
+          SLOT(respondToPlotSpectrumChanged()));
   connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged()), this, SLOT(respondToPlotSpectrumChanged()));
   connect(m_plotPresenter.get(), SIGNAL(fwhmChanged(double)), this, SLOT(respondToFwhmChanged(double)));
   connect(m_plotPresenter.get(), SIGNAL(backgroundChanged(double)), this, SLOT(respondToBackgroundChanged(double)));
