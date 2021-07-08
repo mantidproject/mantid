@@ -103,11 +103,18 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             return self.calcResiduals(x, ws_list)
 
         alatt0 = [a, b, c, alpha, beta, gamma]
-        alatt, *_, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
+        alatt, cov, info, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
         success = ier in [1, 2, 3, 4]
         if success:
+            # calculate errors
+            dof = sum([self.child_IndexPeaks(ws, RoundHKLs=True) for ws in ws_list]) - len(alatt0)
+            err = np.sqrt(abs(np.diag(cov))*(info['fvec']**2).sum()/dof)
+            for wsname in ws_list:
+                ws = AnalysisDataService.retrieve(wsname)
+                ws.sample().getOrientedLattice().setError(*err)
             logger.notice(f"Lattice parameters successfully refined for workspaces: {ws_list}\n"
-                          f"Lattice parameters [a, b, c, alpha, beta, gamma] = {alatt}")
+                          f"Lattice Parameters: {np.array2string(alatt, precision=6)}\n"
+                          f"Parameter Errors  : {np.array2string(err, precision=6)}")
         else:
             logger.warning(f"Error in optimization of lattice parameters: {msg}")
         # complete progress
