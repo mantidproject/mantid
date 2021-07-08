@@ -84,6 +84,9 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.superplotClicked.connect(self._do_superplot)
         self.workspacewidget.superplotWithErrsClicked.connect(
                 self._do_superplot_with_errors)
+        self.workspacewidget.superplotBinsClicked.connect(self._do_superplot_bins)
+        self.workspacewidget.superplotBinsWithErrsClicked.connect(
+                self._do_superplot_bins_with_errors)
         self.workspacewidget.contextMenuAboutToShow.connect(
             self._on_context_menu)
 
@@ -119,7 +122,7 @@ class WorkspaceWidget(PluginWidget):
 
         :param names: A list of workspace names
         """
-        superplot_from_names(names)
+        superplot_from_names(names, plot_kwargs=None)
 
     def _do_superplot_with_errors(self, names):
         """
@@ -128,7 +131,26 @@ class WorkspaceWidget(PluginWidget):
 
         :param names: A list of workspace names
         """
-        superplot_with_errors_from_names(names)
+        superplot_with_errors_from_names(names, plot_kwargs=None)
+
+    def _do_superplot_bins(self, names):
+        """
+        Open an empty plot with the superplot started on bins mode.
+
+        :param names: A list of workspace names
+        """
+        plot_kwargs = {"axis": MantidAxType.BIN}
+        superplot_from_names(names, plot_kwargs=plot_kwargs)
+
+    def _do_superplot_bins_with_errors(self, names):
+        """
+        Open an empty plot with the superplot started on bins mode with error
+        bars.
+
+        :param names: A list of workspace names
+        """
+        plot_kwargs = {"axis": MantidAxType.BIN}
+        superplot_with_errors_from_names(names, plot_kwargs=plot_kwargs)
 
     def _do_plot_spectrum(self, names, errors, overplot, advanced=False):
         """
