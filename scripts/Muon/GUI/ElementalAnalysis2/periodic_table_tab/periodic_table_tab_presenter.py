@@ -5,16 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from copy import deepcopy
-from qtpy import QtWidgets, QtCore
+from qtpy import QtWidgets
 import matplotlib as mpl
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
-from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_presenter import PeakSelectorPresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view import PeakSelectorView
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_presenter import PeaksPresenter
-from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
 from Muon.GUI.Common import message_box
 
 
@@ -34,28 +32,26 @@ def gen_name(element, name):
     return element + " " + name
 
 
-class PeriodicTableWidget(object):
+class PeriodicTableTabPresenter(object):
 
-    def __init__(self, parent, context):
-        self.view = QtWidgets.QWidget(parent=parent)
+    def __init__(self, context, view):
+        self.view = view
         self.context = context
-        self.ptable_view = PeriodicTableView(parent=self.view)
         self.ptable_model = PeriodicTableModel()
-        self.ptable = PeriodicTablePresenter(self.ptable_view, self.ptable_model)
-        self.peakview = PeaksView(parent=self.view)
-        self.peakpresenter = PeaksPresenter(self.peakview)
-        self.default_peak_data_label = QtWidgets.QLabel(" Use default peak data")
-        self.default_peak_data_checkbox = QtWidgets.QCheckBox()
-        self.default_peak_data_checkbox.setChecked(True)
+        self.ptable = PeriodicTablePresenter(self.view.ptable_view, self.ptable_model)
+        self.peakpresenter = PeaksPresenter(self.view.peakview)
+
         self.element_widgets = {}
         self.element_lines = {}
+        # Filename for loaded peak data if it is None default is being used
+        self.loaded_file = None
         self.num_colors = len(mpl.rcParams['axes.prop_cycle'])
         self.used_colors = {}
         self.ptable.register_table_lclicked(self.table_left_clicked)
         self.ptable.register_table_rclicked(self.table_right_clicked)
         self._generate_element_widgets()
         self._setup_peaks_widget()
-        self._setup_widget_interface()
+        self._setup_peak_data_file_buttons_clicked()
 
     def _setup_peaks_widget(self):
         self.peakpresenter.major.setChecked(True)
@@ -69,21 +65,10 @@ class PeriodicTableWidget(object):
         self.peakpresenter.electron.on_checkbox_unchecked(self.electrons_changed)
         self.peakpresenter.set_deselect_elements_slot(self.deselect_elements)
 
-    def _setup_widget_interface(self):
-        vertical_layout = QtWidgets.QVBoxLayout()
-        horizontal_layout1 = QtWidgets.QHBoxLayout()
-        horizontal_layout2 = QtWidgets.QHBoxLayout()
-        horizontal_layout1.addWidget(self.ptable_view, alignment=QtCore.Qt.AlignLeft)
-        horizontal_layout1.addWidget(self.peakview, alignment=QtCore.Qt.AlignRight)
-        horizontal_layout2.insertStretch(1, -1)
-        horizontal_layout2.addWidget(self.default_peak_data_checkbox, alignment=QtCore.Qt.AlignLeft)
-        horizontal_layout2.addWidget(self.default_peak_data_label, alignment=QtCore.Qt.AlignLeft)
-
-        vertical_layout.addLayout(horizontal_layout1)
-        vertical_layout.addLayout(horizontal_layout2)
-        self.view.setLayout(vertical_layout)
-
-        self.default_peak_data_checkbox.clicked.connect(self.handle_peak_data_changed)
+    def _setup_peak_data_file_buttons_clicked(self):
+        self.view.default_peak_data_checkbox.clicked.connect(self.handle_peak_data_checkbox_changed)
+        self.view.select_peak_data_file_button.clicked.connect(self.handle_select_peaks_data_file_button_clicked)
+        self.view.load_peak_data_file_button.clicked.connect(self.handle_load_peaks_data_file_button_clicked)
 
     # interact with periodic table
     def table_right_clicked(self, item):
@@ -151,7 +136,7 @@ class PeriodicTableWidget(object):
             self._plot_line(full_name, x_value, color, element)
 
     def _rm_line(self, name):
-        print("in remove line")
+        pass
 
     def get_color(self, element):
         """
@@ -206,40 +191,11 @@ class PeriodicTableWidget(object):
             self._remove_element_lines(element)
         self.peakpresenter.enable_deselect_elements_btn()
 
-        # general checked data
-
+    # general checked data
     def checked_data(self, element, selection, state):
         for checkbox in selection:
             checkbox.setChecked(state)
         self._update_peak_data(element)
-
-    # sets data file for periodic table
-    def select_data_file(self):
-
-        filename = QtWidgets.QFileDialog.getOpenFileName()
-        if isinstance(filename, tuple):
-            filename = filename[0]
-        filename = str(filename)
-        if filename:
-            self.ptable.set_peak_datafile(filename)
-        else:
-            self.default_peak_data_checkbox.blockSignals(True)
-            self.default_peak_data_checkbox.setChecked(True)
-            self.default_peak_data_checkbox.blockSignals(False)
-            return
-
-        try:
-            self._generate_element_widgets()
-        except ValueError:
-            message_box.warning(
-                'The file does not contain correctly formatted data, resetting to default data file.'
-                'See "https://docs.mantidproject.org/nightly/interfaces/'
-                'Muon%20Elemental%20Analysis.html" for more information.')
-            self.ptable.set_peak_datafile(None)
-            self._generate_element_widgets()
-            self.default_peak_data_checkbox.blockSignals(True)
-            self.default_peak_data_checkbox.setChecked(True)
-            self.default_peak_data_checkbox.blockSignals(False)
 
     def _update_checked_data(self):
         self.major_peaks_changed(self.peakpresenter.major)
@@ -247,14 +203,42 @@ class PeriodicTableWidget(object):
         self.gammas_changed(self.peakpresenter.gamma)
         self.electrons_changed(self.peakpresenter.electron)
 
-    def handle_peak_data_changed(self):
-        old_lines = deepcopy(list(self.element_lines.keys()))
-
-        if self.default_peak_data_checkbox.checkState():
-            self.ptable.set_peak_datafile(None)
-            self._generate_element_widgets()
+    def handle_peak_data_checkbox_changed(self):
+        if self.view.default_peak_data_checkbox.checkState():
+            self.view.set_select_peak_data_file_visible(False)
+            self.set_peak_data_file()
         else:
-            self.select_data_file()
+            self.view.set_select_peak_data_file_visible(True)
+            return
+
+    def handle_select_peaks_data_file_button_clicked(self):
+        filename = QtWidgets.QFileDialog.getOpenFileName()
+        if isinstance(filename, tuple):
+            filename = filename[0]
+        filename = str(filename)
+        if filename:
+            self.view.set_peak_data_file_label_text(filename)
+
+    def handle_load_peaks_data_file_button_clicked(self):
+        filename = self.view.peak_data_file_label.text()
+        self.set_peak_data_file(filename)
+
+    def set_peak_data_file(self, filename=None):
+        old_lines = deepcopy(list(self.element_lines.keys()))
+        if filename != self.loaded_file:
+            self.loaded_file = filename
+            self.ptable.set_peak_datafile(filename)
+            try:
+                self._generate_element_widgets()
+            except ValueError:
+                message_box.warning(
+                    'The file does not contain correctly formatted data, resetting to default data file.'
+                    'See "https://docs.mantidproject.org/nightly/interfaces/muon/'
+                    'Muon%20Elemental%20Analysis.html" for more information.')
+                self.ptable.set_peak_datafile(None)
+                self._generate_element_widgets()
+                self.loaded_file = None
+                self.view.set_peak_data_file_label_text()
 
         for element in old_lines:
             if element in self.element_widgets.keys():

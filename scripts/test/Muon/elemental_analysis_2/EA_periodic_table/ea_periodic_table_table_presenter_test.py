@@ -7,14 +7,14 @@
 import unittest
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
-from Muon.GUI.ElementalAnalysis2.periodic_table_widget import PeriodicTableWidget
+from Muon.GUI.ElementalAnalysis2.periodic_table_tab.periodic_table_tab_presenter import PeriodicTableTabPresenter
 
 
 @start_qapplication
-class PeriodicTableWidgetTest(unittest.TestCase):
+class PeriodicTableTabPresenterTest(unittest.TestCase):
 
     def setUp(self):
-        self.periodic_table = PeriodicTableWidget(None, context=mock.Mock())
+        self.periodic_table = PeriodicTableTabPresenter(mock.Mock(), mock.Mock())
 
     def test_will_fail(self):
         self.assertTrue(False)
