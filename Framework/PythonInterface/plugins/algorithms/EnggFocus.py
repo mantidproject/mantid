@@ -9,8 +9,6 @@ from mantid.api import *
 
 import EnggUtils
 
-ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
-
 
 class EnggFocus(PythonAlgorithm):
     INDICES_PROP_NAME = 'SpectrumNumbers'
@@ -65,7 +63,7 @@ class EnggFocus(PythonAlgorithm):
         self.setPropertyGroup('VanIntegrationWorkspace', vana_grp)
         self.setPropertyGroup('VanCurvesWorkspace', vana_grp)
 
-        self.declareProperty("Bank", '', StringListValidator(ENGINX_BANKS),
+        self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc="Which bank to focus: It can be specified as 1 or 2, or "
                                  "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
