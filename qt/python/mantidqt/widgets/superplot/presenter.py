@@ -351,6 +351,8 @@ class SuperplotPresenter:
                     color = artist.get_color()
                 except:
                     color = artist.lines[0].get_color()
+                if color == self._model.get_workspace_color(ws_name):
+                    self._model.set_workspace_color(ws_name, None)
                 self._view.modify_spectrum_label(ws_name, sp, label, color)
 
         # add selection to plot
@@ -371,6 +373,9 @@ class SuperplotPresenter:
                         kwargs["axis"] = MantidAxType.BIN
                         kwargs["wkspIndex"] = sp
 
+                    color = self._model.get_workspace_color(ws_name)
+                    if color:
+                        kwargs["color"] = color
                     if self._error_bars:
                         lines = axes.errorbar(ws, **kwargs)
                         label = lines.get_label()
@@ -379,7 +384,7 @@ class SuperplotPresenter:
                         lines = axes.plot(ws, **kwargs)
                         label = lines[0].get_label()
                         color = lines[0].get_color()
-                    self._view.modify_spectrum_label(ws_name, sp, label, color)
+                    self._model.set_workspace_color(ws_name, color)
 
         if selection or plotted_data:
             axes.set_axis_on()
