@@ -10,4 +10,5 @@ from mantidqt.utils.observer_pattern import Observable
 
 @dataclass
 class SansGuiObservable:
+    reduction_dim: Observable = Observable()
     save_options: Observable = Observable()

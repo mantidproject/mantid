@@ -12,6 +12,11 @@ class SaveOptionsObserver(GenericObserver):
     pass
 
 
+class DimensionalityObserver(GenericObserver):
+    pass
+
+
 @dataclass
 class RunTabObservers:
     save_options: SaveOptionsObserver
+    reduction_dim: DimensionalityObserver

@@ -218,8 +218,8 @@ class RunTabPresenterTest(unittest.TestCase):
                                     view=self._mock_view)
 
         self._mock_view.get_observable.assert_called_once()
-        mocked_view_observers.save_options.add_subscriber.\
-            assert_called_once_with(presenter._observers.save_options)
+        mocked_view_observers.reduction_dim.add_subscriber.assert_called_once_with(presenter._observers.reduction_dim)
+        mocked_view_observers.save_options.add_subscriber.assert_called_once_with(presenter._observers.save_options)
 
     def test_on_save_options_changed_called(self):
         self.view_observers.save_options.notify_subscribers()

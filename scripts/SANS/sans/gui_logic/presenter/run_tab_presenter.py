@@ -38,7 +38,8 @@ from sans.gui_logic.models.run_tab_model import RunTabModel
 from sans.gui_logic.models.settings_adjustment_model import SettingsAdjustmentModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel
-from sans.gui_logic.presenter.Observers.run_tab_observers import SaveOptionsObserver, RunTabObservers
+from sans.gui_logic.presenter.Observers.run_tab_observers import SaveOptionsObserver, RunTabObservers, \
+    DimensionalityObserver
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.presenter.masking_table_presenter import MaskingTablePresenter
@@ -268,10 +269,12 @@ class RunTabPresenter(PresenterCommon):
 
     def _register_observers(self):
         self._observers = RunTabObservers(
+            reduction_dim = DimensionalityObserver(callback=self.on_reduction_dimensionality_changed),
             save_options = SaveOptionsObserver(callback=self.on_save_options_change)
         )
 
         view_observable: SansGuiObservable = self._view.get_observable()
+        view_observable.reduction_dim.add_subscriber(self._observers.reduction_dim)
         view_observable.save_options.add_subscriber(self._observers.save_options)
 
     def default_gui_setup(self):
