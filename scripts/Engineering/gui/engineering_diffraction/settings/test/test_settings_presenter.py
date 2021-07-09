@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 import unittest
+from os import path
 
 from unittest import mock
 from Engineering.gui.engineering_diffraction.settings import settings_model, settings_view, settings_presenter
@@ -105,6 +106,10 @@ class SettingsPresenterTest(unittest.TestCase):
     def test_settings_not_changed_when_cancelled(self):
         self.presenter.close_dialog()
         self.model.set_settings_dict.assert_not_called()
+
+    def test_default_calib_file_correct_location(self):
+        print(settings_presenter.DEFAULT_SETTINGS["full_calibration"])
+        self.assertTrue(path.exists(settings_presenter.DEFAULT_SETTINGS["full_calibration"]))
 
 
 if __name__ == '__main__':
