@@ -511,13 +511,16 @@ void InstrumentWidgetPickTab::setSelectionType() {
   m_plotController->setPlotType(plotType);
   auto surface = m_instrWidget->getSurface();
   if (surface) {
+    auto previousInteractionMode = surface->getInteractionMode();
     surface->setInteractionMode(surfaceMode);
     auto interactionMode = surface->getInteractionMode();
-    if (interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode) {
-      updatePlotMultipleDetectors();
-    } else {
-      m_plot->clearAll();
-      m_plot->replot();
+    if (interactionMode != previousInteractionMode) {
+      if (interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode) {
+        updatePlotMultipleDetectors();
+      } else {
+        m_plot->clearAll();
+        m_plot->replot();
+      }
     }
     setPlotCaption();
   }
@@ -770,7 +773,19 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
     surface.getMaskedDetectors(dets);
     m_plotController->setPlotData(dets);
   } else {
-    m_plotController->clear();
+    std::vector<Mantid::detid_t> dets;
+    const auto &actor = m_instrWidget->getInstrumentActor();
+    dets = actor.getAllDetIDs();
+
+    std::vector<size_t> detsIds;
+    detsIds.reserve(dets.size());
+
+    for (auto id : dets) {
+      if (id >= 0)
+        detsIds.push_back(static_cast<size_t>(id));
+    }
+
+    m_plotController->setPlotData(detsIds);
   }
   m_plot->replot();
 }
