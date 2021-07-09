@@ -48,8 +48,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
       m_overplotMDHisto1DWithErrs(new QAction("Overplot 1D MDHistogram with errors...", this)),
       m_sampleMaterial(new QAction("Show Sample Material", this)), m_superplot(new QAction("Superplot...", this)),
       m_superplotWithErrs(new QAction("Superplot with errors...", this)),
-      m_superplotBins(new QAction("Superplot Bins...", this)),
-      m_superplotBinsWithErrs(new QAction("Superplot Bins With Errors...", this)) {
+      m_superplotBins(new QAction("Superplot bins...", this)),
+      m_superplotBinsWithErrs(new QAction("Superplot bins with errors...", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) { emit workspaceDoubleClicked(wsName); };
