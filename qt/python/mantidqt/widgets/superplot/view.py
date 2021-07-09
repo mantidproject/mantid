@@ -387,6 +387,7 @@ class SuperplotView(QWidget):
         Returns:
             (int, int): button width and height
         """
+        self._bottom_view.holdButton.adjustSize()
         size = self._bottom_view.holdButton.size()
         return size.width(), size.height()
 
