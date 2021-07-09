@@ -35,6 +35,11 @@ GET_POINTER_SPECIALIZATION(CSGObject)
 boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
   // PyArray_SimpleNewFromData doesn't interact well with smart pointers so use raw pointer
 
+  if (self->getShapeXML().find("infinite") != std::string::npos) {
+    throw std::runtime_error("Cannot plot Shapes of infinite extent.");
+    PyObject *ndarray = 0;
+    return object(handle<>(ndarray));
+  }
   auto localTriangulator = new GeometryTriangulator(self);
   auto vertices = localTriangulator->getTriangleVertices();
   auto triangles = localTriangulator->getTriangleFaces();
