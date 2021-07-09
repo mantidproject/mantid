@@ -110,9 +110,9 @@ class BasicFittingView(ui_form, base_widget):
         """Sets the allowed number of 'Undo Fit' events."""
         self.fit_controls.set_number_of_undos(number_of_undos)
 
-    def update_dataset_name_combo_box(self, dataset_names: list) -> None:
+    def update_dataset_name_combo_box(self, dataset_names: list, emit_signal: bool = True) -> None:
         """Update the data in the parameter display combo box."""
-        self.workspace_selector.update_dataset_name_combo_box(dataset_names)
+        self.workspace_selector.update_dataset_name_combo_box(dataset_names, emit_signal)
 
     def update_local_fit_status_and_chi_squared(self, fit_status: str, chi_squared: float) -> None:
         """Updates the view to show the status and results from a fit."""

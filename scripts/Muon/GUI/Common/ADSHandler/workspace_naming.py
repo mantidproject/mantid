@@ -134,8 +134,11 @@ def get_raw_data_directory(context, run):
         return context.data_context._base_run_name(run) + " Raw Data" + context.workspace_suffix + "/"
 
 
-def get_phase_table_workspace_name(raw_workspace, forward_group, backward_group):
-    workspace_name = raw_workspace.replace('_raw_data', '; PhaseTable')
+def get_phase_table_workspace_name(raw_workspace, forward_group, backward_group, new_name=""):
+    if new_name:
+        workspace_name = raw_workspace.replace('_raw_data', '; ' + new_name)
+    else:
+        workspace_name = raw_workspace.replace('_raw_data', '; PhaseTable')
     workspace_name += '; ' + forward_group + '; ' + backward_group
     return workspace_name
 

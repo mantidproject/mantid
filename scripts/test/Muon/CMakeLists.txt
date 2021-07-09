@@ -103,7 +103,6 @@ set ( TEST_PY_FILES
    muon_data_context_test.py
    muon_group_pair_context_test.py
    muon_gui_context_test.py
-   muon_period_info_widget_test.py
    phase_table_widget/phase_table_context_test.py
    phase_table_widget/phase_table_presenter_test.py
    plot_data_pane/plot_data_pane_model_test.py
@@ -113,8 +112,8 @@ set ( TEST_PY_FILES
    plot_fit_panes/plot_time_fit_pane_model_test.py
    plot_fit_panes/plot_fit_pane_presenter_test.py
    plot_fit_panes/plot_freq_fit_pane_model_test.py
-   plot_widget/plot_widget_model_test.py
-   plot_widget/plot_widget_presenter_test.py
+   plot_fit_panes/plot_model_fit_pane_model_test.py
+   plot_fit_panes/plot_model_fit_pane_presenter_test.py
    plotting_canvas/plot_color_queue_test.py
    plotting_canvas/plotting_canvas_model_test.py
    plotting_canvas/plotting_canvas_presenter_test.py

@@ -7,18 +7,6 @@
 
 from Muon.GUI.Common.contexts.plot_edit_context import PlotEditContext
 from typing import List
-from enum import Enum
-
-# do we need these?
-PlotModeStrings = ['Plot Data', 'Plot Fits']
-
-
-class PlotMode(Enum):
-    Data = 0
-    Fitting = 1
-
-    def __str__(self):
-        return PlotModeStrings[self.value]
 
 
 class PlottingContext(object):

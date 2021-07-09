@@ -20,6 +20,19 @@
                 "HDF5_ROOT": "$env{CONDA_PREFIX}",
                 "OpenSSL_ROOT": "$env{CONDA_PREFIX}"
             }
+        },
+        {
+            "name": "win",
+            "displayName": "win",
+            "description": "Default build options for a windows conda build",
+            "binaryDir": "${sourceDir}/build",
+            "generator": "Visual Studio 16 2019",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "CONDA_BUILD": true,
+                "HDF5_DIR": "$env{CONDA_PREFIX}/Library/cmake/hdf5"
+            }
         }
+
     ]
 }

@@ -19,6 +19,7 @@ class QWidget;
 
 class MockAlgorithmProgressWidget : public IAlgorithmProgressWidget {
 public:
+  virtual ~MockAlgorithmProgressWidget() = default;
   MOCK_METHOD(void, algorithmStarted, (), (override));
   MOCK_METHOD(void, algorithmEnded, (), (override));
   MOCK_METHOD(void, updateProgress, (const double, const QString &, const double, const int), (override));

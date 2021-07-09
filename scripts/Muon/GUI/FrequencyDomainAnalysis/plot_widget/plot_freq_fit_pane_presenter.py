@@ -8,8 +8,8 @@ from Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_presenter import PlotFit
 
 class PlotFreqFitPanePresenter(PlotFitPanePresenter):
 
-    def __init__(self, view, model, context,figure_presenter):
-        super().__init__(view, model, context,figure_presenter)
+    def __init__(self, view, model, context, fitting_context, figure_presenter):
+        super().__init__(view, model, context, fitting_context, figure_presenter)
         self._data_type = ["Frequency"]
         self._sort_by = [""]
         self.update_view()

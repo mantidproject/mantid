@@ -14,12 +14,11 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data, run_pre_processing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
-from Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws, apply_deadtime, calculate_diff_data
-from Muon.GUI.Common.muon_base_pair import MuonBasePair
+from Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws, apply_deadtime, \
+    calculate_diff_data, run_crop_workspace
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
-from Muon.GUI.Common.contexts.plotting_context import PlotMode
 from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper, WorkspaceGroupDefinition
 from mantidqt.utils.observer_pattern import Observable
@@ -51,8 +50,7 @@ class MuonContext(object):
 
         self.gui_context.update(
             {'LastGoodDataFromFile': True,
-             'selected_group_pair': '',
-             'PlotMode': PlotMode.Data})
+             'selected_group_pair': ''})
 
         self.update_view_from_model_notifier = Observable()
         self.update_plots_notifier = Observable()
@@ -192,6 +190,10 @@ class MuonContext(object):
         for run in self._data_context.current_runs:
             with WorkspaceGroupDefinition():
                 for pair_name in self._group_pair_context.pair_names:
+                    # Do not want to rename phasequad parts here
+                    if "_Re_" in pair_name or "_Im_" in pair_name:
+                        continue
+
                     run_as_string = run_list_to_string(run)
                     name = get_pair_asymmetry_name(
                         self,
@@ -219,20 +221,9 @@ class MuonContext(object):
         if(self._do_rebin()):
             self._calculate_pairs(rebin=True)
 
-    def _update_phasequads(self, rebin):
-        # lets remove the phasequad pairs
-        to_rm = []
-        for pair in self._group_pair_context.pairs:
-            if not isinstance(
-                    pair, MuonPair) and isinstance(
-                    pair, MuonBasePair):
-                to_rm.append(pair)
-        # this is to force a reset of phasequads
-        for pair in to_rm:
-            self.group_pair_context.remove_pair_from_selected_pairs(pair.name)
-        # lets remove the phasequads for now -> later will recalculate
-        for pair in self.group_pair_context.phasequads:
-            self.group_pair_context.remove_phasequad(pair)
+    def _update_phasequads(self, rebin=False):
+        for phasequad in self.group_pair_context.phasequads:
+            self.calculate_phasequads(phasequad.name, phasequad)
 
     def _calculate_pairs(self, rebin):
         for run in self._data_context.current_runs:
@@ -310,6 +301,10 @@ class MuonContext(object):
                 phasequad.name), run_string, rebin=rebin)
 
         parameters['InputWorkspace'] = self._run_deadtime(run_string, ws_name)
+        runs = self._data_context.current_runs
+        if runs:
+            parameters['InputWorkspace'] = run_crop_workspace(parameters['InputWorkspace'], self.first_good_data(runs[0]),
+                                                              self.last_good_data(runs[0]))
 
         phase_quad = run_PhaseQuad(parameters, ws_name)
         phase_quad = self._run_rebin(phase_quad, rebin)
@@ -319,7 +314,7 @@ class MuonContext(object):
 
     def _calculate_phasequads(self, name, phasequad_obj, rebin):
         for run in self._data_context.current_runs:
-            if self._data_context.num_periods(run) >1:
+            if self._data_context.num_periods(run) > 1:
                 raise ValueError("Cannot support multiple periods")
 
             ws_list = self.calculate_phasequad(phasequad_obj, run, rebin)
@@ -335,10 +330,8 @@ class MuonContext(object):
                 rebin=rebin)
 
     def _run_deadtime(self, run_string, output):
-        name =get_raw_data_workspace_name(self.data_context.instrument,
-                                          run_string,
-                                          multi_period=False,
-                                          workspace_suffix=self.workspace_suffix)
+        name = get_raw_data_workspace_name(self.data_context.instrument, run_string, multi_period=False,
+                                           workspace_suffix=self.workspace_suffix)
         if isinstance(run_string, str):
             run = wsName.get_first_run_from_run_string(run_string)
         dead_time_table = self._corrections_context.current_dead_time_table_name_for_run(self.data_context.instrument,
