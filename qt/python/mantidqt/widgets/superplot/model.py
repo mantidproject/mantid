@@ -61,10 +61,16 @@ class SuperplotModel(QObject):
     """
     _plot_mode = None
 
+    """
+    Colors of workspaces.
+    """
+    _ws_colors = None
+
     def __init__(self):
         super().__init__()
         self._workspaces = list()
         self._plotted_data = list()
+        self._ws_colors = dict()
         self._ads_observer = SuperplotAdsObserver()
         self._ads_observer.signals.sig_ws_deleted.connect(
                 self.on_workspace_deleted)
@@ -116,6 +122,31 @@ class SuperplotModel(QObject):
             list(str): list of workspace names
         """
         return self._workspaces.copy()
+
+    def set_workspace_color(self, ws_name, color):
+        """
+        Set the color of a workspace.
+
+        Args:
+            ws_name (str): workspace name
+            color (str): color (directly coming (and usable) from (by)
+                         matplotlib)
+        """
+        self._ws_colors[ws_name] = color
+
+    def get_workspace_color(self, ws_name):
+        """
+        Get the color of a workspace.
+
+        Args:
+            ws_name (str): workspace name
+
+        Returns:
+            (str): color or None
+        """
+        if ws_name in self._ws_colors:
+            return self._ws_colors[ws_name]
+        return None
 
     def set_bin_mode(self):
         """
