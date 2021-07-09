@@ -9,6 +9,7 @@
 #include "DllOption.h"
 #include "IGLDisplay.h"
 #include "IQtDisplay.h"
+#include "InstrumentDisplay.h"
 #include "InstrumentWidgetTypes.h"
 #include "QtConnect.h"
 #include "UnwrappedSurface.h"
@@ -62,6 +63,7 @@ class ProjectionSurface;
 
 namespace Detail {
 struct Dependencies {
+  std::unique_ptr<IInstrumentDisplay> instrumentDisplay = nullptr;
   std::unique_ptr<IQtDisplay> qtDisplay = nullptr;
   std::unique_ptr<IGLDisplay> glDisplay = nullptr;
   std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
@@ -286,10 +288,8 @@ protected:
   InstrumentWidgetTreeTab *m_treeTab;
   InstrumentWidgetPickTab *m_pickTab;
   XIntegrationControl *m_xIntegration;
-  /// The OpenGL widget to display the instrument
-  std::unique_ptr<IGLDisplay> m_glDisplay;
-  /// The simple widget to display the instrument
-  std::unique_ptr<IQtDisplay> m_qtDisplay;
+
+  std::unique_ptr<IInstrumentDisplay> m_instrumentDisplay;
 
   // Context menu actions
   QAction *m_clearPeakOverlays, *m_clearAlignment;
@@ -304,8 +304,7 @@ protected:
   bool m_useOpenGL;
   /// 3D view or unwrapped
   SurfaceType m_surfaceType;
-  /// Stacked layout managing m_glDisplay and m_qtDisplay
-  QStackedLayout *m_instrumentDisplayLayout;
+
   /// spectra index id
   int mSpectraIDSelected;
   /// detector id

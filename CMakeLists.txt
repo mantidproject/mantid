@@ -37,6 +37,9 @@ endif()
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
+# Conda build variable
+set(CONDA_BUILD FALSE CACHE BOOL "If True, proceed with a Conda build. Only relevant on Windows")
+
 # Ensure that if we are running any sanitizers the compiler options are
 # known in sub targets
 include(Sanitizers)

@@ -46,6 +46,7 @@ private:
   std::string getResultXAxisUnit() const override;
   std::string getResultLogName() const override;
   std::unordered_map<std::string, FqFitParameters> m_fqFitParameters;
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 
 } // namespace IDA

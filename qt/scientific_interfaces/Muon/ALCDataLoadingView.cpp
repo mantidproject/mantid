@@ -48,6 +48,7 @@ void ALCDataLoadingView::initialize() {
   connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsFoundSignal()));
   connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()), SIGNAL(manageDirectoriesClicked()));
   connect(m_ui.runsAutoAdd, SIGNAL(toggled(bool)), this, SLOT(runsAutoAddToggled(bool)));
+  connect(m_ui.periodInfo, SIGNAL(clicked()), SIGNAL(periodInfoClicked()));
 
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 

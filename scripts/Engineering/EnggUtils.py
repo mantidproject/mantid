@@ -12,6 +12,8 @@ from mantid.simpleapi import AnalysisDataService as ADS
 from matplotlib import gridspec
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
+ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
+
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
 

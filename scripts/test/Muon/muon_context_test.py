@@ -33,6 +33,10 @@ def return_list(name):
     return [name+"1", name+"2"]
 
 
+def crop_side_effect(name, xmin, xmax):
+    return name
+
+
 @start_qapplication
 class MuonContextTest(unittest.TestCase):
     def setUp(self):
@@ -379,100 +383,119 @@ class MuonContextTest(unittest.TestCase):
         self.assertEqual(self.context._calculate_diffs.call_count, 2)
 
     def test_update_phasequads(self):
-        phasequad = MuonPhasequad("test", "table")
+        phasequad = MuonPhasequad("test", "test_table")
         self.context.group_pair_context.add_phasequad(phasequad)
-        self.assertEqual(["long", "test_Re_", "test_Im_"],self.context.group_pair_context.pair_names)
-        self.assertEqual("test",self.context.group_pair_context._phasequad[0].name)
-        self.assertEqual(1,len(self.context.group_pair_context._phasequad))
+        self.context._calculate_phasequads = mock.Mock()
+        self.assertEqual(["long", "test_Re_", "test_Im_"], self.context.group_pair_context.pair_names)
+        self.assertEqual("test", self.context.group_pair_context._phasequad[0].name)
+        self.assertEqual(1, len(self.context.group_pair_context._phasequad))
 
         self.context._update_phasequads(False)
 
-        self.assertEqual(["long"],self.context.group_pair_context.pair_names)
-        self.assertEqual(0,len(self.context.group_pair_context._phasequad))
+        self.assertEqual(["long", "test_Re_", "test_Im_"], self.context.group_pair_context.pair_names)
+        self.assertEqual("test", self.context.group_pair_context._phasequad[0].name)
+        self.assertEqual(1, len(self.context.group_pair_context._phasequad))
+        self.assertEqual(1, self.context._calculate_phasequads.call_count)
 
     def test_calculate_phasequads(self):
         self.context._calculate_phasequads = mock.Mock()
         self.context._run_deadtime = mock.Mock(side_effect=run_side_effect)
         self.context._do_rebin = mock.Mock(return_value=False)
-        self.context.calculate_phasequads("test",mock.Mock())
+        self.context.calculate_phasequads("test", mock.Mock())
         self.assertEqual(1, self.context._calculate_phasequads.call_count)
 
         self.context._do_rebin.return_value=True
-        self.context.calculate_phasequads("test",mock.Mock())
+        self.context.calculate_phasequads("test", mock.Mock())
         # 2 + 1
         self.assertEqual(3, self.context._calculate_phasequads.call_count)
 
     @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
     @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
-    def test_calculate_phasequad(self, split_mock, run_mock):
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
+    def test_calculate_phasequad(self, crop_mock, split_mock, run_mock):
+        table = "test_table"
+        phasequad = MuonPhasequad("test", table)
+        name = "EMU5234; PhaseQuad; test_Re__Im_; MA"
+        self.context._run_deadtime = mock.Mock(return_value=name)
+        self.context.data_context._current_runs = [5234]
+        run_mock.side_effect = run_side_effect
+        self.context._run_rebin = mock.Mock(side_effect=rebin_side_effect)
+        split_mock.side_effect = return_list
+        crop_mock.side_effect = crop_side_effect
+
+        result = self.context.calculate_phasequad(phasequad, 5234, False)
+        # names are wrong due to split mock
+        self.assertEqual(result, [name+"1", name+"2"])
+        self.context._run_rebin.assert_called_with(name, False)
+        run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': name}, name)
+        split_mock.assert_called_with(name)
+        crop_mock.assert_called_with(name, 0.0, 0.0)
+
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
+    def test_calculate_phasequad_rebin(self, crop_mock, split_mock, run_mock):
+        table = "test_table"
+        name = "EMU5234; PhaseQuad; test_Re__Im_; Rebin; MA"
+        self.context._run_deadtime = mock.Mock(return_value=name)
+        self.context.data_context._current_runs = [5234]
+        phasequad = MuonPhasequad("test", table)
+        run_mock.side_effect = run_side_effect
+        self.context._run_rebin = mock.Mock(side_effect=rebin_side_effect)
+        split_mock.side_effect = return_list
+        crop_mock.side_effect = crop_side_effect
+
+        result = self.context.calculate_phasequad(phasequad, 5234, True)
+        # names are wrong due to split mock
+        self.assertEqual(result, [name+"1", name+"2"])
+        self.context._run_rebin.assert_called_with(name, True)
+        run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': name}, name)
+        split_mock.assert_called_with(name)
+        crop_mock.assert_called_with(name, 0.0, 0.0)
+
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
+    def test_calculate_phasequad_deadtime(self, crop_mock, split_mock, run_mock):
         table = "test_table"
         phasequad = MuonPhasequad("test",table)
-        self.context._run_deadtime = mock.Mock(return_value = 'EMU5234_raw_data MA')
+        self.context._run_deadtime = mock.Mock(side_effect=run_side_effect)
+        self.context.data_context._current_runs = [5234]
         run_mock.side_effect = run_side_effect
-        self.context._run_rebin =mock.Mock(side_effect=rebin_side_effect)
+        self.context._run_rebin = mock.Mock(side_effect=rebin_side_effect)
         split_mock.side_effect = return_list
+        crop_mock.side_effect = crop_side_effect
 
         result = self.context.calculate_phasequad(phasequad, 5234, False)
         # names are wrong due to split mock
         name = "EMU5234; PhaseQuad; test_Re__Im_; MA"
         self.assertEqual(result, [name+"1", name+"2"])
         self.context._run_rebin.assert_called_with(name, False)
-        run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': 'EMU5234_raw_data MA' }, name)
+        run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': name}, name)
         split_mock.assert_called_with(name)
+        crop_mock.asser_called_with(name, 0.0, 0.0)
 
     @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
     @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
-    def test_calculate_phasequad_rebin(self, split_mock, run_mock):
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
+    def test_calculate_phasequad_rebin_deadtime(self, crop_mock, split_mock, run_mock):
         table = "test_table"
-        self.context._run_deadtime = mock.Mock(return_value = 'EMU5234_raw_data MA')
-        phasequad = MuonPhasequad("test",table)
+        self.context._run_deadtime = mock.Mock(side_effect=run_side_effect)
+        self.context.data_context._current_runs = [5234]
+        phasequad = MuonPhasequad("test", table)
         run_mock.side_effect = run_side_effect
-        self.context._run_rebin =mock.Mock(side_effect=rebin_side_effect)
+        self.context._run_rebin = mock.Mock(side_effect=rebin_side_effect)
         split_mock.side_effect = return_list
+        crop_mock.side_effect = crop_side_effect
 
         result = self.context.calculate_phasequad(phasequad, 5234, True)
         # names are wrong due to split mock
         name = "EMU5234; PhaseQuad; test_Re__Im_; Rebin; MA"
         self.assertEqual(result, [name+"1", name+"2"])
         self.context._run_rebin.assert_called_with(name, True)
-        run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': 'EMU5234_raw_data MA' }, name)
+        run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': name}, name)
         split_mock.assert_called_with(name)
-
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
-    def test_calculate_phasequad_deadtime(self, split_mock, run_mock):
-        table = "test_table"
-        phasequad = MuonPhasequad("test",table)
-        self.context._run_deadtime = mock.Mock(side_effect=run_side_effect)
-        run_mock.side_effect = run_side_effect
-        self.context._run_rebin =mock.Mock(side_effect=rebin_side_effect)
-        split_mock.side_effect = return_list
-
-        result = self.context.calculate_phasequad(phasequad, 5234, False)
-        # names are wrong due to split mock
-        name = "EMU5234; PhaseQuad; test_Re__Im_; MA"
-        self.assertEqual(result, [name+"1", name+"2"])
-        self.context._run_rebin.assert_called_with(name, False)
-        run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': name }, name)
-        split_mock.assert_called_with(name)
-
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
-    def test_calculate_phasequad_rebin_deadtime(self, split_mock, run_mock):
-        table = "test_table"
-        self.context._run_deadtime = mock.Mock(side_effect=run_side_effect)
-        phasequad = MuonPhasequad("test",table)
-        run_mock.side_effect = run_side_effect
-        self.context._run_rebin =mock.Mock(side_effect=rebin_side_effect)
-        split_mock.side_effect = return_list
-
-        result = self.context.calculate_phasequad(phasequad, 5234, True)
-        # names are wrong due to split mock
-        name = "EMU5234; PhaseQuad; test_Re__Im_; Rebin; MA"
-        self.assertEqual(result, [name+"1", name+"2"])
-        self.context._run_rebin.assert_called_with(name, True)
-        run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': name }, name)
-        split_mock.assert_called_with(name)
+        crop_mock.assert_called_with(name, 0.0, 0.0)
 
     @mock.patch('Muon.GUI.Common.contexts.muon_context.get_raw_data_workspace_name')
     @mock.patch('Muon.GUI.Common.contexts.muon_context.apply_deadtime')

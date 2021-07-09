@@ -23,7 +23,7 @@ private:
   void run() override;
   void setup() override;
   bool validate() override;
-  void loadSettings(const QSettings &settings) override;
+  void loadTabSettings(const QSettings &settings);
   void setFileExtensionsByName(bool filter) override;
 
   bool isErrorsEnabled();
