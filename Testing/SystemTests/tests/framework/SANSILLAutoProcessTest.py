@@ -457,7 +457,7 @@ class D11B_AutoProcess_DirectBeamResolution_Test(systemtesting.MantidSystemTest)
         )
 
 
-class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
+class D33_AutoProcess_Panels_Test(systemtesting.MantidSystemTest):
     """
     Tests auto process with D33 monochromatic data
     One sample at one angle, with separation of the panels
@@ -465,7 +465,7 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
     """
 
     def __init__(self):
-        super(D33_AutoProcess_Test, self).__init__()
+        super(D33_AutoProcess_Panels_Test, self).__init__()
         self.setUp()
 
     def setUp(self):
@@ -507,7 +507,13 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
             TransmissionBeamRadius=0.05
         )
 
-        GroupWorkspaces(InputWorkspaces=['iq', 'iq_panels'], OutputWorkspace='out')
+        GroupWorkspaces(InputWorkspaces=['iq',
+                                         'iq_back_detector',
+                                         'iq_front_detector_bottom',
+                                         'iq_front_detector_left',
+                                         'iq_front_detector_right',
+                                         'iq_front_detector_top'],
+                                         OutputWorkspace='out')
 
 
 class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
@@ -554,15 +560,13 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
             ContainerTransmissionRuns=can_tr,
             TransmissionBeamRuns=tr_beam,
             OutputWorkspace='iphiq',
-            OutputPanels=True,
             NumberOfWedges=60,
             OutputType='I(Phi,Q)',
             BeamRadius=0.05,
             TransmissionBeamRadius=0.05
         )
 
-        GroupWorkspaces(InputWorkspaces=['iphiq', 'iphiq_panels'],
-                        OutputWorkspace='out')
+        GroupWorkspaces(InputWorkspaces=['iphiq'], OutputWorkspace='out')
 
 
 class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
@@ -589,7 +593,7 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking.append("Instrument")
-        return ['iq', 'ILL_D16_Gamma_scan.nxs']
+        return ['iq', 'D16_Gamma_scan.nxs']
 
     def runTest(self):
         water = '3659, 3663, 3667'
