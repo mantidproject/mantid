@@ -7,14 +7,14 @@
 from mantid.py36compat import dataclass
 
 from mantid.api import FunctionFactory, IFunction
-from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
 from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, RUNS_ALL, GROUPS_ALL)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
+from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
 
+BACKGROUND_PARAM = "A0"
 DEFAULT_X_LOWER = 0.0
 DEFAULT_X_UPPER = 100.0
-X_OFFSET = 0.001
 
 
 @dataclass
@@ -121,22 +121,22 @@ class BackgroundCorrectionsModel:
 
     def selected_correction_data(self) -> tuple:
         """Returns lists of the selected correction data to display in the view."""
-        runs, groups, start_xs, end_xs, a0s, a0_errors = self._selected_correction_data_for(
+        runs, groups, start_xs, end_xs, backgrounds, background_errors = self._selected_correction_data_for(
             self._selected_runs(), self._selected_groups())
-        return runs, groups, start_xs, end_xs, a0s, a0_errors
+        return runs, groups, start_xs, end_xs, backgrounds, background_errors
 
     def _selected_correction_data_for(self, selected_runs: list, selected_groups: list) -> tuple:
         """Returns lists of the selected correction data to display in the view."""
-        runs_list, groups_list, start_xs, end_xs, a0s, a0_errors = [], [], [], [], [], []
+        runs_list, groups_list, start_xs, end_xs, backgrounds, background_errors = [], [], [], [], [], []
         for run_group, correction_data in self._corrections_context.background_correction_data.items():
             if run_group[0] in selected_runs and run_group[1] in selected_groups:
                 runs_list.append(run_group[0])
                 groups_list.append(run_group[1])
                 start_xs.append(correction_data.start_x)
                 end_xs.append(correction_data.end_x)
-                a0s.append(correction_data.flat_background.getParameterValue("A0"))
-                a0_errors.append(correction_data.flat_background.getError("A0"))
-        return runs_list, groups_list, start_xs, end_xs, a0s, a0_errors
+                backgrounds.append(correction_data.flat_background.getParameterValue(BACKGROUND_PARAM))
+                background_errors.append(correction_data.flat_background.getError(BACKGROUND_PARAM))
+        return runs_list, groups_list, start_xs, end_xs, backgrounds, background_errors
 
     def _selected_runs(self) -> list:
         """Returns a list containing the run number strings that are currently selected."""
@@ -166,17 +166,4 @@ class BackgroundCorrectionsModel:
 
     def x_limits_of_workspace(self, run: str, group: str) -> tuple:
         """Returns the x data limits of the workspace associated with the provided Run and Group."""
-        return self._x_limits_of_workspace(self._get_counts_workspace_name(run, group))
-
-    @staticmethod
-    def _x_limits_of_workspace(workspace_name: str) -> tuple:
-        """Returns the x data limits of a provided workspace."""
-        if workspace_name is not None and check_if_workspace_exist(workspace_name):
-            x_data = retrieve_ws(workspace_name).dataX(0)
-            if len(x_data) > 0:
-                x_data.sort()
-                x_lower, x_higher = x_data[0], x_data[-1]
-                if x_lower == x_higher:
-                    return x_lower - X_OFFSET, x_higher + X_OFFSET
-                return x_lower, x_higher
-        return DEFAULT_X_LOWER, DEFAULT_X_UPPER
+        return x_limits_of_workspace(self._get_counts_workspace_name(run, group), (DEFAULT_X_LOWER, DEFAULT_X_UPPER))

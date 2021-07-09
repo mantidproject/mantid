@@ -162,12 +162,13 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Returns the Start X associated with the provided Run and Group."""
         return float(self._table_item_value_for(run, group, END_X_COLUMN_INDEX))
 
-    def populate_corrections_table(self, runs: list, groups: list, start_xs: list, end_xs: list, a0s: list,
-                                   a0_errors: list) -> None:
+    def populate_corrections_table(self, runs: list, groups: list, start_xs: list, end_xs: list, backgrounds: list,
+                                   background_errors: list) -> None:
         """Populates the background corrections table with the provided data."""
         self.correction_options_table.blockSignals(True)
         self.correction_options_table.setRowCount(0)
-        for run, group, start_x, end_x, a0, a0_error in zip(runs, groups, start_xs, end_xs, a0s, a0_errors):
+        for run, group, start_x, end_x, background, background_error in zip(runs, groups, start_xs, end_xs, backgrounds,
+                                                                            background_errors):
             row = self.correction_options_table.rowCount()
             self.correction_options_table.insertRow(row)
             self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, self._create_table_item(run, False))
@@ -175,9 +176,9 @@ class BackgroundCorrectionsView(widget, ui_form):
             self.correction_options_table.setItem(row, START_X_COLUMN_INDEX, self._create_double_table_item(start_x))
             self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, self._create_double_table_item(end_x))
             self.correction_options_table.setItem(row, A0_COLUMN_INDEX,
-                                                  self._create_double_table_item(a0, enabled=False))
+                                                  self._create_double_table_item(background, enabled=False))
             self.correction_options_table.setItem(row, A0_ERROR_COLUMN_INDEX,
-                                                  self._create_double_table_item(a0_error, enabled=False))
+                                                  self._create_double_table_item(background_error, enabled=False))
         self.correction_options_table.blockSignals(False)
 
     def _setup_corrections_table(self) -> None:

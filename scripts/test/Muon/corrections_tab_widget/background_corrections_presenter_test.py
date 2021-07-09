@@ -64,17 +64,22 @@ class BackgroundCorrectionsPresenterTest(unittest.TestCase):
         self.presenter._update_displayed_corrections_data.assert_called_once_with()
 
     def test_that_handle_mode_combo_box_changed_will_update_the_model_and_view(self):
+        self.assertEqual(self.view.background_correction_mode, "None")
+        self.assertTrue(self.model.is_background_mode_none())
+
         self.presenter.handle_mode_combo_box_changed()
 
-        self.mock_view_background_correction_mode.assert_called_once_with()
+        self.mock_view_background_correction_mode.assert_called_with()
         self.model.set_background_correction_mode.assert_called_once_with("None")
-        self.model.is_background_mode_none.assert_called_once_with()
+        self.model.is_background_mode_none.assert_called_with()
         self.view.set_background_correction_options_visible.assert_called_once_with(False)
 
     def test_that_handle_select_function_combo_box_changed_will_update_the_model(self):
+        self.assertEqual(self.view.selected_function, "Flat Background")
+
         self.presenter.handle_select_function_combo_box_changed()
 
-        self.mock_view_selected_function.assert_called_once_with()
+        self.mock_view_selected_function.assert_called_with()
         self.model.set_selected_function.assert_called_once_with("Flat Background")
 
     def test_that_handle_selected_group_changed_will_update_the_model(self):
