@@ -539,7 +539,7 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking.append("Instrument")
-        return ['out', 'D33_AutoProcess_IPhiQ_Reference.nxs']
+        return ['iphiq', 'D33_AutoProcess_IPhiQ_Reference.nxs']
 
     def runTest(self):
 
@@ -565,8 +565,6 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
             BeamRadius=0.05,
             TransmissionBeamRadius=0.05
         )
-
-        GroupWorkspaces(InputWorkspaces=['iphiq'], OutputWorkspace='out')
 
 
 class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
