@@ -15,6 +15,11 @@ class TestRunTabModel(unittest.TestCase):
     def setUp(self) -> None:
         self.model = RunTabModel()
 
+    def test_constructor_sets_defaults(self):
+        self.assertEqual(ReductionDimensionality.ONE_DIM, self.model.get_reduction_mode())
+        # Represents default save opts for 1D
+        self.assertEqual(SaveOptions(can_sas_1d=True), self.model.get_save_types())
+
     def test_setting_save_types_marks_as_user_set(self):
         default_options = SaveOptions()
         self.assertFalse(default_options.user_modified)

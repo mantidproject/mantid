@@ -14,6 +14,8 @@ class RunTabModel:
         self._reduction_mode: ReductionDimensionality = ReductionDimensionality.ONE_DIM
         self._save_types = SaveOptions()
 
+        self._set_save_opts_for_reduction_mode(self._reduction_mode)
+
     def get_save_types(self):
         return self._save_types
 
