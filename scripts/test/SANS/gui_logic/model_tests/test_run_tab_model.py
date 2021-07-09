@@ -27,6 +27,20 @@ class TestRunTabModel(unittest.TestCase):
             self.model.update_reduction_mode(mode)
             self.assertEqual(mode, self.model.get_reduction_mode())
 
+    def test_reduction_mode_updates_save_opts(self):
+        for mode, expected in [(ReductionDimensionality.TWO_DIM, SaveOptions(nxs_can_sas=True)),
+                               (ReductionDimensionality.ONE_DIM, SaveOptions(can_sas_1d=True))]:
+            self.model.update_reduction_mode(mode)
+            self.assertEqual(expected, self.model.get_save_types())
+
+    def test_reduction_mode_skips_update_with_custom_save(self):
+        expected = SaveOptions(nxs_can_sas=True, rkh=True, user_modified=True)
+        self.model.update_save_types(expected)
+
+        for mode in [ReductionDimensionality.ONE_DIM, ReductionDimensionality.TWO_DIM]:
+            self.model.update_reduction_mode(mode)
+            self.assertEqual(expected, self.model.get_save_types())
+
 
 if __name__ == '__main__':
     unittest.main()
