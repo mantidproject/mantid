@@ -11,26 +11,10 @@ from mantid.simpleapi import CloneWorkspace
 from Muon.GUI.Common import message_box
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, remove_ws_if_present
 from Muon.GUI.Common.utilities.algorithm_utils import rebin_ws
-from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver, _catch_exceptions
+from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
 
 REBINNED_FIXED_WS_SUFFIX = "_EA_Rebinned_Fixed"
 REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
-
-
-class EAContextADSObserver(MuonContextADSObserver):
-
-    def __init__(self, delete_callback, clear_callback, replace_callback):
-        super(EAContextADSObserver, self).__init__(delete_callback, clear_callback, replace_callback)
-
-    @_catch_exceptions
-    def deleteHandle(self, workspace_name, workspace):
-        """
-        Called when the ADS has deleted a workspace. Removes that workspace from the context and cleans up.
-        :param workspace_name: The name of the workspace (not used)
-        :param workspace: The workspace object
-        """
-
-        self.delete_callback(workspace)
 
 
 class ElementalAnalysisContext(object):
@@ -43,9 +27,10 @@ class ElementalAnalysisContext(object):
         self._group_context = ea_group_context
         self._plot_panes_context = plot_panes_context
         self.workspace_suffix = workspace_suffix
-        self.ads_observer = EAContextADSObserver(delete_callback=self.remove_workspace,
-                                                 clear_callback=self.clear_context,
-                                                 replace_callback=self.workspace_replaced)
+        self.ads_observer = MuonContextADSObserver(delete_callback=self.remove_workspace,
+                                                   clear_callback=self.clear_context,
+                                                   replace_callback=self.workspace_replaced,
+                                                   delete_group_callback=self.remove_workspace)
 
         self.update_view_from_model_notifier = GenericObservable()
         self.update_plots_notifier = GenericObservable()

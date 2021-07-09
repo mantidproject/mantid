@@ -45,7 +45,7 @@ class EAPlotDataPaneModel(BasePaneModel):
         :param is_raw: Whether to use raw or rebinned data
         :return: a list of workspace names
         """
-        self.get_workspace_list(group_names, is_raw)
+        return self.get_workspace_list(group_names, is_raw)
 
     def get_workspace_list(self, group_names, is_raw):
         """
@@ -97,7 +97,6 @@ class EAPlotDataPaneModel(BasePaneModel):
         else:
             runs_present = []
             for group_name in self.context.group_context.selected_groups:
-                print(group_name)
                 group = self.context.group_context[group_name]
                 runs_present.append(group.run_number)
             keys = sorted(list(set(runs_present)), key=lambda element: int(element))
