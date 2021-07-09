@@ -14,8 +14,8 @@ from mantid.plots.utility import MantidAxType, legend_set_draggable
 
 class SuperplotPresenter:
 
-    BIN_MODE_TEXT = "Bin"
-    SPECTRUM_MODE_TEXT = "Spectrum"
+    BIN_MODE_TEXT = "Column (bin)"
+    SPECTRUM_MODE_TEXT = "Row (spectrum)"
     HOLD_BUTTON_TEXT_CHECKED = "Remove"
     HOLD_BUTTON_TEXT_UNCHECKED = "Add"
     _view = None
