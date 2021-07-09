@@ -63,7 +63,6 @@ class CorrectionsPresenterTest(unittest.TestCase):
         self.view.current_run_string.assert_called_once_with()
         self.model.set_current_run_string.assert_called_once_with(self.current_run_string)
         self.mock_model_number_of_run_strings.assert_called_once_with()
-        self.presenter.background_presenter.handle_runs_loaded.assert_called_once_with()
 
     def test_that_handle_runs_loaded_will_disable_the_view_if_there_are_no_runs_loaded(self):
         run_strings = []
@@ -77,7 +76,6 @@ class CorrectionsPresenterTest(unittest.TestCase):
 
         self.mock_model_number_of_run_strings.assert_called_once_with()
         self.view.disable_view.assert_called_once_with()
-        self.presenter.background_presenter.handle_runs_loaded.assert_called_once_with()
 
     def test_that_handle_runs_loaded_will_enable_the_view_if_there_are_runs_loaded(self):
         self.model.run_number_strings = mock.Mock(return_value=self.run_strings)
@@ -87,7 +85,6 @@ class CorrectionsPresenterTest(unittest.TestCase):
 
         self.mock_model_number_of_run_strings.assert_called_once_with()
         self.view.enable_view.assert_called_once_with()
-        self.presenter.background_presenter.handle_runs_loaded.assert_called_once_with()
 
     def test_that_handle_run_selector_changed_will_update_the_run_string_in_the_model(self):
         self.view.current_run_string = mock.Mock(return_value=self.current_run_string)
@@ -99,9 +96,10 @@ class CorrectionsPresenterTest(unittest.TestCase):
         self.presenter.dead_time_presenter.handle_run_selector_changed.assert_called_once_with()
         self.presenter.background_presenter.handle_run_selector_changed.assert_called_once_with()
 
-    def test_that_handle_corrections_complete_will_update_the_dead_time_label_in_the_view(self):
-        self.presenter.handle_corrections_complete()
-        self.presenter.dead_time_presenter.handle_corrections_complete.assert_called_once_with()
+    def test_that_handle_pre_process_and_grouping_complete_will_update_the_dead_time_label_in_the_view(self):
+        self.presenter.handle_pre_process_and_grouping_complete()
+        self.presenter.dead_time_presenter.handle_pre_process_and_grouping_complete.assert_called_once_with()
+        self.presenter.background_presenter.handle_pre_process_and_grouping_complete.assert_called_once_with()
 
     def test_that_handle_groups_changed_will_notify_the_background_corrections_presenter(self):
         self.presenter.handle_groups_changed()
@@ -134,13 +132,14 @@ class CorrectionsPresenterTest(unittest.TestCase):
         self.presenter.dead_time_presenter.handle_ads_clear_or_remove_workspace_event = mock.Mock()
         self.presenter.dead_time_presenter.handle_instrument_changed = mock.Mock()
         self.presenter.dead_time_presenter.handle_run_selector_changed = mock.Mock()
-        self.presenter.dead_time_presenter.handle_corrections_complete = mock.Mock()
+        self.presenter.dead_time_presenter.handle_pre_process_and_grouping_complete = mock.Mock()
 
         self.presenter.background_presenter.initialize_model_options = mock.Mock()
         self.presenter.background_presenter.handle_instrument_changed = mock.Mock()
         self.presenter.background_presenter.handle_runs_loaded = mock.Mock()
         self.presenter.background_presenter.handle_run_selector_changed = mock.Mock()
         self.presenter.background_presenter.handle_groups_changed = mock.Mock()
+        self.presenter.background_presenter.handle_pre_process_and_grouping_complete = mock.Mock()
 
         self.presenter._handle_selected_table_is_invalid = mock.Mock()
 

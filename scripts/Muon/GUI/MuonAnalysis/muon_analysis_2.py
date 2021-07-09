@@ -438,7 +438,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
     def setup_on_recalulation_finished_notifier(self):
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.corrections_tab.corrections_tab_presenter.corrections_complete_observer)
+            self.corrections_tab.corrections_tab_presenter.pre_process_and_grouping_complete_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.input_workspace_observer)

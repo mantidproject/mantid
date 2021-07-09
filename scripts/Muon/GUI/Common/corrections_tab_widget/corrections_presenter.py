@@ -31,7 +31,7 @@ class CorrectionsPresenter(QObject):
         self.dead_time_model = DeadTimeCorrectionsModel(model, context.data_context, context.corrections_context)
         self.dead_time_presenter = DeadTimeCorrectionsPresenter(self.view.dead_time_view, self.dead_time_model, self)
 
-        self.background_model = BackgroundCorrectionsModel(model, context, context.corrections_context)
+        self.background_model = BackgroundCorrectionsModel(model, context)
         self.background_presenter = BackgroundCorrectionsPresenter(self.view.background_view, self.background_model,
                                                                    self)
 
@@ -44,7 +44,7 @@ class CorrectionsPresenter(QObject):
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
         self.load_observer = GenericObserver(self.handle_runs_loaded)
         self.group_change_observer = GenericObserver(self.handle_groups_changed)
-        self.corrections_complete_observer = GenericObserver(self.handle_corrections_complete)
+        self.pre_process_and_grouping_complete_observer = GenericObserver(self.handle_pre_process_and_grouping_complete)
 
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
@@ -85,8 +85,6 @@ class CorrectionsPresenter(QObject):
         else:
             self.view.enable_view()
 
-        self.background_presenter.handle_runs_loaded()
-
     def handle_groups_changed(self) -> None:
         """Handles when the selected groups have changed in the grouping tab."""
         self.background_presenter.handle_groups_changed()
@@ -97,9 +95,10 @@ class CorrectionsPresenter(QObject):
         self.dead_time_presenter.handle_run_selector_changed()
         self.background_presenter.handle_run_selector_changed()
 
-    def handle_corrections_complete(self) -> None:
-        """When the corrections have been calculated, update the displayed correction data."""
-        self.dead_time_presenter.handle_corrections_complete()
+    def handle_pre_process_and_grouping_complete(self) -> None:
+        """Handles when MuonPreProcess and grouping has been completed."""
+        self.dead_time_presenter.handle_pre_process_and_grouping_complete()
+        self.background_presenter.handle_pre_process_and_grouping_complete()
 
     def current_run_string(self) -> str:
         """Returns the currently selected run string."""

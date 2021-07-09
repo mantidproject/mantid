@@ -47,9 +47,11 @@ class BackgroundCorrectionsPresenterTest(unittest.TestCase):
         self.mock_view_background_correction_mode.assert_called_once_with("None")
         self.mock_view_selected_function.assert_called_once_with("Flat Background")
 
-    def test_that_handle_runs_loaded_will_populate_the_background_corrections_data(self):
-        self.presenter.handle_runs_loaded()
+    def test_that_handle_pre_process_and_grouping_complete_will_populate_the_background_corrections_data(self):
+        self.presenter.handle_pre_process_and_grouping_complete()
+
         self.model.populate_background_corrections_data.assert_called_once_with()
+        self.presenter._update_displayed_corrections_data.assert_called_once_with()
 
     def test_that_handle_groups_changed_will_populate_the_group_selector(self):
         self.presenter.handle_groups_changed()

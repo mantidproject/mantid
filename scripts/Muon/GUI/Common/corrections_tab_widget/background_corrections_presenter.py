@@ -38,10 +38,12 @@ class BackgroundCorrectionsPresenter:
         self.model.set_selected_function(FLAT_BACKGROUND)
         self.view.background_correction_mode = BACKGROUND_MODE_NONE
         self.view.selected_function = FLAT_BACKGROUND
+        self.model.clear_background_corrections_data()
 
-    def handle_runs_loaded(self) -> None:
-        """Handles when new run numbers are loaded into the interface."""
+    def handle_pre_process_and_grouping_complete(self) -> None:
+        """Handles when MuonPreProcess and grouping has been completed."""
         self.model.populate_background_corrections_data()
+        self._update_displayed_corrections_data()
 
     def handle_groups_changed(self) -> None:
         """Handles when the selected groups have changed in the grouping tab."""

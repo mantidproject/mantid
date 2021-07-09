@@ -8,13 +8,10 @@ from mantid.py36compat import dataclass
 
 from mantid.api import FunctionFactory, IFunction
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
-from Muon.GUI.Common.contexts.corrections_context import (CorrectionsContext, BACKGROUND_MODE_NONE, RUNS_ALL,
-                                                          GROUPS_ALL)
+from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, RUNS_ALL, GROUPS_ALL)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
 
-DEFAULT_START_X = 5.0
-DEFAULT_END_X = 15.0
 DEFAULT_X_LOWER = 0.0
 DEFAULT_X_UPPER = 100.0
 X_OFFSET = 0.001
@@ -25,10 +22,14 @@ class BackgroundCorrectionData:
     """
     The background correction data associated with a specific group of a run.
     """
-    start_x: float = DEFAULT_START_X
-    end_x: float = DEFAULT_END_X
+    start_x: float
+    end_x: float
     flat_background: IFunction = FunctionFactory.createFunction("FlatBackground")
     exp_decay: IFunction = FunctionFactory.createFunction("ExpDecay")
+
+    def __init__(self, start_x: float, end_x: float):
+        self.start_x = start_x
+        self.end_x = end_x
 
 
 class BackgroundCorrectionsModel:
@@ -36,12 +37,11 @@ class BackgroundCorrectionsModel:
     The BackgroundCorrectionsModel calculates Background corrections.
     """
 
-    def __init__(self, corrections_model: CorrectionsModel, context: MuonContext,
-                 corrections_context: CorrectionsContext):
+    def __init__(self, corrections_model: CorrectionsModel, context: MuonContext):
         """Initialize the BackgroundCorrectionsModel with empty data."""
         self._corrections_model = corrections_model
         self._context = context
-        self._corrections_context = corrections_context
+        self._corrections_context = context.corrections_context
 
     def set_background_correction_mode(self, mode: str) -> None:
         """Sets the current background correction mode in the context."""
@@ -82,7 +82,8 @@ class BackgroundCorrectionsModel:
         run_group = tuple([run, group])
         if run_group in self._corrections_context.background_correction_data:
             return self._corrections_context.background_correction_data[run_group].start_x
-        return DEFAULT_START_X
+
+        raise RuntimeError(f"The provided run and group could not be found ({run}, {group}).")
 
     def set_end_x(self, run: str, group: str, end_x: float) -> None:
         """Sets the End X associated with the provided Run and Group."""
@@ -95,20 +96,28 @@ class BackgroundCorrectionsModel:
         run_group = tuple([run, group])
         if run_group in self._corrections_context.background_correction_data:
             return self._corrections_context.background_correction_data[run_group].end_x
-        return DEFAULT_END_X
+
+        raise RuntimeError(f"The provided run and group could not be found ({run}, {group}).")
 
     @staticmethod
     def is_equal_to_n_decimals(value1: float, value2: float, n_decimals: int) -> bool:
         """Checks that two floats are equal up to n decimal places."""
         return f"{value1:.{n_decimals}f}" == f"{value2:.{n_decimals}f}"
 
+    def clear_background_corrections_data(self) -> None:
+        """Clears the background correction data dictionary."""
+        self._corrections_context.background_correction_data = {}
+
     def populate_background_corrections_data(self) -> None:
         """Populates the background correction data dictionary when runs are initially loaded into the interface."""
-        self._corrections_context.background_correction_data = {}
         groups = self.group_names()
         for run in self._corrections_model.run_number_strings():
             for group in groups:
-                self._corrections_context.background_correction_data[tuple([run, group])] = BackgroundCorrectionData()
+                run_group = tuple([run, group])
+                if run_group not in self._corrections_context.background_correction_data:
+                    start_x, end_x = self.default_x_range(run, group)
+                    self._corrections_context.background_correction_data[run_group] = BackgroundCorrectionData(
+                        start_x, end_x)
 
     def selected_correction_data(self) -> tuple:
         """Returns lists of the selected correction data to display in the view."""
@@ -144,9 +153,16 @@ class BackgroundCorrectionsModel:
     def _get_counts_workspace_name(self, run_string: str, group: str) -> str:
         """Returns the name of the counts workspace associated with the provided run string and group."""
         run_list = self._context.get_runs(run_string)
+        workspace_list = []
         if len(run_list) > 0:
             workspace_list = self._context.group_pair_context.get_group_counts_workspace_names(run_list[0], [group])
         return workspace_list[0] if len(workspace_list) > 0 else None
+
+    def default_x_range(self, run: str, group: str) -> tuple:
+        """Returns the x range to use by default for the background corrections. It is the second half of the data."""
+        x_lower, x_upper = self.x_limits_of_workspace(run, group)
+        x_mid = round((x_upper - x_lower)/2.0)
+        return x_mid, x_upper
 
     def x_limits_of_workspace(self, run: str, group: str) -> tuple:
         """Returns the x data limits of the workspace associated with the provided Run and Group."""
