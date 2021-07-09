@@ -22,7 +22,7 @@ A0_ERROR_COLUMN_INDEX = 5
 
 class DoubleItemDelegate(QStyledItemDelegate):
     """
-    An item delegate that has a QDoubleValidator to validate the data provided.
+    An item delegate that has a QDoubleValidator. The __init__ is the default QStyledItemDelegate __init__.
     """
 
     def createEditor(self, parent, option, index):

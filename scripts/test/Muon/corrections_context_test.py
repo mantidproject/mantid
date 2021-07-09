@@ -99,11 +99,12 @@ class CorrectionsContextTest(unittest.TestCase):
 
     def test_that_the_background_correction_data_can_be_set_as_expected(self):
         run_group = tuple(["84447", "fwd"])
-        self.corrections_context.background_correction_data[run_group] = BackgroundCorrectionData()
+        start_x, end_x = 15.0, 30.0
+        self.corrections_context.background_correction_data[run_group] = BackgroundCorrectionData(start_x, end_x)
 
         self.assertTrue(run_group in self.corrections_context.background_correction_data)
-        self.assertEqual(self.corrections_context.background_correction_data[run_group].start_x, 5.0)
-        self.assertEqual(self.corrections_context.background_correction_data[run_group].end_x, 15.0)
+        self.assertEqual(self.corrections_context.background_correction_data[run_group].start_x, start_x)
+        self.assertEqual(self.corrections_context.background_correction_data[run_group].end_x, end_x)
 
 
 if __name__ == '__main__':

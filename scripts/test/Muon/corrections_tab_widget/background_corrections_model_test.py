@@ -11,9 +11,9 @@ from mantid.api import AnalysisDataService, FrameworkManager
 from mantid.simpleapi import CreateSampleWorkspace
 
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
-from Muon.GUI.Common.corrections_tab_widget.background_corrections_model import (BackgroundCorrectionsModel,
-                                                                                 DEFAULT_X_LOWER, DEFAULT_X_UPPER)
+from Muon.GUI.Common.corrections_tab_widget.background_corrections_model import BackgroundCorrectionsModel
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from Muon.GUI.Common.utilities.workspace_data_utils import DEFAULT_X_LOWER, DEFAULT_X_UPPER
 
 
 class BackgroundCorrectionsModelTest(unittest.TestCase):
@@ -69,14 +69,6 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.model.set_show_all_runs(show_all_runs)
 
         self.assertEqual(self.model._corrections_context.show_all_runs, show_all_runs)
-
-    def test_that_is_equal_to_n_decimals_will_return_false_if_the_two_numbers_are_not_equal_to_the_given_dp(self):
-        value1, value2 = 1.001, 1.0015
-        self.assertTrue(not self.model.is_equal_to_n_decimals(value1, value2, 3))
-
-    def test_that_is_equal_to_n_decimals_will_return_true_if_the_two_numbers_are_equal_to_the_given_dp(self):
-        value1, value2 = 1.001, 1.0014
-        self.assertTrue(self.model.is_equal_to_n_decimals(value1, value2, 3))
 
     def test_that_populate_background_corrections_data_will_populate_default_background_correction_data(self):
         self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 30.0))
@@ -153,7 +145,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
     def test_that_x_limits_of_workspace_will_return_the_x_limits_of_the_workspace(self):
         run, group = "84447", "top"
         workspace_name = f"HIFI{run}; Group; {group}; Counts; MA"
-        self.model._get_counts_workspace_name = mock.Mock(return_value=workspace_name)
+        self.model.get_counts_workspace_name = mock.Mock(return_value=workspace_name)
 
         CreateSampleWorkspace(OutputWorkspace=workspace_name)
 
@@ -165,7 +157,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
     def test_that_x_limits_of_workspace_will_return_the_default_x_values_if_there_are_no_workspaces_loaded(self):
         run, group = "84447", "top"
         workspace_name = f"HIFI{run}; Group; {group}; Counts; MA"
-        self.model._get_counts_workspace_name = mock.Mock(return_value=workspace_name)
+        self.model.get_counts_workspace_name = mock.Mock(return_value=workspace_name)
 
         x_lower, x_upper = self.model.x_limits_of_workspace(run, group)
 
