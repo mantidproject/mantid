@@ -69,6 +69,7 @@ class SuperplotPresenter:
             self._view.set_mode(self.BIN_MODE_TEXT)
         else:
             self._view.set_mode(self.SPECTRUM_MODE_TEXT)
+        self._update_spectrum_slider()
         self._update_plot()
 
     def enable_error_bars(self, state):
