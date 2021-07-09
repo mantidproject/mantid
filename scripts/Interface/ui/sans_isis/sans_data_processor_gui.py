@@ -100,10 +100,6 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
-        def on_reduction_dimensionality_changed(self, is_1d):
-            pass
-
-        @abstractmethod
         def on_output_mode_changed(self):
             pass
 
@@ -574,9 +570,6 @@ class SANSDataProcessorGui(QMainWindow,
         self.save_can_checkBox.setChecked(value)
         UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Save Can Toggled"], False)
         set_setting(self.__generic_settings, self.__save_can_key, value)
-
-    def _on_reduction_dimensionality_changed(self, is_1d):
-        self._call_settings_listeners(lambda listener: listener.on_reduction_dimensionality_changed(is_1d))
 
     def _on_user_file_load(self):
         """

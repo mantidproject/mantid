@@ -144,9 +144,6 @@ class RunTabPresenter(PresenterCommon):
         def on_multi_period_selection(self, show_periods):
             self._presenter.on_multiperiod_changed(show_periods)
 
-        def on_reduction_dimensionality_changed(self, is_1d):
-            self._presenter.on_reduction_dimensionality_changed(is_1d)
-
         def on_output_mode_changed(self):
             self._presenter.on_output_mode_changed()
 
