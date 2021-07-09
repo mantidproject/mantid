@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from sans.common.enums import ReductionDimensionality
 from sans.gui_logic.models.POD.save_options import SaveOptions
 from sans.gui_logic.models.run_tab_model import RunTabModel
 
@@ -20,6 +21,11 @@ class TestRunTabModel(unittest.TestCase):
         self.model.update_save_types(default_options)
         save_types = self.model.get_save_types()
         self.assertTrue(save_types.user_modified)
+
+    def test_reduction_mode_stored(self):
+        for mode in [ReductionDimensionality.TWO_DIM, ReductionDimensionality.ONE_DIM]:
+            self.model.update_reduction_mode(mode)
+            self.assertEqual(mode, self.model.get_reduction_mode())
 
 
 if __name__ == '__main__':
