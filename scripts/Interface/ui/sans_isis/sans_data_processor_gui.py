@@ -36,7 +36,7 @@ from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 from ui.sans_isis.work_handler import WorkHandler
 from ui.sans_isis.modified_qt_field_factory import ModifiedQtFieldFactory
 
-from ui.sans_isis.SansGuiObservable import SansGuiObservable
+from ui.sans_isis.sans_gui_observable import SansGuiObservable
 
 Ui_SansDataProcessorWindow, _ = load_ui(__file__, "sans_data_processor_window.ui")
 

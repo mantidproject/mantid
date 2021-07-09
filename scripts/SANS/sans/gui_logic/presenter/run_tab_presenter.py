@@ -16,10 +16,11 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Optional
 
+from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
-from ui.sans_isis.SansGuiObservable import SansGuiObservable
+from ui.sans_isis.sans_gui_observable import SansGuiObservable
 
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
@@ -38,8 +39,7 @@ from sans.gui_logic.models.run_tab_model import RunTabModel
 from sans.gui_logic.models.settings_adjustment_model import SettingsAdjustmentModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel
-from sans.gui_logic.presenter.Observers.run_tab_observers import SaveOptionsObserver, RunTabObservers, \
-    DimensionalityObserver
+from sans.gui_logic.presenter.Observers.run_tab_observers import RunTabObservers
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.presenter.masking_table_presenter import MaskingTablePresenter
@@ -269,8 +269,8 @@ class RunTabPresenter(PresenterCommon):
 
     def _register_observers(self):
         self._observers = RunTabObservers(
-            reduction_dim = DimensionalityObserver(callback=self.on_reduction_dimensionality_changed),
-            save_options = SaveOptionsObserver(callback=self.on_save_options_change)
+            reduction_dim = GenericObserverWithArgPassing(callback=self.on_reduction_dimensionality_changed),
+            save_options = GenericObserver(callback=self.on_save_options_change)
         )
 
         view_observable: SansGuiObservable = self._view.get_observable()
