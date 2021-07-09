@@ -108,7 +108,6 @@ class SettingsPresenterTest(unittest.TestCase):
         self.model.set_settings_dict.assert_not_called()
 
     def test_default_calib_file_correct_location(self):
-        print(settings_presenter.DEFAULT_SETTINGS["full_calibration"])
         self.assertTrue(path.exists(settings_presenter.DEFAULT_SETTINGS["full_calibration"]))
 
 
