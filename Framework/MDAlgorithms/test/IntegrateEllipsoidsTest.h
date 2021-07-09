@@ -403,20 +403,15 @@ public:
   }
 
   void test_execution_background_shell() {
+
+    const std::vector<double> ub = {0.15468228,  0.10908475,  -0.14428671, -0.08922105, -0.08617147,
+                                    -0.22976459, -0.05616441, 0.12536522,  -0.03238277};
+
     auto loadalg = AlgorithmManager::Instance().createUnmanaged("Load");
     TS_ASSERT_THROWS_NOTHING(loadalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(loadalg->setProperty("Filename", "TOPAZ_36079.nxs.h5"));
-    TS_ASSERT_THROWS_NOTHING(loadalg->setProperty("FilterByTofMin", 500.0));
-    TS_ASSERT_THROWS_NOTHING(loadalg->setProperty("FilterByTofMax", 16666.0));
+    TS_ASSERT_THROWS_NOTHING(loadalg->setProperty("Filename", "TOPAZ_36079_crop.nxs"));
     TS_ASSERT_THROWS_NOTHING(loadalg->setProperty("OutputWorkspace", "TOPAZ_36079_event"));
     TS_ASSERT_THROWS_NOTHING(loadalg->execute());
-
-    auto filteralg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("FilterBadPulses");
-    TS_ASSERT_THROWS_NOTHING(filteralg->initialize());
-    TS_ASSERT_THROWS_NOTHING(filteralg->setProperty("InputWorkspace", "TOPAZ_36079_event"));
-    TS_ASSERT_THROWS_NOTHING(filteralg->setProperty("OutputWorkspace", "TOPAZ_36079_event"));
-    TS_ASSERT_THROWS_NOTHING(filteralg->setProperty("LowerCutoff", 25));
-    TS_ASSERT_THROWS_NOTHING(filteralg->execute());
 
     auto loadcalalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadIsawDetCal");
     TS_ASSERT_THROWS_NOTHING(loadcalalg->initialize());
@@ -430,58 +425,33 @@ public:
     TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("OutputWorkspace", "TOPAZ_36079_md"));
     TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("QDimensions", "Q3D"));
     TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("dEAnalysisMode", "Elastic"));
+    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("Q3DFrames", "Q_sample"));
     TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("LorentzCorrection", true));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MinValues", std::vector<double>{-12.0, -12.0, -12.0}));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MaxValues", std::vector<double>{12.0, 12.0, 12.0}));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("SplitInto", 2));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("SplitThreshold", 50));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MaxRecursionDepth", 13));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MinRecursionDepth", 7));
+    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MinValues", std::vector<double>{1.0, 1.0, 1.675}));
+    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MaxValues", std::vector<double>{10.0, 5.0, 8.425}));
     TS_ASSERT_THROWS_NOTHING(convertalg->execute());
 
-    auto peaksalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("FindPeaksMD");
+    auto peaksalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreatePeaksWorkspace");
     TS_ASSERT_THROWS_NOTHING(peaksalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("InputWorkspace", "TOPAZ_36079_md"));
+    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("InstrumentWorkspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("NumberOfPeaks", 0));
     TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("OutputWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("PeakDistanceThreshold", 0.12025531914893617));
-    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("MaxPeaks", 1200));
-    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("DensityThresholdFactor", 100));
-    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("EdgePixels", 19));
     TS_ASSERT_THROWS_NOTHING(peaksalg->execute());
 
-    auto ubalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("FindUBUsingFFT");
-    TS_ASSERT_THROWS_NOTHING(ubalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(ubalg->setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(ubalg->setProperty("MinD", 3));
-    TS_ASSERT_THROWS_NOTHING(ubalg->setProperty("MaxD", 7));
-    TS_ASSERT_THROWS_NOTHING(ubalg->setProperty("Tolerance", 0.12));
-    TS_ASSERT_THROWS_NOTHING(ubalg->execute());
+    auto setubalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SetUB");
+    TS_ASSERT_THROWS_NOTHING(setubalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(setubalg->setProperty("Workspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(setubalg->setProperty("UB", ub));
+    TS_ASSERT_THROWS_NOTHING(setubalg->execute());
+
+    // add some peaks for testing
+    PeaksWorkspace_sptr peakWS = peaksalg->getProperty("OutputWorkspace");
+    peakWS->createPeakHKL(V3D(0.15, 1.85, -1.0));
+    peakWS->createPeakHKL(V3D(1.0, 4.0, -3.0));
+    peakWS->createPeakHKL(V3D(1.0, 5.0, -3.0));
+    TS_ASSERT_EQUALS(peakWS->getNumberPeaks(), 3);
 
     auto indexalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("IndexPeaks");
-    TS_ASSERT_THROWS_NOTHING(indexalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("Tolerance", 0.12));
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("RoundHKLs", false));
-    TS_ASSERT_THROWS_NOTHING(indexalg->execute());
-
-    auto selectalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SelectCellOfType");
-    TS_ASSERT_THROWS_NOTHING(selectalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(selectalg->setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(selectalg->setProperty("CellType", "Hexagonal"));
-    TS_ASSERT_THROWS_NOTHING(selectalg->setProperty("Apply", true));
-    TS_ASSERT_THROWS_NOTHING(
-        selectalg->setProperty("TransformationMatrix", std::vector<double>{0, 1, 0, 0, 0, 1, 1, 0, 0}));
-    TS_ASSERT_THROWS_NOTHING(selectalg->execute());
-
-    auto optalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("OptimizeLatticeForCellType");
-    TS_ASSERT_THROWS_NOTHING(optalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(optalg->setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(optalg->setProperty("CellType", "Hexagonal"));
-    TS_ASSERT_THROWS_NOTHING(optalg->setProperty("Apply", true));
-    TS_ASSERT_THROWS_NOTHING(optalg->setProperty("Tolerance", 0.06));
-    TS_ASSERT_THROWS_NOTHING(optalg->setProperty("EdgePixels", 19));
-    TS_ASSERT_THROWS_NOTHING(optalg->execute());
-
     TS_ASSERT_THROWS_NOTHING(indexalg->initialize());
     TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
     TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("Tolerance", 0.06));
