@@ -65,8 +65,7 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
                 CalculateResolution='MildnerCarpenter',
                 OutputWorkspace='iq_s' + str(i + 1),
                 BeamRadius='0.05,0.05,0.05',
-                TransmissionBeamRadius=0.05,
-                StitchReferenceIndex=0
+                TransmissionBeamRadius=0.2
             )
 
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
@@ -106,15 +105,12 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
         sample_tr = '2869'
         thick = 0.2
 
-        # reduce samples
-        # this also tests that already loaded workspace can be passed instead of a file
-        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
         SANSILLAutoProcess(
             SampleRuns=sample,
             BeamRuns=beams,
             ContainerRuns=containers,
+            SensitivityMaps='sens-lamp.nxs',
             MaskFiles='mask1.nxs,mask2.nxs,mask3.nxs',
-            SensitivityMaps='sens-lamp',
             SampleTransmissionRuns=sample_tr,
             ContainerTransmissionRuns=container_tr,
             TransmissionBeamRuns=beam_tr,
@@ -175,7 +171,6 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
             ContainerTransmissionRuns='2870+2954',
             TransmissionBeamRuns='2867+2868',
             SampleThickness=0.2,
-            CalculateResolution='MildnerCarpenter',
             OutputWorkspace='iqxy',
             OutputType='I(Qx,Qy)',
             BeamRadius='0.05,0.05,0.05',
@@ -230,9 +225,6 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
         sample_tr = '1204,990,990'
         thick = 0.1
 
-        # reduce samples
-        # this also tests that already loaded workspace can be passed instead of a file
-        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
         SANSILLAutoProcess(
             SampleRuns=samples,
             BeamRuns=beams,
