@@ -177,3 +177,9 @@ class SeqFittingTabPresenter(object):
         workspace_names = self.model.get_fit_workspace_names_from_groups_and_runs(separated_runs,
                                                                                   separated_group_and_pairs)
         return workspace_names
+
+    def copy_fits_to_all_runs(self):
+        if self.view.copy_values_for_fits():
+            self.view.warning_popup(f"Radio is ticked")
+        else:
+            self.view.warning_popup(f"Radio is not ticked")
