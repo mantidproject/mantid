@@ -399,9 +399,8 @@ void IntegrateEllipsoids::exec() {
   std::vector<double> SatelliteBackgroundOuterRadiusVector(n_peaks, satellite_back_outer_radius);
 
   // make the integrator
-  // NOTE: use the larger search radius for both Brag Peaks and satelite peaks
-  const double max_search_radius = std::max(radius_m, satellite_radius);
-  IntegrateQLabEvents integrator(qList, max_search_radius, useOnePercentBackgroundCorrection);
+  IntegrateQLabEvents integrator(qList, radius_m, useOnePercentBackgroundCorrection);
+  IntegrateQLabEvents integrator_satellite(qList, satellite_radius, useOnePercentBackgroundCorrection);
 
   // get the events and add
   // them to the inegrator
@@ -415,9 +414,11 @@ void IntegrateEllipsoids::exec() {
   if (eventWS) {
     // process as EventWorkspace
     qListFromEventWS(integrator, prog, eventWS);
+    qListFromEventWS(integrator_satellite, prog, eventWS);
   } else {
     // process as Workspace2D
     qListFromHistoWS(integrator, prog, histoWS);
+    qListFromHistoWS(integrator_satellite, prog, histoWS);
   }
 
   double inti;
@@ -475,9 +476,16 @@ void IntegrateEllipsoids::exec() {
 
     // integrate the peak to get intensity and error
     std::vector<double> axes_radii;
-    Mantid::Geometry::PeakShape_const_sptr shape =
-        integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
-                                          adaptiveBack_outer_radius, axes_radii, inti, sigi);
+    Mantid::Geometry::PeakShape_const_sptr shape;
+    if (isSatellitePeak) {
+      shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
+                                                          adaptiveBack_inner_radius, adaptiveBack_outer_radius,
+                                                          axes_radii, inti, sigi);
+    } else {
+      shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
+                                                adaptiveBack_outer_radius, axes_radii, inti, sigi);
+    }
+
     peaks[i].setIntensity(inti);
     peaks[i].setSigmaIntensity(sigi);
     peaks[i].setPeakShape(shape);
