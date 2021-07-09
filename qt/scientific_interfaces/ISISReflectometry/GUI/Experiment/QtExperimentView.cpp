@@ -50,23 +50,22 @@ QtExperimentView::QtExperimentView(const Mantid::API::IAlgorithm_sptr &algorithm
   registerSettingsWidgets(algorithmForTooltips);
 }
 
-void QtExperimentView::onRemovePerThetaDefaultsRequested() {
+void QtExperimentView::onRemoveLookupRowRequested() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "ExperimentTab", "RemovePerThetaDefaultsRow"},
-      false);
+      Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "ExperimentTab", "RemoveLookupRow"}, false);
   auto index = m_ui.optionsTable->currentIndex();
   if (index.isValid()) {
-    m_notifyee->notifyRemovePerAngleDefaultsRequested(index.row());
+    m_notifyee->notifyRemoveLookupRowRequested(index.row());
   }
 }
 
-void QtExperimentView::showAllPerAngleOptionsAsValid() {
+void QtExperimentView::showAllLookupRowsAsValid() {
   for (auto row = 0; row < m_ui.optionsTable->rowCount(); ++row)
-    showPerAngleOptionsAsValid(row);
+    showLookupRowAsValid(row);
 }
 
-void QtExperimentView::showPerAngleThetasNonUnique(double tolerance) {
-  QMessageBox::critical(this, "Invalid theta combination!",
+void QtExperimentView::showLookupRowsNotUnique(double tolerance) {
+  QMessageBox::critical(this, "Invalid lookup criteria combination!",
                         "Cannot have multiple defaults with theta values less than " + QString::number(tolerance) +
                             " apart.");
 }
@@ -83,7 +82,7 @@ Initialise the Interface
 void QtExperimentView::initLayout(Mantid::API::IAlgorithm_sptr algorithmForTooltips) {
   m_ui.setupUi(this);
   m_deleteShortcut = std::make_unique<QShortcut>(QKeySequence(tr("Delete")), m_ui.optionsTable);
-  connect(m_deleteShortcut.get(), SIGNAL(activated()), this, SLOT(onRemovePerThetaDefaultsRequested()));
+  connect(m_deleteShortcut.get(), SIGNAL(activated()), this, SLOT(onRemoveLookupRowRequested()));
   initOptionsTable(std::move(algorithmForTooltips));
   initFloodControls();
 
@@ -95,14 +94,14 @@ void QtExperimentView::initLayout(Mantid::API::IAlgorithm_sptr algorithmForToolt
   m_ui.endOverlapEdit->setSpecialValueText("Unset");
 
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this, SLOT(onRestoreDefaultsRequested()));
-  connect(m_ui.addPerAngleOptionsButton, SIGNAL(clicked()), this, SLOT(onNewPerThetaDefaultsRowRequested()));
+  connect(m_ui.addPerAngleOptionsButton, SIGNAL(clicked()), this, SLOT(onNewLookupRowRequested()));
 }
 
 void QtExperimentView::initializeTableColumns(QTableWidget &table,
                                               const Mantid::API::IAlgorithm_sptr &algorithmForTooltips) {
   for (auto column = 0; column < table.columnCount(); ++column) {
     // Get the tooltip for this column based on the algorithm property
-    auto const propertyName = PerThetaDefaults::ColumnPropertyName[column];
+    auto const propertyName = LookupRow::ColumnPropertyName[column];
     auto const toolTip =
         QString::fromStdString(algorithmForTooltips->getPointerToProperty(propertyName)->documentation());
     // We could set the tooltip for the column header here using
@@ -129,7 +128,7 @@ void QtExperimentView::initializeTableRow(QTableWidget &table, int row) {
   m_ui.optionsTable->blockSignals(false);
 }
 
-void QtExperimentView::initializeTableRow(QTableWidget &table, int row, PerThetaDefaults::ValueArray rowValues) {
+void QtExperimentView::initializeTableRow(QTableWidget &table, int row, LookupRow::ValueArray rowValues) {
   m_ui.optionsTable->blockSignals(true);
   for (auto column = 0; column < table.columnCount(); ++column) {
     auto item = new QTableWidgetItem(QString::fromStdString(rowValues[column]));
@@ -144,7 +143,7 @@ void QtExperimentView::initOptionsTable(const Mantid::API::IAlgorithm_sptr &algo
 
   // Set angle and scale columns to a small width so everything fits
   table->resizeColumnsToContents();
-  table->setColumnCount(PerThetaDefaults::OPTIONS_TABLE_COLUMN_COUNT);
+  table->setColumnCount(LookupRow::OPTIONS_TABLE_COLUMN_COUNT);
   table->setRowCount(1);
   initializeTableColumns(*table, std::move(algorithmForTooltips));
   initializeTableItems(*table);
@@ -185,7 +184,7 @@ void QtExperimentView::connectSettingsChange(QCheckBox &edit) {
 }
 
 void QtExperimentView::connectSettingsChange(QTableWidget &edit) {
-  connect(&edit, SIGNAL(cellChanged(int, int)), this, SLOT(onPerAngleDefaultsChanged(int, int)));
+  connect(&edit, SIGNAL(cellChanged(int, int)), this, SLOT(onLookupRowChanged(int, int)));
 }
 
 void QtExperimentView::disconnectSettingsChange(QLineEdit &edit) {
@@ -488,18 +487,16 @@ void QtExperimentView::enableFloodCorrectionInputs() {
   m_ui.floodWorkspaceWsSelectorLabel->setEnabled(true);
 }
 
-void QtExperimentView::onPerAngleDefaultsChanged(int row, int column) {
-  m_notifyee->notifyPerAngleDefaultsChanged(row, column);
-}
+void QtExperimentView::onLookupRowChanged(int row, int column) { m_notifyee->notifyLookupRowChanged(row, column); }
 
 /** Add a new row to the transmission runs table **/
-void QtExperimentView::onNewPerThetaDefaultsRowRequested() {
+void QtExperimentView::onNewLookupRowRequested() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "ExperimentTab", "AddPerThetaDefaultsRow"}, false);
-  m_notifyee->notifyNewPerAngleDefaultsRequested();
+      Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "ExperimentTab", "AddLookupRow"}, false);
+  m_notifyee->notifyNewLookupRowRequested();
 }
 
-void QtExperimentView::addPerThetaDefaultsRow() {
+void QtExperimentView::addLookupRow() {
   auto newRowIndex = m_ui.optionsTable->rowCount();
   // Select the first cell in the new row
   m_ui.optionsTable->insertRow(newRowIndex);
@@ -507,7 +504,7 @@ void QtExperimentView::addPerThetaDefaultsRow() {
   m_ui.optionsTable->setCurrentCell(newRowIndex, 0);
 }
 
-void QtExperimentView::removePerThetaDefaultsRow(int rowIndex) { m_ui.optionsTable->removeRow(rowIndex); }
+void QtExperimentView::removeLookupRow(int rowIndex) { m_ui.optionsTable->removeRow(rowIndex); }
 
 std::string QtExperimentView::getText(QLineEdit const &lineEdit) const { return lineEdit.text().toStdString(); }
 
@@ -612,22 +609,22 @@ std::string QtExperimentView::textFromCell(QTableWidgetItem const *maybeNullItem
 // The missing braces warning is a false positive -
 // https://llvm.org/bugs/show_bug.cgi?id=21629
 GNU_DIAG_OFF("missing-braces")
-std::vector<PerThetaDefaults::ValueArray> QtExperimentView::getPerAngleOptions() const {
+std::vector<LookupRow::ValueArray> QtExperimentView::getLookupTable() const {
   auto const &table = *m_ui.optionsTable;
-  auto rows = std::vector<PerThetaDefaults::ValueArray>();
+  auto rows = std::vector<LookupRow::ValueArray>();
   rows.reserve(table.rowCount());
   for (auto row = 0; row < table.rowCount(); ++row) {
-    rows.emplace_back(PerThetaDefaults::ValueArray{textFromCell(table.item(row, 0)), textFromCell(table.item(row, 1)),
-                                                   textFromCell(table.item(row, 2)), textFromCell(table.item(row, 3)),
-                                                   textFromCell(table.item(row, 4)), textFromCell(table.item(row, 5)),
-                                                   textFromCell(table.item(row, 6)), textFromCell(table.item(row, 7)),
-                                                   textFromCell(table.item(row, 8)), textFromCell(table.item(row, 9))});
+    rows.emplace_back(LookupRow::ValueArray{textFromCell(table.item(row, 0)), textFromCell(table.item(row, 1)),
+                                            textFromCell(table.item(row, 2)), textFromCell(table.item(row, 3)),
+                                            textFromCell(table.item(row, 4)), textFromCell(table.item(row, 5)),
+                                            textFromCell(table.item(row, 6)), textFromCell(table.item(row, 7)),
+                                            textFromCell(table.item(row, 8)), textFromCell(table.item(row, 9))});
   }
   return rows;
 }
 GNU_DIAG_ON("missing-braces")
 
-void QtExperimentView::setPerAngleOptions(std::vector<PerThetaDefaults::ValueArray> rows) {
+void QtExperimentView::setLookupTable(std::vector<LookupRow::ValueArray> rows) {
   auto &table = *m_ui.optionsTable;
   table.blockSignals(true);
   auto numberOfRows = static_cast<int>(rows.size());
@@ -639,13 +636,13 @@ void QtExperimentView::setPerAngleOptions(std::vector<PerThetaDefaults::ValueArr
   table.blockSignals(false);
 }
 
-void QtExperimentView::showPerAngleOptionsAsInvalid(int row, int column) {
+void QtExperimentView::showLookupRowAsInvalid(int row, int column) {
   m_ui.optionsTable->blockSignals(true);
   m_ui.optionsTable->item(row, column)->setBackground(QColor("#ffb8ad"));
   m_ui.optionsTable->blockSignals(false);
 }
 
-void QtExperimentView::showPerAngleOptionsAsValid(int row) {
+void QtExperimentView::showLookupRowAsValid(int row) {
   m_ui.optionsTable->blockSignals(true);
   for (auto column = 0; column < m_ui.optionsTable->columnCount(); ++column)
     m_ui.optionsTable->item(row, column)->setBackground(QBrush(Qt::transparent));
