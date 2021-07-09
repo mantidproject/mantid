@@ -86,7 +86,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                               XPixelMax=x_max,
                               YPixelMin=bck_min,
                               YPixelMax=peak_min - 1,
-                              ErrorWeighting = True,
+                              ErrorWeighting = False,
                               SumPixels=True, NormalizeSum=True)
 
         right_bck = None
@@ -99,7 +99,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                                XPixelMax=x_max,
                                YPixelMin=peak_max + 1,
                                YPixelMax=bck_max,
-                               ErrorWeighting = True,
+                               ErrorWeighting = False,
                                SumPixels=True, NormalizeSum=True)
 
         if right_bck is not None and left_bck is not None:
@@ -117,7 +117,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                              XPixelMax=x_max,
                              YPixelMin=bck_min,
                              YPixelMax=bck_max,
-                             ErrorWeighting = True,
+                             ErrorWeighting = False,
                              SumPixels=True, NormalizeSum=True)
 
         output_name = self.getPropertyValue("OutputWorkspace")
