@@ -721,11 +721,11 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
       if (found != std::string::npos) {
         const std::vector<std::string> matrixElementNames = {"a11", "a12", "a13", "a21", "a22",
                                                              "a23", "a31", "a32", "a33"};
-        std::string goniometerRotation = "   <goniometer ";
+        std::string goniometerRotation = "<goniometer ";
         for (size_t index = 0; index < rotationMatrix.size(); ++index) {
           goniometerRotation += matrixElementNames[index] + " = '" + std::to_string(rotationMatrix[index]) + "' ";
         }
-        goniometerRotation += " /> \\ \n";
+        goniometerRotation += " /> ";
         xml_s.insert(found, goniometerRotation);
       }
       CreateSampleShape::setSampleShape(experiment, xml_s);
