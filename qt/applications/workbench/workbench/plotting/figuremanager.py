@@ -399,12 +399,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """Toggle fit browser and tool on/off"""
         if self.fit_browser.isVisible():
             self.fit_browser.hide()
-            self.toolbar._actions["toggle_superplot"].setEnabled(True)
+            self.toolbar._actions["toggle_fit"].setChecked(False)
         else:
+            if self.toolbar._actions["toggle_superplot"].isChecked():
+                self.superplot_toggle()
             self.fit_browser.show()
-            self.toolbar._actions["toggle_superplot"].setEnabled(False)
-            if not self.fit_browser.isVisible():
-                self.toolbar._actions["toggle_superplot"].setEnabled(True)
 
     def superplot_toggle(self):
         """Toggle superplot dockwidgets on/off"""
@@ -413,15 +412,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.window.removeDockWidget(self.superplot.get_bottom_view())
             self.superplot.close()
             self.superplot = None
-            self.toolbar._actions["toggle_fit"].setEnabled(True)
             self.toolbar._actions["toggle_superplot"].setChecked(False)
         else:
+            if self.toolbar._actions["toggle_fit"].isChecked():
+                self.fit_toggle()
             self.superplot = Superplot(self.canvas, self.window)
             self.window.addDockWidget(Qt.LeftDockWidgetArea,
                                       self.superplot.get_side_view())
             self.window.addDockWidget(Qt.BottomDockWidgetArea,
                                       self.superplot.get_bottom_view())
-            self.toolbar._actions["toggle_fit"].setEnabled(False)
             self.toolbar._actions["toggle_superplot"].setChecked(True)
             self.superplot.get_bottom_view().setFocus()
 
