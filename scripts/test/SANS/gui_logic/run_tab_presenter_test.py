@@ -226,8 +226,14 @@ class RunTabPresenterTest(unittest.TestCase):
         self.mock_run_tab_model.update_save_types.assert_called_once_with(self._mock_view.save_types)
 
     def test_on_reduction_options_changed_called(self):
-        self.view_observers.reduction_dim.notify_subscribers(arg=True)
+        self.view_observers.reduction_dim.notify_subscribers()
         self.mock_run_tab_model.update_reduction_mode.assert_called_once_with(self._mock_view.reduction_dimensionality)
+
+    def test_on_reduction_options_changed_updates_save_opts(self):
+        self.view_observers.reduction_dim.notify_subscribers()
+        self.mock_run_tab_model.get_save_types.assert_called_once()
+        get_save_types_ret_val = self.mock_run_tab_model.get_save_types.return_value
+        self.assertEqual(get_save_types_ret_val, self._mock_view.save_types)
 
     def test_that_can_get_state_for_index_if_index_exists(self):
         state_key = mock.NonCallableMock()
@@ -247,13 +253,6 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.assertIsNone(state)
         self.presenter.sans_logger.warning.assert_called_once()
-
-    def test_switching_dimensionality_updates_model(self):
-        expected_dim = mock.NonCallableMock()
-        self._mock_view.reduction_dimensionality = expected_dim
-        self.presenter.on_reduction_dimensionality_changed(is_1d=False)
-
-        self.assertEqual(expected_dim, self._mock_model.reduction_dimensionality)
 
     def test_on_data_changed_calls_update_rows(self):
         batch_file_path, user_file_path, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
@@ -643,65 +642,6 @@ class RunTabPresenterTest(unittest.TestCase):
         expected_args = ['Save table as', 'test_filename', '*.csv']
         args = [arg for arg in self.presenter.display_save_file_box.call_args[0]]
         self.assertEqual(args, expected_args)
-
-    def test_that_canSAS_is_disabled_if_2D_reduction(self):
-        """This test checks that if you are running a 2D reduction and have canSAS output mode checked,
-        the GUI will automatically uncheck canSAS to avoid data dimension errors."""
-
-        view = mock.MagicMock()
-        view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
-        view.can_sas_checkbox.setChecked = mock.Mock()
-        view.can_sas_checkbox.setEnabled = mock.Mock()
-        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
-
-        self.presenter.set_view(view)
-        self.presenter.on_reduction_dimensionality_changed(False)
-        self.presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(False)
-
-    def test_that_canSAS_is_unchecked_if_2D_reduction(self):
-        """This tests that the canSAS checkbox is unchecked when switching from 1D to 2D reduction"""
-
-        view = mock.MagicMock()
-        view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
-        view.can_sas_checkbox.setChecked = mock.Mock()
-        view.can_sas_checkbox.setEnabled = mock.Mock()
-        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
-
-        self.presenter.set_view(view)
-        self.presenter.on_reduction_dimensionality_changed(False)
-        self.presenter._view.can_sas_checkbox.setChecked.assert_called_once_with(False)
-
-    def test_that_canSAS_is_enabled_if_1D_reduction_and_not_in_memory_mode(self):
-        """This test checks that if you are not in memory mode and switch to 1D reduction, then
-        can sas file type is enabled."""
-
-        view = mock.MagicMock()
-        view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
-        view.can_sas_checkbox.setChecked = mock.Mock()
-        view.can_sas_checkbox.setEnabled = mock.Mock()
-        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
-
-        self.presenter.set_view(view)
-        self.presenter.on_reduction_dimensionality_changed(True)
-
-        self.presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(True)
-        self.presenter._view.can_sas_checkbox.setChecked.assert_not_called()
-
-    def test_that_canSAS_is_not_enabled_if_switch_to_1D_reduction_and_in_memory_mode(self):
-        """This test checks that if you are in memory mode, the can sas file type is not
-        re-enabled if you switch to 1D reduction."""
-
-        view = mock.MagicMock()
-        view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
-        view.can_sas_checkbox.setChecked = mock.Mock()
-        view.can_sas_checkbox.setEnabled = mock.Mock()
-        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
-
-        self.presenter.set_view(view)
-        self.presenter.on_reduction_dimensionality_changed(True)
-
-        self.presenter._view.can_sas_checkbox.setChecked.assert_not_called()
-        self.presenter._view.can_sas_checkbox.setEnabled.assert_not_called()
 
     def test_that_updating_default_save_directory_also_updates_add_runs_save_directory(self):
         """This test checks that add runs self.presenter.s save directory update method is called

@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Optional
 
-from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
+from mantidqt.utils.observer_pattern import GenericObserver
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
@@ -269,7 +269,7 @@ class RunTabPresenter(PresenterCommon):
 
     def _register_observers(self):
         self._observers = RunTabObservers(
-            reduction_dim = GenericObserverWithArgPassing(callback=self.on_reduction_dimensionality_changed),
+            reduction_dim = GenericObserver(callback=self.on_reduction_dimensionality_changed),
             save_options = GenericObserver(callback=self.on_save_options_change)
         )
 
@@ -603,25 +603,11 @@ class RunTabPresenter(PresenterCommon):
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box('Warning', 'Process halted', str(e))
 
-    def on_reduction_dimensionality_changed(self, is_1d):
-        """
-        Unchecks and disabled canSAS output mode if switching to 2D reduction.
-        Enabled canSAS if switching to 1D.
-        :param is_1d: bool. If true then switching TO 1D reduction.
-        """
-        self._model.reduction_dimensionality = self._view.reduction_dimensionality
+    def on_reduction_dimensionality_changed(self):
         self._run_tab_model.update_reduction_mode(self._view.reduction_dimensionality)
-
-        if not self._view.output_mode_memory_radio_button.isChecked():
-            # If we're in memory mode, all file types should always be disabled
-            if is_1d:
-                self._view.can_sas_checkbox.setEnabled(True)
-            else:
-                if self._view.can_sas_checkbox.isChecked():
-                    self._view.can_sas_checkbox.setChecked(False)
-                    self.sans_logger.information("2D reductions are incompatible with canSAS output. "
-                                                 "canSAS output has been unchecked.")
-                self._view.can_sas_checkbox.setEnabled(False)
+        # Update save options in case they've updated in the model
+        save_opts = self._run_tab_model.get_save_types()
+        self._view.save_types = save_opts
 
     def _validate_output_modes(self):
         """
