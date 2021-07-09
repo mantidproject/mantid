@@ -344,6 +344,9 @@ void CalculateMultipleScattering::exec() {
 
   // Create workspace group that holds output workspaces
   auto wsgroup = std::make_shared<WorkspaceGroup>();
+  auto outputGroupWSName = getPropertyValue("OutputWorkspace");
+  if (AnalysisDataService::Instance().doesExist(outputGroupWSName))
+    API::AnalysisDataService::Instance().deepRemoveGroup(outputGroupWSName);
 
   const std::string wsNamePrefix = "Scatter_";
   std::string wsName = wsNamePrefix + "1_NoAbs";
