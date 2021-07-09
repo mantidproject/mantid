@@ -7,6 +7,7 @@
 from Muon.GUI.Common.contexts.corrections_context import BACKGROUND_MODE_NONE, FLAT_BACKGROUND
 from Muon.GUI.Common.corrections_tab_widget.background_corrections_model import BackgroundCorrectionsModel
 from Muon.GUI.Common.corrections_tab_widget.background_corrections_view import BackgroundCorrectionsView
+from Muon.GUI.Common.utilities.workspace_data_utils import check_start_x_is_valid, check_end_x_is_valid
 
 
 class BackgroundCorrectionsPresenter:
@@ -75,64 +76,29 @@ class BackgroundCorrectionsPresenter:
     def handle_start_x_changed(self) -> None:
         """Handles when a Start X table cell is changed."""
         run, group = self.view.selected_run_and_group()
-        self._check_start_x_is_valid_for(run, group)
 
-        self.model.set_start_x(run, group, self.view.start_x(run, group))
-        self.model.set_end_x(run, group, self.view.end_x(run, group))
+        new_start_x, new_end_x = check_start_x_is_valid(self.model.get_counts_workspace_name(run, group),
+                                                        self.view.start_x(run, group), self.view.end_x(run, group),
+                                                        self.model.start_x(run, group))
+        self._update_start_and_end_x_in_view_and_model(run, group, new_start_x, new_end_x)
 
     def handle_end_x_changed(self) -> None:
         """Handles when a End X table cell is changed."""
         run, group = self.view.selected_run_and_group()
-        self._check_end_x_is_valid_for(run, group)
 
-        self.model.set_start_x(run, group, self.view.start_x(run, group))
-        self.model.set_end_x(run, group, self.view.end_x(run, group))
+        new_start_x, new_end_x = check_end_x_is_valid(self.model.get_counts_workspace_name(run, group),
+                                                      self.view.start_x(run, group), self.view.end_x(run, group),
+                                                      self.model.end_x(run, group))
+        self._update_start_and_end_x_in_view_and_model(run, group, new_start_x, new_end_x)
 
     def _update_displayed_corrections_data(self) -> None:
         """Updates the displayed corrections data using the data stored in the model."""
         runs, groups, start_xs, end_xs, backgrounds, background_errors = self.model.selected_correction_data()
         self.view.populate_corrections_table(runs, groups, start_xs, end_xs, backgrounds, background_errors)
 
-    def _check_start_x_is_valid_for(self, run: str, group: str) -> None:
-        """Checks that the new start X is valid. If it isn't, the start and end X is adjusted."""
-        x_lower, x_upper = self.model.x_limits_of_workspace(run, group)
-
-        view_start_x = self.view.start_x(run, group)
-        view_end_x = self.view.end_x(run, group)
-        model_start_x = self.model.start_x(run, group)
-
-        if view_start_x < x_lower:
-            self.view.set_start_x(run, group, x_lower)
-        elif view_start_x > x_upper:
-            if not self.model.is_equal_to_n_decimals(view_end_x, x_upper, 3):
-                self.view.set_start_x(run, group, view_end_x)
-                self.view.set_end_x(run, group, x_upper)
-            else:
-                self.view.set_start_x(run, group, model_start_x)
-        elif view_start_x > view_end_x:
-            self.view.set_start_x(run, group, view_end_x)
-            self.view.set_end_x(run, group, view_start_x)
-        elif view_start_x == view_end_x:
-            self.view.set_start_x(run, group, model_start_x)
-
-    def _check_end_x_is_valid_for(self, run: str, group: str) -> None:
-        """Checks that the new end X is valid. If it isn't, the start and end X is adjusted."""
-        x_lower, x_upper = self.model.x_limits_of_workspace(run, group)
-
-        view_start_x = self.view.start_x(run, group)
-        view_end_x = self.view.end_x(run, group)
-        model_end_x = self.model.end_x(run, group)
-
-        if view_end_x < x_lower:
-            if not self.model.is_equal_to_n_decimals(view_start_x, x_lower, 3):
-                self.view.set_start_x(run, group, x_lower)
-                self.view.set_end_x(run, group, view_start_x)
-            else:
-                self.view.set_end_x(run, group, model_end_x)
-        elif view_end_x > x_upper:
-            self.view.set_end_x(run, group, x_upper)
-        elif view_end_x < view_start_x:
-            self.view.set_start_x(run, group, view_end_x)
-            self.view.set_end_x(run, group, view_start_x)
-        elif view_end_x == view_start_x:
-            self.view.set_end_x(run, group, model_end_x)
+    def _update_start_and_end_x_in_view_and_model(self, run: str, group: str, start_x: float, end_x: float) -> None:
+        """Updates the start and end x in the model using the provided values."""
+        self.view.set_start_x(run, group, start_x)
+        self.view.set_end_x(run, group, end_x)
+        self.model.set_start_x(run, group, start_x)
+        self.model.set_end_x(run, group, end_x)

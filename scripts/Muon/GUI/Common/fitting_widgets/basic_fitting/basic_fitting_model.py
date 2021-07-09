@@ -526,11 +526,6 @@ class BasicFittingModel:
         """Returns only the workspace names that exist in the ADS."""
         return [workspace_name for workspace_name in workspace_names if check_if_workspace_exist(workspace_name)]
 
-    @staticmethod
-    def is_equal_to_n_decimals(value1: float, value2: float, n_decimals: int) -> bool:
-        """Checks that two floats are equal up to n decimal places."""
-        return f"{value1:.{n_decimals}f}" == f"{value2:.{n_decimals}f}"
-
     def get_selected_runs_groups_and_pairs(self) -> tuple:
         """Returns the runs, groups and pairs to use for single fit mode."""
         return "All", self._get_selected_groups_and_pairs()

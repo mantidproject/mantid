@@ -13,8 +13,6 @@ from Muon.GUI.Common.corrections_tab_widget.corrections_model import Corrections
 from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
 
 BACKGROUND_PARAM = "A0"
-DEFAULT_X_LOWER = 0.0
-DEFAULT_X_UPPER = 100.0
 
 
 @dataclass
@@ -99,11 +97,6 @@ class BackgroundCorrectionsModel:
 
         raise RuntimeError(f"The provided run and group could not be found ({run}, {group}).")
 
-    @staticmethod
-    def is_equal_to_n_decimals(value1: float, value2: float, n_decimals: int) -> bool:
-        """Checks that two floats are equal up to n decimal places."""
-        return f"{value1:.{n_decimals}f}" == f"{value2:.{n_decimals}f}"
-
     def clear_background_corrections_data(self) -> None:
         """Clears the background correction data dictionary."""
         self._corrections_context.background_correction_data = {}
@@ -150,7 +143,7 @@ class BackgroundCorrectionsModel:
         selected_group = self._corrections_context.selected_group
         return self.group_names() if selected_group == GROUPS_ALL else [selected_group]
 
-    def _get_counts_workspace_name(self, run_string: str, group: str) -> str:
+    def get_counts_workspace_name(self, run_string: str, group: str) -> str:
         """Returns the name of the counts workspace associated with the provided run string and group."""
         run_list = self._context.get_runs(run_string)
         workspace_list = []
@@ -166,4 +159,4 @@ class BackgroundCorrectionsModel:
 
     def x_limits_of_workspace(self, run: str, group: str) -> tuple:
         """Returns the x data limits of the workspace associated with the provided Run and Group."""
-        return x_limits_of_workspace(self._get_counts_workspace_name(run, group), (DEFAULT_X_LOWER, DEFAULT_X_UPPER))
+        return x_limits_of_workspace(self.get_counts_workspace_name(run, group))
