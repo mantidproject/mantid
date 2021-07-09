@@ -539,7 +539,7 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking.append("Instrument")
-        return ['iphiq', 'D33_AutoProcess_IPhiQ_Reference.nxs']
+        return ['iphiq_#1_d2.0m_c7.8m_w6.0A', 'D33_AutoProcess_IPhiQ_Reference.nxs']
 
     def runTest(self):
 
