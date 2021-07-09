@@ -610,6 +610,7 @@ class RunTabPresenter(PresenterCommon):
         :param is_1d: bool. If true then switching TO 1D reduction.
         """
         self._model.reduction_dimensionality = self._view.reduction_dimensionality
+        self._run_tab_model.update_reduction_mode(self._view.reduction_dimensionality)
 
         if not self._view.output_mode_memory_radio_button.isChecked():
             # If we're in memory mode, all file types should always be disabled

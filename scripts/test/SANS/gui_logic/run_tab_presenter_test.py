@@ -225,6 +225,10 @@ class RunTabPresenterTest(unittest.TestCase):
         self.view_observers.save_options.notify_subscribers()
         self.mock_run_tab_model.update_save_types.assert_called_once_with(self._mock_view.save_types)
 
+    def test_on_reduction_options_changed_called(self):
+        self.view_observers.reduction_dim.notify_subscribers(arg=True)
+        self.mock_run_tab_model.update_reduction_mode.assert_called_once_with(self._mock_view.reduction_dimensionality)
+
     def test_that_can_get_state_for_index_if_index_exists(self):
         state_key = mock.NonCallableMock()
         self._mock_table.get_row.return_value = state_key
