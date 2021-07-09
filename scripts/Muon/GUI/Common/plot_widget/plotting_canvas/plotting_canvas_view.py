@@ -11,6 +11,10 @@ from qtpy import QtWidgets, QtCore
 from Muon.GUI.Common.plot_widget.plotting_canvas.plot_toolbar import PlotToolbar
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_utils import (_do_single_plot,
+                                                                               get_y_min_max_between_x_range,
+                                                                               get_num_row_and_col,
+                                                                               convert_index_to_row_and_col)
 from Muon.GUI.Common.plot_widget.plotting_canvas.plot_color_queue import ColorQueue
 from mantid import AnalysisDataService
 from mantid.plots import legend_set_draggable
@@ -30,43 +34,6 @@ else:
 # Default color cycle using Matplotlib color codes C0, C1...ect
 NUMBER_OF_COLOURS = 10
 DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(NUMBER_OF_COLOURS)]
-
-
-def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
-    plot_fn = ax.errorbar if errors else ax.plot
-    plot_kwargs['wkspIndex'] = index
-    plot_fn(workspace, **plot_kwargs)
-
-
-def get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max):
-    x, y = line.get_data()
-    for i in range(len(x)):
-        if x_min <= x[i] <= x_max:
-            y_min = min(y_min, y[i])
-            y_max = max(y_max, y[i])
-    return y_min, y_max
-
-
-def get_num_row_and_col(num_axis):
-    n_r, n_c = 0, 0
-    # num axis is the number of axis in use
-    if np.sqrt(num_axis)**2 == num_axis:
-        n_r = np.sqrt(num_axis)
-        n_c = np.sqrt(num_axis)
-    else:
-        # cols increment first
-        n_c = np.ceil(np.sqrt(num_axis))
-        n_r = n_c
-        if n_c*(n_c-1) >= num_axis:
-            n_r -= 1
-    return n_r, n_c
-
-
-def convert_index_to_row_and_col(index, n_r, n_c):
-    # number of completed rows
-    row = np.floor(index/n_c)
-    col = index - row*(n_c)
-    return row, col
 
 
 class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
