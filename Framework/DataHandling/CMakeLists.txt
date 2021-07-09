@@ -84,6 +84,7 @@ set(SRC_FILES
     src/LoadMask.cpp
     src/LoadMcStas.cpp
     src/LoadMcStasNexus.cpp
+    src/LoadMuonData.cpp
     src/LoadMuonLog.cpp
     src/LoadMuonNexus.cpp
     src/LoadMuonNexus1.cpp
@@ -298,6 +299,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadMask.h
     inc/MantidDataHandling/LoadMcStas.h
     inc/MantidDataHandling/LoadMcStasNexus.h
+    inc/MantidDataHandling/LoadMuonData.h
     inc/MantidDataHandling/LoadMuonLog.h
     inc/MantidDataHandling/LoadMuonNexus.h
     inc/MantidDataHandling/LoadMuonNexus1.h
