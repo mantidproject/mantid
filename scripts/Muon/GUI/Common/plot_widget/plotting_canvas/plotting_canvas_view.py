@@ -19,7 +19,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 
-from matplotlib.backends.backend_qt5agg import FigureCanvas
+from mantidqt.MPLwidgets import FigureCanvas
 
 # Default color cycle using Matplotlib color codes C0, C1...ect
 NUMBER_OF_COLOURS = 10

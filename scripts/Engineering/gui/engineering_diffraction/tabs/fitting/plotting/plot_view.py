@@ -10,7 +10,7 @@ from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QDockWidget, QMainWindow, QMenu
 from mantidqt.utils.qt import load_ui
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt5agg import FigureCanvas
+from mantidqt.MPLwidgets import FigureCanvas
 from .EngDiff_fitpropertybrowser import EngDiffFitPropertyBrowser
 from workbench.plotting.toolbar import ToolbarStateManager
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_toolbar import FittingPlotToolbar
