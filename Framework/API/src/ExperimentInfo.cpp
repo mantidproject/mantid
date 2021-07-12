@@ -1179,11 +1179,14 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       paramValue += ";" + tokens[i];
     const auto &paramType = tokens[1];
     const auto &paramName = tokens[2];
-    auto &paramVisibility = tokens[size - 1];                    // parameter visibility, if defined, is the last token
-    if (paramVisibility != "true" && paramVisibility != "false") // visibility should have only these two values
-      paramVisibility = "true";                                  // default to visible parameter if not properly defined
-    else { // if defined, the paramValue has one too many entries, -1 to remove also the semicolon
-      paramValue = paramValue.substr(0, paramValue.find(tokens[size - 1]) - 1);
+    auto &paramVisibility = tokens[size - 1];           // parameter visibility, if defined, is the last token
+    auto const visibilityKey = std::string("visible:"); // if visibility is defined, the value will follow this key
+    if (paramVisibility.find(visibilityKey) > paramVisibility.size())
+      paramVisibility = "true"; // visibility not defined: default to visible
+    else {                      // defined, the paramValue has one too many entries, -1 to remove also the semicolon
+      paramVisibility =
+          paramVisibility.substr(paramVisibility.find(visibilityKey) + visibilityKey.size(), paramVisibility.size());
+      paramValue = paramValue.substr(0, paramValue.find(visibilityKey) - 1);
     }
     const auto paramDescr = std::string("");
     if (paramName == "masked") {
