@@ -17,6 +17,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "SearchResult.h"
 #include <memory>
+#include <optional>
 
 class ProgressPresenter;
 

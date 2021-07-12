@@ -4,75 +4,79 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from os import path
-from os import makedirs
+from os import path, makedirs
 
-from mantid.simpleapi import logger, Load, SaveNexus, NormaliseByCurrent, Integration, AppendSpectra, DeleteWorkspace, \
-    RenameWorkspace
+from mantid.simpleapi import logger, Load, SaveNexus, NormaliseByCurrent, Integration, ReplaceSpecialValues, \
+    ApplyDiffCal, ConvertUnits
 from mantid.simpleapi import AnalysisDataService as Ads
 
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 VANADIUM_INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"
-CURVES_WORKSPACE_NAME = "engggui_vanadium_curves"
+PROCESSED_WORKSPACE_NAME = "engggui_vanadium_processed_instrument"
 INTEGRATED_WORKSPACE_NAME = "engggui_vanadium_integration"
 
 VANADIUM_DIRECTORY_NAME = "Vanadium_Runs"
 
-SAVED_FILE_CURVE_SUFFIX = "_precalculated_vanadium_run_bank_curves.nxs"
+SAVED_FILE_PROCESSED_SUFFIX = "_precalculated_vanadium_run_processed_instrument.nxs"
 SAVED_FILE_INTEG_SUFFIX = "_precalculated_vanadium_run_integration.nxs"
 
 
-def fetch_correction_workspaces(vanadium_path, instrument, rb_num="", is_load=False):
+def fetch_correction_workspaces(vanadium_path: str, instrument: str, rb_num: str = "", is_load: bool = False):
+    # -> Workspace2D, Workspace2D
     """
     Fetch workspaces from the file system or create new ones.
     :param vanadium_path: The path to the requested vanadium run raw data.
     :param instrument: The instrument the data came from.
     :param rb_num: A user identifier, usually an experiment number.
     :param is_load: True if this is being called as part of loading a previous calibration (force_recalc ignored)
-    :return: The resultant integration and curves workspaces.
+    :return: The resultant integration and processed instrument workspaces.
     """
     vanadium_number = path_handling.get_run_number_from_path(vanadium_path, instrument)
-    integ_path = generate_van_ws_file_path(vanadium_number, SAVED_FILE_INTEG_SUFFIX, rb_num)
-    curves_path = generate_van_ws_file_path(vanadium_number, SAVED_FILE_CURVE_SUFFIX, rb_num)
+    integ_path, processed_path = generate_van_ws_file_paths(vanadium_number, rb_num)
     if is_load:
         force_recalc = False
     else:
         force_recalc = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                    path_handling.ENGINEERING_PREFIX, "recalc_vanadium", return_type=bool)
-    if path.exists(curves_path) and path.exists(integ_path) and not force_recalc:  # Check if the cached files exist.
+    if path.exists(processed_path) and path.exists(integ_path) and not force_recalc:  # Check if the cached files exist.
         try:
             integ_workspace = Load(Filename=integ_path, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)
-            curves_workspace = Load(Filename=curves_path, OutputWorkspace=CURVES_WORKSPACE_NAME)
+            processed_workspace = Load(Filename=processed_path, OutputWorkspace=PROCESSED_WORKSPACE_NAME)
             if rb_num:
-                user_integ = generate_van_ws_file_path(vanadium_number, SAVED_FILE_INTEG_SUFFIX, rb_num=rb_num)
-                user_curves = generate_van_ws_file_path(vanadium_number, SAVED_FILE_CURVE_SUFFIX, rb_num=rb_num)
-                if not path.exists(user_integ) and not path.exists(user_curves):
-                    save_van_workspace(integ_workspace, user_integ)
-                    save_van_workspace(curves_workspace, user_curves)
-            return integ_workspace, curves_workspace
+                user_integ_path, user_processed_path = generate_van_ws_file_paths(vanadium_number, rb_num=rb_num)
+                if not path.exists(user_integ_path) and not path.exists(user_processed_path):
+                    save_van_workspace(integ_workspace, user_integ_path)
+                    save_van_workspace(processed_workspace, user_processed_path)
+            return integ_workspace, processed_workspace
         except RuntimeError as e:
             logger.error(
                 "Problem loading existing vanadium calculations. Creating new files. Description: "
                 + str(e))
-    integ_workspace = _calculate_vanadium_correction(vanadium_path)
+    (integ_workspace, processed_workspace) = create_vanadium_corrections(vanadium_path)
     save_van_workspace(integ_workspace, integ_path)
+    save_van_workspace(processed_workspace, processed_path)
     if rb_num:
-        user_integ = generate_van_ws_file_path(vanadium_number, SAVED_FILE_INTEG_SUFFIX, rb_num=rb_num)
-        save_van_workspace(integ_workspace, user_integ)
-    return integ_workspace, None  # curves workspace, if not retrieved from fs, will be created and saved separately
+        user_integ_path, user_processed_path = generate_van_ws_file_paths(vanadium_number, rb_num=rb_num)
+        save_van_workspace(integ_workspace, user_integ_path)
+        save_van_workspace(processed_workspace, user_processed_path)
+    return integ_workspace, processed_workspace
 
 
-def check_workspaces_exist():
-    return Ads.doesExist(CURVES_WORKSPACE_NAME) and Ads.doesExist(INTEGRATED_WORKSPACE_NAME)
+def check_workspaces_exist() -> bool:
+    """
+    Check the vanadium workspaces are loaded into the ADS
+    :return: True if both are present, false otherwise
+    """
+    return Ads.doesExist(PROCESSED_WORKSPACE_NAME) and Ads.doesExist(INTEGRATED_WORKSPACE_NAME)
 
 
-def _calculate_vanadium_correction(vanadium_path):
+def create_vanadium_corrections(vanadium_path: str):  # -> Workspace, Workspace
     """
     Runs the vanadium correction algorithm.
     :param vanadium_path: The path to the vanadium data.
-    :return: The integrated workspace and the curves generated by the algorithm.
+    :return: The integrated workspace and the processed instrument workspace generated.
     """
     try:
         van_ws = Load(Filename=vanadium_path, OutputWorkspace=VANADIUM_INPUT_WORKSPACE_NAME)
@@ -81,14 +85,50 @@ def _calculate_vanadium_correction(vanadium_path):
                      "Could not run Load algorithm with vanadium run number: "
                      + str(vanadium_path) + ". Error description: " + str(e))
         raise RuntimeError
-    ws = NormaliseByCurrent(InputWorkspace=van_ws, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)
+    # get full instrument calibration for instrument processing calculation
+    full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
+                                  path_handling.ENGINEERING_PREFIX, "full_calibration")
+    try:
+        full_calib_ws = Load(full_calib_path, OutputWorkspace="full_inst_calib")
+    except ValueError:
+        logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
+        return
+    integral_ws = _calculate_vanadium_integral(van_ws)
+    processed_ws = _calculate_vanadium_processed_instrument(van_ws, full_calib_ws, integral_ws)
+    return integral_ws, processed_ws
+
+
+def _calculate_vanadium_integral(van_ws):  # -> Workspace
+    """
+    Calculate the integral of the normalised vanadium workspace
+    :param van_ws: Chosen vanadium run workspace
+    :return: Integrated workspace
+    """
+    ws = NormaliseByCurrent(InputWorkspace=van_ws, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)  # create new name ws here
     # sensitivity correction for van
-    integ_ws = Integration(InputWorkspace=ws, OutputWorkspace=ws)
-    integ_ws /= van_ws.blocksize()
-    return integ_ws
+    ws_integ = Integration(InputWorkspace=ws, OutputWorkspace=ws)
+    ws_integ /= van_ws.blocksize()
+    return ws_integ
 
 
-def save_van_workspace(workspace, output_path):
+def _calculate_vanadium_processed_instrument(van_ws, full_calib_ws, integral_ws):  # -> Workspace
+    """
+    Calculate the processed whole-instrument workspace
+    :param van_ws: Chosen vanadium run workspace
+    :param full_calib_ws: Table workspace from the full instrument calibration (output from PDCalibration)
+    :param integral_ws: Vanadium integral workspace
+    :return: Whole instrument processed workspace
+    """
+    ws = NormaliseByCurrent(InputWorkspace=van_ws, OutputWorkspace=PROCESSED_WORKSPACE_NAME)  # create new name ws here
+    ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=full_calib_ws)
+    ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='dSpacing')
+    # van sensitivity correction
+    ws /= integral_ws
+    ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0, InfinityValue=0)
+    return ws
+
+
+def save_van_workspace(workspace, output_path: str) -> None:
     """
     Attempt to save the created workspaces to the filesystem.
     :param workspace: The vanadium workspace
@@ -102,7 +142,7 @@ def save_van_workspace(workspace, output_path):
         return
 
 
-def _generate_vanadium_saves_file_path(rb_num=""):
+def _generate_vanadium_saves_file_path(rb_num: str = "") -> str:
     """
     Generate file paths based on a vanadium run number.
     :param rb_num: User identifier, usually an experiment number.
@@ -118,28 +158,14 @@ def _generate_vanadium_saves_file_path(rb_num=""):
     return vanadium_dir
 
 
-def generate_van_ws_file_path(vanadium_number, suffix, rb_num=""):
+def generate_van_ws_file_paths(vanadium_number: str, rb_num: str = "") -> (str, str):
     """
     Generate file path based on a vanadium run number for the vanadium integration workspace.
     :param vanadium_number: The number of the vanadium run.
-    :param suffix: The suffix the filename to be saved
     :param rb_num: User identifier, usually an experiment number.
     :return: The full path to the file.
     """
-    integrated_filename = vanadium_number + suffix
+    integral_filename = vanadium_number + SAVED_FILE_INTEG_SUFFIX
+    processed_filename = vanadium_number + SAVED_FILE_PROCESSED_SUFFIX
     vanadium_dir = _generate_vanadium_saves_file_path(rb_num)
-    return path.join(vanadium_dir, integrated_filename)
-
-
-def handle_van_curves(van_curves, van_path, instrument, rb_num):
-    # this method is provided to be used by the calibration model, as this is where the vanadium curves are generated
-    van_number = path_handling.get_run_number_from_path(van_path, instrument)
-    curves_path = generate_van_ws_file_path(van_number, SAVED_FILE_CURVE_SUFFIX, rb_num)
-    if len(van_curves) == 2:
-        curves_ws = AppendSpectra(InputWorkspace1=van_curves[0], InputWorkspace2=van_curves[1])
-        DeleteWorkspace(van_curves[0])
-        DeleteWorkspace(van_curves[1])
-    else:
-        curves_ws = van_curves[0]
-    save_van_workspace(curves_ws, curves_path)
-    RenameWorkspace(InputWorkspace=curves_ws, OutputWorkspace=CURVES_WORKSPACE_NAME)
+    return path.join(vanadium_dir, integral_filename), path.join(vanadium_dir, processed_filename)

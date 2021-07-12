@@ -1222,6 +1222,9 @@ class MantidAxes(Axes):
         else:
             self.minorticks_off()
 
+    def grid_on(self):
+        return self.xaxis._major_tick_kw.get('gridOn', False) and self.yaxis._major_tick_kw.get('gridOn', False)
+
     # ------------------ Private api --------------------------------------------------------
 
     def _attach_colorbar(self, mappable, colorbar):
@@ -1311,6 +1314,9 @@ class MantidAxes3D(Axes3D):
     def autoscale(self, *args, **kwargs):
         super().autoscale(*args, **kwargs)
         self._set_overflowing_data_to_nan()
+
+    def grid_on(self):
+        return self._draw_grid
 
     def _set_overflowing_data_to_nan(self, axis_index=None):
         """

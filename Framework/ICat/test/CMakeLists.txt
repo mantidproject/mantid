@@ -15,7 +15,8 @@ if(CXXTEST_FOUND)
   target_link_libraries(ICatTest
                         LINK_PRIVATE
                         ${MANTIDLIBS}
-                        ICat)
+                        ICat
+                        gmock)
   add_dependencies(FrameworkTests ICatTest)
 
   # Add to the 'FrameworkTests' group in VS

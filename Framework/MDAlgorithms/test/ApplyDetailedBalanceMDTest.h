@@ -65,7 +65,7 @@ public:
     TS_ASSERT(equals);
 
     // Clean up
-    cleanWorkspace(outputname, false);
+    cleanWorkspace(outputname, true);
   }
 
   /**
@@ -94,7 +94,7 @@ public:
     TS_ASSERT(equals);
 
     // clean up
-    cleanWorkspace(outputname, false);
+    cleanWorkspace(outputname, true);
   }
 
   /**
@@ -367,7 +367,7 @@ private:
     compare_alg.setPropertyValue("Workspace1", ws1);
     compare_alg.setPropertyValue("Workspace2", ws2);
     compare_alg.setProperty("Tolerance", 0.0001);
-    compare_alg.setProperty("CheckEvents", false);
+    compare_alg.setProperty("CheckEvents", true);
     compare_alg.setProperty("IgnoreBoxID", !checkBoxID);
     compare_alg.execute();
     TS_ASSERT(compare_alg.isExecuted());

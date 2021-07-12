@@ -4,18 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-
 from qtpy import QtWidgets, QtCore, QtGui
 from qtpy.QtCore import Signal
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments, show_file_browser_and_return_selection
 from Muon.GUI.Common.utilities.run_string_utils import valid_float_regex
 from Muon.GUI.Common.message_box import warning
-
-DEADTIME_DATA_FILE = 0
-DEADTIME_WORKSPACE = 1
-DEADTIME_OTHER_FILE = 2
-DEADTIME_NONE = 3
 
 
 class InstrumentWidgetView(QtWidgets.QWidget):
@@ -30,11 +23,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self._cached_instrument = ["None", "None"]
 
         self.setup_interface()
-        self.dead_time_file_loader_hidden(True)
-        self.dead_time_other_file_hidden(True)
 
-        self.dead_time_selector.currentIndexChanged.connect(
-            self.on_dead_time_combo_changed)
         self.rebin_selector.currentIndexChanged.connect(
             self.on_rebin_combo_changed)
         self.time_zero_checkbox.stateChanged.connect(
@@ -43,9 +32,6 @@ class InstrumentWidgetView(QtWidgets.QWidget):
             self.on_first_good_data_checkbox_state_change)
         self.last_good_data_checkbox.stateChanged.connect(
             self.on_last_good_data_checkbox_state_change)
-
-        self._on_dead_time_from_data_selected = None
-        self._on_dead_time_from_other_file_selected = lambda: 0
 
         self.first_good_data_checkbox.setChecked(True)
         self.time_zero_checkbox.setChecked(True)
@@ -56,9 +42,6 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
         self._on_time_zero_changed = lambda: 0
         self._on_first_good_data_changed = lambda: 0
-        self._on_dead_time_from_file_selected = lambda: 0
-        self._on_dead_time_file_option_selected = lambda: 0
-        self._on_dead_time_unselected = lambda: 0
         self._on_double_pulse_time_changed = lambda: 0
 
         self.time_zero_edit.editingFinished.connect(
@@ -67,8 +50,6 @@ class InstrumentWidgetView(QtWidgets.QWidget):
             lambda: self._on_first_good_data_changed() if not self.is_first_good_data_checked() else None)
         self.last_good_data_edit.editingFinished.connect(
             lambda: self._on_last_good_data_changed() if not self.is_last_good_data_checked() else None)
-        self.dead_time_file_selector.currentIndexChanged.connect(
-            self.on_dead_time_file_combo_changed)
         self.double_pulse_data_edit.editingFinished.connect(lambda: self._on_double_pulse_time_changed())
 
     def setup_interface(self):
@@ -78,7 +59,6 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.setup_time_zero_row()
         self.setup_first_good_data_row()
         self.setup_last_good_data_row()
-        self.setup_dead_time_row()
         self.setup_rebin_row()
         self.setup_double_pulse_row()
 
@@ -114,9 +94,6 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.rebin_selector.setCurrentIndex(0)
         self.rebin_fixed_hidden(True)
         self.rebin_variable_hidden(True)
-        self.dead_time_selector.setCurrentIndex(DEADTIME_DATA_FILE)
-        self.dead_time_data_info_hidden(True)
-        self.dead_time_file_loader_hidden(True)
 
     def set_checkboxes_to_defualt(self):
         self.time_zero_checkbox.setChecked(True)
@@ -425,153 +402,6 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
     def get_double_pulse_time(self):
         return float(self.double_pulse_data_edit.text())
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Dead time correction
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def setup_dead_time_row(self):
-        self.dead_time_label = QtWidgets.QLabel(self)
-        self.dead_time_label.setText("Dead Time : ")
-
-        self.dead_time_selector = QtWidgets.QComboBox(self)
-        self.dead_time_selector.addItems(
-            ["From data file",
-             "From table workspace",
-             "From other file",
-             "None"])
-
-        self.dead_time_label_2 = QtWidgets.QLabel(self)
-        self.dead_time_label_2.setText("Dead Time Workspace : ")
-
-        self.dead_time_label_3 = QtWidgets.QLabel(self)
-        self.dead_time_label_3.setText("No loaded dead time")
-
-        self.dead_time_file_selector = QtWidgets.QComboBox(self)
-        self.dead_time_file_selector.addItem("None")
-        self.dead_time_file_selector.setToolTip(
-            "Select a table which is loaded into the ADS.")
-
-        self.dead_time_browse_button = QtWidgets.QPushButton(self)
-        self.dead_time_browse_button.setText("Browse")
-        self.dead_time_browse_button.setToolTip("Browse for a .nxs file to load dead times from. If valid, the "
-                                                "dead times will be saved as a table, and automatically selected "
-                                                "as the dead time for the current data.")
-
-        self.dead_time_layout = QtWidgets.QHBoxLayout()
-        self.dead_time_layout.addSpacing(10)
-        self.dead_time_layout.addWidget(self.dead_time_label_3)
-
-        self.dead_time_file_layout = QtWidgets.QHBoxLayout()
-        self.dead_time_file_layout.addWidget(self.dead_time_browse_button)
-        self.dead_time_file_layout.addStretch(0)
-
-        self.dead_time_other_file_label = QtWidgets.QLabel(self)
-        self.dead_time_other_file_label.setText("From other file : ")
-
-        self.layout.addWidget(self.dead_time_label, 5, 0)
-        self.layout.addWidget(self.dead_time_selector, 5, 1)
-        self.layout.addItem(self.dead_time_layout, 5, 2)
-        self.layout.addWidget(self.dead_time_label_2, 6, 0)
-        self.layout.addWidget(self.dead_time_file_selector, 6, 1)
-        self.layout.addWidget(self.dead_time_other_file_label, 7, 0)
-        self.layout.addWidget(self.dead_time_browse_button, 7, 1)
-
-    def on_dead_time_file_option_changed(self, slot):
-        self._on_dead_time_file_option_selected = slot
-
-    def on_dead_time_from_data_selected(self, slot):
-        self._on_dead_time_from_data_selected = slot
-
-    def on_dead_time_unselected(self, slot):
-        self._on_dead_time_unselected = slot
-
-    def on_dead_time_browse_clicked(self, slot):
-        self.dead_time_browse_button.clicked.connect(slot)
-
-    def on_dead_time_from_file_selected(self, slot):
-        self._on_dead_time_from_file_selected = slot
-
-    def populate_dead_time_combo(self, names):
-        self.dead_time_file_selector.blockSignals(True)
-        self.dead_time_file_selector.clear()
-        self.dead_time_file_selector.addItem("None")
-        for name in names:
-            self.dead_time_file_selector.addItem(name)
-        self.dead_time_file_selector.blockSignals(False)
-
-    def get_dead_time_file_selection(self):
-        return self.dead_time_file_selector.currentText()
-
-    def set_dead_time_file_selection_text(self, text):
-        index = self.dead_time_file_selector.findText(text)
-        if index >= 0:
-            self.dead_time_file_selector.setCurrentIndex(index)
-            return True
-        return False
-
-    def set_dead_time_file_selection(self, index):
-        self.dead_time_file_selector.setCurrentIndex(index)
-
-    def set_dead_time_selection(self, index):
-        self.dead_time_selector.setCurrentIndex(index)
-
-    def dead_time_file_loader_hidden(self, hidden=True):
-        if hidden:
-            self.dead_time_file_selector.hide()
-
-            self.dead_time_label_2.hide()
-            self.dead_time_data_info_hidden(hidden)
-        if not hidden:
-            self.dead_time_file_selector.setVisible(True)
-            self.dead_time_label_2.setVisible(True)
-            self.dead_time_data_info_hidden(hidden)
-
-    def dead_time_other_file_hidden(self, hidden):
-        if hidden:
-            self.dead_time_other_file_label.hide()
-            self.dead_time_browse_button.hide()
-
-        if not hidden:
-            self.dead_time_browse_button.setVisible(True)
-            self.dead_time_other_file_label.setVisible(True)
-
-    def dead_time_data_info_hidden(self, hidden=True):
-        if hidden:
-            self.dead_time_label_3.hide()
-        if not hidden:
-            self.dead_time_label_3.setVisible(True)
-
-    def set_dead_time_label(self, text):
-        self.dead_time_label_3.setText(text)
-
-    def on_dead_time_combo_changed(self, index):
-        if index == DEADTIME_DATA_FILE:
-            self._on_dead_time_from_data_selected()
-            self.dead_time_file_loader_hidden(True)
-            self.dead_time_data_info_hidden(False)
-            self.dead_time_other_file_hidden(True)
-        if index == DEADTIME_WORKSPACE:
-            self._on_dead_time_from_file_selected()
-            self.dead_time_file_loader_hidden(False)
-            self.dead_time_data_info_hidden(False)
-            self.dead_time_other_file_hidden(True)
-        if index == DEADTIME_OTHER_FILE:
-            self._on_dead_time_from_other_file_selected()
-            self.dead_time_file_loader_hidden(True)
-            self.dead_time_data_info_hidden(True)
-            self.dead_time_other_file_hidden(False)
-        if index == DEADTIME_NONE:
-            self._on_dead_time_unselected()
-            self.dead_time_file_loader_hidden(True)
-            self.dead_time_data_info_hidden(True)
-            self.dead_time_other_file_hidden(True)
-
-    def on_dead_time_from_other_file_selected(self, slot):
-        self._on_dead_time_from_other_file_selected = slot
-
-    def on_dead_time_file_combo_changed(self, index):
-        self._on_dead_time_file_option_selected()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Rebin row

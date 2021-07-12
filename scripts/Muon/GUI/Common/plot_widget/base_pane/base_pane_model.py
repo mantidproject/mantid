@@ -8,8 +8,10 @@
 
 class BasePaneModel(object):
 
-    def __init__(self, context):
+    def __init__(self, context, name="Plot"):
         self.context = context
+        self.name = name
+        self.context.plot_panes_context.add_pane(self.name)
 
     @staticmethod
     def _generate_run_indices(workspace_list):
@@ -44,3 +46,12 @@ class BasePaneModel(object):
 
     def create_tiled_keys(self, tiled_by):
         return []
+
+    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map):
+        return 0
+
+    def _create_workspace_label(self, workspace_name, index):
+        return workspace_name+"_"+str(index)
+
+    def _is_guess_workspace(self, workspace_name):
+        return False

@@ -748,6 +748,10 @@
     <technique>Diffuse Scattering</technique>
   </instrument>
 
+  <instrument name="D19">
+    <technique>Single Crystal Diffraction</technique>
+  </instrument>
+
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">

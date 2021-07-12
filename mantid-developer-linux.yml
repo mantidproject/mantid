@@ -14,6 +14,7 @@ dependencies:
   - gsl=2.6 # Keep gsl a specific version to reduce changes in our fitting
   - h5py>=2.10.0,<3 # Pinned back due to api differences
   - hdf5=1.10.*
+  - ipykernel<6 # Added as hard dependency only to deal with an issue with ipykernel v6 and incompatibility with qtconsole/workbench, was previously a soft dependency that was allowed to update to v6 by qtconsole, at present it stops workbench from loading.
   - jemalloc>=5.2.1
   - jsoncpp>=1.9.4,<2
   - librdkafka>=1.6.0

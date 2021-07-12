@@ -13,6 +13,7 @@ from matplotlib.image import AxesImage
 
 from mantid import logger
 from mantid.plots.legend import LegendProperties
+from mantid.plots.utility import MantidAxType
 
 from matplotlib.colors import to_hex, Normalize
 
@@ -62,6 +63,8 @@ class PlotsSaver(object):
                 creation_args = deepcopy(ax.creation_args)
                 # convert the normalise object (if present) into a dict so that it can be json serialised
                 for args_dict in creation_args:
+                    if 'axis' in args_dict and type(args_dict['axis']) is MantidAxType:
+                        args_dict['axis'] = args_dict['axis'].value
                     if 'norm' in args_dict.keys() and isinstance(args_dict['norm'], Normalize):
                         norm_dict = self._convert_normalise_obj_to_dict(args_dict['norm'])
                         args_dict['norm'] = norm_dict

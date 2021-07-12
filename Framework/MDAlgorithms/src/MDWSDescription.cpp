@@ -122,7 +122,7 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_sptr &pWS, co
 void MDWSDescription::setWS(API::MatrixWorkspace_sptr otherMatrixWS) { m_InWS = std::move(otherMatrixWS); }
 /// Method checks if input workspace has defined goniometer
 bool MDWSDescription::hasGoniometer() const {
-  if (m_InWS)
+  if ((m_InWS != nullptr) && (m_InWS->run().getNumGoniometers() > 0))
     return m_InWS->run().getGoniometer().isDefined();
   else
     return false;

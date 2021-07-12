@@ -298,3 +298,15 @@ def calculate_diff_data(diff, positive_workspace_name, negative_workspace_name, 
     alg.setProperty("OutputWorkspace", output)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_crop_workspace(ws, start, end):
+    alg = mantid.AlgorithmManager.create("CropWorkspace")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("OutputWorkspace", ws)
+    alg.setProperty("XMin", start)
+    alg.setProperty("XMax", end)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr

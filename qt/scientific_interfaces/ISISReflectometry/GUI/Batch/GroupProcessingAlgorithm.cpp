@@ -71,11 +71,11 @@ void updateParamsFromResolution(AlgorithmRuntimeProps &properties, boost::option
   AlgorithmProperties::update("Params", -(resolution.get()), properties);
 }
 
-void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties, PerThetaDefaults const *perThetaDefaults) {
-  if (!perThetaDefaults)
+void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow const *lookupRow) {
+  if (!lookupRow)
     return;
 
-  updateParamsFromResolution(properties, perThetaDefaults->qRange().step());
+  updateParamsFromResolution(properties, lookupRow->qRange().step());
 }
 
 void updateGroupProperties(AlgorithmRuntimeProps &properties, Group const &group) {
@@ -128,9 +128,9 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model, Group &g
 AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model, Group const &group) {
   auto properties = AlgorithmRuntimeProps();
   updateWorkspaceProperties(properties, group);
-  // Set the rebin Params from the per theta defaults resolution, if given
-  updatePerThetaDefaultProperties(properties, model.wildcardDefaults());
-  // Override the per theta defaults params with the group's rows' resolution,
+  // Set the rebin Params from the lookup row resolution, if given
+  updateLookupRowProperties(properties, model.findLookupRow());
+  // Override the lookup row with the group's rows' resolution,
   // if given
   updateGroupProperties(properties, group);
   // Override the rebin Params from the user-specified stitch params, if given

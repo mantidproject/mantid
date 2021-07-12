@@ -12,14 +12,12 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/Logger.h"
 
-namespace {
-Mantid::Kernel::Logger logger("FqFitModel");
-}
-
 using namespace Mantid::API;
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
+
+Mantid::Kernel::Logger logger("FqFitModel");
 
 struct ContainsOneOrMore {
   explicit ContainsOneOrMore(std::vector<std::string> &&substrings) : m_substrings(std::move(substrings)) {}
@@ -192,10 +190,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-FqFitModel::FqFitModel() { m_fitType = FQFIT_STRING; }
+FqFitModel::FqFitModel() : m_adsInstance(Mantid::API::AnalysisDataService::Instance()) { m_fitType = FQFIT_STRING; }
 
 void FqFitModel::addWorkspace(const std::string &workspaceName, const int &spectrum_index) {
-  auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+  auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addFqFitParameters(workspace.get(), name);
   const auto spectrum = getSpectrum(parameters);
@@ -211,7 +209,7 @@ void FqFitModel::addWorkspace(const std::string &workspaceName, const int &spect
 }
 
 void FqFitModel::addWorkspace(const std::string &workspaceName) {
-  auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+  auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addFqFitParameters(workspace.get(), name);
   const auto spectrum = getSpectrum(parameters);
@@ -238,8 +236,6 @@ FqFitParameters &FqFitModel::addFqFitParameters(MatrixWorkspace *workspace, cons
   const auto parameters = createFqFitParameters(workspace);
   if (parameters.widths.empty() && parameters.eisf.empty())
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
-  if (parameters.widths.empty())
-    throw std::invalid_argument("Workspace contains EISF spectra, but no Width spectra.");
   return m_fqFitParameters[hwhmName] = std::move(parameters);
 }
 

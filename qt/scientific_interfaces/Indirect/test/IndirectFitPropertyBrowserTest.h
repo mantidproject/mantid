@@ -96,7 +96,7 @@ public:
     m_browser = std::make_unique<IndirectFitPropertyBrowser>();
     m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS);
     m_browser->init();
-    m_templateBrowser = std::make_unique<MockFunctionTemplateBrowser>();
+    m_templateBrowser = std::make_unique<NiceMock<MockFunctionTemplateBrowser>>();
     EXPECT_CALL(*m_templateBrowser, createBrowser());
     EXPECT_CALL(*m_templateBrowser, createProperties());
     m_browser->setFunctionTemplateBrowser(m_templateBrowser.get());

@@ -4,14 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
-from Muon.GUI.Common.plot_widget.base_pane.base_pane_model import BasePaneModel
+from Muon.GUI.Common.plot_widget.data_pane.plot_group_pair_model import PlotGroupPairModel
 
 
-class PlotDataPaneModel(BasePaneModel):
+class PlotDataPaneModel(PlotGroupPairModel):
 
     def __init__(self, context):
-        super().__init__(context)
+        super().__init__(context,"Plot Data")
+        self.context.plot_panes_context[self.name].set_defaults([0., 15.0], [-0.3, 0.3])
 
     def get_time_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
         """
@@ -36,6 +36,17 @@ class PlotDataPaneModel(BasePaneModel):
             return workspace_list
         except AttributeError:
             return []
+
+    def get_workspaces_to_remove(self, group_pair_names, is_raw, plot_type):
+        """
+        :param is_raw: Whether to use raw or rebinned data
+        :param plot_type: plotting type, e.g Counts, Frequency Re
+        :return: a list of workspace names
+        """
+        workspace_list = []
+        for group_pair in group_pair_names:
+            workspace_list += self.get_time_workspaces_to_plot(group_pair, is_raw, plot_type)
+        return workspace_list
 
     def get_workspace_and_indices_for_group_or_pair(self, group_or_pair, is_raw, plot_type):
         """
@@ -66,21 +77,3 @@ class PlotDataPaneModel(BasePaneModel):
         indices = self._generate_run_indices(workspace_list)
 
         return workspace_list, indices
-
-    def get_workspaces_to_remove(self, group_pair_names, is_raw, plot_type):
-        """
-        :param is_raw: Whether to use raw or rebinned data
-        :param plot_type: plotting type, e.g Counts, Frequency Re
-        :return: a list of workspace names
-        """
-        workspace_list = []
-        for group_pair in group_pair_names:
-            workspace_list += self.get_time_workspaces_to_plot(group_pair, is_raw, plot_type)
-        return workspace_list
-
-    def create_tiled_keys(self, tiled_by):
-        if tiled_by == "Group/Pair":
-            keys = self.context.group_pair_context.selected_groups_and_pairs
-        else:
-            keys = [run_list_to_string(item) for item in self.context.data_context.current_runs]
-        return keys

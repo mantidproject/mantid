@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 import argparse
 import os
+
 from mantid import __version__ as mtd_version
 import warnings
 
@@ -27,6 +28,9 @@ def main():
     parser.add_argument('--profile',
                         action='store',
                         help='Run workbench with execution profiling. Specify a path for the output file.')
+    parser.add_argument('--yappi',
+                        action='store_true',
+                        help='Profile using Yappi instead of cProfile to capture multi-threaded execution.')
     parser.add_argument('--error-on-warning',
                         action='store_true',
                         help='Convert python warnings to exceptions')
@@ -46,15 +50,36 @@ def main():
         os.environ["PYTHONWARNINGS"] = "error" # Also affect subprocesses
 
     if options.profile:
-        import cProfile
         output_path = os.path.abspath(os.path.expanduser(options.profile))
-        if os.path.exists(os.path.dirname(output_path)):
-            cProfile.runctx('start(options)', globals(), locals(), filename=output_path)
-        else:
+        if not os.path.exists(os.path.dirname(output_path)):
             raise ValueError("Invalid path given for profile output. "
                              "Please specify and existing directory and filename.")
+        if options.yappi:
+            _enable_yappi_profiling(output_path, options)
+        else:
+            _enable_cprofile_profiling(output_path, options)
     else:
         start(options)
+
+
+def _enable_yappi_profiling(output_path, options):
+    import yappi
+    # Dont use wall time as Qt event loop runs for entire duration
+    yappi.set_clock_type('cpu')
+    yappi.start(builtins=False, profile_threads=True, profile_greenlets=True)
+    try:
+        start(options)
+    finally:
+        # Qt will try to sys.exit so wrap in finally block before we go down
+        print(f"Saving kcachegrind to {output_path}")
+        yappi.stop()
+        prof_data = yappi.get_func_stats()
+        prof_data.save(output_path, type='callgrind')
+
+
+def _enable_cprofile_profiling(output_path, options):
+    import cProfile
+    cProfile.runctx('start(options)', globals(), locals(), filename=output_path)
 
 
 def start(options):
