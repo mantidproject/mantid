@@ -239,7 +239,7 @@ private:
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nPoints, nPoints);
     AnalysisDataService::Instance().addOrReplace(name, ws);
     std::vector<double> x(nPoints), y(nPoints), e(nPoints);
-    const double step = (endX - startX) / (nPoints - 1);
+    const double step = (endX - startX) / (double(nPoints) - 1);
     for (size_t ibin = 0; ibin < nPoints; ++ibin) {
       x[ibin] = startX + ibin * step;
       y[ibin] = 7 * ibin + 3;
@@ -254,7 +254,7 @@ private:
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, nPoints, nPoints);
     AnalysisDataService::Instance().addOrReplace(name, ws);
     std::vector<double> x(nPoints), y(nPoints), e(nPoints);
-    const double step = (endX - startX) / (nPoints - 1);
+    const double step = (endX - startX) / (double(nPoints) - 1);
     for (size_t ispec = 0; ispec < nSpectra; ++ispec) {
       for (size_t ibin = 0; ibin < nPoints; ++ibin) {
         x[ibin] = startX + ibin * step;
