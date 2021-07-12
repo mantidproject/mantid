@@ -407,11 +407,19 @@ public:
     const std::vector<double> ub = {0.15468228,  0.10908475,  -0.14428671, -0.08922105, -0.08617147,
                                     -0.22976459, -0.05616441, 0.12536522,  -0.03238277};
 
-    auto loadalg = AlgorithmManager::Instance().createUnmanaged("Load");
+    auto loadalg = AlgorithmManager::Instance().createUnmanaged("LoadNexusProcessed");
     TS_ASSERT_THROWS_NOTHING(loadalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(loadalg->setProperty("Filename", "TOPAZ_36079_crop.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loadalg->setPropertyValue("Filename", "TOPAZ_36079_crop.nxs"));
     TS_ASSERT_THROWS_NOTHING(loadalg->setProperty("OutputWorkspace", "TOPAZ_36079_event"));
     TS_ASSERT_THROWS_NOTHING(loadalg->execute());
+    TS_ASSERT_THROWS_NOTHING(loadalg->isExecuted());
+
+    auto loadinstralg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
+    TS_ASSERT_THROWS_NOTHING(loadinstralg->initialize());
+    TS_ASSERT_THROWS_NOTHING(loadinstralg->setProperty("Workspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(loadinstralg->setProperty("InstrumentName", "TOPAZ"));
+    TS_ASSERT_THROWS_NOTHING(loadinstralg->setProperty("RewriteSpectraMap", "False"));
+    TS_ASSERT_THROWS_NOTHING(loadinstralg->execute());
 
     auto loadcalalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadIsawDetCal");
     TS_ASSERT_THROWS_NOTHING(loadcalalg->initialize());
@@ -445,15 +453,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(setubalg->execute());
 
     // add some peaks for testing
-    PeaksWorkspace_sptr peakWS = peaksalg->getProperty("OutputWorkspace");
-    peakWS->createPeakHKL(V3D(0.15, 1.85, -1.0));
-    peakWS->createPeakHKL(V3D(1.0, 4.0, -3.0));
-    peakWS->createPeakHKL(V3D(1.0, 5.0, -3.0));
+    PeaksWorkspace_sptr peakWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("TOPAZ_36079_peaks");
+    peakWS->addPeak(*peakWS->createPeakHKL(V3D(0.15, 1.85, -1.0)));
+    peakWS->addPeak(*peakWS->createPeakHKL(V3D(1.0, 4.0, -3.0)));
+    peakWS->addPeak(*peakWS->createPeakHKL(V3D(1.0, 5.0, -3.0)));
     TS_ASSERT_EQUALS(peakWS->getNumberPeaks(), 3);
 
     auto indexalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("IndexPeaks");
     TS_ASSERT_THROWS_NOTHING(indexalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("InputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("PeaksWorkspace", "TOPAZ_36079_peaks"));
     TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("Tolerance", 0.06));
     TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ToleranceForSatellite", 0.05));
     TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("RoundHKLs", false));
@@ -465,18 +473,38 @@ public:
     TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("SaveModulationInfo", true));
     TS_ASSERT_THROWS_NOTHING(indexalg->execute());
 
-    // integrate the data now with satellite background options
+    // integrate without satellite background for comparison
     IntegrateEllipsoids alg;
+    TS_ASSERT_THROWS_NOTHING(alg.setChild(true));
+    TS_ASSERT_THROWS_NOTHING(alg.setRethrows(true));
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "TOPAZ_36079_event"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "TOPAZ_36079_peaks_integrated"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_nosatellite"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.085));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.086));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.11));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CutoffIsigI", 5));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.0425));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.043));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CutoffIsigI", 5.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseOnePercentBackgroundCorrection", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
+
+    PeaksWorkspace_sptr peaksNoSatellite = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(peaksNoSatellite->getNumberPeaks(), 3);
+
+    // integrate the data now with satellite background options
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_satellite"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.0425));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.043));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CutoffIsigI", 5.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseOnePercentBackgroundCorrection", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteRegionRadius", 0.1));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatellitePeakSize", 0.08));
@@ -485,7 +513,30 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
 
-    // TODO: add integrated peak checks
+    PeaksWorkspace_sptr peaksSatellite = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(peaksSatellite->getNumberPeaks(), 3);
+
+    for (int peakind = 0; peakind < peaksSatellite->getNumberPeaks(); peakind++) {
+      const Peak &peakNoSatellite = peaksNoSatellite->getPeak(peakind);
+      const Peak &peakSatellite = peaksSatellite->getPeak(peakind);
+
+      // first peak is satellite peak and should have different intensity than first run of algorithm
+      // last two peaks should be identical to algorithm without satellite background options
+      if (peakind == 0) {
+        TS_ASSERT_DELTA(peakNoSatellite.getIntensity(), 17.0, 1e-6);
+        TS_ASSERT_DELTA(peakSatellite.getIntensity(), 13.0, 1e-6);
+      } else {
+        TS_ASSERT_DELTA(peakNoSatellite.getIntensity(), peakSatellite.getIntensity(), 1e-6);
+      }
+
+      TS_ASSERT_EQUALS(peakNoSatellite.getDetectorPosition(), peakSatellite.getDetectorPosition());
+    }
+
+    AnalysisDataService::Instance().remove("TOPAZ_36079_event");
+    AnalysisDataService::Instance().remove("TOPAZ_36079_md");
+    AnalysisDataService::Instance().remove("TOPAZ_36079_peaks");
+    AnalysisDataService::Instance().remove("peaks_integrated_satellite");
+    AnalysisDataService::Instance().remove("peaks_integrated_nosatellite");
   }
 };
 
