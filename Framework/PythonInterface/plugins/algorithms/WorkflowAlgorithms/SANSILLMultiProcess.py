@@ -9,9 +9,76 @@ from mantid.api import DataProcessorAlgorithm, WorkspaceProperty, MultipleFilePr
 from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntBoundedValidator, StringListValidator
 from mantid.simpleapi import *
 from enum import Enum
+from os import path
 
 N_DISTANCES = 5 # maximum number of distinct distance configurations
-N_LAMBDAS = 2 # maximum number of distinct wavelengths used
+N_LAMBDAS = 2 # maximum number of distinct wavelengths used in the experiment
+EMPTY_TOKEN = '000000' # empty run rumber to act as a placeholder where a measurement is missing
+
+
+def get_run_number(value):
+    """
+    Extracts the run number from the first run out of the string value of a
+    multiple file property of numors
+    """
+    return path.splitext(path.basename(value.split(',')[0].split('+')[0]))[0]
+
+
+def needs_processing(property_value, process_reduction_type):
+    """
+    Checks whether a given unary reduction needs processing or is already cached
+    in ADS with expected name.
+    @param property_value: the string value of the corresponding MultipleFile
+                           input property
+    @param process_reduction_type: the reduction_type of process
+    """
+    do_process = False
+    ws_name = ''
+    if property_value:
+        run_number = get_run_number(property_value)
+        ws_name = run_number + '_' + process_reduction_type
+        if mtd.doesExist(ws_name):
+            if isinstance(mtd[ws_name], WorkspaceGroup):
+                run = mtd[ws_name][0].getRun()
+            else:
+                run = mtd[ws_name].getRun()
+            if run.hasProperty('ProcessedAs'):
+                process = run.getLogData('ProcessedAs').value
+                if process == process_reduction_type:
+                    logger.notice('Reusing {0} workspace: {1}'
+                                  .format(process_reduction_type, ws_name))
+                else:
+                    logger.warning('{0} workspace found, but processed '
+                                   'differently: {1}'
+                                   .format(process_reduction_type, ws_name))
+                    do_process = True
+            else:
+                logger.warning('{0} workspace found, but missing the '
+                               'ProcessedAs flag: {1}'
+                               .format(process_reduction_type, ws_name))
+                do_process = True
+        else:
+            do_process = True
+    return [do_process, ws_name]
+
+
+def needs_loading(property_value, loading_reduction_type):
+    """
+    Checks whether a given unary input needs loading or is already loaded in
+    ADS.
+    @param property_value: the string value of the corresponding FileProperty
+    @param loading_reduction_type : the reduction_type of input to load
+    """
+    loading = False
+    ws_name = ''
+    if property_value:
+        ws_name = path.splitext(path.basename(property_value))[0]
+        if mtd.doesExist(ws_name):
+            logger.notice('Reusing {0} workspace: {1}'
+                          .format(loading_reduction_type, ws_name))
+        else:
+            loading = True
+    return [loading, ws_name]
 
 
 class SANSILLMultiProcess(DataProcessorAlgorithm):
@@ -392,7 +459,15 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                 break
         return issues
 
+    def _check_output_name(self):
+        '''Makes sure the name of the output workspace starts with a letter'''
+        issues = dict()
+        if self.getPropertyValue('OutputWorkspace')[0].isdigit():
+            issues['OutputWorkspace'] = "Output workspace name must be alphanumeric, it should start with a letter."
+        return issues
+
     def validateInputs(self):
+        '''Validates all the inputs'''
         issues = dict()
         self._setup_light()
         issues = self._check_sample_runs_dimensions()
@@ -408,10 +483,59 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             issues = self._check_aux_tr_params_dimensions()
         if not issues:
             issues = self._check_q_ranges()
+        if not issues:
+            issues = self._check_output_name()
         return issues
 
     def PyExec(self):
+        '''Executes the algorithm'''
+        self._setup_light()
+        self.process_transmissions()
+        self.process_samples()
+        self.finalize()
+
+    def process_transmissions(self):
+        '''Calculates all the transmissions'''
+        for l in range(self.lambda_rank):
+            self.process_all_transmissions_at_lambda(l)
+
+    def process_samples(self):
+        '''Reduces all the samples'''
+        for d in range(self.rank):
+            self.process_all_samples_at_distance(d)
+
+    def process_all_transmissions_at_lambda(self, l):
+        '''
+        Calculates transmissions at the given lambda index
+        Note, there must be no loop beyond this point in stack
+        '''
         pass
+
+    def process_all_samples_at_distance(self, d):
+        '''
+        Reduces all the samples at a given distance
+        Note, there must be no loop beyond this point in stack
+        '''
+        out_name = self.getPropertyValue('OutputWorkspace')
+        self.load_and_concatenate_monochromatic(f'SampleRunsD{d+1}', out_name)
+        self.setProperty('OutputWorkspace', mtd[out_name])
+
+    def finalize(self):
+        pass
+
+    def load_and_concatenate_monochromatic(self, prop_name, out_name):
+        '''
+        Loads, merges and concatenates a list of files into one workspace
+        The input might be either numors, or nexus processed files as a result of event rebinning in mantid
+        '''
+        LoadAndMerge(Filename=self.getPropertyValue(prop_name),
+                     OutputWorkspace=out_name)
+        ConvertToPointData(InputWorkspace=out_name,
+                           OutputWorkspace=out_name)
+        ConjoinXRuns(InputWorkspaces=out_name,
+                     OutputWorkspace='__tmp'+out_name)
+        DeleteWorkspace(out_name)
+        RenameWorkspace('__tmp'+out_name, out_name)
 
 
 AlgorithmFactory.subscribe(SANSILLMultiProcess)
