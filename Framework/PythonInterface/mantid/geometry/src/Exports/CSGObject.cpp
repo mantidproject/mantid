@@ -33,10 +33,10 @@ GET_POINTER_SPECIALIZATION(CSGObject)
 boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
   // PyArray_SimpleNewFromData doesn't interact well with smart pointers so use raw pointer
 
-  auto localTriangulator = new GeometryTriangulator(self);
-  auto vertices = localTriangulator->getTriangleVertices();
-  auto triangles = localTriangulator->getTriangleFaces();
-  size_t numberTriangles = localTriangulator->numTriangleFaces();
+  auto localTriangulator = GeometryTriangulator(self);
+  const auto &vertices = localTriangulator.getTriangleVertices();
+  const auto &triangles = localTriangulator.getTriangleFaces();
+  const size_t &numberTriangles = localTriangulator.numTriangleFaces();
   npy_intp dims[3] = {static_cast<int>(numberTriangles), 3, 3};
   auto *meshCoords = new double[dims[0] * dims[1] * dims[2]];
   for (size_t corner_index = 0; corner_index < triangles.size(); ++corner_index) {
@@ -45,7 +45,7 @@ boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
     } // for each coordinate of that corner
   }   // for each corner of the triangle
 
-  PyObject *ndarray = Impl::wrapWithNDArray(meshCoords, 3, dims, NumpyWrapMode::ReadOnly, OwnershipMode::Python);
+  PyObject *ndarray = Impl::wrapWithNDArray(meshCoords, 3, dims, NumpyWrapMode::ReadWrite, OwnershipMode::Python);
   return object(handle<>(ndarray));
 }
 
