@@ -237,16 +237,12 @@ class DrillPresenter:
         """
         Handles the processing of selected groups.
         """
-        groups = self.model.getSamplesGroups()
-        selectedRows = self._table.getSelectedRows()
-        if not selectedRows:
-            selectedRows = self._table.getRowsFromSelectedCells()
-        rows = set()
-        for row in selectedRows:
-            for group in groups:
-                if row in groups[group]:
-                    rows.update(groups[group])
-        self._process(rows)
+        rows = self._table.getSelectedRows()
+        if not rows:
+            rows = self._table.getRowsFromSelectedCells()
+        if not rows:
+            rows = self._table.getAllRows()
+        self._process(rows, True)
 
     def onProcessAll(self):
         """
@@ -255,18 +251,23 @@ class DrillPresenter:
         rows = self._table.getAllRows()
         self._process(rows)
 
-    def _process(self, rows):
+    def _process(self, rows, group=False):
         """
         Submit the processing.
 
         Args:
             rows (set(int)): row indexes
+            group (bool): if True, the group(s) of the selected samples will be
+                          processed entirely
         """
         if not rows:
             return
         self.view.set_disabled(True)
         self.view.set_progress(0, 100)
-        result = self.model.process(rows)
+        if group:
+            result = self.model.processGroup(rows)
+        else:
+            result = self.model.process(rows)
         if not result:
             QMessageBox.warning(self.view, "Error", "Please check the "
                                 "parameters value before processing.")
