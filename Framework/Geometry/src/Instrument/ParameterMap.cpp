@@ -942,7 +942,8 @@ std::string ParameterMap::asString() const {
         out << comp->getFullName(); // Use full path name to ensure unambiguous
                                     // naming
       }
-      out << ';' << p->type() << ';' << p->name() << ';' << p->asString() << '|';
+      const auto paramVisible = p->visible() == 1 ? "true" : "false";
+      out << ';' << p->type() << ';' << p->name() << ';' << p->asString() << ';' << paramVisible << '|';
     }
   }
   return out.str();

@@ -1177,9 +1177,15 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     auto size = static_cast<int>(tokens.count());
     for (int i = 4; i < size; i++)
       paramValue += ";" + tokens[i];
-
     const auto &paramType = tokens[1];
     const auto &paramName = tokens[2];
+    auto &paramVisibility = tokens[size - 1];                    // parameter visibility, if defined, is the last token
+    if (paramVisibility != "true" && paramVisibility != "false") // visibility should have only these two values
+      paramVisibility = "true";                                  // default to visible parameter if not properly defined
+    else { // if defined, the paramValue has one too many entries, -1 to remove also the semicolon
+      paramValue = paramValue.substr(0, paramValue.find(tokens[size - 1]) - 1);
+    }
+    const auto paramDescr = std::string("");
     if (paramName == "masked") {
       auto value = getParam<bool>(paramType, paramValue);
       if (value) {
@@ -1212,7 +1218,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       // pixel positions, but we must also add the parameter below.
       if (isScaleParameter(paramName))
         adjustPositionsFromScaleFactor(componentInfo, comp, paramName, getParam<double>(paramType, paramValue));
-      pmap.add(paramType, comp, paramName, paramValue);
+      pmap.add(paramType, comp, paramName, paramValue, &paramDescr, paramVisibility);
     }
   }
 }
