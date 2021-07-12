@@ -29,6 +29,7 @@ Improvements
 - :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` received a number of improvements: changes names of input workspaces to contain polarization information,
   transmission can be provided as a number or a workspace group, new data averaging option depending on measurement 2theta, option to display all measured points
   on a scatter plot, new option for self-attenuation treatment using measured tranmission.
+- added a 3mf format file describing the PEARL sample and environment shapes for the P-E press. Also fixed a couple of minor issues in the 3mf file format loader used in ref:`LoadSampleEnvironment  <algm-LoadSampleEnvironment>`
 
 Bugfixes
 ########
