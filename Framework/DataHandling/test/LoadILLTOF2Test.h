@@ -125,7 +125,7 @@ public:
     TS_ASSERT_DELTA(0.003, pulseInterval, 1e-10)
     TS_ASSERT(run.hasProperty("run_list"))
     const auto runList = run.getLogData("run_list");
-    TS_ASSERT_EQUALS(runList->value(), std::string("84446"))
+    TS_ASSERT_EQUALS(runList->value(), "84446")
   }
 
   void test_IN5_load() {
@@ -141,7 +141,7 @@ public:
     auto const run = ws->run();
     TS_ASSERT(run.hasProperty("run_list"))
     const auto runList = run.getLogData("run_list");
-    TS_ASSERT_EQUALS(runList->value(), std::string("104007"))
+    TS_ASSERT_EQUALS(runList->value(), "104007")
   }
 
   void test_IN6_load() {
@@ -160,7 +160,7 @@ public:
     TS_ASSERT_DELTA(0.0060337892, pulseInterval, 1e-10)
     TS_ASSERT(run.hasProperty("run_list"))
     const auto runList = run.getLogData("run_list");
-    TS_ASSERT_EQUALS(runList->value(), std::string("164192"))
+    TS_ASSERT_EQUALS(runList->value(), "164192")
   }
 
   void test_PANTHER_diffraction_load() {
@@ -227,7 +227,7 @@ public:
     auto const run = ws->run();
     TS_ASSERT(run.hasProperty("run_list"))
     const auto runList = run.getLogData("run_list");
-    TS_ASSERT_EQUALS(runList->value(), std::string("1723"))
+    TS_ASSERT_EQUALS(runList->value(), "1723")
   }
 
   void test_convertToTOF() {
@@ -255,7 +255,7 @@ public:
     auto const run = ws->run();
     TS_ASSERT(run.hasProperty("run_list"))
     const auto runList = run.getLogData("run_list");
-    TS_ASSERT_EQUALS(runList->value(), std::string("102"))
+    TS_ASSERT_EQUALS(runList->value(), "102")
   }
 
   void test_SHARP_TOF_load() {

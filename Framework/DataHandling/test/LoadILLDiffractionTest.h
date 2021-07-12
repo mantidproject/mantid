@@ -693,7 +693,7 @@ public:
 
     TS_ASSERT_DELTA(ei, 5.12, 0.01)
     TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "none")
-    TS_ASSERT_EQUALS(runList->value(), std::string("104"))
+    TS_ASSERT_EQUALS(runList->value(), "104")
     checkTimeFormat(outputWS);
   }
 
