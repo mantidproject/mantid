@@ -50,7 +50,6 @@ public:
     // specify name of file to load workspace from
     inputFile = "mcstas.h5";
     algToBeTested.setPropertyValue("Filename", inputFile);
-    auto des = NexusDescriptor(inputFile, true);
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT(algToBeTested.isExecuted());
