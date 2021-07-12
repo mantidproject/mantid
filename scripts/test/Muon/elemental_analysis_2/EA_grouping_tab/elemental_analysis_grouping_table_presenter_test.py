@@ -113,17 +113,99 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 3)
         self.assertEqual(len(self.model.groups), 3)
 
-    def test_plot_default_case(self):
-        self.test_setup()
+    def test_plot_default_case_with_detector_3_present(self):
+        grpws = WorkspaceGroup()
+        ws_detector1 = '9999; Detector 1'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector1))
+        ws_detector2 = '9999; Detector 2'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
+        ws_detector3 = '9999; Detector 3'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector3))
+        ws_detector4 = '9998; Detector 3'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector4))
+        run = [9999, 9998]
+        self.context.data_context._loaded_data.add_data(run=run, workspace=grpws)
+        loadedData = self.context.data_context._loaded_data
+        self.context.group_context.reset_group_to_default(loadedData)
         self.presenter.add_group_to_view(self.context.group_context._groups[0], False)
-        self.assertEqual(self.view.num_rows(), 1)
-        self.assertEqual(len(self.model.groups), 3)
-        analyse_checkbox = self.view.get_table_item(0, 3)
-        self.presenter._model.add_group_to_analysis = mock.Mock()
+        self.presenter.add_group_to_view(self.context.group_context._groups[1], False)
+        self.presenter.add_group_to_view(self.context.group_context._groups[2], False)
+        self.presenter.add_group_to_view(self.context.group_context._groups[3], False)
+        self.assertEqual(self.view.num_rows(), 4)
+        self.assertEqual(len(self.model.groups), 4)
+        analyse_checkbox = self.view.get_table_item(0, 4)
         self.assertEqual(analyse_checkbox.checkState(), 0)
 
         self.presenter.plot_default_case()
-        self.assertEqual(self.presenter._model.add_group_to_analysis.call_count, 1)
+        self.assertCountEqual(self.context.group_context.selected_groups, ['9999; Detector 3', '9998; Detector 3'])
+
+    def test_plot_default_case_with_detector_3_not_present(self):
+        grpws = WorkspaceGroup()
+        ws_detector1 = '9999; Detector 1'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector1))
+        ws_detector2 = '9999; Detector 2'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
+        ws_detector3 = '9999; Detector 4'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector3))
+        ws_detector4 = '9998; Detector 1'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector4))
+        run = [9999, 9998]
+        self.context.data_context._loaded_data.add_data(run=run, workspace=grpws)
+        loadedData = self.context.data_context._loaded_data
+        self.context.group_context.reset_group_to_default(loadedData)
+        self.presenter.add_group_to_view(self.context.group_context._groups[0], False)
+        self.presenter.add_group_to_view(self.context.group_context._groups[1], False)
+        self.presenter.add_group_to_view(self.context.group_context._groups[2], False)
+        self.presenter.add_group_to_view(self.context.group_context._groups[3], False)
+        self.assertEqual(self.view.num_rows(), 4)
+        self.assertEqual(len(self.model.groups), 4)
+        analyse_checkbox = self.view.get_table_item(0, 4)
+        self.assertEqual(analyse_checkbox.checkState(), 0)
+
+        self.presenter.plot_default_case()
+        self.assertCountEqual(self.context.group_context.selected_groups, ['9999; Detector 1', '9998; Detector 1'])
+
+    def test_plot_default_case_with_detector_1_not_present(self):
+        grpws = WorkspaceGroup()
+        ws_detector1 = '9999; Detector 4'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector1))
+        ws_detector2 = '9998; Detector 2'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
+        ws_detector3 = '9998; Detector 4'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector3))
+        run = [9999, 9998]
+        self.context.data_context._loaded_data.add_data(run=run, workspace=grpws)
+        loadedData = self.context.data_context._loaded_data
+        self.context.group_context.reset_group_to_default(loadedData)
+        self.presenter.add_group_to_view(self.context.group_context._groups[0], False)
+        self.presenter.add_group_to_view(self.context.group_context._groups[1], False)
+        self.presenter.add_group_to_view(self.context.group_context._groups[2], False)
+
+        self.assertEqual(self.view.num_rows(), 3)
+        self.assertEqual(len(self.model.groups), 3)
+        analyse_checkbox = self.view.get_table_item(0, 3)
+        self.assertEqual(analyse_checkbox.checkState(), 0)
+
+        self.presenter.plot_default_case()
+        self.assertCountEqual(self.context.group_context.selected_groups, ['9999; Detector 4', '9998; Detector 4'])
+
+    def test_plot_default_case_with_detector_4_not_present(self):
+        grpws = WorkspaceGroup()
+        ws_detector2 = '9998; Detector 2'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
+        run = [9998]
+        self.context.data_context._loaded_data.add_data(run=run, workspace=grpws)
+        loadedData = self.context.data_context._loaded_data
+        self.context.group_context.reset_group_to_default(loadedData)
+        self.presenter.add_group_to_view(self.context.group_context._groups[0], False)
+
+        self.assertEqual(self.view.num_rows(), 1)
+        self.assertEqual(len(self.model.groups), 1)
+        analyse_checkbox = self.view.get_table_item(0, 1)
+        self.assertEqual(analyse_checkbox.checkState(), 0)
+
+        self.presenter.plot_default_case()
+        self.assertCountEqual(self.context.group_context.selected_groups, ['9998; Detector 2'])
 
     def test_remove_selected_rows_in_view_and_model(self):
         self.test_setup()

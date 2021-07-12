@@ -178,7 +178,7 @@ class EAGroupingTablePresenter(object):
 
     def plot_default_case(self):
         """
-            Detector 3 should be plotted by default and if not present Detecor 1 should be plotted, if neither is
+            Detector 3 should be plotted by default and if not present Detector 1 should be plotted, if neither is
             present then Detector 4 and finally Detector 2
         """
         index_sorted_by_detectors = {}
@@ -196,5 +196,5 @@ class EAGroupingTablePresenter(object):
             index_list = index_sorted_by_detectors[detector]
             if index_list:
                 for index in index_list:
-                    self._view. set_to_analyse_state(index, True)
+                    self._view.set_to_analyse_state(index, True)
                 return

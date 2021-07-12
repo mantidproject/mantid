@@ -88,12 +88,14 @@ class EAGroupingTabPresenterTest(unittest.TestCase):
         self.presenter._model.is_data_loaded.return_value = True
         self.presenter.update_view_from_model = mock.Mock()
         self.presenter.update_description_text = mock.Mock()
+        self.presenter.plot_default_groups = mock.Mock()
 
         self.presenter.handle_new_data_loaded()
 
         # Assert statements
         self.presenter.update_view_from_model.assert_called_once()
         self.presenter.update_description_text.assert_called_once()
+        self.presenter.plot_default_groups.assert_called_once()
 
     def test_handle_data_loaded_when_data_not_loaded(self):
         self.presenter._model.is_data_loaded = mock.Mock()
