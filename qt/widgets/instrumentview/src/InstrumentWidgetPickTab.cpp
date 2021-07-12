@@ -775,14 +775,16 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
   } else {
     std::vector<Mantid::detid_t> dets;
     const auto &actor = m_instrWidget->getInstrumentActor();
-    dets = actor.getAllDetIDs();
+    const auto &detInfo = actor.detectorInfo();
+    dets = detInfo.detectorIDs();
 
     std::vector<size_t> detsIds;
     detsIds.reserve(dets.size());
 
     for (auto id : dets) {
-      if (id >= 0)
-        detsIds.push_back(static_cast<size_t>(id));
+      auto detector = actor.getDetectorByDetID(id);
+      if (!detInfo.isMonitor(detector))
+        detsIds.push_back(detector);
     }
 
     m_plotController->setPlotData(detsIds);
