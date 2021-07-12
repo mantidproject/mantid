@@ -28,6 +28,18 @@
         <value val="4"/>
       </parameter>
 
+      <!-- During the 1st cycle of 2021, back detector was 2, front detector was 1
+        Starting from the 2nd cycle, back detector is 1, front detector is 2-->
+      <parameter name="back_detector_index" type="string">
+          <value val="2" valid-from="2021-01-01T00:00:00" valid-to="2021-04-30T23:59:59"/>
+          <value val="1" valid-from="2021-05-01T00:00:00"/>
+      </parameter>
+
+      <parameter name="front_detector_index" type="string">
+          <value val="1" valid-from="2021-01-01T00:00:00" valid-to="2021-04-30T23:59:59"/>
+          <value val="2" valid-from="2021-05-01T00:00:00"/>
+      </parameter>
+
       <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
       <parameter name="logbook_default_parameters" type="string">
 	<value val="SampleDescription:/entry0/sample_description:s,

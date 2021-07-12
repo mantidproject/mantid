@@ -74,9 +74,9 @@ Output:
 
 .. testoutput:: ExSANSILLAutoProcess
 
-    Distance 1 Q-range:0.001440-0.020011 AA
-    Distance 2 Q-range:0.007263-0.091701 AA
-    Distance 3 Q-range:0.033776-0.342831 AA
+    Distance 1 Q-range:0.001350-0.020028 AA
+    Distance 2 Q-range:0.007625-0.092061 AA
+    Distance 3 Q-range:0.032571-0.343635 AA
 
 .. testcleanup:: ExSANSILLAutoProcess
 

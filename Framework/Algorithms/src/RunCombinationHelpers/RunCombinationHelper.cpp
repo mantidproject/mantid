@@ -61,6 +61,7 @@ void RunCombinationHelper::setReferenceProperties(const MatrixWorkspace_sptr &re
   m_spectrumAxisUnit = ref->getAxis(1)->unit()->unitID();
   m_yUnit = ref->YUnit();
   m_isHistogramData = ref->isHistogramData();
+  m_isDistribution = ref->isDistribution();
   m_isScanning = ref->detectorInfo().isScanning();
   m_instrumentName = ref->getInstrument()->getName();
   if (m_numberSpectra) {
@@ -87,7 +88,9 @@ std::string RunCombinationHelper::checkCompatibility(const MatrixWorkspace_sptr 
   if (ws->YUnit() != m_yUnit)
     errors += "different Y units; ";
   if (ws->isHistogramData() != m_isHistogramData)
-    errors += "different distribution or histogram type; ";
+    errors += "different data type (Histogram Data vs Point Data); ";
+  if (ws->isDistribution() != m_isDistribution)
+    errors += "different distribution flag (Histogrm vs Distribution); ";
   if (ws->detectorInfo().isScanning() != m_isScanning)
     errors += "a mix of workspaces with and without detector scans; ";
   if (m_isScanning && ws->detectorInfo().size() != m_numberDetectors)
