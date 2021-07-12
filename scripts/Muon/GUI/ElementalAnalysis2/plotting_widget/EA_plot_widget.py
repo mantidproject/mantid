@@ -56,6 +56,10 @@ class EAPlotWidget(object):
         return self.presenter.workspace_deleted_from_ads_observers
 
     @property
+    def add_or_remove_plot_observers(self):
+        return self.presenter.add_or_remove_plot_observers
+
+    @property
     def rebin_options_set_observers(self):
         return self.presenter.rebin_options_set_observers
 

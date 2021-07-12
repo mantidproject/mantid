@@ -39,13 +39,14 @@ class EAPlotDataPaneModel(BasePaneModel):
         except AttributeError:
             return []
 
-    def get_workspaces_to_remove(self, group_names, is_raw):
+    def get_workspaces_to_remove(self, group_names):
         """
         :param group_names:
-        :param is_raw: Whether to use raw or rebinned data
         :return: a list of workspace names
         """
-        return self.get_workspace_list(group_names, is_raw)
+        is_raw = self.get_workspace_list(group_names, True)
+        is_rebinned = self.get_workspace_list(group_names, False)
+        return list(set(is_raw + is_rebinned))
 
     def get_workspace_list(self, group_names, is_raw):
         """

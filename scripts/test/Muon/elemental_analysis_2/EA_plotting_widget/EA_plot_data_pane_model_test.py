@@ -71,11 +71,14 @@ class EAPlotDataPaneModelTest(unittest.TestCase):
         self.model.get_count_workspaces_to_plot = mock.Mock(return_value="test")
         names = ["9999; Detector 2", "9999; Detector 3", "9999; Detector 4"]
 
-        self.model.get_workspaces_to_remove(names, True)
-        self.assertEqual(self.model.get_count_workspaces_to_plot.call_count, 3)
+        self.model.get_workspaces_to_remove(names)
+        self.assertEqual(self.model.get_count_workspaces_to_plot.call_count, 6)
         self.model.get_count_workspaces_to_plot.assert_any_call("9999; Detector 2", True)
         self.model.get_count_workspaces_to_plot.assert_any_call("9999; Detector 3", True)
         self.model.get_count_workspaces_to_plot.assert_any_call("9999; Detector 4", True)
+        self.model.get_count_workspaces_to_plot.assert_any_call("9999; Detector 2", False)
+        self.model.get_count_workspaces_to_plot.assert_any_call("9999; Detector 3", False)
+        self.model.get_count_workspaces_to_plot.assert_any_call("9999; Detector 4", False)
 
     def test_create_tiled_keys_returns_correctly_for_tiled_by_run(self):
         self.context.group_context.add_group(EAGroup(group_name="9997; Detector 2", detector="Detector 2",

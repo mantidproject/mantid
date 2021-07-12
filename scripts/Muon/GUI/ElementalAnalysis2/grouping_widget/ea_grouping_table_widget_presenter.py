@@ -14,6 +14,7 @@ MAXIMUM_NUMBER_OF_GROUPS = 20
 REBIN_NONE_OPTION = "0"
 REBIN_FIXED_OPTION = "1"
 REBIN_VARIABLE_OPTION = "2"
+DEFAULT_DETECTOR_PLOTTED_ORDER = ["Detector 3", "Detector 1", "Detector 4", "Detector 2"]
 
 
 class EAGroupingTablePresenter(object):
@@ -176,6 +177,24 @@ class EAGroupingTablePresenter(object):
         self.selected_group_changed_notifier.notify_subscribers(group_info)
 
     def plot_default_case(self):
+        """
+            Detector 3 should be plotted by default and if not present Detecor 1 should be plotted, if neither is
+            present then Detector 4 and finally Detector 2
+        """
+        index_sorted_by_detectors = {}
         for row in range(self._view.num_rows()):
             group_name = self._view.get_table_item(row, 0).text()
-            self._model.add_group_to_analysis(group_name)
+            group = self._model._groups[group_name]
+            detector = group.detector
+            if detector in index_sorted_by_detectors:
+                index_sorted_by_detectors[detector].append(row)
+            else:
+                index_sorted_by_detectors[detector] = [row]
+        for detector in DEFAULT_DETECTOR_PLOTTED_ORDER:
+            if detector not in index_sorted_by_detectors:
+                continue
+            index_list = index_sorted_by_detectors[detector]
+            if index_list:
+                for index in index_list:
+                    self._view. set_to_analyse_state(index, True)
+                return

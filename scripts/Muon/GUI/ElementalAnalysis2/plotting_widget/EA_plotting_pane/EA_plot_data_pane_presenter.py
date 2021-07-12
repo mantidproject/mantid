@@ -12,7 +12,7 @@ class EAPlotDataPanePresenter(BasePanePresenter):
 
     def __init__(self, view, model, context, figure_presenter):
         super(EAPlotDataPanePresenter, self).__init__(view, model, context, figure_presenter)
-        self._data_type = ["Delayed", "Prompt", "Total"]
+        self._data_type = ["Total", "Prompt", "Delayed"]
         self._sort_by = ["Detector", "Run"]
         self.update_view()
         self._view.enable_plot_type_combo()
@@ -20,6 +20,7 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         self._view.enable_tile_plotting_options()
         self._view.enable_plot_raw_option()
         self.added_group_observer = GenericObserverWithArgPassing(self.handle_added_or_removed_group_to_plot)
+        self.add_or_remove_plot_observer = GenericObserverWithArgPassing(self.handle_added_or_removed_group_to_plot)
 
     def handle_data_type_changed(self):
         """
@@ -43,6 +44,7 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         """
         is_added = group_info["is_added"]
         name = group_info["name"]
+
         if is_added:
             self.handle_added_group_to_plot()
         else:
@@ -59,8 +61,7 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         Handles a group being removed in grouping widget analysis table
         :param group_name: The group name that was removed from the analysis
         """
-        workspace_list = self._model.get_workspaces_to_remove(
-            [group_name], is_raw=self._view.is_raw_plot(), plot_type=self._view.get_plot_type())
+        workspace_list = self._model.get_workspaces_to_remove([group_name])
         self.remove_list_from_plot(workspace_list)
         self.handle_data_updated()
 

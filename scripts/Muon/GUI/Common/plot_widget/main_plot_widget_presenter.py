@@ -16,7 +16,7 @@ class MainPlotWidgetPresenter(HomeTabSubWidget):
         """
         self._view = view
 
-        self._plot_modes={}
+        self._plot_modes = {}
         for mode in plot_modes:
             self._plot_modes[mode.name] = mode
             self._plot_modes[mode.name].hide()
@@ -47,6 +47,10 @@ class MainPlotWidgetPresenter(HomeTabSubWidget):
     @property
     def workspace_deleted_from_ads_observers(self):
         return [self._plot_modes[mode].workspace_deleted_from_ads_observer for mode in list(self._plot_modes.keys())]
+
+    @property
+    def add_or_remove_plot_observers(self):
+        return [self._plot_modes[mode].add_or_remove_plot_observer for mode in list(self._plot_modes.keys())]
 
     def show(self, plot_mode):
         self._plot_modes[plot_mode].show()
