@@ -123,25 +123,31 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
         self._plot_information_list = []
 
+    def _make_plot(self, workspace_plot_info: WorkspacePlotInformation):
+        workspace_name = workspace_plot_info.workspace_name
+        try:
+            workspace = AnalysisDataService.Instance().retrieve(workspace_name)
+        except (RuntimeError, KeyError):
+            return -1
+        self._plot_information_list.append(workspace_plot_info)
+        errors = workspace_plot_info.errors
+        ws_index = workspace_plot_info.index
+        axis_number = workspace_plot_info.axis
+        ax = self.fig.axes[axis_number]
+        plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
+        plot_kwargs['color'] = self._color_queue[axis_number]()
+        _do_single_plot(ax, workspace, ws_index, errors=errors,
+                        plot_kwargs=plot_kwargs)
+        return axis_number
+
     def add_workspaces_to_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
         """Add a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
         The PlotInformation contains the workspace name, workspace index and target axis."""
         nrows, ncols = get_num_row_and_col(self._number_of_axes)
         for workspace_plot_info in workspace_plot_info_list:
-            workspace_name = workspace_plot_info.workspace_name
-            try:
-                workspace = AnalysisDataService.Instance().retrieve(workspace_name)
-            except (RuntimeError, KeyError):
+            axis_number = self._make_plot(workspace_plot_info)
+            if axis_number < 0:
                 continue
-            self._plot_information_list.append(workspace_plot_info)
-            errors = workspace_plot_info.errors
-            ws_index = workspace_plot_info.index
-            axis_number = workspace_plot_info.axis
-            ax = self.fig.axes[axis_number]
-            plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
-            plot_kwargs['color'] = self._color_queue[axis_number]()
-            _do_single_plot(ax, workspace, ws_index, errors=errors,
-                            plot_kwargs=plot_kwargs)
             if self._settings.is_condensed:
                 self.hide_axis(axis_number, nrows, ncols)
         #remove labels from empty plots
