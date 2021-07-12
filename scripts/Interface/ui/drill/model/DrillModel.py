@@ -470,6 +470,27 @@ class DrillModel(QObject):
         self.tasksPool.addProcesses(tasks)
         return True
 
+    def processGroup(self, elements):
+        """
+        Start processing of whole group(s) of samples.
+
+        Args:
+            elements (list(int)): list of sample indexes
+
+        Returns:
+            bool: True if all samples are valid and submitted to processing
+        """
+        sampleIndexes = []
+        for e in elements:
+            if (e >= len(self.samples)) or (not self.samples[e]):
+                continue
+            groupName = self.samples[e].getGroupName()
+            if groupName is not None:
+                sampleIndexes += [sample.getIndex()
+                                  for sample
+                                  in self._getSamplesFromGroup(groupName)]
+        return self.process(sampleIndexes)
+
     def _onTaskStarted(self, ref):
         """
         Called each time a task starts.
