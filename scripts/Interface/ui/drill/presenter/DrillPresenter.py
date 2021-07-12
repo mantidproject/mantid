@@ -375,7 +375,6 @@ class DrillPresenter:
         """
         Show the settings dialog.
         """
-        allParameters = self.model.getParameters()
         settingNames = RundexSettings.SETTINGS[self.model.getAcquisitionMode()]
         settings = [parameter for parameter in self.model.getParameters()
                     if parameter.getName() in settingNames]
