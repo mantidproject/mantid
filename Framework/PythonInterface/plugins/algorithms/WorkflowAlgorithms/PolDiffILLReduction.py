@@ -38,7 +38,53 @@ class PolDiffILLReduction(PythonAlgorithm):
     def name(self):
         return 'PolDiffILLReduction'
 
-    # flake8: noqa: C901
+    def _validate_self_attenuation_arguments(self):
+        issues = dict()
+        if len(self.getProperty('SampleAndEnvironmentProperties').value) == 0:
+            issues['SampleAndEnvironmentProperties'] = 'Sample parameters need to be defined.'
+            return issues
+
+        if self.getPropertyValue('SelfAttenuationMethod') == 'Transmission':
+            if self.getProperty('Transmission').isDefault:
+                issues['Transmission'] = 'Transmission value or workspace needs to be provided for' \
+                                         ' this self-attenuation approach.'
+                return issues
+            if self.getPropertyValue('SampleGeometry') != 'None':
+                issues['SampleGeometry'] = 'Sample geometry cannot be taken into account in this ' \
+                                           'self-attenuation approach.'
+                return issues
+
+        if (self.getPropertyValue('SelfAttenuationMethod') == 'User'
+                and self.getProperty('SampleSelfAttenuationFactors').isDefault):
+            issues['User'] = 'WorkspaceGroup containing sample self-attenuation factors must be provided in this mode'
+            issues['SampleSelfAttenuationFactors'] = issues['User']
+            return issues
+
+        sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
+        geometry_type = self.getPropertyValue('SampleGeometry')
+        required_keys = ['SampleMass', 'FormulaUnitMass']
+        if geometry_type != 'None':
+            required_keys += ['SampleChemicalFormula', 'SampleDensity', 'ContainerDensity',
+                              'ContainerChemicalFormula']
+        if geometry_type == 'FlatPlate':
+            required_keys += ['Height', 'SampleWidth', 'SampleThickness', 'SampleAngle', 'ContainerFrontThickness',
+                              'ContainerBackThickness']
+        if geometry_type == 'Cylinder':
+            required_keys += ['Height', 'SampleRadius', 'ContainerRadius']
+        if geometry_type == 'Annulus':
+            required_keys += ['Height', 'SampleInnerRadius', 'SampleOuterRadius', 'ContainerInnerRadius',
+                              'ContainerOuterRadius']
+
+        if self.getPropertyValue('SelfAttenuationMethod') == 'MonteCarlo':
+            required_keys += ['EventsPerPoint']
+        elif self.getPropertyValue('SelfAttenuationMethod') == 'Numerical':
+            required_keys += ['ElementSize']
+
+        for key in required_keys:
+            if key not in sampleAndEnvironmentProperties:
+                issues['SampleAndEnvironmentProperties'] = '{} needs to be defined.'.format(key)
+        return issues
+
     def validateInputs(self):
         issues = dict()
 
@@ -60,45 +106,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             issues['Transmission'] = 'Quartz transmission is mandatory for polarisation correction calculation.'
 
         if process == 'Sample' or process == 'Vanadium':
-            if len(self.getProperty('SampleAndEnvironmentProperties').value) == 0:
-                issues['SampleAndEnvironmentProperties'] = 'Sample parameters need to be defined.'
-
-            if self.getPropertyValue('SelfAttenuationMethod') == 'Transmission':
-                if self.getProperty('Transmission').isDefault:
-                    issues['Transmission'] = 'Transmission value or workspace needs to be provided for' \
-                                             ' this self-attenuation approach.'
-                if self.getPropertyValue('SampleGeometry') != 'None':
-                    issues['SampleGeometry'] = 'Sample geometry cannot be taken into account in this ' \
-                                               'self-attenuation approach.'
-
-            if (self.getPropertyValue('SelfAttenuationMethod') == 'User'
-                    and self.getProperty('SampleSelfAttenuationFactors').isDefault):
-                issues['User'] = 'WorkspaceGroup containing sample self-attenuation factors must be provided in this mode'
-                issues['SampleSelfAttenuationFactors'] = issues['User']
-
-            sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
-            geometry_type = self.getPropertyValue('SampleGeometry')
-            required_keys = ['SampleMass', 'FormulaUnitMass']
-            if geometry_type != 'None':
-                required_keys += ['SampleChemicalFormula', 'SampleDensity', 'ContainerDensity',
-                                  'ContainerChemicalFormula']
-            if geometry_type == 'FlatPlate':
-                required_keys += ['Height', 'SampleWidth', 'SampleThickness', 'SampleAngle', 'ContainerFrontThickness',
-                                  'ContainerBackThickness']
-            if geometry_type == 'Cylinder':
-                required_keys += ['Height', 'SampleRadius', 'ContainerRadius']
-            if geometry_type == 'Annulus':
-                required_keys += ['Height', 'SampleInnerRadius', 'SampleOuterRadius', 'ContainerInnerRadius',
-                                  'ContainerOuterRadius']
-
-            if self.getPropertyValue('SelfAttenuationMethod') == 'MonteCarlo':
-                required_keys += ['EventsPerPoint']
-            elif self.getPropertyValue('SelfAttenuationMethod') == 'Numerical':
-                required_keys += ['ElementSize']
-
-            for key in required_keys:
-                if key not in sampleAndEnvironmentProperties:
-                    issues['SampleAndEnvironmentProperties'] = '{} needs to be defined.'.format(key)
+            issues.update(self._validate_self_attenuation_arguments())
 
         return issues
 
