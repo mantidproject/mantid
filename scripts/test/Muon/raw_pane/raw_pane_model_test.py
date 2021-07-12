@@ -14,6 +14,7 @@ class RawPaneModelTest(unittest.TestCase):
 
     def setUp(self):
         self.context = setup_context(False)
+        self.context.data_context.instrument = "MUSR"
         self.model = RawPaneModel(self.context)
         self.name = self.model.name
 
