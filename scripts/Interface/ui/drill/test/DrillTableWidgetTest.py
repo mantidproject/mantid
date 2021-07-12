@@ -74,16 +74,12 @@ class DrillTableWidgetTest(unittest.TestCase):
         samplePresenter = mock.Mock()
         self.table._samplePresenters = [samplePresenter]
         self.table._columns = ["test"]
-        item.text.return_value = ""
         item.getPresenter.return_value = itemPresenter
         self.table.onItemChanged(item)
-        samplePresenter.onDelItem.assert_called_once()
-        item.text.return_value = "test"
+        item.signals.dataChanged.emit.assert_called()
         item.getPresenter.return_value = None
         self.table.onItemChanged(item)
         samplePresenter.onNewItem.assert_called_once()
-        item.getPresenter.return_value = itemPresenter
-        self.table.onItemChanged(item)
         item.signals.dataChanged.emit.assert_called()
 
     def test_itemFromName(self):
