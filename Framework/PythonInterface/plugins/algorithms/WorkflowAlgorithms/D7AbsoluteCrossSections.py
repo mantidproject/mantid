@@ -23,6 +23,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
     @staticmethod
     def _max_value_per_detector(ws, one_per_detector=True):
+        """Returns maximum value either one per detector or a global maximum."""
         if isinstance(mtd[ws], WorkspaceGroup):
             max_values = np.zeros(shape=(mtd[ws][0].getNumberHistograms(),
                                          mtd[ws].getNumberOfEntries()))
@@ -51,12 +52,15 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
     @staticmethod
     def _set_as_distribution(ws):
+        """Wrapper to set distribution flag to all entries in a workspace group."""
         for entry in mtd[ws]:
             entry.setDistribution(True)
         return ws
 
     @staticmethod
     def _extract_numor(name):
+        """Returns a numor contained in the workspace name, assuming the first number in the name is the run number.
+        Otherwise it returns the full name to ensure a unique workspace name."""
         word_list = name.split("_")
         numor = name  # fail case to ensure unique name
         for word in word_list:
