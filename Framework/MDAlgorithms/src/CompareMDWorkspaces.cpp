@@ -11,7 +11,6 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -19,7 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//=============================================================================
+namespace {
 /** Custom exception class to signal a failure
  * in the comparison
  */
@@ -29,122 +28,88 @@ public:
   std::string getMessage() const { return this->what(); }
 };
 
+/** Return a string "(a vs b)".   */
+template <typename T> std::string versus(T a, T b) {
+  return "(" + Strings::toString(a) + " vs " + Strings::toString(b) + ")";
+}
+
+/** Compare a and b. Return true if they are considered equal
+ *
+ * @param a First input
+ * @param b Second input
+ * @param tolerance Considered equal within this range
+ */
+template <class T> bool compareTol(T a, T b, double tolerance) {
+  double diff = fabs(a - b);
+  if (diff > tolerance) {
+    const double pa = fabs(a);
+    const double pb = fabs(b);
+    if ((pa > 2 * tolerance) || (pb > 2 * tolerance)) {
+      diff = 0.5 * diff / (pa + pb);
+      if (diff > tolerance)
+        return false;
+    } else
+      return false;
+  }
+  return true;
+}
+
+/** Compare a and b. Throw if they dont match within Tolerance
+ *
+ * @param a :: double
+ * @param b :: double
+ * @param message :: message for result
+ * @throw CompareFailsException if the two DONT match
+ */
+template <class T> void throwIfCompareTol(T a, T b, double tolerance, const std::string &message) {
+  if (!compareTol(a, b, tolerance)) {
+    throw CompareFailsException(message + " " + versus(a, b));
+  }
+}
+
+/**
+ * Predicate to determine if one event is less than another within a tolerance
+ * @param lhs First input MDEvent
+ * @param rhs Second input MDEvent
+ * @param tolerance Two events are considered equal within this tolerance
+ */
+template <size_t ND, template <size_t> class MDE>
+bool lessThan(const MDE<ND> &lhs, const MDE<ND> &rhs, double tolerance) {
+  for (size_t i = 0; i < ND; ++i) {
+    if (!compareTol(lhs.getCenter(i), rhs.getCenter(i), tolerance)) {
+      if (lhs.getCenter(i) < rhs.getCenter(i))
+        return true;
+    }
+  }
+
+  if (!compareTol(lhs.getSignal(), rhs.getSignal(), tolerance) && lhs.getSignal() < rhs.getSignal()) {
+    return true;
+  }
+  if (!compareTol(lhs.getErrorSquared(), rhs.getErrorSquared(), tolerance) &&
+      lhs.getErrorSquared() < rhs.getErrorSquared()) {
+    return true;
+  }
+
+  return false;
+}
+
+/// Output an MDEvent to a stream. Used for debugging.
+template <size_t ND, template <size_t> class MDE> std::ostream &operator<<(std::ostream &os, const MDE<ND> &event) {
+  os << "(";
+  for (size_t i = 0; i < ND; ++i) {
+    os << event.getCenter(i) << ", ";
+  }
+  os << ")"
+     << ""
+     << "signal = " << event.getSignal() << ", errorSq = " << event.getErrorSquared();
+
+  return os;
+}
+
+} // namespace
+
 namespace Mantid {
 namespace MDAlgorithms {
-
-class SimpleMDEvent {
-
-private:
-  std::vector<float> mCoordinates;
-  float mSignal;
-  float mError;
-
-public:
-  /// static tolerance
-  static float s_tolerance;
-  // static float s_tolerance {static_cast<float>(1E-7)};
-
-  SimpleMDEvent(const std::vector<float> &coordinates, const float &signal, const float &error)
-      : mCoordinates(coordinates), mSignal(signal), mError(error) {}
-
-  SimpleMDEvent(const SimpleMDEvent &other)
-      : mCoordinates(other.mCoordinates), mSignal(other.mSignal), mError(other.mError) {}
-
-  // pretty output
-  std::string str() const {
-    std::stringstream ss;
-    size_t numdirs = mCoordinates.size();
-    for (size_t i = 0; i < numdirs; ++i)
-      ss << mCoordinates[i] << ", ";
-    ss << "signal = " << mSignal << ", error = " << mError;
-
-    return ss.str();
-  }
-
-  float getCenter(size_t dim) const { return mCoordinates[dim]; }
-
-  float getSignal() const { return mSignal; }
-
-  float getError() const { return mError; }
-
-  bool operator()(SimpleMDEvent &event1, const SimpleMDEvent &event2) { return event1 < event2; }
-
-  /**
-   * @brief override operator <
-   * order
-   * 1. coordinate
-   * 2. signal
-   * 3. error
-   * @return
-   */
-  bool operator<(const SimpleMDEvent &event2) const {
-
-    bool less(true);
-    bool equal(false);
-
-    // compare coordinates
-    size_t numdirs = mCoordinates.size();
-    for (size_t i = 0; i < numdirs; ++i) {
-      // equal is hard to tell
-      coord_t diff = mCoordinates[i] - event2.mCoordinates[i];
-
-      if (fabs(mCoordinates[i]) > s_tolerance && fabs(diff / mCoordinates[i]) < s_tolerance * 10.) {
-        // larger than epsilon and relative difference less than epsilon
-        equal = true;
-        less = false;
-      } else if (fabs(mCoordinates[i]) < s_tolerance && fabs(diff) < s_tolerance) {
-        // less than epsilon and absolute difference less than epsilon
-        equal = true;
-        less = false;
-      } else if (diff < 0) {
-        // less
-        less = true;
-      } else {
-        // larger
-        less = false;
-      }
-
-      // no need to continue
-      if (!equal)
-        break;
-    }
-
-    // signal
-    if (equal && mSignal < event2.mSignal) {
-      less = true;
-      equal = false;
-    } else if (equal && mSignal > event2.mSignal) {
-      less = false;
-      equal = false;
-    }
-
-    // error: no need to continue the comparison
-    if (equal && mError >= event2.mError) {
-      less = false;
-    }
-
-    return less;
-  }
-
-  bool operator()(const SimpleMDEvent &lx, const SimpleMDEvent &rx) const { return lx < rx; }
-
-  SimpleMDEvent &operator=(const SimpleMDEvent &event2) {
-    // coordiate
-    size_t numdirs = mCoordinates.size();
-    for (size_t i = 0; i < numdirs; ++i)
-      mCoordinates[i] = event2.mCoordinates[i];
-    // signal and error
-    mSignal = event2.mSignal;
-    mError = event2.mError;
-
-    return *this;
-  }
-};
-
-float SimpleMDEvent::s_tolerance(static_cast<float>(1E-7));
-
-//----------------------------------------------------------------------------------------------
-bool compareSimpleEvents(SimpleMDEvent &self, const SimpleMDEvent &other) { return (self < other); }
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareMDWorkspaces)
@@ -169,8 +134,8 @@ void CompareMDWorkspaces::init() {
                   "Second MDWorkspace to compare.");
 
   declareProperty("Tolerance", 0.0, "The maximum amount by which values may differ between the workspaces.");
-  declareProperty("MDEventTolerance", 1E-7,
-                  "The maximum amount by which values may differ between 2 MDEvents to compare.");
+  declareProperty("MDEventTolerance", EMPTY_DBL(),
+                  "The maximum amount by which values may differ between 2 MDEvents to compare. Defaults to tolerance");
   declareProperty("CheckEvents", true,
                   "Whether to compare each MDEvent. If "
                   "False, will only look at the box "
@@ -187,12 +152,6 @@ void CompareMDWorkspaces::init() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Return a string "(a vs b)".   */
-template <typename T> std::string versus(T a, T b) {
-  return "(" + Strings::toString(a) + " vs " + Strings::toString(b) + ")";
-}
-
-//----------------------------------------------------------------------------------------------
 /** Compare a and b. Throw if they dont match
  *
  * @param a :: any type
@@ -203,28 +162,6 @@ template <typename T> std::string versus(T a, T b) {
 template <typename T> void CompareMDWorkspaces::compare(T a, T b, const std::string &message) {
   if (a != b)
     throw CompareFailsException(message + " " + versus(a, b));
-}
-
-//----------------------------------------------------------------------------------------------
-/** Compare a and b. Throw if they dont match within Tolerance
- *
- * @param a :: double
- * @param b :: double
- * @param message :: message for result
- * @throw CompareFailsException if the two DONT match
- */
-template <class T> void CompareMDWorkspaces::compareTol(T a, T b, const std::string &message) {
-  double diff = fabs(a - b);
-  if (diff > m_tolerance) {
-    double pa = fabs(a);
-    double pb = fabs(b);
-    if ((pa > 2 * m_tolerance) || (pb > 2 * m_tolerance)) {
-      diff = 0.5 * diff / (pa + pb);
-      if (diff > m_tolerance)
-        throw CompareFailsException(message + " " + versus(a, b));
-    } else
-      throw CompareFailsException(message + " " + versus(a, b));
-  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -240,10 +177,10 @@ void CompareMDWorkspaces::compareMDGeometry(const Mantid::API::IMDWorkspace_sptr
     compare(dim1->getUnits(), dim2->getUnits(), "Dimension #" + Strings::toString(d) + " has different units");
     compare(dim1->getNBins(), dim2->getNBins(),
             "Dimension #" + Strings::toString(d) + " has a different number of bins");
-    compareTol(dim1->getMinimum(), dim2->getMinimum(),
-               "Dimension #" + Strings::toString(d) + " has a different minimum");
-    compareTol(dim1->getMaximum(), dim2->getMaximum(),
-               "Dimension #" + Strings::toString(d) + " has a different maximum");
+    throwIfCompareTol(dim1->getMinimum(), dim2->getMinimum(), m_tolerance,
+                      "Dimension #" + Strings::toString(d) + " has a different minimum");
+    throwIfCompareTol(dim1->getMaximum(), dim2->getMaximum(), m_tolerance,
+                      "Dimension #" + Strings::toString(d) + " has a different maximum");
   }
 }
 
@@ -292,10 +229,10 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
 
   bool boxes_same(true);
   std::string errormessage("");
-  int num_boxes = static_cast<int>(boxes1.size());
+  const int num_boxes = static_cast<int>(boxes1.size());
   // workspace with file backed cannot work with OpenMP
   // segmentation fault is generated on Mac build
-  bool filebacked = ws1->isFileBacked() || ws2->isFileBacked();
+  const bool filebacked = ws1->isFileBacked() || ws2->isFileBacked();
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP( parallel for if (!filebacked))
@@ -362,12 +299,15 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
   }
 
   for (size_t d = 0; d < nd; d++) {
-    this->compareTol(box1->getExtents(d).getMin(), box2->getExtents(d).getMin(), "Extents of box do not match");
-    this->compareTol(box1->getExtents(d).getMax(), box2->getExtents(d).getMax(), "Extents of box do not match");
+    throwIfCompareTol(box1->getExtents(d).getMin(), box2->getExtents(d).getMin(), m_tolerance,
+                      "Extents of box do not match");
+    throwIfCompareTol(box1->getExtents(d).getMax(), box2->getExtents(d).getMax(), m_tolerance,
+                      "Extents of box do not match");
   }
-  this->compareTol(box1->getInverseVolume(), box2->getInverseVolume(), "Box inverse volume does not match");
-  this->compareTol(box1->getSignal(), box2->getSignal(), "Box signal does not match");
-  this->compareTol(box1->getErrorSquared(), box2->getErrorSquared(), "Box error squared does not match");
+  throwIfCompareTol(box1->getInverseVolume(), box2->getInverseVolume(), m_tolerance,
+                    "Box inverse volume does not match");
+  throwIfCompareTol(box1->getSignal(), box2->getSignal(), m_tolerance, "Box signal does not match");
+  throwIfCompareTol(box1->getErrorSquared(), box2->getErrorSquared(), m_tolerance, "Box error squared does not match");
   if (m_CheckEvents)
     this->compare(box1->getNPoints(), box2->getNPoints(), "Number of points in box does not match");
 
@@ -377,7 +317,7 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
   if (gridbox1 && gridbox2) {
     // MDGridBox: compare box size on each dimension
     for (size_t d = 0; d < nd; d++)
-      this->compareTol(gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), "Box sizes do not match");
+      throwIfCompareTol(gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), m_tolerance, "Box sizes do not match");
   } else {
     // Could be both MDBoxes (with events)
     auto *mdbox1 = dynamic_cast<MDBox<MDE, nd> *>(box1);
@@ -402,55 +342,46 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
       try {
         this->compare(events1.size(), events2.size(), "Box event vectors are not the same length");
 
-        if (events1.size() == events2.size() && events1.size() > 2) {
+        if (events1.size() == events2.size()) {
+          // Sorting requires assignment. Use index into original array and sort that
+          std::vector<size_t> events1Indexes(events1.size()), events2Indexes(events2.size());
+          std::iota(events1Indexes.begin(), events1Indexes.end(), 0);
+          std::iota(events2Indexes.begin(), events2Indexes.end(), 0);
 
-          std::vector<SimpleMDEvent> events_vec1;
-          std::vector<SimpleMDEvent> events_vec2;
-
-          // convert MDEvents vectors to SimpleMDEvent vectors for comparison
-          for (size_t i = 0; i < events1.size(); i++) {
-            std::vector<float> centers1(nd);
-            std::vector<float> centers2(nd);
-            for (size_t d = 0; d < nd; d++) {
-              centers1[d] = events1[i].getCenter(d);
-              centers2[d] = events2[i].getCenter(d);
-            }
-            SimpleMDEvent se1(centers1, events1[i].getSignal(), events1[i].getErrorSquared());
-            SimpleMDEvent se2(centers2, events2[i].getSignal(), events2[i].getErrorSquared());
-            events_vec1.push_back(se1);
-            events_vec2.push_back(se2);
-          }
-
-          // sort events for comparing
-          std::sort(events_vec1.begin(), events_vec1.end());
-          std::sort(events_vec2.begin(), events_vec2.end());
-
-          // compare MEEvents
-          bool same = true;
-          size_t numdiff = 0;
-          for (size_t i = 0; i < events_vec1.size(); ++i) {
+          std::stable_sort(events1Indexes.begin(), events1Indexes.end(),
+                           [this, &events1](const size_t lhsIndex, const size_t rhsIndex) {
+                             return lessThan(events1[lhsIndex], events1[rhsIndex], m_mdeventTolerance);
+                           });
+          std::stable_sort(events2Indexes.begin(), events2Indexes.end(),
+                           [this, &events2](const size_t lhsIndex, const size_t rhsIndex) {
+                             return lessThan(events2[lhsIndex], events2[rhsIndex], m_mdeventTolerance);
+                           });
+          bool same{true};
+          size_t numdiff{0};
+          for (size_t i = 0; i < events1Indexes.size(); ++i) {
+            const auto &lhs(events1[events1Indexes[i]]), rhs(events2[events2Indexes[i]]);
             try {
               // coordinate
               for (size_t d = 0; d < nd; ++d) {
-                compareTol(events_vec1[i].getCenter(d), events_vec2[i].getCenter(d), "dim " + std::to_string(d) + " ");
+                throwIfCompareTol(lhs.getCenter(d), rhs.getCenter(d), m_mdeventTolerance,
+                                  "dim " + std::to_string(d) + " ");
               }
               // signal
-              compareTol(events_vec1[i].getSignal(), events_vec2[i].getSignal(), "");
+              throwIfCompareTol(lhs.getSignal(), rhs.getSignal(), m_mdeventTolerance, "");
               // error
-              compareTol(events_vec1[i].getError(), events_vec2[i].getError(), "");
+              throwIfCompareTol(lhs.getErrorSquared(), rhs.getErrorSquared(), m_mdeventTolerance, "");
             } catch (CompareFailsException &e) {
-              g_log.debug() << "Box " << ibox << " Event " << i << ": " << e.what()
-                            << "\n    [ws1] : " + events_vec1[i].str() << "\n    [ws2] : " + events_vec2[i].str()
-                            << "\n";
+              g_log.debug() << "Box " << ibox << " Event " << i << ": " << e.what() << "\n    [ws1] : " << lhs
+                            << "\n    [ws2] : " << rhs << "\n";
               numdiff++;
               same = false;
             }
           }
 
           if (!same) {
-            std::string diffmessage("Box " + std::to_string(ibox) +
-                                    " Number of different MDEvents =  " + std::to_string(numdiff));
-            throw CompareFailsException("MDEvents are not the same!\n" + diffmessage);
+            const std::string diffmessage("Box " + std::to_string(ibox) + " contains " + std::to_string(numdiff) +
+                                          " different events\n");
+            throw CompareFailsException("MDEvents are not the same: " + diffmessage);
           }
         }
       } catch (CompareFailsException &) {
@@ -471,11 +402,10 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
  */
 void CompareMDWorkspaces::doComparison() {
   m_tolerance = getProperty("Tolerance");
+  m_mdeventTolerance = getProperty("MDEventTolerance");
+  if (isEmpty(m_mdeventTolerance))
+    m_mdeventTolerance = m_tolerance;
   m_CheckEvents = getProperty("CheckEvents");
-  if (m_CheckEvents) {
-    double x = getProperty("MDEventTolerance");
-    SimpleMDEvent::s_tolerance = static_cast<float>(x);
-  }
 
   IMDWorkspace_sptr ws1 = getProperty("Workspace1");
   IMDWorkspace_sptr ws2 = getProperty("Workspace2");

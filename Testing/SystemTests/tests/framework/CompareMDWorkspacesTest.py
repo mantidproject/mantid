@@ -63,8 +63,10 @@ class CompareMDWorkspacesTest(systemtesting.MantidSystemTest):
                     OutputWorkspace='md_2')
 
         # compare md1 and md2
-        self.compare_result_1 = CompareMDWorkspaces(Workspace1='md_1', Workspace2='md_2',
-                                                    Tolerance=0.000001, CheckEvents=True,
+        self.compare_result_1 = CompareMDWorkspaces(Workspace1='md_1',
+                                                    Workspace2='md_2',
+                                                    Tolerance=1e-6,
+                                                    CheckEvents=True,
                                                     IgnoreBoxID=False)
 
         # merge some MD workspaces
@@ -77,14 +79,13 @@ class CompareMDWorkspacesTest(systemtesting.MantidSystemTest):
         # create merge3
         merged_3 = md_1 + md_1
         # compare
-        self.compare_result_3 = CompareMDWorkspaces(Workspace1=merged_1, Workspace2=merged_3, CheckEvents=True,
-                                                    Tolerance=1E-14)
+        self.compare_result_3 = CompareMDWorkspaces(Workspace1=merged_1, Workspace2=merged_3, CheckEvents=True, Tolerance=1e-14)
 
     def validate(self):
         # compare result 1
         self.assertTrue(self.compare_result_1 is not None)
         self.assertTrue(self.compare_result_1.Equals is False)
-        self.assertTrue(self.compare_result_1.Result.endswith(' 54'))
+        self.assertTrue('54' in self.compare_result_1.Result)
 
         # compare result 2
         self.assertTrue(self.compare_result_2 is not None)
@@ -93,4 +94,4 @@ class CompareMDWorkspacesTest(systemtesting.MantidSystemTest):
         # compare result 3
         self.assertTrue(self.compare_result_3 is not None)
         self.assertTrue(self.compare_result_3.Equals is False)
-        self.assertTrue(self.compare_result_3.Result.endswith(' 66'))
+        self.assertTrue('66' in self.compare_result_3.Result)

@@ -41,8 +41,6 @@ private:
 
   template <typename T> void compare(T a, T b, const std::string &message);
 
-  template <typename T> inline void compareTol(T a, T b, const std::string &message);
-
   template <typename MDE, size_t nd> void compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, size_t ibox);
 
   Mantid::API::IMDWorkspace_sptr inWS2;
@@ -50,8 +48,9 @@ private:
   /// Result string
   std::string m_result;
 
-  /// Tolerance
+  /// Tolerances
   double m_tolerance = 0.0;
+  double m_mdeventTolerance = 0.0;
 
   /// Is CheckEvents true
   bool m_CheckEvents = true;
