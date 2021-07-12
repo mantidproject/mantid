@@ -524,7 +524,6 @@ void IntegrateEllipsoids::exec() {
     wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
 
     if (cutoffIsigI != EMPTY_DBL()) {
-      // Bragg peaks and satellite peaks share the same routine from this point on
       principalaxis1.clear();
       principalaxis2.clear();
       principalaxis3.clear();
@@ -537,10 +536,20 @@ void IntegrateEllipsoids::exec() {
       back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
       // will make the background shell volume equal to the peak region volume.
       for (size_t i = 0; i < n_peaks; i++) {
+        // check if peak is satellite peak
+        const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
+        //
         const V3D peak_q = peaks[i].getQLabFrame();
         std::vector<double> axes_radii;
-        integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-                                          back_outer_radius, axes_radii, inti, sigi);
+
+        if (isSatellitePeak) {
+          integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
+                                                      back_outer_radius, axes_radii, inti, sigi);
+        } else {
+          integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
+                                            back_outer_radius, axes_radii, inti, sigi);
+        }
+
         peaks[i].setIntensity(inti);
         peaks[i].setSigmaIntensity(sigi);
         if (axes_radii.size() == 3) {
