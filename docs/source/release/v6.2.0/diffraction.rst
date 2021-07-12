@@ -13,6 +13,8 @@ Powder Diffraction
 ------------------
 New features
 ############
+- New algorithm :ref:`CombineDiffCal <algm-CombineDiffCal>` to calibrate groups of pixels after cross correlation so that diffraction peaks can be adjusted to the correct positions
+- New script for doing calibration by groups, :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`
 
 Improvements
 ############
@@ -35,10 +37,13 @@ New features
 ############
 - New setting for default peak function to fit in the Engineering Diffraction interface (initial default is :ref:`BackToBackExponential <func-BackToBackExponential>`).
 - Added serial fit capability to fitting tab in EngDiff UI - this fits all loaded workspaces with same initial parameters.
+- The last used RB number is now saved for the next session
 
 Improvements
 ############
 - The workflows for Calibration and Focusing in the EnggDiffraction GUI and EnginX scripts have been replaced to make use of faster, better tested C++ algorithms (PDCalibration) - as a result the following algorithms have been deprecated, and will likely be removed entirely in the next release: EnggCalibrate, EnggCalibrateFull, EnggFocus, EnggVanadiumCorrections.
+- The cropping/region of interest selection for Calibration/Focusing is now chosen only on the Calibration tab, to avoid confusion and duplication of input.
+- The region of interest for Calibration/Focusing can now be selected with a user-supplied custom calibration file.
 
 Bugfixes
 ########
@@ -55,7 +60,9 @@ New features
 - New algorithm :ref:`ApplyInstrumentToPeaks <algm-ApplyInstrumentToPeaks>` to update the instrument of peaks within a PeaksWorkspace.
 - New plotting script that provides diagnostic plots of SCDCalibratePanels output.
 - New plotting script that provides diagnositc plots of SCDCalibratePanels2 on a per panel/bank basis.
+- Added two integration methods to :ref:`HB3AIntegrateDetectorPeaks <algm-HB3AIntegrateDetectorPeaks>` for simple cuboid integration with and without fitted background.
 - New algorithm :ref:`ConvertPeaksWorkspace <algm-ConvertPeaksWorkspace>` for quick conversion between PeaksWorkspace and LeanElasticPeaksWorkspace.
+- New definition file for D19 ILL instrument added.
 
 Improvements
 ############

@@ -372,7 +372,7 @@ void IndirectDataAnalysisIqtTab::updateDisplayedBinParameters() {
   }
 }
 
-void IndirectDataAnalysisIqtTab::loadSettings(const QSettings &settings) {
+void IndirectDataAnalysisIqtTab::loadTabSettings(const QSettings &settings) {
   m_uiForm.dsInput->readSettings(settings.group());
   m_uiForm.dsResolution->readSettings(settings.group());
 }

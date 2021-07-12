@@ -11,7 +11,7 @@
 #include "Common/InstrumentParameters.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtWidgets/Common/Hint.h"
-#include "Reduction/PerThetaDefaults.h"
+#include "Reduction/LookupRow.h"
 #include <map>
 #include <vector>
 
@@ -29,12 +29,12 @@ namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentViewSubscriber {
 public:
-  virtual void notifyPerAngleDefaultsChanged(int column, int row) = 0;
+  virtual void notifyLookupRowChanged(int column, int row) = 0;
   virtual void notifySettingsChanged() = 0;
   virtual void notifyRestoreDefaultsRequested() = 0;
   virtual void notifySummationTypeChanged() = 0;
-  virtual void notifyNewPerAngleDefaultsRequested() = 0;
-  virtual void notifyRemovePerAngleDefaultsRequested(int index) = 0;
+  virtual void notifyNewLookupRowRequested() = 0;
+  virtual void notifyRemoveLookupRowRequested(int index) = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IExperimentView {
@@ -63,11 +63,11 @@ public:
   virtual bool getDebugOption() const = 0;
   virtual void setDebugOption(bool enable) = 0;
 
-  virtual std::vector<PerThetaDefaults::ValueArray> getPerAngleOptions() const = 0;
-  virtual void setPerAngleOptions(std::vector<PerThetaDefaults::ValueArray> rows) = 0;
-  virtual void showPerAngleOptionsAsInvalid(int row, int column) = 0;
-  virtual void showPerAngleOptionsAsValid(int row) = 0;
-  virtual void showAllPerAngleOptionsAsValid() = 0;
+  virtual std::vector<LookupRow::ValueArray> getLookupTable() const = 0;
+  virtual void setLookupTable(std::vector<LookupRow::ValueArray> rows) = 0;
+  virtual void showLookupRowAsInvalid(int row, int column) = 0;
+  virtual void showLookupRowAsValid(int row) = 0;
+  virtual void showAllLookupRowsAsValid() = 0;
   virtual void showStitchParametersValid() = 0;
   virtual void showStitchParametersInvalid() = 0;
 
@@ -120,10 +120,10 @@ public:
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;
 
-  virtual void addPerThetaDefaultsRow() = 0;
-  virtual void removePerThetaDefaultsRow(int rowIndex) = 0;
+  virtual void addLookupRow() = 0;
+  virtual void removeLookupRow(int rowIndex) = 0;
 
-  virtual void showPerAngleThetasNonUnique(double tolerance) = 0;
+  virtual void showLookupRowsNotUnique(double tolerance) = 0;
 
   virtual ~IExperimentView() = default;
 };

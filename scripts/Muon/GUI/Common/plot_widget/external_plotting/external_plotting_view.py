@@ -91,6 +91,12 @@ class ExternalPlottingView(object):
             external_axis.set_xlim(xlim[0], xlim[1])
             external_axis.set_ylim(ylim[0], ylim[1])
 
+            external_axis.set_xticks(internal_axis.get_xticks())
+            external_axis.set_xticklabels(internal_axis.get_xticklabels())
+
+            external_axis.set_yticks(internal_axis.get_yticks())
+            external_axis.set_yticklabels(internal_axis.get_yticklabels())
+
     # private Mantidplot methods
     def _plot_data_mantidplot(self, fig_window, data):
         from mantidplot import plotSpectrum

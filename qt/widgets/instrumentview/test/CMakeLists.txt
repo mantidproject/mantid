@@ -7,6 +7,7 @@ set(
   PlotFitAnalysisPaneModelTest.h
   PlotFitAnalysisPanePresenterTest.h
 
+  InstrumentWidget/InstrumentDisplayTest.h
   InstrumentWidget/InstrumentWidgetTest.h
 )
 
@@ -25,7 +26,6 @@ mtd_add_qt_tests(
   INCLUDE_DIRS
     ${MOCK_HEADER_DIRS}
 
-    ../inc/MantidQtWidgets/InstrumentView
     ../../../../Framework/DataObjects/inc
     ../../../../Framework/TestHelpers/inc
   TEST_HELPER_SRCS
