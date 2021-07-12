@@ -178,7 +178,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         assert QAppThreadCall.is_qapp_thread(
         ), "FigureManagerWorkbench cannot be created outside of the QApplication thread"
         QObject.__init__(self)
-        FigureManagerBase.__init__(self, canvas, num)
 
         parent, flags = get_window_config()
         self.window = FigureWindow(canvas, parent=parent, window_flags=flags)
@@ -190,6 +189,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.setWindowTitle("Figure %d" % num)
         canvas.figure.set_label("Figure %d" % num)
 
+        FigureManagerBase.__init__(self, canvas, num)
         # Give the keyboard focus to the figure instead of the
         # manager; StrongFocus accepts both tab and click to focus and
         # will enable the canvas to process event w/o clicking.
