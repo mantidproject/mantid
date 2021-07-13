@@ -29,7 +29,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         return "PowderReduceP2D"
 
     def seeAlso(self):
-        return ["SaveP2D"]
+        return ["SaveP2D", "Bin2DPowderDiffraction"]
 
     def PyInit(self):
         def loadInputOutputFiles():
