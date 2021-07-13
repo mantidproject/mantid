@@ -132,7 +132,13 @@ class SeqFittingTabPresenter(object):
         self.sequential_fit_finished_notifier.notify_subscribers()
 
     def handle_updated_fit_parameter_in_table(self, index):
-        self._update_parameter_values_in_fitting_model_for_row(index.row())
+        copy_param = self.view.copy_values_for_fits()
+        if copy_param:
+            parameter_value = index.data()
+            column = index.column()
+            self.view.fit_table.set_parameter_values_for_column(column, parameter_value)
+        else:
+            self._update_parameter_values_in_fitting_model_for_row(index.row())
         self.fit_parameter_changed_notifier.notify_subscribers()
 
     def validate_sequential_fit(self, workspace_names):
@@ -177,9 +183,3 @@ class SeqFittingTabPresenter(object):
         workspace_names = self.model.get_fit_workspace_names_from_groups_and_runs(separated_runs,
                                                                                   separated_group_and_pairs)
         return workspace_names
-
-    def copy_fits_to_all_runs(self):
-        if self.view.copy_values_for_fits():
-            self.view.warning_popup(f"Radio is ticked")
-        else:
-            self.view.warning_popup(f"Radio is not ticked")

@@ -37,4 +37,4 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.seq_fit_button.clicked.connect(slot)
 
     def copy_values_for_fits(self):
-        return self.copy_fit_radio.isChecked()
+        return self.copy_fit_checkbox.isChecked()

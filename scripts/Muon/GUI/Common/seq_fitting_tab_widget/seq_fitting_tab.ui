@@ -69,7 +69,7 @@
     </widget>
    </item>
    <item row="5" column="2">
-    <widget class="QRadioButton" name="copy_fit_radio">
+    <widget class="QCheckBox" name="copy_fit_checkbox">
      <property name="text">
       <string>Copy fit parameters to all</string>
      </property>

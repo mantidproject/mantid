@@ -133,6 +133,12 @@ class QSequentialTableModel(QAbstractTableModel):
         self._parameterData[row] = parameter_values
         self.dataChanged.emit(leftIndex, rightIndex)
 
+    def set_fit_parameter_values_for_column(self, column, parameter_value):
+        parameter_index = column-NUM_DEFAULT_COLUMNS
+        for row in range(self.rowCount()):
+            current_parameters = self._parameterData[row]
+            current_parameters[parameter_index] = parameter_value
+
     def set_fit_workspaces(self, runs, group_and_pairs):
         self.clear_fit_workspaces()
         if not runs or not group_and_pairs:
