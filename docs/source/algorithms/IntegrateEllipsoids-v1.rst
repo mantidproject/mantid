@@ -319,15 +319,11 @@ Users should test this function with the data set that contains satellite peaks 
                Q3DFrames='Q_sample',
                LorentzCorrection=True,
                OutputWorkspace='md',
-               #MinValues='-12,-12,-12',
-               #MaxValues='12,12,12')
-               MinValues='1,1,1.675', # closer crop to the data
+               MinValues='1,1,1.675',
                MaxValues='10,5,8.425')
 
    CreatePeaksWorkspace(InstrumentWorkspace='crop', NumberOfPeaks=0, OutputWorkspace='peaks')
-   ​
    SetUB('peaks', UB=UB)
-   ​
    AddPeakHKL('peaks', [0.15, 1.85, -1])
    AddPeakHKL('peaks', [1, 4, -3])
    AddPeakHKL('peaks', [1, 5, -3])
@@ -347,6 +343,7 @@ Users should test this function with the data set that contains satellite peaks 
                     SatelliteBackgroundInnerSize=0.081,
                     SatelliteBackgroundOuterSize=0.1)
 ​​
+
 The first peak is a satellite peak, which was integrated using the satellite peak integrator;
 The other peaks are regular Bragg peaks, which were integrated using the default integrator.
 
