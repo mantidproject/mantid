@@ -154,7 +154,6 @@ set(PYTHON_PLUGINS
     algorithms/RefinePowderDiffProfileSeq.py
     algorithms/ReflectometryReductionOneLiveData.py
     algorithms/ReflectometrySliceEventWorkspace.py
-    algorithms/ResetNegatives2D.py
     algorithms/ResNorm.py
     algorithms/RetrieveRunInfo.py
     algorithms/SANSSubtract.py
