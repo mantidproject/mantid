@@ -34,8 +34,9 @@ edgebinning file is specified, logarithmic binning (standard values: x1=-0.008, 
 Manipulating data with constants
 ################################
 
-The reduced data are modified by :ref:`ResetNegatives2D <algm-ResetNegatives2D>` because negative
-values cannot be processed in multidimensional Rietveld refinement.
+The reduced data are checked for negative intensities. If any are found, they are removed either
+by adding the most negative valueor by setting the intensity to a specified value. This is done,
+because negative values cannot be processed in multidimensional Rietveld refinement.
 
 Output
 ######
