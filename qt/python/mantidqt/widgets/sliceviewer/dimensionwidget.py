@@ -178,11 +178,13 @@ class Dimension(QWidget):
         self.x.clicked.connect(self.x_clicked)
         # square button based on height. Default sizeHint is too large
         self.x.setFixedWidth(self.x.sizeHint().height())
+        self.x.setToolTip("Swap X and Y axes")
 
         self.y = QPushButton('Y')
         self.y.setCheckable(True)
         self.y.clicked.connect(self.y_clicked)
         self.y.setFixedWidth(self.y.sizeHint().height())
+        self.y.setToolTip("Swap X and Y axes")
 
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setRange(0, self.nbins - 1)

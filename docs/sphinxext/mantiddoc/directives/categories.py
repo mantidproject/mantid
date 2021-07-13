@@ -433,11 +433,9 @@ def create_top_algorithm_category(categories):
     general_categories = all_top_categories
     technique_categories = extract_matching_categories(general_categories,posixpath.join(category_src_dir, 'techniquecategories') + '.txt')
     facility_categories = extract_matching_categories(general_categories,posixpath.join(category_src_dir, 'facilitycategories') + '.txt')
-    hidden_categories = extract_matching_categories(general_categories,posixpath.join(category_src_dir, 'hiddencategories') + '.txt')
 
     # create the page
     top_context = {}
-    top_html_path_noext = ""
     top_category_html_path_noext = posixpath.join('algorithms', 'index')
     top_context['outpath'] = top_category_html_path_noext + '.html'
     #set the content
@@ -461,7 +459,6 @@ def extract_matching_categories(input_categories,filepath):
       filepath : The path to the file of names to be extracted
     """
     extracted_list = []
-    name_list = []
     if os.path.isfile(filepath):
         with open(filepath) as f:
             name_list = [line.strip() for line in f]
@@ -473,12 +470,12 @@ def extract_matching_categories(input_categories,filepath):
     return extracted_list
 
 
-def purge_categories(app, env, docname):
+def purge_categories(_, env, docname):
     """
     Purge information about the given document name from the tracked algorithms
 
     Arguments:
-      app (Sphinx.application): Application object
+      _ (Sphinx.application): Application object
       env (Sphinx.BuildEnvironment):
       docname (str): Name of the document
     """
@@ -496,8 +493,6 @@ def purge_categories(app, env, docname):
         pages = category.pages
         if deadref in pages:
             pages.remove(deadref)
-
-#------------------------------------------------------------------------------
 
 
 def setup(app):

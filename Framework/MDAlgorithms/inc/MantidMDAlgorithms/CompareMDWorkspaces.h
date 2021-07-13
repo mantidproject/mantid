@@ -37,11 +37,13 @@ private:
                                 const Mantid::DataObjects::MDHistoWorkspace_sptr &ws2);
 
   template <typename MDE, size_t nd>
-  void compareMDWorkspaces(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  void compareMDEventWorkspaces(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   template <typename T> void compare(T a, T b, const std::string &message);
 
   template <typename T> inline void compareTol(T a, T b, const std::string &message);
+
+  template <typename MDE, size_t nd> void compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, size_t ibox);
 
   Mantid::API::IMDWorkspace_sptr inWS2;
 

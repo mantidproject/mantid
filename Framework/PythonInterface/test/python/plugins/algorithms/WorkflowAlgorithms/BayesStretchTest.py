@@ -8,8 +8,10 @@ import unittest
 import platform
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
+from IndirectImport import is_supported_f2py_platform
 
-if platform.system() == "Windows":
+
+if is_supported_f2py_platform():
     class BayesStretchTest(unittest.TestCase):
 
         _res_ws = None

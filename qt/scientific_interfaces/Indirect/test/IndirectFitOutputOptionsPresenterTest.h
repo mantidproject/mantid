@@ -115,8 +115,8 @@ public:
   static void destroySuite(IndirectFitOutputOptionsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_view = std::make_unique<MockIndirectFitOutputOptionsView>();
-    m_model = std::make_unique<MockIndirectFitOutputOptionsModel>();
+    m_view = std::make_unique<NiceMock<MockIndirectFitOutputOptionsView>>();
+    m_model = std::make_unique<NiceMock<MockIndirectFitOutputOptionsModel>>();
 
     m_presenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_model.get(), m_view.get());
   }

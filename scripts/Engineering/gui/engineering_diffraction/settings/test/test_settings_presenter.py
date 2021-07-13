@@ -8,7 +8,6 @@
 import unittest
 
 from unittest import mock
-
 from Engineering.gui.engineering_diffraction.settings import settings_model, settings_view, settings_presenter
 
 
@@ -23,7 +22,8 @@ class SettingsPresenterTest(unittest.TestCase):
                          "recalc_vanadium": False,
                          "logs": "some,logs",
                          "primary_log": "some",
-                         "sort_ascending": True
+                         "sort_ascending": True,
+                         "default_peak": "BackToBackExponential"
                          }
 
     def test_load_existing_settings(self):
@@ -61,6 +61,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view.get_checked_logs.return_value = self.settings['logs'][:]
         self.view.get_primary_log.return_value = self.settings['primary_log'][:]
         self.view.get_ascending_checked.return_value = self.settings['sort_ascending']
+        self.view.get_peak_function.return_value = self.settings["default_peak"]
         self.presenter.savedir_notifier = mock.MagicMock()
 
         self.presenter.save_new_settings()
@@ -82,6 +83,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view.set_checked_logs.assert_called_with(self.settings["logs"])
         self.view.set_primary_log_combobox.assert_called_with(self.settings["primary_log"])
         self.view.set_ascending_checked.assert_called_with(self.settings["sort_ascending"])
+        self.view.set_peak_function.assert_called_with(self.settings["default_peak"])
 
     def test_save_settings_and_close(self):
         self.view.get_save_location.return_value = self.settings['save_location'][:]
@@ -90,6 +92,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view.get_checked_logs.return_value = self.settings['logs'][:]
         self.view.get_primary_log.return_value = self.settings['primary_log'][:]
         self.view.get_ascending_checked.return_value = self.settings['sort_ascending']
+        self.view.get_peak_function.return_value = self.settings["default_peak"]
         self.presenter.savedir_notifier = mock.MagicMock()
 
         self.presenter.save_and_close_dialog()

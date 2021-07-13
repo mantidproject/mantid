@@ -71,8 +71,8 @@ MANTIDQT_ISISREFLECTOMETRY_DLL
 ReductionJobs oneGroupWithTwoRowsWithOutputNamesModel();
 
 /* Experiment */
-MANTIDQT_ISISREFLECTOMETRY_DLL std::vector<PerThetaDefaults> makePerThetaDefaults();
-MANTIDQT_ISISREFLECTOMETRY_DLL std::vector<PerThetaDefaults> makePerThetaDefaultsWithTwoAnglesAndWildcard();
+MANTIDQT_ISISREFLECTOMETRY_DLL LookupTable makeLookupTable();
+MANTIDQT_ISISREFLECTOMETRY_DLL LookupTable makeLookupTableWithTwoAnglesAndWildcard();
 MANTIDQT_ISISREFLECTOMETRY_DLL std::map<std::string, std::string> makeStitchOptions();
 MANTIDQT_ISISREFLECTOMETRY_DLL std::map<std::string, std::string> makeEmptyStitchOptions();
 MANTIDQT_ISISREFLECTOMETRY_DLL BackgroundSubtraction makeBackgroundSubtraction();

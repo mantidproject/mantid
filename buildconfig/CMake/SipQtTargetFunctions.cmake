@@ -81,10 +81,15 @@ function(mtd_add_sip_module)
     ${PARSED_TARGET_NAME} PRIVATE ${PARSED_INCLUDE_DIRS}
   )
   target_include_directories(
-    ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${PARSED_SYSTEM_INCLUDE_DIRS}
+    ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${PARSED_SYSTEM_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
   )
+
+  if(USE_PYTHON_DYNAMIC_LIB)
+  target_link_libraries(${PARSED_TARGET_NAME} PRIVATE Python::Python)
+  endif()
+
   target_link_libraries(
-    ${PARSED_TARGET_NAME} PRIVATE Python::Python ${PARSED_LINK_LIBS}
+    ${PARSED_TARGET_NAME} PRIVATE ${PARSED_LINK_LIBS}
   )
 
   # Set all required properties on the target

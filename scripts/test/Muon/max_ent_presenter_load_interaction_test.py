@@ -65,7 +65,8 @@ class MaxEntPresenterTest(unittest.TestCase):
 
     def test_get_parameters_for_maxent_calculations(self):
         self.presenter.getWorkspaceNames()
-        self.context.dead_time_table = mock.MagicMock(return_value='deadtime_table_name')
+        self.context.corrections_context.current_dead_time_table_name_for_run = \
+            mock.MagicMock(return_value='deadtime_table_name')
         self.context.first_good_data = mock.MagicMock(return_value=0.11)
         self.context.last_good_data = mock.MagicMock(return_value=13.25)
         self.context.phase_context.phase_tables = [create_workspace_wrapper_stub_object(x) for x in

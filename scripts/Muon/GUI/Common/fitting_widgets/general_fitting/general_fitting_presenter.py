@@ -54,7 +54,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.automatically_update_function_name()
 
         self.reset_fit_status_and_chi_squared_information()
-        self.clear_cached_fit_functions()
+        self.clear_undo_data()
 
         self.fitting_mode_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
@@ -74,7 +74,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.update_dataset_names_in_view_and_model()
 
         self.reset_fit_status_and_chi_squared_information()
-        self.clear_cached_fit_functions()
+        self.clear_undo_data()
 
         self.simultaneous_fit_by_specifier_changed.notify_subscribers()
 

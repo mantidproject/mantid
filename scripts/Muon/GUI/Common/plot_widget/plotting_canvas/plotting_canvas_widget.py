@@ -13,14 +13,32 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view import Plo
 
 class PlottingCanvasWidget(object):
 
-    def __init__(self, parent, context):
+    def __init__(self, parent, context, plot_model):
 
-        self._figure_options = QuickEditWidget(context.plotting_context, parent)
-        self._plotting_view = PlottingCanvasView(self._figure_options.widget, context.plotting_context.min_y_range,
-                                                 context.plotting_context.y_axis_margin, parent)
-        self._model = PlottingCanvasModel(context)
+        self._figure_options = QuickEditWidget(context, parent)
+        self._plotting_view = PlottingCanvasView(self._figure_options.widget, context.min_y_range,
+                                                 context.y_axis_margin, parent)
+        self._model = PlottingCanvasModel(plot_model)
         self._presenter = PlottingCanvasPresenter(self._plotting_view, self._model, self._figure_options,
-                                                  context.plotting_context)
+                                                  context)
+
+    @property
+    def get_quick_edit_info(self):
+        selection = self._figure_options.get_selection()
+        if len(selection) > 1:
+            selection = "ALL"
+        return (selection, self._figure_options.get_plot_x_range(), self._figure_options.autoscale,
+                self._figure_options.get_plot_y_range(), self._figure_options.get_errors())
+
+    def set_quick_edit_info(self, selection, x_range, auto, y_range, errors):
+        self._presenter.set_subplot_selection(selection)
+        self._presenter.set_plot_range(x_range)
+        if auto:
+            self._presenter.set_autoscale(auto)
+        else:
+            self._presenter.set_autoscale(auto)
+            self._presenter.set_plot_y_range(y_range)
+        self._presenter.set_errors(errors)
 
     @property
     def presenter(self):

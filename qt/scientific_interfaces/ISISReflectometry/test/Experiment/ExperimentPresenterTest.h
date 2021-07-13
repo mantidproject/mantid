@@ -33,7 +33,7 @@ using testing::Return;
 GNU_DIAG_OFF("missing-braces")
 
 class ExperimentPresenterTest : public CxxTest::TestSuite {
-  using OptionsRow = PerThetaDefaults::ValueArray;
+  using OptionsRow = LookupRow::ValueArray;
   using OptionsTable = std::vector<OptionsRow>;
 
 public:
@@ -325,51 +325,51 @@ public:
     verifyAndClear();
   }
 
-  void testNewPerAngleDefaultsRequested() {
+  void testNewLookupRowRequested() {
     auto presenter = makePresenter();
 
     // row should be added to view
-    EXPECT_CALL(m_view, addPerThetaDefaultsRow());
+    EXPECT_CALL(m_view, addLookupRow());
     // new value should be requested from view to update model
-    EXPECT_CALL(m_view, getPerAngleOptions()).Times(1);
-    presenter.notifyNewPerAngleDefaultsRequested();
+    EXPECT_CALL(m_view, getLookupTable()).Times(1);
+    presenter.notifyNewLookupRowRequested();
 
     verifyAndClear();
   }
 
-  void testRemovePerAngleDefaultsRequested() {
+  void testRemoveLookupRowRequested() {
     auto presenter = makePresenter();
 
     int const indexToRemove = 0;
     // row should be removed from view
-    EXPECT_CALL(m_view, removePerThetaDefaultsRow(indexToRemove)).Times(1);
+    EXPECT_CALL(m_view, removeLookupRow(indexToRemove)).Times(1);
     // new value should be requested from view to update model
-    EXPECT_CALL(m_view, getPerAngleOptions()).Times(1);
-    presenter.notifyRemovePerAngleDefaultsRequested(indexToRemove);
+    EXPECT_CALL(m_view, getLookupTable()).Times(1);
+    presenter.notifyRemoveLookupRowRequested(indexToRemove);
 
     verifyAndClear();
   }
 
-  void testChangingPerAngleDefaultsUpdatesModel() {
+  void testChangingLookupRowUpdatesModel() {
     auto presenter = makePresenter();
 
     auto const row = 1;
     auto const column = 0;
     OptionsTable const optionsTable = {optionsRowWithFirstAngle(), optionsRowWithSecondAngle()};
-    EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
-    presenter.notifyPerAngleDefaultsChanged(row, column);
+    EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
+    presenter.notifyLookupRowChanged(row, column);
 
     // Check the model contains the per-theta defaults returned by the view
-    auto const perThetaDefaults = presenter.experiment().perThetaDefaults();
-    TS_ASSERT_EQUALS(perThetaDefaults.size(), 2);
-    TS_ASSERT_EQUALS(perThetaDefaults[0], defaultsWithFirstAngle());
-    TS_ASSERT_EQUALS(perThetaDefaults[1], defaultsWithSecondAngle());
+    auto const lookupTable = presenter.experiment().lookupTable();
+    TS_ASSERT_EQUALS(lookupTable.size(), 2);
+    TS_ASSERT_EQUALS(lookupTable[0], defaultsWithFirstAngle());
+    TS_ASSERT_EQUALS(lookupTable[1], defaultsWithSecondAngle());
     verifyAndClear();
   }
 
   void testMultipleUniqueAnglesAreValid() {
     OptionsTable const optionsTable = {optionsRowWithFirstAngle(), optionsRowWithSecondAngle()};
-    runTestForValidPerAngleOptions(optionsTable);
+    runTestForValidOptionsTable(optionsTable);
   }
 
   void testMultipleNonUniqueAnglesAreInvalid() {
@@ -379,102 +379,102 @@ public:
 
   void testSingleWildcardRowIsValid() {
     OptionsTable const optionsTable = {optionsRowWithWildcard()};
-    runTestForValidPerAngleOptions(optionsTable);
+    runTestForValidOptionsTable(optionsTable);
   }
 
   void testAngleAndWildcardRowAreValid() {
     OptionsTable const optionsTable = {optionsRowWithFirstAngle(), optionsRowWithWildcard()};
-    runTestForValidPerAngleOptions(optionsTable);
+    runTestForValidOptionsTable(optionsTable);
   }
 
   void testMultipleWildcardRowsAreInvalid() {
     OptionsTable const optionsTable = {optionsRowWithWildcard(), optionsRowWithWildcard()};
-    runTestForInvalidPerAngleOptions(optionsTable, {0, 1}, PerThetaDefaults::Column::THETA);
+    runTestForInvalidOptionsTable(optionsTable, {0, 1}, LookupRow::Column::THETA);
   }
 
   void testSetFirstTransmissionRun() {
     OptionsTable const optionsTable = {optionsRowWithFirstTransmissionRun()};
-    runTestForValidPerAngleOptions(optionsTable);
+    runTestForValidOptionsTable(optionsTable);
   }
 
   void testSetSecondTransmissionRun() {
     OptionsTable const optionsTable = {optionsRowWithSecondTransmissionRun()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::FIRST_TRANS);
+    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::FIRST_TRANS);
   }
 
   void testSetBothTransmissionRuns() {
     OptionsTable const optionsTable = {optionsRowWithBothTransmissionRuns()};
-    runTestForValidPerAngleOptions(optionsTable);
+    runTestForValidOptionsTable(optionsTable);
   }
 
   void testSetTransmissionProcessingInstructionsValid() {
     OptionsTable const optionsTable = {optionsRowWithTransProcessingInstructions()};
-    runTestForValidPerAngleOptions(optionsTable);
+    runTestForValidOptionsTable(optionsTable);
   }
 
   void testSetTransmissionProcessingInstructionsInvalid() {
     OptionsTable const optionsTable = {optionsRowWithTransProcessingInstructionsInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::TRANS_SPECTRA);
+    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::TRANS_SPECTRA);
   }
 
   void testSetQMin() {
     OptionsTable const optionsTable = {optionsRowWithQMin()};
-    runTestForValidPerAngleOptions(optionsTable);
+    runTestForValidOptionsTable(optionsTable);
   }
 
   void testSetQMinInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQMinInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::QMIN);
+    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::QMIN);
   }
 
   void testSetQMax() {
     OptionsTable const optionsTable = {optionsRowWithQMax()};
-    runTestForValidPerAngleOptions(optionsTable);
+    runTestForValidOptionsTable(optionsTable);
   }
 
   void testSetQMaxInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQMaxInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::QMAX);
+    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::QMAX);
   }
 
   void testSetQStep() {
     OptionsTable const optionsTable = {optionsRowWithQStep()};
-    runTestForValidPerAngleOptions(optionsTable);
+    runTestForValidOptionsTable(optionsTable);
   }
 
   void testSetQStepInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQStepInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::QSTEP);
+    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::QSTEP);
   }
 
   void testSetScale() {
     OptionsTable const optionsTable = {optionsRowWithScale()};
-    runTestForValidPerAngleOptions(optionsTable);
+    runTestForValidOptionsTable(optionsTable);
   }
 
   void testSetScaleInvalid() {
     OptionsTable const optionsTable = {optionsRowWithScaleInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::SCALE);
+    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::SCALE);
   }
 
   void testSetProcessingInstructions() {
     OptionsTable const optionsTable = {optionsRowWithProcessingInstructions()};
-    runTestForValidPerAngleOptions(optionsTable);
+    runTestForValidOptionsTable(optionsTable);
   }
 
   void testSetProcessingInstructionsInvalid() {
     OptionsTable const optionsTable = {optionsRowWithProcessingInstructionsInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::RUN_SPECTRA);
+    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::RUN_SPECTRA);
   }
 
   void testSetBackgroundProcessingInstructionsValid() {
     OptionsTable const optionsTable = {optionsRowWithBackgroundProcessingInstructions()};
-    runTestForValidPerAngleOptions(optionsTable);
+    runTestForValidOptionsTable(optionsTable);
   }
 
   void testSetBackgroundProcessingInstructionsInvalid() {
     OptionsTable const optionsTable = {optionsRowWithBackgroundProcessingInstructionsInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::BACKGROUND_SPECTRA);
+    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::BACKGROUND_SPECTRA);
   }
 
   void testChangingSettingsNotifiesMainPresenter() {
@@ -484,10 +484,10 @@ public:
     verifyAndClear();
   }
 
-  void testChangingPerAngleDefaultsNotifiesMainPresenter() {
+  void testChangingLookupRowNotifiesMainPresenter() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
-    presenter.notifyPerAngleDefaultsChanged(0, 0);
+    presenter.notifyLookupRowChanged(0, 0);
     verifyAndClear();
   }
 
@@ -556,30 +556,30 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesPerThetaInView() {
-    auto perThetaDefaults = PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
-                                             0.7, std::string("390-415"), std::string("370-389,416-430"));
-    auto model = makeModelWithPerThetaDefaults(std::move(perThetaDefaults));
+  void testInstrumentChangedUpdatesLookupRowInView() {
+    auto lookupRow = LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
+                               std::string("390-415"), std::string("370-389,416-430"));
+    auto model = makeModelWithLookupRow(std::move(lookupRow));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    auto const expected = std::vector<PerThetaDefaults::ValueArray>{
+    auto const expected = std::vector<LookupRow::ValueArray>{
         {"", "", "", "", "0.010000", "0.200000", "0.030000", "0.700000", "390-415", "370-389,416-430"}};
-    EXPECT_CALL(m_view, setPerAngleOptions(expected)).Times(1);
+    EXPECT_CALL(m_view, setLookupTable(expected)).Times(1);
     presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesPerThetaInModel() {
-    auto model = makeModelWithPerThetaDefaults(PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
-                                                                RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
-                                                                std::string("370-389,416-430")));
+  void testInstrumentChangedUpdatesLookupRowInModel() {
+    auto model =
+        makeModelWithLookupRow(LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
+                                         0.7, std::string("390-415"), std::string("370-389,416-430")));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
-                                     std::string("390-415"), std::string("370-389,416-430"));
-    TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().size(), 1);
-    TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().front(), expected);
+    auto expected = LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
+                              std::string("390-415"), std::string("370-389,416-430"));
+    TS_ASSERT_EQUALS(presenter.experiment().lookupTable().size(), 1);
+    TS_ASSERT_EQUALS(presenter.experiment().lookupTable().front(), expected);
     verifyAndClear();
   }
 
@@ -670,41 +670,41 @@ private:
   Experiment makeModelWithAnalysisMode(AnalysisMode analysisMode) {
     return Experiment(analysisMode, ReductionType::Normal, SummationType::SumInLambda, false, false,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
-                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makePerThetaDefaults());
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable());
   }
 
   Experiment makeModelWithReduction(SummationType summationType, ReductionType reductionType, bool includePartialBins) {
     return Experiment(AnalysisMode::PointDetector, reductionType, summationType, includePartialBins, false,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
-                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makePerThetaDefaults());
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable());
   }
 
   Experiment makeModelWithDebug(bool debug) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, debug,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
-                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makePerThetaDefaults());
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable());
   }
 
-  Experiment makeModelWithPerThetaDefaults(PerThetaDefaults perThetaDefaults) {
-    auto perThetaList = std::vector<PerThetaDefaults>();
-    perThetaList.emplace_back(std::move(perThetaDefaults));
+  Experiment makeModelWithLookupRow(LookupRow lookupRow) {
+    auto lookupTable = LookupTable();
+    lookupTable.emplace_back(std::move(lookupRow));
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
-                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), std::move(perThetaList));
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), std::move(lookupTable));
   }
 
   Experiment makeModelWithTransmissionRunRange(RangeInLambda range) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
                       TransmissionStitchOptions(std::move(range), std::string(), false), makeEmptyStitchOptions(),
-                      makePerThetaDefaults());
+                      makeLookupTable());
   }
 
   Experiment makeModelWithCorrections(PolarizationCorrections polarizationCorrections,
                                       FloodCorrections floodCorrections, BackgroundSubtraction backgroundSubtraction) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                       std::move(backgroundSubtraction), std::move(polarizationCorrections), std::move(floodCorrections),
-                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makePerThetaDefaults());
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable());
   }
 
   ExperimentPresenter makePresenter(
@@ -842,15 +842,15 @@ private:
   // These functions create various rows in the per-theta defaults tables,
   // either as an input array of strings or an output model
   OptionsRow optionsRowWithFirstAngle() { return {"0.5", "13463", ""}; }
-  PerThetaDefaults defaultsWithFirstAngle() {
-    return PerThetaDefaults(0.5, TransmissionRunPair("13463", ""), boost::none, RangeInQ(), boost::none, boost::none,
-                            boost::none);
+  LookupRow defaultsWithFirstAngle() {
+    return LookupRow(0.5, TransmissionRunPair("13463", ""), boost::none, RangeInQ(), boost::none, boost::none,
+                     boost::none);
   }
 
   OptionsRow optionsRowWithSecondAngle() { return {"2.3", "13463", "13464"}; }
-  PerThetaDefaults defaultsWithSecondAngle() {
-    return PerThetaDefaults(2.3, TransmissionRunPair("13463", "13464"), boost::none, RangeInQ(), boost::none,
-                            boost::none, boost::none);
+  LookupRow defaultsWithSecondAngle() {
+    return LookupRow(2.3, TransmissionRunPair("13463", "13464"), boost::none, RangeInQ(), boost::none, boost::none,
+                     boost::none);
   }
   OptionsRow optionsRowWithWildcard() { return {"", "13463", "13464"}; }
   OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "13463"}; }
@@ -873,36 +873,36 @@ private:
     return {"", "", "", "", "", "", "", "", "", "bad"};
   }
 
-  void runTestForValidPerAngleOptions(OptionsTable const &optionsTable) {
+  void runTestForValidOptionsTable(OptionsTable const &optionsTable) {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
-    EXPECT_CALL(m_view, showAllPerAngleOptionsAsValid()).Times(1);
-    presenter.notifyPerAngleDefaultsChanged(1, 1);
+    EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
+    EXPECT_CALL(m_view, showAllLookupRowsAsValid()).Times(1);
+    presenter.notifyLookupRowChanged(1, 1);
     verifyAndClear();
   }
 
-  void runTestForInvalidPerAngleOptions(OptionsTable const &optionsTable, const std::vector<int> &rows, int column) {
+  void runTestForInvalidOptionsTable(OptionsTable const &optionsTable, const std::vector<int> &rows, int column) {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
+    EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
     for (auto row : rows)
-      EXPECT_CALL(m_view, showPerAngleOptionsAsInvalid(row, column)).Times(1);
-    presenter.notifyPerAngleDefaultsChanged(1, 1);
+      EXPECT_CALL(m_view, showLookupRowAsInvalid(row, column)).Times(1);
+    presenter.notifyLookupRowChanged(1, 1);
     verifyAndClear();
   }
 
-  void runTestForInvalidPerAngleOptions(OptionsTable const &optionsTable, int row, int column) {
+  void runTestForInvalidOptionsTable(OptionsTable const &optionsTable, int row, int column) {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
-    EXPECT_CALL(m_view, showPerAngleOptionsAsInvalid(row, column)).Times(1);
-    presenter.notifyPerAngleDefaultsChanged(1, 1);
+    EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
+    EXPECT_CALL(m_view, showLookupRowAsInvalid(row, column)).Times(1);
+    presenter.notifyLookupRowChanged(1, 1);
     verifyAndClear();
   }
 
   void runTestForNonUniqueAngles(OptionsTable const &optionsTable) {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
-    EXPECT_CALL(m_view, showPerAngleThetasNonUnique(m_thetaTolerance)).Times(1);
-    presenter.notifyPerAngleDefaultsChanged(0, 0);
+    EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
+    EXPECT_CALL(m_view, showLookupRowsNotUnique(m_thetaTolerance)).Times(1);
+    presenter.notifyLookupRowChanged(0, 0);
     verifyAndClear();
   }
 

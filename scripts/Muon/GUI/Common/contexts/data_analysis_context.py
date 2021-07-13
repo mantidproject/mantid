@@ -8,11 +8,14 @@ from Muon.GUI.Common.contexts.muon_context import MuonContext
 
 
 class DataAnalysisContext(MuonContext):
-    def __init__(self, muon_data_context=None, muon_gui_context=None,
-                 muon_group_context=None, fitting_context=None, muon_phase_context=None, plotting_context=None):
+    def __init__(self, muon_data_context=None, muon_gui_context=None, muon_group_context=None, corrections_context=None,
+                 fitting_context=None, results_context=None, model_fitting_context=None, muon_phase_context=None,
+                 plot_panes_context=None):
         super().__init__(muon_data_context=muon_data_context, muon_gui_context=muon_gui_context,
-                         muon_group_context=muon_group_context, fitting_context=fitting_context,
-                         muon_phase_context=muon_phase_context, plotting_context=plotting_context)
+                         muon_group_context=muon_group_context, corrections_context=corrections_context,
+                         fitting_context=fitting_context, results_context=results_context,
+                         model_fitting_context=model_fitting_context, muon_phase_context=muon_phase_context,
+                         plot_panes_context=plot_panes_context)
         self.workspace_suffix = ' MA'
         self.base_directory = 'Muon Data'
 

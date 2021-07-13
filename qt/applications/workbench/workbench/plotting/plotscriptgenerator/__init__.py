@@ -9,6 +9,7 @@
 from matplotlib.legend import Legend
 
 from mantid.plots.mantidaxes import MantidAxes
+from mantid.plots.utility import row_num, col_num
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from workbench.config import DEFAULT_SCRIPT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
@@ -196,9 +197,9 @@ def get_axes_object_variable(ax):
     ax_object_var = AXES_VARIABLE
     try:
         if ax.numRows > 1:
-            ax_object_var += "[{row_num}]".format(row_num=ax.rowNum)
+            ax_object_var += "[{row_num}]".format(row_num=row_num(ax))
         if ax.numCols > 1:
-            ax_object_var += "[{col_num}]".format(col_num=ax.colNum)
+            ax_object_var += "[{col_num}]".format(col_num=col_num(ax))
     except AttributeError:
         # No numRows or NumCols members, so no list use the default
         pass

@@ -23,7 +23,8 @@ class EnggFocus(PythonAlgorithm):
         return "EnggFocus"
 
     def summary(self):
-        return "Focuses a run by summing up all the spectra into a single one."
+        return ("This algorithm is deprecated as of May 2021, consider using DiffractionFocussing instead."
+                "Focuses a run by summing up all the spectra into a single one.")
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
@@ -116,6 +117,7 @@ class EnggFocus(PythonAlgorithm):
         return issues
 
     def PyExec(self):
+        logger.warning("EnggFocus is deprecated as of May 2021. Please use DiffractionFocussing instead.")
         # Get the run workspace
         input_ws = self.getProperty('InputWorkspace').value
 

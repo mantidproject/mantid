@@ -186,8 +186,9 @@ void ReflectometryBackgroundSubtraction::init() {
   const auto &inputWSPropRef = *inputWSProp;
   declareProperty(std::move(inputWSProp), "An input workspace.");
 
-  auto inputIndexType = std::make_unique<IndexTypeProperty>("InputWorkspaceIndexType",
-                                                            IndexType::SpectrumNum | IndexType::WorkspaceIndex);
+  auto inputIndexType =
+      std::make_unique<IndexTypeProperty>("InputWorkspaceIndexType", static_cast<int>(IndexType::SpectrumNum) |
+                                                                         static_cast<int>(IndexType::WorkspaceIndex));
   const auto &inputIndexTypeRef = *inputIndexType;
   declareProperty(std::move(inputIndexType), "The type of indices in the optional index set; For optimal "
                                              "performance WorkspaceIndex should be preferred;");

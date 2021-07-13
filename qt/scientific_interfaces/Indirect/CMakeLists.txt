@@ -10,7 +10,6 @@ set(
         ConvFitDataTablePresenter.cpp
         ConvFitModel.cpp
         DensityOfStates.cpp
-        ExternalPlotter.cpp
         FitStatusWidget.cpp
         FqFitAddWorkspaceDialog.cpp
         FqFitDataPresenter.cpp
@@ -81,7 +80,6 @@ set(
         IndirectSettingsView.cpp
         IndirectSimulation.cpp
         IndirectSimulationTab.cpp
-        IndirectSpectrumSelectionPresenter.cpp
         IndirectSpectrumSelectionView.cpp
         IndirectSqw.cpp
         IndirectSymmetrise.cpp
@@ -108,7 +106,6 @@ set(
         ConvFitDataTablePresenter.h
         CorrectionsTab.h
         DensityOfStates.h
-        ExternalPlotter.h
         FqFitAddWorkspaceDialog.h
         FqFitDataPresenter.h
         FqFitDataTablePresenter.h
@@ -164,7 +161,6 @@ set(
         IndirectSettingsView.h
         IndirectSimulation.h
         IndirectSimulationTab.h
-        IndirectSpectrumSelectionPresenter.h
         IndirectSpectrumSelectionView.h
         IndirectSqw.h
         IndirectSymmetrise.h
@@ -225,7 +221,6 @@ set(
         IndirectDataAnalysisElwinTab.ui
         IndirectDataReduction.ui
         IndirectDiffractionReduction.ui
-        IndirectDockWidgetArea.ui
         IndirectEditResultsDialog.ui
         IndirectFitDataView.ui
         IndirectFitOutputOptions.ui
@@ -276,7 +271,7 @@ mtd_add_qt_library(
         PythonInterfaceCore
         ${POCO_LIBRARIES}
         ${Boost_LIBRARIES}
-        ${PYTHON_LIBRARIES}
+        Python::Python
         Qt5::Concurrent
         Qt5::Xml
         MTD_QT_LINK_LIBS

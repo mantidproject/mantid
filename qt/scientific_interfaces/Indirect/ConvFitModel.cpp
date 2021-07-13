@@ -230,14 +230,14 @@ Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFitFunction() const {
   return IndirectFittingModel::getFitFunction();
 }
 
-boost::optional<double> ConvFitModel::getInstrumentResolution(TableDatasetIndex dataIndex) const {
-  if (dataIndex < getNumberOfWorkspaces())
-    return instrumentResolution(getWorkspace(dataIndex));
+boost::optional<double> ConvFitModel::getInstrumentResolution(WorkspaceID workspaceID) const {
+  if (workspaceID < getNumberOfWorkspaces())
+    return instrumentResolution(getWorkspace(workspaceID));
   return boost::none;
 }
 
-std::size_t ConvFitModel::getNumberHistograms(TableDatasetIndex index) const {
-  return getWorkspace(index)->getNumberHistograms();
+std::size_t ConvFitModel::getNumberHistograms(WorkspaceID workspaceID) const {
+  return getWorkspace(workspaceID)->getNumberHistograms();
 }
 
 MultiDomainFunction_sptr ConvFitModel::getMultiDomainFunction() const {
@@ -253,24 +253,24 @@ void ConvFitModel::setFitFunction(MultiDomainFunction_sptr function) { IndirectF
 
 void ConvFitModel::setTemperature(const boost::optional<double> &temperature) { m_temperature = temperature; }
 
-void ConvFitModel::removeWorkspace(TableDatasetIndex index) {
-  IndirectFittingModel::removeWorkspace(index);
+void ConvFitModel::removeWorkspace(WorkspaceID workspaceID) {
+  IndirectFittingModel::removeWorkspace(workspaceID);
 
   const auto newSize = getNumberOfWorkspaces();
   while (m_resolution.size() > newSize)
-    m_resolution.remove(index);
+    m_resolution.remove(workspaceID);
 
   while (m_extendedResolution.size() > newSize) {
-    AnalysisDataService::Instance().remove(m_extendedResolution[index]);
-    m_extendedResolution.remove(index);
+    AnalysisDataService::Instance().remove(m_extendedResolution[workspaceID]);
+    m_extendedResolution.remove(workspaceID);
   }
 }
 
-void ConvFitModel::setResolution(const std::string &name, TableDatasetIndex index) {
-  m_fitDataModel->setResolution(name, index);
+void ConvFitModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
+  m_fitDataModel->setResolution(name, workspaceID);
 }
 
-std::unordered_map<std::string, ParameterValue> ConvFitModel::createDefaultParameters(TableDatasetIndex index) const {
+std::unordered_map<std::string, ParameterValue> ConvFitModel::createDefaultParameters(WorkspaceID workspaceID) const {
   std::unordered_map<std::string, ParameterValue> defaultValues;
   defaultValues["PeakCentre"] = ParameterValue(0.0);
   defaultValues["Centre"] = ParameterValue(0.0);
@@ -284,7 +284,7 @@ std::unordered_map<std::string, ParameterValue> ConvFitModel::createDefaultParam
   defaultValues["Radius"] = ParameterValue(1.0);
   defaultValues["Tau"] = ParameterValue(1.0);
 
-  auto resolution = getInstrumentResolution(index);
+  auto resolution = getInstrumentResolution(workspaceID);
   if (resolution)
     defaultValues["FWHM"] = ParameterValue(*resolution);
   return defaultValues;

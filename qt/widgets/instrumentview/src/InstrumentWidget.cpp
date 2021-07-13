@@ -1,9 +1,9 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
+//+ Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX - License - Identifier: GPL - 3.0
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -26,7 +26,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/InstrumentView/PanelsSurface.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
-#include "MantidQtWidgets/InstrumentView/SimpleWidget.h"
+#include "MantidQtWidgets/InstrumentView/QtDisplay.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
 #include "MantidQtWidgets/InstrumentView/XIntegrationControl.h"
@@ -111,13 +111,21 @@ public:
  * Constructor.
  */
 InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool resetGeometry, bool autoscaling,
-                                   double scaleMin, double scaleMax, bool setDefaultView)
-    : QWidget(parent), WorkspaceObserver(), m_InstrumentDisplay(nullptr), m_simpleDisplay(nullptr),
+                                   double scaleMin, double scaleMax, bool setDefaultView, Dependencies deps)
+    : QWidget(parent), WorkspaceObserver(), m_instrumentDisplay(std::move(deps.instrumentDisplay)),
       m_workspaceName(wsName), m_instrumentActor(nullptr), m_surfaceType(FULL3D),
       m_savedialog_dir(
           QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
       mViewChanged(false), m_blocked(false), m_instrumentDisplayContextMenuOn(false),
-      m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr) {
+      m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr),
+      m_qtConnect(std::move(deps.qtConnect)) {
+
+  QWidget *aWidget = new QWidget(this);
+  if (!m_instrumentDisplay) {
+    m_instrumentDisplay =
+        std::make_unique<InstrumentDisplay>(aWidget, std::move(deps.glDisplay), std::move(deps.qtDisplay));
+  }
+
   setFocusPolicy(Qt::StrongFocus);
   m_mainLayout = new QVBoxLayout(this);
   auto *controlPanelLayout = new QSplitter(Qt::Horizontal);
@@ -127,20 +135,10 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
   controlPanelLayout->addWidget(mControlsTab);
   controlPanelLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-  // Create the display widget
-  m_InstrumentDisplay = new MantidGLWidget(this);
-  m_InstrumentDisplay->installEventFilter(this);
-  m_InstrumentDisplay->setMinimumWidth(600);
-  connect(this, SIGNAL(enableLighting(bool)), m_InstrumentDisplay, SLOT(enableLighting(bool)));
-
-  // Create simple display widget
-  m_simpleDisplay = new SimpleWidget(this);
-  m_simpleDisplay->installEventFilter(this);
-
-  QWidget *aWidget = new QWidget(this);
-  m_instrumentDisplayLayout = new QStackedLayout(aWidget);
-  m_instrumentDisplayLayout->addWidget(m_InstrumentDisplay);
-  m_instrumentDisplayLayout->addWidget(m_simpleDisplay);
+  m_instrumentDisplay->installEventFilter(this);
+  m_instrumentDisplay->getGLDisplay()->setMinimumWidth(600);
+  m_qtConnect->connect(this, SIGNAL(enableLighting(bool)), m_instrumentDisplay->getGLDisplay(),
+                       SLOT(enableLighting(bool)));
 
   controlPanelLayout->addWidget(aWidget);
 
@@ -150,7 +148,8 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
 
   m_xIntegration = new XIntegrationControl(this);
   m_mainLayout->addWidget(m_xIntegration);
-  connect(m_xIntegration, SIGNAL(changed(double, double)), this, SLOT(setIntegrationRange(double, double)));
+  m_qtConnect->connect(m_xIntegration, SIGNAL(changed(double, double)), this,
+                       SLOT(setIntegrationRange(double, double)));
 
   // Set the mouse/keyboard operation info and help button
   auto *infoLayout = new QHBoxLayout();
@@ -158,7 +157,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
   infoLayout->addWidget(mInteractionInfo);
   m_help = new QPushButton("?");
   m_help->setMaximumWidth(25);
-  connect(m_help, SIGNAL(clicked()), this, SLOT(helpClicked()));
+  m_qtConnect->connect(m_help, SIGNAL(clicked()), this, SLOT(helpClicked()));
   infoLayout->addWidget(m_help);
   infoLayout->setStretchFactor(mInteractionInfo, 1);
   infoLayout->setStretchFactor(m_help, 0);
@@ -176,11 +175,11 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
 
   // Init actions
   m_clearPeakOverlays = new QAction("Clear peaks", this);
-  connect(m_clearPeakOverlays, SIGNAL(triggered()), this, SLOT(clearPeakOverlays()));
+  m_qtConnect->connect(m_clearPeakOverlays, SIGNAL(triggered()), this, SLOT(clearPeakOverlays()));
 
   // Clear alignment plane action
   m_clearAlignment = new QAction("Clear alignment plane", this);
-  connect(m_clearAlignment, SIGNAL(triggered()), this, SLOT(clearAlignmentPlane()));
+  m_qtConnect->connect(m_clearAlignment, SIGNAL(triggered()), this, SLOT(clearAlignmentPlane()));
 
   // confirmClose(app->confirmCloseInstrWindow);
 
@@ -204,8 +203,8 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
 
   tabChanged(0);
 
-  connect(this, SIGNAL(needSetIntegrationRange(double, double)), this, SLOT(setIntegrationRange(double, double)),
-          Qt::QueuedConnection);
+  m_qtConnect->connect(this, SIGNAL(needSetIntegrationRange(double, double)), this,
+                       SLOT(setIntegrationRange(double, double)), Qt::QueuedConnection);
   setAcceptDrops(true);
 
   setWindowTitle(QString("Instrument - ") + m_workspaceName);
@@ -533,9 +532,9 @@ void InstrumentWidget::setSurfaceType(int type) {
     // init tabs with new surface
     foreach (InstrumentWidgetTab *tab, m_tabs) { tab->initSurface(); }
 
-    connect(surface, SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
-            SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
-    connect(surface, SIGNAL(updateInfoText()), this, SLOT(updateInfoText()), Qt::QueuedConnection);
+    m_qtConnect->connect(surface, SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
+                         SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
+    m_qtConnect->connect(surface, SIGNAL(updateInfoText()), this, SLOT(updateInfoText()), Qt::QueuedConnection);
     QApplication::restoreOverrideCursor();
   }
   emit surfaceTypeChanged(type);
@@ -823,9 +822,9 @@ void InstrumentWidget::saveImage(QString filename) {
   }
 
   if (isGLEnabled()) {
-    m_InstrumentDisplay->saveToFile(filename);
+    m_instrumentDisplay->getGLDisplay()->saveToFile(filename);
   } else {
-    m_simpleDisplay->saveToFile(filename);
+    m_instrumentDisplay->getQtDisplay()->saveToFile(filename);
   }
 }
 
@@ -858,8 +857,10 @@ void InstrumentWidget::setInfoText(const QString &text) { mInteractionInfo->setT
 void InstrumentWidget::saveSettings() {
   QSettings settings;
   settings.beginGroup(InstrumentWidgetSettingsGroup);
-  if (m_InstrumentDisplay)
-    settings.setValue("BackgroundColor", m_InstrumentDisplay->currentBackgroundColor());
+
+  if (m_instrumentDisplay->getGLDisplay())
+    settings.setValue("BackgroundColor", m_instrumentDisplay->getGLDisplay()->currentBackgroundColor());
+
   auto surface = getSurface();
   if (surface) {
     // if surface is null istrument view wasn't created and there is nothing to
@@ -889,7 +890,7 @@ void InstrumentWidget::finishHandle(const Mantid::API::IAlgorithm *alg) {
   UNUSED_ARG(alg);
   emit needSetIntegrationRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
   // m_instrumentActor->update();
-  // m_InstrumentDisplay->refreshView();
+  // m_instrumentDisplay->getGLDisplay()->refreshView();
 }
 
 void InstrumentWidget::changeScaleType(int type) {
@@ -1024,15 +1025,15 @@ void InstrumentWidget::dropEvent(QDropEvent *e) {
 }
 
 /**
- * Filter events directed to m_InstrumentDisplay and ContextMenuEvent in
+ * Filter events directed to m_instrumentDisplay->getGLDisplay() and ContextMenuEvent in
  * particular.
  * @param obj :: Object which events will be filtered.
  * @param ev :: An ingoing event.
  */
 bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
   if (ev->type() == QEvent::ContextMenu &&
-      (dynamic_cast<MantidGLWidget *>(obj) == m_InstrumentDisplay ||
-       dynamic_cast<SimpleWidget *>(obj) == m_simpleDisplay) &&
+      (dynamic_cast<GLDisplay *>(obj) == m_instrumentDisplay->getGLDisplay() ||
+       dynamic_cast<QtDisplay *>(obj) == m_instrumentDisplay->getQtDisplay()) &&
       getSurface() && getSurface()->canShowContextMenu()) {
     // an ugly way of preventing the curve in the pick tab's miniplot
     // disappearing when
@@ -1160,8 +1161,8 @@ void InstrumentWidget::setShowPeakRelativeIntensity(bool on) {
  * @param color :: New background colour.
  */
 void InstrumentWidget::setBackgroundColor(const QColor &color) {
-  if (m_InstrumentDisplay)
-    m_InstrumentDisplay->setBackgroundColor(color);
+  if (m_instrumentDisplay->getGLDisplay())
+    m_instrumentDisplay->getGLDisplay()->setBackgroundColor(color);
 }
 
 /**
@@ -1175,14 +1176,7 @@ QString InstrumentWidget::getSurfaceInfoText() const {
 /**
  * Get pointer to the projection surface
  */
-ProjectionSurface_sptr InstrumentWidget::getSurface() const {
-  if (m_InstrumentDisplay) {
-    return m_InstrumentDisplay->getSurface();
-  } else if (m_simpleDisplay) {
-    return m_simpleDisplay->getSurface();
-  }
-  return ProjectionSurface_sptr();
-}
+ProjectionSurface_sptr InstrumentWidget::getSurface() const { return m_instrumentDisplay->getSurface(); }
 
 bool MantidQt::MantidWidgets::InstrumentWidget::isWsBeingReplaced() const { return m_wsReplace; }
 
@@ -1191,15 +1185,8 @@ bool MantidQt::MantidWidgets::InstrumentWidget::isWsBeingReplaced() const { retu
  * @param surface :: Pointer to the new surace.
  */
 void InstrumentWidget::setSurface(ProjectionSurface *surface) {
-  ProjectionSurface_sptr sharedSurface(surface);
-  if (m_InstrumentDisplay) {
-    m_InstrumentDisplay->setSurface(sharedSurface);
-    m_InstrumentDisplay->update();
-  }
-  if (m_simpleDisplay) {
-    m_simpleDisplay->setSurface(sharedSurface);
-    m_simpleDisplay->update();
-  }
+  m_instrumentDisplay->setSurface(ProjectionSurface_sptr(surface));
+
   auto *unwrappedSurface = dynamic_cast<UnwrappedSurface *>(surface);
   if (unwrappedSurface) {
     m_renderTab->flipUnwrappedView(unwrappedSurface->isFlippedView());
@@ -1216,10 +1203,10 @@ QSize InstrumentWidget::glWidgetDimensions() {
     return QSize(w->width() * devicePixelRatio, w->height() * devicePixelRatio);
   };
 #endif
-  if (m_InstrumentDisplay)
-    return sizeinLogicalPixels(m_InstrumentDisplay);
-  else if (m_simpleDisplay)
-    return sizeinLogicalPixels(m_simpleDisplay);
+  if (m_instrumentDisplay->getGLDisplay())
+    return sizeinLogicalPixels(m_instrumentDisplay->getGLDisplay());
+  else if (m_instrumentDisplay->getQtDisplay())
+    return sizeinLogicalPixels(m_instrumentDisplay->getQtDisplay());
   else
     return QSize(0, 0);
 }
@@ -1228,23 +1215,17 @@ QSize InstrumentWidget::glWidgetDimensions() {
 /// @param picking :: Set to true to update the picking image regardless the
 /// interaction
 ///   mode of the surface.
-void InstrumentWidget::updateInstrumentView(bool picking) {
-  if (m_InstrumentDisplay &&
-      m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget *>(m_InstrumentDisplay)) {
-    m_InstrumentDisplay->updateView(picking);
-  } else {
-    m_simpleDisplay->updateView(picking);
-  }
-}
+void InstrumentWidget::updateInstrumentView(bool picking) { m_instrumentDisplay->updateView(picking); }
 
 /// Recalculate the colours and redraw the instrument view
 void InstrumentWidget::updateInstrumentDetectors() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  if (m_InstrumentDisplay &&
-      m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget *>(m_InstrumentDisplay)) {
-    m_InstrumentDisplay->updateDetectors();
+
+  if (m_instrumentDisplay->getGLDisplay() &&
+      m_instrumentDisplay->currentWidget() == dynamic_cast<QWidget *>(m_instrumentDisplay->getGLDisplay())) {
+    m_instrumentDisplay->getGLDisplay()->updateDetectors();
   } else {
-    m_simpleDisplay->updateDetectors();
+    m_instrumentDisplay->getQtDisplay()->updateDetectors();
   }
   QApplication::restoreOverrideCursor();
 }
@@ -1260,10 +1241,10 @@ void InstrumentWidget::deletePeaksWorkspace(const Mantid::API::IPeaksWorkspace_s
  */
 void InstrumentWidget::selectOpenGLDisplay(bool yes) {
   int widgetIndex = yes ? 0 : 1;
-  const int oldIndex = m_instrumentDisplayLayout->currentIndex();
+  const int oldIndex = m_instrumentDisplay->currentIndex();
   if (oldIndex == widgetIndex)
     return;
-  m_instrumentDisplayLayout->setCurrentIndex(widgetIndex);
+  m_instrumentDisplay->setCurrentIndex(widgetIndex);
   auto surface = getSurface();
   if (surface) {
     surface->updateView();
@@ -1291,8 +1272,8 @@ bool InstrumentWidget::isGLEnabled() const { return m_useOpenGL; }
 void InstrumentWidget::createTabs(QSettings &settings) {
   // Render Controls
   m_renderTab = new InstrumentWidgetRenderTab(this);
-  connect(m_renderTab, SIGNAL(setAutoscaling(bool)), this, SLOT(setColorMapAutoscaling(bool)));
-  connect(m_renderTab, SIGNAL(rescaleColorMap()), this, SLOT(setupColorMap()));
+  m_qtConnect->connect(m_renderTab, SIGNAL(setAutoscaling(bool)), this, SLOT(setColorMapAutoscaling(bool)));
+  m_qtConnect->connect(m_renderTab, SIGNAL(rescaleColorMap()), this, SLOT(setupColorMap()));
   m_renderTab->loadSettings(settings);
 
   // Pick controls
@@ -1301,17 +1282,18 @@ void InstrumentWidget::createTabs(QSettings &settings) {
 
   // Mask controls
   m_maskTab = new InstrumentWidgetMaskTab(this);
-  connect(m_maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)), this,
-          SLOT(executeAlgorithm(const QString &, const QString &)));
+  m_qtConnect->connect(m_maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)), this,
+                       SLOT(executeAlgorithm(const QString &, const QString &)));
   m_maskTab->loadSettings(settings);
 
-  connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab, SLOT(changedIntegrationRange(double, double)));
+  m_qtConnect->connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
+                       SLOT(changedIntegrationRange(double, double)));
 
   // Instrument tree controls
   m_treeTab = new InstrumentWidgetTreeTab(this);
   m_treeTab->loadSettings(settings);
 
-  connect(mControlsTab, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
+  m_qtConnect->connect(mControlsTab, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
   m_stateOfTabs.emplace_back(std::string("Render"), true);
   m_stateOfTabs.emplace_back(std::string("Pick"), true);
   m_stateOfTabs.emplace_back(std::string("Draw"), true);

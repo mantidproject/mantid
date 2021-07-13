@@ -16,10 +16,10 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Optional
 
-from qtpy import PYQT4
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
+from ui.sans_isis.SansGuiObservable import SansGuiObservable
 
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
@@ -34,9 +34,11 @@ from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.gui_logic.models.file_loading import FileLoading, UserFileLoadException
+from sans.gui_logic.models.run_tab_model import RunTabModel
 from sans.gui_logic.models.settings_adjustment_model import SettingsAdjustmentModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel
+from sans.gui_logic.presenter.Observers.run_tab_observers import SaveOptionsObserver, RunTabObservers
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.presenter.masking_table_presenter import MaskingTablePresenter
@@ -46,16 +48,7 @@ from sans.gui_logic.presenter.settings_adjustment_presenter import SettingsAdjus
 from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
 from sans.sans_batch import SANSCentreFinder
 from sans.state.AllStates import AllStates
-
-IN_MANTIDPLOT = False
-if PYQT4:
-    try:
-        from mantidplot import graph, newGraph
-        IN_MANTIDPLOT = True
-    except ImportError:
-        pass
-else:
-    from mantid.plots.plotfunctions import get_plot_fig
+from mantid.plots.plotfunctions import get_plot_fig
 
 row_state_to_colour_mapping = {RowState.UNPROCESSED: '#FFFFFF', RowState.PROCESSED: '#d0f4d0',
                                RowState.ERROR: '#accbff'}
@@ -206,7 +199,7 @@ class RunTabPresenter(PresenterCommon):
         def on_processing_error(self, error):
             self._presenter.on_processing_error(error)
 
-    def __init__(self, facility, model=None, table_model=None, view=None, ):
+    def __init__(self, facility, run_tab_model, model=None, table_model=None, view=None):
         # We don't have access to state model really at this point
         super(RunTabPresenter, self).__init__(view, None)
 
@@ -221,6 +214,7 @@ class RunTabPresenter(PresenterCommon):
 
         # Models that are being used by the presenter
         self._model = model if model else StateGuiModel(all_states=AllStates())
+        self._run_tab_model: RunTabModel = run_tab_model
         self._table_model = table_model if table_model else TableModel()
         self._table_model.subscribe_to_model_changes(self)
 
@@ -244,6 +238,7 @@ class RunTabPresenter(PresenterCommon):
         # Check save dir for display
         self._save_directory_observer = \
             SaveDirectoryObserver(self._handle_output_directory_changed)
+        self._register_observers()
 
     def _setup_sub_presenters(self):
         # Holds a list of sub presenters which uses the CommonPresenter class to set views
@@ -270,6 +265,14 @@ class RunTabPresenter(PresenterCommon):
         self._settings_adjustment_presenter = SettingsAdjustmentPresenter(
             model=SettingsAdjustmentModel(), view=self._view)
         self._common_sub_presenters.append(self._settings_adjustment_presenter)
+
+    def _register_observers(self):
+        self._observers = RunTabObservers(
+            save_options = SaveOptionsObserver(callback=self.on_save_options_change)
+        )
+
+        view_observable: SansGuiObservable = self._view.get_observable()
+        view_observable.save_options.add_subscriber(self._observers.save_options)
 
     def default_gui_setup(self):
         """
@@ -324,7 +327,7 @@ class RunTabPresenter(PresenterCommon):
             traceback.print_stack()
             return
 
-        self._view = view
+        self._view: SANSDataProcessorGui = view
 
         listener = RunTabPresenter.ConcreteRunTabListener(self)
         self._view.add_listener(listener)
@@ -377,6 +380,10 @@ class RunTabPresenter(PresenterCommon):
     @property
     def instrument(self):
         return self._model.instrument
+
+    def on_save_options_change(self):
+        selected_save_types = self._view.save_types
+        self._run_tab_model.update_save_types(selected_save_types)
 
     def on_user_file_load(self):
         """
@@ -540,15 +547,11 @@ class RunTabPresenter(PresenterCommon):
         Plot a graph if continuous output specified.
         """
         if self._view.plot_results:
-            if IN_MANTIDPLOT:
-                if not graph(self.output_graph):
-                    newGraph(self.output_graph)
-            elif not PYQT4:
-                ax_properties = {'yscale': 'log',
-                                 'xscale': 'log'}
-                fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
-                fig.show()
-                self.output_fig = fig
+            ax_properties = {'yscale': 'log',
+                             'xscale': 'log'}
+            fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
+            fig.show()
+            self.output_fig = fig
 
     def _set_progress_bar(self, current, number_steps):
         """
@@ -585,14 +588,11 @@ class RunTabPresenter(PresenterCommon):
             self._plot_graph()
             save_can = self._view.save_can
 
-            # MantidPlot and Workbench have different approaches to plotting
-            output_graph = self.output_graph if PYQT4 else self.output_fig
-
             self.batch_process_runner.process_states(row_index_pair, self.get_states,
                                                      self._view.use_optimizations,
                                                      self._view.output_mode,
                                                      self._view.plot_results,
-                                                     output_graph,
+                                                     self.output_fig,
                                                      save_can)
 
         except Exception as e:
@@ -1010,8 +1010,8 @@ class RunTabPresenter(PresenterCommon):
             presenter.update_view_from_model()
 
         # Front tab view
+        self._view.save_types = self._run_tab_model.get_save_types()
         self._set_on_view("zero_error_free")
-        self._set_on_view("save_types")
         self._set_on_view("compatibility_mode")
         self._set_on_view("merge_scale")
         self._set_on_view("merge_shift")
@@ -1119,10 +1119,11 @@ class RunTabPresenter(PresenterCommon):
         for presenter in self._common_sub_presenters:
             presenter.update_model_from_view()
 
+        state_model.save_types = self._run_tab_model.get_save_types().to_all_states()
+
         try:
             # Run tab view
             self._set_on_custom_model("zero_error_free", state_model)
-            self._set_on_custom_model("save_types", state_model)
             self._set_on_custom_model("compatibility_mode", state_model)
             self._set_on_custom_model("event_slice_optimisation", state_model)
             self._set_on_custom_model("merge_scale", state_model)

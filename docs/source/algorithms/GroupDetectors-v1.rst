@@ -101,7 +101,7 @@ Example 1: specifying spectrum numbers
 
   # Create a workspace filled with a constant value = 0.3
   ws=CreateSampleWorkspace()
-  # Group detectots using a list of spectrum numbers
+  # Group detectors using a list of spectrum numbers
   group_index = GroupDetectors(ws,SpectraList=[1,3,5],Version=1)
 
   # The specified spectra are grouped and saved into the same workspace.

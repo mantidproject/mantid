@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/InstrumentView/GLDisplay.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
-#include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -120,14 +120,7 @@ private:
   void collapsePlotPanel();
 
   /* Pick tab controls */
-  MiniPlot *m_plot; ///< Miniplot to display data in the detectors
-
-  QWidget *m_rebin;
-  QLineEdit *m_rebinParams;
-  QCheckBox *m_rebinUseReverseLog;
-  QCheckBox *m_rebinSaveToHisto;
-  QPushButton *m_runRebin;
-
+  MiniPlot *m_plot;              ///< Miniplot to display data in the detectors
   QLabel *m_activeTool;          ///< Displays a tip on which tool is currently selected
   QPushButton *m_zoom;           ///< Button switching on navigation mode
   QPushButton *m_one;            ///< Button switching on single detector selection mode
@@ -148,6 +141,7 @@ private:
   // Actions to set integration option for the detector's parent selection mode
   QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
   QAction *m_integrateTimeBins; ///< Sets integration over time bins (m_plotSum = false)
+
   QActionGroup *m_summationType;
   QAction *m_logY;
   QAction *m_linearY;
@@ -172,6 +166,12 @@ private:
   ComponentInfoController *m_infoController;
   /// Controller responsible for the plot.
   DetectorPlotController *m_plotController;
+
+  QWidget *m_rebin;
+  QLineEdit *m_rebinParams;
+  QCheckBox *m_rebinUseReverseLog;
+  QCheckBox *m_rebinSaveToHisto;
+  QPushButton *m_runRebin;
 
   // Temporary caches for values from settings
   int m_tubeXUnitsCache;

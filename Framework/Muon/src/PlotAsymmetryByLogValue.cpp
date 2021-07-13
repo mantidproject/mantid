@@ -468,6 +468,8 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outW
   }
   outWS->replaceAxis(1, std::move(tAxis));
   outWS->getAxis(0)->title() = m_logName;
+  outWS->getAxis(0)->setUnit("Label");
+  std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(outWS->getAxis(0)->unit())->setLabel(m_logName, "");
   outWS->setYUnitLabel("Asymmetry");
 }
 

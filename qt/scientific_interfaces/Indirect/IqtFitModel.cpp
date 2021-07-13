@@ -109,11 +109,11 @@ void IqtFitModel::setFitFunction(Mantid::API::MultiDomainFunction_sptr function)
     constrainIntensities(function);
 }
 
-std::unordered_map<std::string, ParameterValue> IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
+std::unordered_map<std::string, ParameterValue> IqtFitModel::createDefaultParameters(WorkspaceID workspaceID) const {
   std::unordered_map<std::string, ParameterValue> parameters;
   parameters["Height"] = ParameterValue(computeHeightApproximation(getFitFunction()));
 
-  const auto inputWs = getWorkspace(index);
+  const auto inputWs = getWorkspace(workspaceID);
   const auto tau = inputWs ? computeTauApproximation(inputWs) : 0.0;
 
   parameters["Lifetime"] = ParameterValue(tau);
