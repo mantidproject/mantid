@@ -19,7 +19,7 @@ FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *
     : IndirectFitDataPresenter(model, view, std::make_unique<FqFitDataTablePresenter>(model, view->getDataTable())),
       m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}), m_fqFitModel(model),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
-  connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveDataIndex()));
+  connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveWorkspaceID()));
 
   m_notifier = Notifier<IFQFitObserver>();
   m_notifier.subscribe(SingleFunctionTemplateBrowser);
@@ -77,30 +77,6 @@ std::vector<std::string> FqFitDataPresenter::getParameterTypes(FqFitParameters &
   return types;
 }
 
-void FqFitDataPresenter::addWorkspace(IndirectFittingModel *model, const std::string &name) {
-  if (model->getNumberOfWorkspaces() > m_activeWorkspaceID)
-    model->removeWorkspace(m_activeWorkspaceID);
-  model->addWorkspace(name);
-}
-
-void FqFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
-    m_fqFitModel->addWorkspace(fqFitDialog->workspaceName(), fqFitDialog->parameterNameIndex());
-    setActiveWorkspaceIDToCurrentWorkspace(fqFitDialog);
-    setModelSpectrum(fqFitDialog->parameterNameIndex());
-    updateActiveWorkspaceID();
-  }
-}
-
-void FqFitDataPresenter::setModelSpectrum(int index) {
-  if (index < 0)
-    throw std::runtime_error("No valid parameter was selected.");
-  else if (m_activeParameterType == "Width")
-    m_fqFitModel->setActiveWidth(static_cast<std::size_t>(index), m_activeWorkspaceID, false);
-  else
-    m_fqFitModel->setActiveEISF(static_cast<std::size_t>(index), m_activeWorkspaceID, false);
-}
-
 void FqFitDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog) {
   //  update active data index with correct index based on the workspace name
   //  and the vector in m_fitDataModel which is in the base class
@@ -116,8 +92,8 @@ void FqFitDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDia
 }
 
 void FqFitDataPresenter::closeDialog() {
-  if (m_fqFitModel->getNumberOfWorkspaces() > m_activeWorkspaceID)
-    m_fqFitModel->removeWorkspace(m_activeWorkspaceID);
+  //  if (m_fqFitModel->getNumberOfWorkspaces() > m_activeWorkspaceID)
+  //    m_fqFitModel->removeWorkspace(m_activeWorkspaceID);
   IndirectFitDataPresenter::closeDialog();
 }
 

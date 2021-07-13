@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisIqtFitTab.h"
+#include "IndirectAddWorkspaceDialog.h"
 #include "IndirectFitPlotView.h"
 #include "IndirectFunctionBrowser/IqtTemplateBrowser.h"
 
@@ -70,6 +71,11 @@ EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector(
           return DataForParameterEstimation{{}, {}};
         return DataForParameterEstimation{{x[0], x[n]}, {y[0], y[n]}};
       };
+}
+
+void IndirectDataAnalysisIqtFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
+    m_iqtFittingModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
 }
 
 void IndirectDataAnalysisIqtFitTab::fitFunctionChanged() { m_iqtFittingModel->setFitTypeString(getFitTypeString()); }

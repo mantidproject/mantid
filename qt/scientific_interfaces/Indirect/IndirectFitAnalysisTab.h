@@ -81,6 +81,8 @@ protected:
   std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
   std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
+  WorkspaceID m_activeWorkspaceID;
+  WorkspaceIndex m_activeSpectrumIndex;
 
 private:
   void setup() override;
@@ -100,12 +102,11 @@ private:
   void enableOutputOptions(bool enable);
   void setPDFWorkspace(std::string const &workspaceName);
   void updateParameterEstimationData();
+  virtual void addDataToModel(IAddWorkspaceDialog const *dialog) = 0;
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
-  WorkspaceID m_activeWorkspaceID;
-  WorkspaceIndex m_activeSpectrumIndex;
 
 protected slots:
   void setModelFitFunction();
@@ -136,7 +137,7 @@ private slots:
   void plotSelectedSpectra();
   void respondToSingleResolutionLoaded();
   void respondToDataChanged();
-  void respondToDataAdded();
+  void respondToDataAdded(IAddWorkspaceDialog const *dialog);
   void respondToDataRemoved();
   void respondToPlotSpectrumChanged();
   void respondToFwhmChanged(double);

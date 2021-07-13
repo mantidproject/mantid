@@ -119,6 +119,38 @@ EstimationDataSelector IndirectDataAnalysisFqFitTab::getEstimationDataSelector()
   };
 }
 
+void IndirectDataAnalysisFqFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
+  if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
+    m_FqFittingModel->addWorkspace(fqFitDialog->workspaceName(), fqFitDialog->parameterNameIndex());
+    setActiveWorkspaceIDToCurrentWorkspace(fqFitDialog);
+    setModelSpectrum(fqFitDialog->parameterNameIndex(), fqFitDialog->parameterType());
+    m_activeWorkspaceID = m_FqFittingModel->getNumberOfWorkspaces();
+  }
+}
+
+void IndirectDataAnalysisFqFitTab::setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog) {
+  //  update active data index with correct index based on the workspace name
+  //  and the vector in m_fitDataModel which is in the base class
+  //  indirectFittingModel get table workspace index
+  const auto wsName = dialog->workspaceName().append("_HWHM");
+  // This a vector of workspace names currently loaded
+  auto wsVector = m_FqFittingModel->getFitDataModel()->getWorkspaceNames();
+  // this is an iterator pointing to the current wsName in wsVector
+  auto wsIt = std::find(wsVector.begin(), wsVector.end(), wsName);
+  // this is the index of the workspace.
+  const auto index = WorkspaceID(std::distance(wsVector.begin(), wsIt));
+  m_activeWorkspaceID = index;
+}
+
+void IndirectDataAnalysisFqFitTab::setModelSpectrum(int index, std::string paramType) {
+  if (index < 0)
+    throw std::runtime_error("No valid parameter was selected.");
+  else if (paramType == "Width")
+    m_FqFittingModel->setActiveWidth(static_cast<std::size_t>(index), m_activeWorkspaceID, false);
+  else
+    m_FqFittingModel->setActiveEISF(static_cast<std::size_t>(index), m_activeWorkspaceID, false);
+}
+
 namespace {
 void estimateChudleyElliot(::Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData) {
 

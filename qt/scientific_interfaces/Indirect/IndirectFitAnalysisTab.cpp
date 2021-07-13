@@ -7,6 +7,7 @@
 #include "IndirectFitAnalysisTab.h"
 #include "IndirectSettingsHelper.h"
 
+#include "IndirectAddWorkspaceDialog.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
@@ -90,7 +91,8 @@ void IndirectFitAnalysisTab::connectDataPresenter() {
 
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this, SLOT(respondToSingleResolutionLoaded()));
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this, SLOT(respondToDataChanged()));
-  connect(m_dataPresenter.get(), SIGNAL(dataAdded()), this, SLOT(respondToDataAdded()));
+  connect(m_dataPresenter.get(), SIGNAL(dataAdded(IAddWorkspaceDialog const *)), this,
+          SLOT(respondToDataAdded(IAddWorkspaceDialog const *)));
   connect(m_dataPresenter.get(), SIGNAL(dataRemoved()), this, SLOT(respondToDataRemoved()));
 }
 
@@ -517,7 +519,7 @@ void IndirectFitAnalysisTab::setPDFWorkspace(std::string const &workspaceName) {
 
 void IndirectFitAnalysisTab::updateParameterEstimationData() {
   m_fitPropertyBrowser->updateParameterEstimationData(
-      m_dataPresenter->getDataForParameterEstimation(getEstimationDataSelector()));
+      m_fittingModel->getDataForParameterEstimation(getEstimationDataSelector()));
   const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(), getSelectedSpectrum());
   // If we haven't fit the data yet we may update the guess
   if (!isFit) {
@@ -627,7 +629,8 @@ void IndirectFitAnalysisTab::respondToDataChanged() {
   updateResultOptions();
 }
 
-void IndirectFitAnalysisTab::respondToDataAdded() {
+void IndirectFitAnalysisTab::respondToDataAdded(IAddWorkspaceDialog const *dialog) {
+  addDataToModel(dialog);
   updateDataReferences();
   m_plotPresenter->appendLastDataToSelection();
   updateParameterEstimationData();
@@ -661,6 +664,11 @@ void IndirectFitAnalysisTab::respondToFunctionChanged() {
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateFit();
   emit functionChanged();
+}
+
+void IndirectFitAnalysisTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
+    m_fittingModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
 }
 
 } // namespace IDA

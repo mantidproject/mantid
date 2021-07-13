@@ -39,14 +39,11 @@ signals:
 protected slots:
 
 private:
-  void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   void closeDialog() override;
   std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
   void updateParameterOptions(FqFitAddWorkspaceDialog *dialog, FqFitParameters parameters);
   void updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters);
   std::vector<std::string> getParameterTypes(FqFitParameters &parameters) const;
-  void addWorkspace(IndirectFittingModel *model, const std::string &name);
-  void setModelSpectrum(int index);
   void setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
 
   std::string m_activeParameterType;

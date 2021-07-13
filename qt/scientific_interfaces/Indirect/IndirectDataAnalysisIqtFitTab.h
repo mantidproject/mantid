@@ -44,6 +44,7 @@ private:
   void setupFitTab() override;
   std::string getFitTypeString() const;
   EstimationDataSelector getEstimationDataSelector() const override;
+  void addDataToModel(IAddWorkspaceDialog const *dialog) override;
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
   IqtFitModel *m_iqtFittingModel;
