@@ -22,6 +22,7 @@
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/System.h"
@@ -63,6 +64,9 @@ const std::string WL_MIN("CropWavelengthMin");
 const std::string WL_MAX("CropWavelengthMax");
 const std::string PRESERVE_EVENTS("PreserveEvents");
 const std::string REMOVE_PROMPT_PULSE("RemovePromptPulseWidth");
+const std::string RESONANCE_UNITS("ResonanceFilterUnits");
+const std::string RESONANCE_LOWER_LIMITS("ResonanceFilterLowerLimits");
+const std::string RESONANCE_UPPER_LIMITS("ResonanceFilterUpperLimits");
 const std::string COMPRESS_TOF_TOL("CompressTolerance");
 const std::string COMPRESS_WALL_TOL("CompressWallClockTolerance");
 const std::string COMPRESS_WALL_START("CompressStartTime");
@@ -161,6 +165,19 @@ void AlignAndFocusPowder::init() {
                   "pulse to remove. 0 disables");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
+
+  std::vector<std::string> allowedResonanceUnits({"Energy", "Wavelength"});
+  declareProperty(PropertyNames::RESONANCE_UNITS, allowedResonanceUnits.back(),
+                  std::make_shared<StringListValidator>(allowedResonanceUnits),
+                  "Units for resonances to be filtered in. "
+                  "The data will be converted to these units temporarily to filter.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::RESONANCE_LOWER_LIMITS),
+                  "Minimum values to filter absorption resonance. This must have same number of values as "
+                  "ResonanceFilterUpperLimits. Default behavior is to not filter.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::RESONANCE_UPPER_LIMITS),
+                  "Maximum values to filter absorption resonance. This must have same number of values as "
+                  "ResonanceFilterLowerLimits. Default behavior is to not filter.");
+
   declareProperty(std::make_unique<PropertyWithValue<double>>(PropertyNames::COMPRESS_TOF_TOL, 1e-5, mustBePositive,
                                                               Direction::Input),
                   "Compress events (in "
@@ -238,6 +255,17 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
     result[PropertyNames::INPUT_WKSP] = "Empty workspace encounter, possibly due to beam down."
                                         "Please plot the pCharge-time to identify suitable range for "
                                         "re-time-slicing";
+
+  m_resonanceLower = getProperty(PropertyNames::RESONANCE_LOWER_LIMITS);
+  m_resonanceUpper = getProperty(PropertyNames::RESONANCE_UPPER_LIMITS);
+  if (m_resonanceLower.size() > 0 || m_resonanceUpper.size() > 0) {
+    if (m_resonanceLower.size() != m_resonanceUpper.size()) {
+      result[PropertyNames::RESONANCE_LOWER_LIMITS] =
+          "Must have same number of values as " + PropertyNames::RESONANCE_UPPER_LIMITS;
+      result[PropertyNames::RESONANCE_UPPER_LIMITS] =
+          "Must have same number of values as " + PropertyNames::RESONANCE_LOWER_LIMITS;
+    }
+  }
 
   return result;
 }
