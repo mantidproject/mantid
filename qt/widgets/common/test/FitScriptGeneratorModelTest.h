@@ -53,7 +53,7 @@ class FitScriptGeneratorModelTest : public CxxTest::TestSuite {
 
 public:
   FitScriptGeneratorModelTest()
-      : m_wsName("Name"), m_wsIndex(MantidQt::MantidWidgets::WorkspaceIndex(0)), m_workspace(create2DWorkspace(3, 3)),
+      : m_wsName("Name"), m_wsIndex(WorkspaceIndex(0)), m_workspace(create2DWorkspace(3, 3)),
         m_startX(m_workspace->x(m_wsIndex.value).front()), m_endX(m_workspace->x(m_wsIndex.value).back()) {
     Mantid::API::FrameworkManager::Instance();
   }
@@ -934,7 +934,7 @@ private:
   }
 
   std::string m_wsName;
-  MantidQt::MantidWidgets::WorkspaceIndex m_wsIndex;
+  WorkspaceIndex m_wsIndex;
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   double m_startX;
   double m_endX;

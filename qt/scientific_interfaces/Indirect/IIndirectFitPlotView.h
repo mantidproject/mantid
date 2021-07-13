@@ -28,13 +28,9 @@ public:
   virtual void watchADS(bool watch) = 0;
 
   virtual WorkspaceIndex getSelectedSpectrum() const = 0;
-  virtual FitDomainIndex getSelectedSpectrumIndex() const = 0;
-  virtual TableDatasetIndex getSelectedDataIndex() const = 0;
-  virtual TableDatasetIndex dataSelectionSize() const = 0;
+  virtual WorkspaceID getSelectedDataIndex() const = 0;
+  virtual WorkspaceID dataSelectionSize() const = 0;
   virtual bool isPlotGuessChecked() const = 0;
-
-  virtual void hideMultipleDataSelection() = 0;
-  virtual void showMultipleDataSelection() = 0;
 
   virtual void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) = 0;
   virtual void setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
@@ -44,7 +40,7 @@ public:
   virtual void setMaximumSpectrum(int maximum) = 0;
   virtual void setPlotSpectrum(WorkspaceIndex spectrum) = 0;
   virtual void appendToDataSelection(const std::string &dataName) = 0;
-  virtual void setNameInDataSelection(const std::string &dataName, TableDatasetIndex index) = 0;
+  virtual void setNameInDataSelection(const std::string &dataName, WorkspaceID workspaceID) = 0;
   virtual void clearDataSelection() = 0;
 
   virtual void plotInTopPreview(const QString &name, Mantid::API::MatrixWorkspace_sptr workspace,
@@ -87,7 +83,7 @@ public slots:
   virtual void setHWHMMinimum(double maximum) = 0;
 
 signals:
-  void selectedFitDataChanged(TableDatasetIndex /*_t1*/);
+  void selectedFitDataChanged(WorkspaceID /*_t1*/);
   void plotCurrentPreview();
   void plotSpectrumChanged(WorkspaceIndex /*_t1*/);
   void plotGuessChanged(bool /*_t1*/);

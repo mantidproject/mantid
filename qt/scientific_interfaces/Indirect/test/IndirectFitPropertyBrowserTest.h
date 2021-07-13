@@ -68,7 +68,7 @@ public:
   MOCK_METHOD1(updateParameterEstimationData, void(DataForParameterEstimationCollection &&data));
   MOCK_METHOD0(estimateFunctionParameters, void());
   MOCK_METHOD1(setBackgroundA0, void(double value));
-  MOCK_METHOD2(setResolution, void(std::string const &name, TableDatasetIndex const &index));
+  MOCK_METHOD2(setResolution, void(std::string const &name, WorkspaceID const &index));
   MOCK_METHOD1(setResolution, void(const std::vector<std::pair<std::string, size_t>> &fitResolutions));
   MOCK_METHOD1(setQValues, void(const std::vector<double> &qValues));
   // protected Slots
@@ -263,7 +263,7 @@ public:
     int nData = 2;
     QList<FunctionModelDataset> datasets;
     for (auto i = 0u; i < 2; ++i) {
-      TableDatasetIndex index{i};
+      WorkspaceID workspaceID{i};
 
       auto const name = "wsName" + std::to_string(i);
       datasets.append(FunctionModelDataset(QString::fromStdString(name), FunctionModelSpectra("0")));
