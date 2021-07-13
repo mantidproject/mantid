@@ -27,7 +27,7 @@ def check_distances_match(ws1, ws2):
     r1 = ws1.getRunNumber()
     r2 = ws2.getRunNumber()
     if fabs(l2_1 - l2_2) > tolerance:
-        logger.warning('Distance difference out of tolerance {0}: {1}, {2}: {3}'.format(r1, l2_1, r2, l2_2))
+        logger.warning(f'Distance difference out of tolerance {r1}: {l2_1}, {r2}: {l2_2}')
 
 
 def check_wavelengths_match(ws1, ws2):
@@ -42,7 +42,7 @@ def check_wavelengths_match(ws1, ws2):
     r1 = ws1.getRunNumber()
     r2 = ws2.getRunNumber()
     if fabs(wavelength_1 - wavelength_2) > tolerance:
-        logger.warning('Wavelength difference out of tolerance {0}: {1}, {2}: {3}'.format(r1, wavelength_1, r2, wavelength_2))
+        logger.warning(f'Wavelength difference out of tolerance {r1}: {wavelength_1}, {r2}: {wavelength_2}')
 
 
 def check_processed_flag(ws, exp_value):
@@ -51,7 +51,8 @@ def check_processed_flag(ws, exp_value):
         @param ws : workspace
         @param exp_value : the expected value of the ProcessedAs log
     """
-    return ws.getRun().getLogData('ProcessedAs').value == exp_value
+    if ws.getRun().getLogData('ProcessedAs').value != exp_value:
+        logger.warning(f'{exp_value} workspace is not processed as such.')
 
 
 def cylinder_xml(radius):

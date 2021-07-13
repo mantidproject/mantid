@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from SANSILLCommon import *
-from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
-    WorkspaceGroup, FileAction
+from mantid.api import PythonAlgorithm, MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, \
+    MultipleFileProperty, PropertyMode, Progress, WorkspaceGroup, FileAction
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, \
     StringListValidator
 from mantid.simpleapi import *
@@ -237,7 +237,20 @@ class SANSILLReduction2(PythonAlgorithm):
                 raise RuntimeError('Only the sample can be a kinetic measurement, the auxiliary calibration measurements cannot.')
         self.progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(self.process) + 1)
 
-    def normalise(self, ws):
+    def normalise_by_time(self, ws):
+        '''Normalises the given workspace to time and applies the dead time correction'''
+        run = ws.getRun()
+        if run.hasProperty('timer'):
+            duration = run['timer'].value
+            if duration != 0.:
+                Scale(InputWorkspace=ws, Factor=1./duration, OutputWorkspace=ws)
+                self.apply_dead_time(ws)
+            else:
+                raise RuntimeError('Unable to normalise to time; duration found is 0.')
+        else:
+            raise RuntimeError('Normalise to time requested, but duration is not available in the workspace.')
+
+    def apply_normalisation(self, ws):
         '''Normalizes the workspace by monitor (default) or acquisition time'''
         normalise_by = self.getPropertyValue('NormaliseBy')
         monitor_ids = monitor_id(self.instrument)
@@ -257,27 +270,10 @@ class SANSILLReduction2(PythonAlgorithm):
                 Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
                 DeleteWorkspace(mon)
             else:
-                if isinstance(mtd[ws], WorkspaceGroup):
-                    for ws in mtd[ws]:
-                        normalise_by_time(ws)
-                else:
-                    normalise_by_time(mtd[ws])
+                normalise_by_time(mtd[ws])
         # regardless on normalisation mask out the monitors not to skew the scale in the instrument viewer
         # but do not extract them, since extracting by ID is slow, so just leave them masked
         MaskDetectors(Workspace=ws, DetectorList=monitor_ids)
-
-    def normalise_by_time(self, ws):
-        '''Normalises the given workspace to time and applies the dead time correction'''
-        run = ws.getRun()
-        if run.hasProperty('timer'):
-            duration = run.getLogData('timer').value
-            if duration != 0.:
-                Scale(InputWorkspace=ws, Factor=1./duration, OutputWorkspace=ws)
-                self.apply_dead_time(ws)
-            else:
-                raise RuntimeError('Unable to normalise to time; duration found is 0.')
-        else:
-            raise RuntimeError('Normalise to time requested, but duration is not available in the workspace.')
 
     def apply_dead_time(self, ws):
         '''Performs the dead time correction'''
@@ -297,58 +293,133 @@ class SANSILLReduction2(PythonAlgorithm):
         else:
             self.log().notice('No tau available in IPF, skipping dead time correction.')
 
-    def load_and_merge(self, ws):
+    def apply_dark_current(self, ws):
+        '''Applies Cd/B4C subtraction'''
+        cadmium_ws = self.getPropertyValue('DarkCurrentWorkspace')
+        if cadmium_ws:
+            check_processed_flag(mtd[cadmium_ws], 'DarkCurrent')
+            Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_ws, OutputWorkspace=ws)
+
+    def apply_direct_beam(self, ws):
+        '''Applies the beam center correction'''
+        beam_ws = self.getPropertyValue('EmptyBeamWorkspace')
+        if beam_ws:
+            check_processed_flag(mtd[beam_ws], 'EmptyBeam')
+            check_distances_match(mtd[ws], mtd[beam_ws])
+            if self.mode != AcqMode.TOF:
+                run = mtd[beam_ws].getRun()
+                beam_x = run['BeamCenterX'].value
+                beam_y = run['BeamCenterY'].value
+                AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
+                AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
+                self.apply_multipanel_beam_center_corr(ws, beam_x, beam_y)
+                if 'BeamWidthX' in run:
+                    beam_width_x = run['BeamWidthX']
+                    AddSampleLog(Workspace=ws, LogName='BeamWidthX', LogText=str(beam_width_x), LogType='Number',
+                                 LogUnit='rad')
+
+    def apply_multipanel_beam_center_corr(self, ws, beam_x, beam_y):
+        '''Applies the beam center correction on multipanel detectors'''
+        instrument = mtd[ws].getInstrument()
+        l2_main = mtd[ws].getRun()['L2'].value
+        panel_names = instrument.getStringParameter('detector_panels')[0].split(',')
+        for panel in panel_names:
+            l2_panel = instrument.getComponentByName(panel).getPos()[2]
+            MoveInstrumentComponent(Workspace=ws, X=-beam_x * l2_panel/l2_main, Y=-beam_y * l2_panel/l2_main, ComponentName=panel)
+
+    def apply_transmission(self, ws):
+        '''Applies transmission correction'''
+        tr_ws = self.getPropertyValue('TransmissionWorkspace')
+        theta_dependent = self.getProperty('TransmissionThetaDependent').value
+        if tr_ws:
+            check_processed_flag(mtd[tr_ws], 'Transmission')
+            if self.mode == AcqMode.TOF:
+                # wavelength dependent transmission, need to rebin
+                tr_ws_rebin = tr_ws + '_tr_rebinned'
+                RebinToWorkspace(WorkspaceToRebin=tr_ws, WorkspaceToMatch=ws,
+                                 OutputWorkspace=tr_ws_rebin)
+                ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionWorkspace=tr_ws_rebin,
+                                            ThetaDependent=theta_dependent, OutputWorkspace=ws)
+                DeleteWorkspace(tr_ws_rebin)
+            else:
+                check_wavelengths_match(mtd[tr_ws], mtd[ws])
+                if theta_dependent and self.instrument == 'D16' and 75 < mtd[ws].getRun()['Gamma.value'].value < 105:
+                    # D16 can do wide angles, which means it can cross 90 degrees, where theta dependent transmission is divergent
+                    # gamma is the detector center's theta, if it is in a certain range, then some pixels are around 90 degrees
+                    MaskAngle(Workspace=ws, MinAngle=89, MaxAngle=91, Angle='TwoTheta')
+                ApplyTransmissionCorrection(InputWorkspace=ws,
+                                            TransmissionWorkspace=tr_ws,
+                                            ThetaDependent=theta_dependent,
+                                            OutputWorkspace=ws)
+
+    def apply_container(self, ws):
+        '''Applies empty container subtraction'''
+        can_ws = self.getPropertyValue('EmptyContainerWorkspace')
+        if can_ws:
+            check_processed_flag(mtd[can_ws], 'EmptyContainer')
+            check_distances_match(mtd[can_ws], mtd[ws])
+            if self.mode == AcqMode.TOF:
+                # wavelength dependent subtraction, need to rebin
+                can_ws_rebin = can_ws + '_tr_rebinned'
+                RebinToWorkspace(WorkspaceToRebin=can_ws, WorkspaceToMatch=ws,
+                                 OutputWorkspace=can_ws_rebin)
+                Minus(LHSWorkspace=ws, RHSWorkspace=can_ws_rebin, OutputWorkspace=ws)
+                DeleteWorkspace(can_ws_rebin)
+            else:
+                check_wavelengths_match(mtd[can_ws], mtd[ws])
+                Minus(LHSWorkspace=ws, RHSWorkspace=can_ws, OutputWorkspace=ws)
+
+    def load(self, ws):
         '''
         Loads, merges and concatenates the input runs, if needed
-        Concatenation is allowed only for sample and transmission runs
+        Concatenation is allowed only for sample and transmission runs, if the mode is not TOF
         For all the rest, only summing is permitted
         The input might be either a numor or a processed nexus as a result of rebinning of event data in mantid
         Hence, we cannot specify a name of a specifc loader
         Besides, if it is processed nexus, it will be histogram data, which needs to be converted to point data
-        Currently, the loader will load to a histogram data for monochromatic non-kinetic, so we need to run a conversion
+        Currently, the loader too will load to a histogram data for monochromatic non-kinetic, so we need to run a conversion
         This is redundant, since the loader could load directly to point-data
         The latter is a breaking change for the loader, so will require a new version
-        The output can be a workspace or a workspace group as follows:
-            if mode == Sample || Transmission
-                MONO : workspace
-                KINETIC : workspace
-                TOF : workspace group
-            else:
-                * : if there is a , in the Runs - workspace group, otherwise workspace
+        The final output of this must be a workspace and not a workspace group
         '''
         #TODO: note that this operation is quite generic, so perhaps concatenation can become an option directly in LoadAndMerge
         LoadAndMerge(Filename=self.getPropertyValue('Runs'), OutputWorkspace=ws)
         if isinstance(mtd[ws], WorkspaceGroup):
             self.setup(mtd[ws][0])
-            if self.process == 'Sample' or self.process == 'Transmission':
-                if self.mode != AcqMode.TOF:
+            if self.mode != AcqMode.TOF:
+                if self.process == 'Sample' or self.process == 'Transmission':
                     if not self.is_point:
                         ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
                     # TODO: inject blank frames for the empty token placeholder here at the right index
                     ConjoinXRuns(InputWorkspaces=ws, OutputWorkspace=ws + '__joined')
                     DeleteWorkspace(Workspace=ws)
                     RenameWorkspace(InputWorkspace=ws + '__joined', OutputWorkspace=ws)
+                else:
+                    raise RuntimeError('Listing of runs in MONO mode is allowed only for sample and transmission measurements.')
+            else:
+                raise RuntimeError('Listing of runs is not allowed for TOF mode as concatenation of multiple runs is not possible.')
         else:
             self.setup(mtd[ws])
+        assert isinstance(mtd[ws], MatrixWorkspace)
         return ws
 
     def reduce(self, ws):
         '''Performs the corresponding reduction based on the process type'''
-        self.normalise(ws)
+        self.apply_normalisation(ws)
         if self.process != 'DarkCurrent':
-            # apply dark current
+            self.apply_dark_current(ws)
             if self.process == 'EmptyBeam':
                 pass # process beam
             else:
-                # apply beam
+                self.apply_direct_beam(ws)
                 if self.process == 'Transmission':
                     pass # calculate transmission
                 else:
-                    # apply transmission
+                    self.apply_transmission(ws)
                     if self.process == 'Container':
                         pass # process container
                     else:
-                        # apply container
+                        self.apply_container(ws)
                         if self.process == 'Water':
                             pass # process water
                         else:
@@ -361,7 +432,7 @@ class SANSILLReduction2(PythonAlgorithm):
     def PyExec(self):
         self.reset()
         ws = self.getPropertyValue('OutputWorkspace')
-        self.load_and_merge(ws)
+        self.load(ws)
         self.reduce(ws)
         self.setProperty('OutputWorkspace', ws)
 
