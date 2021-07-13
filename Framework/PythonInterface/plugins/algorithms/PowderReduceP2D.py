@@ -4,10 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
+from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, EnabledWhenProperty, PropertyCriterion
 from mantid.api import (AlgorithmFactory, DistributedDataProcessorAlgorithm, FileProperty, FileAction)
 from mantid.simpleapi import Load, FindDetectorsPar, FilterBadPulses, RemovePromptPulse, LoadDiffCal, MaskDetectors, AlignDetectors, \
-    ConvertUnits, CylinderAbsorption, Divide, Bin2DPowderDiffraction, StripVanadiumPeaks, FFTSmooth, Minus, SaveP2D, ResetNegatives2D
+    ConvertUnits, CylinderAbsorption, Divide, Bin2DPowderDiffraction, StripVanadiumPeaks, FFTSmooth, Minus, SaveP2D, Scale, CreateWorkspace
+from mantid import mtd
+
+import numpy as np
 
 
 class PowderReduceP2D(DistributedDataProcessorAlgorithm):
@@ -356,7 +359,15 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
 
         def loadResetNegatives2D():
             # input for ResetNegatives2D
-            self.copyProperties('ResetNegatives2D', ['AddMinimum', 'ResetValue'])
+            self.declareProperty('AddMinimum',
+                                 True,
+                                 direction=Direction.Input,
+                                 doc='If set to True, adds the most negative intensity to all intensities.')
+            self.declareProperty('ResetValue',
+                                 0,
+                                 direction=Direction.Input,
+                                 doc='Set negative intensities to the specified value (default=0).')
+            self.setPropertySettings('ResetValue', EnabledWhenProperty('AddMinimum', PropertyCriterion.IsNotDefault))
             grp13 = 'ResetNegatives2D'
             self.setPropertyGroup('AddMinimum', grp13)
             self.setPropertyGroup('ResetValue', grp13)
@@ -623,12 +634,32 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         if useVana:
             Divide(LHSWorkspace=sampleWsName, RHSWorkspace=vanaWsName, OutputWorkspace=sampleWsName)
 
+    def ResetNegatives2D(self, wsName, addMin, resetValue):
+        # Check if workspace has negative values and correct them if necessary
+        xData = mtd[wsName].extractX()
+        yData = mtd[wsName].extractY()
+
+        eData = mtd[wsName].extractE()
+        if addMin:
+            intMin = np.min(yData)
+            # Check if minimal Intensity is negative. If it is, add -1*intMin to all intensities
+            if intMin < 0:
+                Scale(InputWorkspace=mtd[wsName], OutputWorkspace=mtd[wsName], Factor=-intMin, Operation="Add")
+        else:
+            yDataNew = np.where(yData < 0, resetValue, yData)
+            CreateWorkspace(OutputWorkspace=mtd[wsName],
+                            DataX=xData,
+                            DataY=yDataNew,
+                            DataE=eData,
+                            NSpec=mtd[wsName].getNumberHistograms(),
+                            ParentWorkspace=mtd[wsName])
+
     def checkForNegatives(self, wsName, useVana, vanaWsName, useEmpty, emptyWsName, addMinimum, resetValue, addMinimumVana, resetValueVana):
-        ResetNegatives2D(wsName, addMinimum, resetValue)
+        self.ResetNegatives2D(wsName, addMinimum, resetValue)
         if useVana:
-            ResetNegatives2D(vanaWsName, addMinimumVana, resetValueVana)
+            self.ResetNegatives2D(vanaWsName, addMinimumVana, resetValueVana)
         if useEmpty:
-            ResetNegatives2D(emptyWsName, addMinimum, resetValue)
+            self.ResetNegatives2D(emptyWsName, addMinimum, resetValue)
 
     def PyExec(self):
         # Input laden
