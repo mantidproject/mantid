@@ -311,12 +311,15 @@ void LoadMuonNexus1::exec() {
       outWs = localWorkspace;
     }
 
-    if (m_numberOfPeriods == 1) {
-      setProperty("OutputWorkspace", outWs);
+    if (existsProperty("TimeZero")) {
       auto timeZeroList = std::vector<double>(m_numberOfSpectra, getProperty("TimeZero"));
       setProperty("TimeZeroList", timeZeroList);
       setProperty("TimeZeroTable", createTimeZeroTable(m_numberOfSpectra, timeZeroList));
-    } else
+    }
+
+    if (m_numberOfPeriods == 1)
+      setProperty("OutputWorkspace", outWs);
+    else
       // In case of multiple periods, just add workspace to the group, and we
       // will return the
       // group later
