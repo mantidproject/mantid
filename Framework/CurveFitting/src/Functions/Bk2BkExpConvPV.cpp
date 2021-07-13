@@ -76,7 +76,7 @@ double Bk2BkExpConvPV::height() const {
  * Get approximate peak width.
  */
 double Bk2BkExpConvPV::fwhm() const {
-  // get sigma of Gauss with dame FWHM as voigt (H)
+  // get sigma of Gauss with same FWHM as voigt (H)
   double H, eta;
   calHandEta(getParameter("Sigma2"), getParameter("Gamma"), H, eta);
   const auto s = H / (2 * sqrt(2 * M_LN2));

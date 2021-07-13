@@ -26,12 +26,14 @@ Improvements
 Bugfixes
 ########
 - fix d-spacing calculation when parabolic model is selected.
+- Correct equation for pseudo-voigt FWHM and mixing parameter in peak profile function :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>`.
 
 Engineering Diffraction
 -----------------------
 New features
 ############
 - Added serial fit capability to fitting tab in EngDiff UI - this fits all loaded workspaces with same initial parameters.
+- Add GSAS coefficients for parameters of peak profile function :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>` for ENGIN-X.
 
 Improvements
 ############

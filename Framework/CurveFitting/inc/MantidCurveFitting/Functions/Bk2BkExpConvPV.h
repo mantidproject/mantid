@@ -25,7 +25,7 @@ namespace Functions {
 class MANTID_CURVEFITTING_DLL Bk2BkExpConvPV : virtual public API::IPeakFunction, virtual public API::IFunctionMW {
 public:
   /// Default constructor.
-  Bk2BkExpConvPV() : API::IPeakFunction() {}
+  Bk2BkExpConvPV() = default;
 
   /// overwrite IPeakFunction base class methods
   double centre() const override;
