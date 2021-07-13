@@ -4,16 +4,16 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from SANSILLCommon import *
 from mantid.api import DataProcessorAlgorithm, WorkspaceProperty, MultipleFileProperty, PropertyMode, \
     FileAction, MatrixWorkspaceProperty
 from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntBoundedValidator, StringListValidator
 from mantid.simpleapi import *
-from enum import Enum
 from os import path
 
 N_DISTANCES = 5 # maximum number of distinct distance configurations
 N_LAMBDAS = 2 # maximum number of distinct wavelengths used in the experiment
-EMPTY_TOKEN = '000000' # empty run rumber to act as a placeholder where a measurement is missing
+EMPTY_TOKEN = '000000' # empty run rumber to act as a placeholder where a sample measurement is missing
 
 
 def get_run_number(value):
@@ -88,13 +88,6 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     Provides azimuthal integration only (I(Q)), optionally with sectors.
     Reduces all the samples at all the distances together in the most optimal way.
     '''
-
-    class AcqMode(Enum):
-        MONO = 1 # standard monochromatic SANS
-        KINETIC = 2 # kinetic monochromatic SANS
-        TOF = 3 # TOF SANS (D33 only)
-        SCAN = 4 # monochromatic sample environment scans
-
     instrument = None # the name of the instrument [D11, D11B, D16, D22, D22B, D33]
     mode = None # the acquisition mode Mono, Kinetic, TOF
     rank = None # the rank of the reduction, i.e. the number of (detector distance, wavelength) configurations
