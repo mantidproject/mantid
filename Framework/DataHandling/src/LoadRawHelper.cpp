@@ -695,6 +695,14 @@ void LoadRawHelper::runLoadLog(const std::string &fileName, const DataObjects::W
       continue;
     }
 
+    std::string alarmSuffix = "ICPalarm.txt";
+    if (boost::algorithm::ends_with(*logPath, alarmSuffix)) {
+      if (Mantid::Kernel::FileDescriptor::isEmpty(*logPath)) {
+        g_log.information("Skipping empty log file: " + *logPath);
+        continue;
+      }
+    }
+
     // Create a new object for each log file.
     auto loadLog = createChildAlgorithm("LoadLog");
 
@@ -1086,7 +1094,7 @@ void LoadRawHelper::loadSpectra(FILE *file, const int &period, const int &total_
 }
 
 /**
- * Return the confidence with with this algorithm can load the file
+ * Return the confidence with which this algorithm can load the file
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
