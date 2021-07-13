@@ -10,7 +10,6 @@ from unittest import mock
 from mantid.api import FrameworkManager, FunctionFactory
 from mantidqt.widgets.fitscriptgenerator import FittingMode
 
-from Muon.GUI.Common.contexts.plotting_context import PlotMode
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
@@ -84,10 +83,6 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.presenter.update_and_reset_all_data.assert_called_with()
         self.view.disable_view.assert_called_once_with()
-
-    def test_that_handle_plot_mode_changed_will_update_the_plot_guess_if_in_fitting_mode(self):
-        self.presenter.handle_plot_mode_changed(PlotMode.Fitting)
-        self.model.update_plot_guess.assert_called_once_with()
 
     def test_that_handle_gui_changes_made_will_reset_the_start_and_end_x_in_the_model_and_view(self):
         self.presenter.handle_gui_changes_made({"FirstGoodDataFromFile": True})

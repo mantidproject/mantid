@@ -26,52 +26,14 @@ public:
   ~IndirectFitDataView() override = default;
 
   QTableWidget *getDataTable() const override;
-  virtual bool isMultipleDataTabSelected() const override;
-  bool isResolutionHidden() const override;
-  void setResolutionHidden(bool hide) override;
-  void disableMultipleDataTab() override;
 
-  virtual std::string getSelectedSample() const override;
-  std::string getSelectedResolution() const override;
-
-  virtual QStringList getSampleWSSuffices() const override;
-  virtual QStringList getSampleFBSuffices() const override;
-  QStringList getResolutionWSSuffices() const override;
-  QStringList getResolutionFBSuffices() const override;
-
-  virtual void setSampleWSSuffices(const QStringList &suffices) override;
-  virtual void setSampleFBSuffices(const QStringList &suffices) override;
-  virtual void setResolutionWSSuffices(const QStringList &suffices) override;
-  virtual void setResolutionFBSuffices(const QStringList &suffices) override;
-
-  bool isSampleWorkspaceSelectorVisible() const override;
-  void setSampleWorkspaceSelectorIndex(const QString &workspaceName) override;
-
-  void readSettings(const QSettings &settings) override;
   UserInputValidator &validate(UserInputValidator &validator) override;
-
-  void setXRange(std::pair<double, double> const &range) override;
-  std::pair<double, double> getXRange() const override;
-  QComboBox *cbParameterType;
-  QComboBox *cbParameter;
-  QLabel *lbParameter;
-  QLabel *lbParameterType;
 
 public slots:
   void displayWarning(const std::string &warning) override;
 
-protected slots:
-  void emitViewSelected(int index);
-  void setStartX(double) override;
-  void setEndX(double) override;
-
 private:
-  UserInputValidator &validateMultipleData(UserInputValidator &validator);
-  UserInputValidator &validateSingleData(UserInputValidator &validator);
-  UserInputValidator &validateSample(UserInputValidator &validator);
-  UserInputValidator &validateResolution(UserInputValidator &validator);
-
-  std::unique_ptr<Ui::IndirectFitDataForm> m_dataForm;
+  std::unique_ptr<Ui::IndirectFitDataView> m_dataForm;
 };
 
 } // namespace IDA

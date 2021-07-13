@@ -56,6 +56,7 @@ if(CXXTEST_FOUND)
                         ${MANTIDLIBS}
                         Algorithms
                         DataHandling
+                        CurveFitting
                         Nexus
                         ${BCRYPT}
                         gmock

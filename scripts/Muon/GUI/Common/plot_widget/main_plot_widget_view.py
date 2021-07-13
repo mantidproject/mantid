@@ -28,5 +28,11 @@ class MainPlotWidgetView(QtWidgets.QWidget):
     def get_plot_mode(self):
         return self._plot_mode.currentText()
 
+    def set_plot_mode(self, index):
+        self._plot_mode.setCurrentIndex(index)
+
+    def get_index(self, mode):
+        return self._plot_mode.findText(mode)
+
     def plot_mode_change_connect(self, slot):
         self._plot_mode.currentIndexChanged.connect(slot)

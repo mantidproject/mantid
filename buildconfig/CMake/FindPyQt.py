@@ -37,6 +37,36 @@ class PyQtConfig:
         self.version_str = qtcore.PYQT_VERSION_STR
         self.sip_flags = qtcore.PYQT_CONFIGURATION['sip_flags']
         self.qt_tag = self._get_qt_tag(self.sip_flags)
+
+        conda_activated, conda_env = find_conda_env()
+        if conda_activated:
+            self.get_pyqt_conda_dirs(conda_env, pyqt_name)
+        else:
+            self.get_pyqt_dirs(pyqt_name)
+
+        # Assume uic script is in uic submodule
+        uic = __import__(pyqt_name + '.uic', globals(), locals(), ['uic'], 0)
+        self.pyuic_path = os.path.join(os.path.dirname(uic.__file__), 'pyuic.py')
+
+    def _get_qt_tag(self, sip_flags):
+        match = QT_TAG_RE.search(sip_flags)
+        if match:
+            return match.group(0)
+        else:
+            return None
+
+    def __str__(self):
+        lines = [
+            'pyqt_version:%06.x' % self.version_hex,
+            'pyqt_version_str:%s' % self.version_str,
+            'pyqt_version_tag:%s' % self.qt_tag,
+            'pyqt_sip_dir:%s' % self.sip_dir,
+            'pyqt_sip_flags:%s' % self.sip_flags,
+            'pyqt_pyuic:%s' % self.pyuic_path
+        ]
+        return '\n'.join(lines)
+
+    def get_pyqt_dirs(self, pyqt_name):
         # This is based on QScintilla's configure.py, and only works for the
         # default case where installation paths have not been changed in PyQt's
         # configuration process.
@@ -68,27 +98,17 @@ class PyQtConfig:
                 possible_sip_dirs = list(map(lambda p: os.path.join(prefix, p), possible_sip_dirs))
                 raise RuntimeError(f"Unable to find {pyqt_name}.\n" + f"Tried following locations: {pprint.pformat(possible_sip_dirs)}")
 
-        # Assume uic script is in uic submodule
-        uic = __import__(pyqt_name + '.uic', globals(), locals(), ['uic'], 0)
-        self.pyuic_path = os.path.join(os.path.dirname(uic.__file__), 'pyuic.py')
-
-    def _get_qt_tag(self, sip_flags):
-        match = QT_TAG_RE.search(sip_flags)
-        if match:
-            return match.group(0)
+    def get_pyqt_conda_dirs(self, conda_env_path, pyqt_name):
+        if sys.platform != 'win32':
+            self.sip_dir = os.path.join(conda_env_path, "share", "sip", pyqt_name)
         else:
-            return None
+            self.sip_dir = os.path.join(conda_env_path, 'sip', pyqt_name)
 
-    def __str__(self):
-        lines = [
-            'pyqt_version:%06.x' % self.version_hex,
-            'pyqt_version_str:%s' % self.version_str,
-            'pyqt_version_tag:%s' % self.qt_tag,
-            'pyqt_sip_dir:%s' % self.sip_dir,
-            'pyqt_sip_flags:%s' % self.sip_flags,
-            'pyqt_pyuic:%s' % self.pyuic_path
-        ]
-        return '\n'.join(lines)
+
+def find_conda_env():
+    if 'CONDA_PREFIX' in os.environ:
+        return True, os.environ['CONDA_PREFIX']
+    return False, None
 
 
 def main():

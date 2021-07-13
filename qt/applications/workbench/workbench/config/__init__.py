@@ -85,7 +85,7 @@ DEFAULTS = {
 
 # State encodes widget layout (among other things).
 # Increment this when the state of the next version is incompatible with the previous.
-SAVE_STATE_VERSION = 1
+SAVE_STATE_VERSION = 2
 
 # 'Singleton' instance
 QSettings.setDefaultFormat(QSettings.IniFormat)

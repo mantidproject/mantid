@@ -663,6 +663,31 @@ Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels, double 
 }
 
 /**
+ * createEmptyInstrument, creates a geometrically nonsensical instrument
+ * specifically to be populated with detectors. Components are added to
+ * satisfy basic checks in algorithms.
+ */
+Instrument_sptr createEmptyInstrument() {
+  Instrument_sptr instrument = std::make_shared<Instrument>();
+
+  V3D place_holder_pos(0, 0, 0);
+
+  // A source
+  ObjComponent *place_holder_0 = new ObjComponent("place_holder");
+  place_holder_0->setPos(place_holder_pos);
+  place_holder_0->setShape(createSphere(0.01, V3D(0, 0, 0), "1"));
+  instrument->add(place_holder_0);
+  instrument->markAsSource(place_holder_0);
+
+  // A sample
+  Component *place_holder_1 = new Component("place_holder");
+  place_holder_1->setPos(place_holder_pos);
+  instrument->add(place_holder_1);
+  instrument->markAsSamplePos(place_holder_1);
+
+  return instrument;
+}
+/**
  * createMinimalInstrument, creates the most simple possible definition of
  * an instrument in which we can extract a valid L1 and L2 distance for unit
  * calculations.

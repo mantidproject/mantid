@@ -4,66 +4,40 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from matplotlib.backends.qt_compat import is_pyqt5
-from mantidqt.icons import get_icon
-from qtpy import QtCore, QtWidgets
 from mantidqt.utils.observer_pattern import GenericObservable
-
-if is_pyqt5():
-    from matplotlib.backends.backend_qt5agg import (
-        NavigationToolbar2QT as NavigationToolbar)
-else:
-    from matplotlib.backends.backend_qt4agg import (
-        NavigationToolbar2QT as NavigationToolbar)
+from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar, MantidStandardNavigationTools, MantidNavigationTool
+from qtpy import QtCore, QtWidgets
 
 
-class PlotToolbar(NavigationToolbar):
+class PlotToolbar(MantidNavigationToolbar):
+
+    toolitems = (
+        MantidStandardNavigationTools.HOME,
+        MantidStandardNavigationTools.BACK,
+        MantidStandardNavigationTools.FORWARD,
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidStandardNavigationTools.PAN,
+        MantidStandardNavigationTools.ZOOM,
+        MantidStandardNavigationTools().SEPARATOR,
+        MantidNavigationTool('Show major','Show major gridlines','mdi.grid-large','show_major_gridlines'),
+        MantidNavigationTool('Show minor','Show minor gridlines','mdi.grid','show_minor_gridlines' ),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidStandardNavigationTools.CONFIGURE,
+        MantidStandardNavigationTools.SAVE,
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Show/hide legend', 'Toggles the legend on/off', None, 'toggle_legend'),
+                 )
 
     def __init__(self, figure_canvas, parent=None):
-        self.toolitems = (('Home', 'Reset original view', 'mdi.home', 'home'),
-                          ('Back', 'Back to previous view', 'mdi.arrow-left', 'back'),
-                          ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward'),
-                          (None, None, None, None),
-                          ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan'),
-                          ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom'),
-                          (None, None, None, None),
-                          ('Show major','Show major gridlines','mdi.grid-large','show_major_gridlines'),
-                          ('Show minor','Show minor gridlines','mdi.grid','show_minor_gridlines' ),
-                          (None, None, None, None),
-                          ('Subplots', 'Edit subplots', 'mdi.settings', 'configure_subplots'),
-                          ('Save', 'Save the figure', 'mdi.content-save', 'save_figure'),
-                          (None, None, None, None),
-                          ('Show/hide legend', 'Toggles the legend on/off', None, 'toggle_legend'),
-                          )
+
+        super().__init__(figure_canvas, parent)
+
         self.is_major_grid_on = False
         self.is_minor_grid_on = False
-        NavigationToolbar.__init__(self, figure_canvas, parent=parent)
         self.uncheck_autoscale_notifier = GenericObservable()
         self.enable_autoscale_notifier = GenericObservable()
         self.disable_autoscale_notifier = GenericObservable()
         self.range_changed_notifier = GenericObservable()
-
-    def _init_toolbar(self):
-        for text, tooltip_text, mdi_icon, callback in self.toolitems:
-            if text is None:
-                self.addSeparator()
-            else:
-
-                if mdi_icon:
-                    a = self.addAction(get_icon(mdi_icon), text, getattr(self, callback))
-                else:
-                    a = self.addAction(text, getattr(self, callback))
-                self._actions[callback] = a
-                if tooltip_text is not None:
-                    a.setToolTip(tooltip_text)
-
-        if self.coordinates:
-            self.locLabel = QtWidgets.QLabel("", self)
-            self.locLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
-            self.locLabel.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                                                                    QtWidgets.QSizePolicy.Ignored)))
-            labelAction = self.addWidget(self.locLabel)
-            labelAction.setVisible(True)
 
         # Adjust icon size or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
@@ -136,6 +110,7 @@ class PlotToolbar(NavigationToolbar):
         for axes in self.canvas.figure.get_axes():
             axes.set_navigate_mode(self._active)
 
+        self._update_buttons_checked()
         self.set_message(self.mode)
 
     def pan(self, *args):
@@ -173,6 +148,7 @@ class PlotToolbar(NavigationToolbar):
         for axes in self.canvas.figure.get_axes():
             axes.set_navigate_mode(self._active)
 
+        self._update_buttons_checked()
         self.set_message(self.mode)
 
     def home(self, *args):

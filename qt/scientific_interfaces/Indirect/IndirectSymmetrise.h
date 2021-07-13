@@ -75,6 +75,7 @@ private:
   Ui::IndirectSymmetrise m_uiForm;
   double m_originalMax;
   double m_originalMin;
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.qt import load_ui
-from Muon.GUI.Common.fitting_widgets.basic_fitting.workspace_selector_view import WorkspaceSelectorView
+from Muon.GUI.Common.data_selectors.cyclic_data_selector_view import CyclicDataSelectorView
 
 from qtpy.QtWidgets import QWidget
 
@@ -23,8 +23,8 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
         super(ModelFittingDataSelectorView, self).__init__(parent)
         self.setupUi(self)
 
-        self.result_table_selector = WorkspaceSelectorView(self)
-        self.result_table_selector.set_workspace_combo_box_label("Results table")
+        self.result_table_selector = CyclicDataSelectorView(self)
+        self.result_table_selector.set_data_combo_box_label("Results table")
         self.result_table_selector_layout.addWidget(self.result_table_selector)
 
     def set_slot_for_results_table_changed(self, slot) -> None:

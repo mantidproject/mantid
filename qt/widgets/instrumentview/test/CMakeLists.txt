@@ -7,6 +7,7 @@ set(
   PlotFitAnalysisPaneModelTest.h
   PlotFitAnalysisPanePresenterTest.h
 
+  InstrumentWidget/InstrumentDisplayTest.h
   InstrumentWidget/InstrumentWidgetTest.h
 )
 
@@ -25,7 +26,6 @@ mtd_add_qt_tests(
   INCLUDE_DIRS
     ${MOCK_HEADER_DIRS}
 
-    ../inc/MantidQtWidgets/InstrumentView
     ../../../../Framework/DataObjects/inc
     ../../../../Framework/TestHelpers/inc
   TEST_HELPER_SRCS
@@ -34,12 +34,12 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
   LINK_LIBS
+    Python::Python
     ${CORE_MANTIDLIBS}
     PythonInterfaceCore
     DataObjects
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
     gmock
   QT5_LINK_LIBS Qt5::OpenGL
   MTD_QT_LINK_LIBS

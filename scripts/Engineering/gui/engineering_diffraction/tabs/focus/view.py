@@ -33,9 +33,6 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
     def set_enable_controls_connection(self, slot):
         self.sig_enable_controls.connect(slot)
 
-    def set_on_check_cropping_state_changed(self, slot):
-        self.check_cropFocus.stateChanged.connect(slot)
-
     # =================
     # Component Setters
     # =================
@@ -49,8 +46,8 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
     def set_plot_output_enabled(self, enabled):
         self.check_plotOutput.setEnabled(enabled)
 
-    def set_cropping_widget_visibility(self, visible):
-        self.widget_cropping.setVisible(visible)
+    def set_region_display_text(self, text):
+        self.regionDisplay.setText(text)
 
     # =================
     # Component Getters
@@ -65,12 +62,6 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
     def get_plot_output(self):
         return self.check_plotOutput.isChecked()
 
-    def get_crop_checked(self):
-        return self.check_cropFocus.isChecked()
-
-    def get_cropping_widget(self):
-        return self.widget_cropping
-
     # =================
     # State Getters
     # =================
@@ -84,8 +75,5 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
 
     def setup_tabbing_order(self):
         self.finder_focus.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
-
-        self.setTabOrder(self.finder_focus.focusProxy(), self.check_cropFocus)
-        self.setTabOrder(self.check_cropFocus, self.widget_cropping)
-        self.setTabOrder(self.widget_cropping, self.check_plotOutput)
+        self.setTabOrder(self.finder_focus.focusProxy(), self.check_plotOutput)
         self.setTabOrder(self.check_plotOutput, self.button_focus)

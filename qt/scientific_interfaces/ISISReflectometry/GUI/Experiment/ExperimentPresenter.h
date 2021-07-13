@@ -11,7 +11,7 @@
 #include "ExperimentOptionDefaults.h"
 #include "IExperimentPresenter.h"
 #include "IExperimentView.h"
-#include "PerThetaDefaultsTableValidationError.h"
+#include "LookupTableValidationError.h"
 #include "Reduction/Experiment.h"
 #include <boost/optional.hpp>
 
@@ -23,13 +23,13 @@ class ExperimentValidationErrors {
 public:
   explicit ExperimentValidationErrors(
       // cppcheck-suppress passedByValue
-      PerThetaDefaultsTableValidationError perThetaDefaultsErrors)
-      : m_perThetaDefaultsErrors(std::move(perThetaDefaultsErrors)) {}
+      LookupTableValidationError lookupTableErrors)
+      : m_lookupTableErrors(std::move(lookupTableErrors)) {}
 
-  PerThetaDefaultsTableValidationError const &perThetaValidationErrors() const { return m_perThetaDefaultsErrors; }
+  LookupTableValidationError const &lookupTableValidationErrors() const { return m_lookupTableErrors; }
 
 private:
-  PerThetaDefaultsTableValidationError m_perThetaDefaultsErrors;
+  LookupTableValidationError m_lookupTableErrors;
 };
 
 using ExperimentValidationResult = ValidationResult<Experiment, ExperimentValidationErrors>;
@@ -52,9 +52,9 @@ public:
   void notifySettingsChanged() override;
   void notifyRestoreDefaultsRequested() override;
   void notifySummationTypeChanged() override;
-  void notifyNewPerAngleDefaultsRequested() override;
-  void notifyRemovePerAngleDefaultsRequested(int index) override;
-  void notifyPerAngleDefaultsChanged(int row, int column) override;
+  void notifyNewLookupRowRequested() override;
+  void notifyRemoveLookupRowRequested(int index) override;
+  void notifyLookupRowChanged(int row, int column) override;
 
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
@@ -83,7 +83,7 @@ private:
   void updateViewFromModel();
 
   void showValidationResult(ExperimentValidationResult const &result);
-  void showPerThetaTableErrors(PerThetaDefaultsTableValidationError const &errors);
+  void showLookupTableErrors(LookupTableValidationError const &errors);
 
   void updateWidgetEnabledState();
   void updateSummationTypeEnabledState();

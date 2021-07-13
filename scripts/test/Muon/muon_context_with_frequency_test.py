@@ -61,7 +61,7 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
 
     def test_get_workspace_names_returns_no_time_domain_workspaces(self):
         self.populate_ADS()
-        workspace_list = self.context.get_workspace_names_for('19489', 'fwd, bwd, long', True)
+        workspace_list = self.context.get_workspace_names_for('19489', 'fwd, bwd, long')
         self.assertEqual(Counter(workspace_list),
                          Counter())
 
@@ -75,8 +75,7 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
     def test_get_workspaces_names_copes_with_no_freq_runs(self):
         self.populate_ADS()
         self.context._frequency_context.plot_type = "All"
-        workspace_list = self.context.get_workspace_names_for(runs='19489', group_and_pair='fwd, bwd, long, random, wrong',
-                                                                     phasequad=True)
+        workspace_list = self.context.get_workspace_names_for(runs='19489', group_and_pair='fwd, bwd, long, random, wrong')
 
         self.assertEqual(Counter(workspace_list),
                          Counter([]))

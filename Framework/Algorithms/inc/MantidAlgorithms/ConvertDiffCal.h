@@ -8,6 +8,8 @@
 
 #include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 namespace Mantid {
 namespace Algorithms {
 

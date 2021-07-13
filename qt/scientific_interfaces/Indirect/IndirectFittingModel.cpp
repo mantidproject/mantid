@@ -395,16 +395,6 @@ void IndirectFittingModel::clearWorkspaces() {
   m_fitDataModel->clear();
 }
 
-void IndirectFittingModel::switchToSingleInputMode() {
-  m_fitOutput->clear();
-  m_fitDataModel->switchToSingleInputMode();
-}
-
-void IndirectFittingModel::switchToMultipleInputMode() {
-  m_fitOutput->clear();
-  m_fitDataModel->switchToMultipleInputMode();
-}
-
 void IndirectFittingModel::clear() {}
 
 void IndirectFittingModel::setFittingMode(FittingMode mode) { m_fittingMode = mode; }

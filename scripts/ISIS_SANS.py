@@ -10,6 +10,7 @@
 """
 import sys
 from sans.common.enums import SANSFacility
+from sans.gui_logic.models.run_tab_model import RunTabModel
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from ui.sans_isis import sans_data_processor_gui
 
@@ -22,7 +23,7 @@ else:
 
 main_window_view = sans_data_processor_gui.SANSDataProcessorGui(parent, flags)
 
-run_tab_presenter = RunTabPresenter(SANSFacility.ISIS, view=main_window_view)
+run_tab_presenter = RunTabPresenter(SANSFacility.ISIS, run_tab_model=RunTabModel(), view=main_window_view)
 
 
 # Show
