@@ -90,10 +90,11 @@ public:
 
     XMLInstrumentParameter testParamEntry("", "1000.0", interpolation, "", "", "", "bob", "double", "", constraint,
                                           penaltyFactor, fitFunc, extractSingleValueAs, eq, comp, angleConvert,
-                                          "bla bla bla");
+                                          "bla bla bla", "false");
 
     TimeSeriesProperty<double> *dummy = nullptr;
     TS_ASSERT_DELTA(testParamEntry.createParamValue(dummy), 1000.0, 0.0001);
+    TS_ASSERT_EQUALS(testParamEntry.m_visible, "false");
 
     interpolation->addPoint(201.0, 60);
     TS_ASSERT_DELTA(testParamEntry.createParamValue(dummy), 0.0, 0.0001);

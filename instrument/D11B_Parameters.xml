@@ -3,7 +3,7 @@
 
     <component-link name="D11B">
       <!-- The name of the panels for separate I(Q) calculations, the names are from the IDF -->
-      <parameter name="detector_panels" type="string">
+      <parameter name="detector_panels" type="string" visible="false">
         <value val="detector_center,detector_left,detector_right"/>
       </parameter>
       <!-- Tau coefficient for DeadTimeCorrection, to be applied tube by tube -->
@@ -11,7 +11,7 @@
         <value val="0.0000015" />
       </parameter>
       <!-- Logs to sum when merging the runs -->
-      <parameter name="sample_logs_sum" type="string">
+      <parameter name="sample_logs_sum" type="string" visible="false">
         <value val="time, timer, duration" />
       </parameter>
       <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.
@@ -24,7 +24,7 @@
         <value val="8"/>
       </parameter>
       <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
-      <parameter name="logbook_default_parameters" type="string">
+      <parameter name="logbook_default_parameters" type="string" visible="false">
 	<value val="SampleDescription:/entry0/sample_description:s,
 		    TotalTime:/entry0/duration:d,
 		    RateMonitor1:/entry0/monitor1/monrate:f,
@@ -37,7 +37,7 @@
 		    SD:/entry0/D11/Detector 1/det_actual:f,
 		    BeamStopY:/entry0/D11/beamstop/by_actual:f" />
       </parameter>
-      <parameter name="logbook_optional_parameters" type="string">
+      <parameter name="logbook_optional_parameters" type="string" visible="false">
 	<value val="AcquisitionMode:/entry0/acquisition_mode:d,
 		    TotalCountsDetAll:/entry0/D11/Detector 1/detsum+/entry0/D11/Detector 2/detsum+/entry0/D11/Detector 3/detsum:d,
 		    Beamstop:/entry0/D11/beamstop/actual_beamstop_number:f,
@@ -95,7 +95,7 @@
 		    SampleApertureWidth:/entry0/D11/Beam/sample_ap_x_or_diam:f,
 		    SampleApertureHeight:/entry0/D11/Beam/sample_ap_y:f" />
       </parameter>
-      <parameter name="log_list_to_save" type="string">
+      <parameter name="log_list_to_save" type="string" visible="false">
 	<value val="facility,instrument_name,experiment_identifier,
 		    experiment_title,start_time,end_time,numor_list,
 		    processedAs,wavelength,sample_transmission_numors,

@@ -21,6 +21,7 @@ New and Improved
   may need to be saved again to include the workspace calculator widget.
 - Added tooltips to all the widgets in the Slice Viewer. Please contact the developers if any are missing.
 - Script editor tab completion and call tip support for Numpy 1.21
+- The visibility of a component parameter in the Pick tab of the InstrumentViewer is now steered by the 'visible' atrribute of a parameter in IPF
 
 Bugfixes
 --------

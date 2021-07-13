@@ -46,7 +46,8 @@ public:
                          const std::string &type, const std::string &tie, const std::vector<std::string> &constraint,
                          std::string &penaltyFactor, const std::string &fitFunc,
                          const std::string &extractSingleValueAs, const std::string &eq,
-                         const Geometry::IComponent *comp, double angleConvertConst, const std::string &description);
+                         const Geometry::IComponent *comp, double angleConvertConst, const std::string &description,
+                         const std::string &visible);
 
   // XML attributes from instrument definition file or instrument parameter file
   const std::string m_logfileID; ///< logfile id
@@ -85,6 +86,8 @@ public:
   double m_angleConvertConst;
   /// if present, contains help string, describing the parameter
   const std::string m_description;
+  /// if present, describes whether the parameter shall be visible in InstrumentViewer
+  const std::string m_visible;
 };
 
 } // namespace Geometry
