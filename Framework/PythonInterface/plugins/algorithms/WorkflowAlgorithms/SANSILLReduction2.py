@@ -369,6 +369,75 @@ class SANSILLReduction2(PythonAlgorithm):
                 check_wavelengths_match(mtd[can_ws], mtd[ws])
                 Minus(LHSWorkspace=ws, RHSWorkspace=can_ws, OutputWorkspace=ws)
 
+    def apply_water(self, ws):
+        '''Applies flat-field (water) normalisation for detector efficiency and absolute scale'''
+        flat_ws = self.getPropertyValue('FlatFieldWorkspace')
+        if flat_ws:
+            check_processed_flag(mtd[flat_ws], 'Water')
+            # do not check for distance, since flat field is typically not available at the longest distances
+            if self.mode != AcqMode.TOF:
+                check_wavelengths_match(mtd[flat_ws], mtd[ws])
+            # flat field is time-independent, so even for tof and kinetic it must be just one frame
+            Divide(LHSWorkspace=ws, RHSWorkspace=flat_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
+            Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
+            # copy the mask of water to the ws as it might be larger than the beam stop used for ws
+            MaskDetectors(Workspace=ws, MaskedWorkspace=flat_ws)
+            # rescale the absolute scale if they ws and flat field are at different distances
+            self.rescale_flux(ws, flat_ws)
+
+    def rescale_flux(self, ws, flat_ws):
+        '''
+            Rescales the absolute scale if ws and flat_ws are at different distances
+            If both sample and flat runs are normalised by flux, there is nothing to do, they are both in abs scale
+            If one is normalised, the other is not, we raise an error
+            If neither is normalised by flux, only then we have to rescale by the factor
+        '''
+        message = 'Sample and flat field runs are not consistent in terms of flux normalisation; ' \
+                  'unable to perform flat field normalisation.' \
+                  'Make sure either they are both normalised or both not normalised by direct beam flux.'
+        run = mtd[ws].getRun()
+        run_ref = mtd[flat_ws].getRun()
+        has_log = run.hasProperty('NormalisedByFlux')
+        has_log_ref = run_ref.hasProperty('NormalisedByFlux')
+        if has_log != has_log_ref:
+            raise RuntimeError(message)
+        if has_log and has_log_ref:
+            log_val = run['NormalisedByFlux'].value
+            log_val_ref = run_ref['NormalisedByFlux'].value
+            if log_val != log_val_ref:
+                raise RuntimeError(message)
+            elif not log_val:
+                self.do_rescale_flux(ws, flat_ws)
+        else:
+            raise RuntimeError(message)
+
+    def do_rescale_flux(self, ws, flat_ws):
+        '''Scales ws by the flux factor wrt the flat field'''
+        if self.mode != AcqMode.TOF:
+            check_wavelengths_match(mtd[ws], mtd[flat_ws])
+        sample_l2 = mtd[ws].getRun()['L2'].value
+        ref_l2 = mtd[flat_ws].getRun()['L2'].value
+        flux_factor = (sample_l2 ** 2) / (ref_l2 ** 2)
+        self.log().notice(f'Flux factor is: {flux_factor}')
+        Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
+
+    def apply_solvent(self, ws):
+        '''Applies pixel-by-pixel solvent/buffer subtraction'''
+        solvent_ws = self.getPropertyValue('SolventWorkspace')
+        if solvent_ws:
+            check_processed_flag(mtd[solvent_ws], 'Solvent')
+            check_distances_match(mtd[solvent_ws], mtd[ws])
+            if self.mode == AcqMode.TOF:
+                # wavelength dependent subtraction, need to rebin
+                solvent_ws_rebin = solvent_ws + '_tr_rebinned'
+                RebinToWorkspace(WorkspaceToRebin=solvent_ws, WorkspaceToMatch=ws,
+                                 OutputWorkspace=solvent_ws_rebin)
+                Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws_rebin, OutputWorkspace=ws)
+                DeleteWorkspace(solvent_ws_rebin)
+            else:
+                check_wavelengths_match(mtd[solvent_ws], mtd[ws])
+                Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws, OutputWorkspace=ws)
+
     def load(self, ws):
         '''
         Loads, merges and concatenates the input runs, if needed
@@ -423,11 +492,11 @@ class SANSILLReduction2(PythonAlgorithm):
                         if self.process == 'Water':
                             pass # process water
                         else:
-                            # apply water
+                            self.apply_water(ws)
                             if self.process == 'Solvent':
                                 pass # process solvent
                             else:
-                                pass # apply solvent
+                                self.apply_solvent(ws)
 
     def PyExec(self):
         self.reset()
