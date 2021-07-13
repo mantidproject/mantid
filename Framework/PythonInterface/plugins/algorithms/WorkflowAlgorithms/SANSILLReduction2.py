@@ -51,7 +51,7 @@ class SANSILLReduction2(PythonAlgorithm):
 
         options = ['DarkCurrent', 'EmptyBeam', 'Transmission', 'EmptyContainer', 'Water', 'Solvent', 'Sample']
 
-        self.declareProperty(MultipleFileProperty(name='Run',
+        self.declareProperty(MultipleFileProperty(name='Runs',
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs'],
                                                   allow_empty=True),
@@ -78,7 +78,7 @@ class SANSILLReduction2(PythonAlgorithm):
         solvent = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Solvent')
         sample = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Sample')
         solvent_sample = EnabledWhenProperty(solvent, sample, LogicOperator.Or)
-        water_solvent_sample = EnabledWhenProperty(solvent_or_sample, water, LogicOperator.Or)
+        water_solvent_sample = EnabledWhenProperty(solvent_sample, water, LogicOperator.Or)
         can_water_solvent_sample = EnabledWhenProperty(water_solvent_sample, container, LogicOperator.Or)
 
         self.declareProperty(name='NormaliseBy',
@@ -213,7 +213,7 @@ class SANSILLReduction2(PythonAlgorithm):
 
     def setup(self, ws):
         '''Performs a full setup, which can be done only after having loaded the sample data'''
-        self.process = getPropertyValue('ProcessAs')
+        self.process = self.getPropertyValue('ProcessAs')
         self.instrument = ws.getInstrument().getName()
         self.log().notice(f'Set the instrument name to {self.instrument}')
         unit = ws.getAxis(0).getUnit().unitID()
@@ -230,7 +230,7 @@ class SANSILLReduction2(PythonAlgorithm):
         self.is_point = not ws.isHistogramData()
         self.log().notice(f'Set the point data flag to {self.is_point}')
         if self.mode == AcqMode.KINETIC:
-            if process != 'Sample':
+            if self.process != 'Sample':
                 raise RuntimeError('Only the sample can be a kinetic measurement, the auxiliary calibration measurements cannot.')
 
     def load_and_merge(self):
@@ -241,19 +241,23 @@ class SANSILLReduction2(PythonAlgorithm):
         The input might be either a numor or a processed nexus as a result of rebinning of event data in mantid
         Hence, we cannot specify a name of a specifc loader
         Besides, if it is processed nexus, it will be histogram data, which needs to be converted to point data
-        The output can be a workspace or a workspace group as follows
+        Currently, the loader will load to a histogram data for monochromatic non-kinetic, so we need to run a conversion
+        This is redundant, since the loader could load directly to point-data
+        The latter is a breaking change for the loader, so will require a new version
+        The output of this can be a workspace or a workspace group
+        TODO: note that this operation is quite generic, so perhaps concatenation can become an option directly in LoadAndMerge
         '''
         ws = self.getPropertyValue('OutputWorkspace')
-        LoadAndMerge(Filename=self.getPropertyValue('Run'), OutputWorkspace=ws)
-        if isinstance(WorkspaceGroup, mtd[ws]):
+        LoadAndMerge(Filename=self.getPropertyValue('Runs'), OutputWorkspace=ws)
+        if isinstance(mtd[ws], WorkspaceGroup):
+            self.setup(mtd[ws][0])
             if self.process == 'Sample' or self.process == 'Transmission':
-                self.setup(mtd[ws][0])
                 if self.mode != AcqMode.TOF:
                     if not self.is_point:
                         ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
                     # TODO: inject blank frames for the empty token placeholder
                     ConjoinXRuns(InputWorkspaces=ws, OutputWorkspace=ws + '__joined')
-                    DeleteWorkspace(InputWorkspaces=ws)
+                    DeleteWorkspace(Workspace=ws)
                     RenameWorkspace(InputWorkspace=ws + '__joined', OutputWorkspace=ws)
         else:
             self.setup(mtd[ws])
