@@ -230,8 +230,6 @@ void LoadMuonNexus2::doExec() {
     if (detector.containsDataSet("time_zero")) {
       double dum = detector.getFloat("time_zero");
       setProperty("TimeZero", dum);
-      auto timeZeroList = std::vector<double>(m_numberOfSpectra, dum);
-      setProperty("TimeZeroTable", createTimeZeroTable(m_numberOfSpectra, timeZeroList));
     }
     if (detector.containsDataSet("first_good_time")) {
       double dum = detector.getFloat("first_good_time");

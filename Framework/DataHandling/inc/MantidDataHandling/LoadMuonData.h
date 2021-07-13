@@ -18,9 +18,10 @@ class DLLExport LoadMuonData : public API::Algorithm {
     return {"LoadMuonNexus", "LoadMuonNexusV2", "LoadPSIMuonBin"};
   }
   const std::string category() const override { return "DataHandling;Muon\\DataHandling"; };
-  const std::string summary() const override { return "Summary"; };
-  /// Cross-check properties with each other @see IAlgorithm::validateInputs
-  // std::map<std::string, std::string> validateInputs() override;
+  const std::string summary() const override {
+    return "The LoadMuonData algorithm will read the given file name using LoadMuonNexus or LoadPSIMuonBin depending "
+           "on the file type. The result will be used to populate the named output workspace.";
+  };
 
 private:
   void init() override;
