@@ -50,6 +50,7 @@ Bugfixes
 - Sequential fitting in the EngDiff UI now uses the output of the last successful fit (as opposed to the previous fit) as the initial parameters for the next fit.
 - An empty Engineering Diffraction interface is no longer saved if the user saves a project having previously had the interface open at some point in that session
 - The help button on the Engineering Diffraction interface points to the correct page, having been broken in the last release
+- Using the Clear button on the Workspace widget while using the Fitting tab no longer causes issues when you try to load runs back in.
 
 
 Single Crystal Diffraction
