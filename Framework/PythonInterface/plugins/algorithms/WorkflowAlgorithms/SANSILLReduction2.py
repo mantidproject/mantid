@@ -234,10 +234,7 @@ class SANSILLReduction2(PythonAlgorithm):
                 raise RuntimeError('Only the sample can be a kinetic measurement, the auxiliary calibration measurements cannot.')
 
     def normalise(self, ws):
-        """
-            Normalizes the workspace by time (SampleLog Timer) or monitor
-            @param ws : the input workspace or workspace group
-        """
+        '''Normalizes the workspace by monitor (default) or acquisition time'''
         normalise_by = self.getPropertyValue('NormaliseBy')
         monitor_ids = monitor_id(self.instrument)
         if normalise_by == 'Monitor':
@@ -256,28 +253,31 @@ class SANSILLReduction2(PythonAlgorithm):
                 Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
                 DeleteWorkspace(mon)
             else:
-                run = mtd[ws].getRun()
-                if run.hasProperty('timer'):
-                    duration = run.getLogData('timer').value
-                    if duration != 0.:
-                        Scale(InputWorkspace=ws, Factor=1./duration, OutputWorkspace=ws)
-                        self.apply_dead_time(ws)
-                    else:
-                        raise RuntimeError('Unable to normalise to time; duration found is 0.')
+                if isinstance(mtd[ws], WorkspaceGroup):
+                    for ws in mtd[ws]:
+                        normalise_by_time(ws)
                 else:
-                    raise RuntimeError('Normalise to time requested, but duration is not available in the workspace.')
-
-        # regardless on normalisation, mask out the monitors not to skew the scale in the instrument viewer
+                    normalise_by_time(mtd[ws])
+        # regardless on normalisation mask out the monitors not to skew the scale in the instrument viewer
         # but do not extract them, since extracting by ID is slow, so just leave them masked
         MaskDetectors(Workspace=ws, DetectorList=monitor_ids)
 
-    def apply_dead_time(self, ws):
-        """
-            Performs the dead time correction
-            @param ws : the input workspace
-        """
+    def normalise_by_time(self, ws):
+        '''Normalises the given workspace to time and applies the dead time correction'''
+        run = ws.getRun()
+        if run.hasProperty('timer'):
+            duration = run.getLogData('timer').value
+            if duration != 0.:
+                Scale(InputWorkspace=ws, Factor=1./duration, OutputWorkspace=ws)
+                self.apply_dead_time(ws)
+            else:
+                raise RuntimeError('Unable to normalise to time; duration found is 0.')
+        else:
+            raise RuntimeError('Normalise to time requested, but duration is not available in the workspace.')
 
-        instrument = mtd[ws].getInstrument()
+    def apply_dead_time(self, ws):
+        '''Performs the dead time correction'''
+        instrument = ws.getInstrument()
         if instrument.hasParameter('tau'):
             tau = instrument.getNumberParameter('tau')[0]
             if self.instrument == 'D33' or self.instrument == 'D11B':
@@ -304,9 +304,15 @@ class SANSILLReduction2(PythonAlgorithm):
         Currently, the loader will load to a histogram data for monochromatic non-kinetic, so we need to run a conversion
         This is redundant, since the loader could load directly to point-data
         The latter is a breaking change for the loader, so will require a new version
-        The output of this can be a workspace or a workspace group
-        TODO: note that this operation is quite generic, so perhaps concatenation can become an option directly in LoadAndMerge
+        The output can be a workspace or a workspace group as follows:
+            if mode == Sample || Transmission
+                MONO : workspace
+                KINETIC : workspace
+                TOF : workspace group
+            else:
+                * : if there is a , in the Runs - workspace group, otherwise workspace
         '''
+        #TODO: note that this operation is quite generic, so perhaps concatenation can become an option directly in LoadAndMerge
         ws = self.getPropertyValue('OutputWorkspace')
         LoadAndMerge(Filename=self.getPropertyValue('Runs'), OutputWorkspace=ws)
         if isinstance(mtd[ws], WorkspaceGroup):
@@ -315,7 +321,7 @@ class SANSILLReduction2(PythonAlgorithm):
                 if self.mode != AcqMode.TOF:
                     if not self.is_point:
                         ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
-                    # TODO: inject blank frames for the empty token placeholder
+                    # TODO: inject blank frames for the empty token placeholder here at the right index
                     ConjoinXRuns(InputWorkspaces=ws, OutputWorkspace=ws + '__joined')
                     DeleteWorkspace(Workspace=ws)
                     RenameWorkspace(InputWorkspace=ws + '__joined', OutputWorkspace=ws)
