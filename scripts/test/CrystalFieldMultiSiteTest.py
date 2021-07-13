@@ -615,6 +615,15 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in ties)
         self.assertTrue('ion3.IntensityScaling=0.1*ion2.IntensityScaling' in ties)
 
+    def test_multi_ion_ties_and_fixes(self):
+        from CrystalField import CrystalField
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': 44.0, 'FWHM': 1.1}
+        cf1 = CrystalField('Ce', 'C2v', **params)
+        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf = cf1 + cf2
+        self.assertTrue(cf.function.isFixed("ion0.B21"))
+
 
 if __name__ == '__main__':
     unittest.main()
