@@ -303,24 +303,11 @@ Users should test this function with the data set that contains satellite peaks 
    :linenos:
 
    from mantid.simpleapi import *
-   Load(
-     Filename='TOPAZ_36079_crop.nxs',
-     OutputWorkspace='ws',
-     FilterByTofMin=500,
-     FilterByTofMax=16666)
+   Load(Filename='TOPAZ_36079_crop.nxs',OutputWorkspace='ws',FilterByTofMin=500,FilterByTofMax=16666)
 
-   UB = np.array([[ 0.15468228,  0.10908475, -0.14428671],
-               [-0.08922105, -0.08617147, -0.22976459],
-               [-0.05616441,  0.12536522, -0.03238277]])
+   UB = np.array([[0.15468228,0.10908475,-0.14428671],[-0.08922105,-0.08617147,-0.22976459],[-0.05616441,0.12536522,-0.03238277]])
 ​
-   ConvertToMD(InputWorkspace='ws',
-               QDimensions='Q3D',
-               dEAnalysisMode='Elastic',
-               Q3DFrames='Q_sample',
-               LorentzCorrection=True,
-               OutputWorkspace='md',
-               MinValues='1,1,1.675',
-               MaxValues='10,5,8.425')
+   ConvertToMD(InputWorkspace='ws',QDimensions='Q3D',dEAnalysisMode='Elastic',Q3DFrames='Q_sample',LorentzCorrection=True,OutputWorkspace='md',MinValues='1,1,1.675',MaxValues='10,5,8.425')
 
    CreatePeaksWorkspace(InstrumentWorkspace='crop', NumberOfPeaks=0, OutputWorkspace='peaks')
    SetUB('peaks', UB=UB)
@@ -328,22 +315,8 @@ Users should test this function with the data set that contains satellite peaks 
    AddPeakHKL('peaks', [1, 4, -3])
    AddPeakHKL('peaks', [1, 5, -3])
 
-   IntegrateEllipsoids(InputWorkspace='ws',
-                    PeaksWorkspace='peaks',
-                    RegionRadius=0.055,
-                    SpecifySize=True,
-                    PeakSize=0.0425,
-                    BackgroundInnerSize=0.043,
-                    BackgroundOuterSize=0.055,
-                    OutputWorkspace='peaks_integrated_satellite',
-                    CutoffIsigI=5,
-                    UseOnePercentBackgroundCorrection=False,
-                    SatelliteRegionRadius=0.1,
-                    SatellitePeakSize=0.08,
-                    SatelliteBackgroundInnerSize=0.081,
-                    SatelliteBackgroundOuterSize=0.1)
+   IntegrateEllipsoids(InputWorkspace='ws',PeaksWorkspace='peaks',RegionRadius=0.055,SpecifySize=True,PeakSize=0.0425,BackgroundInnerSize=0.043,BackgroundOuterSize=0.055,OutputWorkspace='peaks_integrated_satellite',CutoffIsigI=5,UseOnePercentBackgroundCorrection=False,SatelliteRegionRadius=0.1,SatellitePeakSize=0.08,SatelliteBackgroundInnerSize=0.081,SatelliteBackgroundOuterSize=0.1)
 ​​
-
 The first peak is a satellite peak, which was integrated using the satellite peak integrator;
 The other peaks are regular Bragg peaks, which were integrated using the default integrator.
 
