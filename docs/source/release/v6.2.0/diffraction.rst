@@ -44,6 +44,7 @@ Improvements
 - The workflows for Calibration and Focusing in the EnggDiffraction GUI and EnginX scripts have been replaced to make use of faster, better tested C++ algorithms (PDCalibration) - as a result the following algorithms have been deprecated, and will likely be removed entirely in the next release: EnggCalibrate, EnggCalibrateFull, EnggFocus, EnggVanadiumCorrections.
 - The cropping/region of interest selection for Calibration/Focusing is now chosen only on the Calibration tab, to avoid confusion and duplication of input.
 - The region of interest for Calibration/Focusing can now be selected with a user-supplied custom calibration file.
+- The Focused Run Files input box defaults to the last runs focused on the Focus tab, even if multiple runs were focussed
 
 Bugfixes
 ########

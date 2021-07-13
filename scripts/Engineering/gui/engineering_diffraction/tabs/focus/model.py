@@ -29,11 +29,10 @@ SOUTH_BANK_CAL = "EnginX_SouthBank.cal"
 class FocusModel(object):
 
     def __init__(self):
-        self._last_path = None
-        self._last_path_ws = None
+        self._last_focused_files = []
 
-    def get_last_path(self):
-        return self._last_path
+    def get_last_focused_files(self):
+        return self._last_focused_files
 
     def focus_run(self, sample_paths: list, vanadium_path: str, plot_output: bool, instrument: str, rb_num: str,
                   regions_dict: dict) -> None:
@@ -73,6 +72,7 @@ class FocusModel(object):
 
         # loop over samples provided, focus each over region(s) specified in regions_dict
         output_workspaces = []  # List of collated workspaces to plot.
+        self._last_focused_files = []
         for sample_path in sample_paths:
             sample_workspace = path_handling.load_workspace(sample_path)
             run_no = path_handling.get_run_number_from_path(sample_path, instrument)
@@ -154,9 +154,9 @@ class FocusModel(object):
         ApplyDiffCal(InstrumentWorkspace=focused_sample, CalibrationWorkspace=region_calib)
         # set bankid for use in fit tab
         run = focused_sample.getRun()
-        if region_calib == "engggui_calibration_bank_1":
+        if region_calib.name() == "engggui_calibration_bank_1":
             run.addProperty("bankid", 1, True)
-        elif region_calib == "engggui_calibration_bank_2":
+        elif region_calib.name() == "engggui_calibration_bank_2":
             run.addProperty("bankid", 2, True)
         else:
             run.addProperty("bankid", 3, True)
@@ -267,9 +267,6 @@ class FocusModel(object):
         if rb_num:
             output_path = path.join(path_handling.get_output_path(), 'User', rb_num, 'Focus')
             logger.notice(f"\n\nFocus files also saved to: \"{output_path}\"\n\n")
-        self._last_path = output_path
-        if self._last_path and self._last_path_ws:
-            self._last_path = path.join(self._last_path, self._last_path_ws)
 
     def _save_focused_output_files_as_gss(self, instrument, sample_path, bank, sample_workspace,
                                           rb_num, unit):
@@ -292,7 +289,8 @@ class FocusModel(object):
             nexus_output_path = path.join(
                 path_handling.get_output_path(), "User", rb_num, "Focus", file_name)
             SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
-        self._last_path_ws = file_name
+        if unit == "TOF":
+            self._last_focused_files.append(nexus_output_path)
 
     def _save_focused_output_files_as_topas_xye(self, instrument, sample_path, bank,
                                                 sample_workspace, rb_num, unit):
