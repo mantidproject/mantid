@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from qtpy import QtCore, QtWidgets
-
 from mantidqt.icons import get_icon
+from mantid.kernel import ConfigService
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqt.utils.qt import load_ui
 from Engineering.gui.engineering_diffraction.presenter import EngineeringDiffractionPresenter
@@ -29,10 +29,14 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         else:
             super(EngineeringDiffractionGui, self).__init__(parent)
 
+        # save initial default peak function so can reset on closing UI
+        self._initial_peak_fun = ConfigService.getString("curvefitting.defaultPeak")
+
         # Main Window
         self.setupUi(self)
         self.tabs = self.tab_main
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
 
@@ -55,6 +59,10 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.set_on_rb_num_changed(self.presenter.calibration_presenter.set_rb_num)
         self.set_on_instrument_changed(self.presenter.focus_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.focus_presenter.set_rb_num)
+
+        # load previous rb number if saved, create mechanism to save
+        self.set_rb_no(self.presenter.get_saved_rb_number())
+        self.set_on_rb_num_changed(self.presenter.set_saved_rb_number)
 
         # Usage Reporting
         try:
@@ -93,11 +101,17 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.savedir_label.setToolTip(savedir_text)
         self.savedir_label.setText(savedir_text)
 
-    def closeEvent(self, _):
+    def closeEvent(self, event):
+        ConfigService.setString("curvefitting.defaultPeak", self._initial_peak_fun)  # reset peak function
         self.presenter.handle_close()
+        self.setParent(None)
+        event.accept()
 
     def get_rb_no(self):
         return self.lineEdit_RBNumber.text()
+
+    def set_rb_no(self, text) -> None:
+        self.lineEdit_RBNumber.setText(text)
 
     def set_on_help_clicked(self, slot):
         self.pushButton_help.clicked.connect(slot)

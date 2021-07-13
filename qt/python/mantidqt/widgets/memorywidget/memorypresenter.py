@@ -7,8 +7,6 @@
 #  This file is part of the mantidqt package
 #
 #
-from threading import Timer
-
 from ..memorywidget.memoryinfo import get_memory_info
 from ...utils.asynchronous import set_interval
 
@@ -56,7 +54,7 @@ class MemoryPresenter(object):
         """
         if self.update_allowed:
             mem_used_percent, mem_used, mem_avail = get_memory_info()
-            self.view.set_value(mem_used_percent, mem_used, mem_avail)
+            self.view.invoke_set_value(mem_used_percent, mem_used, mem_avail)
 
     def cancel_memory_update(self):
         """

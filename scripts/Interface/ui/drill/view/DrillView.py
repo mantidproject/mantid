@@ -14,11 +14,9 @@ from qtpy import uic
 from mantidqt.widgets import manageuserdirectories, instrumentselector
 from mantid.kernel import config  # noqa
 from mantidqt import icons
-from mantidqt.interfacemanager import InterfaceManager
 
 from .DrillExportDialog import DrillExportDialog
 from ..presenter.DrillPresenter import DrillPresenter
-from .DrillTableWidget import DrillTableWidget
 from .DrillContextMenu import DrillContextMenu
 
 

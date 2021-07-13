@@ -445,7 +445,7 @@ Workspace_sptr DgsReduction::loadInputData(const std::string &prop, const bool m
 
     inputWS = this->load(inputData, true);
 
-    IAlgorithm_sptr smlog = this->createChildAlgorithm("AddSampleLog");
+    auto smlog = createChildAlgorithm("AddSampleLog");
     smlog->setProperty("Workspace", inputWS);
     smlog->setProperty("LogName", "Filename");
     smlog->setProperty("LogText", inputData);
@@ -497,7 +497,7 @@ MatrixWorkspace_sptr DgsReduction::loadGroupingFile(const std::string &prop) {
     return std::shared_ptr<MatrixWorkspace>();
   } else {
     try {
-      IAlgorithm_sptr loadGrpFile = this->createChildAlgorithm("LoadDetectorsGroupingFile");
+      auto loadGrpFile = createChildAlgorithm("LoadDetectorsGroupingFile");
       loadGrpFile->setProperty("InputFile", groupFile);
       loadGrpFile->execute();
       return loadGrpFile->getProperty("OutputWorkspace");
@@ -609,7 +609,7 @@ void DgsReduction::exec() {
   if (detVanWS && !isProcessedDetVan) {
     std::string detVanMaskName = outputWsName + "_diagmask";
 
-    IAlgorithm_sptr diag = this->createChildAlgorithm("DgsDiagnose");
+    auto diag = createChildAlgorithm("DgsDiagnose");
     diag->setProperty("DetVanWorkspace", detVanWS);
     diag->setProperty("DetVanMonitorWorkspace", detVanMonWS);
     diag->setProperty("DetVanCompWorkspace", detVan2WS);
@@ -649,7 +649,7 @@ void DgsReduction::exec() {
   }
 
   progress.report("Converting to energy transfer...");
-  IAlgorithm_sptr etConv = this->createChildAlgorithm("DgsConvertToEnergyTransfer");
+  auto etConv = createChildAlgorithm("DgsConvertToEnergyTransfer");
   etConv->setProperty("InputWorkspace", sampleWS);
   etConv->setProperty("InputMonitorWorkspace", sampleMonWS);
   etConv->setProperty("IntegratedDetectorVanadium", idetVanWS);
@@ -688,7 +688,7 @@ void DgsReduction::exec() {
     MatrixWorkspace_sptr absGroupingWS = this->loadGroupingFile("AbsUnits");
 
     // Run the absolute normalisation reduction
-    IAlgorithm_sptr absUnitsRed = this->createChildAlgorithm("DgsAbsoluteUnitsReduction");
+    auto absUnitsRed = createChildAlgorithm("DgsAbsoluteUnitsReduction");
     absUnitsRed->setProperty("InputWorkspace", absSampleWS);
     absUnitsRed->setProperty("InputMonitorWorkspace", absSampleMonWS);
     absUnitsRed->setProperty("DetectorVanadiumWorkspace", absDetVanWS);
@@ -702,7 +702,7 @@ void DgsReduction::exec() {
     // is using wrong property for masks
     MatrixWorkspace_sptr absMaskWS = absUnitsRed->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr mask = this->createChildAlgorithm("MaskDetectors");
+    auto mask = createChildAlgorithm("MaskDetectors");
     mask->setProperty("Workspace", outputWS);
     mask->setProperty("MaskedWorkspace", absMaskWS);
     mask->executeAsChildAlg();
@@ -731,7 +731,7 @@ void DgsReduction::exec() {
     std::vector<double> qBinning = this->getProperty("PowderMomTransferRange");
     const auto initialEnergy = outputWS->run().getPropertyValueAsType<double>("Ei");
 
-    IAlgorithm_sptr sofqw = this->createChildAlgorithm("SofQW3");
+    auto sofqw = createChildAlgorithm("SofQW3");
     sofqw->setProperty("InputWorkspace", outputWS);
     sofqw->setProperty("QAxisBinning", qBinning);
     sofqw->setProperty("EMode", "Direct");
@@ -747,7 +747,7 @@ void DgsReduction::exec() {
       if (saveProcNexusFilename.empty()) {
         saveProcNexusFilename = sqwWsName + ".nxs";
       }
-      IAlgorithm_sptr saveNxs = this->createChildAlgorithm("SaveNexus");
+      auto saveNxs = createChildAlgorithm("SaveNexus");
       saveNxs->setProperty("InputWorkspace", sqwWS);
       saveNxs->setProperty("Filename", saveProcNexusFilename);
       saveNxs->executeAsChildAlg();

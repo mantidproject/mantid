@@ -7,7 +7,7 @@
 from typing import List
 
 from matplotlib.container import ErrorbarContainer
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 from Muon.GUI.Common.plot_widget.plotting_canvas.plot_toolbar import PlotToolbar
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
@@ -19,13 +19,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 
-from matplotlib.backends.qt_compat import is_pyqt5
-
-if is_pyqt5():
-    from matplotlib.backends.backend_qt5agg import FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvas
-
+from mantidqt.MPLwidgets import FigureCanvas
 
 # Default color cycle using Matplotlib color codes C0, C1...ect
 NUMBER_OF_COLOURS = 10
@@ -57,6 +51,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         # create the figure
         self.fig = Figure()
         self.fig.canvas = FigureCanvas(self.fig)
+        self.fig.canvas.setMinimumHeight(500)
         self.toolBar = PlotToolbar(self.fig.canvas, self)
 
         # Create a set of Mantid axis for the figure
@@ -65,11 +60,16 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self._number_of_axes = 1
         self._color_queue = [ColorQueue(DEFAULT_COLOR_CYCLE)]
 
+        # Add a splitter for the plotting canvas and quick edit toolbar
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
+        splitter.addWidget(self.fig.canvas)
+        self._quick_edit = quick_edit
+        splitter.addWidget(self._quick_edit)
+        splitter.setChildrenCollapsible(False)
+
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.toolBar)
-        layout.addWidget(self.fig.canvas)
-        self._quick_edit = quick_edit
-        layout.addWidget(self._quick_edit)
+        layout.addWidget(splitter)
         self.setLayout(layout)
 
         self._plot_information_list = []  # type : List[PlotInformation}

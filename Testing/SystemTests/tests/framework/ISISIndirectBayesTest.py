@@ -11,7 +11,7 @@ import systemtesting
 import os
 from abc import ABCMeta, abstractmethod
 from mantid.simpleapi import *
-import platform
+from IndirectImport import is_supported_f2py_platform
 #==============================================================================
 
 
@@ -33,7 +33,7 @@ def _cleanup_files(dirname, filenames):
 class QLresTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not platform.system() == "Windows"
+        return not is_supported_f2py_platform()
 
     def runTest(self):
         prefix = 'rt_'
@@ -77,7 +77,7 @@ class QLresTest(systemtesting.MantidSystemTest):
 class ResNormTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not platform.system() == "Windows"
+        return not is_supported_f2py_platform()
 
     def runTest(self):
         import IndirectBayes as Main
@@ -109,7 +109,7 @@ class ResNormTest(systemtesting.MantidSystemTest):
 class QuestTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not platform.system() == "Windows"
+        return not is_supported_f2py_platform()
 
     def runTest(self):
         sname = 'irs26176_graphite002_red'
@@ -148,7 +148,7 @@ class QuestTest(systemtesting.MantidSystemTest):
 class QSeTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not platform.system() == "Windows"
+        return not is_supported_f2py_platform()
 
     def runTest(self):
         sname = 'irs26176_graphite002_red'
@@ -191,7 +191,7 @@ class QSeTest(systemtesting.MantidSystemTest):
 class QLDataTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not platform.system() == "Windows"
+        return not is_supported_f2py_platform()
 
     def runTest(self):
         sname = 'irs26176_graphite002_red'
@@ -235,7 +235,7 @@ class QLDataTest(systemtesting.MantidSystemTest):
 class QLResNormTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not platform.system() == "Windows"
+        return not is_supported_f2py_platform()
 
     def runTest(self):
         sname = 'irs26176_graphite002_red'
@@ -283,7 +283,7 @@ class QLResNormTest(systemtesting.MantidSystemTest):
 class QLWidthTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not platform.system() == "Windows"
+        return not is_supported_f2py_platform()
 
     def runTest(self):
         prefix = 'wt_'

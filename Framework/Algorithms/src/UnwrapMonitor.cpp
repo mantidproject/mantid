@@ -339,7 +339,7 @@ API::MatrixWorkspace_sptr UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &
   const double step = (max - min) / static_cast<double>(numBins);
 
   // Create a Rebin child algorithm
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
+  auto childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setPropertyValue("OutputWorkspace", "Anonymous");
 

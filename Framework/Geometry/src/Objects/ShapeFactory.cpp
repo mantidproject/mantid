@@ -125,6 +125,17 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
     return retVal;
   }
 
+  Poco::AutoPtr<NodeList> pNL_gonio = pElem->getElementsByTagName("goniometer");
+  auto *pElemGonio = static_cast<Element *>(pNL_gonio->item(0));
+  m_gonioRotationMatrix.clear();
+  if (pElemGonio) {
+    // Parse the rotation matrix, defined in units of radians
+    const std::vector<std::string> matrixElements = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
+    for (std::string elemName : matrixElements) {
+      m_gonioRotationMatrix.push_back(getDoubleAttribute(pElemGonio, elemName));
+    }
+  }
+
   // match id given to a shape by the user to
   // id understandable by Mantid code
   std::map<std::string, std::string> idMatching;
@@ -339,7 +350,6 @@ std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element *pElem, std::map
   Element *pElemPip = getShapeElement(pElem, "point-in-plane");
   Element *pElemNormal = getShapeElement(pElem, "normal-to-plane");
   Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
-  Element *pElem_gonio = getOptionalShapeElement(pElem, "goniometer");
 
   V3D normVec = normalize(parsePosition(pElemNormal));
 
@@ -350,15 +360,9 @@ std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element *pElem, std::map
     const std::vector<double> rotationMatrix = generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
     normVec.rotate(rotationMatrix);
   }
-  if (pElem_gonio) {
+  if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
-    // The rotation matrix is defined in the xml in units of radians
-    std::vector<double> rotationMatrix;
-    const std::vector<std::string> matrixElements = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
-    for (std::string elemName : matrixElements) {
-      rotationMatrix.push_back(getDoubleAttribute(pElem_gonio, elemName));
-    }
-    normVec.rotate(rotationMatrix);
+    normVec.rotate(m_gonioRotationMatrix);
   }
 
   // create infinite-plane
@@ -389,7 +393,6 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element *pElem,
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemRadius = getShapeElement(pElem, "radius");
   Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
-  Element *pElem_gonio = getOptionalShapeElement(pElem, "goniometer");
 
   // getDoubleAttribute can throw - put the calls above any new
   const double radius = getDoubleAttribute(pElemRadius, "val");
@@ -402,15 +405,9 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element *pElem,
     const std::vector<double> rotationMatrix = generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
     normVec.rotate(rotationMatrix);
   }
-  if (pElem_gonio) {
+  if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
-    // The rotation matrix is defined in the xml in units of radians
-    std::vector<double> rotationMatrix;
-    const std::vector<std::string> matrixElements = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
-    for (std::string elemName : matrixElements) {
-      rotationMatrix.push_back(getDoubleAttribute(pElem_gonio, elemName));
-    }
-    normVec.rotate(rotationMatrix);
+    normVec.rotate(m_gonioRotationMatrix);
   }
 
   // create infinite-cylinder
@@ -445,7 +442,6 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem, std::map<int,
   Element *pElemRadius = getShapeElement(pElem, "radius");
   Element *pElemHeight = getShapeElement(pElem, "height");
   Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
-  Element *pElem_gonio = getOptionalShapeElement(pElem, "goniometer");
 
   V3D normVec = normalize(parsePosition(pElemAxis));
 
@@ -467,15 +463,9 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem, std::map<int,
     const std::vector<double> rotationMatrix = generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
     normVec.rotate(rotationMatrix);
   }
-  if (pElem_gonio) {
+  if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
-    // The rotation matrix is defined in the xml in units of radians
-    std::vector<double> rotationMatrix;
-    const std::vector<std::string> matrixElements = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
-    for (std::string elemName : matrixElements) {
-      rotationMatrix.push_back(getDoubleAttribute(pElem_gonio, elemName));
-    }
-    normVec.rotate(rotationMatrix);
+    normVec.rotate(m_gonioRotationMatrix);
   }
   pCylinder->setNorm(normVec);
 
@@ -522,7 +512,6 @@ std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element *pElem,
   Element *pElemRadius = getShapeElement(pElem, "radius");
   Element *pElemHeight = getShapeElement(pElem, "height");
   Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
-  Element *pElem_gonio = getOptionalShapeElement(pElem, "goniometer");
 
   // getDoubleAttribute can throw - put the calls above any new
   const double radius = getDoubleAttribute(pElemRadius, "val");
@@ -543,15 +532,9 @@ std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element *pElem,
     const std::vector<double> rotationMatrix = generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
     normVec.rotate(rotationMatrix);
   }
-  if (pElem_gonio) {
+  if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
-    // The rotation matrix is defined in the xml in units of radians
-    std::vector<double> rotationMatrix;
-    const std::vector<std::string> matrixElements = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
-    for (std::string elemName : matrixElements) {
-      rotationMatrix.push_back(getDoubleAttribute(pElem_gonio, elemName));
-    }
-    normVec.rotate(rotationMatrix);
+    normVec.rotate(m_gonioRotationMatrix);
   }
   pCylinder->setNorm(normVec);
 
@@ -600,7 +583,6 @@ std::string ShapeFactory::parseHollowCylinder(Poco::XML::Element *pElem, std::ma
   Element *pElemOuterRadius = getShapeElement(pElem, "outer-radius");
   Element *pElemHeight = getShapeElement(pElem, "height");
   Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
-  Element *pElem_gonio = getOptionalShapeElement(pElem, "goniometer");
 
   const double innerRadius = getDoubleAttribute(pElemInnerRadius, "val");
   if (innerRadius <= 0.0) {
@@ -628,15 +610,9 @@ std::string ShapeFactory::parseHollowCylinder(Poco::XML::Element *pElem, std::ma
     const std::vector<double> rotationMatrix = generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
     normVec.rotate(rotationMatrix);
   }
-  if (pElem_gonio) {
+  if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
-    // The rotation matrix is defined in the xml in units of radians
-    std::vector<double> rotationMatrix;
-    const std::vector<std::string> matrixElements = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
-    for (std::string elemName : matrixElements) {
-      rotationMatrix.push_back(getDoubleAttribute(pElem_gonio, elemName));
-    }
-    normVec.rotate(rotationMatrix);
+    normVec.rotate(m_gonioRotationMatrix);
   }
 
   // add outer infinite cylinder surface
@@ -704,7 +680,6 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
   Element *pElem_centre = getOptionalShapeElement(pElem, "centre");
   Element *pElem_axis = getOptionalShapeElement(pElem, "axis");
   Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
-  Element *pElem_gonio = getOptionalShapeElement(pElem, "goniometer");
 
   const bool usingPointSyntax = pElem_lfb && pElem_lft && pElem_lbb && pElem_rfb;
   const bool usingAlternateSyntax = pElem_height && pElem_width && pElem_depth;
@@ -765,20 +740,12 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
       result.lbb.rotate(rotationMatrix);
       result.rfb.rotate(rotationMatrix);
     }
-
-    if (pElem_gonio && usingAlternateSyntax) {
+    if (m_gonioRotationMatrix.size() > 0) {
       // Apply automatic rotation due to the goniometer that should not be manually defined by the user
-      // The rotation matrix is defined in the xml in units of radians
-
-      std::vector<double> rotationMatrix;
-      const std::vector<std::string> matrixElements = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
-      for (std::string elemName : matrixElements) {
-        rotationMatrix.push_back(getDoubleAttribute(pElem_gonio, elemName));
-      }
-      result.lfb.rotate(rotationMatrix);
-      result.lft.rotate(rotationMatrix);
-      result.lbb.rotate(rotationMatrix);
-      result.rfb.rotate(rotationMatrix);
+      result.lfb.rotate(m_gonioRotationMatrix);
+      result.lft.rotate(m_gonioRotationMatrix);
+      result.lbb.rotate(m_gonioRotationMatrix);
+      result.rfb.rotate(m_gonioRotationMatrix);
     }
 
     result.lfb += centre;
@@ -1072,7 +1039,6 @@ Hexahedron ShapeFactory::parseHexahedron(Poco::XML::Element *pElem) {
   Element *pElem_rbb = getShapeElement(pElem, "right-back-bottom-point");
   Element *pElem_rbt = getShapeElement(pElem, "right-back-top-point");
   Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
-  Element *pElem_gonio = getOptionalShapeElement(pElem, "goniometer");
 
   const bool isValid =
       pElem_lfb && pElem_lft && pElem_lbb && pElem_lbt && pElem_rfb && pElem_rft && pElem_rbb && pElem_rbt;
@@ -1125,24 +1091,16 @@ Hexahedron ShapeFactory::parseHexahedron(Poco::XML::Element *pElem) {
     hex.rbb.rotate(rotationMatrix);
     hex.rbt.rotate(rotationMatrix);
   }
-
-  if (pElem_gonio) {
+  if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
-    // The rotation matrix is defined in the xml in units of radians
-
-    std::vector<double> rotationMatrix;
-    const std::vector<std::string> matrixElements = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
-    for (std::string elemName : matrixElements) {
-      rotationMatrix.push_back(getDoubleAttribute(pElem_gonio, elemName));
-    }
-    hex.lfb.rotate(rotationMatrix);
-    hex.lft.rotate(rotationMatrix);
-    hex.lbb.rotate(rotationMatrix);
-    hex.lbt.rotate(rotationMatrix);
-    hex.rfb.rotate(rotationMatrix);
-    hex.rft.rotate(rotationMatrix);
-    hex.rbb.rotate(rotationMatrix);
-    hex.rbt.rotate(rotationMatrix);
+    hex.lfb.rotate(m_gonioRotationMatrix);
+    hex.lft.rotate(m_gonioRotationMatrix);
+    hex.lbb.rotate(m_gonioRotationMatrix);
+    hex.lbt.rotate(m_gonioRotationMatrix);
+    hex.rfb.rotate(m_gonioRotationMatrix);
+    hex.rft.rotate(m_gonioRotationMatrix);
+    hex.rbb.rotate(m_gonioRotationMatrix);
+    hex.rbt.rotate(m_gonioRotationMatrix);
   }
 
   return hex;
@@ -1186,7 +1144,6 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element *pElem, std::map<
   Element *pElemCentre = getOptionalShapeElement(pElem, "centre");
   Element *pElemAxis = getOptionalShapeElement(pElem, "axis");
   Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
-  Element *pElem_gonio = getOptionalShapeElement(pElem, "goniometer");
 
   // For centre and axis we allow defaults.
   const V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
@@ -1242,24 +1199,16 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element *pElem, std::map<
     hex.rbb.rotate(rotationMatrix);
     hex.rbt.rotate(rotationMatrix);
   }
-
-  if (pElem_gonio) {
+  if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
-    // The rotation matrix is defined in the xml in units of radians
-
-    std::vector<double> rotationMatrix;
-    const std::vector<std::string> matrixElements = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
-    for (std::string elemName : matrixElements) {
-      rotationMatrix.push_back(getDoubleAttribute(pElem_gonio, elemName));
-    }
-    hex.lfb.rotate(rotationMatrix);
-    hex.lft.rotate(rotationMatrix);
-    hex.lbb.rotate(rotationMatrix);
-    hex.lbt.rotate(rotationMatrix);
-    hex.rfb.rotate(rotationMatrix);
-    hex.rft.rotate(rotationMatrix);
-    hex.rbb.rotate(rotationMatrix);
-    hex.rbt.rotate(rotationMatrix);
+    hex.lfb.rotate(m_gonioRotationMatrix);
+    hex.lft.rotate(m_gonioRotationMatrix);
+    hex.lbb.rotate(m_gonioRotationMatrix);
+    hex.lbt.rotate(m_gonioRotationMatrix);
+    hex.rfb.rotate(m_gonioRotationMatrix);
+    hex.rft.rotate(m_gonioRotationMatrix);
+    hex.rbb.rotate(m_gonioRotationMatrix);
+    hex.rbt.rotate(m_gonioRotationMatrix);
   }
 
   // Move it to the defined centre.
@@ -1333,7 +1282,6 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element *pElem,
   Element *pElemOuterRadius = getShapeElement(pElem, "outer-radius");
   Element *pElemDepth = getShapeElement(pElem, "depth");
   Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
-  Element *pElem_gonio = getOptionalShapeElement(pElem, "goniometer");
 
   const double outerRadius = getDoubleAttribute(pElemOuterRadius, "val");
   double innerRadius = getDoubleAttribute(pElemInnerRadius, "val");
@@ -1360,17 +1308,11 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element *pElem,
     planeSlice1.rotate(rotationMatrix);
     planeSlice2.rotate(rotationMatrix);
   }
-  if (pElem_gonio) {
+  if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
-    // The rotation matrix is defined in the xml in units of radians
-    std::vector<double> rotationMatrix;
-    const std::vector<std::string> matrixElements = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
-    for (std::string elemName : matrixElements) {
-      rotationMatrix.push_back(getDoubleAttribute(pElem_gonio, elemName));
-    }
-    normVec.rotate(rotationMatrix);
-    planeSlice1.rotate(rotationMatrix);
-    planeSlice2.rotate(rotationMatrix);
+    normVec.rotate(m_gonioRotationMatrix);
+    planeSlice1.rotate(m_gonioRotationMatrix);
+    planeSlice2.rotate(m_gonioRotationMatrix);
   }
 
   // add inner infinite cylinder

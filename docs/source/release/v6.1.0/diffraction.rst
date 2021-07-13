@@ -50,6 +50,7 @@ Improvements
 Bugfixes
 ########
 
+- Use the correct version of exponential integral (i.e., the E1 function) in peak profile function :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>` so it can be evaluated properly.
 - Fix the issue with SNS Powder Reduction interface when multiple run numbers are provided and separated with comma.
 - Fix an issue when saving reduced data as GSAS format using :ref:`HB2AReduce <algm-HB2AReduce>`.
 - Fix the format inconsistency (with data saved from autoreduction workflow) issue for saving GSAS data using :ref:`HB2AReduce <algm-HB2AReduce>` - both are now using :ref:`SaveGSSCW <algm-SaveGSSCW>` for saving GSAS data.

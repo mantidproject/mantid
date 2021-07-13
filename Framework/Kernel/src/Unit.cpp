@@ -13,6 +13,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <cfloat>
+#include <limits>
 #include <sstream>
 
 namespace Mantid {
@@ -653,36 +654,48 @@ double dSpacing::singleToTOF(const double x) const {
 }
 
 double dSpacing::singleFromTOF(const double tof) const {
+  // DIFA * d^2 + DIFC * d + T0 - TOF = 0
+
+  // Use the citardauq formula to solve quadratic in order to minimise loss of precision. DIFC and sqrt term are often
+  // similar and the "classic" quadratic formula involves calculating their difference in the numerator
+
+  //               2*(T0 - TOF)                                            (T0 - TOF)
+  // d = -------------------------------------------  =  ---------------------------------------------------
+  //     -DIFC -+ SQRT(DIFC^2 - 4*DIFA*(T0 - TOF))       0.5 * DIFC (-1 -+ SQRT(1 - 4*DIFA*(T0 - TOF)/DIFC^2)
+
+  // dealing with various edge cases
   if (!isInitialized())
     throw std::runtime_error("dSpacingBase::singleFromTOF called before object "
                              "has been initialized.");
   if (!toDSpacingError.empty())
     throw std::runtime_error(toDSpacingError);
+  double c = tzero - tof;
   // handle special cases first...
+  // citardauq formula hides non-zero root if c=0
   if (tof == tzero) {
-    if (difa != 0)
+    if (difa < 0)
       return -difc / difa;
+    else
+      return 0;
   }
-  if ((difc * difc - 4 * difa * (tzero - tof)) < 0) {
+  double sqrtTerm = 1 - 4 * difa * c / (difc * difc);
+  if (sqrtTerm < 0) {
     throw std::runtime_error("Cannot convert to d spacing. Quadratic doesn't have real roots");
   }
-  if ((difa > 0) && ((tzero - tof) > 0)) {
+  if ((difa > 0) && (c > 0)) {
     throw std::runtime_error("Cannot convert to d spacing. Quadratic doesn't "
                              "have a positive root");
   }
-  // and then solve quadratic using Muller formula
-  double sqrtTerm;
-  if (difa == 0) {
-    // avoid costly sqrt even though formula reduces to this
-    sqrtTerm = difc;
-  } else {
-    sqrtTerm = sqrt(difc * difc - 4 * difa * (tzero - tof));
-  }
-  if (sqrtTerm < difc)
-    return (tof - tzero) / (0.5 * (difc - sqrtTerm));
+  // pick smallest positive root. Since difc is positive it just depends on sign of c
+  // Note - c is generally negative
+  if (c > 0)
+    // single positive root
+    return c / (0.5 * difc * (-1 + sqrt(sqrtTerm)));
   else
-    return (tof - tzero) / (0.5 * (difc + sqrtTerm));
+    // two positive roots. pick most negative denominator to get smallest root
+    return c / (0.5 * difc * (-1 - sqrt(sqrtTerm)));
 }
+
 double dSpacing::conversionTOFMin() const {
   // quadratic only has a min if difa is positive
   if (difa > 0) {
@@ -697,6 +710,7 @@ double dSpacing::conversionTOFMin() const {
     return TOFmin;
   }
 }
+
 double dSpacing::conversionTOFMax() const {
   // quadratic only has a max if difa is negative
   if (difa < 0) {

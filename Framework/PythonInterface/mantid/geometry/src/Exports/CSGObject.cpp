@@ -13,7 +13,6 @@
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-
 #include <boost/python/self.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
@@ -26,7 +25,6 @@ using Mantid::Geometry::IObject;
 using namespace Mantid::PythonInterface::Converters;
 using Mantid::Geometry::BoundingBox;
 using Mantid::Geometry::CSGObject;
-using Mantid::Geometry::IObject;
 using Mantid::Geometry::detail::GeometryTriangulator;
 using namespace boost::python;
 
@@ -40,10 +38,10 @@ boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
     PyObject *ndarray = 0;
     return object(handle<>(ndarray));
   }
-  auto localTriangulator = new GeometryTriangulator(self);
-  auto vertices = localTriangulator->getTriangleVertices();
-  auto triangles = localTriangulator->getTriangleFaces();
-  size_t numberTriangles = localTriangulator->numTriangleFaces();
+  auto localTriangulator = GeometryTriangulator(self);
+  const auto &vertices = localTriangulator.getTriangleVertices();
+  const auto &triangles = localTriangulator.getTriangleFaces();
+  const size_t &numberTriangles = localTriangulator.numTriangleFaces();
   npy_intp dims[3] = {static_cast<int>(numberTriangles), 3, 3};
   auto *meshCoords = new double[dims[0] * dims[1] * dims[2]];
   for (size_t corner_index = 0; corner_index < triangles.size(); ++corner_index) {
@@ -52,7 +50,7 @@ boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
     } // for each coordinate of that corner
   }   // for each corner of the triangle
 
-  PyObject *ndarray = Impl::wrapWithNDArray(meshCoords, 3, dims, NumpyWrapMode::ReadOnly, OwnershipMode::Python);
+  PyObject *ndarray = Impl::wrapWithNDArray(meshCoords, 3, dims, NumpyWrapMode::ReadWrite, OwnershipMode::Python);
   return object(handle<>(ndarray));
 }
 
@@ -64,6 +62,8 @@ void export_Object() {
            return_value_policy<copy_const_reference>(), "Return the axis-aligned bounding box for this shape")
 
       .def("getShapeXML", &CSGObject::getShapeXML, arg("self"), "Returns the XML that was used to create this shape.")
+
       .def("volume", &CSGObject::volume, arg("self"), "Returns the volume of this shape.")
+
       .def("getMesh", &wrapMeshWithNDArray, (arg("self")), "Get the vertices, grouped by triangles, from mesh");
 }

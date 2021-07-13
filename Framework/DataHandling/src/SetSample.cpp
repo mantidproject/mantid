@@ -717,8 +717,9 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
       // Here the goniometer rotation tag is added, but is only used for a cuboid(flat-plate) or cylinder
       std::vector<double> rotationMatrix = experiment.run().getGoniometer().getR();
       std::string xml_s = std::string(xml);
-      std::size_t found = xml_s.find("</");
-      if (found != std::string::npos) {
+      std::size_t foundAlgebra = xml_s.find("<algebra");
+      std::size_t foundAlgebraEnd = xml_s.find("/>", foundAlgebra);
+      if (foundAlgebraEnd != std::string::npos) {
         const std::vector<std::string> matrixElementNames = {"a11", "a12", "a13", "a21", "a22",
                                                              "a23", "a31", "a32", "a33"};
         std::string goniometerRotation = "<goniometer ";
@@ -726,7 +727,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
           goniometerRotation += matrixElementNames[index] + " = '" + std::to_string(rotationMatrix[index]) + "' ";
         }
         goniometerRotation += " /> ";
-        xml_s.insert(found, goniometerRotation);
+        xml_s.insert(foundAlgebraEnd + 3, goniometerRotation);
       }
       CreateSampleShape::setSampleShape(experiment, xml_s);
       return;

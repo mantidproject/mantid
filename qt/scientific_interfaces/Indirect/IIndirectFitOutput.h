@@ -30,9 +30,9 @@ struct ParameterValue {
 
 struct ResultLocationNew {
   ResultLocationNew() = default;
-  ResultLocationNew(const Mantid::API::WorkspaceGroup_sptr &group, WorkspaceGroupIndex i) : result(group), index(i) {}
+  ResultLocationNew(const Mantid::API::WorkspaceGroup_sptr &group, WorkspaceID i) : result(group), index(i) {}
   std::weak_ptr<Mantid::API::WorkspaceGroup> result;
-  WorkspaceGroupIndex index = WorkspaceGroupIndex{0};
+  WorkspaceID index = WorkspaceID{0};
 };
 /*
     IIndirectFitData - Specifies an interface for updating, querying and

@@ -9,6 +9,7 @@
 import unittest
 
 import matplotlib
+
 matplotlib.use('AGG')  # noqa
 from numpy import zeros
 
@@ -208,7 +209,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
     @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.setPeakFwhmOf')
     @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.isParameterExplicitlySetOf')
     @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.getWidthParameterNameOf')
-    def _set_peak_initial_fwhm(self, mock_getWidthName, mock_parameterSet, mock_setFwhm):
+    def test_set_peak_initial_fwhm(self, mock_getWidthName, mock_parameterSet, mock_setFwhm):
         property_browser = self._create_widget()
         mock_getWidthName.side_effect = lambda prefix: "S" if prefix == "f0" else ""
         mock_parameterSet.return_value = True
@@ -224,8 +225,8 @@ class FitPropertyBrowserTest(unittest.TestCase):
     def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):
         return FitPropertyBrowser(canvas, toolbar_manager)
 
-    def _create_and_plot_matrix_workspace(self, name = "workspace", distribution = False):
-        ws = CreateWorkspace(OutputWorkspace = name, DataX=zeros(10), DataY=zeros(10),
+    def _create_and_plot_matrix_workspace(self, name="workspace", distribution=False):
+        ws = CreateWorkspace(OutputWorkspace=name, DataX=zeros(10), DataY=zeros(10),
                              NSpec=2, Distribution=distribution)
         fig = plot([ws], spectrum_nums=[1])
         canvas = fig.canvas

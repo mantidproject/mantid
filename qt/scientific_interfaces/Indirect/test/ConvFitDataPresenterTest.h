@@ -45,36 +45,10 @@ public:
 
   /// Public Methods
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
-  MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
-  MOCK_CONST_METHOD0(isResolutionHidden, bool());
-  MOCK_METHOD1(setResolutionHidden, void(bool hide));
-  MOCK_METHOD0(disableMultipleDataTab, void());
-
-  MOCK_CONST_METHOD0(getSelectedSample, std::string());
-  MOCK_CONST_METHOD0(getSelectedResolution, std::string());
-
-  MOCK_CONST_METHOD0(getSampleWSSuffices, QStringList());
-  MOCK_CONST_METHOD0(getSampleFBSuffices, QStringList());
-  MOCK_CONST_METHOD0(getResolutionWSSuffices, QStringList());
-  MOCK_CONST_METHOD0(getResolutionFBSuffices, QStringList());
-
-  MOCK_METHOD1(setSampleWSSuffices, void(QStringList const &suffices));
-  MOCK_METHOD1(setSampleFBSuffices, void(QStringList const &suffices));
-  MOCK_METHOD1(setResolutionWSSuffices, void(QStringList const &suffices));
-  MOCK_METHOD1(setResolutionFBSuffices, void(QStringList const &suffices));
-
-  MOCK_CONST_METHOD0(isSampleWorkspaceSelectorVisible, bool());
-  MOCK_METHOD1(setSampleWorkspaceSelectorIndex, void(QString const &workspaceName));
-
-  MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
-  MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
-  MOCK_CONST_METHOD0(getXRange, std::pair<double, double>());
 
   /// Public slots
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
-  MOCK_METHOD1(setStartX, void(double));
-  MOCK_METHOD1(setEndX, void(double));
 };
 
 /// Mock object to mock the model
@@ -132,21 +106,12 @@ public:
   }
 
   void test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
-    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), TableDatasetIndex{1});
+    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), WorkspaceID{1});
   }
 
   ///----------------------------------------------------------------------
   /// Unit Tests that test the signals, methods and slots of the presenter
   ///----------------------------------------------------------------------
-
-  void test_that_getXRange_calls_the_correct_method_in_the_view() {
-    auto const xRange = std::make_pair(0.0, 1.0);
-
-    ON_CALL(*m_view, getXRange()).WillByDefault(Return(xRange));
-    EXPECT_CALL(*m_view, getXRange()).Times(1);
-
-    TS_ASSERT_EQUALS(m_presenter->getXRange(), xRange);
-  }
 
 private:
   std::unique_ptr<QTableWidget> m_dataTable;

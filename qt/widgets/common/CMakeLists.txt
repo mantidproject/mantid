@@ -49,7 +49,6 @@ set(
   src/ImageInfoModelMD.cpp
   src/ImageInfoPresenter.cpp
   src/ImageInfoWidget.cpp
-  src/IndexTypes.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
   src/InterfaceManager.cpp
@@ -72,6 +71,7 @@ set(
   src/Message.cpp
   src/MessageDisplay.cpp
   src/MultifitSetupDialog.cpp
+  src/MuonPeriodInfo.cpp
   src/NotificationService.cpp
   src/OptionsPropertyWidget.cpp
   src/ParseKeyValueString.cpp
@@ -199,6 +199,7 @@ set(
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
   inc/MantidQtWidgets/Common/MessageDisplay.h
   inc/MantidQtWidgets/Common/MultifitSetupDialog.h
+  inc/MantidQtWidgets/Common/MuonPeriodInfo.h
   inc/MantidQtWidgets/Common/FileFinderWidget.h
   inc/MantidQtWidgets/Common/NotificationService.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
@@ -285,6 +286,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
+    inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/ProgressableView.h
@@ -330,6 +332,7 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/LogValueSelector.ui
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
+    inc/MantidQtWidgets/Common/MuonPeriodInfo.ui
     inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/FitScriptGenerator.ui
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
@@ -376,6 +379,7 @@ set(
   src/MantidHelpInterface.cpp
   src/MantidWidget.cpp
   src/Message.cpp
+  src/MuonPeriodInfo.cpp
   src/NonOrthogonal.cpp
   src/FileFinderWidget.cpp
   src/OptionsPropertyWidget.cpp
@@ -473,7 +477,6 @@ set(
   src/FunctionTreeView.cpp
   src/HintingLineEdit.cpp
   src/IFunctionModel.cpp
-  src/IndexTypes.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
   src/LineEditWithClear.cpp
@@ -604,6 +607,7 @@ set(
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
+  inc/MantidQtWidgets/Common/MuonPeriodInfo.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
@@ -768,6 +772,7 @@ set(
   inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
+  inc/MantidQtWidgets/Common/MuonPeriodInfo.h
   inc/MantidQtWidgets/Common/ProgressableView.h
   inc/MantidQtWidgets/Common/MockProgressableView.h
   inc/MantidQtWidgets/Common/ProgressPresenter.h
@@ -830,6 +835,7 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
+    inc/MantidQtWidgets/Common/MuonPeriodInfo.ui
     inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/FitScriptGenerator.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
@@ -978,6 +984,7 @@ set(
   test/ImageInfoModelMDTest.h
   test/ImageInfoPresenterTest.h
   test/InterfaceManagerTest.h
+  test/MuonPeriodInfoTest.h
   test/NonOrthogonalTest.h
   test/ParseKeyValueStringTest.h
   test/PlotAxisTest.h
@@ -1060,6 +1067,7 @@ set(
   test/ImageInfoPresenterTest.h
   test/InterfaceManagerTest.h
   test/ManageUserDirectoriesTest.h
+  test/MuonPeriodInfoTest.h
   test/QtJSONUtilsTest.h
   test/RepoModelTest.h
   test/Batch/BuildSubtreeItemsTest.h
@@ -1102,6 +1110,7 @@ mtd_add_qt_tests(
     DataObjects
     gmock
     Qt5::Test
+    Python::Python
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )

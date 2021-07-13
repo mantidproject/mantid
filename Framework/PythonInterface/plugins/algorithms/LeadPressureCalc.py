@@ -16,25 +16,25 @@ TOL = 0.01
 # this calculation taken from the EOS equations in [1]
 def calculate_pressure(d_spacing, temp):
     v00 = 121.41813  # zero pressure unit cell volume at (0) (A^3)
-    a = 1.0584E-02  # volume fit parameter
+    a = 1.0582E-02  # volume fit parameter
     b = 3.493E-06  # volume fit parameter
-    k00 = 41.731  # zero pressure bulk modulus at (0) (GPa)
-    c = -2.5444E-05  # bulk modulus fit parameter
-    d = -2.7567E-06  # bulk modulus fit parameter
-    k00p = 5.3925  # K' at (0)
+    k00 = 41.7253509951022  # zero pressure bulk modulus at (0) (GPa)
+    c = -2.54374974975855E-02  # bulk modulus fit parameter
+    d = -2.7567006420938E-06  # bulk modulus fit parameter
+    k00p = 5.3944  # K' at (0)
     e = 0.00111  # K' fit parameter
     k00pp = -0.3272  # K'' at (0)
     v_calc = (np.sqrt(3) * d_spacing) ** 3  # unit cell volume (A^3)
     ltemp = temp - 300
 
     v_quad = (v00 + a * ltemp + b * (ltemp ** 2))
-    k_quad = (k00 + c * ltemp + d * (ltemp ** 2))
-    factor = k00p + e * temp
+    k_quad = (k00 + (c * ltemp) + (d * (ltemp ** 2)))
+    factor = k00p + (e * temp)
 
     return 1.5 * k_quad * (((v_calc / v_quad) ** (-2 / 3)) - 1) * (1 + ((v_calc / v_quad) ** (-2 / 3) - 1)) ** (5 / 2) \
-        * (1 + ((3 / 2) * (factor - 4) * ((((v_calc / v_quad) ** (-2 / 3)) - 1) / 2)))\
-        + ((3 / 2) * (((k_quad*k00pp) + (factor - 4) * (factor - 3) + (35 / 9))
-                      * ((((v_calc / v_quad) ** (-2 / 3))-1) / 2) ** 2))
+        * ((1 + ((3 / 2) * (factor - 4) * ((((v_calc / v_quad) ** (-2 / 3)) - 1) / 2)))
+           + ((3 / 2) * (((k_quad * k00pp) + (factor - 4) * (factor - 3) + (35 / 9))
+                         * ((((v_calc / v_quad) ** (-2 / 3)) - 1) / 2) ** 2)))
 
 
 class LeadPressureCalc(PythonAlgorithm):

@@ -112,6 +112,7 @@ private:
   Kernel::Matrix<double> generateXRotation(double xRotation);
   Kernel::Matrix<double> generateYRotation(double yRotation);
   Kernel::Matrix<double> generateZRotation(double zRotation);
+  std::vector<double> m_gonioRotationMatrix;
 };
 
 } // namespace Geometry

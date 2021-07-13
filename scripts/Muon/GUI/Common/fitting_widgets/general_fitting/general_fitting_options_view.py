@@ -8,12 +8,12 @@ from mantidqt.utils.qt import load_ui
 
 from qtpy.QtWidgets import QWidget
 
-ui_general_fitting_options, _ = load_ui(__file__, "general_fitting_options.ui")
+ui_form, base_widget = load_ui(__file__, "general_fitting_options.ui")
 
 MA_FIT_BY_OPTIONS = ["Run", "Group/Pair"]
 
 
-class GeneralFittingOptionsView(QWidget, ui_general_fitting_options):
+class GeneralFittingOptionsView(ui_form, base_widget):
     """
     The GeneralFittingOptionsView includes the Simultaneous fitting options, and the cyclic dataset display combobox.
     """

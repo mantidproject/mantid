@@ -615,7 +615,7 @@ set(TEST_FILES
     UpdateInstrumentFromFileTest.h
     XMLInstrumentParameterTest.h)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS
@@ -689,6 +689,11 @@ target_link_libraries(DataHandling
 if(ENABLE_LIB3MF)
   target_link_libraries(DataHandling LINK_PRIVATE
                         ${LIB3MF_LIBRARIES})
+  if (CONDA_BUILD)
+    target_include_directories(DataHandling PUBLIC ${LIB3MF_INCLUDE_DIR})
+  else()
+    target_include_directories(DataHandling PUBLIC ${LIB3MF_INCLUDE_DIR}/lib3mf)
+  endif()
 endif()
 
 # Add the unit tests directory

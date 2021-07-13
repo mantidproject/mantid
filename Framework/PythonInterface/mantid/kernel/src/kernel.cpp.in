@@ -51,6 +51,11 @@ BOOST_PYTHON_MODULE(_kernel) {
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
     "PythonStdoutChannel",
     new Poco::Instantiator<Poco::PythonStdoutChannel, Poco::Channel>);
+  /*
+  // TODO: this channel should replace PythonStdoutChannel when we adopt pybind11 because of robust GIL  management
+  Poco::LoggingFactory::defaultFactory().registerChannelClass(
+      "PyBindStdoutChannel", new Poco::Instantiator<Poco::PyBindStdoutChannel, Poco::Channel>);
+  */
 
   def("version_str", &Mantid::Kernel::MantidVersion::version,
       "Returns the Mantid version string in the form \"major.minor.patch\"");

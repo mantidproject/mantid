@@ -342,15 +342,17 @@ public:
                    "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"-0.009\"/> "
                    "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"-0.009\"/> "
                    "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"-0.005\"/> "
-                   "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"-0.009\"/> "
-                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
-                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
-                   "a32=\"0.000000\" a33=\"1.000000\"/> </cuboid> <cuboid id=\"back\"> "
+                   "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" "
+                   "z=\"-0.009\"/> </cuboid> <cuboid id=\"back\"> "
                    "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.005\"/> "
                    "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.005\"/> "
                    "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.007\"/> "
                    "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.005\"/> "
-                   "</cuboid><algebra val=\"back:front\"/> </type>";
+                   "</cuboid><algebra val=\"back:front\"/> "
+                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
+                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
+                   "a32=\"0.000000\" a33=\"1.000000\"/> "
+                   "</type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -380,7 +382,11 @@ public:
                    "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.005\"/> "
                    "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.007\"/> "
                    "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.005\"/> "
-                   "</cuboid><algebra val=\"back:front\"/> </type>";
+                   "</cuboid><algebra val=\"back:front\"/> "
+                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
+                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
+                   "a32=\"0.000000\" a33=\"1.000000\"/> "
+                   "</type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -404,15 +410,17 @@ public:
                    "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.001\"/> "
                    "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.001\"/> "
                    "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.005\"/> "
-                   "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.001\"/> "
-                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
-                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
-                   "a32=\"0.000000\" a33=\"1.000000\"/> </cuboid> <cuboid id=\"back\"> "
+                   "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" "
+                   "z=\"0.001\"/> </cuboid> <cuboid id=\"back\"> "
                    "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.015\"/> "
                    "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.015\"/> "
                    "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.017\"/> "
                    "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.015\"/> "
-                   "</cuboid><algebra val=\"back:front\"/> </type>";
+                   "</cuboid><algebra val=\"back:front\"/> "
+                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
+                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
+                   "a32=\"0.000000\" a33=\"1.000000\"/> "
+                   "</type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -436,15 +444,16 @@ public:
                    "<left-front-top-point x=\"-0.009\" y=\"0.0065\" z=\"-0.004\"/> "
                    "<left-back-bottom-point x=\"-0.005\" y=\"-0.0065\" z=\"-0.004\"/> "
                    "<right-front-bottom-point x=\"-0.009\" y=\"-0.0065\" z=\"0.004\"/> "
-                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
-                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
-                   "a32=\"0.000000\" a33=\"1.000000\"/> "
                    "</cuboid> <cuboid id=\"back\"> <left-front-bottom-point "
                    "x=\"0.005\" y=\"-0.0065\" z=\"-0.004\"/> <left-front-top-point "
                    "x=\"0.005\" y=\"0.0065\" z=\"-0.004\"/> <left-back-bottom-point "
                    "x=\"0.007\" y=\"-0.0065\" z=\"-0.004\"/> <right-front-bottom-point "
                    "x=\"0.005\" y=\"-0.0065\" z=\"0.004\"/> </cuboid><algebra "
-                   "val=\"back:front\"/> </type>";
+                   "val=\"back:front\"/> "
+                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
+                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
+                   "a32=\"0.000000\" a33=\"1.000000\"/> "
+                   "</type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -467,15 +476,16 @@ public:
                    "<centre-of-bottom-base x=\"0\" y=\"-0.005\" z=\"0\"/> "
                    "<axis x=\"0\" y=\"1\" z=\"0\"/> <height val=\"0.01\"/> "
                    "<inner-radius val=\"0.001\"/><outer-radius "
-                   "val=\"0.002\"/> "
-                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
-                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
-                   "a32=\"0.000000\" a33=\"1.000000\"/> </cuboid> <cuboid id=\"back\"> "
-                   "</hollow-cylinder><hollow-cylinder id=\"outer\"> <centre-of-bottom-base x=\"0\" "
-                   "y=\"-0.005\" z=\"0\"/> <axis x=\"0\" y=\"1\" z=\"0\"/> <height "
+                   "val=\"0.002\"/></hollow-cylinder><hollow-cylinder "
+                   "id=\"outer\"> <centre-of-bottom-base x=\"0\" y=\"-0.005\" "
+                   "z=\"0\"/> <axis x=\"0\" y=\"1\" z=\"0\"/> <height "
                    "val=\"0.01\"/> <inner-radius val=\"0.003\"/><outer-radius "
                    "val=\"0.004\"/></hollow-cylinder><algebra "
-                   "val=\"inner:outer\"/> </type>";
+                   "val=\"inner:outer\"/> "
+                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
+                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
+                   "a32=\"0.000000\" a33=\"1.000000\"/> "
+                   "</type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -498,16 +508,16 @@ public:
                    "<centre-of-bottom-base x=\"0.03\" y=\"0.045\" z=\"0.07\"/> "
                    "<axis x=\"0\" y=\"1\" z=\"0\"/> <height val=\"0.01\"/> "
                    "<inner-radius val=\"0.001\"/><outer-radius "
-                   "val=\"0.002\"/> "
-                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
-                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
-                   "a32=\"0.000000\" a33=\"1.000000\"/> </cuboid> <cuboid id=\"back\"> "
-                   "</hollow-cylinder><hollow-cylinder "
+                   "val=\"0.002\"/></hollow-cylinder><hollow-cylinder "
                    "id=\"outer\"> <centre-of-bottom-base x=\"0.03\" y=\"0.045\" "
                    "z=\"0.07\"/> <axis x=\"0\" y=\"1\" z=\"0\"/> <height "
                    "val=\"0.01\"/> <inner-radius val=\"0.003\"/><outer-radius "
                    "val=\"0.004\"/></hollow-cylinder><algebra "
-                   "val=\"inner:outer\"/> </type>";
+                   "val=\"inner:outer\"/> "
+                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
+                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
+                   "a32=\"0.000000\" a33=\"1.000000\"/> "
+                   "</type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -530,16 +540,17 @@ public:
     expectedXML << "<type name=\"userShape\"> <hollow-cylinder id=\"inner\"> "
                    "<centre-of-bottom-base x=\"0\" y=\"-0.005\" z=\"0\"/> "
                    "<axis x=\"0\" y=\"1\" z=\"0\"/> <height val=\"0.01\"/> "
-                   "<inner-radius val=\"0.001\"/><outer-radius val=\"0.002\"/> "
-                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
-                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
-                   "a32=\"0.000000\" a33=\"1.000000\"/> </cuboid> <cuboid id=\"back\"> "
-                   "</hollow-cylinder><hollow-cylinder "
+                   "<inner-radius val=\"0.001\"/><outer-radius "
+                   "val=\"0.002\"/></hollow-cylinder><hollow-cylinder "
                    "id=\"outer\"> <centre-of-bottom-base x=\"0\" y=\"-0.005\" "
                    "z=\"0\"/> <axis x=\"0\" y=\"1\" z=\"0\"/> <height "
                    "val=\"0.01\"/> <inner-radius val=\"0.003\"/><outer-radius "
                    "val=\"0.004\"/></hollow-cylinder><algebra "
-                   "val=\"inner:outer\"/> </type>";
+                   "val=\"inner:outer\"/> "
+                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
+                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
+                   "a32=\"0.000000\" a33=\"1.000000\"/> "
+                   "</type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -562,11 +573,11 @@ public:
     expectedXML << "<type name=\"userShape\"> <hollow-cylinder id=\"sample-shape\"> "
                    "<centre-of-bottom-base x=\"0\" y=\"-0.01\" z=\"0.01\"/> <axis "
                    "x=\"0\" y=\"1\" z=\"0\"/><height val=\"0.02\"/> <inner-radius "
-                   "val=\"0.03\"/><outer-radius val=\"0.04\"/> "
+                   "val=\"0.03\"/><outer-radius val=\"0.04\"/></hollow-cylinder> "
                    "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
                    "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
-                   "a32=\"0.000000\" a33=\"1.000000\"/> </cuboid> <cuboid id=\"back\"> "
-                   "</hollow-cylinder> </type>";
+                   "a32=\"0.000000\" a33=\"1.000000\"/> "
+                   "</type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
