@@ -51,6 +51,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
     sample = None
     process = None
     reduction_type = None
+    incident_energy = None
     incident_energy_calibration = None
     incident_energy_ws = None
     elastic_channel_ws = None
@@ -104,12 +105,6 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 issues['DetectorGrouping'] = grouping_err_msg
                 issues[common.PROP_GROUPING_ANGLE_STEP] = grouping_err_msg
 
-        if self.getProperty('IncidentEnergyCalibration').value and self.getProperty('IncidentEnergy').isDefault:
-            issues['IncidentEnergy'] = 'Please provide a value for the incident energy in meV.'
-
-        if self.getProperty('ElasticChannelCalibration').value and self.getProperty('ElasticChannelEnergy').isDefault:
-            issues['ElasticChannelEnergy'] = 'Please provide a value for the elastic channel energy in meV.'
-
         if self.getProperty('MaskWithVanadium').value and self.getProperty('VanadiumWorkspace').isDefault:
             issues['VanadiumWorkspace'] = 'Please provide a vanadium input for a masking reference.'
 
@@ -138,14 +133,15 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.to_clean = []
         if self.getProperty('IncidentEnergyCalibration').value:
             self.incident_energy_calibration = 'Energy Calibration ON'
+        if not self.getProperty('IncidentEnergy').isDefault:
             self.incident_energy = self.getProperty('IncidentEnergy').value
             self.incident_energy_ws = 'incident_energy_ws'
             CreateSingleValuedWorkspace(DataValue=self.incident_energy,
                                         OutputWorkspace=self.incident_energy_ws)
             self.to_clean.append(self.incident_energy_ws)
-        if self.getProperty('ElasticChannelCalibration').value:
-            self.elastic_channel_ws = 'elastic_channel_ws'
-            CreateSingleValuedWorkspace(DataValue=self.getProperty('ElasticChannelCalibration').value,
+        if not self.getProperty('ElasticChannelEnergy').isDefault:
+            self.elastic_channel_ws = 'elastic_channel_energy_ws'
+            CreateSingleValuedWorkspace(DataValue=self.getProperty('ElasticChannelEnergy').value,
                                         OutputWorkspace=self.elastic_channel_ws)
             self.to_clean.append(self.elastic_channel_ws)
         if (self.getProperty('MaskWorkspace').isDefault and self.getProperty('MaskedTubes').isDefault
