@@ -233,6 +233,66 @@ class SANSILLReduction2(PythonAlgorithm):
             if self.process != 'Sample':
                 raise RuntimeError('Only the sample can be a kinetic measurement, the auxiliary calibration measurements cannot.')
 
+    def normalise(self, ws):
+        """
+            Normalizes the workspace by time (SampleLog Timer) or monitor
+            @param ws : the input workspace or workspace group
+        """
+        normalise_by = self.getPropertyValue('NormaliseBy')
+        monitor_ids = monitor_id(self.instrument)
+        if normalise_by == 'Monitor':
+            mon = ws + '_mon'
+            ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[0], OutputWorkspace=mon)
+            if mtd[mon].readY(0)[0] == 0:
+                raise RuntimeError('Normalise to monitor requested, but monitor has 0 counts.')
+            else:
+                Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
+                DeleteWorkspace(mon)
+        elif normalise_by == 'Time':
+            if self.mode == AcqMode.KINETIC:
+                # for kinetic, the durations are stored in the second monitor
+                mon = ws + '_duration'
+                ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[1], OutputWorkspace=mon)
+                Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
+                DeleteWorkspace(mon)
+            else:
+                run = mtd[ws].getRun()
+                if run.hasProperty('timer'):
+                    duration = run.getLogData('timer').value
+                    if duration != 0.:
+                        Scale(InputWorkspace=ws, Factor=1./duration, OutputWorkspace=ws)
+                        self.apply_dead_time(ws)
+                    else:
+                        raise RuntimeError('Unable to normalise to time; duration found is 0.')
+                else:
+                    raise RuntimeError('Normalise to time requested, but duration is not available in the workspace.')
+
+        # regardless on normalisation, mask out the monitors not to skew the scale in the instrument viewer
+        # but do not extract them, since extracting by ID is slow, so just leave them masked
+        MaskDetectors(Workspace=ws, DetectorList=monitor_ids)
+
+    def apply_dead_time(self, ws):
+        """
+            Performs the dead time correction
+            @param ws : the input workspace
+        """
+
+        instrument = mtd[ws].getInstrument()
+        if instrument.hasParameter('tau'):
+            tau = instrument.getNumberParameter('tau')[0]
+            if self.instrument == 'D33' or self.instrument == 'D11B':
+                grouping_filename = self._instrument + '_Grouping.xml'
+                grouping_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
+                DeadTimeCorrection(InputWorkspace=ws, Tau=tau, MapFile=grouping_file, OutputWorkspace=ws)
+            elif instrument.hasParameter('grouping'):
+                pattern = instrument.getStringParameter('grouping')[0]
+                DeadTimeCorrection(InputWorkspace=ws, Tau=tau, GroupingPattern=pattern, OutputWorkspace=ws)
+            else:
+                self.log().warning('No grouping available in IPF, dead time correction will be performed detector-wise.')
+                DeadTimeCorrection(InputWorkspace=ws, Tau=tau, OutputWorkspace=ws)
+        else:
+            self.log().notice('No tau available in IPF, skipping dead time correction.')
+
     def load_and_merge(self):
         '''
         Loads, merges and concatenates the input runs, if needed
@@ -261,15 +321,16 @@ class SANSILLReduction2(PythonAlgorithm):
                     RenameWorkspace(InputWorkspace=ws + '__joined', OutputWorkspace=ws)
         else:
             self.setup(mtd[ws])
-        return mtd[ws]
+        return ws
 
     def PyExec(self):
         self.reset()
         processes = ['DarkCurrent', 'EmptyBeam', 'Transmission', 'Container', 'Water', 'Solvent', 'Sample']
         process = self.getPropertyValue('ProcessAs')
         progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
-        progress.report()
         ws = self.load_and_merge()
+        progress.report()
+        self.normalise(ws)
         self.setProperty('OutputWorkspace', ws)
 
 

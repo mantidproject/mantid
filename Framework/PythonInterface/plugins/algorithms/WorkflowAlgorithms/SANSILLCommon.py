@@ -62,3 +62,16 @@ def cylinder_xml(radius):
     """
     return f'<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
            '<radius val="{radius}"/></infinite-cylinder>'
+
+
+def monitor_id(instrument):
+    """
+        Returns the pair of the real monitor ID and the other, blank monitor ID for the given instrument
+        TODO: These could rather be defined in the IPFs
+    """
+    if instrument == 'D33':
+        return [500000, 500001]
+    elif instrument == 'D16':
+        return [500001, 500000]
+    else:
+        return [100000, 100001]
