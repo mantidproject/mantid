@@ -622,7 +622,14 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
-        self.assertTrue(cf.function.isFixed("ion0.B21"))
+        self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion0.BmolX")))
+        self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion0.B21")))
+        self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion0.B43")))
+        self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion0.IB65")))
+        self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion1.BmolZ")))
+        self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion1.B41")))
+        self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion1.B66")))
+        self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion1.IB62")))
 
 
 if __name__ == '__main__':
