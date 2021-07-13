@@ -162,9 +162,11 @@ public:
     declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace", "");
     declareProperty(
         std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace2", "", Mantid::Kernel::Direction::Input));
-    declareWorkspaceInputProperties<MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
-        "InputWorkspace3", "");
-    declareWorkspaceInputProperties<MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
+    declareWorkspaceInputProperties<MatrixWorkspace, static_cast<int>(IndexType::SpectrumNum) |
+                                                         static_cast<int>(IndexType::WorkspaceIndex)>("InputWorkspace3",
+                                                                                                      "");
+    declareWorkspaceInputProperties<MatrixWorkspace, static_cast<int>(IndexType::SpectrumNum) |
+                                                         static_cast<int>(IndexType::WorkspaceIndex)>(
         "InputWorkspace4", "", std::make_shared<HistogramValidator>());
   }
 

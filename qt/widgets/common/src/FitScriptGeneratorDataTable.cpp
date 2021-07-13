@@ -169,7 +169,7 @@ std::string FitScriptGeneratorDataTable::workspaceName(FitDomainIndex row) const
   return getText(row, ColumnIndex::WorkspaceName).toStdString();
 }
 
-WorkspaceIndex FitScriptGeneratorDataTable::workspaceIndex(FitDomainIndex row) const {
+MantidWidgets::WorkspaceIndex FitScriptGeneratorDataTable::workspaceIndex(FitDomainIndex row) const {
   return getText(row, ColumnIndex::WorkspaceIndex).toInt();
 }
 

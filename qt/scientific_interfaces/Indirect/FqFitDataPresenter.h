@@ -30,8 +30,8 @@ private slots:
   void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type);
   void setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspace);
   void setActiveParameterType(const std::string &type);
-  void updateActiveDataIndex();
-  void updateActiveDataIndex(int index);
+  void updateActiveWorkspaceID();
+  void updateActiveWorkspaceID(WorkspaceID index);
 
 signals:
   void spectrumChanged(WorkspaceIndex);
@@ -47,10 +47,10 @@ private:
   std::vector<std::string> getParameterTypes(FqFitParameters &parameters) const;
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
-  void setDataIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
+  void setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
 
   std::string m_activeParameterType;
-  TableDatasetIndex m_dataIndex;
+  WorkspaceID m_activeWorkspaceID;
 
   FqFitModel *m_fqFitModel;
   Notifier<IFQFitObserver> m_notifier;

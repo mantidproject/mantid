@@ -16,15 +16,15 @@ The instrument view also allows users to see close-ups of any component.
 
 Instrument View Pane
 --------------------
-The instrument view window can be obtained by right clicking on the workspace of interest and selecting "Show instrument". 
+The instrument view window can be obtained by right clicking on the workspace of interest and selecting "Show instrument".
 A 2D projection of the detector arrangement will be visible with each detector pixel color coded depending on the integrated number of counts in its corresponding spectrum, as in the image below.
 
 .. figure:: ../images/Workbench/InstrumentViewer/Overview.png
     :align: center
     :width: 635
 
-It is possible to alter the view of the instrument by holding down, either, mouse button and moving (dragging) it within the window. 
-There are other mouse and key board controls and these are listed at the bottom of the instrument view window. 
+It is possible to alter the view of the instrument by holding down, either, mouse button and moving (dragging) it within the window.
+There are other mouse and key board controls and these are listed at the bottom of the instrument view window.
 There are other ways to change the view, find and get information about components and these are described in the next sections.
 
 The control panel of the instrument view has four tabs: Render, Pick, Mask, and Instrument Tree.
@@ -46,8 +46,8 @@ Right mouse click undoes the last zoom.
 
 The next control is Axis View, visible only in the 3D mode, which resets the view so that the instrument is fully visible and the specified axis is perpendicular to the screen.
 
-The Display Settings button controls the appearance of the instrument in the view. 
-It's worth mentioning the "Use OpenGL" option. 
+The Display Settings button controls the appearance of the instrument in the view.
+It's worth mentioning the "Use OpenGL" option.
 It toggles between two display modes of a flat view: the one that uses OpenGL to render the instrument and the one that doesn't.
 
 .. figure:: ../images/Workbench/InstrumentViewer/DisplaySettings.png
@@ -58,16 +58,15 @@ This option can be useful if the instrument is viewed over a slow network connec
 
 The "Save image" button allows the image to be save into a file.
 
-The colour bar axis below maps the colours of the detectors to the integrated number of counts in their spectra. 
-The axis also defines the minimum and maximum values which can be edited using the text boxes below and above the colour bar and also by clicking on the bar and dragging in the vertical direction. 
-Clicking and dragging the upper half of the bar changes the maximum while the lower half modifies the minimum. 
+The colour bar axis below maps the colours of the detectors to the integrated number of counts in their spectra.
+The axis also defines the minimum and maximum values which can be edited using the text boxes below and above the colour bar and also by clicking on the bar and dragging in the vertical direction.
+Clicking and dragging the upper half of the bar changes the maximum while the lower half modifies the minimum.
 Mantid comes with a number of color map files and these can be loaded by selecting the "Display Settings"->"Color Map".
 
 
 Pick Tab
 --------
-Pick Tab is for displaying information about detectors of an instruments and data collected by them.
-You can also manipulate the peak markers in this tab.
+Pick Tab is for displaying information about detectors of an instruments and data collected by them. The parameters defined for each component may be hidden if the attribute 'visible' is specified as false. You can also manipulate the peak markers in this tab.
 At the top of the tab there is a tool bar for switching between different interactive tools.
 The text box below the tool bar show textual information about selected detector: its name, ID, index in the workspace, cartesian coordinates of the detector (xyz) in metres, spherical coordinates of the detector (rtp, which stands for r, \theta, and \phi) where the distance is in metres and the angles are in degrees, the full path of the detector in the instrument tree, integrated counts, and the units of the X vector in the underlying workspace.
 
@@ -80,7 +79,7 @@ Documentation will be updated as additional features are added.
 
 Draw Tab
 --------
-The Draw tab contains tools for creating and editing geometrical shapes which can be used for selecting regions of interest (ROI), masking or grouping detectors. 
+The Draw tab contains tools for creating and editing geometrical shapes which can be used for selecting regions of interest (ROI), masking or grouping detectors.
 The tab contains a mini toolbar, a shape property browser and a set of buttons to use the shapes.
 
 .. figure:: ../images/Workbench/InstrumentViewer/DrawTab.png
@@ -97,7 +96,7 @@ To use the Python interface for InstrumentViewer, use the following code to impo
 
 .. code-block:: python
 
-  from mantidqt.widgets.instrumentview.api import get_instrumentview 
+  from mantidqt.widgets.instrumentview.api import get_instrumentview
 
 then load the Nexus data into a workspace
 
@@ -159,7 +158,7 @@ To start the app outside ``MantidWorkbench``, use the following code snippet as 
   import sys
   from mantidqt.gui_helper import get_qapplication
   from mantid.simpleapi import LoadEventNexus
-  from mantidqt.widgets.instrumentview.api import get_instrumentview 
+  from mantidqt.widgets.instrumentview.api import get_instrumentview
   # check if launched within Workbench, if not return a parent QApp for this widget
   # to attach to
   app, within_mantid = get_qapplication()

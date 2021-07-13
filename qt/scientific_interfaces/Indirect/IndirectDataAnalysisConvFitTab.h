@@ -47,7 +47,7 @@ protected slots:
   void runClicked();
   void fitFunctionChanged();
   void setModelResolution(const std::string &resolutionName);
-  void setModelResolution(const std::string &resolutionName, TableDatasetIndex index);
+  void setModelResolution(const std::string &resolutionName, WorkspaceID workspaceID);
 };
 
 } // namespace IDA
