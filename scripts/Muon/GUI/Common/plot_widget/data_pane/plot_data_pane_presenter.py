@@ -5,14 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_presenter import BasePanePresenter
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing#, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
 
 class PlotDataPanePresenter(BasePanePresenter):
 
     def __init__(self, view, model, context,figure_presenter):
         super().__init__(view, model, context,figure_presenter)
-        self._name = "Plot Data"
         self._data_type = ["Asymmetry", "Counts"]
         self._sort_by = ["Group/Pair", "Run"]
         self.update_view()
@@ -20,7 +19,6 @@ class PlotDataPanePresenter(BasePanePresenter):
         self._view.hide_plot_diff()
         self._view.enable_tile_plotting_options()
         self._view.enable_plot_raw_option()
-        self.data_changed_observer = GenericObserver(self.handle_data_updated)
         self.added_group_or_pair_observer = GenericObserverWithArgPassing(
             self.handle_added_or_removed_group_or_pair_to_plot)
 

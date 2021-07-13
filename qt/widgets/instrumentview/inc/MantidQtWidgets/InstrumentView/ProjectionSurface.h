@@ -45,7 +45,7 @@ class QWheelEvent;
 
 namespace MantidQt {
 namespace MantidWidgets {
-class MantidGLWidget;
+class GLDisplay;
 
 /**
 * @class ProjectionSurface
@@ -89,7 +89,7 @@ public:
   //-----------------------------------
 
   /// draw the surface onto a GL widget
-  virtual void draw(MantidGLWidget *widget) const;
+  virtual void draw(GLDisplay *widget) const;
   /// draw the surface onto a normal widget
   virtual void drawSimple(QWidget *widget) const;
   /// called when the gl widget gets resized
@@ -160,88 +160,65 @@ public:
   /// Return bounding rect of the currently selected shape in the "original"
   /// coord system.
   /// It doesn't depend on the zooming of the surface
-  RectF getCurrentBoundingRect() const {
-    return m_maskShapes.getCurrentBoundingRect();
-  }
+  RectF getCurrentBoundingRect() const { return m_maskShapes.getCurrentBoundingRect(); }
 
   /// Set new bounding rect of the currently selected shape in the "original"
   /// coord system.
   /// This method resizes the shape to fit into the new rectangle.
-  void setCurrentBoundingRect(const RectF &rect) {
-    m_maskShapes.setCurrentBoundingRect(rect);
-  }
+  void setCurrentBoundingRect(const RectF &rect) { m_maskShapes.setCurrentBoundingRect(rect); }
 
   /// Initialize interactive shape creation.
   /// @param type :: Type of the shape. For available types see code of
   /// Shape2DCollection::createShape(const QString& type,int x,int y) const
   /// @param borderColor :: The color of the shape outline.
   /// @param fillColor :: The fill color.
-  void startCreatingShape2D(const QString &type, const QColor &borderColor,
-                            const QColor &fillColor = QColor());
+  void startCreatingShape2D(const QString &type, const QColor &borderColor, const QColor &fillColor = QColor());
 
   /// Initialize interactive creation of a free draw shape.
   /// @param borderColor :: The color of the shape outline.
   /// @param fillColor :: The fill color.
-  void startCreatingFreeShape(const QColor &borderColor,
-                              const QColor &fillColor = QColor());
+  void startCreatingFreeShape(const QColor &borderColor, const QColor &fillColor = QColor());
 
   // Properties methods which allow the mask shapes to be modified with a
   // property browser.
 
   /// Return a list of all properties of type double of the currently selected
   /// shape.
-  QStringList getCurrentDoubleNames() const {
-    return m_maskShapes.getCurrentDoubleNames();
-  }
+  QStringList getCurrentDoubleNames() const { return m_maskShapes.getCurrentDoubleNames(); }
 
   /// Get value of a "double" property of the currently selected shape.
   /// @param prop :: Name of the property
-  double getCurrentDouble(const QString &prop) const {
-    return m_maskShapes.getCurrentDouble(prop);
-  }
+  double getCurrentDouble(const QString &prop) const { return m_maskShapes.getCurrentDouble(prop); }
 
   /// Set value of a "double" property of the currently selected shape.
   /// @param prop :: Name of the property
   /// @param value :: New value
-  void setCurrentDouble(const QString &prop, double value) {
-    m_maskShapes.setCurrentDouble(prop, value);
-  }
+  void setCurrentDouble(const QString &prop, double value) { m_maskShapes.setCurrentDouble(prop, value); }
 
   /// Return a list of all properties of type QPointF of the currently selected
   /// shape.
-  QStringList getCurrentPointNames() const {
-    return m_maskShapes.getCurrentPointNames();
-  }
+  QStringList getCurrentPointNames() const { return m_maskShapes.getCurrentPointNames(); }
 
   /// Get value of a "QPointF" property of the currently selected shape.
   /// @param prop :: Name of the property
-  QPointF getCurrentPoint(const QString &prop) const {
-    return m_maskShapes.getCurrentPoint(prop);
-  }
+  QPointF getCurrentPoint(const QString &prop) const { return m_maskShapes.getCurrentPoint(prop); }
 
   /// Set value of a "QPointF" property of the currently selected shape.
   /// @param prop :: Name of the property
   /// @param value :: New value
-  void setCurrentPoint(const QString &prop, const QPointF &value) {
-    m_maskShapes.setCurrentPoint(prop, value);
-  }
+  void setCurrentPoint(const QString &prop, const QPointF &value) { m_maskShapes.setCurrentPoint(prop, value); }
 
   /// Check if a point on the scren is under any of the mask shapes
-  bool isMasked(double x, double y) const {
-    return m_maskShapes.isMasked(x, y);
-  }
+  bool isMasked(double x, double y) const { return m_maskShapes.isMasked(x, y); }
   /// Check if there are any masks defined
   bool hasMasks() const { return m_maskShapes.size() > 0; }
   /// Remove all mask shapes.
   void clearMask() { m_maskShapes.clear(); }
   /// Change all border colors.
-  void changeBorderColor(const QColor &color) {
-    m_maskShapes.changeBorderColor(color);
-  }
+  void changeBorderColor(const QColor &color) { m_maskShapes.changeBorderColor(color); }
 
   /// Load masks from a table workspace
-  void loadShapesFromTableWorkspace(
-      const Mantid::API::ITableWorkspace_const_sptr &ws);
+  void loadShapesFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws);
 
   //-----------------------------------
   //    Peaks overlay methods
@@ -250,8 +227,7 @@ public:
   QList<PeakMarker2D *> getMarkersWithID(int detID) const;
   std::shared_ptr<Mantid::API::IPeaksWorkspace> getEditPeaksWorkspace() const;
   QStringList getPeaksWorkspaceNames() const;
-  void
-  deletePeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &ws);
+  void deletePeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &ws);
   void clearPeakOverlays();
   void clearAlignmentPlane();
   void clearComparisonPeaks();
@@ -263,9 +239,7 @@ public:
   void setShowPeakLabelsFlag(bool on);
   bool getShowPeakLabelsFlag() const { return m_showPeakLabels; }
   void setShowPeakRelativeIntensityFlag(bool on);
-  bool getShowPeakRelativeIntensityFlag() const {
-    return m_showPeakRelativeIntensity;
-  }
+  bool getShowPeakRelativeIntensityFlag() const { return m_showPeakRelativeIntensity; }
 
 signals:
 
@@ -275,11 +249,8 @@ signals:
   void singleComponentPickedForMasking(size_t /*_t1*/);
 
   // shape manipulation
-  void signalToStartCreatingShape2D(const QString &type,
-                                    const QColor &borderColor,
-                                    const QColor &fillColor);
-  void signalToStartCreatingFreeShape(const QColor &borderColor,
-                                      const QColor &fillColor);
+  void signalToStartCreatingShape2D(const QString &type, const QColor &borderColor, const QColor &fillColor);
+  void signalToStartCreatingFreeShape(const QColor &borderColor, const QColor &fillColor);
   void shapeCreated();
   void shapeSelected();
   void shapesDeselected();
@@ -291,11 +262,9 @@ signals:
   // peaks
   void peaksWorkspaceAdded();
   void peaksWorkspaceDeleted();
-  void alignPeaks(const std::vector<Mantid::Kernel::V3D> & /*_t1*/,
-                  const Mantid::Geometry::IPeak * /*_t2*/);
+  void alignPeaks(const std::vector<Mantid::Kernel::V3D> & /*_t1*/, const Mantid::Geometry::IPeak * /*_t2*/);
   void comparePeaks(
-      const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                      std::vector<Mantid::Geometry::IPeak *>> & /*_t1*/);
+      const std::pair<std::vector<Mantid::Geometry::IPeak *>, std::vector<Mantid::Geometry::IPeak *>> & /*_t1*/);
 
   // other
   void redrawRequired(); ///< request redrawing of self
@@ -323,8 +292,7 @@ protected:
 
   virtual void init() = 0;
   /// Draw the surface onto an OpenGL widget
-  virtual void drawSurface(MantidGLWidget *widget,
-                           bool picking = false) const = 0;
+  virtual void drawSurface(GLDisplay *widget, bool picking = false) const = 0;
   /// Respond to a change of color map in m_instrActor
   virtual void changeColorMap() = 0;
   /// Draw the surface onto an image without OpenGL
@@ -332,13 +300,12 @@ protected:
 
   //-----------------------------------
 
-  void draw(MantidGLWidget *widget, bool picking) const;
+  void draw(GLDisplay *widget, bool picking) const;
   void clear();
   QRect selectionRect() const;
   RectF selectionRectUV() const;
   size_t getPickID(int x, int y) const;
-  void setInputController(int mode,
-                          MantidQt::MantidWidgets::InputController *controller);
+  void setInputController(int mode, MantidQt::MantidWidgets::InputController *controller);
   void setPeakVisibility() const;
 
   //-----------------------------------
@@ -360,14 +327,12 @@ protected:
   mutable bool m_showPeakRows;      ///< flag to show peak row index
   mutable bool m_showPeakLabels;    ///< flag to show peak hkl labels
   bool m_showPeakRelativeIntensity; ///< flag to show peak hkl labels
-  mutable int m_peakShapesStyle; ///< index of a default PeakMarker2D style to
+  mutable int m_peakShapesStyle;    ///< index of a default PeakMarker2D style to
 
   std::vector<std::pair<Mantid::Kernel::V3D, QPointF>> m_selectedAlignmentPlane;
   std::pair<Mantid::Geometry::IPeak *, QPointF> m_selectedAlignmentPeak;
 
-  std::pair<std::vector<Mantid::Geometry::IPeak *>,
-            std::vector<Mantid::Geometry::IPeak *>>
-      m_selectedPeaks;
+  std::pair<std::vector<Mantid::Geometry::IPeak *>, std::vector<Mantid::Geometry::IPeak *>> m_selectedPeaks;
   std::pair<QPointF, QPointF> m_selectedMarkers;
 
 private:

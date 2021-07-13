@@ -14,14 +14,14 @@ class BasePanePresenter():
 
     def __init__(self, view, model, context, figure_presenter, external_plotting_view=None, external_plotting_model=None):
 
-        self._name = "Plot"
+        self._name = model.name
         self._data_type = [""]
         self._sort_by = [""]
         self._view = view
         self._model = model
         self.context = context
         self._figure_presenter = figure_presenter
-        self._x_data_range = context.default_data_plot_range
+        self._x_data_range = context.plot_panes_context[self._name].default_xlims
         self._external_plotting_view = external_plotting_view if external_plotting_view else ExternalPlottingView()
         self._external_plotting_model = external_plotting_model if external_plotting_model else ExternalPlottingModel()
         self.add_or_remove_plot_observer = GenericObserverWithArgPassing(
@@ -41,10 +41,18 @@ class BasePanePresenter():
         self._view.on_plot_type_changed(self.handle_data_type_changed)
         # rebin
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_changed)
+        # data changed
+        self.data_changed_observer = GenericObserver(self.handle_data_updated)
 
     def handle_data_type_changed(self):
         """
         Handles the data type being changed in the view by plotting the workspaces corresponding to the new data type
+        """
+        return
+
+    def handle_data_updated(self):
+        """
+        Handles the data being updated
         """
         return
 
@@ -75,7 +83,14 @@ class BasePanePresenter():
         Handles a workspace being deleted from ads by removing the workspace from the plot
         :param workspace: workspace 2D object
         """
-        workspace_name = workspace.name()
+        # this is to allow both MA and FDA to be open at the same time
+        # without this an error is thrown as the ws name is passed as a string
+        workspace_name = None
+        if type(workspace) is Workspace2D:
+            workspace_name = workspace.name()
+        else:
+            return
+
         plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
         if workspace_name in plotted_workspaces:
             self._figure_presenter.remove_workspace_from_plot(workspace)
@@ -162,10 +177,12 @@ class BasePanePresenter():
         If switching to tiled plot, create a new figure based on the number of tiles and replot the data
         If switching from a tiled plot, create a new single figure and replot the data
         """
+        self.context.plot_panes_context[self.name].set_tiled(self._view.is_tiled_plot())
         if self._view.is_tiled_plot():
             tiled_by = self._view.tiled_by()
+            self.context.plot_panes_context[self.name].set_tiled_by(tiled_by)
             keys = self._model.create_tiled_keys(tiled_by)
-            self._figure_presenter.convert_plot_to_tiled_plot(keys, tiled_by)
+            self._figure_presenter.convert_plot_to_tiled_plot(keys)
         else:
             self._figure_presenter.convert_plot_to_single_plot()
 
@@ -177,12 +194,14 @@ class BasePanePresenter():
         if not self._view.is_tiled_plot():
             return
         tiled_by = self._view.tiled_by()
+        self.context.plot_panes_context[self.name].set_tiled_by(tiled_by)
         keys = self._model.create_tiled_keys(tiled_by)
-        self._figure_presenter.convert_plot_to_tiled_plot(keys, tiled_by)
+        self._figure_presenter.convert_plot_to_tiled_plot(keys)
 
     def _update_tile_plot(self):
         if self._view.is_tiled_plot():
             tiled_by = self._view.tiled_by()
+            self.context.plot_panes_context[self.name].set_tiled_by(tiled_by)
             keys = self._model.create_tiled_keys(tiled_by)
-            self._figure_presenter.create_tiled_plot(keys, tiled_by)
+            self._figure_presenter.create_tiled_plot(keys)
             self._figure_presenter._handle_autoscale_y_axes()

@@ -98,8 +98,6 @@ public:
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
   // Generic
-  void switchToSingleInputMode() override;
-  void switchToMultipleInputMode() override;
   void setFittingMode(FittingMode mode) override;
   FittingMode getFittingMode() const override;
 

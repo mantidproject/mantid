@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+from mantid.plots.utility import row_num, col_num
 from matplotlib.axes import ErrorbarContainer
 from matplotlib.collections import QuadMesh
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -18,7 +19,7 @@ def generate_ax_name(ax):
     on the figure.
     """
     title = ax.get_title()
-    position = "({}, {})".format(ax.rowNum, ax.colNum)
+    position = "({}, {})".format(row_num(ax), col_num(ax))
     if title:
         return "{}: {}".format(title, position)
     return position

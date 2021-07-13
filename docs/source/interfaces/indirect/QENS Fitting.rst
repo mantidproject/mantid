@@ -19,19 +19,14 @@ There are four QENS fitting interfaces:
 
 These fitting interfaces share common features, with a few unique options in each.
 
-Single & Multiple Input
-~~~~~~~~~~~~~~~~~~~~~~~
+Input
+~~~~~
 
 .. figure::  ../../images/ConvFitDataSelection.png
    :height: 200px
    :align: center
 
-Each interface provides the option to choose between selecting one or multiple data files to be fit.
-The selected mode can be changed by clicking either the 'Single Input' tab or 'Multiple Input' tab at the the top
-of the interface to switch between selecting one or multiple data files respectively.
-Data may either be provided as a file, or selected from workspaces which have already been loaded.
-
-When selecting 'Multiple Input', a table along with two buttons 'Add Workspace' and 'Remove' will be displayed.
+The input section for QENSFitting tabs consists of, a table along with two buttons 'Add Workspace' and 'Remove'.
 Clicking 'Add Workspace' will allow you to add a new data-set to the fit (this will bring up a menu allowing you
 to select a file/workspace and the spectra to load). Once the data has been loaded, it will be displayed in the table.
 Highlighting data in the table and selecting 'Remove' will allow you to remove data from the fit. Above the preview
@@ -114,18 +109,6 @@ selected specturm.
 a separate plotting window.
 
 The 'Plot Guess' check-box can be used to enable/disable the guess curve in the top preview plot.
-
-
-Spectrum Selection
-~~~~~~~~~~~~~~~~~~
-
-In MsdFit, IqtFit and ConvFit below the fit model selection and preview plots, the spectra to be fit can be selected.
-The 'Fit Spectra' drop-down menu provides two options ('Range' and 'String') to specificity the fit spectra. If 'Range' is selected, you are able to select a range of spectra to fit by
-providing the upper and lower bounds. If 'String' is selected you can provide the spectra to fit in a text form.
-When selecting spectra using text, you can use '-' to identify a range and ',' to separate each spectrum/range.
-
-:math:`X`-Ranges may be excluded from the fit by selecting a spectrum next to the 'Mask Bins of Spectrum' label and
-then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
 
 Output
 ~~~~~~

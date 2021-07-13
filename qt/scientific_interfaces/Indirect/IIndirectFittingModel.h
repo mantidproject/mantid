@@ -76,8 +76,6 @@ public:
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) = 0;
 
   // Generic
-  virtual void switchToSingleInputMode() = 0;
-  virtual void switchToMultipleInputMode() = 0;
   virtual void setFittingMode(FittingMode mode) = 0;
   virtual FittingMode getFittingMode() const = 0;
 

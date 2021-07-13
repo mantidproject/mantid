@@ -25,6 +25,7 @@ class BasePanePresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = mock.MagicMock()
         self.model = mock.Mock(spec=BasePaneModel)
+        self.model.name = "test"
         self.view = mock.Mock(spec=BasePaneView)
         self.view.warning_popup = mock.MagicMock()
         self.view.setEnabled = mock.MagicMock()
@@ -100,6 +101,13 @@ class BasePanePresenterTest(unittest.TestCase):
 
         self.presenter.handle_workspace_deleted_from_ads(ws)
 
+        self.figure_presenter.remove_workspace_from_plot.assert_not_called()
+
+    def test_handle_workspace_deleted_from_ads_with_wrong_type(self):
+        self.figure_presenter.get_plotted_workspaces_and_indices.return_value = [["fwd", "bwd"], []]
+        ws = self.create_workspace('fwd')
+
+        self.presenter.handle_workspace_deleted_from_ads(ws.name)
         self.figure_presenter.remove_workspace_from_plot.assert_not_called()
 
     def test_added_or_removed_plot_add(self):
@@ -184,7 +192,7 @@ class BasePanePresenterTest(unittest.TestCase):
         self.presenter.handle_plot_tiled_state_changed()
 
         self.model.create_tiled_keys.assert_called_once_with("Group/pairs")
-        self.figure_presenter.convert_plot_to_tiled_plot.assert_called_once_with(["fwd", "bwd"], "Group/pairs")
+        self.figure_presenter.convert_plot_to_tiled_plot.assert_called_once_with(["fwd", "bwd"])
 
     def test_tiled_by_changed_does_nothing_if_not_tiled_plot(self):
         self.view.is_tiled_plot.return_value = False
@@ -199,7 +207,7 @@ class BasePanePresenterTest(unittest.TestCase):
         self.model.create_tiled_keys.return_value = ["fwd", "bwd"]
 
         self.presenter.handle_tiled_by_type_changed()
-        self.figure_presenter.convert_plot_to_tiled_plot.assert_called_once_with(["fwd", "bwd"], "Asymmetry")
+        self.figure_presenter.convert_plot_to_tiled_plot.assert_called_once_with(["fwd", "bwd"])
 
     def test_update_tiled_plot_not_tiled(self):
         self.view.is_tiled_plot.return_value = False
@@ -218,7 +226,7 @@ class BasePanePresenterTest(unittest.TestCase):
         self.figure_presenter._handle_autoscale_y_axes = mock.Mock()
 
         self.presenter._update_tile_plot()
-        self.figure_presenter.create_tiled_plot.assert_called_once_with(["fwd", "bwd"], "Asymmetry")
+        self.figure_presenter.create_tiled_plot.assert_called_once_with(["fwd", "bwd"])
         self.figure_presenter._handle_autoscale_y_axes.assert_called_once()
 
 

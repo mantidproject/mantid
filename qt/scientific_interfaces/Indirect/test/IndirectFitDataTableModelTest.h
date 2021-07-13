@@ -18,6 +18,10 @@
 #include "MantidKernel/UnitConversion.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
+namespace {
+auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
+}
+
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace MantidQt::MantidWidgets;
@@ -31,9 +35,9 @@ public:
     auto resolutionWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
     auto dataWorkspace1 = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
     auto dataWorkspace2 = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("resolution workspace", std::move(resolutionWorkspace));
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("data workspace 1", std::move(dataWorkspace1));
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("data workspace 2", std::move(dataWorkspace2));
+    ads_instance.addOrReplace("resolution workspace", std::move(resolutionWorkspace));
+    ads_instance.addOrReplace("data workspace 1", std::move(dataWorkspace1));
+    ads_instance.addOrReplace("data workspace 2", std::move(dataWorkspace2));
     m_fitData->addWorkspace("data workspace 1");
     m_fitData->addWorkspace("data workspace 2");
     m_fitData->setResolution("resolution workspace", TableDatasetIndex{0});
@@ -65,8 +69,8 @@ public:
     auto singleFitData = std::make_unique<IndirectFitDataTableModel>();
     auto resolutionWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
     auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("resolution workspace", std::move(resolutionWorkspace));
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("data workspace", std::move(dataWorkspace));
+    ads_instance.addOrReplace("resolution workspace", std::move(resolutionWorkspace));
+    ads_instance.addOrReplace("data workspace", std::move(dataWorkspace));
     singleFitData->addWorkspace("data workspace");
     singleFitData->setResolution("resolution workspace", TableDatasetIndex{0});
     TS_ASSERT(!singleFitData->isMultiFit());
@@ -77,7 +81,7 @@ public:
   void test_getNumberOfWorkspaces_returns_correct_number_of_workspaces() {
     TS_ASSERT_EQUALS(m_fitData->getNumberOfWorkspaces(), 2);
     auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("data workspace 3", std::move(dataWorkspace));
+    ads_instance.addOrReplace("data workspace 3", std::move(dataWorkspace));
     m_fitData->addWorkspace("data workspace 3");
     TS_ASSERT_EQUALS(m_fitData->getNumberOfWorkspaces(), 3);
   }
@@ -85,7 +89,7 @@ public:
   void test_getNumberOfSpectra_returns_correct_number_of_spectra() {
     TS_ASSERT_EQUALS(m_fitData->getNumberOfSpectra(TableDatasetIndex{0}), 4);
     auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(5, 5);
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("data workspace 3", std::move(dataWorkspace));
+    ads_instance.addOrReplace("data workspace 3", std::move(dataWorkspace));
     m_fitData->addWorkspace("data workspace 3");
     TS_ASSERT_EQUALS(m_fitData->getNumberOfSpectra(TableDatasetIndex{2}), 5);
   }
@@ -114,7 +118,7 @@ public:
 
   void test_getQValuesForData_returns_correct_value() {
     auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspaceWithInelasticInstrument(4);
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("data workspace Inelastic", dataWorkspace);
+    ads_instance.addOrReplace("data workspace Inelastic", dataWorkspace);
     m_fitData->addWorkspace("data workspace Inelastic");
     auto spectrumInfo = dataWorkspace->spectrumInfo();
     auto detID = spectrumInfo.detector(0).getID();
@@ -133,7 +137,7 @@ public:
   }
 
   void test_that_getResolutionsForFit_return_correctly_if_resolution_workspace_removed() {
-    Mantid::API::AnalysisDataService::Instance().clear();
+    ads_instance.clear();
 
     auto resolutionVector = m_fitData->getResolutionsForFit();
 

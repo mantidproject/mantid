@@ -1,3 +1,5 @@
+.. _interface-HFIR-Single-Crystal-Reduction:
+
 HFIR Single Crystal Reduction Interface
 =======================================
 

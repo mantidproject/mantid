@@ -78,7 +78,6 @@ void IndirectFitAnalysisTab::setup() {
   connectDataPresenter();
   connectPlotPresenter();
   connectFitPropertyBrowser();
-  connectSpectrumPresenter();
 }
 
 void IndirectFitAnalysisTab::connectDataPresenter() {
@@ -93,8 +92,6 @@ void IndirectFitAnalysisTab::connectDataPresenter() {
 
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this, SLOT(respondToSingleResolutionLoaded()));
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this, SLOT(respondToDataChanged()));
-  connect(m_dataPresenter.get(), SIGNAL(singleDataViewSelected()), this, SLOT(respondToSingleDataViewSelected()));
-  connect(m_dataPresenter.get(), SIGNAL(multipleDataViewSelected()), this, SLOT(respondToMultipleDataViewSelected()));
   connect(m_dataPresenter.get(), SIGNAL(dataAdded()), this, SLOT(respondToDataAdded()));
   connect(m_dataPresenter.get(), SIGNAL(dataRemoved()), this, SLOT(respondToDataRemoved()));
 }
@@ -104,8 +101,8 @@ void IndirectFitAnalysisTab::connectPlotPresenter() {
           SLOT(singleFit(TableDatasetIndex, WorkspaceIndex)));
   connect(m_plotPresenter.get(), SIGNAL(runAsPythonScript(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
-  connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this, SLOT(setDataTableStartX(double)));
-  connect(m_plotPresenter.get(), SIGNAL(endXChanged(double)), this, SLOT(setDataTableEndX(double)));
+  connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this, SLOT(updateDataInTable()));
+  connect(m_plotPresenter.get(), SIGNAL(endXChanged(double)), this, SLOT(updateDataInTable()));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
           SLOT(respondToSelectedFitDataChanged(TableDatasetIndex)));
   connect(m_plotPresenter.get(), SIGNAL(noFitDataSelected()), this, SLOT(respondToNoFitDataSelected()));
@@ -113,13 +110,6 @@ void IndirectFitAnalysisTab::connectPlotPresenter() {
           SLOT(respondToPlotSpectrumChanged(WorkspaceIndex)));
   connect(m_plotPresenter.get(), SIGNAL(fwhmChanged(double)), this, SLOT(respondToFwhmChanged(double)));
   connect(m_plotPresenter.get(), SIGNAL(backgroundChanged(double)), this, SLOT(respondToBackgroundChanged(double)));
-}
-
-void IndirectFitAnalysisTab::connectSpectrumPresenter() {
-  connect(m_spectrumPresenter.get(), SIGNAL(spectraChanged(TableDatasetIndex)), this,
-          SLOT(respondToChangeOfSpectraRange(TableDatasetIndex)));
-  connect(m_spectrumPresenter.get(), SIGNAL(maskChanged(const std::string &)), this,
-          SLOT(setDataTableExclude(const std::string &)));
 }
 
 void IndirectFitAnalysisTab::connectFitPropertyBrowser() {
@@ -134,10 +124,6 @@ void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
   m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(m_fittingModel.get(), view);
 }
 
-void IndirectFitAnalysisTab::setSpectrumSelectionView(IndirectSpectrumSelectionView *view) {
-  m_spectrumPresenter = std::make_unique<IndirectSpectrumSelectionPresenter>(m_fittingModel.get(), view);
-}
-
 void IndirectFitAnalysisTab::setOutputOptionsView(IIndirectFitOutputOptionsView *view) {
   m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(view);
 }
@@ -146,8 +132,6 @@ void IndirectFitAnalysisTab::setFitPropertyBrowser(IndirectFitPropertyBrowser *b
   browser->init();
   m_fitPropertyBrowser = browser;
 }
-
-void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) { m_dataPresenter->loadSettings(settings); }
 
 void IndirectFitAnalysisTab::setFileExtensionsByName(bool filter) {
   auto const tab = getTabName();
@@ -160,16 +144,12 @@ void IndirectFitAnalysisTab::setSampleSuffixes(std::string const &tab, bool filt
   QStringList const noSuffixes{""};
   setSampleWSSuffixes(filter ? getSampleWSSuffixes(tab) : noSuffixes);
   setSampleFBSuffixes(filter ? getSampleFBSuffixes(tab) : getExtensions(tab));
-  m_dataPresenter->setMultiInputSampleWSSuffixes();
-  m_dataPresenter->setMultiInputSampleFBSuffixes();
 }
 
 void IndirectFitAnalysisTab::setResolutionSuffixes(std::string const &tab, bool filter) {
   QStringList const noSuffixes{""};
   setResolutionWSSuffixes(filter ? getResolutionWSSuffixes(tab) : noSuffixes);
   setResolutionFBSuffixes(filter ? getResolutionFBSuffixes(tab) : getExtensions(tab));
-  m_dataPresenter->setMultiInputResolutionWSSuffixes();
-  m_dataPresenter->setMultiInputResolutionFBSuffixes();
 }
 
 void IndirectFitAnalysisTab::setSampleWSSuffixes(const QStringList &suffices) {
@@ -232,17 +212,7 @@ void IndirectFitAnalysisTab::setModelEndX(double endX) {
   }
 }
 
-void IndirectFitAnalysisTab::setDataTableStartX(double startX) {
-  m_dataPresenter->setStartX(startX, m_plotPresenter->getSelectedDataIndex());
-}
-
-void IndirectFitAnalysisTab::setDataTableEndX(double endX) {
-  m_dataPresenter->setEndX(endX, m_plotPresenter->getSelectedDataIndex());
-}
-
-void IndirectFitAnalysisTab::setDataTableExclude(const std::string &exclude) {
-  m_dataPresenter->setExclude(exclude, m_plotPresenter->getSelectedDataIndex(), m_plotPresenter->getSelectedSpectrum());
-}
+void IndirectFitAnalysisTab::updateDataInTable() { m_dataPresenter->updateDataInTable(); }
 
 void IndirectFitAnalysisTab::tableStartXChanged(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum) {
   if (isRangeCurrentlySelected(dataIndex, spectrum)) {
@@ -258,12 +228,6 @@ void IndirectFitAnalysisTab::tableEndXChanged(double endX, TableDatasetIndex dat
     m_plotPresenter->updateGuess();
     m_fittingModel->setEndX(endX, m_plotPresenter->getSelectedDataIndex(), m_plotPresenter->getSelectedSpectrum());
   }
-}
-
-void IndirectFitAnalysisTab::tableExcludeChanged(const std::string & /*unused*/, TableDatasetIndex dataIndex,
-                                                 WorkspaceIndex spectrum) {
-  if (isRangeCurrentlySelected(dataIndex, spectrum))
-    m_spectrumPresenter->displayBinMask();
 }
 
 void IndirectFitAnalysisTab::startXChanged(double startX) {
@@ -328,7 +292,6 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
     updateFitStatus();
     setModelFitFunction();
   }
-  m_spectrumPresenter->enableView();
   m_plotPresenter->updatePlots();
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgorithmComplete(bool)));
 }
@@ -491,7 +454,6 @@ void IndirectFitAnalysisTab::executeFit() {
 bool IndirectFitAnalysisTab::validate() {
   UserInputValidator validator;
   m_dataPresenter->validate(validator);
-  m_spectrumPresenter->validate(validator);
 
   const auto invalidFunction = m_fittingModel->isInvalidFunction();
   if (invalidFunction)
@@ -621,7 +583,6 @@ void IndirectFitAnalysisTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
 void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
   setAlgorithmProperties(fitAlgorithm);
   m_fittingAlgorithm = fitAlgorithm;
-  m_spectrumPresenter->disableView();
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgorithmComplete(bool)));
 }
@@ -658,17 +619,6 @@ void IndirectFitAnalysisTab::updateResultOptions() {
   m_outOptionsPresenter->setSaveEnabled(isFit);
 }
 
-void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(TableDatasetIndex index) {
-  m_plotPresenter->updateSelectedDataName();
-  m_plotPresenter->updateAvailableSpectra();
-  m_dataPresenter->updateSpectraInTable(index);
-  m_fitPropertyBrowser->updateFunctionBrowserData(static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasets(),
-                                                  m_fittingModel->getQValuesForData(),
-                                                  m_fittingModel->getResolutionsForFit());
-  setModelFitFunction();
-  updateParameterEstimationData();
-}
-
 void IndirectFitAnalysisTab::respondToSingleResolutionLoaded() {
   setModelFitFunction();
   m_plotPresenter->updatePlots();
@@ -678,24 +628,11 @@ void IndirectFitAnalysisTab::respondToSingleResolutionLoaded() {
 void IndirectFitAnalysisTab::respondToDataChanged() {
   updateDataReferences();
   m_fittingModel->removeFittingData();
-  m_spectrumPresenter->updateSpectra();
-  m_plotPresenter->setXBounds(m_dataPresenter->getXRange());
   m_plotPresenter->updateAvailableSpectra();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateGuessAvailability();
   updateParameterEstimationData();
   updateResultOptions();
-}
-
-void IndirectFitAnalysisTab::respondToSingleDataViewSelected() {
-  m_spectrumPresenter->setActiveIndexToZero();
-  m_plotPresenter->hideMultipleDataSelection();
-  m_plotPresenter->updateDataSelection();
-}
-
-void IndirectFitAnalysisTab::respondToMultipleDataViewSelected() {
-  m_plotPresenter->showMultipleDataSelection();
-  m_plotPresenter->updateDataSelection();
 }
 
 void IndirectFitAnalysisTab::respondToDataAdded() {
@@ -709,12 +646,6 @@ void IndirectFitAnalysisTab::respondToDataRemoved() {
   m_plotPresenter->updateDataSelection();
   updateParameterEstimationData();
 }
-
-void IndirectFitAnalysisTab::respondToSelectedFitDataChanged(TableDatasetIndex i) {
-  m_spectrumPresenter->setActiveModelIndex(i);
-}
-
-void IndirectFitAnalysisTab::respondToNoFitDataSelected() { m_spectrumPresenter->disableView(); }
 
 void IndirectFitAnalysisTab::respondToPlotSpectrumChanged(WorkspaceIndex) {
   auto const index = m_plotPresenter->getSelectedDomainIndex();
