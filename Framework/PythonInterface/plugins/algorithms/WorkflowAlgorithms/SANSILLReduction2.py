@@ -22,6 +22,7 @@ class SANSILLReduction2(PythonAlgorithm):
     process = None # the process type
     is_point = None # whether or not the input is point data
     n_reports = None # how many progress report checkpoints
+    progress = None # the global progress reporter
 
     def category(self):
         return 'ILL\\SANS'
@@ -210,9 +211,11 @@ class SANSILLReduction2(PythonAlgorithm):
         self.n_samples = None
         self.is_point = None
         self.process = None
+        self.progress = None
 
     def setup(self, ws):
         '''Performs a full setup, which can be done only after having loaded the sample data'''
+        processes = ['DarkCurrent', 'EmptyBeam', 'Transmission', 'Container', 'Water', 'Solvent', 'Sample']
         self.process = self.getPropertyValue('ProcessAs')
         self.instrument = ws.getInstrument().getName()
         self.log().notice(f'Set the instrument name to {self.instrument}')
@@ -232,6 +235,7 @@ class SANSILLReduction2(PythonAlgorithm):
         if self.mode == AcqMode.KINETIC:
             if self.process != 'Sample':
                 raise RuntimeError('Only the sample can be a kinetic measurement, the auxiliary calibration measurements cannot.')
+        self.progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(self.process) + 1)
 
     def normalise(self, ws):
         '''Normalizes the workspace by monitor (default) or acquisition time'''
@@ -293,7 +297,7 @@ class SANSILLReduction2(PythonAlgorithm):
         else:
             self.log().notice('No tau available in IPF, skipping dead time correction.')
 
-    def load_and_merge(self):
+    def load_and_merge(self, ws):
         '''
         Loads, merges and concatenates the input runs, if needed
         Concatenation is allowed only for sample and transmission runs
@@ -313,7 +317,6 @@ class SANSILLReduction2(PythonAlgorithm):
                 * : if there is a , in the Runs - workspace group, otherwise workspace
         '''
         #TODO: note that this operation is quite generic, so perhaps concatenation can become an option directly in LoadAndMerge
-        ws = self.getPropertyValue('OutputWorkspace')
         LoadAndMerge(Filename=self.getPropertyValue('Runs'), OutputWorkspace=ws)
         if isinstance(mtd[ws], WorkspaceGroup):
             self.setup(mtd[ws][0])
@@ -329,14 +332,37 @@ class SANSILLReduction2(PythonAlgorithm):
             self.setup(mtd[ws])
         return ws
 
+    def reduce(self, ws):
+        '''Performs the corresponding reduction based on the process type'''
+        self.normalise(ws)
+        if self.process != 'DarkCurrent':
+            # apply dark current
+            if self.process == 'EmptyBeam':
+                pass # process beam
+            else:
+                # apply beam
+                if self.process == 'Transmission':
+                    pass # calculate transmission
+                else:
+                    # apply transmission
+                    if self.process == 'Container':
+                        pass # process container
+                    else:
+                        # apply container
+                        if self.process == 'Water':
+                            pass # process water
+                        else:
+                            # apply water
+                            if self.process == 'Solvent':
+                                pass # process solvent
+                            else:
+                                pass # apply solvent
+
     def PyExec(self):
         self.reset()
-        processes = ['DarkCurrent', 'EmptyBeam', 'Transmission', 'Container', 'Water', 'Solvent', 'Sample']
-        process = self.getPropertyValue('ProcessAs')
-        progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
-        ws = self.load_and_merge()
-        progress.report()
-        self.normalise(ws)
+        ws = self.getPropertyValue('OutputWorkspace')
+        self.load_and_merge(ws)
+        self.reduce(ws)
         self.setProperty('OutputWorkspace', ws)
 
 
