@@ -309,11 +309,6 @@ Users should test this function with the data set that contains satellite peaks 
      FilterByTofMin=500,
      FilterByTofMax=16666)
 
-   ExtractSpectra(
-      InputWorkspace="ws",
-      OutputWorkspace="ws",
-      DetectorList="858220-858230, 905232-905242, 874003-874013")
-
    UB = np.array([[ 0.15468228,  0.10908475, -0.14428671],
                [-0.08922105, -0.08617147, -0.22976459],
                [-0.05616441,  0.12536522, -0.03238277]])
