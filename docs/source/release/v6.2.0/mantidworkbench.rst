@@ -21,6 +21,8 @@ New and Improved
   may need to be saved again to include the workspace calculator widget.
 - Added tooltips to all the widgets in the Slice Viewer. Please contact the developers if any are missing.
 - Script editor tab completion and call tip support for Numpy 1.21
+- In the pick tab of the instrument viewer, integration is now by default over the entire detector until something is selected.
+- In the pick tab of the instrument viewer, a new panel allowing for direct rebinning of the workspace now exists.
 
 Bugfixes
 --------
