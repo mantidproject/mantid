@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisConvFitTab.h"
+#include "ConvFitAddWorkspaceDialog.h"
 #include "ConvFitDataPresenter.h"
 #include "IndirectFitPlotView.h"
 #include "IndirectFunctionBrowser/ConvTemplateBrowser.h"
@@ -108,6 +109,16 @@ EstimationDataSelector IndirectDataAnalysisConvFitTab::getEstimationDataSelector
   return [](const MantidVec &, const MantidVec &, const std::pair<double, double>) -> DataForParameterEstimation {
     return DataForParameterEstimation{};
   };
+}
+
+void IndirectDataAnalysisConvFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
+  if (const auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
+    m_convFittingModel->addWorkspace(convDialog->workspaceName(), convDialog->workspaceIndices());
+    auto const name = convDialog->resolutionName();
+    auto const index = m_convFittingModel->getNumberOfWorkspaces() - WorkspaceID{1};
+    m_convFittingModel->setResolution(name, index);
+    setModelResolution(name, index);
+  }
 }
 
 void IndirectDataAnalysisConvFitTab::setModelResolution(const std::string &resolutionName) {

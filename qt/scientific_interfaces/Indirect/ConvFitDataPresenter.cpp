@@ -36,20 +36,6 @@ void ConvFitDataPresenter::setModelResolution(std::string const &name, Workspace
   }
 }
 
-void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
-    addWorkspace(*convDialog, *m_convModel);
-    auto const name = convDialog->resolutionName();
-    auto const index = m_convModel->getNumberOfWorkspaces() - WorkspaceID{1};
-    m_convModel->setResolution(name, index);
-    emit modelResolutionAdded(name, index);
-  }
-}
-
-void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const &dialog, IndirectFittingModel &model) {
-  model.addWorkspace(dialog.workspaceName(), dialog.workspaceIndices());
-}
-
 std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
   dialog->setResolutionWSSuffices(getResolutionWSSuffices());

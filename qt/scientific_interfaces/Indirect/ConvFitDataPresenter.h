@@ -28,9 +28,7 @@ private slots:
 
 private:
   void setModelResolution(std::string const &name, WorkspaceID const &workspaceID);
-  void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
-  void addWorkspace(ConvFitAddWorkspaceDialog const &dialog, IndirectFittingModel &model);
 
   ConvFitModel *m_convModel;
 };

@@ -73,8 +73,8 @@ public:
 private:
   void addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra);
 
-  std::vector<IndirectFitData> *m_fittingData;
-  std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>> *m_resolutions;
+  std::unique_ptr<std::vector<IndirectFitData>> m_fittingData;
+  std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutions;
 
   std::unique_ptr<std::vector<IndirectFitData>> m_fittingDataMultiple;
   std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutionsMultiple;

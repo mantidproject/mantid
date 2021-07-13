@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisMSDFitTab.h"
 #include "IDAFunctionParameterEstimation.h"
+#include "IndirectAddWorkspaceDialog.h"
 
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 
@@ -153,6 +154,11 @@ IDAFunctionParameterEstimation IndirectDataAnalysisMSDFitTab::createParameterEst
   parameterEstimation.addParameterEstimationFunction(MSDYIFUNC, estimateMsd);
 
   return parameterEstimation;
+}
+
+void IndirectDataAnalysisMSDFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
+    m_msdFittingModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
 }
 
 } // namespace IDA

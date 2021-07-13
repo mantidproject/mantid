@@ -52,7 +52,7 @@ protected slots:
 
 signals:
   void singleResolutionLoaded();
-  void dataAdded();
+  void dataAdded(IAddWorkspaceDialog const *);
   void dataRemoved();
   void dataChanged();
   void startXChanged(double, WorkspaceID, WorkspaceIndex);
@@ -66,7 +66,6 @@ protected:
                            std::unique_ptr<IndirectFitDataTablePresenter> tablePresenter);
   IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
-  virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   void displayWarning(const std::string &warning);
   QStringList m_wsSampleSuffixes;
   QStringList m_fbSampleSuffixes;

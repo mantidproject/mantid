@@ -32,13 +32,9 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitDataTableModel::IndirectFitDataTableModel()
-    : m_fittingDataMultiple(std::make_unique<std::vector<IndirectFitData>>()),
-      m_resolutionsMultiple(std::make_unique<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>()),
-      m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
-
-  m_fittingData = m_fittingDataMultiple.get();
-  m_resolutions = m_resolutionsMultiple.get();
-}
+    : m_fittingData(std::make_unique<std::vector<IndirectFitData>>()),
+      m_resolutions(std::make_unique<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>()),
+      m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {}
 
 bool IndirectFitDataTableModel::hasWorkspace(std::string const &workspaceName) const {
   auto const names = getWorkspaceNames();

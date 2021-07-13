@@ -100,18 +100,12 @@ void IndirectFitDataPresenter::closeDialog() {
 
 void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
   try {
-    addDataToModel(dialog);
+    emit dataAdded(dialog);
     m_tablePresenter->updateTableFromModel();
-    emit dataAdded();
     emit dataChanged();
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
   }
-}
-
-void IndirectFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
-    m_model->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
 }
 
 void IndirectFitDataPresenter::displayWarning(const std::string &warning) { m_view->displayWarning(warning); }

@@ -36,6 +36,7 @@ private:
   EstimationDataSelector getEstimationDataSelector() const override;
   std::string getFitTypeString() const;
   IDAFunctionParameterEstimation createParameterEstimation() const;
+  void addDataToModel(IAddWorkspaceDialog const *dialog) override;
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
   MSDFitModel *m_msdFittingModel;
