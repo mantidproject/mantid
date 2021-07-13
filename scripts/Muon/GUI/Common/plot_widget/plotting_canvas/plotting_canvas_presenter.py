@@ -158,6 +158,12 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._update_quick_edit_widget()
         self._view.redraw_figure()
 
+    def set_x_ticks(self, x_ticks=None):
+        self._view.set_x_ticks(x_ticks)
+
+    def set_y_ticks(self, y_ticks=None):
+        self._view.set_y_ticks(y_ticks)
+
     """ Quick edit"""
     def _setup_quick_edit_widget(self):
         self._options_presenter.connect_errors_changed(self.handle_error_selection_changed)
