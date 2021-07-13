@@ -11,7 +11,7 @@ from mantid.kernel import logger
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, DiffractionFocussing, \
     CreateEmptyTableWorkspace, NormaliseByCurrent, ConvertUnits, Load, SaveNexus, ApplyDiffCal
 import Engineering.EnggUtils as EnggUtils
-from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
+from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
@@ -270,7 +270,10 @@ class CalibrationModel(object):
         def generate_prm_output_file(difa_list, difc_list, tzero_list, bank_name, kwargs_to_pass):
             file_path = calibration_dir + EnggUtils.generate_output_file_name(vanadium_path, ceria_path, instrument,
                                                                               bank=bank_name)
-            EnggUtils.write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, bk2bk_params, **kwargs_to_pass)
+            EnggUtils.write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, bk2bk_params,
+                                                    **kwargs_to_pass)
+            set_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+                        "last_calibration_path", file_path)
 
         def save_pdcal_output_file(ws_name_suffix, bank_name):
             file_path = calibration_dir + EnggUtils.generate_output_file_name(vanadium_path, ceria_path, instrument,
