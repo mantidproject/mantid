@@ -137,6 +137,8 @@ class SeqFittingTabPresenter(object):
             parameter_value = index.data()
             column = index.column()
             self.view.fit_table.set_parameter_values_for_column(column, parameter_value)
+            for row in range(self.view.fit_table.get_number_of_fits()):
+                self._update_parameter_values_in_fitting_model_for_row(row)
         else:
             self._update_parameter_values_in_fitting_model_for_row(index.row())
         self.fit_parameter_changed_notifier.notify_subscribers()
