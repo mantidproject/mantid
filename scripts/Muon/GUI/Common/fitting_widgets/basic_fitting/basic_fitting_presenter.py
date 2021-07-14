@@ -63,6 +63,9 @@ class BasicFittingPresenter:
             lambda function_index, parameter: self.handle_function_parameter_changed(function_index, parameter))
         self.view.set_slot_for_start_x_updated(self.handle_start_x_updated)
         self.view.set_slot_for_end_x_updated(self.handle_end_x_updated)
+        self.view.set_slot_for_exclude_range_state_changed(self.handle_exclude_range_state_changed)
+        self.view.set_slot_for_exclude_start_x_updated(self.handle_exclude_start_x_updated)
+        self.view.set_slot_for_exclude_end_x_updated(self.handle_exclude_end_x_updated)
         self.view.set_slot_for_minimizer_changed(self.handle_minimizer_changed)
         self.view.set_slot_for_evaluation_type_changed(self.handle_evaluation_type_changed)
         self.view.set_slot_for_use_raw_changed(self.handle_use_rebin_changed)
@@ -252,6 +255,25 @@ class BasicFittingPresenter:
                                                       self.view.end_x, self.model.current_end_x)
         self.update_start_and_end_x_in_view_and_model(new_start_x, new_end_x)
 
+    def handle_exclude_range_state_changed(self) -> None:
+        """Handles when Exclude Range is ticked or unticked."""
+        self.model.exclude_range = self.view.exclude_range
+        self.view.set_exclude_start_and_end_x_visible(self.model.exclude_range)
+
+    def handle_exclude_start_x_updated(self) -> None:
+        """Handle when the exclude start X is changed."""
+        exclude_start_x, exclude_end_x = self._check_exclude_start_x_is_valid(self.view.exclude_start_x,
+                                                                              self.view.exclude_end_x,
+                                                                              self.model.current_exclude_start_x)
+        self.update_exclude_start_and_end_x_in_view_and_model(exclude_start_x, exclude_end_x)
+
+    def handle_exclude_end_x_updated(self) -> None:
+        """Handle when the exclude end X is changed."""
+        exclude_start_x, exclude_end_x = self._check_exclude_end_x_is_valid(self.view.exclude_start_x,
+                                                                            self.view.exclude_end_x,
+                                                                            self.model.current_exclude_end_x)
+        self.update_exclude_start_and_end_x_in_view_and_model(exclude_start_x, exclude_end_x)
+
     def handle_use_rebin_changed(self) -> None:
         """Handle the Fit to raw data checkbox state change."""
         if self._check_rebin_options():
@@ -272,6 +294,8 @@ class BasicFittingPresenter:
         self.model.reset_start_xs_and_end_xs()
         self.view.start_x = self.model.current_start_x
         self.view.end_x = self.model.current_end_x
+        self.view.exclude_start_x = self.model.current_exclude_start_x
+        self.view.exclude_end_x = self.model.current_exclude_end_x
 
     def set_selected_dataset(self, dataset_name: str) -> None:
         """Sets the workspace to be displayed in the view programmatically."""
@@ -333,6 +357,13 @@ class BasicFittingPresenter:
         """Updates the start and end x in the view using the current values in the model."""
         self.view.start_x = self.model.current_start_x
         self.view.end_x = self.model.current_end_x
+        self.view.exclude_start_x = self.model.current_exclude_start_x
+        self.view.exclude_end_x = self.model.current_exclude_end_x
+
+    def update_exclude_start_and_end_x_in_view_and_model(self, exclude_start_x: float, exclude_end_x: float) -> None:
+        """Updates the current exclude start and end X in the view and model."""
+        self.view.exclude_start_x, self.view.exclude_end_x = exclude_start_x, exclude_end_x
+        self.model.current_exclude_start_x, self.model.current_exclude_end_x = exclude_start_x, exclude_end_x
 
     def update_start_and_end_x_in_view_and_model(self, start_x: float, end_x: float) -> None:
         """Updates the start and end x in the model using the provided values."""
@@ -396,3 +427,39 @@ class BasicFittingPresenter:
             self.view.warning_popup("No rebin options specified.")
             return False
         return True
+
+    def _check_exclude_start_x_is_valid(self, view_exclude_start_x: float, view_exclude_end_x: float,
+                                        model_exclude_start_x: float) -> float:
+        """Check that the exclude start x is valid. If it isn't, the exclude range is adjusted to be valid."""
+        x_lower, x_upper = self.view.start_x, self.view.end_x
+        if view_exclude_start_x < x_lower:
+            new_start_x, new_end_x = x_lower, view_exclude_end_x
+        elif view_exclude_start_x > x_upper:
+            if not self.model.is_equal_to_n_decimals(view_exclude_end_x, x_upper, 3):
+                new_start_x, new_end_x = view_exclude_end_x, x_upper
+            else:
+                new_start_x, new_end_x = model_exclude_start_x, view_exclude_end_x
+        elif view_exclude_start_x > view_exclude_end_x:
+            new_start_x, new_end_x = view_exclude_end_x, view_exclude_start_x
+        else:
+            new_start_x, new_end_x = view_exclude_start_x, view_exclude_end_x
+
+        return new_start_x, new_end_x
+
+    def _check_exclude_end_x_is_valid(self, view_exclude_start_x: float, view_exclude_end_x: float,
+                                      model_exclude_end_x: float):
+        """Check that the exclude end x is valid. If it isn't, the exclude range is adjusted to be valid."""
+        x_lower, x_upper = self.view.start_x, self.view.end_x
+        if view_exclude_end_x < x_lower:
+            if not self.model.is_equal_to_n_decimals(view_exclude_start_x, x_lower, 3):
+                new_start_x, new_end_x = x_lower, view_exclude_start_x
+            else:
+                new_start_x, new_end_x = view_exclude_start_x, model_exclude_end_x
+        elif view_exclude_end_x > x_upper:
+            new_start_x, new_end_x = view_exclude_start_x, x_upper
+        elif view_exclude_end_x < view_exclude_start_x:
+            new_start_x, new_end_x = view_exclude_end_x, view_exclude_start_x
+        else:
+            new_start_x, new_end_x = view_exclude_start_x, view_exclude_end_x
+
+        return new_start_x, new_end_x
