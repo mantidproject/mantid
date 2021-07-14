@@ -26,6 +26,11 @@ BugFixes
 Muon Analysis and Frequency Domain Analysis
 -------------------------------------------
 
+New Features
+############
+
+- It is now possible to Exclude a range from a fit range when doing a fit on the Fitting tab.
+
 Improvements
 ############
 
