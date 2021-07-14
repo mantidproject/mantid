@@ -57,7 +57,6 @@ Requires: python%{python3_pkgversion}-sphinx-bootstrap-theme
 Requires: python%{python3_pkgversion}-toml
 Requires: python%{python3_pkgversion}-PyCifRW
 Requires: poco-devel >= 1.4.6
-Requires: qscintilla-devel
 Requires: qscintilla-qt5-devel
 Requires: qt5-qtbase-devel
 Requires: qt5-qtbase-gui
@@ -68,8 +67,6 @@ Requires: qt5-qttools-libs-designer
 Requires: qt5-qtwebkit-devel
 Requires: qt5-qtx11extras
 Requires: qt5-qtx11extras-devel
-Requires: qt-devel >= 4.6
-Requires: qtwebkit-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
 Requires: scipy
