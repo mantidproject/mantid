@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -259,7 +260,21 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
   m_resonanceLower = getProperty(PropertyNames::RESONANCE_LOWER_LIMITS);
   m_resonanceUpper = getProperty(PropertyNames::RESONANCE_UPPER_LIMITS);
   if (m_resonanceLower.size() > 0 || m_resonanceUpper.size() > 0) {
-    if (m_resonanceLower.size() != m_resonanceUpper.size()) {
+    // verify that they are the same length
+    if (m_resonanceLower.size() == m_resonanceUpper.size()) {
+      // verify that the lowers are less than the uppers
+      const size_t NUM_WINDOWS = m_resonanceLower.size();
+      bool ok = true;
+      for (size_t i = 0; i < NUM_WINDOWS; ++i) {
+        if (m_resonanceLower[i] >= m_resonanceUpper[i])
+          ok = false;
+      }
+      if (!ok) {
+        const std::string msg = "Lower limits must be less than upper limits";
+        result[PropertyNames::RESONANCE_LOWER_LIMITS] = msg;
+        result[PropertyNames::RESONANCE_UPPER_LIMITS] = msg;
+      }
+    } else {
       result[PropertyNames::RESONANCE_LOWER_LIMITS] =
           "Must have same number of values as " + PropertyNames::RESONANCE_UPPER_LIMITS;
       result[PropertyNames::RESONANCE_UPPER_LIMITS] =
@@ -462,7 +477,7 @@ void AlignAndFocusPowder::exec() {
   }
 
   // set up a progress bar with the "correct" number of steps
-  m_progress = std::make_unique<Progress>(this, 0., 1., 21);
+  m_progress = std::make_unique<Progress>(this, 0., 1., 22);
 
   if (m_inputEW) {
     if (compressEventsTolerance > 0.) {
@@ -599,6 +614,12 @@ void AlignAndFocusPowder::exec() {
     outputw = applyDiffCalAlg->getProperty("InstrumentWorkspace");
     m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputw);
   }
+
+  // filter out absorption resonances
+  if (!m_resonanceLower.empty()) {
+    m_outputW = filterResonances(m_outputW);
+  }
+  m_progress->report(); // the step wil be really fast if the option isn't selected
 
   // ----------------- WACKY LORENTZ THING HERE
   // TODO should call LorentzCorrection as a sub-algorithm
@@ -890,6 +911,35 @@ API::MatrixWorkspace_sptr AlignAndFocusPowder::convertUnits(API::MatrixWorkspace
   convert2Alg->executeAsChildAlg();
 
   matrixws = convert2Alg->getProperty("OutputWorkspace");
+
+  return matrixws;
+}
+
+API::MatrixWorkspace_sptr AlignAndFocusPowder::filterResonances(API::MatrixWorkspace_sptr matrixws) {
+  // determine the previous units
+  const std::string PREVIOUS_UNITS(matrixws->getAxis(0)->unit()->unitID());
+  // number of resonance windows to be removed
+  const size_t NUM_WINDOWS = m_resonanceLower.size();
+
+  // convert to the units requested
+  matrixws = convertUnits(matrixws, getPropertyValue(PropertyNames::RESONANCE_UNITS));
+
+  // filter out the requested area
+  API::IAlgorithm_sptr maskBinsAlg = createChildAlgorithm("MaskBins");
+  for (size_t i = 0; i < NUM_WINDOWS; ++i) {
+    g_log.information() << "running MaskBins(XMin=" << m_resonanceLower[i] << ", XMax=" << m_resonanceUpper[i]
+                        << ") started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
+    maskBinsAlg->setProperty("InputWorkspace", matrixws);
+    maskBinsAlg->setProperty("OutputWorkspace", matrixws); // operate in-place
+    maskBinsAlg->setProperty("XMin", m_resonanceLower[i]);
+    maskBinsAlg->setProperty("XMax", m_resonanceUpper[i]);
+    maskBinsAlg->executeAsChildAlg();
+
+    matrixws = maskBinsAlg->getProperty("OutputWorkspace"); // update workspace pointer
+  }
+
+  // convert back to the original units
+  matrixws = convertUnits(matrixws, PREVIOUS_UNITS);
 
   return matrixws;
 }
