@@ -171,7 +171,7 @@ By default, the algorithm does not distinguish satellite peaks from Bragg
 peaks by using identical integrators for two different type of peaks.
 However, users can specify *SatelliteRegionRadius*, *SatellitePeakSize*,
 *SatelliteBackgroundInnerSize* and *SatelliteBackgroundOuterSize* such that
-the integrator used for staellite peaks are different from the one used for
+the integrator used for satellite peaks are different from the one used for
 Bragg Peaks.
 
 This algorithm uses principle component analysis to determine the principle
@@ -291,7 +291,7 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
    | 3132     | 1218337  |     -5.0 |     -2.0 |      7.0 |      1.0 |     79.8 |   4724.1 |      0.8 |   7411.0 |     88.3 |     15.0 | bank18   |     33.0 |    151.0 | [4.96622,3.61607,5.32554] | [7.99244,1.19363,0.892655] | 10       |
 
 
-**Example - IntegrateEllipsoids with staellite peaks:**
+**Example - IntegrateEllipsoids with satellite peaks:**
 
 Users should test this function with the data set that contains satellite peaks (such as **TOPAZ_36079_crop.nxs** from the testing data).
 The first peak is a satellite peak, which was integrated using the satellite peak integrator, while the other peaks are regular Bragg peaks integrated using the default integrator.
