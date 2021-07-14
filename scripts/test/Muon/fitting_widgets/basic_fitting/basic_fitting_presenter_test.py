@@ -318,26 +318,26 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.mock_model_exclude_range.assert_has_calls([mock.call(True), mock.call()])
         self.view.set_exclude_start_and_end_x_visible.assert_called_once_with(True)
 
-    def test_that_handle_exclude_start_x_updated_will_check_the_exclude_start_x_is_valid_before_updating_it(self):
-        self.presenter._check_exclude_start_x_is_valid = mock.Mock(return_value=(self.start_x, self.end_x))
+    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.check_exclude_start_x_is_valid")
+    def test_that_handle_exclude_start_x_updated_will_check_the_exclude_start_x_is_valid_before_updating_it(self, mock_check):
+        mock_check.return_value = (self.start_x, self.end_x)
 
         self.presenter.handle_exclude_start_x_updated()
 
-        self.mock_view_exclude_start_x.assert_called_once_with()
-        self.mock_view_exclude_end_x.assert_called_once_with()
+        self.mock_view_exclude_start_x.assert_called_with()
+        self.mock_view_exclude_end_x.assert_called_with()
         self.mock_model_current_exclude_start_x.assert_called_once_with()
-        self.presenter._check_exclude_start_x_is_valid.assert_called_once_with(self.start_x, self.end_x, self.start_x)
         self.presenter.update_exclude_start_and_end_x_in_view_and_model.assert_called_once_with(self.start_x, self.end_x)
 
-    def test_that_handle_exclude_end_x_updated_will_check_the_exclude_end_x_is_valid_before_updating_it(self):
-        self.presenter._check_exclude_end_x_is_valid = mock.Mock(return_value=(self.start_x, self.end_x))
+    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.check_exclude_end_x_is_valid")
+    def test_that_handle_exclude_end_x_updated_will_check_the_exclude_end_x_is_valid_before_updating_it(self, mock_check):
+        mock_check.return_value = (self.start_x, self.end_x)
 
         self.presenter.handle_exclude_end_x_updated()
 
-        self.mock_view_exclude_start_x.assert_called_once_with()
-        self.mock_view_exclude_end_x.assert_called_once_with()
+        self.mock_view_exclude_start_x.assert_called_with()
+        self.mock_view_exclude_end_x.assert_called_with()
         self.mock_model_current_exclude_end_x.assert_called_once_with()
-        self.presenter._check_exclude_end_x_is_valid.assert_called_once_with(self.start_x, self.end_x, self.end_x)
         self.presenter.update_exclude_start_and_end_x_in_view_and_model.assert_called_once_with(self.start_x, self.end_x)
 
     def test_that_handle_use_rebin_changed_will_not_update_the_model_if_the_rebin_check_fails(self):

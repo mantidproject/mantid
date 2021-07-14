@@ -13,7 +13,9 @@ from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import Ba
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from Muon.GUI.Common.thread_model import ThreadModel
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
-from Muon.GUI.Common.utilities.workspace_data_utils import check_start_x_is_valid, check_end_x_is_valid
+from Muon.GUI.Common.utilities.workspace_data_utils import (check_exclude_start_x_is_valid,
+                                                            check_exclude_end_x_is_valid, check_start_x_is_valid,
+                                                            check_end_x_is_valid)
 
 
 class BasicFittingPresenter:
@@ -262,16 +264,18 @@ class BasicFittingPresenter:
 
     def handle_exclude_start_x_updated(self) -> None:
         """Handle when the exclude start X is changed."""
-        exclude_start_x, exclude_end_x = self._check_exclude_start_x_is_valid(self.view.exclude_start_x,
-                                                                              self.view.exclude_end_x,
-                                                                              self.model.current_exclude_start_x)
+        exclude_start_x, exclude_end_x = check_exclude_start_x_is_valid(self.view.start_x, self.view.end_x,
+                                                                        self.view.exclude_start_x,
+                                                                        self.view.exclude_end_x,
+                                                                        self.model.current_exclude_start_x)
         self.update_exclude_start_and_end_x_in_view_and_model(exclude_start_x, exclude_end_x)
 
     def handle_exclude_end_x_updated(self) -> None:
         """Handle when the exclude end X is changed."""
-        exclude_start_x, exclude_end_x = self._check_exclude_end_x_is_valid(self.view.exclude_start_x,
-                                                                            self.view.exclude_end_x,
-                                                                            self.model.current_exclude_end_x)
+        exclude_start_x, exclude_end_x = check_exclude_end_x_is_valid(self.view.start_x, self.view.end_x,
+                                                                      self.view.exclude_start_x,
+                                                                      self.view.exclude_end_x,
+                                                                      self.model.current_exclude_end_x)
         self.update_exclude_start_and_end_x_in_view_and_model(exclude_start_x, exclude_end_x)
 
     def handle_use_rebin_changed(self) -> None:
@@ -427,39 +431,3 @@ class BasicFittingPresenter:
             self.view.warning_popup("No rebin options specified.")
             return False
         return True
-
-    def _check_exclude_start_x_is_valid(self, view_exclude_start_x: float, view_exclude_end_x: float,
-                                        model_exclude_start_x: float) -> float:
-        """Check that the exclude start x is valid. If it isn't, the exclude range is adjusted to be valid."""
-        x_lower, x_upper = self.view.start_x, self.view.end_x
-        if view_exclude_start_x < x_lower:
-            new_start_x, new_end_x = x_lower, view_exclude_end_x
-        elif view_exclude_start_x > x_upper:
-            if not self.model.is_equal_to_n_decimals(view_exclude_end_x, x_upper, 3):
-                new_start_x, new_end_x = view_exclude_end_x, x_upper
-            else:
-                new_start_x, new_end_x = model_exclude_start_x, view_exclude_end_x
-        elif view_exclude_start_x > view_exclude_end_x:
-            new_start_x, new_end_x = view_exclude_end_x, view_exclude_start_x
-        else:
-            new_start_x, new_end_x = view_exclude_start_x, view_exclude_end_x
-
-        return new_start_x, new_end_x
-
-    def _check_exclude_end_x_is_valid(self, view_exclude_start_x: float, view_exclude_end_x: float,
-                                      model_exclude_end_x: float):
-        """Check that the exclude end x is valid. If it isn't, the exclude range is adjusted to be valid."""
-        x_lower, x_upper = self.view.start_x, self.view.end_x
-        if view_exclude_end_x < x_lower:
-            if not self.model.is_equal_to_n_decimals(view_exclude_start_x, x_lower, 3):
-                new_start_x, new_end_x = x_lower, view_exclude_start_x
-            else:
-                new_start_x, new_end_x = view_exclude_start_x, model_exclude_end_x
-        elif view_exclude_end_x > x_upper:
-            new_start_x, new_end_x = view_exclude_start_x, x_upper
-        elif view_exclude_end_x < view_exclude_start_x:
-            new_start_x, new_end_x = view_exclude_end_x, view_exclude_start_x
-        else:
-            new_start_x, new_end_x = view_exclude_start_x, view_exclude_end_x
-
-        return new_start_x, new_end_x
