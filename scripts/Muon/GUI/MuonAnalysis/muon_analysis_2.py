@@ -354,6 +354,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.home_tab.home_tab_widget.groupingObserver)
 
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
+            self.corrections_tab.corrections_tab_presenter.group_change_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
             self.phase_tab.phase_table_presenter.group_change_observer)
 
     def setup_corrections_changed_observers(self):
@@ -435,7 +438,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
     def setup_on_recalulation_finished_notifier(self):
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.corrections_tab.corrections_tab_presenter.corrections_complete_observer)
+            self.corrections_tab.corrections_tab_presenter.pre_process_and_grouping_complete_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.input_workspace_observer)

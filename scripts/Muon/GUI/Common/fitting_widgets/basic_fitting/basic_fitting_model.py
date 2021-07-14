@@ -16,6 +16,7 @@ from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import Basi
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
+from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
 from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 import math
@@ -26,7 +27,6 @@ DEFAULT_CHI_SQUARED = 0.0
 DEFAULT_FIT_STATUS = None
 DEFAULT_SINGLE_FIT_FUNCTION = None
 DEFAULT_START_X = 0.0
-X_OFFSET = 0.001
 
 
 def get_function_name_for_composite(composite: CompositeFunction) -> str:
@@ -376,15 +376,7 @@ class BasicFittingModel:
 
     def x_limits_of_workspace(self, workspace_name: str) -> tuple:
         """Returns the x data limits of a provided workspace or the current dataset."""
-        if workspace_name is not None and check_if_workspace_exist(workspace_name):
-            x_data = retrieve_ws(workspace_name).dataX(0)
-            if len(x_data) > 0:
-                x_data.sort()
-                x_lower, x_higher = x_data[0], x_data[-1]
-                if x_lower == x_higher:
-                    return x_lower - X_OFFSET, x_higher + X_OFFSET
-                return x_lower, x_higher
-        return self.current_start_x, self.current_end_x
+        return x_limits_of_workspace(workspace_name, (self.current_start_x, self.current_end_x))
 
     def update_plot_guess(self) -> None:
         """Updates the guess plot using the current dataset and function."""
@@ -533,11 +525,6 @@ class BasicFittingModel:
     def _check_data_exists(workspace_names: list) -> list:
         """Returns only the workspace names that exist in the ADS."""
         return [workspace_name for workspace_name in workspace_names if check_if_workspace_exist(workspace_name)]
-
-    @staticmethod
-    def is_equal_to_n_decimals(value1: float, value2: float, n_decimals: int) -> bool:
-        """Checks that two floats are equal up to n decimal places."""
-        return f"{value1:.{n_decimals}f}" == f"{value2:.{n_decimals}f}"
 
     def get_selected_runs_groups_and_pairs(self) -> tuple:
         """Returns the runs, groups and pairs to use for single fit mode."""

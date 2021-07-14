@@ -266,7 +266,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_start_x_updated_will_attempt_to_update_the_start_x_in_the_model(self):
         self.presenter.handle_start_x_updated()
-        self.mock_model_current_start_x.assert_called_once_with(self.start_x)
+        self.mock_model_current_start_x.assert_called_with(self.start_x)
 
     def test_that_handle_start_x_updated_will_reset_the_start_x_if_it_equals_the_end_x(self):
         self.mock_view_start_x = mock.PropertyMock(return_value=self.end_x)
@@ -274,31 +274,31 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.presenter.handle_start_x_updated()
 
-        calls = [mock.call(), mock.call(), mock.call(), mock.call(), mock.call(0.0), mock.call()]
-        self.mock_view_start_x.assert_has_calls(calls)
+        self.mock_view_start_x.assert_called_with(0.0)
 
-    def test_that_handle_start_x_updated_will_use_the_min_start_x_when_the_set_start_x_is_too_small(self):
+    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.x_limits_of_workspace")
+    def test_that_handle_start_x_updated_will_use_the_min_start_x_when_the_set_start_x_is_too_small(self, mock_x_limits):
         x_lower = 3.0
+        mock_x_limits.return_value = (x_lower, self.end_x)
         self.model.x_limits_of_workspace = mock.Mock(return_value=(x_lower, self.end_x))
 
         self.presenter.handle_start_x_updated()
 
-        calls = [mock.call(), mock.call(3.0), mock.call()]
-        self.mock_view_start_x.assert_has_calls(calls)
+        self.mock_view_start_x.assert_called_with(3.0)
 
-    def test_that_handle_start_x_updated_will_use_the_max_start_x_when_the_set_start_x_is_too_large(self):
+    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.x_limits_of_workspace")
+    def test_that_handle_start_x_updated_will_use_the_max_start_x_when_the_set_start_x_is_too_large(self, mock_x_limits):
         x_upper = -0.1
-        self.model.x_limits_of_workspace = mock.Mock(return_value=(self.start_x, x_upper))
+        mock_x_limits.return_value = (self.start_x, x_upper)
         self.model.is_equal_to_n_decimals = mock.Mock(return_value=False)
 
         self.presenter.handle_start_x_updated()
 
-        calls = [mock.call(), mock.call(), mock.call(15.0), mock.call()]
-        self.mock_view_start_x.assert_has_calls(calls)
+        self.mock_view_start_x.assert_called_with(15.0)
 
     def test_that_handle_end_x_updated_will_attempt_to_update_the_end_x_in_the_model(self):
         self.presenter.handle_end_x_updated()
-        self.mock_model_current_end_x.assert_called_once_with(self.end_x)
+        self.mock_model_current_end_x.assert_called_with(self.end_x)
 
     def test_that_handle_end_x_updated_will_reset_the_end_x_if_it_equals_the_end_x(self):
         self.mock_view_end_x = mock.PropertyMock(return_value=self.start_x)
@@ -306,8 +306,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.presenter.handle_end_x_updated()
 
-        calls = [mock.call(), mock.call(), mock.call(), mock.call(), mock.call(15.0), mock.call()]
-        self.mock_view_end_x.assert_has_calls(calls)
+        self.mock_view_end_x.assert_called_with(15.0)
 
     def test_that_handle_use_rebin_changed_will_not_update_the_model_if_the_rebin_check_fails(self):
         self.presenter._check_rebin_options = mock.Mock(return_value=False)
