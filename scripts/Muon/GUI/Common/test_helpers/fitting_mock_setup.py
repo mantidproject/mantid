@@ -18,6 +18,9 @@ def add_mock_methods_to_basic_fitting_view(view):
     view.set_slot_for_function_parameter_changed = mock.Mock()
     view.set_slot_for_start_x_updated = mock.Mock()
     view.set_slot_for_end_x_updated = mock.Mock()
+    view.set_slot_for_exclude_range_state_changed = mock.Mock()
+    view.set_slot_for_exclude_start_x_updated = mock.Mock()
+    view.set_slot_for_exclude_end_x_updated = mock.Mock()
     view.set_slot_for_minimizer_changed = mock.Mock()
     view.set_slot_for_evaluation_type_changed = mock.Mock()
     view.set_slot_for_use_raw_changed = mock.Mock()
@@ -34,6 +37,7 @@ def add_mock_methods_to_basic_fitting_view(view):
     view.switch_to_simultaneous = mock.Mock()
     view.switch_to_single = mock.Mock()
     view.disable_view = mock.Mock()
+    view.set_exclude_start_and_end_x_visible = mock.Mock()
     return view
 
 

@@ -60,6 +60,9 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.set_slot_for_function_parameter_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_start_x_updated.call_count, 1)
         self.assertEqual(self.view.set_slot_for_end_x_updated.call_count, 1)
+        self.assertEqual(self.view.set_slot_for_exclude_range_state_changed.call_count, 1)
+        self.assertEqual(self.view.set_slot_for_exclude_start_x_updated.call_count, 1)
+        self.assertEqual(self.view.set_slot_for_exclude_end_x_updated.call_count, 1)
         self.assertEqual(self.view.set_slot_for_minimizer_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_evaluation_type_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_use_raw_changed.call_count, 1)
@@ -308,6 +311,35 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.mock_view_end_x.assert_called_with(15.0)
 
+    def test_that_handle_exclude_range_state_changed_will_update_the_model_and_view(self):
+        self.presenter.handle_exclude_range_state_changed()
+
+        self.mock_view_exclude_range.assert_called_once_with()
+        self.mock_model_exclude_range.assert_has_calls([mock.call(True), mock.call()])
+        self.view.set_exclude_start_and_end_x_visible.assert_called_once_with(True)
+
+    def test_that_handle_exclude_start_x_updated_will_check_the_exclude_start_x_is_valid_before_updating_it(self):
+        self.presenter._check_exclude_start_x_is_valid = mock.Mock(return_value=(self.start_x, self.end_x))
+
+        self.presenter.handle_exclude_start_x_updated()
+
+        self.mock_view_exclude_start_x.assert_called_once_with()
+        self.mock_view_exclude_end_x.assert_called_once_with()
+        self.mock_model_current_exclude_start_x.assert_called_once_with()
+        self.presenter._check_exclude_start_x_is_valid.assert_called_once_with(self.start_x, self.end_x, self.start_x)
+        self.presenter.update_exclude_start_and_end_x_in_view_and_model.assert_called_once_with(self.start_x, self.end_x)
+
+    def test_that_handle_exclude_end_x_updated_will_check_the_exclude_end_x_is_valid_before_updating_it(self):
+        self.presenter._check_exclude_end_x_is_valid = mock.Mock(return_value=(self.start_x, self.end_x))
+
+        self.presenter.handle_exclude_end_x_updated()
+
+        self.mock_view_exclude_start_x.assert_called_once_with()
+        self.mock_view_exclude_end_x.assert_called_once_with()
+        self.mock_model_current_exclude_end_x.assert_called_once_with()
+        self.presenter._check_exclude_end_x_is_valid.assert_called_once_with(self.start_x, self.end_x, self.end_x)
+        self.presenter.update_exclude_start_and_end_x_in_view_and_model.assert_called_once_with(self.start_x, self.end_x)
+
     def test_that_handle_use_rebin_changed_will_not_update_the_model_if_the_rebin_check_fails(self):
         self.presenter._check_rebin_options = mock.Mock(return_value=False)
 
@@ -430,6 +462,12 @@ class BasicFittingPresenterTest(unittest.TestCase):
         type(self.view).start_x = self.mock_view_start_x
         self.mock_view_end_x = mock.PropertyMock(return_value=self.end_x)
         type(self.view).end_x = self.mock_view_end_x
+        self.mock_view_exclude_range = mock.PropertyMock(return_value=True)
+        type(self.view).exclude_range = self.mock_view_exclude_range
+        self.mock_view_exclude_start_x = mock.PropertyMock(return_value=self.start_x)
+        type(self.view).exclude_start_x = self.mock_view_exclude_start_x
+        self.mock_view_exclude_end_x = mock.PropertyMock(return_value=self.end_x)
+        type(self.view).exclude_end_x = self.mock_view_exclude_end_x
         self.mock_view_plot_guess = mock.PropertyMock(return_value=self.plot_guess)
         type(self.view).plot_guess = self.mock_view_plot_guess
         self.mock_view_function_name = mock.PropertyMock(return_value=self.function_name)
@@ -459,6 +497,12 @@ class BasicFittingPresenterTest(unittest.TestCase):
         type(self.model).end_xs = self.mock_model_end_xs
         self.mock_model_current_end_x = mock.PropertyMock(return_value=self.end_x)
         type(self.model).current_end_x = self.mock_model_current_end_x
+        self.mock_model_exclude_range = mock.PropertyMock(return_value=True)
+        type(self.model).exclude_range = self.mock_model_exclude_range
+        self.mock_model_current_exclude_start_x = mock.PropertyMock(return_value=self.start_x)
+        type(self.model).current_exclude_start_x = self.mock_model_current_exclude_start_x
+        self.mock_model_current_exclude_end_x = mock.PropertyMock(return_value=self.end_x)
+        type(self.model).current_exclude_end_x = self.mock_model_current_exclude_end_x
         self.mock_model_plot_guess = mock.PropertyMock(return_value=self.plot_guess)
         type(self.model).plot_guess = self.mock_model_plot_guess
         self.mock_model_minimizer = mock.PropertyMock(return_value=self.minimizer)
@@ -510,6 +554,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.presenter.selected_fit_results_changed.notify_subscribers = mock.Mock()
         self.presenter.fit_function_changed_notifier.notify_subscribers = mock.Mock()
         self.presenter.fit_parameter_changed_notifier.notify_subscribers = mock.Mock()
+        self.presenter.update_exclude_start_and_end_x_in_view_and_model = mock.Mock()
 
 
 if __name__ == '__main__':
