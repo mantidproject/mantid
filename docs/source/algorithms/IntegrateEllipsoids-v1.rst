@@ -295,6 +295,7 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
    | 3132     | 1189484  |     -4.0 |     -1.0 |      6.0 |      1.1 |     63.4 |   5299.3 |      1.0 |  13512.0 |    120.7 |     31.0 | bank18   |    108.0 |     38.0 | [4.02414,3.39659,3.83664] | [6.4679,0.298896,0.726133] | 9        |
    | 3132     | 1218337  |     -5.0 |     -2.0 |      7.0 |      1.0 |     79.8 |   4724.1 |      0.8 |   7411.0 |     88.3 |     15.0 | bank18   |     33.0 |    151.0 | [4.96622,3.61607,5.32554] | [7.99244,1.19363,0.892655] | 10       |
 
+
 **Example - IntegrateEllipsoids with staellite peaks:**
 
 Users should test this function with the data set that contains satellite peaks (such as **TOPAZ_36079_crop.nxs** from the testing data).
@@ -303,7 +304,6 @@ The first peak is a satellite peak, which was integrated using the satellite pea
 .. code-block:: python
    :linenos:
 
-   from mantid.simpleapi import *
    Load(Filename='TOPAZ_36079_crop.nxs',OutputWorkspace='ws',FilterByTofMin=500,FilterByTofMax=16666)
    UB = np.array([[0.15468228,0.10908475,-0.14428671],[-0.08922105,-0.08617147,-0.22976459],[-0.05616441,0.12536522,-0.03238277]])
    ConvertToMD(InputWorkspace='ws',QDimensions='Q3D',dEAnalysisMode='Elastic',Q3DFrames='Q_sample',LorentzCorrection=True,OutputWorkspace='md',MinValues='1,1,1.675',MaxValues='10,5,8.425')
@@ -313,8 +313,24 @@ The first peak is a satellite peak, which was integrated using the satellite pea
    AddPeakHKL('peaks', [1, 4, -3])
    AddPeakHKL('peaks', [1, 5, -3])
    # perform integration
-   IntegrateEllipsoids(InputWorkspace='ws',PeaksWorkspace='peaks',RegionRadius=0.055,SpecifySize=True,PeakSize=0.0425,BackgroundInnerSize=0.043,BackgroundOuterSize=0.055,OutputWorkspace='peaks_integrated_satellite',CutoffIsigI=5,UseOnePercentBackgroundCorrection=False,SatelliteRegionRadius=0.1,SatellitePeakSize=0.08,SatelliteBackgroundInnerSize=0.081,SatelliteBackgroundOuterSize=0.1)
+   IntegrateEllipsoids(
+      InputWorkspace='ws',
+      PeaksWorkspace='peaks',
+      RegionRadius=0.055,
+      SpecifySize=True,
+      PeakSize=0.0425,
+      BackgroundInnerSize=0.043,
+      BackgroundOuterSize=0.055,
+      OutputWorkspace='peaks_integrated_satellite',
+      CutoffIsigI=5,
+      UseOnePercentBackgroundCorrection=False,
+      SatelliteRegionRadius=0.1,
+      SatellitePeakSize=0.08,
+      SatelliteBackgroundInnerSize=0.081,
+      SatelliteBackgroundOuterSize=0.1)
 ​​
+
 .. categories::
 
 .. sourcelink::
+
