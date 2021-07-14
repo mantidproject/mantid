@@ -5,7 +5,7 @@ project(eigen-download NONE)
 include( ExternalProject )
 
 ExternalProject_Add(eigen
-  URL "https://github.com/eigenteam/eigen-git-mirror/archive/3.3.4.tar.gz"
+  URL "https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz"
   URL_HASH "MD5=1896a1f682e6cdcffd91b6e5ba8286a2"
   DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/extern-eigen/download
   SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/extern-eigen/source
