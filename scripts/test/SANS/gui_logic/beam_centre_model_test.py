@@ -146,6 +146,17 @@ class BeamCentreModelTest(unittest.TestCase):
         self.beam_centre_model.lab_pos_1 = 'a'
         self.assertEqual(self.beam_centre_model.lab_pos_1, 'a')
 
+    def test_scaling_ignores_zero_vals(self):
+        self.beam_centre_model.lab_pos_1 = 0.0
+        self.beam_centre_model.lab_pos_2 = 0.0
+        self.beam_centre_model.hab_pos_1 = 0.0
+        self.beam_centre_model.hab_pos_2 = 0.0
+
+        self.assertEqual(0.0, self.beam_centre_model.lab_pos_1)
+        self.assertEqual(0.0, self.beam_centre_model.lab_pos_2)
+        self.assertEqual(0.0, self.beam_centre_model.hab_pos_1)
+        self.assertEqual(0.0, self.beam_centre_model.hab_pos_2)
+
 
 if __name__ == '__main__':
     unittest.main()

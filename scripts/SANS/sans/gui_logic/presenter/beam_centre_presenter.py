@@ -13,8 +13,6 @@ from ui.sans_isis.work_handler import WorkHandler
 
 
 class BeamCentrePresenter(object):
-    DECIMAL_PLACES_CENTRE_POS = 3
-
     class ConcreteBeamCentreListener(BeamCentre.BeamCentreListener):
         def __init__(self, presenter):
             self._presenter = presenter
@@ -69,10 +67,10 @@ class BeamCentrePresenter(object):
         # Enable button
         self._view.set_run_button_to_normal()
         # Update Centre Positions in model and GUI
-        self._view.lab_pos_1 = round(float(self._beam_centre_model.lab_pos_1), self.DECIMAL_PLACES_CENTRE_POS)
-        self._view.lab_pos_2 = round(float(self._beam_centre_model.lab_pos_2), self.DECIMAL_PLACES_CENTRE_POS)
-        self._view.hab_pos_1 = round(float(self._beam_centre_model.hab_pos_1), self.DECIMAL_PLACES_CENTRE_POS)
-        self._view.hab_pos_2 = round(float(self._beam_centre_model.hab_pos_2), self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.lab_pos_1 = self._round(self._beam_centre_model.lab_pos_1)
+        self._view.lab_pos_2 = self._round(self._beam_centre_model.lab_pos_2)
+        self._view.hab_pos_1 = self._round(self._beam_centre_model.hab_pos_1)
+        self._view.hab_pos_2 = self._round(self._beam_centre_model.hab_pos_2)
 
     def on_processing_error_centre_finder(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))
@@ -142,14 +140,14 @@ class BeamCentrePresenter(object):
         lab_pos_1 = self._beam_centre_model.lab_pos_1
         lab_pos_2 = self._beam_centre_model.lab_pos_2
 
-        hab_pos_1 = self._beam_centre_model.hab_pos_1 if self._beam_centre_model.hab_pos_1 else lab_pos_1
-        hab_pos_2 = self._beam_centre_model.hab_pos_2 if self._beam_centre_model.hab_pos_2 else lab_pos_2
+        hab_pos_1 = self._beam_centre_model.hab_pos_1 if self._beam_centre_model.hab_pos_1 == '' else lab_pos_1
+        hab_pos_2 = self._beam_centre_model.hab_pos_2 if self._beam_centre_model.hab_pos_2 == '' else lab_pos_2
 
-        self._view.lab_pos_1 = round(float(lab_pos_1), self.DECIMAL_PLACES_CENTRE_POS)
-        self._view.lab_pos_2 = round(float(lab_pos_2), self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.lab_pos_1 = self._round(lab_pos_1)
+        self._view.lab_pos_2 = self._round(lab_pos_2)
 
-        self._view.hab_pos_1 = round(float(hab_pos_1), self.DECIMAL_PLACES_CENTRE_POS)
-        self._view.hab_pos_2 = round(float(hab_pos_2), self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.hab_pos_1 = self._round(hab_pos_1)
+        self._view.hab_pos_2 = self._round(hab_pos_2)
 
     def update_hab_selected(self):
         self._beam_centre_model.update_hab = True
@@ -185,6 +183,14 @@ class BeamCentrePresenter(object):
         attribute = getattr(state_model, attribute_name)
         if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
             setattr(self._view, attribute_name, attribute)
+
+    def _round(self, val):
+        DECIMAL_PLACES_CENTRE_POS = 3
+        try:
+            val = float(val)
+        except ValueError:
+            return val
+        return round(val, DECIMAL_PLACES_CENTRE_POS)
 
     def _validate_radius_values(self):
         min_value = getattr(self._view, "r_min_line_edit").text()
