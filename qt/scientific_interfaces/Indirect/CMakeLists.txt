@@ -7,13 +7,13 @@ set(
         CorrectionsTab.cpp
         ConvFitAddWorkspaceDialog.cpp
         ConvFitDataPresenter.cpp
-        ConvFitDataTablePresenter.cpp
+        ConvFitDataView.cpp
         ConvFitModel.cpp
         DensityOfStates.cpp
         FitStatusWidget.cpp
         FqFitAddWorkspaceDialog.cpp
         FqFitDataPresenter.cpp
-        FqFitDataTablePresenter.cpp
+        FqFitDataView.cpp
         FqFitModel.cpp
         FunctionTemplateBrowser.cpp
         IDAFunctionParameterEstimation.cpp
@@ -42,7 +42,6 @@ set(
         IndirectFitAnalysisTab.cpp
         IndirectFitData.cpp
         IndirectFitDataPresenter.cpp
-	IndirectFitDataTablePresenter.cpp
         IndirectFitDataView.cpp
         IndirectFitOutputOptionsModel.cpp
         IndirectFitOutputOptionsPresenter.cpp
@@ -52,7 +51,7 @@ set(
         IndirectFitPlotView.cpp
         IndirectFitPropertyBrowser.cpp
         IndirectFittingModel.cpp
-        IndirectFitDataTableModel.cpp
+        IndirectFitDataModel.cpp
         IndirectFitOutputModel.cpp
         IndirectFunctionBrowser/ConvTypes.cpp
         IndirectFunctionBrowser/ConvFunctionModel.cpp
@@ -103,15 +102,15 @@ set(
         ContainerSubtraction.h
         ConvFitAddWorkspaceDialog.h
         ConvFitDataPresenter.h
-        ConvFitDataTablePresenter.h
+        ConvFitDataView.h
         CorrectionsTab.h
         DensityOfStates.h
         FqFitAddWorkspaceDialog.h
         FqFitDataPresenter.h
-        FqFitDataTablePresenter.h
+        FqFitDataView.h
         FunctionTemplateBrowser.h
         IAddWorkspaceDialog.h
-        IIndirectFitDataTableModel.h
+        IIndirectFitDataModel.h
         IIndirectFitDataView.h
         IIndirectFitOutputOptionsView.h
         IIndirectFitPlotView.h
@@ -136,7 +135,6 @@ set(
         IndirectEditResultsDialog.h
         IndirectFitAnalysisTab.h
         IndirectFitDataPresenter.h
-	IndirectFitDataTablePresenter.h
         IndirectFitDataView.h
         IndirectFitOutputOptionsPresenter.h
         IndirectFitOutputOptionsView.h
@@ -190,7 +188,7 @@ set(
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h
         IndirectFittingModel.h
-        IndirectFitDataTableModel.h
+        IndirectFitDataModel.h
         IndirectFitOutputModel.h
         IndirectFunctionBrowser/ConvFunctionModel.h
         IndirectPlotOptionsModel.h

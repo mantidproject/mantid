@@ -18,7 +18,7 @@ class ConvFitAddWorkspaceDialog;
 class MANTIDQT_INDIRECT_DLL ConvFitDataPresenter : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view);
+  ConvFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
 
 signals:
   void modelResolutionAdded(std::string const &name, WorkspaceID const &workspaceID);
@@ -26,11 +26,12 @@ signals:
 private slots:
   void setModelResolution(const QString &name);
 
+protected:
+  void addTableEntry(FitDomainIndex row) override;
+
 private:
   void setModelResolution(std::string const &name, WorkspaceID const &workspaceID);
   std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
-
-  ConvFitModel *m_convModel;
 };
 
 } // namespace IDA

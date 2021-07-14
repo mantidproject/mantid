@@ -49,7 +49,8 @@ IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(new ConvTemplateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
   m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(CONVFIT_HIDDEN_PROPS);
-  auto dataPresenter = std::make_unique<ConvFitDataPresenter>(m_convFittingModel, m_uiForm->dockArea->m_fitDataView);
+  auto dataPresenter =
+      std::make_unique<ConvFitDataPresenter>(m_convFittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
   connect(dataPresenter.get(), SIGNAL(modelResolutionAdded(std::string const &, WorkspaceID const &)), this,
           SLOT(setModelResolution(std::string const &, WorkspaceID const &)));
   setFitDataPresenter(std::move(dataPresenter));

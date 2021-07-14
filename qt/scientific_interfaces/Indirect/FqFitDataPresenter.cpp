@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqFitDataPresenter.h"
-#include "FqFitDataTablePresenter.h"
 #include "IDAFunctionParameterEstimation.h"
+#include "MantidAPI/TextAxis.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -16,8 +16,8 @@ namespace IDA {
 
 FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view,
                                        IFQFitObserver *SingleFunctionTemplateBrowser)
-    : IndirectFitDataPresenter(model, view, std::make_unique<FqFitDataTablePresenter>(model, view->getDataTable())),
-      m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}), m_fqFitModel(model),
+    : IndirectFitDataPresenter(model->getFitDataModel(), view), m_activeParameterType("Width"),
+      m_activeWorkspaceID(WorkspaceID{0}), m_fqFitModel(model),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
   connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveWorkspaceID()));
 
@@ -91,12 +91,6 @@ void FqFitDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDia
   updateActiveWorkspaceID(index);
 }
 
-void FqFitDataPresenter::closeDialog() {
-  //  if (m_fqFitModel->getNumberOfWorkspaces() > m_activeWorkspaceID)
-  //    m_fqFitModel->removeWorkspace(m_activeWorkspaceID);
-  IndirectFitDataPresenter::closeDialog();
-}
-
 std::unique_ptr<IAddWorkspaceDialog> FqFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<FqFitAddWorkspaceDialog>(parent);
   connect(dialog.get(), SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
@@ -106,6 +100,28 @@ std::unique_ptr<IAddWorkspaceDialog> FqFitDataPresenter::getAddWorkspaceDialog(Q
   return dialog;
 }
 
+void FqFitDataPresenter::addTableEntry(FitDomainIndex row) {
+  const auto &name = m_model->getWorkspace(row)->getName();
+
+  auto subIndices = m_model->getSubIndices(row);
+  const auto workspace = m_model->getWorkspace(subIndices.first);
+  const auto axis = dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(1));
+  const auto parameter = axis->label(subIndices.second.value);
+
+  const auto workspaceIndex = m_model->getSpectrum(row);
+  const auto range = m_model->getFittingRange(row);
+  const auto exclude = m_model->getExcludeRegion(row);
+
+  FitDataRow newRow;
+  newRow.name = name;
+  newRow.workspaceIndex = workspaceIndex;
+  newRow.parameter = parameter;
+  newRow.startX = range.first;
+  newRow.endX = range.second;
+  newRow.exclude = exclude;
+
+  m_view->addTableEntry(row.value, newRow);
+}
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IIndirectFitDataTableModel.h"
+#include "IIndirectFitDataModel.h"
 #include "IIndirectFitOutput.h"
 #include "IIndirectFittingModel.h"
 #include "IndirectFitData.h"
@@ -44,7 +44,7 @@ public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
 
-  // Functions that interact with IndirectFitDataTableModel
+  // Functions that interact with IndirectFitDataModel
   virtual void addWorkspace(const std::string &workspaceName) override;
   void addWorkspace(const std::string &workspaceName, const std::string &spectra) override;
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) override;
@@ -114,7 +114,7 @@ public:
   getDataForParameterEstimation(const EstimationDataSelector &selector) const override;
   void removeFittingData() override;
 
-  IIndirectFitDataTableModel *getFitDataModel() override;
+  IIndirectFitDataModel *getFitDataModel() override;
 
 protected:
   std::string createOutputName(const std::string &fitMode) const;
@@ -126,7 +126,7 @@ protected:
   std::string m_fitType = "FitType";
   std::string m_fitString = "FitString";
 
-  std::unique_ptr<IIndirectFitDataTableModel> m_fitDataModel;
+  std::unique_ptr<IIndirectFitDataModel> m_fitDataModel;
 
 private:
   std::vector<std::string> getWorkspaceNames() const;

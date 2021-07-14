@@ -206,7 +206,7 @@ void IndirectFitAnalysisTab::setModelEndX(double endX) {
   }
 }
 
-void IndirectFitAnalysisTab::updateDataInTable() { m_dataPresenter->updateDataInTable(); }
+void IndirectFitAnalysisTab::updateDataInTable() { m_dataPresenter->updateTableFromModel(); }
 
 void IndirectFitAnalysisTab::tableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (isRangeCurrentlySelected(workspaceID, spectrum)) {

@@ -51,7 +51,14 @@ public:
   /// Public Methods
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
-
+  MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow newRow));
+  MOCK_CONST_METHOD0(workspaceIndexColumn, int());
+  MOCK_CONST_METHOD0(startXColumn, int());
+  MOCK_CONST_METHOD0(endXColumn, int());
+  MOCK_CONST_METHOD0(excludeColumn, int());
+  MOCK_METHOD0(clearTable, void());
+  MOCK_CONST_METHOD2(getText, QString(int row, int column));
+  MOCK_CONST_METHOD0(getSelectedIndexes, QModelIndexList());
   /// Public slots
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
 };

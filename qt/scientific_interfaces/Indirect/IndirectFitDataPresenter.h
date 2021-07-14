@@ -8,7 +8,6 @@
 
 #include "IAddWorkspaceDialog.h"
 #include "IIndirectFitDataView.h"
-#include "IndirectFitDataTablePresenter.h"
 #include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
@@ -27,7 +26,7 @@ using namespace MantidWidgets;
 class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject, public AnalysisDataServiceObserver {
   Q_OBJECT
 public:
-  IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view);
+  IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
 
   void setSampleWSSuffices(const QStringList &suffices);
@@ -38,12 +37,9 @@ public:
   QStringList getSampleFBSuffices() const;
   QStringList getResolutionWSSuffices() const;
   QStringList getResolutionFBSuffices() const;
-
-  void updateDataInTable();
+  void updateTableFromModel();
 
   UserInputValidator &validate(UserInputValidator &validator);
-
-  DataForParameterEstimationCollection getDataForParameterEstimation(const EstimationDataSelector &selector) const;
 
 protected slots:
   void showAddWorkspaceDialog();
@@ -62,26 +58,30 @@ signals:
   void requestedAddWorkspaceDialog();
 
 protected:
-  IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view,
-                           std::unique_ptr<IndirectFitDataTablePresenter> tablePresenter);
   IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
   void displayWarning(const std::string &warning);
+  virtual void addTableEntry(FitDomainIndex row);
   QStringList m_wsSampleSuffixes;
   QStringList m_fbSampleSuffixes;
   QStringList m_wsResolutionSuffixes;
   QStringList m_fbResolutionSuffixes;
+  IIndirectFitDataModel *m_model;
+  IIndirectFitDataView *m_view;
 
 private slots:
   void addData();
+  void handleCellChanged(int row, int column);
+  void removeSelectedData();
 
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
+  void setModelStartXAndEmit(double startX, FitDomainIndex row);
+  void setModelEndXAndEmit(double endX, FitDomainIndex row);
+  void setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row);
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
-  IIndirectFittingModel *m_model;
-  IIndirectFitDataView *m_view;
-  std::unique_ptr<IndirectFitDataTablePresenter> m_tablePresenter;
+  bool m_emitCellChanged = true;
 };
 
 } // namespace IDA
