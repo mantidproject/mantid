@@ -298,6 +298,7 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
 **Example - IntegrateEllipsoids with staellite peaks:**
 
 Users should test this function with the data set that contains satellite peaks (such as **TOPAZ_36079_crop.nxs** from the testing data).
+The first peak is a satellite peak, which was integrated using the satellite peak integrator, while the other peaks are regular Bragg peaks integrated using the default integrator.
 
 .. code-block:: python
    :linenos:
@@ -314,9 +315,6 @@ Users should test this function with the data set that contains satellite peaks 
    # perform integration
    IntegrateEllipsoids(InputWorkspace='ws',PeaksWorkspace='peaks',RegionRadius=0.055,SpecifySize=True,PeakSize=0.0425,BackgroundInnerSize=0.043,BackgroundOuterSize=0.055,OutputWorkspace='peaks_integrated_satellite',CutoffIsigI=5,UseOnePercentBackgroundCorrection=False,SatelliteRegionRadius=0.1,SatellitePeakSize=0.08,SatelliteBackgroundInnerSize=0.081,SatelliteBackgroundOuterSize=0.1)
 ​​
-The first peak is a satellite peak, which was integrated using the satellite peak integrator;
-The other peaks are regular Bragg peaks, which were integrated using the default integrator.
-
 .. categories::
 
 .. sourcelink::
