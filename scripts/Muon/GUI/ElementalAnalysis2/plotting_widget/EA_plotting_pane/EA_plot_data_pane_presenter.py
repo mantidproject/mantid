@@ -19,8 +19,7 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         self._view.hide_plot_diff()
         self._view.enable_tile_plotting_options()
         self._view.enable_plot_raw_option()
-        self.added_group_observer = GenericObserverWithArgPassing(self.handle_added_or_removed_group_to_plot)
-        self.add_or_remove_plot_observer = GenericObserverWithArgPassing(self.handle_added_or_removed_group_to_plot)
+        self.data_changed_observer = GenericObserverWithArgPassing(self.handle_added_or_removed_group_to_plot)
 
     def handle_data_type_changed(self):
         """
@@ -49,6 +48,7 @@ class EAPlotDataPanePresenter(BasePanePresenter):
             self.handle_added_group_to_plot()
         else:
             self.handle_removed_group_from_plot(name)
+        self._figure_presenter._handle_autoscale_y_axes()
 
     def handle_added_group_to_plot(self):
         """

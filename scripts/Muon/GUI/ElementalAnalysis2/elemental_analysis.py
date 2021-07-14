@@ -150,7 +150,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget.grouping_table_widget.data_changed_notifier.add_subscriber(
             self.auto_tab.auto_tab_presenter.group_change_observer)
 
-        for observer in self.plot_widget.add_or_remove_plot_observers:
+        for observer in self.plot_widget.data_changed_observers:
             self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(observer)
 
         for observer in self.plot_widget.workspace_deleted_from_ads_observers:
