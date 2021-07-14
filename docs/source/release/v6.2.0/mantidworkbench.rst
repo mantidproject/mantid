@@ -34,5 +34,6 @@ Bugfixes
 - Fixed a bug where parameters wouldn't update in the fit property browser when fitting a single function with ties.
 - Fixed a bug retrieving algorithm history from a workspace when the retrieval methods were chained together.
 - Added missing icon for the uninstaller in Windows "Apps & features" list.
+- Fixed a bug where output workspaces of different types would interfere with successive calls to binary operations, such as multiply.
 
 :ref:`Release 6.2.0 <v6.2.0>`
