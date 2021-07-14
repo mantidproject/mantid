@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from enum import Enum
 from os import path
 from mantid.api import *
 from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logger
@@ -13,9 +14,182 @@ from matplotlib import gridspec
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
-
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
+
+
+class GROUP(Enum):
+    """Group Enum with attributes: banks (list of banks required for calibration) and grouping ws name"""
+    def __new__(self, value, banks):
+        obj = object.__new__(self)
+        obj._value_ = value  # overwrite value to be first arg
+        obj.banks = banks  # set attribute bank
+        return obj
+    # value of enum is the file suffix of .prm (for easy creation)
+    #       value,  banks
+    BOTH = "banks", [1, 2]
+    NORTH = "1", [1]
+    SOUTH = "2", [2]
+    CROPPED = "Custom", []  # pdcal results will be saved with file with same suffix
+    CUSTOM = "Cropped", []  # pdcal results will be saved with file with same suffix
+    TEXTURE = "Texture", [1, 2]
+
+
+class GroupingInfo:
+    def __init__(self, group=None):
+        self.group = group
+        self.group_ws = None
+        self.description = None
+        self.prm_filepath = None
+        self.cal_filepath = None
+        self.spectra_list = None
+        # private dicts with enum keys to avoid hard-coding strings in multiple places and many if/elif branches
+        # would like to reduce the number of these required by making naming more consistent but required for
+        # backwards compatibility
+        self._group_files = {GROUP.BOTH: "ENGINX_NorthAndSouth_grouping.xml", GROUP.NORTH: "ENGINX_North_grouping.xml",
+                             GROUP.SOUTH: "ENGINX_South_grouping.xml", GROUP.TEXTURE: "ENGINX_Texture_grouping.xml"}
+        self._group_bank_args = {GROUP.BOTH: "NorthBank,SouthBank", GROUP.NORTH: "NorthBank", GROUP.SOUTH: "SouthBank"}
+        self._group_descriptions = {GROUP.BOTH: "North and South Banks", GROUP.NORTH: "North Bank",
+                                    GROUP.SOUTH: "South Bank", GROUP.CROPPED: "Custom spectrum numbers",
+                                    GROUP.CUSTOM: "Custom .cal file", GROUP.TEXTURE: "Texture"}
+        self._group_ws_names = {GROUP.BOTH: "NorthAndSouthBank_grouping", GROUP.NORTH: "NorthBank_grouping",
+                                    GROUP.SOUTH: "SouthBank_grouping", GROUP.CROPPED: "Cropped_spectra_grouping",
+                                    GROUP.CUSTOM: "Custom_calfile_grouping", GROUP.TEXTURE: "Texture"}
+        self._group_suffix = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2",
+                              GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}
+
+    # getters
+    def get_group_suffix(self):
+        if self.group:
+            return self._group_suffix[self.group]
+
+    def get_group_description(self):
+        if self.group:
+            return self._group_descriptions[self.group]
+
+    def get_group_file(self):
+        if self.group:
+            return self._group_files[self.group]
+
+    # setters
+    def set_spectra_list(self, spectra_list):
+        self.spectra_list = spectra_list
+
+    def set_cal_file(self, spectra_list):
+        self.spectra_list = spectra_list
+
+    def set_group(self, group):
+        self.group = group
+
+    def set_group_from_prm_fname(self, file_path):
+        basepath, fname = path.split(file_path)
+        fname_words = fname.split('_')
+        suffix = fname_words[-1]
+        if any(grp.value == suffix for grp in GROUP):
+            self.group = GROUP(suffix)
+            self.prm_filepath = file_path
+        else:
+            raise ValueError("Group not set: region of interest not recognised from .prm file name")
+
+    # functional
+    def load_relevant_calibration_files(self, output_prefix="engggui"):
+        basepath, fname = path.split(self.prm_filepath)
+        fname_words = fname.split('_')
+        prefix = '_'.join(fname_words[0:3])
+        if self.group.banks:
+            for bank in self.group.banks:
+                suffix = f"_bank_{bank}"
+                path_to_load = path.join(basepath, prefix + suffix + ".nxs")
+                mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration" + suffix)
+        else:
+            suffix = f"_{self.group.value}"  # custom or cropped (.prm suffix)
+            path_to_load = path.join(basepath, prefix + suffix + ".nxs")
+            mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration" + suffix)
+
+    def load_custom_grouping_workspace(self):
+        """
+        Determine the grouping workspace that corresponds to the .prm calibration file being loaded, and if this is a
+        non-bank based region, load and return the saved grouping workspace corresponding to the calibration being loaded.
+        :param file_path: Path to the .prm file being loaded
+        :return: Name of the grouping workspace IF custom, and description of roi for use as display text on the Focus tab
+        """
+        if not self.group.banks:
+            # no need to load grp ws for bank grouping
+            ws_name = self._group_ws_names[self.group]
+            filepath_no_ext, _ = path.splittext(self.prm_filepath)
+            mantid.LoadDetectorsGroupingFile(InputFile=filepath_no_ext + ".xml", OutputWorkspace=ws_name)
+            self.group_ws = ws_name
+
+    def save_grouping_workspace(self, directory: str, ceria_path: str, vanadium_path: str, instrument: str) -> None:
+        if self.group and not self.group.banks:
+            name = generate_output_file_name(vanadium_path, ceria_path, instrument, self.group.value, '.xml')
+            save_path = path.join(directory, name)
+            mantid.SaveDetectorsGrouping(InputWorkspace=self.group_ws, OutputFile=save_path)
+        else:
+            logger.warning("Only save grouping workspace for custom or cropped groupings.")
+        return
+
+    def generate_output_file_name(self, vanadium_path, ceria_path, instrument, ext='.prm'):
+        """
+        TO BE CALLED FROM CALIBRATIONINFO
+        Generate an output filename in the form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
+        :param vanadium_path: Path to vanadium data file
+        :param ceria_path: Path to ceria data file
+        :param instrument: The instrument in use.
+        :param ext: Extension to be used on the saved file
+        :return: The filename, the vanadium run number, and ceria run number.
+        """
+        vanadium_no = path_handling.get_run_number_from_path(vanadium_path, instrument)
+        ceria_no = path_handling.get_run_number_from_path(ceria_path, instrument)
+        filename = "_".join([instrument, vanadium_no, ceria_no, self.get_group_suffix()])
+        return filename + ext
+
+    def get_group_ws(self, sample_ws):
+        if not self.group_ws or not ADS.doesExist(self.group_ws):
+            if self.group.banks:
+                self.create_bank_grouping_workspace(sample_ws)
+            elif self.group == GROUP.CROPPED:
+                self.create_grouping_workspace_from_spectra_list(sample_ws)
+            elif self.group == GROUP.CUSTOM:
+                self.create_grouping_workspace_from_calfile(sample_ws)
+        return self.group_ws
+
+    def create_bank_grouping_workspace(self, sample_raw):  # -> GroupingWorkspace
+        """
+        Retrieve the grouping workspace for the North/South bank from the user directories, or create a new one from the
+        sample workspace instrument data if not found
+        :param bank: integer denoting the bank, 1 or 2 for North/South respectively
+        :param sample_raw: Workspace containing the instrument data that can be used to create a new grouping workspace
+        :return: The loaded or created grouping workspace
+        """
+        ws_name = self._group_ws_names[self.group]
+        grp_ws = None
+        try:
+            grp_ws = mantid.LoadDetectorsGroupingFile(InputFile=self._group_files[self.group],
+                                                      OutputWorkspace=ws_name)
+        except ValueError:
+            logger.notice("Grouping file not found in user directories - creating one")
+            if self.group.banks and self.group != GROUP.TEXTURE:
+                grp_ws, _, _ = mantid.CreateGroupingWorkspace(InputWorkspace=sample_raw, OutputWorkspace=ws_name,
+                                                              GroupNames=self._group_bank_args[self.group])
+        if grp_ws:
+            self.group_ws = grp_ws
+        else:
+            raise ValueError("Could not find or create grouping requested - make sure the directory of the grouping.xml"
+                             " files is on the path")
+
+    def create_grouping_workspace_from_calfile(self, sample_raw):  # -> GroupingWorkspace
+        grp_ws, _, _ = mantid.CreateGroupingWorkspace(InputWorkspace=sample_raw, OldCalFilename=self.cal_filepath,
+                                                      OutputWorkspace="Custom_calfile_grouping")
+        self.group_ws = grp_ws
+
+    def create_grouping_workspace_from_spectra_list(self, sample_raw):
+        grp_ws, _, _ = mantid.CreateGroupingWorkspace(InputWorkspace=sample_raw,
+                                                      OutputWorkspace="Custom_spectra_grouping")
+        for spec in self.spectra_list:
+            det_ids = grp_ws.getDetectorIDs(int(spec - 1))
+            grp_ws.setValue(det_ids[0], 1)
+        self.group_ws = grp_ws
 
 
 def determine_roi_from_prm_fname(file_path: str) -> str:
