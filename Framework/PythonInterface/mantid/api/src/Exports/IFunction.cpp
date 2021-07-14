@@ -241,6 +241,9 @@ void export_IFunction() {
 
       .def("nDomains", &IFunction::getNumberDomains, arg("self"), "Get the number of domains.")
 
+      .def("functionDeriv", &IFunction::functionDeriv, (arg("self"), arg("domain"), arg("jacobian")),
+           "Returns the derivatives of the function with respect to active parameters")
+
       .def("setMatrixWorkspace", &setMatrixWorkspace,
            (arg("self"), arg("workspace"), arg("wi"), arg("startX"), arg("endX")),
            "Set matrix workspace to parse Parameters.xml")
