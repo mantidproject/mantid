@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitDataPresenter.h"
 #include "ConvFitAddWorkspaceDialog.h"
-#include "ConvFitDataTablePresenter.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -15,8 +14,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(model, view, std::make_unique<ConvFitDataTablePresenter>(model, view->getDataTable())),
-      m_convModel(model) {
+    : IndirectFitDataPresenter(model, view), m_convModel(model) {
   connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SLOT(setModelResolution(const QString &)));
   connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SIGNAL(singleResolutionLoaded()));
 }
@@ -41,6 +39,25 @@ std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog
   dialog->setResolutionWSSuffices(getResolutionWSSuffices());
   dialog->setResolutionFBSuffices(getResolutionFBSuffices());
   return dialog;
+}
+
+void ConvFitDataPresenter::addTableEntry(FitDomainIndex row) {
+  const auto &name = m_model->getWorkspace(row)->getName();
+  auto resolutionVector = m_model->getResolutionsForFit();
+  const auto resolution = resolutionVector.at(row.value).first;
+  const auto workspaceIndex = m_model->getSpectrum(row);
+  const auto range = m_model->getFittingRange(row);
+  const auto exclude = m_model->getExcludeRegion(row);
+
+  FitDataRow newRow;
+  newRow.name = name;
+  newRow.workspaceIndex = workspaceIndex;
+  newRow.resolution = resolution;
+  newRow.startX = range.first;
+  newRow.endX = range.second;
+  newRow.exclude = exclude;
+
+  m_view->addTableEntry(row.value, newRow);
 }
 
 } // namespace IDA

@@ -40,7 +40,7 @@ public:
                                                                            WorkspaceIndex spectrum) const = 0;
   virtual std::unordered_map<std::string, ParameterValue> getDefaultParameters(WorkspaceID workspaceID) const = 0;
 
-  // Functions that interact with IndirectFitDataTableModel
+  // Functions that interact with IndirectFitDataModel
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const = 0;
   virtual FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const = 0;
@@ -96,7 +96,7 @@ public:
   getDataForParameterEstimation(const EstimationDataSelector &selector) const = 0;
   virtual void removeFittingData() = 0;
 
-  virtual IIndirectFitDataTableModel *getFitDataModel() = 0;
+  virtual IIndirectFitDataModel *getFitDataModel() = 0;
 };
 
 } // namespace IDA

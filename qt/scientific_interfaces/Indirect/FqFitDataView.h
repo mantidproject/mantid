@@ -6,34 +6,30 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "FqFitModel.h"
-#include "IndirectFitDataTablePresenter.h"
+#include "IndirectFitDataView.h"
 
-#include <QTableWidget>
+#include "DllConfig.h"
 
-#include <cstddef>
-#include <unordered_map>
+#include <QTabWidget>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-
 /**
-  Presenter for a table of data containing Widths/EISF.
+Presenter for a table of convolution fitting data.
 */
-class DLLExport FqFitDataTablePresenter : public IndirectFitDataTablePresenter {
+class MANTIDQT_INDIRECT_DLL FqFitDataView : public IndirectFitDataView {
   Q_OBJECT
 public:
-  FqFitDataTablePresenter(FqFitModel *model, QTableWidget *dataTable);
-
-protected:
-  void addTableEntry(FitDomainIndex row) override;
-
-private:
+  FqFitDataView(QWidget *parent = nullptr);
+  void addTableEntry(size_t row, FitDataRow newRow) override;
   int workspaceIndexColumn() const override;
   int startXColumn() const override;
   int endXColumn() const override;
   int excludeColumn() const override;
+
+protected:
+  FqFitDataView(const QStringList &headers, QWidget *parent = nullptr);
 };
 
 } // namespace IDA

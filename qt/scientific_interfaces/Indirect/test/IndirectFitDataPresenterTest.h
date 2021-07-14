@@ -10,8 +10,8 @@
 #include <gmock/gmock.h>
 
 #include "IIndirectFitDataView.h"
+#include "IndirectFitDataModel.h"
 #include "IndirectFitDataPresenter.h"
-#include "IndirectFitDataTableModel.h"
 #include "IndirectFitDataTablePresenterTest.h"
 #include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
@@ -41,9 +41,9 @@ public:
 };
 
 /// Mock object to mock the model
-class MockIndirectFitDataTableModel : public IIndirectFittingModel {
+class MockIndirectFitDataModel : public IIndirectFittingModel {
 public:
-  MockIndirectFitDataTableModel() : m_fitDataModel(std::make_unique<MockIndirectDataTableModel>()) {}
+  MockIndirectFitDataModel() : m_fitDataModel(std::make_unique<MockIndirectDataModel>()) {}
 
   /// Public Methods
   MOCK_CONST_METHOD2(isPreviouslyFit, bool(WorkspaceID workspaceID, WorkspaceIndex spectrum));
@@ -117,10 +117,10 @@ public:
 
   MOCK_METHOD0(removeFittingData, void());
 
-  IIndirectFitDataTableModel *getFitDataModel() override { return m_fitDataModel.get(); }
+  IIndirectFitDataModel *getFitDataModel() override { return m_fitDataModel.get(); }
 
 protected:
-  std::unique_ptr<IIndirectFitDataTableModel> m_fitDataModel;
+  std::unique_ptr<IIndirectFitDataModel> m_fitDataModel;
 
 private:
   std::string sequentialFitOutputName() const { return ""; };
@@ -173,7 +173,7 @@ public:
 
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockIIndirectFitDataView>>();
-    m_model = std::make_unique<NiceMock<MockIndirectFitDataTableModel>>();
+    m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_table.get()));
     m_presenter = std::make_unique<IndirectFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()));
@@ -259,7 +259,7 @@ private:
   std::unique_ptr<QTableWidget> m_table;
 
   std::unique_ptr<MockIIndirectFitDataView> m_view;
-  std::unique_ptr<MockIndirectFitDataTableModel> m_model;
+  std::unique_ptr<MockIndirectFitDataModel> m_model;
   std::unique_ptr<IndirectFitDataPresenter> m_presenter;
 
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;

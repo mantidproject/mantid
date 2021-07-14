@@ -36,10 +36,10 @@ private slots:
 signals:
   void spectrumChanged(WorkspaceIndex);
 
-protected slots:
+protected:
+  void addTableEntry(FitDomainIndex row) override;
 
 private:
-  void closeDialog() override;
   std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
   void updateParameterOptions(FqFitAddWorkspaceDialog *dialog, FqFitParameters parameters);
   void updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters);
