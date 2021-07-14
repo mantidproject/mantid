@@ -125,63 +125,8 @@ Ubuntu 20.04
 - The header and lib shipped with Anaconda (if installed) could interfere with Mantid building _
   process. It is highly recommended to remove Anaconda Python from your env prior to building _
   using `conda deactivate`.
-- Mantid is not yet officially supported on Ubuntu 20.04 as Qt4 has been removed but Workbench can be built by installing:
-
-.. code-block:: sh
-
-   apt-get install -y \
-     git \
-     g++ \
-     clang-format-6.0 \
-     cmake \
-     dvipng \
-     doxygen \
-     libtbb-dev \
-     libgoogle-perftools-dev \
-     libboost-all-dev \
-     libpoco-dev \
-     libnexus-dev \
-     libhdf5-dev \
-     libhdf4-dev \
-     libjemalloc-dev \
-     libgsl-dev \
-     liboce-visualization-dev \
-     libmuparser-dev \
-     libssl-dev \
-     libjsoncpp-dev \
-     librdkafka-dev \
-     qtbase5-dev \
-     qttools5-dev \
-     qttools5-dev-tools \
-     libqt5webkit5-dev \
-     libqt5x11extras5-dev \
-     libqt5opengl5-dev \
-     libqscintilla2-qt5-dev \
-     libpython3-dev \
-     ninja-build \
-     python3-setuptools \
-     python3-sip-dev \
-     python3-pyqt5 \
-     pyqt5-dev \
-     pyqt5-dev-tools \
-     python3-qtpy \
-     python3-numpy \
-     python3-scipy \
-     python3-sphinx \
-     python3-sphinx-bootstrap-theme \
-     python3-pycifrw \
-     python3-dateutil \
-     python3-matplotlib \
-     python3-qtconsole \
-     python3-h5py \
-     python3-mock \
-     python3-psutil \
-     python3-requests \
-     python3-toml \
-     python3-yaml
-
-
-Install pre-commit for use in our current developer workflow
+- Mantid is not yet officially supported on Ubuntu 20.04, but mantid-developer package (see Ubuntu 18.04 instructions) has been modified to support it.
+- Install pre-commit for use in our current developer workflow
 
 .. code-block:: sh
 
