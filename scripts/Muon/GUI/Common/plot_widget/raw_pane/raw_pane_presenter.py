@@ -19,6 +19,8 @@ class RawPanePresenter(BasePanePresenter):
         self._view.hide_plot_diff()
         self._view.enable_tile_plotting_options()
         self._view.hide_plot_raw()
+        self._view.disable_tile_plotting_options()
+        self._view.set_is_tiled_plot(True)
         self.data_observer = GenericObserver(self.handle_data_updated)
 
     def handle_data_updated(self, autoscale=True, hold_on=False):

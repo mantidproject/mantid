@@ -17,7 +17,7 @@ class RawPaneModel(BasePaneModel):
         super().__init__(context,"Raw Data")
         self.context.plot_panes_context[self.name].set_defaults([0., 9.9], [0., 1e3])
         self.context.plot_panes_context[self.name].settings.set_condensed(True)
-        self._max_spec = 36
+        self._max_spec = 16
 
     def get_ws_names(self, run_string, multi_period, period):
         return [get_raw_data_workspace_name(self.context.data_context.instrument, run_string, multi_period,

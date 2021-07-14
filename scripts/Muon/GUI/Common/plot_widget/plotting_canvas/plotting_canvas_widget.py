@@ -29,6 +29,9 @@ class PlottingCanvasWidget(object):
         return (selection, self._figure_options.get_plot_x_range(), self._figure_options.autoscale,
                 self._figure_options.get_plot_y_range(), self._figure_options.get_errors())
 
+    def disable_plot_selection(self):
+        self._figure_options.disable_plot_selection()
+
     def set_quick_edit_info(self, selection, x_range, auto, y_range, errors):
         self._presenter.set_subplot_selection(selection)
         self._presenter.set_plot_range(x_range)

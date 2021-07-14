@@ -51,7 +51,7 @@ class MuonAnalysisPlotWidget(object):
 
         self._view4 = BasePaneView(parent)
         self._view4.add_canvas_widget(self.plotting_canvas_widgets[self.raw_model.name].widget)
-
+        self.plotting_canvas_widgets[self.raw_model.name].disable_plot_selection()
         # set up presenter
         self.view = MainPlotWidgetView(parent)
         self.model = PlotDataPaneModel(context)
