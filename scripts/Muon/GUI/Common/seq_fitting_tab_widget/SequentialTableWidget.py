@@ -44,6 +44,12 @@ class SequentialTableWidget(object):
         self.block_signals(False)
         self._view.resizeColumnsToContents()
 
+    def set_parameter_values_for_column(self, column, parameter_value):
+        self.block_signals(True)
+        self._model.set_fit_parameter_values_for_column(column, parameter_value)
+        self.block_signals(False)
+        self._view.resizeColumnsToContents()
+
     def set_fit_quality(self, row, quality, chi_squared):
         self.block_signals(True)
         quality = self.get_shortened_fit_status(quality)

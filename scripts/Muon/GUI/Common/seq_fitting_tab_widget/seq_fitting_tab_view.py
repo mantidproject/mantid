@@ -35,3 +35,6 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
 
     def setup_slot_for_sequential_fit_button(self, slot):
         self.seq_fit_button.clicked.connect(slot)
+
+    def copy_values_for_fits(self):
+        return self.copy_fit_checkbox.isChecked()
