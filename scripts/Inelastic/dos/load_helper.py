@@ -12,7 +12,7 @@ FLOAT_REGEX = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
 
 # Header regex. Looks for lines in the following format:
 #     q-pt=    1    0.000000  0.000000  0.000000      1.0000000000    0.000000  0.000000  1.000000
-PHONON_HEADER_REGEX = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) (?: *(%(s)s)){0,4}" % {'s': FLOAT_REGEX}
+PHONON_HEADER_REGEX = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s)(?: *(%(s)s)){0,3}" % {'s': FLOAT_REGEX}
 
 
 PHONON_EIGENVEC_REGEX = r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*"
@@ -43,7 +43,7 @@ def _parse_block_header(header_match, block_count):
     @return weight for this block of values
     """
     # Found header block at start of frequencies
-    q1, q2, q3, weight = [float(x) for x in header_match.groups()]
+    q1, q2, q3, weight = [float(x) for x in header_match.groups()[:4]]
     q_vector = [q1, q2, q3]
     if block_count > 1 and sum(q_vector) == 0:
         weight = 0.0

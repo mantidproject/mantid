@@ -35,6 +35,8 @@
          <stringlist>
           <string>.phonon</string>
           <string>.castep</string>
+          <string>.castep_bin</string>
+          <string>.yaml</string>
          </stringlist>
         </property>
         <property name="multipleFiles" stdset="0">
