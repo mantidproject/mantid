@@ -283,6 +283,10 @@ class BasicFittingView(ui_form, base_widget):
         """Hides the Fit Raw checkbox in the fitting options."""
         self.fit_function_options.hide_fit_raw_checkbox()
 
+    def hide_evaluate_function_as_checkbox(self) -> None:
+        """Hides the Evaluate Function as checkbox in the fitting options."""
+        self.fit_function_options.hide_evaluate_function_as_checkbox()
+
     def set_start_and_end_x_labels(self, start_x_label: str, end_x_label: str) -> None:
         """Sets the labels to use for the start and end X labels in the fit options table."""
         self.fit_function_options.set_start_and_end_x_labels(start_x_label, end_x_label)
