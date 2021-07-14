@@ -63,6 +63,9 @@ private:
   /// Convert units
   API::MatrixWorkspace_sptr convertUnits(API::MatrixWorkspace_sptr matrixws, const std::string &target);
 
+  /// Filter out absorption resonances
+  API::MatrixWorkspace_sptr filterResonances(API::MatrixWorkspace_sptr matrixws);
+
   /// Call edit instrument geometry
   API::MatrixWorkspace_sptr editInstrument(API::MatrixWorkspace_sptr ws, const std::vector<double> &polars,
                                            const std::vector<specnum_t> &specids, const std::vector<double> &l2s,

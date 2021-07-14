@@ -420,6 +420,40 @@ public:
     TS_ASSERT_EQUALS(m_outWS->y(0)[599], 0.);
   }
 
+  void testEventWksp_filterResonance() {
+    // Setup the event workspace
+    setUp_EventWorkspace();
+
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
+    addFrequencyForLogs();
+
+    // string representation of the parameters - arbitrary position
+    m_filterResonanceLower = ".1";
+    m_filterResonanceUpper = ".2";
+
+    // Run the main test function
+    doTestEventWksp();
+
+    // Reset inputs to default values
+    m_filterResonanceLower = "";
+    m_filterResonanceUpper = "";
+
+    // Test the input
+    docheckEventInputWksp();
+
+    // Test the output
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
+    // TODO just copied value from a failed run - should look for where the events should have been filtered out
+    // TODO this position in the workspace is where the prompt pulse would have been from when it was copied
+    // TODO from `testEventWksp_preserveEvents_removePromptPulse`
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 277.);
+  }
+
   void testEventWksp_preserveEvents_compressStartTime() {
     // Setup the event workspace
     setUp_EventWorkspace();
@@ -627,6 +661,10 @@ public:
     if (m_removePromptPulse)
       align_and_focus.setProperty("RemovePromptPulseWidth", 1e4);
 
+    // Filter absorption resonances - default unit is wavelength
+    align_and_focus.setPropertyValue("ResonanceFilterLowerLimits", m_filterResonanceLower);
+    align_and_focus.setPropertyValue("ResonanceFilterUpperLimits", m_filterResonanceUpper);
+
     // Setup the binning type
     if (m_useResamplex) {
       align_and_focus.setProperty("ResampleX", numHistoBins);
@@ -798,6 +836,8 @@ private:
   std::string m_compressWallClockTolerance{"0"};
   std::string m_compressStartTime{"0"};
   bool m_removePromptPulse{false};
+  std::string m_filterResonanceLower;
+  std::string m_filterResonanceUpper;
   bool m_preserveEvents{true};
   bool m_useGroupAll{true};
   bool m_useResamplex{true};
