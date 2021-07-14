@@ -6,8 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
+#include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidAlgorithms/SmoothNeighbours.h"
+#include "MantidKernel/ANN/ANN.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -372,7 +377,200 @@ public:
     TS_ASSERT_EQUALS("Rectangular Detectors", propSumPixelsY->getGroup());
     TS_ASSERT_EQUALS("Rectangular Detectors", propZeroEdgePixels->getGroup());
   }
-};
+
+  void test_WISH() {
+    auto algo = AlgorithmManager::Instance().create("LoadRaw");
+    algo->setPropertyValue("Filename", "WISH00019612.raw");
+    algo->setPropertyValue("SpectrumMin", "1");
+    algo->setPropertyValue("SpectrumMax", "19461");
+    algo->setPropertyValue("LoadMonitors", "Separate");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    /*algo = AlgorithmManager::Instance().create("CropWorkspace");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612");
+    algo->setPropertyValue("XMin", "6000");
+    algo->setPropertyValue("XMax", "99000");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("CropWorkspace");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612_monitors");
+    algo->setPropertyValue("XMin", "6000");
+    algo->setPropertyValue("XMax", "99000");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612_monitors");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("NormaliseByCurrent");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("NormaliseByCurrent");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612_monitors");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612_monitors");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("ConvertUnits");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612");
+    algo->setPropertyValue("Target", "Wavelength");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("ConvertUnits");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612_monitors");
+    algo->setPropertyValue("Target", "Wavelength");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612_monitors");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("NormaliseToMonitor");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612");
+    algo->setPropertyValue("MonitorWorkspaceIndex", "3");
+    algo->setPropertyValue("MonitorWorkspace", "WISH00019612_monitors");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("ReplaceSpecialValues");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612");
+    algo->setPropertyValue("NaNValue", "0");
+    algo->setPropertyValue("InfinityValue", "0");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();
+
+    algo = AlgorithmManager::Instance().create("CropWorkspace");
+    algo->setPropertyValue("InputWorkspace", "WISH00019612");
+    algo->setPropertyValue("XMin", "0.8");
+    algo->setPropertyValue("XMax", "9.3");
+    algo->setPropertyValue("OutputWorkspace", "WISH00019612");
+    algo->execute();*/
+
+    MatrixWorkspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("WISH00019612"));
+
+    /*specnum_t inSpec = workspace->getSpectrum(19397).getSpectrumNo();
+
+    API::WorkspaceNearestNeighbourInfo neighbourInfo(*workspace, true, 8);
+    // Step one - Get the number of specified neighbours
+    SpectraDistanceMap insideGrid = neighbourInfo.getNeighboursExact(inSpec);
+    std::vector<specnum_t> expectedSpecNums{19146, 19147, 19274, 19275, 19276, 19277, 19402, 19404};
+    int i = 0;
+    for (std::map<specnum_t, Kernel::V3D>::iterator it = insideGrid.begin(); it != insideGrid.end(); ++it) {
+      TS_ASSERT_EQUALS(it->first, expectedSpecNums[i]);
+      i++;
+      }*/
+
+    std::vector<specnum_t> spectrumNumbers;
+    const auto nhist = workspace->getNumberHistograms();
+    spectrumNumbers.reserve(nhist);
+    for (size_t i = 0; i < nhist; ++i)
+      spectrumNumbers.emplace_back(workspace->getSpectrum(i).getSpectrumNo());
+
+    auto m_nearestNeighbours =
+        std::make_unique<WorkspaceNearestNeighbours>(8, workspace->spectrumInfo(), std::move(spectrumNumbers), true);
+    /*SpectraDistanceMap insideGrid2 = m_nearestNeighbours->neighbours(inSpec);
+    i = 0;
+    for (std::map<specnum_t, Kernel::V3D>::iterator it = insideGrid2.begin(); it != insideGrid2.end(); ++it) {
+      TS_ASSERT_EQUALS(it->first, expectedSpecNums[i]);
+      i++;
+    }
+
+    // check WorkspaceNearestNeighbours::build()
+    TS_ASSERT_EQUALS(m_nearestNeighbours->m_specToVertex.size(), 19456);
+    TS_ASSERT_EQUALS(m_nearestNeighbours->m_specToVertex[19403], 19397);
+    auto vertex = m_nearestNeighbours->m_specToVertex.find(19403);
+    std::pair<WorkspaceNearestNeighbours::Graph::adjacency_iterator,
+              WorkspaceNearestNeighbours::Graph::adjacency_iterator>
+        adjacent = boost::adjacent_vertices(vertex->second, m_nearestNeighbours->m_graph);
+    WorkspaceNearestNeighbours::Graph::adjacency_iterator adjIt;
+    std::vector<int> specNs;
+    for (adjIt = adjacent.first; adjIt != adjacent.second; adjIt++) {
+      WorkspaceNearestNeighbours::Vertex nearest = (*adjIt);
+      auto nrSpec = specnum_t(m_nearestNeighbours->m_vertexID[nearest]);
+      specNs.push_back(nrSpec);
+    }
+    TS_ASSERT_EQUALS(specNs[0], 19275);
+    TS_ASSERT_EQUALS(specNs[1], 19404);
+    TS_ASSERT_EQUALS(specNs[2], 19402);
+    TS_ASSERT_EQUALS(specNs[3], 19276);
+    TS_ASSERT_EQUALS(specNs[4], 19274);
+    TS_ASSERT_EQUALS(specNs[5], 19147);
+    TS_ASSERT_EQUALS(specNs[6], 19277);
+    TS_ASSERT_EQUALS(specNs[7], 19146);*/
+
+    const auto indices = m_nearestNeighbours->getSpectraDetectors();
+    TS_ASSERT_EQUALS(indices.size(), 19456);
+
+    Mantid::API::SpectrumInfo specInfo = workspace->spectrumInfo();
+    Mantid::Geometry::BoundingBox bbox;
+    // Base the scaling on the first detector, should be adequate but we can look
+    // at this
+    const auto &firstDet = specInfo.detector(indices.front());
+    firstDet.getBoundingBox(bbox);
+    auto m_scale = V3D(bbox.width());
+    TS_ASSERT_EQUALS(m_scale[0], 0.011467840514357563);
+    TS_ASSERT_EQUALS(m_scale[1], 0.0099093322347372226);
+    TS_ASSERT_EQUALS(m_scale[2], 0.011487383212974045);
+
+    ANNpointArray dataPoints = annAllocPts(static_cast<int>(nhist), 3);
+    std::vector<specnum_t> spectrumNumbers2;
+    spectrumNumbers2.reserve(nhist);
+    for (size_t i = 0; i < nhist; ++i)
+      spectrumNumbers2.emplace_back(workspace->getSpectrum(i).getSpectrumNo());
+    int pointNo = 0;
+    for (const auto i : indices) {
+      // const specnum_t spectrum = spectrumNumbers2[i];
+      V3D pos = specInfo.position(i) / m_scale;
+      dataPoints[pointNo][0] = pos.X();
+      dataPoints[pointNo][1] = pos.Y();
+      dataPoints[pointNo][2] = pos.Z();
+      ++pointNo;
+    }
+    auto annTree = std::make_unique<ANNkd_tree>(dataPoints, static_cast<int>(nhist), 3);
+
+    // Run the nearest neighbour search on each detector, reusing the arrays
+    // Set size initially to avoid array index error when testing in debug mode
+    std::vector<ANNidx> nnIndexList(12);
+    std::vector<ANNdist> nnDistList(12);
+    ANNpoint scaledPos = dataPoints[19397];
+    annTree->annkSearch(scaledPos,          // Point to search nearest neighbours of
+                        12,                 // Number of neighbours to find
+                        nnIndexList.data(), // Index list of results
+                        nnDistList.data(),  // List of distances to each of these
+                        0.0);               // Error bound (?) is this the radius to search in?
+
+    TS_ASSERT_EQUALS(nnIndexList[0], 19269);
+    TS_ASSERT_EQUALS(nnIndexList[1], 19396);
+    TS_ASSERT_EQUALS(nnIndexList[2], 19398);
+    TS_ASSERT_EQUALS(nnIndexList[3], 19270);
+    TS_ASSERT_EQUALS(nnIndexList[4], 19268);
+    TS_ASSERT_EQUALS(nnIndexList[5], 19141);
+    TS_ASSERT_EQUALS(nnIndexList[6], 19271);
+    TS_ASSERT_EQUALS(nnIndexList[7], 19140);
+    TS_ASSERT_EQUALS(nnIndexList[8], 19142);
+
+    TS_ASSERT_DELTA(nnDistList[0], 0.59042046182435803, 1E-10);
+    TS_ASSERT_DELTA(nnDistList[1], 0.67358344667063674, 1E-10);
+    TS_ASSERT_DELTA(nnDistList[2], 0.67358344667063597, 1E-10);
+    TS_ASSERT_DELTA(nnDistList[3], 0.76706550105551297, 1E-10);
+    TS_ASSERT_DELTA(nnDistList[4], 1.7609423159344773, 1E-10);
+    TS_ASSERT_DELTA(nnDistList[5], 1.9952666377146773, 1E-10);
+    TS_ASSERT_DELTA(nnDistList[6], 2.2908774336279398, 1E-10);
+    // 8th and 9th neighbour distances only different in 15th dp
+    TS_ASSERT_DELTA(nnDistList[7], 2.6688500843853133, 1E-10);
+    TS_ASSERT_DELTA(nnDistList[8], 2.6688500843853147, 1E-10);
+
+    Mantid::Kernel::Logger g_log("SmoothNeighboursTest");
+    for (int i = 0; i < 12; i++)
+      g_log.error() << "nnIndexList[" << i << "]=" << nnIndexList[i] << std::setprecision(17) << ", nnDistList[" << i
+                    << "]=" << nnDistList[i] << std::endl;
+
+    g_log.error() << std::setprecision(17) << "epsilon=" << std::numeric_limits<double>::epsilon() << std::endl;
+    g_log.error() << std::setprecision(17) << std::abs(nnDistList[8] - nnDistList[7]) << std::endl;
+    // TS_ASSERT(std::abs(nnDistList[8]-nnDistList[7])<std::numeric_limits<double>::epsilon()*(nnDistList[7]+nnDistList[8]));
+  }
+}
+
+;
 
 class SmoothNeighboursTestPerformance : public CxxTest::TestSuite {
 public:
