@@ -39,4 +39,4 @@ class PlotModelFitPanePresenter(PlotFitPanePresenter):
         x_lower, x_upper = x_limits[0], x_limits[1]
         margin = self.context.plot_panes_context[self.name].settings.x_axis_margin
         x_offset = abs(x_upper - x_lower) * margin
-        return x_lower - x_offset, x_upper + x_offset
+        return [x_lower - x_offset, x_upper + x_offset]
