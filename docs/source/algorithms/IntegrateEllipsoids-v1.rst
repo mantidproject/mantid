@@ -231,12 +231,8 @@ Usage
 User should provide their own event nexus file instead of **TOPAZ_3132_event.nxs** used within this example. The original **TOPAZ_3132_event.nxs**
 file is available in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
 
-.. .. testcode:: exIntegrateEllipsoids
-.. The code itself works but disabled from doc tests as takes too long to complete.
-
 .. code-block:: python
    :linenos:
-
 
    def print_tableWS(pTWS,nRows):
        ''' Method to print part of the table workspace '''
@@ -276,9 +272,8 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
    # print 10 rows of resulting table workspace
    print_tableWS(result,10)
 
-**Output:**
 
-.. .. testoutput:: exIntegrateEllipsoids
+**Output:**
 
 .. code-block:: python
    :linenos:
@@ -306,7 +301,15 @@ The first peak is a satellite peak, which was integrated using the satellite pea
 
    Load(Filename='TOPAZ_36079_crop.nxs',OutputWorkspace='ws',FilterByTofMin=500,FilterByTofMax=16666)
    UB = np.array([[0.15468228,0.10908475,-0.14428671],[-0.08922105,-0.08617147,-0.22976459],[-0.05616441,0.12536522,-0.03238277]])
-   ConvertToMD(InputWorkspace='ws',QDimensions='Q3D',dEAnalysisMode='Elastic',Q3DFrames='Q_sample',LorentzCorrection=True,OutputWorkspace='md',MinValues='1,1,1.675',MaxValues='10,5,8.425')
+   ConvertToMD(
+      InputWorkspace='ws',
+      QDimensions='Q3D',
+      dEAnalysisMode='Elastic',
+      Q3DFrames='Q_sample',
+      LorentzCorrection=True,
+      OutputWorkspace='md',
+      MinValues='1,1,1.675',
+      MaxValues='10,5,8.425')
    CreatePeaksWorkspace(InstrumentWorkspace='crop', NumberOfPeaks=0, OutputWorkspace='peaks')
    SetUB('peaks', UB=UB)
    AddPeakHKL('peaks', [0.15, 1.85, -1])
@@ -327,10 +330,12 @@ The first peak is a satellite peak, which was integrated using the satellite pea
       SatelliteRegionRadius=0.1,
       SatellitePeakSize=0.08,
       SatelliteBackgroundInnerSize=0.081,
-      SatelliteBackgroundOuterSize=0.1)
-​​
+      SatelliteBackgroundOuterSize=0.1,
+      )
+
 
 .. categories::
+
 
 .. sourcelink::
 
