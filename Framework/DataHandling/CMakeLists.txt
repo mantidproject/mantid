@@ -506,6 +506,7 @@ set(TEST_FILES
     LoadMaskTest.h
     LoadMcStasNexusTest.h
     LoadMcStasTest.h
+    LoadMuonDataTest.h
     LoadMuonLogTest.h
     LoadMuonNexus1Test.h
     LoadMuonNexus2Test.h
