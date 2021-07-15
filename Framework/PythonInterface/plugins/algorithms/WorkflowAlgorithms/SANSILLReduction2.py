@@ -317,18 +317,20 @@ class SANSILLReduction2(PythonAlgorithm):
                 AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
                 self.apply_multipanel_beam_center_corr(ws, beam_x, beam_y)
                 if 'BeamWidthX' in run:
-                    beam_width_x = run['BeamWidthX']
-                    AddSampleLog(Workspace=ws, LogName='BeamWidthX', LogText=str(beam_width_x), LogType='Number',
-                                 LogUnit='rad')
+                    AddSampleLog(Workspace=ws, LogName='BeamWidthX', LogText=str(run['BeamWidthX'].value),
+                                 LogType='Number', LogUnit='rad')
 
     def apply_multipanel_beam_center_corr(self, ws, beam_x, beam_y):
         '''Applies the beam center correction on multipanel detectors'''
         instrument = mtd[ws].getInstrument()
         l2_main = mtd[ws].getRun()['L2'].value
-        panel_names = instrument.getStringParameter('detector_panels')[0].split(',')
-        for panel in panel_names:
-            l2_panel = instrument.getComponentByName(panel).getPos()[2]
-            MoveInstrumentComponent(Workspace=ws, X=-beam_x * l2_panel/l2_main, Y=-beam_y * l2_panel/l2_main, ComponentName=panel)
+        if instrument.hasParameter('detector_panels'):
+            panel_names = instrument.getStringParameter('detector_panels')[0].split(',')
+            for panel in panel_names:
+                l2_panel = instrument.getComponentByName(panel).getPos()[2]
+                MoveInstrumentComponent(Workspace=ws, X=-beam_x * l2_panel/l2_main, Y=-beam_y * l2_panel/l2_main, ComponentName=panel)
+        else:
+            MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
 
     def apply_transmission(self, ws):
         '''Applies transmission correction'''
@@ -443,7 +445,7 @@ class SANSILLReduction2(PythonAlgorithm):
 
     #===============================METHODS TO PROCESS BY TYPE===============================#
 
-    def process_empty_beam(self, ws):
+    def treat_empty_beam(self, ws):
         '''Processes as empty beam, i.e. calculates beam center, beam width and incident flux'''
         centers = ws + '_centers'
         radius = self.getProperty('BeamRadius').value
@@ -533,6 +535,17 @@ class SANSILLReduction2(PythonAlgorithm):
         DeleteWorkspaces(WorkspaceList=[tmp_ws, tmp_ws+'_fit_output_Parameters', tmp_ws+'_fit_output_Workspace',
                                         tmp_ws+'_fit_output_NormalisedCovarianceMatrix'])
 
+    def calculate_transmission(self, ws):
+        '''Calculates the transmission'''
+        beam_ws = self.getPropertyValue('EmptyBeamWorkspace')
+        check_distances_match(mtd[ws], mtd[beam_ws])
+        self.calculate_flux(ws)
+        if self.mode != AcqMode.TOF:
+            check_wavelengths_match(mtd[ws], mtd[beam_ws])
+        else:
+            RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam_ws, OutputWorkspace=ws)
+        Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
+
     def PyExec(self):
         self.reset()
         ws = self.getPropertyValue('OutputWorkspace')
@@ -591,11 +604,11 @@ class SANSILLReduction2(PythonAlgorithm):
         if self.process != 'DarkCurrent':
             self.apply_dark_current(ws)
             if self.process == 'EmptyBeam':
-                self.process_empty_beam(ws)
+                self.treat_empty_beam(ws)
             else:
                 self.apply_direct_beam(ws)
                 if self.process == 'Transmission':
-                    pass # calculate transmission
+                    self.calculate_transmission(ws)
                 else:
                     self.apply_transmission(ws)
                     if self.process == 'Container':
