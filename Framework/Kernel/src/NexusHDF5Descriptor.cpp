@@ -97,7 +97,6 @@ herr_t readStringAttribute(hid_t attr, char **data) {
  * Reads a string attribute of N-dimensions
  * @param attr input HDF5 attribute handler
  * @param data output attribute data
- * @param maxlen
  * @return
  */
 std::pair<std::string, herr_t> readStringAttributeN(hid_t attr, char *data) {
