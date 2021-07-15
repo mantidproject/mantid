@@ -18,11 +18,17 @@ class RawPaneModel(BasePaneModel):
         self.context.plot_panes_context[self.name].set_defaults([0., 9.9], [0., 1e3])
         self.context.plot_panes_context[self.name].settings.set_condensed(True)
         self._max_spec = 16
+        self._spec_limit = 16
 
     def get_ws_names(self, run_string, multi_period, period):
-        return [get_raw_data_workspace_name(self.context.data_context.instrument, run_string, multi_period,
-                                                       period=period, workspace_suffix=self.context.workspace_suffix) for
-                           _ in range(self._max_spec)]
+        name = get_raw_data_workspace_name(self.context.data_context.instrument, run_string, multi_period,
+                                                       period=period, workspace_suffix=self.context.workspace_suffix)
+
+        if self._max_spec > self.context.data_context.num_detectors:
+            self._max_spec = self.context.data_context.num_detectors
+        elif self._max_spec < self.context.data_context.num_detectors:
+            self._max_spec = self._spec_limit
+        return [name for _ in range(self._max_spec)]
 
     def get_workspaces_to_plot(self, is_raw, plot_type):
         """
