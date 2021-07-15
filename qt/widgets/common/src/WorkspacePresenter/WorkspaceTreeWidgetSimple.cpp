@@ -46,7 +46,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
       m_overplotMDHisto1D(new QAction("Overplot 1D MDHistogram...", this)),
       m_plotMDHisto1DWithErrs(new QAction("Plot 1D MDHistogram with errors...", this)),
       m_overplotMDHisto1DWithErrs(new QAction("Overplot 1D MDHistogram with errors...", this)),
-      m_sampleMaterial(new QAction("Show Sample Material", this)) {
+      m_sampleMaterial(new QAction("Show Sample Material", this)), m_superplot(new QAction("Superplot...", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) { emit workspaceDoubleClicked(wsName); };
@@ -75,6 +75,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
   connect(m_plotWireframe, SIGNAL(triggered()), this, SLOT(onPlotWireframeClicked()));
   connect(m_plotContour, SIGNAL(triggered()), this, SLOT(onPlotContourClicked()));
   connect(m_sampleMaterial, SIGNAL(triggered()), this, SLOT(onSampleMaterialClicked()));
+  connect(m_superplot, SIGNAL(triggered()), this, SLOT(onSuperplotClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -131,6 +132,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addAction(m_plotSpectrumWithErrs);
         plotSubMenu->addAction(m_overplotSpectrumWithErrs);
         plotSubMenu->addAction(m_plotAdvanced);
+        plotSubMenu->addAction(m_superplot);
       } else {
         plotSubMenu->addAction(m_plotBin);
       }
@@ -227,6 +229,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addAction(m_plotSpectrumWithErrs);
         plotSubMenu->addAction(m_overplotSpectrumWithErrs);
         plotSubMenu->addAction(m_plotAdvanced);
+        plotSubMenu->addAction(m_superplot);
 
         plotSubMenu->addSeparator();
         plotSubMenu->addAction(m_plotColorfill);
@@ -335,6 +338,8 @@ void WorkspaceTreeWidgetSimple::onOverPlotMDHistoWorkspaceWithErrorsClicked() {
 void WorkspaceTreeWidgetSimple::onSampleMaterialClicked() {
   emit sampleMaterialClicked(getSelectedWorkspaceNamesAsQList());
 }
+
+void WorkspaceTreeWidgetSimple::onSuperplotClicked() { emit superplotClicked(getSelectedWorkspaceNamesAsQList()); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

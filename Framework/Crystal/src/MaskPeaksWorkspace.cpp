@@ -150,7 +150,7 @@ void MaskPeaksWorkspace::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Mask bins
-  API::IAlgorithm_sptr maskbinstb = this->createChildAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
+  auto maskbinstb = createChildAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
   maskbinstb->setProperty("InputWorkspace", m_inputW);
   maskbinstb->setPropertyValue("OutputWorkspace", m_inputW->getName());
   maskbinstb->setProperty("MaskingInformation", tablews);
@@ -185,6 +185,8 @@ void MaskPeaksWorkspace::retrieveProperties() {
 size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, const Geometry::IComponent_const_sptr &comp,
                                         const int x, const int y) {
   Geometry::RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+  Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
+
   if (det) {
     if (x >= det->xpixels() || x < 0 || y >= det->ypixels() || y < 0)
       return EMPTY_INT();
@@ -212,15 +214,40 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, cons
     std::shared_ptr<const Geometry::ICompAssembly> asmb =
         std::dynamic_pointer_cast<const Geometry::ICompAssembly>(comp);
     asmb->getChildren(children, false);
+
     std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
         std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
+
     auto NROWS = static_cast<int>(grandchildren.size());
     auto NCOLS = static_cast<int>(children.size());
+
+    std::ostringstream msg;
+    if (Iptr->getName().compare("CORELLI") == 0) {
+      msg << "Instrument is CORELLI\n";
+      // CORELLI has one extra layer than WISH
+      std::shared_ptr<const Geometry::ICompAssembly> asmb3 =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(grandchildren[0]);
+      std::vector<Geometry::IComponent_const_sptr> greatgrandchildren;
+      asmb3->getChildren(greatgrandchildren, false);
+      // update for CORELLI
+      NCOLS = static_cast<int>(grandchildren.size());
+      NROWS = static_cast<int>(greatgrandchildren.size());
+    } else {
+      msg << "Instrument is WISH\n";
+    }
+
     // Wish pixels and tubes start at 1 not 0
-    if (x - 1 >= NCOLS || x - 1 < 0 || y - 1 >= NROWS || y - 1 < 0)
+    if (x - 1 >= NCOLS || x - 1 < 0 || y - 1 >= NROWS || y - 1 < 0) {
+      // useful for future dev in plan
+      // msg << "--(x,y) = (" << x << "," << y << ")\n"
+      //     << "--NCOLS = " << NCOLS << "\n"
+      //     << "--NROWS = " << NROWS << "\n";
+      // g_log.warning() << msg.str();
       return EMPTY_INT();
+    }
+
     std::string bankName = comp->getName();
     auto it = pixel_to_wi.find(findPixelID(bankName, x, y));
     if (it == pixel_to_wi.end())
@@ -247,13 +274,37 @@ void MaskPeaksWorkspace::getTofRange(double &tofMin, double &tofMax, const doubl
     tofMax = tofPeak + m_tofMax;
   }
 }
+
+/**
+ * @brief
+ *
+ * @param bankName
+ * @param col
+ * @param row
+ * @return int
+ */
 int MaskPeaksWorkspace::findPixelID(const std::string &bankName, int col, int row) {
   Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
   std::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
+
   if (parent->type() == "RectangularDetector") {
     std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
+    return pixel->getID();
+  } else if (Iptr->getName().compare("CORELLI") == 0) {
+    // Checking for CORELLI
+    // pixel full name example
+    //      /CORELLI/A row/bank10/sixteenpack/tube10/pixel23
+    //                                ^ the extra layer that makes CORELLI different from WISH
+    std::ostringstream pixelString;
+    pixelString << parent->getFullName() // /CORELLI/A row/bank10
+                << "/sixteenpack"        // /sixteenpack
+                << "/tube" << col        // /tube10
+                << "/pixel" << row;      // /pixel23
+    std::shared_ptr<const Geometry::IComponent> component = Iptr->getComponentByName(pixelString.str());
+    std::shared_ptr<const Detector> pixel = std::dynamic_pointer_cast<const Detector>(component);
+    //
     return pixel->getID();
   } else {
     std::string bankName0 = bankName;

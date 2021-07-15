@@ -70,24 +70,23 @@ public:
     TS_ASSERT_EQUALS(result.debug(), true);
   }
 
-  void testDefaultPerThetaOptions() {
+  void testDefaultLookupRowOptions() {
     auto result = getDefaults();
-    auto expected =
-        PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
-                         RangeInQ(boost::none, boost::none, boost::none), boost::none, boost::none, boost::none);
-    TS_ASSERT_EQUALS(result.perThetaDefaults().size(), 1);
-    TS_ASSERT_EQUALS(result.perThetaDefaults().front(), expected);
+    auto expected = LookupRow(boost::none, TransmissionRunPair(), boost::none,
+                              RangeInQ(boost::none, boost::none, boost::none), boost::none, boost::none, boost::none);
+    TS_ASSERT_EQUALS(result.lookupTable().size(), 1);
+    TS_ASSERT_EQUALS(result.lookupTable().front(), expected);
   }
 
-  void testValidPerThetaOptionsFromParamsFile() {
+  void testValidLookupRowOptionsFromParamsFile() {
     auto result = getDefaultsFromParamsFile("Experiment");
-    auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
-                                     std::string("390-415"), std::string("370-389,416-430"));
-    TS_ASSERT_EQUALS(result.perThetaDefaults().size(), 1);
-    TS_ASSERT_EQUALS(result.perThetaDefaults().front(), expected);
+    auto expected = LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
+                              std::string("390-415"), std::string("370-389,416-430"));
+    TS_ASSERT_EQUALS(result.lookupTable().size(), 1);
+    TS_ASSERT_EQUALS(result.lookupTable().front(), expected);
   }
 
-  void testInvalidPerThetaOptionsFromParamsFile() { getDefaultsFromParamsFileThrows("PerTheta_Invalid"); }
+  void testInvalidLookupRowOptionsFromParamsFile() { getDefaultsFromParamsFileThrows("LookupRow_Invalid"); }
 
   void testDefaultTransmissionRunRange() {
     auto result = getDefaults();

@@ -14,6 +14,7 @@ from qtpy.QtCore import QCoreApplication
 
 from mantidqt.dialogs.errorreports.presenter import ErrorReporterPresenter
 from mantidqt.dialogs.errorreports.report import CrashReportPage
+import mantidqt.utils.qt as qtutils
 
 
 def main() -> int:
@@ -30,6 +31,9 @@ def main() -> int:
 
     # Qt resources must be imported before QApplication starts
     importlib.import_module(f'mantidqt.dialogs.errorreports.resources_qt{QT_VERSION[0]}')
+
+    if sys.platform == 'darwin':
+        qtutils.force_layer_backing_BigSur()
 
     from qtpy.QtWidgets import QApplication
     app = QApplication(sys.argv)

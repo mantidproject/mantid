@@ -28,6 +28,7 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.finder_path.setLabelText("Path")
         self.finder_path.isForRunFiles(False)
         self.finder_path.setEnabled(False)
+        self.finder_path.setFileExtensions([".prm"])
 
     # =================
     # Slot Connectors
@@ -90,6 +91,12 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def set_calibrate_button_text(self, text):
         self.button_calibrate.setText(text)
+
+    def set_load_checked(self, ticked: bool):
+        self.radio_loadCalib.setChecked(ticked)
+
+    def set_file_text_with_search(self, text: str):
+        self.finder_path.setFileTextWithSearch(text)
 
     def set_cropping_widget_visibility(self, visible):
         self.widget_cropping.setVisible(visible)

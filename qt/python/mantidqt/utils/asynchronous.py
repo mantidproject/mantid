@@ -90,6 +90,26 @@ class AsyncTask(threading.Thread):
         time.sleep(0.1)
 
 
+class _Receiver(object):
+
+    def __init__(self, success_cb=None, error_cb=None):
+        self.output = None
+        self.exc_value = None
+
+        self.success_cb = success_cb
+        self.error_cb = error_cb
+
+    def on_success(self, result):
+        self.output = result.output
+        if self.success_cb is not None:
+            self.success_cb(result)
+
+    def on_error(self, result):
+        self.exc_value = result.exc_value
+        if self.error_cb is not None:
+            self.error_cb(result)
+
+
 class BlockingAsyncTaskWithCallback(AsyncTask):
     def __init__(self, target, args=(), kwargs=None, success_cb=None, error_cb=None, blocking_cb=None,
                  period_secs=0.05):
@@ -117,20 +137,7 @@ class BlockingAsyncTaskWithCallback(AsyncTask):
         self.success_cb = create_callback(success_cb)
         self.error_cb = create_callback(error_cb)
 
-        class Receiver(object):
-            output, exc_value = None, None
-
-            def on_success(self, result):
-                self.output = result.output
-                if success_cb is not None:
-                    success_cb(result)
-
-            def on_error(self, result):
-                self.exc_value = result.exc_value
-                if error_cb is not None:
-                    error_cb(result)
-
-        self.recv = Receiver()
+        self.recv = _Receiver(success_cb=success_cb, error_cb=error_cb)
         self.task = AsyncTask(target, args, kwargs, success_cb=self.recv.on_success, error_cb=self.recv.on_error)
 
     def start(self):
@@ -215,3 +222,25 @@ class AsyncTaskFailure(AsyncTaskResult):
     @property
     def success(self):
         return False
+
+
+# From https://stackoverflow.com/questions/5179467/equivalent-of-setinterval-in-python by Andrea
+# (https://stackoverflow.com/users/249001/andrea) with help of jd (https://stackoverflow.com/users/280490/jd)
+def set_interval(interval):
+    """
+    This is a decorator function that will repeat once per interval.
+    """
+    def outer_wrap(function):
+        def wrap(*args, **kwargs):
+            stop = threading.Event()
+
+            def inner_wrap():
+                function(*args, **kwargs)
+                while not stop.isSet():
+                    stop.wait(interval)
+                    function(*args, **kwargs)
+            t = threading.Timer(0, inner_wrap)
+            t.start()
+            return stop
+        return wrap
+    return outer_wrap

@@ -8,17 +8,20 @@
 from os import path
 from mantidqt.utils.observer_pattern import Observable
 
+CALIB_FOLDER = path.join(path.dirname(path.dirname(path.dirname(path.dirname(path.realpath(__file__))))), "calib")
+DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
 SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
-                 "primary_log": str, "sort_ascending": bool}
+                 "primary_log": str, "sort_ascending": bool, "default_peak": str}
 
 DEFAULT_SETTINGS = {
-    "full_calibration": "",
+    "full_calibration": path.join(CALIB_FOLDER, DEFAULT_FULL_INST_CALIB),
     "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
     "recalc_vanadium": False,
     "logs": ','.join(
         ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
     "primary_log": 'strain',
-    "sort_ascending": True
+    "sort_ascending": True,
+    "default_peak": "BackToBackExponential"
 }
 
 ALL_LOGS = ','.join(
@@ -33,6 +36,8 @@ ALL_LOGS = ','.join(
      'strain_sp_rbv', 'strain_step_time', 'stress', 'stress_sp_rbv', 'stress_step_time', 'stressrig_go',
      'wave_running', 'wave_start', 'wave_type'])
 
+ALL_PEAKS = ','.join(["BackToBackExponential", "Gaussian", "Lorentzian", "Voigt"])
+
 
 class SettingsPresenter(object):
     def __init__(self, model, view):
@@ -41,8 +46,9 @@ class SettingsPresenter(object):
         self.settings = {}
         self.savedir_notifier = self.SavedirNotifier(self)
 
-        # add logs to list in view
+        # populate lists in view
         self.view.add_log_checkboxs(ALL_LOGS)
+        self.view.populate_peak_function_list(ALL_PEAKS)
 
         # Connect view signals
         self.view.set_on_apply_clicked(self.save_new_settings)
@@ -83,6 +89,7 @@ class SettingsPresenter(object):
         self.settings["logs"] = self.view.get_checked_logs()
         self.settings["primary_log"] = self.view.get_primary_log()
         self.settings["sort_ascending"] = self.view.get_ascending_checked()
+        self.settings["default_peak"] = self.view.get_peak_function()
 
     def _show_settings_in_view(self):
         if self._validate_settings(self.settings):
@@ -92,6 +99,7 @@ class SettingsPresenter(object):
             self.view.set_checked_logs(self.settings["logs"])
             self.view.set_primary_log_combobox(self.settings["primary_log"])
             self.view.set_ascending_checked(self.settings["sort_ascending"])
+            self.view.set_peak_function(self.settings["default_peak"])
         self._find_files()
 
     def _find_files(self):
@@ -119,7 +127,8 @@ class SettingsPresenter(object):
             save_valid = save_location != ""
             log_valid = settings["logs"] != ""
             ascending_valid = settings["sort_ascending"] != ""
-            return all_keys and not_none and save_valid and log_valid and ascending_valid
+            peak_valid = settings["default_peak"] in ALL_PEAKS
+            return all_keys and not_none and save_valid and log_valid and ascending_valid and peak_valid
         except KeyError:  # Settings contained invalid key.
             return False
 

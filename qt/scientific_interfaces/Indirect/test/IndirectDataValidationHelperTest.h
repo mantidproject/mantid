@@ -76,7 +76,7 @@ public:
 
   void setUp() override {
     m_uiv = std::make_unique<UserInputValidator>();
-    m_dataSelector = std::make_unique<MockDataSelector>();
+    m_dataSelector = std::make_unique<NiceMock<MockDataSelector>>();
   }
 
   void tearDown() override {

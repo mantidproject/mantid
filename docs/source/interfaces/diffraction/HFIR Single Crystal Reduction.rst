@@ -1,3 +1,5 @@
+.. _interface-HFIR-Single-Crystal-Reduction:
+
 HFIR Single Crystal Reduction Interface
 =======================================
 
@@ -137,7 +139,7 @@ Here is a typical use case to merge all the measuring points (Pt.) in a scan
 
 8.  User pushes button *Process*
 
-9.  User goes to MantidPlot to view the merged scan by SliceView
+9.  User goes to MantidWorkbench to view the merged scan by SliceView
 
 
 Workflow to calculate peak intensity of a single measurement scan

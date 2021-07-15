@@ -511,7 +511,7 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
   std::shared_ptr<BankPulseTimes> out;
-  API::IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
+  auto loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
@@ -610,7 +610,7 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
   std::shared_ptr<BankPulseTimes> out;
-  API::IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
+  auto loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
@@ -1358,7 +1358,7 @@ void LoadEventNexus::runLoadMonitors() {
   std::string mon_wsname = this->getProperty("OutputWorkspace");
   mon_wsname.append("_monitors");
 
-  IAlgorithm_sptr loadMonitors = this->createChildAlgorithm("LoadNexusMonitors");
+  auto loadMonitors = createChildAlgorithm("LoadNexusMonitors");
   g_log.information("Loading monitors from NeXus file...");
   loadMonitors->setPropertyValue("Filename", m_filename);
   g_log.information() << "New workspace name for monitors: " << mon_wsname << '\n';

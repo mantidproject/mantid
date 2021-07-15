@@ -15,7 +15,7 @@ Defines Python objects that wrap the C++ Kernel namespace.
 # Make modules available in this namespace
 ###############################################################################
 # Imports boost.mpi if applicable
-from mantid.kernel import environment, funcinspect, mpisetup
+from mantid.kernel import funcinspect
 
 # module alias for backwards-compatibility in user scripts
 funcreturns = funcinspect
@@ -23,16 +23,16 @@ funcreturns = funcinspect
 ###############################################################################
 # Do site-specific setup for packages
 ###############################################################################
-from mantid.kernel import packagesetup as _mantidsite
+from mantid.kernel import packagesetup as _mantidsite  # noqa: E402
 
 _mantidsite.set_NEXUSLIB_var()
 
 ###############################################################################
 # Load the C++ library
 ###############################################################################
-from mantid.utils import import_mantid_cext
+from mantid.utils import import_mantid_cext  # noqa: E402
 
 # insert all the classes from _kernel in the mantid.kernel namespace
 import_mantid_cext('._kernel', 'mantid.kernel', globals())
 
-from mantid.kernel._aliases import *
+from mantid.kernel._aliases import *  # noqa: E402,F401

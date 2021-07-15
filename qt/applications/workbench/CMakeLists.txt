@@ -27,13 +27,20 @@ else()
   )
 endif()
 
+if (APPLE AND Python_W_EXECUTABLE)
+set(WORKBENCH_PYTHON_EXECUTABLE ${Python_W_EXECUTABLE})
+else()
+set(WORKBENCH_PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+endif()
+file(TO_CMAKE_PATH ${WORKBENCH_PYTHON_EXECUTABLE} WORKBENCH_PYTHON_EXECUTABLE)
+
 # Wrapper launchers: See mantidworkbench.cpp:main for their function
 if(APPLE OR WIN32)
   # development version
   add_executable(MantidWorkbench mantidworkbench.cpp)
   target_compile_definitions(MantidWorkbench
     PRIVATE
-    -DPYTHON_EXECUTABLE_PATH="${Python_EXECUTABLE}")
+    -DPYTHON_EXECUTABLE_PATH="${WORKBENCH_PYTHON_EXECUTABLE}")
   target_link_libraries(MantidWorkbench PRIVATE Boost::filesystem)
   set_target_properties(MantidWorkbench PROPERTIES
                         VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
@@ -74,10 +81,14 @@ if (WIN32)
     set(_paths_qrc_file ${CMAKE_CURRENT_BINARY_DIR}/resources.qrc.${BUILD_TYPE})
     set(_qt_conf_file ${CMAKE_CURRENT_BINARY_DIR}/qt.conf.${BUILD_TYPE})
     set(_qrc_file_contents "<!DOCTYPE RCC><RCC version=\"1.0\">\n<qresource prefix=\"/qt/etc\">\n<file alias=\"qt.conf\">qt.conf.${BUILD_TYPE}</file>\n</qresource>\n</RCC>\n")
-
+    if (CONDA_BUILD)
+      file(TO_CMAKE_PATH $ENV{CONDA_PREFIX}/Library _qt5_dir)
+    else()
+      set(_qt5_dir ${THIRD_PARTY_DIR}/lib/qt5)
+    endif()
     # Write qt.conf.BUILD_TYPE file and get resources file name
     if (${BUILD_TYPE} STREQUAL "build")
-      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
+      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${_qt5_dir}\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
       set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
     elseif(${BUILD_TYPE} STREQUAL "install")
       file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
@@ -142,7 +153,7 @@ endif()
 # Testing
 set(TEST_FILES
     workbench/config/test/test_user.py
-    workbench/test/mainwindowtest.py
+    workbench/test/test_mainwindow.py
     workbench/test/test_import.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratoraxes.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorcolorfills.py
@@ -159,6 +170,8 @@ set(TEST_FILES
     workbench/plotting/test/test_globalfiguremanager.py
     workbench/plotting/test/test_propertiesdialog.py
     workbench/plotting/test/test_plothelppages.py
+    workbench/plotting/test/test_toolbar.py
+    workbench/plotting/test/test_utility.py
     workbench/plugins/test/test_editor.py
     workbench/plugins/test/test_exception_handler.py
     workbench/plugins/test/test_jupyterconsole.py

@@ -106,6 +106,217 @@ for selecting between :ref:`GetDetectorOffsets
 <algm-GetDetectorOffsets>` and :ref:`GetDetOffsetsMultiPeaks
 <algm-GetDetOffsetsMultiPeaks>`.
 
+
+.. _calibration_tofpd_group_calibration-ref:
+
+Group Calibration
+~~~~~~~~~~~~~~~~~
+
+Some script have been created that provided a workflow for calibrating
+the instrument in groups using a combination of :ref:`CrossCorrelate
+<algm-CrossCorrelate>`, :ref:`GetDetectorOffsets
+<algm-GetDetectorOffsets>` and :ref:`PDCalibration
+<algm-PDCalibration>`.
+
+It works by performing the cross-correlations on only the detectors
+within a group, after which the grouped detectors are merge together
+to use with PDCalibration. The difc from the PDCalibration and
+cross-correlation are combined using :ref:`CombineDiffCal
+<algm-CombineDiffCal>`
+
+The workflow follows these step:
+
+#. Load data, usually diamond
+#. Convert to d-spacing
+#. CrossCorrelate a portion of the instrument according to the group information
+#. GetDetectorOffsets to calculate offsets for individual pixels with a group
+#. ConvertDiffCal to convert these constants to :math:`DIFC_{CC}`
+#. Use :math:`DIFC_{CC}` to convert the origonal data to d-spacing. DiffractionFocus allows for combining a portion of the instrument into a single spectrum for improved statistics
+#. Pick an arbitrary constant, :math:`DIFC_{arb}` to convert this combined spectrum back to time-of-flight
+#. PDCalibration the combined spectrum to determine a conversion constant :math:`DIFC_{PD}`
+#. Use :ref:`CombineDiffCal <algm-CombineDiffCal>` to combine :math:`DIFC_{CC}`, :math:`DIFC_{arb}`, and :math:`DIFC_{PD}` into a new calibration constant, :math:`DIFC_{eff}`
+
+.. testcode:: group_cal
+
+    # create a fake starting workspace in d-spacing then convert to TOF for calibration
+    myFunc = "name=Gaussian, PeakCentre=1, Height=100, Sigma=0.01;name=Gaussian, PeakCentre=2, Height=100, Sigma=0.01;name=Gaussian, PeakCentre=3, Height=100, Sigma=0.01"
+    ws_d = CreateSampleWorkspace("Event","User Defined", myFunc, BankPixelWidth=1, XUnit='dSpacing', XMax=5, BinWidth=0.001, NumEvents=10000, NumBanks=6)
+    for n in range(1,7):
+        MoveInstrumentComponent(ws_d, ComponentName=f'bank{n}', X=1, Y=0, Z=1, RelativePosition=False)
+
+    # Offset the different spectra
+    ws_d = ScaleX(ws_d, Factor=1.05, IndexMin=1, IndexMax=1)
+    ws_d = ScaleX(ws_d, Factor=0.95, IndexMin=2, IndexMax=2)
+    ws_d = ScaleX(ws_d, Factor=1.05, IndexMin=3, IndexMax=5)
+    ws_d = ScaleX(ws_d, Factor=1.02, IndexMin=3, IndexMax=4)
+    ws_d = ScaleX(ws_d, Factor=0.98, IndexMin=4, IndexMax=5)
+    ws_d = Rebin(ws_d, '0,0.001,5')
+    ws = ConvertUnits(ws_d, Target='TOF')
+
+    # Make 2 groups of 3 detectors each
+    groups, _, _, = CreateGroupingWorkspace(InputWorkspace=ws, ComponentName='basic_rect', CustomGroupingString='1-3,4-6')
+
+    # starting DIFC are all the same
+    detectorTable = CreateDetectorTable(ws)
+
+    print("DetID DIFC")
+    for detid, difc in zip(detectorTable.column('Detector ID(s)'), detectorTable.column('DIFC')):
+        print(f'{detid:>5} {difc:.1f}')
+
+.. testoutput:: group_cal
+
+    DetID DIFC
+        1 2208.3
+        2 2208.3
+        3 2208.3
+        4 2208.3
+        5 2208.3
+        6 2208.3
+
+.. testcode:: group_cal
+
+    from Calibration.tofpd.group_calibration import cc_calibrate_groups
+
+    cc_diffcal = cc_calibrate_groups(ws,
+                                     groups,
+                                     DReference=2.0,
+                                     Xmin=1.75,
+                                     Xmax=2.25)
+
+    print("DetID DIFC")
+    for detid, difc in zip(cc_diffcal.column('detid'), cc_diffcal.column('difc')):
+        print(f'{detid:>5} {difc:.1f}')
+
+.. testoutput:: group_cal
+
+    DetID DIFC
+        1 2208.3
+        2 2318.6
+        3 2098.0
+        4 2208.3
+        5 2161.2
+        6 2115.7
+
+.. testcode:: group_cal
+
+    from Calibration.tofpd.group_calibration import pdcalibration_groups
+
+    diffcal, mask = pdcalibration_groups(ws,
+                                         groups,
+                                         cc_diffcal,
+                                         PeakPositions = [1.0, 2.0, 3.0],
+                                         PeakFunction='Gaussian',
+                                         PeakWindow=0.4)
+
+    print("DetID DIFC")
+    for detid, difc in zip(diffcal.column('detid'), diffcal.column('difc')):
+        print(f'{detid:>5} {difc:.1f}')
+
+.. testoutput:: group_cal
+
+    DetID DIFC
+        1 2208.7
+        2 2319.0
+        3 2098.4
+        4 2368.8
+        5 2318.3
+        6 2269.5
+
+The evolution in the calibration can be seen with
+
+.. code::
+
+   import matplotlib.pyplot as plt
+   from mantid import plots
+
+   ws_d = Rebin(ws_d, '0.75,0.01,3.5')
+
+   ApplyDiffCal(ws, CalibrationWorkspace=cc_diffcal)
+   ws_d_after_cc = ConvertUnits(ws, Target='dSpacing')
+   ws_d_after_cc = Rebin(ws_d_after_cc, '0.75,0.01,3.5')
+
+   ApplyDiffCal(ws, CalibrationWorkspace=diffcal)
+   ws_d_after_cc_and_pd = ConvertUnits(ws, Target='dSpacing')
+   ws_d_after_cc_and_pd = Rebin(ws_d_after_cc_and_pd, '0.75,0.01,3.5')
+
+   fig = plt.figure(figsize=(6.4,9.6))
+   ax1 = fig.add_subplot(311, projection = 'mantid')
+   ax2 = fig.add_subplot(312, projection = 'mantid')
+   ax3 = fig.add_subplot(313, projection = 'mantid')
+
+   for n in range(1,7):
+       ax1.plot(ws_d, specNum=n)
+       ax2.plot(ws_d_after_cc, specNum=n)
+       ax3.plot(ws_d_after_cc_and_pd, specNum=n)
+
+   ax1.set_title('Starting peaks')
+   ax2.set_title('After cross-correlation, spectra in two groups')
+   ax3.set_title('After all calibration')
+   fig.tight_layout()
+   #fig.savefig('tofpd_group_calibration.png')
+   fig.show()
+
+.. figure:: /images/tofpd_group_calibration.png
+  :align: center
+
+The same complete calibration can just be run with just
+``group_calibration.do_group_calibration``.
+
+.. testsetup:: group_cal2
+
+   # recreate ws for next test
+   myFunc = "name=Gaussian, PeakCentre=1, Height=100, Sigma=0.01;name=Gaussian, PeakCentre=2, Height=100, Sigma=0.01;name=Gaussian, PeakCentre=3, Height=100, Sigma=0.01"
+   ws_d = CreateSampleWorkspace("Event","User Defined", myFunc, BankPixelWidth=1, XUnit='dSpacing', XMax=5, BinWidth=0.001, NumEvents=10000, NumBanks=6)
+   for n in range(1,7):
+       MoveInstrumentComponent(ws_d, ComponentName=f'bank{n}', X=1, Y=0, Z=1, RelativePosition=False)
+   ws_d = ScaleX(ws_d, Factor=1.05, IndexMin=1, IndexMax=1)
+   ws_d = ScaleX(ws_d, Factor=0.95, IndexMin=2, IndexMax=2)
+   ws_d = ScaleX(ws_d, Factor=1.05, IndexMin=3, IndexMax=5)
+   ws_d = ScaleX(ws_d, Factor=1.02, IndexMin=3, IndexMax=4)
+   ws_d = ScaleX(ws_d, Factor=0.98, IndexMin=4, IndexMax=5)
+   ws_d = Rebin(ws_d, '0,0.001,5')
+   ws = ConvertUnits(ws_d, Target='TOF')
+   groups, _, _, = CreateGroupingWorkspace(InputWorkspace=ws, ComponentName='basic_rect', CustomGroupingString='1-3,4-6')
+
+.. testcode:: group_cal2
+
+    from Calibration.tofpd.group_calibration import do_group_calibration
+
+    diffcal, mask = do_group_calibration(ws,
+                                        groups,
+                                        cc_kwargs={
+                                            "DReference": 2.0,
+                                            "Xmin": 1.75,
+                                            "Xmax": 2.25},
+                                        pdcal_kwargs={
+                                            "PeakPositions": [1.0, 2.0, 3.0],
+                                            "PeakFunction": 'Gaussian',
+                                            "PeakWindow": 0.4})
+
+    print("DetID DIFC")
+    for detid, difc in zip(diffcal.column('detid'), diffcal.column('difc')):
+        print(f'{detid:>5} {difc:.1f}')
+
+.. testoutput:: group_cal2
+
+    DetID DIFC
+        1 2208.7
+        2 2319.0
+        3 2098.4
+        4 2368.8
+        5 2318.3
+        6 2269.5
+
+The resulting :ref:`diffcal <DiffractionCalibrationWorkspace>` can be
+saved with :ref:`SaveDiffCal <algm-SaveDiffCal>`.
+
+.. code-block:: python
+
+   SaveDiffCal(CalibrationWorkspace=diffcal,
+               MaskWorkspace=mask,
+               Filename='calibration.h5')
+
+
 Saving and Loading Calibration
 ##############################
 
@@ -135,8 +346,8 @@ Testing your Calibration
 
 The first thing that should be done is to convert the calibration
 workspace (either table or ``OffsetsWorkspace`` to a workspace of
-:math:`DIFC` values to inspect using the :py:obj:`instrument view
-<mantidplot.InstrumentView>`. This can be done using
+:math:`DIFC` values to inspect using the :ref:`instrument view
+<InstrumentViewer>`. This can be done using
 :ref:`CalculateDIFC <algm-CalculateDIFC>`. The values of :math:`DIFC`
 should vary continuously across the detectors that are close to each
 other (e.g. neighboring pixels in an LPSD).

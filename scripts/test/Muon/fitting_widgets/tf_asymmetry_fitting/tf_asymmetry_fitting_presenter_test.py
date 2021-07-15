@@ -121,21 +121,22 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.presenter.handle_ads_clear_or_remove_workspace_event()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.presenter.disable_fitting_notifier.notify_subscribers.assert_called_once_with()
+        self.view.disable_view.assert_called_once_with()
         self.mock_view_tf_asymmetry_mode.assert_called_with(False)
         self.mock_model_tf_asymmetry_mode.assert_called_with(False)
         self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 2)
         self.assertEqual(self.mock_model_tf_asymmetry_mode.call_count, 2)
 
     def test_that_handle_new_data_loaded_will_attempt_to_reset_all_the_data_and_enable_the_gui(self):
-        self.presenter.clear_cached_fit_functions = mock.Mock()
+        self.presenter.clear_undo_data = mock.Mock()
         self.presenter.update_and_reset_all_data = mock.Mock()
 
         self.presenter.handle_new_data_loaded()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
         self.mock_view_plot_guess.assert_called_once_with(False)
-        self.presenter.clear_cached_fit_functions.assert_called_with()
+        self.mock_model_plot_guess.assert_called_once_with(False)
+        self.presenter.clear_undo_data.assert_called_with()
         self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
         self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 1)
         self.assertEqual(self.mock_model_tf_asymmetry_mode.call_count, 1)
@@ -143,15 +144,16 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
     def test_that_handle_new_data_loaded_will_disable_the_tab_if_no_data_is_loaded(self):
         self.mock_model_number_of_datasets = mock.PropertyMock(return_value=0)
         type(self.model).number_of_datasets = self.mock_model_number_of_datasets
-        self.presenter.clear_cached_fit_functions = mock.Mock()
+        self.presenter.clear_undo_data = mock.Mock()
         self.presenter.update_and_reset_all_data = mock.Mock()
 
         self.presenter.handle_new_data_loaded()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
         self.mock_view_plot_guess.assert_called_once_with(False)
-        self.presenter.clear_cached_fit_functions.assert_called_with()
-        self.presenter.disable_fitting_notifier.notify_subscribers.assert_called_once_with()
+        self.mock_model_plot_guess.assert_called_once_with(False)
+        self.presenter.clear_undo_data.assert_called_with()
+        self.view.disable_view.assert_called_once_with()
         self.mock_view_tf_asymmetry_mode.assert_called_with(False)
         self.mock_model_tf_asymmetry_mode.assert_called_with(False)
         self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 2)
@@ -187,7 +189,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.presenter.update_tf_asymmetry_functions_in_model_and_view = mock.Mock()
         self.presenter.reset_start_xs_and_end_xs = mock.Mock()
         self.presenter.reset_fit_status_and_chi_squared_information = mock.Mock()
-        self.presenter.clear_cached_fit_functions = mock.Mock()
+        self.presenter.clear_undo_data = mock.Mock()
         self.presenter.automatically_update_function_name = mock.Mock()
 
         self.presenter.handle_tf_asymmetry_mode_changed(self.tf_asymmetry_mode)
@@ -200,10 +202,9 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.presenter.update_tf_asymmetry_functions_in_model_and_view.assert_called_once_with()
 
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
-        self.presenter.clear_cached_fit_functions.assert_called_once_with()
+        self.presenter.clear_undo_data.assert_called_once_with()
         self.presenter.automatically_update_function_name.assert_called_once_with()
 
-        self.mock_view_plot_guess.assert_called_once_with()
         self.model.update_plot_guess(self.plot_guess)
 
     def test_that_handle_normalisation_changed_sets_the_normalisation_in_the_model_and_updates_the_guess(self):
@@ -212,7 +213,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.mock_view_normalisation.assert_called_with()
         self.model.set_current_normalisation.assert_called_once_with(self.normalisation)
 
-        self.mock_view_plot_guess.assert_called_once_with()
         self.model.update_plot_guess(self.plot_guess)
 
     def test_that_update_and_reset_all_data_will_attempt_to_update_the_tf_asymmetry_functions(self):
@@ -364,6 +364,8 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         type(self.model).end_xs = self.mock_model_end_xs
         self.mock_model_current_end_x = mock.PropertyMock(return_value=self.end_x)
         type(self.model).current_end_x = self.mock_model_current_end_x
+        self.mock_model_plot_guess = mock.PropertyMock(return_value=self.plot_guess)
+        type(self.model).plot_guess = self.mock_model_plot_guess
         self.mock_model_minimizer = mock.PropertyMock(return_value=self.minimizer)
         type(self.model).minimizer = self.mock_model_minimizer
         self.mock_model_evaluation_type = mock.PropertyMock(return_value=self.evaluation_type)
@@ -413,15 +415,16 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.model.clear_single_fit_functions = mock.Mock()
         self.model.get_single_fit_function_for = mock.Mock(return_value=self.fit_function)
         self.model.cache_the_current_fit_functions = mock.Mock()
-        self.model.clear_cached_fit_functions = mock.Mock()
+        self.model.clear_undo_data = mock.Mock()
         self.model.automatically_update_function_name = mock.Mock()
-        self.model.use_cached_function = mock.Mock()
+        self.model.save_current_fit_function_to_undo_data = mock.Mock()
         self.model.update_plot_guess = mock.Mock()
         self.model.remove_all_fits_from_context = mock.Mock()
         self.model.reset_current_dataset_index = mock.Mock()
         self.model.reset_start_xs_and_end_xs = mock.Mock()
         self.model.reset_fit_statuses_and_chi_squared = mock.Mock()
         self.model.reset_fit_functions = mock.Mock()
+        self.model.x_limits_of_workspace = mock.Mock(return_value=(self.start_x, self.end_x))
         self.model.retrieve_first_good_data_from_run = mock.Mock(return_value=self.start_x)
         self.model.get_active_fit_function = mock.Mock(return_value=self.fit_function)
         self.model.get_active_workspace_names = mock.Mock(return_value=[self.dataset_names[self.current_dataset_index]])
@@ -438,7 +441,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         # Mock unimplemented methods and notifiers
         self.presenter.disable_editing_notifier.notify_subscribers = mock.Mock()
         self.presenter.enable_editing_notifier.notify_subscribers = mock.Mock()
-        self.presenter.disable_fitting_notifier.notify_subscribers = mock.Mock()
         self.presenter.selected_fit_results_changed.notify_subscribers = mock.Mock()
         self.presenter.fit_function_changed_notifier.notify_subscribers = mock.Mock()
         self.presenter.fit_parameter_changed_notifier.notify_subscribers = mock.Mock()

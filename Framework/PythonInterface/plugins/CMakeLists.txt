@@ -80,6 +80,7 @@ set(PYTHON_PLUGINS
     algorithms/HB2AReduce.py
     algorithms/HB3AAdjustSampleNorm.py
     algorithms/HB3AFindPeaks.py
+    algorithms/HB3AIntegrateDetectorPeaks.py
     algorithms/HB3AIntegratePeaks.py
     algorithms/HB3APredictPeaks.py
     algorithms/HFIRCalculateGoniometer.py
@@ -148,6 +149,7 @@ set(PYTHON_PLUGINS
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
+    algorithms/PowderReduceP2D.py
     algorithms/RebinRagged.py
     algorithms/RefinePowderDiffProfileSeq.py
     algorithms/ReflectometryReductionOneLiveData.py

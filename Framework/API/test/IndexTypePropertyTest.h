@@ -20,22 +20,25 @@ public:
   static IndexTypePropertyTest *createSuite() { return new IndexTypePropertyTest(); }
   static void destroySuite(IndexTypePropertyTest *suite) { delete suite; }
 
-  void testConstruct() { TS_ASSERT_THROWS_NOTHING((IndexTypeProperty("IndexType", IndexType::SpectrumNum))); }
+  void testConstruct() {
+    TS_ASSERT_THROWS_NOTHING((IndexTypeProperty("IndexType", static_cast<int>(IndexType::SpectrumNum))));
+  }
 
   void testContructorFailsWithInvalidIndexType() {
     TS_ASSERT_THROWS(IndexTypeProperty("IndexType", 0), const std::invalid_argument &);
   }
 
   void testSingleIndexTypeAutomaticallySet() {
-    IndexTypeProperty prop1("IndexType", IndexType::SpectrumNum);
-    IndexTypeProperty prop2("IndexType", IndexType::WorkspaceIndex);
+    IndexTypeProperty prop1("IndexType", static_cast<int>(IndexType::SpectrumNum));
+    IndexTypeProperty prop2("IndexType", static_cast<int>(IndexType::WorkspaceIndex));
 
     TS_ASSERT_EQUALS(prop1.value(), "SpectrumNumber");
     TS_ASSERT_EQUALS(prop2.value(), "WorkspaceIndex");
   }
 
   void testAllowedValuesCorrectlySet() {
-    IndexTypeProperty prop("IndexType", IndexType::SpectrumNum | IndexType::WorkspaceIndex);
+    IndexTypeProperty prop("IndexType",
+                           static_cast<int>(IndexType::SpectrumNum) | static_cast<int>(IndexType::WorkspaceIndex));
     auto allowed = prop.allowedValues();
 
     TS_ASSERT_EQUALS(allowed.size(), 2);
@@ -44,15 +47,17 @@ public:
   }
 
   void testAllowedTypesCorrectlySet() {
-    IndexTypeProperty prop("IndexType", IndexType::SpectrumNum | IndexType::WorkspaceIndex);
+    IndexTypeProperty prop("IndexType",
+                           static_cast<int>(IndexType::SpectrumNum) | static_cast<int>(IndexType::WorkspaceIndex));
     auto allowed = prop.allowedTypes();
 
-    TS_ASSERT(allowed & IndexType::SpectrumNum);
-    TS_ASSERT(allowed & IndexType::WorkspaceIndex);
+    TS_ASSERT(allowed & static_cast<int>(IndexType::SpectrumNum));
+    TS_ASSERT(allowed & static_cast<int>(IndexType::WorkspaceIndex));
   }
 
   void testCorrectTypeReturnedWhenSetWithString() {
-    IndexTypeProperty prop("IndexType", IndexType::SpectrumNum | IndexType::WorkspaceIndex);
+    IndexTypeProperty prop("IndexType",
+                           static_cast<int>(IndexType::SpectrumNum) | static_cast<int>(IndexType::WorkspaceIndex));
 
     prop = "SpectrumNumber";
 
@@ -64,7 +69,7 @@ public:
   }
 
   void testCorrectTypeReturnedWhenSetWithIndexType() {
-    IndexTypeProperty prop("IndexType", IndexType::SpectrumNum);
+    IndexTypeProperty prop("IndexType", static_cast<int>(IndexType::SpectrumNum));
 
     prop = IndexType::SpectrumNum;
 

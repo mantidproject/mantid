@@ -28,6 +28,7 @@ class FittingDataPresenter(object):
         self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
         self.view.set_on_plotBG_clicked(self._plotBG)
         self.view.set_on_seq_fit_clicked(self._start_seq_fit)
+        self.view.set_on_serial_fit_clicked(self._start_serial_fit)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
         self.view.set_on_xunit_changed(self._log_xunit_change)
         self.view.set_table_selection_changed(self._handle_selection_changed)
@@ -36,25 +37,28 @@ class FittingDataPresenter(object):
         self.plot_added_notifier = GenericObservable()
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
-        self.seq_fit_started_notifier = GenericObservable()
+        self.fit_all_started_notifier = GenericObservable()
         # Observers
         self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
         #
         self.fit_enabled_observer = GenericObserverWithArgPassing(self.set_fit_enabled)
-        self.seq_fit_done_observer = GenericObserverWithArgPassing(self.fit_completed)
+        self.fit_all_done_observer = GenericObserverWithArgPassing(self.fit_completed)
         self.focus_run_observer = GenericObserverWithArgPassing(
             self.view.set_file_last)
 
     def set_fit_enabled(self, fit_enabled):
-        self.view.set_seq_fit_button_enabled(fit_enabled)
+        self.view.set_fit_buttons_enabled(fit_enabled)
 
     def fit_completed(self, fit_props):
         self.model.update_fit(fit_props)
 
     def _start_seq_fit(self):
         ws_list = self.model.get_ws_sorted_by_primary_log()
-        # set off sequential fit
-        self.seq_fit_started_notifier.notify_subscribers(ws_list)
+        self.fit_all_started_notifier.notify_subscribers(ws_list, do_sequential=True)
+
+    def _start_serial_fit(self):
+        ws_list = self.model.get_ws_list()
+        self.fit_all_started_notifier.notify_subscribers(ws_list, do_sequential=False)
 
     def _log_xunit_change(self, xunit):
         logger.notice("Subsequent files will be loaded with the x-axis unit:\t{}".format(xunit))
@@ -86,6 +90,9 @@ class FittingDataPresenter(object):
 
     def clear_workspaces(self):
         self.get_loaded_workspaces().clear()
+        self.get_bgsub_workspaces().clear()
+        self.get_bg_params().clear()
+        self.model.set_log_workspaces_none()
         self.plotted.clear()
         self.row_numbers.clear()
         self._repopulate_table()
@@ -99,6 +106,12 @@ class FittingDataPresenter(object):
 
     def get_loaded_workspaces(self):
         return self.model.get_loaded_workspaces()
+
+    def get_bgsub_workspaces(self):
+        return self.model.get_bgsub_workspaces()
+
+    def get_bg_params(self):
+        return self.model.get_bg_params()
 
     def restore_table(self):  # used when the interface is being restored from a save or crash
         self._repopulate_table()

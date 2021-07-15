@@ -12,6 +12,8 @@ Description
 Compute the cross correlation function for a range of spectra with
 respect to a reference spectrum.
 
+.. math:: c_{fg}(r) = \frac{1}{\sigma_f \sigma_g} \int (f(x) - \mu_f) (g(x+r)-\mu_g) dx
+
 This is use in powder diffraction experiments when trying to estimate
 the offset of one spectra with respect to another one. The spectra are
 converted in d-spacing and then interpolate on the X-axis of the

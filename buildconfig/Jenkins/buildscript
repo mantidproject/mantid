@@ -28,9 +28,9 @@ function onexit {
 
 function run_with_xvfb {
     if [ $(command -v xvfb-run) ]; then
-        # -e=--error-file. A bug in Xvfb on RHEL7 means --error-file
-        # produces an error: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337703;msg=2
-        xvfb-run -e /dev/stderr --server-args="-screen 0 640x480x24" \
+        # Use -e because a bug on RHEL7 means --error-file produces an error: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337703;msg=2
+        # Use -noreset because of an X Display bug caused by a race condition in xvfb: https://gitlab.freedesktop.org/xorg/xserver/-/issues/1102
+        xvfb-run -e /dev/stderr --server-args="-core -noreset -screen 0 640x480x24" \
         --server-num=${XVFB_SERVER_NUM} $@
     else
         eval $@
@@ -111,6 +111,12 @@ $CMAKE_EXE --version
 ###############################################################################
 if [[ ${JOB_NAME} == *clean* || ${JOB_NAME} == *clang_tidy* ]]; then
     CLEANBUILD=true
+fi
+
+if [[ ${JOB_NAME} == *coverage* ]]; then
+    COVERAGE=ON
+else
+    COVERAGE=OFF
 fi
 
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
@@ -348,7 +354,7 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DCOVERAGE=${COVERAGE} -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
 
 ###############################################################################
 # Coverity build should exit early

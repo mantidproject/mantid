@@ -216,8 +216,8 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         out_shift_factor = alg.getProperty('OutShiftFactor').value
         out_scale_factor = alg.getProperty('OutScaleFactor').value
 
-        self.assertEqual(out_scale_factor, 1.0)
-        self.assertEqual(out_shift_factor, -5.0)
+        self.assertAlmostEqual(out_scale_factor, 1.0, 5)
+        self.assertAlmostEqual(out_shift_factor, -5.0, 5)
 
     def test_scale_both(self):
         hab_range = range(5, 14)

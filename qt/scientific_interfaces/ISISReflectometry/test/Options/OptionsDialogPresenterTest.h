@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_OPTIONSDIALOGPRESENTERTEST_H
-#define MANTID_MANTIDWIDGETS_OPTIONSDIALOGPRESENTERTEST_H
+#pragma once
 
 #include "GUI/Options/OptionsDialogPresenter.h"
 #include "MockOptionsDialogModel.h"
@@ -198,4 +197,3 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mainWindowSubscriber));
   }
 };
-#endif // MANTID_MANTIDWIDGETS_OPTIONSDIALOGPRESENTERTEST_H

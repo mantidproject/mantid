@@ -18,9 +18,11 @@ New
 Bugfixes
 --------
 
+- The ISIS SANS Interface will now display an error, instead of an unexpected error, if the user does not have permission to save a CSV file to the requested location.
 
 Improvements
 ############
 
+- :ref:The ANSTO Bilby loader `LoadBBY <algm-LoadBBY>` logs the occurence of invalid events detected in the file as a warning.
 
 :ref:`Release 6.2.0 <v6.2.0>`

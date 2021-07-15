@@ -539,6 +539,7 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
   static const boost::regex digits("[0-9]+");
   auto h = hints.begin();
 
+  std::string instrSName;
   for (; h != hints.end(); ++h) {
     // Quick check for a filename
     bool fileSuspected = false;
@@ -559,6 +560,9 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
       throw std::invalid_argument("Malformed range of runs: " + *h);
     } else if ((range.count() == 2) && (!fileSuspected)) {
       std::pair<std::string, std::string> p1 = toInstrumentAndNumber(range[0]);
+      if (boost::algorithm::istarts_with(hint, "PG3")) {
+        instrSName = "PG3";
+      }
       std::string run = p1.second;
       size_t nZero = run.size(); // zero padding
       if (range[1].size() > nZero) {
@@ -601,7 +605,13 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
           }
         }
 
-        std::string path = findRun(p1.first + run, exts, useExtsOnly);
+        std::string path;
+        if (boost::algorithm::istarts_with(hint, "PG3")) {
+          path = findRun(instrSName + run, exts, useExtsOnly);
+        } else {
+          path = findRun(p1.first + run, exts, useExtsOnly);
+        }
+
         if (!path.empty()) {
           // Cache successfully found path and extension
           auto tempPath = Poco::Path(path);
@@ -613,7 +623,18 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
         }
       }
     } else {
-      std::string path = findRun(*h, exts, useExtsOnly);
+      std::string path;
+      // Special check for "PG3", to cope with situation like '48314,48316'.
+      if (boost::algorithm::istarts_with(hint, "PG3")) {
+        if (h == hints.begin()) {
+          instrSName = "PG3";
+          path = findRun(*h, exts, useExtsOnly);
+        } else {
+          path = findRun(instrSName + *h, exts, useExtsOnly);
+        }
+      } else {
+        path = findRun(*h, exts, useExtsOnly);
+      }
       if (!path.empty()) {
         res.emplace_back(path);
       } else {

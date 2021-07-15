@@ -40,7 +40,11 @@
 #include <stdexcept>
 #include <vector>
 
+#if BOOST_VERSION < 107100
 #include <boost/timer.hpp>
+#else
+#include <boost/timer/timer.hpp>
+#endif
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -586,7 +590,7 @@ void LoadEventPreNexus2::runLoadInstrument(const std::string &eventfilename,
   instrument = instrument.substr(0, pos);
 
   // do the actual work
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   loadInst->setPropertyValue("InstrumentName", instrument);
@@ -884,12 +888,10 @@ void LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr &workspace)
                    << "  Events of Wrong Detector = " << this->num_wrongdetid_events << ", "
                    << "Number of Wrong Detector IDs = " << this->wrongdetids.size() << "\n";
 
-    std::set<PixelType>::iterator wit;
-    for (wit = this->wrongdetids.begin(); wit != this->wrongdetids.end(); ++wit) {
+    for (auto wit = this->wrongdetids.begin(); wit != this->wrongdetids.end(); ++wit) {
       g_log.notice() << "Wrong Detector ID : " << *wit << '\n';
     }
-    std::map<PixelType, size_t>::iterator git;
-    for (git = this->wrongdetidmap.begin(); git != this->wrongdetidmap.end(); ++git) {
+    for (auto git = this->wrongdetidmap.begin(); git != this->wrongdetidmap.end(); ++git) {
       PixelType tmpid = git->first;
       size_t vindex = git->second;
       g_log.notice() << "Pixel " << tmpid

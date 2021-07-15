@@ -31,8 +31,7 @@ class Instrument;
 
   ParameterMap class. Holds the parameters of modified (parametrized) instrument
   components. ParameterMap has a number of 'add' methods for adding parameters
-  of
-  different types.
+  of different types.
 
   @author Roman Tolchenov, Tessella Support Services plc
   @date 2/12/2008
@@ -102,7 +101,7 @@ public:
 
   /// Method for adding a parameter providing its value as a string
   void add(const std::string &type, const IComponent *comp, const std::string &name, const std::string &value,
-           const std::string *const pDescription = nullptr);
+           const std::string *const pDescription = nullptr, const std::string &visible = "true");
 
   /**
    * Method for adding a parameter providing its value of a particular type.
@@ -110,21 +109,21 @@ public:
    * given type and value
    * @tparam T The concrete type
    * @param type :: A string denoting the type, e.g. double, string, fitting
-   * @param comp :: A pointer to the component that this parameter is attached
-   * to
+   * @param comp :: A pointer to the component that this parameter is attached to
    * @param name :: The name of the parameter
    * @param value :: The parameter's value
    * @param pDescription :: if present, the constant pointer to a constant
    * string, containing parameter's description.
+   * @param pVisible :: if present, defines whether the parameter should be visible
+   * in InstrumentViewer
    */
   template <class T>
   void add(const std::string &type, const IComponent *comp, const std::string &name, const T &value,
-           const std::string *const pDescription = nullptr) {
-    auto param = create(type, name);
+           const std::string *const pDescription = nullptr, const std::string &pVisible = "true") {
+    auto param = create(type, name, pVisible);
     auto typedParam = std::dynamic_pointer_cast<ParameterType<T>>(param);
     assert(typedParam); // If not true the factory has created the wrong type
     typedParam->setValue(value);
-
     this->add(comp, param, pDescription);
   }
   /// Method for adding a parameter providing shared pointer to it. The class
@@ -141,25 +140,25 @@ public:
                         const std::string *const pDescription = nullptr);
   /// Adds a double value to the parameter map.
   void addDouble(const IComponent *comp, const std::string &name, const std::string &value,
-                 const std::string *const pDescription = nullptr);
+                 const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
   /// Adds a double value to the parameter map.
   void addDouble(const IComponent *comp, const std::string &name, double value,
-                 const std::string *const pDescription = nullptr);
+                 const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
   /// Adds an int value to the parameter map.
   void addInt(const IComponent *comp, const std::string &name, const std::string &value,
-              const std::string *const pDescription = nullptr);
+              const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
   /// Adds an int value to the parameter map.
   void addInt(const IComponent *comp, const std::string &name, int value,
-              const std::string *const pDescription = nullptr);
+              const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
   /// Adds a bool value to the parameter map.
   void addBool(const IComponent *comp, const std::string &name, const std::string &value,
-               const std::string *const pDescription = nullptr);
+               const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
   /// Adds a bool value to the parameter map.
   void addBool(const IComponent *comp, const std::string &name, bool value,
-               const std::string *const pDescription = nullptr);
+               const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
   /// Adds a std::string value to the parameter map.
   void addString(const IComponent *comp, const std::string &name, const std::string &value,
-                 const std::string *const pDescription = nullptr);
+                 const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
   /// Adds a Kernel::V3D value to the parameter map.
   void addV3D(const IComponent *comp, const std::string &name, const std::string &value,
               const std::string *const pDescription = nullptr);
@@ -294,7 +293,8 @@ public:
   void setInstrument(const Instrument *instrument);
 
 private:
-  std::shared_ptr<Parameter> create(const std::string &className, const std::string &name) const;
+  std::shared_ptr<Parameter> create(const std::string &className, const std::string &name,
+                                    const std::string &visible = "true") const;
 
   /// Assignment operator
   ParameterMap &operator=(ParameterMap *rhs);

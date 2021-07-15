@@ -7,7 +7,7 @@ Overview
 --------
 
 The SCD Event Data Reduction interface(MantidEV) is a wrapper around
-MantidPlot algorithms that is intended to help handle the basic data reduction
+Mantid algorithms that is intended to help handle the basic data reduction
 steps for one crystal orientation in a time-of-flight single crystal neutron
 diffraction experiment.  The basic steps of loading data, converting to
 reciprocal space, finding peaks, finding a  :ref:`UB matrix <Lattice>`
@@ -15,13 +15,13 @@ reciprocal space, finding peaks, finding a  :ref:`UB matrix <Lattice>`
 are supported.
 
 All of the steps carried out can also be done by using the algorithms
-directly from from the MantidPlot GUI.  In most cases, many more
+directly from from the MantidWorkbench GUI.  In most cases, many more
 control parameters and options are available when the algorithm is
-used directly from MantidPlot.  MantidEV attempts to provide good
+used directly from the GUI or a Python script. MantidEV attempts to provide good
 default values for many of the additional parameters to make the
 process more user-friendly.  Since the workspaces created and/or used
-by MantidEV are stored in MantidPlot, it is easy to intersperse using
-the full algorithms from MantidPlot with applying various steps from
+by MantidEV are stored in Mantid, it is easy to intersperse using
+the full algorithms from Mantid with applying various steps from
 MantidEV, if the additional options are needed.
 
 After going through these initial steps for one or two runs from a
@@ -52,12 +52,12 @@ space and the peaks workspace listed on the Find Peaks tab holds a
 list of peaks.  If the Browse button is used to select a NeXus file to
 be loaded, default names will be set for all of these workspaces.
 Alternatively, if the user has already loaded data and converted to an
-MD workspace in MantidPlot, then those workspaces can be specified in
+MD workspace in MantidWorkbench, then those workspaces can be specified in
 MantidEV and the work does not need to be repeated.
 
 To actually load a selected file, press the apply button at the bottom
 of the tab.  This will take a little while depending on the file size,
-but you can watch the progress bar on MantidPlot and note what
+but you can watch the progress bar on the the GUI and note what
 workspaces have been created, to see how it is progressing.
 
 Find Peaks
@@ -99,7 +99,7 @@ Choose Cell
 If everything worked to this point, go to the Choose Cell tab and
 press Apply to show the possible conventional cells corresponding to
 the current Niggli reduced cell.  You should see the cell you expect
-displayed in the results log window of MantidPlot.  If so, you can
+displayed in the results log window.  If so, you can
 either actually select the cell (and re-index the peaks) at this time,
 or proceed to integrate the peaks first and then come back to this tab
 and select the cell and re-index the peaks.  The desired cell can be
@@ -182,9 +182,9 @@ small molecules.  Applying the Lorentz correction helps find the peaks
 at higher Q.  When the input fields have been filled out correctly as
 shown below, press the Apply button to actually load the data and
 convert it to an MD workspace.  This will take some time, depending on
-the size of the data.  The MantidPlot progress bar will show the
+the size of the data.  The progress bar will show the
 progress of the underlying algorithms.  The work is done when the MD
-workspace has been created and appears in the MantidPlot list of
+workspace has been created and appears in the list of
 Workspaces.
 
 .. figure:: /images/MantidEV_Select_Data.png
@@ -211,7 +211,7 @@ useful to start requesting a smaller number of peaks, say 25-50, and
 gradually increase the number requested until too many peaks are being
 found that don't index properly on the next tab.  Press the Apply
 button to actually carry out the calculation and find peaks.  As
-before the progress can be seen on the MantidPlot progress bar and the
+before the progress can be seen on the progress bar and the
 step is complete when the specified peaks workspace has been created.
 
 .. figure:: /images/MantidEV_Find_Peaks.png
@@ -238,8 +238,8 @@ been filled out, as shown below, press Apply to do the calculation.
 
 
 After pressing Apply, it is helpful to look at the output from
-:ref:`FindUBUsingFFT <algm-FindUBUsingFFT>` in the Results Log window
-in MantidPlot, shown below.  In particular, note what the lattice
+:ref:`FindUBUsingFFT <algm-FindUBUsingFFT>` in the Results Log window,
+shown below.  In particular, note what the lattice
 parameters are and how many peaks are indexed.  The lattice parameters
 should be the lattice parameters of the Niggli reduced cell for the
 sample and the majority of the peaks should have been indexed.  In
@@ -266,8 +266,8 @@ shown below and press Apply.
 
 
 A list of conventional cells together with the error in the match to
-the current Niggli reduced cell will be listed in the MantidPlot
-Results Log window, as shown below.  In this case we see that form #9,
+the current Niggli reduced cell will be listed in the Results Log window, as shown below.
+In this case we see that form #9,
 a Rhobohedral R cell with lattice parameters 4.7523, 4.7560, 12.9976,
 90.011, 89.920, 119.882 and cell volume 254.71 is the first option in
 the list.  This is a good match for sapphire and we would select that
@@ -299,7 +299,7 @@ seconds.
 
 
 After carrying out the integration, the integrated intensities can be
-observed in the peaks workspace in MantidPlot.  The list of indexed
+observed in the peaks workspace in the GUI.  The list of indexed
 and integrated peaks can also be saved in an ISAW format peaks file,
 by choosing Save Isaw Peaks from the File item on the MantidEV menu
 bar.  This will save the peaks in a simple ASCII file as shown below.
@@ -321,7 +321,7 @@ further detailed information about the calculations being done can be
 found on the documentation pages for the underlying algorithms.  Also,
 as mentioned previously, if more control over the calculation is
 needed, the user can run the underlying algorithm directly from
-MantidPlot, applying it to the same workspaces being used by MantidEV.
+the GUI, applying it to the same workspaces being used by MantidEV.
 The algorithms used by each tab are:
 
 

@@ -34,7 +34,11 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+#if BOOST_VERSION < 107100
 #include <boost/timer.hpp>
+#else
+#include <boost/timer/timer.hpp>
+#endif
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -735,7 +739,7 @@ void FilterEventsByLogValuePreNexus::runLoadInstrument(const std::string &eventf
   instrument = instrument.substr(0, pos);
 
   // do the actual work
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   loadInst->setPropertyValue("InstrumentName", instrument);

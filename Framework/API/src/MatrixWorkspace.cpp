@@ -1303,7 +1303,8 @@ Types::Core::DateAndTime MatrixWorkspace::getLastPulseTime() const {
  *                     stored value (default = 0.0). Used for point data only.
  * @returns The index corresponding to the X value provided
  */
-std::size_t MatrixWorkspace::yIndexOfX(const double xValue, const std::size_t &index, const double tolerance) const {
+std::size_t MatrixWorkspace::yIndexOfX(const double xValue, const std::size_t &index,
+                                       [[maybe_unused]] const double tolerance) const {
   if (index >= getNumberHistograms())
     throw std::out_of_range("MatrixWorkspace::yIndexOfX - Index out of range.");
 
@@ -1313,8 +1314,6 @@ std::size_t MatrixWorkspace::yIndexOfX(const double xValue, const std::size_t &i
   const auto maxX = ascendingOrder ? xValues.back() : xValues.front();
 
   if (isHistogramDataByIndex(index)) {
-    UNUSED_ARG(tolerance);
-
     if (xValue < minX || xValue > maxX)
       throw std::out_of_range("MatrixWorkspace::yIndexOfX - X value is out of "
                               "the range of the min and max bin edges.");
@@ -1650,7 +1649,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(const coord_t *coords,
   const auto &yVals = this->y(wi);
   double yBinSize(1.0); // only applies for volume normalization & numeric axis
   if (normalization == VolumeNormalization && ax1->isNumeric()) {
-    size_t uVI; // unused vertical index.
+    size_t uVI = 0; // unused vertical index.
     double currentVertical = ax1->operator()(wi, uVI);
     if (wi + 1 == nhist && nhist > 1) // On the boundary, look back to get diff
     {
@@ -1969,7 +1968,7 @@ std::pair<size_t, double> MatrixWorkspace::getXIndex(size_t i, double x, bool is
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 void MatrixWorkspace::setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image,
-                               size_t start, bool parallelExecution) {
+                               size_t start, [[maybe_unused]] bool parallelExecution) {
 
   if (image.empty())
     return;
@@ -2000,8 +1999,6 @@ void MatrixWorkspace::setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std:
       (this->*dataVec)(spec)[0] = *pixel;
     }
   }
-  // suppress warning when built without openmp.
-  UNUSED_ARG(parallelExecution)
 }
 
 /**

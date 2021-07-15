@@ -119,6 +119,24 @@ public:
 
   void test_NoEvents() { do_test_events(workspace, false); }
 
+  void test_extrapolation_large_muR() {
+    // repeat test with large radius and absorption to get muR > 2.5 (i.e. do extrapolation)
+    // previously this threw an error
+    workspace->getAxis(0)->setUnit("Wavelength");
+    AnvredCorrection alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "TOPAZ");
+    alg.setProperty("PreserveEvents", false);
+    alg.setProperty("OnlySphericalAbsorption", true);
+    alg.setProperty("LinearScatteringCoef", 0.0);
+    alg.setProperty("LinearAbsorptionCoef", 1.0); // large
+    alg.setProperty("Radius", 0.1);               // large
+    TS_ASSERT_THROWS_NOTHING(alg.execute();)
+    TS_ASSERT(alg.isExecuted())
+  }
+
 private:
   EventWorkspace_sptr workspace;
 };

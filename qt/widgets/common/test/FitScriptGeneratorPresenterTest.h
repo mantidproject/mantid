@@ -55,7 +55,7 @@ public:
 
   void setUp() override {
     m_wsName = "Name";
-    m_wsIndex = MantidQt::MantidWidgets::WorkspaceIndex(0);
+    m_wsIndex = WorkspaceIndex(0);
     m_workspace = create2DWorkspace(3, 3);
     m_startX = m_workspace->x(m_wsIndex.value).front();
     m_endX = m_workspace->x(m_wsIndex.value).back();
@@ -122,7 +122,7 @@ public:
 
   void test_that_a_add_domain_event_will_attempt_to_add_a_domain_in_the_view_and_model() {
     auto const workspaces = std::vector<Mantid::API::MatrixWorkspace_const_sptr>{m_workspace};
-    auto const workspaceIndices = std::vector<MantidQt::MantidWidgets::WorkspaceIndex>{m_wsIndex};
+    auto const workspaceIndices = std::vector<WorkspaceIndex>{m_wsIndex};
 
     ON_CALL(*m_view, openAddWorkspaceDialog()).WillByDefault(Return(true));
     ON_CALL(*m_view, getDialogWorkspaces()).WillByDefault(Return(workspaces));
@@ -567,7 +567,7 @@ private:
   }
 
   std::string m_wsName;
-  MantidQt::MantidWidgets::WorkspaceIndex m_wsIndex;
+  WorkspaceIndex m_wsIndex;
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   double m_startX;
   double m_endX;

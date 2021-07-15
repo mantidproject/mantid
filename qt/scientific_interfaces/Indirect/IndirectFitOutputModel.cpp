@@ -129,8 +129,7 @@ void IndirectFitOutputModel::addOutput(const Mantid::API::WorkspaceGroup_sptr &r
   m_resultWorkspace = resultWorkspace;
   m_outputResultLocations.clear();
   for (size_t index = 0; index < resultGroup->size(); index++) {
-    m_outputResultLocations.emplace(index,
-                                    ResultLocationNew(resultGroup, WorkspaceGroupIndex{static_cast<size_t>(index)}));
+    m_outputResultLocations.emplace(index, ResultLocationNew(resultGroup, WorkspaceID{static_cast<size_t>(index)}));
   }
 }
 
@@ -140,8 +139,7 @@ void IndirectFitOutputModel::addSingleOutput(const Mantid::API::WorkspaceGroup_s
                                              FitDomainIndex fitDomainIndex) {
   TableRowExtractor extractRowFromTable(std::move(parameterTable));
   m_parameters.insert_or_assign(fitDomainIndex.value, extractRowFromTable(0));
-  m_outputResultLocations.insert_or_assign(fitDomainIndex.value,
-                                           ResultLocationNew(resultGroup, WorkspaceGroupIndex{0}));
+  m_outputResultLocations.insert_or_assign(fitDomainIndex.value, ResultLocationNew(resultGroup, WorkspaceID{0}));
   m_resultWorkspace = resultWorkspace;
   m_resultGroup = resultGroup;
 }
