@@ -73,13 +73,10 @@ const std::string ParallaxCorrection::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ParallaxCorrection::init() {
-  auto validator = std::make_shared<Kernel::CompositeValidator>();
-  validator->add(std::make_unique<API::InstrumentValidator>());
-  validator->add(std::make_unique<API::WorkspaceUnitValidator>("Wavelength"));
   auto lengthValidator = std::make_shared<Kernel::ArrayLengthValidator<std::string>>();
   lengthValidator->setLengthMin(1);
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "",
-                                                                                 Kernel::Direction::Input, validator),
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                      "InputWorkspace", "", Kernel::Direction::Input, std::make_unique<API::InstrumentValidator>()),
                   "An input workspace.");
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>("ComponentNames", lengthValidator),
                   "List of instrument components to perform the corrections for.");
