@@ -82,6 +82,9 @@ class BackgroundCorrectionsPresenter:
                                                         self.model.start_x(run, group))
         self._update_start_and_end_x_in_view_and_model(run, group, new_start_x, new_end_x)
 
+        self.model.run_background_correction_for(run, group)
+        self._update_displayed_corrections_data()
+
     def handle_end_x_changed(self) -> None:
         """Handles when a End X table cell is changed."""
         run, group = self.view.selected_run_and_group()
@@ -91,10 +94,13 @@ class BackgroundCorrectionsPresenter:
                                                       self.model.end_x(run, group))
         self._update_start_and_end_x_in_view_and_model(run, group, new_start_x, new_end_x)
 
+        self.model.run_background_correction_for(run, group)
+        self._update_displayed_corrections_data()
+
     def _update_displayed_corrections_data(self) -> None:
         """Updates the displayed corrections data using the data stored in the model."""
-        runs, groups, start_xs, end_xs, backgrounds, background_errors = self.model.selected_correction_data()
-        self.view.populate_corrections_table(runs, groups, start_xs, end_xs, backgrounds, background_errors)
+        runs, groups, start_xs, end_xs, backgrounds, background_errors, statuses = self.model.selected_correction_data()
+        self.view.populate_corrections_table(runs, groups, start_xs, end_xs, backgrounds, background_errors, statuses)
 
     def _update_start_and_end_x_in_view_and_model(self, run: str, group: str, start_x: float, end_x: float) -> None:
         """Updates the start and end x in the model using the provided values."""

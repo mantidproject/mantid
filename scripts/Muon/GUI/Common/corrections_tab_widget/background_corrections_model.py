@@ -6,13 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.py36compat import dataclass
 
-from mantid.api import FunctionFactory, IFunction
+from mantid.api import AlgorithmManager, FunctionFactory, IFunction
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, RUNS_ALL, GROUPS_ALL)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
+from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
 from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 BACKGROUND_PARAM = "A0"
+MAX_ACCEPTABLE_CHI_SQUARED = 50.0
 
 
 @dataclass
@@ -20,12 +24,15 @@ class BackgroundCorrectionData:
     """
     The background correction data associated with a specific group of a run.
     """
+    uncorrected_counts_workspace: StaticWorkspaceWrapper
     start_x: float
     end_x: float
     flat_background: IFunction = FunctionFactory.createFunction("FlatBackground")
     exp_decay: IFunction = FunctionFactory.createFunction("ExpDecay")
+    status: str = "No background correction"
 
-    def __init__(self, start_x: float, end_x: float):
+    def __init__(self, counts_workspace: StaticWorkspaceWrapper, start_x: float, end_x: float):
+        self.uncorrected_counts_workspace = counts_workspace
         self.start_x = start_x
         self.end_x = end_x
 
@@ -109,18 +116,47 @@ class BackgroundCorrectionsModel:
                 run_group = tuple([run, group])
                 if run_group not in self._corrections_context.background_correction_data:
                     start_x, end_x = self.default_x_range(run, group)
+                    workspace_name = self.get_counts_workspace_name(run, group)
                     self._corrections_context.background_correction_data[run_group] = BackgroundCorrectionData(
-                        start_x, end_x)
+                        StaticWorkspaceWrapper(workspace_name, retrieve_ws(workspace_name)), start_x, end_x)
+                    self.run_background_correction_for(run, group)
+
+    def run_background_correction_for(self, run: str, group: str) -> None:
+        """Calculates the background for some data using a Fit."""
+        run_group = tuple([run, group])
+        if run_group in self._corrections_context.background_correction_data:
+            self._run_background_correction(self._corrections_context.background_correction_data[run_group])
+
+    def _run_background_correction(self, correction_data: BackgroundCorrectionData) -> None:
+        """Calculates the background for some data using a Fit."""
+        params = self._get_parameters_for_background_fit(correction_data)
+        function, fit_status, chi_squared = run_Fit(params, AlgorithmManager.create("Fit"))
+
+        if chi_squared > MAX_ACCEPTABLE_CHI_SQUARED:
+            correction_data.flat_background = FunctionFactory.createFunction("FlatBackground")
+            correction_data.status = f"Correction skipped - chi squared is poor ({chi_squared:.3f})."
+        else:
+            correction_data.flat_background = function.clone()
+            correction_data.status = "Correction success"
+
+    @staticmethod
+    def _get_parameters_for_background_fit(correction_data: BackgroundCorrectionData) -> dict:
+        """Gets the parameters to use for the background Fit."""
+        return {"Function": correction_data.flat_background,
+                "InputWorkspace": correction_data.uncorrected_counts_workspace.workspace_copy(),
+                "StartX": correction_data.start_x,
+                "EndX": correction_data.end_x,
+                "CreateOutput": False}
 
     def selected_correction_data(self) -> tuple:
         """Returns lists of the selected correction data to display in the view."""
-        runs, groups, start_xs, end_xs, backgrounds, background_errors = self._selected_correction_data_for(
+        runs, groups, start_xs, end_xs, backgrounds, background_errors, statuses = self._selected_correction_data_for(
             self._selected_runs(), self._selected_groups())
-        return runs, groups, start_xs, end_xs, backgrounds, background_errors
+        return runs, groups, start_xs, end_xs, backgrounds, background_errors, statuses
 
     def _selected_correction_data_for(self, selected_runs: list, selected_groups: list) -> tuple:
         """Returns lists of the selected correction data to display in the view."""
-        runs_list, groups_list, start_xs, end_xs, backgrounds, background_errors = [], [], [], [], [], []
+        runs_list, groups_list, start_xs, end_xs, backgrounds, background_errors, statuses = [], [], [], [], [], [], []
         for run_group, correction_data in self._corrections_context.background_correction_data.items():
             if run_group[0] in selected_runs and run_group[1] in selected_groups:
                 runs_list.append(run_group[0])
@@ -129,7 +165,8 @@ class BackgroundCorrectionsModel:
                 end_xs.append(correction_data.end_x)
                 backgrounds.append(correction_data.flat_background.getParameterValue(BACKGROUND_PARAM))
                 background_errors.append(correction_data.flat_background.getError(BACKGROUND_PARAM))
-        return runs_list, groups_list, start_xs, end_xs, backgrounds, background_errors
+                statuses.append(correction_data.status)
+        return runs_list, groups_list, start_xs, end_xs, backgrounds, background_errors, statuses
 
     def _selected_runs(self) -> list:
         """Returns a list containing the run number strings that are currently selected."""

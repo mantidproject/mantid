@@ -103,6 +103,11 @@ background-color: #c7e0ff;
           <string>A0 Error</string>
          </property>
         </column>
+        <column>
+         <property name="text">
+          <string>Status</string>
+         </property>
+        </column>
        </widget>
       </item>
       <item row="6" column="2" colspan="2">

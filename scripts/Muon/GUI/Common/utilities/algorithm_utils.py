@@ -135,10 +135,12 @@ def run_MuonMaxent(parameters_dict, alg, output_workspace_name):
 
 
 def run_Fit(parameters_dict, alg):
+    create_output = parameters_dict['CreateOutput'] if 'CreateOutput' in parameters_dict else True
+
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
-    alg.setProperty('CreateOutput', True)
+    alg.setProperty('CreateOutput', create_output)
     pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
                              key not in ['InputWorkspace', 'StartX', 'EndX']}
     alg.setProperties(pruned_parameter_dict)
@@ -146,10 +148,13 @@ def run_Fit(parameters_dict, alg):
     alg.setProperty('StartX', parameters_dict['StartX'])
     alg.setProperty('EndX', parameters_dict['EndX'])
     alg.execute()
-    return alg.getProperty("OutputWorkspace").valueAsStr, alg.getProperty(
-        "OutputParameters").valueAsStr, alg.getProperty(
-        "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value, \
-        alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
+    if create_output:
+        return alg.getProperty("OutputWorkspace").valueAsStr, alg.getProperty("OutputParameters").valueAsStr, \
+               alg.getProperty("Function").value, alg.getProperty('OutputStatus').value, \
+               alg.getProperty('OutputChi2overDoF').value, alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
+    else:
+        return alg.getProperty("Function").value, alg.getProperty('OutputStatus').value, \
+               alg.getProperty('OutputChi2overDoF').value
 
 
 def run_simultaneous_Fit(parameters_dict, alg):

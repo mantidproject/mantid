@@ -18,6 +18,7 @@ START_X_COLUMN_INDEX = 2
 END_X_COLUMN_INDEX = 3
 A0_COLUMN_INDEX = 4
 A0_ERROR_COLUMN_INDEX = 5
+STATUS_COLUMN_INDEX = 6
 
 
 class DoubleItemDelegate(QStyledItemDelegate):
@@ -163,12 +164,13 @@ class BackgroundCorrectionsView(widget, ui_form):
         return float(self._table_item_value_for(run, group, END_X_COLUMN_INDEX))
 
     def populate_corrections_table(self, runs: list, groups: list, start_xs: list, end_xs: list, backgrounds: list,
-                                   background_errors: list) -> None:
+                                   background_errors: list, statuses: list) -> None:
         """Populates the background corrections table with the provided data."""
         self.correction_options_table.blockSignals(True)
         self.correction_options_table.setRowCount(0)
-        for run, group, start_x, end_x, background, background_error in zip(runs, groups, start_xs, end_xs, backgrounds,
-                                                                            background_errors):
+        for run, group, start_x, end_x, background, background_error, status in zip(runs, groups, start_xs, end_xs,
+                                                                                    backgrounds, background_errors,
+                                                                                    statuses):
             row = self.correction_options_table.rowCount()
             self.correction_options_table.insertRow(row)
             self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, self._create_table_item(run, False))
@@ -179,7 +181,10 @@ class BackgroundCorrectionsView(widget, ui_form):
                                                   self._create_double_table_item(background, enabled=False))
             self.correction_options_table.setItem(row, A0_ERROR_COLUMN_INDEX,
                                                   self._create_double_table_item(background_error, enabled=False))
+            self.correction_options_table.setItem(row, STATUS_COLUMN_INDEX,
+                                                  self._create_table_item(status, False, alignment=Qt.AlignVCenter))
         self.correction_options_table.blockSignals(False)
+        self.correction_options_table.resizeColumnsToContents()
 
     def _setup_corrections_table(self) -> None:
         """Setup the correction options table to have a good layout."""
@@ -217,10 +222,11 @@ class BackgroundCorrectionsView(widget, ui_form):
         return self._create_table_item(self._float_to_str(value), editable, enabled)
 
     @staticmethod
-    def _create_table_item(text: str, editable: bool = True, enabled: bool = True) -> QTableWidgetItem:
+    def _create_table_item(text: str, editable: bool = True, enabled: bool = True, alignment: int = Qt.AlignCenter) \
+            -> QTableWidgetItem:
         """Creates a table item for the corrections options table from a string."""
         item = QTableWidgetItem(text)
-        item.setTextAlignment(Qt.AlignCenter)
+        item.setTextAlignment(alignment)
         if not editable:
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
         if not enabled:
