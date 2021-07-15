@@ -24,7 +24,7 @@ New Features
   displacement data. This approximation is useful for the study of
   light (e.g. organic) molecules adsorbed to surfaces of heavy
   (e.g. noble-metal) catalysts.
-  
+
 Bug Fixes
 #########
 
