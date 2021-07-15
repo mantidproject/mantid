@@ -278,6 +278,8 @@ class SANSILLReduction2(PythonAlgorithm):
                 mon = ws + '_duration'
                 ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[1], OutputWorkspace=mon)
                 Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
+                # TODO: check if dead time correction as is is applicable to kinetic
+                self.apply_dead_time(ws)
                 DeleteWorkspace(mon)
             else:
                 normalise_by_time(mtd[ws])
@@ -287,11 +289,11 @@ class SANSILLReduction2(PythonAlgorithm):
 
     def apply_dead_time(self, ws):
         '''Performs the dead time correction'''
-        instrument = ws.getInstrument()
+        instrument = mtd[ws].getInstrument()
         if instrument.hasParameter('tau'):
             tau = instrument.getNumberParameter('tau')[0]
             if self.instrument == 'D33' or self.instrument == 'D11B':
-                grouping_filename = self._instrument + '_Grouping.xml'
+                grouping_filename = self.instrument + '_Grouping.xml'
                 grouping_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
                 DeadTimeCorrection(InputWorkspace=ws, Tau=tau, MapFile=grouping_file, OutputWorkspace=ws)
             elif instrument.hasParameter('grouping'):
