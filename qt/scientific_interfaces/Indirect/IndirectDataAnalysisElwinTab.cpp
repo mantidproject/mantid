@@ -618,6 +618,13 @@ QStringList IndirectDataAnalysisElwinTab::getSampleWSSuffices() const { return m
 
 QStringList IndirectDataAnalysisElwinTab::getSampleFBSuffices() const { return m_fbSampleSuffixes; }
 
+void IndirectDataAnalysisElwinTab::closeDialog() {
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
+  m_addWorkspaceDialog->close();
+  m_addWorkspaceDialog = nullptr;
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

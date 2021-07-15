@@ -30,6 +30,7 @@ protected:
 
 protected slots:
   void showAddWorkspaceDialog();
+  virtual void closeDialog();
 
 signals:
   /// Signal emitted when file input is visible
