@@ -20,13 +20,17 @@ class RawPaneModel(BasePaneModel):
         self._max_spec = 16
         self._spec_limit = 16
 
+    def get_num_detectors(self):
+        return self.context.data_context.num_detectors
+
     def get_ws_names(self, run_string, multi_period, period):
         name = get_raw_data_workspace_name(self.context.data_context.instrument, run_string, multi_period,
                                                        period=period, workspace_suffix=self.context.workspace_suffix)
 
-        if self._max_spec > self.context.data_context.num_detectors:
-            self._max_spec = self.context.data_context.num_detectors
-        elif self._max_spec < self.context.data_context.num_detectors:
+        num_detectors = self.get_num_detectors()
+        if self._max_spec > num_detectors:
+            self._max_spec = num_detectors
+        elif self._max_spec < num_detectors:
             self._max_spec = self._spec_limit
         return [name for _ in range(self._max_spec)]
 

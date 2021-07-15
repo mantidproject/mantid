@@ -58,6 +58,24 @@ class RawPaneModelTest(unittest.TestCase):
         index = 5
         self.assertEqual("Run62260_Det6", self.model._create_workspace_label(name,index))
 
+    @mock.patch('Muon.GUI.Common.plot_widget.raw_pane.raw_pane_model.get_raw_data_workspace_name')
+    def test_get_ws_names(self, get_name_mock):
+        get_name_mock.return_value = "test"
+        self.model.get_num_detectors = mock.Mock(return_value = 100)
+        self.model._spec_limit = 16
+        names = self.model.get_ws_names("1234", False, 1)
+        # dont plot all of the spec in one go
+        self.assertEqual(len(names), self.model._spec_limit)
+
+    @mock.patch('Muon.GUI.Common.plot_widget.raw_pane.raw_pane_model.get_raw_data_workspace_name')
+    def test_get_ws_names_less_spec_than_limit(self, get_name_mock):
+        get_name_mock.return_value = "test"
+        self.model.get_num_detectors = mock.Mock(return_value = 4)
+        self.model._spec_limit = 16
+        names = self.model.get_ws_names("1234", False, 1)
+        # plot the number of spec in ws
+        self.assertEqual(len(names), self.model.get_num_detectors())
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
