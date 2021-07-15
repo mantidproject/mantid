@@ -111,7 +111,7 @@ void LoadPSIMuonBin::init() {
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("TimeZeroList", Kernel::Direction::Output),
                   "A vector of time zero values");
 
-  declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::ITableWorkspace>>(
+  declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
                       "TimeZeroTable", "", Mantid::Kernel::Direction::Output, Mantid::API::PropertyMode::Optional),
                   "TableWorkspace of time zeros for each spectra");
 

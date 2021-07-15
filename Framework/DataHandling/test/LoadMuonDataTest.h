@@ -19,7 +19,15 @@ public:
     loader.initialize();
     loader.setProperty("Filename", "emu00006473.nxs");
     loader.setProperty("OutputWorkspace", "OutWS");
+
     TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+    std::string field = loader.getProperty("MainFieldDirection");
+    TS_ASSERT_EQUALS("Longitudinal", field);
+    double timeZero = loader.getProperty("TimeZero");
+    TS_ASSERT_DELTA(timeZero, 0.55, 0.001);
+    double firstgood = loader.getProperty("FirstGoodData");
+    TS_ASSERT_DELTA(firstgood, 0.656, 0.001);
   }
 
   void testExecWithBinFile() {
