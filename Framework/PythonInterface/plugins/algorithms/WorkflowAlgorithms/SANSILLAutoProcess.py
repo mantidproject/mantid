@@ -408,6 +408,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
     def PyExec(self):
         self.setUp()
+        self.log().warning('SANSILLAutoProcess is deprecated for monochromatic measurements, use SANSILLMultiProcess instead.')
         outputSamples = []
         outputWedges = []
         outputPanels = []
