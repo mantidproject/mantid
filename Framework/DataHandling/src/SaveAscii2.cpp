@@ -254,7 +254,7 @@ void SaveAscii2::exec() {
   if (m_nBins == 0 || nSpectra == 0) {
     throw std::runtime_error("Trying to save an empty workspace");
   }
-  std::ofstream file(filename.c_str(), (appendToFile ? std::ios::app : std::ios::out));
+  std::ofstream file(filename, (appendToFile ? std::ios::app : std::ios::out));
 
   if (!file) {
     g_log.error("Unable to create file: " + filename);
