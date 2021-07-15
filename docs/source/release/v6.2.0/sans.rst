@@ -18,6 +18,7 @@ New
 Bugfixes
 --------
 
+- The ISIS SANS Interface will now display an error, instead of an unexpected error, if the user does not have permission to save a CSV file to the requested location.
 
 Improvements
 ############
