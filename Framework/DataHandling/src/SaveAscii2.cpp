@@ -256,7 +256,7 @@ void SaveAscii2::exec() {
   }
   std::ofstream file(filename, (appendToFile ? std::ios::app : std::ios::out));
 
-  if (!file) {
+  if (file.bad()) {
     g_log.error("Unable to create file: " + filename);
     throw Exception::FileError("Unable to create file: ", filename);
   }
