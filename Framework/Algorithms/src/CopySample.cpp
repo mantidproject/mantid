@@ -166,22 +166,38 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool ma
 
       // Delete previous goniometer from xml
       std::size_t foundGonioTag = xml.find("<goniometer");
-      std::size_t gonioTagLength = xml.find(">", foundGonioTag + 1) - foundGonioTag;
-      xml.erase(foundGonioTag, gonioTagLength);
-
-      // Add newly defined goniometer
-      std::size_t found = xml.find("</");
-      if (found != std::string::npos) {
-        const std::vector<std::string> matrixElementNames = {"a11", "a12", "a13", "a21", "a22",
-                                                             "a23", "a31", "a32", "a33"};
-        std::string goniometerRotation = "<goniometer ";
-        for (size_t index = 0; index < rotationMatrix.size(); ++index) {
-          goniometerRotation += matrixElementNames[index] + " = '" + std::to_string(rotationMatrix[index]) + "' ";
-        }
-        goniometerRotation += " /> \\ \n";
-        xml.insert(found, goniometerRotation);
+      if (foundGonioTag != std::string::npos) {
+        std::size_t gonioTagLength = xml.find(">", foundGonioTag + 1) - foundGonioTag;
+        xml.erase(foundGonioTag, gonioTagLength);
       }
+
+      // Put goniometer tag in correct place in xml
+      std::size_t gonioPlace;
+      std::size_t foundAlgebra = xml.find("<algebra");
+      std::size_t foundAlgebraEnd = xml.find("/>", foundAlgebra) + 2;
+      std::size_t foundType = xml.find("</type>");
+
+      if (foundAlgebra != std::string::npos) {
+        // If Algebra tag exists, add goniometer AFTER algebra end tag
+        gonioPlace = foundAlgebraEnd;
+      } else if (foundType != std::string::npos) {
+        // If no algebra tag, add goniometer BEFORE Type end tag
+        gonioPlace = foundType;
+      } else {
+        // If no Algebra or Type tag, add goniometer to the end
+        gonioPlace = xml.size();
+      }
+
+      const std::vector<std::string> matrixElementNames = {"a11", "a12", "a13", "a21", "a22",
+                                                           "a23", "a31", "a32", "a33"};
+      std::string goniometerRotation = " <goniometer ";
+      for (size_t index = 0; index < rotationMatrix.size(); ++index) {
+        goniometerRotation += matrixElementNames[index] + " = '" + std::to_string(rotationMatrix[index]) + "' ";
+      }
+      goniometerRotation += "/>";
+      xml.insert(gonioPlace, goniometerRotation);
       rhsObject = Geometry::ShapeFactory().createShape(xml, 0);
+      rhsObject->setMaterial(rhsMaterial); // add back in Material
     }
     if (auto meshObj = std::dynamic_pointer_cast<Geometry::MeshObject>(rhsObject)) {
       // Rotate MeshObject by goniometer
