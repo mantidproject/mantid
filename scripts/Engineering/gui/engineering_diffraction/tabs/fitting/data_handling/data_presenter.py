@@ -90,6 +90,9 @@ class FittingDataPresenter(object):
 
     def clear_workspaces(self):
         self.get_loaded_workspaces().clear()
+        self.get_bgsub_workspaces().clear()
+        self.get_bg_params().clear()
+        self.model.set_log_workspaces_none()
         self.plotted.clear()
         self.row_numbers.clear()
         self._repopulate_table()
@@ -103,6 +106,12 @@ class FittingDataPresenter(object):
 
     def get_loaded_workspaces(self):
         return self.model.get_loaded_workspaces()
+
+    def get_bgsub_workspaces(self):
+        return self.model.get_bgsub_workspaces()
+
+    def get_bg_params(self):
+        return self.model.get_bg_params()
 
     def restore_table(self):  # used when the interface is being restored from a save or crash
         self._repopulate_table()

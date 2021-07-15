@@ -21,6 +21,8 @@ namespace Geometry {
 class DetectorInfo;
 }
 namespace MDAlgorithms {
+// Note: this relies on several MD specific interfaces, so it needs to be defined
+// in MDAlgorithms despite it not actually operating on MDWorkspaces
 
 class DLLExport IntegrateEllipsoids : public API::Algorithm {
 public:
@@ -41,6 +43,8 @@ private:
   void init() override;
   /// Execute the algorithm
   void exec() override;
+  /// Private validator for inputs
+  std::map<std::string, std::string> validateInputs() override;
 
   /**
    * @brief create a list of SlimEvent objects from an events workspace
