@@ -355,6 +355,8 @@ class SANSILLReduction2(PythonAlgorithm):
                 ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionWorkspace=tr_ws_rebin,
                                             ThetaDependent=theta_dependent, OutputWorkspace=ws)
                 DeleteWorkspace(tr_ws_rebin)
+            elif self.mode == AcqMode.KINETIC:
+                pass # TODO apply also here once the algorithm is capable of doing kinetic
             else:
                 check_wavelengths_match(mtd[tr_ws], mtd[ws])
                 if theta_dependent and self.instrument == 'D16' and 75 < mtd[ws].getRun()['Gamma.value'].value < 105:
@@ -629,10 +631,10 @@ class SANSILLReduction2(PythonAlgorithm):
                 if self.process == 'Sample' or self.process == 'Transmission':
                     if not self.is_point:
                         ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
-                    # TODO: inject blank frames for the empty token placeholder here at the right index
-                    ConjoinXRuns(InputWorkspaces=ws, OutputWorkspace=ws + '__joined')
+                    # TODO: inject blank frames for the empty token placeholder of the right shape here at the right index
+                    ConjoinXRuns(InputWorkspaces=ws, OutputWorkspace=ws + '_joined')
                     DeleteWorkspace(Workspace=ws)
-                    RenameWorkspace(InputWorkspace=ws + '__joined', OutputWorkspace=ws)
+                    RenameWorkspace(InputWorkspace=ws + '_joined', OutputWorkspace=ws)
                 else:
                     raise RuntimeError('Listing of runs in MONO mode is allowed only for sample and transmission measurements.')
             else:
