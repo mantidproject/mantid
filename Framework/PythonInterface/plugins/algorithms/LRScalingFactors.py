@@ -477,7 +477,8 @@ class LRScalingFactors(PythonAlgorithm):
                                                 PeakRange=peak_range,
                                                 BackgroundRange=background_range,
                                                 LowResolutionRange=low_res_range,
-                                                OutputWorkspace=str(workspace))
+                                                OutputWorkspace=str(workspace),
+                                                ErrorWeighting=True)
 
         # Normalize by current proton charge
         # Note that the background subtraction will use an error weighted mean
