@@ -89,10 +89,10 @@ void Rebin::init() {
 
   declareProperty(std::make_unique<ArrayProperty<double>>("Params", std::make_shared<RebinParamsValidator>()),
                   "A comma separated list of first bin boundary, width, last bin boundary. "
-                  "Optionally this can be followed by a comma and more widths and last boundary pairs."
+                  "Optionally this can be followed by a comma and more widths and last boundary pairs. "
                   "Optionally this can also be a single number, which is the bin width. In this case, the boundary of "
                   "binning will be determined by minimum and maximum TOF values among all events, or previous binning "
-                  "boundary, in case of event Workspace, or non-event Workspace, respectively."
+                  "boundary, in case of event Workspace, or non-event Workspace, respectively. "
                   "Negative width values indicate logarithmic binning.");
 
   declareProperty("PreserveEvents", true,
