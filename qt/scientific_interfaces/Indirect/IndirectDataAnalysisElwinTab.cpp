@@ -16,6 +16,8 @@
 
 #include <algorithm>
 
+#include "IndirectAddWorkspaceDialog.h"
+
 using namespace Mantid::API;
 using namespace MantidQt::API;
 
@@ -94,6 +96,10 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
   // data selected changes
   connect(m_uiForm.page, SIGNAL(filesFoundChanged()), this, SLOT(handleFileInput()));
   connect(m_uiForm.page_2, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
+
+  connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
+
+  m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
 }
 
 IndirectDataAnalysisElwinTab::~IndirectDataAnalysisElwinTab() {
@@ -592,6 +598,25 @@ void IndirectDataAnalysisElwinTab::setButtonsEnabled(const bool &enabled) {
 void IndirectDataAnalysisElwinTab::setRunEnabled(const bool &enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
 void IndirectDataAnalysisElwinTab::setSaveResultEnabled(const bool &enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+
+std::unique_ptr<IAddWorkspaceDialog> IndirectDataAnalysisElwinTab::getAddWorkspaceDialog(QWidget *parent) const {
+  return std::make_unique<IndirectAddWorkspaceDialog>(parent);
+}
+
+void IndirectDataAnalysisElwinTab::showAddWorkspaceDialog() {
+  if (!m_addWorkspaceDialog)
+    m_addWorkspaceDialog = getAddWorkspaceDialog(m_parent);
+  m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
+  m_addWorkspaceDialog->setFBSuffices(getSampleFBSuffices());
+  m_addWorkspaceDialog->updateSelectedSpectra();
+  m_addWorkspaceDialog->show();
+  connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
+  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
+}
+
+QStringList IndirectDataAnalysisElwinTab::getSampleWSSuffices() const { return m_wsSampleSuffixes; }
+
+QStringList IndirectDataAnalysisElwinTab::getSampleFBSuffices() const { return m_fbSampleSuffixes; }
 
 } // namespace IDA
 } // namespace CustomInterfaces

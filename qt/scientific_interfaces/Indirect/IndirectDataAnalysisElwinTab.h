@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "IAddWorkspaceDialog.h"
+#include "IIndirectFitDataView.h"
 #include "IndirectDataAnalysisTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_IndirectDataAnalysisElwinTab.h"
@@ -19,6 +21,15 @@ class DLLExport IndirectDataAnalysisElwinTab : public IndirectDataAnalysisTab {
 public:
   IndirectDataAnalysisElwinTab(QWidget *parent = nullptr);
   ~IndirectDataAnalysisElwinTab();
+  QStringList getSampleWSSuffices() const;
+  QStringList getSampleFBSuffices() const;
+
+protected:
+  QStringList m_wsSampleSuffixes;
+  QStringList m_fbSampleSuffixes;
+
+protected slots:
+  void showAddWorkspaceDialog();
 
 signals:
   /// Signal emitted when file input is visible
@@ -46,8 +57,12 @@ private:
   void setRunEnabled(const bool &enabled);
   void setSaveResultEnabled(const bool &enabled);
 
+  virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
+
+  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   Ui::IndirectDataAnalysisElwinTab m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
+  IndirectDataAnalysis *m_parent;
 
 private slots:
   void newInputFiles();
@@ -66,6 +81,7 @@ private slots:
   /// Slot called when the current view is changed
   void handleViewChanged(int index);
 };
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
