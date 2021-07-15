@@ -719,16 +719,17 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
       std::string xml_s = std::string(xml);
       std::size_t foundAlgebra = xml_s.find("<algebra");
       std::size_t foundAlgebraEnd = xml_s.find("/>", foundAlgebra);
-      if (foundAlgebraEnd != std::string::npos) {
-        const std::vector<std::string> matrixElementNames = {"a11", "a12", "a13", "a21", "a22",
-                                                             "a23", "a31", "a32", "a33"};
-        std::string goniometerRotation = "<goniometer ";
-        for (size_t index = 0; index < rotationMatrix.size(); ++index) {
-          goniometerRotation += matrixElementNames[index] + " = '" + std::to_string(rotationMatrix[index]) + "' ";
-        }
-        goniometerRotation += " /> ";
-        xml_s.insert(foundAlgebraEnd + 3, goniometerRotation);
+      if (foundAlgebraEnd == std::string::npos) {
+        foundAlgebraEnd = xml_s.size() - 3;
       }
+      const std::vector<std::string> matrixElementNames = {"a11", "a12", "a13", "a21", "a22",
+                                                           "a23", "a31", "a32", "a33"};
+      std::string goniometerRotation = " <goniometer ";
+      for (size_t index = 0; index < rotationMatrix.size(); ++index) {
+        goniometerRotation += matrixElementNames[index] + " = '" + std::to_string(rotationMatrix[index]) + "' ";
+      }
+      goniometerRotation += " /> ";
+      xml_s.insert(foundAlgebraEnd + 3, goniometerRotation);
       CreateSampleShape::setSampleShape(experiment, xml_s);
       return;
     }

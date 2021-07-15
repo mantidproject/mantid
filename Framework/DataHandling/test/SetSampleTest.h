@@ -349,10 +349,11 @@ public:
                    "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.007\"/> "
                    "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.005\"/> "
                    "</cuboid><algebra val=\"back:front\"/> "
-                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
+                   " <goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
                    "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" a31=\"0.000000\" "
                    "a32=\"0.000000\" a33=\"1.000000\"/> "
                    "</type>";
+    std::cout << xml;
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
