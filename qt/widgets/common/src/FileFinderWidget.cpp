@@ -19,7 +19,6 @@
 #include <Poco/File.h>
 #include <QDragEnterEvent>
 #include <QDropEvent>
-#include <QFileDialog>
 #include <QFileInfo>
 #include <QHash>
 #include <QMimeData>
@@ -43,7 +42,8 @@ FileFinderWidget::FileFinderWidget(QWidget *parent)
     : MantidWidget(parent), m_findRunFiles(true), m_isForDirectory(false), m_allowMultipleFiles(false),
       m_isOptional(false), m_multiEntry(false), m_buttonOpt(Text), m_fileProblem(""), m_entryNumProblem(""),
       m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true), m_liveButtonState(Hide),
-      m_showValidator(true), m_foundFiles(), m_lastFoundFiles(), m_lastDir(), m_fileFilter(), m_pool() {
+      m_showValidator(true), m_foundFiles(), m_lastFoundFiles(), m_lastDir(), m_fileFilter(), m_pool(),
+      m_useNativeDialog(true), m_dialog() {
 
   m_uiForm.setupUi(this);
 
@@ -778,15 +778,35 @@ QString FileFinderWidget::openFileDialog() {
   }
 
   if (m_isForDirectory) {
-    QString file = QFileDialog::getExistingDirectory(this, "Select directory", dir);
+    QString file;
+    if (!m_useNativeDialog) {
+      m_dialog.setFileMode(QFileDialog::Directory);
+      m_dialog.setDirectory(dir);
+      m_dialog.exec();
+      filenames = m_dialog.selectedFiles();
+    } else
+      file = QFileDialog::getExistingDirectory(this, "Select directory", dir);
     if (!file.isEmpty())
       filenames.append(file);
   } else if (m_allowMultipleFiles) {
-    filenames =
-        QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter, nullptr, QFileDialog::DontResolveSymlinks);
+    if (!m_useNativeDialog) {
+      m_dialog.setNameFilter(m_fileFilter);
+      m_dialog.setDirectory(dir);
+      m_dialog.exec();
+      filenames = m_dialog.selectedFiles();
+    } else
+      filenames = QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter, nullptr,
+                                                QFileDialog::DontResolveSymlinks);
   } else {
-    QString file =
-        QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter, nullptr, QFileDialog::DontResolveSymlinks);
+    QString file;
+    if (!m_useNativeDialog) {
+      m_dialog.setFileMode(QFileDialog::ExistingFile);
+      m_dialog.setDirectory(dir);
+      m_dialog.exec();
+      QString file = m_dialog.selectedFiles()[0];
+    } else
+      file =
+          QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter, nullptr, QFileDialog::DontResolveSymlinks);
     if (!file.isEmpty())
       filenames.append(file);
   }
@@ -941,3 +961,10 @@ FindFilesSearchParameters FileFinderWidget::createFindFilesSearchParameters(cons
 }
 
 void FileFinderWidget::setTextValidator(const QValidator *validator) { m_uiForm.fileEditor->setValidator(validator); }
+
+void FileFinderWidget::setUseNativeWidget(bool native) {
+  m_useNativeDialog = native;
+  m_dialog.setOption(QFileDialog::DontUseNativeDialog);
+}
+
+void FileFinderWidget::setProxyModel(QAbstractProxyModel *proxyModel) { m_dialog.setProxyModel(proxyModel); }
