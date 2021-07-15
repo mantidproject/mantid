@@ -10,6 +10,7 @@ from mantid.api import PythonAlgorithm, MatrixWorkspace, MatrixWorkspaceProperty
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, \
     StringListValidator
 from mantid.simpleapi import *
+import numpy as np
 
 
 class SANSILLReduction2(PythonAlgorithm):
@@ -222,13 +223,13 @@ class SANSILLReduction2(PythonAlgorithm):
         unit = ws.getAxis(0).getUnit().unitID()
         self.n_frames = ws.blocksize()
         self.log().notice(f'Set the number of frames to {self.n_frames}')
-        if unit == 'Wavelength':
-            self.mode = AcqMode.TOF
-        else:
-            if self.n_frames > 1:
-                self.mode = AcqMode.KINETIC
+        if self.n_frames > 1:
+            if unit == 'Wavelength':
+                self.mode = AcqMode.TOF
             else:
-                self.mode = AcqMode.MONO
+                self.mode = AcqMode.KINETIC
+        else:
+            self.mode = AcqMode.MONO
         self.log().notice(f'Set the acquisition mode to {self.mode}')
         self.is_point = not ws.isHistogramData()
         self.log().notice(f'Set the point data flag to {self.is_point}')
@@ -236,6 +237,8 @@ class SANSILLReduction2(PythonAlgorithm):
             if self.process != 'Sample':
                 raise RuntimeError('Only the sample can be a kinetic measurement, the auxiliary calibration measurements cannot.')
         self.progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(self.process) + 1)
+
+    #==============================METHODS TO APPLY CORRECTIONS==============================#
 
     def normalise_by_time(self, ws):
         '''Normalises the given workspace to time and applies the dead time correction'''
@@ -438,20 +441,125 @@ class SANSILLReduction2(PythonAlgorithm):
                 check_wavelengths_match(mtd[solvent_ws], mtd[ws])
                 Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws, OutputWorkspace=ws)
 
+    #===============================METHODS TO PROCESS BY TYPE===============================#
+
+    def process_empty_beam(self, ws):
+        '''Processes as empty beam, i.e. calculates beam center, beam width and incident flux'''
+        centers = ws + '_centers'
+        radius = self.getProperty('BeamRadius').value
+        FindCenterOfMassPosition(InputWorkspace=ws, DirectBeam=True, BeamRadius=radius, Output=centers)
+        beam_x = mtd[centers].cell(0,1)
+        beam_y = mtd[centers].cell(1,1)
+        AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
+        AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
+        DeleteWorkspace(centers)
+        if self.mode != AcqMode.TOF:
+            # correct for beam center before calculating the beam width for resolution
+            MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
+            self.fit_beam_width(ws)
+        self.calculate_flux(ws)
+
+    def calculate_flux(self, ws):
+        '''Calculates the incident flux'''
+        run = mtd[ws].getRun()
+        att_coeff = 1.
+        if run.hasProperty('attenuator.attenuation_coefficient'):
+            att_coeff = run['attenuator.attenuation_coefficient'].value
+        elif run.hasProperty('attenuator.attenuation_value'):
+            att_value = run['attenuator.attenuation_value'].value
+            if float(att_value) < 10. and self.instrument == 'D33':
+                # for D33, it's not always the attenuation value, it could be the index of the attenuator
+                # if it is <10, we consider it's the index and take the corresponding value from the IPF
+                instrument = mtd[ws].getInstrument()
+                param = 'att'+str(int(att_value))
+                if instrument.hasParameter(param):
+                    att_coeff = instrument.getNumberParameter(param)[0]
+                else:
+                    raise RuntimeError('Unable to find the attenuation coefficient for D33 attenuator #'+str(int(att_value)))
+            else:
+                att_coeff = float(att_value)
+        self.log().information('Attenuator 1 coefficient/value: {0}'.format(att_coeff))
+        if run.hasProperty('attenuator2.attenuation_value'):
+            # D22 can have the second, chopper attenuator
+            # In principle, either of the 2 attenuators can be in or out
+            # In practice, only one (standard or chopper) is in at a time
+            # If one is out, its attenuation_value is set to 1, so it's safe to take the product
+            att2_value = run['attenuator2.attenuation_value'].value
+            self.log().information('Attenuator 2 coefficient/value: {0}'.format(att2_value))
+            att_coeff *= float(att2_value)
+        self.log().information('Attenuation coefficient used is: {0}'.format(att_coeff))
+        flux = ws + '_flux'
+        radius = self.getProperty('BeamRadius').value
+        CalculateFlux(InputWorkspace=ws, OutputWorkspace=flux, BeamRadius=radius)
+        Scale(InputWorkspace=flux, Factor=att_coeff, OutputWorkspace=flux)
+        # for TOF, the flux is wavelength dependent, and the sample workspace is ragged
+        # hence the flux must be rebinned to the sample before it can be divided by flux
+        # that's why we broadcast the empty beam workspace to the same size as the sample
+        # this allows rebinning spectrum-wise when processing the sample w/o tiling the empty beam data for each sample
+        # for mono however, this must be a single count workspace
+        nspec = mtd[ws].getNumberHistograms() if self.mode == AcqMode.TOF else 1
+        x = mtd[flux].readX(0)
+        y = mtd[flux].readY(0)
+        e = mtd[flux].readE(0)
+        CreateWorkspace(DataX=x, DataY=np.tile(y, nspec), DataE=np.tile(e, nspec), NSpec=nspec,
+                        ParentWorkspace=ws, OutputWorkspace=flux)
+        RenameWorkspace(InputWorkspace=flux, OutputWorkspace=ws)
+
+    def fit_beam_width(self, ws):
+        ''''Groups detectors vertically and fits the horizontal beam width with a Gaussian profile'''
+        tmp_ws = ws + '_beam_width'
+        CloneWorkspace(InputWorkspace=ws, OutputWorkspace=tmp_ws)
+        grouping_pattern = get_vertical_grouping_pattern(tmp_ws)
+        if not grouping_pattern: # unsupported instrument
+            return
+        GroupDetectors(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, GroupingPattern=grouping_pattern)
+        ConvertSpectrumAxis(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, Target='SignedInPlaneTwoTheta')
+        Transpose(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws)
+        background = 'name=FlatBackground, A0=1e-4'
+        distribution_width = np.max(mtd[tmp_ws].getAxis(0).extractValues())
+        function = "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}".format(
+            0, np.max(mtd[tmp_ws].getAxis(1).extractValues()), 0.1*distribution_width)
+        constraints = "{0} < f1.PeakCentre < {1}".format(-0.1*distribution_width, 0.1*distribution_width)
+        fit_function = [background, function]
+        fit_output = Fit(Function=';'.join(fit_function),
+                         InputWorkspace=tmp_ws,
+                         Constraints=constraints,
+                         CreateOutput=False,
+                         IgnoreInvalidData=True,
+                         Output=tmp_ws+"_fit_output")
+        param_table = fit_output.OutputParameters
+        beam_width = param_table.column(1)[3] * np.pi / 180.0
+        AddSampleLog(Workspace=ws, LogName='BeamWidthX', LogText=str(beam_width), LogType='Number', LogUnit='rad')
+        DeleteWorkspaces(WorkspaceList=[tmp_ws, tmp_ws+'_fit_output_Parameters', tmp_ws+'_fit_output_Workspace',
+                                        tmp_ws+'_fit_output_NormalisedCovarianceMatrix'])
+
+    def PyExec(self):
+        self.reset()
+        ws = self.getPropertyValue('OutputWorkspace')
+        self.load(ws)
+        self.set_process_as(ws)
+        self.reduce(ws)
+        self.setProperty('OutputWorkspace', ws)
+
+    def set_process_as(self, ws):
+        '''Sets the process as flag as sample log for future sanity checks'''
+        AddSampleLog(Workspace=ws, LogName='ProcessedAs', LogText=self.process)
+
     def load(self, ws):
         '''
         Loads, merges and concatenates the input runs, if needed
+        This is a performance critical section, as it dominates the total runtime
         Concatenation is allowed only for sample and transmission runs, if the mode is not TOF
         For all the rest, only summing is permitted
         The input might be either a numor or a processed nexus as a result of rebinning of event data in mantid
         Hence, we cannot specify a name of a specifc loader
         Besides, if it is processed nexus, it will be histogram data, which needs to be converted to point data
-        Currently, the loader too will load to a histogram data for monochromatic non-kinetic, so we need to run a conversion
-        This is redundant, since the loader could load directly to point-data
-        The latter is a breaking change for the loader, so will require a new version
         The final output of this must be a workspace and not a workspace group
         '''
         #TODO: note that this operation is quite generic, so perhaps concatenation can become an option directly in LoadAndMerge
+        #TODO: Currently, the loader too will load to a histogram data for monochromatic non-kinetic,
+        # so we need to run a conversion to point data, which is redundant, since the loader could load directly to point-data
+        #The latter is a breaking change for the loader, so will require a new version
         LoadAndMerge(Filename=self.getPropertyValue('Runs'), OutputWorkspace=ws)
         if isinstance(mtd[ws], WorkspaceGroup):
             self.setup(mtd[ws][0])
@@ -473,12 +581,17 @@ class SANSILLReduction2(PythonAlgorithm):
         return ws
 
     def reduce(self, ws):
-        '''Performs the corresponding reduction based on the process type'''
+        '''
+        Performs the corresponding reduction based on the process type
+        This is the core logic of the reduction realised as a hard-wired dependency graph, for example:
+        If we are processing the empty beam we apply the dark current correction and process as empty beam
+        If we are processing transmission, we apply both dark current and empty beam corrections and process as transmission
+        '''
         self.apply_normalisation(ws)
         if self.process != 'DarkCurrent':
             self.apply_dark_current(ws)
             if self.process == 'EmptyBeam':
-                pass # process beam
+                self.process_empty_beam(ws)
             else:
                 self.apply_direct_beam(ws)
                 if self.process == 'Transmission':
@@ -497,13 +610,6 @@ class SANSILLReduction2(PythonAlgorithm):
                                 pass # process solvent
                             else:
                                 self.apply_solvent(ws)
-
-    def PyExec(self):
-        self.reset()
-        ws = self.getPropertyValue('OutputWorkspace')
-        self.load(ws)
-        self.reduce(ws)
-        self.setProperty('OutputWorkspace', ws)
 
 
 # Register algorithm with Mantid

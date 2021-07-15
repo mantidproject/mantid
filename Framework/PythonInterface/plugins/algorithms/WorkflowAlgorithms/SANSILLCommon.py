@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import logger
+from mantid.simpleapi import (logger, mtd)
 from enum import Enum
 from math import fabs
 
@@ -61,8 +61,8 @@ def cylinder_xml(radius):
         @param radius : the radius of the cylinder [m]
         @return : XML string for the geometry shape
     """
-    return f'<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
-           '<radius val="{radius}"/></infinite-cylinder>'
+    return '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
+           '<radius val="{0}"/></infinite-cylinder>'.format(radius)
 
 
 def monitor_id(instrument):
@@ -76,3 +76,41 @@ def monitor_id(instrument):
         return [500001, 500000]
     else:
         return [100000, 100001]
+
+
+def get_vertical_grouping_pattern(ws):
+    """
+    Provides vertical grouping pattern and crops to the main detector panel where counts from the beam are measured.
+    Used for fitting the horizontal incident beam profile for q resolution calculation.
+    TODO: These are static and can be turned to grouping files in instrument/Grouping folder
+    :param ws: Empty beam workspace.
+    """
+    inst_name = mtd[ws].getInstrument().getName()
+    min_id = 0
+    if 'D11' in inst_name:
+        if 'lr' in inst_name:
+            step = 128
+            max_id = 16384
+        elif 'B' in inst_name:
+            CropToComponent(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames='detector_center')
+            max_id = 49152
+            step = 192
+        else:
+            step = 256
+            max_id = 65536
+    elif 'D22' in inst_name:
+        max_id = 32768
+        step = 256
+        if 'lr' in inst_name:
+            step = 128
+            max_id = 16384
+        elif 'B' in inst_name:
+            CropToComponent(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames='detector_back')
+    elif 'D33' in inst_name:
+        CropToComponent(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames='back_detector')
+        max_id = 32768
+        step = 128
+    else:
+        self.log().warning('Instruments other than D11, D22, and D33 are not yet supported.')
+        return
+    return ','.join(["{}-{}".format(start, start + step - 1) for start in range(min_id, max_id, step)])
