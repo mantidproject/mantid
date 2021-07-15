@@ -108,7 +108,8 @@ class SANSILLReduction2(PythonAlgorithm):
 
         self.setPropertySettings('WaterCrossSection', solvent_sample)
 
-        self.declareProperty('TransmissionThetaDependent', True,
+        self.declareProperty(name='TransmissionThetaDependent',
+                             defaultValue=True,
                              doc='Whether or not to use 2theta dependent transmission correction')
         self.setPropertySettings('TransmissionThetaDependent', can_water_solvent_sample)
 
@@ -216,7 +217,7 @@ class SANSILLReduction2(PythonAlgorithm):
 
     def setup(self, ws):
         '''Performs a full setup, which can be done only after having loaded the sample data'''
-        processes = ['DarkCurrent', 'EmptyBeam', 'Transmission', 'Container', 'Water', 'Solvent', 'Sample']
+        processes = ['DarkCurrent', 'EmptyBeam', 'Transmission', 'EmptyContainer', 'Water', 'Solvent', 'Sample']
         self.process = self.getPropertyValue('ProcessAs')
         self.instrument = ws.getInstrument().getName()
         self.log().notice(f'Set the instrument name to {self.instrument}')
@@ -443,6 +444,13 @@ class SANSILLReduction2(PythonAlgorithm):
                 check_wavelengths_match(mtd[solvent_ws], mtd[ws])
                 Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws, OutputWorkspace=ws)
 
+    def apply_solid_angle(self, ws):
+        '''Calculates solid angle and divides by it'''
+        sa_ws = ws + '_solidangle'
+        SolidAngle(InputWorkspace=ws, OutputWorkspace=sa_ws, Method="Rectangle")
+        Divide(LHSWorkspace=ws, RHSWorkspace=sa_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
+        DeleteWorkspace(Workspace=sa_ws)
+
     #===============================METHODS TO PROCESS BY TYPE===============================#
 
     def treat_empty_beam(self, ws):
@@ -611,16 +619,20 @@ class SANSILLReduction2(PythonAlgorithm):
                     self.calculate_transmission(ws)
                 else:
                     self.apply_transmission(ws)
-                    if self.process == 'Container':
-                        pass # process container
+                    self.apply_solid_angle(ws)
+                    if self.process == 'EmptyContainer':
+                        pass # nothing to do here
                     else:
                         self.apply_container(ws)
+                        self.apply_masks(ws)
+                        self.apply_thickness(ws)
+                        self.apply_parallax(ws)
                         if self.process == 'Water':
-                            pass # process water
+                            self.generate_sensitivity(ws)
                         else:
                             self.apply_water(ws)
                             if self.process == 'Solvent':
-                                pass # process solvent
+                                pass # nothing to do here
                             else:
                                 self.apply_solvent(ws)
 
