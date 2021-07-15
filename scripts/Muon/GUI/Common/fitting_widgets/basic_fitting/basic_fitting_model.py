@@ -16,7 +16,7 @@ from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import Basi
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
-from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
+from Muon.GUI.Common.utilities.workspace_data_utils import check_exclude_start_and_end_x_is_valid, x_limits_of_workspace
 from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 import math
@@ -167,9 +167,9 @@ class BasicFittingModel:
         return self.fitting_context.exclude_range
 
     @exclude_range.setter
-    def exclude_range(self, exclude_range_on: bool) -> None:
+    def exclude_range(self, exclude_range_state: bool) -> None:
         """Sets whether the Exclude Range option is on in the context."""
-        self.fitting_context.exclude_range = exclude_range_on
+        self.fitting_context.exclude_range = exclude_range_state
 
     @property
     def current_exclude_start_x(self) -> float:
@@ -479,7 +479,7 @@ class BasicFittingModel:
         self.fitting_context.end_xs = [self.current_end_x] * self.fitting_context.number_of_datasets
 
     def _reset_exclude_start_and_end_xs(self) -> None:
-        """Resets the exclude start and end Xs stored by the context."""
+        """Resets the exclude start and end Xs. Default exclude range is to have exclude_start_x == exclude_end_x."""
         self.fitting_context.exclude_start_xs = [self.current_end_x] * self.fitting_context.number_of_datasets
         self.fitting_context.exclude_end_xs = [self.current_end_x] * self.fitting_context.number_of_datasets
 
@@ -528,20 +528,7 @@ class BasicFittingModel:
         new_exclude_start_x = exclude_start_xs[dataset_index] if dataset_index < len(exclude_start_xs) else end_x
         new_exclude_end_x = exclude_end_xs[dataset_index] if dataset_index < len(exclude_end_xs) else end_x
 
-        return self._check_new_exclude_start_and_end_x(start_x, end_x, new_exclude_start_x, new_exclude_end_x)
-
-    @staticmethod
-    def _check_new_exclude_start_and_end_x(start_x: float, end_x: float, new_exclude_start_x: float,
-                                           new_exclude_end_x: float) -> tuple:
-        """Check that the new exclude start and end X are valid. If not they are adjusted."""
-        if new_exclude_start_x < start_x or new_exclude_start_x > end_x:
-            new_exclude_start_x = end_x
-        if new_exclude_end_x < start_x or new_exclude_end_x > end_x:
-            new_exclude_end_x = end_x
-
-        if new_exclude_start_x > new_exclude_end_x:
-            new_exclude_start_x, new_exclude_end_x = new_exclude_end_x, new_exclude_start_x
-        return new_exclude_start_x, new_exclude_end_x
+        return check_exclude_start_and_end_x_is_valid(start_x, end_x, new_exclude_start_x, new_exclude_end_x)
 
     def _get_new_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
         """Returns the functions to use for the new datasets. It tries to use the existing functions if possible."""

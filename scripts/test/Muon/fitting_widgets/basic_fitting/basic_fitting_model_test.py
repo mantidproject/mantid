@@ -97,6 +97,30 @@ class BasicFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.fitting_context.exclude_start_xs, [5.0])
         self.assertEqual(self.model.fitting_context.exclude_end_xs, [5.0])
 
+    def test_that_newly_loaded_datasets_will_reuse_the_existing_exclude_xs_when_there_are_more_new_datasets(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.start_xs = [2.0, 2.0]
+        self.model.end_xs = [4.0, 4.0]
+        self.model.fitting_context.exclude_start_xs = [2.2, 2.2]
+        self.model.fitting_context.exclude_end_xs = [2.5, 2.5]
+
+        self.model.dataset_names = ["Name2", "Name3", "Name4"]
+
+        self.assertEqual(self.model.fitting_context.exclude_start_xs, [2.2, 2.2, 4.0])
+        self.assertEqual(self.model.fitting_context.exclude_end_xs, [2.5, 2.5, 4.0])
+
+    def test_that_newly_loaded_datasets_will_reuse_the_existing_exclude_xs_when_there_are_equal_num_datasets(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.start_xs = [2.0, 2.0]
+        self.model.end_xs = [4.0, 4.0]
+        self.model.fitting_context.exclude_start_xs = [2.2, 2.2]
+        self.model.fitting_context.exclude_end_xs = [2.5, 2.5]
+
+        self.model.dataset_names = ["Name2", "Name3"]
+
+        self.assertEqual(self.model.fitting_context.exclude_start_xs, [2.2, 2.2])
+        self.assertEqual(self.model.fitting_context.exclude_end_xs, [2.5, 2.5])
+
     def test_that_current_dataset_index_will_raise_if_the_index_is_greater_than_or_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
         with self.assertRaises(RuntimeError):
