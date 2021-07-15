@@ -152,7 +152,7 @@ Output:
    ws = CreateWorkspace(dataX, dataY)
 
    # rebin from min to max - 1 with reverse logarithmic bins of 1
-   ws = Rebin(ws, "1, -1, 9")
+   ws = Rebin(ws, "1, -1, 9", UseReverseLogarithmic=True)
 
    print("The rebinned X values are: {}".format(ws.readX(0)))
 
@@ -160,7 +160,7 @@ Output:
 
 .. testoutput:: ExHistRevLog
 
-   The rebinned X values are: [ 1. 2. 6. 8. 9.]
+   The rebinned X values are: [ 1.  2.  6.  8.  9.]
 
 **Example - custom two regions rebinning:**
 
