@@ -43,7 +43,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "HDF5_DIR": "$env{CONDA_PREFIX}/Library/cmake/hdf5",
+		"CONDA_BUILD": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "Debug"
