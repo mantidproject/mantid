@@ -251,7 +251,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.declareProperty(name="NormaliseBy",
                              defaultValue="Monitor",
-                             validator=StringListValidator(["Monitor", "Time"]),
+                             validator=StringListValidator(["Monitor", "Time", "None"]),
                              direction=Direction.Input,
                              doc="What normalisation approach to use on data.")
 
@@ -348,6 +348,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         In case the input group is used to calculate transmission, the output contains normalised monitors rather
         than normalised detectors."""
         normaliseBy = self.getPropertyValue('NormaliseBy')
+        if normaliseBy == "None":
+            return ws
         # the following factor to scale normalisation comes from legacy LAMP reduction code
         lampCompatibilityFactor = 1000.0 if normaliseBy == 'Monitor' else 100.0
         transmissionProcess = self.getPropertyValue("ProcessAs") in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']
