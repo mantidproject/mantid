@@ -1031,6 +1031,8 @@ public:
     void findFiles(bool isModified);
     void isOptional(bool);
     void setLastDirectory(const QString &lastDir);
+    void setUseNativeWidget(bool native);
+    void setProxyModel(QAbstractProxyModel* /Transfer/);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);
