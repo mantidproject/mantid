@@ -22,7 +22,7 @@ class PlotFreqFitPaneModel(PlotFitPaneModel):
         run = str(get_run_numbers_as_string_from_workspace_name(workspace_name, self.context.data_context.instrument))
         instrument = self.context.data_context.instrument
         fit_label = self._get_fit_label(workspace_name, index)
-        freq_label = self._get_freq_lebel(workspace_name)
+        freq_label = self._get_freq_label(workspace_name)
         if not self.context.plot_panes_context[self.name].settings._is_tiled:
             return f"{instrument}{run};{group}{fit_label}{freq_label}"
         if self.context.plot_panes_context[self.name].settings.is_tiled_by == "Group/Pair":

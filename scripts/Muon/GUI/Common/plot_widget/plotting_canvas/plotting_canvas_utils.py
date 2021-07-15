@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
+import math
 
 
 def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
@@ -25,12 +26,12 @@ def get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max):
 def get_num_row_and_col(num_axis):
     n_rows, n_cols = 0, 0
     # num axis is the number of axis in use
-    if np.sqrt(num_axis)**2 == num_axis:
+    if math.isqrt(num_axis)**2 == num_axis:
         n_rows = np.sqrt(num_axis)
         n_cols = np.sqrt(num_axis)
     else:
         # cols increment first
-        n_cols = np.ceil(np.sqrt(num_axis))
+        n_cols = math.isqrt(num_axis)+1
         n_rows = n_cols
         if n_cols*(n_cols-1) >= num_axis:
             n_rows -= 1

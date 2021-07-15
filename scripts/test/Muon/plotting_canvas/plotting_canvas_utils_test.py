@@ -38,6 +38,12 @@ class PlottingCanvasUtilsTest(unittest.TestCase):
         self.assertEqual(n_rows,2)
         self.assertEqual(n_cols,3)
 
+    def test_get_num_row_and_col_27(self):
+        # 27 is a square of 5.196152422706632
+        n_rows, n_cols = get_num_row_and_col(27)
+        self.assertEqual(n_rows,5)
+        self.assertEqual(n_cols,6)
+
     def test_get_num_row_and_col_with_empty_axis(self):
         n_rows, n_cols = get_num_row_and_col(8)
         self.assertEqual(n_rows,3)

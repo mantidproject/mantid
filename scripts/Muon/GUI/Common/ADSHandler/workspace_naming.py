@@ -36,7 +36,8 @@ def get_period_from_raw_name(workspace_name, suffix):
     if PERIOD_STR in workspace_name:
         index_start = workspace_name.find(PERIOD_STR)+len(PERIOD_STR)
         index_end = workspace_name.find(suffix)
-        return "_period"+ workspace_name[index_start:index_end]
+        # remove the trailing underscore
+        return PERIOD_STR[:-1]+ workspace_name[index_start:index_end]
     return ""
 
 

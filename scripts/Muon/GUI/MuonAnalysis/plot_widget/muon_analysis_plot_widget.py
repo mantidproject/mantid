@@ -25,48 +25,44 @@ class MuonAnalysisPlotWidget(object):
         self.fit_model = PlotTimeFitPaneModel(context)
         self.raw_model = RawPaneModel(context)
         self.model_fit_model = PlotModelFitPaneModel(context)
-        # The plotting canvas widgets
-        self.plotting_canvas_widgets = {}
-        self.plotting_canvas_widgets[self.data_model.name] = PlottingCanvasWidget(parent, context=
-                                                                                  context.plot_panes_context[self.data_model.name],
-                                                                                  plot_model=self.data_model)
-        self.plotting_canvas_widgets[self.fit_model.name] = PlottingCanvasWidget(parent, context=
-                                                                                 context.plot_panes_context[self.fit_model.name],
-                                                                                 plot_model=self.fit_model)
-        self.plotting_canvas_widgets[self.raw_model.name] = PlottingCanvasWidget(parent, context=
-                                                                                 context.plot_panes_context[self.raw_model.name],
-                                                                                 plot_model=self.raw_model)
-        self.plotting_canvas_widgets[self.model_fit_model.name] = PlottingCanvasWidget(
-            parent, context=context.plot_panes_context[self.model_fit_model.name], plot_model=self.model_fit_model)
+        models = [self.data_model, self.fit_model, self.model_fit_model, self.raw_model]
 
-        # The UI view
-        self._view1 = BasePaneView(parent)
-        self._view1.add_canvas_widget(self.plotting_canvas_widgets[self.data_model.name].widget)
-
-        self._view2 = BasePaneView(parent)
-        self._view2.add_canvas_widget(self.plotting_canvas_widgets[self.fit_model.name].widget)
-
-        self._view3 = BasePaneView(parent)
-        self._view3.add_canvas_widget(self.plotting_canvas_widgets[self.model_fit_model.name].widget)
-
-        self._view4 = BasePaneView(parent)
-        self._view4.add_canvas_widget(self.plotting_canvas_widgets[self.raw_model.name].widget)
-        self.plotting_canvas_widgets[self.raw_model.name].disable_plot_selection()
-        # set up presenter
         self.view = MainPlotWidgetView(parent)
         self.model = PlotDataPaneModel(context)
-        # generate the presenter
+        # The plotting canvas widgets
+        self.plotting_canvas_widgets = {}
+        # The UI view
+        self._views = {}
 
-        self.data_mode = PlotDataPanePresenter(self._view1, self.data_model,
-                                               context,self.plotting_canvas_widgets[self.data_model.name].presenter)
-        self.fit_mode = PlotFitPanePresenter(self._view2, self.fit_model,
+        for model in models:
+            self.plotting_canvas_widgets[model.name] = PlottingCanvasWidget(parent, context=
+                                                                                 context.plot_panes_context[model.name],
+                                                                                 plot_model=model)
+            self._views[model.name] = BasePaneView(parent)
+            self._views[model.name].add_canvas_widget(self.plotting_canvas_widgets[model.name].widget)
+
+        self.plotting_canvas_widgets[self.raw_model.name].disable_plot_selection()
+        # set up presenter
+
+        # generate the presenters
+        name = self.data_model.name
+        self.data_mode = PlotDataPanePresenter(self._views[name], self.data_model,
+                                               context,self.plotting_canvas_widgets[name].presenter)
+
+        name = self.fit_model.name
+        self.fit_mode = PlotFitPanePresenter(self._views[name], self.fit_model,
                                                  context,context.fitting_context,
-                                             self.plotting_canvas_widgets[self.fit_model.name].presenter)
-        self.model_fit_mode = PlotModelFitPanePresenter(self._view3, self.model_fit_model, context,
+                                             self.plotting_canvas_widgets[name].presenter)
+
+        name = self.model_fit_model.name
+        self.model_fit_mode = PlotModelFitPanePresenter(self._views[name], self.model_fit_model, context,
                                                         context.model_fitting_context,
-                                                        self.plotting_canvas_widgets[self.model_fit_model.name].presenter)
-        self.raw_mode = RawPanePresenter(self._view4, self.raw_model,
-                                                 context,self.plotting_canvas_widgets[self.raw_model.name].presenter)
+                                                        self.plotting_canvas_widgets[name].presenter)
+
+        name = self.raw_model.name
+        self.raw_mode = RawPanePresenter(self._views[name], self.raw_model,
+                                                 context,self.plotting_canvas_widgets[name].presenter)
+
         self.presenter = MainPlotWidgetPresenter(self.view,
                                                    [self.data_mode, self.raw_mode, self.fit_mode, self.model_fit_mode])
 
