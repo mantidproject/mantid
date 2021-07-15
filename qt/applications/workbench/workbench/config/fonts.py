@@ -18,15 +18,13 @@ import sys
 from qtpy.QtGui import QFont, QFontDatabase
 
 
-def is_ubuntu():
+def is_ubuntu() -> bool:
     """Return True if we're running an Ubuntu distro else return False"""
     # platform.linux_distribution doesn't exist in Python 3.5
     if sys.platform.startswith('linux') and osp.isfile('/etc/lsb-release'):
-        release_info = open('/etc/lsb-release').read()
-        if 'Ubuntu' in release_info:
-            return True
-        else:
-            return False
+        with open('/etc/lsb-release') as handle:
+            release_info = handle.read()
+            return bool('Ubuntu' in release_info)
     else:
         return False
 

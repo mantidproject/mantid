@@ -68,8 +68,8 @@ def _get_splash_image():
 
 SPLASH = QSplashScreen(_get_splash_image(), Qt.WindowStaysOnTopHint)
 SPLASH.show()
-SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
-                   | Qt.AlignAbsolute, QColor(Qt.black))
+SPLASH.showMessage("Starting...", int(Qt.AlignBottom | Qt.AlignLeft
+                   | Qt.AlignAbsolute), QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -226,7 +226,7 @@ class MainWindow(QMainWindow):
         if not self.splash:
             return
         if msg:
-            self.splash.showMessage(msg, Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute,
+            self.splash.showMessage(msg, int(Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute),
                                     QColor(Qt.black))
         QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -391,7 +391,8 @@ class MainWindow(QMainWindow):
         for reg_list in registers_to_run.values():
             for register in reg_list:
                 file_path = os.path.join(interface_dir, register)
-                self.interface_executor.execute(open(file_path).read(), file_path)
+                with open(file_path) as handle:
+                    self.interface_executor.execute(handle.read(), file_path)
 
     def redirect_python_warnings(self):
         """By default the warnings module writes warnings to sys.stderr. stderr is assumed to be
