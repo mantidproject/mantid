@@ -39,6 +39,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         return 'PolDiffILLReduction'
 
     def _validate_self_attenuation_arguments(self):
+        """Validates the algorithm properties relating to the self-attenuation correction."""
+
         issues = dict()
         if len(self.getProperty('SampleAndEnvironmentProperties').value) == 0:
             issues['SampleAndEnvironmentProperties'] = 'Sample parameters need to be defined.'
@@ -309,6 +311,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     @staticmethod
     def _match_attenuation_workspace(sample_entry, attenuation_ws):
+        """Matches the workspace containing self-attenuation corrections to the workspace with sample data."""
         correction_ws = attenuation_ws + '_matched_corr'
         CloneWorkspace(InputWorkspace=attenuation_ws, OutputWorkspace=correction_ws)
         converted_entry = sample_entry + '_converted'
@@ -630,6 +633,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass)
 
     def _prepare_arguments(self):
+        """Matches the values available from the input SampleAndEnvironmentProperties dictionary with the keys expected
+        by the selected self-attenuation method."""
+
         attenuation_method = self.getPropertyValue('SelfAttenuationMethod')
         sample_geometry_type = self.getPropertyValue('SampleGeometry')
         kwargs = dict()
@@ -802,6 +808,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         return sample_ws
 
     def _data_structure_helper(self):
+        """Helper function that returns number of measurements (workspaces) per numor appropriate for the data
+        structure."""
         nMeasurements = 0
         if self._method_data_structure == '10p':
             nMeasurements = 10
@@ -850,6 +858,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _set_units(self, ws, process):
+        """Sets proper units, according to the process, to the workspace ws."""
         unit_symbol = ''
         unit = 'Normalised Intensity'
         if process == 'Vanadium' and self.getProperty('AbsoluteNormalisation').value:
@@ -860,6 +869,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _finalize(self, ws, process):
+        """Finalizes the reduction step by removing special values, calling merging functions and setting unique names
+         to the output workspaces."""
         output_treatment = self.getPropertyValue('OutputTreatment')
         if process not in ['Vanadium']:
             if output_treatment == 'AverageTwoTheta':

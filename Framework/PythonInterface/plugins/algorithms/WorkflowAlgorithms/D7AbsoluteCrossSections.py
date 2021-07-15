@@ -601,6 +601,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         return output_name
 
     def _set_output_names(self, output_ws):
+        """Renames output workspaces with unique names based on the provided output workspace name
+        and the input name."""
         for entry in mtd[output_ws]:  # renames individual ws to contain the output name
             entry_name = entry.name()
             if entry_name[:2] == "__":
