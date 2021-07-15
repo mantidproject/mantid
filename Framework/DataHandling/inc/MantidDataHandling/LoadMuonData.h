@@ -11,6 +11,9 @@
 namespace Mantid {
 namespace DataHandling {
 
+/**
+Is a wrapper class to load NeXuS and bin (PSI) files using the LoadMuonNexus and LoadPSIMuonBin algorithms.
+*/
 class DLLExport LoadMuonData : public API::Algorithm {
   const std::string name() const override { return "LoadMuonData"; };
   int version() const override { return 1; };
