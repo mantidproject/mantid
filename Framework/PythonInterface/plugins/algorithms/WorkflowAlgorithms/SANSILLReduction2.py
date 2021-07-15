@@ -14,7 +14,11 @@ import numpy as np
 
 
 class SANSILLReduction2(PythonAlgorithm):
-    """Performs unit data reduction of the given process type"""
+    """
+        Performs unit data reduction of the given process type
+        Note that there should be no loop throughout this file
+        Except for the small loops, e.g. over detector panels (up to 5)
+    """
 
     mode = None # the acquisition mode of the reduction
     instrument = None # the name of the instrument
@@ -45,6 +49,9 @@ class SANSILLReduction2(PythonAlgorithm):
         process = self.getPropertyValue('ProcessAs')
         if process == 'Transmission' and not self.getPropertyValue('EmptyBeamWorkspace'):
             issues['EmptyBeamWorkspace'] = 'Empty beam input workspace is mandatory for transmission calculation.'
+        samples_thickness = len(self.getProperty('SampleThickness').value)
+        if samples_thickness != 1 and samples_thickness != self.getPropertyValue('Runs').count(',') + 1:
+            issues['SampleThickness'] = 'Sample thickness must have either a single value or as many as there are samples.'
         return issues
 
     def PyInit(self):
@@ -96,8 +103,7 @@ class SANSILLReduction2(PythonAlgorithm):
         self.setPropertySettings('BeamRadius', beam_or_transmission)
 
         self.declareProperty(name='SampleThickness',
-                             defaultValue=0.1,
-                             validator=FloatBoundedValidator(lower=-1),
+                             defaultValue=[0.1],
                              doc='Sample thickness [cm] (if -1, the value is taken from the nexus file).')
 
         self.setPropertySettings('SampleThickness', water_solvent_sample)
@@ -366,7 +372,7 @@ class SANSILLReduction2(PythonAlgorithm):
             check_distances_match(mtd[can_ws], mtd[ws])
             if self.mode == AcqMode.TOF:
                 # wavelength dependent subtraction, need to rebin
-                can_ws_rebin = can_ws + '_tr_rebinned'
+                can_ws_rebin = can_ws + '_rebinned'
                 RebinToWorkspace(WorkspaceToRebin=can_ws, WorkspaceToMatch=ws,
                                  OutputWorkspace=can_ws_rebin)
                 Minus(LHSWorkspace=ws, RHSWorkspace=can_ws_rebin, OutputWorkspace=ws)
@@ -450,6 +456,30 @@ class SANSILLReduction2(PythonAlgorithm):
         SolidAngle(InputWorkspace=ws, OutputWorkspace=sa_ws, Method="Rectangle")
         Divide(LHSWorkspace=ws, RHSWorkspace=sa_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
         DeleteWorkspace(Workspace=sa_ws)
+
+    def apply_masks(self, ws):
+        '''Applies default (edges) and beam stop masks'''
+        edge_mask = self.getProperty('DefaultMaskWorkspace').value
+        if edge_mask:
+            MaskDetectors(Workspace=ws, MaskedWorkspace=edge_mask)
+        beam_stop_mask = self.getProperty('MaskWorkspace').value
+        if beam_stop_mask:
+            MaskDetectors(Workspace=ws, MaskedWorkspace=beam_stop_mask)
+
+    def apply_thickness(self, ws):
+        '''Normalises by sample thickness'''
+        thicknesses = self.getProperty('SampleThickness').value
+        if len(thicknesses) == 1:
+            Scale(InputWorkspace=ws, Factor=1/thicknesses[0], OutputWorkspace=ws)
+        else:
+            pass #TODO create a thickness workspace of the right shape
+
+    def apply_parallax(self, ws):
+        '''Applies the parallax correction'''
+        components = ['detector']
+        if mtd[ws].getInstrument().hasParameter('detector_panels'):
+            components = mtd[ws].getInstrument().getStringParameter('detector_panels')[0].split(',')
+            ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components)
 
     #===============================METHODS TO PROCESS BY TYPE===============================#
 
@@ -554,6 +584,15 @@ class SANSILLReduction2(PythonAlgorithm):
             RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam_ws, OutputWorkspace=ws)
         Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
 
+    def generate_sensitivity(self, ws):
+        '''Creates relative inter-pixel efficiency map'''
+        sens = self.getPropertyValue('OutputSensitivityWorkspace')
+        if sens:
+            CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sens)
+            self.setProperty('OutputSensitivityWorkspace', mtd[sens])
+
+    #===============================ENTRY POINT AND CORE LOGIC===============================#
+
     def PyExec(self):
         self.reset()
         ws = self.getPropertyValue('OutputWorkspace')
@@ -619,11 +658,11 @@ class SANSILLReduction2(PythonAlgorithm):
                     self.calculate_transmission(ws)
                 else:
                     self.apply_transmission(ws)
-                    self.apply_solid_angle(ws)
                     if self.process == 'EmptyContainer':
                         pass # nothing to do here
                     else:
                         self.apply_container(ws)
+                        self.apply_solid_angle(ws)
                         self.apply_masks(ws)
                         self.apply_thickness(ws)
                         self.apply_parallax(ws)
