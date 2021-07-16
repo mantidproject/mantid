@@ -81,13 +81,26 @@ IAlgorithm_sptr loadAlgorithm(std::string const &filepath, std::string const &ou
   return loadAlg;
 }
 
+QString makeNumber(double d) { return QString::number(d, 'g', 16); }
+
+class ScopedFalse {
+  bool &m_ref;
+  bool m_oldValue;
+
+public:
+  // this sets the input bool to false whilst this object is in scope and then
+  // resets it to its old value when this object drops out of scope.
+  explicit ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) { m_ref = false; }
+  ~ScopedFalse() { m_ref = m_oldValue; }
+};
+
 } // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr) {
+    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr), m_dataModel(std::make_unique<IndirectFitDataTableModel>()) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
@@ -100,6 +113,7 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
   connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
 
   m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
+  m_dataTable = getDataTable();
 }
 
 IndirectDataAnalysisElwinTab::~IndirectDataAnalysisElwinTab() {
@@ -624,6 +638,75 @@ void IndirectDataAnalysisElwinTab::closeDialog() {
   m_addWorkspaceDialog->close();
   m_addWorkspaceDialog = nullptr;
 }
+
+void IndirectDataAnalysisElwinTab::addData() { addData(m_addWorkspaceDialog.get()); }
+
+void IndirectDataAnalysisElwinTab::addData(IAddWorkspaceDialog const *dialog) {
+  try {
+    addDataToModel(dialog);
+    updateTableFromModel();
+    emit dataAdded();
+    emit dataChanged();
+  } catch (const std::runtime_error &ex) {
+    displayWarning(ex.what());
+  }
+}
+
+void IndirectDataAnalysisElwinTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
+    m_dataModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+}
+
+void IndirectDataAnalysisElwinTab::updateTableFromModel() {
+  ScopedFalse _signalBlock(m_emitCellChanged);
+  m_dataTable->setRowCount(0);
+  for (auto domainIndex = FitDomainIndex{0}; domainIndex < m_dataModel->getNumberOfDomains(); domainIndex++) {
+    addTableEntry(domainIndex);
+  }
+}
+
+QTableWidget *IndirectDataAnalysisElwinTab::getDataTable() const { return m_uiForm.tbElwinData; }
+
+void IndirectDataAnalysisElwinTab::addTableEntry(FitDomainIndex row) {
+  m_dataTable->insertRow(static_cast<int>(row.value));
+  const auto &name = m_dataModel->getWorkspace(row)->getName();
+  auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
+  auto flags = cell->flags();
+  flags ^= Qt::ItemIsEditable;
+  cell->setFlags(flags);
+  setCell(std::move(cell), row.value, 0);
+
+  cell = std::make_unique<QTableWidgetItem>(QString::number(m_dataModel->getSpectrum(row)));
+  cell->setFlags(flags);
+  setCell(std::move(cell), row.value, workspaceIndexColumn());
+
+  const auto range = m_dataModel->getFittingRange(row);
+  cell = std::make_unique<QTableWidgetItem>(makeNumber(range.first));
+  setCell(std::move(cell), row.value, startXColumn());
+
+  cell = std::make_unique<QTableWidgetItem>(makeNumber(range.second));
+  setCell(std::move(cell), row.value, endXColumn());
+
+  const auto exclude = m_dataModel->getExcludeRegion(row);
+  cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(exclude));
+  setCell(std::move(cell), row.value, excludeColumn());
+}
+
+void IndirectDataAnalysisElwinTab::setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row, int column) {
+  m_dataTable->setItem(static_cast<int>(row.value), column, cell.release());
+}
+
+void IndirectDataAnalysisElwinTab::setCellText(const QString &text, FitDomainIndex row, int column) {
+  m_dataTable->item(static_cast<int>(row.value), column)->setText(text);
+}
+
+int IndirectDataAnalysisElwinTab::workspaceIndexColumn() const { return 1; }
+
+int IndirectDataAnalysisElwinTab::startXColumn() const { return 2; }
+
+int IndirectDataAnalysisElwinTab::endXColumn() const { return 3; }
+
+int IndirectDataAnalysisElwinTab::excludeColumn() const { return 4; }
 
 } // namespace IDA
 } // namespace CustomInterfaces
