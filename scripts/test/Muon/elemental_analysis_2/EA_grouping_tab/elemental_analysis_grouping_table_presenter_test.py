@@ -354,11 +354,11 @@ class GroupingTablePresenterTest(unittest.TestCase):
         mock_changed_item = mock.Mock()
         mock_changed_item.checkState.return_value = "mock_state"
 
-        update_model = self.presenter.handle_to_analyse_column_changed(INVERSE_GROUP_TABLE_COLUMNS['to_analyse'],
-                                                                       mock_changed_item, ws_name)
+        to_analyse_changed = self.presenter.handle_to_analyse_column_changed(INVERSE_GROUP_TABLE_COLUMNS['to_analyse'],
+                                                                             mock_changed_item, ws_name)
         # Assert statements
         # method should return False
-        self.assertEqual(update_model, False)
+        self.assertEqual(to_analyse_changed, True)
         self.presenter.to_analyse_data_checkbox_changed.assert_called_once_with("mock_state", ws_name)
         mock_changed_item.checkState.assert_called_once()
 
@@ -369,11 +369,12 @@ class GroupingTablePresenterTest(unittest.TestCase):
         mock_changed_item = mock.Mock()
         mock_changed_item.checkState.return_value = "mock_state"
 
-        update_model = self.presenter.handle_to_analyse_column_changed(INVERSE_GROUP_TABLE_COLUMNS['workspace_name'],
-                                                                       mock_changed_item, ws_name)
+        to_analyse_changed = self.presenter.handle_to_analyse_column_changed(
+            INVERSE_GROUP_TABLE_COLUMNS['workspace_name'],
+            mock_changed_item, ws_name)
         # Assert statements
         # method should return True
-        self.assertEqual(update_model, True)
+        self.assertEqual(to_analyse_changed, False)
         self.presenter.to_analyse_data_checkbox_changed.assert_not_called()
         mock_changed_item.checkState.assert_not_called()
 
