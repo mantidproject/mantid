@@ -632,7 +632,7 @@ class SANSILLReduction2(PythonAlgorithm):
                     if not self.is_point:
                         ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
                     # TODO: inject blank frames for the empty token placeholder of the right shape here at the right index
-                    ConjoinXRuns(InputWorkspaces=ws, OutputWorkspace=ws + '_joined')
+                    ConjoinXRuns(InputWorkspaces=ws, OutputWorkspace=ws + '_joined', LinearizeAxis=True)
                     DeleteWorkspace(Workspace=ws)
                     RenameWorkspace(InputWorkspace=ws + '_joined', OutputWorkspace=ws)
                 else:

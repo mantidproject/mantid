@@ -10,6 +10,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -106,6 +107,9 @@ void ConjoinXRuns::init() {
   declareProperty("FailBehaviour", SKIP_BEHAVIOUR, std::make_shared<StringListValidator>(failBehaviourOptions),
                   "Choose whether to skip the workspace and continue, or stop and "
                   "throw and error, when encountering a failure on merging.");
+  declareProperty(
+      "LinearizeAxis", false,
+      "Choose to set a linear x-axis starting from 1, can be used only if the workspaces have common bins.");
 }
 
 std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
@@ -157,6 +161,15 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
       const std::string logValid = checkLogEntry(ws);
       if (!logValid.empty()) {
         issues[INPUT_WORKSPACE_PROPERTY] += "Invalid sample log entry for " + ws->getName() + ": " + logValid + "\n";
+      }
+    }
+  }
+  if (getProperty("LinearizeAxis")) {
+    for (const auto &ws : m_inputWS) {
+      if (!ws->isCommonBins()) {
+        issues[INPUT_WORKSPACE_PROPERTY] +=
+            "Workspace " + ws->getName() + " is ragged, which is not allowed if linearize axis is requested.\n";
+        break;
       }
     }
   }
@@ -411,6 +424,14 @@ void ConjoinXRuns::exec() {
     } catch (Exception::NotFoundError &) {
       m_outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Empty");
     }
+  }
+
+  if (getProperty("LinearizeAxis")) {
+    std::vector<double> axis(m_outWS->blocksize());
+    for (size_t i = 0; i < axis.size(); ++i) {
+      axis[i] = i + 1;
+    }
+    m_outWS->replaceAxis(0, std::make_unique<NumericAxis>(std::move(axis)));
   }
 
   setProperty("OutputWorkspace", m_outWS);
