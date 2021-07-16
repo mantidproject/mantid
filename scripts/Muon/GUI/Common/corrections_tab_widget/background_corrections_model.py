@@ -33,8 +33,7 @@ class BackgroundCorrectionData:
     exp_decay: IFunction
     status: str = "No background correction"
 
-    def __init__(self, counts_workspace: StaticWorkspaceWrapper, start_x: float, end_x: float):
-        self.uncorrected_counts_workspace = counts_workspace
+    def __init__(self, start_x: float, end_x: float):
         self.start_x = start_x
         self.end_x = end_x
         self.setup_functions()
@@ -130,11 +129,13 @@ class BackgroundCorrectionsModel:
         for run in self._corrections_model.run_number_strings():
             for group in groups:
                 run_group = tuple([run, group])
+                workspace_name = self.get_counts_workspace_name(run, group)
                 if run_group not in self._corrections_context.background_correction_data:
                     start_x, end_x = self.default_x_range(run, group)
-                    workspace_name = self.get_counts_workspace_name(run, group)
-                    self._corrections_context.background_correction_data[run_group] = BackgroundCorrectionData(
-                        StaticWorkspaceWrapper(workspace_name, retrieve_ws(workspace_name)), start_x, end_x)
+                    self._corrections_context.background_correction_data[run_group] = BackgroundCorrectionData(start_x,
+                                                                                                               end_x)
+                self._corrections_context.background_correction_data[run_group].uncorrected_counts_workspace = \
+                    StaticWorkspaceWrapper(workspace_name, retrieve_ws(workspace_name))
 
     def reset_background_function_data(self) -> None:
         """Resets the background functions back to zero when the correction mode is changed."""
