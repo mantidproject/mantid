@@ -10,7 +10,7 @@
 Description
 -----------
 
-This algorithm performs stitching of multiple 2D workspaces. Stitching is the operation of scaling one workspace to match the scale of another one in the overlap region and combine them.
+This algorithm performs stitching of multiple 2D workspaces. Stitching is the operation of scaling one workspace to match the scale of another one in the overlap region and the combination of the workspaces after scale matching.
 For each pair of adjacent workspaces in the input, it will find the overlap, interpolate one to another in the overlap region, make the ratio and find the scaling factor.
 Then each workspace will be scaled with that factor, and finally all the workspaces will be combined.
 
@@ -23,7 +23,7 @@ InputWorkspaces
 The list of input workspace or workspace group names. The workspace groups will be flattened to a list of workspaces.
 Note that because of this type of input that relies on WorkspaceGroups, this algorithm is currently supported only for named workspaces present on ADS.
 The inputs can be in any order in terms of their x-axis extent. The algorithm will first sort them ascending in terms of x-intervals.
-Then it will start stitching iteratively to the left and to the right starting from the reference workspace.
+Then it will start stitching iteratively to the left and to the right starting from the reference workspace. The input workspaces must be point-data and must have common bins.
 
 ReferenceWorkspace
 ##################

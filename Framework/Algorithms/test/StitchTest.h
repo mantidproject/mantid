@@ -37,6 +37,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
+  //================================FAILURE CASES===================================//
   void test_NoOverlap() {
     auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
     auto ws2 = pointDataWorkspaceOneSpectrum(17, 0.8, 0.9, "ws2");
@@ -60,6 +61,31 @@ public:
                             "Some invalid Properties found: [ InputWorkspaces ]");
   }
 
+  void test_IncompatibleWorkspaces() {
+    auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
+    auto ws2 = pointDataWorkspaceMultiSpectrum(3, 11, 0.5, 0.9, "ws2");
+    Stitch alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: [ InputWorkspaces ]");
+  }
+
+  void test_NotEnoughOverlap() {
+    auto ws1 = pointDataWorkspaceOneSpectrum(5, 0.1, 0.6, "ws1");
+    auto ws2 = pointDataWorkspaceOneSpectrum(7, 0.5, 1.2, "ws2");
+    Stitch alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Unable to make the ratio; only one overlapping point is found and it is at different x");
+  }
+
+  //================================HAPPY CASES===================================//
   void test_WorkspaceGroup() {
     auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
     auto ws2 = pointDataWorkspaceOneSpectrum(17, 0.5, 0.9, "ws2");
@@ -75,19 +101,8 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "group"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputScaleFactorsWorkspace", "factors"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-  }
-
-  void test_IncompatibleWorkspaces() {
-    auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
-    auto ws2 = pointDataWorkspaceMultiSpectrum(3, 11, 0.5, 0.9, "ws2");
-    Stitch alg;
-    alg.setRethrows(true);
-    alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
-                            "Some invalid Properties found: [ InputWorkspaces ]");
   }
 
   void test_WorkspacesAndGroupsMixed() {
@@ -107,18 +122,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"group", "ws3"})));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-  }
-
-  void test_NotEnoughOverlap() {
-    auto ws1 = pointDataWorkspaceOneSpectrum(5, 0.1, 0.6, "ws1");
-    auto ws2 = pointDataWorkspaceOneSpectrum(7, 0.5, 1.2, "ws2");
-    Stitch alg;
-    alg.setRethrows(true);
-    alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
-                            "Unable to make the ratio; only one overlapping point is found and it is at different x");
   }
 
   void test_NoExplicitReference() {
@@ -241,8 +244,8 @@ private:
     std::vector<double> x(nPoints), y(nPoints), e(nPoints);
     const double step = (endX - startX) / (double(nPoints) - 1);
     for (size_t ibin = 0; ibin < nPoints; ++ibin) {
-      x[ibin] = startX + ibin * step;
-      y[ibin] = 7 * ibin + 3;
+      x[ibin] = startX + double(ibin) * step;
+      y[ibin] = 7 * double(ibin) + 3;
       e[ibin] = std::sqrt(y[ibin]);
     }
     ws->setHistogram(0, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));
@@ -257,8 +260,8 @@ private:
     const double step = (endX - startX) / (double(nPoints) - 1);
     for (size_t ispec = 0; ispec < nSpectra; ++ispec) {
       for (size_t ibin = 0; ibin < nPoints; ++ibin) {
-        x[ibin] = startX + ibin * step;
-        y[ibin] = 7 * ibin + 3 + 10 * ispec;
+        x[ibin] = startX + double(ibin) * step;
+        y[ibin] = 7 * double(ibin) + 3 + 10 * ispec;
         e[ibin] = std::sqrt(y[ibin]);
       }
       ws->setHistogram(ispec, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));
