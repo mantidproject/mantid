@@ -108,11 +108,9 @@ class BackgroundCorrectionsPresenter:
 
     def _handle_start_or_end_x_changed(self, get_new_x_range) -> None:
         """Handles when a Start X or End X is changed using an appropriate getter to get the new x range."""
-        view_start_x, view_end_x = self.view.selected_start_x(), self.view.selected_end_x()
-
         runs, groups = self._selected_runs_and_groups()
         for run, group in zip(runs, groups):
-            new_start_x, new_end_x = get_new_x_range(run, group, view_start_x, view_end_x)
+            new_start_x, new_end_x = get_new_x_range(run, group)
             self._update_start_and_end_x_in_view_and_model(run, group, new_start_x, new_end_x)
 
         if len(runs) == 1:
@@ -120,15 +118,15 @@ class BackgroundCorrectionsPresenter:
         elif len(runs) > 1:
             self._perform_background_corrections(self.model.run_background_correction_for_all)
 
-    def _get_new_x_range_when_start_x_changed(self, run: str, group: str, view_start_x: float, view_end_x: float) -> tuple:
+    def _get_new_x_range_when_start_x_changed(self, run: str, group: str) -> tuple:
         """Returns the new x range for a domain when the start X has been changed."""
-        return check_start_x_is_valid(self.model.get_counts_workspace_name(run, group), view_start_x, view_end_x,
-                                      self.model.start_x(run, group))
+        return check_start_x_is_valid(self.model.get_counts_workspace_name(run, group), self.view.selected_start_x(),
+                                      self.model.end_x(run, group), self.model.start_x(run, group))
 
-    def _get_new_x_range_when_end_x_changed(self, run: str, group: str, view_start_x: float, view_end_x: float) -> tuple:
+    def _get_new_x_range_when_end_x_changed(self, run: str, group: str) -> tuple:
         """Returns the new x range for a domain when the end X has been changed."""
-        return check_end_x_is_valid(self.model.get_counts_workspace_name(run, group), view_start_x, view_end_x,
-                                    self.model.end_x(run, group))
+        return check_end_x_is_valid(self.model.get_counts_workspace_name(run, group), self.model.start_x(run, group),
+                                    self.view.selected_end_x(), self.model.end_x(run, group))
 
     def _run_background_corrections_for_all(self) -> None:
         """Runs the background corrections for all stored data in the corrections context."""
@@ -145,8 +143,9 @@ class BackgroundCorrectionsPresenter:
 
     def _update_start_and_end_x_in_view_and_model(self, run: str, group: str, start_x: float, end_x: float) -> None:
         """Updates the start and end x in the model using the provided values."""
-        self.view.set_start_x(run, group, start_x)
-        self.view.set_end_x(run, group, end_x)
+        if self.view.is_run_group_displayed(run, group):
+            self.view.set_start_x(run, group, start_x)
+            self.view.set_end_x(run, group, end_x)
         self.model.set_start_x(run, group, start_x)
         self.model.set_end_x(run, group, end_x)
 

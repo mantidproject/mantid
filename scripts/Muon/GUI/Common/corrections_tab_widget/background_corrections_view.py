@@ -168,12 +168,16 @@ class BackgroundCorrectionsView(widget, ui_form):
             run = self.correction_options_table.item(self._selected_row, RUN_COLUMN_INDEX).text()
             group = self.correction_options_table.item(self._selected_row, GROUP_COLUMN_INDEX).text()
             return [run], [group]
-
-        raise RuntimeError("There is no selected run/group table row.")
+        else:
+            raise RuntimeError("There is no selected run/group table row.")
 
     def apply_table_changes_to_all(self) -> bool:
         """Returns true if the changes made in the table should be made for all domains at once."""
         return self.apply_table_changes_to_all_checkbox.isChecked()
+
+    def is_run_group_displayed(self, run: str, group: str) -> bool:
+        """Returns true if a Run-Group is currently displayed in the data table."""
+        return self._table_row_index_of(run, group) is not None
 
     def set_start_x(self, run: str, group: str, start_x: float) -> None:
         """Sets the Start X associated with the provided Run and Group."""
@@ -195,15 +199,15 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Returns the Start X in the row that is selected."""
         if self._selected_row is not None:
             return float(self.correction_options_table.item(self._selected_row, START_X_COLUMN_INDEX).text())
-
-        raise RuntimeError("There is no selected run/group table row.")
+        else:
+            raise RuntimeError("There is no selected run/group table row.")
 
     def selected_end_x(self) -> float:
         """Returns the End X in the row that is selected."""
         if self._selected_row is not None:
             return float(self.correction_options_table.item(self._selected_row, END_X_COLUMN_INDEX).text())
-
-        raise RuntimeError("There is no selected run/group table row.")
+        else:
+            raise RuntimeError("There is no selected run/group table row.")
 
     def populate_corrections_table(self, runs: list, groups: list, start_xs: list, end_xs: list, backgrounds: list,
                                    background_errors: list, statuses: list) -> None:
