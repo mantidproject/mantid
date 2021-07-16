@@ -81,25 +81,11 @@ class BackgroundCorrectionsPresenter:
 
     def handle_start_x_changed(self) -> None:
         """Handles when a Start X table cell is changed."""
-        run, group = self.view.selected_run_and_group()
-
-        new_start_x, new_end_x = check_start_x_is_valid(self.model.get_counts_workspace_name(run, group),
-                                                        self.view.start_x(run, group), self.view.end_x(run, group),
-                                                        self.model.start_x(run, group))
-        self._update_start_and_end_x_in_view_and_model(run, group, new_start_x, new_end_x)
-
-        self._perform_background_corrections(self.model.run_background_correction_for, run, group)
+        self._handle_start_or_end_x_changed(self._get_new_x_range_when_start_x_changed)
 
     def handle_end_x_changed(self) -> None:
         """Handles when a End X table cell is changed."""
-        run, group = self.view.selected_run_and_group()
-
-        new_start_x, new_end_x = check_end_x_is_valid(self.model.get_counts_workspace_name(run, group),
-                                                      self.view.start_x(run, group), self.view.end_x(run, group),
-                                                      self.model.end_x(run, group))
-        self._update_start_and_end_x_in_view_and_model(run, group, new_start_x, new_end_x)
-
-        self._perform_background_corrections(self.model.run_background_correction_for, run, group)
+        self._handle_start_or_end_x_changed(self._get_new_x_range_when_end_x_changed)
 
     def handle_background_corrections_for_all_started(self) -> None:
         """Handle when the background corrections for all has started."""
@@ -119,6 +105,30 @@ class BackgroundCorrectionsPresenter:
         self._corrections_presenter.disable_editing_notifier.notify_subscribers()
         self.background_correction_thread_success = False
         self._corrections_presenter.warning_popup(error)
+
+    def _handle_start_or_end_x_changed(self, get_new_x_range) -> None:
+        """Handles when a Start X or End X is changed using an appropriate getter to get the new x range."""
+        view_start_x, view_end_x = self.view.selected_start_x(), self.view.selected_end_x()
+
+        runs, groups = self._selected_runs_and_groups()
+        for run, group in zip(runs, groups):
+            new_start_x, new_end_x = get_new_x_range(run, group, view_start_x, view_end_x)
+            self._update_start_and_end_x_in_view_and_model(run, group, new_start_x, new_end_x)
+
+        if len(runs) == 1:
+            self._perform_background_corrections(self.model.run_background_correction_for, runs[0], groups[0])
+        elif len(runs) > 1:
+            self._perform_background_corrections(self.model.run_background_correction_for_all)
+
+    def _get_new_x_range_when_start_x_changed(self, run: str, group: str, view_start_x: float, view_end_x: float) -> tuple:
+        """Returns the new x range for a domain when the start X has been changed."""
+        return check_start_x_is_valid(self.model.get_counts_workspace_name(run, group), view_start_x, view_end_x,
+                                      self.model.start_x(run, group))
+
+    def _get_new_x_range_when_end_x_changed(self, run: str, group: str, view_start_x: float, view_end_x: float) -> tuple:
+        """Returns the new x range for a domain when the end X has been changed."""
+        return check_end_x_is_valid(self.model.get_counts_workspace_name(run, group), view_start_x, view_end_x,
+                                    self.model.end_x(run, group))
 
     def _run_background_corrections_for_all(self) -> None:
         """Runs the background corrections for all stored data in the corrections context."""
@@ -157,3 +167,8 @@ class BackgroundCorrectionsPresenter:
         if args:
             self.correction_calculator.set_args(*args)
         return ThreadModel(self.correction_calculator)
+
+    def _selected_runs_and_groups(self) -> tuple:
+        """Returns the runs and groups to apply the parameter changes to."""
+        apply_to_all = self.view.apply_table_changes_to_all()
+        return self.model.all_runs_and_groups() if apply_to_all else self.view.selected_run_and_group()

@@ -112,6 +112,14 @@ class BackgroundCorrectionsModel:
 
         raise RuntimeError(f"The provided run and group could not be found ({run}, {group}).")
 
+    def all_runs_and_groups(self) -> tuple:
+        """Returns all the runs and groups stored in the context. The list indices of the runs and groups correspond."""
+        runs, groups = [], []
+        for run_group in self._corrections_context.background_correction_data.keys():
+            runs.append(run_group[0])
+            groups.append(run_group[1])
+        return runs, groups
+
     def clear_background_corrections_data(self) -> None:
         """Clears the background correction data dictionary."""
         self._corrections_context.background_correction_data = {}

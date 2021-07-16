@@ -83,9 +83,10 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Sets the Background corrections widgets as being visible or hidden."""
         self.select_function_label.setVisible(visible)
         self.function_combo_box.setVisible(visible)
-        self.group_label.setVisible(visible)
+        self.show_data_for_label.setVisible(visible)
         self.group_combo_box.setVisible(visible)
         self.show_all_runs_checkbox.setVisible(visible)
+        self.apply_table_changes_to_all_checkbox.setVisible(visible)
         self.correction_options_table.setVisible(visible)
         self.background_info_label.setVisible(not visible)
 
@@ -145,8 +146,13 @@ class BackgroundCorrectionsView(widget, ui_form):
         if self._selected_row is not None:
             run = self.correction_options_table.item(self._selected_row, RUN_COLUMN_INDEX).text()
             group = self.correction_options_table.item(self._selected_row, GROUP_COLUMN_INDEX).text()
-            return run, group
-        return None, None
+            return [run], [group]
+
+        raise RuntimeError("There is no selected run/group table row.")
+
+    def apply_table_changes_to_all(self) -> bool:
+        """Returns true if the changes made in the table should be made for all domains at once."""
+        return self.apply_table_changes_to_all_checkbox.isChecked()
 
     def set_start_x(self, run: str, group: str, start_x: float) -> None:
         """Sets the Start X associated with the provided Run and Group."""
@@ -163,6 +169,20 @@ class BackgroundCorrectionsView(widget, ui_form):
     def end_x(self, run: str, group: str) -> float:
         """Returns the Start X associated with the provided Run and Group."""
         return float(self._table_item_value_for(run, group, END_X_COLUMN_INDEX))
+
+    def selected_start_x(self) -> float:
+        """Returns the Start X in the row that is selected."""
+        if self._selected_row is not None:
+            return float(self.correction_options_table.item(self._selected_row, START_X_COLUMN_INDEX).text())
+
+        raise RuntimeError("There is no selected run/group table row.")
+
+    def selected_end_x(self) -> float:
+        """Returns the End X in the row that is selected."""
+        if self._selected_row is not None:
+            return float(self.correction_options_table.item(self._selected_row, END_X_COLUMN_INDEX).text())
+
+        raise RuntimeError("There is no selected run/group table row.")
 
     def populate_corrections_table(self, runs: list, groups: list, start_xs: list, end_xs: list, backgrounds: list,
                                    background_errors: list, statuses: list) -> None:
