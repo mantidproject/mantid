@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -76,7 +76,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             if isinstance(ws, IPeaksWorkspace) and ws.getNumberPeaks() >= _MIN_NUM_PEAKS:
                 n_valid_ws += 1
         if n_valid_ws < 2 or n_valid_ws < len(ws_list):
-            issues["PeakWorkspaces"] = "Accept only peaks workspace with more than {_MIN_NUM_PEAKS} peaks - " \
+            issues["PeakWorkspaces"] = f"Accept only peaks workspace with more than {_MIN_NUM_PEAKS} peaks - " \
                                        "there must be at least two peak tables provided in total."
         return issues
 
@@ -183,7 +183,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
     def calcResiduals(self, x0, ws_list):
         """
-        Calculates avergae of square magnitude of difference between qsample and q of integer HKL
+        Calculates average of square magnitude of difference between qsample and q of integer HKL
         :param x0: lattice parameters [a, b, c, alpha, beta, gamma]
         :param ws_list: list of peak workspaces
         :return: sqrt of average square residuals (required by scipy.leastsq optimiser - default settings behave better)
@@ -193,7 +193,11 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         for wsname in ws_list:
             nindexed = self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=True)
             if nindexed >= _MIN_NUM_INDEXED_PEAKS:
-                self.child_CalculateUMatrix(wsname, *x0)
+                try:
+                    self.child_CalculateUMatrix(wsname, *x0)
+                except RuntimeError:
+                    logger.error("CalculateUMatrix failed - check initial lattice parameters provided.")
+                    return
                 self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=False)
                 ws = AnalysisDataService.retrieve(wsname)
                 UB = 2 * np.pi * ws.sample().getOrientedLattice().getUB()
