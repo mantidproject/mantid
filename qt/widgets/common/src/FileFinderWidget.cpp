@@ -777,38 +777,35 @@ QString FileFinderWidget::openFileDialog() {
     m_fileFilter = createFileFilter();
   }
 
-  if (m_isForDirectory) {
-    QString file;
-    if (!m_useNativeDialog) {
+  if (!m_useNativeDialog) {
+    if (m_isForDirectory) {
+      m_dialog.setOption(QFileDialog::DontResolveSymlinks, false);
       m_dialog.setFileMode(QFileDialog::Directory);
-      m_dialog.setDirectory(dir);
-      m_dialog.exec();
-      filenames = m_dialog.selectedFiles();
-    } else
-      file = QFileDialog::getExistingDirectory(this, "Select directory", dir);
-    if (!file.isEmpty())
-      filenames.append(file);
-  } else if (m_allowMultipleFiles) {
-    if (!m_useNativeDialog) {
+    } else {
       m_dialog.setNameFilter(m_fileFilter);
-      m_dialog.setDirectory(dir);
-      m_dialog.exec();
-      filenames = m_dialog.selectedFiles();
-    } else
+      m_dialog.setOption(QFileDialog::DontResolveSymlinks);
+      if (m_allowMultipleFiles)
+        m_dialog.setFileMode(QFileDialog::ExistingFiles);
+      else
+        m_dialog.setFileMode(QFileDialog::ExistingFile);
+    }
+    m_dialog.setDirectory(dir);
+    m_dialog.exec();
+    filenames = m_dialog.selectedFiles();
+  } else {
+    if (m_isForDirectory) {
+      QString file = QFileDialog::getExistingDirectory(this, "Select directory", dir);
+      if (!file.isEmpty())
+        filenames.append(file);
+    } else if (m_allowMultipleFiles) {
       filenames = QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter, nullptr,
                                                 QFileDialog::DontResolveSymlinks);
-  } else {
-    QString file;
-    if (!m_useNativeDialog) {
-      m_dialog.setFileMode(QFileDialog::ExistingFile);
-      m_dialog.setDirectory(dir);
-      m_dialog.exec();
-      QString file = m_dialog.selectedFiles()[0];
-    } else
-      file =
+    } else {
+      QString file =
           QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter, nullptr, QFileDialog::DontResolveSymlinks);
-    if (!file.isEmpty())
-      filenames.append(file);
+      if (!file.isEmpty())
+        filenames.append(file);
+    }
   }
 
   if (filenames.isEmpty()) {
