@@ -397,7 +397,7 @@ CursorInfo = namedtuple("CursorInfo", ("array", "extent", "point"))
 
 
 @lru_cache(maxsize=32)
-def cursor_info(image: AxesImage, xdata: float, ydata: float) -> Optional[CursorInfo]:
+def cursor_info(image: AxesImage, xdata: float, ydata: float, full_bbox=None) -> Optional[CursorInfo]:
     """Return information on the image for the given position in
     data coordinates.
     :param image: An instance of an image type
@@ -410,7 +410,10 @@ def cursor_info(image: AxesImage, xdata: float, ydata: float) -> Optional[Cursor
     arr = image.get_array()
     data_extent = Bbox([[ymin, xmin], [ymax, xmax]])
     array_extent = Bbox([[0, 0], arr.shape[:2]])
-    trans = BboxTransform(boxin=data_extent, boxout=array_extent)
+    if full_bbox is None:
+        trans = BboxTransform(boxin=data_extent, boxout=array_extent)
+    else:
+        trans = BboxTransform(boxin=full_bbox, boxout=array_extent)
     point = trans.transform_point([ydata, xdata])
     if any(np.isnan(point)):
         return None
