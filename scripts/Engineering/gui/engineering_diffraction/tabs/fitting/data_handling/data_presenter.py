@@ -132,9 +132,12 @@ class FittingDataPresenter(object):
         self._emit_enable_load_button_signal()
 
     def _on_worker_success(self, _):
+        wsnames = self.model.get_last_added()
         if self.view.get_add_to_plot():
-            self.plotted.update(self.model.get_last_added())
+            self.plotted.update(wsnames)
         self._repopulate_table()
+        # subtract background - has to be done post repopulation, can't change default in _add_row_to_table
+        [self.view.set_item_checkstate(self.row_numbers[wsname], 3, True) for wsname in wsnames]
 
     def _repopulate_table(self):
         """
@@ -187,6 +190,7 @@ class FittingDataPresenter(object):
     def _handle_table_cell_changed(self, row, col):
         if row in self.row_numbers:
             ws_name = self.row_numbers[row]
+            is_plotted = self.view.get_item_checked(row, 2)
             is_sub = self.view.get_item_checked(row, 3)
             if col == 2:
                 # Plot check box
@@ -203,7 +207,8 @@ class FittingDataPresenter(object):
                     self.plotted.discard(ws_name)
             elif col == 3:
                 # subtract bg col
-                if is_sub or self.view.get_item_checked(row, 2):  # this ensures the sub ws isn't made on load
+                self.model.update_bgsub_status(ws_name, is_sub)
+                if is_sub or is_plotted:  # this ensures the sub ws isn't made on load
                     bg_params = self.view.read_bg_params_from_table(row)
                     self.model.create_or_update_bgsub_ws(ws_name, bg_params)
                     self._update_plotted_ws_with_sub_state(ws_name, is_sub)
@@ -264,6 +269,7 @@ class FittingDataPresenter(object):
 
     def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, checked=False, bgsub=False, niter=100,
                           xwindow=None, SG=True):
+
         words = ws_name.split("_")
         # find xwindow from ws xunit if not specified
         if not xwindow:
@@ -274,18 +280,16 @@ class FittingDataPresenter(object):
                 xwindow = 0.05
         if run_no is not None and bank is not None:
             self.view.add_table_row(run_no, bank, checked, bgsub, niter, xwindow, SG)
-            self.row_numbers[ws_name] = row
         elif len(words) == 4 and words[2] == "bank":
             logger.notice("No sample logs present, determining information from workspace name.")
             self.view.add_table_row(words[1], words[3], checked, bgsub, niter, xwindow, SG)
-            self.row_numbers[ws_name] = row
         else:
             logger.warning(
                 "The workspace '{}' was not in the correct naming format. Files should be named in the following way: "
                 "INSTRUMENT_RUNNUMBER_bank_BANK. Using workspace name as identifier.".format(ws_name)
             )
             self.view.add_table_row(ws_name, "N/A", checked, bgsub, niter, xwindow, SG)
-            self.row_numbers[ws_name] = row
+        self.row_numbers[ws_name] = row
 
     def _remove_table_row(self, row_no):
         self.view.remove_table_row(row_no)

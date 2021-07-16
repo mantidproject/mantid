@@ -318,6 +318,10 @@ class FittingDataModel(object):
         else:
             logger.notice("Background workspace already calculated")
 
+    def update_bgsub_status(self, ws_name, status):
+        if self._bg_params[ws_name]:
+            self._bg_params[ws_name][0] = status
+
     def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
         ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg",
                                                NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter)
