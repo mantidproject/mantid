@@ -10,8 +10,8 @@ from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.ElementalAnalysis2.context.context import REBINNED_VARIABLE_WS_SUFFIX, REBINNED_FIXED_WS_SUFFIX
 from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model import PEAKS_WS_SUFFIX, MATCH_GROUP_WS_SUFFIX
 
-INVALID_STRINGS_FOR_GROUP_NAMES = ["_EA_Rebinned_Fixed", "_EA_Rebinned_Variable", "_peaks", "_refitted_peaks",
-                                   "_with_errors", "_matches"]
+INVALID_STRINGS_FOR_GROUP_NAMES = ["_EA_Rebinned_Fixed", "_EA_Rebinned_Variable", "_EA_peaks", "_EA_refitted_peaks",
+                                   "_with_errors", "_EA_matches"]
 
 
 def get_default_grouping(loadedData):

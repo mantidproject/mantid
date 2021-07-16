@@ -118,6 +118,16 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         self.context.group_context.remove_group.assert_called_once_with("mock_workspace")
 
     @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
+    def test_remove_workspace_with_a_rebinned_workspace(self, mock_notify_subscirbers):
+        self.context.group_context.remove_workspace_from_group = mock.Mock()
+        # call remove_workspace function
+        self.context.remove_workspace("rebinned_mock_workspace")
+
+        # assert statement
+        mock_notify_subscirbers.assert_has_calls([mock.call("rebinned_mock_workspace")])
+        self.context.group_context.remove_workspace_from_group.assert_called_once_with("rebinned_mock_workspace")
+
+    @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
     def test_remove_workspace_with_a_string_and_not_present_in_group(self, mock_notify_subscirbers):
         self.context.group_context.remove_workspace_from_group = mock.Mock()
         # call remove_workspace function

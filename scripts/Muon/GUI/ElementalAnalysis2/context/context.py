@@ -71,7 +71,8 @@ class ElementalAnalysisContext(object):
         if workspace_name not in self.group_context.group_names:
             self.group_context.remove_workspace_from_group(workspace_name)
             self.deleted_plots_notifier.notify_subscribers(workspace)
-            self.update_view_from_model_notifier.notify_subscribers(workspace_name)
+            if "Rebin" not in workspace_name:
+                self.update_view_from_model_notifier.notify_subscribers(workspace_name)
             return
         self.group_context.remove_group(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
@@ -117,8 +118,9 @@ class ElementalAnalysisContext(object):
         workspace = retrieve_ws(rebined_run_name)
         group_workspace = retrieve_ws(self.group_context[name].run_number)
         group_workspace.addWorkspace(workspace)
-        self.group_context[name].update_workspaces(str(workspace), rebin=True, rebin_index=rebin_index,
-                                                   rebin_option=rebin_option)
+        group = self.group_context[name]
+        group.update_workspaces(str(workspace), rebin=True, rebin_index=rebin_index,
+                                rebin_option=rebin_option)
         self.update_plots_notifier.notify_subscribers(workspace)
 
     def handle_rebin(self, name, rebin_type, rebin_param):
