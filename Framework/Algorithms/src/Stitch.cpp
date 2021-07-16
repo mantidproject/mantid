@@ -241,9 +241,8 @@ void Stitch::init() {
                   std::make_unique<ListValidator<std::string>>(std::array<std::string, 1>{"Interleave"}));
   declareProperty(SCALE_FACTOR_CALCULATION_PROPERTY, "MedianOfRatios",
                   std::make_unique<ListValidator<std::string>>(std::array<std::string, 2>{"MedianOfRatios", "Manual"}));
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(MANUAL_SCALE_FACTORS_PROPERTY),
-      "Manually specified scale factors, must follow the order of ascending x-axis in the input workspaces list.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(MANUAL_SCALE_FACTORS_PROPERTY),
+                  "Manually specified scale factors, must follow the same order of the workspaces in the list.");
   setPropertySettings(MANUAL_SCALE_FACTORS_PROPERTY,
                       std::make_unique<EnabledWhenProperty>(SCALE_FACTOR_CALCULATION_PROPERTY, IS_EQUAL_TO, "Manual"));
   declareProperty(TIE_SCALE_FACTORS_PROPERTY, false,
