@@ -167,7 +167,7 @@ class BackgroundCorrectionsModel:
             correction_data.status = f"Correction skipped - chi squared is poor ({chi_squared:.3f})."
         elif "Failed to converge" in fit_status:
             correction_data.setup_functions()
-            correction_data.status = f"Correction skipped - {fit_status}."
+            correction_data.status = f"Correction skipped - {fit_status}"
         else:
             if self._corrections_context.selected_function == FLAT_BACKGROUND:
                 correction_data.flat_background = function.clone()

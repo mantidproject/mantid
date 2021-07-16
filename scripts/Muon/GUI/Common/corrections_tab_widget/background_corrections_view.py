@@ -7,8 +7,8 @@
 from mantidqt.utils.qt import load_ui
 
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QDoubleValidator
-from qtpy.QtWidgets import QLineEdit, QStyledItemDelegate, QTableWidgetItem, QWidget
+from qtpy.QtGui import QDoubleValidator, QPalette
+from qtpy.QtWidgets import QLineEdit, QStyledItemDelegate, QStyleOptionViewItem, QTableWidgetItem, QWidget
 
 ui_form, widget = load_ui(__file__, "background_corrections_view.ui")
 
@@ -30,6 +30,27 @@ class DoubleItemDelegate(QStyledItemDelegate):
         line_edit = QLineEdit(parent)
         line_edit.setValidator(QDoubleValidator())
         return line_edit
+
+
+class StatusItemDelegate(QStyledItemDelegate):
+    """
+    An item delegate for changing the text color of the correction status.
+    """
+
+    def paint(self, painter, options, index):
+        new_options = QStyleOptionViewItem(options)
+        text_color = self.get_text_color(index.data())
+        new_options.palette.setColor(QPalette.Text, text_color)
+        super(StatusItemDelegate, self).paint(painter, new_options, index)
+
+    @staticmethod
+    def get_text_color(status):
+        if "success" in status:
+            return Qt.green
+        elif "skipped" in status:
+            return Qt.red
+        else:
+            return Qt.black
 
 
 class BackgroundCorrectionsView(widget, ui_form):
@@ -213,6 +234,8 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._setup_double_item_delegate(END_X_COLUMN_INDEX)
         self._setup_double_item_delegate(A0_COLUMN_INDEX)
         self._setup_double_item_delegate(A0_ERROR_COLUMN_INDEX)
+        self.correction_options_table.setItemDelegateForColumn(STATUS_COLUMN_INDEX,
+                                                               StatusItemDelegate(self.correction_options_table))
 
         self.correction_options_table.cellChanged.connect(lambda row, column:
                                                           self._on_corrections_table_cell_changed(row, column))
