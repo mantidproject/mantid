@@ -48,6 +48,7 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(self.view.show_data_for_label.isHidden())
         self.assertTrue(self.view.group_combo_box.isHidden())
         self.assertTrue(self.view.show_all_runs_checkbox.isHidden())
+        self.assertTrue(self.view.apply_table_changes_to_all_checkbox.isHidden())
         self.assertTrue(self.view.correction_options_table.isHidden())
         self.assertTrue(not self.view.background_info_label.isHidden())
 
@@ -59,6 +60,7 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(not self.view.show_data_for_label.isHidden())
         self.assertTrue(not self.view.group_combo_box.isHidden())
         self.assertTrue(not self.view.show_all_runs_checkbox.isHidden())
+        self.assertTrue(not self.view.apply_table_changes_to_all_checkbox.isHidden())
         self.assertTrue(not self.view.correction_options_table.isHidden())
         self.assertTrue(self.view.background_info_label.isHidden())
 
@@ -85,6 +87,22 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.view.selected_function = "Fake Function"
         self.assertEqual(self.view.selected_function, "Flat Background")
+
+    def test_that_apply_table_changes_to_all_returns_true_by_default_when_view_is_initialized(self):
+        self.assertTrue(self.view.apply_table_changes_to_all())
+
+    def test_that_apply_table_changes_to_all_returns_false_when_the_checkbox_is_unchecked(self):
+        self.view.apply_table_changes_to_all_checkbox.setChecked(False)
+        self.assertTrue(not self.view.apply_table_changes_to_all())
+
+    def test_that_is_run_group_displayed_returns_false_if_a_run_and_group_does_not_exist(self):
+        self.assertTrue(not self.view.is_run_group_displayed("FakeRun", "FakeGroup"))
+
+    def test_that_is_run_group_displayed_returns_true_if_a_run_and_group_does_not_exist(self):
+        self.view.populate_corrections_table(self.runs, self.groups, self.start_xs, self.end_xs, self.a0s,
+                                             self.a0_errors, self.statuses)
+        for run, group in zip(self.runs, self.groups):
+            self.assertTrue(self.view.is_run_group_displayed(run, group))
 
     def test_that_populate_group_selector_will_populate_the_group_selector_with_the_first_entry_being_all(self):
         self.view.populate_group_selector(self.groups)
@@ -146,7 +164,7 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(self.view.end_x(run, "top"), 3.3)
         self.assertEqual(self.view.end_x(run, "bottom"), 4.4)
 
-    def test_that_selected_run_and_group_will_return_none_if_there_is_no_group_selected(self):
+    def test_that_selected_run_and_group_will_raise_if_there_is_no_group_selected(self):
         self.view.populate_corrections_table(self.runs, self.groups, self.start_xs, self.end_xs, self.a0s,
                                              self.a0_errors, self.statuses)
         self.assertRaises(RuntimeError, self.view.selected_run_and_group)
@@ -157,6 +175,30 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
 
         self._select_table_cell(2, 0)
         self.assertEqual(self.view.selected_run_and_group(), (["84447"], ["top"]))
+
+    def test_that_selected_start_x_will_raise_if_there_is_no_row_selected(self):
+        self.view.populate_corrections_table(self.runs, self.groups, self.start_xs, self.end_xs, self.a0s,
+                                             self.a0_errors, self.statuses)
+        self.assertRaises(RuntimeError, self.view.selected_start_x)
+
+    def test_that_selected_start_x_will_return_the_start_x_of_the_selected_row(self):
+        self.view.populate_corrections_table(self.runs, self.groups, self.start_xs, self.end_xs, self.a0s,
+                                             self.a0_errors, self.statuses)
+
+        self._select_table_cell(2, 0)
+        self.assertEqual(self.view.selected_start_x(), 7.0)
+
+    def test_that_selected_end_x_will_raise_if_there_is_no_row_selected(self):
+        self.view.populate_corrections_table(self.runs, self.groups, self.start_xs, self.end_xs, self.a0s,
+                                             self.a0_errors, self.statuses)
+        self.assertRaises(RuntimeError, self.view.selected_end_x)
+
+    def test_that_selected_end_x_will_return_the_end_x_of_the_selected_row(self):
+        self.view.populate_corrections_table(self.runs, self.groups, self.start_xs, self.end_xs, self.a0s,
+                                             self.a0_errors, self.statuses)
+
+        self._select_table_cell(2, 0)
+        self.assertEqual(self.view.selected_end_x(), 11.0)
 
     def _select_table_cell(self, row, column):
         x = int(self.view.correction_options_table.columnViewportPosition(column)
