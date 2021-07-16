@@ -7,6 +7,7 @@
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_group_data_workspace_name, get_run_numbers_as_string_from_workspace_name
 from typing import Iterable
 
 
@@ -29,12 +30,13 @@ def calculate_pair_data(pair: MuonPair, forward_group: str, backward_group: str,
 
 
 def estimate_group_asymmetry_data(context, group, run, rebin, workspace_name, unormalised_workspace_name, periods):
-    processed_data = get_pre_process_workspace_name(run, context.data_context.instrument)
-
-    params = _get_MuonGroupingAsymmetry_parameters(context, group, run, periods)
-    params["InputWorkspace"] = processed_data
-    group_asymmetry, group_asymmetry_unnorm = algorithm_utils.run_MuonGroupingAsymmetry(params, workspace_name,
-                                                                                        unormalised_workspace_name)
+    params = _get_EstimateMuonAsymmetryFromCounts_parameters(context, group, run, periods)
+    params["InputWorkspace"] = get_group_data_workspace_name(context, group.name,
+                                                             get_run_numbers_as_string_from_workspace_name(
+                                                                 workspace_name, context.data_context.instrument), "",
+                                                             rebin)
+    group_asymmetry, group_asymmetry_unnorm = \
+        algorithm_utils.run_EstimateMuonAsymmetryFromCounts(params, workspace_name, unormalised_workspace_name)
 
     return group_asymmetry, group_asymmetry_unnorm
 
@@ -136,6 +138,24 @@ def _get_MuonGroupingAsymmetry_parameters(context, group, run, periods):
     if group:
         params["GroupName"] = group.name
         params["Grouping"] = ",".join([str(i) for i in group.detectors])
+
+    return params
+
+
+def _get_EstimateMuonAsymmetryFromCounts_parameters(context, group, run, periods):
+    params = {}
+
+    if 'GroupRangeMin' in context.gui_context:
+        params['StartX'] = context.gui_context['GroupRangeMin']
+    else:
+        params['StartX'] = context.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
+
+    if 'GroupRangeMax' in context.gui_context:
+        params['EndX'] = context.gui_context['GroupRangeMax']
+    else:
+        params['EndX'] = max(context.data_context.get_loaded_data_for_run(run)['OutputWorkspace'][0].workspace.dataX(0))
+
+    params['OutputUnNormData'] = True
 
     return params
 

@@ -77,6 +77,23 @@ def run_MuonGroupingAsymmetry(parameter_dict, workspace_name, unormalised_worksp
     return workspace_name, unormalised_workspace_name
 
 
+def run_EstimateMuonAsymmetryFromCounts(parameter_dict, workspace_name, unormalised_workspace_name):
+    """
+        Apply the run_EstimateMuonAsymmetryFromCounts algorithm with the properties supplied through
+        the input dictionary of {property_name:property_value} pairs.
+        Returns the calculated workspace name.
+    """
+    alg = mantid.AlgorithmManager.create("EstimateMuonAsymmetryFromCounts")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setRethrows(True)
+    alg.setProperty("OutputWorkspace", workspace_name)
+    alg.setProperty("OutputUnNormWorkspace", unormalised_workspace_name)
+    alg.setProperties(parameter_dict)
+    alg.execute()
+    return workspace_name, unormalised_workspace_name
+
+
 def run_CalMuonDetectorPhases(parameter_dict, alg, fitted_workspace_name):
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
