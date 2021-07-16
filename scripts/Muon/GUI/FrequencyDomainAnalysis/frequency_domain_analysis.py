@@ -28,6 +28,7 @@ from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabW
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_widget import SeqFittingTabWidget
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
 from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget import MaxEntWidget
@@ -101,7 +102,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             frequency_context=self.frequency_context)
 
         # create the dockable widget
-        self.fitting_tab = FittingTabWidget(self.context, self)
         self.plot_widget = FrequencyAnalysisPlotWidget(self.context, parent=self)
 
         self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
@@ -122,13 +122,10 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.corrections_tab = CorrectionsTabWidget(self.context, self)
         self.home_tab = HomeTabWidget(self.context, self)
         self.phase_tab = PhaseTabWidget(self.context, self)
-        self.transform = TransformWidget(
-            self.context,
-            FFTWidget,
-            MaxEntWidget,
-            parent=self)
-        self.results_tab = ResultsTabWidget(
-            self.context.fitting_context, self.context, self)
+        self.transform = TransformWidget(self.context, FFTWidget, MaxEntWidget, parent=self)
+        self.fitting_tab = FittingTabWidget(self.context, self)
+        self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
+        self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget(self.context.window_title)
@@ -198,6 +195,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.phase_tab.phase_table_view, 'Phase Table')
         self.tabs.addTabWithOrder(self.transform.widget, 'Transform')
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
+        self.tabs.addTabWithOrder(self.seq_fitting_tab.seq_fitting_tab_view, 'Sequential Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
         self.transform_finished_observer = GenericObserverWithArgPassing(self.handle_transform_performed)
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
@@ -208,7 +206,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         index = self.tabs.currentIndex()
         if TAB_ORDER[index] in ["Home", "Grouping", "Phase Table"]:  # Plot all the selected data
             plot_mode = self.plot_widget.data_index
-        elif TAB_ORDER[index] in ["Fitting", "Transform"]:  # Plot the displayed workspace
+        elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting", "Transform"]:  # Plot the displayed workspace
             plot_mode = self.plot_widget.frequency_index
         else:
             return
