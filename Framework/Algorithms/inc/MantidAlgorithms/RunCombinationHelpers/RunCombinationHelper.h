@@ -18,7 +18,7 @@ namespace Algorithms {
 
 /** RunCombinationHelper : This holds some useful utilities for operations
  * involving transformations of lists of workspaces into single one.
- * E.g. this is used commonly between MergeRuns and ConjoinXRuns
+ * E.g. this is used commonly between MergeRuns, ConjoinXRuns and Stitch
  */
 
 namespace RunCombinationOptions {
@@ -44,6 +44,7 @@ private:
   std::string m_spectrumAxisUnit;
   std::string m_instrumentName;
   bool m_isHistogramData;
+  bool m_isDistribution;
   bool m_isScanning;
   std::vector<bool> m_hasDx;
 };

@@ -14,7 +14,9 @@ Concepts
 
 Algorithms
 ----------
+- A new algorithm :ref:`Stitch <algm-Stitch>` will perform stitching of multiple 2D workspaces by calculating the scale factors as medians of point-wise ratios in the overlap regions.
 - All remote algorithms have been deprecated as they have not been used since v3.8.
+
 
 Improvements
 ############

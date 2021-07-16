@@ -302,6 +302,7 @@ set(SRC_FILES
     src/SpatialGrouping.cpp
     src/SpectrumAlgorithm.cpp
     src/SphericalAbsorption.cpp
+    src/Stitch.cpp
     src/Stitch1D.cpp
     src/Stitch1DMany.cpp
     src/StripPeaks.cpp
@@ -646,6 +647,7 @@ set(INC_FILES
     inc/MantidAlgorithms/SpatialGrouping.h
     inc/MantidAlgorithms/SpectrumAlgorithm.h
     inc/MantidAlgorithms/SphericalAbsorption.h
+    inc/MantidAlgorithms/Stitch.h
     inc/MantidAlgorithms/Stitch1D.h
     inc/MantidAlgorithms/Stitch1DMany.h
     inc/MantidAlgorithms/StripPeaks.h
@@ -983,6 +985,7 @@ set(TEST_FILES
     SphericalAbsorptionTest.h
     Stitch1DManyTest.h
     Stitch1DTest.h
+    StitchTest.h
     StripPeaksTest.h
     StripVanadiumPeaks2Test.h
     StripVanadiumPeaksTest.h

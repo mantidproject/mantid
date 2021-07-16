@@ -30,6 +30,7 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
+  enum MultichannelType { TOF, KINETIC };
   struct DetectorPosition {
     double distanceSampleRear;
     double distanceSampleBottomTop;
@@ -60,10 +61,12 @@ private:
   void initWorkSpaceD22B(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD16(NeXus::NXEntry &, const std::string &);
-  void createEmptyWorkspace(const size_t, const size_t);
+  void createEmptyWorkspace(const size_t, const size_t, const MultichannelType type = MultichannelType::TOF);
 
-  size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex = 0);
-  size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t);
+  size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex = 0,
+                              const MultichannelType type = MultichannelType::TOF);
+  size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t,
+                           const MultichannelType type = MultichannelType::TOF);
   void runLoadInstrument();
   void moveDetectorsD33(const DetectorPosition &);
   void moveDetectorDistance(double distance, const std::string &componentName);

@@ -65,8 +65,7 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
                 CalculateResolution='MildnerCarpenter',
                 OutputWorkspace='iq_s' + str(i + 1),
                 BeamRadius='0.05,0.05,0.05',
-                TransmissionBeamRadius=0.05,
-                StitchReferenceIndex=0
+                TransmissionBeamRadius=0.2
             )
 
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
@@ -106,15 +105,12 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
         sample_tr = '2869'
         thick = 0.2
 
-        # reduce samples
-        # this also tests that already loaded workspace can be passed instead of a file
-        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
         SANSILLAutoProcess(
             SampleRuns=sample,
             BeamRuns=beams,
             ContainerRuns=containers,
+            SensitivityMaps='sens-lamp.nxs',
             MaskFiles='mask1.nxs,mask2.nxs,mask3.nxs',
-            SensitivityMaps='sens-lamp',
             SampleTransmissionRuns=sample_tr,
             ContainerTransmissionRuns=container_tr,
             TransmissionBeamRuns=beam_tr,
@@ -127,15 +123,15 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
             )
 
         GroupWorkspaces(
-            InputWorkspaces=['iq_1_d39.0m_c40.5m_w5.6A',
-                             'iq_2_d8.0m_c8.0m_w5.6A',
-                             'iq_3_d2.0m_c5.5m_w5.6A',
-                             'iq_wedge_1_1_d39.0m_c40.5m_w5.6A',
-                             'iq_wedge_1_2_d8.0m_c8.0m_w5.6A',
-                             'iq_wedge_1_3_d2.0m_c5.5m_w5.6A',
-                             'iq_wedge_2_1_d39.0m_c40.5m_w5.6A',
-                             'iq_wedge_2_2_d8.0m_c8.0m_w5.6A',
-                             'iq_wedge_2_3_d2.0m_c5.5m_w5.6A'],
+            InputWorkspaces=['iq_#1_d39.0m_c40.5m_w5.6A',
+                             'iq_#2_d8.0m_c8.0m_w5.6A',
+                             'iq_#3_d2.0m_c5.5m_w5.6A',
+                             'iq_wedge_1_#1_d39.0m_c40.5m_w5.6A',
+                             'iq_wedge_1_#2_d8.0m_c8.0m_w5.6A',
+                             'iq_wedge_1_#3_d2.0m_c5.5m_w5.6A',
+                             'iq_wedge_2_#1_d39.0m_c40.5m_w5.6A',
+                             'iq_wedge_2_#2_d8.0m_c8.0m_w5.6A',
+                             'iq_wedge_2_#3_d2.0m_c5.5m_w5.6A'],
             OutputWorkspace='out'
             )
 
@@ -175,7 +171,6 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
             ContainerTransmissionRuns='2870+2954',
             TransmissionBeamRuns='2867+2868',
             SampleThickness=0.2,
-            CalculateResolution='MildnerCarpenter',
             OutputWorkspace='iqxy',
             OutputType='I(Qx,Qy)',
             BeamRadius='0.05,0.05,0.05',
@@ -230,9 +225,6 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
         sample_tr = '1204,990,990'
         thick = 0.1
 
-        # reduce samples
-        # this also tests that already loaded workspace can be passed instead of a file
-        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
         SANSILLAutoProcess(
             SampleRuns=samples,
             BeamRuns=beams,
@@ -465,7 +457,7 @@ class D11B_AutoProcess_DirectBeamResolution_Test(systemtesting.MantidSystemTest)
         )
 
 
-class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
+class D33_AutoProcess_Panels_Test(systemtesting.MantidSystemTest):
     """
     Tests auto process with D33 monochromatic data
     One sample at one angle, with separation of the panels
@@ -473,7 +465,7 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
     """
 
     def __init__(self):
-        super(D33_AutoProcess_Test, self).__init__()
+        super(D33_AutoProcess_Panels_Test, self).__init__()
         self.setUp()
 
     def setUp(self):
@@ -515,7 +507,13 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
             TransmissionBeamRadius=0.05
         )
 
-        GroupWorkspaces(InputWorkspaces=['iq', 'iq_panels'], OutputWorkspace='out')
+        GroupWorkspaces(InputWorkspaces=['iq',
+                                         'iq_back_detector',
+                                         'iq_front_detector_bottom',
+                                         'iq_front_detector_left',
+                                         'iq_front_detector_right',
+                                         'iq_front_detector_top'],
+                                         OutputWorkspace='out')
 
 
 class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
@@ -541,7 +539,7 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking.append("Instrument")
-        return ['out', 'D33_AutoProcess_IPhiQ_Reference.nxs']
+        return ['iphiq_#1_d2.0m_c7.8m_w6.0A', 'D33_AutoProcess_IPhiQ_Reference.nxs']
 
     def runTest(self):
 
@@ -562,15 +560,11 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
             ContainerTransmissionRuns=can_tr,
             TransmissionBeamRuns=tr_beam,
             OutputWorkspace='iphiq',
-            OutputPanels=True,
             NumberOfWedges=60,
             OutputType='I(Phi,Q)',
             BeamRadius=0.05,
             TransmissionBeamRadius=0.05
         )
-
-        GroupWorkspaces(InputWorkspaces=['iphiq', 'iphiq_panels'],
-                        OutputWorkspace='out')
 
 
 class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
@@ -597,7 +591,7 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking.append("Instrument")
-        return ['iq', 'ILL_D16_Gamma_scan.nxs']
+        return ['iq', 'D16_Gamma_scan.nxs']
 
     def runTest(self):
         water = '3659, 3663, 3667'
