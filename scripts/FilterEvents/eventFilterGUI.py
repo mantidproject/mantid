@@ -101,12 +101,10 @@ class MainWindow(QMainWindow):
         self.ui.horizontalSlider_2.setTickPosition(QSlider.NoTicks)
         self.ui.horizontalSlider_2.valueChanged.connect(self.move_rightSlider)
 
-        # self.connect(self.ui.lineEdit_3, QtCore.SIGNAL("textChanged(QString)"),
-        #         self.set_startTime)
+        self.ui.lineEdit_3.editingFinished.connect(self.set_startTime)
         self.ui.lineEdit_3.setValidator(QDoubleValidator(self.ui.lineEdit_3))
         self.ui.pushButton_setT0.clicked.connect(self.set_startTime)
-        # self.connect(self.ui.lineEdit_4, QtCore.SIGNAL("textChanged(QString)"),
-        #         self.set_stopTime)
+        self.ui.lineEdit_4.editingFinished.connect(self.set_stopTime)
         self.ui.lineEdit_4.setValidator(QDoubleValidator(self.ui.lineEdit_4))
         self.ui.pushButton_setTf.clicked.connect(self.set_stopTime)
 
@@ -239,12 +237,19 @@ class MainWindow(QMainWindow):
         Triggered by a change in Qt Widget.  NO EVENT is required.
         """
         newx = self.ui.horizontalSlider.value()
+
         if newx <= self._rightSlideValue and newx != self._leftSlideValue:
             # Allowed value: move the value bar
             self._leftSlideValue = newx
 
             # Move the vertical line
             xlim = self.ui.mainplot.get_xlim()
+
+            if self.ui.lineEdit_4.text():
+                newx = max(xlim[0] + newx*(xlim[1] - xlim[0])*0.01, float(self.ui.lineEdit_4.text()))
+            else:
+                newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
+
             newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
             leftx = [newx, newx]
             lefty = self.ui.mainplot.get_ylim()
@@ -277,7 +282,7 @@ class MainWindow(QMainWindow):
         debug_msg = "iLeftSlide = %s" % str(ileftvalue)
         Logger("Filter_Events").debug(debug_msg)
 
-        # Skip if same as origina
+        # Skip if same as original
         if ileftvalue == self._leftSlideValue:
             return
 
@@ -323,7 +328,14 @@ class MainWindow(QMainWindow):
             self._rightSlideValue = newx
 
             xlim = self.ui.mainplot.get_xlim()
-            newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
+
+            if self.ui.lineEdit_3.text():
+                # that is not entirely fool proof, as the user could still remove the value in the field after putting
+                # a non round percent, but this a) is unlikely and b) will not crash mantid, only show an artifact
+                newx = max(xlim[0] + newx*(xlim[1] - xlim[0])*0.01, float(self.ui.lineEdit_3.text()))
+            else:
+                newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
+
             leftx = [newx, newx]
             lefty = self.ui.mainplot.get_ylim()
             setp(self.rightslideline, xdata=leftx, ydata=lefty)
@@ -337,7 +349,7 @@ class MainWindow(QMainWindow):
             self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
 
     def set_stopTime(self):
-        """ Set the starting time and left slide bar
+        """ Set the stopping time and right slide bar
         """
         inps = str(self.ui.lineEdit_4.text())
         Logger("Filter_Events").information('Stopping time = {}'.format(inps))
@@ -367,7 +379,7 @@ class MainWindow(QMainWindow):
         else:
             resetT = False
 
-        if resetT is True:
+        if resetT:
             newtimef = xlim[0] + irightvalue*(xlim[1]-xlim[0])*0.01
 
         # Move the slide bar (right)
@@ -503,7 +515,7 @@ class MainWindow(QMainWindow):
         self.canvas.draw()
 
         # Change value
-        if setLineEdit is True:
+        if setLineEdit:
             self.ui.lineEdit_6.setText(str(newy))
             self._upperSlideValue = inewy
 
@@ -815,7 +827,6 @@ class MainWindow(QMainWindow):
         try:
             ws = api.Load(Filename=filename, OutputWorkspace=wsname)
         except RuntimeError as e:
-            ws = None
             return str(e)
 
         return ws
@@ -826,29 +837,37 @@ class MainWindow(QMainWindow):
         import datetime
         # Rebin events by pulse time
         try:
-            # Get run start and run stop
+            # Get run start
             if wksp.getRun().hasProperty("run_start"):
                 runstart = wksp.getRun().getProperty("run_start").value
-            else:
+            elif wksp.getRun().hasProperty("proton_charge"):
                 runstart = wksp.getRun().getProperty("proton_charge").times[0]
-            runstop = wksp.getRun().getProperty("proton_charge").times[-1]
+            else:
+                runstart = wksp.getRun().getProperty("start_time").value
+
+            # get run stop
+            if wksp.getRun().hasProperty("proton_charge"):
+                runstop = wksp.getRun().getProperty("proton_charge").times[-1]
+                runstop = str(runstop).split(".")[0].strip()
+                tf = datetime.datetime.strptime(runstop, "%Y-%m-%dT%H:%M:%S")
+            else:
+                last_pulse = wksp.getPulseTimeMax().toISO8601String()
+                tf = datetime.datetime.strptime(last_pulse[:19], "%Y-%m-%dT%H:%M:%S")
+                tf += datetime.timedelta(0, wksp.getTofMax() / 1000000)
 
             runstart = str(runstart).split(".")[0].strip()
-            runstop = str(runstop).split(".")[0].strip()
 
             t0 = datetime.datetime.strptime(runstart, "%Y-%m-%dT%H:%M:%S")
-            tf = datetime.datetime.strptime(runstop, "%Y-%m-%dT%H:%M:%S")
 
             # Calculate
             dt = tf-t0
             timeduration = dt.days*3600*24 + dt.seconds
-
             timeres = float(timeduration)/MAXTIMEBINSIZE
             if timeres < 1.0:
                 timeres = 1.0
 
             sumwsname = '_Summed_{}'.format(wksp)
-            if AnalysisDataService.doesExist(sumwsname) is False:
+            if not AnalysisDataService.doesExist(sumwsname):
                 sumws = api.SumSpectra(InputWorkspace=wksp, OutputWorkspace=sumwsname)
                 sumws = api.RebinByPulseTimes(InputWorkspace=sumws, OutputWorkspace=sumwsname,
                                               Params='{}'.format(timeres))
@@ -861,8 +880,10 @@ class MainWindow(QMainWindow):
         vecx = sumws.readX(0)
         vecy = sumws.readY(0)
 
-        xmin = min(vecx)
-        xmax = max(vecx)
+        # get the x limits using the original workspace, as they are far more precise
+        xmin = min(wksp.readX(0)) / 1000000
+        xmax = max(wksp.readX(0)) / 1000000
+
         ymin = min(vecy)
         ymax = max(vecy)
 
@@ -890,6 +911,11 @@ class MainWindow(QMainWindow):
         """ Filter by time
         """
         # Generate event filters
+        if not self._dataWS:
+            error_msg = "No workspace has been loaded for use!"
+            Logger("Filter_Events").error(error_msg)
+            return
+
         kwargs = {}
         if self.ui.lineEdit_3.text() != "":
             rel_starttime = float(self.ui.lineEdit_3.text())
@@ -900,6 +926,7 @@ class MainWindow(QMainWindow):
         if self.ui.lineEdit_timeInterval.text() != "":
             interval = float(self.ui.lineEdit_timeInterval.text())
             kwargs["TimeInterval"] = interval
+        kwargs["useReverseLogarithmic"] = self.ui.useReverseLogarithmic.isChecked()
 
         splitwsname = str(self._dataWS) + "_splitters"
         splitinfowsname = str(self._dataWS) + "_info"

@@ -395,6 +395,14 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID) {
  */
 std::string LoadHelper::dateTimeInIsoFormat(const std::string &dateToParse) {
   namespace bt = boost::posix_time;
+  try {
+    // Try to convert to a boost date as an iso string. If it works, we are already in ISO and no conversion is
+    // requiered.
+    bt::from_iso_extended_string(dateToParse);
+    return dateToParse;
+
+  } catch (...) {
+  }
   // parsing format
   const std::locale format = std::locale(std::locale::classic(), new bt::time_input_facet("%d-%b-%y %H:%M:%S"));
 

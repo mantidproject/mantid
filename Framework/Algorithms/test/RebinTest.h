@@ -490,6 +490,173 @@ public:
     do_test_FullBinsOnly(params, yExpected, xExpected);
   }
 
+  void test_reverseLogSimple() {
+    // Test UseReverseLogarithmic alone
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("Params", "1, -1, 37");
+    rebin.setProperty("UseReverseLogarithmic", true);
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
+    auto &outX = out->x(0);
+
+    TS_ASSERT_EQUALS(outX.size(), 7);
+    TS_ASSERT_EQUALS(outX[0], 1);
+    TS_ASSERT_EQUALS(outX[1], 6);
+    TS_ASSERT_EQUALS(outX[2], 22);
+    TS_ASSERT_EQUALS(outX[3], 30);
+    TS_ASSERT_EQUALS(outX[4], 34);
+    TS_ASSERT_EQUALS(outX[5], 36);
+    TS_ASSERT_EQUALS(outX[6], 37);
+    AnalysisDataService::Instance().remove("test_Rebin_revLog");
+  }
+
+  void test_reverseLogDiffStep() {
+    // Test UseReverseLog with a different step than the usual -1
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("Params", "1, -0.5, 37");
+    rebin.setProperty("UseReverseLogarithmic", true);
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
+    auto &outX = out->x(0);
+
+    TS_ASSERT_EQUALS(outX.size(), 10);
+    TS_ASSERT_EQUALS(outX[0], 1);
+    TS_ASSERT_EQUALS(outX[7], 35.75);
+    TS_ASSERT_EQUALS(outX[8], 36.5);
+    TS_ASSERT_EQUALS(outX[9], 37);
+    AnalysisDataService::Instance().remove("test_Rebin_revLog");
+  }
+
+  void test_reverseLogEdgeCase() {
+    // Check that if the parameters given are so that the edges of the bins fall perfectly, there is no offset by one in
+    // the split
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("Params", "30, -1, 37");
+    rebin.setProperty("UseReverseLogarithmic", true);
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
+    auto &outX = out->x(0);
+
+    TS_ASSERT_EQUALS(outX.size(), 4);
+    TS_ASSERT_EQUALS(outX[0], 30);
+    TS_ASSERT_EQUALS(outX[1], 34);
+    TS_ASSERT_EQUALS(outX[2], 36);
+    TS_ASSERT_EQUALS(outX[3], 37);
+    AnalysisDataService::Instance().remove("test_Rebin_revLog");
+  }
+
+  void test_reverseLogAgainst() {
+    // Test UseReverseLogarithmic with a linear spacing before it
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("Params", "1, 2, 15, -1, 37");
+    rebin.setProperty("UseReverseLogarithmic", true);
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
+    auto &outX = out->x(0);
+
+    TS_ASSERT_EQUALS(outX.size(), 13);
+    TS_ASSERT_EQUALS(outX[0], 1);
+    TS_ASSERT_EQUALS(outX[6], 13);
+    TS_ASSERT_EQUALS(outX[7], 15);
+    TS_ASSERT_EQUALS(outX[8], 22);
+    TS_ASSERT_EQUALS(outX[9], 30);
+    TS_ASSERT_EQUALS(outX[10], 34);
+    TS_ASSERT_EQUALS(outX[11], 36);
+    TS_ASSERT_EQUALS(outX[12], 37);
+    AnalysisDataService::Instance().remove("test_Rebin_revLog");
+  }
+
+  void test_reverseLogBetween() {
+    // Test UseReverseLogarithmic between 2 linear binnings
+
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("Params", "1, 2, 15, -1, 36, 0.5, 38");
+    rebin.setProperty("UseReverseLogarithmic", true);
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
+    auto &outX = out->x(0);
+
+    TS_ASSERT_EQUALS(outX.size(), 16);
+    TS_ASSERT_EQUALS(outX[0], 1);
+    TS_ASSERT_EQUALS(outX[6], 13);
+    TS_ASSERT_EQUALS(outX[7], 15);
+    TS_ASSERT_EQUALS(outX[8], 22);
+    TS_ASSERT_EQUALS(outX[9], 30);
+    TS_ASSERT_EQUALS(outX[10], 34);
+    TS_ASSERT_EQUALS(outX[11], 36);
+    TS_ASSERT_EQUALS(outX[12], 36.5);
+    AnalysisDataService::Instance().remove("test_Rebin_revLog");
+  }
+
+  void test_reverseLogFullBinsOnly() {
+    // Test UseReverseLogarithmic with the FullBinsOnly option checked. It should change absolutely nothing
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("Params", "1, -1, 37");
+    rebin.setProperty("UseReverseLogarithmic", true);
+    rebin.setProperty("FullBinsOnly", true);
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
+    auto &outX = out->x(0);
+
+    TS_ASSERT_EQUALS(outX.size(), 7);
+    TS_ASSERT_EQUALS(outX[0], 1);
+    TS_ASSERT_EQUALS(outX[1], 6);
+    TS_ASSERT_EQUALS(outX[2], 22);
+    TS_ASSERT_EQUALS(outX[3], 30);
+    TS_ASSERT_EQUALS(outX[4], 34);
+    TS_ASSERT_EQUALS(outX[5], 36);
+    TS_ASSERT_EQUALS(outX[6], 37);
+    AnalysisDataService::Instance().remove("test_Rebin_revLog");
+  }
+
   void test_parallel_cloned() { ParallelTestHelpers::runParallel(run_rebin, "Parallel::StorageMode::Cloned"); }
 
   void test_parallel_distributed() {
@@ -507,10 +674,10 @@ public:
 private:
   Workspace2D_sptr Create1DWorkspace(int size) {
     auto retVal = createWorkspace<Workspace2D>(1, size, size - 1);
-    double j = 1.0;
+    double j = 0.5;
     for (int i = 0; i < size; i++) {
-      retVal->dataX(0)[i] = j * 0.5;
-      j += 1.5;
+      retVal->dataX(0)[i] = j;
+      j += 0.75;
     }
     retVal->setCounts(0, size - 1, 3.0);
     retVal->setCountVariances(0, size - 1, 3.0);
