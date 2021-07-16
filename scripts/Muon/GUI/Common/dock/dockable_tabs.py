@@ -52,7 +52,16 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
     def addTabWithOrder(self, tab, name):
         self.tab_order.append(name)
         self.attached_tab_names.append(name)
+        self.addTab(tab, name)
+
+    def addTab(self, tab, name):
         super(DetachableTabWidget, self).addTab(tab, name)
+        self.setTabToolTip(self.indexOf(tab), name)
+
+    def insertTab(self, to_index, widget, *args):
+        index = super(DetachableTabWidget, self).insertTab(to_index, widget, *args)
+        self.setTabToolTip(to_index, args[-1])
+        return index
 
     def set_slot_for_tab_changed(self, slot):
         self.currentChanged.connect(slot)
