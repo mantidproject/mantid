@@ -87,6 +87,7 @@ class BackgroundCorrectionsView(widget, ui_form):
         self.group_combo_box.setVisible(visible)
         self.show_all_runs_checkbox.setVisible(visible)
         self.correction_options_table.setVisible(visible)
+        self.background_info_label.setVisible(not visible)
 
     @property
     def background_correction_mode(self) -> str:

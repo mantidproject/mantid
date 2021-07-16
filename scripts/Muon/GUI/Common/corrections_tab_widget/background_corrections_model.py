@@ -17,7 +17,8 @@ from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
 from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 BACKGROUND_PARAM = "A0"
-MAX_ACCEPTABLE_CHI_SQUARED = 50.0
+DEFAULT_A_VALUE = 1e6
+MAX_ACCEPTABLE_CHI_SQUARED = 10.0
 
 
 @dataclass
@@ -28,18 +29,20 @@ class BackgroundCorrectionData:
     uncorrected_counts_workspace: StaticWorkspaceWrapper
     start_x: float
     end_x: float
-    flat_background: IFunction = FunctionFactory.createFunction("FlatBackground")
-    exp_decay: IFunction = FunctionFactory.createFunction("ExpDecayMuon")
+    flat_background: IFunction
+    exp_decay: IFunction
     status: str = "No background correction"
 
     def __init__(self, counts_workspace: StaticWorkspaceWrapper, start_x: float, end_x: float):
         self.uncorrected_counts_workspace = counts_workspace
         self.start_x = start_x
         self.end_x = end_x
+        self.setup_functions()
 
-    def reset_functions(self):
+    def setup_functions(self):
         self.flat_background = FunctionFactory.createFunction("FlatBackground")
         self.exp_decay = FunctionFactory.createFunction("ExpDecayMuon")
+        self.exp_decay.setParameter("A", DEFAULT_A_VALUE)
 
 
 class BackgroundCorrectionsModel:
@@ -128,7 +131,7 @@ class BackgroundCorrectionsModel:
     def reset_background_function_data(self) -> None:
         """Resets the background functions back to zero when the correction mode is changed."""
         for correction_data in self._corrections_context.background_correction_data.values():
-            correction_data.reset_functions()
+            correction_data.setup_functions()
 
     def run_background_correction_for_all(self) -> None:
         """Runs the background corrections for all stored domains."""
@@ -152,7 +155,7 @@ class BackgroundCorrectionsModel:
                                       chi_squared: float) -> None:
         """Handles the output of the background fit."""
         if chi_squared > MAX_ACCEPTABLE_CHI_SQUARED:
-            correction_data.reset_functions()
+            correction_data.setup_functions()
             correction_data.status = f"Correction skipped - chi squared is poor ({chi_squared:.3f})."
         else:
             if self._corrections_context.selected_function == FLAT_BACKGROUND:
