@@ -697,54 +697,19 @@ class RunTabPresenterTest(unittest.TestCase):
 
     def test_that_switching_to_memory_mode_disables_all_file_type_buttons(self):
         """This tests that all file type buttons are disabled when memory mode is selected."""
-
-        view = mock.MagicMock()
-
-        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
-        view.disable_file_type_buttons = mock.Mock()
-
-        self.presenter.set_view(view)
+        self._mock_view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
 
         self.presenter.on_output_mode_changed()
-        self.presenter._view.disable_file_type_buttons.assert_called_once_with()
+        self.presenter._view.disable_file_type_buttons.assert_called_once()
 
-    def test_that_all_file_type_buttons_are_enabled_if_switching_to_non_memory_mode_and_in_1D_reduction_mode(self):
+    def test_that_switching_off_memory_mode_enables_all_file_type_buttons(self):
         """This tests that all file type buttons are enabled if switching to file or both mode, when reduction
         dimensionality is 1D"""
 
-        view = mock.MagicMock()
-
-        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
-        view.reduction_dimensionality_1D.isChecked = mock.Mock(return_value=True)
-        view.can_sas_checkbox.setEnabled = mock.Mock()
-        view.nx_can_sas_checkbox.setEnabled = mock.Mock()
-        view.rkh_checkbox.setEnabled = mock.Mock()
-
-        self.presenter.set_view(view)
+        self._mock_view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
 
         self.presenter.on_output_mode_changed()
-        self.presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(True)
-        self.presenter._view.nx_can_sas_checkbox.setEnabled.assert_called_once_with(True)
-        self.presenter._view.rkh_checkbox.setEnabled.assert_called_once_with(True)
-
-    def test_that_rkh_and_nx_can_sas_are_enabled_if_switching_to_non_memory_mode_and_in_2D_reduction_mode(self):
-        """This tests that nx_can_sas and rkh file type buttons are enabled if switching to file or both mode, when
-         reduction dimensionality is 1D, but can sas is not enabled"""
-
-        view = mock.MagicMock()
-
-        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
-        view.reduction_dimensionality_1D.isChecked = mock.Mock(return_value=False)
-        view.can_sas_checkbox.setEnabled = mock.Mock()
-        view.nx_can_sas_checkbox.setEnabled = mock.Mock()
-        view.rkh_checkbox.setEnabled = mock.Mock()
-
-        self.presenter.set_view(view)
-
-        self.presenter.on_output_mode_changed()
-        self.presenter._view.can_sas_checkbox.setEnabled.assert_not_called()
-        self.presenter._view.nx_can_sas_checkbox.setEnabled.assert_called_once_with(True)
-        self.presenter._view.rkh_checkbox.setEnabled.assert_called_once_with(True)
+        self.presenter._view.enable_file_type_buttons.assert_called_once()
 
     def test_that_on_reduction_mode_changed_calls_update_hab_if_selection_is_HAB(self):
 

@@ -628,10 +628,7 @@ class RunTabPresenter(PresenterCommon):
             # If in memory mode, disable all buttons regardless of dimension
             self._view.disable_file_type_buttons()
         else:
-            self._view.nx_can_sas_checkbox.setEnabled(True)
-            self._view.rkh_checkbox.setEnabled(True)
-            if self._view.reduction_dimensionality_1D.isChecked():
-                self._view.can_sas_checkbox.setEnabled(True)
+            self._view.enable_file_type_buttons()
 
     def on_process_all_clicked(self):
         """
