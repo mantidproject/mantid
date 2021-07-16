@@ -247,8 +247,9 @@ void Stitch::init() {
                       std::make_unique<EnabledWhenProperty>(SCALE_FACTOR_CALCULATION_PROPERTY, IS_EQUAL_TO, "Manual"));
   declareProperty(TIE_SCALE_FACTORS_PROPERTY, false,
                   "Whether or not to calculate a single scale factor per workspace for all the spectra.");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(OUTPUT_WORKSPACE_PROPERTY, "", Direction::Output),
-                  "The output workspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(OUTPUT_WORKSPACE_PROPERTY, "", Direction::Output),
+      "The output workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(OUTPUT_SCALE_FACTORS_PROPERTY, "",
                                                                        Direction::Output, PropertyMode::Optional),
                   "The output workspace containing the applied scale factors.");
@@ -304,6 +305,13 @@ void Stitch::exec() {
   }
 }
 
+/**
+ * @brief Combines the scaled workspaces together by interleaving their data
+ * This is equivalent to concatenation followed by sort
+ * @param inputs: the list of the scaled input workspace names
+ * @param refName: the name of the reference workspace that is not scaled
+ * @return the combined workspace
+ */
 MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs, const std::string &refName) {
   // interleave option is equivalent to concatenation followed by sort X axis
   auto joiner = createChildAlgorithm("ConjoinXRuns");
@@ -327,6 +335,16 @@ MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs, const
   return sorted;
 }
 
+/**
+ * @brief Scales one workspace to match the scale of the other
+ * The scale factors are calculated as medians of point-wise ratios in the overlap region
+ * The scale factors can be different per spectrum, or global for the workspace, if tied scale factors is requested
+ * @param wsToMatch: the workspace to match up the scale
+ * @param wsToScale: the workspace to be scaled
+ * @param scaleFactorsWorkspace: the workspace where calculated scale factors will be stored
+ * @param inputs: the name of the input workspace list (needed only to store the scale factor at right index)
+ * @return the name of the scaled workspace
+ */
 std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScale,
                           Mantid::API::MatrixWorkspace_sptr scaleFactorsWorkspace,
                           const std::vector<std::string> &inputs) {
@@ -391,6 +409,13 @@ std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr w
   return scaled;
 }
 
+/**
+ * @brief Stores the scale factors into a workspace
+ * @param scaleFactorWorkspace: the output workspace where they'll be stored
+ * @param medianWorkspace: the workspace containing the scale factors (i.e. medians)
+ * @param scaledWorkspace: the workspace that was scaled
+ * @param inputs: the list of the workspace names used to store the factors at the right index
+ */
 void Stitch::recordScaleFactor(Mantid::API::MatrixWorkspace_sptr scaleFactorWorkspace,
                                Mantid::API::MatrixWorkspace_sptr medianWorkspace,
                                Mantid::API::MatrixWorkspace_sptr scaledWorkspace,
@@ -404,6 +429,15 @@ void Stitch::recordScaleFactor(Mantid::API::MatrixWorkspace_sptr scaleFactorWork
   }
 }
 
+/**
+ * @brief Performs scaling with manual scale factors, which are treated as global, i.e. applied to all spectra
+ * Manual scale factors must be given in the original order of the workspaces, no matter their order in terms of
+ * x-extent
+ * @param inputs: the list of the input workspace names
+ * @param scaleFactors: a vector with the manual scale factors, must have the same size as inputs
+ * @param scaleFactorsWorkspace: the workspace to store the scale factors to
+ * @return: the list of names of scaled workspaces
+ */
 std::vector<std::string> Stitch::scaleManual(const std::vector<std::string> &inputs,
                                              const std::vector<double> &scaleFactors,
                                              MatrixWorkspace_sptr scaleFactorsWorkspace) {
