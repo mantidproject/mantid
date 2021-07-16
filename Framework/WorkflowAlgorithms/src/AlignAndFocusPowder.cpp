@@ -1153,49 +1153,63 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename, const std:
   if (calFilename.empty() && groupFilename.empty())
     return;
 
-  g_log.information() << "Loading Calibration file \"" << calFilename << "\"";
-  if (!groupFilename.empty())
-    g_log.information() << "with grouping from \"" << groupFilename << "\"";
-  g_log.information("");
-
   // bunch of booleans to keep track of things
   const bool loadMask = !m_maskWS;
   const bool loadGrouping = !m_groupWS;
   const bool loadCalibration = !m_calibrationWS;
 
-  IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
-  alg->setProperty("InputWorkspace", m_inputW);
-  alg->setPropertyValue("Filename", calFilename);
-  alg->setPropertyValue("GroupFilename", groupFilename);
-  alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
-  alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
-  alg->setProperty<bool>("MakeMaskWorkspace", loadMask);
-  alg->setProperty<double>("TofMin", getProperty("TMin"));
-  alg->setProperty<double>("TofMax", getProperty("TMax"));
-  alg->setPropertyValue("WorkspaceName", m_instName);
-  alg->executeAsChildAlg();
+  if (calFilename.empty()) { // only load the grouping file
+    g_log.information() << "Loading Grouping file \"" << groupFilename << "\"\n";
 
-  // replace workspaces as appropriate
-  if (loadGrouping) {
-    m_groupWS = alg->getProperty("OutputGroupingWorkspace");
+    IAlgorithm_sptr alg = createChildAlgorithm("LoadDetectorsGroupingFile");
+    alg->setProperty("InputFile", groupFilename);
+    alg->setProperty("InputWorkspace", m_inputW);
+    alg->executeAsChildAlg();
 
+    m_groupWS = alg->getProperty("OutputWorkspace");
     const std::string name = m_instName + "_group";
     AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
     this->setPropertyValue(PropertyNames::GROUP_WKSP, name);
-  }
-  if (loadCalibration) {
-    m_calibrationWS = alg->getProperty("OutputCalWorkspace");
+  } else { // let LoadDiffCal sort out everything
+    g_log.information() << "Loading Calibration file \"" << calFilename << "\"";
+    if (!groupFilename.empty())
+      g_log.information() << "with grouping from \"" << groupFilename << "\"";
+    g_log.information("");
 
-    const std::string name = m_instName + "_cal";
-    AnalysisDataService::Instance().addOrReplace(name, m_calibrationWS);
-    this->setPropertyValue(PropertyNames::CAL_WKSP, name);
-  }
-  if (loadMask) {
-    m_maskWS = alg->getProperty("OutputMaskWorkspace");
+    IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
+    alg->setProperty("InputWorkspace", m_inputW);
+    alg->setPropertyValue("Filename", calFilename);
+    alg->setPropertyValue("GroupFilename", groupFilename);
+    alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
+    alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
+    alg->setProperty<bool>("MakeMaskWorkspace", loadMask);
+    alg->setProperty<double>("TofMin", getProperty("TMin"));
+    alg->setProperty<double>("TofMax", getProperty("TMax"));
+    alg->setPropertyValue("WorkspaceName", m_instName);
+    alg->executeAsChildAlg();
 
-    const std::string name = m_instName + "_mask";
-    AnalysisDataService::Instance().addOrReplace(name, m_maskWS);
-    this->setPropertyValue(PropertyNames::MASK_WKSP, name);
+    // replace workspaces as appropriate
+    if (loadGrouping) {
+      m_groupWS = alg->getProperty("OutputGroupingWorkspace");
+
+      const std::string name = m_instName + "_group";
+      AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
+      this->setPropertyValue(PropertyNames::GROUP_WKSP, name);
+    }
+    if (loadCalibration) {
+      m_calibrationWS = alg->getProperty("OutputCalWorkspace");
+
+      const std::string name = m_instName + "_cal";
+      AnalysisDataService::Instance().addOrReplace(name, m_calibrationWS);
+      this->setPropertyValue(PropertyNames::CAL_WKSP, name);
+    }
+    if (loadMask) {
+      m_maskWS = alg->getProperty("OutputMaskWorkspace");
+
+      const std::string name = m_instName + "_mask";
+      AnalysisDataService::Instance().addOrReplace(name, m_maskWS);
+      this->setPropertyValue(PropertyNames::MASK_WKSP, name);
+    }
   }
 }
 
