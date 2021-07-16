@@ -22,6 +22,8 @@ New and Improved
 - Added tooltips to all the widgets in the Slice Viewer. Please contact the developers if any are missing.
 - Script editor tab completion and call tip support for Numpy 1.21
 - The visibility of a component parameter in the Pick tab of the InstrumentViewer is now steered by the 'visible' atrribute of a parameter in IPF
+- Improved cross-platform theming by using the same icon on all platforms for closing editor tabs.
+- Added help button to the sliceviewer
 
 Bugfixes
 --------
