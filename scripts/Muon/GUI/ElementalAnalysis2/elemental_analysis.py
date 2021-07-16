@@ -18,6 +18,8 @@ from Muon.GUI.ElementalAnalysis2.load_widget.load_widget import LoadWidget
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_widget import EAGroupingTabWidget
 from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_widget import EAAutoTabWidget
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
+from Muon.GUI.ElementalAnalysis2.periodic_table_tab.periodic_table_tab_presenter import PeriodicTableTabPresenter
+from Muon.GUI.ElementalAnalysis2.periodic_table_tab.periodic_table_tab_view import PeriodicTableTabView
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
@@ -79,6 +81,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget = EAGroupingTabWidget(self.context)
         self.fitting_tab = QtWidgets.QLineEdit("fitting")
         self.auto_tab = EAAutoTabWidget(self.context)
+        view = PeriodicTableTabView(self)
+        self.periodic_table = PeriodicTableTabPresenter(self.context, view)
 
     def setup_tabs(self):
         """
@@ -89,6 +93,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.home_tab, 'Home')
         self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
         self.tabs.addTabWithOrder(self.auto_tab.auto_tab_view, 'Automatic')
+        self.tabs.addTabWithOrder(self.periodic_table.view, "Periodic Table")
         self.tabs.addTabWithOrder(self.fitting_tab, 'Fitting')
 
     def closeEvent(self, event):
