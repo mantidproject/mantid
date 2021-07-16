@@ -248,57 +248,84 @@ void SaveAscii2::exec() {
       }
     }
   }
-  if (!idx.empty()) {
-    nSpectra = static_cast<int>(idx.size());
+
+  // if no interval or spectra list, take all of them
+  if (idx.empty()) {
+    for (int i = 0; i < nSpectra; i++) {
+      idx.insert(i);
+    }
   }
 
   if (m_nBins == 0 || nSpectra == 0) {
     throw std::runtime_error("Trying to save an empty workspace");
   }
-  std::ofstream file(filename, (appendToFile ? std::ios::app : std::ios::out));
 
-  if (file.bad()) {
-    g_log.error("Unable to create file: " + filename);
-    throw Exception::FileError("Unable to create file: ", filename);
-  }
-  // Set the number precision
-  if (prec != EMPTY_INT()) {
-    file.precision(prec);
-  }
-  if (scientific) {
-    file << std::scientific;
-  }
-  const std::vector<std::string> logList = getProperty("LogList");
-  if (!logList.empty()) {
-    writeFileHeader(logList, file);
-  }
-  if (writeHeader) {
-    file << comment << " X " << m_sep << " Y " << m_sep << " E";
-    if (m_writeDX) {
-      file << " " << m_sep << " DX";
-    }
-    file << '\n';
-  }
+  bool singleFile = false;
+  auto idxIt = idx.begin();
+  int i = 0;
+
+  Progress progress(this, 0.0, 1.0, idx.size());
+
   // populate the meta data map
   if (!m_metaData.empty()) {
     populateAllMetaData();
   }
-  if (idx.empty()) {
-    Progress progress(this, 0.0, 1.0, nSpectra);
-    for (int i = 0; i < nSpectra; i++) {
-      writeSpectrum(i, file);
-      progress.report();
-    }
-  } else {
-    Progress progress(this, 0.0, 1.0, idx.size());
-    for (int i : idx) {
-      writeSpectrum(i, file);
-      progress.report();
-    }
-  }
 
-  file.unsetf(std::ios_base::floatfield);
-  file.close();
+  do {
+    std::string currentFilename = filename;
+    size_t extPosition;
+    if (!singleFile) {
+      for (const std::string &ext : ASCII_EXTS) {
+        extPosition = filename.find(ext);
+        if (extPosition != std::string::npos)
+          break;
+      }
+      std::ostringstream ss;
+      ss << std::string(filename, 0, extPosition) << i << std::string(filename, extPosition);
+      currentFilename = ss.str();
+    }
+    std::ofstream file(currentFilename, (appendToFile ? std::ios::app : std::ios::out));
+
+    if (file.bad()) {
+      g_log.error("Unable to create file: " + currentFilename);
+      throw Exception::FileError("Unable to create file: ", currentFilename);
+    }
+    // Set the number precision
+    if (prec != EMPTY_INT()) {
+      file.precision(prec);
+    }
+    if (scientific) {
+      file << std::scientific;
+    }
+    const std::vector<std::string> logList = getProperty("LogList");
+    if (!logList.empty()) {
+      writeFileHeader(logList, file);
+    }
+    if (writeHeader) {
+      file << comment << " X " << m_sep << " Y " << m_sep << " E";
+      if (m_writeDX) {
+        file << " " << m_sep << " DX";
+      }
+      file << '\n';
+    }
+
+    // data writting
+    if (singleFile) {
+      while (idxIt != idx.end()) {
+        writeSpectrum((*idxIt), file);
+        progress.report();
+        idxIt++;
+      }
+    } else {
+      writeSpectrum((*idxIt), file);
+      progress.report();
+      idxIt++;
+      i++;
+    }
+
+    file.unsetf(std::ios_base::floatfield);
+    file.close();
+  } while (idxIt != idx.end());
 }
 
 /** Writes a spectrum to the file using a workspace index
