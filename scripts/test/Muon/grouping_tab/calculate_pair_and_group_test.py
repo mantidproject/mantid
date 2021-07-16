@@ -30,8 +30,8 @@ class TestCalculateMuonGroupPair(unittest.TestCase):
 
         params = _get_EstimateMuonAsymmetryFromCounts_parameters(context, group, run, periods)
 
-        self.assertEquals(params, {'StartX': 15.0,
-                                   'EndX': 0.0,
+        self.assertEquals(params, {'StartX': 0.0,
+                                   'EndX': 15.0,
                                    'OutputUnNormData': True})
 
     def test_parameters_correct_for_pairing_asymmetry(self):
