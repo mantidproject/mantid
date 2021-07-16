@@ -19,6 +19,7 @@ The way that algorithms are connected together is better described in the workfl
 - :ref:`algm-ConvertUnits`
 - :ref:`algm-DiffractionFocussing`
 - :ref:`algm-EditInstrumentGeometry`
+- :ref:`algm-LoadDetectorsGroupingFile` when grouping file is specified without a calibration file
 - :ref:`algm-LoadDiffCal`
 - :ref:`algm-AppendSpectra` only used when ``LowResRef`` is specified
 - :ref:`algm-LorentzCorrection`
