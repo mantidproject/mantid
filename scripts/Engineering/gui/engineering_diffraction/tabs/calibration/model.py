@@ -22,29 +22,25 @@ SOUTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_South_bank.prm"
 
 
 class CalibrationModel(object):
-    def create_new_calibration(self,
-                               vanadium_path,
-                               ceria_path,
-                               plot_output,
-                               instrument,
-                               rb_num=None,
-                               bank=None,
-                               calfile=None,
-                               spectrum_numbers=None):
+    def create_new_calibration(self, calibration, rb_num, plot_output):
         """
         Create a new calibration from a vanadium run and ceria run
         :param vanadium_path: Path to vanadium data file.
         :param ceria_path: Path to ceria (CeO2) data file
-        :param plot_output: Whether the output should be plotted.
-        :param instrument: The instrument the data relates to.
         :param rb_num: The RB number for file creation.
-        :param bank: Optional parameter to crop by bank
-        :param calfile: Optional parameter to crop using a custom calfile
-        :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
-        # vanadium corrections workspaces not used at this stage, but ensure they exist and create if not
-        vanadium_corrections.fetch_correction_workspaces(vanadium_path, instrument, rb_num=rb_num)
+        ceria_path = calibration.get_sample()
+        van_path = calibration.get_vanadium()
+        inst = calibration.get_instrument()
+
+        # load grouping workspace (creates if doesn't exist - tries to read from xml for banks)
+        group_ws = calibration.get_group_ws()
+        # load ceria data
         ceria_workspace = path_handling.load_workspace(ceria_path)
+
+        # load or create vanadium corrections workspaces
+        vanadium_corrections.fetch_correction_workspaces(van_path, inst, rb_num)
+        # load whole instrument calibration
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         try:
@@ -52,52 +48,40 @@ class CalibrationModel(object):
         except ValueError:
             logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
             return
-        cal_params, ceria_raw, grp_ws = self.run_calibration(ceria_workspace,
-                                                             bank,
-                                                             calfile,
-                                                             spectrum_numbers,
-                                                             full_calib)
+
+        # run PDCalibraiton
+        cal_params, ceria_raw, grp_ws = self.run_calibration(ceria_workspace, group_ws, full_calib)
+
+        # surely do this right at end?
         if plot_output:
-            plot_dicts = list()
-            if len(cal_params) == 1:
-                if calfile:
-                    bank_name = "Custom"
-                elif spectrum_numbers:
-                    bank_name = "Cropped"
-                else:
-                    bank_name = bank
-                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary(bank_name))
-                EnggUtils.plot_tof_fit(plot_dicts, [bank_name])
-            else:
-                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_1"))
-                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_2"))
-                EnggUtils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
+            self.plot_output(cal_params, calibration.get_group_suffix())
+
+        # write diff constants to params table
         difa = [row['difa'] for row in cal_params]
         difc = [row['difc'] for row in cal_params]
         tzero = [row['tzero'] for row in cal_params]
+        diff_consts = []
+        for i in range(len(difc)):
+            diff_consts.append([i, difc[i], difa[i], tzero[i]])
+        self.update_calibration_params_table(diff_consts)
 
+        # extract Back-to-Back Exponential params for .prm before deleting raw data
         bk2bk_params = self.extract_b2b_params(ceria_raw)
         DeleteWorkspace(ceria_raw)
 
-        params_table = []
-
-        for i in range(len(difc)):
-            params_table.append([i, difc[i], difa[i], tzero[i]])
-        self.update_calibration_params_table(params_table)
-
-        calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
-        if calfile:
-            EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument, calfile=calfile)
-        elif spectrum_numbers:
-            EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument,
-                                              spec_nos=spectrum_numbers)
-        self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path, instrument,
-                                 bank, spectrum_numbers, calfile)
+        # save output
         if rb_num:
-            user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
-                                       "Calibration", "")
-            self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
-                                     instrument, bank, spectrum_numbers, calfile)
+            calib_dir = path.join(path_handling.get_output_path(), "User", rb_num, "Calibration", "")
+        else:
+            calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
+
+        # save grouping ws if custom or cropped
+        if not calibration.group.banks:
+            self.calibration.save_grouping_workspace(calib_dir)
+
+        # get diff consts from table?
+        self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, van_path, inst,
+                                 calibration)
 
     @staticmethod
     def extract_b2b_params(workspace):
@@ -113,21 +97,39 @@ class CalibrationModel(object):
 
         return [params_north, params_south]
 
-    def load_existing_calibration_files(self, file_path):
-        if not path.exists(file_path):
-            msg = "Could not open GSAS calibration file: " + file_path
+    def plot_output(self, cal_params, group_name):
+        """
+        Don't like the way EnggUtils.generate_tof_fit_dictionary relies on hard-coding of ws names
+        If EnginX script deosn't use this func I'd be tempted to move into model
+        """
+        plot_dicts = list()
+        if len(cal_params) == 1:
+            plot_dicts.append(EnggUtils.generate_tof_fit_dictionary(group_name))
+            EnggUtils.plot_tof_fit(plot_dicts, [group_name])
+        else:
+            # want to get rid of special code like this for both banks
+            plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_1"))
+            plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_2"))
+            EnggUtils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
+
+    def load_existing_calibration_files(self, calibration):
+        # load prm
+        prm_filepath = calibration.prm_filepath
+        if not path.exists(prm_filepath):
+            msg = f"Could not open GSAS calibration file: {prm_filepath}"
             logger.warning(msg)
             return
         try:
-            instrument, van_no, ceria_no, params_table = self.get_info_from_file(file_path)
-            self.update_calibration_params_table(params_table)
+            # read diff constants from prm
+            diff_consts = self.read_diff_constants_from_prm(prm_filepath)
+            self.update_calibration_params_table(diff_consts)
         except RuntimeError:
-            logger.error("Invalid file selected: ", file_path)
+            logger.error(f"Invalid file selected: {prm_filepath}")
             return
-        vanadium_corrections.fetch_correction_workspaces(instrument+van_no, instrument, is_load=True)
-        bank = EnggUtils.load_relevant_calibration_files(file_path)
-        grp_ws_name, roi_text = EnggUtils.load_custom_grouping_workspace(file_path)
-        return instrument, van_no, ceria_no, grp_ws_name, roi_text, bank
+        # load vanadium workspaces
+        inst = calibration.get_instrument()
+        van_fname = inst + calibration.get_vanadium()
+        vanadium_corrections.fetch_correction_workspaces(van_fname, inst, is_load=True)
 
     @staticmethod
     def update_calibration_params_table(params_table):
@@ -241,7 +243,7 @@ class CalibrationModel(object):
         return cal_params, ceria_raw, grp_ws
 
     def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
-                            instrument, bank, spectrum_numbers, calfile):
+                            instrument, calibration):
         """
         Create output files from the algorithms in the specified directory
         :param calibration_dir: The directory to save the files into.
@@ -280,62 +282,41 @@ class CalibrationModel(object):
 
         if not path.exists(calibration_dir):
             makedirs(calibration_dir)
-
-        if not (bank or spectrum_numbers or calfile):
-            # both banks
-            generate_prm_output_file(difa, difc, tzero, "all", kwargs)
-            north_kwargs()
-            generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "north", kwargs)
-            save_pdcal_output_file("bank_1", "north")
-            south_kwargs()
-            generate_prm_output_file([difa[1]], [difc[1]], [tzero[1]], "south", kwargs)
-            save_pdcal_output_file("bank_2", "south")
-        elif bank == "1":
-            north_kwargs()
-            generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "north", kwargs)
-            save_pdcal_output_file("bank_1", "north")
-        elif bank == "2":
-            south_kwargs()
-            generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "south", kwargs)
-            save_pdcal_output_file("bank_2", "south")
-        elif spectrum_numbers:  # Custom crops use the north bank template
-            north_kwargs()
-            generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "Cropped", kwargs)
-            save_pdcal_output_file("Cropped", "Cropped")
-        else:  # custom calfile
+        prm_filepath = calibration.generate_output_file_name()
+        if calibration.group.banks:
+            # also want to do a separate North and South when both banks selected
+            for ibank, bank in enumerate(self.group.banks):
+                generate_prm_output_file([difa[ibank]], [difc[ibank]], [tzero[ibank]], "north", kwargs)
+                EnggUtils.write_ENGINX_GSAS_iparam_file(prm_filepath, [difa[ibank]], [difc[ibank]], [tzero[ibank]],
+                                                        bk2bk_params,      **kwargs_to_pass)
+                save_pdcal_output_file(f"bank_{bank}", "north")
+        else:
+            # CUSTOM or CROPPED
             north_kwargs()
             generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "Custom", kwargs)
             save_pdcal_output_file("Custom", "Custom")
         logger.notice(f"\n\nCalibration files saved to: \"{calibration_dir}\"\n\n")
 
     @staticmethod
-    def get_info_from_file(file_path):
+    def read_diff_constants_from_prm(file_path):
         # TODO: Find a way to reliably get the instrument from the file without using the filename.
-        instrument = file_path.split("/")[-1].split("_", 1)[0]
-        # Get run numbers from file.
-        run_numbers = ""
-        params_table = []
+        diff_consts = []  # one list per component (e.g. bank)
         with open(file_path) as f:
             for line in f:
-                if "INS    CALIB" in line:
-                    run_numbers = line
                 if "ICONS" in line:
                     # If formatted correctly the line should be in the format INS bank ICONS difc difa tzero
                     elements = line.split()
                     bank = elements[1]
-                    params_table.append(
+                    diff_consts.append(
                         [int(bank) - 1,
                          float(elements[3]),
                          float(elements[4]),
                          float(elements[5])])
 
-        if run_numbers == "":
+        if not diff_consts:
             raise RuntimeError("Invalid file format.")
 
-        words = run_numbers.split()
-        ceria_no = words[2]  # Run numbers are stored as the 3rd and 4th word in this line.
-        van_no = words[3]
-        return instrument, van_no, ceria_no, params_table
+        return diff_consts
 
     @staticmethod
     def _generate_table_workspace_name(bank_num):

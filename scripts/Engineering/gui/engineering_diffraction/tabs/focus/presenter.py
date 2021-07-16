@@ -124,5 +124,5 @@ class FocusPresenter(object):
         :param calibration: The new current calibration.
         """
         self.current_calibration = calibration
-        region_text = calibration.get_roi_text()
+        region_text = calibration.get_group_description()
         self.view.set_region_display_text(region_text)

@@ -39,7 +39,6 @@ class GroupingInfo:
     def __init__(self, group=None):
         self.group = group
         self.group_ws = None
-        self.description = None
         self.prm_filepath = None
         self.cal_filepath = None
         self.spectra_list = None
@@ -57,6 +56,13 @@ class GroupingInfo:
                                     GROUP.CUSTOM: "Custom_calfile_grouping", GROUP.TEXTURE: "Texture"}
         self._group_suffix = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2",
                               GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}
+
+    def clear(self):
+        self.group = None
+        self.group_ws = None
+        self.prm_filepath = None
+        self.cal_filepath = None
+        self.spectra_list = None
 
     # getters
     def get_group_suffix(self):
@@ -82,7 +88,14 @@ class GroupingInfo:
         self.group = group
 
     def set_group_from_prm_fname(self, file_path):
+        """
+        Determine the region of interest from the .prm calibration file that is being loaded
+        :param file_path: Path of the .prm file being loaded
+        :return: [instrument, van_run, ceria_run]
+        """
         basepath, fname = path.split(file_path)
+        # fname has form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
+        # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom"
         fname_words = fname.split('_')
         suffix = fname_words[-1]
         if any(grp.value == suffix for grp in GROUP):
@@ -90,9 +103,11 @@ class GroupingInfo:
             self.prm_filepath = file_path
         else:
             raise ValueError("Group not set: region of interest not recognised from .prm file name")
+        return fname_words[0:3]
 
     # functional
     def load_relevant_calibration_files(self, output_prefix="engggui"):
+        """Output cal table from second step (e.g. bank-wise) run of PDCalibration"""
         basepath, fname = path.split(self.prm_filepath)
         fname_words = fname.split('_')
         prefix = '_'.join(fname_words[0:3])
@@ -110,8 +125,6 @@ class GroupingInfo:
         """
         Determine the grouping workspace that corresponds to the .prm calibration file being loaded, and if this is a
         non-bank based region, load and return the saved grouping workspace corresponding to the calibration being loaded.
-        :param file_path: Path to the .prm file being loaded
-        :return: Name of the grouping workspace IF custom, and description of roi for use as display text on the Focus tab
         """
         if not self.group.banks:
             # no need to load grp ws for bank grouping
@@ -131,7 +144,7 @@ class GroupingInfo:
 
     def generate_output_file_name(self, vanadium_path, ceria_path, instrument, ext='.prm'):
         """
-        TO BE CALLED FROM CALIBRATIONINFO
+        PRM?
         Generate an output filename in the form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
         :param vanadium_path: Path to vanadium data file
         :param ceria_path: Path to ceria data file

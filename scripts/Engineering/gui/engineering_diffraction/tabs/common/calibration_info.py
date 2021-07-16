@@ -4,21 +4,23 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import Engineering.EnggUtils as EnggUtils
 
 
-class CalibrationInfo(object):
+class CalibrationInfo(EnggUtils.GroupingInfo):
     """
     Keeps track of the parameters that went into a calibration created by the engineering diffraction GUI.
     """
-    def __init__(self, vanadium_path=None, sample_path=None, instrument=None, grouping_ws=None, roi_text: str = ""):
+    def __init__(self, vanadium_path=None, sample_path=None, instrument=None):
+        super().__init__()
         self.vanadium_path = vanadium_path
         self.sample_path = sample_path
         self.instrument = instrument
-        self.grouping_ws_name = grouping_ws
-        self.roi_text = roi_text
-        self.bank = None
+        self._prm_templates = {EnggUtils.GROUP.NORTH: "template_ENGINX_241391_236516_North_bank.prm",
+                               EnggUtils.GROUP.SOUTH: "template_ENGINX_241391_236516_South_bank.prm",
+                               EnggUtils.GROUP.BOTH: "template_ENGINX_241391_236516_South_bank.prm"}
 
-    def set_calibration(self, vanadium_path, sample_path, instrument):
+    def set_calibration_paths(self, vanadium_path, sample_path, instrument):
         """
         Set the values of the calibration. requires a complete set of calibration info to be supplied.
         :param vanadium_path: Path to the vanadium data file used in the calibration.
@@ -29,76 +31,16 @@ class CalibrationInfo(object):
         self.sample_path = sample_path
         self.instrument = instrument
 
-    def set_roi_info_load(self, banks: list, grp_ws: str, roi_text: str) -> None:
-        """
-        Set the region of interest fields, used in the event that a calibration is being loaded rather than created
-        :param banks: list of banks defining chosen roi, None if Custom or Cropped region
-        :param grp_ws: Name of the grouping workspace
-        :param roi_text: Text to signify this region of interest to be displayed on the Focus tab
-        """
-        self.grouping_ws_name = grp_ws
-        self.roi_text = roi_text
-        self.bank = banks
+    def set_calibration_from_prm_fname(self, file_path):
+        inst, van, ceria = self.set_group_from_prm_fname(file_path)
+        self.set_calibration_paths(van, ceria, inst)
 
-    def set_roi_info(self, bank: str = None, calfile: str = None, spec_nos=None) -> None:
-        """
-        Set the region of interest fields using the inputs to the calibration that has just been run
-        :param bank: Single string bank to identify North (1) or South (2) bank. If None & all other params are None,
-        signifies that both banks are to be treated as a region of interest
-        :param calfile: Custom calfile that can be used to define a region of interest. Can be None
-        :param spec_nos: Custom spectrum number list that can be used to define a region of interest. Can be None
-        """
-        if bank == '1':
-            self.grouping_ws_name = "NorthBank_grouping"
-            self.bank = ['1']
-            self.roi_text = "North Bank"
-        elif bank == '2':
-            self.grouping_ws_name = "SouthBank_grouping"
-            self.roi_text = "South Bank"
-            self.bank = ['2']
-        elif calfile:
-            self.grouping_ws_name = "Custom_calfile_grouping"
-            self.roi_text = "Custom CalFile"
-            self.bank = None
-        elif spec_nos:
-            self.grouping_ws_name = "Custom_spectra_grouping"
-            self.roi_text = "Custom spectra cropping"
-            self.bank = None
-        elif bank is None:
-            self.grouping_ws_name = None
-            self.roi_text = "North and South Banks"
-            self.bank = ['1', '2']
+    def generate_output_file_name(self):
+        return super().generate_output_file_name(self.get_vanadium(),self.get_sample(),self.get_instrument())
 
-    def create_focus_roi_dictionary(self) -> dict:
-        """
-        With the stored region of interest data, create a dictionary for use in the focussing workflow to define the
-        regions to focus and their corresponding grouping workspace
-        :return: dict mapping region_name -> grp_ws_name
-        """
-        regions = dict()
-        if self.bank:
-            # focus over one or both banks
-            for bank in self.bank:
-                if bank == '1':
-                    roi = "bank_1"
-                    grp_ws = "NorthBank_grouping"
-                elif bank == '2':
-                    roi = "bank_2"
-                    grp_ws = "SouthBank_grouping"
-                else:
-                    raise ValueError
-                regions[roi] = grp_ws
-        elif self.grouping_ws_name:
-            if "calfile" in self.grouping_ws_name:
-                regions["Custom"] = self.grouping_ws_name
-            elif "spectra" in self.grouping_ws_name:
-                regions["Cropped"] = self.grouping_ws_name
-        else:
-            raise ValueError("CalibrationInfo object contains no region-of-interest data")
-        return regions
-
-    def get_roi_text(self):
-        return self.roi_text
+    # getters
+    def get_prm_template_file(self):
+        return self._prm_templates[self.group]
 
     def get_vanadium(self):
         return self.vanadium_path
@@ -110,6 +52,7 @@ class CalibrationInfo(object):
         return self.instrument
 
     def clear(self):
+        super().clear()
         self.vanadium_path = None
         self.sample_path = None
         self.instrument = None
