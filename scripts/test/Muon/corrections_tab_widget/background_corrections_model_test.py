@@ -34,6 +34,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.end_xs = [30.0] * 4
         self.a0s = [0.0] * 4
         self.a0_errors = [0.0] * 4
+        self.statuses = ["No background correction"] * 4
 
     def tearDown(self):
         self.model = None
@@ -70,7 +71,11 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
         self.assertEqual(self.model._corrections_context.show_all_runs, show_all_runs)
 
-    def test_that_populate_background_corrections_data_will_populate_default_background_correction_data(self):
+    @mock.patch("Muon.GUI.Common.corrections_tab_widget.background_corrections_model.retrieve_ws")
+    def test_that_populate_background_corrections_data_will_populate_default_background_correction_data(self,
+                                                                                                        mock_retrieve_ws):
+        workspace = CreateSampleWorkspace()
+        mock_retrieve_ws.return_value = workspace
         self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 30.0))
         self._populate_background_corrections_data()
 
@@ -81,7 +86,11 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
             self.assertEqual(correction_data.flat_background.getParameterValue("A0"), 0.0)
             self.assertEqual(correction_data.flat_background.getError("A0"), 0.0)
 
-    def test_that_set_start_x_will_set_the_start_x_in_the_background_correction_data_for_a_specific_domain(self):
+    @mock.patch("Muon.GUI.Common.corrections_tab_widget.background_corrections_model.retrieve_ws")
+    def test_that_set_start_x_will_set_the_start_x_in_the_background_correction_data_for_a_specific_domain(self,
+                                                                                                           mock_retrieve_ws):
+        workspace = CreateSampleWorkspace()
+        mock_retrieve_ws.return_value = workspace
         run = "84447"
 
         self._populate_background_corrections_data()
@@ -96,7 +105,11 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.assertEqual(self.model.start_x(run, "top"), 7.0)
         self.assertEqual(self.model.start_x(run, "bottom"), 8.0)
 
-    def test_that_set_end_x_will_set_the_end_x_in_the_background_correction_data_for_a_specific_domain(self):
+    @mock.patch("Muon.GUI.Common.corrections_tab_widget.background_corrections_model.retrieve_ws")
+    def test_that_set_end_x_will_set_the_end_x_in_the_background_correction_data_for_a_specific_domain(self,
+                                                                                                       mock_retrieve_ws):
+        workspace = CreateSampleWorkspace()
+        mock_retrieve_ws.return_value = workspace
         run = "84447"
 
         self._populate_background_corrections_data()
@@ -111,12 +124,16 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.assertEqual(self.model.end_x(run, "top"), 7.0)
         self.assertEqual(self.model.end_x(run, "bottom"), 8.0)
 
-    def test_that_selected_correction_data_returns_all_correction_data_if_all_runs_and_groups_are_selected(self):
+    @mock.patch("Muon.GUI.Common.corrections_tab_widget.background_corrections_model.retrieve_ws")
+    def test_that_selected_correction_data_returns_all_correction_data_if_all_runs_and_groups_are_selected(self,
+                                                                                                           mock_retrieve_ws):
+        workspace = CreateSampleWorkspace()
+        mock_retrieve_ws.return_value = workspace
         self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 30.0))
         self.model.set_show_all_runs(True)
 
         self._populate_background_corrections_data()
-        runs, groups, start_xs, end_xs, a0s, a0_errors = self.model.selected_correction_data()
+        runs, groups, start_xs, end_xs, a0s, a0_errors, statuses = self.model.selected_correction_data()
 
         self.assertEqual(runs, self.runs)
         self.assertEqual(groups, self.groups)
@@ -124,8 +141,13 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.assertEqual(end_xs, self.end_xs)
         self.assertEqual(a0s, self.a0s)
         self.assertEqual(a0_errors, self.a0_errors)
+        self.assertEqual(statuses, self.statuses)
 
-    def test_that_selected_correction_data_returns_all_correction_data_for_a_specific_run_and_group(self):
+    @mock.patch("Muon.GUI.Common.corrections_tab_widget.background_corrections_model.retrieve_ws")
+    def test_that_selected_correction_data_returns_all_correction_data_for_a_specific_run_and_group(self,
+                                                                                                    mock_retrieve_ws):
+        workspace = CreateSampleWorkspace()
+        mock_retrieve_ws.return_value = workspace
         run = "84447"
         group = "bwd"
         self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 30.0))
@@ -133,7 +155,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.corrections_model.set_current_run_string(run)
 
         self._populate_background_corrections_data()
-        runs, groups, start_xs, end_xs, a0s, a0_errors = self.model.selected_correction_data()
+        runs, groups, start_xs, end_xs, a0s, a0_errors, statuses = self.model.selected_correction_data()
 
         self.assertEqual(runs, [run])
         self.assertEqual(groups, [group])
@@ -141,6 +163,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.assertEqual(end_xs, [30.0])
         self.assertEqual(a0s, [0.0])
         self.assertEqual(a0_errors, [0.0])
+        self.assertEqual(statuses, ["No background correction"])
 
     def test_that_x_limits_of_workspace_will_return_the_x_limits_of_the_workspace(self):
         run, group = "84447", "top"
