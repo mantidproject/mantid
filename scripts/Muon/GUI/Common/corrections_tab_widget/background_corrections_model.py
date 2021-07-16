@@ -147,16 +147,19 @@ class BackgroundCorrectionsModel:
     def _run_background_correction(self, correction_data: BackgroundCorrectionData) -> None:
         """Calculates the background for some data using a Fit."""
         params = self._get_parameters_for_background_fit(correction_data)
-        function, _, chi_squared = run_Fit(params, AlgorithmManager.create("Fit"))
+        function, fit_status, chi_squared = run_Fit(params, AlgorithmManager.create("Fit"))
 
-        self._handle_background_fit_output(correction_data, function, chi_squared)
+        self._handle_background_fit_output(correction_data, function, fit_status, chi_squared)
 
     def _handle_background_fit_output(self, correction_data: BackgroundCorrectionData, function: IFunction,
-                                      chi_squared: float) -> None:
+                                      fit_status: str, chi_squared: float) -> None:
         """Handles the output of the background fit."""
         if chi_squared > MAX_ACCEPTABLE_CHI_SQUARED:
             correction_data.setup_functions()
             correction_data.status = f"Correction skipped - chi squared is poor ({chi_squared:.3f})."
+        elif "Failed to converge" in fit_status:
+            correction_data.setup_functions()
+            correction_data.status = f"Correction skipped - {fit_status}."
         else:
             if self._corrections_context.selected_function == FLAT_BACKGROUND:
                 correction_data.flat_background = function.clone()
