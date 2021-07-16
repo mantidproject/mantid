@@ -60,3 +60,5 @@ Compile and Build using Visual Studio
 ----------------------------------------------------------
 
 * Open visual studio with ``visualstudio.bat`` then click build.
+* It's not possible to compile in Debug on Windows with conda libraries, however Release, and RelWithDebInfo for Debugging will compile fine.
+* Once in visual studio, the correct target to use as a startup project in visual studio is ``workbench``, not ``MantidWorkbench``. You can then press F5 to start workbench.
