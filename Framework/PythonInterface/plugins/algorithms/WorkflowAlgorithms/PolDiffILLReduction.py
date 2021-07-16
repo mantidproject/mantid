@@ -107,7 +107,9 @@ class PolDiffILLReduction(PythonAlgorithm):
         if process == 'Quartz' and self.getProperty('Transmission').isDefault:
             issues['Transmission'] = 'Quartz transmission is mandatory for polarisation correction calculation.'
 
-        if process == 'Sample' or process == 'Vanadium':
+        if ((process == 'Sample' or process == 'Vanadium')
+                and (self.getPropertyValue('SelfAttenuationMethod') not in ['None', 'Transmission']
+                     or self.getProperty('AbsoluteNormalisation').value)):
             issues.update(self._validate_self_attenuation_arguments())
 
         return issues
@@ -959,8 +961,10 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if pol_eff_ws:
                     progress.report('Applying polarisation corrections')
                     self._apply_polarisation_corrections(ws, pol_eff_ws)
-                self._read_experiment_properties(ws)
                 empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
+                if self.getPropertyValue('SelfAttenuationMethod') != 'Transmission' \
+                        or self.getProperty('AbsoluteNormalisation').value:
+                    self._read_experiment_properties(ws)
                 if self.getPropertyValue('SelfAttenuationMethod') != 'None' and empty_ws != '':
                     progress.report('Applying self-attenuation correction')
                     self._apply_self_attenuation_correction(ws, empty_ws)
