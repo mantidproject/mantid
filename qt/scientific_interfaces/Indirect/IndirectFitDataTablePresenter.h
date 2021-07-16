@@ -20,7 +20,7 @@ namespace CustomInterfaces {
 namespace IDA {
 using namespace MantidWidgets;
 
-using DataPositionType = IndexCollectionType<TableDatasetIndex, FitDomainIndex>;
+using DataPositionType = IndexCollectionType<WorkspaceID, FitDomainIndex>;
 
 /**
   Presenter for a table of indirect fitting data.
@@ -39,9 +39,8 @@ public slots:
   void removeSelectedData();
 
 signals:
-  void startXChanged(double /*_t1*/, TableDatasetIndex /*_t2*/, WorkspaceIndex /*_t3*/);
-  void endXChanged(double /*_t1*/, TableDatasetIndex /*_t2*/, WorkspaceIndex /*_t3*/);
-  void excludeRegionChanged(const std::string & /*_t1*/, TableDatasetIndex /*_t2*/, WorkspaceIndex /*_t3*/);
+  void startXChanged(double /*_t1*/, WorkspaceID /*_t2*/, WorkspaceIndex /*_t3*/);
+  void endXChanged(double /*_t1*/, WorkspaceID /*_t2*/, WorkspaceIndex /*_t3*/);
 
 private slots:
   void handleCellChanged(int row, int column);

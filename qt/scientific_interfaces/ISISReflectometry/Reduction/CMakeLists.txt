@@ -22,8 +22,8 @@ set(REDUCTION_SRC_FILES
     PolarizationCorrections.cpp
     RangeInLambda.cpp
     RunsTable.cpp
-    PerThetaDefaults.cpp
-    ValidatePerThetaDefaults.cpp)
+    LookupRow.cpp
+    ValidateLookupRow.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
@@ -43,7 +43,7 @@ set(REDUCTION_INC_FILES
     ProcessingInstructions.h
     TransmissionRunPair.h
     TransmissionStitchOptions.h
-    ValidatePerThetaDefaults.h
+    ValidateLookupRow.h
     AnalysisMode.h
     Batch.h
     DetectorCorrections.h
@@ -56,7 +56,7 @@ set(REDUCTION_INC_FILES
     RangeInLambda.h
     ReductionType.h
     RunsTable.h
-    PerThetaDefaults.h
+    LookupRow.h
     SummationType.h)
 
 prepend(REDUCTION_SRC_FILES Reduction ${REDUCTION_SRC_FILES})

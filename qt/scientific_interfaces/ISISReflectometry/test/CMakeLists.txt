@@ -28,11 +28,11 @@ set(TEST_FILES
   Common/EncoderTest.h
   Common/PlotterTestQt5.h
   Experiment/ExperimentPresenterTest.h
-  Experiment/PerThetaDefaultsTableValidatorTest.h
+  Experiment/LookupTableValidatorTest.h
   Experiment/ExperimentOptionDefaultsTest.h
   Reduction/ReductionJobsMergeTest.h
   Reduction/ParseReflectometryStringsTest.h
-  Reduction/ValidatePerThetaDefaultsTest.h
+  Reduction/ValidateLookupRowTest.h
   Reduction/GroupTest.h
   Reduction/ValidateRowTest.h
 )

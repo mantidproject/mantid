@@ -13,6 +13,7 @@ import mantid.simpleapi
 import numpy as np
 import os
 from functools import wraps
+import warnings
 
 VAN_SAMPLE_DENSITY = 0.0721
 _EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
@@ -530,18 +531,25 @@ def create_absorption_input(   # noqa: C901
 
     if geometry is not None:
         if "Height" not in geometry or not geometry['Height']:
+            invalidUnit = False
             # Check units - SetSample expects cm
             if absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "mm":
                 conversion = 0.1
             elif absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "cm":
                 conversion = 1.0
             else:
-                raise ValueError(
-                    "HeightInContainerUnits expects cm or mm; specified units not recognized: ",
-                    absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue())
+                unitVal = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue()
+                warningMsg1 = "HeightInContainerUnits expects cm or mm;"
+                warningMsg2 = " specified units not recognized: {:s};".format(unitVal)
+                warningMsg3 = " we will reply on user input for sample density information."
+                warnings.warn(warningMsg1 + warningMsg2 + warningMsg3)
+                invalidUnit = True
 
-            geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue(
-            ) * conversion
+            if not invalidUnit:
+                geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue(
+                ) * conversion
+            else:
+                geometry = {}
 
     # Set container if not set
     if environment is not None:

@@ -63,7 +63,7 @@ public:
     assertNoTopLevelWidgets();
 
     m_wsName = "Name";
-    m_wsIndex = MantidQt::MantidWidgets::WorkspaceIndex(0);
+    m_wsIndex = WorkspaceIndex(0);
     m_workspace = create2DWorkspace(3, 3);
     m_workspaceGroup = createWorkspaceGroup(3, 3, 3, "GroupName");
 
@@ -266,7 +266,7 @@ public:
 
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
     TS_ASSERT_EQUALS(workspaceIndices.size(), 1);
-    TS_ASSERT_EQUALS(workspaceIndices[0], MantidQt::MantidWidgets::WorkspaceIndex(1));
+    TS_ASSERT_EQUALS(workspaceIndices[0], WorkspaceIndex(1));
   }
 
   void
@@ -285,7 +285,7 @@ public:
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
     TS_ASSERT_EQUALS(workspaceIndices.size(), 3);
     for (auto i = 0u; i < workspaceIndices.size(); ++i)
-      TS_ASSERT_EQUALS(workspaceIndices[i], MantidQt::MantidWidgets::WorkspaceIndex(i));
+      TS_ASSERT_EQUALS(workspaceIndices[i], WorkspaceIndex(i));
   }
 
   void test_that_resetSelection_will_reset_the_selected_rows_value_to_its_previous_value() {
@@ -381,7 +381,7 @@ private:
   }
 
   std::string m_wsName;
-  MantidQt::MantidWidgets::WorkspaceIndex m_wsIndex;
+  WorkspaceIndex m_wsIndex;
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   Mantid::API::WorkspaceGroup_sptr m_workspaceGroup;
   Mantid::API::CompositeFunction_sptr m_function;

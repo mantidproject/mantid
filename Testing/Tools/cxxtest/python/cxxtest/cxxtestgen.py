@@ -265,6 +265,7 @@ def writePreamble( output ):
     output.write("#include <cxxtest/TestRunner.h>\n")
     output.write("#include <cxxtest/RealDescriptions.h>\n")
     output.write("#include <cxxtest/TestMain.h>\n")
+    output.write("#include <gmock/gmock.h>\n")
     if options.runner:
         output.write("#include <cxxtest/%s.h>\n" % options.runner)
     if options.gui:
@@ -280,6 +281,8 @@ def writeMain(output):
     output.write('int main( int argc, char *argv[] ) {\n')
 
     # Build the filename to output, using the suitename if specified
+    output.write('    ::testing::GTEST_FLAG(throw_on_failure) = true;\n')
+    output.write('    ::testing::InitGoogleMock(&argc, argv);\n')
     output.write('    std::string output_filename = "%s";  \n' % (options.xunit_file))
     output.write('    // Look for an argument giving the suite name (not starting with -) and change the output filename to use it.  \n ')
     output.write('    if (argc > 1) { \n ')

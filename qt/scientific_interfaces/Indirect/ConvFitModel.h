@@ -12,8 +12,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-using ResolutionCollectionType = IndexCollectionType<TableDatasetIndex, std::weak_ptr<Mantid::API::MatrixWorkspace>>;
-using ExtendedResolutionType = IndexCollectionType<TableDatasetIndex, std::string>;
+using ResolutionCollectionType = IndexCollectionType<WorkspaceID, std::weak_ptr<Mantid::API::MatrixWorkspace>>;
+using ExtendedResolutionType = IndexCollectionType<WorkspaceID, std::string>;
 
 class MANTIDQT_INDIRECT_DLL ConvFitModel : public IndirectFittingModel {
 public:
@@ -21,13 +21,13 @@ public:
   ~ConvFitModel() override;
 
   Mantid::API::MultiDomainFunction_sptr getFitFunction() const override;
-  boost::optional<double> getInstrumentResolution(TableDatasetIndex dataIndex) const;
-  std::size_t getNumberHistograms(TableDatasetIndex index) const;
+  boost::optional<double> getInstrumentResolution(WorkspaceID workspaceID) const;
+  std::size_t getNumberHistograms(WorkspaceID workspaceID) const;
 
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
   void setTemperature(const boost::optional<double> &temperature);
-  void removeWorkspace(TableDatasetIndex index) override;
-  void setResolution(const std::string &name, TableDatasetIndex index);
+  void removeWorkspace(WorkspaceID workspaceID) override;
+  void setResolution(const std::string &name, WorkspaceID workspaceID);
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
@@ -37,7 +37,7 @@ private:
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
   Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const override;
-  std::unordered_map<std::string, ParameterValue> createDefaultParameters(TableDatasetIndex index) const override;
+  std::unordered_map<std::string, ParameterValue> createDefaultParameters(WorkspaceID workspaceID) const override;
   std::unordered_map<std::string, std::string> mapDefaultParameterNames() const override;
   void addSampleLogs();
 

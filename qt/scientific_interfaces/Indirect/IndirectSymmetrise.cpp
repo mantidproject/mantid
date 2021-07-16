@@ -18,7 +18,7 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectSymmetrise");
-}
+} // namespace
 
 namespace MantidQt {
 using MantidWidgets::AxisID;
@@ -27,7 +27,7 @@ namespace CustomInterfaces {
 /** Constructor
  */
 IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent) {
+    : IndirectDataReductionTab(idrUI, parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
@@ -296,8 +296,8 @@ void IndirectSymmetrise::updateMiniPlots() {
   QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
   int spectrumNumber = static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"]));
 
-  Mantid::API::MatrixWorkspace_sptr input = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName.toStdString()));
+  Mantid::API::MatrixWorkspace_sptr input =
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(m_adsInstance.retrieve(workspaceName.toStdString()));
 
   // Plot the spectrum chosen by the user
   size_t spectrumIndex = input->getIndexFromSpectrumNumber(spectrumNumber);

@@ -87,7 +87,6 @@ public:
   void removeBackground();
   bool hasBackground() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
-  void setResolution(std::string const &name, TableDatasetIndex const &index);
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void setQValues(const std::vector<double> &qValues);
 
@@ -146,8 +145,6 @@ private:
   QList<ParamID> m_globals;
   FitSubType m_fitSubType;
   BackgroundSubType m_backgroundSubtype;
-  std::string m_resolutionName;
-  TableDatasetIndex m_resolutionIndex;
   std::vector<std::pair<std::string, size_t>> m_fitResolutions;
   std::vector<double> m_qValues;
   bool m_isQDependentFunction = false;

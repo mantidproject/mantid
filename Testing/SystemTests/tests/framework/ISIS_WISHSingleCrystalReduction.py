@@ -38,7 +38,7 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
     def cleanup(self):
         ADS.clear()
         try:
-            os.path.remove(self._peaks_file)
+            os.remove(self._peaks_file)
         except:
             pass
 
@@ -162,14 +162,10 @@ class WISHProcessVanadiumForNormalisationTest(MantidSystemTest):
         # correct Vanadium run for absorption
         van = Divide(LHSWorkspace=van, RHSWorkspace=abs_cor, OutputWorkspace=van)
         # smooth data
-        SmoothNeighbours(InputWorkspace=van, OutputWorkspace=van, Radius=3)
+        SmoothNeighbours(InputWorkspace=van, OutputWorkspace=van, Radius=3, NumberOfNeighbours=6)
         SmoothData(InputWorkspace=van, OutputWorkspace=van, NPoints=300)
 
     def validate(self):
-        # SmoothNeighbours seems to apply different grouping for spectrum with workspace index 19397 on mac
-        # the increased tolerance and disabling of spectra mapping is temporary until this issue can be fixed
-        self.tolerance = 0.0012
-        self.disableChecking.append('SpectraMap')
         return "van", "WISH19612_vana_bank1_SXProcessed.nxs"
 
 
@@ -215,7 +211,7 @@ class WISHIntegrateSatellitePeaksTest(MantidSystemTest):
     def cleanup(self):
         ADS.clear()
         try:
-            os.path.remove(self._peaks_file)
+            os.remove(self._filepath)
         except:
             pass
 

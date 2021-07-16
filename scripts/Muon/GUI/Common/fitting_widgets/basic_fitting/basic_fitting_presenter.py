@@ -9,11 +9,11 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, Gener
 from mantidqt.widgets.fitscriptgenerator import (FittingMode, FitScriptGeneratorModel, FitScriptGeneratorPresenter,
                                                  FitScriptGeneratorView)
 
-from Muon.GUI.Common.contexts.plotting_context import PlotMode
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from Muon.GUI.Common.thread_model import ThreadModel
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
+from Muon.GUI.Common.utilities.workspace_data_utils import check_start_x_is_valid, check_end_x_is_valid
 
 
 class BasicFittingPresenter:
@@ -27,9 +27,6 @@ class BasicFittingPresenter:
         self.model = model
 
         self.initialize_model_options()
-
-        # This prevents plotting the wrong data when selecting different group/pairs on the grouping tab
-        self._update_plot = True
 
         self.thread_success = True
         self.enable_editing_notifier = GenericObservable()
@@ -105,29 +102,18 @@ class BasicFittingPresenter:
 
     def handle_instrument_changed(self) -> None:
         """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
-        self._update_plot = False
         self.update_and_reset_all_data()
-        self._update_plot = True
         self.clear_undo_data()
         self.model.remove_all_fits_from_context()
 
     def handle_selected_group_pair_changed(self) -> None:
         """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
-        self._update_plot = False
         self.update_and_reset_all_data()
-        self._update_plot = True
 
     def handle_pulse_type_changed(self, updated_variables: dict) -> None:
         """Handles when double pulse mode is switched on and switches to normal fitting mode."""
         if "DoublePulseEnabled" in updated_variables:
-            self._update_plot = False
             self.update_and_reset_all_data()
-            self._update_plot = True
-
-    def handle_plot_mode_changed(self, plot_mode: PlotMode) -> None:
-        """Handles when the tab has been changed. Updates the plot guess."""
-        if plot_mode == PlotMode.Fitting:
-            self.update_plot_guess()
 
     def handle_plot_guess_changed(self) -> None:
         """Handle when plot guess is ticked or un-ticked."""
@@ -142,7 +128,7 @@ class BasicFittingPresenter:
         self.update_fit_function_in_view_from_model()
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
 
-        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+        self.update_plot_fit()
         self.update_plot_guess()
 
     def handle_fit_clicked(self) -> None:
@@ -167,7 +153,11 @@ class BasicFittingPresenter:
         if not self.thread_success:
             return
 
-        fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
+        fit_result = self.fitting_calculation_model.result
+        if fit_result is None:
+            return
+
+        fit_function, fit_status, fit_chi_squared = fit_result
         if any([not fit_function, not fit_status, fit_chi_squared != 0.0 and not fit_chi_squared]):
             return
 
@@ -183,7 +173,7 @@ class BasicFittingPresenter:
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
         self.update_fit_function_in_view_from_model()
 
-        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+        self.update_plot_fit()
         self.fit_parameter_changed_notifier.notify_subscribers()
 
     def handle_error(self, error: str) -> None:
@@ -206,9 +196,8 @@ class BasicFittingPresenter:
         self.update_fit_function_in_view_from_model()
         self.update_start_and_end_x_in_view_from_model()
 
-        if self._update_plot:
-            self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
-            self.update_plot_guess()
+        self.update_plot_fit()
+        self.update_plot_guess()
 
     def handle_function_name_changed_by_user(self) -> None:
         """Handle when the fit name is changed by the user."""
@@ -230,7 +219,7 @@ class BasicFittingPresenter:
 
         if self.model.get_active_fit_function() is None:
             self.clear_undo_data()
-            self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+            self.update_plot_fit()
 
         self.reset_fit_status_and_chi_squared_information()
 
@@ -253,21 +242,15 @@ class BasicFittingPresenter:
 
     def handle_start_x_updated(self) -> None:
         """Handle when the start X is changed."""
-        self._check_start_x_is_valid()
-
-        self.model.current_start_x = self.view.start_x
-        self.model.current_end_x = self.view.end_x
-
-        self.update_plot_guess()
+        new_start_x, new_end_x = check_start_x_is_valid(self.model.current_dataset_name, self.view.start_x,
+                                                        self.view.end_x, self.model.current_start_x)
+        self.update_start_and_end_x_in_view_and_model(new_start_x, new_end_x)
 
     def handle_end_x_updated(self) -> None:
         """Handle when the end X is changed."""
-        self._check_end_x_is_valid()
-
-        self.model.current_start_x = self.view.start_x
-        self.model.current_end_x = self.view.end_x
-
-        self.update_plot_guess()
+        new_start_x, new_end_x = check_end_x_is_valid(self.model.current_dataset_name, self.view.start_x,
+                                                      self.view.end_x, self.model.current_end_x)
+        self.update_start_and_end_x_in_view_and_model(new_start_x, new_end_x)
 
     def handle_use_rebin_changed(self) -> None:
         """Handle the Fit to raw data checkbox state change."""
@@ -351,11 +334,22 @@ class BasicFittingPresenter:
         self.view.start_x = self.model.current_start_x
         self.view.end_x = self.model.current_end_x
 
+    def update_start_and_end_x_in_view_and_model(self, start_x: float, end_x: float) -> None:
+        """Updates the start and end x in the model using the provided values."""
+        self.view.start_x, self.view.end_x = start_x, end_x
+        self.model.current_start_x, self.model.current_end_x = start_x, end_x
+
+        self.update_plot_guess()
+
     def update_plot_guess(self) -> None:
         """Updates the guess plot using the current dataset and function."""
         self.remove_plot_guess_notifier.notify_subscribers()
         self.model.update_plot_guess()
         self.update_plot_guess_notifier.notify_subscribers()
+
+    def update_plot_fit(self) -> None:
+        """Updates the fit results on the plot using the currently active fit results."""
+        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
     def _get_single_fit_functions_from_view(self) -> list:
         """Returns the fit functions corresponding to each domain as a list."""
@@ -402,33 +396,3 @@ class BasicFittingPresenter:
             self.view.warning_popup("No rebin options specified.")
             return False
         return True
-
-    def _check_start_x_is_valid(self) -> None:
-        """Checks that the new start X is valid. If it isn't, the start and end X is adjusted."""
-        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
-        if self.view.start_x < x_lower:
-            self.view.start_x = x_lower
-        elif self.view.start_x > x_upper:
-            if not self.model.is_equal_to_n_decimals(self.view.end_x, x_upper, 3):
-                self.view.start_x, self.view.end_x = self.view.end_x, x_upper
-            else:
-                self.view.start_x = self.model.current_start_x
-        elif self.view.start_x > self.view.end_x:
-            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
-        elif self.view.start_x == self.view.end_x:
-            self.view.start_x = self.model.current_start_x
-
-    def _check_end_x_is_valid(self) -> None:
-        """Checks that the new end X is valid. If it isn't, the start and end X is adjusted."""
-        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
-        if self.view.end_x < x_lower:
-            if not self.model.is_equal_to_n_decimals(self.view.start_x, x_lower, 3):
-                self.view.start_x, self.view.end_x = x_lower, self.view.start_x
-            else:
-                self.view.end_x = self.model.current_end_x
-        elif self.view.end_x > x_upper:
-            self.view.end_x = x_upper
-        elif self.view.end_x < self.view.start_x:
-            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
-        elif self.view.end_x == self.view.start_x:
-            self.view.end_x = self.model.current_end_x
