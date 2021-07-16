@@ -25,7 +25,7 @@ def getUMatrix(ws):
 class FindGlobalBMatrixTest(unittest.TestCase):
 
     def setUp(self):
-        # laod empty instrument so can create a peak table
+        # load empty instrument so can create a peak table
         self.ws = LoadEmptyInstrument(InstrumentName='SXD', OutputWorkspace='empty_SXD')
         axis = self.ws.getAxis(0)
         axis.setUnit("TOF")
@@ -53,7 +53,6 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         self.assert_matrix([peaks1, peaks2], np.eye(3), getUMatrix, delta=5e-2)
 
     def test_handles_inaccurate_goniometer(self):
-        # create two peak tables with UB corresponding to different lattice constant, a
         peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks3")
         peaks2 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks4")
         # set different gonio on each run

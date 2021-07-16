@@ -183,8 +183,10 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
     def calcResiduals(self, x0, ws_list):
         """
-        Calulates sum of square magnitude of difference between qsample and q of integer HKL
-        x0 = [a, b, c, alpha, beta, gamma]
+        Calculates avergae of square magnitude of difference between qsample and q of integer HKL
+        :param x0: lattice parameters [a, b, c, alpha, beta, gamma]
+        :param ws_list: list of peak workspaces
+        :return: sqrt of average square residuals (required by scipy.leastsq optimiser - default settings behave better)
         """
         residsq = np.zeros(sum([AnalysisDataService.retrieve(wsname).getNumberPeaks() for wsname in ws_list]))
         ipk = 0  # normalise by n peaks indexed so no penalty in indexing more peaks
