@@ -241,8 +241,8 @@ private:
     std::vector<double> x(nPoints), y(nPoints), e(nPoints);
     const double step = (endX - startX) / (double(nPoints) - 1);
     for (size_t ibin = 0; ibin < nPoints; ++ibin) {
-      x[ibin] = startX + ibin * step;
-      y[ibin] = 7 * ibin + 3;
+      x[ibin] = startX + double(ibin) * step;
+      y[ibin] = 7 * double(ibin) + 3;
       e[ibin] = std::sqrt(y[ibin]);
     }
     ws->setHistogram(0, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));
@@ -257,8 +257,8 @@ private:
     const double step = (endX - startX) / (double(nPoints) - 1);
     for (size_t ispec = 0; ispec < nSpectra; ++ispec) {
       for (size_t ibin = 0; ibin < nPoints; ++ibin) {
-        x[ibin] = startX + ibin * step;
-        y[ibin] = 7 * ibin + 3 + 10 * ispec;
+        x[ibin] = startX + double(ibin) * step;
+        y[ibin] = 7 * double(ibin) + 3 + 10 * ispec;
         e[ibin] = std::sqrt(y[ibin]);
       }
       ws->setHistogram(ispec, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));

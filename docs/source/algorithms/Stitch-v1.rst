@@ -23,7 +23,7 @@ InputWorkspaces
 The list of input workspace or workspace group names. The workspace groups will be flattened to a list of workspaces.
 Note that because of this type of input that relies on WorkspaceGroups, this algorithm is currently supported only for named workspaces present on ADS.
 The inputs can be in any order in terms of their x-axis extent. The algorithm will first sort them ascending in terms of x-intervals.
-Then it will start stitching iteratively to the left and to the right starting from the reference workspace.
+Then it will start stitching iteratively to the left and to the right starting from the reference workspace. The input workspaces must be point-data and must have common bins.
 
 ReferenceWorkspace
 ##################
