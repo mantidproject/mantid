@@ -355,18 +355,16 @@ class SANSILLReduction2(PythonAlgorithm):
                 ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionWorkspace=tr_ws_rebin,
                                             ThetaDependent=theta_dependent, OutputWorkspace=ws)
                 DeleteWorkspace(tr_ws_rebin)
-            elif self.mode == AcqMode.KINETIC:
-                pass # TODO apply also here once the algorithm is capable of doing kinetic
             else:
                 check_wavelengths_match(mtd[tr_ws], mtd[ws])
-                if theta_dependent and self.instrument == 'D16' and 75 < mtd[ws].getRun()['Gamma.value'].value < 105:
-                    # D16 can do wide angles, which means it can cross 90 degrees, where theta dependent transmission is divergent
-                    # gamma is the detector center's theta, if it is in a certain range, then some pixels are around 90 degrees
-                    MaskAngle(Workspace=ws, MinAngle=89, MaxAngle=91, Angle='TwoTheta')
                 ApplyTransmissionCorrection(InputWorkspace=ws,
                                             TransmissionWorkspace=tr_ws,
                                             ThetaDependent=theta_dependent,
                                             OutputWorkspace=ws)
+                if theta_dependent and self.instrument == 'D16' and 75 < mtd[ws].getRun()['Gamma.value'].value < 105:
+                    # D16 can do wide angles, which means it can cross 90 degrees, where theta dependent transmission is divergent
+                    # gamma is the detector center's theta, if it is in a certain range, then some pixels are around 90 degrees
+                    MaskAngle(Workspace=ws, MinAngle=89, MaxAngle=91, Angle='TwoTheta')
 
     def apply_container(self, ws):
         '''Applies empty container subtraction'''
