@@ -90,6 +90,7 @@ private:
   std::vector<std::string> m_metaData;
   std::map<std::string, std::vector<std::string>> m_metaDataMap;
   std::unique_ptr<AxisHelper::AxisProxy> m_axisProxy;
+  static const std::vector<std::string> ASCII_EXTS;
 };
 } // namespace DataHandling
 } // namespace Mantid
