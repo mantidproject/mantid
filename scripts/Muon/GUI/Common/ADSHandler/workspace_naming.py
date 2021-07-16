@@ -281,7 +281,7 @@ def create_covariance_matrix_name(input_workspace_name, function_name):
 
 
 def create_model_fitting_parameter_combination_name(result_table_name, x_parameter, y_parameter):
-    return result_table_name + "; " + x_parameter + " vs " + y_parameter
+    return result_table_name + "; " + y_parameter + " vs " + x_parameter
 
 
 def create_model_fitting_parameters_group_name(results_table_name):

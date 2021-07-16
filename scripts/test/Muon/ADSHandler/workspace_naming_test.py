@@ -127,7 +127,7 @@ class WorkspaceNamingTest(unittest.TestCase):
 
         name = create_model_fitting_parameter_combination_name(results_table_name, x_parameter, y_parameter)
 
-        self.assertEqual(name, "Result1; A0 vs A1")
+        self.assertEqual(name, "Result1; A1 vs A0")
 
     def test_create_model_fitting_parameters_group_name(self):
         results_table_name = "Result1"

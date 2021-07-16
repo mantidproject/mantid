@@ -26,6 +26,11 @@ BugFixes
 Muon Analysis and Frequency Domain Analysis
 -------------------------------------------
 
+New Features
+############
+
+- It is now possible to Exclude a range from a fit range when doing a fit on the Fitting tab.
+
 Improvements
 ############
 
@@ -56,5 +61,6 @@ Algorithms
 ##########
 
 - Updated :ref:`LoadMuonLog <algm-LoadMuonLog>` to read units for most log values.
+- It is now possible to exclude a fit range when executing the :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` algorithm.
 
 :ref:`Release 6.2.0 <v6.2.0>`

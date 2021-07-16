@@ -81,6 +81,18 @@ class BasicFittingView(ui_form, base_widget):
         """Connect the slot for the end x option."""
         self.fit_function_options.set_slot_for_end_x_updated(slot)
 
+    def set_slot_for_exclude_range_state_changed(self, slot) -> None:
+        """Connect the slot for the exclude range checkbox."""
+        self.fit_function_options.set_slot_for_exclude_range_state_changed(slot)
+
+    def set_slot_for_exclude_start_x_updated(self, slot) -> None:
+        """Connect the slot for the exclude start x option."""
+        self.fit_function_options.set_slot_for_exclude_start_x_updated(slot)
+
+    def set_slot_for_exclude_end_x_updated(self, slot) -> None:
+        """Connect the slot for the exclude end x option."""
+        self.fit_function_options.set_slot_for_exclude_end_x_updated(slot)
+
     def set_slot_for_minimizer_changed(self, slot) -> None:
         """Connect the slot for changing the Minimizer."""
         self.fit_function_options.set_slot_for_minimizer_changed(slot)
@@ -183,6 +195,31 @@ class BasicFittingView(ui_form, base_widget):
         self.fit_function_options.end_x = value
 
     @property
+    def exclude_range(self) -> bool:
+        """Returns true if the Exclude Range option is ticked."""
+        return self.fit_function_options.exclude_range
+
+    @property
+    def exclude_start_x(self) -> float:
+        """Returns the start X for the excluded region."""
+        return self.fit_function_options.exclude_start_x
+
+    @exclude_start_x.setter
+    def exclude_start_x(self, value: float) -> None:
+        """Sets the selected exclude start X."""
+        self.fit_function_options.exclude_start_x = value
+
+    @property
+    def exclude_end_x(self) -> float:
+        """Returns the end X for the excluded region."""
+        return self.fit_function_options.exclude_end_x
+
+    @exclude_end_x.setter
+    def exclude_end_x(self, value: float) -> None:
+        """Sets the selected exclude end X."""
+        self.fit_function_options.exclude_end_x = value
+
+    @property
     def evaluation_type(self) -> str:
         """Returns the selected evaluation type."""
         return self.fit_function_options.evaluation_type
@@ -238,13 +275,25 @@ class BasicFittingView(ui_form, base_widget):
         """Switches the view to single fit mode."""
         self.fit_function_options.switch_to_single()
 
+    def hide_exclude_range_checkbox(self) -> None:
+        """Hides the Exclude Range checkbox in the fitting options."""
+        self.fit_function_options.hide_exclude_range_checkbox()
+
     def hide_fit_raw_checkbox(self) -> None:
         """Hides the Fit Raw checkbox in the fitting options."""
         self.fit_function_options.hide_fit_raw_checkbox()
 
+    def hide_evaluate_function_as_checkbox(self) -> None:
+        """Hides the Evaluate Function as checkbox in the fitting options."""
+        self.fit_function_options.hide_evaluate_function_as_checkbox()
+
     def set_start_and_end_x_labels(self, start_x_label: str, end_x_label: str) -> None:
         """Sets the labels to use for the start and end X labels in the fit options table."""
         self.fit_function_options.set_start_and_end_x_labels(start_x_label, end_x_label)
+
+    def set_exclude_start_and_end_x_visible(self, visible: bool) -> None:
+        """Sets whether the exclude start and end x options are visible."""
+        self.fit_function_options.set_exclude_start_and_end_x_visible(visible)
 
     def disable_view(self) -> None:
         """Disable all widgets in this fitting widget."""
