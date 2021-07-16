@@ -8,7 +8,8 @@ from mantid.py36compat import dataclass
 
 from mantid.api import AlgorithmManager, FunctionFactory, IFunction
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
-from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, RUNS_ALL, GROUPS_ALL)
+from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, FLAT_BACKGROUND,
+                                                          FLAT_BACKGROUND_AND_EXP_DECAY, RUNS_ALL, GROUPS_ALL)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
@@ -28,13 +29,17 @@ class BackgroundCorrectionData:
     start_x: float
     end_x: float
     flat_background: IFunction = FunctionFactory.createFunction("FlatBackground")
-    exp_decay: IFunction = FunctionFactory.createFunction("ExpDecay")
+    exp_decay: IFunction = FunctionFactory.createFunction("ExpDecayMuon")
     status: str = "No background correction"
 
     def __init__(self, counts_workspace: StaticWorkspaceWrapper, start_x: float, end_x: float):
         self.uncorrected_counts_workspace = counts_workspace
         self.start_x = start_x
         self.end_x = end_x
+
+    def reset_functions(self):
+        self.flat_background = FunctionFactory.createFunction("FlatBackground")
+        self.exp_decay = FunctionFactory.createFunction("ExpDecayMuon")
 
 
 class BackgroundCorrectionsModel:
@@ -119,7 +124,16 @@ class BackgroundCorrectionsModel:
                     workspace_name = self.get_counts_workspace_name(run, group)
                     self._corrections_context.background_correction_data[run_group] = BackgroundCorrectionData(
                         StaticWorkspaceWrapper(workspace_name, retrieve_ws(workspace_name)), start_x, end_x)
-                    self.run_background_correction_for(run, group)
+
+    def reset_background_function_data(self) -> None:
+        """Resets the background functions back to zero when the correction mode is changed."""
+        for correction_data in self._corrections_context.background_correction_data.values():
+            correction_data.reset_functions()
+
+    def run_background_correction_for_all(self) -> None:
+        """Runs the background corrections for all stored domains."""
+        for correction_data in self._corrections_context.background_correction_data.values():
+            self._run_background_correction(correction_data)
 
     def run_background_correction_for(self, run: str, group: str) -> None:
         """Calculates the background for some data using a Fit."""
@@ -130,23 +144,45 @@ class BackgroundCorrectionsModel:
     def _run_background_correction(self, correction_data: BackgroundCorrectionData) -> None:
         """Calculates the background for some data using a Fit."""
         params = self._get_parameters_for_background_fit(correction_data)
-        function, fit_status, chi_squared = run_Fit(params, AlgorithmManager.create("Fit"))
+        function, _, chi_squared = run_Fit(params, AlgorithmManager.create("Fit"))
 
+        self._handle_background_fit_output(correction_data, function, chi_squared)
+
+    def _handle_background_fit_output(self, correction_data: BackgroundCorrectionData, function: IFunction,
+                                      chi_squared: float) -> None:
+        """Handles the output of the background fit."""
         if chi_squared > MAX_ACCEPTABLE_CHI_SQUARED:
-            correction_data.flat_background = FunctionFactory.createFunction("FlatBackground")
+            correction_data.reset_functions()
             correction_data.status = f"Correction skipped - chi squared is poor ({chi_squared:.3f})."
         else:
-            correction_data.flat_background = function.clone()
+            if self._corrections_context.selected_function == FLAT_BACKGROUND:
+                correction_data.flat_background = function.clone()
+            elif self._corrections_context.selected_function == FLAT_BACKGROUND_AND_EXP_DECAY:
+                correction_data.flat_background = function.getFunction(0).clone()
+                correction_data.exp_decay = function.getFunction(1).clone()
+
             correction_data.status = "Correction success"
 
-    @staticmethod
-    def _get_parameters_for_background_fit(correction_data: BackgroundCorrectionData) -> dict:
+    def _get_parameters_for_background_fit(self, correction_data: BackgroundCorrectionData) -> dict:
         """Gets the parameters to use for the background Fit."""
-        return {"Function": correction_data.flat_background,
+        return {"Function": self._get_fit_function_for_background_fit(correction_data),
                 "InputWorkspace": correction_data.uncorrected_counts_workspace.workspace_copy(),
                 "StartX": correction_data.start_x,
                 "EndX": correction_data.end_x,
-                "CreateOutput": False}
+                "CreateOutput": False,
+                "CalcErrors": True}
+
+    def _get_fit_function_for_background_fit(self, correction_data: BackgroundCorrectionData) -> IFunction:
+        """Returns the fit function to use for a background fit."""
+        if self._corrections_context.selected_function == FLAT_BACKGROUND:
+            return correction_data.flat_background
+        elif self._corrections_context.selected_function == FLAT_BACKGROUND_AND_EXP_DECAY:
+            composite = FunctionFactory.createFunction("CompositeFunction")
+            composite.add(correction_data.flat_background)
+            composite.add(correction_data.exp_decay)
+            return composite
+
+        raise RuntimeError("The selected background function is not recognised.")
 
     def selected_correction_data(self) -> tuple:
         """Returns lists of the selected correction data to display in the view."""
