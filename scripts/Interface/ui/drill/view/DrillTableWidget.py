@@ -88,6 +88,7 @@ class DrillTableWidget(QTableWidget):
             labels (list(str)): columns labels
         """
         super(DrillTableWidget, self).setHorizontalHeaderLabels(labels)
+        self._columns = list()
         for label in labels:
             self._columns.append(label)
 
