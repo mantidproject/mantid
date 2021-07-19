@@ -36,7 +36,6 @@ class DrillParameterPresenter:
         self._parameter.checked.connect(self.onChecked)
         self._item.signals.dataChanged.connect(self.onDataChanged)
         self._parameter.valueChanged.connect(self.onValueChanged)
-        self.onDataChanged()
 
     def onDataChanged(self):
         """
