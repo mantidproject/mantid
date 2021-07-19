@@ -240,21 +240,17 @@ def empty_loaded_data():
 
 
 def create_load_algorithm(filename, property_dictionary):
-    # Assume if .bin it is a PSI file
     psi_data = False
-    output_filename = os.path.basename(filename)
     if ".bin" in filename:
-        alg = mantid.AlgorithmManager.create("LoadPSIMuonBin")
         psi_data = True
-    else:
-        alg = mantid.AlgorithmManager.create("LoadMuonNexus")
-        alg.setProperties(property_dictionary)
-    alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
-
+    output_filename = os.path.basename(filename)
+    alg = mantid.AlgorithmManager.create("LoadMuonData")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
-    alg.setProperty("OutputWorkspace", output_filename)
+    alg.setProperties(property_dictionary)
     alg.setProperty("Filename", filename)
+    alg.setProperty("OutputWorkspace", output_filename)
+    alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
     return alg, psi_data
 
 
