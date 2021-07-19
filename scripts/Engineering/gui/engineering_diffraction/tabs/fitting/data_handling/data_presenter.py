@@ -44,7 +44,7 @@ class FittingDataPresenter(object):
         self.fit_enabled_observer = GenericObserverWithArgPassing(self.set_fit_enabled)
         self.fit_all_done_observer = GenericObserverWithArgPassing(self.fit_completed)
         self.focus_run_observer = GenericObserverWithArgPassing(
-            self.view.set_file_last)
+            self.view.set_default_files)
 
     def set_fit_enabled(self, fit_enabled):
         self.view.set_fit_buttons_enabled(fit_enabled)

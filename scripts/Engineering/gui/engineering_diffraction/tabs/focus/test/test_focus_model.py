@@ -199,7 +199,7 @@ class FocusModelTest(unittest.TestCase):
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
                                 mocked_workspace, None)
 
-        self.assertEqual(self.model._last_path, output_file)
+        self.assertEqual(self.model._last_focused_files[0], output_file)
 
     @patch(file_path + ".SaveFocusedXYE")
     @patch(file_path + ".SaveGSS")
@@ -215,7 +215,7 @@ class FocusModelTest(unittest.TestCase):
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
                                 mocked_workspace, rb_num)
 
-        self.assertEqual(self.model._last_path, output_file)
+        self.assertEqual(self.model._last_focused_files[0], output_file)
 
 
 if __name__ == '__main__':
