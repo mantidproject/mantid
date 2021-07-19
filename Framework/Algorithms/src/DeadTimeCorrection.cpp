@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DeadTimeCorrection.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
@@ -75,7 +76,8 @@ void DeadTimeCorrection::exec() {
   const auto map = outputWorkspace->getDetectorIDToWorkspaceIndexMap();
   const double tau = getProperty("Tau");
   MatrixWorkspace_sptr integrated = inputWorkspace;
-  if (outputWorkspace->blocksize() != 1) {
+  auto xAxisUnitID = inputWorkspace->getAxis(0)->unit()->unitID();
+  if (outputWorkspace->blocksize() != 1 && xAxisUnitID != "Empty") {
     auto integrator = createChildAlgorithm("Integration");
     integrator->setProperty("InputWorkspace", inputWorkspace);
     integrator->setPropertyValue("OutputWorkspace", "unused");
