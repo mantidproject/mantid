@@ -148,7 +148,7 @@ class DrillParameter(QObject):
             value (any): value
         """
         self._value = value
-        if self._controller:
+        if self._controller is not None:
             self._controller.check(self)
         self.valueChanged.emit()
 
