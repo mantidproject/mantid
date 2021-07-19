@@ -133,6 +133,7 @@ class DrillTableWidget(QTableWidget):
             row = item.row()
             col = item.column()
             self._samplePresenters[row].onNewItem(self._columns[col], item)
+            item.signals.dataChanged.emit()
 
     def itemFromName(self, row, name):
         """
