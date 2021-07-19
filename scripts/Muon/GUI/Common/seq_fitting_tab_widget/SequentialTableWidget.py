@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableView import QSequentialTableView
-from Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import QSequentialTableModel
+from Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import (QSequentialTableModel, GROUP_COLUMN,
+                                                                          RUN_COLUMN, WORKSPACE_COLUMN)
 from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FIT_STATUSES
 from collections import namedtuple
 
@@ -26,6 +27,15 @@ class SequentialTableWidget(object):
 
     def block_signals(self, state):
         self._view.blockSignals(state)
+
+    def hide_workspace_column(self):
+        self._view.hideColumn(WORKSPACE_COLUMN)
+
+    def hide_run_column(self):
+        self._view.hideColumn(RUN_COLUMN)
+
+    def hide_group_column(self):
+        self._view.hideColumn(GROUP_COLUMN)
 
     def get_number_of_fits(self):
         return self._model.number_of_fits
