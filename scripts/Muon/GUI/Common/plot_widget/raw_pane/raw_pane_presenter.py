@@ -21,12 +21,23 @@ class RawPanePresenter(BasePanePresenter):
         self._view.hide_plot_raw()
         self._view.disable_tile_plotting_options()
         self._view.set_is_tiled_plot(True)
-        self.data_observer = GenericObserver(self.handle_data_updated)
+        self.new_data_observer = GenericObserver(self.handle_new_data)
+
+        self._view.set_slot_for_detectors_changed(self._selector_changed)
+        self._view.set_slot_for_runs_changed(self._selector_changed)
+
+    def handle_new_data(self, autoscale=True, hold_on=False):
+        self._model.check_num_detectors()
+        self.update_selectors()
+        self.handle_data_updated(autoscale,hold_on)
 
     def handle_data_updated(self, autoscale=True, hold_on=False):
+        detectors = self._view.get_detectors
+        run = self._view.get_run
         workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(True,
-                                                                                      self._view.get_plot_type())
+                                                                                      self._view.get_plot_type(), detectors, run)
         self.add_list_to_plot(workspace_list, indicies, hold=hold_on, autoscale=autoscale)
+        self._figure_presenter.force_autoscale()
 
     def handle_plot_tiled_state_changed(self):
         """
@@ -42,3 +53,13 @@ class RawPanePresenter(BasePanePresenter):
             self._figure_presenter.convert_plot_to_tiled_plot(keys)
         else:
             self._figure_presenter.convert_plot_to_single_plot()
+
+    def update_selectors(self):
+        det_list = self._model.gen_detector_options()
+        self._view.update_detectors(det_list)
+
+        run_list = self._model.gen_run_list()
+        self._view.update_runs(run_list)
+
+    def _selector_changed(self) -> None:
+        self.handle_data_updated()
