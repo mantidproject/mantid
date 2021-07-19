@@ -229,6 +229,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.disable_notifier.add_subscriber(self.fitting_tab.fitting_tab_view.disable_tab_observer)
 
+        self.disable_notifier.add_subscriber(self.seq_fitting_tab.seq_fitting_tab_presenter.disable_tab_observer)
+
         self.disable_notifier.add_subscriber(self.phase_tab.phase_table_presenter.disable_tab_observer)
 
         self.disable_notifier.add_subscriber(self.results_tab.results_tab_presenter.disable_tab_observer)
@@ -244,6 +246,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.enable_notifier.add_subscriber(self.corrections_tab.corrections_tab_view.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.fitting_tab.fitting_tab_view.enable_tab_observer)
+
+        self.enable_notifier.add_subscriber(self.seq_fitting_tab.seq_fitting_tab_presenter.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.phase_tab.phase_table_presenter.enable_tab_observer)
 
@@ -275,6 +279,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.plot_widget.raw_mode.new_data_observer)
 
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.disable_tab_observer)
+
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
@@ -299,7 +306,22 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             [self.transform.GroupPairObserver,
              self.plot_widget.data_mode.added_group_or_pair_observer])
 
+        self.fitting_tab.fitting_tab_presenter.fit_function_changed_notifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.fit_function_updated_observer)
+
+        self.fitting_tab.fitting_tab_presenter.fit_parameter_changed_notifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.fit_parameter_updated_observer)
+
+        self.seq_fitting_tab.seq_fitting_tab_presenter.fit_parameter_changed_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.fit_parameter_updated_observer)
+
+        self.seq_fitting_tab.seq_fitting_tab_presenter.sequential_fit_finished_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.sequential_fit_finished_observer)
+
         self.fitting_tab.fitting_tab_presenter.selected_fit_results_changed.add_subscriber(
+            self.plot_widget.fit_mode.plot_selected_fit_observer)
+
+        self.seq_fitting_tab.seq_fitting_tab_presenter.selected_sequential_fit_notifier.add_subscriber(
             self.plot_widget.fit_mode.plot_selected_fit_observer)
 
         self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
@@ -307,6 +329,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
             self.transform.GroupPairObserver)
+
+        self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 
     def setup_grouping_changed_observers(self):
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
@@ -394,6 +419,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         for observer in self.plot_widget.data_changed_observers:
             self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(observer)
             self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(observer)
+
+        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
             self.corrections_tab.corrections_tab_presenter.pre_process_and_grouping_complete_observer)

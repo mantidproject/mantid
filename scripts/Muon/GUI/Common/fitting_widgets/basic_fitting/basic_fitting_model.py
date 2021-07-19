@@ -9,13 +9,18 @@ from mantid.api import CompositeFunction, IAlgorithm, IFunction
 from mantid.simpleapi import CopyLogs, EvaluateFunction
 
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
-from Muon.GUI.Common.ADSHandler.workspace_naming import (create_covariance_matrix_name, create_fitted_workspace_name,
-                                                         create_parameter_table_name)
+from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_covariance_matrix_name,
+                                                         create_fitted_workspace_name, create_parameter_table_name,
+                                                         get_diff_asymmetry_name, get_group_asymmetry_name,
+                                                         get_group_or_pair_from_name, get_pair_asymmetry_name,
+                                                         get_pair_phasequad_name,
+                                                         get_run_numbers_as_string_from_workspace_name)
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.Common.utilities.workspace_data_utils import check_exclude_start_and_end_x_is_valid, x_limits_of_workspace
 from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
@@ -572,10 +577,6 @@ class BasicFittingModel:
                 return [fit_function.parameterName(i) for i in range(fit_function.nParams())]
         return []
 
-    def get_all_fit_functions(self) -> list:
-        """Returns all the fit functions for the current fitting mode."""
-        return self.fitting_context.single_fit_functions
-
     def get_active_fit_function(self) -> IFunction:
         """Returns the fit function that is active and will be used for a fit."""
         return self.current_single_fit_function
@@ -801,3 +802,82 @@ class BasicFittingModel:
         workspace_wrapper.show(directory + name)
         self.context.ads_observer.observeRename(True)
         return workspace_wrapper
+
+    @staticmethod
+    def get_fit_function_parameter_values(fit_function: IFunction) -> list:
+        """Get all the parameter values within a given fit function."""
+        parameters, errors = [], []
+        if fit_function is not None:
+            for i in range(fit_function.nParams()):
+                parameters.append(fit_function.getParameterValue(i))
+                errors.append(fit_function.getError(i))
+        return parameters, errors
+
+    """
+    Methods used by the Sequential Fitting Tab
+    """
+
+    def validate_sequential_fit(self, workspace_names: list) -> str:
+        if self.get_active_fit_function() is None or len(workspace_names) == 0:
+            return "No data or fit function selected for fitting."
+        else:
+            return ""
+
+    def get_runs_groups_and_pairs_for_fits(self) -> tuple:
+        """Returns the runs and group/pairs corresponding to the selected dataset names."""
+        runs, groups_and_pairs = [], []
+        for name in self.fitting_context.dataset_names:
+            runs.append(get_run_numbers_as_string_from_workspace_name(name, self.context.data_context.instrument))
+            groups_and_pairs.append(get_group_or_pair_from_name(name))
+        return runs, groups_and_pairs
+
+    def get_all_fit_function_parameter_values_for(self, fit_function: IFunction) -> list:
+        """Returns the values of the fit function parameters."""
+        parameter_values, _ = self.get_fit_function_parameter_values(fit_function)
+        return parameter_values
+
+    @staticmethod
+    def _set_fit_function_parameter_values(fit_function: IFunction, parameter_values: list, errors: list = None) -> None:
+        """Set the parameter values within a fit function."""
+        for i in range(fit_function.nParams()):
+            fit_function.setParameter(i, parameter_values[i])
+            if errors is not None:
+                fit_function.setError(i, errors[i])
+
+    def get_all_fit_functions(self) -> list:
+        """Returns all the fit functions for the current fitting mode."""
+        return self.fitting_context.single_fit_functions
+
+    def get_fit_workspace_names_from_groups_and_runs(self, runs: list, groups_and_pairs: list) -> list:
+        """Returns the workspace names to use for the given runs and groups/pairs."""
+        workspace_names = []
+        for run in runs:
+            for group_or_pair in groups_and_pairs:
+                workspace_names += self._get_workspace_name_from_run_and_group_or_pair(run, group_or_pair)
+        return workspace_names
+
+    def _get_workspace_name_from_run_and_group_or_pair(self, run: str, group_or_pair: str) -> list:
+        """Returns the workspace name to use for the given run and group/pair."""
+        fit_to_raw = self.fitting_context.fit_to_raw
+        if check_phasequad_name(group_or_pair) and group_or_pair in self.context.group_pair_context.selected_pairs:
+            return [get_pair_phasequad_name(self.context, group_or_pair, run, not fit_to_raw)]
+        elif group_or_pair in self.context.group_pair_context.selected_pairs:
+            return [get_pair_asymmetry_name(self.context, group_or_pair, run, not fit_to_raw)]
+        elif group_or_pair in self.context.group_pair_context.selected_diffs:
+            return [get_diff_asymmetry_name(self.context, group_or_pair, run, not fit_to_raw)]
+        elif group_or_pair in self.context.group_pair_context.selected_groups:
+            period_string = run_list_to_string(self.context.group_pair_context[group_or_pair].periods)
+            return [get_group_asymmetry_name(self.context, group_or_pair, run, period_string, not fit_to_raw)]
+        else:
+            return []
+
+    def update_ws_fit_function_parameters(self, dataset_names: list, parameter_values: list) -> None:
+        """Updates the function parameter values for the given dataset names."""
+        self._update_fit_function_parameters_for_single_fit(dataset_names, parameter_values)
+
+    def _update_fit_function_parameters_for_single_fit(self, dataset_names: list, parameter_values: list) -> None:
+        """Updates the function parameters for the given dataset names if in single fit mode."""
+        for name in dataset_names:
+            fit_function = self.get_single_fit_function_for(name)
+            if fit_function is not None:
+                self._set_fit_function_parameter_values(fit_function, parameter_values)
