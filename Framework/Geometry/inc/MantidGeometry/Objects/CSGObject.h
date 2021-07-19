@@ -176,7 +176,7 @@ public:
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors, double &innerRadius,
                      double &radius, double &height) const override;
   /// Getter for the shape xml
-  std::string getShapeXML() const override;
+  std::string getShapeXML() const;
 
 private:
   int procPair(std::string &lineStr, std::map<int, std::unique_ptr<Rule>> &ruleMap, int &compUnit) const;

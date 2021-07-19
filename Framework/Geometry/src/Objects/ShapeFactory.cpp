@@ -1658,5 +1658,41 @@ Kernel::Matrix<double> ShapeFactory::generateZRotation(double zRotation) {
   std::vector<double> matrixList = {cosZ, -sinZ, 0, sinZ, cosZ, 0, 0, 0, 1};
   return Kernel::Matrix<double>(matrixList);
 }
+
+std::string ShapeFactory::addGoniometerTag(std::vector<double> rotationMatrix, std::string xml) {
+
+  // Delete previous goniometer from xml
+  std::size_t foundGonioTag = xml.find("<goniometer");
+  if (foundGonioTag != std::string::npos) {
+    std::size_t gonioTagLength = xml.find(">", foundGonioTag + 1) - foundGonioTag;
+    xml.erase(foundGonioTag, gonioTagLength);
+  }
+
+  // Put goniometer tag in correct place in xml
+  std::size_t gonioPlace;
+  std::size_t foundType = xml.find("</type>");
+  std::size_t foundSampleGeometry = xml.find("</samplegeometry");
+
+  if (foundType != std::string::npos) {
+    // Add goniometer BEFORE Type end tag
+    gonioPlace = foundType;
+  } else if (foundSampleGeometry != std::string::npos) {
+    // If no type tag, add goniometer BEFORE SampleGeometry end tag
+    gonioPlace = foundSampleGeometry;
+  } else {
+    // If no Type or SampleGeometry tag, add goniometer to the end
+    gonioPlace = xml.size();
+  }
+
+  const std::vector<std::string> matrixElementNames = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
+  std::string goniometerRotation = " <goniometer ";
+  for (size_t index = 0; index < rotationMatrix.size(); ++index) {
+    goniometerRotation += matrixElementNames[index] + " = '" + std::to_string(rotationMatrix[index]) + "' ";
+  }
+  goniometerRotation += "/>";
+  xml.insert(gonioPlace, goniometerRotation);
+
+  return xml;
+}
 } // namespace Geometry
 } // namespace Mantid

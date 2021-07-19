@@ -151,9 +151,6 @@ private:
   /// Search object for valid point
   bool searchForObject(Kernel::V3D &point) const;
 
-  /// Getter for the shape xml
-  std::string getShapeXML() const override { return ""; }
-
   /// Cache for object's bounding box
   mutable BoundingBox m_boundingBox;
 

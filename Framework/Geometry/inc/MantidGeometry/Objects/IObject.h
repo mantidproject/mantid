@@ -48,7 +48,6 @@ public:
   virtual bool hasValidShape() const = 0;
   virtual IObject *clone() const = 0;
   virtual IObject *cloneWithMaterial(const Kernel::Material &material) const = 0;
-  virtual std::string getShapeXML() const = 0;
 
   virtual int getName() const = 0;
 
