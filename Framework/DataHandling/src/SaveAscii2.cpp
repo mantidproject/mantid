@@ -73,6 +73,7 @@ void SaveAscii2::init() {
                   "single-spectrum workspaces. "
                   "It is always written for workspaces with multiple spectra, "
                   "unless spectrum axis value is written. Ignored for Table Workspaces.");
+  declareProperty("OneSpectrumPerFile", false, "If true, each spectrum will be saved in an invididual file");
 
   declareProperty("CommentIndicator", "#", "Character(s) to put in front of comment lines.");
 
@@ -260,7 +261,7 @@ void SaveAscii2::exec() {
     throw std::runtime_error("Trying to save an empty workspace");
   }
 
-  bool singleFile = false;
+  bool OneSpectrumPerFile = getProperty("OneSpectrumPerFile");
   auto idxIt = idx.begin();
   int i = 0;
 
@@ -274,7 +275,7 @@ void SaveAscii2::exec() {
   do {
     std::string currentFilename = filename;
     size_t extPosition;
-    if (!singleFile) {
+    if (OneSpectrumPerFile) {
       for (const std::string &ext : ASCII_EXTS) {
         extPosition = filename.find(ext);
         if (extPosition != std::string::npos)
@@ -310,17 +311,17 @@ void SaveAscii2::exec() {
     }
 
     // data writting
-    if (singleFile) {
+    if (OneSpectrumPerFile) {
+      writeSpectrum((*idxIt), file);
+      progress.report();
+      idxIt++;
+      i++;
+    } else {
       while (idxIt != idx.end()) {
         writeSpectrum((*idxIt), file);
         progress.report();
         idxIt++;
       }
-    } else {
-      writeSpectrum((*idxIt), file);
-      progress.report();
-      idxIt++;
-      i++;
     }
 
     file.unsetf(std::ios_base::floatfield);
