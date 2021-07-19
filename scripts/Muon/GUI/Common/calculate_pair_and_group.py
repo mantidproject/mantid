@@ -7,7 +7,6 @@
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_group_data_workspace_name, get_run_numbers_as_string_from_workspace_name
 from typing import Iterable
 
 
@@ -31,9 +30,7 @@ def calculate_pair_data(pair: MuonPair, forward_group: str, backward_group: str,
 
 def estimate_group_asymmetry_data(context, group, run, rebin, workspace_name, unormalised_workspace_name, periods):
     params = _get_EstimateMuonAsymmetryFromCounts_parameters(context, group, run, periods)
-    params["InputWorkspace"] = get_group_data_workspace_name(
-        context, group.name,get_run_numbers_as_string_from_workspace_name(
-            workspace_name, context.data_context.instrument), "", rebin)
+    params["InputWorkspace"] = workspace_name.replace("Asymmetry", "Counts")
     group_asymmetry, group_asymmetry_unnorm = \
         algorithm_utils.run_EstimateMuonAsymmetryFromCounts(params, workspace_name, unormalised_workspace_name)
 
