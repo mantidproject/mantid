@@ -212,6 +212,7 @@ set(SRC_FILES
     src/MonitorEfficiencyCorUser.cpp
     src/MonteCarloAbsorption.cpp
     src/MostLikelyMean.cpp
+    src/MultipleScatteringCorrection.cpp
     src/Multiply.cpp
     src/MultiplyRange.cpp
     src/NormaliseByCurrent.cpp
@@ -553,6 +554,7 @@ set(INC_FILES
     inc/MantidAlgorithms/MonitorEfficiencyCorUser.h
     inc/MantidAlgorithms/MonteCarloAbsorption.h
     inc/MantidAlgorithms/MostLikelyMean.h
+    inc/MantidAlgorithms/MultipleScatteringCorrection.h
     inc/MantidAlgorithms/Multiply.h
     inc/MantidAlgorithms/MultiplyRange.h
     inc/MantidAlgorithms/NormaliseByCurrent.h
@@ -903,6 +905,7 @@ set(TEST_FILES
     MonitorEfficiencyCorUserTest.h
     MonteCarloAbsorptionTest.h
     MostLikelyMeanTest.h
+    MultipleScatteringCorrectionTest.h
     MultiplyRangeTest.h
     MultiplyTest.h
     MuonWorkspaceCreationHelperTest.h
