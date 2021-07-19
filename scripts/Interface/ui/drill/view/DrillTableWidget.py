@@ -172,8 +172,8 @@ class DrillTableWidget(QTableWidget):
             return
         for column in range(self.columnCount()):
             item = self.item(position, column)
-            item.setText("")
-            self.cellChanged.emit(position, column)
+            if item:
+                item.setData(Qt.EditRole, None)
 
     def eraseCell(self, row, column):
         """
@@ -190,8 +190,8 @@ class DrillTableWidget(QTableWidget):
         if ((row < 0) or (row > n_rows) or (column < 0) or (column > n_cols)):
             return
         item = self.item(row, column)
-        item.setData(Qt.EditRole, None)
-        self.cellChanged.emit(row, column)
+        if item:
+            item.setData(Qt.EditRole, None)
 
     def getSelectedRows(self):
         """
