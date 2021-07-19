@@ -162,9 +162,7 @@ class BackgroundCorrectionsPresenter:
 
     def _create_correction_calculation_thread(self, callback, *args) -> ThreadModel:
         """Create a thread for fitting."""
-        self.correction_calculator = ThreadModelWrapperWithOutput(callback)
-        if args:
-            self.correction_calculator.set_args(*args)
+        self.correction_calculator = ThreadModelWrapperWithOutput(callback, *args)
         return ThreadModel(self.correction_calculator)
 
     def _selected_runs_and_groups(self) -> tuple:

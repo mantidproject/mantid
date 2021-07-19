@@ -24,13 +24,10 @@ class ThreadModelWrapper(object):
 
 
 class ThreadModelWrapperWithOutput(object):
-    def __init__(self, function=None):
+    def __init__(self, function, *args):
         self.callback = function
-        self.args = None
-        self.result = None
-
-    def set_args(self, *args):
         self.args = args
+        self.result = None
 
     def setInputs(self):
         pass
@@ -42,7 +39,4 @@ class ThreadModelWrapperWithOutput(object):
         pass
 
     def execute(self):
-        if self.args is not None:
-            self.result = self.callback(*self.args)
-        else:
-            self.result = self.callback()
+        self.result = self.callback(*self.args)
