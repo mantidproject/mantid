@@ -70,24 +70,10 @@ void replaceAll(std::string &str, std::string const &remove, std::string const &
   }
 }
 
-std::string getFilepathOfTemplateFile(std::string const &templateFilename) {
-  auto directory = ConfigService::Instance().getInstrumentDirectory();
-
-  auto const position = directory.find("instrument/");
-  if (position != std::string::npos) {
-    directory.erase(position, directory.length());
-    directory += "Framework/Algorithms/src/GeneratePythonFitScriptTemplates/";
-    directory += templateFilename;
-    return directory;
-  } else {
-    throw std::runtime_error("Failed to find the path of the template python fit scripts.");
-  }
-}
-
 std::string getFileContents(std::string const &filename) {
-  std::string filepath = getFilepathOfTemplateFile(filename);
+  auto const directory = ConfigService::Instance().getString("python.templates.directory");
 
-  std::ifstream filestream(filepath);
+  std::ifstream filestream(directory + "/" + filename);
   if (!filestream) {
     filestream.close();
     throw std::runtime_error("Error occured when attempting to load file: " + filename);
@@ -225,16 +211,16 @@ std::string GeneratePythonFitScript::generateFitScript(std::string const &fittin
   generatedScript += generateVariableSetupCode();
   generatedScript += "\n";
   if (fittingType == "Sequential")
-    generatedScript += getFileContents("SequentialFitTemplate.txt");
+    generatedScript += getFileContents("GeneratePythonFitScript_SequentialFit.py.in");
   else if (fittingType == "Simultaneous")
     generatedScript += generateSimultaneousFitCode();
   generatedScript += "\n";
-  generatedScript += getFileContents("PlottingOutputTemplate.txt");
+  generatedScript += getFileContents("GeneratePythonFitScript_PlottingOutput.py.in");
   return generatedScript;
 }
 
 std::string GeneratePythonFitScript::generateVariableSetupCode() const {
-  std::string code = getFileContents("VariableSetupTemplate.txt");
+  std::string code = getFileContents("GeneratePythonFitScript_VariableSetup.py.in");
 
   std::vector<std::string> const inputWorkspaces = getProperty("InputWorkspaces");
   std::vector<std::size_t> const workspaceIndices = getProperty("WorkspaceIndices");
@@ -258,12 +244,13 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
 }
 
 std::string GeneratePythonFitScript::generateSimultaneousFitCode() const {
-  std::string code = getFileContents("SimultaneousFitTemplate.txt");
+  std::string code = getFileContents("GeneratePythonFitScript_SimultaneousFit.py.in");
+  std::string const line = getFileContents("GeneratePythonFitScript_SimultaneousFitDomainLine.py.in");
 
   std::vector<std::string> const inputWorkspaces = getProperty("InputWorkspaces");
   std::string domainLines;
   for (auto i = 1u; i < inputWorkspaces.size(); ++i) {
-    std::string snippet = getFileContents("SimultaneousFitDomainLineTemplate.txt");
+    std::string snippet = line;
     replaceAll(snippet, "\"{{i}}\"", std::to_string(i));
     domainLines += snippet;
   }
