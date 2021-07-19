@@ -49,7 +49,7 @@ class CodeCompletionTest(unittest.TestCase):
 
     def test_numpy_call_tips_generated_if_numpy_imported_in_script(self):
         self._run_check_call_tip_generated("import numpy as np\n# My code",
-                                           r"np\.asarray\(a, \[dtype\], .*\)")
+                                           r"np\.asarray\(a, .*\)")
 
     def test_numpy_call_tips_generated_handling_wildcards_properly_if_numpy_imported_in_script(self):
         if LooseVersion(np.__version__) >= LooseVersion('1.21'):
