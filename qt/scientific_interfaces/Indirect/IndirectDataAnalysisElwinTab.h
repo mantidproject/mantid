@@ -31,6 +31,9 @@ public:
   void updateTableFromModel();
   QTableWidget *getDataTable() const;
 
+public slots:
+  void removeSelectedData();
+
 protected:
   QStringList m_wsSampleSuffixes;
   QStringList m_fbSampleSuffixes;
@@ -50,6 +53,7 @@ signals:
   /// Signal emitted when workspace selector is visible
   void workspaceViewVisible();
   void dataAdded();
+  void dataRemoved();
   void dataChanged();
 
 private:
@@ -84,9 +88,6 @@ private:
   bool m_emitCellChanged = true;
 
   virtual int workspaceIndexColumn() const;
-  virtual int startXColumn() const;
-  virtual int endXColumn() const;
-  virtual int excludeColumn() const;
 
   void setHorizontalHeaders(const QStringList &headers);
 

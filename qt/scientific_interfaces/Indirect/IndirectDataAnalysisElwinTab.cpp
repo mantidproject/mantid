@@ -120,10 +120,7 @@ public:
 QStringList defaultHeaders() {
   QStringList headers;
   headers << "Workspace"
-          << "WS Index"
-          << "StartX"
-          << "EndX"
-          << "Mask X Range";
+          << "WS Index";
   return headers;
 }
 
@@ -157,6 +154,8 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
   connect(m_uiForm.page_2, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
 
   connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
+  connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SLOT(removeSelectedData()));
+  connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SIGNAL(dataRemoved()));
 
   m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
   m_dataTable = getDataTable();
@@ -732,17 +731,6 @@ void IndirectDataAnalysisElwinTab::addTableEntry(FitDomainIndex row) {
   cell = std::make_unique<QTableWidgetItem>(QString::number(m_dataModel->getSpectrum(row)));
   cell->setFlags(flags);
   setCell(std::move(cell), row.value, workspaceIndexColumn());
-
-  const auto range = m_dataModel->getFittingRange(row);
-  cell = std::make_unique<QTableWidgetItem>(makeNumber(range.first));
-  setCell(std::move(cell), row.value, startXColumn());
-
-  cell = std::make_unique<QTableWidgetItem>(makeNumber(range.second));
-  setCell(std::move(cell), row.value, endXColumn());
-
-  const auto exclude = m_dataModel->getExcludeRegion(row);
-  cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(exclude));
-  setCell(std::move(cell), row.value, excludeColumn());
 }
 
 void IndirectDataAnalysisElwinTab::setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row, int column) {
@@ -755,12 +743,6 @@ void IndirectDataAnalysisElwinTab::setCellText(const QString &text, FitDomainInd
 
 int IndirectDataAnalysisElwinTab::workspaceIndexColumn() const { return 1; }
 
-int IndirectDataAnalysisElwinTab::startXColumn() const { return 2; }
-
-int IndirectDataAnalysisElwinTab::endXColumn() const { return 3; }
-
-int IndirectDataAnalysisElwinTab::excludeColumn() const { return 4; }
-
 void IndirectDataAnalysisElwinTab::setHorizontalHeaders(const QStringList &headers) {
   m_dataTable->setColumnCount(headers.size());
   m_dataTable->setHorizontalHeaderLabels(headers);
@@ -771,6 +753,16 @@ void IndirectDataAnalysisElwinTab::setHorizontalHeaders(const QStringList &heade
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   header->setSectionResizeMode(0, QHeaderView::Stretch);
 #endif
+}
+
+void IndirectDataAnalysisElwinTab::removeSelectedData() {
+  auto selectedIndices = m_dataTable->selectionModel()->selectedIndexes();
+  std::sort(selectedIndices.begin(), selectedIndices.end());
+  for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
+    --item;
+    m_dataModel->removeDataByIndex(FitDomainIndex(item->row()));
+  }
+  updateTableFromModel();
 }
 
 } // namespace IDA
