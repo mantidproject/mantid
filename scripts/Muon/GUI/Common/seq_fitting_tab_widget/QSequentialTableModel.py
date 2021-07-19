@@ -144,10 +144,6 @@ class QSequentialTableModel(QAbstractTableModel):
         if not workspace_names or not runs or not group_and_pairs:
             return
         self.beginInsertRows(QModelIndex(), 0, len(runs) - 1)
-        from mantid import logger
-        logger.warning(str(workspace_names))
-        logger.warning(str(runs))
-        logger.warning(str(group_and_pairs))
         for i in range(len(runs)):
             self._defaultData.insert(i, [workspace_names[i], runs[i], group_and_pairs[i], default_fit_status,
                                          default_chi_squared])
@@ -166,6 +162,10 @@ class QSequentialTableModel(QAbstractTableModel):
         self.setData(index, quality, Qt.EditRole)
         index = self.index(row, FIT_QUALITY_COLUMN)
         self.setData(index, chi_squared, Qt.EditRole)
+
+    def get_workspace_name_information(self, row):
+        index = self.index(row, WORKSPACE_COLUMN)
+        return self.data(index, Qt.DisplayRole)
 
     def get_run_information(self, row):
         index = self.index(row, RUN_COLUMN)

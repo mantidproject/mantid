@@ -171,9 +171,4 @@ class SeqFittingTabPresenter(object):
         self.selected_sequential_fit_notifier.notify_subscribers(fit_information)
 
     def get_workspaces_for_row_in_fit_table(self, row):
-        runs, group_and_pairs = self.view.fit_table.get_workspace_info_from_row(row)
-        separated_runs = runs.split(';')
-        separated_group_and_pairs = group_and_pairs.split(';')
-        workspace_names = self.model.get_fit_workspace_names_from_groups_and_runs(separated_runs,
-                                                                                  separated_group_and_pairs)
-        return workspace_names
+        return self.view.fit_table.get_workspace_names_from_row(row).split("/")

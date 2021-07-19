@@ -93,6 +93,9 @@ class SequentialTableWidget(object):
             rows += [model.row()]
         return rows
 
+    def get_workspace_names_from_row(self, row):
+        return self._model.get_workspace_name_information(row)
+
     def get_workspace_info_from_row(self, row):
         if row > self._model.rowCount():
             return WorkspaceInfo([], [])

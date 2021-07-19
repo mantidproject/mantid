@@ -881,3 +881,80 @@ class BasicFittingModel:
             fit_function = self.get_single_fit_function_for(name)
             if fit_function is not None:
                 self._set_fit_function_parameter_values(fit_function, parameter_values)
+
+    def perform_sequential_fit(self, workspaces: list, parameter_values: list, use_initial_values: bool = False) -> tuple:
+        """Performs a sequential fit of the workspace names provided for single fitting mode.
+
+        :param workspaces: A list of lists of workspace names e.g. [[Row 1 workspaces], [Row 2 workspaces], etc...]
+        :param parameter_values: A list of lists of parameter values e.g. [[Row 1 params], [Row 2 params], etc...]
+        :param use_initial_values: If false the parameters at the end of each fit are passed on to the next fit.
+        """
+        workspaces = self._flatten_workspace_names(workspaces)
+        return self._perform_sequential_fit_using_func(self._do_sequential_fit, workspaces, parameter_values,
+                                                       use_initial_values)
+
+    def _perform_sequential_fit_using_func(self, fitting_func, workspaces: list, parameter_values: list,
+                                           use_initial_values: bool = False) -> tuple:
+        """Performs a sequential fit of the workspace names provided for the current fitting mode."""
+        functions, fit_statuses, chi_squared_list = self._evaluate_sequential_fit(
+            fitting_func, workspaces, parameter_values, use_initial_values)
+
+        self._update_fit_functions_after_sequential_fit(workspaces, functions)
+        self._update_fit_statuses_and_chi_squared_after_sequential_fit(workspaces, fit_statuses, chi_squared_list)
+        return functions, fit_statuses, chi_squared_list
+
+    def _do_sequential_fit(self, row_index: int, workspace_name: str, parameter_values: list, functions: list,
+                           use_initial_values: bool = False):
+        """Performs a sequential fit of the single fit data."""
+        single_function = functions[row_index - 1].clone() if not use_initial_values and row_index >= 1 else \
+            self._get_single_function_with_parameters(parameter_values)
+
+        params = self._get_parameters_for_single_fit(workspace_name, single_function)
+
+        return self._do_single_fit(params)
+
+    def _get_single_function_with_parameters(self, parameter_values: list) -> IFunction:
+        """Returns the current single fit function but with the parameter values provided."""
+        single_fit_function = self.current_single_fit_function.clone()
+        self._set_fit_function_parameter_values(single_fit_function, parameter_values)
+        return single_fit_function
+
+    @staticmethod
+    def _evaluate_sequential_fit(fitting_func, workspace_names: list, parameter_values: list,
+                                 use_initial_values: bool = False):
+        """Evaluates a sequential fit using the provided fitting func. The workspace_names is either a 1D or 2D list."""
+        functions, fit_statuses, chi_squared_list = [], [], []
+
+        for row_index, row_workspaces in enumerate(workspace_names):
+            function, fit_status, chi_squared = fitting_func(row_index, row_workspaces, parameter_values[row_index],
+                                                             functions, use_initial_values)
+
+            functions.append(function)
+            fit_statuses.append(fit_status)
+            chi_squared_list.append(chi_squared)
+
+        return functions, fit_statuses, chi_squared_list
+
+    def _update_fit_functions_after_sequential_fit(self, workspaces: list, functions: list) -> None:
+        """Updates the fit functions after a sequential fit has been run on the Sequential fitting tab."""
+        dataset_names = self.fitting_context.dataset_names
+
+        for workspace_index, workspace_name in enumerate(workspaces):
+            if workspace_name in dataset_names:
+                dataset_index = dataset_names.index(workspace_name)
+                self.fitting_context.single_fit_functions[dataset_index] = functions[workspace_index]
+
+    def _update_fit_statuses_and_chi_squared_after_sequential_fit(self, workspaces, fit_statuses, chi_squared_list):
+        """Updates the fit statuses and chi squared after a sequential fit."""
+        dataset_names = self.fitting_context.dataset_names
+
+        for workspace_index, workspace_name in enumerate(workspaces):
+            if workspace_name in dataset_names:
+                dataset_index = dataset_names.index(workspace_name)
+                self.fitting_context.fit_statuses[dataset_index] = fit_statuses[workspace_index]
+                self.fitting_context.chi_squared[dataset_index] = chi_squared_list[workspace_index]
+
+    @staticmethod
+    def _flatten_workspace_names(workspaces: list) -> list:
+        """Provides a workspace name list of lists to be flattened if in single fitting mode."""
+        return [workspace for fit_workspaces in workspaces for workspace in fit_workspaces]
