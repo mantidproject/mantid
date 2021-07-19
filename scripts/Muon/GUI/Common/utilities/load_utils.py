@@ -204,7 +204,7 @@ def load_workspace_from_filename(filename,
 
     # The filename given to the loading algorithm can be different to the file that was actually loaded.
     # Pulling the filename back out of the algorithm after loading ensures that the path is accurate.
-    filename = alg.getProperty("Filename").value
+    filename = alg.getProperty("Filename").value[0]
     workspace = AnalysisDataService.retrieve(alg.getProperty("OutputWorkspace").valueAsStr)
     if is_workspace_group(workspace):
         # handle multi-period data
@@ -240,17 +240,35 @@ def empty_loaded_data():
 
 
 def create_load_algorithm(filename, property_dictionary):
+    # # Assume if .bin it is a PSI file
+    # psi_data = False
+    # output_filename = os.path.basename(filename)
+    # if ".bin" in filename:
+    #     alg = mantid.AlgorithmManager.create("LoadPSIMuonBin")
+    #     psi_data = True
+    # else:
+    #     alg = mantid.AlgorithmManager.create("LoadMuonNexus")
+    #     alg.setProperties(property_dictionary)
+    # alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
+    #
+    # alg.initialize()
+    # alg.setAlwaysStoreInADS(True)
+    # alg.setProperty("OutputWorkspace", output_filename)
+    # alg.setProperty("Filename", filename)
+    # return alg, psi_data
+
     psi_data = False
-    if ".bin" in filename:
-        psi_data = True
     output_filename = os.path.basename(filename)
-    alg = mantid.AlgorithmManager.create("LoadMuonData")
+    alg = mantid.AlgorithmManager.create("Load")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
-    alg.setProperties(property_dictionary)
     alg.setProperty("Filename", filename)
     alg.setProperty("OutputWorkspace", output_filename)
     alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
+    alg.setProperty("TimeZeroTable", output_filename + '_time_zero_table')
+    if ".bin" in filename:
+        psi_data = True
+        # alg.setProperty("DetectorGroupingTable", output_filename + '_detector_grouping_table')
     return alg, psi_data
 
 
