@@ -124,7 +124,7 @@ QStringList defaultHeaders() {
   return headers;
 }
 
-QString makeNumber(double d) { return QString::number(d, 'g', 16); }
+// QString makeNumber(double d) { return QString::number(d, 'g', 16); }
 
 class ScopedFalse {
   bool &m_ref;
