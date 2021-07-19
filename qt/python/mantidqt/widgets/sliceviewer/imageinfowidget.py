@@ -26,12 +26,15 @@ ImageInfoWidget = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')
 
 class ImageInfoTracker(CursorTracker):
     def __init__(self, image: Union[AxesImage, QuadMesh], transform: NonOrthogonalTransform,
-                 do_transform: bool, widget: ImageInfoWidget, cursor_transform):
+                 do_transform: bool, widget: ImageInfoWidget, cursor_transform: tuple = None):
         """
         Update the image that the widget refers too.
         :param: An AxesImage or Mesh instance to track
         :param: transpose_xy: If true the cursor position should be transposed
                 before sending to the table update
+        :param do_transform: Flag to perform transform for QuadMesh images
+        :param widget: ImageInfoWidget instance
+        :param cursor_transform: Full axes limits to use for mouse coord transform to use instead of image extents
         """
         super().__init__(image_axes=image.axes, autoconnect=False)
         self._image = image

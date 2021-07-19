@@ -254,8 +254,6 @@ class SliceViewerDataView(QWidget):
                                     transpose=self.dimensions.transpose,
                                     norm=self.colorbar.get_norm(),
                                     **kwargs)
-        self.on_track_cursor_state_change(self.track_cursor_checked())
-
         # ensure the axes data limits are updated to match the
         # image. For example if the axes were zoomed and the
         # swap dimensions was clicked we need to restore the
@@ -263,7 +261,11 @@ class SliceViewerDataView(QWidget):
         extent = self.image.get_extent()
         self.ax.set_xlim(extent[0], extent[1])
         self.ax.set_ylim(extent[2], extent[3])
+        # Set the original data limits which get passed to the ImageInfoWidget so that
+        # the mouse projection to data space is correct for MDH workspaces when zoomed/changing slices
         self._orig_lims = self.get_axes_limits()
+
+        self.on_track_cursor_state_change(self.track_cursor_checked())
 
         self.draw_plot()
 
