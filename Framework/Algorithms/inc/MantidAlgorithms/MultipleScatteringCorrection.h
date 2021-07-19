@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -13,8 +14,17 @@ namespace Algorithms {
 
 /** MultipleScatteringCorrection : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL MultipleScatteringCorrection {
+class MANTID_ALGORITHMS_DLL MultipleScatteringCorrection : public API::Algorithm {
 public:
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
+  std::map<std::string, std::string> validateInputs() override;
+
+private:
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms
