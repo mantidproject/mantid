@@ -192,5 +192,8 @@ void LoadMuonData::exec() {
   }
 }
 
+int LoadMuonData::confidence(Kernel::FileDescriptor &descriptor) const { return false; }
+bool LoadMuonData::loadMutipleAsOne() { return false; }
+
 } // namespace DataHandling
 } // namespace Mantid
