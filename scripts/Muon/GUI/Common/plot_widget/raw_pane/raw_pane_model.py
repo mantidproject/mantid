@@ -58,9 +58,9 @@ class RawPaneModel(BasePaneModel):
         if run not in self.context.data_context.current_runs:
             return workspace_list
         multi_period = False
-        if self.context._data_context.num_periods(run) >1:
+        if self.context.data_context.num_periods(run) >1:
             multi_period = True
-            for period in range(self.context._data_context.num_periods(run)):
+            for period in range(self.context.data_context.num_periods(run)):
                 # periods start at 1 and not 0
                 workspace_list += self.get_ws_names(run_string, multi_period, str(period+1),detectors)
         else:

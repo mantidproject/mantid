@@ -37,7 +37,6 @@ class RawPanePresenter(BasePanePresenter):
         workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(True,
                                                                                       self._view.get_plot_type(), detectors, run)
         self.add_list_to_plot(workspace_list, indicies, hold=hold_on, autoscale=autoscale)
-        self._figure_presenter.force_autoscale()
 
     def handle_plot_tiled_state_changed(self):
         """
