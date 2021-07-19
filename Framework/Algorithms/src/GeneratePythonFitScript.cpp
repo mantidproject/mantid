@@ -232,10 +232,9 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
   std::string const costFunction = getProperty("CostFunction");
   std::string const evaluationType = getProperty("EvaluationType");
 
-  replaceAll(code, "\"{{input_dictionary}}\"",
-             constructInputDictionary(inputWorkspaces, workspaceIndices, startXs, endXs));
-  replaceAll(code, "\"{{function_string}}\"", generateFunctionString());
-  replaceAll(code, "\"{{max_iterations}}\"", std::to_string(maxIterations));
+  replaceAll(code, "{{input_dictionary}}", constructInputDictionary(inputWorkspaces, workspaceIndices, startXs, endXs));
+  replaceAll(code, "{{function_string}}", generateFunctionString());
+  replaceAll(code, "{{max_iterations}}", std::to_string(maxIterations));
   replaceAll(code, "{{minimizer}}", minimizer);
   replaceAll(code, "{{cost_function}}", costFunction);
   replaceAll(code, "{{evaluation_type}}", evaluationType);
@@ -251,11 +250,11 @@ std::string GeneratePythonFitScript::generateSimultaneousFitCode() const {
   std::string domainLines;
   for (auto i = 1u; i < inputWorkspaces.size(); ++i) {
     std::string snippet = line;
-    replaceAll(snippet, "\"{{i}}\"", std::to_string(i));
+    replaceAll(snippet, "{{i}}", std::to_string(i));
     domainLines += snippet;
   }
 
-  replaceAll(code, "\"{{other_domains}}\"", domainLines);
+  replaceAll(code, "{{other_domains}}", domainLines);
   return code;
 }
 
