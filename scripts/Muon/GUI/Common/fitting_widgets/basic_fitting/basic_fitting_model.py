@@ -829,7 +829,7 @@ class BasicFittingModel:
         for name in self.fitting_context.dataset_names:
             runs.append(get_run_numbers_as_string_from_workspace_name(name, self.context.data_context.instrument))
             groups_and_pairs.append(get_group_or_pair_from_name(name))
-        return runs, groups_and_pairs
+        return self.fitting_context.dataset_names, runs, groups_and_pairs
 
     def get_all_fit_function_parameter_values_for(self, fit_function: IFunction) -> list:
         """Returns the values of the fit function parameters."""

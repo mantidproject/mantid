@@ -67,8 +67,8 @@ class SeqFittingTabPresenter(object):
             self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
 
     def handle_selected_workspaces_changed(self):
-        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
-        self.view.fit_table.set_fit_workspaces(runs, groups_and_pairs)
+        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
+        self.view.fit_table.set_fit_workspaces(workspace_names, runs, groups_and_pairs)
         self.handle_fit_function_updated()
 
     def handle_fit_selected_pressed(self):

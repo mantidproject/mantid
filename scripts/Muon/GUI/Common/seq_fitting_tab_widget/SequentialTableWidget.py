@@ -56,9 +56,9 @@ class SequentialTableWidget(object):
         self._model.set_fit_quality(row, quality, chi_squared)
         self.block_signals(False)
 
-    def set_fit_workspaces(self, runs, group_and_pairs):
+    def set_fit_workspaces(self, workspace_names, runs, group_and_pairs):
         self.block_signals(True)
-        self._model.set_fit_workspaces(runs, group_and_pairs)
+        self._model.set_fit_workspaces(workspace_names, runs, group_and_pairs)
         self.block_signals(False)
 
     def set_selection_to_last_row(self):
