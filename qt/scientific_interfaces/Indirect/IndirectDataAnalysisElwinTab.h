@@ -88,6 +88,8 @@ private:
   virtual int endXColumn() const;
   virtual int excludeColumn() const;
 
+  void setHorizontalHeaders(const QStringList &headers);
+
 private slots:
   void newInputFiles();
   void newPreviewFileSelected(int index);

@@ -81,6 +81,52 @@ IAlgorithm_sptr loadAlgorithm(std::string const &filepath, std::string const &ou
   return loadAlg;
 }
 
+namespace Regexes {
+const QString EMPTY = "^$";
+const QString SPACE = "(\\s)*";
+const QString COMMA = SPACE + "," + SPACE;
+const QString NATURAL_NUMBER = "(0|[1-9][0-9]*)";
+const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
+const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
+const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
+} // namespace Regexes
+
+class ExcludeRegionDelegate : public QItemDelegate {
+public:
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
+                        const QModelIndex & /*index*/) const override {
+    auto lineEdit = std::make_unique<QLineEdit>(parent);
+    auto validator = std::make_unique<QRegExpValidator>(QRegExp(Regexes::MASK_LIST), parent);
+    lineEdit->setValidator(validator.release());
+    return lineEdit.release();
+  }
+
+  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
+    const auto value = index.model()->data(index, Qt::EditRole).toString();
+    static_cast<QLineEdit *>(editor)->setText(value);
+  }
+
+  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
+    auto *lineEdit = static_cast<QLineEdit *>(editor);
+    model->setData(index, lineEdit->text(), Qt::EditRole);
+  }
+
+  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                            const QModelIndex & /*index*/) const override {
+    editor->setGeometry(option.rect);
+  }
+};
+
+QStringList defaultHeaders() {
+  QStringList headers;
+  headers << "Workspace"
+          << "WS Index"
+          << "StartX"
+          << "EndX"
+          << "Mask X Range";
+  return headers;
+}
+
 QString makeNumber(double d) { return QString::number(d, 'g', 16); }
 
 class ScopedFalse {
@@ -114,6 +160,13 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
 
   m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
   m_dataTable = getDataTable();
+
+  const QStringList headers = defaultHeaders();
+  setHorizontalHeaders(headers);
+  m_dataTable->setItemDelegateForColumn(headers.size() - 1, std::make_unique<ExcludeRegionDelegate>().release());
+  m_dataTable->verticalHeader()->setVisible(false);
+
+  connect(m_dataTable, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
 }
 
 IndirectDataAnalysisElwinTab::~IndirectDataAnalysisElwinTab() {
@@ -707,6 +760,18 @@ int IndirectDataAnalysisElwinTab::startXColumn() const { return 2; }
 int IndirectDataAnalysisElwinTab::endXColumn() const { return 3; }
 
 int IndirectDataAnalysisElwinTab::excludeColumn() const { return 4; }
+
+void IndirectDataAnalysisElwinTab::setHorizontalHeaders(const QStringList &headers) {
+  m_dataTable->setColumnCount(headers.size());
+  m_dataTable->setHorizontalHeaderLabels(headers);
+
+  auto header = m_dataTable->horizontalHeader();
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  header->setResizeMode(0, QHeaderView::Stretch);
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  header->setSectionResizeMode(0, QHeaderView::Stretch);
+#endif
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces
