@@ -16,6 +16,8 @@
 
 #include <algorithm>
 
+#include "IndirectAddWorkspaceDialog.h"
+
 using namespace Mantid::API;
 using namespace MantidQt::API;
 
@@ -79,16 +81,91 @@ IAlgorithm_sptr loadAlgorithm(std::string const &filepath, std::string const &ou
   return loadAlg;
 }
 
+namespace Regexes {
+const QString EMPTY = "^$";
+const QString SPACE = "(\\s)*";
+const QString COMMA = SPACE + "," + SPACE;
+const QString NATURAL_NUMBER = "(0|[1-9][0-9]*)";
+const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
+const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
+const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
+} // namespace Regexes
+
+class ExcludeRegionDelegate : public QItemDelegate {
+public:
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
+                        const QModelIndex & /*index*/) const override {
+    auto lineEdit = std::make_unique<QLineEdit>(parent);
+    auto validator = std::make_unique<QRegExpValidator>(QRegExp(Regexes::MASK_LIST), parent);
+    lineEdit->setValidator(validator.release());
+    return lineEdit.release();
+  }
+
+  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
+    const auto value = index.model()->data(index, Qt::EditRole).toString();
+    static_cast<QLineEdit *>(editor)->setText(value);
+  }
+
+  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
+    auto *lineEdit = static_cast<QLineEdit *>(editor);
+    model->setData(index, lineEdit->text(), Qt::EditRole);
+  }
+
+  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                            const QModelIndex & /*index*/) const override {
+    editor->setGeometry(option.rect);
+  }
+};
+
+QStringList defaultHeaders() {
+  QStringList headers;
+  headers << "Workspace"
+          << "WS Index";
+  return headers;
+}
+
+// QString makeNumber(double d) { return QString::number(d, 'g', 16); }
+
+class ScopedFalse {
+  bool &m_ref;
+  bool m_oldValue;
+
+public:
+  // this sets the input bool to false whilst this object is in scope and then
+  // resets it to its old value when this object drops out of scope.
+  explicit ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) { m_ref = false; }
+  ~ScopedFalse() { m_ref = m_oldValue; }
+};
+
 } // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr) {
+    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr), m_dataModel(std::make_unique<IndirectFitDataTableModel>()) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
+  connect(m_uiForm.inputChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
+
+  // data selected changes
+  connect(m_uiForm.page, SIGNAL(filesFoundChanged()), this, SLOT(handleFileInput()));
+  connect(m_uiForm.page_2, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
+
+  connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
+  connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SLOT(removeSelectedData()));
+  connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SIGNAL(dataRemoved()));
+
+  m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
+  m_dataTable = getDataTable();
+
+  const QStringList headers = defaultHeaders();
+  setHorizontalHeaders(headers);
+  m_dataTable->setItemDelegateForColumn(headers.size() - 1, std::make_unique<ExcludeRegionDelegate>().release());
+  m_dataTable->verticalHeader()->setVisible(false);
+
+  connect(m_dataTable, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
 }
 
 IndirectDataAnalysisElwinTab::~IndirectDataAnalysisElwinTab() {
@@ -264,6 +341,25 @@ void IndirectDataAnalysisElwinTab::run() {
   m_pythonExportWsName = qSquaredWorkspace;
 }
 
+/**
+ * Handles when the view changes between workspace and file selection
+ *
+ * @param index :: The index the stacked widget has been switched too.
+ */
+void IndirectDataAnalysisElwinTab::handleViewChanged(int index) {
+  // Index indicates which view is visible.
+  m_uiForm.stackedInputWidget->setCurrentIndex(index);
+
+  // 0 is always file view
+  switch (index) {
+  case 0:
+    emit fileViewVisible();
+    break;
+  case 1:
+    emit workspaceViewVisible();
+    break;
+  }
+}
 /**
  * Ungroups the output after the execution of the algorithm
  */
@@ -568,6 +664,106 @@ void IndirectDataAnalysisElwinTab::setButtonsEnabled(const bool &enabled) {
 void IndirectDataAnalysisElwinTab::setRunEnabled(const bool &enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
 void IndirectDataAnalysisElwinTab::setSaveResultEnabled(const bool &enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+
+std::unique_ptr<IAddWorkspaceDialog> IndirectDataAnalysisElwinTab::getAddWorkspaceDialog(QWidget *parent) const {
+  return std::make_unique<IndirectAddWorkspaceDialog>(parent);
+}
+
+void IndirectDataAnalysisElwinTab::showAddWorkspaceDialog() {
+  if (!m_addWorkspaceDialog)
+    m_addWorkspaceDialog = getAddWorkspaceDialog(m_parent);
+  m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
+  m_addWorkspaceDialog->setFBSuffices(getSampleFBSuffices());
+  m_addWorkspaceDialog->updateSelectedSpectra();
+  m_addWorkspaceDialog->show();
+  connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
+  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
+}
+
+QStringList IndirectDataAnalysisElwinTab::getSampleWSSuffices() const { return m_wsSampleSuffixes; }
+
+QStringList IndirectDataAnalysisElwinTab::getSampleFBSuffices() const { return m_fbSampleSuffixes; }
+
+void IndirectDataAnalysisElwinTab::closeDialog() {
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
+  m_addWorkspaceDialog->close();
+  m_addWorkspaceDialog = nullptr;
+}
+
+void IndirectDataAnalysisElwinTab::addData() { addData(m_addWorkspaceDialog.get()); }
+
+void IndirectDataAnalysisElwinTab::addData(IAddWorkspaceDialog const *dialog) {
+  try {
+    addDataToModel(dialog);
+    updateTableFromModel();
+    emit dataAdded();
+    emit dataChanged();
+  } catch (const std::runtime_error &ex) {
+    displayWarning(ex.what());
+  }
+}
+
+void IndirectDataAnalysisElwinTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
+    m_dataModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+}
+
+void IndirectDataAnalysisElwinTab::updateTableFromModel() {
+  ScopedFalse _signalBlock(m_emitCellChanged);
+  m_dataTable->setRowCount(0);
+  for (auto domainIndex = FitDomainIndex{0}; domainIndex < m_dataModel->getNumberOfDomains(); domainIndex++) {
+    addTableEntry(domainIndex);
+  }
+}
+
+QTableWidget *IndirectDataAnalysisElwinTab::getDataTable() const { return m_uiForm.tbElwinData; }
+
+void IndirectDataAnalysisElwinTab::addTableEntry(FitDomainIndex row) {
+  m_dataTable->insertRow(static_cast<int>(row.value));
+  const auto &name = m_dataModel->getWorkspace(row)->getName();
+  auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
+  auto flags = cell->flags();
+  flags ^= Qt::ItemIsEditable;
+  cell->setFlags(flags);
+  setCell(std::move(cell), row.value, 0);
+
+  cell = std::make_unique<QTableWidgetItem>(QString::number(m_dataModel->getSpectrum(row)));
+  cell->setFlags(flags);
+  setCell(std::move(cell), row.value, workspaceIndexColumn());
+}
+
+void IndirectDataAnalysisElwinTab::setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row, int column) {
+  m_dataTable->setItem(static_cast<int>(row.value), column, cell.release());
+}
+
+void IndirectDataAnalysisElwinTab::setCellText(const QString &text, FitDomainIndex row, int column) {
+  m_dataTable->item(static_cast<int>(row.value), column)->setText(text);
+}
+
+int IndirectDataAnalysisElwinTab::workspaceIndexColumn() const { return 1; }
+
+void IndirectDataAnalysisElwinTab::setHorizontalHeaders(const QStringList &headers) {
+  m_dataTable->setColumnCount(headers.size());
+  m_dataTable->setHorizontalHeaderLabels(headers);
+
+  auto header = m_dataTable->horizontalHeader();
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  header->setResizeMode(0, QHeaderView::Stretch);
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  header->setSectionResizeMode(0, QHeaderView::Stretch);
+#endif
+}
+
+void IndirectDataAnalysisElwinTab::removeSelectedData() {
+  auto selectedIndices = m_dataTable->selectionModel()->selectedIndexes();
+  std::sort(selectedIndices.begin(), selectedIndices.end());
+  for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
+    --item;
+    m_dataModel->removeDataByIndex(FitDomainIndex(item->row()));
+  }
+  updateTableFromModel();
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces
