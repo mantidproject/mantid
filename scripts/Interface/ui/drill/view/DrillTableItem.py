@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from qtpy.QtWidgets import QTableWidgetItem
-from qtpy.QtCore import QObject, Signal
+from qtpy.QtCore import QObject, Signal, Qt
 
 
 class DrillTableItemSignals(QObject):
@@ -35,6 +35,14 @@ class DrillTableItem(QTableWidgetItem):
             DrillTableItem: a new item
         """
         return DrillTableItem()
+
+    def setData(self, role, value):
+        """
+        Override QTableWidgetItem::setData.
+        """
+        super().setData(role, value)
+        if role == Qt.EditRole:
+            self.signals.dataChanged.emit()
 
     def setPresenter(self, presenter):
         """
