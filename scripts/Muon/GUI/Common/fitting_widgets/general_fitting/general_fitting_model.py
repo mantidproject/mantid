@@ -443,20 +443,24 @@ class GeneralFittingModel(BasicFittingModel):
         elif self.fitting_context.simultaneous_fit_by == "Group/Pair":
             return self._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs()
         else:
-            return [], []
+            return [], [], []
 
     def _get_runs_groups_and_pairs_for_simultaneous_fit_by_runs(self):
         """Returns the runs and group/pairs for the selected data in simultaneous fit by runs mode."""
         runs = self._get_selected_runs()
         groups_and_pairs = [get_group_or_pair_from_name(name) for name in self.fitting_context.dataset_names]
-        return runs, [";".join(groups_and_pairs)] * len(runs)
+        workspace_names = [";".join(self.get_fit_workspace_names_from_groups_and_runs([run], groups_and_pairs))
+                           for run in runs]
+        return workspace_names, runs, [";".join(groups_and_pairs)] * len(runs)
 
     def _get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs(self):
         """Returns the runs and group/pairs for the selected data in simultaneous fit by group/pairs mode."""
         runs = [get_run_numbers_as_string_from_workspace_name(name, self.context.data_context.instrument)
                 for name in self.fitting_context.dataset_names]
         groups_and_pairs = self._get_selected_groups_and_pairs()
-        return [";".join(runs)] * len(groups_and_pairs), groups_and_pairs
+        workspace_names = [";".join(self.get_fit_workspace_names_from_groups_and_runs(runs, [group_and_pair]))
+                           for group_and_pair in groups_and_pairs]
+        return workspace_names, [";".join(runs)] * len(groups_and_pairs), groups_and_pairs
 
     def get_all_fit_functions(self) -> list:
         """Returns all the fit functions for the current fitting mode."""
