@@ -1020,6 +1020,8 @@ public:
 
     // check that the logs have been loaded by looking at some random example
     TS_ASSERT_DELTA(eventWS->run().getPropertyAsSingleValue("reactor_power"), 43.21, 1e-2);
+
+    AnalysisDataService::Instance().remove("dummy");
   }
 
   void test_load_ILL_triggers() {
@@ -1047,6 +1049,8 @@ public:
 
     // check that the logs have been loaded by looking at some random example
     TS_ASSERT_DELTA(eventWS->run().getPropertyAsSingleValue("reactor_power"), 43.2, 1e-2);
+
+    AnalysisDataService::Instance().remove("dummy");
   }
 
 private:
