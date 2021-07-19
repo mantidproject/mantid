@@ -339,8 +339,8 @@ class DrillTableWidget(QTableWidget):
                 or (column < 0) or (column >= n_columns)):
             return
         cell = self.itemPrototype().clone()
-        cell.setText(contents)
         self.setItem(row, column, cell)
+        cell.setData(Qt.EditRole, contents)
 
     def setRowBackground(self, row, color):
         """
