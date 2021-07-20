@@ -5,6 +5,14 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
+Frequency Domain Analysis
+-------------------------
+
+New Features
+############
+
+- The Frequency Domain Analysis interface now allows you to perform a sequential fit using the Sequential Fitting tab.
+
 Muon Analysis
 -------------
 

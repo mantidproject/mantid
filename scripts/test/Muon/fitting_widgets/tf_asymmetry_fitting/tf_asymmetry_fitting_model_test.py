@@ -564,13 +564,15 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.assertEqual(normalisations, [1.234, 2.234])
 
     def test_that_get_runs_groups_and_pairs_for_fits_will_attempt_to_get_the_runs_groups_and_pairs_when_in_single_fit_mode(self):
-        self.model._get_runs_groups_and_pairs_for_single_fit = mock.Mock(return_value=(["62260"], ["fwd", "bwd"]))
+        self.mock_context_instrument = mock.PropertyMock(return_value="EMU")
+        type(self.model.context.data_context).instrument = self.mock_context_instrument
 
-        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
-        self.assertEqual(runs, ["62260"])
-        self.assertEqual(groups_and_pairs, ["fwd", "bwd"])
+        self.model.dataset_names = self.dataset_names
 
-        self.model._get_runs_groups_and_pairs_for_single_fit.assert_called_once_with()
+        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
+        self.assertEqual(workspace_names, self.dataset_names)
+        self.assertEqual(runs, ["20884", "20884"])
+        self.assertEqual(groups_and_pairs, ["fwd", "top"])
 
     def test_that_get_runs_groups_and_pairs_for_fits_will_attempt_to_get_it_by_runs_when_in_simultaneous_fitting_mode(self):
         self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_runs = mock.Mock(return_value=(["62260"], ["fwd;bwd;long"]))
