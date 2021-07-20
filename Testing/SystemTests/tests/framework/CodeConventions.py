@@ -25,6 +25,7 @@ ALG_BAD_PARAMS = {
     "ConvertToMDMinMaxGlobal(v1)": ("dEAnalysisMode"),
     "EstimateDivergence(v1)": ("alpha", "beta0", "beta1"),
     "FindUBUsingLatticeParameters(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
+    "FindGlobalBMatrix(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "IndexSXPeaks(v1)": ("a", "b", "c", "alpha", "beta", "gamma", "dTolerance"),
     "LoadDNSSCD(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "ModeratorTzero(v1)": ("tolTOF"),
