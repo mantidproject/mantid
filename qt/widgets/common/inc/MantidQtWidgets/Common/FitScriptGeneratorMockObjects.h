@@ -77,11 +77,13 @@ public:
   MOCK_CONST_METHOD1(parameterValue, double(std::string const &parameter));
   MOCK_CONST_METHOD1(attributeValue, Mantid::API::IFunction::Attribute(std::string const &attribute));
 
-  MOCK_METHOD2(removeWorkspaceDomain, void(std::string const &workspaceName, WorkspaceIndex workspaceIndex));
+  MOCK_METHOD2(renameWorkspace, void(std::string const &workspaceName, std::string const &newName));
+
+  MOCK_METHOD1(removeDomain, void(MantidQt::MantidWidgets::FitDomainIndex domainIndex));
   MOCK_METHOD4(addWorkspaceDomain,
                void(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX));
 
-  MOCK_METHOD0(openAddWorkspaceDialog, bool());
+  MOCK_METHOD0(openAddWorkspaceDialog, void());
   MOCK_METHOD0(getDialogWorkspaces, std::vector<Mantid::API::MatrixWorkspace_const_sptr>());
   MOCK_CONST_METHOD0(getDialogWorkspaceIndices, std::vector<WorkspaceIndex>());
 
@@ -126,10 +128,12 @@ class MockFitScriptGeneratorModel : public IFitScriptGeneratorModel {
 public:
   MOCK_METHOD1(subscribePresenter, void(IFitScriptGeneratorPresenter *presenter));
 
-  MOCK_METHOD2(removeWorkspaceDomain, void(std::string const &workspaceName, WorkspaceIndex workspaceIndex));
+  MOCK_METHOD1(removeDomain, void(MantidQt::MantidWidgets::FitDomainIndex domainIndex));
   MOCK_METHOD4(addWorkspaceDomain,
                void(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX));
   MOCK_CONST_METHOD2(hasWorkspaceDomain, bool(std::string const &workspaceName, WorkspaceIndex workspaceIndex));
+
+  MOCK_METHOD2(renameWorkspace, void(std::string const &workspaceName, std::string const &newName));
 
   MOCK_METHOD3(updateStartX, bool(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX));
   MOCK_METHOD3(updateEndX, bool(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double endX));

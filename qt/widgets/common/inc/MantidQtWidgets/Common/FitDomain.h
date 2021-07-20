@@ -29,6 +29,8 @@ class EXPORT_OPT_MANTIDQT_COMMON FitDomain {
 public:
   FitDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX);
 
+  void setWorkspaceName(std::string const &workspaceName);
+
   [[nodiscard]] std::string domainName() const;
   [[nodiscard]] std::string workspaceName() const noexcept { return m_workspaceName; }
   [[nodiscard]] WorkspaceIndex workspaceIndex() const noexcept { return m_workspaceIndex; }
