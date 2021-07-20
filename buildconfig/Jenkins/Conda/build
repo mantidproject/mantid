@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# This script expects a setup environment with all dependencies availiable in
+# the environment
+#
+# Expected args:
+#   1. WORKSPACE: path to the workspace/source code that this should run inside
+#   2. ENABLE_SYSTEM_TESTS: whether or not to build the system tests
+#   3. CMAKE_PRESET: the CMake preset that should be ran to generate the cmake files for this CI job
+
+WORKSPACE=$1
+ENABLE_SYSTEM_TESTS=$2
+CMAKE_PRESET=$3
+
+# Only pass MANTID_DATA_STORE to CMake if present in the environment otherwise rely on CMake default
+if [![ -z "$MANTID_DATA_STORE" ]]; then
+    MANTID_DATA_STORE_CMAKE="-DMANTID_DATA_STORE=${MANTID_DATA_STORE}"
+fi
+# Run CMake using preset and variables ${DIST_FLAGS} is from the environment
+cmake --preset=$CMAKE_PRESET -DCOVERAGE=${COVERAGE} ${MANTID_DATA_STORE_CMAKE} ${DIST_FLAGS} $WORKSPACE
+
+# Run the actual build of
+cd $WORKSPACE/build
+cmake --build .
+cmake --build . --target AllTests
+
+# Build system tests
+if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
+    cmake --build . --target SystemTestData
+fi
