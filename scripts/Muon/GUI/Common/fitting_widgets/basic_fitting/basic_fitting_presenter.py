@@ -132,6 +132,7 @@ class BasicFittingPresenter:
 
         self.update_fit_function_in_view_from_model()
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        self.update_covariance_matrix_button()
 
         self.update_plot_fit()
         self.update_plot_guess()
@@ -176,6 +177,7 @@ class BasicFittingPresenter:
         self.update_fit_function_in_model(fit_function)
 
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        self.update_covariance_matrix_button()
         self.update_fit_function_in_view_from_model()
 
         self.update_plot_fit()
@@ -198,6 +200,7 @@ class BasicFittingPresenter:
         self.model.current_dataset_index = self.view.current_dataset_index
 
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        self.update_covariance_matrix_button()
         self.update_fit_function_in_view_from_model()
         self.update_start_and_end_x_in_view_from_model()
 
@@ -356,6 +359,10 @@ class BasicFittingPresenter:
         self.view.update_local_fit_status_and_chi_squared(self.model.current_fit_status,
                                                           self.model.current_chi_squared)
         self.view.update_global_fit_status(self.model.fit_statuses, self.model.current_dataset_index)
+
+    def update_covariance_matrix_button(self) -> None:
+        """Updates the covariance matrix button to be enabled if a covariance matrix exists for the selected data."""
+        self.view.set_covariance_button_enabled(self.model.has_normalised_covariance_matrix())
 
     def update_start_and_end_x_in_view_from_model(self) -> None:
         """Updates the start and end x in the view using the current values in the model."""

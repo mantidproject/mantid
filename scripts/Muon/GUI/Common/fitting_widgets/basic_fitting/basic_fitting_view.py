@@ -295,6 +295,10 @@ class BasicFittingView(ui_form, base_widget):
         """Sets whether the exclude start and end x options are visible."""
         self.fit_function_options.set_exclude_start_and_end_x_visible(visible)
 
+    def set_covariance_button_enabled(self, enabled: bool) -> None:
+        """Sets whether the Covariance Matrix button is enabled or not."""
+        self.fit_function_options.set_covariance_button_enabled(enabled)
+
     def disable_view(self) -> None:
         """Disable all widgets in this fitting widget."""
         self.setEnabled(False)

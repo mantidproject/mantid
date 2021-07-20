@@ -307,6 +307,10 @@ class FitFunctionOptionsView(ui_form, base_widget):
             self.fit_options_table.hideRow(EXCLUDE_START_X_TABLE_ROW)
             self.fit_options_table.hideRow(EXCLUDE_END_X_TABLE_ROW)
 
+    def set_covariance_button_enabled(self, enabled: bool) -> None:
+        """Sets whether the Covariance Matrix button is enabled or not."""
+        self.covariance_matrix_button.setEnabled(enabled)
+
     def _setup_fit_options_table(self) -> None:
         """Setup the fit options table with the appropriate options."""
         self.fit_options_table.setRowCount(8)
