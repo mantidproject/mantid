@@ -715,7 +715,11 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
     auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
       std::vector<double> rotationMatrix = experiment.run().getGoniometer().getR();
-      xml = Geometry::ShapeFactory().addGoniometerTag(rotationMatrix, xml);
+      if (rotationMatrix != std::vector<double>{1, 0, 0, 0, 1, 0, 0, 0, 1} && !sampleEnv) {
+        // Only add goniometer tag if rotataionMatrix is not the Identity,
+        // and this shape is not defined within a sample environment
+        xml = Geometry::ShapeFactory().addGoniometerTag(rotationMatrix, xml);
+      }
       CreateSampleShape::setSampleShape(experiment, xml);
       return;
     }

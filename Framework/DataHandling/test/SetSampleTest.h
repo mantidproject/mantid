@@ -348,11 +348,7 @@ public:
                    "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.005\"/> "
                    "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.007\"/> "
                    "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.005\"/> "
-                   "</cuboid><algebra val=\"back:front\"/> "
-                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
-                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" "
-                   "a31=\"0.000000\" a32=\"0.000000\" a33=\"1.000000\"/> "
-                   "</type>";
+                   "</cuboid><algebra val=\"back:front\"/> </type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -412,11 +408,7 @@ public:
                    "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.015\"/> "
                    "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.017\"/> "
                    "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.015\"/> "
-                   "</cuboid><algebra val=\"back:front\"/> "
-                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
-                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" "
-                   "a31=\"0.000000\" a32=\"0.000000\" a33=\"1.000000\"/> "
-                   "</type>";
+                   "</cuboid><algebra val=\"back:front\"/> </type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -445,11 +437,7 @@ public:
                    "x=\"0.005\" y=\"0.0065\" z=\"-0.004\"/> <left-back-bottom-point "
                    "x=\"0.007\" y=\"-0.0065\" z=\"-0.004\"/> <right-front-bottom-point "
                    "x=\"0.005\" y=\"-0.0065\" z=\"0.004\"/> </cuboid><algebra "
-                   "val=\"back:front\"/> "
-                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
-                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" "
-                   "a31=\"0.000000\" a32=\"0.000000\" a33=\"1.000000\"/> "
-                   "</type>";
+                   "val=\"back:front\"/> </type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -477,11 +465,7 @@ public:
                    "z=\"0\"/> <axis x=\"0\" y=\"1\" z=\"0\"/> <height "
                    "val=\"0.01\"/> <inner-radius val=\"0.003\"/><outer-radius "
                    "val=\"0.004\"/></hollow-cylinder><algebra "
-                   "val=\"inner:outer\"/> "
-                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
-                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" "
-                   "a31=\"0.000000\" a32=\"0.000000\" a33=\"1.000000\"/> "
-                   "</type>";
+                   "val=\"inner:outer\"/> </type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -509,11 +493,7 @@ public:
                    "z=\"0.07\"/> <axis x=\"0\" y=\"1\" z=\"0\"/> <height "
                    "val=\"0.01\"/> <inner-radius val=\"0.003\"/><outer-radius "
                    "val=\"0.004\"/></hollow-cylinder><algebra "
-                   "val=\"inner:outer\"/> "
-                   "<goniometer a11=\"1.000000\" a12=\"0.000000\" a13=\"0.000000\" "
-                   "a21=\"0.000000\" a22=\"1.000000\" a23=\"0.000000\" "
-                   "a31=\"0.000000\" a32=\"0.000000\" a33=\"1.000000\"/> "
-                   "</type>";
+                   "val=\"inner:outer\"/> </type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
