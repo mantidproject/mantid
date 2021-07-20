@@ -18,7 +18,8 @@ using Mantid::API::FrameworkManager;
 using Mantid::API::MatrixWorkspace_sptr;
 
 namespace {
-MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3, const int nBins = 2, const int numBanks = 2) {
+MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3, const int nBins = 2, const int numBanks = 2,
+                                     const std::string &xUnit = "TOF") {
   CreateSampleWorkspace creator;
   creator.initialize();
   creator.setChild(true);
@@ -28,6 +29,7 @@ MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3, const int nBi
   creator.setProperty("XMax", 2.);
   creator.setProperty("BinWidth", 1. / nBins);
   creator.setProperty("BankPixelWidth", nPixelsPerBank);
+  creator.setProperty("XUnit", xUnit);
   creator.setPropertyValue("OutputWorkspace", "__unused");
   creator.execute();
   MatrixWorkspace_sptr in = creator.getProperty("OutputWorkspace");
