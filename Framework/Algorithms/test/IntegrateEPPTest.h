@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/IntegrateEPP.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -148,5 +149,41 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
     TS_ASSERT_THROWS_ANYTHING(alg.execute())
     TS_ASSERT(!alg.isExecuted())
+  }
+
+  void testValidateInputsForGroupWS() {
+    using namespace Mantid::API;
+    using namespace WorkspaceCreationHelper;
+    const size_t nHist = 3;
+    const size_t nBins = 6;
+    auto groupWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.
+    groupWS->addWorkspace(create2DWorkspaceWhereYIsWorkspaceIndex(nHist, nBins + 1));
+    groupWS->addWorkspace(create2DWorkspaceWhereYIsWorkspaceIndex(nHist, nBins + 1));
+
+    AnalysisDataService::Instance().addOrReplace("groupWS", groupWS);
+
+    std::vector<EPPTableRow> eppRows(nHist);
+    for (auto &row : eppRows) {
+      row.peakCentre = static_cast<double>(nBins + 1) / 2.0;
+      row.sigma = 1;
+    }
+    auto eppWS = createEPPTableWorkspace(eppRows);
+
+    IntegrateEPP alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "groupWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidthInSigmas", 1.0));
+
+    // Make sure validateInputs doesn't throw for a WorkspaceGroup input.
+    Algorithm &baseAlg = alg;
+    TS_ASSERT_THROWS_NOTHING(baseAlg.validateInputs());
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
   }
 };

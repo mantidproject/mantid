@@ -20,22 +20,13 @@ Improvements
 ############
 
 - :ref:`CreateSampleWorkspace <algm-CreateSampleWorkspace>` has new property InstrumentName.
+- :ref:`CrossCorrelate <algm-CrossCorrelate>` has additional parameter to set the maximum d-space shift during cross correlation
 
 Bugfixes
 ########
 
 - Fix rare divide-by zero error when running :ref:`GetEi <algm-GetEi>` on noisy data.
-
-
-Improvements
-############
-
-- :ref:`CrossCorrelate <algm-CrossCorrelate>` has additional parameter to set the maximum d-space shift during cross correlation
-
-Improvements
-############
-
-- :ref:`CrossCorrelate <algm-CrossCorrelate>` has additional parameter to set the maximum d-space shift during cross correlation
+- Fix crash when running :ref:`IntegrateEPP <algm-IntegrateEPP>` on a workspace group via the algorithm dialog.
 
 Fit Functions
 -------------
