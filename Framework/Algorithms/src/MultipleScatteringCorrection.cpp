@@ -23,6 +23,12 @@ using namespace API;
 using namespace Kernel;
 using namespace Mantid::DataObjects;
 
+DECLARE_ALGORITHM(MultipleScatteringCorrection)
+
+/**
+ * @brief interface initialisation method
+ *
+ */
 void MultipleScatteringCorrection::init() {
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = std::make_shared<CompositeValidator>();
@@ -45,6 +51,11 @@ void MultipleScatteringCorrection::init() {
   declareProperty("ElementSize", 1.0, moreThanZero, "The size of one side of an integration element cube in mm");
 }
 
+/**
+ * @brief validate the inputs
+ *
+ * @return std::map<std::string, std::string>
+ */
 std::map<std::string, std::string> MultipleScatteringCorrection::validateInputs() {
   std::map<std::string, std::string> result;
 
@@ -62,5 +73,12 @@ std::map<std::string, std::string> MultipleScatteringCorrection::validateInputs(
   }
   return result;
 }
+
+/**
+ * @brief execute the algorithm
+ *
+ */
+void MultipleScatteringCorrection::exec() {}
+
 } // namespace Algorithms
 } // namespace Mantid
