@@ -30,6 +30,7 @@ New Features
 ############
 
 - It is now possible to Exclude a range from a fit range when doing a fit on the Fitting tab.
+- Added a 'Covariance Matrix' button to the Fitting tab that can be used to open and inspect the normalised covariance parameters of a fit.
 
 Improvements
 ############
