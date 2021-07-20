@@ -1,12 +1,10 @@
 #!/bin/bash
 
-#####################################################################################
+# This script will download and install mambaforge if it's not present where expected
 #
 # Expected args:
 #   1. EXPECTED_MAMBAFORGE_PATH: path to where mambaforge should be installed
 #   2. EXPECTED_CONDA_PATH: path to the conda executable
-#
-#####################################################################################
 
 EXPECTED_MAMBAFORGE_PATH=$1
 EXPECTED_CONDA_PATH=$2
