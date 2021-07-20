@@ -889,14 +889,14 @@ public:
   void test_that_isValid_returns_true_if_the_data_stored_in_the_model_is_sufficient_for_generating_a_file() {
     setup_sequential_fit_with_no_ties();
 
-    auto const [valid, message] = m_model->isValid();
+    auto const [valid, message] = m_model->isValid("Output_Fit");
 
     TS_ASSERT(valid);
     TS_ASSERT_EQUALS(message, "");
   }
 
   void test_that_isValid_returns_false_if_there_is_not_data_loaded() {
-    auto const [valid, message] = m_model->isValid();
+    auto const [valid, message] = m_model->isValid("Output_Fit");
 
     TS_ASSERT(!valid);
     TS_ASSERT_EQUALS(message, "Domain data must be loaded before generating a python script.");
@@ -908,7 +908,7 @@ public:
 
     m_model->setFunction(m_wsName, m_wsIndex, m_flatBackground->asString());
 
-    auto const [valid, message] = m_model->isValid();
+    auto const [valid, message] = m_model->isValid("Output_Fit");
 
     TS_ASSERT(!valid);
     TS_ASSERT_EQUALS(message, "A function must exist in ALL domains to generate a python script.");
@@ -922,13 +922,22 @@ public:
     m_model->setFunction(m_wsName, m_wsIndex, m_flatBackground->asString());
     m_model->setFunction("Name2", m_wsIndex, m_expDecay->asString());
 
-    auto const [valid, message] = m_model->isValid();
+    auto const [valid, message] = m_model->isValid("Output_Fit");
 
     TS_ASSERT(valid);
     TS_ASSERT_EQUALS(message,
                      "Note that each domain should have the same fit function, including ties and constraints, for a "
                      "sequential fit. This is not the case for the fit functions you have provided. \n\nThe sequential "
                      "fit script will be generated using the fit function in the first domain.");
+  }
+
+  void test_that_isValid_returns_false_and_a_warning_message_if_the_output_base_name_is_empty() {
+    setup_sequential_fit_with_no_ties();
+
+    auto const [valid, message] = m_model->isValid("");
+
+    TS_ASSERT(!valid);
+    TS_ASSERT_EQUALS(message, "The Output Base Name must not be empty, please provide an Output Base Name.");
   }
 
 private:

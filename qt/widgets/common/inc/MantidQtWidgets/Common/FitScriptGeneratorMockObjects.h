@@ -96,6 +96,7 @@ public:
                                                               std::vector<std::string>, std::vector<std::string>>());
 
   MOCK_CONST_METHOD0(fitOptions, std::tuple<std::string, std::string, std::string, std::string, std::string, bool>());
+  MOCK_CONST_METHOD0(outputBaseName, std::string());
   MOCK_CONST_METHOD0(filepath, std::string());
 
   MOCK_METHOD0(resetSelection, void());
@@ -207,7 +208,7 @@ public:
   MOCK_CONST_METHOD0(getGlobalTies, std::vector<GlobalTie>());
   MOCK_CONST_METHOD0(getGlobalParameters, std::vector<GlobalParameter>());
 
-  MOCK_CONST_METHOD0(isValid, std::tuple<bool, std::string>());
+  MOCK_CONST_METHOD1(isValid, std::tuple<bool, std::string>(std::string const &outputBaseName));
 
   std::string generatePythonFitScript([[maybe_unused]] std::tuple<std::string, std::string, std::string, std::string,
                                                                   std::string, bool> const &fitOptions,

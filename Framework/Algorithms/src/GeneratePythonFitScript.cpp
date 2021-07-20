@@ -227,7 +227,8 @@ std::string GeneratePythonFitScript::generateFitScript(std::string const &fittin
   else if (fittingType == "Simultaneous")
     generatedScript += generateSimultaneousFitCode();
 
-  if (bool plotOutput = getProperty("PlotOutput")) {
+  bool plotOutput = getProperty("PlotOutput");
+  if (plotOutput) {
     generatedScript += "\n";
     generatedScript += getFileContents("GeneratePythonFitScript_PlottingOutput.py.in");
   }
