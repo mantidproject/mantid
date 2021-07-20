@@ -25,6 +25,7 @@ Improvements
 - :ref:`SNAPReduce <algm-SNAPReduce-v1>` permits saving selected property names and values to file, to aid autoreduction.
 - Add a custom ttmode to the PEARL powder diffraction scripts for running with a custom grouping file
 - improve performance of :ref:`ApplyDiffCal <algm-ApplyDiffCal>` on large instruments eg WISH. This in turn improves the performance of :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`
+- added a 3mf format file describing the PEARL sample and environment shapes for the P-E press. Also fixed a couple of minor issues in the 3mf file format loader used in ref:`LoadSampleEnvironment  <algm-LoadSampleEnvironment>`
 
 Bugfixes
 ########
