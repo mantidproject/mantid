@@ -80,6 +80,9 @@ public:
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS(timeSeriesString.substr(0, 24), "2006-Nov-21 07:03:08  50");
+
+    l_property = output->run().getLogData(std::string("Temp_Cryostat"));
+    TS_ASSERT_EQUALS(l_property->units(), "K");
   }
 
 private:

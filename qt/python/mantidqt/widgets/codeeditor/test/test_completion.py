@@ -7,11 +7,12 @@
 #  This file is part of the mantid workbench.
 import re
 import unittest
+from distutils.version import LooseVersion
 
-import matplotlib.pyplot as plt  # noqa
-import numpy as np  # noqa
+import matplotlib.pyplot as plt  # noqa # Needs importing so it's availiabe in the tests, but isn't actually used.
+import numpy as np
 
-from mantid.simpleapi import Rebin  # noqa  # needed so sys.modules can pick up Rebin
+from mantid.simpleapi import FrameworkManager
 from unittest.mock import Mock
 from mantidqt.widgets.codeeditor.completion import (CodeCompleter, generate_call_tips, get_function_spec,
                                                     get_builtin_argspec, get_module_import_alias)
@@ -19,6 +20,9 @@ from testhelpers import assertRaisesNothing
 
 
 class CodeCompletionTest(unittest.TestCase):
+    def setUp(self):
+        # needed so sys.modules can pick up Rebin
+        FrameworkManager.Instance()
 
     def _get_completer(self, text, env_globals=None):
         return CodeCompleter(Mock(text=lambda: text, fileName=lambda: ""), env_globals)
@@ -46,6 +50,11 @@ class CodeCompletionTest(unittest.TestCase):
     def test_numpy_call_tips_generated_if_numpy_imported_in_script(self):
         self._run_check_call_tip_generated("import numpy as np\n# My code",
                                            r"np\.asarray\(a, \[dtype\], .*\)")
+
+    def test_numpy_call_tips_generated_handling_wildcards_properly_if_numpy_imported_in_script(self):
+        if LooseVersion(np.__version__) >= LooseVersion('1.21'):
+            self._run_check_call_tip_generated("import numpy as np\n# My code",
+                                               r"np\.asarray\(a, \[dtype\], \[order\], \*, \[like\]\)")
 
     def test_call_tips_generated_if_syntax_errors_in_script(self):
         self._run_check_call_tip_generated("from mantid.simpleapi import *\n print 'Hello', 'World'", "Rebin")

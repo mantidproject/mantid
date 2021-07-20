@@ -9,8 +9,8 @@
 #include <utility>
 
 #include "Common/OptionDefaults.h"
+#include "LookupTableValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "PerThetaDefaultsTableValidator.h"
 #include "Reduction/Experiment.h"
 
 namespace MantidQt {
@@ -84,20 +84,20 @@ Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
   auto const processingInstructions = defaults.getStringOrEmpty("ProcessingInstructions", "ProcessingInstructions");
   auto const backgroundProcessingInstructions =
       defaults.getStringOrEmpty("BackgroundProcessingInstructions", "BackgroundProcessingInstructions");
-  auto perThetaDefaultsRow = PerThetaDefaults::ValueArray{
-      {theta, firstTransmissionRun, secondTransmissionRun, transmissionProcessingInstructions, qMin, qMax, qStep,
-       scaleFactor, processingInstructions, backgroundProcessingInstructions}};
-  auto perThetaDefaults = std::vector<PerThetaDefaults::ValueArray>{perThetaDefaultsRow};
-  auto validate = PerThetaDefaultsTableValidator();
+  auto lookupRow =
+      LookupRow::ValueArray{{theta, firstTransmissionRun, secondTransmissionRun, transmissionProcessingInstructions,
+                             qMin, qMax, qStep, scaleFactor, processingInstructions, backgroundProcessingInstructions}};
+  auto lookupTable = std::vector<LookupRow::ValueArray>{lookupRow};
+  auto validate = LookupTableValidator();
   auto const tolerance = 0.0; // irrelevant because theta is empty
-  auto perThetaValidationResult = validate(perThetaDefaults, tolerance);
-  if (!perThetaValidationResult.isValid())
-    throw std::invalid_argument("Errors were found in the per-angle default values");
+  auto lookupTableValidationResult = validate(lookupTable, tolerance);
+  if (!lookupTableValidationResult.isValid())
+    throw std::invalid_argument("Errors were found in the lookup table values");
 
   return Experiment(analysisMode, reductionType, summationType, includePartialBins, debug,
                     std::move(backgroundSubtraction), std::move(polarizationCorrections), std::move(floodCorrections),
                     std::move(transmissionStitchOptions), std::move(stitchParameters),
-                    std::move(perThetaValidationResult.assertValid()));
+                    std::move(lookupTableValidationResult.assertValid()));
 }
 } // unnamed namespace
 

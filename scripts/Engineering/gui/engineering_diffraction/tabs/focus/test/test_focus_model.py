@@ -9,7 +9,7 @@ import tempfile
 import shutil
 from os import path
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 from mantid.simpleapi import CreateSampleWorkspace
 from Engineering.gui.engineering_diffraction.tabs.focus import model
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -17,8 +17,8 @@ from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import
 
 file_path = "Engineering.gui.engineering_diffraction.tabs.focus.model"
 
-DF_KWARG_NORTH = {'GroupingFileName': 'EnginX_NorthBank.cal'}
-DF_KWARG_SOUTH = {'GroupingFileName': 'EnginX_SouthBank.cal'}
+DF_KWARG_NORTH = {'GroupingWorkspace': 'NorthBank_grouping'}
+DF_KWARG_SOUTH = {'GroupingWorkspace': 'SouthBank_grouping'}
 DF_KWARG_CUSTOM = {'GroupingWorkspace': 'custom_grouping_wsp'}
 
 
@@ -37,13 +37,32 @@ class FocusModelTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
+    @patch(file_path + ".DeleteWorkspace")
     @patch(file_path + ".Load")
+    @patch(file_path + ".FocusModel._output_sample_logs")
+    @patch(file_path + ".Ads")
+    @patch(file_path + ".FocusModel._save_output")
+    @patch(file_path + ".FocusModel._whole_inst_prefocus")
+    @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + ".vanadium_corrections.Ads.doesExist")
-    def test_focus_cancelled_if_van_wsp_missing(self, ads_exist, load_sample, load):
-        ads_exist.return_value = False
-        self.model.focus_run("307593", ["1", "2"], False, "ENGINX", "0", None, None)
-        self.assertEqual(load_sample.call_count, 0)
+    @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
+    def test_focus_run_for_each_bank(self, fetch_van, load_focus, run_focus, prefocus, output, ads, logs, load, delete):
+        ads.retrieve.side_effect = ["full_calib", "calib_n", "curves_n", "calib_s", "curves_s"]
+        regions_dict = {"bank_1": "NorthBank_grouping", "bank_2": "SouthBank_grouping"}
+        load_focus.return_value = "mocked_sample"
+        fetch_van.return_value = ("mocked_integ", "mocked_curves")
+        van_path = "fake/van/path"
+
+        self.model.focus_run(["305761"], van_path, False, "ENGINX", "0", regions_dict)
+
+        self.assertEqual(2, run_focus.call_count)
+        north_call = call("mocked_sample",
+                          "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "bank_1",
+                          "curves_n", "NorthBank_grouping", "calib_n")
+        south_call = call("mocked_sample",
+                          "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "bank_2",
+                          "curves_s", "SouthBank_grouping", "calib_s")
+        run_focus.assert_has_calls([north_call, south_call])
 
     @patch(file_path + ".DeleteWorkspace")
     @patch(file_path + ".Load")
@@ -53,39 +72,21 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".FocusModel._whole_inst_prefocus")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
-    def test_focus_run_for_each_bank(self, load_focus, run_focus, prefocus, output, ads, logs, load, delete):
-        ads.retrieve.return_value = "test_wsp"
-        banks = ["1", "2"]
+    @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
+    def test_focus_run_for_custom_spectra(self, fetch_van, load_focus, run_focus, prefocus, output, ads, logs, load,
+                                          delete):
+        ads.retrieve.side_effect = ["full_calib", "calib_cropped", "curves_cropped"]
+        fetch_van.return_value = ("mocked_integ", "mocked_curves")
+        van_path = "fake/van/path"
         load_focus.return_value = "mocked_sample"
+        regions_dict = {"Cropped": "Custom_spectra_grouping"}
 
-        self.model.focus_run(["305761"], banks, False, "ENGINX", "0", None, None)
-
-        self.assertEqual(len(banks), run_focus.call_count)
-        run_focus.assert_called_with("mocked_sample",
-                                     "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1],
-                                     "test_wsp", DF_KWARG_SOUTH, "engggui_calibration_bank_2")
-
-    @patch(file_path + ".create_custom_grouping_workspace")
-    @patch(file_path + ".DeleteWorkspace")
-    @patch(file_path + ".Load")
-    @patch(file_path + ".FocusModel._output_sample_logs")
-    @patch(file_path + ".Ads")
-    @patch(file_path + ".FocusModel._save_output")
-    @patch(file_path + ".FocusModel._whole_inst_prefocus")
-    @patch(file_path + ".FocusModel._run_focus")
-    @patch(file_path + ".path_handling.load_workspace")
-    def test_focus_run_for_custom_spectra(self, load_focus, run_focus, prefocus, output, ads, logs, load, delete, cgw):
-        ads.retrieve.return_value = "test_wsp"
-        spectra = "20-50"
-        load_focus.return_value = "mocked_sample"
-        cgw.return_value = "custom_grouping_wsp"
-
-        self.model.focus_run(["305761"], None, False, "ENGINX", "0", spectra, None)
+        self.model.focus_run(["305761"], van_path, False, "ENGINX", "0", regions_dict)
 
         self.assertEqual(1, run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
                                      "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "Cropped",
-                                     "test_wsp", DF_KWARG_CUSTOM, "engggui_calibration_Cropped")
+                                     "curves_cropped", "Custom_spectra_grouping", "calib_cropped")
 
     @patch(file_path + ".DeleteWorkspace")
     @patch(file_path + ".Load")
@@ -101,10 +102,11 @@ class FocusModelTest(unittest.TestCase):
                                         load, delete):
         ads.doesExist.return_value = True
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
-        banks = ["1", "2"]
+        van_path = "fake/van/path"
+        regions_dict = {"bank_1": "NorthBank_grouping", "bank_2": "SouthBank_grouping"}
         load_focus.return_value = "mocked_sample"
 
-        self.model.focus_run(["305761"], banks, True, "ENGINX", "0", None, None)
+        self.model.focus_run(["305761"], van_path, True, "ENGINX", "0", regions_dict)
 
         self.assertEqual(1, plot_focus.call_count)
 
@@ -121,10 +123,11 @@ class FocusModelTest(unittest.TestCase):
     def test_focus_not_plotted_when_not_checked(self, fetch_van, load_focus, run_focus, prefocus, plot_focus, output,
                                                 ads, logs, load, delete):
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
-        banks = ["1", "2"]
+        van_path = "fake/van/path"
+        regions_dict = {"region1": "grp_ws_name"}
         load_focus.return_value = "mocked_sample"
 
-        self.model.focus_run("305761", banks, False, "ENGINX", "0", None, None)
+        self.model.focus_run("305761", van_path, False, "ENGINX", "0", regions_dict)
         self.assertEqual(0, plot_focus.call_count)
 
     @patch(file_path + ".SaveFocusedXYE")
@@ -133,7 +136,7 @@ class FocusModelTest(unittest.TestCase):
     def test_save_output_files_with_no_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
         output_file = path.join(path_handling.get_output_path(), "Focus",
-                                "ENGINX_123_bank_North_TOF.nxs")
+                                "ENGINX_123_North_TOF.nxs")
 
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
                                 mocked_workspace, None)
@@ -189,13 +192,14 @@ class FocusModelTest(unittest.TestCase):
     def test_last_path_updates_with_no_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
         output_file = path.join(path_handling.get_output_path(), "Focus",
-                                "ENGINX_123_bank_North_TOF.nxs")
+                                "ENGINX_123_North_TOF.nxs")
 
-        self.model._last_path_ws = 'ENGINX_123_bank_North_TOF.nxs'
+        self.model._last_path_ws = 'ENGINX_123_North_TOF.nxs'
+
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
                                 mocked_workspace, None)
 
-        self.assertEqual(self.model._last_path, output_file)
+        self.assertEqual(self.model._last_focused_files[0], output_file)
 
     @patch(file_path + ".SaveFocusedXYE")
     @patch(file_path + ".SaveGSS")
@@ -204,13 +208,14 @@ class FocusModelTest(unittest.TestCase):
         mocked_workspace = "mocked-workspace"
         rb_num = '2'
         output_file = path.join(path_handling.get_output_path(), "User", rb_num, "Focus",
-                                "ENGINX_123_bank_North_TOF.nxs")
+                                "ENGINX_123_North_TOF.nxs")
 
-        self.model._last_path_ws = 'ENGINX_123_bank_North_TOF.nxs'
+        self.model._last_path_ws = 'ENGINX_123_North_TOF.nxs'
+
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
                                 mocked_workspace, rb_num)
 
-        self.assertEqual(self.model._last_path, output_file)
+        self.assertEqual(self.model._last_focused_files[0], output_file)
 
 
 if __name__ == '__main__':

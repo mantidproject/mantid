@@ -10,6 +10,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
+#include "MantidCurveFitting/SpecialFunctionSupport.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -24,6 +25,7 @@ namespace CurveFitting {
 namespace Functions {
 
 using namespace CurveFitting;
+using namespace CurveFitting::SpecialFunctionSupport;
 namespace {
 /// static logger
 Kernel::Logger g_log("Bk2BkExpConvPV");
@@ -181,58 +183,11 @@ double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha, do
   if (eta < 1.0E-8) {
     omega2 = 0.0;
   } else {
-    omega2 = 2 * N * eta / M_PI * (imag(exp(p) * E1(p)) + imag(exp(q) * E1(q)));
+    omega2 = 2 * N * eta / M_PI * (imag(exponentialIntegral(p)) + imag(exponentialIntegral(q)));
   }
   double omega = omega1 - omega2;
 
   return omega;
-}
-
-/** Implementation of complex integral E_1
- */
-std::complex<double> Bk2BkExpConvPV::E1(std::complex<double> z) const {
-  std::complex<double> e1;
-
-  double rz = real(z);
-  double az = abs(z);
-
-  if (fabs(az) < 1.0E-8) {
-    // If z = 0, then the result is infinity... diverge!
-    std::complex<double> r(1.0E300, 0.0);
-    e1 = r;
-  } else if (az <= 10.0 || (rz < 0.0 && az < 20.0)) {
-    // Some interesting region, equal to integrate to infinity, converged
-    std::complex<double> r(1.0, 0.0);
-    e1 = r;
-    std::complex<double> cr = r;
-
-    for (size_t k = 0; k < 150; ++k) {
-      auto dk = double(k);
-      cr = -cr * dk * z / ((dk + 2.0) * (dk + 2.0));
-      e1 += cr;
-      if (abs(cr) < abs(e1) * 1.0E-15) {
-        // cr is converged to zero
-        break;
-      }
-    } // ENDFOR k
-
-    e1 = -e1 - log(z) + (z * e1);
-  } else {
-    std::complex<double> ct0(0.0, 0.0);
-    for (int k = 120; k > 0; --k) {
-      std::complex<double> dk(double(k), 0.0);
-      ct0 = dk / (10.0 + dk / (z + ct0));
-    } // ENDFOR k
-
-    e1 = 1.0 / (z + ct0);
-    e1 = e1 * exp(-z);
-    if (rz < 0.0 && fabs(imag(z)) < 1.0E-10) {
-      std::complex<double> u(0.0, 1.0);
-      e1 = e1 - (M_PI * u);
-    }
-  }
-
-  return e1;
 }
 
 void Bk2BkExpConvPV::geneatePeak(double *out, const double *xValues, const size_t nData) {

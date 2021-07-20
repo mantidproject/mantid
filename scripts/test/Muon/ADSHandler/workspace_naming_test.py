@@ -57,6 +57,24 @@ class WorkspaceNamingTest(unittest.TestCase):
         self.assertEqual(period_name_rebin, add_rebin_to_name(period_name))
         self.assertEqual(period_name_rebin, add_rebin_to_name(period_name_rebin))
 
+    def test_get_run_number_from_raw_name(self):
+        run = "2532"
+        name = get_raw_data_workspace_name("HIFI", run, False)
+
+        self.assertEqual(run, get_run_number_from_raw_name(name, "HIFI"))
+
+    def test_get_period_from_raw_name_single(self):
+        run = "2532"
+        name = get_raw_data_workspace_name("HIFI", run, False)
+
+        self.assertEqual("", get_period_from_raw_name(name, "MA"))
+
+    def test_get_period_from_raw_name_mutli(self):
+        run = "2532"
+        name = get_raw_data_workspace_name("HIFI", run, True, "3")
+
+        self.assertEqual("_period3 ", get_period_from_raw_name(name, "MA"))
+
     def test_check_phasequad_name(self):
         self.assertEqual(True, check_phasequad_name("Ref_data_Re_"))
         self.assertEqual(True, check_phasequad_name("Ref_data_Im_"))
@@ -127,7 +145,7 @@ class WorkspaceNamingTest(unittest.TestCase):
 
         name = create_model_fitting_parameter_combination_name(results_table_name, x_parameter, y_parameter)
 
-        self.assertEqual(name, "Result1; A0 vs A1")
+        self.assertEqual(name, "Result1; A1 vs A0")
 
     def test_create_model_fitting_parameters_group_name(self):
         results_table_name = "Result1"

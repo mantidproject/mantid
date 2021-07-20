@@ -177,8 +177,11 @@ class FittingDataModel(object):
         else:
             self.clear_logs()
 
+    def get_ws_list(self):
+        return list(self._loaded_workspaces.keys())
+
     def get_ws_sorted_by_primary_log(self):
-        ws_list = list(self._loaded_workspaces.keys())
+        ws_list = self.get_ws_list()
         tof_ws_inds = [ind for ind, ws in enumerate(ws_list) if
                        self._loaded_workspaces[ws].getAxis(0).getUnit().caption() == 'Time-of-flight']
         primary_log = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
@@ -202,7 +205,6 @@ class FittingDataModel(object):
             self._fit_results[wsname] = {'model': fit_prop['properties']['Function'],
                                          'status': fit_prop['status']}
             self._fit_results[wsname]['results'] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
-            self._fit_results[wsname]
             fnames = [x.split('=')[-1] for x in findall('name=[^,]*', fit_prop['properties']['Function'])]
             # get num params for each function (first elem empty as str begins with 'name=')
             # need to remove ties and constraints which are enclosed in ()
@@ -338,6 +340,10 @@ class FittingDataModel(object):
 
     def get_sample_log_from_ws(self, ws_name, log_name):
         return self._loaded_workspaces[ws_name].getSampleDetails().getLogData(log_name).value
+
+    def set_log_workspaces_none(self):
+        # to be used in the event of Ads clear, as trying to reference the deleted grp ws results in an error
+        self._log_workspaces = None
 
     def _convert_TOF_to_d(self, tof, ws_name):
         diff_consts = self._get_diff_constants(ws_name)

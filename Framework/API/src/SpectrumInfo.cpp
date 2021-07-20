@@ -17,6 +17,7 @@
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
+#include <limits>
 #include <memory>
 
 using namespace Mantid::Kernel;
@@ -259,7 +260,7 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit, const Kernel
     }
   } else {
     pmap[UnitParams::twoTheta] = 0.0;
-    pmap[UnitParams::efixed] = DBL_MIN;
+    pmap[UnitParams::efixed] = std::numeric_limits<double>::min();
     // Energy transfer is meaningless for a monitor, so set l2 to 0.
     if (outputUnit.unitID().find("DeltaE") != std::string::npos) {
       pmap[UnitParams::l2] = 0.0;

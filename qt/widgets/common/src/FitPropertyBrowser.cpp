@@ -70,7 +70,6 @@ using namespace Mantid::API;
 int getNumberOfSpectra(const MatrixWorkspace_sptr &workspace) {
   return static_cast<int>(workspace->getNumberHistograms());
 }
-
 } // namespace
 
 /**
@@ -1554,7 +1553,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     if (isHistogramFit()) {
       alg->setProperty("EvaluationType", "Histogram");
     }
-    alg->setPropertyValue("Function", compositeFunction()->asString());
+    alg->setProperty("Function", std::dynamic_pointer_cast<Mantid::API::IFunction>(compositeFunction())->clone());
     alg->setProperty("InputWorkspace", ws);
     auto tbl = std::dynamic_pointer_cast<ITableWorkspace>(ws);
     if (!tbl) {
@@ -2036,11 +2035,6 @@ void FitPropertyBrowser::getFitResults() {
         std::string name;
         double value, error;
         row >> name >> value >> error;
-
-        // In case of a single function Fit doesn't create a CompositeFunction
-        if (count() == 1) {
-          name.insert(0, "f0.");
-        }
 
         size_t paramIndex = compositeFunction()->parameterIndex(name);
 

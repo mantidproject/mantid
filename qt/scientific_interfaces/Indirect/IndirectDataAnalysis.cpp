@@ -72,8 +72,6 @@ void IndirectDataAnalysis::initLayout() {
   // Set up all tabs
   for (auto &tab : m_tabs) {
     tab.second->setupTab();
-    connect(tab.second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
-            SIGNAL(runAsPythonScript(const QString &, bool)));
     connect(tab.second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
   }
 
@@ -107,9 +105,9 @@ void IndirectDataAnalysis::loadSettings() {
 
   settings.setValue("last_directory", QString::fromStdString(saveDir));
 
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
+  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->loadTabSettings(settings);
-
+  }
   settings.endGroup();
 }
 

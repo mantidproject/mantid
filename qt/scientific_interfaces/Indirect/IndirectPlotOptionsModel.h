@@ -6,13 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ExternalPlotter.h"
+#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <boost/none_t.hpp>
 #include <boost/optional.hpp>
+
+using namespace MantidQt::Widgets::MplCpp;
 
 namespace MantidQt {
 namespace CustomInterfaces {
