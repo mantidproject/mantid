@@ -273,6 +273,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
   }
   m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
   NXclose(&nxfileID);
+  runDetails.addProperty("run_list", runDetails.getPropertyValueAsType<int>("run_number"));
   g_log.debug() << "End parsing properties from : " << filename << '\n';
 }
 

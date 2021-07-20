@@ -170,6 +170,8 @@ Every ``DirectILL`` algorithm has an *OutputWorkspace* property which provides t
 
 As shown above, these optional outputs are sometimes named similarly the corresponding inputs giving a hint were they are supposed to be used.
 
+The information regarding which numors were loaded by relevant NeXus data loaders to create the current workspace is available in the sample logs under the entry `run_list`.
+
 Time-independent background for position sensitive tubes
 ========================================================
 
