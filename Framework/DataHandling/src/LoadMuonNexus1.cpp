@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -308,6 +309,12 @@ void LoadMuonNexus1::exec() {
       outWs = groupedWs;
     } else {
       outWs = localWorkspace;
+    }
+
+    if (existsProperty("TimeZero")) {
+      auto timeZeroList = std::vector<double>(m_numberOfSpectra, getProperty("TimeZero"));
+      setProperty("TimeZeroList", timeZeroList);
+      setProperty("TimeZeroTable", createTimeZeroTable(m_numberOfSpectra, timeZeroList));
     }
 
     if (m_numberOfPeriods == 1)
