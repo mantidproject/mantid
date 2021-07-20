@@ -383,7 +383,7 @@ void LoadNexusMonitors2::fixUDets(::NeXus::File &file) {
 
 void LoadNexusMonitors2::runLoadLogs(const std::string &filename, const API::MatrixWorkspace_sptr &localWorkspace) {
   // do the actual work
-  API::IAlgorithm_sptr loadLogs = createChildAlgorithm("LoadNexusLogs");
+  auto loadLogs = createChildAlgorithm("LoadNexusLogs");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {

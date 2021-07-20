@@ -40,6 +40,9 @@ mantidqt.plugins.directory = @QT_PLUGINS_DIR@
 # Where to find the python plugin manifest file
 python.plugins.manifest = @PYTHONPLUGIN_MANIFEST@
 
+# Where to find the template files used to generate python scripts for some algorithms
+python.templates.directory = @MANTID_ROOT@/scripts/templates
+
 # Where to load instrument definition files from
 instrumentDefinition.directory = @MANTID_ROOT@/instrument
 # Controls whether Mantid Workbench will use system notifications for important messages (On/Off)

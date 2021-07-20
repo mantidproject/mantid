@@ -57,6 +57,8 @@ std::vector<size_t> toWorkspaceIndices(const Mantid::Indexing::SpectrumIndexSet 
 namespace Mantid {
 namespace Algorithms {
 
+using namespace API;
+
 // Register the algorithm into the algorithm factory.
 DECLARE_ALGORITHM(GetEiMonDet3)
 
@@ -96,7 +98,8 @@ void GetEiMonDet3::init() {
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0);
 
-  declareWorkspaceInputProperties<API::MatrixWorkspace, API::IndexType::SpectrumNum | API::IndexType::WorkspaceIndex>(
+  declareWorkspaceInputProperties<API::MatrixWorkspace, static_cast<int>(IndexType::SpectrumNum) |
+                                                            static_cast<int>(IndexType::WorkspaceIndex)>(
       Prop::DETECTOR_WORKSPACE, "A workspace containing the detector spectra.", tofWorkspace);
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>(Prop::MONITOR_WORKSPACE.c_str(), "", Kernel::Direction::Input,

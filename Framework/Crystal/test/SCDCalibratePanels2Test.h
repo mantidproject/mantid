@@ -147,7 +147,7 @@ public:
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
     const std::string xmlFileName = filenamebase.string() + ".xml";
-    IAlgorithm_sptr lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+    auto lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
     lpf_alg->setProperty("Workspace", ws);
@@ -186,7 +186,7 @@ public:
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
     const std::string xmlFileName = filenamebase.string() + ".xml";
-    IAlgorithm_sptr lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+    auto lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
     lpf_alg->setProperty("Workspace", ws);
@@ -240,7 +240,7 @@ public:
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
     const std::string xmlFileName = filenamebase.string() + ".xml";
-    IAlgorithm_sptr lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+    auto lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
     lpf_alg->setProperty("Workspace", ws);
@@ -401,7 +401,7 @@ public:
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
     const std::string xmlFileName = filenamebase.string() + ".xml";
-    IAlgorithm_sptr lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+    auto lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
     lpf_alg->setProperty("Workspace", ws);
@@ -496,7 +496,7 @@ private:
   MatrixWorkspace_sptr generateSimulatedWorkspace() {
 
     // create simulated workspace
-    IAlgorithm_sptr csws_alg = AlgorithmFactory::Instance().create("CreateSimulationWorkspace", 1);
+    auto csws_alg = AlgorithmFactory::Instance().create("CreateSimulationWorkspace", 1);
     csws_alg->initialize();
     csws_alg->setLogging(LOGCHILDALG);
     csws_alg->setProperty("Instrument", "TOPAZ");
@@ -507,7 +507,7 @@ private:
     TS_ASSERT(csws_alg->isExecuted());
 
     // set UB
-    IAlgorithm_sptr sub_alg = AlgorithmFactory::Instance().create("SetUB", 1);
+    auto sub_alg = AlgorithmFactory::Instance().create("SetUB", 1);
     sub_alg->initialize();
     sub_alg->setLogging(LOGCHILDALG);
     sub_alg->setProperty("Workspace", wsname);
@@ -539,9 +539,9 @@ private:
    */
   PeaksWorkspace_sptr generateSimulatedPeaksWorkspace(MatrixWorkspace_sptr ws) {
     // prepare the algs pointer
-    IAlgorithm_sptr sg_alg = AlgorithmFactory::Instance().create("SetGoniometer", 1);
-    IAlgorithm_sptr pp_alg = AlgorithmFactory::Instance().create("PredictPeaks", 1);
-    IAlgorithm_sptr cpw_alg = AlgorithmFactory::Instance().create("CombinePeaksWorkspaces", 1);
+    auto sg_alg = AlgorithmFactory::Instance().create("SetGoniometer", 1);
+    auto pp_alg = AlgorithmFactory::Instance().create("PredictPeaks", 1);
+    auto cpw_alg = AlgorithmFactory::Instance().create("CombinePeaksWorkspaces", 1);
 
     // generate peaks for a range of omega values
     for (double omega = 0; omega <= 180; omega = omega + omega_step) {
@@ -602,7 +602,7 @@ private:
                        std::string cmptName, PeaksWorkspace_sptr &pws) {
 
     // rotation
-    IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
+    auto rot_alg = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
     rot_alg->initialize();
     rot_alg->setLogging(LOGCHILDALG);
     rot_alg->setProperty("Workspace", pws);
@@ -615,7 +615,7 @@ private:
     rot_alg->execute();
 
     // translation
-    IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
+    auto mv_alg = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
     mv_alg->initialize();
     mv_alg->setLogging(LOGCHILDALG);
     mv_alg->setProperty("Workspace", pws);

@@ -24,7 +24,7 @@ namespace DataHandling {
 using namespace Kernel;
 using namespace API;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStasNexus)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMcStasNexus)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -42,10 +42,20 @@ const std::string LoadMcStasNexus::category() const { return "DataHandling\\Nexu
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMcStasNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
-  UNUSED_ARG(descriptor)
-  // To ensure that this loader is somewhat hitten return 0
+int LoadMcStasNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   int confidence(0);
+  const auto &entries = descriptor.getAllEntries();
+  const static auto target_dataset = "information";
+  for (const auto &[nx_class, grouped_entries] : entries) {
+    UNUSED_ARG(nx_class);
+    for (const auto &path : grouped_entries) {
+      // Mccode writes an information dataset so can be reasonably confident if we find it
+      if (boost::ends_with(path, target_dataset)) {
+        confidence = 40;
+        break;
+      }
+    }
+  }
   return confidence;
 }
 

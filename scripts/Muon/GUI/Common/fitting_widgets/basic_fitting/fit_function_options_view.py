@@ -12,19 +12,22 @@ from Muon.GUI.Common.utilities import table_utils
 
 from qtpy.QtWidgets import QWidget
 
-ui_fit_function_options, _ = load_ui(__file__, "fit_function_options.ui")
+ui_form, base_widget = load_ui(__file__, "fit_function_options.ui")
 
 ALLOWED_MINIMIZERS = ["Levenberg-Marquardt", "BFGS", "Conjugate gradient (Fletcher-Reeves imp.)",
                       "Conjugate gradient (Polak-Ribiere imp.)", "Damped GaussNewton",
                       "Levenberg-MarquardtMD", "Simplex", "SteepestDescent", "Trust Region"]
 START_X_TABLE_ROW = 0
 END_X_TABLE_ROW = 1
-MINIMIZER_TABLE_ROW = 2
-RAW_DATA_TABLE_ROW = 3
-EVALUATE_AS_TABLE_ROW = 4
+EXCLUDE_RANGE_TABLE_ROW = 2
+EXCLUDE_START_X_TABLE_ROW = 3
+EXCLUDE_END_X_TABLE_ROW = 4
+RAW_DATA_TABLE_ROW = 5
+MINIMIZER_TABLE_ROW = 6
+EVALUATE_AS_TABLE_ROW = 7
 
 
-class FitFunctionOptionsView(QWidget, ui_fit_function_options):
+class FitFunctionOptionsView(ui_form, base_widget):
     """
     The FitFunctionOptionsView includes the Function Name line edit, FunctionBrowser and the fitting options table
     widget. It also holds the Fit Status and Chi Squared labels.
@@ -39,11 +42,17 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         self.start_x_validator = None
         self.end_x_line_edit = None
         self.end_x_validator = None
+        self.exclude_range_checkbox = None
+        self.exclude_start_x_line_edit = None
+        self.exclude_start_x_validator = None
+        self.exclude_end_x_line_edit = None
+        self.exclude_end_x_validator = None
         self.minimizer_combo = None
         self.fit_to_raw_data_checkbox = None
         self.evaluation_combo = None
 
         self._setup_fit_options_table()
+        self.set_exclude_start_and_end_x_visible(self.exclude_range)
 
         self.function_browser = FunctionBrowser(self, True)
         self.function_browser_layout.addWidget(self.function_browser)
@@ -70,6 +79,18 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
     def set_slot_for_end_x_updated(self, slot) -> None:
         """Connect the slot for the end x option."""
         self.end_x_line_edit.editingFinished.connect(slot)
+
+    def set_slot_for_exclude_range_state_changed(self, slot) -> None:
+        """Connect the slot for the exclude range checkbox."""
+        self.exclude_range_checkbox.stateChanged.connect(slot)
+
+    def set_slot_for_exclude_start_x_updated(self, slot) -> None:
+        """Connect the slot for the exclude start x option."""
+        self.exclude_start_x_line_edit.editingFinished.connect(slot)
+
+    def set_slot_for_exclude_end_x_updated(self, slot) -> None:
+        """Connect the slot for the exclude end x option."""
+        self.exclude_end_x_line_edit.editingFinished.connect(slot)
 
     def set_slot_for_minimizer_changed(self, slot) -> None:
         """Connect the slot for changing the Minimizer."""
@@ -112,6 +133,18 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         """Sets the index of the current dataset."""
         self.function_browser.setCurrentDataset(dataset_index)
 
+    def set_fit_function(self, fit_function: IFunction) -> None:
+        """Set the fit function shown in the view."""
+        self.function_browser.blockSignals(True)
+        if fit_function is None:
+            self.function_browser.setFunction("")
+        else:
+            self.function_browser.setFunction(str(fit_function))
+            # Required to update the parameter errors as they are not stored in the function string
+            self.function_browser.updateParameters(fit_function)
+        self.function_browser.blockSignals(False)
+        self.function_browser.setErrorsEnabled(True)
+
     def update_function_browser_parameters(self, is_simultaneous_fit: bool, fit_function: IFunction,
                                            global_parameters: list = []) -> None:
         """Updates the parameters in the function browser."""
@@ -133,6 +166,10 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         """Returns the global fitting function."""
         return self.function_browser.getGlobalFunction()
 
+    def current_fit_function(self) -> IFunction:
+        """Returns the current fitting function in the view."""
+        return self.function_browser.getFunction()
+
     @property
     def minimizer(self) -> str:
         """Returns the selected minimizer."""
@@ -146,9 +183,8 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
     @start_x.setter
     def start_x(self, value: float) -> None:
         """Sets the selected start X."""
-        if value <= self.end_x:
-            self.start_x_validator.last_valid_value = f"{value:.3f}"
-            self.start_x_line_edit.setText(f"{value:.3f}")
+        self.start_x_validator.last_valid_value = f"{value:.3f}"
+        self.start_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def end_x(self) -> float:
@@ -158,9 +194,35 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
     @end_x.setter
     def end_x(self, value: float) -> None:
         """Sets the selected end X."""
-        if value >= self.start_x:
-            self.end_x_validator.last_valid_value = f"{value:.3f}"
-            self.end_x_line_edit.setText(f"{value:.3f}")
+        self.end_x_validator.last_valid_value = f"{value:.3f}"
+        self.end_x_line_edit.setText(f"{value:.3f}")
+
+    @property
+    def exclude_range(self) -> bool:
+        """Returns true if the Exclude Range option is ticked."""
+        return self.exclude_range_checkbox.isChecked()
+
+    @property
+    def exclude_start_x(self) -> float:
+        """Returns the start X for the excluded region."""
+        return float(self.exclude_start_x_line_edit.text())
+
+    @exclude_start_x.setter
+    def exclude_start_x(self, value: float) -> None:
+        """Sets the selected exclude start X."""
+        self.exclude_start_x_validator.last_valid_value = f"{value:.3f}"
+        self.exclude_start_x_line_edit.setText(f"{value:.3f}")
+
+    @property
+    def exclude_end_x(self) -> float:
+        """Returns the end X for the excluded region."""
+        return float(self.exclude_end_x_line_edit.text())
+
+    @exclude_end_x.setter
+    def exclude_end_x(self, value: float) -> None:
+        """Sets the selected exclude end X."""
+        self.exclude_end_x_validator.last_valid_value = f"{value:.3f}"
+        self.exclude_end_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def evaluation_type(self) -> str:
@@ -217,18 +279,37 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         self.function_browser.hideGlobalCheckbox()
         self.function_browser.setGlobalParameters([])
 
+    def hide_exclude_range_checkbox(self) -> None:
+        """Hides the Exclude Range checkbox in the fitting options."""
+        self.fit_options_table.hideRow(EXCLUDE_RANGE_TABLE_ROW)
+
     def hide_fit_raw_checkbox(self) -> None:
         """Hides the Fit Raw checkbox in the fitting options."""
         self.fit_options_table.hideRow(RAW_DATA_TABLE_ROW)
+
+    def hide_evaluate_function_as_checkbox(self) -> None:
+        """Hides the Evaluate Function as checkbox in the fitting options."""
+        self.fit_options_table.hideRow(EVALUATE_AS_TABLE_ROW)
 
     def set_start_and_end_x_labels(self, start_x_label: str, end_x_label: str) -> None:
         """Sets the labels to use for the start and end X labels in the fit options table."""
         table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, start_x_label)
         table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, end_x_label)
+        table_utils.setRowName(self.fit_options_table, EXCLUDE_START_X_TABLE_ROW, f"Exclude {start_x_label}")
+        table_utils.setRowName(self.fit_options_table, EXCLUDE_END_X_TABLE_ROW, f"Exclude {end_x_label}")
+
+    def set_exclude_start_and_end_x_visible(self, visible: bool) -> None:
+        """Sets whether the exclude start and end x options are visible."""
+        if visible:
+            self.fit_options_table.showRow(EXCLUDE_START_X_TABLE_ROW)
+            self.fit_options_table.showRow(EXCLUDE_END_X_TABLE_ROW)
+        else:
+            self.fit_options_table.hideRow(EXCLUDE_START_X_TABLE_ROW)
+            self.fit_options_table.hideRow(EXCLUDE_END_X_TABLE_ROW)
 
     def _setup_fit_options_table(self) -> None:
         """Setup the fit options table with the appropriate options."""
-        self.fit_options_table.setRowCount(5)
+        self.fit_options_table.setRowCount(8)
         self.fit_options_table.setColumnCount(2)
         self.fit_options_table.setColumnWidth(0, 150)
         self.fit_options_table.verticalHeader().setVisible(False)
@@ -243,13 +324,25 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         self.end_x_line_edit, self.end_x_validator = table_utils.addDoubleToTable(self.fit_options_table, 15.0,
                                                                                   END_X_TABLE_ROW, 1)
 
-        table_utils.setRowName(self.fit_options_table, MINIMIZER_TABLE_ROW, "Minimizer")
-        self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, MINIMIZER_TABLE_ROW, [])
-        self.minimizer_combo.addItems(ALLOWED_MINIMIZERS)
+        table_utils.setRowName(self.fit_options_table, EXCLUDE_RANGE_TABLE_ROW, "Exclude Range")
+        self.exclude_range_checkbox = table_utils.addCheckBoxWidgetToTable(
+            self.fit_options_table, False, EXCLUDE_RANGE_TABLE_ROW)
+
+        table_utils.setRowName(self.fit_options_table, EXCLUDE_START_X_TABLE_ROW, "Exclude Start X")
+        self.exclude_start_x_line_edit, self.exclude_start_x_validator = table_utils.addDoubleToTable(
+            self.fit_options_table, 15.0, EXCLUDE_START_X_TABLE_ROW, 1)
+
+        table_utils.setRowName(self.fit_options_table, EXCLUDE_END_X_TABLE_ROW, "Exclude End X")
+        self.exclude_end_x_line_edit, self.exclude_end_x_validator = table_utils.addDoubleToTable(
+            self.fit_options_table, 15.0, EXCLUDE_END_X_TABLE_ROW, 1)
 
         table_utils.setRowName(self.fit_options_table, RAW_DATA_TABLE_ROW, "Fit To Raw Data")
         self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
             self.fit_options_table, True, RAW_DATA_TABLE_ROW)
+
+        table_utils.setRowName(self.fit_options_table, MINIMIZER_TABLE_ROW, "Minimizer")
+        self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, MINIMIZER_TABLE_ROW, [])
+        self.minimizer_combo.addItems(ALLOWED_MINIMIZERS)
 
         table_utils.setRowName(self.fit_options_table, EVALUATE_AS_TABLE_ROW, "Evaluate Function As")
         self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, EVALUATE_AS_TABLE_ROW,

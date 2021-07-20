@@ -34,7 +34,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class AlgorithmProgressPresenter;
 class AlgorithmProgressDialogPresenter;
-class AlgorithmProgressModel : public Mantid::API::AlgorithmObserver {
+class AlgorithmProgressModel final : public Mantid::API::AlgorithmObserver {
 public:
   AlgorithmProgressModel(AlgorithmProgressPresenter *presenter);
   ~AlgorithmProgressModel() override;

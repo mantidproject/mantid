@@ -44,14 +44,13 @@ IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
   m_uiForm->setupUi(parent);
   m_convFittingModel = dynamic_cast<ConvFitModel *>(getFittingModel());
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
-  setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(new ConvTemplateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
   m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(CONVFIT_HIDDEN_PROPS);
   auto dataPresenter = std::make_unique<ConvFitDataPresenter>(m_convFittingModel, m_uiForm->dockArea->m_fitDataView);
-  connect(dataPresenter.get(), SIGNAL(modelResolutionAdded(std::string const &, TableDatasetIndex const &)), this,
-          SLOT(setModelResolution(std::string const &, TableDatasetIndex const &)));
+  connect(dataPresenter.get(), SIGNAL(modelResolutionAdded(std::string const &, WorkspaceID const &)), this,
+          SLOT(setModelResolution(std::string const &, WorkspaceID const &)));
   setFitDataPresenter(std::move(dataPresenter));
 
   setEditResultVisible(true);
@@ -112,11 +111,11 @@ EstimationDataSelector IndirectDataAnalysisConvFitTab::getEstimationDataSelector
 }
 
 void IndirectDataAnalysisConvFitTab::setModelResolution(const std::string &resolutionName) {
-  setModelResolution(resolutionName, TableDatasetIndex{0});
+  setModelResolution(resolutionName, WorkspaceID{0});
 }
 
-void IndirectDataAnalysisConvFitTab::setModelResolution(const std::string &resolutionName, TableDatasetIndex index) {
-  m_convFittingModel->setResolution(resolutionName, index);
+void IndirectDataAnalysisConvFitTab::setModelResolution(const std::string &resolutionName, WorkspaceID workspaceID) {
+  m_convFittingModel->setResolution(resolutionName, workspaceID);
   auto fitResolutions = m_convFittingModel->getResolutionsForFit();
   m_fitPropertyBrowser->setModelResolution(fitResolutions);
   updateParameterValues();

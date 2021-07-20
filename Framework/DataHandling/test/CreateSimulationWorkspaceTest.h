@@ -40,7 +40,7 @@ public:
 
   void test_Execute_With_Unknown_Instrument_Throws() {
     using namespace Mantid::API;
-    Mantid::API::IAlgorithm_sptr alg = createAlgorithm(m_wsName);
+    auto alg = createAlgorithm(m_wsName);
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BinParams", "1,1,10"));
 
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Instrument", "__NOT_AN_INSTRUMENT__"));
@@ -155,7 +155,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr runAlgorithm(const std::string &inst, const std::string &unitx = "",
                                                  const std::string &maptable = "") {
     using namespace Mantid::API;
-    IAlgorithm_sptr alg = createAlgorithm(m_wsName);
+    auto alg = createAlgorithm(m_wsName);
 
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Instrument", inst));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BinParams", "-30,3,279"));

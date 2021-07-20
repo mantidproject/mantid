@@ -10,15 +10,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 
-namespace {
-using namespace Mantid::API;
-
-bool isWorkspaceLoaded(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-} // namespace
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -26,23 +17,20 @@ namespace IDA {
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view)
     : IndirectFitDataPresenter(model, view, std::make_unique<ConvFitDataTablePresenter>(model, view->getDataTable())),
       m_convModel(model) {
-  setResolutionHidden(false);
-
   connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SLOT(setModelResolution(const QString &)));
   connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SIGNAL(singleResolutionLoaded()));
 }
 
 void ConvFitDataPresenter::setModelResolution(const QString &name) {
   auto const workspaceCount = m_convModel->getNumberOfWorkspaces();
-  auto const index =
-      m_convModel->getWorkspace(TableDatasetIndex{0}) ? workspaceCount - TableDatasetIndex{1} : workspaceCount;
+  auto const index = m_convModel->getWorkspace(WorkspaceID{0}) ? workspaceCount - WorkspaceID{1} : workspaceCount;
   setModelResolution(name.toStdString(), index);
 }
 
-void ConvFitDataPresenter::setModelResolution(std::string const &name, TableDatasetIndex const &index) {
+void ConvFitDataPresenter::setModelResolution(std::string const &name, WorkspaceID const &workspaceID) {
   try {
-    m_convModel->setResolution(name, index);
-    emit modelResolutionAdded(name, index);
+    m_convModel->setResolution(name, workspaceID);
+    emit modelResolutionAdded(name, workspaceID);
   } catch (std::exception const &ex) {
     displayWarning(ex.what());
   }
@@ -52,7 +40,7 @@ void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
   if (const auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
     addWorkspace(*convDialog, *m_convModel);
     auto const name = convDialog->resolutionName();
-    auto const index = m_convModel->getNumberOfWorkspaces() - TableDatasetIndex{1};
+    auto const index = m_convModel->getNumberOfWorkspaces() - WorkspaceID{1};
     m_convModel->setResolution(name, index);
     emit modelResolutionAdded(name, index);
   }
@@ -62,31 +50,11 @@ void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const &dialog,
   model.addWorkspace(dialog.workspaceName(), dialog.workspaceIndices());
 }
 
-void ConvFitDataPresenter::addModelData(const std::string &name) {
-  IndirectFitDataPresenter::addModelData(name);
-  const auto resolution = getView()->getSelectedResolution();
-  if (!resolution.empty() && isWorkspaceLoaded(resolution)) {
-    auto const index = TableDatasetIndex{0};
-    m_convModel->setResolution(resolution, index);
-    emit modelResolutionAdded(resolution, index);
-  }
-}
-
 std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
-  dialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
-  dialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
+  dialog->setResolutionWSSuffices(getResolutionWSSuffices());
+  dialog->setResolutionFBSuffices(getResolutionFBSuffices());
   return dialog;
-}
-
-void ConvFitDataPresenter::setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) {
-  if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
-    convDialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
-}
-
-void ConvFitDataPresenter::setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) {
-  if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
-    convDialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
 }
 
 } // namespace IDA

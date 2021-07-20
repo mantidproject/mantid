@@ -7,6 +7,7 @@
 import PyQt5.QtCore as QtCore
 import PyQt5.QtWidgets as QtWidgets
 
+
 class View(QtWidgets.QDialog):
     # In PyQt signals are the first thing to be defined in a class:
     displaySignal = QtCore.pyqtSignal()

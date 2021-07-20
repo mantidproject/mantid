@@ -61,7 +61,6 @@ class ElementalAnalysisContext(object):
 
         self.data_context.remove_workspace_by_name(workspace_name)
         self.group_context.remove_group(workspace_name)
-        self.gui_context.remove_workspace_by_name(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
 
     def clear_context(self):

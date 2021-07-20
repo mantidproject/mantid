@@ -30,7 +30,7 @@ template <class Base> class MANTID_API_DLL GenericDataProcessorAlgorithm : publi
 public:
   GenericDataProcessorAlgorithm();
   std::string getPropertyValue(const std::string &name) const override;
-  Kernel::PropertyManagerOwner::TypedValue getProperty(const std::string &name) const override;
+  Kernel::IPropertyManager::TypedValue getProperty(const std::string &name) const override;
 
 protected:
   std::shared_ptr<Algorithm> createChildAlgorithm(const std::string &name, const double startProgress = -1.,

@@ -90,7 +90,7 @@ public:
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     m_wkspProp = ws;
 
-    IndexTypeProperty itypeProp("IndexType", IndexType::SpectrumNum);
+    IndexTypeProperty itypeProp("IndexType", static_cast<int>(IndexType::SpectrumNum));
     IndexProperty indexProp("IndexSet", m_wkspProp, itypeProp);
     std::vector<int64_t> input{1, 3, 5, 7};
     indexProp = input;
@@ -106,7 +106,7 @@ public:
   void testIndexOrderOfFullRangePreserved() {
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 3, 1, 1);
     m_wkspProp = ws;
-    IndexTypeProperty itypeProp("IndexType", IndexType::WorkspaceIndex);
+    IndexTypeProperty itypeProp("IndexType", static_cast<int>(IndexType::WorkspaceIndex));
     IndexProperty indexProp("IndexSet", m_wkspProp, itypeProp);
     std::vector<int64_t> input{0, 2, 1};
     indexProp = input;
@@ -155,7 +155,7 @@ public:
   void testGetFilteredIndexInfo_WorkspaceIndex() {
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 3, 1, 1);
     m_wkspProp = ws;
-    IndexTypeProperty itypeProp("IndexType", IndexType::WorkspaceIndex);
+    IndexTypeProperty itypeProp("IndexType", static_cast<int>(IndexType::WorkspaceIndex));
     IndexProperty indexProp("IndexSet", m_wkspProp, itypeProp);
 
     auto indexInfo = indexProp.getFilteredIndexInfo();
@@ -172,7 +172,7 @@ public:
   void testGetFilteredIndexInfo_SpectrumNum() {
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 3, 1, 1);
     m_wkspProp = ws;
-    IndexTypeProperty itypeProp("IndexType", IndexType::SpectrumNum);
+    IndexTypeProperty itypeProp("IndexType", static_cast<int>(IndexType::SpectrumNum));
     IndexProperty indexProp("IndexSet", m_wkspProp, itypeProp);
 
     auto indexInfo = indexProp.getFilteredIndexInfo();

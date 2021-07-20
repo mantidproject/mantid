@@ -11,7 +11,11 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
-from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import RAW_DATA_TABLE_ROW
+from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import (EVALUATE_AS_TABLE_ROW,
+                                                                                     EXCLUDE_RANGE_TABLE_ROW,
+                                                                                     EXCLUDE_START_X_TABLE_ROW,
+                                                                                     EXCLUDE_END_X_TABLE_ROW,
+                                                                                     RAW_DATA_TABLE_ROW)
 
 from qtpy.QtWidgets import QApplication
 
@@ -36,9 +40,9 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.plot_guess = True
         self.assertTrue(self.view.plot_guess)
 
-    def test_that_the_undo_fit_button_can_be_enabled_as_expected(self):
+    def test_that_the_undo_fit_button_can_be_enabled_as_expected_when_the_number_of_undos_is_above_zero(self):
         self.view.enable_view()
-        self.view.enable_undo_fit(True)
+        self.view.set_number_of_undos(2)
         self.assertTrue(self.view.fit_controls.undo_fit_button.isEnabled())
 
     def test_that_update_global_fit_status_label_will_display_no_fit_if_the_success_list_is_empty(self):
@@ -74,6 +78,27 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.show()
 
         self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(RAW_DATA_TABLE_ROW))
+
+    def test_that_the_view_has_been_initialized_with_the_exclude_range_start_and_end_x_options_not_visible(self):
+        self.view = BasicFittingView()
+        self.view.show()
+
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(EXCLUDE_START_X_TABLE_ROW))
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(EXCLUDE_END_X_TABLE_ROW))
+
+    def test_that_hide_exclude_range_checkbox_will_hide_the_exclude_range_table_row(self):
+        self.view = BasicFittingView()
+        self.view.hide_exclude_range_checkbox()
+        self.view.show()
+
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(EXCLUDE_RANGE_TABLE_ROW))
+
+    def test_that_hide_evaluate_function_as_checkbox_will_hide_the_evaluate_function_table_row(self):
+        self.view = BasicFittingView()
+        self.view.hide_evaluate_function_as_checkbox()
+        self.view.show()
+
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(EVALUATE_AS_TABLE_ROW))
 
     def test_that_update_fit_status_labels_will_display_no_fit_if_the_success_list_is_empty(self):
         fit_status, chi_squared = "success", 1.1
@@ -141,28 +166,12 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assertEqual(self.view.start_x, new_value)
 
-    def test_that_the_start_x_will_not_be_set_to_a_different_value_if_it_is_larger_than_the_end_x(self):
-        new_start_x = 6.0
-
-        self.view.end_x = 5.0
-        self.view.start_x = new_start_x
-
-        self.assertNotEqual(self.view.start_x, new_start_x)
-
     def test_that_it_is_possible_to_set_the_end_x_to_a_different_value(self):
         new_value = 5.0
 
         self.view.end_x = new_value
 
         self.assertEqual(self.view.end_x, new_value)
-
-    def test_that_the_end_x_will_not_be_set_to_a_different_value_if_it_is_smaller_than_the_start_x(self):
-        new_end_x = 4.0
-
-        self.view.start_x = 5.0
-        self.view.end_x = new_end_x
-
-        self.assertNotEqual(self.view.end_x, new_end_x)
 
     def test_that_the_fit_to_raw_checkbox_value_can_be_changed_as_expected(self):
         self.view.fit_to_raw = False

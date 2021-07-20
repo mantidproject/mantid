@@ -44,8 +44,11 @@ Usage
 
    # print comparison results
    print("Workspaces mdWs1 and mdWs1a are equal? : {0}  : Comparison result: {1}".format(comp_rez1[0], comp_rez1[1]))
-   print("Workspaces mdWs1 and mdWs2  are equal? : {0} : Comparison result: {1}".format(comp_rez2[0], comp_rez2[1]))
-
+   if comp_rez2[1].count('Box signal does not match (18360 vs 36720)') == 1:
+       result = 'Box signal does not match (18360 vs 36720)'
+   else:
+       result = comp_rez2[1]
+   print("Workspaces mdWs1 and mdWs2  are equal? : {0} : Comparison result: {1}".format(comp_rez2[0], result))
 
 
 
@@ -55,6 +58,7 @@ Usage
 
     Workspaces mdWs1 and mdWs1a are equal? : True  : Comparison result: Success!
     Workspaces mdWs1 and mdWs2  are equal? : False : Comparison result: Box signal does not match (18360 vs 36720)
+
 
 .. categories::
 

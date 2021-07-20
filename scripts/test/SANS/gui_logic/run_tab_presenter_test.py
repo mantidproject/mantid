@@ -13,6 +13,7 @@ from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, RowState)
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.models.RowEntries import RowEntries
+from sans.gui_logic.models.run_tab_model import RunTabModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
@@ -20,6 +21,7 @@ from sans.state.AllStates import AllStates
 from sans.test_helper.common import (remove_file)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file)
+from ui.sans_isis.SansGuiObservable import SansGuiObservable
 
 BATCH_FILE_TEST_CONTENT_1 = [RowEntries(sample_scatter=1, sample_transmission=2,
                                         sample_direct=3, output_name='test_file',
@@ -70,16 +72,19 @@ class RunTabPresenterTest(unittest.TestCase):
         config["default.facility"] = "ISIS"
 
         self._mock_model = mock.create_autospec(StateGuiModel, spec_set=True)
+        self.mock_run_tab_model = mock.create_autospec(RunTabModel(), spec_set=True)
         self._mock_table = mock.create_autospec(TableModel, spec_set=True)
         self._mock_csv_parser = mock.create_autospec(BatchCsvParser, spec_set=True)
         self._mock_view = mock.Mock()
 
-        self._mock_model.instrument = SANSInstrument.SANS2D
+        self.view_observers = SansGuiObservable()
+        self._mock_view.get_observable = mock.Mock(return_value=self.view_observers)
 
+        self._mock_model.instrument = SANSInstrument.SANS2D
         # TODO, this top level presenter should not be creating sub presenters, instead we should use
         # TODO  an observer pattern and common interface to exchange messages. However for the moment
         # TODO  we will skip patching each
-        self.presenter = RunTabPresenter(SANSFacility.ISIS,
+        self.presenter = RunTabPresenter(SANSFacility.ISIS, run_tab_model=self.mock_run_tab_model,
                                          model=self._mock_model, table_model=self._mock_table, view=self._mock_view)
 
         # The beam centre presenter will run QThreads which leads to flaky tests, so mock out
@@ -192,6 +197,33 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
+
+    def test_state_retrieved_from_model(self):
+        self._mock_view.q_1d_step = 1.0
+
+        expected = self.mock_run_tab_model.get_save_types().to_all_states()
+        all_states = self.presenter.update_model_from_view()
+        self.assertEqual(all_states.save_types, expected)
+
+    def test_view_updated_from_model(self):
+        # Avoid an error with magic mock not having __round__
+        self.presenter._set_on_view_to_custom_view = mock.Mock()
+        self.presenter.update_view_from_model()
+        self.assertEqual(self.mock_run_tab_model.get_save_types.return_value, self._mock_view.save_types)
+
+    def test_observers_subscribed_to(self):
+        mocked_view_observers = mock.create_autospec(SansGuiObservable())
+        self._mock_view.get_observable = mock.Mock(return_value=mocked_view_observers)
+        presenter = RunTabPresenter(facility=SANSFacility.ISIS, run_tab_model=self.mock_run_tab_model,
+                                    view=self._mock_view)
+
+        self._mock_view.get_observable.assert_called_once()
+        mocked_view_observers.save_options.add_subscriber.\
+            assert_called_once_with(presenter._observers.save_options)
+
+    def test_on_save_options_changed_called(self):
+        self.view_observers.save_options.notify_subscribers()
+        self.mock_run_tab_model.update_save_types.assert_called_once_with(self._mock_view.save_types)
 
     def test_that_can_get_state_for_index_if_index_exists(self):
         state_key = mock.NonCallableMock()
@@ -557,6 +589,17 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter.on_export_table_clicked()
         self.assertEqual(self._mock_csv_parser.save_batch_file.call_count, 1,
                          "_save_batch_file should have been called but was not")
+
+    def test_save_csv_handles_exceptions(self):
+        for exception in [PermissionError(), IOError()]:
+            self.presenter.display_errors = mock.Mock()
+            self._mock_csv_parser.save_batch_file.side_effect = exception
+            self._mock_table.get_non_empty_rows.return_value = BATCH_FILE_TEST_CONTENT_1
+            self._mock_model.batch_file = ""
+            self.presenter.display_save_file_box = mock.Mock(return_value="mocked_file_path")
+
+            self.presenter.on_export_table_clicked()
+            self.presenter.display_errors.assert_called_once()
 
     def test_that_table_not_exported_if_table_is_empty(self):
         self.presenter._export_table = mock.MagicMock()

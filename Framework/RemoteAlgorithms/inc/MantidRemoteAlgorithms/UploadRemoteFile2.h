@@ -7,13 +7,15 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
+
 namespace Mantid {
 namespace RemoteAlgorithms {
 
 /**
 Transer/upload a file to a (remote) compute resource
 */
-class DLLExport UploadRemoteFile2 : public API::Algorithm {
+class DLLExport UploadRemoteFile2 : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "UploadRemoteFile"; }
