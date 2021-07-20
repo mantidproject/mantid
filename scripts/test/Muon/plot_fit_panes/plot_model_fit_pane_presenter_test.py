@@ -7,6 +7,7 @@
 import unittest
 from unittest import mock
 
+from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_model import PlotTimeFitPaneModel
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
 from Muon.GUI.Common.plot_widget.model_fit_pane.plot_model_fit_pane_presenter import PlotModelFitPanePresenter
@@ -27,9 +28,12 @@ class MockFitInfo(object):
 class PlotFitPanePresenterTest(unittest.TestCase):
 
     def setUp(self):
-        self.context = mock.MagicMock()
+        self.context = setup_context()
         self.model = mock.Mock(spec=PlotTimeFitPaneModel)
         self.model.name = "data"
+        # manually add pane
+        self.context.plot_panes_context.add_pane(self.model.name)
+
         self.view = mock.Mock(spec=BasePaneView)
         self.view.warning_popup = mock.MagicMock()
         self.view.disable_plot_raw_option()
@@ -62,7 +66,7 @@ class PlotFitPanePresenterTest(unittest.TestCase):
 
         self.presenter.update_x_plot_range(limits)
 
-        self.figure_presenter.set_plot_range.assert_called_once_with([-1.0, 1.0])
+        self.figure_presenter.set_plot_range.assert_called_once_with([-1.2, 1.2])
 
 
 if __name__ == '__main__':

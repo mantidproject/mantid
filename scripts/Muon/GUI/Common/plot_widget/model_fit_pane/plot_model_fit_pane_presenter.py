@@ -27,9 +27,16 @@ class PlotModelFitPanePresenter(PlotFitPanePresenter):
 
     def update_override_x_and_y_tick_labels(self, tick_labels: list) -> None:
         """Updates the override x and y tick labels to use when plotting data."""
-        # This will be implemented in a separate PR when adjusting some of the plot options for model fitting.
-        pass
+        self._figure_presenter.set_x_ticks(tick_labels[0])
+        self._figure_presenter.set_y_ticks(tick_labels[1])
 
     def update_x_plot_range(self, x_limits: list) -> None:
         """Updates the x range of a plot using the provided x limits of a workspace."""
-        self._figure_presenter.set_plot_range(x_limits)
+        self._figure_presenter.set_plot_range(self._calculate_new_x_range(x_limits))
+
+    def _calculate_new_x_range(self, x_limits: list) -> tuple:
+        """Calculates the new X range based off the x limits of the plotted data."""
+        x_lower, x_upper = x_limits[0], x_limits[1]
+        margin = self.context.plot_panes_context[self.name].settings.x_axis_margin
+        x_offset = abs(x_upper - x_lower) * margin
+        return [x_lower - x_offset, x_upper + x_offset]
