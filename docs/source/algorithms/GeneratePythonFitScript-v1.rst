@@ -174,7 +174,9 @@ Output:
            MaxIterations=max_iterations, Minimizer=minimizer, CostFunction=cost_function,
            EvaluationType=evaluation_type, Output=output_base_name)
 
-   output_workspaces = [output_base_name + "_Workspace_" + str(i) for i in range(len(input_workspaces))]
+   output_workspaces = []
+   for i in range(len(input_workspaces)):
+       output_workspaces.append(output_base_name + "_Workspace_" + str(i))
 
    # Plot the results of the fit
    fig, axes = plt.subplots(nrows=2,

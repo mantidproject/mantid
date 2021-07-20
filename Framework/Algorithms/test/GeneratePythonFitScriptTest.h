@@ -28,24 +28,10 @@ std::vector<std::string> splitStringBy(std::string const &str, std::string const
   return subStrings;
 }
 
-std::string getFilepathOfReferenceFile(std::string const &filename) {
-  auto directory = ConfigService::Instance().getInstrumentDirectory();
-
-  auto const position = directory.find("instrument/");
-  if (position != std::string::npos) {
-    directory.erase(position, directory.length());
-    directory += "Framework/Algorithms/test/reference/";
-    directory += filename;
-    return directory;
-  } else {
-    throw std::runtime_error("Failed to find the path of the reference python fit script.");
-  }
-}
-
 std::string getFileContents(std::string const &filename) {
-  std::string filepath = getFilepathOfReferenceFile(filename);
+  auto const directory = ConfigService::Instance().getString("python.templates.directory") + "/reference";
 
-  std::ifstream filestream(filepath);
+  std::ifstream filestream(directory + "/" + filename);
   if (!filestream) {
     filestream.close();
     throw std::runtime_error("Error occured when attempting to load file: " + filename);
