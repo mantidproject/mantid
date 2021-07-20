@@ -402,6 +402,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar._actions["toggle_superplot"].setChecked(False)
         else:
             self.superplot = Superplot(self.canvas, self.window)
+            if not self.superplot.is_valid():
+                logger.warning("Superplot cannot be opened on data not linked "
+                               "to a workspace.")
+                self.superplot = None
+                self.toolbar._actions["toggle_superplot"].setChecked(False)
+                return
             self.window.addDockWidget(Qt.LeftDockWidgetArea,
                                       self.superplot.get_side_view())
             self.window.addDockWidget(Qt.BottomDockWidgetArea,
