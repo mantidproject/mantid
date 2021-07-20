@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import IFunction
+from mantid.api import IFunction, ITableWorkspace
 from mantidqt.utils.observer_pattern import GenericObserver
 from mantidqt.utils.qt import load_ui
 
@@ -60,6 +60,10 @@ class BasicFittingView(ui_form, base_widget):
     def set_slot_for_dataset_changed(self, slot) -> None:
         """Connect the slot for the display workspace combo box being changed."""
         self.workspace_selector.set_slot_for_dataset_changed(slot)
+
+    def set_slot_for_covariance_matrix_clicked(self, slot) -> None:
+        """Connect the slot for the Covariance Matrix button being clicked."""
+        self.fit_function_options.set_slot_for_covariance_matrix_clicked(slot)
 
     def set_slot_for_fit_name_changed(self, slot) -> None:
         """Connect the slot for the fit name being changed by the user."""
@@ -298,6 +302,10 @@ class BasicFittingView(ui_form, base_widget):
     def set_covariance_button_enabled(self, enabled: bool) -> None:
         """Sets whether the Covariance Matrix button is enabled or not."""
         self.fit_function_options.set_covariance_button_enabled(enabled)
+
+    def show_normalised_covariance_matrix(self, covariance_ws: ITableWorkspace, workspace_name: str) -> None:
+        """Shows the normalised covariance matrix in a separate table display window."""
+        self.fit_function_options.show_normalised_covariance_matrix(covariance_ws, workspace_name)
 
     def disable_view(self) -> None:
         """Disable all widgets in this fitting widget."""

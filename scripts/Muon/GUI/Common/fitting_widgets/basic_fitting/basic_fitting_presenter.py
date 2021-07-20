@@ -60,6 +60,7 @@ class BasicFittingPresenter:
         self.view.set_slot_for_plot_guess_changed(self.handle_plot_guess_changed)
         self.view.set_slot_for_fit_name_changed(self.handle_function_name_changed_by_user)
         self.view.set_slot_for_dataset_changed(self.handle_dataset_name_changed)
+        self.view.set_slot_for_covariance_matrix_clicked(self.handle_covariance_matrix_clicked)
         self.view.set_slot_for_function_structure_changed(self.handle_function_structure_changed)
         self.view.set_slot_for_function_parameter_changed(
             lambda function_index, parameter: self.handle_function_parameter_changed(function_index, parameter))
@@ -206,6 +207,12 @@ class BasicFittingPresenter:
 
         self.update_plot_fit()
         self.update_plot_guess()
+
+    def handle_covariance_matrix_clicked(self) -> None:
+        """Handle when the Covariance Matrix button is clicked."""
+        covariance_matrix = self.model.current_normalised_covariance_matrix()
+        if covariance_matrix is not None:
+            self.view.show_normalised_covariance_matrix(covariance_matrix.workspace, covariance_matrix.workspace_name)
 
     def handle_function_name_changed_by_user(self) -> None:
         """Handle when the fit name is changed by the user."""
