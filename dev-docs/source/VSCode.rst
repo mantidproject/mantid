@@ -169,7 +169,7 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
       "stopAtEntry": false,
       "cwd": "Path/To/Build/Directory/bin", // this should point to bin inside the build directory
       "environment": [],
-      "externalConsole": false,
+      "externalConsole": true,
       "MIMode": "gdb",
       "preLaunchTask": "Build Mantid",
       "setupCommands": [
@@ -181,6 +181,16 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
       ]
     }
 
+If this fails, try adding the following environment variables:
+
+.. code-block:: javascript
+
+      "environment": [
+        {"name":"LD_PRELOAD", "value": "/usr/lib/x86_64-linux-gnu/libjemalloc.so.1"},
+        {"name":"PYTHONPATH", "value": "Path/To/Build/Directory/bin:${env:PYTHONPATH}"}
+      ],
+
+where the correct value for the ``LD_PRELOAD`` environment variable can be found in Path/To/Build/Directory/bin/launch_mantidworkbench.sh.
 
 
 **Windows:**
