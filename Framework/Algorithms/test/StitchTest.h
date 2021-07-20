@@ -261,7 +261,7 @@ private:
     for (size_t ispec = 0; ispec < nSpectra; ++ispec) {
       for (size_t ibin = 0; ibin < nPoints; ++ibin) {
         x[ibin] = startX + double(ibin) * step;
-        y[ibin] = 7 * double(ibin) + 3 + 10 * ispec;
+        y[ibin] = 7 * double(ibin) + 3 + 10 * double(ispec);
         e[ibin] = std::sqrt(y[ibin]);
       }
       ws->setHistogram(ispec, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));
