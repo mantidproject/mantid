@@ -282,7 +282,8 @@ void SaveAscii2::exec() {
           break;
       }
       std::ostringstream ss;
-      ss << std::string(filename, 0, extPosition) << i << std::string(filename, extPosition);
+      double axisValue = m_ws->getAxis(1)->getValue(i);
+      ss << std::string(filename, 0, extPosition) << "_" << axisValue << std::string(filename, extPosition);
       currentFilename = ss.str();
     }
     std::ofstream file(currentFilename, (appendToFile ? std::ios::app : std::ios::out));
