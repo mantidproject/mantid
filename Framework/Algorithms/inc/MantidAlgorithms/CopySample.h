@@ -55,7 +55,7 @@ private:
   void exec() override;
   /// Function to copy information from one sample to another
   void copyParameters(API::Sample &from, API::Sample &to, bool nameFlag, bool materialFlag, bool environmentFlag,
-                      bool shapeFlag, bool latticeFlag, bool orientationOnlyFlag);
+                      bool shapeFlag, bool latticeFlag, bool orientationOnlyFlag, std::vector<double> rotationMatrix);
 };
 
 } // namespace Algorithms

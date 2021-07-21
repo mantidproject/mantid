@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
 #include <memory>
@@ -75,6 +76,7 @@ public:
   static std::shared_ptr<CSGObject> createSphere(const Kernel::V3D &centre, double radius);
   static std::shared_ptr<CSGObject> createHexahedralShape(double xlb, double xlf, double xrf, double xrb, double ylb,
                                                           double ylf, double yrf, double yrb);
+  std::string addGoniometerTag(std::vector<double> rotationMatrix, std::string xml);
 
 private:
   static std::string sphereAlgebra(const int surfaceID);
@@ -106,6 +108,12 @@ private:
   double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
   void createGeometryHandler(Poco::XML::Element *, std::shared_ptr<CSGObject>);
+
+  Kernel::Matrix<double> generateMatrix(double xRotation, double yRotation, double zRotation);
+  Kernel::Matrix<double> generateXRotation(double xRotation);
+  Kernel::Matrix<double> generateYRotation(double yRotation);
+  Kernel::Matrix<double> generateZRotation(double zRotation);
+  std::vector<double> m_gonioRotationMatrix;
 };
 
 } // namespace Geometry

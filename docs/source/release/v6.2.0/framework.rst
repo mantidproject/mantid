@@ -45,6 +45,8 @@ Fit Functions
 Data Objects
 ------------
 - **Sample shapes which are CSGObjects can now be plotted. Shapes can also be merged, such as a sphere with a cylindrical hole. For more details see** :ref:`Mesh_Plots`.
+- Sample shapes (both MeshObjects and CSGObjects) can be manually rotated. Rotations from :ref:`SetGoniometer <algm-SetGoniometer>` are applied. This works with :ref:`CopySample <algm-CopySample>`,
+  so the copied shape can be plotted, but the old goniometer angle is not copied.
 
 Python
 ------
