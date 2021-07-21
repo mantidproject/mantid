@@ -76,11 +76,9 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.table._columns = ["test"]
         item.getPresenter.return_value = itemPresenter
         self.table.onItemChanged(item)
-        item.signals.dataChanged.emit.assert_called()
         item.getPresenter.return_value = None
         self.table.onItemChanged(item)
         samplePresenter.onNewItem.assert_called_once()
-        item.signals.dataChanged.emit.assert_called()
 
     def test_itemFromName(self):
         self.table.rowCount = mock.Mock()
@@ -106,11 +104,10 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.table.cellChanged = mock.Mock()
         self.table._disabled = True
         self.table.eraseRow(0)
-        self.table.item.return_value.setText.assert_not_called()
+        self.table.item.return_value.setData.assert_not_called()
         self.table._disabled = False
         self.table.eraseRow(0)
-        self.table.item.return_value.setText.assert_called_once_with("")
-        self.table.cellChanged.emit.assert_called_once()
+        self.table.item.return_value.setData.assert_called_once()
 
     def test_eraseCell(self):
         self.table.rowCount = mock.Mock()
@@ -121,10 +118,8 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.table.cellChanged = mock.Mock()
         self.table.eraseCell(-1, -1)
         self.table.item.return_value.setData.assert_not_called()
-        self.table.cellChanged.emit.assert_not_called()
         self.table.eraseCell(0, 0)
         self.table.item.return_value.setData.assert_called_once()
-        self.table.cellChanged.emit.assert_called_once()
 
     def test_getSelectedRows(self):
         mSelectionModel = mock.Mock()
@@ -251,7 +246,7 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.table.setCellContents(0, 0, "test")
         self.table.itemPrototype.assert_called
         self.table.itemPrototype.return_value.clone.return_value \
-            .setText.assert_called_once_with("test")
+            .setData.assert_called_once_with(2, "test")
         self.table.setItem.assert_called_once()
 
     @mock.patch("Interface.ui.drill.view.DrillTableWidget.QBrush")
