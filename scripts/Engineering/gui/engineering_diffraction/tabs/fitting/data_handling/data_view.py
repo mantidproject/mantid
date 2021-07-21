@@ -48,6 +48,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.finder_data.setFileExtensions([".nxs"])
         # xunit combo box
         self.setup_xunit_combobox()
+        self.update_file_filter(self.combo_bank.currentText(), self.combo_xunit.currentText())
 
     def saveSettings(self):
         self.finder_data.saveSettings(path_handling.INTERFACES_SETTINGS_GROUP + '/' + path_handling.ENGINEERING_PREFIX)
