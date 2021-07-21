@@ -131,8 +131,7 @@ class BackgroundCorrectionsPresenter:
     def _run_background_corrections_for_all(self) -> None:
         """Runs the background corrections for all stored data in the corrections context."""
         if self.model.is_background_mode_none():
-            self.model.reset_background_function_data()
-            self._update_displayed_corrections_data()
+            self._perform_background_corrections(self.model.reset_background_subtraction_data)
         else:
             self._perform_background_corrections(self.model.run_background_correction_for_all)
 

@@ -307,13 +307,13 @@ def apply_deadtime(ws, output, table):
     return alg.getProperty("OutputWorkspace").valueAsStr
 
 
-def calculate_diff_data(diff, positive_workspace_name, negative_workspace_name, output):
+def run_minus(lhs_workspace, rhs_workspace, output_name):
     alg = mantid.AlgorithmManager.create("Minus")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
-    alg.setProperty("LHSWorkspace", positive_workspace_name)
-    alg.setProperty("RHSWorkspace", negative_workspace_name)
-    alg.setProperty("OutputWorkspace", output)
+    alg.setProperty("LHSWorkspace", lhs_workspace)
+    alg.setProperty("RHSWorkspace", rhs_workspace)
+    alg.setProperty("OutputWorkspace", output_name)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
 

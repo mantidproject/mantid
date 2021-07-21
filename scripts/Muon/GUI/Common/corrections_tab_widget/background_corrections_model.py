@@ -7,12 +7,13 @@
 from mantid.py36compat import dataclass
 
 from mantid.api import AlgorithmManager, FunctionFactory, IFunction
-from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
+from mantid.simpleapi import CreateWorkspace
+from Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, retrieve_ws
 from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, FLAT_BACKGROUND,
                                                           FLAT_BACKGROUND_AND_EXP_DECAY, RUNS_ALL, GROUPS_ALL)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
-from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
+from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_minus
 from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
 from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
@@ -137,10 +138,12 @@ class BackgroundCorrectionsModel:
                 self._corrections_context.background_correction_data[run_group].uncorrected_counts_workspace = \
                     StaticWorkspaceWrapper(workspace_name, retrieve_ws(workspace_name))
 
-    def reset_background_function_data(self) -> None:
-        """Resets the background functions back to zero when the correction mode is changed."""
+    def reset_background_subtraction_data(self) -> None:
+        """Resets the calculated background functions and corrected counts data in the ADS."""
         for correction_data in self._corrections_context.background_correction_data.values():
             correction_data.setup_functions()
+            add_ws_to_ads(correction_data.uncorrected_counts_workspace.workspace_name,
+                          correction_data.uncorrected_counts_workspace.workspace_copy())
 
     def run_background_correction_for_all(self) -> None:
         """Runs the background corrections for all stored domains."""
@@ -159,6 +162,15 @@ class BackgroundCorrectionsModel:
         function, fit_status, chi_squared = run_Fit(params, AlgorithmManager.create("Fit"))
 
         self._handle_background_fit_output(correction_data, function, fit_status, chi_squared)
+        self._perform_background_subtraction_on_counts(correction_data)
+
+    @staticmethod
+    def _perform_background_subtraction_on_counts(correction_data: BackgroundCorrectionData) -> None:
+        """Performs the background subtraction on """
+        background = correction_data.flat_background.getParameterValue(BACKGROUND_PARAM)
+        background_workspace = CreateWorkspace(DataX=[0.0], DataY=[background], StoreInADS=False)
+        run_minus(correction_data.uncorrected_counts_workspace.workspace_copy(), background_workspace,
+                  correction_data.uncorrected_counts_workspace.workspace_name)
 
     def _handle_background_fit_output(self, correction_data: BackgroundCorrectionData, function: IFunction,
                                       fit_status: str, chi_squared: float) -> None:

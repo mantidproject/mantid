@@ -15,7 +15,7 @@ from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calcu
     estimate_group_asymmetry_data, run_pre_processing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 from Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws, apply_deadtime, \
-    calculate_diff_data, run_crop_workspace
+    run_minus, run_crop_workspace
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
@@ -118,7 +118,7 @@ class MuonContext(object):
             return None
         run_as_string = run_list_to_string(run)
         output_workspace_name = get_diff_asymmetry_name(self, diff.name, run_as_string, rebin=rebin)
-        return calculate_diff_data(diff, positive_workspace_name, negative_workspace_name, output_workspace_name)
+        return run_minus(positive_workspace_name, negative_workspace_name, output_workspace_name)
 
     def calculate_pair(self, pair: MuonPair, run: List[int], rebin: bool=False):
         try:
