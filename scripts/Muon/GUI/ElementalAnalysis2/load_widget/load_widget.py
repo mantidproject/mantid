@@ -41,8 +41,6 @@ class LoadWidget(object):
 
         self.run_widget.updated_directory.add_subscriber(self.file_widget.updated_file_path)
 
-        context.update_view_from_model_notifier.add_subscriber(self.load_widget.update_view_from_model_observer)
-
     @property
     def view(self):
         return self.load_widget_view

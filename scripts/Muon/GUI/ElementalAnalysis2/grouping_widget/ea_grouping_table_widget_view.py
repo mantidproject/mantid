@@ -119,7 +119,8 @@ class EAGroupingTableView(QtWidgets.QWidget):
         if not self._updating:
             self.dataChanged.emit()
 
-    def get_index_of_text(self, selector, text):
+    @staticmethod
+    def get_index_of_text(selector, text):
         index = selector.findText(text)
         return index if index != -1 else 0
 
@@ -273,7 +274,7 @@ class EAGroupingTableView(QtWidgets.QWidget):
     def rebin_fixed_chosen(self, row):
         steps, ok = QtWidgets.QInputDialog.getText(self, 'Steps',
                                                    'Rebinning creates a new workspace.\n'
-                                                   'Enter the new bin width for a new workspace:')
+                                                   'Enter the new bin width in KeV for a new workspace:')
         if not ok:
             self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
             return
@@ -287,7 +288,7 @@ class EAGroupingTableView(QtWidgets.QWidget):
             self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
             self.warning_popup("Given rebin step is invalid")
             return
-        steps_text = "Steps: " + str(steps)
+        steps_text = "Steps: " + str(steps) + " KeV"
         table_item = QTableWidgetItem(steps_text)
         table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])
         self.grouping_table.setItem(row, 5, table_item)

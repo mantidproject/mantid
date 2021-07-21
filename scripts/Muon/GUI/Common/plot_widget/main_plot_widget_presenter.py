@@ -16,7 +16,7 @@ class MainPlotWidgetPresenter(HomeTabSubWidget):
         """
         self._view = view
 
-        self._plot_modes={}
+        self._plot_modes = {}
         for mode in plot_modes:
             self._plot_modes[mode.name] = mode
             self._plot_modes[mode.name].hide()

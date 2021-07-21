@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver,GenericObserverWithArgPassing
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper

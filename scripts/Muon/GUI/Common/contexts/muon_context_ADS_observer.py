@@ -27,11 +27,12 @@ def _catch_exceptions(func):
 
 
 class MuonContextADSObserver(AnalysisDataServiceObserver):
-    def __init__(self, delete_callback, clear_callback, replace_callback):
+    def __init__(self, delete_callback, clear_callback, replace_callback, delete_group_callback=None):
         super(MuonContextADSObserver, self).__init__()
         self.delete_callback = delete_callback
         self.clear_callback = clear_callback
         self.replace_callback = replace_callback
+        self.delete_group_callback = delete_group_callback
 
         self.observeDelete(True)
         self.observeRename(True)
@@ -47,6 +48,8 @@ class MuonContextADSObserver(AnalysisDataServiceObserver):
         """
         if not isinstance(workspace, WorkspaceGroup):
             self.delete_callback(workspace)
+        elif self.delete_group_callback is not None:
+            self.delete_group_callback(workspace)
 
     @_catch_exceptions
     def renameHandle(self, old_workspace_name, new_workspace_name):

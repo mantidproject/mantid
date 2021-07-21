@@ -7,9 +7,11 @@
 
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from mantidqt.utils.observer_pattern import GenericObservable
+from Muon.GUI.ElementalAnalysis2.context.context import REBINNED_VARIABLE_WS_SUFFIX, REBINNED_FIXED_WS_SUFFIX
+from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model import PEAKS_WS_SUFFIX, MATCH_GROUP_WS_SUFFIX
 
-INVALID_STRINGS_FOR_GROUP_NAMES = ["EA_Rebinned_Fixed", "EA_Rebinned_Variable", "peaks", "refitted_peaks",
-                                   "with_errors", "matches"]
+INVALID_STRINGS_FOR_GROUP_NAMES = ["_EA_Rebinned_Fixed", "_EA_Rebinned_Variable", "_EA_peaks", "_EA_refitted_peaks",
+                                   "_with_errors", "_EA_matches"]
 
 
 def get_default_grouping(loadedData):
@@ -118,3 +120,36 @@ class EAGroupContext(object):
             if group.name == group_name:
                 self._groups.remove(group)
                 return
+
+    @staticmethod
+    def get_detector_and_run_from_workspace_name(workspace_name):
+        for suffix in INVALID_STRINGS_FOR_GROUP_NAMES:
+            if suffix in workspace_name:
+                workspace_name = workspace_name.replace(suffix, "")
+
+        run, detector = workspace_name.split(";")
+
+        return run.strip(), detector.strip()
+
+    def remove_workspace_from_group(self, workspace_name):
+        """
+        handles removing workspace from group
+        :param workspace_name : name of workspace removed
+        """
+        for name in [REBINNED_FIXED_WS_SUFFIX, REBINNED_VARIABLE_WS_SUFFIX, PEAKS_WS_SUFFIX, MATCH_GROUP_WS_SUFFIX]:
+            if workspace_name.endswith(name):
+                group_name = workspace_name.replace(name, "")
+                group = self[group_name]
+                if group is None:
+                    return
+                if workspace_name.endswith(REBINNED_FIXED_WS_SUFFIX):
+                    group.remove_rebinned_workspace()
+
+                elif workspace_name.endswith(REBINNED_VARIABLE_WS_SUFFIX):
+                    group.remove_rebinned_workspace()
+
+                elif workspace_name.endswith(PEAKS_WS_SUFFIX):
+                    group.remove_peak_table()
+
+                elif workspace_name.endswith(MATCH_GROUP_WS_SUFFIX):
+                    group.remove_matches_group()

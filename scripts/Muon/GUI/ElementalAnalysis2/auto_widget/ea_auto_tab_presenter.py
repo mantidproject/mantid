@@ -92,12 +92,12 @@ class EAAutoTabPresenter(object):
             if group.is_peak_table_present():
                 if run not in show_peaks_options:
                     show_peaks_options[run] = []
-                show_peaks_options[run].append(group.get_peak_table(run))
+                show_peaks_options[run].append(group.get_peak_table())
 
             if group.is_matches_table_present():
                 if run not in show_matches_options:
                     show_matches_options[run] = []
-                matches_group_workspace = retrieve_ws(group.get_matches_table(run))
+                matches_group_workspace = retrieve_ws(group.get_matches_table())
                 show_matches_options[run].extend(matches_group_workspace.getNames())
 
         self.view.add_options_to_find_peak_combobox(find_peak_workspaces)
