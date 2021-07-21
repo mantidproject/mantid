@@ -37,11 +37,15 @@ using namespace Mantid::Kernel;
 class LoadMDTest : public CxxTest::TestSuite {
 public:
   void test_simple_file() {
-    // std::string filename("/home/wfg/data/mantid/SrMnSb2_T2K_H0T_Ei50meV_dmb_5runs.nxs"); // 6s
-    // std::string filename("/home/wfg/data/mantid/SrMnSb2_T2K_H0T_Ei50meV_dmb_10runs.nxs"); //15s
-    std::string filename("/home/wfg/data/mantid/SrMnSb2_T2K_H0T_Ei50meV_dmb_20runs.nxs"); // 50s
-    // std::string filename("/home/wfg/data/mantid/SrMnSb2_T2K_H0T_Ei50meV_dmb_40runs.nxs"); // 212s
-    // std::string filename("/home/wfg/data/mantid/SrMnSb2_T2K_H0T_Ei50meV_dmb_80runs.nxs"); // 1320s
+
+    const std::string rootDir = "/home/wfg/data/mantid/"; // work
+    // const std::string rootDir = "/SNS/ARCS/IPTS-24207/shared/3y9/MDE/"; //analysis
+
+    // std::string filename( rootDir + "SrMnSb2_T2K_H0T_Ei50meV_dmb_5runs.nxs"); // 6s
+    // std::string filename(rootDir + "SrMnSb2_T2K_H0T_Ei50meV_dmb_10runs.nxs"); //15s
+    std::string filename(rootDir + "SrMnSb2_T2K_H0T_Ei50meV_dmb_20runs.nxs"); // 50s
+    // std::string filename( rootDir + "SrMnSb2_T2K_H0T_Ei50meV_dmb_40runs.nxs"); // 212s
+    // std::string filename( rootDir + "SrMnSb2_T2K_H0T_Ei50meV_dmb_80runs.nxs"); // 1320s
     std::string outWSName("outWS");
     bool fileBackEnd(false);
     // double memory(0.0); // don't allocate in-cache memory for the file backend
