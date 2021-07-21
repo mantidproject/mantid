@@ -72,17 +72,17 @@ do
 done
 
 # Setup Mambaforge
-$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH
+$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH $CLEAN_BUILD
 
 # Setup Conda environment
-$SCRIPT_DIR/setup-conda-env $WORKSPACE $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH
+$SCRIPT_DIR/setup-conda-env $WORKSPACE $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH $CONDA_ENV_NAME
 
 # Activate Conda environment
-. $HOME/mambaforge/etc/profile.d/conda.sh
+. $WORKSPACE/mambaforge/etc/profile.d/conda.sh
 conda activate $CONDA_ENV_NAME
 
 # Clean the source tree to remove stale configured files ignoring the build directory
-git clean -d -x --force --exclude=build --exclude=".Xauthority-*"
+git clean -d -x --force --exclude=build --exclude=mambaforge --exclude=".Xauthority-*"
 
 # Clean up build folder
 if [[ $CLEAN_BUILD  == true ]]; then
@@ -110,7 +110,7 @@ if ${SCRIPT_DIR}/../check_for_changes dev-docs-only || ${SCRIPT_DIR}/../check_fo
 fi
 
 # Run the script that handles the actual building
-$SCRIPT_DIR/build $WORKSPACE $ENABLE_SYSTEM_TESTS $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $EXTRA_CMAKE_FLAGS
+$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $EXTRA_CMAKE_FLAGS
 
 # Clean up prior to testing
 # Prevent race conditions when creating the user config directory

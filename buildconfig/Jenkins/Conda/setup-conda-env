@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 
 # This script will setup a working conda environment given the arguements
@@ -16,7 +16,7 @@ CONDA_ENV_NAME=$4
 
 # If conda env already exists delete it, so the current version of the environment is tested against
 ENVS=$($EXPECTED_CONDA_PATH env list)
-if [[ $ENVS = *"$EXPECTED_MAMBAFORGE_PATH/envs/$CONDA_ENV_NAME"* ]]; then
+if [[ "$ENVS" == *"$EXPECTED_MAMBAFORGE_PATH/envs/$CONDA_ENV_NAME"* ]]; then
     $EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
 fi
 

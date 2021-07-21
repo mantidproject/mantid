@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 # This script expects a setup environment with all dependencies availiable in
 # the environment
@@ -56,12 +56,12 @@ fi
 
 # Run unit tests
 cd $WORKSPACE/build
-if [[ ENABLE_UNIT_TESTS == true ]]; then
+if [[ $ENABLE_UNIT_TESTS == true ]]; then
     run_with_xvfb ctest -j$CPU_COUNT --no-compress-output -T Test --schedule-random --output-on-failure
     terminate_xvfb_sessions
 fi
 
-if [[ ENABLE_SYSTEM_TESTS == true ]]; then
+if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     run_with_xvfb $WORKSPACE/systemtest
     terminate_xvfb_sessions
 fi

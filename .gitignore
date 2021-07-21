@@ -197,3 +197,7 @@ rel/
 
 # NFS files
 *.nfs*
+
+# in source installed conda
+mambaforge/
+miniconda3/

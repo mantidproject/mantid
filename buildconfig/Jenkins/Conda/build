@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 # This script expects a setup environment with all dependencies availiable in
 # the environment
@@ -23,7 +23,7 @@ ENABLE_SYSTEM_TESTS=$7
 EXTRA_CMAKE_FLAGS=$8
 
 # Only pass MANTID_DATA_STORE to CMake if present in the environment otherwise rely on CMake default
-if [![ -z "$MANTID_DATA_STORE" ]]; then
+if [![ -z "${MANTID_DATA_STORE}" ]]; then
     MANTID_DATA_STORE_CMAKE="-DMANTID_DATA_STORE=${MANTID_DATA_STORE}"
 fi
 
