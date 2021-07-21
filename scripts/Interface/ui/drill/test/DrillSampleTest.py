@@ -162,24 +162,24 @@ class DrillSampleTest(unittest.TestCase):
 
     @mock.patch("Interface.ui.drill.model.DrillSample.logger")
     def test_onProcessStarted(self, mLogger):
-        self.sample.processStarted = mock.Mock()
+        self.sample.statusChanged = mock.Mock()
         self.sample.onProcessStarted()
         mLogger.information.assert_called_once()
-        self.sample.processStarted.emit.assert_called_once()
+        self.sample.statusChanged.emit.assert_called_once()
 
     @mock.patch("Interface.ui.drill.model.DrillSample.logger")
     def test_onProcessSuccess(self, mLogger):
-        self.sample.processDone = mock.Mock()
+        self.sample.statusChanged = mock.Mock()
         self.sample.onProcessSuccess()
         mLogger.information.assert_called_once()
-        self.sample.processDone.emit.assert_called_once_with(0)
+        self.sample.statusChanged.emit.assert_called_once_with()
 
     @mock.patch("Interface.ui.drill.model.DrillSample.logger")
     def test_onProcessError(self, mLogger):
-        self.sample.processDone = mock.Mock()
+        self.sample.statusChanged = mock.Mock()
         self.sample.onProcessError("test")
         mLogger.error.assert_called_once()
-        self.sample.processDone.emit.assert_called_once_with(-1)
+        self.sample.statusChanged.emit.assert_called_once_with()
 
 
 if __name__ == "__main__":
