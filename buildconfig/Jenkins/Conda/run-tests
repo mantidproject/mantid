@@ -6,12 +6,18 @@
 # Expected args:
 #   1. WORKSPACE: path to the workspace/source code that this should run inside
 #   2. ENABLE_SYSTEM_TESTS: whether or not system tests are being ran/built
-#
+#   3. ENABLE_UNIT_TESTS: whether or not unit tests are being ran/built
+#   4. CPU_COUNT: The number of threads to use during testing
+#   5. USE_CORE_DUMPS: Activate core dumps (Linux only)
 
 WORKSPACE=$1
 ENABLE_SYSTEM_TESTS=$2
+ENABLE_UNIT_TESTS=$3
+CPU_COUNT=$4
+USE_CORE_DUMPS=$5
 
 XVFB_SERVER_NUM=101
+ULIMIT_CORE_ORIG=$(ulimit -c)
 
 function run_with_xvfb {
     if [ $(command -v xvfb-run) ]; then
@@ -36,11 +42,25 @@ function terminate_xvfb_sessions {
     fi
 }
 
+function onexit {
+    if [[ ${USE_CORE_DUMPS} == true ]]; then
+        ulimit -c $ULIMIT_CORE_ORIG
+    fi
+}
+
+# Setup core dumping
+trap onexit INT TERM EXIT
+if [[ ${USE_CORE_DUMPS} == true ]]; then
+    ulimit -c unlimited
+fi
+
 # Run unit tests
 cd $WORKSPACE/build
-run_with_xvfb ctest -j$CPU_COUNT --no-compress-output -T Test --schedule-random --output-on-failure
-terminate_xvfb_sessions
+if [[ ENABLE_UNIT_TESTS == true ]]; then
+    run_with_xvfb ctest -j$CPU_COUNT --no-compress-output -T Test --schedule-random --output-on-failure
+    terminate_xvfb_sessions
+fi
 
 if [[ ENABLE_SYSTEM_TESTS == true ]]; then
-    #TODO: system tests
+    $WORKSPACE/buildconfig/Jenkins/systemtests
 fi
