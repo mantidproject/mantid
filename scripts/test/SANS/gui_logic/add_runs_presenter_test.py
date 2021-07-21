@@ -12,7 +12,7 @@ from fake_signal import FakeSignal
 from mantid.kernel import ConfigService
 from unittest import mock
 from sans.common.enums import SANSInstrument
-from sans.gui_logic.models.SumRunsModel import SumRunsModel
+from sans.gui_logic.models.sum_runs_model import SumRunsModel
 from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter, AddRunsFilenameManager

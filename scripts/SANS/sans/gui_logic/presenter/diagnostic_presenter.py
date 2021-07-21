@@ -6,12 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Logger
 from ui.sans_isis.diagnostics_page import DiagnosticsPage
-from ui.sans_isis.work_handler import WorkHandler
 from sans.common.enums import IntegralEnum
 from sans.gui_logic.gui_common import get_detector_strings_for_diagnostic_page, get_detector_from_gui_selection
+from sans.gui_logic.models.async_workers.diagnostic_async import DiagnosticsAsync
+from sans.gui_logic.models.diagnostics_model import DiagnosticsModel
 
 
-class DiagnosticsPagePresenter(object):
+class DiagnosticsPagePresenter:
     class ConcreteDiagnosticsPageListener(DiagnosticsPage.DiagnosticsPageListener):
         def __init__(self, presenter):
             self._presenter = presenter
@@ -28,25 +29,13 @@ class DiagnosticsPagePresenter(object):
         def on_time_clicked(self):
             self._presenter.on_time_clicked()
 
-    class IntegralListener(WorkHandler.WorkListener):
-        def __init__(self, presenter):
-            super(DiagnosticsPagePresenter.IntegralListener, self).__init__()
-            self._presenter = presenter
-
-        def on_processing_finished(self, result):
-            self._presenter.on_processing_finished_integral(result)
-
-        def on_processing_error(self, error):
-            self._presenter.on_processing_error_integral(error)
-
-    def __init__(self, parent_presenter, WorkHandler, run_integral, create_state, facility):
+    def __init__(self, parent_presenter, facility):
         self._view = None
         self._facility = facility
         self._parent_presenter = parent_presenter
-        self._work_handler = WorkHandler()
-        self.run_integral = run_integral
         self._logger = Logger("SANS")
-        self._create_state = create_state
+        self._model = DiagnosticsModel()
+        self._worker = DiagnosticsAsync(parent_presenter=self)
 
     def set_view(self, view, instrument):
         if view:
@@ -71,42 +60,38 @@ class DiagnosticsPagePresenter(object):
         input_file = self._view.run_input
         period = self._view.period
         state_model_with_view_update = self._parent_presenter.update_model_from_view()
-        state = self._create_state(state_model_with_view_update, input_file, period, self._facility)
+        state = self._model.create_state(state_model_with_view_update, input_file, period, self._facility)
         mask = self._view.horizontal_mask
         range = self._view.horizontal_range
-        listener = DiagnosticsPagePresenter.IntegralListener(self)
         detector = get_detector_from_gui_selection(self._view.detector)
-        self._work_handler.process(listener, self.run_integral, 0, range, mask, IntegralEnum.Horizontal,
-                                   detector, state)
+        self._worker.run_integral(range, mask, IntegralEnum.Horizontal, detector, state)
 
     def on_vertical_clicked(self):
         self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
         state_model_with_view_update = self._parent_presenter.update_model_from_view()
-        state = self._create_state(state_model_with_view_update, input_file, period, self._facility)
+        state = self._model.create_state(state_model_with_view_update, input_file, period, self._facility)
         mask = self._view.vertical_mask
         range = self._view.vertical_range
-        listener = DiagnosticsPagePresenter.IntegralListener(self)
         detector = get_detector_from_gui_selection(self._view.detector)
-        self._work_handler.process(listener, self.run_integral, 0, range, mask, IntegralEnum.Vertical,
-                                   detector, state)
+        self._worker.run_integral(range, mask, IntegralEnum.Vertical, detector, state)
 
     def on_time_clicked(self):
         self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
         state_model_with_view_update = self._parent_presenter.update_model_from_view()
-        state = self._create_state(state_model_with_view_update, input_file, period, self._facility)
+        state = self._model.create_state(state_model_with_view_update, input_file, period, self._facility)
         mask = self._view.time_mask
         range = self._view.time_range
-        listener = DiagnosticsPagePresenter.IntegralListener(self)
+
         detector = get_detector_from_gui_selection(self._view.detector)
-        self._work_handler.process(listener, self.run_integral, 0, range, mask, IntegralEnum.Time,
-                                   detector, state)
+        self._worker.run_integral(range, mask, IntegralEnum.Time, detector, state)
 
-    def on_processing_finished_integral(self, result):
+    def on_processing_finished(self):
         self._view.enable_integrals()
 
-    def on_processing_error_integral(self, error):
-        self._view.enable_integrals()
+    def on_processing_success(self, output):
+        # We don't do anything with this in production, but it is replaced with a mock by unit test code
+        pass

@@ -30,10 +30,9 @@ from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_instrument_from_gui_selection)
 from sans.gui_logic.models.POD.save_options import SaveOptions
 from sans.gui_logic.models.RowEntries import RowEntries
-from sans.gui_logic.models.SumRunsModel import SumRunsModel
+from sans.gui_logic.models.sum_runs_model import SumRunsModel
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
-from ui.sans_isis.work_handler import WorkHandler
 from ui.sans_isis.modified_qt_field_factory import ModifiedQtFieldFactory
 
 from ui.sans_isis.SansGuiObservable import SansGuiObservable
@@ -256,7 +255,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.main_stacked_widget.setCurrentIndex(index)
 
     def _setup_add_runs_page(self):
-        self.add_runs_presenter = AddRunsPagePresenter(SumRunsModel(WorkHandler(), self.add_runs_page),
+        self.add_runs_presenter = AddRunsPagePresenter(SumRunsModel(self.add_runs_page),
                                                        self.add_runs_page, self)
 
     def setup_layout(self):

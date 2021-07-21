@@ -7,9 +7,9 @@
 import copy
 
 from mantid.kernel import Logger
+from sans.gui_logic.models.async_workers.beam_centre_async import BeamCentreAsync
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from ui.sans_isis.beam_centre import BeamCentre
-from ui.sans_isis.work_handler import WorkHandler
 
 
 class BeamCentrePresenter(object):
@@ -22,23 +22,12 @@ class BeamCentrePresenter(object):
         def on_run_clicked(self):
             self._presenter.on_run_clicked()
 
-    class CentreFinderListener(WorkHandler.WorkListener):
-        def __init__(self, presenter):
-            super(BeamCentrePresenter.CentreFinderListener, self).__init__()
-            self._presenter = presenter
-
-        def on_processing_finished(self, _):
-            self._presenter.on_processing_finished_centre_finder()
-
-        def on_processing_error(self, error):
-            self._presenter.on_processing_error_centre_finder(error)
-
-    def __init__(self, parent_presenter, SANSCentreFinder, work_handler=None, beam_centre_model=None):
+    def __init__(self, parent_presenter, beam_centre_model=None):
         self._view = None
         self._parent_presenter = parent_presenter
-        self._work_handler = WorkHandler() if not work_handler else work_handler
         self._logger = Logger("SANS")
-        self._beam_centre_model = BeamCentreModel(SANSCentreFinder) if not beam_centre_model else beam_centre_model
+        self._beam_centre_model = BeamCentreModel() if not beam_centre_model else beam_centre_model
+        self._worker = BeamCentreAsync(parent_presenter=self)
 
     def set_view(self, view):
         if view:
@@ -78,12 +67,15 @@ class BeamCentrePresenter(object):
         self._logger.warning("There has been an error. See more: {}".format(error))
         self._view.set_run_button_to_normal()
 
+    def on_processing_finished(self):
+        # Signal from run tab presenter
+        self._view.set_run_button_to_normal()
+
     def on_processing_error(self, error):
+        # Signal from run tab presenter
         self._view.set_run_button_to_normal()
 
     def on_run_clicked(self):
-        self._work_handler.wait_for_done()
-
         # Get the state information for the first row.
         state = self._parent_presenter.get_state_for_row(0)
 
@@ -94,15 +86,11 @@ class BeamCentrePresenter(object):
 
         # Disable the button
         self._view.set_run_button_to_processing()
-
-        #Update model
         self._update_beam_model_from_view()
 
         # Run the task
-        listener = BeamCentrePresenter.CentreFinderListener(self)
         state_copy = copy.copy(state)
-
-        self._work_handler.process(listener, self._beam_centre_model.find_beam_centre, 0, state_copy)
+        self._worker.find_beam_centre(state_copy, self._beam_centre_model.pack_beam_centre_settings())
 
     def _update_beam_model_from_view(self):
         self._beam_centre_model.r_min = self._view.r_min

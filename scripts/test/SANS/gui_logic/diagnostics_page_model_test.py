@@ -7,7 +7,7 @@
 import unittest
 
 from sans.common.enums import SANSFacility
-from sans.gui_logic.models.diagnostics_page_model import create_state
+from sans.gui_logic.models.diagnostics_model import DiagnosticsModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.test_helper.user_file_test_helper import sample_user_file, create_user_file
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
@@ -21,7 +21,7 @@ class DiagnosticsPageModelTest(unittest.TestCase):
 
         state_from_view = StateGuiModel(user_file_items)
 
-        state = create_state(state_from_view, "SANS2D00022024", '', SANSFacility.ISIS)
+        state = DiagnosticsModel.create_state(state_from_view, "SANS2D00022024", '', SANSFacility.ISIS)
 
         self.assertEqual(state.data.sample_scatter, "SANS2D00022024")
 

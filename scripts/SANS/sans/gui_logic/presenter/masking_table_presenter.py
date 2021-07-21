@@ -6,99 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """  The presenter associated with the masking table view. """
 
-from collections import namedtuple
 import copy
+from collections import namedtuple
 
-from mantid.kernel import Logger
-from mantid.api import (AnalysisDataService)
-from sans.algorithm_detail.mask_sans_workspace import mask_workspace
-from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
-from sans.state.Serializer import Serializer
 from ui.sans_isis.masking_table import MaskingTable
+
+from mantid.api import (AnalysisDataService)
+from mantid.kernel import Logger
 from sans.common.enums import DetectorType
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_unmanaged_algorithm
-from ui.sans_isis.work_handler import WorkHandler
+from sans.gui_logic.models.async_workers.masking_table_async import MaskingTableAsync
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 
 masking_information = namedtuple("masking_information", "first, second, third")
-
-
-def load_and_mask_workspace(state, workspace_name):
-    workspace_to_mask = load_workspace(state, workspace_name)
-    return run_mask_workspace(state, workspace_to_mask)
-
-
-def load_workspace(state, workspace_name):
-    prepare_to_load_scatter_sample_only(state)
-    handle_multi_period_data(state)
-
-    serialized_state = Serializer.to_json(state)
-
-    workspace = perform_load(serialized_state)
-    perform_move(state, workspace)
-    store_in_ads_as_hidden(workspace_name, workspace)
-    return workspace
-
-
-def run_mask_workspace(state, workspace_to_mask):
-    mask_info = state.mask
-
-    detectors = [DetectorType.LAB.value, DetectorType.HAB.value] \
-                if DetectorType.HAB.value in mask_info.detectors else\
-                [DetectorType.LAB.value]  # noqa
-
-    for detector in detectors:
-        mask_workspace(component_as_string=detector, workspace=workspace_to_mask, state=state)
-
-    return workspace_to_mask
-
-
-def prepare_to_load_scatter_sample_only(state):
-    # We only want to load the data for the scatter sample. Hence we set everything else to an empty string.
-    # This is ok since we are changing a copy of the state which is not being used for the actual data reduction.
-    state.data.sample_transmission = ""
-    state.data.sample_direct = ""
-    state.data.can_scatter = ""
-    state.data.can_transmission = ""
-    state.data.can_direct = ""
-
-
-def handle_multi_period_data(state):
-    # If the data is multi-period data, then we select only the first period.
-    if state.data.sample_scatter_is_multi_period and state.data.sample_scatter_period == 0:
-        state.data.sample_scatter_period = 1
-
-
-def perform_load(serialized_state):
-    load_algorithm = create_load_algorithm(serialized_state)
-    load_algorithm.execute()
-    return load_algorithm.getProperty("SampleScatterWorkspace").value
-
-
-def perform_move(state, workspace):
-    move_component(state=state, component_name='', workspace=workspace, move_type=MoveTypes.RESET_POSITION)
-    move_component(component_name=None, state=state, workspace=workspace, move_type=MoveTypes.INITIAL_MOVE)
-
-
-def store_in_ads_as_hidden(workspace_name, workspace):
-    AnalysisDataService.addOrReplace(workspace_name, workspace)
-
-
-def create_load_algorithm(serialized_state):
-    load_name = "SANSLoad"
-    load_options = {"SANSState": serialized_state,
-                    "PublishToCache": True,
-                    "UseCached": True,
-                    "SampleScatterWorkspace": EMPTY_NAME,
-                    "SampleScatterMonitorWorkspace": EMPTY_NAME,
-                    "SampleTransmissionWorkspace": EMPTY_NAME,
-                    "SampleDirectWorkspace": EMPTY_NAME,
-                    "CanScatterWorkspace": EMPTY_NAME,
-                    "CanScatterMonitorWorkspace": EMPTY_NAME,
-                    "CanTransmissionWorkspace": EMPTY_NAME,
-                    "CanDirectWorkspace": EMPTY_NAME}
-    return create_unmanaged_algorithm(load_name, **load_options)
 
 
 class MaskingTablePresenter(object):
@@ -118,21 +37,10 @@ class MaskingTablePresenter(object):
         def on_display(self):
             self._presenter.on_display()
 
-    class DisplayMaskListener(WorkHandler.WorkListener):
-        def __init__(self, presenter):
-            super(MaskingTablePresenter.DisplayMaskListener, self).__init__()
-            self._presenter = presenter
-
-        def on_processing_finished(self, result):
-            self._presenter.on_processing_finished_masking_display(result)
-
-        def on_processing_error(self, error):
-            self._presenter.on_processing_error_masking_display(error)
-
     def __init__(self, parent_presenter):
         self._view = None
         self._parent_presenter = parent_presenter
-        self._work_handler = WorkHandler()
+        self._worker = MaskingTableAsync(parent_presenter=self)
         self._logger = Logger("SANS")
 
     def on_display(self):
@@ -154,16 +62,16 @@ class MaskingTablePresenter(object):
 
         # Run the task
         self.display_masking_information(state)
-        listener = MaskingTablePresenter.DisplayMaskListener(self)
         state_copy = copy.copy(state)
-        self._work_handler.process(listener, load_and_mask_workspace, 0, state_copy, self.DISPLAY_WORKSPACE_NAME)
+        self._worker.load_and_mask_workspace(state_copy, self.DISPLAY_WORKSPACE_NAME)
 
-    def on_processing_finished_masking_display(self, result):
-        # Enable button
-        self._view.set_display_mask_button_to_normal()
-
+    def on_processing_successful_masking_display(self, result):
         # Display masked workspace
         self._display(result)
+
+    def on_processing_finished_masking_display(self):
+        # Enable button
+        self._view.set_display_mask_button_to_normal()
 
     def on_processing_error_masking_display(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))

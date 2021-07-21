@@ -29,7 +29,7 @@ class IQtAsync:
     - Annotate anything to run async with the @qt_async_task decorator
     - Get yourself a nice coffee to celebrate a job well done
 
-    For the benefits of using this over QThreads see AsyncTaskQtAdaptor
+    For the benefits of using this over QThreads see AsyncTaskQtAdaptor.
     """
     def __init__(self):
         self._worker = None
@@ -40,14 +40,8 @@ class IQtAsync:
         Enables unit test mode to prevent having to deal with race-y tests due
         to threading. Instead it forces the target to run as a blocking call.
 
-        Note: Call backs will NOT fire in unit test mode, as they still use signals.
-
-        Test your callback separately by manually triggering it in your test
-        (as per best practice) and treat the callback "glue"
-        in this class as a tested blackbox rather than trying to re-test it.
-
         @param value: True: Force tasks to run on current thread instead of async
-                      False: Tasks will run in async.
+        False (default): Tasks will run in async mode. This may cause random failures in testing.
         """
         self._run_synchronously = value
 
@@ -95,7 +89,8 @@ def qt_async_task(method: Callable):
         self._worker = AsyncTaskQtAdaptor(target=method, args=(self, *args), kwargs=kwargs,
                                           success_cb=self.success_cb_slot,
                                           error_cb=self.error_cb_slot,
-                                          finished_cb=self._internal_finished_handler)
+                                          finished_cb=self._internal_finished_handler,
+                                          run_synchronously=self._run_synchronously)
         if self._run_synchronously:
             self._worker.run()
         else:
@@ -151,9 +146,10 @@ class AsyncTaskQtAdaptor(AsyncTask):
     def __init__(self, target: Callable, args: Any = (), kwargs: Any = None,
                  success_cb: SuccessCbType = None,
                  error_cb: ErrorCbType = None,
-                 finished_cb: FinishedCbType = None):
-
+                 finished_cb: FinishedCbType = None,
+                 run_synchronously: bool = False):
         self._signals = _QtSignals()
+        self._run_synchronously = run_synchronously
         success_cb = self._wrap_signal(self._signals.success_signal, success_cb)
         error_cb = self._wrap_signal(self._signals.error_signal, error_cb)
         finished_cb = self._wrap_signal(self._signals.finished_signal, finished_cb)
@@ -163,8 +159,7 @@ class AsyncTaskQtAdaptor(AsyncTask):
             success_cb=success_cb, error_cb=error_cb, finished_cb=finished_cb
         )
 
-    @staticmethod
-    def _wrap_signal(signal: Signal, slot: Optional[Callable]) -> Optional[Callable]:
+    def _wrap_signal(self, signal: Signal, slot: Optional[Callable]) -> Optional[Callable]:
         """
         Wraps a given signal so that the thread calls emit rather than the target directly.
         This allows us to complete the slot on the target, rather than trying
@@ -176,6 +171,9 @@ class AsyncTaskQtAdaptor(AsyncTask):
         signal.connect(slot, QtCore.Qt.QueuedConnection)
 
         def emit_on_completion(*args, **kwargs):
-            signal.emit(*args, **kwargs)
+            if self._run_synchronously:
+                slot(*args, **kwargs)
+            else:
+                signal.emit(*args, **kwargs)
 
         return emit_on_completion if slot else None

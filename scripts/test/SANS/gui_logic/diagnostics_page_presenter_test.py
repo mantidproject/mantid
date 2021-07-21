@@ -17,46 +17,35 @@ class DiagnosticsPagePresenterTest(unittest.TestCase):
     def setUp(self):
         self.parent_presenter = create_run_tab_presenter_mock(use_fake_state = False)
         self.view = create_mock_diagnostics_tab()
-        self.state = mock.MagicMock()
-        self.create_state = mock.MagicMock(return_value = self.state)
-        self.WorkHandler = mock.MagicMock()
-        self.run_integral = mock.MagicMock()
-        self.presenter = DiagnosticsPagePresenter(self.parent_presenter, self.WorkHandler, self.run_integral,
-                                                  self.create_state, SANSFacility.ISIS)
+        self.presenter = DiagnosticsPagePresenter(self.parent_presenter, SANSFacility.ISIS)
         self.presenter.set_view(self.view, SANSInstrument.LARMOR)
 
-    def test_that_on_horizontal_clicked_calls_work_handler_with_correct_parameters(self):
+        # Inject mocks to things tested elsewhere
+        self.presenter._worker = mock.create_autospec(self.presenter._worker)
+        self.presenter._model = mock.create_autospec(self.presenter._model)
+
+        self.mock_state = self.presenter._model.create_state.return_value
+
+    def test_that_on_horizontal_clicked_calls_worker_with_correct_parameters(self):
         self.presenter.on_horizontal_clicked()
 
-        self.assertEqual(self.presenter._work_handler.process.call_count, 1)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][1], self.run_integral)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][3], self.presenter._view.horizontal_range)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][4], self.presenter._view.horizontal_mask)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][5], IntegralEnum.Horizontal)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][6], DetectorType.LAB)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][7], self.state)
+        self.presenter._worker.run_integral.assert_called_once_with(
+            self.view.horizontal_range, self.view.horizontal_mask,
+            IntegralEnum.Horizontal, DetectorType.LAB, self.mock_state)
 
-    def test_that_on_vertical_clicked_calls_work_handler_with_correct_parameters(self):
+    def test_that_on_vertical_clicked_calls_worker_with_correct_parameters(self):
         self.presenter.on_vertical_clicked()
 
-        self.assertEqual(self.presenter._work_handler.process.call_count, 1)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][1], self.run_integral)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][3], self.presenter._view.vertical_range)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][4], self.presenter._view.vertical_mask)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][5], IntegralEnum.Vertical)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][6], DetectorType.LAB)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][7], self.state)
+        self.presenter._worker.run_integral.assert_called_once_with(
+            self.view.vertical_range, self.view.vertical_mask,
+            IntegralEnum.Vertical, DetectorType.LAB, self.mock_state)
 
-    def test_that_on_time_clicked_calls_work_handler_with_correct_parameters(self):
+    def test_that_on_time_clicked_calls_worker_with_correct_parameters(self):
         self.presenter.on_time_clicked()
 
-        self.assertEqual(self.presenter._work_handler.process.call_count, 1)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][1], self.run_integral)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][3], self.presenter._view.time_range)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][4], self.presenter._view.time_mask)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][5], IntegralEnum.Time)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][6], DetectorType.LAB)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][7], self.state)
+        self.presenter._worker.run_integral.assert_called_once_with(
+            self.view.time_range, self.view.time_mask,
+            IntegralEnum.Time, DetectorType.LAB, self.mock_state)
 
     def test_that_on_user_file_load_sets_user_file_name_on_view(self):
         user_file_name = 'user_file_name'
