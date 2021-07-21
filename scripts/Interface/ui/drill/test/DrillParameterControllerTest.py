@@ -15,6 +15,12 @@ from Interface.ui.drill.model.DrillParameterController \
 class DrillParameterControllerTest(unittest.TestCase):
 
     def setUp(self):
+        #mock queue
+        patch = mock.patch(
+                "Interface.ui.drill.model.DrillParameterController.queue")
+        self.mQueue = patch.start()
+        self.addCleanup(patch.stop)
+        self.mQueue = self.mQueue.Queue.return_value
         # mock sapi
         patch = mock.patch(
                 'Interface.ui.drill.model.DrillParameterController.sapi')
@@ -27,11 +33,10 @@ class DrillParameterControllerTest(unittest.TestCase):
         self.assertTrue(isinstance(self.controller.signals,
                                    DrillControllerSignals))
 
-    def test_addParameter(self):
-        p = DrillParameter("name", "value", 0)
-        self.controller.addParameter(p)
-        pGet = self.controller._paramQueue.get()
-        self.assertEqual(p, pGet)
+    def test_check(self):
+        param = mock.Mock()
+        self.controller.check(param)
+        self.mQueue.put.assert_called_once_with(param)
 
     def test_stop(self):
         self.controller._running = True

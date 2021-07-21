@@ -62,14 +62,6 @@ class DrillView(QMainWindow):
     rowDeleted = Signal(int)
 
     """
-    Sent when a cell contents has changed.
-    Args:
-        int: row index
-        str: column name
-    """
-    dataChanged = Signal(int, str)
-
-    """
     Sent when a new group is requested.
     """
     groupSelectedRows = Signal()
@@ -83,6 +75,11 @@ class DrillView(QMainWindow):
     Sent when a row is set as master row.
     """
     setMasterRow = Signal()
+
+    """
+    Sent to remove the master row status.
+    """
+    unsetMasterRow = Signal()
 
     """
     Sent when the user asks to process the selected row(s).
@@ -134,11 +131,6 @@ class DrillView(QMainWindow):
     """
     automaticFilling = Signal()
 
-    # colors for the table rows
-    OK_COLOR = "#3f00ff00"
-    ERROR_COLOR = "#3fff0000"
-    PROCESSING_COLOR = "#3fffff00"
-
     def __init__(self, parent=None, window_flags=None):
         super(DrillView, self).__init__(parent)
         if window_flags:
@@ -157,7 +149,7 @@ class DrillView(QMainWindow):
         self.buffer = list()  # for cells cut-copy-paste
         self.bufferShape = tuple() # (n_rows, n_columns) shape of self.buffer
 
-        self._presenter = DrillPresenter(self)
+        self._presenter = DrillPresenter(self, self.table)
 
     def setup_header(self):
         """
@@ -170,7 +162,7 @@ class DrillView(QMainWindow):
         self.actionManageDirectories.triggered.connect(self.show_directory_manager)
         self.actionSettings.triggered.connect(self.showSettings.emit)
         self.actionClose.triggered.connect(self.close)
-        self.actionAddRow.triggered.connect(self.add_row_after)
+        self.actionAddRow.triggered.connect(self.addRowAfter)
         self.actionDelRow.triggered.connect(self.del_selected_rows)
         self.actionCopyRow.triggered.connect(self.copySelectedCells)
         self.actionCutRow.triggered.connect(self.cutSelectedCells)
@@ -222,7 +214,7 @@ class DrillView(QMainWindow):
         self.deleterow.clicked.connect(self.del_selected_rows)
 
         self.addrow.setIcon(icons.get_icon("mdi.table-row-plus-after"))
-        self.addrow.clicked.connect(self.add_row_after)
+        self.addrow.clicked.connect(self.addRowsAfter)
 
         self.save.setIcon(icons.get_icon("mdi.file-export"))
         self.save.clicked.connect(self.saveRundex.emit)
@@ -249,8 +241,6 @@ class DrillView(QMainWindow):
         """
         Setup the main table widget.
         """
-        self.table.cellChanged.connect(
-                lambda r,c: self.dataChanged.emit(r, self.columns[c]))
         self.table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self.showContextMenu)
 
@@ -262,13 +252,15 @@ class DrillView(QMainWindow):
         Args:
             event (QCloseEvent): the close event
         """
-        self.assistant_process.close()
-        self.assistant_process.waitForFinished()
-        children = self.findChildren(QDialog)
-        for child in children:
-            child.close()
-        self._presenter.onClose()
-        super(DrillView, self).closeEvent(event)
+        if self._presenter.onClose():
+            self.assistant_process.close()
+            self.assistant_process.waitForFinished()
+            children = self.findChildren(QDialog)
+            for child in children:
+                child.close()
+            event.accept()
+        else:
+            event.ignore()
 
     ###########################################################################
     # actions                                                                 #
@@ -282,7 +274,6 @@ class DrillView(QMainWindow):
         exp = self.experimentId.text()
         if (cycle and exp):
             self.cycleAndExperimentChanged.emit(cycle, exp)
-        self.setWindowModified(True)
 
     def copySelectedCells(self):
         """
@@ -363,25 +354,28 @@ class DrillView(QMainWindow):
         for (r, c) in indexes:
             self.table.eraseCell(r, c)
 
-    def add_row_after(self, n=0):
+    def addRowAfter(self):
         """
-        Add row(s) after the selected ones. If no row selected, the row(s)
-        is(are) added at the end of the table. The number of row to add is
-        taken from the ui spinbox.
-
-        Args:
-            n(int): number of rows. If 0, it will be taken from the spinbox
+        Add a single row after the current position (or the end of the table if
+        nothing is selected).
         """
         position = self.table.getLastSelectedRow()
         if position == -1:
             position = self.table.getLastRow()
-        if not n:
-            n = self.nrows.value()
+        self._presenter.onRowAdded(position + 1)
+
+    def addRowsAfter(self):
+        """
+        Add several rows after the current position (or the end of the table if
+        nothing is selected). The number of rows to add is given by the spinbox.
+        """
+        position = self.table.getLastSelectedRow()
+        if position == -1:
+            position = self.table.getLastRow()
+        n = self.nrows.value()
         for i in range(n):
-            self.table.addRow(position + 1)
-            self.rowAdded.emit(position + 1)
+            self._presenter.onRowAdded(position + 1)
             position += 1
-            self.setWindowModified(True)
 
     def del_selected_rows(self):
         """
@@ -392,44 +386,6 @@ class DrillView(QMainWindow):
         for row in rows:
             self.table.deleteRow(row)
             self.rowDeleted.emit(row)
-            self.setWindowModified(True)
-
-    def updateLabelsFromGroups(self, groups, masters):
-        """
-        Update all the row labels from the current groups.
-
-        Args:
-            groups (dict(str:set(int))): group name and rows
-            master (dict(str:int)): group name and master row
-        """
-        for row in range(self.table.rowCount()):
-            self.table.delRowLabel(row)
-        for groupName,rows in groups.items():
-            rowName = 1
-            for row in sorted(rows):
-                if groupName in masters and masters[groupName] == row:
-                    _bold = True
-                    _tooltip = "This is the master row of the group {}" \
-                               .format(groupName)
-                else:
-                    _bold = False
-                    _tooltip = "This row belongs to the sample group {}" \
-                               .format(groupName)
-                self.table.setRowLabel(row, groupName + str(rowName),
-                                       _bold, _tooltip)
-                rowName += 1
-
-    def getRowLabel(self, row):
-        """
-        Get the visual label of a row.
-
-        Args:
-            row(int): row index
-
-        Returns:
-            str: row label
-        """
-        return self.table.getRowLabel(row)
 
     def helpWindow(self):
         """
@@ -465,6 +421,9 @@ class DrillView(QMainWindow):
         elif (event.key() == Qt.Key_M
                 and event.modifiers() == Qt.ControlModifier):
             self.setMasterRow.emit()
+        elif (event.key() == Qt.Key_M
+                and event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier):
+            self.unsetMasterRow.emit()
 
     def show_directory_manager(self):
         """
@@ -498,6 +457,15 @@ class DrillView(QMainWindow):
     # for model calls                                                         #
     ###########################################################################
 
+    def setInstrument(self, instrument):
+        """
+        Set the instrument in the combobox.
+
+        Args:
+            instrument (str): instrument name
+        """
+        self.instrumentselector.setCurrentText(instrument)
+
     def set_available_modes(self, modes):
         """
         Set the available acquisition modes in the comboxbox.
@@ -520,6 +488,15 @@ class DrillView(QMainWindow):
         self.modeSelector.blockSignals(True)
         self.modeSelector.setCurrentText(mode)
         self.modeSelector.blockSignals(False)
+
+    def getAcquisitionMode(self):
+        """
+        Get the selected acquistion mode.
+
+        Returns:
+            str: acquisition mode
+        """
+        return self.modeSelector.currentText()
 
     def setCycleAndExperiment(self, cycle, experiment):
         """
@@ -554,39 +531,6 @@ class DrillView(QMainWindow):
         self.menuAddRemoveColumn.aboutToShow.connect(
                 lambda : self.setAddRemoveColumnMenu(columns))
         self.table.resizeColumnsToContents()
-        self.setWindowModified(False)
-
-    def getSelectedRows(self):
-        """
-        Get the list of selected row indexes. If the user did not select any
-        full row, the selected rows are extracted from the selected cells.
-
-        Returns:
-            list(int): row indexes
-        """
-        rows = self.table.getSelectedRows()
-        if not rows:
-            rows = self.table.getRowsFromSelectedCells()
-        return rows
-
-    def getAllRows(self):
-        """
-        Get the list of all row indexes.
-
-        Returns:
-            list(int): row indexes
-        """
-        return self.table.getAllRows()
-
-    def getCellContents(self, row, column):
-        """
-        Get the contents of a specific cell.
-
-        Args:
-            row (int): row index
-            column (str): column name
-        """
-        return self.table.getCellContents(row, self.columns.index(column))
 
     def setAddRemoveColumnMenu(self, columns):
         """
@@ -611,19 +555,6 @@ class DrillView(QMainWindow):
 
         self.menuAddRemoveColumn.triggered.connect(
                 lambda action: self.table.toggleColumnVisibility(action.text()))
-
-    def setCellContents(self, row, column, value):
-        """
-        Set the contents of a specific cell.
-
-        Args:
-            row (int): row index
-            column (str): column name
-            value (str): column contents
-        """
-        if row >= self.table.rowCount() or column not in self.columns:
-            return
-        self.table.setCellContents(row, self.columns.index(column), value)
 
     def set_progress(self, n, nmax):
         """
@@ -673,74 +604,6 @@ class DrillView(QMainWindow):
             self.table.setCursor(Qt.WaitCursor)
         else:
             self.table.setCursor(Qt.ArrowCursor)
-
-    def unsetRowBackground(self, row):
-        """
-        Remove any background for a specific row.
-
-        Args:
-            row (int): row index
-        """
-        self.table.removeRowBackground(row)
-
-    def setRowProcessing(self, row):
-        """
-        Set a row as currently processing.
-
-        Args:
-            row (int): the row index
-        """
-        self.table.setRowBackground(row, self.PROCESSING_COLOR)
-
-    def setRowDone(self, row):
-        """
-        Set a row as done with success.
-
-        Args:
-            row (int): the row index
-        """
-        self.table.setRowBackground(row, self.OK_COLOR)
-
-    def setRowError(self, row):
-        """
-        Set a row as done with error.
-
-        Args:
-            row (int): the row index
-        """
-        self.table.setRowBackground(row, self.ERROR_COLOR)
-
-    def setCellOk(self, row, columnTitle):
-        """
-        Set a cell as OK. Change its color and remove the tooltip if it exists.
-
-        Args:
-            row (int): row index
-            columnTile (str): column header
-        """
-        if ((row < 0) or (row >= self.table.rowCount())
-                or (columnTitle not in self.columns)):
-            return
-        column = self.columns.index(columnTitle)
-        self.table.removeCellBackground(row, column)
-        self.table.setCellToolTip(row, column, "")
-
-    def setCellError(self, row, columnTitle, msg):
-        """
-        Set a cell a containing an invalid value. Change its colors, add a
-        tooltip containing the provided message.
-
-        Args:
-            row (int): row index
-            columnTitle (str): column header
-            msg (str): the error message
-        """
-        if ((row < 0) or (row >= self.table.rowCount())
-                or (columnTitle not in self.columns)):
-            return
-        column = self.columns.index(columnTitle)
-        self.table.setCellBackground(row, column, self.ERROR_COLOR)
-        self.table.setCellToolTip(row, column, msg)
 
     def setVisualSettings(self, visualSettings):
         """

@@ -12,6 +12,7 @@ from qtpy.QtCore import *
 
 from .DrillHeaderView import DrillHeaderView
 from .DrillItemDelegate import DrillItemDelegate
+from .DrillTableItem import DrillTableItem
 
 
 class DrillTableWidget(QTableWidget):
@@ -20,9 +21,19 @@ class DrillTableWidget(QTableWidget):
     the custom header and delegate and expose some useful functions.
     """
 
+    """
+    List of column names.
+    """
+    _columns = None
+
+    """
+    True if the table has been disabled.
+    """
+    _disabled = False
+
     def __init__(self, parent=None):
         super(DrillTableWidget, self).__init__(parent)
-        self._disabled = False
+        self._columns = list()
         header = DrillHeaderView(self)
         header.setSectionsClickable(True)
         header.setSectionResizeMode(QHeaderView.Interactive)
@@ -40,6 +51,34 @@ class DrillTableWidget(QTableWidget):
         self.horizontalHeader().setHighlightSections(False)
         self.verticalHeader().setHighlightSections(False)
 
+        self.setItemPrototype(DrillTableItem())
+
+        self._samplePresenters = list()
+
+        self.itemChanged.connect(self.onItemChanged)
+
+    def setWindowModified(self, state):
+        """
+        Propagate the windowModified flag to the parents.
+
+        Args:
+            state (bool): if True, the window is modified
+        """
+        widget = self
+        while widget.parent():
+            widget = widget.parent()
+            widget.setWindowModified(state)
+
+    def addSamplePresenter(self, presenter, index):
+        """
+        Add a sample presenter.
+
+        Args:
+            presenter (DrillSamplePresenter): reference to the presenter
+            index (int): sample index
+        """
+        self._samplePresenters.insert(index, presenter)
+
     def setHorizontalHeaderLabels(self, labels):
         """
         Overrides QTableWidget::setHorizontalHeaderLabels. This methods calls
@@ -49,7 +88,9 @@ class DrillTableWidget(QTableWidget):
             labels (list(str)): columns labels
         """
         super(DrillTableWidget, self).setHorizontalHeaderLabels(labels)
-        self.columns = labels
+        self._columns = list()
+        for label in labels:
+            self._columns.append(label)
 
     def addRow(self, position):
         """
@@ -78,6 +119,45 @@ class DrillTableWidget(QTableWidget):
         if ((position < 0) or (position >= n_rows)):
             return
         self.removeRow(position)
+        del self._samplePresenters[position]
+
+    def onItemChanged(self, item):
+        """
+        Triggered when a item was changed in the table. This function create
+        a new MVP for any new item and forward the modification signals to the
+        item itself.
+
+        Args:
+            item (DrillTableItem): the item
+        """
+        if item.getPresenter() is None:
+            row = item.row()
+            col = item.column()
+            self._samplePresenters[row].onNewItem(self._columns[col], item)
+            item.signals.dataChanged.emit()
+
+    def itemFromName(self, row, name):
+        """
+        Get table item from row number and column name.
+
+        Args:
+            row (int): row index
+            name (str): name of the column
+
+        Returns:
+            QTableWidgetItem: the table item, None if the colum/row does not
+                              exist
+        """
+        if name not in self._columns or row >= self.rowCount():
+            return None
+        col = self._columns.index(name)
+        item = self.item(row, col)
+        if item is None:
+            item = self.itemPrototype().clone()
+            self.blockSignals(True)
+            self.setItem(row, col, item)
+            self.blockSignals(False)
+        return item
 
     def eraseRow(self, position):
         """
@@ -92,8 +172,9 @@ class DrillTableWidget(QTableWidget):
         if ((position < 0) or (position >= n_rows)):
             return
         for column in range(self.columnCount()):
-            self.takeItem(position, column)
-            self.cellChanged.emit(position, column)
+            item = self.item(position, column)
+            if item:
+                item.setData(Qt.EditRole, None)
 
     def eraseCell(self, row, column):
         """
@@ -109,8 +190,9 @@ class DrillTableWidget(QTableWidget):
         n_cols = self.columnCount()
         if ((row < 0) or (row > n_rows) or (column < 0) or (column > n_cols)):
             return
-        self.takeItem(row, column)
-        self.cellChanged.emit(row, column)
+        item = self.item(row, column)
+        if item:
+            item.setData(Qt.EditRole, None)
 
     def getSelectedRows(self):
         """
@@ -257,41 +339,9 @@ class DrillTableWidget(QTableWidget):
         if ((row < 0) or (row >= n_rows)
                 or (column < 0) or (column >= n_columns)):
             return
-        cell = QTableWidgetItem(contents)
+        cell = self.itemPrototype().clone()
         self.setItem(row, column, cell)
-
-    def getRowContents(self, row):
-        """
-        Get the contents of a whole row.
-
-        Args:
-            row (int): row index
-
-        Returns:
-            list(str): the row contents
-        """
-        contents = list()
-        for column in range(self.columnCount()):
-            contents.append(self.getCellContents(row, column))
-        return contents
-
-    def setRowContents(self, row, contents):
-        """
-        Set the content of an existing row.
-
-        Args:
-            row (int): row index
-            contents (list(str)): contents
-        """
-        if self._disabled:
-            return
-        n_rows = self.rowCount()
-        if ((row < 0) or (row >= n_rows)):
-            return
-        column = 0
-        for txt in contents:
-            self.setCellContents(row, column, txt)
-            column += 1
+        cell.setData(Qt.EditRole, contents)
 
     def setRowBackground(self, row, color):
         """
@@ -309,9 +359,8 @@ class DrillTableWidget(QTableWidget):
         for c in range(self.columnCount()):
             item = self.item(row, c)
             if not item:
-                item = QTableWidgetItem()
+                item = self.itemPrototype().clone()
                 self.setItem(row, c, item)
-
             self.item(row, c).setBackground(brush)
         self.blockSignals(False)
 
@@ -327,62 +376,7 @@ class DrillTableWidget(QTableWidget):
             item = self.item(row, c)
             if not item:
                 continue
-            self.setItem(row, c, QTableWidgetItem(item.text()))
-        self.blockSignals(False)
-
-    def setCellBackground(self, row, column, color):
-        """
-        Set the background color of an existing cell. If the cell does not
-        contain item, it will be created by this method.
-
-        Args:
-            row (int): row index
-            column (int): column index
-            color (str): the RBG or ARGB color string
-        """
-        self.blockSignals(True)
-        brush = QBrush(QColor(color))
-        if (row >= self.rowCount()) or (column >= self.columnCount()):
-            return
-        item = self.item(row, column)
-        if not item:
-            self.setItem(row, column, QTableWidgetItem())
-
-        self.item(row, column).setBackground(brush)
-        self.blockSignals(False)
-
-    def removeCellBackground(self, row, column):
-        """
-        Remove a previously set background color for a cell.
-
-        Args:
-            row (int): row index
-            column (int): column index
-        """
-        self.blockSignals(True)
-        item = self.item(row, column)
-        if not item:
-            return
-        item = QTableWidgetItem(item.text())
-        self.setItem(row, column, item)
-        self.blockSignals(False)
-
-    def setCellToolTip(self, row, column, contents):
-        """
-        Set a tooltip associated with a cell. If the cell does not contain
-        item, it will be created by this method.
-
-        Args:
-            row (int): row index
-            column (int): column index
-            contents (str): tooltip contents
-        """
-        self.blockSignals(True)
-        item = self.item(row, column)
-        if not item:
-            self.setItem(row, column, QTableWidgetItem())
-
-        self.item(row, column).setToolTip(contents)
+            item.setData(Qt.BackgroundRole, None)
         self.blockSignals(False)
 
     def setColumnHeaderToolTips(self, tooltips):
@@ -417,22 +411,6 @@ class DrillTableWidget(QTableWidget):
         if tooltip:
             self.verticalHeaderItem(row).setToolTip(tooltip)
 
-    def getRowLabel(self, row):
-        """
-        Get the label of a specific row.
-
-        Args:
-            row (int): row index
-
-        Returns:
-            str: row label
-        """
-        item = self.verticalHeaderItem(row)
-        if item:
-            return item.text()
-        else:
-            return str(row + 1)
-
     def delRowLabel(self, row):
         """
         Delete the row label.
@@ -451,8 +429,8 @@ class DrillTableWidget(QTableWidget):
             columns (list(str)): list of column labels
         """
         header = self.horizontalHeader()
-        for i in range(len(self.columns)):
-            name = self.columns[i]
+        for i in range(len(self._columns)):
+            name = self._columns[i]
             if name in columns:
                 header.foldSection(i)
 
@@ -465,9 +443,9 @@ class DrillTableWidget(QTableWidget):
         """
         header = self.horizontalHeader()
         folded = list()
-        for i in range(len(self.columns)):
+        for i in range(len(self._columns)):
             if header.isSectionFolded(i):
-                folded.append(self.columns[i])
+                folded.append(self._columns[i])
         return folded
 
     def setHiddenColumns(self, columns):
@@ -478,8 +456,8 @@ class DrillTableWidget(QTableWidget):
             columns(list(str)): list of column labels
         """
         header = self.horizontalHeader()
-        for i in range(len(self.columns)):
-            name = self.columns[i]
+        for i in range(len(self._columns)):
+            name = self._columns[i]
             if name in columns:
                 header.hideSection(i)
 
@@ -492,10 +470,10 @@ class DrillTableWidget(QTableWidget):
         Args:
             column (str): column name
         """
-        if column not in self.columns:
+        if column not in self._columns:
             return
         header = self.horizontalHeader()
-        i = self.columns.index(column)
+        i = self._columns.index(column)
         if header.isSectionHidden(i):
             header.showSection(i)
         else:
@@ -523,9 +501,9 @@ class DrillTableWidget(QTableWidget):
         """
         header = self.horizontalHeader()
         hidden = list()
-        for i in range(len(self.columns)):
+        for i in range(len(self._columns)):
             if header.isSectionHidden(i):
-                hidden.append(self.columns[i])
+                hidden.append(self._columns[i])
         return hidden
 
     def setColumnsOrder(self, columns):
@@ -538,9 +516,9 @@ class DrillTableWidget(QTableWidget):
         """
         header = self.horizontalHeader()
         for c in columns:
-            if c not in self.columns:
+            if c not in self._columns:
                 continue
-            indexFrom = header.visualIndex(self.columns.index(c))
+            indexFrom = header.visualIndex(self._columns.index(c))
             indexTo = columns.index(c)
             header.moveSection(indexFrom, indexTo)
 
@@ -551,11 +529,11 @@ class DrillTableWidget(QTableWidget):
         Returns:
             list(str): list of columns labels
         """
-        columns = [""] * len(self.columns)
+        columns = [""] * len(self._columns)
         header = self.horizontalHeader()
-        for i in range(len(self.columns)):
+        for i in range(len(self._columns)):
             index = header.visualIndex(i)
-            columns[index] = self.columns[i]
+            columns[index] = self._columns[i]
         return columns
 
     def setDisabled(self, state):

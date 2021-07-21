@@ -10,7 +10,6 @@ import json
 from mantid.kernel import *
 
 from .configurations import RundexSettings
-from .DrillSample import DrillSample
 
 
 class DrillRundexIO:
@@ -88,7 +87,10 @@ class DrillRundexIO:
         # global settings
         if (RundexSettings.SETTINGS_JSON_KEY in json_data):
             settings = json_data[RundexSettings.SETTINGS_JSON_KEY]
-            drill.setSettings(settings)
+            parameters = drill.getParameters()
+            for parameter in drill.getParameters():
+                if parameter.getName() in settings:
+                    parameter.setValue(settings[parameter.getName()])
         else:
             logger.warning("No global settings found when importing {0}. "
                            "Default settings will be used."
@@ -105,23 +107,34 @@ class DrillRundexIO:
         # samples
         if ((RundexSettings.SAMPLES_JSON_KEY in json_data)
                 and (json_data[RundexSettings.SAMPLES_JSON_KEY])):
+            i = 0
             for sampleJson in json_data[RundexSettings.SAMPLES_JSON_KEY]:
                 # for backward compatibility
                 if "CustomOptions" in sampleJson:
                     sampleJson.update(sampleJson["CustomOptions"])
                     del sampleJson["CustomOptions"]
-                sample = DrillSample()
-                sample.setParameters(sampleJson)
-                drill.addSample(-1, sample)
+                sample = drill.addSample(i)
+                for name, value in sampleJson.items():
+                    param = sample.addParameter(name)
+                    param.setValue(value)
+                i += 1
         else:
             logger.warning("No sample found when importing {0}."
                            .format(self._filename))
 
         # groups
+        samples = drill.getSamples()
         if "SamplesGroups" in json_data and json_data["SamplesGroups"]:
-            drill.setSamplesGroups(json_data["SamplesGroups"])
+            for groupName, indexes in json_data["SamplesGroups"].items():
+                i = 0
+                for index in indexes:
+                    if index < len(samples):
+                        samples[index].setGroup(groupName, i)
+                    i += 1
         if "MasterSamples" in json_data and json_data["MasterSamples"]:
-            drill.setMasterSamples(json_data["MasterSamples"])
+            for groupName, index in json_data["MasterSamples"].items():
+                if index < len(samples):
+                    samples[index].setMaster(True)
 
     def save(self):
         """
@@ -145,9 +158,12 @@ class DrillRundexIO:
             json_data[RundexSettings.VISUAL_SETTINGS_JSON_KEY] = visualSettings
 
         # global settings
-        settings = drill.getSettings()
-        if settings:
-            json_data[RundexSettings.SETTINGS_JSON_KEY] = settings
+        parameters = drill.getParameters()
+        parametersJson = dict()
+        for parameter in parameters:
+            parametersJson[parameter.getName()] = parameter.getValue()
+        if parametersJson:
+            json_data[RundexSettings.SETTINGS_JSON_KEY] = parametersJson
 
         # export settings
         exportModel = drill.getExportModel()
@@ -162,15 +178,22 @@ class DrillRundexIO:
             json_data[RundexSettings.SAMPLES_JSON_KEY] = list()
             for sample in samples:
                 json_data[RundexSettings.SAMPLES_JSON_KEY].append(
-                        sample.getParameters())
+                        sample.getParameterValues())
 
         # groups
-        groups = drill.getSamplesGroups()
+        groups = dict()
+        masters = dict()
+        for sample in samples:
+            groupName = sample.getGroupName()
+            if groupName is not None:
+                if groupName in groups:
+                    groups[groupName].append(sample.getIndex())
+                else:
+                    groups[groupName] = [sample.getIndex()]
+                if sample.isMaster():
+                    masters[groupName] = sample.getIndex()
         if groups:
-            json_data["SamplesGroups"] = dict()
-        for k,v in groups.items():
-            json_data["SamplesGroups"][k] = list(v)
-        masters = drill.getMasterSamples()
+            json_data["SamplesGroups"] = groups
         if masters:
             json_data["MasterSamples"] = masters
 

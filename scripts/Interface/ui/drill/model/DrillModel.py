@@ -7,7 +7,6 @@
 
 import os
 import sys
-import numpy
 
 from qtpy.QtCore import QObject, Signal, QThread
 
@@ -18,9 +17,11 @@ from mantid.api import *
 from .configurations import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
-from .DrillParameterController import DrillParameter, DrillParameterController
+from .DrillParameterController import DrillParameterController
 from .DrillExportModel import DrillExportModel
 from .DrillRundexIO import DrillRundexIO
+from .DrillSample import DrillSample
+from .DrillParameter import DrillParameter
 
 
 class DrillModel(QObject):
@@ -50,30 +51,14 @@ class DrillModel(QObject):
     """
     PROCESSED_DATA_DIR = "processed"
 
+    """
+    List of processing parameter from the current algorithm.
+    """
+    _parameters = None
+
     ###########################################################################
     # signals                                                                 #
     ###########################################################################
-
-    """
-    Raised when a process is started.
-    Args:
-        (int): sample index
-    """
-    processStarted = Signal(int)
-
-    """
-    Raised when a process finished with success.
-    Args:
-        (int): sample index
-    """
-    processSuccess = Signal(int)
-
-    """
-    Raised when a process failed.
-    Args:
-        (int): sample index
-    """
-    processError = Signal(int)
 
     """
     Raised when all the processing are done.
@@ -88,25 +73,11 @@ class DrillModel(QObject):
     progressUpdate = Signal(int)
 
     """
-    Raised when a new param is ok.
+    Sent when the model get a new sample.
     Args:
-        (int): sample index
-        (str): parameter name
+        DrillSample: the new sample
     """
-    paramOk = Signal(int, str)
-
-    """
-    Raised when a new parameter is wrong.
-    Args:
-        (int): sample index
-        (str): parameter name
-    """
-    paramError = Signal(int, str, str)
-
-    """
-    Raised when groups are updated.
-    """
-    groupsUpdated = Signal()
+    newSample = Signal(DrillSample)
 
     def __init__(self):
         super(DrillModel, self).__init__()
@@ -116,17 +87,12 @@ class DrillModel(QObject):
         self.experimentId = None
         self.algorithm = None
         self.samples = list()
-        self.groups = dict()
-        self.masterSamples = dict()
-        self.settings = dict()
         self.controller = None
         self.visualSettings = dict()
         self.rundexIO = None
         self.exportModel = None
 
-        # set the instrument and default acquisition mode
         self.tasksPool = DrillAlgorithmPool()
-        self.setInstrument(config['default.instrument'], log=False)
 
         # setup the thread pool
         self.tasksPool.signals.taskStarted.connect(self._onTaskStarted)
@@ -140,10 +106,9 @@ class DrillModel(QObject):
         Clear the sample list and the settings.
         """
         self.samples = list()
-        self.groups = dict()
-        self.masterSamples = dict()
         self.visualSettings = dict()
-        self._setDefaultSettings()
+        self._initController()
+        self._initProcessingParameters()
 
     def setInstrument(self, instrument, log=True):
         """
@@ -155,10 +120,6 @@ class DrillModel(QObject):
             instrument (str): instrument name
         """
         self.samples = list()
-        self.groups = dict()
-        self.masterSamples = dict()
-        self.settings = dict()
-        self.columns = list()
         self.visualSettings = dict()
         self.instrument = None
         self.acquisitionMode = None
@@ -202,24 +163,19 @@ class DrillModel(QObject):
                     self.instrument])):
             return
         self.samples = list()
-        self.groups = dict()
-        self.masterSamples = dict()
         self.visualSettings = dict()
         if mode in RundexSettings.VISUAL_SETTINGS:
             self.visualSettings = RundexSettings.VISUAL_SETTINGS[mode]
         self.acquisitionMode = mode
-        self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
         self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
         if self.acquisitionMode in RundexSettings.THREADS_NUMBER:
             nThreads = RundexSettings.THREADS_NUMBER[self.acquisitionMode]
         else:
             nThreads = QThread.idealThreadCount()
         self.tasksPool.setMaxThreadCount(nThreads)
-        self.settings = dict.fromkeys(
-                RundexSettings.SETTINGS[self.acquisitionMode])
-        self._setDefaultSettings()
         self.exportModel = DrillExportModel(self.acquisitionMode)
         self._initController()
+        self._initProcessingParameters()
 
     def getAcquisitionMode(self):
         """
@@ -307,147 +263,53 @@ class DrillModel(QObject):
         """
         Initialize the parameter controller.
         """
-        def onParamOk(p):
-            if ((p.sample != -1) and (p.name not in self.columns)):
-                self.paramOk.emit(p.sample, RundexSettings.CUSTOM_OPT_JSON_KEY)
-            elif ((p.name in self.columns) or (p.name in self.settings)):
-                self.paramOk.emit(p.sample, p.name)
-
-        def onParamError(p):
-            if ((p.sample != -1) and (p.name not in self.columns)):
-                self.paramError.emit(p.sample,
-                                     RundexSettings.CUSTOM_OPT_JSON_KEY,
-                                     p.errorMsg)
-            elif ((p.name in self.columns) or (p.name in self.settings)):
-                self.paramError.emit(p.sample, p.name, p.errorMsg)
-
-        if (self.algorithm is None):
+        if not self.algorithm:
+            self.controller = None
             return
         self.controller = DrillParameterController(self.algorithm)
-        self.controller.signals.okParam.connect(onParamOk)
-        self.controller.signals.wrongParam.connect(onParamError)
         self.controller.start()
 
-    def setSettings(self, settings):
+    def _initProcessingParameters(self):
         """
-        Update the settings from a dictionnary.
-
-        Args:
-            settings (dict(str: any)): settings key,value pairs. Value can be
-                                       str, int, float or bool
+        Initialize the processing parameters from the algorithm.
         """
-        for (k, v) in settings.items():
-            if k in self.settings:
-                self.settings[k] = v
-
-    def getSettings(self):
-        """
-        Get the settings.
-
-        Returns:
-            dict(str, any): the settings. Value can be str, int, float or bool
-        """
-        return self.settings
-
-    def getSettingsTypes(self):
-        """
-        Get informations about the algorithm settings. For all settings that
-        should appear in the settings dialog, the function will return their
-        type, allowed values and documentation. This method is used to generate
-        the settings dialog automatically.
-
-        Returns:
-            tuple(dict(str: str), dict(str: list(str)), dict(str: str)): three
-                dictionnaries for type, allowed values and documentation. Each
-                of them uses the setting name as key. The type is a str:
-                "file", "workspace", "combobox", "bool" or "string".
-        """
-        types = dict()
-        values = dict()
-        docs = dict()
-        if not self.algorithm:
-            return types, values, docs
-
-        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
-        alg.initialize()
-        for s in self.settings:
-            p = alg.getProperty(s)
-            if (isinstance(p, FileProperty)):
-                t = "file"
-            elif (isinstance(p, MultipleFileProperty)):
-                t = "files"
-            elif (isinstance(p, (WorkspaceGroupProperty,
-                                 MatrixWorkspaceProperty))):
-                t = "workspace"
-            elif (isinstance(p, StringPropertyWithValue)):
-                if (p.allowedValues):
-                    t = "combobox"
-                else:
-                    t = "string"
-            elif (isinstance(p, BoolPropertyWithValue)):
-                t = "bool"
-            elif (isinstance(p, FloatArrayProperty)):
-                t = "floatArray"
-            elif (isinstance(p, IntArrayProperty)):
-                t = "intArray"
-            else:
-                t = "string"
-
-            types[s] = t
-            values[s] = p.allowedValues
-            docs[s] = p.documentation
-
-        return (types, values, docs)
-
-    def _setDefaultSettings(self):
-        """
-        Set the settings to their defautl values. This method takes the default
-        values directly from the algorithm.
-        """
+        self._parameters = list()
         if not self.algorithm:
             return
         alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
         alg.initialize()
 
-        for s in self.settings:
-            p = alg.getProperty(s)
-            v = p.value
-            if isinstance(v, numpy.ndarray):
-                self.settings[s] = v.tolist()
-            elif v is None:
-                self.settings[s] = ""
-            else:
-                self.settings[s] = v
+        properties = alg.getProperties()
+        for p in properties:
+            parameter = DrillParameter(p.name)
+            parameter.setController(self.controller)
+            parameter.initFromProperty(p)
+            self._parameters.append(parameter)
 
-    def checkParameter(self, param, value, sample=-1):
+    def getParameters(self):
         """
-        Check a parameter by giving it name and value. The sample index is a
-        facultative parameter. This method pushes the parameter on the
-        controller queue.
+        Get the parameters of the current algorithm.
 
-        Args:
-            param (str): parameter name
-            value (any): parameter value. Can be str, bool
-            sample (int): sample index if it is a sample specific parameter
+        Returns:
+            list(DrillParameter): list of all parameters
         """
-        self.controller.addParameter(DrillParameter(param, value, sample))
+        return self._parameters
 
-    def changeParameter(self, sampleIndex, name, value):
+    def _getSamplesFromGroup(self, groupName):
         """
-        Change parameter value and update the model samples. It submits the new
-        value to the parameters controller to check it. In case of empty value,
-        the paramOk signal is sent without any submission to the controller.
+        Get the list of samples that belong to a group.
 
         Args:
-            sampleIndex (int): index of the sample in self.samples
-            name (str): name of the parameter
-            value (str): new value
+            groupName (str): name of the group
+
+        Returns:
+            list(DrillSample): samples that belong to the group
         """
-        self.samples[sampleIndex].changeParameter(name, value)
-        if (value == "DEFAULT") or value == "":
-            self.paramOk.emit(sampleIndex, name)
-        else:
-            self.checkParameter(name, value, sampleIndex)
+        out = []
+        for sample in self.samples:
+            if sample.getGroupName() == groupName:
+                out.append(sample)
+        return out
 
     def groupSamples(self, sampleIndexes, groupName=None):
         """
@@ -457,17 +319,6 @@ class DrillModel(QObject):
             sampleIndexes (list(int)): sample indexes
             groupName (str): optional name for the new group
         """
-        for i in sampleIndexes:
-            sample = self.samples[i]
-            for group in self.groups:
-                if sample in self.groups[group]:
-                    self.groups[group].remove(sample)
-                if ((group in self.masterSamples)
-                        and (self.masterSamples[group] == sample)):
-                    del self.masterSamples[group]
-
-        self.groups = {k:v for k,v in self.groups.items() if v}
-
         def incrementName(name):
             """
             Increment the group name from A to Z, AA to AZ, ...
@@ -485,27 +336,25 @@ class DrillModel(QObject):
 
         if not groupName:
             groupName = 'A'
-            while groupName in self.groups:
+            while self._getSamplesFromGroup(groupName):
                 groupName = incrementName(groupName)
-        samples = set(self.samples[i] for i in sampleIndexes)
-        self.groups[groupName] = samples
 
-        self.groupsUpdated.emit()
-
-    def addToGroup(self, sampleIndexes, groupName):
-        """
-        Add some samples in an existing group.
-
-        Args:
-            sampleIndexes (list(int)): list of sample indexes
-            groupName (str): name of the group
-        """
-        if groupName not in self.groups:
-            return
-        self.ungroupSamples(sampleIndexes)
-        samples = set(self.samples[i] for i in sampleIndexes)
-        self.groups[groupName].update(samples)
-        self.groupsUpdated.emit()
+        i = 0
+        modifiedGroups = list()
+        for s in sampleIndexes:
+            sample = self.samples[s]
+            currentGroup = sample.getGroupName()
+            if currentGroup:
+                modifiedGroups.append(currentGroup)
+            sample.setGroup(groupName, i)
+            i += 1
+        for group in modifiedGroups:
+            i = 0
+            for s in self._getSamplesFromGroup(group):
+                master = s.isMaster()
+                s.setGroup(group, i)
+                s.setMaster(master)
+                i += 1
 
     def ungroupSamples(self, sampleIndexes):
         """
@@ -514,70 +363,53 @@ class DrillModel(QObject):
         Args:
             sampleIndexes (list(int)): sample indexes
         """
-        for i in sampleIndexes:
-            sample = self.samples[i]
-            for group in self.groups:
-                if sample in self.groups[group]:
-                    self.groups[group].remove(sample)
-                if ((group in self.masterSamples)
-                        and (self.masterSamples[group] == sample)):
-                    del self.masterSamples[group]
+        modifiedGroups = list()
+        for s in sampleIndexes:
+            group = self.samples[s].getGroupName()
+            if group and group not in modifiedGroups:
+                modifiedGroups.append(group)
+            self.samples[s].setGroup(None)
+        for group in modifiedGroups:
+            samples = self._getSamplesFromGroup(group)
+            sampleIndexes = list()
+            for sample in samples:
+                sampleIndexes.append(sample.getIndex())
+                sample.setGroup(None)
+            self.groupSamples(sampleIndexes, group)
 
-        self.groups = {k:v for k,v in self.groups.items() if v}
-        self.groupsUpdated.emit()
-
-    def setSamplesGroups(self, groups):
+    def addToGroup(self, sampleIndexes, groupName):
         """
-        Set the dictionnary of samples groups.
+        Add some samples to an existing group.
 
         Args:
-            groups (dict(str:list(int))): samples groups
+            sampleIndexes (list(int)): sample indexes
+            groupName (str): name of the group
         """
-        self.groups = {k:set(self.samples[i] for i in v) for k,v in groups.items()}
+        self.ungroupSamples(sampleIndexes)
+        samples = [sample.getIndex() for sample
+                   in self._getSamplesFromGroup(groupName)]
+        samples += sampleIndexes
+        self.groupSamples(samples, groupName)
 
-    def getSamplesGroups(self):
+    def setGroupMaster(self, sampleIndex, state):
         """
-        Get the samples groups.
-
-        Returns:
-            dict(str, list(int)): groups of samples
-        """
-        groups = {}
-        for k,v in self.groups.items():
-            groups[k] = set(self.samples.index(s) for s in v)
-        return groups
-
-    def setMasterSamples(self, masterSamples):
-        """
-        Set the dictionnary of master samples.
-
-        Args:
-            masterSamples (dict(str:int)): master samples
-        """
-        self.masterSamples = {k:self.samples[v] for k,v in masterSamples.items()}
-
-    def getMasterSamples(self):
-        """
-        Get the master samples of each groups.
-
-        Returns:
-            dict(str, int): master samples for each group.
-        """
-        return {k:self.samples.index(v) for k,v in self.masterSamples.items()}
-
-    def setGroupMaster(self, sampleIndex):
-        """
-        Set the sample as master for its group.
+        Set/unset the sample as master for its group.
 
         Args:
             sampleIndex (int): sample index
+            state (bool): True to set the master sample
         """
-        for group in self.groups:
-            if self.samples[sampleIndex] in self.groups[group]:
-                self.masterSamples[group] = self.samples[sampleIndex]
-                self.groupsUpdated.emit()
+        sample = self.samples[sampleIndex]
+        groupName = sample.getGroupName()
+        if groupName is None or sample.isMaster() == state:
+            return
+        if state:
+            for s in self._getSamplesFromGroup(groupName):
+                if s.isMaster():
+                    s.setMaster(False)
+        sample.setMaster(state)
 
-    def getProcessingParameters(self, sample):
+    def getProcessingParameters(self, index):
         """
         Get the keyword arguments to be provided to an algorithm. This will
         merge the global settings and the row specific settings in a single
@@ -593,47 +425,70 @@ class DrillModel(QObject):
         params = dict()
         if self.acquisitionMode in RundexSettings.FLAGS:
             params.update(RundexSettings.FLAGS[self.acquisitionMode])
-        params.update(self.settings)
+        for p in self._parameters:
+            params[p.getName()] = p.getValue()
 
+        sample = self.samples[index]
         # search for master sample
-        master = None
-        for group in self.groups:
-            if self.samples[sample] in self.groups[group]:
-                master = None
-                if group in self.masterSamples:
-                    master = self.masterSamples[group]
-                if master is not None:
-                    params.update(master.getParameters())
+        groupName = sample.getGroupName()
+        if groupName:
+            samplesFromGroup = self._getSamplesFromGroup(groupName)
+            for s in samplesFromGroup:
+                if s.isMaster():
+                    params.update(s.getParameterValues())
 
-        params.update(self.samples[sample].getParameters())
-        # override global params with custom ones
-        if "CustomOptions" in params:
-            params.update(params["CustomOptions"])
-            del params["CustomOptions"]
+        params.update(sample.getParameterValues())
         # remove empty params
         for (k, v) in list(params.items()):
             if v is None or v == "DEFAULT":
                 del params[k]
         # add the output workspace param
-        if "OutputWorkspace" not in params:
-            params["OutputWorkspace"] = "sample_" + str(sample + 1)
-        self.samples[sample].setOutputName(params["OutputWorkspace"])
+        if "OutputWorkspace" not in params or params["OutputWorkspace"] == "":
+            params["OutputWorkspace"] = "sample_" + str(index + 1)
+        sample.setOutputName(params["OutputWorkspace"])
         return params
 
     def process(self, elements):
         """
-        Start samples processing.
+        Start samples processing. The method first checks that all the samples
+        are valid and if yes, submit them to the processing.
 
         Args:
             elements (list(int)): list of sample indexes to be processed
+
+        Returns:
+            bool: True if all samples are valid and submitted to processing
         """
         tasks = list()
         for e in elements:
             if (e >= len(self.samples)) or (not self.samples[e]):
                 continue
+            if not self.samples[e].isValid():
+                return False
             kwargs = self.getProcessingParameters(e)
             tasks.append(DrillTask(str(e), self.algorithm, **kwargs))
         self.tasksPool.addProcesses(tasks)
+        return True
+
+    def processGroup(self, elements):
+        """
+        Start processing of whole group(s) of samples.
+
+        Args:
+            elements (list(int)): list of sample indexes
+
+        Returns:
+            bool: True if all samples are valid and submitted to processing
+        """
+        sampleIndexes = []
+        for e in elements:
+            if (e >= len(self.samples)) or (not self.samples[e]):
+                continue
+            groupName = self.samples[e].getGroupName()
+            if groupName is not None:
+                sampleIndexes += [sample.getIndex()
+                        for sample  in self._getSamplesFromGroup(groupName)]
+        return self.process(sampleIndexes)
 
     def _onTaskStarted(self, ref):
         """
@@ -642,11 +497,7 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
-        ref = int(ref)
-        name = str(ref + 1)
-        logger.information("Starting of sample {0} processing"
-                           .format(name))
-        self.processStarted.emit(ref)
+        self.samples[int(ref)].onProcessStarted()
 
     def _onTaskSuccess(self, ref):
         """
@@ -655,12 +506,8 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
-        ref = int(ref)
-        name = str(ref + 1)
-        logger.information("Processing of sample {0} finished with sucess"
-                           .format(name))
-        self.processSuccess.emit(ref)
-        self.exportModel.run(self.samples[ref])
+        self.samples[int(ref)].onProcessSuccess()
+        self.exportModel.run(self.samples[int(ref)])
 
     def _onTaskError(self, ref, msg):
         """
@@ -671,11 +518,7 @@ class DrillModel(QObject):
             ref (int): sample index
             msg (str): error msg
         """
-        ref = int(ref)
-        name = str(ref + 1)
-        logger.error("Error while processing sample {0}: {1}"
-                     .format(name, msg))
-        self.processError.emit(ref)
+        self.samples[int(ref)].onProcessError(msg)
 
     def _onProcessingProgress(self, progress):
         """
@@ -757,42 +600,26 @@ class DrillModel(QObject):
         """
         return {k:v for k,v in self.visualSettings.items()}
 
-    def getColumnHeaderData(self):
-        """
-        Get the column names and tooltips in two lists with same length.
-
-        Returns:
-            list(str): list of column names
-            list(str): list of column tooltips
-        """
-        if not self.columns:
-            return [], []
-
-        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
-        alg.initialize()
-
-        tooltips = list()
-        for c in self.columns:
-            try:
-                p = alg.getProperty(c)
-                tooltips.append(p.documentation)
-            except:
-                tooltips.append(c)
-
-        return self.columns, tooltips
-
-    def addSample(self, index, sample):
+    def addSample(self, index):
         """
         Add a sample to the model.
 
         Args:
             index (int): sample index; if -1 the sample is added to the end
-            sample (DrillSample): sample
         """
-        if (index == -1):
+        if (index == -1) or (index >= len(self.samples)):
+            sample = DrillSample(len(self.samples))
             self.samples.append(sample)
         else:
+            sample = DrillSample(index)
             self.samples.insert(index, sample)
+            i = index + 1
+            while i < len(self.samples):
+                self.samples[i].setIndex(i)
+                i += 1
+        sample.setController(self.controller)
+        self.newSample.emit(sample)
+        return sample
 
     def deleteSample(self, ref):
         """
@@ -803,17 +630,10 @@ class DrillModel(QObject):
         """
         sample = self.samples[ref]
         del self.samples[ref]
-        # remove from groups if needed
-        for group in self.groups:
-            if sample in self.groups[group]:
-                self.groups[group].remove(sample)
-                if not self.groups[group]:
-                    del self.groups[group]
-                if ((group in self.masterSamples)
-                        and (self.masterSamples[group] == sample)):
-                    del self.masterSamples[group]
-                self.groupsUpdated.emit()
-                return
+        i = ref
+        while i < len(self.samples):
+            self.samples[i].setIndex(i)
+            i += 1
 
     def getSamples(self):
         """
@@ -823,27 +643,3 @@ class DrillModel(QObject):
             list(dict(str:str)): samples
         """
         return self.samples
-
-    def getRowsContents(self):
-        """
-        Get all the samples as a table, 1 sample per row.
-
-        Returns:
-            list(list(str)): table contents
-        """
-        rows = list()
-        for sample in self.samples:
-            params = sample.getParameters()
-            row = list()
-            for column in self.columns[:-1]:
-                if column in params:
-                    row.append(str(params[column]))
-                else:
-                    row.append("")
-            if self.columns[-1] in params:
-                options = list()
-                for (k, v) in params[self.columns[-1]].items():
-                    options.append(str(k) + "=" + str(v))
-                row.append(';'.join(options))
-            rows.append(row)
-        return rows
