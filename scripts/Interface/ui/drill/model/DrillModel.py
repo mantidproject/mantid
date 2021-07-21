@@ -629,7 +629,6 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
-        sample = self.samples[ref]
         del self.samples[ref]
         i = ref
         while i < len(self.samples):
