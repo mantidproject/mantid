@@ -8,6 +8,7 @@ from qtpy import QtWidgets, QtCore
 from os import path
 
 from mantidqt.utils.qt import load_ui
+from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
 Ui_data, _ = load_ui(__file__, "data_widget.ui")
 
@@ -31,13 +32,15 @@ class FileFilterProxyModel (QtCore.QSortFilterProxyModel):
 class FittingDataView(QtWidgets.QWidget, Ui_data):
     sig_enable_load_button = QtCore.Signal(bool)
     sig_enable_inspect_bg_button = QtCore.Signal(bool)
-    proxy_model = FileFilterProxyModel()
+    proxy_model = None
 
     def __init__(self, parent=None):
         super(FittingDataView, self).__init__(parent)
         self.setupUi(self)
         # file finder
+        self.finder_data.readSettings(path_handling.INTERFACES_SETTINGS_GROUP + '/' + path_handling.ENGINEERING_PREFIX)
         self.finder_data.setUseNativeWidget(False)
+        self.proxy_model = FileFilterProxyModel()
         self.finder_data.setProxyModel(self.proxy_model)
         self.finder_data.setLabelText("Focused Run Files")
         self.finder_data.isForRunFiles(False)
@@ -45,6 +48,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.finder_data.setFileExtensions([".nxs"])
         # xunit combo box
         self.setup_xunit_combobox()
+
+    def saveSettings(self):
+        self.finder_data.saveSettings(path_handling.INTERFACES_SETTINGS_GROUP + '/' + path_handling.ENGINEERING_PREFIX)
 
     # =================
     # Slot Connectors
@@ -181,10 +187,12 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
             self.get_table_item(row, col).setCheckState(QtCore.Qt.Unchecked)
 
     def update_file_filter(self, bank, xunit):
-        if bank == "North":
+        if bank == "1 (North)":
             self.proxy_model.text_filter = "bank_1"
-        elif bank == "South":
+        elif bank == "2 (South)":
             self.proxy_model.text_filter = "bank_2"
+        else:
+            self.proxy_model.text_filter = ""
         if xunit != "":
             self.proxy_model.text_filter += "_" + xunit
 

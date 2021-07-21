@@ -63,14 +63,21 @@ QGroupBox:title {
         <item row="0" column="0" colspan="4">
          <widget class="FileFinderWidget" name="finder_data" native="true"/>
         </item>
-        <item row="2" column="3">
+        <item row="3" column="3">
          <widget class="QPushButton" name="button_load">
           <property name="text">
            <string>Load</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
+          <item row="1" column="0">
+           <widget class="QLabel" name="filterLabel">
+            <property name="text">
+             <string>File Filters:</string>
+            </property>
+           </widget>
+          </item>
+        <item row="1" column="1">
          <widget class="QComboBox" name="combo_xunit">
           <item>
            <property name="text">
@@ -84,33 +91,33 @@ QGroupBox:title {
           </item>
          </widget>
         </item>
-        <item row="2" column="2">
+        <item row="1" column="2">
          <widget class="QComboBox" name="combo_bank">
           <item>
            <property name="text">
-            <string></string>
+            <string>All</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>North</string>
+            <string>1 (North)</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>South</string>
+            <string>2 (South)</string>
            </property>
           </item>
          </widget>
         </item>
-        <item row="2" column="0">
+        <item row="3" column="2">
          <widget class="QCheckBox" name="check_addToPlot">
           <property name="text">
            <string>Add to Plot</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="0" colspan="3">
+        <item row="2" column="0" colspan="4">
          <widget class="Line" name="line">
           <property name="minimumSize">
            <size>
