@@ -38,6 +38,7 @@ Improvements
 - :ref:`SaveAscii <algm-SaveAscii>` can now create a header for the output file containing sample logs specified through the new property `LogList`.
 - The algorithm :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` now accepts a negative angle for the SampleAngle parameter of the FlatPlate shape
 - :ref:`AnvredCorrection <algm-AnvredCorrection>` now extrapolates to determine the spherical absorption correction factor for very absorbing samples (a warning is printed to the log to inform the user when this occurs).
+- :ref:`GenerateLogbook <algm-GenerateLogbook>` now allows to perform binary operations with certain entries not existing, e.g. to create a string with polarisations contained in data files
 
 Bugfixes
 ########

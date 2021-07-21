@@ -42,29 +42,29 @@ class GenerateLogbookTest(unittest.TestCase):
         GenerateLogbook(Directory=self._data_directory,
                         OutputWorkspace='default_logbook', Facility='ILL', Instrument='D7',
                         NumorRange="396990:396993")
-        self._check_output('default_logbook', numberEntries=3, numberColumns=6)
+        self._check_output('default_logbook', numberEntries=3, numberColumns=7)
 
     def test_d7_optional(self):
         self.assertTrue(os.path.exists(self._data_directory))
         GenerateLogbook(Directory=self._data_directory,
                         OutputWorkspace='optional_logbook', Facility='ILL', Instrument='D7',
                         NumorRange="396990:396993", OptionalHeaders='TOF')
-        self._check_output('optional_logbook', numberEntries=3, numberColumns=7)
+        self._check_output('optional_logbook', numberEntries=3, numberColumns=8)
 
     def test_d7_custom(self):
         self.assertTrue(os.path.exists(self._data_directory))
         GenerateLogbook(Directory=self._data_directory,
                         OutputWorkspace='custom_logbook', Facility='ILL', Instrument='D7',
                         NumorRange="396990:396993", CustomEntries='/entry0/acquisition_mode')
-        self._check_output('custom_logbook', numberEntries=3, numberColumns=7)
+        self._check_output('custom_logbook', numberEntries=3, numberColumns=8)
 
     def test_d7_custom_with_summing(self):
         self.assertTrue(os.path.exists(self._data_directory))
         GenerateLogbook(Directory=self._data_directory,
                         OutputWorkspace='custom_logbook_w_summing', Facility='ILL', Instrument='D7',
                         NumorRange="396990:396993", CustomEntries='/entry0/acquisition_mode',
-                        OptionalHeaders='polarisation')
-        self._check_output('custom_logbook_w_summing', numberEntries=3, numberColumns=8)
+                        OptionalHeaders='wavelength')
+        self._check_output('custom_logbook_w_summing', numberEntries=3, numberColumns=9)
 
     def test_d7_save_csv(self):
         self.assertTrue(os.path.exists(self._data_directory))
