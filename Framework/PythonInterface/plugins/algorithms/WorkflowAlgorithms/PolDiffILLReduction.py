@@ -212,6 +212,12 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment',
                                                                                PropertyCriterion.IsEqualTo, 'Sum'))
 
+        self.declareProperty(name="MeasurementTechnique",
+                             defaultValue="Powder",
+                             validator=StringListValidator(["Powder", "SingleCrystal"]),
+                             direction=Direction.Input,
+                             doc="What type of measurement technique has been used to collect the data.")
+
         self.declareProperty(FileProperty('InstrumentCalibration', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['.xml']),
@@ -246,6 +252,21 @@ class PolDiffILLReduction(PythonAlgorithm):
             raise RuntimeError('Cannot calculate transmission; beam monitor has 0 counts.')
         Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
         return ws
+
+    @staticmethod
+    def _merge_omega_scan(ws, nMeasurements, group_name):
+        names_list = [list() for _ in range(nMeasurements)]
+        for entry_no, entry in enumerate(mtd[ws]):
+            ConvertToPointData(InputWorkspace=entry, OutputWorkspace=entry)
+            names_list[entry_no % nMeasurements].append(entry.name())
+        tmp_names = [''] * nMeasurements
+        for entry_no in range(nMeasurements):
+            tmp_name = group_name + '_{}'.format(entry_no)
+            tmp_names[entry_no] = tmp_name
+            ConjoinXRuns(InputWorkspaces=names_list[entry_no], OutputWorkspace=tmp_name,
+                         SampleLogAsXAxis='omega.actual')
+        GroupWorkspaces(InputWorkspaces=tmp_names, OutputWorkspace=group_name)
+        return group_name
 
     def _figure_out_measurement_method(self, ws):
         """Figures out the measurement method based on the structure of the input files."""
@@ -301,39 +322,51 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _subtract_background(self, ws, empty_ws, transmission_ws):
         """Subtracts empty container and cadmium absorber scaled by transmission."""
+        cadmium_present = True
         cadmium_ws = self.getPropertyValue('CadmiumInputWorkspace')
         if cadmium_ws == "":
-            return ws
+            cadmium_present = False
         unit_ws = 'unit_ws'
         CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=unit_ws)
         background_ws = 'background_ws'
         tmp_names = [unit_ws, background_ws]
         nMeasurements = self._data_structure_helper()
-        singleEmptyPerPOL = mtd[empty_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
-        singleCadmiumPerPOL = mtd[empty_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
+        singleEmpty = mtd[empty_ws].getNumberOfEntries() == 1
+        singleEmptyPerPOL = mtd[empty_ws].getNumberOfEntries() % nMeasurements == 0
+        if cadmium_present:
+            singleCadmiumPerPOL = mtd[empty_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
         for entry_no, entry in enumerate(mtd[ws]):
-            if singleEmptyPerPOL:
+            if singleEmpty:
+                empty_entry = mtd[empty_ws][0].name()
+            elif singleEmptyPerPOL:
                 empty_entry = mtd[empty_ws][entry_no % nMeasurements].name()
             else:
                 empty_entry = mtd[empty_ws][entry_no].name()
-            if singleCadmiumPerPOL:
-                cadmium_entry = mtd[cadmium_ws][entry_no % nMeasurements].name()
-            else:
-                cadmium_entry = mtd[cadmium_ws][entry_no].name()
+
+            if cadmium_present:
+                if singleCadmiumPerPOL:
+                    cadmium_entry = mtd[cadmium_ws][entry_no % nMeasurements].name()
+                else:
+                    cadmium_entry = mtd[cadmium_ws][entry_no].name()
             empty_corr = empty_entry + '_corr'
             tmp_names.append(empty_corr)
             Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=empty_entry, OutputWorkspace=empty_corr)
-            transmission_corr = transmission_ws + '_corr'
-            tmp_names.append(transmission_corr)
-            Minus(LHSWorkspace=unit_ws, RHSWorkspace=transmission_ws, OutputWorkspace=transmission_corr)
-            cadmium_corr = cadmium_entry + '_corr'
-            tmp_names.append(cadmium_corr)
-            Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=cadmium_entry, OutputWorkspace=cadmium_corr)
-            Plus(LHSWorkspace=empty_corr, RHSWorkspace=cadmium_corr, OutputWorkspace=background_ws)
+            if cadmium_present:
+                transmission_corr = transmission_ws + '_corr'
+                tmp_names.append(transmission_corr)
+                Minus(LHSWorkspace=unit_ws, RHSWorkspace=transmission_ws, OutputWorkspace=transmission_corr)
+                cadmium_corr = cadmium_entry + '_corr'
+                tmp_names.append(cadmium_corr)
+                Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=cadmium_entry, OutputWorkspace=cadmium_corr)
+                Plus(LHSWorkspace=empty_corr, RHSWorkspace=cadmium_corr, OutputWorkspace=background_ws)
+            else:
+                tmp_names.pop()
+                RenameWorkspace(InputWorkspace=empty_corr, OutputWorkspace=background_ws)
             Minus(LHSWorkspace=entry,
                   RHSWorkspace=background_ws,
                   OutputWorkspace=entry)
-        DeleteWorkspaces(WorkspaceList=tmp_names)
+        if self.getProperty('ClearCache').value and len(tmp_names) > 0:
+            DeleteWorkspaces(WorkspaceList=tmp_names)
         return ws
 
     def _calculate_polarising_efficiencies(self, ws):
@@ -647,6 +680,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                  or (self._method_data_structure == '10p' and entry_no % 10 == 0) ):
                 correction_ws = self._match_attenuation_workspace(entry.name(), attenuation_ws)
             ApplyPaalmanPingsCorrection(SampleWorkspace=entry,
+                                        CanWorkspace=mtd[empty_ws][entry_no],
                                         CorrectionsWorkspace=correction_ws,
                                         OutputWorkspace=entry)
         if self.getProperty('ClearCache').value:
@@ -705,6 +739,11 @@ class PolDiffILLReduction(PythonAlgorithm):
         if process == 'Sample' and self.getPropertyValue('OutputTreatment') in  ['Average','Sum']:
             self._merge_polarisations(ws, average_detectors=(self.getPropertyValue('OutputTreatment') == 'Average'))
 
+        if self.getPropertyValue('MeasurementTechnique') == 'SingleCrystal':
+            SortXAxis(InputWorkspace=ws, OutputWorkspace=ws, Ordering='Ascending')
+            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta', OrderAxis=False)
+            ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
+
         for entry in mtd[ws]:
             if not self.getProperty('AbsoluteNormalisation').value:
                 unit = 'Intensity'
@@ -712,7 +751,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
 
-    def _finalize(self, ws, process, progress):
+    def _finalize(self, ws, process):
+        if process in ['Empty', 'Cadmium'] and self.getPropertyValue('OutputTreatment') != 'Individual':
+            ws = self._merge_polarisations(ws, average_detectors=self.getPropertyValue('OutputTreatment') == 'Average')
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws][0].getRun().addProperty('ProcessedAs', process, True)
@@ -722,24 +763,31 @@ class PolDiffILLReduction(PythonAlgorithm):
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Cadmium', 'EmptyBeam', 'BeamWithCadmium', 'Transmission', 'Empty', 'Quartz', 'Vanadium', 'Sample']
-        nReports = [3, 2, 2, 3, 3, 3, 10, 10]
-        progress = Progress(self, start=0.0, end=1.0, nreports=nReports[processes.index(process)])
+        nReports = np.array([3, 2, 2, 3, 3, 3, 10, 10])
+        measurement_technique = self.getPropertyValue('MeasurementTechnique')
+        if measurement_technique == 'SingleCrystal':
+            nReports += 2
+        progress = Progress(self, start=0.0, end=1.0, nreports=int(nReports[processes.index(process)]))
         ws = '__' + self.getPropertyValue('OutputWorkspace')
 
         calibration_setting = 'YIGFile'
         if self.getProperty('InstrumentCalibration').isDefault:
             calibration_setting = 'None'
-        progress.report('Loading data')
-        Load(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLPolarizedDiffraction',
-             PositionCalibration=calibration_setting, YIGFileName=self.getPropertyValue('InstrumentCalibration'),
-             OutputWorkspace=ws)
-
+        progress.report(0, 'Loading data')
+        LoadAndMerge(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLPolarizedDiffraction',
+                     LoaderOptions={'PositionCalibration':calibration_setting,
+                                    'YIGFileName':self.getPropertyValue('InstrumentCalibration')},
+                     OutputWorkspace=ws, startProgress=0.0, endProgress=0.6)
         self._instrument = mtd[ws][0].getInstrument().getName()
         run = mtd[ws][0].getRun()
         if run['acquisition_mode'].value == 1:
             raise RuntimeError("TOF data reduction is not supported at the moment.")
         self._figure_out_measurement_method(ws)
-
+        if measurement_technique == 'SingleCrystal':
+            progress.report(7, 'Merging omega scan')
+            input_ws = self._merge_omega_scan(ws, self._data_structure_helper(), ws+'_conjoined')
+            DeleteWorkspace(Workspace=ws)
+            RenameWorkspace(InputWorkspace=input_ws, OutputWorkspace=ws)
         if process in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
                 self._merge_polarisations(ws, average_detectors=True)
@@ -753,7 +801,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 progress.report('Calculating transmission')
                 self._calculate_transmission(ws, beam_ws)
         else:
-            progress.report('Normalising to monitor')
+            progress.report(7, 'Normalising to monitor')
             self._normalise(ws)
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
@@ -782,7 +830,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     self._normalise_vanadium(ws)
                 self._set_units(ws, process)
 
-        self._finalize(ws, process, progress)
+        self._finalize(ws, process)
 
 
 AlgorithmFactory.subscribe(PolDiffILLReduction)

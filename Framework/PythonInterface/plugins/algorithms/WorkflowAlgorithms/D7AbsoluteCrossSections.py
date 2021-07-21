@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import AlgorithmFactory, PropertyMode, PythonAlgorithm, \
+from mantid.api import AlgorithmFactory, NumericAxis, PropertyMode, Progress, PythonAlgorithm, \
     WorkspaceGroupProperty, WorkspaceGroup
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
     PropertyCriterion, PropertyManagerProperty, StringListValidator
@@ -133,7 +133,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty(name="OutputUnits",
                              defaultValue="TwoTheta",
-                             validator=StringListValidator(["TwoTheta", "Q"]),
+                             validator=StringListValidator(["TwoTheta", "Q", "Qxy"]),
                              direction=Direction.Input,
                              doc="The choice to display the output either as a function of detector twoTheta,"
                                  +" or the momentum exchange.")
@@ -149,6 +149,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              validator=StringListValidator(["Individual", "Merge"]),
                              direction=Direction.Input,
                              doc="Which treatment of the provided scan should be used to create output.")
+
+        self.declareProperty(name="MeasurementTechnique",
+                             defaultValue="Powder",
+                             validator=StringListValidator(["Powder", "SingleCrystal"]),
+                             direction=Direction.Input,
+                             doc="What type of measurement technique has been used to collect the data.")
 
         self.declareProperty(PropertyManagerProperty('SampleAndEnvironmentProperties', dict()),
                              doc="Dictionary for the information about sample and its environment.")
@@ -172,6 +178,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         self.declareProperty('AbsoluteUnitsNormalisation', True,
                              doc='Whether or not express the output in absolute units.')
 
+        self.declareProperty("IsotropicMagnetism", True,
+                             doc="Whether the paramagnetism is isotropic (Steward, Ehlers) or anisotropic (Schweika).")
+
         self.declareProperty('ClearCache', True,
                              doc='Whether or not to delete intermediate workspaces.')
 
@@ -183,22 +192,17 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             measurements.add(name[last_underscore+1:])
         nMeasurements = len(measurements)
         error_msg = "The provided data cannot support {} measurement cross-section separation."
-        if nMeasurements == 10:
-            nComponents = 3
-        elif nMeasurements == 6:
-            nComponents = 3
-            if user_method == '10p' and self.getProperty('RotatedXYZWorkspace').isDefault:
-                raise RuntimeError(error_msg.format(user_method))
+        if nMeasurements == 6 and user_method == '10p' and self.getProperty('RotatedXYZWorkspace').isDefault:
+            raise RuntimeError(error_msg.format(user_method))
         elif nMeasurements == 2:
-            nComponents = 2
             if user_method == '10p':
                 raise RuntimeError(error_msg.format(user_method))
             if user_method == 'XYZ':
                 raise RuntimeError(error_msg.format(user_method))
-        else:
+        if nMeasurements not in [2, 6, 10]:
             raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
                                + "The provided input does not fit in any of these measurement types.")
-        return nMeasurements, nComponents
+        return nMeasurements
 
     def _read_experiment_properties(self, ws):
         """Reads the user-provided dictionary that contains sample geometry (type, dimensions) and experimental conditions,
@@ -217,17 +221,54 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
             self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass) * formula_units
 
-    def _cross_section_separation(self, ws, nMeasurements, nComponents):
+    def _create_angle_dists(self, ws):
+        """
+        Calculates sin^2 (alpha) and cos^2 (alpha) for all detectors, needed by Schweika's anisotropic cross-section
+        separation.
+        :param ws: Sample workspace.
+        :return: Tuple with two workspaces containing sin^2 (alpha) and cos^2 (alpha)
+        """
+        ws_to_transpose = mtd[ws][0].name()
+        angle_ws = mtd[ws][0].name() + "_tmp_angle"
+        conv_to_theta = 0.5  # conversion to half of the scattering angle
+        if self.getPropertyValue('MeasurementTechnique') != 'SingleCrystal':
+            # for single crystal, the spectrum axis is already converted
+            ConvertSpectrumAxis(InputWorkspace=mtd[ws][0],
+                                OutputWorkspace=angle_ws,
+                                Target='SignedTheta',
+                                OrderAxis=False)
+            ws_to_transpose = angle_ws
+            conv_to_theta *= -1.0  # the sign needs to be flipped
+        Transpose(InputWorkspace=ws_to_transpose, OutputWorkspace=angle_ws)
+        theta = conv_to_theta * mtd[angle_ws].extractX()[0]
+        alpha = (theta - self._sampleAndEnvironmentProperties['KiXAngle'].value) * np.pi / 180.0
+        cos2_alpha_arr = np.power(np.cos(alpha), 2)
+        sin2_alpha_arr = np.power(np.sin(alpha), 2)
+        sin2_alpha_name = 'sin2_alpha'
+        cos2_alpha_name = 'cos2_alpha'
+        cos2_m_sin2_alpha_name = 'cos2_m_sin2_alpha'
+        CreateWorkspace(OutputWorkspace=sin2_alpha_name, DataX=np.arange(1), DataY=sin2_alpha_arr, NSpec=len(alpha))
+        CreateWorkspace(OutputWorkspace=cos2_alpha_name, DataX=np.arange(1), DataY=cos2_alpha_arr, NSpec=len(alpha))
+        Minus(LHSWorkspace=cos2_alpha_name, RHSWorkspace=sin2_alpha_name, OutputWorkspace=cos2_m_sin2_alpha_name)
+        if self.getProperty('ClearCache').value:
+            DeleteWorkspaces(WorkspaceList=[angle_ws, sin2_alpha_name, cos2_alpha_name])
+        return cos2_m_sin2_alpha_name
+
+    def _cross_section_separation(self, ws, nMeasurements):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
         current sample. The method used is based on either the user's choice or the provided data structure."""
         DEG_2_RAD =  np.pi / 180.0
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
+        isotropic_magnetism = self.getProperty('IsotropicMagnetism').value
+        tmp_names = set()
+        if user_method == "XYZ" and not isotropic_magnetism:
+            cos2_m_sin2_alpha = self._create_angle_dists(ws)
+            tmp_names.add(cos2_m_sin2_alpha)
         n_detectors = mtd[ws][0].getNumberHistograms()
         double_xyz_method = False
         if not self.getProperty('RotatedXYZWorkspace').isDefault:
             double_xyz_method = True
             second_xyz_ws = self.getPropertyValue('RotatedXYZWorkspace')
-        tmp_names = set()
         separated_cs = []
 
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
@@ -252,33 +293,50 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 sigma_x_sf = mtd[ws][entry_no+4]
                 sigma_x_nsf = mtd[ws][entry_no+5]
                 average_magnetic_cs = mtd[ws][entry_no].name() + '_AverageMagnetic'
-                sf_magnetic_cs = mtd[ws][entry_no].name() + '_SFMagnetic'
-                nsf_magnetic_cs = mtd[ws][entry_no].name() + '_NSFMagnetic'
+                if isotropic_magnetism:
+                    magnetic_name_1 = '_SFMagnetic'
+                    magnetic_name_2 = '_NSFMagnetic'
+                else:
+                    magnetic_name_1 = '_PerpendicularMagnetic_Y'
+                    magnetic_name_2 = '_PerpendicularMagnetic_Z'
+                magnetic_1_cs = mtd[ws][entry_no].name() + magnetic_name_1
+                magnetic_2_cs = mtd[ws][entry_no].name() + magnetic_name_2
                 if nMeasurements == 6 and user_method == 'XYZ':
                     # Total cross-section:
                     data_total = (sigma_z_nsf + sigma_x_nsf + sigma_y_nsf + sigma_z_sf + sigma_x_sf + sigma_y_sf) / 3.0
                     RenameWorkspace(InputWorkspace=data_total, OutputWorkspace=total_cs)
                     separated_cs.append(total_cs)
-                    # Magnetic component
-                    data_nsf_magnetic = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf)
-                    data_sf_magnetic = 2.0 * (-2.0 * sigma_z_sf + sigma_x_sf + sigma_y_sf)
-                    data_average_magnetic = WeightedMean(InputWorkspace1=data_nsf_magnetic,
-                                                         InputWorkspace2=data_sf_magnetic)
-                    # Nuclear coherent component
-                    data_nuclear = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
-                                    - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
+                    if isotropic_magnetism: # Steward's isotropic cross-section separation
+                        # Magnetic component
+                        data_sf_magnetic = 2.0 * (-2.0 * sigma_z_sf + sigma_x_sf + sigma_y_sf)
+                        data_nsf_magnetic = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf)
+                        RenameWorkspace(InputWorkspace=data_sf_magnetic, OutputWorkspace=magnetic_1_cs)
+                        RenameWorkspace(InputWorkspace=data_nsf_magnetic, OutputWorkspace=magnetic_2_cs)
+                        data_average_magnetic = WeightedMean(InputWorkspace1=magnetic_1_cs,
+                                                             InputWorkspace2=magnetic_2_cs)
+                        RenameWorkspace(InputWorkspace=data_average_magnetic, OutputWorkspace=average_magnetic_cs)
+                        separated_cs.append(average_magnetic_cs)
+                        # Nuclear coherent component
+                        data_nuclear = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
+                                        - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
+                        # Incoherent component
+                        data_incoherent = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - data_average_magnetic
+                    else: # anisotropic, Schweika's cross-section separation
+                        # Nuclear coherent component
+                        data_nuclear = 0.5 * (sigma_x_nsf + sigma_y_nsf - sigma_z_sf)
+                        # Incoherent component
+                        data_incoherent = 1.5 * ((sigma_x_nsf - sigma_y_nsf) / mtd[cos2_m_sin2_alpha] + sigma_z_sf)
+                        # Magnetic components
+                        data_perp_magnetic_y = sigma_z_sf - (2.0/3.0) * data_incoherent
+                        data_perp_magnetic_z = sigma_z_nsf - data_incoherent / 3.0 - data_nuclear
+                        RenameWorkspace(InputWorkspace=data_perp_magnetic_y, OutputWorkspace=magnetic_1_cs)
+                        RenameWorkspace(InputWorkspace=data_perp_magnetic_z, OutputWorkspace=magnetic_2_cs)
                     RenameWorkspace(InputWorkspace=data_nuclear, OutputWorkspace=nuclear_cs)
                     separated_cs.append(nuclear_cs)
-                    # Incoherent component
-                    data_incoherent= 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - data_average_magnetic
                     RenameWorkspace(InputWorkspace=data_incoherent, OutputWorkspace=incoherent_cs)
                     separated_cs.append(incoherent_cs)
-                    RenameWorkspace(InputWorkspace=data_average_magnetic, OutputWorkspace=average_magnetic_cs)
-                    separated_cs.append(average_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=data_sf_magnetic, OutputWorkspace=sf_magnetic_cs)
-                    separated_cs.append(sf_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=data_nsf_magnetic, OutputWorkspace=nsf_magnetic_cs)
-                    separated_cs.append(nsf_magnetic_cs)
+                    separated_cs.append(magnetic_1_cs)
+                    separated_cs.append(magnetic_2_cs)
                 else:
                     if not double_xyz_method:
                         sigma_xmy_sf = mtd[ws][entry_no+6]
@@ -347,7 +405,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     data_sf_magnetic.getAxis(0).setUnit(mtd[ws][entry_no].getAxis(0).getUnit().unitID())
                     data_sf_magnetic.getAxis(1).setUnit(mtd[ws][entry_no].getAxis(1).getUnit().unitID())
 
-                    data_average_magnetic = 0.5 * (data_nsf_magnetic + data_sf_magnetic)
+                    data_average_magnetic = WeightedMean(InputWorkspace1=data_sf_magnetic,
+                                                         InputWorkspace2=data_nsf_magnetic)
 
                     # Nuclear coherent component
                     data_nuclear = (2.0 * (sigma_x_nsf + sigma_y_nsf + 2*sigma_z_nsf + sigma_xpy_nsf + sigma_xmy_nsf)
@@ -361,12 +420,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     separated_cs.append(incoherent_cs)
                     RenameWorkspace(InputWorkspace=data_average_magnetic, OutputWorkspace=average_magnetic_cs)
                     separated_cs.append(average_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=data_sf_magnetic, OutputWorkspace=sf_magnetic_cs)
-                    separated_cs.append(sf_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=data_nsf_magnetic, OutputWorkspace=nsf_magnetic_cs)
-                    separated_cs.append(nsf_magnetic_cs)
+                    RenameWorkspace(InputWorkspace=data_sf_magnetic, OutputWorkspace=magnetic_1_cs)
+                    separated_cs.append(magnetic_1_cs)
+                    RenameWorkspace(InputWorkspace=data_nsf_magnetic, OutputWorkspace=magnetic_2_cs)
+                    separated_cs.append(magnetic_2_cs)
 
-        if tmp_names != set(): # clean only when non-empty
+        if self.getProperty('ClearCache').value and tmp_names != set(): # clean only when non-empty
             DeleteWorkspaces(WorkspaceList=list(tmp_names))
         output_name = ws + '_separated_cs'
         GroupWorkspaces(InputWorkspaces=separated_cs, OutputWorkspace=output_name)
@@ -452,6 +511,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         """Normalises the sample data using the detector efficiency calibration workspace."""
 
         normalisation_method = self.getPropertyValue('NormalisationMethod')
+        is_single_crystal = self.getPropertyValue('MeasurementTechnique') == 'SingleCrystal'
+        if is_single_crystal and normalisation_method == 'Vanadium' \
+                and mtd[sample_ws][0].getNumberHistograms() == 2 * mtd[det_efficiency_ws][0].getNumberHistograms():
+            # the length of the spectrum axis is twice the size of Vanadium, as data comes from two omega scans
+            AppendSpectra(InputWorkspace1=det_efficiency_ws, InputWorkspace2=det_efficiency_ws,
+                          OutputWorkspace=det_efficiency_ws)
 
         single_efficiency_per_POL = False
         if mtd[sample_ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
@@ -474,6 +539,75 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         output_ws = self.getPropertyValue('OutputWorkspace')
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_ws)
         return output_ws
+
+    def _q_rebin(self, ws):
+        """
+        Rebins the single crystal omega scan measurement output onto 2D Qx-Qy grid.
+        :param ws: Output of the cross-section separation and/or normalisation.
+        :return: WorkspaceGroup containing 2D distributions on a Qx-Qy grid.
+        """
+        fld = self._sampleAndEnvironmentProperties['fld'].value if 'fld' in self._sampleAndEnvironmentProperties else 1
+        nQ = self._sampleAndEnvironmentProperties['nQ'].value if 'nQ' in self._sampleAndEnvironmentProperties else 80
+        omega_shift = self._sampleAndEnvironmentProperties['OmegaShift'].value \
+            if 'OmegaShift' in self._sampleAndEnvironmentProperties else 0
+        wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value
+        ki = 2 * np.pi / wavelength
+        dE = 0.0  # monochromatic data
+        kf = np.sqrt(ki * ki - dE / 2.07194)
+        twoTheta = -mtd[ws][0].getAxis(1).extractValues() * np.pi / 180.0  # detector positions in radians
+        omega = mtd[ws][0].getAxis(0).extractValues() * np.pi / 180.0  # omega scan angle in radians
+        ntheta = len(twoTheta)
+        nomega = len(omega)
+        # omega = -1.0 * np.matrix(np.flip(omega, 0)) - omega_shift * np.pi / 180.0
+        omega = np.matrix(omega) + omega_shift * np.pi / 180.0
+        Qmag = np.sqrt(ki * ki + kf * kf - 2 * ki * kf * np.cos(twoTheta))
+        # beta is the angle between ki and Q
+        beta = (twoTheta / np.abs(twoTheta)) * np.arccos((ki * ki - kf * kf + Qmag * Qmag) / (2 * ki * Qmag))
+        alpha = -np.pi/2 + omega.T * np.ones(shape=(1, ntheta)) + np.ones(shape=(nomega, 1)) * beta
+        Qx = np.multiply((np.ones(shape=(nomega, 1)) * Qmag), np.cos(alpha)).T
+        Qy = np.multiply((np.ones(shape=(nomega, 1)) * Qmag), np.sin(alpha)).T
+        Qmax = 1.1 * np.max(Qmag)
+        dQ = Qmax / nQ
+        output_names = []
+        for entry in mtd[ws]:
+            w_out = np.zeros(shape=((fld + 1) * nQ, (fld + 1) * nQ))
+            e_out = np.zeros(shape=((fld + 1) * nQ, (fld + 1) * nQ))
+            n_out = np.zeros(shape=((fld + 1) * nQ, (fld + 1) * nQ))
+            w_in = entry.extractY()
+            e_in = entry.extractE()
+            for theta in range(ntheta):
+                for omega in range(nomega):
+                    if fld == 1:
+                        ix = int(((Qx[theta, omega] + dQ / 2.) / dQ) + nQ)
+                        iy = int(((Qy[theta, omega] + dQ / 2.) / dQ) + nQ)
+                        if Qx[theta, omega] > 0.99 * Qmax or Qy[theta, omega] > 0.99 * Qmax:
+                            continue
+                    else:
+                        ix = int(abs((Qx[theta, omega]) + dQ / 2.) / dQ)
+                        iy = int(abs((Qy[theta, omega]) + dQ / 2.) / dQ)
+                    w_out[ix, iy] += w_in[theta, omega]
+                    e_out[ix, iy] += e_in[theta, omega]**2
+                    n_out[ix, iy] += 1.
+            w_out /= n_out
+            e_out = np.sqrt(e_out / n_out)
+            w_out_name = entry.name() + '_qxqy'
+            output_names.append(w_out_name)
+            data_x = [(val-(fld*nQ)) * dQ for val in range((fld+1)*nQ)]
+            # data_x = [(val-(fld*nQ)) * dQ * 6.759 * np.cos(17.26*np.pi/180.0)/(2*np.pi) for val in range((fld+1)*nQ)]
+            y_axis = NumericAxis.create(int((fld+1)*nQ))
+            for q_index in range(int((fld+1)*nQ)):
+                y_axis.setValue(q_index, (q_index-(fld*nQ))*dQ)
+                # y_axis.setValue(q_index, (q_index-(fld*nQ))*dQ*10.412/(2*np.pi))
+            CreateWorkspace(DataX=data_x, DataY=w_out, DataE=e_out, NSpec=int((fld+1)*nQ),
+                            OutputWorkspace=w_out_name)
+            mtd[w_out_name].replaceAxis(1, y_axis)
+            mtd[w_out_name].getAxis(0).setUnit('Label').setLabel('Qx', r'\AA^{-1}')
+            mtd[w_out_name].getAxis(1).setUnit('Label').setLabel('Qy', r'\AA^{-1}')
+            ReplaceSpecialValues(InputWorkspace=w_out_name, OutputWorkspace=w_out_name, NaNValue=0,
+                                 NaNError=0, InfinityValue=0, InfinityError=0)
+        DeleteWorkspace(Workspace=ws)
+        GroupWorkspaces(InputWorkspaces=output_names, OutputWorkspace=ws)
+        return ws
 
     def _set_units(self, ws, nMeasurements):
         output_unit = self.getPropertyValue('OutputUnits')
@@ -503,6 +637,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                     EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
                                     OrderAxis=False)
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
+        elif output_unit == 'Qxy':
+            ws = self._q_rebin(ws)
 
         if self.getPropertyValue('NormalisationMethod') in ['Incoherent', 'Paramagnetic']:
             unit = 'Normalized intensity'
@@ -548,38 +684,53 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                             Normalise=True, HeightAxis='-0.1,0.1')
         return output_name
 
+    def _get_number_reports(self):
+        nreports = 4
+        if self.getPropertyValue('CrossSectionSeparationMethod') != 'None':
+            nreports += 1
+        return nreports
+
     def PyExec(self):
+        progress = Progress(self, start=0.0, end=1.0, nreports=self._get_number_reports())
         input_ws = self.getPropertyValue('InputWorkspace')
         output_ws = self.getPropertyValue('OutputWorkspace')
+        progress.report('Loading experiment properties')
         self._read_experiment_properties(input_ws)
-        nMeasurements, nComponents = self._data_structure_helper(input_ws)
+        nMeasurements = self._data_structure_helper(input_ws)
+        to_clean = []
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if self.getPropertyValue('CrossSectionSeparationMethod') == 'None':
-            if normalisation_method =='Vanadium':
+            if normalisation_method == 'Vanadium':
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
+                progress.report('Calculating detector efficiency correction')
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
+                progress.report('Normalising sample data')
                 output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
-                if self.getProperty('ClearCache').value:
-                    DeleteWorkspace(det_efficiency_ws)
+                to_clean.append(det_efficiency_ws)
             else:
                 CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws)
         else:
-            component_ws = self._cross_section_separation(input_ws, nMeasurements, nComponents)
+            progress.report('Separating cross-sections')
+            component_ws = self._cross_section_separation(input_ws, nMeasurements)
             self._set_as_distribution(component_ws)
             if normalisation_method != 'None':
                 if normalisation_method == 'Vanadium':
                     det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
                 else:
                     det_efficiency_input = component_ws
+                progress.report('Calculating detector efficiency correction')
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
+                progress.report('Normalising sample data')
                 output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws)
-                if self.getProperty('ClearCache').value:
-                    DeleteWorkspaces(WorkspaceList=[component_ws, det_efficiency_ws])
+                to_clean += [component_ws, det_efficiency_ws]
             else:
                 RenameWorkspace(InputWorkspace=component_ws, OutputWorkspace=output_ws)
-        self._set_units(output_ws, nMeasurements)
+        progress.report('Setting units')
+        output_ws = self._set_units(output_ws, nMeasurements)
         self._set_as_distribution(output_ws)
         self.setProperty('OutputWorkspace', mtd[output_ws])
+        if self.getProperty('ClearCache').value and len(to_clean) != 0:
+            DeleteWorkspaces(WorkspaceList=to_clean)
 
 
 AlgorithmFactory.subscribe(D7AbsoluteCrossSections)
