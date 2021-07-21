@@ -60,13 +60,13 @@ def run_MuonPairingAsymmetry(parameter_dict, workspace_name):
     return workspace_name
 
 
-def run_MuonGroupingAsymmetry(parameter_dict, workspace_name, unormalised_workspace_name):
+def run_EstimateMuonAsymmetryFromCounts(parameter_dict, workspace_name, unormalised_workspace_name):
     """
-    Apply the MuonGroupingCounts algorithm with the properties supplied through
-    the input dictionary of {property_name:property_value} pairs.
-    Returns the calculated workspace name.
+        Apply the run_EstimateMuonAsymmetryFromCounts algorithm with the properties supplied through
+        the input dictionary of {property_name:property_value} pairs.
+        Returns the calculated workspace name.
     """
-    alg = mantid.AlgorithmManager.create("MuonGroupingAsymmetry")
+    alg = mantid.AlgorithmManager.create("EstimateMuonAsymmetryFromCounts")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
