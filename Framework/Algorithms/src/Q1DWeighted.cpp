@@ -597,6 +597,7 @@ void Q1DWeighted::fillTOFOutput(MatrixWorkspace_sptr &outputWS, const size_t iou
  * @param parent : the parent workspace
  * @param nBins : number of bins in the histograms
  * @param binEdges : bin edges
+ * @param nSpectra : number of histograms the workspace should have
  * @return output I(Q) workspace
  */
 MatrixWorkspace_sptr Q1DWeighted::createOutputWorkspace(const MatrixWorkspace_const_sptr &parent, const size_t nBins,
