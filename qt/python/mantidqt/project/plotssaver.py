@@ -68,6 +68,8 @@ class PlotsSaver(object):
                     if 'norm' in args_dict.keys() and isinstance(args_dict['norm'], Normalize):
                         norm_dict = self._convert_normalise_obj_to_dict(args_dict['norm'])
                         args_dict['norm'] = norm_dict
+                    if 'axis' in args_dict.keys():
+                        args_dict['axis'] = args_dict['axis'].value
                 create_list.append(creation_args)
                 self.figure_creation_args = creation_args
             except AttributeError:
