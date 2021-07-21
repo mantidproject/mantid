@@ -125,7 +125,7 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
                          test_dic)
 
     def test_loaded_workspaces_encode(self):
-        self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
+        self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE)
         self.fitprop_browser.read_current_fitprop.return_value = None
         test_dic = self.encoder.encode(self.mock_view)
         self.assertEqual({'encoder_version': IO_VERSION, 'current_tab': 0, 'data_loaded_workspaces': [TEST_WS],
@@ -134,7 +134,7 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
                           'background_params': {'ENGINX_277208_focused_bank_2_TOF': []}}, test_dic)
 
     def test_background_params_encode(self):
-        self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
+        self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE)
         self.fitprop_browser.read_current_fitprop.return_value = None
         self.presenter.fitting_presenter.data_widget.model._bg_params = {TEST_WS: [True, 70, 4000, True]}
         test_dic = self.encoder.encode(self.mock_view)
@@ -144,7 +144,7 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
                           'background_params': {TEST_WS: [True, 70, 4000, True]}}, test_dic)
 
     def test_fits_encode(self):
-        self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
+        self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE)
         self.presenter.fitting_presenter.data_widget.presenter.model._fit_results = FIT_RESULTS
         self.fitprop_browser.read_current_fitprop.return_value = FIT_DICT
         self.fitprop_browser.plotDiff.return_value = True
