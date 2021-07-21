@@ -470,4 +470,5 @@ class DrillPresenter:
                 if p.getName() == name:
                     tooltips.append(p.getDocumentation())
         self.view.set_table(columns, tooltips)
+        self.view.setVisualSettings(self.model.getVisualSettings())
         return True
