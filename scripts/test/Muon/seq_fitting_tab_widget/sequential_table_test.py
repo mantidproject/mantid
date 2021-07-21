@@ -182,6 +182,15 @@ class SequentialTableModelTest(unittest.TestCase):
 
         self.assertEqual(self.model._parameterData[row], parameter_values)
 
+    def test_set_fit_parameter_values_for_column(self):
+        parameter_value = 1.5
+        column = 5
+
+        self.model.set_fit_parameter_values_for_column(column, parameter_value)
+
+        self.assertEqual(self.model._parameterData[0][1], parameter_value)
+        self.assertEqual(self.model._parameterData[1][1], parameter_value)
+
     def test_set_fit_workspaces(self):
         new_runs = ['2224', '2224']
         new_groups = ['top', 'bottom']
