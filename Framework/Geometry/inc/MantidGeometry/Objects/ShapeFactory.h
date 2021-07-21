@@ -76,7 +76,7 @@ public:
   static std::shared_ptr<CSGObject> createSphere(const Kernel::V3D &centre, double radius);
   static std::shared_ptr<CSGObject> createHexahedralShape(double xlb, double xlf, double xrf, double xrb, double ylb,
                                                           double ylf, double yrf, double yrb);
-  std::string addGoniometerTag(std::vector<double> rotationMatrix, std::string xml);
+  std::string addGoniometerTag(std::vector<double> rotateMatrix, std::string xml);
 
 private:
   static std::string sphereAlgebra(const int surfaceID);
@@ -113,7 +113,8 @@ private:
   Kernel::Matrix<double> generateXRotation(double xRotation);
   Kernel::Matrix<double> generateYRotation(double yRotation);
   Kernel::Matrix<double> generateZRotation(double zRotation);
-  std::vector<double> m_gonioRotationMatrix;
+  std::vector<double> m_gonioRotateMatrix;
+  std::vector<double> m_rotateAllMatrix;
 };
 
 } // namespace Geometry
