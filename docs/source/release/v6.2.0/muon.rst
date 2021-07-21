@@ -30,6 +30,7 @@ New Features
 ############
 
 - It is now possible to Exclude a range from a fit range when doing a fit on the Fitting tab.
+- Can now plot the raw count data in the GUI.
 
 Improvements
 ############

@@ -39,5 +39,5 @@ if 'muon_freq' in globals():
 else:
     muon_freq = FrequencyAnalysisGui(parent, flags)
     report_interface_startup(Name)
-    muon_freq.resize(750, 750)
+    muon_freq.resize(800, 800)
     muon_freq.show()
