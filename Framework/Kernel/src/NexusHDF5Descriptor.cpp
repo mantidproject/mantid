@@ -97,19 +97,18 @@ herr_t readStringAttribute(hid_t attr, char **data) {
  * Reads a string attribute of N-dimensions
  * @param attr input HDF5 attribute handler
  * @param data output attribute data
- * @param maxlen
  * @return
  */
-herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
+std::pair<std::string, herr_t> readStringAttributeN(hid_t attr, char *data) {
+  std::string dataString(data);
   herr_t iRet;
   char *vdat = NULL;
   iRet = readStringAttribute(attr, &vdat);
   if (iRet >= 0) {
-    strncpy(data, vdat, maxlen);
+    dataString = vdat;
     free(vdat);
   }
-  data[maxlen - 1] = '\0';
-  return iRet;
+  return std::pair<std::string, herr_t>(dataString, iRet);
 }
 
 void getGroup(hid_t groupID, std::map<std::string, std::set<std::string>> &allEntries) {
@@ -129,9 +128,9 @@ void getGroup(hid_t groupID, std::map<std::string, std::set<std::string>> &allEn
     hid_t atype = H5Tcopy(type);
     char data[128];
     H5Tset_size(atype, sizeof(data));
-    readStringAttributeN(attributeID, data, sizeof(data));
+    auto pairData = readStringAttributeN(attributeID, data);
     // already null terminated in readStringAttributeN
-    attribute = std::string(data);
+    attribute = pairData.first;
     H5Tclose(atype);
     H5Aclose(attributeID);
 
