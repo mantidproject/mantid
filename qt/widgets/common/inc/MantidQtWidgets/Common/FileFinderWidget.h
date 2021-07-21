@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "ui_FileFinderWidget.h"
 #include <QComboBox>
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
 #include <QString>
@@ -147,6 +148,8 @@ public:
   void setLastDirectory(const QString &lastDir) { m_lastDir = lastDir; }
   /// Set an arbitrary validator on the line edit
   void setTextValidator(const QValidator *validator);
+  void setUseNativeWidget(bool /*native*/);
+  void setProxyModel(QAbstractProxyModel *proxyModel);
 
 signals:
   /// Emitted when the file text changes
@@ -267,7 +270,12 @@ private:
   FindFilesThreadPoolManager m_pool;
   /// Handle to any results found
   FindFilesSearchResults m_cachedResults;
+  /// non-native QFileDialog
+  QFileDialog m_dialog;
+  /// flag to control use of m_dialog
+  bool m_useNativeDialog;
 };
+
 } // namespace API
 } // namespace MantidQt
 
