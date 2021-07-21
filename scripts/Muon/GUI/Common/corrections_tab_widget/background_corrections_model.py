@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.py36compat import dataclass
 
-from mantid.api import AlgorithmManager, FunctionFactory, IFunction
+from mantid.api import AlgorithmManager, FunctionFactory, IFunction, Workspace
 from mantid.simpleapi import CreateWorkspace
 from Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, retrieve_ws
 from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, FLAT_BACKGROUND,
@@ -43,6 +43,13 @@ class BackgroundCorrectionData:
         self.flat_background = FunctionFactory.createFunction("FlatBackground")
         self.exp_decay = FunctionFactory.createFunction("ExpDecayMuon")
         self.exp_decay.setParameter("A", DEFAULT_A_VALUE)
+
+    def create_background_workspace(self) -> Workspace:
+        background = self.flat_background.getParameterValue(BACKGROUND_PARAM)
+        background_error = self.flat_background.getError(BACKGROUND_PARAM)
+        background_workspace = CreateWorkspace(DataX=[0.0], DataY=[background], DataE=[background_error],
+                                               StoreInADS=False)
+        return background_workspace
 
 
 class BackgroundCorrectionsModel:
@@ -167,9 +174,8 @@ class BackgroundCorrectionsModel:
     @staticmethod
     def _perform_background_subtraction_on_counts(correction_data: BackgroundCorrectionData) -> None:
         """Performs the background subtraction on """
-        background = correction_data.flat_background.getParameterValue(BACKGROUND_PARAM)
-        background_workspace = CreateWorkspace(DataX=[0.0], DataY=[background], StoreInADS=False)
-        run_minus(correction_data.uncorrected_counts_workspace.workspace_copy(), background_workspace,
+        run_minus(correction_data.uncorrected_counts_workspace.workspace_copy(),
+                  correction_data.create_background_workspace(),
                   correction_data.uncorrected_counts_workspace.workspace_name)
 
     def _handle_background_fit_output(self, correction_data: BackgroundCorrectionData, function: IFunction,
