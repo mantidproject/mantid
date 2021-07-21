@@ -3,7 +3,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-import sys
 import math
 import os
 import xml.etree.cElementTree as ET
@@ -11,6 +10,7 @@ import xml.etree.cElementTree as ET
 
 maxCountPerFile = 1500
 reversed_json_file_name = 'compile_commands'
+
 
 def load_config_json(filename):
     if os.path.exists(filename):
@@ -22,6 +22,7 @@ def load_config_json(filename):
     commandline = [str(item) for item in config]
 
     return " ".join(commandline)
+
 
 def split_json(all_json_objects):
     total_count = len(all_json_objects)
@@ -47,9 +48,9 @@ def lint_jsonfiles(oclint, jsonfiles, config):
     i = 0
     result_files = []
     for file_name in jsonfiles:
-        print 'linting ... %s' %file_name
+        print('linting ... %s' %file_name)
         input_file = rename(file_name, 'compile_commands.json')
-        out_file = 'oclint%02d.xml' %i
+        out_file = 'oclint%02d.xml' % i
         lint(oclint, out_file, config)
         result_files.append(out_file)
         i += 1
@@ -63,12 +64,12 @@ def lint(oclint, out_file, config):
     %s \
     --report-type pmd \
     -o %s''' %  (oclint, config, out_file)
-    print lint_command
+    print(lint_command)
     os.system(lint_command)
 
 
 def combine_outputs(output_files):
-    print "combining output files"
+    print("combining output files")
 
     base_tree = None
     base_root = None
@@ -96,6 +97,7 @@ def rename(file_path, new_name):
     os.rename(file_path, new_path)
     return new_path
 
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="wrapper around oclint-json-compilation-database")
@@ -103,11 +105,9 @@ if __name__ == "__main__":
                         help="location of 'compile_commands.json')")
     parser.add_argument("--oclint",
                         default="oclint-json-compilation-database",
-                        help="location of 'oclint-json-compilation-database' "\
-                        + "if not in path")
+                        help="location of 'oclint-json-compilation-database' if not in path")
     parser.add_argument("--config", default="oclint_config.json",
-                        help="configuration file " \
-                        + "(default='oclint_config.json')")
+                        help="configuration file (default='oclint_config.json')")
     args = parser.parse_args()
 
     if not os.path.exists(args.compile_commands):
@@ -116,9 +116,8 @@ if __name__ == "__main__":
        not os.path.exists(args.oclint):
         parser.error("File '%s' does not exist" % args.oclint)
 
-
     config = load_config_json(args.config)
-    print config
+    print(config)
 
     with open(args.compile_commands, 'r') as r_handler:
         json_objects = json.loads(r_handler.read())

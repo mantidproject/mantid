@@ -6,6 +6,13 @@
 
 .. properties::
 
+.. note:: As of 2021-01-04, this algorithm is officially deprecated.
+          As a result, developers and users are recommend to use
+          :ref:`ApplyDiffCal<algm-ApplyDiffCal>`, followed by
+          :ref:`ConvertUnits<algm-ConvertUnits>`, followed by
+          :ref:`ApplyDiffCal<algm-ApplyDiffCal>` (ClearCalibration=true) to
+          produce the equivalent results.
+
 Description
 -----------
 
@@ -78,7 +85,7 @@ Output:
 .. testoutput:: ExAlignDetectors
 
     Peak in dSpace 2.66413186052
-    Peak from calibration 2.5596132087
+    Peak from calibration 2.5622683421
 
 
 .. categories::

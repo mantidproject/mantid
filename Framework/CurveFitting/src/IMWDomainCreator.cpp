@@ -385,9 +385,8 @@ void IMWDomainCreator::addFunctionValuesToWS(const API::IFunction_sptr &function
   resultValues->zeroCalculated();
   // Confidence bands are calculated based on the example in
   // www.astro.rug.nl/software/kapteyn/kmpfittutorial.html#confidence-and-prediction-intervals,
-  // which references J.Wolberg, Data Analysis Using the Method of Least
-  // Squares, 2006, Springer.
-  // Here we asusme a confidence band of 1 sigma
+  // which references J.Wolberg, Data Analysis Using the Method of Least Squares, 2006, Springer.
+  // Here we assume a confidence band of 1 sigma
   double sigma = 1;
   double prob = std::erf(sigma / sqrt(2));
   // critical value for t distribution

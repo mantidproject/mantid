@@ -281,8 +281,10 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename, S
  * be added to any pre-existing components already in the environment
  * @param debugString Debug string that can be appended to by this function
  */
-void LoadSampleEnvironment::loadEnvironmentFrom3MF(MatrixWorkspace_const_sptr inputWS, const std::string filename,
-                                                   Sample &sample, const bool add, std::string debugString) {
+void LoadSampleEnvironment::loadEnvironmentFrom3MF([[maybe_unused]] MatrixWorkspace_const_sptr inputWS,
+                                                   [[maybe_unused]] const std::string filename,
+                                                   [[maybe_unused]] Sample &sample, [[maybe_unused]] const bool add,
+                                                   [[maybe_unused]] std::string debugString) {
 #ifdef ENABLE_LIB3MF
   std::unique_ptr<Geometry::SampleEnvironment> environment = nullptr;
   Mantid3MFFileIO MeshLoader;
@@ -318,11 +320,6 @@ void LoadSampleEnvironment::loadEnvironmentFrom3MF(MatrixWorkspace_const_sptr in
   // Put Environment into sample.
   sample.setEnvironment(std::move(environment));
 #else
-  UNUSED_ARG(inputWS)
-  UNUSED_ARG(filename)
-  UNUSED_ARG(sample)
-  UNUSED_ARG(add)
-  UNUSED_ARG(debugString)
   throw std::runtime_error("3MF format not supported on this platform");
 #endif
 }

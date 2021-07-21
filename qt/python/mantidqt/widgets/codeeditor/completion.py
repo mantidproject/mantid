@@ -91,18 +91,25 @@ def get_function_spec(func):
     :returns: A string containing the function specification
     """
     try:
-        argspec = getfullargspec(func)
-    except TypeError:
         try:
-            args_obj = inspect.getargs(func.__code__)
-            argspec = ArgSpec(args_obj.args, args_obj.varargs, args_obj.varkw, defaults=None)
-        except (TypeError, AttributeError, ValueError):
-            if inspect.isbuiltin(func):
-                argspec = get_builtin_argspec(func)
-                if not argspec:
+            argspec = getfullargspec(func)
+        except TypeError:
+            try:
+                args_obj = inspect.getargs(func.__code__)
+                argspec = ArgSpec(args_obj.args, args_obj.varargs, args_obj.varkw, defaults=None)
+            except (TypeError, AttributeError, ValueError):
+                if inspect.isbuiltin(func):
+                    argspec = get_builtin_argspec(func)
+                    if not argspec:
+                        return ''
+                else:
                     return ''
-            else:
-                return ''
+    except Exception:
+        # It's hard to determine all possible exception types that could happen
+        # above. We don't want errors if we can't generate completion so just
+        # bail out
+        return ''
+
     # mantid algorithm functions have varargs set not args
     args = argspec[0]
     if args:
@@ -135,16 +142,25 @@ def get_function_spec(func):
             defs = None
     else:
         return ''
+    return generate_call_tip(defs, args)
 
+
+def generate_call_tip(defs, args):
     if defs is None:
         call_tip = "({})".format(', '.join(args))
     else:
         # The defaults list contains the default values for the last n arguments
-        diff = len(args) - len(defs)
         call_tip = ''
+        offset = 0
+        defaults_diff = len(args) - len(defs)
         for index in range(len(args) - 1, -1, -1):
-            def_index = index - diff
-            if def_index >= 0:
+            # If * is present we want to add an offset so we ignore the *, because it's likely required like in
+            # np.asarray()
+            is_wildcard = args[index] == '*'
+            if is_wildcard:
+                offset += 1
+            def_index = index - defaults_diff + offset
+            if def_index >= 0 and not is_wildcard:
                 call_tip = '[' + args[index] + '], ' + call_tip
             else:
                 call_tip = args[index] + ", " + call_tip

@@ -1,7 +1,7 @@
 # ##############################################################################
 # Configure required dependencies if necessary
 # ##############################################################################
-if(MSVC)
+if(MSVC AND NOT CONDA_BUILD)
   # Git LFS does not work properly with <= 1.9
   find_package(Git 1.9.5 REQUIRED)
   find_package(GitLFS REQUIRED)
@@ -15,7 +15,7 @@ if(MSVC)
   set(THIRD_PARTY_GIT_URL
       "https://github.com/mantidproject/thirdparty-msvc2015.git"
   )
-  set(THIRD_PARTY_GIT_SHA1 913585ad3212c6fa6bd6f9c54cde473fa171ff54)
+  set(THIRD_PARTY_GIT_SHA1 0a4c81cb2a6809125867022d2d5320c22075a0c6)
   set(THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty)
   # Generates a script to do the clone/update in tmp
   set(_project_name ThirdParty)
@@ -127,7 +127,22 @@ if(MSVC)
   set(BOOST_INCLUDEDIR "${CMAKE_INCLUDE_PATH}")
   set(BOOST_LIBRARYDIR "${CMAKE_LIBRARY_PATH}")
   set(Boost_NO_SYSTEM_PATHS TRUE)
-
+elseif(MSVC AND CONDA_BUILD)
+  # Print out where we are looking for 3rd party stuff
+  set(Python_FIND_REGISTRY NEVER)
+  # used in later parts for MSVC to bundle Python
+  set(MSVC_PYTHON_EXECUTABLE_DIR
+      $ENV{CONDA_PREFIX}
+  )
+  set(THIRD_PARTY_BIN
+      "$ENV{CONDA_PREFIX}/Library/bin;$ENV{CONDA_PREFIX}/Library/lib;${MSVC_PYTHON_EXECUTABLE_DIR}"
+  )
+  # Add to the path so that cmake can configure correctly without the user
+  # having to do it
+  set(ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}")
+  # Set PATH for custom command or target build steps. Avoids the need to
+  # make external PATH updates
+  set(CMAKE_MSVCIDE_RUN_PATH ${THIRD_PARTY_BIN})
 else()
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     # Homebrew adds qt4 here and we require it to be unlinked from /usr/local to
@@ -166,11 +181,19 @@ endfunction()
 
 # Find python interpreter
 set(MINIMUM_PYTHON_VERSION 3.6)
+set(Python3_ROOT_DIR $ENV{CONDA_PREFIX})
 find_package(Python ${MINIMUM_PYTHON_VERSION} REQUIRED
              COMPONENTS Interpreter Development NumPy)
 # If anything external uses find_package(PythonInterp) then make sure it finds the correct version and executable
 set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
 set(Python_ADDITIONAL_VERSIONS ${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
+
+# Search for the pythonw executable if it has not already been found
+# Will only look in the folder containing the current python.exe
+if (NOT Python_W_EXECUTABLE)
+  get_filename_component(Python_Binary_Dir ${PYTHON_EXECUTABLE} DIRECTORY)
+  find_program(Python_W_EXECUTABLE PATHS ${Python_Binary_Dir} NAMES pythonw NO_DEFAULT_PATH)
+endif()
 
 # Handle switching between previously configured Python verions
 if(Python_INCLUDE_DIR

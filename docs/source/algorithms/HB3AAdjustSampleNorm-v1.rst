@@ -22,8 +22,23 @@ the conversion to Q-space is done using :ref:`ConvertWANDSCDtoQ
 `MDEventWorkspace.`
 
 If multiple data file are included then the output will be a
-:ref:`WorkspaceGroup <WorkspaceGroup>` contaning all the
+:ref:`WorkspaceGroup <WorkspaceGroup>` containing all the
 :ref:`MDWorkspaces <MDWorkspace>`.
+
+Normalisation
+-------------
+
+During loading a few different types of normalisation can be applied,
+vanadium, time or monitor and motor step size. `VanadiumFile` or
+`VanadiumWorkspace` is applied by dividing the data detector
+pixel-by-pixel. The `NormaliseBy` option `time` or `monitor` uses that
+log values from the data (and vanadium if used) input and is applied
+to each scan axis step. The `ScaleByMotorStep` scales the entire data
+by the step size of either the `omega` or `chi` axis, this is only
+using when converting to Q-sample and allows the comparison of peak
+intensities found with :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
+to be directly compared between scans measured with different step
+sizes.
 
 See :ref:`HB3AIntegratePeaks <algm-HB3AIntegratePeaks>` for complete examples of the HB3A workflow.
 

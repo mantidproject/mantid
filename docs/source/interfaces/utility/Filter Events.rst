@@ -36,7 +36,7 @@ Layout
 Data Loading
 ------------
 
-For the data loading step, MantidPlot provides an interface in which the user shall select the
+For the data loading step, MantidWorkbench provides an interface in which the user shall select the
 appropriate file via *Browse* button or by entering an integer as a valid run number in the
 *File/Run* field, if the instrument name is set up in Mantid. The user must provide a file,
 which contains valid sample logs

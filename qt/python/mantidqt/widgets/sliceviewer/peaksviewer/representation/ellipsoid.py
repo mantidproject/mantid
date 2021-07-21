@@ -15,9 +15,9 @@ from .alpha import compute_alpha
 from .painter import Painted
 
 
-class EllipsoidalIntergratedPeakRepresentation():
+class EllipsoidalIntegratedPeakRepresentation():
     """Provide methods to display a representation of a slice through an
-    Ellipsoidally intgerated region around a Peak"""
+    Ellipsoidally integrated region around a Peak"""
 
     @classmethod
     def draw(cls, peak_origin, peak_shape, slice_info, painter, fg_color, bg_color):

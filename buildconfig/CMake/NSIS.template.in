@@ -19,6 +19,8 @@
   Var ADD_TO_PATH_CURRENT_USER
   Var INSTALL_DESKTOP
   Var IS_DEFAULT_INSTALLDIR
+  Var RUNNING_FROM_INSTALLER
+  Var RUNNING_SHELL_AS_USER
 ;--------------------------------
 ;Include Modern UI
 
@@ -558,7 +560,7 @@ Function ConditionalAddToRegisty
   ConditionalAddToRegisty_EmptyString:
 FunctionEnd
 
-; Add a switch to the uninstaller that skipts the confirmation dialog
+; Add a switch to the uninstaller that skips the confirmation dialog
 !include FileFunc.nsh
 
 Function un.skipifsilentprogress
@@ -697,7 +699,7 @@ Section "-Core installation"
 
   ; Optional registration
   Push "DisplayIcon"
-  Push "$INSTDIR\@CPACK_NSIS_INSTALLED_ICON_NAME@"
+  Push "$INSTDIR\Uninstall.exe"
   Call ConditionalAddToRegisty
   Push "HelpLink"
   Push "@CPACK_NSIS_HELP_LINK@"
@@ -761,10 +763,46 @@ Function InstallOptionsPage
 
 FunctionEnd
 
-;--------------------------------
-; determine admin versus local install
-Function un.onInit
+; Required for Windows 10 "Apps & features" uninstall workaround.
+@CPACK_NSIS_ADDITIONAL_INCLUDE_DIR@
+@CPACK_NSIS_ADDITIONAL_PLUGIN_ANSI_DIR@
+@CPACK_NSIS_ADDITIONAL_PLUGIN_UNICODE_DIR@
 
+!include "UAC.nsh"
+!include "StdUtils.nsh"
+
+;--------------------------------
+; Check whether the uninstaller is running in elevated mode and restart as user if necessary.
+; Also determine whether it's an admin vs local install and SetShellVarContext appropriately.
+Function un.onInit
+  ${GetParameters} $R0
+  ${GetOptions} $R0 "/UIS" $R1
+  ${ifnot} ${errors}
+    StrCpy $RUNNING_FROM_INSTALLER 1
+  ${else}
+    StrCpy $RUNNING_FROM_INSTALLER 0
+  ${endif}
+
+  ${GetOptions} $R0 "/shelluser" $R1
+  ${ifnot} ${errors}
+    StrCpy $RUNNING_SHELL_AS_USER 1
+  ${else}
+    StrCpy $RUNNING_SHELL_AS_USER 0
+  ${endif}
+
+  ; Uninstalling via the Windows 10 "Apps & features" list forces the user to run the uninstaller
+  ; with an admin account. This results in an incomplete uninstallation. This is a workaround to
+  ; to avoid the issue by re-running the uninstaller as the current Windows user.
+  ${ifnot} ${UAC_IsInnerInstance}
+  ${andif} $RUNNING_FROM_INSTALLER = 0
+    ${if} ${UAC_IsAdmin}
+    ${andif} $RUNNING_SHELL_AS_USER = 0
+      ${StdUtils.ExecShellAsUser} $0 "$INSTDIR\uninstall.exe" "open" "/shelluser $R0"
+      Quit
+    ${endif}
+  ${endif}
+
+  ; Determine admin versus local install
   ClearErrors
   UserInfo::GetName
   IfErrors noLM
@@ -826,7 +864,7 @@ FunctionEnd
 ;---------------------------------------------
 ; Check if mantid is running
 Function in.abortIfRunning
-  !insertmacro HandleRunningMantid "MantidPlot.exe" "$INSTDIR" "$INSTDIR\bin\MantidPlot.exe appears to be running. Please shut down MantidPlot and try again."
+  !insertmacro HandleRunningMantid "MantidWorkbench.exe" "$INSTDIR" "$INSTDIR\bin\MantidWorkbench.exe appears to be running. Please shut down MantidWorkbench and try again."
 FunctionEnd
 
 ;---------------------------------------------

@@ -11,8 +11,8 @@ from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
-from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter_new
-from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view_new
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view
 from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import FileFinder
@@ -47,11 +47,11 @@ class FFTPresenterTest(unittest.TestCase):
 
         self.context.gui_context.update({'RebinType': 'None'})
 
-        self.view = fft_view_new.FFTView()
+        self.view = fft_view.FFTView()
         self.model1 = fft_model.FFTModel()
         self.model = fft_model.FFTWrapper
 
-        self.presenter = fft_presenter_new.FFTPresenter(
+        self.presenter = fft_presenter.FFTPresenter(
             self.view, self.model, self.context)
 
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
@@ -168,8 +168,8 @@ class FFTPresenterTest(unittest.TestCase):
         self.presenter.getWorkspaceNames()
         self.view.ws.setCurrentIndex(1)
         self.assertEqual(self.presenter.get_fft_inputs('input_workspace', 'imaginary_input_workspace'),
-                         {'AcceptXRoundingErrors': True, 'AutoShift': True, 'Imaginary': 0,
-                          'InputImagWorkspace': 'imaginary_input_workspace', 'InputWorkspace': 'input_workspace',
+                         {'AcceptXRoundingErrors': True, 'AutoShift': True,
+                          'InputWorkspace': 'input_workspace',
                           'Real': 0, 'Transform': 'Forward'})
 
     def test_get_fft_inputs_with_no_imaginary_workspace_specified(self):
@@ -181,9 +181,9 @@ class FFTPresenterTest(unittest.TestCase):
                           'InputWorkspace': 'input_workspace',
                           'Real': 0, 'Transform': 'Forward'})
 
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.run_PaddingAndApodization')
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.run_FFT')
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.convert_to_field')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.run_PaddingAndApodization')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.run_FFT')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.convert_to_field')
     def test_calculate_FFT_calls_correct_algorithm_sequence_for_no_imaginary(self, field_mock, fft_mock,
                                                                              apodization_mock):
         self.view.imaginary_data = False
@@ -216,9 +216,9 @@ class FFTPresenterTest(unittest.TestCase):
         field_mock.assert_called_once_with(fft_mock_return)
         self.presenter.add_fft_workspace_to_ADS.assert_called_once_with(name, '', field_mock_return)
 
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.run_PaddingAndApodization')
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.run_FFT')
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.convert_to_field')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.run_PaddingAndApodization')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.run_FFT')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.convert_to_field')
     def test_calculate_FFT_calls_correct_algorithm_sequence_with_imaginary(self, field_mock, fft_mock,
                                                                            apodization_mock):
         self.view.imaginary_data = True

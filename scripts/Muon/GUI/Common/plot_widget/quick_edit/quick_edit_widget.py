@@ -11,8 +11,8 @@ from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_presenter import QuickEdi
 class QuickEditWidget(object):
 
     def __init__(self, context, parent=None):
-        view = QuickEditView(None, parent)
-        self._presenter = QuickEditPresenter(view, context)
+        self._view = QuickEditView(None, parent)
+        self._presenter = QuickEditPresenter(self._view, context)
 
     @property
     def widget(self):
@@ -33,6 +33,9 @@ class QuickEditWidget(object):
 
     def enable_autoscale(self):
         self._presenter.enable_autoscale()
+
+    def disable_plot_selection(self):
+        self._view.disable_plot_selection()
 
     def add_subplot(self, name):
         self._presenter.add_subplot(name)

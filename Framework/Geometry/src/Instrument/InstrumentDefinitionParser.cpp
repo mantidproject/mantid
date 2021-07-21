@@ -2083,6 +2083,11 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
       continue;
     }
 
+    std::string visible = "true";
+    if (pParamElem->hasAttribute("visible")) {
+      visible = pParamElem->getAttribute("visible");
+    }
+
     DateAndTime validityDate;
 
     if (requestedDate.empty()) {
@@ -2342,7 +2347,7 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
     auto cacheKey = std::make_pair(paramName, comp);
     auto cacheValue = std::make_shared<XMLInstrumentParameter>(
         logfileID, value, interpolation, formula, formulaUnit, resultUnit, paramName, type, tie, constraint,
-        penaltyFactor, fittingFunction, extractSingleValueAs, eq, comp, m_angleConvertConst, description);
+        penaltyFactor, fittingFunction, extractSingleValueAs, eq, comp, m_angleConvertConst, description, visible);
     auto inserted = logfileCache.emplace(cacheKey, cacheValue);
     if (!inserted.second) {
       logfileCache[cacheKey] = cacheValue;

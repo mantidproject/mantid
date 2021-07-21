@@ -7,6 +7,7 @@
 #include "IndirectDataAnalysisElwinTab.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
@@ -87,7 +88,7 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_elwTree(nullptr) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
 }
 
 IndirectDataAnalysisElwinTab::~IndirectDataAnalysisElwinTab() {
@@ -132,11 +133,13 @@ void IndirectDataAnalysisElwinTab::setup() {
   // We always want one range selector... the second one can be controlled from
   // within the elwinTwoRanges(bool state) function
   auto integrationRangeSelector = m_uiForm.ppPlot->addRangeSelector("ElwinIntegrationRange");
+  integrationRangeSelector->setBounds(-1.0, 1.0);
   connect(integrationRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
   connect(integrationRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
   // create the second range
   auto backgroundRangeSelector = m_uiForm.ppPlot->addRangeSelector("ElwinBackgroundRange");
   backgroundRangeSelector->setColour(Qt::darkGreen); // dark green for background
+  backgroundRangeSelector->setBounds(-1.0, 1.0);
   connect(integrationRangeSelector, SIGNAL(selectionChanged(double, double)), backgroundRangeSelector,
           SLOT(setRange(double, double)));
   connect(backgroundRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
@@ -320,7 +323,7 @@ bool IndirectDataAnalysisElwinTab::validate() {
   return error.isEmpty();
 }
 
-void IndirectDataAnalysisElwinTab::loadSettings(const QSettings &settings) {
+void IndirectDataAnalysisElwinTab::loadTabSettings(const QSettings &settings) {
   m_uiForm.dsInputFiles->readSettings(settings.group());
 }
 

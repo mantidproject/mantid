@@ -7,10 +7,10 @@
 #include "ExperimentPresenter.h"
 #include "Common/Parse.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "LookupTableValidator.h"
 #include "MantidGeometry/Instrument_fwd.h"
-#include "PerThetaDefaultsTableValidator.h"
 #include "Reduction/ParseReflectometryStrings.h"
-#include "Reduction/ValidatePerThetaDefaults.h"
+#include "Reduction/ValidateLookupRow.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -55,23 +55,23 @@ void ExperimentPresenter::updateSummationTypeEnabledState() {
   }
 }
 
-void ExperimentPresenter::notifyNewPerAngleDefaultsRequested() {
-  m_view->addPerThetaDefaultsRow();
+void ExperimentPresenter::notifyNewLookupRowRequested() {
+  m_view->addLookupRow();
   notifySettingsChanged();
 }
 
-void ExperimentPresenter::notifyRemovePerAngleDefaultsRequested(int index) {
-  m_view->removePerThetaDefaultsRow(index);
+void ExperimentPresenter::notifyRemoveLookupRowRequested(int index) {
+  m_view->removeLookupRow(index);
   notifySettingsChanged();
 }
 
-void ExperimentPresenter::notifyPerAngleDefaultsChanged(int, int column) {
+void ExperimentPresenter::notifyLookupRowChanged(int, int column) {
   auto validationResult = updateModelFromView();
   showValidationResult(validationResult);
   if (column == 0 && !validationResult.isValid() &&
-      validationResult.assertError().perThetaValidationErrors().fullTableError() ==
+      validationResult.assertError().lookupTableValidationErrors().fullTableError() ==
           ThetaValuesValidationError::NonUniqueTheta)
-    m_view->showPerAngleThetasNonUnique(m_thetaTolerance);
+    m_view->showLookupRowsNotUnique(m_thetaTolerance);
   m_mainPresenter->notifySettingsChanged();
 }
 
@@ -237,9 +237,9 @@ std::map<std::string, std::string> ExperimentPresenter::stitchParametersFromView
 }
 
 ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
-  auto validate = PerThetaDefaultsTableValidator();
-  auto perThetaValidationResult = validate(m_view->getPerAngleOptions(), m_thetaTolerance);
-  if (perThetaValidationResult.isValid()) {
+  auto validate = LookupTableValidator();
+  auto lookupTableValidationResult = validate(m_view->getLookupTable(), m_thetaTolerance);
+  if (lookupTableValidationResult.isValid()) {
     auto const analysisMode = analysisModeFromString(m_view->getAnalysisMode());
     auto const reductionType = reductionTypeFromString(m_view->getReductionType());
     auto const summationType = summationTypeFromString(m_view->getSummationType());
@@ -253,9 +253,9 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
     return ExperimentValidationResult(Experiment(analysisMode, reductionType, summationType, includePartialBins,
                                                  debugOption, backgroundSubtraction, polarizationCorrections,
                                                  floodCorrections, transmissionStitchOptions, stitchParameters,
-                                                 perThetaValidationResult.assertValid()));
+                                                 lookupTableValidationResult.assertValid()));
   } else {
-    return ExperimentValidationResult(ExperimentValidationErrors(perThetaValidationResult.assertError()));
+    return ExperimentValidationResult(ExperimentValidationErrors(lookupTableValidationResult.assertError()));
   }
 }
 
@@ -268,20 +268,20 @@ ExperimentValidationResult ExperimentPresenter::updateModelFromView() {
   return validationResult;
 }
 
-void ExperimentPresenter::showPerThetaTableErrors(PerThetaDefaultsTableValidationError const &errors) {
-  m_view->showAllPerAngleOptionsAsValid();
+void ExperimentPresenter::showLookupTableErrors(LookupTableValidationError const &errors) {
+  m_view->showAllLookupRowsAsValid();
   for (auto const &validationError : errors.errors()) {
     for (auto const &column : validationError.invalidColumns())
-      m_view->showPerAngleOptionsAsInvalid(validationError.row(), column);
+      m_view->showLookupRowAsInvalid(validationError.row(), column);
   }
 }
 
 void ExperimentPresenter::showValidationResult(ExperimentValidationResult const &result) {
   if (result.isValid()) {
-    m_view->showAllPerAngleOptionsAsValid();
+    m_view->showAllLookupRowsAsValid();
   } else {
     auto errors = result.assertError();
-    showPerThetaTableErrors(errors.perThetaValidationErrors());
+    showLookupTableErrors(errors.lookupTableValidationErrors());
   }
 }
 
@@ -295,7 +295,7 @@ void ExperimentPresenter::updateViewFromModel() {
   m_view->setSummationType(summationTypeToString(m_model.summationType()));
   m_view->setIncludePartialBins(m_model.includePartialBins());
   m_view->setDebugOption(m_model.debug());
-  m_view->setPerAngleOptions(m_model.perThetaDefaultsArray());
+  m_view->setLookupTable(m_model.lookupTableToArray());
   // Transmission
   if (m_model.transmissionStitchOptions().overlapRange()) {
     m_view->setTransmissionStartOverlap(m_model.transmissionStitchOptions().overlapRange()->min());
@@ -323,7 +323,7 @@ void ExperimentPresenter::updateViewFromModel() {
   m_view->setStitchOptions(m_model.stitchParametersString());
 
   // We don't allow invalid config so reset all state to valid
-  m_view->showAllPerAngleOptionsAsValid();
+  m_view->showAllLookupRowsAsValid();
   m_view->showTransmissionRangeValid();
   m_view->showStitchParametersValid();
 

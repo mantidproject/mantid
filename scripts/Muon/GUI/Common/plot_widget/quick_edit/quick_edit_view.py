@@ -48,6 +48,9 @@ class QuickEditView(QtWidgets.QWidget):
         self.setLayout(button_layout)
 
     """ plot selection """
+    def disable_plot_selection(self):
+        self.plot_selector.setEnabled(False)
+
     def add_subplot(self, name):
         self.plot_selector.blockSignals(True)
         self.plot_selector.addItem(name)

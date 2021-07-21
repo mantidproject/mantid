@@ -33,7 +33,7 @@ extern std::unordered_map<FittingMode, std::string> fitModeToName;
 
 class IndirectFittingModel;
 
-using DefaultParametersType = IndexCollectionType<TableDatasetIndex, std::unordered_map<std::string, ParameterValue>>;
+using DefaultParametersType = IndexCollectionType<WorkspaceID, std::unordered_map<std::string, ParameterValue>>;
 
 /*
     IndirectFittingModel - Provides methods for specifying and
@@ -50,72 +50,66 @@ public:
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) override;
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) override;
   virtual bool hasWorkspace(std::string const &workspaceName) const override;
-  virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(TableDatasetIndex index) const override;
-  virtual void removeWorkspace(TableDatasetIndex index) override;
-  void setSpectra(const std::string &spectra, TableDatasetIndex dataIndex) override;
-  void setSpectra(FunctionModelSpectra &&spectra, TableDatasetIndex dataIndex) override;
-  void setSpectra(const FunctionModelSpectra &spectra, TableDatasetIndex dataIndex) override;
-  FunctionModelSpectra getSpectra(TableDatasetIndex index) const override;
+  virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const override;
+  virtual void removeWorkspace(WorkspaceID workspaceID) override;
+  void setSpectra(const std::string &spectra, WorkspaceID workspaceID) override;
+  void setSpectra(FunctionModelSpectra &&spectra, WorkspaceID workspaceID) override;
+  void setSpectra(const FunctionModelSpectra &spectra, WorkspaceID workspaceID) override;
+  FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const override;
 
   virtual bool isMultiFit() const override;
-  virtual TableDatasetIndex getNumberOfWorkspaces() const override;
-  size_t getNumberOfSpectra(TableDatasetIndex index) const override;
+  virtual WorkspaceID getNumberOfWorkspaces() const override;
+  size_t getNumberOfSpectra(WorkspaceID workspaceID) const override;
   size_t getNumberOfDomains() const override;
-  FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const override;
+  FitDomainIndex getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   std::vector<double> getQValuesForData() const override;
   virtual std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const override;
   void clearWorkspaces() override;
   void clear() override;
 
-  void setStartX(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum) override;
-  virtual void setStartX(double startX, TableDatasetIndex dataIndex) override;
-  void setEndX(double endX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum) override;
-  virtual void setEndX(double endX, TableDatasetIndex dataIndex) override;
-  virtual std::pair<double, double> getFittingRange(TableDatasetIndex dataIndex,
-                                                    WorkspaceIndex spectrum) const override;
-  void setExcludeRegion(const std::string &exclude, TableDatasetIndex dataIndex, WorkspaceIndex spectrum) override;
-  virtual std::string getExcludeRegion(TableDatasetIndex dataIndex, WorkspaceIndex index) const override;
-
-  // Functions concerned with naming
+  void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
+  virtual void setStartX(double startX, WorkspaceID workspaceID) override;
+  void setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
+  virtual void setEndX(double endX, WorkspaceID workspaceID) override;
+  virtual std::pair<double, double> getFittingRange(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
+  void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
+  virtual std::string getExcludeRegion(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
 
   // IIndirectFittingModel
-  bool isPreviouslyFit(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const override;
+  bool isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
 
   virtual boost::optional<std::string> isInvalidFunction() const override;
   std::vector<std::string> getFitParameterNames() const override;
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
   virtual Mantid::API::MultiDomainFunction_sptr getFitFunction() const override;
-  void setDefaultParameterValue(const std::string &name, double value, TableDatasetIndex dataIndex) override;
-  std::unordered_map<std::string, ParameterValue> getParameterValues(TableDatasetIndex dataIndex,
+  void setDefaultParameterValue(const std::string &name, double value, WorkspaceID workspaceID) override;
+  std::unordered_map<std::string, ParameterValue> getParameterValues(WorkspaceID workspaceID,
                                                                      WorkspaceIndex spectrum) const override;
-  std::unordered_map<std::string, ParameterValue> getFitParameters(TableDatasetIndex dataIndex,
+  std::unordered_map<std::string, ParameterValue> getFitParameters(WorkspaceID workspaceID,
                                                                    WorkspaceIndex spectrum) const override;
-  std::unordered_map<std::string, ParameterValue> getDefaultParameters(TableDatasetIndex dataIndex) const override;
+  std::unordered_map<std::string, ParameterValue> getDefaultParameters(WorkspaceID workspaceID) const override;
 
   // IIndirectFitOutput
-  void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, TableDatasetIndex index,
+  void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
                           WorkspaceIndex spectrum) override;
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
   // Generic
-  void switchToSingleInputMode() override;
-  void switchToMultipleInputMode() override;
   void setFittingMode(FittingMode mode) override;
   FittingMode getFittingMode() const override;
 
   void setFitTypeString(const std::string &fitType) override;
-  boost::optional<ResultLocationNew> getResultLocation(TableDatasetIndex dataIndex,
-                                                       WorkspaceIndex spectrum) const override;
+  boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const override;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const override;
   virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const override;
-  Mantid::API::IAlgorithm_sptr getSingleFit(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const override;
-  Mantid::API::IFunction_sptr getSingleFunction(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const override;
+  Mantid::API::IAlgorithm_sptr getSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
+  Mantid::API::IFunction_sptr getSingleFunction(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   std::string getOutputBasename() const override;
-  virtual std::string createDisplayName(TableDatasetIndex dataIndex) const override;
+  virtual std::string createDisplayName(WorkspaceID workspaceID) const override;
 
   void cleanFailedRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) override;
-  void cleanFailedSingleRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, TableDatasetIndex index) override;
+  void cleanFailedSingleRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID) override;
   DataForParameterEstimationCollection
   getDataForParameterEstimation(const EstimationDataSelector &selector) const override;
   void removeFittingData() override;
@@ -136,9 +130,9 @@ protected:
 
 private:
   std::vector<std::string> getWorkspaceNames() const;
-  std::vector<double> getExcludeRegionVector(TableDatasetIndex dataIndex, WorkspaceIndex index) const;
+  std::vector<double> getExcludeRegionVector(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
 
-  void removeWorkspaceFromFittingData(TableDatasetIndex const &index);
+  void removeWorkspaceFromFittingData(WorkspaceID const &workspaceIndex);
 
   Mantid::API::IAlgorithm_sptr createSequentialFit(const Mantid::API::IFunction_sptr &function,
                                                    const std::string &input) const;
@@ -146,8 +140,8 @@ private:
   virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const;
   virtual std::string sequentialFitOutputName() const;
   virtual std::string simultaneousFitOutputName() const;
-  virtual std::string singleFitOutputName(TableDatasetIndex index, WorkspaceIndex spectrum) const;
-  virtual std::unordered_map<std::string, ParameterValue> createDefaultParameters(TableDatasetIndex index) const;
+  virtual std::string singleFitOutputName(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
+  virtual std::unordered_map<std::string, ParameterValue> createDefaultParameters(WorkspaceID workspaceID) const;
 
   virtual std::string getResultXAxisUnit() const;
   virtual std::string getResultLogName() const;

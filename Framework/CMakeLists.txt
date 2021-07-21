@@ -39,6 +39,10 @@ include_directories(Types/inc)
 add_subdirectory(Types)
 set(MANTIDLIBS ${MANTIDLIBS} Types)
 
+include_directories(Json/inc)
+add_subdirectory(Json)
+set(MANTIDLIBS ${MANTIDLIBS} Json)
+
 include_directories(Kernel/inc)
 add_subdirectory(Kernel)
 
@@ -112,6 +116,7 @@ add_subdirectory (ScriptRepository)
 
 set(FRAMEWORK_LIBS
     Kernel
+    Json
     HistogramData
     Indexing
     Beamline

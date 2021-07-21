@@ -183,15 +183,9 @@ This section *must* be manually entered. The usage is a 'code' example of the al
 Building the Documentation
 ==========================
 
-One can update the documentation for a particular algorithm after changes have been introduced into the corresponding documentation file. Assuming you are in the build directory and want to update the documentation for Rebin:
+One can update the documentation for a particular algorithm after changes have been introduced into the corresponding documentation file.
+Assuming you are in the build directory and want to update the documentation for Rebin:
 
 ::
 
-   bin/MantidPlot -xq docs/runsphinx_html.py -R Rebin  # builds HTML documentation
-   bin/MantidPlot -xq docs/runsphinx_qthelp.py -R Rebin  # builds Qt-help documentation
-
-or with vanilla python
-
-::
-
-   python docs/runsphinx_html.py -m $PWD/bin -R Rebin
+   bin/mantidpython --classic -m sphinx <sourcedir>/docs/source docs <sourcedir>/docs/source/algorithms/Rebin-v1.rst

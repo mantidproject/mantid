@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Bindings/Cpp/lib3mf_implicit.hpp"
 #include "MantidDataHandling/MeshFileIO.h"
-#include "lib3mf/Bindings/Cpp/lib3mf_implicit.hpp"
 #include <memory>
 
 namespace Mantid {

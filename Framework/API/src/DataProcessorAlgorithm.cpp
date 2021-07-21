@@ -212,7 +212,7 @@ template <class Base> MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::
 template <class Base> Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemble(Workspace_sptr partialWS) {
   Workspace_sptr outputWS = std::move(partialWS);
 #ifdef MPI_BUILD
-  IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
+  auto gatherAlg = createChildAlgorithm("GatherWorkspaces");
   gatherAlg->setLogging(true);
   gatherAlg->setAlwaysStoreInADS(true);
   gatherAlg->setProperty("InputWorkspace", partialWS);
@@ -236,11 +236,11 @@ template <class Base> Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemb
  */
 template <class Base>
 Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemble(const std::string &partialWSName,
-                                                             const std::string &outputWSName) {
+                                                             [[maybe_unused]] const std::string &outputWSName) {
 #ifdef MPI_BUILD
   std::string threadOutput = partialWSName;
   Workspace_sptr partialWS = AnalysisDataService::Instance().retrieve(partialWSName);
-  IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
+  auto gatherAlg = createChildAlgorithm("GatherWorkspaces");
   gatherAlg->setLogging(true);
   gatherAlg->setAlwaysStoreInADS(true);
   gatherAlg->setProperty("InputWorkspace", partialWS);
@@ -251,7 +251,6 @@ Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemble(const std::string &
   if (isMainThread())
     threadOutput = outputWSName;
 #else
-  UNUSED_ARG(outputWSName)
   const std::string &threadOutput = partialWSName;
 
 #endif
@@ -272,7 +271,7 @@ void GenericDataProcessorAlgorithm<Base>::saveNexus(const std::string &outputWSN
 #else
   if (!outputFile.empty()) {
 #endif
-    IAlgorithm_sptr saveAlg = createChildAlgorithm("SaveNexus");
+    auto saveAlg = createChildAlgorithm("SaveNexus");
     saveAlg->setPropertyValue("Filename", outputFile);
     saveAlg->setPropertyValue("InputWorkspace", outputWSName);
     saveAlg->execute();
@@ -324,7 +323,7 @@ Workspace_sptr GenericDataProcessorAlgorithm<Base>::load(const std::string &inpu
       Poco::Path p(foundFile);
       const std::string outputWSName = p.getBaseName();
 
-      IAlgorithm_sptr loadAlg = createChildAlgorithm(m_loadAlg);
+      auto loadAlg = createChildAlgorithm(m_loadAlg);
       loadAlg->setProperty(m_loadAlgFileProp, foundFile);
       if (!loadQuiet) {
         loadAlg->setAlwaysStoreInADS(true);

@@ -8,6 +8,7 @@ import unittest
 import tempfile
 import shutil
 import os
+import numpy as np
 from mantid.simpleapi import HB3AAdjustSampleNorm, HB3AFindPeaks, HB3AIntegratePeaks, IntegratePeaksMD, mtd
 
 
@@ -18,7 +19,7 @@ class HB3AIntegratePeaksTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Create the workspaces needed for each test
-        HB3AAdjustSampleNorm(Filename=cls._files, MergeInputs=True, OutputWorkspace="merged")
+        HB3AAdjustSampleNorm(Filename=cls._files, MergeInputs=True, OutputWorkspace="merged", NormaliseBy='None')
         HB3AFindPeaks(InputWorkspace=mtd["merged"],
                       CellType="Orthorhombic",
                       Centering="F",
@@ -46,22 +47,22 @@ class HB3AIntegratePeaksTest(unittest.TestCase):
 
             self.assertAlmostEqual(peak1.getIntensity(), peak2.getIntensity())
 
-    def test_integrate_peaks_lorentz(self):
-        # Make sure that this algorithm gives similar results to IntegratePeaksMD
-        int_peaks = HB3AIntegratePeaks(InputWorkspace=mtd["merged"], PeaksWorkspace=mtd["peaks"],
-                                       PeakRadius=0.25)
+        # test Lorentz correction, compare to previous integration
+        int_peaks2 = HB3AIntegratePeaks(InputWorkspace=mtd["merged"], PeaksWorkspace=mtd["peaks"],
+                                        PeakRadius=0.25)
 
         # Verify that both have the same number of peaks
-        self.assertEqual(mtd['int_peaksmd'].getNumberPeaks(), int_peaks.getNumberPeaks())
+        self.assertEqual(int_peaks2.getNumberPeaks(), int_peaks.getNumberPeaks())
 
-        self.assertTrue(int_peaks.hasIntegratedPeaks())
+        self.assertTrue(int_peaks2.hasIntegratedPeaks())
 
         # Check that peaks match - the sigma intensity shouldnt change even after lorentz
-        for p in range(int_peaks.getNumberPeaks()):
-            peak1 = mtd['int_peaksmd'].getPeak(p)
-            peak2 = int_peaks.getPeak(p)
-
-            self.assertAlmostEqual(peak1.getSigmaIntensity(), peak2.getSigmaIntensity())
+        for p in range(int_peaks2.getNumberPeaks()):
+            peak1 = int_peaks.getPeak(p)
+            peak2 = int_peaks2.getPeak(p)
+            lorentz = abs(np.sin(peak2.getScattering() * np.cos(peak2.getAzimuthal())))
+            self.assertAlmostEqual(peak1.getIntensity() * lorentz, peak2.getIntensity())
+            self.assertAlmostEqual(peak1.getSigmaIntensity() * lorentz, peak2.getSigmaIntensity())
 
     def test_integrate_peaks_output(self):
         test_dir = tempfile.mkdtemp()

@@ -60,7 +60,7 @@ public:
   void setSpectra(std::string const &spectra);
   void setSpectra(FunctionModelSpectra &&spectra);
   void setSpectra(FunctionModelSpectra const &spectra);
-  void setStartX(double const &startX, WorkspaceIndex const &index);
+  void setStartX(double const &startX, WorkspaceIndex const &spectrum);
   void setStartX(double const &startX);
   void setEndX(double const &endX, WorkspaceIndex const &spectrum);
   void setEndX(double const &endX);

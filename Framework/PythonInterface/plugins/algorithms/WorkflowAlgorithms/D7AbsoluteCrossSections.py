@@ -23,6 +23,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
     @staticmethod
     def _max_value_per_detector(ws, one_per_detector=True):
+        """Returns maximum value either one per detector or a global maximum."""
         if isinstance(mtd[ws], WorkspaceGroup):
             max_values = np.zeros(shape=(mtd[ws][0].getNumberHistograms(),
                                          mtd[ws].getNumberOfEntries()))
@@ -51,9 +52,34 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
     @staticmethod
     def _set_as_distribution(ws):
+        """Wrapper to set distribution flag to all entries in a workspace group."""
         for entry in mtd[ws]:
             entry.setDistribution(True)
         return ws
+
+    @staticmethod
+    def _extract_numor(name):
+        """Returns a numor contained in the workspace name, assuming the first number in the name is the run number.
+        Otherwise it returns the full name to ensure a unique workspace name."""
+        word_list = name.split("_")
+        numor = name  # fail case to ensure unique name
+        for word in word_list:
+            if word.isnumeric():
+                numor = word
+        return numor
+
+    @staticmethod
+    def _find_matching_twoTheta(sample_ws, det_eff_ws):
+        """Finds a workspace in the detector efficiency WorkspaceGroup det_eff_ws that matches the twoTheta
+        SampleLog of the sample_ws workspace."""
+        sample_twoTheta = str(mtd[sample_ws].getRun().getLogData('2theta.requested').value)
+        matched_no = 0
+        for entry_no, entry in enumerate(mtd[det_eff_ws]):
+            det_eff_twoTheta = str(entry.getRun().getLogData('2theta.requested').value)
+            if sample_twoTheta == det_eff_twoTheta:
+                matched_no = entry_no
+                break
+        return matched_no
 
     def category(self):
         return 'ILL\\Diffraction'
@@ -93,7 +119,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             else:
                 required_keys = []
                 if normalisation_method == 'Incoherent':
-                    required_keys = ['FormulaUnits', 'SampleMass', 'FormulaUnitMass']
+                    required_keys = ['SampleMass', 'FormulaUnitMass']
                 elif normalisation_method == 'Incoherent' and self.getProperty('AbsoluteUnitsNormalisation').value:
                     required_keys.append('IncoherentCrossSection')
                 elif normalisation_method == 'Paramagnetic':
@@ -185,16 +211,23 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              doc='Whether or not to delete intermediate workspaces.')
 
     def _data_structure_helper(self, ws):
+        """Returns the number of polarisation orientations present in the data and checks against the chosen
+        cross-section separation method if it is feasible with the given data structure."""
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
         measurements = set()
-        for name in mtd[ws].getNames():
-            last_underscore = name.rfind("_")
-            measurements.add(name[last_underscore+1:])
+        for name in mtd[ws].getNames():  # ws name suffix is now: '_POL_FLIPPER_STATE'
+            slast_underscore = name.rfind("_", 0, name.rfind("_"))
+            measurements.add(name[slast_underscore+1:])
         nMeasurements = len(measurements)
         error_msg = "The provided data cannot support {} measurement cross-section separation."
-        if nMeasurements == 6 and user_method == '10p' and self.getProperty('RotatedXYZWorkspace').isDefault:
-            raise RuntimeError(error_msg.format(user_method))
+        if nMeasurements == 10:
+            nComponents = 6  # Total, Nuclear Coherent, Spin-incoherent, SF Magnetic, NSF Magnetic, Average Magnetic
+        elif nMeasurements == 6:
+            nComponents = 6  # Total, Nuclear Coherent, Spin-incoherent, SF Magnetic, NSF Magnetic, Average Magnetic
+            if user_method == '10p' and self.getProperty('RotatedXYZWorkspace').isDefault:
+                raise RuntimeError(error_msg.format(user_method))
         elif nMeasurements == 2:
+            nComponents = 3  # Total, Nuclear Coherent, Spin-incoherent
             if user_method == '10p':
                 raise RuntimeError(error_msg.format(user_method))
             if user_method == 'XYZ':
@@ -202,7 +235,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         if nMeasurements not in [2, 6, 10]:
             raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
                                + "The provided input does not fit in any of these measurement types.")
-        return nMeasurements
+        return nMeasurements, nComponents
 
     def _read_experiment_properties(self, ws):
         """Reads the user-provided dictionary that contains sample geometry (type, dimensions) and experimental conditions,
@@ -217,9 +250,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         if self.getPropertyValue('NormalisationMethod') != 'None' and 'NMoles' not in self._sampleAndEnvironmentProperties:
             sample_mass = self._sampleAndEnvironmentProperties['SampleMass'].value
-            formula_units = self._sampleAndEnvironmentProperties['FormulaUnits'].value
             formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
-            self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass) * formula_units
+            self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass)
 
     def _create_angle_dists(self, ws):
         """
@@ -257,7 +289,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def _cross_section_separation(self, ws, nMeasurements):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
         current sample. The method used is based on either the user's choice or the provided data structure."""
-        DEG_2_RAD =  np.pi / 180.0
+        DEG_2_RAD = np.pi / 180.0
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
         isotropic_magnetism = self.getProperty('IsotropicMagnetism').value
         tmp_names = set()
@@ -270,13 +302,13 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             double_xyz_method = True
             second_xyz_ws = self.getPropertyValue('RotatedXYZWorkspace')
         separated_cs = []
-
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
             sigma_z_sf = mtd[ws][entry_no]
             sigma_z_nsf = mtd[ws][entry_no+1]
-            total_cs = mtd[ws][entry_no].name() + '_Total'
-            nuclear_cs = mtd[ws][entry_no].name() + '_Coherent'
-            incoherent_cs = mtd[ws][entry_no].name() + '_Incoherent'
+            numor = self._extract_numor(mtd[ws][entry_no].name())
+            total_cs = numor + '_Total'
+            nuclear_cs = numor + '_Coherent'
+            incoherent_cs = numor + '_Incoherent'
             if nMeasurements == 2:
                 data_total = sigma_z_nsf + sigma_z_sf
                 RenameWorkspace(InputWorkspace=data_total, OutputWorkspace=total_cs)
@@ -288,11 +320,15 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 RenameWorkspace(InputWorkspace=data_incoherent, OutputWorkspace=incoherent_cs)
                 separated_cs.append(incoherent_cs)
             elif nMeasurements == 6 or nMeasurements == 10:
-                sigma_y_sf = mtd[ws][entry_no+2]
-                sigma_y_nsf = mtd[ws][entry_no+3]
-                sigma_x_sf = mtd[ws][entry_no+4]
-                sigma_x_nsf = mtd[ws][entry_no+5]
-                average_magnetic_cs = mtd[ws][entry_no].name() + '_AverageMagnetic'
+                sigma_x_sf = mtd[ws][entry_no+2]
+                sigma_x_nsf = mtd[ws][entry_no+3]
+                sigma_y_sf = mtd[ws][entry_no+4]
+                sigma_y_nsf = mtd[ws][entry_no+5]
+                if any(["Y" in ws_name for ws_name in [sigma_x_sf.name(), sigma_x_nsf.name()]]):
+                    # if the order of X and Y polarisations is different than assumed, swap
+                    sigma_x_sf,  sigma_y_sf = sigma_y_sf, sigma_x_sf
+                    sigma_x_nsf, sigma_y_nsf = sigma_y_nsf, sigma_x_nsf
+                average_magnetic_cs = numor + '_AverageMagnetic'
                 if isotropic_magnetism:
                     magnetic_name_1 = '_SFMagnetic'
                     magnetic_name_2 = '_NSFMagnetic'
@@ -507,9 +543,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             DeleteWorkspaces(to_clean)
         return det_efficiency_ws
 
-    def _normalise_sample_data(self, sample_ws, det_efficiency_ws):
+    def _normalise_sample_data(self, sample_ws, det_efficiency_ws, nMeasurements, nComponents):
         """Normalises the sample data using the detector efficiency calibration workspace."""
-
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         is_single_crystal = self.getPropertyValue('MeasurementTechnique') == 'SingleCrystal'
         if is_single_crystal and normalisation_method == 'Vanadium' \
@@ -518,23 +553,34 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             AppendSpectra(InputWorkspace1=det_efficiency_ws, InputWorkspace2=det_efficiency_ws,
                           OutputWorkspace=det_efficiency_ws)
 
-        single_efficiency_per_POL = False
-        if mtd[sample_ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
-            single_efficiency_per_POL = True
+        single_eff_per_numor = False
+        single_eff = False
+        eff_entries = mtd[det_efficiency_ws].getNumberOfEntries()
+        sample_entries = mtd[sample_ws].getNumberOfEntries()
+        single_eff_per_twoTheta = False
+        if eff_entries == 1:
+            single_eff = True
+        elif eff_entries != mtd[sample_ws].getNumberOfEntries() \
+                and eff_entries == (sample_entries / nComponents):
+            single_eff_per_numor = True
+        elif (sample_entries / nComponents) % eff_entries == 0:
+            single_eff_per_twoTheta = True
         tmp_names = []
-        for entry_no, entry in enumerate(mtd[sample_ws]):
-            det_eff_entry_no = int(entry_no / 2)
-            if normalisation_method == 'Vanadium':
-                det_eff_entry_no = 0
-            elif single_efficiency_per_POL:
-                det_eff_entry_no = int(entry_no / 2)
-                if entry_no % 2 != 0:
-                    det_eff_entry_no -= 1
 
+        for entry_no, entry in enumerate(mtd[sample_ws]):
+            det_eff_no = entry_no
+            if single_eff:
+                det_eff_no = 0
+            elif single_eff_per_numor:
+                det_eff_no = entry_no % nMeasurements
+            elif single_eff_per_twoTheta:
+                det_eff_no = self._find_matching_twoTheta(entry.name(), det_efficiency_ws)
+            elif det_eff_no >= eff_entries:
+                det_eff_no = det_eff_no % eff_entries
             ws_name = entry.name() + '_normalised'
             tmp_names.append(ws_name)
             Divide(LHSWorkspace=entry,
-                   RHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
+                   RHSWorkspace=mtd[det_efficiency_ws][det_eff_no],
                    OutputWorkspace=ws_name)
         output_ws = self.getPropertyValue('OutputWorkspace')
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_ws)
@@ -610,13 +656,14 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         return ws
 
     def _set_units(self, ws, nMeasurements):
+        """Sets units for the output workspace."""
         output_unit = self.getPropertyValue('OutputUnits')
         unit_symbol = 'barn / sr / formula unit'
         unit = r'd$\sigma$/d$\Omega$'
         self._set_as_distribution(ws)
         if output_unit == 'TwoTheta':
             if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
-                self._merge_polarisations(ws)
+                self._merge_data(ws)
                 ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula='-x')
             else:
                 ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta', OrderAxis=False)
@@ -624,7 +671,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
         elif output_unit == 'Q':
             if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
-                self._merge_polarisations(ws)
+                self._merge_data(ws)
                 wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value # in Angstrom
                 # flips axis sign and converts detector 2theta to momentum exchange
                 formula = '4*pi*sin(-0.5*pi*x/180.0)/{}'.format(wavelength)
@@ -650,33 +697,46 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             mtd[ws].setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
 
-    def _merge_polarisations(self, ws):
-        pol_directions = set()
-        numors = set()
+    def _merge_data(self, ws):
+        """Averages data belonging to the same polarisation direction and flipper state, or cross-section type."""
+        # assumed naming scheme: numor_pol-dir_flipper-state_cross-section(optional)_normalised(optional)
+        cs_present = not self.getProperty("CrossSectionSeparationMethod").isDefault
+        possible_polarisations = ["ZPO", "YPO", "XPO", "XMYPO", "XPYPO"]  # 10p is approximate, no data atm
+        flipper_states = ["_ON", "_OFF"]
+        merging_keys = dict()
         for name in mtd[ws].getNames():
-            last_underscore = name.rfind("_")
-            if name[last_underscore+1:] == 'normalised':
-                short_name = name[:last_underscore]
-                second_last = short_name.rfind("_")
-                numors.add(short_name[:second_last])
-                pol_directions.add(short_name[second_last + 1:]+name[last_underscore:])
+            if cs_present:
+                non_numor_info = name[name.find("_")+1:]
+                next_underscore = non_numor_info.find("_")
+                if next_underscore < 1:
+                    key = non_numor_info
+                else:
+                    key = non_numor_info[:next_underscore]
             else:
-                numors.add(name[:last_underscore])
-                pol_directions.add(name[last_underscore + 1:])
-        if len(numors) > 1:
-            names_list = []
-            for direction in sorted(list(pol_directions)):
-                name = '{0}_{1}'.format(ws, direction)
-                list_pol = []
-                for numor in numors:
-                    list_pol.append('{0}_{1}'.format(numor, direction))
-                self._call_sum_data(input_name=','.join(list_pol), output_name=name)
+                key = ""
+                for pol in possible_polarisations:
+                    if pol in name:
+                        key = pol
+                        break
+                if flipper_states[0] in name:
+                    key += flipper_states[0]
+                else:
+                    key += flipper_states[1]
+            if key not in merging_keys:
+                merging_keys[key] = list()
+            merging_keys[key].append(name)
+        if len(merging_keys) > 1:
+            names_list = list()
+            for key in merging_keys:
+                name = '{0}_{1}'.format(ws, key)
+                self._call_sum_data(input_name=merging_keys[key], output_name=name)
                 names_list.append(name)
             DeleteWorkspaces(WorkspaceList=ws)
             GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)
         return ws
 
     def _call_sum_data(self, input_name, output_name=''):
+        """Wrapper around SumOverlappingTubes algorithm."""
         if output_name == '':
             output_name = input_name
         SumOverlappingTubes(InputWorkspaces=input_name, OutputWorkspace=output_name,
@@ -690,13 +750,25 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             nreports += 1
         return nreports
 
+    def _set_output_names(self, output_ws):
+        """Renames output workspaces with unique names based on the provided output workspace name
+        and the input name."""
+        for entry in mtd[output_ws]:  # renames individual ws to contain the output name
+            entry_name = entry.name()
+            if entry_name[:2] == "__":
+                entry_name = entry_name[2:]
+            output_name = self.getPropertyValue("OutputWorkspace")
+            if output_name not in entry_name:
+                new_name = "{}_{}".format(output_name, entry_name)
+                RenameWorkspace(InputWorkspace=entry, OutputWorkspace=new_name)
+
     def PyExec(self):
         progress = Progress(self, start=0.0, end=1.0, nreports=self._get_number_reports())
         input_ws = self.getPropertyValue('InputWorkspace')
         output_ws = self.getPropertyValue('OutputWorkspace')
         progress.report('Loading experiment properties')
         self._read_experiment_properties(input_ws)
-        nMeasurements = self._data_structure_helper(input_ws)
+        nMeasurements, nComponents = self._data_structure_helper(input_ws)
         to_clean = []
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if self.getPropertyValue('CrossSectionSeparationMethod') == 'None':
@@ -705,7 +777,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 progress.report('Calculating detector efficiency correction')
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
                 progress.report('Normalising sample data')
-                output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
+                output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws, nMeasurements, nComponents)
                 to_clean.append(det_efficiency_ws)
             else:
                 CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws)
@@ -721,13 +793,14 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 progress.report('Calculating detector efficiency correction')
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
                 progress.report('Normalising sample data')
-                output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws)
+                output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws, nMeasurements, nComponents)
                 to_clean += [component_ws, det_efficiency_ws]
             else:
                 RenameWorkspace(InputWorkspace=component_ws, OutputWorkspace=output_ws)
         progress.report('Setting units')
         output_ws = self._set_units(output_ws, nMeasurements)
         self._set_as_distribution(output_ws)
+        self._set_output_names(output_ws)
         self.setProperty('OutputWorkspace', mtd[output_ws])
         if self.getProperty('ClearCache').value and len(to_clean) != 0:
             DeleteWorkspaces(WorkspaceList=to_clean)

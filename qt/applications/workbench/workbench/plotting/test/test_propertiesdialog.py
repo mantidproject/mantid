@@ -90,6 +90,29 @@ class PropertiesDialogTest(unittest.TestCase):
         self.assertEqual(ax.get_legend().get_texts()[0].get_text(), "New label")
         self.assertEqual(lines[0].get_label(), "New label")
 
+    def test_grid_option_correct_when_grid_set_with_kwargs(self):
+        """
+        Plot script generator toggles grid lines using axes.tick_params. Reproduce that here to check whether the
+        grid line visibility is being picked up correctly by the axis editor dialog.
+        """
+        # make figure
+        fig, ax = plt.subplots(1, 1)
+        ax.plot([1, 2, 3], [1, 10, 100], 'o')
+        # set properties that can be accessed via the axes menu
+        ax.tick_params(axis='x', which='major',
+                       **{'gridOn': True, 'tick1On': True, 'tick2On': False, 'label1On': True, 'label2On': False,
+                          'size': 6, 'tickdir': 'out', 'width': 1})
+        ax.tick_params(axis='y', which='major',
+                       **{'gridOn': True, 'tick1On': True, 'tick2On': False, 'label1On': True, 'label2On': False,
+                          'size': 6, 'tickdir': 'out', 'width': 1})
+
+        # get an AxisEditor object for x/y axes
+        x_editor = XAxisEditor(fig.canvas, ax)
+        y_editor = YAxisEditor(fig.canvas, ax)
+
+        self.assertTrue(x_editor._memento.grid)
+        self.assertTrue(y_editor._memento.grid)
+
 
 if __name__ == '__main__':
     unittest.main()

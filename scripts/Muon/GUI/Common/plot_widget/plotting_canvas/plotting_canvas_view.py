@@ -7,10 +7,14 @@
 from typing import List
 
 from matplotlib.container import ErrorbarContainer
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 from Muon.GUI.Common.plot_widget.plotting_canvas.plot_toolbar import PlotToolbar
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_utils import (_do_single_plot,
+                                                                               get_y_min_max_between_x_range,
+                                                                               get_num_row_and_col,
+                                                                               convert_index_to_row_and_col)
 from Muon.GUI.Common.plot_widget.plotting_canvas.plot_color_queue import ColorQueue
 from mantid import AnalysisDataService
 from mantid.plots import legend_set_draggable
@@ -19,43 +23,25 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 
-from matplotlib.backends.qt_compat import is_pyqt5
-
-if is_pyqt5():
-    from matplotlib.backends.backend_qt5agg import FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvas
-
+from mantidqt.MPLwidgets import FigureCanvas
 
 # Default color cycle using Matplotlib color codes C0, C1...ect
-DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(10)]
-
-
-def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
-    plot_fn = ax.errorbar if errors else ax.plot
-    plot_kwargs['wkspIndex'] = index
-    plot_fn(workspace, **plot_kwargs)
-
-
-def get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max):
-    x, y = line.get_data()
-    for i in range(len(x)):
-        if x_min <= x[i] <= x_max:
-            y_min = min(y_min, y[i])
-            y_max = max(y_max, y[i])
-    return y_min, y_max
+NUMBER_OF_COLOURS = 10
+DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(NUMBER_OF_COLOURS)]
 
 
 class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
-    def __init__(self, quick_edit, min_y_range, y_axis_margin, parent=None):
+    def __init__(self, quick_edit, settings, parent=None):
         super().__init__(parent)
         # later we will allow these to be changed in the settings
-        self._min_y_range = min_y_range
-        self._y_axis_margin = y_axis_margin
+        self._settings = settings
+        self._min_y_range = settings.min_y_range
+        self._y_axis_margin = settings.y_axis_margin
         # create the figure
         self.fig = Figure()
         self.fig.canvas = FigureCanvas(self.fig)
+        self.fig.canvas.setMinimumHeight(500)
         self.toolBar = PlotToolbar(self.fig.canvas, self)
 
         # Create a set of Mantid axis for the figure
@@ -64,11 +50,16 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self._number_of_axes = 1
         self._color_queue = [ColorQueue(DEFAULT_COLOR_CYCLE)]
 
+        # Add a splitter for the plotting canvas and quick edit toolbar
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
+        splitter.addWidget(self.fig.canvas)
+        self._quick_edit = quick_edit
+        splitter.addWidget(self._quick_edit)
+        splitter.setChildrenCollapsible(False)
+
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.toolBar)
-        layout.addWidget(self.fig.canvas)
-        self._quick_edit = quick_edit
-        layout.addWidget(self._quick_edit)
+        layout.addWidget(splitter)
         self.setLayout(layout)
 
         self._plot_information_list = []  # type : List[PlotInformation}
@@ -108,7 +99,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self.fig.clf()
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=num_axes,
                                       fig=self.fig)
-        self.fig.tight_layout()
+        if self._settings.is_condensed:
+            self.fig.subplots_adjust(wspace=0, hspace=0)
+        else:
+            self.fig.tight_layout()
         self.fig.canvas.draw()
 
     def clear_all_workspaces_from_plot(self):
@@ -123,26 +117,57 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
         self._plot_information_list = []
 
+    def _make_plot(self, workspace_plot_info: WorkspacePlotInformation):
+        workspace_name = workspace_plot_info.workspace_name
+        try:
+            workspace = AnalysisDataService.Instance().retrieve(workspace_name)
+        except (RuntimeError, KeyError):
+            return -1
+        self._plot_information_list.append(workspace_plot_info)
+        errors = workspace_plot_info.errors
+        ws_index = workspace_plot_info.index
+        axis_number = workspace_plot_info.axis
+        ax = self.fig.axes[axis_number]
+        plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
+        plot_kwargs['color'] = self._color_queue[axis_number]()
+        _do_single_plot(ax, workspace, ws_index, errors=errors,
+                        plot_kwargs=plot_kwargs)
+        return axis_number
+
     def add_workspaces_to_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
         """Add a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
         The PlotInformation contains the workspace name, workspace index and target axis."""
+        nrows, ncols = get_num_row_and_col(self._number_of_axes)
         for workspace_plot_info in workspace_plot_info_list:
-            workspace_name = workspace_plot_info.workspace_name
-            try:
-                workspace = AnalysisDataService.Instance().retrieve(workspace_name)
-            except (RuntimeError, KeyError):
+            axis_number = self._make_plot(workspace_plot_info)
+            if axis_number < 0:
                 continue
-            self._plot_information_list.append(workspace_plot_info)
-            errors = workspace_plot_info.errors
-            ws_index = workspace_plot_info.index
-            axis_number = workspace_plot_info.axis
-            ax = self.fig.axes[axis_number]
-            plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
-            plot_kwargs['color'] = self._color_queue[axis_number]()
-            _do_single_plot(ax, workspace, ws_index, errors=errors,
-                            plot_kwargs=plot_kwargs)
+            if self._settings.is_condensed:
+                self.hide_axis(axis_number, nrows, ncols)
+        #remove labels from empty plots
+        if self._settings.is_condensed:
+            for axis_number in range(int(self._number_of_axes), int(nrows*ncols)):
+                self.hide_axis(axis_number, nrows, ncols)
+
+    def hide_axis(self, axis_number, nrows, ncols):
+        row, col = convert_index_to_row_and_col(axis_number,  nrows, ncols)
+        ax = self.fig.axes[axis_number]
+        if row != nrows-1:
+            labels = ["" for item in ax.get_xticks().tolist()]
+            ax.set_xticklabels(labels)
+            ax.xaxis.label.set_visible(False)
+        if col != 0 and col != ncols-1:
+            labels = ["" for item in ax.get_yticks().tolist()]
+            ax.set_yticklabels(labels)
+            ax.yaxis.label.set_visible(False)
+        elif col == ncols-1 and ncols>1:
+            ax.yaxis.set_label_position('right')
+            ax.yaxis.tick_right()
 
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
+        # We reverse the workspace info list so that we can maintain a unique color queue
+        # See _update_color_queue_on_workspace_removal for more
+        workspace_plot_info_list.reverse()
         for workspace_plot_info in workspace_plot_info_list:
             workspace_name = workspace_plot_info.workspace_name
             if not AnalysisDataService.Instance().doesExist(workspace_name):
@@ -182,6 +207,16 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                     color = artist[0].get_color()
                 else:
                     color = artist.get_color()
+                # When we repeat colors we don't want to add colors to the queue if they are already plotted.
+                # We know we are repeating colors if we have more lines than colors, then we check if the color
+                # removed is already the color of an existing line. If it is we don't manually re-add the color
+                # to the queue. This ensures we only plot lines of the same colour if we have more lines
+                # plotted than colours
+                lines = self.fig.axes[axis_number].get_lines()
+                if len(lines) > NUMBER_OF_COLOURS:
+                    current_colors = [line.get_c() for line in lines]
+                    if color in current_colors:
+                        return
                 self._color_queue[axis_number] += color
 
     # Ads observer functions
@@ -258,7 +293,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         axis.set_ylim(bottom, top)
 
     def set_title(self, axis_number, title):
-        if axis_number >= self.number_of_axes:
+        if axis_number >= self.number_of_axes or self._settings.is_condensed:
             return
         axis = self.fig.axes[axis_number]
         axis.set_title(title)
@@ -272,7 +307,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def redraw_figure(self):
         self.fig.canvas.toolbar.update()
         self._redraw_legend()
-        self.fig.tight_layout()
+        if not self._settings.is_condensed:
+            self.fig.tight_layout()
         self.fig.canvas.draw()
 
     def _redraw_legend(self):
@@ -308,6 +344,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             ax.tracked_workspaces.clear()
 
     def resizeEvent(self, event):
+        if self._settings.is_condensed:
+            return
         self.fig.tight_layout()
 
     def add_uncheck_autoscale_subscriber(self, observer):

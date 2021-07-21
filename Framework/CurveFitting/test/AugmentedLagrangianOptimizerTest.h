@@ -108,8 +108,8 @@ public:
     auto res = runMinimizer(INEQUALITYCONSTRAINT);
     TS_ASSERT_EQUALS(m_nparams, res.size());
     if (res.size() == m_nparams) {
-      TS_ASSERT_DELTA(1.4709132, res[0], 1e-7);
-      TS_ASSERT_DELTA(0.2941826, res[1], 1e-7);
+      TS_ASSERT_DELTA(1.4709132, res[0], 1e-4);
+      TS_ASSERT_DELTA(0.2941826, res[1], 1e-5);
     }
   }
 
