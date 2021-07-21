@@ -9,10 +9,6 @@
 Description
 -----------
 
-.. note::
-
-.. math::
-
 .. categories::
 
 .. sourcelink::

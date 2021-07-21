@@ -16,15 +16,29 @@ namespace Algorithms {
  */
 class MANTID_ALGORITHMS_DLL MultipleScatteringCorrection : public API::Algorithm {
 public:
-  const std::string name() const override;
-  int version() const override;
-  const std::string category() const override;
-  const std::string summary() const override;
-  std::map<std::string, std::string> validateInputs() override;
+  /// Algorithm's name
+  const std::string name() const override { return "MultipleScatteringCorrection"; };
+
+  /// Algorithm's version
+  int version() const override { return 1; };
+
+  /// Algorithm's category
+  const std::string category() const override { return "CorrectionFunctions"; };
+
+  /// Algorithm's summary
+  const std::string summary() const override {
+    return "Multiple Scattering Correction with the assumption of sample only and elastic scattering only";
+  };
+
+  /// Algorithm's see also
+  const std::vector<std::string> seeAlso() const override {
+    return {"AbsorptionCorrection", "PaalmanPingsAbsorptionCorrection", "PaalmanPingsMonteCarloAbsorption"};
+  };
 
 private:
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithms
