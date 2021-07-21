@@ -318,8 +318,21 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element *pElem, std::map<int, s
                                       int &l_id) {
   Element *pElemCentre = getOptionalShapeElement(pElem, "centre");
   Element *pElemRadius = getShapeElement(pElem, "radius");
+  Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
   const double radius = getDoubleAttribute(pElemRadius, "val");
-  const V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
+  V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
+
+  // rotate the normal vector by the rotation and goniometer tags
+  if (pElem_rot) {
+    // Apply manual rotation supplied to rotation tag
+    std::vector<double> rotationAngles = DegreesToRadians(parsePosition(pElem_rot));
+    const std::vector<double> rotationMatrix = generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
+    centre.rotate(rotationMatrix);
+  }
+  if (m_gonioRotationMatrix.size() > 0) {
+    // Apply automatic rotation due to the goniometer that should not be manually defined by the user
+    centre.rotate(m_gonioRotationMatrix);
+  }
 
   prim[l_id] = std::make_shared<Sphere>(centre, radius);
   const auto algebra = sphereAlgebra(l_id);
@@ -352,6 +365,7 @@ std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element *pElem, std::map
   Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
 
   V3D normVec = normalize(parsePosition(pElemNormal));
+  V3D centre = parsePosition(pElemPip);
 
   // rotate the normal vector by the rotation and goniometer tags
   if (pElem_rot) {
@@ -359,15 +373,17 @@ std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element *pElem, std::map
     std::vector<double> rotationAngles = DegreesToRadians(parsePosition(pElem_rot));
     const std::vector<double> rotationMatrix = generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
     normVec.rotate(rotationMatrix);
+    centre.rotate(rotationMatrix);
   }
   if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
     normVec.rotate(m_gonioRotationMatrix);
+    centre.rotate(m_gonioRotationMatrix);
   }
 
   // create infinite-plane
   auto pPlane = std::make_shared<Plane>();
-  pPlane->setPlane(parsePosition(pElemPip), normVec);
+  pPlane->setPlane(centre, normVec);
   prim[l_id] = pPlane;
 
   std::stringstream retAlgebraMatch;
@@ -397,6 +413,7 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element *pElem,
   // getDoubleAttribute can throw - put the calls above any new
   const double radius = getDoubleAttribute(pElemRadius, "val");
   V3D normVec = normalize(parsePosition(pElemAxis));
+  V3D centre = parsePosition(pElemCentre);
 
   // rotate the normal vector by the rotation and goniometer tags
   if (pElem_rot) {
@@ -404,16 +421,18 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element *pElem,
     std::vector<double> rotationAngles = DegreesToRadians(parsePosition(pElem_rot));
     const std::vector<double> rotationMatrix = generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
     normVec.rotate(rotationMatrix);
+    centre.rotate(rotationMatrix);
   }
   if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
     normVec.rotate(m_gonioRotationMatrix);
+    centre.rotate(m_gonioRotationMatrix);
   }
 
   // create infinite-cylinder
   auto pCylinder = std::make_shared<Cylinder>();
   pCylinder->setNorm(normVec);
-  pCylinder->setCentre(parsePosition(pElemCentre));
+  pCylinder->setCentre(centre);
 
   pCylinder->setRadius(radius);
   prim[l_id] = pCylinder;
@@ -453,7 +472,6 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem, std::map<int,
   auto pCylinder = std::make_shared<Cylinder>();
   V3D centreOfBottomBase = parsePosition(pElemBase);
   V3D centre = centreOfBottomBase + normVec * (0.5 * height);
-  pCylinder->setCentre(centre);
   pCylinder->setRadius(radius);
 
   // rotate the normal vector by the rotation and goniometer tags
@@ -462,12 +480,15 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem, std::map<int,
     std::vector<double> rotationAngles = DegreesToRadians(parsePosition(pElem_rot));
     const std::vector<double> rotationMatrix = generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
     normVec.rotate(rotationMatrix);
+    centre.rotate(rotationMatrix);
   }
   if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
     normVec.rotate(m_gonioRotationMatrix);
+    centre.rotate(m_gonioRotationMatrix);
   }
   pCylinder->setNorm(normVec);
+  pCylinder->setCentre(centre);
 
   prim[l_id] = pCylinder;
   std::stringstream retAlgebraMatch;
@@ -522,7 +543,6 @@ std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element *pElem,
   V3D centreOfBottomBase = parsePosition(pElemBase);
   V3D normVec = normalize(parsePosition(pElemAxis));
   V3D centre = centreOfBottomBase + normVec * (0.5 * height);
-  pCylinder->setCentre(centre);
   pCylinder->setRadius(radius);
 
   // rotate the normal vector by the rotation and goniometer tags
@@ -531,12 +551,15 @@ std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element *pElem,
     std::vector<double> rotationAngles = DegreesToRadians(parsePosition(pElem_rot));
     const std::vector<double> rotationMatrix = generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
     normVec.rotate(rotationMatrix);
+    centre.rotate(rotationMatrix);
   }
   if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
     normVec.rotate(m_gonioRotationMatrix);
+    centre.rotate(m_gonioRotationMatrix);
   }
   pCylinder->setNorm(normVec);
+  pCylinder->setCentre(centre);
 
   prim[l_id] = pCylinder;
   std::stringstream retAlgebraMatch;
@@ -609,10 +632,12 @@ std::string ShapeFactory::parseHollowCylinder(Poco::XML::Element *pElem, std::ma
     std::vector<double> rotationAngles = DegreesToRadians(parsePosition(pElem_rot));
     const std::vector<double> rotationMatrix = generateMatrix(rotationAngles[0], rotationAngles[1], rotationAngles[2]);
     normVec.rotate(rotationMatrix);
+    centre.rotate(rotationMatrix);
   }
   if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
     normVec.rotate(m_gonioRotationMatrix);
+    centre.rotate(m_gonioRotationMatrix);
   }
 
   // add outer infinite cylinder surface
@@ -710,7 +735,7 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
     const double deltaW = getDoubleAttribute(pElem_width, "val") / 2;
     const double deltaD = getDoubleAttribute(pElem_depth, "val") / 2;
 
-    const V3D centre = pElem_centre ? parsePosition(pElem_centre) : DEFAULT_CENTRE;
+    V3D centre = pElem_centre ? parsePosition(pElem_centre) : DEFAULT_CENTRE;
 
     result.lfb = V3D(-deltaW, -deltaH, -deltaD);
     result.lft = V3D(-deltaW, deltaH, -deltaD);
@@ -739,6 +764,7 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
       result.lft.rotate(rotationMatrix);
       result.lbb.rotate(rotationMatrix);
       result.rfb.rotate(rotationMatrix);
+      centre.rotate(rotationMatrix);
     }
     if (m_gonioRotationMatrix.size() > 0) {
       // Apply automatic rotation due to the goniometer that should not be manually defined by the user
@@ -746,14 +772,16 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
       result.lft.rotate(m_gonioRotationMatrix);
       result.lbb.rotate(m_gonioRotationMatrix);
       result.rfb.rotate(m_gonioRotationMatrix);
+      centre.rotate(m_gonioRotationMatrix);
     }
 
     result.lfb += centre;
     result.lft += centre;
     result.lbb += centre;
     result.rfb += centre;
-  } else
+  } else {
     throw std::invalid_argument(SYNTAX_ERROR_MSG);
+  }
 
   return result;
 }
@@ -1146,7 +1174,7 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element *pElem, std::map<
   Element *pElem_rot = getOptionalShapeElement(pElem, "rotation");
 
   // For centre and axis we allow defaults.
-  const V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
+  V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
   // Quat requires normalised axes.
   const V3D axis = normalize(pElemAxis ? parsePosition(pElemAxis) : DEFAULT_AXIS);
 
@@ -1198,6 +1226,7 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element *pElem, std::map<
     hex.rft.rotate(rotationMatrix);
     hex.rbb.rotate(rotationMatrix);
     hex.rbt.rotate(rotationMatrix);
+    centre.rotate(rotationMatrix);
   }
   if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
@@ -1209,6 +1238,7 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element *pElem, std::map<
     hex.rft.rotate(m_gonioRotationMatrix);
     hex.rbb.rotate(m_gonioRotationMatrix);
     hex.rbt.rotate(m_gonioRotationMatrix);
+    centre.rotate(m_gonioRotationMatrix);
   }
 
   // Move it to the defined centre.
@@ -1307,12 +1337,14 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element *pElem,
     normVec.rotate(rotationMatrix);
     planeSlice1.rotate(rotationMatrix);
     planeSlice2.rotate(rotationMatrix);
+    centrePoint.rotate(rotationMatrix);
   }
   if (m_gonioRotationMatrix.size() > 0) {
     // Apply automatic rotation due to the goniometer that should not be manually defined by the user
     normVec.rotate(m_gonioRotationMatrix);
     planeSlice1.rotate(m_gonioRotationMatrix);
     planeSlice2.rotate(m_gonioRotationMatrix);
+    centrePoint.rotate(m_gonioRotationMatrix);
   }
 
   // add inner infinite cylinder
