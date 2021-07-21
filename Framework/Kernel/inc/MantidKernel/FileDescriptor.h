@@ -31,6 +31,8 @@ public:
   static bool isAscii(std::istream &data, const size_t nbytes = 256);
   /// Returns true if the file is considered ascii
   static bool isAscii(FILE *file, const size_t nbytes = 256);
+  /// Returns true if the file is empty
+  static bool isEmpty(const std::string &filename);
 
 public:
   /// Constructor accepting a filename
