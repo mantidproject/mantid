@@ -5,8 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+import numpy as np
 
-@staticmethod
+from mantid.kernel import logger
+
+
 def euphonic_available():
     """Find out if Euphonic modules can be imported, without raising an error
 
@@ -21,7 +24,7 @@ def euphonic_available():
     return True
 
 
-def get_data_with_euphonic(self, file_name: str, cutoff: float = 20.):
+def get_data_with_euphonic(file_name: str, cutoff: float = 20.):
     """
     Read force constants file with Euphonic and sample frequencies/modes
 
@@ -78,10 +81,10 @@ def get_data_with_euphonic(self, file_name: str, cutoff: float = 20.):
     # with the existing code
 
     element_isotopes = {ion['species']: ion['isotope_number']
-                             for ion in ions}
+                        for ion in ions}
 
     # Generate index per element
-    ion_counts = {element: 0 for element in self._element_isotope}
+    ion_counts = {element: 0 for element in element_isotopes}
     for ion in ions:
         species = ion['species']
         ion_counts[species] += 1

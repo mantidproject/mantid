@@ -193,28 +193,30 @@ void DensityOfStates::handleFileChange() {
 void DensityOfStates::ionLoadComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(ionLoadComplete(bool)));
 
-  if (error)
+  if (error) {
     g_log.error("Could not get a list of ions from input file");
+  } else {
 
-  // Get the list of ions from algorithm
-  auto ionTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__dos_ions");
-  Column_sptr ionColumn = ionTable->getColumn("Species");
-  size_t numIons = ionColumn->size();
+    // Get the list of ions from algorithm
+    auto ionTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__dos_ions");
+    Column_sptr ionColumn = ionTable->getColumn("Species");
+    size_t numIons = ionColumn->size();
 
-  // Remove old ions
-  m_uiForm.lwIons->clear();
+    // Remove old ions
+    m_uiForm.lwIons->clear();
 
-  // Add ions to list
-  QStringList ionSpecies;
-  for (size_t ion = 0; ion < numIons; ion++) {
-    const QString species = QString::fromStdString(ionColumn->cell<std::string>(ion));
-    if (!ionSpecies.contains(species))
-      ionSpecies << species;
+    // Add ions to list
+    QStringList ionSpecies;
+    for (size_t ion = 0; ion < numIons; ion++) {
+      const QString species = QString::fromStdString(ionColumn->cell<std::string>(ion));
+      if (!ionSpecies.contains(species))
+        ionSpecies << species;
+    }
+    m_uiForm.lwIons->addItems(ionSpecies);
+
+    // Select all ions by default
+    m_uiForm.lwIons->selectAll();
   }
-  m_uiForm.lwIons->addItems(ionSpecies);
-
-  // Select all ions by default
-  m_uiForm.lwIons->selectAll();
 }
 
 /**
@@ -257,15 +259,9 @@ void DensityOfStates::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled
  * Handle file formats
  */
 
-enum class DensityOfStates::InputFormat : int {
-  Unsupported = 0,
-  Phonon,
-  Castep,
-  ForceConstants
-};
+enum class DensityOfStates::InputFormat : int { Unsupported = 0, Phonon, Castep, ForceConstants };
 
-DensityOfStates::InputFormat
-DensityOfStates::filenameToFormat(QString filename) {
+DensityOfStates::InputFormat DensityOfStates::filenameToFormat(QString filename) {
   QFileInfo inputFileInfo(filename);
   const auto suffix = inputFileInfo.suffix().toStdString();
 
@@ -300,16 +296,14 @@ std::string DensityOfStates::formatToFilePropName(InputFormat format) {
     filePropName = "ForceConstantsFile";
     break;
   default:
-    g_log.error(
-        "Could not determine appropriate input field for this file type. ");
+    g_log.error("Could not determine appropriate input field for this file type. ");
   }
 
   return filePropName;
 }
 
 bool DensityOfStates::isPdosFile(InputFormat dosFileFormat) {
-  return {(dosFileFormat == InputFormat::Phonon) ||
-          (dosFileFormat == InputFormat::ForceConstants)};
+  return {(dosFileFormat == InputFormat::Phonon) || (dosFileFormat == InputFormat::ForceConstants)};
 }
 
 } // namespace MantidQt::CustomInterfaces

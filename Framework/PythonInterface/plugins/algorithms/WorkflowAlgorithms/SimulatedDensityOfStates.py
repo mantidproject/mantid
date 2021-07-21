@@ -133,7 +133,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         calc_partial = len(ions) > 0
 
         if euphonic_filename and not euphonic_available():
-            issues['ForceConstantsFile'] = 'Cannot import the Euphonic library for force constants import.'
+            issues['ForceConstantsFile'] = ('Cannot import the Euphonic library for force constants import. '
+                                            'This can be installed using users/AdamJackson/install_euphonic.py '
+                                            'from the ScriptRepository.')
 
         if spec_type == 'IonTable' and not pdos_available:
             issues['SpectrumType'] = 'Cannot produce ion table when only .castep file is provided'
@@ -263,9 +265,12 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         elif castep_filename:
             return self._read_data_from_file(castep_filename)
         elif euphonic_filename:
-            file_data, self._element_isotope = get_data_with_euphonic(
-                euphonic_filename,
-                cutoff=float(self.getPropertyValue('ForceConstantsSampling')))
+            if euphonic_available():
+                file_data, self._element_isotope = get_data_with_euphonic(
+                    euphonic_filename,
+                    cutoff=float(self.getPropertyValue('ForceConstantsSampling')))
+            else:
+                raise ValueError("Could not load file using Euphonic: you may need to install this library.")
 
             self._num_ions = file_data['num_ions']
             return file_data
