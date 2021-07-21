@@ -962,6 +962,7 @@ void FileFinderWidget::setTextValidator(const QValidator *validator) { m_uiForm.
 void FileFinderWidget::setUseNativeWidget(bool native) {
   m_useNativeDialog = native;
   m_dialog.setOption(QFileDialog::DontUseNativeDialog);
+  m_dialog.setOption(QFileDialog::ReadOnly);
 }
 
 void FileFinderWidget::setProxyModel(QAbstractProxyModel *proxyModel) { m_dialog.setProxyModel(proxyModel); }
