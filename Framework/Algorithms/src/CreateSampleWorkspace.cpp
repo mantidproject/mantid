@@ -392,7 +392,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(int numPixels, i
       auto eventsInBin = static_cast<int>(yValues[i]);
       for (int q = 0; q < eventsInBin; q++) {
         DateAndTime pulseTime = run_start + (m_randGen->nextValue() * hourInSeconds);
-        el += TofEvent((i + m_randGen->nextValue()) * binDelta, pulseTime);
+        el += TofEvent((i + m_randGen->nextValue()) * binDelta + x0, pulseTime);
       }
     }
     workspaceIndex++;

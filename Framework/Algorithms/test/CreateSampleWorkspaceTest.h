@@ -243,6 +243,26 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
+  // Test create sample workspace with DeltaE as X unit
+  void test_event_deltae() {
+    // Name of the output workspace.
+    std::string outWSName("CreateSampleWorkspaceTest_OutputWS_DeltaE");
+
+    auto ws = std::dynamic_pointer_cast<IEventWorkspace>(createSampleWorkspace(
+        outWSName, "Event", "Flat background", "", 2, 1, 1000, false, "DeltaE", -10., 19., 0.5, 1));
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 1972);
+    TS_ASSERT_EQUALS(ws->readY(0).size(), 58);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
+
+    for (auto i = 0; i < 58; ++i) {
+      for (auto j = 0; j < 2; ++j)
+        TS_ASSERT_DELTA(ws->readY(j)[i], 17., 1E-7);
+    }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
   void test_event_MoreBanksMoreDetectorsLessEvents() {
     // Name of the output workspace.
     std::string outWSName("CreateSampleWorkspaceTest_OutputWS_MoreBanksMoreDetectors");
