@@ -19,6 +19,7 @@ def add_mock_methods_to_basic_fitting_view(view):
     view.set_slot_for_undo_fit_clicked = mock.Mock()
     view.set_slot_for_plot_guess_changed = mock.Mock()
     view.set_slot_for_fit_name_changed = mock.Mock()
+    view.set_slot_for_covariance_matrix_clicked = mock.Mock()
     view.set_slot_for_function_structure_changed = mock.Mock()
     view.set_slot_for_function_parameter_changed = mock.Mock()
     view.set_slot_for_start_x_updated = mock.Mock()
@@ -43,6 +44,8 @@ def add_mock_methods_to_basic_fitting_view(view):
     view.switch_to_single = mock.Mock()
     view.disable_view = mock.Mock()
     view.set_exclude_start_and_end_x_visible = mock.Mock()
+    view.set_covariance_button_enabled = mock.Mock()
+    view.show_normalised_covariance_matrix = mock.Mock()
     return view
 
 
@@ -69,6 +72,7 @@ def add_mock_methods_to_basic_fitting_model(model, dataset_names, current_datase
     model.get_workspace_names_to_display_from_context = mock.Mock(return_value=dataset_names)
     model.perform_fit = mock.Mock(return_value=(fit_function, fit_status, chi_squared))
     model.number_of_undos = mock.Mock(return_value=1)
+    model.has_normalised_covariance_matrix = mock.Mock(return_value=True)
     return model
 
 
@@ -145,6 +149,8 @@ class MockBasicFitting:
         self.view = add_mock_methods_to_basic_fitting_view(self.view)
 
         # Mock the properties of the view
+        self.mock_view_current_dataset_index = mock.PropertyMock(return_value=self.current_dataset_index)
+        type(self.view).current_dataset_index = self.mock_view_current_dataset_index
         self.mock_view_minimizer = mock.PropertyMock(return_value=self.minimizer)
         type(self.view).minimizer = self.mock_view_minimizer
         self.mock_view_evaluation_type = mock.PropertyMock(return_value=self.evaluation_type)

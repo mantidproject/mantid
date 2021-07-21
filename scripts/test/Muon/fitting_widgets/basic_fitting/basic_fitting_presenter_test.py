@@ -8,8 +8,10 @@ import unittest
 from unittest import mock
 
 from mantid.api import FrameworkManager, FunctionFactory
+from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantidqt.widgets.fitscriptgenerator import FittingMode
 from Muon.GUI.Common.test_helpers.fitting_mock_setup import MockBasicFitting
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
 class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
@@ -49,6 +51,7 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.assertEqual(self.view.set_slot_for_undo_fit_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_plot_guess_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_fit_name_changed.call_count, 1)
+        self.assertEqual(self.view.set_slot_for_covariance_matrix_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_function_structure_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_function_parameter_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_start_x_updated.call_count, 1)
@@ -113,6 +116,26 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.presenter.clear_undo_data.assert_called_with()
         self.view.disable_view.assert_called_once_with()
 
+    def test_that_handle_dataset_name_changed_will_update_the_model_and_view(self):
+        self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
+        self.presenter.update_covariance_matrix_button = mock.Mock()
+        self.presenter.update_fit_function_in_view_from_model = mock.Mock()
+        self.presenter.update_start_and_end_x_in_view_from_model = mock.Mock()
+
+        self.presenter.handle_dataset_name_changed()
+
+        self.mock_view_current_dataset_index.assert_called_once_with()
+        self.mock_model_current_dataset_index.assert_called_once_with(self.current_dataset_index)
+
+        self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
+        self.presenter.update_covariance_matrix_button.assert_called_once_with()
+        self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
+        self.presenter.update_start_and_end_x_in_view_from_model.assert_called_once_with()
+
+        self.model.update_plot_guess.assert_called_once_with()
+
+        self.presenter.selected_fit_results_changed.notify_subscribers.assert_called_once_with([])
+
     def test_that_handle_plot_guess_changed_will_update_plot_guess_using_the_model(self):
         self.presenter.handle_plot_guess_changed()
         self.model.update_plot_guess.assert_called_once_with()
@@ -120,12 +143,14 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
     def test_that_handle_undo_fit_clicked_will_attempt_to_reset_the_fit_data_and_notify_that_the_data_has_changed(self):
         self.presenter.update_fit_function_in_view_from_model = mock.Mock()
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
+        self.presenter.update_covariance_matrix_button = mock.Mock()
 
         self.presenter.handle_undo_fit_clicked()
 
         self.model.undo_previous_fit.assert_called_once_with()
         self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
+        self.presenter.update_covariance_matrix_button.assert_called_once_with()
         self.model.update_plot_guess.assert_called_once_with()
         self.presenter.selected_fit_results_changed.notify_subscribers.assert_called_once_with([])
 
@@ -208,6 +233,22 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.presenter._open_fit_script_generator_interface.assert_called_once_with(self.dataset_names,
                                                                                     FittingMode.SEQUENTIAL,
                                                                                     fit_options)
+
+    def test_that_handle_covariance_matrix_clicked_calls_the_expected_functions(self):
+        ws = CreateEmptyTableWorkspace()
+        wrapper = StaticWorkspaceWrapper("CovarianceMatrix", ws)
+        self.model.current_normalised_covariance_matrix = mock.Mock(return_value=wrapper)
+
+        self.presenter.handle_covariance_matrix_clicked()
+
+        self.model.current_normalised_covariance_matrix.assert_called_once_with()
+        self.view.show_normalised_covariance_matrix.assert_called_once_with(wrapper.workspace, wrapper.workspace_name)
+
+    def test_that_update_covariance_matrix_button_will_call_the_expected_functions(self):
+        self.presenter.update_covariance_matrix_button()
+
+        self.model.has_normalised_covariance_matrix.assert_called_once_with()
+        self.view.set_covariance_button_enabled.assert_called_once_with(True)
 
     def test_that_handle_function_name_changed_by_user_will_set_the_automatic_update_property_to_false(self):
         self.presenter.handle_function_name_changed_by_user()

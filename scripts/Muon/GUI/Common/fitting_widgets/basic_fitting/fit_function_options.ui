@@ -98,7 +98,7 @@
      </widget>
     </widget>
    </item>
-   <item row="0" column="0">
+   <item row="0" column="0" colspan="2">
     <widget class="QFrame" name="frame">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <property name="leftMargin">
@@ -164,6 +164,16 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="covariance_matrix_button">
+        <property name="toolTip">
+         <string>Open the Normalised Covariance Matrix</string>
+        </property>
+        <property name="text">
+         <string>Covariance Matrix</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
