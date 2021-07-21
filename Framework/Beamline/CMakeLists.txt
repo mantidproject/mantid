@@ -29,6 +29,7 @@ endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library(Beamline ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Beamline ALIAS Beamline)
 # Set the name of the generated library
 set_target_properties(Beamline
                       PROPERTIES OUTPUT_NAME
@@ -43,18 +44,17 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
-target_include_directories(Beamline SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
-
+target_include_directories(Beamline PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Add to the 'Framework' group in VS
 set_property(TARGET Beamline PROPERTY FOLDER "MantidFramework")
 
 target_link_libraries(Beamline
-                      LINK_PUBLIC
+                      PUBLIC
                       Eigen3::Eigen
-                      LINK_PRIVATE
-                      ${GSL_LIBRARIES}
-                      Kernel
-                      ${MANTIDLIBS})
+                      Mantid::Kernel)
 
 # Add the unit tests directory
 add_subdirectory(test)

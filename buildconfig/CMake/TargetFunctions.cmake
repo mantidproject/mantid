@@ -15,12 +15,42 @@ function (mtd_install_targets)
         message(FATAL_ERROR "Empty argument TARGETS")
         return()
     endif()
-
     _sanitize_install_dirs(_install_dirs ${PARSED_INSTALL_DIRS})
     foreach( _dir ${_install_dirs})
         install ( TARGETS ${PARSED_TARGETS} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_dir} )
     endforeach ()
 endfunction()
+
+
+# Install a target into multiple directories
+# This respects ENABLE_WORKBENCH flags for macOS
+function (mtd_install_dylib)
+  set (options)
+  set (oneValueArgs TARGETS)
+  set (multiValueArgs INSTALL_DIRS)
+  cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
+                         "${multiValueArgs}" ${ARGN})
+
+    if (NOT PARSED_INSTALL_DIRS)
+        message(FATAL_ERROR "Empty argument INSTALL_DIRS")
+        return()
+    endif()
+    if (NOT PARSED_TARGETS)
+        message(FATAL_ERROR "Empty argument TARGETS")
+        return()
+    endif()
+    install(
+        DIRECTORY inc/
+        DESTINATION include/Mantid
+        COMPONENT Devel
+        PATTERN ".in" EXCLUDE
+    )
+    _sanitize_install_dirs(_install_dirs ${PARSED_INSTALL_DIRS})
+    foreach( _dir ${_install_dirs})
+        install ( TARGETS ${PARSED_TARGETS} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_dir} )
+    endforeach ()
+endfunction()
+
 
 # Install files into multiple directories
 # This respects ENABLE_WORKBENCH flags for macOS

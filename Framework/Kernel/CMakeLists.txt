@@ -482,6 +482,7 @@ endif(UNITY_BUILD)
 enable_precompiled_headers(inc/MantidKernel/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(Kernel ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Kernel ALIAS Kernel)
 # Set the name of the generated library
 set_target_properties(Kernel
                       PROPERTIES OUTPUT_NAME
@@ -489,10 +490,15 @@ set_target_properties(Kernel
                                  COMPILE_DEFINITIONS
                                  "IN_MANTID_KERNEL;PSAPI_VERSION=1")
 
+target_include_directories(Kernel PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
+
 target_include_directories(Kernel SYSTEM
                            PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS}
-                                  ${JSONCPP_INCLUDE_DIR} ${NEXUS_INCLUDE_DIR}
-                           PRIVATE ${GSL_INCLUDE_DIR}
+                                  ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
 			   ${OPENSSL_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -507,22 +513,22 @@ set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
 
 target_link_libraries(Kernel
                       PUBLIC
+                      Mantid::Types
                       ${NEXUS_LIBRARIES}
                       Eigen3::Eigen
-                      ${JSONCPP_LIBRARIES}
                       ${TBB_LIBRARIES}
                       ${TBB_MALLOC_LIBRARIES}
-                      PRIVATE
+                      ${POCO_LIBRARIES}
                       ${GSL_LIBRARIES}
-                      ${MANTIDLIBS}
+                      ${HDF5_LIBRARIES}
+                      PRIVATE
                       ${NETWORK_LIBRARIES}
                       span
-                      ${HDF5_LIBRARIES}
-                      Json
+                      Mantid::Json
                       )
 if(WIN32)
-  target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage
-                                                       # queries
+  target_link_libraries(Kernel PRIVATE Psapi.lib) # For memory usage
+                                                  # queries
 endif()
 
 # Add the unit tests directory
@@ -607,7 +613,7 @@ endif()
 
 # Installation settings
 
-mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+mtd_install_dylib(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
 # Create the properties file for the installer
 set(MANTID_ROOT_BUILD ${MANTID_ROOT})

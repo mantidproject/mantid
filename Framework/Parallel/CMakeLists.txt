@@ -60,7 +60,14 @@ endif()
 
 # Add the target for this directory
 add_library(Parallel ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Parallel ALIAS Parallel)
 add_dependencies(Parallel EventParallelLoader Kernel)
+
+target_include_directories(Parallel PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Set the name of the generated library
 set_target_properties(Parallel
                       PROPERTIES OUTPUT_NAME
@@ -79,17 +86,10 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Parallel PROPERTY FOLDER "MantidFramework")
 
-target_include_directories(Parallel SYSTEM
-                           PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-target_link_libraries(Parallel
-                      LINK_PRIVATE
-                      ${GSL_LIBRARIES}
-                      ${MANTIDLIBS}
-                      ${HDF5_LIBRARIES}
-                      Kernel)
+target_link_libraries(Parallel PUBLIC Mantid::Kernel)
 
 if(UNIX AND NOT APPLE)
-  target_link_libraries(Parallel LINK_PRIVATE rt)
+  target_link_libraries(Parallel PRIVATE rt)
 endif()
 
 # Add executable for Nexus parallel loader child process

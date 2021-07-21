@@ -112,6 +112,8 @@ endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library(HistogramData ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::HistogramData ALIAS HistogramData)
+
 # Set the name of the generated library
 set_target_properties(HistogramData
                       PROPERTIES OUTPUT_NAME
@@ -130,12 +132,12 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET HistogramData PROPERTY FOLDER "MantidFramework")
 
-target_include_directories (HistogramData SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
-target_link_libraries(HistogramData
-                      LINK_PRIVATE
-                      ${GSL_LIBRARIES}
-                      Kernel
-                      ${MANTIDLIBS})
+target_include_directories(HistogramData PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
+target_link_libraries(HistogramData PUBLIC Kernel)
 
 # Add the unit tests directory
 add_subdirectory(test)

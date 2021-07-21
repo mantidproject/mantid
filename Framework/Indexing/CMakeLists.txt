@@ -59,6 +59,13 @@ endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library(Indexing ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Indexing ALIAS Indexing)
+
+target_include_directories(Indexing PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Set the name of the generated library
 set_target_properties(Indexing
                       PROPERTIES OUTPUT_NAME
@@ -77,12 +84,7 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Indexing PROPERTY FOLDER "MantidFramework")
 
-target_include_directories (Indexing SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
-target_link_libraries(Indexing
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      Kernel
-                      Parallel)
+target_link_libraries(Indexing PUBLIC Mantid::Kernel PRIVATE Parallel)
 
 if("${UNIX_CODENAME}" STREQUAL "trusty")
   # Special linking options are required for some older Ubuntu gcc builds to use

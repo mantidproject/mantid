@@ -46,6 +46,12 @@ endif()
 
 # Add the target for this directory
 add_library(NexusGeometry ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::NexusGeometry ALIAS NexusGeometry)
+
+target_include_directories(NexusGeometry PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(NexusGeometry
                       PROPERTIES OUTPUT_NAME
@@ -58,17 +64,14 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
                         PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 endif()
 
-# Include HDF5 libraries
-target_include_directories(NexusGeometry SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
 # Add to the 'Framework' group in VS
 set_property(TARGET NexusGeometry PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(NexusGeometry
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${HDF5_LIBRARIES}
-                      ${HDF5_HL_LIBRARIES}
-                      ${HDF5_CXX_LIBRARIES})
+target_link_libraries(NexusGeometry PUBLIC Mantid::Geometry Mantid::API
+                      PRIVATE
+                      Mantid::Kernel
+                      Mantid::Json
+                      Mantid::Indexing)
 
 # Add the unit tests directory
 add_subdirectory(test)

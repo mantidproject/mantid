@@ -33,6 +33,12 @@ add_definitions(-DWITH_OPENSSL -DWITH_NONAMESPACES)
 
 # Add the target for this directory
 add_library(Catalog ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Catalog ALIAS Catalog)
+
+target_include_directories(Catalog PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(Catalog
                       PROPERTIES OUTPUT_NAME
@@ -51,13 +57,8 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Catalog PROPERTY FOLDER "MantidFramework")
 
-target_include_directories(Catalog PUBLIC inc/)
-
-target_link_libraries(Catalog
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${OPENSSL_LIBRARIES}
-                      ${JSONCPP_LIBRARIES})
+target_link_libraries(Catalog PUBLIC Mantid::Kernel PRIVATE ${JSONCPP_LIBRARIES})
+target_include_directories(Catalog PRIVATE ${JSONCPP_INCLUDE_DIR})
 
 # Add the unit tests directory
 add_subdirectory(test)

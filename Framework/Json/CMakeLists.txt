@@ -11,6 +11,7 @@ set (TEST_FILES
 )
 
 add_library(Json ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Json ALIAS Json)
 target_link_libraries(Json PUBLIC ${JSONCPP_LIBRARIES})
 set_target_properties(Json PROPERTIES OUTPUT_NAME MantidJson)
 
@@ -22,6 +23,12 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Json
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
+
+
+target_include_directories(Json PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+	$<INSTALL_INTERFACE:include/Mantid>
+)
 
 # Add to the 'Framework' group in VS
 set_property(TARGET Json PROPERTY FOLDER "MantidFramework")

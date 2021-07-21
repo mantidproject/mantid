@@ -463,8 +463,14 @@ endif()
 enable_precompiled_headers(inc/MantidGeometry/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(Geometry ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Geometry ALIAS Geometry)
 
-target_include_directories(Geometry SYSTEM PUBLIC  ${NEXUS_INCLUDE_DIR} ${TBB_INCLUDE_DIRS} ${GSL_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
+target_include_directories(Geometry PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
+target_include_directories(Geometry SYSTEM PUBLIC ${NEXUS_INCLUDE_DIR} ${TBB_INCLUDE_DIRS} ${MUPARSER_INCLUDE_DIR})
 
 # Set the name of the generated library
 set_target_properties(Geometry
@@ -488,19 +494,10 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Geometry PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Geometry
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${OPENGL_gl_LIBRARY}
-                      ${OPENGL_glu_LIBRARY}
-                      ${GSL_LIBRARIES}
-                      ${NEXUS_LIBRARIES}
-                      ${JSONCPP_LIBRARIES})
-
-target_link_libraries(Geometry
-                      LINK_PUBLIC
-                      ${TBB_LIBRARIES}
-                      ${TBB_MALLOC_LIBRARIES})
+target_link_libraries(Geometry PUBLIC Mantid::Kernel ${NEXUS_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES} ${MUPARSER_LIBRARIES}
+                      PRIVATE
+                      Mantid::Json
+                      Mantid::Beamline)
 
 if(ENABLE_OPENGL)
   target_include_directories(Geometry SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})

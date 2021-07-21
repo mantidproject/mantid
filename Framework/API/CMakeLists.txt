@@ -523,6 +523,7 @@ endif()
 enable_precompiled_headers(inc/MantidAPI/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(API ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::API ALIAS API)
 # Set the name of the generated library
 set_target_properties(
   API PROPERTIES OUTPUT_NAME MantidAPI COMPILE_DEFINITIONS IN_MANTID_API
@@ -545,7 +546,7 @@ target_include_directories(
 )
 target_link_libraries(
   API
-  LINK_PRIVATE
+  PRIVATE
   ${JSONCPP_LIBRARIES}
   ${MANTIDLIBS}
   ${GSL_LIBRARIES}

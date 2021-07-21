@@ -24,7 +24,7 @@ if(COVERAGE)
 endif()
 
 add_library(Types ${SRC_FILES} ${INC_FILES})
-
+add_library(Mantid::Types ALIAS Types)
 set_target_properties(Types
                       PROPERTIES OUTPUT_NAME
                                  MantidTypes
@@ -32,8 +32,13 @@ set_target_properties(Types
                                  "Types_EXPORTS;PSAPI_VERSION=1")
 
 set_property(TARGET Types PROPERTY FOLDER "MantidFramework")
-target_link_libraries(Types LINK_PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(Types PUBLIC ${Boost_LIBRARIES})
 target_include_directories(Types SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
+
+target_include_directories(Types PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 
 # Auto-generate exports header
 target_include_directories(Types PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
