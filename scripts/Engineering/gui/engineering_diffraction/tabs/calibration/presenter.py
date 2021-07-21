@@ -7,11 +7,11 @@
 # pylint: disable=invalid-name
 from copy import deepcopy
 
+from Engineering.common import path_handling
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_presenter import CroppingPresenter
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
-from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger

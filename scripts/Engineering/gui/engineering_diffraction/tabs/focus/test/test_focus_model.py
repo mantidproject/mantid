@@ -11,8 +11,8 @@ from os import path
 
 from unittest.mock import patch, MagicMock, call
 from mantid.simpleapi import CreateSampleWorkspace
+from Engineering.common import path_handling
 from Engineering.gui.engineering_diffraction.tabs.focus import model
-from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 
 file_path = "Engineering.gui.engineering_diffraction.tabs.focus.model"

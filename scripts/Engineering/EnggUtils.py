@@ -10,7 +10,7 @@ from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logg
 import mantid.simpleapi as mantid
 from mantid.simpleapi import AnalysisDataService as ADS
 from matplotlib import gridspec
-from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from Engineering.common import path_handling
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 
