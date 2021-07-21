@@ -25,6 +25,10 @@ Improvements
 - :ref:`SNAPReduce <algm-SNAPReduce-v1>` permits saving selected property names and values to file, to aid autoreduction.
 - Add a custom ttmode to the PEARL powder diffraction scripts for running with a custom grouping file
 - improve performance of :ref:`ApplyDiffCal <algm-ApplyDiffCal>` on large instruments eg WISH. This in turn improves the performance of :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`
+- :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` now sorts the polarization orientations and enforces spin-flip, then non-spin-flip order
+- :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` received a number of improvements: changes names of input workspaces to contain polarization information,
+  transmission can be provided as a number or a workspace group, new data averaging option depending on measurement 2theta, option to display all measured points
+  on a scatter plot, new option for self-attenuation treatment using measured tranmission.
 
 Bugfixes
 ########
