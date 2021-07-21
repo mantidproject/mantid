@@ -33,7 +33,7 @@
     <item row="1" column="6">
      <widget class="QPushButton" name="holdButton">
       <property name="toolTip">
-       <string>Click hold or press Space to persist (hold) or remove (unhold) a curve in the plot</string>
+       <string>Click Add/Remove or press Space to hold/unhold the current curve</string>
       </property>
      </widget>
     </item>

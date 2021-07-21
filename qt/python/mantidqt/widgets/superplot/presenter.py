@@ -14,20 +14,25 @@ from mantid.plots.utility import MantidAxType, legend_set_draggable
 
 class SuperplotPresenter:
 
-    BIN_MODE_TEXT = "Bin"
-    SPECTRUM_MODE_TEXT = "Spectrum"
+    BIN_MODE_TEXT = "Column (bin)"
+    SPECTRUM_MODE_TEXT = "Row (spectrum)"
     HOLD_BUTTON_TEXT_CHECKED = "Remove"
     HOLD_BUTTON_TEXT_UNCHECKED = "Add"
     _view = None
     _model = None
     _canvas = None
-    _plot_function = None
+    _error_bars = False
 
     def __init__(self, canvas, parent=None):
         self._view = SuperplotView(self, parent)
         self._model = SuperplotModel()
         self._canvas = canvas
         self.parent = parent
+
+        # fix size of hold button with the longest text
+        self._view.set_hold_button_text(self.HOLD_BUTTON_TEXT_CHECKED)
+        width, height = self._view.get_hold_button_size()
+        self._view.set_hold_button_size(width, height)
 
         if self.parent:
             self.parent.plot_updated.connect(self.on_plot_updated)
@@ -53,6 +58,30 @@ class SuperplotPresenter:
         self._view.set_selection(selection)
         self._update_spectrum_slider()
         self._update_hold_button()
+
+    def set_bin_mode(self, state):
+        """
+        Set the plot mode.
+
+        Args:
+            state (bool): if true, bin mode is set, if false, spectrum mode
+        """
+        if state:
+            self._view.set_mode(self.BIN_MODE_TEXT)
+        else:
+            self._view.set_mode(self.SPECTRUM_MODE_TEXT)
+        self._update_spectrum_slider()
+        self._update_plot()
+
+    def enable_error_bars(self, state):
+        """
+        Enable/disable error bars in plot.
+
+        Args:
+            state (bool): if True, the error bars will be on
+        """
+        self._error_bars = state
+        self._update_plot()
 
     def set_workspaces(self, workspaces):
         """
@@ -143,7 +172,7 @@ class SuperplotPresenter:
                 self._model.set_spectrum_mode()
                 self._view.set_available_modes([self.SPECTRUM_MODE_TEXT])
             if "function" in args[0]:
-                self._plot_function = args[0]["function"]
+                self._error_bars = (args[0]["function"] == "errorbar")
 
         for artist in artists:
             ws, spec_index = axes.get_artists_workspace_and_workspace_index(artist)
@@ -327,7 +356,7 @@ class SuperplotPresenter:
                         kwargs["axis"] = MantidAxType.BIN
                         kwargs["wkspIndex"] = sp
 
-                    if self._plot_function == "errorbar":
+                    if self._error_bars:
                         lines = axes.errorbar(ws, **kwargs)
                         label = lines.get_label()
                         color = lines.lines[0].get_color()
@@ -446,12 +475,14 @@ class SuperplotPresenter:
             else:
                 for spectrum in selection[ws_name]:
                     self._model.remove_data(ws_name, spectrum)
+            selection[ws_name] = [-1]
         if not self._model.is_bin_mode() and not self._model.is_spectrum_mode():
             self._view.set_available_modes([self.SPECTRUM_MODE_TEXT,
                                             self.BIN_MODE_TEXT])
             self._view.set_mode(mode)
         self._update_list()
-        self._update_spectrum_slider()
+        self._update_hold_button()
+        self._view.set_selection(selection)
         self._update_plot()
 
     def on_hold_button_clicked(self):

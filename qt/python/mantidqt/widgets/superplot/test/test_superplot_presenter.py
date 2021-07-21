@@ -42,6 +42,7 @@ class SuperplotPresenterTest(unittest.TestCase):
             ws, sp
         self.m_axes.get_tracked_artists.return_value = [a1]
         self.m_view.get_selection.return_value = {}
+        self.m_view.get_hold_button_size.return_value = 0,0
         self.presenter = SuperplotPresenter(self.m_canvas)
         self.m_view.reset_mock()
         self.m_model.reset_mock()
@@ -266,7 +267,6 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_model.remove_data.assert_has_calls(calls)
         self.presenter._update_list.assert_called_once()
         self.presenter._update_plot.assert_called_once()
-        self.presenter._update_spectrum_slider.assert_called_once()
 
     def test_on_hold_button_clicked(self):
         self.presenter._on_hold = mock.Mock()
