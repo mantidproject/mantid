@@ -10,7 +10,7 @@ from mantid.api import AnalysisDataService
 from mantid.simpleapi import GeneratePythonFitScript, Load
 
 
-class GeneratePythonFitScriptTest(MantidSystemTest):
+class ExecuteGeneratedPythonFitScriptTest(MantidSystemTest):
     """
     This test will execute a python script for sequential fitting, and simultaneous fitting, to make sure that the
     generated scripts will run without an error.

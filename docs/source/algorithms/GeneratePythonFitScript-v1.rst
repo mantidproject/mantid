@@ -30,7 +30,7 @@ Usage
     script_text = GeneratePythonFitScript(InputWorkspaces=["ws1", "ws1", "ws2", "ws2"], WorkspaceIndices=[0, 1, 0, 1],
                                           StartXs=[0.0, 0.0, 0.0, 0.0], EndXs=[20000.0, 20000.0, 20000.0, 20000.0],
                                           FittingType="Sequential", Function=function, MaxIterations=500,
-                                          Minimizer="Levenberg-Marquardt")
+                                          Minimizer="Levenberg-Marquardt", OutputBaseName="Output_Fit")
 
     print(script_text)
 
@@ -60,6 +60,7 @@ Output:
    minimizer = "Levenberg-Marquardt"
    cost_function = "Least squares"
    evaluation_type = "CentrePoint"
+   output_base_name = "Output_Fit"
 
    # Perform a sequential fit
    output_workspaces, parameter_tables, normalised_matrices = [], [], []
@@ -67,19 +68,19 @@ Output:
        fit_output = Fit(Function=function, InputWorkspace=input_workspace, WorkspaceIndex=domain_data[0],
                         StartX=domain_data[1], EndX=domain_data[2], MaxIterations=max_iterations,
                         Minimizer=minimizer, CostFunction=cost_function, EvaluationType=evaluation_type,
-                        CreateOutput=True)
+                        Output=output_base_name + input_workspace)
 
-       output_workspaces.append(fit_output.OutputWorkspace)
-       parameter_tables.append(fit_output.OutputParameters)
-       normalised_matrices.append(fit_output.OutputNormalisedCovarianceMatrix)
+       output_workspaces.append(output_base_name + input_workspace + "_Workspace")
+       parameter_tables.append(output_base_name + input_workspace + "_Parameters")
+       normalised_matrices.append(output_base_name + input_workspace + "_NormalisedCovarianceMatrix")
 
        # Use the parameters in the previous function as the start parameters of the next fit
        function = fit_output.Function
 
    # Group the output workspaces from the sequential fit
-   GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace="Sequential_Fit_Workspaces")
-   GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace="Sequential_Fit_Parameters")
-   GroupWorkspaces(InputWorkspaces=normalised_matrices, OutputWorkspace="Sequential_Fit_NormalisedCovarianceMatrices")
+   GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=output_base_name + "Workspaces")
+   GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace=output_base_name + "Parameters")
+   GroupWorkspaces(InputWorkspaces=normalised_matrices, OutputWorkspace=output_base_name + "NormalisedCovarianceMatrices")
 
    # Plot the results of the fit
    fig, axes = plt.subplots(nrows=2,
@@ -88,10 +89,11 @@ Output:
                             gridspec_kw={"height_ratios": [2, 1]},
                             subplot_kw={"projection": "mantid"})
 
-   for i, workspace in enumerate(output_workspaces):
+   for i, workspace_name in enumerate(output_workspaces):
+       workspace = AnalysisDataService.retrieve(workspace_name)
        axes[0, i].errorbar(workspace, "rs", wkspIndex=0, label="Data", markersize=2)
        axes[0, i].errorbar(workspace, "b-", wkspIndex=1, label="Fit")
-       axes[0, i].set_title(workspace.name())
+       axes[0, i].set_title(workspace_name)
        axes[0, i].set_xlabel("")
        axes[0, i].tick_params(axis="both", direction="in")
        axes[0, i].legend()
@@ -122,7 +124,7 @@ Output:
     script_text = GeneratePythonFitScript(InputWorkspaces=["ws1", "ws1", "ws2", "ws2"], WorkspaceIndices=[0, 1, 0, 1],
                                           StartXs=[0.0, 0.0, 0.0, 0.0], EndXs=[20000.0, 20000.0, 20000.0, 20000.0],
                                           FittingType="Simultaneous", Function=function, MaxIterations=500,
-                                          Minimizer="Levenberg-Marquardt")
+                                          Minimizer="Levenberg-Marquardt", OutputBaseName="Output_Fit")
 
     print(script_text)
 
@@ -157,6 +159,7 @@ Output:
    minimizer = "Levenberg-Marquardt"
    cost_function = "Least squares"
    evaluation_type = "CentrePoint"
+   output_base_name = "Output_Fit"
 
    # Perform a simultaneous fit
    input_workspaces = list(input_data.keys())
@@ -169,9 +172,11 @@ Output:
            InputWorkspace_2=input_workspaces[2], WorkspaceIndex_2=domain_data[2][0], StartX_2=domain_data[2][1], EndX_2=domain_data[2][2],
            InputWorkspace_3=input_workspaces[3], WorkspaceIndex_3=domain_data[3][0], StartX_3=domain_data[3][1], EndX_3=domain_data[3][2],
            MaxIterations=max_iterations, Minimizer=minimizer, CostFunction=cost_function,
-           EvaluationType=evaluation_type, CreateOutput=True)
+           EvaluationType=evaluation_type, Output=output_base_name)
 
-   output_workspaces = fit_output.OutputWorkspace
+   output_workspaces = []
+   for i in range(len(input_workspaces)):
+       output_workspaces.append(output_base_name + "_Workspace_" + str(i))
 
    # Plot the results of the fit
    fig, axes = plt.subplots(nrows=2,
@@ -180,10 +185,11 @@ Output:
                             gridspec_kw={"height_ratios": [2, 1]},
                             subplot_kw={"projection": "mantid"})
 
-   for i, workspace in enumerate(output_workspaces):
+   for i, workspace_name in enumerate(output_workspaces):
+       workspace = AnalysisDataService.retrieve(workspace_name)
        axes[0, i].errorbar(workspace, "rs", wkspIndex=0, label="Data", markersize=2)
        axes[0, i].errorbar(workspace, "b-", wkspIndex=1, label="Fit")
-       axes[0, i].set_title(workspace.name())
+       axes[0, i].set_title(workspace_name)
        axes[0, i].set_xlabel("")
        axes[0, i].tick_params(axis="both", direction="in")
        axes[0, i].legend()

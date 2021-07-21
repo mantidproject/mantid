@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtWidgets/Common/BasicFitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/FitScriptOptionsBrowser.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -15,15 +15,15 @@
 
 using namespace MantidQt::MantidWidgets;
 
-class BasicFitOptionsBrowserTest : public CxxTest::TestSuite {
+class FitScriptOptionsBrowserTest : public CxxTest::TestSuite {
 
 public:
-  BasicFitOptionsBrowserTest() { Mantid::API::FrameworkManager::Instance(); }
+  FitScriptOptionsBrowserTest() { Mantid::API::FrameworkManager::Instance(); }
 
-  static BasicFitOptionsBrowserTest *createSuite() { return new BasicFitOptionsBrowserTest; }
-  static void destroySuite(BasicFitOptionsBrowserTest *suite) { delete suite; }
+  static FitScriptOptionsBrowserTest *createSuite() { return new FitScriptOptionsBrowserTest; }
+  static void destroySuite(FitScriptOptionsBrowserTest *suite) { delete suite; }
 
-  void setUp() override { m_fitOptionsBrowser = std::make_unique<BasicFitOptionsBrowser>(nullptr); }
+  void setUp() override { m_fitOptionsBrowser = std::make_unique<FitScriptOptionsBrowser>(nullptr); }
 
   void tearDown() override { m_fitOptionsBrowser.reset(); }
 
@@ -34,7 +34,7 @@ public:
      * happen once every 100-200 attempts to instantiate this class.
      */
     for (auto i = 0u; i < 100u; ++i)
-      m_fitOptionsBrowser = std::make_unique<BasicFitOptionsBrowser>(nullptr);
+      m_fitOptionsBrowser = std::make_unique<FitScriptOptionsBrowser>(nullptr);
   }
 
   void test_that_the_BasicFitOptionsBrowser_is_instantiated_with_the_expected_default_properties() {
@@ -112,5 +112,5 @@ public:
   }
 
 private:
-  std::unique_ptr<BasicFitOptionsBrowser> m_fitOptionsBrowser;
+  std::unique_ptr<FitScriptOptionsBrowser> m_fitOptionsBrowser;
 };
