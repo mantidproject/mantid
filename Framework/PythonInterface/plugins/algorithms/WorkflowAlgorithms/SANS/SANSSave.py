@@ -117,11 +117,11 @@ class SANSSave(DataProcessorAlgorithm):
             progress.report(progress_message)
             try:
                 save_to_file(workspace, file_format, file_name, transmission_workspaces, additional_run_numbers)
-            except (RuntimeError, ValueError):
+            except (RuntimeError, ValueError) as e:
                 logger.warning(f"Cannot save workspace using SANSSave. "
                                "This workspace needs to be the result of a SANS reduction, "
-                               "i.e. it can only be 1D or 2D if the second axis "
-                               "is numeric.")
+                               "and must be appropriate for saving 1D or 2D reduced data.")
+                raise e
         progress.report("Finished saving workspace to files.")
 
     def validateInputs(self):

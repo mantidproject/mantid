@@ -13,7 +13,8 @@ New
 ---
 
 - :ref:`SANSILLIntegration <algm-SANSILLIntegration>` has new resolution calculation option alternative to Mildner-Carpenter based on fitting horizontal size of direct beam. The fitting is handled in :ref:`SANSILLReduction <algm-SANSILLReduction>` while processing beam.
-
+- ISIS SANS GUI will automatically toggle between Can SAS and NXS Can SAS when switching between 1D and 2D reductions.
+  If you have toggled any save options it will not update the selected methods until the interface is restarted to avoid interfering with the user's save selection.
 
 Bugfixes
 --------
