@@ -376,9 +376,4 @@ class FittingDataModel(object):
     @staticmethod
     def _generate_workspace_name(filepath):
         wsname = path.splitext(path.split(filepath)[1])[0]
-        # remove unit from fname if present as will convert unit to xunit in combo box temporarily until it is removed
-        # Once combo box removed we can get unit from workspace post-loading (and call RenameWorkspace)
-        #if wsname.endswith('_TOF') or wsname.endswith('_dSpacing'):
-        #    wsname = '_'.join(wsname.split('_')[0:-1])
-        #return wsname + '_' + xunit
         return wsname
