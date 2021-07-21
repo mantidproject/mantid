@@ -52,6 +52,19 @@ class DrillViewTest(unittest.TestCase):
         c3.close.assert_not_called()
         self.mPresenter.return_value.onClose.assert_called_once()
 
+    def test_changeCycleOrExperiment(self):
+        self.view.cycleAndExperimentChanged = mock.Mock()
+        self.view.cycleNumber = mock.Mock()
+        self.view.cycleNumber.text.return_value = "cycle1"
+        self.view.experimentId = mock.Mock()
+        self.view.experimentId.text.return_value = ""
+        self.view._changeCycleOrExperiment()
+        self.view.cycleAndExperimentChanged.assert_not_called()
+        self.view.experimentId.text.return_value = "exp1"
+        self.view._changeCycleOrExperiment()
+        self.view.cycleAndExperimentChanged.emit \
+            .assert_called_once_with("cycle1", "exp1")
+
     def test_copySelectedCells(self):
         # no selection
         self.view.table.getSelectedCells.return_value = []
@@ -196,7 +209,6 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.getLastSelectedRow.return_value = 0
         self.view.addRowAfter()
         self.mPresenter.return_value.onRowAdded.assert_called_once_with(1)
-        pass
 
     def test_addRowsAdter(self):
         self.view.table.getLastSelectedRow.return_value = 0
@@ -215,20 +227,6 @@ class DrillViewTest(unittest.TestCase):
         self.view.del_selected_rows()
         calls = [mock.call(2), mock.call(1), mock.call(0)]
         self.view.table.deleteRow.assert_has_calls(calls)
-
-    def test_updateLabelsFromGroups(self):
-        self.view.table.rowCount.return_value = 6
-        groups = {'A': {1, 2, 3},
-                  'B': {5, 6}}
-        masters = {'B': 6}
-        self.view.updateLabelsFromGroups(groups, masters)
-        self.view.table.delRowLabel.assert_called()
-        calls = [mock.call(1, "A1", False, "This row belongs to the sample group A"),
-                 mock.call(2, "A2", False, "This row belongs to the sample group A"),
-                 mock.call(3, "A3", False, "This row belongs to the sample group A"),
-                 mock.call(5, "B1", False, "This row belongs to the sample group B"),
-                 mock.call(6, "B2", True,  "This is the master row of the group B")]
-        self.view.table.setRowLabel.assert_has_calls(calls)
 
     def test_keyPressEvent(self):
         self.view.copySelectedCells = mock.Mock()
@@ -260,6 +258,12 @@ class DrillViewTest(unittest.TestCase):
         self.view.show_directory_manager()
         self.mUserDir.ManageUserDirectories.assert_called_once()
 
+    def test_setInstrument(self):
+        self.view.instrumentselector = mock.Mock()
+        self.view.setInstrument("i1")
+        self.view.instrumentselector.setCurrentText \
+            .assert_called_once_with("i1")
+
     def test_setAvailableModes(self):
         self.view.modeSelector = mock.Mock()
         self.view.set_available_modes(["test", "test"])
@@ -273,6 +277,12 @@ class DrillViewTest(unittest.TestCase):
         self.view.modeSelector.setCurrentText.assert_called_once_with(
                 "test")
 
+    def test_getAcquisitionMode(self):
+        self.view.modeSelector = mock.Mock()
+        self.view.modeSelector.currentText.return_value = "mode"
+        mode = self.view.getAcquisitionMode()
+        self.assertEqual(mode, "mode")
+
     def test_setCycleAndExperiment(self):
         self.view.setCycleAndExperiment("test1", "test2")
         self.assertEqual(self.view.cycleNumber.text(), "test1")
@@ -281,25 +291,6 @@ class DrillViewTest(unittest.TestCase):
     def test_setTable(self):
         self.view.set_table(["test", "test"])
         self.view.table.setColumnCount.assert_called_with(2)
-
-    def test_getSelectedRows(self):
-        self.view.table.getSelectedRows.return_value = [0, 2]
-        rows = self.view.getSelectedRows()
-        self.assertEqual(rows, [0, 2])
-        self.view.table.getSelectedRows.return_value = []
-        self.view.table.getRowsFromSelectedCells.return_value = [1, 3]
-        rows = self.view.getSelectedRows()
-        self.assertEqual(rows, [1, 3])
-
-    def test_getAllRows(self):
-        self.view.table.getAllRows.return_value = [0, 1, 4]
-        rows = self.view.getAllRows()
-        self.assertEqual(rows, [0, 1, 4])
-
-    def test_getCellContents(self):
-        self.view.columns = ["test", "test1", "test2"]
-        self.view.getCellContents(1, "test2")
-        self.view.table.getCellContents.assert_called_once_with(1, 2)
 
     def test_setProgress(self):
         self.view.set_progress(0, 100)
@@ -313,22 +304,6 @@ class DrillViewTest(unittest.TestCase):
         # only visual. here we just go through the function
         self.view.set_disabled(True)
         self.view.set_disabled(False)
-
-    def test_unsetRowBackground(self):
-        self.view.unsetRowBackground(0)
-        self.view.table.removeRowBackground.assert_called_once_with(0)
-
-    def test_setRowProcessing(self):
-        self.view.setRowProcessing(0)
-        self.view.table.setRowBackground.assert_called_once()
-
-    def test_setRowDone(self):
-        self.view.setRowDone(0)
-        self.view.table.setRowBackground.assert_called_once()
-
-    def test_setRowError(self):
-        self.view.setRowError(0)
-        self.view.table.setRowBackground.assert_called_once()
 
     def test_setVisualSettings(self):
         self.view.columns = ["test"]
