@@ -10,7 +10,8 @@
 #   4. ENABLE_DEV_DOCS: build the user docs
 #   5. ENABLE_BUILD_CODE: whether or not to build the main code target
 #   6. ENABLE_UNIT_TESTS: whether or not to build the unit tests target
-#   7. EXTRA_CMAKE_FLAGS: Extra flags to pass directly to cmake, enclose in "".
+#   7. ENABLE_SYSTEM_TESTS: whether or not to build the system test data
+#   8. EXTRA_CMAKE_FLAGS: Extra flags to pass directly to cmake, enclose in "".
 
 WORKSPACE=$1
 CMAKE_PRESET=$2
@@ -18,7 +19,8 @@ ENABLE_DOCS=$3
 ENABLE_DEV_DOCS=$4
 ENABLE_BUILD_CODE=$5
 ENABLE_UNIT_TESTS=$6
-EXTRA_CMAKE_FLAGS=$7
+ENABLE_SYSTEM_TESTS=$7
+EXTRA_CMAKE_FLAGS=$8
 
 # Only pass MANTID_DATA_STORE to CMake if present in the environment otherwise rely on CMake default
 if [![ -z "$MANTID_DATA_STORE" ]]; then
@@ -28,7 +30,7 @@ fi
 # Run CMake using preset and variables ${DIST_FLAGS} is from the environment
 cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${DIST_FLAGS} ${EXTRA_CMAKE_FLAGS} $WORKSPACE
 
-# Run the actual build of
+# Run the actual builds for the code, unit tests, and system tests.
 cd $WORKSPACE/build
 if [[ $ENABLE_BUILD_CODE == true ]]; then
     cmake --build .
@@ -36,6 +38,11 @@ fi
 
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
     cmake --build . --target AllTests
+fi
+
+if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
+    cmake --build . --target StandardTestData
+    cmake --build . --target SystemTestData
 fi
 
 # Build docs

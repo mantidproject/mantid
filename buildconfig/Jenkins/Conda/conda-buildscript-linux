@@ -106,10 +106,11 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 if ${SCRIPT_DIR}/../check_for_changes dev-docs-only || ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
     ENABLE_BUILD_CODE=false
     ENABLE_UNIT_TESTS=false
+    ENABLE_SYSTEM_TESTS=false
 fi
 
 # Run the script that handles the actual building
-$SCRIPT_DIR/build $WORKSPACE $ENABLE_SYSTEM_TESTS $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $EXTRA_CMAKE_FLAGS
+$SCRIPT_DIR/build $WORKSPACE $ENABLE_SYSTEM_TESTS $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $EXTRA_CMAKE_FLAGS
 
 # Clean up prior to testing
 # Prevent race conditions when creating the user config directory

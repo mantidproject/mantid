@@ -62,5 +62,6 @@ if [[ ENABLE_UNIT_TESTS == true ]]; then
 fi
 
 if [[ ENABLE_SYSTEM_TESTS == true ]]; then
-    $WORKSPACE/buildconfig/Jenkins/systemtests
+    run_with_xvfb $WORKSPACE/systemtest
+    terminate_xvfb_sessions
 fi
