@@ -46,7 +46,7 @@ class DrillRundexIO:
         """
         return self._filename
 
-    def load(self):
+    def load(self):  # noqa
         """
         Import data and set the associated model.
         """
@@ -88,7 +88,7 @@ class DrillRundexIO:
         if (RundexSettings.SETTINGS_JSON_KEY in json_data):
             settings = json_data[RundexSettings.SETTINGS_JSON_KEY]
             parameters = drill.getParameters()
-            for parameter in drill.getParameters():
+            for parameter in parameters:
                 if parameter.getName() in settings:
                     parameter.setValue(settings[parameter.getName()])
         else:
