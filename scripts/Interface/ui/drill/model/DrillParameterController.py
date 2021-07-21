@@ -89,5 +89,5 @@ class DrillParameterController(threading.Thread):
                     p.setValidationState(True)
                 except Exception as e:
                     p.setValidationState(False, str(e))
-            except Exception as e:
+            except Exception:
                 pass
