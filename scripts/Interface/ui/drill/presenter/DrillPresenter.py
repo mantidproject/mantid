@@ -439,6 +439,9 @@ class DrillPresenter:
             return False
 
     def _syncViewHeader(self):
+        """
+        Synchronize the drill header with the model.
+        """
         availableModes = self.model.getAvailableAcquisitionModes()
         instrument = self.model.getInstrument()
         acquisitionMode = self.model.getAcquisitionMode()
