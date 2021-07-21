@@ -8,9 +8,6 @@
 import unittest
 from unittest import mock
 
-from mantid.kernel import *
-from mantid.api import *
-
 from Interface.ui.drill.model.DrillModel import DrillModel
 
 
