@@ -212,10 +212,10 @@ class DrillModelTest(unittest.TestCase):
         self.model.samples = [s0, s1]
         self.model._getSamplesFromGroup = mock.Mock()
         self.model._getSamplesFromGroup.return_value = [s0, s1]
-        self.model.setGroupMaster(0)
+        self.model.setGroupMaster(0, True)
         s0.setMaster.assert_called_once_with(True)
         s1.setMaster.assert_called_once_with(False)
-        self.model.setGroupMaster(1)
+        self.model.setGroupMaster(1, True)
         s2.setMaster.assert_not_called()
 
     def test_getProcessingParameters(self):
