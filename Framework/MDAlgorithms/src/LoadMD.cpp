@@ -45,7 +45,7 @@ using file_holder_type = std::unique_ptr<Mantid::DataObjects::BoxControllerNeXus
 
 namespace Mantid::MDAlgorithms {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMD)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -61,15 +61,15 @@ LoadMD::LoadMD()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
-  int confidence(0);
-  const auto &rootPathNameType = descriptor.firstEntryNameType();
-  if (rootPathNameType.second != "NXentry")
-    return 0;
-  if (descriptor.pathExists("/MDEventWorkspace") || descriptor.pathExists("/MDHistoWorkspace")) {
-    return 95;
-  } else
-    return 0;
+int LoadMD::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+  int confidence = 0;
+  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
+  if (allEntries.count("NXentry") == 1) {
+    if (descriptor.isEntry("/MDEventWorkspace") || descriptor.isEntry("/MDHistoWorkspace")) {
+      confidence = 95;
+    }
+  }
+
   return confidence;
 }
 
@@ -109,7 +109,7 @@ void LoadMD::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void LoadMD::exec() {
+void LoadMD::execLoader() {
   m_filename = getPropertyValue("Filename");
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // Start loading
