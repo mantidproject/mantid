@@ -163,27 +163,27 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(state_reduction.merge_fit_mode, FitModeForMerge.BOTH)
 
     def test_detector_parsed(self):
-        top_level_dict = {"detector": {"calibration": {"direct": {},
+        top_level_dict = {"detector": {"correction": {"direct": {},
                                                        "flat": {},
                                                        "tube": {},
                                                        "position": {}},
                                        "radius_limit": {"min": None,
                                                         "max": None}}}
 
-        calibration_dict = top_level_dict["detector"]["calibration"]
+        correction_dict = top_level_dict["detector"]["correction"]
 
         direct_front = mock.NonCallableMock()
         direct_rear = mock.NonCallableMock()
-        calibration_dict["direct"]["front_file"] = direct_front
-        calibration_dict["direct"]["rear_file"] = direct_rear
+        correction_dict["direct"]["front_file"] = direct_front
+        correction_dict["direct"]["rear_file"] = direct_rear
 
         flat_front = mock.NonCallableMock()
         flat_rear = mock.NonCallableMock()
-        calibration_dict["flat"]["front_file"] = flat_front
-        calibration_dict["flat"]["rear_file"] = flat_rear
+        correction_dict["flat"]["front_file"] = flat_front
+        correction_dict["flat"]["rear_file"] = flat_rear
 
         tube_file = mock.NonCallableMock()
-        calibration_dict["tube"]["file"] = tube_file
+        correction_dict["tube"]["file"] = tube_file
 
         radius_limit = top_level_dict["detector"]["radius_limit"]
         radius_limit["min"] = 100
@@ -210,9 +210,9 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(100, mask.radius_min)
         self.assertEqual(200, mask.radius_max)
 
-    def test_detector_calibration_position(self):
-        top_level_dict = {"detector": {"calibration": {"position": {}}}}
-        position_dict = top_level_dict["detector"]["calibration"]["position"]
+    def test_detector_correction_position(self):
+        top_level_dict = {"detector": {"correction": {"position": {}}}}
+        position_dict = top_level_dict["detector"]["correction"]["position"]
 
         for adjustment in ["_x", "_y", "_z", "_rot", "_radius", "_side", "_x_tilt", "_y_tilt", "_z_tilt"]:
             position_dict["front" + adjustment] = mock.NonCallableMock()

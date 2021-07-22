@@ -60,7 +60,7 @@ class TomlSchemaV1Validator(object):
                                            "rear_scale": None,
                                            "front_centre": {"x", "y", "z"},
                                            "rear_centre": {"x", "y", "z"}},
-                         "calibration": {"direct": {"front_file", "rear_file"},
+                         "correction": {"direct": {"front_file", "rear_file"},
                                          "flat": {"front_file", "rear_file"},
                                          "tube": {"file"},
                                          "position": {"front_x", "front_y", "front_z",

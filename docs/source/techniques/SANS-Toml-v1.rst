@@ -1193,4 +1193,13 @@ TUBECALIBFILE=str
   [detector.calibration.tube]
     file = "Tube.nxs"
 
+Format Changes
+==============
+
+V0 to V1
+--------
+
+- *normalisation* and *normalization* are both accepted
+- *detector.calibration* was renamed to *detector.correction*
+
 .. categories:: Techniques

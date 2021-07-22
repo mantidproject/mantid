@@ -182,18 +182,18 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.mask.radius_min = self.get_val(["radius_limit", "min"], detector_dict)
         self.mask.radius_max = self.get_val(["radius_limit", "max"], detector_dict)
 
-        calibration_dict = self.get_val("calibration", detector_dict)
+        correction_dict = self.get_val("correction", detector_dict)
 
         lab_adjustment = self.wavelength_and_pixel.adjustment_files[DetectorType.LAB.value]
         hab_adjustment = self.wavelength_and_pixel.adjustment_files[DetectorType.HAB.value]
 
-        lab_adjustment.wavelength_adjustment_file = self.get_val(["direct", "rear_file"], calibration_dict)
-        hab_adjustment.wavelength_adjustment_file = self.get_val(["direct", "front_file"], calibration_dict)
+        lab_adjustment.wavelength_adjustment_file = self.get_val(["direct", "rear_file"], correction_dict)
+        hab_adjustment.wavelength_adjustment_file = self.get_val(["direct", "front_file"], correction_dict)
 
-        lab_adjustment.pixel_adjustment_file = self.get_val(["flat", "rear_file"], calibration_dict)
-        hab_adjustment.pixel_adjustment_file = self.get_val(["flat", "front_file"], calibration_dict)
+        lab_adjustment.pixel_adjustment_file = self.get_val(["flat", "rear_file"], correction_dict)
+        hab_adjustment.pixel_adjustment_file = self.get_val(["flat", "front_file"], correction_dict)
 
-        self.adjustment.calibration = self.get_val(["tube", "file"], calibration_dict)
+        self.adjustment.calibration = self.get_val(["tube", "file"], correction_dict)
 
         name_attr_pairs = {"_x": "x_translation_correction",
                            "_y": "y_translation_correction",
@@ -205,7 +205,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
                            "_y_tilt": "y_tilt_correction",
                            "_z_tilt": "z_tilt_correction"}
 
-        position_dict = self.get_val("position", calibration_dict)
+        position_dict = self.get_val("position", correction_dict)
         lab_move = self.move.detectors[DetectorType.LAB.value]
         # Some detectors do not have HAB
         hab_move = self.move.detectors.get(DetectorType.HAB.value, None)
