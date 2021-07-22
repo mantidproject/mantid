@@ -684,19 +684,19 @@ void LoadRawHelper::runLoadLog(const std::string &fileName, const DataObjects::W
   for (logPath = logFiles.begin(); logPath != logFiles.end(); ++logPath) {
     // check for log files we should just ignore
     std::string statusSuffix = "ICPstatus.txt";
-    if (boost::algorithm::ends_with(*logPath, statusSuffix)) {
+    if (boost::algorithm::iends_with(*logPath, statusSuffix)) {
       g_log.information("Skipping log file: " + *logPath);
       continue;
     }
 
     std::string debugSuffix = "ICPdebug.txt";
-    if (boost::algorithm::ends_with(*logPath, debugSuffix)) {
+    if (boost::algorithm::iends_with(*logPath, debugSuffix)) {
       g_log.information("Skipping log file: " + *logPath);
       continue;
     }
 
     std::string alarmSuffix = "ICPalarm.txt";
-    if (boost::algorithm::ends_with(*logPath, alarmSuffix)) {
+    if (boost::algorithm::iends_with(*logPath, alarmSuffix)) {
       if (Mantid::Kernel::FileDescriptor::isEmpty(*logPath)) {
         g_log.information("Skipping empty log file: " + *logPath);
         continue;
