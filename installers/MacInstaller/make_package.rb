@@ -27,19 +27,6 @@ BUNDLED_PY_MODULES_COMMON = [
   'wheel',
   'wheel*.*-info'
 ].freeze
-# Brew Python packages to be copied to bundle
-BUNDLED_PY_MODULES_MANTIDPLOT = [
-  'PyQt4/__init__.py',
-  'PyQt4/Qt.so',
-  'PyQt4/QtCore.so',
-  'PyQt4/QtGui.so',
-  'PyQt4/QtOpenGL.so',
-  'PyQt4/QtSql.so',
-  'PyQt4/QtSvg.so',
-  'PyQt4/QtXml.so',
-  'PyQt4/sip.so',
-  'PyQt4/uic'
-].freeze
 BUNDLED_PY_MODULES_WORKBENCH = [
   'PyQt5/__init__.py',
   'PyQt5/Qt.*so',
@@ -83,7 +70,6 @@ DEBUG = 1
 FRAMEWORK_IDENTIFIER = '.framework'
 HOMEBREW_PREFIX = '/usr/local'
 MANTID_PY_SO = ['_api.so', '_geometry.so', '_kernel.so'].freeze
-QT4_PLUGINS_DIR = Pathname.new('/usr/local/opt/qt@4/lib/qt4/plugins')
 QT_PLUGINS_COMMON = ['imageformats', 'sqldrivers', 'iconengines'].freeze
 QT_PLUGINS_BLACKLIST = ['libqsqlpsql.dylib'].freeze
 QT_CONF = '[Paths]
@@ -611,13 +597,8 @@ if bundle_path.to_s.include?('MantidWorkbench')
   bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'printsupport', 'styles']
   host_qt_plugins_dir = host_qt_prefix + 'plugins'
   executables << "#{contents_macos}/#{bundle_path.basename.to_s.split('.')[0]}"
-elsif bundle_path.to_s.include?('MantidPlot')
-  bundled_packages += BUNDLED_PY_MODULES_MANTIDPLOT
-  bundled_qt_plugins = QT_PLUGINS_COMMON
-  host_qt_plugins_dir = QT4_PLUGINS_DIR
-  executables << "#{contents_macos}/MantidPlot"
 else
-  fatal("Unknown bundle type #{bundle_path}. Expected MantidPlot.app or MantidWorkbench.app.")
+  fatal("Unknown bundle type #{bundle_path}. Expected MantidWorkbench.app.")
 end
 
 # We start with the assumption CMake has installed all required target libraries/executables
