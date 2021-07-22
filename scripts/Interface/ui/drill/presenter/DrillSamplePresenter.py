@@ -48,7 +48,7 @@ class DrillSamplePresenter:
         if name == self.CUSTOM_OPTIONS:
             DrillParametersPresenter(self._table, item, self._sample)
         else:
-            parameter = self._sample.addParameter(name)
+            self._sample.addParameter(name)
         self._table.setWindowModified(True)
 
     def onNewParameter(self, parameter):
