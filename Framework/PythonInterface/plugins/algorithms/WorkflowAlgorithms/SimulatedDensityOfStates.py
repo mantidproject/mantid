@@ -11,6 +11,8 @@ import os.path
 import math
 from collections import OrderedDict
 
+import scipy.constants
+
 from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as s_api
