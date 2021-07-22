@@ -451,7 +451,11 @@ public:
   }
 
   void testEventWksp_filterResonance() {
-    // Setup the event workspace
+
+    /* Create fake event data in an event workspace */
+    /* fake data is the "Powder Diffraction" composite function from
+     * CreateSampleWorkspace.cpp: a series
+     * of 9 Gaussians, the 9th Gaussian is the tallest. */
     setUp_EventWorkspace("EventWksp_filterResonance");
 
     // Set the inputs for doTestEventWksp
@@ -460,22 +464,146 @@ public:
     m_useResamplex = true;
     addFrequencyForLogs();
 
-    // string representation of the parameters - arbitrary position
-    m_filterResonanceLower = ".1";
-    m_filterResonanceUpper = ".2";
-
-    // Run the main test function
-    doTestEventWksp();
-
-    // Reset inputs to default values
+    /* Run 0: produces the aligned and focused output workspace with no wavelength ranges
+     * filtered out: */
     m_filterResonanceLower = "";
     m_filterResonanceUpper = "";
 
-    // Test the input
-    docheckEventInputWksp();
-    AnalysisDataService::Instance().remove(m_inputWS);
+    /* Run AlignAndFocus */
+    doTestEventWksp();
 
-    // Test the output
+    TS_ASSERT_EQUALS(m_outWS->getNumberHistograms(), 144);
+
+    /* Run ConvertUnits */
+    /*
+    ConvertUnits convert_units;
+    convert_units.initialize();
+    convert_units.setPropertyValue("InputWorkspace", m_outputWS );
+    convert_units.setPropertyValue("OutputWorkspace", m_outputWS );
+    convert_units.setPropertyValue("Target", "Wavelength");
+    convert_units.execute();
+    */
+
+    /* get the raw output data */
+    //const std::vector< double > &y0 = m_outWS->y(0).rawData();
+    const auto &y0 = m_outWS->y(0);
+    const std::vector< double > &x0 = m_outWS->x(0).rawData();
+
+    /* find the index of the max element */
+    /* note warning */
+    const auto index_0 = std::distance( y0.cbegin(),
+                                        std::max_element( y0.cbegin(), y0.cend() ) );
+
+    /* print out the max element */
+    double x_max_0 = x0[ index_0 ];
+    double y_max_0 = y0[ index_0 ];
+
+    std::cout << "Ahoy, Captain! Before: " << std::endl;
+
+    /* y-value at this index should be 232 in the unfiltered and 0 in the filtered */
+    /* x-value at this index should be 1.36189937... */
+    int peak_2_index = 286; 
+    double peak_2_x_unfiltered = x0[ peak_2_index ];
+    double peak_2_y_unfiltered = y0[ peak_2_index ];
+
+    std::cout << "Ahoy, Captain! peak_2: ( " << peak_2_x_unfiltered << ", " 
+              << peak_2_y_unfiltered << " )" << std::endl;
+
+    /* x-value at this index: 2.65263236 */
+    /* y-value at this index: 849.0 */
+    int peak_5_index = 353;
+    double peak_5_x_unfiltered = x0[ peak_5_index ];
+    double peak_5_y_unfiltered = y0[ peak_5_index ];
+    std::cout << "Ahoy, Captain! peak_5: ( " << peak_5_x_unfiltered << ", " 
+              << peak_5_y_unfiltered << " )" << std::endl;
+
+    /* Print out the workspace */
+    /* Captain! */
+    std::cout << "unfiltered workspace:" << std::endl;
+    for( int i = 0; i < x0.size(); ++i )
+    {
+      std::cout << "( " << x0[ i ] << ", " << y0[ i ] << " )" << std::endl;
+    }
+    std::cout << std::endl;
+
+    /* cleanup */
+    AnalysisDataService::Instance().remove(m_outputWS);
+
+    /* Run 1: produces the aligned and focused output workspace with the wavelenth range
+       containing the max filtered out */
+    /* Empirically determined wavelength range known to contain the tallest Gaussian "peak" */
+    /* ...looks like this worked... */
+    m_filterResonanceLower = "3.7";
+    m_filterResonanceUpper = "4.2";
+
+    /* now seems like there is a workspace leak... go ahead and see if you can remove it here */
+
+    /* Run AlignAndFocus */
+    doTestEventWksp();
+
+    /*
+    ConvertUnits convert_units_1;
+    convert_units_1.initialize();
+    convert_units_1.setPropertyValue("InputWorkspace", m_outputWS );
+    convert_units_1.setPropertyValue("OutputWorkspace", m_outputWS );
+    convert_units_1.setPropertyValue("Target", "Wavelength");
+    convert_units_1.execute();
+    */
+
+    /* obtain raw data and print it out: */
+    /* Question: is it the same exact reference as x0/y0 above? I figure so...? What vector
+     * operations invalidate references? */
+    const std::vector< double > &y1 = m_outWS->y(0).rawData();
+    const std::vector< double > &x1 = m_outWS->x(0).rawData();
+    int index_1 = std::distance( y1.begin(), std::max_element( y1.begin(), y1.end() ) );
+
+    double x_max_1 = x1[ index_1 ];
+    double y_max_1 = y1[ index_1 ];
+
+    TS_ASSERT( x_max_1 < x_max_0 );
+    TS_ASSERT( y_max_1 < y_max_0 );
+
+    AnalysisDataService::Instance().remove(m_outputWS);
+
+    /* show that the max peak was removed by showing the new max is less than the old one and
+       located closer to zero */
+    /* Run 2: produces the aligned and focused output workspace with the xth and yth peaks
+     * filtered out: the indices they occupied should now contain zero: */
+    /* How do you specify an array property in a string?? Do you create a vector of strings? */
+    /* If so, the filter resonance member variable will have to be changed I think? */
+    /* will it work to just make it comma separated? Idk... */
+    m_filterResonanceLower = "1.0, 1.5";
+    m_filterResonanceUpper = "2.4, 2.9";
+
+    /* Run AlignAndFocus */
+    doTestEventWksp();
+
+    /*
+    ConvertUnits convert_units_2;
+    convert_units_2.initialize();
+    convert_units_2.setPropertyValue("InputWorkspace", m_outputWS );
+    convert_units_2.setPropertyValue("OutputWorkspace", m_outputWS );
+    convert_units_2.setPropertyValue("Target", "Wavelength");
+    convert_units_2.execute();
+    */
+
+    const std::vector< double > &y2 = m_outWS->y(0).rawData();
+    const std::vector< double > &x2 = m_outWS->x(0).rawData();
+
+    peak_2_x_unfiltered = x2[ peak_2_index ];
+    peak_2_y_unfiltered = y2[ peak_2_index ];
+    peak_5_x_unfiltered = x2[ peak_5_index ];
+    peak_5_y_unfiltered = y2[ peak_5_index ];
+    std::cout << "Ahoy, Captain! After" << std::endl;
+    std::cout << "Ahoy, Captain! peak_2: ( " << peak_2_x_unfiltered << ", " 
+              << peak_2_y_unfiltered << " )" << std::endl;
+    std::cout << "Ahoy, Captain! peak_5: ( " << peak_5_x_unfiltered << ", " 
+              << peak_5_y_unfiltered << " )" << std::endl;
+
+    /* Check the input workspace here for some reason otherwise segfault */
+    docheckEventInputWksp();
+
+    /* check the output - the final peak should be removed */
     TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
     TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
     // TODO just copied value from a failed run - should look for where the events should have been filtered out
@@ -483,7 +611,14 @@ public:
     // TODO from `testEventWksp_preserveEvents_removePromptPulse`
     TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
     TS_ASSERT_EQUALS(m_outWS->y(0)[599], 277.);
+
+    /* remove trashed workspaces */
+    AnalysisDataService::Instance().remove(m_inputWS);
     AnalysisDataService::Instance().remove(m_outputWS);
+
+    /* reset state variables for future tests... */
+    m_filterResonanceLower = "";
+    m_filterResonanceUpper = "";
   }
 
   void testEventWksp_preserveEvents_compressStartTime() {
@@ -595,6 +730,7 @@ public:
 
   /* Setup for event data. The caller supplies the workspace name */
 
+  /* Captain! */
   void setUp_EventWorkspace(const std::string &wkspname) {
     m_inputWS = wkspname;
     CreateSampleWorkspace createSampleAlg;
@@ -650,6 +786,7 @@ public:
     TS_ASSERT_EQUALS(m_inWS->y(0)[89], 1524);
   }
 
+  /* Captain! */
   void doTestEventWksp() {
     // Bin events using either ResampleX or Rebin
     int inputHistoBins{100};
