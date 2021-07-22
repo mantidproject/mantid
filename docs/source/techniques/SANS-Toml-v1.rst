@@ -82,7 +82,8 @@ BACK/M[n]/TIMES x y
 
 ..  code-block:: none
 
-    [normalization]
+    # Note: both "normalisation" and "normalization" are both accepted
+    [normalisation]
       [normalisation.monitor.Mn]
         spectrum_number = n
         background = [x, y]

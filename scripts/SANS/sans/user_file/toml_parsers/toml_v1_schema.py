@@ -112,6 +112,7 @@ class TomlSchemaV1Validator(object):
                 "mask": mask_keys,
                 "instrument": instrument_keys,
                 "normalisation": normalisation_keys,
+                "normalization": normalisation_keys,  # Accept both forms
                 "q_resolution": q_resolution_keys,
                 "reduction": reduction_keys,
                 "transmission": transmission_keys

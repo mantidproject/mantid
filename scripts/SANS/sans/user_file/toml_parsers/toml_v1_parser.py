@@ -367,8 +367,10 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
     def _parse_normalisation(self):
         normalisation_dict = self.get_val("normalisation")
-        selected_monitor = self.get_val("selected_monitor", normalisation_dict)
+        if not normalisation_dict:
+            normalisation_dict = self.get_val("normalization")
 
+        selected_monitor = self.get_val("selected_monitor", normalisation_dict)
         if not normalisation_dict or not selected_monitor:
             return
 

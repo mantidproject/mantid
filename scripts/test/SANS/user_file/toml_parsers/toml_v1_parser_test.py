@@ -325,6 +325,19 @@ class TomlV1ParserTest(unittest.TestCase):
         fitting_dict["enabled"] = False
         self.assertIsNotNone(self._setup_parser(top_level_dict))
 
+    def test_normalisation_normalization_both_accepted(self):
+        for norm_variant in "normalisation", "normalization":
+            norm_dict = {norm_variant: {"monitor": {"M1": {}, "A2": {}}, "selected_monitor": "M1"}}
+            monitor_dict = norm_dict[norm_variant]["monitor"]
+
+            m1_dict = monitor_dict["M1"]
+            m1_dict["background"] = [100, 200]
+            m1_dict["spectrum_number"] = 1
+
+            calc_transmission = self._setup_parser(norm_dict).get_state_calculate_transmission()
+            self.assertEqual({'1': 100}, calc_transmission.background_TOF_monitor_start)
+            self.assertEqual({'1': 200}, calc_transmission.background_TOF_monitor_stop)
+
     def test_parse_normalisation(self):
         # A2 is intentional to check were not hardcoded to Mx
         top_level_dict = {"normalisation": {"monitor": {"M1": {}, "A2": {}},
