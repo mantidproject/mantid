@@ -12,7 +12,9 @@ set (TEST_FILES
 
 add_library(Json ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Json ALIAS Json)
-target_link_libraries(Json PUBLIC ${JSONCPP_LIBRARIES})
+
+
+target_link_libraries(Json PUBLIC JsonCPP::jsoncpp)
 set_target_properties(Json PROPERTIES OUTPUT_NAME MantidJson)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -29,21 +31,30 @@ target_include_directories(Json PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
 	$<INSTALL_INTERFACE:include/Mantid>
 )
+message("BOOST LIBRARIEES ARE THESE ${Boost_LIBRARIES} JSON ARE ${JSONCPP_LIBRARIES}")
 
 # Add to the 'Framework' group in VS
 set_property(TARGET Json PROPERTY FOLDER "MantidFramework")
 
 # Auto-generate exports header
-target_include_directories(Json PUBLIC ${CMAKE_BINARY_DIR}/Framework/Json)
-target_include_directories(Json SYSTEM PUBLIC ${JSONCPP_INCLUDE_DIR})
+target_include_directories(Json PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Json>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
+
 generate_mantid_export_header(Json FALSE)
 
+
 # Installation settings
-mtd_install_dylib(TARGETS
-                    Json
-                    INSTALL_DIRS
-                    ${LIB_DIR}
-                    ${WORKBENCH_LIB_DIR})
+set(TARGET_EXPORT_NAME "MantidJsonTargets")
+mtd_install_dylib(TARGETS Json INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)
 
 if(CXXTEST_FOUND)
 

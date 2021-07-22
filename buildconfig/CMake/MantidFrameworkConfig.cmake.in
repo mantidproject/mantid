@@ -2,6 +2,9 @@
 
 @PACKAGE_INIT@
 
-include("${CMAKE_CURRENT_LIST_DIR}/MantidTypesTargets.cmake")
+include(CMakeFindDependencyMacro)
 
+
+include("${CMAKE_CURRENT_LIST_DIR}/MantidTypesTargets.cmake")
+find_dependency(Boost)
 check_required_components(MantidTypesTargets)

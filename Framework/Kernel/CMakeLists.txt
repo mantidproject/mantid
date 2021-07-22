@@ -514,6 +514,7 @@ set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
 target_link_libraries(Kernel
                       PUBLIC
                       Mantid::Types
+                      Mantid::Json
                       ${NEXUS_LIBRARIES}
                       Eigen3::Eigen
                       ${TBB_LIBRARIES}
@@ -524,7 +525,6 @@ target_link_libraries(Kernel
                       PRIVATE
                       ${NETWORK_LIBRARIES}
                       span
-                      Mantid::Json
                       )
 if(WIN32)
   target_link_libraries(Kernel PRIVATE Psapi.lib) # For memory usage
