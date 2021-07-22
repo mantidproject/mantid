@@ -111,6 +111,11 @@ bool FileDescriptor::isAscii(FILE *file, const size_t nbytes) {
  */
 bool FileDescriptor::isEmpty(const std::string &filename) {
   std::ifstream file(filename.c_str());
+
+  if (!file) {
+    throw std::invalid_argument("FileDescriptor::isEmpty() - Unable to open file '" + filename + "'");
+  }
+
   return file.peek() == std::ifstream::traits_type::eof();
 }
 

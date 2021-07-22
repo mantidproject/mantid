@@ -42,7 +42,8 @@ public:
       if (Poco::File(emptyFilePath).exists())
         m_emptyFilePath = emptyFilePath.toString();
 
-      if (!m_testNexusPath.empty() && !m_testNonNexusPath.empty() && !m_testAsciiPath.empty())
+      if (!m_testNexusPath.empty() && !m_testNonNexusPath.empty() && !m_testAsciiPath.empty() &&
+          !m_emptyFilePath.empty())
         break;
     }
     if (m_testNexusPath.empty() || m_testNonNexusPath.empty() || m_testAsciiPath.empty() || m_emptyFilePath.empty()) {
@@ -165,6 +166,11 @@ public:
 
   void test_Constructor_Throws_With_NonExistant_filename() {
     TS_ASSERT_THROWS(FileDescriptor("__ThisShouldBeANonExistantFile.txt"), const std::invalid_argument &);
+  }
+
+  void testIsEmptyThrowsForInaccessibleFileName() {
+    TS_ASSERT_THROWS(FileDescriptor::isEmpty(""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(FileDescriptor::isEmpty("__not_a_File.txt__"), const std::invalid_argument &);
   }
 
 private:
