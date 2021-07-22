@@ -9,7 +9,7 @@ import unittest
 from unittest import mock
 
 from Interface.ui.drill.model.DrillParameterController \
-        import DrillParameterController, DrillControllerSignals, DrillParameter
+        import DrillParameterController, DrillControllerSignals
 
 
 class DrillParameterControllerTest(unittest.TestCase):
