@@ -17,6 +17,7 @@ from functools import wraps
 from typing import Optional
 
 from mantidqt.utils.observer_pattern import GenericObserver
+from sans.user_file.toml_parsers.toml_v1_schema import TomlValidationError
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.sans_gui_observable import SansGuiObservable
@@ -394,7 +395,7 @@ class RunTabPresenter(PresenterCommon):
             # Always set the instrument to NoInstrument unless otherwise specified as our fallback
             user_file_items = FileLoading.load_user_file(file_path=user_file_path,
                                                          file_information=self._file_information)
-        except UserFileLoadException as e:
+        except (UserFileLoadException, TomlValidationError) as e:
             # It is in this exception block that loading fails if the file is invalid (e.g. a csv)
             self._on_user_file_load_failure(e, error_msg + " when reading file.", use_error_name=True)
             return

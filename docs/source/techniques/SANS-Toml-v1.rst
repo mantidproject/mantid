@@ -683,7 +683,7 @@ L/WAV min max step [/LIN]
     [binning]
       # Only for "Lin", "Log"
       wavelength = {start = 2.0, step=0.125, stop=14.0, type = "Lin"}
-      # Only for "RangeLin" or "RangeLog
+      # Only for "RangeLin" or "RangeLog"
       wavelength = {binning="2.0-7.0, 7.0-14.0", type = "RangeLin"}
 
 MASKFILE str
