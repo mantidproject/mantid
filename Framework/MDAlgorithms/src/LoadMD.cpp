@@ -139,17 +139,28 @@ void LoadMD::execLoader() {
     throw Kernel::Exception::FileError("Can not open file " + for_access, m_filename);
 
   // The main entry
-  std::map<std::string, std::string> entries;
-  m_file->getEntries(entries);
+  const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo = getFileInfo();
+  auto allEntries = fileInfo->getAllEntries();
+
+  // DEBUG contents
+  //  for (const auto &pair : allEntries) {
+  //    const std::string &nxClass = pair.first;
+  //    std::cout << nxClass << " :\n";
+  //    for (const auto &entry : pair.second) {
+  //      std::cout << "\t" << entry << "\n";
+  //    }
+  //  }
+  //  std::cout << std::endl;
 
   std::string entryName;
-  if (entries.find("MDEventWorkspace") != entries.end())
+  if (fileInfo->isEntry("/MDEventWorkspace", "NXentry")) {
     entryName = "MDEventWorkspace";
-  else if (entries.find("MDHistoWorkspace") != entries.end())
+  } else if (fileInfo->isEntry("/MDHistoWorkspace", "NXentry")) {
     entryName = "MDHistoWorkspace";
-  else
+  } else {
     throw std::runtime_error("Unexpected NXentry name. Expected "
                              "'MDEventWorkspace' or 'MDHistoWorkspace'.");
+  }
 
   // Open the entry
   m_file->openGroup(entryName, "NXentry");
