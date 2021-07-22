@@ -391,7 +391,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
             self.normalize_to_monitor.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
 
     def _parse_spatial_masks(self):
-        mask_dict = self.get_val("mask")
+        spatial_dict = self.get_val(["mask", "spatial"])
 
         def parse_mask_dict(spatial_dict, bank_type):
             mask_detectors = self.mask.detectors[bank_type.value]
@@ -419,18 +419,26 @@ class _TomlV1ParserImpl(TomlParserImplBase):
                 mask_detectors.range_horizontal_strip_start.append(pair[0])
                 mask_detectors.range_horizontal_strip_stop.append(pair[1])
 
-        rear_dict = self.get_val(["spatial", "rear"], mask_dict)
+        rear_dict = self.get_val("rear", spatial_dict)
         if rear_dict:
             parse_mask_dict(rear_dict, DetectorType.LAB)
 
-        front_dict = self.get_val(["spatial", "front"], mask_dict)
+        front_dict = self.get_val("front", spatial_dict)
         if front_dict:
             parse_mask_dict(front_dict, DetectorType.HAB)
 
+        self.mask.beam_stop_arm_angle = self.get_val(["beamstop_shadow", "angle"], spatial_dict)
+        self.mask.beam_stop_arm_width = self.get_val(["beamstop_shadow", "width"], spatial_dict)
+
+        mask_pixels = self.get_val("mask_pixels", spatial_dict)
+        if mask_pixels:
+            for pixel in mask_pixels:
+                # TODO we shouldn't be trying to guess which bank each pixel belongs to
+                bank = get_bank_for_spectrum_number(pixel, instrument=self.instrument)
+                self.mask.detectors[bank.value].single_spectra.append(pixel)
+
     def _parse_mask(self):
         mask_dict = self.get_val("mask")
-        self.mask.beam_stop_arm_angle = self.get_val(["beamstop_shadow", "angle"], mask_dict)
-        self.mask.beam_stop_arm_width = self.get_val(["beamstop_shadow", "width"], mask_dict)
 
         prompt_peak_vals = self.get_val("prompt_peak", mask_dict)
         self.calculate_transmission.prompt_peak_correction_enabled = bool(prompt_peak_vals)
@@ -446,13 +454,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         mask_files = self.get_val("mask_files", mask_dict)
         if mask_files:
             self.mask.mask_files.extend(mask_files)
-
-        mask_pixels = self.get_val("mask_pixels", mask_dict)
-        if mask_pixels:
-            for pixel in mask_pixels:
-                # TODO we shouldn't be trying to guess which bank each pixel belongs to
-                bank = get_bank_for_spectrum_number(pixel, instrument=self.instrument)
-                self.mask.detectors[bank.value].single_spectra.append(pixel)
 
         tof_masks = self.get_val(["time", "tof"], mask_dict)
         if tof_masks:

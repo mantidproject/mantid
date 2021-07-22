@@ -1201,5 +1201,7 @@ V0 to V1
 
 - *normalisation* and *normalization* are both accepted
 - *detector.calibration* was renamed to *detector.correction*
+- *mask.beamstop_shadow* and *mask.mask_pixels* were moved to
+  *mask.spatial.beamstop_shadow* and *mask.spatial.mask_pixels*
 
 .. categories:: Techniques

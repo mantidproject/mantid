@@ -93,16 +93,18 @@ class TomlSchemaV1Validator(object):
         normalisation_keys = {"monitor": {"*": {"spectrum_number", "background"}},
                               "selected_monitor": None}
 
-        mask_keys = {"beamstop_shadow": {"angle", "width"},
+        mask_keys = {
                      "prompt_peak" : {"start", "stop"},
                      "mask_files": None,
-                     "mask_pixels": None,
                      "phi": {"mirror", "start", "stop"},
                      "time": {"tof"},
                      "spatial": {"rear": {"detector_columns", "detector_rows",
                                           "detector_column_ranges", "detector_row_ranges"},
                                  "front": {"detector_columns", "detector_rows",
-                                           "detector_column_ranges", "detector_row_ranges"}}}
+                                           "detector_column_ranges", "detector_row_ranges"},
+                                 "beamstop_shadow": {"angle", "width"},
+                                 "mask_pixels": None}
+                     }
 
         return {"toml_file_version": None,
                 "binning": binning_keys,

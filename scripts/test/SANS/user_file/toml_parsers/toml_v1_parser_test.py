@@ -369,8 +369,12 @@ class TomlV1ParserTest(unittest.TestCase):
             self._setup_parser(top_level_dict)
 
     def test_parse_mask_spatial(self):
-        top_level_dict = {"mask": {"spatial": {"rear": {},
-                                               "front": {}}}}
+        top_level_dict = {"mask": {"spatial": {
+                                                "beamstop_shadow": {},
+                                                "front": {},
+                                                "rear": {},
+                                                "mask_pixels": [],
+                                               }}}
 
         rear_spatial_dict = top_level_dict["mask"]["spatial"]["rear"]
         rear_spatial_dict["detector_columns"] = [101, 102]
@@ -383,6 +387,10 @@ class TomlV1ParserTest(unittest.TestCase):
         front_spatial_dict["detector_rows"] = [2, 3]
         front_spatial_dict["detector_column_ranges"] = [[0, 10]]
         front_spatial_dict["detector_row_ranges"] = [[100, 400]]
+
+        top_level_dict["mask"]["spatial"]["beamstop_shadow"] = {"width": 10, "angle": 180}
+        mask_pixels_expected = [1, 2, 4, 17000]  # 17000 is in HAB on LOQ
+        top_level_dict["mask"]["spatial"]["mask_pixels"] = mask_pixels_expected
 
         mask_state = self._setup_parser(top_level_dict).get_state_mask(None)
 
@@ -404,22 +412,25 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual([100], front_result.range_horizontal_strip_start)
         self.assertEqual([400], front_result.range_horizontal_strip_stop)
 
+        # Pixel masks
+        self.assertEqual([1, 2, 4], mask_state.detectors[DetectorType.LAB.value].single_spectra)
+        self.assertEqual([17000], mask_state.detectors[DetectorType.HAB.value].single_spectra)
+        # Beamstop angle
+        self.assertEqual(180, mask_state.beam_stop_arm_angle)
+        self.assertEqual(10, mask_state.beam_stop_arm_width)
+
     def test_parse_mask(self):
-        top_level_dict = {"mask": {"beamstop_shadow": {},
+        top_level_dict = {"mask": {
                                    "prompt_peak": {},
-                                   "mask_pixels": [],
                                    "mask_files": [],
-                                   "time": {"tof": []}},
+                                   "time": {"tof": []}
+                                  },
                           "phi": {}}
 
-        top_level_dict["mask"]["beamstop_shadow"] = {"width": 10, "angle": 180}
         top_level_dict["mask"]["prompt_peak"] = {"start": 101, "stop": 102}
 
         mask_files_mock = [mock.NonCallableMock()]
-        mask_pixels_expected = [1, 2, 4, 17000]  # 17000 is in HAB on LOQ
         top_level_dict["mask"]["mask_files"] = mask_files_mock
-        top_level_dict["mask"]["mask_pixels"] = mask_pixels_expected
-
         time_dict = top_level_dict["mask"]["time"]
 
         time_dict["tof"].extend([{"start": 100, "stop": 200},
@@ -432,12 +443,7 @@ class TomlV1ParserTest(unittest.TestCase):
         masks = parser_result.get_state_mask(None)
 
         self.assertIsInstance(masks, StateMask)
-        self.assertEqual(180, masks.beam_stop_arm_angle)
-        self.assertEqual(10, masks.beam_stop_arm_width)
-
         self.assertEqual(mask_files_mock, masks.mask_files)
-        self.assertEqual([1, 2, 4], masks.detectors[DetectorType.LAB.value].single_spectra)
-        self.assertEqual([17000], masks.detectors[DetectorType.HAB.value].single_spectra)
 
         self.assertEqual([100, 300], masks.bin_mask_general_start)
         self.assertEqual([200, 400], masks.bin_mask_general_stop)
