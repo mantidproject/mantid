@@ -152,7 +152,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         metrics=QtGui.QFontMetrics(self.font())
         self.signaldict=dict()
         #instrument selector
-        self.instrumentList=['ARCS','CHESS','CNCS','DNS','EXED','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA']
+        self.instrumentList=['ARCS','CHESS','CNCS','DNS','EXED','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA','WAND2']
         self.combo = QtWidgets.QComboBox(self)
         for inst in self.instrumentList:
             self.combo.addItem(inst)
@@ -341,6 +341,18 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         filename=str(self.editMask.text())
         d={'maskFilename':filename}
         self.updateAll(**d)
+
+    def setLabelEi(self, newLabel):
+        self.labelEi.setText(newLabel)
+
+    def setEiVal(self, val):
+        self.editEi.setText(val)
+
+    def getInstrumentComboBox(self):
+        return self.combo
+
+    def getEditEi(self):
+        return self.editEi
 
     def checkValidInputs(self, *dummy_args, **dummy_kwargs):
         sender = self.sender()

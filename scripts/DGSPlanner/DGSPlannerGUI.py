@@ -19,6 +19,8 @@ from mantidqt.MPLwidgets import *
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from mpl_toolkits.axisartist import Subplot
+from scipy.constants import m_n
+from scipy.constants import h
 import numpy
 import copy
 import os
@@ -120,6 +122,8 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.classic.changed.connect(self.matrix.UBmodel.updateOL)
         self.classic.changed.connect(self.updateUB)
         self.instrumentWidget.changed.connect(self.updateParams)
+        self.instrumentWidget.getInstrumentComboBox().activated[str].connect(self.instrumentUpdateEvent)
+        self.instrumentWidget.getEditEi().textChanged.connect(self.eiWavelengthUpdateEvent)
         self.dimensionWidget.changed.connect(self.updateParams)
         self.plotButton.clicked.connect(self.updateFigure)
         self.oplotButton.clicked.connect(self.updateFigure)
@@ -144,6 +148,33 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.ol = ol
         self.updatedOL = True
         self.trajfig.clear()
+
+    # (h*h)/(2*m{n}*lambda*lambda)
+    # h = Planck constant
+    # m{n} = mass of the neutron m_n
+    # lambda = input wavelength
+    def convertWavelengthToEnergy(self, wavelength):
+        return (h*h)/(2*m_n*wavelength*wavelength)
+
+    def eiWavelengthUpdateEvent(self):
+        if self.masterDict['instrument'] == 'WAND2':
+            ei = self.convertWavelengthToEnergy(self.masterDict['Ei'])
+            offset = ei * 0.01
+            lowerBound = ei - offset
+            upperBound = ei + offset
+            self.dimensionWidget.set_editMin4(str(lowerBound))
+            self.dimensionWidget.set_editMax4(str(upperBound))
+
+    def instrumentUpdateEvent(self):
+        if self.masterDict['instrument'] == 'WAND2':
+            # change the ui accordingly
+            self.dimensionWidget.toggleDeltaE(False)
+            self.instrumentWidget.setLabelEi('Input Wavelength')
+            self.instrumentWidget.setEiVal(str(1.0))
+        else:
+            self.dimensionWidget.toggleDeltaE(True)
+            self.instrumentWidget.setLabelEi('Incident Energy')
+            self.instrumentWidget.setEiVal(str(10.0))
 
     @QtCore.Slot(dict)
     def updateParams(self, d):

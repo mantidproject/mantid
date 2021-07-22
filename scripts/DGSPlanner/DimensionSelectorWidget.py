@@ -138,7 +138,8 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
         #basis
         self.basis=['1,0,0','0,1,0','0,0,1']
         #default values
-        self.dimNames=['[H,0,0]','[0,K,0]','[0,0,L]','DeltaE']
+        self.dimNames=['[H,0,0]','[0,K,0]','[0,0,L]', 'DeltaE']
+
         self.dimMin=[-numpy.inf,-numpy.inf,-numpy.inf,-numpy.inf]
         self.dimMax=[numpy.inf,numpy.inf,numpy.inf,numpy.inf]
         self.dimStep=[0.05,0.05,0.05,1]
@@ -313,6 +314,37 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
         self.updateGui()
         self.updateChanges()
 
+    def toggleDeltaE(self, on):
+        # test disable code
+        if on:
+            self._editMin4.setReadOnly(False)
+            self._editMax4.setReadOnly(False)
+            self._comboDim4.setDisabled(False)
+
+            self._editMin4.setStyleSheet("QLineEdit[readOnly=\"true\"] {}")
+            self._editMax4.setStyleSheet("QLineEdit[readOnly=\"true\"] {}")
+
+            if 'DeltaE' not in self.dimNames:
+                self.dimNames.append('DeltaE')
+                self.updateCombo()
+
+        else:
+            self._editMin4.setReadOnly(True)
+            self._editMax4.setReadOnly(True)
+            self._comboDim4.setDisabled(True)
+
+            self._editMin4.setStyleSheet("QLineEdit[readOnly=\"true\"] {color: #808080; background-color: #F0F0F0;}")
+            self._editMax4.setStyleSheet("QLineEdit[readOnly=\"true\"] {color: #808080; background-color: #F0F0F0;}")
+
+            if 'DeltaE' in self.dimNames:
+                self.dimNames.remove('DeltaE')
+                self.updateCombo()
+                # add back deltaE to last combo box so only that can be deltaE
+                self.inhibitSignal=True
+                self._comboDim4.addItem('DeltaE')
+                self._comboDim4.setCurrentIndex(3)
+                self.inhibitSignal=False
+
     def updateGui(self):
         self._editMin1.setText(FloatToQString(self.dimMin[0]))
         self._editMin2.setText(FloatToQString(self.dimMin[1]))
@@ -351,6 +383,12 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
         d['dimStep']=self.dimStep
         d['dimIndex']=self.dimIndex
         self.changed.emit(d)
+
+    def set_editMin4(self, val):
+        self._editMin4.setText(val)
+
+    def set_editMax4(self, val):
+        self._editMax4.setText(val)
 
 
 if __name__=='__main__':
