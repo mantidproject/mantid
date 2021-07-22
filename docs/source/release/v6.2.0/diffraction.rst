@@ -42,6 +42,7 @@ New features
 ############
 - New setting for default peak function to fit in the Engineering Diffraction interface (initial default is :ref:`BackToBackExponential <func-BackToBackExponential>`).
 - Added serial fit capability to fitting tab in EngDiff UI - this fits all loaded workspaces with same initial parameters.
+- Automatically subtract background from runs on loading in EngDiff UI.
 - The most recently created or loaded Calibration is now selected by default in the load path when the interface is opened.
 - The last used RB number is now saved for the next session
 
