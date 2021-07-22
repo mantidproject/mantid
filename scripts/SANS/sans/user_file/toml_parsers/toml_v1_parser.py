@@ -371,6 +371,15 @@ class _TomlV1ParserImpl(TomlParserImplBase):
             normalisation_dict = self.get_val("normalization")
 
         selected_monitor = self.get_val("selected_monitor", normalisation_dict)
+        if self.get_val(["all_monitors", "enabled"], normalisation_dict):
+            background = self.get_val(["all_monitors", "background"], normalisation_dict)
+            if len(background) != 2:
+                raise ValueError("Two background values required")
+            self.calculate_transmission.background_TOF_general_start = background[0]
+            self.calculate_transmission.background_TOF_general_stop = background[1]
+            self.normalize_to_monitor.background_TOF_general_start = background[0]
+            self.normalize_to_monitor.background_TOF_general_stop = background[1]
+
         if not normalisation_dict or not selected_monitor:
             return
 

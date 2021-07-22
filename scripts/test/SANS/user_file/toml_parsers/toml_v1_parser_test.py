@@ -164,9 +164,9 @@ class TomlV1ParserTest(unittest.TestCase):
 
     def test_detector_parsed(self):
         top_level_dict = {"detector": {"correction": {"direct": {},
-                                                       "flat": {},
-                                                       "tube": {},
-                                                       "position": {}},
+                                                      "flat": {},
+                                                      "tube": {},
+                                                      "position": {}},
                                        "radius_limit": {"min": None,
                                                         "max": None}}}
 
@@ -338,6 +338,28 @@ class TomlV1ParserTest(unittest.TestCase):
             self.assertEqual({'1': 100}, calc_transmission.background_TOF_monitor_start)
             self.assertEqual({'1': 200}, calc_transmission.background_TOF_monitor_stop)
 
+    def test_parsing_all_monitor_background(self):
+        top_level_dict = {"normalisation": {"all_monitors": {"enabled": True,
+                                                             "background": [1200, 2400]}}}
+        parsed = self._setup_parser(top_level_dict)
+        parsed_transmission = parsed.get_state_calculate_transmission()
+        self.assertEqual(1200, parsed_transmission.background_TOF_general_start)
+        self.assertEqual(2400, parsed_transmission.background_TOF_general_stop)
+        parsed_norm_monitors = parsed.get_state_normalize_to_monitor(None)
+        self.assertEqual(1200, parsed_norm_monitors.background_TOF_general_start)
+        self.assertEqual(2400, parsed_norm_monitors.background_TOF_general_stop)
+
+    def test_parsing_all_monitor_background_ignored_false(self):
+        top_level_dict = {"normalisation": {"all_monitors": {"enabled": False,
+                                                             "background": [1200, 2400]}}}
+        parsed = self._setup_parser(top_level_dict)
+        parsed_transmission = parsed.get_state_calculate_transmission()
+        self.assertIsNone(parsed_transmission.background_TOF_general_start)
+        self.assertIsNone(parsed_transmission.background_TOF_general_stop)
+        parsed_norm_monitors = parsed.get_state_normalize_to_monitor(None)
+        self.assertIsNone(parsed_norm_monitors.background_TOF_general_start)
+        self.assertIsNone(parsed_norm_monitors.background_TOF_general_stop)
+
     def test_parse_normalisation(self):
         # A2 is intentional to check were not hardcoded to Mx
         top_level_dict = {"normalisation": {"monitor": {"M1": {}, "A2": {}},
@@ -370,11 +392,11 @@ class TomlV1ParserTest(unittest.TestCase):
 
     def test_parse_mask_spatial(self):
         top_level_dict = {"mask": {"spatial": {
-                                                "beamstop_shadow": {},
-                                                "front": {},
-                                                "rear": {},
-                                                "mask_pixels": [],
-                                               }}}
+            "beamstop_shadow": {},
+            "front": {},
+            "rear": {},
+            "mask_pixels": [],
+        }}}
 
         rear_spatial_dict = top_level_dict["mask"]["spatial"]["rear"]
         rear_spatial_dict["detector_columns"] = [101, 102]
@@ -421,11 +443,11 @@ class TomlV1ParserTest(unittest.TestCase):
 
     def test_parse_mask(self):
         top_level_dict = {"mask": {
-                                   "prompt_peak": {},
-                                   "mask_files": [],
-                                   "time": {"tof": []}
-                                  },
-                          "phi": {}}
+            "prompt_peak": {},
+            "mask_files": [],
+            "time": {"tof": []}
+        },
+            "phi": {}}
 
         top_level_dict["mask"]["prompt_peak"] = {"start": 101, "stop": 102}
 

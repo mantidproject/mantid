@@ -7,6 +7,18 @@ SANS TOML Files
 .. contents:: Table of Contents
     :local:
 
+Format Changes
+==============
+
+V0 to V1
+--------
+
+- *normalisation* and *normalisation* are both accepted and equivalent
+- *detector.calibration* was renamed to *detector.correction*
+- *mask.beamstop_shadow* and *mask.mask_pixels* were moved to
+  *mask.spatial.beamstop_shadow* and *mask.spatial.mask_pixels*
+- *normalisation.all_monitors* was added to support *BACK/MON/TIMES*
+
 
 Conversion From Legacy User Files
 =================================
@@ -73,8 +85,27 @@ For converting existing files I recommend the following process:
 BACK/MON/TIMES
 --------------
 
-**Replacement**
-Unsupported - Monitor ranges must be set directly
+..  code-block:: none
+
+    [normalisation]
+      [normalisation.all_monitors]
+        background = [x, y]
+        enabled = true
+
+**Existing Example**
+
+..  code-block:: none
+
+    BACK/MON/TIMES 30000 40000
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [normalisation]
+      [normalisation.all_monitors]
+        background = [30000, 40000]
+        enabled = true
 
 
 BACK/M[n]/TIMES x y
@@ -82,7 +113,7 @@ BACK/M[n]/TIMES x y
 
 ..  code-block:: none
 
-    # Note: both "normalisation" and "normalization" are both accepted
+    # Note: both "normalisation" and "normalisation" are both accepted
     [normalisation]
       [normalisation.monitor.Mn]
         spectrum_number = n
@@ -109,7 +140,7 @@ BACK/M[n]/TIMES x y
 
 ..  code-block:: none
 
-    [normalization]
+    [normalisation]
       [normalisation.monitor.M1]
         spectrum_number = 1
         background = [30000.0, 40000.0]
@@ -1192,16 +1223,5 @@ TUBECALIBFILE=str
 
   [detector.calibration.tube]
     file = "Tube.nxs"
-
-Format Changes
-==============
-
-V0 to V1
---------
-
-- *normalisation* and *normalization* are both accepted
-- *detector.calibration* was renamed to *detector.correction*
-- *mask.beamstop_shadow* and *mask.mask_pixels* were moved to
-  *mask.spatial.beamstop_shadow* and *mask.spatial.mask_pixels*
 
 .. categories:: Techniques

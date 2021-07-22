@@ -91,6 +91,7 @@ class TomlSchemaV1Validator(object):
                              "selected_monitor": None}
 
         normalisation_keys = {"monitor": {"*": {"spectrum_number", "background"}},
+                              "all_monitors": {"background", "enabled"},
                               "selected_monitor": None}
 
         mask_keys = {
