@@ -92,7 +92,10 @@ function(add_python_package pkg_name)
   # --install-lib=lib removes any of the platform/distribution specific install
   # directories so we can have a flat structure
   install(
-    CODE "execute_process(COMMAND ${Python_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})"
+    CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
+    ${Python_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed \
+    --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib \
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})"
   )
 
   # Registers the "installed" components with CMake so it will carry them over
