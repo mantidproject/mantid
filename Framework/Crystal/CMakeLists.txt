@@ -277,7 +277,7 @@ generate_mantid_export_header(Crystal FALSE)
 
 # Installation settings
 
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     Crystal
                     INSTALL_DIRS
                     ${PLUGINS_DIR}

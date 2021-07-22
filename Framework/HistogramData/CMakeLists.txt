@@ -147,7 +147,7 @@ target_include_directories(HistogramData PUBLIC ${CMAKE_BINARY_DIR}/Framework/Hi
 generate_mantid_export_header(HistogramData FALSE)
 
 # Installation settings
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     HistogramData
                     INSTALL_DIRS
                     ${LIB_DIR}

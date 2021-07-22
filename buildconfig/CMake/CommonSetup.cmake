@@ -109,6 +109,8 @@ if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
   )
   set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
 else()
+# We'll use the cmake finder
+# This will define HDF5_LIBRARIES and HDF5_HL_LIBRARIES
   find_package(ZLIB REQUIRED)
   find_package(
     HDF5

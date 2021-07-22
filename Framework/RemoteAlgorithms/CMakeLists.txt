@@ -51,6 +51,12 @@ endif()
 
 # Add the target for this directory
 add_library(RemoteAlgorithms ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::RemoteAlgorithms ALIAS RemoteAlgorithms)
+
+target_include_directories(RemoteAlgorithms PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 
 # Set the name of the generated library
 set_target_properties(RemoteAlgorithms
@@ -68,18 +74,13 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET RemoteAlgorithms PROPERTY FOLDER "MantidFramework")
 
-include_directories(inc)
-
-target_link_libraries(RemoteAlgorithms
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES})
+target_link_libraries(RemoteAlgorithms PUBLIC Mantid::API PRIVATE Mantid::Kernel)
 
 # Add the unit tests directory
 add_subdirectory(test) # Note: No tests yet for many remote algorithms...
 
 # Installation settings
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     RemoteAlgorithms
                     INSTALL_DIRS
                     ${PLUGINS_DIR}

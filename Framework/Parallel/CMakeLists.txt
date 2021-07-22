@@ -94,6 +94,11 @@ endif()
 
 # Add executable for Nexus parallel loader child process
 add_executable(EventParallelLoader ${SRC_FILES} ${INC_FILES})
+
+target_include_directories(EventParallelLoader PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 add_dependencies(EventParallelLoader Kernel)
 # set the name of generated executable
 set_target_properties(EventParallelLoader
@@ -113,15 +118,8 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET EventParallelLoader PROPERTY FOLDER "MantidFramework")
 
-target_include_directories(EventParallelLoader SYSTEM
-                           PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
-target_link_libraries(EventParallelLoader
-                      LINK_PRIVATE
-                      ${GSL_LIBRARIES}
-                      ${MANTIDLIBS}
-                      ${HDF5_LIBRARIES}
-                      Kernel)
+target_link_libraries(EventParallelLoader PUBLIC Mantid::Kernel)
 
 if(UNIX AND NOT APPLE)
   target_link_libraries(EventParallelLoader LINK_PRIVATE rt)
@@ -131,7 +129,7 @@ endif()
 add_subdirectory(test)
 
 # Installation settings
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     Parallel
                     INSTALL_DIRS
                     ${LIB_DIR}

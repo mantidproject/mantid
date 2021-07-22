@@ -102,7 +102,7 @@ target_include_directories(Indexing PUBLIC ${CMAKE_BINARY_DIR}/Framework/Indexin
 generate_mantid_export_header(Indexing TRUE)
 
 # Installation settings
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     Indexing
                     INSTALL_DIRS
                     ${LIB_DIR}

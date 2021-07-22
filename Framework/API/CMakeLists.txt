@@ -524,6 +524,11 @@ enable_precompiled_headers(inc/MantidAPI/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(API ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::API ALIAS API)
+
+target_include_directories(API PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(
   API PROPERTIES OUTPUT_NAME MantidAPI COMPILE_DEFINITIONS IN_MANTID_API
@@ -546,13 +551,20 @@ target_include_directories(
 )
 target_link_libraries(
   API
-  PRIVATE
-  ${JSONCPP_LIBRARIES}
-  ${MANTIDLIBS}
-  ${GSL_LIBRARIES}
+  PUBLIC
   ${NEXUS_LIBRARIES}
+  ${Boost_LIBRARIES}
+  Mantid::HistogramData
+  Mantid::Types
+  Mantid::Kernel
+  Mantid::Geometry
+  Mantid::Indexing
+  Mantid::Parallel
+  PRIVATE
   ${WINSOCK}
   ${BCRYPT}
+  Mantid::Beamline
+  Mantid::Json
 )
 
 # Add the unit tests directory
@@ -564,4 +576,4 @@ generate_mantid_export_header(API TRUE)
 
 # Installation settings
 
-mtd_install_targets(TARGETS API INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+mtd_install_dylib(TARGETS API INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

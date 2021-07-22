@@ -84,6 +84,12 @@ endif()
 # enable_precompiled_headers (inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library(Muon ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
+add_library(Mantid::Muon ALIAS Muon)
+
+target_include_directories(Muon PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(Muon
                       PROPERTIES OUTPUT_NAME
@@ -102,13 +108,7 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Muon PROPERTY FOLDER "MantidFramework")
 
-include_directories(inc)
-
-target_link_libraries(Muon
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES})
-
+target_link_libraries(Muon PUBLIC Mantid::API Mantid::Kernel Mantid::HistogramData Mantid::Geometry PRIVATE Mantid::DataObjects Mantid::Indexing)
 # Add the unit tests directory
 add_subdirectory(test)
 
@@ -117,7 +117,7 @@ target_include_directories(Muon PUBLIC ${CMAKE_BINARY_DIR}/Framework/Muon)
 generate_mantid_export_header(Muon FALSE)
 
 # Installation settings
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     Muon
                     INSTALL_DIRS
                     ${PLUGINS_DIR}

@@ -19,7 +19,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   option(MPI_BUILD "Enable MPI options")
   if(MPI_BUILD)
     include(MPISetup)
-    set(MANTIDLIBS ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES})
   endif(MPI_BUILD)
 endif()
 
@@ -35,60 +34,21 @@ add_custom_target(FrameworkTests) # target for all framework tests
 add_dependencies(check FrameworkTests)
 add_dependencies(FrameworkTests Framework)
 
-include_directories(Types/inc)
+
 add_subdirectory(Types)
-set(MANTIDLIBS ${MANTIDLIBS} Types)
-
-include_directories(Json/inc)
 add_subdirectory(Json)
-set(MANTIDLIBS ${MANTIDLIBS} Json)
-
-include_directories(Kernel/inc)
 add_subdirectory(Kernel)
-
-include_directories(Parallel/inc)
 add_subdirectory(Parallel)
-
-include_directories(HistogramData/inc)
-add_subdirectory(HistogramData)
-
-include_directories(Indexing/inc)
-add_subdirectory(Indexing)
-
-include_directories(Beamline/inc)
-add_subdirectory(Beamline)
-
-set(MANTIDLIBS ${MANTIDLIBS} Parallel)
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.
-set(MANTIDLIBS ${MANTIDLIBS} HistogramData)
-set(MANTIDLIBS ${MANTIDLIBS} Indexing)
-set(MANTIDLIBS ${MANTIDLIBS} Kernel)
-set(MANTIDLIBS ${MANTIDLIBS} Beamline)
-
-# muParser needed by Geometry and subsequent packages
-include_directories(${MUPARSER_INCLUDE_DIR})
-set(MANTIDLIBS ${MANTIDLIBS} ${MUPARSER_LIBRARIES})
-
-include_directories(Geometry/inc)
+add_subdirectory(HistogramData)
+add_subdirectory(Indexing)
+add_subdirectory(Beamline)
 add_subdirectory(Geometry)
-set(MANTIDLIBS ${MANTIDLIBS} Geometry)
-
-include_directories(API/inc)
 add_subdirectory(API)
-set(MANTIDLIBS ${MANTIDLIBS} API)
-
-include_directories(NexusGeometry/inc)
 add_subdirectory(NexusGeometry)
-set(MANTIDLIBS ${MANTIDLIBS} NexusGeometry)
-
 add_subdirectory(PythonInterface)
-
-include_directories(DataObjects/inc)
 add_subdirectory(DataObjects)
-set(MANTIDLIBS ${MANTIDLIBS} DataObjects)
-
 add_subdirectory(Catalog)
-
 add_subdirectory(Nexus)
 add_subdirectory(DataHandling)
 add_subdirectory(Algorithms)

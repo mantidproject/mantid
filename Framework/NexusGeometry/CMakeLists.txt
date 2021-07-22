@@ -80,7 +80,7 @@ add_subdirectory(test)
 target_include_directories(NexusGeometry PUBLIC ${CMAKE_BINARY_DIR}/Framework/NexusGeometry)
 generate_mantid_export_header(NexusGeometry TRUE)
 
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     NexusGeometry
                     INSTALL_DIRS
                     ${LIB_DIR}

@@ -85,6 +85,13 @@ endif()
 enable_precompiled_headers (inc/MantidReflectometry/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library(Reflectometry ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Reflectometry ALIAS Reflectometry)
+
+target_include_directories(Reflectometry PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Set the name of the generated library
 set_target_properties(Reflectometry
                       PROPERTIES OUTPUT_NAME
@@ -109,18 +116,13 @@ generate_mantid_export_header(Reflectometry FALSE)
 target_include_directories(Reflectometry PUBLIC
   ${CMAKE_BINARY_DIR}/Framework/Reflectometry)
 
-include_directories(inc)
-
-target_link_libraries(Reflectometry
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES})
+target_link_libraries(Reflectometry PUBLIC Mantid::Kernel Mantid::API Mantid::Geometry Mantid::DataObjects PRIVATE Mantid::Indexing Mantid::HistogramData)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     Reflectometry
                     INSTALL_DIRS
                     ${PLUGINS_DIR}

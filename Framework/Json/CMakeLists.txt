@@ -35,11 +35,11 @@ set_property(TARGET Json PROPERTY FOLDER "MantidFramework")
 
 # Auto-generate exports header
 target_include_directories(Json PUBLIC ${CMAKE_BINARY_DIR}/Framework/Json)
-target_include_directories(Json SYSTEM PRIVATE ${JSONCPP_INCLUDE_DIR})
+target_include_directories(Json SYSTEM PUBLIC ${JSONCPP_INCLUDE_DIR})
 generate_mantid_export_header(Json FALSE)
 
 # Installation settings
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     Json
                     INSTALL_DIRS
                     ${LIB_DIR}

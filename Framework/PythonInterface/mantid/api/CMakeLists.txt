@@ -130,25 +130,26 @@ add_library(
   PythonAPIModule ${ALL_FILES} ${MODULE_DEFINITION}
                   ${INC_FILES} ${PYTHON_INSTALL_FILES}
 )
+add_library(Mantid::PythonAPIModule ALIAS PythonAPIModule)
+
+target_include_directories(PythonAPIModule PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
 set_python_properties(PythonAPIModule _api)
 
-target_include_directories(PythonAPIModule PUBLIC inc)
 
 # Add the required dependencies
-target_link_libraries(
-  PythonAPIModule
-  PRIVATE
-          PythonInterfaceCore
-          PythonGeometryModule
-          PythonKernelModule
-          API
-          Geometry
-          HistogramData
-          Indexing
-          Kernel
-          Types
-          ${POCO_LIBRARIES}
-          ${Boost_LIBRARIES}
+target_link_libraries(PythonAPIModule
+          PUBLIC Mantid::API
+          PRIVATE
+          Mantid::PythonInterfaceCore
+          Mantid::PythonGeometryModule
+          Mantid::PythonKernelModule
+          Mantid::HistogramData
+          Mantid::Indexing
+          Mantid::Types
 )
 
 # Installation settings

@@ -650,6 +650,12 @@ endif()
 enable_precompiled_headers(inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(DataHandling ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::DataHandling ALIAS DataHandling)
+
+target_include_directories(DataHandling PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(DataHandling
                       PROPERTIES OUTPUT_NAME
@@ -671,21 +677,23 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET DataHandling PROPERTY FOLDER "MantidFramework")
 
-target_include_directories(DataHandling PUBLIC inc ../Nexus/inc)
-target_include_directories(DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-
 target_link_libraries(DataHandling
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      Nexus
-                      HistogramData
-                      DataObjects
-                      ${NEXUS_LIBRARIES}
-                      ${HDF5_LIBRARIES}
-                      ${HDF5_HL_LIBRARIES}
-                      ${JSONCPP_LIBRARIES}
-                      Catalog)
+                        PUBLIC
+                        ${HDF5_HL_LIBRARIES}
+                        Mantid::Nexus
+                        Mantid::API
+                        Mantid::HistogramData
+                        Mantid::Catalog
+                        Mantid::DataObjects
+                        Mantid::Geometry
+                        Mantid::Kernel
+                        Mantid::Indexing
+                        Mantid::Parallel
+                        PRIVATE
+                        Mantid::Json
+                        Mantid::NexusGeometry)
 
+target_include_directories(DataHandling SYSTEM PUBLIC ${HDF5_INCLUDE_DIRS})
 if(ENABLE_LIB3MF)
   target_link_libraries(DataHandling LINK_PRIVATE
                         ${LIB3MF_LIBRARIES})
@@ -701,7 +709,7 @@ add_subdirectory(test)
 
 # Installation settings
 
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     DataHandling
                     INSTALL_DIRS
                     ${PLUGINS_DIR}

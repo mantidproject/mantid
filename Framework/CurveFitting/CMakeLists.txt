@@ -502,6 +502,14 @@ endif(UNITY_BUILD)
 enable_precompiled_headers(inc/MantidCurveFitting/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(CurveFitting ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::CurveFitting ALIAS CurveFitting)
+
+target_include_directories(CurveFitting PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
+
 # Set the name of the generated library
 set_target_properties(CurveFitting
                       PROPERTIES OUTPUT_NAME
@@ -522,11 +530,7 @@ endif()
 set_property(TARGET CurveFitting PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
-target_include_directories(CurveFitting SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
-target_link_libraries(CurveFitting
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES})
+target_link_libraries(CurveFitting PUBLIC Mantid::API Mantid::Kernel Mantid::DataObjects PRIVATE Mantid::HistogramData Mantid::Geometry)
 
 # Add the unit tests directory
 add_subdirectory(test)
@@ -537,7 +541,7 @@ generate_mantid_export_header(CurveFitting FALSE)
 
 # Installation settings
 
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     CurveFitting
                     INSTALL_DIRS
                     ${PLUGINS_DIR}

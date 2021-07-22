@@ -71,7 +71,15 @@ enable_precompiled_headers(inc/MantidPythonInterface/core/PrecompiledHeader.h SR
 # Add the target for this directory
 set(_target_name PythonInterfaceCore)
 add_library(${_target_name} ${SRC_FILES} ${INC_FILES})
-target_include_directories(${_target_name} PUBLIC inc)
+add_library(Mantid::${_target_name} ALIAS ${_target_name})
+
+
+target_include_directories(${_target_name} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
+
 target_include_directories(${_target_name} SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 
 # Set the name of the generated library
@@ -87,8 +95,8 @@ endif()
 # Dependencies
 target_link_libraries(
   ${_target_name}
-  PUBLIC ${PUBLIC_TARGETS}
-  PRIVATE Types Kernel ${Boost_LIBRARIES}  ${POCO_LIBRARIES}
+  PUBLIC ${PUBLIC_TARGETS} Mantid::Kernel ${Boost_LIBRARIES}
+  PRIVATE Mantid::Types
 )
 
 # Add to the 'Framework/Python' group in MSVS

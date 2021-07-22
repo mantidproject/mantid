@@ -363,6 +363,13 @@ endif(UNITY_BUILD)
 enable_precompiled_headers(inc/MantidMDAlgorithms/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(MDAlgorithms ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::MDAlgorithms ALIAS MDAlgorithms)
+
+target_include_directories(MDAlgorithms PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Set the name of the generated library
 set_target_properties(MDAlgorithms
                       PROPERTIES OUTPUT_NAME
@@ -386,18 +393,13 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework")
 
-target_include_directories(MDAlgorithms PUBLIC inc SYSTEM ${Boost_INCLUDE_DIRS})
-target_link_libraries(MDAlgorithms
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES}
-                      ${NEXUS_LIBRARIES})
+target_link_libraries(MDAlgorithms PUBLIC Mantid::API Mantid::DataObjects Mantid::Kernel Mantid::Geometry)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     MDAlgorithms
                     INSTALL_DIRS
                     ${PLUGINS_DIR}

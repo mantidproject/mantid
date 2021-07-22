@@ -49,4 +49,4 @@ target_include_directories(Nexus PUBLIC ${NEXUS_INCLUDE_DIR})
 add_subdirectory(test)
 
 # Installation settings
-mtd_install_targets(TARGETS Nexus INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+mtd_install_dylib(TARGETS Nexus INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

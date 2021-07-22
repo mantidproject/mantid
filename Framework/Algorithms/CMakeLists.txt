@@ -1065,7 +1065,7 @@ generate_mantid_export_header(Algorithms FALSE)
 
 # Installation settings
 
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     Algorithms
                     INSTALL_DIRS
                     ${PLUGINS_DIR}

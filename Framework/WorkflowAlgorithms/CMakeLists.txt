@@ -114,6 +114,12 @@ enable_precompiled_headers(inc/MantidWorkflowAlgorithms/PrecompiledHeader.h
 
 # Add the target for this directory
 add_library(WorkflowAlgorithms ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::WorkflowAlgorithms ALIAS WorkflowAlgorithms)
+
+target_include_directories(WorkflowAlgorithms PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(WorkflowAlgorithms
                       PROPERTIES OUTPUT_NAME MantidWorkflowAlgorithms)
@@ -130,19 +136,14 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET WorkflowAlgorithms PROPERTY FOLDER "MantidFramework")
 
-include_directories(inc ../Nexus/inc)
 
-target_link_libraries(WorkflowAlgorithms
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      Nexus
-                      ${GSL_LIBRARIES})
+target_link_libraries(WorkflowAlgorithms PUBLIC Mantid::Nexus Mantid::API Mantid::DataObjects PRIVATE Mantid::Kernel)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     WorkflowAlgorithms
                     INSTALL_DIRS
                     ${PLUGINS_DIR}

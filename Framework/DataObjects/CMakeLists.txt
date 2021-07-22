@@ -259,7 +259,7 @@ add_subdirectory(test)
 
 # Installation settings
 
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     DataObjects
                     INSTALL_DIRS
                     ${LIB_DIR}

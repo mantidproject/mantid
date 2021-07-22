@@ -494,10 +494,9 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Geometry PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Geometry PUBLIC Mantid::Kernel ${NEXUS_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES} ${MUPARSER_LIBRARIES}
+target_link_libraries(Geometry PUBLIC Mantid::Kernel Mantid::Beamline ${NEXUS_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES} ${MUPARSER_LIBRARIES}
                       PRIVATE
-                      Mantid::Json
-                      Mantid::Beamline)
+                      Mantid::Json)
 
 if(ENABLE_OPENGL)
   target_include_directories(Geometry SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
@@ -516,7 +515,7 @@ add_subdirectory(test)
 
 # Installation settings
 
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     Geometry
                     INSTALL_DIRS
                     ${LIB_DIR}

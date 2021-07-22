@@ -64,7 +64,7 @@ target_include_directories(Beamline PUBLIC ${CMAKE_BINARY_DIR}/Framework/Beamlin
 generate_mantid_export_header(Beamline FALSE)
 
 # Installation settings
-mtd_install_targets(TARGETS
+mtd_install_dylib(TARGETS
                     Beamline
                     INSTALL_DIRS
                     ${LIB_DIR}
