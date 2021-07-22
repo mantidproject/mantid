@@ -213,6 +213,7 @@ set(SRC_FILES
     src/MonteCarloAbsorption.cpp
     src/MostLikelyMean.cpp
     src/MultipleScatteringCorrection.cpp
+    src/MultipleScatteringCorrectionDistGraber.cpp
     src/Multiply.cpp
     src/MultiplyRange.cpp
     src/NormaliseByCurrent.cpp
@@ -555,6 +556,7 @@ set(INC_FILES
     inc/MantidAlgorithms/MonteCarloAbsorption.h
     inc/MantidAlgorithms/MostLikelyMean.h
     inc/MantidAlgorithms/MultipleScatteringCorrection.h
+    inc/MantidAlgorithms/MultipleScatteringCorrectionDistGraber.h
     inc/MantidAlgorithms/Multiply.h
     inc/MantidAlgorithms/MultiplyRange.h
     inc/MantidAlgorithms/NormaliseByCurrent.h

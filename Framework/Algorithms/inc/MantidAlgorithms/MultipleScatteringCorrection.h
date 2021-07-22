@@ -27,13 +27,19 @@ public:
 
   /// Algorithm's summary
   const std::string summary() const override {
-    return "Multiple Scattering Correction with the assumption of sample only and elastic scattering only";
+    return "Calculate Multiple Scattering Correction using numerical integration with the assumption of sample only, "
+           "elastic scattering only, and isotropic scattering within the sample.";
   };
 
   /// Algorithm's see also
   const std::vector<std::string> seeAlso() const override {
     return {"AbsorptionCorrection", "PaalmanPingsAbsorptionCorrection", "PaalmanPingsMonteCarloAbsorption"};
   };
+
+protected:
+  API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
+  Kernel::V3D m_beamDirection;         ///< The direction of the beam.
+  double m_elementSize;                ///< The size of the sample in meters
 
 private:
   void init() override;

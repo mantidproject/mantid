@@ -12,6 +12,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -37,8 +38,6 @@ void MultipleScatteringCorrection::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "The X values for the input workspace must be in units of wavelength");
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
-                  "Output workspace name");
 
   auto positiveInt = std::make_shared<BoundedValidator<int64_t>>();
   positiveInt->setLower(1);
@@ -49,6 +48,11 @@ void MultipleScatteringCorrection::init() {
   auto moreThanZero = std::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(0.001);
   declareProperty("ElementSize", 1.0, moreThanZero, "The size of one side of an integration element cube in mm");
+
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
+                  "Output workspace name. "
+                  "A Workspace2D containing the correction matrix that can be directly applied to the corresponding "
+                  "Event workspace for multipalce scattering correction.");
 }
 
 /**
@@ -71,6 +75,9 @@ std::map<std::string, std::string> MultipleScatteringCorrection::validateInputs(
   } else {
     result["InputWorkspace"] = "Sample does not have a container defined";
   }
+
+  // others?
+
   return result;
 }
 
@@ -78,7 +85,22 @@ std::map<std::string, std::string> MultipleScatteringCorrection::validateInputs(
  * @brief execute the algorithm
  *
  */
-void MultipleScatteringCorrection::exec() {}
+void MultipleScatteringCorrection::exec() {
+  // Get input workspace
+  m_inputWS = getProperty("InputWorkspace");
+  // Cache the beam direction
+  m_beamDirection = m_inputWS->getInstrument()->getBeamDirection();
+  // Get the element size
+  m_elementSize = getProperty("ElementSize");
+
+  // prepare the cached distances
+
+  // perform integration
+
+  // compute the correction matrix
+
+  // set the output workspace
+}
 
 } // namespace Algorithms
 } // namespace Mantid
