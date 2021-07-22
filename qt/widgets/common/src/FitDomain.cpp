@@ -55,6 +55,8 @@ FitDomain::FitDomain(std::string const &workspaceName, WorkspaceIndex workspaceI
     : m_workspaceName(workspaceName), m_workspaceIndex(workspaceIndex), m_startX(startX), m_endX(endX),
       m_function(nullptr) {}
 
+void FitDomain::setWorkspaceName(std::string const &workspaceName) { m_workspaceName = workspaceName; }
+
 std::string FitDomain::domainName() const {
   return m_workspaceName + " (" + std::to_string(m_workspaceIndex.value) + ")";
 }

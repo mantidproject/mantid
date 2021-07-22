@@ -36,19 +36,25 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws')
         self._check_output(mtd['cadmium_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['cadmium_ws'], 'Cadmium')
-        self.assertAlmostEqual(mtd['cadmium_ws_1'].readY(0)[0], 116, delta=1)
+        self.assertAlmostEqual(mtd['cadmium_ws_1'].readY(0)[0], 0.06, delta=1e-3)
+
+    def test_absorber_transmission_norm_by_time(self):
+        PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws', NormaliseBy='Time')
+        self._check_output(mtd['cadmium_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['cadmium_ws'], 'Cadmium')
+        self.assertAlmostEqual(mtd['cadmium_ws_1'].readY(0)[0], 0.00773, delta=1e-3)
 
     def test_beam(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         self._check_output(mtd['beam_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['beam_ws'], 'Beam')
-        self.assertAlmostEqual(mtd['beam_ws_1'].readY(0)[0], 10769, delta=1)
+        self.assertAlmostEqual(mtd['beam_ws_1'].readY(0)[0], 5.566, delta=1e-3)
 
     def test_transmission(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
-                            CadmiumTransmissionInputWorkspace='cadmium_ws_1', BeamInputWorkspace='beam_ws_1',)
+                            CadmiumTransmissionWorkspace='cadmium_ws', EmptyBeamWorkspace='beam_ws')
         self._check_output(mtd['quartz_transmission'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self.assertAlmostEqual(mtd['quartz_transmission_1'].readY(0)[0], 0.692, delta=1e-3)
         self._check_process_flag(mtd['quartz_transmission'], 'Transmission')
@@ -66,14 +72,25 @@ class PolDiffILLReductionTest(unittest.TestCase):
     def test_quartz(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
-                            BeamInputWorkspace='beam_ws_1')
-        PolDiffILLReduction(Run='396939', ProcessAs='Quartz', TransmissionInputWorkspace='quartz_transmission_1',
-                            OutputTreatment='Average', OutputWorkspace='quartz')
+                            EmptyBeamWorkspace='beam_ws')
+        PolDiffILLReduction(Run='396939', ProcessAs='Quartz', Transmission='quartz_transmission',
+                            OutputTreatment='AveragePol', OutputWorkspace='quartz')
+        self._check_output(mtd['quartz'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['quartz'], 'Quartz')
+
+    def test_quartz_transmission_as_value(self):
+        PolDiffILLReduction(Run='396917', ProcessAs='Empty', OutputWorkspace='container_ws')
+        quartz_transmission = '0.95124'
+        PolDiffILLReduction(Run='396939', ProcessAs='Quartz', OutputWorkspace='quartz',
+                            Transmission=quartz_transmission, OutputTreatment='AveragePol',
+                            EmptyContainerWorkspace='container_ws')
+        self.assertTrue('quartz_transmission' in mtd)
+        self.assertTrue(mtd['quartz_transmission'].readY(0)[0] == float(quartz_transmission))
         self._check_output(mtd['quartz'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['quartz'], 'Quartz')
 
     def test_vanadium(self):
-        sampleProperties = {'FormulaUnits': 1, 'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
+        sampleProperties = {'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
@@ -82,13 +99,13 @@ class PolDiffILLReductionTest(unittest.TestCase):
 
     def test_vanadium_annulus(self):
         PolDiffILLReduction(Run='396917', ProcessAs='Empty', OutputWorkspace='container_ws')
-        sampleProperties = {'FormulaUnits': 1, 'SampleChemicalFormula': 'V', 'SampleMass': 8.54, 'FormulaUnitMass': 50.94,
+        sampleProperties = {'SampleChemicalFormula': 'V', 'SampleMass': 8.54, 'FormulaUnitMass': 50.94,
                             'SampleInnerRadius': 2, 'SampleOuterRadius': 2.5, 'Height': 2,
                             'BeamWidth': 2.6, 'BeamHeight': 2.6, 'SampleDensity': 1,
                             'ContainerChemicalFormula': 'Al', 'ContainerDensity': 2.7,
                             'ContainerInnerRadius': 0.1, 'ContainerOuterRadius': 2.51, 'EventsPerPoint':1000}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium_annulus',
-                            EmptyInputWorkspace='container_ws',
+                            EmptyContainerWorkspace='container_ws',
                             SampleAndEnvironmentProperties=sampleProperties,
                             SelfAttenuationMethod='MonteCarlo',
                             SampleGeometry='Annulus',
@@ -97,7 +114,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['vanadium_annulus'], 'Vanadium')
 
     def test_sample(self):
-        sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.93, 'FormulaUnitMass': 182.56}
+        sampleProperties = {'SampleMass': 2.93, 'FormulaUnitMass': 182.56}
         PolDiffILLReduction(Run='397004', ProcessAs='Sample', OutputWorkspace='sample',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')

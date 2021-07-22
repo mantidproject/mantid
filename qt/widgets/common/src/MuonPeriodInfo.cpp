@@ -40,7 +40,7 @@ using namespace Mantid::API;
 std::string MuonPeriodInfo::readSampleLog(MatrixWorkspace_sptr ws, const std::string &logName) {
   try {
     return ws->run().getLogData(logName)->value();
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     Logger("MuonPeriodInfo").warning("Workspace does not contain " + logName);
     return "";
   }

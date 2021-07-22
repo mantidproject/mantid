@@ -7,8 +7,8 @@
 from mantidqt.utils.qt import load_ui
 
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QDoubleValidator
-from qtpy.QtWidgets import QLineEdit, QStyledItemDelegate, QTableWidgetItem, QWidget
+from qtpy.QtGui import QDoubleValidator, QPalette
+from qtpy.QtWidgets import QLineEdit, QStyledItemDelegate, QStyleOptionViewItem, QTableWidgetItem, QWidget
 
 ui_form, widget = load_ui(__file__, "background_corrections_view.ui")
 
@@ -18,6 +18,7 @@ START_X_COLUMN_INDEX = 2
 END_X_COLUMN_INDEX = 3
 A0_COLUMN_INDEX = 4
 A0_ERROR_COLUMN_INDEX = 5
+STATUS_COLUMN_INDEX = 6
 
 
 class DoubleItemDelegate(QStyledItemDelegate):
@@ -29,6 +30,27 @@ class DoubleItemDelegate(QStyledItemDelegate):
         line_edit = QLineEdit(parent)
         line_edit.setValidator(QDoubleValidator())
         return line_edit
+
+
+class StatusItemDelegate(QStyledItemDelegate):
+    """
+    An item delegate for changing the text color of the correction status.
+    """
+
+    def paint(self, painter, options, index):
+        new_options = QStyleOptionViewItem(options)
+        text_color = self.get_text_color(index.data())
+        new_options.palette.setColor(QPalette.Text, text_color)
+        super(StatusItemDelegate, self).paint(painter, new_options, index)
+
+    @staticmethod
+    def get_text_color(status):
+        if "success" in status:
+            return Qt.green
+        elif "skipped" in status:
+            return Qt.red
+        else:
+            return Qt.black
 
 
 class BackgroundCorrectionsView(widget, ui_form):
@@ -82,10 +104,12 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Sets the Background corrections widgets as being visible or hidden."""
         self.select_function_label.setVisible(visible)
         self.function_combo_box.setVisible(visible)
-        self.group_label.setVisible(visible)
+        self.show_data_for_label.setVisible(visible)
         self.group_combo_box.setVisible(visible)
         self.show_all_runs_checkbox.setVisible(visible)
+        self.apply_table_changes_to_all_checkbox.setVisible(visible)
         self.correction_options_table.setVisible(visible)
+        self.background_info_label.setVisible(not visible)
 
     @property
     def background_correction_mode(self) -> str:
@@ -143,8 +167,17 @@ class BackgroundCorrectionsView(widget, ui_form):
         if self._selected_row is not None:
             run = self.correction_options_table.item(self._selected_row, RUN_COLUMN_INDEX).text()
             group = self.correction_options_table.item(self._selected_row, GROUP_COLUMN_INDEX).text()
-            return run, group
-        return None, None
+            return [run], [group]
+        else:
+            raise RuntimeError("There is no selected run/group table row.")
+
+    def apply_table_changes_to_all(self) -> bool:
+        """Returns true if the changes made in the table should be made for all domains at once."""
+        return self.apply_table_changes_to_all_checkbox.isChecked()
+
+    def is_run_group_displayed(self, run: str, group: str) -> bool:
+        """Returns true if a Run-Group is currently displayed in the data table."""
+        return self._table_row_index_of(run, group) is not None
 
     def set_start_x(self, run: str, group: str, start_x: float) -> None:
         """Sets the Start X associated with the provided Run and Group."""
@@ -162,13 +195,28 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Returns the Start X associated with the provided Run and Group."""
         return float(self._table_item_value_for(run, group, END_X_COLUMN_INDEX))
 
+    def selected_start_x(self) -> float:
+        """Returns the Start X in the row that is selected."""
+        if self._selected_row is not None:
+            return float(self.correction_options_table.item(self._selected_row, START_X_COLUMN_INDEX).text())
+        else:
+            raise RuntimeError("There is no selected run/group table row.")
+
+    def selected_end_x(self) -> float:
+        """Returns the End X in the row that is selected."""
+        if self._selected_row is not None:
+            return float(self.correction_options_table.item(self._selected_row, END_X_COLUMN_INDEX).text())
+        else:
+            raise RuntimeError("There is no selected run/group table row.")
+
     def populate_corrections_table(self, runs: list, groups: list, start_xs: list, end_xs: list, backgrounds: list,
-                                   background_errors: list) -> None:
+                                   background_errors: list, statuses: list) -> None:
         """Populates the background corrections table with the provided data."""
         self.correction_options_table.blockSignals(True)
         self.correction_options_table.setRowCount(0)
-        for run, group, start_x, end_x, background, background_error in zip(runs, groups, start_xs, end_xs, backgrounds,
-                                                                            background_errors):
+        for run, group, start_x, end_x, background, background_error, status in zip(runs, groups, start_xs, end_xs,
+                                                                                    backgrounds, background_errors,
+                                                                                    statuses):
             row = self.correction_options_table.rowCount()
             self.correction_options_table.insertRow(row)
             self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, self._create_table_item(run, False))
@@ -179,7 +227,10 @@ class BackgroundCorrectionsView(widget, ui_form):
                                                   self._create_double_table_item(background, enabled=False))
             self.correction_options_table.setItem(row, A0_ERROR_COLUMN_INDEX,
                                                   self._create_double_table_item(background_error, enabled=False))
+            self.correction_options_table.setItem(row, STATUS_COLUMN_INDEX,
+                                                  self._create_table_item(status, False, alignment=Qt.AlignVCenter))
         self.correction_options_table.blockSignals(False)
+        self.correction_options_table.resizeColumnsToContents()
 
     def _setup_corrections_table(self) -> None:
         """Setup the correction options table to have a good layout."""
@@ -187,6 +238,8 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._setup_double_item_delegate(END_X_COLUMN_INDEX)
         self._setup_double_item_delegate(A0_COLUMN_INDEX)
         self._setup_double_item_delegate(A0_ERROR_COLUMN_INDEX)
+        self.correction_options_table.setItemDelegateForColumn(STATUS_COLUMN_INDEX,
+                                                               StatusItemDelegate(self.correction_options_table))
 
         self.correction_options_table.cellChanged.connect(lambda row, column:
                                                           self._on_corrections_table_cell_changed(row, column))
@@ -217,10 +270,11 @@ class BackgroundCorrectionsView(widget, ui_form):
         return self._create_table_item(self._float_to_str(value), editable, enabled)
 
     @staticmethod
-    def _create_table_item(text: str, editable: bool = True, enabled: bool = True) -> QTableWidgetItem:
+    def _create_table_item(text: str, editable: bool = True, enabled: bool = True, alignment: int = Qt.AlignCenter) \
+            -> QTableWidgetItem:
         """Creates a table item for the corrections options table from a string."""
         item = QTableWidgetItem(text)
-        item.setTextAlignment(Qt.AlignCenter)
+        item.setTextAlignment(alignment)
         if not editable:
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
         if not enabled:
