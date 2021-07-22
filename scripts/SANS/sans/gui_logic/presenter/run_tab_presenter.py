@@ -16,10 +16,11 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Optional
 
+from mantidqt.utils.observer_pattern import GenericObserver
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
-from ui.sans_isis.SansGuiObservable import SansGuiObservable
+from ui.sans_isis.sans_gui_observable import SansGuiObservable
 
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
@@ -38,7 +39,7 @@ from sans.gui_logic.models.run_tab_model import RunTabModel
 from sans.gui_logic.models.settings_adjustment_model import SettingsAdjustmentModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel
-from sans.gui_logic.presenter.Observers.run_tab_observers import SaveOptionsObserver, RunTabObservers
+from sans.gui_logic.presenter.Observers.run_tab_observers import RunTabObservers
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.presenter.masking_table_presenter import MaskingTablePresenter
@@ -142,9 +143,6 @@ class RunTabPresenter(PresenterCommon):
 
         def on_multi_period_selection(self, show_periods):
             self._presenter.on_multiperiod_changed(show_periods)
-
-        def on_reduction_dimensionality_changed(self, is_1d):
-            self._presenter.on_reduction_dimensionality_changed(is_1d)
 
         def on_output_mode_changed(self):
             self._presenter.on_output_mode_changed()
@@ -268,10 +266,12 @@ class RunTabPresenter(PresenterCommon):
 
     def _register_observers(self):
         self._observers = RunTabObservers(
-            save_options = SaveOptionsObserver(callback=self.on_save_options_change)
+            reduction_dim = GenericObserver(callback=self.on_reduction_dimensionality_changed),
+            save_options = GenericObserver(callback=self.on_save_options_change)
         )
 
         view_observable: SansGuiObservable = self._view.get_observable()
+        view_observable.reduction_dim.add_subscriber(self._observers.reduction_dim)
         view_observable.save_options.add_subscriber(self._observers.save_options)
 
     def default_gui_setup(self):
@@ -600,24 +600,11 @@ class RunTabPresenter(PresenterCommon):
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box('Warning', 'Process halted', str(e))
 
-    def on_reduction_dimensionality_changed(self, is_1d):
-        """
-        Unchecks and disabled canSAS output mode if switching to 2D reduction.
-        Enabled canSAS if switching to 1D.
-        :param is_1d: bool. If true then switching TO 1D reduction.
-        """
-        self._model.reduction_dimensionality = self._view.reduction_dimensionality
-
-        if not self._view.output_mode_memory_radio_button.isChecked():
-            # If we're in memory mode, all file types should always be disabled
-            if is_1d:
-                self._view.can_sas_checkbox.setEnabled(True)
-            else:
-                if self._view.can_sas_checkbox.isChecked():
-                    self._view.can_sas_checkbox.setChecked(False)
-                    self.sans_logger.information("2D reductions are incompatible with canSAS output. "
-                                                 "canSAS output has been unchecked.")
-                self._view.can_sas_checkbox.setEnabled(False)
+    def on_reduction_dimensionality_changed(self):
+        self._run_tab_model.update_reduction_mode(self._view.reduction_dimensionality)
+        # Update save options in case they've updated in the model
+        save_opts = self._run_tab_model.get_save_types()
+        self._view.save_types = save_opts
 
     def _validate_output_modes(self):
         """
@@ -641,10 +628,7 @@ class RunTabPresenter(PresenterCommon):
             # If in memory mode, disable all buttons regardless of dimension
             self._view.disable_file_type_buttons()
         else:
-            self._view.nx_can_sas_checkbox.setEnabled(True)
-            self._view.rkh_checkbox.setEnabled(True)
-            if self._view.reduction_dimensionality_1D.isChecked():
-                self._view.can_sas_checkbox.setEnabled(True)
+            self._view.enable_file_type_buttons()
 
     def on_process_all_clicked(self):
         """
