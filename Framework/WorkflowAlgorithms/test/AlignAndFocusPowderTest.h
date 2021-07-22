@@ -477,9 +477,9 @@ public:
      * filtering limits */
     ConvertUnits convert_units;
     convert_units.initialize();
-    convert_units.setPropertyValue( "InputWorkspace", m_outputWS );
-    convert_units.setPropertyValue( "OutputWorkspace", m_outputWS );
-    convert_units.setPropertyValue( "Target", "Wavelength" );
+    convert_units.setPropertyValue("InputWorkspace", m_outputWS);
+    convert_units.setPropertyValue("OutputWorkspace", m_outputWS);
+    convert_units.setPropertyValue("Target", "Wavelength");
     convert_units.execute();
 
     /* get the raw output data */
@@ -497,10 +497,10 @@ public:
     double peak_5_y = 277;
     double tol = 1e-5;
 
-    TS_ASSERT_DELTA( x0[ peak_2_index ], peak_2_x, tol );
-    TS_ASSERT_DELTA( y0[ peak_2_index ], peak_2_y, tol );
-    TS_ASSERT_DELTA( x0[ peak_5_index ], peak_5_x, tol );
-    TS_ASSERT_DELTA( y0[ peak_5_index ], peak_5_y, tol );
+    TS_ASSERT_DELTA(x0[peak_2_index], peak_2_x, tol);
+    TS_ASSERT_DELTA(y0[peak_2_index], peak_2_y, tol);
+    TS_ASSERT_DELTA(x0[peak_5_index], peak_5_x, tol);
+    TS_ASSERT_DELTA(y0[peak_5_index], peak_5_y, tol);
 
     /* cleanup */
     AnalysisDataService::Instance().remove(m_outputWS);
@@ -518,19 +518,19 @@ public:
     /* Convert the units of the workspace to get wavelength ranges */
     ConvertUnits convert_units_0;
     convert_units_0.initialize();
-    convert_units_0.setPropertyValue( "InputWorkspace", m_outputWS );
-    convert_units_0.setPropertyValue( "OutputWorkspace", m_outputWS );
-    convert_units_0.setPropertyValue( "Target", "Wavelength" );
+    convert_units_0.setPropertyValue("InputWorkspace", m_outputWS);
+    convert_units_0.setPropertyValue("OutputWorkspace", m_outputWS);
+    convert_units_0.setPropertyValue("Target", "Wavelength");
     convert_units_0.execute();
 
     const auto &y2 = m_outWS->y(0).rawData();
     const auto &x2 = m_outWS->x(0).rawData();
 
     /* y values of filtered peaks should be zero */
-    TS_ASSERT_DELTA( x2[ peak_2_index ], peak_2_x, tol );
-    TS_ASSERT_EQUALS( y2[ peak_2_index ], 0 );
-    TS_ASSERT_DELTA( x2[ peak_5_index ], peak_5_x, tol );
-    TS_ASSERT_EQUALS( y2[ peak_5_index ], 0 );
+    TS_ASSERT_DELTA(x2[peak_2_index], peak_2_x, tol);
+    TS_ASSERT_EQUALS(y2[peak_2_index], 0);
+    TS_ASSERT_DELTA(x2[peak_5_index], peak_5_x, tol);
+    TS_ASSERT_EQUALS(y2[peak_5_index], 0);
 
     /* Check the input workspace here for some reason otherwise segfault */
     docheckEventInputWksp();
