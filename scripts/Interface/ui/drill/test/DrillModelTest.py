@@ -21,6 +21,13 @@ class DrillModelTest(unittest.TestCase):
         self.addCleanup(patch.stop)
         self.mTasksPool = self.mTasksPool.return_value
 
+        patch = mock.patch("Interface.ui.drill.model.DrillModel.config")
+        self.mConfig = patch.start()
+        config = {"default.facility": "ILL"}
+        self.addCleanup(patch.stop)
+        self.mConfig.__getitem__.side_effect = config.__getitem__
+        # self.mConfig.__getitem__.return_value = "ILL"
+
         self.model = DrillModel()
 
     @mock.patch("Interface.ui.drill.model.DrillModel.RundexSettings")
