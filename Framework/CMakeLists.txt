@@ -186,3 +186,19 @@ endforeach()
 if(NOT FULL_PACKAGE_BUILD)
   add_subdirectory(PostInstall)
 endif()
+
+
+configure_package_config_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/MantidFrameworkConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework)
+
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake
+  VERSION 1.0.0
+  COMPATIBILITY SameMajorVersion )
+
+install(FILES
+          "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)

@@ -1042,6 +1042,12 @@ set_target_properties(Algorithms
                                  COMPILE_DEFINITIONS
                                  "IN_MANTID_ALGORITHMS")
 
+
+set_target_properties(Algorithms
+                      PROPERTIES OUTPUT_NAME
+                                 MantidAlgorithms
+                                 COMPILE_DEFINITIONS
+                                 "IN_MANTID_ALGORITHMS")
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Algorithms
                         PROPERTIES INSTALL_RPATH
@@ -1060,13 +1066,26 @@ target_link_libraries(Algorithms PUBLIC Mantid::API Mantid::HistogramData Mantid
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Algorithms PUBLIC ${CMAKE_BINARY_DIR}/Framework/Algorithms)
+target_include_directories(Algorithms PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Algorithms>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(Algorithms FALSE)
 
 # Installation settings
+set(TARGET_EXPORT_NAME "MantidAlgorithmsTargets")
 
 mtd_install_dylib(TARGETS
-                    Algorithms
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+                  Algorithms
+                  INSTALL_EXPORT_FILE
+                  EXPORT_NAME ${TARGET_EXPORT_NAME}
+                  INSTALL_DIRS
+                  ${PLUGINS_DIR}
+                  ${WORKBENCH_PLUGINS_DIR})
+
+# install(EXPORT ${TARGET_EXPORT_NAME}
+#         FILE ${TARGET_EXPORT_NAME}.cmake
+#         NAMESPACE Mantid::
+#         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Mantid
+# )
+

@@ -32,8 +32,6 @@ set_target_properties(Types
                                  "Types_EXPORTS;PSAPI_VERSION=1")
 
 set_property(TARGET Types PROPERTY FOLDER "MantidFramework")
-target_link_libraries(Types PUBLIC ${Boost_LIBRARIES})
-target_include_directories(Types SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 
 target_include_directories(Types PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
@@ -41,11 +39,25 @@ target_include_directories(Types PUBLIC
 )
 
 # Auto-generate exports header
-target_include_directories(Types PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
+target_include_directories(Types PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Types>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
+
+target_link_libraries(Types PUBLIC Boost::date_time Boost::regex)
 generate_mantid_export_header(Types FALSE)
 
 # Installation settings
-mtd_install_targets(TARGETS Types INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+set(TARGET_EXPORT_NAME "MantidTypesTargets")
+mtd_install_dylib(TARGETS Types INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)
+
 
 # Add the unit tests directory
 add_subdirectory(test)

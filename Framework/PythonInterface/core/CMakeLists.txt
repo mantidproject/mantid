@@ -79,7 +79,6 @@ target_include_directories(${_target_name} PUBLIC
 		$<INSTALL_INTERFACE:include/Mantid>
 )
 
-
 target_include_directories(${_target_name} SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 
 # Set the name of the generated library

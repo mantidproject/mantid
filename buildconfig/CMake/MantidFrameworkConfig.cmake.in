@@ -1,0 +1,7 @@
+# Defines the cmake targets for the Mantid framework.
+
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/MantidTypesTargets.cmake")
+
+check_required_components(MantidTypesTargets)

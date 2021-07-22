@@ -86,7 +86,7 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Parallel PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Parallel PUBLIC Mantid::Kernel)
+target_link_libraries(Parallel PUBLIC Mantid::Kernel Boost::serialization)
 
 if(UNIX AND NOT APPLE)
   target_link_libraries(Parallel PRIVATE rt)
@@ -119,10 +119,10 @@ endif()
 set_property(TARGET EventParallelLoader PROPERTY FOLDER "MantidFramework")
 
 
-target_link_libraries(EventParallelLoader PUBLIC Mantid::Kernel)
+target_link_libraries(EventParallelLoader PUBLIC Mantid::Kernel Boost::serialization)
 
 if(UNIX AND NOT APPLE)
-  target_link_libraries(EventParallelLoader LINK_PRIVATE rt)
+  target_link_libraries(EventParallelLoader PRIVATE rt)
 endif()
 
 # Add the unit tests directory
