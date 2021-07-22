@@ -15,7 +15,6 @@
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFitPropertyBrowser.h"
 #include "IndirectFittingModel.h"
-#include "IndirectSpectrumSelectionView.h"
 
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 
