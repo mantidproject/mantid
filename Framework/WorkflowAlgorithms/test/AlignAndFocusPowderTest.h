@@ -486,15 +486,6 @@ public:
     const auto &y0 = m_outWS->y(0);
     const auto &x0 = m_outWS->x(0).rawData();
 
-    /* Print out the workspace */
-    std::cout << "Captain! unfiltered workspace:" << std::endl;
-    for( int i = 1; i < x0.size(); ++i )
-    {
-      if( y0[ i ] > 0 && y0[ i - 1 ] == 0 ) std::cout << "Captain! Likely peak at ";
-      std::cout << "index " << i << ": ( " << x0[ i ] << ", " << y0[ i ] << " )" << std::endl;
-    }
-    std::cout << std::endl;
-
     /* Obtain data values from peaks 2 and 5 (zero-indexed): */
     /* 1.3 - 1.5 for peak 2 */
     int peak_2_index = 299;
@@ -662,7 +653,6 @@ public:
 
   /* Setup for event data. The caller supplies the workspace name */
 
-  /* Captain! */
   void setUp_EventWorkspace(const std::string &wkspname) {
     m_inputWS = wkspname;
     CreateSampleWorkspace createSampleAlg;
@@ -718,7 +708,6 @@ public:
     TS_ASSERT_EQUALS(m_inWS->y(0)[89], 1524);
   }
 
-  /* Captain! */
   void doTestEventWksp() {
     // Bin events using either ResampleX or Rebin
     int inputHistoBins{100};
