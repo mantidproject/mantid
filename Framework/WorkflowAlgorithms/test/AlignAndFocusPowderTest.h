@@ -454,8 +454,7 @@ public:
 
     /* Create fake event data in an event workspace */
     /* fake data is the "Powder Diffraction" composite function from
-     * CreateSampleWorkspace.cpp: a series
-     * of 9 Gaussians, the 9th Gaussian is the tallest. */
+     * CreateSampleWorkspace.cpp: a series of 9 peaks */
     setUp_EventWorkspace("EventWksp_filterResonance");
 
     // Set the inputs for doTestEventWksp
@@ -474,143 +473,76 @@ public:
 
     TS_ASSERT_EQUALS(m_outWS->getNumberHistograms(), 144);
 
-    /* Run ConvertUnits */
-    /*
+    /* Convert the units of the workspace to wavelength, the same units as the resonance
+     * filtering limits */
     ConvertUnits convert_units;
     convert_units.initialize();
-    convert_units.setPropertyValue("InputWorkspace", m_outputWS );
-    convert_units.setPropertyValue("OutputWorkspace", m_outputWS );
-    convert_units.setPropertyValue("Target", "Wavelength");
+    convert_units.setPropertyValue( "InputWorkspace", m_outputWS );
+    convert_units.setPropertyValue( "OutputWorkspace", m_outputWS );
+    convert_units.setPropertyValue( "Target", "Wavelength" );
     convert_units.execute();
-    */
 
     /* get the raw output data */
-    //const std::vector< double > &y0 = m_outWS->y(0).rawData();
     const auto &y0 = m_outWS->y(0);
-    const std::vector< double > &x0 = m_outWS->x(0).rawData();
-
-    /* find the index of the max element */
-    /* note warning */
-    const auto index_0 = std::distance( y0.cbegin(),
-                                        std::max_element( y0.cbegin(), y0.cend() ) );
-
-    /* print out the max element */
-    double x_max_0 = x0[ index_0 ];
-    double y_max_0 = y0[ index_0 ];
-
-    std::cout << "Ahoy, Captain! Before: " << std::endl;
-
-    /* y-value at this index should be 232 in the unfiltered and 0 in the filtered */
-    /* x-value at this index should be 1.36189937... */
-    int peak_2_index = 286; 
-    double peak_2_x_unfiltered = x0[ peak_2_index ];
-    double peak_2_y_unfiltered = y0[ peak_2_index ];
-
-    std::cout << "Ahoy, Captain! peak_2: ( " << peak_2_x_unfiltered << ", " 
-              << peak_2_y_unfiltered << " )" << std::endl;
-
-    /* x-value at this index: 2.65263236 */
-    /* y-value at this index: 849.0 */
-    int peak_5_index = 353;
-    double peak_5_x_unfiltered = x0[ peak_5_index ];
-    double peak_5_y_unfiltered = y0[ peak_5_index ];
-    std::cout << "Ahoy, Captain! peak_5: ( " << peak_5_x_unfiltered << ", " 
-              << peak_5_y_unfiltered << " )" << std::endl;
+    const auto &x0 = m_outWS->x(0).rawData();
 
     /* Print out the workspace */
-    /* Captain! */
-    std::cout << "unfiltered workspace:" << std::endl;
-    for( int i = 0; i < x0.size(); ++i )
+    std::cout << "Captain! unfiltered workspace:" << std::endl;
+    for( int i = 1; i < x0.size(); ++i )
     {
-      std::cout << "( " << x0[ i ] << ", " << y0[ i ] << " )" << std::endl;
+      if( y0[ i ] > 0 && y0[ i - 1 ] == 0 ) std::cout << "Captain! Likely peak at ";
+      std::cout << "index " << i << ": ( " << x0[ i ] << ", " << y0[ i ] << " )" << std::endl;
     }
     std::cout << std::endl;
+
+    /* Obtain data values from peaks 2 and 5 (zero-indexed): */
+    /* 1.3 - 1.5 for peak 2 */
+    int peak_2_index = 299;
+    double peak_2_x = 1.36951;
+    double peak_2_y = 126;
+    /* 2.6 - 2.8 */
+    int peak_5_index = 599;
+    double peak_5_x = 2.66423;
+    double peak_5_y = 277;
+    double tol = 1e-5;
+
+    TS_ASSERT_DELTA( x0[ peak_2_index ], peak_2_x, tol );
+    TS_ASSERT_DELTA( y0[ peak_2_index ], peak_2_y, tol );
+    TS_ASSERT_DELTA( x0[ peak_5_index ], peak_5_x, tol );
+    TS_ASSERT_DELTA( y0[ peak_5_index ], peak_5_y, tol );
 
     /* cleanup */
     AnalysisDataService::Instance().remove(m_outputWS);
 
-    /* Run 1: produces the aligned and focused output workspace with the wavelenth range
-       containing the max filtered out */
-    /* Empirically determined wavelength range known to contain the tallest Gaussian "peak" */
-    /* ...looks like this worked... */
-    m_filterResonanceLower = "3.7";
-    m_filterResonanceUpper = "4.2";
+    /* Run 2: produces the aligned and focused output workspace with two peaks
+     * filtered out: the indices they occupied should now contain zero. */
 
-    /* now seems like there is a workspace leak... go ahead and see if you can remove it here */
+    /* filter out peak 2 and peak 5 from above */
+    m_filterResonanceLower = "1.3, 2.6";
+    m_filterResonanceUpper = "1.5, 2.8";
 
     /* Run AlignAndFocus */
     doTestEventWksp();
 
-    /*
-    ConvertUnits convert_units_1;
-    convert_units_1.initialize();
-    convert_units_1.setPropertyValue("InputWorkspace", m_outputWS );
-    convert_units_1.setPropertyValue("OutputWorkspace", m_outputWS );
-    convert_units_1.setPropertyValue("Target", "Wavelength");
-    convert_units_1.execute();
-    */
+    /* Convert the units of the workspace to get wavelength ranges */
+    ConvertUnits convert_units_0;
+    convert_units_0.initialize();
+    convert_units_0.setPropertyValue( "InputWorkspace", m_outputWS );
+    convert_units_0.setPropertyValue( "OutputWorkspace", m_outputWS );
+    convert_units_0.setPropertyValue( "Target", "Wavelength" );
+    convert_units_0.execute();
 
-    /* obtain raw data and print it out: */
-    /* Question: is it the same exact reference as x0/y0 above? I figure so...? What vector
-     * operations invalidate references? */
-    const std::vector< double > &y1 = m_outWS->y(0).rawData();
-    const std::vector< double > &x1 = m_outWS->x(0).rawData();
-    int index_1 = std::distance( y1.begin(), std::max_element( y1.begin(), y1.end() ) );
+    const auto &y2 = m_outWS->y(0).rawData();
+    const auto &x2 = m_outWS->x(0).rawData();
 
-    double x_max_1 = x1[ index_1 ];
-    double y_max_1 = y1[ index_1 ];
-
-    TS_ASSERT( x_max_1 < x_max_0 );
-    TS_ASSERT( y_max_1 < y_max_0 );
-
-    AnalysisDataService::Instance().remove(m_outputWS);
-
-    /* show that the max peak was removed by showing the new max is less than the old one and
-       located closer to zero */
-    /* Run 2: produces the aligned and focused output workspace with the xth and yth peaks
-     * filtered out: the indices they occupied should now contain zero: */
-    /* How do you specify an array property in a string?? Do you create a vector of strings? */
-    /* If so, the filter resonance member variable will have to be changed I think? */
-    /* will it work to just make it comma separated? Idk... */
-    m_filterResonanceLower = "1.0, 1.5";
-    m_filterResonanceUpper = "2.4, 2.9";
-
-    /* Run AlignAndFocus */
-    doTestEventWksp();
-
-    /*
-    ConvertUnits convert_units_2;
-    convert_units_2.initialize();
-    convert_units_2.setPropertyValue("InputWorkspace", m_outputWS );
-    convert_units_2.setPropertyValue("OutputWorkspace", m_outputWS );
-    convert_units_2.setPropertyValue("Target", "Wavelength");
-    convert_units_2.execute();
-    */
-
-    const std::vector< double > &y2 = m_outWS->y(0).rawData();
-    const std::vector< double > &x2 = m_outWS->x(0).rawData();
-
-    peak_2_x_unfiltered = x2[ peak_2_index ];
-    peak_2_y_unfiltered = y2[ peak_2_index ];
-    peak_5_x_unfiltered = x2[ peak_5_index ];
-    peak_5_y_unfiltered = y2[ peak_5_index ];
-    std::cout << "Ahoy, Captain! After" << std::endl;
-    std::cout << "Ahoy, Captain! peak_2: ( " << peak_2_x_unfiltered << ", " 
-              << peak_2_y_unfiltered << " )" << std::endl;
-    std::cout << "Ahoy, Captain! peak_5: ( " << peak_5_x_unfiltered << ", " 
-              << peak_5_y_unfiltered << " )" << std::endl;
+    /* y values of filtered peaks should be zero */
+    TS_ASSERT_DELTA( x2[ peak_2_index ], peak_2_x, tol );
+    TS_ASSERT_EQUALS( y2[ peak_2_index ], 0 );
+    TS_ASSERT_DELTA( x2[ peak_5_index ], peak_5_x, tol );
+    TS_ASSERT_EQUALS( y2[ peak_5_index ], 0 );
 
     /* Check the input workspace here for some reason otherwise segfault */
     docheckEventInputWksp();
-
-    /* check the output - the final peak should be removed */
-    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
-    // TODO just copied value from a failed run - should look for where the events should have been filtered out
-    // TODO this position in the workspace is where the prompt pulse would have been from when it was copied
-    // TODO from `testEventWksp_preserveEvents_removePromptPulse`
-    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 277.);
 
     /* remove trashed workspaces */
     AnalysisDataService::Instance().remove(m_inputWS);
