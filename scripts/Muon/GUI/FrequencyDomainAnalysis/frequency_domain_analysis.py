@@ -134,6 +134,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.help_widget = HelpWidget(self.context.window_title)
 
         central_widget = QtWidgets.QWidget()
+        central_widget.setMinimumWidth(590)
         vertical_layout = QtWidgets.QVBoxLayout()
 
         vertical_layout.addWidget(self.load_widget.load_widget_view)

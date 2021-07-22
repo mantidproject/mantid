@@ -140,6 +140,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         vertical_layout.addWidget(self.tabs)
         vertical_layout.addWidget(self.help_widget.view)
         central_widget.setLayout(vertical_layout)
+        central_widget.setMinimumWidth(730)
 
         self.setCentralWidget(central_widget)
         self.setWindowTitle(self.context.window_title)
