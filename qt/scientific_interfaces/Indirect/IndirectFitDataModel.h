@@ -38,6 +38,7 @@ public:
   std::vector<double> getQValuesForData() const override;
   std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const override;
   std::vector<std::string> getWorkspaceNames() const override;
+  std::string createDisplayName(WorkspaceID workspaceID) const override;
 
   void setSpectra(const std::string &spectra, WorkspaceID workspaceID) override;
   void setSpectra(FunctionModelSpectra &&spectra, WorkspaceID workspaceID) override;

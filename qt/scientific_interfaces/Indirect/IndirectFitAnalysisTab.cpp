@@ -335,7 +335,7 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
         auto const paramWsName = m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
         auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);
         auto rowCount = static_cast<int>(paramWs->rowCount());
-        if (rowCount == static_cast<int>(m_fittingModel->getNumberOfDomains()))
+        if (rowCount == static_cast<int>(m_dataPresenter->getNumberOfDomains()))
           m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
       } else {
         IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
@@ -359,8 +359,8 @@ void IndirectFitAnalysisTab::updateFitStatus() {
   if (m_fittingModel->getFittingMode() == FittingMode::SIMULTANEOUS) {
     std::string fit_status = m_fittingAlgorithm->getProperty("OutputStatus");
     double chi2 = m_fittingAlgorithm->getProperty("OutputChiSquared");
-    const std::vector<std::string> status(m_fittingModel->getNumberOfDomains(), fit_status);
-    const std::vector<double> chiSquared(m_fittingModel->getNumberOfDomains(), chi2);
+    const std::vector<std::string> status(m_dataPresenter->getNumberOfDomains(), fit_status);
+    const std::vector<double> chiSquared(m_dataPresenter->getNumberOfDomains(), chi2);
     m_fitPropertyBrowser->updateFitStatusData(status, chiSquared);
   } else {
     const std::vector<std::string> status = m_fittingAlgorithm->getProperty("OutputStatus");
@@ -594,8 +594,8 @@ QList<FunctionModelDataset> IndirectFitAnalysisTab::getDatasets() const {
 }
 
 void IndirectFitAnalysisTab::updateDataReferences() {
-  m_fitPropertyBrowser->updateFunctionBrowserData(static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasets(),
-                                                  m_fittingModel->getQValuesForData(),
+  m_fitPropertyBrowser->updateFunctionBrowserData(static_cast<int>(m_dataPresenter->getNumberOfDomains()),
+                                                  getDatasets(), m_dataPresenter->getQValuesForData(),
                                                   m_fittingModel->getResolutionsForFit());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFitFunction());
 }

@@ -109,10 +109,15 @@ void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
 void IndirectFitDataPresenter::updateTableFromModel() {
   ScopedFalse _signalBlock(m_emitCellChanged);
   m_view->clearTable();
-  for (auto domainIndex = FitDomainIndex{0}; domainIndex < m_model->getNumberOfDomains(); domainIndex++) {
+  for (auto domainIndex = FitDomainIndex{0}; domainIndex < getNumberOfDomains(); domainIndex++) {
     addTableEntry(domainIndex);
   }
 }
+
+size_t IndirectFitDataPresenter::getNumberOfDomains() { return m_model->getNumberOfDomains(); }
+
+std::vector<double> IndirectFitDataPresenter::getQValuesForData() const { return m_model->getQValuesForData(); }
+
 void IndirectFitDataPresenter::displayWarning(const std::string &warning) { m_view->displayWarning(warning); }
 
 void IndirectFitDataPresenter::addTableEntry(FitDomainIndex row) {

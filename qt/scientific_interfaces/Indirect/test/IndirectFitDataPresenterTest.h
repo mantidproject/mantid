@@ -88,6 +88,7 @@ public:
   MOCK_CONST_METHOD0(getQValuesForData, std::vector<double>());
   MOCK_CONST_METHOD0(getResolutionsForFit, std::vector<std::pair<std::string, size_t>>());
   MOCK_CONST_METHOD0(getWorkspaceNames, std::vector<std::string>());
+  MOCK_CONST_METHOD1(createDisplayName, std::string(WorkspaceID workspaceID));
 
   MOCK_METHOD2(setSpectra, void(const std::string &spectra, WorkspaceID workspaceID));
   MOCK_METHOD2(setSpectra, void(FunctionModelSpectra &&spectra, WorkspaceID workspaceID));

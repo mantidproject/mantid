@@ -22,8 +22,8 @@ struct FitDataRow {
   std::string name;
   std::string exclude;
   size_t workspaceIndex;
-  int startX;
-  int endX;
+  double startX;
+  double endX;
   std::string resolution;
   std::string parameter;
 };

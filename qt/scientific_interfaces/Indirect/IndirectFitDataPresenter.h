@@ -38,6 +38,8 @@ public:
   QStringList getResolutionWSSuffices() const;
   QStringList getResolutionFBSuffices() const;
   void updateTableFromModel();
+  size_t getNumberOfDomains();
+  std::vector<double> getQValuesForData() const;
 
   UserInputValidator &validate(UserInputValidator &validator);
 

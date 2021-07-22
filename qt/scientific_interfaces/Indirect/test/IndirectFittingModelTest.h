@@ -247,39 +247,9 @@ public:
     TS_ASSERT_EQUALS(model->getWorkspace(1), nullptr);
   }
 
-  void test_that_setSpectra_will_set_the_spectra_to_the_provided_inputSpectra() {
-    auto model = createModelWithSingleWorkspace("WorkspaceName", 10);
-
-    FunctionModelSpectra const inputSpectra = FunctionModelSpectra("2,4,6-8");
-    model->setSpectra(inputSpectra, 0);
-    FunctionModelSpectra const spectra = model->getSpectra(0);
-
-    TS_ASSERT_EQUALS(spectra, inputSpectra);
-  }
-
-  void test_that_setSpectra_will_set_the_spectra_when_provided_a_spectra_pair() {
-    auto model = createModelWithSingleWorkspace("WorkspaceName", 10);
-
-    FunctionModelSpectra const inputSpectra = FunctionModelSpectra(WorkspaceIndex(0), WorkspaceIndex(5));
-    model->setSpectra(inputSpectra, 0);
-    FunctionModelSpectra const spectra = model->getSpectra(0);
-
-    TS_ASSERT_EQUALS(spectra, inputSpectra);
-  }
-
   void test_that_setSpectra_does_not_throw_when_provided_an_out_of_range_dataIndex() {
     auto const model = createModelWithSingleWorkspace("WorkspaceName", 5);
     TS_ASSERT_THROWS_NOTHING(model->getSpectra(1));
-  }
-
-  void test_that_getSpectra_returns_a_correct_spectra_when_the_index_provided_is_valid() {
-    auto model = createModelWithSingleWorkspace("WorkspaceName", 3);
-
-    FunctionModelSpectra const inputSpectra = FunctionModelSpectra("0-1");
-    model->setSpectra(inputSpectra, 0);
-    FunctionModelSpectra const spectra = model->getSpectra(0);
-
-    TS_ASSERT_EQUALS(spectra, inputSpectra);
   }
 
   void test_that_getSpectra_returns_an_empty_DiscontinuousSpectra_when_provided_an_out_of_range_index() {
@@ -325,61 +295,6 @@ public:
 
     TS_ASSERT_EQUALS(model->getFittingRange(1, 0).first, 0.0);
     TS_ASSERT_EQUALS(model->getFittingRange(1, 0).second, 0.0);
-  }
-
-  void test_that_getFittingRange_returns_empty_range_when_there_are_zero_spectra() {
-    auto model = createModelWithSingleWorkspace("WorkspaceName", 1);
-
-    model->setStartX(1.2, 0, 0);
-    model->setEndX(5.6, 0, 0);
-    FunctionModelSpectra const emptySpec("");
-    model->setSpectra(emptySpec, 0);
-
-    TS_ASSERT_EQUALS(model->getFittingRange(0, 0).first, 0.0);
-    TS_ASSERT_EQUALS(model->getFittingRange(0, 0).second, 0.0);
-  }
-
-  void test_that_setExcludeRegion_set_the_excludeRegion_at_the_first_dataIndex_when_the_fit_is_sequential() {
-    auto model = createModelWithSingleWorkspace("WorkspaceName", 5);
-
-    model->setExcludeRegion("0,1,3,4", 0, 0);
-
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,3.000,4.000");
-  }
-
-  void test_that_getExcludeRegion_returns_correct_range_when_provided_a_valid_index_and_spectrum() {
-    auto model = createModelWithSingleWorkspace("WorkspaceName", 1);
-
-    model->setExcludeRegion("0,1,3,4", 0, 0);
-
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,3.000,4.000");
-  }
-
-  void test_that_getExcludeRegion_returns_empty_range_when_provided_an_out_of_range_dataIndex() {
-    auto model = createModelWithSingleWorkspace("WorkspaceName", 1);
-
-    model->setExcludeRegion("0,1,3,4", 0, 0);
-
-    TS_ASSERT_EQUALS(model->getExcludeRegion(1, 0), "");
-  }
-
-  void test_that_getExcludeRegion_returns_empty_range_when_there_are_zero_spectra() {
-    auto model = createModelWithSingleWorkspace("WorkspaceName", 1);
-
-    model->setExcludeRegion("0,1,3,4", 0, 0);
-    FunctionModelSpectra const emptySpec("");
-    model->setSpectra(emptySpec, 0);
-
-    TS_ASSERT_EQUALS(model->getExcludeRegion(1, 0), "");
-  }
-
-  void
-  test_that_getExcludeRegion_returns_a_region_where_each_range_is_in_order_after_setExcludeRegion_is_given_an_unordered_region_string() {
-    auto model = createModelWithSingleWorkspace("WorkspaceName", 1);
-
-    model->setExcludeRegion("0,1,6,4", 0, 0);
-
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,4.000,6.000");
   }
 
   void test_that_isMultiFit_returns_true_when_there_are_more_than_one_workspaces_stored_in_the_model() {
@@ -513,17 +428,6 @@ public:
   void test_that_getNumberOfSpectra_returns_the_number_of_spectra_stored_in_the_workspace_given() {
     auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
     TS_ASSERT_EQUALS(model->getNumberOfSpectra(0), 3);
-  }
-
-  void test_that_getNumberOfDomains_returns_the_number_of_domains_in_the_dataTableModel() {
-    auto const model = createModelWithMultipleWorkspaces(3, "Workspace1", "Workspace2");
-    TS_ASSERT_EQUALS(model->getNumberOfDomains(), 6);
-  }
-
-  void test_that_getQValuesForData_returns_values_from_fitDataModel() {
-    auto const model = createModelWithSingleInelasticInstrumentWorkspace("WorkspaceName", 5);
-    std::vector<double> QValues{2.1986};
-    TS_ASSERT_DELTA(model->getQValuesForData(), QValues, 1e-4)
   }
 
   void test_that_getFitParameterNames_returns_an_empty_vector_if_the_fitOutput_is_empty() {

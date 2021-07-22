@@ -39,6 +39,7 @@ public:
   virtual std::vector<double> getQValuesForData() const = 0;
   virtual std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const = 0;
   virtual std::vector<std::string> getWorkspaceNames() const = 0;
+  virtual std::string createDisplayName(WorkspaceID workspaceID) const = 0;
 
   virtual void setSpectra(const std::string &spectra, WorkspaceID workspaceID) = 0;
   virtual void setSpectra(FunctionModelSpectra &&spectra, WorkspaceID workspaceID) = 0;

@@ -16,6 +16,12 @@ using namespace MantidQt::MantidWidgets;
 
 namespace {
 
+using namespace MantidQt::CustomInterfaces::IDA;
+
+std::string getFitDataName(const std::string &baseWorkspaceName, const FunctionModelSpectra &workspaceIndexes) {
+  return baseWorkspaceName + " (" + workspaceIndexes.getString() + ")";
+}
+
 bool equivalentWorkspaces(const Mantid::API::MatrixWorkspace_const_sptr &lhs,
                           const Mantid::API::MatrixWorkspace_const_sptr &rhs) {
   if (!lhs || !rhs)
@@ -52,6 +58,14 @@ FunctionModelSpectra IndirectFitDataModel::getSpectra(WorkspaceID workspaceID) c
   if (workspaceID < m_fittingData->size())
     return m_fittingData->at(workspaceID.value).spectra();
   return FunctionModelSpectra("");
+}
+
+std::string IndirectFitDataModel::createDisplayName(WorkspaceID workspaceID) const {
+  if (getNumberOfWorkspaces() > workspaceID)
+    return getFitDataName(getWorkspaceNames()[workspaceID.value], getSpectra(workspaceID));
+  else
+    throw std::runtime_error("Cannot create a display name for a workspace:"
+                             "the workspace index provided is too large.");
 }
 
 WorkspaceID IndirectFitDataModel::getNumberOfWorkspaces() const { return WorkspaceID{m_fittingData->size()}; }

@@ -270,17 +270,17 @@ void FqFitModel::setActiveWidth(std::size_t widthIndex, WorkspaceID workspaceID,
   if (parametersIt != m_fqFitParameters.end() && parametersIt->second.widthSpectra.size() > widthIndex) {
     const auto &widthSpectra = parametersIt->second.widthSpectra;
     if (single == true) {
-      setSpectra(createSpectra(std::vector<std::size_t>({widthSpectra[widthIndex]})), workspaceID);
+      m_fitDataModel->setSpectra(createSpectra(std::vector<std::size_t>({widthSpectra[widthIndex]})), workspaceID);
     } else { // In multiple mode the spectra needs to be appending on the
              // existing spectra list.
       auto spectra_vec = std::vector<std::size_t>({widthSpectra[widthIndex]});
-      auto spectra = getSpectra(workspaceID);
+      auto spectra = m_fitDataModel->getSpectra(workspaceID);
       for (auto i : spectra) {
         if ((std::find(spectra_vec.begin(), spectra_vec.end(), i.value) == spectra_vec.end())) {
           spectra_vec.push_back(i.value);
         }
       }
-      setSpectra(createSpectra(spectra_vec), workspaceID);
+      m_fitDataModel->setSpectra(createSpectra(spectra_vec), workspaceID);
     }
   } else
     logger.warning("Invalid width index specified.");
@@ -291,17 +291,17 @@ void FqFitModel::setActiveEISF(std::size_t eisfIndex, WorkspaceID workspaceID, b
   if (parametersIt != m_fqFitParameters.end() && parametersIt->second.eisfSpectra.size() > eisfIndex) {
     const auto &eisfSpectra = parametersIt->second.eisfSpectra;
     if (single == true) {
-      setSpectra(createSpectra(std::vector<std::size_t>({eisfSpectra[eisfIndex]})), workspaceID);
+      m_fitDataModel->setSpectra(createSpectra(std::vector<std::size_t>({eisfSpectra[eisfIndex]})), workspaceID);
     } else { // In multiple mode the spectra needs to be appending on the
              // existing spectra list.
       auto spectra_vec = std::vector<std::size_t>({eisfSpectra[eisfIndex]});
-      auto spectra = getSpectra(workspaceID);
+      auto spectra = m_fitDataModel->getSpectra(workspaceID);
       for (auto i : spectra) {
         if ((std::find(spectra_vec.begin(), spectra_vec.end(), i.value) == spectra_vec.end())) {
           spectra_vec.push_back(i.value);
         }
       }
-      setSpectra(createSpectra(spectra_vec), workspaceID);
+      m_fitDataModel->setSpectra(createSpectra(spectra_vec), workspaceID);
     }
   } else
     logger.warning("Invalid EISF index specified.");
