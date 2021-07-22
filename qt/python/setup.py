@@ -5,16 +5,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import os
 from setuptools import find_packages, setup
 
-
-@SETUPTOOLS_BUILD_COMMANDS_DEF@
-
 setup(
-    name='mantidqt', # must match what is required by workbench setup.py
+    name='mantidqt',  # must match what is required by workbench setup.py
     install_requires=['mantid'],
-    version='@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@VERSION_TWEAK_PY@',
+    version=os.environ['MANTID_VERSION_STR'],
     packages=find_packages(exclude=['*.test']),
     package_data={'': ['*.ui']},
-    @SETUPTOOLS_BUILD_COMMANDS_USE@
 )

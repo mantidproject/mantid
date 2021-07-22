@@ -18,12 +18,10 @@
 #                             file in the egg link directory
 # ~~~
 function(add_python_package pkg_name)
-  # Create a setup.py file if necessary
   set(_setup_py ${CMAKE_CURRENT_SOURCE_DIR}/setup.py)
-  set(_setup_py_build_root ${CMAKE_CURRENT_BINARY_DIR})
+  set(_setup_py_build_root ${CMAKE_CURRENT_SOURCE_DIR}/build)
   set(_egg_link_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR})
 
-  _configure_setup_py(${_setup_py} ${_setup_py_build_root})
   cmake_parse_arguments(
     _parsed_arg "EXECUTABLE;GENERATE_SITECUSTOMIZE"
     "EGGLINKNAME;EXCLUDE_FROM_INSTALL;INSTALL_BIN_DIR" "INSTALL_LIB_DIRS"
@@ -124,41 +122,4 @@ function(add_python_package pkg_name)
             DESTINATION ${_parsed_arg_INSTALL_BIN_DIR}
     )
   endif()
-endfunction()
-
-# ~~~
-# Function to generate a setup.py from a template. It is assumed the template
-# resides at ${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in.
-# The generated file injects custom build commands to:
-#  - ensure setup build/install ends up in the binary tree and not source
-#  - inject a sitecustomize file in the egg-link directory if one does not
-#    exist
-# ~~~
-function(_configure_setup_py target build_root)
-  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
-    message(
-      FATAL_ERROR
-        "Unable to generate setup.py. ${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in not found."
-    )
-  endif()
-  # # ~~~ set(SETUPTOOLS_BUILD_COMMANDS_DEF "class
-  # CustomBuildDir(setuptools_command_cls): user_options =
-  # setuptools_command_cls.user_options[:] boolean_options =
-  # setuptools_command_cls.boolean_options[:]
-
-  # def finalize_options(self): self.build_lib = '${build_root}/build'
-  # setuptools_command_cls.finalize_options(self)
-
-  # def patch_setuptools_command(cmd_cls_name, CommandCls): import importlib
-  # cmd_module = importlib.import_module('setuptools.command.' + cmd_cls_name)
-  # setuptools_command_cls = getattr(cmd_module, cmd_cls_name) return CommandCls
-
-  # CustomBuildPy = patch_setuptools_command('build_py') CustomInstall =
-  # patch_setuptools_command('install') CustomInstallLib =
-  # patch_setuptools_command('install_lib') " ) # ~~~
-
-  # set(SETUPTOOLS_BUILD_COMMANDS_USE "cmdclass={'build_py': CustomBuildPy,
-  # 'install': CustomInstall, 'install-lib': CustomInstallLib }" )
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in ${target} @ONLY)
-
 endfunction()
