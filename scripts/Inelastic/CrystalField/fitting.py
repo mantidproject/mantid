@@ -1265,6 +1265,7 @@ class CrystalFieldFit(object):
         self._fit_properties = kwargs
         self._function = None
         self._estimated_parameters = None
+        self._free_cef_parameters = []
         if self.model.NumberOfSpectra == 1:
             logger.notice("Fit single spectrum")
         else:
@@ -1288,6 +1289,57 @@ class CrystalFieldFit(object):
         else:
             self._monte_carlo_single(**kwargs)
         self.model.FixAllPeaks = fix_all_peaks
+
+    def two_step_fit(self, OverwriteMaxIterations=None, OverwriteMinimizers=None, Iterations=20):
+        fix_all_peaks = self.model.FixAllPeaks
+        fit_properties = self._fit_properties
+        self._overwrite_maxiterations = OverwriteMaxIterations
+        if self._overwrite_maxiterations is not None and len(self._overwrite_maxiterations) != 2:
+            raise RuntimeError('You must provide two values for overwriting MaxIterations')
+        self._overwrite_minimizer = OverwriteMinimizers
+        if self._overwrite_minimizer is not None and len(self._overwrite_minimizer) != 2:
+            raise RuntimeError('You must provide two values for overwriting Minimizers')
+        self._iterations = Iterations
+        self.check_consistency()
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
+        # Store free CEF parameters
+        if isinstance(self.model, CrystalFieldMultiSite):
+            fun = self.model.function
+        else:
+            if self._function is None:
+                fun = self.model.crystalFieldFunction
+            else:
+                fun = self._function
+        for par_id in [id for id in range(fun.nParams()) if not fun.isFixed(id)]:
+            parName = fun.getParamName(par_id)
+            if parName in CrystalField.field_parameter_names or parName == "IntensityScaling":
+                self._free_cef_parameters.append(par_id)
+        self._two_step_fit()
+        self.model.FixAllPeaks = fix_all_peaks
+        self._fit_properties = fit_properties
+
+    def _two_step_fit(self):
+        iter = 0
+        while iter < self._iterations:
+            self.model.FixAllPeaks = True
+            if self._overwrite_maxiterations is not None:
+                self._fit_properties['MaxIterations'] = self._overwrite_maxiterations[0]
+            if self._overwrite_minimizer is not None:
+                self._fit_properties['Minimizer'] = self._overwrite_minimizer[0]
+            self.fit()
+            self._function = self.model.function
+            for parameter in self._free_cef_parameters:
+                self._function.fixParameter(parameter)
+            self.model.FixAllPeaks = False
+            if self._overwrite_maxiterations is not None:
+                self._fit_properties['MaxIterations'] = self._overwrite_maxiterations[1]
+            if self._overwrite_minimizer is not None:
+                self._fit_properties['Minimizer'] = self._overwrite_minimizer[1]
+            self.fit()
+            self._function = self.model.function
+            for parameter in self._free_cef_parameters:
+                self._function.removeTie(parameter)
+            iter += 1
 
     def estimate_parameters(self, EnergySplitting, Parameters, **kwargs):
         from CrystalField.normalisation import split2range
