@@ -483,17 +483,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 normFactor = self._sampleAndEnvironmentProperties['NMoles'].value
                 CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace=norm_ws)
             else:
-                normalisationFactors, dataE = self._max_value_per_detector(mtd[cross_section_ws].name(),
-                                                                           one_per_detector=False)
-                unit_ws = 'unit'
-                CreateSingleValuedWorkspace(DataValue=1.0, ErrorValue=0.0,
-                                            OutputWorkspace=unit_ws)
-                maximumFactors_ws = "maximum_vanadium_ws"
-                CreateSingleValuedWorkspace(DataValue=normalisationFactors, ErrorValue=dataE,
-                                            OutputWorkspace=maximumFactors_ws)
-                Divide(LHSWorkspace=unit_ws, RHSWorkspace=maximumFactors_ws, OutputWorkspace=norm_ws)
-                to_clean += [unit_ws, maximumFactors_ws]
-
+                CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=norm_ws)
             to_clean.append(norm_ws)
             Multiply(LHSWorkspace=cross_section_ws,
                      RHSWorkspace=norm_ws,
