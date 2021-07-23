@@ -62,6 +62,6 @@ if [[ $ENABLE_UNIT_TESTS == true ]]; then
 fi
 
 if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
-    run_with_xvfb $WORKSPACE/systemtest
+    run_with_xvfb $WORKSPACE/build/systemtest
     terminate_xvfb_sessions
 fi
