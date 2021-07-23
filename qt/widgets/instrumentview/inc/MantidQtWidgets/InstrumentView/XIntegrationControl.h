@@ -15,6 +15,7 @@ class QScrollBar;
 class QPushButton;
 class QLineEdit;
 class QLabel;
+class QSpinBox;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -24,7 +25,7 @@ class InstrumentWidget;
 class XIntegrationScrollBar : public QFrame {
   Q_OBJECT
 public:
-  explicit XIntegrationScrollBar(QWidget *parent);
+  explicit XIntegrationScrollBar(QWidget *parent, bool isDiscrete = false, int stepsTotal = 0);
   double getMinimum() const;
   double getMaximum() const;
   double getWidth() const;
@@ -37,7 +38,9 @@ protected:
   void mouseMoveEvent(QMouseEvent *e) override;
   void resizeEvent(QResizeEvent *e) override;
   bool eventFilter(QObject *object, QEvent *e) override;
+  bool manageEventDiscrete(QEvent *e);
   void updateMinMax();
+  void setDiscreteValues();
 
 private:
   int m_resizeMargin; ///< distance from the left (or right) end of the slider
@@ -50,6 +53,10 @@ private:
   int m_x, m_width;
   double m_minimum;
   double m_maximum;
+  int m_stepsTotal;
+  bool m_isDiscrete;
+  int m_currentStepMin;
+  int m_currentStepMax;
   QPushButton *m_slider;
 };
 
@@ -59,7 +66,7 @@ private:
 class XIntegrationControl : public QFrame {
   Q_OBJECT
 public:
-  explicit XIntegrationControl(InstrumentWidget *instrWindow);
+  explicit XIntegrationControl(InstrumentWidget *instrWindow, bool isDiscrete = false, int stepsTotal = 0);
   void setTotalRange(double minimum, double maximum);
   void setUnits(const QString &units);
   void setRange(double minimum, double maximum);
@@ -78,6 +85,7 @@ private slots:
 
 private:
   void updateTextBoxes();
+  void discretize();
   InstrumentWidget *m_instrWindow;
   XIntegrationScrollBar *m_scrollBar;
   QLineEdit *m_minText;
@@ -88,6 +96,7 @@ private:
   double m_totalMaximum;
   double m_minimum;
   double m_maximum;
+  bool m_isDiscrete;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -147,7 +147,10 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
 
   m_instrumentActor.reset(new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
 
-  m_xIntegration = new XIntegrationControl(this);
+  bool isDiscrete = m_instrumentActor->getWorkspace()->isCommonBins() &&
+                    m_instrumentActor->getWorkspace()->getAxis(0)->unit()->unitID() == "Empty";
+  int stepsTotal = static_cast<int>(m_instrumentActor->getWorkspace()->getNumberBins(0));
+  m_xIntegration = new XIntegrationControl(this, isDiscrete, stepsTotal);
   m_mainLayout->addWidget(m_xIntegration);
   m_qtConnect->connect(m_xIntegration, SIGNAL(changed(double, double)), this,
                        SLOT(setIntegrationRange(double, double)));
