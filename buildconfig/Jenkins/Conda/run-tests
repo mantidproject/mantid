@@ -62,6 +62,17 @@ if [[ $ENABLE_UNIT_TESTS == true ]]; then
 fi
 
 if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
+    userconfig_dir=$HOME/.mantid
+    rm -fr $userconfig_dir
+    rm -f ~/.config/mantidproject/mantidworkbench.ini
+
+    # Turn off any auto updating on startup
+    mkdir -p $userconfig_dir
+    userprops=$userconfig_dir/Mantid.user.properties
+    echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
+    echo "usagereports.enabled = 0" >> $userprops
+    echo "CheckMantidVersion.OnStartup = 0" >> $userprops
+
     run_with_xvfb $WORKSPACE/build/systemtest
     terminate_xvfb_sessions
 fi
