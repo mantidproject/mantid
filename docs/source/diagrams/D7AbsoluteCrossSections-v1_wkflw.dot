@@ -4,9 +4,11 @@ digraph Sample {
   subgraph decisions {
     $decision_style
     AverageCounts
+    IsotropicMagnetism
     NormalisationMethod
     CrossSectionSeparationMethod
     AbsoluteNormalisation
+    SingleCrystal
     OutputTreatment
     OutputUnits
   }
@@ -29,7 +31,8 @@ digraph Sample {
     $algorithm_style
     Minus [label="Separate cross-sections"]
     Minus2 [label="Uniaxial"]
-    Minus3 [label="6-point"]
+    Minus3 [label="6-point Ehlers"]
+    Minus31 [label="6-point Schweika"]
     Minus4 [label="10-point"]
     Divide [label="Normalise data"]
     Divide2 [label="Vanadium"]
@@ -37,6 +40,7 @@ digraph Sample {
     Divide4 [label="Incoherent"]
     Divide5 [label="Absolute normalisation"]
     Plus [label="Average counts"]
+    Plus2 [label="QRebin"]
     SumOverlappingTubes
   }
 
@@ -44,11 +48,14 @@ digraph Sample {
   CrossSectionSeparationMethod -> NormalisationMethod #skip
   CrossSectionSeparationMethod -> Minus
   Minus -> Minus2
-  Minus -> Minus3
+  Minus -> IsotropicMagnetism
+  IsotropicMagnetism -> Minus3
+  IsotropicMagnetism -> Minus31
   RotatedXYZWorkspace -> Minus4
   Minus -> Minus4
   Minus2 -> NormalisationMethod
   Minus3 -> NormalisationMethod
+  Minus31 -> NormalisationMethod
   Minus4 -> NormalisationMethod
   NormalisationMethod -> OutputTreatment
   NormalisationMethod -> Divide
@@ -71,8 +78,11 @@ digraph Sample {
   AverageCounts -> OutputUnits
   SumOverlappingTubes -> OutputUnits
   Plus -> OutputUnits
+  OutputUnits -> SingleCrystal
+  SingleCrystal -> Plus2
   OutputUnits -> ConvertTo2Theta
   OutputUnits -> ConvertToQ
+  Plus2 -> OutputWorkspace
   ConvertToQ -> OutputWorkspace
   ConvertTo2Theta -> OutputWorkspace
 }
