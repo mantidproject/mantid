@@ -9,7 +9,8 @@ from os import path, makedirs
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
 
-from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections, path_handling
+from Engineering.common import path_handling
+from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering import EnggUtils
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
