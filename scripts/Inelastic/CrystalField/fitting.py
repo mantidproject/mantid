@@ -1321,25 +1321,29 @@ class CrystalFieldFit(object):
     def _two_step_fit(self):
         iter = 0
         while iter < self._iterations:
+            # Fit CEF parameters only
             self.model.FixAllPeaks = True
-            if self._overwrite_maxiterations is not None:
-                self._fit_properties['MaxIterations'] = self._overwrite_maxiterations[0]
-            if self._overwrite_minimizer is not None:
-                self._fit_properties['Minimizer'] = self._overwrite_minimizer[0]
+            self.overwrite_fit_properties(0)
             self.fit()
             self._function = self.model.function
+            # Fit peaks only
             for parameter in self._free_cef_parameters:
                 self._function.fixParameter(parameter)
             self.model.FixAllPeaks = False
-            if self._overwrite_maxiterations is not None:
-                self._fit_properties['MaxIterations'] = self._overwrite_maxiterations[1]
-            if self._overwrite_minimizer is not None:
-                self._fit_properties['Minimizer'] = self._overwrite_minimizer[1]
+            self.overwrite_fit_properties(1)
             self.fit()
             self._function = self.model.function
             for parameter in self._free_cef_parameters:
                 self._function.removeTie(parameter)
             iter += 1
+
+    def overwrite_fit_properties(self, index):
+        if index > 1:
+            return
+        if self._overwrite_maxiterations is not None:
+            self._fit_properties['MaxIterations'] = self._overwrite_maxiterations[index]
+        if self._overwrite_minimizer is not None:
+            self._fit_properties['Minimizer'] = self._overwrite_minimizer[index]
 
     def estimate_parameters(self, EnergySplitting, Parameters, **kwargs):
         from CrystalField.normalisation import split2range
