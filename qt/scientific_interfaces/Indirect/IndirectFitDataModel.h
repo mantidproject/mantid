@@ -43,7 +43,6 @@ public:
   void setSpectra(const std::string &spectra, WorkspaceID workspaceID) override;
   void setSpectra(FunctionModelSpectra &&spectra, WorkspaceID workspaceID) override;
   void setSpectra(const FunctionModelSpectra &spectra, WorkspaceID workspaceID) override;
-  void addWorkspace(const std::string &workspaceName) override;
   void addWorkspace(const std::string &workspaceName, const std::string &spectra) override;
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) override;
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) override;

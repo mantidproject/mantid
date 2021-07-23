@@ -21,6 +21,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
 using namespace MantidWidgets;
 
 class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject, public AnalysisDataServiceObserver {
@@ -28,7 +29,8 @@ class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject, public An
 public:
   IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
-
+  virtual void addWorkspace(const std::string &workspaceName, const std::string &spectra);
+  virtual void addWorkspace(const std::string &workspaceName, std::string paramType, const int &spectrum_index){};
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);
   void setResolutionWSSuffices(const QStringList &suffices);
@@ -42,6 +44,9 @@ public:
   std::vector<double> getQValuesForData() const;
 
   UserInputValidator &validate(UserInputValidator &validator);
+
+  virtual void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true){};
+  virtual void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true){};
 
 protected slots:
   void showAddWorkspaceDialog();

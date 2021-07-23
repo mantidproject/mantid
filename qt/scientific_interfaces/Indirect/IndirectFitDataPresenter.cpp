@@ -40,6 +40,7 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFitDataModel *model,
   connect(m_view, SIGNAL(removeClicked()), this, SLOT(removeSelectedData()));
   connect(m_view, SIGNAL(removeClicked()), this, SIGNAL(dataRemoved()));
   connect(m_view, SIGNAL(removeClicked()), this, SIGNAL(dataChanged()));
+  connect(m_view, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
   connect(m_view, SIGNAL(startXChanged(double)), this, SIGNAL(startXChanged(double)));
   connect(m_view, SIGNAL(endXChanged(double)), this, SIGNAL(endXChanged(double)));
 }
@@ -47,6 +48,10 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFitDataModel *model,
 IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }
 
 IIndirectFitDataView const *IndirectFitDataPresenter::getView() const { return m_view; }
+
+void IndirectFitDataPresenter::addWorkspace(const std::string &workspaceName, const std::string &spectra) {
+  m_model->addWorkspace(workspaceName, spectra);
+}
 
 void IndirectFitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
 
@@ -176,6 +181,7 @@ void IndirectFitDataPresenter::removeSelectedData() {
   }
   updateTableFromModel();
 }
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

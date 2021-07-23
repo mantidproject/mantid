@@ -41,6 +41,7 @@ set(
         IndirectEditResultsDialog.cpp
         IndirectFitAnalysisTab.cpp
         IndirectFitData.cpp
+        IndirectFitDataModel.cpp
         IndirectFitDataPresenter.cpp
         IndirectFitDataView.cpp
         IndirectFitOutputOptionsModel.cpp
@@ -51,7 +52,6 @@ set(
         IndirectFitPlotView.cpp
         IndirectFitPropertyBrowser.cpp
         IndirectFittingModel.cpp
-        IndirectFitDataModel.cpp
         IndirectFitOutputModel.cpp
         IndirectFunctionBrowser/ConvTypes.cpp
         IndirectFunctionBrowser/ConvFunctionModel.cpp
@@ -133,6 +133,7 @@ set(
         IndirectDiffractionReduction.h
         IndirectEditResultsDialog.h
         IndirectFitAnalysisTab.h
+        IndirectFitDataModel.h
         IndirectFitDataPresenter.h
         IndirectFitDataView.h
         IndirectFitOutputOptionsPresenter.h
@@ -186,7 +187,6 @@ set(
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h
         IndirectFittingModel.h
-        IndirectFitDataModel.h
         IndirectFitOutputModel.h
         IndirectFunctionBrowser/ConvFunctionModel.h
         IndirectPlotOptionsModel.h

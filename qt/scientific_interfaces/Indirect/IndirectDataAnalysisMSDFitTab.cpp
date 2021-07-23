@@ -158,8 +158,10 @@ IDAFunctionParameterEstimation IndirectDataAnalysisMSDFitTab::createParameterEst
 }
 
 void IndirectDataAnalysisMSDFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
-    m_msdFittingModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
+    m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+    m_msdFittingModel->addDefaultParameters();
+  }
 }
 
 } // namespace IDA

@@ -44,7 +44,6 @@ public:
   virtual void setSpectra(const std::string &spectra, WorkspaceID workspaceID) = 0;
   virtual void setSpectra(FunctionModelSpectra &&spectra, WorkspaceID workspaceID) = 0;
   virtual void setSpectra(const FunctionModelSpectra &spectra, WorkspaceID workspaceID) = 0;
-  virtual void addWorkspace(const std::string &workspaceName) = 0;
   virtual void addWorkspace(const std::string &workspaceName, const std::string &spectra) = 0;
   virtual void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) = 0;
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) = 0;

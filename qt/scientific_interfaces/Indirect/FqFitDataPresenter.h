@@ -8,7 +8,7 @@
 
 #include "FQFitConstants.h"
 #include "FqFitAddWorkspaceDialog.h"
-#include "FqFitModel.h"
+//#include "FqFitDataModel.h"
 #include "IFQFitObserver.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
@@ -17,6 +17,15 @@
 #include <QComboBox>
 #include <QSpacerItem>
 
+namespace {
+struct FqFitParameters {
+  std::vector<std::string> widths;
+  std::vector<std::size_t> widthSpectra;
+  std::vector<std::string> eisf;
+  std::vector<std::size_t> eisfSpectra;
+};
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -24,7 +33,11 @@ namespace IDA {
 class MANTIDQT_INDIRECT_DLL FqFitDataPresenter : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view, IFQFitObserver *SingleFunctionTemplateBrowser);
+  FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view,
+                     IFQFitObserver *SingleFunctionTemplateBrowser);
+  void addWorkspace(const std::string &workspaceName, std::string paramType, const int &spectrum_index) override;
+  void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) override;
+  void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) override;
 
 private slots:
   void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type);
@@ -49,7 +62,6 @@ private:
   std::string m_activeParameterType;
   WorkspaceID m_activeWorkspaceID;
 
-  FqFitModel *m_fqFitModel;
   Notifier<IFQFitObserver> m_notifier;
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };

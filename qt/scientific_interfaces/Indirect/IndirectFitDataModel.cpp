@@ -158,11 +158,6 @@ std::vector<std::string> IndirectFitDataModel::getWorkspaceNames() const {
   return names;
 }
 
-void IndirectFitDataModel::addWorkspace(const std::string &workspaceName) {
-  auto ws = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
-  addWorkspace(ws, FunctionModelSpectra(WorkspaceIndex{0}, WorkspaceIndex{ws->getNumberHistograms() - 1}));
-}
-
 void IndirectFitDataModel::addWorkspace(const std::string &workspaceName, const std::string &spectra) {
   if (spectra.empty())
     throw std::runtime_error("Fitting Data must consist of one or more spectra.");

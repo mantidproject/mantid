@@ -45,10 +45,6 @@ public:
   virtual ~IndirectFittingModel() = default;
 
   // Functions that interact with IndirectFitDataModel
-  virtual void addWorkspace(const std::string &workspaceName) override;
-  void addWorkspace(const std::string &workspaceName, const std::string &spectra) override;
-  void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) override;
-  void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) override;
   virtual void removeWorkspace(WorkspaceID workspaceID) override;
   void clearWorkspaces() override;
   bool hasWorkspace(std::string const &workspaceName) const override;
@@ -102,6 +98,8 @@ public:
   DataForParameterEstimationCollection
   getDataForParameterEstimation(const EstimationDataSelector &selector) const override;
   void removeFittingData() override;
+  void addDefaultParameters() override;
+  void removeDefaultParameters(WorkspaceID workspaceID);
 
   IIndirectFitDataModel *getFitDataModel() override;
 

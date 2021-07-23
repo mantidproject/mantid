@@ -41,10 +41,6 @@ public:
   virtual std::unordered_map<std::string, ParameterValue> getDefaultParameters(WorkspaceID workspaceID) const = 0;
 
   // Functions that interact with IndirectFitDataModel
-  virtual void addWorkspace(const std::string &workspaceName) = 0;
-  virtual void addWorkspace(const std::string &workspaceName, const std::string &spectra) = 0;
-  virtual void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) = 0;
-  virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) = 0;
   virtual void removeWorkspace(WorkspaceID workspaceID) = 0;
   virtual void clearWorkspaces() = 0;
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
@@ -85,7 +81,8 @@ public:
   virtual DataForParameterEstimationCollection
   getDataForParameterEstimation(const EstimationDataSelector &selector) const = 0;
   virtual void removeFittingData() = 0;
-
+  virtual void addDefaultParameters() = 0;
+  virtual void removeDefaultParameters(WorkspaceID workspaceID) = 0;
   virtual IIndirectFitDataModel *getFitDataModel() = 0;
 };
 

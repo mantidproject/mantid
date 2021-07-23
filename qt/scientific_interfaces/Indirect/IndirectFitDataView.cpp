@@ -77,7 +77,7 @@ IndirectFitDataView::IndirectFitDataView(const QStringList &headers, QWidget *pa
                                                 std::make_unique<ExcludeRegionDelegate>().release());
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 
-  connect(m_uiForm->tbFitData, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
+  connect(m_uiForm->tbFitData, SIGNAL(cellChanged(int, int)), this, SIGNAL(cellChanged(int, int)));
   connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SIGNAL(addClicked()));
   connect(m_uiForm->pbRemove, SIGNAL(clicked()), this, SIGNAL(removeClicked()));
 }

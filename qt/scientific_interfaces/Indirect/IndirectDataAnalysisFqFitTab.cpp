@@ -50,8 +50,8 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
       widthFits, std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   m_plotPresenter->setXBounds({0.0, 2.0});
-  setFitDataPresenter(
-      std::make_unique<FqFitDataPresenter>(m_FqFittingModel, m_uiForm->dockArea->m_fitDataView, templateBrowser));
+  setFitDataPresenter(std::make_unique<FqFitDataPresenter>(m_FqFittingModel->getFitDataModel(),
+                                                           m_uiForm->dockArea->m_fitDataView, templateBrowser));
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
 
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
@@ -121,7 +121,9 @@ EstimationDataSelector IndirectDataAnalysisFqFitTab::getEstimationDataSelector()
 
 void IndirectDataAnalysisFqFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
   if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
-    m_FqFittingModel->addWorkspace(fqFitDialog->workspaceName(), fqFitDialog->parameterNameIndex());
+    m_dataPresenter->addWorkspace(fqFitDialog->workspaceName(), fqFitDialog->parameterType(),
+                                  fqFitDialog->parameterNameIndex());
+    m_FqFittingModel->addDefaultParameters();
     setActiveWorkspaceIDToCurrentWorkspace(fqFitDialog);
     setModelSpectrum(fqFitDialog->parameterNameIndex(), fqFitDialog->parameterType());
     m_activeWorkspaceID = m_FqFittingModel->getNumberOfWorkspaces();
@@ -146,9 +148,9 @@ void IndirectDataAnalysisFqFitTab::setModelSpectrum(int index, std::string param
   if (index < 0)
     throw std::runtime_error("No valid parameter was selected.");
   else if (paramType == "Width")
-    m_FqFittingModel->setActiveWidth(static_cast<std::size_t>(index), m_activeWorkspaceID, false);
+    m_dataPresenter->setActiveWidth(static_cast<std::size_t>(index), m_activeWorkspaceID, false);
   else
-    m_FqFittingModel->setActiveEISF(static_cast<std::size_t>(index), m_activeWorkspaceID, false);
+    m_dataPresenter->setActiveEISF(static_cast<std::size_t>(index), m_activeWorkspaceID, false);
 }
 
 namespace {

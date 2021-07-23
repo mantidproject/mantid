@@ -52,6 +52,7 @@ public slots:
 
 signals:
   void resolutionLoaded(QString const & /*_t1*/);
+  void cellChanged(int, int);
   void addClicked();
   void removeClicked();
   void startXChanged(double);

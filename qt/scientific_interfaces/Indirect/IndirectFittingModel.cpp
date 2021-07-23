@@ -242,25 +242,14 @@ IndirectFittingModel::IndirectFittingModel()
       m_fittingMode(FittingMode::SEQUENTIAL), m_fitOutput(std::make_unique<IndirectFitOutputModel>()) {}
 
 // Functions that interact with IndirectFitDataModel
-void IndirectFittingModel::addWorkspace(const std::string &workspaceName) {
-  m_fitDataModel->addWorkspace(workspaceName);
+
+void IndirectFittingModel::addDefaultParameters() {
   m_defaultParameters.emplace_back(createDefaultParameters(WorkspaceID{0}));
 }
 
-void IndirectFittingModel::addWorkspace(const std::string &workspaceName, const std::string &spectra) {
-  m_fitDataModel->addWorkspace(workspaceName, spectra);
-  m_defaultParameters.emplace_back(createDefaultParameters(WorkspaceID{0}));
-}
-
-void IndirectFittingModel::addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) {
-  m_fitDataModel->addWorkspace(workspaceName, spectra);
-  m_defaultParameters.emplace_back(createDefaultParameters(WorkspaceID{0}));
-}
-
-void IndirectFittingModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                                        const FunctionModelSpectra &spectra) {
-  m_fitDataModel->addWorkspace(workspace, spectra);
-  m_defaultParameters.emplace_back(createDefaultParameters(WorkspaceID{0}));
+void IndirectFittingModel::removeDefaultParameters(WorkspaceID workspaceID) {
+  m_fitDataModel->removeWorkspace(workspaceID);
+  m_defaultParameters.remove(workspaceID);
 }
 
 void IndirectFittingModel::removeWorkspace(WorkspaceID workspaceID) {

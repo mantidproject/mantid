@@ -667,8 +667,10 @@ void IndirectFitAnalysisTab::respondToFunctionChanged() {
 }
 
 void IndirectFitAnalysisTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
-    m_fittingModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
+    m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+    m_fittingModel->addDefaultParameters();
+  }
 }
 
 } // namespace IDA

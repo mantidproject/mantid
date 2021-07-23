@@ -75,8 +75,10 @@ EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector(
 }
 
 void IndirectDataAnalysisIqtFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
-    m_iqtFittingModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
+    m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+    m_iqtFittingModel->addDefaultParameters();
+  }
 }
 
 void IndirectDataAnalysisIqtFitTab::fitFunctionChanged() { m_iqtFittingModel->setFitTypeString(getFitTypeString()); }
