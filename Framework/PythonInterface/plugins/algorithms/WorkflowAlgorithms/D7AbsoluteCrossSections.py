@@ -351,7 +351,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                         data_average_magnetic = WeightedMean(InputWorkspace1=magnetic_1_cs,
                                                              InputWorkspace2=magnetic_2_cs)
                         RenameWorkspace(InputWorkspace=data_average_magnetic, OutputWorkspace=average_magnetic_cs)
-                        separated_cs.append(average_magnetic_cs)
                         # Nuclear coherent component
                         data_nuclear = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
                                         - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
@@ -371,6 +370,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     separated_cs.append(nuclear_cs)
                     RenameWorkspace(InputWorkspace=data_incoherent, OutputWorkspace=incoherent_cs)
                     separated_cs.append(incoherent_cs)
+                    separated_cs.append(average_magnetic_cs)
                     separated_cs.append(magnetic_1_cs)
                     separated_cs.append(magnetic_2_cs)
                 else:
