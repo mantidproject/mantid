@@ -13,6 +13,4 @@ New and Improved
 Bugfixes
 --------
 
-- Fix cursor tracking from getting stuck and displaying incorrect signals when viewing MDHistogram workspaces in :ref:`sliceviewer`.
-
 :ref:`Release 6.2.0 <v6.2.0>`
