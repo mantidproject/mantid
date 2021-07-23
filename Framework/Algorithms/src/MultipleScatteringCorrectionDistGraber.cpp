@@ -28,22 +28,22 @@ using namespace Geometry;
 using namespace Kernel;
 
 /**
- * @brief Construct a new Multiple Scattering Correction Dist Graber
+ * @brief Construct a new Multiple Scattering Correction Dist Graber:: Multiple Scattering Correction Dist Graber object
  *
- * @param sampleBbject
+ * @param sampleOBbject : the sample object
+ * @param elementSize : in meters
  */
-MultipleScatteringCorrectionDistGraber::MultipleScatteringCorrectionDistGraber(const Geometry::IObject &sampleOBbject,
+MultipleScatteringCorrectionDistGraber::MultipleScatteringCorrectionDistGraber(const Geometry::IObject &sampleShape,
                                                                                const double elementSize)
-    : m_sampleObject(&sampleOBbject), m_elementSize(elementSize * 1e-3) {}
+    : m_sampleShape(&sampleShape), m_elementSize(elementSize) {}
 
 /**
- * @brief pre-calculate all distances from source to each voxels inside the sample
+ * @brief pre-calculate the distance from source to L1 for all the voxels in the sample
  *
- * @note this function is borrowed from AnyShapeAbsorption.initialiseCachedDistances()
- *
+ * @param beamDirection
  */
 void MultipleScatteringCorrectionDistGraber::cacheLS1(const V3D &beamDirection) {
-  auto integrationVolume = std::shared_ptr<const IObject>(m_sampleObject->clone());
+  auto integrationVolume = std::shared_ptr<const IObject>(m_sampleShape->clone());
 
   // create the raster
   auto raster = Geometry::Rasterize::calculate(beamDirection, *integrationVolume, m_elementSize);

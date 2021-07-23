@@ -11,18 +11,22 @@
 #include "MantidGeometry/Objects/IObject.h"
 
 namespace Mantid {
-namespace Algorithms {
 
 namespace Geometry {
 class IDetector;
 class IObject;
 } // namespace Geometry
 
-/** MultipleScatteringCorrectionDistGraber : TODO: DESCRIPTION
+namespace Algorithms {
+
+/** MultipleScatteringCorrectionDistGraber :
+ * This is a helper class to calculate the distance from source to sample voxel.
+ * TODO:
+ * - Add support for containers (see PaalmanPingAbsorption for example)
  */
 class MANTID_ALGORITHMS_DLL MultipleScatteringCorrectionDistGraber {
 public:
-  MultipleScatteringCorrectionDistGraber(const Geometry::IObject &sampleBbject, const double elementSize);
+  MultipleScatteringCorrectionDistGraber(const Geometry::IObject &sampleShape, const double elementSize);
   ~MultipleScatteringCorrectionDistGraber();
   // Pre-calculate (cache) all the distances from source to each indivudual voxel
   // inside the sample.
@@ -36,8 +40,8 @@ public:
   size_t m_numVolumeElements;                  ///< The number of volume elements
 
 private:
-  const Geometry::IObject *m_sampleObject; ///< Local cache of sample object.
-  const double m_elementSize;              ///< Size of the sample in m.
+  const Geometry::IObject *m_sampleShape; ///< Local cache of sample object.
+  const double m_elementSize;             ///< Size of the sample in m.
 };
 
 } // namespace Algorithms

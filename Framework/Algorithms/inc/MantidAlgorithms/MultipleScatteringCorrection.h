@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -37,14 +38,23 @@ public:
   };
 
 protected:
-  API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
-  Kernel::V3D m_beamDirection;         ///< The direction of the beam.
-  double m_elementSize;                ///< The size of the sample in meters
+  API::MatrixWorkspace_sptr m_inputWS;  ///< A pointer to the input workspace
+  API::MatrixWorkspace_sptr m_outputWS; ///< A pointer to the output workspace
+  Kernel::V3D m_beamDirection;          ///< The direction of the beam.
+  int64_t m_num_lambda;                 ///< The number of points in wavelength, the rest is interpolated linearly
+  double m_elementSize;                 ///< The size of the sample in meters
 
 private:
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
+
+  void parseInputs();
+
+  Kernel::Material m_material;
+  double m_sampleLinearCoefTotScatt; ///< The total scattering cross-section in
+                                     ///< 1/m for the sample
+  int64_t m_xStep;                   ///< The step in bin number between adjacent points for linear interpolation
 };
 
 } // namespace Algorithms
