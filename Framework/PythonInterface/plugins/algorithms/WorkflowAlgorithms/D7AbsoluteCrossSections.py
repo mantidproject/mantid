@@ -335,8 +335,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 else:
                     magnetic_name_1 = '_PerpendicularMagnetic_Y'
                     magnetic_name_2 = '_PerpendicularMagnetic_Z'
-                magnetic_1_cs = mtd[ws][entry_no].name() + magnetic_name_1
-                magnetic_2_cs = mtd[ws][entry_no].name() + magnetic_name_2
+                magnetic_1_cs = numor + magnetic_name_1
+                magnetic_2_cs = numor + magnetic_name_2
                 if nMeasurements == 6 and user_method == 'XYZ':
                     # Total cross-section:
                     data_total = (sigma_z_nsf + sigma_x_nsf + sigma_y_nsf + sigma_z_sf + sigma_x_sf + sigma_y_sf) / 3.0
