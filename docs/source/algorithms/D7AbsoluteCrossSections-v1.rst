@@ -123,11 +123,11 @@ where `I` is the sample intensity distribution corrected for all effects, and `D
 
 If the data is to be expressed in absolute units, the normalisation factor is the reduced vanadium data, normalised by the number of moles of the sample material :math:`N_{S}`:
 
-.. math:: D (\#, \pm \text{, chn/t/meV)} = \frac{1}{N_{S}} \cdot \frac{1}{V (\#, \pm \text{, chn/t/meV)}}
+.. math:: D (\#, \pm \text{, chn/t/meV)} = \frac{1}{N_{S}} \cdot V^{-1} (\#, \pm \text{, chn/t/meV)}
 
 If data is not to be expressed in absolute units, the normalisation factor depends only on the vanadium input:
 
-.. math:: D (\#, \pm \text{, chn/t/meV)} = \frac{\text{max}(V (\#, \pm \text{, chn/t/meV)})}{V (\#, \pm \text{, chn/t/meV)}}
+.. math:: D (\#, \pm \text{, chn/t/meV)} = V^{-1} (\#, \pm \text{, chn/t/meV)}
 
 2. Paramagnetic
 
