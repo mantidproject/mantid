@@ -13,7 +13,10 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAlgorithms/CompareWorkspaces.h"
+#include "MantidAlgorithms/ConjoinXRuns.h"
+#include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidAlgorithms/Multiply.h"
 #include "MantidAlgorithms/SortXAxis.h"
 #include "MantidAlgorithms/Stitch.h"
 #include "MantidHistogramData/Histogram.h"
@@ -92,10 +95,11 @@ public:
     // prepare
     auto ws1 = pointDataWorkspaceOneSpectrum(11, 0.3, 0.7, "ws1");
     auto ws2 = pointDataWorkspaceOneSpectrum(21, 0.55, 0.95, "ws2");
+    const std::vector<std::string> inputs({"ws1", "ws2"});
     GroupWorkspaces grouper;
     grouper.initialize();
     grouper.setAlwaysStoreInADS(true);
-    grouper.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"}));
+    grouper.setProperty("InputWorkspaces", inputs);
     grouper.setPropertyValue("OutputWorkspace", "group");
     grouper.execute();
 
@@ -104,26 +108,16 @@ public:
     alg.setRethrows(true);
     alg.setChild(true);
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "group"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputScaleFactorsWorkspace", "factors"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", "group"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputScaleFactorsWorkspace", "factors"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     // assert
     TS_ASSERT(alg.isExecuted());
-    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out);
-    TS_ASSERT(!out->isHistogramData());
-    TS_ASSERT(out->isCommonBins());
-    TS_ASSERT_EQUALS(out->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(out->blocksize(), 11 + 21);
+    MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
     MatrixWorkspace_sptr factors = alg.getProperty("OutputScaleFactorsWorkspace");
-    TS_ASSERT(factors);
-    TS_ASSERT_EQUALS(factors->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(factors->blocksize(), 2);
-    const auto factorsY = factors->readY(0);
-    TS_ASSERT_EQUALS(factorsY[0], 1.);
-    TS_ASSERT_DELTA(factorsY[1], 1.82666823, 1E-8);
+    TS_ASSERT(crossCheckStitch(inputs, stitched, factors));
   }
 
   void test_WorkspacesAndGroupsMixed() {
@@ -258,6 +252,54 @@ public:
   }
 
 private:
+  bool crossCheckStitch(const std::vector<std::string> &inputs, MatrixWorkspace_sptr stitched,
+                        MatrixWorkspace_sptr factors) {
+    MatrixWorkspace_sptr expected = expectedStitchedOutput(inputs, factors);
+    CompareWorkspaces comparator;
+    comparator.initialize();
+    comparator.setChild(true);
+    comparator.setProperty("Workspace1", stitched);
+    comparator.setProperty("Workspace2", expected);
+    comparator.execute();
+    return comparator.getProperty("Result");
+  }
+
+  MatrixWorkspace_sptr expectedStitchedOutput(const std::vector<std::string> &inputs, MatrixWorkspace_sptr factors) {
+    for (size_t ws = 0; ws < inputs.size(); ++ws) {
+      CropWorkspace cropper;
+      cropper.setChild(true);
+      cropper.initialize();
+      cropper.setProperty("InputWorkspace", factors);
+      cropper.setProperty("XMin", ws + 0.5);
+      cropper.setProperty("XMax", ws + 1.5);
+      cropper.setPropertyValue("OutputWorkspace", "__tmp");
+      cropper.execute();
+      MatrixWorkspace_sptr factorsColumn = cropper.getProperty("OutputWorkspace");
+      Multiply multiplier;
+      multiplier.initialize();
+      multiplier.setChild(true);
+      multiplier.setProperty("LHSWorkspace", inputs[ws]);
+      multiplier.setProperty("RHSWorkspace", factorsColumn);
+      multiplier.setPropertyValue("OutputWorkspace", inputs[ws]);
+      multiplier.execute();
+    }
+    ConjoinXRuns conjoiner;
+    conjoiner.initialize();
+    conjoiner.setChild(true);
+    conjoiner.setProperty("InputWorkspaces", inputs);
+    conjoiner.setPropertyValue("OutputWorkspace", "__joined");
+    conjoiner.execute();
+    Workspace_sptr joined = conjoiner.getProperty("OutputWorkspace");
+    SortXAxis sorter;
+    sorter.initialize();
+    sorter.setChild(true);
+    sorter.setProperty("InputWorkspace", joined);
+    sorter.setPropertyValue("OutputWorkspace", "__sorted");
+    sorter.execute();
+    MatrixWorkspace_sptr sorted = sorter.getProperty("OutputWorkspace");
+    return sorted;
+  }
+
   MatrixWorkspace_sptr pointDataWorkspaceOneSpectrum(size_t nPoints, double startX, double endX,
                                                      const std::string &name) {
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nPoints, nPoints);
