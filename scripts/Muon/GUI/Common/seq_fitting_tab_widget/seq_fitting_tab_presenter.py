@@ -134,14 +134,15 @@ class SeqFittingTabPresenter(object):
     def handle_updated_fit_parameter_in_table(self, index):
         copy_param = self.view.copy_values_for_fits()
         if copy_param:
-            parameter_value = index.data()
-            column = index.column()
-            self.view.fit_table.set_parameter_values_for_column(column, parameter_value)
-            for row in range(self.view.fit_table.get_number_of_fits()):
-                self._update_parameter_values_in_fitting_model_for_row(row)
+            self.view.fit_table.set_parameter_values_for_column(index.column(), index.data())
+            self._update_parameter_values_in_fitting_model_for_all_rows(self.view.fit_table.get_number_of_fits())
         else:
             self._update_parameter_values_in_fitting_model_for_row(index.row())
         self.fit_parameter_changed_notifier.notify_subscribers()
+
+    def _update_parameter_values_in_fitting_model_for_all_rows(self, num_of_rows):
+        for row in range(num_of_rows):
+            self._update_parameter_values_in_fitting_model_for_row(row)
 
     def validate_sequential_fit(self, workspace_names):
         if self.model.get_active_fit_function() is None or len(workspace_names) == 0:
