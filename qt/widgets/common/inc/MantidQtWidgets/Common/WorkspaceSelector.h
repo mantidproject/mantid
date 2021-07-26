@@ -81,6 +81,9 @@ public:
   void setValidatingAlgorithm(const QString &algName);
   bool isValid() const;
   void refresh();
+  void disconnectObservers();
+  void connectObservers();
+  bool isConnected();
 
 signals:
   void emptied();
@@ -111,6 +114,7 @@ private:
   Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
   bool m_init;
+  bool m_connected;
 
   /// A list of workspace types that should be shown in the ComboBox
   QStringList m_workspaceTypes;

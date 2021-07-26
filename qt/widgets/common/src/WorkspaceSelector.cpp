@@ -42,14 +42,7 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
       m_suffix(), m_algName(), m_algPropName(), m_algorithm() {
   setEditable(true);
   if (init) {
-    Mantid::API::AnalysisDataServiceImpl &ads = Mantid::API::AnalysisDataService::Instance();
-    ads.notificationCenter.addObserver(m_addObserver);
-    ads.notificationCenter.addObserver(m_remObserver);
-    ads.notificationCenter.addObserver(m_renameObserver);
-    ads.notificationCenter.addObserver(m_clearObserver);
-    ads.notificationCenter.addObserver(m_replaceObserver);
-
-    refresh();
+    connectObservers();
   }
   this->setAcceptDrops(true);
   this->completer()->setCompletionMode(QCompleter::PopupCompletion);
@@ -60,14 +53,36 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
  * Destructor for WorkspaceSelector
  * De-subscribes this object from the Poco NotificationCentre
  */
-WorkspaceSelector::~WorkspaceSelector() {
+WorkspaceSelector::~WorkspaceSelector() { disconnectObservers(); }
+
+/**
+ * De-subscribes this object from the Poco NotificationCentre
+ */
+void WorkspaceSelector::disconnectObservers() {
   if (m_init) {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_remObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
+    m_init = false;
+    m_connected = false;
   }
+}
+
+/**
+ * Subscribes this object to the Poco NotificationCentre
+ */
+void WorkspaceSelector::connectObservers() {
+  Mantid::API::AnalysisDataServiceImpl &ads = Mantid::API::AnalysisDataService::Instance();
+  ads.notificationCenter.addObserver(m_addObserver);
+  ads.notificationCenter.addObserver(m_remObserver);
+  ads.notificationCenter.addObserver(m_renameObserver);
+  ads.notificationCenter.addObserver(m_clearObserver);
+  ads.notificationCenter.addObserver(m_replaceObserver);
+  refresh();
+  m_init = true;
+  m_connected = true;
 }
 
 QStringList WorkspaceSelector::getWorkspaceTypes() const { return m_workspaceTypes; }
@@ -124,6 +139,8 @@ void WorkspaceSelector::setSorted(bool sorted) {
       refresh();
   }
 }
+
+bool WorkspaceSelector::isConnected() { return m_connected; }
 
 QStringList WorkspaceSelector::getSuffixes() const { return m_suffix; }
 
