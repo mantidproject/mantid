@@ -564,10 +564,10 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.q_resolution_delta_r, 0.1)
         self.assertEqual(state_gui_model.radius_limit_min, 12.)
         self.assertEqual(state_gui_model.radius_limit_max, 13.)
-        self.assertEqual(state_gui_model.lab_pos_1, 21.5)
-        self.assertEqual(state_gui_model.lab_pos_2, 17.8)
-        self.assertEqual(state_gui_model.hab_pos_1, 25.1)
-        self.assertEqual(state_gui_model.hab_pos_2, 16.9)
+        self.assertEqual(state_gui_model.rear_pos_1, 21.5)
+        self.assertEqual(state_gui_model.rear_pos_2, 17.8)
+        self.assertEqual(state_gui_model.front_pos_1, 25.1)
+        self.assertEqual(state_gui_model.front_pos_2, 16.9)
 
 
 if __name__ == '__main__':
