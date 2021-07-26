@@ -87,6 +87,7 @@ public:
 
 signals:
   void emptied();
+  void focussed();
 
 private:
   void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
@@ -104,6 +105,8 @@ protected:
   void dropEvent(QDropEvent * /*unused*/) override;
   // called when a drag event enters the class
   void dragEnterEvent(QDragEnterEvent * /*unused*/) override;
+  // Method for handling focus in events
+  void focusInEvent(QFocusEvent * /*unused*/) override;
 
 private:
   /// Poco Observers for ADS Notifications

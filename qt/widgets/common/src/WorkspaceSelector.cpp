@@ -372,3 +372,8 @@ void WorkspaceSelector::dragEnterEvent(QDragEnterEvent *de) {
       de->acceptProposedAction();
   }
 }
+
+/**
+ * Called when there is an interaction with the widget.
+ */
+void WorkspaceSelector::focusInEvent(QFocusEvent *) { emit focussed(); }
