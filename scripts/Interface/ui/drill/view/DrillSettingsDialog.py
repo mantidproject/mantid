@@ -81,8 +81,8 @@ class DrillSetting(QObject):
 
         elif (settingType == "floatArray") or (settingType == "intArray"):
             self._widget = QLineEdit()
-            self._widget.editingFinished.connect(
-                    lambda : self.valueChanged.emit(name)
+            self._widget.textChanged.connect(
+                    lambda _ : self.valueChanged.emit(name)
                     )
             self._setter = lambda v : self._widget.setText(','.join(str(e)
                                                            for e in v))
@@ -100,8 +100,8 @@ class DrillSetting(QObject):
 
         elif (settingType == "string"):
             self._widget = QLineEdit()
-            self._widget.editingFinished.connect(
-                    lambda : self.valueChanged.emit(name)
+            self._widget.textChanged.connect(
+                    lambda _ : self.valueChanged.emit(name)
                     )
             self._setter = lambda v : self._widget.setText(str(v))
             self._getter = self._widget.text
