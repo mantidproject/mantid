@@ -104,6 +104,9 @@ class MantidSystemTest(unittest.TestCase):
         self.stripWhitespace = True
         # Tolerance
         self.tolerance = 0.00000001
+        # Whether or not to check the instrument/parameter map in CompareWorkspaces
+        self.checkInstrument = True
+
         # Store the resident memory of the system (in MB) before starting the test
         FrameworkManager.clear()
         self.memory = MemoryStats().residentMem() / 1024
@@ -347,7 +350,10 @@ class MantidSystemTest(unittest.TestCase):
         checker.setLogging(True)
         checker.setPropertyValue("Workspace1", valNames[0])
         checker.setPropertyValue("Workspace2", valNames[1])
+        import pydevd_pycharm
+        pydevd_pycharm.settrace('localhost', port=8080, stdoutToServer=True, stderrToServer=True)
         checker.setProperty("Tolerance", float(self.tolerance))
+        checker.setProperty("CheckInstrument", self.checkInstrument)
         if hasattr(self, 'tolerance_is_rel_err') and self.tolerance_is_rel_err:
             checker.setProperty("ToleranceRelErr", True)
         for d in self.disableChecking:
