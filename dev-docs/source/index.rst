@@ -63,6 +63,7 @@ Development Process
    PatchReleaseChecklist
    TSC
    DesignDocumentGuides
+   CodeCoverage
 
 :doc:`DevelopmentAndReleaseCycle`
    An overview of the development cycle.
