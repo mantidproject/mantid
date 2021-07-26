@@ -166,7 +166,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 self.hide_axis(axis_number, nrows, ncols)
 
     def _wrap_labels(self, labels: list) -> list:
-        """Wraps a list of labels so that every line is at most LABEL_WRAP_WIDTH characters long."""
+        """Wraps a list of labels so that every line is at most self._settings.wrap_width characters long."""
         return ["\n".join(wrap(label, self._settings.wrap_width)) for label in labels]
 
     def _set_text_tick_labels(self, axis_number):
