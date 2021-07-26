@@ -37,5 +37,7 @@ Improvements
 - :ref:`DeadTimeCorrection <algm-DeadTimeCorrection>` now does not integrate TOF axis if the unit is `Empty`, allowing to correct multi-frame monochromatic SANS data.
 - The ISIS SANS TOML V0 format was updated with several incompatible changes as-per testing feedback.
   A full list of changes can be found on the :ref:`TOML documentation page <sans_toml_v1-ref>` along with more conversion entries.
+- ISIS SANS now uses Front / Rear instead of HAB / LAB respectively in the UI. This only affects the text in the interface, and does
+  not affect compatibility with existing user files.
 
 :ref:`Release 6.2.0 <v6.2.0>`
