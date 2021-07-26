@@ -1109,6 +1109,10 @@ public:
     WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
     void setWorkspaceTypes(const QStringList &types);
     void setOptional(bool optional);
+    void setSorted(bool sorted);
+    bool isConnected();
+    void disconnectObservers();
+    void connectObservers();
 };
 
 // ----------------------------------------------------------------------------
