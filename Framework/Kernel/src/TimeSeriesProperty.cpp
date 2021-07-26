@@ -1064,7 +1064,7 @@ template <typename TYPE> std::vector<double> TimeSeriesProperty<TYPE>::timesAsVe
  *  @param value  The associated value
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::addValue(const Types::Core::DateAndTime &time, const TYPE value) {
+void TimeSeriesProperty<TYPE>::addValue(const Types::Core::DateAndTime &time, const TYPE &value) {
   TimeValueUnit<TYPE> newvalue(time, value);
   // Add the value to the back of the vector
   m_values.emplace_back(newvalue);
@@ -1094,7 +1094,7 @@ void TimeSeriesProperty<TYPE>::addValue(const Types::Core::DateAndTime &time, co
  *  @param value :: The associated value
  *  @return True if insertion successful (i.e. identical time not already in map
  */
-template <typename TYPE> void TimeSeriesProperty<TYPE>::addValue(const std::string &time, const TYPE value) {
+template <typename TYPE> void TimeSeriesProperty<TYPE>::addValue(const std::string &time, const TYPE &value) {
   return addValue(Types::Core::DateAndTime(time), value);
 }
 
@@ -1104,7 +1104,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::addValue(const std::stri
  *  @param value :: The associated value
  *  @return True if insertion successful (i.e. identical time not already in map
  */
-template <typename TYPE> void TimeSeriesProperty<TYPE>::addValue(const std::time_t &time, const TYPE value) {
+template <typename TYPE> void TimeSeriesProperty<TYPE>::addValue(const std::time_t &time, const TYPE &value) {
   Types::Core::DateAndTime dt;
   dt.set_from_time_t(time);
   return addValue(dt, value);

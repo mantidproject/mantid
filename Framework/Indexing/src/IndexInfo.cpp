@@ -22,7 +22,7 @@ namespace Indexing {
 
 /// Construct a default IndexInfo, with contiguous spectrum numbers starting at
 /// 1 and no spectrum definitions.
-IndexInfo::IndexInfo(const size_t globalSize, const Parallel::StorageMode storageMode)
+IndexInfo::IndexInfo(const size_t globalSize, const Parallel::StorageMode &storageMode)
     : IndexInfo(globalSize, storageMode, Parallel::Communicator{}) {}
 
 /// Construct a default IndexInfo, with contiguous spectrum numbers starting at
