@@ -104,8 +104,13 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             return self.calcResiduals(x, ws_list)
 
         alatt0 = [a, b, c, alpha, beta, gamma]
-        alatt, cov, info, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
-        success = ier in [1, 2, 3, 4]
+        try:
+            alatt, cov, info, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
+        except ValueError:
+            logger.error("CalculateUMatrix failed - check initial lattice parameters and tolerance provided.")
+            return
+
+        success = ier in [1, 2, 3, 4] and cov is not None  # cov is None when matrix is singular
         if success:
             # calculate errors
             dof = sum([self.child_IndexPeaks(ws, RoundHKLs=True) for ws in ws_list]) - len(alatt0)
@@ -162,7 +167,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                     # if gonio matrix is inaccurate we have to find the UB from scratch and transform to correct HKL
                     self.child_FindUBUsingLatticeParameters(PeaksWorkspace=ws_list[iws], a=a, b=b, c=c,
                                                             alpha=alpha, beta=beta, gamma=gamma, FixParameters=False)
-                    self.make_UB_consistent(self, ws_list[iref], ws_list[iws])
+                    self.make_UB_consistent(ws_list[iref], ws_list[iws])
                     nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[iws], RoundHKLs=True)
                     foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
             if foundUB:
@@ -193,11 +198,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         for wsname in ws_list:
             nindexed = self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=True)
             if nindexed >= _MIN_NUM_INDEXED_PEAKS:
-                try:
-                    self.child_CalculateUMatrix(wsname, *x0)
-                except RuntimeError:
-                    logger.error("CalculateUMatrix failed - check initial lattice parameters provided.")
-                    return
+                self.child_CalculateUMatrix(wsname, *x0)
                 self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=False)
                 ws = AnalysisDataService.retrieve(wsname)
                 UB = 2 * np.pi * ws.sample().getOrientedLattice().getUB()
