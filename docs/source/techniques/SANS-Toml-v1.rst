@@ -7,6 +7,12 @@ SANS TOML Files
 .. contents:: Table of Contents
     :local:
 
+General Notes
+=============
+
+- Lengths are given in meters within TOML files, unlike previous legacy formats.
+
+
 Format Changes
 ==============
 
@@ -1033,6 +1039,76 @@ MON [/TRANS] /SPECTRUM=n [/INTERPOLATE]
 
     [normalisation.monitor.M1]
       spectrum_number = 1
+
+QRESOL/A1=x
+--------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    source_aperture = x
+
+**Existing Example:**
+
+..  code-block:: none
+
+    QRESOL/A1=30
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    source_aperture = 0.03
+
+QRESOL/A2=x
+--------------
+
+  **Replacement**
+
+  ..  code-block:: none
+
+    [instrument.configuration]
+      sample_aperture_diameter = x
+
+  **Existing Example:**
+
+  ..  code-block:: none
+
+      QRESOL/A2=20
+
+  **Existing Replacement**
+
+  ..  code-block:: none
+
+    [instrument.configuration]
+      sample_aperture_diameter = 0.02
+
+QRESOL/MODERATOR=filename.txt
+-----------------------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    moderator_file = filename.txt
+
+**Existing Example:**
+
+..  code-block:: none
+
+    QRESOL/MODERATOR=moderator_rkh_file.txt
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    moderator_file = moderator_rkh_file.txt
+
 
 QRESOL[/ON][/OFF]
 -----------------
