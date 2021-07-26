@@ -212,9 +212,8 @@ void MultipleScatteringCorrection::parseInputs() {
   m_beamDirection = m_inputWS->getInstrument()->getBeamDirection();
 
   // Get the total number of wavelength points, default to use all if not specified
-  m_num_lambda = isEmpty(getProperty("NumberOfWavelengthPoints"))
-                     ? static_cast<int64_t>(m_inputWS->getNumberHistograms())
-                     : getProperty("NumberOfWavelengthPoints");
+  m_num_lambda = isDefault("NumberOfWavelengthPoints") ? static_cast<int64_t>(m_inputWS->getNumberHistograms())
+                                                       : getProperty("NumberOfWavelengthPoints");
   // -- while we're here, compute the step in bin number between two adjacent points
   const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
   m_xStep = std::max(int64_t(1), specSize / m_num_lambda); // Bin step between points to calculate

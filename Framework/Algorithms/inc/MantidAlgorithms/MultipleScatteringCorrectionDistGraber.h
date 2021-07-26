@@ -27,7 +27,7 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL MultipleScatteringCorrectionDistGraber {
 public:
   MultipleScatteringCorrectionDistGraber(const Geometry::IObject &sampleShape, const double elementSize);
-  ~MultipleScatteringCorrectionDistGraber();
+  ~MultipleScatteringCorrectionDistGraber() = default;
   // Pre-calculate (cache) all the distances from source to each indivudual voxel
   // inside the sample.
   // This function is borrowed from AnyShapeAbsorption.initialiseCachedDistances()
