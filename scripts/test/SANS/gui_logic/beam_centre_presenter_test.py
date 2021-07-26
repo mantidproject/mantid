@@ -96,6 +96,11 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.assertEqual("foo", self.view.rear_pos_1)
         self.assertEqual("", self.view.rear_pos_2)
 
+    def test_on_success_forwards_new_vals(self):
+        expected_vals = mock.NonCallableMock()
+        self.presenter.on_update_centre_values(expected_vals)
+        self.BeamCentreModel.update_centre_positions.assert_called_once_with(expected_vals)
+
     def test_that_update_front_selected_enabled_front_and_disabled_rear(self):
         self.presenter.set_view(self.view)
         self.presenter.update_front_selected()

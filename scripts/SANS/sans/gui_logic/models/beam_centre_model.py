@@ -54,7 +54,7 @@ class BeamCentreModel(object):
 
         self.instrument = instrument
 
-    def _update_centre_positions(self, results):
+    def update_centre_positions(self, results):
         if self.component is DetectorType.LAB:
             self._rear_pos_1 = results["pos1"]
             self._rear_pos_2 = results["pos2"]

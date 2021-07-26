@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import copy
+from typing import Dict
 
 from mantid.kernel import Logger
 from sans.gui_logic.models.async_workers.beam_centre_async import BeamCentreAsync
@@ -51,6 +52,9 @@ class BeamCentrePresenter(object):
     def on_update_rows(self):
         self._beam_centre_model.reset_inst_defaults(self._parent_presenter.instrument)
         self.update_centre_positions()
+
+    def on_update_centre_values(self, new_vals: Dict):
+        self._beam_centre_model.update_centre_positions(new_vals)
 
     def on_processing_finished_centre_finder(self):
         # Enable button

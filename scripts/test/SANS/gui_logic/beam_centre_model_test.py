@@ -43,6 +43,32 @@ class BeamCentreModelTest(unittest.TestCase):
             self.assertEqual(60, self.beam_centre_model.r_min)
             self.assertEqual(280, self.beam_centre_model.r_max)
 
+    def test_update_centre_positions_front_mode(self):
+        expected_vals = {"pos1": 101.123, "pos2": 202.234}
+        rear_vals_before = (self.beam_centre_model.rear_pos_1, self.beam_centre_model.rear_pos_2)
+        self.beam_centre_model.component = DetectorType.HAB  # Where HAB == front
+        self.beam_centre_model.update_centre_positions(expected_vals)
+
+        # mm -> m scaling
+        self.assertEqual(expected_vals["pos1"] * 1000, self.beam_centre_model.front_pos_1)
+        self.assertEqual(expected_vals["pos2"] * 1000, self.beam_centre_model.front_pos_2)
+
+        self.assertEqual(rear_vals_before[0], self.beam_centre_model.rear_pos_1)
+        self.assertEqual(rear_vals_before[1], self.beam_centre_model.rear_pos_2)
+
+    def test_update_centre_positions_rear_mode(self):
+        expected_vals = {"pos1": 303.345, "pos2": 404.456}
+        front_vals_before = (self.beam_centre_model.front_pos_1, self.beam_centre_model.front_pos_2)
+        self.beam_centre_model.component = DetectorType.LAB  # Where LAB == rear
+        self.beam_centre_model.update_centre_positions(expected_vals)
+
+        # mm -> m scaling
+        self.assertEqual(expected_vals["pos1"] * 1000, self.beam_centre_model.rear_pos_1)
+        self.assertEqual(expected_vals["pos2"] * 1000, self.beam_centre_model.rear_pos_2)
+
+        self.assertEqual(front_vals_before[0], self.beam_centre_model.front_pos_1)
+        self.assertEqual(front_vals_before[1], self.beam_centre_model.front_pos_2)
+
     def test_loq_values_updated(self):
         self.beam_centre_model.reset_inst_defaults(SANSInstrument.LOQ)
         self.assertEqual(96, self.beam_centre_model.r_min)
