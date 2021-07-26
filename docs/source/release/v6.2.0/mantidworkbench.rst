@@ -23,6 +23,7 @@ New and Improved
 - Added tooltips to all the widgets in the Slice Viewer. Please contact the developers if any are missing.
 - Script editor tab completion and call tip support for Numpy 1.21
 - The visibility of a component parameter in the Pick tab of the InstrumentViewer is now steered by the 'visible' atrribute of a parameter in IPF
+- New signal from `WorkspaceSelector`: focussed, emitted when the `WorkspaceSelector` is in the focus.
 
 Bugfixes
 --------
