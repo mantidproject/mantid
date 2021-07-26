@@ -38,6 +38,7 @@ public:
   std::vector<double> m_elementVolumes;        ///< Cached element volumes
   std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
   size_t m_numVolumeElements;                  ///< The number of volume elements
+  double m_totalVolume;                        ///< The total volume of the sample
 
 private:
   const Geometry::IObject *m_sampleShape; ///< Local cache of sample object.

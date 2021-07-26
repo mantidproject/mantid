@@ -8,10 +8,14 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidAlgorithms/MultipleScatteringCorrectionDistGraber.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Algorithms {
+
+using namespace Geometry;
 
 /** MultipleScatteringCorrection : TODO: DESCRIPTION
  */
@@ -50,6 +54,11 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   void parseInputs();
+  void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber, const IDetector &detector,
+                     std::vector<double> &sample_L2Ds) const;
+  void pairWiseSum(double &A1, double &A2, const double linearCoefAbs,
+                   const MultipleScatteringCorrectionDistGraber &distGraber, const std::vector<double> &L2Ds,
+                   const std::vector<double> &L12s, const size_t startIndex, const size_t endIndex) const;
 
   Kernel::Material m_material;
   double m_sampleLinearCoefTotScatt; ///< The total scattering cross-section in

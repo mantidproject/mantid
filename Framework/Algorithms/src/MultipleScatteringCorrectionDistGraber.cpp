@@ -58,6 +58,7 @@ void MultipleScatteringCorrectionDistGraber::cacheLS1(const V3D &beamDirection) 
   m_LS1 = std::move(raster.l1);
   m_elementPositions = std::move(raster.position);
   m_elementVolumes = std::move(raster.volume);
+  m_totalVolume = raster.totalvolume;
 }
 } // namespace Algorithms
 } // namespace Mantid
