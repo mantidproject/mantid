@@ -52,6 +52,9 @@ redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisr
 // Ref binding means Cppcheck can't see these are used
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MaskBinsIf.cpp
 
+// the mru-list is intentionally not altered
+operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:309
+
 // --------- Missing copy assignment / constructors -------------------
 // We don't want more creeping in so just mark these one by one
 
