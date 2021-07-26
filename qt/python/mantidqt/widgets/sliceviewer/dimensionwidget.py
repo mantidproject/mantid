@@ -10,10 +10,10 @@
 from qtpy.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider,
                             QDoubleSpinBox, QSpinBox)
 from qtpy.QtCore import Qt, Signal
-from enum import Enum
+from enum import IntEnum
 
 
-class State(Enum):
+class State(IntEnum):
     X = 0
     Y = 1
     NONE = 2
@@ -64,6 +64,11 @@ class DimensionWidget(QWidget):
 
         self.transpose = False
 
+        # Store the current and previous valid dimensions state, i.e. after self.change_dims has executed.
+        # Initial values for both is the current state
+        self.previous_dimensions_state = self._get_states()
+        self.dimensions_state = self._get_states()
+
     def change_dims(self, number):
         states = [d.get_state() for n, d in enumerate(self.dims)]
 
@@ -83,6 +88,10 @@ class DimensionWidget(QWidget):
             for n, d in enumerate(self.dims):
                 if n != number and d.get_state() == State.Y:
                     d.set_state(State.NONE)
+
+        # Store the previous dimensions state and reset the current states.
+        self.previous_dimensions_state = self.dimensions_state
+        self.dimensions_state = self._get_states()
 
         self.check_transpose()
         self.dimensionsChanged.emit()
@@ -140,6 +149,23 @@ class DimensionWidget(QWidget):
         for index, value in enumerate(point):
             if value is not None:
                 self.dims[index].set_value(value)
+
+    def get_states(self):
+        return self._get_axis_indices_from_states(self.dimensions_state)
+
+    def get_previous_states(self):
+        return self._get_axis_indices_from_states(self.previous_dimensions_state)
+
+    def _get_states(self):
+        return [d.get_state() for d in self.dims]
+
+    @staticmethod
+    def _get_axis_indices_from_states(states):
+        """
+        :return: a list where the value (0, 1, None) at index i
+                represents the axis that dimension i is to be displayed on.
+        """
+        return list(map(lambda i: i if i <= 1 else None, [int(state) for state in states]))
 
 
 class Dimension(QWidget):
