@@ -424,7 +424,7 @@ void Stitch::recordScaleFactor(Mantid::API::MatrixWorkspace_sptr scaleFactorWork
   const auto it = std::find(inputs.cbegin(), inputs.cend(), scaledWorkspace->getName());
   const size_t index = std::distance(inputs.cbegin(), it);
   PARALLEL_FOR_IF(threadSafe(*scaleFactorWorkspace))
-  for (size_t i = 0; i < scaleFactorWorkspace->getNumberHistograms(); ++i) {
+  for (int i = 0; i < static_cast<int>(scaleFactorWorkspace->getNumberHistograms()); ++i) {
     scaleFactorWorkspace->mutableY(i)[index] = 1. / medianWorkspace->readY(i)[0];
   }
 }
@@ -444,7 +444,7 @@ std::vector<std::string> Stitch::scaleManual(const std::vector<std::string> &inp
   std::vector<std::string> result;
   auto &outputFactors = scaleFactorsWorkspace->mutableY(0);
   PARALLEL_FOR_IF(threadSafe(*scaleFactorsWorkspace))
-  for (size_t i = 0; i < inputs.size(); ++i) {
+  for (int i = 0; i < static_cast<int>(inputs.size()); ++i) {
     outputFactors[i] = scaleFactors[i];
     auto scaler = createChildAlgorithm("Scale");
     scaler->setAlwaysStoreInADS(true);
