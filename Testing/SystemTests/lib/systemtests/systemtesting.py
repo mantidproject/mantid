@@ -350,8 +350,6 @@ class MantidSystemTest(unittest.TestCase):
         checker.setLogging(True)
         checker.setPropertyValue("Workspace1", valNames[0])
         checker.setPropertyValue("Workspace2", valNames[1])
-        import pydevd_pycharm
-        pydevd_pycharm.settrace('localhost', port=8080, stdoutToServer=True, stderrToServer=True)
         checker.setProperty("Tolerance", float(self.tolerance))
         checker.setProperty("CheckInstrument", self.checkInstrument)
         if hasattr(self, 'tolerance_is_rel_err') and self.tolerance_is_rel_err:
