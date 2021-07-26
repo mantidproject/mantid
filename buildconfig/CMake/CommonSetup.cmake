@@ -104,17 +104,19 @@ if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
   set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
   find_package(
     HDF5
-    COMPONENTS CXX HL
+    COMPONENTS C CXX HL
     REQUIRED CONFIGS hdf5-config.cmake
   )
   set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
+  add_library(hdf5::hdf5_cpp ALIAS hdf5::hdf5_cpp-shared)
+  add_library(hdf5::hdf5_hl ALIAS hdf5::hdf5_hl-shared)
+  add_library(hdf5::hdf5 ALIAS hdf5::hdf5-shared)
 else()
-# We'll use the cmake finder
-# This will define HDF5_LIBRARIES and HDF5_HL_LIBRARIES
+  # We'll use the cmake finder
   find_package(ZLIB REQUIRED)
   find_package(
     HDF5
-    COMPONENTS CXX HL
+    COMPONENTS C CXX HL
     REQUIRED
   )
 endif()

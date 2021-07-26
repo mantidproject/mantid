@@ -495,12 +495,6 @@ target_include_directories(Kernel PUBLIC
 		$<INSTALL_INTERFACE:include/Mantid>
 )
 
-
-target_include_directories(Kernel SYSTEM
-                           PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS}
-                                  ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
-			   ${OPENSSL_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
-
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -510,18 +504,24 @@ endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
+target_compile_features(Kernel PUBLIC cxx_std_17)
 
 target_link_libraries(Kernel
                       PUBLIC
                       Mantid::Types
                       Mantid::Json
-                      ${NEXUS_LIBRARIES}
+                      Nexus::nexuscpp
                       Eigen3::Eigen
-                      ${TBB_LIBRARIES}
-                      ${TBB_MALLOC_LIBRARIES}
-                      ${POCO_LIBRARIES}
-                      ${GSL_LIBRARIES}
-                      ${HDF5_LIBRARIES}
+                      TBB::tbb
+                      Poco::Foundation
+                      Poco::Net
+                      Poco::XML
+                      Poco::Util
+                      Poco::NetSSL
+                      GSL::gsl
+                      hdf5::hdf5_cpp
+                      hdf5::hdf5_hl
+                      hdf5::hdf5
                       PRIVATE
                       ${NETWORK_LIBRARIES}
                       span
@@ -530,6 +530,9 @@ if(WIN32)
   target_link_libraries(Kernel PRIVATE Psapi.lib) # For memory usage
                                                   # queries
 endif()
+
+# H5_BUILT_AS_DYNAMIC_LIB required https://github.com/conda-forge/hdf5-feedstock/issues/58
+target_compile_definitions(Kernel PUBLIC -DH5_BUILT_AS_DYNAMIC_LIB)
 
 # Add the unit tests directory
 add_subdirectory(test)
@@ -612,8 +615,15 @@ else()
 endif()
 
 # Installation settings
+set(TARGET_EXPORT_NAME "MantidKernelTargets")
+mtd_install_dylib(TARGETS Kernel EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
-mtd_install_dylib(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)
 
 # Create the properties file for the installer
 set(MANTID_ROOT_BUILD ${MANTID_ROOT})

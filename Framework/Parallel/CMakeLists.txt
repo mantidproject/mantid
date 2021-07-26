@@ -61,7 +61,7 @@ endif()
 # Add the target for this directory
 add_library(Parallel ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Parallel ALIAS Parallel)
-add_dependencies(Parallel EventParallelLoader Kernel)
+add_dependencies(Parallel EventParallelLoader Mantid::Kernel)
 
 target_include_directories(Parallel PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
@@ -99,7 +99,7 @@ target_include_directories(EventParallelLoader PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
 		$<INSTALL_INTERFACE:include/Mantid>
 )
-add_dependencies(EventParallelLoader Kernel)
+add_dependencies(EventParallelLoader Mantid::Kernel)
 # set the name of generated executable
 set_target_properties(EventParallelLoader
                       PROPERTIES OUTPUT_NAME
@@ -119,7 +119,7 @@ endif()
 set_property(TARGET EventParallelLoader PROPERTY FOLDER "MantidFramework")
 
 
-target_link_libraries(EventParallelLoader PUBLIC Mantid::Kernel Boost::serialization)
+target_link_libraries(EventParallelLoader PUBLIC Mantid::Kernel PRIVATE Boost::serialization)
 
 if(UNIX AND NOT APPLE)
   target_link_libraries(EventParallelLoader PRIVATE rt)
@@ -134,6 +134,18 @@ mtd_install_dylib(TARGETS
                     INSTALL_DIRS
                     ${LIB_DIR}
                     ${WORKBENCH_LIB_DIR})
+
+# Installation settings
+set(TARGET_EXPORT_NAME "MantidParallelTargets")
+mtd_install_dylib(TARGETS Parallel EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)
+
+
 mtd_install_targets(TARGETS
                     EventParallelLoader
                     INSTALL_DIRS

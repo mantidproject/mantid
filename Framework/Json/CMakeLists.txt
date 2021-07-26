@@ -31,7 +31,6 @@ target_include_directories(Json PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
 	$<INSTALL_INTERFACE:include/Mantid>
 )
-message("BOOST LIBRARIEES ARE THESE ${Boost_LIBRARIES} JSON ARE ${JSONCPP_LIBRARIES}")
 
 # Add to the 'Framework' group in VS
 set_property(TARGET Json PROPERTY FOLDER "MantidFramework")

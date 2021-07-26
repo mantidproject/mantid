@@ -691,6 +691,7 @@ target_link_libraries(DataHandling
                         Mantid::Parallel
                         PRIVATE
                         Mantid::Json
+                        Boost::filesystem
                         Mantid::NexusGeometry)
 
 target_include_directories(DataHandling SYSTEM PUBLIC ${HDF5_INCLUDE_DIRS})

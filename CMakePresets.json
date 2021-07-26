@@ -31,7 +31,7 @@
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
                 "CONDA_BUILD": true,
-                "HDF5_DIR": "$env{CONDA_PREFIX}/Library/cmake/hdf5"
+                "HDF5_ROOT": "$env{CONDA_PREFIX}/Library"
             }
         },
         {

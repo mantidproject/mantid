@@ -470,8 +470,6 @@ target_include_directories(Geometry PUBLIC
 		$<INSTALL_INTERFACE:include/Mantid>
 )
 
-target_include_directories(Geometry SYSTEM PUBLIC ${NEXUS_INCLUDE_DIR} ${TBB_INCLUDE_DIRS} ${MUPARSER_INCLUDE_DIR})
-
 # Set the name of the generated library
 set_target_properties(Geometry
                       PROPERTIES OUTPUT_NAME
@@ -494,7 +492,11 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Geometry PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Geometry PUBLIC Mantid::Kernel Mantid::Beamline ${NEXUS_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES} ${MUPARSER_LIBRARIES}
+target_link_libraries(Geometry
+                      PUBLIC
+                      Mantid::Kernel
+                      Mantid::Beamline
+                      MuParser::MuParser
                       PRIVATE
                       Mantid::Json)
 
@@ -514,9 +516,18 @@ endif()
 add_subdirectory(test)
 
 # Installation settings
+# Auto-generate exports header
+target_include_directories(Geometry PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Geometry>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 
-mtd_install_dylib(TARGETS
-                    Geometry
-                    INSTALL_DIRS
-                    ${LIB_DIR}
-                    ${WORKBENCH_LIB_DIR})
+# Installation settings
+set(TARGET_EXPORT_NAME "MantidGeometryTargets")
+mtd_install_dylib(TARGETS Geometry EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)

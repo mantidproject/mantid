@@ -263,7 +263,7 @@ set_property(TARGET Crystal PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
 
-target_link_libraries(Crystal PUBLIC Mantid::API Mantid::Geometry Mantid::Kernel PRIVATE Mantid::DataObjects Mantid::Indexing)
+target_link_libraries(Crystal PUBLIC Mantid::API Mantid::Geometry Mantid::Kernel PRIVATE Mantid::DataObjects Mantid::Indexing Boost::filesystem)
 
 # Add the unit tests directory
 add_subdirectory(test)

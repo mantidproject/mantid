@@ -98,12 +98,18 @@ endif()
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Indexing PUBLIC ${CMAKE_BINARY_DIR}/Framework/Indexing)
+target_include_directories(Indexing PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Indexing>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(Indexing TRUE)
 
 # Installation settings
-mtd_install_dylib(TARGETS
-                    Indexing
-                    INSTALL_DIRS
-                    ${LIB_DIR}
-                    ${WORKBENCH_LIB_DIR})
+set(TARGET_EXPORT_NAME "MantidIndexingTargets")
+mtd_install_dylib(TARGETS Indexing INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)

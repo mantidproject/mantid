@@ -71,7 +71,9 @@ target_link_libraries(NexusGeometry PUBLIC Mantid::Geometry Mantid::API
                       PRIVATE
                       Mantid::Kernel
                       Mantid::Json
-                      Mantid::Indexing)
+                      Mantid::Indexing
+                      Boost::filesystem
+                      )
 
 # Add the unit tests directory
 add_subdirectory(test)

@@ -202,3 +202,12 @@ install(FILES
           "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake"
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
 )
+
+
+install(FILES
+${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindNexus.cmake
+${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindJsonCPP.cmake
+${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindTBB.cmake
+${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindMuParser.cmake
+DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework/find_modules
+)

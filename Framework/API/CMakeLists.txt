@@ -546,20 +546,16 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET API PROPERTY FOLDER "MantidFramework")
 
-target_include_directories(
-  API SYSTEM PUBLIC ${NEXUS_INCLUDE_DIR} ${Boost_INCLUDE_DIRS}
-)
 target_link_libraries(
   API
   PUBLIC
-  ${NEXUS_LIBRARIES}
-  ${Boost_LIBRARIES}
   Mantid::HistogramData
   Mantid::Types
   Mantid::Kernel
   Mantid::Geometry
   Mantid::Indexing
   Mantid::Parallel
+  Nexus::nexus
   PRIVATE
   ${WINSOCK}
   ${BCRYPT}
@@ -581,8 +577,8 @@ generate_mantid_export_header(API TRUE)
 set(TARGET_EXPORT_NAME "MantidAPITargets")
 mtd_install_dylib(TARGETS API INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
-# install(EXPORT ${TARGET_EXPORT_NAME}
-#         FILE ${TARGET_EXPORT_NAME}.cmake
-#         NAMESPACE Mantid::
-#         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Mantid
-# )
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)
