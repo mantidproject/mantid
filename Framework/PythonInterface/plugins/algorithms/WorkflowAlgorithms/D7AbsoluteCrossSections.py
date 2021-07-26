@@ -257,12 +257,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass)
 
     def _create_angle_dists(self, ws):
-        """
-        Calculates sin^2 (alpha) and cos^2 (alpha) for all detectors, needed by Schweika's anisotropic cross-section
-        separation.
-        :param ws: Sample workspace.
-        :return: Tuple with two workspaces containing sin^2 (alpha) and cos^2 (alpha)
-        """
+        """Calculates sin^2 (alpha) and cos^2 (alpha) for all detectors, needed by Schweika's anisotropic cross-section
+        separation. Alpha angle is the Scharpf angle. Returns a name of the workspace containing a difference between
+        the calculated cos^2 (alpha) and sin^2 (alpha)."""
         ws_to_transpose = mtd[ws][0].name()
         angle_ws = mtd[ws][0].name() + "_tmp_angle"
         conv_to_theta = 0.5  # conversion to half of the scattering angle
@@ -279,14 +276,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         alpha = (theta - self._sampleAndEnvironmentProperties['KiXAngle'].value) * np.pi / 180.0
         cos2_alpha_arr = np.power(np.cos(alpha), 2)
         sin2_alpha_arr = np.power(np.sin(alpha), 2)
-        sin2_alpha_name = 'sin2_alpha'
-        cos2_alpha_name = 'cos2_alpha'
         cos2_m_sin2_alpha_name = 'cos2_m_sin2_alpha'
-        CreateWorkspace(OutputWorkspace=sin2_alpha_name, DataX=np.arange(1), DataY=sin2_alpha_arr, NSpec=len(alpha))
-        CreateWorkspace(OutputWorkspace=cos2_alpha_name, DataX=np.arange(1), DataY=cos2_alpha_arr, NSpec=len(alpha))
-        Minus(LHSWorkspace=cos2_alpha_name, RHSWorkspace=sin2_alpha_name, OutputWorkspace=cos2_m_sin2_alpha_name)
-        if self.getProperty('ClearCache').value:
-            DeleteWorkspaces(WorkspaceList=[angle_ws, sin2_alpha_name, cos2_alpha_name])
+        CreateWorkspace(OutputWorkspace=cos2_m_sin2_alpha_name, DataX=np.arange(1),
+                        DataY=np.subtract(cos2_alpha_arr, sin2_alpha_arr),
+                        NSpec=len(alpha))
         return cos2_m_sin2_alpha_name
 
     def _cross_section_separation(self, ws, nMeasurements):
