@@ -30,6 +30,7 @@ class WorkspaceCalculatorView(QWidget):
         self.rhs_scaling.setValidator(scale_validator)
 
     def setValidationLabel(self, ws, validationValue, tooltip=""):
+        """Sets the visibility of the validity indicator (asterisk) next to the workspace selector."""
         if ws == "LHS":
             if isinstance(tooltip, list):
                 tooltip = tooltip[0]
@@ -42,6 +43,7 @@ class WorkspaceCalculatorView(QWidget):
             self.label_validation_rhs.setToolTip(tooltip)
 
     def closeEvent(self, event):
+        """Handles close event of the calculator widget."""
         self.deleteLater()
         super(WorkspaceCalculatorView, self).closeEvent(event)
 
