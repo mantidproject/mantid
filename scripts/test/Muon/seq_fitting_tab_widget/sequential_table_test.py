@@ -80,6 +80,13 @@ class SequentialTableWidgetTest(unittest.TestCase):
         self.model.get_run_information.assert_not_called()
         self.model.get_group_information.assert_not_called()
 
+    def test_get_workspace_names_from_row_correctly_queries_model(self):
+        row = 1
+
+        self.table_widget.get_workspace_names_from_row(row)
+
+        self.model.get_workspace_name_information.assert_called_once_with(row)
+
 
 class SequentialTableModelTest(unittest.TestCase):
     def setUp(self):

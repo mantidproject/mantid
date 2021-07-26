@@ -754,6 +754,40 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.model.dataset_names = self.dataset_names
         self.assertTrue(not self.model._are_same_workspaces_as_the_datasets(dataset_names))
 
+    def test_that_validate_sequential_fit_returns_an_empty_message_when_the_data_provided_is_valid_in_normal_fitting(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+
+        message = self.model.validate_sequential_fit([self.model.dataset_names])
+
+        self.assertEqual(message, "")
+
+    def test_that_validate_sequential_fit_returns_an_error_message_when_no_fit_function_is_selected(self):
+        self.model.dataset_names = self.dataset_names
+
+        message = self.model.validate_sequential_fit([self.model.dataset_names])
+
+        self.assertEqual(message, "No data or fit function selected for fitting.")
+
+    def test_that_validate_sequential_fit_returns_an_empty_message_when_the_data_provided_is_valid_in_tf_fitting(self):
+        self.model.dataset_names = ["EMU20884; Group; bottom; Asymmetry", "EMU20884; Group; top; Asymmetry"]
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.tf_asymmetry_mode = True
+
+        message = self.model.validate_sequential_fit([self.model.dataset_names])
+
+        self.assertEqual(message, "")
+
+    def test_that_validate_sequential_fit_returns_an_error_message_for_pair_data_in_tf_asymmetry_fitting_mode(self):
+        self.model.dataset_names = ["EMU20884; Pair Asym; bottom; Asymmetry", "EMU20884; Pair Asym; top; Asymmetry"]
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.tf_asymmetry_mode = True
+
+        message = self.model.validate_sequential_fit([self.model.dataset_names])
+
+        self.assertEqual(message, "Only Groups can be fitted in TF Asymmetry mode. "
+                                  "Please unselect the following Pairs/Diffs in the grouping tab: 'bottom', 'top'")
+
 
 if __name__ == '__main__':
     unittest.main()
