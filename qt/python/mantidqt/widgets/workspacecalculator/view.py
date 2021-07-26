@@ -29,6 +29,24 @@ class WorkspaceCalculatorView(QWidget):
         self.lhs_scaling.setValidator(scale_validator)
         self.rhs_scaling.setValidator(scale_validator)
 
+        # setting these selectors to be optional allows to have an empty entry
+        self.lhs_ws.setOptional(True)
+        self.rhs_ws.setOptional(True)
+        self.output_ws.setOptional(True)
+
+        # connecting ADS observers
+        self.lhs_ws.focussed.connect(lambda: self.connectADS('lhs'))
+        self.rhs_ws.focussed.connect(lambda: self.connectADS('rhs'))
+        self.output_ws.focussed.connect(lambda: self.connectADS('output'))
+
+        # cases for disconnecting ADS observers
+        self.pushButton.clicked.connect(self.disconnectADS)
+
+        # by default the observers to the ADS should be disconnected, and connected only when user focuses on the widget
+        self.lhs_ws.disconnectObservers()
+        self.rhs_ws.disconnectObservers()
+        self.output_ws.disconnectObservers()
+
     def setValidationLabel(self, ws, validationValue, tooltip=""):
         """Sets the visibility of the validity indicator (asterisk) next to the workspace selector."""
         if ws == "LHS":
@@ -41,6 +59,29 @@ class WorkspaceCalculatorView(QWidget):
                 tooltip = tooltip[1]
             self.label_validation_rhs.setVisible(not validationValue)
             self.label_validation_rhs.setToolTip(tooltip)
+
+    def connectADS(self, selector_name):
+        """Explicitly connects the workspace selector observers to the ADS."""
+        if selector_name == "lhs" and not self.lhs_ws.isConnected():
+            self.lhs_ws.connectObservers()
+        elif selector_name == "rhs" and not self.rhs_ws.isConnected():
+            self.rhs_ws.connectObservers()
+        elif selector_name == "output" and not self.output_ws.isConnected():
+            self.output_ws.connectObservers()
+
+    def disconnectADS(self):
+        """Disconnects connected workspace selectors from signals coming from the ADS."""
+        if self.lhs_ws.isConnected():
+            self.lhs_ws.disconnectObservers()
+        if self.rhs_ws.isConnected():
+            self.rhs_ws.disconnectObservers()
+        if self.output_ws.isConnected():
+            self.output_ws.disconnectObservers()
+
+    def hideEvent(self, event):
+        """Handles hide event of the calculator widget."""
+        self.disconnectADS()
+        super(WorkspaceCalculatorView, self).hideEvent(event)
 
     def closeEvent(self, event):
         """Handles close event of the calculator widget."""
