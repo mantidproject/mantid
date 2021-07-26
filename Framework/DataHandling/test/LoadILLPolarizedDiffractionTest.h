@@ -125,7 +125,7 @@ public:
   }
 
   void test_D7_timeOfFlight() {
-    // Tests loading TOF data for D7
+    // Tests loading TOF data for D7, indirectly tests for sorting SF and NSF entries
     LoadILLPolarizedDiffraction alg;
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -143,7 +143,7 @@ public:
     do_test_general_features(outputWS, "TOF");
 
     MatrixWorkspace_sptr workspaceEntry1 =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(0));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(1));
     TS_ASSERT(workspaceEntry1)
     TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->unitID(), "TOF")
     TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(), "Time-of-flight")
@@ -211,7 +211,7 @@ public:
   }
 
   void test_D7_timeOfFlight_timechannels() {
-    // Tests loading TOF data for D7
+    // Tests loading TOF data for D7, indirectly tests for sorting of SF and NSF entries
     LoadILLPolarizedDiffraction alg;
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -230,7 +230,7 @@ public:
     do_test_general_features(outputWS, "TOF");
 
     MatrixWorkspace_sptr workspaceEntry1 =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(0));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(1));
     TS_ASSERT(workspaceEntry1)
     TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->unitID(), "Label")
     TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(), "Time channel")

@@ -61,7 +61,7 @@ public:
 
     combobox->setCurrentIndex(4);
     lineedit->setText("0-2");
-    m_dialog->accept();
+    m_dialog->handleOKClicked();
 
     AnalysisDataService::Instance().clear();
 
@@ -77,7 +77,7 @@ public:
 
     combobox->setCurrentIndex(4);
     lineedit->setText("0-2");
-    m_dialog->accept();
+    m_dialog->handleOKClicked();
 
     auto const workspaces = m_dialog->getWorkspaces();
     TS_ASSERT_EQUALS(workspaces.size(), 1);
@@ -94,7 +94,7 @@ public:
 
     combobox->setCurrentIndex(0);
     lineedit->setText("0-2");
-    m_dialog->accept();
+    m_dialog->handleOKClicked();
 
     auto const workspaces = m_dialog->getWorkspaces();
     TS_ASSERT_EQUALS(workspaces.size(), 3);
@@ -112,7 +112,7 @@ public:
 
     combobox->setCurrentIndex(0);
     lineedit->setText("0-2");
-    m_dialog->accept();
+    m_dialog->handleOKClicked();
 
     auto const expectedIndices = std::vector<int>{0, 1, 2};
     TS_ASSERT_EQUALS(m_dialog->workspaceIndices(), expectedIndices);

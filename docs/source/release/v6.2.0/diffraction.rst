@@ -25,6 +25,11 @@ Improvements
 - :ref:`SNAPReduce <algm-SNAPReduce-v1>` permits saving selected property names and values to file, to aid autoreduction.
 - Add a custom ttmode to the PEARL powder diffraction scripts for running with a custom grouping file
 - improve performance of :ref:`ApplyDiffCal <algm-ApplyDiffCal>` on large instruments eg WISH. This in turn improves the performance of :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`
+- :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` now sorts the polarization orientations and enforces spin-flip, then non-spin-flip order
+- :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` received a number of improvements: changes names of input workspaces to contain polarization information,
+  transmission can be provided as a number or a workspace group, new data averaging option depending on measurement 2theta, option to display all measured points
+  on a scatter plot, new option for self-attenuation treatment using measured tranmission.
+- added a 3mf format file describing the PEARL sample and environment shapes for the P-E press. Also fixed a couple of minor issues in the 3mf file format loader used in ref:`LoadSampleEnvironment  <algm-LoadSampleEnvironment>`
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now adds input run number also to a metadata field `run_list`, indended to contain a full list of numors, handled by :ref:`MergeRuns <algm-MergeRuns>`
 
 Bugfixes
@@ -38,6 +43,7 @@ New features
 ############
 - New setting for default peak function to fit in the Engineering Diffraction interface (initial default is :ref:`BackToBackExponential <func-BackToBackExponential>`).
 - Added serial fit capability to fitting tab in EngDiff UI - this fits all loaded workspaces with same initial parameters.
+- Automatically subtract background from runs on loading in EngDiff UI.
 - The most recently created or loaded Calibration is now selected by default in the load path when the interface is opened.
 - The last used RB number is now saved for the next session
 
