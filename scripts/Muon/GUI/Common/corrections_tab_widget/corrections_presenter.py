@@ -44,7 +44,7 @@ class CorrectionsPresenter(QObject):
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
         self.load_observer = GenericObserver(self.handle_runs_loaded)
         self.group_change_observer = GenericObserver(self.handle_groups_changed)
-        self.pre_process_and_grouping_complete_observer = GenericObserver(self.handle_pre_process_and_grouping_complete)
+        self.pre_process_and_counts_calculated_observer = GenericObserver(self.handle_pre_process_and_counts_calculated)
 
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
@@ -95,10 +95,10 @@ class CorrectionsPresenter(QObject):
         self.dead_time_presenter.handle_run_selector_changed()
         self.background_presenter.handle_run_selector_changed()
 
-    def handle_pre_process_and_grouping_complete(self) -> None:
-        """Handles when MuonPreProcess and grouping has been completed."""
-        self.dead_time_presenter.handle_pre_process_and_grouping_complete()
-        self.background_presenter.handle_pre_process_and_grouping_complete()
+    def handle_pre_process_and_counts_calculated(self) -> None:
+        """Handles when MuonPreProcess and counts workspaces have been calculated."""
+        self.dead_time_presenter.handle_pre_process_and_counts_calculated()
+        self.background_presenter.handle_pre_process_and_counts_calculated()
 
     def current_run_string(self) -> str:
         """Returns the currently selected run string."""

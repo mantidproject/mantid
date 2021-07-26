@@ -45,8 +45,8 @@ class BackgroundCorrectionsPresenter:
         self.view.selected_function = FLAT_BACKGROUND
         self.model.clear_background_corrections_data()
 
-    def handle_pre_process_and_grouping_complete(self) -> None:
-        """Handles when MuonPreProcess and grouping has been completed."""
+    def handle_pre_process_and_counts_calculated(self) -> None:
+        """Handles when MuonPreProcess and counts workspaces have been calculated."""
         self.model.populate_background_corrections_data()
         self._run_background_corrections_for_all()
 
