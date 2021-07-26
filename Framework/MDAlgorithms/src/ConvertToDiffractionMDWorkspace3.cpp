@@ -20,6 +20,8 @@
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
+#include <boost/math/special_functions/sign.hpp>
+
 #include <algorithm>
 #include <limits>
 

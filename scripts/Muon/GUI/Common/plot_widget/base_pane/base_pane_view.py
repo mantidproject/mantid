@@ -21,14 +21,23 @@ class BasePaneView(widget, ui_plotting_view):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setupUi(self)
-        self.setMinimumSize(600,600)
-        #self.setEnabled(False)
+        self.setMinimumSize(600, 600)
 
     def show_plot_diff(self):
         self.plot_diff_checkbox.setVisible(True)
 
     def hide_plot_diff(self):
         self.plot_diff_checkbox.setVisible(False)
+
+    def hide_plot_type(self):
+        self.plot_type_combo.setVisible(False)
+
+    def hide_plot_raw(self):
+        self.plot_raw_checkbox.setVisible(False)
+
+    def hide_tiled_by(self):
+        self.tiled_by_combo.setVisible(False)
+        self.tiled_plot_checkbox.setVisible(False)
 
     def setup_plot_type_options(self, options):
         """

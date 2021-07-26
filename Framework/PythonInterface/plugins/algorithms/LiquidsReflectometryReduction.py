@@ -416,7 +416,8 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                                     PeakRange=peak_range,
                                                     BackgroundRange=background_range,
                                                     LowResolutionRange=[x_min, x_max],
-                                                    OutputWorkspace=str(workspace))
+                                                    OutputWorkspace=str(workspace),
+                                                    ErrorWeighting=True)
         else:
             # If we don't subtract the background, we still have to integrate
             # over the low resolution axis

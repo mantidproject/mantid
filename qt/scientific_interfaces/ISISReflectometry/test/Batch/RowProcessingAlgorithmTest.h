@@ -67,7 +67,7 @@ public:
     TS_ASSERT_EQUALS(result["EndOverlap"], "9.200000");
   }
 
-  void testPerThetaDefaultsWithAngleLookup() {
+  void testLookupRowWithAngleLookup() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     // angle within tolerance of 2.3
     auto row = makeRow(2.29);
@@ -83,7 +83,7 @@ public:
     TS_ASSERT_EQUALS(result["BackgroundProcessingInstructions"], "2-3,7-8");
   }
 
-  void testPerThetaDefaultsWithWildcardLookup() {
+  void testLookupRowWithWildcardLookup() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     // angle outside tolerance of any angle matches wildcard row instead
     auto row = makeRow(2.28);
@@ -201,7 +201,7 @@ public:
     TS_ASSERT_EQUALS(result["ReductionType"], "DivergentBeam");
   }
 
-  void testOptionsCellOverridesPerThetaDefaults() {
+  void testOptionsCellOverridesLookupRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     // Use an angle that will match per-theta defaults. They should be
     // overridden by the cell values
@@ -223,7 +223,7 @@ public:
                    BackgroundSubtraction(false, BackgroundSubtractionType::AveragePixelFit, 3,
                                          CostFunctionType::UnweightedLeastSquares),
                    makePolarizationCorrections(), makeFloodCorrections(), makeTransmissionStitchOptions(),
-                   makeStitchOptions(), makePerThetaDefaultsWithTwoAnglesAndWildcard());
+                   makeStitchOptions(), makeLookupTableWithTwoAnglesAndWildcard());
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"SubtractBackground", "1"}});
     auto result = createAlgorithmRuntimeProps(model, row);

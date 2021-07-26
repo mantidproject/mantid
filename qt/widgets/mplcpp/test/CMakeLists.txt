@@ -35,6 +35,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtWidgetsMplCppTest
                    ${Boost_LIBRARIES}
                    ${POCO_LIBRARIES}
                    Python::Python
+                   gmock
                  MTD_QT_LINK_LIBS
                    MantidQtWidgetsMplCpp
                    MantidQtWidgetsCommon

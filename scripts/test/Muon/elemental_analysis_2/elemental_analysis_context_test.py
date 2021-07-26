@@ -94,13 +94,11 @@ class ElementalAnalysisContextTest(unittest.TestCase):
     def test_remove_workspace_with_a_string(self, mock_notify_subscirbers):
         self.context.data_context.remove_workspace_by_name = mock.Mock()
         self.context.group_context.remove_group = mock.Mock()
-        self.context.gui_context.remove_workspace_by_name = mock.Mock()
         # call remove_workspace function
         self.context.remove_workspace("mock_workspace")
 
         # assert statement
         mock_notify_subscirbers.assert_called_once_with("mock_workspace")
-        self.context.gui_context.remove_workspace_by_name.assert_called_once_with("mock_workspace")
         self.context.data_context.remove_workspace_by_name.assert_called_once_with("mock_workspace")
         self.context.group_context.remove_group.assert_called_once_with("mock_workspace")
 
@@ -109,7 +107,6 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         # setup
         self.context.data_context.remove_workspace_by_name = mock.Mock()
         self.context.group_context.remove_group = mock.Mock()
-        self.context.gui_context.remove_workspace_by_name = mock.Mock()
         mock_ws = CreateWorkspace(OutputWorkspace="mock_workspace", DataX=[0, 2, 4, 6, 8, 9], DataY=[2, 2, 2, 2, 1])
 
         # call remove_workspace function
@@ -117,7 +114,6 @@ class ElementalAnalysisContextTest(unittest.TestCase):
 
         # assert statement
         mock_notify_subscirbers.assert_called_once_with("mock_workspace")
-        self.context.gui_context.remove_workspace_by_name.assert_called_once_with("mock_workspace")
         self.context.data_context.remove_workspace_by_name.assert_called_once_with("mock_workspace")
         self.context.group_context.remove_group.assert_called_once_with("mock_workspace")
 

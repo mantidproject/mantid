@@ -174,7 +174,7 @@ class ModelFittingPresenterTest(unittest.TestCase):
 
         self.mock_model_dataset_names.assert_has_calls([mock.call(), mock.call()])
         self.view.set_datasets_in_function_browser.assert_called_once_with(self.dataset_names)
-        self.view.update_dataset_name_combo_box.assert_called_once_with(self.dataset_names)
+        self.view.update_dataset_name_combo_box.assert_called_once_with(self.dataset_names, emit_signal=False)
         self.view.update_y_parameters.assert_called_once_with(self.y_parameters)
         self.view.update_x_parameters.assert_called_once_with(self.x_parameters, emit_signal=True)
 

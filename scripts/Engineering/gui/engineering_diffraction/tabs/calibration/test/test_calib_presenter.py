@@ -22,8 +22,9 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter = presenter.CalibrationPresenter(self.model, self.view)
         self.presenter.cropping_widget = MagicMock()
 
+    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
-    def test_worker_started_with_right_params(self, worker_method):
+    def test_worker_started_with_right_params(self, worker_method, setting):
         self.view.get_crop_checked.return_value = False
         self.view.get_vanadium_filename.return_value = "307521"
         self.view.get_sample_filename.return_value = "305738"
@@ -33,35 +34,41 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.on_calibrate_clicked()
         worker_method.assert_called_with("307521", "305738", True, None)
 
+    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
-    def test_worker_started_with_right_params_crop_bank(self, worker_method):
+    def test_worker_started_with_right_params_crop_bank(self, worker_method, setting):
         self.view.get_crop_checked.return_value = True
         self.view.get_vanadium_filename.return_value = "307521"
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
-        self.presenter.cropping_widget.is_custom.return_value = False
+        self.presenter.cropping_widget.get_custom_calfile_enabled.return_value = False
+        self.presenter.cropping_widget.get_custom_spectra_enabled.return_value = False
         self.presenter.cropping_widget.get_bank.return_value = "bank"
+        self.presenter.cropping_widget.get_custom_calfile.return_value = None
 
         self.presenter.on_calibrate_clicked()
         worker_method.assert_called_with("307521", "305738", True, None, bank="bank")
 
+    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
-    def test_worker_started_with_right_params_crop_spec_nums(self, worker_method):
+    def test_worker_started_with_right_params_crop_spec_nums(self, worker_method, setting):
         self.view.get_crop_checked.return_value = True
         self.view.get_vanadium_filename.return_value = "307521"
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
-        self.presenter.cropping_widget.is_custom.return_value = True
+        self.presenter.cropping_widget.get_custom_calfile_enabled.return_value = False
+        self.presenter.cropping_widget.get_custom_spectra_enabled.return_value = True
         self.presenter.cropping_widget.get_custom_spectra.return_value = "1-56,401-809"
 
         self.presenter.on_calibrate_clicked()
         worker_method.assert_called_with("307521", "305738", True, None, spectrum_numbers="1-56,401-809")
 
+    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.create_error_message")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
-    def test_worker_not_started_while_finder_is_searching(self, worker_method, err_msg):
+    def test_worker_not_started_while_finder_is_searching(self, worker_method, err_msg, setting):
         self.view.get_vanadium_filename.return_value = "307521"
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
@@ -72,10 +79,11 @@ class CalibrationPresenterTest(unittest.TestCase):
         worker_method.assert_not_called()
         self.assertEqual(err_msg.call_count, 1)
 
+    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.create_error_message")
     @patch(tab_path + ".presenter.CalibrationPresenter.validate_run_numbers")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
-    def test_worker_not_started_when_run_numbers_invalid(self, worker_method, validator, err_msg):
+    def test_worker_not_started_when_run_numbers_invalid(self, worker_method, validator, err_msg, setting):
         self.view.get_vanadium_filename.return_value = "307521"
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
@@ -87,17 +95,18 @@ class CalibrationPresenterTest(unittest.TestCase):
         worker_method.assert_not_called()
         self.assertEqual(err_msg.call_count, 1)
 
+    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.create_error_message")
     @patch(tab_path + ".presenter.CalibrationPresenter.validate_run_numbers")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
-    def test_worker_not_started_when_cropping_invalid(self, worker_method, validator, err_msg):
+    def test_worker_not_started_when_cropping_invalid(self, worker_method, validator, err_msg, setting):
         self.view.get_vanadium_filename.return_value = "307521"
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
         self.view.get_load_checked.return_value = False
         validator.return_value = True
-        self.presenter.cropping_widget.is_valid.return_value = False
+        self.presenter.cropping_widget.is_spectra_valid.return_value = False
 
         self.presenter.on_calibrate_clicked()
         worker_method.assert_not_called()
@@ -181,20 +190,23 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.calibration_notifier.notify_subscribers.call_count, 1)
         self.assertEqual(update_sig.call_count, 1)
 
+    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.emit_update_fields_signal")
     @patch(tab_path + ".presenter.CalibrationPresenter.validate_path")
-    def test_calibrate_clicked_load_valid_path(self, path, update):
+    def test_calibrate_clicked_load_valid_path(self, path, update, setting):
         self.presenter.calibration_notifier = MagicMock()
         self.view.get_new_checked.return_value = False
         self.view.get_load_checked.return_value = True
 
         path.return_value = True
-        instrument, van, cer = ("test_ins", "test_van", "test_cer")
-        self.model.load_existing_calibration_files.return_value = instrument, van, cer
+        instrument, van, cer, grp_ws, roi, banks = ("test_ins", "test_van", "test_cer", "test_grpws", "test_roi",
+                                                    ['test'])
+        self.model.load_existing_calibration_files.return_value = instrument, van, cer, grp_ws, roi, banks
         current = CalibrationInfo(vanadium_path="old/value",
                                   sample_path="old/cera",
                                   instrument="ENGINX")
         new = CalibrationInfo(vanadium_path=van, sample_path=cer, instrument=instrument)
+        new.set_roi_info_load(banks, grp_ws, roi)
         self.presenter.current_calibration = current
 
         self.presenter.on_calibrate_clicked()
@@ -205,8 +217,9 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.current_calibration.get_instrument(), new.get_instrument())
         self.assertEqual(self.presenter.calibration_notifier.notify_subscribers.call_count, 1)
 
+    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.validate_path")
-    def test_calibrate_clicked_load_invalid_path(self, path):
+    def test_calibrate_clicked_load_invalid_path(self, path, setting):
         self.presenter.calibration_notifier = MagicMock()
         self.view.get_new_checked.return_value = False
         self.view.get_load_checked.return_value = True

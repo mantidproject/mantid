@@ -127,7 +127,6 @@ protected:
   QtCheckBoxFactory *m_blnEdFac;
 
 private:
-  virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
   virtual void setBrowserWorkspace(){};
 

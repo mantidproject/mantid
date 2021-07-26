@@ -24,21 +24,32 @@ class MainPlotWidgetPresenter(HomeTabSubWidget):
         self._view.add_panes(self._plot_modes)
         self._current_plot_mode = self._view.get_plot_mode
         self._plot_modes[self._current_plot_mode].show()
-        self._view.plot_mode_change_connect(self.handle_plot_mode_changed_by_user)
-        # gui observers
-        self._setup_gui_observers()
-        self._setup_view_connections()
-        #self._view
 
-    def _setup_gui_observers(self):
-        """"Setup GUI observers, e.g fit observers"""
-        return
+    def set_plot_mode_changed_slot(self, slot):
+        self._view.plot_mode_change_connect(slot)
 
-    def _setup_view_connections(self):
-        return #self._view.on_plot_mode_changed(self.handle_plot_mode_changed_by_user)
+    @property
+    def get_plot_mode(self):
+        return self._view.get_plot_mode
 
-    def handle_plot_mode_changed_by_user(self):
-        old_plot_mode = self._current_plot_mode
-        self._current_plot_mode = self._view.get_plot_mode
-        self._plot_modes[old_plot_mode].hide()
-        self._plot_modes[self._current_plot_mode].show()
+    @property
+    def data_changed_observers(self):
+        return [self._plot_modes[mode].data_changed_observer for mode in list(self._plot_modes.keys())]
+
+    @property
+    def rebin_options_set_observers(self):
+        return [self._plot_modes[mode].rebin_options_set_observer for mode in list(self._plot_modes.keys())]
+
+    @property
+    def workspace_replaced_in_ads_observers(self):
+        return [self._plot_modes[mode].workspace_replaced_in_ads_observer for mode in list(self._plot_modes.keys())]
+
+    @property
+    def workspace_deleted_from_ads_observers(self):
+        return [self._plot_modes[mode].workspace_deleted_from_ads_observer for mode in list(self._plot_modes.keys())]
+
+    def show(self, plot_mode):
+        self._plot_modes[plot_mode].show()
+
+    def hide(self, plot_mode):
+        self._plot_modes[plot_mode].hide()

@@ -23,7 +23,7 @@ if(CXXTEST_FOUND)
 
   if(WIN32)
     set_target_properties(${_pythoninterface_test_target_name}
-                          PROPERTIES COMPILE_FLAGS "/w44244")
+                          PROPERTIES COMPILE_FLAGS "/w44244 /DHAVE_SNPRINTF")
   endif()
 
   target_include_directories(${_pythoninterface_test_target_name} PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
@@ -35,6 +35,7 @@ if(CXXTEST_FOUND)
                         PythonInterfaceCore
                         PythonKernelModule
                         PythonAPIModule
+                        gmock
                         ${OpenGL_LIBRARIES}
                         ${TBB_LIBRARIES}
                         ${Boost_LIBRARIES}
