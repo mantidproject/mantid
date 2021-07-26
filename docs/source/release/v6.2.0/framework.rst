@@ -27,6 +27,7 @@ Bugfixes
 ########
 
 - Fix rare divide-by zero error when running :ref:`GetEi <algm-GetEi>` on noisy data.
+- Fix crash when running :ref:`IntegrateEPP <algm-IntegrateEPP>` on a workspace group via the algorithm dialog.
 
 Fit Functions
 -------------
