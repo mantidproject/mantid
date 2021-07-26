@@ -128,6 +128,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 if self.getPropertyValue('CrossSectionSeparationMethod') == '10p':
                     required_keys.append('ThetaOffset')
 
+                if self.getPropertyValue('MeasurementTechnique') == 'SingleCrystal':
+                    required_keys.extend(['KiXAngle', 'OmegaShift'])
+
                 for key in required_keys:
                     if key not in sampleAndEnvironmentProperties:
                         issues['SampleAndEnvironmentProperties'] = '{} needs to be defined.'.format(key)

@@ -41,6 +41,11 @@ The following keys need to be defined:
 - *SampleSpin* if the `NormalisationMethod` is set to `Paramagnetic`
 - *IncoherentCrossSection* if the `NormalisationMethod` is set to `Incoherent` and `AbsoluteUnitsNormalisation` is *True*
 
+Keys required when the `MeasurementTechnique` is `SingleCrystal`:
+
+- *KiXAngle* - angle between the incident momentum and X-axis
+- *OmegaShift* - omega offset
+
 Cross-section separation method
 ###############################
 
