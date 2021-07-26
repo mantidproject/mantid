@@ -258,6 +258,38 @@ Output:
    mtd.clear()
 
 
+**Example - D7D7AbsoluteCrossSections - Single crystal sample normalisation with vanadium**
+
+.. testcode:: ExD7AbsoluteCrossSections_single_crystal
+
+   sampleProperties = {'SampleMass': 2.932, 'FormulaUnitMass': 182.54, 'OmegaShift': 0.0, 'KiXAngle': 45.0}
+
+   Load('ILL/D7/399870_400288_by_25.nxs', OutputWorkspace='sample_data')
+   D7AbsoluteCrossSections(
+     InputWorkspace='sample_data',
+     OutputWorkspace='sample_data_qxy',
+     CrossSectionSeparationMethod='XYZ',
+     NormalisationMethod='None',
+     OutputUnits='Qxy',
+     SampleAndEnvironmentProperties=sampleProperties,
+     AbsoluteUnitsNormalisation=False,
+     IsotropicMagnetism=True,
+     MeasurementTechnique='SingleCrystal',
+     ClearCache=True
+   )
+   print("The number of entries in the output data is: {}".format(mtd['sample_data_qxy'].getNumberOfEntries()))
+
+Output:
+
+.. testoutput:: ExD7AbsoluteCrossSections_single_crystal
+
+   The number of entries in the output data is: 6
+
+.. testcleanup:: ExD7AbsoluteCrossSections_single_crystal
+
+   mtd.clear()
+
+
 References
 ----------
 
