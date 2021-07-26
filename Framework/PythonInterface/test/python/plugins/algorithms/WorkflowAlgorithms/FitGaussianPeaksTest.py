@@ -131,6 +131,24 @@ class FitGaussianPeaksTest(unittest.TestCase):
                              PeakGuessTable=self.peak_guess_table,
                              MaxPeakSigma=-1.0)
 
+    def test_algorithm_with_even_fit_window_throws(self):
+        with self.assertRaises(Exception):
+            FitGaussianPeaks(InputWorkspace=self.data_ws,
+                             PeakGuessTable=self.peak_guess_table,
+                             FitWindowSize=6)
+
+    def test_algorithm_with_fit_window_lower_than_5_throws(self):
+        with self.assertRaises(Exception):
+            FitGaussianPeaks(InputWorkspace=self.data_ws,
+                             PeakGuessTable=self.peak_guess_table,
+                             FitWindowSize=3)
+
+    def test_algorithm_with_float_fit_window_throws(self):
+        with self.assertRaises(Exception):
+            FitGaussianPeaks(InputWorkspace=self.data_ws,
+                             PeakGuessTable=self.peak_guess_table,
+                             FitWindowSize=5.5)
+
     def test_algorithm_with_negative_general_fit_tolerance_throws(self):
         with self.assertRaises(Exception):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
@@ -513,6 +531,54 @@ class FitGaussianPeaksTest(unittest.TestCase):
 
         self.assertEqual(mtd["peak_table"].rowCount(), 0)
         self.assertEqual(mtd["refit_peak_table"].rowCount(), 0)
+
+    def test_algorithm_uses_right_fit_window(self):
+        ws = CreateWorkspace([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22] * 2,
+                             [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7] + [0] * 12, NSpec=2)
+
+        table = CreateEmptyTableWorkspace()
+        table.addColumn("float", "Centre")
+        table.addRow([20])
+        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks.'
+                        'estimate_single_parameters') as mock_estimate_params:
+            mock_estimate_params.return_value = None
+            FitGaussianPeaks(InputWorkspace=ws,
+                             PeakGuessTable=table,
+                             EstimateFitWindow=False,
+                             FitWindowSize=11)
+            correct_x_val = np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22])
+            correct_y_val = np.array([0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7])
+
+            arguements = mock_estimate_params.call_args_list[0][0]
+            np.testing.assert_equal(arguements[0], correct_x_val)
+            np.testing.assert_equal(arguements[1], correct_y_val)
+            np.testing.assert_equal(arguements[2], 10)
+            np.testing.assert_equal(arguements[3], 5)
+            self.assertEqual(len(arguements), 4)
+
+    def test_algorithm_estimates_fit_window(self):
+        ws = CreateWorkspace([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22] * 2,
+                             [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7] + [0] * 12, NSpec=2)
+
+        table = CreateEmptyTableWorkspace()
+        table.addColumn("float", "Centre")
+        table.addRow([20])
+        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks.'
+                        'estimate_single_parameters') as mock_estimate_params:
+            mock_estimate_params.return_value = None
+            FitGaussianPeaks(InputWorkspace=ws,
+                             PeakGuessTable=table,
+                             EstimateFitWindow=True,
+                             FitWindowSize=11)
+            correct_x_val = np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22])
+            correct_y_val = np.array([0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7])
+
+            arguements = mock_estimate_params.call_args_list[0][0]
+            np.testing.assert_equal(arguements[0], correct_x_val)
+            np.testing.assert_equal(arguements[1], correct_y_val)
+            np.testing.assert_equal(arguements[2], 10)
+            np.testing.assert_equal(arguements[3], 2)
+            self.assertEqual(len(arguements), 4)
 
 
 if __name__ == '__main__':

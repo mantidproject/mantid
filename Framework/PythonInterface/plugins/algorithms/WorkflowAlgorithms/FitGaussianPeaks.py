@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import (CreateEmptyTableWorkspace, Fit)
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, ITableWorkspaceProperty)
-from mantid.kernel import (Direction, FloatBoundedValidator)
+from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator)
 
 import numpy as np
 import scipy.optimize
@@ -17,6 +17,8 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
     _estimate_sigma = 3.0
     _min_sigma = 0.0
     _max_sigma = 30.0
+    _estimate_fit_window = True
+    _fit_window = 5
     _general_tolerance = 0.1
     _refit_tolerance = 0.001
 
@@ -57,6 +59,15 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
                              30.0,
                              doc='Maximum value for the standard deviation of a peak',
                              validator=FloatBoundedValidator(lower=0.0))
+        self.declareProperty('EstimateFitWindow',
+                             True,
+                             doc='If checked, algorithm attempts to calculate number of data points to use from'
+                                 ' EstimatePeakSigma, if unchecked algorithm will use FitWindow argument')
+        self.declareProperty('FitWindowSize',
+                             5,
+                             doc='Number of data point used to fit peaks, minimum allowed value is 5, '
+                                 'value must be an odd number ',
+                             validator=IntBoundedValidator(lower=5))
         self.declareProperty('GeneralFitTolerance',
                              0.1,
                              doc='Tolerance for the constraint in the general fit',
@@ -91,6 +102,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         self._estimate_sigma = self.getProperty('EstimatedPeakSigma').value
         self._min_sigma = self.getProperty('MinPeakSigma').value
         self._max_sigma = self.getProperty('MaxPeakSigma').value
+        self._fit_window = self.getProperty('FitWindowSize').value
         self._general_tolerance = self.getProperty('GeneralFitTolerance').value
         self._refit_tolerance = self.getProperty('RefitTolerance').value
 
@@ -103,10 +115,12 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
 
         if self._estimate_sigma > self._max_sigma:
             issues['EstimatePeakSigma'] = 'EstimatePeakSigma must be greater than MaxPeakSigma'
-
+        if self._fit_window % 2 != 1:
+            issues['FitWindowSize'] = 'WindowSize must be an odd number'
         return issues
 
     def PyExec(self):
+        self._estimate_fit_window = self.getProperty('EstimateFitWindow').value
         xvals, flat_yvals, baseline, errors = self._load_data()
 
         # Find the index of the peaks given as input
@@ -306,9 +320,12 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         fit_func = ''
         fit_constr = ''
         for i, pid in enumerate(peakids):
-            win_size = int(self._estimate_sigma * len(xvals) / (max(xvals) - min(xvals)))
-            if win_size < 2:
-                win_size = 2
+            if self._estimate_fit_window:
+                win_size = int(self._estimate_sigma * len(xvals) / (max(xvals) - min(xvals)))
+                if win_size < 2:
+                    win_size = 2
+            else:
+                win_size = int((self._fit_window - 1)/2)
             params = self.estimate_single_parameters(xvals, yvals, pid, win_size)
             if params is None:
                 continue
