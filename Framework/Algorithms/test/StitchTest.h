@@ -242,6 +242,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
     MatrixWorkspace_sptr factors = alg.getProperty("OutputScaleFactorsWorkspace");
+    // TS_ASSERT(crossCheckStitch(std::vector<std::string>({"ws3", "ws1", "ws2"}), stitched, factors));
   }
 
   void test_ManualScaleFactors() {
@@ -250,12 +251,22 @@ public:
     auto ws3 = pointDataWorkspaceOneSpectrum(19, 0.8, 1.3, "ws3");
     Stitch alg;
     alg.setRethrows(true);
+    alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws3", "ws1", "ws2"})));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactorCalculation", "Manual"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ScaleFactorCalculation", "Manual"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ManualScaleFactors", std::vector<double>({9.1, 31.7, 11.19})));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputScaleFactorsWorkspace", "factors"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr factors = alg.getProperty("OutputScaleFactorsWorkspace");
+    TS_ASSERT_EQUALS(factors->getNumberHistograms(), 1)
+    TS_ASSERT_EQUALS(factors->readY(0)[0], 9.1)
+    TS_ASSERT_EQUALS(factors->readY(0)[1], 31.7)
+    TS_ASSERT_EQUALS(factors->readY(0)[2], 11.19)
+    // TS_ASSERT(crossCheckStitch(std::vector<std::string>({"ws3", "ws1", "ws2"}), stitched, factors));
   }
 
   void test_NoScaling() {
@@ -264,12 +275,22 @@ public:
     auto ws3 = pointDataWorkspaceOneSpectrum(19, 0.8, 1.3, "ws3");
     Stitch alg;
     alg.setRethrows(true);
+    alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws3", "ws1", "ws2"})));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactorCalculation", "Manual"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ScaleFactorCalculation", "Manual"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ManualScaleFactors", std::vector<double>({1., 1., 1.})));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputScaleFactorsWorkspace", "factors"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr factors = alg.getProperty("OutputScaleFactorsWorkspace");
+    TS_ASSERT_EQUALS(factors->getNumberHistograms(), 1)
+    TS_ASSERT_EQUALS(factors->readY(0)[0], 1.)
+    TS_ASSERT_EQUALS(factors->readY(0)[1], 1.)
+    TS_ASSERT_EQUALS(factors->readY(0)[2], 1.)
+    // TS_ASSERT(crossCheckStitch(std::vector<std::string>({"ws3", "ws1", "ws2"}), stitched, factors));
   }
 
   void test_MultiSpectra() {
@@ -278,10 +299,19 @@ public:
     auto ws3 = pointDataWorkspaceMultiSpectrum(3, 19, 0.8, 1.3, "ws3");
     Stitch alg;
     alg.setRethrows(true);
+    alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2", "ws3"})));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputScaleFactorsWorkspace", "factors"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr factors = alg.getProperty("OutputScaleFactorsWorkspace");
+    TS_ASSERT_EQUALS(factors->readY(0)[0], 1.)
+    TS_ASSERT_DIFFERS(factors->readY(0)[1], 1.)
+    TS_ASSERT_DIFFERS(factors->readY(0)[2], 1.)
+    TS_ASSERT(crossCheckStitch(std::vector<std::string>({"ws1", "ws2", "ws3"}), stitched, factors));
   }
 
   void test_TiedScaleFactor() {
@@ -290,11 +320,21 @@ public:
     auto ws3 = pointDataWorkspaceMultiSpectrum(3, 19, 0.8, 1.3, "ws3");
     Stitch alg;
     alg.setRethrows(true);
+    alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2", "ws3"})));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TieScaleFactors", true));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputScaleFactorsWorkspace", "factors"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr factors = alg.getProperty("OutputScaleFactorsWorkspace");
+    TS_ASSERT_EQUALS(factors->getNumberHistograms(), 1)
+    TS_ASSERT_EQUALS(factors->readY(0)[0], 1.)
+    TS_ASSERT_DIFFERS(factors->readY(0)[1], 1.)
+    TS_ASSERT_DIFFERS(factors->readY(0)[2], 1.)
+    // TS_ASSERT(crossCheckStitch(std::vector<std::string>({"ws1", "ws2", "ws3"}), stitched, factors));
   }
 
 private:
