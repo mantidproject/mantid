@@ -40,8 +40,8 @@ class GroupingTabModel(object):
         try:
             workspace = self._groups_and_pairs[group_name].workspace[MuonRun(run)].workspace
         except AttributeError:
-            workspace = self._context.calculate_group(group_name, run, rebin=False)
-            self._groups_and_pairs[group_name].update_counts_workspace(workspace, MuonRun(run))
+            workspace = self._context.calculate_counts(run, group_name, rebin=False)
+            self._groups_and_pairs[group_name].update_counts_workspace(MuonRun(run), workspace)
         return workspace
 
     @property

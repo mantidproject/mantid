@@ -14,6 +14,7 @@ from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, 
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_minus
+from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
 from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
@@ -147,36 +148,49 @@ class BackgroundCorrectionsModel:
 
     def reset_background_subtraction_data(self) -> None:
         """Resets the calculated background functions and corrected counts data in the ADS."""
-        for correction_data in self._corrections_context.background_correction_data.values():
+        for run_group in self._corrections_context.background_correction_data.keys():
+            correction_data = self._corrections_context.background_correction_data[run_group]
             correction_data.setup_functions()
             add_ws_to_ads(correction_data.uncorrected_counts_workspace.workspace_name,
                           correction_data.uncorrected_counts_workspace.workspace_copy())
+            self._create_asymmetry_workspace_for(run_group[0], run_group[1])
 
     def run_background_correction_for_all(self) -> None:
         """Runs the background corrections for all stored domains."""
-        for correction_data in self._corrections_context.background_correction_data.values():
-            self._run_background_correction(correction_data)
+        for run_group in self._corrections_context.background_correction_data.keys():
+            self._run_background_correction(run_group[0], run_group[1],
+                                            self._corrections_context.background_correction_data[run_group])
 
     def run_background_correction_for(self, run: str, group: str) -> None:
         """Calculates the background for some data using a Fit."""
         run_group = tuple([run, group])
         if run_group in self._corrections_context.background_correction_data:
-            self._run_background_correction(self._corrections_context.background_correction_data[run_group])
+            self._run_background_correction(run_group[0], run_group[1],
+                                            self._corrections_context.background_correction_data[run_group])
 
-    def _run_background_correction(self, correction_data: BackgroundCorrectionData) -> None:
+    def _run_background_correction(self, run: str, group: str, correction_data: BackgroundCorrectionData) -> None:
         """Calculates the background for some data using a Fit."""
         params = self._get_parameters_for_background_fit(correction_data)
         function, fit_status, chi_squared = run_Fit(params, AlgorithmManager.create("Fit"))
 
         self._handle_background_fit_output(correction_data, function, fit_status, chi_squared)
         self._perform_background_subtraction_on_counts(correction_data)
+        self._create_asymmetry_workspace_for(run, group)
 
     @staticmethod
     def _perform_background_subtraction_on_counts(correction_data: BackgroundCorrectionData) -> None:
-        """Performs the background subtraction on """
+        """Performs the background subtraction on the counts workspace, and then generates the asymmetry workspace."""
         run_minus(correction_data.uncorrected_counts_workspace.workspace_copy(),
                   correction_data.create_background_workspace(),
                   correction_data.uncorrected_counts_workspace.workspace_name)
+
+    def _create_asymmetry_workspace_for(self, run: str, group: str) -> None:
+        """Creates the asymmetry workspace for a run and group using its corresponding Counts workspace in the ADS."""
+        run_list = run_string_to_list(run)
+        group_object = self._context.group_pair_context[group]
+        if run_list is not None and group_object is not None:
+            self._context.calculate_asymmetry_for(run_list, group_object)
+            self._context.show_group(run_list, group_object)
 
     def _handle_background_fit_output(self, correction_data: BackgroundCorrectionData, function: IFunction,
                                       fit_status: str, chi_squared: float) -> None:
