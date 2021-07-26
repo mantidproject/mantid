@@ -24,6 +24,7 @@ V0 to V1
 - *mask.beamstop_shadow* and *mask.mask_pixels* were moved to
   *mask.spatial.beamstop_shadow* and *mask.spatial.mask_pixels*
 - *normalisation.all_monitors* was added to support *BACK/MON/TIMES*
+- *[gravity]* and *gravity.enabled* were merged into *instrument.configuration.gravity_enabled*
 
 
 Conversion From Legacy User Files
@@ -463,8 +464,8 @@ GRAVITY/ON
 
 ..  code-block:: none
 
-    [gravity]
-      enabled = true
+    [instrument.configuration]
+      gravity_enabled = true
 
 **Existing Example**
 
@@ -476,8 +477,9 @@ GRAVITY/ON
 
 ..  code-block:: none
 
-    [gravity]
-      enabled = true
+    [instrument.configuration]
+      gravity_enabled = true
+
 
 GRAVITY/LEXTRA x
 ----------------
@@ -501,7 +503,6 @@ GRAVITY/LEXTRA x
 
     [instrument.configuration]
       gravity_extra_length = 2.0
-
 
 
 L/EVENTSTIME str

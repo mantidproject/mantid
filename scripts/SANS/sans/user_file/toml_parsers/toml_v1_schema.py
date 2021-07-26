@@ -50,6 +50,7 @@ class TomlSchemaV1Validator(object):
         """
         instrument_keys = {"name": None,
                            "configuration": {"collimation_length",
+                                             "gravity_enabled",
                                              "gravity_extra_length",
                                              "norm_monitor",
                                              "sample_aperture_diameter",
@@ -83,8 +84,6 @@ class TomlSchemaV1Validator(object):
         q_resolution_keys = {"enabled", "moderator_file", "source_aperture", "delta_r",
                              "h1", "h2", "w1", "w2"}
 
-        gravity_keys = {"enabled"}
-
         transmission_keys = {"monitor": {"*": {"spectrum_number", "background", "shift", "use_own_background"}},
                              "fitting": {"enabled": None, "function": None, "polynomial_order": None,
                                          "parameters": {"lambda_min", "lambda_max"}},
@@ -111,7 +110,6 @@ class TomlSchemaV1Validator(object):
                 "binning": binning_keys,
                 "metadata": ".*",
                 "detector": detector_keys,
-                "gravity": gravity_keys,
                 "mask": mask_keys,
                 "instrument": instrument_keys,
                 "normalisation": normalisation_keys,

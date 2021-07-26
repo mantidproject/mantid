@@ -104,7 +104,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self._parse_binning()
         self._parse_detector()
         self._parse_detector_configuration()
-        self._parse_gravity()
         self._parse_instrument_configuration()
         self._parse_mask()
         self._parse_normalisation()
@@ -157,6 +156,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.convert_to_q.q_resolution_a2 = self.get_val("sample_aperture_diameter", inst_config_dict)
 
         self.move.sample_offset = self.get_val("sample_offset", inst_config_dict, 0.0)
+        self.convert_to_q.use_gravity = self.get_val("gravity_enabled", inst_config_dict, default=True)
 
     def _parse_detector_configuration(self):
         det_config_dict = self.get_val(["detector", "configuration"])
@@ -303,9 +303,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.convert_to_q.q_resolution_h2 = self.get_val("h2", q_dict)
         self.convert_to_q.q_resolution_w1 = self.get_val("w1", q_dict)
         self.convert_to_q.q_resolution_w2 = self.get_val("w2", q_dict)
-
-    def _parse_gravity(self):
-        self.convert_to_q.use_gravity = self.get_val(["gravity", "enabled"], default=True)
 
     def _parse_transmission(self):
         transmission_dict = self.get_val("transmission")

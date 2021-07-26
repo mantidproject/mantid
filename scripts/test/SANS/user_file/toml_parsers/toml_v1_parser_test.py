@@ -74,7 +74,8 @@ class TomlV1ParserTest(unittest.TestCase):
             ("norm_monitor", lambda x: x.get_state_calculate_transmission().incident_monitor),
             ("trans_monitor", lambda x: x.get_state_calculate_transmission().transmission_monitor),
             ("sample_aperture_diameter", lambda x: x.get_state_convert_to_q().q_resolution_a2),
-            ("sample_offset", lambda x: x.get_state_move(None).sample_offset)
+            ("sample_offset", lambda x: x.get_state_move(None).sample_offset),
+            ("gravity_enabled", lambda x: x.get_state_convert_to_q().use_gravity)
         ]
 
         self._loop_over_supported_keys(supported_keys=supported_keys, top_level_keys=["instrument", "configuration"])
@@ -249,12 +250,6 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(5, q_resolution.q_resolution_w1)
         self.assertEqual(6, q_resolution.q_resolution_w2)
         self.assertEqual(q_resolution_dict["moderator_file"], q_resolution.moderator_file)
-
-    def test_gravity(self):
-        test_dict = {"gravity": {"enabled": True}}
-        q_state = self._setup_parser(test_dict).get_state_convert_to_q()
-
-        self.assertEqual(True, q_state.use_gravity)
 
     def test_transmission(self):
         top_level_dict = {"transmission": {"monitor": {"M3": {}, "M5": {}}}}
