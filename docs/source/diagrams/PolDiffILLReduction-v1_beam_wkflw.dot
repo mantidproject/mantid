@@ -4,7 +4,7 @@ digraph Beam {
   subgraph params {
     $param_style
     Run
-    AbsorberTransmissionWorkspace
+    CadmiumTransmissionWorkspace
   }
 
   subgraph values {
@@ -22,6 +22,6 @@ digraph Beam {
   Run -> LoadAndMerge
   LoadAndMerge -> Divide
   Divide -> Minus
-  AbsorberTransmissionWorkspace -> Minus
+  CadmiumTransmissionWorkspace -> Minus
   Minus -> OutputWorkspace
 }
