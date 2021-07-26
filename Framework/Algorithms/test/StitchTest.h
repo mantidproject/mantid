@@ -12,7 +12,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidAlgorithms/SortXAxis.h"
 #include "MantidAlgorithms/Stitch.h"
 #include "MantidHistogramData/Histogram.h"
 
@@ -87,8 +89,9 @@ public:
 
   //================================HAPPY CASES===================================//
   void test_WorkspaceGroup() {
-    auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
-    auto ws2 = pointDataWorkspaceOneSpectrum(17, 0.5, 0.9, "ws2");
+    // prepare
+    auto ws1 = pointDataWorkspaceOneSpectrum(11, 0.3, 0.7, "ws1");
+    auto ws2 = pointDataWorkspaceOneSpectrum(21, 0.55, 0.95, "ws2");
     GroupWorkspaces grouper;
     grouper.initialize();
     grouper.setAlwaysStoreInADS(true);
@@ -96,13 +99,31 @@ public:
     grouper.setPropertyValue("OutputWorkspace", "group");
     grouper.execute();
 
+    // run
     Stitch alg;
     alg.setRethrows(true);
+    alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "group"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputScaleFactorsWorkspace", "factors"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // assert
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(out);
+    TS_ASSERT(!out->isHistogramData());
+    TS_ASSERT(out->isCommonBins());
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(out->blocksize(), 11 + 21);
+    MatrixWorkspace_sptr factors = alg.getProperty("OutputScaleFactorsWorkspace");
+    TS_ASSERT(factors);
+    TS_ASSERT_EQUALS(factors->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(factors->blocksize(), 2);
+    const auto factorsY = factors->readY(0);
+    TS_ASSERT_EQUALS(factorsY[0], 1.);
+    TS_ASSERT_DELTA(factorsY[1], 1.82666823, 1E-8);
   }
 
   void test_WorkspacesAndGroupsMixed() {
