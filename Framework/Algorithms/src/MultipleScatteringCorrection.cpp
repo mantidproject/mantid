@@ -212,7 +212,7 @@ void MultipleScatteringCorrection::parseInputs() {
   m_beamDirection = m_inputWS->getInstrument()->getBeamDirection();
 
   // Get the total number of wavelength points, default to use all if not specified
-  m_num_lambda = isDefault("NumberOfWavelengthPoints") ? static_cast<int64_t>(m_inputWS->getNumberHistograms())
+  m_num_lambda = isDefault("NumberOfWavelengthPoints") ? static_cast<int64_t>(m_inputWS->blocksize())
                                                        : getProperty("NumberOfWavelengthPoints");
   // -- while we're here, compute the step in bin number between two adjacent points
   const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
@@ -289,6 +289,19 @@ void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrect
   }
 }
 
+/**
+ * @brief Integrate for A1 and A2 using pair-wise summation
+ * see https://en.wikipedia.org/wiki/Pairwise_summation for details
+ *
+ * @param A1
+ * @param A2
+ * @param linearCoefAbs
+ * @param distGraber
+ * @param L2Ds
+ * @param L12s
+ * @param startIndex
+ * @param endIndex
+ */
 void MultipleScatteringCorrection::pairWiseSum(double &A1, double &A2, const double linearCoefAbs,
                                                const MultipleScatteringCorrectionDistGraber &distGraber,
                                                const std::vector<double> &L2Ds, const std::vector<double> &L12s,
