@@ -169,7 +169,7 @@ class BeamCentreModel(object):
     @property
     @apply_selective_view_scaling
     def lab_pos_1(self):
-        return self._lab_pos_1 if self._lab_pos_1 else ''
+        return self._lab_pos_1 if self._lab_pos_1 is not None else ''
 
     @lab_pos_1.setter
     @undo_selective_view_scaling
@@ -179,7 +179,7 @@ class BeamCentreModel(object):
     @property
     @apply_selective_view_scaling
     def lab_pos_2(self):
-        return self._lab_pos_2 if self._lab_pos_2 else ''
+        return self._lab_pos_2 if self._lab_pos_2 is not None else ''
 
     @lab_pos_2.setter
     @undo_selective_view_scaling
@@ -189,7 +189,7 @@ class BeamCentreModel(object):
     @property
     @apply_selective_view_scaling
     def hab_pos_1(self):
-        return self._hab_pos_1 if self._hab_pos_1 else ''
+        return self._hab_pos_1 if self._hab_pos_1 is not None else ''
 
     @hab_pos_1.setter
     @undo_selective_view_scaling
@@ -199,7 +199,7 @@ class BeamCentreModel(object):
     @property
     @apply_selective_view_scaling
     def hab_pos_2(self):
-        return self._hab_pos_2 if self._hab_pos_2 else ''
+        return self._hab_pos_2 if self._hab_pos_2 is not None else ''
 
     @hab_pos_2.setter
     @undo_selective_view_scaling
