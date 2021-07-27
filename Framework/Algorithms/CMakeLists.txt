@@ -1042,12 +1042,6 @@ set_target_properties(Algorithms
                                  COMPILE_DEFINITIONS
                                  "IN_MANTID_ALGORITHMS")
 
-
-set_target_properties(Algorithms
-                      PROPERTIES OUTPUT_NAME
-                                 MantidAlgorithms
-                                 COMPILE_DEFINITIONS
-                                 "IN_MANTID_ALGORITHMS")
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Algorithms
                         PROPERTIES INSTALL_RPATH

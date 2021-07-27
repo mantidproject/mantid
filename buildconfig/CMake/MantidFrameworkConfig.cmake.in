@@ -52,6 +52,7 @@ set(MODULES
     RemoteAlgorithms
     RemoteJobManagers
     SINQ
+    ScriptRepository
     Muon
     Reflectometry
 )

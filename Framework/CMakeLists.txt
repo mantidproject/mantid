@@ -187,7 +187,7 @@ configure_package_config_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/MantidFramew
 
 write_basic_package_version_file(
   ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake
-  VERSION 1.0.0
+  VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
   COMPATIBILITY SameMajorVersion )
 
 install(FILES
