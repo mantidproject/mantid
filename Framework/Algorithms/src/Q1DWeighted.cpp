@@ -584,11 +584,9 @@ void Q1DWeighted::fillTOFOutput(MatrixWorkspace_sptr &outputWS, const size_t iou
     PARALLEL_CHECK_INTERUPT_REGION
   }
 
-  if (!m_isMonochromatic) {
-    for (size_t i = 0; i < m_nQ; ++i) {
-      YOut[i] /= normLambda[i];
-      EOut[i] = sqrt(EOut[i]) / normLambda[i];
-    }
+  for (size_t i = 0; i < m_nQ; ++i) {
+    YOut[i] /= normLambda[i];
+    EOut[i] = sqrt(EOut[i]) / normLambda[i];
   }
 }
 
