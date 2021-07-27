@@ -701,9 +701,7 @@
   <instrument name="D22">
     <technique>SANS</technique>
   </instrument>
-  <instrument name="D22B">
-    <technique>SANS</technique>
-  </instrument>
+
   <instrument name="D33">
     <technique>SANS</technique>
   </instrument>
