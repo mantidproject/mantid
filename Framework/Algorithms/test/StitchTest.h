@@ -334,10 +334,10 @@ public:
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
     MatrixWorkspace_sptr factors = alg.getProperty("OutputScaleFactorsWorkspace");
     TS_ASSERT_EQUALS(factors->getNumberHistograms(), 1)
+    TS_ASSERT(crossCheckStitch(std::vector<std::string>({"ws1", "ws2", "ws3"}), stitched, factors));
     TS_ASSERT_EQUALS(factors->readY(0)[0], 1.)
     TS_ASSERT_DIFFERS(factors->readY(0)[1], 1.)
     TS_ASSERT_DIFFERS(factors->readY(0)[2], 1.)
-    // TS_ASSERT(crossCheckStitch(std::vector<std::string>({"ws1", "ws2", "ws3"}), stitched, factors));
   }
 
 private:

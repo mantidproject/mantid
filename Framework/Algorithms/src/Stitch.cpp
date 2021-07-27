@@ -103,15 +103,14 @@ double median(const std::vector<double> &vec) {
  * @param global : if true, a global median will be calculated for all the spectra
  * @return a new workspace representing the medians, single count if global is requested
  */
-MatrixWorkspace_sptr medianWorkspace(MatrixWorkspace_sptr ws, bool global = false) {
+MatrixWorkspace_sptr medianWorkspace(MatrixWorkspace_sptr ws, bool global) {
   if (global) {
     MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     std::vector<double> allY;
     allY.reserve(ws->getNumberHistograms() * ws->blocksize());
-    for (int i = 0; i < static_cast<int>(ws->getNumberHistograms()); ++i) {
-      const size_t wsIndex = static_cast<size_t>(i);
-      const auto spectrum = ws->mutableY(wsIndex).rawData();
-      std::copy(spectrum.cbegin(), spectrum.cend(), allY.end());
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+      const auto spectrum = ws->mutableY(i).rawData();
+      std::copy(spectrum.cbegin(), spectrum.cend(), std::back_inserter(allY));
     }
     auto &y = out->mutableY(0);
     y = std::vector<double>(1, median(std::move(allY)));
@@ -308,6 +307,11 @@ void Stitch::exec() {
   }
 }
 
+/**
+ * @brief Clones all the input workspaces so that they can be scaled in-place without altering the inputs
+ * Clones will be prefixed and stored on ADS, and will be eventually deleted
+ * @param inputs: the list of workspace names to clone
+ */
 void Stitch::cloneWorkspaces(const std::vector<std::string> &inputs) {
   auto cloner = createChildAlgorithm("CloneWorkspace");
   cloner->setAlwaysStoreInADS(true);
@@ -368,22 +372,13 @@ void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScal
 
   MatrixWorkspace_sptr rebinnedToScale;
   if (croppedToMatch->blocksize() > 1) {
-    if (wsToMatch->isHistogramData()) {
-      auto rebinner = createChildAlgorithm("RebinToWorkspace");
-      rebinner->setProperty("WorkspaceToMatch", croppedToMatch);
-      rebinner->setProperty("WorkspaceToRebin", croppedToScale);
-      rebinner->setPropertyValue("OutputWorkspace", "__rebinned");
-      rebinner->execute();
-      rebinnedToScale = rebinner->getProperty("OutputWorkspace");
-    } else {
-      auto interpolator = createChildAlgorithm("SplineInterpolation");
-      interpolator->setProperty("WorkspaceToMatch", croppedToMatch);
-      interpolator->setProperty("WorkspaceToInterpolate", croppedToScale);
-      interpolator->setProperty("Linear2Points", true);
-      interpolator->setPropertyValue("OutputWorkspace", "__interpolated");
-      interpolator->execute();
-      rebinnedToScale = interpolator->getProperty("OutputWorkspace");
-    }
+    auto interpolator = createChildAlgorithm("SplineInterpolation");
+    interpolator->setProperty("WorkspaceToMatch", croppedToMatch);
+    interpolator->setProperty("WorkspaceToInterpolate", croppedToScale);
+    interpolator->setProperty("Linear2Points", true);
+    interpolator->setPropertyValue("OutputWorkspace", "__interpolated");
+    interpolator->execute();
+    rebinnedToScale = interpolator->getProperty("OutputWorkspace");
   } else {
     if (croppedToMatch->readX(0) != croppedToScale->readX(0)) {
       throw std::runtime_error(
@@ -399,7 +394,7 @@ void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScal
   divider->setPropertyValue("OutputWorkspace", "__ratio");
   divider->execute();
   MatrixWorkspace_sptr ratio = divider->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr median = medianWorkspace(ratio, false);
+  MatrixWorkspace_sptr median = medianWorkspace(ratio, getProperty("TieScaleFactors"));
 
   auto scaler = createChildAlgorithm("Divide");
   scaler->setAlwaysStoreInADS(true);
