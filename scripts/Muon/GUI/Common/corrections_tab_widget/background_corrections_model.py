@@ -14,7 +14,6 @@ from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, 
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_minus
-from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
 from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
@@ -182,53 +181,6 @@ class BackgroundCorrectionsModel:
         run_minus(correction_data.uncorrected_counts_workspace.workspace_copy(),
                   correction_data.create_background_workspace(),
                   correction_data.uncorrected_counts_workspace.workspace_name)
-
-    def calculate_asymmetry_workspaces_for(self, runs: list, groups: list) -> None:
-        """Creates the asymmetry workspaces for the runs and groups provided using the Counts workspaces in the ADS."""
-        for run, group in zip(runs, groups):
-            self._create_asymmetry_workspace_for(run, group)
-
-    def _create_asymmetry_workspace_for(self, run: str, group: str) -> None:
-        """Creates the asymmetry workspace for a run and group using its corresponding Counts workspace in the ADS."""
-        run_list = run_string_to_list(run)
-        group_object = self._context.group_pair_context[group]
-        if run_list is not None and group_object is not None:
-            self._context.calculate_asymmetry_for(run_list, group_object)
-            self._context.show_group(run_list, group_object)
-
-    def calculate_pairs_for(self, runs: list, groups: list) -> list:
-        """Calculates the Pair Asymmetry workspaces which are concerned with the provided Runs and Groups."""
-        self._context.update_phasequads()
-
-        # Remove duplicates from the list
-        runs = list(dict.fromkeys(runs))
-
-        pairs = self._context.find_pairs_containing_groups(groups)
-        self._calculate_pairs_for(runs, pairs)
-        return [pair.name for pair in pairs]
-
-    def _calculate_pairs_for(self, runs: list, pairs: list) -> None:
-        """Calculates the Pair Asymmetry workspaces for the provided runs and pairs."""
-        for run in runs:
-            run_list = run_string_to_list(run)
-            for pair_object in pairs:
-                self._context.calculate_pair_for(run_list, pair_object)
-                self._context.show_pair(run_list, pair_object)
-
-    def calculate_diffs_for(self, runs: list, groups_and_pairs: list) -> None:
-        """Calculates the Diff Asymmetry workspaces which are concerned with the provided Runs and Groups/Pairs."""
-        # Remove duplicates from the list
-        runs = list(dict.fromkeys(runs))
-
-        self._calculate_diffs_for(runs, self._context.find_diffs_containing_groups_or_pairs(groups_and_pairs))
-
-    def _calculate_diffs_for(self, runs: list, diffs: list) -> None:
-        """Calculates the Diff Asymmetry workspaces for the provided runs and diffs."""
-        for run in runs:
-            run_list = run_string_to_list(run)
-            for diff_object in diffs:
-                self._context.calculate_diff_for(run_list, diff_object)
-                self._context.show_diff(run_list, diff_object)
 
     def _handle_background_fit_output(self, correction_data: BackgroundCorrectionData, function: IFunction,
                                       fit_status: str, chi_squared: float) -> None:

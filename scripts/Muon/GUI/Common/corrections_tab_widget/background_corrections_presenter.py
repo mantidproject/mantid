@@ -7,8 +7,6 @@
 from Muon.GUI.Common.contexts.corrections_context import BACKGROUND_MODE_NONE, FLAT_BACKGROUND
 from Muon.GUI.Common.corrections_tab_widget.background_corrections_model import BackgroundCorrectionsModel
 from Muon.GUI.Common.corrections_tab_widget.background_corrections_view import BackgroundCorrectionsView
-from Muon.GUI.Common.thread_model import ThreadModel
-from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common.utilities.workspace_data_utils import check_start_x_is_valid, check_end_x_is_valid
 
 
@@ -22,8 +20,6 @@ class BackgroundCorrectionsPresenter:
         self.view = view
         self.model = model
         self._corrections_presenter = corrections_presenter
-
-        self.thread_success = True
 
         self.view.set_slot_for_mode_combo_box_changed(self.handle_mode_combo_box_changed)
         self.view.set_slot_for_select_function_combo_box_changed(self.handle_select_function_combo_box_changed)
@@ -87,33 +83,9 @@ class BackgroundCorrectionsPresenter:
         """Handles when a End X table cell is changed."""
         self._handle_start_or_end_x_changed(self._get_new_x_range_when_end_x_changed)
 
-    def handle_thread_calculation_started(self) -> None:
-        """Handles when a calculation on a thread has started."""
-        self._corrections_presenter.disable_editing_notifier.notify_subscribers()
-        self.thread_success = True
-
     def handle_background_corrections_for_all_finished(self) -> None:
-        """Handle when the background corrections for all has finished."""
-        self._corrections_presenter.enable_editing_notifier.notify_subscribers()
-        if not self.thread_success:
-            return
-
+        """Handle when the background corrections has finished."""
         self._update_displayed_corrections_data()
-
-        corrected_runs_and_groups = self.thread_model_wrapper.result
-        if corrected_runs_and_groups is not None:
-            self._perform_asymmetry_pairs_and_diffs_calculation(*corrected_runs_and_groups)
-
-    def handle_thread_error(self, error: str) -> None:
-        """Handle when an error occurs while doing calculations on a thread."""
-        self._corrections_presenter.disable_editing_notifier.notify_subscribers()
-        self.thread_success = False
-        self._corrections_presenter.warning_popup(error)
-
-    def handle_asymmetry_pairs_and_diffs_calc_finished(self) -> None:
-        """Handle when the calculation of Asymmetry, Pairs and Diffs has finished finished."""
-        self._corrections_presenter.enable_editing_notifier.notify_subscribers()
-        self._corrections_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.notify_subscribers()
 
     def _handle_start_or_end_x_changed(self, get_new_x_range) -> None:
         """Handles when a Start X or End X is changed using an appropriate getter to get the new x range."""
@@ -160,38 +132,15 @@ class BackgroundCorrectionsPresenter:
     def _perform_background_corrections(self, calculation_func, *args) -> None:
         """Creates a matrix workspace for each possible parameter combination to be used for fitting."""
         try:
-            self.correction_calculation_thread = self._create_calculation_thread(calculation_func, *args)
-            self.correction_calculation_thread.threadWrapperSetUp(self.handle_thread_calculation_started,
-                                                                  self.handle_background_corrections_for_all_finished,
-                                                                  self.handle_thread_error)
+            self.correction_calculation_thread = self._corrections_presenter.create_calculation_thread(calculation_func,
+                                                                                                       *args)
+            self.correction_calculation_thread.threadWrapperSetUp(
+                self._corrections_presenter.handle_thread_calculation_started,
+                self._corrections_presenter.handle_background_corrections_for_all_finished,
+                self._corrections_presenter.handle_thread_error)
             self.correction_calculation_thread.start()
         except ValueError as error:
             self._corrections_presenter.warning_popup(error)
-
-    def _perform_asymmetry_pairs_and_diffs_calculation(self, *args) -> None:
-        """Calculate the Asymmetry workspaces, Pairs and Diffs on a thread after background corrections are complete."""
-        try:
-            self.calculation_thread = self._create_calculation_thread(self._calculate_asymmetry_pairs_and_diffs, *args)
-            self.calculation_thread.threadWrapperSetUp(self.handle_thread_calculation_started,
-                                                       self.handle_asymmetry_pairs_and_diffs_calc_finished,
-                                                       self.handle_thread_error)
-            self.calculation_thread.start()
-        except ValueError as error:
-            self._corrections_presenter.warning_popup(error)
-
-    def _calculate_asymmetry_pairs_and_diffs(self, runs: list, groups: list) -> None:
-        """Calculates the Asymmetry workspaces, Pairs and Diffs only for the provided runs and groups."""
-        # Calculates the Asymmetry workspaces for the corresponding runs and groups that have just been corrected
-        self.model.calculate_asymmetry_workspaces_for(runs, groups)
-        # Calculates the Pair Asymmetry workspaces for pairs formed from one or more groups which have been corrected
-        pairs = self.model.calculate_pairs_for(runs, groups)
-        # Calculates the Diff Asymmetry workspaces formed from one or more groups/pairs which have been corrected
-        self.model.calculate_diffs_for(runs, groups + pairs)
-
-    def _create_calculation_thread(self, callback, *args) -> ThreadModel:
-        """Create a thread for calculations."""
-        self.thread_model_wrapper = ThreadModelWrapperWithOutput(callback, *args)
-        return ThreadModel(self.thread_model_wrapper)
 
     def _selected_runs_and_groups(self) -> tuple:
         """Returns the runs and groups to apply the parameter changes to."""
