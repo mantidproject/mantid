@@ -157,7 +157,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         return (h*h)/(2*m_n*wavelength*wavelength)
 
     def eiWavelengthUpdateEvent(self):
-        if self.masterDict['instrument'] == 'WAND2':
+        if self.masterDict['instrument'] == 'WAND\u00B2':
             ei = self.convertWavelengthToEnergy(self.masterDict['Ei'])
             offset = ei * 0.01
             lowerBound = ei - offset
@@ -166,15 +166,23 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             self.dimensionWidget.set_editMax4(str(upperBound))
 
     def instrumentUpdateEvent(self):
-        if self.masterDict['instrument'] == 'WAND2':
+        if self.masterDict['instrument'] == 'WAND\u00B2':
             # change the ui accordingly
             self.dimensionWidget.toggleDeltaE(False)
             self.instrumentWidget.setLabelEi('Input Wavelength')
             self.instrumentWidget.setEiVal(str(1.0))
+
+            self.instrumentWidget.setGoniometerNames(['s1', 'sgl','sgu'])
+            self.instrumentWidget.setGoniometerDirections(['0,1,0', '1,0,0','0,0,1'])
+            self.instrumentWidget.setGoniometerRotationSense([1,-1,-1])
+            self.instrumentWidget.updateAll()
         else:
             self.dimensionWidget.toggleDeltaE(True)
             self.instrumentWidget.setLabelEi('Incident Energy')
             self.instrumentWidget.setEiVal(str(10.0))
+
+            self.instrumentWidget.setGoniometerNames(['psi','gl','gs'])
+            self.instrumentWidget.updateAll()
 
     @QtCore.Slot(dict)
     def updateParams(self, d):
@@ -249,9 +257,15 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             if self.wg is not None:
                 mantid.simpleapi.DeleteWorkspace(self.wg)
 
+            instrumentName = self.masterDict['instrument']
+            if instrumentName == 'WAND\u00B2':
+                instrumentName = 'WAND'
+
             mantid.simpleapi.LoadEmptyInstrument(
-                mantid.api.ExperimentInfo.getInstrumentFilename(self.masterDict['instrument']),
-                OutputWorkspace="__temp_instrument")
+                instrumentName
+                mantid.api.ExperimentInfo.getInstrumentFilename(instrumentName),
+                OutputWorkspace="__temp_instrument"
+                )
             if self.masterDict['instrument'] == 'HYSPEC':
                 mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName='msd', LogText='1798.5',
                                               LogType='Number Series')
@@ -265,6 +279,16 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                                                            Y=1,
                                                            Angle=str(self.masterDict['S2']),
                                                            RelativeRotation=False)
+            elif instrumentName == 'WAND':
+                for bankNum in range(1,9):
+                    mantid.simpleapi.MoveInstrumentComponent(
+                        "__temp_instrument",
+                        'bank' + str(bankNum),
+                        X=0,
+                        Y=self.masterDict['DetZ'],
+                        Z=0,
+                        RelativePosition=True
+                        )
             # masking
             if 'maskFilename' in self.masterDict and len(self.masterDict['maskFilename'].strip()) > 0:
                 try:
