@@ -265,15 +265,14 @@ void Stitch::exec() {
   const auto scaleFactorCalculation = getPropertyValue(SCALE_FACTOR_CALCULATION_PROPERTY);
   const auto inputs = RunCombinationHelper::unWrapGroups(getProperty(INPUT_WORKSPACE_PROPERTY));
   MatrixWorkspace_sptr scaleFactorsWorkspace;
+  cloneWorkspaces(inputs);
+  std::vector<std::string> clones;
+  std::transform(inputs.cbegin(), inputs.cend(), std::back_inserter(clones),
+                 [](const auto ws) { return "__cloned_" + ws; });
   if (scaleFactorCalculation == "Manual") {
-    scaleFactorsWorkspace = initScaleFactorsWorkspace(1, inputs.size());
-    const auto scaled = scaleManual(inputs, getProperty(MANUAL_SCALE_FACTORS_PROPERTY), scaleFactorsWorkspace);
-    setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(scaled));
+    scaleFactorsWorkspace = initScaleFactorsWorkspace(1, clones.size());
+    scaleManual(clones, getProperty(MANUAL_SCALE_FACTORS_PROPERTY), scaleFactorsWorkspace);
   } else {
-    cloneWorkspaces(inputs);
-    std::vector<std::string> clones;
-    std::transform(inputs.cbegin(), inputs.cend(), std::back_inserter(clones),
-                   [](const auto ws) { return "__cloned_" + ws; });
     std::transform(clones.cbegin(), clones.cend(), std::back_inserter(workspaces),
                    [](const auto ws) { return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws); });
     const size_t nSpectrumInScaleFactors =
@@ -299,10 +298,10 @@ void Stitch::exec() {
       progress->report();
       ++rightIterator;
     }
-    setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(clones));
-    for (const auto &ws : clones) {
-      AnalysisDataService::Instance().remove(ws);
-    }
+  }
+  setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(clones));
+  for (const auto &ws : clones) {
+    AnalysisDataService::Instance().remove(ws);
   }
   if (!isDefault(OUTPUT_SCALE_FACTORS_PROPERTY)) {
     setProperty(OUTPUT_SCALE_FACTORS_PROPERTY, scaleFactorsWorkspace);
@@ -439,12 +438,9 @@ void Stitch::recordScaleFactor(Mantid::API::MatrixWorkspace_sptr scaleFactorWork
  * @param inputs: the list of the input workspace names
  * @param scaleFactors: a vector with the manual scale factors, must have the same size as inputs
  * @param scaleFactorsWorkspace: the workspace to store the scale factors to
- * @return: the list of names of scaled workspaces
  */
-std::vector<std::string> Stitch::scaleManual(const std::vector<std::string> &inputs,
-                                             const std::vector<double> &scaleFactors,
-                                             MatrixWorkspace_sptr scaleFactorsWorkspace) {
-  std::vector<std::string> result;
+void Stitch::scaleManual(const std::vector<std::string> &inputs, const std::vector<double> &scaleFactors,
+                         MatrixWorkspace_sptr scaleFactorsWorkspace) {
   auto &outputFactors = scaleFactorsWorkspace->mutableY(0);
   PARALLEL_FOR_IF(threadSafe(*scaleFactorsWorkspace))
   for (int i = 0; i < static_cast<int>(inputs.size()); ++i) {
@@ -453,13 +449,9 @@ std::vector<std::string> Stitch::scaleManual(const std::vector<std::string> &inp
     scaler->setAlwaysStoreInADS(true);
     scaler->setPropertyValue("InputWorkspace", inputs[i]);
     scaler->setProperty("Factor", scaleFactors[i]);
-    const std::string scaled = "__scaled_" + inputs[i];
-    scaler->setPropertyValue("OutputWorkspace", scaled);
+    scaler->setPropertyValue("OutputWorkspace", inputs[i]);
     scaler->execute();
-    PARALLEL_CRITICAL(StoringScaledWorkspaceNames)
-    result.emplace_back(scaled);
   }
-  return result;
 }
 
 } // namespace Algorithms
