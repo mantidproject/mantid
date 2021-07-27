@@ -27,7 +27,7 @@ mtd_add_qt_tests(
     ${CORE_MANTIDLIBS}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
+    Python::Python
     ${OPENGL_gl_LIBRARY}
     ${OPENGL_glu_LIBRARY}
     gmock
@@ -64,7 +64,7 @@ mtd_add_qt_tests(
     ${CORE_MANTIDLIBS}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
+    Python::Python
     ${OPENGL_gl_LIBRARY}
     ${OPENGL_glu_LIBRARY}
     gmock

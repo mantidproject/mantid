@@ -46,6 +46,7 @@ set(SRC_FILES
     src/ClearInstrumentParameters.cpp
     src/ClearMaskFlag.cpp
     src/CloneWorkspace.cpp
+    src/CombineDiffCal.cpp
     src/Comment.cpp
     src/CommutativeBinaryOperation.cpp
     src/CompareWorkspaces.cpp
@@ -226,6 +227,7 @@ set(SRC_FILES
     src/PaddingAndApodization.cpp
     src/ParallaxCorrection.cpp
     src/Pause.cpp
+    src/PeakParameterHelper.cpp
     src/PerformIndexOperations.cpp
     src/Plus.cpp
     src/PointByPointVCorrection.cpp
@@ -381,6 +383,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ClearInstrumentParameters.h
     inc/MantidAlgorithms/ClearMaskFlag.h
     inc/MantidAlgorithms/CloneWorkspace.h
+    inc/MantidAlgorithms/CombineDiffCal.h
     inc/MantidAlgorithms/Comment.h
     inc/MantidAlgorithms/CommutativeBinaryOperation.h
     inc/MantidAlgorithms/CompareWorkspaces.h
@@ -565,6 +568,7 @@ set(INC_FILES
     inc/MantidAlgorithms/PaddingAndApodization.h
     inc/MantidAlgorithms/ParallaxCorrection.h
     inc/MantidAlgorithms/Pause.h
+    inc/MantidAlgorithms/PeakParameterHelper.h
     inc/MantidAlgorithms/PerformIndexOperations.h
     inc/MantidAlgorithms/Plus.h
     inc/MantidAlgorithms/PointByPointVCorrection.h
@@ -736,6 +740,7 @@ set(TEST_FILES
     ClearInstrumentParametersTest.h
     ClearMaskFlagTest.h
     CloneWorkspaceTest.h
+    CombineDiffCalTest.h
     CommentTest.h
     CommutativeBinaryOperationTest.h
     CompareWorkspacesTest.h
@@ -786,6 +791,7 @@ set(TEST_FILES
     CropWorkspaceRaggedTest.h
     CropWorkspaceTest.h
     CrossCorrelateTest.h
+    CrossCorrelateTestData.h
     CuboidGaugeVolumeAbsorptionTest.h
     CylinderAbsorptionTest.h
     DeadTimeCorrectionTest.h
@@ -1011,7 +1017,7 @@ set(TEST_PY_FILES
 
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python ${TEST_PY_FILES})
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS

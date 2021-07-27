@@ -65,6 +65,7 @@ class SliceViewerDataView(QWidget):
         self._line_plots = None
         self._image_info_tracker = None
         self._region_selection_on = False
+        self._orig_lims = None
 
         # Dimension widget
         self.dimensions_layout = QGridLayout()
@@ -78,6 +79,7 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.setSpacing(0)
 
         self.image_info_widget = ImageInfoWidget(self)
+        self.image_info_widget.setToolTip("Information about the selected pixel")
         self.track_cursor = QCheckBox("Track Cursor", self)
         self.track_cursor.setToolTip(
             "Update the image readout table when the cursor is over the plot. "
@@ -111,6 +113,13 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.addWidget(self.colorbar_label)
         norm_scale = self.get_default_scale_norm()
         self.colorbar = ColorbarWidget(self, norm_scale)
+        self.colorbar.cmap.setToolTip("Colormap options")
+        self.colorbar.crev.setToolTip("Reverse colormap")
+        self.colorbar.norm.setToolTip("Colormap normalisation options")
+        self.colorbar.powerscale.setToolTip("Power colormap scale")
+        self.colorbar.cmax.setToolTip("Colormap maximum limit")
+        self.colorbar.cmin.setToolTip("Colormap minimum limit")
+        self.colorbar.autoscale.setToolTip("Automatically changes colormap limits when zooming on the plot")
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
         self.colorbar.scaleNormChanged.connect(self.scale_norm_changed)
@@ -253,8 +262,6 @@ class SliceViewerDataView(QWidget):
                                     transpose=self.dimensions.transpose,
                                     norm=self.colorbar.get_norm(),
                                     **kwargs)
-        self.on_track_cursor_state_change(self.track_cursor_checked())
-
         # ensure the axes data limits are updated to match the
         # image. For example if the axes were zoomed and the
         # swap dimensions was clicked we need to restore the
@@ -262,6 +269,11 @@ class SliceViewerDataView(QWidget):
         extent = self.image.get_extent()
         self.ax.set_xlim(extent[0], extent[1])
         self.ax.set_ylim(extent[2], extent[3])
+        # Set the original data limits which get passed to the ImageInfoWidget so that
+        # the mouse projection to data space is correct for MDH workspaces when zoomed/changing slices
+        self._orig_lims = self.get_axes_limits()
+
+        self.on_track_cursor_state_change(self.track_cursor_checked())
 
         self.draw_plot()
 
@@ -384,7 +396,8 @@ class SliceViewerDataView(QWidget):
         self._image_info_tracker = ImageInfoTracker(image=self.image,
                                                     transform=self.nonortho_transform,
                                                     do_transform=self.nonorthogonal_mode,
-                                                    widget=self.image_info_widget)
+                                                    widget=self.image_info_widget,
+                                                    cursor_transform=self._orig_lims)
 
         if state:
             self._image_info_tracker.connect()
@@ -462,7 +475,6 @@ class SliceViewerDataView(QWidget):
             return self.image.get_full_extent()
         else:
             return None
-
 
     def set_axes_limits(self, xlim, ylim):
         """

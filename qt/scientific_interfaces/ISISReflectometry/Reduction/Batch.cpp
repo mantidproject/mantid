@@ -28,11 +28,9 @@ std::vector<MantidWidgets::Batch::RowLocation> Batch::selectedRowLocations() con
 
 std::vector<Group> Batch::selectedGroups() const { return m_runsTable.selectedGroups(); }
 
-PerThetaDefaults const *Batch::defaultsForTheta(double thetaAngle) const {
-  return experiment().defaultsForTheta(thetaAngle, runsTable().thetaTolerance());
+LookupRow const *Batch::findLookupRow(boost::optional<double> thetaAngle) const {
+  return experiment().findLookupRow(thetaAngle, runsTable().thetaTolerance());
 }
-
-PerThetaDefaults const *Batch::wildcardDefaults() const { return experiment().wildcardDefaults(); }
 
 void Batch::resetState() { m_runsTable.resetState(); }
 

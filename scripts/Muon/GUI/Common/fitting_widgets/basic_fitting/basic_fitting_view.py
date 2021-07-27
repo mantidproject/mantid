@@ -10,15 +10,15 @@ from mantidqt.utils.qt import load_ui
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_controls_view import FitControlsView
 from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import FitFunctionOptionsView
-from Muon.GUI.Common.fitting_widgets.basic_fitting.workspace_selector_view import WorkspaceSelectorView
+from Muon.GUI.Common.data_selectors.cyclic_data_selector_view import CyclicDataSelectorView
 from Muon.GUI.Common.message_box import warning
 
 from qtpy.QtWidgets import QWidget
 
-ui_fitting_layout, _ = load_ui(__file__, "fitting_layout.ui")
+ui_form, base_widget = load_ui(__file__, "fitting_layout.ui")
 
 
-class BasicFittingView(QWidget, ui_fitting_layout):
+class BasicFittingView(ui_form, base_widget):
     """
     The BasicFittingView has a FitControlsView and a FitFunctionOptionsView. It can be used for Single Fitting.
     """
@@ -29,7 +29,7 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         self.setupUi(self)
 
         self.fit_controls = FitControlsView(self)
-        self.workspace_selector = WorkspaceSelectorView(self)
+        self.workspace_selector = CyclicDataSelectorView(self)
         self.fit_function_options = FitFunctionOptionsView(self)
 
         self.fit_controls_layout.addWidget(self.fit_controls)
@@ -81,6 +81,18 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         """Connect the slot for the end x option."""
         self.fit_function_options.set_slot_for_end_x_updated(slot)
 
+    def set_slot_for_exclude_range_state_changed(self, slot) -> None:
+        """Connect the slot for the exclude range checkbox."""
+        self.fit_function_options.set_slot_for_exclude_range_state_changed(slot)
+
+    def set_slot_for_exclude_start_x_updated(self, slot) -> None:
+        """Connect the slot for the exclude start x option."""
+        self.fit_function_options.set_slot_for_exclude_start_x_updated(slot)
+
+    def set_slot_for_exclude_end_x_updated(self, slot) -> None:
+        """Connect the slot for the exclude end x option."""
+        self.fit_function_options.set_slot_for_exclude_end_x_updated(slot)
+
     def set_slot_for_minimizer_changed(self, slot) -> None:
         """Connect the slot for changing the Minimizer."""
         self.fit_function_options.set_slot_for_minimizer_changed(slot)
@@ -95,7 +107,7 @@ class BasicFittingView(QWidget, ui_fitting_layout):
 
     def set_workspace_combo_box_label(self, text: str) -> None:
         """Sets the label text next to the workspace selector combobox."""
-        self.workspace_selector.set_workspace_combo_box_label(text)
+        self.workspace_selector.set_data_combo_box_label(text)
 
     def set_datasets_in_function_browser(self, dataset_names: list) -> None:
         """Sets the datasets stored in the FunctionBrowser."""
@@ -106,9 +118,13 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         if dataset_index is not None:
             self.fit_function_options.set_current_dataset_index(dataset_index)
 
-    def update_dataset_name_combo_box(self, dataset_names: list) -> None:
+    def set_number_of_undos(self, number_of_undos: int) -> None:
+        """Sets the allowed number of 'Undo Fit' events."""
+        self.fit_controls.set_number_of_undos(number_of_undos)
+
+    def update_dataset_name_combo_box(self, dataset_names: list, emit_signal: bool = True) -> None:
         """Update the data in the parameter display combo box."""
-        self.workspace_selector.update_dataset_name_combo_box(dataset_names)
+        self.workspace_selector.update_dataset_name_combo_box(dataset_names, emit_signal)
 
     def update_local_fit_status_and_chi_squared(self, fit_status: str, chi_squared: float) -> None:
         """Updates the view to show the status and results from a fit."""
@@ -140,7 +156,7 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         return self.workspace_selector.number_of_datasets()
 
     @property
-    def current_dataset_index(self) -> str:
+    def current_dataset_index(self) -> int:
         """Returns the index of the currently displayed dataset."""
         return self.workspace_selector.current_dataset_index
 
@@ -148,6 +164,10 @@ class BasicFittingView(QWidget, ui_fitting_layout):
     def fit_object(self) -> IFunction:
         """Returns the global fitting function."""
         return self.fit_function_options.fit_object
+
+    def current_fit_function(self) -> IFunction:
+        """Returns the current fitting function in the view."""
+        return self.fit_function_options.current_fit_function()
 
     @property
     def minimizer(self) -> str:
@@ -175,6 +195,31 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         self.fit_function_options.end_x = value
 
     @property
+    def exclude_range(self) -> bool:
+        """Returns true if the Exclude Range option is ticked."""
+        return self.fit_function_options.exclude_range
+
+    @property
+    def exclude_start_x(self) -> float:
+        """Returns the start X for the excluded region."""
+        return self.fit_function_options.exclude_start_x
+
+    @exclude_start_x.setter
+    def exclude_start_x(self, value: float) -> None:
+        """Sets the selected exclude start X."""
+        self.fit_function_options.exclude_start_x = value
+
+    @property
+    def exclude_end_x(self) -> float:
+        """Returns the end X for the excluded region."""
+        return self.fit_function_options.exclude_end_x
+
+    @exclude_end_x.setter
+    def exclude_end_x(self, value: float) -> None:
+        """Sets the selected exclude end X."""
+        self.fit_function_options.exclude_end_x = value
+
+    @property
     def evaluation_type(self) -> str:
         """Returns the selected evaluation type."""
         return self.fit_function_options.evaluation_type
@@ -198,10 +243,6 @@ class BasicFittingView(QWidget, ui_fitting_layout):
     def plot_guess(self, check: bool) -> None:
         """Sets whether or not plot guess is ticked."""
         self.fit_controls.plot_guess = check
-
-    def enable_undo_fit(self, enable: bool) -> None:
-        """Sets whether or not undo fit is enabled."""
-        self.fit_controls.enable_undo_fit(enable)
 
     @property
     def function_name(self) -> str:
@@ -234,13 +275,25 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         """Switches the view to single fit mode."""
         self.fit_function_options.switch_to_single()
 
+    def hide_exclude_range_checkbox(self) -> None:
+        """Hides the Exclude Range checkbox in the fitting options."""
+        self.fit_function_options.hide_exclude_range_checkbox()
+
     def hide_fit_raw_checkbox(self) -> None:
         """Hides the Fit Raw checkbox in the fitting options."""
         self.fit_function_options.hide_fit_raw_checkbox()
 
+    def hide_evaluate_function_as_checkbox(self) -> None:
+        """Hides the Evaluate Function as checkbox in the fitting options."""
+        self.fit_function_options.hide_evaluate_function_as_checkbox()
+
     def set_start_and_end_x_labels(self, start_x_label: str, end_x_label: str) -> None:
         """Sets the labels to use for the start and end X labels in the fit options table."""
         self.fit_function_options.set_start_and_end_x_labels(start_x_label, end_x_label)
+
+    def set_exclude_start_and_end_x_visible(self, visible: bool) -> None:
+        """Sets whether the exclude start and end x options are visible."""
+        self.fit_function_options.set_exclude_start_and_end_x_visible(visible)
 
     def disable_view(self) -> None:
         """Disable all widgets in this fitting widget."""

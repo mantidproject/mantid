@@ -8,7 +8,6 @@
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
 #include "ManualProgressReporter.h"
 #include "MockAlgorithmProgressWidget.h"
@@ -17,13 +16,21 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <memory>
 
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
+#include <chrono>
+#include <memory>
+#include <thread>
 
 using namespace testing;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
+
+namespace {
+void pauseForTimer() {
+  // Algorithm will only write an update after 0.1 seconds, so suspend for 0.2
+  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+}
+} // namespace
 
 class AlgorithmProgressPresenterTest : public CxxTest::TestSuite {
 public:
@@ -36,12 +43,7 @@ public:
     delete suite;
   }
 
-  void setUp() override {
-    mockView.reset();
-    // The mock view also creates the presenter, because
-    // so that is passes the correct type into the constructor
-    mockView = std::make_unique<NiceMock<MockAlgorithmProgressWidget>>();
-  }
+  using MockViewT = MockAlgorithmProgressWidget;
 
   void testAlgorithmStart() {
     // Sets up a fake AlgorithmID - it is just a `void *`
@@ -49,104 +51,87 @@ public:
     // what it actually points to does not matter
     int testInt = 123;
     void *algorithmIDpretender = &testInt;
-    EXPECT_CALL(*mockView.get(), algorithmStarted()).Times(1);
+    auto mockView = createMockView();
+    EXPECT_CALL(*mockView, algorithmStarted()).Times(1);
 
-    auto pres = mockView->m_presenter.get();
+    auto pres = createPresenter(mockView.get());
     pres->algorithmStartedSlot(algorithmIDpretender);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
+
   void testAlgorithmStart_SecondAlgorithmStartDoesntReplaceFirst() {
     int testInt = 123;
     void *algorithmIDpretender = &testInt;
     int testInt2 = 666;
     void *secondAlgorithmID = &testInt2;
-    EXPECT_CALL(*mockView.get(), algorithmStarted()).Times(1);
+    auto mockView = createMockView();
+    EXPECT_CALL(*mockView, algorithmStarted()).Times(1);
 
-    auto pres = mockView->m_presenter.get();
+    auto pres = createPresenter(mockView.get());
     pres->algorithmStartedSlot(algorithmIDpretender);
     // second call should not increment the algorithm started calls
     pres->algorithmStartedSlot(secondAlgorithmID);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
   void testAlgorithmEnd() {
     int testInt = 123;
     void *algorithmIDpretender = &testInt;
-    EXPECT_CALL(*mockView.get(), algorithmStarted()).Times(1);
-    EXPECT_CALL(*mockView.get(), algorithmEnded()).Times(1);
+    auto mockView = createMockView();
+    EXPECT_CALL(*mockView, algorithmStarted()).Times(1);
+    EXPECT_CALL(*mockView, algorithmEnded()).Times(1);
 
-    auto pres = mockView->m_presenter.get();
+    auto pres = createPresenter(mockView.get());
     pres->algorithmStartedSlot(algorithmIDpretender);
     // Alg ended is from another algorithm ID,
     // it should not cancel the first one
     pres->algorithmEndedSlot(algorithmIDpretender);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
   void testAlgorithmEnd_NotTrackedAlgorithmEnds() {
     int testInt = 123;
     void *algorithmIDpretender = &testInt;
     int testInt2 = 666;
     void *secondAlgorithmID = &testInt2;
-    EXPECT_CALL(*mockView.get(), algorithmStarted()).Times(1);
-    EXPECT_CALL(*mockView.get(), algorithmEnded()).Times(0);
+    auto mockView = createMockView();
+    EXPECT_CALL(*mockView, algorithmStarted()).Times(1);
+    EXPECT_CALL(*mockView, algorithmEnded()).Times(0);
 
-    auto pres = mockView->m_presenter.get();
+    auto pres = createPresenter(mockView.get());
     pres->algorithmStartedSlot(algorithmIDpretender);
     // Alg ended is from another algorithm ID,
     // it should not cancel the first one
     pres->algorithmEndedSlot(secondAlgorithmID);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
   void testUpdateProgressBar() {
     int testInt = 123;
     void *algorithmIDpretender = &testInt;
-    EXPECT_CALL(*mockView.get(), algorithmStarted()).Times(1);
-    EXPECT_CALL(*mockView.get(), updateProgress(3.0, QString(""), 0., 0)).Times(1);
+    auto mockView = createMockView();
+    EXPECT_CALL(*mockView, algorithmStarted()).Times(1);
+    QString emptyQString;
+    EXPECT_CALL(*mockView, updateProgress(DoubleEq(3.0), emptyQString, 0., 0)).Times(1);
 
-    auto pres = mockView->m_presenter.get();
+    auto pres = createPresenter(mockView.get());
     pres->algorithmStartedSlot(algorithmIDpretender);
-    // Algorithm reports a progress update
+    pauseForTimer();
     pres->updateProgressBarSlot(algorithmIDpretender, 3.0, "", 0., 0);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
   void testUpdateProgressBar_NotUpdatedIfAlgorithmNotBeingTracked() {
     int testInt = 123;
     void *algorithmIDpretender = &testInt;
     int testInt2 = 666;
     void *secondAlgorithmID = &testInt2;
-    EXPECT_CALL(*mockView.get(), algorithmStarted()).Times(1);
-    EXPECT_CALL(*mockView.get(), updateProgress(3.0, QString(""), 0., 0)).Times(0);
+    auto mockView = createMockView();
+    EXPECT_CALL(*mockView, algorithmStarted()).Times(1);
+    EXPECT_CALL(*mockView, updateProgress(3.0, QString(""), 0., 0)).Times(0);
 
-    auto pres = mockView->m_presenter.get();
+    auto pres = createPresenter(mockView.get());
     pres->algorithmStartedSlot(algorithmIDpretender);
+    pauseForTimer();
     pres->updateProgressBarSlot(secondAlgorithmID, 3.0, "", 0., 0);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-  void testRealAlgorithmRunning() {
-    EXPECT_CALL(*mockView.get(), algorithmStarted()).Times(1);
-    int reports = 10;
-    QString emptyQString;
-    // This is the only way the comparison worked,
-    // incrementing a bool had too high error (in 1e-1 range)),
-    // but manually writing the values works.
-    // This way testing::DoubleNear doesn't seem to be necessary
-    // Another thing to note: 0.0 progress is NOT reported
-    for (const auto prog : {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0}) {
-      EXPECT_CALL(*mockView.get(), updateProgress(DoubleEq(prog), emptyQString, 0., 0));
-    }
-    EXPECT_CALL(*mockView.get(), algorithmEnded()).Times(1);
-
-    auto alg = AlgorithmManager::Instance().create("ManualProgressReporter");
-    TS_ASSERT_THROWS_NOTHING(alg->initialize());
-    TS_ASSERT(alg->isInitialized());
-    alg->setProperty("NumberOfProgressReports", reports);
-    alg->setRethrows(true);
-    alg->execute();
-    QCoreApplication::processEvents();
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
 private:
-  std::unique_ptr<NiceMock<MockAlgorithmProgressWidget>> mockView;
+  std::unique_ptr<MockViewT> createMockView() { return std::make_unique<MockViewT>(); }
+
+  std::unique_ptr<AlgorithmProgressPresenter> createPresenter(MockViewT *mockView) {
+    return std::make_unique<AlgorithmProgressPresenter>(nullptr, mockView);
+  }
 };

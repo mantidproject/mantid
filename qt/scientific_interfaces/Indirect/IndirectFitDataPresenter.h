@@ -34,34 +34,19 @@ public:
   void setSampleFBSuffices(const QStringList &suffices);
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
-  void setMultiInputSampleWSSuffixes();
-  void setMultiInputSampleFBSuffixes();
-  void setMultiInputResolutionWSSuffixes();
-  void setMultiInputResolutionFBSuffixes();
+  QStringList getSampleWSSuffices() const;
+  QStringList getSampleFBSuffices() const;
+  QStringList getResolutionWSSuffices() const;
+  QStringList getResolutionFBSuffices() const;
 
-  void setStartX(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
-  void setStartX(double startX, TableDatasetIndex dataIndex);
-  void setEndX(double endX, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
-  void setEndX(double endX, TableDatasetIndex dataIndex);
-  void setExclude(const std::string &exclude, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
+  void updateDataInTable();
 
-  std::pair<double, double> getXRange() const;
-
-  void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
 
-  void replaceHandle(const std::string &workspaceName, const Workspace_sptr &workspace) override;
   DataForParameterEstimationCollection getDataForParameterEstimation(const EstimationDataSelector &selector) const;
 
-public slots:
-  void updateSpectraInTable(TableDatasetIndex dataIndex);
-
 protected slots:
-  void setModelWorkspace(const QString &name);
-  void setModelFromSingleData();
-  void setModelFromMultipleData();
   void showAddWorkspaceDialog();
-  virtual void handleSampleLoaded(const QString &);
 
   virtual void closeDialog();
 
@@ -70,15 +55,11 @@ signals:
   void dataAdded();
   void dataRemoved();
   void dataChanged();
-  void startXChanged(double, TableDatasetIndex, WorkspaceIndex);
+  void startXChanged(double, WorkspaceID, WorkspaceIndex);
   void startXChanged(double);
-  void endXChanged(double, TableDatasetIndex, WorkspaceIndex);
+  void endXChanged(double, WorkspaceID, WorkspaceIndex);
   void endXChanged(double);
-  void excludeRegionChanged(const std::string &, TableDatasetIndex, WorkspaceIndex);
-  void multipleDataViewSelected();
-  void singleDataViewSelected();
   void requestedAddWorkspaceDialog();
-  void updateAvailableFitTypes();
 
 protected:
   IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view,
@@ -86,22 +67,17 @@ protected:
   IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
-  void setSingleModelData(const std::string &name);
-  void updateRanges();
-  virtual void addModelData(const std::string &name);
-  void setResolutionHidden(bool hide);
   void displayWarning(const std::string &warning);
+  QStringList m_wsSampleSuffixes;
+  QStringList m_fbSampleSuffixes;
+  QStringList m_wsResolutionSuffixes;
+  QStringList m_fbResolutionSuffixes;
 
 private slots:
   void addData();
 
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
-  void updateDataInTable(TableDatasetIndex dataIndex);
-  void selectReplacedWorkspace(const QString &workspaceName);
-
-  virtual void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog);
-  virtual void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog);
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IIndirectFittingModel *m_model;

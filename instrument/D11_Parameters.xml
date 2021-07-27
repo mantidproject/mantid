@@ -7,11 +7,11 @@
         <value val="0.00000042" />
       </parameter>
       <!-- Logs to sum when merging the runs -->
-      <parameter name="sample_logs_sum" type="string">
+      <parameter name="sample_logs_sum" type="string" visible="false">
         <value val="timer" />
       </parameter>
       <!-- GroupingPattern for DeadTimeCorrection, groups the entire detector-->
-      <parameter name="grouping" type="string">
+      <parameter name="grouping" type="string" visible="false">
         <value val="0-65535"/>
       </parameter>
       <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.
@@ -24,7 +24,7 @@
         <value val="3.75"/>
       </parameter>
       <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
-      <parameter name="logbook_default_parameters" type="string">
+      <parameter name="logbook_default_parameters" type="string" visible="false">
 	<value val="SampleDescription:/entry0/sample_description:s,
 		    TotalTime:/entry0/duration:d,
 		    RateMonitor1:/entry0/monitor1/monrate:d,
@@ -37,7 +37,7 @@
 		    SD:/entry0/D11/detector/det_actual:f,
 		    BeamStopY:/entry0/D11/beamstop/by_actual:f" />
       </parameter>
-      <parameter name="logbook_optional_parameters" type="string">
+      <parameter name="logbook_optional_parameters" type="string" visible="false">
 	<value val="AcquisitionMode:/entry0/acquisition_mode:d,
 		    TotalCountsDetAll:/entry0/D11/detector/detsum+/entry0/D11/detectorLeft/detsum+/entry0/D11/detectorRight/detsum:d,
 		    Beamstop:/entry0/D11/beamstop/actual_beamstop_number:f,
@@ -91,7 +91,7 @@
 		    SampleApertureWidth:/entry0/D11/Beam/sample_ap_x_or_diam:f,
 		    SampleApertureHeight:/entry0/D11/Beam/sample_ap_y:f" />
       </parameter>
-      <parameter name="log_list_to_save" type="string">
+      <parameter name="log_list_to_save" type="string" visible="false">
 	<value val="facility,instrument_name,experiment_identifier,
 		    experiment_title,start_time,end_time,numor_list,
 		    processedAs,wavelength,sample_transmission_numors,

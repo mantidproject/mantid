@@ -5,7 +5,7 @@
             name="CSP"
             valid-from   ="2017-05-04 15:15:00"
             valid-to     ="2100-01-31 23:59:59"
-            last-modified="2018-08-07 11:00:00">
+            last-modified="2021-09-07 11:00:00">
 
   <defaults>
     <length unit="meter" />
@@ -51,7 +51,7 @@
   <!-- detector components (including monitors) -->
   
   <component type="monitor1" idlist="monitor1">
-    <location z="7.2055" />
+    <location z="-3.053" />
   </component>
   
   <type name="monitor1" is="monitor">
@@ -70,7 +70,7 @@
   </type>  
   
   <component type="monitor2" idlist="monitor2">
-    <location z="9.92" />
+    <location z="-0.3385" />
   </component>
 
   <!-- Putting in monitors, which are defined in raw/neuxs
@@ -79,7 +79,7 @@
          physically exist, and with a dummy position -->
   <type>
   <component type="no shape monitor">
-    <location z="12.12" name="placeholder monitor"/>
+    <location z="1.8615" name="placeholder monitor"/>
   </component>  
   </type>
   
@@ -111,7 +111,7 @@
 
   <component type="point-detector" idlist="point-detector">
   
-    <location z="12.113" />
+    <location z="1.8545" />
     
     <!-- Link to log file that stores the z position. This angle can be used to
     calculate the z position since the distance along the x-axis between
@@ -151,7 +151,7 @@
       Thin slabs 50mm wide, one for each spectrum 1.2 mm pixel pitch growing upward    
     </properties>
     
-    <location z="12.403" />
+    <location z="2.1445" />
   </component>    
 
   <type name="linear-detector">
@@ -413,7 +413,7 @@
   <!-- source and sample-position components -->
 
   <component type="source">
-    <location />
+    <location z="-10.2585"/>
   </component>
 
   <type name="source" is="Source">
@@ -425,7 +425,7 @@
   
   <component type="some-surface-holder">
     <!-- worry about linking relevant logfiles for y,z,theta,phi up later. Change from 10.25 -->
-    <location z="10.2585"/>
+    <location z="0.0"/>
   </component>
 
   <type name="some-surface-holder" is="SamplePos">
@@ -435,7 +435,7 @@
   <!-- other components -->  
   
   <component type="slit" name="slit1">
-    <location z="7.3025"/>
+    <location z="-2.956"/>
      <!-- This log file stores the vertical opening of slit -->
     <parameter name="vertical gap"> 
       <logfile id="s1vg" extract-single-value-as="last_value" />
@@ -443,7 +443,7 @@
   </component>
   
   <component type="slit" name="slit2">
-    <location z="9.6885"/> 
+    <location z="-0.57"/> 
     <!-- This log file stores the vertical opening of this. Note this
      slit can also be translated in the z. However this info not stored
      in log file since it is not used in the data analysis process. -->
@@ -453,7 +453,7 @@
   </component>    
   
   <component type="slit" name="slit3">
-    <location z="10.651"/>
+    <location z="0.3925"/>
     <!-- This log file stores the vertical opening of slit -->  
     <parameter name="vertical gap">
       <logfile id="s3vg" extract-single-value-as="last_value" />
@@ -461,7 +461,7 @@
   </component>    
   
   <component type="slit" name="slit4">
-    <location z="11.983"/>     
+    <location z="1.7245"/>     
     <!-- This log file stores the vertical opening of slit. Note this slit
      is fixed to the point detector. -->
     <parameter name="vertical gap"> 
@@ -484,7 +484,7 @@
   
   <component type="supermirror">
     <!-- Worry about linking relevant logfiles for z,theta up later -->
-    <location z="7.7685"/>  
+    <location z="-2.49"/>  
   </component>  
 
   <type name="supermirror" /> 

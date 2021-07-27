@@ -33,11 +33,11 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr appendGuessToInput(const Mantid::API::MatrixWorkspace_sptr &guessWorkspace) const;
 
-  TableDatasetIndex getActiveDataIndex() const;
+  WorkspaceID getActiveWorkspaceIndex() const;
   WorkspaceIndex getActiveSpectrum() const;
-  TableDatasetIndex numberOfWorkspaces() const;
+  WorkspaceID numberOfWorkspaces() const;
   FitDomainIndex getActiveDomainIndex() const;
-  std::string getFitDataName(TableDatasetIndex index) const;
+  std::string getFitDataName(WorkspaceID workspaceID) const;
   std::string getFitDataName() const;
   std::string getLastFitDataName() const;
   std::pair<double, double> getRange() const;
@@ -50,7 +50,7 @@ public:
   double calculateHWHMMinimum(double maximum) const;
   bool canCalculateGuess() const;
 
-  void setActiveIndex(TableDatasetIndex index);
+  void setActiveIndex(WorkspaceID workspaceID);
   void setActiveSpectrum(WorkspaceIndex spectrum);
   void setStartX(double startX);
   void setEndX(double endX);
@@ -91,8 +91,8 @@ private:
   bool isResolutionLoaded() const;
 
   IndirectFittingModel *m_fittingModel;
-  TableDatasetIndex m_activeIndex;
-  WorkspaceIndex m_activeSpectrum;
+  WorkspaceID m_activeWorkspaceID;
+  WorkspaceIndex m_activeWorkspaceIndex;
 };
 
 } // namespace IDA

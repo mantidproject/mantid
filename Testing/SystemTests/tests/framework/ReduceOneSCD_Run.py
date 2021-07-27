@@ -27,8 +27,6 @@ import os
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid import config
-# Make this test use crystallography convention
-config['Q.convention'] = 'Crystallography'
 
 
 class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
@@ -37,6 +35,11 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
     saved = False
     output_directory = ""
     run_conventional_matrix_file = ""
+    qconvention = config['Q.convention']
+
+    def setUp(self):
+        # Make this test use crystallography convention
+        config['Q.convention'] = 'Crystallography'
 
     def requiredMemoryMB(self):
         """ Require about 12GB free """
@@ -260,6 +263,7 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
         print(["output directory=", self.output_directory])
 
     def cleanup(self):
+        config['Q.convention'] = self.qconvention
         if self.saved:
             os.remove(self.run_conventional_matrix_file)
 

@@ -6,10 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
 
-from mantidqt.MPLwidgets import NavigationToolbar2QT
-from mantidqt.icons import get_icon
-from qtpy.QtCore import Signal, Qt, QSize
-from qtpy.QtWidgets import QLabel, QSizePolicy
+from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar, MantidStandardNavigationTools, MantidNavigationTool
+from qtpy.QtWidgets import QApplication
+from qtpy.QtCore import Signal,QSize
 
 
 class ToolItemText:
@@ -24,7 +23,7 @@ class ToolItemText:
     SAVE = 'Save'
 
 
-class SliceViewerNavigationToolbar(NavigationToolbar2QT):
+class SliceViewerNavigationToolbar(MantidNavigationToolbar):
 
     gridClicked = Signal(bool)
     homeClicked = Signal()
@@ -36,57 +35,32 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
     zoomPanFinished = Signal()
 
     toolitems = (
-        (ToolItemText.HOME, 'Reset original view', 'mdi.home', 'homeClicked', None),
-        (ToolItemText.PAN, 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan',
-         False),
-        (ToolItemText.ZOOM, 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
-        (None, None, None, None, None),
-        (ToolItemText.GRID, 'Toggle grid on/off', 'mdi.grid', 'gridClicked', False),
-        (None, None, None, None, None),
-        (ToolItemText.LINEPLOTS, 'Toggle lineplots on/off', 'mdi.chart-bell-curve',
-         'linePlotsClicked', False),
-        (ToolItemText.REGIONSELECTION, 'Toggle region selection on/off', 'mdi.vector-rectangle',
-         'regionSelectionClicked', False),
-        (None, None, None, None, None),
-        (ToolItemText.OVERLAY_PEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble',
-         'peaksOverlayClicked', None),
-        (ToolItemText.NONORTHOGONAL_AXES, 'Toggle nonorthogonal axes on/off', 'mdi.axis',
-         'nonOrthogonalClicked', False),
-        (None, None, None, None, None),
-        (ToolItemText.SAVE, 'Save the figure', 'mdi.content-save', 'save_figure', None)
+        MantidNavigationTool(ToolItemText.HOME, 'Reset original view', 'mdi.home', 'homeClicked', None),
+        MantidStandardNavigationTools.PAN,
+        MantidNavigationTool(ToolItemText.ZOOM, 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool(ToolItemText.GRID, 'Toggle grid on/off', 'mdi.grid', 'gridClicked', False),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool(ToolItemText.LINEPLOTS, 'Toggle lineplots on/off', 'mdi.chart-bell-curve',
+                             'linePlotsClicked', False),
+        MantidNavigationTool(ToolItemText.REGIONSELECTION, 'Toggle region selection on/off', 'mdi.vector-rectangle',
+                             'regionSelectionClicked', False),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool(ToolItemText.OVERLAY_PEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble',
+                             'peaksOverlayClicked', None),
+        MantidNavigationTool(ToolItemText.NONORTHOGONAL_AXES, 'Toggle nonorthogonal axes on/off', 'mdi.axis',
+                             'nonOrthogonalClicked', False),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool(ToolItemText.SAVE, 'Save the figure', 'mdi.content-save', 'save_figure', None)
     )
 
-    def _init_toolbar(self):
-        for text, tooltip_text, fa_icon, callback, checked in self.toolitems:
-            if text is None:
-                self.addSeparator()
-            else:
-                if fa_icon:
-                    a = self.addAction(get_icon(fa_icon), text, getattr(self, callback))
-                else:
-                    a = self.addAction(text, getattr(self, callback))
-                self._actions[callback] = a
-                if checked is not None:
-                    a.setCheckable(True)
-                    a.setChecked(checked)
-                if tooltip_text is not None:
-                    a.setToolTip(tooltip_text)
-
-        # Add the x,y location widget at the right side of the toolbar
-        # The stretch factor is 1 which means any resizing of the toolbar
-        # will resize this label instead of the buttons.
-        if self.coordinates:
-            self.locLabel = QLabel("", self)
-            self.locLabel.setAlignment(Qt.AlignRight | Qt.AlignTop)
-            self.locLabel.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Ignored))
-            labelAction = self.addWidget(self.locLabel)
-            labelAction.setVisible(True)
+    def __init__(self, canvas, parent, coordinates=True):
+        """coordinates: should we show the coordinates on the right?"""
+        super().__init__(canvas, parent, coordinates)
 
         # Adjust icon size or they are too small in PyQt5 by default
-        self.setIconSize(QSize(24, 24))
-
-        # Location of a press event
-        self._pressed_xy = None
+        dpi_ratio = QApplication.instance().desktop().physicalDpiX() / 100
+        self.setIconSize(QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
 
     def zoom(self, *args):
         super().zoom(*args)
@@ -96,14 +70,22 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         super().pan(*args)
         self.zoomPanClicked.emit(bool(self.mode))
 
-    def press(self, event):
+    def _press_pan_zoom_event(self, event):
         """
         Called by matplotlib after a press event has been handled. Stores the location
         of the event.
         """
         self._pressed_xy = event.x, event.y
 
-    def release(self, event):
+    def press_pan(self, event):
+        super().press_pan(event)
+        self._press_pan_zoom_event(event)
+
+    def press_zoom(self, event):
+        super().press_zoom(event)
+        self._press_pan_zoom_event(event)
+
+    def _release_pan_zoom_event(self, event):
         """
         Called when a zoom/pan event has completed. Mouse must move more than 5 pixels
         to be consider a pan/zoom ending
@@ -119,32 +101,10 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
             return
         self.zoomPanFinished.emit()
 
-    def set_action_enabled(self, text: str, state: bool):
-        """
-        Sets the enabled/disabled state of action with the given text
-        :param text: Text on the action
-        :param state: Enabled if True else it is disabled
-        """
-        actions = self.actions()
-        for action in actions:
-            if action.text() == text:
-                if action.isChecked() and not state:
-                    action.trigger()  # ensure view reacts appropriately
-                action.setEnabled(state)
+    def release_pan(self, event):
+        super().release_pan(event)
+        self._release_pan_zoom_event(event)
 
-    def set_action_checked(self, text: str, state: bool, trigger: bool = True):
-        """
-        Sets the checked/unchecked state of toggle button with the given text
-        :param text: Text on the action
-        :param state: checked if True else it is disabled
-        :param trigger: If true the action is triggered if the state changes,
-                        else the state changes only
-        """
-        actions = self.actions()
-        for action in actions:
-            if action.text() == text:
-                if action.isChecked() != state:
-                    if trigger:
-                        action.trigger()  # ensure view reacts appropriately
-                    else:
-                        action.setChecked(state)
+    def release_zoom(self, event):
+        super().release_zoom(event)
+        self._release_pan_zoom_event(event)

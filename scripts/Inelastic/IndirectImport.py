@@ -13,6 +13,7 @@ We also deal with importing the mantidplot module outside of MantidPlot here.
 from contextlib import contextmanager
 import numpy.core.setup_common as numpy_cfg
 import platform
+import os
 import sys
 from mantid import logger
 
@@ -80,7 +81,7 @@ def is_supported_f2py_platform():
     @returns True if we are currently on a platform that supports the F2Py
     libraries, else False.
     """
-    if (_os_env().startswith("Windows")
+    if (_os_env().startswith("Windows") and "CONDA_PREFIX" not in os.environ
             and _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI
             and "python_d" not in sys.executable):
         return True

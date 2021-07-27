@@ -28,6 +28,7 @@ class FittingDataPresenter(object):
         self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
         self.view.set_on_plotBG_clicked(self._plotBG)
         self.view.set_on_seq_fit_clicked(self._start_seq_fit)
+        self.view.set_on_serial_fit_clicked(self._start_serial_fit)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
         self.view.set_on_xunit_changed(self._log_xunit_change)
         self.view.set_table_selection_changed(self._handle_selection_changed)
@@ -36,25 +37,28 @@ class FittingDataPresenter(object):
         self.plot_added_notifier = GenericObservable()
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
-        self.seq_fit_started_notifier = GenericObservable()
+        self.fit_all_started_notifier = GenericObservable()
         # Observers
         self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
         #
         self.fit_enabled_observer = GenericObserverWithArgPassing(self.set_fit_enabled)
-        self.seq_fit_done_observer = GenericObserverWithArgPassing(self.fit_completed)
+        self.fit_all_done_observer = GenericObserverWithArgPassing(self.fit_completed)
         self.focus_run_observer = GenericObserverWithArgPassing(
-            self.view.set_file_last)
+            self.view.set_default_files)
 
     def set_fit_enabled(self, fit_enabled):
-        self.view.set_seq_fit_button_enabled(fit_enabled)
+        self.view.set_fit_buttons_enabled(fit_enabled)
 
     def fit_completed(self, fit_props):
         self.model.update_fit(fit_props)
 
     def _start_seq_fit(self):
         ws_list = self.model.get_ws_sorted_by_primary_log()
-        # set off sequential fit
-        self.seq_fit_started_notifier.notify_subscribers(ws_list)
+        self.fit_all_started_notifier.notify_subscribers(ws_list, do_sequential=True)
+
+    def _start_serial_fit(self):
+        ws_list = self.model.get_ws_list()
+        self.fit_all_started_notifier.notify_subscribers(ws_list, do_sequential=False)
 
     def _log_xunit_change(self, xunit):
         logger.notice("Subsequent files will be loaded with the x-axis unit:\t{}".format(xunit))
@@ -86,6 +90,9 @@ class FittingDataPresenter(object):
 
     def clear_workspaces(self):
         self.get_loaded_workspaces().clear()
+        self.get_bgsub_workspaces().clear()
+        self.get_bg_params().clear()
+        self.model.set_log_workspaces_none()
         self.plotted.clear()
         self.row_numbers.clear()
         self._repopulate_table()
@@ -99,6 +106,12 @@ class FittingDataPresenter(object):
 
     def get_loaded_workspaces(self):
         return self.model.get_loaded_workspaces()
+
+    def get_bgsub_workspaces(self):
+        return self.model.get_bgsub_workspaces()
+
+    def get_bg_params(self):
+        return self.model.get_bg_params()
 
     def restore_table(self):  # used when the interface is being restored from a save or crash
         self._repopulate_table()
@@ -119,9 +132,12 @@ class FittingDataPresenter(object):
         self._emit_enable_load_button_signal()
 
     def _on_worker_success(self, _):
+        wsnames = self.model.get_last_added()
         if self.view.get_add_to_plot():
-            self.plotted.update(self.model.get_last_added())
+            self.plotted.update(wsnames)
         self._repopulate_table()
+        # subtract background - has to be done post repopulation, can't change default in _add_row_to_table
+        [self.view.set_item_checkstate(self.row_numbers[wsname], 3, True) for wsname in wsnames]
 
     def _repopulate_table(self):
         """
@@ -174,6 +190,7 @@ class FittingDataPresenter(object):
     def _handle_table_cell_changed(self, row, col):
         if row in self.row_numbers:
             ws_name = self.row_numbers[row]
+            is_plotted = self.view.get_item_checked(row, 2)
             is_sub = self.view.get_item_checked(row, 3)
             if col == 2:
                 # Plot check box
@@ -190,7 +207,8 @@ class FittingDataPresenter(object):
                     self.plotted.discard(ws_name)
             elif col == 3:
                 # subtract bg col
-                if is_sub or self.view.get_item_checked(row, 2):  # this ensures the sub ws isn't made on load
+                self.model.update_bgsub_status(ws_name, is_sub)
+                if is_sub or is_plotted:  # this ensures the sub ws isn't made on load
                     bg_params = self.view.read_bg_params_from_table(row)
                     self.model.create_or_update_bgsub_ws(ws_name, bg_params)
                     self._update_plotted_ws_with_sub_state(ws_name, is_sub)
@@ -251,6 +269,7 @@ class FittingDataPresenter(object):
 
     def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, checked=False, bgsub=False, niter=100,
                           xwindow=None, SG=True):
+
         words = ws_name.split("_")
         # find xwindow from ws xunit if not specified
         if not xwindow:
@@ -261,18 +280,16 @@ class FittingDataPresenter(object):
                 xwindow = 0.05
         if run_no is not None and bank is not None:
             self.view.add_table_row(run_no, bank, checked, bgsub, niter, xwindow, SG)
-            self.row_numbers[ws_name] = row
         elif len(words) == 4 and words[2] == "bank":
             logger.notice("No sample logs present, determining information from workspace name.")
             self.view.add_table_row(words[1], words[3], checked, bgsub, niter, xwindow, SG)
-            self.row_numbers[ws_name] = row
         else:
             logger.warning(
                 "The workspace '{}' was not in the correct naming format. Files should be named in the following way: "
                 "INSTRUMENT_RUNNUMBER_bank_BANK. Using workspace name as identifier.".format(ws_name)
             )
             self.view.add_table_row(ws_name, "N/A", checked, bgsub, niter, xwindow, SG)
-            self.row_numbers[ws_name] = row
+        self.row_numbers[ws_name] = row
 
     def _remove_table_row(self, row_no):
         self.view.remove_table_row(row_no)

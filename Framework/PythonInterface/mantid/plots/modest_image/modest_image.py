@@ -11,14 +11,15 @@ set_extent.
 """
 import matplotlib
 rcParams = matplotlib.rcParams
-import matplotlib.image as mi
-import matplotlib.colors as mcolors
-import matplotlib.cbook as cbook
-from matplotlib.transforms import IdentityTransform, Affine2D
 
-from mantid.plots.mantidimage import MantidImage
+import matplotlib.image as mi  # noqa: E402
+import matplotlib.colors as mcolors  # noqa: E402
+import matplotlib.cbook as cbook  # noqa: E402
+from matplotlib.transforms import IdentityTransform, Affine2D  # noqa: E402
 
-import numpy as np
+from mantid.plots.mantidimage import MantidImage  # noqa: E402
+
+import numpy as np  # noqa: E402
 
 IDENTITY_TRANSFORM = IdentityTransform()
 
@@ -62,9 +63,8 @@ class ModestImage(MantidImage):
                                                          np.float):
             raise TypeError("Image data can not convert to float")
 
-        if (self._A.ndim not in (2, 3) or
-                (self._A.ndim == 3 and self._A.shape[-1] not in (3, 4))):
-                raise TypeError("Invalid dimensions for image data")
+        if self._A.ndim not in (2, 3) or (self._A.ndim == 3 and self._A.shape[-1] not in (3, 4)):
+            raise TypeError("Invalid dimensions for image data")
 
         self.invalidate_cache()
 
@@ -134,10 +134,10 @@ class ModestImage(MantidImage):
 
         # Check whether we've already calculated what we need, and if so just
         # return without doing anything further.
-        if (self._bounds is not None and
-                sx >= self._sx and sy >= self._sy and
-                x0 >= self._bounds[0] and x1 <= self._bounds[1] and
-                y0 >= self._bounds[2] and y1 <= self._bounds[3]):
+        if (self._bounds is not None
+                and sx >= self._sx and sy >= self._sy
+                and x0 >= self._bounds[0] and x1 <= self._bounds[1]
+                and y0 >= self._bounds[2] and y1 <= self._bounds[3]):
             return
 
         # Slice the array using the slices determined previously to optimally

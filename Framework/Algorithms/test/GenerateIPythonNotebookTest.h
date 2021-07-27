@@ -99,7 +99,7 @@ public:
     }
 
     // Check that the expected lines do appear in the output
-    for (auto const expected_line : result) {
+    for (auto const &expected_line : result) {
       TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), expected_line) != notebookLines.cend())
     }
 
