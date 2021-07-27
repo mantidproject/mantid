@@ -22,6 +22,7 @@ BugFixes
 ############
 - A bug has been fixed in the BinWidth for the Dynamic Kobu Toyabe Fitting Function which caused a crash and did not provide
   any information about why the value was invalid. Will now revert to last viable BinWidth used and explain why.
+- The autoscale option when `All` is selected will now show the largest and smallest y value from the all of the plots.
 
 Muon Analysis and Frequency Domain Analysis
 -------------------------------------------

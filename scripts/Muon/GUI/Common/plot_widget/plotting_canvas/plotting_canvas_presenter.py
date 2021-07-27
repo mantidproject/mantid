@@ -353,7 +353,12 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             return y_list[plot]
 
     def update_y_limits_of_subplots(self, y_limits_list, selected_subplots, axes):
+        # these are seperate to make it easier for debugging if it ever breaks
         if len(selected_subplots)==0:
+            return
+        elif len(selected_subplots) != len(y_limits_list):
+            return
+        elif len(selected_subplots) != len(axes):
             return
         # get max and min across all plots
         y_mins = [y_limits_list[plot][0] for plot in selected_subplots]
