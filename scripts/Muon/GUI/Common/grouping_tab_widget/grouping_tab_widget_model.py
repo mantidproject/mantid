@@ -99,10 +99,11 @@ class GroupingTabModel(object):
     def selected_groups_and_pairs(self):
         return self._groups_and_pairs.selected_groups_and_pairs
 
-    def show_all_groups_and_pairs(self):
-        self._context.show_all_groups()
-        self._context.show_all_pairs()
-        self._context.show_all_diffs()
+    def calculate_all_data(self):
+        # Calculates the counts workspaces and then triggers the background correction process. The corrections are
+        # performed, the Asymmetry workspaces generated based off the corrected counts, and then the pairs and diffs
+        # are calculated.
+        self._context.calculate_all_groups()
 
     def clear_groups(self):
         self._groups_and_pairs.clear_groups()

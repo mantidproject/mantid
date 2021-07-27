@@ -147,9 +147,6 @@ class MuonContext(object):
         output_workspace_name = get_pair_asymmetry_name(self, pair.name, run_as_string, rebin=rebin)
         return calculate_pair_data(pair, forward_group_workspace_name, backward_group_workspace_name, output_workspace_name)
 
-    def show_all_groups(self):
-        self.calculate_all_groups()
-
     def show_group(self, run, group):
         run_as_string = run_list_to_string(run)
         group_name = group.name

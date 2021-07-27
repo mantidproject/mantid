@@ -153,29 +153,28 @@ class BackgroundCorrectionsModel:
             correction_data.setup_functions()
             add_ws_to_ads(correction_data.uncorrected_counts_workspace.workspace_name,
                           correction_data.uncorrected_counts_workspace.workspace_copy())
-            self._create_asymmetry_workspace_for(run_group[0], run_group[1])
+        return self.all_runs_and_groups()
 
     def run_background_correction_for_all(self) -> None:
         """Runs the background corrections for all stored domains."""
         for run_group in self._corrections_context.background_correction_data.keys():
-            self._run_background_correction(run_group[0], run_group[1],
-                                            self._corrections_context.background_correction_data[run_group])
+            self._run_background_correction(self._corrections_context.background_correction_data[run_group])
+        return self.all_runs_and_groups()
 
     def run_background_correction_for(self, run: str, group: str) -> None:
         """Calculates the background for some data using a Fit."""
         run_group = tuple([run, group])
         if run_group in self._corrections_context.background_correction_data:
-            self._run_background_correction(run_group[0], run_group[1],
-                                            self._corrections_context.background_correction_data[run_group])
+            self._run_background_correction(self._corrections_context.background_correction_data[run_group])
+        return [run], [group]
 
-    def _run_background_correction(self, run: str, group: str, correction_data: BackgroundCorrectionData) -> None:
+    def _run_background_correction(self, correction_data: BackgroundCorrectionData) -> None:
         """Calculates the background for some data using a Fit."""
         params = self._get_parameters_for_background_fit(correction_data)
         function, fit_status, chi_squared = run_Fit(params, AlgorithmManager.create("Fit"))
 
         self._handle_background_fit_output(correction_data, function, fit_status, chi_squared)
         self._perform_background_subtraction_on_counts(correction_data)
-        self._create_asymmetry_workspace_for(run, group)
 
     @staticmethod
     def _perform_background_subtraction_on_counts(correction_data: BackgroundCorrectionData) -> None:
@@ -183,6 +182,11 @@ class BackgroundCorrectionsModel:
         run_minus(correction_data.uncorrected_counts_workspace.workspace_copy(),
                   correction_data.create_background_workspace(),
                   correction_data.uncorrected_counts_workspace.workspace_name)
+
+    def calculate_asymmetry_workspaces_for(self, runs: list, groups: list) -> None:
+        """Creates the asymmetry workspaces for the runs and groups provided using the Counts workspaces in the ADS."""
+        for run, group in zip(runs, groups):
+            self._create_asymmetry_workspace_for(run, group)
 
     def _create_asymmetry_workspace_for(self, run: str, group: str) -> None:
         """Creates the asymmetry workspace for a run and group using its corresponding Counts workspace in the ADS."""

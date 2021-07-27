@@ -168,7 +168,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.setup_fitting_notifier()
 
-        self.setup_on_recalulation_finished_notifier()
+        self.setup_counts_calculation_finished_notifier()
+
+        self.setup_asymmetry_pair_and_diff_calculations_finished_notifier()
 
         self.setup_results_notifier()
 
@@ -441,18 +443,19 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_view.disable_tab_observer)
 
-    def setup_on_recalulation_finished_notifier(self):
-        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+    def setup_counts_calculation_finished_notifier(self):
+        self.grouping_tab_widget.group_tab_presenter.counts_calculation_finished_notifier.add_subscriber(
             self.corrections_tab.corrections_tab_presenter.pre_process_and_counts_calculated_observer)
 
-        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+    def setup_asymmetry_pair_and_diff_calculations_finished_notifier(self):
+        self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
 
-        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+        self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 
         for observer in self.plot_widget.data_changed_observers:
-            self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(observer)
+            self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.add_subscriber(observer)
             self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(observer)
 
     def setup_phase_quad_changed_notifier(self):

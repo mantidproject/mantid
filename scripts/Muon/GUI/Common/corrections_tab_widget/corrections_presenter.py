@@ -49,6 +49,7 @@ class CorrectionsPresenter(QObject):
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
         self.perform_corrections_notifier = GenericObservable()
+        self.asymmetry_pair_and_diff_calculations_finished_notifier = GenericObservable()
 
     def initialize_model_options(self) -> None:
         """Initialise the model with the default fitting options."""
