@@ -399,8 +399,16 @@ target_link_libraries(MDAlgorithms PUBLIC Mantid::API Mantid::DataObjects Mantid
 add_subdirectory(test)
 
 # Installation settings
-mtd_install_dylib(TARGETS
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidMDAlgorithmsTargets")
+mtd_install_framework_lib(TARGETS
+                  MDAlgorithms
+                  EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+mtd_install_targets(TARGETS
                     MDAlgorithms
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()
+

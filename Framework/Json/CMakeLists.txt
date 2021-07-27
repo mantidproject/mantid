@@ -43,18 +43,6 @@ target_include_directories(Json PUBLIC
 
 generate_mantid_export_header(Json FALSE)
 
-
-# Installation settings
-set(TARGET_EXPORT_NAME "MantidJsonTargets")
-mtd_install_dylib(TARGETS Json INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
-
-
-install(EXPORT ${TARGET_EXPORT_NAME}
-        FILE ${TARGET_EXPORT_NAME}.cmake
-        NAMESPACE Mantid::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
-)
-
 if(CXXTEST_FOUND)
 
 cxxtest_add_test(JsonTest ${TEST_FILES})
@@ -66,4 +54,16 @@ add_dependencies(FrameworkTests JsonTest)
 # Add to the 'FrameworkTests' group in VS
 set_property(TARGET JsonTest PROPERTY FOLDER "UnitTests")
 
+endif()
+
+# Installation settings
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidJsonTargets")
+mtd_install_framework_lib(TARGETS Json INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+mtd_install_targets(TARGETS
+                    Json
+                    INSTALL_DIRS
+                    ${LIB_DIR}
+                    ${WORKBENCH_LIB_DIR})
 endif()

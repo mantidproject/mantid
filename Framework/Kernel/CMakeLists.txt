@@ -614,16 +614,6 @@ else()
        ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
 endif()
 
-# Installation settings
-set(TARGET_EXPORT_NAME "MantidKernelTargets")
-mtd_install_dylib(TARGETS Kernel EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
-
-
-install(EXPORT ${TARGET_EXPORT_NAME}
-        FILE ${TARGET_EXPORT_NAME}.cmake
-        NAMESPACE Mantid::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
-)
 
 # Create the properties file for the installer
 set(MANTID_ROOT_BUILD ${MANTID_ROOT})
@@ -663,3 +653,10 @@ mtd_install_files(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
                   INSTALL_DIRS ${BIN_DIR} ${WORKBENCH_BIN_DIR}
                   RENAME Mantid.properties)
 
+# Installation settings
+if(CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidKernelTargets")
+mtd_install_framework_lib(TARGETS Kernel EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+endif()

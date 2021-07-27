@@ -128,23 +128,18 @@ endif()
 # Add the unit tests directory
 add_subdirectory(test)
 
+
 # Installation settings
-mtd_install_dylib(TARGETS
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidParallelTargets")
+mtd_install_framework_lib(TARGETS Parallel EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+mtd_install_targets(TARGETS
                     Parallel
                     INSTALL_DIRS
                     ${LIB_DIR}
                     ${WORKBENCH_LIB_DIR})
-
-# Installation settings
-set(TARGET_EXPORT_NAME "MantidParallelTargets")
-mtd_install_dylib(TARGETS Parallel EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
-
-install(EXPORT ${TARGET_EXPORT_NAME}
-        FILE ${TARGET_EXPORT_NAME}.cmake
-        NAMESPACE Mantid::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
-)
-
+endif()
 
 mtd_install_targets(TARGETS
                     EventParallelLoader

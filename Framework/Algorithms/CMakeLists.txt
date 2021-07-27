@@ -1073,17 +1073,16 @@ target_include_directories(Algorithms PUBLIC
 generate_mantid_export_header(Algorithms FALSE)
 
 # Installation settings
+if (CONDA_BUILD)
 set(TARGET_EXPORT_NAME "MantidAlgorithmsTargets")
-mtd_install_dylib(TARGETS
+mtd_install_framework_lib(TARGETS
                   Algorithms
                   INSTALL_EXPORT_FILE
-                  EXPORT_NAME ${TARGET_EXPORT_NAME}
-                  INSTALL_DIRS
-                  ${PLUGINS_DIR}
-                  ${WORKBENCH_PLUGINS_DIR})
-
-install(EXPORT ${TARGET_EXPORT_NAME}
-        FILE ${TARGET_EXPORT_NAME}.cmake
-        NAMESPACE Mantid::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
-)
+                  EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+mtd_install_targets(TARGETS
+                    Algorithms
+                    INSTALL_DIRS
+                    ${PLUGINS_DIR}
+                    ${WORKBENCH_PLUGINS_DIR})
+endif()

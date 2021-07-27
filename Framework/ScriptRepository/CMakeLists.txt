@@ -47,8 +47,13 @@ set_property(TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 
 target_link_libraries(ScriptRepository PUBLIC Mantid::Kernel Mantid::API PRIVATE Mantid::Json)
 
-mtd_install_dylib(TARGETS
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidScriptRepositoryTargets")
+mtd_install_framework_lib(TARGETS ScriptRepository EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+mtd_install_targets(TARGETS
                     ScriptRepository
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()

@@ -105,11 +105,14 @@ target_include_directories(Indexing PUBLIC
 generate_mantid_export_header(Indexing TRUE)
 
 # Installation settings
+if (CONDA_BUILD)
 set(TARGET_EXPORT_NAME "MantidIndexingTargets")
-mtd_install_dylib(TARGETS Indexing INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+mtd_install_framework_lib(TARGETS Indexing INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+mtd_install_targets(TARGETS
+                    Indexing
+                    INSTALL_DIRS
+                    ${LIB_DIR}
+                    ${WORKBENCH_LIB_DIR})
+endif()
 
-install(EXPORT ${TARGET_EXPORT_NAME}
-        FILE ${TARGET_EXPORT_NAME}.cmake
-        NAMESPACE Mantid::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
-)

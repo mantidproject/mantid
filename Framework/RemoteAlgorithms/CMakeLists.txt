@@ -80,11 +80,13 @@ target_link_libraries(RemoteAlgorithms PUBLIC Mantid::API PRIVATE Mantid::Kernel
 add_subdirectory(test) # Note: No tests yet for many remote algorithms...
 
 # Installation settings
+if (CONDA_BUILD)
 set(TARGET_EXPORT_NAME "MantidRemoteAlgorithmsTargets")
-mtd_install_dylib(TARGETS RemoteAlgorithms EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
-
-install(EXPORT ${TARGET_EXPORT_NAME}
-        FILE ${TARGET_EXPORT_NAME}.cmake
-        NAMESPACE Mantid::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
-)
+mtd_install_framework_lib(TARGETS RemoteAlgorithms EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+mtd_install_targets(TARGETS
+                    RemoteAlgorithms
+                    INSTALL_DIRS
+                    ${PLUGINS_DIR}
+                    ${WORKBENCH_PLUGINS_DIR})
+endif()

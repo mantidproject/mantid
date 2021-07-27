@@ -22,42 +22,36 @@ function (mtd_install_targets)
 endfunction()
 
 
-# Install a target into multiple directories
-# This respects ENABLE_WORKBENCH flags for macOS
-function (mtd_install_dylib)
-  set (options INSTALL_EXPORT_FILE)
-  set (oneValueArgs TARGETS EXPORT_NAME)
-  set (multiValueArgs INSTALL_DIRS)
-  cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
-                         "${multiValueArgs}" ${ARGN})
-
-    if (NOT PARSED_INSTALL_DIRS)
-        message(FATAL_ERROR "Empty argument INSTALL_DIRS")
-        return()
-    endif()
-    if (NOT PARSED_TARGETS)
-        message(FATAL_ERROR "Empty argument TARGETS")
-        return()
-    endif()
-    install(
-        DIRECTORY inc/
-        DESTINATION include/Mantid
-        COMPONENT Devel
-        PATTERN ".in" EXCLUDE
-    )
-    if(PARSED_INSTALL_EXPORT_FILE)
+# Install a framework library (used primarily for a conda install)
+function (mtd_install_framework_lib)
+set (options INSTALL_EXPORT_FILE)
+set (oneValueArgs TARGETS EXPORT_NAME)
+set (multiValueArgs INSTALL_DIRS)
+cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
+"${multiValueArgs}" ${ARGN})
+install(
+    DIRECTORY inc/
+    DESTINATION include/Mantid
+    COMPONENT Devel
+    PATTERN ".in" EXCLUDE)
+if(PARSED_INSTALL_EXPORT_FILE)
     install(
         FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid${PARSED_TARGETS}/DllConfig.h
         DESTINATION include/Mantid/Mantid${PARSED_TARGETS}
-        COMPONENT Devel
-    )
-    endif()
-    install ( TARGETS ${PARSED_TARGETS}
-    EXPORT ${PARSED_EXPORT_NAME}
+        COMPONENT Devel)
+endif()
+install ( TARGETS ${PARSED_TARGETS}
+EXPORT ${PARSED_EXPORT_NAME}
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
-    )
+    RUNTIME DESTINATION bin)
+
+install(EXPORT ${PARSED_EXPORT_NAME}
+    FILE ${PARSED_EXPORT_NAME}.cmake
+    NAMESPACE Mantid::
+    COMPONENT Devel
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)
 endfunction()
 
 

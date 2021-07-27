@@ -120,12 +120,14 @@ target_include_directories(ICat PUBLIC
 generate_mantid_export_header(ICat True)
 
 # Installation settings
+if (CONDA_BUILD)
 set(TARGET_EXPORT_NAME "MantidICatTargets")
-mtd_install_dylib(TARGETS ICat INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
-
-install(EXPORT ${TARGET_EXPORT_NAME}
-        FILE ${TARGET_EXPORT_NAME}.cmake
-        NAMESPACE Mantid::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
-)
+mtd_install_framework_lib(TARGETS ICat INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+mtd_install_targets(TARGETS
+                    ICat
+                    INSTALL_DIRS
+                    ${PLUGINS_DIR}
+                    ${WORKBENCH_PLUGINS_DIR})
+endif()
 

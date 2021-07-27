@@ -180,7 +180,7 @@ if(NOT FULL_PACKAGE_BUILD)
   add_subdirectory(PostInstall)
 endif()
 
-
+if (CONDA_BUILD)
 configure_package_config_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/MantidFrameworkConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake
   INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework)
@@ -196,7 +196,6 @@ install(FILES
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
 )
 
-
 install(FILES
 ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindNexus.cmake
 ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindJsonCPP.cmake
@@ -204,3 +203,4 @@ ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindTBB.cmake
 ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindMuParser.cmake
 DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework/find_modules
 )
+endif()

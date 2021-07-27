@@ -176,11 +176,14 @@ target_link_libraries(SINQ PUBLIC Mantid::Kernel Mantid::Geometry Mantid::API Ma
 add_subdirectory(test)
 
 # Installation settings
+if (CONDA_BUILD)
 set(TARGET_EXPORT_NAME "MantidSINQTargets")
-mtd_install_dylib(TARGETS SINQ EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+mtd_install_framework_lib(TARGETS SINQ EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+mtd_install_targets(TARGETS
+                    SINQ
+                    INSTALL_DIRS
+                    ${PLUGINS_DIR}
+                    ${WORKBENCH_PLUGINS_DIR})
+endif()
 
-install(EXPORT ${TARGET_EXPORT_NAME}
-        FILE ${TARGET_EXPORT_NAME}.cmake
-        NAMESPACE Mantid::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
-)

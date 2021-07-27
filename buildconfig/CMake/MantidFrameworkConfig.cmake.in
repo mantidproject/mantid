@@ -45,6 +45,7 @@ set(MODULES
     Algorithms
     WorkflowAlgorithms
     CurveFitting
+    MDAlgorithms
     Crystal
     ICat
     LiveData

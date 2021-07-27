@@ -36,7 +36,7 @@ target_link_libraries(MPIAlgorithms PUBLIC Mantid::API Mantid::DataObjects PRIVA
 add_subdirectory(test)
 
 # Installation settings
-mtd_install_dylib(TARGETS
+mtd_install_targets(TARGETS
                     MPIAlgorithms
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
