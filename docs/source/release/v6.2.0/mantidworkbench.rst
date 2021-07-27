@@ -14,6 +14,7 @@ New and Improved
     :width: 500px
     :align: center
 
+- Workflow diagrams in help pages are now ``.svg`` rather than ``.png``
 - Peaks can now be added or removed from a PeaksWorkspace using the :ref:`peaks overlay <sliceviewer_peaks_overlay>` in :ref:`sliceviewer`.
 - The list of eligible workspaces in the `WorkspaceSelector` can now be sorted by name
 - New widget and workbench plugin: `WorkspaceCalculator`, allows to perform binary operations and scaling by a floating number on workspaces;

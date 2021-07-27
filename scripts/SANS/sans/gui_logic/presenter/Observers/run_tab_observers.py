@@ -8,10 +8,7 @@ from mantid.py36compat import dataclass
 from mantidqt.utils.observer_pattern import GenericObserver
 
 
-class SaveOptionsObserver(GenericObserver):
-    pass
-
-
 @dataclass
 class RunTabObservers:
-    save_options: SaveOptionsObserver
+    save_options: GenericObserver
+    reduction_dim: GenericObserver

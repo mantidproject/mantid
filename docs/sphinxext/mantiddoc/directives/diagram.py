@@ -86,7 +86,7 @@ class DiagramDirective(BaseDirective):
                 "Diagrams need to be referred to by their filename, including '.dot' extension.")
 
         in_path = os.path.join(env.srcdir, "diagrams", diagram_name)
-        out_path = os.path.join(diagrams_dir, diagram_name[:-4] + ".png")
+        out_path = os.path.join(diagrams_dir, diagram_name[:-4] + ".svg")
 
         #Generate the diagram
         try:
@@ -97,7 +97,7 @@ class DiagramDirective(BaseDirective):
 
         out_src = Template(in_src).substitute(STYLE)
         out_src = out_src.encode()
-        gviz = subprocess.Popen([dot_executable, "-Tpng", "-o", out_path], stdin=subprocess.PIPE)
+        gviz = subprocess.Popen([dot_executable, "-Tsvg", "-o", out_path], stdin=subprocess.PIPE)
         gviz.communicate(input=out_src)
         gviz.wait()
 

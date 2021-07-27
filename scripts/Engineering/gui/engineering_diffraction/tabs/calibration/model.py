@@ -13,7 +13,7 @@ from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, Dif
 import Engineering.EnggUtils as EnggUtils
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
-from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from Engineering.common import path_handling
 
 CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
 

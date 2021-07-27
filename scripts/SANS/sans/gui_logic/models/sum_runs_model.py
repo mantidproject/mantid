@@ -5,30 +5,24 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import SANSadd2
-from ui.sans_isis.work_handler import WorkHandler
+from mantidqt.utils.async_qt_adaptor import qt_async_task, IQtAsync
 
 
-class SumRunsModel(object):
-    def __init__(self, work_handler, view=None):
-        self._work_handler = work_handler
+class SumRunsModel(IQtAsync):
+    def __init__(self, view=None):
+        super().__init__()
+        # TODO this should be in presenter, not the model
         self._view = view
 
-    class Listener(WorkHandler.WorkListener):
-        def __init__(self, presenter):
-            self._presenter = presenter
+    def __call__(self, *args, **kwargs):
+        self.run(*args, **kwargs)
 
-        def on_processing_finished(self, result):
-            self._presenter.on_processing_finished(result)
+    def finished_cb_slot(self) -> None:
+        # TODO move to presenter
+        if self._view:
+            self._view.enable_sum()
 
-        def on_processing_error(self, error):
-            # currently no different functionality required between
-            # processing finished and processing error,
-            # so call the same method
-            self._presenter.on_processing_finished(error)
-
-    def __call__(self, run_selection, settings, base_file_name):
-        self._work_handler.process(SumRunsModel.Listener(self), self.run, 0, run_selection, settings, base_file_name)
-
+    @qt_async_task
     def run(self, run_selection, settings, base_file_name):
         run_selection = self._run_selection_as_path_list(run_selection)
         binning = self._bin_settings_or_monitors(settings)
@@ -70,7 +64,3 @@ class SumRunsModel(object):
 
     def _should_save_as_event_workspaces(self, settings):
         return settings.should_save_as_event_workspaces()
-
-    def on_processing_finished(self, result):
-        if self._view:
-            self._view.enable_sum()

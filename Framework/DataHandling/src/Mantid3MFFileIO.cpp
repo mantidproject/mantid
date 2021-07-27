@@ -16,6 +16,7 @@
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NodeList.h"
 #include <Poco/DOM/Element.h>
+#include <boost/algorithm/string/trim.hpp>
 #include <iostream>
 
 namespace {
@@ -39,6 +40,7 @@ void Mantid3MFFileIO::LoadFile(std::string filename) {
     // demonstrates where/how to use it).
     reader->SetStrictModeActive(false);
     reader->ReadFromFile(filename);
+    m_filename = filename;
 
     ScaleUnits scale;
     switch (model->GetUnit()) {
@@ -84,8 +86,8 @@ MeshObject_sptr Mantid3MFFileIO::loadMeshObject(Lib3MF::PMeshObject meshObject, 
 
   g_log.debug("Name: \"" + meshObject->GetName() + "\"");
   g_log.debug("PartNumber: \"" + meshObject->GetPartNumber() + "\"");
-  g_log.debug("Vertex count: " + nVertexCount);
-  g_log.debug("Triangle count: " + nTriangleCount);
+  g_log.debug("Vertex count: " + std::to_string(nVertexCount));
+  g_log.debug("Triangle count: " + std::to_string(nTriangleCount));
 
   uint32_t vertexCount = 0;
   std::vector<Lib3MF::sTriangle> triangles;
@@ -124,25 +126,28 @@ MeshObject_sptr Mantid3MFFileIO::loadMeshObject(Lib3MF::PMeshObject meshObject, 
       std::string materialName;
       size_t openBracket = fullMaterialName.find("(");
       size_t closeBracket = fullMaterialName.find(")");
+
+      materialName = fullMaterialName.substr(0, openBracket);
+      boost::algorithm::trim(materialName);
+      std::string xmlString;
+
+      xmlString = "<material id=\"" + materialName + "\" formula=\"" + materialName + "\"";
       if ((openBracket != std::string::npos) && (closeBracket != std::string::npos)) {
-        materialName = fullMaterialName.substr(0, openBracket);
-        materialName.erase(std::remove_if(materialName.begin(), materialName.end(), ::isspace), materialName.end());
         std::string materialSpec = fullMaterialName.substr(openBracket + 1, closeBracket - openBracket - 1);
-        Poco::XML::DOMParser parser;
-        Poco::XML::AutoPtr<Poco::XML::Document> doc;
-        try {
-          doc = parser.parseString("<material id=\"" + materialName + "\" formula=\"" + materialName + "\" " +
-                                   materialSpec + "></material>");
-          Poco::XML::AutoPtr<Poco::XML::NodeList> materialElements = doc->getElementsByTagName("material");
-          Kernel::MaterialXMLParser materialParser;
-          material = materialParser.parse(static_cast<Poco::XML::Element *>(materialElements->item(0)));
-        } catch (std::exception) {
-          g_log.warning("Unable to parse material properties for " + fullMaterialName + " so material will be ignored");
-        }
-      } else {
-        g_log.warning("Material name " + fullMaterialName +
-                      " found without any properties so material will be ignored");
+        xmlString += " " + materialSpec;
       }
+      xmlString += "></material>";
+      Poco::XML::DOMParser parser;
+      Poco::XML::AutoPtr<Poco::XML::Document> doc;
+      try {
+        doc = parser.parseString(xmlString);
+        Poco::XML::AutoPtr<Poco::XML::NodeList> materialElements = doc->getElementsByTagName("material");
+        Kernel::MaterialXMLParser materialParser;
+        material = materialParser.parse(static_cast<Poco::XML::Element *>(materialElements->item(0)), m_filename);
+      } catch (std::exception &e) {
+        g_log.warning("Unable to parse material properties for " + fullMaterialName +
+                      " so material will be ignored: " + e.what());
+      };
     }
   };
 

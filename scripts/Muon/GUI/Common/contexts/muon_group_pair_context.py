@@ -340,6 +340,16 @@ class MuonGroupPairContext(object):
                 return False
         return True
 
+    def get_group_counts_workspace_names(self, runs, groups, rebin=False):
+        workspace_names = []
+        for group_name in groups:
+            try:
+                name = self[group_name].get_counts_workspace_for_run(runs, rebin)
+                workspace_names.append(name)
+            except KeyError:
+                continue
+        return workspace_names
+
     def get_group_workspace_names(self, runs, groups, rebin):
         workspace_list = []
 

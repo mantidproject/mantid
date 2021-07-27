@@ -10,6 +10,7 @@ from .model import SuperplotModel
 
 from mantid.api import mtd
 from mantid.plots.utility import MantidAxType, legend_set_draggable
+from mantid.plots import MantidAxes
 
 
 class SuperplotPresenter:
@@ -22,12 +23,15 @@ class SuperplotPresenter:
     _model = None
     _canvas = None
     _plot_function = None
+    _synchronized = False
 
     def __init__(self, canvas, parent=None):
         self._view = SuperplotView(self, parent)
         self._model = SuperplotModel()
         self._canvas = canvas
         self.parent = parent
+        if not isinstance(self._canvas.figure.gca(), MantidAxes):
+            return
 
         if self.parent:
             self.parent.plot_updated.connect(self.on_plot_updated)
@@ -53,6 +57,16 @@ class SuperplotPresenter:
         self._view.set_selection(selection)
         self._update_spectrum_slider()
         self._update_hold_button()
+        self._synchronized = True
+
+    def is_valid(self):
+        """
+        Check that the superplot started correctly.
+
+        Returns:
+            (bool): true if the superplot is in a valid state
+        """
+        return self._synchronized
 
     def set_workspaces(self, workspaces):
         """
