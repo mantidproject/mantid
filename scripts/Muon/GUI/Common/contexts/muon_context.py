@@ -169,6 +169,22 @@ class MuonContext(object):
             self.group_pair_context[group_name].show_rebin(run, directory + name, directory + asym_name,
                                                            asym_name_unnorm)
 
+    def show_pair(self, run: list, pair: MuonPair):
+        pair_name = pair.name
+        # Do not want to rename phasequad parts here
+        if "_Re_" in pair_name or "_Im_" in pair_name:
+            return
+
+        run_as_string = run_list_to_string(run)
+        name = get_pair_asymmetry_name(self, pair_name, run_as_string, rebin=False)
+        directory = get_base_data_directory(self, run_as_string)
+
+        self.group_pair_context[pair_name].show_raw(run, directory + name)
+
+        if self._do_rebin():
+            name = get_pair_asymmetry_name(self, pair_name, run_as_string, rebin=True)
+            self.group_pair_context[pair_name].show_rebin(run, directory + name)
+
     def show_all_diffs(self):
         self.calculate_all_diffs()
         for run in self._data_context.current_runs:
@@ -195,65 +211,6 @@ class MuonContext(object):
                             rebin=True)
                         self.group_pair_context[
                             diff_name].show_rebin(run, directory + name)
-
-    def show_all_pairs(self):
-        self.calculate_all_pairs()
-        for run in self._data_context.current_runs:
-            with WorkspaceGroupDefinition():
-                for pair_name in self._group_pair_context.pair_names:
-                    # Do not want to rename phasequad parts here
-                    if "_Re_" in pair_name or "_Im_" in pair_name:
-                        continue
-
-                    run_as_string = run_list_to_string(run)
-                    name = get_pair_asymmetry_name(
-                        self,
-                        pair_name,
-                        run_as_string,
-                        rebin=False)
-                    directory = get_base_data_directory(
-                        self,
-                        run_as_string)
-
-                    self.group_pair_context[
-                        pair_name].show_raw(run, directory + name)
-
-                    if self._do_rebin():
-                        name = get_pair_asymmetry_name(
-                            self,
-                            pair_name,
-                            run_as_string,
-                            rebin=True)
-                        self.group_pair_context[
-                            pair_name].show_rebin(run, directory + name)
-
-    def calculate_all_pairs(self):
-        self._calculate_pairs(rebin=False)
-        if(self._do_rebin()):
-            self._calculate_pairs(rebin=True)
-
-    def _update_phasequads(self, rebin=False):
-        for phasequad in self.group_pair_context.phasequads:
-            self.calculate_phasequads(phasequad.name, phasequad)
-
-    def _calculate_pairs(self, rebin):
-        for run in self._data_context.current_runs:
-
-            self._update_phasequads(rebin)
-            # construct the pairs
-            for pair in self._group_pair_context.pairs:
-                if isinstance(pair, MuonPair):
-                    pair_asymmetry_workspace = self.calculate_pair(
-                        pair, run, rebin=rebin)
-                else:
-                    continue
-
-                if not pair_asymmetry_workspace:
-                    continue
-                pair.update_asymmetry_workspace(
-                     pair_asymmetry_workspace,
-                     run,
-                     rebin=rebin)
 
     def calculate_all_diffs(self):
         self._calculate_diffs(rebin=False)
@@ -301,12 +258,31 @@ class MuonContext(object):
     def _calculate_asymmetry_for(self, run, group, rebin):
         asymmetry_workspaces = self.calculate_asymmetry(run, group, rebin)
 
-        if asymmetry_workspaces is None:
-            return
+        if asymmetry_workspaces is not None:
+            self.group_pair_context[group.name].update_asymmetry_workspace(MuonRun(run), *asymmetry_workspaces, rebin)
 
-        asymmetry_workspace, asymmetry_workspace_unnormalised = asymmetry_workspaces
-        self.group_pair_context[group.name].update_asymmetry_workspace(MuonRun(run), asymmetry_workspace,
-                                                                       asymmetry_workspace_unnormalised, rebin)
+    def calculate_pair_for(self, run: List[int], pair: MuonPair):
+        self._calculate_pair_for(run, pair, rebin=False)
+        if self._do_rebin():
+            self._calculate_pair_for(run, pair, rebin=True)
+
+    def _calculate_pair_for(self, run: List[int], pair: MuonPair, rebin: bool):
+        pair_asymmetry_workspace = self.calculate_pair(pair, run, rebin=rebin)
+
+        if pair_asymmetry_workspace is not None:
+            self.group_pair_context[pair.name].update_asymmetry_workspace(pair_asymmetry_workspace, run, rebin=rebin)
+
+    def find_pairs_containing_groups(self, groups: list) -> list:
+        """Returns a list of MuonPair's that are formed from one or more groups contained in the provided list."""
+        pairs = []
+        for pair in self._group_pair_context.pairs:
+            if pair.forward_group in groups or pair.backward_group in groups:
+                pairs.append(pair)
+        return pairs
+
+    def update_phasequads(self):
+        for phasequad in self.group_pair_context.phasequads:
+            self.calculate_phasequads(phasequad.name, phasequad)
 
     def calculate_phasequads(self, name, phasequad_obj):
         self._calculate_phasequads(name, phasequad_obj, rebin=False)

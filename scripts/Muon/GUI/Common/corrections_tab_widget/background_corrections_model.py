@@ -196,6 +196,23 @@ class BackgroundCorrectionsModel:
             self._context.calculate_asymmetry_for(run_list, group_object)
             self._context.show_group(run_list, group_object)
 
+    def calculate_pairs_for(self, runs: list, groups: list) -> None:
+        """Calculates the Pair Asymmetry workspaces which are concerned with the provided Runs and Groups."""
+        self._context.update_phasequads()
+
+        # Remove duplicates from the list
+        runs = list(dict.fromkeys(runs))
+
+        self._calculate_pairs_for(runs, self._context.find_pairs_containing_groups(groups))
+
+    def _calculate_pairs_for(self, runs: list, pairs: list) -> None:
+        """Calculates the Pair Asymmetry workspaces for the provided runs and pairs."""
+        for run in runs:
+            run_list = run_string_to_list(run)
+            for pair_object in pairs:
+                self._context.calculate_pair_for(run_list, pair_object)
+                self._context.show_pair(run_list, pair_object)
+
     def _handle_background_fit_output(self, correction_data: BackgroundCorrectionData, function: IFunction,
                                       fit_status: str, chi_squared: float) -> None:
         """Handles the output of the background fit."""

@@ -183,7 +183,9 @@ class BackgroundCorrectionsPresenter:
         """Calculates the Asymmetry workspaces, Pairs and Diffs only for the provided runs and groups."""
         # Calculates the Asymmetry workspaces for the corresponding runs and groups that have just been corrected
         self.model.calculate_asymmetry_workspaces_for(runs, groups)
-        # self.model.calculate_pairs_and_diffs_for(runs, groups)
+        # Calculates the Pair Asymmetry workspaces for pairs formed from one or more groups which have been corrected
+        self.model.calculate_pairs_for(runs, groups)
+        # self.model.calculate_diffs_for(runs, groups)
 
     def _create_calculation_thread(self, callback, *args) -> ThreadModel:
         """Create a thread for calculations."""
