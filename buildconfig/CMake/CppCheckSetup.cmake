@@ -39,9 +39,9 @@ if ( CPPCHECK_EXECUTABLE )
   # generate the target
   if (NOT TARGET cppcheck)
     add_custom_target ( cppcheck
-                        COMMAND ${CPPCHECK_EXECUTABLE}
+                        COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} ${_cppcheck_xml_args}
                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                        COMMENT "Running cppcheck ${_cppcheck_args} ${_cppcheck_xml_args}"
+                        COMMENT "Running cppcheck"
                       )
     set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
   endif()
