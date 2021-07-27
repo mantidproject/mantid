@@ -242,7 +242,10 @@ public:
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
     MatrixWorkspace_sptr factors = alg.getProperty("OutputScaleFactorsWorkspace");
-    // TS_ASSERT(crossCheckStitch(std::vector<std::string>({"ws3", "ws1", "ws2"}), stitched, factors));
+    TS_ASSERT(crossCheckStitch(std::vector<std::string>({"ws3", "ws1", "ws2"}), stitched, factors));
+    TS_ASSERT_DIFFERS(factors->readY(0)[0], 1.)
+    TS_ASSERT_EQUALS(factors->readY(0)[1], 1.)
+    TS_ASSERT_DIFFERS(factors->readY(0)[2], 1.)
   }
 
   void test_ManualScaleFactors() {
@@ -263,10 +266,10 @@ public:
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
     MatrixWorkspace_sptr factors = alg.getProperty("OutputScaleFactorsWorkspace");
     TS_ASSERT_EQUALS(factors->getNumberHistograms(), 1)
+    // TS_ASSERT(crossCheckStitch(std::vector<std::string>({"ws3", "ws1", "ws2"}), stitched, factors));
     TS_ASSERT_EQUALS(factors->readY(0)[0], 9.1)
     TS_ASSERT_EQUALS(factors->readY(0)[1], 31.7)
     TS_ASSERT_EQUALS(factors->readY(0)[2], 11.19)
-    // TS_ASSERT(crossCheckStitch(std::vector<std::string>({"ws3", "ws1", "ws2"}), stitched, factors));
   }
 
   void test_NoScaling() {
