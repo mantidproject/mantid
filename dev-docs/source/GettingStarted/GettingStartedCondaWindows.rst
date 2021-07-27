@@ -34,6 +34,7 @@ Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
 
 * Choose the latest version of ``Mambaforge-Windows-x86_64.exe``
 * Run your downloaded ``Mambaforge-Windows-x86_64.exe`` and work through the installer until it finishes. In order to make it easier later on, check the box that adds Conda to your path.
+* Temporary fix for Mambaforge on Windows. Run ``conda config --add channels main`` this will add the main channel and allow Windows developers to install ``cyrus-sasl`` (A dependency of librdkafka) which is not available on Windows yet via conda-forge.
 
 Setup the mantid conda environment
 ----------------------------------
