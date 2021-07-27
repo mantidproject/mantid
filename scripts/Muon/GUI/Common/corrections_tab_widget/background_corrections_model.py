@@ -196,14 +196,16 @@ class BackgroundCorrectionsModel:
             self._context.calculate_asymmetry_for(run_list, group_object)
             self._context.show_group(run_list, group_object)
 
-    def calculate_pairs_for(self, runs: list, groups: list) -> None:
+    def calculate_pairs_for(self, runs: list, groups: list) -> list:
         """Calculates the Pair Asymmetry workspaces which are concerned with the provided Runs and Groups."""
         self._context.update_phasequads()
 
         # Remove duplicates from the list
         runs = list(dict.fromkeys(runs))
 
-        self._calculate_pairs_for(runs, self._context.find_pairs_containing_groups(groups))
+        pairs = self._context.find_pairs_containing_groups(groups)
+        self._calculate_pairs_for(runs, pairs)
+        return [pair.name for pair in pairs]
 
     def _calculate_pairs_for(self, runs: list, pairs: list) -> None:
         """Calculates the Pair Asymmetry workspaces for the provided runs and pairs."""
@@ -212,6 +214,21 @@ class BackgroundCorrectionsModel:
             for pair_object in pairs:
                 self._context.calculate_pair_for(run_list, pair_object)
                 self._context.show_pair(run_list, pair_object)
+
+    def calculate_diffs_for(self, runs: list, groups_and_pairs: list) -> None:
+        """Calculates the Diff Asymmetry workspaces which are concerned with the provided Runs and Groups/Pairs."""
+        # Remove duplicates from the list
+        runs = list(dict.fromkeys(runs))
+
+        self._calculate_diffs_for(runs, self._context.find_diffs_containing_groups_or_pairs(groups_and_pairs))
+
+    def _calculate_diffs_for(self, runs: list, diffs: list) -> None:
+        """Calculates the Diff Asymmetry workspaces for the provided runs and diffs."""
+        for run in runs:
+            run_list = run_string_to_list(run)
+            for diff_object in diffs:
+                self._context.calculate_diff_for(run_list, diff_object)
+                self._context.show_diff(run_list, diff_object)
 
     def _handle_background_fit_output(self, correction_data: BackgroundCorrectionData, function: IFunction,
                                       fit_status: str, chi_squared: float) -> None:

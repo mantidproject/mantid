@@ -185,54 +185,18 @@ class MuonContext(object):
             name = get_pair_asymmetry_name(self, pair_name, run_as_string, rebin=True)
             self.group_pair_context[pair_name].show_rebin(run, directory + name)
 
-    def show_all_diffs(self):
-        self.calculate_all_diffs()
-        for run in self._data_context.current_runs:
-            with WorkspaceGroupDefinition():
-                for diff_name in self._group_pair_context.diff_names:
-                    run_as_string = run_list_to_string(run)
-                    name = get_diff_asymmetry_name(
-                        self,
-                        diff_name,
-                        run_as_string,
-                        rebin=False)
-                    directory = get_base_data_directory(
-                        self,
-                        run_as_string)
+    def show_diff(self, run: list, diff: MuonDiff):
+        diff_name = diff.name
 
-                    self.group_pair_context[
-                        diff_name].show_raw(run, directory + name)
+        run_as_string = run_list_to_string(run)
+        name = get_diff_asymmetry_name(self, diff_name, run_as_string, rebin=False)
+        directory = get_base_data_directory(self, run_as_string)
 
-                    if self._do_rebin():
-                        name = get_diff_asymmetry_name(
-                            self,
-                            diff_name,
-                            run_as_string,
-                            rebin=True)
-                        self.group_pair_context[
-                            diff_name].show_rebin(run, directory + name)
+        self.group_pair_context[diff_name].show_raw(run, directory + name)
 
-    def calculate_all_diffs(self):
-        self._calculate_diffs(rebin=False)
         if self._do_rebin():
-            self._calculate_diffs(rebin=True)
-
-    def _calculate_diffs(self, rebin):
-        for run in self._data_context.current_runs:
-            # construct the diffs
-            for diff in self._group_pair_context.diffs:
-                if isinstance(diff, MuonDiff):
-                    diff_asymmetry_workspace = self.calculate_diff(
-                        diff, run, rebin=rebin)
-                else:
-                    continue
-
-                if not diff_asymmetry_workspace:
-                    continue
-                diff.update_asymmetry_workspace(
-                     diff_asymmetry_workspace,
-                     run,
-                     rebin=rebin)
+            name = get_diff_asymmetry_name(self, diff_name, run_as_string, rebin=True)
+            self.group_pair_context[diff_name].show_rebin(run, directory + name)
 
     def calculate_all_groups(self):
         self._calculate_groups(rebin=False)
@@ -279,6 +243,25 @@ class MuonContext(object):
             if pair.forward_group in groups or pair.backward_group in groups:
                 pairs.append(pair)
         return pairs
+
+    def calculate_diff_for(self, run: List[int], diff: MuonDiff):
+        self._calculate_diff_for(run, diff, rebin=False)
+        if self._do_rebin():
+            self._calculate_diff_for(run, diff, rebin=True)
+
+    def _calculate_diff_for(self, run: List[int], diff: MuonDiff, rebin: bool):
+        diff_asymmetry_workspace = self.calculate_diff(diff, run, rebin=rebin)
+
+        if diff_asymmetry_workspace is not None:
+            self.group_pair_context[diff.name].update_asymmetry_workspace(diff_asymmetry_workspace, run, rebin=rebin)
+
+    def find_diffs_containing_groups_or_pairs(self, groups_and_pairs: list) -> list:
+        """Returns a list of MuonDiff's that are formed from one or more groups/pairs contained in the provided list."""
+        diffs = []
+        for diff in self._group_pair_context.diffs:
+            if diff.positive in groups_and_pairs or diff.negative in groups_and_pairs:
+                diffs.append(diff)
+        return diffs
 
     def update_phasequads(self):
         for phasequad in self.group_pair_context.phasequads:
