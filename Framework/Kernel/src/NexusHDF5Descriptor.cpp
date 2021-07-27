@@ -96,19 +96,16 @@ herr_t readStringAttribute(hid_t attr, char **data) {
 /**
  * Reads a string attribute of N-dimensions
  * @param attr input HDF5 attribute handler
- * @param data output attribute data
  * @return
  */
-std::pair<std::string, herr_t> readStringAttributeN(hid_t attr, char *data) {
-  std::string dataString(data);
-  herr_t iRet;
+std::pair<std::string, herr_t> readStringAttributeN(hid_t attr) {
   char *vdat = NULL;
-  iRet = readStringAttribute(attr, &vdat);
+  const auto iRet = readStringAttribute(attr, &vdat);
+  std::string attrData;
   if (iRet >= 0) {
-    dataString = vdat;
-    free(vdat);
+    attrData = vdat;
   }
-  return std::pair<std::string, herr_t>(dataString, iRet);
+  return std::make_pair(attrData, iRet);
 }
 
 void getGroup(hid_t groupID, std::map<std::string, std::set<std::string>> &allEntries) {
@@ -124,14 +121,9 @@ void getGroup(hid_t groupID, std::map<std::string, std::set<std::string>> &allEn
       return attribute;
     }
 
-    hid_t type = H5T_C_S1;
-    hid_t atype = H5Tcopy(type);
-    char data[128];
-    H5Tset_size(atype, sizeof(data));
-    auto pairData = readStringAttributeN(attributeID, data);
+    auto pairData = readStringAttributeN(attributeID);
     // already null terminated in readStringAttributeN
     attribute = pairData.first;
-    H5Tclose(atype);
     H5Aclose(attributeID);
 
     return attribute;
