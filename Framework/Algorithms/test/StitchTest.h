@@ -359,8 +359,8 @@ private:
       cropper.setChild(true);
       cropper.initialize();
       cropper.setProperty("InputWorkspace", factors);
-      cropper.setProperty("XMin", ws + 0.5);
-      cropper.setProperty("XMax", ws + 1.5);
+      cropper.setProperty("XMin", double(ws) + 0.5);
+      cropper.setProperty("XMax", double(ws) + 1.5);
       cropper.setPropertyValue("OutputWorkspace", "__tmp");
       cropper.execute();
       MatrixWorkspace_sptr factorsColumn = cropper.getProperty("OutputWorkspace");
