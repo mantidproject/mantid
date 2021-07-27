@@ -21,7 +21,7 @@ The correction can be calculated for groups of pixels specified. Check the **Gro
 If no grouping is specified, correction will be calculated on pixel by pixel bases.
 
 First the counts are integrated over all the time-of-flight channels, if there are more than one and the X-axis unit id is not `Empty`.
-Otherwise, the binning in the X-axis is not changed.
+Otherwise, the correction is calculated and applied for each frame individually.
 
 Then for each group the counts of the pixels are summed.
 
