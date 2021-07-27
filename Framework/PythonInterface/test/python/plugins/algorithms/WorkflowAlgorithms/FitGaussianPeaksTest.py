@@ -520,8 +520,9 @@ class FitGaussianPeaksTest(unittest.TestCase):
         self.assertAlmostEqual(row["error area"], 0.2347, places=3)
 
     def test_algorithm_does_not_throw_an_error_when_no_valid_peaks_fitted(self):
-        ws = CreateWorkspace([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22] * 2,
-                             [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7] + [0] * 12, NSpec=2)
+        x_val = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
+        y_val = [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7]
+        ws = CreateWorkspace(x_val * 2, y_val + [0] * 12, NSpec=2)
         table = CreateEmptyTableWorkspace()
         table.addColumn("float", "Centre")
         table.addRow([20])
@@ -533,8 +534,9 @@ class FitGaussianPeaksTest(unittest.TestCase):
         self.assertEqual(mtd["refit_peak_table"].rowCount(), 0)
 
     def test_algorithm_uses_right_fit_window(self):
-        ws = CreateWorkspace([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22] * 2,
-                             [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7] + [0] * 12, NSpec=2)
+        x_val = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
+        y_val = [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7]
+        ws = CreateWorkspace(x_val * 2, y_val + [0] * 12, NSpec=2)
 
         table = CreateEmptyTableWorkspace()
         table.addColumn("float", "Centre")
@@ -546,19 +548,20 @@ class FitGaussianPeaksTest(unittest.TestCase):
                              PeakGuessTable=table,
                              EstimateFitWindow=False,
                              FitWindowSize=11)
-            correct_x_val = np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22])
-            correct_y_val = np.array([0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7])
-
+            centre_index = 10
+            # win_size is ( FitWindowSize -1)/2 as method estimate_single_parameters expects in this form
+            win_size = 5
             arguements = mock_estimate_params.call_args_list[0][0]
-            np.testing.assert_equal(arguements[0], correct_x_val)
-            np.testing.assert_equal(arguements[1], correct_y_val)
-            np.testing.assert_equal(arguements[2], 10)
-            np.testing.assert_equal(arguements[3], 5)
+            self.assertSequenceEqual(list(arguements[0]), x_val)
+            self.assertSequenceEqual(list(arguements[1]), y_val)
+            self.assertEqual(arguements[2], centre_index)
+            self.assertEqual(arguements[3], win_size)
             self.assertEqual(len(arguements), 4)
 
     def test_algorithm_estimates_fit_window(self):
-        ws = CreateWorkspace([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22] * 2,
-                             [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7] + [0] * 12, NSpec=2)
+        x_val = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
+        y_val = [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7]
+        ws = CreateWorkspace(x_val * 2, y_val + [0] * 12, NSpec=2)
 
         table = CreateEmptyTableWorkspace()
         table.addColumn("float", "Centre")
@@ -570,14 +573,15 @@ class FitGaussianPeaksTest(unittest.TestCase):
                              PeakGuessTable=table,
                              EstimateFitWindow=True,
                              FitWindowSize=11)
-            correct_x_val = np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22])
-            correct_y_val = np.array([0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7])
 
+            centre_index = 10
+            # win_size is ( FitWindowSize -1)/2 as method estimate_single_parameters expects in this form
+            win_size = 2
             arguements = mock_estimate_params.call_args_list[0][0]
-            np.testing.assert_equal(arguements[0], correct_x_val)
-            np.testing.assert_equal(arguements[1], correct_y_val)
-            np.testing.assert_equal(arguements[2], 10)
-            np.testing.assert_equal(arguements[3], 2)
+            self.assertSequenceEqual(list(arguements[0]), x_val)
+            self.assertSequenceEqual(list(arguements[1]), y_val)
+            self.assertEqual(arguements[2], centre_index)
+            self.assertEqual(arguements[3], win_size)
             self.assertEqual(len(arguements), 4)
 
 
