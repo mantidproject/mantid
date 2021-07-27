@@ -99,6 +99,10 @@ endif()
 
 find_package(Doxygen) # optional
 
+# This is far more complicated than it has to be.
+# The issue is the library is found in different ways on all three OS platforms
+# Once we move to conda build we can just use the cmake finder...
+# At the moment this is necessary so we can link to targets rather than a library list..
 if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
   find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
   set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
@@ -108,9 +112,16 @@ if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
     REQUIRED CONFIGS hdf5-config.cmake
   )
   set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
-  add_library(hdf5::hdf5_cpp ALIAS hdf5::hdf5_cpp-shared)
-  add_library(hdf5::hdf5_hl ALIAS hdf5::hdf5_hl-shared)
-  add_library(hdf5::hdf5 ALIAS hdf5::hdf5-shared)
+elseif(CONDA_BUILD)
+  # We'll use the cmake finder
+  find_package(ZLIB REQUIRED)
+  find_package(
+    HDF5
+    COMPONENTS C CXX HL
+    REQUIRED
+  )
+  set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
+  set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
 else()
   # We'll use the cmake finder
   find_package(ZLIB REQUIRED)
@@ -429,7 +440,7 @@ if (ENABLE_PRECOMMIT)
     message ( FATAL_ERROR "Failed to find pre-commit see https://developer.mantidproject.org/GettingStarted.html" )
   endif ()
 
-  if (MSVC)
+  if (WIN32)
     if(CONDA_BUILD)
     execute_process(COMMAND "${PRE_COMMIT_EXE}" install --overwrite WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
     else()

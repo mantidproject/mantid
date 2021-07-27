@@ -42,11 +42,18 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Nexus PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Nexus PUBLIC Mantid::API Mantid::DataObjects Mantid::Kernel ${NEXUS_C_LIBRARIES} ${NEXUS_LIBRARIES})
-target_include_directories(Nexus PUBLIC ${NEXUS_INCLUDE_DIR})
+target_link_libraries(Nexus PUBLIC Mantid::API Mantid::DataObjects Mantid::Kernel Nexus::nexus Nexus::nexuscpp)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
-mtd_install_dylib(TARGETS Nexus INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+# Installation settings
+set(TARGET_EXPORT_NAME "MantidNexusTargets")
+mtd_install_dylib(TARGETS Nexus EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)

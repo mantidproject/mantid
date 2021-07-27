@@ -108,17 +108,23 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Muon PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Muon PUBLIC Mantid::API Mantid::Kernel Mantid::HistogramData Mantid::Geometry PRIVATE Mantid::DataObjects Mantid::Indexing)
+target_link_libraries(Muon PUBLIC Mantid::API Mantid::Kernel Mantid::Muon Mantid::Geometry PRIVATE Mantid::DataObjects Mantid::Indexing)
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Muon PUBLIC ${CMAKE_BINARY_DIR}/Framework/Muon)
+target_include_directories(Muon PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Muon>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(Muon FALSE)
 
 # Installation settings
-mtd_install_dylib(TARGETS
-                    Muon
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+set(TARGET_EXPORT_NAME "MantidMuonTargets")
+mtd_install_dylib(TARGETS Muon INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)

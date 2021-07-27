@@ -79,11 +79,18 @@ target_link_libraries(NexusGeometry PUBLIC Mantid::Geometry Mantid::API
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(NexusGeometry PUBLIC ${CMAKE_BINARY_DIR}/Framework/NexusGeometry)
-generate_mantid_export_header(NexusGeometry TRUE)
+target_include_directories(NexusGeometry PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/NexusGeometry>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(NexusGeometry FALSE)
 
-mtd_install_dylib(TARGETS
-                    NexusGeometry
-                    INSTALL_DIRS
-                    ${LIB_DIR}
-                    ${WORKBENCH_LIB_DIR})
+# Installation settings
+set(TARGET_EXPORT_NAME "MantidNexusGeometryTargets")
+mtd_install_dylib(TARGETS NexusGeometry INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)

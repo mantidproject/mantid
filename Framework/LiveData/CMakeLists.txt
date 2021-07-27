@@ -138,6 +138,7 @@ endif()
 set(PRIVATE_LINK_LIBRARIES ${WINSOCK})
 if(LIBRDKAFKA_FOUND)
   set(PRIVATE_LINK_LIBRARIES ${PRIVATE_LINK_LIBRARIES} ${LibRDKafka_LIBRARIES})
+  target_include_directories(LiveData PRIVATE ${LibRDKafka_INCLUDE_DIR})
 endif()
 target_link_libraries(LiveData PUBLIC Mantid::Kernel Mantid::API Mantid::DataObjects Mantid::Geometry Mantid::NexusGeometry PRIVATE ${PRIVATE_LINK_LIBRARIES} Mantid::Indexing)
 
@@ -145,12 +146,18 @@ target_link_libraries(LiveData PUBLIC Mantid::Kernel Mantid::API Mantid::DataObj
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(LiveData PUBLIC ${CMAKE_BINARY_DIR}/Framework/LiveData)
+target_include_directories(LiveData PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/LiveData>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(LiveData FALSE)
 
 # Installation settings
-mtd_install_dylib(TARGETS
-                    LiveData
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+set(TARGET_EXPORT_NAME "MantidLiveDataTargets")
+mtd_install_dylib(TARGETS LiveData INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)

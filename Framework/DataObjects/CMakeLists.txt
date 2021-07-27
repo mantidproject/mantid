@@ -226,14 +226,13 @@ target_include_directories(DataObjects PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
 		$<INSTALL_INTERFACE:include/Mantid>
 )
+
 # Set the name of the generated library
 set_target_properties(DataObjects PROPERTIES
                       OUTPUT_NAME
                         MantidDataObjects
                       COMPILE_DEFINITIONS
-                        IN_MANTID_DATAOBJECTS
-                      INTERFACE_INCLUDE_DIRECTORIES
-                        ${CMAKE_CURRENT_LIST_DIR}/inc)
+                        IN_MANTID_DATAOBJECTS)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(DataObjects
@@ -258,9 +257,11 @@ target_link_libraries(DataObjects PUBLIC Mantid::API Mantid::Geometry Mantid::Hi
 add_subdirectory(test)
 
 # Installation settings
+set(TARGET_EXPORT_NAME "MantidDataObjectsTargets")
+mtd_install_dylib(TARGETS DataObjects EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
-mtd_install_dylib(TARGETS
-                    DataObjects
-                    INSTALL_DIRS
-                    ${LIB_DIR}
-                    ${WORKBENCH_LIB_DIR})
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)

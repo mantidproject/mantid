@@ -57,8 +57,11 @@ target_link_libraries(RemoteJobManagers PUBLIC Mantid::Kernel Mantid::API)
 add_subdirectory(test)
 
 # Installation settings
-mtd_install_dylib(TARGETS
-                    RemoteJobManagers
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+set(TARGET_EXPORT_NAME "MantidRemoteJobManagersTargets")
+mtd_install_dylib(TARGETS RemoteJobManagers EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)

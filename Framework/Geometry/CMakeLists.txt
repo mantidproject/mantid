@@ -503,13 +503,13 @@ target_link_libraries(Geometry
 if(ENABLE_OPENGL)
   target_include_directories(Geometry SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
   target_link_libraries(Geometry
-    LINK_PRIVATE
+    PRIVATE
     ${OPENGL_gl_LIBRARY}
     ${OPENGL_glu_LIBRARY})
 endif()
 
 if(ENABLE_OPENCASCADE)
-  target_link_libraries(Geometry LINK_PRIVATE ${OPENCASCADE_LIBRARIES})
+  target_link_libraries(Geometry PRIVATE ${OPENCASCADE_LIBRARIES})
 endif()
 
 # Add the unit tests directory

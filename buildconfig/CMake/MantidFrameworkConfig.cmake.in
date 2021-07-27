@@ -27,23 +27,36 @@ find_dependency(MuParser)
 set(CMAKE_MODULE_PATH "${_mypackage_module_path_save}")
 unset(_mypackage_module_path_save)
 
+set(MODULES
+    Types
+    Json
+    Kernel
+    Parallel
+    HistogramData
+    Indexing
+    Beamline
+    Geometry
+    API
+    NexusGeometry
+    DataObjects
+    Catalog
+    Nexus
+    DataHandling
+    Algorithms
+    WorkflowAlgorithms
+    CurveFitting
+    Crystal
+    ICat
+    LiveData
+    RemoteAlgorithms
+    RemoteJobManagers
+    SINQ
+    Muon
+    Reflectometry
+)
 
-include("${CMAKE_CURRENT_LIST_DIR}/MantidTypesTargets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/MantidJsonTargets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/MantidKernelTargets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/MantidParallelTargets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/MantidHistogramDataTargets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/MantidIndexingTargets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/MantidBeamlineTargets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/MantidGeometryTargets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/MantidAPITargets.cmake")
-
-check_required_components(MantidTypesTargets)
-check_required_components(MantidJsonTargets)
-check_required_components(MantidKernelTargets)
-check_required_components(MantidParallelTargets)
-check_required_components(MantidHistogramDataTargets)
-check_required_components(MantidIndexingTargets)
-check_required_components(MantidBeamlineTargets)
-check_required_components(MantidGeometryTargets)
-check_required_components(MantidAPITargets)
+foreach(module ${MODULES})
+include("${CMAKE_CURRENT_LIST_DIR}/Mantid${module}Targets.cmake")
+check_required_components(Mantid${module}Targets)
+list(APPEND MantidFramework_Libraries "Mantid::${module}")
+endforeach()

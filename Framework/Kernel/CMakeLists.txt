@@ -519,9 +519,9 @@ target_link_libraries(Kernel
                       Poco::Util
                       Poco::NetSSL
                       GSL::gsl
-                      hdf5::hdf5_cpp
-                      hdf5::hdf5_hl
-                      hdf5::hdf5
+                      OpenSSL::SSL
+                      ${HDF5_LIBRARIES}
+                      ${HDF5_HL_LIBRARIES}
                       PRIVATE
                       ${NETWORK_LIBRARIES}
                       span

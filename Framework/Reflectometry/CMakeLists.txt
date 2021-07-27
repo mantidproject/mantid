@@ -110,20 +110,24 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Reflectometry PROPERTY FOLDER "MantidFramework")
 
-# Auto-generate exports header
-generate_mantid_export_header(Reflectometry FALSE)
-
-target_include_directories(Reflectometry PUBLIC
-  ${CMAKE_BINARY_DIR}/Framework/Reflectometry)
-
 target_link_libraries(Reflectometry PUBLIC Mantid::Kernel Mantid::API Mantid::Geometry Mantid::DataObjects PRIVATE Mantid::Indexing Mantid::HistogramData)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
+# Auto-generate exports header
+target_include_directories(Reflectometry PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Reflectometry>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(Reflectometry FALSE)
+
 # Installation settings
-mtd_install_dylib(TARGETS
-                    Reflectometry
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+set(TARGET_EXPORT_NAME "MantidReflectometryTargets")
+mtd_install_dylib(TARGETS Reflectometry INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)

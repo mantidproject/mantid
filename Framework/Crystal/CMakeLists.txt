@@ -269,16 +269,17 @@ target_link_libraries(Crystal PUBLIC Mantid::API Mantid::Geometry Mantid::Kernel
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Crystal PUBLIC ${CMAKE_BINARY_DIR}/Framework/Crystal)
 target_include_directories(Crystal PUBLIC
-                           ${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal )
-
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Crystal>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(Crystal FALSE)
 
 # Installation settings
+set(TARGET_EXPORT_NAME "MantidCrystalTargets")
+mtd_install_dylib(TARGETS Crystal INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
-mtd_install_dylib(TARGETS
-                    Crystal
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework)

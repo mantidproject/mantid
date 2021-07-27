@@ -106,21 +106,26 @@ endif()
 set_property(TARGET ICat PROPERTY FOLDER "MantidFramework")
 
 
-target_link_libraries(ICat PUBLIC Mantid::Kernel Mantid::API Mantid::DataObjects ${OPENSSL_LIBRARIES} PRIVATE ${JSONCPP_LIBRARIES})
+target_link_libraries(ICat PUBLIC Mantid::Kernel Mantid::API Mantid::DataObjects OpenSSL::SSL PRIVATE JsonCPP::jsoncpp )
 
-target_include_directories(ICat PUBLIC ${OPENSSL_INCLUDE_DIR} PRIVATE ${JSONCPP_INCLUDE_DIR})
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(ICat PUBLIC ${CMAKE_BINARY_DIR}/Framework/ICat)
-generate_mantid_export_header(ICat TRUE)
+target_include_directories(ICat PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/ICat>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(ICat True)
 
 # Installation settings
-mtd_install_targets(TARGETS
-                    ICat
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+set(TARGET_EXPORT_NAME "MantidICatTargets")
+mtd_install_dylib(TARGETS ICat INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)
 

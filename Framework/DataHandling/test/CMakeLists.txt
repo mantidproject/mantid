@@ -38,6 +38,11 @@ if(CXXTEST_FOUND)
   if(ENABLE_LIB3MF)
     target_link_libraries(DataHandlingTest LINK_PRIVATE
                           ${LIB3MF_LIBRARIES})
+    if (CONDA_BUILD)
+      target_include_directories(DataHandlingTest PRIVATE ${LIB3MF_INCLUDE_DIR})
+    else()
+      target_include_directories(DataHandlingTest PRIVATE ${LIB3MF_INCLUDE_DIR}/lib3mf)
+    endif()
   endif()
 
   add_dependencies(DataHandlingTest Algorithms MDAlgorithms)

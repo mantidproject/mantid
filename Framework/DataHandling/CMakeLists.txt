@@ -679,7 +679,6 @@ set_property(TARGET DataHandling PROPERTY FOLDER "MantidFramework")
 
 target_link_libraries(DataHandling
                         PUBLIC
-                        ${HDF5_HL_LIBRARIES}
                         Mantid::Nexus
                         Mantid::API
                         Mantid::HistogramData
@@ -689,19 +688,23 @@ target_link_libraries(DataHandling
                         Mantid::Kernel
                         Mantid::Indexing
                         Mantid::Parallel
+                        ${HDF5_LIBRARIES}
+                        ${HDF5_HL_LIBRARIES}
                         PRIVATE
                         Mantid::Json
                         Boost::filesystem
                         Mantid::NexusGeometry)
 
-target_include_directories(DataHandling SYSTEM PUBLIC ${HDF5_INCLUDE_DIRS})
+
+# Lib3mf is technically a public dependency as it is in our public headers.
+# We are assuming here that it won't be used.
 if(ENABLE_LIB3MF)
-  target_link_libraries(DataHandling LINK_PRIVATE
+  target_link_libraries(DataHandling PRIVATE
                         ${LIB3MF_LIBRARIES})
   if (CONDA_BUILD)
-    target_include_directories(DataHandling PUBLIC ${LIB3MF_INCLUDE_DIR})
+    target_include_directories(DataHandling PRIVATE ${LIB3MF_INCLUDE_DIR})
   else()
-    target_include_directories(DataHandling PUBLIC ${LIB3MF_INCLUDE_DIR}/lib3mf)
+    target_include_directories(DataHandling PRIVATE ${LIB3MF_INCLUDE_DIR}/lib3mf)
   endif()
 endif()
 
@@ -709,9 +712,11 @@ endif()
 add_subdirectory(test)
 
 # Installation settings
+set(TARGET_EXPORT_NAME "MantidDataHandlingTargets")
+mtd_install_dylib(TARGETS DataHandling EXPORT_NAME ${TARGET_EXPORT_NAME} INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
-mtd_install_dylib(TARGETS
-                    DataHandling
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+install(EXPORT ${TARGET_EXPORT_NAME}
+        FILE ${TARGET_EXPORT_NAME}.cmake
+        NAMESPACE Mantid::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)
