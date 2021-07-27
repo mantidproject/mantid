@@ -26,6 +26,10 @@ class PG3Calibration(systemtesting.MantidSystemTest):
         os.remove(self.saved_cal_file)
 
     def skipTests(self):
+        # don't run in conda, temporary solution
+        if "CONDA_PREFIX" in os.environ:
+            return True
+
         return _skip_test()
 
     def requiredFiles(self):
