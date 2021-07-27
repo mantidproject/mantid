@@ -125,6 +125,8 @@ list (APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
 enable_precompiled_headers(inc/MantidPythonInterface/api/PrecompiledHeader.h ALL_FILES)
 
 # Create the target for this directory
+set(FRAMEWORK_DIR ../../..)
+include_directories(${FRAMEWORK_DIR}/CurveFitting/inc)
 
 add_library(
   PythonAPIModule ${ALL_FILES} ${MODULE_DEFINITION}
