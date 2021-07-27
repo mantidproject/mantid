@@ -10,6 +10,7 @@ from .model import SuperplotModel
 
 from mantid.api import mtd
 from mantid.plots.utility import MantidAxType, legend_set_draggable
+from mantid.plots import MantidAxes
 
 
 class SuperplotPresenter:
@@ -22,12 +23,15 @@ class SuperplotPresenter:
     _model = None
     _canvas = None
     _error_bars = False
+    _synchronized = False
 
     def __init__(self, canvas, parent=None):
         self._view = SuperplotView(self, parent)
         self._model = SuperplotModel()
         self._canvas = canvas
         self.parent = parent
+        if not isinstance(self._canvas.figure.gca(), MantidAxes):
+            return
 
         # fix size of hold button with the longest text
         self._view.set_hold_button_text(self.HOLD_BUTTON_TEXT_CHECKED)
@@ -36,6 +40,7 @@ class SuperplotPresenter:
 
         if self.parent:
             self.parent.plot_updated.connect(self.on_plot_updated)
+            self.parent.resized.connect(self.on_resize)
 
         self._model.sig_workspace_deleted.connect(self.on_workspace_deleted)
         self._model.sig_workspace_renamed.connect(self.on_workspace_renamed)
@@ -57,6 +62,16 @@ class SuperplotPresenter:
         self._view.set_selection(selection)
         self._update_spectrum_slider()
         self._update_hold_button()
+        self._synchronized = True
+
+    def is_valid(self):
+        """
+        Check that the superplot started correctly.
+
+        Returns:
+            (bool): true if the superplot is in a valid state
+        """
+        return self._synchronized
 
     def set_bin_mode(self, state):
         """
@@ -116,6 +131,16 @@ class SuperplotPresenter:
                 pass
         self._view.close()
         del self._model
+
+    def on_resize(self):
+        """
+        Triggered when the window/dockwidgets is(are) resized.
+        """
+        try:
+            self._canvas.figure.tight_layout()
+        except ValueError:
+            pass
+        self._canvas.draw_idle()
 
     def _sync_with_current_plot(self):
         """
@@ -186,7 +211,7 @@ class SuperplotPresenter:
         if visible:
             try:
                 self._canvas.figure.tight_layout()
-            except:
+            except ValueError:
                 pass
             self._canvas.draw_idle()
 
@@ -357,7 +382,10 @@ class SuperplotPresenter:
 
         if selection or plotted_data:
             axes.set_axis_on()
-            figure.tight_layout()
+            try:
+                figure.tight_layout()
+            except ValueError:
+                pass
             legend = axes.legend()
             if legend:
                 legend_set_draggable(legend, True)

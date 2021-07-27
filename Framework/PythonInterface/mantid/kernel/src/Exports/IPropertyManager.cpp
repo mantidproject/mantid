@@ -155,7 +155,7 @@ void export_IPropertyManager() {
            "Returns the number of properties being managed")
 
       .def("getProperty", &IPropertyManager::getPointerToProperty, (arg("self"), arg("name")),
-           return_value_policy<return_by_value>(),
+           return_internal_reference<>(),
            "Returns the property of the given name. Use .value to give the "
            "value")
 

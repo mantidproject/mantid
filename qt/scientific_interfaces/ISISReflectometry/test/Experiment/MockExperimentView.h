@@ -45,11 +45,11 @@ public:
   MOCK_METHOD0(disableIncludePartialBins, void());
   MOCK_CONST_METHOD0(getDebugOption, bool());
   MOCK_METHOD1(setDebugOption, void(bool));
-  MOCK_CONST_METHOD0(getPerAngleOptions, std::vector<PerThetaDefaults::ValueArray>());
-  MOCK_METHOD1(setPerAngleOptions, void(std::vector<PerThetaDefaults::ValueArray>));
-  MOCK_METHOD2(showPerAngleOptionsAsInvalid, void(int row, int column));
-  MOCK_METHOD1(showPerAngleOptionsAsValid, void(int row));
-  MOCK_METHOD0(showAllPerAngleOptionsAsValid, void());
+  MOCK_CONST_METHOD0(getLookupTable, std::vector<LookupRow::ValueArray>());
+  MOCK_METHOD1(setLookupTable, void(std::vector<LookupRow::ValueArray>));
+  MOCK_METHOD2(showLookupRowAsInvalid, void(int row, int column));
+  MOCK_METHOD1(showLookupRowAsValid, void(int row));
+  MOCK_METHOD0(showAllLookupRowsAsValid, void());
   MOCK_METHOD0(showStitchParametersValid, void());
   MOCK_METHOD0(showStitchParametersInvalid, void());
 
@@ -96,9 +96,9 @@ public:
                                           std::vector<MissingInstrumentParameterValue> const &));
   MOCK_METHOD0(disableAll, void());
   MOCK_METHOD0(enableAll, void());
-  MOCK_METHOD0(addPerThetaDefaultsRow, void());
-  MOCK_METHOD1(removePerThetaDefaultsRow, void(int));
-  MOCK_METHOD1(showPerAngleThetasNonUnique, void(double));
+  MOCK_METHOD0(addLookupRow, void());
+  MOCK_METHOD1(removeLookupRow, void(int));
+  MOCK_METHOD1(showLookupRowsNotUnique, void(double));
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

@@ -178,7 +178,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         assert QAppThreadCall.is_qapp_thread(
         ), "FigureManagerWorkbench cannot be created outside of the QApplication thread"
         QObject.__init__(self)
-        FigureManagerBase.__init__(self, canvas, num)
 
         parent, flags = get_window_config()
         self.window = FigureWindow(canvas, parent=parent, window_flags=flags)
@@ -186,11 +185,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.closing.connect(canvas.close_event)
         self.window.closing.connect(self.destroy)
         self.window.visibility_changed.connect(self.fig_visibility_changed)
-        self.window.resized.connect(self.on_resize)
 
         self.window.setWindowTitle("Figure %d" % num)
         canvas.figure.set_label("Figure %d" % num)
 
+        FigureManagerBase.__init__(self, canvas, num)
         # Give the keyboard focus to the figure instead of the
         # manager; StrongFocus accepts both tab and click to focus and
         # will enable the canvas to process event w/o clicking.
@@ -345,18 +344,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # Gcf can get destroyed before the Gcf.destroy
             # line is run, leading to a useless AttributeError.
 
-    def on_resize(self):
-        """
-        Triggered when the plot window is resized. This method updates the plot
-        layout to fit the actual size.
-        """
-        if self.canvas:
-            try:
-                self.canvas.figure.tight_layout()
-            except:
-                pass
-            self.canvas.draw_idle()
-
     def launch_plot_options(self):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
 
@@ -417,6 +404,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             if self.toolbar._actions["toggle_fit"].isChecked():
                 self.fit_toggle()
             self.superplot = Superplot(self.canvas, self.window)
+            if not self.superplot.is_valid():
+                logger.warning("Superplot cannot be opened on data not linked "
+                               "to a workspace.")
+                self.superplot = None
+                self.toolbar._actions["toggle_superplot"].setChecked(False)
+                return
             self.window.addDockWidget(Qt.LeftDockWidgetArea,
                                       self.superplot.get_side_view())
             self.window.addDockWidget(Qt.BottomDockWidgetArea,

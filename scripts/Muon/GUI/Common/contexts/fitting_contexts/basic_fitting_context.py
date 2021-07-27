@@ -45,6 +45,10 @@ class BasicFittingContext(FittingContext):
         self._start_xs: list = []
         self._end_xs: list = []
 
+        self._exclude_range: bool = False
+        self._exclude_start_xs: list = []
+        self._exclude_end_xs: list = []
+
         self._minimizer: str = ""
         self._evaluation_type: str = ""
         self._fit_to_raw: bool = True
@@ -262,6 +266,42 @@ class BasicFittingContext(FittingContext):
             raise RuntimeError(f"The provided number of end Xs is not equal to the number of datasets.")
 
         self._end_xs = end_xs
+
+    @property
+    def exclude_range(self) -> bool:
+        """Returns true if the Exclude Range option is on in the context."""
+        return self._exclude_range
+
+    @exclude_range.setter
+    def exclude_range(self, exclude_range_on: bool) -> None:
+        """Sets whether the Exclude Range option is on in the context."""
+        self._exclude_range = exclude_range_on
+
+    @property
+    def exclude_start_xs(self) -> list:
+        """Returns the exclude start Xs stored by the context."""
+        return self._exclude_start_xs
+
+    @exclude_start_xs.setter
+    def exclude_start_xs(self, start_xs: list) -> None:
+        """Sets the exclude start Xs stored by the context."""
+        if len(start_xs) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of exclude start Xs is not equal to the number of datasets.")
+
+        self._exclude_start_xs = start_xs
+
+    @property
+    def exclude_end_xs(self) -> list:
+        """Returns the exclude end Xs stored by the context."""
+        return self._exclude_end_xs
+
+    @exclude_end_xs.setter
+    def exclude_end_xs(self, end_xs: list) -> None:
+        """Sets the exclude end Xs stored by the context."""
+        if len(end_xs) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of exclude end Xs is not equal to the number of datasets.")
+
+        self._exclude_end_xs = end_xs
 
     @property
     def minimizer(self) -> str:

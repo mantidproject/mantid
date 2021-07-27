@@ -6,41 +6,41 @@
 			<value val="direct" />
 		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
-		<parameter name="sample_logs_sum" type="string">
+		<parameter name="sample_logs_sum" type="string" visible="false">
 			<value val="duration, monitor1.monsum, monitor2.monsum, PSD.detsum, time" />
 		</parameter>
-		<parameter name="sample_logs_time_series" type="string">
+		<parameter name="sample_logs_time_series" type="string" visible="false">
 			<value val="sample.bath1_regulation_temperature, sample.bath2_regulation_temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn" type="string">
+		<parameter name="sample_logs_warn" type="string" visible="false">
 			<value val="sample.bath1_regulation_temperature, sample.bath2_regulation_temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn_tolerances" type="string">
+		<parameter name="sample_logs_warn_tolerances" type="string" visible="false">
 			<value val="1.0" />
 		</parameter>
-		<parameter name="sample_logs_fail" type="string">
+		<parameter name="sample_logs_fail" type="string" visible="false">
 			<value val="CollAngle.actual_coll_angle, monitor1.time_of_flight_0, monitor1.time_of_flight_1, monitor1.time_of_flight_2" />
 		</parameter>
-		<parameter name="sample_logs_fail_tolerances" type="string">
+		<parameter name="sample_logs_fail_tolerances" type="string" visible="false">
 			<value val="0, 0, 0, 0" />
 		</parameter>
     <!-- ConjoinXRuns behavior when merging sample logs when using Stitch1D or Stitch1DMany. -->
-		<parameter name="conjoin_sample_logs_sum" type="string">
+		<parameter name="conjoin_sample_logs_sum" type="string" visible="false">
 			<value val="" />
 		</parameter>
-		<parameter name="conjoin_sample_logs_time_series" type="string">
+		<parameter name="conjoin_sample_logs_time_series" type="string" visible="false">
 			<value val="" />
 		</parameter>
-		<parameter name="conjoin_sample_logs_warn" type="string">
+		<parameter name="conjoin_sample_logs_warn" type="string" visible="false">
 			<value val="" />
 		</parameter>
-		<parameter name="conjoin_sample_logs_warn_tolerances" type="string">
+		<parameter name="conjoin_sample_logs_warn_tolerances" type="string" visible="false">
 			<value val="" />
 		</parameter>
-		<parameter name="conjoin_sample_logs_fail" type="string">
+		<parameter name="conjoin_sample_logs_fail" type="string" visible="false">
 			<value val="" />
 		</parameter>
-		<parameter name="conjoin_sample_logs_fail_tolerances" type="string">
+		<parameter name="conjoin_sample_logs_fail_tolerances" type="string" visible="false">
 			<value val="" />
 		</parameter>
 		<parameter name="chopper_window_opening">

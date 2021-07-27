@@ -1,0 +1,10 @@
+@echo off
+::
+:: Sets up the environment configured for Mantid by CMake and
+:: starts the appropriate version of Visual Studio
+
+call %~dp0thirdpartypaths.bat
+set MSVC_IDE=@MSVC_IDE_LOCATION@
+set CONDA_BASE=@CONDA_BASE_DIR@
+:: Start IDE
+%CONDA_BASE%/Scripts/wrappers/conda/run-in.bat "%MSVC_IDE%/devenv.exe" Mantid.sln

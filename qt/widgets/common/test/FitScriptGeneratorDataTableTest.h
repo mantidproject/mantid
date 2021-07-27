@@ -62,9 +62,37 @@ public:
     m_dataTable->addDomain("Name", WorkspaceIndex(0), 0.0, 2.0);
 
     TS_ASSERT_EQUALS(m_dataTable->rowCount(), 1);
-    m_dataTable->removeDomain("Name", WorkspaceIndex(0));
+    m_dataTable->removeDomain(FitDomainIndex{0});
 
     TS_ASSERT_EQUALS(m_dataTable->rowCount(), 0);
+  }
+
+  void test_that_renameWorkspace_will_rename_the_all_rows_containing_that_workspace() {
+    QString const newName("NewName");
+
+    m_dataTable->show();
+    m_dataTable->addDomain("Name", WorkspaceIndex(0), 0.0, 2.0);
+    m_dataTable->addDomain("Name1", WorkspaceIndex(0), 0.0, 2.0);
+    m_dataTable->addDomain("Name", WorkspaceIndex(1), 0.0, 2.0);
+    m_dataTable->addDomain("Name2", WorkspaceIndex(0), 0.0, 2.0);
+    m_dataTable->addDomain("Name", WorkspaceIndex(2), 0.0, 2.0);
+
+    m_dataTable->renameWorkspace("Name", newName);
+
+    TS_ASSERT_EQUALS(m_dataTable->workspaceName(0), newName.toStdString());
+    TS_ASSERT_EQUALS(m_dataTable->workspaceName(1), "Name1");
+    TS_ASSERT_EQUALS(m_dataTable->workspaceName(2), newName.toStdString());
+    TS_ASSERT_EQUALS(m_dataTable->workspaceName(3), "Name2");
+    TS_ASSERT_EQUALS(m_dataTable->workspaceName(4), newName.toStdString());
+  }
+
+  void test_that_renameWorkspace_will_not_cause_an_exception_if_a_workspace_name_does_not_exist() {
+    m_dataTable->show();
+    m_dataTable->addDomain("Name", WorkspaceIndex(0), 0.0, 2.0);
+
+    m_dataTable->renameWorkspace("NonExistingName", "NewName");
+
+    TS_ASSERT_EQUALS(m_dataTable->workspaceName(0), "Name");
   }
 
   void test_that_allRows_will_return_all_of_the_existing_row_indices() {

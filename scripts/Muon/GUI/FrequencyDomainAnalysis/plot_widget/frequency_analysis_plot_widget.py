@@ -40,10 +40,10 @@ class FrequencyAnalysisPlotWidget(object):
         self.model = PlotDataPaneModel(context)
         # generate the presenter
 
-        self.data_mode = PlotDataPanePresenter(self._view1, self.data_model,
-                                               context,self.plotting_canvas_widgets[self.data_model.name].presenter)
-        self.fit_mode = PlotFreqFitPanePresenter(self._view2, self.fit_model,
-                                                 context,self.plotting_canvas_widgets[self.fit_model.name].presenter)
+        self.data_mode = PlotDataPanePresenter(self._view1, self.data_model, context,
+                                               self.plotting_canvas_widgets[self.data_model.name].presenter)
+        self.fit_mode = PlotFreqFitPanePresenter(self._view2, self.fit_model, context, context.fitting_context,
+                                                 self.plotting_canvas_widgets[self.fit_model.name].presenter)
 
         self.presenter = MainPlotWidgetPresenter(self.view,
                                                    [self.data_mode, self.fit_mode])

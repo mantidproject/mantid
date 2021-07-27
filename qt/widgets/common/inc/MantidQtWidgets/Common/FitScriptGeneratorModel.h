@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FitDomain.h"
 #include "MantidQtWidgets/Common/FittingGlobals.h"
@@ -39,10 +40,12 @@ public:
 
   void subscribePresenter(IFitScriptGeneratorPresenter *presenter) override;
 
-  void removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) override;
+  void removeDomain(FitDomainIndex domainIndex) override;
   void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                           double endX) override;
   [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) const override;
+
+  void renameWorkspace(std::string const &workspaceName, std::string const &newName) override;
 
   [[nodiscard]] bool updateStartX(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                   double startX) override;
@@ -172,7 +175,14 @@ private:
 
   template <typename T, typename Function> std::vector<T> transformDomains(Function const &func) const;
 
+  [[nodiscard]] std::string getFittingType() const;
   [[nodiscard]] Mantid::API::IFunction_sptr getFunction() const;
+  [[nodiscard]] Mantid::API::IFunction_sptr getMultiDomainFunction() const;
+
+  void addGlobalParameterTies(Mantid::API::MultiDomainFunction_sptr &function) const;
+  std::string constructGlobalParameterTie(GlobalParameter const &globalParameter) const;
+
+  void addGlobalTies(Mantid::API::MultiDomainFunction_sptr &function) const;
 
   IFitScriptGeneratorPresenter *m_presenter;
   std::vector<std::unique_ptr<FitDomain>> m_fitDomains;

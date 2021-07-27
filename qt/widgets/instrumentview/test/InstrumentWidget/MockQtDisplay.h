@@ -7,15 +7,17 @@
 
 #pragma once
 
-#include "IQtDisplay.h"
+#include "MantidQtWidgets/InstrumentView/IQtDisplay.h"
 
-#include <QObject>
 #include <gmock/gmock.h>
+
+class QObject;
 
 namespace MantidQt::MantidWidgets {
 
 class MockQtDisplay : public IQtDisplay {
 public:
+  virtual ~MockQtDisplay() = default;
   MOCK_METHOD(void, setSurface, (std::shared_ptr<ProjectionSurface>), (override));
   MOCK_METHOD(std::shared_ptr<ProjectionSurface>, getSurface, (), (override));
   MOCK_METHOD(void, updateView, (bool), (override));

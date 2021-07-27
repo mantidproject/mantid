@@ -384,13 +384,6 @@ void IndirectFitPropertyBrowser::fit() { emit fitScheduled(); }
  */
 void IndirectFitPropertyBrowser::sequentialFit() { emit sequentialFitScheduled(); }
 
-void IndirectFitPropertyBrowser::setModelResolution(std::string const &name, TableDatasetIndex const &index) {
-  if (isFullFunctionBrowserActive()) {
-    showFullFunctionBrowser(false);
-  }
-  m_templateBrowser->setResolution(name, index);
-}
-
 void IndirectFitPropertyBrowser::setModelResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   if (isFullFunctionBrowserActive()) {
     showFullFunctionBrowser(false);

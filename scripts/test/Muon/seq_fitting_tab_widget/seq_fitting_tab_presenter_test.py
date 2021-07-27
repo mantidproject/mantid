@@ -235,6 +235,44 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         enable_notifier.notify_subscribers()
         self.view.setEnabled.assert_called_once_with(True)
 
+    def test_handle_updated_fit_parameter_in_table_without_copying_fit_param(self):
+        workspaces = ["EMU20884; Group; fwd; Asymmetry"]
+        parameters_values = [0.2, 0.2, 0.1, 0]
+        number_of_entries = 3
+        self._setup_test_fit_function(parameters_values)
+        self.view.fit_table.get_number_of_fits = mock.MagicMock(return_value=number_of_entries)
+        self.view.fit_table.get_fit_parameter_values_from_row = mock.Mock(return_value=parameters_values)
+        self.presenter.get_workspaces_for_row_in_fit_table = mock.MagicMock(return_value=workspaces)
+        self.model.check_datasets_are_tf_asymmetry_compliant = mock.MagicMock(return_value=(True, ""))
+
+        index = mock.MagicMock()
+        index.column = mock.MagicMock(return_value=5)
+        index.row = mock.MagicMock(return_value=1)
+        self.view.copy_values_for_fits = mock.MagicMock(return_value=False)
+
+        self.presenter.handle_updated_fit_parameter_in_table(index)
+
+        self.assertEqual(self.model.update_ws_fit_function_parameters.call_count, 1)
+
+    def test_handle_updated_fit_parameter_in_table_and_copy_fit_param(self):
+        workspaces = ["EMU20884; Group; fwd; Asymmetry"]
+        parameters_values = [0.2, 0.2, 0.1, 0]
+        number_of_entries = 3
+        self._setup_test_fit_function(parameters_values)
+        self.view.fit_table.get_number_of_fits = mock.MagicMock(return_value=number_of_entries)
+        self.view.fit_table.get_fit_parameter_values_from_row = mock.Mock(return_value=parameters_values)
+        self.presenter.get_workspaces_for_row_in_fit_table = mock.MagicMock(return_value=workspaces)
+        self.model.check_datasets_are_tf_asymmetry_compliant = mock.MagicMock(return_value=(True, ""))
+
+        index = mock.MagicMock()
+        index.column = mock.MagicMock(return_value=5)
+        index.row = mock.MagicMock(return_value=1)
+        self.view.copy_values_for_fits = mock.MagicMock(return_value=True)
+
+        self.presenter.handle_updated_fit_parameter_in_table(index)
+
+        self.assertEqual(self.model.update_ws_fit_function_parameters.call_count, number_of_entries)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
