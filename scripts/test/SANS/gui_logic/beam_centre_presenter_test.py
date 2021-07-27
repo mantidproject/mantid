@@ -22,16 +22,16 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.WorkHandler = mock.MagicMock()
         self.BeamCentreModel = mock.MagicMock()
         self.SANSCentreFinder = mock.MagicMock()
-        self.presenter = BeamCentrePresenter(self.parent_presenter, self.SANSCentreFinder,
-                                             work_handler=self.WorkHandler, beam_centre_model=self.BeamCentreModel)
+
+        self.presenter = BeamCentrePresenter(self.parent_presenter, beam_centre_model=self.BeamCentreModel)
         self.presenter.connect_signals = mock.Mock()
         self.presenter.set_view(self.view)
+        self.presenter._worker = mock.create_autospec(self.presenter._worker)
 
     def test_that_on_run_clicked_calls_find_beam_centre(self):
         self.presenter.on_run_clicked()
-
-        self.assertEqual(self.presenter._work_handler.process.call_count, 1)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][1],  self.presenter._beam_centre_model.find_beam_centre)
+        self.presenter._worker.find_beam_centre.assert_called_once_with(
+            mock.ANY, self.BeamCentreModel.pack_beam_centre_settings.return_value)
 
     def test_beam_centre_finder_update_handles_str(self):
         # Since the view might give us mixed types check we can handle str
@@ -87,6 +87,14 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.assertEqual(self.BeamCentreModel.hab_pos_1, self.view.hab_pos_1)
         self.assertEqual(self.BeamCentreModel.hab_pos_2, self.view.hab_pos_2)
         self.view.set_run_button_to_normal.assert_called_once_with()
+
+    def test_on_update_positions_handles_strings(self):
+        self.BeamCentreModel.lab_pos_1 = "foo"
+        self.BeamCentreModel.lab_pos_2 = ""
+        self.presenter.update_centre_positions()
+
+        self.assertEqual("foo", self.view.lab_pos_1)
+        self.assertEqual("", self.view.lab_pos_2)
 
     def test_that_update_hab_selected_enabled_hab_and_disabled_lab(self):
         self.presenter.set_view(self.view)

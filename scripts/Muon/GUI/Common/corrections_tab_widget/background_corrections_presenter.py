@@ -7,6 +7,8 @@
 from Muon.GUI.Common.contexts.corrections_context import BACKGROUND_MODE_NONE, FLAT_BACKGROUND
 from Muon.GUI.Common.corrections_tab_widget.background_corrections_model import BackgroundCorrectionsModel
 from Muon.GUI.Common.corrections_tab_widget.background_corrections_view import BackgroundCorrectionsView
+from Muon.GUI.Common.thread_model import ThreadModel
+from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common.utilities.workspace_data_utils import check_start_x_is_valid, check_end_x_is_valid
 
 
@@ -20,6 +22,8 @@ class BackgroundCorrectionsPresenter:
         self.view = view
         self.model = model
         self._corrections_presenter = corrections_presenter
+
+        self.background_correction_thread_success = True
 
         self.view.set_slot_for_mode_combo_box_changed(self.handle_mode_combo_box_changed)
         self.view.set_slot_for_select_function_combo_box_changed(self.handle_select_function_combo_box_changed)
@@ -44,7 +48,7 @@ class BackgroundCorrectionsPresenter:
     def handle_pre_process_and_grouping_complete(self) -> None:
         """Handles when MuonPreProcess and grouping has been completed."""
         self.model.populate_background_corrections_data()
-        self._update_displayed_corrections_data()
+        self._run_background_corrections_for_all()
 
     def handle_groups_changed(self) -> None:
         """Handles when the selected groups have changed in the grouping tab."""
@@ -58,10 +62,12 @@ class BackgroundCorrectionsPresenter:
         """Handles when the background corrections mode is changed."""
         self.model.set_background_correction_mode(self.view.background_correction_mode)
         self.view.set_background_correction_options_visible(not self.model.is_background_mode_none())
+        self._run_background_corrections_for_all()
 
     def handle_select_function_combo_box_changed(self) -> None:
         """Handles when the selected function is changed."""
         self.model.set_selected_function(self.view.selected_function)
+        self._run_background_corrections_for_all()
 
     def handle_selected_group_changed(self) -> None:
         """Handles when the selected group has changed."""
@@ -75,30 +81,91 @@ class BackgroundCorrectionsPresenter:
 
     def handle_start_x_changed(self) -> None:
         """Handles when a Start X table cell is changed."""
-        run, group = self.view.selected_run_and_group()
-
-        new_start_x, new_end_x = check_start_x_is_valid(self.model.get_counts_workspace_name(run, group),
-                                                        self.view.start_x(run, group), self.view.end_x(run, group),
-                                                        self.model.start_x(run, group))
-        self._update_start_and_end_x_in_view_and_model(run, group, new_start_x, new_end_x)
+        self._handle_start_or_end_x_changed(self._get_new_x_range_when_start_x_changed)
 
     def handle_end_x_changed(self) -> None:
         """Handles when a End X table cell is changed."""
-        run, group = self.view.selected_run_and_group()
+        self._handle_start_or_end_x_changed(self._get_new_x_range_when_end_x_changed)
 
-        new_start_x, new_end_x = check_end_x_is_valid(self.model.get_counts_workspace_name(run, group),
-                                                      self.view.start_x(run, group), self.view.end_x(run, group),
-                                                      self.model.end_x(run, group))
-        self._update_start_and_end_x_in_view_and_model(run, group, new_start_x, new_end_x)
+    def handle_background_corrections_for_all_started(self) -> None:
+        """Handle when the background corrections for all has started."""
+        self._corrections_presenter.disable_editing_notifier.notify_subscribers()
+        self.background_correction_thread_success = True
+
+    def handle_background_corrections_for_all_finished(self) -> None:
+        """Handle when the background corrections for all has finished."""
+        self._corrections_presenter.enable_editing_notifier.notify_subscribers()
+        if not self.background_correction_thread_success:
+            return
+
+        self._update_displayed_corrections_data()
+
+    def handle_background_corrections_error(self, error: str) -> None:
+        """Handle when an error occurs while performing background corrections."""
+        self._corrections_presenter.disable_editing_notifier.notify_subscribers()
+        self.background_correction_thread_success = False
+        self._corrections_presenter.warning_popup(error)
+
+    def _handle_start_or_end_x_changed(self, get_new_x_range) -> None:
+        """Handles when a Start X or End X is changed using an appropriate getter to get the new x range."""
+        runs, groups = self._selected_runs_and_groups()
+        for run, group in zip(runs, groups):
+            new_start_x, new_end_x = get_new_x_range(run, group)
+            self._update_start_and_end_x_in_view_and_model(run, group, new_start_x, new_end_x)
+
+        if len(runs) == 1:
+            self._perform_background_corrections(self.model.run_background_correction_for, runs[0], groups[0])
+        elif len(runs) > 1:
+            self._perform_background_corrections(self.model.run_background_correction_for_all)
+
+    def _get_new_x_range_when_start_x_changed(self, run: str, group: str) -> tuple:
+        """Returns the new x range for a domain when the start X has been changed."""
+        return check_start_x_is_valid(self.model.get_counts_workspace_name(run, group), self.view.selected_start_x(),
+                                      self.model.end_x(run, group), self.model.start_x(run, group))
+
+    def _get_new_x_range_when_end_x_changed(self, run: str, group: str) -> tuple:
+        """Returns the new x range for a domain when the end X has been changed."""
+        return check_end_x_is_valid(self.model.get_counts_workspace_name(run, group), self.model.start_x(run, group),
+                                    self.view.selected_end_x(), self.model.end_x(run, group))
+
+    def _run_background_corrections_for_all(self) -> None:
+        """Runs the background corrections for all stored data in the corrections context."""
+        if self.model.is_background_mode_none():
+            self.model.reset_background_function_data()
+            self._update_displayed_corrections_data()
+        else:
+            self._perform_background_corrections(self.model.run_background_correction_for_all)
 
     def _update_displayed_corrections_data(self) -> None:
         """Updates the displayed corrections data using the data stored in the model."""
-        runs, groups, start_xs, end_xs, backgrounds, background_errors = self.model.selected_correction_data()
-        self.view.populate_corrections_table(runs, groups, start_xs, end_xs, backgrounds, background_errors)
+        runs, groups, start_xs, end_xs, backgrounds, background_errors, statuses = self.model.selected_correction_data()
+        self.view.populate_corrections_table(runs, groups, start_xs, end_xs, backgrounds, background_errors, statuses)
 
     def _update_start_and_end_x_in_view_and_model(self, run: str, group: str, start_x: float, end_x: float) -> None:
         """Updates the start and end x in the model using the provided values."""
-        self.view.set_start_x(run, group, start_x)
-        self.view.set_end_x(run, group, end_x)
+        if self.view.is_run_group_displayed(run, group):
+            self.view.set_start_x(run, group, start_x)
+            self.view.set_end_x(run, group, end_x)
         self.model.set_start_x(run, group, start_x)
         self.model.set_end_x(run, group, end_x)
+
+    def _perform_background_corrections(self, calculation_func, *args) -> None:
+        """Creates a matrix workspace for each possible parameter combination to be used for fitting."""
+        try:
+            self.correction_calculation_thread = self._create_correction_calculation_thread(calculation_func, *args)
+            self.correction_calculation_thread.threadWrapperSetUp(self.handle_background_corrections_for_all_started,
+                                                                  self.handle_background_corrections_for_all_finished,
+                                                                  self.handle_background_corrections_error)
+            self.correction_calculation_thread.start()
+        except ValueError as error:
+            self._corrections_presenter.warning_popup(error)
+
+    def _create_correction_calculation_thread(self, callback, *args) -> ThreadModel:
+        """Create a thread for fitting."""
+        self.correction_calculator = ThreadModelWrapperWithOutput(callback, *args)
+        return ThreadModel(self.correction_calculator)
+
+    def _selected_runs_and_groups(self) -> tuple:
+        """Returns the runs and groups to apply the parameter changes to."""
+        apply_to_all = self.view.apply_table_changes_to_all()
+        return self.model.all_runs_and_groups() if apply_to_all else self.view.selected_run_and_group()

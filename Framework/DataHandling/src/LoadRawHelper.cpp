@@ -683,16 +683,24 @@ void LoadRawHelper::runLoadLog(const std::string &fileName, const DataObjects::W
   std::list<std::string>::const_iterator logPath;
   for (logPath = logFiles.begin(); logPath != logFiles.end(); ++logPath) {
     // check for log files we should just ignore
-    std::string ignoreSuffix = "ICPstatus.txt";
-    if (boost::algorithm::ends_with(*logPath, ignoreSuffix)) {
+    std::string statusSuffix = "ICPstatus.txt";
+    if (boost::algorithm::iends_with(*logPath, statusSuffix)) {
       g_log.information("Skipping log file: " + *logPath);
       continue;
     }
 
-    ignoreSuffix = "ICPdebug.txt";
-    if (boost::algorithm::ends_with(*logPath, ignoreSuffix)) {
+    std::string debugSuffix = "ICPdebug.txt";
+    if (boost::algorithm::iends_with(*logPath, debugSuffix)) {
       g_log.information("Skipping log file: " + *logPath);
       continue;
+    }
+
+    std::string alarmSuffix = "ICPalarm.txt";
+    if (boost::algorithm::iends_with(*logPath, alarmSuffix)) {
+      if (Mantid::Kernel::FileDescriptor::isEmpty(*logPath)) {
+        g_log.information("Skipping empty log file: " + *logPath);
+        continue;
+      }
     }
 
     // Create a new object for each log file.
@@ -1086,7 +1094,7 @@ void LoadRawHelper::loadSpectra(FILE *file, const int &period, const int &total_
 }
 
 /**
- * Return the confidence with with this algorithm can load the file
+ * Return the confidence with which this algorithm can load the file
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used

@@ -10,6 +10,8 @@ from unittest import mock
 
 from mantidqt.widgets.superplot.presenter import SuperplotPresenter
 
+from mantid.plots import MantidAxes
+
 
 class SuperplotPresenterTest(unittest.TestCase):
 
@@ -33,6 +35,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_canvas = mock.Mock()
         self.m_figure = self.m_canvas.figure
         self.m_axes = self.m_canvas.figure.gca.return_value
+        self.m_axes.__class__ = MantidAxes
         self.m_axes.get_lines.return_value = list()
         self.m_axes.creation_args = [{}]
         a1 = mock.Mock()

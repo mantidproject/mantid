@@ -12,6 +12,9 @@ New Features
 ############
 
 - The Model Fitting tab allows you to perform fits across the sample logs and fit parameters stored in your results table.
+- Users can now copy sequential fitting parameters to all other runs. To do this, click the checkbox to turn this feature
+  on and change a parmeter. The change should be copied to the other cells in the same column. Turn the feature off to make
+  changes to single rows.
 
 Improvements
 ############

@@ -11,7 +11,9 @@ Description
 -----------
 
 This is the loader for the raw `.nxs` files produced by the polarized diffractometers and spectrometers at ILL.
-Currently it supports only the D7 instrument.
+Currently it supports only the D7 instrument. Workspaces in the loaded group are sorted according to their flipper
+state value for each present polarisation orientation, with the first workspace having always flipper 'ON',
+and the next 'OFF'.
 
 Loading D7
 ##########
