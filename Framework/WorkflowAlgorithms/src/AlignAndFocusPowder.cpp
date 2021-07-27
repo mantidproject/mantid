@@ -259,27 +259,25 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
 
   m_resonanceLower = getProperty(PropertyNames::RESONANCE_LOWER_LIMITS);
   m_resonanceUpper = getProperty(PropertyNames::RESONANCE_UPPER_LIMITS);
-  if (m_resonanceLower.size() > 0 || m_resonanceUpper.size() > 0) {
-    // verify that they are the same length
-    if (m_resonanceLower.size() == m_resonanceUpper.size()) {
-      // verify that the lowers are less than the uppers
-      const size_t NUM_WINDOWS = m_resonanceLower.size();
-      bool ok = true;
-      for (size_t i = 0; i < NUM_WINDOWS; ++i) {
-        if (m_resonanceLower[i] >= m_resonanceUpper[i])
-          ok = false;
-      }
-      if (!ok) {
-        const std::string msg = "Lower limits must be less than upper limits";
-        result[PropertyNames::RESONANCE_LOWER_LIMITS] = msg;
-        result[PropertyNames::RESONANCE_UPPER_LIMITS] = msg;
-      }
-    } else {
-      result[PropertyNames::RESONANCE_LOWER_LIMITS] =
-          "Must have same number of values as " + PropertyNames::RESONANCE_UPPER_LIMITS;
-      result[PropertyNames::RESONANCE_UPPER_LIMITS] =
-          "Must have same number of values as " + PropertyNames::RESONANCE_LOWER_LIMITS;
+  // verify that they are the same length
+  if (m_resonanceLower.size() == m_resonanceUpper.size()) {
+    // verify that the lowers are less than the uppers
+    const size_t NUM_WINDOWS = m_resonanceLower.size();
+    bool ok = true;
+    for (size_t i = 0; i < NUM_WINDOWS; ++i) {
+      if (m_resonanceLower[i] >= m_resonanceUpper[i])
+        ok = false;
     }
+    if (!ok) {
+      const std::string msg = "Lower limits must be less than upper limits";
+      result[PropertyNames::RESONANCE_LOWER_LIMITS] = msg;
+      result[PropertyNames::RESONANCE_UPPER_LIMITS] = msg;
+    }
+  } else {
+    result[PropertyNames::RESONANCE_LOWER_LIMITS] =
+        "Must have same number of values as " + PropertyNames::RESONANCE_UPPER_LIMITS;
+    result[PropertyNames::RESONANCE_UPPER_LIMITS] =
+        "Must have same number of values as " + PropertyNames::RESONANCE_LOWER_LIMITS;
   }
 
   return result;
