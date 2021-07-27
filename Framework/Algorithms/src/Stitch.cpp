@@ -103,15 +103,14 @@ double median(const std::vector<double> &vec) {
  * @param global : if true, a global median will be calculated for all the spectra
  * @return a new workspace representing the medians, single count if global is requested
  */
-MatrixWorkspace_sptr medianWorkspace(MatrixWorkspace_sptr ws, bool global = false) {
+MatrixWorkspace_sptr medianWorkspace(MatrixWorkspace_sptr ws, bool global) {
   if (global) {
     MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     std::vector<double> allY;
     allY.reserve(ws->getNumberHistograms() * ws->blocksize());
-    for (int i = 0; i < static_cast<int>(ws->getNumberHistograms()); ++i) {
-      const size_t wsIndex = static_cast<size_t>(i);
-      const auto spectrum = ws->mutableY(wsIndex).rawData();
-      std::copy(spectrum.cbegin(), spectrum.cend(), allY.end());
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+      const auto spectrum = ws->mutableY(i).rawData();
+      std::copy(spectrum.cbegin(), spectrum.cend(), std::back_inserter(allY));
     }
     auto &y = out->mutableY(0);
     y = std::vector<double>(1, median(std::move(allY)));
@@ -265,12 +264,15 @@ void Stitch::exec() {
   const auto scaleFactorCalculation = getPropertyValue(SCALE_FACTOR_CALCULATION_PROPERTY);
   const auto inputs = RunCombinationHelper::unWrapGroups(getProperty(INPUT_WORKSPACE_PROPERTY));
   MatrixWorkspace_sptr scaleFactorsWorkspace;
+  cloneWorkspaces(inputs);
+  std::vector<std::string> clones;
+  std::transform(inputs.cbegin(), inputs.cend(), std::back_inserter(clones),
+                 [](const auto ws) { return "__cloned_" + ws; });
   if (scaleFactorCalculation == "Manual") {
-    scaleFactorsWorkspace = initScaleFactorsWorkspace(1, inputs.size());
-    const auto scaled = scaleManual(inputs, getProperty(MANUAL_SCALE_FACTORS_PROPERTY), scaleFactorsWorkspace);
-    setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(scaled));
+    scaleFactorsWorkspace = initScaleFactorsWorkspace(1, clones.size());
+    scaleManual(clones, getProperty(MANUAL_SCALE_FACTORS_PROPERTY), scaleFactorsWorkspace);
   } else {
-    std::transform(inputs.cbegin(), inputs.cend(), std::back_inserter(workspaces),
+    std::transform(clones.cbegin(), clones.cend(), std::back_inserter(workspaces),
                    [](const auto ws) { return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws); });
     const size_t nSpectrumInScaleFactors =
         isDefault(TIE_SCALE_FACTORS_PROPERTY) ? workspaces[0]->getNumberHistograms() : 1;
@@ -279,26 +281,26 @@ void Stitch::exec() {
     auto progress = std::make_unique<Progress>(this, 0.0, 1.0, workspaces.size());
     size_t referenceIndex = 0;
     if (!isDefault(REFERENCE_WORKSPACE_PROPERTY)) {
-      const auto ref = std::find_if(workspaces.cbegin(), workspaces.cend(),
-                                    [&referenceName](const auto ws) { return ws->getName() == referenceName; });
+      const auto ref = std::find_if(workspaces.cbegin(), workspaces.cend(), [&referenceName](const auto ws) {
+        return ws->getName() == "__cloned_" + referenceName;
+      });
       referenceIndex = std::distance(workspaces.cbegin(), ref);
     }
     size_t leftIterator = referenceIndex, rightIterator = referenceIndex;
-    std::vector<std::string> toStitch(workspaces.size(), "");
-    toStitch[referenceIndex] = workspaces[referenceIndex]->getName();
     while (leftIterator > 0) {
-      toStitch[leftIterator - 1] =
-          scale(workspaces[leftIterator], workspaces[leftIterator - 1], scaleFactorsWorkspace, inputs);
+      scale(workspaces[leftIterator], workspaces[leftIterator - 1], scaleFactorsWorkspace, clones);
       progress->report();
       --leftIterator;
     }
     while (rightIterator < workspaces.size() - 1) {
-      toStitch[rightIterator + 1] =
-          scale(workspaces[rightIterator], workspaces[rightIterator + 1], scaleFactorsWorkspace, inputs);
+      scale(workspaces[rightIterator], workspaces[rightIterator + 1], scaleFactorsWorkspace, clones);
       progress->report();
       ++rightIterator;
     }
-    setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(toStitch, toStitch[referenceIndex]));
+  }
+  setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(clones));
+  for (const auto &ws : clones) {
+    AnalysisDataService::Instance().remove(ws);
   }
   if (!isDefault(OUTPUT_SCALE_FACTORS_PROPERTY)) {
     setProperty(OUTPUT_SCALE_FACTORS_PROPERTY, scaleFactorsWorkspace);
@@ -306,13 +308,27 @@ void Stitch::exec() {
 }
 
 /**
+ * @brief Clones all the input workspaces so that they can be scaled in-place without altering the inputs
+ * Clones will be prefixed and stored on ADS, and will be eventually deleted
+ * @param inputs: the list of workspace names to clone
+ */
+void Stitch::cloneWorkspaces(const std::vector<std::string> &inputs) {
+  auto cloner = createChildAlgorithm("CloneWorkspace");
+  cloner->setAlwaysStoreInADS(true);
+  for (const auto &ws : inputs) {
+    cloner->setProperty("InputWorkspace", ws);
+    cloner->setProperty("OutputWorkspace", "__cloned_" + ws);
+    cloner->execute();
+  }
+}
+
+/**
  * @brief Combines the scaled workspaces together by interleaving their data
  * This is equivalent to concatenation followed by sort
  * @param inputs: the list of the scaled input workspace names
- * @param refName: the name of the reference workspace that is not scaled
  * @return the combined workspace
  */
-MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs, const std::string &refName) {
+MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs) {
   // interleave option is equivalent to concatenation followed by sort X axis
   auto joiner = createChildAlgorithm("ConjoinXRuns");
   joiner->setProperty("InputWorkspaces", inputs);
@@ -320,12 +336,6 @@ MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs, const
   joiner->execute();
   Workspace_sptr output = joiner->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr joined = std::dynamic_pointer_cast<MatrixWorkspace>(output);
-
-  // once joined, clear all the scaled workspaces, except the reference as it is not clonned
-  for (const auto &wsName : inputs) {
-    if (wsName != refName)
-      AnalysisDataService::Instance().remove(wsName);
-  }
 
   auto sorter = createChildAlgorithm("SortXAxis");
   sorter->setProperty("InputWorkspace", joined);
@@ -343,11 +353,9 @@ MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs, const
  * @param wsToScale: the workspace to be scaled
  * @param scaleFactorsWorkspace: the workspace where calculated scale factors will be stored
  * @param inputs: the name of the input workspace list (needed only to store the scale factor at right index)
- * @return the name of the scaled workspace
  */
-std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScale,
-                          Mantid::API::MatrixWorkspace_sptr scaleFactorsWorkspace,
-                          const std::vector<std::string> &inputs) {
+void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScale,
+                   Mantid::API::MatrixWorkspace_sptr scaleFactorsWorkspace, const std::vector<std::string> &inputs) {
   const auto overlap = getOverlap(wsToMatch, wsToScale);
   auto cropper = createChildAlgorithm("CropWorkspaceRagged");
   cropper->setProperty("XMin", std::vector<double>({overlap.first}));
@@ -364,22 +372,13 @@ std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr w
 
   MatrixWorkspace_sptr rebinnedToScale;
   if (croppedToMatch->blocksize() > 1) {
-    if (wsToMatch->isHistogramData()) {
-      auto rebinner = createChildAlgorithm("RebinToWorkspace");
-      rebinner->setProperty("WorkspaceToMatch", croppedToMatch);
-      rebinner->setProperty("WorkspaceToRebin", croppedToScale);
-      rebinner->setPropertyValue("OutputWorkspace", "__rebinned");
-      rebinner->execute();
-      rebinnedToScale = rebinner->getProperty("OutputWorkspace");
-    } else {
-      auto interpolator = createChildAlgorithm("SplineInterpolation");
-      interpolator->setProperty("WorkspaceToMatch", croppedToMatch);
-      interpolator->setProperty("WorkspaceToInterpolate", croppedToScale);
-      interpolator->setProperty("Linear2Points", true);
-      interpolator->setPropertyValue("OutputWorkspace", "__interpolated");
-      interpolator->execute();
-      rebinnedToScale = interpolator->getProperty("OutputWorkspace");
-    }
+    auto interpolator = createChildAlgorithm("SplineInterpolation");
+    interpolator->setProperty("WorkspaceToMatch", croppedToMatch);
+    interpolator->setProperty("WorkspaceToInterpolate", croppedToScale);
+    interpolator->setProperty("Linear2Points", true);
+    interpolator->setPropertyValue("OutputWorkspace", "__interpolated");
+    interpolator->execute();
+    rebinnedToScale = interpolator->getProperty("OutputWorkspace");
   } else {
     if (croppedToMatch->readX(0) != croppedToScale->readX(0)) {
       throw std::runtime_error(
@@ -395,18 +394,16 @@ std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr w
   divider->setPropertyValue("OutputWorkspace", "__ratio");
   divider->execute();
   MatrixWorkspace_sptr ratio = divider->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr median = medianWorkspace(ratio, false);
+  MatrixWorkspace_sptr median = medianWorkspace(ratio, getProperty("TieScaleFactors"));
 
   auto scaler = createChildAlgorithm("Divide");
   scaler->setAlwaysStoreInADS(true);
   scaler->setProperty("LHSWorkspace", wsToScale);
   scaler->setProperty("RHSWorkspace", median);
-  const std::string scaled = "__scaled_" + wsToScale->getName();
-  scaler->setPropertyValue("OutputWorkspace", scaled);
+  scaler->setPropertyValue("OutputWorkspace", wsToScale->getName());
   scaler->execute();
 
   recordScaleFactor(scaleFactorsWorkspace, median, wsToScale, inputs);
-  return scaled;
 }
 
 /**
@@ -424,7 +421,7 @@ void Stitch::recordScaleFactor(Mantid::API::MatrixWorkspace_sptr scaleFactorWork
   const auto it = std::find(inputs.cbegin(), inputs.cend(), scaledWorkspace->getName());
   const size_t index = std::distance(inputs.cbegin(), it);
   PARALLEL_FOR_IF(threadSafe(*scaleFactorWorkspace))
-  for (size_t i = 0; i < scaleFactorWorkspace->getNumberHistograms(); ++i) {
+  for (int i = 0; i < static_cast<int>(scaleFactorWorkspace->getNumberHistograms()); ++i) {
     scaleFactorWorkspace->mutableY(i)[index] = 1. / medianWorkspace->readY(i)[0];
   }
 }
@@ -436,27 +433,20 @@ void Stitch::recordScaleFactor(Mantid::API::MatrixWorkspace_sptr scaleFactorWork
  * @param inputs: the list of the input workspace names
  * @param scaleFactors: a vector with the manual scale factors, must have the same size as inputs
  * @param scaleFactorsWorkspace: the workspace to store the scale factors to
- * @return: the list of names of scaled workspaces
  */
-std::vector<std::string> Stitch::scaleManual(const std::vector<std::string> &inputs,
-                                             const std::vector<double> &scaleFactors,
-                                             MatrixWorkspace_sptr scaleFactorsWorkspace) {
-  std::vector<std::string> result;
+void Stitch::scaleManual(const std::vector<std::string> &inputs, const std::vector<double> &scaleFactors,
+                         MatrixWorkspace_sptr scaleFactorsWorkspace) {
   auto &outputFactors = scaleFactorsWorkspace->mutableY(0);
   PARALLEL_FOR_IF(threadSafe(*scaleFactorsWorkspace))
-  for (size_t i = 0; i < inputs.size(); ++i) {
+  for (int i = 0; i < static_cast<int>(inputs.size()); ++i) {
     outputFactors[i] = scaleFactors[i];
     auto scaler = createChildAlgorithm("Scale");
     scaler->setAlwaysStoreInADS(true);
     scaler->setPropertyValue("InputWorkspace", inputs[i]);
     scaler->setProperty("Factor", scaleFactors[i]);
-    const std::string scaled = "__scaled_" + inputs[i];
-    scaler->setPropertyValue("OutputWorkspace", scaled);
+    scaler->setPropertyValue("OutputWorkspace", inputs[i]);
     scaler->execute();
-    PARALLEL_CRITICAL(StoringScaledWorkspaceNames)
-    result.emplace_back(scaled);
   }
-  return result;
 }
 
 } // namespace Algorithms
