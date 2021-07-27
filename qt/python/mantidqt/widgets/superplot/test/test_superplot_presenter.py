@@ -58,6 +58,43 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter = SuperplotPresenter(self.m_canvas)
         self.m_model.set_bin_mode.assert_called_once()
 
+    def test_set_bin_mode(self):
+        self.presenter._update_spectrum_slider = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
+        self.presenter.set_bin_mode(True)
+        self.m_view.set_mode.assert_called_once_with(
+                self.presenter.BIN_MODE_TEXT)
+        self.presenter._update_spectrum_slider.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
+        self.m_view.reset_mock()
+        self.presenter._update_spectrum_slider.reset_mock()
+        self.presenter._update_plot.reset_mock()
+        self.presenter.set_bin_mode(False)
+        self.m_view.set_mode.assert_called_once_with(
+                self.presenter.SPECTRUM_MODE_TEXT)
+        self.presenter._update_spectrum_slider.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
+
+    def test_enable_error_bars(self):
+        self.presenter._update_plot = mock.Mock()
+        self.presenter.enable_error_bars(True)
+        self.assertTrue(self.presenter._error_bars)
+        self.presenter._update_plot.assert_called_once()
+        self.presenter._update_plot.reset_mock()
+        self.presenter.enable_error_bars(False)
+        self.assertFalse(self.presenter._error_bars)
+        self.presenter._update_plot.assert_called_once()
+
+    def test_set_workspaces(self):
+        self.m_model.get_workspaces.return_value = ["ws1"]
+        self.presenter._update_list = mock.Mock()
+        self.presenter._update_spectrum_slider = mock.Mock()
+        self.presenter._update_hold_button = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
+        self.presenter.set_workspaces(["ws2"])
+        self.m_model.del_workspace.assert_called_once_with("ws1")
+        self.m_model.add_workspace.assert_called_once_with("ws2")
+
     def test_get_side_view(self):
         self.presenter.get_side_view()
         self.m_view.get_side_widget.assert_called_once()
