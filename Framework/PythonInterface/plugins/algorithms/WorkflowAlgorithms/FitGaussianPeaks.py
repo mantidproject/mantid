@@ -62,7 +62,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         self.declareProperty('EstimateFitWindow',
                              True,
                              doc='If checked, algorithm attempts to calculate number of data points to use from'
-                                 ' EstimatePeakSigma, if unchecked algorithm will use FitWindow argument')
+                                 ' EstimatePeakSigma, if unchecked algorithm will use FitWindowSize argument')
         self.declareProperty('FitWindowSize',
                              5,
                              doc='Number of data point used to fit peaks, minimum allowed value is 5, '

@@ -522,7 +522,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
     def test_algorithm_does_not_throw_an_error_when_no_valid_peaks_fitted(self):
         x_val = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
         y_val = [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7]
-        ws = CreateWorkspace(x_val * 2, y_val + [0] * 12, NSpec=2)
+        ws = CreateWorkspace(x_val * 2, y_val + [0] * len(y_val), NSpec=2)
         table = CreateEmptyTableWorkspace()
         table.addColumn("float", "Centre")
         table.addRow([20])
@@ -536,7 +536,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
     def test_algorithm_uses_right_fit_window(self):
         x_val = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
         y_val = [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7]
-        ws = CreateWorkspace(x_val * 2, y_val + [0] * 12, NSpec=2)
+        ws = CreateWorkspace(x_val * 2, y_val + [0] * len(y_val), NSpec=2)
 
         table = CreateEmptyTableWorkspace()
         table.addColumn("float", "Centre")
@@ -561,7 +561,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
     def test_algorithm_estimates_fit_window(self):
         x_val = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
         y_val = [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7]
-        ws = CreateWorkspace(x_val * 2, y_val + [0] * 12, NSpec=2)
+        ws = CreateWorkspace(x_val * 2, y_val + [0] * len(y_val), NSpec=2)
 
         table = CreateEmptyTableWorkspace()
         table.addColumn("float", "Centre")
@@ -575,7 +575,10 @@ class FitGaussianPeaksTest(unittest.TestCase):
                              FitWindowSize=11)
 
             centre_index = 10
-            # win_size is ( FitWindowSize -1)/2 as method estimate_single_parameters expects in this form
+            """
+                win_size in this case is calculated from EstimatePeakSigma and is estimated to be 2 and FitWindowSize
+                is ignored
+            """
             win_size = 2
             arguements = mock_estimate_params.call_args_list[0][0]
             self.assertSequenceEqual(list(arguements[0]), x_val)
