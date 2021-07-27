@@ -79,17 +79,18 @@ double Bk2BkExpConvPV::fwhm() const {
   // get sigma of Gauss with same FWHM as voigt (H)
   double H, eta;
   calHandEta(getParameter("Sigma2"), getParameter("Gamma"), H, eta);
-  const auto s = H / (2 * sqrt(2 * M_LN2));
+  const auto s = H / (2 * sqrt(2 * M_LN2)); // FWHM = 2*sqrt(2*ln(2))*sigma
   const auto w0 = expWidth();
   // Gaussian and B2B exp widths don't add in quadrature. The following
   // tends to gaussian at large S and at S=0 is equal to the intrinsic width of
   // the B2B exp (good to <3% for typical params)
+  // (same Eq. used in BackToBackExponential)
   return w0 * exp(-0.5 * M_LN2 * s / w0) + 2 * sqrt(2 * M_LN2) * s;
 }
 
 /**
  * Set new peak width approximately using same mapping in BackToBackExponential
- * (i.e. set gamma=0).
+ * assuming fwhm_gaus = fwhm_lorz (i.e. fwhm_pv = 1.6363*fwhm_gauss from calHandEta)
  * @param w :: New value for the width.
  */
 void Bk2BkExpConvPV::setFwhm(const double w) {
