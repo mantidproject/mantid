@@ -5,13 +5,6 @@ if(stdint)
   add_definitions(-DHAVE_STDINT_H)
 endif()
 
-# Globally-linked libraries variable
-
-# Might just as well link everything to Boost & Poco (found in CommonSetup)
-# Boost_LIBRARIES variable is redefined by MPISetup so capture the value here
-# and just add MPI stuff if required
-set(MANTIDLIBS ${Boost_LIBRARIES} ${POCO_LIBRARIES})
-
 # MPI-enable build setup
 
 # Only available on Linux (specifically RedHat), and for a framework-only build
