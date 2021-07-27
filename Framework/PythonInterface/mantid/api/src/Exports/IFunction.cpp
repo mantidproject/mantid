@@ -5,7 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionDomain.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidCurveFitting/Jacobian.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -85,6 +88,14 @@ using removeTieByName = void (IFunction::*)(const std::string &);
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
+
+Mantid::CurveFitting::Jacobian *getFunctionDeriv(IFunction &self, const Mantid::API::FunctionDomain &domain) {
+  Mantid::API::FunctionValues values(domain);
+  Mantid::CurveFitting::Jacobian out(values.size(), self.nParams());
+  self.functionDeriv(domain, out);
+
+  return new Mantid::CurveFitting::Jacobian(out);
+}
 
 void setMatrixWorkspace(IFunction &self, const boost::python::object &workspace, int wi, float startX, float endX) {
   Mantid::API::MatrixWorkspace_sptr matWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -241,8 +252,8 @@ void export_IFunction() {
 
       .def("nDomains", &IFunction::getNumberDomains, arg("self"), "Get the number of domains.")
 
-      .def("functionDeriv", &IFunction::functionDeriv, (arg("self"), arg("domain"), arg("jacobian")),
-           "Returns the derivatives of the function with respect to active parameters")
+      .def("functionDeriv", &getFunctionDeriv, (arg("self"), arg("domain")), return_internal_reference<>(),
+           "Calculate the values of the function for the given domain and returns them")
 
       .def("setMatrixWorkspace", &setMatrixWorkspace,
            (arg("self"), arg("workspace"), arg("wi"), arg("startX"), arg("endX")),
