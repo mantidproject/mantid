@@ -7,7 +7,7 @@
 from mantid.py36compat import dataclass
 
 from mantid.api import AlgorithmManager, FunctionFactory, IFunction, Workspace
-from mantid.simpleapi import CreateWorkspace
+from mantid.simpleapi import CreateSingleValuedWorkspace
 from Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, retrieve_ws
 from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, FLAT_BACKGROUND,
                                                           FLAT_BACKGROUND_AND_EXP_DECAY, RUNS_ALL, GROUPS_ALL)
@@ -48,8 +48,8 @@ class BackgroundCorrectionData:
     def create_background_workspace(self) -> Workspace:
         background = self.flat_background.getParameterValue(BACKGROUND_PARAM)
         background_error = self.flat_background.getError(BACKGROUND_PARAM)
-        background_workspace = CreateWorkspace(DataX=[0.0], DataY=[background], DataE=[background_error],
-                                               StoreInADS=False)
+        background_workspace = CreateSingleValuedWorkspace(DataValue=background, ErrorValue=background_error,
+                                                           StoreInADS=False)
         return background_workspace
 
 
