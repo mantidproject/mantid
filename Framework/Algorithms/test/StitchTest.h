@@ -27,6 +27,41 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
 
+namespace {
+
+MatrixWorkspace_sptr pointDataWorkspaceOneSpectrum(size_t nPoints, double startX, double endX,
+                                                   const std::string &name) {
+  MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nPoints, nPoints);
+  AnalysisDataService::Instance().addOrReplace(name, ws);
+  std::vector<double> x(nPoints), y(nPoints), e(nPoints);
+  const double step = (endX - startX) / (double(nPoints) - 1);
+  for (size_t ibin = 0; ibin < nPoints; ++ibin) {
+    x[ibin] = startX + double(ibin) * step;
+    y[ibin] = 7 * double(ibin) + 3;
+    e[ibin] = std::sqrt(y[ibin]);
+  }
+  ws->setHistogram(0, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));
+  return ws;
+}
+
+MatrixWorkspace_sptr pointDataWorkspaceMultiSpectrum(size_t nSpectra, size_t nPoints, double startX, double endX,
+                                                     const std::string &name) {
+  MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, nPoints, nPoints);
+  AnalysisDataService::Instance().addOrReplace(name, ws);
+  std::vector<double> x(nPoints), y(nPoints), e(nPoints);
+  const double step = (endX - startX) / (double(nPoints) - 1);
+  for (size_t ispec = 0; ispec < nSpectra; ++ispec) {
+    for (size_t ibin = 0; ibin < nPoints; ++ibin) {
+      x[ibin] = startX + double(ibin) * step;
+      y[ibin] = 7 * double(ibin) + 3 + 10 * double(ispec);
+      e[ibin] = std::sqrt(y[ibin]);
+    }
+    ws->setHistogram(ispec, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));
+  }
+  return ws;
+}
+} // namespace
+
 class StitchTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -388,36 +423,31 @@ private:
     MatrixWorkspace_sptr sorted = sorter.getProperty("OutputWorkspace");
     return sorted;
   }
+};
 
-  MatrixWorkspace_sptr pointDataWorkspaceOneSpectrum(size_t nPoints, double startX, double endX,
-                                                     const std::string &name) {
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nPoints, nPoints);
-    AnalysisDataService::Instance().addOrReplace(name, ws);
-    std::vector<double> x(nPoints), y(nPoints), e(nPoints);
-    const double step = (endX - startX) / (double(nPoints) - 1);
-    for (size_t ibin = 0; ibin < nPoints; ++ibin) {
-      x[ibin] = startX + double(ibin) * step;
-      y[ibin] = 7 * double(ibin) + 3;
-      e[ibin] = std::sqrt(y[ibin]);
+class StitchTestPerformance : public CxxTest::TestSuite {
+public:
+  static StitchTestPerformance *createSuite() { return new StitchTestPerformance(); }
+  static void destroySuite(StitchTestPerformance *suite) { delete suite; }
+
+  StitchTestPerformance() {}
+
+  void setUp() override {
+    m_alg.initialize();
+    std::vector<std::string> inputs;
+    inputs.reserve(100);
+    for (size_t i = 0; i < 50; ++i) {
+      inputs.emplace_back("ws" + std::to_string(i));
+      pointDataWorkspaceMultiSpectrum(1000, 99, 7 + double(i), 9 + double(i), inputs[i]);
     }
-    ws->setHistogram(0, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));
-    return ws;
+    m_alg.setProperty("InputWorkspaces", inputs);
+    m_alg.setPropertyValue("OutputWorkspace", "__out_ws");
   }
 
-  MatrixWorkspace_sptr pointDataWorkspaceMultiSpectrum(size_t nSpectra, size_t nPoints, double startX, double endX,
-                                                       const std::string &name) {
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, nPoints, nPoints);
-    AnalysisDataService::Instance().addOrReplace(name, ws);
-    std::vector<double> x(nPoints), y(nPoints), e(nPoints);
-    const double step = (endX - startX) / (double(nPoints) - 1);
-    for (size_t ispec = 0; ispec < nSpectra; ++ispec) {
-      for (size_t ibin = 0; ibin < nPoints; ++ibin) {
-        x[ibin] = startX + double(ibin) * step;
-        y[ibin] = 7 * double(ibin) + 3 + 10 * double(ispec);
-        e[ibin] = std::sqrt(y[ibin]);
-      }
-      ws->setHistogram(ispec, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));
-    }
-    return ws;
-  }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
+  void test_performance() { TS_ASSERT_THROWS_NOTHING(m_alg.execute()); }
+
+private:
+  Stitch m_alg;
 };
