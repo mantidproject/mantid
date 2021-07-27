@@ -10,12 +10,13 @@
 #include <numeric>
 
 namespace {
+using MantidQt::MantidWidgets::WorkspaceIndex;
 
-std::vector<MantidQt::MantidWidgets::WorkspaceIndex> workspaceIndexVectorFromString(const std::string &listString) {
+std::vector<WorkspaceIndex> workspaceIndexVectorFromString(const std::string &listString) {
   auto const intVec = MantidQt::MantidWidgets::vectorFromString<std::size_t>(listString);
-  std::vector<MantidQt::MantidWidgets::WorkspaceIndex> output;
+  std::vector<WorkspaceIndex> output;
   for (auto const i : intVec) {
-    output.emplace_back(MantidQt::MantidWidgets::WorkspaceIndex{i});
+    output.emplace_back(WorkspaceIndex{i});
   }
   return output;
 }

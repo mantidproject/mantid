@@ -60,6 +60,13 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.set_on_instrument_changed(self.presenter.focus_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.focus_presenter.set_rb_num)
 
+        # load most recent calibration, if one saved
+        self.presenter.calibration_presenter.load_last_calibration()
+
+        # load previous rb number if saved, create mechanism to save
+        self.set_rb_no(self.presenter.get_saved_rb_number())
+        self.set_on_rb_num_changed(self.presenter.set_saved_rb_number)
+
         # Usage Reporting
         try:
             import mantid
@@ -97,12 +104,17 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.savedir_label.setToolTip(savedir_text)
         self.savedir_label.setText(savedir_text)
 
-    def closeEvent(self, _):
+    def closeEvent(self, event):
         ConfigService.setString("curvefitting.defaultPeak", self._initial_peak_fun)  # reset peak function
         self.presenter.handle_close()
+        self.setParent(None)
+        event.accept()
 
     def get_rb_no(self):
         return self.lineEdit_RBNumber.text()
+
+    def set_rb_no(self, text) -> None:
+        self.lineEdit_RBNumber.setText(text)
 
     def set_on_help_clicked(self, slot):
         self.pushButton_help.clicked.connect(slot)

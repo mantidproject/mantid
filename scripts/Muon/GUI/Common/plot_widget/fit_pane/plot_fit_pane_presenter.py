@@ -10,8 +10,14 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import remove_rebin_from_name, 
 
 class PlotFitPanePresenter(BasePanePresenter):
 
-    def __init__(self, view, model, context,figure_presenter):
-        super().__init__(view, model, context,figure_presenter)
+    def __init__(self, view, model, context, fitting_context, figure_presenter):
+        """
+        Initializes the PlotFitPanePresenter. The fitting_context is a FittingContext that corresponds to this specific
+        fit pane. For instance it is a ModelFittingContext for the Model Fitting pane, and is a TFAsymmetryFittingContext
+        for the tf asymmetry Fitting pane.
+        """
+        super().__init__(view, model, context, figure_presenter)
+        self._fitting_context = fitting_context
         self._data_type = ["Asymmetry"]
         self._sort_by = ["Group/Pair", "Run"]
         self.update_view()
@@ -49,7 +55,7 @@ class PlotFitPanePresenter(BasePanePresenter):
         if type(workspace_names) != list:
             workspace_list = [workspace_names]
         for workspace_name in workspace_list:
-            fit_raw_data = self.context.fitting_context.fit_to_raw
+            fit_raw_data = self._fitting_context.fit_to_raw
             # binned data but want raw plot
             if plot_raw and not fit_raw_data:
                 ws_list.append(remove_rebin_from_name(workspace_name))
@@ -68,9 +74,9 @@ class PlotFitPanePresenter(BasePanePresenter):
         self.handle_plot_selected_fits(self._current_fit_info, autoscale)
 
     def handle_remove_plot_guess(self):
-        if self.context.fitting_context.guess_workspace_name is not None:
-            self._figure_presenter.remove_workspace_names_from_plot([self.context.fitting_context.guess_workspace_name])
+        if self._fitting_context.guess_workspace_name is not None:
+            self._figure_presenter.remove_workspace_names_from_plot([self._fitting_context.guess_workspace_name])
 
     def handle_update_plot_guess(self):
-        if self.context.fitting_context.guess_workspace_name is not None and self.context.fitting_context.plot_guess:
-            self._figure_presenter.plot_guess_workspace(self.context.fitting_context.guess_workspace_name)
+        if self._fitting_context.guess_workspace_name is not None and self._fitting_context.plot_guess:
+            self._figure_presenter.plot_guess_workspace(self._fitting_context.guess_workspace_name)

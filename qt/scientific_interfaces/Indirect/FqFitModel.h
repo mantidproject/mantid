@@ -25,27 +25,27 @@ public:
   using IndirectFittingModel::addWorkspace;
   void addWorkspace(const std::string &workspaceName, const int &spectrum_index);
   void addWorkspace(const std::string &workspaceName) override;
-  void removeWorkspace(TableDatasetIndex index) override;
+  void removeWorkspace(WorkspaceID workspaceID) override;
 
   bool isMultiFit() const override;
 
-  std::string getFitParameterName(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
-  std::vector<std::string> getWidths(TableDatasetIndex dataIndex) const;
-  std::vector<std::string> getEISF(TableDatasetIndex dataIndex) const;
-  boost::optional<std::size_t> getWidthSpectrum(std::size_t widthIndex, TableDatasetIndex dataIndex) const;
-  boost::optional<std::size_t> getEISFSpectrum(std::size_t eisfIndex, TableDatasetIndex dataIndex) const;
-  void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex, bool single = true);
-  void setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataIndex, bool single = true);
+  std::string getFitParameterName(WorkspaceID dataIndex, WorkspaceIndex spectrum) const;
+  std::vector<std::string> getWidths(WorkspaceID dataIndex) const;
+  std::vector<std::string> getEISF(WorkspaceID dataIndex) const;
+  boost::optional<std::size_t> getWidthSpectrum(std::size_t widthIndex, WorkspaceID dataIndex) const;
+  boost::optional<std::size_t> getEISFSpectrum(std::size_t eisfIndex, WorkspaceID dataIndex) const;
+  void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true);
+  void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true);
   FqFitParameters createFqFitParameters(Mantid::API::MatrixWorkspace *workspace);
 
 private:
   bool allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
   FqFitParameters &addFqFitParameters(Mantid::API::MatrixWorkspace *workspace, const std::string &hwhmName);
-  std::unordered_map<std::string, FqFitParameters>::const_iterator
-  findFqFitParameters(TableDatasetIndex dataIndex) const;
+  std::unordered_map<std::string, FqFitParameters>::const_iterator findFqFitParameters(WorkspaceID workspaceID) const;
   std::string getResultXAxisUnit() const override;
   std::string getResultLogName() const override;
   std::unordered_map<std::string, FqFitParameters> m_fqFitParameters;
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 
 } // namespace IDA

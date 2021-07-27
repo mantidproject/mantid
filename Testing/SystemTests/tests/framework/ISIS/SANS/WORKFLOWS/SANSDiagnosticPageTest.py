@@ -8,17 +8,20 @@
 
 import unittest
 import os
+from unittest import mock
+
 import systemtesting
 
 import mantid
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
+from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.common.enums import (DetectorType, SANSFacility, IntegralEnum, SANSInstrument)
 
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
-from sans.gui_logic.models.diagnostics_page_model import run_integral
+from sans.gui_logic.models.async_workers.diagnostic_async import DiagnosticsAsync
 from sans.common.file_information import SANSFileInformationFactory
 
 
@@ -99,7 +102,14 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         state.data = data_state
 
         # Act
-        output_workspaces = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
+        mocked_parent = mock.create_autospec(DiagnosticsPagePresenter)
+        async_worker = DiagnosticsAsync(parent_presenter=mocked_parent)
+        async_worker.set_unit_test_mode(True)
+        async_worker.run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
+        mocked_parent.on_processing_success.assert_called_once()
+        mocked_parent.on_processing_finished.assert_called_once()
+        output_workspaces = mocked_parent.on_processing_success.call_args_list[0][1]["output"]
+
         self.assertEqual(len(output_workspaces), 1)
         # Evaluate it up to a defined point
         reference_file_name = "SANS2D_ws_centred_diagnostic_reference.nxs"
@@ -124,11 +134,19 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         state.data = data_state
 
         # Act
-        output_workspaces = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
+        mocked_parent = mock.create_autospec(DiagnosticsPagePresenter)
+        async_worker = DiagnosticsAsync(parent_presenter=mocked_parent)
+        async_worker.set_unit_test_mode(True)
+        async_worker.run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
+
+        mocked_parent.on_processing_success.assert_called_once()
+        mocked_parent.on_processing_finished.assert_called_once()
+        output_workspaces = mocked_parent.on_processing_success.call_args_list[0][1]["output"]
 
         # Evaluate it up to a defined point
         reference_file_name = "LARMOR_ws_diagnostic_reference.nxs"
         self._compare_workspace(output_workspaces[0], reference_file_name)
+        mocked_parent.on_processing_finished.assert_called_once()
 
 
 @ISISSansSystemTest(SANSInstrument.LARMOR, SANSInstrument.SANS2D)

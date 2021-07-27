@@ -16,6 +16,8 @@ import matplotlib.pyplot as plt
 
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWorkbench
+from mantid.plots.plotfunctions import plot
+from mantid.simpleapi import CreateSampleWorkspace
 
 
 @start_qapplication
@@ -23,6 +25,29 @@ class ToolBarTest(unittest.TestCase):
     """
     Test that the grids on/off toolbar button has the correct state when creating a plot in various different cases.
     """
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_waterfall_buttons_correctly_disabled_for_non_waterfall_plots(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+
+        fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
+        axes.plot([-10, 10], [1, 2])
+
+        self.assertFalse(self._is_button_enabled(fig, 'waterfall_offset_amount'))
+        self.assertFalse(self._is_button_enabled(fig, 'waterfall_reverse_order'))
+        self.assertFalse(self._is_button_enabled(fig, 'waterfall_fill_area'))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_waterfall_buttons_correctly_enabled_for_waterfall_plots(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+
+        fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ws = CreateSampleWorkspace()
+        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+
+        self.assertTrue(self._is_button_enabled(fig, 'waterfall_offset_amount'))
+        self.assertTrue(self._is_button_enabled(fig, 'waterfall_reverse_order'))
+        self.assertTrue(self._is_button_enabled(fig, 'waterfall_fill_area'))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_button_unchecked_for_plot_with_no_grid(self, mock_qappthread):
@@ -115,6 +140,19 @@ class ToolBarTest(unittest.TestCase):
         # This is only called when show() is called on the figure manager, so we have to manually call it here.
         fig_manager.toolbar.set_buttons_visibility(fig)
         return fig_manager.toolbar._actions['toggle_grid'].isChecked()
+
+    @classmethod
+    def _is_button_enabled(cls, fig, button):
+        """
+        Create the figure manager and check whether its toolbar is toggled on or off for the given figure.
+        We have to explicity call set_button_visibilty() here, which would otherwise be called within the show()
+        function.
+        """
+        canvas = MantidFigureCanvas(fig)
+        fig_manager = FigureManagerWorkbench(canvas, 1)
+        # This is only called when show() is called on the figure manager, so we have to manually call it here.
+        fig_manager.toolbar.set_buttons_visibility(fig)
+        return fig_manager.toolbar._actions[button].isEnabled()
 
 
 if __name__ == '__main__':

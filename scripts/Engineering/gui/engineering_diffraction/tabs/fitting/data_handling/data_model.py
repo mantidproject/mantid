@@ -9,7 +9,7 @@ from os import path
 from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, ConvertUnits, Minus, AverageLogData, \
     CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace, DeleteTableRows, RenameWorkspace, CreateWorkspace
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
-from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from Engineering.common import path_handling
 from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams
@@ -205,7 +205,6 @@ class FittingDataModel(object):
             self._fit_results[wsname] = {'model': fit_prop['properties']['Function'],
                                          'status': fit_prop['status']}
             self._fit_results[wsname]['results'] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
-            self._fit_results[wsname]
             fnames = [x.split('=')[-1] for x in findall('name=[^,]*', fit_prop['properties']['Function'])]
             # get num params for each function (first elem empty as str begins with 'name=')
             # need to remove ties and constraints which are enclosed in ()
@@ -319,6 +318,10 @@ class FittingDataModel(object):
         else:
             logger.notice("Background workspace already calculated")
 
+    def update_bgsub_status(self, ws_name, status):
+        if self._bg_params[ws_name]:
+            self._bg_params[ws_name][0] = status
+
     def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
         ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg",
                                                NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter)
@@ -341,6 +344,10 @@ class FittingDataModel(object):
 
     def get_sample_log_from_ws(self, ws_name, log_name):
         return self._loaded_workspaces[ws_name].getSampleDetails().getLogData(log_name).value
+
+    def set_log_workspaces_none(self):
+        # to be used in the event of Ads clear, as trying to reference the deleted grp ws results in an error
+        self._log_workspaces = None
 
     def _convert_TOF_to_d(self, tof, ws_name):
         diff_consts = self._get_diff_constants(ws_name)

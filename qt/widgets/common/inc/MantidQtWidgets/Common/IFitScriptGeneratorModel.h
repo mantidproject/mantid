@@ -27,11 +27,13 @@ public:
 
   virtual void subscribePresenter(IFitScriptGeneratorPresenter *presenter) = 0;
 
-  virtual void removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) = 0;
+  virtual void removeDomain(FitDomainIndex domainIndex) = 0;
   virtual void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                                   double endX) = 0;
   [[nodiscard]] virtual bool hasWorkspaceDomain(std::string const &workspaceName,
                                                 WorkspaceIndex workspaceIndex) const = 0;
+
+  virtual void renameWorkspace(std::string const &workspaceName, std::string const &newName) = 0;
 
   [[nodiscard]] virtual bool updateStartX(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                           double startX) = 0;

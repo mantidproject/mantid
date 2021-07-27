@@ -277,7 +277,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         else:
             norm_data = CloneMDWorkspace(data)
 
-        if self.getProperty("ScaleByMotorStep").value:
+        if self.getProperty("ScaleByMotorStep").value and self.getProperty("OutputType").value != "Detector":
             run = data.getExperimentInfo(0).run()
             scan_log = 'omega' if np.isclose(run.getTimeAveragedStd('phi'), 0.0) else 'phi'
             scan_axis = run[scan_log].value

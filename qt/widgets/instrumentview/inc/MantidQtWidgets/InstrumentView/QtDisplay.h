@@ -23,7 +23,7 @@ class ProjectionSurface;
 class QtDisplay final : public IQtDisplay {
 public:
   /// Constructor
-  explicit QtDisplay(QWidget *parent);
+  explicit QtDisplay(QWidget *parent = nullptr);
   ~QtDisplay() override;
   /// Assign a surface to draw on
   void setSurface(std::shared_ptr<ProjectionSurface> surface) override;

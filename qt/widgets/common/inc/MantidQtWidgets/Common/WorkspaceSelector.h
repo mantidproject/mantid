@@ -50,6 +50,7 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspaceSelector : public QComboBox {
   Q_PROPERTY(bool ShowHidden READ showHiddenWorkspaces WRITE showHiddenWorkspaces)
   Q_PROPERTY(bool ShowGroups READ showWorkspaceGroups WRITE showWorkspaceGroups)
   Q_PROPERTY(bool Optional READ isOptional WRITE setOptional)
+  Q_PROPERTY(bool Sorted READ isSorted WRITE setSorted)
   Q_PROPERTY(QStringList Suffix READ getSuffixes WRITE setSuffixes)
   Q_PROPERTY(QString Algorithm READ getValidatingAlgorithm WRITE setValidatingAlgorithm)
   friend class DataSelector;
@@ -70,6 +71,8 @@ public:
   void showWorkspaceGroups(bool show);
   bool isOptional() const;
   void setOptional(bool optional);
+  bool isSorted() const;
+  void setSorted(bool sorted);
   QStringList getSuffixes() const;
   void setSuffixes(const QStringList &suffix);
   void setLowerBinLimit(int numberOfBins);
@@ -117,6 +120,8 @@ private:
   bool m_showGroups;
   /// Whether to add an extra empty entry to the combobox
   bool m_optional;
+  /// Whetherthe combobox model should be kept sorted
+  bool m_sorted;
   /// Allows you to put limits on the size of the workspace i.e. number of bins
   std::pair<int, int> m_binLimits;
   QStringList m_suffix;

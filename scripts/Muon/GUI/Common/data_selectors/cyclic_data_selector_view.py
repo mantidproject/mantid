@@ -45,7 +45,7 @@ class CyclicDataSelectorView(ui_form, base_widget):
         if self.dataset_name_combo_box.currentText() == dataset_name:
             self.dataset_name_combo_box.currentIndexChanged.emit(self.dataset_name_combo_box.currentIndex())
 
-    def update_dataset_name_combo_box(self, dataset_names: list) -> None:
+    def update_dataset_name_combo_box(self, dataset_names: list, emit_signal: bool = True) -> None:
         """Update the data in the combo box."""
         old_name = self.dataset_name_combo_box.currentText()
 
@@ -58,8 +58,9 @@ class CyclicDataSelectorView(ui_form, base_widget):
         self.dataset_name_combo_box.setCurrentIndex(new_index)
         self.dataset_name_combo_box.blockSignals(False)
 
-        # Signal is emitted manually in case the dataset index has not changed (but the loaded dataset may be different)
-        self.dataset_name_combo_box.currentIndexChanged.emit(new_index)
+        if emit_signal:
+            # Emit manually in case the dataset index has not changed (but the loaded dataset may be different)
+            self.dataset_name_combo_box.currentIndexChanged.emit(new_index)
 
     def update_dataset_names_combo_box(self, dataset_names: list) -> None:
         """Update the datasets displayed in the combobox."""
@@ -104,7 +105,12 @@ class CyclicDataSelectorView(ui_form, base_widget):
         """Sets the currently selected dataset name."""
         index = self.dataset_name_combo_box.findText(dataset_name)
         if index != -1:
+            self.dataset_name_combo_box.blockSignals(True)
             self.dataset_name_combo_box.setCurrentIndex(index)
+            self.dataset_name_combo_box.blockSignals(False)
+
+            # Emit it manually in case the index hasn't changed, but the item has.
+            self.dataset_name_combo_box.currentIndexChanged.emit(index)
 
     def number_of_datasets(self) -> int:
         """Returns the number of dataset names loaded into the widget."""
