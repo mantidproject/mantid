@@ -37,6 +37,7 @@ set(INC_FILES)
 
 # Create the target for this directory
 set(FRAMEWORK_DIR ../../..)
+include_directories(${FRAMEWORK_DIR}/CurveFitting/inc)
 include_directories(${FRAMEWORK_DIR}/DataObjects/inc)
 
 add_library(

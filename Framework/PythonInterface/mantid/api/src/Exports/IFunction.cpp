@@ -17,6 +17,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
+#include <boost/python/manage_new_object.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
@@ -252,7 +253,7 @@ void export_IFunction() {
 
       .def("nDomains", &IFunction::getNumberDomains, arg("self"), "Get the number of domains.")
 
-      .def("functionDeriv", &getFunctionDeriv, (arg("self"), arg("domain")), return_internal_reference<>(),
+      .def("functionDeriv", &getFunctionDeriv, (arg("self"), arg("domain")), return_value_policy<manage_new_object>(),
            "Calculate the values of the function for the given domain and returns them")
 
       .def("setMatrixWorkspace", &setMatrixWorkspace,
