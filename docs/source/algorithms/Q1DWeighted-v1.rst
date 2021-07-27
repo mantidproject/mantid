@@ -21,7 +21,7 @@ Note that for the TOF data, this is mathematically not equivalent to performing 
 The latter is done in :ref:`Q1D <algm-Q1D>` algorithm.
 See the :ref:`Rebin <algm-Rebin>` documentation for details about choosing the ``OutputBinning`` parameter.
 
-For monochromatic data, the algorithm considers each bin as belonging to a different sample, and averages in distinct bins that are not merged.
+For monochromatic data, the algorithm considers each bin as belonging to a different sample and/or kinetic frame.
 Usage
 -----
 
@@ -31,7 +31,8 @@ However, it can also be used directly, provided that the input data is already c
 I/O
 ---
 
-The input to this algorithm must be a histogram with common wavelength bins for each pixel, or a monochromatic workspace with different sample in each bin.
+The input to this algorithm must be a histogram with common wavelength bins for each pixel, or a monochromatic workspace with a different sample or kinetic frame in each bin.
+In this case the workspace must not be in units of wavelength, but the wavelength must be present in the sample logs.
 The output will be a distribution though.
 
 Additional options
