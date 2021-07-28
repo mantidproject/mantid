@@ -240,24 +240,6 @@ def empty_loaded_data():
 
 
 def create_load_algorithm(filename, property_dictionary):
-    # # Assume if .bin it is a PSI file
-    # psi_data = False
-    # output_filename = os.path.basename(filename)
-    # if ".bin" in filename:
-    #     alg = mantid.AlgorithmManager.create("LoadPSIMuonBin")
-    #     psi_data = True
-    # else:
-    #     alg = mantid.AlgorithmManager.create("LoadMuonNexus")
-    #     alg.setProperties(property_dictionary)
-    # alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
-    #
-    # alg.initialize()
-    # alg.setAlwaysStoreInADS(True)
-    # alg.setProperty("OutputWorkspace", output_filename)
-    # alg.setProperty("Filename", filename)
-    # return alg, psi_data
-
-    psi_data = False
     output_filename = os.path.basename(filename)
     alg = mantid.AlgorithmManager.create("Load")
     alg.initialize()
@@ -265,11 +247,10 @@ def create_load_algorithm(filename, property_dictionary):
     alg.setProperty("Filename", filename)
     alg.setProperty("OutputWorkspace", output_filename)
     alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
-    alg.setProperty("TimeZeroTable", output_filename + '_time_zero_table')
-    if ".bin" in filename:
-        psi_data = True
-        # alg.setProperty("DetectorGroupingTable", output_filename + '_detector_grouping_table')
-    return alg, psi_data
+    alg.setProperty("DetectorGroupingTable", '__notUsed')
+    alg.setProperty("TimeZeroTable", '__notUsed')
+    # Assume if .bin it is a PSI file so return True, else return False
+    return (alg, True) if ".bin" in filename else (alg, False)
 
 
 def _get_algorithm_properties(alg, property_dict):

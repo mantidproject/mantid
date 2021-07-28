@@ -14,7 +14,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataHandling/LoadMuonNexusV2.h"
-#include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ArrayProperty.h"

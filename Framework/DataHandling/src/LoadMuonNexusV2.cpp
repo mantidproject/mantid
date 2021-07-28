@@ -95,10 +95,6 @@ void LoadMuonNexusV2::init() {
   declareProperty("SpectrumMin", static_cast<specnum_t>(0), mustBePositiveSpectra);
   declareProperty("SpectrumMax", static_cast<specnum_t>(EMPTY_INT()), mustBePositiveSpectra);
   declareProperty(std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"));
-  declareProperty("AutoGroup", false,
-                  "Determines whether the spectra are automatically grouped\n"
-                  "together based on the groupings in the NeXus file, only\n"
-                  "for single period data (default no). Version 1 only.");
   auto mustBePositive = std::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(0);
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
