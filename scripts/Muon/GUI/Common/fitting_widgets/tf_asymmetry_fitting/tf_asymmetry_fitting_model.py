@@ -661,6 +661,9 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
                   "EndX": self.current_end_x,
                   "Minimizer": self.fitting_context.minimizer}
 
+        if self.fitting_context.exclude_range:
+            params["Exclude"] = [self.current_exclude_start_x, self.current_exclude_end_x]
+
         if self._double_pulse_enabled():
             params.update(self._get_common_double_pulse_parameters())
         return params

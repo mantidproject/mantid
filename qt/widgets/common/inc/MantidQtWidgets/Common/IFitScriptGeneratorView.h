@@ -36,8 +36,12 @@ class EXPORT_OPT_MANTIDQT_COMMON IFitScriptGeneratorView : public API::MantidWid
 
 public:
   enum class Event {
+    ADSDeleteEvent,
+    ADSClearEvent,
+    ADSRenameEvent,
     RemoveDomainClicked,
     AddDomainClicked,
+    AddDomainAccepted,
     StartXChanged,
     EndXChanged,
     SelectionChanged,
@@ -76,11 +80,13 @@ public:
   [[nodiscard]] virtual double parameterValue(std::string const &parameter) const = 0;
   [[nodiscard]] virtual Mantid::API::IFunction::Attribute attributeValue(std::string const &attribute) const = 0;
 
-  virtual void removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) = 0;
+  virtual void renameWorkspace(std::string const &workspaceName, std::string const &newName) = 0;
+
+  virtual void removeDomain(FitDomainIndex domainIndex) = 0;
   virtual void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                                   double endX) = 0;
 
-  [[nodiscard]] virtual bool openAddWorkspaceDialog() = 0;
+  virtual void openAddWorkspaceDialog() = 0;
   [[nodiscard]] virtual std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces() = 0;
   [[nodiscard]] virtual std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const = 0;
 

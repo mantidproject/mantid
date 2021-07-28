@@ -106,8 +106,8 @@ class DeadTimeCorrectionsPresenter:
                 else:
                     self._corrections_presenter.warning_popup(error)
 
-    def handle_corrections_complete(self) -> None:
-        """When the corrections have been calculated, update the displayed dead time averages."""
+    def handle_pre_process_and_grouping_complete(self) -> None:
+        """Handles when MuonPreProcess and grouping has been completed."""
         self.update_dead_time_info_text_in_view()
 
     def update_dead_time_info_text_in_view(self) -> None:

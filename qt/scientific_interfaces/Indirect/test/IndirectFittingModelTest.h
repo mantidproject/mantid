@@ -264,7 +264,7 @@ public:
   void test_that_setSpectra_will_set_the_spectra_when_provided_a_spectra_pair() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 10);
 
-    FunctionModelSpectra const inputSpectra = FunctionModelSpectra(IDA::WorkspaceIndex(0), IDA::WorkspaceIndex(5));
+    FunctionModelSpectra const inputSpectra = FunctionModelSpectra(WorkspaceIndex(0), WorkspaceIndex(5));
     model->setSpectra(inputSpectra, 0);
     FunctionModelSpectra const spectra = model->getSpectra(0);
 
@@ -455,7 +455,7 @@ public:
     auto const modelWorkspace = model->getWorkspace(0);
 
     auto const alg = getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
-    model->addSingleFitOutput(alg, TableDatasetIndex{0}, IDA::WorkspaceIndex{0});
+    model->addSingleFitOutput(alg, WorkspaceID{0}, WorkspaceIndex{0});
 
     TS_ASSERT(model->getResultWorkspace());
     TS_ASSERT(model->getResultGroup());
@@ -463,7 +463,7 @@ public:
 
   void test_that_isPreviouslyFit_returns_true_if_the_spectrum_has_been_fitted_previously() {
     auto const model = getModelWithFitOutputData();
-    TS_ASSERT(model->isPreviouslyFit(TableDatasetIndex(0), IDA::WorkspaceIndex(0)));
+    TS_ASSERT(model->isPreviouslyFit(WorkspaceID(0), WorkspaceIndex(0)));
   }
 
   void test_that_number_of_spectra_is_zero_if_workspace_has_zero_spectra() {
@@ -473,12 +473,12 @@ public:
 
     model->addWorkspace("WorkspaceEmpty", FunctionModelSpectra(""));
 
-    TS_ASSERT_EQUALS(model->getSpectra(TableDatasetIndex(0)).size(), 0);
+    TS_ASSERT_EQUALS(model->getSpectra(WorkspaceID(0)).size(), 0);
   }
 
   void test_that_number_of_spectra_is_not_zero_if_workspace_contains_one_or_more_spectra() {
     auto const model = createModelWithSingleWorkspace("WorkspaceName", 1);
-    TS_ASSERT_DIFFERS(model->getSpectra(TableDatasetIndex(0)).size(), 0);
+    TS_ASSERT_DIFFERS(model->getSpectra(WorkspaceID(0)).size(), 0);
   }
 
   void test_that_isInvalidFunction_returns_a_message_when_no_activeFunction_exists() {
@@ -711,7 +711,7 @@ public:
 
   void test_getResultLocation_returns_none_when_out_of_index() {
     auto model = getModelWithFitOutputData();
-    TS_ASSERT_EQUALS(model->getResultLocation(TableDatasetIndex{1}, IDA::WorkspaceIndex{0}), boost::none);
+    TS_ASSERT_EQUALS(model->getResultLocation(WorkspaceID{1}, WorkspaceIndex{0}), boost::none);
   }
 
   void test_getResultWorkspace_does_not_throw() {
@@ -740,7 +740,7 @@ public:
                                  "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
                                  "0175)))";
     setFittingFunction(model, function);
-    TS_ASSERT_THROWS_NOTHING(model->getSingleFit(TableDatasetIndex{0}, IDA::WorkspaceIndex{0}));
+    TS_ASSERT_THROWS_NOTHING(model->getSingleFit(WorkspaceID{0}, WorkspaceIndex{0}));
   }
 
   void test_getSingleFunction_does_not_throw() {
@@ -752,7 +752,7 @@ public:
                                  "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
                                  "0175)))";
     setFittingFunction(model, function);
-    TS_ASSERT_THROWS_NOTHING(model->getSingleFunction(TableDatasetIndex{0}, IDA::WorkspaceIndex{0}));
+    TS_ASSERT_THROWS_NOTHING(model->getSingleFunction(WorkspaceID{0}, WorkspaceIndex{0}));
   }
 
   void test_getOutputBasename_returns_correct_sequential_name() {
@@ -763,15 +763,15 @@ public:
 
   void test_createDisplayName_raises_error_when_index_out_of_range() {
     auto model = createModelWithSingleWorkspace("wsName", 1);
-    auto foo = model->createDisplayName(TableDatasetIndex{0});
+    auto foo = model->createDisplayName(WorkspaceID{0});
 
-    TS_ASSERT_THROWS(model->createDisplayName(TableDatasetIndex{1}), const std::runtime_error &);
+    TS_ASSERT_THROWS(model->createDisplayName(WorkspaceID{1}), const std::runtime_error &);
   }
 
   void test_createDisplayName_produces_correct_format() {
     auto model = createModelWithSingleWorkspace("wsName", 1);
 
-    TS_ASSERT_EQUALS(model->createDisplayName(TableDatasetIndex{0}), "wsName (0)");
+    TS_ASSERT_EQUALS(model->createDisplayName(WorkspaceID{0}), "wsName (0)");
   }
 
   void test_getDataForParameterEstimation_returns_values_for_each_spectrum() {

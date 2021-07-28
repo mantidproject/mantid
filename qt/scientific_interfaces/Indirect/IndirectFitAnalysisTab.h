@@ -47,9 +47,9 @@ public:
   void setPlotView(IIndirectFitPlotView *view);
   void setOutputOptionsView(IIndirectFitOutputOptionsView *view);
   void setFitPropertyBrowser(IndirectFitPropertyBrowser *browser);
-  TableDatasetIndex getSelectedDataIndex() const;
+  WorkspaceID getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
-  bool isRangeCurrentlySelected(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
+  bool isRangeCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
   size_t getNumberOfCustomFunctions(const std::string &functionName) const;
   void setConvolveMembers(bool convolveMembers);
 
@@ -104,23 +104,23 @@ private:
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
-  TableDatasetIndex m_currentTableDatasetIndex;
-  WorkspaceIndex m_singleFitWorkspaceIndex;
+  WorkspaceID m_activeWorkspaceID;
+  WorkspaceIndex m_activeSpectrumIndex;
 
 protected slots:
   void setModelFitFunction();
   void setModelStartX(double startX);
   void setModelEndX(double endX);
   void updateDataInTable();
-  void tableStartXChanged(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
-  void tableEndXChanged(double endX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
+  void tableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
+  void tableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void startXChanged(double startX);
   void endXChanged(double endX);
   void updateFitOutput(bool error);
   void updateSingleFitOutput(bool error);
   void fitAlgorithmComplete(bool error);
   void singleFit();
-  void singleFit(TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
+  void singleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void executeFit();
   void updateParameterValues();
   void updateParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters);
@@ -138,7 +138,7 @@ private slots:
   void respondToDataChanged();
   void respondToDataAdded();
   void respondToDataRemoved();
-  void respondToPlotSpectrumChanged(WorkspaceIndex);
+  void respondToPlotSpectrumChanged();
   void respondToFwhmChanged(double);
   void respondToBackgroundChanged(double value);
 

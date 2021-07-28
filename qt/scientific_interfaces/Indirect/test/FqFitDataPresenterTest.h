@@ -114,7 +114,7 @@ public:
   }
 
   void test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
-    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), TableDatasetIndex{1});
+    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), WorkspaceID{1});
   }
 
   /// TODO: Add unittests for setDataIndexToCurrentWorkspace when mainanence

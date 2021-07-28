@@ -7,9 +7,11 @@
 # pylint: disable=invalid-name
 from copy import deepcopy
 
+from Engineering.common import path_handling
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_presenter import CroppingPresenter
+from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
 
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
@@ -55,6 +57,7 @@ class CalibrationPresenter(object):
                 self.start_calibration_worker(vanadium_file, sample_file, plot_output, self.rb_num)
         elif self.view.get_load_checked():
             if not self.validate_path():
+                logger.notice("Invalid path")
                 return
             filename = self.view.get_path_filename()
             instrument, vanadium_file, sample_file, grp_ws_name, roi_text, banks = \
@@ -62,6 +65,8 @@ class CalibrationPresenter(object):
             self.pending_calibration.set_calibration(vanadium_file, sample_file, instrument)
             self.pending_calibration.set_roi_info_load(banks, grp_ws_name, roi_text)
             self.set_current_calibration()
+            set_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+                        "last_calibration_path", filename)
 
     def start_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num, bank=None, calfile=None,
                                  spectrum_numbers=None):
@@ -109,6 +114,17 @@ class CalibrationPresenter(object):
         self.calibration_notifier.notify_subscribers(self.current_calibration)
         self.emit_update_fields_signal()
         self.pending_calibration.clear()
+
+    def load_last_calibration(self) -> None:
+        """
+        Loads the most recently created or loaded calibration into the interface instance. To be used on interface
+        startup.
+        """
+        last_cal_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+                                    "last_calibration_path")
+        if last_cal_path:
+            self.view.set_load_checked(True)
+            self.view.set_file_text_with_search(last_cal_path)
 
     def set_field_values(self):
         self.view.set_sample_text(self.current_calibration.get_sample())

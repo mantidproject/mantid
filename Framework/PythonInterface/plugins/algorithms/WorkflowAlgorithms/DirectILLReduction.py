@@ -278,16 +278,16 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # KiKf conversion.
         mainWS = self._correctByKiKf(mainWS)
 
+        # Detector efficiency correction.
+        progress.report('Correcting detector efficiency')
+        mainWS = self._correctByDetectorEfficiency(mainWS)
+
         # Rebinning.
         progress.report('Rebinning in energy')
         mainWS = self._rebinInW(mainWS)
 
         # Divide the energy transfer workspace by bin widths.
         mainWS = self._convertToDistribution(mainWS)
-
-        # Detector efficiency correction.
-        progress.report('Correcting detector efficiency')
-        mainWS = self._correctByDetectorEfficiency(mainWS)
 
         progress.report('Grouping detectors')
         mainWS = self._groupDetectors(mainWS)

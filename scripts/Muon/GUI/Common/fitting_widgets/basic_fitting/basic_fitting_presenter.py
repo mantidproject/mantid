@@ -13,6 +13,11 @@ from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import Ba
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from Muon.GUI.Common.thread_model import ThreadModel
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
+from Muon.GUI.Common.utilities.workspace_data_utils import (check_exclude_start_x_is_valid,
+                                                            check_exclude_end_x_is_valid, check_start_x_is_valid,
+                                                            check_end_x_is_valid)
+
+from PyQt5.QtCore import Qt
 
 
 class BasicFittingPresenter:
@@ -62,6 +67,9 @@ class BasicFittingPresenter:
             lambda function_index, parameter: self.handle_function_parameter_changed(function_index, parameter))
         self.view.set_slot_for_start_x_updated(self.handle_start_x_updated)
         self.view.set_slot_for_end_x_updated(self.handle_end_x_updated)
+        self.view.set_slot_for_exclude_range_state_changed(self.handle_exclude_range_state_changed)
+        self.view.set_slot_for_exclude_start_x_updated(self.handle_exclude_start_x_updated)
+        self.view.set_slot_for_exclude_end_x_updated(self.handle_exclude_end_x_updated)
         self.view.set_slot_for_minimizer_changed(self.handle_minimizer_changed)
         self.view.set_slot_for_evaluation_type_changed(self.handle_evaluation_type_changed)
         self.view.set_slot_for_use_raw_changed(self.handle_use_rebin_changed)
@@ -241,21 +249,36 @@ class BasicFittingPresenter:
 
     def handle_start_x_updated(self) -> None:
         """Handle when the start X is changed."""
-        self._check_start_x_is_valid()
-
-        self.model.current_start_x = self.view.start_x
-        self.model.current_end_x = self.view.end_x
-
-        self.update_plot_guess()
+        new_start_x, new_end_x = check_start_x_is_valid(self.model.current_dataset_name, self.view.start_x,
+                                                        self.view.end_x, self.model.current_start_x)
+        self.update_start_and_end_x_in_view_and_model(new_start_x, new_end_x)
 
     def handle_end_x_updated(self) -> None:
         """Handle when the end X is changed."""
-        self._check_end_x_is_valid()
+        new_start_x, new_end_x = check_end_x_is_valid(self.model.current_dataset_name, self.view.start_x,
+                                                      self.view.end_x, self.model.current_end_x)
+        self.update_start_and_end_x_in_view_and_model(new_start_x, new_end_x)
 
-        self.model.current_start_x = self.view.start_x
-        self.model.current_end_x = self.view.end_x
+    def handle_exclude_range_state_changed(self) -> None:
+        """Handles when Exclude Range is ticked or unticked."""
+        self.model.exclude_range = self.view.exclude_range
+        self.view.set_exclude_start_and_end_x_visible(self.model.exclude_range)
 
-        self.update_plot_guess()
+    def handle_exclude_start_x_updated(self) -> None:
+        """Handle when the exclude start X is changed."""
+        exclude_start_x, exclude_end_x = check_exclude_start_x_is_valid(self.view.start_x, self.view.end_x,
+                                                                        self.view.exclude_start_x,
+                                                                        self.view.exclude_end_x,
+                                                                        self.model.current_exclude_start_x)
+        self.update_exclude_start_and_end_x_in_view_and_model(exclude_start_x, exclude_end_x)
+
+    def handle_exclude_end_x_updated(self) -> None:
+        """Handle when the exclude end X is changed."""
+        exclude_start_x, exclude_end_x = check_exclude_end_x_is_valid(self.view.start_x, self.view.end_x,
+                                                                      self.view.exclude_start_x,
+                                                                      self.view.exclude_end_x,
+                                                                      self.model.current_exclude_end_x)
+        self.update_exclude_start_and_end_x_in_view_and_model(exclude_start_x, exclude_end_x)
 
     def handle_use_rebin_changed(self) -> None:
         """Handle the Fit to raw data checkbox state change."""
@@ -277,6 +300,8 @@ class BasicFittingPresenter:
         self.model.reset_start_xs_and_end_xs()
         self.view.start_x = self.model.current_start_x
         self.view.end_x = self.model.current_end_x
+        self.view.exclude_start_x = self.model.current_exclude_start_x
+        self.view.exclude_end_x = self.model.current_exclude_end_x
 
     def set_selected_dataset(self, dataset_name: str) -> None:
         """Sets the workspace to be displayed in the view programmatically."""
@@ -338,6 +363,20 @@ class BasicFittingPresenter:
         """Updates the start and end x in the view using the current values in the model."""
         self.view.start_x = self.model.current_start_x
         self.view.end_x = self.model.current_end_x
+        self.view.exclude_start_x = self.model.current_exclude_start_x
+        self.view.exclude_end_x = self.model.current_exclude_end_x
+
+    def update_exclude_start_and_end_x_in_view_and_model(self, exclude_start_x: float, exclude_end_x: float) -> None:
+        """Updates the current exclude start and end X in the view and model."""
+        self.view.exclude_start_x, self.view.exclude_end_x = exclude_start_x, exclude_end_x
+        self.model.current_exclude_start_x, self.model.current_exclude_end_x = exclude_start_x, exclude_end_x
+
+    def update_start_and_end_x_in_view_and_model(self, start_x: float, end_x: float) -> None:
+        """Updates the start and end x in the model using the provided values."""
+        self.view.start_x, self.view.end_x = start_x, end_x
+        self.model.current_start_x, self.model.current_end_x = start_x, end_x
+
+        self.update_plot_guess()
 
     def update_plot_guess(self) -> None:
         """Updates the guess plot using the current dataset and function."""
@@ -381,7 +420,8 @@ class BasicFittingPresenter:
                                              fit_options: dict) -> None:
         """Open the Fit Script Generator interface."""
         self.fsg_model = FitScriptGeneratorModel()
-        self.fsg_view = FitScriptGeneratorView(None, fitting_mode, fit_options)
+        self.fsg_view = FitScriptGeneratorView(self.view, fitting_mode, fit_options)
+        self.fsg_view.setWindowFlag(Qt.Window)
         self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model, workspaces,
                                                          self.view.start_x, self.view.end_x)
 
@@ -394,33 +434,3 @@ class BasicFittingPresenter:
             self.view.warning_popup("No rebin options specified.")
             return False
         return True
-
-    def _check_start_x_is_valid(self) -> None:
-        """Checks that the new start X is valid. If it isn't, the start and end X is adjusted."""
-        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
-        if self.view.start_x < x_lower:
-            self.view.start_x = x_lower
-        elif self.view.start_x > x_upper:
-            if not self.model.is_equal_to_n_decimals(self.view.end_x, x_upper, 3):
-                self.view.start_x, self.view.end_x = self.view.end_x, x_upper
-            else:
-                self.view.start_x = self.model.current_start_x
-        elif self.view.start_x > self.view.end_x:
-            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
-        elif self.view.start_x == self.view.end_x:
-            self.view.start_x = self.model.current_start_x
-
-    def _check_end_x_is_valid(self) -> None:
-        """Checks that the new end X is valid. If it isn't, the start and end X is adjusted."""
-        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
-        if self.view.end_x < x_lower:
-            if not self.model.is_equal_to_n_decimals(self.view.start_x, x_lower, 3):
-                self.view.start_x, self.view.end_x = x_lower, self.view.start_x
-            else:
-                self.view.end_x = self.model.current_end_x
-        elif self.view.end_x > x_upper:
-            self.view.end_x = x_upper
-        elif self.view.end_x < self.view.start_x:
-            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
-        elif self.view.end_x == self.view.start_x:
-            self.view.end_x = self.model.current_end_x

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from Muon.GUI.Common.contexts.plot_edit_context import PlotEditContext
+from Muon.GUI.Common.contexts.plot_settings_context import PlotSettingsContext
 from typing import List
 
 
@@ -18,10 +19,11 @@ class PlottingContext(object):
         self._ylim_all = self._default_ylim
         self._autoscale_all = True
         self._errors_all = False
-        self._min_y_range = 2.0
-        self._y_axis_margin = 20.
-        self._is_tiled = False
-        self._is_tiled_by = ""
+        self._settings = PlotSettingsContext()
+
+    @property
+    def settings(self):
+        return self._settings
 
     @property
     def is_tiled(self):
