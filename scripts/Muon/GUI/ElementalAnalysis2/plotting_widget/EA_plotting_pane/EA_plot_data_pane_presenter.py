@@ -30,10 +30,10 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         self._figure_presenter.force_autoscale()
 
     def handle_data_updated(self, autoscale=True, hold_on=False):
-        if self.check_if_can_use_rebin():
-            workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
-                                                                                          self._view.get_plot_type())
-            self.add_list_to_plot(workspace_list, indicies, hold=hold_on, autoscale=autoscale)
+        self.check_if_can_use_rebin()
+        workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
+                                                                                     self._view.get_plot_type())
+        self.add_list_to_plot(workspace_list, indices, hold=hold_on, autoscale=autoscale)
 
     def handle_added_or_removed_group_to_plot(self, group_info):
         """

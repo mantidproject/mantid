@@ -13,7 +13,7 @@ INVERSE_SPECTRA_INDICES = {0: "Delayed", 1: "Prompt", 2: "Total"}
 class EAPlotDataPaneModel(BasePaneModel):
 
     def __init__(self, context):
-        super(EAPlotDataPaneModel, self).__init__(context)
+        super(EAPlotDataPaneModel, self).__init__(context, name="Plot Data")
         self.context.plot_panes_context[self.name].set_defaults([-10.0, 1000.0], [-100, 2000])
 
     @staticmethod

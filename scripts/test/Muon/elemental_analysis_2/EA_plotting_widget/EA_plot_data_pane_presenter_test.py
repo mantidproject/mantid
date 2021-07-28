@@ -5,8 +5,7 @@ from Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plotting_pane.EA_plot_data_p
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
 from Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plotting_pane.EA_plot_data_pane_presenter import \
     EAPlotDataPanePresenter
-from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
-    PlottingCanvasPresenterInterface
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter import PlottingCanvasPresenter
 from mantid import AnalysisDataService
 
 from mantidqt.utils.qt.testing import start_qapplication
@@ -21,7 +20,7 @@ class EAPlotDataPanePresenterTest(unittest.TestCase):
         self.model.name = "data"
         self.view = mock.Mock(spec=BasePaneView)
         self.view.warning_popup = mock.MagicMock()
-        self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
+        self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenter)
 
         self.context.group_context.selected_groups = ["9999; Detector 1"]
 

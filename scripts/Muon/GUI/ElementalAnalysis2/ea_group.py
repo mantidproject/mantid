@@ -32,19 +32,28 @@ class EAGroup(object):
         self.update_counts_workspace(str(group_name))
 
     def __del__(self):
-        remove_ws_if_present(self.get_counts_workspace_for_run())
+        try:
+            remove_ws_if_present(self.get_counts_workspace_for_run())
 
-        if self.is_rebinned_workspace_present():
-            remove_ws_if_present(self.get_counts_workspace_for_run(rebin=True))
+            if self.is_rebinned_workspace_present():
+                remove_ws_if_present(self.get_counts_workspace_for_run(rebin=True))
 
-        if self.is_peak_table_present():
-            remove_ws_if_present(self.get_peak_table())
+            if self.is_peak_table_present():
+                remove_ws_if_present(self.get_peak_table())
 
-        if self.is_matches_table_present():
-            matches_table = retrieve_ws(self.get_matches_table())
-            for table in matches_table.getNames():
-                remove_ws_if_present(table)
-            remove_ws_if_present(self.get_matches_table())
+            if self.is_matches_table_present():
+                matches_table = retrieve_ws(self.get_matches_table())
+                for table in matches_table.getNames():
+                    remove_ws_if_present(table)
+                remove_ws_if_present(self.get_matches_table())
+
+        except Exception as e:
+            """
+                If ADS is deleted before group is deleted, boost.python.ArgumentError is raised and
+                boost.python.ArgumentError are not catchable
+            """
+            if "Python argument types in" not in str(e):
+                raise e
 
     @property
     def workspace(self):
