@@ -231,7 +231,8 @@ void LoadPSIMuonBin::exec() {
   }
 
   // Make empty detector table
-  makeDetectorGroupingTable(m_histograms.size());
+  if (!getPropertyValue("DetectorGroupingTable").empty())
+    makeDetectorGroupingTable(m_histograms.size());
 }
 
 void LoadPSIMuonBin::makeDetectorGroupingTable(const size_t &numSpec) {

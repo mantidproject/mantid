@@ -248,7 +248,6 @@ def create_load_algorithm(filename, property_dictionary):
     alg.setProperty("OutputWorkspace", output_filename)
     alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
     alg.setProperty("DetectorGroupingTable", '__notUsed')
-    alg.setProperty("TimeZeroTable", '__notUsed')
     # Assume if .bin it is a PSI file so return True, else return False
     return (alg, True) if ".bin" in filename else (alg, False)
 

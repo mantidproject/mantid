@@ -520,12 +520,94 @@ void Load::setUpLoader(const API::IAlgorithm_sptr &loader, const double startPro
  * @param loader :: Shared pointer to the load algorithm
  */
 void Load::setOutputProperties(const API::IAlgorithm_sptr &loader) {
-  // Loop all properties and set outputs only
+  // Set output properties
   const auto &loaderProperties = loader->getProperties();
   for (const auto &property : loaderProperties) {
-    if (property->direction() == Direction::Output)
-      getPointerToProperty(property->name())->setValueFromProperty(*property);
+    if (property->direction() == Direction::Output) {
+      if (dynamic_cast<IWorkspaceProperty *>(property)) {
+        const std::string &name = property->name();
+        if (!this->existsProperty(name)) {
+          declareProperty(
+              std::make_unique<WorkspaceProperty<Workspace>>(name, loader->getPropertyValue(name), Direction::Output));
+        }
+        Workspace_sptr wkspace = getOutputWorkspace(name, loader);
+        setProperty(name, wkspace);
+      } else {
+        if (!getPropertyValue(property->name()).empty())
+          getPointerToProperty(property->name())->setValueFromProperty(*property);
+      }
+    }
   }
+}
+
+/**
+ * Return an output workspace property dealing with the lack of connection
+ * between of
+ * WorkspaceProperty types
+ * @param propName :: The name of the property
+ * @param loader :: The loader algorithm
+ * @returns A pointer to the OutputWorkspace property of the Child Algorithm
+ */
+API::Workspace_sptr Load::getOutputWorkspace(const std::string &propName, const API::IAlgorithm_sptr &loader) const {
+  // @todo Need to try and find a better way using the getValue methods
+  try {
+    return loader->getProperty(propName);
+  } catch (std::runtime_error &) {
+  }
+
+  // Try a MatrixWorkspace
+  try {
+    MatrixWorkspace_sptr childWS = loader->getProperty(propName);
+    return childWS;
+  } catch (std::runtime_error &) {
+  }
+
+  // EventWorkspace
+  try {
+    IEventWorkspace_sptr childWS = loader->getProperty(propName);
+    return childWS;
+  } catch (std::runtime_error &) {
+  }
+
+  // IMDEventWorkspace
+  try {
+    IMDEventWorkspace_sptr childWS = loader->getProperty(propName);
+    return childWS;
+  } catch (std::runtime_error &) {
+  }
+
+  // General IMDWorkspace
+  try {
+    IMDWorkspace_sptr childWS = loader->getProperty(propName);
+    return childWS;
+  } catch (std::runtime_error &) {
+  }
+
+  // ITableWorkspace?
+  try {
+    ITableWorkspace_sptr childWS = loader->getProperty(propName);
+    return childWS;
+  } catch (std::runtime_error &) {
+  }
+
+  // WorkspaceGroup?
+  try {
+    WorkspaceGroup_sptr childWS = loader->getProperty(propName);
+    return childWS;
+  } catch (std::runtime_error &) {
+  }
+
+  // Just workspace?
+  try {
+    Workspace_sptr childWS = loader->getProperty(propName);
+    return childWS;
+  } catch (std::runtime_error &) {
+  }
+
+  g_log.debug() << "Workspace property " << propName
+                << " did not return to MatrixWorkspace, EventWorkspace, "
+                   "IMDEventWorkspace, IMDWorkspace\n";
+  return Workspace_sptr();
 }
 
 /*

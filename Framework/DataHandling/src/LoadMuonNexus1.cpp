@@ -314,7 +314,8 @@ void LoadMuonNexus1::exec() {
     if (existsProperty("TimeZero")) {
       auto timeZeroList = std::vector<double>(m_numberOfSpectra, getProperty("TimeZero"));
       setProperty("TimeZeroList", timeZeroList);
-      setProperty("TimeZeroTable", createTimeZeroTable(m_numberOfSpectra, timeZeroList));
+      if (!getPropertyValue("TimeZeroTable").empty())
+        setProperty("TimeZeroTable", createTimeZeroTable(m_numberOfSpectra, timeZeroList));
     }
 
     if (m_numberOfPeriods == 1)
