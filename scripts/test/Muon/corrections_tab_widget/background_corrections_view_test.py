@@ -50,7 +50,6 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(self.view.show_all_runs_checkbox.isHidden())
         self.assertTrue(self.view.apply_table_changes_to_all_checkbox.isHidden())
         self.assertTrue(self.view.correction_options_table.isHidden())
-        self.assertTrue(not self.view.background_info_label.isHidden())
 
     def test_that_set_background_correction_options_visible_will_make_the_correction_options_visible(self):
         self.view.set_background_correction_options_visible(True)
@@ -62,7 +61,6 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(not self.view.show_all_runs_checkbox.isHidden())
         self.assertTrue(not self.view.apply_table_changes_to_all_checkbox.isHidden())
         self.assertTrue(not self.view.correction_options_table.isHidden())
-        self.assertTrue(self.view.background_info_label.isHidden())
 
     def test_that_background_correction_mode_will_return_and_set_the_correction_mode_as_expected(self):
         self.assertEqual(self.view.background_correction_mode, "None")

@@ -24,7 +24,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
     def setUp(self):
         context = setup_context()
-        self.corrections_model = CorrectionsModel(context.data_context, context.corrections_context)
+        self.corrections_model = CorrectionsModel(context)
         self.model = BackgroundCorrectionsModel(self.corrections_model, context)
         self.model.clear_background_corrections_data()
 
@@ -218,7 +218,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.assertEqual(a0s, [self.fitted_a0] * 4)
         self.assertEqual(a0_errors, [self.fitted_a0_error] * 4)
 
-        self.model.reset_background_function_data()
+        self.model.reset_background_subtraction_data()
 
         _, _, _, _, a0s, a0_errors, _ = self.model.selected_correction_data()
 
@@ -247,6 +247,10 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
     def _populate_background_corrections_data(self, mock_retrieve_ws):
         workspace = CreateSampleWorkspace()
         mock_retrieve_ws.return_value = workspace
+
+        workspace_name = f"HIFI84447; Group; fwd; Counts; MA"
+        self.model.get_counts_workspace_name = mock.Mock(return_value=workspace_name)
+
         self.corrections_model.run_number_strings = mock.Mock(return_value=self.runs)
         self.mock_group_names = mock.PropertyMock(return_value=self.groups)
         type(self.model._context.group_pair_context).group_names = self.mock_group_names

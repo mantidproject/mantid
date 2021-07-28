@@ -21,7 +21,7 @@ class CorrectionsModelTest(unittest.TestCase):
 
     def setUp(self):
         context = setup_context()
-        self.model = CorrectionsModel(context.data_context, context.corrections_context)
+        self.model = CorrectionsModel(context)
         self.runs = [[84447], [84448], [84449]]
         self.coadd_runs = [[84447, 84448, 84449]]
 

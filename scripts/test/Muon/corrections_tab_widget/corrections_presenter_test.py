@@ -96,10 +96,10 @@ class CorrectionsPresenterTest(unittest.TestCase):
         self.presenter.dead_time_presenter.handle_run_selector_changed.assert_called_once_with()
         self.presenter.background_presenter.handle_run_selector_changed.assert_called_once_with()
 
-    def test_that_handle_pre_process_and_grouping_complete_will_update_the_dead_time_label_in_the_view(self):
-        self.presenter.handle_pre_process_and_grouping_complete()
-        self.presenter.dead_time_presenter.handle_pre_process_and_grouping_complete.assert_called_once_with()
-        self.presenter.background_presenter.handle_pre_process_and_grouping_complete.assert_called_once_with()
+    def test_that_handle_pre_process_and_counts_calculated_will_update_the_dead_time_label_in_the_view(self):
+        self.presenter.handle_pre_process_and_counts_calculated()
+        self.presenter.dead_time_presenter.handle_pre_process_and_counts_calculated.assert_called_once_with()
+        self.presenter.background_presenter.handle_pre_process_and_counts_calculated.assert_called_once_with()
 
     def test_that_handle_groups_changed_will_notify_the_background_corrections_presenter(self):
         self.presenter.handle_groups_changed()
@@ -132,14 +132,14 @@ class CorrectionsPresenterTest(unittest.TestCase):
         self.presenter.dead_time_presenter.handle_ads_clear_or_remove_workspace_event = mock.Mock()
         self.presenter.dead_time_presenter.handle_instrument_changed = mock.Mock()
         self.presenter.dead_time_presenter.handle_run_selector_changed = mock.Mock()
-        self.presenter.dead_time_presenter.handle_pre_process_and_grouping_complete = mock.Mock()
+        self.presenter.dead_time_presenter.handle_pre_process_and_counts_calculated = mock.Mock()
 
         self.presenter.background_presenter.initialize_model_options = mock.Mock()
         self.presenter.background_presenter.handle_instrument_changed = mock.Mock()
         self.presenter.background_presenter.handle_runs_loaded = mock.Mock()
         self.presenter.background_presenter.handle_run_selector_changed = mock.Mock()
         self.presenter.background_presenter.handle_groups_changed = mock.Mock()
-        self.presenter.background_presenter.handle_pre_process_and_grouping_complete = mock.Mock()
+        self.presenter.background_presenter.handle_pre_process_and_counts_calculated = mock.Mock()
 
         self.presenter._handle_selected_table_is_invalid = mock.Mock()
 
