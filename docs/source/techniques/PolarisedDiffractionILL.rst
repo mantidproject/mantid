@@ -26,7 +26,8 @@ This document tries to give an overview on how the algorithms work together via 
 Reduction workflow and recommendations
 ######################################
 
-A description of the usage of the algorithms for the D7 data reduction is presented along with several possible workflows, depending on the number of desired corrections and the type of normalisation.
+A description of the usage of the algorithms for the D7 data reduction is presented along with several possible workflows, depending on the number of desired corrections, the type of normalisation, as well
+as the type of measurement that the data comes from (powder sample, TOF, single crystal).
 
 Reduction basics
 ================
@@ -598,7 +599,11 @@ Sample data reduction
 The sample data reduction follows the same steps of monitor or time normalisation, background subtraction, polarisation correction, and
 self-attenuation correction as vanadium data reduction. Should the self-attenuation correction be taken into account, the relevant
 sample and environment parameters need to be defined in a dictionary that is provided to `SampleAndEnvironmentProperty` with
-keys described in the vanadium reduction section.
+keys described in the vanadium reduction section. The extra keys, required by :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
+and relevant only for the `SingleCrystal` reduction are:
+
+* KiXAngle - the angle between the incident momentum and the Sharpf angle,
+* OmegaShift - omega offset of the sample.
 
 The output of the  is a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries equal to number of measured polarisations
 times number of steps in a :math:`2\theta` scan. This output can be provided to :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
@@ -618,6 +623,10 @@ documentation of the :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections
 measured scattering cross-section. The specifics of the 10-point measurement as a set of two separate 6-point measurements are taken into account.
 In that case, the second set of 6-point data needs to be provided to `RotatedXYZWorkspace` property of the :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
 algorithm, and the '10-p' needs to be chosen as the `CrossSectionSeparationMethod`.
+
+In the case of `SingleCrystal` measurements, cross-section separation can be performed following Ref. [#Schweika]_ formulae, which apply in the case
+of anisotropic magnetism. The relevant property to be checked as `False` is `IsotropicMagnetism` of the :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
+algorithm.
 
 
 Sample data normalisation
@@ -643,15 +652,14 @@ options available to normalise the sample data:
    an additional parameter needs to be defined in the sample properties dictionary, named `IncoherentCrossSection`, to provide the total
    nuclear-spin-incoherent cross-section of the sample.
 
-In all cases, a relative normalisation to the detector with highest number of counts is always performed.
-
 Output
 ------
 
 The output of the reduction and normalisation is a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries consistent with the input
 if the `OutputTreatment` property was selected to be `Individual`, or the number of entries will be consistent with either the number of polarisation
 orientations present in the data (e.g. six for a XYZ method) or the number of separated cross-section.
-Each entry of the output group is a workspace with X-axis unit being either momentum exchange :math:`Q` or the scattering angle :math:`2\theta`.
+Each entry of the output group is a workspace with X-axis unit being either momentum exchange :math:`Q`, the scattering angle :math:`2\theta`,
+or, in the case of `SingleCrystal` reduction, cross-section values on a :math:`Q_{x}` - :math:`Q_{y}` plane.
 
 
 Workflow diagrams and working example
@@ -830,16 +838,130 @@ Output:
 
     mtd.clear()
 
+**Example - full treatment of a single crystal sample**
+
+.. code-block:: python
+
+    vanadium_mass = 8.535
+    sample_formula_mass = 137.33 * 2.0 + 54.93 + 127.6 + 15.999 * 6.0
+    sample_mass = 7.83
+    vanadium_dictionary = {'SampleMass': vanadium_mass, 'FormulaUnits': 1, 'FormulaUnitMass': 50.942}
+    sample_dictionary = {'SampleMass': sample_mass, 'FormulaUnits': 1, 'FormulaUnitMass': sample_formula_mass,
+                             'KiXAngle': 45.0, 'OmegaShift': 52.5}
+    calibration_file = "D7_YIG_calibration.xml"
+
+    # Empty container for quartz and vanadium
+    PolDiffILLReduction(
+        Run='450747:450748',
+            OutputWorkspace='container_ws',
+            ProcessAs='Empty'
+   )
+
+   # Empty container for bank position 1 (bt1), tth=79.5
+   PolDiffILLReduction(
+       Run='397406:397407',
+       OutputTreatment='AveragePol',
+       OutputWorkspace='container_bt1_ws',
+       ProcessAs='Empty'
+   )
+   # empty container for bt2, tth=75
+   PolDiffILLReduction(
+       Run='397397:397398',
+       OutputTreatment='AveragePol',
+       OutputWorkspace='container_bt2_ws',
+       ProcessAs='Empty'
+   )
+
+   PolDiffILLReduction(
+       Run='450769:450770',
+       OutputWorkspace='pol_corrections',
+       EmptyContainerWorkspace='container_ws',
+       Transmission='0.9',
+       OutputTreatment='AveragePol',
+       ProcessAs='Quartz'
+   )
+
+   PolDiffILLReduction(
+       Run='450835:450836',
+       OutputWorkspace='vanadium_ws',
+       EmptyContainerWorkspace='container_ws',
+       Transmission='0.89',
+       QuartzWorkspace='pol_corrections',
+       OutputTreatment='Sum',
+       SampleGeometry='None',
+       SelfAttenuationMethod='Transmission',
+       SampleAndEnvironmentProperties=vanadium_dictionary,
+       AbsoluteNormalisation=True,
+       InstrumentCalibration=calibration_file,
+       ProcessAs='Vanadium'
+   )
+
+   # bank position 1, tth=79.5
+   PolDiffILLReduction(
+       Run='399451:399452',
+       OutputWorkspace='bt1',
+       EmptyContainerWorkspace='container_bt1_ws',
+       Transmission='0.95',
+       QuartzWorkspace='pol_corrections',
+       OutputTreatment='Individual',
+       SampleGeometry='None',
+       SampleAndEnvironmentProperties=sample_dictionary,
+       MeasurementTechnique='SingleCrystal',
+       InstrumentCalibration=calibration_file,
+       ProcessAs='Sample'
+   )
+   # bank position 2, tth=75
+   PolDiffILLReduction(
+       Run='400287:400288',
+       OutputWorkspace='bt2',
+       EmptyContainerWorkspace='container_bt2_ws',
+       Transmission='0.95',
+       QuartzWorkspace='pol_corrections',
+       OutputTreatment='Individual',
+       SampleGeometry='None',
+       SampleAndEnvironmentProperties=sample_dictionary,
+       MeasurementTechnique='SingleCrystal',
+       InstrumentCalibration=calibration_file,
+       ProcessAs='Sample'
+   )
+   appended_ws = 'appended_ws'
+   AppendSpectra(InputWorkspace1='bt1', InputWorkspace2='bt2',
+   OutputWorkspace=appended_ws)
+   # names need to be re-set, AppendSpectra just concatenates them
+   possible_polarisations = ['ZPO_ON', 'ZPO_OFF', 'XPO_ON', 'XPO_OFF', 'YPO_ON', 'YPO_OFF']
+   polarisation = ""
+   for entry in mtd[appended_ws]:
+       entry_name = entry.name()
+       for polarisation in possible_polarisations:
+           if polarisation in entry_name:
+	       break
+       RenameWorkspace(InputWorkspace=entry, OutputWorkspace="{}_{}".format(appended_ws, polarisation))
+
+
+   D7AbsoluteCrossSections(
+       InputWorkspace=appended_ws,
+       OutputWorkspace='normalized_single_crystal_XYZ',
+       CrossSectionSeparationMethod='XYZ',
+       NormalisationMethod='Vanadium',
+       VanadiumInputWorkspace='vanadium_ws',
+       OutputUnits='Qxy',
+       SampleAndEnvironmentProperties=sample_dictionary,
+       AbsoluteUnitsNormalisation=False,
+       IsotropicMagnetism=False,
+       MeasurementTechnique='SingleCrystal',
+       ClearCache=True
+   )
+
 
 References
 ----------
 
-.. [#Fennell] T. Fennell, L. Mangin-Thro, H.Mutka, G.J. Nilsen, A.R. Wildes.
+.. [#Fennell] Fennell T. , Mangin-Thro L., Mutka H., Nilsen G.J., Wildes A.R..
    *Wavevector and energy resolution of the polarized diffuse scattering spectrometer D7*,
    Nuclear Instruments and Methods in Physics Research A **857** (2017) 24–30
    `doi: 10.1016/j.nima.2017.03.024 <https://doi.org/10.1016/j.nima.2017.03.024>`_
 
-.. [#Nakatsuka] A. Nakatsuka, A. Yoshiasa, and S. Takeno.
+.. [#Nakatsuka] Nakatsuka A., Yoshiasa A., and Takeno S..
    *Site preference of cations and structural variation in Y3Fe5O12 solid solutions with garnet structure*,
    Acta Crystallographica Section B **51** (1995) 737–745
    `doi: 10.1107/S0108768194014813 <https://doi.org/10.1107/S0108768194014813>`_
@@ -854,10 +976,15 @@ References
    Journal of Applied Crystallography **42** (2009) 69-84
    `doi: 10.1107/S0021889808039162 <https://doi.org/10.1107/S0021889808039162>`_
 
-.. [#Ehlers] G. Ehlers, J. R. Stewart, A. R. Wildes, P. P. Deen, and K. H. Andersen
+.. [#Ehlers] Ehlers G., Stewart J. R., Wildes A. R., Deen P. P., and Andersen K. H.
    *Generalization of the classical xyz-polarization analysis technique to out-of-plane and inelastic scattering*
    Review of Scientific Instruments **84** (2013), 093901
    `doi: 10.1063/1.4819739 <https://doi.org/10.1063/1.4819739>`_
+
+.. [#Schweika] Schweika W.
+    *XYZ-polarisation analysis of diffuse magnetic neutron scattering from single crystals*
+    J. Phys.: Conf. Ser. **211** (2010) 012026
+    `doi: 10.1088/1742-6596/211/1/012026 <https://doi.org/10.1088/1742-6596/211/1/012026>`_
 
 
 .. categories:: Techniques
