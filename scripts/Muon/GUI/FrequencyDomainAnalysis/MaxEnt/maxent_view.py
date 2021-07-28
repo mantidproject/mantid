@@ -55,7 +55,7 @@ class MaxEntView(QtWidgets.QWidget):
         options = []
 
         table_utils.setRowName(self.table, 0, "Calculate by")
-        self.method = table_utils.addComboToTable(self.table, 0, ["all detectors", "groups"])
+        self.method = table_utils.addComboToTable(self.table, 0, options)
 
         table_utils.setRowName(self.table, 1, "Phase Table")
         self.phase_table_combo = table_utils.addComboToTable(self.table, 1, options)
@@ -157,6 +157,10 @@ class MaxEntView(QtWidgets.QWidget):
 
     def add_periods(self, periods):
         self._period_selector.update_dataset_name_combo_box(periods)
+
+    def set_methods(self, options):
+        self.method.clear()
+        self.method.addItems(options)
 
     def addNPoints(self, options):
         self.N_points.clear()

@@ -7,12 +7,21 @@
 from Muon.GUI.Common.ADSHandler.workspace_naming import PHASEQUAD_IM, PHASEQUAD_RE
 import mantid.simpleapi as mantid
 from mantid.kernel import Logger
-from Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws
+from Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws, retrieve_ws
 from copy import copy
 from mantid.kernel import PhysicalConstants as const
 
 
 muon_logger = Logger('Muon-Algs')
+
+
+def create_empty_table(name):
+    alg = mantid.AlgorithmManager.create("CreateEmptyTableWorkspace")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("OutputWorkspace", name)
+    alg.execute()
+    return retrieve_ws(name)
 
 
 def run_MuonPreProcess(parameter_dict):

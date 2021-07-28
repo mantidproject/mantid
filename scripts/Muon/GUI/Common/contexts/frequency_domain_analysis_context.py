@@ -24,6 +24,10 @@ class FrequencyDomainAnalysisContext(MuonContext):
         self._frequency_context = frequency_context
 
     @property
+    def frequency_context(self):
+        return self._frequency_context
+
+    @property
     def default_fitting_plot_range(self):
         return FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_X_RANGE
 
