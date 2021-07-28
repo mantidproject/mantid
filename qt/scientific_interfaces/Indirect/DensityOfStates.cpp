@@ -303,7 +303,7 @@ std::string DensityOfStates::formatToFilePropName(InputFormat format) {
 }
 
 bool DensityOfStates::isPdosFile(InputFormat dosFileFormat) {
-  return {(dosFileFormat == InputFormat::Phonon) || (dosFileFormat == InputFormat::ForceConstants)};
+  return (dosFileFormat == InputFormat::Phonon) || (dosFileFormat == InputFormat::ForceConstants);
 }
 
 } // namespace MantidQt::CustomInterfaces
