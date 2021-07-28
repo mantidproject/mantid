@@ -57,7 +57,6 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
   LINK_LIBS
-    CurveFitting
     DataObjects
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
