@@ -99,10 +99,6 @@ endif()
 
 find_package(Doxygen) # optional
 
-# This is far more complicated than it has to be.
-# The issue is the library is found in different ways on all three OS platforms
-# Once we move to conda build we can just use the cmake finder...
-# At the moment this is necessary so we can link to targets rather than a library list..
 if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
   find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
   set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
@@ -117,16 +113,17 @@ elseif(CONDA_BUILD)
   find_package(ZLIB REQUIRED)
   find_package(
     HDF5
+    MODULE
     COMPONENTS C CXX HL
     REQUIRED
   )
   set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
   set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
-else()
-  # We'll use the cmake finder
+  else()
   find_package(ZLIB REQUIRED)
   find_package(
     HDF5
+    MODULE
     COMPONENTS C CXX HL
     REQUIRED
   )

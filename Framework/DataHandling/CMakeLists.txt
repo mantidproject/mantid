@@ -688,8 +688,6 @@ target_link_libraries(DataHandling
                         Mantid::Kernel
                         Mantid::Indexing
                         Mantid::Parallel
-                        ${HDF5_LIBRARIES}
-                        ${HDF5_HL_LIBRARIES}
                         PRIVATE
                         Mantid::Json
                         Boost::filesystem
