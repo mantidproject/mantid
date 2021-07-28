@@ -30,6 +30,7 @@ Improvements
   transmission can be provided as a number or a workspace group, new data averaging option depending on measurement 2theta, option to display all measured points
   on a scatter plot, new option for self-attenuation treatment using measured tranmission.
 - added a 3mf format file describing the PEARL sample and environment shapes for the P-E press. Also fixed a couple of minor issues in the 3mf file format loader used in ref:`LoadSampleEnvironment  <algm-LoadSampleEnvironment>`
+- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now adds input run number also to a metadata field `run_list`, indended to contain a full list of numors, handled by :ref:`MergeRuns <algm-MergeRuns>`
 
 Bugfixes
 ########
