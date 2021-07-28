@@ -33,31 +33,31 @@ Different input properties can be specified depending on the value of **ProcessA
 +------------------+---------------------------------+--------------------------------------------+
 | ProcessAs        | Input Workspace Properties      | Other Input Properties                     |
 +==================+=================================+============================================+
-| BeamWithCadmium  |                                 |                                            |
+| BeamWithCadmium  |                                 | * NormaliseBy                              |
 +------------------+---------------------------------+--------------------------------------------+
-| EmptyBeam        | * CadmiumTransmissionWorkspace  |                                            |
+| EmptyBeam        | * CadmiumTransmissionWorkspace  | * NormaliseBy                              |
 |                  |                                 |                                            |
 +------------------+---------------------------------+--------------------------------------------+
-| Transmission     | * CadmiumTransmissionWorkspace  |                                            |
+| Transmission     | * CadmiumTransmissionWorkspace  | * NormaliseBy                              |
 |                  | * **EmptyBeamWorkspace**        |                                            |
 +------------------+---------------------------------+--------------------------------------------+
-| Cadmium          |                                 |                                            |
+| Cadmium          |                                 | * NormaliseBy                              |
 +------------------+---------------------------------+--------------------------------------------+
-| Empty            |                                 |                                            |
+| Empty            |                                 | * NormaliseBy                              |
 +------------------+---------------------------------+--------------------------------------------+
-| Quartz           | * CadmiumWorkspace              | * OutputTreatment                          |
-|                  | * EmptyContainerWorkspace       |                                            |
+| Quartz           | * CadmiumWorkspace              | * NormaliseBy                              |
+|                  | * EmptyContainerWorkspace       | * OutputTreatment                          |
 |                  | * **Transmission**              |                                            |
 +------------------+---------------------------------+--------------------------------------------+
-| Vanadium         | * CadmiumWorkspace              | * SampleGeometry                           |
-|                  | * EmptyContainerWorkspace       | * **SampleAndEnvironmentProperties**       |
-|                  | * Transmission                  | * OutputTreatment                          |
-|                  | * QuartzWorkspace               |                                            |
+| Vanadium         | * CadmiumWorkspace              | * NormaliseBy                              |
+|                  | * EmptyContainerWorkspace       | * SampleGeometry                           |
+|                  | * Transmission                  | * **SampleAndEnvironmentProperties**       |
+|                  | * QuartzWorkspace               | * OutputTreatment                          |
 +------------------+---------------------------------+--------------------------------------------+
 | Sample           | * CadmiumWorkspace              | * SampleGeometry                           |
 |                  | * EmptyContainerWorkspace       | * **SampleAndEnvironmentProperties**       |
 |                  | * Transmission                  | * OutputTreatment                          |
-|                  | * QuartzWorkspace               |                                            |
+|                  | * QuartzWorkspace               | * MeasurementTechnique                     |
 +------------------+---------------------------------+--------------------------------------------+
 
 All the input workspace properties above are optional, unless bolded.
@@ -65,6 +65,18 @@ For example, if processing as sample, if a empty container and cadmium absorber 
 The rare exceptions are when processing as transmission, when beam input workspace is mandatory, and to calculate polarising efficiencies,
 where input from transmission is indispensable. Transmission however can be provided also as a string containing floating point value of desired tranmission, that needs
 to be in the range (0, 1].
+
+NormaliseBy
+-----------
+
+This property allows to choose how the data is going to be normalised. The choices are: `Monitor` (Monitor 1) and `Time` (experiment duration saved in the NeXus file).
+
+MeasurementTechnique
+--------------------
+
+This property allows to distinguish between reducing powder data from single crystal measurement. The options are: `Powder` and `SingleCrystal`. In the case of single crystal
+data, one bank position is processed at a time, and all input files are concatenated into a single workspace with vertical axis being 2theta positions of detectors,
+and the horizontal axis containing omega scan steps.
 
 OutputTreatment
 ---------------
