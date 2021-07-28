@@ -40,6 +40,13 @@ struct CuboidCorners {
   Kernel::V3D lft;
   Kernel::V3D lbb;
   Kernel::V3D rfb;
+
+  void rotatePoints(std::vector<double> rotationMatrix) {
+    lfb.rotate(rotationMatrix);
+    lft.rotate(rotationMatrix);
+    lbb.rotate(rotationMatrix);
+    rfb.rotate(rotationMatrix);
+  }
 };
 
 struct Hexahedron {
@@ -51,6 +58,17 @@ struct Hexahedron {
   Kernel::V3D rft; // right front top
   Kernel::V3D rbb; // right back bottom
   Kernel::V3D rbt; // right back top
+
+  void rotatePoints(std::vector<double> rotationMatrix) {
+    lfb.rotate(rotationMatrix);
+    lft.rotate(rotationMatrix);
+    lbb.rotate(rotationMatrix);
+    lbt.rotate(rotationMatrix);
+    rfb.rotate(rotationMatrix);
+    rft.rotate(rotationMatrix);
+    rbb.rotate(rotationMatrix);
+    rbt.rotate(rotationMatrix);
+  }
 };
 /**
 
@@ -76,7 +94,11 @@ public:
   static std::shared_ptr<CSGObject> createSphere(const Kernel::V3D &centre, double radius);
   static std::shared_ptr<CSGObject> createHexahedralShape(double xlb, double xlf, double xrf, double xrb, double ylb,
                                                           double ylf, double yrf, double yrb);
-  std::string addGoniometerTag(std::vector<double> rotateMatrix, std::string xml);
+  std::string addGoniometerTag(Kernel::Matrix<double> rotateMatrix, std::string xml);
+  static Kernel::Matrix<double> generateMatrix(double xRotation, double yRotation, double zRotation);
+  static Kernel::Matrix<double> generateXRotation(double xRotation);
+  static Kernel::Matrix<double> generateYRotation(double yRotation);
+  static Kernel::Matrix<double> generateZRotation(double zRotation);
 
 private:
   static std::string sphereAlgebra(const int surfaceID);
@@ -109,12 +131,8 @@ private:
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
   void createGeometryHandler(Poco::XML::Element *, std::shared_ptr<CSGObject>);
 
-  Kernel::Matrix<double> generateMatrix(double xRotation, double yRotation, double zRotation);
-  Kernel::Matrix<double> generateXRotation(double xRotation);
-  Kernel::Matrix<double> generateYRotation(double yRotation);
-  Kernel::Matrix<double> generateZRotation(double zRotation);
-  std::vector<double> m_gonioRotateMatrix;
-  std::vector<double> m_rotateAllMatrix;
+  Kernel::Matrix<double> m_gonioRotateMatrix = Kernel::Matrix<double>(3, 3, 1);
+  Kernel::Matrix<double> m_rotateAllMatrix = Kernel::Matrix<double>(3, 3, 1);
 };
 
 } // namespace Geometry

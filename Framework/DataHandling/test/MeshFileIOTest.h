@@ -39,38 +39,6 @@ public:
     std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     TS_ASSERT_THROWS(loader.translate(environmentMesh, {-1, 0, 1, 0, 0, 0, 0, 1}), const std::invalid_argument &);
   }
-  void testGenerateXRotation() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    auto loader = LoadBinaryStl(path, unit);
-    auto rotationMatrix = loader.generateXRotation(90.0 * M_PI / 180);
-    std::vector<double> vectorToMatch = {1, 0, 0, 0, 0, -1, 0, 1, 0};
-    compareMatrix(vectorToMatch, rotationMatrix);
-  }
-
-  void testGenerateYRotation() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    auto loader = LoadBinaryStl(path, unit);
-    auto rotationMatrix = loader.generateYRotation(90.0 * M_PI / 180);
-    std::vector<double> vectorToMatch = {0, 0, 1, 0, 1, 0, -1, 0, 0};
-    compareMatrix(vectorToMatch, rotationMatrix);
-  }
-
-  void testGenerateZRotation() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    auto loader = LoadBinaryStl(path, unit);
-    auto rotationMatrix = loader.generateZRotation(90.0 * M_PI / 180);
-    std::vector<double> vectorToMatch = {0, -1, 0, 1, 0, 0, 0, 0, 1};
-    compareMatrix(vectorToMatch, rotationMatrix);
-  }
-
-  void testGenerateRotationMatrix() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    auto loader = LoadBinaryStl(path, unit);
-    auto rotationMatrix = loader.generateMatrix(90.0 * M_PI / 180, 60.0 * M_PI / 180, 30.0 * M_PI / 180);
-    std::vector<double> vectorToMatch = {0.4330127,  0.7500000,  0.5000000, 0.2500000, 0.4330127,
-                                         -0.8660254, -0.8660254, 0.5000000, 0.0000000};
-    compareMatrix(vectorToMatch, rotationMatrix);
-  }
 
   void testXRotation() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
@@ -141,12 +109,5 @@ public:
   }
 
 private:
-  void compareMatrix(const std::vector<double> &vectorToMatch, const Kernel::Matrix<double> &rotationMatrix) {
-    auto checkVector = rotationMatrix.getVector();
-    for (size_t i = 0; i < 9; ++i) {
-      TS_ASSERT_DELTA(checkVector[i], vectorToMatch[i], 1e-7);
-    }
-  }
-
   const ScaleUnits unit = ScaleUnits::metres;
 };
