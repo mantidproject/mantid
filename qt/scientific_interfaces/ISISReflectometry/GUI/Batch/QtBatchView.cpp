@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtBatchView.h"
 #include "GUI/Event/QtEventView.h"
+#include "GUI/Preview/QtPreviewView.h"
 #include "GUI/Runs/QtRunsView.h"
 #include "GUI/Save/QtSaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -46,6 +47,9 @@ void QtBatchView::initLayout() {
 
   m_instrument = std::make_unique<QtInstrumentView>(createReductionAlg(), this);
   m_ui.batchTabs->addTab(m_instrument.get(), "Instrument Settings");
+
+  m_preview = std::make_unique<QtPreviewView>(this);
+  m_ui.batchTabs->addTab(m_preview.get(), "Reduction Preview");
 
   m_save = createSaveTab();
   m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");

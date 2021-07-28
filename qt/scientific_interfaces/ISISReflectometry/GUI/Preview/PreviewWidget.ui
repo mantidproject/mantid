@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PreviewWidget</class>
+ <widget class="QWidget" name="PreviewWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1000</width>
+    <height>870</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QSplitter" name="outer_splitter">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">
+QSplitter::handle
+{
+    background-color: grey;
+}
+</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="opaqueResize">
+      <bool>true</bool>
+     </property>
+     <property name="handleWidth">
+      <number>2</number>
+     </property>
+     <widget class="QWidget" name="">
+      <layout class="QHBoxLayout" name="input_tool_layout">
+       <property name="spacing">
+        <number>6</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMinimumSize</enum>
+       </property>
+       <item>
+        <widget class="QTableWidget" name="tableWidget">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton">
+         <property name="text">
+          <string>PushButton</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="text">
+          <string>PushButton</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QSplitter" name="plot_splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="handleWidth">
+       <number>3</number>
+      </property>
+      <widget class="QWidget" name="verticalLayoutWidget">
+       <layout class="QVBoxLayout" name="inst_view_layout">
+        <item>
+         <widget class="QPushButton" name="inst_view_toolbar_placeholder">
+          <property name="text">
+           <string>Toolbar IV</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableView" name="tableView"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QSplitter" name="subplot_splitter">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="handleWidth">
+        <number>2</number>
+       </property>
+       <widget class="QWidget" name="">
+        <layout class="QVBoxLayout" name="contour_plot_layout">
+         <item>
+          <widget class="QPushButton" name="plot_2d_tool_placeholders">
+           <property name="text">
+            <string>Toolbar 2d</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTreeView" name="treeView_2"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="">
+        <layout class="QVBoxLayout" name="line_plot_layout">
+         <item>
+          <widget class="QPushButton" name="plot_1d_toolbar_placeholder">
+           <property name="text">
+            <string>Toolbar 1d</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTreeView" name="treeView"/>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="">
+      <layout class="QHBoxLayout" name="output_tool_layout">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMinimumSize</enum>
+       </property>
+       <item>
+        <widget class="QTableWidget" name="tableWidget_2"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_3">
+         <property name="text">
+          <string>Apply</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
