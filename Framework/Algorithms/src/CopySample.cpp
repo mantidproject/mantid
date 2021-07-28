@@ -143,7 +143,7 @@ void CopySample::exec() {
 
 void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool materialFlag, bool environmentFlag,
                                 bool shapeFlag, bool latticeFlag, bool orientationOnlyFlag,
-                                std::vector<double> rotationMatrix) {
+                                Kernel::Matrix<double> rotationMatrix) {
   if (nameFlag)
     to.setName(from.getName());
   if (environmentFlag) {
