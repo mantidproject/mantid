@@ -20,7 +20,7 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
   LINK_LIBS
-    DataObjects
+    Mantid::DataObjects
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
     ${CORE_MANTIDLIBS}

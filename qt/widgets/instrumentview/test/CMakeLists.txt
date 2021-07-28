@@ -36,8 +36,8 @@ mtd_add_qt_tests(
   LINK_LIBS
     Python::Python
     ${CORE_MANTIDLIBS}
-    PythonInterfaceCore
-    DataObjects
+    Mantid::PythonInterfaceCore
+    Mantid::DataObjects
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     gmock

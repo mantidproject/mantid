@@ -52,6 +52,9 @@ def _bin_dirs():
     # conda layout
     yield os.path.dirname(sys.executable)
 
+    # conda windows layout
+    yield os.path.join(os.path.dirname(sys.executable), 'Library', 'bin')
+
     # iterate over the PYTHONPATH, to scan all possible bin dirs
     for path in sys.path:
         yield path

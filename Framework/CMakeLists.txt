@@ -20,8 +20,6 @@ if(MPI_EXPERIMENTAL)
   include(BoostMPI)
 endif()
 
-# Now add the packages one-by-one, building up the dependencies as we go
-include(TargetFunctions)
 
 add_custom_target(FrameworkTests) # target for all framework tests
 add_dependencies(check FrameworkTests)

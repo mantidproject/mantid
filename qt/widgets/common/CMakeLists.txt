@@ -950,7 +950,7 @@ mtd_add_qt_library(
   LINK_LIBS
     ${TARGET_LIBRARIES}
     PUBLIC
-    PythonInterfaceCore
+    Mantid::PythonInterfaceCore
   QT5_LINK_LIBS
     Qt5::Concurrent
     Qt5::Help
@@ -1082,8 +1082,8 @@ mtd_add_qt_tests(
   LINK_LIBS
     ${TARGET_LIBRARIES}
     ${Boost_LIBRARIES}
-    PythonInterfaceCore
-    DataObjects
+    Mantid::PythonInterfaceCore
+    Mantid::DataObjects
     gmock
     Qt5::Test
     Python::Python

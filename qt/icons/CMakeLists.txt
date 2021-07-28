@@ -33,6 +33,8 @@ if(ENABLE_WORKBENCH)
                         @loader_path/../Frameworks
                       LINUX_INSTALL_RPATH
                         "\$ORIGIN/../${WORKBENCH_LIB_DIR}")
+# We require just the headers for system.h
+target_include_directories(MantidQtIconsQt5 PUBLIC $<TARGET_PROPERTY:Mantid::Kernel,INTERFACE_INCLUDE_DIRECTORIES>)
 endif()
 
 set(QT5_TEST_FILES test/IconTest.h)
