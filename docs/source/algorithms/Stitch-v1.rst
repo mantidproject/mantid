@@ -50,7 +50,7 @@ Those must be in the same order as the workspaces in the original input list. By
 TieScaleFactors
 ###############
 
-If this is checked, one will enforce that the scale factor calculated between two workspaces is the global median of point-wise rations in the overlapping region and is hence constant for all the spectra.
+If this is checked, one will enforce that the scale factor calculated between two workspaces is the global median of point-wise ratios in the overlapping region and is hence constant for all the spectra.
 Otherwise, for each spectra, it will find the median for that spectrum and scale each spectrum with its own factor.
 Manual factors can only be considered as tied, i.e. they will be applied to all the spectra.
 
