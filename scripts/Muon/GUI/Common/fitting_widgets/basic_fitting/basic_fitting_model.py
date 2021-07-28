@@ -106,6 +106,15 @@ class BasicFittingModel:
         """Sets the currently selected dataset name to have a different name."""
         self.fitting_context.dataset_names[self.fitting_context.current_dataset_index] = name
 
+    def current_normalised_covariance_matrix(self) -> StaticWorkspaceWrapper:
+        """Returns the Normalised Covariance matrix for the currently selected data."""
+        return self._get_normalised_covariance_matrix_for(self.get_active_workspace_names(),
+                                                          self.fitting_context.function_name)
+
+    def has_normalised_covariance_matrix(self) -> bool:
+        """Returns true if a Normalised Covariance matrix exists for the currently selected dataset."""
+        return self.current_normalised_covariance_matrix() is not None
+
     @property
     def number_of_datasets(self) -> int:
         """Returns the number of datasets stored by the model."""
@@ -701,6 +710,11 @@ class BasicFittingModel:
         """Creates the FitPlotInformation storing fit data to be plotted in the plot widget."""
         return [FitPlotInformation(input_workspaces=workspace_names,
                                    fit=self._get_fit_results_from_context(workspace_names, function_name))]
+
+    def _get_normalised_covariance_matrix_for(self, workspace_names: list, function_name: str) -> StaticWorkspaceWrapper:
+        """Returns the Normalised Covariance Matrix associated with some input workspaces and a function name."""
+        fit = self._get_fit_results_from_context(workspace_names, function_name)
+        return fit.covariance_workspace if fit is not None else None
 
     def _get_fit_results_from_context(self, workspace_names: list, function_name: str) -> FitInformation:
         """Gets the fit results from the context using the workspace names and function name."""

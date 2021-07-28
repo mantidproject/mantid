@@ -4,9 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import IFunction
+from mantid.api import IFunction, ITableWorkspace
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.functionbrowser import FunctionBrowser
+from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 
 from Muon.GUI.Common.utilities import table_utils
 
@@ -59,6 +60,10 @@ class FitFunctionOptionsView(ui_form, base_widget):
         self.function_browser.setErrorsEnabled(True)
         self.function_browser.hideGlobalCheckbox()
         self.function_browser.setStretchLastColumn(True)
+
+    def set_slot_for_covariance_matrix_clicked(self, slot) -> None:
+        """Connect the slot for the Covariance Matrix button being clicked."""
+        self.covariance_matrix_button.clicked.connect(slot)
 
     def set_slot_for_fit_name_changed(self, slot) -> None:
         """Connect the slot for the fit name being changed by the user."""
@@ -306,6 +311,15 @@ class FitFunctionOptionsView(ui_form, base_widget):
         else:
             self.fit_options_table.hideRow(EXCLUDE_START_X_TABLE_ROW)
             self.fit_options_table.hideRow(EXCLUDE_END_X_TABLE_ROW)
+
+    def set_covariance_button_enabled(self, enabled: bool) -> None:
+        """Sets whether the Covariance Matrix button is enabled or not."""
+        self.covariance_matrix_button.setEnabled(enabled)
+
+    def show_normalised_covariance_matrix(self, covariance_ws: ITableWorkspace, workspace_name: str) -> None:
+        """Shows the normalised covariance matrix in a separate table display window."""
+        table_display = TableWorkspaceDisplay(covariance_ws, parent=self, name=workspace_name)
+        table_display.show_view()
 
     def _setup_fit_options_table(self) -> None:
         """Setup the fit options table with the appropriate options."""

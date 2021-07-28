@@ -8,10 +8,11 @@ import unittest
 from unittest import mock
 
 from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.simpleapi import CreateEmptyTableWorkspace, CreateSampleWorkspace
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel, DEFAULT_START_X
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
 class BasicFittingModelTest(unittest.TestCase):
@@ -463,6 +464,27 @@ class BasicFittingModelTest(unittest.TestCase):
 
     def test_that_get_active_fit_results_returns_an_empty_list_if_there_are_no_datasets(self):
         self.assertEqual(self.model.get_active_fit_results(), [])
+
+    def test_that_current_normalised_covariance_matrix_returns_none_when_there_are_no_fits(self):
+        self.assertEqual(self.model.current_normalised_covariance_matrix(), None)
+
+    def test_that_current_normalised_covariance_matrix_will_return_a_statix_workspace_wrapper_when_a_fit_exists(self):
+        ws = CreateEmptyTableWorkspace()
+        wrapper = StaticWorkspaceWrapper("CovarianceMatrix", ws)
+        self.model._get_normalised_covariance_matrix_for = mock.Mock(return_value=wrapper)
+
+        covariance_wrapper = self.model.current_normalised_covariance_matrix()
+        self.assertEqual(covariance_wrapper, wrapper)
+
+    def test_that_has_normalised_covariance_matrix_returns_false_when_there_is_not_a_covariance_matrix(self):
+        self.assertTrue(not self.model.has_normalised_covariance_matrix())
+
+    def test_that_has_normalised_covariance_matrix_returns_true_when_there_is_not_a_covariance_matrix(self):
+        ws = CreateEmptyTableWorkspace()
+        wrapper = StaticWorkspaceWrapper("CovarianceMatrix", ws)
+        self.model._get_normalised_covariance_matrix_for = mock.Mock(return_value=wrapper)
+
+        self.assertTrue(self.model.has_normalised_covariance_matrix())
 
     def test_update_plot_guess_will_evaluate_the_function(self):
         guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
