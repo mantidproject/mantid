@@ -1068,13 +1068,7 @@ generate_mantid_export_header(Algorithms FALSE)
 
 # Installation settings
 if (CONDA_BUILD)
-set(TARGET_EXPORT_NAME "MantidAlgorithmsTargets")
-mtd_install_framework_lib(TARGETS
-                  Algorithms
-                  INSTALL_EXPORT_FILE
-                  BIN_DIR ${PLUGINS_DIR}
-                  LIB_DIR lib
-                  EXPORT_NAME ${TARGET_EXPORT_NAME})
+mtd_install_framework_lib(TARGETS Algorithms PLUGIN_LIB)
 else()
 mtd_install_targets(TARGETS
                     Algorithms

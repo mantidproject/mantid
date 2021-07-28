@@ -81,12 +81,7 @@ add_subdirectory(test) # Note: No tests yet for many remote algorithms...
 
 # Installation settings
 if (CONDA_BUILD)
-set(TARGET_EXPORT_NAME "MantidRemoteAlgorithmsTargets")
-mtd_install_framework_lib(TARGETS RemoteAlgorithms
-EXPORT_NAME ${TARGET_EXPORT_NAME}
-BIN_DIR ${PLUGINS_DIR}
-LIB_DIR lib
-)
+mtd_install_framework_lib(TARGETS RemoteAlgorithms PLUGIN_LIB)
 else()
 mtd_install_targets(TARGETS
                     RemoteAlgorithms

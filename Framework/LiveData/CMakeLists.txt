@@ -154,12 +154,7 @@ generate_mantid_export_header(LiveData FALSE)
 
 # Installation settings
 if (CONDA_BUILD)
-set(TARGET_EXPORT_NAME "MantidLiveDataTargets")
-mtd_install_framework_lib(TARGETS LiveData
-INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME}
-BIN_DIR ${PLUGINS_DIR}
-LIB_DIR lib
-)
+mtd_install_framework_lib(TARGETS LiveData PLUGIN_LIB)
 else()
 mtd_install_targets(TARGETS
                     LiveData

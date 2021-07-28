@@ -42,20 +42,6 @@ set(MODULES
     DataObjects
     Catalog
     Nexus
-    DataHandling
-    Algorithms
-    WorkflowAlgorithms
-    CurveFitting
-    MDAlgorithms
-    Crystal
-    ICat
-    LiveData
-    RemoteAlgorithms
-    RemoteJobManagers
-    SINQ
-    ScriptRepository
-    Muon
-    Reflectometry
     PythonInterfaceCore
 )
 

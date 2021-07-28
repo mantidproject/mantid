@@ -177,12 +177,7 @@ add_subdirectory(test)
 
 # Installation settings
 if (CONDA_BUILD)
-set(TARGET_EXPORT_NAME "MantidSINQTargets")
-mtd_install_framework_lib(TARGETS SINQ
-EXPORT_NAME ${TARGET_EXPORT_NAME}
-BIN_DIR ${PLUGINS_DIR}
-LIB_DIR lib
-)
+mtd_install_framework_lib(TARGETS SINQ PLUGIN_LIB)
 else()
 mtd_install_targets(TARGETS
                     SINQ

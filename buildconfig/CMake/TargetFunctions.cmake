@@ -24,11 +24,16 @@ endfunction()
 
 # Install a framework library (used primarily for a conda install)
 function (mtd_install_framework_lib)
-set (options INSTALL_EXPORT_FILE)
-set (oneValueArgs TARGETS EXPORT_NAME BIN_DIR LIB_DIR)
+set (options INSTALL_EXPORT_FILE PLUGIN_LIB)
+set (oneValueArgs TARGETS EXPORT_NAME)
 set (multiValueArgs INSTALL_DIRS)
 cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
 "${multiValueArgs}" ${ARGN})
+# if its a plugin we don't need to headers or .lib file
+# we also don't need to export the cmake targets
+if (PARSED_PLUGIN_LIB)
+install(TARGETS ${PARSED_TARGETS} RUNTIME DESTINATION plugins)
+else()
 install(
     DIRECTORY inc/
     DESTINATION include/Mantid
@@ -40,15 +45,11 @@ if(PARSED_INSTALL_EXPORT_FILE)
         DESTINATION include/Mantid/Mantid${PARSED_TARGETS}
         COMPONENT Devel)
 endif()
-if (NOT PARSED_LIB_DIR)
-set(LIB_DIR lib)
-set(BIN_DIR bin)
-endif()
 install ( TARGETS ${PARSED_TARGETS}
 EXPORT ${PARSED_EXPORT_NAME}
-    LIBRARY DESTINATION ${PARSED_LIB_DIR}
-    ARCHIVE DESTINATION ${PARSED_LIB_DIR}
-    RUNTIME DESTINATION ${PARSED_BIN_DIR})
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin)
 
 install(EXPORT ${PARSED_EXPORT_NAME}
     FILE ${PARSED_EXPORT_NAME}.cmake
@@ -56,6 +57,7 @@ install(EXPORT ${PARSED_EXPORT_NAME}
     COMPONENT Devel
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
 )
+endif()
 endfunction()
 
 
