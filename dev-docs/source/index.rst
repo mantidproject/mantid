@@ -16,6 +16,7 @@ Guides
 
    DeveloperAccounts
    GettingStarted
+   Architecture
    BuildingOnOSX
    BuildingWithCMake
    Standards/index
@@ -27,6 +28,9 @@ Guides
 
 :doc:`GettingStarted`
    Describes the process of obtaining and building the mantid code base.
+
+:doc:`Architecture`
+   Describes the architecture of the mantid libraries and applications.
 
 :doc:`Standards <Standards/index>`
    Details of coding and documentation standards for the project. Includes specifics regarding algorithms.
@@ -59,6 +63,7 @@ Development Process
    PatchReleaseChecklist
    TSC
    DesignDocumentGuides
+   CodeCoverage
 
 :doc:`DevelopmentAndReleaseCycle`
    An overview of the development cycle.
