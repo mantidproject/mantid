@@ -246,7 +246,7 @@ class SuperplotPresenter:
                                             self.BIN_MODE_TEXT])
             self._view.set_mode(mode)
         self._view.set_selection(selection)
-        if all(name in selection.keys() for name in selected_workspaces):
+        if all(name in selected_workspaces for name in selection.keys()):
             self._update_spectrum_slider()
         self._update_plot()
 
