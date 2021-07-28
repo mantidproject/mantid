@@ -192,7 +192,10 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
             self.model.set_start_x(run, group, 0.0)
             self.model.set_end_x(run, group, 1.0)
 
-        self.model.run_background_correction_for_all()
+        runs, groups = self.model.run_background_correction_for_all()
+
+        self.assertEqual(runs, self.runs)
+        self.assertEqual(groups, self.groups)
 
     def test_that_run_background_correction_for_all_will_cause_an_exception_when_the_start_and_end_x_are_out_of_range(self):
         self._populate_background_corrections_data()
@@ -211,19 +214,23 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
         self._populate_background_corrections_data()
 
-        self.model.run_background_correction_for_all()
+        runs, groups = self.model.run_background_correction_for_all()
 
         _, _, _, _, a0s, a0_errors, _ = self.model.selected_correction_data()
 
         self.assertEqual(a0s, [self.fitted_a0] * 4)
         self.assertEqual(a0_errors, [self.fitted_a0_error] * 4)
+        self.assertEqual(runs, self.runs)
+        self.assertEqual(groups, self.groups)
 
-        self.model.reset_background_subtraction_data()
+        runs, groups = self.model.reset_background_subtraction_data()
 
         _, _, _, _, a0s, a0_errors, _ = self.model.selected_correction_data()
 
         self.assertEqual(a0s, [0.0] * 4)
         self.assertEqual(a0_errors, [0.0] * 4)
+        self.assertEqual(runs, self.runs)
+        self.assertEqual(groups, self.groups)
 
     def test_that_run_background_correction_for_will_run_without_error_when_the_start_and_end_x_is_good(self):
         run, group = "84447", "bwd"
@@ -232,7 +239,10 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.model.set_start_x(run, group, 0.0)
         self.model.set_end_x(run, group, 1.0)
 
-        self.model.run_background_correction_for(run, group)
+        runs, groups = self.model.run_background_correction_for(run, group)
+
+        self.assertEqual(runs, [run])
+        self.assertEqual(groups, [group])
 
     def test_that_run_background_correction_for_will_cause_an_exception_when_the_start_and_end_x_are_out_of_range(self):
         run, group = "84447", "bwd"

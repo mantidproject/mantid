@@ -103,7 +103,7 @@ class GroupingTabModel(object):
         # Calculates the counts workspaces and then triggers the background correction process. The corrections are
         # performed, the Asymmetry workspaces generated based off the corrected counts, and then the pairs and diffs
         # are calculated.
-        self._context.calculate_all_groups()
+        self._context.calculate_all_counts()
 
     def clear_groups(self):
         self._groups_and_pairs.clear_groups()

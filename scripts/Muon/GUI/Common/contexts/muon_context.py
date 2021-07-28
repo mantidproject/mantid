@@ -198,12 +198,12 @@ class MuonContext(object):
             name = get_diff_asymmetry_name(self, diff_name, run_as_string, rebin=True)
             self.group_pair_context[diff_name].show_rebin(run, directory + name)
 
-    def calculate_all_groups(self):
-        self._calculate_groups(rebin=False)
+    def calculate_all_counts(self):
+        self._calculate_all_counts(rebin=False)
         if self._do_rebin():
-            self._calculate_groups(rebin=True)
+            self._calculate_all_counts(rebin=True)
 
-    def _calculate_groups(self, rebin):
+    def _calculate_all_counts(self, rebin):
         for run in self._data_context.current_runs:
             run_pre_processing(context=self, run=run, rebin=rebin)
             for group in self._group_pair_context.groups:

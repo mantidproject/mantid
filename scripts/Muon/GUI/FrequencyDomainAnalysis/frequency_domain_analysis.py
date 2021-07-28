@@ -420,7 +420,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def setup_counts_calculation_finished_notifier(self):
         self.grouping_tab_widget.group_tab_presenter.counts_calculation_finished_notifier.add_subscriber(
-            self.corrections_tab.corrections_tab_presenter.pre_process_and_grouping_complete_observer)
+            self.corrections_tab.corrections_tab_presenter.pre_process_and_counts_calculated_observer)
 
     def setup_asymmetry_pair_and_diff_calculations_finished_notifier(self):
         for observer in self.plot_widget.data_changed_observers:

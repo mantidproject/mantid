@@ -83,7 +83,7 @@ class MuonContextTest(unittest.TestCase):
         return diff
 
     def _calculate_data_for(self, run_list: list, groups: list = [], pairs: list = [], diffs: list = []):
-        self.context.calculate_all_groups()
+        self.context.calculate_all_counts()
         for group in groups:
             self.context.calculate_asymmetry_for(run_list, group)
             self.context.show_group(run_list, group)
@@ -180,7 +180,7 @@ class MuonContextTest(unittest.TestCase):
         self._assert_list_in_ADS(['EMU19489; Diff; pair_diff; Asymmetry; MA'])
 
     def test_calculate_group_diff_returns_nothing_if_relevant_groups_do_not_exist(self):
-        self.context.calculate_all_groups()
+        self.context.calculate_all_counts()
         diff = MuonDiff('diff', 'fwd', 'bwd')
         diff_asymmetry = self.context.calculate_diff(diff, [19489], True)
 
@@ -188,7 +188,7 @@ class MuonContextTest(unittest.TestCase):
 
     def test_calculate_pair_diff_returns_nothing_if_relevant_pairs_do_not_exist(self):
         diff = self.add_pair_diff()
-        self.context.calculate_all_groups()
+        self.context.calculate_all_counts()
         diff_asymmetry = self.context.calculate_diff(diff, [19489], True)
         self.assertEqual(diff_asymmetry, None)
 
@@ -353,22 +353,58 @@ class MuonContextTest(unittest.TestCase):
                          Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
                                   'EMU19489; Pair Asym; long; MA']))
 
-    def test_calculate_all_groups(self):
-        self.context._calculate_groups = mock.Mock()
+    def test_that_find_pairs_containing_groups_will_return_an_empty_list_if_the_provided_group_is_not_in_a_pair(self):
+        groups = ["top"]
+        pairs = self.context.find_pairs_containing_groups(groups)
+
+        self.assertEqual(len(pairs), 0)
+
+    def test_that_find_pairs_containing_groups_will_return_pairs_containing_the_provided_group(self):
+        groups = ["bwd"]
+        pairs = self.context.find_pairs_containing_groups(groups)
+
+        self.assertEqual(len(pairs), 1)
+        self.assertEqual(pairs[0].name, "long")
+
+    def test_that_find_diffs_containing_groups_or_pairs_will_return_an_empty_list_if_the_provided_group_is_not_in_a_pair(self):
+        groups = ["top"]
+        diffs = self.context.find_pairs_containing_groups(groups)
+
+        self.assertEqual(len(diffs), 0)
+
+    def test_that_find_diffs_containing_groups_or_pairs_will_return_diffs_containing_the_provided_pair(self):
+        pair_diff = self.add_pair_diff()
+
+        groups = ["long"]
+        diffs = self.context.find_diffs_containing_groups_or_pairs(groups)
+
+        self.assertEqual(len(diffs), 1)
+        self.assertEqual(diffs[0], pair_diff)
+
+    def test_that_find_diffs_containing_groups_or_pairs_will_return_an_empty_list_if_the_provided_group_is_not_in_a_diff(self):
+        self.add_group_diff()
+
+        groups = ["top"]
+        diffs = self.context.find_diffs_containing_groups_or_pairs(groups)
+
+        self.assertEqual(len(diffs), 0)
+
+    def test_calculate_all_counts(self):
+        self.context._calculate_all_counts = mock.Mock()
         self.context._do_rebin = mock.Mock(return_value=False)
 
-        self.context.calculate_all_groups()
-        self.context._calculate_groups.assert_called_with(rebin=False)
-        self.assertEqual(self.context._calculate_groups.call_count, 1)
+        self.context.calculate_all_counts()
+        self.context._calculate_all_counts.assert_called_with(rebin=False)
+        self.assertEqual(self.context._calculate_all_counts.call_count, 1)
 
-    def test_calculate_all_groups_rebin(self):
-        self.context._calculate_groups = mock.Mock()
+    def test_calculate_all_counts_rebin(self):
+        self.context._calculate_all_counts = mock.Mock()
         self.context._do_rebin = mock.Mock(return_value=True)
 
-        self.context.calculate_all_groups()
-        self.context._calculate_groups.assert_any_call(rebin=False)
-        self.context._calculate_groups.assert_called_with(rebin=True)
-        self.assertEqual(self.context._calculate_groups.call_count,2)
+        self.context.calculate_all_counts()
+        self.context._calculate_all_counts.assert_any_call(rebin=False)
+        self.context._calculate_all_counts.assert_called_with(rebin=True)
+        self.assertEqual(self.context._calculate_all_counts.call_count, 2)
 
     def test_that_calculate_asymmetry_for_calls_the_expected_methods(self):
         self.context._calculate_asymmetry_for = mock.Mock()

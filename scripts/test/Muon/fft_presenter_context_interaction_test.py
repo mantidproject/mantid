@@ -77,7 +77,7 @@ class FFTPresenterTest(unittest.TestCase):
         self.view = None
 
     def _calculate_all_data(self):
-        self.context.calculate_all_groups()
+        self.context.calculate_all_counts()
         for group in self.groups:
             self.context.calculate_asymmetry_for(self.run_list, group)
             self.context.show_group(self.run_list, group)

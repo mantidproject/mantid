@@ -131,7 +131,7 @@ class CorrectionsPresenter(QObject):
         """Handle when an error occurs while doing calculations on a thread."""
         self.disable_editing_notifier.notify_subscribers()
         self.thread_success = False
-        self.warning_popup(error)
+        self.view.warning_popup(error)
 
     def current_run_string(self) -> str:
         """Returns the currently selected run string."""
@@ -146,7 +146,7 @@ class CorrectionsPresenter(QObject):
                                                        self.handle_thread_error)
             self.calculation_thread.start()
         except ValueError as error:
-            self._corrections_presenter.warning_popup(error)
+            self.view.warning_popup(error)
 
     def _calculate_asymmetry_pairs_and_diffs(self, runs: list, groups: list) -> None:
         """Calculates the Asymmetry workspaces, Pairs and Diffs only for the provided runs and groups."""
