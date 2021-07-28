@@ -29,6 +29,6 @@ Improvements
 - :ref:The ANSTO Bilby loader `LoadBBY <algm-LoadBBY>` logs the occurence of invalid events detected in the file as a warning.
 - The ISIS SANS threading has been switched to use Python native threading. This provides users with much clearer error messages
   if something goes wrong, and improves tool compatibility for future development.
-
+- :ref:`DeadTimeCorrection <algm-DeadTimeCorrection>` now does not integrate TOF axis if the unit is `Empty`, allowing to correct multi-frame monochromatic SANS data.
 
 :ref:`Release 6.2.0 <v6.2.0>`
